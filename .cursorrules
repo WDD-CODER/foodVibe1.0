@@ -39,3 +39,5 @@ Checkpoint Enforcement: The AI must pause and prompt for a git add . && git comm
 Remote Synchronization: All commits must be pushed to the main or feature branch on GitHub to ensure cloud-based persistence and a secondary audit trail.
 
 Zero-State Integrity: Never proceed with a new feature if the working directory has uncommitted "dirty" changes that belong to a previous architectural layer.
+
+After each change that we're making, if there is a file that has been changed.You have to suggest again.To commit to Github.
