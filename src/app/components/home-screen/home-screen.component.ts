@@ -9,5 +9,5 @@ import { RouterLink } from '@angular/router';
   styleUrl: './home-screen.component.scss'
 })
 export class HomeScreenComponent {
-  title = 'foodVibe';
+  title = 'foodCo';
 }
