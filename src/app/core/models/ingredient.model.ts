@@ -40,4 +40,6 @@ export interface IngredientLedger {
   code?: string;
   /** Optional allergen identifiers for matrix propagation. */
   allergenIds?: string[];
+  /** Custom properties for filtering and categorization. */
+  properties?: { [key: string]: string[]; };
 }
