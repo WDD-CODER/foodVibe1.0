@@ -1,0 +1,41 @@
+Unified Technical Standards
+
+## 1. Angular 19 & TypeScript
+- **Architecture**: Strict Adapter Pattern. Decouple UI from persistence via `IStorageAdapter` (LocalStorage/MongoDB).
+- **Patterns**: "Angular Renaissance". Use Standalone Components and `inject()`. No constructors.
+- **Reactivity**: Signals-First (Redux-lite). Private writable, public read-only signals.
+- **Data Modeling**: Ingredient Ledger (Atomic Layer) must use UIDs and triple-unit conversion (Purchase, Inventory, Recipe).
+- **Logic**: Support Recursive Compounding for sub-recipes and Waste Factor logic.
+- **Performance**: Cascading calculations must execute in <200ms.
+
+## 2. Playwright E2E & QA
+- **Locators**: Strictly use Role-based (`getByRole`, `getByLabel`) or `getByTestId`. Prohibit `page.locator`.
+- **Assertions**: Use Web-first assertions (`toBeVisible`, `toHaveText`). No hardcoded timeouts.
+- **Validation**: Assert Allergen Matrix propagation and Offline Persistence (LocalStorage) reliability.
+
+## 3. UI/CSS Standards
+- **Structure**: Semantic HTML. Scoped `<style>` tags with SCSS nesting.
+- **Property Order**: 
+  1. Layout (display, position, z-index)
+  2. Spacing/Dimensions (gap, margin, padding, width)
+  3. Content (background, color, font-size)
+  4. Structural (border, border-radius, box-shadow)
+  5. Interactions (cursor, transition, transform)
+
+## 4. Operational Protocol
+- **Naming**: kebab-case for all filenames. Boolean prefixes for flags (is/has).
+- **Import Order**: 1. Angular Core -> 2. RxJS -> 3. Features -> 4. Core (Types/Adapters) -> 5. Relative.
+- **Code Delivery**: Maximum conciseness. No conversational fillers. Provide "Why" for architectural decisions. 
+- **Quality**: TDD-First. Unit/Integration tests (Vitest/Jasmine) required for all public service methods.
+
+6. Version Control & Git Protocol
+
+Atomic Commits: Every discrete technical step (e.g., interface definition, service method implementation, unit test creation) must be committed individually.
+
+Commit Messaging: Use the Conventional Commits specification: <type>(<scope>): <description> (e.g., feat(ingredients): define core interface, test(conversion): add unit tests for kg-to-g).
+
+Checkpoint Enforcement: The AI must pause and prompt for a git add . && git commit command after completing a sub-task and before initiating a new one.
+
+Remote Synchronization: All commits must be pushed to the main or feature branch on GitHub to ensure cloud-based persistence and a secondary audit trail.
+
+Zero-State Integrity: Never proceed with a new feature if the working directory has uncommitted "dirty" changes that belong to a previous architectural layer.
