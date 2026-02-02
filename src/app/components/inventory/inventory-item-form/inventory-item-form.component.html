@@ -1,39 +1,50 @@
 <div class="inventory-form-container">
-  <h2>{{ isEditing() ? 'Edit Ingredient' : 'Add New Ingredient' }}</h2>
+    <h2>{{ isEditing() ? 'Edit Ingredient' : 'Add New Ingredient' }}</h2>
 
-  <form [formGroup]="ingredientForm" (ngSubmit)="onSubmit()">
-    <div class="form-group">
-      <label for="name">Ingredient Name:</label>
-      <input id="name" type="text" formControlName="name">
-      <div *ngIf="ingredientForm.get('name')?.invalid && ingredientForm.get('name')?.touched" class="error-message">
-        Ingredient Name is required.
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label for="allergenIds">Allergen IDs (comma-separated):</label>
-      <input id="allergenIds" type="text" formControlName="allergenIds">
-    </div>
-
-    <div formArrayName="properties" class="properties-section">
-      <h3>Properties</h3>
-      <div *ngFor="let propertyGroup of properties.controls; let i = index" [formGroupName]="i" class="property-group">
-        <input type="text" formControlName="key" placeholder="Property Key" class="property-key-input">
-        <input type="text" formControlName="value" placeholder="Property Value" class="property-value-input">
-        <button type="button" (click)="removeProperty(i)" class="remove-property-button">Remove</button>
-        <div *ngIf="propertyGroup.get('key')?.invalid && propertyGroup.get('key')?.touched" class="error-message">
-          Key is required.
+    <form [formGroup]="ingredientForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+            <label for="name">Ingredient Name:</label>
+            <input id="name" type="text" formControlName="name">
+            <div *ngIf="ingredientForm.get('name')?.invalid && ingredientForm.get('name')?.touched"
+                class="error-message">
+                Ingredient Name is required.
+            </div>
         </div>
-        <div *ngIf="propertyGroup.get('value')?.invalid && propertyGroup.get('value')?.touched" class="error-message">
-          Value is required.
-        </div>
-      </div>
-      <button type="button" (click)="addProperty()" class="add-property-button">Add Property</button>
-    </div>
 
-    <div class="form-actions">
-      <button type="submit" [disabled]="!ingredientForm.valid" class="submit-button">{{ isEditing() ? 'Update' : 'Add' }} Ingredient</button>
-      <button type="button" (click)="onCancel()" class="cancel-button">Cancel</button>
-    </div>
-  </form>
+        <div class="form-group">
+            <label for="allergenIds">Allergen IDs (comma-separated):</label>
+            <input id="allergenIds" type="text" formControlName="allergenIds">
+        </div>
+
+        <div formArrayName="properties" class="properties-section">
+            <h3>Properties</h3>
+            <div *ngFor="let propertyGroup of properties.controls; let i = index" [formGroupName]="i"
+                class="property-group">
+                <label for="key">
+                    <input type="text" formControlName="key" placeholder="Property name" class="property-key-input">
+                    <div *ngIf="propertyGroup.get('key')?.invalid && propertyGroup.get('key')?.touched"
+                        class="error-message">
+                        Key is required.
+                    </div>
+
+                </label>
+                <label for="value">
+                    <input type="text" formControlName="value" placeholder="Property Value"
+                        class="property-value-input">
+                    <div *ngIf="propertyGroup.get('value')?.invalid && propertyGroup.get('value')?.touched"
+                        class="error-message">
+                        Value is required.
+                    </div>
+                </label>
+                <button type="button" (click)="removeProperty(i)" class="remove-property-button">Remove</button>
+            </div>
+            <button type="button" (click)="addProperty()" class="add-property-button">Add Property</button>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" [disabled]="!ingredientForm.valid" class="submit-button">{{ isEditing() ? 'Update' :
+                'Add' }} Ingredient</button>
+            <button type="button" (click)="onCancel()" class="cancel-button">Cancel</button>
+        </div>
+    </form>
 </div>

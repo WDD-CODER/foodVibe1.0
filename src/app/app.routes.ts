@@ -5,7 +5,7 @@ import { InventoryItemListComponent } from './components/inventory/inventory-ite
 import { InventoryItemFormComponent } from './components/inventory/inventory-item-form/inventory-item-form.component';
 import { RecipesComponent } from './components/recipes/recipes.component';
 import { DishesComponent } from './components/dishes/dishes.component';
-import { MenuCreatingComponent }'./components/menu-creating/menu-creating.component';
+import { MenuCreatingComponent } from './components/menu-creating/menu-creating.component';
 import { ChecklistCreatorComponent } from './components/checklist-creator/checklist-creator.component';
 
 export const routes: Routes = [
