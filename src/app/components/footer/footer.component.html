@@ -1,10 +1,15 @@
 <footer class="app-footer">
   <div class="left-content">
-    <span>{{ currentDateTime }}</span>
+    <span>{{ now_() | date: 'dd/MM/yyyy HH:mm' }}</span>
   </div>
   <div class="center-content">
-    <img src="assets/food-compos-logo.png" alt="Food Compos Logo" class="logo">
-  </div>
+    <img ngSrc="assets/style/img/food-compos-logo.png"
+    alt="Food Compos Logo" 
+    class="logo" 
+    width="1" 
+    height="1" 
+    priority>
+      </div>
   <div class="right-content">
     <span>Recipes: {{ recipesCount }}</span>
   </div>

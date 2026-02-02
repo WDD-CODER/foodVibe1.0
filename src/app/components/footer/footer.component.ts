@@ -1,37 +1,21 @@
-import { Component, inject, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe, NgOptimizedImage } from '@angular/common';
 
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [CommonModule],
-  providers: [DatePipe],
+  imports: [DatePipe, NgOptimizedImage],
   templateUrl: './footer.component.html',
-  styleUrl: './footer.component.scss'
+  styleUrl: './footer.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FooterComponent implements OnDestroy {
-  private datePipe = inject(DatePipe);
-  private changeDetectorRef = inject(ChangeDetectorRef);
-  currentDateTime: string = '';
-  recipesCount: number = 0; // Placeholder for now
-
-  private intervalId: any;
+export class FooterComponent {
+  now_ = signal(new Date());
+  recipesCount = signal(0);
 
   constructor() {
-    this.updateDateTime();
-    this.intervalId = setInterval(() => {
-      this.updateDateTime();
-      this.changeDetectorRef.detectChanges(); // Manually trigger change detection
+    setInterval(() => {
+      this.now_.set(new Date());
     }, 1000);
-  }
-
-  ngOnDestroy(): void {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-    }
-  }
-
-  private updateDateTime(): void {
-    this.currentDateTime = this.datePipe.transform(new Date(), 'medium') || '';
   }
 }
