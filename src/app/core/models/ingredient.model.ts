@@ -41,7 +41,9 @@ export interface ItemLedger {
   /** Optional allergen identifiers for matrix propagation. */
   allergenIds?: string[];
   /** Custom properties for filtering and categorization. */
-  topCategory: string;
-  subCategories?: string[];
-  [key: string]: string | string[] | undefined; // Allow for other dynamic properties
+  properties?: {
+    topCategory: string;
+    subCategories?: string[];
+    [key: string]: string | string[]; // For other dynamic properties
+  };
 }
