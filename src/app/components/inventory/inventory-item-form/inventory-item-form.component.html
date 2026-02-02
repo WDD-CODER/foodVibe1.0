@@ -30,7 +30,7 @@
 
     <div class="form-group">
       <label>Allergens:</label>
-      <div class="multi-select-dropdown" (click)="showAllergenDropdown.update(val => !val)">
+      <div class="multi-select-dropdown" (click)="toggleAllergenDropdown()">
         <div class="selected-items">
           <span *ngIf="selectedAllergens().length === 0">Select Allergens...</span>
           <span *ngFor="let allergen of selectedAllergens()" class="selected-tag">{{ allergen }}</span>

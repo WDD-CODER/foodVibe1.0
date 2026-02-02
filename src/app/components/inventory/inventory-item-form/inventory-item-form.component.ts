@@ -171,6 +171,10 @@ export class InventoryItemFormComponent implements OnInit {
     }
   }
 
+  toggleAllergenDropdown(): void {
+    this.showAllergenDropdown.update(val => !val);
+  }
+
   // Dynamic Properties methods
   get properties(): FormArray {
     return this.itemForm.get('properties') as FormArray;
