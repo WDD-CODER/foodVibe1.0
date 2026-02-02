@@ -1,10 +1,11 @@
-import { Component, HostListener, OnInit, inject, signal, effect } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ItemDataService } from '../../../core/services/ingredient-data.service';
 import type { ItemLedger, TripleUnitConversion } from '../../../core/models/ingredient.model';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { ClickOutsideDirective } from '../../../directives/click-out-side.directive';
 
 const defaultUnitConversion: TripleUnitConversion = {
   purchase: { symbol: 'kg', label: 'Kilograms', factorToInventory: 1 },
@@ -15,9 +16,10 @@ const defaultUnitConversion: TripleUnitConversion = {
 @Component({
   selector: 'app-inventory-item-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ClickOutsideDirective],
   templateUrl: './inventory-item-form.component.html',
-  styleUrl: './inventory-item-form.component.scss'
+  styleUrl: './inventory-item-form.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InventoryItemFormComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -29,21 +31,10 @@ export class InventoryItemFormComponent implements OnInit {
   isEditing = signal<boolean>(false);
   itemId: string | null = null;
   
-  // Autocomplete for item name
-  searchItems = signal<ItemLedger[]>([]);
   showItemDropdown = signal<boolean>(false);
-
-  // Multi-select for allergens
+  searchItems = signal<ItemLedger[]>([]);
   selectedAllergens = signal<string[]>([]);
   showAllergenDropdown = signal<boolean>(false);
-
-  // Autocomplete for property keys
-  propertyKeySearchTerm = signal<string>('');
-  filteredPropertyKeys = signal<string[]>([]);
-  selectedPropertyKeys = signal<string[]>([]); // To display selected property keys
-  showPropertyKeyDropdown = signal<boolean>(false);
-
-  // Multi-select for top categories (chip-based)
   selectedTopCategories = signal<string[]>([]);
   showTopCategoryDropdown = signal<boolean>(false);
 
@@ -51,265 +42,113 @@ export class InventoryItemFormComponent implements OnInit {
     this.itemForm = this.fb.group({
       itemName: ['', Validators.required],
       topCategory: ['', Validators.required],
-      allergens: this.fb.array([]),
       properties: this.fb.array([]),
     });
 
-    // Effect for item name autocomplete
-    effect(() => {
-      const itemNameControl = this.itemForm.get('itemName');
-      if (itemNameControl) {
-        itemNameControl.valueChanges.pipe(
-          debounceTime(300),
-          distinctUntilChanged()
-        ).subscribe(value => {
-          this.onItemNameInput(value);
-        });
-      }
-    });
-
-    // Effect for property key autocomplete
-    effect(() => {
-      const propKeyControl = this.itemForm.get('newPropertyKey'); // Assuming a temporary control for new property key input
-      // No direct link to properties FormArray for autocomplete. Handle it in HTML input event.
-    });
+    this.itemForm.get('itemName')?.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(value => this.onItemNameInput(value));
   }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       this.itemId = params.get('id');
-      if (this.itemId) {
-        this.isEditing.set(true);
-        const item = this.itemDataService.getItemById(this.itemId);
-        if (item) {
-          const loadedTopCategories = [
-            ...(item.properties?.topCategory ? [item.properties.topCategory] : []),
-            ...(item.properties?.subCategories ?? []),
-          ].filter(Boolean);
-          this.selectedTopCategories.set(loadedTopCategories);
-
-          this.itemForm.patchValue({
-            itemName: item.itemName,
-            topCategory: loadedTopCategories.length ? 'selected' : '',
-          });
-          this.selectedAllergens.set(item.allergenIds || []);
-          
-          // Populate properties FormArray
-          if (item.properties) {
-            for (const key in item.properties) {
-              if (item.properties.hasOwnProperty(key) && key !== 'topCategory' && key !== 'subCategories') {
-                const values = item.properties[key];
-                if (Array.isArray(values)) {
-                  values.forEach(value => {
-                    this.properties.push(this.createPropertyFormGroup(key, value));
-                    if (!this.selectedPropertyKeys().includes(key)) {
-                      this.selectedPropertyKeys.update(keys => [...keys, key]);
-                    }
-                  });
-                } else if (typeof values === 'string') {
-                  this.properties.push(this.createPropertyFormGroup(key, values));
-                  if (!this.selectedPropertyKeys().includes(key)) {
-                    this.selectedPropertyKeys.update(keys => [...keys, key]);
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+      if (this.itemId) this.loadItem(this.itemId);
     });
   }
 
-  // Item Name Autocomplete methods
-  onItemNameInput(value: string): void {
-    if (value && value.length > 0) {
-      this.searchItems.set(this.itemDataService.allItems().filter(item =>
-        item.itemName.toLowerCase().includes(value.toLowerCase())
-      ));
-      this.showItemDropdown.set(true);
-    } else {
-      this.searchItems.set([]);
-      this.showItemDropdown.set(false);
-    }
-  }
+  private loadItem(id: string): void {
+    const item = this.itemDataService.getItemById(id);
+    if (!item) return;
 
-  onItemNameFocus(): void {
-    const control = this.itemForm.get('itemName');
-    const value = (control?.value ?? '').toString();
-
-    // If the dropdown is already visible, don't change anything.
-    if (this.showItemDropdown()) {
-      return;
-    }
-
-    if (value && value.length > 0) {
-      this.searchItems.set(this.itemDataService.allItems().filter(item =>
-        item.itemName.toLowerCase().includes(value.toLowerCase())
-      ));
-      this.showItemDropdown.set(true);
-    }
-  }
-
-  selectExistingItem(item: ItemLedger): void {
-    const loadedTopCategories = [
+    this.isEditing.set(true);
+    const loadedCategories = [
       ...(item.properties?.topCategory ? [item.properties.topCategory] : []),
       ...(item.properties?.subCategories ?? []),
     ].filter(Boolean);
-    this.selectedTopCategories.set(loadedTopCategories);
 
+    this.selectedTopCategories.set(loadedCategories);
+    this.selectedAllergens.set(item.allergenIds || []);
+    
     this.itemForm.patchValue({
       itemName: item.itemName,
-      topCategory: loadedTopCategories.length ? 'selected' : '',
+      topCategory: loadedCategories.length ? 'selected' : '',
     });
-    this.selectedAllergens.set(item.allergenIds || []);
+
     this.properties.clear();
-    this.selectedPropertyKeys.set([]);
-
     if (item.properties) {
-      for (const key in item.properties) {
-        if (item.properties.hasOwnProperty(key) && key !== 'topCategory' && key !== 'subCategories') {
-          const values = item.properties[key];
-          if (Array.isArray(values)) {
-            values.forEach(value => {
-              this.properties.push(this.createPropertyFormGroup(key, value));
-              if (!this.selectedPropertyKeys().includes(key)) {
-                this.selectedPropertyKeys.update(keys => [...keys, key]);
-              }
-            });
-          } else if (typeof values === 'string') {
-            this.properties.push(this.createPropertyFormGroup(key, values));
-            if (!this.selectedPropertyKeys().includes(key)) {
-              this.selectedPropertyKeys.update(keys => [...keys, key]);
-            }
-          }
-        }
-      }
-    }
-    this.showItemDropdown.set(false);
-    this.isEditing.set(true); // Automatically switch to edit mode
-  }
-
-  // Allergen Multi-select methods
-  toggleAllergen(allergen: string): void {
-    const currentAllergens = this.selectedAllergens();
-    if (currentAllergens.includes(allergen)) {
-      this.selectedAllergens.set(currentAllergens.filter(a => a !== allergen));
-    } else {
-      this.selectedAllergens.set([...currentAllergens, allergen]);
+      Object.entries(item.properties).forEach(([key, values]) => {
+        if (key === 'topCategory' || key === 'subCategories') return;
+        const vals = Array.isArray(values) ? values : [values];
+        vals.forEach(v => this.properties.push(this.createPropertyFormGroup(key, v as string)));
+      });
     }
   }
 
-  toggleAllergenDropdown(): void {
-    this.showAllergenDropdown.update(val => !val);
-    this.showItemDropdown.set(false);
-    this.showTopCategoryDropdown.set(false);
-  }
-
-  // Dynamic Properties methods
   get properties(): FormArray {
     return this.itemForm.get('properties') as FormArray;
   }
 
-  createPropertyFormGroup(key: string = '', value: string = ''): FormGroup {
+  createPropertyFormGroup(key = '', value = ''): FormGroup {
     return this.fb.group({
       key: [key, Validators.required],
       value: [value, Validators.required]
     });
   }
 
-  addProperty(): void {
-    this.properties.push(this.createPropertyFormGroup());
+  onItemNameInput(value: string): void {
+    if (value?.length > 0) {
+      this.searchItems.set(this.itemDataService.allItems().filter(i => 
+        i.itemName.toLowerCase().includes(value.toLowerCase())));
+      this.showItemDropdown.set(true);
+    } else {
+      this.showItemDropdown.set(false);
+    }
   }
 
-  removeProperty(index: number): void {
-    this.properties.removeAt(index);
-    // Re-evaluate selected property keys if necessary, or let it be handled on submit
-  }
-
-  // Top Category multi-select methods
-  toggleTopCategoryDropdown(): void {
-    this.showTopCategoryDropdown.update(val => !val);
+  selectExistingItem(item: ItemLedger): void {
+    this.loadItem(item.id);
     this.showItemDropdown.set(false);
-    this.showAllergenDropdown.set(false);
+  }
+
+  toggleAllergen(allergen: string): void {
+    this.selectedAllergens.update(current => 
+      current.includes(allergen) ? current.filter(a => a !== allergen) : [...current, allergen]);
   }
 
   toggleTopCategory(category: string): void {
-    const current = this.selectedTopCategories();
-    if (current.includes(category)) {
-      this.selectedTopCategories.set(current.filter(c => c !== category));
-    } else {
-      this.selectedTopCategories.set([...current, category]);
-    }
-
-    // Keep the form control "valid" state in sync without storing a comma string.
+    this.selectedTopCategories.update(current => 
+      current.includes(category) ? current.filter(c => c !== category) : [...current, category]);
     this.itemForm.get('topCategory')?.setValue(this.selectedTopCategories().length ? 'selected' : '');
-    this.itemForm.get('topCategory')?.markAsTouched();
   }
 
-  closeAllDropdowns(): void {
-    this.showItemDropdown.set(false);
-    this.showAllergenDropdown.set(false);
-    this.showTopCategoryDropdown.set(false);
-  }
+  addProperty(): void { this.properties.push(this.createPropertyFormGroup()); }
+  removeProperty(index: number): void { this.properties.removeAt(index); }
 
-  @HostListener('document:click')
-  onDocumentClick(): void {
-    this.closeAllDropdowns();
-  }
-
-  @HostListener('document:keydown.escape')
-  onEscape(): void {
-    this.closeAllDropdowns();
-  }
-
-  // Property Key Autocomplete (for adding new dynamic properties)
-  onPropertyKeyInput(event: Event, index: number): void {
-    const inputElement = event.target as HTMLInputElement;
-    const value = inputElement.value;
-    // Assuming a separate signal for the current property key being typed for dropdown
-    // This might be better handled directly in the template with a filtered list for each property row.
-    // For simplicity, let's assume the dropdown appears when user types and they select from it.
-    // If no match, they can type and press 'add'.
-  }
-
-  // Submit and Cancel
   onSubmit(): void {
-    if (this.itemForm.valid) {
-      const formValue = this.itemForm.value;
-      const selectedTopCategories = this.selectedTopCategories();
-
-      const newProperties: { topCategory: string; subCategories?: string[]; [key: string]: string | string[] | undefined; } = {
-        topCategory: selectedTopCategories[0] ?? '',
-      };
-      if (selectedTopCategories.length > 1) {
-        newProperties.subCategories = selectedTopCategories.slice(1);
+    if (this.itemForm.invalid) return;
+    const formValue = this.itemForm.value;
+    const cats = this.selectedTopCategories();
+    
+    const item: ItemLedger = {
+      id: this.isEditing() && this.itemId ? this.itemId : `item_${Date.now()}`,
+      itemName: formValue.itemName,
+      units: defaultUnitConversion,
+      allergenIds: this.selectedAllergens(),
+      properties: {
+        topCategory: cats[0] || '',
+        subCategories: cats.slice(1),
+        ...formValue.properties.reduce((acc: any, p: any) => {
+          acc[p.key] = acc[p.key] ? [...acc[p.key], p.value] : [p.value];
+          return acc;
+        }, {})
       }
+    };
 
-      formValue.properties.forEach((prop: { key: string, value: string }) => {
-        if (!newProperties[prop.key]) {
-          newProperties[prop.key] = [];
-        }
-        (newProperties[prop.key] as string[]).push(prop.value);
-      });
-
-      const item: ItemLedger = {
-        id: this.isEditing() && this.itemId ? this.itemId : `item_${Date.now()}`,
-        itemName: formValue.itemName,
-        units: defaultUnitConversion, // Using default for now
-        allergenIds: this.selectedAllergens(),
-        properties: newProperties,
-      };
-
-      if (this.isEditing()) {
-        this.itemDataService.updateItem(item);
-      } else {
-        this.itemDataService.addItem(item);
-      }
-      this.router.navigate(['/inventory/list']);
-    }
-  }
-
-  onCancel(): void {
+    this.isEditing() ? this.itemDataService.updateItem(item) : this.itemDataService.addItem(item);
     this.router.navigate(['/inventory/list']);
   }
+
+  onCancel(): void { this.router.navigate(['/inventory/list']); }
 }

@@ -118,7 +118,7 @@
     .multi-select-dropdown {
       border: 1px solid #ddd;
       border-radius: 6px;
-      padding: 10px 15px;
+      padding: 0 15px;
       cursor: pointer;
       background-color: #fff;
       min-height: 44px;
@@ -141,7 +141,7 @@
       .selected-tag {
         background-color: #e0f7fa;
         color: #007bff;
-        padding: 5px 10px;
+        padding: 5px ;
         border-radius: 4px;
         font-size: 0.9em;
         max-width: 100%;

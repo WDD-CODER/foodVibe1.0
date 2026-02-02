@@ -2,23 +2,10 @@
   <h2>{{ isEditing() ? 'Edit Item' : 'Add New Item' }}</h2>
 
   <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
-    <div class="form-group" (click)="$event.stopPropagation()">
-      <label for="itemName">
-        Item Name:
-        <input
-          id="itemName"
-          type="text"
-          formControlName="itemName"
-          (input)="onItemNameInput($any($event.target).value)"
-          (focus)="onItemNameFocus()"
-        >
-        <div
-          *ngIf="itemForm.get('itemName')?.invalid && itemForm.get('itemName')?.touched"
-          class="error-message"
-        >
-          Item Name is required.
-        </div>
-      </label>
+    <div class="form-group" (clickOutside)="showItemDropdown.set(false)">
+      <label for="itemName">Item Name:</label>
+      <input id="itemName" type="text" formControlName="itemName" (focus)="showItemDropdown.set(true)">
+      
       <div *ngIf="showItemDropdown() && searchItems().length > 0" class="autocomplete-dropdown">
         <div *ngFor="let item of searchItems()" (click)="selectExistingItem(item)" class="dropdown-item">
           {{ item.itemName }}
@@ -26,75 +13,48 @@
       </div>
     </div>
 
-    <div class="form-row" (click)="$event.stopPropagation()">
-      <div class="form-group form-group--compact">
+    <div class="form-row">
+      <div class="form-group form-group--compact" (clickOutside)="showTopCategoryDropdown.set(false)">
         <label>Top Category:</label>
-        <input type="hidden" formControlName="topCategory">
-        <div class="multi-select-dropdown" (click)="toggleTopCategoryDropdown()">
+        <div class="multi-select-dropdown" (click)="showTopCategoryDropdown.set(!showTopCategoryDropdown())">
           <div class="selected-items">
-            <span *ngIf="selectedTopCategories().length === 0">Select Top Category...</span>
-            <span
-              *ngFor="let category of selectedTopCategories()"
-              class="selected-tag"
-              role="button"
-              tabindex="0"
-              (click)="toggleTopCategory(category); $event.stopPropagation()"
-              (keydown.enter)="toggleTopCategory(category); $event.stopPropagation()"
-              (keydown.space)="toggleTopCategory(category); $event.stopPropagation()"
-              [attr.aria-label]="'Remove top category ' + category"
-              title="Click to remove"
-            >
+            <span *ngIf="selectedTopCategories().length === 0">Select...</span>
+            <span *ngFor="let category of selectedTopCategories()" class="selected-tag" (click)="toggleTopCategory(category); $event.stopPropagation()">
               {{ category }}
             </span>
           </div>
           <div *ngIf="showTopCategoryDropdown()" class="dropdown-list">
-            <div *ngFor="let category of itemDataService.allTopCategories()" class="dropdown-item">
-              <input
-                type="checkbox"
-                [id]="'top-category-' + category"
-                [checked]="selectedTopCategories().includes(category)"
-                (change)="toggleTopCategory(category); $event.stopPropagation()"
-              >
-              <label [for]="'top-category-' + category">{{ category }}</label>
+            <div *ngFor="let cat of itemDataService.allTopCategories()" class="dropdown-item">
+              <input type="checkbox" [id]="cat" [checked]="selectedTopCategories().includes(cat)" (change)="toggleTopCategory(cat)">
+              <label [for]="cat">{{ cat }}</label>
             </div>
           </div>
         </div>
-        <div
-          *ngIf="itemForm.get('topCategory')?.invalid && itemForm.get('topCategory')?.touched"
-          class="error-message"
-        >
-          Top Category is required.
-        </div>
       </div>
 
-      <div class="form-group form-group--compact">
+      <div class="form-group form-group--compact" (clickOutside)="showAllergenDropdown.set(false)">
         <label>Allergens:</label>
-        <div class="multi-select-dropdown" (click)="toggleAllergenDropdown()">
+        <div class="multi-select-dropdown" (click)="showAllergenDropdown.set(!showAllergenDropdown())">
           <div class="selected-items">
-            <span *ngIf="selectedAllergens().length === 0">Select Allergens...</span>
-          <span
-            *ngFor="let allergen of selectedAllergens()"
-            class="selected-tag"
-            role="button"
-            tabindex="0"
-            (click)="toggleAllergen(allergen); $event.stopPropagation()"
-            (keydown.enter)="toggleAllergen(allergen); $event.stopPropagation()"
-            (keydown.space)="toggleAllergen(allergen); $event.stopPropagation()"
-            [attr.aria-label]="'Remove allergen ' + allergen"
-            title="Click to remove"
-          >
-            {{ allergen }}
-          </span>
+            <span *ngIf="selectedAllergens().length === 0">Select...</span>
+            <span *ngFor="let alg of selectedAllergens()" class="selected-tag" (click)="toggleAllergen(alg); $event.stopPropagation()">
+              {{ alg }}
+            </span>
           </div>
           <div *ngIf="showAllergenDropdown()" class="dropdown-list">
-            <div *ngFor="let allergen of itemDataService.allAllergens()" class="dropdown-item">
-              <input
-                type="checkbox"
-                [id]="'allergen-' + allergen"
-                [checked]="selectedAllergens().includes(allergen)"
-                (change)="toggleAllergen(allergen); $event.stopPropagation()"
-              >
-              <label [for]="'allergen-' + allergen">{{ allergen }}</label>
+            <div *ngFor="let alg of itemDataService.allAllergens()" 
+                 class="dropdown-item"
+                 (click)="toggleAllergen(alg); $event.stopPropagation()">
+              
+              <input type="checkbox" 
+                     [id]="'alg-' + alg" 
+                     [checked]="selectedAllergens().includes(alg)"
+                     (click)="$event.stopPropagation()"
+                     (change)="toggleAllergen(alg)">
+              
+              <label [for]="'alg-' + alg" (click)="$event.stopPropagation()">
+                {{ alg }}
+              </label>
             </div>
           </div>
         </div>
@@ -103,23 +63,17 @@
 
     <div formArrayName="properties" class="properties-section">
       <h3>Additional Properties</h3>
-      <div *ngFor="let propertyGroup of properties.controls; let i = index" [formGroupName]="i" class="property-group">
-        <input type="text" formControlName="key" placeholder="Property Key" class="property-key-input">
-        <input type="text" formControlName="value" placeholder="Property Value" class="property-value-input">
-        <button type="button" (click)="removeProperty(i)" class="remove-property-button">Remove</button>
-        <div *ngIf="propertyGroup.get('key')?.invalid && propertyGroup.get('key')?.touched" class="error-message">
-          Key is required.
-        </div>
-        <div *ngIf="propertyGroup.get('value')?.invalid && propertyGroup.get('value')?.touched" class="error-message">
-          Value is required.
-        </div>
+      <div *ngFor="let prop of properties.controls; let i = index" [formGroupName]="i" class="property-group">
+        <input type="text" formControlName="key" placeholder="Key">
+        <input type="text" formControlName="value" placeholder="Value">
+        <button type="button" (click)="removeProperty(i)">Remove</button>
       </div>
-      <button type="button" (click)="addProperty()" class="add-property-button">Add Property</button>
+      <button type="button" (click)="addProperty()">Add Property</button>
     </div>
 
     <div class="form-actions">
-      <button type="submit" [disabled]="!itemForm.valid" class="submit-button">{{ isEditing() ? 'Update' : 'Add' }} Item</button>
-      <button type="button" (click)="onCancel()" class="cancel-button">Cancel</button>
+      <button type="submit" [disabled]="itemForm.invalid">{{ isEditing() ? 'Update' : 'Add' }}</button>
+      <button type="button" (click)="onCancel()">Cancel</button>
     </div>
   </form>
 </div>
