@@ -228,12 +228,9 @@ export class InventoryItemFormComponent implements OnInit {
   onSubmit(): void {
     if (this.itemForm.valid) {
       const formValue = this.itemForm.value;
-      const newProperties: { [key: string]: string | string[] } = {};
-
-      // Add topCategory directly to properties
-      if (formValue.topCategory) {
-        newProperties['topCategory'] = formValue.topCategory;
-      }
+      const newProperties: { [key: string]: string | string[] | undefined } = {
+        topCategory: formValue.topCategory,
+      };
 
       formValue.properties.forEach((prop: { key: string, value: string }) => {
         if (!newProperties[prop.key]) {
