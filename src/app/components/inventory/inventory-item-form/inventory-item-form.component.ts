@@ -228,7 +228,7 @@ export class InventoryItemFormComponent implements OnInit {
   onSubmit(): void {
     if (this.itemForm.valid) {
       const formValue = this.itemForm.value;
-      const newProperties: { [key: string]: string | string[] | undefined } = {
+      const newProperties: { topCategory: string; subCategories?: string[]; [key: string]: string | string[] | undefined; } = {
         topCategory: formValue.topCategory,
       };
 
