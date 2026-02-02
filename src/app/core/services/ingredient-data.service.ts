@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import type { IngredientLedger, TripleUnitConversion } from '../../core/models/ingredient.model';
+import type { ItemLedger, TripleUnitConversion } from '../models/ingredient.model';
 
 interface FilterOption {
   label: string;
@@ -19,68 +19,73 @@ const defaultUnitConversion: TripleUnitConversion = {
 };
 
 @Injectable({ providedIn: 'root' })
-export class IngredientDataService {
-  private ingredientsStore = signal<IngredientLedger[]>([
+export class ItemDataService {
+  private itemsStore = signal<ItemLedger[]>([
     {
-      id: 'ing_001',
-      name: 'Tomato',
+      id: 'item_001',
+      itemName: 'Tomato',
       units: defaultUnitConversion,
       allergenIds: [],
-      properties: { topCategory: ['Vegetable'], subCategories: ['Produce'], color: ['red'], season: ['summer'] }
+      properties: { topCategory: 'Vegetable', subCategories: ['Produce'], color: ['red'], season: ['summer'] }
     },
     {
-      id: 'ing_002',
-      name: 'Chicken Breast',
+      id: 'item_002',
+      itemName: 'Chicken Breast',
       units: defaultUnitConversion,
       allergenIds: [],
-      properties: { topCategory: ['Meat'], subCategories: ['Poultry'], diet: ['keto', 'protein-rich'] }
+      properties: { topCategory: 'Meat', subCategories: ['Poultry'], diet: ['keto', 'protein-rich'] }
     },
     {
-      id: 'ing_003',
-      name: 'Flour',
+      id: 'item_003',
+      itemName: 'Flour',
       units: defaultUnitConversion,
       allergenIds: ['gluten'],
-      properties: { topCategory: ['Grain'], subCategories: ['Baking'], type: ['all-purpose'] }
+      properties: { topCategory: 'Grain', subCategories: ['Baking'], type: ['all-purpose'] }
     },
     {
-      id: 'ing_004',
-      name: 'Milk',
+      id: 'item_004',
+      itemName: 'Milk',
       units: defaultUnitConversion,
       allergenIds: ['dairy'],
-      properties: { topCategory: ['Dairy'], subCategories: ['Liquids'], type: ['full-fat'] }
+      properties: { topCategory: 'Dairy', subCategories: ['Liquids'], type: ['full-fat'] }
     },
     {
-      id: 'ing_005',
-      name: 'Salmon',
+      id: 'item_005',
+      itemName: 'Salmon',
       units: defaultUnitConversion,
       allergenIds: ['fish'],
-      properties: { topCategory: ['Fish'], subCategories: ['Seafood'], diet: ['omega-rich'] }
+      properties: { topCategory: 'Fish', subCategories: ['Seafood'], diet: ['omega-rich'] }
     },
     {
-      id: 'ing_006',
-      name: 'Carrot',
+      id: 'item_006',
+      itemName: 'Carrot',
       units: defaultUnitConversion,
       allergenIds: [],
-      properties: { topCategory: ['Vegetable'], subCategories: ['Root'], color: ['orange'], season: ['autumn'] }
+      properties: { topCategory: 'Vegetable', subCategories: ['Root'], color: ['orange'], season: ['autumn'] }
     },
     {
-      id: 'ing_007',
-      name: 'Egg',
+      id: 'item_007',
+      itemName: 'Egg',
       units: defaultUnitConversion,
       allergenIds: ['egg'],
-      properties: { topCategory: ['Dairy'], subCategories: ['Protein'] }
+      properties: { topCategory: 'Dairy', subCategories: ['Protein'] }
     },
     {
-      id: 'ing_008',
-      name: 'Rice',
+      id: 'item_008',
+      itemName: 'Rice',
       units: defaultUnitConversion,
       allergenIds: [],
-      properties: { topCategory: ['Grain'], subCategories: ['Rice'], type: ['basmati'] }
+      properties: { topCategory: 'Grain', subCategories: ['Rice'], type: ['basmati'] }
     },
   ]);
 
-  readonly allIngredients = this.ingredientsStore.asReadonly();
+  readonly allItems = this.itemsStore.asReadonly();
   readonly filterCategories = signal<FilterCategory[]>([]);
+
+  // Demo global data for autocomplete/multi-select
+  readonly allAllergens = signal<string[]>(['Gluten', 'Dairy', 'Fish', 'Egg', 'Peanuts', 'Soy', 'Tree Nuts', 'Shellfish']);
+  readonly allPropertyKeys = signal<string[]>(['TopCategory', 'SubCategories', 'Color', 'Season', 'Diet', 'Type']);
+  readonly allTopCategories = signal<string[]>(['Vegetable', 'Meat', 'Grain', 'Dairy', 'Fish']);
 
   constructor() {
     this.generateFilterCategories();
@@ -89,17 +94,25 @@ export class IngredientDataService {
   private generateFilterCategories(): void {
     const categories: { [key: string]: Set<string> } = {};
 
-    this.ingredientsStore().forEach(ingredient => {
-      if (ingredient.allergenIds) {
+    this.itemsStore().forEach(item => {
+      // Collect allergen categories
+      if (item.allergenIds) {
         if (!categories['Allergens']) categories['Allergens'] = new Set<string>();
-        ingredient.allergenIds.forEach(allergen => categories['Allergens'].add(allergen));
+        item.allergenIds.forEach(allergen => categories['Allergens'].add(allergen));
       }
 
-      if (ingredient.properties) {
-        for (const key in ingredient.properties) {
-          if (ingredient.properties.hasOwnProperty(key)) {
-            if (!categories[key]) categories[key] = new Set<string>();
-            ingredient.properties[key].forEach(prop => categories[key].add(prop));
+      // Collect custom properties
+      if (item.properties) {
+        for (const key in item.properties) {
+          if (item.properties.hasOwnProperty(key)) {
+            const value = item.properties[key];
+            if (Array.isArray(value)) {
+              if (!categories[key]) categories[key] = new Set<string>();
+              value.forEach(prop => categories[key].add(prop));
+            } else if (typeof value === 'string') {
+              if (!categories[key]) categories[key] = new Set<string>();
+              categories[key].add(value);
+            }
           }
         }
       }
@@ -121,24 +134,24 @@ export class IngredientDataService {
     this.filterCategories.set(filterCategories);
   }
 
-  getIngredientById(id: string): IngredientLedger | undefined {
-    return this.ingredientsStore().find(i => i.id === id);
+  getItemById(id: string): ItemLedger | undefined {
+    return this.itemsStore().find(i => i.id === id);
   }
 
-  addIngredient(newIngredient: IngredientLedger): void {
-    this.ingredientsStore.update(ingredients => [...ingredients, newIngredient]);
-    this.generateFilterCategories(); // Re-generate filters after adding an ingredient
+  addItem(newItem: ItemLedger): void {
+    this.itemsStore.update(items => [...items, newItem]);
+    this.generateFilterCategories();
   }
 
-  updateIngredient(updatedIngredient: IngredientLedger): void {
-    this.ingredientsStore.update(ingredients =>
-      ingredients.map(ing => (ing.id === updatedIngredient.id ? updatedIngredient : ing))
+  updateItem(updatedItem: ItemLedger): void {
+    this.itemsStore.update(items =>
+      items.map(ing => (ing.id === updatedItem.id ? updatedItem : ing))
     );
-    this.generateFilterCategories(); // Re-generate filters after updating an ingredient
+    this.generateFilterCategories();
   }
 
-  deleteIngredient(id: string): void {
-    this.ingredientsStore.update(ingredients => ingredients.filter(ing => ing.id !== id));
-    this.generateFilterCategories(); // Re-generate filters after deleting an ingredient
+  deleteItem(id: string): void {
+    this.itemsStore.update(items => items.filter(ing => ing.id !== id));
+    this.generateFilterCategories();
   }
 }

@@ -1,8 +1,8 @@
 import { Component, OnDestroy, inject, ChangeDetectionStrategy, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import type { IngredientLedger } from '../../../core/models/ingredient.model';
+import type { ItemLedger } from '../../../core/models/ingredient.model';
 import { FormsModule } from '@angular/forms';
-import { IngredientDataService } from '../../../core/services/ingredient-data.service';
+import { ItemDataService } from '../../../core/services/ingredient-data.service';
 interface FilterOption {
   label: string;
   value: string;
@@ -23,39 +23,53 @@ interface FilterCategory {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InventoryItemListComponent implements OnDestroy {
-  private readonly ingredientDataService = inject(IngredientDataService);
+  private readonly itemDataService = inject(ItemDataService);
 
-  protected filteredIngredients = signal<IngredientLedger[]>([]);
+  protected filteredItems = signal<ItemLedger[]>([]);
   protected filterCategories = signal<FilterCategory[]>([]);
 
   constructor() {
     effect(() => {
-      const ingredients = this.ingredientDataService.allIngredients();
-      this.filteredIngredients.set(ingredients);
-      this.generateFilterCategories(ingredients);
+      const items = this.itemDataService.allItems();
+      this.filteredItems.set(items);
+      this.generateFilterCategories(items);
     });
   }
 
   ngOnDestroy(): void {
-    // 'takeUntilDestroyed' handles cleanup, so explicit ngOnDestroy is not strictly necessary for subscriptions.
+    // Cleanup handled by 'takeUntilDestroyed' if it were used, but effects clean up automatically.
   }
 
-  private generateFilterCategories(ingredients: IngredientLedger[]): void {
+  private generateFilterCategories(items: ItemLedger[]): void {
     const categories: { [key: string]: Set<string> } = {};
 
-    ingredients.forEach(ingredient => {
+    items.forEach(item => {
       // Collect allergen categories
-      if (ingredient.allergenIds) {
+      if (item.allergenIds) {
         if (!categories['Allergens']) categories['Allergens'] = new Set<string>();
-        ingredient.allergenIds.forEach(allergen => categories['Allergens'].add(allergen));
+        item.allergenIds.forEach(allergen => categories['Allergens'].add(allergen));
       }
 
-      // Collect custom properties
-      if (ingredient.properties) {
-        for (const key in ingredient.properties) {
-          if (ingredient.properties.hasOwnProperty(key)) {
-            if (!categories[key]) categories[key] = new Set<string>();
-            ingredient.properties[key].forEach(prop => categories[key].add(prop));
+      // Collect custom properties, including topCategory explicitly
+      if (item.properties) {
+        // Top Category
+        if (item.properties.topCategory) {
+          if (!categories['TopCategory']) categories['TopCategory'] = new Set<string>();
+          categories['TopCategory'].add(item.properties.topCategory);
+        }
+
+        // Other dynamic properties (excluding subCategories as it's not a primary filter here)
+        for (const key in item.properties) {
+          if (item.properties.hasOwnProperty(key) && key !== 'topCategory' && key !== 'subCategories') {
+            const value = item.properties[key];
+            if (Array.isArray(value)) {
+              if (!categories[key]) categories[key] = new Set<string>();
+              value.forEach(prop => categories[key].add(prop));
+            } else if (typeof value === 'string') {
+              // This case handles if a property value is a single string instead of an array
+              if (!categories[key]) categories[key] = new Set<string>();
+              categories[key].add(value);
+            }
           }
         }
       }
@@ -87,24 +101,31 @@ export class InventoryItemListComponent implements OnDestroy {
       }
     });
 
-    const allIngredients = this.ingredientDataService.allIngredients();
+    const allItems = this.itemDataService.allItems();
 
     if (Object.keys(selectedFilters).length === 0) {
-      this.filteredIngredients.set(allIngredients); // No filters selected, show all
+      this.filteredItems.set(allItems); // No filters selected, show all
       return;
     }
 
-    const filtered = allIngredients.filter(ingredient => {
+    const filtered = allItems.filter(item => {
       return Object.keys(selectedFilters).every(categoryName => {
-        const ingredientPropertyValues = categoryName === 'Allergens'
-          ? ingredient.allergenIds || []
-          : (ingredient.properties && ingredient.properties[categoryName]) || [];
+        let itemPropertyValues: string[] = [];
+
+        if (categoryName === 'Allergens') {
+          itemPropertyValues = item.allergenIds || [];
+        } else if (categoryName === 'TopCategory') {
+          itemPropertyValues = item.properties?.topCategory ? [item.properties.topCategory] : [];
+        } else if (item.properties && item.properties[categoryName]) {
+          const propValue = item.properties[categoryName];
+          itemPropertyValues = Array.isArray(propValue) ? propValue : [propValue as string];
+        }
 
         return selectedFilters[categoryName].some(filterValue =>
-          ingredientPropertyValues.includes(filterValue)
+          itemPropertyValues.includes(filterValue)
         );
       });
     });
-    this.filteredIngredients.set(filtered);
+    this.filteredItems.set(filtered);
   }
 }

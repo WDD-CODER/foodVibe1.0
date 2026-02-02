@@ -1,5 +1,5 @@
 /**
- * Ingredient Ledger model — Atomic layer with ID identity and triple-unit conversion.
+ * Item Ledger model — Atomic layer with ID identity and triple-unit conversion.
  * Why: IDs and three-unit mapping decouple procurement, storage, and recipe usage so
  * adapters and calculations can convert consistently without unit ambiguity.
  */
@@ -29,11 +29,11 @@ export interface TripleUnitConversion {
   recipe: UnitDescriptor & UnitConversion;
 }
 
-export interface IngredientLedger {
+export interface ItemLedger {
   /** Unique identifier for the ledger entry (opaque, adapter-agnostic). */
   id: string;
   /** Display name. */
-  name: string;
+  itemName: string;
   /** Triple-unit structure: Purchase, Inventory, Recipe with conversion factors. */
   units: TripleUnitConversion;
   /** Optional external/code reference. */
@@ -41,5 +41,7 @@ export interface IngredientLedger {
   /** Optional allergen identifiers for matrix propagation. */
   allergenIds?: string[];
   /** Custom properties for filtering and categorization. */
-  properties?: { [key: string]: string[]; };
+  topCategory: string;
+  subCategories?: string[];
+  [key: string]: string | string[] | undefined; // Allow for other dynamic properties
 }

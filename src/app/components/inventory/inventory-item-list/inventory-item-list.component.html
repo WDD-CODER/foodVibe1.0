@@ -1,17 +1,17 @@
 <div class="inventory-container">
-  <div class="ingredients-list">
-    <h2>Ingredients</h2>
-    <div *ngIf="filteredIngredients().length === 0" class="no-results">
-      No ingredients match your current filters.
+  <div class="items-list">
+    <h2>Items</h2>
+    <div *ngIf="filteredItems().length === 0" class="no-results">
+      No items match your current filters.
     </div>
-    <div *ngFor="let ingredient of filteredIngredients()" class="ingredient-card">
-      <h3>{{ ingredient.name }}</h3>
-      <p *ngIf="ingredient.properties?.['topCategory']?.length">Category: {{ ingredient.properties['topCategory'][0] }}</p>
+    <div *ngFor="let item of filteredItems()" class="item-card">
+      <h3>{{ item.itemName }}</h3>
+      <p *ngIf="item.properties?.topCategory">Category: {{ item.properties.topCategory }}</p>
     </div>
   </div>
 
   <div class="filter-control-panel">
-    <h2>Filter Ingredients</h2>
+    <h2>Filter Items</h2>
     <div *ngFor="let category of filterCategories()" class="filter-category">
       <h3>{{ category.name }}</h3>
       <div *ngFor="let option of category.options" class="filter-option">
