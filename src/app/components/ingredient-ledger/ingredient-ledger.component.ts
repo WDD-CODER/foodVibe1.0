@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import type { ItemLedger } from '../../core/models/ingredient.model';
 import { IngredientService } from '../../core/services/ingredient.service';
 
@@ -6,6 +6,7 @@ import { IngredientService } from '../../core/services/ingredient.service';
   selector: 'app-ingredient-ledger',
   standalone: true,
   templateUrl: 'ingredient-ledger.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class IngredientLedgerComponent {
   protected readonly ingredientService = inject(IngredientService);

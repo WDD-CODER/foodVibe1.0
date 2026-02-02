@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
@@ -6,7 +6,8 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './inventory.component.html',
-  styleUrl: './inventory.component.scss'
+  styleUrl: './inventory.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InventoryComponent {
 }

@@ -2,15 +2,13 @@
   <div class="left-content">
     <span>{{ now_() | date: 'dd/MM/yyyy HH:mm' }}</span>
   </div>
+
   <div class="center-content">
-    <img ngSrc="assets/style/img/food-compos-logo.png"
-    alt="Food Compos Logo" 
-    class="logo" 
-    width="1" 
-    height="1" 
-    priority>
-      </div>
+    <img ngSrc="assets/style/img/food-compos-logo.png" alt="Food Compos Logo" class="logo" width="1" height="1"
+      priority>
+  </div>
+
   <div class="right-content">
-    <span>Recipes: {{ recipesCount }}</span>
+    <span>Recipes: {{ recipesCount_() }}</span>
   </div>
 </footer>

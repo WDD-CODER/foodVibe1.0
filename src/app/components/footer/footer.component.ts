@@ -1,5 +1,7 @@
 import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe, NgOptimizedImage } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { interval, map } from 'rxjs';
 
 @Component({
   selector: 'app-footer',
@@ -10,12 +12,12 @@ import { DatePipe, NgOptimizedImage } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FooterComponent {
-  now_ = signal(new Date());
-  recipesCount = signal(0);
+  // now_ = signal(new Date());
+  recipesCount_ = signal<number>(0);
 
-  constructor() {
-    setInterval(() => {
-      this.now_.set(new Date());
-    }, 1000);
-  }
+  readonly now_ = toSignal(
+    interval(1000).pipe(map(() => new Date())),
+    { initialValue: new Date() }
+  )
+  
 }
