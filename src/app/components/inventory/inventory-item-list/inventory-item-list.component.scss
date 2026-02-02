@@ -1,8 +1,10 @@
 .inventory-container {
-  display: flex;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: 1fr minmax(100px, 200px);
   gap: 20px;
   padding: 20px;
-  max-width: 1200px;
+
   margin: 20px auto;
 
   .ingredients-list {
