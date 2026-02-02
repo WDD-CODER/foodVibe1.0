@@ -41,14 +41,14 @@ export class InventoryComponent implements OnDestroy {
       name: 'Tomato',
       units: defaultUnitConversion,
       allergenIds: [],
-      properties: { category: ['vegetable'], color: ['red'], season: ['summer'] }
+      properties: { topCategory: ['Vegetable'], subCategories: ['Produce'], color: ['red'], season: ['summer'] }
     },
     {
       id: 'ing_002',
       name: 'Chicken Breast',
       units: defaultUnitConversion,
       allergenIds: [],
-      properties: { category: ['meat', 'poultry'], diet: ['keto', 'protein-rich'] }
+      properties: { topCategory: ['Meat'], subCategories: ['Poultry'], diet: ['keto', 'protein-rich'] }
     },
     {
       id: 'ing_003',
@@ -62,35 +62,35 @@ export class InventoryComponent implements OnDestroy {
       name: 'Milk',
       units: defaultUnitConversion,
       allergenIds: ['dairy'],
-      properties: { category: ['dairy'], type: ['full-fat'] }
+      properties: { topCategory: ['Dairy'], subCategories: ['Liquids'], type: ['full-fat'] }
     },
     {
       id: 'ing_005',
       name: 'Salmon',
       units: defaultUnitConversion,
       allergenIds: ['fish'],
-      properties: { category: ['fish'], diet: ['omega-rich'] }
+      properties: { topCategory: ['Fish'], subCategories: ['Seafood'], diet: ['omega-rich'] }
     },
     {
       id: 'ing_006',
       name: 'Carrot',
       units: defaultUnitConversion,
       allergenIds: [],
-      properties: { category: ['vegetable'], color: ['orange'], season: ['autumn'] }
+      properties: { topCategory: ['Vegetable'], subCategories: ['Root'], color: ['orange'], season: ['autumn'] }
     },
     {
       id: 'ing_007',
       name: 'Egg',
       units: defaultUnitConversion,
       allergenIds: ['egg'],
-      properties: { category: ['dairy', 'protein'] }
+      properties: { topCategory: ['Dairy'], subCategories: ['Protein'] }
     },
     {
       id: 'ing_008',
       name: 'Rice',
       units: defaultUnitConversion,
       allergenIds: [],
-      properties: { category: ['grain'], type: ['basmati'] }
+      properties: { topCategory: ['Grain'], subCategories: ['Rice'], type: ['basmati'] }
     },
   ];
 

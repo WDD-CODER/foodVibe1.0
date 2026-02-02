@@ -6,19 +6,7 @@
     </div>
     <div *ngFor="let ingredient of filteredIngredients()" class="ingredient-card">
       <h3>{{ ingredient.name }}</h3>
-      <p>ID: {{ ingredient.id }}</p>
-      <p>Units: {{ ingredient.units.inventory.label }} ({{ ingredient.units.inventory.symbol }})</p>
-      <p *ngIf="ingredient.allergenIds && ingredient.allergenIds.length > 0">
-        Allergens: {{ ingredient.allergenIds.join(', ') }}
-      </p>
-      <div *ngIf="ingredient.properties">
-        <h4>Properties:</h4>
-        <ul>
-          <li *ngFor="let propKey of (ingredient.properties | keyvalue)">
-            {{ propKey.key }}: {{ propKey.value.join(', ') }}
-          </li>
-        </ul>
-      </div>
+      <p *ngIf="ingredient.properties?.topCategory">Category: {{ ingredient.properties.topCategory[0] }}</p>
     </div>
   </div>
 
