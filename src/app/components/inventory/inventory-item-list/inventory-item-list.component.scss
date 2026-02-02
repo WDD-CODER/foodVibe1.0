@@ -1,40 +1,44 @@
 .inventory-container {
   display: grid;
-  grid-auto-flow: column;
-  grid-template-columns: 1fr minmax(100px, 200px);
+  grid-template-columns: 1fr 250px;
   gap: 20px;
-  padding: 20px;
 
+  padding: 20px;
   margin: 20px auto;
 
-  .ingredients-list {
-    flex: 3;
+  .items-list {
     background-color: #fff;
     padding: 20px;
+
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
     h2 {
       color: #333;
       margin-bottom: 20px;
-      border-bottom: 2px solid #eee;
       padding-bottom: 10px;
+
+      border-bottom: 2px solid #eee;
     }
 
     .no-results {
+      padding: 20px;
+
       color: #777;
       text-align: center;
-      padding: 20px;
+
       border: 1px dashed #ccc;
       border-radius: 4px;
     }
 
-    .ingredient-card {
-      background-color: #f9f9f9;
-      border: 1px solid #eee;
-      border-radius: 6px;
+    .item-card {
       padding: 15px;
       margin-bottom: 15px;
+
+      background-color: #f9f9f9;
+
+      border: 1px solid #eee;
+      border-radius: 6px;
 
       h3 {
         color: #0056b3;
@@ -45,37 +49,22 @@
       p {
         margin-bottom: 5px;
       }
-
-      h4 {
-        margin-top: 10px;
-        margin-bottom: 5px;
-        color: #555;
-      }
-
-      ul {
-        list-style-type: disc;
-        padding-left: 20px;
-        margin-top: 5px;
-
-        li {
-          margin-bottom: 3px;
-        }
-      }
     }
   }
 
   .filter-control-panel {
-    flex: 1;
     background-color: #fff;
     padding: 20px;
+
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
     h2 {
       color: #333;
       margin-bottom: 20px;
-      border-bottom: 2px solid #eee;
       padding-bottom: 10px;
+
+      border-bottom: 2px solid #eee;
     }
 
     .filter-category {
@@ -91,6 +80,7 @@
       .filter-option {
         display: flex;
         align-items: center;
+
         margin-bottom: 8px;
 
         input[type="checkbox"] {
@@ -99,8 +89,10 @@
         }
 
         label {
-          cursor: pointer;
           color: #666;
+          cursor: pointer;
+
+          transition: color 0.2s;
 
           &:hover {
             color: #000;
