@@ -44,6 +44,6 @@ export interface ItemLedger {
   properties?: {
     topCategory: string;
     subCategories?: string[];
-    [key: string]: string[]; // Now all other dynamic properties are explicitly string[]
+    [key: string]: string | string[] | undefined; // Allow other dynamic properties to include undefined
   };
 }
