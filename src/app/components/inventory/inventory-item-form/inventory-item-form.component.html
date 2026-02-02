@@ -4,7 +4,7 @@
   <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
     <div class="form-group">
       <label for="itemName">Item Name:</label>
-      <input id="itemName" type="text" formControlName="itemName" (input)="onItemNameInput(($event.target as HTMLInputElement).value)">
+      <input id="itemName" type="text" formControlName="itemName" (input)="onItemNameInput($any($event.target).value)">
       <div *ngIf="itemForm.get('itemName')?.invalid && itemForm.get('itemName')?.touched" class="error-message">
         Item Name is required.
       </div>
@@ -17,7 +17,7 @@
 
     <div class="form-group">
       <label for="topCategory">Top Category:</label>
-      <input id="topCategory" type="text" formControlName="topCategory" (input)="onTopCategoryInput(($event.target as HTMLInputElement).value)">
+      <input id="topCategory" type="text" formControlName="topCategory" (input)="onTopCategoryInput($any($event.target).value)">
       <div *ngIf="itemForm.get('topCategory')?.invalid && itemForm.get('topCategory')?.touched" class="error-message">
         Top Category is required.
       </div>
