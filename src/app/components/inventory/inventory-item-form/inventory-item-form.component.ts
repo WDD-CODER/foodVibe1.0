@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@ang
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ItemDataService } from '../../../core/services/ingredient-data.service';
+import { ItemDataService } from '../../../core/services/items-data.service';
 import type { ItemLedger, TripleUnitConversion } from '../../../core/models/ingredient.model';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ClickOutsideDirective } from '../../../core/directives/click-out-side';
@@ -21,6 +21,7 @@ const defaultUnitConversion: TripleUnitConversion = {
   styleUrl: './inventory-item-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
+
 export class InventoryItemFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
@@ -28,15 +29,15 @@ export class InventoryItemFormComponent implements OnInit {
   protected itemDataService = inject(ItemDataService);
 
   itemForm: FormGroup;
-  isEditing = signal<boolean>(false);
+  isEditing_ = signal<boolean>(false);
   itemId: string | null = null;
   
-  showItemDropdown = signal<boolean>(false);
-  searchItems = signal<ItemLedger[]>([]);
-  selectedAllergens = signal<string[]>([]);
-  showAllergenDropdown = signal<boolean>(false);
-  selectedTopCategories = signal<string[]>([]);
-  showTopCategoryDropdown = signal<boolean>(false);
+  showItemDropdown_ = signal<boolean>(false);
+  searchItems_ = signal<ItemLedger[]>([]);
+  selectedAllergens_ = signal<string[]>([]);
+  showAllergenDropdown_ = signal<boolean>(false);
+  selectedTopCategories_ = signal<string[]>([]);
+  showTopCategoryDropdown_ = signal<boolean>(false);
 
   constructor() {
     this.itemForm = this.fb.group({
@@ -58,24 +59,27 @@ export class InventoryItemFormComponent implements OnInit {
     });
   }
 
-  private loadItem(id: string): void {
-    const item = this.itemDataService.getItemById(id);
+  private async loadItem(id: string): Promise<void> {
+    // Use await to resolve the Promise into the actual ItemLedger object
+    const item = await this.itemDataService.getItem(id);
+    
     if (!item) return;
-
-    this.isEditing.set(true);
+  
+    this.isEditing_.set(true);
+    
     const loadedCategories = [
       ...(item.properties?.topCategory ? [item.properties.topCategory] : []),
       ...(item.properties?.subCategories ?? []),
     ].filter(Boolean);
-
-    this.selectedTopCategories.set(loadedCategories);
-    this.selectedAllergens.set(item.allergenIds || []);
+  
+    this.selectedTopCategories_.set(loadedCategories);
+    this.selectedAllergens_.set(item.allergenIds || []);
     
     this.itemForm.patchValue({
       itemName: item.itemName,
       topCategory: loadedCategories.length ? 'selected' : '',
     });
-
+  
     this.properties.clear();
     if (item.properties) {
       Object.entries(item.properties).forEach(([key, values]) => {
@@ -99,28 +103,28 @@ export class InventoryItemFormComponent implements OnInit {
 
   onItemNameInput(value: string): void {
     if (value?.length > 0) {
-      this.searchItems.set(this.itemDataService.allItems().filter(i => 
+      this.searchItems_.set(this.itemDataService.allItems_().filter(i => 
         i.itemName.toLowerCase().includes(value.toLowerCase())));
-      this.showItemDropdown.set(true);
+      this.showItemDropdown_.set(true);
     } else {
-      this.showItemDropdown.set(false);
+      this.showItemDropdown_.set(false);
     }
   }
 
   selectExistingItem(item: ItemLedger): void {
     this.loadItem(item.id);
-    this.showItemDropdown.set(false);
+    this.showItemDropdown_.set(false);
   }
 
   toggleAllergen(allergen: string): void {
-    this.selectedAllergens.update(current => 
+    this.selectedAllergens_.update(current => 
       current.includes(allergen) ? current.filter(a => a !== allergen) : [...current, allergen]);
   }
 
   toggleTopCategory(category: string): void {
-    this.selectedTopCategories.update(current => 
+    this.selectedTopCategories_.update(current => 
       current.includes(category) ? current.filter(c => c !== category) : [...current, category]);
-    this.itemForm.get('topCategory')?.setValue(this.selectedTopCategories().length ? 'selected' : '');
+    this.itemForm.get('topCategory')?.setValue(this.selectedTopCategories_().length ? 'selected' : '');
   }
 
   addProperty(): void { this.properties.push(this.createPropertyFormGroup()); }
@@ -129,13 +133,13 @@ export class InventoryItemFormComponent implements OnInit {
   onSubmit(): void {
     if (this.itemForm.invalid) return;
     const formValue = this.itemForm.value;
-    const cats = this.selectedTopCategories();
+    const cats = this.selectedTopCategories_();
     
     const item: ItemLedger = {
-      id: this.isEditing() && this.itemId ? this.itemId : `item_${Date.now()}`,
+      id: this.isEditing_() && this.itemId ? this.itemId : `item_${Date.now()}`,
       itemName: formValue.itemName,
       units: defaultUnitConversion,
-      allergenIds: this.selectedAllergens(),
+      allergenIds: this.selectedAllergens_(),
       properties: {
         topCategory: cats[0] || '',
         subCategories: cats.slice(1),
@@ -146,7 +150,7 @@ export class InventoryItemFormComponent implements OnInit {
       }
     };
 
-    this.isEditing() ? this.itemDataService.updateItem(item) : this.itemDataService.addItem(item);
+    this.isEditing_() ? this.itemDataService.updateItem(item) : this.itemDataService.addItem(item);
     this.router.navigate(['/inventory/list']);
   }
 

@@ -2,7 +2,7 @@ import { Component, OnDestroy, inject, ChangeDetectionStrategy, signal, effect }
 import { CommonModule } from '@angular/common';
 import type { ItemLedger } from '../../../core/models/ingredient.model';
 import { FormsModule } from '@angular/forms';
-import { ItemDataService } from '../../../core/services/ingredient-data.service';
+import { ItemDataService } from '../../../core/services/items-data.service';
 interface FilterOption {
   label: string;
   value: string;
@@ -30,7 +30,7 @@ export class InventoryItemListComponent implements OnDestroy {
 
   constructor() {
     effect(() => {
-      const items = this.itemDataService.allItems();
+      const items = this.itemDataService.allItems_();
       this.filteredItems.set(items);
       this.generateFilterCategories(items);
     });
@@ -101,14 +101,14 @@ export class InventoryItemListComponent implements OnDestroy {
       }
     });
 
-    const allItems = this.itemDataService.allItems();
+    const allItems_ = this.itemDataService.allItems_();
 
     if (Object.keys(selectedFilters).length === 0) {
-      this.filteredItems.set(allItems); // No filters selected, show all
+      this.filteredItems.set(allItems_); // No filters selected, show all
       return;
     }
 
-    const filtered = allItems.filter(item => {
+    const filtered = allItems_.filter(item => {
       return Object.keys(selectedFilters).every(categoryName => {
         let itemPropertyValues: string[] = [];
 
