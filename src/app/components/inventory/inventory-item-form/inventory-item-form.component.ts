@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ItemDataService } from '../../../core/services/ingredient-data.service';
 import type { ItemLedger, TripleUnitConversion } from '../../../core/models/ingredient.model';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { ClickOutsideDirective } from '../../../directives/click-out-side.directive';
+import { ClickOutsideDirective } from '../../../core/directives/click-out-side';
 
 const defaultUnitConversion: TripleUnitConversion = {
   purchase: { symbol: 'kg', label: 'Kilograms', factorToInventory: 1 },
