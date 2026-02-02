@@ -4,7 +4,7 @@ Unified Technical Standards
 - **Architecture**: Strict Adapter Pattern. Decouple UI from persistence via `IStorageAdapter` (LocalStorage/MongoDB).
 - **Patterns**: "Angular Renaissance". Use Standalone Components and `inject()`. No constructors.
 - **Reactivity**: Signals-First (Redux-lite). Private writable, public read-only signals.
-- **Data Modeling**: Ingredient Ledger (Atomic Layer) must use UIDs and triple-unit conversion (Purchase, Inventory, Recipe).
+- **Data Modeling**: Ingredient Ledger (Atomic Layer) must use IDs and triple-unit conversion (Purchase, Inventory, Recipe).
 - **Logic**: Support Recursive Compounding for sub-recipes and Waste Factor logic.
 - **Performance**: Cascading calculations must execute in <200ms.
 

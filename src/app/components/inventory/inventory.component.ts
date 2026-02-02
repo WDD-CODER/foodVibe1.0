@@ -1,4 +1,4 @@
-import { Component, OnDestroy, inject, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, OnDestroy, inject, ChangeDetectionStrategy, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { IngredientLedger, TripleUnitConversion, UnitDescriptor, UnitConversion } from '../../core/models/ingredient.model';
 import { FormsModule } from '@angular/forms';
@@ -37,56 +37,56 @@ export class InventoryComponent implements OnDestroy {
   // Demo ingredient list
   private readonly allIngredients: IngredientLedger[] = [
     {
-      uid: 'ing_001',
+      id: 'ing_001',
       name: 'Tomato',
       units: defaultUnitConversion,
       allergenIds: [],
       properties: { category: ['vegetable'], color: ['red'], season: ['summer'] }
     },
     {
-      uid: 'ing_002',
+      id: 'ing_002',
       name: 'Chicken Breast',
       units: defaultUnitConversion,
       allergenIds: [],
       properties: { category: ['meat', 'poultry'], diet: ['keto', 'protein-rich'] }
     },
     {
-      uid: 'ing_003',
+      id: 'ing_003',
       name: 'Flour',
       units: defaultUnitConversion,
       allergenIds: ['gluten'],
       properties: { category: ['grain'], type: ['all-purpose'] }
     },
     {
-      uid: 'ing_004',
+      id: 'ing_004',
       name: 'Milk',
       units: defaultUnitConversion,
       allergenIds: ['dairy'],
       properties: { category: ['dairy'], type: ['full-fat'] }
     },
     {
-      uid: 'ing_005',
+      id: 'ing_005',
       name: 'Salmon',
       units: defaultUnitConversion,
       allergenIds: ['fish'],
       properties: { category: ['fish'], diet: ['omega-rich'] }
     },
     {
-      uid: 'ing_006',
+      id: 'ing_006',
       name: 'Carrot',
       units: defaultUnitConversion,
       allergenIds: [],
       properties: { category: ['vegetable'], color: ['orange'], season: ['autumn'] }
     },
     {
-      uid: 'ing_007',
+      id: 'ing_007',
       name: 'Egg',
       units: defaultUnitConversion,
       allergenIds: ['egg'],
       properties: { category: ['dairy', 'protein'] }
     },
     {
-      uid: 'ing_008',
+      id: 'ing_008',
       name: 'Rice',
       units: defaultUnitConversion,
       allergenIds: [],

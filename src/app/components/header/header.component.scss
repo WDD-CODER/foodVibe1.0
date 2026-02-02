@@ -5,15 +5,24 @@
   ul {
     list-style: none;
     display: flex;
-    gap: 1rem;
+    
+    place-content: center	;
+    
     margin: 0;
     padding: 0;
+    
+    gap: 1rem;
+
+    
+    li{
+      // width: 100%;
+    }
   }
 
   a {
     color: white;
     text-decoration: none;
-    padding: 0.5rem 1rem;
+    padding: 5px;
     border-radius: 4px;
 
     &:hover,

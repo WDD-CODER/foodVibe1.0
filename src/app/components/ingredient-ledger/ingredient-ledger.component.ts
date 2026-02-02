@@ -10,7 +10,7 @@ import { IngredientService } from '../../core/services/ingredient.service';
 export class IngredientLedgerComponent {
   protected readonly ingredientService = inject(IngredientService);
 
-  trackByUid(_index: number, item: IngredientLedger): string {
-    return item.uid;
+  trackById(_index: number, item: IngredientLedger): string {
+    return item.id;
   }
 }

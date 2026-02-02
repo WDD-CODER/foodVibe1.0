@@ -6,7 +6,7 @@
     </div>
     <div *ngFor="let ingredient of filteredIngredients()" class="ingredient-card">
       <h3>{{ ingredient.name }}</h3>
-      <p>UID: {{ ingredient.uid }}</p>
+      <p>ID: {{ ingredient.id }}</p>
       <p>Units: {{ ingredient.units.inventory.label }} ({{ ingredient.units.inventory.symbol }})</p>
       <p *ngIf="ingredient.allergenIds && ingredient.allergenIds.length > 0">
         Allergens: {{ ingredient.allergenIds.join(', ') }}
