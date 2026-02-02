@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, effect } from '@angular/core';
+import { Component, HostListener, OnInit, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray, FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -43,9 +43,8 @@ export class InventoryItemFormComponent implements OnInit {
   selectedPropertyKeys = signal<string[]>([]); // To display selected property keys
   showPropertyKeyDropdown = signal<boolean>(false);
 
-  // Autocomplete for top category
-  topCategorySearchTerm = signal<string>('');
-  filteredTopCategories = signal<string[]>([]);
+  // Multi-select for top categories (chip-based)
+  selectedTopCategories = signal<string[]>([]);
   showTopCategoryDropdown = signal<boolean>(false);
 
   constructor() {
@@ -83,9 +82,15 @@ export class InventoryItemFormComponent implements OnInit {
         this.isEditing.set(true);
         const item = this.itemDataService.getItemById(this.itemId);
         if (item) {
+          const loadedTopCategories = [
+            ...(item.properties?.topCategory ? [item.properties.topCategory] : []),
+            ...(item.properties?.subCategories ?? []),
+          ].filter(Boolean);
+          this.selectedTopCategories.set(loadedTopCategories);
+
           this.itemForm.patchValue({
             itemName: item.itemName,
-            topCategory: item.properties?.topCategory || '',
+            topCategory: loadedTopCategories.length ? 'selected' : '',
           });
           this.selectedAllergens.set(item.allergenIds || []);
           
@@ -128,10 +133,33 @@ export class InventoryItemFormComponent implements OnInit {
     }
   }
 
+  onItemNameFocus(): void {
+    const control = this.itemForm.get('itemName');
+    const value = (control?.value ?? '').toString();
+
+    // If the dropdown is already visible, don't change anything.
+    if (this.showItemDropdown()) {
+      return;
+    }
+
+    if (value && value.length > 0) {
+      this.searchItems.set(this.itemDataService.allItems().filter(item =>
+        item.itemName.toLowerCase().includes(value.toLowerCase())
+      ));
+      this.showItemDropdown.set(true);
+    }
+  }
+
   selectExistingItem(item: ItemLedger): void {
+    const loadedTopCategories = [
+      ...(item.properties?.topCategory ? [item.properties.topCategory] : []),
+      ...(item.properties?.subCategories ?? []),
+    ].filter(Boolean);
+    this.selectedTopCategories.set(loadedTopCategories);
+
     this.itemForm.patchValue({
       itemName: item.itemName,
-      topCategory: item.properties?.topCategory || '',
+      topCategory: loadedTopCategories.length ? 'selected' : '',
     });
     this.selectedAllergens.set(item.allergenIds || []);
     this.properties.clear();
@@ -173,6 +201,8 @@ export class InventoryItemFormComponent implements OnInit {
 
   toggleAllergenDropdown(): void {
     this.showAllergenDropdown.update(val => !val);
+    this.showItemDropdown.set(false);
+    this.showTopCategoryDropdown.set(false);
   }
 
   // Dynamic Properties methods
@@ -196,22 +226,40 @@ export class InventoryItemFormComponent implements OnInit {
     // Re-evaluate selected property keys if necessary, or let it be handled on submit
   }
 
-  // Top Category Autocomplete methods
-  onTopCategoryInput(value: string): void {
-    if (value && value.length > 0) {
-      this.filteredTopCategories.set(this.itemDataService.allTopCategories().filter(cat =>
-        cat.toLowerCase().includes(value.toLowerCase())
-      ).sort());
-      this.showTopCategoryDropdown.set(true);
-    } else {
-      this.filteredTopCategories.set([]);
-      this.showTopCategoryDropdown.set(false);
-    }
+  // Top Category multi-select methods
+  toggleTopCategoryDropdown(): void {
+    this.showTopCategoryDropdown.update(val => !val);
+    this.showItemDropdown.set(false);
+    this.showAllergenDropdown.set(false);
   }
 
-  selectTopCategory(category: string): void {
-    this.itemForm.get('topCategory')?.setValue(category);
+  toggleTopCategory(category: string): void {
+    const current = this.selectedTopCategories();
+    if (current.includes(category)) {
+      this.selectedTopCategories.set(current.filter(c => c !== category));
+    } else {
+      this.selectedTopCategories.set([...current, category]);
+    }
+
+    // Keep the form control "valid" state in sync without storing a comma string.
+    this.itemForm.get('topCategory')?.setValue(this.selectedTopCategories().length ? 'selected' : '');
+    this.itemForm.get('topCategory')?.markAsTouched();
+  }
+
+  closeAllDropdowns(): void {
+    this.showItemDropdown.set(false);
+    this.showAllergenDropdown.set(false);
     this.showTopCategoryDropdown.set(false);
+  }
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.closeAllDropdowns();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.closeAllDropdowns();
   }
 
   // Property Key Autocomplete (for adding new dynamic properties)
@@ -228,9 +276,14 @@ export class InventoryItemFormComponent implements OnInit {
   onSubmit(): void {
     if (this.itemForm.valid) {
       const formValue = this.itemForm.value;
+      const selectedTopCategories = this.selectedTopCategories();
+
       const newProperties: { topCategory: string; subCategories?: string[]; [key: string]: string | string[] | undefined; } = {
-        topCategory: formValue.topCategory,
+        topCategory: selectedTopCategories[0] ?? '',
       };
+      if (selectedTopCategories.length > 1) {
+        newProperties.subCategories = selectedTopCategories.slice(1);
+      }
 
       formValue.properties.forEach((prop: { key: string, value: string }) => {
         if (!newProperties[prop.key]) {

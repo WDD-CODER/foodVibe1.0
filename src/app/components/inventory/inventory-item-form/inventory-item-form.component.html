@@ -2,12 +2,23 @@
   <h2>{{ isEditing() ? 'Edit Item' : 'Add New Item' }}</h2>
 
   <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
-    <div class="form-group">
-      <label for="itemName">Item Name:</label>
-      <input id="itemName" type="text" formControlName="itemName" (input)="onItemNameInput($any($event.target).value)">
-      <div *ngIf="itemForm.get('itemName')?.invalid && itemForm.get('itemName')?.touched" class="error-message">
-        Item Name is required.
-      </div>
+    <div class="form-group" (click)="$event.stopPropagation()">
+      <label for="itemName">
+        Item Name:
+        <input
+          id="itemName"
+          type="text"
+          formControlName="itemName"
+          (input)="onItemNameInput($any($event.target).value)"
+          (focus)="onItemNameFocus()"
+        >
+        <div
+          *ngIf="itemForm.get('itemName')?.invalid && itemForm.get('itemName')?.touched"
+          class="error-message"
+        >
+          Item Name is required.
+        </div>
+      </label>
       <div *ngIf="showItemDropdown() && searchItems().length > 0" class="autocomplete-dropdown">
         <div *ngFor="let item of searchItems()" (click)="selectExistingItem(item)" class="dropdown-item">
           {{ item.itemName }}
@@ -15,35 +26,76 @@
       </div>
     </div>
 
-    <div class="form-group">
-      <label for="topCategory">Top Category:</label>
-      <input id="topCategory" type="text" formControlName="topCategory" (input)="onTopCategoryInput($any($event.target).value)">
-      <div *ngIf="itemForm.get('topCategory')?.invalid && itemForm.get('topCategory')?.touched" class="error-message">
-        Top Category is required.
-      </div>
-      <div *ngIf="showTopCategoryDropdown() && filteredTopCategories().length > 0" class="autocomplete-dropdown">
-        <div *ngFor="let category of filteredTopCategories()" (click)="selectTopCategory(category)" class="dropdown-item">
-          {{ category }}
-        </div>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label>Allergens:</label>
-      <div class="multi-select-dropdown" (click)="toggleAllergenDropdown()">
-        <div class="selected-items">
-          <span *ngIf="selectedAllergens().length === 0">Select Allergens...</span>
-          <span *ngFor="let allergen of selectedAllergens()" class="selected-tag">{{ allergen }}</span>
-        </div>
-        <div *ngIf="showAllergenDropdown()" class="dropdown-list">
-          <div *ngFor="let allergen of itemDataService.allAllergens()" class="dropdown-item">
-            <input
-              type="checkbox"
-              [id]="'allergen-' + allergen"
-              [checked]="selectedAllergens().includes(allergen)"
-              (change)="toggleAllergen(allergen); $event.stopPropagation()"
+    <div class="form-row" (click)="$event.stopPropagation()">
+      <div class="form-group form-group--compact">
+        <label>Top Category:</label>
+        <input type="hidden" formControlName="topCategory">
+        <div class="multi-select-dropdown" (click)="toggleTopCategoryDropdown()">
+          <div class="selected-items">
+            <span *ngIf="selectedTopCategories().length === 0">Select Top Category...</span>
+            <span
+              *ngFor="let category of selectedTopCategories()"
+              class="selected-tag"
+              role="button"
+              tabindex="0"
+              (click)="toggleTopCategory(category); $event.stopPropagation()"
+              (keydown.enter)="toggleTopCategory(category); $event.stopPropagation()"
+              (keydown.space)="toggleTopCategory(category); $event.stopPropagation()"
+              [attr.aria-label]="'Remove top category ' + category"
+              title="Click to remove"
             >
-            <label [for]="'allergen-' + allergen">{{ allergen }}</label>
+              {{ category }}
+            </span>
+          </div>
+          <div *ngIf="showTopCategoryDropdown()" class="dropdown-list">
+            <div *ngFor="let category of itemDataService.allTopCategories()" class="dropdown-item">
+              <input
+                type="checkbox"
+                [id]="'top-category-' + category"
+                [checked]="selectedTopCategories().includes(category)"
+                (change)="toggleTopCategory(category); $event.stopPropagation()"
+              >
+              <label [for]="'top-category-' + category">{{ category }}</label>
+            </div>
+          </div>
+        </div>
+        <div
+          *ngIf="itemForm.get('topCategory')?.invalid && itemForm.get('topCategory')?.touched"
+          class="error-message"
+        >
+          Top Category is required.
+        </div>
+      </div>
+
+      <div class="form-group form-group--compact">
+        <label>Allergens:</label>
+        <div class="multi-select-dropdown" (click)="toggleAllergenDropdown()">
+          <div class="selected-items">
+            <span *ngIf="selectedAllergens().length === 0">Select Allergens...</span>
+          <span
+            *ngFor="let allergen of selectedAllergens()"
+            class="selected-tag"
+            role="button"
+            tabindex="0"
+            (click)="toggleAllergen(allergen); $event.stopPropagation()"
+            (keydown.enter)="toggleAllergen(allergen); $event.stopPropagation()"
+            (keydown.space)="toggleAllergen(allergen); $event.stopPropagation()"
+            [attr.aria-label]="'Remove allergen ' + allergen"
+            title="Click to remove"
+          >
+            {{ allergen }}
+          </span>
+          </div>
+          <div *ngIf="showAllergenDropdown()" class="dropdown-list">
+            <div *ngFor="let allergen of itemDataService.allAllergens()" class="dropdown-item">
+              <input
+                type="checkbox"
+                [id]="'allergen-' + allergen"
+                [checked]="selectedAllergens().includes(allergen)"
+                (change)="toggleAllergen(allergen); $event.stopPropagation()"
+              >
+              <label [for]="'allergen-' + allergen">{{ allergen }}</label>
+            </div>
           </div>
         </div>
       </div>
