@@ -1,10 +1,8 @@
-import { Component, OnDestroy, inject, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, OnDestroy, inject, ChangeDetectionStrategy, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { IngredientLedger } from '../../../core/models/ingredient.model';
 import { FormsModule } from '@angular/forms';
 import { IngredientDataService } from '../../../core/services/ingredient-data.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-
 interface FilterOption {
   label: string;
   value: string;
@@ -31,7 +29,8 @@ export class InventoryItemListComponent implements OnDestroy {
   protected filterCategories = signal<FilterCategory[]>([]);
 
   constructor() {
-    this.ingredientDataService.allIngredients.pipe(takeUntilDestroyed()).subscribe(ingredients => {
+    effect(() => {
+      const ingredients = this.ingredientDataService.allIngredients();
       this.filteredIngredients.set(ingredients);
       this.generateFilterCategories(ingredients);
     });
