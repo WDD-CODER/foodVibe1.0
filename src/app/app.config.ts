@@ -1,6 +1,6 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { ItemDataService } from './core/services/ingredient-data.service';
+import { ItemDataService } from './core/services/items-data.service';
 
 import { routes } from './app.routes';
 
