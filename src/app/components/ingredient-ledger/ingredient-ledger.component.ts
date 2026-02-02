@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import type { IngredientLedger } from '../../core/models/ingredient.model';
+import type { ItemLedger } from '../../core/models/ingredient.model';
 import { IngredientService } from '../../core/services/ingredient.service';
 
 @Component({
@@ -10,7 +10,7 @@ import { IngredientService } from '../../core/services/ingredient.service';
 export class IngredientLedgerComponent {
   protected readonly ingredientService = inject(IngredientService);
 
-  trackById(_index: number, item: IngredientLedger): string {
+  trackById(_index: number, item: ItemLedger): string {
     return item.id;
   }
 }
