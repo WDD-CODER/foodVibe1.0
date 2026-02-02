@@ -44,6 +44,5 @@ export interface ItemLedger {
   properties?: {
     topCategory: string;
     subCategories?: string[];
-    [key: string]: string | string[]; // For other dynamic properties
-  };
+  } & { [key: string]: string[]; }; // Intersection type for other dynamic properties as string arrays
 }
