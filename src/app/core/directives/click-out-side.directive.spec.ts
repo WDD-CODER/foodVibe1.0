@@ -1,4 +1,4 @@
-import { ClickOutSideDirective } from './click-out-side.directive';
+import { ClickOutSideDirective } from './click-out-side';
 
 describe('ClickOutSideDirective', () => {
   it('should create an instance', () => {
