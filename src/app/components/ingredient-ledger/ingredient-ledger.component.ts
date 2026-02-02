@@ -3,7 +3,7 @@ import type { ItemLedger } from '../../core/models/ingredient.model';
 import { IngredientService } from '../../core/services/ingredient.service';
 
 @Component({
-  selector: 'app-ingredient-ledger',
+  selector: 'ingredient-ledger',
   standalone: true,
   templateUrl: 'ingredient-ledger.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush

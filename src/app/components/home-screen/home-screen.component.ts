@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
-  selector: 'app-home-screen',
+  selector: 'home-screen',
   standalone: true,
   imports: [RouterLink],
   templateUrl: './home-screen.component.html',

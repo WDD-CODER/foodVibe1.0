@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
-  selector: 'app-checklist-creator',
+  selector: 'checklist-creator',
   standalone: true,
   imports: [],
   templateUrl: './checklist-creator.component.html',

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
-  selector: 'app-recipes',
+  selector: 'recipes',
   standalone: true,
   imports: [],
   templateUrl: './recipes.component.html',

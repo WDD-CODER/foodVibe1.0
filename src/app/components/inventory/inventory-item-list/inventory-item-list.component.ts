@@ -15,7 +15,7 @@ interface FilterCategory {
 }
 
 @Component({
-  selector: 'app-inventory-item-list',
+  selector: 'inventory-item-list',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './inventory-item-list.component.html',

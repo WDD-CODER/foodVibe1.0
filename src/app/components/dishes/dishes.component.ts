@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
-  selector: 'app-dishes',
+  selector: 'dishes',
   standalone: true,
   imports: [],
   templateUrl: './dishes.component.html',

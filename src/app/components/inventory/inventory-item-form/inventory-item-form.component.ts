@@ -14,7 +14,7 @@ const defaultUnitConversion: TripleUnitConversion = {
 };
 
 @Component({
-  selector: 'app-inventory-item-form',
+  selector: 'inventory-item-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, ClickOutsideDirective],
   templateUrl: './inventory-item-form.component.html',
