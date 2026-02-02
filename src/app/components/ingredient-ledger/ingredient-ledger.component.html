@@ -1,5 +1,5 @@
 <ul>
-  @for (item of ingredientService.ingredients(); track trackByid($index, item)) {
-    <li>{{ item.name }}</li>
+  @for (item of ingredientService.ingredients(); track trackById($index, item)) {
+    <li>{{ item.itemName }}</li>
   }
 </ul>
