@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import type { ItemLedger } from '../../../core/models/ingredient.model';
-import { IngredientService } from '../../../core/services/ingredient.service';
+import type { ItemLedger } from '@models/ingredient.model';
+import { IngredientService } from '@services/ingredient.service';
 
 @Component({
   selector: 'ingredient-ledger',

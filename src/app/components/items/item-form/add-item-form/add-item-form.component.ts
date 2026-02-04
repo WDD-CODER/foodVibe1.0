@@ -1,7 +1,7 @@
 import { Component, inject } from "@angular/core";
-import { ItemDataService } from "../../../../core/services/items-data.service";
+import { ItemDataService } from "@services/items-data.service";
 import { ItemFormComponent } from "../item-form.component";
-import { ItemLedger } from "../../../../core/models/ingredient.model";
+import { ItemLedger } from "@models/ingredient.model";
 import { Router } from "@angular/router";
 
 @Component({

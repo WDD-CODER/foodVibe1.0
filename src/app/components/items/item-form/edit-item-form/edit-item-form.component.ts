@@ -1,9 +1,9 @@
 import { Component, OnInit, inject, signal } from "@angular/core";
 import { ItemFormComponent } from "../item-form.component";
 import { CommonModule } from "@angular/common";
-import { ItemDataService } from "../../../../core/services/items-data.service";
+import { ItemDataService } from "@services/items-data.service";
 import { ActivatedRoute, Router } from "@angular/router";
-import { ItemLedger } from "../../../../core/models/ingredient.model";
+import { ItemLedger } from "@models/ingredient.model";
 
 @Component({
   standalone: true,

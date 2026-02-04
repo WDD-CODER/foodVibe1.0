@@ -1,10 +1,10 @@
 import { Component, OnInit, inject, signal, input, output, ChangeDetectionStrategy, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
-import { ItemDataService } from '../../../core/services/items-data.service';
-import type { ItemLedger, TripleUnitConversion } from '../../../core/models/ingredient.model';
+import { ItemDataService } from '@services/items-data.service';
+import type { ItemLedger, TripleUnitConversion } from '@models/ingredient.model';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { ClickOutSideDirective } from '../../../core/directives/click-out-side';
+import { ClickOutSideDirective } from '@directives/click-out-side';
 
 const defaultUnitConversion: TripleUnitConversion = {
   purchase: { symbol: 'kg', label: 'Kilograms', factorToInventory: 1 },
