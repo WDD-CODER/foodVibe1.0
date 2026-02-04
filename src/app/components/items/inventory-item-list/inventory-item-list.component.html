@@ -1,0 +1,32 @@
+<div class="inventory-container">
+  
+  <div class="filter-control-panel">
+    <h2>Filter Items</h2>
+    <div *ngFor="let category of filterCategories()" class="filter-category">
+      <h3>{{ category.name }}</h3>
+      <div *ngFor="let option of category.options" class="filter-option">
+        <input
+          type="checkbox"
+          id="{{ category.name | lowercase }}-{{ option.value | lowercase }}"
+          [name]="category.name | lowercase"
+          [value]="option.value"
+          [(ngModel)]="option.checked"
+          (change)="toggleFilter(category.name, option.value)"
+          />
+        <label for="{{ category.name | lowercase }}-{{ option.value | lowercase }}">{{ option.label }}</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="items-list">
+    <h2>Items</h2>
+    <div *ngIf="filteredItems_().length === 0" class="no-results">
+      No items match your current filters.
+    </div>
+    <div *ngFor="let item of filteredItems_()" class="item-card">
+      <h3>{{ item.itemName }}</h3>
+      <p *ngIf="item.properties?.['topCategory']">Main Category: {{ item.properties?.['topCategory'] }}</p>
+    </div>
+  </div>
+
+</div>

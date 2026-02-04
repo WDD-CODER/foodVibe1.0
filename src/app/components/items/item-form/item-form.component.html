@@ -1,0 +1,25 @@
+<div class="item-form-container">
+    <h2>{{ isEditing_() ? 'Edit Item' : 'Add New Item' }}</h2>
+  
+    <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+      <div class="form-group" (clickOutside)="showItemDropdown_.set(false)">
+        <label for="itemName">Item Name:</label>
+        <input id="itemName" type="text" formControlName="itemName" (focus)="showItemDropdown_.set(true)">
+        
+        <div *ngIf="showItemDropdown_() && searchItems_().length > 0" class="autocomplete-dropdown">
+          <div *ngFor="let item of searchItems_()" (click)="selectExistingItem(item)" class="dropdown-item">
+            {{ item.itemName }}
+          </div>
+        </div>
+  
+        <div *ngIf="duplicateMatch_()" class="duplicate-notice">
+          <p>An item named "<strong>{{ duplicateMatch_()?.itemName }}</strong>" already exists.</p>
+          <div class="notice-actions">
+            <button type="button" (click)="switchToEdit.emit(duplicateMatch_()!)">Edit Existing</button>
+            <button type="button" (click)="duplicateMatch_.set(null)">Create New Anyway</button>
+          </div>
+        </div>
+      </div>
+  
+      </form>
+  </div>

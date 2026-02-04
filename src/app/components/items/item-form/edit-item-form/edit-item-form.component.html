@@ -1,0 +1,7 @@
+@if (item_()) {
+    <item-form 
+      [initialItem]="item_()" 
+      (save)="onSave($event)" 
+      (cancel)="onBack()">
+    </item-form>
+  }

@@ -1,0 +1,10 @@
+:host {
+  display: block;
+
+  /* Ensure the form doesn't touch the fixed header/footer */
+  padding-top: 40px;
+  padding-bottom: 80px;
+
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}

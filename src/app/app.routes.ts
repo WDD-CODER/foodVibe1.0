@@ -1,23 +1,23 @@
 import { Routes } from '@angular/router';
-import { IngredientLedgerComponent } from './components/ingredient-ledger/ingredient-ledger.component';
-import { InventoryComponent } from './components/inventory/inventory.component';
-import { InventoryItemListComponent } from './components/inventory/inventory-item-list/inventory-item-list.component';
-import { InventoryItemFormComponent } from './components/inventory/inventory-item-form/inventory-item-form.component';
+import { IngredientLedgerComponent } from './components/items/inventory-ledger/ingredient-ledger.component';
 import { RecipesComponent } from './components/recipes/recipes.component';
 import { DishesComponent } from './components/dishes/dishes.component';
 import { MenuCreatingComponent } from './components/menu-creating/menu-creating.component';
 import { ChecklistCreatorComponent } from './components/checklist-creator/checklist-creator.component';
+import { InventoryItemListComponent } from './components/items/inventory-item-list/inventory-item-list.component';
+import { AddItemFormComponent } from './components/items/item-form/add-item-form/add-item-form.component';
+import { EditItemFormComponent } from './components/items/item-form/edit-item-form/edit-item-form.component';
+import { InventoryPage } from './pages/inventory.page/inventory.page';
 
 export const routes: Routes = [
-  { path: 'ingredients', component: IngredientLedgerComponent },
   {
     path: 'inventory',
-    component: InventoryComponent,
+    component: InventoryPage,
     children: [
       { path: '', redirectTo: 'list', pathMatch: 'full' },
       { path: 'list', component: InventoryItemListComponent },
-      { path: 'add', component: InventoryItemFormComponent },
-      { path: 'edit/:id', component: InventoryItemFormComponent },
+      { path: 'add', component: AddItemFormComponent },
+      { path: 'edit', component: EditItemFormComponent },
     ],
   },
   { path: 'recipes', component: RecipesComponent },
