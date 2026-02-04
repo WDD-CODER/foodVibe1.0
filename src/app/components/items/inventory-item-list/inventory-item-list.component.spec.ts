@@ -8,6 +8,7 @@ import { signal } from '@angular/core';
 import type { ItemLedger } from '@models/ingredient.model';
 import { FilterOption } from '@models/filter-option.model';
 import { FilterCategory } from '@models/filter-category.model';
+import { LucideAngularModule , Filter} from 'lucide-angular';
 
 describe('InventoryItemListComponent', () => {
   let component: InventoryItemListComponent;
@@ -36,7 +37,7 @@ describe('InventoryItemListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [InventoryItemListComponent, FormsModule],
+      imports: [InventoryItemListComponent, FormsModule,LucideAngularModule.pick({ Filter })],
       providers: [
         { provide: ItemDataService, useValue: mockItemDataService }
       ]
