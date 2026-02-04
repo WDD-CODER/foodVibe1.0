@@ -1,15 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { InventoryItemListComponent } from './inventory-item-list.component';
-import { ItemDataService } from '../../../core/services/items-data.service';
+import { ItemDataService } from '@services/items-data.service';
 import { FormsModule } from '@angular/forms';
 import { signal } from '@angular/core';
-import { ItemLedger } from '../../../core/models/ingredient.model';
+
+// Models
+import type { ItemLedger } from '@models/ingredient.model';
+import { FilterOption } from '@models/filter-option.model';
+import { FilterCategory } from '@models/filter-category.model';
 
 describe('InventoryItemListComponent', () => {
   let component: InventoryItemListComponent;
   let fixture: ComponentFixture<InventoryItemListComponent>;
 
-  // נתונים דמה לבדיקה
+  // Mock Data
   const mockItems: ItemLedger[] = [
     {
       id: '1',
@@ -25,9 +29,9 @@ describe('InventoryItemListComponent', () => {
     } as any
   ];
 
-  // יצירת Mock לסרוויס עם Signal
+  // Service Mock with Signal
   const mockItemDataService = {
-    allItems_: signal(mockItems)
+    allItems_: signal<ItemLedger[]>(mockItems)
   };
 
   beforeEach(async () => {
@@ -40,7 +44,7 @@ describe('InventoryItemListComponent', () => {
 
     fixture = TestBed.createComponent(InventoryItemListComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges(); // מפעיל את ה-effect ב-constructor
+    fixture.detectChanges(); 
   });
 
   it('should create', () => {
@@ -48,50 +52,54 @@ describe('InventoryItemListComponent', () => {
   });
 
   it('should generate filter categories based on items', () => {
-    const categories = component['filterCategories']();
+    // Accessing protected signal via bracket notation for testing
+    const categories = (component as any).filterCategories();
     
-    // בדיקה שקטגוריות נוצרו (Allergens, TopCategory, color)
-    const categoryNames = categories.map(c => c.name);
+    const categoryNames = categories.map((c: FilterCategory) => c.name);
     expect(categoryNames).toContain('Allergens');
     expect(categoryNames).toContain('TopCategory');
     expect(categoryNames).toContain('color');
   });
 
   it('should filter items when applyFilters is called', () => {
-    // 1. סימולציית בחירת פילטר (בחירת 'Dairy' בקטגוריית 'TopCategory')
-    const categories = component['filterCategories']();
-    const dairyCategory = categories.find(c => c.name === 'TopCategory');
-    const dairyOption = dairyCategory?.options.find(o => o.value === 'Dairy');
+    // 1. Setup Filter State
+    const categories = (component as any).filterCategories();
+    const dairyCategory = categories.find((c: FilterCategory) => c.name === 'TopCategory');
+    const dairyOption = dairyCategory?.options.find((o: FilterOption) => o.value === 'Dairy');
     
-    if (dairyOption) dairyOption.checked = true;
+    if (dairyOption) {
+      dairyOption.checked_ = true; // Use the underscore marker
+    }
 
-    // 2. הפעלת הסינון
-    component['applyFilters']();
+    // 2. Execute Action
+    (component as any).applyFilters();
     fixture.detectChanges();
 
-    // 3. וידוא שרק 'Milk' נשאר ברשימה
-    expect(component['filteredItems']().length).toBe(1);
-    expect(component['filteredItems']()[0].itemName).toBe('Milk');
+    // 3. Verify via computed signal 'filteredItems_'
+    const results = (component as any).filteredItems_();
+    expect(results.length).toBe(1);
+    expect(results[0].itemName).toBe('Milk');
   });
 
   it('should show all items when no filters are selected', () => {
-    component['applyFilters']();
-    expect(component['filteredItems']().length).toBe(mockItems.length);
+    (component as any).applyFilters();
+    fixture.detectChanges();
+    
+    const results = (component as any).filteredItems_();
+    expect(results.length).toBe(mockItems.length);
   });
 
   it('should display "No results" message when filter matches nothing', () => {
-    // 1. Use the new public method to update the protected signal
+    // 1. Inject impossible filter
     component.setFilters({ 'TopCategory': ['NonExistentValue'] });
     
-    // 2. Trigger change detection to update the computed signal (filteredItems_) 
-    // and re-render the template
+    // 2. Trigger reactivity
     fixture.detectChanges();
   
     const compiled = fixture.nativeElement as HTMLElement;
     
-    // 3. Match the selector exactly as it appears in your HTML
-    // If your HTML uses <div class="no-results">, use '.no-results'
-    const message = compiled.querySelector('.no-results') || compiled.querySelector('.no-results-msg');
+    // 3. Search for the standard Tailwind 'no-results' class
+    const message = compiled.querySelector('.no-results');
     
     expect(message).toBeTruthy();
   });
