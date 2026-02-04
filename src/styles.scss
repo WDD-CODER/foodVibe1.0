@@ -1,5 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@100..900&display=swap');
-@import "tailwindcss";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'Heebo', sans-serif;
+}
 
 html {
   box-sizing: border-box;
@@ -15,3 +22,6 @@ body {
   font-family: 'Heebo', sans-serif;
 }
 
+// button{
+//   cursor: pointer;
+// }
