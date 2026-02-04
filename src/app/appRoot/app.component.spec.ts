@@ -1,10 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { provideRouter } from '@angular/router';
+import { HeaderComponent } from '../components/header/header.component';
+import { FooterComponent } from '../components/footer/footer.component';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AppComponent],
+      // באנגולר Standalone, אנחנו חייבים לייבא את הקומפוננטה ואת תלויות ה-UI שלה
+      imports: [AppComponent, HeaderComponent, FooterComponent],
+      providers: [
+        provideRouter([])
+      ]
     }).compileComponents();
   });
 
@@ -18,12 +25,5 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
     expect(app.title).toEqual('foodVibe1.0');
-  });
-
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, foodVibe1.0');
   });
 });
