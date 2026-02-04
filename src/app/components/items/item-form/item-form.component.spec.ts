@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ItemFormComponent } from './item-form.component';
-import { ItemDataService } from '../../../core/services/items-data.service';
-import { ClickOutSideDirective } from '../../../core/directives/click-out-side';
+import { ItemDataService } from '@services/items-data.service';
+import { ClickOutSideDirective } from '@directives/click-out-side';
 import { signal } from '@angular/core';
-import { ItemLedger } from '../../../core/models/ingredient.model';
+import { ItemLedger } from '@models/ingredient.model';
 
 describe('ItemFormComponent', () => {
   let component: ItemFormComponent;

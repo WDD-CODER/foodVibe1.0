@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AddItemFormComponent } from './add-item-form.component';
-import { ItemDataService } from '../../../../core/services/items-data.service';
+import { ItemDataService } from '@services/items-data.service';
 import { Router } from '@angular/router';
 import { ItemFormComponent } from '../item-form.component';
 import { By } from '@angular/platform-browser';
-import { ItemLedger } from '../../../../core/models/ingredient.model';
+import { ItemLedger } from '@models/ingredient.model';
 
 describe('AddItemFormComponent', () => {
   let component: AddItemFormComponent;

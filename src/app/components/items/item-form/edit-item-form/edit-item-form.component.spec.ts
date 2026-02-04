@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { EditItemFormComponent } from './edit-item-form.component';
-import { ItemDataService } from '../../../../core/services/items-data.service';
+import { ItemDataService } from '@services/items-data.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ItemFormComponent } from '../item-form.component';
-import { ItemLedger } from '../../../../core/models/ingredient.model';
+import { ItemLedger } from '@models/ingredient.model';
 import { signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
 
