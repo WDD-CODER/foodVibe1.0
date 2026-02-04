@@ -10,7 +10,7 @@
           id="{{ category.name | lowercase }}-{{ option.value | lowercase }}"
           [name]="category.name | lowercase"
           [value]="option.value"
-          [(ngModel)]="option.checked"
+          [(ngModel)]="option.checked_"
           (change)="toggleFilter(category.name, option.value)"
           />
         <label for="{{ category.name | lowercase }}-{{ option.value | lowercase }}">{{ option.label }}</label>
