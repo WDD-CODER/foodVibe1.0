@@ -8,6 +8,7 @@ import { InventoryItemListComponent } from './components/items/inventory-item-li
 import { AddItemFormComponent } from './components/items/item-form/add-item-form/add-item-form.component';
 import { EditItemFormComponent } from './components/items/item-form/edit-item-form/edit-item-form.component';
 import { InventoryPage } from './pages/inventory.page/inventory.page';
+import { ProductFormComponent } from '@components/items/product-form/product-form.component';
 
 export const routes: Routes = [
   {
@@ -16,8 +17,8 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'list', pathMatch: 'full' },
       { path: 'list', component: InventoryItemListComponent },
-      { path: 'add', component: AddItemFormComponent },
-      { path: 'edit', component: EditItemFormComponent },
+      { path: 'add', component: ProductFormComponent },
+      { path: 'edit', component: ProductFormComponent },
     ],
   },
   { path: 'recipes', component: RecipesComponent },

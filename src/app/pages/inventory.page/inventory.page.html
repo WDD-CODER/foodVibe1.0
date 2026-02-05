@@ -1,11 +1,22 @@
-<div class="inventory-parent-container">
-    <nav class="inventory-nav">
-      <ul>
-        <li><a routerLink="list" routerLinkActive="active">View Ingredients</a></li>
-        <li><a routerLink="add" routerLinkActive="active">Add Ingredient</a></li>
-        <li><a routerLink="edit" routerLinkActive="active">Edit Ingredient</a></li>
-      </ul>
-    </nav>
-    <router-outlet></router-outlet>
-  </div>
-  
+<div class="inventory-parent-container" dir="rtl">
+  <nav class="inventory-nav">
+    <ul class="flex gap-4 border-b border-slate-200 mb-6">
+      <li>
+        <a routerLink="list" 
+           routerLinkActive="active" 
+           class="inline-block p-4 border-b-2 border-transparent hover:text-emerald-600 transition-colors">
+           צפייה במלאי
+        </a>
+      </li>
+      <li>
+        <a routerLink="add" 
+           routerLinkActive="active"
+           class="inline-block p-4 border-b-2 border-transparent hover:text-emerald-600 transition-colors">
+           הוספת חומר גלם
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <router-outlet></router-outlet>
+</div>
