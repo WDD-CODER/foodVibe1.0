@@ -1,75 +1,245 @@
 .form-container {
     display: flex;
     flex-direction: column;
-
-    gap: 2rem;
-    padding: 2.5rem;
-    width: 100%;
-    max-width: 800px;
-
+    gap: 1.5rem;
     background: #ffffff;
-    color: #1e293b;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-
-    select {
-        appearance: none;
-        background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"><path stroke="%236b7280" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m6 8 4 4 4-4"/></svg>');
-        background-position: left 0.75rem center;
-        background-repeat: no-repeat;
-        background-size: 1.5em 1.5em;
-        padding-left: 2.5rem;
-    }
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-
-    gap: 0.5rem;
-
-    label {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #475569;
-    }
-
-    input,
-    select {
-        padding: 0.625rem 0.875rem;
-
-        background-color: #f8fafc;
-        font-size: 1rem;
-
-        border: 1px solid #cbd5e1;
+    .product-info {
+        display: grid;
+        /* Use auto-fill with a fixed max to allow justify-content to work */
+        grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
+        grid-auto-flow: dense;
+        // justify-content: center;
+        gap: 1rem;
         border-radius: 0.5rem;
+    }
 
-        transition: all 0.2s ease;
+    .form-section {
+        display: grid;
+        gap: 1.5rem;
 
-        &:focus {
-            background-color: #ffffff;
-            outline: none;
-            border-color: #10b981; // Emerald-500
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        &.grid-2 {
+            grid-template-columns: 1fr 1fr;
         }
 
-        &.ng-invalid.ng-touched {
-            border-color: #ef4444;
-            background-color: #fef2f2;
+        &.border-top {
+            border-top: 1px solid #f1f5f9;
+            padding-top: 1.5rem;
+        }
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #334155;
+        }
+
+        input,
+        select {
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            outline: none;
+            transition: all 0.2s;
+
             &:focus {
-                border-color: #ef4444;
-                box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+                border-color: #10b981;
+                box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
             }
         }
     }
 
-    /* Styles the group container when the input inside is invalid & touched */
+    .relative-input {
+        position: relative;
+        display: flex;
+        align-items: center;
+
+        input {
+            width: 100%;
+            padding-left: 2rem;
+        }
+
+        .prefix {
+            position: absolute;
+            left: 0.75rem;
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+    }
+
+    .scaling-box {
+        background: #f8fafc;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px dashed #cbd5e1;
+
+        .scaling-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+
+            input {
+                max-width: 100px;
+            }
+
+            select {
+                max-width: 150px;
+            }
+
+            .math-text {
+                font-weight: 700;
+                color: #64748b;
+                font-size: 1.1rem;
+            }
+
+            input[type="text"] {
+                flex: 2;
+            }
+
+            input[type="number"] {
+                flex: 1.5;
+            }
+
+            select {
+                flex: 1.5;
+            }
+        }
+    }
+
+    .danger-label {
+        color: #b91c1c;
+    }
+
+    .helper-text {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+
+    .form-actions {
+        margin-top: 1rem;
+        display: flex;
+        justify-content: flex-start;
+
+        .btn-primary {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #059669;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+
+            &:hover:not(:disabled) {
+                background: #047857;
+            }
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .icon-sm {
+                width: 1rem;
+                height: 1rem;
+            }
+        }
+    }
+
+    .waste-section .form-section {
+        display: grid;
+        /* Use auto-fill with a fixed max to allow justify-content to work */
+        grid-template-columns: repeat(auto-fill, minmax(100px, 140px));
+        grid-auto-flow: dense;
+        justify-content: center;
+        gap: 1rem;
+        border-radius: 0.5rem;
+
+    }
+
+
 }
 
-.form-grid {
+// ADD to product-form.component.scss
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.75); // Slate-900 with opacity [cite: 217]
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+
+    h3 {
+        margin-bottom: 1.5rem;
+        color: #1e293b;
+    }
+
+    .comparable-units {
+        // display: flex;
+    }
+}
+
+.scaling-formula {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+    align-items: center;
+    gap: 0.5rem;
+    background: #f1f5f9;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+
+    input,
+    select {
+        padding: 0.5rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+    }
+
+    input[type="text"] {
+        width: 200px;
+    }
+
+    input[type="number"] {
+        width: 80px;
+    }
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+// Responsive
+@media (max-width: 768px) {
+    .form-container .form-section.grid-2 {
+        grid-template-cols: 1fr;
+    }
+
+    .scaling-row {
+        flex-wrap: wrap;
+    }
 }
