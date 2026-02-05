@@ -1,0 +1,75 @@
+.form-container {
+    display: flex;
+    flex-direction: column;
+
+    gap: 2rem;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 800px;
+
+    background: #ffffff;
+    color: #1e293b;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+    select {
+        appearance: none;
+        background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20"><path stroke="%236b7280" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m6 8 4 4 4-4"/></svg>');
+        background-position: left 0.75rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-left: 2.5rem;
+    }
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+
+    gap: 0.5rem;
+
+    label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #475569;
+    }
+
+    input,
+    select {
+        padding: 0.625rem 0.875rem;
+
+        background-color: #f8fafc;
+        font-size: 1rem;
+
+        border: 1px solid #cbd5e1;
+        border-radius: 0.5rem;
+
+        transition: all 0.2s ease;
+
+        &:focus {
+            background-color: #ffffff;
+            outline: none;
+            border-color: #10b981; // Emerald-500
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        &.ng-invalid.ng-touched {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+            &:focus {
+                border-color: #ef4444;
+                box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+            }
+        }
+    }
+
+    /* Styles the group container when the input inside is invalid & touched */
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}

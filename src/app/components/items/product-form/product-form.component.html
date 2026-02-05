@@ -1,0 +1,42 @@
+<form [formGroup]="productForm_" (ngSubmit)="onSubmit()" class="form-container" dir="rtl">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <div class="form-group">
+        <label class="text-sm font-medium text-slate-700">שם הפריט</label>
+        <input formControlName="itemName" type="text" 
+               class="border border-slate-300 rounded-md p-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+      </div>
+    
+      <ng-container formGroupName="properties">
+        <div class="form-group">
+          <label class="text-sm font-medium text-slate-700">קטגוריה ראשית</label>
+          <select formControlName="topCategory" 
+                  class="border border-slate-300 rounded-md p-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+            <option value="">בחר קטגוריה</option>
+            <option value="Vegetables">ירקות</option>
+            <option value="Dairy">חלבי</option>
+            <option value="Meat">בשר</option>
+            <option value="Dry">יבש</option>
+          </select>
+        </div>
+  
+        <div class="form-group">
+          <label class="text-sm font-medium text-slate-700">יחידת מידה</label>
+          <select formControlName="uom" 
+                  class="border border-slate-300 rounded-md p-2 focus:ring-2 focus:ring-emerald-500 outline-none">
+            <option value="kg">ק"ג</option>
+            <option value="liter">ליטר</option>
+            <option value="units">יחידות</option>
+          </select>
+        </div>
+      </ng-container>
+    </div>
+
+    <div class="flex justify-start gap-4 mt-6" >
+      <button type="submit" [disabled]="productForm_.invalid"
+              class="flex items-center gap-2 bg-emerald-600 text-white px-6 py-2 rounded-md hover:bg-emerald-700 disabled:opacity-50">
+        <lucide-icon name="plus" class="w-4 h-4"></lucide-icon>
+        שמור פריט
+      </button>
+    </div>
+  </form>
