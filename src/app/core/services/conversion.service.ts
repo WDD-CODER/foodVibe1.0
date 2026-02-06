@@ -9,13 +9,12 @@ export class ConversionService {
    */
   calculateNetCost(grossPrice: number, convFactor: number, wastePercent: number): number {
     if (!grossPrice || convFactor <= 0) return 0;
-    
-    // Yield Factor is the inverse of waste (e.g., 10% waste = 0.9 yield)
     const yieldFactor = 1 - (wastePercent / 100);
     const netQuantity = convFactor * yieldFactor;
-
     return netQuantity > 0 ? grossPrice / netQuantity : 0;
   }
+
+  
 
   /**
    * Translates waste percentage to quantity based on total scaling amount
@@ -37,4 +36,6 @@ export class ConversionService {
   getChainConversion(amount: number, factor: number): number {
     return amount * factor;
   }
+
+  
 }
