@@ -11,15 +11,21 @@ describe('EditItemFormComponent', () => {
   let component: EditItemFormComponent;
   let fixture: ComponentFixture<EditItemFormComponent>;
 
+  const mockAllItemsSignal = signal<any[]>([]);
+  const mockProductsSignal = signal<any[]>([]);
   // נתון דמה עבור הפריט שנשלף
   const mockItem: ItemLedger = { id: 'item_123', itemName: 'Existing Item' } as any;
 
   // Mock עבור הסרוויס
   const mockService = {
     getItem: jasmine.createSpy('getItem').and.returnValue(Promise.resolve(mockItem)),
-    updateItem: jasmine.createSpy('updateItem').and.returnValue(Promise.resolve())
+    updateItem: jasmine.createSpy('updateItem').and.returnValue(Promise.resolve()),
+    allItems_: () => mockAllItemsSignal() // Added this to prevent TypeError
   };
 
+  const mockKitchenState = {
+    products_: () => mockProductsSignal() // Added this to prevent TypeError
+  };
   // Mock עבור ה-Router
   const mockRouter = {
     navigate: jasmine.createSpy('navigate')
@@ -56,7 +62,7 @@ describe('EditItemFormComponent', () => {
   it('should fetch item on init using id from route', async () => {
     // מחכים לסיום הפונקציה האסינכרונית ngOnInit
     await fixture.whenStable();
-    
+
     expect(mockService.getItem).toHaveBeenCalledWith('item_123');
     expect(component['item_']()).toEqual(mockItem);
   });
@@ -77,7 +83,7 @@ describe('EditItemFormComponent', () => {
 
   it('should call updateItem and navigate back onSave', async () => {
     const updatedItem: ItemLedger = { ...mockItem, itemName: 'Updated' };
-    
+
     await component.onSave(updatedItem);
 
     expect(mockService.updateItem).toHaveBeenCalledWith(updatedItem);

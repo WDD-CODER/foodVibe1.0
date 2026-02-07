@@ -5,6 +5,8 @@ import { ItemDataService } from '@services/items-data.service';
 import type { ItemLedger, TripleUnitConversion } from '@models/ingredient.model';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ClickOutSideDirective } from '@directives/click-out-side';
+import { KitchenStateService } from '@services/kitchen-state.service';
+import { duplicateNameValidator } from 'src/app/core/validators/item.validators';
 
 const defaultUnitConversion: TripleUnitConversion = {
   purchase: { symbol: 'kg', label: 'Kilograms', factorToInventory: 1 },
@@ -22,16 +24,17 @@ const defaultUnitConversion: TripleUnitConversion = {
 })
 export class ItemFormComponent implements OnInit {
   private fb = inject(FormBuilder);
-  protected itemDataService = inject(ItemDataService);
-  readonly isEditing_ = computed(() => !!this.initialItem());
-  
+  private kitchenState = inject(KitchenStateService)
+  protected itemDataService = inject(ItemDataService)
+  readonly isEditing_ = computed(() => !!this.initialItem())
+
   // Inputs/Outputs for the wrapper components
   initialItem = input<ItemLedger | null>(null);
   save = output<ItemLedger>();
   cancel = output<void>();
   switchToEdit = output<ItemLedger>();
 
-  itemForm: FormGroup;
+  itemForm!: FormGroup;
   searchItems_ = signal<ItemLedger[]>([]);
   showItemDropdown_ = signal<boolean>(false);
   duplicateMatch_ = signal<ItemLedger | null>(null);
@@ -41,8 +44,20 @@ export class ItemFormComponent implements OnInit {
   showTopCategoryDropdown_ = signal<boolean>(false);
 
   constructor() {
+    this.initForm();
+  }
+
+  private initForm(): void {
     this.itemForm = this.fb.group({
-      itemName: ['', Validators.required],
+      itemName: ['', {
+        validators: [
+          Validators.required,
+          duplicateNameValidator(
+            () => this.kitchenState.products_(),
+            this.initialItem()?._id
+          )
+        ]
+      }],
       topCategory: ['', Validators.required],
       properties: this.fb.array([]),
     });
@@ -55,9 +70,13 @@ export class ItemFormComponent implements OnInit {
 
   ngOnInit(): void {
     const item = this.initialItem();
-    if (item) this.populateForm(item);
+    if (item) {
+      // Re-initialize form so the validator receives the correct ID from the input signal
+      this.initForm(); 
+      this.populateForm(item);
+    }
   }
-  
+
   selectExistingItem(item: ItemLedger): void {
     this.switchToEdit.emit(item);
     this.showItemDropdown_.set(false);
@@ -71,7 +90,7 @@ export class ItemFormComponent implements OnInit {
 
     this.selectedTopCategories_.set(categories);
     this.selectedAllergens_.set(item.allergenIds || []);
-    
+
     this.itemForm.patchValue({
       itemName: item.itemName,
       topCategory: categories.length ? 'selected' : '',
@@ -111,6 +130,7 @@ export class ItemFormComponent implements OnInit {
     this.selectedTopCategories_.update(s => s.includes(cat) ? s.filter(x => x !== cat) : [...s, cat]);
     this.itemForm.get('topCategory')?.setValue(this.selectedTopCategories_().length ? 'selected' : '');
   }
+
 
   onSubmit(): void {
     if (this.itemForm.invalid) return;
