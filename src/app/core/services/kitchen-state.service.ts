@@ -23,6 +23,8 @@ export class KitchenStateService {
   products_ = signal<Product[]>([]);
   recipes_ = signal<Recipe[]>([]);
   suppliers_ = signal<Supplier[]>([]);
+  selectedProductId_ = signal<string | null>(null);
+  isDrawerOpen_ = signal<boolean>(false);
 
   // COMPUTED SIGNALS
   lowStockItems_ = computed(() =>
@@ -83,57 +85,57 @@ export class KitchenStateService {
 
 
   // UPDATE
-updateProduct(updatedProduct: Product) {
-  // 1. Prepare: Convert the Product model back to the ItemLedger schema
-  const rawItem = this._mapProductToLedger(updatedProduct);
+  updateProduct(updatedProduct: Product) {
+    // 1. Prepare: Convert the Product model back to the ItemLedger schema
+    const rawItem = this._mapProductToLedger(updatedProduct);
 
-  // 2. The Pipeline: Delegate the storage work to the Data Service
-  return from(this.itemsDataService.updateItem(rawItem)).pipe(
-    tap(() => {
-      // SUCCESS: The computed products_ signal updates automatically
-      // because ItemDataService.updateItem internally updates its itemsStore_
-      this.userMsgService.onSetSuccessMsg('המוצר עודכן בהצלחה');
-    }),
-    catchError(err => {
-      // ERROR: System feedback
-      this.userMsgService.onSetErrorMsg('שגיאה בעדכון המוצר');
-      return throwError(() => err);
-    })
-  );
-}
+    // 2. The Pipeline: Delegate the storage work to the Data Service
+    return from(this.itemsDataService.updateItem(rawItem)).pipe(
+      tap(() => {
+        // SUCCESS: The computed products_ signal updates automatically
+        // because ItemDataService.updateItem internally updates its itemsStore_
+        this.userMsgService.onSetSuccessMsg('המוצר עודכן בהצלחה');
+      }),
+      catchError(err => {
+        // ERROR: System feedback
+        this.userMsgService.onSetErrorMsg('שגיאה בעדכון המוצר');
+        return throwError(() => err);
+      })
+    );
+  }
 
   // DELETE
-deleteProduct(_id: string): Observable<void> {
-  // Use 'defer' or 'of' to ensure the logic runs only upon subscription
-  return of(null).pipe(
-    switchMap(() => {
-      const exists = this.products_().some(p => p._id === _id);
-      console.log("🚀 ~ KitchenStateService ~ deleteProduct ~ exists:", exists)
-      
-      if (!exists) {
-        // We throw a proper error object to the catch block
-        return throwError(() => new Error('NOT_FOUND'));
-      }
+  deleteProduct(_id: string): Observable<void> {
+    // Use 'defer' or 'of' to ensure the logic runs only upon subscription
+    return of(null).pipe(
+      switchMap(() => {
+        const exists = this.products_().some(p => p._id === _id);
+        console.log("🚀 ~ KitchenStateService ~ deleteProduct ~ exists:", exists)
 
-      // Delegate the actual DB removal to the 'Worker'
-      return from(this.itemsDataService.deleteItem(_id));
-    }),
-    tap(() => {
-      console.log('deleteItem')
-      
-      // Logic for Day 14: Success feedback only triggers if deletion worked [cite: 15]
-      this.userMsgService.onSetSuccessMsg('חומר הגלם נמחק בהצלחה');
-    }),
-    catchError(err => {
-      const msg = err.message === 'NOT_FOUND' 
-        ? 'הפריט לא נמצא במלאי' 
-        : 'שגיאת מערכת בעת המחיקה';
-      
-      this.userMsgService.onSetErrorMsg(msg);
-      return throwError(() => err);
-    })
-  );
-}
+        if (!exists) {
+          // We throw a proper error object to the catch block
+          return throwError(() => new Error('NOT_FOUND'));
+        }
+
+        // Delegate the actual DB removal to the 'Worker'
+        return from(this.itemsDataService.deleteItem(_id));
+      }),
+      tap(() => {
+        console.log('deleteItem')
+
+        // Logic for Day 14: Success feedback only triggers if deletion worked [cite: 15]
+        this.userMsgService.onSetSuccessMsg('חומר הגלם נמחק בהצלחה');
+      }),
+      catchError(err => {
+        const msg = err.message === 'NOT_FOUND'
+          ? 'הפריט לא נמצא במלאי'
+          : 'שגיאת מערכת בעת המחיקה';
+
+        this.userMsgService.onSetErrorMsg(msg);
+        return throwError(() => err);
+      })
+    );
+  }
 
   // RECIPE CRUD OPERATIONS
   addRecipe(recipe: Recipe) {

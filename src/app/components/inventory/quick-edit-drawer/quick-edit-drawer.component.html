@@ -1,0 +1,28 @@
+<div class="drawer-body" *ngIf="selectedProduct_() as product">
+  <div class="item-info-card">
+    <h4>{{ product.name_hebrew }}</h4>
+    <span class="category-tag">{{ product.category_ }}</span>
+  </div>
+
+  <form class="edit-form" (submit)="$event.preventDefault()">
+    <div class="form-group">
+  <label>מחיר קנייה (Buy Price)</label>
+  <div class="input-wrapper">
+    <input 
+      type="number" 
+      [ngModel]="product.purchase_price_" 
+      (ngModelChange)="onSave({ purchase_price_: $event })"
+      name="price"
+    />
+    <span class="currency-prefix">₪</span>
+  </div>
+</div>
+
+    <div class="net-cost-display">
+      <label>מחיר נטו לגרם (Net Unit Cost)</label>
+      <p class="emerald-highlight">
+        ₪{{ (product.purchase_price_ / product.conversion_factor_).toFixed(4) }}
+      </p>
+    </div>
+  </form>
+</div>
