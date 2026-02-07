@@ -2,30 +2,28 @@ import { KitchenUnit } from './units.enum';
 
 export interface Ingredient {
   _id: string;
-  item_type_: 'product' | 'recipe'; // Defines if it's raw or a sub-recipe 
-  reference_id_: string;            // ID linking to Product or Recipe
-  amount_: number;                  // 
-  unit_: KitchenUnit;               // 
-  note_?: string;                   // e.g., "Cut into 1cm cubes" 
+  item_type_: 'product' | 'recipe';
+  reference_id_: string;
+  amount_: number;
+  unit_: KitchenUnit;
+  note_?: string;
 }
 
 export interface RecipeStep {
-  order_: number;                   // [cite: 82]
-  instruction_: string;             // [cite: 97, 328]
-  labor_time_minutes_: number;      // Active work time [cite: 83, 329]
-  video_url_?: string;              // Link for technique training [cite: 84, 159, 391]
+  order_: number;
+  instruction_: string;
+  labor_time_minutes_: number;
+  video_url_?: string;
 }
 
 export interface Recipe {
   _id: string;
   name_hebrew: string;
-  ingredients_: Ingredient[];       // Recursive ingredient list [cite: 13, 75, 276]
-  steps_: RecipeStep[];             // Preparation steps [cite: 81, 326]
-  yield_amount_: number;            // Final output quantity [cite: 73, 219]
-  yield_unit_: KitchenUnit;         // Final output unit (e.g., LITER or UNITS) [cite: 219]
-  default_station_: string;         // e.g., "Cold Station" [cite: 140, 312]
-  
-  // Governance
-  is_approved_: boolean;            // Draft vs. Approved state [cite: 86, 198, 403]
-  version_history_?: string[];      // Log of changes [cite: 87, 399]
+  ingredients_: Ingredient[];
+  steps_: RecipeStep[];
+  yield_amount_: number;
+  yield_unit_: KitchenUnit;
+  default_station_: string;
+  is_approved_: boolean;
+  version_history_?: string[];
 }
