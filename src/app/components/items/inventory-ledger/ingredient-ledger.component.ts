@@ -12,6 +12,6 @@ export class IngredientLedgerComponent {
   protected readonly ingredientService = inject(IngredientService);
 
   trackById(_index: number, item: ItemLedger): string {
-    return item.id;
+    return item._id;
   }
 }

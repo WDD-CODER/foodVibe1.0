@@ -41,7 +41,7 @@ describe('AddItemFormComponent', () => {
 
   describe('Business Logic', () => {
     it('should call addItem and navigate to list on onSave', async () => {
-      const dummyItem: ItemLedger = { id: 'item_1', itemName: 'Test Item' } as any;
+      const dummyItem: ItemLedger = { _id: 'item_1', itemName: 'Test Item' } as any;
       
       await component.onSave(dummyItem);
 
@@ -50,7 +50,7 @@ describe('AddItemFormComponent', () => {
     });
 
     it('should navigate to edit page on onSwitch', () => {
-      const dummyItem: ItemLedger = { id: '123', itemName: 'Switch Item' } as any;
+      const dummyItem: ItemLedger = { _id: '123', itemName: 'Switch Item' } as any;
       
       component.onSwitch(dummyItem);
 
@@ -67,7 +67,7 @@ describe('AddItemFormComponent', () => {
     it('should trigger onSave when child emits save event', () => {
       spyOn(component, 'onSave');
       const childDebugElement = fixture.debugElement.query(By.directive(ItemFormComponent));
-      const dummyItem: ItemLedger = { id: 'test', itemName: 'From Child' } as any;
+      const dummyItem: ItemLedger = { _id: 'test', itemName: 'From Child' } as any;
 
       childDebugElement.componentInstance.save.emit(dummyItem);
 

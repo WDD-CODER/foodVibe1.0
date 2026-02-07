@@ -19,6 +19,6 @@ export class AddItemFormComponent {
     this.onBack();
   }
 
-  onSwitch(item: ItemLedger) { this.router.navigate(['/inventory/edit', item.id]); }
+  onSwitch(item: ItemLedger) { this.router.navigate(['/inventory/edit', item._id]); }
   onBack() { this.router.navigate(['/inventory/list']); }
 }

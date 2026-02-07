@@ -1,18 +1,13 @@
 <div class="inventory-container">
-  
+
   <div class="filter-control-panel">
     <h2>Filter Items</h2>
-    <div *ngFor="let category of filterCategories()" class="filter-category">
+    <div *ngFor="let category of filterCategories_()" class="filter-category">
       <h3>{{ category.name }}</h3>
       <div *ngFor="let option of category.options" class="filter-option">
-        <input
-          type="checkbox"
-          id="{{ category.name | lowercase }}-{{ option.value | lowercase }}"
-          [name]="category.name | lowercase"
-          [value]="option.value"
-          [(ngModel)]="option.checked_"
-          (change)="toggleFilter(category.name, option.value)"
-          />
+        <input type="checkbox" id="{{ category.name | lowercase }}-{{ option.value | lowercase }}"
+          [name]="category.name | lowercase" [value]="option.value" [(ngModel)]="option.checked_"
+          (change)="toggleFilter(category.name, option.value)" />
         <label for="{{ category.name | lowercase }}-{{ option.value | lowercase }}">{{ option.label }}</label>
       </div>
     </div>
@@ -24,8 +19,11 @@
       No items match your current filters.
     </div>
     <div *ngFor="let item of filteredItems_()" class="item-card">
-      <h3>{{ item.itemName }}</h3>
-      <p *ngIf="item.properties?.['topCategory']">Main Category: {{ item.properties?.['topCategory'] }}</p>
+      <h3>{{ item.name_hebrew }}</h3>
+      <p *ngIf="item.category_">Main Category: {{ item.category_ }}</p>
+      <button (click)="onDeleteProduct(item._id)" class="btn-delete">
+        <i-lucide name="trash-2"></i-lucide>
+      </button>
     </div>
   </div>
 

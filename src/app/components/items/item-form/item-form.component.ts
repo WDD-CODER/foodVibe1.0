@@ -100,7 +100,7 @@ export class ItemFormComponent implements OnInit {
     this.showItemDropdown_.set(true);
 
     const exact = all.find(i => i.itemName.toLowerCase() === value.toLowerCase().trim());
-    this.duplicateMatch_.set(exact && exact.id !== this.initialItem()?.id ? exact : null);
+    this.duplicateMatch_.set(exact && exact._id !== this.initialItem()?._id ? exact : null);
   }
 
   toggleAllergen(alg: string): void {
@@ -116,7 +116,7 @@ export class ItemFormComponent implements OnInit {
     if (this.itemForm.invalid) return;
     const cats = this.selectedTopCategories_();
     const item: ItemLedger = {
-      id: this.initialItem()?.id || `item_${Date.now()}`,
+      _id: this.initialItem()?._id || `item_${Date.now()}`,
       itemName: this.itemForm.value.itemName,
       units: defaultUnitConversion,
       allergenIds: this.selectedAllergens_(),
