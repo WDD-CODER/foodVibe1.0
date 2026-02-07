@@ -1,0 +1,212 @@
+[
+  {
+    "_id": "65c367a1f1d2a3a4b5c6d001",
+    "itemName": "עגבניות שרי",
+    "allergenIds": [],
+    "brand": "משק יוסף",
+    "updatedAt": "2026-02-07T09:40:55.108Z",
+    "properties": {
+      "topCategory": "Vegetables",
+      "uom": "g",
+      "purchase_unit_": "Crate",
+      "conversion_factor_": 5000,
+      "gross_price_": 85,
+      "waste_percent_": 5,
+      "waste_quantity_": 250
+    },
+    "units": {
+      "purchase": { "symbol": "CRT", "label": "Crate (5kg)", "factorToInventory": 5000 },
+      "inventory": { "symbol": "g", "label": "Gram", "factorToInventory": 1, "factorFromInventory": 1 },
+      "recipe": { "symbol": "g", "label": "Gram", "factorToInventory": 1, "factorFromInventory": 1 }
+    }
+  },
+  {
+    "_id": "65c367a1f1d2a3a4b5c6d002",
+    "itemName": "קמח לחם לבן",
+    "allergenIds": ["gluten"],
+    "brand": "טחנות קמח",
+    "updatedAt": "2026-02-07T09:40:55.108Z",
+    "properties": {
+      "topCategory": "Dry Goods",
+      "uom": "g",
+      "purchase_unit_": "Bag",
+      "conversion_factor_": 25000,
+      "gross_price_": 140,
+      "waste_percent_": 0,
+      "waste_quantity_": 0
+    },
+    "units": {
+      "purchase": { "symbol": "BAG", "label": "Bag (25kg)", "factorToInventory": 25000 },
+      "inventory": { "symbol": "g", "label": "Gram", "factorToInventory": 1, "factorFromInventory": 1 },
+      "recipe": { "symbol": "kg", "label": "Kilogram", "factorToInventory": 1000, "factorFromInventory": 0.001 }
+    }
+  },
+  {
+    "_id": "65c367a1f1d2a3a4b5c6d003",
+    "itemName": "שמן זית כתית",
+    "allergenIds": [],
+    "brand": "יד מרדכי",
+    "updatedAt": "2026-02-07T09:40:55.108Z",
+    "properties": {
+      "topCategory": "Oils",
+      "uom": "ml",
+      "purchase_unit_": "Tin",
+      "conversion_factor_": 18000,
+      "gross_price_": 320,
+      "waste_percent_": 2,
+      "waste_quantity_": 360
+    },
+    "units": {
+      "purchase": { "symbol": "TIN", "label": "Tin (18L)", "factorToInventory": 18000 },
+      "inventory": { "symbol": "ml", "label": "Milliliter", "factorToInventory": 1, "factorFromInventory": 1 },
+      "recipe": { "symbol": "ml", "label": "Milliliter", "factorToInventory": 1, "factorFromInventory": 1 }
+    }
+  },
+  {
+    "_id": "65c367a1f1d2a3a4b5c6d004",
+    "itemName": "ביצים L",
+    "allergenIds": ["eggs"],
+    "brand": "תנובה",
+    "updatedAt": "2026-02-07T09:40:55.108Z",
+    "properties": {
+      "topCategory": "Dairy & Eggs",
+      "uom": "unit",
+      "purchase_unit_": "Tray",
+      "conversion_factor_": 30,
+      "gross_price_": 32.5,
+      "waste_percent_": 3,
+      "waste_quantity_": 1
+    },
+    "units": {
+      "purchase": { "symbol": "TRY", "label": "Tray (30u)", "factorToInventory": 30 },
+      "inventory": { "symbol": "u", "label": "Unit", "factorToInventory": 1, "factorFromInventory": 1 },
+      "recipe": { "symbol": "u", "label": "Unit", "factorToInventory": 1, "factorFromInventory": 1 }
+    }
+  },
+  {
+    "_id": "65c367a1f1d2a3a4b5c6d005",
+    "itemName": "חמאה לא מלוחה",
+    "allergenIds": ["milk"],
+    "brand": "תנובה",
+    "updatedAt": "2026-02-07T09:40:55.108Z",
+    "properties": {
+      "topCategory": "Dairy",
+      "uom": "g",
+      "purchase_unit_": "Block",
+      "conversion_factor_": 1000,
+      "gross_price_": 48,
+      "waste_percent_": 0,
+      "waste_quantity_": 0
+    },
+    "units": {
+      "purchase": { "symbol": "BLK", "label": "Block (1kg)", "factorToInventory": 1000 },
+      "inventory": { "symbol": "g", "label": "Gram", "factorToInventory": 1, "factorFromInventory": 1 },
+      "recipe": { "symbol": "g", "label": "Gram", "factorToInventory": 1, "factorFromInventory": 1 }
+    }
+  },
+  {
+    "_id": "65c367a1f1d2a3a4b5c6d006",
+    "itemName": "חזה עוף טרי",
+    "allergenIds": [],
+    "brand": "עוף טוב",
+    "updatedAt": "2026-02-07T09:40:55.108Z",
+    "properties": {
+      "topCategory": "Meat",
+      "uom": "g",
+      "purchase_unit_": "Kg",
+      "conversion_factor_": 1000,
+      "gross_price_": 39,
+      "waste_percent_": 8,
+      "waste_quantity_": 80
+    },
+    "units": {
+      "purchase": { "symbol": "kg", "label": "Kilogram", "factorToInventory": 1000 },
+      "inventory": { "symbol": "g", "label": "Gram", "factorToInventory": 1, "factorFromInventory": 1 },
+      "recipe": { "symbol": "g", "label": "Gram", "factorToInventory": 1, "factorFromInventory": 1 }
+    }
+  },
+  {
+    "_id": "65c367a1f1d2a3a4b5c6d007",
+    "itemName": "חלב 3%",
+    "allergenIds": ["milk"],
+    "brand": "טרה",
+    "updatedAt": "2026-02-07T09:40:55.108Z",
+    "properties": {
+      "topCategory": "Dairy",
+      "uom": "ml",
+      "purchase_unit_": "Carton",
+      "conversion_factor_": 1000,
+      "gross_price_": 6.3,
+      "waste_percent_": 1,
+      "waste_quantity_": 10
+    },
+    "units": {
+      "purchase": { "symbol": "CTN", "label": "Carton (1L)", "factorToInventory": 1000 },
+      "inventory": { "symbol": "ml", "label": "Milliliter", "factorToInventory": 1, "factorFromInventory": 1 },
+      "recipe": { "symbol": "ml", "label": "Milliliter", "factorToInventory": 1, "factorFromInventory": 1 }
+    }
+  },
+  {
+    "_id": "65c367a1f1d2a3a4b5c6d008",
+    "itemName": "סוכר לבן",
+    "allergenIds": [],
+    "brand": "סוגת",
+    "updatedAt": "2026-02-07T09:40:55.108Z",
+    "properties": {
+      "topCategory": "Dry Goods",
+      "uom": "g",
+      "purchase_unit_": "Pack",
+      "conversion_factor_": 1000,
+      "gross_price_": 4.5,
+      "waste_percent_": 0,
+      "waste_quantity_": 0
+    },
+    "units": {
+      "purchase": { "symbol": "PCK", "label": "Pack (1kg)", "factorToInventory": 1000 },
+      "inventory": { "symbol": "g", "label": "Gram", "factorToInventory": 1, "factorFromInventory": 1 },
+      "recipe": { "symbol": "g", "label": "Gram", "factorToInventory": 1, "factorFromInventory": 1 }
+    }
+  },
+  {
+    "_id": "65c367a1f1d2a3a4b5c6d009",
+    "itemName": "מלח שולחן",
+    "allergenIds": [],
+    "brand": "מלח הארץ",
+    "updatedAt": "2026-02-07T09:40:55.108Z",
+    "properties": {
+      "topCategory": "Spices",
+      "uom": "g",
+      "purchase_unit_": "Bag",
+      "conversion_factor_": 1000,
+      "gross_price_": 2.2,
+      "waste_percent_": 0,
+      "waste_quantity_": 0
+    },
+    "units": {
+      "purchase": { "symbol": "BAG", "label": "Bag (1kg)", "factorToInventory": 1000 },
+      "inventory": { "symbol": "g", "label": "Gram", "factorToInventory": 1, "factorFromInventory": 1 },
+      "recipe": { "symbol": "g", "label": "Gram", "factorToInventory": 1, "factorFromInventory": 1 }
+    }
+  },
+  {
+    "_id": "65c367a1f1d2a3a4b5c6d010",
+    "itemName": "שוקולד מריר 60%",
+    "allergenIds": ["soy"],
+    "brand": "Callebaut",
+    "updatedAt": "2026-02-07T09:40:55.108Z",
+    "properties": {
+      "topCategory": "Pastry",
+      "uom": "g",
+      "purchase_unit_": "Box",
+      "conversion_factor_": 10000,
+      "gross_price_": 480,
+      "waste_percent_": 0,
+      "waste_quantity_": 0
+    },
+    "units": {
+      "purchase": { "symbol": "BOX", "label": "Box (10kg)", "factorToInventory": 10000 },
+      "inventory": { "symbol": "g", "label": "Gram", "factorToInventory": 1, "factorFromInventory": 1 },
+      "recipe": { "symbol": "g", "label": "Gram", "factorToInventory": 1, "factorFromInventory": 1 }
+    }
+  }
+]
