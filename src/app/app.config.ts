@@ -1,7 +1,7 @@
 import { ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
-import { ArrowLeft, Edit, LucideAngularModule, Plus, Trash2 } from 'lucide-angular';
+import { ArrowLeft, Edit, LucideAngularModule, Pencil, Plus, Save, Trash2 } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 
 export const appConfig: ApplicationConfig = {
@@ -9,7 +9,7 @@ export const appConfig: ApplicationConfig = {
      provideRouter(routes), 
     KitchenStateService,
     importProvidersFrom(
-      LucideAngularModule.pick({ Plus, Trash2, Edit, ArrowLeft }) // Register 'Plus' here
+      LucideAngularModule.pick({ Plus, Trash2, Edit, ArrowLeft, Pencil,Save}) // Register 'Plus' here
     )
   ]
 };
