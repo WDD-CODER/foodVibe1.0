@@ -1,13 +1,29 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 
 import { ItemDataService } from '@services/items-data.service';
 import { ConversionService } from '@services/conversion.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { UserMsgService } from '@services/user-msg.service';
-
+import { KitchenStateService } from '@services/kitchen-state.service';
+import { Product } from '@models/product.model';
+import { KitchenUnit } from '@models/units.enum';
+interface ProductFormValue {
+  itemName: string;
+  brand?: string;
+  allergenIds?: string[];
+  properties: {
+    topCategory: string;
+    uom: 'g' | 'ml' | 'units';
+    purchase_unit_: string;
+    conversion_factor_: number;
+    gross_price_: number;
+    waste_percent_: number;
+    waste_quantity_: number;
+  };
+}
 @Component({
   selector: 'app-product-form',
   standalone: true,
@@ -16,27 +32,28 @@ import { UserMsgService } from '@services/user-msg.service';
   styleUrl: './product-form.component.scss'
 })
 export class ProductFormComponent implements OnInit {
+  // // INJECTIONS
   private readonly fb_ = inject(FormBuilder);
   private readonly itemDataService = inject(ItemDataService);
   private readonly conversionService = inject(ConversionService);
   private readonly userMsgService = inject(UserMsgService);
   private readonly router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private kitchenStateService = inject(KitchenStateService);
 
   // Signals
   protected availableUnits_ = signal<string[]>(['Bucket', 'Case', 'Bag', 'Bottle', 'Unit']);
   protected isModalOpen_ = signal(false);
   protected productForm_!: FormGroup;
-  
+  protected isEditMode_ = signal<boolean>(false);
+  protected initialItem_ = signal<Product | null>(null);
+
   // Modal Fields
   protected newUnitName_ = '';
   protected newUnitValue_ = 1;
   protected basisUnit_ = 'g';
   protected customBasisName_ = '';
 
-  /**
-   * סיגנל מחושב שמציג את המחיר נטו ליחידה בזמן אמת.
-   * שואב נתונים מהטופס ומעבד אותם דרך ה-Service.
-   */
   protected netUnitCost_ = computed(() => {
     const props = this.productForm_?.get('properties')?.value;
     if (!props) return 0;
@@ -47,6 +64,36 @@ export class ProductFormComponent implements OnInit {
       props.waste_percent_ || 0
     );
   });
+
+// // INITIALIZATION
+constructor() {
+  const id = this.route.snapshot.paramMap.get('id');
+  
+  if (id) {
+    this.isEditMode_.set(true);
+    const item = this.kitchenStateService.products_().find(p => p._id === id);
+    if (item) {
+      this.initialItem_.set(item);
+      
+      effect(() => {
+        const data = this.initialItem_();
+        if (data && this.productForm_) {
+          // FIX: Aligning keys with the initForm() definition
+          this.productForm_.patchValue({
+            itemName: data.name_hebrew, // Corrected from name_hebrew
+            properties: {
+              topCategory: data.category_,
+              gross_price_: data.purchase_price_,
+              conversion_factor_: data.conversion_factor_,
+              uom: data.base_unit_ || 'g'
+            }
+          });
+          console.log('Form Patched with Single Source of Truth:', data.name_hebrew);
+        }
+      });
+    }
+  }
+}
 
   ngOnInit(): void {
     this.initForm();
@@ -107,7 +154,7 @@ export class ProductFormComponent implements OnInit {
     const select = event.target as HTMLSelectElement;
     if (select.value === 'NEW_UNIT') {
       this.openNewUnitModal();
-      select.value = ''; 
+      select.value = '';
     }
   }
 
@@ -142,23 +189,53 @@ export class ProductFormComponent implements OnInit {
   }
 
   protected onSubmit(): void {
-    if (this.productForm_.valid) {
-      const rawProduct = {
-        ...this.productForm_.value,
-        updatedAt: new Date().toISOString()
-      };
-      this.saveProduct(rawProduct);
-    }
+   if (this.productForm_.valid) {
+    // Cast the raw value to our strict interface
+    const typedValue = this.productForm_.getRawValue() as ProductFormValue;
+    this.saveProduct(typedValue);
+  }
   }
 
-  private async saveProduct(product: any): Promise<void> {
-    try {
-      await this.itemDataService.addItem(product);
-      this.userMsgService.onSetSuccessMsg('פריט נשמר בהצלחה!');
-      this.router.navigate(['/inventory/list']);
-    } catch (error) {
-      this.userMsgService.onSetErrorMsg('שגיאה בשמירת הפריט');
-      console.error(error);
+// // CREATE / UPDATE / DELETE
+private async saveProduct(formData: ProductFormValue): Promise<void> {
+  try {
+    const initial = this.initialItem_();
+    console.log("🚀 ~ ProductFormComponent ~ saveProduct ~ initial:", initial)
+
+    // Now TypeScript knows exactly what is inside formData
+    const productToSave: Product = {
+      ...initial!, 
+      _id: initial!._id, 
+      name_hebrew: formData.itemName,
+      category_: formData.properties.topCategory,
+      purchase_price_: formData.properties.gross_price_,
+      purchase_unit_: formData.properties.purchase_unit_ as KitchenUnit,
+      conversion_factor_: formData.properties.conversion_factor_,
+      base_unit_: formData.properties.uom as KitchenUnit,
+      // yield_factor calculation is now protected by type-safe numbers
+      yield_factor_: (100 - formData.properties.waste_percent_) / 100 
+    };
+
+    if (this.isEditMode_()) {
+      this.kitchenStateService.updateProduct(productToSave).subscribe({
+        next: () => this.handleNavigationSuccess(),
+        error: () => this.userMsgService.onSetErrorMsg('שגיאה בעדכון המוצר')
+      });
+    } else {
+      // For Add mode, we pass the typed data
+      // כרגע הבעיה שלי היא פה שאני מקבל ערך ריק ובעצם הפונקציה לא מראה שהיא מצאה באמת את המוצר שאנחנו רוצים לערוך ולא מחלאה גם את כל המידע שלו !
+      
+      console.log("🚀 ~ ProductFormComponent ~ saveProduct ~ formData:", formData)
+      // await this.itemDataService.addItem(formData);
+      // this.handleNavigationSuccess();
     }
+  } catch (error) {
+    throw new Error('Critical Failure in Product Save Protocol'); // Use Station Protocol Error Handling
   }
+}
+
+private handleNavigationSuccess(): void {
+  this.userMsgService.onSetSuccessMsg('המוצר נשמר בהצלחה [cite: 28]');
+  this.router.navigate(['/inventory/list']);
+}
 }

@@ -67,7 +67,6 @@ export class InventoryItemListComponent implements OnDestroy {
   protected filterCategories_ = computed(() => {
     const items = this.kitchenStateService.products_();
     const categories: Record<string, Set<string>> = {};
-
     items.forEach(item => {
       if (item.allergens_?.length) {
         if (!categories['Allergens']) categories['Allergens'] = new Set();
@@ -132,9 +131,14 @@ export class InventoryItemListComponent implements OnDestroy {
   }
 
   // UPDATE
-  protected onEditProduct(_id: string): void {
-    this.router.navigate(['inventory', 'edit', _id]);
+  onEditProduct(_id: string): void {
+    console.log('Opening Edit Drawer for ID:', _id);
+    // We will use these signals in the next step to open the Side Drawer
+    this.router.navigate(['/inventory/edit', _id])
+    // this.kitchenStateService.selectedProductId_.set(_id);
+    // this.kitchenStateService.isDrawerOpen_.set(true);
   }
+
 
   // DELETE
   protected onDeleteProduct(_id: string): void {

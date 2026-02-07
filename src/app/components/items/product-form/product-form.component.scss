@@ -1,3 +1,28 @@
+.item-form-container {
+  display: block; /* Ensure it's not collapsed */
+  width: 100%;
+  min-height: 100px;
+  
+  .form-header {
+    display: block !important; /* Force visibility */
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    border-bottom: 2px solid #f1f5f9;
+
+    h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  &.edit-mode {
+    border-top: 6px solid #10b981; /* Strong Emerald visual [cite: 77] */
+    background: #fff;
+  }
+}
+
+
 .form-container {
     display: flex;
     flex-direction: column;
@@ -6,7 +31,6 @@
     padding: 2rem;
     border-radius: 12px;
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-
     .product-info {
         display: grid;
         /* Use auto-fill with a fixed max to allow justify-content to work */

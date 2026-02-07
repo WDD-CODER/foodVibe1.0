@@ -1,154 +1,83 @@
-<form [formGroup]="productForm_" (ngSubmit)="onSubmit()" class="form-container" dir="rtl">
-<!-- <section class="product-info"> -->
-  <div class="form-section product-info ">
+<div class="item-form-container" [class.edit-mode]="isEditMode_()">
 
-    <div class="form-group">
-      <label>שם הפריט</label>
-      <input formControlName="itemName" type="text" placeholder="למשל: עגבניות מגי">
-    </div>
+  <header class="form-header">
+    @if (isEditMode_()) {
+      <h2 class="text-emerald-600">עריכת מוצר: {{ initialItem_()?.name_hebrew }}</h2>
+      <p class="subtitle">עדכון נתונים במנוע התמחור הרקורסיבי</p>
+    } @else {
+      <h2 class="text-slate-900">הוספת מוצר חדש למלאי </h2>
+    }
+  </header>
 
-    <div class="form-group" formGroupName="properties">
-      <label>קטגוריה ראשית</label>
-      <select formControlName="topCategory">
-        <option value="">בחר קטגוריה</option>
-        <option value="Vegetables">ירקות</option>
-        <option value="Dairy">חלבי</option>
-        <option value="Meat">בשר</option>
-        <option value="Dry">יבש</option>
-      </select>
-    </div>
+  <form [formGroup]="productForm_" (ngSubmit)="onSubmit()" class="form-container" dir="rtl">
+    
+    <div class="form-section product-info">
+      <div class="form-group">
+        <label>שם הפריט</label>
+        <input formControlName="itemName" type="text" placeholder="למשל: עגבניות מגי">
+      </div>
 
+      <div class="form-group" formGroupName="properties">
+        <label>קטגוריה ראשית</label>
+        <select formControlName="topCategory">
+          <option value="">בחר קטגוריה</option>
+          <option value="Vegetables">ירקות</option>
+          <option value="Dairy">חלבי</option>
+          <option value="Meat">בשר</option>
+          <option value="Dry">יבש</option>
+        </select>
+      </div>
 
-  <div class="form-group">
-    <label>מחיר קנייה (Buy Price)</label>
-    <div class="relative-input">
-      <input type="number" formControlName="gross_price_" placeholder="0.00">
-      <span class="prefix">₪</span>
-    </div>
-  </div>
-</div>
-
-<!-- </section> -->
-
-  <ng-container formGroupName="properties">
-  <div class="form-section  border-top">
-
-      <!-- <div class="form-group scaling-box">
-        <label>הגדרת יחידת רכש (Scaling)</label>
-        <div class="scaling-row">
-          <span class="math-text">1</span>
-          <input type="text" formControlName="purchase_unit_" placeholder="ארגז / דלי / שק">
-          <span class="math-text">=</span>
-          <input type="number" formControlName="conversion_factor_" placeholder="כמות">
-          <select formControlName="uom">
-            <option value="g">גרם (g)</option>
-            <option value="ml">מ"ל (ml)</option>
-            <option value="units">יחידות (pcs)</option>
-          </select>
+      <div class="form-group" formGroupName="properties">
+        <label>מחיר קנייה (Buy Price) [cite: 62]</label>
+        <div class="relative-input">
+          <input type="number" formControlName="gross_price_" placeholder="0.00">
+          <span class="prefix">₪</span>
         </div>
-        <p class="helper-text">לדוגמה: 1 [דלי] = 5000 [גרם]</p>
-      </div> -->
-      <div class="form-group scaling-box ">
-        <label>יחידת רכש (Purchase Unit)</label>
-        <div class="scaling-row">
-          <span class="math-text">1</span>
-          <select formControlName="purchase_unit_" (change)="onUnitChange($event)">
-            <option value="">בחר יחידה...</option>
-            <option *ngFor="let unit of availableUnits_()" [value]="unit">{{unit}}</option>
-            <option value="NEW_UNIT">+ הוסף יחידה חדשה...</option>
-          </select>
-
-          <span class="math-text">=</span>
-
-          <input type="number" formControlName="conversion_factor_" placeholder="כמות">
-
-          <lucide-icon name="arrow-left"></lucide-icon>
-
-          <select formControlName="uom">
-            <option value="g">גרם (g)</option>
-            <option value="ml">מ"ל (ml)</option>
-            <option value="units">יחידות (pcs)</option>
-          </select>
-        </div>
-        <p class="helper-text">בחר יחידה קיימת או הגדר יחס המרה חדש </p>
       </div>
     </div>
-    <section class="waste-section ">
-      <div class="form-section ">
-        <div class="form-group">
-          <label class="danger-label">פחת באחוזים (%)</label>
-          <div class="relative-input">
-            <input type="number" formControlName="waste_percent_" placeholder="0">
-            <span class="prefix">%</span>
-          </div>
-        </div>
 
-        <div class="form-group">
-          <label class="danger-label">פחת בכמות (Base)</label>
-          <div class="relative-input">
-            <input type="number" formControlName="waste_quantity_" placeholder="0">
-            <span class="prefix">Qty</span>
-          </div>
-        </div>
-      </div>
-    </section>
-  </ng-container>
-
-  <div class="form-actions">
-    <button type="submit" [disabled]="productForm_.invalid" class="btn-primary">
-      <lucide-icon name="plus" class="icon-sm"></lucide-icon>
-      שמור פריט
-    </button>
-  </div>
-
-
-</form>
-
-<div class="modal-overlay" *ngIf="isModalOpen_()">
-  <div class="modal-content" dir="rtl">
-    <h3>הגדרת יחידת מידה חדשה (New Scaling Unit)</h3>
-
-    <div class="modal-body">
-      <div class="scaling-formula">
-        <!-- <span class="math-text">1</span> -->
-        <label for="text">
-          <input type="text" [(ngModel)]="newUnitName_" placeholder="שם היחידה (למשל: ארגז)">
-          <span class="math-text"> =</span>
-        </label>
-        <span class="math-text"> Of</span>
-        <section class="comparable-units">
-          <div class="basis-unit-container">
-            <select [(ngModel)]="basisUnit_">
+    <ng-container formGroupName="properties">
+      <div class="form-section border-top">
+        <div class="form-group scaling-box">
+          <label>יחידת רכש (Purchase Unit) </label>
+          <div class="scaling-row">
+            <span class="math-text">1</span>
+            <select formControlName="purchase_unit_" (change)="onUnitChange($event)">
+              <option value="">בחר יחידה...</option>
               <option *ngFor="let unit of availableUnits_()" [value]="unit">{{unit}}</option>
-              <option value="CUSTOM_BASIS">+ יחידת בסיס חדשה...</option>
+              <option value="NEW_UNIT">+ הוסף יחידה חדשה...</option>
             </select>
 
-            <input *ngIf="basisUnit_ === 'CUSTOM_BASIS'" type="text" [(ngModel)]="customBasisName_"
-              placeholder="שם יחידת הבסיס (למשל: דלי)">
+            <span class="math-text">=</span>
+            <input type="number" formControlName="conversion_factor_" placeholder="כמות">
+            <lucide-icon name="arrow-left"></lucide-icon>
 
-            <input type="number" [(ngModel)]="newUnitValue_" placeholder="כמות">
-
-
+            <select formControlName="uom">
+              <option value="g">גרם (g)</option>
+              <option value="ml">מ"ל (ml)</option>
+              <option value="units">יחידות (pcs)</option>
+            </select>
           </div>
-        </section>
-        <div class="cost-preview-card" *ngIf="productForm_.get('properties.gross_price_')?.value > 0">
-          <div class="preview-item">
-            <span class="label">עלות נטו ליחידה ({{productForm_.get('properties.uom')?.value}}):</span>
-            <span class="value">{{ netUnitCost_() | number:'1.2-4' }} ₪</span>
-          </div>
-          <p class="helper-text">* המחיר משקלל פחת של {{productForm_.get('properties.waste_percent_')?.value}}%</p>
         </div>
 
-        <div class="form-actions">
+        <div class="waste-section">
+          <div class="form-group">
+            <label class="danger-label">פחת באחוזים (%) [cite: 273]</label>
+            <div class="relative-input">
+              <input type="number" formControlName="waste_percent_" placeholder="0">
+              <span class="prefix">%</span>
+            </div>
+          </div>
         </div>
       </div>
+    </ng-container>
 
-      <p class="helper-text">המערכת תחשב אוטומטית את המשקל/נפח הסופי לפי שרשרת ההמרות.</p>
+    <div class="form-actions">
+      <button type="submit" [disabled]="productForm_.invalid" class="btn-primary">
+        <lucide-icon [name]="isEditMode_() ? 'save' : 'plus'" class="icon-sm"></lucide-icon>
+        {{ isEditMode_() ? 'עדכן מוצר' : 'שמור פריט' }} 
+      </button>
     </div>
-
-    <div class="modal-actions">
-      <button class="btn-secondary" (click)="closeModal()">ביטול</button>
-      <button class="btn-primary" (click)="saveNewUnit()">אשר ושמור</button>
-    </div>
-  </div>
+  </form>
 </div>
