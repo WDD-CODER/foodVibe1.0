@@ -1,0 +1,24 @@
+.user-msg {
+    position: fixed; // Use fixed to stay relative to screen
+    top: 20px;
+    right: 20px;
+
+    width: 250px;
+    padding: 15px;
+    
+    text-align: center;
+    
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    z-index: 9999; // Ensure it's on top
+
+    &.success {
+        background-color: green;
+    }
+
+    &.error {
+        background-color: red;
+    }
+}

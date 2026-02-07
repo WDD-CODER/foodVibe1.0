@@ -1,0 +1,5 @@
+@if(msg_();as msg){
+    <div class="user-msg"  [ngClass]="msg.type" (click)="onCloseMsg($event)">
+        <p>{{ msg.txt }}</p> 
+    </div>
+}

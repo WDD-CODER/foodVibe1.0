@@ -1,6 +1,5 @@
-import { inject, Injectable, signal } from '@angular/core';
-import { UserService } from './user.service';
-import { BehaviorSubject, concatMap, delay, distinctUntilChanged, of, Subject, tap } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
+import { concatMap, delay, of, Subject, tap } from 'rxjs';
 import { Msg } from '../models/msg.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -38,9 +37,12 @@ export class UserMsgService {
   }
 
   public onSetSuccessMsg(txt: string) {
+    console.log("🚀 ~ UserMsgService ~ onSetSuccessMsg ~ txt:", txt)
     this._setMsg({ txt, type: 'success' })
   }
   public onSetErrorMsg(txt: string) {
+    console.log("🚀 ~ UserMsgService ~ onSetErrorMsg ~ txt:", txt)
+    
     this._setMsg({ txt, type: 'error' })
   }
 
