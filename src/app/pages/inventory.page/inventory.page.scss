@@ -2,38 +2,31 @@
   padding: 20px;
 }
 
-.inventory-nav {
+nav {
+  display: flex;
+  gap: 15px;
   margin-bottom: 20px;
 
-  ul {
-    display: flex;
-    gap: 15px;
+  .nav-link {
+    display: inline-block;
 
-    margin: 0;
-    padding: 0;
+    padding: 8px 15px;
 
-    list-style: none;
+    background-color: transparent;
+    color: #007bff;
+    text-decoration: none;
 
-    a {
-      display: inline-block;
+    border-radius: 5px;
 
-      padding: 8px 15px;
+    transition: background-color 0.3s ease;
 
-      color: #007bff;
-      text-decoration: none;
+    &:hover {
+      background-color: #e9ecef;
+    }
 
-      border-radius: 5px;
-
-      transition: background-color 0.3s ease;
-
-      &:hover {
-        background-color: #e9ecef;
-      }
-
-      &.active {
-        background-color: #007bff;
-        color: white;
-      }
+    &.active {
+      background-color: #007bff;
+      color: white;
     }
   }
 }

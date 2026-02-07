@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
@@ -10,4 +10,9 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InventoryPage {
+  readonly navItems_ = signal([
+    { label: 'Produce List', path: 'list' },
+    { label: 'Add Produce', path: 'add' },
+    // { label: 'Edit', path: 'edit' }
+  ]);
 }
