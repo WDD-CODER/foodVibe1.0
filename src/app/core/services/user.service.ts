@@ -4,7 +4,7 @@ import { BehaviorSubject, filter, from, map, Observable, of, switchMap, take, ta
 import { Router } from '@angular/router';
 import { UtilService } from './util.service';
 import { UserMsgService } from './user-msg.service';
-import { AsyncStorageService } from './async-storage.service.service';
+import {  StorageService } from './async-storage.service';
 
 
 const SINGED_USERS = 'signed-users-db'
@@ -16,7 +16,7 @@ export class UserService {
 
   utilService = inject(UtilService)
   userMsgService = inject(UserMsgService)
-  storageService = inject(AsyncStorageService)
+  storageService = inject(StorageService)
   router = inject(Router)
 
   
