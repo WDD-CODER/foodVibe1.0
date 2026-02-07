@@ -1,5 +1,5 @@
 export interface Supplier {
-  id: string;
+  _id: string;
   name_hebrew: string; // [cite: 8]
   contact_person_?: string;
   

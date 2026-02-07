@@ -1,12 +1,12 @@
 import { Injectable, signal, inject, computed } from '@angular/core';
 import type { ItemLedger } from '../models/ingredient.model';
-import { AsyncStorageService } from './async-storage.service.service';
+import { StorageService } from './async-storage.service';
 
 const ENTITY = 'item_list';
 
 @Injectable({ providedIn: 'root' })
 export class ItemDataService {
-  private storage = inject(AsyncStorageService);
+  private storage = inject(StorageService);
 
   // Signal naming convention: suffix _
   private itemsStore_ = signal<ItemLedger[]>([]);
@@ -35,39 +35,36 @@ export class ItemDataService {
   // Uses 'query'
   private async loadInitialData(): Promise<void> {
     const data = await this.storage.query<ItemLedger>(ENTITY);
-    // console.log(data);
-    // Map _id from storage to id for your ItemLedger model
-    const mappedData = data.map((item: any) => ({ ...item, id: item._id }));
-    this.itemsStore_.set(mappedData);
+    // ItemLedger now uses _id directly from storage
+    this.itemsStore_.set(data);
   }
 
   // Uses 'get'
-  async getItem(id: string): Promise<ItemLedger> {
-    const item = await this.storage.get<any>(ENTITY, id);
-    return { ...item, id: item._id };
+  async getItem(_id: string): Promise<ItemLedger> {
+    const item = await this.storage.get<any>(ENTITY, _id);
+    return item;
   }
 
   // Uses 'post'
-  async addItem(newItem: Omit<ItemLedger, 'id'>): Promise<void> {
+  async addItem(newItem: Omit<ItemLedger, '_id'>): Promise<void> {
+    console.log("🚀 ~ ItemDataService ~ addItem ~ newItem:", newItem)
     const saved = await this.storage.post<any>(ENTITY, newItem);
-    const itemWithId = { ...saved, id: saved._id };
     
-    this.itemsStore_.update(items => [...items, itemWithId]);
+    this.itemsStore_.update(items => [...items, saved]);
   }
 
   // Uses 'put'
   async updateItem(item: ItemLedger): Promise<void> {
-    const entity = { ...item, _id: item.id };
-    const updated = await this.storage.put<any>(ENTITY, entity);
+    const updated = await this.storage.put<any>(ENTITY, item);
     
     this.itemsStore_.update(items => 
-      items.map(i => i.id === updated._id ? { ...updated, id: updated._id } : i)
+      items.map(i => i._id === updated._id ? updated : i)
     );
   }
 
   // Uses 'remove'
-  async deleteItem(id: string): Promise<void> {
-    await this.storage.remove(ENTITY, id);
-    this.itemsStore_.update(items => items.filter(i => i.id !== id));
+  async deleteItem(_id: string): Promise<void> {
+    await this.storage.remove(ENTITY, _id);
+    this.itemsStore_.update(items => items.filter(i => i._id !== _id));
   }
 }

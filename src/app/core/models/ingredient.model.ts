@@ -31,7 +31,7 @@ export interface TripleUnitConversion {
 
 export interface ItemLedger {
   /** Unique identifier for the ledger entry (opaque, adapter-agnostic). */
-  id: string;
+  _id: string;
   /** Display name. */
   itemName: string;
   /** Triple-unit structure: Purchase, Inventory, Recipe with conversion factors. */

@@ -1,12 +1,12 @@
 import { KitchenUnit } from './units.enum';
 
 export interface Ingredient {
-  id: string;
-  item_type_: 'product' | 'recipe'; // Defines if it's raw or a sub-recipe [cite: 77, 323]
-  reference_id_: string;            // ID linking to Product or Recipe [cite: 20]
-  amount_: number;                  // [cite: 96, 316]
-  unit_: KitchenUnit;               // [cite: 316]
-  note_?: string;                   // e.g., "Cut into 1cm cubes" [cite: 320]
+  _id: string;
+  item_type_: 'product' | 'recipe'; // Defines if it's raw or a sub-recipe 
+  reference_id_: string;            // ID linking to Product or Recipe
+  amount_: number;                  // 
+  unit_: KitchenUnit;               // 
+  note_?: string;                   // e.g., "Cut into 1cm cubes" 
 }
 
 export interface RecipeStep {
@@ -17,7 +17,7 @@ export interface RecipeStep {
 }
 
 export interface Recipe {
-  id: string;
+  _id: string;
   name_hebrew: string;
   ingredients_: Ingredient[];       // Recursive ingredient list [cite: 13, 75, 276]
   steps_: RecipeStep[];             // Preparation steps [cite: 81, 326]

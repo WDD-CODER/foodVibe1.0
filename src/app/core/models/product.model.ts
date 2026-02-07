@@ -1,7 +1,7 @@
 import { KitchenUnit } from './units.enum';
 
 export interface Product {
-  id: string;
+  _id: string;
   name_hebrew: string; 
   category_: string;
   supplierId_: string;
