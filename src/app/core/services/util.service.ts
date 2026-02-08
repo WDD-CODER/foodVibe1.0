@@ -48,11 +48,15 @@ getEmptyProduct(): Product {
     _id: '',
     name_hebrew: '',
     category_: '',
-    supplierId_: '', 
-    purchase_price_: 0,
-    purchase_unit_: KitchenUnit.UNIT,
-    base_unit_: KitchenUnit.GRAM,
-    conversion_factor_: 1,
+    supplierId_: '',
+    
+    // Updated naming based on your interface
+    buy_price_global_: 0,
+    base_unit_: KitchenUnit.GRAM, // Ensure KitchenUnit.GRAM returns a string
+    
+    // New required array
+    purchase_options_: [], 
+    
     yield_factor_: 1,
     is_dairy_: false,
     allergens_: [],
@@ -63,34 +67,34 @@ getEmptyProduct(): Product {
 }
 
 // // TRANSFORMERS
-mapProductToLedger(product: Product): Omit<ItemLedger, "_id"> {
-  return {
-    itemName: product.name_hebrew,
-    allergenIds: product.allergens_,
-    units: {
-      purchase: { 
-        symbol: product.purchase_unit_, 
-        label: product.purchase_unit_, 
-        factorToInventory: product.conversion_factor_ 
-      },
-      inventory: { 
-        symbol: product.base_unit_, 
-        label: product.base_unit_, 
-        factorToInventory: 1 
-      },
-      recipe: { 
-        symbol: product.base_unit_, 
-        label: product.base_unit_, 
-        factorToInventory: 1 
-      }
-    },
-    properties: {
-      topCategory: product.category_,
-      // CRITICAL: We attach these here so the database stores them
-      purchase_price_: product.purchase_price_.toString(),
-      yield_factor_: product.yield_factor_.toString(),
-      min_stock_: product.min_stock_level_.toString()
-    }
-  };
-}
+// mapProductToLedger(product: Product): Omit<ItemLedger, "_id"> {
+//   return {
+//     itemName: product.name_hebrew,
+//     allergenIds: product.allergens_,
+//     units: {
+//       purchase: { 
+//         symbol: product.purchase_unit_, 
+//         label: product.purchase_unit_, 
+//         factorToInventory: product.conversion_factor_ 
+//       },
+//       inventory: { 
+//         symbol: product.base_unit_, 
+//         label: product.base_unit_, 
+//         factorToInventory: 1 
+//       },
+//       recipe: { 
+//         symbol: product.base_unit_, 
+//         label: product.base_unit_, 
+//         factorToInventory: 1 
+//       }
+//     },
+//     properties: {
+//       topCategory: product.category_,
+//       // CRITICAL: We attach these here so the database stores them
+//       purchase_price_: product.purchase_price_.toString(),
+//       yield_factor_: product.yield_factor_.toString(),
+//       min_stock_: product.min_stock_level_.toString()
+//     }
+//   };
+// }
 }
