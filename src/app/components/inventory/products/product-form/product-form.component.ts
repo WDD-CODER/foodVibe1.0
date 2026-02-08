@@ -12,6 +12,8 @@ import { Product } from '@models/product.model';
 import { KitchenUnit } from '@models/units.enum';
 import { ClickOutSideDirective } from "@directives/click-out-side";
 import { UtilService } from '@services/util.service';
+import { UnitRegistryService } from '@services/unit-registry.service';
+import { FormArray } from '@angular/forms';
 
 interface ProductFormValue {
   productName: string;
@@ -19,10 +21,10 @@ interface ProductFormValue {
   allergenIds?: string[];
   properties: {
     topCategory: string;
-    uom: 'g' | 'ml' | 'units';
+    uom: string; // Base Unit (g/ml/units) [cite: 59, 101]
     purchase_unit_: string;
     conversion_factor_: number;
-    gross_price_: number;
+    gross_price_: number; // This maps to buy_price_global_ [cite: 288]
     waste_percent_: number;
     waste_quantity_: number;
   };
@@ -47,6 +49,8 @@ export class ProductFormComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private kitchenStateService = inject(KitchenStateService);
   private utilService = inject(UtilService);
+  private unitRegistry = inject(UnitRegistryService)
+
 
   protected availableUnits_ = signal<string[]>(['Bucket', 'Case', 'Bag', 'Bottle', 'Unit']);
   protected isModalOpen_ = signal(false);
@@ -71,7 +75,7 @@ export class ProductFormComponent implements OnInit {
   });
 
   // // LIST
-ngOnInit(): void {
+  ngOnInit(): void {
     this.initForm();
 
     // 2. We use an 'effect' or 'ngOnInit' logic to watch the input
@@ -115,9 +119,11 @@ ngOnInit(): void {
       productName: data.name_hebrew,
       properties: {
         topCategory: data.category_,
-        gross_price_: data.purchase_price_,
-        purchase_unit_: data.purchase_unit_,
-        conversion_factor_: data.conversion_factor_,
+        // Change data.purchase_price_ to data.buy_price_global_
+        gross_price_: data.buy_price_global_,
+        // Ensure these follow your new interface naming convention
+        purchase_unit_: data.purchase_options_[0]?.unit_symbol_ || '',
+        conversion_factor_: data.purchase_options_[0]?.conversion_rate_ || 1,
         uom: data.base_unit_ || 'g',
         waste_percent_: (1 - (data.yield_factor_ || 1)) * 100
       }
@@ -127,48 +133,47 @@ ngOnInit(): void {
   // // CREATE
   private initForm(): void {
     this.productForm_ = this.fb_.group({
-      productName: ['', [Validators.required, Validators.minLength(2)]],
+      productName: ['', [Validators.required]],
       brand: [''],
-      allergenIds: [[]],
-      properties: this.fb_.group({
-        topCategory: ['', Validators.required],
-        uom: ['g', Validators.required],
-        purchase_unit_: ['Unit', [Validators.required]],
-        conversion_factor_: [1, [Validators.required, Validators.min(0.0001)]],
-        gross_price_: [0, [Validators.required, Validators.min(0)]],
-        waste_percent_: [0, [Validators.min(0), Validators.max(100)]],
-        waste_quantity_: [0, [Validators.min(0)]]
-      })
+      base_unit_: ['g', Validators.required], // Single Source of Truth [cite: 210]
+      buy_price_global_: [0, [Validators.required, Validators.min(0)]],
+      category_: ['', Validators.required],
+      yield_factor_: [1, [Validators.required]],
+      // This array will hold our "Tomato Boxes", "Crates", etc. 
+      purchase_options_: this.fb_.array([])
     });
-
     this.setupWasteLogic();
   }
 
-  private setupWasteLogic(): void {
-    const props = this.productForm_.get('properties') as FormGroup;
-    const percentCtrl = props.get('waste_percent_');
-    const qtyCtrl = props.get('waste_quantity_');
-    const convCtrl = props.get('conversion_factor_');
-
-    percentCtrl?.valueChanges.subscribe(pct => {
-      const newQty = this.conversionService.getWasteQuantity(pct, convCtrl?.value || 0);
-      if (qtyCtrl?.value !== newQty) {
-        qtyCtrl?.setValue(newQty, { emitEvent: false });
-      }
-    });
-
-    qtyCtrl?.valueChanges.subscribe(qty => {
-      const newPct = this.conversionService.getWastePercent(qty, convCtrl?.value || 0);
-      if (percentCtrl?.value !== newPct) {
-        percentCtrl?.setValue(newPct, { emitEvent: false });
-      }
-    });
-
-    convCtrl?.valueChanges.subscribe(total => {
-      const pct = percentCtrl?.value || 0;
-      qtyCtrl?.setValue(this.conversionService.getWasteQuantity(pct, total), { emitEvent: false });
-    });
+  get purchaseOptions_(): FormArray {
+    return this.productForm_.get('purchase_options_') as FormArray;
   }
+
+ private setupWasteLogic(): void {
+  // Update: These now sit directly on the root of productForm_
+  const percentCtrl = this.productForm_.get('waste_percent_'); // You'll need to add this control to initForm
+  const qtyCtrl = this.productForm_.get('waste_quantity_');    // You'll need to add this control to initForm
+  
+  // Note: For waste quantity, we usually compare it against the 'base_unit_' 
+  // or a standard 1000g reference.
+  const referenceMass = 1000; 
+
+  percentCtrl?.valueChanges.subscribe(pct => {
+    const newQty = (pct / 100) * referenceMass;
+    if (qtyCtrl?.value !== newQty) {
+      qtyCtrl?.setValue(newQty, { emitEvent: false });
+    }
+    // Update the yield_factor_ (100% - 10% waste = 0.9 yield)
+    this.productForm_.get('yield_factor_')?.setValue((100 - pct) / 100, { emitEvent: false });
+  });
+
+  qtyCtrl?.valueChanges.subscribe(qty => {
+    const newPct = (qty / referenceMass) * 100;
+    if (percentCtrl?.value !== newPct) {
+      percentCtrl?.setValue(newPct, { emitEvent: false });
+    }
+  });
+}
 
   protected onUnitChange(event: Event): void {
     const select = event.target as HTMLSelectElement;
@@ -218,25 +223,46 @@ ngOnInit(): void {
     }
   }
 
+  protected addPurchaseOption(unitSymbol: string): void {
+    const conversion = this.unitRegistry.getConversion(unitSymbol);
+    const globalPrice = this.productForm_.get('buy_price_global_')?.value || 0;
+
+    // Suggested price based on global rate * conversion [cite: 78, 211]
+    const suggestedPrice = globalPrice * conversion;
+
+    const optionGroup = this.fb_.group({
+      unit_symbol_: [unitSymbol, Validators.required],
+      conversion_rate_: [conversion, [Validators.required, Validators.min(0.0001)]],
+      price_override_: [suggestedPrice] // Editable: allows for the bulk discount [cite: 12]
+    });
+
+    this.purchaseOptions_.push(optionGroup);
+  }
+
   private async saveProduct(formData: ProductFormValue): Promise<void> {
     try {
       const initial = this.curProduct_();
       if (!initial) throw new Error('No initial product state available');
 
+      // BUILD THE REFACTORED PRODUCT OBJECT
       const productToSave: Product = {
         ...initial,
         name_hebrew: formData.productName,
         category_: formData.properties.topCategory,
-        purchase_price_: formData.properties.gross_price_,
-        purchase_unit_: formData.properties.purchase_unit_ as KitchenUnit,
-        base_unit_: formData.properties.uom as KitchenUnit,
-        conversion_factor_: formData.properties.conversion_factor_,
-        yield_factor_: (100 - formData.properties.waste_percent_) / 100
+        base_unit_: formData.properties.uom, // The "Single Source of Truth" [cite: 61, 210]
+        buy_price_global_: formData.properties.gross_price_, // Unified pricing [cite: 211, 288]
+        yield_factor_: (100 - formData.properties.waste_percent_) / 100, // 
+
+        // Map the current form unit into the first slot of our new array
+        purchase_options_: [
+          {
+            unit_symbol_: formData.properties.purchase_unit_,
+            conversion_rate_: formData.properties.conversion_factor_,
+            // Initially, we can leave price_override_ undefined so it uses global
+          }
+        ]
       };
 
-      // UNIFIED SAVE PROTOCOL
-      // We don't need the if/else here anymore because the 
-      // KitchenStateService.saveProduct handles both branches!
       this.kitchenStateService.saveProduct(productToSave).subscribe({
         next: () => this.handleNavigationSuccess(),
         error: () => this.userMsgService.onSetErrorMsg('שגיאה בשמירת המוצר')
@@ -246,5 +272,6 @@ ngOnInit(): void {
       console.error("Critical Failure in Product Save Protocol", error);
     }
   }
+
   // // DELETE
 }

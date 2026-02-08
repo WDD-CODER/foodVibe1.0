@@ -2,7 +2,7 @@
 
   <header class="form-header">
     @if (isEditMode_()) {
-    <h2 class="text-emerald-600">עריכת מוצר: {{ curProduct_()?.name_hebrew }}</h2>
+    <h2 class="text-emerald-600">עריכת מוצר: {{ initialProduct_()?.name_hebrew }}</h2>
     <p class="subtitle">עדכון נתונים במנוע התמחור הרקורסיבי</p>
     } @else {
     <h2 class="text-slate-900">הוספת מוצר חדש למלאי </h2>
