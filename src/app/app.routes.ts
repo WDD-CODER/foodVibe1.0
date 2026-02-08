@@ -37,8 +37,10 @@ export const routes: Routes = [
     loadComponent: () => import('./components/menu-creating/menu-creating.component').then(m => m.MenuCreatingComponent)
   },
   {
-    path: 'checklist-creator',
-    loadComponent: () => import('./components/checklist-creator/checklist-creator.component').then(m => m.ChecklistCreatorComponent)
+    path: 'command-center',
+    loadComponent: () => 
+      import('./pages/metadata-manager/metadata-manager.page.component')
+        .then(m => m.MetadataManagerComponent)
   },
   { path: '', redirectTo: 'inventory', pathMatch: 'full' },
 ];

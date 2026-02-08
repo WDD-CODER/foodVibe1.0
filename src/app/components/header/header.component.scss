@@ -1,35 +1,29 @@
+
+
 .header-nav {
-  position: fixed;
-  width: 100%;
-  background-color: #333;
-  padding: 1rem;
-
   ul {
-    list-style: none;
     display: flex;
-    
-    place-content: center	;
-    
-    margin: 0;
-    padding: 0;
-    
-    gap: 1rem;
+    place-content: center;
 
-    
-    li{
-      // width: 100%;
-    }
-  }
+    gap: 1.5rem;
+    list-style: none;
+    padding: 1rem;
+    background-color: #0f172a; // Slate-900
 
-  a {
-    color: white;
-    text-decoration: none;
-    padding: 5px;
-    border-radius: 4px;
+    li a {
+      color: #94a3b8; // Slate-400
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s ease;
 
-    &:hover,
-    &.active {
-      background-color: #555;
+      &.active {
+        color: #ffffff;
+        border-bottom: 2px solid #10b981; // Emerald-500 indicator
+      }
+
+      &:hover {
+        color: #f1f5f9;
+      }
     }
   }
 }
