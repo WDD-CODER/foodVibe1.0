@@ -18,4 +18,5 @@ export interface Product {
   allergens_: string[];        
   min_stock_level_: number;    
   expiry_days_default_: number; 
+  updatedAt?:string
 }

@@ -34,7 +34,7 @@ export class StorageService {
   async put<T extends EntityId>(entityType: string, updatedEntity: T): Promise<T> {
     const entities = await this.query<T>(entityType);
     const idx = entities.findIndex(entity => entity._id === updatedEntity._id);
-    if (idx === -1) throw new Error(`Cannot update, item ${updatedEntity._id} does not exist`);
+    if (idx === -1) throw new Error(`Cannot update, product ${updatedEntity._id} does not exist`);
 
     entities[idx] = updatedEntity;
     this._save(entityType, entities);
@@ -48,7 +48,7 @@ export class StorageService {
       entities.splice(idx, 1);
       this._save(entityType, entities);
     } else {
-      throw new Error(`Cannot remove, item ${entityId} of type: ${entityType} does not exist`);
+      throw new Error(`Cannot remove, product ${entityId} of type: ${entityType} does not exist`);
     }
   }
 

@@ -19,16 +19,16 @@ describe('StorageService', () => {
   });
 
   describe('Create (post)', () => {
-    it('should save an item and assign an _id', async () => {
-      const newItem = { name: 'Test' };
-      const savedItem = await service.post(ENTITY_TYPE, newItem);
+    it('should save an product and assign an _id', async () => {
+      const newProduct = { name: 'Test' };
+      const savedProduct = await service.post(ENTITY_TYPE, newProduct);
 
-      expect(savedItem._id).toBeDefined();
-      expect(savedItem.name).toBe('Test');
+      expect(savedProduct._id).toBeDefined();
+      expect(savedProduct.name).toBe('Test');
 
       const entities = JSON.parse(localStorage.getItem(ENTITY_TYPE)!);
       expect(entities.length).toBe(1);
-      expect(entities[0]._id).toBe(savedItem._id);
+      expect(entities[0]._id).toBe(savedProduct._id);
     });
   });
 
@@ -54,22 +54,22 @@ describe('StorageService', () => {
       }
     }));
 
-    it('should fetch a specific item by _id', async () => {
-      const item = await service.post(ENTITY_TYPE, { val: 42 });
-      const fetched = await service.get<EntityId & { val: number }>(ENTITY_TYPE, item._id);
+    it('should fetch a specific product by _id', async () => {
+      const product = await service.post(ENTITY_TYPE, { val: 42 });
+      const fetched = await service.get<EntityId & { val: number }>(ENTITY_TYPE, product._id);
       expect(fetched.val).toBe(42);
     });
 
-    it('should throw error if item does not exist', async () => {
+    it('should throw error if product does not exist', async () => {
       await expectAsync(service.get(ENTITY_TYPE, 'non-existent'))
         .toBeRejectedWithError(/does not exist/);
     });
   });
 
   describe('Update (put)', () => {
-    it('should update an existing item', async () => {
-      const item = await service.post(ENTITY_TYPE, { status: 'old' });
-      const updated = { ...item, status: 'new' };
+    it('should update an existing product', async () => {
+      const product = await service.post(ENTITY_TYPE, { status: 'old' });
+      const updated = { ...product, status: 'new' };
 
       const result = await service.put(ENTITY_TYPE, updated);
       expect(result.status).toBe('new');
@@ -78,7 +78,7 @@ describe('StorageService', () => {
       expect(entities[0].status).toBe('new');
     });
 
-    it('should throw error when updating non-existent item', async () => {
+    it('should throw error when updating non-existent product', async () => {
       const ghost = { _id: '123', name: 'ghost' };
       await expectAsync(service.put(ENTITY_TYPE, ghost))
         .toBeRejectedWithError(/does not exist/);
@@ -86,15 +86,15 @@ describe('StorageService', () => {
   });
 
   describe('Delete (remove)', () => {
-    it('should remove an item from localStorage', async () => {
-      const item = await service.post(ENTITY_TYPE, { deleteMe: true });
-      await service.remove(ENTITY_TYPE, item._id);
+    it('should remove an product from localStorage', async () => {
+      const product = await service.post(ENTITY_TYPE, { deleteMe: true });
+      await service.remove(ENTITY_TYPE, product._id);
 
       const entities = await service.query(ENTITY_TYPE, 0);
       expect(entities.length).toBe(0);
     });
 
-    it('should throw error when removing non-existent item', async () => {
+    it('should throw error when removing non-existent product', async () => {
       await expectAsync(service.remove(ENTITY_TYPE, 'none'))
         .toBeRejectedWithError(/does not exist/);
     });

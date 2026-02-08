@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
 import { User } from '../models/user.model';
+import { Product } from '@models/product.model';
+import { KitchenUnit } from '@models/units.enum';
+import { ItemLedger } from '@models/ingredient.model';
 
 const LOGGED_IN_USER = 'signed-user'
 const SINGED_USERS = 'signed-users-db'
@@ -38,4 +41,56 @@ export class UtilService {
 
     return result;
   }
+
+  // // READ / UTILITY
+getEmptyProduct(): Product {
+  return {
+    _id: '',
+    name_hebrew: '',
+    category_: '',
+    supplierId_: '', 
+    purchase_price_: 0,
+    purchase_unit_: KitchenUnit.UNIT,
+    base_unit_: KitchenUnit.GRAM,
+    conversion_factor_: 1,
+    yield_factor_: 1,
+    is_dairy_: false,
+    allergens_: [],
+    min_stock_level_: 0,
+    expiry_days_default_: 0,
+    updatedAt: new Date().toISOString()
+  };
+}
+
+// // TRANSFORMERS
+mapProductToLedger(product: Product): Omit<ItemLedger, "_id"> {
+  return {
+    itemName: product.name_hebrew,
+    allergenIds: product.allergens_,
+    units: {
+      purchase: { 
+        symbol: product.purchase_unit_, 
+        label: product.purchase_unit_, 
+        factorToInventory: product.conversion_factor_ 
+      },
+      inventory: { 
+        symbol: product.base_unit_, 
+        label: product.base_unit_, 
+        factorToInventory: 1 
+      },
+      recipe: { 
+        symbol: product.base_unit_, 
+        label: product.base_unit_, 
+        factorToInventory: 1 
+      }
+    },
+    properties: {
+      topCategory: product.category_,
+      // CRITICAL: We attach these here so the database stores them
+      purchase_price_: product.purchase_price_.toString(),
+      yield_factor_: product.yield_factor_.toString(),
+      min_stock_: product.min_stock_level_.toString()
+    }
+  };
+}
 }
