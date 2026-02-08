@@ -53,13 +53,13 @@
       .btn-edit {
         background: none;
         border: none;
-        color: var(--slate-400); // Or use Tailwind slate-400
+        color: var(--slate-400); 
         cursor: pointer;
         transition: color 0.2s;
         padding: 8px;
 
         &:hover {
-          color: #059669; // Emerald-600 for success/edit actions [cite: 77]
+          color: #059669;
         }
       }
     }

@@ -123,7 +123,7 @@ export class KitchenStateService {
       tap(() => {
         console.log('deleteItem')
 
-        // Logic for Day 14: Success feedback only triggers if deletion worked [cite: 15]
+        // Logic for Day 14: Success feedback only triggers if deletion worked 
         this.userMsgService.onSetSuccessMsg('חומר הגלם נמחק בהצלחה');
       }),
       catchError(err => {

@@ -235,7 +235,7 @@ private async saveProduct(formData: ProductFormValue): Promise<void> {
 }
 
 private handleNavigationSuccess(): void {
-  this.userMsgService.onSetSuccessMsg('המוצר נשמר בהצלחה [cite: 28]');
+  this.userMsgService.onSetSuccessMsg('המוצר נשמר בהצלחה ');
   this.router.navigate(['/inventory/list']);
 }
 }

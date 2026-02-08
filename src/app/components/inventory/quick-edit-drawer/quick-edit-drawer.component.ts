@@ -22,7 +22,7 @@ export class QuickEditDrawerComponent {
   productId = input.required<string | null>();
   close = output<void>();
 
-  // Derived signal: Automatically finds the product whenever productId changes [cite: 6]
+  
   selectedProduct_ = computed(() => {
     const id = this.productId();
     return id ? this.kitchenState_.products_().find(p => p._id === id) : null;
@@ -36,7 +36,7 @@ export class QuickEditDrawerComponent {
 
     const finalProduct: Product = { ...current, ...updatedData };
     
-    // Logic: Call service to update storage and sync signals [cite: 15, 18]
+ 
     this.kitchenState_.updateProduct(finalProduct).subscribe({
       next: () => this.onClose(),
       error: (err) => console.error('Update failed', err)

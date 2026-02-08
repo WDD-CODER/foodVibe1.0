@@ -17,7 +17,7 @@
   }
 
   &.edit-mode {
-    border-top: 6px solid #10b981; /* Strong Emerald visual [cite: 77] */
+    border-top: 6px solid #10b981; 
     background: #fff;
   }
 }
@@ -200,7 +200,7 @@
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.75); // Slate-900 with opacity [cite: 217]
+    background: rgba(15, 23, 42, 0.75); 
     display: flex;
     align-items: center;
     justify-content: center;

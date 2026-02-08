@@ -1,12 +1,12 @@
-// Inheriting from item-form-container DNA
+
 .drawer-content {
   position: fixed;
   top: 0;
   left: 0; 
   width: 35%;
   height: 100%;
-  background: #ffffff; // Matches item-form background
-  box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1); // Matches item-form shadow [cite: 46]
+  background: #ffffff;
+  box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1); 
   transform: translateX(-100%);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
@@ -17,7 +17,7 @@
 }
 
 .drawer-header {
-  padding: 30px; // Matches item-form padding
+  padding: 30px; 
   border-bottom: 1px solid #eee;
   display: flex;
   justify-content: space-between;
@@ -26,14 +26,14 @@
 
   h3 {
     margin: 0;
-    color: #333; // Matches item-form h2
+    color: #333; 
     font-size: 1.5em;
     font-weight: 700;
   }
 }
 
 .drawer-body {
-  padding: 30px; // Matches item-form padding
+  padding: 30px; 
   overflow-y: auto;
   flex: 1;
 
@@ -49,13 +49,13 @@
   }
 
   .form-group {
-    margin-bottom: 30px; // Matches item-form-group [cite: 44]
+    margin-bottom: 30px; 
     
     label {
       display: block;
       margin-bottom: 8px;
       font-weight: 700;
-      color: #444; // Matches item-form label
+      color: #444; 
     }
 
     .input-wrapper {
@@ -64,13 +64,13 @@
       input {
         width: 100%;
         padding: 12px;
-        border: 1px solid #ddd; // Matches item-form input border
+        border: 1px solid #ddd; 
         border-radius: 6px;
         box-sizing: border-box;
-        font-family: 'Inter', sans-serif; // Numbers use Inter [cite: 78, 155]
+        font-family: 'Inter', sans-serif; 
 
         &:focus {
-          border-color: #007bff; // Matches item-form focus color
+          border-color: #007bff; 
           outline: none;
           box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
         }
@@ -96,7 +96,7 @@
 
   label { font-weight: 700; color: #004085; display: block; margin-bottom: 10px; }
   .emerald-highlight {
-    color: #047857; // Emerald-700 [cite: 63]
+    color: #047857; 
     font-size: 1.8em;
     font-weight: 800;
     margin: 0;
