@@ -1,22 +1,20 @@
-import { KitchenUnit } from './units.enum';
+export interface PurchaseOption_ {
+  unit_symbol_: string;
+  conversion_rate_: number;
+  price_override_?: number;
+}
 
 export interface Product {
   _id: string;
-  name_hebrew: string; 
+  name_hebrew: string;
+  base_unit_: string;
+  buy_price_global_: number;
+  purchase_options_: PurchaseOption_[];
   category_: string;
   supplierId_: string;
-  
-  // Pricing & Conversion Logic
-  purchase_price_: number;     
-  purchase_unit_: KitchenUnit; 
-  base_unit_: KitchenUnit;   
-  conversion_factor_: number;  
-  yield_factor_: number;      
-  
-  // Metadata & Health
-  is_dairy_: boolean;          
-  allergens_: string[];        
-  min_stock_level_: number;    
-  expiry_days_default_: number; 
-  updatedAt?:string
+  yield_factor_: number;
+  allergens_: string[];
+  is_dairy_: boolean;
+  min_stock_level_: number;
+  expiry_days_default_: number;
 }
