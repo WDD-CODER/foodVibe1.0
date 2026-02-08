@@ -17,61 +17,111 @@
         <input formControlName="productName" type="text" placeholder="למשל: עגבניות מגי">
       </div>
 
-      <div class="form-group" formGroupName="properties">
+      <div class="form-group">
         <label>קטגוריה ראשית</label>
-        <select formControlName="topCategory">
+        <select formControlName="category_">
           <option value="">בחר קטגוריה</option>
-          <option value="Vegetables">ירקות</option>
-          <option value="Dairy">חלבי</option>
-          <option value="Meat">בשר</option>
-          <option value="Dry">יבש</option>
+          <option *ngFor="let cat of categoryOptions_()" [value]="cat">{{cat}}</option>
         </select>
       </div>
 
-      <div class="form-group" formGroupName="properties">
-        <label>מחיר קנייה (Buy Price)</label>
+      <div class="form-group">
+        <label>מחיר קנייה בסיסי (₪)</label>
         <div class="relative-input">
-          <input type="number" formControlName="gross_price_" placeholder="0.00">
+          <input type="number" formControlName="buy_price_global_" placeholder="0.00">
           <span class="prefix">₪</span>
         </div>
       </div>
-    </div>
 
-    <ng-container formGroupName="properties">
-      <div class="form-section border-top">
-        <div class="form-group scaling-box">
-          <label>יחידת רכש (Purchase Unit) </label>
-          <div class="scaling-row">
-            <span class="math-text">1</span>
-            <select formControlName="purchase_unit_" (change)="onUnitChange($event)">
-              <option value="">בחר יחידה...</option>
-              <option *ngFor="let unit of availableUnits_()" [value]="unit">{{unit}}</option>
-              <option value="NEW_UNIT">+ הוסף יחידה חדשה...</option>
-            </select>
+      <div class="form-group">
+        <label>יחידת מידה בסיס (Base Unit)</label>
+        <select formControlName="base_unit_">
+          <option value="grams">גרם (g)</option>
+          <option value="ml">מ"ל (ml)</option>
+          <option value="units">יחידות (pcs)</option>
+        </select>
+      </div>
 
-            <span class="math-text">=</span>
-            <input type="number" formControlName="conversion_factor_" placeholder="כמות">
-            <lucide-icon name="arrow-left"></lucide-icon>
+      <div class="form-group allergen-container">
+        <label class="flex items-center gap-2">
+          <lucide-icon name="shield-alert" class="icon-xs text-amber-500"></lucide-icon>
+          אלרגנים (Allergens)
+        </label>
 
-            <select formControlName="uom">
-              <option value="g">גרם (g)</option>
-              <option value="ml">מ"ל (ml)</option>
-              <option value="units">יחידות (pcs)</option>
-            </select>
+        <div class="allergen-search-box" (clickOutside)="showSuggestions = false">
+          <div >
+            <section class="selected-chips">
+              <span *ngFor="let selected of productForm_.get('allergens_')?.value" (click)="toggleAllergen(selected)"
+                class="allergen-tag">
+                {{ selected }}
+                <lucide-icon name="x" class="icon"></lucide-icon>
+              </span>
+            </section>
+            <input type="text" placeholder="חפש או בחר אלרגן..." (focus)="showSuggestions = true" #allergenInput>
           </div>
-        </div>
 
-        <div class="waste-section">
-          <div class="form-group">
-            <label class="danger-label">פחת באחוזים (%) </label>
-            <div class="relative-input">
-              <input type="number" formControlName="waste_percent_" placeholder="0">
-              <span class="prefix">%</span>
+          <div class="allergen-dropdown" *ngIf="showSuggestions">
+            <div *ngFor="let allergen of filteredAllergenOptions_()" (click)="toggleAllergen(allergen)"
+              class="dropdown-item">
+              {{ allergen }}
+            </div>
+
+            <div *ngIf="filteredAllergenOptions_().length === 0" class="dropdown-item text-slate-400 italic">
+              כל האלרגנים נבחרו
             </div>
           </div>
         </div>
       </div>
-    </ng-container>
+    </div>
+
+    <div class="form-section border-top" formArrayName="purchase_options_">
+      <div class="section-header">
+        <label>יחידות רכש (Purchase Units)
+          <button type="button" class="btn-text-add" (click)="addPurchaseOption()">
+            <lucide-icon name="plus" class="icon-xs"></lucide-icon> הוסף יחידת רכש
+          </button>
+        </label>
+      </div>
+
+      <div *ngFor="let option of purchaseOptions_.controls; let i = index" [formGroupName]="i"
+        class="form-group scaling-box mb-4">
+        <div class="scaling-row">
+          <span class="math-text"></span>
+          <select formControlName="unit_symbol_" (change)="onUnitChange($event)">
+            <option value="">בחר יחידה...</option>
+            <option *ngFor="let unit of availableUnits_()" [value]="unit">{{unit}}</option>
+            <option value="NEW_UNIT">+ הוסף יחידה חדשה...</option>
+          </select>
+
+          <label class="flex items-center gap-2 ">
+            <span class="math-text">=</span>
+            <input type="number" formControlName="conversion_rate_" placeholder="כמות">
+          </label>
+
+          <label class="flex items-center gap-2 ">
+            <span class="math-text">של</span>
+            <select formControlName="uom" class="uom-select">
+              <option value="grams">גרם (g)</option>
+              <option value="ml">מ"ל (ml)</option>
+              <option value="units">יחידות (pcs)</option>
+            </select>
+          </label>
+
+          <div class="price-override-wrapper">
+            <span class="math-text">מחיר ליחידת המידה-</span>
+            <input type="number" formControlName="price_override_" placeholder="מחיר" class="override-input">
+            <span class="math-text">₪</span>
+          </div>
+
+          <button type="button" class="btn-delete-row" (click)="purchaseOptions_.removeAt(i)">
+            <lucide-icon name="trash-2" class="icon-sm"></lucide-icon>
+          </button>
+
+        </div>
+      </div>
+
+    </div>
+
 
     <div class="form-actions">
       <button type="button" class="btn-primary" (click)="onCancel()">
@@ -83,7 +133,11 @@
         {{ isEditMode_() ? 'עדכן מוצר' : 'שמור פריט' }}
       </button>
     </div>
+
+
   </form>
+
+
   <div class="modal-overlay" (clickOutside)="closeModal()" *ngIf="isModalOpen_()" (click)="closeModal()">
     <div class="modal-content" dir="rtl" (click)="$event.stopPropagation()">
       <header class="modal-header">
@@ -105,7 +159,7 @@
             <div class="input-stack">
               <label>מתוך יחידה</label>
               <select [(ngModel)]="basisUnit_">
-                <option value="g">גרם (g)</option>
+                <option value="grams">גרם (g)</option>
                 <option value="ml">מ"ל (ml)</option>
                 <option value="units">יחידות (pcs)</option>
               </select>
@@ -113,7 +167,7 @@
           </div>
         </div>
 
-        <div class="cost-preview-card" *ngIf="productForm_.get('properties.gross_price_')?.value > 0">
+        <div class="cost-preview-card" *ngIf="productForm_.get('buy_price_global_')?.value > 0">
           <div class="preview-product">
             <span class="label">עלות נטו ליחידה החדשה:</span>
             <span class="value">{{ (netUnitCost_() * newUnitValue_) | number:'1.2-2' }} ₪</span>

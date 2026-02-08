@@ -2,6 +2,7 @@ export interface PurchaseOption_ {
   unit_symbol_: string;
   conversion_rate_: number;
   price_override_?: number;
+  uom?:string
 }
 
 export interface Product {
@@ -17,4 +18,5 @@ export interface Product {
   is_dairy_: boolean;
   min_stock_level_: number;
   expiry_days_default_: number;
+  updatedAt?: string
 }
