@@ -36,7 +36,7 @@ export class ProductFormComponent implements OnInit {
   private readonly metadataRegistry = inject(MetadataRegistryService);
   // RESTORED UI SIGNALS
 
-  protected readonly categoryOptions_ = computed(() => this.metadataRegistry.allCategories_()); // Metadata [cite: 1]
+  protected readonly categoryOptions_ = computed(() => this.metadataRegistry.allCategories_()); 
   protected availableUnits_ = computed(() => this.unitRegistry.allUnits_());
   protected allergenOptions_ = computed(() => this.metadataRegistry.allAllergens_());
   protected isModalOpen_ = signal(false);
