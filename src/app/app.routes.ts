@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { productResolver } from './core/resolvers/product.resolver';
 
 export const routes: Routes = [
   {
@@ -7,36 +8,37 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/inventory.page/inventory.page').then(m => m.InventoryPage),
     children: [
       { path: '', redirectTo: 'list', pathMatch: 'full' },
-      { 
-        path: 'list', 
-        loadComponent: () => import('./components/items/inventory-item-list/inventory-item-list.component').then(m => m.InventoryItemListComponent) 
+      {
+        path: 'list',
+        loadComponent: () => import('./components/inventory/products/inventory-product-list/inventory-product-list.component').then(m => m.InventoryProductListComponent)
       },
-      { 
-        path: 'add', 
-        loadComponent: () => import('./components/items/product-form/product-form.component').then(m => m.ProductFormComponent) 
+      {
+        path: 'add',
+        loadComponent: () => import('./components/inventory/products/product-form/product-form.component').then(m => m.ProductFormComponent)
       },
-      { 
+      {
         // Full-screen edit route with ID parameter for MongoDB-ready identification
-        path: 'edit/:id', 
-        loadComponent: () => import('./components/items/product-form/product-form.component').then(m => m.ProductFormComponent) 
+        path: 'edit/:id',
+        loadComponent: () => import('./components/inventory/products/product-form/product-form.component').then(m => m.ProductFormComponent),
+        resolve: { product: productResolver }
       },
     ],
   },
-  { 
-    path: 'recipes', 
-    loadComponent: () => import('./components/recipes/recipes.component').then(m => m.RecipesComponent) 
+  {
+    path: 'recipes',
+    loadComponent: () => import('./components/recipes/recipes.component').then(m => m.RecipesComponent)
   },
-  { 
-    path: 'dishes', 
-    loadComponent: () => import('./components/dishes/dishes.component').then(m => m.DishesComponent) 
+  {
+    path: 'dishes',
+    loadComponent: () => import('./components/dishes/dishes.component').then(m => m.DishesComponent)
   },
-  { 
-    path: 'menu-creating', 
-    loadComponent: () => import('./components/menu-creating/menu-creating.component').then(m => m.MenuCreatingComponent) 
+  {
+    path: 'menu-creating',
+    loadComponent: () => import('./components/menu-creating/menu-creating.component').then(m => m.MenuCreatingComponent)
   },
-  { 
-    path: 'checklist-creator', 
-    loadComponent: () => import('./components/checklist-creator/checklist-creator.component').then(m => m.ChecklistCreatorComponent) 
+  {
+    path: 'checklist-creator',
+    loadComponent: () => import('./components/checklist-creator/checklist-creator.component').then(m => m.ChecklistCreatorComponent)
   },
   { path: '', redirectTo: 'inventory', pathMatch: 'full' },
 ];
