@@ -1,0 +1,80 @@
+$bg-slate-50: #f8fafc;
+$border-color: #e2e8f0;
+$text-main: #0f172a;
+$emerald-600: #059669;
+$rose-600: #e11d48;
+
+.metadata-page {
+  background-color: $bg-slate-50;
+  min-height: 100vh;
+  padding: 2rem;
+  font-family: 'Heebo', sans-serif;
+
+  .header-section {
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid $border-color;
+    padding-bottom: 1.5rem;
+
+    h1 {
+      font-size: 1.875rem;
+      font-weight: 900;
+      color: $text-main;
+      margin: 0;
+    }
+
+    p {
+      color: #64748b;
+      margin-top: 0.5rem;
+    }
+  }
+
+  .admin-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 2rem;
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (min-width: 1024px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .manager-card {
+    background: white;
+    border: 1px solid $border-color;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 1rem;
+
+      h2 {
+        font-size: 1.125rem;
+        font-weight: 700;
+        margin: 0;
+      }
+    }
+  }
+
+  .input-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+
+    input {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid $border-color;
+      border-radius: 0.5rem;
+    }
+  }
+}
