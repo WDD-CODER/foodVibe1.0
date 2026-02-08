@@ -1,7 +1,7 @@
 <div class="inventory-container">
 
   <div class="filter-control-panel">
-    <h2>Filter Items</h2>
+    <h2>Filter Products</h2>
     <div *ngFor="let category of filterCategories_()" class="filter-category">
       <h3>{{ category.name }}</h3>
       <div *ngFor="let option of category.options" class="filter-option">
@@ -13,18 +13,18 @@
     </div>
   </div>
 
-  <div class="items-list">
-    <h2>Items</h2>
-    <div *ngIf="filteredItems_().length === 0" class="no-results">
-      No items match your current filters.
+  <div class="products-list">
+    <h2>Products</h2>
+    <div *ngIf="filteredProducts_().length === 0" class="no-results">
+      No products match your current filters.
     </div>
-    <div *ngFor="let item of filteredItems_()" class="item-card">
-      <h3>{{ item.name_hebrew }}</h3>
-      <p *ngIf="item.category_">Main Category: {{ item.category_ }}</p>
-      <button (click)="onDeleteProduct(item._id)" class="btn-delete">
+    <div *ngFor="let product of filteredProducts_()" class="product-card">
+      <h3>{{ product.name_hebrew }}</h3>
+      <p *ngIf="product.category_">Main Category: {{ product.category_ }}</p>
+      <button (click)="onDeleteProduct(product._id)" class="btn-delete">
         <i-lucide name="trash-2"></i-lucide>
       </button>
-      <button (click)="onEditProduct(item._id)" class="btn-edit">
+      <button (click)="onEditProduct(product._id)" class="btn-edit">
         <i-lucide name="pencil"></i-lucide>
       </button>
     </div>

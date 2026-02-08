@@ -1,16 +1,12 @@
 <div class="inventory-parent-container" dir="rtl">
   <nav>
-    @for (item of navItems_(); track item.path) {
+    @for (item of navRoutes_(); track item.path) {
     <a [routerLink]="item.path" routerLinkActive="active" class="nav-link">
       {{ item.label }}
     </a>
     }
   </nav>
 
-<app-quick-edit-drawer
-  [isOpen]="isDrawerOpen_()"
-  [productId]="selectedProductId_()"
-  (close)="onCloseDrawer()">
-</app-quick-edit-drawer>  <router-outlet></router-outlet>
+ <router-outlet></router-outlet>
 
 </div>

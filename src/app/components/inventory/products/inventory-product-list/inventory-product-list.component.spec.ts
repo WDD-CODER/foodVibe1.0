@@ -1,18 +1,18 @@
 // import { ComponentFixture, TestBed } from '@angular/core/testing';
-// import { InventoryItemListComponent } from './inventory-item-list.component';
-// import { ItemDataService } from '@services/items-data.service';
+// import { InventoryProductListComponent } from './inventory-item-list.component';
+// import { ProductDataService } from '@services/items-data.service';
 // import { KitchenStateService } from '@services/kitchen-state.service';
 // import { Router } from '@angular/router';
 // import { signal } from '@angular/core';
 // import { By } from '@angular/platform-browser';
 
-// describe('InventoryItemListComponent', () => {
-//   let component: InventoryItemListComponent;
-//   let fixture: ComponentFixture<InventoryItemListComponent>;
+// describe('InventoryProductListComponent', () => {
+//   let component: InventoryProductListComponent;
+//   let fixture: ComponentFixture<InventoryProductListComponent>;
   
 //   // Mocks
 //   const mockItemDataService = {
-//     allItems_: signal([])
+//     allProducts_: signal([])
 //   };
   
 //   const mockKitchenState = {
@@ -39,15 +39,15 @@
 
 //   beforeEach(async () => {
 //     await TestBed.configureTestingModule({
-//       imports: [InventoryItemListComponent],
+//       imports: [InventoryProductListComponent],
 //       providers: [
-//         { provide: ItemDataService, useValue: mockItemDataService },
+//         { provide: ProductDataService, useValue: mockItemDataService },
 //         { provide: KitchenStateService, useValue: mockKitchenState },
 //         { provide: Router, useValue: mockRouter }
 //       ]
 //     }).compileComponents();
 
-//     fixture = TestBed.createComponent(InventoryItemListComponent);
+//     fixture = TestBed.createComponent(InventoryProductListComponent);
 //     component = fixture.componentInstance;
 //     fixture.detectChanges();
 //   });

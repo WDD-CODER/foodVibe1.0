@@ -45,7 +45,7 @@ describe('InventoryPage', () => {
     expect(normalizedPaths).toEqual(jasmine.arrayContaining(expectedPaths));
   }));
 
-  it('should render exactly 2 navigation items in the list', () => {
+  it('should render exactly 2 navigation products in the list', () => {
     const navElements = fixture.debugElement.queryAll(By.css('a.nav-link'));
     expect(navElements.length).toBe(2);
   });
