@@ -42,7 +42,7 @@ describe('HeaderComponent', () => {
     expect(hrefs).toContain('/recipes');
     expect(hrefs).toContain('/dishes');
     expect(hrefs).toContain('/menu-creating');
-    expect(hrefs).toContain('/checklist-creator');
+    expect(hrefs).toContain('/command-center');
   });
 
   it('should have 5 navigation links', () => {

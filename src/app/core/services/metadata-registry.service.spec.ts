@@ -1,16 +1,74 @@
-import { TestBed } from '@angular/core/testing';
-
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { MetadataRegistryService } from './metadata-registry.service';
+import { ProductDataService } from './product-data.service';
+import { signal } from '@angular/core';
+import { Product } from '../models/product.model';
 
 describe('MetadataRegistryService', () => {
   let service: MetadataRegistryService;
+  let productDataSpy: jasmine.SpyObj<ProductDataService>;
+  
+  // Rule #4: Signal Mock for Dependency
+  const mockProductsSignal = signal<Product[]>([]);
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    const pSpy = jasmine.createSpyObj('ProductDataService', ['updateProduct'], {
+      allProducts_: mockProductsSignal
+    });
+
+    TestBed.configureTestingModule({
+      providers: [
+        MetadataRegistryService,
+        { provide: ProductDataService, useValue: pSpy }
+      ]
+    });
+
     service = TestBed.inject(MetadataRegistryService);
+    productDataSpy = TestBed.inject(ProductDataService) as jasmine.SpyObj<ProductDataService>;
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+  });
+
+  describe('Signal Management', () => {
+    it('should register a new allergen if it does not exist', () => {
+      const initialCount = service.allAllergens_().length;
+      service.registerAllergen('פירות ים');
+      
+      expect(service.allAllergens_()).toContain('פירות ים');
+      expect(service.allAllergens_().length).toBe(initialCount + 1);
+    });
+
+    it('should not register duplicate allergens', () => {
+      const initialCount = service.allAllergens_().length;
+      service.registerAllergen('גלוטן'); // Already exists in SoT
+      
+      expect(service.allAllergens_().length).toBe(initialCount);
+    });
+  });
+
+  describe('Async Logic: purgeGlobalUnit', () => {
+    it('should update all products using the purged unit to "גרם"', fakeAsync(() => {
+      // Setup products using 'kg'
+      const productA = { _id: '1', name_hebrew: 'קמח', base_unit_: 'kg' } as Product;
+      const productB = { _id: '2', name_hebrew: 'מלח', base_unit_: 'kg' } as Product;
+      const productC = { _id: '3', name_hebrew: 'מים', base_unit_: 'liters' } as Product;
+      
+      mockProductsSignal.set([productA, productB, productC]);
+      productDataSpy.updateProduct.and.returnValue(Promise.resolve());
+
+      service.purgeGlobalUnit('kg');
+      tick(); // Resolve the async loop
+
+      // Only the 2 products with 'kg' should have been updated
+      expect(productDataSpy.updateProduct).toHaveBeenCalledTimes(2);
+      expect(productDataSpy.updateProduct).toHaveBeenCalledWith(
+        jasmine.objectContaining({ _id: '1', base_unit_: 'גרם' })
+      );
+      expect(productDataSpy.updateProduct).toHaveBeenCalledWith(
+        jasmine.objectContaining({ _id: '2', base_unit_: 'גרם' })
+      );
+    }));
   });
 });
