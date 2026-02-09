@@ -1,10 +1,11 @@
+
 export enum KitchenUnit {
-  GRAM = 'גרם',
-  KILOGRAM = 'ק"ג',
-  MILLILITER = 'מ"ל',
-  LITER = 'ליטר',
-  UNIT = 'יחידה',
-  BUCKET = 'דלי',
-  BOX = 'ארגז',
-  TRAY = 'תבנית'
+  GRAM = 'grams',
+  KILOGRAM = 'kg',
+  MILLILITER = 'ml',
+  LITER = 'liter',
+  UNIT = 'unit',
+  BUCKET = 'bucket',
+  BOX = 'box',
+  TRAY = 'tray'
 }
