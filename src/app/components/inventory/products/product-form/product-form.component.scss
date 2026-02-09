@@ -135,6 +135,11 @@
     }
   }
 
+
+  .yield-logic{
+    display: grid;
+    grid-template-rows:repeat(3 ,1fr)
+  }
   // Specialized Input Containers
   .relative-input {
     position: relative;
@@ -234,10 +239,9 @@
 
   // Action Bar
   .form-actions {
-    margin-top: 2rem;
     display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
+    justify-content: space-between;
+    
     border-top: 1px solid #f1f5f9;
     padding-top: 1.5rem;
 
@@ -271,24 +275,12 @@
         background: #047857;
       }
     }
-
-    // .btn-secondary {
-    //     background: #f8fafc;
-    //     color: #475569;
-    //     border: 1px solid #cbd5e1;
-
-    //     &:hover {
-    //         background: #f1f5f9;
-    //         border-color: #94a3b8;
-    //     }
-    // }
   }
 
   .allergen-container {
     .allergen-search-box {
       position: relative;
 
-      width: 250px;
       padding: 0.5rem;
 
       border: 1px solid #e2e8f0;

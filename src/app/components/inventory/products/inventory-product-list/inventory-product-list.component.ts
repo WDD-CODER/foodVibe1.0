@@ -29,38 +29,6 @@ export class InventoryProductListComponent implements OnDestroy {
   // INITIAL STATE
   protected activeFilters_ = signal<Record<string, string[]>>({});
 
-  // INITIALIZATION & MIGRATION
-  // constructor() {
-  //   effect(() => {
-  //     const legacyProducts = this.ProductDataService.allProducts_() as any[];
-  //     if (legacyProducts.length === 0) return;
-
-  //     const products: Product[] = legacyProducts.map(product => {
-  //       const props = product['properties'] || {};
-  //       const units = product['units'] || {};
-  //       const pUnit = units['purchase']?.['symbol'] || props['purchase_unit_'] || 'ק"ג';
-  //       const bUnit = units['recipe']?.['symbol'] || props['uom'] || 'גרם';
-
-  //       return {
-  //         _id: product['_id'] || crypto.randomUUID(),
-  //         name_hebrew: product['productName'] || 'ללא שם',
-  //         category_: props['topCategory'] || 'כללי',
-  //         supplierId_: 'ספק כללי',
-  //         purchase_price_: Number(props['gross_price_'] || props['purchasePrice'] || 0),
-  //         purchase_unit_: pUnit as KitchenUnit,
-  //         base_unit_: bUnit as KitchenUnit,
-  //         conversion_factor_: Number(props['conversion_factor_'] || 1000),
-  //         yield_factor_: Number(props['yieldFactor'] || (1 - (props['waste_percent_'] || 0) / 100)),
-  //         allergens_: product['allergenIds'] || [],
-  //         min_stock_level_: 0,
-  //         is_dairy_: false,
-  //         expiry_days_default_: 3
-  //       };
-  //     });
-
-  //     this.kitchenStateService.products_.set(products);
-  //   });
-  // }
 
   // LISTING
   protected filterCategories_ = computed(() => {
@@ -131,10 +99,7 @@ export class InventoryProductListComponent implements OnDestroy {
 
   // UPDATE
   onEditProduct(_id: string): void {
-    // We will use these signals in the next step to open the Side Drawer
     this.router.navigate(['/inventory/edit', _id])
-    // this.kitchenStateService.selectedProductId_.set(_id);
-    // this.kitchenStateService.isDrawerOpen_.set(true);
   }
 
 

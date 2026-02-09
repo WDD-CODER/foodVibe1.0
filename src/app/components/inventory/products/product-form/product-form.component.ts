@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed, input } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, input, Signal, runInInjectionContext, Injector } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule, FormArray } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -14,11 +14,12 @@ import { UtilService } from '@services/util.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 
 @Component({
   selector: 'product-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, FormsModule, ClickOutSideDirective],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, FormsModule, ClickOutSideDirective,SelectOnFocusDirective],
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.scss'
 })
@@ -34,16 +35,17 @@ export class ProductFormComponent implements OnInit {
   private readonly utilService = inject(UtilService);
   private readonly unitRegistry = inject(UnitRegistryService);
   private readonly metadataRegistry = inject(MetadataRegistryService);
+  private readonly injector = inject(Injector);
   // RESTORED UI SIGNALS
 
-  protected readonly categoryOptions_ = computed(() => this.metadataRegistry.allCategories_()); 
+  protected readonly categoryOptions_ = computed(() => this.metadataRegistry.allCategories_());
   protected availableUnits_ = computed(() => this.unitRegistry.allUnits_());
   protected allergenOptions_ = computed(() => this.metadataRegistry.allAllergens_());
   protected isModalOpen_ = signal(false);
   protected isEditMode_ = signal<boolean>(false);
   protected curProduct_ = signal<Product | null>(null);
   protected selectedAllergensSignal_ = signal<string[]>([]);
-
+  private formValue_!: Signal<any>
   // RESTORED MODAL STATE
   protected newUnitName_ = '';
   protected newUnitValue_ = 1;
@@ -53,8 +55,13 @@ export class ProductFormComponent implements OnInit {
   protected productForm_!: FormGroup;
 
   protected netUnitCost_ = computed(() => {
-    const price = this.productForm_?.get('buy_price_global_')?.value || 0;
-    const yieldFactor = this.productForm_?.get('yield_factor_')?.value || 1;
+    // If the formValue_ signal isn't ready yet, return a default
+    if (!this.formValue_) return 0;
+
+    const currentForm = this.formValue_();
+    const price = currentForm?.buy_price_global_ || 0;
+    const yieldFactor = currentForm?.yield_factor_ || 1;
+
     return yieldFactor > 0 ? price / yieldFactor : 0;
   });
 
@@ -66,10 +73,17 @@ export class ProductFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
+
+    runInInjectionContext(this.injector, () => {
+      this.formValue_ = toSignal(this.productForm_.valueChanges, {
+        initialValue: this.productForm_.getRawValue()
+      });
+    });
+
     this.productForm_.get('allergens_')?.valueChanges.subscribe(val => {
       this.selectedAllergensSignal_.set(val || []);
     });
-    
+
     const productData = this.initialProduct_();
     if (productData) {
       this.hydrateForm(productData);
@@ -105,13 +119,29 @@ export class ProductFormComponent implements OnInit {
     const percentCtrl = this.productForm_.get('waste_percent_');
     const yieldCtrl = this.productForm_.get('yield_factor_');
 
+    // React to Waste % change
     percentCtrl?.valueChanges.subscribe(pct => {
-      const calculatedYield = (100 - pct) / 100;
-      if (yieldCtrl?.value !== calculatedYield) {
-        yieldCtrl?.setValue(calculatedYield, { emitEvent: false });
+      const { yieldFactor } = this.conversionService.handleWasteChange(pct);
+
+      // Only update if the value is actually different to avoid loops 
+      if (yieldCtrl?.value !== yieldFactor) {
+        yieldCtrl?.setValue(yieldFactor, { emitEvent: false });
+        this.productForm_.get('buy_price_global_')?.updateValueAndValidity(); // Force price recalc
+      }
+    });
+
+    yieldCtrl?.valueChanges.subscribe(y => {
+      if (y === null || y === undefined) return;
+      const { wastePercent } = this.conversionService.handleYieldChange(y);
+
+      if (percentCtrl?.value !== wastePercent) {
+        percentCtrl?.setValue(wastePercent, { emitEvent: false });
+        this.productForm_.get('buy_price_global_')?.updateValueAndValidity();
       }
     });
   }
+
+
 
   // RESTORED MODAL ACTIONS
   protected onUnitChange(event: Event): void {
@@ -172,9 +202,12 @@ export class ProductFormComponent implements OnInit {
       if (!newUnit) return;
       const suggestedConv = this.unitRegistry.getConversion(newUnit);
       const currentGlobal = this.productForm_.get('buy_price_global_')?.value || 0;
+
+      const suggestedPrice = this.conversionService.getSuggestedPurchasePrice(currentGlobal, suggestedConv);
+
       group.patchValue({
         conversion_rate_: suggestedConv,
-        price_override_: currentGlobal * suggestedConv
+        price_override_: suggestedPrice
       }, { emitEvent: false });
     });
 

@@ -28,7 +28,7 @@
       <div class="form-group">
         <label>מחיר קנייה בסיסי (₪)</label>
         <div class="relative-input">
-          <input type="number" formControlName="buy_price_global_" placeholder="0.00">
+          <input SelectOnFocus type="number" formControlName="buy_price_global_" placeholder="0.00">
           <span class="prefix">₪</span>
         </div>
       </div>
@@ -49,7 +49,7 @@
         </label>
 
         <div class="allergen-search-box" (clickOutside)="showSuggestions = false">
-          <div >
+          <div>
             <section class="selected-chips">
               <span *ngFor="let selected of productForm_.get('allergens_')?.value" (click)="toggleAllergen(selected)"
                 class="allergen-tag">
@@ -70,6 +70,42 @@
               כל האלרגנים נבחרו
             </div>
           </div>
+        </div>
+      </div>
+
+      <div class="form-section border-top mt-6 pt-4">
+        <div class="section-header mb-4">
+          <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
+            <lucide-icon name="flask-conical" class="icon-xs text-indigo-500"></lucide-icon>
+            לוגיקת פחת ויבול (Waste & Yield)
+          </h3>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group yield-logic">
+            <label>אחוז פחת (Waste %)</label>
+            <div class="relative-input">
+              <input SelectOnFocus type="number" formControlName="waste_percent_" placeholder="0">
+              <span class="prefix text-slate-400">%</span>
+            </div>
+            <p class="helper-text text-xs text-slate-400 mt-1">אחוז החומר שנזרק (קליפות, עצמות וכו')</p>
+          </div>
+
+          <div class="form-group yield-logic ">
+            <label>פקטור יבול (Yield Factor)</label>
+            <div class="relative-input">
+              <input SelectOnFocus type="number" formControlName="yield_factor_" step="0.01" placeholder="1.00">
+              <!-- <lucide-icon name="trending-up" class="prefix-icon text-emerald-500"></lucide-icon> -->
+            </div>
+            <p class="helper-text text-xs text-slate-400 mt-1">מקדם הניצולת (1.0 = ללא פחת)</p>
+          </div>
+        </div>
+
+        <div
+          class="cost-impact-alert mt-4 p-3 bg-emerald-50 border border-emerald-100 rounded-lg flex justify-between items-center"
+          *ngIf="productForm_.get('buy_price_global_')?.value > 0">
+          <span class="text-sm text-emerald-800 font-medium">עלות נטו מחושבת (לאחר פחת):</span>
+          <span class="text-lg font-bold text-emerald-700">₪{{ netUnitCost_() | number:'1.2-2' }}</span>
         </div>
       </div>
     </div>
