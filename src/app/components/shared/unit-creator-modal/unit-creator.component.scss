@@ -1,0 +1,57 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+
+  .modal-card {
+    background: white;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      color: #0f172a;
+    }
+
+    button {
+        display: flex;
+
+        gap: 0.5rem;
+
+        padding: 0.6rem;
+        border-radius: 6px;
+        
+        font-weight: 600;
+        transition: all 0.2s;
+
+        color: white;
+        border: none;
+
+        background: #059669;
+
+        &:hover:not(:disabled) {
+          background: #047857;
+        }
+      }
+  }
+}
+
+.formula-grid {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+}
