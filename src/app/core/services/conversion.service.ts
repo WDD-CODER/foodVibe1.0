@@ -14,7 +14,7 @@ export class ConversionService {
     return netQuantity > 0 ? grossPrice / netQuantity : 0;
   }
 
-  
+
 
   /**
    * Translates waste percentage to quantity based on total scaling amount
@@ -37,5 +37,33 @@ export class ConversionService {
     return amount * factor;
   }
 
-  
+  /** * Logic to sync Waste % and Yield Factor 
+   */
+  handleWasteChange(wastePercent: any): { yieldFactor: number } {
+    // Guard against non-numeric or empty values while typing 
+    if (wastePercent === null || wastePercent === '') {
+    return { yieldFactor: 1 };
+  }
+    const val = parseFloat(wastePercent);
+    if (isNaN(val)) return { yieldFactor: 1 };
+
+    const yieldFactor = Math.max(0, (100 - val) / 100);
+    return { yieldFactor: parseFloat(yieldFactor.toFixed(4)) }; // Avoid floating point junk 
+  }
+
+  handleYieldChange(yieldFactor: any): { wastePercent: number } {
+    const val = parseFloat(yieldFactor);
+    if (isNaN(val)) return { wastePercent: 0 };
+
+    const wastePercent = Math.max(0, 100 - (val * 100));
+    return { wastePercent: Math.round(wastePercent) };
+  }
+
+  /**
+   * Calculates suggested price for a purchase unit based on global price and conversion rate
+   */
+  getSuggestedPurchasePrice(globalPrice: number, conversionRate: number): number {
+    if (!globalPrice || !conversionRate) return 0;
+    return globalPrice * conversionRate;
+  }
 }
