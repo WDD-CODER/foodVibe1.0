@@ -2,25 +2,42 @@ import { Injectable, signal, computed } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class UnitRegistryService {
-  // Map of Unit Symbol -> Base Conversion (e.g., 'ק"ג' -> 1000) 
+  private isCreatorOpen = signal(false);
+  public isCreatorOpen_ = this.isCreatorOpen.asReadonly();
+
+  /**
+   * The Technical Source of Truth (English Keys).
+   * Values represent the conversion factor to the lowest common denominator (grams/ml)[cite: 59, 122].
+   */
   private globalUnits_ = signal<Record<string, number>>({
-    'ק"ג': 1000,
-    'ליטר': 1000,
-    'גרם': 1,
-    'מ"ל': 1,
-    'יחידה': 1
+    'kg': 1000,
+    'liter': 1000,
+    'grams': 1,
+    'ml': 1,
+    'unit': 1
   });
 
-  // Exposes all available unit names for your dropdowns
-  allUnits_ = computed(() => Object.keys(this.globalUnits_()));
+  /**
+   * Exposes keys for calculation logic and UI iteration[cite: 65, 410].
+   * The UI will pass these keys through TranslatePipe for Hebrew display.
+   */
+  allUnitKeys_ = computed(() => Object.keys(this.globalUnits_()));
 
-  // Retrieves the conversion rate for a specific unit 
-  getConversion(symbol: string): number {
-    return this.globalUnits_()[symbol] || 1;
+  /**
+   * Returns the conversion factor for a given English unit key[cite: 122, 123].
+   */
+  getConversion(key: string): number {
+    return this.globalUnits_()[key] || 1;
   }
 
-  // Registers a new unit (e.g., 'Box' = 20000g) into the global state 
-  registerUnit(symbol: string, rate: number): void {
-    this.globalUnits_.update(units => ({ ...units, [symbol]: rate }));
+  /**
+   * Registers a new custom unit. 
+   * Standard keys should be English, custom keys (e.g., 'דלי') are stored as-is[cite: 16, 17].
+   */
+  registerUnit(name: string, rate: number): void {
+    this.globalUnits_.update(units => ({ ...units, [name]: rate }));
   }
+
+  openUnitCreator() { this.isCreatorOpen.set(true); }
+  closeUnitCreator() { this.isCreatorOpen.set(false); }
 }

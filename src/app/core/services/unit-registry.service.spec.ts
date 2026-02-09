@@ -13,30 +13,34 @@ describe('UnitRegistryService', () => {
 
   it('should be created and have initial units', () => {
     expect(service).toBeTruthy();
-    // Verify initial SoT
-    const units = service.allUnits_();
-    expect(units).toContain('ק"ג');
-    expect(units).toContain('גרם');
-    expect(service.getConversion('ק"ג')).toBe(1000);
+    
+    // REPLACEMENT: Using allUnitKeys_ and English Logic Keys
+    const units = service.allUnitKeys_();
+    expect(units).toContain('kg');
+    expect(units).toContain('grams');
+    
+    // LOGIC CHANGE: Standardized English Key
+    expect(service.getConversion('kg')).toBe(1000);
   });
 
   describe('Registry Operations', () => {
-    it('should register a new unit and update the allUnits_ computed signal', () => {
-      // 1. Register a new unit
-      service.registerUnit('שק', 25000);
+    it('should register a new unit and update the allUnitKeys_ computed signal', () => {
+      // 1. Register a new unit using English key (or custom name)
+      service.registerUnit('sack', 25000);
       
-      // 2. Assert signal reactivity
-      expect(service.allUnits_()).toContain('שק');
-      expect(service.getConversion('שק')).toBe(25000);
+      // 2. Assert signal reactivity using correctly named property
+      expect(service.allUnitKeys_()).toContain('sack');
+      expect(service.getConversion('sack')).toBe(25000);
     });
 
     it('should update an existing unit rate', () => {
-      service.registerUnit('גרם', 2); // Overwriting base gram
-      expect(service.getConversion('גרם')).toBe(2);
+      // LOGIC CHANGE: Standardized English Key
+      service.registerUnit('grams', 2); // Overwriting base gram
+      expect(service.getConversion('grams')).toBe(2);
     });
 
     it('should return 1 as a fallback for unknown units', () => {
-      // Rule: Safety fallback to prevent division by zero in ConversionService
+      // Rule: Safety fallback to prevent division by zero in ConversionService [cite: 464]
       expect(service.getConversion('UnknownUnit')).toBe(1);
     });
   });

@@ -17,16 +17,17 @@ describe('MetadataManagerPageComponent', () => {
   let component: MetadataManagerComponent;
   let fixture: ComponentFixture<MetadataManagerComponent>;
 
-  // Mock Signals for Dependency Mapping
-  const mockUnits = signal(['גרם', 'מ"ל']);
-  const mockAllergens = signal(['גלוטן', 'אגוזים']);
-  const mockCategories = signal(['ירקות', 'בשר']);
+  // LOGIC CHANGE: Standardized English keys for Mock Signals 
+  const mockUnits = signal(['grams', 'ml']);
+  const mockAllergens = signal(['gluten', 'nuts']);
+  const mockCategories = signal(['vegetables', 'meat']);
   const mockProducts = signal([]);
 
   beforeEach(async () => {
     // Mocking Services
+    // REPLACEMENT: Changed 'allUnits_' to 'allUnitKeys_' to match the refactored Service 
     const unitRegistrySpy = jasmine.createSpyObj('UnitRegistryService', ['getConversion', 'registerUnit'], {
-      allUnits_: mockUnits
+      allUnitKeys_: mockUnits
     });
     unitRegistrySpy.getConversion.and.returnValue(1);
 
@@ -38,28 +39,33 @@ describe('MetadataManagerPageComponent', () => {
     const productDataSpy = jasmine.createSpyObj('ProductDataService', [], {
       allProducts_: mockProducts
     });
+
     await TestBed.configureTestingModule({
       imports: [
         MetadataManagerComponent,
-        // FIX: Use .pick() to properly initialize the icon provider service
-        LucideAngularModule.pick({ Scale, AlertTriangle, X, ChevronLeft ,Tag})
+        LucideAngularModule.pick({ Scale, AlertTriangle, X, ChevronLeft, Tag })
       ],
       providers: [
         { provide: UnitRegistryService, useValue: unitRegistrySpy },
         { provide: MetadataRegistryService, useValue: metadataRegistrySpy },
         { provide: ProductDataService, useValue: productDataSpy }
-        // REMOVE the manual { provide: LUCIDE_ICONS ... } block
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(MetadataManagerComponent);
     component = fixture.componentInstance;
 
-    // Rule #4: Trigger lifecycle order
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // NEW TEST CASE: Verify the logic uses English while the view uses the Pipe
+  it('should handle English keys for allergens', () => {
+    const metadataRegistry = TestBed.inject(MetadataRegistryService) as jasmine.SpyObj<MetadataRegistryService>;
+    component.addAllergen('peanuts');
+    expect(metadataRegistry.registerAllergen).toHaveBeenCalledWith('peanuts');
   });
 });

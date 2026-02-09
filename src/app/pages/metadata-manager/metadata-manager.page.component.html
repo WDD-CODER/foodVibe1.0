@@ -12,9 +12,9 @@
       </div>
       
       <div class="flex flex-col gap-3">
-        @for (unit of allUnits_(); track unit) {
+        @for (unit of allUnitKeys_(); track unit) {
           <div class="flex items-center justify-between p-2 rounded hover:bg-slate-50 border border-transparent hover:border-slate-100">
-            <span class="font-bold text-slate-700">{{ unit }}</span>
+            <span class="font-bold text-slate-700">{{ unit | translatePipe }}</span>
             <input type="number" 
                    [value]="tempUnitRates()[unit]" 
                    (change)="updateUnitRate(unit, $event)"
@@ -41,7 +41,7 @@
       <div class="flex flex-wrap gap-2 mt-4">
         @for (allergen of allAllergens_(); track allergen) {
           <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-sm font-medium">
-            {{ allergen }}
+            {{ allergen | translatePipe }}
             <button (click)="removeAllergen(allergen)" class="hover:text-rose-900">
               <lucide-icon name="x" size="14"></lucide-icon>
             </button>
@@ -58,7 +58,7 @@
       <div class="flex flex-col gap-2">
         @for (category of allCategories_(); track category) {
           <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-            <span class="font-medium">{{ category }}</span>
+            <span class="font-medium">{{ category | translatePipe }}</span>
             <lucide-icon name="chevron-left" size="16" class="text-slate-400"></lucide-icon>
           </div>
         }

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed, input, Signal, runInInjectionContext, Injector } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, input, Signal, runInInjectionContext, Injector, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule, FormArray } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -15,11 +15,21 @@ import { UnitRegistryService } from '@services/unit-registry.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
+import { UnitCreatorModal } from '@components/shared/unit-creator-modal/unit-creator.component';
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
+import { KitchenUnit } from '@models/units.enum';
 
 @Component({
   selector: 'product-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, FormsModule, ClickOutSideDirective,SelectOnFocusDirective],
+  imports: [CommonModule,
+    ReactiveFormsModule,
+    LucideAngularModule,
+    FormsModule,
+    ClickOutSideDirective,
+    SelectOnFocusDirective,
+    TranslatePipe
+  ],
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.scss'
 })
@@ -33,29 +43,28 @@ export class ProductFormComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly kitchenStateService = inject(KitchenStateService);
   private readonly utilService = inject(UtilService);
-  private readonly unitRegistry = inject(UnitRegistryService);
   private readonly metadataRegistry = inject(MetadataRegistryService);
   private readonly injector = inject(Injector);
+
+  unitRegistry = inject(UnitRegistryService);
   // RESTORED UI SIGNALS
 
   protected readonly categoryOptions_ = computed(() => this.metadataRegistry.allCategories_());
-  protected availableUnits_ = computed(() => this.unitRegistry.allUnits_());
+  protected availableUnits_ = computed(() => this.unitRegistry.allUnitKeys_());
   protected allergenOptions_ = computed(() => this.metadataRegistry.allAllergens_());
-  protected isModalOpen_ = signal(false);
   protected isEditMode_ = signal<boolean>(false);
   protected curProduct_ = signal<Product | null>(null);
   protected selectedAllergensSignal_ = signal<string[]>([]);
+  protected activeRowIndex_ = signal<number | null>(null);
+  // protected isUnitModalOpen_ = signal(false);
+  protected isBaseUnitMode_ = signal(false);
+
   private formValue_!: Signal<any>
-  // RESTORED MODAL STATE
-  protected newUnitName_ = '';
-  protected newUnitValue_ = 1;
-  protected basisUnit_ = 'g';
-  protected customBasisName_ = '';
   protected showSuggestions = false;
   protected productForm_!: FormGroup;
-
+  protected readonly KitchenUnit = KitchenUnit;
+  
   protected netUnitCost_ = computed(() => {
-    // If the formValue_ signal isn't ready yet, return a default
     if (!this.formValue_) return 0;
 
     const currentForm = this.formValue_();
@@ -70,6 +79,39 @@ export class ProductFormComponent implements OnInit {
     const selected = this.selectedAllergensSignal_() || [];
     return all.filter(allergen => !selected.includes(allergen));
   });
+
+
+  constructor() {
+    effect(() => {
+      // 1. Define variables first
+      const allUnits = this.unitRegistry.allUnitKeys_();
+      const isCreatorOpen = this.unitRegistry.isCreatorOpen_();
+      const index = this.activeRowIndex_();
+      const isBase = this.isBaseUnitMode_();
+
+      // 2. Only run logic if the modal just closed
+      if (!isCreatorOpen) {
+        const lastUnitName = Array.from(allUnits.keys()).pop();
+        if (!lastUnitName) return;
+
+        if (isBase) {
+          this.productForm_.get('base_unit_')?.setValue(lastUnitName);
+          this.isBaseUnitMode_.set(false);
+        } else if (index !== null) {
+          const row = this.purchaseOptions_.at(index);
+          const currentBase = this.productForm_.get('base_unit_')?.value;
+
+          // 3. Patch both the symbol AND the UOM (grams/ml) at once
+          row.patchValue({
+            unit_symbol_: lastUnitName,
+            uom: currentBase
+          });
+
+          this.activeRowIndex_.set(null);
+        }
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.initForm();
@@ -94,7 +136,7 @@ export class ProductFormComponent implements OnInit {
         } else {
           this.isEditMode_.set(false);
           this.curProduct_.set(this.utilService.getEmptyProduct());
-          this.productForm_.patchValue({ base_unit_: 'grams' });
+          this.productForm_.patchValue({ base_unit_: KitchenUnit.GRAM })
         }
       });
     }
@@ -103,7 +145,7 @@ export class ProductFormComponent implements OnInit {
   private initForm(): void {
     this.productForm_ = this.fb_.group({
       productName: ['', [Validators.required]],
-      base_unit_: ['grams', Validators.required],
+      base_unit_: ['gram', Validators.required],
       buy_price_global_: [0, [Validators.required, Validators.min(0)]],
       category_: ['', Validators.required],
       yield_factor_: [1, [Validators.required]],
@@ -144,30 +186,65 @@ export class ProductFormComponent implements OnInit {
 
 
   // RESTORED MODAL ACTIONS
-  protected onUnitChange(event: Event): void {
+  protected onUnitChange(event: Event, index: number): void {
     const select = event.target as HTMLSelectElement;
     if (select.value === 'NEW_UNIT') {
-      this.isModalOpen_.set(true);
+      // 1. Tell the service which row we are currently editing
+      // This allows the form to "remember" the target while the UnitCreatorComponent is active
+      this.activeRowIndex_.set(index);
+      this.isBaseUnitMode_.set(false);
+
+      // 2. Trigger the GLOBAL station
+      this.unitRegistry.openUnitCreator();
+
       select.value = '';
     }
   }
 
-  protected closeModal(): void {
-    this.isModalOpen_.set(false);
-    this.newUnitName_ = '';
-    this.newUnitValue_ = 1;
-  }
-
-  protected saveNewUnit(): void {
-    if (this.newUnitName_ && this.newUnitValue_ > 0) {
-      this.unitRegistry.registerUnit(this.newUnitName_, this.newUnitValue_);
-      this.addPurchaseOption({
-        unit_symbol_: this.newUnitName_,
-        conversion_rate_: this.newUnitValue_
-      });
-      this.closeModal();
+  protected onCategoryChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    if (select.value === 'NEW_CATEGORY') {
+      const newCat = prompt('הכנס שם קטגוריה חדשה:'); // Simple prompt for now
+      if (newCat) {
+        this.metadataRegistry.registerCategory(newCat);
+        this.productForm_.get('category_')?.setValue(newCat);
+      }
+      select.value = '';
     }
   }
+
+  protected onBaseUnitChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    if (select.value === 'NEW_UNIT') {
+      this.activeRowIndex_.set(null);
+      this.isBaseUnitMode_.set(true);
+
+      // Trigger the GLOBAL station
+      this.unitRegistry.openUnitCreator();
+
+      select.value = '';
+    }
+  }
+
+  // protected handleNewUnitSaved(data: { symbol: string, rate: number }): void {
+  //   if (this.isBaseUnitMode_()) {
+  //     // Mode A: Update the Base Unit control
+  //     this.productForm_.get('base_unit_')?.setValue(data.symbol);
+  //     this.isBaseUnitMode_.set(false);
+  //   } else {
+  //     // Mode B: Update a Purchase Option row (your existing logic)
+  //     const index = this.activeRowIndex_();
+  //     if (index !== null) {
+  //       this.purchaseOptions_.at(index).patchValue({
+  //         unit_symbol_: data.symbol,
+  //         conversion_rate_: data.rate
+  //       });
+  //     }
+  //   }
+
+  //   this.userMsgService.onSetSuccessMsg(`היחידה "${data.symbol}" נרשמה כבסיס חדש במערכת`);
+  //   this.isUnitModalOpen_.set(false);
+  // }
 
   protected toggleAllergen(allergen: string): void {
     const ctrl = this.productForm_.get('allergens_');
@@ -180,6 +257,8 @@ export class ProductFormComponent implements OnInit {
     ctrl?.markAsDirty();
   }
 
+
+  //GETERS
   get purchaseOptions_(): FormArray {
     return this.productForm_.get('purchase_options_') as FormArray;
   }
@@ -189,26 +268,35 @@ export class ProductFormComponent implements OnInit {
     const conv = opt?.conversion_rate_ || 1;
     const globalPrice = this.productForm_.get('buy_price_global_')?.value || 0;
 
-    const currentBaseUnit = this.productForm_.get('base_unit_')?.value || 'grams';
+    const currentBaseUnit = this.productForm_.get('base_unit_')?.value || 'gram';
 
     const group = this.fb_.group({
       unit_symbol_: [unit, Validators.required],
       conversion_rate_: [conv, [Validators.required, Validators.min(0.0001)]],
-      uom: [opt?.uom || currentBaseUnit, Validators.required],
+      uom: [opt?.uom || currentBaseUnit, Validators.required], // 👈 This will now match an option in the @for loop
       price_override_: [opt?.price_override_ || (globalPrice * conv)]
     });
 
     group.get('unit_symbol_')?.valueChanges.subscribe((newUnit: string | null) => {
       if (!newUnit) return;
+
       const suggestedConv = this.unitRegistry.getConversion(newUnit);
       const currentGlobal = this.productForm_.get('buy_price_global_')?.value || 0;
 
+      // 1. Get the actual base unit selected at the top of the form (e.g., 'grams')
+      const currentBaseUnit = this.productForm_.get('base_unit_')?.value || 'gram';
+
       const suggestedPrice = this.conversionService.getSuggestedPurchasePrice(currentGlobal, suggestedConv);
 
+      // 2. Patch the row so the "UOM" (middle dropdown) is no longer empty
       group.patchValue({
         conversion_rate_: suggestedConv,
+        uom: currentBaseUnit, // 👈 This fills the empty slot next to 5000
         price_override_: suggestedPrice
       }, { emitEvent: false });
+
+      // 3. Mark for check to ensure the UI refreshes the calculation
+      group.get('price_override_')?.markAsDirty();
     });
 
     group.get('conversion_rate_')?.valueChanges.subscribe((newConv: number | null) => {
@@ -240,6 +328,10 @@ export class ProductFormComponent implements OnInit {
   protected onSubmit(): void {
     if (this.productForm_.valid) {
       const val = this.productForm_.getRawValue();
+
+      // 3. Ensure the Metadata Registry learns the category if it's new
+      this.metadataRegistry.registerCategory(val.category_);
+
       const productToSave: Product = {
         ...this.curProduct_()!,
         name_hebrew: val.productName,
@@ -253,7 +345,6 @@ export class ProductFormComponent implements OnInit {
 
       this.kitchenStateService.saveProduct(productToSave).subscribe({
         next: () => {
-          this.userMsgService.onSetSuccessMsg('המוצר נשמר בהצלחה');
           this.router.navigate(['/inventory/list']);
         }
       });

@@ -57,6 +57,7 @@
     gap: 1.5rem;
 
     .section-header {
+      width: fit-content;
       display: flex;
 
       label {
@@ -75,9 +76,12 @@
 
       button {
         display: flex;
+
         gap: 0.5rem;
+
         padding: 0.6rem;
         border-radius: 6px;
+        
         font-weight: 600;
         transition: all 0.2s;
 
@@ -101,6 +105,12 @@
       border-top: 1px solid #f1f5f9;
       padding-top: 1.5rem;
     }
+
+    &.yield-logic {
+      display: grid;
+      grid-template-rows: repeat(3, 1fr)
+    }
+
   }
 
   // Input & Label Groups
@@ -136,10 +146,6 @@
   }
 
 
-  .yield-logic{
-    display: grid;
-    grid-template-rows:repeat(3 ,1fr)
-  }
   // Specialized Input Containers
   .relative-input {
     position: relative;
@@ -241,7 +247,7 @@
   .form-actions {
     display: flex;
     justify-content: space-between;
-    
+
     border-top: 1px solid #f1f5f9;
     padding-top: 1.5rem;
 
@@ -378,124 +384,3 @@
   }
 }
 
-// Modal Design System Station
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.75); // Slate-900 with high opacity
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-
-  .modal-content {
-    background: #ffffff;
-    padding: 2rem;
-    border-radius: 12px;
-    width: 95%;
-    max-width: 550px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-
-    .modal-header {
-      margin-bottom: 1.5rem;
-      border-bottom: 1px solid #f1f5f9;
-      padding-bottom: 1rem;
-
-      h3 {
-        margin: 0;
-        color: #1e293b;
-        font-size: 1.25rem;
-        font-weight: 800;
-      }
-    }
-
-    .scaling-formula-box {
-      background: #f8fafc;
-      padding: 1.5rem;
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
-      margin-bottom: 1.5rem;
-
-      .formula-row {
-        display: flex;
-        align-items: flex-end;
-        gap: 1rem;
-
-        .input-stack {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-          flex: 1;
-
-          label {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: #64748b;
-          }
-
-          input,
-          select {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-          }
-        }
-
-        .math-operator {
-          font-size: 1.5rem;
-          font-weight: 800;
-          color: #94a3b8;
-          padding-bottom: 0.5rem;
-        }
-      }
-    }
-
-    .cost-preview-card {
-      background: #ecfdf5; // Emerald-50
-      border: 1px solid #a7f3d0;
-      padding: 1rem;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-
-      .preview-product {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        .label {
-          font-weight: 700;
-          color: #065f46;
-        }
-
-        .value {
-          font-size: 1.25rem;
-          font-weight: 800;
-          color: #059669;
-        }
-      }
-
-      .helper-text {
-        font-size: 0.7rem;
-        color: #059669;
-        margin: 0.5rem 0 0;
-      }
-    }
-
-    .helper-info {
-      font-size: 0.8rem;
-      color: #94a3b8;
-      text-align: center;
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 1rem;
-      margin-top: 2rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid #f1f5f9;
-    }
-  }
-}
