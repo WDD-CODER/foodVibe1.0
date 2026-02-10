@@ -9,13 +9,14 @@ export class UnitRegistryService {
    * The Technical Source of Truth (English Keys).
    * Values represent the conversion factor to the lowest common denominator (grams/ml)[cite: 59, 122].
    */
-  private globalUnits_ = signal<Record<string, number>>({
-    'kg': 1000,
-    'liter': 1000,
-    'grams': 1,
+   globalUnits_ = signal<Record<string, number>>({
+    'kg': 1,
+    'liter': 1,
+    'gram': 1,
     'ml': 1,
     'unit': 1
   });
+
 
   /**
    * Exposes keys for calculation logic and UI iteration[cite: 65, 410].

@@ -1,6 +1,6 @@
 
 export enum KitchenUnit {
-  GRAM = 'grams',
+  GRAM = 'gram',
   KILOGRAM = 'kg',
   MILLILITER = 'ml',
   LITER = 'liter',

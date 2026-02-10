@@ -17,7 +17,7 @@ describe('UnitRegistryService', () => {
     // REPLACEMENT: Using allUnitKeys_ and English Logic Keys
     const units = service.allUnitKeys_();
     expect(units).toContain('kg');
-    expect(units).toContain('grams');
+    expect(units).toContain('gram');
     
     // LOGIC CHANGE: Standardized English Key
     expect(service.getConversion('kg')).toBe(1000);
@@ -35,8 +35,8 @@ describe('UnitRegistryService', () => {
 
     it('should update an existing unit rate', () => {
       // LOGIC CHANGE: Standardized English Key
-      service.registerUnit('grams', 2); // Overwriting base gram
-      expect(service.getConversion('grams')).toBe(2);
+      service.registerUnit('gram', 2); // Overwriting base gram
+      expect(service.getConversion('gram')).toBe(2);
     });
 
     it('should return 1 as a fallback for unknown units', () => {

@@ -18,7 +18,7 @@ export class MetadataRegistryService {
   private readonly globalUnits_ = signal<Record<string, number>>({
     'kg': 1000,
     'liter': 1000,
-    'grams': 1,
+    'gram': 1,
     'ml': 1,
     'unit': 1
   });
@@ -30,9 +30,9 @@ export class MetadataRegistryService {
     const affectedProducts = this.productDataService.allProducts_()
       .filter(p => p.base_unit_ === unitSymbol);
 
-    // LOGIC CHANGE: Standardized fallback to English 'grams' [cite: 407, 413]
+    // LOGIC CHANGE: Standardized fallback to English 'gram' [cite: 407, 413]
     for (const p of affectedProducts) {
-      await this.productDataService.updateProduct({ ...p, base_unit_: 'grams' });
+      await this.productDataService.updateProduct({ ...p, base_unit_: 'gram' });
     }
   }
 

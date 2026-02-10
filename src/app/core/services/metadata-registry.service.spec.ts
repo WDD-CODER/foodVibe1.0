@@ -68,12 +68,12 @@ describe('MetadataRegistryService', () => {
       // Only the 2 products with 'kg' should have been updated
       expect(productDataSpy.updateProduct).toHaveBeenCalledTimes(2);
       
-      // LOGIC CHANGE: Verify fallback uses the standardized English 'grams' [cite: 407]
+      // LOGIC CHANGE: Verify fallback uses the standardized English 'gram' [cite: 407]
       expect(productDataSpy.updateProduct).toHaveBeenCalledWith(
-        jasmine.objectContaining({ _id: '1', base_unit_: 'grams' })
+        jasmine.objectContaining({ _id: '1', base_unit_: 'gram' })
       );
       expect(productDataSpy.updateProduct).toHaveBeenCalledWith(
-        jasmine.objectContaining({ _id: '2', base_unit_: 'grams' })
+        jasmine.objectContaining({ _id: '2', base_unit_: 'gram' })
       );
     }));
   });
