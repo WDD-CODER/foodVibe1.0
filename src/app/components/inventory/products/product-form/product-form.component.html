@@ -157,7 +157,7 @@
             <span class="math-text">₪</span>
           </div>
 
-          <button type="button" class="btn-delete-row" (click)="purchaseOptions_.removeAt(idx)">
+          <button type="button" class="btn-delete-row" (click)="onDeletePurchaseOption(idx)">
             <lucide-icon name="trash-2" class="icon-sm"></lucide-icon>
           </button>
 
@@ -165,7 +165,6 @@
       </div>
 
     </div>
-
 
     <div class="form-actions">
       <button type="button" class="btn-primary" (click)="onCancel()">
@@ -177,8 +176,6 @@
         {{ isEditMode_() ? 'עדכן מוצר' : 'שמור פריט' }}
       </button>
     </div>
-
-
   </form>
 
 </div>

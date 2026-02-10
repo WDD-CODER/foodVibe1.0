@@ -46,6 +46,7 @@ export class ProductDataService {
 //CREATE
  async addProduct(newProduct: Omit<Product, '_id'>): Promise<void> {
   const saved = await this.storage.post<Product>(ENTITY, newProduct as Product);
+  console.log("🚀 ~ ProductDataService ~ addProduct ~ saved:", saved)
   this.ProductsStore_.update(products => [...products, saved]);
 }
 

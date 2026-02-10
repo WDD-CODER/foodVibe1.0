@@ -33,6 +33,7 @@ import { KitchenUnit } from '@models/units.enum';
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.scss'
 })
+
 export class ProductFormComponent implements OnInit {
   initialProduct_ = input<Product | null>(null);
 
@@ -63,6 +64,7 @@ export class ProductFormComponent implements OnInit {
   protected showSuggestions = false;
   protected productForm_!: FormGroup;
   protected readonly KitchenUnit = KitchenUnit;
+  public isSubmitted = false;
 
   protected netUnitCost_ = computed(() => {
     if (!this.formValue_) return 0;
@@ -245,7 +247,13 @@ export class ProductFormComponent implements OnInit {
     return this.productForm_.get('purchase_options_') as FormArray;
   }
 
+  get readProductForm_(): FormGroup {
+    return this.productForm_;
+  }
+
+
   protected addPurchaseOption(opt?: Partial<PurchaseOption_>): void {
+    console.log("🚀 ~ ProductFormComponent ~ addPurchaseOption ~ opt:", opt)
     const unit = opt?.unit_symbol_ || '';
     const conv = opt ? opt.conversion_rate_ : null;
     const uomValue = opt ? opt.uom : ''
@@ -262,7 +270,7 @@ export class ProductFormComponent implements OnInit {
     });
 
     group.get('unit_symbol_')?.valueChanges.subscribe((newUnit: string | null) => {
-      
+
       if (!newUnit || newUnit === 'NEW_UNIT') {
         group.patchValue({
           conversion_rate_: null,
@@ -271,7 +279,7 @@ export class ProductFormComponent implements OnInit {
         }, { emitEvent: false });
         return;
       }
-      
+
       const suggestedConv = this.unitRegistry.getConversion(newUnit);
       const currentGlobal = this.productForm_.get('buy_price_global_')?.value || 0;
 
@@ -299,9 +307,12 @@ export class ProductFormComponent implements OnInit {
     this.purchaseOptions_.push(group);
   }
 
+
   private hydrateForm(data: Product): void {
     this.isEditMode_.set(true);
     this.curProduct_.set(data);
+
+    // 1. Update the top-level form fields [cite: 73]
     this.productForm_.patchValue({
       productName: data.name_hebrew,
       base_unit_: data.base_unit_,
@@ -313,12 +324,18 @@ export class ProductFormComponent implements OnInit {
     });
 
     this.purchaseOptions_.clear();
-    data.purchase_options_?.forEach(opt => this.addPurchaseOption(opt));
-  }
 
+    if (data.purchase_options_ && data.purchase_options_.length > 0) {
+      data.purchase_options_.forEach(opt => {
+        this.addPurchaseOption(opt);
+      });
+    }
+  }
   protected onSubmit(): void {
     if (this.productForm_.valid) {
+      this.isSubmitted = true
       const val = this.productForm_.getRawValue();
+      console.log("🚀 ~ ProductFormComponent ~ onSubmit ~ val:", val)
 
       // 3. Ensure the Metadata Registry learns the category if it's new
       this.metadataRegistry.registerCategory(val.category_);
@@ -333,7 +350,6 @@ export class ProductFormComponent implements OnInit {
         allergens_: val.allergens_,
         purchase_options_: val.purchase_options_
       };
-      console.log("🚀 ~ ProductFormComponent ~ onSubmit ~ productToSave:", productToSave)
 
       this.kitchenStateService.saveProduct(productToSave).subscribe({
         next: () => {
@@ -346,4 +362,11 @@ export class ProductFormComponent implements OnInit {
   protected onCancel(): void {
     this.router.navigate(['/inventory/list']);
   }
+
+  //DELETE
+  protected onDeletePurchaseOption(idx: number): void {
+    this.purchaseOptions_.removeAt(idx);
+    this.productForm_.markAsDirty();
+  }
+
 }
