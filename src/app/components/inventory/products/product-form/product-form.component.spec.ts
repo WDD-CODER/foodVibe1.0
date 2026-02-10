@@ -48,7 +48,7 @@ describe('ProductFormComponent', () => {
     });
 
     const mockUtil = jasmine.createSpyObj('UtilService', ['getEmptyProduct']);
-    mockUtil.getEmptyProduct.and.returnValue({ name_hebrew: '', base_unit_: 'grams' } as Product);
+    mockUtil.getEmptyProduct.and.returnValue({ name_hebrew: '', base_unit_: 'gram' } as Product);
 
     await TestBed.configureTestingModule({
       imports: [

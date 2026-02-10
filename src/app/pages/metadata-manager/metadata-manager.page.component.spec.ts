@@ -18,7 +18,7 @@ describe('MetadataManagerPageComponent', () => {
   let fixture: ComponentFixture<MetadataManagerComponent>;
 
   // LOGIC CHANGE: Standardized English keys for Mock Signals 
-  const mockUnits = signal(['grams', 'ml']);
+  const mockUnits = signal(['gram', 'ml']);
   const mockAllergens = signal(['gluten', 'nuts']);
   const mockCategories = signal(['vegetables', 'meat']);
   const mockProducts = signal([]);

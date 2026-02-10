@@ -19,9 +19,13 @@
 
       <div class="form-group">
         <label>קטגוריה ראשית</label>
-        <select formControlName="category_">
+        <select formControlName="category_" (change)="onCategoryChange($event)">
           <option value="">בחר קטגוריה</option>
-          <option *ngFor="let cat of categoryOptions_()" [value]="cat">{{cat}}</option>
+          <option *ngFor="let cat of categoryOptions_()" [value]="cat">
+            {{ cat | translatePipe }}
+          </option>
+          <option value="NEW_CATEGORY" class="text-emerald-600 font-bold">הוסף{{ 'NEW_CATEGORY' | translatePipe }}
+          </option>
         </select>
       </div>
 
@@ -35,14 +39,14 @@
 
       <div class="form-group">
         <label>יחידת מידה בסיס (Base Unit)</label>
-        <select formControlName="base_unit_" (change)="onBaseUnitChange($event)">
-          @for (key of unitRegistry.allUnitKeys_(); track key) {
-          <option [value]="KitchenUnit.KILOGRAM">{{ KitchenUnit.KILOGRAM | translatePipe }}</option>
-          }
-          <option value="NEW_UNIT" class="text-emerald-600 font-bold">
-            {{ 'NEW_UNIT' | translatePipe }}
-          </option>
-        </select>
+      <select formControlName="base_unit_" (change)="onBaseUnitChange($event)">
+  @for (key of unitRegistry.allUnitKeys_(); track key) {
+    <option [value]="key">{{ key | translatePipe }}</option>
+  }
+  <option value="NEW_UNIT" class="text-emerald-600 font-bold">
+    {{ 'NEW_UNIT' | translatePipe }}
+  </option>
+</select>
       </div>
 
       <div class="form-group allergen-container">
@@ -139,6 +143,7 @@
           <label class="flex items-center gap-2">
             <span class="math-text">של</span>
             <select formControlName="uom" class="uom-select">
+              <option value="" disabled selected hidden>בחר יחידת מידה</option>
               @for (unit of availableUnits_(); track unit) {
               <option [value]="unit">{{ unit | translatePipe}}</option>
               }
@@ -148,7 +153,8 @@
           <div class="price-override-wrapper">
             <span class="math-text">מחיר ליחידת המידה-</span>
             <input type="number" formControlName="price_override_" [placeholder]="'PRICE' | translatePipe"
-              class="override-input"> <span class="math-text">₪</span>
+              class="override-input">
+            <span class="math-text">₪</span>
           </div>
 
           <button type="button" class="btn-delete-row" (click)="purchaseOptions_.removeAt(idx)">
@@ -174,12 +180,5 @@
 
 
   </form>
-
-
-  <!-- @if (isUnitModalOpen_()) {
-  <unit-creator-modal [netUnitCost]="netUnitCost_()" (unitSaved)="handleNewUnitSaved($event)"
-    (closed)="isUnitModalOpen_.set(false)">
-  </unit-creator-modal>
-  } -->
 
 </div>

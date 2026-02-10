@@ -63,7 +63,7 @@ export class ProductFormComponent implements OnInit {
   protected showSuggestions = false;
   protected productForm_!: FormGroup;
   protected readonly KitchenUnit = KitchenUnit;
-  
+
   protected netUnitCost_ = computed(() => {
     if (!this.formValue_) return 0;
 
@@ -83,6 +83,7 @@ export class ProductFormComponent implements OnInit {
 
   constructor() {
     effect(() => {
+
       // 1. Define variables first
       const allUnits = this.unitRegistry.allUnitKeys_();
       const isCreatorOpen = this.unitRegistry.isCreatorOpen_();
@@ -145,7 +146,7 @@ export class ProductFormComponent implements OnInit {
   private initForm(): void {
     this.productForm_ = this.fb_.group({
       productName: ['', [Validators.required]],
-      base_unit_: ['gram', Validators.required],
+      base_unit_: ['', Validators.required],
       buy_price_global_: [0, [Validators.required, Validators.min(0)]],
       category_: ['', Validators.required],
       yield_factor_: [1, [Validators.required]],
@@ -226,25 +227,6 @@ export class ProductFormComponent implements OnInit {
     }
   }
 
-  // protected handleNewUnitSaved(data: { symbol: string, rate: number }): void {
-  //   if (this.isBaseUnitMode_()) {
-  //     // Mode A: Update the Base Unit control
-  //     this.productForm_.get('base_unit_')?.setValue(data.symbol);
-  //     this.isBaseUnitMode_.set(false);
-  //   } else {
-  //     // Mode B: Update a Purchase Option row (your existing logic)
-  //     const index = this.activeRowIndex_();
-  //     if (index !== null) {
-  //       this.purchaseOptions_.at(index).patchValue({
-  //         unit_symbol_: data.symbol,
-  //         conversion_rate_: data.rate
-  //       });
-  //     }
-  //   }
-
-  //   this.userMsgService.onSetSuccessMsg(`היחידה "${data.symbol}" נרשמה כבסיס חדש במערכת`);
-  //   this.isUnitModalOpen_.set(false);
-  // }
 
   protected toggleAllergen(allergen: string): void {
     const ctrl = this.productForm_.get('allergens_');
@@ -265,27 +247,36 @@ export class ProductFormComponent implements OnInit {
 
   protected addPurchaseOption(opt?: Partial<PurchaseOption_>): void {
     const unit = opt?.unit_symbol_ || '';
-    const conv = opt?.conversion_rate_ || 1;
+    const conv = opt ? opt.conversion_rate_ : null;
+    const uomValue = opt ? opt.uom : ''
+
     const globalPrice = this.productForm_.get('buy_price_global_')?.value || 0;
 
-    const currentBaseUnit = this.productForm_.get('base_unit_')?.value || 'gram';
+    // const currentBaseUnit = this.productForm_.get('base_unit_')?.value || '';
 
     const group = this.fb_.group({
       unit_symbol_: [unit, Validators.required],
       conversion_rate_: [conv, [Validators.required, Validators.min(0.0001)]],
-      uom: [opt?.uom || currentBaseUnit, Validators.required], // 👈 This will now match an option in the @for loop
-      price_override_: [opt?.price_override_ || (globalPrice * conv)]
+      uom: [uomValue, Validators.required],
+      price_override_: [opt?.price_override_ || 0]
     });
 
     group.get('unit_symbol_')?.valueChanges.subscribe((newUnit: string | null) => {
-      if (!newUnit) return;
-
+      
+      if (!newUnit || newUnit === 'NEW_UNIT') {
+        group.patchValue({
+          conversion_rate_: null,
+          uom: '',
+          price_override_: 0
+        }, { emitEvent: false });
+        return;
+      }
+      
       const suggestedConv = this.unitRegistry.getConversion(newUnit);
       const currentGlobal = this.productForm_.get('buy_price_global_')?.value || 0;
 
-      // 1. Get the actual base unit selected at the top of the form (e.g., 'grams')
-      const currentBaseUnit = this.productForm_.get('base_unit_')?.value || 'gram';
-
+      // 1. Get the actual base unit selected at the top of the form (e.g., 'gram')
+      const currentBaseUnit = this.productForm_.get('base_unit_')?.value ?? '';
       const suggestedPrice = this.conversionService.getSuggestedPurchasePrice(currentGlobal, suggestedConv);
 
       // 2. Patch the row so the "UOM" (middle dropdown) is no longer empty
@@ -299,8 +290,8 @@ export class ProductFormComponent implements OnInit {
       group.get('price_override_')?.markAsDirty();
     });
 
-    group.get('conversion_rate_')?.valueChanges.subscribe((newConv: number | null) => {
-      if (newConv === null) return;
+    group.get('conversion_rate_')?.valueChanges.subscribe((newConv: number | null | undefined) => {
+      if (newConv === null || newConv === undefined) return;
       const currentGlobal = this.productForm_.get('buy_price_global_')?.value || 0;
       group.get('price_override_')?.setValue(currentGlobal * newConv, { emitEvent: false });
     });
@@ -342,6 +333,7 @@ export class ProductFormComponent implements OnInit {
         allergens_: val.allergens_,
         purchase_options_: val.purchase_options_
       };
+      console.log("🚀 ~ ProductFormComponent ~ onSubmit ~ productToSave:", productToSave)
 
       this.kitchenStateService.saveProduct(productToSave).subscribe({
         next: () => {
