@@ -11,16 +11,20 @@ describe('UnitRegistryService', () => {
     service = TestBed.inject(UnitRegistryService);
   });
 
-  it('should be created and have initial units', () => {
+ it('should be created and have initial units', () => {
     expect(service).toBeTruthy();
     
-    // REPLACEMENT: Using allUnitKeys_ and English Logic Keys
+    // 1. Verify the computed list of keys
     const units = service.allUnitKeys_();
     expect(units).toContain('kg');
     expect(units).toContain('gram');
-    
-    // LOGIC CHANGE: Standardized English Key
+
+    // 2. Verify specific conversion rates (The SoT Check)
+    // 'ק"ג' should be 1000 (grams)
     expect(service.getConversion('kg')).toBe(1000);
+    
+    // 'גרם' should be 1 (base unit)
+    expect(service.getConversion('gram')).toBe(1);
   });
 
   describe('Registry Operations', () => {

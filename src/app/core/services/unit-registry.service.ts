@@ -10,8 +10,8 @@ export class UnitRegistryService {
    * Values represent the conversion factor to the lowest common denominator (grams/ml)[cite: 59, 122].
    */
    globalUnits_ = signal<Record<string, number>>({
-    'kg': 1,
-    'liter': 1,
+    'kg': 1000,
+    'liter': 1000,
     'gram': 1,
     'ml': 1,
     'unit': 1
