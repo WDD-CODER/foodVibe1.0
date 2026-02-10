@@ -1,57 +1,56 @@
 @if (isOpen_()) {
 <div class="modal-overlay" (click)="resetAndClose()">
-  <div class="modal-card" dir="rtl" (click)="$event.stopPropagation()" appClickOutSide (clickOutside)="resetAndClose()">
+  <div class="modal-card" dir="rtl" (click)="$event.stopPropagation()" (clickOutside)="resetAndClose()">
     <h3>הגדרת יחידת המרה חדשה</h3>
 
-    <div class="formula-grid mb-6">
-      <div class="flex flex-col gap-2">
-        <label class="text-xs font-bold text-slate-500">שם היחידה</label>
-        <input 
-          type="text" 
-          [ngModel]="newUnitName()" 
-          (ngModelChange)="newUnitName.set($event)" 
-          placeholder="למשל: דלי" 
-          class="border p-2 rounded w-full">
-      </div>
-      
-      <span class="text-2xl font-bold text-slate-300 mt-6">=</span>
-
-      <div class="flex flex-col gap-2">
-        <label class="text-xs font-bold text-slate-500">כמות</label>
-        <input 
-          SelectOnFocus 
-          type="number" 
-          [ngModel]="newUnitValue()" 
-          (ngModelChange)="newUnitValue.set($event)" 
-          class="border p-2 rounded w-24 text-center">
+    <div class="formula-grid">
+      <div class="input-stack">
+        <label>שם היחידה</label>
+        <input type="text" 
+               [ngModel]="newUnitName_()" 
+               (ngModelChange)="newUnitName_.set($event)" 
+               placeholder="למשל: דלי">
       </div>
 
-      <div class="flex flex-col gap-2">
-        <label class="text-xs font-bold text-slate-500">מתוך</label>
-        <select 
-          [ngModel]="basisUnit()" 
-          (ngModelChange)="basisUnit.set($event)" 
-          class="border p-2 rounded">
-          <option value="grams">{{ 'grams' | translatePipe }} (g)</option>
-          <option value="ml">{{ 'ml' | translatePipe }} (ml)</option>
-          <option value="unit">{{ 'unit' | translatePipe }} (pcs)</option>
+  <div class="input-stack amounte">
+  <label>כמות</label>
+  <div class="flex gap-2 items-center">
+    <span class="math-operator"> = </span>
+
+        <input SelectOnFocus 
+        type="number" 
+        [ngModel]="newUnitValue_()" 
+        (ngModelChange)="newUnitValue_.set($event)"
+        class="">
+      </div>
+    </div>
+
+      <div class="input-stack">
+        <label>יחידת מידה להשוואה</label>
+        <select [ngModel]="basisUnit_()" 
+                (ngModelChange)="basisUnit_.set($event)">
+          <option value="" disabled selected hidden>בחר יחידה</option>
+          @for (unitKey of basisOptions_(); track unitKey) {
+            <option [value]="unitKey">
+              {{ unitKey | translatePipe }} ({{ unitKey }})
+            </option>
+          }
         </select>
       </div>
     </div>
 
     @if (netUnitCost() > 0) {
-      <div class="p-4 bg-emerald-50 rounded-lg border border-emerald-100 flex justify-between items-center mb-6">
-        <span class="text-sm font-bold text-emerald-800">עלות נטו מחושבת:</span>
-        <span class="text-xl font-black text-emerald-600">₪{{ (netUnitCost() * newUnitValue()) | number:'1.2-2' }}</span>
-      </div>
+    <div class="cost-preview">
+      <span class="label">עלות נטו מחושבת:</span>
+      <span class="value">₪{{ (netUnitCost() * newUnitValue_()) | number:'1.2-2' }}</span>
+    </div>
     }
 
-    <div class="flex justify-end gap-3 border-top pt-4">
-      <button (click)="resetAndClose()" class="px-4 py-2 text-slate-500 font-bold">ביטול</button>
-      <button 
-        (click)="save()" 
-        [disabled]="!newUnitName() || newUnitValue() <= 0" 
-        class="px-6 py-2 bg-slate-900 text-white rounded-lg font-bold disabled:opacity-50">
+    <div class="modal-actions">
+      <button class="btn-ghost" (click)="resetAndClose()">ביטול</button>
+      <button class="btn-save" 
+              (click)="save()" 
+              [disabled]="!newUnitName_() || newUnitValue_() <= 0">
         אשר ושמור יחידה
       </button>
     </div>

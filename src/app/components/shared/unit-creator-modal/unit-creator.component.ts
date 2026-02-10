@@ -11,10 +11,10 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'; // Adj
   selector: 'unit-creator-modal',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
-    LucideAngularModule, 
-    ClickOutSideDirective, 
+    CommonModule,
+    FormsModule,
+    LucideAngularModule,
+    ClickOutSideDirective,
     SelectOnFocusDirective,
     TranslatePipe // 👈 Added
   ],
@@ -22,36 +22,38 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'; // Adj
   styleUrl: './unit-creator.component.scss'
 })
 export class UnitCreatorModal {
-  private unitRegistry = inject(UnitRegistryService);
-  protected isOpen_ = this.unitRegistry.isCreatorOpen_;
+  private unitRegistryService = inject(UnitRegistryService);
+  protected isOpen_ = this.unitRegistryService.isCreatorOpen_;
 
   netUnitCost = input<number>(0);
   unitSaved = output<{ symbol: string, rate: number }>();
   closed = output<void>();
 
   // Technical Keys for logic
-  newUnitName = signal('');
-  newUnitValue = signal(1);
-  basisUnit = signal('grams'); // 🛠️ REFACTORED: Use technical key 'grams'
+  newUnitName_ = signal('');
+  newUnitValue_ = signal(1);
+  basisUnit_ = signal<string>(''); // 🛠️ REFACTORED: Use technical key 'gram'
+
+  protected basisOptions_ = this.unitRegistryService.allUnitKeys_;
 
   save() {
-    if (this.newUnitName() && this.newUnitValue() > 0) {
+    if (this.newUnitName_() && this.newUnitValue_() > 0) {
       // We save the custom name as the key and the rate as the value
-      this.unitRegistry.registerUnit(this.newUnitName(), this.newUnitValue());
-      this.unitRegistry.closeUnitCreator();
+      this.unitRegistryService.registerUnit(this.newUnitName_(), this.newUnitValue_());
+      this.unitRegistryService.closeUnitCreator();
       this.resetFields();
     }
   }
 
   close() {
-    this.unitRegistry.closeUnitCreator();
+    this.unitRegistryService.closeUnitCreator();
     this.resetFields();
   }
 
   private resetFields() {
-    this.newUnitName.set('');
-    this.newUnitValue.set(1);
-    this.basisUnit.set('grams'); // 🛠️ REFACTORED: Use technical key 'grams'
+    this.newUnitName_.set('');
+    this.newUnitValue_.set(1);
+    this.basisUnit_.set(''); // 🛠️ REFACTORED: Use technical key 'gram'
   }
 
   resetAndClose() {

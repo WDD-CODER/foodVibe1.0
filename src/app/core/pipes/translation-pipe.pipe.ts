@@ -8,22 +8,32 @@ import { Pipe, PipeTransform } from '@angular/core';
 export class TranslatePipe implements PipeTransform {
   // This dictionary is your single point of truth for translations
   private readonly dictionary: Record<string, string> = {
-  // Standard Units
-  'kg': 'קילו',
-  'liter': 'ליטר',
-  'grams': 'גרם',
-  'ml': 'מ"ל',
-  'unit': 'יחידה',
-  
-  // New Enum Keys from KitchenUnit
-  'bucket': 'דלי',
-  'box': 'ארגז',
-  'tray': 'תבנית',
+    // Standard Units
+    'kg': 'קילו',
+    'liter': 'ליטר',
+    'gram': 'גרם',
+    'ml': 'מ"ל',
+    'unit': 'יחידה',
 
-  // UI Strings
-  'NEW_UNIT': '+ הוסף יחידה חדשה',
-  'PRICE': 'מחיר'
-};
+    // Product category's
+    'vegetables': 'ירקות',
+    'dairy': 'חלבי',
+    'meat': 'בשר',
+    'chicken': 'עוף',
+    'dry': 'יבשים',
+    "fish": 'דגים',
+
+    // New Enum Keys from KitchenUnit
+    'bucket': 'דלי',
+    'box': 'ארגז',
+    'tray': 'תבנית',
+
+    // UI Strings
+    'ADD' : 'הוסף',
+    'NEW_UNIT': 'יחידה חדשה',
+    'NEW_CATEGORY': 'קטגוריה חדשה',
+    'PRICE': 'מחיר'
+  };
 
   transform(value: string | null | undefined): string {
     if (!value) return '';
