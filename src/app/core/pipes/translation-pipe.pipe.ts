@@ -12,6 +12,7 @@ export class TranslatePipe implements PipeTransform {
     'kg': 'קילו',
     'liter': 'ליטר',
     'gram': 'גרם',
+    'grams': 'גרם',
     'ml': 'מ"ל',
     'unit': 'יחידה',
 
@@ -37,8 +38,6 @@ export class TranslatePipe implements PipeTransform {
 
   transform(value: string | null | undefined): string {
     if (!value) return '';
-    // If it's in our dictionary, translate it. 
-    // If it's a custom unit (like "דלי"), return the name as is.
     return this.dictionary[value] || value;
   }
 }
