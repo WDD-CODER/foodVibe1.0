@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { productResolver } from './core/resolvers/product.resolver';
+import { pendingChangesGuard } from './core/guards/pending-changes.guard';
 
 export const routes: Routes = [
   {
@@ -14,13 +15,15 @@ export const routes: Routes = [
       },
       {
         path: 'add',
-        loadComponent: () => import('./components/inventory/products/product-form/product-form.component').then(m => m.ProductFormComponent)
+        loadComponent: () => import('./components/inventory/products/product-form/product-form.component').then(m => m.ProductFormComponent),
+        canDeactivate: [pendingChangesGuard]
       },
       {
         // Full-screen edit route with ID parameter for MongoDB-ready identification
         path: 'edit/:id',
         loadComponent: () => import('./components/inventory/products/product-form/product-form.component').then(m => m.ProductFormComponent),
-        resolve: { product: productResolver }
+        resolve: { product: productResolver },
+        canDeactivate: [pendingChangesGuard]
       },
     ],
   },
