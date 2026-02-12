@@ -1,5 +1,5 @@
 import { CanDeactivateFn } from '@angular/router';
-import { ProductFormComponent } from '@components/inventory/products/product-form/product-form.component';
+import { ProductFormComponent } from 'src/app/pages/inventory/components/product-form/product-form.component';
 import { inject } from '@angular/core';
 import { UserMsgService } from '@services/user-msg.service';
 

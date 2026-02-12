@@ -18,7 +18,7 @@ export class UserMsgService {
       return of(msg).pipe(
         delay(0),
         tap(msg => this._msg_.set(msg)),
-        delay(1500),
+        delay(2000),
         tap(() => this._msg_.set(null))
       )
     })
