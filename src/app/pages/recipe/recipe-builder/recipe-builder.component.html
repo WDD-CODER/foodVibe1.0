@@ -1,0 +1,62 @@
+<div class="recipe-lab-container" dir="rtl">
+  <aside class="costing-sidebar">
+    <div class="analytics-card shadow-sm">
+      <h3 class="text-xl font-bold mb-6">ניתוח עלות / Cost Analysis</h3>
+      
+      <div class="stat-row">
+        <span>עלות נטו ליחידה:</span>
+        <span class="font-bold text-emerald-600 text-lg">₪ 0.00</span>
+      </div>
+
+      <div class="stat-row">
+        <span>זמן עבודה כולל:</span>
+        <span>0 דק'</span>
+      </div>
+
+      <hr class="my-6" />
+
+      <button class="save-btn w-full" [disabled]="recipeForm_.invalid">
+        <lucide-icon name="save" class="ml-2 h-5 w-5"></lucide-icon>
+        שמור מתכון / Save Recipe
+      </button>
+    </div>
+  </aside>
+
+  <main class="builder-main">
+    <form [formGroup]="recipeForm_" class="header-card">
+      <div class="form-grid">
+        <div class="input-group full-width">
+          <label>שם המתכון</label>
+          <input formControlName="name_hebrew" placeholder="לדוגמא: רוטב עגבניות בסיסי" class="form-input" />
+        </div>
+
+        <div class="input-group">
+          <label>תחנת עבודה</label>
+          <select formControlName="default_station_" class="form-select">
+            <option value="">בחר תחנה...</option>
+            <option value="hot">פס חם</option>
+            <option value="cold">פס קר</option>
+            <option value="prep">הכנות</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label>כמות פלט (Yield)</label>
+          <div class="yield-inputs">
+            <input type="number" formControlName="yield_amount_" class="form-input" />
+            <input formControlName="yield_unit_" placeholder="יחידה (ליטר/ק״ג)" class="form-input" />
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <section class="mt-8">
+      <div class="section-header">
+        <h2 class="text-xl font-bold">מרכיבים / Ingredients</h2>
+      </div>
+      <div class="empty-state-card mt-4">
+        חיפוש מרכיבים יתווסף בשלב הבא...
+      </div>
+    </section>
+  </main>
+</div>
