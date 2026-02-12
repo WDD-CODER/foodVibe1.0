@@ -4,7 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule, F
 import { LucideAngularModule } from 'lucide-angular';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { ProductDataService } from '@services/product-data.service';
+// import { ProductDataService } from '@services/product-data.service';
 import { ConversionService } from '@services/conversion.service';
 import { UserMsgService } from '@services/user-msg.service';
 import { KitchenStateService } from '@services/kitchen-state.service';
@@ -15,7 +15,7 @@ import { UnitRegistryService } from '@services/unit-registry.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
-import { UnitCreatorModal } from '@components/shared/unit-creator-modal/unit-creator.component';
+// import { UnitCreatorModal } from '@components/shared/unit-creator-modal/unit-creator.component';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { KitchenUnit } from '@models/units.enum';
 
@@ -61,7 +61,7 @@ export class ProductFormComponent implements OnInit {
   private formValue_!: Signal<any>
   protected showSuggestions = false;
   protected productForm_!: FormGroup;
-  protected readonly KitchenUnit = KitchenUnit;
+  // protected readonly KitchenUnit = KitchenUnit;
   isSubmitted = false;
 
   //COMPUTED
@@ -138,7 +138,7 @@ export class ProductFormComponent implements OnInit {
         } else {
           this.isEditMode_.set(false);
           this.curProduct_.set(this.utilService.getEmptyProduct());
-          this.productForm_.patchValue({ base_unit_: KitchenUnit.GRAM })
+          this.productForm_.patchValue({ base_unit_: 'gram' })
         }
       });
     }

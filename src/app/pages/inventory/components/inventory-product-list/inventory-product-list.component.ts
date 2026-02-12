@@ -3,13 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 
-import { FilterCategory } from '@models/filter-category.model';
-import { FilterOption } from '@models/filter-option.model';
 import { ProductDataService } from '@services/product-data.service';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { Router } from '@angular/router';
-import { Product } from '@models/product.model';
-import { KitchenUnit } from '@models/units.enum';
 
 @Component({
   selector: 'inventory-product-list',
