@@ -2,7 +2,7 @@ import { Injectable, signal, inject, computed } from '@angular/core';
 import { StorageService } from './async-storage.service';
 import { Product } from '../models/product.model'; 
 
-const ENTITY = 'Product_list';
+const ENTITY = 'PRODUCT_LIST';
 
 @Injectable({ providedIn: 'root' })
 export class ProductDataService {

@@ -29,9 +29,18 @@ export class KitchenStateService {
 
   saveProduct(product: Product): Observable<void> {
     const isUpdate = !!(product._id && product._id.trim() !== '');
+    
+    const isDuplicate = this.products_().some(p =>
+      p.name_hebrew.trim() === product.name_hebrew.trim() &&
+      p._id !== product._id
+    );
 
-    const operation$ = isUpdate 
-      ? from(this.productDataService.updateProduct(product)) 
+    if (isDuplicate) {
+      this.userMsgService.onSetErrorMsg('כבר קיים חומר גלם בשם זה - לא ניתן לשמור');
+      return throwError(() => new Error('Duplicate product name'));
+    }
+    const operation$ = isUpdate
+      ? from(this.productDataService.updateProduct(product))
       : from(this.productDataService.addProduct(product));
 
     return operation$.pipe(

@@ -1,30 +1,62 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { ProductDataService } from './product-data.service';
+import { UserMsgService } from './user-msg.service';
+import { StorageService } from './async-storage.service';
 
 @Injectable({ providedIn: 'root' })
 export class MetadataRegistryService {
+  //INJECTIONS
+  private readonly userMsgService = inject(UserMsgService);
   private readonly productDataService = inject(ProductDataService);
+  private readonly storageService = inject(StorageService);
 
-  // LOGIC CHANGE: Standardized English keys for Allergens
-  private readonly allergens_ = signal<string[]>([
-    'gluten', 'eggs', 'peanuts', 'nuts', 'soy', 'dairy', 'sesame'
-  ]);
+  //PRIVATE SIGNALS
+  private categories_ = signal<string[]>([]);
+  private allergens_ = signal<string[]>([]);
 
-  // LOGIC CHANGE: Standardized English keys for Categories
-  private readonly categories_ = signal<string[]>([
-    'vegetables', 'dairy', 'meat', 'dry', 'fish'
-  ]);
-  
-  private readonly globalUnits_ = signal<Record<string, number>>({
-    'kg': 1000,
-    'liter': 1000,
-    'gram': 1,
-    'ml': 1,
-    'unit': 1
-  });
+  //PUBLIC SIGNALS
+  public allCategories_ = this.categories_.asReadonly();
+  public allAllergens_ = this.allergens_.asReadonly();
 
-  // Exposes keys for the UI to consume via the TranslatePipe
-  allUnitKeys_ = computed(() => Object.keys(this.globalUnits_()));
+
+  constructor() {
+    this.initMetadata();
+  }
+
+  private async initMetadata() {
+    const DEFAULT_CATEGORIES = ['vegetables', 'dairy', 'meat', 'dry', 'fish'];
+    const DEFAULT_ALLERGENS = ['gluten', 'eggs', 'peanuts', 'nuts', 'soy', 'milk solids', 'sesame'];
+
+    // 1. Fetch Categories
+    const catRegistry = await this.storageService.query<any>('KITCHEN_CATEGORIES');
+    const existingCats = catRegistry[0]?.items || [];
+
+    if (existingCats.length === 0) {
+      if (catRegistry[0]?._id) {
+        await this.storageService.put('KITCHEN_CATEGORIES', { ...catRegistry[0], items: DEFAULT_CATEGORIES });
+      } else {
+        await this.storageService.post('KITCHEN_CATEGORIES', { items: DEFAULT_CATEGORIES });
+      }
+      this.categories_.set(DEFAULT_CATEGORIES);
+    } else {
+      this.categories_.set(existingCats);
+    }
+
+    // 2. Fetch Allergens (Same Logic)
+    const allergenRegistry = await this.storageService.query<any>('KITCHEN_ALLERGENS');
+    const existingAllergens = allergenRegistry[0]?.items || [];
+
+    if (existingAllergens.length === 0) {
+      if (allergenRegistry[0]?._id) {
+        await this.storageService.put('KITCHEN_ALLERGENS', { ...allergenRegistry[0], items: DEFAULT_ALLERGENS });
+      } else {
+        await this.storageService.post('KITCHEN_ALLERGENS', { items: DEFAULT_ALLERGENS });
+      }
+      this.allergens_.set(DEFAULT_ALLERGENS);
+    } else {
+      this.allergens_.set(existingAllergens);
+    }
+  }
 
   async purgeGlobalUnit(unitSymbol: string): Promise<void> {
     const affectedProducts = this.productDataService.allProducts_()
@@ -36,29 +68,109 @@ export class MetadataRegistryService {
     }
   }
 
-  allAllergens_ = computed(() => this.allergens_());
-  allCategories_ = computed(() => this.categories_());
+  async registerAllergen(name: string): Promise<void> {
+    const sanitized = name.trim();
+    if (!sanitized || this.allergens_().includes(sanitized)) return;
 
-  registerAllergen(name: string): void {
-    if (!this.allergens_().includes(name)) {
-      this.allergens_.update(list => [...list, name]);
+    const updated = [...this.allergens_(), sanitized];
+
+    try {
+      const registries = await this.storageService.query<any>('KITCHEN_ALLERGENS');
+      const registry = registries[0];
+
+      if (registry?._id) {
+        await this.storageService.put('KITCHEN_ALLERGENS', { ...registry, items: updated });
+      } else {
+        await this.storageService.post('KITCHEN_ALLERGENS', { items: updated });
+      }
+
+      this.allergens_.set(updated);
+      this.userMsgService.onSetSuccessMsg(`אלרגן "${sanitized}" נוסף בהצלחה`);
+    } catch (err) {
+      this.userMsgService.onSetErrorMsg('שגיאה בשמירת האלרגן');
     }
   }
 
-  registerCategory(name: string): void {
-    const trimmed = name.trim();
-    if (!trimmed) return;
+  async registerCategory(name: string): Promise<void> {
+    const sanitized = name.trim();
+    // Validation: Check if empty or already exists in the signal
+    if (!sanitized || this.categories_().includes(sanitized)) return;
 
-    if (!this.categories_().includes(trimmed)) {
-      this.categories_.update(list => [...list, trimmed]);
+    // 1. Calculate the new state
+    const updatedCategories = [...this.categories_(), sanitized];
+
+    try {
+      // 2. Persistence Logic (POST vs PUT)
+      // Query the storageService for the metadata collection
+      const registries = await this.storageService.query<any>('KITCHEN_CATEGORIES');
+      const existingRegistry = registries[0]; // We maintain one document for categories
+
+      if (existingRegistry && existingRegistry._id) {
+        // Registry exists -> Update it (PUT)
+        await this.storageService.put('KITCHEN_CATEGORIES', {
+          ...existingRegistry,
+          items: updatedCategories
+        });
+      } else {
+        // Registry doesn't exist -> Create it (POST)
+        await this.storageService.post('KITCHEN_CATEGORIES', {
+          items: updatedCategories
+        });
+      }
+
+      // 3. Update the Signal for UI reactivity
+      this.categories_.set(updatedCategories);
+      this.userMsgService.onSetSuccessMsg(`הקטגוריה "${sanitized}" נוספה בהצלחה`);
+
+    } catch (err) {
+      this.userMsgService.onSetErrorMsg('שגיאה בשמירת הקטגוריה');
+      console.error('Category Save Error:', err);
     }
   }
 
-  deleteAllergen(name: string): void {
+async deleteCategory(name: string): Promise<void> {
+  // 1. מחשבים את הרשימה החדשה (יכולה להיות [])
+  const updated = this.categories_().filter(c => c !== name);
+
+  try {
+    // 2. סנכרון מול ה-Storage
+    const registries = await this.storageService.query<any>('KITCHEN_CATEGORIES');
+    const registry = registries[0];
+
+    if (registry?._id) {
+      await this.storageService.put('KITCHEN_CATEGORIES', {
+        ...registry,
+        items: updated // כאן אנחנו שומרים את המערך כפי שהוא, גם אם הוא ריק
+      });
+
+      // 3. עדכון ה-UI
+      this.categories_.set(updated);
+      this.userMsgService.onSetSuccessMsg(`הקטגוריה ${name} נמחקה בהצלחה`);
+    }
+  } catch (err) {
+    this.userMsgService.onSetErrorMsg('שגיאה במחיקת הקטגוריה מהשרת');
+    console.error(err);
+  }
+}
+
+  async deleteAllergen(name: string): Promise<void> {
+    // 1. Update UI immediately
     this.allergens_.update(list => list.filter(a => a !== name));
-  }
 
-  deleteCategory(name: string): void {
-    this.categories_.update(list => list.filter(c => c !== name));
+    try {
+      // 2. Sync with "Server"
+      const registries = await this.storageService.query<any>('KITCHEN_ALLERGENS');
+      const registry = registries[0];
+
+      if (registry?._id) {
+        await this.storageService.put('KITCHEN_ALLERGENS', {
+          ...registry,
+          items: this.allergens_()
+        });
+        this.userMsgService.onSetSuccessMsg(`האלרגן ${name} נמחק`);
+      }
+    } catch (err) {
+      this.userMsgService.onSetErrorMsg('שגיאה במחיקת האלרגן מהשרת');
+    }
   }
 }
