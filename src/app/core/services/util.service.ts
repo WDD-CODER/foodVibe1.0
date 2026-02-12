@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import { User } from '../models/user.model';
 import { Product } from '@models/product.model';
-import { KitchenUnit } from '@models/units.enum';
-import { ItemLedger } from '@models/ingredient.model';
 
 const LOGGED_IN_USER = 'signed-user'
 const SINGED_USERS = 'signed-users-db'
@@ -52,7 +50,7 @@ getEmptyProduct(): Product {
     
     // Updated naming based on your interface
     buy_price_global_: 0,
-    base_unit_: KitchenUnit.GRAM, // Ensure KitchenUnit.GRAM returns a string
+    base_unit_: 'gram', // Ensure KitchenUnit.GRAM returns a string
     
     // New required array
     purchase_options_: [], 

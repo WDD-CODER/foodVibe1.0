@@ -7,7 +7,7 @@ describe('ProductDataService', () => {
   let service: ProductDataService;
   let storageSpy: jasmine.SpyObj<StorageService>;
 
-  const ENTITY = 'Product_list';
+  const ENTITY = 'PRODUCT_LIST';
 
   const mockProducts: Product[] = [
     { _id: '1', name_hebrew: 'Tomato', category_: 'Veg', allergens_: ['dairy'] } as Product,

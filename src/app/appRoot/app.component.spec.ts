@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { provideRouter } from '@angular/router';
-import { HeaderComponent } from '../components/header/header.component';
-import { FooterComponent } from '../components/footer/footer.component';
-import { UserMsg } from "@components/user-msg/user-msg.component";
+import { HeaderComponent } from '../core/componets/header/header.component';
+import { FooterComponent } from '../core/componets/footer/footer.component';
+import { UserMsg } from "src/app/core/componets/user-msg/user-msg.component";
 import { UserMsgService } from '@services/user-msg.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { ConversionService } from '@services/conversion.service';
-import { UnitCreatorModal } from '@components/shared/unit-creator-modal/unit-creator.component';
+import { UnitCreatorModal } from 'src/app/shared/unit-creator/unit-creator.component';
 import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
 
 // 1. Rigorous Mock to replace the problematic production component

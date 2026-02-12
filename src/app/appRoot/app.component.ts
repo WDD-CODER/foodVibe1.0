@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { HeaderComponent } from '../components/header/header.component';
-import { FooterComponent } from '../components/footer/footer.component';
-import { UserMsg } from "@components/user-msg/user-msg.component";
-import { UnitCreatorModal } from '@components/shared/unit-creator-modal/unit-creator.component';
+import { HeaderComponent } from '../core/componets/header/header.component';
+import { FooterComponent } from '../core/componets/footer/footer.component';
+import { UserMsg } from "src/app/core/componets/user-msg/user-msg.component";
+import { UnitCreatorModal } from 'src/app/shared/unit-creator/unit-creator.component';
 
 @Component({
   selector: 'app-root',
