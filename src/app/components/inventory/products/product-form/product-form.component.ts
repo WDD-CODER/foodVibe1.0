@@ -55,26 +55,28 @@ export class ProductFormComponent implements OnInit {
   protected allergenOptions_ = computed(() => this.metadataRegistry.allAllergens_());
   protected isEditMode_ = signal<boolean>(false);
   protected curProduct_ = signal<Product | null>(null);
-  protected selectedAllergensSignal_ = signal<string[]>([]);
-  protected activeRowIndex_ = signal<number | null>(null);
-  // protected isUnitModalOpen_ = signal(false);
   protected isBaseUnitMode_ = signal(false);
 
+  //SIMPLE VALUES
   private formValue_!: Signal<any>
   protected showSuggestions = false;
   protected productForm_!: FormGroup;
   protected readonly KitchenUnit = KitchenUnit;
-  public isSubmitted = false;
+  isSubmitted = false;
 
+  //COMPUTED
   protected netUnitCost_ = computed(() => {
     if (!this.formValue_) return 0;
-
     const currentForm = this.formValue_();
     const price = currentForm?.buy_price_global_ || 0;
     const yieldFactor = currentForm?.yield_factor_ || 1;
-
     return yieldFactor > 0 ? price / yieldFactor : 0;
   });
+
+  protected selectedAllergensSignal_ = computed(() => {
+    return this.formValue_()?.allergens_ || [];
+  }); protected activeRowIndex_ = signal<number | null>(null);
+
 
   protected filteredAllergenOptions_ = computed(() => {
     const all = this.metadataRegistry.allAllergens_();
@@ -125,9 +127,6 @@ export class ProductFormComponent implements OnInit {
       });
     });
 
-    this.productForm_.get('allergens_')?.valueChanges.subscribe(val => {
-      this.selectedAllergensSignal_.set(val || []);
-    });
 
     const productData = this.initialProduct_();
     if (productData) {
@@ -204,13 +203,20 @@ export class ProductFormComponent implements OnInit {
     }
   }
 
-  protected onCategoryChange(event: Event): void {
+  protected async onCategoryChange(event: Event): Promise<void> {
     const select = event.target as HTMLSelectElement;
     if (select.value === 'NEW_CATEGORY') {
-      const newCat = prompt('הכנס שם קטגוריה חדשה:'); // Simple prompt for now
+      const newCat = prompt('הכנס שם קטגוריה חדשה:');
       if (newCat) {
-        this.metadataRegistry.registerCategory(newCat);
-        this.productForm_.get('category_')?.setValue(newCat);
+        try {
+          // Wait for the server-side simulation to finish
+          await this.metadataRegistry.registerCategory(newCat);
+          // Only set the form value after confirmed save
+          this.productForm_.get('category_')?.setValue(newCat);
+        } catch (err) {
+          // Error is already handled by userMsgService in the registry service
+          console.error('Failed to add category:', err);
+        }
       }
       select.value = '';
     }
@@ -253,7 +259,6 @@ export class ProductFormComponent implements OnInit {
 
 
   protected addPurchaseOption(opt?: Partial<PurchaseOption_>): void {
-    console.log("🚀 ~ ProductFormComponent ~ addPurchaseOption ~ opt:", opt)
     const unit = opt?.unit_symbol_ || '';
     const conv = opt ? opt.conversion_rate_ : null;
     const uomValue = opt ? opt.uom : ''
@@ -333,9 +338,7 @@ export class ProductFormComponent implements OnInit {
   }
   protected onSubmit(): void {
     if (this.productForm_.valid) {
-      this.isSubmitted = true
       const val = this.productForm_.getRawValue();
-      console.log("🚀 ~ ProductFormComponent ~ onSubmit ~ val:", val)
 
       // 3. Ensure the Metadata Registry learns the category if it's new
       this.metadataRegistry.registerCategory(val.category_);
@@ -353,7 +356,12 @@ export class ProductFormComponent implements OnInit {
 
       this.kitchenStateService.saveProduct(productToSave).subscribe({
         next: () => {
+          this.isSubmitted = true; // ✅ MOVED HERE: Only true if save worked!
           this.router.navigate(['/inventory/list']);
+        },
+        error: (err) => {
+          this.isSubmitted = false; // 🛡️ ENSURE it stays false so Guard stays active
+          console.error('Save failed:', err);
         }
       });
     }

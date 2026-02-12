@@ -81,7 +81,7 @@
 
         padding: 0.6rem;
         border-radius: 6px;
-        
+
         font-weight: 600;
         transition: all 0.2s;
 
@@ -106,10 +106,7 @@
       padding-top: 1.5rem;
     }
 
-    &.yield-logic {
-      display: grid;
-      grid-template-rows: repeat(3, 1fr)
-    }
+
 
   }
 
@@ -123,10 +120,16 @@
       font-size: 0.875rem;
       font-weight: 700; // Bolded for industrial clarity
       color: #334155;
+      height: 24px;
 
       &.danger-label {
         color: #b91c1c;
       }
+    }
+
+    &.yield-logic {
+      display: grid;
+      grid-template-rows: repeat(3, 1fr)
     }
 
     input,
@@ -173,6 +176,37 @@
 
     border-radius: 8px;
     border: 1px dashed #cbd5e1;
+    transition: all 0.3s ease;
+
+
+    &.row-invalid {
+      border-right: 3px solid #f43f5e; // Rose 500
+      background-color: #fff1f2; // Rose 50
+    }
+
+    .input-wrapper.field-error {
+
+      input,
+      select {
+        border-color: #f43f5e !important;
+        background-color: #fff;
+        color: #e11d48;
+
+        &:focus {
+          box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.2);
+        }
+      }
+    }
+
+    .error-message-row {
+      color: #e11d48;
+      font-size: 0.75rem;
+      margin-top: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-weight: 500;
+    }
 
     .price-override-wrapper {
       display: flex;
@@ -296,6 +330,15 @@
       input {
         width: 100%;
         margin-top: 5px;
+
+        &.no-chips {
+          margin-top: 0
+        }
+      }
+
+      &.no-chips {
+        border: none;
+        padding: 0;
       }
 
       .selected-chips {
@@ -373,7 +416,7 @@
   }
 
   // Responsive
-  @media (max-width: 800px) {
+  @media (max-width: 830px) {
     .form-container .form-section.grid-2 {
       grid-template-columns: 1fr;
     }
@@ -383,4 +426,3 @@
     }
   }
 }
-

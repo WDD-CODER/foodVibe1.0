@@ -7,21 +7,17 @@ export const pendingChangesGuard: CanDeactivateFn<ProductFormComponent> = (compo
   const userMsgService = inject(UserMsgService);
 
   const form = component.readProductForm_;
-  
-  // LOGGING: Check the actual state of the form instance
-  console.log("Form Status - Dirty:", form?.dirty);
-  console.log("Form Status - Touched:", form?.touched);
-  console.log("Is Submitted:", component.isSubmitted);
-
-  // If the form is submitted, let them leave no matter what
   if (component.isSubmitted) return true;
 
-  // If the form is NOT dirty AND NOT touched, it's safe to leave
   if (!form?.dirty && !form?.touched) {
     return true;
   }
+  const isConfirmed = confirm('יש שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?')
 
-  // If we reach here, there are unsaved changes
-  userMsgService.onSetErrorMsg('השינויים לא נשמרו - המידע יאבד בעת יציאה');
-  return confirm('יש שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?');
+  if (isConfirmed) {
+    userMsgService.onSetErrorMsg('השינויים לא נשמרו - המידע יאבד בעת יציאה');
+    return true;
+  } else {
+    return false;
+  }
 };

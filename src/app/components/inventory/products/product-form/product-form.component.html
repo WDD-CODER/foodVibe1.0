@@ -24,7 +24,7 @@
           <option *ngFor="let cat of categoryOptions_()" [value]="cat">
             {{ cat | translatePipe }}
           </option>
-          <option value="NEW_CATEGORY" class="text-emerald-600 font-bold">הוסף{{ 'NEW_CATEGORY' | translatePipe }}
+          <option value="NEW_CATEGORY" class="text-emerald-600 font-bold">הוסף {{ 'NEW_CATEGORY' | translatePipe }}
           </option>
         </select>
       </div>
@@ -39,14 +39,14 @@
 
       <div class="form-group">
         <label>יחידת מידה בסיס (Base Unit)</label>
-      <select formControlName="base_unit_" (change)="onBaseUnitChange($event)">
-  @for (key of unitRegistry.allUnitKeys_(); track key) {
-    <option [value]="key">{{ key | translatePipe }}</option>
-  }
-  <option value="NEW_UNIT" class="text-emerald-600 font-bold">
-    {{ 'NEW_UNIT' | translatePipe }}
-  </option>
-</select>
+        <select formControlName="base_unit_" (change)="onBaseUnitChange($event)">
+          @for (key of unitRegistry.allUnitKeys_(); track key) {
+          <option [value]="key">{{ key | translatePipe }}</option>
+          }
+          <option value="NEW_UNIT" class="text-emerald-600 font-bold">
+            הוסף {{ 'NEW_UNIT' | translatePipe }}
+          </option>
+        </select>
       </div>
 
       <div class="form-group allergen-container">
@@ -55,7 +55,8 @@
           אלרגנים (Allergens)
         </label>
 
-        <div class="allergen-search-box" (clickOutside)="showSuggestions = false">
+        <div class="allergen-search-box" (clickOutside)="showSuggestions = false"
+          [class.no-chips]="selectedAllergensSignal_().length === 0">
           <div>
             <section class="selected-chips">
               <span *ngFor="let selected of productForm_.get('allergens_')?.value" (click)="toggleAllergen(selected)"
@@ -64,13 +65,14 @@
                 <lucide-icon name="x" class="icon"></lucide-icon>
               </span>
             </section>
-            <input type="text" placeholder="חפש או בחר אלרגן..." (focus)="showSuggestions = true" #allergenInput>
+            <input type="text" placeholder="חפש או בחר אלרגן..." (focus)="showSuggestions = true" #allergenInput
+              [class.no-chips]="selectedAllergensSignal_().length === 0">
           </div>
 
           <div class="allergen-dropdown" *ngIf="showSuggestions">
             <div *ngFor="let allergen of filteredAllergenOptions_()" (click)="toggleAllergen(allergen)"
               class="dropdown-item">
-              {{ allergen }}
+              {{ allergen | translatePipe }}
             </div>
 
             <div *ngIf="filteredAllergenOptions_().length === 0" class="dropdown-item text-slate-400 italic">
@@ -80,7 +82,7 @@
         </div>
       </div>
 
-      <div class="form-section border-top mt-6 pt-4">
+      <div class="form-group border-top  ">
         <div class="section-header mb-4">
           <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
             <lucide-icon name="flask-conical" class="icon-xs text-indigo-500"></lucide-icon>
@@ -125,30 +127,39 @@
       </label>
 
       <div *ngFor="let option of purchaseOptions_.controls; let idx = index" [formGroupName]="idx"
-        class="form-group scaling-box mb-4">
+        class="form-group scaling-box mb-4" [class.row-invalid]="option.invalid && (option.dirty || isSubmitted)">
+
         <div class="scaling-row">
-          <span class="math-text"></span>
-          <select formControlName="unit_symbol_" (change)="onUnitChange($event,idx)">
-            <option value="">בחר יחידה...</option>
-            <option *ngFor="let unit of availableUnits_()" [value]="unit">{{ unit | translatePipe }}</option>
-            <option value="NEW_UNIT" class="add-new-option text-emerald-600 font-bold">+ הוסף יחידת מידה חדשה...
-            </option>
-          </select>
-
-          <label class="flex items-center gap-2 ">
-            <span class="math-text">=</span>
-            <input type="number" formControlName="conversion_rate_" placeholder="כמות">
-          </label>
-
-          <label class="flex items-center gap-2">
-            <span class="math-text">של</span>
-            <select formControlName="uom" class="uom-select">
-              <option value="" disabled selected hidden>בחר יחידת מידה</option>
-              @for (unit of availableUnits_(); track unit) {
-              <option [value]="unit">{{ unit | translatePipe}}</option>
-              }
+          <div class="input-wrapper"
+            [class.field-error]="option.get('unit_symbol_')?.invalid && (option.get('unit_symbol_')?.dirty || isSubmitted)">
+            <select formControlName="unit_symbol_" (change)="onUnitChange($event,idx)">
+              <option value="">בחר יחידה...</option>
+              <option *ngFor="let unit of availableUnits_()" [value]="unit">{{ unit | translatePipe }}</option>
+              <option value="NEW_UNIT" class="add-new-option text-emerald-600 font-bold"> הוסף {{ 'NEW_UNIT' |
+                translatePipe }}</option>
             </select>
-          </label>
+          </div>
+
+          <div class="input-wrapper"
+            [class.field-error]="option.get('conversion_rate_')?.invalid && (option.get('conversion_rate_')?.dirty || isSubmitted)">
+            <label class="flex items-center gap-2">
+              <span class="math-text">=</span>
+              <input type="number" formControlName="conversion_rate_" placeholder="כמות">
+            </label>
+          </div>
+
+          <div class="input-wrapper"
+            [class.field-error]="option.get('uom')?.invalid && (option.get('uom')?.dirty || isSubmitted)">
+            <label class="flex items-center gap-2">
+              <span class="math-text">של</span>
+              <select formControlName="uom" class="uom-select">
+                <option value="" disabled selected hidden>בחר יחידת מידה</option>
+                @for (unit of availableUnits_(); track unit) {
+                <option [value]="unit">{{ unit | translatePipe}}</option>
+                }
+              </select>
+            </label>
+          </div>
 
           <div class="price-override-wrapper">
             <span class="math-text">מחיר ליחידת המידה-</span>
@@ -160,8 +171,14 @@
           <button type="button" class="btn-delete-row" (click)="onDeletePurchaseOption(idx)">
             <lucide-icon name="trash-2" class="icon-sm"></lucide-icon>
           </button>
-
         </div>
+
+        @if (option.invalid && (option.dirty || isSubmitted)) {
+        <div class="error-message-row">
+          <lucide-icon name="alert-circle" class="icon-xs"></lucide-icon>
+          אנא מלא את כל פרטי יחידת הרכש בצורה תקינה
+        </div>
+        }
       </div>
 
     </div>

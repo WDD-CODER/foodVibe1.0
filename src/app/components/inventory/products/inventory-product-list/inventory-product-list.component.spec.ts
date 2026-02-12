@@ -32,7 +32,7 @@ describe('InventoryProductListComponent', () => {
       name_hebrew: 'Milk',
       category_: 'Dairy',
       supplierId_: 'Supplier B',
-      allergens_: ['Dairy']
+      allergens_: ['milk products']
     } as Product
   ]);
 
