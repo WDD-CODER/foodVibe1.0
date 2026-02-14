@@ -1,0 +1,44 @@
+<div class="recipe-builder-container" dir="rtl">
+  <div class="builder-shell">
+
+    <section class="builder-section">
+      <app-recipe-header [form]="recipeForm_"></app-recipe-header>
+    </section>
+
+    <section class="builder-section">
+      <div class="section-card table-logic">
+        <h2 class="section-title">אינדקס מרכיבים</h2>
+
+        <app-recipe-ingredients-table [ingredientsFormArray]="ingredientsArray"
+          [portions]="recipeForm_.get('serving_portions')?.value || 1" (removeIngredient)="removeIngredient($event)">
+        </app-recipe-ingredients-table>
+
+        <button type="button" class="add-row-btn" (click)="addNewIngredientRow();$event.stopPropagation()">
+          <div class="plus-icon-wrapper">
+            <lucide-icon name="plus-circle" [size]="18"></lucide-icon>
+          </div>
+          <span class="btn-text">הוסף שורה</span>
+        </button>
+
+      </div>
+    </section>
+    <section class="builder-section">
+      <div class="section-card workflow-logic">
+        <h2 class="section-title">
+          {{ recipeForm_.get('recipe_type')?.value === 'dish' ? 'רשימת הכנות (מיזאנפלאס)' : 'תהליך הכנה / Prep Workflow'
+          }}
+        </h2>
+        <app-recipe-workflow [workflowFormArray]="workflowArray" [type]="recipeType_()" (addItem)="addNewStep()"
+          (removeItem)="deleteStep($event)">
+        </app-recipe-workflow>
+      </div>
+    </section>
+
+    <footer class="action-footer">
+      <button class="main-submit-btn" [disabled]="isSaving_()" (click)="saveRecipe()">
+        {{ isSaving_() ? 'שומר...' : 'שמור כמתכון מאושר / Approve & Save' }}
+      </button>
+    </footer>
+
+  </div>
+</div>

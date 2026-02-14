@@ -1,0 +1,76 @@
+<div class="workflow-container shadow-sm" dir="rtl" [formGroup]="$any(workflowFormArray().parent)">
+  
+  @if (type() === 'preparation') {
+    <div class="workflow-grid" formArrayName="workflow_items">
+      <div class="grid-header">
+        <div class="col-id text-center">#</div>
+        <div class="col-instruction">תהליך / Instruction</div>
+        <div class="col-timer text-center">זמן (דק')</div>
+        <div class="col-actions"></div>
+      </div>
+
+      <div class="grid-body">
+        @for (group of workflowGroups; track $index) {
+          <div [formGroupName]="$index" class="grid-row">
+            <div class="col-id">
+              <span class="step-badge">{{ $index + 1 }}</span>
+            </div>
+
+            <div class="col-instruction">
+              <textarea 
+                formControlName="instruction" 
+                class="workflow-textarea"
+                placeholder="תאר את פעולת ההכנה..."></textarea>
+            </div>
+
+            <div class="col-timer">
+              <div class="timer-input-group">
+                <lucide-icon name="timer" class="h-4 w-4 text-slate-400"></lucide-icon>
+                <input type="number" formControlName="labor_time" class="timer-field" />
+              </div>
+            </div>
+
+            <div class="col-actions">
+              <button (click)="removeItem.emit($index)" class="delete-btn">
+                <lucide-icon name="trash-2" class="h-4 w-4"></lucide-icon>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+      
+      <button type="button" (click)="addItem.emit()" class="add-row-btn">
+        <lucide-icon name="plus" class="ml-2 h-4 w-4"></lucide-icon>
+        הוסף שלב הכנה / Add Stage
+      </button>
+    </div>
+  }
+
+  @else {
+    <div class="mise-en-place-view" formArrayName="workflow_items">
+      @for (categoryGroup of workflowGroups; track $index) {
+        <div [formGroupName]="$index" class="category-block">
+          <div class="category-header">
+            <input formControlName="category_name" placeholder="שם קטגוריה (למשל: עמדת גריל)..." class="category-input" />
+            <button (click)="removeItem.emit($index)" class="text-rose-400 hover:text-rose-600">מחק קטגוריה</button>
+          </div>
+
+          <div class="category-items" formArrayName="items">
+            @for (item of getMiseItems(categoryGroup); track $itemIndex; let $itemIndex = $index) {
+              <div [formGroupName]="$itemIndex" class="mise-item-row">
+                <input formControlName="item_name" placeholder="שם ההכנה..." class="item-input" />
+                <input formControlName="unit" placeholder="יחידה" class="unit-input" />
+                </div>
+            }
+            <button type="button" class="add-item-btn" (click)="$any(categoryGroup.get('items')).push()">+ הוסף הכנה לקטגוריה</button>
+          </div>
+        </div>
+      }
+      
+      <button type="button" (click)="addItem.emit()" class="add-row-btn">
+        <lucide-icon name="plus" class="ml-2 h-4 w-4"></lucide-icon>
+        הוסף קטגוריית מיזאנפלאס / Add Category
+      </button>
+    </div>
+  }
+</div>

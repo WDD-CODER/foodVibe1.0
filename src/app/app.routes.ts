@@ -33,11 +33,11 @@ export const routes: Routes = [
   },
   {
     path: 'recipe-builder',
-    loadComponent: () => import('./pages/recipe/recipe-builder/recipe-builder.component').then(m => m.RecipeBuilderComponent)
+    loadComponent: () => import('./pages/recipe-builder/recipe-builder.page').then(m => m.RecipeBuilderPage)
   },
   {
     path: 'recipe-builder/:id',
-    loadComponent: () => import('./pages/recipe/recipe-builder/recipe-builder.component').then(m => m.RecipeBuilderComponent)
+    loadComponent: () => import('./pages/recipe-builder/recipe-builder.page').then(m => m.RecipeBuilderPage)
   },
   { path: '', redirectTo: 'inventory', pathMatch: 'full' },
 ];

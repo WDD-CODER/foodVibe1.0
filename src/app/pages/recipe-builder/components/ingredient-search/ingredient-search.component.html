@@ -1,0 +1,25 @@
+<div class="search-container" dir="rtl">
+  <div class="input-wrapper">
+    <lucide-icon name="search" size="18"></lucide-icon>
+    <input 
+      type="text" 
+      [value]="searchQuery_()"
+      (input)="searchQuery_.set($any($event.target).value)"
+      placeholder="חפש מוצר או מתכון" />
+  </div>
+
+  @if (filteredResults_().length > 0) {
+    <ul class="results-dropdown">
+      @for (item of filteredResults_(); track item._id) {
+        <li (click)="selectItem(item)" class="result-item">
+          <span class="item-name">{{ item.name_hebrew }}</span>
+          <span class="type-pill" 
+                [class.recipe]="item.item_type_ === 'recipe'"
+                [class.product]="item.item_type_ !== 'recipe'">
+            {{ item.item_type_ === 'recipe' ? 'מתכון' : 'מוצר' }}
+          </span>
+        </li>
+      }
+    </ul>
+  }
+</div>

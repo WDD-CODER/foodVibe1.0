@@ -1,0 +1,61 @@
+<div class="ingredients-container" dir="rtl">
+  <div class="ingredients-grid-header">
+    <div class="col-name">מרכיב</div>
+    <div class="col-unit">יחידה</div>
+    <div class="col-net">כמות נטו</div>
+    <div class="col-cost">עלות</div>
+    <div class="col-actions"></div>
+  </div>
+
+  <div class="ingredients-grid-body">
+    @for (group of ingredientGroups; track $index) {
+    <div [formGroup]="group" class="ingredient-grid-row">
+
+      <div class="col-name">
+        @if (!group.get('referenceId')?.value) {
+        <app-ingredient-search (itemSelected)="onItemSelected($event, group)"></app-ingredient-search>
+        } @else {
+        <div class="selected-item-display">
+          <span class="item-text">{{ group.get('name_hebrew')?.value }}</span>
+          <button type="button" class="clear-btn" (click)="group.patchValue({referenceId: null, name_hebrew: ''})">
+            <lucide-icon name="x" [size]="14"></lucide-icon>
+          </button>
+        </div>
+        }
+      </div>
+
+      <div class="col-unit">
+        @if (group.get('referenceId')?.value) {
+        <select formControlName="unit" class="grid-select" (change)="updateLineCalculations($index)">
+          @for (unit of getAvailableUnits(group); track unit) {
+          <option [value]="unit">{{ unit | translatePipe }}</option>
+          }
+        </select>
+        } @else {
+        <span class="placeholder-dash">---</span>
+        }
+      </div>
+
+      <div class="col-net">
+        <input type="number" SelectOnFocus formControlName="amount_net" (input)="updateLineCalculations($index)"
+          class="grid-input" placeholder="0" />
+      </div>
+
+      <div class="col-cost" [class.is-zero]="!group.get('total_cost')?.value">
+        @if (!group.get('total_cost')?.value) {
+        <span class="pending-text">ממתין...</span>
+        } @else {
+        <span class="cost-value">₪{{ group.get('total_cost')?.value | number:'1.2-2' }}</span>
+        }
+      </div>
+
+      <div class="col-actions">
+        <button type="button" (click)="removeIngredient.emit($index)" class="remove-btn">
+          <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+        </button>
+      </div>
+
+    </div>
+    }
+  </div>
+</div>

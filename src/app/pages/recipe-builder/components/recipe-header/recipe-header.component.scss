@@ -1,0 +1,243 @@
+.header-dashboard-container {
+  display: grid;
+  grid-template-columns: 120px minmax(100px, 1fr) 140px;
+  align-items: stretch;
+  gap: 1.5rem;
+  padding: 1rem;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.image-square {
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+
+  .header-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.center-controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  .top-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .recipe-name-input {
+      flex: 1;
+      background: transparent;
+      color: #1e293b;
+      font-size: 1.4rem;
+      font-weight: 800;
+      border: none;
+      border-bottom: 2px solid #f1f5f9;
+      outline: none;
+      transition: border-color 0.2s;
+
+      &:focus {
+        border-color: #1e3a8a;
+      }
+    }
+
+    .type-toggle-btn {
+      padding: 0.4rem 1rem;
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 0.8rem;
+      font-weight: 800;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      cursor: pointer;
+
+      &.dish-mode {
+        background: #dcfce7;
+        color: #166534;
+        border-color: #86efac;
+      }
+    }
+  }
+}
+
+.scaling-dock-grid {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  align-items: center;
+  gap: 12px;
+  margin-top: 1rem;
+}
+
+.scaling-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 50px;
+  transition: all 0.2s;
+
+unit-select-wrapper {
+  display: flex;
+  align-items: center;
+
+  .native-unit-select {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #1e3a8a; // Brand Blue
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 2px 4px;
+    appearance: none; // Removes default arrow in some browsers
+    
+    // Optional: Add a custom arrow back via background-image if you want it styled
+    
+    .add-new-option {
+      color: #059669; // Emerald-600
+      font-weight: bold;
+    }
+  }
+}
+
+  &.active {
+    background: #eff6ff;
+    border-color: #1e3a8a;
+  }
+
+  &.primary {
+    .unit-switcher-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+
+      .unit-name {
+        color: #1e3a8a;
+        font-size: 0.9rem;
+        font-weight: 800;
+      }
+    }
+  }
+}
+
+.counter-grid {
+  display: grid;
+  grid-template-columns: 32px 1fr 32px;
+  align-items: center;
+  height: 36px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  overflow: hidden;
+
+  .ctrl-btn {
+    height: 100%;
+    border: none;
+    background: #f8fafc;
+    color: #1e3a8a;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+    &:hover { background: #f1f5f9; }
+    &:disabled { opacity: 50% }
+  }
+
+  .input-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .chip-input-native {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    text-align: center;
+    font-weight: 800;
+    font-size: 1rem;
+    color: #1e3a8a;
+    padding: 0 !important;
+    margin: 0;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+}
+
+.secondary-units-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 12px;
+  border-right: 2px solid #f1f5f9;
+}
+
+.add-custom-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  color: #94a3b8;
+  border: 2px dashed #cbd5e1;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #f8fafc;
+    color: #1e3a8a;
+    border-color: #1e3a8a;
+  }
+}
+
+.metrics-square {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0.5rem;
+  background: #1e3a8a;
+  color: #ffffff;
+  border-radius: 8px;
+  text-align: center;
+
+  .metric-group {
+    .label {
+      display: block;
+      margin-bottom: 2px;
+      font-size: 0.65rem;
+      opacity: 0.8;
+    }
+    .value {
+      font-size: 1.1rem;
+      font-weight: 900;
+    }
+  }
+
+  .divider {
+    width: 40%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+  }
+}

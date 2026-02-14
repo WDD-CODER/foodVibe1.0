@@ -1,0 +1,89 @@
+.workflow-grid {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-family: 'Heebo', sans-serif;
+
+  .grid-header {
+    display: grid;
+    grid-template-columns: 60px 1fr 120px 50px;
+    background: #f8fafc;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 0.75rem;
+    font-weight: 700;
+    color: #1e3a8a;
+  }
+
+  .grid-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 120px 50px;
+    border-bottom: 1px solid #f1f5f9;
+    padding: 1rem 0.75rem;
+    align-items: center;
+    
+    &:last-child { border-bottom: none; }
+  }
+}
+
+.step-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #1e3a8a;
+  color: white;
+  border-radius: 4px;
+  font-weight: 800;
+}
+
+.workflow-textarea {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 0.5rem;
+  font-size: 0.95rem;
+  resize: none;
+  outline: none;
+
+  &:focus {
+    border-color: #cbd5e1;
+    background: #fff;
+    border-radius: 4px;
+  }
+}
+
+.timer-input-group {
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+
+  .timer-field {
+    width: 100%;
+    background: transparent;
+    border: none;
+    text-align: center;
+    font-weight: 700;
+    outline: none;
+  }
+}
+
+.add-row-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #fff;
+  color: #1e3a8a;
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  &:hover { background: #f0f4ff; }
+}
