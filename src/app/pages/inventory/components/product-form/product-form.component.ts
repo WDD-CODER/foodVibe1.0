@@ -39,7 +39,6 @@ export class ProductFormComponent implements OnInit {
 
   private readonly fb_ = inject(FormBuilder);
   private readonly conversionService = inject(ConversionService);
-  private readonly userMsgService = inject(UserMsgService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly kitchenStateService = inject(KitchenStateService);
