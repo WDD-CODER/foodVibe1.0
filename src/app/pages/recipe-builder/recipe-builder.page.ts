@@ -1,4 +1,5 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -6,6 +7,8 @@ import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
+import { UnitRegistryService } from '@services/unit-registry.service';
+import { RecipeCostService } from '@services/recipe-cost.service';
 import { Ingredient } from '@models/ingredient.model';
 import { Recipe, RecipeStep, MiseCategory } from '@models/recipe.model';
 import { RecipeHeaderComponent } from './components/recipe-header/recipe-header.component';
@@ -30,6 +33,8 @@ export class RecipeBuilderPage implements OnInit {
   private fb = inject(FormBuilder);
   private readonly state_ = inject(KitchenStateService);
   private readonly route_ = inject(ActivatedRoute);
+  private readonly unitRegistry_ = inject(UnitRegistryService);
+  private readonly recipeCostService_ = inject(RecipeCostService);
 
   //SIGNALS
   protected isSaving_ = signal(false);
@@ -38,8 +43,9 @@ export class RecipeBuilderPage implements OnInit {
 
   //COMPUTED
   protected totalCost_ = computed(() => {
-    const ingredients = this.recipeForm_.get('ingredients')?.value || [];
-    return ingredients.reduce((acc: number, ing: any) => acc + (ing.total_cost || 0), 0);
+    const raw = this.recipeForm_.getRawValue() as { ingredients?: { total_cost?: number }[] };
+    const ingredients = raw?.ingredients || [];
+    return ingredients.reduce((acc: number, ing: { total_cost?: number }) => acc + (ing.total_cost || 0), 0);
   });
   protected recipeType_ = computed<'preparation' | 'dish'>(() => {
     const value = this.recipeForm_.get('recipe_type')?.value;
@@ -66,6 +72,21 @@ export class RecipeBuilderPage implements OnInit {
     { initialValue: 1 }
   );
 
+  private destroyRef = inject(DestroyRef);
+
+  constructor() {
+    this.ingredientsArray.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.updateTotalWeightG());
+  }
+
+  private updateTotalWeightG(): void {
+    const raw = this.recipeForm_.getRawValue() as { ingredients?: { amount_net?: number; unit?: string }[] };
+    const rows = raw?.ingredients || [];
+    const weight = this.recipeCostService_.computeTotalWeightG(rows);
+    this.recipeForm_.get('total_weight_g')?.setValue(Math.round(weight), { emitEvent: false });
+  }
+
   ngOnInit(): void {
     const recipe = this.route_.snapshot.data['recipe'] as Recipe | null;
     if (recipe) {
@@ -75,6 +96,7 @@ export class RecipeBuilderPage implements OnInit {
     if (this.ingredientsArray.length === 0) {
       this.addNewIngredientRow();
     }
+    this.updateTotalWeightG();
   }
 
   private patchFormFromRecipe(recipe: Recipe): void {
@@ -235,7 +257,10 @@ export class RecipeBuilderPage implements OnInit {
     const recipe = this.buildRecipeFromForm();
 
     this.state_.saveRecipe(recipe).subscribe({
-      next: () => {
+      next: (saved) => {
+        if (saved && !this.recipeId_()) {
+          this.recipeId_.set(saved._id);
+        }
         this.isSaving_.set(false);
         this.isSubmitted = true;
         this.recipeForm_.markAsPristine();
@@ -307,6 +332,10 @@ export class RecipeBuilderPage implements OnInit {
 
   removeIngredient(index: number): void {
     this.ingredientsArray.removeAt(index);
+  }
+
+  protected onOpenUnitCreator(): void {
+    this.unitRegistry_.openUnitCreator();
   }
 
   deleteStep(index: number): void {
