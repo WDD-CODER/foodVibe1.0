@@ -19,7 +19,8 @@ export class UnitRegistryService {
     'liter': 1000,
     'gram': 1,
     'ml': 1,
-    'unit': 1
+    'unit': 1,
+    'dish': 1
   });
 
   // COMPUTED
@@ -33,7 +34,7 @@ export class UnitRegistryService {
    * Hydrates the registry from storage or persists defaults if empty.
    */
   private async initUnits(): Promise<void> {
-    const DEFAULT_UNITS = { 'kg': 1000, 'liter': 1000, 'gram': 1, 'ml': 1, 'unit': 1 };
+    const DEFAULT_UNITS = { 'kg': 1000, 'liter': 1000, 'gram': 1, 'ml': 1, 'unit': 1, 'dish': 1 };
 
     try {
       const registries = await this.storageService.query<any>(this.STORAGE_KEY);
@@ -57,7 +58,9 @@ export class UnitRegistryService {
         }
         this.globalUnits_.set(DEFAULT_UNITS);
       } else {
-        this.globalUnits_.set(existingRegistry.units);
+        const units = { ...existingRegistry.units };
+        if (!('dish' in units)) units['dish'] = 1;
+        this.globalUnits_.set(units);
       }
     } catch (err) {
       console.error('Failed to hydrate units:', err);
