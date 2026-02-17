@@ -15,6 +15,7 @@ import { UnitRegistryService } from '@services/unit-registry.service';
   styleUrl: './recipe-header.component.scss'
 })
 export class RecipeHeaderComponent {
+  // INJECTED
   private fb = inject(FormBuilder);
   private unitRegistryService = inject(UnitRegistryService);
   private kitchenStateService = inject(KitchenStateService);

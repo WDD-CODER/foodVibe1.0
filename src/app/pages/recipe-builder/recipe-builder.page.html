@@ -2,7 +2,8 @@
   <div class="builder-shell">
 
     <section class="builder-section">
-      <app-recipe-header [form]="recipeForm_" [currentCost]="totalCost_()"></app-recipe-header>
+      <app-recipe-header [form]="recipeForm_" [currentCost]="totalCost_()"
+        (openUnitCreator)="onOpenUnitCreator()"></app-recipe-header>
     </section>
 
     <section class="builder-section">

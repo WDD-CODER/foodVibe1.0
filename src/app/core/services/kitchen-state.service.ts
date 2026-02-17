@@ -1,6 +1,6 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { from, throwError, of, Observable } from 'rxjs';
-import { tap, catchError, switchMap, map } from 'rxjs/operators';
+import { tap, catchError, switchMap } from 'rxjs/operators';
 import { Product } from '../models/product.model';
 import { Recipe } from '../models/recipe.model';
 import { Supplier } from '@models/supplier.model';
@@ -75,7 +75,7 @@ export class KitchenStateService {
   }
 
   // RECIPE CRUD
-  saveRecipe(recipe: Recipe): Observable<void> {
+  saveRecipe(recipe: Recipe): Observable<Recipe> {
     const isUpdate = !!(recipe._id && recipe._id.trim() !== '');
 
     const operation$ = isUpdate
@@ -83,8 +83,7 @@ export class KitchenStateService {
       : from(this.recipeDataService.addRecipe(recipe as Omit<Recipe, '_id'>));
 
     return operation$.pipe(
-      map(() => undefined),
-      tap(() => {
+      tap((saved) => {
         const msg = isUpdate ? 'המתכון עודכן בהצלחה' : 'המתכון נשמר בהצלחה';
         this.userMsgService.onSetSuccessMsg(msg);
       }),

@@ -14,7 +14,7 @@ describe('HeaderComponent', () => {
         // מספקים נתיבים ריקים כדי לאפשר ל-RouterLink לעבוד בבדיקה
         provideRouter([
           { path: 'inventory', redirectTo: '' },
-          { path: 'recipes', redirectTo: '' },
+          { path: 'recipe-builder', redirectTo: '' },
           { path: 'dishes', redirectTo: '' },
           { path: 'menu-creating', redirectTo: '' },
           { path: 'checklist-creator', redirectTo: '' }
@@ -39,7 +39,7 @@ describe('HeaderComponent', () => {
     const hrefs = linkDebugElements.map(de => de.attributes['routerLink']);
 
     expect(hrefs).toContain('/inventory');
-    expect(hrefs).toContain('/recipes');
+    expect(hrefs).toContain('/recipe-builder');
     expect(hrefs).toContain('/dishes');
     expect(hrefs).toContain('/menu-creating');
     expect(hrefs).toContain('/command-center');

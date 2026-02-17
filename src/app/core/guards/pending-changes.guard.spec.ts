@@ -4,7 +4,7 @@ import { pendingChangesGuard } from './pending-changes.guard';
 
 describe('pendingChangesGuard', () => {
   const executeGuard: CanDeactivateFn<unknown> = (...guardParameters) =>
-    TestBed.runInInjectionContext(() => pendingChangesGuard(...guardParameters));
+    TestBed.runInInjectionContext(() => pendingChangesGuard(...(guardParameters as Parameters<typeof pendingChangesGuard>)));
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
