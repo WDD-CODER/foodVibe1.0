@@ -52,12 +52,17 @@ export class RecipeBuilderPage implements OnInit {
     return (value === 'dish') ? 'dish' : 'preparation';
   });
 
+  protected totalWeightG_ = computed(() => {
+    const raw = this.recipeForm_.getRawValue() as { total_weight_g?: number };
+    return raw?.total_weight_g ?? 0;
+  });
+
   protected recipeForm_ = this.fb.group({
     name_hebrew: ['', Validators.required],
     recipe_type: ['preparation'],
     serving_portions: [1, [Validators.required, Validators.min(1)]],
     yield_conversions: this.fb.array([
-      this.fb.group({ amount: [0], unit: ['gr'] })
+      this.fb.group({ amount: [0], unit: ['gram'] })
     ]),
     ingredients: this.fb.array([]),
     workflow_items: this.fb.array([]),
@@ -81,7 +86,9 @@ export class RecipeBuilderPage implements OnInit {
   }
 
   private updateTotalWeightG(): void {
-    const raw = this.recipeForm_.getRawValue() as { ingredients?: { amount_net?: number; unit?: string }[] };
+    const raw = this.recipeForm_.getRawValue() as {
+      ingredients?: { amount_net?: number; unit?: string; referenceId?: string; item_type?: string }[];
+    };
     const rows = raw?.ingredients || [];
     const weight = this.recipeCostService_.computeTotalWeightG(rows);
     this.recipeForm_.get('total_weight_g')?.setValue(Math.round(weight), { emitEvent: false });
@@ -110,8 +117,12 @@ export class RecipeBuilderPage implements OnInit {
     });
 
     const yieldConv = this.yieldConversionsArray.at(0);
-    if (yieldConv && !isDish) {
-      yieldConv.patchValue({ amount: recipe.yield_amount_, unit: recipe.yield_unit_ });
+    if (yieldConv) {
+      if (isDish) {
+        yieldConv.patchValue({ amount: recipe.yield_amount_, unit: 'dish' });
+      } else {
+        yieldConv.patchValue({ amount: recipe.yield_amount_, unit: recipe.yield_unit_ });
+      }
     }
 
     this.ingredientsArray.clear();
@@ -193,7 +204,7 @@ export class RecipeBuilderPage implements OnInit {
       name_hebrew: [item?.name_hebrew || ''],
       amount_net: [item ? 1 : null, [Validators.required, Validators.min(0)]],
       yield_percentage: [item?.yield_percentage || 1],
-      unit: [item?.base_unit_ || 'gr'],
+      unit: [item?.base_unit_ || 'gram'],
       total_cost: [{ value: 0, disabled: true }]
     });
   }
@@ -313,7 +324,7 @@ export class RecipeBuilderPage implements OnInit {
 
     const yieldConv = (raw['yield_conversions'] as { amount?: number; unit?: string }[])?.[0];
     const yieldAmount = isDish ? ((raw['serving_portions'] as number) ?? 1) : (yieldConv?.amount ?? 0);
-    const yieldUnit = isDish ? 'מנה' : (yieldConv?.unit ?? 'gr');
+    const yieldUnit = isDish ? 'מנה' : (yieldConv?.unit ?? 'gram');
 
     return {
       _id: (this.recipeId_() ?? '') as string,

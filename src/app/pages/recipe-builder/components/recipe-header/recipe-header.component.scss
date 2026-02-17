@@ -69,64 +69,71 @@
 
 .scaling-dock-grid {
   display: grid;
-  grid-template-columns: 180px 1fr;
+  grid-template-columns: minmax(auto, 160px) auto;
   align-items: center;
   gap: 12px;
   margin-top: 1rem;
 }
 
+// Shared chip design: primary and secondary identical, only backgrounds differ
 .scaling-chip {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 1rem;
+  // gap: 0.5rem;
+  padding: 0.5rem ;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 50px;
   transition: all 0.2s;
 
-unit-select-wrapper {
+  &.primary.active {
+    background: #eff6ff;
+    border-color: #1e3a8a;
+
+    .native-unit-select {
+      width: 45px;
+    }
+  }
+}
+
+// Shared unit-switcher: same design for primary and secondary
+.unit-switcher-btn {
   display: flex;
   align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+
+
+  .unit-select-wrapper {
+    display: flex;
+    align-items: center;
+  }
+
+  .unit-name,
+  .native-unit-select {
+    color: #1e3a8a;
+    font-size: 0.85rem;
+    font-weight: 800;
+  }
 
   .native-unit-select {
     background: transparent;
     border: none;
     outline: none;
-    color: #1e3a8a; // Brand Blue
-    font-weight: 800;
-    font-size: 0.9rem;
     cursor: pointer;
     padding: 2px 4px;
-    appearance: none; // Removes default arrow in some browsers
-    
-    // Optional: Add a custom arrow back via background-image if you want it styled
-    
+    appearance: none;
+
     .add-new-option {
-      color: #059669; // Emerald-600
+      color: #059669;
       font-weight: bold;
     }
   }
-}
 
-  &.active {
+  &:hover {
     background: #eff6ff;
-    border-color: #1e3a8a;
-  }
-
-  &.primary {
-    .unit-switcher-btn {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      cursor: pointer;
-
-      .unit-name {
-        color: #1e3a8a;
-        font-size: 0.9rem;
-        font-weight: 800;
-      }
-    }
   }
 }
 
@@ -140,6 +147,20 @@ unit-select-wrapper {
   border-radius: 8px;
   overflow: hidden;
 
+  &.small {
+    grid-template-columns: 24px 1fr 24px;
+    height: 28px;
+    border-radius: 6px;
+
+    .ctrl-btn {
+      font-size: 0.95rem;
+    }
+
+    .chip-input-native {
+      font-size: 0.85rem;
+    }
+  }
+
   .ctrl-btn {
     height: 100%;
     border: none;
@@ -149,8 +170,14 @@ unit-select-wrapper {
     font-weight: bold;
     cursor: pointer;
     transition: background 0.2s;
-    &:hover { background: #f1f5f9; }
-    &:disabled { opacity: 50% }
+
+    &:hover {
+      background: #f1f5f9;
+    }
+
+    &:disabled {
+      opacity: 50%
+    }
   }
 
   .input-wrapper {
@@ -178,17 +205,50 @@ unit-select-wrapper {
       -webkit-appearance: none;
       margin: 0;
     }
+
     appearance: textfield;
     -moz-appearance: textfield;
   }
 }
 
 .secondary-units-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-auto-flow: dense;
   align-items: center;
   gap: 8px;
   padding-right: 12px;
   border-right: 2px solid #f1f5f9;
+}
+
+.scaling-chip.secondary {
+  position: relative;
+
+  .unit-dropdown-menu.secondary-chip-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    min-width: 80px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    max-height: 160px;
+    overflow-y: auto;
+
+    .menu-item {
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+
+      &:hover {
+        background: #f1f5f9;
+      }
+    }
+  }
 }
 
 .add-custom-chip {
@@ -229,6 +289,7 @@ unit-select-wrapper {
       font-size: 0.65rem;
       opacity: 0.8;
     }
+
     .value {
       font-size: 1.1rem;
       font-weight: 900;

@@ -1,5 +1,20 @@
 # Recipe Builder Page – Implementation Plan
 
+## 0. Translation Workflow (i18n)
+
+**Rule**: All user-facing text must use `translatePipe` with an English key. Add each key to `public/assets/data/dictionary.json` in the appropriate section (`general` for UI, `units` for units).
+
+| Usage | Example |
+|-------|---------|
+| Template | `{{ 'cost' \| translatePipe }}` |
+| Dynamic key | `{{ unit \| translatePipe }}` |
+| Placeholder | `[placeholder]="'recipe_name_placeholder' \| translatePipe"` |
+| Programmatic | `this.translationService.translate('cost')` |
+
+**Per task**: When adding or changing UI text, add the key + Hebrew value to `dictionary.json` before or with the code change.
+
+---
+
 ## 1. Current State vs. Plan
 
 ### What Exists (Implemented)
@@ -60,11 +75,11 @@
 
 ### Phase A: Fix Critical Bugs
 
-1. **A1** – Wire `currentCost` to recipe-header: pass `totalCost_()` from page to `[currentCost]`.
-2. **A2** – Fix mise-en-place "Add item": add `addMiseItem(categoryGroup)` in `RecipeWorkflowComponent` (or page) that pushes a proper `FormGroup` via `FormBuilder`; replace broken button handler.
-3. **A3** – Implement recipe persistence: map form to `Recipe` (or extended DTO), call `KitchenStateService.addRecipe()` (and future update/delete), show success/error via `UserMsgService`.
+1. **A1** – Wire `currentCost` to recipe-header: pass `totalCost_()` from page to `[currentCost]`. *i18n*: Replace hardcoded "עלות / COST", "משקל / WEIGHT" with `translatePipe`; add `cost`, `weight` to `dictionary.json` if missing.
+2. **A2** – Fix mise-en-place "Add item": add `addMiseItem(categoryGroup)` in `RecipeWorkflowComponent` (or page) that pushes a proper `FormGroup` via `FormBuilder`; replace broken button handler. *i18n*: Add any new UI labels to `dictionary.json`.
+3. **A3** – Implement recipe persistence: map form to `Recipe` (or extended DTO), call `KitchenStateService.addRecipe()` (and future update/delete), show success/error via `UserMsgService`. *i18n*: Add success/error message keys to `dictionary.json`.
 4. **A4** – Add recipe data layer: extend `KitchenStateService` or create `RecipeDataService` with `addRecipe`, `updateRecipe`, `getRecipeById`; persist to `AsyncStorageService` if available.
-5. **A5** – Implement edit flow: add `recipeResolver` for `recipe-builder/:id`, inject `ActivatedRoute`, load recipe by id and patch form; differentiate create vs edit in `saveRecipe()`.
+5. **A5** – Implement edit flow: add `recipeResolver` for `recipe-builder/:id`, inject `ActivatedRoute`, load recipe by id and patch form; differentiate create vs edit in `saveRecipe()`. *i18n*: Add any new labels (e.g. `save`, `edit`, `create`) to `dictionary.json`.
 
 ### Phase B: Recipe-as-Ingredient & Cost
 
@@ -73,14 +88,15 @@
 
 ### Phase C: UX & Guardrails
 
-8. **C1** – Add `pendingChangesGuard` to recipe-builder routes (create + edit).
+8. **C1** – Add `pendingChangesGuard` to recipe-builder routes (create + edit). *i18n*: Add guard dialog message keys (e.g. `unsaved_changes`, `discard`, `stay`) to `dictionary.json`.
 9. **C2** – Make `portions` reactive: pass `portions` as computed/signal or ensure `recipe-ingredients-table` reacts to form value changes.
-10. **C3** – Handle `openUnitCreator`: wire to shared unit-creator flow (or stub for now).
+10. **C3** – Handle `openUnitCreator`: wire to shared unit-creator flow (or stub for now). *i18n*: Unit-creator UI strings must use `translatePipe`; add keys to `dictionary.json`.
 
 ### Phase D: Cleanup & Tests
 
 11. **D1** – Align `yield_percentage` / `yield_factor` naming across form and product model.
 12. **D2** – Expand specs: add behavior tests for save, edit load, cost calculation, workflow add/remove.
+13. **D3** – **i18n audit**: Replace all hardcoded Hebrew in recipe-builder components with `translatePipe`; ensure `recipe-header` (e.g. "מנה", "הכנה", "הוסף יחידה חדשה", "עלות / COST", "משקל / WEIGHT") uses dictionary keys; add any missing keys to `dictionary.json`.
 
 ---
 
