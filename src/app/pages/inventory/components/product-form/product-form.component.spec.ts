@@ -12,6 +12,7 @@ import { of } from 'rxjs';
 import { signal } from '@angular/core';
 import { LucideAngularModule, ShieldAlert, X, FlaskConical, Plus, Trash2, ArrowRight, Save } from 'lucide-angular';
 import { Product } from '@models/product.model';
+import { TranslationService } from '@services/translation.service';
 
 describe('ProductFormComponent', () => {
   let component: ProductFormComponent;
@@ -67,7 +68,8 @@ describe('ProductFormComponent', () => {
         {
           provide: ActivatedRoute,
           useValue: { data: of({ product: null }), params: of({}) }
-        }
+        },
+        { provide: TranslationService, useValue: { translate: (k: string) => k || '' } }
       ]
     }).compileComponents();
 

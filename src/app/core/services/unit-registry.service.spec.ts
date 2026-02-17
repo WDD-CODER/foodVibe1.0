@@ -1,50 +1,56 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { UnitRegistryService } from './unit-registry.service';
+import { StorageService } from './async-storage.service';
+import { UserMsgService } from './user-msg.service';
 
 describe('UnitRegistryService', () => {
   let service: UnitRegistryService;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [UnitRegistryService]
-    });
-    service = TestBed.inject(UnitRegistryService);
-  });
+  beforeEach(fakeAsync(() => {
+    const storageSpy = jasmine.createSpyObj('StorageService', ['query', 'put', 'post']);
+    storageSpy.query.and.returnValue(Promise.resolve([]));
+    storageSpy.put.and.returnValue(Promise.resolve());
+    storageSpy.post.and.returnValue(Promise.resolve());
 
- it('should be created and have initial units', () => {
+    const userMsgSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg']);
+
+    TestBed.configureTestingModule({
+      providers: [
+        UnitRegistryService,
+        { provide: StorageService, useValue: storageSpy },
+        { provide: UserMsgService, useValue: userMsgSpy }
+      ]
+    });
+
+    service = TestBed.inject(UnitRegistryService);
+    tick(); // let initUnits() complete
+  }));
+
+  it('should be created and have initial units', () => {
     expect(service).toBeTruthy();
-    
-    // 1. Verify the computed list of keys
     const units = service.allUnitKeys_();
     expect(units).toContain('kg');
     expect(units).toContain('gram');
-
-    // 2. Verify specific conversion rates (The SoT Check)
-    // 'ק"ג' should be 1000 (grams)
     expect(service.getConversion('kg')).toBe(1000);
-    
-    // 'גרם' should be 1 (base unit)
     expect(service.getConversion('gram')).toBe(1);
   });
 
   describe('Registry Operations', () => {
-    it('should register a new unit and update the allUnitKeys_ computed signal', () => {
-      // 1. Register a new unit using English key (or custom name)
+    it('should register a new unit and update the allUnitKeys_ computed signal', fakeAsync(() => {
       service.registerUnit('sack', 25000);
-      
-      // 2. Assert signal reactivity using correctly named property
+      tick();
       expect(service.allUnitKeys_()).toContain('sack');
       expect(service.getConversion('sack')).toBe(25000);
-    });
+    }));
 
-    it('should update an existing unit rate', () => {
-      // LOGIC CHANGE: Standardized English Key
-      service.registerUnit('gram', 2); // Overwriting base gram
-      expect(service.getConversion('gram')).toBe(2);
-    });
+    it('should not overwrite existing unit (shows message instead)', fakeAsync(() => {
+      const rateBefore = service.getConversion('gram');
+      service.registerUnit('gram', 2);
+      tick();
+      expect(service.getConversion('gram')).toBe(rateBefore);
+    }));
 
     it('should return 1 as a fallback for unknown units', () => {
-      // Rule: Safety fallback to prevent division by zero in ConversionService [cite: 464]
       expect(service.getConversion('UnknownUnit')).toBe(1);
     });
   });

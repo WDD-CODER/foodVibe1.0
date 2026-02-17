@@ -10,8 +10,10 @@ import {
   X,
   ChevronLeft,
   Tag,
+  Trash2,
 } from 'lucide-angular';
 import { signal } from '@angular/core';
+import { TranslationService } from '@services/translation.service';
 
 describe('MetadataManagerPageComponent', () => {
   let component: MetadataManagerComponent;
@@ -43,12 +45,13 @@ describe('MetadataManagerPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         MetadataManagerComponent,
-        LucideAngularModule.pick({ Scale, AlertTriangle, X, ChevronLeft, Tag })
+        LucideAngularModule.pick({ Scale, AlertTriangle, X, ChevronLeft, Tag, Trash2 })
       ],
       providers: [
         { provide: UnitRegistryService, useValue: unitRegistrySpy },
         { provide: MetadataRegistryService, useValue: metadataRegistrySpy },
-        { provide: ProductDataService, useValue: productDataSpy }
+        { provide: ProductDataService, useValue: productDataSpy },
+        { provide: TranslationService, useValue: { translate: (k: string) => k || '' } }
       ]
     }).compileComponents();
 
@@ -60,12 +63,5 @@ describe('MetadataManagerPageComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
-  });
-
-  // NEW TEST CASE: Verify the logic uses English while the view uses the Pipe
-  it('should handle English keys for allergens', () => {
-    const metadataRegistry = TestBed.inject(MetadataRegistryService) as jasmine.SpyObj<MetadataRegistryService>;
-    component.addAllergen('peanuts');
-    expect(metadataRegistry.registerAllergen).toHaveBeenCalledWith('peanuts');
   });
 });

@@ -1,54 +1,69 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { MetadataRegistryService } from './metadata-registry.service';
 import { ProductDataService } from './product-data.service';
+import { StorageService } from './async-storage.service';
+import { UserMsgService } from './user-msg.service';
 import { signal } from '@angular/core';
 import { Product } from '../models/product.model';
-import { KitchenUnit } from '../models/units.enum';
 
 describe('MetadataRegistryService', () => {
   let service: MetadataRegistryService;
   let productDataSpy: jasmine.SpyObj<ProductDataService>;
-  
-  // Rule #4: Signal Mock for Dependency
   const mockProductsSignal = signal<Product[]>([]);
 
-  beforeEach(() => {
+  beforeEach(fakeAsync(() => {
     const pSpy = jasmine.createSpyObj('ProductDataService', ['updateProduct'], {
       allProducts_: mockProductsSignal
     });
 
+    const storageSpy = jasmine.createSpyObj('StorageService', ['query', 'put', 'post']);
+    storageSpy.query.and.callFake((entity: string) => {
+      if (entity === 'KITCHEN_CATEGORIES') {
+        return Promise.resolve([{ _id: 'c1', items: ['vegetables', 'dairy', 'meat', 'dry', 'fish'] }]);
+      }
+      if (entity === 'KITCHEN_ALLERGENS') {
+        return Promise.resolve([{ _id: 'a1', items: ['gluten', 'eggs', 'peanuts', 'nuts', 'soy', 'milk solids', 'sesame'] }]);
+      }
+      return Promise.resolve([]);
+    });
+    storageSpy.put.and.returnValue(Promise.resolve());
+    storageSpy.post.and.returnValue(Promise.resolve());
+
+    const userMsgSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg']);
+
     TestBed.configureTestingModule({
       providers: [
         MetadataRegistryService,
-        { provide: ProductDataService, useValue: pSpy }
+        { provide: ProductDataService, useValue: pSpy },
+        { provide: StorageService, useValue: storageSpy },
+        { provide: UserMsgService, useValue: userMsgSpy }
       ]
     });
 
     service = TestBed.inject(MetadataRegistryService);
     productDataSpy = TestBed.inject(ProductDataService) as jasmine.SpyObj<ProductDataService>;
-  });
+    tick(); // let initMetadata() complete
+  }));
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
   describe('Signal Management', () => {
-    it('should register a new allergen if it does not exist', () => {
+    it('should register a new allergen if it does not exist', fakeAsync(() => {
       const initialCount = service.allAllergens_().length;
-      // LOGIC CHANGE: Use English Key
       service.registerAllergen('shellfish');
-      
+      tick();
       expect(service.allAllergens_()).toContain('shellfish');
       expect(service.allAllergens_().length).toBe(initialCount + 1);
-    });
+    }));
 
-    it('should not register duplicate allergens', () => {
+    it('should not register duplicate allergens', fakeAsync(() => {
       const initialCount = service.allAllergens_().length;
-      // LOGIC CHANGE: Use English Key (Match the default set in Service)
-      service.registerAllergen('gluten'); 
-      
+      service.registerAllergen('gluten');
+      tick();
       expect(service.allAllergens_().length).toBe(initialCount);
-    });
+    }));
   });
 
   describe('Async Logic: purgeGlobalUnit', () => {

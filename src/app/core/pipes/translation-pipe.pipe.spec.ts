@@ -1,10 +1,36 @@
+import { TestBed } from '@angular/core/testing';
 import { TranslatePipe } from './translation-pipe.pipe';
+import { TranslationService } from '@services/translation.service';
 
 describe('TranslatePipe', () => {
   let pipe: TranslatePipe;
+  let mockTranslationService: jasmine.SpyObj<TranslationService>;
 
   beforeEach(() => {
-    pipe = new TranslatePipe();
+    mockTranslationService = jasmine.createSpyObj('TranslationService', ['translate']);
+    mockTranslationService.translate.and.callFake((key: string | undefined) => {
+      if (key === undefined || key === '') return '';
+      const k = key.trim().toLowerCase();
+      const dict: Record<string, string> = {
+        kg: 'קילו',
+        gram: 'גרם',
+        ml: 'מ"ל',
+        dairy: 'חלבי',
+        meat: 'בשר',
+        add: 'הוסף',
+        new_unit: 'יחידה חדשה'
+      };
+      return dict[k] ?? key;
+    });
+
+    TestBed.configureTestingModule({
+      providers: [
+        TranslatePipe,
+        { provide: TranslationService, useValue: mockTranslationService }
+      ]
+    });
+
+    pipe = TestBed.inject(TranslatePipe);
   });
 
   it('create an instance', () => {
@@ -31,13 +57,11 @@ describe('TranslatePipe', () => {
 
   describe('Fallback and Safety Logic', () => {
     it('should return the original value if key is not in dictionary', () => {
-      // Test for custom units registered by the user
       const customUnit = 'דלי פלסטיק';
       expect(pipe.transform(customUnit)).toBe(customUnit);
     });
 
-    it('should return an empty string for null or undefined values', () => {
-      expect(pipe.transform(null)).toBe('');
+    it('should return an empty string for undefined or empty values', () => {
       expect(pipe.transform(undefined)).toBe('');
       expect(pipe.transform('')).toBe('');
     });
