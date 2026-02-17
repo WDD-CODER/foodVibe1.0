@@ -7,10 +7,10 @@
         <div class="top-row">
             <button type="button" (click)="toggleType()" class="type-toggle-btn"
                 [class.dish-mode]="form().get('recipe_type')?.value === 'dish'">
-                {{ form().get('recipe_type')?.value === 'dish' ? 'מנה' : 'הכנה' }}
+                {{ (form().get('recipe_type')?.value === 'dish' ? 'dish' : 'prep') | translatePipe }}
             </button>
             <input formControlName="name_hebrew"
-                placeholder="שם {{ form().get('recipe_type')?.value === 'dish' ? 'המנה' : 'המתכון' }}..."
+                [placeholder]="((form().get('recipe_type')?.value === 'dish' ? 'dish_name_placeholder' : 'recipe_name_placeholder') | translatePipe) + '...'"
                 class="recipe-name-input" />
         </div>
 
@@ -20,17 +20,18 @@
                     <div class="unit-select-wrapper">
                         <select class="native-unit-select" [value]="primaryUnitLabel_()"
                             (change)="onPrimaryUnitChange($event)">
-                            @for (key of availableUnits_(); track key) {
-                            <option [value]="key">{{ key }}</option>
+                            @for (key of availablePrimaryUnits_(); track key) {
+                            <option [value]="key">{{ key | translatePipe }}</option>
                             }
                             <option value="NEW_UNIT" class="add-new-option">
-                                + הוסף יחידה חדשה
+                                + {{ 'add_new_unit' | translatePipe }}
                             </option>
                         </select>
-                    </div> <lucide-icon name="chevron-down" [size]="12"></lucide-icon>
+                    </div>
+                    <lucide-icon name="chevron-down" [size]="10"></lucide-icon>
                 </div>
 
-                <div class="counter-grid">
+                <div class="counter-grid small">
                     <button type="button" class="ctrl-btn disabled" [disabled]="primaryAmount_() === 0"
                         (click)="updatePrimaryAmount(-1)">-</button>
                     <div class="input-wrapper">
@@ -46,11 +47,31 @@
             <div class="secondary-units-container">
                 @for (group of secondaryConversions; track $index) {
                 <div class="scaling-chip secondary">
-                    <span class="unit-name">{{ group.get('unit')?.value }}</span>
+                    <div class="unit-switcher-btn " (click)="setActiveSecondaryEdit($index)">
+                        <span class="unit-name">{{ group.get('unit')?.value | translatePipe }}</span>
+                        <lucide-icon name="chevron-down" [size]="10"></lucide-icon>
+                    </div>
+                    @if (activeSecondaryEdit_() === $index) {
+                    <div class="unit-dropdown-menu secondary-chip-dropdown">
+                        @for (unit of availableUnitsForSecondaryChip_($index); track unit) {
+                        <div class="menu-item" (click)="changeSecondaryUnit($index, unit)">
+                            {{ unit | translatePipe }}
+                        </div>
+                        }
+                    </div>
+                    }
 
                     <div class="counter-grid small">
-                        <input type="number" class="chip-input-native" [value]="group.get('amount')?.value"
-                            (input)="group.get('amount')?.patchValue($any($event.target).value)">
+                        <button type="button" class="ctrl-btn" [disabled]="(group.get('amount')?.value ?? 0) === 0"
+                            (click)="updateSecondaryAmount($index, -1)">-</button>
+                        <div class="input-wrapper">
+                            <input type="number" #secInput SelectOnFocus class="chip-input-native"
+                                [value]="group.get('amount')?.value"
+                                (input)="onSecondaryAmountInput(group, $any($event.target).value)"
+                                (blur)="onSecondaryAmountInput(group, $any($event.target).value)"
+                                (keydown.enter)="$event.preventDefault(); secInput.blur()">
+                        </div>
+                        <button type="button" class="ctrl-btn" (click)="updateSecondaryAmount($index, 1)">+</button>
                     </div>
 
                     <button type="button" class="remove-btn" (click)="removeSecondaryUnit($index)">
@@ -60,19 +81,9 @@
                 }
 
                 <div class="add-unit-wrapper">
-                    <button type="button" class="add-custom-chip" (click)="setActiveUnit('selector')">
+                    <button type="button" class="add-custom-chip" (click)="addSecondaryChipWithDefault()">
                         <lucide-icon name="plus" [size]="16"></lucide-icon>
                     </button>
-
-                    @if (activeUnit() === 'selector') {
-                    <div class="unit-dropdown-menu">
-                        @for (unit of availableUnits_(); track unit) {
-                        <div class="menu-item" (click)="addSecondaryUnit(unit)">
-                            {{ unit }}
-                        </div>
-                        }
-                    </div>
-                    }
                 </div>
             </div>
         </div>
@@ -80,13 +91,13 @@
 
     <div class="metrics-square">
         <div class="metric-group">
-            <span class="label">עלות / COST</span>
+            <span class="label">{{ 'cost' | translatePipe }}</span>
             <span class="value">₪{{ currentCost() | number:'1.2-2' }}</span>
         </div>
         <div class="divider"></div>
         <div class="metric-group">
-            <span class="label">משקל / WEIGHT</span>
-            <span class="value">{{ form().get('total_weight_g')?.value || 0 }}g</span>
+            <span class="label">{{ 'weight' | translatePipe }}</span>
+            <span class="value">{{ totalWeightG() }}g</span>
         </div>
     </div>
 </div>

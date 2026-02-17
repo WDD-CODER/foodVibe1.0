@@ -1,26 +1,44 @@
 {
-  "cup": "כוס",
-  "dairy": "חלבי",
-  "dry": "יבש",
-  "eggs": "ביצים",
-  "fish": "דגים",
-  "gluten": "גלוטן",
-  "gram": "גרם",
-  "kg": "ק\"ג",
-  "liter": "ליטר",
-  "meat": "בשר",
-  "milk_solids": "לקטוז/חלב",
-  "ml": "מ\"ל",
-  "nuts": "אגוזים",
-  "peanuts": "בוטנים",
-  "search": "חיפוש",
-  "seafood": "פירות ים",
-  "sesame": "שומשום",
-  "shellfish": "סרטניים",
-  "soy": "סויה",
-  "spices": "תבלינים",
-  "tbsp": "כף",
-  "tsp": "כפית",
-  "unit": "יחידה",
-  "vegetables": "ירקות"
+  "units": {
+    "cup": "כוס",
+    "gram": "גרם",
+    "kg": "ק\"ג",
+    "liter": "ליטר",
+    "ml": "מ\"ל",
+    "tbsp": "כף",
+    "tsp": "כפית",
+    "unit": "יחידה"
+  },
+  "categories": {
+    "dairy": "חלבי",
+    "dry": "יבש",
+    "meat": "בשר",
+    "spices": "תבלינים",
+    "vegetables": "ירקות"
+  },
+  "allergens": {
+    "eggs": "ביצים",
+    "fish": "דגים",
+    "gluten": "גלוטן",
+    "milk_solids": "לקטוז/חלב",
+    "nuts": "אגוזים",
+    "peanuts": "בוטנים",
+    "seafood": "פירות ים",
+    "sesame": "שומשום",
+    "shellfish": "סרטניים",
+    "soy": "סויה"
+  },
+  "general": {
+    "search": "חיפוש",
+    "new_category": "קטגוריה חדשה",
+    "new_unit": "יחידה חדשה",
+    "price": "מחיר",
+    "add_new_unit": "הוסף יחידה חדשה",
+    "cost": "עלות",
+    "weight": "משקל",
+    "dish": "מנה",
+    "prep": "הכנה",
+    "recipe_name_placeholder": "שם המתכון",
+    "dish_name_placeholder": "שם המנה"
+  }
 }
