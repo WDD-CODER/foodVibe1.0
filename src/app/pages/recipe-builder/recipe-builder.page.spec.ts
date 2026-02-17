@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
 import { RecipeBuilderPage } from './recipe-builder.page';
 
 describe('RecipeBuilderComponent', () => {
@@ -8,9 +9,16 @@ describe('RecipeBuilderComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RecipeBuilderPage]
-    })
-    .compileComponents();
+      imports: [RecipeBuilderPage],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { data: {}, paramMap: { get: () => null } }
+          }
+        }
+      ]
+    }).compileComponents();
 
     fixture = TestBed.createComponent(RecipeBuilderPage);
     component = fixture.componentInstance;

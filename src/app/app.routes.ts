@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { productResolver } from './core/resolvers/product.resolver';
+import { recipeResolver } from './core/resolvers/recipe.resolver';
 import { pendingChangesGuard } from './core/guards/pending-changes.guard';
 
 export const routes: Routes = [
@@ -33,11 +34,14 @@ export const routes: Routes = [
   },
   {
     path: 'recipe-builder',
-    loadComponent: () => import('./pages/recipe-builder/recipe-builder.page').then(m => m.RecipeBuilderPage)
+    loadComponent: () => import('./pages/recipe-builder/recipe-builder.page').then(m => m.RecipeBuilderPage),
+    canDeactivate: [pendingChangesGuard]
   },
   {
     path: 'recipe-builder/:id',
-    loadComponent: () => import('./pages/recipe-builder/recipe-builder.page').then(m => m.RecipeBuilderPage)
+    loadComponent: () => import('./pages/recipe-builder/recipe-builder.page').then(m => m.RecipeBuilderPage),
+    resolve: { recipe: recipeResolver },
+    canDeactivate: [pendingChangesGuard]
   },
   { path: '', redirectTo: 'inventory', pathMatch: 'full' },
 ];

@@ -62,7 +62,7 @@
                 <input formControlName="unit" placeholder="יחידה" class="unit-input" />
                 </div>
             }
-            <button type="button" class="add-item-btn" (click)="$any(categoryGroup.get('items')).push()">+ הוסף הכנה לקטגוריה</button>
+            <button type="button" class="add-item-btn" (click)="addMiseItemToCategory(categoryGroup)">+ הוסף הכנה לקטגוריה</button>
           </div>
         </div>
       }

@@ -2,7 +2,7 @@
   <div class="builder-shell">
 
     <section class="builder-section">
-      <app-recipe-header [form]="recipeForm_"></app-recipe-header>
+      <app-recipe-header [form]="recipeForm_" [currentCost]="totalCost_()"></app-recipe-header>
     </section>
 
     <section class="builder-section">
@@ -10,7 +10,7 @@
         <h2 class="section-title">אינדקס מרכיבים</h2>
 
         <app-recipe-ingredients-table [ingredientsFormArray]="ingredientsArray"
-          [portions]="recipeForm_.get('serving_portions')?.value || 1" (removeIngredient)="removeIngredient($event)">
+          [portions]="portions_() ?? 1" (removeIngredient)="removeIngredient($event)">
         </app-recipe-ingredients-table>
 
         <button type="button" class="add-row-btn" (click)="addNewIngredientRow();$event.stopPropagation()">

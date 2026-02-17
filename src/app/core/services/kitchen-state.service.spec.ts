@@ -1,20 +1,21 @@
 import { TestBed } from '@angular/core/testing';
 import { KitchenStateService } from './kitchen-state.service';
 import { ProductDataService } from './product-data.service';
+import { RecipeDataService } from './recipe-data.service';
 import { UserMsgService } from './user-msg.service';
 import { Product } from '../models/product.model';
 import { Recipe } from '../models/recipe.model';
 import { Supplier } from '@models/supplier.model';
-import { KitchenUnit } from '@models/units.enum';
 import { signal, WritableSignal } from '@angular/core';
 
 describe('KitchenStateService', () => {
   let service: KitchenStateService;
   let productDataSpy: jasmine.SpyObj<ProductDataService>;
+  let recipeDataSpy: jasmine.SpyObj<RecipeDataService>;
   let userMsgSpy: jasmine.SpyObj<UserMsgService>;
 
-  // 1. Declare at describe level so all tests and beforeEach share the same instance
   const mockAllItemsSignal: WritableSignal<any[]> = signal<any[]>([]);
+  const mockRecipesSignal: WritableSignal<Recipe[]> = signal<Recipe[]>([]);
 
   const createMockProduct = (_id: string): Product => ({
     _id,
@@ -32,28 +33,35 @@ describe('KitchenStateService', () => {
   });
 
   beforeEach(() => {
-    // 2. Reset signal state before each test
     mockAllItemsSignal.set([]);
+    mockRecipesSignal.set([]);
 
     const iSpy = jasmine.createSpyObj('ProductDataService',
       ['addProduct', 'updateProduct', 'deleteProduct'],
       { allProducts_: mockAllItemsSignal }
     );
-    const uSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg']);
-
-    // 3. Directly assign the signal to the spy property so calling iSpy.allProducts_() works
     iSpy.allProducts_ = mockAllItemsSignal;
+
+    const rSpy = jasmine.createSpyObj('RecipeDataService',
+      ['addRecipe', 'updateRecipe', 'getRecipeById'],
+      { allRecipes_: mockRecipesSignal }
+    );
+    rSpy.allRecipes_ = mockRecipesSignal;
+
+    const uSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg']);
 
     TestBed.configureTestingModule({
       providers: [
         KitchenStateService,
         { provide: ProductDataService, useValue: iSpy },
+        { provide: RecipeDataService, useValue: rSpy },
         { provide: UserMsgService, useValue: uSpy }
       ]
     });
 
     service = TestBed.inject(KitchenStateService);
     productDataSpy = TestBed.inject(ProductDataService) as jasmine.SpyObj<ProductDataService>;
+    recipeDataSpy = TestBed.inject(RecipeDataService) as jasmine.SpyObj<RecipeDataService>;
     userMsgSpy = TestBed.inject(UserMsgService) as jasmine.SpyObj<UserMsgService>;
   });
 
@@ -118,10 +126,33 @@ describe('KitchenStateService', () => {
     });
   });
 
+  describe('Recipe CRUD', () => {
+    it('should call saveRecipe (add) and show success message', (done) => {
+      const recipe = {
+        _id: '',
+        name_hebrew: 'Hummus',
+        ingredients_: [],
+        steps_: [],
+        yield_amount_: 1,
+        yield_unit_: 'portion',
+        default_station_: '',
+        is_approved_: true
+      } as Recipe;
+      recipeDataSpy.addRecipe.and.returnValue(Promise.resolve({ ...recipe, _id: 'r1' }));
+
+      service.saveRecipe(recipe).subscribe(() => {
+        expect(recipeDataSpy.addRecipe).toHaveBeenCalled();
+        expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('המתכון נשמר בהצלחה');
+        done();
+      });
+    });
+  });
+
   describe('Direct State Updates', () => {
-    it('should update recipes_ signal', () => {
+    it('should sync recipes_ from RecipeDataService', () => {
       const recipe = { _id: 'r1', name_hebrew: 'Hummus' } as Recipe;
-      service.addRecipe(recipe);
+      mockRecipesSignal.set([recipe]);
+      TestBed.flushEffects();
       expect(service.recipes_()).toContain(recipe);
     });
 

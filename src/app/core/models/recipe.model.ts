@@ -7,6 +7,16 @@ export interface RecipeStep {
   video_url_?: string;
 }
 
+export interface MiseItem {
+  item_name: string;
+  unit: string;
+}
+
+export interface MiseCategory {
+  category_name: string;
+  items: MiseItem[];
+}
+
 export interface Recipe {
   _id: string;
   name_hebrew: string;
@@ -17,4 +27,6 @@ export interface Recipe {
   default_station_: string;
   is_approved_: boolean;
   version_history_?: string[];
+  /** For recipe_type === 'dish': mise-en-place categories and items */
+  mise_categories_?: MiseCategory[];
 }
