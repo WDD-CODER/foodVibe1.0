@@ -97,6 +97,7 @@
             <input type="text"
                    [ngModel]="allergenSearchQuery_()"
                    (ngModelChange)="allergenSearchQuery_.set($event)"
+                   [ngModelOptions]="{standalone: true}"
                    placeholder="חפש או בחר אלרגן..."
                    (focus)="showSuggestions = true"
                    [class.no-chips]="selectedAllergensSignal_().length === 0">

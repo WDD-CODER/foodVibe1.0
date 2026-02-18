@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { HeaderComponent } from '../core/componets/header/header.component';
 import { FooterComponent } from '../core/componets/footer/footer.component';
 import { UserMsg } from "src/app/core/componets/user-msg/user-msg.component";
@@ -38,6 +40,8 @@ describe('AppComponent', () => {
       ],
       providers: [
         provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: UserMsgService, useValue: mockUserMsgService },
         { provide: UnitRegistryService, useValue: mockUnitRegistry },
         { provide: ConversionService, useValue: {} }

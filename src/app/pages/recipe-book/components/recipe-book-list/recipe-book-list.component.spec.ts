@@ -4,7 +4,7 @@ import { KitchenStateService } from '@services/kitchen-state.service';
 import { RecipeCostService } from '@services/recipe-cost.service';
 import { Router } from '@angular/router';
 import { signal } from '@angular/core';
-import { LucideAngularModule, Search, Trash2, Pencil, Plus, Menu, X, ShieldAlert } from 'lucide-angular';
+import { LucideAngularModule, Search, Trash2, Pencil, Plus, Menu, X, ShieldAlert, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-angular';
 import { Recipe } from '@models/recipe.model';
 import { TranslationService } from '@services/translation.service';
 
@@ -38,7 +38,7 @@ describe('RecipeBookListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         RecipeBookListComponent,
-        LucideAngularModule.pick({ Search, Trash2, Pencil, Plus, Menu, X, ShieldAlert })
+        LucideAngularModule.pick({ Search, Trash2, Pencil, Plus, Menu, X, ShieldAlert, ArrowUpDown, ArrowUp, ArrowDown })
       ],
       providers: [
         { provide: KitchenStateService, useValue: mockKitchenState },

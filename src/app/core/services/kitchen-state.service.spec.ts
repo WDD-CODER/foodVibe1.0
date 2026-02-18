@@ -193,8 +193,16 @@ describe('KitchenStateService', () => {
 
   describe('Direct State Updates', () => {
     it('should sync recipes_ from RecipeDataService and DishDataService', () => {
-      const recipe = { _id: 'r1', name_hebrew: 'Hummus' } as Recipe;
-      const dish = { _id: 'd1', name_hebrew: 'Salad', prep_items_: [] } as Recipe;
+      const recipe: Recipe = {
+        _id: 'r1', name_hebrew: 'Hummus',
+        ingredients_: [], steps_: [], yield_amount_: 1, yield_unit_: 'portion',
+        default_station_: '', is_approved_: true
+      };
+      const dish: Recipe = {
+        _id: 'd1', name_hebrew: 'Salad', prep_items_: [],
+        ingredients_: [], steps_: [], yield_amount_: 1, yield_unit_: 'portion',
+        default_station_: '', is_approved_: true
+      };
       mockRecipesSignal.set([recipe]);
       mockDishesSignal.set([dish]);
       TestBed.flushEffects();

@@ -64,7 +64,13 @@ describe('ProductFormComponent', () => {
         { provide: MetadataRegistryService, useValue: mockMetadata },
         { provide: UtilService, useValue: mockUtil },
         { provide: UserMsgService, useValue: {} },
-        { provide: KitchenStateService, useValue: { saveProduct: () => of(null) } },
+        {
+          provide: KitchenStateService,
+          useValue: {
+            saveProduct: () => of(null),
+            suppliers_: signal([])
+          }
+        },
         {
           provide: ActivatedRoute,
           useValue: { data: of({ product: null }), params: of({}) }
