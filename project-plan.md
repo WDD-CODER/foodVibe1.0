@@ -54,6 +54,6 @@ The application is **written in English** (keys, IDs, code) but **serves Hebrew 
 4. **Shared**: Reusable UI in `src/app/shared/`; app shell in `src/app/appRoot/`.
 
 ## Next Steps
-- Align any new features with this plan and the `plan/` folder.
+- Align any new features with this plan and the `plans/` folder.
 - Keep `agent.md` and `.assistant/copilot-instructions.md` as the source of truth for AI agents.
 - **i18n**: For every new user-facing string, add the English key to `dictionary.json` and use `translatePipe` in templates (or `translationService.translate()` in code).

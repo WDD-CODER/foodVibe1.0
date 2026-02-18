@@ -1,22 +1,23 @@
-import { Component, input, output, inject, computed } from '@angular/core';
+import { Component, input, output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormArray, FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormArray, FormGroup, FormBuilder } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { RecipeCostService } from '@services/recipe-cost.service';
+import type { IngredientWeightRow } from '@services/recipe-cost.service';
 import { IngredientSearchComponent } from '../ingredient-search/ingredient-search.component';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
-import { SelectOnFocusDirective } from "@directives/select-on-focus.directive";
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 
 @Component({
   selector: 'app-recipe-ingredients-table',
   standalone: true,
-  imports: [CommonModule,
+  imports: [
+    CommonModule,
     ReactiveFormsModule,
     LucideAngularModule,
     IngredientSearchComponent,
     TranslatePipe,
-    SelectOnFocusDirective,
     SelectOnFocusDirective
   ],
   templateUrl: './recipe-ingredients-table.component.html',
@@ -31,18 +32,8 @@ export class RecipeIngredientsTableComponent {
   //INPUT OUTPUT
   ingredientsFormArray = input.required<FormArray>();
   portions = input<number>(1);
-  removeIngredient = output<number>(); // Emit index for removal
-  addIngredient = output<any>();
-
-  //COMPUTED
-  protected totalMass_ = computed(() => {
-    return this.ingredientGroups.reduce((acc, group) => {
-      const net = group.get('amount_net')?.value || 0;
-      return acc + (net * (this.portions() || 1));
-    }, 0);
-  });
-
-
+  removeIngredient = output<number>();
+  addIngredient = output<void>();
 
   // GETTERS
 
@@ -51,6 +42,44 @@ export class RecipeIngredientsTableComponent {
   }
 
 
+
+  incrementAmount(group: FormGroup, index: number): void {
+    const ctrl = group.get('amount_net');
+    const val = (ctrl?.value ?? 0) + 1;
+    ctrl?.setValue(val);
+    this.updateLineCalculations(index);
+  }
+
+  decrementAmount(group: FormGroup, index: number): void {
+    const ctrl = group.get('amount_net');
+    const val = Math.max(0, (ctrl?.value ?? 0) - 1);
+    ctrl?.setValue(val);
+    this.updateLineCalculations(index);
+  }
+
+  getTotalWeightG(): number {
+    const rows = this.ingredientGroups.map(g => ({
+      amount_net: g.get('amount_net')?.value,
+      unit: g.get('unit')?.value,
+      referenceId: g.get('referenceId')?.value,
+      item_type: g.get('item_type')?.value
+    })) as IngredientWeightRow[];
+    return this.recipeCostService.computeTotalWeightG(rows);
+  }
+
+  getPercentageDisplay(group: FormGroup): string {
+    const row: IngredientWeightRow = {
+      amount_net: group.get('amount_net')?.value,
+      unit: group.get('unit')?.value,
+      referenceId: group.get('referenceId')?.value,
+      item_type: group.get('item_type')?.value
+    };
+    const rowG = this.recipeCostService.getRowWeightG(row);
+    if (rowG === null) return 'n/a';
+    const total = this.getTotalWeightG();
+    if (total === 0) return '0%';
+    return `${((rowG / total) * 100).toFixed(1)}%`;
+  }
 
   onItemSelected(item: any, group: FormGroup) {
     group.patchValue({
@@ -61,11 +90,12 @@ export class RecipeIngredientsTableComponent {
       amount_net: 0,
     });
 
-    // Trigger calculation for this specific row immediately
     const index = this.ingredientGroups.indexOf(group);
     if (index !== -1) {
       this.updateLineCalculations(index);
     }
+
+    this.addIngredient.emit();
   }
 
   getItemMetadata(group: FormGroup) {

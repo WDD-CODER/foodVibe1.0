@@ -343,6 +343,9 @@ export class RecipeBuilderPage implements OnInit {
 
   removeIngredient(index: number): void {
     this.ingredientsArray.removeAt(index);
+    if (this.ingredientsArray.length === 0) {
+      this.addNewIngredientRow();
+    }
   }
 
   protected onOpenUnitCreator(): void {

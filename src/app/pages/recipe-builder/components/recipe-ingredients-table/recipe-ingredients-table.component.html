@@ -1,10 +1,11 @@
 <div class="ingredients-container" dir="rtl">
   <div class="ingredients-grid-header">
-    <div class="col-name">מרכיב</div>
-    <div class="col-unit">יחידה</div>
-    <div class="col-net">כמות נטו</div>
-    <div class="col-cost">עלות</div>
-    <div class="col-actions"></div>
+    <div class="col-name">{{ 'ingredient' | translatePipe }}</div>
+    <div class="col-quantity">{{ 'quantity' | translatePipe }}</div>
+    <div class="col-unit">{{ 'unit' | translatePipe }}</div>
+    <div class="col-percent">{{ 'percent' | translatePipe }}</div>
+    <div class="col-cost">{{ 'cost' | translatePipe }}</div>
+    <!-- <div class="col-actions">{{ 'actions' | translatePipe }}</div> -->
   </div>
 
   <div class="ingredients-grid-body">
@@ -24,6 +25,24 @@
         }
       </div>
 
+      <div class="col-quantity">
+        @if (group.get('referenceId')?.value) {
+        <div class="quantity-controls">
+          <button type="button" class="qty-btn minus" [disabled]="(group.get('amount_net')?.value ?? 0) <= 0"
+            (click)="decrementAmount(group, $index)">
+            <lucide-icon name="minus" [size]="16"></lucide-icon>
+          </button>
+          <input type="number" SelectOnFocus formControlName="amount_net" (input)="updateLineCalculations($index)"
+            class="grid-input qty-input" placeholder="0" />
+          <button type="button" class="qty-btn plus" (click)="incrementAmount(group, $index)">
+            <lucide-icon name="plus" [size]="16"></lucide-icon>
+          </button>
+        </div>
+        } @else {
+        <span class="placeholder-dash">---</span>
+        }
+      </div>
+
       <div class="col-unit">
         @if (group.get('referenceId')?.value) {
         <select formControlName="unit" class="grid-select" (change)="updateLineCalculations($index)">
@@ -36,14 +55,13 @@
         }
       </div>
 
-      <div class="col-net">
-        <input type="number" SelectOnFocus formControlName="amount_net" (input)="updateLineCalculations($index)"
-          class="grid-input" placeholder="0" />
+      <div class="col-percent">
+        <span class="percent-value">{{ getPercentageDisplay(group) }}</span>
       </div>
 
       <div class="col-cost" [class.is-zero]="!group.get('total_cost')?.value">
         @if (!group.get('total_cost')?.value) {
-        <span class="pending-text">ממתין...</span>
+        <span class="pending-text">{{ 'pending' | translatePipe }}</span>
         } @else {
         <span class="cost-value">₪{{ group.get('total_cost')?.value | number:'1.2-2' }}</span>
         }

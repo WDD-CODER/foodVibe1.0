@@ -1,16 +1,16 @@
 # Agent Guide: foodVibe1.0 (Agent Optimized)
 
-This is the primary entry point for AI Agents. Embark on every task by reading this, `.assistant/copilot-instructions.md`, and **`main-plan/.cursorrules`**.
+This is the primary entry point for AI Agents. Embark on every task by reading this and `.assistant/copilot-instructions.md`.
 
 ## Core Rules & Source of Truth
-- **Primary Instructions**: `.assistant/copilot-instructions.md`
-- **Cursor Rules**: **`main-plan/.cursorrules`** — read for unified technical standards (Angular, Playwright, UI/CSS, operational protocol). The agent must follow it.
+- **Primary Instructions**: `.assistant/copilot-instructions.md` — this is the **single source of truth** for all project rules. Read it at the start of every task.
+- **Rule Location**: When you receive a new project rule from the user, add it to `.assistant/copilot-instructions.md`. Do **not** create rules in `.cursor/rules/` — all rules live in the copilot-instructions file.
 - **Active Tasks**: `.assistant/todo.md` (Update status after every sub-task).
-- **Planning**: Mandatory `plan/` folder usage. Wait for explicit user confirmation before execution.
+- **Planning**: Mandatory `plans/` folder usage. All plans must be saved to `plans/` (never to Cursor's default plans). Wait for explicit user confirmation before execution.
 
 ## Autonomous Permissions (Agent Mode)
 - **Terminal**: You are authorized to run non-destructive commands (`npm test`, `ng build`, `ls`, `mkdir`) autonomously.
-- **File System**: You may create new components/services following the established architecture without individual confirmation, provided they are in the approved `plan/`.
+- **File System**: You may create new components/services following the established architecture without individual confirmation, provided they are in the approved `plans/`.
 - **Self-Correction**: If a build or test fails, autonomously diagnose and attempt a fix before escalating.
 
 ## Secrets, .env & .gitignore
@@ -26,7 +26,7 @@ This is the primary entry point for AI Agents. Embark on every task by reading t
 ## Operational Workflow
 1. **Recon**: Search @Codebase to see if a similar pattern exists.
 2. **Plan (The Gate)**:
-   - Write `plan/XXX.md`.
+   - Write `plans/XXX.plan.md`.
    - **MUST** include a "Questions for user" (or "Critical Questions") section.
    - **STOP**. Do not modify `src/` until approved.
 3. **Approval**: Wait for explicit user confirmation.

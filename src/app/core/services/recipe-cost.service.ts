@@ -67,65 +67,93 @@ export class RecipeCostService {
   }
 
   /**
+   * Returns the weight in grams for a single row, or null if the unit cannot be converted to grams.
+   */
+  getRowWeightG(row: IngredientWeightRow, depth = 0): number | null {
+    if (depth >= MAX_RECURSION_DEPTH) return null;
+    const contribution = this.getRowWeightContributionG(row, depth);
+    return contribution === 0 && !this.hasGramConversion(row) ? null : contribution;
+  }
+
+  /**
    * Computes total weight in grams from ingredient form rows.
-   * Only includes ingredients that have a verifiable conversion path to grams:
-   * - Unit is a mass unit in the registry (gram, kg)
-   * - Or product has purchase_options with conversion_rate_ to base_unit_ (gram)
-   * - Or recipe has yield_unit that converts to grams
-   * Ingredients without conversion data are excluded from the total.
+   * Only includes ingredients that have a verifiable conversion path to grams.
    */
   computeTotalWeightG(ingredientRows: IngredientWeightRow[], depth = 0): number {
     if (depth >= MAX_RECURSION_DEPTH) return 0;
-    return ingredientRows.reduce((acc, row) => {
-      const net = row.amount_net ?? 0;
-      const unit = (row.unit ?? 'gr').trim().toLowerCase();
-      const key = UNIT_ALIASES[unit] ?? unit;
+    return ingredientRows.reduce((acc, row) => acc + this.getRowWeightContributionG(row, depth), 0);
+  }
 
-      if (MASS_UNITS.has(key) || MASS_UNITS.has(unit)) {
-        const factor = this.unitRegistry_.getConversion(key) || this.unitRegistry_.getConversion(unit);
-        if (factor && factor > 0) return acc + net * factor;
+  private hasGramConversion(row: IngredientWeightRow): boolean {
+    const unit = (row.unit ?? 'gr').trim().toLowerCase();
+    const key = UNIT_ALIASES[unit] ?? unit;
+    if (MASS_UNITS.has(key) || MASS_UNITS.has(unit)) return true;
+    if (row.referenceId && row.item_type === 'product') {
+      const product = this.kitchenState_.products_().find(p => p._id === row.referenceId) as Product | undefined;
+      if (product?.purchase_options_?.length && product.base_unit_) {
+        const baseKey = (UNIT_ALIASES[product.base_unit_] ?? product.base_unit_).toLowerCase();
+        if (baseKey === 'gram' || baseKey === 'kg' || MASS_UNITS.has(baseKey)) return true;
       }
+    }
+    if (row.referenceId && row.item_type === 'recipe') {
+      const subRecipe = this.kitchenState_.recipes_().find(r => r._id === row.referenceId) as Recipe | undefined;
+      if (subRecipe?.yield_unit_) {
+        const yieldKey = (UNIT_ALIASES[subRecipe.yield_unit_] ?? subRecipe.yield_unit_).toLowerCase();
+        if (yieldKey === 'gram' || yieldKey === 'kg' || MASS_UNITS.has(yieldKey)) return true;
+      }
+    }
+    return false;
+  }
 
-      if (row.referenceId && row.item_type === 'product') {
-        const product = this.kitchenState_.products_().find(p => p._id === row.referenceId) as Product | undefined;
-        if (product) {
-          const opt = product.purchase_options_?.find(o =>
-            (o.unit_symbol_ ?? '').toLowerCase() === unit || (o.unit_symbol_ ?? '').toLowerCase() === key
+  private getRowWeightContributionG(row: IngredientWeightRow, depth: number): number {
+    const net = row.amount_net ?? 0;
+    const unit = (row.unit ?? 'gr').trim().toLowerCase();
+    const key = UNIT_ALIASES[unit] ?? unit;
+
+    if (MASS_UNITS.has(key) || MASS_UNITS.has(unit)) {
+      const factor = this.unitRegistry_.getConversion(key) || this.unitRegistry_.getConversion(unit);
+      if (factor && factor > 0) return net * factor;
+    }
+
+    if (row.referenceId && row.item_type === 'product') {
+      const product = this.kitchenState_.products_().find(p => p._id === row.referenceId) as Product | undefined;
+      if (product) {
+        const opt = product.purchase_options_?.find(o =>
+          (o.unit_symbol_ ?? '').toLowerCase() === unit || (o.unit_symbol_ ?? '').toLowerCase() === key
+        );
+        if (opt?.conversion_rate_ && product.base_unit_) {
+          const baseKey = (UNIT_ALIASES[product.base_unit_] ?? product.base_unit_).toLowerCase();
+          if (baseKey === 'gram' || baseKey === 'kg' || MASS_UNITS.has(baseKey)) {
+            const gramsPerUnit = opt.conversion_rate_ * (baseKey === 'kg' ? 1000 : 1);
+            return net * gramsPerUnit;
+          }
+        }
+      }
+    }
+
+    if (row.referenceId && row.item_type === 'recipe') {
+      const subRecipe = this.kitchenState_.recipes_().find(r => r._id === row.referenceId) as Recipe | undefined;
+      if (subRecipe?.yield_unit_) {
+        const yieldKey = UNIT_ALIASES[subRecipe.yield_unit_] ?? subRecipe.yield_unit_;
+        const yieldFactor = this.unitRegistry_.getConversion(yieldKey);
+        if (yieldFactor && (yieldKey === 'gram' || yieldKey === 'kg' || MASS_UNITS.has(yieldKey))) {
+          const amountInYield = this.normalizeToRecipeYieldUnit(net, unit, subRecipe.yield_unit_);
+          const totalRecipeG = this.computeTotalWeightG(
+            subRecipe.ingredients_?.map((i: Ingredient) => ({
+              amount_net: i.amount_,
+              unit: i.unit_,
+              referenceId: i.referenceId,
+              item_type: i.type
+            })) ?? [],
+            depth + 1
           );
-          if (opt?.conversion_rate_ && product.base_unit_) {
-            const baseKey = (UNIT_ALIASES[product.base_unit_] ?? product.base_unit_).toLowerCase();
-            if (baseKey === 'gram' || baseKey === 'kg' || MASS_UNITS.has(baseKey)) {
-              const gramsPerUnit = opt.conversion_rate_ * (baseKey === 'kg' ? 1000 : 1);
-              return acc + net * gramsPerUnit;
-            }
-          }
+          const yieldAmount = subRecipe.yield_amount_ || 1;
+          return (totalRecipeG / yieldAmount) * amountInYield;
         }
       }
+    }
 
-      if (row.referenceId && row.item_type === 'recipe') {
-        const subRecipe = this.kitchenState_.recipes_().find(r => r._id === row.referenceId) as Recipe | undefined;
-        if (subRecipe?.yield_unit_) {
-          const yieldKey = UNIT_ALIASES[subRecipe.yield_unit_] ?? subRecipe.yield_unit_;
-          const yieldFactor = this.unitRegistry_.getConversion(yieldKey);
-          if (yieldFactor && (yieldKey === 'gram' || yieldKey === 'kg' || MASS_UNITS.has(yieldKey))) {
-            const amountInYield = this.normalizeToRecipeYieldUnit(net, unit, subRecipe.yield_unit_);
-            const totalRecipeG = this.computeTotalWeightG(
-              subRecipe.ingredients_?.map((i: Ingredient) => ({
-                amount_net: i.amount_,
-                unit: i.unit_,
-                referenceId: i.referenceId,
-                item_type: i.type
-              })) ?? [],
-              depth + 1
-            );
-            const yieldAmount = subRecipe.yield_amount_ || 1;
-            return acc + (totalRecipeG / yieldAmount) * amountInYield;
-          }
-        }
-      }
-
-      return acc;
-    }, 0);
+    return 0;
   }
 
   private computeIngredientCost(ing: Ingredient, depth: number): number {

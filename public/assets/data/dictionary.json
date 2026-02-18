@@ -39,6 +39,10 @@
     "dish": "מנה",
     "prep": "הכנה",
     "recipe_name_placeholder": "שם המתכון",
-    "dish_name_placeholder": "שם המנה"
+    "dish_name_placeholder": "שם המנה",
+    "ingredient": "מרכיב",
+    "quantity": "כמות נטו",
+    "percent": "אחוז",
+    "pending": "ממתין..."
   }
 }

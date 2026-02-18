@@ -1,5 +1,5 @@
 
-$ingredients-grid-template: 2.5fr 1fr 1fr 1fr 48px;
+$ingredients-grid-template: 2.5fr 1.5fr 1fr 1fr 1fr 48px;
 
 .ingredients-container {
   width: 100%;
@@ -41,6 +41,46 @@ $ingredients-grid-template: 2.5fr 1fr 1fr 1fr 48px;
   &:hover {
     background-color: #f8fafc;
   }
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  .qty-btn {
+    display: grid;
+    place-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background-color: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+
+    &:hover:not(:disabled) {
+      background-color: #e2e8f0;
+      border-color: #94a3b8;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .qty-input {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+  }
+}
+
+.col-percent {
+  color: #64748b;
+  font-size: 0.875rem;
 }
 
 .col-cost {
