@@ -10,7 +10,7 @@ import { KitchenStateService } from '@services/kitchen-state.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { RecipeCostService } from '@services/recipe-cost.service';
 import { Ingredient } from '@models/ingredient.model';
-import { Recipe, RecipeStep, MiseCategory } from '@models/recipe.model';
+import { Recipe, RecipeStep, MiseCategory, FlatPrepItem, PrepCategory } from '@models/recipe.model';
 import { RecipeHeaderComponent } from './components/recipe-header/recipe-header.component';
 import { RecipeIngredientsTableComponent } from './components/recipe-ingredients-table/recipe-ingredients-table.component';
 import { RecipeWorkflowComponent } from './components/recipe-workflow/recipe-workflow.component';
@@ -83,6 +83,21 @@ export class RecipeBuilderPage implements OnInit {
     this.ingredientsArray.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.updateTotalWeightG());
+
+    this.recipeForm_.get('recipe_type')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(type => this.onRecipeTypeChange(type));
+  }
+
+  private onRecipeTypeChange(type: string | null): void {
+    if (type == null) return;
+    const isDish = type === 'dish';
+    this.workflowArray.clear();
+    if (isDish) {
+      this.workflowArray.push(this.createPrepItemRow());
+    } else {
+      this.workflowArray.push(this.createStepGroup(1));
+    }
   }
 
   private updateTotalWeightG(): void {
@@ -107,7 +122,7 @@ export class RecipeBuilderPage implements OnInit {
   }
 
   private patchFormFromRecipe(recipe: Recipe): void {
-    const isDish = !!recipe.mise_categories_?.length;
+    const isDish = !!(recipe.prep_items_?.length || recipe.mise_categories_?.length);
     this.recipeForm_.patchValue({
       name_hebrew: recipe.name_hebrew,
       recipe_type: isDish ? 'dish' : 'preparation',
@@ -148,19 +163,13 @@ export class RecipeBuilderPage implements OnInit {
     });
 
     this.workflowArray.clear();
-    if (recipe.mise_categories_) {
-      recipe.mise_categories_.forEach(cat => {
-        const itemsArray = this.fb.array(
-          cat.items.map(it => this.fb.group({
-            item_name: [it.item_name, Validators.required],
-            unit: [it.unit, Validators.required]
-          }))
-        );
-        this.workflowArray.push(this.fb.group({
-          category_name: [cat.category_name, Validators.required],
-          items: itemsArray
-        }));
-      });
+    if (isDish) {
+      const prepRows = this.getPrepRowsFromRecipe(recipe);
+      if (prepRows.length > 0) {
+        prepRows.forEach(row => this.workflowArray.push(this.createPrepItemRow(row)));
+      } else {
+        this.workflowArray.push(this.createPrepItemRow());
+      }
     } else {
       recipe.steps_.forEach((step, i) => {
         this.workflowArray.push(this.fb.group({
@@ -237,13 +246,50 @@ export class RecipeBuilderPage implements OnInit {
     });
   }
 
+  private getPrepRowsFromRecipe(recipe: Recipe): { preparation_name: string; category_name: string; quantity: number; unit: string }[] {
+    if (recipe.prep_items_?.length) {
+      return recipe.prep_items_.map(p => ({
+        preparation_name: p.preparation_name,
+        category_name: p.category_name,
+        quantity: p.quantity ?? 1,
+        unit: p.unit ?? 'unit'
+      }));
+    }
+    if (recipe.mise_categories_?.length) {
+      const rows: { preparation_name: string; category_name: string; quantity: number; unit: string }[] = [];
+      recipe.mise_categories_.forEach(cat => {
+        cat.items.forEach(it => {
+          rows.push({
+            preparation_name: it.item_name,
+            category_name: cat.category_name,
+            quantity: it.quantity ?? 1,
+            unit: it.unit ?? 'unit'
+          });
+        });
+      });
+      return rows;
+    }
+    return [];
+  }
+
+  private createPrepItemRow(row?: { preparation_name?: string; category_name?: string; quantity?: number; unit?: string }) {
+    const units = this.unitRegistry_.allUnitKeys_();
+    const defaultUnit = units[0] ?? 'unit';
+    return this.fb.group({
+      preparation_name: [row?.preparation_name ?? ''],
+      category_name: [row?.category_name ?? ''],
+      quantity: [row?.quantity ?? 1, [Validators.required, Validators.min(0)]],
+      unit: [row?.unit ?? defaultUnit, Validators.required]
+    });
+  }
+
   addNewStep(): void {
     const nextOrder = this.workflowArray.length + 1;
     const isDish = this.recipeForm_.get('recipe_type')?.value === 'dish';
 
-    // Logic: Add a Category if it's a Dish, or a Step if it's a Prep
+    // Logic: Add a prep row if it's a Dish, or a Step if it's a Prep
     const newGroup = isDish
-      ? this.createMiseCategoryGroup()
+      ? this.createPrepItemRow()
       : this.createStepGroup(nextOrder);
 
     this.workflowArray.push(newGroup);
@@ -300,16 +346,30 @@ export class RecipeBuilderPage implements OnInit {
       }));
 
     const steps: RecipeStep[] = [];
-    let miseCategories: MiseCategory[] | undefined;
+    let prepItems: FlatPrepItem[] | undefined;
+    let prepCategories: PrepCategory[] | undefined;
 
     if (isDish) {
-      type CatRow = { category_name?: string; items?: { item_name?: string; unit?: string }[] };
-      miseCategories = ((raw['workflow_items'] || []) as CatRow[]).map(cat => ({
-        category_name: cat.category_name ?? '',
-        items: (cat.items || []).map(it => ({
-          item_name: it.item_name ?? '',
-          unit: it.unit ?? ''
-        }))
+      type PrepRow = { preparation_name?: string; category_name?: string; quantity?: number; unit?: string };
+      const rows = (raw['workflow_items'] || []) as PrepRow[];
+      prepItems = rows
+        .filter(r => !!r?.preparation_name?.trim())
+        .map(r => ({
+          preparation_name: r.preparation_name ?? '',
+          category_name: r.category_name ?? '',
+          quantity: r.quantity ?? 1,
+          unit: r.unit ?? 'unit'
+        }));
+
+      const byCategory = new Map<string, { item_name: string; unit: string; quantity?: number }[]>();
+      prepItems.forEach(p => {
+        const list = byCategory.get(p.category_name) ?? [];
+        list.push({ item_name: p.preparation_name, unit: p.unit, quantity: p.quantity });
+        byCategory.set(p.category_name, list);
+      });
+      prepCategories = Array.from(byCategory.entries()).map(([category_name, items]) => ({
+        category_name,
+        items: items.map(it => ({ item_name: it.item_name, unit: it.unit }))
       }));
     } else {
       type StepRow = { order?: number; instruction?: string; labor_time?: number };
@@ -335,7 +395,9 @@ export class RecipeBuilderPage implements OnInit {
       yield_unit_: yieldUnit,
       default_station_: '',
       is_approved_: true,
-      ...(miseCategories && { mise_categories_: miseCategories })
+      ...(prepItems && prepItems.length > 0 && { prep_items_: prepItems }),
+      ...(prepCategories && prepCategories.length > 0 && { prep_categories_: prepCategories }),
+      ...(prepCategories && prepCategories.length > 0 && { mise_categories_: prepCategories })
     };
   }
 

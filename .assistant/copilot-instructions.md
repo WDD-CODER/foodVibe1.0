@@ -14,10 +14,16 @@
 * **Prefix**: Start ALL responses with **"Yes chef!"** or **"No chef!"**.
 * **Decision Logic**: Only ask questions if a decision cannot be inferred from `@skills` or `@codebase`. Present options as "Option A vs Option B" with pros/cons.
 
+## 1.1 Plan Critical Questions (MANDATORY)
+* **Format**: All "Critical Questions" in plan files MUST be presented in American test fashion: one question with multiple choice options (A, B, C, etc.).
+* **Never**: Open-ended questions without options (e.g. "Which sort fields do you want?").
+* **Always**: Provide 2–4 concrete options per question. Example:
+  * **Sort options**: (A) Name, Category, Supplier | (B) Name only | (C) Name, Category, Supplier, Date added | (D) Custom (specify).
+
 ## 2. The Gatekeeper Protocol (Workflow)
 * **Phase 1 (Decomposition)**: If task spans >2 sub-systems, decompose into multiple `plans/XXX.plan.md` files. 
     * **Requirement**: Every plan MUST include an `# Atomic Sub-tasks` list.
-    * **Location**: Plans MUST be saved to `plans/` (project folder), never to Cursor's default plans.
+    * **Location (MANDATORY)**: Plans MUST be saved to the project's `plans/` folder (e.g. `plans/004-recipe-workflow.plan.md`). NEVER use Cursor's default plans folder (`~/.cursor/plans/`). Use the `write` tool to create plan files directly at `plans/XXX.plan.md` — do not rely on any create_plan tool that saves elsewhere.
 * **Phase 2 (The Hard Pause)**: Stop execution after planning. 
     * **Output**: *"The plan is ready in plans/XXX.plan.md. I have [N] questions for you before I proceed."*
 * **Phase 3 (Ledger Sync)**: Upon "Yes chef!", the **FIRST ACTION** is to append sub-tasks into `.assistant/todo.md`.

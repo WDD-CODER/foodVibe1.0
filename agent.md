@@ -6,7 +6,7 @@ This is the primary entry point for AI Agents. Embark on every task by reading t
 - **Primary Instructions**: `.assistant/copilot-instructions.md` — this is the **single source of truth** for all project rules. Read it at the start of every task.
 - **Rule Location**: When you receive a new project rule from the user, add it to `.assistant/copilot-instructions.md`. Do **not** create rules in `.cursor/rules/` — all rules live in the copilot-instructions file.
 - **Active Tasks**: `.assistant/todo.md` (Update status after every sub-task).
-- **Planning**: Mandatory `plans/` folder usage. All plans must be saved to `plans/` (never to Cursor's default plans). Wait for explicit user confirmation before execution.
+- **Planning**: Mandatory `plans/` folder usage. All plans must be saved to the project's `plans/` folder (e.g. `plans/004-feature.plan.md`). NEVER use Cursor's default `~/.cursor/plans/`. Use the `write` tool to create plan files directly. Wait for explicit user confirmation before execution.
 
 ## Autonomous Permissions (Agent Mode)
 - **Terminal**: You are authorized to run non-destructive commands (`npm test`, `ng build`, `ls`, `mkdir`) autonomously.

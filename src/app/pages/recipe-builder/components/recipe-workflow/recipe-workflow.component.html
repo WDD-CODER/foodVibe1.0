@@ -47,29 +47,73 @@
   }
 
   @else {
-    <div class="mise-en-place-view" formArrayName="workflow_items">
-      @for (categoryGroup of workflowGroups; track $index) {
-        <div [formGroupName]="$index" class="category-block">
-          <div class="category-header">
-            <input formControlName="category_name" placeholder="שם קטגוריה (למשל: עמדת גריל)..." class="category-input" />
-            <button (click)="removeItem.emit($index)" class="text-rose-400 hover:text-rose-600">מחק קטגוריה</button>
-          </div>
+    <div class="prep-flat-grid" formArrayName="workflow_items">
+      <div class="grid-header prep-grid-header">
+        <div class="col-prep-name">{{ 'preparation' | translatePipe }}</div>
+        <div class="col-prep-category">{{ 'preparation_category' | translatePipe }}</div>
+        <div class="col-prep-qty">{{ 'quantity' | translatePipe }}</div>
+        <div class="col-prep-unit">{{ 'unit' | translatePipe }}</div>
+        <div class="col-prep-actions"></div>
+      </div>
 
-          <div class="category-items" formArrayName="items">
-            @for (item of getMiseItems(categoryGroup); track $itemIndex; let $itemIndex = $index) {
-              <div [formGroupName]="$itemIndex" class="mise-item-row">
-                <input formControlName="item_name" placeholder="שם ההכנה..." class="item-input" />
-                <input formControlName="unit" placeholder="יחידה" class="unit-input" />
+      <div class="grid-body">
+        @for (group of workflowGroups; track $index) {
+          <div [formGroupName]="$index" class="prep-grid-row">
+            <div class="col-prep-name">
+              @if (!group.get('preparation_name')?.value) {
+                <app-preparation-search
+                  (preparationSelected)="onPreparationSelected($event, group)"
+                  (preparationAdded)="onPreparationSelected($event, group)">
+                </app-preparation-search>
+              } @else {
+                <div class="selected-item-display">
+                  <span class="item-text">{{ group.get('preparation_name')?.value }}</span>
+                  <button type="button" class="clear-btn" (click)="clearPreparation(group)">
+                    <lucide-icon name="x" [size]="14"></lucide-icon>
+                  </button>
                 </div>
-            }
-            <button type="button" class="add-item-btn" (click)="addMiseItemToCategory(categoryGroup)">+ הוסף הכנה לקטגוריה</button>
+              }
+            </div>
+
+            <div class="col-prep-category">
+              <span class="category-display">{{ group.get('category_name')?.value || '—' }}</span>
+            </div>
+
+            <div class="col-prep-qty">
+              <div class="quantity-controls">
+                <button type="button" class="qty-btn minus"
+                  [disabled]="(group.get('quantity')?.value ?? 0) <= 0"
+                  (click)="decrementQuantity(group, $index)">
+                  <lucide-icon name="minus" [size]="16"></lucide-icon>
+                </button>
+                <input type="number" SelectOnFocus formControlName="quantity"
+                  class="grid-input qty-input" placeholder="1" />
+                <button type="button" class="qty-btn plus" (click)="incrementQuantity(group, $index)">
+                  <lucide-icon name="plus" [size]="16"></lucide-icon>
+                </button>
+              </div>
+            </div>
+
+            <div class="col-prep-unit">
+              <select formControlName="unit" class="grid-select">
+                @for (unit of getAllUnitKeys(); track unit) {
+                  <option [value]="unit">{{ unit | translatePipe }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="col-prep-actions">
+              <button type="button" (click)="removeItem.emit($index)" class="delete-btn">
+                <lucide-icon name="trash-2" class="h-4 w-4"></lucide-icon>
+              </button>
+            </div>
           </div>
-        </div>
-      }
+        }
+      </div>
       
       <button type="button" (click)="addItem.emit()" class="add-row-btn">
         <lucide-icon name="plus" class="ml-2 h-4 w-4"></lucide-icon>
-        הוסף קטגוריית מיזאנפלאס / Add Category
+        {{ 'add_preparation' | translatePipe }}
       </button>
     </div>
   }

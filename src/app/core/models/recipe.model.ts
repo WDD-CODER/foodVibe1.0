@@ -10,9 +10,24 @@ export interface RecipeStep {
 export interface MiseItem {
   item_name: string;
   unit: string;
+  quantity?: number;
+  category_name?: string;
 }
 
 export interface MiseCategory {
+  category_name: string;
+  items: MiseItem[];
+}
+
+/** Flat prep item for dish workflow (prep list) */
+export interface FlatPrepItem {
+  preparation_name: string;
+  category_name: string;
+  quantity: number;
+  unit: string;
+}
+
+export interface PrepCategory {
   category_name: string;
   items: MiseItem[];
 }
@@ -27,6 +42,10 @@ export interface Recipe {
   default_station_: string;
   is_approved_: boolean;
   version_history_?: string[];
-  /** For recipe_type === 'dish': mise-en-place categories and items */
+  /** For recipe_type === 'dish': legacy nested structure (backward compat) */
   mise_categories_?: MiseCategory[];
+  /** For recipe_type === 'dish': flat prep list */
+  prep_items_?: FlatPrepItem[];
+  /** For recipe_type === 'dish': grouped by category (backward compat) */
+  prep_categories_?: PrepCategory[];
 }
