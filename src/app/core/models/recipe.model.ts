@@ -41,6 +41,8 @@ export interface Recipe {
   yield_unit_: string;
   default_station_: string;
   is_approved_: boolean;
+  /** 'dish' | 'preparation' - determines storage (DISH_LIST vs RECIPE_LIST) */
+  recipe_type_?: 'dish' | 'preparation';
   version_history_?: string[];
   /** For recipe_type === 'dish': legacy nested structure (backward compat) */
   mise_categories_?: MiseCategory[];

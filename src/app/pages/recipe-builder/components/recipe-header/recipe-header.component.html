@@ -18,7 +18,7 @@
         </div>
 
         <div class="scaling-dock-grid">
-            <div class="primary-chip-wrapper">
+            <div class="primary-chip-wrapper" (clickOutside)="setActivePrimaryEdit(false)">
                 <div class="scaling-chip primary">
                     <div class="unit-switcher-btn" (click)="setActivePrimaryEdit(!activePrimaryEdit_())">
                         <span class="unit-name">{{ primaryUnitLabel_() | translatePipe }}</span>
@@ -58,7 +58,7 @@
 
             <div class="secondary-units-container">
                 @for (group of secondaryConversions; track $index) {
-                <div class="scaling-chip secondary">
+                <div class="scaling-chip secondary" (clickOutside)="setActiveSecondaryEdit(null)">
                     <div class="unit-switcher-btn" (click)="setActiveSecondaryEdit($index)">
                         <span class="unit-name">{{ group.get('unit')?.value | translatePipe }}</span>
                         <lucide-icon name="chevron-down" [size]="10"></lucide-icon>

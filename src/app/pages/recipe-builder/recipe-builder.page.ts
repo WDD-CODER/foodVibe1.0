@@ -1,12 +1,13 @@
 import { Component, inject, signal, computed, OnInit, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { startWith } from 'rxjs';
+import { startWith, map } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
+import { UserMsgService } from '@services/user-msg.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { RecipeCostService } from '@services/recipe-cost.service';
 import { Ingredient } from '@models/ingredient.model';
@@ -14,6 +15,7 @@ import { Recipe, RecipeStep, MiseCategory, FlatPrepItem, PrepCategory } from '@m
 import { RecipeHeaderComponent } from './components/recipe-header/recipe-header.component';
 import { RecipeIngredientsTableComponent } from './components/recipe-ingredients-table/recipe-ingredients-table.component';
 import { RecipeWorkflowComponent } from './components/recipe-workflow/recipe-workflow.component';
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 
 @Component({
   selector: 'app-recipe-builder-page',
@@ -24,7 +26,8 @@ import { RecipeWorkflowComponent } from './components/recipe-workflow/recipe-wor
     RecipeHeaderComponent,
     RecipeIngredientsTableComponent,
     RecipeWorkflowComponent,
-    LucideAngularModule
+    LucideAngularModule,
+    TranslatePipe
   ],
   templateUrl: './recipe-builder.page.html',
   styleUrl: './recipe-builder.page.scss'
@@ -32,13 +35,16 @@ import { RecipeWorkflowComponent } from './components/recipe-workflow/recipe-wor
 export class RecipeBuilderPage implements OnInit {
   private fb = inject(FormBuilder);
   private readonly state_ = inject(KitchenStateService);
+  private readonly userMsg_ = inject(UserMsgService);
   private readonly route_ = inject(ActivatedRoute);
+  private readonly router_ = inject(Router);
   private readonly unitRegistry_ = inject(UnitRegistryService);
   private readonly recipeCostService_ = inject(RecipeCostService);
 
   //SIGNALS
   protected isSaving_ = signal(false);
   private recipeId_ = signal<string | null>(null);
+  protected resetTrigger_ = signal(0);
   isSubmitted = false;
 
   //COMPUTED
@@ -47,28 +53,27 @@ export class RecipeBuilderPage implements OnInit {
     const ingredients = raw?.ingredients || [];
     return ingredients.reduce((acc: number, ing: { total_cost?: number }) => acc + (ing.total_cost || 0), 0);
   });
-  protected recipeType_ = computed<'preparation' | 'dish'>(() => {
-    const value = this.recipeForm_.get('recipe_type')?.value;
-    return (value === 'dish') ? 'dish' : 'preparation';
-  });
 
   protected totalWeightG_ = computed(() => {
     const raw = this.recipeForm_.getRawValue() as { total_weight_g?: number };
     return raw?.total_weight_g ?? 0;
   });
 
-  protected recipeForm_ = this.fb.group({
-    name_hebrew: ['', Validators.required],
-    recipe_type: ['preparation'],
-    serving_portions: [1, [Validators.required, Validators.min(1)]],
-    yield_conversions: this.fb.array([
-      this.fb.group({ amount: [0], unit: ['gram'] })
-    ]),
-    ingredients: this.fb.array([]),
-    workflow_items: this.fb.array([]),
-    total_weight_g: [0],
-    total_cost: [0]
-  });
+  protected recipeForm_ = this.fb.group(
+    {
+      name_hebrew: ['', Validators.required],
+      recipe_type: ['preparation'],
+      serving_portions: [1, [Validators.required, Validators.min(1)]],
+      yield_conversions: this.fb.array([
+        this.fb.group({ amount: [0], unit: ['gram'] })
+      ]),
+      ingredients: this.fb.array([]),
+      workflow_items: this.fb.array([]),
+      total_weight_g: [0],
+      total_cost: [0]
+    },
+    { validators: this.recipeFormValidator_ }
+  );
 
   protected portions_ = toSignal(
     this.recipeForm_.get('serving_portions')!.valueChanges.pipe(
@@ -77,7 +82,18 @@ export class RecipeBuilderPage implements OnInit {
     { initialValue: 1 }
   );
 
+  protected recipeType_ = toSignal(
+    this.recipeForm_.get('recipe_type')!.valueChanges.pipe(
+      startWith(this.recipeForm_.get('recipe_type')?.value ?? 'preparation'),
+      map((v: string | null) => (v === 'dish' ? 'dish' : 'preparation'))
+    ),
+    { initialValue: 'preparation' as const }
+  );
+
   private destroyRef = inject(DestroyRef);
+
+  private cachedPrepItems_: { preparation_name?: string; category_name?: string; main_category_name?: string; quantity?: number; unit?: string }[] = [];
+  private cachedSteps_: { order?: number; instruction?: string; labor_time?: number }[] = [];
 
   constructor() {
     this.ingredientsArray.valueChanges
@@ -92,12 +108,67 @@ export class RecipeBuilderPage implements OnInit {
   private onRecipeTypeChange(type: string | null): void {
     if (type == null) return;
     const isDish = type === 'dish';
+    const wasDish = !isDish;
+
+    if (wasDish) {
+      const rows = this.workflowArray.controls.map(c => c.getRawValue() as { preparation_name?: string; category_name?: string; main_category_name?: string; quantity?: number; unit?: string });
+      this.cachedPrepItems_ = rows;
+    } else {
+      const rows = this.workflowArray.controls.map(c => c.getRawValue() as { order?: number; instruction?: string; labor_time?: number });
+      this.cachedSteps_ = rows;
+    }
+
     this.workflowArray.clear();
     if (isDish) {
-      this.workflowArray.push(this.createPrepItemRow());
+      if (this.cachedPrepItems_.length > 0) {
+        this.cachedPrepItems_.forEach(row => this.workflowArray.push(this.createPrepItemRow(row)));
+      } else {
+        this.workflowArray.push(this.createPrepItemRow());
+      }
     } else {
-      this.workflowArray.push(this.createStepGroup(1));
+      if (this.cachedSteps_.length > 0) {
+        this.cachedSteps_.forEach((step, i) =>
+          this.workflowArray.push(this.fb.group({
+            order: [step.order ?? i + 1],
+            instruction: [step.instruction ?? '', Validators.required],
+            labor_time: [step.labor_time ?? 0]
+          }))
+        );
+      } else {
+        this.workflowArray.push(this.createStepGroup(1));
+      }
     }
+  }
+
+  /** Resets the form to a blank state for creating a new recipe/dish. */
+  private resetToNewForm_(): void {
+    this.recipeId_.set(null);
+    this.cachedPrepItems_ = [];
+    this.cachedSteps_ = [];
+
+    this.recipeForm_.patchValue(
+      {
+        name_hebrew: '',
+        recipe_type: 'preparation',
+        serving_portions: 1,
+        total_weight_g: 0,
+        total_cost: 0
+      },
+      { emitEvent: false }
+    );
+
+    this.yieldConversionsArray.clear();
+    this.yieldConversionsArray.push(this.fb.group({ amount: [0], unit: ['gram'] }));
+
+    this.ingredientsArray.clear();
+    this.addNewIngredientRow();
+
+    this.workflowArray.clear();
+    this.workflowArray.push(this.createStepGroup(1));
+
+    this.recipeForm_.updateValueAndValidity({ emitEvent: false });
+    this.recipeForm_.markAsPristine();
+    this.resetTrigger_.update(v => v + 1);
   }
 
   private updateTotalWeightG(): void {
@@ -118,11 +189,19 @@ export class RecipeBuilderPage implements OnInit {
     if (this.ingredientsArray.length === 0) {
       this.addNewIngredientRow();
     }
+    if (this.workflowArray.length === 0) {
+      const isDish = this.recipeForm_.get('recipe_type')?.value === 'dish';
+      if (isDish) {
+        this.workflowArray.push(this.createPrepItemRow());
+      } else {
+        this.workflowArray.push(this.createStepGroup(1));
+      }
+    }
     this.updateTotalWeightG();
   }
 
   private patchFormFromRecipe(recipe: Recipe): void {
-    const isDish = !!(recipe.prep_items_?.length || recipe.mise_categories_?.length);
+    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.mise_categories_?.length);
     this.recipeForm_.patchValue({
       name_hebrew: recipe.name_hebrew,
       recipe_type: isDish ? 'dish' : 'preparation',
@@ -201,21 +280,45 @@ export class RecipeBuilderPage implements OnInit {
   private createStepGroup(order: number) {
     return this.fb.group({
       order: [order],
-      instruction: ['', Validators.required],
+      instruction: [''],
       labor_time: [0]
     });
   }
 
   private createIngredientGroup(item: any = null) {
-    return this.fb.group({
+    const group = this.fb.group({
       referenceId: [item?._id || null],
       item_type: [item?.item_type_ || null], // product | recipe
       name_hebrew: [item?.name_hebrew || ''],
-      amount_net: [item ? 1 : null, [Validators.required, Validators.min(0)]],
+      amount_net: [item ? 1 : null, [Validators.min(0)]],
       yield_percentage: [item?.yield_percentage || 1],
       unit: [item?.base_unit_ || 'gram'],
       total_cost: [{ value: 0, disabled: true }]
+    }, { validators: this.ingredientRowValidator });
+    return group;
+  }
+
+  /** Require amount > 0 when referenceId is set; empty rows are valid. */
+  private ingredientRowValidator(control: AbstractControl): ValidationErrors | null {
+    const refId = control.get('referenceId')?.value;
+    const amount = control.get('amount_net')?.value;
+    if (!refId) return null;
+    if (amount == null || amount === '') return { required: true };
+    const numAmt = typeof amount === 'number' ? amount : Number(amount);
+    if (isNaN(numAmt) || numAmt <= 0) return { min: true };
+    return null;
+  }
+
+  /** Requires at least one ingredient with product/recipe selected and quantity > 0. */
+  private recipeFormValidator_(control: AbstractControl): ValidationErrors | null {
+    const ingredients = (control.get('ingredients')?.value || []) as { referenceId?: string; amount_net?: number | string }[];
+    const hasValid = ingredients.some(ing => {
+      if (!ing?.referenceId) return false;
+      const amt = ing.amount_net;
+      const num = typeof amt === 'number' ? amt : Number(amt);
+      return amt != null && amt !== '' && !isNaN(num) && num > 0;
     });
+    return hasValid ? null : { atLeastOneIngredient: true };
   }
 
   private createMiseCategory(name: string = '') {
@@ -246,22 +349,24 @@ export class RecipeBuilderPage implements OnInit {
     });
   }
 
-  private getPrepRowsFromRecipe(recipe: Recipe): { preparation_name: string; category_name: string; quantity: number; unit: string }[] {
+  private getPrepRowsFromRecipe(recipe: Recipe): { preparation_name: string; category_name: string; main_category_name: string; quantity: number; unit: string }[] {
     if (recipe.prep_items_?.length) {
       return recipe.prep_items_.map(p => ({
         preparation_name: p.preparation_name,
         category_name: p.category_name,
+        main_category_name: p.category_name,
         quantity: p.quantity ?? 1,
         unit: p.unit ?? 'unit'
       }));
     }
     if (recipe.mise_categories_?.length) {
-      const rows: { preparation_name: string; category_name: string; quantity: number; unit: string }[] = [];
+      const rows: { preparation_name: string; category_name: string; main_category_name: string; quantity: number; unit: string }[] = [];
       recipe.mise_categories_.forEach(cat => {
         cat.items.forEach(it => {
           rows.push({
             preparation_name: it.item_name,
             category_name: cat.category_name,
+            main_category_name: cat.category_name,
             quantity: it.quantity ?? 1,
             unit: it.unit ?? 'unit'
           });
@@ -272,13 +377,14 @@ export class RecipeBuilderPage implements OnInit {
     return [];
   }
 
-  private createPrepItemRow(row?: { preparation_name?: string; category_name?: string; quantity?: number; unit?: string }) {
+  private createPrepItemRow(row?: { preparation_name?: string; category_name?: string; main_category_name?: string; quantity?: number; unit?: string }) {
     const units = this.unitRegistry_.allUnitKeys_();
     const defaultUnit = units[0] ?? 'unit';
     return this.fb.group({
       preparation_name: [row?.preparation_name ?? ''],
       category_name: [row?.category_name ?? ''],
-      quantity: [row?.quantity ?? 1, [Validators.required, Validators.min(0)]],
+      main_category_name: [row?.main_category_name ?? ''],
+      quantity: [row?.quantity ?? 1, [Validators.min(0)]],
       unit: [row?.unit ?? defaultUnit, Validators.required]
     });
   }
@@ -307,6 +413,8 @@ export class RecipeBuilderPage implements OnInit {
   saveRecipe(): void {
     if (this.recipeForm_.invalid) {
       this.recipeForm_.markAllAsTouched();
+      const msg = this.getRecipeValidationError_();
+      this.userMsg_.onSetErrorMsg(msg);
       return;
     }
 
@@ -314,18 +422,72 @@ export class RecipeBuilderPage implements OnInit {
     const recipe = this.buildRecipeFromForm();
 
     this.state_.saveRecipe(recipe).subscribe({
-      next: (saved) => {
-        if (saved && !this.recipeId_()) {
-          this.recipeId_.set(saved._id);
-        }
+      next: () => {
         this.isSaving_.set(false);
         this.isSubmitted = true;
-        this.recipeForm_.markAsPristine();
+        this.resetToNewForm_();
+        this.router_.navigate(['/recipe-builder']);
       },
       error: () => {
         this.isSaving_.set(false);
       }
     });
+  }
+
+  /** Returns a user-friendly validation error message listing exactly what is missing. */
+  private getRecipeValidationError_(): string {
+    const isDish = this.recipeForm_.get('recipe_type')?.value === 'dish';
+    const errors: string[] = [];
+
+    const name = (this.recipeForm_.get('name_hebrew')?.value ?? '').toString().trim();
+    if (!name) {
+      errors.push(isDish ? 'שם המנה חסר' : 'שם המתכון חסר');
+    }
+
+    const raw = this.recipeForm_.getRawValue() as {
+      ingredients?: { referenceId?: string; amount_net?: number | string; name_hebrew?: string }[];
+      workflow_items?: { preparation_name?: string; quantity?: number | string; unit?: string }[];
+    };
+    const ingredients = raw?.ingredients || [];
+    const hasAnyIngredient = ingredients.some((ing: { referenceId?: string }) => !!ing?.referenceId);
+    if (!hasAnyIngredient) {
+      errors.push('חסר מרכיב: יש לבחור לפחות מוצר או מתכון אחד');
+    }
+    ingredients.forEach((ing: { referenceId?: string; amount_net?: number | string; name_hebrew?: string }, i: number) => {
+      if (!ing?.referenceId) return;
+      const amt = ing.amount_net;
+      const numAmt = typeof amt === 'number' ? amt : Number(amt);
+      const label = ing.name_hebrew || `מרכיב ${i + 1}`;
+      if (amt == null || amt === '' || isNaN(numAmt) || numAmt < 0) {
+        errors.push(`כמות חסרה עבור "${label}"`);
+      } else if (numAmt === 0) {
+        errors.push(`כמות עבור "${label}" חייבת להיות גדולה מ-0`);
+      }
+    });
+
+    const portions = this.recipeForm_.get('serving_portions')?.value;
+    if (isDish && (portions == null || Number(portions) < 1)) {
+      errors.push('מספר מנות חסר או לא תקין (נדרש לפחות 1)');
+    }
+
+    const workflowRows = raw?.workflow_items || [];
+    if (isDish) {
+      workflowRows.forEach((row: { preparation_name?: string; quantity?: number | string; unit?: string }, i: number) => {
+        if (!row?.preparation_name?.trim()) return;
+        const qty = typeof row.quantity === 'number' ? row.quantity : Number(row.quantity);
+        if (row.quantity == null || row.quantity === '' || isNaN(qty) || qty < 0) {
+          errors.push(`כמות חסרה עבור ההכנה "${row.preparation_name}"`);
+        }
+        if (!row?.unit?.trim()) {
+          errors.push(`יחידה חסרה עבור ההכנה "${row.preparation_name}"`);
+        }
+      });
+    }
+
+    if (errors.length === 0) {
+      return 'יש למלא את כל השדות הנדרשים';
+    }
+    return errors.length === 1 ? errors[0] : `חסרים: ${errors.join('; ')}`;
   }
 
   private buildRecipeFromForm(): Recipe {
@@ -350,16 +512,19 @@ export class RecipeBuilderPage implements OnInit {
     let prepCategories: PrepCategory[] | undefined;
 
     if (isDish) {
-      type PrepRow = { preparation_name?: string; category_name?: string; quantity?: number; unit?: string };
+      type PrepRow = { preparation_name?: string; category_name?: string; quantity?: number | string; unit?: string };
       const rows = (raw['workflow_items'] || []) as PrepRow[];
       prepItems = rows
         .filter(r => !!r?.preparation_name?.trim())
-        .map(r => ({
-          preparation_name: r.preparation_name ?? '',
-          category_name: r.category_name ?? '',
-          quantity: r.quantity ?? 1,
-          unit: r.unit ?? 'unit'
-        }));
+        .map(r => {
+          const qty = typeof r.quantity === 'number' ? r.quantity : (Number(r.quantity) || 1);
+          return {
+            preparation_name: r.preparation_name ?? '',
+            category_name: r.category_name ?? '',
+            quantity: qty,
+            unit: r.unit ?? 'unit'
+          };
+        });
 
       const byCategory = new Map<string, { item_name: string; unit: string; quantity?: number }[]>();
       prepItems.forEach(p => {
@@ -373,13 +538,16 @@ export class RecipeBuilderPage implements OnInit {
       }));
     } else {
       type StepRow = { order?: number; instruction?: string; labor_time?: number };
-      ((raw['workflow_items'] || []) as StepRow[]).forEach((step, i) => {
-        steps.push({
-          order_: step?.order ?? i + 1,
-          instruction_: step?.instruction ?? '',
-          labor_time_minutes_: step?.labor_time ?? 0
+      const stepRows = (raw['workflow_items'] || []) as StepRow[];
+      stepRows
+        .filter(s => !!s?.instruction?.trim())
+        .forEach((step, i) => {
+          steps.push({
+            order_: step?.order ?? i + 1,
+            instruction_: step?.instruction ?? '',
+            labor_time_minutes_: step?.labor_time ?? 0
+          });
         });
-      });
     }
 
     const yieldConv = (raw['yield_conversions'] as { amount?: number; unit?: string }[])?.[0];
@@ -388,13 +556,14 @@ export class RecipeBuilderPage implements OnInit {
 
     return {
       _id: (this.recipeId_() ?? '') as string,
-      name_hebrew: (raw['name_hebrew'] as string) ?? '',
+      name_hebrew: (raw['name_hebrew'] as string)?.trim() ?? '',
       ingredients_: ingredients,
       steps_: steps,
       yield_amount_: yieldAmount,
       yield_unit_: yieldUnit,
       default_station_: '',
       is_approved_: true,
+      recipe_type_: isDish ? 'dish' : 'preparation',
       ...(prepItems && prepItems.length > 0 && { prep_items_: prepItems }),
       ...(prepCategories && prepCategories.length > 0 && { prep_categories_: prepCategories }),
       ...(prepCategories && prepCategories.length > 0 && { mise_categories_: prepCategories })
@@ -422,5 +591,17 @@ export class RecipeBuilderPage implements OnInit {
         group.get('order')?.setValue(i + 1);
       });
     }
+  }
+
+  sortPrepByCategory(): void {
+    if (this.recipeForm_.get('recipe_type')?.value !== 'dish') return;
+    const controls = this.workflowArray.controls as FormGroup[];
+    const sorted = [...controls].sort((a, b) => {
+      const catA = (a.get('category_name')?.value ?? '') as string;
+      const catB = (b.get('category_name')?.value ?? '') as string;
+      return catA.localeCompare(catB);
+    });
+    this.workflowArray.clear();
+    sorted.forEach(c => this.workflowArray.push(c));
   }
 }

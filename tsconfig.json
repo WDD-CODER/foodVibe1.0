@@ -17,6 +17,9 @@
       "@directives/*": [
         "src/app/core/directives/*"
       ],
+      "@pages/*": [
+        "src/app/pages/*"
+      ],
     },
     "outDir": "./dist/out-tsc",
     "strict": true,

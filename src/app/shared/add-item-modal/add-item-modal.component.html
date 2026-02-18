@@ -1,0 +1,29 @@
+@if (isOpen_()) {
+<div class="modal-overlay" (click)="resetAndClose()">
+  <div class="modal-card" dir="rtl" (click)="$event.stopPropagation()" (clickOutside)="resetAndClose()">
+    @if (config(); as cfg) {
+    <h3>{{ cfg.title | translatePipe }}</h3>
+
+    <div class="formula-grid">
+      <div class="input-stack full-width">
+        <label>{{ cfg.label | translatePipe }}</label>
+        <input type="text"
+               [ngModel]="value_()"
+               (ngModelChange)="value_.set($event)"
+               [placeholder]="(cfg.placeholder || cfg.label) | translatePipe"
+               (keydown.enter)="save()" />
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-ghost" (click)="cancel()">{{ 'cancel' | translatePipe }}</button>
+      <button class="btn-save"
+              (click)="save()"
+              [disabled]="!value_()?.trim()">
+        {{ cfg.saveLabel | translatePipe }}
+      </button>
+    </div>
+    }
+  </div>
+</div>
+}

@@ -2,6 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { KitchenStateService } from './kitchen-state.service';
 import { ProductDataService } from './product-data.service';
 import { RecipeDataService } from './recipe-data.service';
+import { DishDataService } from './dish-data.service';
+import { SupplierDataService } from './supplier-data.service';
 import { UserMsgService } from './user-msg.service';
 import { Product } from '../models/product.model';
 import { Recipe } from '../models/recipe.model';
@@ -16,6 +18,8 @@ describe('KitchenStateService', () => {
 
   const mockAllItemsSignal: WritableSignal<any[]> = signal<any[]>([]);
   const mockRecipesSignal: WritableSignal<Recipe[]> = signal<Recipe[]>([]);
+  const mockDishesSignal: WritableSignal<Recipe[]> = signal<Recipe[]>([]);
+  const mockSuppliersSignal: WritableSignal<Supplier[]> = signal<Supplier[]>([]);
 
   const createMockProduct = (_id: string): Product => ({
     _id,
@@ -48,13 +52,30 @@ describe('KitchenStateService', () => {
     );
     rSpy.allRecipes_ = mockRecipesSignal;
 
+    const dSpy = jasmine.createSpyObj('DishDataService',
+      ['addDish', 'updateDish', 'getDishById'],
+      { allDishes_: mockDishesSignal }
+    );
+    dSpy.allDishes_ = mockDishesSignal;
+
     const uSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg']);
+
+    const supplierSpy = jasmine.createSpyObj('SupplierDataService', ['addSupplier'], {
+      allSuppliers_: mockSuppliersSignal
+    });
+    supplierSpy.addSupplier.and.callFake(async (s: Omit<Supplier, '_id'>) => {
+      const saved = { ...s, _id: 's1' } as Supplier;
+      mockSuppliersSignal.set([...mockSuppliersSignal(), saved]);
+      return saved;
+    });
 
     TestBed.configureTestingModule({
       providers: [
         KitchenStateService,
         { provide: ProductDataService, useValue: iSpy },
         { provide: RecipeDataService, useValue: rSpy },
+        { provide: DishDataService, useValue: dSpy },
+        { provide: SupplierDataService, useValue: supplierSpy },
         { provide: UserMsgService, useValue: uSpy }
       ]
     });
@@ -127,7 +148,7 @@ describe('KitchenStateService', () => {
   });
 
   describe('Recipe CRUD', () => {
-    it('should call saveRecipe (add) and show success message', (done) => {
+    it('should call addRecipe for preparation and show success message', (done) => {
       const recipe = {
         _id: '',
         name_hebrew: 'Hummus',
@@ -146,26 +167,51 @@ describe('KitchenStateService', () => {
         done();
       });
     });
+
+    it('should call addDish for dish and show success message', (done) => {
+      const dish = {
+        _id: '',
+        name_hebrew: 'Salad',
+        ingredients_: [],
+        steps_: [],
+        yield_amount_: 1,
+        yield_unit_: 'מנה',
+        default_station_: '',
+        is_approved_: true,
+        prep_items_: [{ preparation_name: 'Chopped lettuce', category_name: 'veg', quantity: 1, unit: 'unit' }]
+      } as Recipe;
+      const dishDataSpy = TestBed.inject(DishDataService) as jasmine.SpyObj<DishDataService>;
+      dishDataSpy.addDish.and.returnValue(Promise.resolve({ ...dish, _id: 'd1' }));
+
+      service.saveRecipe(dish).subscribe(() => {
+        expect(dishDataSpy.addDish).toHaveBeenCalled();
+        expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('המנה נשמרה בהצלחה');
+        done();
+      });
+    });
   });
 
   describe('Direct State Updates', () => {
-    it('should sync recipes_ from RecipeDataService', () => {
+    it('should sync recipes_ from RecipeDataService and DishDataService', () => {
       const recipe = { _id: 'r1', name_hebrew: 'Hummus' } as Recipe;
+      const dish = { _id: 'd1', name_hebrew: 'Salad', prep_items_: [] } as Recipe;
       mockRecipesSignal.set([recipe]);
+      mockDishesSignal.set([dish]);
       TestBed.flushEffects();
       expect(service.recipes_()).toContain(recipe);
+      expect(service.recipes_()).toContain(dish);
     });
 
-    it('should update suppliers_ signal with valid type conversion', () => {
-      const supplier: Supplier = {
-        _id: 's1',
+    it('should update suppliers_ signal with valid type conversion', async () => {
+      const supplierInput = {
         name_hebrew: 'Osem',
         delivery_days_: [1],
         min_order_mov_: 100,
         lead_time_days_: 1
-      };
-      service.addSupplier(supplier);
-      expect(service.suppliers_()).toContain(supplier);
+      } as Omit<Supplier, '_id'>;
+      const saved = await service.addSupplier(supplierInput);
+      expect(saved._id).toBeDefined();
+      expect(service.suppliers_().some(s => s.name_hebrew === 'Osem')).toBe(true);
     });
   });
 });

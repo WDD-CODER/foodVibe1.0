@@ -5,11 +5,10 @@ import { Directive, HostListener, ElementRef } from '@angular/core';
   standalone: true
 })
 export class SelectOnFocusDirective {
-  constructor(private el: ElementRef<HTMLInputElement>) {}
+  constructor(private el: ElementRef<HTMLInputElement | HTMLTextAreaElement>) {}
 
   @HostListener('focus')
   onFocus() {
-    // Selects the whole number so the next keystroke replaces it
     this.el.nativeElement.select();
   }
 }

@@ -1,29 +1,28 @@
-import { Component, inject, signal, computed, output } from '@angular/core'
+import { Component, inject, input, signal, computed, output } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { FormsModule } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
 import { PreparationRegistryService, type PreparationEntry } from '@services/preparation-registry.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { ClickOutSideDirective } from '@directives/click-out-side'
 
 @Component({
   selector: 'app-preparation-search',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe],
+  imports: [CommonModule, LucideAngularModule, ClickOutSideDirective, TranslatePipe],
   templateUrl: './preparation-search.component.html',
   styleUrl: './preparation-search.component.scss'
 })
 export class PreparationSearchComponent {
   private readonly prepRegistry = inject(PreparationRegistryService)
 
+  /** Category from the row's category dropdown; used when adding a new preparation. */
+  selectedCategory = input<string>('')
+
   preparationSelected = output<PreparationEntry>()
   preparationAdded = output<PreparationEntry>()
 
   searchQuery_ = signal<string>('')
-  showAddForm_ = signal(false)
-  addFormName_ = signal('')
-  addFormCategory_ = signal('')
-  showNewCategoryInput_ = signal(false)
-  newCategoryName_ = signal('')
+  protected showResults_ = signal(false)
 
   protected filteredResults_ = computed(() => {
     const query = this.searchQuery_().toLowerCase().trim()
@@ -54,65 +53,22 @@ export class PreparationSearchComponent {
   selectPreparation(entry: PreparationEntry): void {
     this.preparationSelected.emit(entry)
     this.searchQuery_.set('')
+    this.showResults_.set(false)
   }
 
-  openAddForm(): void {
-    this.addFormName_.set(this.searchQuery_().trim())
-    const cats = this.categories_()
-    if (cats.length === 0) {
-      this.showNewCategoryInput_.set(true)
-      this.addFormCategory_.set('')
-    } else {
-      this.addFormCategory_.set(cats[0])
-    }
-    this.showNewCategoryInput_.set(false)
-    this.showAddForm_.set(true)
-  }
-
-  closeAddForm(): void {
-    this.showAddForm_.set(false)
-    this.addFormName_.set('')
-    this.addFormCategory_.set('')
-    this.newCategoryName_.set('')
-    this.showNewCategoryInput_.set(false)
-  }
-
-  onCategoryChange(value: string): void {
-    if (value === '__add_new__') {
-      this.showNewCategoryInput_.set(true)
-      this.addFormCategory_.set('')
-    } else {
-      this.showNewCategoryInput_.set(false)
-      this.addFormCategory_.set(value)
-    }
-  }
-
-  async addNewCategory(): Promise<void> {
-    const name = this.newCategoryName_().trim()
+  async addPreparationDirectly(): Promise<void> {
+    const name = this.searchQuery_().trim()
     if (!name) return
-    await this.prepRegistry.registerCategory(name)
-    this.addFormCategory_.set(name)
-    this.showNewCategoryInput_.set(false)
-    this.newCategoryName_.set('')
-  }
 
-  async submitAddForm(): Promise<void> {
-    let category = this.addFormCategory_()
-    if (this.showNewCategoryInput_()) {
-      const newName = this.newCategoryName_().trim()
-      if (!newName) return
-      await this.prepRegistry.registerCategory(newName)
-      category = newName
-    }
-
-    const name = this.addFormName_().trim()
-    if (!name || !category) return
+    const cats = this.categories_()
+    const category = this.selectedCategory().trim() || (cats.length > 0 ? cats[0] : '')
+    if (!category) return
 
     await this.prepRegistry.registerPreparation(name, category)
     const entry: PreparationEntry = { name, category }
     this.preparationAdded.emit(entry)
     this.preparationSelected.emit(entry)
-    this.closeAddForm()
     this.searchQuery_.set('')
+    this.showResults_.set(false)
   }
 }

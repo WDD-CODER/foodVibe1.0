@@ -1,9 +1,9 @@
 import { APP_INITIALIZER, ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
-import { ArrowLeft, ArrowRight, ChevronDown, Edit, FlaskConical, Image, LucideAngularModule, Minus, Pencil, Plus, PlusCircle, Save, Scale, Search, ShieldAlert, Trash2, TrendingUp } from 'lucide-angular';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, Edit, FlaskConical, Image, LucideAngularModule, Menu, Minus, Pencil, Plus, PlusCircle, Save, Scale, Search, ShieldAlert, Timer, Trash2, TrendingUp } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
-import { AlertTriangle, ChevronLeft, Tag, X } from 'lucide-angular/src/icons';
+import { AlertTriangle, Tag, X } from 'lucide-angular/src/icons';
 import { provideHttpClient } from '@angular/common/http';
 import { TranslationService } from '@services/translation.service';
 
@@ -37,12 +37,17 @@ export const appConfig: ApplicationConfig = {
         AlertTriangle,
         Tag,
         ChevronLeft,
+        ChevronRight,
         Image,
         Search,
         PlusCircle,
         ChevronDown,
-        
-      }) // Register 'Plus' here
+        Timer,
+        Menu,
+        ArrowUpDown,
+        ArrowUp,
+        ArrowDown
+      })
     )
   ]
 };

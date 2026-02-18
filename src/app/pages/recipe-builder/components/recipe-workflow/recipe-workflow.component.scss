@@ -46,7 +46,7 @@
   font-size: 0.95rem;
   resize: none;
   outline: none;
-
+  align-content: center;
   &:focus {
     border-color: #cbd5e1;
     background: #fff;
@@ -54,21 +54,65 @@
   }
 }
 
-.timer-input-group {
+.timer-counter {
   display: flex;
   align-items: center;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
-  padding: 0.25rem 0.5rem;
+  gap: 4px;
 
-  .timer-field {
-    width: 100%;
-    background: transparent;
-    border: none;
+  .counter-btn {
+    display: grid;
+    place-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background-color: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+
+    &:hover:not(:disabled) {
+      background-color: #e2e8f0;
+      border-color: #94a3b8;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .timer-value {
+    min-width: 2em;
     text-align: center;
     font-weight: 700;
+    font-size: 0.875rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.15s;
+
+    &:hover {
+      background-color: #e2e8f0;
+    }
+  }
+
+  .timer-field {
+    width: 3.5em;
+    padding: 4px 8px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+    border: 1px solid #0ea5e9;
+    border-radius: 4px;
     outline: none;
+
+    -moz-appearance: textfield;
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
   }
 }
 
@@ -125,9 +169,24 @@ $prep-grid-template: 2fr 1.5fr 1.2fr 1fr 48px;
   min-width: 0;
 }
 
-.col-prep-category .category-display {
-  font-size: 0.875rem;
-  color: #64748b;
+.sortable-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    color: #0ea5e9;
+  }
+
+  .sort-icon {
+    opacity: 0.7;
+  }
+}
+
+.category-select {
+  min-width: 120px;
 }
 
 .quantity-controls {
@@ -163,6 +222,12 @@ $prep-grid-template: 2fr 1.5fr 1.2fr 1fr 48px;
     min-width: 0;
     text-align: center;
     width: 48px;
+    -moz-appearance: textfield;
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
   }
 }
 

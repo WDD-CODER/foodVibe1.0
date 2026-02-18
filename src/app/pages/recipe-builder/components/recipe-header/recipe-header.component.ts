@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormArray, Validators } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
+import { ClickOutSideDirective } from '@directives/click-out-side';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
@@ -11,7 +12,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 @Component({
   selector: 'app-recipe-header',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, SelectOnFocusDirective, TranslatePipe],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, SelectOnFocusDirective, ClickOutSideDirective, TranslatePipe],
   templateUrl: './recipe-header.component.html',
   styleUrl: './recipe-header.component.scss'
 })
@@ -26,6 +27,7 @@ export class RecipeHeaderComponent {
   imageUrl = input<string | null>(null);
   currentCost = input<number>(0);
   totalWeightG = input<number>(0);
+  resetTrigger = input<number>(0);
 
   // OUTPUTS
   openUnitCreator = output<string>();
@@ -40,6 +42,7 @@ export class RecipeHeaderComponent {
 
   protected usedUnits_ = computed(() => {
     this.manualTrigger_();
+    this.resetTrigger();
     const conversions = this.form().get('yield_conversions') as FormArray;
     if (!conversions?.length) return new Set<string>();
     return new Set(conversions.value.map((c: { unit?: string }) => c.unit).filter(Boolean));
@@ -47,6 +50,7 @@ export class RecipeHeaderComponent {
 
   protected availablePrimaryUnits_ = computed(() => {
     this.manualTrigger_();
+    this.resetTrigger();
     const all = this.allUnitKeys_();
     const conversions = this.form().get('yield_conversions') as FormArray;
     const usedSecondary = conversions?.length > 1
@@ -57,6 +61,7 @@ export class RecipeHeaderComponent {
 
   protected availableSecondaryUnits_ = computed(() => {
     this.manualTrigger_();
+    this.resetTrigger();
     const all = this.allUnitKeys_();
     const used = this.usedUnits_();
     return all.filter(u => !used.has(u));
@@ -64,6 +69,7 @@ export class RecipeHeaderComponent {
   // COMPUTED SIGNALS
   protected primaryUnitLabel_ = computed(() => {
     this.manualTrigger_();
+    this.resetTrigger();
     const f = this.form();
     const type = f.get('recipe_type')?.value;
 
@@ -74,7 +80,8 @@ export class RecipeHeaderComponent {
   });
 
   protected primaryAmount_ = computed(() => {
-    this.manualTrigger_()
+    this.manualTrigger_();
+    this.resetTrigger();
     const f = this.form();
     const type = f.get('recipe_type')?.value;
 

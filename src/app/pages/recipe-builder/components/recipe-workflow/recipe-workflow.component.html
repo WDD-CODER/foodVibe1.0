@@ -4,34 +4,71 @@
     <div class="workflow-grid" formArrayName="workflow_items">
       <div class="grid-header">
         <div class="col-id text-center">#</div>
-        <div class="col-instruction">תהליך / Instruction</div>
-        <div class="col-timer text-center">זמן (דק')</div>
+        <div class="col-instruction">{{ 'instruction' | translatePipe }}</div>
+        <div class="col-timer text-center">{{ 'labor_time_minutes' | translatePipe }}</div>
         <div class="col-actions"></div>
       </div>
 
       <div class="grid-body">
-        @for (group of workflowGroups; track $index) {
-          <div [formGroupName]="$index" class="grid-row">
+        @for (group of workflowGroups_(); track group; let i = $index) {
+          <div [formGroupName]="i" class="grid-row">
             <div class="col-id">
-              <span class="step-badge">{{ $index + 1 }}</span>
+              <span class="step-badge">{{ i + 1 }}</span>
             </div>
 
             <div class="col-instruction">
               <textarea 
                 formControlName="instruction" 
                 class="workflow-textarea"
-                placeholder="תאר את פעולת ההכנה..."></textarea>
+                SelectOnFocus
+                placeholder="{{ 'instruction_placeholder' | translatePipe }}"
+                (keydown.enter)="onInstructionEnter($event)"></textarea>
             </div>
 
             <div class="col-timer">
-              <div class="timer-input-group">
+              <div class="timer-counter">
                 <lucide-icon name="timer" class="h-4 w-4 text-slate-400"></lucide-icon>
-                <input type="number" formControlName="labor_time" class="timer-field" />
+                <button
+                  type="button"
+                  class="counter-btn minus"
+                  [disabled]="(group.get('labor_time')?.value ?? 0) <= 0"
+                  (click)="decrementLaborTime(group)"
+                  tabindex="-1"
+                >
+                  <lucide-icon name="minus" class="h-4 w-4"></lucide-icon>
+                </button>
+                @if (editingLaborTimeIndex_() === i) {
+                  <input
+                    type="number"
+                    formControlName="labor_time"
+                    class="timer-field"
+                    min="0"
+                    autofocus
+                    SelectOnFocus
+                    (blur)="exitLaborTimeEdit(group)"
+                    (keydown.enter)="exitLaborTimeEdit(group); $event.preventDefault()"
+                  />
+                } @else {
+                  <span
+                    class="timer-value"
+                    (click)="enterLaborTimeEdit(i)"
+                    tabindex="0"
+                    role="button"
+                  >{{ group.get('labor_time')?.value ?? 0 }}</span>
+                }
+                <button
+                  type="button"
+                  class="counter-btn plus"
+                  (click)="incrementLaborTime(group)"
+                  tabindex="-1"
+                >
+                  <lucide-icon name="plus" class="h-4 w-4"></lucide-icon>
+                </button>
               </div>
             </div>
 
-            <div class="col-actions">
-              <button (click)="removeItem.emit($index)" class="delete-btn">
+            <div class="col-actions place-self-center h-4">
+              <button (click)="removeItem.emit(i)" class="delete-btn">
                 <lucide-icon name="trash-2" class="h-4 w-4"></lucide-icon>
               </button>
             </div>
@@ -41,7 +78,7 @@
       
       <button type="button" (click)="addItem.emit()" class="add-row-btn">
         <lucide-icon name="plus" class="ml-2 h-4 w-4"></lucide-icon>
-        הוסף שלב הכנה / Add Stage
+        {{ 'add_prep_stage' | translatePipe }}
       </button>
     </div>
   }
@@ -50,18 +87,22 @@
     <div class="prep-flat-grid" formArrayName="workflow_items">
       <div class="grid-header prep-grid-header">
         <div class="col-prep-name">{{ 'preparation' | translatePipe }}</div>
-        <div class="col-prep-category">{{ 'preparation_category' | translatePipe }}</div>
+        <div class="col-prep-category sortable-header" (click)="sortByCategory.emit()">
+          <span>{{ 'preparation_category' | translatePipe }}</span>
+          <lucide-icon name="arrow-up-down" class="sort-icon" [size]="14"></lucide-icon>
+        </div>
         <div class="col-prep-qty">{{ 'quantity' | translatePipe }}</div>
         <div class="col-prep-unit">{{ 'unit' | translatePipe }}</div>
         <div class="col-prep-actions"></div>
       </div>
 
       <div class="grid-body">
-        @for (group of workflowGroups; track $index) {
-          <div [formGroupName]="$index" class="prep-grid-row">
+        @for (group of workflowGroups_(); track group; let i = $index) {
+          <div [formGroupName]="i" class="prep-grid-row">
             <div class="col-prep-name">
               @if (!group.get('preparation_name')?.value) {
                 <app-preparation-search
+                  [selectedCategory]="group.get('category_name')?.value ?? ''"
                   (preparationSelected)="onPreparationSelected($event, group)"
                   (preparationAdded)="onPreparationSelected($event, group)">
                 </app-preparation-search>
@@ -76,19 +117,26 @@
             </div>
 
             <div class="col-prep-category">
-              <span class="category-display">{{ group.get('category_name')?.value || '—' }}</span>
+              <select formControlName="category_name" class="grid-select category-select"
+                (change)="onCategoryChange(group, $any($event.target).value)">
+                <option value="">{{ 'choose_category' | translatePipe }}</option>
+                @for (cat of getPreparationCategories(); track cat) {
+                  <option [value]="cat">{{ cat | translatePipe }}</option>
+                }
+                <option value="__add_new__">{{ 'add_preparation_category' | translatePipe }}</option>
+              </select>
             </div>
 
             <div class="col-prep-qty">
               <div class="quantity-controls">
                 <button type="button" class="qty-btn minus"
                   [disabled]="(group.get('quantity')?.value ?? 0) <= 0"
-                  (click)="decrementQuantity(group, $index)">
+                  (click)="decrementQuantity(group, i)">
                   <lucide-icon name="minus" [size]="16"></lucide-icon>
                 </button>
                 <input type="number" SelectOnFocus formControlName="quantity"
                   class="grid-input qty-input" placeholder="1" />
-                <button type="button" class="qty-btn plus" (click)="incrementQuantity(group, $index)">
+                <button type="button" class="qty-btn plus" (click)="incrementQuantity(group, i)">
                   <lucide-icon name="plus" [size]="16"></lucide-icon>
                 </button>
               </div>
@@ -103,7 +151,7 @@
             </div>
 
             <div class="col-prep-actions">
-              <button type="button" (click)="removeItem.emit($index)" class="delete-btn">
+              <button type="button" (click)="removeItem.emit(i)" class="delete-btn">
                 <lucide-icon name="trash-2" class="h-4 w-4"></lucide-icon>
               </button>
             </div>

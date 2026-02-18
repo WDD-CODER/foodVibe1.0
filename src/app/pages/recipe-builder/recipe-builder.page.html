@@ -3,12 +3,12 @@
 
     <section class="builder-section">
       <app-recipe-header [form]="recipeForm_" [currentCost]="totalCost_()"
-        [totalWeightG]="totalWeightG_()" (openUnitCreator)="onOpenUnitCreator()"></app-recipe-header>
+        [totalWeightG]="totalWeightG_()" [resetTrigger]="resetTrigger_()" (openUnitCreator)="onOpenUnitCreator()"></app-recipe-header>
     </section>
 
     <section class="builder-section">
       <div class="section-card table-logic">
-        <h2 class="section-title">אינדקס מרכיבים</h2>
+        <h2 class="section-title">{{ 'ingredients_index' | translatePipe }}</h2>
 
         <app-recipe-ingredients-table [ingredientsFormArray]="ingredientsArray"
           [portions]="portions_() ?? 1" (removeIngredient)="removeIngredient($event)"
@@ -19,7 +19,7 @@
           <div class="plus-icon-wrapper">
             <lucide-icon name="plus-circle" [size]="18"></lucide-icon>
           </div>
-          <span class="btn-text">הוסף שורה</span>
+          <span class="btn-text">{{ 'add_row' | translatePipe }}</span>
         </button>
 
       </div>
@@ -27,18 +27,17 @@
     <section class="builder-section">
       <div class="section-card workflow-logic">
         <h2 class="section-title">
-          {{ recipeForm_.get('recipe_type')?.value === 'dish' ? 'רשימת הכנות (מיזאנפלאס)' : 'תהליך הכנה / Prep Workflow'
-          }}
+          {{ (recipeForm_.get('recipe_type')?.value === 'dish' ? 'prep_list_mise_en_place' : 'prep_workflow') | translatePipe }}
         </h2>
-        <app-recipe-workflow [workflowFormArray]="workflowArray" [type]="recipeType_()" (addItem)="addNewStep()"
-          (removeItem)="deleteStep($event)">
+        <app-recipe-workflow [workflowFormArray]="workflowArray" [type]="recipeType_()" [resetTrigger]="resetTrigger_()" (addItem)="addNewStep()"
+          (removeItem)="deleteStep($event)" (sortByCategory)="sortPrepByCategory()">
         </app-recipe-workflow>
       </div>
     </section>
 
     <footer class="action-footer">
       <button class="main-submit-btn" [disabled]="isSaving_()" (click)="saveRecipe()">
-        {{ isSaving_() ? 'שומר...' : 'שמור כמתכון מאושר / Approve & Save' }}
+        {{ (isSaving_() ? 'saving' : (recipeForm_.get('recipe_type')?.value === 'dish' ? 'save_dish' : 'save_recipe')) | translatePipe }}
       </button>
     </footer>
 

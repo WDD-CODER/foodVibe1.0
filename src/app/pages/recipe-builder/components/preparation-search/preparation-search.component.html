@@ -1,72 +1,34 @@
-<div class="search-container" dir="rtl">
-  @if (!showAddForm_()) {
-    <div class="input-wrapper">
-      <lucide-icon name="search" size="18"></lucide-icon>
-      <input
-        type="text"
-        [value]="searchQuery_()"
-        (input)="searchQuery_.set($any($event.target).value)"
-        placeholder="{{ 'search_preparation' | translatePipe }}" />
-    </div>
+<div class="search-container" dir="rtl" (clickOutside)="showResults_.set(false)">
+  <div class="input-wrapper">
+    <lucide-icon name="search" size="18"></lucide-icon>
+    <input
+      type="text"
+      [value]="searchQuery_()"
+      (input)="searchQuery_.set($any($event.target).value); showResults_.set(true)"
+      (focus)="showResults_.set(true)"
+      placeholder="{{ 'search_preparation' | translatePipe }}" />
+  </div>
 
-    @if (groupedResults_().length > 0) {
-      <ul class="results-dropdown">
-        @for (group of groupedResults_(); track group[0]) {
-          <li class="category-header">{{ group[0] }}</li>
-          @for (entry of group[1]; track entry.name + entry.category) {
-            <li (click)="selectPreparation(entry)" class="result-item">
-              <span class="item-name">{{ entry.name }}</span>
-              <span class="category-pill">{{ entry.category }}</span>
-            </li>
-          }
+  @if (showResults_() && groupedResults_().length > 0) {
+    <ul class="results-dropdown">
+      @for (group of groupedResults_(); track group[0]) {
+        <li class="category-header">{{ group[0] }}</li>
+        @for (entry of group[1]; track entry.name + entry.category) {
+          <li (click)="selectPreparation(entry)" class="result-item">
+            <span class="item-name">{{ entry.name }}</span>
+            <span class="category-pill">{{ entry.category }}</span>
+          </li>
         }
-      </ul>
-    }
+      }
+    </ul>
+  }
 
-    @if (showAddOption_()) {
-      <div class="add-option">
-        <button type="button" (click)="openAddForm()" class="add-prep-btn">
-          <lucide-icon name="plus" size="16"></lucide-icon>
-          {{ 'add_preparation' | translatePipe }}: {{ searchQuery_() }}
-        </button>
-      </div>
-    }
-  } @else {
-    <div class="add-form">
-      <div class="form-row">
-        <label>{{ 'preparation' | translatePipe }}</label>
-        <input type="text" [ngModel]="addFormName_()" (ngModelChange)="addFormName_.set($event)" />
-      </div>
-      <div class="form-row">
-        <label>{{ 'preparation_category' | translatePipe }}</label>
-        @if (showNewCategoryInput_()) {
-          <div class="new-category-row">
-            <input
-              type="text"
-              [ngModel]="newCategoryName_()"
-              (ngModelChange)="newCategoryName_.set($event)"
-              placeholder="{{ 'new_category' | translatePipe }}" />
-            <button type="button" (click)="addNewCategory()" class="small-btn">
-              {{ 'add_preparation_category' | translatePipe }}
-            </button>
-          </div>
-        } @else {
-          <select [ngModel]="addFormCategory_()" (ngModelChange)="onCategoryChange($event)">
-            @for (cat of categories_(); track cat) {
-              <option [value]="cat">{{ cat }}</option>
-            }
-            <option value="__add_new__">{{ 'add_preparation_category' | translatePipe }}</option>
-          </select>
-        }
-      </div>
-      <div class="form-actions">
-        <button type="button" (click)="submitAddForm()" class="submit-btn">
-          {{ 'add_preparation' | translatePipe }}
-        </button>
-        <button type="button" (click)="closeAddForm()" class="cancel-btn">
-          {{ 'cancel' | translatePipe }}
-        </button>
-      </div>
+  @if (showResults_() && showAddOption_()) {
+    <div class="add-option">
+      <button type="button" (click)="addPreparationDirectly()" class="add-prep-btn">
+        <lucide-icon name="plus" size="16"></lucide-icon>
+        {{ 'add_preparation' | translatePipe }}: {{ searchQuery_() }}
+      </button>
     </div>
   }
 </div>

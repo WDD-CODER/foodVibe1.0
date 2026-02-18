@@ -1,0 +1,125 @@
+<div class="recipe-book-container" dir="rtl">
+  <div class="action-bar">
+    <button type="button" class="burger-btn" [class.burger-hidden]="isSidebarOpen_()" (click)="toggleSidebar()" [attr.aria-label]="isSidebarOpen_() ? 'Close menu' : 'Open menu'">
+      <lucide-icon name="menu" [size]="24"></lucide-icon>
+    </button>
+    <h2 class="page-title">{{ 'recipe_book' | translatePipe }}</h2>
+    <button type="button" class="add-btn" (click)="onAddRecipe()">
+      <lucide-icon name="plus" [size]="18"></lucide-icon>
+      {{ 'add_recipe_dish' | translatePipe }}
+    </button>
+  </div>
+
+  <aside class="action-sidebar" [class.open]="isSidebarOpen_()">
+    <div class="sidebar-content">
+      <button type="button" class="sidebar-close-btn" (click)="toggleSidebar()" [attr.aria-label]="'close' | translatePipe">
+        <lucide-icon name="x" [size]="20"></lucide-icon>
+      </button>
+      <div class="search-section">
+        <label class="visually-hidden" for="recipe-search">{{ 'search' | translatePipe }}</label>
+        <div class="input-wrapper">
+          <lucide-icon name="search" [size]="18"></lucide-icon>
+          <input id="recipe-search" type="text" [ngModel]="searchQuery_()" (ngModelChange)="searchQuery_.set($event)"
+            [placeholder]="'search' | translatePipe" />
+        </div>
+      </div>
+      <div class="filter-section">
+        <h3>{{ 'filter' | translatePipe }}</h3>
+        @for (category of filterCategories_(); track category.name) {
+          <div class="filter-category">
+            <h4>{{ category.name | translatePipe }}</h4>
+            <div class="filter-options">
+              @for (option of category.options; track option.value) {
+                <label class="filter-option">
+                  <input type="checkbox" [checked]="option.checked_" (change)="toggleFilter(category.name, option.value)" />
+                  <span>{{ option.label | translatePipe }}</span>
+                </label>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </aside>
+
+  <main class="recipes-main">
+    <div class="recipes-grid">
+      <div class="recipes-grid-header">
+        <div class="col-name sortable-header" (click)="setSort('name')" (keydown.enter)="setSort('name')" (keydown.space)="$event.preventDefault(); setSort('name')" role="button" tabindex="0">
+          {{ 'name' | translatePipe }}
+          <lucide-icon [name]="sortIconFor_('name')" [size]="14"></lucide-icon>
+        </div>
+        <div class="col-type sortable-header" (click)="setSort('type')" (keydown.enter)="setSort('type')" (keydown.space)="$event.preventDefault(); setSort('type')" role="button" tabindex="0">
+          {{ 'type' | translatePipe }}
+          <lucide-icon [name]="sortIconFor_('type')" [size]="14"></lucide-icon>
+        </div>
+        <div class="col-cost sortable-header" (click)="setSort('cost')" (keydown.enter)="setSort('cost')" (keydown.space)="$event.preventDefault(); setSort('cost')" role="button" tabindex="0">
+          {{ 'cost' | translatePipe }}
+          <lucide-icon [name]="sortIconFor_('cost')" [size]="14"></lucide-icon>
+        </div>
+        <div class="col-approved sortable-header" (click)="setSort('approved')" (keydown.enter)="setSort('approved')" (keydown.space)="$event.preventDefault(); setSort('approved')" role="button" tabindex="0">
+          {{ 'approved' | translatePipe }}
+          <lucide-icon [name]="sortIconFor_('approved')" [size]="14"></lucide-icon>
+        </div>
+        <div class="col-station sortable-header" (click)="setSort('station')" (keydown.enter)="setSort('station')" (keydown.space)="$event.preventDefault(); setSort('station')" role="button" tabindex="0">
+          {{ 'station' | translatePipe }}
+          <lucide-icon [name]="sortIconFor_('station')" [size]="14"></lucide-icon>
+        </div>
+        <div class="col-main-category sortable-header" (click)="setSort('main_category')" (keydown.enter)="setSort('main_category')" (keydown.space)="$event.preventDefault(); setSort('main_category')" role="button" tabindex="0">
+          {{ 'main_category' | translatePipe }}
+          <lucide-icon [name]="sortIconFor_('main_category')" [size]="14"></lucide-icon>
+        </div>
+        <div class="col-allergens sortable-header" (click)="setSort('allergens')" (keydown.enter)="setSort('allergens')" (keydown.space)="$event.preventDefault(); setSort('allergens')" role="button" tabindex="0">
+          {{ 'allergens' | translatePipe }}
+          <lucide-icon [name]="sortIconFor_('allergens')" [size]="14"></lucide-icon>
+        </div>
+        <div class="col-actions">{{ 'actions' | translatePipe }}</div>
+      </div>
+
+      <div class="recipes-grid-body">
+        @if (filteredRecipes_().length === 0) {
+          <div class="no-results">{{ 'no_recipes_match' | translatePipe }}</div>
+        }
+        @for (recipe of filteredRecipes_(); track recipe._id) {
+          <div class="recipe-grid-row">
+            <div class="col-name">{{ recipe.name_hebrew }}</div>
+            <div class="col-type">{{ (isRecipeDish(recipe) ? 'dish' : 'preparation') | translatePipe }}</div>
+            <div class="col-cost">₪{{ getRecipeCost(recipe) | number:'1.2-2' }}</div>
+            <div class="col-approved">{{ recipe.is_approved_ ? '✓' : '—' }}</div>
+            <div class="col-station">{{ recipe.default_station_ || '—' }}</div>
+            <div class="col-main-category">{{ 'no_category' | translatePipe }}</div>
+            <div class="col-allergens" #allergenCell>
+              @if (getRecipeAllergens(recipe).length) {
+                <div class="allergen-btn-wrapper">
+                  <button type="button" class="allergen-btn" (click)="toggleAllergenPopover(recipe._id)">
+                    <lucide-icon name="shield-alert" [size]="16"></lucide-icon>
+                    {{ getRecipeAllergens(recipe).length }} {{ 'allergens' | translatePipe }}
+                  </button>
+                  @if (allergenPopoverRecipeId_() === recipe._id) {
+                    <div class="allergen-popover" (clickOutside)="closeAllergenPopover()">
+                      <div class="allergen-chips-grid">
+                        @for (a of getRecipeAllergens(recipe); track a) {
+                          <span class="allergen-pill">{{ a | translatePipe }}</span>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <span class="placeholder-dash">—</span>
+              }
+            </div>
+            <div class="col-actions">
+              <button type="button" class="action-btn edit" (click)="onEditRecipe(recipe)" [attr.aria-label]="'edit' | translatePipe">
+                <lucide-icon name="pencil" [size]="18"></lucide-icon>
+              </button>
+              <button type="button" class="action-btn delete" (click)="onDeleteRecipe(recipe)" [attr.aria-label]="'delete' | translatePipe">
+                <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </main>
+</div>

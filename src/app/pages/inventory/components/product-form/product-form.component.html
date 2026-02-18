@@ -13,24 +13,35 @@
 
     <div class="form-section product-info">
       <div class="form-group">
-        <label>שם הפריט</label>
+        <label>{{ 'product_name' | translatePipe }}</label>
         <input formControlName="productName" type="text" placeholder="למשל: עגבניות מגי">
       </div>
 
       <div class="form-group">
-        <label>קטגוריה ראשית</label>
+        <label>{{ 'category' | translatePipe }}</label>
         <select formControlName="category_" (change)="onCategoryChange($event)">
-          <option value="">בחר קטגוריה</option>
+          <option value="">{{ 'choose_category' | translatePipe }}</option>
           <option *ngFor="let cat of categoryOptions_()" [value]="cat">
             {{ cat | translatePipe }}
           </option>
-          <option value="NEW_CATEGORY" class="text-emerald-600 font-bold">הוסף {{ 'NEW_CATEGORY' | translatePipe }}
+          <option value="NEW_CATEGORY" class="text-emerald-600 font-bold">{{ 'add_new_category' | translatePipe }}
           </option>
         </select>
       </div>
 
       <div class="form-group">
-        <label>מחיר קנייה בסיסי (₪)</label>
+        <label>{{ 'supplier' | translatePipe }}</label>
+        <select formControlName="supplierId_" (change)="onSupplierChange($event)">
+          <option value="">{{ 'choose_supplier' | translatePipe }}</option>
+          @for (s of suppliers_(); track s._id) {
+          <option [value]="s._id">{{ s.name_hebrew }}</option>
+          }
+          <option value="ADD_SUPPLIER" class="text-emerald-600 font-bold">{{ 'add_supplier' | translatePipe }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>{{ 'base_buy_price' | translatePipe }}</label>
         <div class="relative-input">
           <input SelectOnFocus type="number" formControlName="buy_price_global_" placeholder="0.00">
           <span class="prefix">₪</span>
@@ -38,21 +49,39 @@
       </div>
 
       <div class="form-group">
-        <label>יחידת מידה בסיס (Base Unit)</label>
+        <label>{{ 'base_unit' | translatePipe }}</label>
         <select formControlName="base_unit_" (change)="onBaseUnitChange($event)">
           @for (key of unitRegistry.allUnitKeys_(); track key) {
           <option [value]="key">{{ key | translatePipe }}</option>
           }
           <option value="NEW_UNIT" class="text-emerald-600 font-bold">
-            הוסף {{ 'NEW_UNIT' | translatePipe }}
+            {{ 'add_new_unit' | translatePipe }}
           </option>
         </select>
+      </div>
+
+      <div class="form-group">
+        <label class="flex items-center gap-2">
+          <input type="checkbox" formControlName="is_dairy_" />
+          {{ 'is_dairy' | translatePipe }}
+        </label>
+      </div>
+
+      <div class="form-group grid grid-cols-2 gap-4">
+        <div>
+          <label>{{ 'min_stock_level' | translatePipe }}</label>
+          <input type="number" formControlName="min_stock_level_" min="0" />
+        </div>
+        <div>
+          <label>{{ 'expiry_days_default' | translatePipe }}</label>
+          <input type="number" formControlName="expiry_days_default_" min="0" />
+        </div>
       </div>
 
       <div class="form-group allergen-container">
         <label class="flex items-center gap-2">
           <lucide-icon name="shield-alert" class="icon-xs text-amber-500"></lucide-icon>
-          אלרגנים (Allergens)
+          {{ 'allergens' | translatePipe }}
         </label>
 
         <div class="allergen-search-box" (clickOutside)="showSuggestions = false"
@@ -61,12 +90,16 @@
             <section class="selected-chips">
               <span *ngFor="let selected of productForm_.get('allergens_')?.value" (click)="toggleAllergen(selected)"
                 class="allergen-tag">
-                {{ selected }}
+                {{ selected | translatePipe }}
                 <lucide-icon name="x" class="icon"></lucide-icon>
               </span>
             </section>
-            <input type="text" placeholder="חפש או בחר אלרגן..." (focus)="showSuggestions = true" #allergenInput
-              [class.no-chips]="selectedAllergensSignal_().length === 0">
+            <input type="text"
+                   [ngModel]="allergenSearchQuery_()"
+                   (ngModelChange)="allergenSearchQuery_.set($event)"
+                   placeholder="חפש או בחר אלרגן..."
+                   (focus)="showSuggestions = true"
+                   [class.no-chips]="selectedAllergensSignal_().length === 0">
           </div>
 
           <div class="allergen-dropdown" *ngIf="showSuggestions">
@@ -74,8 +107,12 @@
               class="dropdown-item">
               {{ allergen | translatePipe }}
             </div>
-
-            <div *ngIf="filteredAllergenOptions_().length === 0" class="dropdown-item text-slate-400 italic">
+            @if (allergenSearchQuery_()?.trim() && !filteredAllergenOptions_().includes(allergenSearchQuery_()?.trim() ?? '') && !productForm_.get('allergens_')?.value?.includes(allergenSearchQuery_()?.trim())) {
+            <div class="dropdown-item text-emerald-600 font-bold" (click)="onAddNewAllergen(allergenSearchQuery_())">
+              {{ 'add_new_allergen' | translatePipe }} "{{ allergenSearchQuery_() }}"
+            </div>
+            }
+            <div *ngIf="filteredAllergenOptions_().length === 0 && !allergenSearchQuery_()?.trim()" class="dropdown-item text-slate-400 italic">
               כל האלרגנים נבחרו
             </div>
           </div>
@@ -86,13 +123,13 @@
         <div class="section-header mb-4">
           <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
             <lucide-icon name="flask-conical" class="icon-xs text-indigo-500"></lucide-icon>
-            לוגיקת פחת ויבול (Waste & Yield)
+            {{ 'waste_yield_logic' | translatePipe }}
           </h3>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div class="form-group yield-logic">
-            <label>אחוז פחת (Waste %)</label>
+            <label>{{ 'waste_percent' | translatePipe }}</label>
             <div class="relative-input">
               <input SelectOnFocus type="number" formControlName="waste_percent_" placeholder="0">
               <span class="prefix text-slate-400">%</span>
@@ -101,7 +138,7 @@
           </div>
 
           <div class="form-group yield-logic ">
-            <label>פקטור יבול (Yield Factor)</label>
+            <label>{{ 'yield_factor' | translatePipe }}</label>
             <div class="relative-input">
               <input SelectOnFocus type="number" formControlName="yield_factor_" step="0.01" placeholder="1.00">
               <!-- <lucide-icon name="trending-up" class="prefix-icon text-emerald-500"></lucide-icon> -->
@@ -122,7 +159,7 @@
     <div class="form-section border-top" formArrayName="purchase_options_">
       <label class="section-header">
         <button type="button" class="btn-text-add" (click)="addPurchaseOption()">
-          <lucide-icon name="plus" class="icon-xs"></lucide-icon> הוסף יחידת רכש
+          <lucide-icon name="plus" class="icon-xs"></lucide-icon> {{ 'add_purchase_unit' | translatePipe }}
         </button>
       </label>
 
@@ -163,7 +200,7 @@
 
           <div class="price-override-wrapper">
             <span class="math-text">מחיר ליחידת המידה-</span>
-            <input type="number" formControlName="price_override_" [placeholder]="'PRICE' | translatePipe"
+            <input type="number" formControlName="price_override_" [placeholder]="'price' | translatePipe"
               class="override-input">
             <span class="math-text">₪</span>
           </div>
@@ -186,11 +223,11 @@
     <div class="form-actions">
       <button type="button" class="btn-primary" (click)="onCancel()">
         <lucide-icon name="arrow-right" class="icon-sm"></lucide-icon>
-        חזור לרשימה
+        {{ 'back_to_list' | translatePipe }}
       </button>
       <button type="submit" [disabled]="productForm_.invalid" class="btn-primary">
         <lucide-icon [name]="isEditMode_() ? 'save' : 'plus'" class="icon-sm"></lucide-icon>
-        {{ isEditMode_() ? 'עדכן מוצר' : 'שמור פריט' }}
+        {{ isEditMode_() ? ('update_product' | translatePipe) : ('save_product' | translatePipe) }}
       </button>
     </div>
   </form>

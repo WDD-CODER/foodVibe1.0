@@ -1,0 +1,15 @@
+@if (modalService.isOpen()) {
+  <div class="modal-overlay" (click)="modalService.choose(false)">
+    <div class="modal-card" dir="rtl" (click)="$event.stopPropagation()">
+      <p class="modal-message">{{ modalService.message() | translatePipe }}</p>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" (click)="modalService.choose(false)">
+          {{ 'cancel' | translatePipe }}
+        </button>
+        <button type="button" class="btn-confirm" (click)="modalService.choose(true)">
+          {{ modalService.saveLabel() | translatePipe }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

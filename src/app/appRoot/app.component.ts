@@ -4,10 +4,14 @@ import { HeaderComponent } from '../core/componets/header/header.component';
 import { FooterComponent } from '../core/componets/footer/footer.component';
 import { UserMsg } from "src/app/core/componets/user-msg/user-msg.component";
 import { UnitCreatorModal } from 'src/app/shared/unit-creator/unit-creator.component';
+import { TranslationKeyModalComponent } from 'src/app/shared/translation-key-modal/translation-key-modal.component';
+import { AddItemModalComponent } from 'src/app/shared/add-item-modal/add-item-modal.component';
+import { GlobalSpecificModalComponent } from 'src/app/shared/global-specific-modal/global-specific-modal.component';
+import { ConfirmModalComponent } from 'src/app/shared/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, HeaderComponent, FooterComponent, UserMsg, UnitCreatorModal],
+  imports: [RouterOutlet, HeaderComponent, FooterComponent, UserMsg, UnitCreatorModal, TranslationKeyModalComponent, AddItemModalComponent, GlobalSpecificModalComponent, ConfirmModalComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

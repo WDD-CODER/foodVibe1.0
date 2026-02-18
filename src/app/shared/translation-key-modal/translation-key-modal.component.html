@@ -1,0 +1,38 @@
+@if (isOpen_()) {
+<div class="modal-overlay" (click)="resetAndClose()">
+  <div class="modal-card" dir="rtl" (click)="$event.stopPropagation()" (clickOutside)="resetAndClose()">
+    <h3>{{ title_() | translatePipe }}</h3>
+
+    <div class="formula-grid">
+      <div class="input-stack full-width">
+        <label>ערך בעברית</label>
+        <input type="text"
+               [ngModel]="hebrewLabel_()"
+               (ngModelChange)="updateHebrew($event)"
+               [placeholder]="context_() === 'category' ? 'למשל: קטגוריה חדשה' : 'ערך בעברית'"
+               [readOnly]="isHebrewReadonly_()" />
+      </div>
+      <div class="input-stack full-width">
+        <label>מפתח באנגלית (לדוגמה: olive_oil)</label>
+        <input type="text"
+               [ngModel]="englishKey_()"
+               (ngModelChange)="englishKey_.set($event); validationError_.set(null)"
+               placeholder="olive_oil"
+               (keydown.enter)="save()" />
+        @if (validationError_()) {
+        <span class="validation-error">{{ validationError_() }}</span>
+        }
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-ghost" (click)="cancel()">{{ 'cancel' | translatePipe }}</button>
+      <button class="btn-save"
+              (click)="save()"
+              [disabled]="!englishKey_()?.trim() || !hebrewLabel_()?.trim()">
+        {{ 'save_approve' | translatePipe }}
+      </button>
+    </div>
+  </div>
+</div>
+}

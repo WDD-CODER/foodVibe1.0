@@ -37,12 +37,14 @@ export class UserMsgService {
   }
 
   public onSetSuccessMsg(txt: string) {
-    console.log("🚀 ~ UserMsgService ~ onSetSuccessMsg ~ txt:", txt)
     this._setMsg({ txt, type: 'success' })
   }
+
+  /** Success message with optional undo action. */
+  public onSetSuccessMsgWithUndo(txt: string, undo: () => void) {
+    this._setMsg({ txt, type: 'success', undo })
+  }
   public onSetErrorMsg(txt: string) {
-    console.log("🚀 ~ UserMsgService ~ onSetErrorMsg ~ txt:", txt)
-    
     this._setMsg({ txt, type: 'error' })
   }
 

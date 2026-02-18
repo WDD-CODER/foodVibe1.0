@@ -98,6 +98,18 @@ export class RecipeIngredientsTableComponent {
     this.addIngredient.emit();
   }
 
+  clearIngredient(group: FormGroup): void {
+    group.patchValue({
+      referenceId: null,
+      name_hebrew: '',
+      item_type: null,
+      amount_net: null,
+      unit: 'gram',
+    });
+    group.updateValueAndValidity();
+    this.ingredientsFormArray().updateValueAndValidity();
+  }
+
   getItemMetadata(group: FormGroup) {
     const id = group.get('referenceId')?.value;
     const type = group.get('item_type')?.value;

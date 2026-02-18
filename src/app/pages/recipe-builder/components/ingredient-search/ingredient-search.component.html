@@ -1,14 +1,15 @@
-<div class="search-container" dir="rtl">
+<div class="search-container" dir="rtl" (clickOutside)="showResults_.set(false)">
   <div class="input-wrapper">
     <lucide-icon name="search" size="18"></lucide-icon>
     <input 
       type="text" 
       [value]="searchQuery_()"
-      (input)="searchQuery_.set($any($event.target).value)"
+      (input)="searchQuery_.set($any($event.target).value); showResults_.set(true)"
+      (focus)="showResults_.set(true)"
       placeholder="חפש מוצר או מתכון" />
   </div>
 
-  @if (filteredResults_().length > 0) {
+  @if (showResults_() && filteredResults_().length > 0) {
     <ul class="results-dropdown">
       @for (item of filteredResults_(); track item._id) {
         <li (click)="selectItem(item)" class="result-item">

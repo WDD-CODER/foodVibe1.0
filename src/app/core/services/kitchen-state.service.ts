@@ -7,6 +7,8 @@ import { Supplier } from '@models/supplier.model';
 import { UserMsgService } from './user-msg.service';
 import { ProductDataService } from './product-data.service';
 import { RecipeDataService } from './recipe-data.service';
+import { DishDataService } from './dish-data.service';
+import { SupplierDataService } from './supplier-data.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,12 +16,18 @@ import { RecipeDataService } from './recipe-data.service';
 export class KitchenStateService {
   private productDataService = inject(ProductDataService);
   private recipeDataService = inject(RecipeDataService);
+  private dishDataService = inject(DishDataService);
+  private supplierDataService = inject(SupplierDataService);
   private userMsgService = inject(UserMsgService);
 
   // CORE SIGNALS
   products_ = computed(() => this.productDataService.allProducts_());
-  recipes_ = computed(() => this.recipeDataService.allRecipes_());
-  suppliers_ = signal<Supplier[]>([]);
+  /** Combined recipes (preparations) + dishes for ingredient search and lookup. */
+  recipes_ = computed(() => [
+    ...this.recipeDataService.allRecipes_(),
+    ...this.dishDataService.allDishes_()
+  ]);
+  suppliers_ = computed(() => this.supplierDataService.allSuppliers_());
   selectedProductId_ = signal<string | null>(null);
   isDrawerOpen_ = signal<boolean>(false);
 
@@ -74,21 +82,49 @@ export class KitchenStateService {
     );
   }
 
-  // RECIPE CRUD
-  saveRecipe(recipe: Recipe): Observable<Recipe> {
-    const isUpdate = !!(recipe._id && recipe._id.trim() !== '');
-
-    const operation$ = isUpdate
-      ? from(this.recipeDataService.updateRecipe(recipe))
-      : from(this.recipeDataService.addRecipe(recipe as Omit<Recipe, '_id'>));
+  // RECIPE / DISH CRUD
+  deleteRecipe(recipe: Recipe): Observable<void> {
+    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.mise_categories_?.length);
+    const operation$ = isDish
+      ? from(this.dishDataService.deleteDish(recipe._id))
+      : from(this.recipeDataService.deleteRecipe(recipe._id));
 
     return operation$.pipe(
-      tap((saved) => {
-        const msg = isUpdate ? 'המתכון עודכן בהצלחה' : 'המתכון נשמר בהצלחה';
+      tap(() => {
+        const msg = isDish ? 'המנה נמחקה בהצלחה' : 'המתכון נמחק בהצלחה';
         this.userMsgService.onSetSuccessMsg(msg);
       }),
       catchError(() => {
-        const errorMsg = isUpdate ? 'שגיאה בעדכון המתכון' : 'שגיאה בשמירת המתכון';
+        const errorMsg = isDish ? 'שגיאה במחיקת המנה' : 'שגיאה במחיקת המתכון';
+        this.userMsgService.onSetErrorMsg(errorMsg);
+        return throwError(() => new Error(errorMsg));
+      })
+    );
+  }
+
+  saveRecipe(recipe: Recipe): Observable<Recipe> {
+    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.mise_categories_?.length);
+    const isUpdate = !!(recipe._id && recipe._id.trim() !== '');
+
+    const operation$ = isDish
+      ? (isUpdate
+          ? from(this.dishDataService.updateDish(recipe))
+          : from(this.dishDataService.addDish(recipe as Omit<Recipe, '_id'>)))
+      : (isUpdate
+          ? from(this.recipeDataService.updateRecipe(recipe))
+          : from(this.recipeDataService.addRecipe(recipe as Omit<Recipe, '_id'>)));
+
+    return operation$.pipe(
+      tap((saved) => {
+        const msg = isDish
+          ? (isUpdate ? 'המנה עודכנה בהצלחה' : 'המנה נשמרה בהצלחה')
+          : (isUpdate ? 'המתכון עודכן בהצלחה' : 'המתכון נשמר בהצלחה');
+        this.userMsgService.onSetSuccessMsg(msg);
+      }),
+      catchError(() => {
+        const errorMsg = isDish
+          ? (isUpdate ? 'שגיאה בעדכון המנה' : 'שגיאה בשמירת המנה')
+          : (isUpdate ? 'שגיאה בעדכון המתכון' : 'שגיאה בשמירת המתכון');
         this.userMsgService.onSetErrorMsg(errorMsg);
         return throwError(() => new Error(errorMsg));
       })
@@ -96,7 +132,7 @@ export class KitchenStateService {
   }
 
   // SUPPLIER CRUD
-  addSupplier(supplier: Supplier) {
-    this.suppliers_.update(suppliers => [...suppliers, supplier]);
+  async addSupplier(supplier: Omit<Supplier, '_id'>): Promise<Supplier> {
+    return this.supplierDataService.addSupplier(supplier);
   }
 }

@@ -1,68 +1,63 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { InventoryProductListComponent } from './inventory-product-list.component';
 import { KitchenStateService } from '@services/kitchen-state.service';
-import { ProductDataService } from '@services/product-data.service';
 import { Router } from '@angular/router';
 import { signal } from '@angular/core';
-import { 
-  LucideAngularModule, 
-  Search, 
-  Plus, 
-  Trash2, 
-  Pencil, // <--- Missing dependency identified
-  ChevronRight 
-} from 'lucide-angular';import { Product } from '@models/product.model';
+import { LucideAngularModule, Search, Trash2, Pencil, PlusCircle, Menu, X } from 'lucide-angular';
+import { Product } from '@models/product.model';
+import { TranslationService } from '@services/translation.service';
+import { UnitRegistryService } from '@services/unit-registry.service';
 
 describe('InventoryProductListComponent', () => {
   let component: InventoryProductListComponent;
   let fixture: ComponentFixture<InventoryProductListComponent>;
   let mockRouter: jasmine.SpyObj<Router>;
 
-  // Rule #4: Callable Signal Mocks for SoT
   const mockProductsSignal = signal<Product[]>([
     {
       _id: '1',
       name_hebrew: 'Tomato',
       category_: 'Vegetables',
       supplierId_: 'Supplier A',
-      allergens_: ['Gluten']
+      allergens_: ['Gluten'],
+      base_unit_: 'gram',
+      buy_price_global_: 5
     } as Product,
     {
       _id: '2',
       name_hebrew: 'Milk',
       category_: 'Dairy',
       supplierId_: 'Supplier B',
-      allergens_: ['milk products']
+      allergens_: ['milk products'],
+      base_unit_: 'liter',
+      buy_price_global_: 12
     } as Product
   ]);
 
+  const mockUnitRegistry = {
+    allUnitKeys_: signal(['gram', 'kg', 'liter', 'unit']),
+    getConversion: (key: string) => ({ gram: 1, kg: 1000, liter: 1000, ml: 1, unit: 1 }[key] ?? 1)
+  };
+
   beforeEach(async () => {
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
-    
+
     const mockKitchenState = {
       products_: mockProductsSignal,
-      deleteProduct: jasmine.createSpy('deleteProduct')
-    };
-
-    const mockProductData = {
-      allProducts_: signal([])
+      deleteProduct: jasmine.createSpy('deleteProduct'),
+      saveProduct: jasmine.createSpy('saveProduct').and.returnValue({ subscribe: () => {} })
     };
 
     await TestBed.configureTestingModule({
       imports: [
-        InventoryProductListComponent, 
-        LucideAngularModule.pick({ 
-          Search, 
-          Plus, 
-          Trash2, 
-          Pencil, // <--- Added to satisfy the template
-          ChevronRight 
-        })
+        InventoryProductListComponent,
+        LucideAngularModule.pick({ Search, Trash2, Pencil, PlusCircle, Menu, X })
       ],
       providers: [
         { provide: KitchenStateService, useValue: mockKitchenState },
-        { provide: ProductDataService, useValue: mockProductData },
-        { provide: Router, useValue: mockRouter }
+        { provide: Router, useValue: mockRouter },
+        { provide: TranslationService, useValue: { translate: (k: string) => k || '' } },
+        { provide: UnitRegistryService, useValue: mockUnitRegistry }
       ]
     }).compileComponents();
 

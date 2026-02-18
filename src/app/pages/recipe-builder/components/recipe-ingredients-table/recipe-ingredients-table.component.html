@@ -18,7 +18,7 @@
         } @else {
         <div class="selected-item-display">
           <span class="item-text">{{ group.get('name_hebrew')?.value }}</span>
-          <button type="button" class="clear-btn" (click)="group.patchValue({referenceId: null, name_hebrew: ''})">
+          <button type="button" class="clear-btn" (click)="clearIngredient(group)">
             <lucide-icon name="x" [size]="14"></lucide-icon>
           </button>
         </div>

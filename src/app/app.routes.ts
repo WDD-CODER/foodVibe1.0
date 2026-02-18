@@ -43,5 +43,9 @@ export const routes: Routes = [
     resolve: { recipe: recipeResolver },
     canDeactivate: [pendingChangesGuard]
   },
+  {
+    path: 'recipe-book',
+    loadComponent: () => import('@pages/recipe-book/recipe-book.page').then(m => m.RecipeBookPage),
+  },
   { path: '', redirectTo: 'inventory', pathMatch: 'full' },
 ];

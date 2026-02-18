@@ -13,11 +13,12 @@ import { ClickOutSideDirective } from "@directives/click-out-side";
 import { UtilService } from '@services/util.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
+import { TranslationService } from '@services/translation.service';
+import { TranslationKeyModalService } from '@services/translation-key-modal.service';
+import { AddSupplierFlowService } from '@services/add-supplier-flow.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
-// import { UnitCreatorModal } from '@components/shared/unit-creator-modal/unit-creator.component';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
-import { KitchenUnit } from '@models/units.enum';
 
 @Component({
   selector: 'product-form',
@@ -44,12 +45,17 @@ export class ProductFormComponent implements OnInit {
   private readonly kitchenStateService = inject(KitchenStateService);
   private readonly utilService = inject(UtilService);
   private readonly metadataRegistry = inject(MetadataRegistryService);
+  private readonly translationService = inject(TranslationService);
+  private readonly translationKeyModal = inject(TranslationKeyModalService);
+  private readonly addSupplierFlowService = inject(AddSupplierFlowService);
+  private readonly userMsgService = inject(UserMsgService);
   private readonly injector = inject(Injector);
 
   unitRegistry = inject(UnitRegistryService);
   // RESTORED UI SIGNALS
 
   protected readonly categoryOptions_ = computed(() => this.metadataRegistry.allCategories_());
+  protected readonly suppliers_ = computed(() => this.kitchenStateService.suppliers_());
   protected availableUnits_ = computed(() => this.unitRegistry.allUnitKeys_());
   protected allergenOptions_ = computed(() => this.metadataRegistry.allAllergens_());
   protected isEditMode_ = signal<boolean>(false);
@@ -82,6 +88,8 @@ export class ProductFormComponent implements OnInit {
     const selected = this.selectedAllergensSignal_() || [];
     return all.filter(allergen => !selected.includes(allergen));
   });
+
+  protected allergenSearchQuery_ = signal('');
 
 
   constructor() {
@@ -149,6 +157,10 @@ export class ProductFormComponent implements OnInit {
       base_unit_: ['', Validators.required],
       buy_price_global_: [0, [Validators.required, Validators.min(0)]],
       category_: ['', Validators.required],
+      supplierId_: [''],
+      is_dairy_: [false],
+      min_stock_level_: [0, [Validators.min(0)]],
+      expiry_days_default_: [0, [Validators.min(0)]],
       yield_factor_: [1, [Validators.required]],
       waste_percent_: [0, [Validators.min(0), Validators.max(100)]],
       allergens_: [[]],
@@ -205,19 +217,40 @@ export class ProductFormComponent implements OnInit {
   protected async onCategoryChange(event: Event): Promise<void> {
     const select = event.target as HTMLSelectElement;
     if (select.value === 'NEW_CATEGORY') {
-      const newCat = prompt('הכנס שם קטגוריה חדשה:');
-      if (newCat) {
-        try {
-          // Wait for the server-side simulation to finish
-          await this.metadataRegistry.registerCategory(newCat);
-          // Only set the form value after confirmed save
-          this.productForm_.get('category_')?.setValue(newCat);
-        } catch (err) {
-          // Error is already handled by userMsgService in the registry service
-          console.error('Failed to add category:', err);
+      try {
+        const result = await this.translationKeyModal.open('', 'category');
+        if (result?.englishKey && result?.hebrewLabel) {
+          await this.metadataRegistry.registerCategory(result.englishKey);
+          this.translationService.updateDictionary(result.englishKey, result.hebrewLabel);
+          this.productForm_.get('category_')?.setValue(result.englishKey);
         }
+      } catch (err) {
+        console.error('Failed to add category:', err);
       }
       select.value = '';
+    }
+  }
+
+  protected async onSupplierChange(event: Event): Promise<void> {
+    const select = event.target as HTMLSelectElement;
+    if (select.value === 'ADD_SUPPLIER') {
+      const supplier = await this.addSupplierFlowService.open();
+      this.productForm_.get('supplierId_')?.setValue(supplier?._id ?? '');
+    }
+  }
+
+  protected async onAddNewAllergen(hebrewLabel: string): Promise<void> {
+    if (!hebrewLabel?.trim()) return;
+    try {
+      const result = await this.translationKeyModal.open(hebrewLabel.trim(), 'allergen');
+      if (result) {
+        await this.metadataRegistry.registerAllergen(result.englishKey);
+        this.translationService.updateDictionary(result.englishKey, result.hebrewLabel);
+        this.toggleAllergen(result.englishKey);
+        this.allergenSearchQuery_.set('');
+      }
+    } catch (err) {
+      console.error('Failed to add allergen:', err);
     }
   }
 
@@ -322,6 +355,10 @@ export class ProductFormComponent implements OnInit {
       base_unit_: data.base_unit_,
       buy_price_global_: data.buy_price_global_,
       category_: data.category_,
+      supplierId_: data.supplierId_ ?? '',
+      is_dairy_: data.is_dairy_ ?? false,
+      min_stock_level_: data.min_stock_level_ ?? 0,
+      expiry_days_default_: data.expiry_days_default_ ?? 0,
       yield_factor_: data.yield_factor_,
       waste_percent_: Math.round((1 - data.yield_factor_) * 100),
       allergens_: data.allergens_ || []
@@ -336,34 +373,38 @@ export class ProductFormComponent implements OnInit {
     }
   }
   protected onSubmit(): void {
-    if (this.productForm_.valid) {
-      const val = this.productForm_.getRawValue();
-
-      // 3. Ensure the Metadata Registry learns the category if it's new
-      this.metadataRegistry.registerCategory(val.category_);
-
-      const productToSave: Product = {
-        ...this.curProduct_()!,
-        name_hebrew: val.productName,
-        base_unit_: val.base_unit_,
-        buy_price_global_: val.buy_price_global_,
-        category_: val.category_,
-        yield_factor_: val.yield_factor_,
-        allergens_: val.allergens_,
-        purchase_options_: val.purchase_options_
-      };
-
-      this.kitchenStateService.saveProduct(productToSave).subscribe({
-        next: () => {
-          this.isSubmitted = true; // ✅ MOVED HERE: Only true if save worked!
-          this.router.navigate(['/inventory/list']);
-        },
-        error: (err) => {
-          this.isSubmitted = false; // 🛡️ ENSURE it stays false so Guard stays active
-          console.error('Save failed:', err);
-        }
-      });
+    if (!this.productForm_.valid) {
+      this.productForm_.markAllAsTouched();
+      this.userMsgService.onSetErrorMsg('יש למלא את כל השדות הנדרשים (שם הפריט, יחידה, מחיר)');
+      return;
     }
+    const val = this.productForm_.getRawValue();
+    this.metadataRegistry.registerCategory(val.category_);
+
+    const productToSave: Product = {
+      ...this.curProduct_()!,
+      name_hebrew: val.productName,
+      base_unit_: val.base_unit_,
+      buy_price_global_: val.buy_price_global_,
+      category_: val.category_,
+      supplierId_: val.supplierId_ ?? '',
+      is_dairy_: val.is_dairy_ ?? false,
+      min_stock_level_: val.min_stock_level_ ?? 0,
+      expiry_days_default_: val.expiry_days_default_ ?? 0,
+      yield_factor_: val.yield_factor_,
+      allergens_: val.allergens_,
+      purchase_options_: val.purchase_options_
+    };
+
+    this.kitchenStateService.saveProduct(productToSave).subscribe({
+      next: () => {
+        this.isSubmitted = true;
+        this.router.navigate(['/inventory/list']);
+      },
+      error: () => {
+        this.isSubmitted = false;
+      }
+    });
   }
 
   protected onCancel(): void {

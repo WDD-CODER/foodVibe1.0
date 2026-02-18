@@ -8,6 +8,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { TranslationService } from '@services/translation.service';
 import { UserMsgService } from '@services/user-msg.service';
+import { TranslationKeyModalService } from '@services/translation-key-modal.service';
 
 type MetadataType = 'category' | 'allergen' | 'unit';
 @Component({
@@ -24,6 +25,7 @@ export class MetadataManagerComponent implements OnInit {
   private productData = inject(ProductDataService);
   private translationService = inject(TranslationService);
   private userMsgService = inject(UserMsgService);
+  private translationKeyModal = inject(TranslationKeyModalService);
 
   // SIGNALS
   allUnitKeys_ = this.unitRegistry.allUnitKeys_;
@@ -64,21 +66,15 @@ async onAddMetadata(hebrewLabel: string, type: MetadataType, inputElement: HTMLI
   }
 
   // --- LAYER 2: ENGLISH KEY GUARD ---
-  const englishKey = prompt(`הכנס מזהה באנגלית עבור "${sanitizedHebrew}":`);
-  
-  if (!englishKey || !englishKey.trim()) return; 
+  const contextMap = { category: 'category' as const, allergen: 'allergen' as const, unit: 'unit' as const };
+  const result = await this.translationKeyModal.open(sanitizedHebrew, contextMap[type]);
+  if (!result?.englishKey || !result?.hebrewLabel) return;
 
-  const validation = this.translationService.validateEnglishKey(englishKey);
-  if (!validation.valid) {
-    this.userMsgService.onSetErrorMsg(validation.error!);
-    return;
-  }
-
-  const sanitizedKey = englishKey.trim().toLowerCase().replace(/\s+/g, '_');
+  const sanitizedKey = result.englishKey;
 
   // --- LAYER 3: EXECUTION ---
   try {
-    this.translationService.updateDictionary(sanitizedKey, sanitizedHebrew);
+    this.translationService.updateDictionary(sanitizedKey, result.hebrewLabel);
 
     await this.registerInService(sanitizedKey, type);
     

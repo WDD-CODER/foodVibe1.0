@@ -15,7 +15,7 @@ describe('HeaderComponent', () => {
         provideRouter([
           { path: 'inventory', redirectTo: '' },
           { path: 'recipe-builder', redirectTo: '' },
-          { path: 'dishes', redirectTo: '' },
+          { path: 'recipe-book', redirectTo: '' },
           { path: 'menu-creating', redirectTo: '' },
           { path: 'checklist-creator', redirectTo: '' }
         ])
@@ -40,7 +40,7 @@ describe('HeaderComponent', () => {
 
     expect(hrefs).toContain('/inventory');
     expect(hrefs).toContain('/recipe-builder');
-    expect(hrefs).toContain('/dishes');
+    expect(hrefs).toContain('/recipe-book');
     expect(hrefs).toContain('/menu-creating');
     expect(hrefs).toContain('/command-center');
   });
