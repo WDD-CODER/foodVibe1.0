@@ -208,6 +208,14 @@ export class RecipeHeaderComponent {
     this.activeUnit.set(this.activeUnit() === unit ? null : unit);
   }
 
+  /** Whether the primary chip unit dropdown is open. */
+  activePrimaryEdit_ = signal<boolean>(false);
+
+  setActivePrimaryEdit(open: boolean): void {
+    this.activePrimaryEdit_.set(open);
+    if (open) this.activeSecondaryEdit_.set(null);
+  }
+
   /** Which secondary chip index has its unit dropdown open (null = none). */
   activeSecondaryEdit_ = signal<number | null>(null);
 
@@ -224,6 +232,7 @@ export class RecipeHeaderComponent {
 
   setActiveSecondaryEdit(index: number | null): void {
     this.activeSecondaryEdit_.set(this.activeSecondaryEdit_() === index ? null : index);
+    if (index !== null) this.activePrimaryEdit_.set(false);
   }
 
   changeSecondaryUnit(chipIndex: number, newUnit: string): void {

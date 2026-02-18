@@ -5,52 +5,65 @@
 
     <div class="center-controls">
         <div class="top-row">
-            <button type="button" (click)="toggleType()" class="type-toggle-btn"
+            <button type="button" 
+                (click)="toggleType()" 
+                class="type-toggle-btn"
                 [class.dish-mode]="form().get('recipe_type')?.value === 'dish'">
                 {{ (form().get('recipe_type')?.value === 'dish' ? 'dish' : 'prep') | translatePipe }}
             </button>
+            
             <input formControlName="name_hebrew"
                 [placeholder]="((form().get('recipe_type')?.value === 'dish' ? 'dish_name_placeholder' : 'recipe_name_placeholder') | translatePipe) + '...'"
                 class="recipe-name-input" />
         </div>
 
         <div class="scaling-dock-grid">
-            <div class="scaling-chip active primary">
-                <div class="unit-switcher-btn" (click)="setActiveUnit('primary')">
-                    <div class="unit-select-wrapper">
-                        <select class="native-unit-select" [value]="primaryUnitLabel_()"
-                            (change)="onPrimaryUnitChange($event)">
-                            @for (key of availablePrimaryUnits_(); track key) {
-                            <option [value]="key">{{ key | translatePipe }}</option>
-                            }
-                            <option value="NEW_UNIT" class="add-new-option">
-                                + {{ 'add_new_unit' | translatePipe }}
-                            </option>
-                        </select>
+            <div class="primary-chip-wrapper">
+                <div class="scaling-chip primary">
+                    <div class="unit-switcher-btn" (click)="setActivePrimaryEdit(!activePrimaryEdit_())">
+                        <span class="unit-name">{{ primaryUnitLabel_() | translatePipe }}</span>
+                        <lucide-icon name="chevron-down" [size]="10"></lucide-icon>
                     </div>
-                    <lucide-icon name="chevron-down" [size]="10"></lucide-icon>
-                </div>
 
-                <div class="counter-grid small">
-                    <button type="button" class="ctrl-btn disabled" [disabled]="primaryAmount_() === 0"
-                        (click)="updatePrimaryAmount(-1)">-</button>
-                    <div class="input-wrapper">
-                        <input type="number" #primaryInput SelectOnFocus class="chip-input-native"
-                            [value]="primaryAmount_()" (input)="onAmountManualChange(primaryInput.value)"
-                            (blur)="onAmountManualChange(primaryInput.value)"
-                            (keydown.enter)="$event.preventDefault(); primaryInput.blur()">
+                    @if (activePrimaryEdit_()) {
+                    <div class="unit-dropdown-menu primary-chip-dropdown">
+                        @for (unit of availablePrimaryUnits_(); track unit) {
+                        <div class="menu-item" (click)="setPrimaryUnit(unit); setActivePrimaryEdit(false)">
+                            {{ unit | translatePipe }}
+                        </div>
+                        }
+                        <div class="menu-item menu-item-create" (click)="openUnitCreator.emit('unit'); setActivePrimaryEdit(false)">
+                            {{ 'create_new_unit' | translatePipe }}
+                        </div>
                     </div>
-                    <button type="button" class="ctrl-btn" (click)="updatePrimaryAmount(1)">+</button>
+                    }
+
+                    <div class="counter-grid small">
+                        <button type="button" class="ctrl-btn"
+                            [disabled]="!(primaryAmount_() > (form().get('recipe_type')?.value === 'dish' ? 1 : 0))"
+                            (click)="updatePrimaryAmount(-1)">-</button>
+
+                        <div class="input-wrapper">
+                            <input type="number" #priInput SelectOnFocus class="chip-input-native"
+                                [value]="primaryAmount_()"
+                                (input)="onAmountManualChange(priInput.value)"
+                                (blur)="onAmountManualChange(priInput.value)"
+                                (keydown.enter)="$event.preventDefault(); priInput.blur()">
+                        </div>
+
+                        <button type="button" class="ctrl-btn" (click)="updatePrimaryAmount(1)">+</button>
+                    </div>
                 </div>
             </div>
 
             <div class="secondary-units-container">
                 @for (group of secondaryConversions; track $index) {
                 <div class="scaling-chip secondary">
-                    <div class="unit-switcher-btn " (click)="setActiveSecondaryEdit($index)">
+                    <div class="unit-switcher-btn" (click)="setActiveSecondaryEdit($index)">
                         <span class="unit-name">{{ group.get('unit')?.value | translatePipe }}</span>
                         <lucide-icon name="chevron-down" [size]="10"></lucide-icon>
                     </div>
+
                     @if (activeSecondaryEdit_() === $index) {
                     <div class="unit-dropdown-menu secondary-chip-dropdown">
                         @for (unit of availableUnitsForSecondaryChip_($index); track unit) {
@@ -62,15 +75,18 @@
                     }
 
                     <div class="counter-grid small">
-                        <button type="button" class="ctrl-btn" [disabled]="(group.get('amount')?.value ?? 0) === 0"
+                        <button type="button" class="ctrl-btn" 
+                            [disabled]="!(group.get('amount')?.value > 0)"
                             (click)="updateSecondaryAmount($index, -1)">-</button>
+                        
                         <div class="input-wrapper">
                             <input type="number" #secInput SelectOnFocus class="chip-input-native"
                                 [value]="group.get('amount')?.value"
-                                (input)="onSecondaryAmountInput(group, $any($event.target).value)"
-                                (blur)="onSecondaryAmountInput(group, $any($event.target).value)"
+                                (input)="onSecondaryAmountInput(group, secInput.value)"
+                                (blur)="onSecondaryAmountInput(group, secInput.value)"
                                 (keydown.enter)="$event.preventDefault(); secInput.blur()">
                         </div>
+                        
                         <button type="button" class="ctrl-btn" (click)="updateSecondaryAmount($index, 1)">+</button>
                     </div>
 
