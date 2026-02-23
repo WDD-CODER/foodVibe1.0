@@ -29,6 +29,17 @@
         "shellfish": "סרטניים",
         "soy": "סויה"
     },
+    "actions": {
+        "recipe_creation": "יצירת מתכון",
+        "recipes_creation": "יצירת מתכונים",
+        "recipe_edit": "עריכת מתכון",
+        "recipe_delete": "מחיקת מתכון",
+        "recipe_view": "הצגת מתכון",
+        "recipe_print": "הדפסת מתכון",
+        "recipe_email": "שליחת מתכון בדואר אלקטרוני",
+        "recipe_sms": "שליחת מתכון בהודעת SMS",
+        "recipe_whatsapp": "שליחת מתכון בוואטסאפ"
+    },
     "general": {
         "search": "חיפוש",
         "search_preparation": "חפש הכנה",
@@ -125,6 +136,24 @@
         "approved": "מאושר",
         "station": "תחנה",
         "main_category": "קטגוריה ראשית",
-        "no_category": "ללא קטגוריה"
+        "no_category": "ללא קטגוריה",
+        "dashboard": "לוח בקרה",
+        "overview": "סקירה",
+        "core_settings": "הגדרות ליבה",
+        "inventory": "מלאי",
+        "recipes": "מתכונים",
+        "dishes": "מנות",
+        "command_center": "מרכז בקרה",
+        "total_products": "סה\"כ מוצרים",
+        "total_recipes": "סה\"כ מתכונים/מנות",
+        "unapproved_recipes": "מתכונים/מנות לא מאושרים",
+        "recent_activity": "פעילות אחרונה",
+        "new_recipe": "מתכון חדש",
+        "new_dish": "מנה חדשה",
+        "view_inventory": "צפייה במלאי",
+        "view_recipes": "צפייה בספר מתכונים",
+        "no_recent_activity": "עדיין אין פעילות להצגה",
+        "unsaved_changes_confirm": "יש שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?",
+        "leave_without_saving": "יציאה בלי לשמור"
     }
 }

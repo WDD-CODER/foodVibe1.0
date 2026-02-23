@@ -185,6 +185,18 @@ export class RecipeBuilderPage implements OnInit {
     if (recipe) {
       this.recipeId_.set(recipe._id);
       this.patchFormFromRecipe(recipe);
+    } else {
+      const type = this.route_.snapshot.queryParams['type'] as string | undefined;
+      if (type === 'dish') {
+        this.recipeForm_.patchValue({
+          recipe_type: 'dish',
+          serving_portions: 1,
+        }, { emitEvent: false });
+        this.yieldConversionsArray.clear();
+        this.yieldConversionsArray.push(this.fb.group({ amount: [1], unit: ['dish'] }));
+        this.workflowArray.clear();
+        this.workflowArray.push(this.createPrepItemRow());
+      }
     }
     if (this.ingredientsArray.length === 0) {
       this.addNewIngredientRow();
@@ -198,6 +210,8 @@ export class RecipeBuilderPage implements OnInit {
       }
     }
     this.updateTotalWeightG();
+    // So leave confirmation only triggers when the user actually changes something
+    this.recipeForm_.markAsPristine();
   }
 
   private patchFormFromRecipe(recipe: Recipe): void {

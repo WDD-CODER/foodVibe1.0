@@ -19,7 +19,7 @@
       <button class="btn-ghost" (click)="cancel()">{{ 'cancel' | translatePipe }}</button>
       <button class="btn-save"
               (click)="save()"
-              [disabled]="!value_()?.trim()">
+              [disabled]="!value_().trim()">
         {{ cfg.saveLabel | translatePipe }}
       </button>
     </div>

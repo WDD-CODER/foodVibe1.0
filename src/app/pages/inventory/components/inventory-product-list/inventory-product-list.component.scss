@@ -73,6 +73,9 @@ $products-grid-template: 2fr 1fr 1.5fr 1fr 100px 1fr 80px;
 // --- Products grid: header and rows share same column tracks ---
 .products-grid {
   display: grid;
+  // The width of each item in this row is determined by the grid-template-columns property.
+  // $products-grid-template is a SCSS variable defining the column widths (e.g. a string like '2fr 1fr 1fr 1fr 1fr 1fr 1fr').
+  // Adjust $products-grid-template in the SCSS to change individual column widths.
   grid-template-columns: $products-grid-template;
   grid-auto-rows: auto;
   background-color: #ffffff;

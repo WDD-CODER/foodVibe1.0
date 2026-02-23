@@ -29,7 +29,7 @@
       <button class="btn-ghost" (click)="cancel()">{{ 'cancel' | translatePipe }}</button>
       <button class="btn-save"
               (click)="save()"
-              [disabled]="!englishKey_()?.trim() || !hebrewLabel_()?.trim()">
+              [disabled]="!englishKey_().trim() || !hebrewLabel_().trim()">
         {{ 'save_approve' | translatePipe }}
       </button>
     </div>
