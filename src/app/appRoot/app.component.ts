@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { HeaderComponent } from '../core/componets/header/header.component';
-import { FooterComponent } from '../core/componets/footer/footer.component';
-import { UserMsg } from "src/app/core/componets/user-msg/user-msg.component";
+import { HeaderComponent } from '../core/components/header/header.component';
+import { FooterComponent } from '../core/components/footer/footer.component';
+import { UserMsg } from "src/app/core/components/user-msg/user-msg.component";
 import { UnitCreatorModal } from 'src/app/shared/unit-creator/unit-creator.component';
 import { TranslationKeyModalComponent } from 'src/app/shared/translation-key-modal/translation-key-modal.component';
 import { AddItemModalComponent } from 'src/app/shared/add-item-modal/add-item-modal.component';

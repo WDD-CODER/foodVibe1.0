@@ -68,7 +68,7 @@ recipes_ = computed(() => [
 
 ## Route and Navigation
 
-- **Path**: `/recipe-book` (replace `/dishes` in [header.component.html](src/app/core/componets/header/header.component.html))
+- **Path**: `/recipe-book` (replace `/dishes` in [header.component.html](src/app/core/components/header/header.component.html))
 - **Structure**: Single page with list view; Add navigates to `/recipe-builder`, Edit navigates to `/recipe-builder/:id`
 - **Routes**: Add to [app.routes.ts](src/app/app.routes.ts); update header link from `/dishes` to `/recipe-book`
 
@@ -157,7 +157,7 @@ const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length |
 | `src/app/pages/recipe-book/recipe-book.page.scss`        | Create — styles                              |
 | `src/app/pages/recipe-book/components/recipe-book-list/` | Create — list component (sidebar + grid)     |
 | `src/app/app.routes.ts`                                  | Add `/recipe-book` route                     |
-| `src/app/core/componets/header/header.component.html`    | Change `/dishes` → `/recipe-book`            |
+| `src/app/core/components/header/header.component.html`    | Change `/dishes` → `/recipe-book`            |
 | `src/app/core/services/kitchen-state.service.ts`         | Add `deleteRecipe` if absent                 |
 | `public/assets/data/dictionary.json`                     | Add keys: `recipe_book`, `no_category`, etc. |
 

@@ -18,7 +18,11 @@ describe('RecipeBuilderComponent', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            snapshot: { data: {}, paramMap: { get: () => null } }
+            snapshot: {
+              data: {},
+              paramMap: { get: () => null },
+              queryParams: {}
+            }
           }
         }
       ]

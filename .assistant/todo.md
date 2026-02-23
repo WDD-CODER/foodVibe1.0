@@ -130,9 +130,13 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Sync documentation: update `project-plan.md` checkboxes, update breadcrumbs.
 - [ ] When adding new features: add/update `.spec.ts` and mark related sub-tasks here; run tests before considering the task done.
 
+### Plan 011 — Dashboard & Command Center Unification (done)
+
+- [x] Dashboard default route, Overview + Core settings tabs; `/command-center` → `/dashboard?tab=metadata`; single Dashboard nav link; unit tests + recipe-builder spec fix (queryParams).
+
 ### Phase 2 — Product Enhancement
 
-- [ ] **Plan 011 — Dashboard Page**: KPI cards (total products, recipes, low stock, unapproved), recent activity, quick-action buttons. New default landing at `/dashboard`.
+- [ ] **Plan 011 (KPI expansion, optional)**: Further dashboard enhancements per roadmap if desired.
 - [ ] **Plan 012 — Supplier Management Page**: Dedicated CRUD page at `/suppliers` with list, edit, delete, linked products view.
 - [ ] **Plan 013 — Recipe Quick Actions**: Duplicate recipe, approval toggle in recipe book list, batch select/actions.
 - [ ] **Plan 014 — Low Stock Alerts**: Visual indicators in inventory list, filter toggle, dashboard card.
@@ -162,7 +166,7 @@ Update status after each sub-task. Link plan files here when applicable.
 | 008 | Recipe Book Page | Done |
 | 009 | Cohesive Add Item Modal | Done |
 | 010 | Product Roadmap: V1 Completion & Beyond | Active |
-| 011 | Dashboard Page | Planned |
+| 011 | Unify Dashboard & Command Center | Done |
 | 012 | Supplier Management Page | Planned |
 | 013 | Recipe Quick Actions | Planned |
 | 014 | Low Stock Alerts | Planned |

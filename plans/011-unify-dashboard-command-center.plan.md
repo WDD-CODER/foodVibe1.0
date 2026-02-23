@@ -57,7 +57,7 @@ Recommendation: **Component-based tabs** in a single dashboard shell for simplic
 - **Routes ([app.routes.ts](src/app/app.routes.ts)):**
   - Remove the standalone `command-center` route (or leave it as a redirect to `/dashboard?tab=metadata` or `dashboard` with a fragment so deep links still work).
   - Default route stays `redirectTo: 'dashboard'`.
-- **Header ([header.component.html](src/app/core/componets/header/header.component.html)):**
+- **Header ([header.component.html](src/app/core/components/header/header.component.html)):**
   - Remove the "Command center" nav item.
   - Single "Dashboard" (or "Control panel") link to `/dashboard`. Tab selection is internal to the dashboard page.
 
