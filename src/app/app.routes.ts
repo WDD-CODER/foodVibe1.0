@@ -28,9 +28,8 @@ export const routes: Routes = [
   },
   {
     path: 'command-center',
-    loadComponent: () =>
-      import('./pages/metadata-manager/metadata-manager.page.component')
-        .then(m => m.MetadataManagerComponent)
+    redirectTo: 'dashboard?tab=metadata',
+    pathMatch: 'full',
   },
   {
     path: 'recipe-builder',
@@ -47,5 +46,9 @@ export const routes: Routes = [
     path: 'recipe-book',
     loadComponent: () => import('@pages/recipe-book/recipe-book.page').then(m => m.RecipeBookPage),
   },
-  { path: '', redirectTo: 'inventory', pathMatch: 'full' },
+  {
+    path: 'dashboard',
+    loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage),
+  },
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 ];
