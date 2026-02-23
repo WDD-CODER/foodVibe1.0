@@ -30,7 +30,7 @@
       <button class="btn-save"
               (click)="save()"
               [disabled]="!englishKey_().trim() || !hebrewLabel_().trim()">
-        {{ 'save_approve' | translatePipe }}
+        {{ saveLabelKey_() | translatePipe }}
       </button>
     </div>
   </div>

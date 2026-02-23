@@ -40,6 +40,16 @@ export class TranslationKeyModalComponent {
     return 'הזן מפתח אנגלי';
   });
 
+  /** Translation key for the save button based on context (e.g. save_category, save_supplier). */
+  protected saveLabelKey_ = computed(() => {
+    const ctx = this.context_();
+    if (ctx === 'category') return 'save_category';
+    if (ctx === 'allergen') return 'save_allergen';
+    if (ctx === 'supplier') return 'save_supplier';
+    if (ctx === 'unit') return 'save_unit';
+    return 'save_approve';
+  });
+
   protected save(): void {
     const key = this.englishKey_().trim();
     const hebrew = this.hebrewLabel_().trim();
