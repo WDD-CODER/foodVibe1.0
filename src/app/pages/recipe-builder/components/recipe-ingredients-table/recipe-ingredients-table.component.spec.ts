@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { LucideAngularModule, Trash2, Search } from 'lucide-angular';
 import { RecipeIngredientsTableComponent } from './recipe-ingredients-table.component';
 
@@ -11,7 +13,7 @@ describe('RecipeIngredientsTableComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RecipeIngredientsTableComponent, ReactiveFormsModule, LucideAngularModule.pick({ Trash2, Search })],
-      providers: [FormBuilder]
+      providers: [FormBuilder, provideHttpClient(), provideHttpClientTesting()]
     }).compileComponents();
 
     fb = TestBed.inject(FormBuilder);

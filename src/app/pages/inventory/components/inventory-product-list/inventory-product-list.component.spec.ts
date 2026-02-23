@@ -3,7 +3,7 @@ import { InventoryProductListComponent } from './inventory-product-list.componen
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { Router } from '@angular/router';
 import { signal } from '@angular/core';
-import { LucideAngularModule, Search, Trash2, Pencil, PlusCircle, Menu, X } from 'lucide-angular';
+import { LucideAngularModule, Search, Trash2, Pencil, PlusCircle, Menu, X, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-angular';
 import { Product } from '@models/product.model';
 import { TranslationService } from '@services/translation.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
@@ -42,8 +42,13 @@ describe('InventoryProductListComponent', () => {
   beforeEach(async () => {
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
+    const mockSuppliersSignal = signal([
+      { _id: 'Supplier A', name_hebrew: 'Supplier A' },
+      { _id: 'Supplier B', name_hebrew: 'Supplier B' }
+    ]);
     const mockKitchenState = {
       products_: mockProductsSignal,
+      suppliers_: mockSuppliersSignal,
       deleteProduct: jasmine.createSpy('deleteProduct'),
       saveProduct: jasmine.createSpy('saveProduct').and.returnValue({ subscribe: () => {} })
     };
@@ -51,7 +56,7 @@ describe('InventoryProductListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         InventoryProductListComponent,
-        LucideAngularModule.pick({ Search, Trash2, Pencil, PlusCircle, Menu, X })
+        LucideAngularModule.pick({ Search, Trash2, Pencil, PlusCircle, Menu, X, ArrowUpDown, ArrowUp, ArrowDown })
       ],
       providers: [
         { provide: KitchenStateService, useValue: mockKitchenState },

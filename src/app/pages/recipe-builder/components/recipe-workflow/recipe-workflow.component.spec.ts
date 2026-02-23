@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, FormArray, ReactiveFormsModule } from '@angular/forms';
-import { LucideAngularModule, Plus, Trash2, Timer } from 'lucide-angular';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { LucideAngularModule, Plus, Trash2, Timer, Minus, ArrowUpDown, X } from 'lucide-angular';
 import { RecipeWorkflowComponent } from './recipe-workflow.component';
 
 describe('RecipeWorkflowComponent', () => {
@@ -10,8 +12,8 @@ describe('RecipeWorkflowComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RecipeWorkflowComponent, ReactiveFormsModule, LucideAngularModule.pick({ Plus, Trash2, Timer })],
-      providers: [FormBuilder]
+      imports: [RecipeWorkflowComponent, ReactiveFormsModule, LucideAngularModule.pick({ Plus, Trash2, Timer, Minus, ArrowUpDown, X })],
+      providers: [FormBuilder, provideHttpClient(), provideHttpClientTesting()]
     }).compileComponents();
 
     fb = TestBed.inject(FormBuilder);

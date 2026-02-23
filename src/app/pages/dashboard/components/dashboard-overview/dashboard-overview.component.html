@@ -1,0 +1,75 @@
+<div class="dashboard-overview" dir="rtl">
+  <header class="dashboard-header">
+    <h1 class="page-title">{{ 'dashboard' | translatePipe }}</h1>
+    <div class="quick-actions">
+      <button type="button" class="qa-btn primary" (click)="goToAddProduct()">
+        <lucide-icon name="plus-circle" [size]="18"></lucide-icon>
+        <span>{{ 'add_product' | translatePipe }}</span>
+      </button>
+      <button type="button" class="qa-btn" (click)="goToRecipeBuilder('preparation')">
+        <lucide-icon name="file-plus" [size]="18"></lucide-icon>
+        <span>{{ 'new_recipe' | translatePipe }}</span>
+      </button>
+      <button type="button" class="qa-btn" (click)="goToRecipeBuilder('dish')">
+        <lucide-icon name="utensils" [size]="18"></lucide-icon>
+        <span>{{ 'new_dish' | translatePipe }}</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="dashboard-main">
+    <section class="kpi-grid">
+      <article class="kpi-card">
+        <h2 class="kpi-label">{{ 'total_products' | translatePipe }}</h2>
+        <p class="kpi-value">{{ totalProducts_() }}</p>
+        <div class="kpi-actions">
+          <button type="button" class="link-btn" (click)="goToInventory()">
+            {{ 'view_inventory' | translatePipe }}
+          </button>
+          <button type="button" class="link-btn" (click)="goToAddProduct()">
+            {{ 'add_product' | translatePipe }}
+          </button>
+        </div>
+      </article>
+
+      <article class="kpi-card">
+        <h2 class="kpi-label">{{ 'total_recipes' | translatePipe }}</h2>
+        <p class="kpi-value">{{ totalRecipes_() }}</p>
+        <button type="button" class="link-btn" (click)="goToRecipeBook()">
+          {{ 'view_recipes' | translatePipe }}
+        </button>
+      </article>
+
+      <article class="kpi-card warning">
+        <h2 class="kpi-label">{{ 'low_stock' | translatePipe }}</h2>
+        <p class="kpi-value">{{ lowStockCount_() }}</p>
+      </article>
+
+      <article class="kpi-card info">
+        <h2 class="kpi-label">{{ 'unapproved_recipes' | translatePipe }}</h2>
+        <p class="kpi-value">{{ unapprovedCount_() }}</p>
+      </article>
+    </section>
+
+    <section class="activity-section">
+      <header class="section-header">
+        <h2>{{ 'recent_activity' | translatePipe }}</h2>
+      </header>
+
+      <div class="activity-list" *ngIf="recentActivity_().length; else noActivity">
+        <div class="activity-item" *ngFor="let item of recentActivity_()">
+          <span class="activity-name">{{ item.name }}</span>
+          <span class="activity-type">
+            {{ item.type === 'product' ? ('product' | translatePipe) : ('preparation' | translatePipe) }}
+          </span>
+        </div>
+      </div>
+
+      <ng-template #noActivity>
+        <p class="empty-copy">
+          {{ 'no_recent_activity' | translatePipe }}
+        </p>
+      </ng-template>
+    </section>
+  </main>
+</div>

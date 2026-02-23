@@ -70,7 +70,7 @@
             <div class="col-name">{{ product.name_hebrew }}</div>
             <div class="col-category">{{ product.category_ | translatePipe }}</div>
             <div class="col-allergens">
-              @if (product.allergens_?.length) {
+              @if (product.allergens_.length) {
                 <span class="allergen-pills">
                   @for (a of product.allergens_; track a) {
                     <span class="allergen-pill">{{ a | translatePipe }}</span>
@@ -96,7 +96,7 @@
                 (focus)="onPriceFocus(product, product.base_unit_)"
                 (blur)="onPriceBlur(product, product.base_unit_, $event, priceInput)"
                 min="0" step="0.01" />
-              <span class="price-suffix">₪/{{ product.base_unit_ | translatePipe }}</span>
+              <span class="price-suffix">₪</span>
             </div>
             <div class="col-actions">
               <button type="button" class="action-btn edit" (click)="onEditProduct(product._id)" [attr.aria-label]="'edit' | translatePipe">

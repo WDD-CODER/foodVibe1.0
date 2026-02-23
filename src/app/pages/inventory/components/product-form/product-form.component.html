@@ -97,6 +97,7 @@
             <input type="text"
                    [ngModel]="allergenSearchQuery_()"
                    (ngModelChange)="allergenSearchQuery_.set($event)"
+                   [ngModelOptions]="{standalone: true}"
                    placeholder="חפש או בחר אלרגן..."
                    (focus)="showSuggestions = true"
                    [class.no-chips]="selectedAllergensSignal_().length === 0">
@@ -107,12 +108,12 @@
               class="dropdown-item">
               {{ allergen | translatePipe }}
             </div>
-            @if (allergenSearchQuery_()?.trim() && !filteredAllergenOptions_().includes(allergenSearchQuery_()?.trim() ?? '') && !productForm_.get('allergens_')?.value?.includes(allergenSearchQuery_()?.trim())) {
+            @if (allergenSearchQuery_().trim() && !filteredAllergenOptions_().includes(allergenSearchQuery_().trim()) && !productForm_.get('allergens_')?.value?.includes(allergenSearchQuery_().trim())) {
             <div class="dropdown-item text-emerald-600 font-bold" (click)="onAddNewAllergen(allergenSearchQuery_())">
               {{ 'add_new_allergen' | translatePipe }} "{{ allergenSearchQuery_() }}"
             </div>
             }
-            <div *ngIf="filteredAllergenOptions_().length === 0 && !allergenSearchQuery_()?.trim()" class="dropdown-item text-slate-400 italic">
+            <div *ngIf="filteredAllergenOptions_().length === 0 && !allergenSearchQuery_().trim()" class="dropdown-item text-slate-400 italic">
               כל האלרגנים נבחרו
             </div>
           </div>
