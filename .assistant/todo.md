@@ -88,6 +88,16 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Category change modal (Change global / Add as specific).
 - [x] Undo/revert for change main.
 
+### Plan 009 — Cohesive Add Item Modal (`plans/009-cohesive-add-item-modal.plan.md`)
+
+- [x] Create AddItemModalService and AddItemModal component (refactor from add-supplier-modal).
+- [x] Create AddSupplierFlowService for add-supplier orchestration.
+- [x] Update TranslationKeyModal for 'unit' context (metadata manager).
+- [x] Update Product Form to use AddSupplierFlowService.
+- [x] Update Metadata Manager to use TranslationKeyModal instead of prompt().
+- [x] Update App Root and delete deprecated add-supplier-modal service.
+- [x] Add add_supplier_translation_key and ensure dictionary keys.
+
 ### Plan 008 — Recipe Book Page (`plans/008-recipe-book-page.plan.md`)
 
 - [x] Route `/recipe-book` + page shell + header link (replace `/dishes`).
@@ -96,7 +106,7 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Allergens column: button opens floating container with dense allergen chips (aggregated from ingredients).
 - [x] Actions: Add, Edit, Delete; KitchenStateService.deleteRecipe (routes to DishDataService/RecipeDataService by recipe_type_).
 - [x] Main-category column placeholder (no_category).
-- [ ] Add recipe-book-list.spec.ts and run tests.
+- [x] Add recipe-book-list.spec.ts and run tests.
 
 ### Plan 007 — Product Form Enhancement (`plans/007-product-form-enhancement.plan.md`)
 
@@ -112,11 +122,27 @@ Update status after each sub-task. Link plan files here when applicable.
 
 ## Ahead (Pending)
 
-### E2E & Testing
+### Phase 1 — Stabilize & Complete (`plans/010-product-roadmap.plan.md`)
 
-- [ ] Add or extend e2e tests (Playwright per `.assistant/copilot-instructions.md`) if not yet present.
+- [x] Add `recipe-book-list.spec.ts` and run tests (Plan 008 closure).
+- [x] Set up Playwright E2E tests: config + 3 critical flow tests (product CRUD, recipe creation with cost, recipe edit persistence).
 - [ ] Optionally expand minimal specs (e.g. recipe-builder page and subcomponents) with behavior tests when touching those areas.
+- [x] Sync documentation: update `project-plan.md` checkboxes, update breadcrumbs.
 - [ ] When adding new features: add/update `.spec.ts` and mark related sub-tasks here; run tests before considering the task done.
+
+### Phase 2 — Product Enhancement
+
+- [ ] **Plan 011 — Dashboard Page**: KPI cards (total products, recipes, low stock, unapproved), recent activity, quick-action buttons. New default landing at `/dashboard`.
+- [ ] **Plan 012 — Supplier Management Page**: Dedicated CRUD page at `/suppliers` with list, edit, delete, linked products view.
+- [ ] **Plan 013 — Recipe Quick Actions**: Duplicate recipe, approval toggle in recipe book list, batch select/actions.
+- [ ] **Plan 014 — Low Stock Alerts**: Visual indicators in inventory list, filter toggle, dashboard card.
+
+### Phase 3 — Polish & Production Readiness
+
+- [ ] **Plan 015 — Empty States & Onboarding**: Empty-state UX for all list views, first-use guidance, Hebrew copy.
+- [ ] **Plan 016 — Print-Friendly Recipe View**: Print stylesheet, hide navigation in print, RTL-aware layout, print button.
+- [ ] **Plan 017 — Backend API Preparation**: Formalize `IStorageAdapter`, document REST API contract, audit adapter compliance.
+- [ ] **Deployment Pipeline**: Validate and activate GitHub Actions workflow for GitHub Pages.
 
 ---
 
@@ -134,5 +160,14 @@ Update status after each sub-task. Link plan files here when applicable.
 | 006-2 | Preparation Category Change Modal | Done |
 | 007 | Product Form Enhancement | Done |
 | 008 | Recipe Book Page | Done |
+| 009 | Cohesive Add Item Modal | Done |
+| 010 | Product Roadmap: V1 Completion & Beyond | Active |
+| 011 | Dashboard Page | Planned |
+| 012 | Supplier Management Page | Planned |
+| 013 | Recipe Quick Actions | Planned |
+| 014 | Low Stock Alerts | Planned |
+| 015 | Empty States & Onboarding | Planned |
+| 016 | Print-Friendly Recipe View | Planned |
+| 017 | Backend API Preparation | Planned |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
