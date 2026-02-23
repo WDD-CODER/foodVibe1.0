@@ -8,6 +8,35 @@ This is the primary entry point for AI Agents. Embark on every task by reading t
 - **Active Tasks**: `.assistant/todo.md` (Update status after every sub-task).
 - **Planning**: Mandatory `plans/` folder usage. All plans must be saved to the project's `plans/` folder (e.g. `plans/004-feature.plan.md`). NEVER use Cursor's default `~/.cursor/plans/`. Use the `write` tool to create plan files directly. Wait for explicit user confirmation before execution.
 
+## Agent System
+
+This project uses specialized agent personas for complex tasks. Read the relevant agent file before delegating work.
+
+### Agent Files (`.assistant/agents/`)
+| Agent | File | Purpose |
+|-------|------|---------|
+| Team Leader | `team-leader.md` | Orchestrate multi-agent tasks, resolve conflicts |
+| Software Architect | `software-architect.md` | Architecture decisions, HLD documents |
+| Product Manager | `product-manager.md` | PRDs, feature scoping, plans/ integration |
+| Breadcrumb Navigator | `breadcrumb-navigator.md` | Codebase documentation & navigation |
+| QA Engineer | `qa-engineer.md` | Testing strategy, spec coverage, E2E |
+
+### Skills (`.assistant/skills/`)
+| Skill | Folder | Purpose |
+|-------|--------|---------|
+| GitHub Sync | `github-sync/` | Pull recent GitHub activity for context |
+| Tech Debt | `techdebt/` | Find duplicates, dead code, TODO audit |
+| Update Docs | `update-docs/` | Refresh all project documentation |
+| Elegant Fix | `elegant-fix/` | Refine hacky solutions into clean ones |
+
+### Commands (`.assistant/commands/`)
+| Command | File | Purpose |
+|---------|------|---------|
+| Test-PR-Merge | `test-pr-review-merge.md` | Full CI flow: test, PR, review, merge |
+
+### Using Breadcrumbs
+Before making changes to any directory, check for a `breadcrumbs.md` file and read it for context about file purposes, architecture, and conventions.
+
 ## Autonomous Permissions (Agent Mode)
 - **Terminal**: You are authorized to run non-destructive commands (`npm test`, `ng build`, `ls`, `mkdir`) autonomously.
 - **File System**: You may create new components/services following the established architecture without individual confirmation, provided they are in the approved `plans/`.

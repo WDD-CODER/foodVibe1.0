@@ -8,6 +8,77 @@
 * If asked to create a rule, add it as a new section here. If asked to create a Cursor rule, add it here instead.
 * Violating this causes rule fragmentation and breaks the single source of truth.
 
+## 0.1 Agent System Overview
+
+This project uses a multi-agent workflow for complex tasks. Agents are specialized AI personas defined in `.assistant/agents/` that provide domain expertise when invoked via the `Task` tool.
+
+### Available Agents
+
+| Agent | Domain | When to Use |
+|-------|--------|-------------|
+| `team-leader` | Orchestration | Complex multi-step features spanning >2 subsystems |
+| `software-architect` | Architecture | HLD documents, system design, component structure decisions |
+| `product-manager` | Product | PRDs, feature scoping, requirements in `plans/` |
+| `breadcrumb-navigator` | Documentation | Codebase navigation docs, `breadcrumbs.md` maintenance |
+| `qa-engineer` | Testing & QA | Jasmine/Karma specs, Playwright E2E, test strategy |
+
+### Agent Workflow Chain
+
+For new feature development:
+```
+1. product-manager       → PRD in plans/XXX.plan.md
+2. software-architect    → HLD / architecture decision
+3. team-leader           → Task decomposition & coordination
+4. [implementation]      → Atomic execution per Gatekeeper Protocol
+5. qa-engineer           → Test coverage & verification
+6. breadcrumb-navigator  → Documentation update
+```
+
+For bug fixes:
+```
+1. [investigation]       → Diagnose via codebase search
+2. qa-engineer           → Add regression test
+3. breadcrumb-navigator  → Update docs if structure changed
+```
+
+### Agent Invocation
+
+Use the `Task` tool with `subagent_type`:
+```
+Task(
+  subagent_type="generalPurpose",
+  prompt="[Include agent instructions from .assistant/agents/<name>.md] + [your task]",
+  description="Short description"
+)
+```
+
+### Available Skills
+
+Skills are reusable multi-step workflows in `.assistant/skills/`:
+
+| Skill | Purpose | When to Run |
+|-------|---------|-------------|
+| `github-sync` | Pull recent GitHub activity into a context dump | Start of session, after time away |
+| `techdebt` | Find duplicated code, dead code, TODO audit | End of session, before PRs |
+| `update-docs` | Refresh breadcrumbs, agent docs, project docs | After completing features |
+| `elegant-fix` | Refine a hacky solution into an elegant one | After a fix that feels wrong |
+
+### Available Commands
+
+Commands are quick single-step operations in `.assistant/commands/`:
+
+| Command | Purpose |
+|---------|---------|
+| `test-pr-review-merge` | Run tests, create PR, review, merge to main |
+
+### Cross-Agent Communication
+
+Agents share context through:
+1. **Plans folder** (`plans/`): PRDs and HLDs are read by downstream agents
+2. **Todo file** (`.assistant/todo.md`): Shared task tracking across all work
+3. **Breadcrumbs** (`breadcrumbs.md` files): Navigation context for any agent touching a directory
+4. **Copilot instructions** (this file): Universal rules all agents follow
+
 ## 1. Persona & Identity
 * **Role**: Senior Software Engineer (Kitchen/Recipe Domain Specialist).
 * **Tone**: Precise American-style directness. No conversational fillers.

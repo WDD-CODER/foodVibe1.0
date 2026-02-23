@@ -68,4 +68,55 @@ describe('RecipeBookListComponent', () => {
     const allergens = (component as any).getRecipeAllergens(recipe);
     expect(allergens).toContain('gluten');
   });
+
+  it('should change sort order when sort column is clicked', () => {
+    (component as any).setSort('name');
+    expect((component as any).sortBy_()).toBe('name');
+    expect((component as any).sortOrder_()).toBe('asc');
+
+    (component as any).setSort('name');
+    expect((component as any).sortOrder_()).toBe('desc');
+
+    (component as any).setSort('cost');
+    expect((component as any).sortBy_()).toBe('cost');
+    expect((component as any).sortOrder_()).toBe('asc');
+  });
+
+  it('should filter list when search input is set', () => {
+    let filtered = (component as any).filteredRecipes_();
+    expect(filtered.length).toBe(1);
+    expect(filtered[0].name_hebrew).toBe('סלט ירקות');
+
+    (component as any).searchQuery_.set('סלט');
+    fixture.detectChanges();
+    filtered = (component as any).filteredRecipes_();
+    expect(filtered.length).toBe(1);
+
+    (component as any).searchQuery_.set('לא קיים');
+    fixture.detectChanges();
+    filtered = (component as any).filteredRecipes_();
+    expect(filtered.length).toBe(0);
+  });
+
+  it('should call deleteRecipe when delete is confirmed', () => {
+    spyOn(window, 'confirm').and.returnValue(true);
+    const stateService = TestBed.inject(KitchenStateService);
+    (stateService.deleteRecipe as jasmine.Spy).and.returnValue({ subscribe: () => {} });
+
+    const recipe = mockRecipesSignal()[0];
+    (component as any).onDeleteRecipe(recipe);
+
+    expect(window.confirm).toHaveBeenCalledWith('האם אתה בטוח שברצונך למחוק?');
+    expect(stateService.deleteRecipe).toHaveBeenCalledWith(recipe);
+  });
+
+  it('should not call deleteRecipe when delete is cancelled', () => {
+    spyOn(window, 'confirm').and.returnValue(false);
+    const stateService = TestBed.inject(KitchenStateService);
+
+    const recipe = mockRecipesSignal()[0];
+    (component as any).onDeleteRecipe(recipe);
+
+    expect(stateService.deleteRecipe).not.toHaveBeenCalled();
+  });
 });

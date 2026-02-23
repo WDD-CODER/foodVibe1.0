@@ -34,12 +34,24 @@ The application is **written in English** (keys, IDs, code) but **serves Hebrew 
 }
 ```
 
-## Features
-- [ ] **Inventory**: Product list, add/edit product with form and validation.
-- [ ] **Recipe builder**: Create/edit recipes with ingredients table, steps, header, and ingredient search.
-- [ ] **Command center**: Metadata manager for global/config data.
-- [ ] **Data layer**: Core services (product-data, ingredient, unit-registry, metadata-registry, async-storage, user-msg, translation, kitchen-state).
-- [ ] **UX**: User messaging (toast/feedback), pending-changes guard, translation pipe, theme-aware styling.
+## Features — Core (Complete)
+- [x] **Inventory**: Product list with filters, sorting, inline editing, add/edit product form with validation, supplier integration.
+- [x] **Recipe builder**: Create/edit recipes and dishes with ingredients table, cost calculation, workflow steps, dual type (preparation/dish), pending changes guard.
+- [x] **Recipe book**: Browse, filter, sort, and manage all recipes with allergen aggregation and actions.
+- [x] **Command center**: Metadata manager for units, categories, allergens with translation key modal.
+- [x] **Data layer**: Core services (product-data, recipe-data, dish-data, supplier-data, unit-registry, metadata-registry, preparation-registry, async-storage, user-msg, translation, kitchen-state, recipe-cost, conversion).
+- [x] **UX**: User messaging (toast with undo), pending-changes guard, translation pipe (Hebrew UI), cohesive modals (AddItemModal, TranslationKeyModal, GlobalSpecificModal, ConfirmModal).
+- [x] **Unit tests**: 89+ specs passing (Karma/Jasmine) covering services, components, guards, resolvers, pipes, directives.
+
+## Features — Planned (see `plans/010-product-roadmap.plan.md`)
+- [ ] **Dashboard**: KPI cards, recent activity, quick actions — default landing page.
+- [ ] **Supplier management page**: Dedicated CRUD page for suppliers.
+- [ ] **Recipe quick actions**: Duplicate, approval toggle, batch operations.
+- [ ] **Low stock alerts**: Visual indicators, filter, dashboard card.
+- [ ] **Empty states & onboarding**: Guided first-use experience.
+- [ ] **Print-friendly recipes**: Print stylesheet for kitchen use.
+- [ ] **Backend API preparation**: Formalize adapter interface, document API contract.
+- [x] **E2E tests**: Playwright setup with critical flow coverage (product CRUD, recipe creation, recipe edit).
 
 ## Tech Stack
 - **Frontend**: Angular 19 (Standalone, Signals, strict TypeScript)
@@ -54,6 +66,8 @@ The application is **written in English** (keys, IDs, code) but **serves Hebrew 
 4. **Shared**: Reusable UI in `src/app/shared/`; app shell in `src/app/appRoot/`.
 
 ## Next Steps
+- Follow the phased roadmap in `plans/010-product-roadmap.plan.md`.
+- Track progress in `.assistant/todo.md`.
 - Align any new features with this plan and the `plans/` folder.
 - Keep `agent.md` and `.assistant/copilot-instructions.md` as the source of truth for AI agents.
 - **i18n**: For every new user-facing string, add the English key to `dictionary.json` and use `translatePipe` in templates (or `translationService.translate()` in code).

@@ -1,7 +1,28 @@
 ---
 name: Cohesive Add Item Modal
 overview: Refactor AddSupplierModal into a generic AddItemModal (single-field), keep TranslationKeyModal separate, add AddSupplierFlowService for orchestration, and replace metadata manager's prompt() with TranslationKeyModal.
-todos: []
+todos:
+  - id: add-item-modal
+    content: Create AddItemModalService and AddItemModal component (refactor from add-supplier-modal)
+    status: completed
+  - id: add-supplier-flow
+    content: Create AddSupplierFlowService for add-supplier orchestration
+    status: completed
+  - id: translation-key-unit
+    content: Update TranslationKeyModal for 'unit' context (metadata manager)
+    status: completed
+  - id: product-form
+    content: Update Product Form to use AddSupplierFlowService
+    status: completed
+  - id: metadata-manager
+    content: Update Metadata Manager to use TranslationKeyModal instead of prompt()
+    status: completed
+  - id: app-root
+    content: Update App Root and delete deprecated add-supplier-modal service
+    status: completed
+  - id: dictionary-keys
+    content: Add add_supplier_translation_key and ensure dictionary keys
+    status: completed
 isProject: true
 ---
 

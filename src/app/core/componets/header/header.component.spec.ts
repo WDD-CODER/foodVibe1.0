@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { HeaderComponent } from './header.component';
 import { provideRouter, RouterLinkWithHref } from '@angular/router';
 import { By } from '@angular/platform-browser';
@@ -9,15 +10,14 @@ describe('HeaderComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HeaderComponent],
+      imports: [HeaderComponent, HttpClientTestingModule],
       providers: [
         // מספקים נתיבים ריקים כדי לאפשר ל-RouterLink לעבוד בבדיקה
         provideRouter([
+          { path: 'dashboard', redirectTo: '' },
           { path: 'inventory', redirectTo: '' },
           { path: 'recipe-builder', redirectTo: '' },
           { path: 'recipe-book', redirectTo: '' },
-          { path: 'menu-creating', redirectTo: '' },
-          { path: 'checklist-creator', redirectTo: '' }
         ])
       ]
     }).compileComponents();
@@ -38,15 +38,14 @@ describe('HeaderComponent', () => {
     // שליפת הכתובות אליהן הקישורים מצביעים
     const hrefs = linkDebugElements.map(de => de.attributes['routerLink']);
 
+    expect(hrefs).toContain('/dashboard');
     expect(hrefs).toContain('/inventory');
     expect(hrefs).toContain('/recipe-builder');
     expect(hrefs).toContain('/recipe-book');
-    expect(hrefs).toContain('/menu-creating');
-    expect(hrefs).toContain('/command-center');
   });
 
-  it('should have 5 navigation links', () => {
+  it('should have 4 navigation links', () => {
     const navLinks = fixture.nativeElement.querySelectorAll('li a');
-    expect(navLinks.length).toBe(5);
+    expect(navLinks.length).toBe(4);
   });
 });
