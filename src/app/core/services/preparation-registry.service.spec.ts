@@ -2,6 +2,7 @@ import { TestBed, fakeAsync, tick } from '@angular/core/testing'
 import { PreparationRegistryService } from './preparation-registry.service'
 import { StorageService } from './async-storage.service'
 import { UserMsgService } from './user-msg.service'
+import { TranslationService } from './translation.service'
 
 describe('PreparationRegistryService', () => {
   let service: PreparationRegistryService
@@ -14,12 +15,14 @@ describe('PreparationRegistryService', () => {
     storageSpy.post.and.returnValue(Promise.resolve({ _id: 'p1', categories: [], preparations: [] }))
 
     const userMsgSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
+    const translationSpy = jasmine.createSpyObj('TranslationService', ['updateDictionary'])
 
     TestBed.configureTestingModule({
       providers: [
         PreparationRegistryService,
         { provide: StorageService, useValue: storageSpy },
-        { provide: UserMsgService, useValue: userMsgSpy }
+        { provide: UserMsgService, useValue: userMsgSpy },
+        { provide: TranslationService, useValue: translationSpy }
       ]
     })
 
@@ -35,9 +38,9 @@ describe('PreparationRegistryService', () => {
 
   it('should register a category and persist', fakeAsync(() => {
     storageSpy.query.and.returnValue(Promise.resolve([]))
-    service.registerCategory('עמדת בישול')
+    service.registerCategory('cooking_station', 'עמדת בישול')
     tick()
-    expect(service.preparationCategories_()).toContain('עמדת בישול')
+    expect(service.preparationCategories_()).toContain('cooking_station')
     expect(storageSpy.post).toHaveBeenCalled()
   }))
 
@@ -53,10 +56,10 @@ describe('PreparationRegistryService', () => {
   }))
 
   it('should not add duplicate category', fakeAsync(() => {
-    service.registerCategory('מטבח')
+    service.registerCategory('kitchen', 'מטבח')
     tick()
     const countBefore = service.preparationCategories_().length
-    service.registerCategory('מטבח')
+    service.registerCategory('kitchen', 'מטבח')
     tick()
     expect(service.preparationCategories_().length).toBe(countBefore)
   }))
