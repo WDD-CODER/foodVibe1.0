@@ -25,6 +25,7 @@ This project uses specialized agent personas for complex tasks. Read the relevan
 | Skill | Folder | Purpose |
 |-------|--------|---------|
 | GitHub Sync | `github-sync/` | Pull recent GitHub activity for context |
+| Commit to GitHub | `commit-to-github/` | Safe branch/commit workflow; present plan as tree, then execute after approval |
 | Tech Debt | `techdebt/` | Find duplicates, dead code, TODO audit |
 | Update Docs | `update-docs/` | Refresh all project documentation |
 | Elegant Fix | `elegant-fix/` | Refine hacky solutions into clean ones |
