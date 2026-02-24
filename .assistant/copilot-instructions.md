@@ -58,10 +58,14 @@ Skills are reusable multi-step workflows in `.assistant/skills/`:
 
 | Skill | Purpose | When to Run |
 |-------|---------|-------------|
+| `save-plan` | Determine next plan number from `plans/`, write plan to `plans/NNN-slug.plan.md` (or `NNN-R-slug` for refactors) | When the user says "save the plan" (or equivalent) after confirming a plan |
 | `github-sync` | Pull recent GitHub activity into a context dump | Start of session, after time away |
+| `commit-to-github` | Safe branch/commit workflow: evaluate changes, propose branches and commits as a visual tree, execute only after explicit user approval | When the user says "commit to GitHub", "push my changes", "save to branches", or similar |
 | `techdebt` | Find duplicated code, dead code, TODO audit | End of session, before PRs |
 | `update-docs` | Refresh breadcrumbs, agent docs, project docs | After completing features |
 | `elegant-fix` | Refine a hacky solution into an elegant one | After a fix that feels wrong |
+
+* **Commit / push**: When the user asks to commit to GitHub, push changes, or save work to branches, you **MUST** use the **commit-to-github** skill (read `.assistant/skills/commit-to-github/SKILL.md`). Do **not** run `git add`, `git commit`, or `git push` for committing until the user has **explicitly approved** the visual branch/commit plan in chat (e.g. "approve", "yes, go ahead"). No exceptions.
 
 ### Available Commands
 
@@ -95,6 +99,7 @@ Agents share context through:
 * **Phase 1 (Decomposition)**: If task spans >2 sub-systems, decompose into multiple `plans/XXX.plan.md` files. 
     * **Requirement**: Every plan MUST include an `# Atomic Sub-tasks` list.
     * **Location (MANDATORY)**: Plans MUST be saved to the project's `plans/` folder (e.g. `plans/004-recipe-workflow.plan.md`). NEVER use Cursor's default plans folder (`~/.cursor/plans/`). Use the `write` tool to create plan files directly at `plans/XXX.plan.md` — do not rely on any create_plan tool that saves elsewhere.
+    * **Saving a confirmed plan**: When the user has confirmed a plan and says **"save the plan"** (or equivalent), apply the **save-plan** skill: read `.assistant/skills/save-plan/SKILL.md`, list existing `plans/*.plan.md` to determine the next number (e.g. 012 → 013 for new; 012-1, 012-2 for refactors of 012), then write the plan to `plans/NNN-slug.plan.md` or `plans/NNN-R-slug.plan.md`. Always save to the project's `plans/` folder.
 * **Phase 2 (The Hard Pause)**: Stop execution after planning. 
     * **Output**: *"The plan is ready in plans/XXX.plan.md. I have [N] questions for you before I proceed."*
 * **Phase 3 (Ledger Sync)**: Upon "Yes chef!", the **FIRST ACTION** is to append sub-tasks into `.assistant/todo.md`.
