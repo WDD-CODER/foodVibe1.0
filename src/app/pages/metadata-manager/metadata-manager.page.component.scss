@@ -22,12 +22,14 @@ $rose-600: #e11d48;
 
   .admin-grid {
     display: grid;
-    grid-template-columns: minmax(200px, 400px);
+    grid-template-columns: repeat(auto-fit, minmax(335px, 1fr));
     place-content: center;
     gap: 2rem;
 
-    @media (min-width: 768px) { grid-template-columns: repeat(2, minmax(200px, 1fr)); }
-    @media (min-width: 1024px) { grid-template-columns: repeat(3, minmax(250px, 1fr)); }
+    @media (max-width: 830px) { 
+      
+      grid-template-columns: 350px;
+     }
   }
 }
 

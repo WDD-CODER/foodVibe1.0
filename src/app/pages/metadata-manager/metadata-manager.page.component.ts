@@ -121,7 +121,7 @@ async onAddMetadata(hebrewLabel: string, type: MetadataType, inputElement: HTMLI
       isUsed = allProducts.some(p => p.allergens_?.includes(item));
       break;
     case 'category':
-      isUsed = allProducts.some(p => p.category_ === item);
+      isUsed = allProducts.some(p => (p.categories_ ?? []).includes(item));
       break;
   }
 

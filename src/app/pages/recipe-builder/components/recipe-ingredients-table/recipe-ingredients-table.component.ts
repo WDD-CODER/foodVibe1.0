@@ -144,7 +144,9 @@ export class RecipeIngredientsTableComponent {
 
       if (unitOption) {
         if (unitOption.price_override_ != null) {
-          lineCost = netAmount * unitOption.price_override_;
+          const conv = unitOption.conversion_rate_ || 1;
+          const pricePerUnit = unitOption.price_override_ / conv;
+          lineCost = netAmount * pricePerUnit;
         } else {
           const normalizedAmount = netAmount / (unitOption.conversion_rate_ || 1);
           const price = prod.buy_price_global_ || 0;

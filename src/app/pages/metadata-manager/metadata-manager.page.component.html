@@ -14,19 +14,19 @@
     }"></ng-container>
 
     <ng-container *ngTemplateOutlet="managerCard; context: { 
-      title: 'מאגר אלרגנים גלובלי', 
-      icon: 'alert-triangle', 
-      colorClass: 'text-rose-500',
-      items: allAllergens_(),
-      type: 'allergen'
-    }"></ng-container>
-
-    <ng-container *ngTemplateOutlet="managerCard; context: { 
       title: 'קטגוריות מוצרים', 
       icon: 'tag', 
       colorClass: 'text-indigo-600',
       items: allCategories_(),
       type: 'category'
+    }"></ng-container>
+
+    <ng-container *ngTemplateOutlet="managerCard; context: { 
+      title: 'מאגר אלרגנים גלובלי', 
+      icon: 'alert-triangle', 
+      colorClass: 'text-rose-500',
+      items: allAllergens_(),
+      type: 'allergen'
     }"></ng-container>
   </div>
 </div>

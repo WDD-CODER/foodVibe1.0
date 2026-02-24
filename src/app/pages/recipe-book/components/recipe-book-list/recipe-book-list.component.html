@@ -87,7 +87,7 @@
             <div class="col-cost">₪{{ getRecipeCost(recipe) | number:'1.2-2' }}</div>
             <div class="col-approved">{{ recipe.is_approved_ ? '✓' : '—' }}</div>
             <div class="col-station">{{ recipe.default_station_ || '—' }}</div>
-            <div class="col-main-category">{{ 'no_category' | translatePipe }}</div>
+            <div class="col-main-category">{{ getRecipeCategoriesDisplay(recipe) || ('no_category' | translatePipe) }}</div>
             <div class="col-allergens" #allergenCell>
               @if (getRecipeAllergens(recipe).length) {
                 <div class="allergen-btn-wrapper">

@@ -53,9 +53,18 @@ export class RecipeBookListComponent {
         if (!categories['Allergens']) categories['Allergens'] = new Set();
         categories['Allergens'].add(a);
       });
-    });
 
-    if (!categories['Main-category']) categories['Main-category'] = new Set(['no_category']);
+      const recipeCats = this.getRecipeCategories(recipe);
+      if (recipeCats.length > 0) {
+        recipeCats.forEach(c => {
+          if (!categories['Main-category']) categories['Main-category'] = new Set();
+          categories['Main-category'].add(c);
+        });
+      } else {
+        if (!categories['Main-category']) categories['Main-category'] = new Set();
+        categories['Main-category'].add('no_category');
+      }
+    });
 
     return Object.keys(categories).map(name => ({
       name,
@@ -83,7 +92,8 @@ export class RecipeBookListComponent {
           } else if (category === 'Allergens') {
             recipeValues = this.getRecipeAllergens(recipe);
           } else if (category === 'Main-category') {
-            recipeValues = ['no_category'];
+            const cats = this.getRecipeCategories(recipe);
+            recipeValues = cats.length > 0 ? cats : ['no_category'];
           }
           return selectedValues.some(v => recipeValues.includes(v));
         });
@@ -128,6 +138,31 @@ export class RecipeBookListComponent {
     return Array.from(set);
   }
 
+  protected getRecipeCategories(recipe: Recipe, depth = 0): string[] {
+    if (depth >= MAX_ALLERGEN_RECURSION || !recipe?.ingredients_?.length) return [];
+    const set = new Set<string>();
+    const products = this.kitchenState.products_();
+    const recipes = this.kitchenState.recipes_();
+
+    for (const ing of recipe.ingredients_) {
+      if (ing.type === 'product') {
+        const product = products.find(p => p._id === ing.referenceId) as Product | undefined;
+        (product?.categories_ || []).forEach(c => set.add(c));
+      } else if (ing.type === 'recipe') {
+        const subRecipe = recipes.find(r => r._id === ing.referenceId);
+        if (subRecipe) {
+          this.getRecipeCategories(subRecipe, depth + 1).forEach(c => set.add(c));
+        }
+      }
+    }
+    return Array.from(set);
+  }
+
+  protected getRecipeCategoriesDisplay(recipe: Recipe): string {
+    const cats = this.getRecipeCategories(recipe);
+    return cats.map(c => this.translationService.translate(c)).filter(Boolean).join(', ');
+  }
+
   private compareRecipes(a: Recipe, b: Recipe, field: SortField): number {
     const hebrewCompare = (x: string, y: string) => (x || '').localeCompare(y || '', 'he');
     switch (field) {
@@ -147,8 +182,13 @@ export class RecipeBookListComponent {
         return (a.is_approved_ ? 1 : 0) - (b.is_approved_ ? 1 : 0);
       case 'station':
         return hebrewCompare(a.default_station_ || '', b.default_station_ || '');
-      case 'main_category':
-        return 0;
+      case 'main_category': {
+        const aCats = this.getRecipeCategories(a);
+        const bCats = this.getRecipeCategories(b);
+        const aStr = aCats.length > 0 ? this.translationService.translate(aCats[0]) : '';
+        const bStr = bCats.length > 0 ? this.translationService.translate(bCats[0]) : '';
+        return hebrewCompare(aStr, bStr);
+      }
       case 'allergens': {
         const aAll = this.getRecipeAllergens(a);
         const bAll = this.getRecipeAllergens(b);
