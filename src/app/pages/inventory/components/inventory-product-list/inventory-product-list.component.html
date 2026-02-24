@@ -68,7 +68,7 @@
         @for (product of filteredProducts_(); track product._id) {
           <div class="product-grid-row">
             <div class="col-name">{{ product.name_hebrew }}</div>
-            <div class="col-category">{{ product.category_ | translatePipe }}</div>
+            <div class="col-category">{{ getCategoryDisplay(product.categories_) || '—' }}</div>
             <div class="col-allergens">
               @if (product.allergens_.length) {
                 <span class="allergen-pills">
@@ -80,7 +80,7 @@
                 <span class="placeholder-dash">—</span>
               }
             </div>
-            <div class="col-supplier">{{ product.supplierId_ || '—' }}</div>
+            <div class="col-supplier">{{ getSupplierNames(product.supplierIds_) || '—' }}</div>
             <div class="col-unit">
               <select class="grid-select" [ngModel]="product.base_unit_"
                 (ngModelChange)="onUnitChange(product, $event)">

@@ -10,9 +10,11 @@ import { UserMsgService } from '@services/user-msg.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { signal } from '@angular/core';
-import { LucideAngularModule, ShieldAlert, X, FlaskConical, Plus, Trash2, ArrowRight, Save } from 'lucide-angular';
+import { LucideAngularModule, ShieldAlert, X, FlaskConical, Plus, Trash2, ArrowRight, Save, ChevronDown, ChevronUp } from 'lucide-angular';
 import { Product } from '@models/product.model';
 import { TranslationService } from '@services/translation.service';
+import { TranslationKeyModalService } from '@services/translation-key-modal.service';
+import { AddSupplierFlowService } from '@services/add-supplier-flow.service';
 
 describe('ProductFormComponent', () => {
   let component: ProductFormComponent;
@@ -49,13 +51,17 @@ describe('ProductFormComponent', () => {
     });
 
     const mockUtil = jasmine.createSpyObj('UtilService', ['getEmptyProduct']);
-    mockUtil.getEmptyProduct.and.returnValue({ name_hebrew: '', base_unit_: 'gram' } as Product);
+    mockUtil.getEmptyProduct.and.returnValue({
+      _id: '', name_hebrew: '', base_unit_: 'gram', categories_: [], supplierIds_: [],
+      buy_price_global_: 0, purchase_options_: [], yield_factor_: 1, allergens_: [],
+      min_stock_level_: 0, expiry_days_default_: 0
+    } as Product);
 
     await TestBed.configureTestingModule({
       imports: [
         ProductFormComponent,
         ReactiveFormsModule,
-        LucideAngularModule.pick({ ShieldAlert, X, FlaskConical, Plus, Trash2, ArrowRight, Save })
+        LucideAngularModule.pick({ ShieldAlert, X, FlaskConical, Plus, Trash2, ArrowRight, Save, ChevronDown, ChevronUp })
       ],
       providers: [
         { provide: Router, useValue: mockRouter },
@@ -75,7 +81,9 @@ describe('ProductFormComponent', () => {
           provide: ActivatedRoute,
           useValue: { data: of({ product: null }), params: of({}) }
         },
-        { provide: TranslationService, useValue: { translate: (k: string) => k || '' } }
+        { provide: TranslationService, useValue: { translate: (k: string) => k || '' } },
+        { provide: TranslationKeyModalService, useValue: { open: () => Promise.resolve(null) } },
+        { provide: AddSupplierFlowService, useValue: { open: () => Promise.resolve(null) } }
       ]
     }).compileComponents();
 

@@ -50,14 +50,16 @@ export class InventoryProductListComponent implements OnDestroy {
         if (!categories['Allergens']) categories['Allergens'] = new Set();
         product.allergens_.forEach(a => categories['Allergens'].add(a));
       }
-      if (product.category_) {
+      const cats = product.categories_ ?? [];
+      cats.forEach(cat => {
         if (!categories['Category']) categories['Category'] = new Set();
-        categories['Category'].add(product.category_);
-      }
-      if (product.supplierId_) {
+        categories['Category'].add(cat);
+      });
+      const supplierIds = product.supplierIds_ ?? [];
+      supplierIds.forEach(id => {
         if (!categories['Supplier']) categories['Supplier'] = new Set();
-        categories['Supplier'].add(product.supplierId_);
-      }
+        categories['Supplier'].add(id);
+      });
     });
 
     return Object.keys(categories).map(name => ({
@@ -83,8 +85,8 @@ export class InventoryProductListComponent implements OnDestroy {
         return Object.entries(filters).every(([category, selectedValues]) => {
           let productValues: string[] = [];
           if (category === 'Allergens') productValues = product.allergens_ || [];
-          else if (category === 'Category') productValues = product.category_ ? [product.category_] : [];
-          else if (category === 'Supplier') productValues = product.supplierId_ ? [product.supplierId_] : [];
+          else if (category === 'Category') productValues = product.categories_ ?? [];
+          else if (category === 'Supplier') productValues = product.supplierIds_ ?? [];
           return selectedValues.some(v => productValues.includes(v));
         });
       });
@@ -113,9 +115,9 @@ export class InventoryProductListComponent implements OnDestroy {
       case 'name':
         return hebrewCompare(a.name_hebrew || '', b.name_hebrew || '');
       case 'category': {
-        const aHeb = this.translationService.translate(a.category_);
-        const bHeb = this.translationService.translate(b.category_);
-        return hebrewCompare(aHeb, bHeb);
+        const aStr = this.getCategoryDisplay(a.categories_ ?? []);
+        const bStr = this.getCategoryDisplay(b.categories_ ?? []);
+        return hebrewCompare(aStr, bStr);
       }
       case 'allergens': {
         const aVal = this.translationService.translate((a.allergens_?.[0] ?? '') as string);
@@ -123,7 +125,7 @@ export class InventoryProductListComponent implements OnDestroy {
         return hebrewCompare(aVal, bVal);
       }
       case 'supplier':
-        return hebrewCompare(this.getSupplierName(a.supplierId_ || ''), this.getSupplierName(b.supplierId_ || ''));
+        return hebrewCompare(this.getSupplierNames(a.supplierIds_ ?? []), this.getSupplierNames(b.supplierIds_ ?? []));
       case 'date':
         return new Date(a.updatedAt || 0).getTime() - new Date(b.updatedAt || 0).getTime();
       default:
@@ -186,6 +188,14 @@ export class InventoryProductListComponent implements OnDestroy {
     if (!supplierId) return '';
     const supplier = this.kitchenStateService.suppliers_().find(s => s._id === supplierId);
     return supplier?.name_hebrew ?? supplierId;
+  }
+
+  protected getSupplierNames(ids: string[] | undefined): string {
+    return (ids ?? []).map(id => this.getSupplierName(id)).filter(Boolean).join(', ');
+  }
+
+  protected getCategoryDisplay(ids: string[] | undefined): string {
+    return ((ids ?? []).map(id => this.translationService.translate(id)).filter(Boolean).join(', ')) || '';
   }
 
   /** Units available for this product: base_unit + purchase_options */

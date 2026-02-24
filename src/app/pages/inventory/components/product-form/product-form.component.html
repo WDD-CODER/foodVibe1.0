@@ -6,42 +6,75 @@
     <p class="subtitle">עדכון נתונים במנוע התמחור הרקורסיבי</p>
     } @else {
     <h2 class="text-slate-900">הוספת מוצר חדש למלאי </h2>
+    <p class="subtitle">{{ 'add_product_subtitle' | translatePipe }}</p>
     }
   </header>
 
   <form [formGroup]="productForm_" (ngSubmit)="onSubmit()" class="form-container" dir="rtl">
 
-    <div class="form-section product-info">
+    <div class="form-section form-section--mandatory">
       <div class="form-group">
         <label>{{ 'product_name' | translatePipe }}</label>
         <input formControlName="productName" type="text" placeholder="למשל: עגבניות מגי">
       </div>
 
       <div class="form-group">
-        <label>{{ 'category' | translatePipe }}</label>
-        <select formControlName="category_" (change)="onCategoryChange($event)">
-          <option value="">{{ 'choose_category' | translatePipe }}</option>
-          <option *ngFor="let cat of categoryOptions_()" [value]="cat">
-            {{ cat | translatePipe }}
-          </option>
-          <option value="NEW_CATEGORY" class="text-emerald-600 font-bold">{{ 'add_new_category' | translatePipe }}
-          </option>
-        </select>
+        <label class="flex items-center gap-2 collapsible-field__label-with-icon">
+          <lucide-icon name="tags" class="icon-xs text-slate-500"></lucide-icon>
+          {{ 'category' | translatePipe }}
+        </label>
+        <div class="category-input-box" (clickOutside)="showCategoryDropdown_.set(false)"
+          [class.no-chips]="selectedCategories_().length === 0">
+          <div class="selected-chips"
+               #categoryTrigger
+               tabindex="0"
+               (click)="showCategoryDropdown_.set(true)"
+               (keydown.enter)="showCategoryDropdown_.set(true)"
+               (keydown.arrowDown)="onCategoryKeyboardOpen($event)"
+               (keydown.arrowUp)="onCategoryKeyboardOpen($event)">
+            @for (cat of selectedCategories_(); track cat) {
+              <span class="chipe category" (click)="removeCategory(cat); $event.stopPropagation()">
+                {{ cat | translatePipe }}
+                <lucide-icon name="x" class="icon"></lucide-icon>
+              </span>
+            }
+            <span class="category-placeholder"
+                  *ngIf="selectedCategories_().length === 0"
+                  (click)="showCategoryDropdown_.set(true)">
+              {{ 'choose_category' | translatePipe }}
+            </span>
+          </div>
+
+          <div class="category dropdown" *ngIf="showCategoryDropdown_()"
+               (keydown)="onCategoryDropdownKeydown($event)"
+               role="listbox"
+               [attr.aria-activedescendant]="'category-option-' + categoryDropdownHighlightIndex_()">
+            @for (cat of filteredCategoryOptions_(); track cat; let i = $index) {
+              <div class="dropdown-item"
+                   #categoryDropdownItem
+                   [id]="'category-option-' + i"
+                   [class.dropdown-item--highlight]="categoryDropdownHighlightIndex_() === i"
+                   tabindex="-1"
+                   role="option"
+                   (click)="addCategory(cat)">
+                {{ cat | translatePipe }}
+              </div>
+            }
+            <div class="dropdown-item dropdown-item-add"
+                 #categoryDropdownItem
+                 [id]="'category-option-' + filteredCategoryOptions_().length"
+                 [class.dropdown-item--highlight]="categoryDropdownHighlightIndex_() === filteredCategoryOptions_().length"
+                 tabindex="-1"
+                 role="option"
+                 (click)="openAddNewCategory(); $event.stopPropagation()">
+              {{ 'add_new_category' | translatePipe }}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="form-group">
-        <label>{{ 'supplier' | translatePipe }}</label>
-        <select formControlName="supplierId_" (change)="onSupplierChange($event)">
-          <option value="">{{ 'choose_supplier' | translatePipe }}</option>
-          @for (s of suppliers_(); track s._id) {
-          <option [value]="s._id">{{ s.name_hebrew }}</option>
-          }
-          <option value="ADD_SUPPLIER" class="text-emerald-600 font-bold">{{ 'add_supplier' | translatePipe }}</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>{{ 'base_buy_price' | translatePipe }}</label>
+        <label>{{ 'buy_price' | translatePipe }}</label>
         <div class="relative-input">
           <input SelectOnFocus type="number" formControlName="buy_price_global_" placeholder="0.00">
           <span class="prefix">₪</span>
@@ -59,105 +92,9 @@
           </option>
         </select>
       </div>
-
-      <div class="form-group">
-        <label class="flex items-center gap-2">
-          <input type="checkbox" formControlName="is_dairy_" />
-          {{ 'is_dairy' | translatePipe }}
-        </label>
-      </div>
-
-      <div class="form-group grid grid-cols-2 gap-4">
-        <div>
-          <label>{{ 'min_stock_level' | translatePipe }}</label>
-          <input type="number" formControlName="min_stock_level_" min="0" />
-        </div>
-        <div>
-          <label>{{ 'expiry_days_default' | translatePipe }}</label>
-          <input type="number" formControlName="expiry_days_default_" min="0" />
-        </div>
-      </div>
-
-      <div class="form-group allergen-container">
-        <label class="flex items-center gap-2">
-          <lucide-icon name="shield-alert" class="icon-xs text-amber-500"></lucide-icon>
-          {{ 'allergens' | translatePipe }}
-        </label>
-
-        <div class="allergen-search-box" (clickOutside)="showSuggestions = false"
-          [class.no-chips]="selectedAllergensSignal_().length === 0">
-          <div>
-            <section class="selected-chips">
-              <span *ngFor="let selected of productForm_.get('allergens_')?.value" (click)="toggleAllergen(selected)"
-                class="allergen-tag">
-                {{ selected | translatePipe }}
-                <lucide-icon name="x" class="icon"></lucide-icon>
-              </span>
-            </section>
-            <input type="text"
-                   [ngModel]="allergenSearchQuery_()"
-                   (ngModelChange)="allergenSearchQuery_.set($event)"
-                   [ngModelOptions]="{standalone: true}"
-                   placeholder="חפש או בחר אלרגן..."
-                   (focus)="showSuggestions = true"
-                   [class.no-chips]="selectedAllergensSignal_().length === 0">
-          </div>
-
-          <div class="allergen-dropdown" *ngIf="showSuggestions">
-            <div *ngFor="let allergen of filteredAllergenOptions_()" (click)="toggleAllergen(allergen)"
-              class="dropdown-item">
-              {{ allergen | translatePipe }}
-            </div>
-            @if (allergenSearchQuery_().trim() && !filteredAllergenOptions_().includes(allergenSearchQuery_().trim()) && !productForm_.get('allergens_')?.value?.includes(allergenSearchQuery_().trim())) {
-            <div class="dropdown-item text-emerald-600 font-bold" (click)="onAddNewAllergen(allergenSearchQuery_())">
-              {{ 'add_new_allergen' | translatePipe }} "{{ allergenSearchQuery_() }}"
-            </div>
-            }
-            <div *ngIf="filteredAllergenOptions_().length === 0 && !allergenSearchQuery_().trim()" class="dropdown-item text-slate-400 italic">
-              כל האלרגנים נבחרו
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-group border-top  ">
-        <div class="section-header mb-4">
-          <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
-            <lucide-icon name="flask-conical" class="icon-xs text-indigo-500"></lucide-icon>
-            {{ 'waste_yield_logic' | translatePipe }}
-          </h3>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-          <div class="form-group yield-logic">
-            <label>{{ 'waste_percent' | translatePipe }}</label>
-            <div class="relative-input">
-              <input SelectOnFocus type="number" formControlName="waste_percent_" placeholder="0">
-              <span class="prefix text-slate-400">%</span>
-            </div>
-            <p class="helper-text text-xs text-slate-400 mt-1">אחוז החומר שנזרק (קליפות, עצמות וכו')</p>
-          </div>
-
-          <div class="form-group yield-logic ">
-            <label>{{ 'yield_factor' | translatePipe }}</label>
-            <div class="relative-input">
-              <input SelectOnFocus type="number" formControlName="yield_factor_" step="0.01" placeholder="1.00">
-              <!-- <lucide-icon name="trending-up" class="prefix-icon text-emerald-500"></lucide-icon> -->
-            </div>
-            <p class="helper-text text-xs text-slate-400 mt-1">מקדם הניצולת (1.0 = ללא פחת)</p>
-          </div>
-        </div>
-
-        <div
-          class="cost-impact-alert mt-4 p-3 bg-emerald-50 border border-emerald-100 rounded-lg flex justify-between items-center"
-          *ngIf="productForm_.get('buy_price_global_')?.value > 0">
-          <span class="text-sm text-emerald-800 font-medium">עלות נטו מחושבת (לאחר פחת):</span>
-          <span class="text-lg font-bold text-emerald-700">₪{{ netUnitCost_() | number:'1.2-2' }}</span>
-        </div>
-      </div>
     </div>
 
-    <div class="form-section border-top" formArrayName="purchase_options_">
+    <div class="form-section form-section--purchase border-top" formArrayName="purchase_options_">
       <label class="section-header">
         <button type="button" class="btn-text-add" (click)="addPurchaseOption()">
           <lucide-icon name="plus" class="icon-xs"></lucide-icon> {{ 'add_purchase_unit' | translatePipe }}
@@ -189,7 +126,7 @@
           <div class="input-wrapper"
             [class.field-error]="option.get('uom')?.invalid && (option.get('uom')?.dirty || isSubmitted)">
             <label class="flex items-center gap-2">
-              <span class="math-text">של</span>
+              <span class="math-text flex">:</span>
               <select formControlName="uom" class="uom-select">
                 <option value="" disabled selected hidden>בחר יחידת מידה</option>
                 @for (unit of availableUnits_(); track unit) {
@@ -202,7 +139,8 @@
           <div class="price-override-wrapper">
             <span class="math-text">מחיר ליחידת המידה-</span>
             <input type="number" formControlName="price_override_" [placeholder]="'price' | translatePipe"
-              class="override-input">
+              class="override-input"
+              (blur)="onPriceOverrideBlur(option)">
             <span class="math-text">₪</span>
           </div>
 
@@ -219,6 +157,164 @@
         }
       </div>
 
+    </div>
+
+    <div class="form-section form-section--optional border-top">
+      <!-- <h3 class="form-section__heading text-slate-600 text-sm font-semibold mb-3">שדות אופציונליים</h3> -->
+
+      <div class="form-group collapsible-field">
+        <div class="collapsible-field__content" [class.collapsible-field__content--hidden]="!expandedSupplier_()" (clickOutside)="onSupplierBlur($event)">
+          <label class="collapsible-field__label-with-icon flex items-center gap-2">
+            <lucide-icon name="truck" class="icon-xs text-slate-500"></lucide-icon>
+            {{ 'supplier' | translatePipe }}
+          </label>
+          <div class="supplier-input-box" (clickOutside)="showSupplierDropdown_.set(false)"
+            [class.no-chips]="selectedSupplierIds_().length === 0">
+            <div class="selected-chips" (click)="showSupplierDropdown_.set(true)">
+              @for (id of selectedSupplierIds_(); track id) {
+                <span class="chipe supplier" (click)="removeSupplierId(id); $event.stopPropagation()">
+                  {{ getSupplierName(id) }}
+                  <lucide-icon name="x" class="icon"></lucide-icon>
+                </span>
+              }
+              <span class="supplier-placeholder" *ngIf="selectedSupplierIds_().length === 0" (click)="showSupplierDropdown_.set(true)">
+                {{ 'choose_supplier' | translatePipe }}
+              </span>
+            </div>
+
+            <div class="supplier dropdown" *ngIf="showSupplierDropdown_()">
+              @for (s of filteredSupplierOptions_(); track s._id) {
+                <div class="dropdown-item" (click)="addSupplierId(s._id)">
+                  {{ s.name_hebrew }}
+                </div>
+              }
+              <div class="dropdown-item dropdown-item-add" (click)="openAddSupplier(); $event.stopPropagation()">
+                {{ 'add_supplier' | translatePipe }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedSupplier_()" (click)="toggleSupplier()" (keydown.enter)="toggleSupplier()" role="button" tabindex="0">
+          <lucide-icon name="truck" class="icon-xs text-slate-500"></lucide-icon>
+          <span>{{ 'supplier' | translatePipe }}</span>
+        </div>
+      </div>
+
+      <div class="form-group allergen-container collapsible-field">
+        <div class="collapsible-field__content" [class.collapsible-field__content--hidden]="!expandedAllergens_()" (clickOutside)="onAllergensBlur($event)">
+          <label class="collapsible-field__label-with-icon flex items-center gap-2">
+            <lucide-icon name="shield-alert" class="icon-xs text-amber-500"></lucide-icon>
+            {{ 'allergens' | translatePipe }}
+          </label>
+          <div class="allergen-search-box" (clickOutside)="showSuggestions = false"
+            [class.no-chips]="selectedAllergensSignal_().length === 0">
+            <div>
+              <section class="selected-chips">
+                <span *ngFor="let selected of productForm_.get('allergens_')?.value" (click)="toggleAllergen(selected)"
+                  class="chipe allergen">
+                  {{ selected | translatePipe }}
+                  <lucide-icon name="x" class="icon"></lucide-icon>
+                </span>
+              </section>
+              <input type="text"
+                 [ngModel]="allergenSearchQuery_()"
+                 (ngModelChange)="allergenSearchQuery_.set($event)"
+                 [ngModelOptions]="{standalone: true}"
+                 placeholder="חפש או בחר אלרגן..."
+                 (focus)="showSuggestions = true"
+                 [class.no-chips]="selectedAllergensSignal_().length === 0">
+            </div>
+
+            <div class="allergen dropdown" *ngIf="showSuggestions">
+              <div *ngFor="let allergen of filteredAllergenOptions_()" (click)="toggleAllergen(allergen)"
+                class="dropdown-item">
+                {{ allergen | translatePipe }}
+              </div>
+              @if (allergenSearchQuery_().trim() && !filteredAllergenOptions_().includes(allergenSearchQuery_().trim()) && !productForm_.get('allergens_')?.value?.includes(allergenSearchQuery_().trim())) {
+              <div class="dropdown-item text-emerald-600 font-bold" (click)="onAddNewAllergen(allergenSearchQuery_())">
+                {{ 'add_new_allergen' | translatePipe }} "{{ allergenSearchQuery_() }}"
+              </div>
+              }
+              <div *ngIf="filteredAllergenOptions_().length === 0 && !allergenSearchQuery_().trim()" class="dropdown-item text-slate-400 italic">
+                כל האלרגנים נבחרו
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedAllergens_()" (click)="toggleAllergens()" (keydown.enter)="toggleAllergens()" role="button" tabindex="0">
+          <lucide-icon name="shield-alert" class="icon-xs text-amber-500"></lucide-icon>
+          <span>{{ 'allergens' | translatePipe }}</span>
+        </div>
+      </div>
+
+
+      
+      <div class="form-group collapsible-field">
+        <div class="collapsible-field__content" [class.collapsible-field__content--hidden]="!expandedWasteYield_()" (clickOutside)="onWasteYieldBlur($event)">
+          <div class="collapsible-field__label-with-icon flex items-center gap-2 mb-2">
+            <lucide-icon name="flask-conical" class="icon-xs text-indigo-500"></lucide-icon>
+            <span class="font-medium text-slate-700">{{ 'waste_yield_logic' | translatePipe }}</span>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-group yield-logic">
+              <label>{{ 'waste_percent' | translatePipe }}</label>
+              <div class="relative-input">
+                <input SelectOnFocus type="number" formControlName="waste_percent_" placeholder="0" min="0" max="99">
+                <span class="prefix text-slate-400">%</span>
+              </div>
+              <p class="helper-text text-xs text-slate-400 mt-1">אחוז החומר שנזרק (קליפות, עצמות וכו')</p>
+            </div>
+
+            <div class="form-group yield-logic ">
+              <label>{{ 'yield_factor' | translatePipe }}</label>
+              <div class="relative-input">
+                <input class="yield-factor-input" SelectOnFocus type="number" formControlName="yield_factor_" step="0.01" placeholder="1.00">
+              </div>
+              <p class="helper-text text-xs text-slate-400 mt-1">מקדם הניצולת (1.0 = ללא פחת)</p>
+            </div>
+          </div>
+
+          <div
+            class="cost-impact-alert mt-4 p-3 bg-emerald-50 border border-emerald-100 rounded-lg flex justify-between items-center"
+            *ngIf="productForm_.get('buy_price_global_')?.value > 0">
+            <span class="text-sm text-emerald-800 font-medium">עלות נטו מחושבת (לאחר פחת):</span>
+            <span class="text-lg font-bold text-emerald-700">₪{{ netUnitCost_() | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        
+        <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedWasteYield_()" (click)="toggleWasteYield()" (keydown.enter)="toggleWasteYield()" role="button" tabindex="0">
+          <lucide-icon name="flask-conical" class="icon-xs text-indigo-500"></lucide-icon>
+          <span>{{ 'waste_yield_logic' | translatePipe }}</span>
+        </div>
+      </div>
+      <div class="form-group collapsible-field">
+        <div class="collapsible-field__content" [class.collapsible-field__content--hidden]="!expandedMinStock_()" (clickOutside)="onMinStockBlur($event)">
+          <label class="collapsible-field__label-with-icon flex items-center gap-2">
+            <lucide-icon name="package" class="icon-xs text-slate-500"></lucide-icon>
+            {{ 'min_stock_level' | translatePipe }}
+          </label>
+          <input type="number" formControlName="min_stock_level_" min="0" placeholder="0" />
+        </div>
+        <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedMinStock_()" (click)="toggleMinStock()" (keydown.enter)="toggleMinStock()" role="button" tabindex="0">
+          <lucide-icon name="package" class="icon-xs text-slate-500"></lucide-icon>
+          <span>{{ 'min_stock_level' | translatePipe }}</span>
+        </div>
+      </div>
+
+      <div class="form-group collapsible-field">
+        <div class="collapsible-field__content" [class.collapsible-field__content--hidden]="!expandedExpiryDays_()" (clickOutside)="onExpiryDaysBlur($event)">
+          <label class="collapsible-field__label-with-icon flex items-center gap-2">
+            <lucide-icon name="calendar-clock" class="icon-xs text-slate-500"></lucide-icon>
+            {{ 'expiry_days_default' | translatePipe }}
+          </label>
+          <input type="number" formControlName="expiry_days_default_" min="0" placeholder="0" />
+        </div>
+        <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedExpiryDays_()" (click)="toggleExpiryDays()" (keydown.enter)="toggleExpiryDays()" role="button" tabindex="0">
+          <lucide-icon name="calendar-clock" class="icon-xs text-slate-500"></lucide-icon>
+          <span>{{ 'expiry_days_default' | translatePipe }}</span>
+        </div>
+      </div>
     </div>
 
     <div class="form-actions">

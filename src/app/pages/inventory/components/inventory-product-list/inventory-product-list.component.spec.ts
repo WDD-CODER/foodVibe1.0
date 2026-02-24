@@ -17,8 +17,8 @@ describe('InventoryProductListComponent', () => {
     {
       _id: '1',
       name_hebrew: 'Tomato',
-      category_: 'Vegetables',
-      supplierId_: 'Supplier A',
+      categories_: ['Vegetables'],
+      supplierIds_: ['Supplier A'],
       allergens_: ['Gluten'],
       base_unit_: 'gram',
       buy_price_global_: 5
@@ -26,8 +26,8 @@ describe('InventoryProductListComponent', () => {
     {
       _id: '2',
       name_hebrew: 'Milk',
-      category_: 'Dairy',
-      supplierId_: 'Supplier B',
+      categories_: ['Dairy'],
+      supplierIds_: ['Supplier B'],
       allergens_: ['milk products'],
       base_unit_: 'liter',
       buy_price_global_: 12
