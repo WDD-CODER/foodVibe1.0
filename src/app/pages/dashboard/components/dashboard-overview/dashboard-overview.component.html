@@ -70,14 +70,32 @@
             {{ item.entityName }}
           </span>
 
-          <div class="activity-changes">
+          <div class="activity-changes-wrapper">
             <button
               type="button"
-              class="change-tag"
-              *ngFor="let change of item.changes || []"
-              (click)="toggleChangePopover(item.id, change.field, $event)"
+              class="activity-scroll-btn activity-scroll-left"
+              (click)="scrollActivityChanges($event, 'left')"
+              aria-label="Scroll changes left"
             >
-              {{ change.label | translatePipe }}
+              <lucide-icon name="chevron-right" [size]="16"></lucide-icon>
+            </button>
+            <div class="activity-changes">
+              <button
+                type="button"
+                class="change-tag"
+                *ngFor="let change of item.changes || []"
+                (click)="toggleChangePopover(item.id, change.field, $event)"
+              >
+                {{ change.label | translatePipe }}
+              </button>
+            </div>
+            <button
+              type="button"
+              class="activity-scroll-btn activity-scroll-right"
+              (click)="scrollActivityChanges($event, 'right')"
+              aria-label="Scroll changes right"
+            >
+              <lucide-icon name="chevron-left" [size]="16"></lucide-icon>
             </button>
           </div>
 

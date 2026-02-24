@@ -99,6 +99,17 @@ export class DashboardOverviewComponent {
     this.openChange_.set(null);
   }
 
+  /** Scroll the activity-changes container left/right (used on mobile for clickable scroll). */
+  protected scrollActivityChanges(event: Event, direction: 'left' | 'right'): void {
+    const btn = event.currentTarget as HTMLElement;
+    const item = btn.closest('.activity-item');
+    const changesEl = item?.querySelector('.activity-changes') as HTMLElement | null;
+    if (!changesEl) return;
+    const delta = Math.max(120, changesEl.clientWidth * 0.6);
+    const step = direction === 'left' ? -delta : delta;
+    changesEl.scrollBy({ left: step, behavior: 'smooth' });
+  }
+
   /** Format change value: translate each comma-separated segment (e.g. categories, allergens). */
   protected formatChangeValue(value: string | undefined): string {
     if (value == null || value === '') return '';
