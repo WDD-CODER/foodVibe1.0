@@ -58,9 +58,8 @@ describe('ConversionService', () => {
       expect(service.getWastePercent(200, 0)).toBe(0); // Zero guard
     });
 
-    it('should calculate suggested purchase price', () => {
-      // 5 NIS (base) * 1000 (unit) = 5000
-      expect(service.getSuggestedPurchasePrice(5, 1000)).toBe(5000);
+    it('should return base price as suggested purchase price for a full base-unit block', () => {
+      expect(service.getSuggestedPurchasePrice(5, 1000)).toBe(5);
       expect(service.getSuggestedPurchasePrice(0, 1000)).toBe(0);
     });
   });

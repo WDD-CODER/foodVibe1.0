@@ -45,18 +45,12 @@ getEmptyProduct(): Product {
   return {
     _id: '',
     name_hebrew: '',
-    category_: '',
-    supplierId_: '',
-    
-    // Updated naming based on your interface
+    categories_: [],
+    supplierIds_: [],
     buy_price_global_: 0,
-    base_unit_: 'gram', // Ensure KitchenUnit.GRAM returns a string
-    
-    // New required array
-    purchase_options_: [], 
-    
+    base_unit_: 'gram',
+    purchase_options_: [],
     yield_factor_: 1,
-    is_dairy_: false,
     allergens_: [],
     min_stock_level_: 0,
     expiry_days_default_: 0,

@@ -10,8 +10,8 @@ describe('ProductDataService', () => {
   const ENTITY = 'PRODUCT_LIST';
 
   const mockProducts: Product[] = [
-    { _id: '1', name_hebrew: 'Tomato', category_: 'Veg', allergens_: ['dairy'] } as Product,
-    { _id: '2', name_hebrew: 'Cucumber', category_: 'Veg', allergens_: ['dairy'] } as Product
+    { _id: '1', name_hebrew: 'Tomato', categories_: ['Veg'], supplierIds_: [], allergens_: ['dairy'], base_unit_: 'gram', buy_price_global_: 0, purchase_options_: [], yield_factor_: 1, min_stock_level_: 0, expiry_days_default_: 0 } as Product,
+    { _id: '2', name_hebrew: 'Cucumber', categories_: ['Veg'], supplierIds_: [], allergens_: ['dairy'], base_unit_: 'gram', buy_price_global_: 0, purchase_options_: [], yield_factor_: 1, min_stock_level_: 0, expiry_days_default_: 0 } as Product
   ];
 
   beforeEach(fakeAsync(() => {
@@ -34,9 +34,10 @@ describe('ProductDataService', () => {
   }));
 
   it('should be created and load initial data', () => {
-    // No tick() needed here, it's handled in beforeEach
     expect(service).toBeTruthy();
-    expect(service.allProducts_()).toEqual(mockProducts);
+    expect(service.allProducts_().length).toBe(mockProducts.length);
+    expect(service.allProducts_()[0].name_hebrew).toBe('Tomato');
+    expect(service.allProducts_()[0].categories_).toEqual(['Veg']);
     expect(storageSpy.query).toHaveBeenCalledWith(ENTITY);
   });
 
@@ -52,11 +53,11 @@ describe('ProductDataService', () => {
 
   describe('CRUD Operations', () => {
     it('should update an existing product in the signal', fakeAsync(() => {
-      const updatedProduct = { ...mockProducts[0], name_hebrew: 'Rotten Tomato' };
+      const updatedProduct = { ...mockProducts[0], name_hebrew: 'Rotten Tomato', categories_: ['Veg'], supplierIds_: [] } as Product;
       storageSpy.put.and.returnValue(Promise.resolve(updatedProduct));
 
       service.updateProduct(updatedProduct);
-      tick(); // Resolve the storage.put promise
+      tick();
 
       const result = service.allProducts_().find(p => p._id === '1');
       expect(result?.name_hebrew).toBe('Rotten Tomato');

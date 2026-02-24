@@ -166,7 +166,9 @@ export class RecipeCostService {
       let normalizedAmount = ing.amount_;
       if (unitOption) {
         if (unitOption.price_override_ != null) {
-          return ing.amount_ * unitOption.price_override_;
+          const conv = unitOption.conversion_rate_ || 1;
+          const pricePerUnit = unitOption.price_override_ / conv;
+          return ing.amount_ * pricePerUnit;
         }
         normalizedAmount = ing.amount_ / (unitOption.conversion_rate_ || 1);
       }

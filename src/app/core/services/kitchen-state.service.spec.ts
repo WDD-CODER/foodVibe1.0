@@ -9,12 +9,14 @@ import { Product } from '../models/product.model';
 import { Recipe } from '../models/recipe.model';
 import { Supplier } from '@models/supplier.model';
 import { signal, WritableSignal } from '@angular/core';
+import { ActivityLogService } from './activity-log.service';
 
 describe('KitchenStateService', () => {
   let service: KitchenStateService;
   let productDataSpy: jasmine.SpyObj<ProductDataService>;
   let recipeDataSpy: jasmine.SpyObj<RecipeDataService>;
   let userMsgSpy: jasmine.SpyObj<UserMsgService>;
+  let activityLogSpy: jasmine.SpyObj<ActivityLogService>;
 
   const mockAllItemsSignal: WritableSignal<any[]> = signal<any[]>([]);
   const mockRecipesSignal: WritableSignal<Recipe[]> = signal<Recipe[]>([]);
@@ -24,15 +26,14 @@ describe('KitchenStateService', () => {
   const createMockProduct = (_id: string): Product => ({
     _id,
     name_hebrew: 'מוצר בדיקה',
-    category_: 'Dry',
-    supplierId_: 's1',
-    buy_price_global_: 10, // FIXED: Correct property name
-    purchase_options_: [], // FIXED: Required by interface
+    categories_: ['Dry'],
+    supplierIds_: ['s1'],
+    buy_price_global_: 10,
+    purchase_options_: [],
     base_unit_: 'gram',
     yield_factor_: 1,
     allergens_: [],
     min_stock_level_: 0,
-    is_dairy_: false,
     expiry_days_default_: 3
   });
 
@@ -69,6 +70,8 @@ describe('KitchenStateService', () => {
       return saved;
     });
 
+    const aSpy = jasmine.createSpyObj('ActivityLogService', ['recordActivity']);
+
     TestBed.configureTestingModule({
       providers: [
         KitchenStateService,
@@ -76,7 +79,8 @@ describe('KitchenStateService', () => {
         { provide: RecipeDataService, useValue: rSpy },
         { provide: DishDataService, useValue: dSpy },
         { provide: SupplierDataService, useValue: supplierSpy },
-        { provide: UserMsgService, useValue: uSpy }
+        { provide: UserMsgService, useValue: uSpy },
+        { provide: ActivityLogService, useValue: aSpy }
       ]
     });
 
@@ -84,6 +88,7 @@ describe('KitchenStateService', () => {
     productDataSpy = TestBed.inject(ProductDataService) as jasmine.SpyObj<ProductDataService>;
     recipeDataSpy = TestBed.inject(RecipeDataService) as jasmine.SpyObj<RecipeDataService>;
     userMsgSpy = TestBed.inject(UserMsgService) as jasmine.SpyObj<UserMsgService>;
+    activityLogSpy = TestBed.inject(ActivityLogService) as jasmine.SpyObj<ActivityLogService>;
   });
 
   describe('Initialization & Sync', () => {
@@ -91,7 +96,7 @@ describe('KitchenStateService', () => {
       const mockRawItem = {
         _id: 'p1',
         name_hebrew: 'Tomato',
-        category_: 'Veg'
+        categories_: ['Veg']
       } as any;
 
       // Update signal and trigger Angular effects
@@ -107,12 +112,14 @@ describe('KitchenStateService', () => {
   describe('Product CRUD', () => {
     it('should call saveProduct (add) and show success message', (done) => {
       const product = createMockProduct(''); // Empty ID triggers add
-      productDataSpy.addProduct.and.returnValue(Promise.resolve());
+      const savedProduct = { ...product, _id: 'p-new' };
+      productDataSpy.addProduct.and.returnValue(Promise.resolve(savedProduct));
 
       // FIXED: Method name in service is saveProduct
       service.saveProduct(product).subscribe(() => {
         expect(productDataSpy.addProduct).toHaveBeenCalled();
         expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('חומר גלם נוסף בהצלחה');
+        expect(activityLogSpy.recordActivity).toHaveBeenCalled();
         done();
       });
     });
@@ -127,6 +134,7 @@ describe('KitchenStateService', () => {
       service.deleteProduct('p-del').subscribe(() => {
         expect(productDataSpy.deleteProduct).toHaveBeenCalledWith('p-del');
         expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('חומר הגלם נמחק בהצלחה');
+        expect(activityLogSpy.recordActivity).toHaveBeenCalled();
         done();
       });
     });
@@ -164,6 +172,7 @@ describe('KitchenStateService', () => {
       service.saveRecipe(recipe).subscribe(() => {
         expect(recipeDataSpy.addRecipe).toHaveBeenCalled();
         expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('המתכון נשמר בהצלחה');
+        expect(activityLogSpy.recordActivity).toHaveBeenCalled();
         done();
       });
     });
@@ -186,6 +195,7 @@ describe('KitchenStateService', () => {
       service.saveRecipe(dish).subscribe(() => {
         expect(dishDataSpy.addDish).toHaveBeenCalled();
         expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('המנה נשמרה בהצלחה');
+        expect(activityLogSpy.recordActivity).toHaveBeenCalled();
         done();
       });
     });

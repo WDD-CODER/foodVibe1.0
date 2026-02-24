@@ -11,11 +11,10 @@ export interface Product {
   base_unit_: string;
   buy_price_global_: number;
   purchase_options_: PurchaseOption_[];
-  category_: string;
-  supplierId_: string;
+  categories_: string[];
+  supplierIds_: string[];
   yield_factor_: number;
   allergens_: string[];
-  is_dairy_: boolean;
   min_stock_level_: number;
   expiry_days_default_: number;
   updatedAt?: string

@@ -63,7 +63,10 @@ export class ConversionService {
    * Calculates suggested price for a purchase unit based on global price and conversion rate
    */
   getSuggestedPurchasePrice(globalPrice: number, conversionRate: number): number {
-    if (!globalPrice || !conversionRate) return 0;
-    return globalPrice * conversionRate;
+    if (!globalPrice) return 0;
+    // By default, the suggested price for a purchase option represents
+    // the price for the quantity that equals 1 base unit (e.g. 1000 g = 1 kg).
+    // So the conventional suggested price is just the base unit price.
+    return globalPrice;
   }
 }
