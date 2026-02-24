@@ -151,24 +151,130 @@
 .activity-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 8px;
   padding: 8px 10px;
-  border-radius: 999px;
+  border-radius: 12px;
   background: #f8fafc;
+}
+
+.activity-type {
+  flex-shrink: 0;
+  margin-inline-start: auto; /* push action pill to the far left in RTL */
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #0369a1;
+
+  &[data-action="created"] {
+    background: #d1fae5;
+    color: #047857;
+  }
+
+  &[data-action="updated"] {
+    background: #fef3c7;
+    color: #b45309;
+  }
+
+  &[data-action="deleted"] {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
 }
 
 .activity-name {
   font-size: 0.9rem;
   color: #0f172a;
+  text-align: right;
 }
 
-.activity-type {
+.entity-type-tag {
+  flex-shrink: 0;
   font-size: 0.75rem;
-  padding: 2px 8px;
+  padding: 4px 10px;
   border-radius: 999px;
-  background: #e0f2fe;
-  color: #0369a1;
+  background: #e0e7ff;
+  color: #3730a3;
+
+  &[data-entity="product"] {
+    background: #e0f2fe;
+    color: #0369a1;
+  }
+
+  &[data-entity="recipe"] {
+    background: #ede9fe;
+    color: #6d28d9;
+  }
+
+  &[data-entity="dish"] {
+    background: #cffafe;
+    color: #0f766e;
+  }
+}
+
+.activity-changes {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 6px;
+  overflow-x: auto;
+  padding-inline: 4px;
+}
+
+.change-tag {
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  color: #111827;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Fixed popover: floats above everything, no backdrop, positioned under the clicked tag */
+.change-popover-fixed {
+  position: fixed;
+  z-index: 1000;
+  background: transparent;
+  pointer-events: none;
+}
+
+.change-popover-fixed .change-popover {
+  pointer-events: auto;
+}
+
+.change-popover {
+  position: absolute;
+  display: flex;
+  left: 0;
+  transform: translateX(-50%);
+  margin-top: 10px;
+  width: max-content;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.18);
+  padding: 6px 10px;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #0f172a;
+  z-index: 10;
+}
+
+.change-label {
+  font-weight: 600;
+}
+
+.change-from,
+.change-to {
+  min-width: fit-content;
+  font-family: inherit;
+}
+
+.change-arrow {
+  opacity: 0.7;
 }
 
 .empty-copy {

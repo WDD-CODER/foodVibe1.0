@@ -56,11 +56,33 @@
         <h2>{{ 'recent_activity' | translatePipe }}</h2>
       </header>
 
-      <div class="activity-list" *ngIf="recentActivity_().length; else noActivity">
-        <div class="activity-item" *ngFor="let item of recentActivity_()">
-          <span class="activity-name">{{ item.name }}</span>
-          <span class="activity-type">
-            {{ item.type === 'product' ? ('product' | translatePipe) : ('preparation' | translatePipe) }}
+      <div class="activity-list" *ngIf="getRecentActivity().length; else noActivity">
+        <div class="activity-item" *ngFor="let item of getRecentActivity(); trackBy: trackByActivityId">
+          <span class="entity-type-tag" [attr.data-entity]="item.entityType">
+            {{ (item.entityType === 'product'
+              ? 'product'
+              : item.entityType === 'dish'
+                ? 'dish'
+                : 'preparation') | translatePipe }}
+          </span>
+
+          <span class="activity-name">
+            {{ item.entityName }}
+          </span>
+
+          <div class="activity-changes">
+            <button
+              type="button"
+              class="change-tag"
+              *ngFor="let change of item.changes || []"
+              (click)="toggleChangePopover(item.id, change.field, $event)"
+            >
+              {{ change.label | translatePipe }}
+            </button>
+          </div>
+
+          <span class="activity-type" [attr.data-action]="item.action">
+            {{ ('activity_' + item.action) | translatePipe }}
           </span>
         </div>
       </div>
@@ -72,4 +94,22 @@
       </ng-template>
     </section>
   </main>
+
+  <!-- Fixed popover above all content, positioned under the clicked tag; no backdrop -->
+  <div
+    class="change-popover-fixed"
+    *ngIf="openChange_() as open"
+    [style.top.px]="open.top"
+    [style.left.px]="open.left"
+    (clickOutside)="closeChangePopoverOnOutsideClick($event)"
+  >
+    <ng-container *ngIf="getOpenActivity() as activity" >
+      <div *ngIf="getChange(activity, open.field) as c" class="change-popover">
+        <!-- <span class="change-label">{{ c.label | translatePipe }}</span> -->
+        <span class="change-from">{{ formatChangeValue(c.from) }}</span>
+        <span class="change-arrow">←</span>
+        <span class="change-to">{{ formatChangeValue(c.to) }}</span>
+      </div>
+    </ng-container>
+  </div>
 </div>
