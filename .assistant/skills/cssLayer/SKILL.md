@@ -1,62 +1,64 @@
 ---
 name: cssLayer
-description: Unified CSS protocol; enforces Native Nesting, Vertical Rhythm property grouping, and Theme-driven Variable architecture.
+description: Unified CSS Protocol; enforces Five-Group Vertical Rhythm, Engine-based Unification, and Native Nesting.
 ---
 
 # Skill: CSS & Styling Standards
 
 ## 1. Architecture & Global Hierarchy
-* **Entry Point**: `src/style/main.css` (The master manifest).
-* **Directory Structure**:
-    * `style/setup/`: Variables (`var.css`) and Typography (`typography.css`).
-    * `style/basics/`: Global Reset, Layout utilities, and Base element styles.
-    * `style/cmps/`: Global component styles (Only for shared/common elements).
-* **Angular Scoping**: For page-specific styles, use **Scoped `<style>` blocks** within the `.ts` or `.html` component files, following the same Vertical Rhythm rules.
-* **Prohibition**: Strictly **FORBIDDEN** to use SCSS/Sass, CSS Modules, or Inline Styles.
+* **Native Only**: Strictly **PROHIBITED**: SCSS/Sass, CSS Modules, or Inline Styles.
+* **Nesting**: Use Native CSS Nesting. Use `&` for pseudo-classes (`&:hover`) and state modifiers (`&.is-active`).
+* **Logic**: Prefer **scoped `<style>` blocks** in Angular components. Avoid lang="scss".
 
-## 2. Modern Implementation & Units
-* **Layout Engine**: Default to `display: flex` or `display: grid`.
-* **Sizing**: Use `rem` for layout/typography and `em` for component-relative spacing. Avoid `px`.
-* **Nesting**: Use **Native CSS Nesting**. Use the `&` selector for clarity when nesting pseudo-classes (`&:hover`) or state classes (`&.active`).
-* **Icons**: Use `lucide-angular` exclusively.
+## 2. Unification Rule (Mandatory)
+1.  **Unify First**: Before creating a selector, search for an existing **Engine** (e.g., `.c-button`, `.c-card`, `.c-chip`).
+2.  **Engines & Modifiers**: Use shared blocks and apply modifiers (e.g., `.c-button.primary`) instead of one-off classes.
+3.  **Tokens**: Zero tolerance for hex codes or raw `px`. Use `var(--token)`. Use `rem` for layout and `em` for relative spacing.
 
-## 3. Theme & Variable Logic
-* **Injection**: All colors/tokens must use `var(--token-name)`.
-* **Reactivity**: Theme values must react to the `theme_` signal state.
-* **Definition**: Define all tokens in `style/setup/var.css` under `:root` (light) and `.theme-dark` (dark).
+## 3. Vertical Rhythm (The Five Groups)
+Every selector MUST group properties into these five blocks, separated by **exactly one blank line**. Omit empty groups.
 
-## 4. Vertical Rhythm & Property Grouping
-* **Strict Rule**: Every selector MUST group properties using a **single blank line** between the five functional categories.
-* **Property Ordering**:
-    1. **Layout**: `display`, `position`, `top`, `left`, `z-index`, `flex`, `grid`, `align-items`, `justify-content`.
-    
-    2. **Dimensions/Spacing**: `width`, `height`, `margin`, `padding`, `gap`.
-    
-    3. **Content**: `background-color`, `color`, `font-size`, `font-weight`, `line-height`, `text-decoration`.
-    
-    4. **Structure**: `border`, `border-radius`, `box-shadow`, `overflow`, `visibility`.
-    
-    5. **Effects/Interactions**: `cursor`, `transition`, `transform`, `animation`.
+1.  **Layout**: `display`, `position`, `top`, `right`, `bottom`, `left`, `inset`, `z-index`, `flex`, `grid`, `align-items`, `justify-content`, `place-items`.
+2.  **Dimensions**: `width`, `min-width`, `max-width`, `height`, `min-height`, `max-height`, `margin`, `padding`, `gap`, `aspect-ratio`.
+3.  **Content/Typo**: `background`, `background-color`, `color`, `font-family`, `font-size`, `font-weight`, `line-height`, `text-align`, `text-decoration`.
+4.  **Structure**: `border`, `border-radius`, `box-shadow`, `outline`, `overflow`, `opacity`, `visibility`.
+5.  **Effects**: `cursor`, `transition`, `transform`, `animation`, `pointer-events`, `user-select`.
 
-## 5. Visual Example (The Agent Pattern)
+## 4. Per-Selector Checklist
+1.  [ ] Can I reuse an existing Engine (`.c-`)?
+2.  [ ] Are properties sorted into the 5 groups?
+3.  [ ] Is there a blank line between each group?
+4.  [ ] Are all values using tokens (`var(--)`) and `rem`/`em`?
+5.  [ ] Did I use Logical Properties (e.g., `margin-inline`)?
+
+## 5. Master Pattern (The "Expected" Output)
 ```css
-.recipe-card {
-  display: flex;
-  flex-direction: column;
+/* CORRECT: Grouped, Tokenized, Unified */
+.c-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-  padding: 1.5rem;
-  gap: 1rem;
+  padding-inline: 1.5rem;
+  height: var(--size-md);
+  gap: 0.5em;
 
-  background-color: var(--bg-surface);
-  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  color: var(--text-on-primary);
+  font-weight: var(--font-bold);
 
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
+  border: none;
 
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: filter 0.2s ease;
+  cursor: pointer;
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
+    filter: brightness(1.1);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }

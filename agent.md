@@ -6,7 +6,7 @@ This is the primary entry point for AI Agents. Embark on every task by reading t
 - **Primary Instructions**: `.assistant/copilot-instructions.md` — this is the **single source of truth** for all project rules. Read it at the start of every task.
 - **Rule Location**: When you receive a new project rule from the user, add it to `.assistant/copilot-instructions.md`. Do **not** create rules in `.cursor/rules/` — all rules live in the copilot-instructions file.
 - **Active Tasks**: `.assistant/todo.md` (Update status after every sub-task).
-- **Planning**: Mandatory `plans/` folder usage. All plans must be saved to the project's `plans/` folder (e.g. `plans/004-feature.plan.md`). NEVER use Cursor's default `~/.cursor/plans/`. Use the `write` tool to create plan files directly. Wait for explicit user confirmation before execution.
+- **Planning**: Mandatory `plans/` folder usage. All plans must be saved to the project's `plans/` folder (e.g. `plans/004-feature.plan.md`). NEVER use Cursor's default `~/.cursor/plans/`. Use the `write` tool to create plan files directly. When the user says **"save the plan"** after confirming a plan, apply the **save-plan** skill (`.assistant/skills/save-plan/`): determine the next plan number from existing files in `plans/`, then write to `plans/NNN-slug.plan.md` or `plans/NNN-R-slug.plan.md` for refactors. Wait for explicit user confirmation before execution.
 
 ## Agent System
 
@@ -24,6 +24,7 @@ This project uses specialized agent personas for complex tasks. Read the relevan
 ### Skills (`.assistant/skills/`)
 | Skill | Folder | Purpose |
 |-------|--------|---------|
+| Save Plan | `save-plan/` | When user says "save the plan" after confirming: determine next plan number from `plans/`, write to `plans/NNN-slug.plan.md` or `plans/NNN-R-slug.plan.md` for refactors |
 | GitHub Sync | `github-sync/` | Pull recent GitHub activity for context |
 | Commit to GitHub | `commit-to-github/` | Safe branch/commit workflow; present plan as tree, then execute after approval |
 | Tech Debt | `techdebt/` | Find duplicates, dead code, TODO audit |
