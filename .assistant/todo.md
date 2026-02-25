@@ -108,6 +108,17 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Main-category column placeholder (no_category).
 - [x] Add recipe-book-list.spec.ts and run tests.
 
+### Plan 017 — Recipe Book List UX Overhaul (`plans/017-recipe-book-list-ux-overhaul.plan.md`)
+
+- [x] Sidebar open by default (desktop), closed on mobile; sticky right; mobile off-canvas with close button.
+- [x] Remove approved/station table columns; keep Approved & Station as sidebar filters.
+- [x] Remove sort arrow icons; keep click-to-sort on column titles.
+- [x] Allergens column: narrow by default; header click = expand all rows, row icon = expand that row; dense grid.
+- [x] Cost column before actions; yield tooltip on hover/tap (getRecipeYieldDescription).
+- [x] Top search = recipe/dish name (action bar + mobile fixed with toggle); sidebar search = by produce (ingredients) with dropdown, chips, clear, filter by all selected.
+- [x] Ingredient search: product dropdown, chips (click to remove), clear, recipeContainsAllProducts filter.
+- [x] Dictionary keys: Approved, Station, approved_yes, approved_no, no_station, search_by_ingredients, clear.
+
 ### Plan 007 — Product Form Enhancement (`plans/007-product-form-enhancement.plan.md`)
 
 - [x] Add SupplierDataService and persist suppliers to KITCHEN_SUPPLIERS.
@@ -154,7 +165,7 @@ Update status after each sub-task. Link plan files here when applicable.
 
 - [ ] **Plan 015 — Empty States & Onboarding**: Empty-state UX for all list views, first-use guidance, Hebrew copy.
 - [ ] **Plan 016 — Print-Friendly Recipe View**: Print stylesheet, hide navigation in print, RTL-aware layout, print button.
-- [ ] **Plan 017 — Backend API Preparation**: Formalize `IStorageAdapter`, document REST API contract, audit adapter compliance.
+- [ ] **Plan 018 — Backend API Preparation**: Formalize `IStorageAdapter`, document REST API contract, audit adapter compliance.
 - [ ] **Deployment Pipeline**: Validate and activate GitHub Actions workflow for GitHub Pages.
 
 ---
@@ -182,6 +193,7 @@ Update status after each sub-task. Link plan files here when applicable.
 | 014 | Low Stock Alerts | Planned |
 | 015 | Empty States & Onboarding | Planned |
 | 016 | Print-Friendly Recipe View | Planned |
-| 017 | Backend API Preparation | Planned |
+| 017 | Recipe Book List UX Overhaul | Done |
+| 018 | Backend API Preparation | Planned |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*

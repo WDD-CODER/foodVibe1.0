@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, computed, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,9 +12,10 @@ import { ClickOutSideDirective } from '@directives/click-out-side';
 import { Recipe } from '@models/recipe.model';
 import { Product } from '@models/product.model';
 
-export type SortField = 'name' | 'type' | 'cost' | 'approved' | 'station' | 'main_category' | 'allergens';
+export type SortField = 'name' | 'type' | 'cost' | 'main_category' | 'allergens';
 
 const MAX_ALLERGEN_RECURSION = 5;
+const MOBILE_BREAKPOINT_PX = 768;
 
 @Component({
   selector: 'recipe-book-list',
@@ -36,6 +37,19 @@ export class RecipeBookListComponent {
   protected sortOrder_ = signal<'asc' | 'desc'>('asc');
   protected isSidebarOpen_ = signal<boolean>(false);
   protected allergenPopoverRecipeId_ = signal<string | null>(null);
+  protected allergenExpandAll_ = signal<boolean>(false);
+  protected hoveredCostRecipeId_ = signal<string | null>(null);
+  protected tappedCostRecipeId_ = signal<string | null>(null);
+  protected ingredientSearchQuery_ = signal<string>('');
+  protected selectedProductIds_ = signal<string[]>([]);
+  protected isMobileSearchOpen_ = signal<boolean>(false);
+
+  constructor() {
+    afterNextRender(() => {
+      const isDesktop = window.matchMedia(`(min-width: ${MOBILE_BREAKPOINT_PX + 1}px)`).matches;
+      this.isSidebarOpen_.set(isDesktop);
+    });
+  }
 
   protected filterCategories_ = computed(() => {
     const recipes = this.kitchenState.recipes_();
@@ -64,16 +78,37 @@ export class RecipeBookListComponent {
         if (!categories['Main-category']) categories['Main-category'] = new Set();
         categories['Main-category'].add('no_category');
       }
+
+      if (!categories['Approved']) categories['Approved'] = new Set();
+      categories['Approved'].add(recipe.is_approved_ ? 'true' : 'false');
+
+      const station = (recipe.default_station_ || '').trim() || '_none';
+      if (!categories['Station']) categories['Station'] = new Set();
+      categories['Station'].add(station);
     });
+
+    const optionLabel = (name: string, value: string): string => {
+      if (name === 'Approved') return value === 'true' ? 'approved_yes' : 'approved_no';
+      if (name === 'Station' && value === '_none') return 'no_station';
+      return value;
+    };
 
     return Object.keys(categories).map(name => ({
       name,
       options: Array.from(categories[name]).map(option => ({
-        label: option,
+        label: optionLabel(name, option),
         value: option,
         checked_: (filters[name] || []).includes(option)
       }))
     }));
+  });
+
+  protected filteredProductsForIngredientSearch_ = computed(() => {
+    const query = this.ingredientSearchQuery_().trim().toLowerCase();
+    if (!query) return [];
+    return this.kitchenState.products_().filter(p =>
+      (p.name_hebrew ?? '').toLowerCase().includes(query)
+    );
   });
 
   protected filteredRecipes_ = computed(() => {
@@ -82,6 +117,7 @@ export class RecipeBookListComponent {
     const search = this.searchQuery_().trim().toLowerCase();
     const sortBy = this.sortBy_();
     const sortOrder = this.sortOrder_();
+    const selectedIds = this.selectedProductIds_();
 
     if (Object.keys(filters).length > 0) {
       recipes = recipes.filter(recipe => {
@@ -94,10 +130,19 @@ export class RecipeBookListComponent {
           } else if (category === 'Main-category') {
             const cats = this.getRecipeCategories(recipe);
             recipeValues = cats.length > 0 ? cats : ['no_category'];
+          } else if (category === 'Approved') {
+            recipeValues = [recipe.is_approved_ ? 'true' : 'false'];
+          } else if (category === 'Station') {
+            const st = (recipe.default_station_ || '').trim() || '_none';
+            recipeValues = [st];
           }
           return selectedValues.some(v => recipeValues.includes(v));
         });
       });
+    }
+
+    if (selectedIds.length > 0) {
+      recipes = recipes.filter(r => this.recipeContainsAllProducts(r, selectedIds));
     }
 
     if (search) {
@@ -163,6 +208,33 @@ export class RecipeBookListComponent {
     return cats.map(c => this.translationService.translate(c)).filter(Boolean).join(', ');
   }
 
+  protected getRecipeYieldDescription(recipe: Recipe): string {
+    const amount = recipe.yield_amount_ ?? 1;
+    const unit = recipe.yield_unit_ ? this.translationService.translate(recipe.yield_unit_) : '';
+    return `${amount} ${unit}`.trim() || String(amount);
+  }
+
+  protected recipeContainsAllProducts(recipe: Recipe, productIds: string[]): boolean {
+    if (productIds.length === 0) return true;
+    const ids = this.getRecipeProductIds(recipe);
+    return productIds.every(id => ids.has(id));
+  }
+
+  private getRecipeProductIds(recipe: Recipe, depth = 0): Set<string> {
+    if (depth >= MAX_ALLERGEN_RECURSION || !recipe?.ingredients_?.length) return new Set();
+    const set = new Set<string>();
+    const recipes = this.kitchenState.recipes_();
+    for (const ing of recipe.ingredients_) {
+      if (ing.type === 'product') {
+        set.add(ing.referenceId);
+      } else if (ing.type === 'recipe') {
+        const sub = recipes.find(r => r._id === ing.referenceId);
+        if (sub) this.getRecipeProductIds(sub, depth + 1).forEach(id => set.add(id));
+      }
+    }
+    return set;
+  }
+
   private compareRecipes(a: Recipe, b: Recipe, field: SortField): number {
     const hebrewCompare = (x: string, y: string) => (x || '').localeCompare(y || '', 'he');
     switch (field) {
@@ -178,10 +250,6 @@ export class RecipeBookListComponent {
       }
       case 'cost':
         return this.recipeCostService.computeRecipeCost(a) - this.recipeCostService.computeRecipeCost(b);
-      case 'approved':
-        return (a.is_approved_ ? 1 : 0) - (b.is_approved_ ? 1 : 0);
-      case 'station':
-        return hebrewCompare(a.default_station_ || '', b.default_station_ || '');
       case 'main_category': {
         const aCats = this.getRecipeCategories(a);
         const bCats = this.getRecipeCategories(b);
@@ -211,14 +279,17 @@ export class RecipeBookListComponent {
     }
   }
 
-  protected sortIconFor_(field: SortField): 'arrow-up' | 'arrow-down' | 'arrow-up-down' {
-    const current = this.sortBy_();
-    if (current !== field) return 'arrow-up-down';
-    return this.sortOrder_() === 'asc' ? 'arrow-up' : 'arrow-down';
-  }
-
   protected toggleSidebar(): void {
     this.isSidebarOpen_.update(v => !v);
+  }
+
+  protected toggleAllergenExpandAll(): void {
+    this.allergenExpandAll_.update(v => !v);
+    this.allergenPopoverRecipeId_.set(null);
+  }
+
+  protected toggleMobileSearch(): void {
+    this.isMobileSearchOpen_.update(v => !v);
   }
 
   protected toggleFilter(categoryName: string, optionValue: string): void {
@@ -236,11 +307,47 @@ export class RecipeBookListComponent {
   }
 
   protected toggleAllergenPopover(recipeId: string): void {
+    this.allergenExpandAll_.set(false);
     this.allergenPopoverRecipeId_.update(id => (id === recipeId ? null : recipeId));
   }
 
   protected closeAllergenPopover(): void {
     this.allergenPopoverRecipeId_.set(null);
+  }
+
+  protected showCostTooltip(recipeId: string): void {
+    this.hoveredCostRecipeId_.set(recipeId);
+  }
+
+  protected hideCostTooltip(): void {
+    this.hoveredCostRecipeId_.set(null);
+  }
+
+  protected toggleCostTooltipTap(recipeId: string): void {
+    this.tappedCostRecipeId_.update(id => (id === recipeId ? null : recipeId));
+  }
+
+  protected closeCostTooltipTap(): void {
+    this.tappedCostRecipeId_.set(null);
+  }
+
+  protected addIngredientProduct(product: Product): void {
+    if (this.selectedProductIds_().includes(product._id)) return;
+    this.selectedProductIds_.update(ids => [...ids, product._id]);
+    this.ingredientSearchQuery_.set('');
+  }
+
+  protected removeIngredientProduct(productId: string): void {
+    this.selectedProductIds_.update(ids => ids.filter(id => id !== productId));
+  }
+
+  protected clearIngredientProducts(): void {
+    this.selectedProductIds_.set([]);
+  }
+
+  protected getSelectedProducts(): Product[] {
+    const ids = this.selectedProductIds_();
+    return this.kitchenState.products_().filter(p => ids.includes(p._id));
   }
 
   protected onAddRecipe(): void {
