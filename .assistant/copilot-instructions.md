@@ -65,7 +65,15 @@ Skills are reusable multi-step workflows in `.assistant/skills/`:
 | `update-docs` | Refresh breadcrumbs, agent docs, project docs | After completing features |
 | `elegant-fix` | Refine a hacky solution into an elegant one | After a fix that feels wrong |
 
-* **Commit / push**: When the user asks to commit to GitHub, push changes, or save work to branches, you **MUST** use the **commit-to-github** skill (read `.assistant/skills/commit-to-github/SKILL.md`). Do **not** run `git add`, `git commit`, or `git push` for committing until the user has **explicitly approved** the visual branch/commit plan in chat (e.g. "approve", "yes, go ahead"). No exceptions.
+### Commit to GitHub (MANDATORY — every chat, no exceptions)
+
+When the user says "commit to GitHub", "push my changes", "save to branches", or similar:
+
+1. **You MUST read** `.assistant/skills/commit-to-github/SKILL.md` before performing any git write.
+2. **You MUST follow** all phases in that skill: evaluate changes, build the plan, present the **visual tree** in chat, and ask: *"Approve to proceed with these branches and commits, or deny to cancel. No git writes until you approve."*
+3. **You MUST NOT** run `git add`, `git commit`, `git push`, or create branches until the user has **explicitly approved** the plan in chat (e.g. "approve", "yes, go ahead").
+
+This applies in **every chat and every session**; there are no exceptions. If you have not shown the visual tree and received approval, do not run any git write commands.
 
 ### Available Commands
 

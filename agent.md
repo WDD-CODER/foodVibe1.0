@@ -64,3 +64,4 @@ Before making changes to any directory, check for a `breadcrumbs.md` file and re
 4. **Execute**: Only then use @Composer for multi-file updates. Keep files under ~300 lines; refactor when needed.
 5. **Audit**: Run tests and ask for the mandatory `.spec.ts` confirmation.
 6. **Branch Check**: Ensure you are not on `main`. Create a `feat/` branch if necessary.
+7. **Commit / push to GitHub**: If the user asks to commit to GitHub, push changes, or save to branches, you **MUST** read `.assistant/skills/commit-to-github/SKILL.md` and follow all phases (visual tree in chat, then approval). Do **not** run `git add`, `git commit`, or `git push` until the user has explicitly approved the plan. See the "Commit to GitHub (MANDATORY)" section in `.assistant/copilot-instructions.md`. This applies in every chat; no exceptions.
