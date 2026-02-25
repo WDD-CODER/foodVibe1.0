@@ -47,17 +47,28 @@ export class RecipeBuilderPage implements OnInit {
   protected resetTrigger_ = signal(0);
   isSubmitted = false;
 
+  /** Bumped when ingredients change so cost/weight computeds re-run (form is not a signal). */
+  private ingredientsFormVersion_ = signal(0);
+
   //COMPUTED
   protected totalCost_ = computed(() => {
+    this.ingredientsFormVersion_();
     const raw = this.recipeForm_.getRawValue() as { ingredients?: { total_cost?: number }[] };
     const ingredients = raw?.ingredients || [];
     return ingredients.reduce((acc: number, ing: { total_cost?: number }) => acc + (ing.total_cost || 0), 0);
   });
 
   protected totalWeightG_ = computed(() => {
+    this.ingredientsFormVersion_();
     const raw = this.recipeForm_.getRawValue() as { total_weight_g?: number };
     return raw?.total_weight_g ?? 0;
   });
+
+  protected totalBrutoWeightG_ = signal(0);
+  protected totalVolumeL_ = signal(0);
+  protected totalVolumeMl_ = signal(0);
+  protected unconvertibleForWeight_ = signal<string[]>([]);
+  protected unconvertibleForVolume_ = signal<string[]>([]);
 
   protected recipeForm_ = this.fb.group(
     {
@@ -98,7 +109,10 @@ export class RecipeBuilderPage implements OnInit {
   constructor() {
     this.ingredientsArray.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.updateTotalWeightG());
+      .subscribe(() => {
+        this.updateTotalWeightG();
+        this.ingredientsFormVersion_.update(v => v + 1);
+      });
 
     this.recipeForm_.get('recipe_type')?.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -173,11 +187,17 @@ export class RecipeBuilderPage implements OnInit {
 
   private updateTotalWeightG(): void {
     const raw = this.recipeForm_.getRawValue() as {
-      ingredients?: { amount_net?: number; unit?: string; referenceId?: string; item_type?: string }[];
+      ingredients?: { amount_net?: number; unit?: string; referenceId?: string; item_type?: string; name_hebrew?: string }[];
     };
     const rows = raw?.ingredients || [];
     const weight = this.recipeCostService_.computeTotalWeightG(rows);
     this.recipeForm_.get('total_weight_g')?.setValue(Math.round(weight), { emitEvent: false });
+    this.totalBrutoWeightG_.set(Math.round(this.recipeCostService_.computeTotalBrutoWeightG(rows)));
+    const vol = this.recipeCostService_.computeTotalVolumeL(rows);
+    this.totalVolumeL_.set(vol.totalL);
+    this.totalVolumeMl_.set(vol.totalL * 1000);
+    this.unconvertibleForWeight_.set(this.recipeCostService_.getUnconvertibleNamesForWeight(rows));
+    this.unconvertibleForVolume_.set(vol.unconvertibleNames);
   }
 
   ngOnInit(): void {

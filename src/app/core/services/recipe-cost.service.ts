@@ -22,11 +22,15 @@ const UNIT_ALIASES: Record<string, string> = {
 /** Units that have a direct conversion to grams in the registry (mass units). */
 const MASS_UNITS = new Set(['gram', 'gr', 'grams', 'g', 'kg']);
 
+/** Units that can be used for weight or volume total (registry fallback). */
+const VOLUME_OR_WEIGHT_KEYS = new Set(['gram', 'gr', 'grams', 'g', 'kg', 'liter', 'l', 'ml']);
+
 export type IngredientWeightRow = {
   amount_net?: number;
   unit?: string;
   referenceId?: string;
   item_type?: string;
+  name_hebrew?: string;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -124,8 +128,9 @@ export class RecipeCostService {
         if (opt?.conversion_rate_ && product.base_unit_) {
           const baseKey = (UNIT_ALIASES[product.base_unit_] ?? product.base_unit_).toLowerCase();
           if (baseKey === 'gram' || baseKey === 'kg' || MASS_UNITS.has(baseKey)) {
-            const gramsPerUnit = opt.conversion_rate_ * (baseKey === 'kg' ? 1000 : 1);
-            return net * gramsPerUnit;
+            const amountInBaseUnits = net / (opt.conversion_rate_ || 1);
+            const gramsPerBaseUnit = baseKey === 'kg' ? 1000 : 1;
+            return amountInBaseUnits * gramsPerBaseUnit;
           }
         }
       }
@@ -153,7 +158,93 @@ export class RecipeCostService {
       }
     }
 
+    if (VOLUME_OR_WEIGHT_KEYS.has(key) || VOLUME_OR_WEIGHT_KEYS.has(unit)) {
+      const factor = this.unitRegistry_.getConversion(key) || this.unitRegistry_.getConversion(unit);
+      if (factor && factor > 0) return net * factor;
+    }
+
     return 0;
+  }
+
+  /**
+   * Returns net weight in grams for the row divided by yield (bruto weight in g).
+   */
+  getRowBrutoWeightG(row: IngredientWeightRow, depth = 0): number {
+    const netG = this.getRowWeightContributionG(row, depth);
+    if (netG <= 0) return 0;
+    const yieldFactor = this.getYieldFactorForRow(row);
+    return netG / yieldFactor;
+  }
+
+  private getYieldFactorForRow(row: IngredientWeightRow): number {
+    if (row.referenceId && row.item_type === 'product') {
+      const product = this.kitchenState_.products_().find(p => p._id === row.referenceId) as Product | undefined;
+      return product?.yield_factor_ ?? 1;
+    }
+    if (row.referenceId && row.item_type === 'recipe') {
+      return 1;
+    }
+    return 1;
+  }
+
+  /**
+   * Total bruto (gross) weight in grams from ingredient rows.
+   */
+  computeTotalBrutoWeightG(rows: IngredientWeightRow[], depth = 0): number {
+    if (depth >= MAX_RECURSION_DEPTH) return 0;
+    return rows.reduce((acc, row) => acc + this.getRowBrutoWeightG(row, depth), 0);
+  }
+
+  /**
+   * Returns ingredient names that could not be converted to weight (grams).
+   */
+  getUnconvertibleNamesForWeight(rows: IngredientWeightRow[], depth = 0): string[] {
+    if (depth >= MAX_RECURSION_DEPTH) return [];
+    const names: string[] = [];
+    for (const row of rows) {
+      const contrib = this.getRowWeightContributionG(row, depth);
+      if (contrib <= 0 && (row.amount_net ?? 0) > 0) {
+        const name = row.name_hebrew?.trim();
+        if (name && !names.includes(name)) names.push(name);
+      }
+    }
+    return names;
+  }
+
+  /**
+   * Total volume in liters and list of ingredient names that could not be converted to volume.
+   * Uses 1 g = 1 ml fallback when product has no volume option.
+   */
+  computeTotalVolumeL(rows: IngredientWeightRow[], depth = 0): { totalL: number; unconvertibleNames: string[] } {
+    if (depth >= MAX_RECURSION_DEPTH) return { totalL: 0, unconvertibleNames: [] };
+    let totalMl = 0;
+    const unconvertibleNames: string[] = [];
+    const unit = (v: string) => (UNIT_ALIASES[v] ?? v).toLowerCase();
+
+    for (const row of rows) {
+      const net = row.amount_net ?? 0;
+      if (net <= 0) continue;
+      const rowUnit = (row.unit ?? '').trim().toLowerCase();
+      const key = unit(rowUnit);
+
+      const volFactor = this.unitRegistry_.getConversion(key) || 0;
+      if (key === 'liter' || key === 'l') {
+        totalMl += net * (volFactor || 1000);
+        continue;
+      }
+      if (key === 'ml') {
+        totalMl += net * (volFactor || 1);
+        continue;
+      }
+      const netG = this.getRowWeightContributionG(row, depth);
+      if (netG > 0) {
+        totalMl += netG;
+        continue;
+      }
+      const name = row.name_hebrew?.trim();
+      if (name && !unconvertibleNames.includes(name)) unconvertibleNames.push(name);
+    }
+    return { totalL: totalMl / 1000, unconvertibleNames };
   }
 
   private computeIngredientCost(ing: Ingredient, depth: number): number {

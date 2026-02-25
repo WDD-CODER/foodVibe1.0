@@ -324,6 +324,53 @@
     height: 1px;
     background: rgba(255, 255, 255, 0.2);
   }
+
+  .metric-group-weight-volume {
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+  }
+
+  .metrics-notice-wrap {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+  }
+
+  .metrics-notice-icon {
+    color: #fecaca;
+    flex-shrink: 0;
+  }
+
+  .metrics-notice-floating {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 4px;
+    padding: 0.5rem 0.75rem;
+    background: #fff;
+    color: #1e293b;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+    min-width: 120px;
+    max-width: 200px;
+    max-height: 180px;
+    overflow-y: auto;
+    font-size: 0.8rem;
+  }
+
+  .metrics-notice-item {
+    padding: 0.2rem 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 @media (max-width: 650px) {

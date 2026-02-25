@@ -118,6 +118,15 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Style new fields and modal per application design system.
 - [x] Update inventory list to resolve supplierId_ to supplier name for display.
 
+### Recipe Builder — Scaling, Bruto, Weight/Volume Toggle (`docs/recipe_metrics_scaling_plan.md`)
+
+- [x] RecipeCostService: fix product weight formula (`net / conversion_rate_`), registry fallback for volume→grams, VOLUME_OR_WEIGHT_KEYS.
+- [x] RecipeCostService: computeTotalBrutoWeightG, getUnconvertibleNamesForWeight, computeTotalVolumeL (with unconvertible names); IngredientWeightRow.name_hebrew.
+- [x] recipe-builder.page: totalBrutoWeightG_, totalVolumeL_/totalVolumeMl_, unconvertibleForWeight_/unconvertibleForVolume_; pass to header; ingredientsFormVersion_ so totalCost_/totalWeightG_ recompute when ingredients change.
+- [x] recipe-header: inputs (totalBrutoWeightG, totalVolumeL, totalVolumeMl, unconvertible lists); metricsDisplayMode_ (weight | volume); toggle on metric-group click; bruto or volume display; red notice icon + floating list (names only), hover/click, ClickOutSideDirective.
+- [x] recipe-header styles: metric-group-weight-volume, metrics-notice-wrap, metrics-notice-icon, metrics-notice-floating, metrics-notice-item.
+- [x] Fix cost not updating when adding ingredients (computed depended on no signal; now depends on ingredientsFormVersion_ bumped in valueChanges).
+
 ---
 
 ## Ahead (Pending)
@@ -167,6 +176,7 @@ Update status after each sub-task. Link plan files here when applicable.
 | 009 | Cohesive Add Item Modal | Done |
 | 010 | Product Roadmap: V1 Completion & Beyond | Active |
 | 011 | Unify Dashboard & Command Center | Done |
+| — | Recipe Builder: scaling, bruto, weight/volume toggle, unconvertible notice | Done |
 | 012 | Supplier Management Page | Planned |
 | 013 | Recipe Quick Actions | Planned |
 | 014 | Low Stock Alerts | Planned |

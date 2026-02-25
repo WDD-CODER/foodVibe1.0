@@ -27,6 +27,11 @@ export class RecipeHeaderComponent {
   imageUrl = input<string | null>(null);
   currentCost = input<number>(0);
   totalWeightG = input<number>(0);
+  totalBrutoWeightG = input<number>(0);
+  totalVolumeL = input<number>(0);
+  totalVolumeMl = input<number>(0);
+  unconvertibleForWeight = input<string[]>([]);
+  unconvertibleForVolume = input<string[]>([]);
   resetTrigger = input<number>(0);
 
   // OUTPUTS
@@ -214,6 +219,33 @@ export class RecipeHeaderComponent {
   setActiveUnit(unit: string) {
     this.activeUnit.set(this.activeUnit() === unit ? null : unit);
   }
+
+  /** Weight vs volume display in metrics-square. */
+  metricsDisplayMode_ = signal<'weight' | 'volume'>('weight');
+  /** Whether the unconvertible-names floating list is open (mobile click). */
+  metricsNoticeOpen_ = signal(false);
+
+  toggleMetricsDisplayMode(): void {
+    this.metricsDisplayMode_.update(m => m === 'weight' ? 'volume' : 'weight');
+    this.metricsNoticeOpen_.set(false);
+  }
+
+  toggleMetricsNotice(): void {
+    this.metricsNoticeOpen_.update(v => !v);
+  }
+
+  closeMetricsNotice(): void {
+    this.metricsNoticeOpen_.set(false);
+  }
+
+  /** Unconvertible names for the current scale (weight or volume). */
+  protected unconvertibleNamesForCurrentMode_ = computed(() => {
+    return this.metricsDisplayMode_() === 'weight'
+      ? this.unconvertibleForWeight()
+      : this.unconvertibleForVolume();
+  });
+
+  protected showMetricsNoticeIcon_ = computed(() => this.unconvertibleNamesForCurrentMode_().length > 0);
 
   /** Whether the primary chip unit dropdown is open. */
   activePrimaryEdit_ = signal<boolean>(false);

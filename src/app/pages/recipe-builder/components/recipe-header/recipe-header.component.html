@@ -111,9 +111,33 @@
             <span class="value">₪{{ currentCost() | number:'1.2-2' }}</span>
         </div>
         <div class="divider"></div>
-        <div class="metric-group">
-            <span class="label">{{ 'weight' | translatePipe }}</span>
-            <span class="value">{{ totalWeightG() }}g</span>
+        <div class="metric-group metric-group-weight-volume" (click)="toggleMetricsDisplayMode()"
+            (clickOutside)="closeMetricsNotice()">
+            <span class="label">{{ metricsDisplayMode_() === 'weight' ? ('weight' | translatePipe) : ('volume' | translatePipe) }}</span>
+            <span class="value">
+                @if (metricsDisplayMode_() === 'weight') {
+                    {{ totalBrutoWeightG() | number:'1.0-0' }}g
+                } @else {
+                    @if (totalVolumeL() >= 1) {
+                        {{ totalVolumeL() | number:'1.2-2' }} L
+                    } @else {
+                        {{ totalVolumeMl() | number:'1.0-0' }} ml
+                    }
+                }
+            </span>
+            @if (showMetricsNoticeIcon_()) {
+                <span class="metrics-notice-wrap" (click)="$event.stopPropagation(); toggleMetricsNotice()"
+                    (mouseenter)="metricsNoticeOpen_.set(true)" (mouseleave)="metricsNoticeOpen_.set(false)">
+                    <lucide-icon name="alert-circle" class="metrics-notice-icon" [size]="16" [title]="'items_not_convertible' | translatePipe"></lucide-icon>
+                    @if (metricsNoticeOpen_()) {
+                        <div class="metrics-notice-floating" (click)="$event.stopPropagation()">
+                            @for (name of unconvertibleNamesForCurrentMode_(); track name) {
+                                <div class="metrics-notice-item">{{ name }}</div>
+                            }
+                        </div>
+                    }
+                </span>
+            }
         </div>
     </div>
 </div>

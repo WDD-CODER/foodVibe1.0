@@ -3,7 +3,10 @@
 
     <section class="builder-section">
       <app-recipe-header [form]="recipeForm_" [currentCost]="totalCost_()"
-        [totalWeightG]="totalWeightG_()" [resetTrigger]="resetTrigger_()" (openUnitCreator)="onOpenUnitCreator()"></app-recipe-header>
+        [totalWeightG]="totalWeightG_()" [totalBrutoWeightG]="totalBrutoWeightG_()"
+        [totalVolumeL]="totalVolumeL_()" [totalVolumeMl]="totalVolumeMl_()"
+        [unconvertibleForWeight]="unconvertibleForWeight_()" [unconvertibleForVolume]="unconvertibleForVolume_()"
+        [resetTrigger]="resetTrigger_()" (openUnitCreator)="onOpenUnitCreator()"></app-recipe-header>
     </section>
 
     <section class="builder-section">
