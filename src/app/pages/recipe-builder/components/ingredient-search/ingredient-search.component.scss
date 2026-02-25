@@ -74,6 +74,10 @@
   &:hover {
     background-color: #f8fafc;
   }
+
+  &.highlighted {
+    background-color: #e0f2fe;
+  }
 }
 
 .item-name {

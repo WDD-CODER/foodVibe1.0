@@ -14,7 +14,9 @@
 
       <div class="col-name">
         @if (!group.get('referenceId')?.value) {
-        <app-ingredient-search (itemSelected)="onItemSelected($event, group)"></app-ingredient-search>
+        <app-ingredient-search [rowIndex]="$index" [focusTrigger]="focusSearchAtRow"
+          (itemSelected)="onItemSelected($event, group)" (focusDone)="focusSearchDone.emit()"
+          (addNewRowRequested)="addIngredient.emit()"></app-ingredient-search>
         } @else {
         <div class="selected-item-display">
           <span class="item-text">{{ group.get('name_hebrew')?.value }}</span>
@@ -28,13 +30,15 @@
       <div class="col-quantity">
         @if (group.get('referenceId')?.value) {
         <div class="quantity-controls">
-          <button type="button" class="qty-btn minus" [disabled]="(group.get('amount_net')?.value ?? 0) <= 0"
+          <button type="button" class="qty-btn minus" tabindex="-1"
+            [disabled]="(group.get('amount_net')?.value ?? 0) <= 0"
             (click)="decrementAmount(group, $index)">
             <lucide-icon name="minus" [size]="16"></lucide-icon>
           </button>
           <input type="number" SelectOnFocus formControlName="amount_net" (input)="updateLineCalculations($index)"
+            (keydown)="onQuantityKeydown($event, $index)" focusByRow [rowIndex]="$index" kind="qty"
             class="grid-input qty-input" placeholder="0" />
-          <button type="button" class="qty-btn plus" (click)="incrementAmount(group, $index)">
+          <button type="button" class="qty-btn plus" tabindex="-1" (click)="incrementAmount(group, $index)">
             <lucide-icon name="plus" [size]="16"></lucide-icon>
           </button>
         </div>
@@ -45,7 +49,8 @@
 
       <div class="col-unit">
         @if (group.get('referenceId')?.value) {
-        <select formControlName="unit" class="grid-select" (change)="updateLineCalculations($index)">
+        <select formControlName="unit" class="grid-select" (change)="updateLineCalculations($index)"
+          (keydown)="onUnitKeydown($event, $index)" focusByRow [rowIndex]="$index" kind="unit">
           @for (unit of getAvailableUnits(group); track unit) {
           <option [value]="unit">{{ unit | translatePipe }}</option>
           }

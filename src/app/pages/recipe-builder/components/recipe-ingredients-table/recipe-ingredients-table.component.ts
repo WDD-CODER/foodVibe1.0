@@ -1,4 +1,4 @@
-import { Component, input, output, inject } from '@angular/core';
+import { Component, input, output, inject, ViewChildren, QueryList, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormArray, FormGroup, FormBuilder } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -8,6 +8,7 @@ import type { IngredientWeightRow } from '@services/recipe-cost.service';
 import { IngredientSearchComponent } from '../ingredient-search/ingredient-search.component';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
+import { FocusByRowDirective } from '@directives/focus-by-row.directive';
 
 @Component({
   selector: 'app-recipe-ingredients-table',
@@ -18,7 +19,8 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
     LucideAngularModule,
     IngredientSearchComponent,
     TranslatePipe,
-    SelectOnFocusDirective
+    SelectOnFocusDirective,
+    FocusByRowDirective
   ],
   templateUrl: './recipe-ingredients-table.component.html',
   styleUrl: './recipe-ingredients-table.component.scss'
@@ -29,11 +31,15 @@ export class RecipeIngredientsTableComponent {
   private readonly recipeCostService = inject(RecipeCostService);
   private fb = inject(FormBuilder);
 
+  @ViewChildren(FocusByRowDirective) private focusByRowRefs!: QueryList<FocusByRowDirective>;
+
   //INPUT OUTPUT
   ingredientsFormArray = input.required<FormArray>();
   portions = input<number>(1);
+  @Input() focusSearchAtRow: number | null = null;
   removeIngredient = output<number>();
   addIngredient = output<void>();
+  focusSearchDone = output<void>();
 
   // GETTERS
 
@@ -95,7 +101,34 @@ export class RecipeIngredientsTableComponent {
       this.updateLineCalculations(index);
     }
 
-    this.addIngredient.emit();
+    // Focus quantity so user can type immediately (no new row yet; Enter in qty/unit adds row).
+    setTimeout(() => this.focusQuantityAtRow(index), 0);
+  }
+
+  focusQuantityAtRow(rowIndex: number): void {
+    const refs = this.focusByRowRefs?.toArray() ?? [];
+    const ref = refs.find((r) => r.rowIndex() === rowIndex && r.kind() === 'qty');
+    ref?.focus();
+  }
+
+  focusUnitAtRow(rowIndex: number): void {
+    const refs = this.focusByRowRefs?.toArray() ?? [];
+    const ref = refs.find((r) => r.rowIndex() === rowIndex && r.kind() === 'unit');
+    ref?.focus();
+  }
+
+  onQuantityKeydown(e: KeyboardEvent, rowIndex: number): void {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      this.addIngredient.emit();
+    }
+  }
+
+  onUnitKeydown(e: KeyboardEvent, rowIndex: number): void {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      this.addIngredient.emit();
+    }
   }
 
   clearIngredient(group: FormGroup): void {

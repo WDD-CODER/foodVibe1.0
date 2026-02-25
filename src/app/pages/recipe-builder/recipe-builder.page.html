@@ -14,8 +14,9 @@
         <h2 class="section-title">{{ 'ingredients_index' | translatePipe }}</h2>
 
         <app-recipe-ingredients-table [ingredientsFormArray]="ingredientsArray"
-          [portions]="portions_() ?? 1" (removeIngredient)="removeIngredient($event)"
-          (addIngredient)="addNewIngredientRow()">
+          [portions]="portions_() ?? 1" [focusSearchAtRow]="focusIngredientSearchAtRow_()"
+          (removeIngredient)="removeIngredient($event)" (addIngredient)="addNewIngredientRow()"
+          (focusSearchDone)="onIngredientSearchFocusDone()">
         </app-recipe-ingredients-table>
 
         <button type="button" class="add-row-btn" (click)="addNewIngredientRow();$event.stopPropagation()">

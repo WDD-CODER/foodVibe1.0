@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit, DestroyRef } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, DestroyRef, afterNextRender } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith, map } from 'rxjs';
@@ -49,6 +49,9 @@ export class RecipeBuilderPage implements OnInit {
 
   /** Bumped when ingredients change so cost/weight computeds re-run (form is not a signal). */
   private ingredientsFormVersion_ = signal(0);
+
+  /** When set, the ingredients table will focus the search input at this row index; cleared after focus. */
+  protected focusIngredientSearchAtRow_ = signal<number | null>(null);
 
   //COMPUTED
   protected totalCost_ = computed(() => {
@@ -220,6 +223,8 @@ export class RecipeBuilderPage implements OnInit {
     }
     if (this.ingredientsArray.length === 0) {
       this.addNewIngredientRow();
+      // Focus the first row's search once the view is ready so user can type immediately
+      afterNextRender(() => this.focusIngredientSearchAtRow_.set(0));
     }
     if (this.workflowArray.length === 0) {
       const isDish = this.recipeForm_.get('recipe_type')?.value === 'dish';
@@ -442,6 +447,11 @@ export class RecipeBuilderPage implements OnInit {
     this.ingredientsArray.push(newGroup);
     this.ingredientsArray.updateValueAndValidity();
     this.recipeForm_.get('ingredients')?.markAsDirty();
+    this.focusIngredientSearchAtRow_.set(this.ingredientsArray.length - 1);
+  }
+
+  protected onIngredientSearchFocusDone(): void {
+    this.focusIngredientSearchAtRow_.set(null);
   }
 
   saveRecipe(): void {
