@@ -2,17 +2,24 @@
   <div class="input-wrapper">
     <lucide-icon name="search" size="18"></lucide-icon>
     <input 
+      #searchInput
       type="text" 
       [value]="searchQuery_()"
-      (input)="searchQuery_.set($any($event.target).value); showResults_.set(true)"
+      (input)="searchQuery_.set($any($event.target).value); showResults_.set(true); highlightedIndex_.set(-1)"
       (focus)="showResults_.set(true)"
+      (keydown)="onSearchKeydown($event)"
       placeholder="חפש מוצר או מתכון" />
   </div>
 
   @if (showResults_() && filteredResults_().length > 0) {
-    <ul class="results-dropdown">
-      @for (item of filteredResults_(); track item._id) {
-        <li (click)="selectItem(item)" class="result-item">
+    <ul class="results-dropdown" role="listbox">
+      @for (item of filteredResults_(); track item._id; let i = $index) {
+        <li
+          role="option"
+          [attr.aria-selected]="highlightedIndex_() === i"
+          [class.highlighted]="highlightedIndex_() === i"
+          (click)="selectItem(item)"
+          class="result-item">
           <span class="item-name">{{ item.name_hebrew }}</span>
           <span class="type-pill" 
                 [class.recipe]="item.item_type_ === 'recipe'"

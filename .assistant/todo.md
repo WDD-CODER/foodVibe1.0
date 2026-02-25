@@ -129,6 +129,15 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Style new fields and modal per application design system.
 - [x] Update inventory list to resolve supplierId_ to supplier name for display.
 
+### Recipe Builder — Ingredients keyboard-first UX (ad-hoc)
+
+- [x] Open recipe-builder with one empty row and auto-focus its search (afterNextRender).
+- [x] Add-row button: focus moves to new row’s search so user can type immediately.
+- [x] Ingredient search: arrow keys + Enter in dropdown; Enter with no selection adds new row.
+- [x] After selecting item: focus moves to quantity (no new row); Tab goes to unit select (not +/-).
+- [x] Enter in quantity or unit: add new row and focus new row’s search (keyboard-only flow).
+- [x] FocusByRowDirective + wiring for focus-by-row (qty/unit).
+
 ### Recipe Builder — Scaling, Bruto, Weight/Volume Toggle (`docs/recipe_metrics_scaling_plan.md`)
 
 - [x] RecipeCostService: fix product weight formula (`net / conversion_rate_`), registry fallback for volume→grams, VOLUME_OR_WEIGHT_KEYS.
