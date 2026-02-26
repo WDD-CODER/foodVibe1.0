@@ -611,24 +611,6 @@
       align-items: center;
       min-height: 1.5rem;
 
-      // .category-tag {
-      //   display: inline-flex;
-      //   align-items: center;
-      //   gap: 0.35rem;
-      //   padding: 0.2rem 0.6rem;
-      //   background: #e0f2fe;
-      //   color: #0369a1;
-      //   border-radius: 0.25rem;
-      //   font-size: 0.85rem;
-      //   line-height: 1;
-      //   cursor: pointer;
-
-      //   .icon {
-      //     width: 14px;
-      //     height: 14px;
-      //   }
-      // }
-
       .category-placeholder {
         color: #94a3b8;
         font-size: 0.9rem;
@@ -639,35 +621,6 @@
     &.no-chips .selected-chips {
       min-height: auto;
     }
-
-    // .category-dropdown {
-    //   position: absolute;
-    //   top: 100%;
-    //   left: 0;
-    //   right: 0;
-    //   z-index: 50;
-    //   background: white;
-    //   border: 1px solid #e2e8f0;
-    //   border-radius: 0.5rem;
-    //   margin-top: 0.25rem;
-    //   max-height: 200px;
-    //   overflow-y: auto;
-    //   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    // }
-
-    // .category-dropdown .dropdown-item {
-    //   padding: 0.6rem 1rem;
-    //   cursor: pointer;
-
-    //   &:hover {
-    //     background: #f8fafc;
-    //   }
-
-    //   &.dropdown-item-add {
-    //     font-weight: 600;
-    //     color: #059669;
-    //   }
-    // }
   }
 
   .supplier-input-box {
@@ -690,24 +643,6 @@
       align-items: center;
       min-height: 1.5rem;
 
-      // .supplier-tag {
-      //   display: inline-flex;
-      //   align-items: center;
-      //   gap: 0.35rem;
-      //   padding: 0.2rem 0.6rem;
-      //   background: #f0fdf4;
-      //   color: #15803d;
-      //   border-radius: 0.25rem;
-      //   font-size: 0.85rem;
-      //   line-height: 1;
-      //   cursor: pointer;
-
-      //   .icon {
-      //     width: 14px;
-      //     height: 14px;
-      //   }
-      // }
-
       .supplier-placeholder {
         color: #94a3b8;
         font-size: 0.9rem;
@@ -719,34 +654,6 @@
       min-height: auto;
     }
 
-    // .supplier-dropdown {
-    //   position: absolute;
-    //   top: 100%;
-    //   left: 0;
-    //   right: 0;
-    //   z-index: 50;
-    //   background: white;
-    //   border: 1px solid #e2e8f0;
-    //   border-radius: 0.5rem;
-    //   margin-top: 0.25rem;
-    //   max-height: 200px;
-    //   overflow-y: auto;
-    //   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    // }
-
-    // .supplier-dropdown .dropdown-item {
-    //   padding: 0.6rem 1rem;
-    //   cursor: pointer;
-
-    //   &:hover {
-    //     background: #f8fafc;
-    //   }
-
-    //   &.dropdown-item-add {
-    //     font-weight: 600;
-    //     color: #059669;
-    //   }
-    // }
   }
 
   select[multiple] {
