@@ -273,13 +273,18 @@ export class KitchenStateService {
     const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.mise_categories_?.length);
     const isUpdate = !!(recipe._id && recipe._id.trim() !== '');
     const previous = isUpdate ? this.recipes_().find(r => r._id === recipe._id) : null;
+    const previousIsDish = previous
+      ? (previous.recipe_type_ === 'dish' || !!(previous.prep_items_?.length || previous.mise_categories_?.length))
+      : false;
+    const typeChanged = isUpdate && !!previous && previousIsDish !== isDish;
     const entityType = isDish ? 'dish' as const : 'recipe' as const;
+    const previousEntityType = previousIsDish ? 'dish' as const : 'recipe' as const;
 
     const recordVersion$ =
       isUpdate && previous
         ? from(
             this.versionHistoryService.addVersion({
-              entityType,
+              entityType: typeChanged ? previousEntityType : entityType,
               entityId: previous._id,
               entityName: previous.name_hebrew,
               snapshot: previous,
@@ -288,36 +293,56 @@ export class KitchenStateService {
           )
         : from(Promise.resolve());
 
-    const operation$ = isDish
-      ? (isUpdate
-          ? from(this.dishDataService.updateDish(recipe))
-          : from(this.dishDataService.addDish(recipe as Omit<Recipe, '_id'>)))
-      : (isUpdate
-          ? from(this.recipeDataService.updateRecipe(recipe))
-          : from(this.recipeDataService.addRecipe(recipe as Omit<Recipe, '_id'>)));
+    const operation$ = typeChanged
+      ? recordVersion$.pipe(
+          switchMap(() => this.deleteRecipe(previous)),
+          switchMap(() => {
+            const { _id: _omit, ...payload } = recipe as Recipe & { _id?: string };
+            return isDish
+              ? from(this.dishDataService.addDish(payload as Omit<Recipe, '_id'>))
+              : from(this.recipeDataService.addRecipe(payload as Omit<Recipe, '_id'>));
+          })
+        )
+      : recordVersion$.pipe(
+          switchMap(() =>
+            isDish
+              ? (isUpdate
+                  ? from(this.dishDataService.updateDish(recipe))
+                  : from(this.dishDataService.addDish(recipe as Omit<Recipe, '_id'>)))
+              : (isUpdate
+                  ? from(this.recipeDataService.updateRecipe(recipe))
+                  : from(this.recipeDataService.addRecipe(recipe as Omit<Recipe, '_id'>)))
+          )
+        );
 
-    return recordVersion$.pipe(
-      switchMap(() => operation$),
+    const fallbackErrorMsg = isDish
+      ? (isUpdate ? 'שגיאה בעדכון המנה' : 'שגיאה בשמירת המנה')
+      : (isUpdate ? 'שגיאה בעדכון המתכון' : 'שגיאה בשמירת המתכון');
+
+    return operation$.pipe(
       tap((saved) => {
-        const msg = isDish
-          ? (isUpdate ? 'המנה עודכנה בהצלחה' : 'המנה נשמרה בהצלחה')
-          : (isUpdate ? 'המתכון עודכן בהצלחה' : 'המתכון נשמר בהצלחה');
+        const msg = typeChanged
+          ? 'המתכון/המנה שונה לסוג החדש ונשמר בהצלחה'
+          : isDish
+            ? (isUpdate ? 'המנה עודכנה בהצלחה' : 'המנה נשמרה בהצלחה')
+            : (isUpdate ? 'המתכון עודכן בהצלחה' : 'המתכון נשמר בהצלחה');
         this.userMsgService.onSetSuccessMsg(msg);
         const changes = isUpdate && previous ? this.buildRecipeChanges(previous, saved) : [];
         this.activityLogService.recordActivity({
-          action: isUpdate ? 'updated' : 'created',
+          action: typeChanged ? 'created' : (isUpdate ? 'updated' : 'created'),
           entityType: isDish ? 'dish' : 'recipe',
           entityId: saved._id,
           entityName: saved.name_hebrew,
           changes,
         });
       }),
-      catchError(() => {
-        const errorMsg = isDish
-          ? (isUpdate ? 'שגיאה בעדכון המנה' : 'שגיאה בשמירת המנה')
-          : (isUpdate ? 'שגיאה בעדכון המתכון' : 'שגיאה בשמירת המתכון');
-        this.userMsgService.onSetErrorMsg(errorMsg);
-        return throwError(() => new Error(errorMsg));
+      catchError((err: unknown) => {
+        const msg =
+          (err && typeof err === 'object' && (err as { error?: { message?: string } }).error?.message) ||
+          (err instanceof Error ? err.message : null) ||
+          fallbackErrorMsg;
+        this.userMsgService.onSetErrorMsg(String(msg));
+        return throwError(() => (err instanceof Error ? err : new Error(String(msg))));
       })
     );
   }
