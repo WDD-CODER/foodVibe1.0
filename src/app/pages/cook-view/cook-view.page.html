@@ -1,0 +1,160 @@
+<div class="cook-view-container" dir="rtl">
+  @if (recipe_(); as recipe) {
+    <div class="cook-view-shell" [class.edit-mode]="editMode_()">
+      @if (editMode_()) {
+        <div class="edit-mode-banner">{{ 'edit_mode' | translatePipe }}</div>
+      }
+      <header class="cook-view-header">
+        <div class="header-top">
+          <h1 class="recipe-name">{{ recipe.name_hebrew }}</h1>
+          @if (editMode_()) {
+            <div class="edit-actions">
+              <button type="button" class="edit-btn save-btn" (click)="saveEdits()" [attr.aria-label]="'save_changes' | translatePipe">
+                <lucide-icon name="save" [size]="18"></lucide-icon>
+                {{ 'save_changes' | translatePipe }}
+              </button>
+              <button type="button" class="edit-btn undo-btn" (click)="undoEdits()" [attr.aria-label]="'undo_changes' | translatePipe">
+                <lucide-icon name="rotate-ccw" [size]="18"></lucide-icon>
+                {{ 'undo_changes' | translatePipe }}
+              </button>
+            </div>
+          } @else {
+            <button type="button" class="edit-btn" (click)="enterEditMode()" [attr.aria-label]="'edit' | translatePipe">
+              <lucide-icon name="pencil" [size]="18"></lucide-icon>
+              {{ 'edit' | translatePipe }}
+            </button>
+          }
+        </div>
+        <div class="quantity-control-wrap">
+          <span class="quantity-label">{{ 'make_quantity' | translatePipe }}</span>
+          <div class="quantity-controls">
+            <button type="button" class="qty-btn minus" (click)="decrementQuantity()" [attr.aria-label]="'decrease' | translatePipe"
+            [disabled]="targetQuantity_() <= (isDish_() ? 1 : 0.01)">
+              <lucide-icon name="minus" [size]="18"></lucide-icon>
+            </button>
+            <input type="number" class="quantity-input" [value]="targetQuantity_()"
+              (input)="setQuantity($any($event.target).valueAsNumber)"
+              SelectOnFocus
+              [min]="isDish_() ? 1 : 0.01" [step]="isDish_() ? 1 : 0.1" />
+            <button type="button" class="qty-btn plus" (click)="incrementQuantity()" [attr.aria-label]="'increase' | translatePipe">
+              <lucide-icon name="plus" [size]="18"></lucide-icon>
+            </button>
+          </div>
+          <span class="unit-label">{{ (recipe.yield_unit_ || 'unit') | translatePipe }}</span>
+        </div>
+        @if (scaledCost_() > 0) {
+          <div class="scaled-cost-badge">
+            <lucide-icon name="scale" [size]="16"></lucide-icon>
+            <span>{{ 'cost' | translatePipe }}: ₪{{ scaledCost_() | number:'1.2-2' }}</span>
+          </div>
+        }
+      </header>
+
+      <section class="cook-view-section ingredients-section">
+        <h2 class="section-title">
+          <lucide-icon name="flask-conical" [size]="20"></lucide-icon>
+          {{ 'ingredients_index' | translatePipe }}
+        </h2>
+        <div class="ingredients-table">
+          <div class="ingredients-table-header">
+            <div class="col-name">{{ 'ingredient' | translatePipe }}</div>
+            <div class="col-amount">{{ 'quantity' | translatePipe }}</div>
+            <div class="col-unit">{{ 'unit' | translatePipe }}</div>
+          </div>
+          @for (row of scaledIngredients_(); track row.referenceId + row.unit + row.amount; let i = $index) {
+            <div class="ingredients-table-row" [class.field-changed]="editMode_() && ingredientChanged(i)">
+              <div class="col-name">{{ row.name }}</div>
+              @if (editMode_()) {
+                <div class="col-amount edit-amount">
+                  <button type="button" class="qty-btn minus small" (click)="setIngredientAmount(i, getEditAmountStep(row.amount, -1))" [attr.aria-label]="'decrease' | translatePipe">
+                    <lucide-icon name="minus" [size]="14"></lucide-icon>
+                  </button>
+                  <input type="number" class="amount-input" [value]="row.amount"
+                    (input)="setIngredientAmount(i, $any($event.target).valueAsNumber ?? 0)"
+                    [min]="0" [step]="isDish_() ? 1 : 0.1" />
+                  <button type="button" class="qty-btn plus small" (click)="setIngredientAmount(i, getEditAmountStep(row.amount, 1))" [attr.aria-label]="'increase' | translatePipe">
+                    <lucide-icon name="plus" [size]="14"></lucide-icon>
+                  </button>
+                </div>
+                <div class="col-unit">
+                  <select class="unit-select" [value]="row.unit" (change)="setIngredientUnit(i, $any($event.target).value)">
+                    @for (u of row.availableUnits; track u) {
+                      <option [value]="u">{{ u | translatePipe }}</option>
+                    }
+                  </select>
+                  <button type="button" class="remove-ingredient-btn" (click)="removeIngredient(i)" [attr.aria-label]="'remove' | translatePipe">
+                    <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                  </button>
+                </div>
+              } @else {
+                <div class="col-amount">{{ formatAmount(getDisplayAmount(i, row)) }}</div>
+                <div class="col-unit">
+                  @if (row.availableUnits.length > 1) {
+                    <select class="unit-select" [value]="getDisplayUnit(i, row)" (change)="setUnitOverride(i, $any($event.target).value)">
+                      @for (u of row.availableUnits; track u) {
+                        <option [value]="u">{{ u | translatePipe }}</option>
+                      }
+                    </select>
+                  } @else {
+                    <span>{{ getDisplayUnit(i, row) | translatePipe }}</span>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </section>
+
+      @if (isDish_()) {
+        <section class="cook-view-section prep-section">
+          <h2 class="section-title">
+            <lucide-icon name="utensils" [size]="20"></lucide-icon>
+            {{ 'prep_list_mise_en_place' | translatePipe }}
+          </h2>
+          @if (scaledPrep_().length > 0) {
+            <div class="prep-list">
+              @for (row of scaledPrep_(); track row.name + row.unit + row.amount) {
+                <div class="prep-row">
+                  <span class="prep-name">{{ row.name }}</span>
+                  <span class="prep-amount">{{ formatAmount(row.amount) }} {{ row.unit | translatePipe }}</span>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="empty-state-text">{{ 'no_preparations_defined' | translatePipe }}</p>
+          }
+        </section>
+      }
+
+      @if (!isDish_()) {
+        <section class="cook-view-section steps-section">
+          <h2 class="section-title">
+            <lucide-icon name="timer" [size]="20"></lucide-icon>
+            {{ 'prep_workflow' | translatePipe }}
+          </h2>
+          @if (recipe.steps_ && recipe.steps_.length) {
+            <ol class="steps-list">
+              @for (step of recipe.steps_; track step.order_) {
+                <li class="step-item">
+                  <span class="step-order">{{ step.order_ }}</span>
+                  <span class="step-instruction">{{ step.instruction_ }}</span>
+                  @if (step.labor_time_minutes_ > 0) {
+                    <span class="step-time">{{ step.labor_time_minutes_ }} {{ 'min' | translatePipe }}</span>
+                  }
+                </li>
+              }
+            </ol>
+          } @else {
+            <p class="empty-state-text">{{ 'no_steps_defined' | translatePipe }}</p>
+          }
+        </section>
+      }
+    </div>
+  } @else {
+    <div class="cook-view-empty">
+      <lucide-icon name="utensils" [size]="48"></lucide-icon>
+      <p>{{ 'no_recipe_selected' | translatePipe }}</p>
+      <a routerLink="/recipe-book">{{ 'recipe_book' | translatePipe }}</a>
+    </div>
+  }
+</div>
