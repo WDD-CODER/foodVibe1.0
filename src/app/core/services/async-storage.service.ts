@@ -61,6 +61,18 @@ export class StorageService {
     return txt;
   }
 
+  /** Append an entity (e.g. with existing _id) to a list and save. Use delay 0 to avoid artificial delay. */
+  async appendExisting<T extends EntityId>(entityType: string, entity: T): Promise<void> {
+    const list = await this.query<T>(entityType, 0);
+    list.push(entity);
+    this._save(entityType, list);
+  }
+
+  /** Replace the entire list for an entity type (e.g. trash list after remove). */
+  async replaceAll<T>(entityType: string, entities: T[]): Promise<void> {
+    this._save(entityType, entities);
+  }
+
   private _save<T>(entityType: string, entities: T[]): void {
     localStorage.setItem(entityType, JSON.stringify(entities));
   }

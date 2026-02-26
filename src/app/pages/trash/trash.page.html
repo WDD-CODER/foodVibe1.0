@@ -1,0 +1,161 @@
+<div class="trash-page" dir="rtl">
+  <header class="trash-header">
+    <h1>{{ 'trash' | translatePipe }}</h1>
+    <button type="button" class="btn-refresh" (click)="refresh()" [disabled]="loading()">
+      {{ loading() ? ('pending' | translatePipe) : 'רענן' }}
+    </button>
+  </header>
+
+  @if (loading()) {
+    <p class="trash-loading">{{ 'pending' | translatePipe }}</p>
+  } @else {
+    <div class="trash-sections">
+      <!-- 1. Dishes -->
+      <section class="trash-section">
+        <div class="trash-section-header">
+          <h2>{{ 'trash_dishes' | translatePipe }}</h2>
+          @if (dishes().length > 0) {
+            <div class="trash-section-actions">
+              <button type="button" class="btn-action btn-restore" (click)="onRestoreAllDishes()">
+                <lucide-icon name="rotate-ccw" [size]="16"></lucide-icon>
+                {{ 'trash_recover_all' | translatePipe }}
+              </button>
+              <button type="button" class="btn-action btn-dispose" (click)="onDisposeAllDishes()">
+                <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                {{ 'trash_dispose_all' | translatePipe }}
+              </button>
+            </div>
+          }
+        </div>
+        @if (dishes().length === 0) {
+          <p class="trash-empty">{{ 'trash_empty' | translatePipe }}</p>
+        } @else {
+          <ul class="trash-list">
+            @for (item of dishes(); track item._id) {
+              <li class="trash-item">
+                <span class="trash-item-name">{{ item.name_hebrew }}</span>
+                <span class="trash-item-meta">{{ 'trash_deleted_at' | translatePipe }}: {{ formatDeletedAt(item.deletedAt) }}</span>
+                <div class="trash-item-actions">
+                  <button type="button" class="btn-item btn-history" (click)="openHistory('dish', item._id, item.name_hebrew)">
+                    {{ 'history' | translatePipe }}
+                  </button>
+                  <button type="button" class="btn-item btn-restore" (click)="onRestoreDish(item._id)">
+                    <lucide-icon name="rotate-ccw" [size]="14"></lucide-icon>
+                    {{ 'trash_recover' | translatePipe }}
+                  </button>
+                  <button type="button" class="btn-item btn-dispose" (click)="onDisposeDish(item._id)">
+                    <lucide-icon name="trash-2" [size]="14"></lucide-icon>
+                    {{ 'trash_dispose' | translatePipe }}
+                  </button>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <!-- 2. Recipes -->
+      <section class="trash-section">
+        <div class="trash-section-header">
+          <h2>{{ 'trash_recipes' | translatePipe }}</h2>
+          @if (recipes().length > 0) {
+            <div class="trash-section-actions">
+              <button type="button" class="btn-action btn-restore" (click)="onRestoreAllRecipes()">
+                <lucide-icon name="rotate-ccw" [size]="16"></lucide-icon>
+                {{ 'trash_recover_all' | translatePipe }}
+              </button>
+              <button type="button" class="btn-action btn-dispose" (click)="onDisposeAllRecipes()">
+                <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                {{ 'trash_dispose_all' | translatePipe }}
+              </button>
+            </div>
+          }
+        </div>
+        @if (recipes().length === 0) {
+          <p class="trash-empty">{{ 'trash_empty' | translatePipe }}</p>
+        } @else {
+          <ul class="trash-list">
+            @for (item of recipes(); track item._id) {
+              <li class="trash-item">
+                <span class="trash-item-name">{{ item.name_hebrew }}</span>
+                <span class="trash-item-meta">{{ 'trash_deleted_at' | translatePipe }}: {{ formatDeletedAt(item.deletedAt) }}</span>
+                <div class="trash-item-actions">
+                  <button type="button" class="btn-item btn-history" (click)="openHistory('recipe', item._id, item.name_hebrew)">
+                    {{ 'history' | translatePipe }}
+                  </button>
+                  <button type="button" class="btn-item btn-restore" (click)="onRestoreRecipe(item._id)">
+                    <lucide-icon name="rotate-ccw" [size]="14"></lucide-icon>
+                    {{ 'trash_recover' | translatePipe }}
+                  </button>
+                  <button type="button" class="btn-item btn-dispose" (click)="onDisposeRecipe(item._id)">
+                    <lucide-icon name="trash-2" [size]="14"></lucide-icon>
+                    {{ 'trash_dispose' | translatePipe }}
+                  </button>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <!-- 3. Products (last) -->
+      <section class="trash-section">
+        <div class="trash-section-header">
+          <h2>{{ 'trash_products' | translatePipe }}</h2>
+          @if (products().length > 0) {
+            <div class="trash-section-actions">
+              <button type="button" class="btn-action btn-restore" (click)="onRestoreAllProducts()">
+                <lucide-icon name="rotate-ccw" [size]="16"></lucide-icon>
+                {{ 'trash_recover_all' | translatePipe }}
+              </button>
+              <button type="button" class="btn-action btn-dispose" (click)="onDisposeAllProducts()">
+                <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                {{ 'trash_dispose_all' | translatePipe }}
+              </button>
+            </div>
+          }
+        </div>
+        @if (products().length === 0) {
+          <p class="trash-empty">{{ 'trash_empty' | translatePipe }}</p>
+        } @else {
+          <ul class="trash-list">
+            @for (item of products(); track item._id) {
+              <li class="trash-item">
+                <span class="trash-item-name">{{ item.name_hebrew }}</span>
+                <span class="trash-item-meta">{{ 'trash_deleted_at' | translatePipe }}: {{ formatDeletedAt(item.deletedAt) }}</span>
+                <div class="trash-item-actions">
+                  <button type="button" class="btn-item btn-history" (click)="openHistory('product', item._id, item.name_hebrew)">
+                    {{ 'history' | translatePipe }}
+                  </button>
+                  <button type="button" class="btn-item btn-restore" (click)="onRestoreProduct(item._id)">
+                    <lucide-icon name="rotate-ccw" [size]="14"></lucide-icon>
+                    {{ 'trash_recover' | translatePipe }}
+                  </button>
+                  <button type="button" class="btn-item btn-dispose" (click)="onDisposeProduct(item._id)">
+                    <lucide-icon name="trash-2" [size]="14"></lucide-icon>
+                    {{ 'trash_dispose' | translatePipe }}
+                  </button>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    </div>
+  }
+
+  @if (historyFor_(); as h) {
+    <div class="history-overlay" (click)="closeHistory()">
+      <div class="history-overlay-panel" (click)="$event.stopPropagation()">
+        <app-version-history-panel
+          [entityType]="h.entityType"
+          [entityId]="h.entityId"
+          [entityName]="h.entityName"
+          [recoverBeforeRestore]="getRecoverBeforeRestore(h)"
+          (closed)="closeHistory()"
+          (restored)="closeHistory(); refresh()"
+        />
+      </div>
+    </div>
+  }
+</div>

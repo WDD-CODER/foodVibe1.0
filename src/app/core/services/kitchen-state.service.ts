@@ -10,6 +10,7 @@ import { RecipeDataService } from './recipe-data.service';
 import { DishDataService } from './dish-data.service';
 import { SupplierDataService } from './supplier-data.service';
 import { ActivityLogService, ActivityChange } from './activity-log.service';
+import { VersionHistoryService } from './version-history.service';
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +22,7 @@ export class KitchenStateService {
   private supplierDataService = inject(SupplierDataService);
   private userMsgService = inject(UserMsgService);
   private activityLogService = inject(ActivityLogService);
+  private versionHistoryService = inject(VersionHistoryService);
 
   // CORE SIGNALS
   products_ = computed(() => this.productDataService.allProducts_());
@@ -53,11 +55,22 @@ export class KitchenStateService {
 
     if (isUpdate) {
       const previous = this.products_().find(p => p._id === product._id) ?? null;
+      const changes = previous ? this.buildProductChanges(previous, product) : [];
 
-      return from(this.productDataService.updateProduct(product)).pipe(
+      return from(
+        previous
+          ? this.versionHistoryService.addVersion({
+              entityType: 'product',
+              entityId: previous._id,
+              entityName: previous.name_hebrew,
+              snapshot: previous,
+              changes,
+            })
+          : Promise.resolve()
+      ).pipe(
+        switchMap(() => from(this.productDataService.updateProduct(product))),
         tap(() => {
           this.userMsgService.onSetSuccessMsg('המוצר עודכן בהצלחה');
-          const changes = previous ? this.buildProductChanges(previous, product) : [];
           this.activityLogService.recordActivity({
             action: 'updated',
             entityType: 'product',
@@ -260,6 +273,20 @@ export class KitchenStateService {
     const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.mise_categories_?.length);
     const isUpdate = !!(recipe._id && recipe._id.trim() !== '');
     const previous = isUpdate ? this.recipes_().find(r => r._id === recipe._id) : null;
+    const entityType = isDish ? 'dish' as const : 'recipe' as const;
+
+    const recordVersion$ =
+      isUpdate && previous
+        ? from(
+            this.versionHistoryService.addVersion({
+              entityType,
+              entityId: previous._id,
+              entityName: previous.name_hebrew,
+              snapshot: previous,
+              changes: this.buildRecipeChanges(previous, recipe),
+            })
+          )
+        : from(Promise.resolve());
 
     const operation$ = isDish
       ? (isUpdate
@@ -269,7 +296,8 @@ export class KitchenStateService {
           ? from(this.recipeDataService.updateRecipe(recipe))
           : from(this.recipeDataService.addRecipe(recipe as Omit<Recipe, '_id'>)));
 
-    return operation$.pipe(
+    return recordVersion$.pipe(
+      switchMap(() => operation$),
       tap((saved) => {
         const msg = isDish
           ? (isUpdate ? 'המנה עודכנה בהצלחה' : 'המנה נשמרה בהצלחה')
