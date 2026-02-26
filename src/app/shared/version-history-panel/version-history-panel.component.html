@@ -1,0 +1,30 @@
+<div class="version-history-panel" dir="rtl">
+  <div class="panel-header">
+    <h3>{{ 'history' | translatePipe }}</h3>
+    <button type="button" class="btn-close" (click)="close()" aria-label="סגור">×</button>
+  </div>
+  @if (loading()) {
+    <p class="panel-loading">{{ 'pending' | translatePipe }}</p>
+  } @else if (versions().length === 0) {
+    <p class="panel-empty">{{ 'history_no_versions' | translatePipe }}</p>
+  } @else {
+    <ul class="version-list">
+      @for (entry of versions(); track entry.versionAt) {
+        <li class="version-item">
+          <span class="version-date">{{ 'history_version_at' | translatePipe }}: {{ formatDate(entry.versionAt) }}</span>
+          @if (entry.changes?.length) {
+            <span class="version-summary">{{ entry.changes?.length }} {{ 'activity_updated' | translatePipe }}</span>
+          }
+          <div class="version-actions">
+            <button type="button" class="btn-view" (click)="viewVersion(entry)">
+              {{ 'history_view_version' | translatePipe }}
+            </button>
+            <button type="button" class="btn-restore" (click)="restore(entry)">
+              {{ 'history_restore' | translatePipe }}
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

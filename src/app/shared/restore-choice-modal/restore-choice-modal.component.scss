@@ -1,0 +1,80 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 24px;
+  min-width: 280px;
+  max-width: 90vw;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e2e8f0;
+
+  .modal-message {
+    margin: 0 0 20px 0;
+    font-size: 0.9375rem;
+    color: #1e293b;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .btn-ghost {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #64748b;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+
+    &:hover {
+      background-color: #f8fafc;
+      color: #1e293b;
+    }
+  }
+
+  .btn-add-new {
+    padding: 8px 16px;
+    background-color: #0ea5e9;
+    border: 1px solid #0ea5e9;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #0284c7;
+      border-color: #0284c7;
+    }
+  }
+
+  .btn-replace {
+    padding: 8px 16px;
+    background-color: #d97706;
+    border: 1px solid #d97706;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #b45309;
+      border-color: #b45309;
+    }
+  }
+}

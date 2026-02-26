@@ -1,0 +1,18 @@
+@if (modalService.isOpen()) {
+  <div class="modal-overlay" (click)="modalService.choose(null)">
+    <div class="modal-card" dir="rtl" (click)="$event.stopPropagation()">
+      <p class="modal-message">{{ 'history_restore_choice_title' | translatePipe }}</p>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" (click)="modalService.choose(null)">
+          {{ 'cancel' | translatePipe }}
+        </button>
+        <button type="button" class="btn-add-new" (click)="modalService.choose('add-new')">
+          {{ 'history_restore_add_new' | translatePipe }}
+        </button>
+        <button type="button" class="btn-replace" (click)="modalService.choose('replace')">
+          {{ 'history_restore_replace' | translatePipe }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,109 @@
+.version-history-panel {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+  min-width: 280px;
+  max-width: 400px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  border: 1px solid #e2e8f0;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0 0.25rem;
+
+  &:hover {
+    color: #1e293b;
+  }
+}
+
+.panel-loading,
+.panel-empty {
+  margin: 0;
+  padding: 0.5rem 0;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.version-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.version-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f5f9;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.version-date {
+  font-size: 0.8125rem;
+  color: #475569;
+  flex: 1 1 100%;
+}
+
+.version-summary {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.version-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1 1 100%;
+  margin-top: 0.25rem;
+}
+
+.btn-view {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #0ea5e9;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:hover {
+    background: #bae6fd;
+  }
+}
+
+.btn-restore {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #f59e0b;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:hover {
+    background: #fde68a;
+  }
+}
