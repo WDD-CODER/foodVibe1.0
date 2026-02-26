@@ -47,8 +47,22 @@ export const routes: Routes = [
     loadComponent: () => import('@pages/recipe-book/recipe-book.page').then(m => m.RecipeBookPage),
   },
   {
+    path: 'cook',
+    loadComponent: () => import('./pages/cook-view/cook-view.page').then(m => m.CookViewPage),
+  },
+  {
+    path: 'cook/:id',
+    loadComponent: () => import('./pages/cook-view/cook-view.page').then(m => m.CookViewPage),
+    resolve: { recipe: recipeResolver },
+    canDeactivate: [pendingChangesGuard],
+  },
+  {
     path: 'dashboard',
     loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage),
+  },
+  {
+    path: 'trash',
+    loadComponent: () => import('./pages/trash/trash.page').then(m => m.TrashPage),
   },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 ];

@@ -8,14 +8,27 @@ interface PendingChangesComponent {
   readProductForm_?: AbstractControl;
   recipeForm_?: AbstractControl;
   isSubmitted?: boolean;
+  hasUnsavedEdits?: () => boolean;
 }
 
 export const pendingChangesGuard: CanDeactivateFn<PendingChangesComponent> = async (component) => {
   const userMsgService = inject(UserMsgService);
   const confirmModal = inject(ConfirmModalService);
 
+  if (typeof component?.hasUnsavedEdits === 'function' && component.hasUnsavedEdits()) {
+    const isConfirmed = await confirmModal.open('unsaved_changes_confirm', {
+      saveLabel: 'leave_without_saving'
+    });
+    if (isConfirmed) {
+      userMsgService.onSetErrorMsg('השינויים לא נשמרו - המידע יאבד בעת יציאה');
+      return true;
+    }
+    return false;
+  }
+
   const form = component?.readProductForm_ ?? component?.recipeForm_;
   if (component?.isSubmitted) return true;
+  if (form?.disabled) return true;
 
   if (!form?.dirty) {
     return true;
