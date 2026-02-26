@@ -43,8 +43,9 @@
         <h2 class="section-title">
           {{ (recipeForm_.get('recipe_type')?.value === 'dish' ? 'prep_list_mise_en_place' : 'prep_workflow') | translatePipe }}
         </h2>
-        <app-recipe-workflow [workflowFormArray]="workflowArray" [type]="recipeType_()" [resetTrigger]="resetTrigger_()" (addItem)="addNewStep()"
-          (removeItem)="deleteStep($event)" (sortByCategory)="sortPrepByCategory()">
+        <app-recipe-workflow [workflowFormArray]="workflowArray" [type]="recipeType_()" [resetTrigger]="resetTrigger_()"
+          [focusRowAt]="focusWorkflowRowAt_()" (addItem)="addNewStep()"
+          (removeItem)="deleteStep($event)" (sortByCategory)="sortPrepByCategory()" (focusRowDone)="focusWorkflowRowAt_.set(null)">
         </app-recipe-workflow>
       </div>
     </section>

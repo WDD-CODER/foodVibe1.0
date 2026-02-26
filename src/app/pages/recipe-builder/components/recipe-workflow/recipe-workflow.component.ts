@@ -1,4 +1,4 @@
-import { Component, input, output, inject, signal, computed } from '@angular/core'
+import { Component, input, output, inject, signal, computed, effect, ViewChildren, QueryList, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { ReactiveFormsModule, FormArray, FormGroup, FormBuilder } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
@@ -24,7 +24,7 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
   templateUrl: './recipe-workflow.component.html',
   styleUrl: './recipe-workflow.component.scss'
 })
-export class RecipeWorkflowComponent {
+export class RecipeWorkflowComponent implements OnChanges {
   private fb = inject(FormBuilder)
   private readonly unitRegistry_ = inject(UnitRegistryService)
   private readonly prepRegistry_ = inject(PreparationRegistryService)
@@ -34,11 +34,40 @@ export class RecipeWorkflowComponent {
   type = input.required<'preparation' | 'dish'>()
   resetTrigger = input<number>(0)
 
+  /** When set, focus the instruction textarea (prep) or prep search (dish) at this row index; parent clears after focus. */
+  @Input() focusRowAt: number | null = null
+  protected focusRowAt_ = signal<number | null>(null)
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['focusRowAt']) {
+      this.focusRowAt_.set(this.focusRowAt ?? null)
+    }
+  }
+
   addItem = output<void>()
   removeItem = output<number>()
   sortByCategory = output<void>()
+  focusRowDone = output<void>()
+
+  @ViewChildren('instructionField') instructionFields!: QueryList<ElementRef<HTMLTextAreaElement>>
+  @ViewChildren('laborTimeInput') laborTimeInputs!: QueryList<ElementRef<HTMLInputElement>>
 
   editingLaborTimeIndex_ = signal<number | null>(null)
+
+  constructor() {
+    effect(() => {
+      const idx = this.focusRowAt_()
+      if (idx === null || idx === undefined) return
+      if (this.type() !== 'preparation') return
+      setTimeout(() => {
+        const el = this.instructionFields?.get(idx)?.nativeElement
+        if (el) {
+          el.focus()
+          this.focusRowDone.emit()
+        }
+      }, 0)
+    })
+  }
 
   protected workflowGroups_ = computed(() => {
     this.resetTrigger();
@@ -77,6 +106,15 @@ export class RecipeWorkflowComponent {
 
   enterLaborTimeEdit(index: number): void {
     this.editingLaborTimeIndex_.set(index)
+    setTimeout(() => this.laborTimeInputs?.get(0)?.nativeElement?.focus(), 0)
+  }
+
+  onLaborTimeKeydown(event: Event, group: FormGroup): void {
+    const e = event as KeyboardEvent
+    const val = (group.get('labor_time')?.value ?? 0) as number
+    if (e.key === 'ArrowDown' && val <= 0) {
+      e.preventDefault()
+    }
   }
 
   exitLaborTimeEdit(group: FormGroup): void {

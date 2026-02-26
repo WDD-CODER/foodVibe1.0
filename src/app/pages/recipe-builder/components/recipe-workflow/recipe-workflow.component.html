@@ -17,8 +17,9 @@
             </div>
 
             <div class="col-instruction">
-              <textarea 
-                formControlName="instruction" 
+              <textarea
+                #instructionField
+                formControlName="instruction"
                 class="workflow-textarea"
                 SelectOnFocus
                 placeholder="{{ 'instruction_placeholder' | translatePipe }}"
@@ -39,19 +40,22 @@
                 </button>
                 @if (editingLaborTimeIndex_() === i) {
                   <input
+                    #laborTimeInput
                     type="number"
                     formControlName="labor_time"
                     class="timer-field"
                     min="0"
-                    autofocus
                     SelectOnFocus
                     (blur)="exitLaborTimeEdit(group)"
                     (keydown.enter)="exitLaborTimeEdit(group); $event.preventDefault()"
+                    (keydown.arrowDown)="onLaborTimeKeydown($event, group)"
+                    (keydown.arrowUp)="onLaborTimeKeydown($event, group)"
                   />
                 } @else {
                   <span
                     class="timer-value"
                     (click)="enterLaborTimeEdit(i)"
+                    (focus)="enterLaborTimeEdit(i)"
                     tabindex="0"
                     role="button"
                   >{{ group.get('labor_time')?.value ?? 0 }}</span>
@@ -103,8 +107,11 @@
               @if (!group.get('preparation_name')?.value) {
                 <app-preparation-search
                   [selectedCategory]="group.get('category_name')?.value ?? ''"
+                  [focusTrigger]="focusRowAt_()"
+                  [rowIndex]="i"
                   (preparationSelected)="onPreparationSelected($event, group)"
-                  (preparationAdded)="onPreparationSelected($event, group)">
+                  (preparationAdded)="onPreparationSelected($event, group)"
+                  (focusDone)="focusRowDone.emit()">
                 </app-preparation-search>
               } @else {
                 <div class="selected-item-display">
@@ -131,12 +138,14 @@
               <div class="quantity-controls">
                 <button type="button" class="qty-btn minus"
                   [disabled]="(group.get('quantity')?.value ?? 0) <= 0"
-                  (click)="decrementQuantity(group, i)">
+                  (click)="decrementQuantity(group, i)"
+                  tabindex="-1">
                   <lucide-icon name="minus" [size]="16"></lucide-icon>
                 </button>
                 <input type="number" SelectOnFocus formControlName="quantity"
                   class="grid-input qty-input" placeholder="1" />
-                <button type="button" class="qty-btn plus" (click)="incrementQuantity(group, i)">
+                <button type="button" class="qty-btn plus" (click)="incrementQuantity(group, i)"
+                  tabindex="-1">
                   <lucide-icon name="plus" [size]="16"></lucide-icon>
                 </button>
               </div>

@@ -2,6 +2,7 @@
   <div class="input-wrapper">
     <lucide-icon name="search" size="18"></lucide-icon>
     <input
+      #searchInput
       type="text"
       [value]="searchQuery_()"
       (input)="searchQuery_.set($any($event.target).value); showResults_.set(true)"
