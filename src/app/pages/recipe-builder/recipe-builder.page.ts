@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit, DestroyRef, afterNextRender } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, DestroyRef, afterNextRender, Injector, runInInjectionContext } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith, map } from 'rxjs';
@@ -43,6 +43,7 @@ export class RecipeBuilderPage implements OnInit {
   private readonly unitRegistry_ = inject(UnitRegistryService);
   private readonly recipeCostService_ = inject(RecipeCostService);
   private readonly versionHistory_ = inject(VersionHistoryService);
+  private readonly injector_ = inject(Injector);
 
   //SIGNALS
   protected isSaving_ = signal(false);
@@ -55,6 +56,9 @@ export class RecipeBuilderPage implements OnInit {
 
   /** When set, the ingredients table will focus the search input at this row index; cleared after focus. */
   protected focusIngredientSearchAtRow_ = signal<number | null>(null);
+
+  /** When set, the workflow will focus the textarea (prep) or prep search (dish) at this row index; cleared after focus. */
+  protected focusWorkflowRowAt_ = signal<number | null>(null);
 
   /** True when viewing an old version from history (read-only, no save). */
   protected historyViewMode_ = signal(false);
@@ -255,7 +259,9 @@ export class RecipeBuilderPage implements OnInit {
 
     if (this.ingredientsArray.length === 0) {
       this.addNewIngredientRow();
-      afterNextRender(() => this.focusIngredientSearchAtRow_.set(0));
+      runInInjectionContext(this.injector_, () => {
+        afterNextRender(() => this.focusIngredientSearchAtRow_.set(0));
+      });
     }
     if (this.workflowArray.length === 0) {
       const isDish = this.recipeForm_.get('recipe_type')?.value === 'dish';
@@ -468,6 +474,7 @@ export class RecipeBuilderPage implements OnInit {
       : this.createStepGroup(nextOrder);
 
     this.workflowArray.push(newGroup);
+    this.focusWorkflowRowAt_.set(this.workflowArray.length - 1);
   }
 
   //UPDATE

@@ -3,7 +3,7 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, ArrowUpDown, CalendarClock, ChevronDown, ChevronLeft, ChevronRight, Edit, FilePlus, FlaskConical, History, Image, LucideAngularModule, Menu, Minus, Package, Pencil, Plus, PlusCircle, RotateCcw, Save, Scale, Search, ShieldAlert, Timer, Trash2, Truck, TrendingUp, Utensils, Tags } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
-import { AlertTriangle, Tag, X } from 'lucide-angular/src/icons';
+import { AlertCircle, AlertTriangle, Tag, X } from 'lucide-angular/src/icons';
 import { provideHttpClient } from '@angular/common/http';
 import { TranslationService } from '@services/translation.service';
 
@@ -34,6 +34,7 @@ export const appConfig: ApplicationConfig = {
         FlaskConical,
         TrendingUp,
         Scale,
+        AlertCircle,
         AlertTriangle,
         Tag,
         Tags,
