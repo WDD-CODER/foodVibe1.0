@@ -1,0 +1,14 @@
+---
+description: All "save the plan" requests must use the save-plan skill (plans/ folder, numbering)
+alwaysApply: true
+---
+
+# Save plan — always use the skill
+
+When the user asks to save the plan in **any phrasing** (e.g. "save the plan", "save plan and execute", "execute and save the plan", "persist the plan", "write the plan to plans"), including when it is part of a larger request:
+
+1. **Read and follow** `.assistant/skills/save-plan/SKILL.md` from start to finish.
+2. Perform the **save step first**: determine path and numbering from the skill, then write the plan to that path. Only then proceed with any other action (e.g. execute).
+3. Save **only** under the project **`plans/`** folder with the correct NNN or NNN-R naming. **Never** write plans to `.cursor/plans/` or any path outside the project `plans/` folder.
+
+The skill is the single source of truth for location, numbering rules, and workflow.

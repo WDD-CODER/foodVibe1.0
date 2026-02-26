@@ -9,8 +9,8 @@ When the user has **confirmed a plan** and says to **save the plan**, follow thi
 
 ## Trigger
 
-- User says "save the plan", "save plan", or equivalent after having seen and confirmed a plan.
-- Plan content is already agreed; the agent must only determine the filename and write the file.
+- User says "save the plan", "save plan", or equivalent after having seen and confirmed a plan. This applies even when combined with other requests (e.g. "save the plan and execute", "execute and save the plan").
+- Plan content is already agreed; the agent must only determine the filename and write the file. When the request includes other actions, perform the save step first using this skill, then proceed.
 
 ## Location (MANDATORY)
 
