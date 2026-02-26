@@ -1,4 +1,12 @@
 <div class="recipe-builder-container" dir="rtl">
+  @if (historyViewMode_()) {
+    <div class="history-view-banner">
+      <span>{{ 'history_view_only_banner' | translatePipe }}</span>
+      <button type="button" class="btn-back" (click)="navigateBackFromHistory()">
+        {{ 'back_to_list' | translatePipe }}
+      </button>
+    </div>
+  }
   <div class="builder-shell">
 
     <section class="builder-section">
@@ -19,12 +27,14 @@
           (focusSearchDone)="onIngredientSearchFocusDone()">
         </app-recipe-ingredients-table>
 
-        <button type="button" class="add-row-btn" (click)="addNewIngredientRow();$event.stopPropagation()">
-          <div class="plus-icon-wrapper">
-            <lucide-icon name="plus-circle" [size]="18"></lucide-icon>
-          </div>
-          <span class="btn-text">{{ 'add_row' | translatePipe }}</span>
-        </button>
+        @if (!historyViewMode_()) {
+          <button type="button" class="add-row-btn" (click)="addNewIngredientRow();$event.stopPropagation()">
+            <div class="plus-icon-wrapper">
+              <lucide-icon name="plus-circle" [size]="18"></lucide-icon>
+            </div>
+            <span class="btn-text">{{ 'add_row' | translatePipe }}</span>
+          </button>
+        }
 
       </div>
     </section>
@@ -39,11 +49,13 @@
       </div>
     </section>
 
-    <footer class="action-footer">
-      <button class="main-submit-btn" [disabled]="isSaving_()" (click)="saveRecipe()">
-        {{ (isSaving_() ? 'saving' : (recipeForm_.get('recipe_type')?.value === 'dish' ? 'save_dish' : 'save_recipe')) | translatePipe }}
-      </button>
-    </footer>
+    @if (!historyViewMode_()) {
+      <footer class="action-footer">
+        <button class="main-submit-btn" [disabled]="isSaving_()" (click)="saveRecipe()">
+          {{ (isSaving_() ? 'saving' : (recipeForm_.get('recipe_type')?.value === 'dish' ? 'save_dish' : 'save_recipe')) | translatePipe }}
+        </button>
+      </footer>
+    }
 
   </div>
 </div>

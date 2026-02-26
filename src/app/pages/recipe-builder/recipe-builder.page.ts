@@ -10,6 +10,8 @@ import { KitchenStateService } from '@services/kitchen-state.service';
 import { UserMsgService } from '@services/user-msg.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { RecipeCostService } from '@services/recipe-cost.service';
+import { VersionHistoryService } from '@services/version-history.service';
+import type { VersionEntityType } from '@services/version-history.service';
 import { Ingredient } from '@models/ingredient.model';
 import { Recipe, RecipeStep, MiseCategory, FlatPrepItem, PrepCategory } from '@models/recipe.model';
 import { RecipeHeaderComponent } from './components/recipe-header/recipe-header.component';
@@ -40,6 +42,7 @@ export class RecipeBuilderPage implements OnInit {
   private readonly router_ = inject(Router);
   private readonly unitRegistry_ = inject(UnitRegistryService);
   private readonly recipeCostService_ = inject(RecipeCostService);
+  private readonly versionHistory_ = inject(VersionHistoryService);
 
   //SIGNALS
   protected isSaving_ = signal(false);
@@ -52,6 +55,9 @@ export class RecipeBuilderPage implements OnInit {
 
   /** When set, the ingredients table will focus the search input at this row index; cleared after focus. */
   protected focusIngredientSearchAtRow_ = signal<number | null>(null);
+
+  /** True when viewing an old version from history (read-only, no save). */
+  protected historyViewMode_ = signal(false);
 
   //COMPUTED
   protected totalCost_ = computed(() => {
@@ -203,27 +209,52 @@ export class RecipeBuilderPage implements OnInit {
     this.unconvertibleForVolume_.set(vol.unconvertibleNames);
   }
 
-  ngOnInit(): void {
-    const recipe = this.route_.snapshot.data['recipe'] as Recipe | null;
-    if (recipe) {
-      this.recipeId_.set(recipe._id);
-      this.patchFormFromRecipe(recipe);
+  async ngOnInit(): Promise<void> {
+    const q = this.route_.snapshot.queryParams;
+    const view = q['view'];
+    const entityType = q['entityType'] as string | undefined;
+    const entityId = q['entityId'];
+    const versionAtStr = q['versionAt'];
+
+    if (view === 'history' && entityType && entityId && versionAtStr) {
+      const versionAt = Number(versionAtStr);
+      if (!Number.isNaN(versionAt) && (entityType === 'recipe' || entityType === 'dish')) {
+        const entry = await this.versionHistory_.getVersionEntry(
+          entityType as VersionEntityType,
+          entityId,
+          versionAt
+        );
+        if (entry && (entry.entityType === 'recipe' || entry.entityType === 'dish')) {
+          const snapshot = entry.snapshot as Recipe;
+          this.patchFormFromRecipe(snapshot);
+          this.historyViewMode_.set(true);
+          this.recipeForm_.disable();
+        } else {
+          this.userMsg_.onSetErrorMsg('גרסה לא נמצאה');
+        }
+      }
     } else {
-      const type = this.route_.snapshot.queryParams['type'] as string | undefined;
-      if (type === 'dish') {
-        this.recipeForm_.patchValue({
-          recipe_type: 'dish',
-          serving_portions: 1,
-        }, { emitEvent: false });
-        this.yieldConversionsArray.clear();
-        this.yieldConversionsArray.push(this.fb.group({ amount: [1], unit: ['dish'] }));
-        this.workflowArray.clear();
-        this.workflowArray.push(this.createPrepItemRow());
+      const recipe = this.route_.snapshot.data['recipe'] as Recipe | null;
+      if (recipe) {
+        this.recipeId_.set(recipe._id);
+        this.patchFormFromRecipe(recipe);
+      } else {
+        const type = this.route_.snapshot.queryParams['type'] as string | undefined;
+        if (type === 'dish') {
+          this.recipeForm_.patchValue({
+            recipe_type: 'dish',
+            serving_portions: 1,
+          }, { emitEvent: false });
+          this.yieldConversionsArray.clear();
+          this.yieldConversionsArray.push(this.fb.group({ amount: [1], unit: ['dish'] }));
+          this.workflowArray.clear();
+          this.workflowArray.push(this.createPrepItemRow());
+        }
       }
     }
+
     if (this.ingredientsArray.length === 0) {
       this.addNewIngredientRow();
-      // Focus the first row's search once the view is ready so user can type immediately
       afterNextRender(() => this.focusIngredientSearchAtRow_.set(0));
     }
     if (this.workflowArray.length === 0) {
@@ -235,7 +266,6 @@ export class RecipeBuilderPage implements OnInit {
       }
     }
     this.updateTotalWeightG();
-    // So leave confirmation only triggers when the user actually changes something
     this.recipeForm_.markAsPristine();
   }
 
@@ -476,6 +506,10 @@ export class RecipeBuilderPage implements OnInit {
         this.isSaving_.set(false);
       }
     });
+  }
+
+  navigateBackFromHistory(): void {
+    this.router_.navigate(['/recipe-book']);
   }
 
   /** Returns a user-friendly validation error message listing exactly what is missing. */
