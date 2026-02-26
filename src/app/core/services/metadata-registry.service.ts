@@ -24,8 +24,8 @@ export class MetadataRegistryService {
   }
 
   private async initMetadata() {
-    const DEFAULT_CATEGORIES = ['vegetables', 'dairy', 'meat', 'dry', 'fish'];
-    const DEFAULT_ALLERGENS = ['gluten', 'eggs', 'peanuts', 'nuts', 'soy', 'milk solids', 'sesame'];
+    const DEFAULT_CATEGORIES = ['vegetables', 'dairy', 'meat', 'dry', 'fish', 'spices'];
+    const DEFAULT_ALLERGENS = ['gluten', 'eggs', 'peanuts', 'nuts', 'soy', 'milk_solids', 'sesame', 'fish', 'shellfish', 'seafood'];
 
     // 1. Fetch Categories
     const catRegistry = await this.storageService.query<any>('KITCHEN_CATEGORIES');

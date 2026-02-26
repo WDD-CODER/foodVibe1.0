@@ -1,0 +1,229 @@
+[
+  {
+    "_id": "dish_001",
+    "name_hebrew": "שקשוקה",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_001_i1", "referenceId": "prep_003", "type": "recipe", "amount_": 0.5, "unit_": "kg"},
+      {"_id": "dish_001_i2", "referenceId": "demo_036", "type": "product", "amount_": 4, "unit_": "unit"},
+      {"_id": "dish_001_i3", "referenceId": "demo_001", "type": "product", "amount_": 0.1, "unit_": "kg"},
+      {"_id": "dish_001_i4", "referenceId": "demo_008", "type": "product", "amount_": 0.15, "unit_": "kg"},
+      {"_id": "dish_001_i5", "referenceId": "demo_004", "type": "product", "amount_": 0.01, "unit_": "kg"},
+      {"_id": "dish_001_i6", "referenceId": "demo_076", "type": "product", "amount_": 0.003, "unit_": "kg"},
+      {"_id": "dish_001_i7", "referenceId": "demo_075", "type": "product", "amount_": 0.002, "unit_": "kg"},
+      {"_id": "dish_001_i8", "referenceId": "demo_068", "type": "product", "amount_": 0.02, "unit_": "liter"},
+      {"_id": "dish_001_i9", "referenceId": "demo_022", "type": "product", "amount_": 0.02, "unit_": "kg"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "מחממים שמן במחבת, מטגנים בצל ופלפל. מוסיפים רוטב עגבניות וכמון.", "labor_time_minutes_": 5},
+      {"order_": 2, "instruction_": "יוצרים גומות ויוצקים ביצים. מכסים ומבשלים עד שהביצים מוכנות. מפזרים פטרוזיליה.", "labor_time_minutes_": 8}
+    ],
+    "yield_amount_": 4,
+    "yield_unit_": "dish",
+    "default_station_": "stove",
+    "is_approved_": true
+  },
+  {
+    "_id": "dish_002",
+    "name_hebrew": "סלמון צלוי עם טחינה",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_002_i1", "referenceId": "demo_044", "type": "product", "amount_": 0.6, "unit_": "kg"},
+      {"_id": "dish_002_i2", "referenceId": "prep_004", "type": "recipe", "amount_": 0.2, "unit_": "kg"},
+      {"_id": "dish_002_i3", "referenceId": "demo_024", "type": "product", "amount_": 0.05, "unit_": "kg"},
+      {"_id": "dish_002_i4", "referenceId": "demo_068", "type": "product", "amount_": 0.02, "unit_": "liter"},
+      {"_id": "dish_002_i5", "referenceId": "demo_073", "type": "product", "amount_": 0.003, "unit_": "kg"},
+      {"_id": "dish_002_i6", "referenceId": "demo_074", "type": "product", "amount_": 0.001, "unit_": "kg"},
+      {"_id": "dish_002_i7", "referenceId": "demo_022", "type": "product", "amount_": 0.01, "unit_": "kg"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "ממליחים ומפלפלים את הסלמון. צולים בתנור 180 מעלות כ-15 דקות.", "labor_time_minutes_": 15},
+      {"order_": 2, "instruction_": "מוסיפים רוטב טחינה, לימון ועשבים. מגישים חם.", "labor_time_minutes_": 2}
+    ],
+    "yield_amount_": 4,
+    "yield_unit_": "dish",
+    "default_station_": "oven",
+    "is_approved_": true
+  },
+  {
+    "_id": "dish_003",
+    "name_hebrew": "שניצל עוף עם סלט",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_003_i1", "referenceId": "demo_037", "type": "product", "amount_": 0.5, "unit_": "kg"},
+      {"_id": "dish_003_i2", "referenceId": "demo_049", "type": "product", "amount_": 0.05, "unit_": "kg"},
+      {"_id": "dish_003_i3", "referenceId": "demo_036", "type": "product", "amount_": 2, "unit_": "unit"},
+      {"_id": "dish_003_i4", "referenceId": "demo_063", "type": "product", "amount_": 0.08, "unit_": "kg"},
+      {"_id": "dish_003_i5", "referenceId": "demo_069", "type": "product", "amount_": 0.15, "unit_": "liter"},
+      {"_id": "dish_003_i6", "referenceId": "demo_010", "type": "product", "amount_": 0.15, "unit_": "kg"},
+      {"_id": "dish_003_i7", "referenceId": "demo_006", "type": "product", "amount_": 0.1, "unit_": "kg"},
+      {"_id": "dish_003_i8", "referenceId": "demo_007", "type": "product", "amount_": 0.1, "unit_": "kg"},
+      {"_id": "dish_003_i9", "referenceId": "prep_005", "type": "recipe", "amount_": 0.1, "unit_": "liter"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "מעטפים חזה עוף בקמח, ביצה ופירורי לחם. מטגנים בשמן עד זהוב.", "labor_time_minutes_": 20},
+      {"order_": 2, "instruction_": "חותכים חסה, עגבניה ומלפפון. מערבבים עם ויניגרט. מגישים עם השניצל.", "labor_time_minutes_": 5}
+    ],
+    "yield_amount_": 4,
+    "yield_unit_": "dish",
+    "default_station_": "fry",
+    "is_approved_": true
+  },
+  {
+    "_id": "dish_004",
+    "name_hebrew": "כרובית צלויה עם טחינה",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_004_i1", "referenceId": "demo_012", "type": "product", "amount_": 1, "unit_": "kg"},
+      {"_id": "dish_004_i2", "referenceId": "prep_004", "type": "recipe", "amount_": 0.25, "unit_": "kg"},
+      {"_id": "dish_004_i3", "referenceId": "demo_068", "type": "product", "amount_": 0.05, "unit_": "liter"},
+      {"_id": "dish_004_i4", "referenceId": "demo_076", "type": "product", "amount_": 0.003, "unit_": "kg"},
+      {"_id": "dish_004_i5", "referenceId": "demo_075", "type": "product", "amount_": 0.002, "unit_": "kg"},
+      {"_id": "dish_004_i6", "referenceId": "demo_073", "type": "product", "amount_": 0.005, "unit_": "kg"},
+      {"_id": "dish_004_i7", "referenceId": "demo_022", "type": "product", "amount_": 0.01, "unit_": "kg"},
+      {"_id": "dish_004_i8", "referenceId": "demo_024", "type": "product", "amount_": 0.02, "unit_": "kg"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "פורסים כרובית לפרחים, מערבבים עם שמן ותבלינים. צולים 200 מעלות כ-25 דקות.", "labor_time_minutes_": 25},
+      {"order_": 2, "instruction_": "מגישים עם רוטב טחינה, לימון ופטרוזיליה.", "labor_time_minutes_": 2}
+    ],
+    "yield_amount_": 4,
+    "yield_unit_": "dish",
+    "default_station_": "oven",
+    "is_approved_": true
+  },
+  {
+    "_id": "dish_005",
+    "name_hebrew": "נזיד עדשים",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_005_i1", "referenceId": "demo_058", "type": "product", "amount_": 0.4, "unit_": "kg"},
+      {"_id": "dish_005_i2", "referenceId": "demo_001", "type": "product", "amount_": 0.2, "unit_": "kg"},
+      {"_id": "dish_005_i3", "referenceId": "demo_002", "type": "product", "amount_": 0.15, "unit_": "kg"},
+      {"_id": "dish_005_i4", "referenceId": "demo_005", "type": "product", "amount_": 0.2, "unit_": "kg"},
+      {"_id": "dish_005_i5", "referenceId": "demo_004", "type": "product", "amount_": 0.02, "unit_": "kg"},
+      {"_id": "dish_005_i6", "referenceId": "prep_002", "type": "recipe", "amount_": 1, "unit_": "liter"},
+      {"_id": "dish_005_i7", "referenceId": "demo_076", "type": "product", "amount_": 0.005, "unit_": "kg"},
+      {"_id": "dish_005_i8", "referenceId": "demo_077", "type": "product", "amount_": 0.003, "unit_": "kg"},
+      {"_id": "dish_005_i9", "referenceId": "demo_068", "type": "product", "amount_": 0.03, "unit_": "liter"},
+      {"_id": "dish_005_i10", "referenceId": "demo_073", "type": "product", "amount_": 0.01, "unit_": "kg"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "מטגנים בצל, גזר ושום. מוסיפים עדשים, ציר ירקות ותבלינים.", "labor_time_minutes_": 5},
+      {"order_": 2, "instruction_": "מבשלים כ-40 דקות עד שהעדשים רכות. מוסיפים תפוחי אדמה אם רוצים.", "labor_time_minutes_": 40}
+    ],
+    "yield_amount_": 6,
+    "yield_unit_": "dish",
+    "default_station_": "stove",
+    "is_approved_": true
+  },
+  {
+    "_id": "dish_006",
+    "name_hebrew": "פסטה ברוטב עגבניות",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_006_i1", "referenceId": "demo_055", "type": "product", "amount_": 0.4, "unit_": "kg"},
+      {"_id": "dish_006_i2", "referenceId": "prep_003", "type": "recipe", "amount_": 0.5, "unit_": "kg"},
+      {"_id": "dish_006_i3", "referenceId": "demo_004", "type": "product", "amount_": 0.01, "unit_": "kg"},
+      {"_id": "dish_006_i4", "referenceId": "demo_068", "type": "product", "amount_": 0.02, "unit_": "liter"},
+      {"_id": "dish_006_i5", "referenceId": "demo_029", "type": "product", "amount_": 0.03, "unit_": "kg"},
+      {"_id": "dish_006_i6", "referenceId": "demo_082", "type": "product", "amount_": 0.005, "unit_": "kg"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "מבשלים פסטה במי מלח עד אל דנטה. מסננים.", "labor_time_minutes_": 10},
+      {"order_": 2, "instruction_": "מחממים רוטב עגבניות עם שום ושמן. מערבבים עם הפסטה, פרמזן ובזיליקום.", "labor_time_minutes_": 5}
+    ],
+    "yield_amount_": 4,
+    "yield_unit_": "dish",
+    "default_station_": "stove",
+    "is_approved_": true
+  },
+  {
+    "_id": "dish_007",
+    "name_hebrew": "שיפודי עוף עם אורז",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_007_i1", "referenceId": "demo_037", "type": "product", "amount_": 0.5, "unit_": "kg"},
+      {"_id": "dish_007_i2", "referenceId": "prep_009", "type": "recipe", "amount_": 0.03, "unit_": "kg"},
+      {"_id": "dish_007_i3", "referenceId": "demo_054", "type": "product", "amount_": 0.35, "unit_": "kg"},
+      {"_id": "dish_007_i4", "referenceId": "demo_001", "type": "product", "amount_": 0.1, "unit_": "kg"},
+      {"_id": "dish_007_i5", "referenceId": "demo_068", "type": "product", "amount_": 0.03, "unit_": "liter"},
+      {"_id": "dish_007_i6", "referenceId": "demo_024", "type": "product", "amount_": 0.03, "unit_": "kg"},
+      {"_id": "dish_007_i7", "referenceId": "demo_073", "type": "product", "amount_": 0.005, "unit_": "kg"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "מעבדים עוף בקוביות עם תערובת תבלינים. צולים על גריל או במחבת.", "labor_time_minutes_": 15},
+      {"order_": 2, "instruction_": "מבשלים אורז בסמטי. מגישים עם שיפודים, לימון ובצל.", "labor_time_minutes_": 20}
+    ],
+    "yield_amount_": 4,
+    "yield_unit_": "dish",
+    "default_station_": "grill",
+    "is_approved_": true
+  },
+  {
+    "_id": "dish_008",
+    "name_hebrew": "דניס עם חמאת עשבי תיבול",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_008_i1", "referenceId": "demo_045", "type": "product", "amount_": 0.6, "unit_": "kg"},
+      {"_id": "dish_008_i2", "referenceId": "demo_034", "type": "product", "amount_": 0.05, "unit_": "kg"},
+      {"_id": "dish_008_i3", "referenceId": "demo_022", "type": "product", "amount_": 0.02, "unit_": "kg"},
+      {"_id": "dish_008_i4", "referenceId": "demo_021", "type": "product", "amount_": 0.01, "unit_": "kg"},
+      {"_id": "dish_008_i5", "referenceId": "demo_004", "type": "product", "amount_": 0.01, "unit_": "kg"},
+      {"_id": "dish_008_i6", "referenceId": "demo_024", "type": "product", "amount_": 0.03, "unit_": "kg"},
+      {"_id": "dish_008_i7", "referenceId": "demo_005", "type": "product", "amount_": 0.4, "unit_": "kg"},
+      {"_id": "dish_008_i8", "referenceId": "demo_073", "type": "product", "amount_": 0.003, "unit_": "kg"},
+      {"_id": "dish_008_i9", "referenceId": "demo_074", "type": "product", "amount_": 0.001, "unit_": "kg"},
+      {"_id": "dish_008_i10", "referenceId": "demo_068", "type": "product", "amount_": 0.02, "unit_": "liter"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "מבשלים תפוחי אדמה. מכינים חמאת עשבים עם חמאה, שום, פטרוזיליה ושמיר.", "labor_time_minutes_": 25},
+      {"order_": 2, "instruction_": "צולים דניס במחבת עם שמן. מגישים עם חמאת עשבים ולימון.", "labor_time_minutes_": 10}
+    ],
+    "yield_amount_": 4,
+    "yield_unit_": "dish",
+    "default_station_": "stove",
+    "is_approved_": true
+  },
+  {
+    "_id": "dish_009",
+    "name_hebrew": "קערת חומוס",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_009_i1", "referenceId": "prep_008", "type": "recipe", "amount_": 0.5, "unit_": "kg"},
+      {"_id": "dish_009_i2", "referenceId": "prep_007", "type": "recipe", "amount_": 0.3, "unit_": "kg"},
+      {"_id": "dish_009_i3", "referenceId": "prep_004", "type": "recipe", "amount_": 0.1, "unit_": "kg"},
+      {"_id": "dish_009_i4", "referenceId": "demo_068", "type": "product", "amount_": 0.02, "unit_": "liter"},
+      {"_id": "dish_009_i5", "referenceId": "demo_075", "type": "product", "amount_": 0.002, "unit_": "kg"},
+      {"_id": "dish_009_i6", "referenceId": "demo_022", "type": "product", "amount_": 0.01, "unit_": "kg"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "מעבירים חומוס לצלחת. מניחים ירקות צלויים ומטפטפים טחינה ושמן זית.", "labor_time_minutes_": 5},
+      {"order_": 2, "instruction_": "מפזרים פפריקה ופטרוזיליה. מגישים עם פיתה.", "labor_time_minutes_": 1}
+    ],
+    "yield_amount_": 4,
+    "yield_unit_": "dish",
+    "default_station_": "cold",
+    "is_approved_": true
+  },
+  {
+    "_id": "dish_010",
+    "name_hebrew": "קרם ברולה",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_010_i1", "referenceId": "prep_010", "type": "recipe", "amount_": 0.5, "unit_": "kg"},
+      {"_id": "dish_010_i2", "referenceId": "demo_051", "type": "product", "amount_": 0.05, "unit_": "kg"},
+      {"_id": "dish_010_i3", "referenceId": "demo_027", "type": "product", "amount_": 0.2, "unit_": "liter"},
+      {"_id": "dish_010_i4", "referenceId": "demo_036", "type": "product", "amount_": 3, "unit_": "unit"},
+      {"_id": "dish_010_i5", "referenceId": "demo_090", "type": "product", "amount_": 0.005, "unit_": "liter"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "מערבבים קרם פטיסייר עם שמנת וביצים. ממלאים כוסות ואופים באמבט מים עד שהקרם מתקשה.", "labor_time_minutes_": 45},
+      {"order_": 2, "instruction_": "מקררים. מפזרים סוכר ומקרמלים עם מבער. מגישים קר.", "labor_time_minutes_": 5}
+    ],
+    "yield_amount_": 6,
+    "yield_unit_": "dish",
+    "default_station_": "oven",
+    "is_approved_": true
+  }
+]

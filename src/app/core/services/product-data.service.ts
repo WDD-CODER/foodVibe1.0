@@ -3,6 +3,7 @@ import { StorageService } from './async-storage.service';
 import { Product } from '../models/product.model'; 
 
 const ENTITY = 'PRODUCT_LIST';
+const TRASH_KEY = 'TRASH_PRODUCTS';
 
 @Injectable({ providedIn: 'root' })
 export class ProductDataService {
@@ -27,7 +28,12 @@ export class ProductDataService {
   constructor() {
     this.loadInitialData();
   }
-  
+
+  /** Re-read from storage and refresh the signal. Used by demo loader after replacing data. */
+  async reloadFromStorage(): Promise<void> {
+    await this.loadInitialData();
+  }
+
 // LIST
 
   private async loadInitialData(): Promise<void> {
@@ -84,9 +90,59 @@ export class ProductDataService {
   );
 }
 
-  // REMOVE
+  // REMOVE (soft delete: move to trash)
   async deleteProduct(_id: string): Promise<void> {
+    const product = await this.storage.get<Product>(ENTITY, _id);
+    const withDeleted = { ...product, deletedAt: Date.now() } as Product & { deletedAt: number };
+    await this.storage.appendExisting(TRASH_KEY, withDeleted);
     await this.storage.remove(ENTITY, _id);
-    this.ProductsStore_.update(Products => Products.filter(i => i._id !== _id));
+    this.ProductsStore_.update(products => products.filter(p => p._id !== _id));
+  }
+
+  async getTrashProducts(): Promise<(Product & { deletedAt: number })[]> {
+    const raw = await this.storage.query<Record<string, unknown>>(TRASH_KEY, 0);
+    return raw.map(row => this.normalizeTrashProduct(row as Partial<Product> & { deletedAt: number }));
+  }
+
+  private normalizeTrashProduct(row: Partial<Product> & { deletedAt: number }): Product & { deletedAt: number } {
+    const legacy = row as Partial<Product> & { category_?: string; is_dairy_?: boolean; supplierId_?: string; deletedAt: number };
+    const product = this.normalizeProduct(legacy as Record<string, unknown>);
+    return { ...product, deletedAt: legacy.deletedAt };
+  }
+
+  async restoreProduct(_id: string): Promise<Product> {
+    const trash = await this.getTrashProducts();
+    const item = trash.find(p => p._id === _id);
+    if (!item) throw new Error(`Product ${_id} not found in trash`);
+    const { deletedAt: _, ...product } = item;
+    const rest = trash.filter(p => p._id !== _id);
+    await this.storage.replaceAll(TRASH_KEY, rest);
+    await this.storage.appendExisting(ENTITY, product);
+    this.ProductsStore_.update(products => [...products, product]);
+    return product;
+  }
+
+  async disposeProduct(_id: string): Promise<void> {
+    const trash = await this.getTrashProducts();
+    const rest = trash.filter(p => p._id !== _id);
+    if (rest.length === trash.length) throw new Error(`Product ${_id} not found in trash`);
+    await this.storage.replaceAll(TRASH_KEY, rest);
+  }
+
+  async restoreAllProducts(): Promise<Product[]> {
+    const trash = await this.getTrashProducts();
+    const restored: Product[] = [];
+    for (const item of trash) {
+      const { deletedAt: _, ...product } = item;
+      await this.storage.appendExisting(ENTITY, product);
+      restored.push(product);
+    }
+    await this.storage.replaceAll(TRASH_KEY, []);
+    this.ProductsStore_.update(products => [...products, ...restored]);
+    return restored;
+  }
+
+  async disposeAllProducts(): Promise<void> {
+    await this.storage.replaceAll(TRASH_KEY, []);
   }
 }

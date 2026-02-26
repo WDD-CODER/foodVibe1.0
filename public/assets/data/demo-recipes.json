@@ -1,0 +1,214 @@
+[
+  {
+    "_id": "prep_001",
+    "name_hebrew": "ציר עוף",
+    "recipe_type_": "preparation",
+    "ingredients_": [
+      {"_id": "prep_001_i1", "referenceId": "demo_038", "type": "product", "amount_": 2, "unit_": "kg"},
+      {"_id": "prep_001_i2", "referenceId": "demo_001", "type": "product", "amount_": 0.5, "unit_": "kg"},
+      {"_id": "prep_001_i3", "referenceId": "demo_002", "type": "product", "amount_": 0.3, "unit_": "kg"},
+      {"_id": "prep_001_i4", "referenceId": "demo_003", "type": "product", "amount_": 0.2, "unit_": "kg"},
+      {"_id": "prep_001_i5", "referenceId": "demo_004", "type": "product", "amount_": 0.05, "unit_": "kg"},
+      {"_id": "prep_001_i6", "referenceId": "demo_080", "type": "product", "amount_": 0.01, "unit_": "kg"},
+      {"_id": "prep_001_i7", "referenceId": "demo_074", "type": "product", "amount_": 0.005, "unit_": "kg"},
+      {"_id": "prep_001_i8", "referenceId": "demo_073", "type": "product", "amount_": 0.02, "unit_": "kg"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "חותכים את הירקות לקוביות גסות. מכניסים לסיר גדול עם העוף.", "labor_time_minutes_": 15},
+      {"order_": 2, "instruction_": "מכסים במים קרים (כ-6 ליטר). מביאים לרתיחה ומנמיכים ללהבה נמוכה.", "labor_time_minutes_": 5},
+      {"order_": 3, "instruction_": "מבשלים 3–4 שעות, מסירים קצף. מסננים ומקררים.", "labor_time_minutes_": 0}
+    ],
+    "yield_amount_": 5,
+    "yield_unit_": "liter",
+    "default_station_": "stove",
+    "is_approved_": true
+  },
+  {
+    "_id": "prep_002",
+    "name_hebrew": "ציר ירקות",
+    "recipe_type_": "preparation",
+    "ingredients_": [
+      {"_id": "prep_002_i1", "referenceId": "demo_001", "type": "product", "amount_": 0.5, "unit_": "kg"},
+      {"_id": "prep_002_i2", "referenceId": "demo_002", "type": "product", "amount_": 0.3, "unit_": "kg"},
+      {"_id": "prep_002_i3", "referenceId": "demo_003", "type": "product", "amount_": 0.2, "unit_": "kg"},
+      {"_id": "prep_002_i4", "referenceId": "demo_005", "type": "product", "amount_": 0.3, "unit_": "kg"},
+      {"_id": "prep_002_i5", "referenceId": "demo_004", "type": "product", "amount_": 0.03, "unit_": "kg"},
+      {"_id": "prep_002_i6", "referenceId": "demo_080", "type": "product", "amount_": 0.01, "unit_": "kg"},
+      {"_id": "prep_002_i7", "referenceId": "demo_074", "type": "product", "amount_": 0.005, "unit_": "kg"},
+      {"_id": "prep_002_i8", "referenceId": "demo_022", "type": "product", "amount_": 0.05, "unit_": "kg"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "מקציצים ירקות גס. מכניסים לסיר עם מים קרים.", "labor_time_minutes_": 10},
+      {"order_": 2, "instruction_": "מביאים לרתיחה, מנמיכים ומבשלים כשעה. מסננים.", "labor_time_minutes_": 0}
+    ],
+    "yield_amount_": 5,
+    "yield_unit_": "liter",
+    "default_station_": "stove",
+    "is_approved_": true
+  },
+  {
+    "_id": "prep_003",
+    "name_hebrew": "רוטב עגבניות ביתי",
+    "recipe_type_": "preparation",
+    "ingredients_": [
+      {"_id": "prep_003_i1", "referenceId": "demo_091", "type": "product", "amount_": 1, "unit_": "kg"},
+      {"_id": "prep_003_i2", "referenceId": "demo_001", "type": "product", "amount_": 0.3, "unit_": "kg"},
+      {"_id": "prep_003_i3", "referenceId": "demo_004", "type": "product", "amount_": 0.02, "unit_": "kg"},
+      {"_id": "prep_003_i4", "referenceId": "demo_068", "type": "product", "amount_": 0.1, "unit_": "liter"},
+      {"_id": "prep_003_i5", "referenceId": "demo_081", "type": "product", "amount_": 0.005, "unit_": "kg"},
+      {"_id": "prep_003_i6", "referenceId": "demo_082", "type": "product", "amount_": 0.005, "unit_": "kg"},
+      {"_id": "prep_003_i7", "referenceId": "demo_051", "type": "product", "amount_": 0.02, "unit_": "kg"},
+      {"_id": "prep_003_i8", "referenceId": "demo_073", "type": "product", "amount_": 0.01, "unit_": "kg"},
+      {"_id": "prep_003_i9", "referenceId": "demo_074", "type": "product", "amount_": 0.002, "unit_": "kg"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "מטגנים בצל ושום בשמן עד הזהבה.", "labor_time_minutes_": 5},
+      {"order_": 2, "instruction_": "מוסיפים רסק עגבניות, תבלינים וסוכר. מבשלים 20 דקות על אש בינונית.", "labor_time_minutes_": 20}
+    ],
+    "yield_amount_": 2,
+    "yield_unit_": "kg",
+    "default_station_": "stove",
+    "is_approved_": true
+  },
+  {
+    "_id": "prep_004",
+    "name_hebrew": "רוטב טחינה",
+    "recipe_type_": "preparation",
+    "ingredients_": [
+      {"_id": "prep_004_i1", "referenceId": "demo_086", "type": "product", "amount_": 0.5, "unit_": "kg"},
+      {"_id": "prep_004_i2", "referenceId": "demo_024", "type": "product", "amount_": 0.1, "unit_": "kg"},
+      {"_id": "prep_004_i3", "referenceId": "demo_004", "type": "product", "amount_": 0.01, "unit_": "kg"},
+      {"_id": "prep_004_i4", "referenceId": "demo_073", "type": "product", "amount_": 0.01, "unit_": "kg"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "מערבבים טחינה עם מים עד מרקם חלק. מוסיפים לימון, שום ומלח.", "labor_time_minutes_": 5}
+    ],
+    "yield_amount_": 1,
+    "yield_unit_": "kg",
+    "default_station_": "cold",
+    "is_approved_": true
+  },
+  {
+    "_id": "prep_005",
+    "name_hebrew": "ויניגרט בסיסי",
+    "recipe_type_": "preparation",
+    "ingredients_": [
+      {"_id": "prep_005_i1", "referenceId": "demo_068", "type": "product", "amount_": 0.6, "unit_": "liter"},
+      {"_id": "prep_005_i2", "referenceId": "demo_072", "type": "product", "amount_": 0.2, "unit_": "liter"},
+      {"_id": "prep_005_i3", "referenceId": "demo_084", "type": "product", "amount_": 0.02, "unit_": "kg"},
+      {"_id": "prep_005_i4", "referenceId": "demo_073", "type": "product", "amount_": 0.01, "unit_": "kg"},
+      {"_id": "prep_005_i5", "referenceId": "demo_074", "type": "product", "amount_": 0.002, "unit_": "kg"},
+      {"_id": "prep_005_i6", "referenceId": "demo_087", "type": "product", "amount_": 0.02, "unit_": "kg"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "מערבבים כל המרכיבים בצנצנת או בקערה עד לאחידות.", "labor_time_minutes_": 3}
+    ],
+    "yield_amount_": 1,
+    "yield_unit_": "liter",
+    "default_station_": "cold",
+    "is_approved_": true
+  },
+  {
+    "_id": "prep_006",
+    "name_hebrew": "שום קונפי",
+    "recipe_type_": "preparation",
+    "ingredients_": [
+      {"_id": "prep_006_i1", "referenceId": "demo_004", "type": "product", "amount_": 0.4, "unit_": "kg"},
+      {"_id": "prep_006_i2", "referenceId": "demo_069", "type": "product", "amount_": 0.3, "unit_": "liter"},
+      {"_id": "prep_006_i3", "referenceId": "demo_073", "type": "product", "amount_": 0.005, "unit_": "kg"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "מכניסים שום ושמן לתבנית. אופים בחום נמוך (120 מעלות) כשעה עד שהשום רך.", "labor_time_minutes_": 60}
+    ],
+    "yield_amount_": 0.5,
+    "yield_unit_": "kg",
+    "default_station_": "oven",
+    "is_approved_": true
+  },
+  {
+    "_id": "prep_007",
+    "name_hebrew": "ירקות צלויים",
+    "recipe_type_": "preparation",
+    "ingredients_": [
+      {"_id": "prep_007_i1", "referenceId": "demo_014", "type": "product", "amount_": 0.5, "unit_": "kg"},
+      {"_id": "prep_007_i2", "referenceId": "demo_015", "type": "product", "amount_": 0.5, "unit_": "kg"},
+      {"_id": "prep_007_i3", "referenceId": "demo_008", "type": "product", "amount_": 0.3, "unit_": "kg"},
+      {"_id": "prep_007_i4", "referenceId": "demo_001", "type": "product", "amount_": 0.2, "unit_": "kg"},
+      {"_id": "prep_007_i5", "referenceId": "demo_068", "type": "product", "amount_": 0.08, "unit_": "liter"},
+      {"_id": "prep_007_i6", "referenceId": "demo_073", "type": "product", "amount_": 0.01, "unit_": "kg"},
+      {"_id": "prep_007_i7", "referenceId": "demo_074", "type": "product", "amount_": 0.002, "unit_": "kg"},
+      {"_id": "prep_007_i8", "referenceId": "demo_076", "type": "product", "amount_": 0.005, "unit_": "kg"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "חותכים ירקות לקוביות. מערבבים עם שמן, מלח, פלפל וכמון.", "labor_time_minutes_": 10},
+      {"order_": 2, "instruction_": "מפזרים על תבנית ואופים 180 מעלות כ-35 דקות עד שזהובים.", "labor_time_minutes_": 35}
+    ],
+    "yield_amount_": 2,
+    "yield_unit_": "kg",
+    "default_station_": "oven",
+    "is_approved_": true
+  },
+  {
+    "_id": "prep_008",
+    "name_hebrew": "חומוס בסיסי",
+    "recipe_type_": "preparation",
+    "ingredients_": [
+      {"_id": "prep_008_i1", "referenceId": "demo_059", "type": "product", "amount_": 0.5, "unit_": "kg"},
+      {"_id": "prep_008_i2", "referenceId": "demo_086", "type": "product", "amount_": 0.15, "unit_": "kg"},
+      {"_id": "prep_008_i3", "referenceId": "demo_024", "type": "product", "amount_": 0.05, "unit_": "kg"},
+      {"_id": "prep_008_i4", "referenceId": "demo_004", "type": "product", "amount_": 0.01, "unit_": "kg"},
+      {"_id": "prep_008_i5", "referenceId": "demo_076", "type": "product", "amount_": 0.005, "unit_": "kg"},
+      {"_id": "prep_008_i6", "referenceId": "demo_073", "type": "product", "amount_": 0.01, "unit_": "kg"},
+      {"_id": "prep_008_i7", "referenceId": "demo_068", "type": "product", "amount_": 0.03, "unit_": "liter"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "מבשלים חומוס יבש עד רך (או משתמשים במוכן). טוחנים במעבד מזון עם שאר המרכיבים.", "labor_time_minutes_": 20},
+      {"order_": 2, "instruction_": "מוסיפים מים עד למרקם חלק. מגישים עם שמן זית.", "labor_time_minutes_": 2}
+    ],
+    "yield_amount_": 1.5,
+    "yield_unit_": "kg",
+    "default_station_": "cold",
+    "is_approved_": true
+  },
+  {
+    "_id": "prep_009",
+    "name_hebrew": "תערובת תבלינים",
+    "recipe_type_": "preparation",
+    "ingredients_": [
+      {"_id": "prep_009_i1", "referenceId": "demo_075", "type": "product", "amount_": 0.15, "unit_": "kg"},
+      {"_id": "prep_009_i2", "referenceId": "demo_076", "type": "product", "amount_": 0.1, "unit_": "kg"},
+      {"_id": "prep_009_i3", "referenceId": "demo_077", "type": "product", "amount_": 0.05, "unit_": "kg"},
+      {"_id": "prep_009_i4", "referenceId": "demo_074", "type": "product", "amount_": 0.05, "unit_": "kg"},
+      {"_id": "prep_009_i5", "referenceId": "demo_073", "type": "product", "amount_": 0.1, "unit_": "kg"},
+      {"_id": "prep_009_i6", "referenceId": "demo_078", "type": "product", "amount_": 0.02, "unit_": "kg"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "מערבבים את כל התבלינים בקערה. שומרים בצנצנת אטומה.", "labor_time_minutes_": 5}
+    ],
+    "yield_amount_": 0.5,
+    "yield_unit_": "kg",
+    "default_station_": "cold",
+    "is_approved_": true
+  },
+  {
+    "_id": "prep_010",
+    "name_hebrew": "קרם פטיסייר",
+    "recipe_type_": "preparation",
+    "ingredients_": [
+      {"_id": "prep_010_i1", "referenceId": "demo_026", "type": "product", "amount_": 0.5, "unit_": "liter"},
+      {"_id": "prep_010_i2", "referenceId": "demo_051", "type": "product", "amount_": 0.12, "unit_": "kg"},
+      {"_id": "prep_010_i3", "referenceId": "demo_036", "type": "product", "amount_": 4, "unit_": "unit"},
+      {"_id": "prep_010_i4", "referenceId": "demo_062", "type": "product", "amount_": 0.06, "unit_": "kg"},
+      {"_id": "prep_010_i5", "referenceId": "demo_034", "type": "product", "amount_": 0.05, "unit_": "kg"},
+      {"_id": "prep_010_i6", "referenceId": "demo_090", "type": "product", "amount_": 0.01, "unit_": "liter"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "מחממים חלב עם חצי מהסוכר. מערבבים ביצים, קורנפלור ושאר הסוכר.", "labor_time_minutes_": 5},
+      {"order_": 2, "instruction_": "יוצקים את תערובת הביצים לחלב החם ומבשלים תוך ערבוב עד שהקרם מסמיך. מוסיפים חמאה ווניל.", "labor_time_minutes_": 10}
+    ],
+    "yield_amount_": 1,
+    "yield_unit_": "kg",
+    "default_station_": "stove",
+    "is_approved_": true
+  }
+]

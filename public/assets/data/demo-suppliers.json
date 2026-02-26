@@ -1,0 +1,10 @@
+[
+  { "_id": "sup_vegetable", "name_hebrew": "ספק ירקות", "delivery_days_": [0, 1, 2, 3, 4], "min_order_mov_": 200, "lead_time_days_": 1 },
+  { "_id": "sup_dairy", "name_hebrew": "ספק חלבי", "delivery_days_": [0, 1, 2, 3, 4], "min_order_mov_": 200, "lead_time_days_": 1 },
+  { "_id": "sup_meat", "name_hebrew": "ספק בשר ועופות", "delivery_days_": [0, 1, 2, 3, 4], "min_order_mov_": 200, "lead_time_days_": 1 },
+  { "_id": "sup_dry", "name_hebrew": "ספק יבש ומכולת", "delivery_days_": [0, 1, 2, 3, 4], "min_order_mov_": 200, "lead_time_days_": 1 },
+  { "_id": "sup_fish", "name_hebrew": "ספק דגים", "delivery_days_": [0, 1, 2, 3, 4], "min_order_mov_": 200, "lead_time_days_": 1 },
+  { "_id": "sup_shellfish", "name_hebrew": "ספק פירות ים", "delivery_days_": [0, 1, 2, 3, 4], "min_order_mov_": 200, "lead_time_days_": 1 },
+  { "_id": "sup_spices", "name_hebrew": "ספק תבלינים", "delivery_days_": [0, 1, 2, 3, 4], "min_order_mov_": 200, "lead_time_days_": 1 },
+  { "_id": "sup_eggs", "name_hebrew": "ספק ביצים", "delivery_days_": [0, 1, 2, 3, 4], "min_order_mov_": 200, "lead_time_days_": 1 }
+]

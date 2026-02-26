@@ -15,6 +15,11 @@ export class SupplierDataService {
     this.loadInitialData();
   }
 
+  /** Re-read from storage and refresh the signal. Used by demo loader after replacing data. */
+  async reloadFromStorage(): Promise<void> {
+    await this.loadInitialData();
+  }
+
   private async loadInitialData(): Promise<void> {
     const data = await this.storage.query<Supplier>(ENTITY);
     this.suppliersStore_.set(Array.isArray(data) ? data : []);
