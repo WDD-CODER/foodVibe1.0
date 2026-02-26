@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
 import { ProductDataService } from '@services/product-data.service';
+import { DemoLoaderService } from '@services/demo-loader.service';
+import { ConfirmModalService } from '@services/confirm-modal.service';
 import { LucideAngularModule } from 'lucide-angular';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { TranslationService } from '@services/translation.service';
@@ -23,6 +25,8 @@ export class MetadataManagerComponent implements OnInit {
   private unitRegistry = inject(UnitRegistryService);
   private metadataRegistry = inject(MetadataRegistryService);
   private productData = inject(ProductDataService);
+  private demoLoader = inject(DemoLoaderService);
+  private confirmModal = inject(ConfirmModalService);
   private translationService = inject(TranslationService);
   private userMsgService = inject(UserMsgService);
   private translationKeyModal = inject(TranslationKeyModalService);
@@ -233,4 +237,11 @@ async onAddMetadata(hebrewLabel: string, type: MetadataType, inputElement: HTMLI
     }
   }
 
+  async onLoadDemoData(): Promise<void> {
+    const message = this.translationService.translate('load_demo_data_confirm');
+    const confirmed = await this.confirmModal.open(message, { variant: 'warning', saveLabel: 'load_demo_data' });
+    if (confirmed) {
+      await this.demoLoader.loadDemoData();
+    }
+  }
 }

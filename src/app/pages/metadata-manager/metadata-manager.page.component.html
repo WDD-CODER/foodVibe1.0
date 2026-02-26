@@ -29,6 +29,17 @@
       type: 'allergen'
     }"></ng-container>
   </div>
+
+  <section class="demo-section manager-card">
+    <div class="card-title">
+      <lucide-icon name="package" class="text-amber-600"></lucide-icon>
+      <h2>{{ 'load_demo_data' | translatePipe }}</h2>
+    </div>
+    <p class="demo-desc">נתוני הדגמה: כ-100 מוצרים, 8 ספקים, 10 הכנות ו-10 מנות. גיבוי ב-assets/data.</p>
+    <button type="button" class="btn-demo" (click)="onLoadDemoData()">
+      {{ 'load_demo_data' | translatePipe }}
+    </button>
+  </section>
 </div>
 
 <ng-template #managerCard let-title="title" let-icon="icon" let-colorClass="colorClass" let-items="items"
