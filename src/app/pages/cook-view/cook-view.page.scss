@@ -13,6 +13,11 @@ $section-bg: #fffbeb;
   padding: 1.25rem;
   min-height: 100vh;
   background: $warm-bg;
+
+  @media (min-width: 900px) {
+    max-width: 1200px;
+    padding: 1.5rem 2rem;
+  }
 }
 
 .cook-view-empty {
@@ -51,6 +56,36 @@ $section-bg: #fffbeb;
     border-radius: 12px;
     padding: 1rem;
     border: 1px solid #fcd34d;
+  }
+
+  @media (min-width: 900px) {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    min-height: calc(100vh - 3rem);
+
+    .cook-view-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .cook-view-main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      align-items: start;
+    }
+
+    .ingredients-section {
+      min-height: 0;
+    }
+
+    .prep-section,
+    .steps-section {
+      min-height: 0;
+    }
   }
 }
 
@@ -344,7 +379,7 @@ $section-bg: #fffbeb;
 }
 
 .step-item {
-  margin-bottom: 0.875rem;
+  margin-bottom: 0.5rem;
   padding: 0.5rem 0.75rem;
   background: #f8fafc;
   border-radius: 8px;
@@ -353,6 +388,11 @@ $section-bg: #fffbeb;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.5rem;
+
+  @media (min-width: 900px) {
+    margin-bottom: 0.375rem;
+    padding: 0.4rem 0.6rem;
+  }
 }
 
 .step-order {

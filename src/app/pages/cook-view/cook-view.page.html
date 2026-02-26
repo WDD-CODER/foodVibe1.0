@@ -50,6 +50,7 @@
         }
       </header>
 
+      <div class="cook-view-main">
       <section class="cook-view-section ingredients-section">
         <h2 class="section-title">
           <lucide-icon name="flask-conical" [size]="20"></lucide-icon>
@@ -111,17 +112,30 @@
             <lucide-icon name="utensils" [size]="20"></lucide-icon>
             {{ 'prep_list_mise_en_place' | translatePipe }}
           </h2>
-          @if (scaledPrep_().length > 0) {
-            <div class="prep-list">
-              @for (row of scaledPrep_(); track row.name + row.unit + row.amount) {
-                <div class="prep-row">
-                  <span class="prep-name">{{ row.name }}</span>
-                  <span class="prep-amount">{{ formatAmount(row.amount) }} {{ row.unit | translatePipe }}</span>
-                </div>
-              }
-            </div>
+          @if (editMode_()) {
+            <app-recipe-workflow
+              [workflowFormArray]="workflowFormArray"
+              [type]="'dish'"
+              [resetTrigger]="workflowResetTrigger"
+              [focusRowAt]="focusWorkflowRowAt_()"
+              (addItem)="addWorkflowItem()"
+              (removeItem)="removeWorkflowItem($event)"
+              (sortByCategory)="sortPrepByCategory()"
+              (focusRowDone)="onWorkflowFocusRowDone()">
+            </app-recipe-workflow>
           } @else {
-            <p class="empty-state-text">{{ 'no_preparations_defined' | translatePipe }}</p>
+            @if (scaledPrep_().length > 0) {
+              <div class="prep-list">
+                @for (row of scaledPrep_(); track row.name + row.unit + row.amount) {
+                  <div class="prep-row">
+                    <span class="prep-name">{{ row.name }}</span>
+                    <span class="prep-amount">{{ formatAmount(row.amount) }} {{ row.unit | translatePipe }}</span>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="empty-state-text">{{ 'no_preparations_defined' | translatePipe }}</p>
+            }
           }
         </section>
       }
@@ -132,23 +146,37 @@
             <lucide-icon name="timer" [size]="20"></lucide-icon>
             {{ 'prep_workflow' | translatePipe }}
           </h2>
-          @if (recipe.steps_ && recipe.steps_.length) {
-            <ol class="steps-list">
-              @for (step of recipe.steps_; track step.order_) {
-                <li class="step-item">
-                  <span class="step-order">{{ step.order_ }}</span>
-                  <span class="step-instruction">{{ step.instruction_ }}</span>
-                  @if (step.labor_time_minutes_ > 0) {
-                    <span class="step-time">{{ step.labor_time_minutes_ }} {{ 'min' | translatePipe }}</span>
-                  }
-                </li>
-              }
-            </ol>
+          @if (editMode_()) {
+            <app-recipe-workflow
+              [workflowFormArray]="workflowFormArray"
+              [type]="'preparation'"
+              [resetTrigger]="workflowResetTrigger"
+              [focusRowAt]="focusWorkflowRowAt_()"
+              (addItem)="addWorkflowItem()"
+              (removeItem)="removeWorkflowItem($event)"
+              (sortByCategory)="sortPrepByCategory()"
+              (focusRowDone)="onWorkflowFocusRowDone()">
+            </app-recipe-workflow>
           } @else {
-            <p class="empty-state-text">{{ 'no_steps_defined' | translatePipe }}</p>
+            @if (recipe.steps_ && recipe.steps_.length) {
+              <ol class="steps-list">
+                @for (step of recipe.steps_; track step.order_) {
+                  <li class="step-item">
+                    <span class="step-order">{{ step.order_ }}</span>
+                    <span class="step-instruction">{{ step.instruction_ }}</span>
+                    @if (step.labor_time_minutes_ > 0) {
+                      <span class="step-time">{{ step.labor_time_minutes_ }} {{ 'min' | translatePipe }}</span>
+                    }
+                  </li>
+                }
+              </ol>
+            } @else {
+              <p class="empty-state-text">{{ 'no_steps_defined' | translatePipe }}</p>
+            }
           }
         </section>
       }
+      </div>
     </div>
   } @else {
     <div class="cook-view-empty">
