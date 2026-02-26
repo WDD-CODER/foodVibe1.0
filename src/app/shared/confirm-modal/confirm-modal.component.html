@@ -1,6 +1,6 @@
 @if (modalService.isOpen()) {
   <div class="modal-overlay" (click)="modalService.choose(false)">
-    <div class="modal-card" dir="rtl" (click)="$event.stopPropagation()">
+    <div class="modal-card" [class.modal-card--danger]="modalService.variant() === 'danger'" [class.modal-card--warning]="modalService.variant() === 'warning'" dir="rtl" (click)="$event.stopPropagation()">
       <p class="modal-message">{{ modalService.message() | translatePipe }}</p>
       <div class="modal-actions">
         <button type="button" class="btn-ghost" (click)="modalService.choose(false)">

@@ -11,6 +11,8 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { Recipe } from '@models/recipe.model';
 import { Product } from '@models/product.model';
+import { VersionEntityType } from '@services/version-history.service';
+import { VersionHistoryPanelComponent } from 'src/app/shared/version-history-panel/version-history-panel.component';
 
 export type SortField = 'name' | 'type' | 'cost' | 'main_category' | 'allergens';
 
@@ -20,7 +22,7 @@ const MOBILE_BREAKPOINT_PX = 768;
 @Component({
   selector: 'recipe-book-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, ClickOutSideDirective],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, ClickOutSideDirective, VersionHistoryPanelComponent],
   templateUrl: './recipe-book-list.component.html',
   styleUrl: './recipe-book-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,6 +45,7 @@ export class RecipeBookListComponent {
   protected ingredientSearchQuery_ = signal<string>('');
   protected selectedProductIds_ = signal<string[]>([]);
   protected isMobileSearchOpen_ = signal<boolean>(false);
+  protected historyFor_ = signal<{ entityType: VersionEntityType; entityId: string; entityName: string } | null>(null);
 
   constructor() {
     afterNextRender(() => {
@@ -356,6 +359,25 @@ export class RecipeBookListComponent {
 
   protected onEditRecipe(recipe: Recipe): void {
     this.router.navigate(['/recipe-builder', recipe._id]);
+  }
+
+  protected openHistory(recipe: Recipe): void {
+    const entityType: VersionEntityType = this.isRecipeDish(recipe) ? 'dish' : 'recipe';
+    this.historyFor_.set({ entityType, entityId: recipe._id, entityName: recipe.name_hebrew });
+  }
+
+  protected closeHistory(): void {
+    this.historyFor_.set(null);
+  }
+
+  protected onCookRecipe(recipe: Recipe): void {
+    this.router.navigate(['/cook', recipe._id]);
+  }
+
+  protected onRowClick(recipe: Recipe, event: MouseEvent): void {
+    const el = event.target as HTMLElement;
+    if (el.closest('button') || el.closest('a') || el.closest('.cost-cell-wrap') || el.closest('.allergen-btn-wrapper')) return;
+    this.router.navigate(['/cook', recipe._id]);
   }
 
   protected onDeleteRecipe(recipe: Recipe): void {

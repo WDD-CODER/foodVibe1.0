@@ -60,4 +60,40 @@
       border-color: #0284c7;
     }
   }
+
+  &.modal-card--danger {
+    border-color: #dc2626;
+
+    .modal-message {
+      color: #991b1b;
+    }
+
+    .btn-confirm {
+      background-color: #dc2626;
+      border-color: #dc2626;
+
+      &:hover {
+        background-color: #b91c1c;
+        border-color: #b91c1c;
+      }
+    }
+  }
+
+  &.modal-card--warning {
+    border-color: #d97706;
+
+    .modal-message {
+      color: #92400e;
+    }
+
+    .btn-confirm {
+      background-color: #d97706;
+      border-color: #d97706;
+
+      &:hover {
+        background-color: #b45309;
+        border-color: #b45309;
+      }
+    }
+  }
 }

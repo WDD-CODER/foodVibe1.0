@@ -468,6 +468,39 @@ $mobile-breakpoint: 768px;
       color: #dc2626;
     }
   }
+
+  &.cook {
+    color: #64748b;
+
+    &:hover {
+      background-color: #dcfce7;
+      color: #16a34a;
+    }
+  }
+
+  &.history {
+    color: #64748b;
+
+    &:hover {
+      background-color: #fef3c7;
+      color: #d97706;
+    }
+  }
+}
+
+.history-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.history-overlay-panel {
+  max-height: 90vh;
+  overflow: auto;
 }
 
 .recipes-grid-body {

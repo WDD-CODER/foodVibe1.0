@@ -114,7 +114,7 @@
           <div class="no-results">{{ 'no_recipes_match' | translatePipe }}</div>
         }
         @for (recipe of filteredRecipes_(); track recipe._id) {
-          <div class="recipe-grid-row">
+          <div class="recipe-grid-row" (click)="onRowClick(recipe, $event)" role="button" tabindex="0" (keydown.enter)="onCookRecipe(recipe)" (keydown.space)="$event.preventDefault(); onCookRecipe(recipe)">
             <div class="col-name">{{ recipe.name_hebrew }}</div>
             <div class="col-type">{{ (isRecipeDish(recipe) ? 'dish' : 'preparation') | translatePipe }}</div>
             <div class="col-main-category">{{ getRecipeCategoriesDisplay(recipe) || ('no_category' | translatePipe) }}</div>
@@ -146,10 +146,16 @@
               }
             </div>
             <div class="col-actions">
-              <button type="button" class="action-btn edit" (click)="onEditRecipe(recipe)" [attr.aria-label]="'edit' | translatePipe">
+              <button type="button" class="action-btn cook" (click)="onCookRecipe(recipe); $event.stopPropagation()" [attr.aria-label]="'cook' | translatePipe">
+                <lucide-icon name="utensils" [size]="18"></lucide-icon>
+              </button>
+              <button type="button" class="action-btn edit" (click)="onEditRecipe(recipe); $event.stopPropagation()" [attr.aria-label]="'edit' | translatePipe">
                 <lucide-icon name="pencil" [size]="18"></lucide-icon>
               </button>
-              <button type="button" class="action-btn delete" (click)="onDeleteRecipe(recipe)" [attr.aria-label]="'delete' | translatePipe">
+              <button type="button" class="action-btn history" (click)="openHistory(recipe); $event.stopPropagation()" [attr.aria-label]="'history' | translatePipe">
+                <lucide-icon name="history" [size]="18"></lucide-icon>
+              </button>
+              <button type="button" class="action-btn delete" (click)="onDeleteRecipe(recipe); $event.stopPropagation()" [attr.aria-label]="'delete' | translatePipe">
                 <lucide-icon name="trash-2" [size]="18"></lucide-icon>
               </button>
             </div>
@@ -158,4 +164,18 @@
       </div>
     </div>
   </main>
+
+  @if (historyFor_(); as h) {
+    <div class="history-overlay" (click)="closeHistory()">
+      <div class="history-overlay-panel" (click)="$event.stopPropagation()">
+        <app-version-history-panel
+          [entityType]="h.entityType"
+          [entityId]="h.entityId"
+          [entityName]="h.entityName"
+          (closed)="closeHistory()"
+          (restored)="closeHistory()"
+        />
+      </div>
+    </div>
+  }
 </div>
