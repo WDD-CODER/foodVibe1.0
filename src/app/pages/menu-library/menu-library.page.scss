@@ -1,3 +1,8 @@
+/* menu-library.page — cssLayer: global token, five-group vertical rhythm */
 :host {
   display: block;
+
+  min-height: 100vh;
+
+  background-color: var(--bg-warm);
 }

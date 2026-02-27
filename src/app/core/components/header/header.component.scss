@@ -8,21 +8,21 @@
     gap: 1.5rem;
     list-style: none;
     padding: 1rem;
-    background-color: #0f172a; // Slate-900
+    background-color: var(--color-text-main);
 
     li a {
-      color: #94a3b8; // Slate-400
+      color: var(--color-text-muted-light);
       text-decoration: none;
       font-weight: 500;
       transition: color 0.2s ease;
 
       &.active {
-        color: #ffffff;
-        border-bottom: 2px solid #10b981; // Emerald-500 indicator
+        color: var(--bg-pure);
+        border-bottom: 0.125rem solid var(--color-success);
       }
 
       &:hover {
-        color: #f1f5f9;
+        color: var(--bg-muted);
       }
     }
   }

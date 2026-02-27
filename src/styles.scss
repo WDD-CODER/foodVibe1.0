@@ -4,8 +4,67 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Designated global tokens (cssLayer): reuse across components */
 :root {
   font-family: 'Heebo', sans-serif;
+  /* Surfaces */
+  --bg-pure: #fff;
+  --bg-subtle: #f8fafc;
+  --bg-muted: #f1f5f9;
+  --border-default: #e2e8f0;
+  --border-strong: #cbd5e1;
+  /* Text */
+  --color-text-main: #0f172a;
+  --color-text-secondary: #1e293b;
+  --color-text-muted: #64748b;
+  --color-text-muted-light: #94a3b8;
+  --color-text-slate-600: #475569;
+  /* Semantic: success */
+  --color-success: #10b981;
+  --bg-success: #dcfce7;
+  --text-success: #166534;
+  /* Semantic: primary */
+  --color-primary: #0ea5e9;
+  --color-primary-hover: #0284c7;
+  --bg-primary-subtle: #f0f9ff;
+  /* Semantic: warning */
+  --bg-warning: #fef3c7;
+  --text-warning: #92400e;
+  --border-warning: #f59e0b;
+  /* Semantic: danger */
+  --color-danger: #dc2626;
+  --bg-danger-subtle: #fee2e2;
+  /* Menu / parchment theme */
+  --font-serif: 'Cormorant Garamond', 'Georgia', serif;
+  --color-ink: #2c2416;
+  --color-ink-muted: #6b5d4f;
+  --color-frame: #5c4a3a;
+  --color-ornament: #9a7b4f;
+  --border-warm: #c4b8a8;
+  --bg-paper: #f2ebe0;
+  --bg-paper-alt: #faf8ed;
+  --bg-paper-light: #fdf5e6;
+  --bg-paper-dark: #f5f0e0;
+  --color-frame-ink: #4a3c2e;
+  --bg-page-menu: #c8c2b8;
+  /* Legacy / cook-view warm */
+  --bg-warm: #e0d9cc;
+  --color-accent: #0d9488;
+  /* Radii */
+  --radius-thin: 0.125rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 999px;
+  /* Shadows */
+  --shadow-card: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
+  --shadow-modal: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.12);
+  --shadow-focus: 0 0 0 0.125rem rgba(14, 165, 233, 0.1);
+  /* Overlay & breakpoints */
+  --overlay-backdrop: rgba(0, 0, 0, 0.4);
+  --break-sm: 48rem;
+  --break-md: 56.25rem;
 }
 
 html {
