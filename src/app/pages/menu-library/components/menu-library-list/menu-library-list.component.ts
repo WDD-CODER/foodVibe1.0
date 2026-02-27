@@ -3,13 +3,17 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { MenuEventDataService } from '@services/menu-event-data.service';
-import { MenuEvent } from '@models/menu-event.model';
+import { MenuEvent, ServingType } from '@models/menu-event.model';
+import { ConfirmModalService } from '@services/confirm-modal.service';
+
+export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count';
 
 @Component({
   selector: 'app-menu-library-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe],
   templateUrl: './menu-library-list.component.html',
   styleUrl: './menu-library-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -17,11 +21,24 @@ import { MenuEvent } from '@models/menu-event.model';
 export class MenuLibraryListComponent {
   private readonly router = inject(Router);
   private readonly menuEventData = inject(MenuEventDataService);
+  private readonly confirmModal = inject(ConfirmModalService);
 
   protected readonly searchQuery_ = signal('');
   protected readonly eventTypeFilter_ = signal('all');
+  protected readonly servingStyleFilter_ = signal('all');
+  protected readonly dateFrom_ = signal('');
+  protected readonly dateTo_ = signal('');
+  protected readonly sortBy_ = signal<SortField>('date');
+  protected readonly sortOrder_ = signal<'asc' | 'desc'>('desc');
 
   protected readonly events_ = this.menuEventData.allMenuEvents_;
+
+  protected readonly servingStyleOptions_: { value: string; label: string }[] = [
+    { value: 'all', label: 'all' },
+    { value: 'buffet_family', label: 'buffet_family' },
+    { value: 'plated_course', label: 'plated_course' },
+    { value: 'cocktail_passed', label: 'cocktail_passed' },
+  ];
 
   protected readonly eventTypeOptions_ = computed(() => {
     const set = new Set<string>();
@@ -34,17 +51,61 @@ export class MenuLibraryListComponent {
   protected readonly filteredEvents_ = computed(() => {
     const query = this.searchQuery_().trim().toLowerCase();
     const type = this.eventTypeFilter_();
+    const style = this.servingStyleFilter_();
+    const from = this.dateFrom_();
+    const to = this.dateTo_();
+    const sortBy = this.sortBy_();
+    const sortOrder = this.sortOrder_();
 
-    return this.events_().filter(event => {
-      const byType = type === 'all' ? true : event.event_type_ === type;
-      const byQuery =
-        !query ||
-        event.name_.toLowerCase().includes(query) ||
-        event.event_type_.toLowerCase().includes(query) ||
-        (event.event_date_ || '').toLowerCase().includes(query);
-      return byType && byQuery;
+    let events = this.events_().filter(event => {
+      if (type !== 'all' && event.event_type_ !== type) return false;
+      if (style !== 'all' && event.serving_type_ !== style) return false;
+      if (from && event.event_date_ && event.event_date_ < from) return false;
+      if (to && event.event_date_ && event.event_date_ > to) return false;
+      if (from && !to && event.event_date_ && event.event_date_ !== from) return false;
+      if (query) {
+        const haystack = [
+          event.name_,
+          event.event_type_,
+          event.event_date_ || '',
+          ...(event.cuisine_tags_ || []),
+        ].join(' ').toLowerCase();
+        if (!haystack.includes(query)) return false;
+      }
+      return true;
     });
+
+    events = [...events].sort((a, b) => {
+      const cmp = this.compareEvents(a, b, sortBy);
+      return sortOrder === 'asc' ? cmp : -cmp;
+    });
+
+    return events;
   });
+
+  private compareEvents(a: MenuEvent, b: MenuEvent, field: SortField): number {
+    switch (field) {
+      case 'name':
+        return (a.name_ || '').localeCompare(b.name_ || '', 'he');
+      case 'date':
+        return (a.event_date_ || '').localeCompare(b.event_date_ || '');
+      case 'food_cost':
+        return (a.performance_tags_?.food_cost_pct_ ?? 0) - (b.performance_tags_?.food_cost_pct_ ?? 0);
+      case 'guest_count':
+        return (a.guest_count_ ?? 0) - (b.guest_count_ ?? 0);
+      default:
+        return 0;
+    }
+  }
+
+  protected setSort(field: SortField): void {
+    if (this.sortBy_() === field) {
+      this.sortOrder_.update(o => o === 'asc' ? 'desc' : 'asc');
+    } else {
+      this.sortBy_.set(field);
+      this.sortOrder_.set('asc');
+    }
+  }
 
   protected onCreateNew(): void {
     this.router.navigate(['/menu-intelligence']);
@@ -59,8 +120,28 @@ export class MenuLibraryListComponent {
     this.router.navigate(['/menu-intelligence', cloned._id]);
   }
 
+  protected async onDelete(event: MenuEvent): Promise<void> {
+    const ok = await this.confirmModal.open('menu_confirm_delete', {
+      saveLabel: 'delete',
+      variant: 'danger',
+    });
+    if (ok) await this.menuEventData.deleteMenuEvent(event._id);
+  }
+
   protected getFoodCostPctDisplay(event: MenuEvent): string {
     const pct = event.performance_tags_?.food_cost_pct_ ?? 0;
     return `${pct.toFixed(1)}%`;
+  }
+
+  protected getGuestCountDisplay(event: MenuEvent): string {
+    return String(event.guest_count_ || 0);
+  }
+
+  protected getSectionCount(event: MenuEvent): number {
+    return event.sections_?.length || 0;
+  }
+
+  protected getDishCount(event: MenuEvent): number {
+    return (event.sections_ || []).reduce((sum, s) => sum + (s.items_?.length || 0), 0);
   }
 }

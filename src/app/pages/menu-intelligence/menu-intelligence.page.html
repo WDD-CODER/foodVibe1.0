@@ -1,103 +1,210 @@
-<div class="menu-intelligence" dir="rtl">
-  <header class="page-header">
-    <h2>Menu Intelligence</h2>
-    <button type="button" class="save-btn" (click)="save()">
-      <lucide-icon name="save" [size]="16"></lucide-icon>
-      Save Event Menu
+<div class="menu-editor-shell" dir="rtl">
+  <!-- Toolbar (hidden in print) -->
+  <div class="editor-toolbar no-print">
+    <button type="button" class="toolbar-btn back" (click)="goBack()">
+      <lucide-icon name="arrow-right" [size]="18"></lucide-icon>
+      {{ 'menu_library' | translatePipe }}
     </button>
-  </header>
+    <div class="toolbar-actions">
+      <button type="button" class="toolbar-btn export" (click)="printMenu()">
+        <lucide-icon name="printer" [size]="16"></lucide-icon>
+        {{ 'menu_export_customer' | translatePipe }}
+      </button>
+      <button type="button" class="toolbar-btn save" (click)="save()" [disabled]="isSaving_()">
+        <lucide-icon name="save" [size]="16"></lucide-icon>
+        {{ isSaving_() ? ('saving' | translatePipe) : ('menu_save' | translatePipe) }}
+      </button>
+    </div>
+  </div>
 
-  <section class="event-config" [formGroup]="form_">
-    <h3>Event Configuration</h3>
-    <div class="grid">
-      <label>
-        Name
-        <input type="text" formControlName="name_" />
-      </label>
-      <label>
-        Event Type
-        <input type="text" formControlName="event_type_" placeholder="Corporate Buffet, Summer Wedding..." />
-      </label>
-      <label>
-        Date
-        <input type="date" formControlName="event_date_" />
-      </label>
-      <label>
-        Serving Type
-        <select formControlName="serving_type_">
+  <!-- Paper in the middle of the screen -->
+  <div class="paper-outer">
+    <div class="paper" [formGroup]="form_">
+      <div class="paper-inner">
+    <div class="paper-ornament top"></div>
+
+    <!-- Metadata column: title stays, value to the left (RTL: value on right) -->
+    <div class="meta-column">
+      <!-- Menu Name: focus first, placeholder kept -->
+      <div class="meta-row">
+        <label class="meta-label" for="menu-focus-name_">{{ 'menu_name_placeholder' | translatePipe }}</label>
+        <input
+          id="menu-focus-name_"
+          type="text"
+          class="meta-input"
+          formControlName="name_"
+          [placeholder]="'menu_name_placeholder' | translatePipe"
+          (keydown)="onMetaKeydown('name_', $event)"
+        />
+      </div>
+
+      <!-- Event Type: label + value/trigger; click opens dropdown with search + add new -->
+      <div class="meta-row">
+        <span class="meta-label">{{ 'menu_event_type' | translatePipe }}</span>
+        <div class="meta-value-wrap">
+          @if (eventTypeDropdownOpen_()) {
+            <div class="event-type-dropdown">
+              <input
+                id="menu-focus-event_type_search"
+                type="text"
+                class="meta-input event-type-search"
+                [ngModel]="eventTypeSearch_()"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="eventTypeSearch_.set($event)"
+                [placeholder]="'search' | translatePipe"
+                (keydown.escape)="closeEventTypeDropdown(); focusField('event_type_')"
+                (keydown.tab)="closeEventTypeDropdown(); focusField('serving_type_'); $event.preventDefault()"
+                (keydown.enter)="getFilteredEventTypes().length ? selectEventType(getFilteredEventTypes()[0]) : focusField('serving_type_'); $event.preventDefault()"
+              />
+              <div class="event-type-list">
+                @for (t of getFilteredEventTypes(); track t) {
+                  <button type="button" class="dropdown-item" (click)="selectEventType(t)">{{ t }}</button>
+                }
+                <button type="button" class="dropdown-item add-new" (click)="addNewEventType()">
+                  + {{ 'add_new_category' | translatePipe }}
+                </button>
+              </div>
+            </div>
+          } @else {
+            <button type="button" id="menu-focus-event_type_" class="meta-trigger"
+              (click)="openEventTypeDropdown()"
+              (keydown)="onMetaKeydown('event_type_', $event)">
+              {{ form_.value.event_type_ || ('menu_event_type' | translatePipe) }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Serving Type -->
+      <div class="meta-row">
+        <span class="meta-label">{{ 'menu_serving_style' | translatePipe }}</span>
+        <select id="menu-focus-serving_type_" class="meta-input meta-select" formControlName="serving_type_"
+          (keydown)="onMetaKeydown('serving_type_', $event)">
           <option value="buffet_family">Buffet / Family Style</option>
           <option value="plated_course">Plated / Course Based</option>
           <option value="cocktail_passed">Cocktail / Passed</option>
         </select>
-      </label>
-      <label>
-        Guest Count
-        <input type="number" min="1" formControlName="guest_count_" />
-      </label>
-      <label>
-        Pieces Per Person
-        <input type="number" min="0" step="0.1" formControlName="pieces_per_person_" />
-      </label>
-      <label>
-        Revenue Per Guest
-        <input type="number" min="0" step="0.01" formControlName="target_revenue_per_guest_" />
-      </label>
-      <label>
-        Target Food Cost %
-        <input type="number" min="0" step="0.1" formControlName="target_food_cost_pct_" />
-      </label>
-    </div>
-  </section>
+      </div>
 
-  <section class="menu-canvas">
-    <div class="canvas-header">
-      <h3>Menu Canvas</h3>
-      <button type="button" (click)="addSection()">Add Section</button>
+      <!-- Guest Count -->
+      <div class="meta-row">
+        <span class="meta-label">{{ 'menu_guests' | translatePipe }}</span>
+        <input id="menu-focus-guest_count_" type="number" class="meta-input meta-number" formControlName="guest_count_" min="1"
+          (keydown)="onMetaKeydown('guest_count_', $event)" />
+      </div>
+
+      <!-- Event Date -->
+      <div class="meta-row">
+        <span class="meta-label">{{ 'menu_set_date' | translatePipe }}</span>
+        <input id="menu-focus-event_date_" type="date" class="meta-input meta-date" formControlName="event_date_"
+          (keydown)="onMetaKeydown('event_date_', $event)" />
+      </div>
     </div>
 
-    <div class="sections" formArrayName="sections_">
+    <div class="paper-divider"></div>
+
+    <!-- Sections: category looks like plain text; dropdown only on click -->
+    <div class="sections-area" formArrayName="sections_">
       @for (section of sectionsArray.controls; track section.get('_id')?.value; let sectionIndex = $index) {
-        <article class="section-card" [formGroupName]="sectionIndex">
-          <header>
-            <input type="text" formControlName="name_" />
-            <button type="button" class="ghost" (click)="removeSection(sectionIndex)">Remove</button>
-          </header>
+        <div class="menu-section" [formGroupName]="sectionIndex">
+          @if (sectionIndex > 0) {
+            <div class="section-ornament"></div>
+          }
 
-          <div class="items" formArrayName="items_">
-            @for (item of getItemsArray(sectionIndex).controls; track $index; let itemIndex = $index) {
-              <div class="item-row" [formGroupName]="itemIndex">
-                <select formControlName="recipe_id_">
-                  <option value="">Select Dish / Preparation</option>
-                  @for (recipe of recipes_(); track recipe._id) {
-                    <option [value]="recipe._id">{{ recipe.name_hebrew }}</option>
+          <div class="section-header">
+            @if (sectionSearchOpen_() === sectionIndex) {
+              <div class="section-search-wrap">
+                <input
+                  type="text"
+                  class="section-search-input"
+                  [ngModel]="getSectionSearchQuery(sectionIndex)"
+                  [ngModelOptions]="{ standalone: true }"
+                  (ngModelChange)="setSectionSearchQuery(sectionIndex, $event)"
+                  [placeholder]="'menu_search_category' | translatePipe"
+                  (keydown.enter)="addNewSectionCategory(sectionIndex); closeSectionSearch()"
+                  (keydown.escape)="closeSectionSearch()"
+                />
+                <div class="section-dropdown">
+                  @for (cat of getFilteredSectionCategories(sectionIndex); track cat) {
+                    <button type="button" class="dropdown-item" (click)="selectSectionCategory(sectionIndex, cat)">
+                      {{ cat }}
+                    </button>
                   }
-                </select>
-                <input type="number" min="0" max="1" step="0.05" formControlName="predicted_take_rate_" />
-                <span class="derived">
-                  Portions:
-                  {{ getDerivedPortions(item.value) }}
-                </span>
-                <button type="button" class="ghost" (click)="removeItem(sectionIndex, itemIndex)">Remove</button>
+                  @if (getSectionSearchQuery(sectionIndex).trim()) {
+                    <button type="button" class="dropdown-item add-new" (click)="addNewSectionCategory(sectionIndex)">
+                      + {{ getSectionSearchQuery(sectionIndex) }}
+                    </button>
+                  }
+                </div>
+              </div>
+            } @else {
+              <button type="button" class="section-title-plain" (click)="openSectionSearch(sectionIndex)">
+                {{ section.get('name_')?.value || ('menu_section_placeholder' | translatePipe) }}
+              </button>
+            }
+            <button type="button" class="section-remove no-print" (click)="removeSection(sectionIndex)">
+              <lucide-icon name="x" [size]="14"></lucide-icon>
+            </button>
+          </div>
+
+          <div class="dish-list" formArrayName="items_">
+            @for (item of getItemsArray(sectionIndex).controls; track $index; let itemIndex = $index) {
+              <div class="dish-row" [formGroupName]="itemIndex">
+                @if (item.get('recipe_id_')?.value) {
+                  <span class="dish-name">{{ getRecipeName(item.get('recipe_id_')?.value) }}</span>
+                  <span class="dish-qty no-print">{{ getDerivedPortions(item.value) }}</span>
+                  <button type="button" class="dish-remove no-print" (click)="removeItem(sectionIndex, itemIndex)">
+                    <lucide-icon name="x" [size]="14"></lucide-icon>
+                  </button>
+                } @else {
+                  <div class="dish-search-wrap">
+                    <input type="text" class="dish-search-input"
+                      [ngModel]="getDishSearchQuery(sectionIndex, itemIndex)"
+                      [ngModelOptions]="{ standalone: true }"
+                      (ngModelChange)="setDishSearchQuery(sectionIndex, itemIndex, $event)"
+                      [placeholder]="'menu_search_dish' | translatePipe" />
+                    @if (getDishSearchQuery(sectionIndex, itemIndex).trim()) {
+                      <div class="dish-dropdown">
+                        @for (recipe of getFilteredRecipes(sectionIndex, itemIndex); track recipe._id) {
+                          <button type="button" class="dropdown-item" (click)="selectRecipe(sectionIndex, itemIndex, recipe)">
+                            {{ recipe.name_hebrew }}
+                          </button>
+                        }
+                        @if (getFilteredRecipes(sectionIndex, itemIndex).length === 0) {
+                          <span class="dropdown-empty">{{ 'no_recipes_match' | translatePipe }}</span>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
               </div>
             }
           </div>
 
-          <button type="button" class="add-item-btn" (click)="addItem(sectionIndex)">
-            Add Dish Injection
+          <button type="button" class="add-dish-btn no-print" (click)="addItem(sectionIndex)">
+            + {{ 'menu_add_dish' | translatePipe }}
           </button>
-        </article>
+        </div>
       }
     </div>
-  </section>
 
-  <footer class="financial-health">
-    <div>
-      <strong>Event Ingredient Cost:</strong>
-      ₪{{ eventCost_() | number:'1.2-2' }}
+    <button type="button" class="add-section-btn no-print" (click)="addSection()">
+      + {{ 'menu_add_section' | translatePipe }}
+    </button>
+
+    <div class="paper-ornament bottom"></div>
+      </div>
     </div>
-    <div>
-      <strong>Food Cost %:</strong>
-      {{ foodCostPct_() | number:'1.1-1' }}%
+  </div>
+
+  <footer class="financial-bar no-print">
+    <div class="fin-metric">
+      <span class="fin-label">{{ 'menu_total_cost' | translatePipe }}</span>
+      <span class="fin-value">₪{{ eventCost_() | number:'1.2-2' }}</span>
+    </div>
+    <div class="fin-metric">
+      <span class="fin-label">{{ 'menu_food_cost' | translatePipe }} %</span>
+      <span class="fin-value">{{ foodCostPct_() | number:'1.1-1' }}%</span>
     </div>
   </footer>
 </div>

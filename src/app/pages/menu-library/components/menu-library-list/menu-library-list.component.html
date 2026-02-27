@@ -1,43 +1,88 @@
-<div class="menu-library" dir="rtl">
-  <div class="toolbar">
-    <h2>Menu Library</h2>
-    <button type="button" class="create-btn" (click)="onCreateNew()">
-      <lucide-icon name="plus" [size]="16"></lucide-icon>
-      New Event Menu
+<div class="menu-library-container" dir="rtl">
+  <div class="action-bar">
+    <h2 class="page-title">{{ 'menu_library' | translatePipe }}</h2>
+    <div class="search-wrap">
+      <div class="input-wrapper">
+        <lucide-icon name="search" [size]="18"></lucide-icon>
+        <input type="text" [ngModel]="searchQuery_()" (ngModelChange)="searchQuery_.set($event)"
+          [placeholder]="'search' | translatePipe" />
+      </div>
+    </div>
+    <button type="button" class="add-btn" (click)="onCreateNew()">
+      <lucide-icon name="plus" [size]="18"></lucide-icon>
+      {{ 'menu_new_event' | translatePipe }}
     </button>
   </div>
 
-  <div class="filters">
-    <input
-      type="text"
-      [ngModel]="searchQuery_()"
-      (ngModelChange)="searchQuery_.set($event)"
-      placeholder="Search by name, date, or event type"
-    />
-    <select [ngModel]="eventTypeFilter_()" (ngModelChange)="eventTypeFilter_.set($event)">
-      @for (type of eventTypeOptions_(); track type) {
-        <option [value]="type">{{ type }}</option>
-      }
-    </select>
+  <div class="filters-bar">
+    <label class="filter-item">
+      <span>{{ 'menu_event_type' | translatePipe }}</span>
+      <select [ngModel]="eventTypeFilter_()" (ngModelChange)="eventTypeFilter_.set($event)">
+        @for (type of eventTypeOptions_(); track type) {
+          <option [value]="type">{{ type === 'all' ? ('all' | translatePipe) : type }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="filter-item">
+      <span>{{ 'menu_serving_style' | translatePipe }}</span>
+      <select [ngModel]="servingStyleFilter_()" (ngModelChange)="servingStyleFilter_.set($event)">
+        @for (opt of servingStyleOptions_; track opt.value) {
+          <option [value]="opt.value">{{ opt.label | translatePipe }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="filter-item">
+      <span>{{ 'menu_date_from' | translatePipe }}</span>
+      <input type="date" [ngModel]="dateFrom_()" (ngModelChange)="dateFrom_.set($event)" />
+    </label>
+
+    <label class="filter-item">
+      <span>{{ 'menu_date_to' | translatePipe }}</span>
+      <input type="date" [ngModel]="dateTo_()" (ngModelChange)="dateTo_.set($event)" />
+    </label>
+
+    <label class="filter-item">
+      <span>{{ 'sort' | translatePipe }}</span>
+      <select [ngModel]="sortBy_()" (ngModelChange)="sortBy_.set($event)">
+        <option value="date">{{ 'sort_by_date' | translatePipe }}</option>
+        <option value="name">{{ 'sort_by_name' | translatePipe }}</option>
+        <option value="food_cost">{{ 'menu_food_cost' | translatePipe }}</option>
+        <option value="guest_count">{{ 'menu_guest_count' | translatePipe }}</option>
+      </select>
+    </label>
   </div>
 
-  <div class="list">
+  <div class="events-list">
     @if (filteredEvents_().length === 0) {
-      <p class="empty">No menus yet. Create your first event menu.</p>
+      <div class="empty-state">
+        <lucide-icon name="book-open" [size]="48"></lucide-icon>
+        <p>{{ 'menu_empty_library' | translatePipe }}</p>
+      </div>
     }
     @for (event of filteredEvents_(); track event._id) {
-      <article class="card">
-        <div class="meta">
-          <h3>{{ event.name_ }}</h3>
-          <p>{{ event.event_type_ }} · {{ event.event_date_ || 'No date' }}</p>
+      <article class="event-card" (click)="onOpen(event)" tabindex="0" role="button">
+        <div class="card-main">
+          <h3 class="card-title">{{ event.name_ }}</h3>
+          <p class="card-subtitle">{{ event.event_type_ }} · {{ event.event_date_ || ('menu_no_date' | translatePipe) }}</p>
         </div>
-        <div class="tags">
-          <span class="tag">Food Cost: {{ getFoodCostPctDisplay(event) }}</span>
-          <span class="tag">Style: {{ event.serving_type_ }}</span>
+        <div class="card-tags">
+          <span class="tag cost">{{ 'menu_food_cost' | translatePipe }}: {{ getFoodCostPctDisplay(event) }}</span>
+          <span class="tag style">{{ event.serving_type_ | translatePipe }}</span>
+          <span class="tag guests">{{ getGuestCountDisplay(event) }} {{ 'menu_guests' | translatePipe }}</span>
+          <span class="tag sections">{{ getSectionCount(event) }} {{ 'menu_sections' | translatePipe }} · {{ getDishCount(event) }} {{ 'dishes' | translatePipe }}</span>
         </div>
-        <div class="actions">
-          <button type="button" (click)="onOpen(event)">Open</button>
-          <button type="button" (click)="onClone(event)">Clone as New</button>
+        <div class="card-actions" (click)="$event.stopPropagation()">
+          <button type="button" class="action-btn edit" (click)="onOpen(event)" [attr.aria-label]="'edit' | translatePipe">
+            <lucide-icon name="pencil" [size]="18"></lucide-icon>
+          </button>
+          <button type="button" class="action-btn clone" (click)="onClone(event)" [attr.aria-label]="'menu_clone' | translatePipe">
+            <lucide-icon name="copy" [size]="18"></lucide-icon>
+          </button>
+          <button type="button" class="action-btn delete" (click)="onDelete(event)" [attr.aria-label]="'delete' | translatePipe">
+            <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+          </button>
         </div>
       </article>
     }

@@ -35,5 +35,7 @@ export interface MenuEvent {
   sections_: MenuSection[];
   financial_targets_?: MenuFinancialTargets;
   performance_tags_?: MenuPerformanceTags;
+  cuisine_tags_?: string[];
+  created_at_?: number;
   created_from_template_id_?: string;
 }

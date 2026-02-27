@@ -1,12 +1,16 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { MenuEventDataService } from '@services/menu-event-data.service';
 import { MenuIntelligenceService } from '@services/menu-intelligence.service';
+import { UserMsgService } from '@services/user-msg.service';
+import { AddItemModalService } from '@services/add-item-modal.service';
 import { MenuEvent, MenuSection, ServingType } from '@models/menu-event.model';
+import { Recipe } from '@models/recipe.model';
 
 type MenuItemForm = {
   recipe_id_: string;
@@ -14,24 +18,44 @@ type MenuItemForm = {
   predicted_take_rate_: number;
 };
 
+const DEFAULT_SECTION_CATEGORIES = [
+  'Amuse-Bouche', 'Appetizers', 'Soups', 'Salads',
+  'Main Course', 'Sides', 'Desserts', 'Beverages',
+];
+
 @Component({
   selector: 'app-menu-intelligence-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, TranslatePipe],
   templateUrl: './menu-intelligence.page.html',
   styleUrl: './menu-intelligence.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MenuIntelligencePage {
+export class MenuIntelligencePage implements AfterViewInit {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly kitchenState = inject(KitchenStateService);
   private readonly menuEventData = inject(MenuEventDataService);
   private readonly menuIntelligence = inject(MenuIntelligenceService);
+  private readonly userMsg = inject(UserMsgService);
+  private readonly addItemModal = inject(AddItemModalService);
 
   protected readonly editingId_ = signal<string | null>(null);
   protected readonly recipes_ = this.kitchenState.recipes_;
+  protected readonly isSaving_ = signal(false);
+  protected readonly showExport_ = signal(false);
+
+  /** Per-section dish search query signals keyed by section index */
+  protected readonly dishSearchQueries_ = signal<Record<number, string>>({});
+  /** Per-section header search query signals */
+  protected readonly sectionSearchQueries_ = signal<Record<number, string>>({});
+  protected readonly sectionSearchOpen_ = signal<number | null>(null);
+
+  protected readonly sectionCategories_ = signal<string[]>([...DEFAULT_SECTION_CATEGORIES]);
+
+  /** Track saved snapshot for dirty detection */
+  private savedSnapshot_ = '';
 
   protected readonly form_ = this.fb.group({
     name_: ['', Validators.required],
@@ -39,11 +63,18 @@ export class MenuIntelligencePage {
     event_date_: [''],
     serving_type_: ['plated_course' as ServingType, Validators.required],
     guest_count_: [50, [Validators.required, Validators.min(1)]],
-    pieces_per_person_: [0],
-    target_revenue_per_guest_: [0],
-    target_food_cost_pct_: [30],
     sections_: this.fb.array<FormGroup>([]),
   });
+
+  /** Inline-edit state for metadata fields */
+  protected readonly editingField_ = signal<string | null>(null);
+
+  /** Event type dropdown open + search query for filtering */
+  protected readonly eventTypeDropdownOpen_ = signal(false);
+  protected readonly eventTypeSearch_ = signal('');
+
+  /** Focus order for keyboard navigation */
+  protected readonly FOCUS_ORDER = ['name_', 'event_type_', 'serving_type_', 'guest_count_', 'event_date_'] as const;
 
   protected readonly eventCost_ = computed(() => {
     const event = this.buildEventFromForm();
@@ -62,7 +93,124 @@ export class MenuIntelligencePage {
       void this.loadEvent(id);
     } else {
       this.addSection();
+      this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue());
     }
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => this.focusField('name_'), 0);
+  }
+
+  /** Focus a field by name; 'name_' = menu name, then event_type_, serving_type_, guest_count_, event_date_, then 'section_0' */
+  protected focusField(field: string): void {
+    const el = document.getElementById(`menu-focus-${field}`);
+    if (el && typeof (el as HTMLInputElement).focus === 'function') (el as HTMLInputElement).focus();
+    else if (el) el.focus();
+  }
+
+  protected onMetaKeydown(field: string, e: KeyboardEvent): void {
+    if (field === 'event_type_') {
+      if (e.key === 'Enter' || e.key === 'Tab' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        this.openEventTypeDropdown();
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        this.moveFocus(field, -1);
+        return;
+      }
+    }
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault();
+      this.moveFocus(field, 1);
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      this.moveFocus(field, 1);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      this.moveFocus(field, -1);
+    }
+  }
+
+  private moveFocus(currentField: string, direction: number): void {
+    const order: string[] = [...this.FOCUS_ORDER];
+    if (this.sectionsArray.length > 0) order.push('section_0');
+    const idx = order.indexOf(currentField);
+    if (idx < 0) return;
+    const nextIdx = idx + direction;
+    if (nextIdx < 0 || nextIdx >= order.length) return;
+    const next = order[nextIdx];
+    if (next === 'section_0') {
+      this.stopEditField();
+      this.closeEventTypeDropdown();
+      this.openSectionSearch(0);
+      setTimeout(() => {
+        const input = document.querySelector('.section-search-input') as HTMLInputElement;
+        input?.focus();
+      }, 50);
+      return;
+    }
+    this.stopEditField();
+    this.closeEventTypeDropdown();
+    this.focusField(next);
+  }
+
+  protected goBack(): void {
+    this.router.navigate(['/menu-library']);
+  }
+
+  /** Event types: from existing menus + allow add new via AddItemModal */
+  protected readonly eventTypeOptions_ = computed(() => {
+    const set = new Set<string>();
+    this.menuEventData.allMenuEvents_().forEach(ev => { if (ev.event_type_) set.add(ev.event_type_); });
+    return Array.from(set);
+  });
+
+  protected getFilteredEventTypes(): string[] {
+    const q = this.eventTypeSearch_().trim().toLowerCase();
+    const list = this.eventTypeOptions_();
+    if (!q) return list;
+    return list.filter(t => t.toLowerCase().includes(q));
+  }
+
+  protected openEventTypeDropdown(): void {
+    this.eventTypeDropdownOpen_.set(true);
+    this.eventTypeSearch_.set('');
+    this.startEditField('event_type');
+    setTimeout(() => document.getElementById('menu-focus-event_type_search')?.focus(), 50);
+  }
+
+  protected closeEventTypeDropdown(): void {
+    this.eventTypeDropdownOpen_.set(false);
+    this.eventTypeSearch_.set('');
+  }
+
+  protected selectEventType(value: string): void {
+    this.form_.patchValue({ event_type_: value });
+    this.closeEventTypeDropdown();
+    this.stopEditField();
+    this.focusField('serving_type_');
+  }
+
+  protected async addNewEventType(): Promise<void> {
+    const result = await this.addItemModal.open({
+      title: 'add_new_category',
+      label: 'menu_event_type',
+      placeholder: 'menu_event_type',
+      saveLabel: 'save',
+    });
+    if (result?.trim()) {
+      this.form_.patchValue({ event_type_: result.trim() });
+      this.closeEventTypeDropdown();
+      this.stopEditField();
+      this.focusField('serving_type_');
+    }
+  }
+
+  /** For pendingChangesGuard */
+  hasUnsavedEdits(): boolean {
+    return JSON.stringify(this.form_.getRawValue()) !== this.savedSnapshot_;
   }
 
   protected get sectionsArray(): FormArray<FormGroup> {
@@ -73,7 +221,7 @@ export class MenuIntelligencePage {
     this.sectionsArray.push(
       this.fb.group({
         _id: [crypto.randomUUID()],
-        name_: ['Section', Validators.required],
+        name_: [''],
         sort_order_: [this.sectionsArray.length + 1],
         items_: this.fb.array<FormGroup>([]),
       })
@@ -97,6 +245,7 @@ export class MenuIntelligencePage {
         predicted_take_rate_: [0.4, [Validators.required, Validators.min(0), Validators.max(1)]],
       })
     );
+    this.setDishSearchQuery(sectionIndex, items.length - 1, '');
   }
 
   protected removeItem(sectionIndex: number, itemIndex: number): void {
@@ -104,7 +253,11 @@ export class MenuIntelligencePage {
   }
 
   protected getRecipeName(recipeId: string): string {
-    return this.recipes_().find(r => r._id === recipeId)?.name_hebrew || 'Unknown';
+    return this.recipes_().find(r => r._id === recipeId)?.name_hebrew || '';
+  }
+
+  protected isRecipeDish(recipe: Recipe): boolean {
+    return recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.mise_categories_?.length);
   }
 
   protected getDerivedPortions(item: MenuItemForm): number {
@@ -112,25 +265,130 @@ export class MenuIntelligencePage {
       this.form_.value.serving_type_ as ServingType,
       Number(this.form_.value.guest_count_ || 0),
       Number(item.predicted_take_rate_ || 0),
-      Number(this.form_.value.pieces_per_person_ || 0)
+      0
     );
+  }
+
+  protected getDishSearchKey(sectionIndex: number, itemIndex: number): string {
+    return `${sectionIndex}-${itemIndex}`;
+  }
+
+  protected getDishSearchQuery(sectionIndex: number, itemIndex: number): string {
+    const key = this.getDishSearchKey(sectionIndex, itemIndex);
+    const queries: Record<string, string> = this.dishSearchQueries_();
+    return queries[key] ?? '';
+  }
+
+  protected setDishSearchQuery(sectionIndex: number, itemIndex: number, value: string): void {
+    this.dishSearchQueries_.update(q => ({
+      ...q,
+      [this.getDishSearchKey(sectionIndex, itemIndex)]: value,
+    }));
+  }
+
+  protected getFilteredRecipes(sectionIndex: number, itemIndex: number): Recipe[] {
+    const query = this.getDishSearchQuery(sectionIndex, itemIndex).trim().toLowerCase();
+    if (!query) return [];
+    return this.recipes_().filter(r =>
+      (r.name_hebrew ?? '').toLowerCase().includes(query)
+    ).slice(0, 12);
+  }
+
+  protected selectRecipe(sectionIndex: number, itemIndex: number, recipe: Recipe): void {
+    const items = this.getItemsArray(sectionIndex);
+    const group = items.at(itemIndex);
+    group.patchValue({
+      recipe_id_: recipe._id,
+      recipe_type_: this.isRecipeDish(recipe) ? 'dish' : 'preparation',
+    });
+    this.setDishSearchQuery(sectionIndex, itemIndex, '');
+  }
+
+  protected openSectionSearch(index: number): void {
+    this.sectionSearchOpen_.set(index);
+    this.sectionSearchQueries_.update(q => ({ ...q, [index]: '' }));
+  }
+
+  protected closeSectionSearch(): void {
+    this.sectionSearchOpen_.set(null);
+  }
+
+  protected getSectionSearchQuery(index: number): string {
+    return this.sectionSearchQueries_()[index] || '';
+  }
+
+  protected setSectionSearchQuery(index: number, value: string): void {
+    this.sectionSearchQueries_.update(q => ({ ...q, [index]: value }));
+  }
+
+  protected getFilteredSectionCategories(index: number): string[] {
+    const query = this.getSectionSearchQuery(index).trim().toLowerCase();
+    if (!query) return this.sectionCategories_();
+    return this.sectionCategories_().filter(c => c.toLowerCase().includes(query));
+  }
+
+  protected selectSectionCategory(index: number, category: string): void {
+    this.sectionsArray.at(index).get('name_')?.setValue(category);
+    this.closeSectionSearch();
+  }
+
+  protected addNewSectionCategory(index: number): void {
+    const name = this.getSectionSearchQuery(index).trim();
+    if (!name) return;
+    if (!this.sectionCategories_().includes(name)) {
+      this.sectionCategories_.update(cats => [...cats, name]);
+    }
+    this.selectSectionCategory(index, name);
+  }
+
+  protected startEditField(field: string): void {
+    this.editingField_.set(field);
+  }
+
+  protected stopEditField(): void {
+    this.editingField_.set(null);
+  }
+
+  protected getServingTypeLabel(): string {
+    const map: Record<string, string> = {
+      buffet_family: 'Buffet / Family Style',
+      plated_course: 'Plated / Course Based',
+      cocktail_passed: 'Cocktail / Passed',
+    };
+    return map[this.form_.value.serving_type_ || 'plated_course'] || '';
   }
 
   protected async save(): Promise<void> {
     if (this.form_.invalid) {
       this.form_.markAllAsTouched();
+      this.userMsg.onSetErrorMsg('Please fill all required fields');
       return;
     }
 
-    const event = this.menuIntelligence.hydrateDerivedPortions(this.buildEventFromForm());
-    const id = this.editingId_();
-    if (id) {
-      await this.menuEventData.updateMenuEvent({ ...event, _id: id });
-    } else {
-      const created = await this.menuEventData.addMenuEvent(event);
-      this.editingId_.set(created._id);
+    this.isSaving_.set(true);
+    try {
+      const event = this.menuIntelligence.hydrateDerivedPortions(this.buildEventFromForm());
+      const id = this.editingId_();
+      if (id) {
+        await this.menuEventData.updateMenuEvent({ ...event, _id: id });
+      } else {
+        const created = await this.menuEventData.addMenuEvent(event);
+        this.editingId_.set(created._id);
+      }
+      this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue());
+      this.userMsg.onSetSuccessMsg('Menu saved successfully');
+      this.router.navigate(['/menu-library']);
+    } finally {
+      this.isSaving_.set(false);
     }
-    this.router.navigate(['/menu-library']);
+  }
+
+  protected toggleExport(): void {
+    this.showExport_.update(v => !v);
+  }
+
+  protected printMenu(): void {
+    window.print();
   }
 
   private async loadEvent(id: string): Promise<void> {
@@ -141,9 +399,6 @@ export class MenuIntelligencePage {
       event_date_: event.event_date_ || '',
       serving_type_: event.serving_type_,
       guest_count_: event.guest_count_,
-      pieces_per_person_: event.pieces_per_person_ || 0,
-      target_revenue_per_guest_: event.financial_targets_?.target_revenue_per_guest_ || 0,
-      target_food_cost_pct_: event.financial_targets_?.target_food_cost_pct_ || 30,
     });
 
     this.sectionsArray.clear();
@@ -166,13 +421,14 @@ export class MenuIntelligencePage {
       });
       this.sectionsArray.push(sectionGroup);
     });
+
+    this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue());
   }
 
   private buildEventFromForm(): Omit<MenuEvent, '_id'> {
     const raw = this.form_.getRawValue();
     const servingType = raw.serving_type_ as ServingType;
     const guestCount = Number(raw.guest_count_ || 0);
-    const piecesPerPerson = Number(raw.pieces_per_person_ || 0);
 
     const sections: MenuSection[] = (raw.sections_ || []).map((section: any, index: number) => ({
       _id: section._id,
@@ -183,10 +439,7 @@ export class MenuIntelligencePage {
         recipe_type_: item.recipe_type_,
         predicted_take_rate_: Number(item.predicted_take_rate_ || 0),
         derived_portions_: this.menuIntelligence.derivePortions(
-          servingType,
-          guestCount,
-          Number(item.predicted_take_rate_ || 0),
-          piecesPerPerson
+          servingType, guestCount, Number(item.predicted_take_rate_ || 0), 0
         ),
       })),
     }));
@@ -198,11 +451,10 @@ export class MenuIntelligencePage {
       event_date_: raw.event_date_ || '',
       serving_type_: servingType,
       guest_count_: guestCount,
-      pieces_per_person_: piecesPerPerson > 0 ? piecesPerPerson : undefined,
       sections_: sections,
       financial_targets_: {
-        target_food_cost_pct_: Number(raw.target_food_cost_pct_ || 30),
-        target_revenue_per_guest_: Number(raw.target_revenue_per_guest_ || 0),
+        target_food_cost_pct_: 30,
+        target_revenue_per_guest_: 0,
       },
       performance_tags_: {
         food_cost_pct_: 0,
