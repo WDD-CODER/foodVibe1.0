@@ -64,6 +64,7 @@ Skills are reusable multi-step workflows in `.assistant/skills/`:
 | `techdebt` | Find duplicated code, dead code, TODO audit | End of session, before PRs |
 | `update-docs` | Refresh breadcrumbs, agent docs, project docs | After completing features |
 | `elegant-fix` | Refine a hacky solution into an elegant one | After a fix that feels wrong |
+| `cssLayer` | Tokens, five-group rhythm, nesting for styles | Before any new or edited `.scss`/`.css` in `src/` — read SKILL.md first |
 
 ### Commit to GitHub (MANDATORY — every chat, no exceptions)
 
@@ -136,6 +137,7 @@ Agents share context through:
     3. Content (bg, color, font) 
     4. Structure (border, shadow) 
     5. Effects (transition, transform).
+* **CSS/SCSS (MANDATORY)**: Before creating or editing any `.scss` or `.css` under `src/`, you MUST read `.assistant/skills/cssLayer/SKILL.md` and apply it. No exceptions.
 
 ## 5. Security & QA
 * **Secrets**: Read from `.env` only. Ensure `.env*` and local configs are in `.gitignore`. **NEVER** hardcode keys.
