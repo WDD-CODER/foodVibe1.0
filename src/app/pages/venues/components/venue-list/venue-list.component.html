@@ -1,0 +1,56 @@
+<div class="venue-list-container" dir="rtl">
+  <header class="list-header">
+    <h2 class="page-title">{{ 'venue_list' | translatePipe }}</h2>
+  </header>
+
+  <div class="toolbar">
+    <div class="search-section">
+      <label class="visually-hidden" for="venue-search">{{ 'search' | translatePipe }}</label>
+      <div class="input-wrapper">
+        <lucide-icon name="search" [size]="18"></lucide-icon>
+        <input
+          id="venue-search"
+          type="text"
+          [ngModel]="searchQuery_()"
+          (ngModelChange)="searchQuery_.set($event)"
+          [placeholder]="'search' | translatePipe"
+        />
+      </div>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="venue-table">
+      <thead>
+        <tr>
+          <th class="col-name">{{ 'name' | translatePipe }}</th>
+          <th class="col-env">{{ 'environment_type' | translatePipe }}</th>
+          <th class="col-infra">{{ 'infrastructure_items' | translatePipe }}</th>
+          <th class="col-actions">{{ 'actions' | translatePipe }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (filteredVenues_().length === 0) {
+          <tr>
+            <td colspan="4" class="no-results">{{ 'no_venues_match' | translatePipe }}</td>
+          </tr>
+        }
+        @for (item of filteredVenues_(); track item._id) {
+          <tr>
+            <td class="col-name">{{ item.name_hebrew }}</td>
+            <td class="col-env">{{ item.environment_type_ | translatePipe }}</td>
+            <td class="col-infra">{{ item.available_infrastructure_.length }}</td>
+            <td class="col-actions">
+              <button type="button" class="btn-icon" (click)="onEdit(item._id)" [attr.aria-label]="'edit' | translatePipe">
+                <lucide-icon name="pencil" [size]="18"></lucide-icon>
+              </button>
+              <button type="button" class="btn-icon" (click)="onDelete(item)" [attr.aria-label]="'delete' | translatePipe">
+                <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

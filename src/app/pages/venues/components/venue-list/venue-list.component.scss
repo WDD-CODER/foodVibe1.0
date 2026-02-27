@@ -1,0 +1,118 @@
+/* Venue list — cssLayer: global tokens, Five-Group rhythm */
+
+:host {
+  display: block;
+}
+
+.venue-list-container {
+  .list-header {
+    margin-block-end: 1rem;
+
+    .page-title {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+  }
+
+  .toolbar {
+    margin-block-end: 1rem;
+
+    .search-section .input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      max-width: 17.5rem;
+      padding-inline: 0.75rem;
+      padding-block: 0.5rem;
+
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+
+      input {
+        flex: 1;
+        border: none;
+        outline: none;
+      }
+    }
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    background: var(--bg-glass-strong);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-glass);
+    backdrop-filter: var(--blur-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+  }
+
+  .venue-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+      padding-inline: 0.75rem;
+      padding-block: 0.625rem;
+      border-block-end: 1px solid var(--border-default);
+      text-align: end;
+    }
+
+    th {
+      background: var(--bg-glass);
+      color: var(--color-text-muted);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      backdrop-filter: var(--blur-glass);
+    }
+
+    .col-name {
+      min-width: 10rem;
+    }
+    .col-env {
+      min-width: 7.5rem;
+    }
+    .col-infra {
+      width: 5rem;
+    }
+    .col-actions {
+      width: 6.25rem;
+    }
+
+    .no-results {
+      padding: 2rem;
+      color: var(--color-text-muted);
+      text-align: center;
+    }
+
+    .btn-icon {
+      padding: 0.25rem;
+      margin-inline-start: 0.25rem;
+
+      background: none;
+      border: none;
+      color: var(--color-text-muted);
+
+      cursor: pointer;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: var(--color-text-main);
+      }
+    }
+  }
+
+  .visually-hidden {
+    position: absolute;
+    inset: 0;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+}

@@ -1,0 +1,5 @@
+[
+  {"_id":"ven_001","name_hebrew":"מטבח סטודיו (מקצועי)","environment_type_":"professional_kitchen","available_infrastructure_":[{"equipment_id_":"eq_001","available_quantity_":4},{"equipment_id_":"eq_003","available_quantity_":2},{"equipment_id_":"eq_004","available_quantity_":10},{"equipment_id_":"eq_005","available_quantity_":6}],"created_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"ven_002","name_hebrew":"חתונה בחורשה","environment_type_":"outdoor_field","available_infrastructure_":[{"equipment_id_":"eq_002","available_quantity_":0},{"equipment_id_":"eq_007","available_quantity_":0},{"equipment_id_":"eq_008","available_quantity_":0}],"notes_":"אין תשתית – להביא הכל","created_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"ven_003","name_hebrew":"בית לקוח (הגשה)","environment_type_":"client_home","available_infrastructure_":[{"equipment_id_":"eq_001","available_quantity_":1},{"equipment_id_":"eq_009","available_quantity_":0}],"notes_":"אריזה להבאה","created_at_":"2025-01-01T00:00:00.000Z"}
+]

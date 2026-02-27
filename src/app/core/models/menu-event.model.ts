@@ -1,3 +1,5 @@
+import type { EventLogistics } from './logistics.model';
+
 export type ServingType = 'buffet_family' | 'plated_course' | 'cocktail_passed';
 
 export interface MenuFinancialTargets {
@@ -38,4 +40,6 @@ export interface MenuEvent {
   cuisine_tags_?: string[];
   created_at_?: number;
   created_from_template_id_?: string;
+  /** Resolved equipment + venue context (contextual logistics) */
+  logistics_?: EventLogistics;
 }

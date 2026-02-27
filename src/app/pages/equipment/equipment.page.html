@@ -1,0 +1,8 @@
+<nav class="equipment-nav" dir="rtl">
+  @for (item of navRoutes_(); track item.path) {
+    <a [routerLink]="item.path" routerLinkActive="active" class="nav-link">
+      {{ item.labelKey | translatePipe }}
+    </a>
+  }
+</nav>
+<router-outlet></router-outlet>

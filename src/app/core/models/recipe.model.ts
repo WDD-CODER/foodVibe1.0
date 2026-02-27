@@ -1,4 +1,5 @@
 import { Ingredient } from './ingredient.model';
+import type { DishLogistics } from './logistics.model';
 
 export interface RecipeStep {
   order_: number;
@@ -50,4 +51,6 @@ export interface Recipe {
   prep_items_?: FlatPrepItem[];
   /** For recipe_type === 'dish': grouped by category (backward compat) */
   prep_categories_?: PrepCategory[];
+  /** Baseline equipment + service-style overrides (contextual logistics) */
+  logistics_?: DishLogistics;
 }

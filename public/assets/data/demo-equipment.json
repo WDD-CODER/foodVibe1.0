@@ -1,0 +1,12 @@
+[
+  {"_id":"eq_001","name_hebrew":"כיריים/תנור","category_":"heat_source","owned_quantity_":2,"scaling_rule_":{"per_guests_":25,"min_quantity_":1,"max_quantity_":8},"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_002","name_hebrew":"מבער גז נייד","category_":"heat_source","owned_quantity_":4,"scaling_rule_":{"per_guests_":30,"min_quantity_":1,"max_quantity_":10},"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_003","name_hebrew":"בלנדר מהיר","category_":"tool","owned_quantity_":1,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_004","name_hebrew":"מחבת","category_":"container","owned_quantity_":6,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_005","name_hebrew":"סיר","category_":"container","owned_quantity_":4,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_006","name_hebrew":"מכל אירופום","category_":"tool","owned_quantity_":1,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_007","name_hebrew":"קרח (ק\"ג)","category_":"consumable","owned_quantity_":0,"scaling_rule_":{"per_guests_":10,"min_quantity_":5,"max_quantity_":200},"is_consumable_":true,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_008","name_hebrew":"גז (מכל)","category_":"consumable","owned_quantity_":0,"scaling_rule_":{"per_guests_":50,"min_quantity_":1,"max_quantity_":20},"is_consumable_":true,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_009","name_hebrew":"מגש הגשה","category_":"packaging","owned_quantity_":20,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_010","name_hebrew":"קופסת טייק אווי מאווררת","category_":"packaging","owned_quantity_":30,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"}
+]

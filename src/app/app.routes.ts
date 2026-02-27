@@ -1,9 +1,51 @@
 import { Routes } from '@angular/router';
 import { productResolver } from './core/resolvers/product.resolver';
 import { recipeResolver } from './core/resolvers/recipe.resolver';
+import { equipmentResolver } from './core/resolvers/equipment.resolver';
+import { venueResolver } from './core/resolvers/venue.resolver';
 import { pendingChangesGuard } from './core/guards/pending-changes.guard';
 
 export const routes: Routes = [
+  {
+    path: 'equipment',
+    loadComponent: () => import('./pages/equipment/equipment.page').then(m => m.EquipmentPage),
+    children: [
+      { path: '', redirectTo: 'list', pathMatch: 'full' },
+      {
+        path: 'list',
+        loadComponent: () => import('./pages/equipment/components/equipment-list/equipment-list.component').then(m => m.EquipmentListComponent),
+      },
+      {
+        path: 'add',
+        loadComponent: () => import('./pages/equipment/components/equipment-form/equipment-form.component').then(m => m.EquipmentFormComponent),
+      },
+      {
+        path: 'edit/:id',
+        loadComponent: () => import('./pages/equipment/components/equipment-form/equipment-form.component').then(m => m.EquipmentFormComponent),
+        resolve: { equipment: equipmentResolver },
+      },
+    ],
+  },
+  {
+    path: 'venues',
+    loadComponent: () => import('./pages/venues/venues.page').then(m => m.VenuesPage),
+    children: [
+      { path: '', redirectTo: 'list', pathMatch: 'full' },
+      {
+        path: 'list',
+        loadComponent: () => import('./pages/venues/components/venue-list/venue-list.component').then(m => m.VenueListComponent),
+      },
+      {
+        path: 'add',
+        loadComponent: () => import('./pages/venues/components/venue-form/venue-form.component').then(m => m.VenueFormComponent),
+      },
+      {
+        path: 'edit/:id',
+        loadComponent: () => import('./pages/venues/components/venue-form/venue-form.component').then(m => m.VenueFormComponent),
+        resolve: { venue: venueResolver },
+      },
+    ],
+  },
   {
     path: 'inventory',
     loadComponent: () => import('./pages/inventory/inventory.page').then(m => m.InventoryPage),

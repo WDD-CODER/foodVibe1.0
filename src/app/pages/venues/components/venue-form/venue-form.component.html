@@ -1,0 +1,63 @@
+<div class="venue-form-container" dir="rtl">
+  <header class="form-header">
+    @if (isEditMode_()) {
+      <h2>{{ 'edit' | translatePipe }}: {{ venueForm_.get('name_hebrew')?.value }}</h2>
+    } @else {
+      <h2>{{ 'add_venue' | translatePipe }}</h2>
+    }
+  </header>
+
+  <form [formGroup]="venueForm_" (ngSubmit)="onSubmit()" class="form-body">
+    <div class="form-section">
+      <div class="form-group">
+        <label for="name_hebrew">{{ 'name' | translatePipe }}</label>
+        <input id="name_hebrew" type="text" formControlName="name_hebrew" />
+      </div>
+      <div class="form-group">
+        <label for="environment_type_">{{ 'environment_type' | translatePipe }}</label>
+        <select id="environment_type_" formControlName="environment_type_">
+          @for (env of envTypes; track env) {
+            <option [value]="env">{{ env | translatePipe }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="notes_">{{ 'notes' | translatePipe }}</label>
+        <textarea id="notes_" formControlName="notes_" rows="2"></textarea>
+      </div>
+    </div>
+
+    <div class="form-section infra-section" formArrayName="available_infrastructure_">
+      <div class="infra-header">
+        <h3>{{ 'available_infrastructure' | translatePipe }}</h3>
+        <button type="button" class="btn btn-add" (click)="addInfraRow()">
+          <lucide-icon name="plus" [size]="16"></lucide-icon>
+          {{ 'add_row' | translatePipe }}
+        </button>
+      </div>
+      @for (ctrl of infraArray.controls; track $index; let i = $index) {
+        <div class="infra-row" [formGroupName]="i">
+          <select formControlName="equipment_id_">
+            <option value="">{{ 'choose_equipment' | translatePipe }}</option>
+            @for (eq of allEquipment_; track eq._id) {
+              <option [value]="eq._id">{{ eq.name_hebrew }}</option>
+            }
+          </select>
+          <input type="number" formControlName="available_quantity_" min="0" placeholder="0" />
+          <button type="button" class="btn-icon" (click)="removeInfraRow(i)" [attr.aria-label]="'remove' | translatePipe">
+            <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+          </button>
+        </div>
+      }
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="onCancel()">
+        {{ 'cancel' | translatePipe }}
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="venueForm_.invalid">
+        {{ 'save' | translatePipe }}
+      </button>
+    </div>
+  </form>
+</div>

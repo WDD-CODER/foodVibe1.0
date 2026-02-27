@@ -1,0 +1,77 @@
+<div class="equipment-list-container" dir="rtl">
+  <header class="list-header">
+    <h2 class="page-title">{{ 'equipment_list' | translatePipe }}</h2>
+  </header>
+
+  <div class="toolbar">
+    <div class="search-section">
+      <label class="visually-hidden" for="equipment-search">{{ 'search' | translatePipe }}</label>
+      <div class="input-wrapper">
+        <lucide-icon name="search" [size]="18"></lucide-icon>
+        <input
+          id="equipment-search"
+          type="text"
+          [ngModel]="searchQuery_()"
+          (ngModelChange)="searchQuery_.set($event)"
+          [placeholder]="'search' | translatePipe"
+        />
+      </div>
+    </div>
+    <div class="filter-section">
+      <label for="category-filter">{{ 'category' | translatePipe }}</label>
+      <select
+        id="category-filter"
+        [ngModel]="categoryFilter_()"
+        (ngModelChange)="categoryFilter_.set($event)"
+      >
+        <option value="">{{ 'all' | translatePipe }}</option>
+        @for (cat of categories; track cat) {
+          <option [value]="cat">{{ categoryLabel(cat) | translatePipe }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="equipment-table">
+      <thead>
+        <tr>
+          <th class="col-name sortable" (click)="setSort('name')" role="button" tabindex="0">
+            {{ 'name' | translatePipe }}
+          </th>
+          <th class="col-category sortable" (click)="setSort('category')" role="button" tabindex="0">
+            {{ 'category' | translatePipe }}
+          </th>
+          <th class="col-owned sortable" (click)="setSort('owned')" role="button" tabindex="0">
+            {{ 'owned_quantity' | translatePipe }}
+          </th>
+          <th class="col-consumable">{{ 'is_consumable' | translatePipe }}</th>
+          <th class="col-actions">{{ 'actions' | translatePipe }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (filteredEquipment_().length === 0) {
+          <tr>
+            <td colspan="5" class="no-results">{{ 'no_equipment_match' | translatePipe }}</td>
+          </tr>
+        }
+        @for (item of filteredEquipment_(); track item._id) {
+          <tr>
+            <td class="col-name">{{ item.name_hebrew }}</td>
+            <td class="col-category">{{ item.category_ | translatePipe }}</td>
+            <td class="col-owned">{{ item.owned_quantity_ }}</td>
+            <td class="col-consumable">{{ item.is_consumable_ ? ('approved_yes' | translatePipe) : ('approved_no' | translatePipe) }}</td>
+            <td class="col-actions">
+              <button type="button" class="btn-icon" (click)="onEdit(item._id)" [attr.aria-label]="'edit' | translatePipe">
+                <lucide-icon name="pencil" [size]="18"></lucide-icon>
+              </button>
+              <button type="button" class="btn-icon" (click)="onDelete(item)" [attr.aria-label]="'delete' | translatePipe">
+                <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

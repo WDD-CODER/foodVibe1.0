@@ -1,0 +1,75 @@
+<div class="equipment-form-container" dir="rtl">
+  <header class="form-header">
+    @if (isEditMode_()) {
+      <h2>{{ 'edit' | translatePipe }}: {{ equipmentForm_.get('name_hebrew')?.value }}</h2>
+    } @else {
+      <h2>{{ 'add_equipment' | translatePipe }}</h2>
+    }
+  </header>
+
+  <form [formGroup]="equipmentForm_" (ngSubmit)="onSubmit()" class="form-body">
+    <div class="form-section">
+      <div class="form-group">
+        <label for="name_hebrew">{{ 'name' | translatePipe }}</label>
+        <input id="name_hebrew" type="text" formControlName="name_hebrew" />
+      </div>
+      <div class="form-group">
+        <label for="category_">{{ 'category' | translatePipe }}</label>
+        <select id="category_" formControlName="category_">
+          @for (cat of categories; track cat) {
+            <option [value]="cat">{{ cat | translatePipe }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="owned_quantity_">{{ 'owned_quantity' | translatePipe }}</label>
+        <input id="owned_quantity_" type="number" formControlName="owned_quantity_" min="0" />
+      </div>
+      <div class="form-group checkbox-group">
+        <label>
+          <input type="checkbox" formControlName="is_consumable_" />
+          {{ 'is_consumable' | translatePipe }}
+        </label>
+      </div>
+      <div class="form-group">
+        <label for="notes_">{{ 'notes' | translatePipe }}</label>
+        <textarea id="notes_" formControlName="notes_" rows="2"></textarea>
+      </div>
+    </div>
+
+    <div class="form-section scaling-section">
+      <h3>{{ 'scaling_rule' | translatePipe }}</h3>
+      <div class="form-group checkbox-group">
+        <label>
+          <input type="checkbox" formControlName="scaling_enabled_" />
+          {{ 'scaling_enabled' | translatePipe }}
+        </label>
+      </div>
+      @if (equipmentForm_.get('scaling_enabled_')?.value) {
+        <div class="scaling-fields">
+          <div class="form-group">
+            <label for="per_guests_">{{ 'per_guests' | translatePipe }}</label>
+            <input id="per_guests_" type="number" formControlName="per_guests_" min="1" />
+          </div>
+          <div class="form-group">
+            <label for="min_quantity_">{{ 'min_quantity' | translatePipe }}</label>
+            <input id="min_quantity_" type="number" formControlName="min_quantity_" min="0" />
+          </div>
+          <div class="form-group">
+            <label for="max_quantity_">{{ 'max_quantity' | translatePipe }}</label>
+            <input id="max_quantity_" type="number" formControlName="max_quantity_" min="0" placeholder="—" />
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="onCancel()">
+        {{ 'cancel' | translatePipe }}
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="equipmentForm_.invalid">
+        {{ 'save' | translatePipe }}
+      </button>
+    </div>
+  </form>
+</div>
