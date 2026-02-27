@@ -3,7 +3,7 @@ import { User } from '../models/user.model';
 import { Product } from '@models/product.model';
 
 const LOGGED_IN_USER = 'signed-user'
-const SINGED_USERS = 'signed-users-db'
+const SIGNED_USERS = 'signed-users-db'
 
 
 @Injectable({
@@ -20,11 +20,11 @@ export class UtilService {
   }
 
   LoadFromStorage() {
-    return JSON.parse(localStorage.getItem(SINGED_USERS) || 'null')
+    return JSON.parse(localStorage.getItem(SIGNED_USERS) || 'null')
   }
 
   saveToStorage(entity: User[]): void {
-    localStorage.setItem(SINGED_USERS, JSON.stringify(entity))
+    localStorage.setItem(SIGNED_USERS, JSON.stringify(entity))
   }
 
 

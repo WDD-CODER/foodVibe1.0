@@ -7,7 +7,7 @@ import { UserMsgService } from './user-msg.service';
 import {  StorageService } from './async-storage.service';
 
 
-const SINGED_USERS = 'signed-users-db'
+const SIGNED_USERS = 'signed-users-db'
 @Injectable({
   providedIn: 'root',
 })
@@ -27,12 +27,12 @@ export class UserService {
   public user_ = this._user_.asReadonly()
 
   public signup(newUser: User) {
-    return from(this.storageService.query<User>(SINGED_USERS)).pipe(
+    return from(this.storageService.query<User>(SIGNED_USERS)).pipe(
       map(users => users.find(_user => _user.name === newUser.name)),
       switchMap(user => user ?
         of(user)
         :
-        from(this.storageService.post(SINGED_USERS, newUser))),
+        from(this.storageService.post(SIGNED_USERS, newUser))),
       tap(user => {
         this.userMsgService.onSetSuccessMsg('Signup Successfully ')
         this._saveUserLocal(user)
@@ -48,7 +48,7 @@ export class UserService {
   }
 
   public login(userName: string) {
-    return from(this.storageService.query<User>(SINGED_USERS)).pipe(
+    return from(this.storageService.query<User>(SIGNED_USERS)).pipe(
       map(users => users.find(_user => _user.name === userName)),
       filter(user => !!user),
       tap(user => {

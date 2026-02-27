@@ -9,7 +9,14 @@ export type EntityId = {
 })
 export class StorageService {
   async query<T>(entityType: string, delay = 100): Promise<T[]> {
-    const entities = JSON.parse(localStorage.getItem(entityType) || 'null') || [];
+    let entities: T[] = [];
+    try {
+      const raw = localStorage.getItem(entityType) || 'null';
+      const parsed = JSON.parse(raw);
+      entities = Array.isArray(parsed) ? parsed : parsed ? [parsed] : [];
+    } catch {
+      entities = [];
+    }
     if (delay) {
       return new Promise((resolve) => setTimeout(resolve, delay, entities));
     }

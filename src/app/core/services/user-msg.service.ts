@@ -1,31 +1,31 @@
 import { Injectable, signal } from '@angular/core';
 import { concatMap, delay, of, Subject, tap } from 'rxjs';
 import { Msg } from '../models/msg.model';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root',
 })
 
 export class UserMsgService {
-  
-  private _msg_ =signal<Msg | null>(null)
-  public msg_ = this._msg_.asReadonly()
 
-  private _msgQueue$ = new Subject<Msg>()
+  private _msg_ = signal<Msg | null>(null);
+  public msg_ = this._msg_.asReadonly();
+
+  private _msgQueue$ = new Subject<Msg>();
   private _msgQueueTimeOut$ = this._msgQueue$.pipe(
     concatMap(msg => {
       return of(msg).pipe(
         delay(0),
-        tap(msg => this._msg_.set(msg)),
+        tap(m => this._msg_.set(m)),
         delay(2000),
         tap(() => this._msg_.set(null))
-      )
+      );
     })
-  )
+  );
 
   constructor() {
-    this._msgQueueTimeOut$.pipe(takeUntilDestroyed()).subscribe()
+    // Root service: subscription lives for app lifetime; takeUntilDestroyed is for components only.
+    this._msgQueueTimeOut$.subscribe();
   }
 
   CloseMsg() {
