@@ -26,6 +26,7 @@ export class TrashPage implements OnInit {
   private readonly confirmModal = inject(ConfirmModalService);
 
   readonly loading = signal(true);
+  readonly loadError = signal<string | null>(null);
 
   readonly dishes = this.trash.trashDishes;
   readonly recipes = this.trash.trashRecipes;
@@ -34,14 +35,24 @@ export class TrashPage implements OnInit {
   readonly historyFor_ = signal<{ entityType: VersionEntityType; entityId: string; entityName: string } | null>(null);
 
   async ngOnInit(): Promise<void> {
-    await this.trash.loadTrash();
-    this.loading.set(false);
+    await this.loadTrashInternal();
   }
 
   async refresh(): Promise<void> {
+    this.loadError.set(null);
+    await this.loadTrashInternal();
+  }
+
+  private async loadTrashInternal(): Promise<void> {
     this.loading.set(true);
-    await this.trash.loadTrash();
-    this.loading.set(false);
+    this.loadError.set(null);
+    try {
+      await this.trash.loadTrash();
+    } catch (err) {
+      this.loadError.set(err instanceof Error ? err.message : 'שגיאה בטעינת האשפה');
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   formatDeletedAt(ts: number): string {

@@ -40,6 +40,7 @@ export class VersionHistoryPanelComponent {
 
   readonly versions = signal<VersionEntry[]>([]);
   readonly loading = signal(false);
+  readonly loadError = signal<string | null>(null);
 
   constructor() {
     effect(() => {
@@ -51,9 +52,12 @@ export class VersionHistoryPanelComponent {
 
   private async loadVersions(entityType: VersionEntityType, entityId: string): Promise<void> {
     this.loading.set(true);
+    this.loadError.set(null);
     try {
       const list = await this.versionHistory.getVersions(entityType, entityId);
       this.versions.set(list);
+    } catch {
+      this.loadError.set('שגיאה בטעינת הגרסאות');
     } finally {
       this.loading.set(false);
     }

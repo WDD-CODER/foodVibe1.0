@@ -5,6 +5,8 @@
   </div>
   @if (loading()) {
     <p class="panel-loading">{{ 'pending' | translatePipe }}</p>
+  } @else if (loadError()) {
+    <p class="panel-error">{{ loadError() }}</p>
   } @else if (versions().length === 0) {
     <p class="panel-empty">{{ 'history_no_versions' | translatePipe }}</p>
   } @else {

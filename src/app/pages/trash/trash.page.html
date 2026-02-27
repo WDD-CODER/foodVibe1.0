@@ -8,6 +8,9 @@
 
   @if (loading()) {
     <p class="trash-loading">{{ 'pending' | translatePipe }}</p>
+  } @else if (loadError()) {
+    <p class="trash-error">{{ loadError() }}</p>
+    <button type="button" class="btn-refresh" (click)="refresh()">רענן שוב</button>
   } @else {
     <div class="trash-sections">
       <!-- 1. Dishes -->
