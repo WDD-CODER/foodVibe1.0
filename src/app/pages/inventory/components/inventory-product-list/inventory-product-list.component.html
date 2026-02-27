@@ -6,9 +6,12 @@
     <h2 class="page-title">{{ 'product_list' | translatePipe }}</h2>
   </div>
 
-  <aside class="action-sidebar" [class.open]="isSidebarOpen_()">
-    <div class="sidebar-content">
-      <button type="button" class="sidebar-close-btn" (click)="toggleSidebar()" [attr.aria-label]="'close' | translatePipe">
+  <aside class="action-sidebar" [class.open]="isSidebarOpen_()" [style.--sidebar-swipe-offset.px]="sidebarSwipeOffset_()">
+    <div class="sidebar-content"
+      (touchstart)="onSidebarTouchStart($event)"
+      (touchmove)="onSidebarTouchMove($event)"
+      (touchend)="onSidebarTouchEnd()">
+      <button type="button" class="sidebar-close-btn desktop-only" (click)="toggleSidebar()" [attr.aria-label]="'close' | translatePipe">
         <lucide-icon name="x" [size]="20"></lucide-icon>
       </button>
       <div class="search-section">
@@ -23,15 +26,20 @@
         <h3>{{ 'filter' | translatePipe }}</h3>
         @for (category of filterCategories_(); track category.name) {
           <div class="filter-category">
-            <h4>{{ category.name | translatePipe }}</h4>
-            <div class="filter-options">
-              @for (option of category.options; track option.value) {
-                <label class="filter-option">
-                  <input type="checkbox" [checked]="option.checked_" (change)="toggleFilter(category.name, option.value)" />
-                  <span>{{ option.label | translatePipe }}</span>
-                </label>
-              }
-            </div>
+            <button type="button" class="filter-category-header" [class.expanded]="isCategoryExpanded(category.name)" (click)="toggleFilterCategory(category.name)">
+              <span>{{ category.displayKey | translatePipe }}</span>
+              <lucide-icon [name]="isCategoryExpanded(category.name) ? 'chevron-down' : 'chevron-left'" [size]="16"></lucide-icon>
+            </button>
+            @if (isCategoryExpanded(category.name)) {
+              <div class="filter-options">
+                @for (option of category.options; track option.value) {
+                  <label class="filter-option">
+                    <input type="checkbox" [checked]="option.checked_" (change)="toggleFilter(category.name, option.value)" />
+                    <span>{{ option.label | translatePipe }}</span>
+                  </label>
+                }
+              </div>
+            }
           </div>
         }
       </div>

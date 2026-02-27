@@ -4,14 +4,16 @@ $mobile-breakpoint: 768px;
 .recipe-book-container {
   display: grid;
   grid-template-columns: auto 1fr;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto auto;
   grid-template-areas:
     "header header"
     "sidebar table";
   min-height: 100%;
+  height: 100vh;
   padding: 20px;
   gap: 0;
-  overflow: hidden;
+  overflow: auto;
+  box-sizing: border-box;
 
   @media (max-width: $mobile-breakpoint) {
     padding-top: 56px;
@@ -93,6 +95,8 @@ $mobile-breakpoint: 768px;
   }
 }
 
+$sticky-sidebar-inset:50px;
+
 .action-sidebar {
   grid-area: sidebar;
   width: 0;
@@ -102,7 +106,8 @@ $mobile-breakpoint: 768px;
   transition: width 0.35s ease, min-width 0.35s ease;
   align-self: start;
   position: sticky;
-  top: 0;
+  top: $sticky-sidebar-inset;
+  max-height: calc(100vh - #{$sticky-sidebar-inset} * 2);
 
   &.open {
     width: 200px;
@@ -123,9 +128,10 @@ $mobile-breakpoint: 768px;
     transform: translateX(100%);
     transition: transform 0.35s ease;
     border: none;
+    max-height: none;
 
     &.open {
-      transform: translateX(0);
+      transform: translateX(calc(-1 * var(--sidebar-swipe-offset, 0px)));
       box-shadow: -4px 0 12px rgba(0, 0, 0, 0.08);
     }
   }
@@ -136,15 +142,18 @@ $mobile-breakpoint: 768px;
   padding: 16px;
   padding-top: 48px;
   min-height: 200px;
+  max-height: calc(100vh - #{$sticky-sidebar-inset} * 2 - 24px);
   overflow-y: auto;
   transform: translateX(100%);
   transition: transform 0.35s ease;
+  touch-action: pan-y;
 
   .action-sidebar.open & {
     transform: translateX(0);
   }
 
   @media (max-width: $mobile-breakpoint) {
+    max-height: none;
     transform: none;
     .action-sidebar.open & {
       transform: none;
@@ -172,6 +181,12 @@ $mobile-breakpoint: 768px;
     background-color: #f8fafc;
     color: #1e293b;
     transform: scale(1.05);
+  }
+
+  @media (max-width: $mobile-breakpoint) {
+    &.desktop-only {
+      display: none;
+    }
   }
 }
 
@@ -236,17 +251,38 @@ $mobile-breakpoint: 768px;
     font-weight: 600;
     color: #64748b;
   }
-
-  h4 {
-    margin: 8px 0 6px 0;
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: #94a3b8;
-  }
 }
 
 .filter-category {
   margin-bottom: 12px;
+}
+
+.filter-category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin: 8px 0 6px 0;
+  padding: 6px 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #94a3b8;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+
+  &:hover {
+    color: #64748b;
+    background-color: #f8fafc;
+  }
+
+  &.expanded {
+    color: #0ea5e9;
+    background-color: #f0f9ff;
+    border-color: #bae6fd;
+  }
 }
 
 .filter-options {
@@ -289,7 +325,6 @@ $mobile-breakpoint: 768px;
 .recipes-main {
   grid-area: table;
   min-width: 0;
-  overflow: auto;
   min-height: 0;
 }
 

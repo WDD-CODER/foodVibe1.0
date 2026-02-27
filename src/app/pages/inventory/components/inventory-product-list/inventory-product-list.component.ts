@@ -1,4 +1,4 @@
-import { Component, OnDestroy, inject, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, OnDestroy, inject, ChangeDetectionStrategy, signal, computed, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -13,6 +13,9 @@ import { ConfirmModalService } from '@services/confirm-modal.service';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
+
+const MOBILE_BREAKPOINT_PX = 768;
+const SIDEBAR_SWIPE_CLOSE_THRESHOLD_RATIO = 0.5;
 
 @Component({
   selector: 'inventory-product-list',
@@ -32,6 +35,9 @@ export class InventoryProductListComponent implements OnDestroy {
   protected readonly unitRegistry = inject(UnitRegistryService);
 
   private lastPriceEdit_ = { productId: '', unit: '', value: 0 };
+  private mediaQueryList: MediaQueryList | null = null;
+  private mediaListener: (() => void) | null = null;
+  private swipeStartX = 0;
 
   // INITIAL STATE
   protected activeFilters_ = signal<Record<string, string[]>>({});
@@ -39,6 +45,26 @@ export class InventoryProductListComponent implements OnDestroy {
   protected sortBy_ = signal<SortField | null>(null);
   protected sortOrder_ = signal<'asc' | 'desc'>('asc');
   protected isSidebarOpen_ = signal<boolean>(false);
+  protected expandedFilterCategories_ = signal<Set<string>>(new Set());
+  protected isMobile_ = signal<boolean>(false);
+  protected sidebarSwipeOffset_ = signal<number>(0);
+
+  constructor() {
+    afterNextRender(() => {
+      this.mediaQueryList = window.matchMedia(`(min-width: ${MOBILE_BREAKPOINT_PX + 1}px)`);
+      const isDesktop = this.mediaQueryList.matches;
+      this.isMobile_.set(!isDesktop);
+      this.isSidebarOpen_.set(isDesktop);
+      this.mediaListener = () => {
+        const desktop = this.mediaQueryList!.matches;
+        this.isMobile_.set(!desktop);
+        if (desktop) this.isSidebarOpen_.set(true);
+        else this.isSidebarOpen_.set(false);
+        this.sidebarSwipeOffset_.set(0);
+      };
+      this.mediaQueryList.addEventListener('change', this.mediaListener);
+    });
+  }
 
   // LISTING
   protected filterCategories_ = computed(() => {
@@ -64,6 +90,7 @@ export class InventoryProductListComponent implements OnDestroy {
 
     return Object.keys(categories).map(name => ({
       name,
+      displayKey: this.categoryDisplayKey(name),
       options: Array.from(categories[name]).map(option => ({
         label: name === 'Supplier' ? this.getSupplierName(option) : option,
         value: option,
@@ -71,6 +98,52 @@ export class InventoryProductListComponent implements OnDestroy {
       }))
     }));
   });
+
+  protected categoryDisplayKey(internalName: string): string {
+    const map: Record<string, string> = {
+      'Category': 'category',
+      'Allergens': 'allergens',
+      'Supplier': 'supplier'
+    };
+    return map[internalName] ?? internalName.toLowerCase();
+  }
+
+  protected toggleFilterCategory(name: string): void {
+    this.expandedFilterCategories_.update(set => {
+      const next = new Set(set);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  }
+
+  protected isCategoryExpanded(name: string): boolean {
+    return this.expandedFilterCategories_().has(name);
+  }
+
+  protected onSidebarTouchStart(e: TouchEvent): void {
+    if (!this.isMobile_() || !this.isSidebarOpen_()) return;
+    this.swipeStartX = e.touches[0].clientX;
+    this.sidebarSwipeOffset_.set(0);
+  }
+
+  protected onSidebarTouchMove(e: TouchEvent): void {
+    if (!this.isMobile_() || !this.isSidebarOpen_()) return;
+    const delta = this.swipeStartX - e.touches[0].clientX;
+    this.sidebarSwipeOffset_.set(Math.max(0, delta));
+  }
+
+  protected onSidebarTouchEnd(): void {
+    if (!this.isMobile_() || !this.isSidebarOpen_()) return;
+    const offset = this.sidebarSwipeOffset_();
+    const panelWidth = 280;
+    if (offset >= panelWidth * SIDEBAR_SWIPE_CLOSE_THRESHOLD_RATIO) {
+      this.isSidebarOpen_.set(false);
+      this.sidebarSwipeOffset_.set(0);
+    } else {
+      this.sidebarSwipeOffset_.set(0);
+    }
+  }
 
   protected filteredProducts_ = computed(() => {
     let products = this.kitchenStateService.products_();
@@ -281,5 +354,7 @@ export class InventoryProductListComponent implements OnDestroy {
   }
 
   // DESTROY
-  ngOnDestroy(): void { }
+  ngOnDestroy(): void {
+    this.mediaQueryList?.removeEventListener('change', this.mediaListener ?? (() => {}));
+  }
 }

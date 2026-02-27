@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy, signal, computed, afterNextRender } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, computed, afterNextRender, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -18,6 +18,7 @@ export type SortField = 'name' | 'type' | 'cost' | 'main_category' | 'allergens'
 
 const MAX_ALLERGEN_RECURSION = 5;
 const MOBILE_BREAKPOINT_PX = 768;
+const SIDEBAR_SWIPE_CLOSE_THRESHOLD_RATIO = 0.5;
 
 @Component({
   selector: 'recipe-book-list',
@@ -27,7 +28,7 @@ const MOBILE_BREAKPOINT_PX = 768;
   styleUrl: './recipe-book-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RecipeBookListComponent {
+export class RecipeBookListComponent implements OnDestroy {
   private readonly kitchenState = inject(KitchenStateService);
   private readonly router = inject(Router);
   private readonly recipeCostService = inject(RecipeCostService);
@@ -38,6 +39,7 @@ export class RecipeBookListComponent {
   protected sortBy_ = signal<SortField | null>(null);
   protected sortOrder_ = signal<'asc' | 'desc'>('asc');
   protected isSidebarOpen_ = signal<boolean>(false);
+  protected expandedFilterCategories_ = signal<Set<string>>(new Set());
   protected allergenPopoverRecipeId_ = signal<string | null>(null);
   protected allergenExpandAll_ = signal<boolean>(false);
   protected hoveredCostRecipeId_ = signal<string | null>(null);
@@ -46,12 +48,79 @@ export class RecipeBookListComponent {
   protected selectedProductIds_ = signal<string[]>([]);
   protected isMobileSearchOpen_ = signal<boolean>(false);
   protected historyFor_ = signal<{ entityType: VersionEntityType; entityId: string; entityName: string } | null>(null);
+  protected isMobile_ = signal<boolean>(false);
+  protected sidebarSwipeOffset_ = signal<number>(0);
+  private swipeStartX = 0;
+  private mediaQueryList: MediaQueryList | null = null;
+  private mediaListener: (() => void) | null = null;
 
   constructor() {
     afterNextRender(() => {
-      const isDesktop = window.matchMedia(`(min-width: ${MOBILE_BREAKPOINT_PX + 1}px)`).matches;
+      this.mediaQueryList = window.matchMedia(`(min-width: ${MOBILE_BREAKPOINT_PX + 1}px)`);
+      const isDesktop = this.mediaQueryList.matches;
+      this.isMobile_.set(!isDesktop);
       this.isSidebarOpen_.set(isDesktop);
+      this.mediaListener = () => {
+        const desktop = this.mediaQueryList!.matches;
+        this.isMobile_.set(!desktop);
+        if (desktop) this.isSidebarOpen_.set(true);
+        else this.isSidebarOpen_.set(false);
+        this.sidebarSwipeOffset_.set(0);
+      };
+      this.mediaQueryList.addEventListener('change', this.mediaListener);
     });
+  }
+
+  ngOnDestroy(): void {
+    this.mediaQueryList?.removeEventListener('change', this.mediaListener ?? (() => {}));
+  }
+
+  protected categoryDisplayKey(internalName: string): string {
+    const map: Record<string, string> = {
+      'Main-category': 'main_category',
+      'Type': 'type',
+      'Allergens': 'allergens',
+      'Approved': 'approved',
+      'Station': 'station'
+    };
+    return map[internalName] ?? internalName.toLowerCase();
+  }
+
+  protected toggleFilterCategory(name: string): void {
+    this.expandedFilterCategories_.update(set => {
+      const next = new Set(set);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  }
+
+  protected isCategoryExpanded(name: string): boolean {
+    return this.expandedFilterCategories_().has(name);
+  }
+
+  protected onSidebarTouchStart(e: TouchEvent): void {
+    if (!this.isMobile_() || !this.isSidebarOpen_()) return;
+    this.swipeStartX = e.touches[0].clientX;
+    this.sidebarSwipeOffset_.set(0);
+  }
+
+  protected onSidebarTouchMove(e: TouchEvent): void {
+    if (!this.isMobile_() || !this.isSidebarOpen_()) return;
+    const delta = this.swipeStartX - e.touches[0].clientX;
+    this.sidebarSwipeOffset_.set(Math.max(0, delta));
+  }
+
+  protected onSidebarTouchEnd(): void {
+    if (!this.isMobile_() || !this.isSidebarOpen_()) return;
+    const offset = this.sidebarSwipeOffset_();
+    const panelWidth = 280;
+    if (offset >= panelWidth * SIDEBAR_SWIPE_CLOSE_THRESHOLD_RATIO) {
+      this.isSidebarOpen_.set(false);
+      this.sidebarSwipeOffset_.set(0);
+    } else {
+      this.sidebarSwipeOffset_.set(0);
+    }
   }
 
   protected filterCategories_ = computed(() => {
@@ -98,6 +167,7 @@ export class RecipeBookListComponent {
 
     return Object.keys(categories).map(name => ({
       name,
+      displayKey: this.categoryDisplayKey(name),
       options: Array.from(categories[name]).map(option => ({
         label: optionLabel(name, option),
         value: option,
