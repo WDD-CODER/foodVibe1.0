@@ -200,6 +200,8 @@ export class RecipeBookListComponent implements OnDestroy {
             recipeValues = [this.isRecipeDish(recipe) ? 'dish' : 'preparation'];
           } else if (category === 'Allergens') {
             recipeValues = this.getRecipeAllergens(recipe);
+            // "Do not include allergens": show only recipes that have NONE of the selected allergens
+            return selectedValues.every(v => !recipeValues.includes(v));
           } else if (category === 'Main-category') {
             const cats = this.getRecipeCategories(recipe);
             recipeValues = cats.length > 0 ? cats : ['no_category'];
@@ -379,6 +381,18 @@ export class RecipeBookListComponent implements OnDestroy {
     });
   }
 
+  protected clearAllFilters(): void {
+    this.activeFilters_.set({});
+  }
+
+  protected hasActiveFilters_ = computed(() =>
+    Object.values(this.activeFilters_()).some(arr => arr.length > 0)
+  );
+
+  protected selectedCountInCategory(category: { options: { checked_: boolean }[] }): number {
+    return category.options.filter(o => o.checked_).length;
+  }
+
   protected toggleAllergenPopover(recipeId: string): void {
     this.allergenExpandAll_.set(false);
     this.allergenPopoverRecipeId_.update(id => (id === recipeId ? null : recipeId));
@@ -386,6 +400,14 @@ export class RecipeBookListComponent implements OnDestroy {
 
   protected closeAllergenPopover(): void {
     this.allergenPopoverRecipeId_.set(null);
+  }
+
+  /** Close allergen chips view (single row or expand-all) on outside click; restores allergy icon. */
+  protected closeAllergenView(clickTarget?: EventTarget | null): void {
+    const el = clickTarget instanceof HTMLElement ? clickTarget : null;
+    if (el?.closest('.recipes-grid-header .col-allergens')) return;
+    this.allergenPopoverRecipeId_.set(null);
+    this.allergenExpandAll_.set(false);
   }
 
   protected showCostTooltip(recipeId: string): void {

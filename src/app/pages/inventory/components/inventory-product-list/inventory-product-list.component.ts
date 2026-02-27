@@ -11,6 +11,7 @@ import { UnitRegistryService } from '@services/unit-registry.service';
 import { TranslationService } from '@services/translation.service';
 import { ConfirmModalService } from '@services/confirm-modal.service';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
+import { ClickOutSideDirective } from '@directives/click-out-side';
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
 
@@ -20,7 +21,7 @@ const SIDEBAR_SWIPE_CLOSE_THRESHOLD_RATIO = 0.5;
 @Component({
   selector: 'inventory-product-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, SelectOnFocusDirective],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, SelectOnFocusDirective, ClickOutSideDirective],
   templateUrl: './inventory-product-list.component.html',
   styleUrl: './inventory-product-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,6 +47,8 @@ export class InventoryProductListComponent implements OnDestroy {
   protected sortOrder_ = signal<'asc' | 'desc'>('asc');
   protected isSidebarOpen_ = signal<boolean>(false);
   protected expandedFilterCategories_ = signal<Set<string>>(new Set());
+  protected allergenPopoverProductId_ = signal<string | null>(null);
+  protected allergenExpandAll_ = signal<boolean>(false);
   protected isMobile_ = signal<boolean>(false);
   protected sidebarSwipeOffset_ = signal<number>(0);
 
@@ -220,6 +223,23 @@ export class InventoryProductListComponent implements OnDestroy {
     this.isSidebarOpen_.update(v => !v);
   }
 
+  protected toggleAllergenExpandAll(): void {
+    this.allergenExpandAll_.update(v => !v);
+    this.allergenPopoverProductId_.set(null);
+  }
+
+  protected toggleAllergenPopover(productId: string): void {
+    this.allergenExpandAll_.set(false);
+    this.allergenPopoverProductId_.update(id => (id === productId ? null : productId));
+  }
+
+  protected closeAllergenView(clickTarget?: EventTarget | null): void {
+    const el = clickTarget instanceof HTMLElement ? clickTarget : null;
+    if (el?.closest('.products-grid-header .col-allergens')) return;
+    this.allergenPopoverProductId_.set(null);
+    this.allergenExpandAll_.set(false);
+  }
+
   protected sortIconFor_(field: SortField): 'arrow-up' | 'arrow-down' | 'arrow-up-down' {
     const current = this.sortBy_();
     if (current !== field) return 'arrow-up-down';
@@ -239,6 +259,18 @@ export class InventoryProductListComponent implements OnDestroy {
       }
       return current;
     });
+  }
+
+  protected clearAllFilters(): void {
+    this.activeFilters_.set({});
+  }
+
+  protected hasActiveFilters_ = computed(() =>
+    Object.values(this.activeFilters_()).some(arr => arr.length > 0)
+  );
+
+  protected selectedCountInCategory(category: { options: { checked_: boolean }[] }): number {
+    return category.options.filter(o => o.checked_).length;
   }
 
   // UPDATE

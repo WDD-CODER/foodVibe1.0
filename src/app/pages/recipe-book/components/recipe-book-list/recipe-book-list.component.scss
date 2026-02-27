@@ -244,12 +244,37 @@ $sticky-sidebar-inset:50px;
 
 .filter-section {
   margin-bottom: 20px;
+}
+
+.filter-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
 
   h3 {
-    margin: 0 0 12px 0;
+    margin: 0;
     font-size: 0.875rem;
     font-weight: 600;
     color: #64748b;
+  }
+}
+
+.clear-filters-btn {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+
+  &:hover {
+    color: #0f172a;
+    background: #e2e8f0;
   }
 }
 
@@ -283,6 +308,13 @@ $sticky-sidebar-inset:50px;
     background-color: #f0f9ff;
     border-color: #bae6fd;
   }
+}
+
+.filter-category-count {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #0ea5e9;
+  margin-inline-start: 4px;
 }
 
 .filter-options {
@@ -412,6 +444,16 @@ $sticky-sidebar-inset:50px;
   align-items: center;
   gap: 4px;
   width: 100%;
+
+  &.allergen-expanded-open .allergen-btn {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
 }
 
 .allergen-expanded {

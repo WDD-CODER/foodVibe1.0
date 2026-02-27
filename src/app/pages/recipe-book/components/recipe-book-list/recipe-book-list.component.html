@@ -73,11 +73,19 @@
         </div>
       </div>
       <div class="filter-section">
-        <h3>{{ 'filter' | translatePipe }}</h3>
+        <div class="filter-section-header">
+          <h3>{{ 'filter' | translatePipe }}</h3>
+          @if (hasActiveFilters_()) {
+            <button type="button" class="clear-filters-btn" (click)="clearAllFilters()">{{ 'clear_filters' | translatePipe }}</button>
+          }
+        </div>
         @for (category of filterCategories_(); track category.name) {
           <div class="filter-category">
             <button type="button" class="filter-category-header" [class.expanded]="isCategoryExpanded(category.name)" (click)="toggleFilterCategory(category.name)">
-              <span>{{ category.displayKey | translatePipe }}</span>
+              <span>{{ (category.name === 'Allergens' ? 'do_not_include_allergens' : category.displayKey) | translatePipe }}</span>
+              @if (selectedCountInCategory(category) > 0) {
+                <span class="filter-category-count" aria-hidden="true">({{ selectedCountInCategory(category) }})</span>
+              }
               <lucide-icon [name]="isCategoryExpanded(category.name) ? 'chevron-down' : 'chevron-left'" [size]="16"></lucide-icon>
             </button>
             @if (isCategoryExpanded(category.name)) {
@@ -128,7 +136,7 @@
             <div class="col-main-category">{{ getRecipeCategoriesDisplay(recipe) || ('no_category' | translatePipe) }}</div>
             <div class="col-allergens">
               @if (getRecipeAllergens(recipe).length) {
-                <div class="allergen-btn-wrapper">
+                <div class="allergen-btn-wrapper" [class.allergen-expanded-open]="allergenExpandAll_() || allergenPopoverRecipeId_() === recipe._id" (clickOutside)="closeAllergenView($event)">
                   <button type="button" class="allergen-btn" (click)="toggleAllergenPopover(recipe._id)">
                     <lucide-icon name="shield-alert" [size]="16"></lucide-icon>
                     {{ getRecipeAllergens(recipe).length }}
