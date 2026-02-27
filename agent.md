@@ -30,6 +30,7 @@ This project uses specialized agent personas for complex tasks. Read the relevan
 | Tech Debt | `techdebt/` | Find duplicates, dead code, TODO audit |
 | Update Docs | `update-docs/` | Refresh all project documentation |
 | Elegant Fix | `elegant-fix/` | Refine hacky solutions into clean ones |
+| cssLayer | `cssLayer/` | Before creating or editing any `.scss`/`.css` in `src/`: read SKILL.md and apply tokens, five-group rhythm, logical properties |
 
 ### Commands (`.assistant/commands/`)
 | Command | File | Purpose |
@@ -59,6 +60,7 @@ Before making changes to any directory, check for a `breadcrumbs.md` file and re
 2. **Plan (The Gate)**:
    - Write `plans/XXX.plan.md`.
    - **MUST** include a "Questions for user" (or "Critical Questions") section.
+   - If the plan will add or modify any `.scss` or `.css` under `src/`, include an explicit step or sub-task: *Before writing those files, read and apply `.assistant/skills/cssLayer/SKILL.md`.*
    - **STOP**. Do not modify `src/` until approved.
 3. **Approval**: Wait for explicit user confirmation.
 4. **Execute**: Only then use @Composer for multi-file updates. Keep files under ~300 lines; refactor when needed.

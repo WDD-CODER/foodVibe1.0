@@ -107,6 +107,7 @@ Agents share context through:
 ## 2. The Gatekeeper Protocol (Workflow)
 * **Phase 1 (Decomposition)**: If task spans >2 sub-systems, decompose into multiple `plans/XXX.plan.md` files. 
     * **Requirement**: Every plan MUST include an `# Atomic Sub-tasks` list.
+    * **Styling in plans**: If the plan will add or change any `.scss` or `.css` under `src/`, the plan MUST include an explicit sub-task or step: *Before creating or editing those style files, read `.assistant/skills/cssLayer/SKILL.md` and apply it (tokens, five-group rhythm, logical properties).*
     * **Location (MANDATORY)**: Plans MUST be saved to the project's `plans/` folder (e.g. `plans/004-recipe-workflow.plan.md`). NEVER use Cursor's default plans folder (`~/.cursor/plans/`). Use the `write` tool to create plan files directly at `plans/XXX.plan.md` — do not rely on any create_plan tool that saves elsewhere.
     * **Saving a confirmed plan**: When the user has confirmed a plan and says **"save the plan"** (or equivalent), apply the **save-plan** skill: read `.assistant/skills/save-plan/SKILL.md`, list existing `plans/*.plan.md` to determine the next number (e.g. 012 → 013 for new; 012-1, 012-2 for refactors of 012), then write the plan to `plans/NNN-slug.plan.md` or `plans/NNN-R-slug.plan.md`. Always save to the project's `plans/` folder.
 * **Phase 2 (The Hard Pause)**: Stop execution after planning. 
@@ -137,7 +138,7 @@ Agents share context through:
     3. Content (bg, color, font) 
     4. Structure (border, shadow) 
     5. Effects (transition, transform).
-* **CSS/SCSS (MANDATORY)**: Before creating or editing any `.scss` or `.css` under `src/`, you MUST read `.assistant/skills/cssLayer/SKILL.md` and apply it. No exceptions.
+* **CSS/SCSS (MANDATORY)**: Before creating or editing any `.scss` or `.css` under `src/`, you MUST read `.assistant/skills/cssLayer/SKILL.md` and apply it. No exceptions. This applies both when executing an existing plan and when creating a new plan: any plan that includes new or modified styles must list as a sub-task or step: *Before writing/editing SCSS/CSS: read and apply `.assistant/skills/cssLayer/SKILL.md`.*
 
 ## 5. Security & QA
 * **Secrets**: Read from `.env` only. Ensure `.env*` and local configs are in `.gitignore`. **NEVER** hardcode keys.
