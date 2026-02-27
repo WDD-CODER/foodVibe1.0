@@ -1,0 +1,103 @@
+<div class="menu-intelligence" dir="rtl">
+  <header class="page-header">
+    <h2>Menu Intelligence</h2>
+    <button type="button" class="save-btn" (click)="save()">
+      <lucide-icon name="save" [size]="16"></lucide-icon>
+      Save Event Menu
+    </button>
+  </header>
+
+  <section class="event-config" [formGroup]="form_">
+    <h3>Event Configuration</h3>
+    <div class="grid">
+      <label>
+        Name
+        <input type="text" formControlName="name_" />
+      </label>
+      <label>
+        Event Type
+        <input type="text" formControlName="event_type_" placeholder="Corporate Buffet, Summer Wedding..." />
+      </label>
+      <label>
+        Date
+        <input type="date" formControlName="event_date_" />
+      </label>
+      <label>
+        Serving Type
+        <select formControlName="serving_type_">
+          <option value="buffet_family">Buffet / Family Style</option>
+          <option value="plated_course">Plated / Course Based</option>
+          <option value="cocktail_passed">Cocktail / Passed</option>
+        </select>
+      </label>
+      <label>
+        Guest Count
+        <input type="number" min="1" formControlName="guest_count_" />
+      </label>
+      <label>
+        Pieces Per Person
+        <input type="number" min="0" step="0.1" formControlName="pieces_per_person_" />
+      </label>
+      <label>
+        Revenue Per Guest
+        <input type="number" min="0" step="0.01" formControlName="target_revenue_per_guest_" />
+      </label>
+      <label>
+        Target Food Cost %
+        <input type="number" min="0" step="0.1" formControlName="target_food_cost_pct_" />
+      </label>
+    </div>
+  </section>
+
+  <section class="menu-canvas">
+    <div class="canvas-header">
+      <h3>Menu Canvas</h3>
+      <button type="button" (click)="addSection()">Add Section</button>
+    </div>
+
+    <div class="sections" formArrayName="sections_">
+      @for (section of sectionsArray.controls; track section.get('_id')?.value; let sectionIndex = $index) {
+        <article class="section-card" [formGroupName]="sectionIndex">
+          <header>
+            <input type="text" formControlName="name_" />
+            <button type="button" class="ghost" (click)="removeSection(sectionIndex)">Remove</button>
+          </header>
+
+          <div class="items" formArrayName="items_">
+            @for (item of getItemsArray(sectionIndex).controls; track $index; let itemIndex = $index) {
+              <div class="item-row" [formGroupName]="itemIndex">
+                <select formControlName="recipe_id_">
+                  <option value="">Select Dish / Preparation</option>
+                  @for (recipe of recipes_(); track recipe._id) {
+                    <option [value]="recipe._id">{{ recipe.name_hebrew }}</option>
+                  }
+                </select>
+                <input type="number" min="0" max="1" step="0.05" formControlName="predicted_take_rate_" />
+                <span class="derived">
+                  Portions:
+                  {{ getDerivedPortions(item.value) }}
+                </span>
+                <button type="button" class="ghost" (click)="removeItem(sectionIndex, itemIndex)">Remove</button>
+              </div>
+            }
+          </div>
+
+          <button type="button" class="add-item-btn" (click)="addItem(sectionIndex)">
+            Add Dish Injection
+          </button>
+        </article>
+      }
+    </div>
+  </section>
+
+  <footer class="financial-health">
+    <div>
+      <strong>Event Ingredient Cost:</strong>
+      ₪{{ eventCost_() | number:'1.2-2' }}
+    </div>
+    <div>
+      <strong>Food Cost %:</strong>
+      {{ foodCostPct_() | number:'1.1-1' }}%
+    </div>
+  </footer>
+</div>

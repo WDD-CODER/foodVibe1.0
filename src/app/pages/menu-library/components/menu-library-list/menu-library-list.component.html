@@ -1,0 +1,45 @@
+<div class="menu-library" dir="rtl">
+  <div class="toolbar">
+    <h2>Menu Library</h2>
+    <button type="button" class="create-btn" (click)="onCreateNew()">
+      <lucide-icon name="plus" [size]="16"></lucide-icon>
+      New Event Menu
+    </button>
+  </div>
+
+  <div class="filters">
+    <input
+      type="text"
+      [ngModel]="searchQuery_()"
+      (ngModelChange)="searchQuery_.set($event)"
+      placeholder="Search by name, date, or event type"
+    />
+    <select [ngModel]="eventTypeFilter_()" (ngModelChange)="eventTypeFilter_.set($event)">
+      @for (type of eventTypeOptions_(); track type) {
+        <option [value]="type">{{ type }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="list">
+    @if (filteredEvents_().length === 0) {
+      <p class="empty">No menus yet. Create your first event menu.</p>
+    }
+    @for (event of filteredEvents_(); track event._id) {
+      <article class="card">
+        <div class="meta">
+          <h3>{{ event.name_ }}</h3>
+          <p>{{ event.event_type_ }} · {{ event.event_date_ || 'No date' }}</p>
+        </div>
+        <div class="tags">
+          <span class="tag">Food Cost: {{ getFoodCostPctDisplay(event) }}</span>
+          <span class="tag">Style: {{ event.serving_type_ }}</span>
+        </div>
+        <div class="actions">
+          <button type="button" (click)="onOpen(event)">Open</button>
+          <button type="button" (click)="onClone(event)">Clone as New</button>
+        </div>
+      </article>
+    }
+  </div>
+</div>

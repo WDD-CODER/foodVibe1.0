@@ -47,6 +47,20 @@ export const routes: Routes = [
     loadComponent: () => import('@pages/recipe-book/recipe-book.page').then(m => m.RecipeBookPage),
   },
   {
+    path: 'menu-library',
+    loadComponent: () => import('@pages/menu-library/menu-library.page').then(m => m.MenuLibraryPage),
+  },
+  {
+    path: 'menu-intelligence',
+    loadComponent: () => import('@pages/menu-intelligence/menu-intelligence.page').then(m => m.MenuIntelligencePage),
+    canDeactivate: [pendingChangesGuard],
+  },
+  {
+    path: 'menu-intelligence/:id',
+    loadComponent: () => import('@pages/menu-intelligence/menu-intelligence.page').then(m => m.MenuIntelligencePage),
+    canDeactivate: [pendingChangesGuard],
+  },
+  {
     path: 'cook',
     loadComponent: () => import('./pages/cook-view/cook-view.page').then(m => m.CookViewPage),
   },
