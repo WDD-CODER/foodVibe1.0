@@ -6,21 +6,22 @@
 .input-wrapper {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background-color: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  gap: 0.5rem;
+  padding-inline: 0.75rem;
+  padding-block: 0.5rem;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
   &:focus-within {
-    border-color: #0ea5e9;
-    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
+    border-color: var(--border-focus);
+    box-shadow: var(--shadow-focus);
   }
 
   lucide-icon {
     flex-shrink: 0;
-    color: #64748b;
+    color: var(--color-text-muted);
   }
 
   input {
@@ -31,27 +32,27 @@
     border: none;
     outline: none;
     font-size: 0.875rem;
-    color: #1e293b;
+    color: var(--color-text-main);
 
     &::placeholder {
-      color: #94a3b8;
+      color: var(--color-text-muted-light);
     }
   }
 }
 
 .results-dropdown {
   position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
+  top: calc(100% + 0.25rem);
+  inset-inline: 0;
   z-index: 10;
   margin: 0;
-  padding: 4px 0;
+  padding: 0.25rem 0;
   list-style: none;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background: var(--bg-glass-strong);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: var(--blur-glass);
   max-height: 240px;
   overflow-y: auto;
 }

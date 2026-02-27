@@ -1,11 +1,9 @@
 .app-content {
-    display: block;
-  
-    /* Use padding to push content away from fixed bars */
-    // padding-top: 70px;    /* Header height + 10px breathing room */
-    padding-bottom: 30px; /* Footer height + 10px breathing room */
-    
-    /* Ensure the content spans at least the full height of the viewport */
-    min-height: 100vh;
-    box-sizing: border-box;
-  }
+  display: flex;
+  flex-direction: column;
+
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-block-end: 3rem;
+  box-sizing: border-box;
+}

@@ -6,37 +6,36 @@
   display: grid;
   width: 100%;
   min-height: 100px;
-  max-width: 800px; // Standardizing container width
+  max-width: 50rem;
   margin: 0 auto;
-  border-top: 6px solid #10b981; // Same top strip for add and edit alignment
-  background: #fff;
+  border-top: 4px solid var(--color-primary);
+  background: transparent;
 
-  // Header Workstation
   .form-header {
     display: block !important;
-    margin-bottom: 2rem;
+    margin-block-end: 2rem;
     padding: 1rem 0;
-    border-bottom: 2px solid #f1f5f9;
-    min-height: 4.5rem; // Unified height so form content starts at same position
+    border-block-end: 2px solid var(--border-default);
+    min-height: 4.5rem;
 
     h2 {
       font-size: 1.75rem;
-      font-weight: 800;
-      margin-bottom: 0.5rem;
+      font-weight: 700;
+      margin-block-end: 0.5rem;
+      color: var(--color-text-main);
     }
 
     .subtitle {
       text-align: center;
-      color: #64748b; // Slate-500
+      color: var(--color-text-muted);
       margin-top: 5px;
       font-size: 0.9em;
     }
   }
 
-  // Edit Mode Specifics (visual only; layout already unified above)
   &.edit-mode {
     .form-header h2 {
-      color: #059669; // Emerald-600
+      color: var(--color-primary);
     }
   }
 }
@@ -45,11 +44,13 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  background: #ffffff;
+  background: var(--bg-glass-strong);
   padding: 2rem;
-
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
 
   // Section Layouts — unified 4-column grid for consistent alignment
   .form-section {
@@ -80,16 +81,16 @@
         align-items: center;
         gap: 0.5rem;
         padding: 0.5rem 1rem;
-        border-radius: 6px;
+        border-radius: var(--radius-md);
         font-weight: 600;
         font-size: 0.875rem;
-        transition: all 0.2s;
-        color: white;
+        transition: background 0.2s ease;
+        color: var(--color-text-on-primary);
         border: none;
-        background: #059669;
+        background: var(--color-primary);
 
         &:hover:not(:disabled) {
-          background: #047857;
+          background: var(--color-primary-hover);
         }
       }
     }
@@ -111,8 +112,8 @@
     }
 
     &.border-top {
-      border-top: 1px solid #f1f5f9;
-      padding-top: 1.5rem;
+      border-block-start: 1px solid var(--border-default);
+      padding-block-start: 1.5rem;
     }
   }
 
@@ -125,12 +126,12 @@
     label {
       place-content: baseline;
       font-size: 0.875rem;
-      font-weight: 700; // Bolded for industrial clarity
-      color: #334155;
+      font-weight: 600;
+      color: var(--color-text-secondary);
       height: 24px;
 
       &.danger-label {
-        color: #b91c1c;
+        color: var(--color-danger);
       }
     }
 
@@ -140,20 +141,19 @@
       place-content: center;
     }
 
-
     input,
     select {
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding-inline: 0.75rem;
+      padding-block: 0.5rem;
       outline: none;
-      transition: all 0.2s;
-      font-family: 'Inter', sans-serif;
-
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      background: var(--bg-glass);
 
       &:focus {
-        border-color: #10b981; // Emerald-500
-        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+        border-color: var(--border-focus);
+        box-shadow: var(--shadow-focus);
       }
     }
   }
@@ -184,19 +184,17 @@
     }
   }
 
-  // Scaling Engine Box
   .scaling-box {
-    background: #f8fafc;
+    background: var(--bg-glass);
     padding: 1.25rem;
-
-    border-radius: 8px;
-    border: 1px dashed #cbd5e1;
-    transition: all 0.3s ease;
-
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--border-default);
+    backdrop-filter: var(--blur-glass);
+    transition: border-color 0.2s ease, background 0.2s ease;
 
     &.row-invalid {
-      border-right: 3px solid #f43f5e; // Rose 500
-      background-color: #fff1f2; // Rose 50
+      border-inline-end: 3px solid var(--color-danger);
+      background: var(--bg-danger-subtle);
     }
 
     .input-wrapper.field-error {
@@ -293,13 +291,11 @@
     }
   }
 
-  // Action Bar
   .form-actions {
     display: flex;
     justify-content: space-between;
-
-    border-top: 1px solid #f1f5f9;
-    padding-top: 1.5rem;
+    border-block-start: 1px solid var(--border-default);
+    padding-block-start: 1.5rem;
 
     // Button Base Styles
     button {
@@ -323,12 +319,24 @@
     }
 
     .btn-primary {
-      background: #059669;
-      color: white;
+      background: var(--color-primary);
+      color: var(--color-text-on-primary);
       border: none;
+      box-shadow: var(--shadow-glow);
 
       &:hover:not(:disabled) {
-        background: #047857;
+        background: var(--color-primary-hover);
+      }
+    }
+
+    .btn-ghost {
+      background: var(--bg-glass);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--border-default);
+
+      &:hover:not(:disabled) {
+        background: var(--bg-glass-hover);
+        border-color: var(--border-strong);
       }
     }
   }
@@ -393,15 +401,16 @@
   .dropdown {
     position: absolute;
     top: 100%;
-    inset-inline: 0; // Modern replacement for left: 0; right: 0;
+    inset-inline: 0;
     z-index: 50;
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.5rem;
+    background: var(--bg-glass-strong);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-md);
     margin-top: 0.25rem;
     max-height: 200px;
     overflow-y: auto;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: var(--blur-glass);
 
     .dropdown-item {
       padding: 0.6rem 1rem;
@@ -409,24 +418,24 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      transition: background 0.2s;
+      transition: background 0.2s ease;
 
       &:hover {
-        background: #f8fafc;
+        background: var(--bg-glass);
       }
 
       &.dropdown-item--highlight {
-        background: #e2e8f0;
+        background: var(--border-default);
       }
 
       &.selected {
-        color: #059669;
+        color: var(--color-primary);
         font-weight: 600;
       }
 
       &.dropdown-item-add {
         font-weight: 600;
-        color: #059669;
+        color: var(--color-primary);
       }
     }
   }
@@ -442,20 +451,19 @@
     line-height: 1;
     cursor: pointer;
 
-    // Modifiers only for color
     &.allergen {
-      background: #fef3c7;
-      color: #92400e;
+      background: rgba(254, 243, 199, 0.5);
+      color: var(--text-warning);
     }
 
     &.supplier {
-      background: #f0fdf4;
-      color: #15803d;
+      background: rgba(220, 252, 231, 0.5);
+      color: var(--text-success);
     }
 
     &.category {
-      background: #e0f2fe;
-      color: #0369a1;
+      background: var(--color-primary-soft);
+      color: var(--color-primary-hover);
     }
   }
 
@@ -661,7 +669,7 @@
   }
 
   // Responsive — align with single grid column on narrow screens
-  @media (max-width: 830px) {
+  @media (max-width: 900px) {
     .form-container .form-section {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -675,9 +683,28 @@
     }
   }
 
-  @media (max-width: 500px) {
-    .form-container .form-section {
+  @media (max-width: 768px) {
+    .product-form-container {
+      max-width: none;
+    }
+
+    .form-container {
+      padding: 1.25rem;
+    }
+
+    .form-container .form-section,
+    .form-container .form-section.product-info {
       grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+      flex-direction: column;
+      gap: 0.5rem;
+
+      button {
+        width: 100%;
+        justify-content: center;
+      }
     }
   }
 }

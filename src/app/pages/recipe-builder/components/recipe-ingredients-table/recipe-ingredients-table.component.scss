@@ -21,48 +21,48 @@ $ingredients-grid-template: 2.5fr 1.5fr 1fr 1fr 1fr 48px;
 }
 
 .ingredients-grid-header {
-  background-color: #f8fafc;
-  color: #64748b;
-  
-  font-size: 0.875rem;
+  padding-inline: 0.75rem;
+  padding-block: 0.625rem;
+  background: var(--bg-glass);
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
   font-weight: 600;
-
-  border-bottom: 2px solid #e2e8f0;
-  border-radius: 8px 8px 0 0;
+  border-block-end: 1px solid var(--border-default);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  backdrop-filter: var(--blur-glass);
 }
 
 .ingredient-grid-row {
   min-height: 64px;
-  background-color: #ffffff;
-
-  border-bottom: 1px solid #f1f5f9;
-  transition: background-color 0.2s;
+  background: transparent;
+  border-block-end: 1px solid rgba(241, 245, 249, 0.4);
+  transition: background 0.15s ease;
 
   &:hover {
-    background-color: #f8fafc;
+    background: var(--bg-glass);
   }
 }
 
 .quantity-controls {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 0.25rem;
 
   .qty-btn {
     display: grid;
     place-content: center;
-    width: 32px;
-    height: 32px;
+    width: 2rem;
+    height: 2rem;
     padding: 0;
-    background-color: #f1f5f9;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: background-color 0.2s, border-color 0.2s;
+    transition: background 0.2s ease, border-color 0.2s ease;
 
     &:hover:not(:disabled) {
-      background-color: #e2e8f0;
-      border-color: #94a3b8;
+      background: var(--bg-glass-hover);
+      border-color: var(--border-strong);
     }
 
     &:disabled {

@@ -1,50 +1,52 @@
-/* Cook view — cssLayer: tokens, five-group vertical rhythm */
 :host {
-  --cv-bg: #fefce8;
-  --cv-header-start: #ccfbf1;
-  --cv-header-end: #f0fdf4;
-  --cv-accent: #0d9488;
-  --cv-accent-soft: #99f6e4;
-  --cv-shadow-card: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.06);
-  --cv-section-bg: #fffbeb;
-  --cv-text-heading: #134e4a;
-  --cv-border-accent: rgba(13, 148, 136, 0.2);
-  --cv-border-accent-strong: rgba(13, 148, 136, 0.3);
-  --cv-border-amber: #fde68a;
-  --cv-border-edit: #fcd34d;
-  --cv-bg-banner: #fef3c7;
-  --cv-text-banner: #92400e;
-  --cv-bg-success: #dcfce7;
-  --cv-text-success: #166534;
-  --cv-border-success: #22c55e;
-  --cv-border-warning: #f59e0b;
-  --cv-bg-step: #f8fafc;
-  --cv-bg-prep: #f0fdf4;
-  --cv-bg-changed: #fef9c3;
-  --cv-border-changed: #eab308;
-  --cv-border-step: #000;
-  --cv-radius-sm: 0.25rem;
-  --cv-radius-md: 0.375rem;
-  --cv-radius-lg: 0.5rem;
-  --cv-radius-xl: 0.75rem;
-  --cv-radius-2xl: 1rem;
-  --cv-radius-full: 999px;
-  --cv-shadow-accent: 0 0.0625rem 0.1875rem rgba(13, 148, 136, 0.15);
-  --cv-shadow-badge: 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.05);
+  display: block;
+  min-height: 100vh;
+  min-height: 100dvh;
+  /* Map legacy --cv-* to global Liquid Glass tokens */
+  --cv-bg: var(--bg-body);
   --cv-break-md: 56.25rem;
+  --cv-header-start: var(--color-primary-soft);
+  --cv-header-end: var(--bg-success);
+  --cv-shadow-card: var(--shadow-glass);
+  --cv-radius-xl: var(--radius-xl);
+  --cv-radius-2xl: var(--radius-lg);
+  --cv-radius-full: var(--radius-full);
+  --cv-radius-md: var(--radius-md);
+  --cv-radius-sm: var(--radius-sm);
+  --cv-accent: var(--color-primary);
+  --cv-section-bg: var(--bg-glass);
+  --cv-border-edit: var(--border-warning);
+  --cv-bg-banner: var(--bg-warning);
+  --cv-text-banner: var(--text-warning);
+  --cv-bg-success: var(--bg-success);
+  --cv-text-success: var(--text-success);
+  --cv-border-success: var(--color-success);
+  --cv-border-warning: var(--border-warning);
+  --cv-text-heading: var(--color-text-main);
+  --cv-border-accent: var(--border-focus);
+  --cv-border-accent-strong: rgba(20, 184, 166, 0.3);
+  --cv-accent-soft: var(--color-primary-soft);
+  --cv-shadow-accent: var(--shadow-glow);
+  --cv-shadow-badge: var(--shadow-glass);
+  --cv-border-light: var(--border-default);
+  --cv-bg-row-even: var(--bg-glass);
+  --cv-bg-changed: var(--bg-warning);
+  --cv-border-changed: var(--border-warning);
+  --cv-bg-prep: var(--color-primary-soft);
+  --cv-bg-step: var(--bg-glass);
+  --cv-border-step: var(--border-default);
 }
 
 .cook-view-container {
   display: block;
-
   max-width: 45rem;
   margin: 0 auto;
   padding: 1.25rem;
   min-height: 100vh;
+  min-height: 100dvh;
+  background: transparent;
 
-  background: var(--cv-bg);
-
-  @media (min-width: var(--cv-break-md)) {
+  @media (min-width: 56.25rem) {
     max-width: 75rem;
     padding: 1.5rem 2rem;
   }
@@ -52,36 +54,31 @@
 
 .cook-view-empty {
   display: block;
-
   padding: 3rem 2rem;
-
-  background: linear-gradient(135deg, var(--cv-header-start) 0%, var(--cv-header-end) 100%);
+  background: var(--bg-glass-strong);
+  border: 1px solid var(--border-glass);
   color: inherit;
   text-align: center;
   font-size: inherit;
-
-  border-radius: var(--cv-radius-xl);
-  box-shadow: var(--cv-shadow-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-glass);
+  backdrop-filter: var(--blur-glass);
 
   p {
     margin: 0 0 1rem;
-
     font-size: 1.1rem;
   }
 
   a {
-    color: var(--cv-accent);
+    color: var(--color-primary);
     font-weight: 600;
     text-decoration: underline;
   }
 
   lucide-icon {
     display: block;
-
     margin: 0 auto 1rem;
-
-    color: var(--cv-accent);
-
+    color: var(--color-primary);
     opacity: 0.9;
   }
 }

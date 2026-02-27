@@ -14,6 +14,8 @@ import { VersionHistoryService } from '@services/version-history.service';
 import type { VersionEntityType } from '@services/version-history.service';
 import { Ingredient } from '@models/ingredient.model';
 import { Recipe, RecipeStep, MiseCategory, FlatPrepItem, PrepCategory } from '@models/recipe.model';
+import type { BaselineEntry, EquipmentPhase } from '@models/logistics.model';
+import { EquipmentDataService } from '@services/equipment-data.service';
 import { RecipeHeaderComponent } from './components/recipe-header/recipe-header.component';
 import { RecipeIngredientsTableComponent } from './components/recipe-ingredients-table/recipe-ingredients-table.component';
 import { RecipeWorkflowComponent } from './components/recipe-workflow/recipe-workflow.component';
@@ -44,6 +46,7 @@ export class RecipeBuilderPage implements OnInit {
   private readonly recipeCostService_ = inject(RecipeCostService);
   private readonly versionHistory_ = inject(VersionHistoryService);
   private readonly injector_ = inject(Injector);
+  private readonly equipmentData_ = inject(EquipmentDataService);
 
   //SIGNALS
   protected isSaving_ = signal(false);
@@ -94,7 +97,10 @@ export class RecipeBuilderPage implements OnInit {
       ingredients: this.fb.array([]),
       workflow_items: this.fb.array([]),
       total_weight_g: [0],
-      total_cost: [0]
+      total_cost: [0],
+      logistics: this.fb.group({
+        baseline_: this.fb.array([])
+      })
     },
     { validators: this.recipeFormValidator_ }
   );
@@ -192,6 +198,8 @@ export class RecipeBuilderPage implements OnInit {
 
     this.workflowArray.clear();
     this.workflowArray.push(this.createStepGroup(1));
+
+    this.logisticsBaselineArray.clear();
 
     this.recipeForm_.updateValueAndValidity({ emitEvent: false });
     this.recipeForm_.markAsPristine();
@@ -333,6 +341,13 @@ export class RecipeBuilderPage implements OnInit {
         }));
       });
     }
+
+    if (isDish && recipe.logistics_?.baseline_?.length) {
+      this.logisticsBaselineArray.clear();
+      recipe.logistics_.baseline_.forEach(entry =>
+        this.logisticsBaselineArray.push(this.createBaselineRow(entry))
+      );
+    }
   }
 
 
@@ -348,6 +363,14 @@ export class RecipeBuilderPage implements OnInit {
 
   get ingredientsArray() {
     return this.recipeForm_.get('ingredients') as FormArray;
+  }
+
+  protected get logisticsBaselineArray(): FormArray {
+    return (this.recipeForm_.get('logistics') as FormGroup)?.get('baseline_') as FormArray;
+  }
+
+  protected get allEquipment_() {
+    return this.equipmentData_.allEquipment_();
   }
 
   //CREATE
@@ -450,6 +473,24 @@ export class RecipeBuilderPage implements OnInit {
       return rows;
     }
     return [];
+  }
+
+  private createBaselineRow(entry?: BaselineEntry) {
+    return this.fb.group({
+      equipment_id_: [entry?.equipment_id_ ?? '', Validators.required],
+      quantity_: [entry?.quantity_ ?? 1, [Validators.required, Validators.min(0)]],
+      phase_: [entry?.phase_ ?? 'both'],
+      is_critical_: [entry?.is_critical_ ?? true],
+      notes_: [entry?.notes_ ?? '']
+    });
+  }
+
+  protected addBaselineRow(): void {
+    this.logisticsBaselineArray.push(this.createBaselineRow());
+  }
+
+  protected removeBaselineRow(index: number): void {
+    this.logisticsBaselineArray.removeAt(index);
   }
 
   private createPrepItemRow(row?: { preparation_name?: string; category_name?: string; main_category_name?: string; quantity?: number; unit?: string }) {
@@ -651,7 +692,20 @@ export class RecipeBuilderPage implements OnInit {
       recipe_type_: isDish ? 'dish' : 'preparation',
       ...(prepItems && prepItems.length > 0 && { prep_items_: prepItems }),
       ...(prepCategories && prepCategories.length > 0 && { prep_categories_: prepCategories }),
-      ...(prepCategories && prepCategories.length > 0 && { mise_categories_: prepCategories })
+      ...(prepCategories && prepCategories.length > 0 && { mise_categories_: prepCategories }),
+      ...(isDish ? (() => {
+        const baselineRaw = (raw['logistics'] as { baseline_?: { equipment_id_: string; quantity_: number; phase_: string; is_critical_: boolean; notes_?: string }[] })?.baseline_ ?? [];
+        const baseline = baselineRaw
+          .filter((r: { equipment_id_?: string }) => !!r?.equipment_id_)
+          .map((r: { equipment_id_: string; quantity_: number; phase_: string; is_critical_: boolean; notes_?: string }) => ({
+            equipment_id_: r.equipment_id_,
+            quantity_: Number(r.quantity_),
+            phase_: (r.phase_ || 'both') as EquipmentPhase,
+            is_critical_: !!r.is_critical_,
+            notes_: r.notes_ || undefined
+          }));
+        return baseline.length > 0 ? { logistics_: { baseline_: baseline } } : {};
+      })() : {})
     };
   }
 

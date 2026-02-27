@@ -3,23 +3,23 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: stretch;
   gap: 1.5rem;
-
-  padding: 1rem;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 1.25rem;
+  background: var(--bg-glass-strong);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
 }
 
 .image-square {
   align-self: center;
   overflow: hidden;
-
   width: 120px;
   height: 120px;
   aspect-ratio: 1 / 1;
-
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
 
   .header-img {
     width: 100%;
@@ -42,38 +42,35 @@
 
     .recipe-name-input {
       flex: 1;
-
       background: transparent;
-      color: #1e293b;
+      color: var(--color-text-main);
       font-size: 1.4rem;
       font-weight: 800;
-
       border: none;
-      border-bottom: 2px solid #f1f5f9;
+      border-block-end: 2px solid var(--border-default);
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s ease;
 
       &:focus {
-        border-color: #1e3a8a;
+        border-color: var(--color-primary);
       }
     }
 
     .type-toggle-btn {
       padding: 0.4rem 1rem;
-
-      background: #f1f5f9;
-      color: #475569;
+      background: var(--bg-glass);
+      color: var(--color-text-muted);
       font-size: 0.8rem;
       font-weight: 800;
-
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
       cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
 
       &.dish-mode {
-        background: #dcfce7;
-        color: #166534;
-        border-color: #86efac;
+        background: var(--bg-success);
+        color: var(--text-success);
+        border-color: rgba(167, 243, 208, 0.6);
       }
     }
   }
@@ -103,9 +100,9 @@
   gap: 5px;
 
   padding: 0.4rem 0.6rem;
-  background: #f8fafc;
+  background: var(--bg-glass);
 
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-default);
   border-radius: 50px;
   transition: all 0.2s;
 
@@ -114,12 +111,12 @@
     border-color: #93c5fd;
 
     .unit-name {
-      color: #1e3a8a;
+      color: var(--color-primary);
     }
   }
 
   &.secondary {
-    background: #f8fafc;
+    background: var(--bg-glass);
   }
 
   .unit-dropdown-menu {
@@ -132,8 +129,8 @@
     max-height: 200px;
     overflow-y: auto;
 
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+    background: var(--bg-pure);
+    border: 1px solid var(--border-default);
     border-radius: 8px;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 
@@ -150,9 +147,9 @@
       }
 
       &.menu-item-create {
-        color: #1e3a8a;
+        color: var(--color-primary);
         font-weight: 700;
-        border-top: 1px solid #e2e8f0;
+        border-top: 1px solid var(--border-default);
       }
     }
   }
@@ -182,7 +179,7 @@
   cursor: pointer;
 
   .unit-name {
-    color: #1e3a8a;
+    color: var(--color-primary);
     font-size: 0.85rem;
     font-weight: 800;
   }
@@ -198,7 +195,7 @@
   align-items: center;
 
   height: 28px;
-  background: #ffffff;
+  background: var(--bg-pure);
 
   border: 1px solid #cbd5e1;
   border-radius: 6px;
@@ -207,8 +204,8 @@
   .ctrl-btn {
     height: 100%;
 
-    background: #f8fafc;
-    color: #1e3a8a;
+    background: var(--bg-glass);
+    color: var(--color-primary);
     font-size: 0.95rem;
     font-weight: bold;
 
@@ -229,7 +226,7 @@
     width: 100%;
 
     background: transparent;
-    color: #1e3a8a;
+    color: var(--color-primary);
     text-align: center;
     font-size: 0.85rem;
     font-weight: 800;
@@ -281,9 +278,9 @@
   cursor: pointer;
 
   &:hover {
-    color: #1e3a8a;
-    background-color: #f8fafc;
-    border-color: #1e3a8a;
+    color: var(--color-primary);
+    background-color: var(--bg-glass);
+    border-color: var(--color-primary);
   }
 }
 
@@ -297,8 +294,8 @@
 
   min-width: 100px;
   padding: 1rem;
-  background: #1e3a8a;
-  color: #ffffff;
+  background: var(--color-primary);
+  color: var(--bg-pure);
 
   border-radius: 8px;
   text-align: center;

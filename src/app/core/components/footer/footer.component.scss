@@ -1,21 +1,25 @@
 .app-footer {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 100;
   display: grid;
   grid-auto-flow: column;
-
   justify-content: space-between;
   align-items: center;
 
-  padding:0.5em;
-  position: fixed;
-  bottom: 0;
+  padding-inline: 1.5rem;
+  padding-block: 0.5rem;
 
-  width: 100%;
+  background: var(--bg-frosted-nav);
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  backdrop-filter: var(--blur-nav);
+  -webkit-backdrop-filter: var(--blur-nav);
 
-  background-color: #f0f0f0;
-  border-top: 1px solid #ccc;
-  font-size: 0.9rem;
-  color: #333;
-  
+  border-block-start: 1px solid var(--border-glass);
+  box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.03);
+
   .left-content,
   .right-content {
     flex: 1;
@@ -23,11 +27,11 @@
   }
 
   .left-content {
-    text-align: left;
+    text-align: start;
   }
 
   .right-content {
-    text-align: right;
+    text-align: end;
   }
 
   .center-content {
@@ -36,8 +40,23 @@
 
     .logo {
       object-fit: contain;
-      width: 50px;
-      height: 50px;
+      width: 2rem;
+      height: 2rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding-inline: 1rem;
+    padding-block: 0.375rem;
+
+    .left-content,
+    .right-content {
+      font-size: 0.75rem;
+    }
+
+    .center-content .logo {
+      width: 1.5rem;
+      height: 1.5rem;
     }
   }
 }

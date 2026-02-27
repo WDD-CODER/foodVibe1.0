@@ -50,6 +50,46 @@
       </div>
     </section>
 
+    @if (recipeForm_.get('recipe_type')?.value === 'dish' && !historyViewMode_()) {
+      <section class="builder-section">
+        <div class="section-card logistics-logic">
+          <h2 class="section-title">{{ 'dish_logistics' | translatePipe }}</h2>
+          <p class="section-desc">{{ 'dish_logistics_desc' | translatePipe }}</p>
+          <div class="logistics-baseline" formGroupName="logistics">
+            <div class="baseline-rows" formArrayName="baseline_">
+              @for (ctrl of logisticsBaselineArray.controls; track $index; let i = $index) {
+                <div class="baseline-row" [formGroupName]="i">
+                  <select formControlName="equipment_id_">
+                    <option value="">{{ 'choose_equipment' | translatePipe }}</option>
+                    @for (eq of allEquipment_; track eq._id) {
+                      <option [value]="eq._id">{{ eq.name_hebrew }}</option>
+                    }
+                  </select>
+                  <input type="number" formControlName="quantity_" min="0" class="qty-input" />
+                  <select formControlName="phase_">
+                    <option value="prep">{{ 'phase_prep' | translatePipe }}</option>
+                    <option value="service">{{ 'phase_service' | translatePipe }}</option>
+                    <option value="both">{{ 'phase_both' | translatePipe }}</option>
+                  </select>
+                  <label class="critical-check">
+                    <input type="checkbox" formControlName="is_critical_" />
+                    {{ 'critical' | translatePipe }}
+                  </label>
+                  <button type="button" class="btn-remove" (click)="removeBaselineRow(i)" [attr.aria-label]="'remove' | translatePipe">
+                    <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                  </button>
+                </div>
+              }
+            </div>
+            <button type="button" class="add-row-btn" (click)="addBaselineRow()">
+              <lucide-icon name="plus-circle" [size]="18"></lucide-icon>
+              <span class="btn-text">{{ 'add_equipment_baseline' | translatePipe }}</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    }
+
     @if (!historyViewMode_()) {
       <footer class="action-footer">
         <button class="main-submit-btn" [disabled]="isSaving_()" (click)="saveRecipe()">

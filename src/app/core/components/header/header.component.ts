@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
@@ -12,5 +12,13 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HeaderComponent {
+  isMobileMenuOpen = signal(false);
 
+  openMobileMenu(): void {
+    this.isMobileMenuOpen.set(true);
+  }
+
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen.set(false);
+  }
 }

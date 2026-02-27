@@ -1,36 +1,41 @@
 .dashboard-shell {
-  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 1.5rem;
+  padding: 1.5rem;
 }
 
 .tab-nav {
   display: flex;
-  gap: 8px;
+  gap: 0.5rem;
   flex-wrap: wrap;
-  border-bottom: 1px solid var(--border-default);
-  padding-bottom: 0.75rem;
 }
 
 .tab-btn {
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--border-default);
-  background: var(--bg-pure);
+  padding-inline: 1.25rem;
+  padding-block: 0.5rem;
+
+  background: var(--bg-glass);
   color: var(--color-text-muted);
   font-size: 0.875rem;
+  font-weight: 500;
+
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  backdrop-filter: var(--blur-glass);
+
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
-    background: var(--bg-subtle);
+    background: var(--bg-glass-hover);
     color: var(--color-text-main);
   }
 
   &.active {
-    background: #0f766e;
-    border-color: #0f766e;
-    color: #ecfeff;
+    background: var(--color-primary);
+    color: var(--color-text-on-primary);
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-glow);
   }
 }
