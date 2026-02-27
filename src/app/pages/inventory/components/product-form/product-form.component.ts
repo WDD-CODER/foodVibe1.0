@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal, computed, input, Signal, runInInjectionContext, Injector, effect, ViewChildren, QueryList, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, input, Signal, runInInjectionContext, Injector, effect, ViewChildren, QueryList, ElementRef, AfterViewChecked, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule, FormArray, AbstractControl } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -20,6 +21,7 @@ import { AddSupplierFlowService } from '@services/add-supplier-flow.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
+import { duplicateNameValidator } from 'src/app/core/validators/item.validators';
 
 @Component({
   selector: 'product-form',
@@ -52,6 +54,7 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
   private readonly userMsgService = inject(UserMsgService);
   private readonly injector = inject(Injector);
   private readonly confirmModal = inject(ConfirmModalService);
+  private readonly destroyRef = inject(DestroyRef);
 
   unitRegistry = inject(UnitRegistryService);
   @ViewChildren('categoryDropdownItem') categoryDropdownItems!: QueryList<ElementRef<HTMLElement>>;
@@ -284,7 +287,7 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
     if (productData) {
       this.hydrateForm(productData);
     } else {
-      this.route.data.subscribe(({ product }) => {
+      this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({ product }) => {
         if (product) {
           this.hydrateForm(product);
         } else {
@@ -298,7 +301,13 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
 
   private initForm(): void {
     this.productForm_ = this.fb_.group({
-      productName: ['', [Validators.required]],
+      productName: ['', [
+        Validators.required,
+        duplicateNameValidator(
+          () => this.kitchenStateService.products_(),
+          () => this.curProduct_()?._id ?? null
+        )
+      ]],
       base_unit_: ['', Validators.required],
       buy_price_global_: [0, [Validators.required, Validators.min(0)]],
       categories_: [[], [Validators.required, Validators.minLength(1)]],
@@ -319,17 +328,17 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
     const yieldCtrl = this.productForm_.get('yield_factor_');
 
     // React to Waste % change
-    percentCtrl?.valueChanges.subscribe(pct => {
+    percentCtrl?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(pct => {
       const { yieldFactor } = this.conversionService.handleWasteChange(pct);
 
-      // Only update if the value is actually different to avoid loops 
+      // Only update if the value is actually different to avoid loops
       if (yieldCtrl?.value !== yieldFactor) {
         yieldCtrl?.setValue(yieldFactor, { emitEvent: false });
         this.productForm_.get('buy_price_global_')?.updateValueAndValidity(); // Force price recalc
       }
     });
 
-    yieldCtrl?.valueChanges.subscribe(y => {
+    yieldCtrl?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(y => {
       if (y === null || y === undefined) return;
       const { wastePercent } = this.conversionService.handleYieldChange(y);
 
@@ -525,7 +534,7 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
     // Initialize state for this row
     this.purchaseOptionState_.set(group, { overrideConfirmed: false });
 
-    group.get('unit_symbol_')?.valueChanges.subscribe((newUnit: string | null) => {
+    group.get('unit_symbol_')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((newUnit: string | null) => {
 
       if (!newUnit || newUnit === 'NEW_UNIT') {
         group.patchValue({
@@ -563,7 +572,7 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
       group.get('price_override_')?.markAsDirty();
     });
 
-    group.get('conversion_rate_')?.valueChanges.subscribe((newConv: number | null | undefined) => {
+    group.get('conversion_rate_')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((newConv: number | null | undefined) => {
       if (newConv === null || newConv === undefined) return;
       const state = this.purchaseOptionState_.get(group) || { overrideConfirmed: false };
       if (state.overrideConfirmed) {

@@ -16,6 +16,9 @@
       <div class="form-group">
         <label>{{ 'product_name' | translatePipe }}</label>
         <input formControlName="productName" type="text" placeholder="למשל: עגבניות מגי">
+        @if (productForm_.get('productName')?.invalid && productForm_.get('productName')?.touched && productForm_.get('productName')?.errors?.['duplicateName']) {
+          <span class="form-error">כבר קיים חומר גלם בשם זה</span>
+        }
       </div>
 
       <div class="form-group">
