@@ -19,7 +19,7 @@
       <span>{{ 'menu_event_type' | translatePipe }}</span>
       <select [ngModel]="eventTypeFilter_()" (ngModelChange)="eventTypeFilter_.set($event)">
         @for (type of eventTypeOptions_(); track type) {
-          <option [value]="type">{{ type === 'all' ? ('all' | translatePipe) : type }}</option>
+          <option [value]="type">{{ type === 'all' ? ('all' | translatePipe) : (type | translatePipe) }}</option>
         }
       </select>
     </label>
@@ -33,25 +33,27 @@
       </select>
     </label>
 
-    <label class="filter-item">
-      <span>{{ 'menu_date_from' | translatePipe }}</span>
-      <input type="date" [ngModel]="dateFrom_()" (ngModelChange)="dateFrom_.set($event)" />
-    </label>
+    <div class="filter-item date-range-wrap">
+      <span class="date-range-label">{{ 'menu_date_from' | translatePipe }}</span>
+      <div class="date-input-wrap" (click)="onDateWrapClick(dateFromRef)" role="button" tabindex="-1">
+        <input #dateFromRef type="date" [ngModel]="dateFrom_()" (ngModelChange)="dateFrom_.set($event)" />
+      </div>
+    </div>
 
-    <label class="filter-item">
-      <span>{{ 'menu_date_to' | translatePipe }}</span>
-      <input type="date" [ngModel]="dateTo_()" (ngModelChange)="dateTo_.set($event)" />
-    </label>
-
-    <label class="filter-item">
-      <span>{{ 'sort' | translatePipe }}</span>
-      <select [ngModel]="sortBy_()" (ngModelChange)="sortBy_.set($event)">
-        <option value="date">{{ 'sort_by_date' | translatePipe }}</option>
-        <option value="name">{{ 'sort_by_name' | translatePipe }}</option>
-        <option value="food_cost">{{ 'menu_food_cost' | translatePipe }}</option>
-        <option value="guest_count">{{ 'menu_guest_count' | translatePipe }}</option>
-      </select>
-    </label>
+    <div class="filter-item sort-wrap">
+      <span class="sort-label">{{ 'sort' | translatePipe }}</span>
+      <div class="sort-controls">
+        <select [ngModel]="sortBy_()" (ngModelChange)="sortBy_.set($event)">
+          <option value="date">{{ 'sort_by_date' | translatePipe }}</option>
+          <option value="name">{{ 'sort_by_name' | translatePipe }}</option>
+          <option value="food_cost">{{ 'menu_food_cost' | translatePipe }}</option>
+          <option value="guest_count">{{ 'menu_guest_count' | translatePipe }}</option>
+        </select>
+        <button type="button" class="sort-order-btn" (click)="toggleSortOrder()" [attr.aria-label]="getSortOrderLabel()" [attr.title]="getSortOrderLabel()">
+          {{ getSortOrderLabel() | translatePipe }}
+        </button>
+      </div>
+    </div>
   </div>
 
   <div class="events-list">
@@ -65,13 +67,11 @@
       <article class="event-card" (click)="onOpen(event)" tabindex="0" role="button">
         <div class="card-main">
           <h3 class="card-title">{{ event.name_ }}</h3>
-          <p class="card-subtitle">{{ event.event_type_ }} · {{ event.event_date_ || ('menu_no_date' | translatePipe) }}</p>
+          <p class="card-subtitle">{{ event.event_type_ | translatePipe }} · {{ event.event_date_ || ('menu_no_date' | translatePipe) }}</p>
         </div>
         <div class="card-tags">
           <span class="tag cost">{{ 'menu_food_cost' | translatePipe }}: {{ getFoodCostPctDisplay(event) }}</span>
-          <span class="tag style">{{ event.serving_type_ | translatePipe }}</span>
-          <span class="tag guests">{{ getGuestCountDisplay(event) }} {{ 'menu_guests' | translatePipe }}</span>
-          <span class="tag sections">{{ getSectionCount(event) }} {{ 'menu_sections' | translatePipe }} · {{ getDishCount(event) }} {{ 'dishes' | translatePipe }}</span>
+          <span class="tag guests">{{ 'menu_guests' | translatePipe }} <span class="tag-value" dir="ltr">{{ getGuestCountDisplay(event) }}</span></span>
         </div>
         <div class="card-actions" (click)="$event.stopPropagation()">
           <button type="button" class="action-btn edit" (click)="onOpen(event)" [attr.aria-label]="'edit' | translatePipe">

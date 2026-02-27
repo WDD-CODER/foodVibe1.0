@@ -27,7 +27,6 @@ export class MenuLibraryListComponent {
   protected readonly eventTypeFilter_ = signal('all');
   protected readonly servingStyleFilter_ = signal('all');
   protected readonly dateFrom_ = signal('');
-  protected readonly dateTo_ = signal('');
   protected readonly sortBy_ = signal<SortField>('date');
   protected readonly sortOrder_ = signal<'asc' | 'desc'>('desc');
 
@@ -53,16 +52,13 @@ export class MenuLibraryListComponent {
     const type = this.eventTypeFilter_();
     const style = this.servingStyleFilter_();
     const from = this.dateFrom_();
-    const to = this.dateTo_();
     const sortBy = this.sortBy_();
     const sortOrder = this.sortOrder_();
 
     let events = this.events_().filter(event => {
       if (type !== 'all' && event.event_type_ !== type) return false;
       if (style !== 'all' && event.serving_type_ !== style) return false;
-      if (from && event.event_date_ && event.event_date_ < from) return false;
-      if (to && event.event_date_ && event.event_date_ > to) return false;
-      if (from && !to && event.event_date_ && event.event_date_ !== from) return false;
+      if (from && (!event.event_date_ || event.event_date_ < from)) return false;
       if (query) {
         const haystack = [
           event.name_,
@@ -143,5 +139,31 @@ export class MenuLibraryListComponent {
 
   protected getDishCount(event: MenuEvent): number {
     return (event.sections_ || []).reduce((sum, s) => sum + (s.items_?.length || 0), 0);
+  }
+
+  /** Translation key for current sort order (א–ת, ת–א, ישן לחדש, etc.). */
+  protected getSortOrderLabel(): string {
+    const order = this.sortOrder_();
+    switch (this.sortBy_()) {
+      case 'name':
+        return order === 'asc' ? 'sort_name_az' : 'sort_name_za';
+      case 'date':
+        return order === 'asc' ? 'sort_date_old_new' : 'sort_date_new_old';
+      case 'food_cost':
+      case 'guest_count':
+        return order === 'asc' ? 'sort_number_low_high' : 'sort_number_high_low';
+      default:
+        return order === 'asc' ? 'sort_number_low_high' : 'sort_number_high_low';
+    }
+  }
+
+  protected toggleSortOrder(): void {
+    this.sortOrder_.update(o => o === 'asc' ? 'desc' : 'asc');
+  }
+
+  protected onDateWrapClick(input: HTMLInputElement | undefined): void {
+    if (input?.showPicker) {
+      input.showPicker();
+    }
   }
 }
