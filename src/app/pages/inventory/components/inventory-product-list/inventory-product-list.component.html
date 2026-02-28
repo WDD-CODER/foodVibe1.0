@@ -1,27 +1,106 @@
 <div class="inventory-container" dir="rtl">
-  <div class="products-header action-bar">
-    <button type="button" class="burger-btn" [class.burger-hidden]="isSidebarOpen_()" (click)="toggleSidebar()" [attr.aria-label]="isSidebarOpen_() ? 'Close menu' : 'Open menu'">
-      <lucide-icon name="menu" [size]="24"></lucide-icon>
-    </button>
+  <header class="list-header">
     <h2 class="page-title">{{ 'product_list' | translatePipe }}</h2>
-  </div>
-
-  <aside class="action-sidebar" [class.open]="isSidebarOpen_()" [style.--sidebar-swipe-offset.px]="sidebarSwipeOffset_()">
-    <div class="sidebar-content"
-      (touchstart)="onSidebarTouchStart($event)"
-      (touchmove)="onSidebarTouchMove($event)"
-      (touchend)="onSidebarTouchEnd()">
-      <button type="button" class="sidebar-close-btn desktop-only" (click)="toggleSidebar()" [attr.aria-label]="'close' | translatePipe">
-        <lucide-icon name="x" [size]="20"></lucide-icon>
-      </button>
-      <div class="search-section">
-        <label class="visually-hidden" for="product-search">{{ 'search' | translatePipe }}</label>
-        <div class="input-wrapper">
-          <lucide-icon name="search" [size]="18"></lucide-icon>
-          <input id="product-search" type="text" [ngModel]="searchQuery_()" (ngModelChange)="searchQuery_.set($event)"
-            [placeholder]="'search' | translatePipe" />
-        </div>
+    <div class="header-search">
+      <label class="visually-hidden" for="product-search">{{ 'search' | translatePipe }}</label>
+      <div class="input-wrapper">
+        <lucide-icon name="search" [size]="18"></lucide-icon>
+        <input id="product-search" type="text" [ngModel]="searchQuery_()" (ngModelChange)="searchQuery_.set($event)"
+          [placeholder]="'search' | translatePipe" />
       </div>
+    </div>
+  </header>
+
+  <section class="table-area">
+    <div class="table-header">
+      <div class="col-name sortable-header" (click)="setSort('name')" (keydown.enter)="setSort('name')" (keydown.space)="$event.preventDefault(); setSort('name')" role="button" tabindex="0">
+        {{ 'product' | translatePipe }}
+      </div>
+      <div class="col-category sortable-header" (click)="setSort('category')" (keydown.enter)="setSort('category')" (keydown.space)="$event.preventDefault(); setSort('category')" role="button" tabindex="0">
+        {{ 'category' | translatePipe }}
+      </div>
+      <div class="col-allergens sortable-header" (click)="toggleAllergenExpandAll()" (keydown.enter)="toggleAllergenExpandAll()" (keydown.space)="$event.preventDefault(); toggleAllergenExpandAll()" role="button" tabindex="0">
+        {{ 'allergens' | translatePipe }}
+      </div>
+      <div class="col-supplier sortable-header" (click)="setSort('supplier')" (keydown.enter)="setSort('supplier')" (keydown.space)="$event.preventDefault(); setSort('supplier')" role="button" tabindex="0">
+        {{ 'supplier' | translatePipe }}
+      </div>
+      <div class="col-unit">{{ 'unit' | translatePipe }}</div>
+      <div class="col-price">{{ 'price' | translatePipe }}</div>
+      <div class="col-actions">{{ 'actions' | translatePipe }}</div>
+    </div>
+
+    <div class="table-body">
+      @if (filteredProducts_().length === 0) {
+        <div class="no-results">{{ 'no_products_match' | translatePipe }}</div>
+      }
+      @for (product of filteredProducts_(); track product._id) {
+        <div class="product-grid-row">
+          <div class="col-name">{{ product.name_hebrew }}</div>
+          <div class="col-category">{{ getCategoryDisplay(product.categories_) || '—' }}</div>
+          <div class="col-allergens">
+            @if (product.allergens_.length) {
+              <div class="allergen-btn-wrapper" [class.allergen-expanded-open]="allergenExpandAll_() || allergenPopoverProductId_() === product._id" (clickOutside)="closeAllergenView($event)">
+                <button type="button" class="allergen-btn" (click)="toggleAllergenPopover(product._id)">
+                  <lucide-icon name="shield-alert" [size]="16"></lucide-icon>
+                  {{ product.allergens_.length }}
+                </button>
+                @if (allergenExpandAll_() || allergenPopoverProductId_() === product._id) {
+                  <div class="allergen-expanded" [class.dense-grid]="true">
+                    @for (a of product.allergens_; track a) {
+                      <span class="allergen-pill">{{ a | translatePipe }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <span class="placeholder-dash">—</span>
+            }
+          </div>
+          <div class="col-supplier">{{ getSupplierNames(product.supplierIds_) || '—' }}</div>
+          <div class="col-unit">
+            <select class="grid-select" [ngModel]="product.base_unit_"
+              (ngModelChange)="onUnitChange(product, $event)">
+              @for (u of getProductUnits(product); track u) {
+                <option [value]="u">{{ u | translatePipe }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-price">
+            @if (savingPriceId_() === product._id) {
+              <app-loader size="small" [inline]="true" />
+            } @else {
+              <input #priceInput type="number" class="grid-input price-input"
+                [ngModel]="getPricePerUnit(product, product.base_unit_)"
+                SelectOnFocus
+                (focus)="onPriceFocus(product, product.base_unit_)"
+                (blur)="onPriceBlur(product, product.base_unit_, $event, priceInput)"
+                min="0" step="0.01" />
+              <span class="price-suffix">₪</span>
+            }
+          </div>
+          <div class="col-actions">
+            <button type="button" class="action-btn edit" (click)="onEditProduct(product._id)" [attr.aria-label]="'edit' | translatePipe">
+              <lucide-icon name="pencil" [size]="18"></lucide-icon>
+            </button>
+            @if (deletingId_() === product._id) {
+              <app-loader size="small" [inline]="true" />
+            } @else {
+              <button type="button" class="action-btn delete" (click)="onDeleteProduct(product._id)" [attr.aria-label]="'delete' | translatePipe">
+                <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <aside class="filter-panel" [class.collapsed]="!isPanelOpen_()">
+    <button type="button" class="panel-toggle-icon" (click)="togglePanel()" [attr.aria-label]="isPanelOpen_() ? ('close' | translatePipe) : ('filter' | translatePipe)">
+      <lucide-icon [name]="isPanelOpen_() ? 'panel-right-close' : 'panel-left-close'" [size]="20"></lucide-icon>
+    </button>
+    <div class="panel-content">
       <div class="filter-section">
         <div class="filter-section-header">
           <h3>{{ 'filter' | translatePipe }}</h3>
@@ -53,90 +132,4 @@
       </div>
     </div>
   </aside>
-  <main class="products-main">
-    <div class="products-grid">
-      <div class="products-grid-header">
-        <div class="col-name sortable-header" (click)="setSort('name')" (keydown.enter)="setSort('name')" (keydown.space)="$event.preventDefault(); setSort('name')" role="button" tabindex="0">
-          {{ 'product' | translatePipe }}
-        </div>
-        <div class="col-category sortable-header" (click)="setSort('category')" (keydown.enter)="setSort('category')" (keydown.space)="$event.preventDefault(); setSort('category')" role="button" tabindex="0">
-          {{ 'category' | translatePipe }}
-        </div>
-        <div class="col-allergens sortable-header" (click)="toggleAllergenExpandAll()" (keydown.enter)="toggleAllergenExpandAll()" (keydown.space)="$event.preventDefault(); toggleAllergenExpandAll()" role="button" tabindex="0">
-          {{ 'allergens' | translatePipe }}
-        </div>
-        <div class="col-supplier sortable-header" (click)="setSort('supplier')" (keydown.enter)="setSort('supplier')" (keydown.space)="$event.preventDefault(); setSort('supplier')" role="button" tabindex="0">
-          {{ 'supplier' | translatePipe }}
-        </div>
-        <div class="col-unit">{{ 'unit' | translatePipe }}</div>
-        <div class="col-price">{{ 'price' | translatePipe }}</div>
-        <div class="col-actions">{{ 'actions' | translatePipe }}</div>
-      </div>
-
-      <div class="products-grid-body">
-        @if (filteredProducts_().length === 0) {
-          <div class="no-results">{{ 'no_products_match' | translatePipe }}</div>
-        }
-        @for (product of filteredProducts_(); track product._id) {
-          <div class="product-grid-row">
-            <div class="col-name">{{ product.name_hebrew }}</div>
-            <div class="col-category">{{ getCategoryDisplay(product.categories_) || '—' }}</div>
-            <div class="col-allergens">
-              @if (product.allergens_.length) {
-                <div class="allergen-btn-wrapper" [class.allergen-expanded-open]="allergenExpandAll_() || allergenPopoverProductId_() === product._id" (clickOutside)="closeAllergenView($event)">
-                  <button type="button" class="allergen-btn" (click)="toggleAllergenPopover(product._id)">
-                    <lucide-icon name="shield-alert" [size]="16"></lucide-icon>
-                    {{ product.allergens_.length }}
-                  </button>
-                  @if (allergenExpandAll_() || allergenPopoverProductId_() === product._id) {
-                    <div class="allergen-expanded" [class.dense-grid]="true">
-                      @for (a of product.allergens_; track a) {
-                        <span class="allergen-pill">{{ a | translatePipe }}</span>
-                      }
-                    </div>
-                  }
-                </div>
-              } @else {
-                <span class="placeholder-dash">—</span>
-              }
-            </div>
-            <div class="col-supplier">{{ getSupplierNames(product.supplierIds_) || '—' }}</div>
-            <div class="col-unit">
-              <select class="grid-select" [ngModel]="product.base_unit_"
-                (ngModelChange)="onUnitChange(product, $event)">
-                @for (u of getProductUnits(product); track u) {
-                  <option [value]="u">{{ u | translatePipe }}</option>
-                }
-              </select>
-            </div>
-            <div class="col-price">
-              @if (savingPriceId_() === product._id) {
-                <app-loader size="small" [inline]="true" />
-              } @else {
-                <input #priceInput type="number" class="grid-input price-input"
-                  [ngModel]="getPricePerUnit(product, product.base_unit_)"
-                  SelectOnFocus
-                  (focus)="onPriceFocus(product, product.base_unit_)"
-                  (blur)="onPriceBlur(product, product.base_unit_, $event, priceInput)"
-                  min="0" step="0.01" />
-                <span class="price-suffix">₪</span>
-              }
-            </div>
-            <div class="col-actions">
-              <button type="button" class="action-btn edit" (click)="onEditProduct(product._id)" [attr.aria-label]="'edit' | translatePipe">
-                <lucide-icon name="pencil" [size]="18"></lucide-icon>
-              </button>
-              @if (deletingId_() === product._id) {
-                <app-loader size="small" [inline]="true" />
-              } @else {
-                <button type="button" class="action-btn delete" (click)="onDeleteProduct(product._id)" [attr.aria-label]="'delete' | translatePipe">
-                  <lucide-icon name="trash-2" [size]="18"></lucide-icon>
-                </button>
-              }
-            </div>
-          </div>
-        }
-      </div>
-    </div>
-  </main>
 </div>

@@ -17,7 +17,6 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
 
 const MOBILE_BREAKPOINT_PX = 768;
-const SIDEBAR_SWIPE_CLOSE_THRESHOLD_RATIO = 0.5;
 
 @Component({
   selector: 'inventory-product-list',
@@ -39,34 +38,26 @@ export class InventoryProductListComponent implements OnDestroy {
   private lastPriceEdit_ = { productId: '', unit: '', value: 0 };
   private mediaQueryList: MediaQueryList | null = null;
   private mediaListener: (() => void) | null = null;
-  private swipeStartX = 0;
 
   // INITIAL STATE
   protected activeFilters_ = signal<Record<string, string[]>>({});
   protected searchQuery_ = signal<string>('');
   protected sortBy_ = signal<SortField | null>(null);
   protected sortOrder_ = signal<'asc' | 'desc'>('asc');
-  protected isSidebarOpen_ = signal<boolean>(false);
+  protected isPanelOpen_ = signal<boolean>(true);
   protected expandedFilterCategories_ = signal<Set<string>>(new Set());
   protected allergenPopoverProductId_ = signal<string | null>(null);
   protected allergenExpandAll_ = signal<boolean>(false);
   protected deletingId_ = signal<string | null>(null);
   protected savingPriceId_ = signal<string | null>(null);
   protected isMobile_ = signal<boolean>(false);
-  protected sidebarSwipeOffset_ = signal<number>(0);
 
   constructor() {
     afterNextRender(() => {
       this.mediaQueryList = window.matchMedia(`(min-width: ${MOBILE_BREAKPOINT_PX + 1}px)`);
-      const isDesktop = this.mediaQueryList.matches;
-      this.isMobile_.set(!isDesktop);
-      this.isSidebarOpen_.set(isDesktop);
+      this.isMobile_.set(!this.mediaQueryList.matches);
       this.mediaListener = () => {
-        const desktop = this.mediaQueryList!.matches;
-        this.isMobile_.set(!desktop);
-        if (desktop) this.isSidebarOpen_.set(true);
-        else this.isSidebarOpen_.set(false);
-        this.sidebarSwipeOffset_.set(0);
+        this.isMobile_.set(!this.mediaQueryList!.matches);
       };
       this.mediaQueryList.addEventListener('change', this.mediaListener);
     });
@@ -125,30 +116,6 @@ export class InventoryProductListComponent implements OnDestroy {
 
   protected isCategoryExpanded(name: string): boolean {
     return this.expandedFilterCategories_().has(name);
-  }
-
-  protected onSidebarTouchStart(e: TouchEvent): void {
-    if (!this.isMobile_() || !this.isSidebarOpen_()) return;
-    this.swipeStartX = e.touches[0].clientX;
-    this.sidebarSwipeOffset_.set(0);
-  }
-
-  protected onSidebarTouchMove(e: TouchEvent): void {
-    if (!this.isMobile_() || !this.isSidebarOpen_()) return;
-    const delta = this.swipeStartX - e.touches[0].clientX;
-    this.sidebarSwipeOffset_.set(Math.max(0, delta));
-  }
-
-  protected onSidebarTouchEnd(): void {
-    if (!this.isMobile_() || !this.isSidebarOpen_()) return;
-    const offset = this.sidebarSwipeOffset_();
-    const panelWidth = 280;
-    if (offset >= panelWidth * SIDEBAR_SWIPE_CLOSE_THRESHOLD_RATIO) {
-      this.isSidebarOpen_.set(false);
-      this.sidebarSwipeOffset_.set(0);
-    } else {
-      this.sidebarSwipeOffset_.set(0);
-    }
   }
 
   protected filteredProducts_ = computed(() => {
@@ -222,8 +189,8 @@ export class InventoryProductListComponent implements OnDestroy {
     }
   }
 
-  protected toggleSidebar(): void {
-    this.isSidebarOpen_.update(v => !v);
+  protected togglePanel(): void {
+    this.isPanelOpen_.update(v => !v);
   }
 
   protected toggleAllergenExpandAll(): void {
