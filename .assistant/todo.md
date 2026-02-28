@@ -172,6 +172,7 @@ Update status after each sub-task. Link plan files here when applicable.
 
 - [x] Move filter panel to visual right (grid swap in both list SCSS)
 - [x] Replace panel toggle with hover-reveal arrow icon; hide scrollbars; remove Cook/History buttons from recipe book
+- [x] Move open-panel (hamburger) into list header when panel closed (recipe-book + inventory); merge to main (feat/list-ux-panel-and-header)
 
 ### Recipe Builder — Scaling, Bruto, Weight/Volume Toggle (`docs/recipe_metrics_scaling_plan.md`)
 
