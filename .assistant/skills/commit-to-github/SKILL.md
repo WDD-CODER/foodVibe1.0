@@ -130,6 +130,9 @@ After the tree, ask: **"Approve to proceed with these branches and commits, or d
    ```
    Optionally `git pull --ff-only origin main` if the user typically pulls after committing.
 
+5. **Update todo**  
+   After all branches and commits are done, open `.assistant/todo.md`. Using the committed branch names, commit messages (type/scope), and file paths, identify tasks in the "Active Tasks" (or other relevant sections) that correspond to this work. Mark those tasks as done (`[x]`) and move or keep them under the appropriate plan or "Done" section. Do not remove or change unrelated tasks.
+
 ---
 
 ## End State
@@ -137,6 +140,7 @@ After the tree, ask: **"Approve to proceed with these branches and commits, or d
 - All planned changes are committed on the intended branches.
 - Current branch is the default (e.g. `main`).
 - No uncommitted changes that were part of the plan are left behind (unless the user asked to leave something uncommitted).
+- `.assistant/todo.md` is updated: tasks that match the committed work (by branch, commit message, or files) are marked done (`[x]`) in the appropriate section.
 
 ---
 

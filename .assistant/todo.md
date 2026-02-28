@@ -138,6 +138,29 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Enter in quantity or unit: add new row and focus new row’s search (keyboard-only flow).
 - [x] FocusByRowDirective + wiring for focus-by-row (qty/unit).
 
+### Plan 032 — Custom Cooking Loader (`plans/032-custom-cooking-loader.plan.md`)
+
+- [x] Create loader component (simmering pot + steam, sizes large/medium/small, overlay, inline).
+- [x] Add dictionary keys (loader_loading, loader_saving, loader_please_wait, loader_cooking_up).
+- [x] Route-level loader in app.component; trash + version-history panel medium loaders.
+- [x] Save-button loaders: recipe-builder, menu-intelligence, cook-view, product/equipment/venue forms.
+- [x] Delete/clone loaders: recipe-book, inventory, equipment, venue, menu-library; inventory price-save loader.
+- [x] Demo data import large overlay on metadata manager.
+
+### Plan 035 — Header and Navigation Refactor (`plans/035-header-navigation-refactor.plan.md`)
+
+- [x] A. Hide mobile-close-btn in desktop mode via SCSS rule
+- [x] B+E. Remove 5 nav items from header HTML, increase gap for padding
+- [x] C. Add equipment child route under inventory + nav buttons in inventory page
+- [x] D. Create AddEquipmentModal component + service (name + category fields)
+- [x] F+H. Location/Trash buttons in dashboard tab bar
+- [x] G. Create HeroFab (expand on main-button hover only); remove footer
+
+### Plan 036 — Dashboard Control Panel Fixed Tabs (`plans/036-dashboard-control-panel-fixed-tabs.plan.md`)
+
+- [x] Extend DashboardTab to five tabs; query param; five tab buttons; sticky header
+- [x] Render five views (overview, metadata, venues, add-venue, trash); VenueForm embedded mode
+
 ### Recipe Builder — Scaling, Bruto, Weight/Volume Toggle (`docs/recipe_metrics_scaling_plan.md`)
 
 - [x] RecipeCostService: fix product weight formula (`net / conversion_rate_`), registry fallback for volume→grams, VOLUME_OR_WEIGHT_KEYS.
@@ -150,6 +173,16 @@ Update status after each sub-task. Link plan files here when applicable.
 ---
 
 ## Ahead (Pending)
+
+### Plan 034 — Recipe Builder UI Fixes (`plans/034-recipe-builder-ui-fixes.plan.md`)
+
+- [ ] a. Type toggle: pass recipeType from parent, add input in header, use in template
+- [ ] b. Header unit dropdowns: overflow visible + z-index for primary/secondary
+- [ ] c. Add row button: justify-content center in recipe-builder.page.scss
+- [ ] d. Ingredient search dropdown: z-index 100, ensure no overflow clip
+- [ ] e. Ingredients table: container-aware grid + small-screen stacked cards
+- [ ] f. Workflow section: space-evenly + define prep-flat-grid styles
+- [ ] g. Add step button: width 100%, align with grid in recipe-workflow
 
 ### Phase 1 — Stabilize & Complete (`plans/010-product-roadmap.plan.md`)
 
@@ -217,7 +250,10 @@ Update status after each sub-task. Link plan files here when applicable.
 | 029 | SCSS Global Tokens Audit Refactor | Done |
 | 030 | Contextual Logistics Layer | Done |
 | 031 | Menu Library Style UX | Done |
-| 032 | Custom Cooking Loader | Planned |
+| 032 | Custom Cooking Loader | Done |
 | 033 | Liquid Glass Design System | Done |
+| 034 | Recipe Builder UI Fixes | Active |
+| 035 | Header and Navigation Refactor | Done |
+| 036 | Dashboard Control Panel Fixed Tabs | Done |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
