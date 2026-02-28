@@ -1,26 +1,32 @@
 <div class="dashboard-shell" dir="rtl">
   <nav class="tab-nav" aria-label="Dashboard sections">
-    <button
-      type="button"
-      class="tab-btn"
-      [class.active]="activeTab() === 'overview'"
-      (click)="setTab('overview')"
-    >
+    <button type="button" class="tab-btn" [class.active]="activeTab() === 'overview'" (click)="setTab('overview')">
       {{ 'overview' | translatePipe }}
     </button>
-    <button
-      type="button"
-      class="tab-btn"
-      [class.active]="activeTab() === 'metadata'"
-      (click)="setTab('metadata')"
-    >
+    <button type="button" class="tab-btn" [class.active]="activeTab() === 'metadata'" (click)="setTab('metadata')">
       {{ 'core_settings' | translatePipe }}
+    </button>
+    <button type="button" class="tab-btn" [class.active]="activeTab() === 'venues'" (click)="setTab('venues')">
+      <lucide-icon name="map-pin" size="16"></lucide-icon>
+      {{ 'venue_list' | translatePipe }}
+    </button>
+    <button type="button" class="tab-btn tab-btn--trash" [class.active]="activeTab() === 'trash'" (click)="setTab('trash')">
+      <lucide-icon name="trash-2" size="16"></lucide-icon>
+      {{ 'trash' | translatePipe }}
     </button>
   </nav>
 
-  @if (activeTab() === 'overview') {
-    <app-dashboard-overview />
-  } @else {
-    <app-metadata-manager />
-  }
+  <div class="dashboard-content">
+    @if (activeTab() === 'overview') {
+      <app-dashboard-overview />
+    } @else if (activeTab() === 'metadata') {
+      <app-metadata-manager />
+    } @else if (activeTab() === 'venues') {
+      <app-venue-list [embeddedInDashboard]="true" (addVenueClick)="setTab('add-venue')" />
+    } @else if (activeTab() === 'add-venue') {
+      <app-venue-form [embeddedInDashboard]="true" (saved)="setTab('venues')" (cancel)="setTab('venues')" />
+    } @else if (activeTab() === 'trash') {
+      <app-trash-page />
+    }
+  </div>
 </div>

@@ -2,8 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  EventEmitter,
   inject,
+  Input,
   OnInit,
+  Output,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -35,8 +38,14 @@ const ENV_TYPES: EnvironmentType[] = [
   templateUrl: './venue-form.component.html',
   styleUrl: './venue-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  inputs: ['embeddedInDashboard'],
+  outputs: ['saved', 'cancel'],
 })
 export class VenueFormComponent implements OnInit {
+  @Input() embeddedInDashboard = false;
+  @Output() saved = new EventEmitter<void>();
+  @Output() cancel = new EventEmitter<void>();
+
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -140,14 +149,22 @@ export class VenueFormComponent implements OnInit {
           created_at_: now,
         });
       }
-      this.router.navigate(['/venues/list']);
+      if (this.embeddedInDashboard) {
+        this.saved.emit();
+      } else {
+        this.router.navigate(['/venues/list']);
+      }
     } finally {
       this.isSaving_.set(false);
     }
   }
 
   onCancel(): void {
-    this.router.navigate(['/venues/list']);
+    if (this.embeddedInDashboard) {
+      this.cancel.emit();
+    } else {
+      this.router.navigate(['/venues/list']);
+    }
   }
 
   protected equipmentName(id: string): string {

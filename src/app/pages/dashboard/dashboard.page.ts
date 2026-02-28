@@ -12,8 +12,19 @@ import { LucideAngularModule } from 'lucide-angular';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { DashboardOverviewComponent } from './components/dashboard-overview/dashboard-overview.component';
 import { MetadataManagerComponent } from '../metadata-manager/metadata-manager.page.component';
+import { VenueListComponent } from '../venues/components/venue-list/venue-list.component';
+import { VenueFormComponent } from '../venues/components/venue-form/venue-form.component';
+import { TrashPage } from '../trash/trash.page';
 
-export type DashboardTab = 'overview' | 'metadata';
+export type DashboardTab = 'overview' | 'metadata' | 'venues' | 'add-venue' | 'trash';
+
+const TAB_QUERY_VALUES: Record<DashboardTab, string | null> = {
+  overview: null,
+  metadata: 'metadata',
+  venues: 'venues',
+  'add-venue': 'add-venue',
+  trash: 'trash',
+};
 
 @Component({
   selector: 'app-dashboard-page',
@@ -24,6 +35,9 @@ export type DashboardTab = 'overview' | 'metadata';
     TranslatePipe,
     DashboardOverviewComponent,
     MetadataManagerComponent,
+    VenueListComponent,
+    VenueFormComponent,
+    TrashPage,
   ],
   templateUrl: './dashboard.page.html',
   styleUrl: './dashboard.page.scss',
@@ -39,14 +53,17 @@ export class DashboardPage {
 
   protected readonly activeTab = computed<DashboardTab>(() => {
     const params = this.queryParams_() as Record<string, string>;
-    return params['tab'] === 'metadata' ? 'metadata' : 'overview';
+    const t = params['tab'];
+    if (t === 'metadata' || t === 'venues' || t === 'add-venue' || t === 'trash') return t;
+    return 'overview';
   });
 
   protected setTab(tab: DashboardTab): void {
+    const value = TAB_QUERY_VALUES[tab];
     void this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: tab === 'metadata' ? { tab: 'metadata' } : {},
-      queryParamsHandling: tab === 'metadata' ? 'merge' : '',
+      queryParams: value ? { tab: value } : {},
+      queryParamsHandling: value ? 'merge' : '',
       replaceUrl: true,
     });
   }
