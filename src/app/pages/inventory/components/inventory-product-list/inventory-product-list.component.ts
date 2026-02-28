@@ -243,11 +243,14 @@ export class InventoryProductListComponent implements OnDestroy {
     return category.options.filter(o => o.checked_).length;
   }
 
-  // UPDATE
-  onEditProduct(_id: string): void {
-    this.router.navigate(['/inventory/edit', _id])
+  protected onAddProduce(): void {
+    this.router.navigate(['/inventory/add']);
   }
 
+  // UPDATE
+  onEditProduct(_id: string): void {
+    this.router.navigate(['/inventory/edit', _id]);
+  }
 
   // DELETE
   protected onDeleteProduct(_id: string): void {

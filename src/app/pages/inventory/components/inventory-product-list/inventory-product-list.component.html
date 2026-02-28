@@ -1,5 +1,10 @@
 <div class="inventory-container" dir="rtl">
   <header class="list-header">
+    @if (!isPanelOpen_()) {
+      <button type="button" class="open-panel-btn header-menu-btn" (click)="togglePanel()" [attr.aria-label]="'filter' | translatePipe">
+        <lucide-icon name="menu" [size]="24"></lucide-icon>
+      </button>
+    }
     <h2 class="page-title">{{ 'product_list' | translatePipe }}</h2>
     <div class="header-search">
       <label class="visually-hidden" for="product-search">{{ 'search' | translatePipe }}</label>
@@ -9,6 +14,10 @@
           [placeholder]="'search' | translatePipe" />
       </div>
     </div>
+    <button type="button" class="add-btn" (click)="onAddProduce()">
+      <lucide-icon name="plus" [size]="18"></lucide-icon>
+      {{ 'add_product' | translatePipe }}
+    </button>
   </header>
 
   <section class="table-area">
@@ -97,9 +106,11 @@
   </section>
 
   <aside class="filter-panel" [class.collapsed]="!isPanelOpen_()">
-    <button type="button" class="panel-toggle-icon" (click)="togglePanel()" [attr.aria-label]="isPanelOpen_() ? ('close' | translatePipe) : ('filter' | translatePipe)">
-      <lucide-icon [name]="isPanelOpen_() ? 'panel-right-close' : 'panel-left-close'" [size]="20"></lucide-icon>
-    </button>
+    @if (isPanelOpen_()) {
+      <button type="button" class="panel-toggle-icon" (click)="togglePanel()" [attr.aria-label]="'close' | translatePipe">
+        <lucide-icon name="panel-right-close" [size]="20"></lucide-icon>
+      </button>
+    }
     <div class="panel-content">
       <div class="filter-section">
         <div class="filter-section-header">

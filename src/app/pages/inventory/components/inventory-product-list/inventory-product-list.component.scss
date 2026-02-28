@@ -1,7 +1,6 @@
 /* Layout tokens (match recipe-book layout) */
 $products-grid-template: 2fr 1fr 1.5fr 1fr minmax(48px, 0.8fr) 1fr 80px;
 $panel-width-expanded: 220px;
-$panel-width-collapsed: 48px;
 
 .inventory-container {
   display: grid;
@@ -35,6 +34,26 @@ $panel-width-collapsed: 48px;
     font-weight: 700;
     color: var(--color-text-main);
     letter-spacing: 0.02em;
+  }
+
+  .open-panel-btn.header-menu-btn {
+    display: grid;
+    place-content: center;
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+
+    &:hover {
+      background: var(--bg-glass-hover);
+      color: var(--color-text-main);
+    }
   }
 
   .header-search {
@@ -80,10 +99,32 @@ $panel-width-collapsed: 48px;
       }
     }
   }
+
+  .add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-inline: 1.25rem;
+    padding-block: 0.625rem;
+    background: var(--color-primary);
+    color: var(--color-text-on-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--shadow-glow);
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: var(--color-primary-hover);
+    }
+  }
 }
 
 .table-area {
   grid-area: table;
+  position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -178,7 +219,7 @@ $panel-width-collapsed: 48px;
   }
 }
 
-/* Filter panel (retractable to icon strip, match recipe-book) */
+/* Filter panel (fully hidden when collapsed; open via button on table area) */
 .filter-panel {
   grid-area: panel;
   display: flex;
@@ -201,9 +242,10 @@ $panel-width-collapsed: 48px;
   }
 
   &.collapsed {
-    width: $panel-width-collapsed;
-    min-width: $panel-width-collapsed;
+    width: 0;
+    min-width: 0;
     overflow: hidden;
+    border-inline-start-width: 0;
 
     .panel-content {
       opacity: 0;
@@ -221,21 +263,16 @@ $panel-width-collapsed: 48px;
   height: 2.25rem;
   margin: 0.75rem;
   padding: 0;
-  background: transparent;
-  border: none;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   color: var(--color-text-muted);
   cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
 
-  lucide-icon {
-    opacity: 0;
-    transition: opacity 0.4s ease 0.15s;
-  }
-
-  .filter-panel:hover & lucide-icon,
-  &:hover lucide-icon,
-  &:focus-visible lucide-icon {
-    opacity: 1;
+  &:hover {
+    background: var(--bg-glass-hover);
+    color: var(--color-text-main);
   }
 }
 
@@ -555,6 +592,11 @@ $panel-width-collapsed: 48px;
   .list-header .header-search {
     min-width: 0;
     max-width: none;
+  }
+
+  .list-header .add-btn {
+    flex: 1;
+    justify-content: center;
   }
 
   .action-btn {

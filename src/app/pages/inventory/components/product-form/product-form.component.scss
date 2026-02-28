@@ -2,6 +2,11 @@
 // PRODUCT FORM - DESIGN SYSTEM DNA
 // ========================================================
 
+:host {
+  display: block;
+  padding: 1.5rem;
+}
+
 .product-form-container {
   display: grid;
   width: 100%;
