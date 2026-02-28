@@ -182,21 +182,21 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] recipe-header styles: metric-group-weight-volume, metrics-notice-wrap, metrics-notice-icon, metrics-notice-floating, metrics-notice-item.
 - [x] Fix cost not updating when adding ingredients (computed depended on no signal; now depends on ingredientsFormVersion_ bumped in valueChanges).
 
+### Plan 037 — Recipe Labels Refactor (`plans/037-recipe-labels-refactor.plan.md`)
+
+- [x] Create LabelDefinition interface + labels_/autoLabels_ on Recipe model
+- [x] Extend MetadataRegistryService: allLabels_ signal, registerLabel, deleteLabel, getLabelColor (KITCHEN_LABELS)
+- [x] Create label-creation-modal component + service (name, key, color swatches, auto-trigger picker)
+- [x] Extend metadata-manager: add 'label' type, labels card, delete guard, custom add via label modal
+- [x] Recipe builder: labels FormControl, patchFormFromRecipe, buildRecipeFromForm, computeAutoLabels on save, liveAutoLabels_
+- [x] Recipe header: custom searchable label dropdown, colored chips (manual removable, auto locked)
+- [x] Recipe-book: replace main_category with labels column (colored chips), filter, sort
+- [x] Add translation keys (labels, choose_label, create_new_label, no_label, label_name, label_color, auto_trigger_sources, save_label, add_new_label)
+- [x] Register label-creation-modal in app root
+
 ---
 
 ## Ahead (Pending)
-
-### Plan 037 — Recipe Labels Refactor (`plans/037-recipe-labels-refactor.plan.md`)
-
-- [ ] Create LabelDefinition interface + labels_/autoLabels_ on Recipe model
-- [ ] Extend MetadataRegistryService: allLabels_ signal, registerLabel, deleteLabel, getLabelColor (KITCHEN_LABELS)
-- [ ] Create label-creation-modal component + service (name, key, color swatches, auto-trigger picker)
-- [ ] Extend metadata-manager: add 'label' type, labels card, delete guard, custom add via label modal
-- [ ] Recipe builder: labels FormControl, patchFormFromRecipe, buildRecipeFromForm, computeAutoLabels on save, liveAutoLabels_
-- [ ] Recipe header: custom searchable label dropdown, colored chips (manual removable, auto locked)
-- [ ] Recipe-book: replace main_category with labels column (colored chips), filter, sort
-- [ ] Add translation keys (labels, choose_label, create_new_label, no_label, label_name, label_color, auto_trigger_sources, save_label, add_new_label)
-- [ ] Register label-creation-modal in app root
 
 ### Plan 034 — Recipe Builder UI Fixes (`plans/034-recipe-builder-ui-fixes.plan.md`)
 
@@ -279,7 +279,7 @@ Update status after each sub-task. Link plan files here when applicable.
 | 034 | Recipe Builder UI Fixes | Active |
 | 035 | Header and Navigation Refactor | Done |
 | 036 | Dashboard Control Panel Fixed Tabs | Done |
-| 037 | Recipe Labels Refactor | Active |
+| 037 | Recipe Labels Refactor | Done |
 | 038 | Inverted-L List Layout | Done |
 | 039 | List UX Panel and Scroll | Done |
 
