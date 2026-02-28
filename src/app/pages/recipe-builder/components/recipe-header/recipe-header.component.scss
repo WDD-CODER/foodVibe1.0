@@ -88,10 +88,12 @@
 .primary-chip-wrapper {
   display: flex;
   align-items: center;
+  overflow: visible;
 }
 
 .scaling-chip {
   position: relative;
+  overflow: visible;
   display: grid;
   grid-template-columns: minmax(20px, 45px) minmax(60px, 1fr) auto;
   align-items: center;
@@ -123,7 +125,7 @@
     position: absolute;
     top: calc(100% + 4px);
     right: 0;
-    z-index: 50;
+    z-index: 100;
 
     min-width: 140px;
     max-height: 200px;

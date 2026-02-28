@@ -1,11 +1,14 @@
 
-$ingredients-grid-template: 2.5fr 1.5fr 1fr 1fr 1fr 48px;
+$ingredients-grid-template: minmax(0, 2.5fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 48px;
 
 .ingredients-container {
+  container-type: inline-size;
+  container-name: ingredients;
   width: 100%;
+  overflow: visible;
 }
 
-.ingredients-grid-header, 
+.ingredients-grid-header,
 .ingredient-grid-row {
   display: grid;
   grid-template-columns: $ingredients-grid-template;
@@ -14,7 +17,7 @@ $ingredients-grid-template: 2.5fr 1.5fr 1fr 1fr 1fr 48px;
 
   padding: 8px 16px;
 
-  .col-actions{
+  .col-actions {
     display: grid;
     place-content: center;
   }
@@ -34,6 +37,7 @@ $ingredients-grid-template: 2.5fr 1.5fr 1fr 1fr 1fr 48px;
 
 .ingredient-grid-row {
   min-height: 64px;
+  overflow: visible;
   background: transparent;
   border-block-end: 1px solid rgba(241, 245, 249, 0.4);
   transition: background 0.15s ease;
@@ -122,5 +126,81 @@ $ingredients-grid-template: 2.5fr 1.5fr 1fr 1fr 1fr 48px;
 
   .item-text {
     font-weight: 500;
+  }
+}
+
+@container ingredients (max-width: 520px) {
+  .ingredients-grid-header {
+    display: none;
+  }
+
+  .ingredient-grid-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 0.5rem;
+    padding: 1rem;
+    margin-block-end: 0.5rem;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    background: var(--bg-glass);
+
+    .col-name {
+      grid-column: 1 / -1;
+    }
+    .col-quantity {
+      grid-column: 1;
+    }
+    .col-unit {
+      grid-column: 2;
+    }
+    .col-percent {
+      grid-column: 1;
+    }
+    .col-cost {
+      grid-column: 2;
+    }
+    .col-actions {
+      grid-column: 1 / -1;
+      justify-content: flex-end;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .ingredients-grid-header {
+    display: none;
+  }
+
+  .ingredient-grid-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 0.5rem;
+    padding: 1rem;
+    margin-block-end: 0.5rem;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    background: var(--bg-glass);
+
+    .col-name {
+      grid-column: 1 / -1;
+    }
+    .col-quantity {
+      grid-column: 1;
+    }
+    .col-unit {
+      grid-column: 2;
+    }
+    .col-percent {
+      grid-column: 1;
+    }
+    .col-cost {
+      grid-column: 2;
+    }
+    .col-actions {
+      grid-column: 1 / -1;
+      justify-content: flex-end;
+    }
   }
 }

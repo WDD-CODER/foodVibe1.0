@@ -24,6 +24,7 @@ export class RecipeHeaderComponent {
 
   // INPUTS
   form = input.required<FormGroup>();
+  recipeType = input<'dish' | 'preparation'>();
   imageUrl = input<string | null>(null);
   currentCost = input<number>(0);
   totalWeightG = input<number>(0);

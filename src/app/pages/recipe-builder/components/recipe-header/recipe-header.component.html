@@ -8,12 +8,12 @@
             <button type="button" 
                 (click)="toggleType()" 
                 class="type-toggle-btn"
-                [class.dish-mode]="form().get('recipe_type')?.value === 'dish'">
-                {{ (form().get('recipe_type')?.value === 'dish' ? 'dish' : 'prep') | translatePipe }}
+                [class.dish-mode]="(recipeType() ?? form().get('recipe_type')?.value) === 'dish'">
+                {{ ((recipeType() ?? form().get('recipe_type')?.value) === 'dish' ? 'dish' : 'prep') | translatePipe }}
             </button>
             
             <input formControlName="name_hebrew"
-                [placeholder]="((form().get('recipe_type')?.value === 'dish' ? 'dish_name_placeholder' : 'recipe_name_placeholder') | translatePipe) + '...'"
+                [placeholder]="(((recipeType() ?? form().get('recipe_type')?.value) === 'dish' ? 'dish_name_placeholder' : 'recipe_name_placeholder') | translatePipe) + '...'"
                 class="recipe-name-input" />
         </div>
 
