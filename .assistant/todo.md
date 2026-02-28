@@ -204,5 +204,20 @@ Update status after each sub-task. Link plan files here when applicable.
 | 016 | Print-Friendly Recipe View | Planned |
 | 017 | Recipe Book List UX Overhaul | Done |
 | 018 | Backend API Preparation | Planned |
+| 019 | Recipe Cook View Page | Done |
+| 020 | Cook View UX Overhaul | Done |
+| 021 | Cook View Workflow Fix Redesign | Done |
+| 022 | Recipe Builder Focus and Save | Done |
+| 023 | Cook View Workflow Fix Redesign (dup) | Done |
+| 024 | Full Project QA Audit | Done |
+| 025 | Menu Intelligence Module | Done |
+| 026 | Menu Builder UX Styling | Done |
+| 027 | Sidebar Filter UX | Done |
+| 028 | CSS Layer Token Hierarchy Skill Update | Done |
+| 029 | SCSS Global Tokens Audit Refactor | Done |
+| 030 | Contextual Logistics Layer | Done |
+| 031 | Menu Library Style UX | Done |
+| 032 | Custom Cooking Loader | Planned |
+| 033 | Liquid Glass Design System | Done |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*

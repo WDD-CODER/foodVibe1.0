@@ -5,7 +5,7 @@ description: Determines the next plan number from the plans folder and writes th
 
 # Save Plan
 
-When the user has **confirmed a plan** and says to **save the plan**, follow this skill so the plan is written to the project's `plans/` folder with the correct numbering. No extra confirmation is needed—the user has already approved the plan content.
+When the user has **confirmed a plan** and says to **save the plan**, follow this skill so the plan is written to the project's `plans/` folder with the correct numbering. **Before** writing the plan file, the agent must update **`.assistant/todo.md`** with what needs to be done (pending tasks derived from the plan). No extra confirmation is needed—the user has already approved the plan content.
 
 ## Trigger
 
@@ -45,6 +45,17 @@ When the user has **confirmed a plan** and says to **save the plan**, follow thi
 - If **no plans exist** in `plans/`, the first plan is **001** (e.g. `plans/001-initial-feature.plan.md`).
 - When in doubt whether it's a **new** plan vs a **refactor**, treat as new (increment global sequence) unless the user or context clearly states it is a refactor of a specific plan number.
 
+## Todo sync (before writing the plan)
+
+**Before** writing the plan file, update **`.assistant/todo.md`** so it reflects what needs to be done for this plan:
+
+- **Extract** from the agreed plan the main tasks or steps (e.g. sections, phases, or bullet points that represent work items).
+- **Under "Ahead (Pending)"**: add a subsection for this plan, e.g. `### Plan NNN — Short title (\`plans/NNN-slug.plan.md\`)`, with one `- [ ]` checkbox per task (or per logical group). Use the exact plan path you are about to write.
+- **Plan Index**: if the file has a "Plan Index" table, add a row for this plan with status "Planned" (or "Active" if the user indicated it).
+- Preserve existing structure, headings, and formatting in `todo.md`; only insert the new plan’s block and index row.
+
+This keeps "what needs to be done" in sync with the plan as soon as it is saved.
+
 ## Workflow (checklist)
 
 1. User has confirmed the plan and said to save it.
@@ -52,8 +63,9 @@ When the user has **confirmed a plan** and says to **save the plan**, follow thi
    - **New plan** → next NNN (max existing NNN + 1).
    - **Refactor of NNN** → next NNN-R (max existing R for that NNN + 1).
 3. Build filename: `plans/NNN-slug.plan.md` or `plans/NNN-R-slug.plan.md`.
-4. Write the agreed plan content to that path using the **write** tool (no other plan tool that might save elsewhere).
-5. Confirm to the user: *"Plan saved to plans/NNN[-R]-slug.plan.md."*
+4. **Update `.assistant/todo.md`** with what needs to be done (see **Todo sync** above): add pending tasks and, if present, Plan Index row.
+5. Write the agreed plan content to that path using the **write** tool (no other plan tool that might save elsewhere).
+6. Confirm to the user: *"Plan saved to plans/NNN[-R]-slug.plan.md. Todo updated with pending tasks."*
 
 ## Summary
 
