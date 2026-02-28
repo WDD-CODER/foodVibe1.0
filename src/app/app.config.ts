@@ -1,7 +1,7 @@
 import { APP_INITIALIZER, ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, ArrowUpDown, CalendarClock, ChevronDown, ChevronLeft, ChevronRight, Edit, FilePlus, FlaskConical, History, Image, LucideAngularModule, Menu, Minus, Package, Pencil, Plus, PlusCircle, RotateCcw, Save, Scale, Search, ShieldAlert, Timer, Trash2, Truck, TrendingUp, Utensils, Tags, BookOpen, Copy } from 'lucide-angular';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, ArrowUpDown, CalendarClock, ChevronDown, ChevronLeft, ChevronRight, CookingPot, Edit, FilePlus, Flame, FlaskConical, History, Image, LucideAngularModule, MapPin, Menu, Minus, Package, Pencil, Plus, PlusCircle, RotateCcw, Save, Scale, Search, ShieldAlert, Timer, Trash2, Truck, TrendingUp, Utensils, Tags, BookOpen, Copy } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { AlertCircle, AlertTriangle, Tag, X } from 'lucide-angular/src/icons';
 import { provideHttpClient } from '@angular/common/http';
@@ -57,7 +57,10 @@ export const appConfig: ApplicationConfig = {
         RotateCcw,
         History,
         BookOpen,
-        Copy
+        Copy,
+        Flame,
+        CookingPot,
+        MapPin
       })
     )
   ]

@@ -1,0 +1,36 @@
+@if (isOpen_()) {
+<div class="modal-overlay" (click)="resetAndClose()">
+  <div class="modal-card" dir="rtl" (click)="$event.stopPropagation()">
+    <h3>{{ 'add_equipment' | translatePipe }}</h3>
+
+    <div class="form-fields">
+      <div class="input-stack">
+        <label>{{ 'equipment_name' | translatePipe }}</label>
+        <input type="text"
+               [ngModel]="name_()"
+               (ngModelChange)="name_.set($event)"
+               [placeholder]="'equipment_name' | translatePipe"
+               (keydown.enter)="save()" />
+      </div>
+
+      <div class="input-stack">
+        <label>{{ 'category' | translatePipe }}</label>
+        <select [ngModel]="category_()" (ngModelChange)="category_.set($event)">
+          @for (cat of categories; track cat) {
+            <option [value]="cat">{{ cat | translatePipe }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-ghost" (click)="cancel()">{{ 'cancel' | translatePipe }}</button>
+      <button class="btn-save"
+              (click)="save()"
+              [disabled]="!name_().trim()">
+        {{ 'save' | translatePipe }}
+      </button>
+    </div>
+  </div>
+</div>
+}

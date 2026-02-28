@@ -1,12 +1,13 @@
-<!-- <div class="inventory-parent-container" dir="rtl"> -->
-  <nav>
-    @for (item of navRoutes_(); track item.path) {
+<nav dir="rtl">
+  @for (item of navRoutes_(); track item.path) {
     <a [routerLink]="item.path" routerLinkActive="active" class="nav-link">
       {{ item.label }}
     </a>
-    }
-  </nav>
+  }
+  <button type="button" class="nav-link add-equipment-btn" (click)="onAddEquipment()">
+    <lucide-icon name="plus" size="16"></lucide-icon>
+    {{ 'add_equipment' | translatePipe }}
+  </button>
+</nav>
 
- <router-outlet></router-outlet>
-
-<!-- </div> -->
+<router-outlet></router-outlet>

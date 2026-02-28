@@ -1,0 +1,109 @@
+.hero-fab-container {
+  position: fixed;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.fab-main {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+  box-shadow: var(--shadow-glow), 0 4px 16px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 0.2s ease,
+              box-shadow 0.2s ease;
+
+  &:hover {
+    background: var(--color-primary-hover);
+    box-shadow: var(--shadow-glow), 0 6px 24px rgba(0, 0, 0, 0.22);
+  }
+
+  &.active {
+    transform: rotate(45deg);
+  }
+}
+
+.fab-actions {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 0.5rem;
+  height: 0;
+  min-height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: height 0.2s ease, margin 0.2s ease;
+
+  &.expanded {
+    height: auto;
+    margin-bottom: 0.5rem;
+    pointer-events: auto;
+
+    .fab-action {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      pointer-events: auto;
+    }
+  }
+}
+
+.fab-action {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  border: 1px solid var(--border-glass);
+  background: var(--bg-glass-strong);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+
+  opacity: 0;
+  transform: scale(0.4) translateY(0.5rem);
+  transition: opacity 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+              transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 0.15s ease;
+
+  &:nth-child(1) {
+    transition-delay: 0.02s;
+  }
+  &:nth-child(2) {
+    transition-delay: 0.06s;
+  }
+
+  &:hover {
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-fab-container {
+    bottom: 0.5rem;
+    left: 0.5rem;
+  }
+
+  .fab-main {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .fab-action {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}

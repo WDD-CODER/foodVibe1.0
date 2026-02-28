@@ -4,7 +4,6 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { HeaderComponent } from '../core/components/header/header.component';
-import { FooterComponent } from '../core/components/footer/footer.component';
 import { UserMsg } from "src/app/core/components/user-msg/user-msg.component";
 import { UserMsgService } from '@services/user-msg.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
@@ -35,7 +34,6 @@ describe('AppComponent', () => {
         AppComponent,
         // We still import dependencies that don't crash
         HeaderComponent,
-        FooterComponent,
         UserMsg,
       ],
       providers: [
@@ -77,7 +75,6 @@ describe('AppComponent', () => {
     
     // Verifying the presence of the selectors
     expect(compiled.querySelector('app-header')).toBeTruthy();
-    expect(compiled.querySelector('app-footer')).toBeTruthy();
     expect(compiled.querySelector('router-outlet')).toBeTruthy();
     expect(compiled.querySelector('user-msg')).toBeTruthy();
     expect(compiled.querySelector('unit-creator-modal')).toBeTruthy();

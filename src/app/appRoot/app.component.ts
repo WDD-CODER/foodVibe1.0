@@ -2,7 +2,6 @@ import { Component, inject, signal } from '@angular/core';
 import { Router, RouterOutlet, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import { filter } from 'rxjs';
 import { HeaderComponent } from '../core/components/header/header.component';
-import { FooterComponent } from '../core/components/footer/footer.component';
 import { UserMsg } from "src/app/core/components/user-msg/user-msg.component";
 import { UnitCreatorModal } from 'src/app/shared/unit-creator/unit-creator.component';
 import { TranslationKeyModalComponent } from 'src/app/shared/translation-key-modal/translation-key-modal.component';
@@ -16,7 +15,7 @@ import { HeroFabComponent } from '../core/components/hero-fab/hero-fab.component
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, HeaderComponent, FooterComponent, UserMsg, UnitCreatorModal, TranslationKeyModalComponent, AddItemModalComponent, AddEquipmentModalComponent, GlobalSpecificModalComponent, ConfirmModalComponent, RestoreChoiceModalComponent, LoaderComponent, HeroFabComponent],
+  imports: [RouterOutlet, HeaderComponent, UserMsg, UnitCreatorModal, TranslationKeyModalComponent, AddItemModalComponent, AddEquipmentModalComponent, GlobalSpecificModalComponent, ConfirmModalComponent, RestoreChoiceModalComponent, LoaderComponent, HeroFabComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

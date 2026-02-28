@@ -1,0 +1,26 @@
+<div class="hero-fab-container" (mouseleave)="collapse()">
+  <div class="fab-actions" [class.expanded]="isExpanded_()">
+    <button type="button"
+            class="fab-action"
+            [attr.aria-label]="'recipe_creation' | translatePipe"
+            (click)="goToRecipeBuilder()">
+      <lucide-icon name="plus" size="20"></lucide-icon>
+    </button>
+
+    <button type="button"
+            class="fab-action"
+            [attr.aria-label]="'cook' | translatePipe"
+            (click)="goToCook()">
+      <lucide-icon name="cooking-pot" size="20"></lucide-icon>
+    </button>
+  </div>
+
+  <button type="button"
+          class="fab-main"
+          [class.active]="isExpanded_()"
+          (mouseenter)="expand()"
+          (click)="goToCook()"
+          aria-label="Quick actions">
+    <lucide-icon name="flame" size="26"></lucide-icon>
+  </button>
+</div>
