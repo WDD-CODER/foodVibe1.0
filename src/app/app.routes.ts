@@ -66,6 +66,10 @@ export const routes: Routes = [
         resolve: { product: productResolver },
         canDeactivate: [pendingChangesGuard]
       },
+      {
+        path: 'equipment',
+        loadComponent: () => import('./pages/equipment/components/equipment-list/equipment-list.component').then(m => m.EquipmentListComponent),
+      },
     ],
   },
   {
