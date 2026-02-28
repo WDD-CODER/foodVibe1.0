@@ -2,6 +2,7 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { ProductDataService } from './product-data.service';
 import { UserMsgService } from './user-msg.service';
 import { StorageService } from './async-storage.service';
+import type { LabelDefinition } from '@models/label.model';
 
 @Injectable({ providedIn: 'root' })
 export class MetadataRegistryService {
@@ -13,10 +14,12 @@ export class MetadataRegistryService {
   //PRIVATE SIGNALS
   private categories_ = signal<string[]>([]);
   private allergens_ = signal<string[]>([]);
+  private labels_ = signal<LabelDefinition[]>([]);
 
   //PUBLIC SIGNALS
   public allCategories_ = this.categories_.asReadonly();
   public allAllergens_ = this.allergens_.asReadonly();
+  public allLabels_ = this.labels_.asReadonly();
 
 
   constructor() {
@@ -55,6 +58,77 @@ export class MetadataRegistryService {
       this.allergens_.set(DEFAULT_ALLERGENS);
     } else {
       this.allergens_.set(existingAllergens);
+    }
+
+    // 3. Fetch Labels (recipe labels with color + optional auto-triggers)
+    const labelRegistry = await this.storageService.query<any>('KITCHEN_LABELS');
+    const existingLabels = labelRegistry[0]?.items ?? [];
+    if (Array.isArray(existingLabels) && existingLabels.length > 0) {
+      this.labels_.set(existingLabels);
+    }
+  }
+
+  getLabelColor(key: string): string {
+    const def = this.labels_().find(l => l.key === key);
+    return def?.color ?? '#78716C';
+  }
+
+  async registerLabel(key: string, color: string, autoTriggers?: string[]): Promise<void> {
+    const sanitized = key.trim();
+    if (!sanitized || this.labels_().some(l => l.key === sanitized)) return;
+    const updated = [...this.labels_(), { key: sanitized, color: color || '#78716C', autoTriggers: autoTriggers ?? [] }];
+    try {
+      const registries = await this.storageService.query<any>('KITCHEN_LABELS');
+      const existing = registries[0];
+      if (existing?._id) {
+        await this.storageService.put('KITCHEN_LABELS', { ...existing, items: updated });
+      } else {
+        await this.storageService.post('KITCHEN_LABELS', { items: updated });
+      }
+      this.labels_.set(updated);
+      this.userMsgService.onSetSuccessMsg(`תווית "${sanitized}" נוספה בהצלחה`);
+    } catch (err) {
+      this.userMsgService.onSetErrorMsg('שגיאה בשמירת התווית');
+      console.error('Label Save Error:', err);
+    }
+  }
+
+  async deleteLabel(key: string): Promise<void> {
+    const updated = this.labels_().filter(l => l.key !== key);
+    try {
+      const registries = await this.storageService.query<any>('KITCHEN_LABELS');
+      const registry = registries[0];
+      if (registry?._id) {
+        await this.storageService.put('KITCHEN_LABELS', { ...registry, items: updated });
+      } else {
+        await this.storageService.post('KITCHEN_LABELS', { items: updated });
+      }
+      this.labels_.set(updated);
+      this.userMsgService.onSetSuccessMsg(`תווית ${key} נמחקה בהצלחה`);
+    } catch (err) {
+      this.userMsgService.onSetErrorMsg('שגיאה במחיקת התווית');
+      console.error(err);
+    }
+  }
+
+  async updateLabel(key: string, changes: Partial<LabelDefinition>): Promise<void> {
+    const current = this.labels_();
+    const idx = current.findIndex(l => l.key === key);
+    if (idx === -1) return;
+    const updated = current.slice();
+    updated[idx] = { ...updated[idx], ...changes };
+    try {
+      const registries = await this.storageService.query<any>('KITCHEN_LABELS');
+      const registry = registries[0];
+      if (registry?._id) {
+        await this.storageService.put('KITCHEN_LABELS', { ...registry, items: updated });
+      } else {
+        await this.storageService.post('KITCHEN_LABELS', { items: updated });
+      }
+      this.labels_.set(updated);
+    } catch (err) {
+      this.userMsgService.onSetErrorMsg('שגיאה בעדכון התווית');
+      console.error(err);
     }
   }
 

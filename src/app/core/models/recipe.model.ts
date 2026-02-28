@@ -53,4 +53,8 @@ export interface Recipe {
   prep_categories_?: PrepCategory[];
   /** Baseline equipment + service-style overrides (contextual logistics) */
   logistics_?: DishLogistics;
+  /** User-chosen labels (keys from label registry) */
+  labels_?: string[];
+  /** Auto-applied labels from ingredient categories/allergens (computed on save) */
+  autoLabels_?: string[];
 }
