@@ -67,7 +67,10 @@
       <button type="button" class="btn btn-secondary" (click)="onCancel()">
         {{ 'cancel' | translatePipe }}
       </button>
-      <button type="submit" class="btn btn-primary" [disabled]="equipmentForm_.invalid">
+      <button type="submit" class="btn btn-primary" [disabled]="equipmentForm_.invalid || isSaving_()">
+        @if (isSaving_()) {
+          <app-loader size="small" [inline]="true" />
+        }
         {{ 'save' | translatePipe }}
       </button>
     </div>

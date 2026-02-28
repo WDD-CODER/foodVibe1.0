@@ -4,7 +4,7 @@
     <button type="button" class="btn-close" (click)="close()" aria-label="סגור">×</button>
   </div>
   @if (loading()) {
-    <p class="panel-loading">{{ 'pending' | translatePipe }}</p>
+    <app-loader size="medium" label="loader_loading" />
   } @else if (loadError()) {
     <p class="panel-error">{{ loadError() }}</p>
   } @else if (versions().length === 0) {

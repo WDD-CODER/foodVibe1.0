@@ -325,7 +325,10 @@
         <lucide-icon name="arrow-right" class="icon-sm"></lucide-icon>
         {{ 'back_to_list' | translatePipe }}
       </button>
-      <button type="submit" [disabled]="productForm_.invalid" class="btn-primary">
+      <button type="submit" [disabled]="productForm_.invalid || isSaving_()" class="btn-primary">
+        @if (isSaving_()) {
+          <app-loader size="small" [inline]="true" />
+        }
         <lucide-icon [name]="isEditMode_() ? 'save' : 'plus'" class="icon-sm"></lucide-icon>
         {{ isEditMode_() ? ('update_product' | translatePipe) : ('save_product' | translatePipe) }}
       </button>

@@ -1,12 +1,17 @@
 <app-header/>
 <div class="app-content">
+  @if (isRouteLoading()) {
+    <app-loader size="large" label="loader_please_wait" [overlay]="true" />
+  }
   <router-outlet></router-outlet>
 </div>
 <user-msg/>
 <unit-creator-modal/>
 <translation-key-modal/>
 <add-item-modal/>
+<add-equipment-modal/>
 <app-global-specific-modal/>
 <app-confirm-modal/>
 <app-restore-choice-modal/>
+<app-hero-fab/>
 <app-footer/>

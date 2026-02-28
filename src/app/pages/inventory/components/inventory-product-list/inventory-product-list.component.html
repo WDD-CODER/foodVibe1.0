@@ -110,21 +110,29 @@
               </select>
             </div>
             <div class="col-price">
-              <input #priceInput type="number" class="grid-input price-input"
-                [ngModel]="getPricePerUnit(product, product.base_unit_)"
-                SelectOnFocus
-                (focus)="onPriceFocus(product, product.base_unit_)"
-                (blur)="onPriceBlur(product, product.base_unit_, $event, priceInput)"
-                min="0" step="0.01" />
-              <span class="price-suffix">₪</span>
+              @if (savingPriceId_() === product._id) {
+                <app-loader size="small" [inline]="true" />
+              } @else {
+                <input #priceInput type="number" class="grid-input price-input"
+                  [ngModel]="getPricePerUnit(product, product.base_unit_)"
+                  SelectOnFocus
+                  (focus)="onPriceFocus(product, product.base_unit_)"
+                  (blur)="onPriceBlur(product, product.base_unit_, $event, priceInput)"
+                  min="0" step="0.01" />
+                <span class="price-suffix">₪</span>
+              }
             </div>
             <div class="col-actions">
               <button type="button" class="action-btn edit" (click)="onEditProduct(product._id)" [attr.aria-label]="'edit' | translatePipe">
                 <lucide-icon name="pencil" [size]="18"></lucide-icon>
               </button>
-              <button type="button" class="action-btn delete" (click)="onDeleteProduct(product._id)" [attr.aria-label]="'delete' | translatePipe">
-                <lucide-icon name="trash-2" [size]="18"></lucide-icon>
-              </button>
+              @if (deletingId_() === product._id) {
+                <app-loader size="small" [inline]="true" />
+              } @else {
+                <button type="button" class="action-btn delete" (click)="onDeleteProduct(product._id)" [attr.aria-label]="'delete' | translatePipe">
+                  <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+                </button>
+              }
             </div>
           </div>
         }

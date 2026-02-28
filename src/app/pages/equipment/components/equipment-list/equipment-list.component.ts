@@ -6,13 +6,14 @@ import { LucideAngularModule } from 'lucide-angular';
 import { EquipmentDataService } from '@services/equipment-data.service';
 import { Equipment, EquipmentCategory } from '@models/equipment.model';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
+import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 
 type SortField = 'name' | 'category' | 'owned';
 
 @Component({
   selector: 'app-equipment-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent],
   templateUrl: './equipment-list.component.html',
   styleUrl: './equipment-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,6 +25,7 @@ export class EquipmentListComponent {
   protected searchQuery_ = signal('');
   protected categoryFilter_ = signal<EquipmentCategory | ''>('');
   protected sortBy_ = signal<SortField>('name');
+  protected deletingId_ = signal<string | null>(null);
   protected sortOrder_ = signal<'asc' | 'desc'>('asc');
 
   protected filteredEquipment_ = computed(() => {
@@ -81,10 +83,13 @@ export class EquipmentListComponent {
 
   async onDelete(item: Equipment): Promise<void> {
     if (!confirm('האם למחוק את פריט הציוד "' + (item.name_hebrew ?? '') + '"?')) return;
+    this.deletingId_.set(item._id);
     try {
       await this.equipmentData.deleteEquipment(item._id);
     } catch (e) {
       console.error(e);
+    } finally {
+      this.deletingId_.set(null);
     }
   }
 }

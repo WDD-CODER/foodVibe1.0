@@ -171,9 +171,13 @@
               <button type="button" class="action-btn history" (click)="openHistory(recipe); $event.stopPropagation()" [attr.aria-label]="'history' | translatePipe">
                 <lucide-icon name="history" [size]="18"></lucide-icon>
               </button>
-              <button type="button" class="action-btn delete" (click)="onDeleteRecipe(recipe); $event.stopPropagation()" [attr.aria-label]="'delete' | translatePipe">
-                <lucide-icon name="trash-2" [size]="18"></lucide-icon>
-              </button>
+              @if (deletingId_() === recipe._id) {
+                <app-loader size="small" [inline]="true" />
+              } @else {
+                <button type="button" class="action-btn delete" (click)="onDeleteRecipe(recipe); $event.stopPropagation()" [attr.aria-label]="'delete' | translatePipe">
+                  <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+                </button>
+              }
             </div>
           </div>
         }

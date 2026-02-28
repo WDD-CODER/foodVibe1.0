@@ -11,6 +11,7 @@ import { UserMsgService } from '@services/user-msg.service';
 import { AddItemModalService } from '@services/add-item-modal.service';
 import { MenuEvent, MenuSection, ServingType } from '@models/menu-event.model';
 import { Recipe } from '@models/recipe.model';
+import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 
 type MenuItemForm = {
   recipe_id_: string;
@@ -26,7 +27,7 @@ const DEFAULT_SECTION_CATEGORIES = [
 @Component({
   selector: 'app-menu-intelligence-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, TranslatePipe],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent],
   templateUrl: './menu-intelligence.page.html',
   styleUrl: './menu-intelligence.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

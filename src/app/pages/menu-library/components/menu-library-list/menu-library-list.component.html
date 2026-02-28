@@ -77,12 +77,20 @@
           <button type="button" class="action-btn edit" (click)="onOpen(event)" [attr.aria-label]="'edit' | translatePipe">
             <lucide-icon name="pencil" [size]="18"></lucide-icon>
           </button>
-          <button type="button" class="action-btn clone" (click)="onClone(event)" [attr.aria-label]="'menu_clone' | translatePipe">
-            <lucide-icon name="copy" [size]="18"></lucide-icon>
-          </button>
-          <button type="button" class="action-btn delete" (click)="onDelete(event)" [attr.aria-label]="'delete' | translatePipe">
-            <lucide-icon name="trash-2" [size]="18"></lucide-icon>
-          </button>
+          @if (cloningId_() === event._id) {
+            <app-loader size="small" [inline]="true" />
+          } @else {
+            <button type="button" class="action-btn clone" (click)="onClone(event)" [attr.aria-label]="'menu_clone' | translatePipe">
+              <lucide-icon name="copy" [size]="18"></lucide-icon>
+            </button>
+          }
+          @if (deletingId_() === event._id) {
+            <app-loader size="small" [inline]="true" />
+          } @else {
+            <button type="button" class="action-btn delete" (click)="onDelete(event)" [attr.aria-label]="'delete' | translatePipe">
+              <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+            </button>
+          }
         </div>
       </article>
     }

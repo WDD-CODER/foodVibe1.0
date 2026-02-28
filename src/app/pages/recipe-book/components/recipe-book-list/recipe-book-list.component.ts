@@ -13,6 +13,7 @@ import { Recipe } from '@models/recipe.model';
 import { Product } from '@models/product.model';
 import { VersionEntityType } from '@services/version-history.service';
 import { VersionHistoryPanelComponent } from 'src/app/shared/version-history-panel/version-history-panel.component';
+import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 
 export type SortField = 'name' | 'type' | 'cost' | 'main_category' | 'allergens';
 
@@ -23,7 +24,7 @@ const SIDEBAR_SWIPE_CLOSE_THRESHOLD_RATIO = 0.5;
 @Component({
   selector: 'recipe-book-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, ClickOutSideDirective, VersionHistoryPanelComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, ClickOutSideDirective, VersionHistoryPanelComponent, LoaderComponent],
   templateUrl: './recipe-book-list.component.html',
   styleUrl: './recipe-book-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,6 +49,7 @@ export class RecipeBookListComponent implements OnDestroy {
   protected selectedProductIds_ = signal<string[]>([]);
   protected isMobileSearchOpen_ = signal<boolean>(false);
   protected historyFor_ = signal<{ entityType: VersionEntityType; entityId: string; entityName: string } | null>(null);
+  protected deletingId_ = signal<string | null>(null);
   protected isMobile_ = signal<boolean>(false);
   protected sidebarSwipeOffset_ = signal<number>(0);
   private swipeStartX = 0;
@@ -474,9 +476,10 @@ export class RecipeBookListComponent implements OnDestroy {
 
   protected onDeleteRecipe(recipe: Recipe): void {
     if (confirm('האם אתה בטוח שברצונך למחוק?')) {
+      this.deletingId_.set(recipe._id);
       this.kitchenState.deleteRecipe(recipe).subscribe({
-        next: () => {},
-        error: () => {}
+        next: () => { this.deletingId_.set(null); },
+        error: () => { this.deletingId_.set(null); }
       });
     }
   }

@@ -20,6 +20,7 @@ import { RecipeHeaderComponent } from './components/recipe-header/recipe-header.
 import { RecipeIngredientsTableComponent } from './components/recipe-ingredients-table/recipe-ingredients-table.component';
 import { RecipeWorkflowComponent } from './components/recipe-workflow/recipe-workflow.component';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
+import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 
 @Component({
   selector: 'app-recipe-builder-page',
@@ -31,7 +32,8 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
     RecipeIngredientsTableComponent,
     RecipeWorkflowComponent,
     LucideAngularModule,
-    TranslatePipe
+    TranslatePipe,
+    LoaderComponent
   ],
   templateUrl: './recipe-builder.page.html',
   styleUrl: './recipe-builder.page.scss'

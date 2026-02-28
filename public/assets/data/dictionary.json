@@ -263,6 +263,7 @@
         "equipment_list": "רשימת ציוד",
         "equipment": "ציוד",
         "add_equipment": "הוסף ציוד",
+        "equipment_name": "שם הציוד",
         "owned_quantity": "כמות בבעלות",
         "is_consumable": "פריט מתכלה",
         "scaling_rule": "כלל סקלה",
@@ -295,6 +296,10 @@
         "phase_service": "הגשה",
         "phase_both": "הכנה והגשה",
         "critical": "קריטי",
-        "add_equipment_baseline": "הוסף ציוד בסיס"
+        "add_equipment_baseline": "הוסף ציוד בסיס",
+        "loader_loading": "טוען...",
+        "loader_saving": "שומר...",
+        "loader_please_wait": "רגע, מכינים הכל...",
+        "loader_cooking_up": "מבשלים את המידע..."
     }
 }

@@ -19,6 +19,7 @@ import {
   EnvironmentType,
 } from '@models/venue.model';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
+import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 
 const ENV_TYPES: EnvironmentType[] = [
   'professional_kitchen',
@@ -30,7 +31,7 @@ const ENV_TYPES: EnvironmentType[] = [
 @Component({
   selector: 'app-venue-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe, LoaderComponent],
   templateUrl: './venue-form.component.html',
   styleUrl: './venue-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,6 +46,7 @@ export class VenueFormComponent implements OnInit {
 
   protected venueForm_!: FormGroup;
   protected isEditMode_ = signal(false);
+  protected isSaving_ = signal(false);
   protected envTypes = ENV_TYPES;
 
   protected get infraArray(): FormArray {
@@ -108,35 +110,40 @@ export class VenueFormComponent implements OnInit {
 
   async onSubmit(): Promise<void> {
     if (this.venueForm_.invalid) return;
-    const v = this.venueForm_.getRawValue();
-    const infra: VenueInfraItem[] = (v.available_infrastructure_ ?? [])
-      .filter((row: { equipment_id_: string }) => row.equipment_id_)
-      .map((row: { equipment_id_: string; available_quantity_: number }) => ({
-        equipment_id_: row.equipment_id_,
-        available_quantity_: Number(row.available_quantity_),
-      }));
+    this.isSaving_.set(true);
+    try {
+      const v = this.venueForm_.getRawValue();
+      const infra: VenueInfraItem[] = (v.available_infrastructure_ ?? [])
+        .filter((row: { equipment_id_: string }) => row.equipment_id_)
+        .map((row: { equipment_id_: string; available_quantity_: number }) => ({
+          equipment_id_: row.equipment_id_,
+          available_quantity_: Number(row.available_quantity_),
+        }));
 
-    const now = new Date().toISOString();
+      const now = new Date().toISOString();
 
-    if (this.isEditMode_()) {
-      const venue = this.route.snapshot.data['venue'] as VenueProfile;
-      await this.venueData.updateVenue({
-        ...venue,
-        name_hebrew: v.name_hebrew,
-        environment_type_: v.environment_type_,
-        notes_: v.notes_ || undefined,
-        available_infrastructure_: infra,
-      });
-    } else {
-      await this.venueData.addVenue({
-        name_hebrew: v.name_hebrew,
-        environment_type_: v.environment_type_,
-        notes_: v.notes_ || undefined,
-        available_infrastructure_: infra,
-        created_at_: now,
-      });
+      if (this.isEditMode_()) {
+        const venue = this.route.snapshot.data['venue'] as VenueProfile;
+        await this.venueData.updateVenue({
+          ...venue,
+          name_hebrew: v.name_hebrew,
+          environment_type_: v.environment_type_,
+          notes_: v.notes_ || undefined,
+          available_infrastructure_: infra,
+        });
+      } else {
+        await this.venueData.addVenue({
+          name_hebrew: v.name_hebrew,
+          environment_type_: v.environment_type_,
+          notes_: v.notes_ || undefined,
+          available_infrastructure_: infra,
+          created_at_: now,
+        });
+      }
+      this.router.navigate(['/venues/list']);
+    } finally {
+      this.isSaving_.set(false);
     }
-    this.router.navigate(['/venues/list']);
   }
 
   onCancel(): void {

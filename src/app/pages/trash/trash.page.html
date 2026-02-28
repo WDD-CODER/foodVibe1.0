@@ -7,7 +7,7 @@
   </header>
 
   @if (loading()) {
-    <p class="trash-loading">{{ 'pending' | translatePipe }}</p>
+    <app-loader size="medium" label="loader_loading" />
   } @else if (loadError()) {
     <p class="trash-error">{{ loadError() }}</p>
     <button type="button" class="btn-refresh" (click)="refresh()">רענן שוב</button>

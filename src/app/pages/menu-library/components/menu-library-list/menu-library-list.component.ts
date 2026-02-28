@@ -7,13 +7,14 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { MenuEventDataService } from '@services/menu-event-data.service';
 import { MenuEvent, ServingType } from '@models/menu-event.model';
 import { ConfirmModalService } from '@services/confirm-modal.service';
+import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 
 export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count';
 
 @Component({
   selector: 'app-menu-library-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent],
   templateUrl: './menu-library-list.component.html',
   styleUrl: './menu-library-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,6 +30,8 @@ export class MenuLibraryListComponent {
   protected readonly dateFrom_ = signal('');
   protected readonly sortBy_ = signal<SortField>('date');
   protected readonly sortOrder_ = signal<'asc' | 'desc'>('desc');
+  protected readonly cloningId_ = signal<string | null>(null);
+  protected readonly deletingId_ = signal<string | null>(null);
 
   protected readonly events_ = this.menuEventData.allMenuEvents_;
 
@@ -112,8 +115,13 @@ export class MenuLibraryListComponent {
   }
 
   protected async onClone(event: MenuEvent): Promise<void> {
-    const cloned = await this.menuEventData.cloneMenuEventAsNew(event._id);
-    this.router.navigate(['/menu-intelligence', cloned._id]);
+    this.cloningId_.set(event._id);
+    try {
+      const cloned = await this.menuEventData.cloneMenuEventAsNew(event._id);
+      this.router.navigate(['/menu-intelligence', cloned._id]);
+    } finally {
+      this.cloningId_.set(null);
+    }
   }
 
   protected async onDelete(event: MenuEvent): Promise<void> {
@@ -121,7 +129,13 @@ export class MenuLibraryListComponent {
       saveLabel: 'delete',
       variant: 'danger',
     });
-    if (ok) await this.menuEventData.deleteMenuEvent(event._id);
+    if (!ok) return;
+    this.deletingId_.set(event._id);
+    try {
+      await this.menuEventData.deleteMenuEvent(event._id);
+    } finally {
+      this.deletingId_.set(null);
+    }
   }
 
   protected getFoodCostPctDisplay(event: MenuEvent): string {

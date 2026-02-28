@@ -9,7 +9,10 @@
           <h1 class="recipe-name">{{ recipe.name_hebrew }}</h1>
           @if (editMode_()) {
             <div class="edit-actions">
-              <button type="button" class="edit-btn save-btn" (click)="saveEdits()" [attr.aria-label]="'save_changes' | translatePipe">
+              <button type="button" class="edit-btn save-btn" (click)="saveEdits()" [disabled]="isSaving_()" [attr.aria-label]="'save_changes' | translatePipe">
+                @if (isSaving_()) {
+                  <app-loader size="small" [inline]="true" />
+                }
                 <lucide-icon name="save" [size]="18"></lucide-icon>
                 {{ 'save_changes' | translatePipe }}
               </button>

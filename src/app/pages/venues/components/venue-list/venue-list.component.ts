@@ -6,11 +6,12 @@ import { LucideAngularModule } from 'lucide-angular';
 import { VenueDataService } from '@services/venue-data.service';
 import { VenueProfile, EnvironmentType } from '@models/venue.model';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
+import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 
 @Component({
   selector: 'app-venue-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent],
   templateUrl: './venue-list.component.html',
   styleUrl: './venue-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,6 +21,7 @@ export class VenueListComponent {
   private readonly router = inject(Router);
 
   protected searchQuery_ = signal('');
+  protected deletingId_ = signal<string | null>(null);
 
   protected filteredVenues_ = computed(() => {
     let list = this.venueData.allVenues_();
@@ -46,10 +48,13 @@ export class VenueListComponent {
 
   async onDelete(item: VenueProfile): Promise<void> {
     if (!confirm('למחוק את המיקום "' + (item.name_hebrew ?? '') + '"?')) return;
+    this.deletingId_.set(item._id);
     try {
       await this.venueData.deleteVenue(item._id);
     } catch (e) {
       console.error(e);
+    } finally {
+      this.deletingId_.set(null);
     }
   }
 }

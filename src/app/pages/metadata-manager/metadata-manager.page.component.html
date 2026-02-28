@@ -1,4 +1,7 @@
 <div class="metadata-page" dir="rtl">
+  @if (isImporting_()) {
+    <app-loader size="large" label="loader_cooking_up" [overlay]="true" />
+  }
   <header class="header-section">
     <h1>ניהול הגדרות ליבה (The Brain)</h1>
     <p>שליטה גלובלית על יחידות מידה, אלרגנים וקטגוריות מוצרים</p>

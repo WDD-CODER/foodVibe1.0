@@ -10,7 +10,7 @@
   <div class="builder-shell">
 
     <section class="builder-section">
-      <app-recipe-header [form]="recipeForm_" [currentCost]="totalCost_()"
+      <app-recipe-header [form]="recipeForm_" [recipeType]="recipeType_()" [currentCost]="totalCost_()"
         [totalWeightG]="totalWeightG_()" [totalBrutoWeightG]="totalBrutoWeightG_()"
         [totalVolumeL]="totalVolumeL_()" [totalVolumeMl]="totalVolumeMl_()"
         [unconvertibleForWeight]="unconvertibleForWeight_()" [unconvertibleForVolume]="unconvertibleForVolume_()"
@@ -93,6 +93,9 @@
     @if (!historyViewMode_()) {
       <footer class="action-footer">
         <button class="main-submit-btn" [disabled]="isSaving_()" (click)="saveRecipe()">
+          @if (isSaving_()) {
+            <app-loader size="small" [inline]="true" />
+          }
           {{ (isSaving_() ? 'saving' : (recipeForm_.get('recipe_type')?.value === 'dish' ? 'save_dish' : 'save_recipe')) | translatePipe }}
         </button>
       </footer>

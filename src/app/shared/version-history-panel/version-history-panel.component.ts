@@ -14,11 +14,12 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { VersionHistoryService, VersionEntry, VersionEntityType } from '@services/version-history.service';
 import { RestoreChoiceModalService } from '@services/restore-choice-modal.service';
 import { UserMsgService } from '@services/user-msg.service';
+import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 
 @Component({
   selector: 'app-version-history-panel',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, TranslatePipe],
+  imports: [CommonModule, LucideAngularModule, TranslatePipe, LoaderComponent],
   templateUrl: './version-history-panel.component.html',
   styleUrl: './version-history-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

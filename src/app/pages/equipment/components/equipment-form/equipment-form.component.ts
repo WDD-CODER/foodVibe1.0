@@ -18,6 +18,7 @@ import {
   ScalingRule,
 } from '@models/equipment.model';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
+import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 
 const CATEGORIES: EquipmentCategory[] = [
   'heat_source',
@@ -31,7 +32,7 @@ const CATEGORIES: EquipmentCategory[] = [
 @Component({
   selector: 'app-equipment-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe, LoaderComponent],
   templateUrl: './equipment-form.component.html',
   styleUrl: './equipment-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,6 +46,7 @@ export class EquipmentFormComponent implements OnInit {
 
   protected equipmentForm_!: FormGroup;
   protected isEditMode_ = signal(false);
+  protected isSaving_ = signal(false);
   protected categories = CATEGORIES;
 
   ngOnInit(): void {
@@ -99,42 +101,47 @@ export class EquipmentFormComponent implements OnInit {
 
   async onSubmit(): Promise<void> {
     if (this.equipmentForm_.invalid) return;
-    const v = this.equipmentForm_.getRawValue();
-    const now = new Date().toISOString();
-    const scalingRule: ScalingRule | undefined = v.scaling_enabled_
-      ? {
-          per_guests_: Number(v.per_guests_),
-          min_quantity_: Number(v.min_quantity_),
-          max_quantity_: v.max_quantity_ != null && v.max_quantity_ !== '' ? Number(v.max_quantity_) : undefined,
-        }
-      : undefined;
+    this.isSaving_.set(true);
+    try {
+      const v = this.equipmentForm_.getRawValue();
+      const now = new Date().toISOString();
+      const scalingRule: ScalingRule | undefined = v.scaling_enabled_
+        ? {
+            per_guests_: Number(v.per_guests_),
+            min_quantity_: Number(v.min_quantity_),
+            max_quantity_: v.max_quantity_ != null && v.max_quantity_ !== '' ? Number(v.max_quantity_) : undefined,
+          }
+        : undefined;
 
-    if (this.isEditMode_()) {
-      const equipment = this.route.snapshot.data['equipment'] as Equipment;
-      const updated: Equipment = {
-        ...equipment,
-        name_hebrew: v.name_hebrew,
-        category_: v.category_,
-        owned_quantity_: Number(v.owned_quantity_),
-        is_consumable_: !!v.is_consumable_,
-        notes_: v.notes_ ?? undefined,
-        scaling_rule_: scalingRule,
-        updated_at_: now,
-      };
-      await this.equipmentData.updateEquipment(updated);
-    } else {
-      await this.equipmentData.addEquipment({
-        name_hebrew: v.name_hebrew,
-        category_: v.category_,
-        owned_quantity_: Number(v.owned_quantity_),
-        scaling_rule_: scalingRule,
-        is_consumable_: !!v.is_consumable_,
-        notes_: v.notes_ || undefined,
-        created_at_: now,
-        updated_at_: now,
-      });
+      if (this.isEditMode_()) {
+        const equipment = this.route.snapshot.data['equipment'] as Equipment;
+        const updated: Equipment = {
+          ...equipment,
+          name_hebrew: v.name_hebrew,
+          category_: v.category_,
+          owned_quantity_: Number(v.owned_quantity_),
+          is_consumable_: !!v.is_consumable_,
+          notes_: v.notes_ ?? undefined,
+          scaling_rule_: scalingRule,
+          updated_at_: now,
+        };
+        await this.equipmentData.updateEquipment(updated);
+      } else {
+        await this.equipmentData.addEquipment({
+          name_hebrew: v.name_hebrew,
+          category_: v.category_,
+          owned_quantity_: Number(v.owned_quantity_),
+          scaling_rule_: scalingRule,
+          is_consumable_: !!v.is_consumable_,
+          notes_: v.notes_ || undefined,
+          created_at_: now,
+          updated_at_: now,
+        });
+      }
+      this.router.navigate(['/equipment/list']);
+    } finally {
+      this.isSaving_.set(false);
     }
-    this.router.navigate(['/equipment/list']);
   }
 
   onCancel(): void {

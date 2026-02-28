@@ -11,6 +11,9 @@
         {{ 'menu_export_customer' | translatePipe }}
       </button>
       <button type="button" class="toolbar-btn save" (click)="save()" [disabled]="isSaving_()">
+        @if (isSaving_()) {
+          <app-loader size="small" [inline]="true" />
+        }
         <lucide-icon name="save" [size]="16"></lucide-icon>
         {{ isSaving_() ? ('saving' | translatePipe) : ('menu_save' | translatePipe) }}
       </button>

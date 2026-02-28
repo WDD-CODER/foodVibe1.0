@@ -12,6 +12,7 @@ import { TranslationService } from '@services/translation.service';
 import { ConfirmModalService } from '@services/confirm-modal.service';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { ClickOutSideDirective } from '@directives/click-out-side';
+import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
 
@@ -21,7 +22,7 @@ const SIDEBAR_SWIPE_CLOSE_THRESHOLD_RATIO = 0.5;
 @Component({
   selector: 'inventory-product-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, SelectOnFocusDirective, ClickOutSideDirective],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, SelectOnFocusDirective, ClickOutSideDirective, LoaderComponent],
   templateUrl: './inventory-product-list.component.html',
   styleUrl: './inventory-product-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,6 +50,8 @@ export class InventoryProductListComponent implements OnDestroy {
   protected expandedFilterCategories_ = signal<Set<string>>(new Set());
   protected allergenPopoverProductId_ = signal<string | null>(null);
   protected allergenExpandAll_ = signal<boolean>(false);
+  protected deletingId_ = signal<string | null>(null);
+  protected savingPriceId_ = signal<string | null>(null);
   protected isMobile_ = signal<boolean>(false);
   protected sidebarSwipeOffset_ = signal<number>(0);
 
@@ -282,10 +285,11 @@ export class InventoryProductListComponent implements OnDestroy {
   // DELETE
   protected onDeleteProduct(_id: string): void {
     if (confirm('האם אתה בטוח שברצונך למחוק חומר גלם זה?')) {
+      this.deletingId_.set(_id);
       this.kitchenStateService.deleteProduct(_id).subscribe({
-        next: res => console.log('res', res),
-        error: err => console.log('Error', err)
-      })
+        next: () => { this.deletingId_.set(null); },
+        error: () => { this.deletingId_.set(null); }
+      });
     }
   }
 
@@ -382,7 +386,11 @@ export class InventoryProductListComponent implements OnDestroy {
       }
     }
     const updated: Product = { ...product, buy_price_global_: buyPriceGlobal };
-    this.kitchenStateService.saveProduct(updated).subscribe({ next: () => {}, error: () => {} });
+    this.savingPriceId_.set(product._id ?? '');
+    this.kitchenStateService.saveProduct(updated).subscribe({
+      next: () => { this.savingPriceId_.set(null); },
+      error: () => { this.savingPriceId_.set(null); }
+    });
   }
 
   // DESTROY

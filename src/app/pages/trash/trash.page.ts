@@ -11,12 +11,13 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { TrashService } from '@services/trash.service';
 import { ConfirmModalService } from '@services/confirm-modal.service';
 import { VersionHistoryPanelComponent } from 'src/app/shared/version-history-panel/version-history-panel.component';
+import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import type { VersionEntityType } from '@services/version-history.service';
 
 @Component({
   selector: 'app-trash-page',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, TranslatePipe, VersionHistoryPanelComponent],
+  imports: [CommonModule, LucideAngularModule, TranslatePipe, VersionHistoryPanelComponent, LoaderComponent],
   templateUrl: './trash.page.html',
   styleUrl: './trash.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

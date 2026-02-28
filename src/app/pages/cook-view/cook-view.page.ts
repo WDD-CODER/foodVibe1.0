@@ -14,6 +14,7 @@ import { UnitRegistryService } from '@services/unit-registry.service';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { RecipeWorkflowComponent } from '@pages/recipe-builder/components/recipe-workflow/recipe-workflow.component';
+import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 
 @Component({
   selector: 'app-cook-view-page',
@@ -25,7 +26,8 @@ import { RecipeWorkflowComponent } from '@pages/recipe-builder/components/recipe
     LucideAngularModule,
     TranslatePipe,
     SelectOnFocusDirective,
-    RecipeWorkflowComponent
+    RecipeWorkflowComponent,
+    LoaderComponent
   ],
   templateUrl: './cook-view.page.html',
   styleUrl: './cook-view.page.scss'
@@ -48,6 +50,7 @@ export class CookViewPage implements OnInit {
   protected editMode_ = signal<boolean>(false);
   /** Snapshot when entering edit mode; restored on Undo. */
   private originalRecipe_ = signal<Recipe | null>(null);
+  protected isSaving_ = signal(false);
   /** Parent form for workflow_items FormArray; used in edit mode only. */
   private readonly workflowParentForm_ = this.fb.group({ workflow_items: this.fb.array([]) });
   /** Focus workflow row at index (for add step/prep); cleared after focus. */
@@ -153,12 +156,14 @@ export class CookViewPage implements OnInit {
       if (!confirmed) return;
       const recipe = this.recipe_();
       if (!recipe) return;
+      this.isSaving_.set(true);
       this.kitchenState.saveRecipe(recipe).subscribe({
         next: () => {
           this.originalRecipe_.set(null);
           this.editMode_.set(false);
+          this.isSaving_.set(false);
         },
-        error: () => {}
+        error: () => { this.isSaving_.set(false); }
       });
     });
   }

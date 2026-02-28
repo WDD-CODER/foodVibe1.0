@@ -11,17 +11,17 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { TranslationService } from '@services/translation.service';
 import { UserMsgService } from '@services/user-msg.service';
 import { TranslationKeyModalService } from '@services/translation-key-modal.service';
+import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 
 type MetadataType = 'category' | 'allergen' | 'unit';
 @Component({
   selector: 'app-metadata-manager',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent],
   templateUrl: './metadata-manager.page.component.html',
   styleUrl: './metadata-manager.page.component.scss'
 })
 export class MetadataManagerComponent implements OnInit {
-  //INJECTIONS
   private unitRegistry = inject(UnitRegistryService);
   private metadataRegistry = inject(MetadataRegistryService);
   private productData = inject(ProductDataService);
@@ -36,6 +36,7 @@ export class MetadataManagerComponent implements OnInit {
   tempUnitRates = signal<Record<string, number>>({});
   allAllergens_ = this.metadataRegistry.allAllergens_;
   allCategories_ = this.metadataRegistry.allCategories_;
+  protected isImporting_ = signal(false);
 
 
   ngOnInit(): void {
@@ -240,8 +241,13 @@ async onAddMetadata(hebrewLabel: string, type: MetadataType, inputElement: HTMLI
   async onLoadDemoData(): Promise<void> {
     const message = this.translationService.translate('load_demo_data_confirm');
     const confirmed = await this.confirmModal.open(message, { variant: 'warning', saveLabel: 'load_demo_data' });
-    if (confirmed) {
+    if (!confirmed) return;
+    this.isImporting_.set(true);
+    try {
       await this.demoLoader.loadDemoData();
+    } finally {
+      this.isImporting_.set(false);
     }
   }
+
 }

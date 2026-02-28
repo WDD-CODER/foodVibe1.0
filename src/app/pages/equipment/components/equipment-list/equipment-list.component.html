@@ -65,9 +65,13 @@
               <button type="button" class="btn-icon" (click)="onEdit(item._id)" [attr.aria-label]="'edit' | translatePipe">
                 <lucide-icon name="pencil" [size]="18"></lucide-icon>
               </button>
-              <button type="button" class="btn-icon" (click)="onDelete(item)" [attr.aria-label]="'delete' | translatePipe">
-                <lucide-icon name="trash-2" [size]="18"></lucide-icon>
-              </button>
+              @if (deletingId_() === item._id) {
+                <app-loader size="small" [inline]="true" />
+              } @else {
+                <button type="button" class="btn-icon" (click)="onDelete(item)" [attr.aria-label]="'delete' | translatePipe">
+                  <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+                </button>
+              }
             </td>
           </tr>
         }

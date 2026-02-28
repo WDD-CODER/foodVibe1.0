@@ -22,6 +22,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { duplicateNameValidator } from 'src/app/core/validators/item.validators';
+import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 
 @Component({
   selector: 'product-form',
@@ -32,7 +33,8 @@ import { duplicateNameValidator } from 'src/app/core/validators/item.validators'
     FormsModule,
     ClickOutSideDirective,
     SelectOnFocusDirective,
-    TranslatePipe
+    TranslatePipe,
+    LoaderComponent
   ],
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.scss'
@@ -67,6 +69,7 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
   protected availableUnits_ = computed(() => this.unitRegistry.allUnitKeys_());
   protected allergenOptions_ = computed(() => this.metadataRegistry.allAllergens_());
   protected isEditMode_ = signal<boolean>(false);
+  protected isSaving_ = signal(false);
   protected curProduct_ = signal<Product | null>(null);
   protected isBaseUnitMode_ = signal(false);
 
@@ -696,12 +699,15 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
       purchase_options_: val.purchase_options_
     };
 
+    this.isSaving_.set(true);
     this.kitchenStateService.saveProduct(productToSave).subscribe({
       next: () => {
+        this.isSaving_.set(false);
         this.isSubmitted = true;
         this.router.navigate(['/inventory/list']);
       },
       error: () => {
+        this.isSaving_.set(false);
         this.isSubmitted = false;
       }
     });
