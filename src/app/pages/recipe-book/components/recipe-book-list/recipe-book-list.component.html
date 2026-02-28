@@ -1,30 +1,7 @@
 <div class="recipe-book-container" dir="rtl">
-  <!-- Mobile: fixed top recipe/dish name search with toggle -->
-  <div class="mobile-search-bar" [class.open]="isMobileSearchOpen_()">
-    <div class="mobile-search-inner">
-      <button type="button" class="mobile-search-toggle" (click)="toggleMobileSearch()" [attr.aria-label]="isMobileSearchOpen_() ? ('close' | translatePipe) : ('search' | translatePipe)">
-        <lucide-icon [name]="isMobileSearchOpen_() ? 'x' : 'search'" [size]="20"></lucide-icon>
-      </button>
-      @if (isMobileSearchOpen_()) {
-        <div class="recipe-name-search-wrap">
-          <label class="visually-hidden" for="recipe-search-mobile">{{ 'search' | translatePipe }}</label>
-          <div class="input-wrapper">
-            <lucide-icon name="search" [size]="18"></lucide-icon>
-            <input id="recipe-search-mobile" type="text" [ngModel]="searchQuery_()" (ngModelChange)="searchQuery_.set($event)"
-              [placeholder]="'search' | translatePipe" />
-          </div>
-        </div>
-      }
-    </div>
-  </div>
-
-  <div class="action-bar">
-    <button type="button" class="burger-btn" [class.burger-hidden]="isSidebarOpen_()" (click)="toggleSidebar()" [attr.aria-label]="isSidebarOpen_() ? 'Close menu' : 'Open menu'">
-      <lucide-icon name="menu" [size]="24"></lucide-icon>
-    </button>
+  <header class="list-header">
     <h2 class="page-title">{{ 'recipe_book' | translatePipe }}</h2>
-    <!-- Desktop: recipe/dish name search beside header -->
-    <div class="recipe-name-search-desktop">
+    <div class="header-search">
       <label class="visually-hidden" for="recipe-search">{{ 'search' | translatePipe }}</label>
       <div class="input-wrapper">
         <lucide-icon name="search" [size]="18"></lucide-icon>
@@ -36,17 +13,94 @@
       <lucide-icon name="plus" [size]="18"></lucide-icon>
       {{ 'add_recipe_dish' | translatePipe }}
     </button>
-  </div>
+  </header>
 
-  <aside class="action-sidebar" [class.open]="isSidebarOpen_()" [style.--sidebar-swipe-offset.px]="sidebarSwipeOffset_()">
-    <div class="sidebar-content"
-      (touchstart)="onSidebarTouchStart($event)"
-      (touchmove)="onSidebarTouchMove($event)"
-      (touchend)="onSidebarTouchEnd()">
-      <button type="button" class="sidebar-close-btn desktop-only" (click)="toggleSidebar()" [attr.aria-label]="'close' | translatePipe">
-        <lucide-icon name="x" [size]="20"></lucide-icon>
-      </button>
-      <!-- Sidebar: search by produce (ingredients) -->
+  <section class="table-area">
+    <div class="table-header">
+      <div class="col-name sortable-header" (click)="setSort('name')" (keydown.enter)="setSort('name')" (keydown.space)="$event.preventDefault(); setSort('name')" role="button" tabindex="0">
+        {{ 'name' | translatePipe }}
+      </div>
+      <div class="col-type sortable-header" (click)="setSort('type')" (keydown.enter)="setSort('type')" (keydown.space)="$event.preventDefault(); setSort('type')" role="button" tabindex="0">
+        {{ 'type' | translatePipe }}
+      </div>
+      <div class="col-labels sortable-header" (click)="setSort('labels')" (keydown.enter)="setSort('labels')" (keydown.space)="$event.preventDefault(); setSort('labels')" role="button" tabindex="0">
+        {{ 'labels' | translatePipe }}
+      </div>
+      <div class="col-allergens sortable-header" (click)="toggleAllergenExpandAll()" (keydown.enter)="toggleAllergenExpandAll()" (keydown.space)="$event.preventDefault(); toggleAllergenExpandAll()" role="button" tabindex="0">
+        {{ 'allergens' | translatePipe }}
+      </div>
+      <div class="col-cost sortable-header" (click)="setSort('cost')" (keydown.enter)="setSort('cost')" (keydown.space)="$event.preventDefault(); setSort('cost')" role="button" tabindex="0">
+        {{ 'cost' | translatePipe }}
+      </div>
+      <div class="col-actions">{{ 'actions' | translatePipe }}</div>
+    </div>
+
+    <div class="table-body">
+      @if (filteredRecipes_().length === 0) {
+        <div class="no-results">{{ 'no_recipes_match' | translatePipe }}</div>
+      }
+      @for (recipe of filteredRecipes_(); track recipe._id) {
+        <div class="recipe-grid-row" (click)="onRowClick(recipe, $event)" role="button" tabindex="0" (keydown.enter)="onCookRecipe(recipe)" (keydown.space)="$event.preventDefault(); onCookRecipe(recipe)">
+          <div class="col-name">{{ recipe.name_hebrew }}</div>
+          <div class="col-type">{{ (isRecipeDish(recipe) ? 'dish' : 'preparation') | translatePipe }}</div>
+          <div class="col-labels">
+            @if (getAllRecipeLabels(recipe).length) {
+              @for (label of getAllRecipeLabels(recipe); track label) {
+                <span class="label-chip" [style.background-color]="getLabelColor(label)">{{ label | translatePipe }}</span>
+              }
+            } @else {
+              <span class="placeholder-dash">—</span>
+            }
+          </div>
+          <div class="col-allergens">
+            @if (getRecipeAllergens(recipe).length) {
+              <div class="allergen-btn-wrapper" [class.allergen-expanded-open]="allergenExpandAll_() || allergenPopoverRecipeId_() === recipe._id" (clickOutside)="closeAllergenView($event)">
+                <button type="button" class="allergen-btn" (click)="toggleAllergenPopover(recipe._id)">
+                  <lucide-icon name="shield-alert" [size]="16"></lucide-icon>
+                  {{ getRecipeAllergens(recipe).length }}
+                </button>
+                @if (allergenExpandAll_() || allergenPopoverRecipeId_() === recipe._id) {
+                  <div class="allergen-expanded" [class.dense-grid]="true">
+                    @for (a of getRecipeAllergens(recipe); track a) {
+                      <span class="allergen-pill">{{ a | translatePipe }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <span class="placeholder-dash">—</span>
+            }
+          </div>
+          <div class="col-cost cost-cell-wrap" (mouseenter)="showCostTooltip(recipe._id)" (mouseleave)="hideCostTooltip()" (click)="toggleCostTooltipTap(recipe._id)" [attr.aria-describedby]="(hoveredCostRecipeId_() === recipe._id || tappedCostRecipeId_() === recipe._id) ? 'cost-tooltip-' + recipe._id : null">
+            ₪{{ getRecipeCost(recipe) | number:'1.2-2' }}
+            @if (hoveredCostRecipeId_() === recipe._id || tappedCostRecipeId_() === recipe._id) {
+              <div class="cost-tooltip" [id]="'cost-tooltip-' + recipe._id" (clickOutside)="closeCostTooltipTap()">
+                {{ getRecipeYieldDescription(recipe) }}
+              </div>
+            }
+          </div>
+          <div class="col-actions">
+            <button type="button" class="action-btn edit" (click)="onEditRecipe(recipe); $event.stopPropagation()" [attr.aria-label]="'edit' | translatePipe">
+              <lucide-icon name="pencil" [size]="18"></lucide-icon>
+            </button>
+            @if (deletingId_() === recipe._id) {
+              <app-loader size="small" [inline]="true" />
+            } @else {
+              <button type="button" class="action-btn delete" (click)="onDeleteRecipe(recipe); $event.stopPropagation()" [attr.aria-label]="'delete' | translatePipe">
+                <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <aside class="filter-panel" [class.collapsed]="!isPanelOpen_()">
+    <button type="button" class="panel-toggle-icon" (click)="togglePanel()" [attr.aria-label]="isPanelOpen_() ? ('close' | translatePipe) : ('filter' | translatePipe)">
+      <lucide-icon [name]="isPanelOpen_() ? 'panel-right-close' : 'panel-left-close'" [size]="20"></lucide-icon>
+    </button>
+    <div class="panel-content">
       <div class="search-section">
         <h3>{{ 'search_by_ingredients' | translatePipe }}</h3>
         <div class="ingredient-search-block">
@@ -103,87 +157,6 @@
       </div>
     </div>
   </aside>
-
-  <main class="recipes-main">
-    <div class="recipes-grid">
-      <div class="recipes-grid-header">
-        <div class="col-name sortable-header" (click)="setSort('name')" (keydown.enter)="setSort('name')" (keydown.space)="$event.preventDefault(); setSort('name')" role="button" tabindex="0">
-          {{ 'name' | translatePipe }}
-        </div>
-        <div class="col-type sortable-header" (click)="setSort('type')" (keydown.enter)="setSort('type')" (keydown.space)="$event.preventDefault(); setSort('type')" role="button" tabindex="0">
-          {{ 'type' | translatePipe }}
-        </div>
-        <div class="col-main-category sortable-header" (click)="setSort('main_category')" (keydown.enter)="setSort('main_category')" (keydown.space)="$event.preventDefault(); setSort('main_category')" role="button" tabindex="0">
-          {{ 'main_category' | translatePipe }}
-        </div>
-        <div class="col-allergens sortable-header" (click)="toggleAllergenExpandAll()" (keydown.enter)="toggleAllergenExpandAll()" (keydown.space)="$event.preventDefault(); toggleAllergenExpandAll()" role="button" tabindex="0">
-          {{ 'allergens' | translatePipe }}
-        </div>
-        <div class="col-cost sortable-header" (click)="setSort('cost')" (keydown.enter)="setSort('cost')" (keydown.space)="$event.preventDefault(); setSort('cost')" role="button" tabindex="0">
-          {{ 'cost' | translatePipe }}
-        </div>
-        <div class="col-actions">{{ 'actions' | translatePipe }}</div>
-      </div>
-
-      <div class="recipes-grid-body">
-        @if (filteredRecipes_().length === 0) {
-          <div class="no-results">{{ 'no_recipes_match' | translatePipe }}</div>
-        }
-        @for (recipe of filteredRecipes_(); track recipe._id) {
-          <div class="recipe-grid-row" (click)="onRowClick(recipe, $event)" role="button" tabindex="0" (keydown.enter)="onCookRecipe(recipe)" (keydown.space)="$event.preventDefault(); onCookRecipe(recipe)">
-            <div class="col-name">{{ recipe.name_hebrew }}</div>
-            <div class="col-type">{{ (isRecipeDish(recipe) ? 'dish' : 'preparation') | translatePipe }}</div>
-            <div class="col-main-category">{{ getRecipeCategoriesDisplay(recipe) || ('no_category' | translatePipe) }}</div>
-            <div class="col-allergens">
-              @if (getRecipeAllergens(recipe).length) {
-                <div class="allergen-btn-wrapper" [class.allergen-expanded-open]="allergenExpandAll_() || allergenPopoverRecipeId_() === recipe._id" (clickOutside)="closeAllergenView($event)">
-                  <button type="button" class="allergen-btn" (click)="toggleAllergenPopover(recipe._id)">
-                    <lucide-icon name="shield-alert" [size]="16"></lucide-icon>
-                    {{ getRecipeAllergens(recipe).length }}
-                  </button>
-                  @if (allergenExpandAll_() || allergenPopoverRecipeId_() === recipe._id) {
-                    <div class="allergen-expanded" [class.dense-grid]="true">
-                      @for (a of getRecipeAllergens(recipe); track a) {
-                        <span class="allergen-pill">{{ a | translatePipe }}</span>
-                      }
-                    </div>
-                  }
-                </div>
-              } @else {
-                <span class="placeholder-dash">—</span>
-              }
-            </div>
-            <div class="col-cost cost-cell-wrap" (mouseenter)="showCostTooltip(recipe._id)" (mouseleave)="hideCostTooltip()" (click)="toggleCostTooltipTap(recipe._id)" [attr.aria-describedby]="(hoveredCostRecipeId_() === recipe._id || tappedCostRecipeId_() === recipe._id) ? 'cost-tooltip-' + recipe._id : null">
-              ₪{{ getRecipeCost(recipe) | number:'1.2-2' }}
-              @if (hoveredCostRecipeId_() === recipe._id || tappedCostRecipeId_() === recipe._id) {
-                <div class="cost-tooltip" [id]="'cost-tooltip-' + recipe._id" (clickOutside)="closeCostTooltipTap()">
-                  {{ getRecipeYieldDescription(recipe) }}
-                </div>
-              }
-            </div>
-            <div class="col-actions">
-              <button type="button" class="action-btn cook" (click)="onCookRecipe(recipe); $event.stopPropagation()" [attr.aria-label]="'cook' | translatePipe">
-                <lucide-icon name="utensils" [size]="18"></lucide-icon>
-              </button>
-              <button type="button" class="action-btn edit" (click)="onEditRecipe(recipe); $event.stopPropagation()" [attr.aria-label]="'edit' | translatePipe">
-                <lucide-icon name="pencil" [size]="18"></lucide-icon>
-              </button>
-              <button type="button" class="action-btn history" (click)="openHistory(recipe); $event.stopPropagation()" [attr.aria-label]="'history' | translatePipe">
-                <lucide-icon name="history" [size]="18"></lucide-icon>
-              </button>
-              @if (deletingId_() === recipe._id) {
-                <app-loader size="small" [inline]="true" />
-              } @else {
-                <button type="button" class="action-btn delete" (click)="onDeleteRecipe(recipe); $event.stopPropagation()" [attr.aria-label]="'delete' | translatePipe">
-                  <lucide-icon name="trash-2" [size]="18"></lucide-icon>
-                </button>
-              }
-            </div>
-          </div>
-        }
-      </div>
-    </div>
-  </main>
 
   @if (historyFor_(); as h) {
     <div class="history-overlay" (click)="closeHistory()">

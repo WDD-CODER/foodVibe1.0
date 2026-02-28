@@ -7,7 +7,10 @@ import { ClickOutSideDirective } from '@directives/click-out-side';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
+import { MetadataRegistryService } from '@services/metadata-registry.service';
+import { TranslationService } from '@services/translation.service';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
+import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service';
 
 @Component({
   selector: 'app-recipe-header',
@@ -21,6 +24,9 @@ export class RecipeHeaderComponent {
   private fb = inject(FormBuilder);
   private unitRegistryService = inject(UnitRegistryService);
   private kitchenStateService = inject(KitchenStateService);
+  private metadataRegistry = inject(MetadataRegistryService);
+  private translationService = inject(TranslationService);
+  private labelCreationModal = inject(LabelCreationModalService);
 
   // INPUTS
   form = input.required<FormGroup>();
@@ -34,6 +40,15 @@ export class RecipeHeaderComponent {
   unconvertibleForWeight = input<string[]>([]);
   unconvertibleForVolume = input<string[]>([]);
   resetTrigger = input<number>(0);
+  autoLabels = input<string[]>([]);
+
+  // LABELS
+  protected showLabelDropdown_ = signal(false);
+  protected selectedLabels_ = computed(() => (this.form().get('labels')?.value ?? []) as string[]);
+  protected allLabelsForDisplay_ = computed(() => [...new Set([...this.selectedLabels_(), ...this.autoLabels()])]);
+  protected filteredLabelOptions_ = computed(() =>
+    this.metadataRegistry.allLabels_().filter(l => !this.allLabelsForDisplay_().includes(l.key))
+  );
 
   // OUTPUTS
   openUnitCreator = output<string>();
@@ -347,5 +362,40 @@ export class RecipeHeaderComponent {
     const conversions = this.form().get('yield_conversions') as FormArray;
     if (!conversions?.length) return [];
     return conversions.controls.slice(1) as FormGroup[];
+  }
+
+  protected addLabel(key: string): void {
+    const current = (this.form().get('labels')?.value ?? []) as string[];
+    if (current.includes(key)) return;
+    this.form().get('labels')?.setValue([...current, key], { emitEvent: true });
+    this.form().markAsDirty();
+    this.showLabelDropdown_.set(false);
+  }
+
+  protected removeLabel(key: string): void {
+    if (this.autoLabels().includes(key)) return;
+    const current = (this.form().get('labels')?.value ?? []) as string[];
+    this.form().get('labels')?.setValue(current.filter(k => k !== key), { emitEvent: true });
+    this.form().markAsDirty();
+  }
+
+  protected isAutoLabel(key: string): boolean {
+    return this.autoLabels().includes(key);
+  }
+
+  protected getLabelColor(key: string): string {
+    return this.metadataRegistry.getLabelColor(key);
+  }
+
+  protected async openCreateLabel(): Promise<void> {
+    const result = await this.labelCreationModal.open();
+    if (!result?.key || !result?.hebrewLabel) return;
+    try {
+      this.translationService.updateDictionary(result.key, result.hebrewLabel);
+      await this.metadataRegistry.registerLabel(result.key, result.color, result.autoTriggers);
+      this.addLabel(result.key);
+    } catch {
+      // Error already shown by registry
+    }
   }
 }

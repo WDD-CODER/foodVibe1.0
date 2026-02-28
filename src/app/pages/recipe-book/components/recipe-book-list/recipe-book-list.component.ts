@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy, signal, computed, afterNextRender, OnDestroy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -7,6 +7,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { RecipeCostService } from '@services/recipe-cost.service';
 import { TranslationService } from '@services/translation.service';
+import { MetadataRegistryService } from '@services/metadata-registry.service';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { Recipe } from '@models/recipe.model';
@@ -15,11 +16,9 @@ import { VersionEntityType } from '@services/version-history.service';
 import { VersionHistoryPanelComponent } from 'src/app/shared/version-history-panel/version-history-panel.component';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 
-export type SortField = 'name' | 'type' | 'cost' | 'main_category' | 'allergens';
+export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens';
 
 const MAX_ALLERGEN_RECURSION = 5;
-const MOBILE_BREAKPOINT_PX = 768;
-const SIDEBAR_SWIPE_CLOSE_THRESHOLD_RATIO = 0.5;
 
 @Component({
   selector: 'recipe-book-list',
@@ -29,17 +28,18 @@ const SIDEBAR_SWIPE_CLOSE_THRESHOLD_RATIO = 0.5;
   styleUrl: './recipe-book-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RecipeBookListComponent implements OnDestroy {
+export class RecipeBookListComponent {
   private readonly kitchenState = inject(KitchenStateService);
   private readonly router = inject(Router);
   private readonly recipeCostService = inject(RecipeCostService);
   private readonly translationService = inject(TranslationService);
+  private readonly metadataRegistry = inject(MetadataRegistryService);
 
   protected activeFilters_ = signal<Record<string, string[]>>({});
   protected searchQuery_ = signal<string>('');
   protected sortBy_ = signal<SortField | null>(null);
   protected sortOrder_ = signal<'asc' | 'desc'>('asc');
-  protected isSidebarOpen_ = signal<boolean>(false);
+  protected isPanelOpen_ = signal<boolean>(true);
   protected expandedFilterCategories_ = signal<Set<string>>(new Set());
   protected allergenPopoverRecipeId_ = signal<string | null>(null);
   protected allergenExpandAll_ = signal<boolean>(false);
@@ -47,45 +47,26 @@ export class RecipeBookListComponent implements OnDestroy {
   protected tappedCostRecipeId_ = signal<string | null>(null);
   protected ingredientSearchQuery_ = signal<string>('');
   protected selectedProductIds_ = signal<string[]>([]);
-  protected isMobileSearchOpen_ = signal<boolean>(false);
   protected historyFor_ = signal<{ entityType: VersionEntityType; entityId: string; entityName: string } | null>(null);
   protected deletingId_ = signal<string | null>(null);
-  protected isMobile_ = signal<boolean>(false);
-  protected sidebarSwipeOffset_ = signal<number>(0);
-  private swipeStartX = 0;
-  private mediaQueryList: MediaQueryList | null = null;
-  private mediaListener: (() => void) | null = null;
-
-  constructor() {
-    afterNextRender(() => {
-      this.mediaQueryList = window.matchMedia(`(min-width: ${MOBILE_BREAKPOINT_PX + 1}px)`);
-      const isDesktop = this.mediaQueryList.matches;
-      this.isMobile_.set(!isDesktop);
-      this.isSidebarOpen_.set(isDesktop);
-      this.mediaListener = () => {
-        const desktop = this.mediaQueryList!.matches;
-        this.isMobile_.set(!desktop);
-        if (desktop) this.isSidebarOpen_.set(true);
-        else this.isSidebarOpen_.set(false);
-        this.sidebarSwipeOffset_.set(0);
-      };
-      this.mediaQueryList.addEventListener('change', this.mediaListener);
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.mediaQueryList?.removeEventListener('change', this.mediaListener ?? (() => {}));
-  }
 
   protected categoryDisplayKey(internalName: string): string {
     const map: Record<string, string> = {
-      'Main-category': 'main_category',
+      'Labels': 'labels',
       'Type': 'type',
       'Allergens': 'allergens',
       'Approved': 'approved',
       'Station': 'station'
     };
     return map[internalName] ?? internalName.toLowerCase();
+  }
+
+  protected getAllRecipeLabels(recipe: Recipe): string[] {
+    return [...new Set([...(recipe.labels_ ?? []), ...(recipe.autoLabels_ ?? [])])];
+  }
+
+  protected getLabelColor(key: string): string {
+    return this.metadataRegistry.getLabelColor(key);
   }
 
   protected toggleFilterCategory(name: string): void {
@@ -101,28 +82,8 @@ export class RecipeBookListComponent implements OnDestroy {
     return this.expandedFilterCategories_().has(name);
   }
 
-  protected onSidebarTouchStart(e: TouchEvent): void {
-    if (!this.isMobile_() || !this.isSidebarOpen_()) return;
-    this.swipeStartX = e.touches[0].clientX;
-    this.sidebarSwipeOffset_.set(0);
-  }
-
-  protected onSidebarTouchMove(e: TouchEvent): void {
-    if (!this.isMobile_() || !this.isSidebarOpen_()) return;
-    const delta = this.swipeStartX - e.touches[0].clientX;
-    this.sidebarSwipeOffset_.set(Math.max(0, delta));
-  }
-
-  protected onSidebarTouchEnd(): void {
-    if (!this.isMobile_() || !this.isSidebarOpen_()) return;
-    const offset = this.sidebarSwipeOffset_();
-    const panelWidth = 280;
-    if (offset >= panelWidth * SIDEBAR_SWIPE_CLOSE_THRESHOLD_RATIO) {
-      this.isSidebarOpen_.set(false);
-      this.sidebarSwipeOffset_.set(0);
-    } else {
-      this.sidebarSwipeOffset_.set(0);
-    }
+  protected togglePanel(): void {
+    this.isPanelOpen_.update(v => !v);
   }
 
   protected filterCategories_ = computed(() => {
@@ -142,15 +103,15 @@ export class RecipeBookListComponent implements OnDestroy {
         categories['Allergens'].add(a);
       });
 
-      const recipeCats = this.getRecipeCategories(recipe);
-      if (recipeCats.length > 0) {
-        recipeCats.forEach(c => {
-          if (!categories['Main-category']) categories['Main-category'] = new Set();
-          categories['Main-category'].add(c);
+      const recipeLabels = this.getAllRecipeLabels(recipe);
+      if (recipeLabels.length > 0) {
+        recipeLabels.forEach(l => {
+          if (!categories['Labels']) categories['Labels'] = new Set();
+          categories['Labels'].add(l);
         });
       } else {
-        if (!categories['Main-category']) categories['Main-category'] = new Set();
-        categories['Main-category'].add('no_category');
+        if (!categories['Labels']) categories['Labels'] = new Set();
+        categories['Labels'].add('no_label');
       }
 
       if (!categories['Approved']) categories['Approved'] = new Set();
@@ -204,9 +165,9 @@ export class RecipeBookListComponent implements OnDestroy {
             recipeValues = this.getRecipeAllergens(recipe);
             // "Do not include allergens": show only recipes that have NONE of the selected allergens
             return selectedValues.every(v => !recipeValues.includes(v));
-          } else if (category === 'Main-category') {
-            const cats = this.getRecipeCategories(recipe);
-            recipeValues = cats.length > 0 ? cats : ['no_category'];
+          } else if (category === 'Labels') {
+            const labels = this.getAllRecipeLabels(recipe);
+            recipeValues = labels.length > 0 ? labels : ['no_label'];
           } else if (category === 'Approved') {
             recipeValues = [recipe.is_approved_ ? 'true' : 'false'];
           } else if (category === 'Station') {
@@ -260,31 +221,6 @@ export class RecipeBookListComponent implements OnDestroy {
     return Array.from(set);
   }
 
-  protected getRecipeCategories(recipe: Recipe, depth = 0): string[] {
-    if (depth >= MAX_ALLERGEN_RECURSION || !recipe?.ingredients_?.length) return [];
-    const set = new Set<string>();
-    const products = this.kitchenState.products_();
-    const recipes = this.kitchenState.recipes_();
-
-    for (const ing of recipe.ingredients_) {
-      if (ing.type === 'product') {
-        const product = products.find(p => p._id === ing.referenceId) as Product | undefined;
-        (product?.categories_ || []).forEach(c => set.add(c));
-      } else if (ing.type === 'recipe') {
-        const subRecipe = recipes.find(r => r._id === ing.referenceId);
-        if (subRecipe) {
-          this.getRecipeCategories(subRecipe, depth + 1).forEach(c => set.add(c));
-        }
-      }
-    }
-    return Array.from(set);
-  }
-
-  protected getRecipeCategoriesDisplay(recipe: Recipe): string {
-    const cats = this.getRecipeCategories(recipe);
-    return cats.map(c => this.translationService.translate(c)).filter(Boolean).join(', ');
-  }
-
   protected getRecipeYieldDescription(recipe: Recipe): string {
     const amount = recipe.yield_amount_ ?? 1;
     const unit = recipe.yield_unit_ ? this.translationService.translate(recipe.yield_unit_) : '';
@@ -327,11 +263,11 @@ export class RecipeBookListComponent implements OnDestroy {
       }
       case 'cost':
         return this.recipeCostService.computeRecipeCost(a) - this.recipeCostService.computeRecipeCost(b);
-      case 'main_category': {
-        const aCats = this.getRecipeCategories(a);
-        const bCats = this.getRecipeCategories(b);
-        const aStr = aCats.length > 0 ? this.translationService.translate(aCats[0]) : '';
-        const bStr = bCats.length > 0 ? this.translationService.translate(bCats[0]) : '';
+      case 'labels': {
+        const aLabels = this.getAllRecipeLabels(a);
+        const bLabels = this.getAllRecipeLabels(b);
+        const aStr = aLabels.length > 0 ? aLabels.map(l => this.translationService.translate(l)).join(', ') : '';
+        const bStr = bLabels.length > 0 ? bLabels.map(l => this.translationService.translate(l)).join(', ') : '';
         return hebrewCompare(aStr, bStr);
       }
       case 'allergens': {
@@ -356,17 +292,9 @@ export class RecipeBookListComponent implements OnDestroy {
     }
   }
 
-  protected toggleSidebar(): void {
-    this.isSidebarOpen_.update(v => !v);
-  }
-
   protected toggleAllergenExpandAll(): void {
     this.allergenExpandAll_.update(v => !v);
     this.allergenPopoverRecipeId_.set(null);
-  }
-
-  protected toggleMobileSearch(): void {
-    this.isMobileSearchOpen_.update(v => !v);
   }
 
   protected toggleFilter(categoryName: string, optionValue: string): void {
@@ -407,7 +335,7 @@ export class RecipeBookListComponent implements OnDestroy {
   /** Close allergen chips view (single row or expand-all) on outside click; restores allergy icon. */
   protected closeAllergenView(clickTarget?: EventTarget | null): void {
     const el = clickTarget instanceof HTMLElement ? clickTarget : null;
-    if (el?.closest('.recipes-grid-header .col-allergens')) return;
+    if (el?.closest('.table-header .col-allergens')) return;
     this.allergenPopoverRecipeId_.set(null);
     this.allergenExpandAll_.set(false);
   }

@@ -7,6 +7,7 @@ import { AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
+import { MetadataRegistryService } from '@services/metadata-registry.service';
 import { UserMsgService } from '@services/user-msg.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { RecipeCostService } from '@services/recipe-cost.service';
@@ -49,6 +50,7 @@ export class RecipeBuilderPage implements OnInit {
   private readonly versionHistory_ = inject(VersionHistoryService);
   private readonly injector_ = inject(Injector);
   private readonly equipmentData_ = inject(EquipmentDataService);
+  private readonly metadataRegistry_ = inject(MetadataRegistryService);
 
   //SIGNALS
   protected isSaving_ = signal(false);
@@ -100,6 +102,7 @@ export class RecipeBuilderPage implements OnInit {
       workflow_items: this.fb.array([]),
       total_weight_g: [0],
       total_cost: [0],
+      labels: [[] as string[]],
       logistics: this.fb.group({
         baseline_: this.fb.array([])
       })
@@ -121,6 +124,25 @@ export class RecipeBuilderPage implements OnInit {
     ),
     { initialValue: 'preparation' as const }
   );
+
+  /** Auto-labels from current form ingredients (for header preview). */
+  protected liveAutoLabels_ = computed(() => {
+    this.ingredientsFormVersion_();
+    const raw = this.recipeForm_.getRawValue() as { ingredients?: { referenceId?: string; item_type?: string }[] };
+    const rows = raw?.ingredients ?? [];
+    const productIds = rows
+      .filter((r: { referenceId?: string; item_type?: string }) => r?.referenceId && r?.item_type !== 'recipe')
+      .map((r: { referenceId?: string }) => r.referenceId!);
+    const products = this.state_.products_().filter(p => productIds.includes(p._id));
+    const triggerSet = new Set<string>();
+    products.forEach(p => {
+      (p.categories_ ?? []).forEach(c => triggerSet.add(c));
+      (p.allergens_ ?? []).forEach(a => triggerSet.add(a));
+    });
+    return this.metadataRegistry_.allLabels_()
+      .filter(def => def.autoTriggers?.some(t => triggerSet.has(t)))
+      .map(def => def.key);
+  });
 
   private destroyRef = inject(DestroyRef);
 
@@ -187,7 +209,8 @@ export class RecipeBuilderPage implements OnInit {
         recipe_type: 'preparation',
         serving_portions: 1,
         total_weight_g: 0,
-        total_cost: 0
+        total_cost: 0,
+        labels: []
       },
       { emitEvent: false }
     );
@@ -292,7 +315,8 @@ export class RecipeBuilderPage implements OnInit {
       recipe_type: isDish ? 'dish' : 'preparation',
       serving_portions: isDish ? recipe.yield_amount_ : 1,
       total_weight_g: 0,
-      total_cost: 0
+      total_cost: 0,
+      labels: recipe.labels_ ?? []
     });
 
     const yieldConv = this.yieldConversionsArray.at(0);
@@ -544,6 +568,7 @@ export class RecipeBuilderPage implements OnInit {
 
     this.isSaving_.set(true);
     const recipe = this.buildRecipeFromForm();
+    recipe.autoLabels_ = this.computeAutoLabels_(recipe);
 
     this.state_.saveRecipe(recipe).subscribe({
       next: () => {
@@ -682,6 +707,7 @@ export class RecipeBuilderPage implements OnInit {
     const yieldAmount = isDish ? ((raw['serving_portions'] as number) ?? 1) : (yieldConv?.amount ?? 0);
     const yieldUnit = isDish ? 'מנה' : (yieldConv?.unit ?? 'gram');
 
+    const labels = (raw['labels'] as string[] | undefined) ?? [];
     return {
       _id: (this.recipeId_() ?? '') as string,
       name_hebrew: (raw['name_hebrew'] as string)?.trim() ?? '',
@@ -692,6 +718,7 @@ export class RecipeBuilderPage implements OnInit {
       default_station_: '',
       is_approved_: true,
       recipe_type_: isDish ? 'dish' : 'preparation',
+      labels_: labels,
       ...(prepItems && prepItems.length > 0 && { prep_items_: prepItems }),
       ...(prepCategories && prepCategories.length > 0 && { prep_categories_: prepCategories }),
       ...(prepCategories && prepCategories.length > 0 && { mise_categories_: prepCategories }),
@@ -709,6 +736,22 @@ export class RecipeBuilderPage implements OnInit {
         return baseline.length > 0 ? { logistics_: { baseline_: baseline } } : {};
       })() : {})
     };
+  }
+
+  /** Compute auto-applied labels from recipe ingredients (product categories + allergens). */
+  private computeAutoLabels_(recipe: Recipe): string[] {
+    const productIds = recipe.ingredients_
+      .filter(ing => ing.type === 'product')
+      .map(ing => ing.referenceId);
+    const products = this.state_.products_().filter(p => productIds.includes(p._id));
+    const triggerSet = new Set<string>();
+    products.forEach(p => {
+      (p.categories_ ?? []).forEach(c => triggerSet.add(c));
+      (p.allergens_ ?? []).forEach(a => triggerSet.add(a));
+    });
+    return this.metadataRegistry_.allLabels_()
+      .filter(def => def.autoTriggers?.some(t => triggerSet.has(t)))
+      .map(def => def.key);
   }
 
   //DELETE

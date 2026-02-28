@@ -103,6 +103,41 @@
                 </div>
             </div>
         </div>
+
+        <div class="labels-container" (clickOutside)="showLabelDropdown_.set(false)">
+            <div class="labels-input-box">
+                <div class="selected-label-chips"
+                     tabindex="0"
+                     (click)="showLabelDropdown_.set(true)">
+                    @for (label of allLabelsForDisplay_(); track label) {
+                        <span class="label-chip" [style.background-color]="getLabelColor(label)">
+                            {{ label | translatePipe }}
+                            @if (!isAutoLabel(label)) {
+                                <button type="button" (click)="removeLabel(label); $event.stopPropagation()">
+                                    <lucide-icon name="x" [size]="12"></lucide-icon>
+                                </button>
+                            }
+                        </span>
+                    }
+                    @if (allLabelsForDisplay_().length === 0) {
+                        <span class="label-placeholder">{{ 'choose_label' | translatePipe }}</span>
+                    }
+                </div>
+                @if (showLabelDropdown_()) {
+                    <div class="label-dropdown" role="listbox">
+                        @for (label of filteredLabelOptions_(); track label.key) {
+                            <div class="dropdown-item" (click)="addLabel(label.key)">
+                                <span class="color-dot" [style.background-color]="label.color"></span>
+                                {{ label.key | translatePipe }}
+                            </div>
+                        }
+                        <div class="dropdown-item dropdown-item-add" (click)="openCreateLabel()">
+                            {{ 'create_new_label' | translatePipe }}
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
     </div>
 
     <div class="metrics-square">
