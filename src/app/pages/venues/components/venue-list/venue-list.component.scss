@@ -16,6 +16,10 @@
   }
 
   .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
     margin-block-end: 1rem;
 
     .search-section .input-wrapper {
@@ -34,6 +38,26 @@
         flex: 1;
         border: none;
         outline: none;
+      }
+    }
+
+    .add-place-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding-inline: 0.75rem;
+      padding-block: 0.5rem;
+      background: var(--color-primary);
+      color: var(--color-text-on-primary);
+      border: 1px solid var(--color-primary);
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+
+      &:hover {
+        opacity: 0.9;
       }
     }
   }

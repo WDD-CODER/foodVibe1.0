@@ -17,6 +17,10 @@
         />
       </div>
     </div>
+    <button type="button" class="add-place-btn" (click)="onAddPlace()">
+      <lucide-icon name="plus" [size]="18"></lucide-icon>
+      <span>{{ 'add_venue' | translatePipe }}</span>
+    </button>
   </div>
 
   <div class="table-wrap">

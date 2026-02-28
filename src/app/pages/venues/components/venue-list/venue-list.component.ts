@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -15,10 +15,15 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component';
   templateUrl: './venue-list.component.html',
   styleUrl: './venue-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  inputs: ['embeddedInDashboard'],
 })
 export class VenueListComponent {
   private readonly venueData = inject(VenueDataService);
   private readonly router = inject(Router);
+
+  /** When true, add button emits addVenueClick instead of navigating (e.g. dashboard tab switch). */
+  embeddedInDashboard = false;
+  readonly addVenueClick = output<void>();
 
   protected searchQuery_ = signal('');
   protected deletingId_ = signal<string | null>(null);
@@ -40,6 +45,14 @@ export class VenueListComponent {
 
   protected envTypeLabel(env: EnvironmentType): string {
     return env;
+  }
+
+  protected onAddPlace(): void {
+    if (this.embeddedInDashboard) {
+      this.addVenueClick.emit();
+    } else {
+      void this.router.navigate(['/venues/add']);
+    }
   }
 
   onEdit(id: string): void {
