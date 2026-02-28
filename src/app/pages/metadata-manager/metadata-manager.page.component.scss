@@ -78,6 +78,14 @@
     gap: 0.5rem;
   }
 
+  .label-color-dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-inline-end: 0.5rem;
+  }
+
   .list-item {
     display: flex;
     align-items: center;

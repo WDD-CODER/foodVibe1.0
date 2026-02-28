@@ -1,0 +1,69 @@
+@if (modal.isOpen_()) {
+  <div class="modal-overlay" (click)="resetAndClose()">
+    <div class="modal-card" dir="rtl" (click)="$event.stopPropagation()" (clickOutside)="resetAndClose()">
+      <h3>{{ 'add_new_label' | translatePipe }}</h3>
+
+      <div class="formula-grid">
+        <div class="input-stack full-width">
+          <label>{{ 'label_name' | translatePipe }} (עברית)</label>
+          <input type="text"
+                 [ngModel]="modal.hebrewLabel_()"
+                 (ngModelChange)="modal.hebrewLabel_.set($event)"
+                 placeholder="למשל: חלבי" />
+        </div>
+        <div class="input-stack full-width">
+          <label>מפתח באנגלית (לדוגמה: dairy)</label>
+          <input type="text"
+                 [ngModel]="englishKey_()"
+                 (ngModelChange)="englishKey_.set($event); validationError_.set(null)"
+                 placeholder="dairy"
+                 (keydown.enter)="save()" />
+          @if (validationError_()) {
+            <span class="validation-error">{{ validationError_() }}</span>
+          }
+        </div>
+        <div class="input-stack full-width">
+          <label>{{ 'label_color' | translatePipe }}</label>
+          <div class="color-swatches">
+            @for (c of palette; track c) {
+              <button type="button"
+                      class="color-swatch"
+                      [style.background-color]="c"
+                      [class.selected]="modal.selectedColor_() === c"
+                      (click)="selectColor(c)">
+                @if (modal.selectedColor_() === c) {
+                  <span class="check" aria-hidden="true">✓</span>
+                }
+              </button>
+            }
+          </div>
+        </div>
+        <div class="input-stack full-width">
+          <label>{{ 'auto_trigger_sources' | translatePipe }}</label>
+          <div class="trigger-checklist">
+            @for (opt of triggerOptions_(); track opt.value) {
+              <label class="trigger-option">
+                <input type="checkbox"
+                       [checked]="isTriggerSelected(opt.value)"
+                       (change)="toggleTrigger(opt.value)" />
+                <span>{{ opt.value | translatePipe }}</span>
+              </label>
+            }
+            @if (triggerOptions_().length === 0) {
+              <span class="trigger-empty">{{ 'no_category' | translatePipe }} / {{ 'allergens' | translatePipe }}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" (click)="cancel()">{{ 'cancel' | translatePipe }}</button>
+        <button type="button" class="btn-save"
+                (click)="save()"
+                [disabled]="!englishKey_().trim() || !modal.hebrewLabel_().trim()">
+          {{ 'save_label' | translatePipe }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

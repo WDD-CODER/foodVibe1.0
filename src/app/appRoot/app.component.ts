@@ -12,10 +12,11 @@ import { RestoreChoiceModalComponent } from 'src/app/shared/restore-choice-modal
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { AddEquipmentModalComponent } from 'src/app/shared/add-equipment-modal/add-equipment-modal.component';
 import { HeroFabComponent } from '../core/components/hero-fab/hero-fab.component';
+import { LabelCreationModalComponent } from 'src/app/shared/label-creation-modal/label-creation-modal.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, HeaderComponent, UserMsg, UnitCreatorModal, TranslationKeyModalComponent, AddItemModalComponent, AddEquipmentModalComponent, GlobalSpecificModalComponent, ConfirmModalComponent, RestoreChoiceModalComponent, LoaderComponent, HeroFabComponent],
+  imports: [RouterOutlet, HeaderComponent, UserMsg, UnitCreatorModal, TranslationKeyModalComponent, LabelCreationModalComponent, AddItemModalComponent, AddEquipmentModalComponent, GlobalSpecificModalComponent, ConfirmModalComponent, RestoreChoiceModalComponent, LoaderComponent, HeroFabComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

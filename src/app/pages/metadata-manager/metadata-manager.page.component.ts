@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UnitRegistryService } from '@services/unit-registry.service';
@@ -6,14 +6,16 @@ import { MetadataRegistryService } from '@services/metadata-registry.service';
 import { ProductDataService } from '@services/product-data.service';
 import { DemoLoaderService } from '@services/demo-loader.service';
 import { ConfirmModalService } from '@services/confirm-modal.service';
+import { KitchenStateService } from '@services/kitchen-state.service';
 import { LucideAngularModule } from 'lucide-angular';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { TranslationService } from '@services/translation.service';
 import { UserMsgService } from '@services/user-msg.service';
 import { TranslationKeyModalService } from '@services/translation-key-modal.service';
+import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 
-type MetadataType = 'category' | 'allergen' | 'unit';
+type MetadataType = 'category' | 'allergen' | 'unit' | 'label';
 @Component({
   selector: 'app-metadata-manager',
   standalone: true,
@@ -30,13 +32,21 @@ export class MetadataManagerComponent implements OnInit {
   private translationService = inject(TranslationService);
   private userMsgService = inject(UserMsgService);
   private translationKeyModal = inject(TranslationKeyModalService);
+  private labelCreationModal = inject(LabelCreationModalService);
+  private kitchenState = inject(KitchenStateService);
 
   // SIGNALS
   allUnitKeys_ = this.unitRegistry.allUnitKeys_;
   tempUnitRates = signal<Record<string, number>>({});
   allAllergens_ = this.metadataRegistry.allAllergens_;
   allCategories_ = this.metadataRegistry.allCategories_;
+  allLabels_ = this.metadataRegistry.allLabels_;
+  allLabelKeys_ = computed(() => this.allLabels_().map(l => l.key));
   protected isImporting_ = signal(false);
+
+  protected getLabelColor(key: string): string {
+    return this.metadataRegistry.getLabelColor(key);
+  }
 
 
   ngOnInit(): void {
@@ -57,39 +67,52 @@ export class MetadataManagerComponent implements OnInit {
 
 
 
-async onAddMetadata(hebrewLabel: string, type: MetadataType, inputElement: HTMLInputElement) {
-  const sanitizedHebrew = hebrewLabel.trim();
-  if (!sanitizedHebrew) return;
-
-  // --- LAYER 1: REGISTRY GUARD ---
-  const currentIds = this.getRegistryByType(type);
-  const existingLabels = currentIds.map(id => this.translationService.translate(id));
-
-  if (existingLabels.includes(sanitizedHebrew)) {
-    this.userMsgService.onSetErrorMsg(`הערך "${sanitizedHebrew}" כבר קיים ברשימה הזו.`);
-    return; // Input stays
+  async onAddLabel(): Promise<void> {
+    const result = await this.labelCreationModal.open();
+    if (!result?.key || !result?.hebrewLabel) return;
+    try {
+      this.translationService.updateDictionary(result.key, result.hebrewLabel);
+      await this.metadataRegistry.registerLabel(result.key, result.color, result.autoTriggers);
+      this.userMsgService.onSetSuccessMsg('הנתונים נשמרו בהצלחה');
+    } catch (err) {
+      this.userMsgService.onSetErrorMsg('שגיאה בסנכרון הנתונים');
+    }
   }
 
-  // --- LAYER 2: ENGLISH KEY GUARD ---
-  const contextMap = { category: 'category' as const, allergen: 'allergen' as const, unit: 'unit' as const };
-  const result = await this.translationKeyModal.open(sanitizedHebrew, contextMap[type]);
-  if (!result?.englishKey || !result?.hebrewLabel) return;
+  async onAddMetadata(hebrewLabel: string, type: MetadataType, inputElement: HTMLInputElement) {
+    if (type === 'label') {
+      await this.onAddLabel();
+      return;
+    }
+    const sanitizedHebrew = hebrewLabel.trim();
+    if (!sanitizedHebrew) return;
 
-  const sanitizedKey = result.englishKey;
+    // --- LAYER 1: REGISTRY GUARD ---
+    const currentIds = this.getRegistryByType(type);
+    const existingLabels = currentIds.map(id => this.translationService.translate(id));
 
-  // --- LAYER 3: EXECUTION ---
-  try {
-    this.translationService.updateDictionary(sanitizedKey, result.hebrewLabel);
+    if (existingLabels.includes(sanitizedHebrew)) {
+      this.userMsgService.onSetErrorMsg(`הערך "${sanitizedHebrew}" כבר קיים ברשימה הזו.`);
+      return;
+    }
 
-    await this.registerInService(sanitizedKey, type);
-    
-    inputElement.value = '';
-    this.userMsgService.onSetSuccessMsg('הנתונים נשמרו בהצלחה');
-    
-  } catch (err) {
-    this.userMsgService.onSetErrorMsg('שגיאה בסנכרון הנתונים');
+    // --- LAYER 2: ENGLISH KEY GUARD ---
+    const contextMap = { category: 'category' as const, allergen: 'allergen' as const, unit: 'unit' as const };
+    const result = await this.translationKeyModal.open(sanitizedHebrew, contextMap[type]);
+    if (!result?.englishKey || !result?.hebrewLabel) return;
+
+    const sanitizedKey = result.englishKey;
+
+    // --- LAYER 3: EXECUTION ---
+    try {
+      this.translationService.updateDictionary(sanitizedKey, result.hebrewLabel);
+      await this.registerInService(sanitizedKey, type);
+      inputElement.value = '';
+      this.userMsgService.onSetSuccessMsg('הנתונים נשמרו בהצלחה');
+    } catch (err) {
+      this.userMsgService.onSetErrorMsg('שגיאה בסנכרון הנתונים');
+    }
   }
-}
 
   // addAllergen(name: string): void {
   //   if (name.trim()) {
@@ -117,8 +140,8 @@ async onAddMetadata(hebrewLabel: string, type: MetadataType, inputElement: HTMLI
   // 1. DYNAMIC USAGE CHECK
   switch (type) {
     case 'unit':
-      isUsed = allProducts.some(p => 
-        p.base_unit_ === item || 
+      isUsed = allProducts.some(p =>
+        p.base_unit_ === item ||
         p.purchase_options_?.some(opt => opt.unit_symbol_ === item)
       );
       break;
@@ -128,13 +151,26 @@ async onAddMetadata(hebrewLabel: string, type: MetadataType, inputElement: HTMLI
     case 'category':
       isUsed = allProducts.some(p => (p.categories_ ?? []).includes(item));
       break;
+    case 'label': {
+      const recipes = this.kitchenState.recipes_();
+      isUsed = recipes.some(r =>
+        (r.labels_ ?? []).includes(item) || (r.autoLabels_ ?? []).includes(item)
+      );
+      break;
+    }
   }
 
   // 2. BLOCK DELETION IF IN USE
   if (isUsed) {
-    const typeNames = { unit: 'היחידה', allergen: 'האלרגן', category: 'הקטגוריה' };
+    const typeNames: Record<MetadataType, string> = {
+      unit: 'היחידה',
+      allergen: 'האלרגן',
+      category: 'הקטגוריה',
+      label: 'התווית',
+    };
+    const where = type === 'label' ? 'במתכונים' : 'במלאי';
     this.userMsgService.onSetErrorMsg(
-      `לא ניתן למחוק את ${typeNames[type]} "${this.translationService.translate(item)}" - היא נמצאת בשימוש במלאי`
+      `לא ניתן למחוק את ${typeNames[type]} "${this.translationService.translate(item)}" - היא נמצאת בשימוש ${where}`
     );
     return;
   }
@@ -155,6 +191,9 @@ async onAddMetadata(hebrewLabel: string, type: MetadataType, inputElement: HTMLI
         break;
       case 'category':
         await this.metadataRegistry.deleteCategory(item);
+        break;
+      case 'label':
+        await this.metadataRegistry.deleteLabel(item);
         break;
     }
     this.userMsgService.onSetSuccessMsg('המחיקה בוצעה בהצלחה');
@@ -222,6 +261,9 @@ async onAddMetadata(hebrewLabel: string, type: MetadataType, inputElement: HTMLI
       case 'category':
         await this.metadataRegistry.registerCategory(key);
         break;
+      case 'label':
+        await this.metadataRegistry.registerLabel(key, this.metadataRegistry.getLabelColor(key) || '#78716C', []);
+        break;
     }
   }
 
@@ -233,6 +275,8 @@ async onAddMetadata(hebrewLabel: string, type: MetadataType, inputElement: HTMLI
         return this.allAllergens_();
       case 'category':
         return this.allCategories_();
+      case 'label':
+        return this.allLabelKeys_();
       default:
         return [];
     }

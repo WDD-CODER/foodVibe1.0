@@ -4,7 +4,7 @@
   }
   <header class="header-section">
     <h1>ניהול הגדרות ליבה (The Brain)</h1>
-    <p>שליטה גלובלית על יחידות מידה, אלרגנים וקטגוריות מוצרים</p>
+    <p>שליטה גלובלית על יחידות מידה, אלרגנים, קטגוריות מוצרים ותוויות מתכונים</p>
   </header>
 
   <div class="admin-grid">
@@ -30,6 +30,14 @@
       colorClass: 'text-rose-500',
       items: allAllergens_(),
       type: 'allergen'
+    }"></ng-container>
+
+    <ng-container *ngTemplateOutlet="managerCard; context: { 
+      title: 'תוויות מתכונים', 
+      icon: 'tags', 
+      colorClass: 'text-sky-600',
+      items: allLabelKeys_(),
+      type: 'label'
     }"></ng-container>
   </div>
 
@@ -67,6 +75,9 @@
       <div [class]="type === 'allergen' ? 'allergen-pool' : 'list-stack'">
         @for (item of items; track item) {
         <div [class]="type === 'allergen' ? 'allergen-pill' : 'list-item group'">
+          @if (type === 'label') {
+            <span class="label-color-dot" [style.background-color]="getLabelColor(item)"></span>
+          }
           <span>{{ item | translatePipe }}</span>
 
           @if (type === 'unit') {
