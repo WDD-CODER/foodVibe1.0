@@ -199,11 +199,47 @@ Update status after each sub-task. Link plan files here when applicable.
 
 ## Ahead (Pending)
 
+### Plan 040 — Menu Intelligence Layout and Design (`plans/040-menu-intelligence-layout-design.plan.md`)
+
+- [x] d: Replace var(--bg-paper-light) with var(--bg-pure) in menu-intelligence.page.scss
+- [x] a+b+c: Menu name as h1, meta right-aligned and denser, paper border-radius
+- [x] f: Add persistent "Add category" in section dropdown via add-item-modal
+- [x] g1: MenuTypeDefinition model + MenuItemSelection extend
+- [x] g2: MetadataRegistryService MENU_TYPES storage
+- [x] g3: Metadata manager "Menu Types" card with field checkboxes
+- [x] g4–g6: Dynamic serving-type dropdown + dish-row field container in menu-intelligence
+
+### Plan 041 — Menu Intelligence UX Fixes (`plans/041-menu-intelligence-ux-fixes.plan.md`)
+
+- [x] a: Add dictionary entries for default section categories
+- [x] b: Close category dropdown on click outside (ClickOutSideDirective)
+- [x] c: Hide scrollbar in dropdown containers
+- [x] d: Remove dish-qty (derived portions) from dish row
+- [x] e: Section grid layout (30% data column, centered names, responsive + mobile)
+
+### Plan 042 — Menu Intelligence Metadata Redesign (`plans/042-menu-intelligence-metadata-redesign.plan.md`)
+
+- [x] 1. menu-intelligence.page.ts: expandedMetaKeys_, isDishMetaExpanded, toggleDishMeta; editingDishField_, startEditDishField, commitEditDishField, isEditingDishField, getInputWidth
+- [x] 2. menu-intelligence.page.html: dish row block; name cell + toggle button; conditional .dish-data; click-to-edit fields (display/edit branches)
+- [x] 3. menu-intelligence.page.scss: single-column list; .dish-row block; toggle + click-to-edit styles; carousel at narrow (cssLayer)
+
+### Plan 043 — Reusable dropdown with scroll arrows (`plans/043-reusable-dropdown-scroll-arrows.plan.md`)
+
+- [x] Add .c-dropdown engine in src/styles.scss (wrapper, list with hidden scrollbar, scroll-top/scroll-bottom arrows)
+- [x] Create scrollIndicators directive (core/directives)
+- [x] Create ScrollableDropdownComponent (shared/scrollable-dropdown)
+- [x] Migrate preparation-search and ingredient-search (HTML, SCSS)
+- [x] Migrate menu-intelligence (event-type, section-dropdown, dish-dropdown)
+- [x] Migrate recipe-header (unit x2, label dropdown)
+- [x] Migrate product-form (category, supplier, allergen dropdowns)
+- [x] Migrate recipe-book-list (ingredient-dropdown)
+- [x] Add agent guidance (HOW-WE-WORK and/or copilot-instructions)
+
 ### Plan 034 — Recipe Builder UI Fixes (`plans/034-recipe-builder-ui-fixes.plan.md`)
 
-- [ ] a. Type toggle: pass recipeType from parent, add input in header, use in template
+- [x] a. Type toggle: pass recipeType from parent, add input in header, use in template
 - [ ] b. Header unit dropdowns: overflow visible + z-index for primary/secondary
-- [ ] c. Add row button: justify-content center in recipe-builder.page.scss
+- [x] c. Add row button: justify-content center in recipe-builder.page.scss
 - [ ] d. Ingredient search dropdown: z-index 100, ensure no overflow clip
 - [ ] e. Ingredients table: container-aware grid + small-screen stacked cards
 - [ ] f. Workflow section: space-evenly + define prep-flat-grid styles
@@ -283,5 +319,9 @@ Update status after each sub-task. Link plan files here when applicable.
 | 037 | Recipe Labels Refactor | Done |
 | 038 | Inverted-L List Layout | Done |
 | 039 | List UX Panel and Scroll | Done |
+| 040 | Menu Intelligence Layout and Design | Done |
+| 041 | Menu Intelligence UX Fixes | Done |
+| 042 | Menu Intelligence Metadata Redesign | Active |
+| 043 | Reusable dropdown with scroll arrows | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
