@@ -1,23 +1,44 @@
+/* recipe-builder page: component-scoped tokens (three-tier rule) */
+:host {
+  --rb-gap-tight: 0.5rem;
+  --rb-gap-mid: 0.75rem;
+  --rb-submit-width: 12.5rem;
+  --rb-banner-margin: -3rem -1rem 1rem -1rem;
+}
+
+/* ---- History view banner ---- */
 .history-view-banner {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+
   gap: 1rem;
-  padding: 0.75rem 1rem;
-  margin: -3rem -1rem 1rem -1rem;
+  padding: var(--rb-gap-mid) 1rem;
+  margin: var(--rb-banner-margin);
+
   background: var(--bg-warning);
-  border-block-end: 2px solid var(--border-warning);
   color: var(--text-warning);
   font-weight: 600;
 
+  border-block-end: 2px solid var(--border-warning);
+
   .btn-back {
-    padding: 0.4rem 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding-block: 0.4rem;
+    padding-inline: var(--rb-gap-mid);
+
     background: var(--bg-pure);
+    color: var(--text-warning);
+    font-size: 0.875rem;
+
     border: 1px solid var(--border-warning);
     border-radius: var(--radius-md);
-    color: var(--text-warning);
+
     cursor: pointer;
-    font-size: 0.875rem;
     transition: background 0.2s ease;
 
     &:hover {
@@ -26,36 +47,54 @@
   }
 }
 
+/* ---- Main container ---- */
 .recipe-builder-container {
+  display: block;
+  position: relative;
+
   min-height: 100vh;
   min-height: 100dvh;
   padding: 2rem 1rem;
+
   background: transparent;
   font-family: 'Heebo', sans-serif;
 
   .builder-shell {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-    max-width: 960px;
-    margin: 0 auto;
     position: relative;
-  }
 
-  // Stack sections so earlier sections (and their absolute dropdowns) paint above later ones.
-  // Without this, backdrop-filter on .section-card creates stacking contexts that hide dropdowns.
-  .builder-section {
-    position: relative;
-    &:nth-of-type(1) { z-index: 10; }
-    &:nth-of-type(2) { z-index: 8; }
-    &:nth-of-type(3) { z-index: 6; }
-    &:nth-of-type(4) { z-index: 4; }
+    max-width: 60rem;
+    margin: 0 auto;
+    gap: 1.5rem;
+
+    .builder-section {
+      position: relative;
+
+      &:nth-of-type(1) {
+        z-index: 10;
+      }
+      &:nth-of-type(2) {
+        z-index: 8;
+      }
+      &:nth-of-type(3) {
+        z-index: 6;
+      }
+      &:nth-of-type(4) {
+        z-index: 4;
+      }
+    }
   }
 }
 
+/* ---- Section card (reuses global tokens) ---- */
 .section-card {
+  display: block;
+
   padding: 1.5rem;
+
   background: var(--bg-glass-strong);
+
   border-inline-start: 4px solid var(--color-primary);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-glass);
@@ -64,7 +103,10 @@
 }
 
 .section-title {
+  display: block;
+
   margin-block-end: 1rem;
+
   color: var(--color-primary);
   font-size: 1.25rem;
   font-weight: 700;
@@ -72,26 +114,36 @@
 }
 
 .placeholder-text {
+  display: block;
+
   padding: 2rem;
+
   color: var(--color-text-muted-light);
   text-align: center;
+
   border: 2px dashed var(--border-default);
   border-radius: var(--radius-md);
 }
 
+/* ---- Primary submit button ---- */
 .main-submit-btn {
   display: block;
-  width: 12.5rem;
-  margin: 2rem auto;
+
+  width: var(--rb-submit-width);
+  margin-block: 2rem;
+  margin-inline: auto;
+  padding-block: var(--rb-gap-mid);
   padding-inline: 1.25rem;
-  padding-block: 0.75rem;
+
   background: var(--color-primary);
   color: var(--color-text-on-primary);
+  font-weight: 700;
+
   border: none;
   border-radius: var(--radius-md);
-  font-weight: 700;
-  cursor: pointer;
   box-shadow: var(--shadow-glow);
+
+  cursor: pointer;
   transition: background 0.2s ease;
 
   &:hover {
@@ -99,25 +151,31 @@
   }
 }
 
+/* ---- Add row button ---- */
 .add-row-btn {
   display: flex;
   align-items: center;
   justify-content: center;
+
   width: fit-content;
   margin-block-start: 0.625rem;
-  padding-inline-start: 0.625rem;
+  padding-inline-end: var(--rb-gap-mid);
+
   background: var(--color-primary);
   color: var(--color-text-on-primary);
+
   border: none;
   border-radius: var(--radius-md);
-  cursor: pointer;
   box-shadow: var(--shadow-glow);
+
+  cursor: pointer;
   transition: background 0.2s ease, transform 0.15s ease;
 
   .plus-icon-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
+
     width: 2.375rem;
     height: 2.375rem;
   }
@@ -133,15 +191,20 @@
 
   &:disabled {
     background: var(--border-default);
+    box-shadow: none;
+
     cursor: not-allowed;
     transform: none;
-    box-shadow: none;
   }
 }
 
+/* ---- Logistics section ---- */
 .logistics-logic {
   .section-desc {
+    display: block;
+
     margin-block: -0.5rem 1rem;
+
     font-size: 0.875rem;
     color: var(--color-text-muted);
   }
@@ -149,22 +212,26 @@
   .baseline-rows {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    margin-block-end: 0.75rem;
+
+    gap: var(--rb-gap-tight);
+    margin-block-end: var(--rb-gap-mid);
   }
 
   .baseline-row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem;
+
+    gap: var(--rb-gap-tight);
 
     select {
       flex: 1;
       min-width: 8.75rem;
-      padding-inline: 0.75rem;
       padding-block: 0.5rem;
+      padding-inline: var(--rb-gap-mid);
+
       background: var(--bg-glass);
+
       border: 1px solid var(--border-default);
       border-radius: var(--radius-md);
       outline: none;
@@ -177,26 +244,37 @@
 
     .qty-input {
       width: 3.75rem;
-      padding-inline: 0.5rem;
       padding-block: 0.4rem;
+      padding-inline: 0.5rem;
+
+      background: var(--bg-glass);
+
       border: 1px solid var(--border-default);
       border-radius: var(--radius-md);
-      background: var(--bg-glass);
     }
 
     .critical-check {
       display: flex;
       align-items: center;
+
       gap: 0.25rem;
+
       font-size: 0.875rem;
+
       cursor: pointer;
     }
 
     .btn-remove {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
       padding: 0.25rem;
+
       background: none;
       border: none;
       color: var(--color-text-muted);
+
       cursor: pointer;
       transition: color 0.2s ease;
 
@@ -207,9 +285,11 @@
   }
 }
 
-@media (max-width: 768px) {
+/* ---- Responsive ---- */
+@media (max-width: 48rem) {
   .recipe-builder-container {
-    padding: 1rem 0.75rem;
+    padding-block: 1rem;
+    padding-inline: 0.75rem;
   }
 
   .builder-shell {
@@ -218,13 +298,15 @@
 
   .section-card {
     padding: 1rem;
-    border-radius: var(--radius-md);
+
     border-inline-start-width: 3px;
+    border-radius: var(--radius-md);
   }
 
   .section-title {
-    font-size: 1.1rem;
     margin-block-end: 1rem;
+
+    font-size: 1.1rem;
   }
 
   .main-submit-btn {
@@ -235,6 +317,7 @@
   .add-row-btn {
     width: 100%;
     justify-content: center;
+
     border-radius: var(--radius-md);
   }
 
