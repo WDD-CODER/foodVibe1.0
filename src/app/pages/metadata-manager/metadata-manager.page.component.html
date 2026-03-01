@@ -39,6 +39,57 @@
       items: allLabelKeys_(),
       type: 'label'
     }"></ng-container>
+
+    <section class="manager-card menu-types-card">
+      <div class="card-title">
+        <lucide-icon name="utensils-crossed" class="text-teal-600"></lucide-icon>
+        <h2>סוגי תפריט (Menu Types)</h2>
+      </div>
+      <p class="card-desc">קביעת שדות לכל סוג תפריט (מחיר מכירה, עלות מזון, מנות וכו׳)</p>
+      <button type="button" class="btn-add" (click)="onAddMenuType()">הוסף סוג תפריט</button>
+      <div class="list-container">
+        @if (allMenuTypes_().length > 0) {
+          <div class="list-stack">
+            @for (def of allMenuTypes_(); track def.key) {
+              <div class="list-item group menu-type-row">
+                @if (editingMenuTypeKey_() === def.key) {
+                  <div class="menu-type-edit">
+                    <span class="menu-type-key">{{ def.key }}</span>
+                    <div class="field-checkboxes">
+                      @for (f of ALL_DISH_FIELDS; track f.key) {
+                        <label class="field-check">
+                          <input type="checkbox" [checked]="isMenuTypeFieldSelected(f.key)" (change)="toggleMenuTypeField(f.key)">
+                          {{ f.labelKey | translatePipe }}
+                        </label>
+                      }
+                    </div>
+                    <div class="edit-actions">
+                      <button type="button" class="btn-save-small" (click)="onSaveMenuTypeFields()">שמור</button>
+                      <button type="button" class="btn-ghost-small" (click)="onCancelEditMenuType()">ביטול</button>
+                    </div>
+                  </div>
+                } @else {
+                  <span class="menu-type-key">{{ def.key }}</span>
+                  <div class="field-pills">
+                    @for (f of def.fields; track f) {
+                      <span class="field-pill">{{ getDishFieldLabelKey(f) | translatePipe }}</span>
+                    }
+                  </div>
+                  <button type="button" class="btn-edit" (click)="onEditMenuType(def.key)">
+                    <lucide-icon name="pencil" [size]="14"></lucide-icon>
+                  </button>
+                  <button type="button" class="btn-delete" (click)="onRemoveMenuType(def.key)">
+                    <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="empty-state">אין סוגי תפריט. לחץ "הוסף סוג תפריט".</div>
+        }
+      </div>
+    </section>
   </div>
 
   <section class="demo-section manager-card">

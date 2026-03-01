@@ -7,6 +7,8 @@ import { ProductDataService } from '@services/product-data.service';
 import { DemoLoaderService } from '@services/demo-loader.service';
 import { ConfirmModalService } from '@services/confirm-modal.service';
 import { KitchenStateService } from '@services/kitchen-state.service';
+import { MenuEventDataService } from '@services/menu-event-data.service';
+import { AddItemModalService } from '@services/add-item-modal.service';
 import { LucideAngularModule } from 'lucide-angular';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { TranslationService } from '@services/translation.service';
@@ -14,6 +16,7 @@ import { UserMsgService } from '@services/user-msg.service';
 import { TranslationKeyModalService } from '@services/translation-key-modal.service';
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
+import { ALL_DISH_FIELDS, DEFAULT_DISH_FIELDS, type DishFieldKey, type MenuTypeDefinition } from '@models/menu-event.model';
 
 type MetadataType = 'category' | 'allergen' | 'unit' | 'label';
 @Component({
@@ -34,6 +37,8 @@ export class MetadataManagerComponent implements OnInit {
   private translationKeyModal = inject(TranslationKeyModalService);
   private labelCreationModal = inject(LabelCreationModalService);
   private kitchenState = inject(KitchenStateService);
+  private menuEventData = inject(MenuEventDataService);
+  private addItemModal = inject(AddItemModalService);
 
   // SIGNALS
   allUnitKeys_ = this.unitRegistry.allUnitKeys_;
@@ -42,7 +47,13 @@ export class MetadataManagerComponent implements OnInit {
   allCategories_ = this.metadataRegistry.allCategories_;
   allLabels_ = this.metadataRegistry.allLabels_;
   allLabelKeys_ = computed(() => this.allLabels_().map(l => l.key));
+  allMenuTypes_ = this.metadataRegistry.allMenuTypes_;
   protected isImporting_ = signal(false);
+  protected editingMenuTypeKey_ = signal<string | null>(null);
+  protected editingMenuTypeFields_ = signal<DishFieldKey[]>([]);
+
+  readonly ALL_DISH_FIELDS = ALL_DISH_FIELDS;
+  readonly DEFAULT_DISH_FIELDS = DEFAULT_DISH_FIELDS;
 
   protected getLabelColor(key: string): string {
     return this.metadataRegistry.getLabelColor(key);
@@ -292,6 +303,67 @@ export class MetadataManagerComponent implements OnInit {
     } finally {
       this.isImporting_.set(false);
     }
+  }
+
+  // Menu Types
+  async onAddMenuType(): Promise<void> {
+    const result = await this.addItemModal.open({
+      title: 'add_new_category',
+      label: 'menu_serving_style',
+      placeholder: 'menu_serving_style',
+      saveLabel: 'save',
+    });
+    if (result?.trim()) {
+      const key = result.trim();
+      if (this.allMenuTypes_().some(t => t.key === key)) {
+        this.userMsgService.onSetErrorMsg(`סוג תפריט "${key}" כבר קיים`);
+        return;
+      }
+      await this.metadataRegistry.registerMenuType({ key, fields: [...DEFAULT_DISH_FIELDS] });
+    }
+  }
+
+  onEditMenuType(key: string): void {
+    this.editingMenuTypeKey_.set(key);
+    this.editingMenuTypeFields_.set([...this.metadataRegistry.getMenuTypeFields(key)]);
+  }
+
+  toggleMenuTypeField(fieldKey: DishFieldKey): void {
+    this.editingMenuTypeFields_.update(fields => {
+      const has = fields.includes(fieldKey);
+      if (has) return fields.filter(f => f !== fieldKey);
+      return [...fields, fieldKey];
+    });
+  }
+
+  isMenuTypeFieldSelected(fieldKey: DishFieldKey): boolean {
+    return this.editingMenuTypeFields_().includes(fieldKey);
+  }
+
+  getDishFieldLabelKey(fieldKey: DishFieldKey): string {
+    return ALL_DISH_FIELDS.find(f => f.key === fieldKey)?.labelKey ?? fieldKey;
+  }
+
+  async onSaveMenuTypeFields(): Promise<void> {
+    const key = this.editingMenuTypeKey_();
+    if (!key) return;
+    await this.metadataRegistry.updateMenuType(key, this.editingMenuTypeFields_());
+    this.editingMenuTypeKey_.set(null);
+    this.editingMenuTypeFields_.set([]);
+  }
+
+  onCancelEditMenuType(): void {
+    this.editingMenuTypeKey_.set(null);
+    this.editingMenuTypeFields_.set([]);
+  }
+
+  async onRemoveMenuType(key: string): Promise<void> {
+    const isUsed = this.menuEventData.allMenuEvents_().some(e => e.serving_type_ === key);
+    if (isUsed) {
+      this.userMsgService.onSetErrorMsg(`לא ניתן למחוק: סוג התפריט "${key}" בשימוש בתפריטים שמורים`);
+      return;
+    }
+    await this.metadataRegistry.deleteMenuType(key);
   }
 
 }

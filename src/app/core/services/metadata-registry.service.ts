@@ -3,6 +3,11 @@ import { ProductDataService } from './product-data.service';
 import { UserMsgService } from './user-msg.service';
 import { StorageService } from './async-storage.service';
 import type { LabelDefinition } from '@models/label.model';
+import {
+  type MenuTypeDefinition,
+  type DishFieldKey,
+  DEFAULT_DISH_FIELDS,
+} from '@models/menu-event.model';
 
 @Injectable({ providedIn: 'root' })
 export class MetadataRegistryService {
@@ -15,11 +20,13 @@ export class MetadataRegistryService {
   private categories_ = signal<string[]>([]);
   private allergens_ = signal<string[]>([]);
   private labels_ = signal<LabelDefinition[]>([]);
+  private menuTypes_ = signal<MenuTypeDefinition[]>([]);
 
   //PUBLIC SIGNALS
   public allCategories_ = this.categories_.asReadonly();
   public allAllergens_ = this.allergens_.asReadonly();
   public allLabels_ = this.labels_.asReadonly();
+  public allMenuTypes_ = this.menuTypes_.asReadonly();
 
 
   constructor() {
@@ -65,6 +72,90 @@ export class MetadataRegistryService {
     const existingLabels = labelRegistry[0]?.items ?? [];
     if (Array.isArray(existingLabels) && existingLabels.length > 0) {
       this.labels_.set(existingLabels);
+    }
+
+    // 4. Fetch Menu Types (serving-style config with dish-row fields)
+    const defaultMenuTypes: MenuTypeDefinition[] = [
+      { key: 'buffet_family', fields: [...DEFAULT_DISH_FIELDS] },
+      { key: 'plated_course', fields: [...DEFAULT_DISH_FIELDS] },
+      { key: 'cocktail_passed', fields: ['food_cost_pct', 'serving_portions_pct'] },
+    ];
+    const menuTypeRegistry = await this.storageService.query<any>('MENU_TYPES');
+    const existingMenuTypes = menuTypeRegistry[0]?.items ?? [];
+    if (Array.isArray(existingMenuTypes) && existingMenuTypes.length > 0) {
+      this.menuTypes_.set(existingMenuTypes);
+    } else {
+      if (menuTypeRegistry[0]?._id) {
+        await this.storageService.put('MENU_TYPES', { ...menuTypeRegistry[0], items: defaultMenuTypes });
+      } else {
+        await this.storageService.post('MENU_TYPES', { items: defaultMenuTypes });
+      }
+      this.menuTypes_.set(defaultMenuTypes);
+    }
+  }
+
+  getMenuTypeFields(key: string): DishFieldKey[] {
+    const def = this.menuTypes_().find(t => t.key === key);
+    return def?.fields ?? [...DEFAULT_DISH_FIELDS];
+  }
+
+  async registerMenuType(def: MenuTypeDefinition): Promise<void> {
+    const key = def.key.trim();
+    if (!key || this.menuTypes_().some(t => t.key === key)) return;
+    const updated = [...this.menuTypes_(), { key, fields: def.fields ?? [...DEFAULT_DISH_FIELDS] }];
+    try {
+      const registries = await this.storageService.query<any>('MENU_TYPES');
+      const existing = registries[0];
+      if (existing?._id) {
+        await this.storageService.put('MENU_TYPES', { ...existing, items: updated });
+      } else {
+        await this.storageService.post('MENU_TYPES', { items: updated });
+      }
+      this.menuTypes_.set(updated);
+      this.userMsgService.onSetSuccessMsg(`סוג תפריט "${key}" נוסף בהצלחה`);
+    } catch (err) {
+      this.userMsgService.onSetErrorMsg('שגיאה בשמירת סוג התפריט');
+      console.error('MenuType Save Error:', err);
+    }
+  }
+
+  async updateMenuType(key: string, fields: DishFieldKey[]): Promise<void> {
+    const current = this.menuTypes_();
+    const idx = current.findIndex(t => t.key === key);
+    if (idx === -1) return;
+    const updated = current.slice();
+    updated[idx] = { ...updated[idx], fields };
+    try {
+      const registries = await this.storageService.query<any>('MENU_TYPES');
+      const registry = registries[0];
+      if (registry?._id) {
+        await this.storageService.put('MENU_TYPES', { ...registry, items: updated });
+      } else {
+        await this.storageService.post('MENU_TYPES', { items: updated });
+      }
+      this.menuTypes_.set(updated);
+      this.userMsgService.onSetSuccessMsg(`סוג תפריט "${key}" עודכן`);
+    } catch (err) {
+      this.userMsgService.onSetErrorMsg('שגיאה בעדכון סוג התפריט');
+      console.error(err);
+    }
+  }
+
+  async deleteMenuType(key: string): Promise<void> {
+    const updated = this.menuTypes_().filter(t => t.key !== key);
+    try {
+      const registries = await this.storageService.query<any>('MENU_TYPES');
+      const registry = registries[0];
+      if (registry?._id) {
+        await this.storageService.put('MENU_TYPES', { ...registry, items: updated });
+      } else {
+        await this.storageService.post('MENU_TYPES', { items: updated });
+      }
+      this.menuTypes_.set(updated);
+      this.userMsgService.onSetSuccessMsg(`סוג תפריט "${key}" נמחק`);
+    } catch (err) {
+      this.userMsgService.onSetErrorMsg('שגיאה במחיקת סוג התפריט');
+      console.error(err);
     }
   }
 
