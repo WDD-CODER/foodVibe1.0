@@ -61,6 +61,24 @@ export class CookViewPage implements OnInit {
   protected focusWorkflowRowAt_ = signal<number | null>(null);
   private workflowResetTrigger_ = 0;
 
+  /** Scale-by-ingredient: index and amount we scaled by (null = normal view). */
+  protected scaleByIngredientIndex_ = signal<number | null>(null);
+  protected scaleByIngredientAmount_ = signal<number | null>(null);
+  /** Row currently in "setting" state (amount input + Convert visible). */
+  protected settingByIngredientIndex_ = signal<number | null>(null);
+  /** Current value in the inline amount input for the row in setting state. */
+  protected settingByIngredientAmount_ = signal<number>(0);
+
+  /** True when we are in special scaled view (show banner + Back to full recipe). */
+  protected isScaledView_ = computed(() => this.scaleByIngredientIndex_() !== null);
+
+  /** Scaled ingredient row for the banner when in special view (null otherwise). */
+  protected scaledViewRow_ = computed(() => {
+    const idx = this.scaleByIngredientIndex_();
+    if (idx === null) return null;
+    return this.getScaledIngredientAt(idx) ?? null;
+  });
+
   protected scaleFactor_ = computed(() => {
     const recipe = this.recipe_();
     const qty = this.targetQuantity_();
@@ -130,12 +148,16 @@ export class CookViewPage implements OnInit {
     const recipe = this.recipe_();
     const min = recipe?.yield_unit_ === 'dish' ? 1 : 0.01;
     this.targetQuantity_.set(Math.max(min, num));
+    this.scaleByIngredientIndex_.set(null);
+    this.scaleByIngredientAmount_.set(null);
   }
 
   protected incrementQuantity(): void {
     const recipe = this.recipe_();
     const step = recipe?.yield_unit_ === 'dish' ? 1 : 1;
     this.targetQuantity_.update(q => q + step);
+    this.scaleByIngredientIndex_.set(null);
+    this.scaleByIngredientAmount_.set(null);
   }
 
   protected decrementQuantity(): void {
@@ -143,6 +165,72 @@ export class CookViewPage implements OnInit {
     const min = recipe?.yield_unit_ === 'dish' ? 1 : 0.01;
     const step = recipe?.yield_unit_ === 'dish' ? 1 : 1;
     this.targetQuantity_.update(q => Math.max(min, q - step));
+    this.scaleByIngredientIndex_.set(null);
+    this.scaleByIngredientAmount_.set(null);
+  }
+
+  /** Enter "setting by this ingredient" state for row at index; prefilled with current scaled amount. */
+  protected startSetByIngredient(index: number): void {
+    const rows = this.scaledIngredients_();
+    const row = rows[index];
+    if (!row) return;
+    this.settingByIngredientIndex_.set(index);
+    this.settingByIngredientAmount_.set(row.amount);
+  }
+
+  /** Cancel setting state (clear inline amount row). */
+  protected cancelSetByIngredient(): void {
+    this.settingByIngredientIndex_.set(null);
+  }
+
+  /** Parse and set the inline "setting by ingredient" amount from input. */
+  protected onSettingAmountChange(value: unknown): void {
+    const num = value != null && value !== '' ? Number(value) : 0;
+    this.settingByIngredientAmount_.set(Number.isFinite(num) ? num : 0);
+  }
+
+  /** Open confirm dialog, then apply scale by ingredient or cancel. */
+  protected confirmScaleByIngredient(index: number, userAmount: number): void {
+    const amount = Number(userAmount);
+    if (!Number.isFinite(amount) || amount <= 0) return;
+    const recipe = this.recipe_();
+    if (!recipe?.ingredients_?.[index]) return;
+    const baseAmount = recipe.ingredients_[index].amount_ ?? 0;
+    if (baseAmount <= 0) return;
+    this.confirmModal.open('scale_recipe_confirm', { saveLabel: 'convert' }).then(confirmed => {
+      if (!confirmed) return;
+      this.applyScaleByIngredient(index, amount);
+      this.settingByIngredientIndex_.set(null);
+    });
+  }
+
+  /** Set targetQuantity_ so that ingredient at index has the given amount; enter special view. */
+  protected applyScaleByIngredient(index: number, userAmount: number): void {
+    const amount = Number(userAmount);
+    if (!Number.isFinite(amount) || amount <= 0) return;
+    const recipe = this.recipe_();
+    if (!recipe?.ingredients_?.[index]) return;
+    const baseAmount = recipe.ingredients_[index].amount_ ?? 0;
+    if (baseAmount <= 0) return;
+    const factor = amount / baseAmount;
+    const yieldAmount = recipe.yield_amount_ ?? 1;
+    this.targetQuantity_.set(yieldAmount * factor);
+    this.scaleByIngredientIndex_.set(index);
+    this.scaleByIngredientAmount_.set(amount);
+  }
+
+  /** Exit special scaled view: reset to recipe base yield. */
+  protected resetToFullRecipe(): void {
+    const recipe = this.recipe_();
+    const base = recipe?.yield_amount_ ?? 1;
+    this.targetQuantity_.set(base);
+    this.scaleByIngredientIndex_.set(null);
+    this.scaleByIngredientAmount_.set(null);
+  }
+
+  /** Scaled ingredient row at index (for banner name/unit in special view). */
+  protected getScaledIngredientAt(index: number): ScaledIngredientRow | undefined {
+    return this.scaledIngredients_()[index];
   }
 
   protected enterEditMode(): void {

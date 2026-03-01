@@ -1,8 +1,19 @@
 <div class="cook-view-container" dir="rtl">
   @if (recipe_(); as recipe) {
-    <div class="cook-view-shell" [class.edit-mode]="editMode_()">
+    <div class="cook-view-shell" [class.edit-mode]="editMode_()" [class.scaled-view]="isScaledView_()">
       @if (editMode_()) {
         <div class="edit-mode-banner">{{ 'edit_mode' | translatePipe }}</div>
+      }
+      @if (!editMode_() && isScaledView_() && scaledViewRow_(); as scaledRow) {
+        <div class="scaled-view-banner">
+          <span class="scaled-view-text">
+            {{ 'scaled_to' | translatePipe }} {{ formatAmount(scaleByIngredientAmount_()!) }} {{ scaledRow.unit | translatePipe }} {{ scaledRow.name }}
+          </span>
+          <button type="button" class="back-to-full-recipe-btn" (click)="resetToFullRecipe()" [attr.aria-label]="'back_to_full_recipe' | translatePipe">
+            <lucide-icon name="rotate-ccw" [size]="18"></lucide-icon>
+            {{ 'back_to_full_recipe' | translatePipe }}
+          </button>
+        </div>
       }
       <header class="cook-view-header">
         <div class="header-top">
@@ -28,23 +39,25 @@
             </button>
           }
         </div>
-        <div class="quantity-control-wrap">
-          <span class="quantity-label">{{ 'make_quantity' | translatePipe }}</span>
-          <div class="quantity-controls">
-            <button type="button" class="qty-btn minus" (click)="decrementQuantity()" [attr.aria-label]="'decrease' | translatePipe"
-            [disabled]="targetQuantity_() <= (isDish_() ? 1 : 0.01)">
-              <lucide-icon name="minus" [size]="18"></lucide-icon>
-            </button>
-            <input type="number" class="quantity-input" [value]="targetQuantity_()"
-              (input)="setQuantity($any($event.target).valueAsNumber)"
-              SelectOnFocus
-              [min]="isDish_() ? 1 : 0.01" [step]="isDish_() ? 1 : 0.1" />
-            <button type="button" class="qty-btn plus" (click)="incrementQuantity()" [attr.aria-label]="'increase' | translatePipe">
-              <lucide-icon name="plus" [size]="18"></lucide-icon>
-            </button>
+        @if (!isScaledView_()) {
+          <div class="quantity-control-wrap">
+            <span class="quantity-label">{{ 'make_quantity' | translatePipe }}</span>
+            <div class="quantity-controls">
+              <button type="button" class="qty-btn minus" (click)="decrementQuantity()" [attr.aria-label]="'decrease' | translatePipe"
+              [disabled]="targetQuantity_() <= (isDish_() ? 1 : 0.01)">
+                <lucide-icon name="minus" [size]="18"></lucide-icon>
+              </button>
+              <input type="number" class="quantity-input" [value]="targetQuantity_()"
+                (input)="setQuantity($any($event.target).valueAsNumber)"
+                SelectOnFocus
+                [min]="isDish_() ? 1 : 0.01" [step]="isDish_() ? 1 : 0.1" />
+              <button type="button" class="qty-btn plus" (click)="incrementQuantity()" [attr.aria-label]="'increase' | translatePipe">
+                <lucide-icon name="plus" [size]="18"></lucide-icon>
+              </button>
+            </div>
+            <span class="unit-label">{{ (recipe.yield_unit_ || 'unit') | translatePipe }}</span>
           </div>
-          <span class="unit-label">{{ (recipe.yield_unit_ || 'unit') | translatePipe }}</span>
-        </div>
+        }
         @if (scaledCost_() > 0) {
           <div class="scaled-cost-badge">
             <lucide-icon name="scale" [size]="16"></lucide-icon>
@@ -60,15 +73,18 @@
           {{ 'ingredients_index' | translatePipe }}
         </h2>
         <div class="ingredients-table">
-          <div class="ingredients-table-header">
+          <div class="ingredients-table-header" [class.has-scale-action]="!editMode_()">
             <div class="col-name">{{ 'ingredient' | translatePipe }}</div>
             <div class="col-amount">{{ 'quantity' | translatePipe }}</div>
             <div class="col-unit">{{ 'unit' | translatePipe }}</div>
+            @if (!editMode_()) {
+              <div class="col-scale-action"></div>
+            }
           </div>
           @for (row of scaledIngredients_(); track row.referenceId + row.unit + row.amount; let i = $index) {
-            <div class="ingredients-table-row" [class.field-changed]="editMode_() && ingredientChanged(i)">
-              <div class="col-name">{{ row.name }}</div>
+            <div class="ingredients-table-row" [class.field-changed]="editMode_() && ingredientChanged(i)" [class.view-mode-row]="!editMode_()" [class.row-highlight]="!editMode_() && (settingByIngredientIndex_() === i)" [class.setting-by]="!editMode_() && settingByIngredientIndex_() === i">
               @if (editMode_()) {
+                <div class="col-name">{{ row.name }}</div>
                 <div class="col-amount edit-amount">
                   <button type="button" class="qty-btn minus small" (click)="setIngredientAmount(i, getEditAmountStep(row.amount, -1))" [attr.aria-label]="'decrease' | translatePipe">
                     <lucide-icon name="minus" [size]="14"></lucide-icon>
@@ -92,19 +108,46 @@
                   </button>
                 </div>
               } @else {
-                <div class="col-amount">{{ formatAmount(getDisplayAmount(i, row)) }}</div>
-                <div class="col-unit">
-                  @if (row.availableUnits.length > 1) {
-                    <app-custom-select
-                      class="unit-select"
-                      [ngModel]="getDisplayUnit(i, row)"
-                      (ngModelChange)="setUnitOverride(i, $event)"
-                      [options]="getUnitOptionsForRow(row)"
-                      placeholder="unit" />
-                  } @else {
-                    <span>{{ getDisplayUnit(i, row) | translatePipe }}</span>
-                  }
-                </div>
+                @if (settingByIngredientIndex_() === i) {
+                  <div class="col-name">{{ row.name }}</div>
+                  <div class="col-amount set-by-amount">
+                    <input type="number" class="amount-input" [ngModel]="settingByIngredientAmount_()"
+                      (ngModelChange)="onSettingAmountChange($event)"
+                      [min]="0.01" [step]="isDish_() ? 1 : 0.1" />
+                  </div>
+                  <div class="col-unit"><span>{{ row.unit | translatePipe }}</span></div>
+                  <div class="col-scale-action">
+                    <button type="button" class="convert-scale-btn" (click)="confirmScaleByIngredient(i, settingByIngredientAmount_())" [attr.aria-label]="'convert' | translatePipe">
+                      <lucide-icon name="scale" [size]="16"></lucide-icon>
+                      {{ 'convert' | translatePipe }}
+                    </button>
+                    <button type="button" class="cancel-set-by-btn" (click)="cancelSetByIngredient()" [attr.aria-label]="'cancel' | translatePipe">
+                      {{ 'cancel' | translatePipe }}
+                    </button>
+                  </div>
+                } @else {
+                  <div class="col-name col-name-with-set-by">
+                    <span class="col-name-text">{{ row.name }}</span>
+                    <button type="button" class="set-by-ingredient-btn" (click)="startSetByIngredient(i)" [attr.aria-label]="'set_recipe_by_this_item' | translatePipe">
+                      <lucide-icon name="scale" [size]="14"></lucide-icon>
+                      {{ 'set_recipe_by_this_item' | translatePipe }}
+                    </button>
+                  </div>
+                  <div class="col-amount">{{ formatAmount(getDisplayAmount(i, row)) }}</div>
+                  <div class="col-unit">
+                    @if (row.availableUnits.length > 1) {
+                      <app-custom-select
+                        class="unit-select"
+                        [ngModel]="getDisplayUnit(i, row)"
+                        (ngModelChange)="setUnitOverride(i, $event)"
+                        [options]="getUnitOptionsForRow(row)"
+                        placeholder="unit" />
+                    } @else {
+                      <span>{{ getDisplayUnit(i, row) | translatePipe }}</span>
+                    }
+                  </div>
+                  <div class="col-scale-action"></div>
+                }
               }
             </div>
           }
