@@ -15,6 +15,7 @@ import { Product } from '@models/product.model';
 import { VersionEntityType } from '@services/version-history.service';
 import { VersionHistoryPanelComponent } from 'src/app/shared/version-history-panel/version-history-panel.component';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
+import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
 
 export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens';
 
@@ -23,7 +24,7 @@ const MAX_ALLERGEN_RECURSION = 5;
 @Component({
   selector: 'recipe-book-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, ClickOutSideDirective, VersionHistoryPanelComponent, LoaderComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, ClickOutSideDirective, VersionHistoryPanelComponent, LoaderComponent, ScrollableDropdownComponent],
   templateUrl: './recipe-book-list.component.html',
   styleUrl: './recipe-book-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,6 +46,7 @@ export class RecipeBookListComponent {
   protected allergenExpandAll_ = signal<boolean>(false);
   protected hoveredCostRecipeId_ = signal<string | null>(null);
   protected tappedCostRecipeId_ = signal<string | null>(null);
+  protected costTooltipAnchor_ = signal<DOMRect | null>(null);
   protected ingredientSearchQuery_ = signal<string>('');
   protected selectedProductIds_ = signal<string[]>([]);
   protected historyFor_ = signal<{ entityType: VersionEntityType; entityId: string; entityName: string } | null>(null);
@@ -197,6 +199,11 @@ export class RecipeBookListComponent {
     return recipes;
   });
 
+  protected activeCostTooltipRecipe_ = computed(() => {
+    const id = this.hoveredCostRecipeId_() ?? this.tappedCostRecipeId_();
+    return id ? this.filteredRecipes_().find(r => r._id === id) ?? null : null;
+  });
+
   protected isRecipeDish(recipe: Recipe): boolean {
     return recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.mise_categories_?.length);
   }
@@ -340,20 +347,31 @@ export class RecipeBookListComponent {
     this.allergenExpandAll_.set(false);
   }
 
-  protected showCostTooltip(recipeId: string): void {
+  protected showCostTooltip(recipeId: string, event?: Event): void {
+    const el = event?.currentTarget as HTMLElement | undefined;
+    if (el) this.costTooltipAnchor_.set(el.getBoundingClientRect());
     this.hoveredCostRecipeId_.set(recipeId);
   }
 
   protected hideCostTooltip(): void {
     this.hoveredCostRecipeId_.set(null);
+    if (!this.tappedCostRecipeId_()) this.costTooltipAnchor_.set(null);
   }
 
-  protected toggleCostTooltipTap(recipeId: string): void {
+  protected toggleCostTooltipTap(recipeId: string, event?: Event): void {
+    const wasOpen = this.tappedCostRecipeId_() === recipeId;
     this.tappedCostRecipeId_.update(id => (id === recipeId ? null : recipeId));
+    if (!wasOpen && recipeId) {
+      const el = event?.currentTarget as HTMLElement | undefined;
+      if (el) this.costTooltipAnchor_.set(el.getBoundingClientRect());
+    } else if (!this.tappedCostRecipeId_() && !this.hoveredCostRecipeId_()) {
+      this.costTooltipAnchor_.set(null);
+    }
   }
 
   protected closeCostTooltipTap(): void {
     this.tappedCostRecipeId_.set(null);
+    if (!this.hoveredCostRecipeId_()) this.costTooltipAnchor_.set(null);
   }
 
   protected addIngredientProduct(product: Product): void {

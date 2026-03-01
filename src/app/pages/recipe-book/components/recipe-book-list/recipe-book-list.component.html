@@ -76,13 +76,8 @@
               <span class="placeholder-dash">—</span>
             }
           </div>
-          <div class="col-cost cost-cell-wrap" (mouseenter)="showCostTooltip(recipe._id)" (mouseleave)="hideCostTooltip()" (click)="toggleCostTooltipTap(recipe._id)" [attr.aria-describedby]="(hoveredCostRecipeId_() === recipe._id || tappedCostRecipeId_() === recipe._id) ? 'cost-tooltip-' + recipe._id : null">
+          <div class="col-cost cost-cell-wrap" (mouseenter)="showCostTooltip(recipe._id, $event)" (mouseleave)="hideCostTooltip()" (click)="toggleCostTooltipTap(recipe._id, $event)" [attr.aria-describedby]="(hoveredCostRecipeId_() === recipe._id || tappedCostRecipeId_() === recipe._id) ? 'cost-tooltip-' + recipe._id : null">
             ₪{{ getRecipeCost(recipe) | number:'1.2-2' }}
-            @if (hoveredCostRecipeId_() === recipe._id || tappedCostRecipeId_() === recipe._id) {
-              <div class="cost-tooltip" [id]="'cost-tooltip-' + recipe._id" (clickOutside)="closeCostTooltipTap()">
-                {{ getRecipeYieldDescription(recipe) }}
-              </div>
-            }
           </div>
           <div class="col-actions">
             <button type="button" class="action-btn edit" (click)="onEditRecipe(recipe); $event.stopPropagation()" [attr.aria-label]="'edit' | translatePipe">
@@ -166,6 +161,15 @@
       </div>
     </div>
   </aside>
+
+  @if (activeCostTooltipRecipe_(); as recipe) {
+    @if (costTooltipAnchor_(); as anchor) {
+      <div class="cost-tooltip cost-tooltip-fixed" [id]="'cost-tooltip-' + recipe._id" (clickOutside)="closeCostTooltipTap()"
+        [style.top.px]="anchor.bottom + 4" [style.left.px]="anchor.left + anchor.width / 2">
+        {{ 'price_for' | translatePipe }}{{ getRecipeYieldDescription(recipe) }}
+      </div>
+    }
+  }
 
   @if (historyFor_(); as h) {
     <div class="history-overlay" (click)="closeHistory()">
