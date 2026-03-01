@@ -1,0 +1,46 @@
+<div class="custom-select-wrap" (clickOutside)="close()">
+  <button
+    #triggerRef
+    type="button"
+    [id]="triggerId()"
+    class="c-select custom-select-trigger"
+    [class.open]="open()"
+    [disabled]="disabled"
+    (click)="onTriggerClick()"
+    [attr.aria-expanded]="open()"
+    aria-haspopup="listbox"
+    [attr.aria-label]="placeholder()">
+    <span class="custom-select-label">
+      @if (selectedLabel()) {
+        @if (translateLabels()) {
+          {{ selectedLabel() | translatePipe }}
+        } @else {
+          {{ selectedLabel() }}
+        }
+      } @else {
+        {{ placeholder() | translatePipe }}
+      }
+    </span>
+    <lucide-icon name="chevron-down" [size]="14"></lucide-icon>
+  </button>
+
+  @if (open()) {
+    <app-scrollable-dropdown [maxHeight]="maxHeight()">
+      @for (opt of options(); track opt.value; let i = $index) {
+        <button
+          type="button"
+          class="custom-select-option"
+          [class.highlighted]="highlightedIndex() === i"
+          role="option"
+          [attr.aria-selected]="value === opt.value"
+          (click)="onOptionClick(opt)">
+          @if (translateLabels()) {
+            {{ opt.label | translatePipe }}
+          } @else {
+            {{ opt.label }}
+          }
+        </button>
+      }
+    </app-scrollable-dropdown>
+  }
+</div>
