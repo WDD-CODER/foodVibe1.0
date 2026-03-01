@@ -1,0 +1,16 @@
+---
+description: All SCSS/CSS creation, updates, and refactors must follow the cssLayer skill (tokens, five-group rhythm, How We Work)
+alwaysApply: true
+---
+
+# SCSS / CSS styling — always use the cssLayer skill
+
+When you **create**, **update**, or **refactor** any `.scss` or `.css` file in this project (including component and page styles):
+
+1. **Read and follow** [.assistant/skills/cssLayer/SKILL.md](.assistant/skills/cssLayer/SKILL.md) from start to finish.
+2. **Before editing**: Read `src/styles.scss` and reuse existing `:root` variables where they apply.
+3. Apply **three-tier token placement** (global in `:root`, component-scoped in `:host`, or no token for one-off values).
+4. Use the **Five-Group Vertical Rhythm** in every selector (Layout → Dimensions → Content/Typo → Structure → Effects), with exactly one blank line between groups.
+5. Use **logical properties** (e.g. `margin-inline`, `padding-inline`) and `var(--...)` / `rem` / `em` as specified in the skill.
+
+The skill is the single source of truth for CSS and styling in this project.

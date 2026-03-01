@@ -8,6 +8,10 @@
 * If asked to create a rule, add it as a new section here. If asked to create a Cursor rule, add it here instead.
 * Violating this causes rule fragmentation and breaks the single source of truth.
 
+## 0.05 How We Work (read first when iterating)
+
+When you **iterate** on this project — updating, creating, or refactoring — read **[.assistant/HOW-WE-WORK.md](.assistant/HOW-WE-WORK.md)** first. That file is the entry point for how we work and links to **all** skills you must follow (save-plan, commit-to-github, cssLayer, Angular, service layer, util-standards, techdebt, update-docs, elegant-fix, github-sync). Use the linked skills for every change that falls under their scope.
+
 ## 0.1 Agent System Overview
 
 This project uses a multi-agent workflow for complex tasks. Agents are specialized AI personas defined in `.assistant/agents/` that provide domain expertise when invoked via the `Task` tool.
@@ -139,6 +143,7 @@ Agents share context through:
     4. Structure (border, shadow) 
     5. Effects (transition, transform).
 * **CSS/SCSS (MANDATORY)**: Before creating or editing any `.scss` or `.css` under `src/`, you MUST read `.assistant/skills/cssLayer/SKILL.md` and apply it. No exceptions. This applies both when executing an existing plan and when creating a new plan: any plan that includes new or modified styles must list as a sub-task or step: *Before writing/editing SCSS/CSS: read and apply `.assistant/skills/cssLayer/SKILL.md`.*
+* **Shared UI**: Before adding a new dropdown or scrollable list overlay, check `src/styles.scss` for engines (e.g. `.c-dropdown`) and `src/app/shared/` for reusable components (e.g. scrollable-dropdown). Use them instead of one-off markup and styles.
 
 ## 5. Security & QA
 * **Secrets**: Read from `.env` only. Ensure `.env*` and local configs are in `.gitignore`. **NEVER** hardcode keys.
