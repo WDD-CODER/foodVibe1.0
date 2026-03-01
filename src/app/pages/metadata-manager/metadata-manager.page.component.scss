@@ -157,14 +157,37 @@
   }
 
   .menu-type-row {
-    grid-template-columns: 1fr auto auto auto;
+    grid-template-columns: 1fr auto 30px 30px;
     align-items: center;
     gap: 0.75rem;
   }
 
-  .menu-type-key {
+  .menu-type-key,
+  .menu-type-key-input {
     font-weight: 600;
     color: var(--color-text-main);
+  }
+
+  .menu-type-key-input {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-xs);
+    outline: none;
+    font: inherit;
+    cursor: text;
+  }
+
+  .menu-type-key-input:hover {
+    background: var(--bg-glass);
+  }
+
+  .menu-type-key-input:focus {
+    background: var(--bg-glass);
+    box-shadow: 0 0 0 1px var(--border-focus);
   }
 
   .field-pills {
@@ -180,6 +203,17 @@
     color: var(--color-primary);
     border-radius: var(--radius-full);
     font-weight: 500;
+  }
+
+  .field-pill-removable {
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .field-pill-removable:hover {
+    background: var(--bg-danger-subtle);
+    color: var(--color-danger);
   }
 
   .menu-type-edit {

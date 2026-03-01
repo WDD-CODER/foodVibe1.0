@@ -366,4 +366,20 @@ export class MetadataManagerComponent implements OnInit {
     await this.metadataRegistry.deleteMenuType(key);
   }
 
+  async onMenuTypeNameBlur(oldKey: string, newName: string): Promise<void> {
+    const trimmed = (newName ?? '').trim();
+    if (trimmed === oldKey || !trimmed) return;
+    const msg = this.translationService.translate('menu_type_rename_confirm');
+    const confirmed = await this.confirmModal.open(msg, { saveLabel: 'save' });
+    if (!confirmed) return;
+    await this.metadataRegistry.renameMenuType(oldKey, trimmed);
+    await this.menuEventData.updateServingTypeForAll(oldKey, trimmed);
+  }
+
+  async removeFieldFromMenuType(key: string, fieldKey: DishFieldKey): Promise<void> {
+    const current = this.metadataRegistry.getMenuTypeFields(key);
+    const updated = current.filter(f => f !== fieldKey);
+    await this.metadataRegistry.updateMenuType(key, updated);
+  }
+
 }

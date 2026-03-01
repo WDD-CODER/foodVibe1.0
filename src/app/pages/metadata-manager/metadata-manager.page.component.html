@@ -69,16 +69,21 @@
                     </div>
                   </div>
                 } @else {
-                  <span class="menu-type-key">{{ def.key }}</span>
+                  <input type="text" class="menu-type-key-input" [value]="def.key"
+                    (blur)="onMenuTypeNameBlur(def.key, $any($event.target).value)"
+                    (keydown.enter)="$any($event.target).blur()" />
                   <div class="field-pills">
                     @for (f of def.fields; track f) {
-                      <span class="field-pill">{{ getDishFieldLabelKey(f) | translatePipe }}</span>
+                      <button type="button" class="field-pill field-pill-removable"
+                        (click)="removeFieldFromMenuType(def.key, f)">
+                        {{ getDishFieldLabelKey(f) | translatePipe }}
+                      </button>
                     }
                   </div>
-                  <button type="button" class="btn-edit" (click)="onEditMenuType(def.key)">
+                  <button type="button" class="btn-edit" (click)="onEditMenuType(def.key)" [attr.aria-label]="'edit' | translatePipe">
                     <lucide-icon name="pencil" [size]="14"></lucide-icon>
                   </button>
-                  <button type="button" class="btn-delete" (click)="onRemoveMenuType(def.key)">
+                  <button type="button" class="btn-delete" (click)="onRemoveMenuType(def.key)" [attr.aria-label]="'remove' | translatePipe">
                     <lucide-icon name="trash-2" [size]="16"></lucide-icon>
                   </button>
                 }
