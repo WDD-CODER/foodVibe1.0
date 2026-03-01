@@ -115,6 +115,7 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Remove sort arrow icons; keep click-to-sort on column titles.
 - [x] Allergens column: narrow by default; header click = expand all rows, row icon = expand that row; dense grid.
 - [x] Cost column before actions; yield tooltip on hover/tap (getRecipeYieldDescription).
+- [x] Cost tooltip: show below cell, Hebrew label (price_for), fixed position so last row is visible (feat/recipe-book-cost-tooltip).
 - [x] Top search = recipe/dish name (action bar + mobile fixed with toggle); sidebar search = by produce (ingredients) with dropdown, chips, clear, filter by all selected.
 - [x] Ingredient search: product dropdown, chips (click to remove), clear, recipeContainsAllProducts filter.
 - [x] Dictionary keys: Approved, Station, approved_yes, approved_no, no_station, search_by_ingredients, clear.
@@ -235,6 +236,42 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Migrate recipe-book-list (ingredient-dropdown)
 - [x] Add agent guidance (HOW-WE-WORK and/or copilot-instructions)
 
+### Plan 044 — Custom dropdown for all selects (`plans/044-custom-dropdown-for-all-selects.plan.md`)
+
+- [x] Create CustomSelectComponent (CVA, scrollable dropdown, host focus forwarding)
+- [x] Replace native selects app-wide: unit-creator, add-equipment-modal, equipment-form, equipment-list, recipe-workflow, recipe-ingredients-table, inventory-product-list, cook-view, menu-library-list, venue-form, recipe-builder
+- [x] Save plan 044 to plans/
+
+### Plan 045 — Logistics tools and menu type edit (`plans/045-logistics-tools-and-menu-type-edit.plan.md`)
+
+- [x] Show logistics section for both recipe and dish (recipe-builder.page.html)
+- [x] Tool search + "Add new tool" opening add-equipment modal in recipe builder
+- [x] Logistics grid: search + quantity one side, dense chip grid other side; distinct styling from ingredients
+- [x] Metadata manager: menu type row grid 1fr auto 30px 30px; inline name edit; removable field chips; confirm on rename
+- [x] MetadataRegistryService.renameMenuType; MenuEventDataService.updateServingTypeForAll; confirm modal + translation key
+
+### Plan 046 — Cook-view scale by ingredient (`plans/046-cook-view-scale-by-ingredient.plan.md`)
+
+- [x] cook-view.page.ts: Add scale-by state signals and methods (startSetByIngredient, applyScaleByIngredient, resetToFullRecipe); hide main quantity in special view
+- [x] cook-view.page.html: Per-row hover/tap highlight, "Set recipe by this item", inline amount + Convert; special scaled view banner + "Back to full recipe"
+- [x] cook-view.page.scss: Row highlight, set-by row controls, special scaled view styles (cssLayer)
+- [x] dictionary.json: set_recipe_by_this_item, convert, scale_recipe_confirm, scaled_to, back_to_full_recipe
+- [x] Reuse ConfirmModalService for scale confirmation
+
+### Plan 046-1 — Cook-view scale-by UX fixes (`plans/046-1-cook-view-scale-by-ux-fixes.plan.md`)
+
+- [ ] HTML: Move "Set recipe by this item" into col-name (left of name); empty col-scale-action for normal rows
+- [ ] SCSS: Button visible only on row hover; full-row border/box-shadow on hover; yellow box-shadow for setting state; scaled-view shell + banner (edit-mode-like, different colors); spacing between containers
+
+### Plan 012-2 — Kitchen demo data full values (`plans/012-2-kitchen-demo-data-full-values.plan.md`)
+
+- [x] demo-suppliers.json: 10 suppliers (add 2)
+- [x] demo-products.json: subset with purchase_options_ and variety
+- [x] demo-recipes.json: optional ingredient note_ on some
+- [x] demo-dishes.json: all 10 dishes have logistics_.baseline_, prep_items_ or mise_categories_
+- [x] demo-equipment.json: verify categories and scaling mix
+- [x] demo-venues.json: 10 venues (add 7)
+
 ### Plan 034 — Recipe Builder UI Fixes (`plans/034-recipe-builder-ui-fixes.plan.md`)
 
 - [x] a. Type toggle: pass recipeType from parent, add input in header, use in template
@@ -291,7 +328,10 @@ Update status after each sub-task. Link plan files here when applicable.
 | 010 | Product Roadmap: V1 Completion & Beyond | Active |
 | 011 | Unify Dashboard & Command Center | Done |
 | — | Recipe Builder: scaling, bruto, weight/volume toggle, unconvertible notice | Done |
-| 012 | Supplier Management Page | Planned |
+| 012 | Kitchen Demo Data (original) | Done |
+| 012-1 | Kitchen Demo Data and Recipes | Done |
+| 012-2 | Kitchen Demo Data Full Values | Active |
+| 012b | Supplier Management Page | Planned |
 | 013 | Recipe Quick Actions | Planned |
 | 014 | Low Stock Alerts | Planned |
 | 015 | Empty States & Onboarding | Planned |
@@ -322,6 +362,10 @@ Update status after each sub-task. Link plan files here when applicable.
 | 040 | Menu Intelligence Layout and Design | Done |
 | 041 | Menu Intelligence UX Fixes | Done |
 | 042 | Menu Intelligence Metadata Redesign | Active |
-| 043 | Reusable dropdown with scroll arrows | Active |
+| 043 | Reusable dropdown with scroll arrows | Done |
+| 044 | Custom dropdown for all selects | Done |
+| 045 | Logistics tools and menu type edit | Active |
+| 046 | Cook-view scale by ingredient | Done |
+| 046-1 | Cook-view scale-by UX fixes | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
