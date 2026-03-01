@@ -1,4 +1,4 @@
-<div class="hero-fab-container" (mouseleave)="collapse()">
+<div class="hero-fab-container" [class.above-bar]="isOnMenuIntelligence_()" (mouseleave)="collapse()">
   <div class="fab-actions" [class.expanded]="isExpanded_()">
     <button type="button"
             class="fab-action"
