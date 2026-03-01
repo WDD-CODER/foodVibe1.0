@@ -41,7 +41,7 @@
     <section class="builder-section">
       <div class="section-card workflow-logic">
         <h2 class="section-title">
-          {{ (recipeForm_.get('recipe_type')?.value === 'dish' ? 'prep_list_mise_en_place' : 'prep_workflow') | translatePipe }}
+          {{ (recipeType_() === 'dish' ? 'prep_list_mise_en_place' : 'prep_workflow') | translatePipe }}
         </h2>
         <app-recipe-workflow [workflowFormArray]="workflowArray" [type]="recipeType_()" [resetTrigger]="resetTrigger_()"
           [focusRowAt]="focusWorkflowRowAt_()" (addItem)="addNewStep()"
@@ -50,12 +50,13 @@
       </div>
     </section>
 
-    @if (recipeForm_.get('recipe_type')?.value === 'dish' && !historyViewMode_()) {
+    @if (recipeType_() === 'dish' && !historyViewMode_()) {
       <section class="builder-section">
         <div class="section-card logistics-logic">
           <h2 class="section-title">{{ 'dish_logistics' | translatePipe }}</h2>
           <p class="section-desc">{{ 'dish_logistics_desc' | translatePipe }}</p>
-          <div class="logistics-baseline" formGroupName="logistics">
+          <div [formGroup]="recipeForm_">
+            <div class="logistics-baseline" formGroupName="logistics">
             <div class="baseline-rows" formArrayName="baseline_">
               @for (ctrl of logisticsBaselineArray.controls; track $index; let i = $index) {
                 <div class="baseline-row" [formGroupName]="i">
@@ -82,9 +83,12 @@
               }
             </div>
             <button type="button" class="add-row-btn" (click)="addBaselineRow()">
-              <lucide-icon name="plus-circle" [size]="18"></lucide-icon>
+              <div class="plus-icon-wrapper">
+                <lucide-icon name="plus-circle" [size]="18"></lucide-icon>
+              </div>
               <span class="btn-text">{{ 'add_equipment_baseline' | translatePipe }}</span>
             </button>
+          </div>
           </div>
         </div>
       </section>
@@ -96,7 +100,7 @@
           @if (isSaving_()) {
             <app-loader size="small" [inline]="true" />
           }
-          {{ (isSaving_() ? 'saving' : (recipeForm_.get('recipe_type')?.value === 'dish' ? 'save_dish' : 'save_recipe')) | translatePipe }}
+          {{ (isSaving_() ? 'saving' : (recipeType_() === 'dish' ? 'save_dish' : 'save_recipe')) | translatePipe }}
         </button>
       </footer>
     }

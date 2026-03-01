@@ -8,12 +8,12 @@
             <button type="button" 
                 (click)="toggleType()" 
                 class="type-toggle-btn"
-                [class.dish-mode]="(recipeType() ?? form().get('recipe_type')?.value) === 'dish'">
-                {{ ((recipeType() ?? form().get('recipe_type')?.value) === 'dish' ? 'dish' : 'prep') | translatePipe }}
+                [class.dish-mode]="currentRecipeTypeDisplay_() === 'dish'">
+                {{ currentRecipeTypeDisplay_() | translatePipe }}
             </button>
             
             <input formControlName="name_hebrew"
-                [placeholder]="(((recipeType() ?? form().get('recipe_type')?.value) === 'dish' ? 'dish_name_placeholder' : 'recipe_name_placeholder') | translatePipe) + '...'"
+                [placeholder]="((currentRecipeTypeDisplay_() === 'dish' ? 'dish_name_placeholder' : 'recipe_name_placeholder') | translatePipe) + '...'"
                 class="recipe-name-input" />
         </div>
 
@@ -40,7 +40,7 @@
 
                     <div class="counter-grid small">
                         <button type="button" class="ctrl-btn"
-                            [disabled]="!(primaryAmount_() > (form().get('recipe_type')?.value === 'dish' ? 1 : 0))"
+                            [disabled]="!(primaryAmount_() > (currentRecipeTypeDisplay_() === 'dish' ? 1 : 0))"
                             (click)="updatePrimaryAmount(-1)">-</button>
 
                         <div class="input-wrapper">

@@ -1,4 +1,4 @@
-import { Component, input, inject, output, signal, computed } from '@angular/core';
+import { Component, input, inject, output, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormArray, Validators } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -27,6 +27,7 @@ export class RecipeHeaderComponent {
   private metadataRegistry = inject(MetadataRegistryService);
   private translationService = inject(TranslationService);
   private labelCreationModal = inject(LabelCreationModalService);
+  private cdr = inject(ChangeDetectorRef);
 
   // INPUTS
   form = input.required<FormGroup>();
@@ -88,6 +89,14 @@ export class RecipeHeaderComponent {
     return all.filter(u => !used.has(u));
   });
   // COMPUTED SIGNALS
+  /** Current recipe type for display (dish vs prep). Form is source of truth so header updates immediately on toggle. */
+  protected currentRecipeTypeDisplay_ = computed(() => {
+    this.manualTrigger_();
+    const fromForm = this.form().get('recipe_type')?.value;
+    const type = fromForm ?? this.recipeType();
+    return type === 'dish' ? 'dish' : 'prep';
+  });
+
   protected primaryUnitLabel_ = computed(() => {
     this.manualTrigger_();
     this.resetTrigger();
@@ -230,6 +239,7 @@ export class RecipeHeaderComponent {
     }
     this.manualTrigger_.update(v => v + 1);
     this.form().updateValueAndValidity({ emitEvent: true });
+    this.cdr.markForCheck();
   }
 
   setActiveUnit(unit: string) {
