@@ -32,14 +32,14 @@ export class StorageService {
 
   async post<T>(entityType: string, newEntity: T): Promise<T & EntityId> {
     const entityToSave = { ...newEntity, _id: this.makeId() };
-    const entities = await this.query<T & EntityId>(entityType);
+    const entities = await this.query<T & EntityId>(entityType, 0);
     entities.push(entityToSave);
     this._save(entityType, entities);
     return entityToSave;
   }
 
   async put<T extends EntityId>(entityType: string, updatedEntity: T): Promise<T> {
-    const entities = await this.query<T>(entityType);
+    const entities = await this.query<T>(entityType, 0);
     const idx = entities.findIndex(entity => entity._id === updatedEntity._id);
     if (idx === -1) throw new Error(`Cannot update, product ${updatedEntity._id} does not exist`);
 
@@ -49,7 +49,7 @@ export class StorageService {
   }
 
   async remove(entityType: string, entityId: string): Promise<void> {
-    const entities = await this.query<EntityId>(entityType);
+    const entities = await this.query<EntityId>(entityType, 0);
     const idx = entities.findIndex(entity => entity._id === entityId);
     if (idx !== -1) {
       entities.splice(idx, 1);
