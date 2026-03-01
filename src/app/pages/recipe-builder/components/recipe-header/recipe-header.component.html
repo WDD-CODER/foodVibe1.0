@@ -26,7 +26,7 @@
                     </div>
 
                     @if (activePrimaryEdit_()) {
-                    <div class="unit-dropdown-menu primary-chip-dropdown">
+                    <app-scrollable-dropdown [maxHeight]="200" class="unit-dropdown-menu primary-chip-dropdown">
                         @for (unit of availablePrimaryUnits_(); track unit) {
                         <div class="menu-item" (click)="setPrimaryUnit(unit); setActivePrimaryEdit(false)">
                             {{ unit | translatePipe }}
@@ -35,7 +35,7 @@
                         <div class="menu-item menu-item-create" (click)="openUnitCreator.emit('unit'); setActivePrimaryEdit(false)">
                             {{ 'create_new_unit' | translatePipe }}
                         </div>
-                    </div>
+                    </app-scrollable-dropdown>
                     }
 
                     <div class="counter-grid small">
@@ -65,13 +65,13 @@
                     </div>
 
                     @if (activeSecondaryEdit_() === $index) {
-                    <div class="unit-dropdown-menu secondary-chip-dropdown">
+                    <app-scrollable-dropdown [maxHeight]="200" class="unit-dropdown-menu secondary-chip-dropdown">
                         @for (unit of availableUnitsForSecondaryChip_($index); track unit) {
                         <div class="menu-item" (click)="changeSecondaryUnit($index, unit)">
                             {{ unit | translatePipe }}
                         </div>
                         }
-                    </div>
+                    </app-scrollable-dropdown>
                     }
 
                     <div class="counter-grid small">
@@ -124,7 +124,7 @@
                     }
                 </div>
                 @if (showLabelDropdown_()) {
-                    <div class="label-dropdown" role="listbox">
+                    <app-scrollable-dropdown [maxHeight]="192" class="label-dropdown">
                         @for (label of filteredLabelOptions_(); track label.key) {
                             <div class="dropdown-item" (click)="addLabel(label.key)">
                                 <span class="color-dot" [style.background-color]="label.color"></span>
@@ -134,7 +134,7 @@
                         <div class="dropdown-item dropdown-item-add" (click)="openCreateLabel()">
                             {{ 'create_new_label' | translatePipe }}
                         </div>
-                    </div>
+                    </app-scrollable-dropdown>
                 }
             </div>
         </div>

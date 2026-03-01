@@ -11,11 +11,12 @@ import { MetadataRegistryService } from '@services/metadata-registry.service';
 import { TranslationService } from '@services/translation.service';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service';
+import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
 
 @Component({
   selector: 'app-recipe-header',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, SelectOnFocusDirective, ClickOutSideDirective, TranslatePipe],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, SelectOnFocusDirective, ClickOutSideDirective, TranslatePipe, ScrollableDropdownComponent],
   templateUrl: './recipe-header.component.html',
   styleUrl: './recipe-header.component.scss'
 })

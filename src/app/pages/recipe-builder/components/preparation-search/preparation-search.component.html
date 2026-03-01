@@ -11,17 +11,19 @@
   </div>
 
   @if (showResults_() && groupedResults_().length > 0) {
-    <ul class="results-dropdown">
-      @for (group of groupedResults_(); track group[0]) {
-        <li class="category-header">{{ group[0] }}</li>
-        @for (entry of group[1]; track entry.name + entry.category) {
-          <li (click)="selectPreparation(entry)" class="result-item">
-            <span class="item-name">{{ entry.name }}</span>
-            <span class="category-pill">{{ entry.category }}</span>
-          </li>
+    <app-scrollable-dropdown [maxHeight]="240">
+      <ul>
+        @for (group of groupedResults_(); track group[0]) {
+          <li class="category-header">{{ group[0] }}</li>
+          @for (entry of group[1]; track entry.name + entry.category) {
+            <li (click)="selectPreparation(entry)" class="result-item">
+              <span class="item-name">{{ entry.name }}</span>
+              <span class="category-pill">{{ entry.category }}</span>
+            </li>
+          }
         }
-      }
-    </ul>
+      </ul>
+    </app-scrollable-dropdown>
   }
 
   @if (showResults_() && showAddOption_()) {

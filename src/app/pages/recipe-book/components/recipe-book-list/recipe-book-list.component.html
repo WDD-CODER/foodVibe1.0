@@ -117,11 +117,13 @@
               [placeholder]="'search_by_ingredients' | translatePipe" />
           </div>
           @if (ingredientSearchQuery_().trim()) {
-            <ul class="ingredient-dropdown" role="listbox">
-              @for (p of filteredProductsForIngredientSearch_(); track p._id) {
-                <li role="option" (click)="addIngredientProduct(p)">{{ p.name_hebrew }}</li>
-              }
-            </ul>
+            <app-scrollable-dropdown [maxHeight]="200">
+              <ul class="ingredient-dropdown-list" role="listbox">
+                @for (p of filteredProductsForIngredientSearch_(); track p._id) {
+                  <li role="option" (click)="addIngredientProduct(p)">{{ p.name_hebrew }}</li>
+                }
+              </ul>
+            </app-scrollable-dropdown>
           }
           <div class="ingredient-chips-wrap">
             @for (p of getSelectedProducts(); track p._id) {

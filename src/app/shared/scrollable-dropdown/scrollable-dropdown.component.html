@@ -1,0 +1,14 @@
+<div class="c-dropdown">
+  <div
+    class="c-dropdown__list"
+    scrollIndicators
+    [style.max-height.px]="maxHeight()">
+    <ng-content></ng-content>
+  </div>
+  <div class="c-dropdown__scroll-top" aria-hidden="true">
+    <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
+  </div>
+  <div class="c-dropdown__scroll-bottom" aria-hidden="true">
+    <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
+  </div>
+</div>

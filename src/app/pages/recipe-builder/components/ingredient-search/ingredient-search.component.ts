@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { ClickOutSideDirective } from '@directives/click-out-side';
+import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
 
 @Component({
   selector: 'app-ingredient-search',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, ClickOutSideDirective],
+  imports: [CommonModule, LucideAngularModule, ClickOutSideDirective, ScrollableDropdownComponent],
   templateUrl: './ingredient-search.component.html',
   styleUrl: './ingredient-search.component.scss'
 })
@@ -107,7 +108,7 @@ export class IngredientSearchComponent {
 
   private scrollHighlightedIntoView(): void {
     setTimeout(() => {
-      const list = document.querySelector('.results-dropdown');
+      const list = document.querySelector('.c-dropdown__list');
       const highlighted = list?.querySelector('.result-item.highlighted');
       highlighted?.scrollIntoView({ block: 'nearest' });
     }, 0);

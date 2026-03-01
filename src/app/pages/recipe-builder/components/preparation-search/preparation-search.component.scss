@@ -40,23 +40,6 @@
   }
 }
 
-.results-dropdown {
-  position: absolute;
-  top: calc(100% + 0.25rem);
-  inset-inline: 0;
-  z-index: 10;
-  margin: 0;
-  padding: 0.25rem 0;
-  list-style: none;
-  background: var(--bg-glass-strong);
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
-  backdrop-filter: var(--blur-glass);
-  max-height: 240px;
-  overflow-y: auto;
-}
-
 .category-header {
   padding: 6px 12px;
   font-size: 0.75rem;

@@ -48,7 +48,9 @@
             </span>
           </div>
 
-          <div class="category dropdown" *ngIf="showCategoryDropdown_()"
+          <app-scrollable-dropdown *ngIf="showCategoryDropdown_()"
+               [maxHeight]="200"
+               class="category dropdown"
                (keydown)="onCategoryDropdownKeydown($event)"
                role="listbox"
                [attr.aria-activedescendant]="'category-option-' + categoryDropdownHighlightIndex_()">
@@ -72,7 +74,7 @@
                  (click)="openAddNewCategory(); $event.stopPropagation()">
               {{ 'add_new_category' | translatePipe }}
             </div>
-          </div>
+          </app-scrollable-dropdown>
         </div>
       </div>
 
@@ -86,14 +88,11 @@
 
       <div class="form-group">
         <label>{{ 'base_unit' | translatePipe }}</label>
-        <select formControlName="base_unit_" (change)="onBaseUnitChange($event)">
-          @for (key of unitRegistry.allUnitKeys_(); track key) {
-          <option [value]="key">{{ key | translatePipe }}</option>
-          }
-          <option value="NEW_UNIT" class="text-emerald-600 font-bold">
-            {{ 'add_new_unit' | translatePipe }}
-          </option>
-        </select>
+        <app-custom-select
+          formControlName="base_unit_"
+          [options]="baseUnitOptions_()"
+          placeholder="choose_unit"
+          (valueChange)="onBaseUnitValueChange($event)" />
       </div>
     </div>
 
@@ -110,12 +109,11 @@
         <div class="scaling-row">
           <div class="input-wrapper"
             [class.field-error]="option.get('unit_symbol_')?.invalid && (option.get('unit_symbol_')?.dirty || isSubmitted)">
-            <select formControlName="unit_symbol_" (change)="onUnitChange($event,idx)">
-              <option value="">בחר יחידה...</option>
-              <option *ngFor="let unit of availableUnits_()" [value]="unit">{{ unit | translatePipe }}</option>
-              <option value="NEW_UNIT" class="add-new-option text-emerald-600 font-bold"> הוסף {{ 'NEW_UNIT' |
-                translatePipe }}</option>
-            </select>
+            <app-custom-select
+              formControlName="unit_symbol_"
+              [options]="unitSymbolOptions_()"
+              placeholder="choose_unit"
+              (valueChange)="onUnitSymbolValueChange($event, idx)" />
           </div>
 
           <div class="input-wrapper"
@@ -130,12 +128,10 @@
             [class.field-error]="option.get('uom')?.invalid && (option.get('uom')?.dirty || isSubmitted)">
             <label class="flex items-center gap-2">
               <span class="math-text flex">:</span>
-              <select formControlName="uom" class="uom-select">
-                <option value="" disabled selected hidden>בחר יחידת מידה</option>
-                @for (unit of availableUnits_(); track unit) {
-                <option [value]="unit">{{ unit | translatePipe}}</option>
-                }
-              </select>
+              <app-custom-select
+                formControlName="uom"
+                [options]="uomOptions_()"
+                placeholder="choose_unit" />
             </label>
           </div>
 
@@ -185,7 +181,7 @@
               </span>
             </div>
 
-            <div class="supplier dropdown" *ngIf="showSupplierDropdown_()">
+            <app-scrollable-dropdown *ngIf="showSupplierDropdown_()" [maxHeight]="200" class="supplier dropdown">
               @for (s of filteredSupplierOptions_(); track s._id) {
                 <div class="dropdown-item" (click)="addSupplierId(s._id)">
                   {{ s.name_hebrew }}
@@ -194,7 +190,7 @@
               <div class="dropdown-item dropdown-item-add" (click)="openAddSupplier(); $event.stopPropagation()">
                 {{ 'add_supplier' | translatePipe }}
               </div>
-            </div>
+            </app-scrollable-dropdown>
           </div>
         </div>
         <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedSupplier_()" (click)="toggleSupplier()" (keydown.enter)="toggleSupplier()" role="button" tabindex="0">
@@ -228,7 +224,7 @@
                  [class.no-chips]="selectedAllergensSignal_().length === 0">
             </div>
 
-            <div class="allergen dropdown" *ngIf="showSuggestions">
+            <app-scrollable-dropdown *ngIf="showSuggestions" [maxHeight]="200" class="allergen dropdown">
               <div *ngFor="let allergen of filteredAllergenOptions_()" (click)="toggleAllergen(allergen)"
                 class="dropdown-item">
                 {{ allergen | translatePipe }}
@@ -241,7 +237,7 @@
               <div *ngIf="filteredAllergenOptions_().length === 0 && !allergenSearchQuery_().trim()" class="dropdown-item text-slate-400 italic">
                 כל האלרגנים נבחרו
               </div>
-            </div>
+            </app-scrollable-dropdown>
           </div>
         </div>
         <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedAllergens_()" (click)="toggleAllergens()" (keydown.enter)="toggleAllergens()" role="button" tabindex="0">

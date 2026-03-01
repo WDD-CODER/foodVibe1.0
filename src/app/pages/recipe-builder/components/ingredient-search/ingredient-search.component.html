@@ -12,22 +12,24 @@
   </div>
 
   @if (showResults_() && filteredResults_().length > 0) {
-    <ul class="results-dropdown" role="listbox">
-      @for (item of filteredResults_(); track item._id; let i = $index) {
-        <li
-          role="option"
-          [attr.aria-selected]="highlightedIndex_() === i"
-          [class.highlighted]="highlightedIndex_() === i"
-          (click)="selectItem(item)"
-          class="result-item">
-          <span class="item-name">{{ item.name_hebrew }}</span>
-          <span class="type-pill" 
-                [class.recipe]="item.item_type_ === 'recipe'"
-                [class.product]="item.item_type_ !== 'recipe'">
-            {{ item.item_type_ === 'recipe' ? 'מתכון' : 'מוצר' }}
-          </span>
-        </li>
-      }
-    </ul>
+    <app-scrollable-dropdown [maxHeight]="240">
+      <ul role="listbox">
+        @for (item of filteredResults_(); track item._id; let i = $index) {
+          <li
+            role="option"
+            [attr.aria-selected]="highlightedIndex_() === i"
+            [class.highlighted]="highlightedIndex_() === i"
+            (click)="selectItem(item)"
+            class="result-item">
+            <span class="item-name">{{ item.name_hebrew }}</span>
+            <span class="type-pill" 
+                  [class.recipe]="item.item_type_ === 'recipe'"
+                  [class.product]="item.item_type_ !== 'recipe'">
+              {{ item.item_type_ === 'recipe' ? 'מתכון' : 'מוצר' }}
+            </span>
+          </li>
+        }
+      </ul>
+    </app-scrollable-dropdown>
   }
 </div>

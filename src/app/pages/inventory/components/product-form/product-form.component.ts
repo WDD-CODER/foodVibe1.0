@@ -23,6 +23,8 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { duplicateNameValidator } from 'src/app/core/validators/item.validators';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
+import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
+import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 
 @Component({
   selector: 'product-form',
@@ -34,7 +36,9 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component';
     ClickOutSideDirective,
     SelectOnFocusDirective,
     TranslatePipe,
-    LoaderComponent
+    LoaderComponent,
+    ScrollableDropdownComponent,
+    CustomSelectComponent
   ],
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.scss'
@@ -67,6 +71,18 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
   protected readonly categoryOptions_ = computed(() => this.metadataRegistry.allCategories_());
   protected readonly suppliers_ = computed(() => this.kitchenStateService.suppliers_());
   protected availableUnits_ = computed(() => this.unitRegistry.allUnitKeys_());
+  protected baseUnitOptions_ = computed(() => [
+    ...this.unitRegistry.allUnitKeys_().map((k) => ({ value: k, label: k })),
+    { value: 'NEW_UNIT', label: 'add_new_unit' },
+  ]);
+  protected unitSymbolOptions_ = computed(() => [
+    { value: '', label: 'choose_unit' },
+    ...this.availableUnits_().map((u) => ({ value: u, label: u })),
+    { value: 'NEW_UNIT', label: 'add_new_unit' },
+  ]);
+  protected uomOptions_ = computed(() =>
+    this.availableUnits_().map((u) => ({ value: u, label: u }))
+  );
   protected allergenOptions_ = computed(() => this.metadataRegistry.allAllergens_());
   protected isEditMode_ = signal<boolean>(false);
   protected isSaving_ = signal(false);
@@ -355,21 +371,6 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
 
 
   // RESTORED MODAL ACTIONS
-  protected onUnitChange(event: Event, index: number): void {
-    const select = event.target as HTMLSelectElement;
-    if (select.value === 'NEW_UNIT') {
-      // 1. Tell the service which row we are currently editing
-      // This allows the form to "remember" the target while the UnitCreatorComponent is active
-      this.activeRowIndex_.set(index);
-      this.isBaseUnitMode_.set(false);
-
-      // 2. Trigger the GLOBAL station
-      this.unitRegistry.openUnitCreator();
-
-      select.value = '';
-    }
-  }
-
   protected async onCategoryChange(event: Event): Promise<void> {
     const select = event.target as HTMLSelectElement;
     const value = select.value;
@@ -435,16 +436,23 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
     }
   }
 
-  protected onBaseUnitChange(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    if (select.value === 'NEW_UNIT') {
+  protected onBaseUnitValueChange(value: string): void {
+    if (value === 'NEW_UNIT') {
       this.activeRowIndex_.set(null);
       this.isBaseUnitMode_.set(true);
-
-      // Trigger the GLOBAL station
       this.unitRegistry.openUnitCreator();
+      this.productForm_.patchValue({ base_unit_: '' });
+    }
+  }
 
-      select.value = '';
+  protected onUnitSymbolValueChange(value: string, index: number): void {
+    if (value === 'NEW_UNIT') {
+      this.activeRowIndex_.set(index);
+      this.isBaseUnitMode_.set(false);
+      this.unitRegistry.openUnitCreator();
+      (this.productForm_.get('purchase_options_') as FormArray)
+        ?.at(index)
+        ?.patchValue({ unit_symbol_: '' });
     }
   }
 

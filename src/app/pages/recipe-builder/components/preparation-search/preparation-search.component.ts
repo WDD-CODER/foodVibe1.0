@@ -4,11 +4,12 @@ import { LucideAngularModule } from 'lucide-angular'
 import { PreparationRegistryService, type PreparationEntry } from '@services/preparation-registry.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ClickOutSideDirective } from '@directives/click-out-side'
+import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
 
 @Component({
   selector: 'app-preparation-search',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, ClickOutSideDirective, TranslatePipe],
+  imports: [CommonModule, LucideAngularModule, ClickOutSideDirective, TranslatePipe, ScrollableDropdownComponent],
   templateUrl: './preparation-search.component.html',
   styleUrl: './preparation-search.component.scss'
 })

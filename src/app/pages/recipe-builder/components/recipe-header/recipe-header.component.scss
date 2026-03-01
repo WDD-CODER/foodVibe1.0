@@ -121,22 +121,17 @@
     background: var(--bg-glass);
   }
 
-  .unit-dropdown-menu {
-    position: absolute;
-    top: calc(100% + 4px);
-    right: 0;
-    z-index: 100;
+  .unit-dropdown-menu.primary-chip-dropdown,
+  .unit-dropdown-menu.secondary-chip-dropdown {
+    ::ng-deep .c-dropdown {
+      inset-inline: auto;
+      right: 0;
+      left: auto;
+      min-width: 140px;
+      top: calc(100% + 4px);
+    }
 
-    min-width: 140px;
-    max-height: 200px;
-    overflow-y: auto;
-
-    background: var(--bg-pure);
-    border: 1px solid var(--border-default);
-    border-radius: 8px;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-
-    .menu-item {
+    ::ng-deep .menu-item {
       padding: 8px 12px;
 
       color: #1e293b;
@@ -424,21 +419,8 @@
   }
 }
 
-.label-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  left: 0;
-  margin-top: 0.25rem;
-  max-height: 12rem;
-  overflow-y: auto;
-  background: var(--bg-glass-strong);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-modal);
-  z-index: 50;
-
-  .dropdown-item {
+app-scrollable-dropdown.label-dropdown {
+  ::ng-deep .dropdown-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -458,7 +440,7 @@
     }
   }
 
-  .color-dot {
+  ::ng-deep .color-dot {
     width: 0.75rem;
     height: 0.75rem;
     border-radius: 50%;
