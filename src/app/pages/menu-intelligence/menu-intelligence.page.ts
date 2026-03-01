@@ -9,14 +9,24 @@ import { MenuEventDataService } from '@services/menu-event-data.service';
 import { MenuIntelligenceService } from '@services/menu-intelligence.service';
 import { UserMsgService } from '@services/user-msg.service';
 import { AddItemModalService } from '@services/add-item-modal.service';
-import { MenuEvent, MenuSection, ServingType } from '@models/menu-event.model';
+import { MetadataRegistryService } from '@services/metadata-registry.service';
+import { MenuEvent, MenuSection, ServingType, DEFAULT_DISH_FIELDS, ALL_DISH_FIELDS, type DishFieldKey } from '@models/menu-event.model';
 import { Recipe } from '@models/recipe.model';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
+import { RecipeCostService } from '@services/recipe-cost.service';
+import { ClickOutSideDirective } from '@directives/click-out-side';
+import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
+import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 
 type MenuItemForm = {
   recipe_id_: string;
   recipe_type_: 'dish' | 'preparation';
   predicted_take_rate_: number;
+  sell_price?: number;
+  food_cost_money?: number;
+  food_cost_pct?: number;
+  serving_portions?: number;
+  serving_portions_pct?: number;
 };
 
 const DEFAULT_SECTION_CATEGORIES = [
@@ -27,7 +37,7 @@ const DEFAULT_SECTION_CATEGORIES = [
 @Component({
   selector: 'app-menu-intelligence-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, ClickOutSideDirective, ScrollableDropdownComponent, CustomSelectComponent],
   templateUrl: './menu-intelligence.page.html',
   styleUrl: './menu-intelligence.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,8 +51,11 @@ export class MenuIntelligencePage implements AfterViewInit {
   private readonly menuIntelligence = inject(MenuIntelligenceService);
   private readonly userMsg = inject(UserMsgService);
   private readonly addItemModal = inject(AddItemModalService);
+  private readonly metadataRegistry = inject(MetadataRegistryService);
+  private readonly recipeCostService = inject(RecipeCostService);
 
   protected readonly editingId_ = signal<string | null>(null);
+  protected readonly ALL_DISH_FIELDS = ALL_DISH_FIELDS;
   protected readonly recipes_ = this.kitchenState.recipes_;
   protected readonly isSaving_ = signal(false);
   protected readonly showExport_ = signal(false);
@@ -70,6 +83,12 @@ export class MenuIntelligencePage implements AfterViewInit {
   /** Inline-edit state for metadata fields */
   protected readonly editingField_ = signal<string | null>(null);
 
+  /** Which dish rows have metadata expanded (key: "sectionIndex-itemIndex") */
+  protected readonly expandedMetaKeys_ = signal<Set<string>>(new Set());
+
+  /** Which dish field is in edit mode (key: "sectionIndex-itemIndex-fieldKey") */
+  protected readonly editingDishField_ = signal<string | null>(null);
+
   /** Event type dropdown open + search query for filtering */
   protected readonly eventTypeDropdownOpen_ = signal(false);
   protected readonly eventTypeSearch_ = signal('');
@@ -85,6 +104,21 @@ export class MenuIntelligencePage implements AfterViewInit {
   protected readonly foodCostPct_ = computed(() => {
     const event = this.buildEventFromForm();
     return this.menuIntelligence.computeFoodCostPct(event);
+  });
+
+  protected readonly menuTypeOptions_ = computed(() =>
+    this.metadataRegistry.allMenuTypes_().map(t => t.key)
+  );
+
+  protected readonly servingTypeOptions_ = computed(() =>
+    this.menuTypeOptions_().map(key => ({ value: key, label: key }))
+  );
+
+  protected readonly activeMenuTypeFields_ = computed((): DishFieldKey[] => {
+    const key = this.form_.value.serving_type_;
+    if (!key) return [...DEFAULT_DISH_FIELDS];
+    const fields = this.metadataRegistry.getMenuTypeFields(key);
+    return fields.length > 0 ? fields : [...DEFAULT_DISH_FIELDS];
   });
 
   constructor() {
@@ -244,9 +278,37 @@ export class MenuIntelligencePage implements AfterViewInit {
         recipe_id_: ['', Validators.required],
         recipe_type_: ['dish'],
         predicted_take_rate_: [0.4, [Validators.required, Validators.min(0), Validators.max(1)]],
+        sell_price: [0],
+        food_cost_money: [0],
+        food_cost_pct: [0],
+        serving_portions: [0],
+        serving_portions_pct: [0],
       })
     );
     this.setDishSearchQuery(sectionIndex, items.length - 1, '');
+  }
+
+  protected getDishFieldLabelKey(fieldKey: DishFieldKey): string {
+    return ALL_DISH_FIELDS.find(f => f.key === fieldKey)?.labelKey ?? fieldKey;
+  }
+
+  protected getAutoFoodCost(sectionIndex: number, itemIndex: number): number {
+    const item = this.getItemsArray(sectionIndex).at(itemIndex);
+    const recipeId = item?.get('recipe_id_')?.value;
+    if (!recipeId) return 0;
+    const recipe = this.recipes_().find(r => r._id === recipeId);
+    if (!recipe) return 0;
+    const derivedPortions = this.getDerivedPortions(item.value as MenuItemForm);
+    const baseYield = Math.max(1, recipe.yield_amount_ || 1);
+    const multiplier = derivedPortions / baseYield;
+    const scaledCost = this.recipeCostService.computeRecipeCost({
+      ...recipe,
+      ingredients_: recipe.ingredients_.map(ing => ({
+        ...ing,
+        amount_: (ing.amount_ || 0) * multiplier,
+      })),
+    });
+    return Math.round(scaledCost * 100) / 100;
   }
 
   protected removeItem(sectionIndex: number, itemIndex: number): void {
@@ -274,6 +336,46 @@ export class MenuIntelligencePage implements AfterViewInit {
     return `${sectionIndex}-${itemIndex}`;
   }
 
+  protected getDishMetaKey(sectionIndex: number, itemIndex: number): string {
+    return `${sectionIndex}-${itemIndex}`;
+  }
+
+  protected isDishMetaExpanded(sectionIndex: number, itemIndex: number): boolean {
+    return this.expandedMetaKeys_().has(this.getDishMetaKey(sectionIndex, itemIndex));
+  }
+
+  protected toggleDishMeta(sectionIndex: number, itemIndex: number): void {
+    const key = this.getDishMetaKey(sectionIndex, itemIndex);
+    this.expandedMetaKeys_.update(set => {
+      const next = new Set(set);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
+  protected getDishFieldEditKey(sectionIndex: number, itemIndex: number, fieldKey: string): string {
+    return `${sectionIndex}-${itemIndex}-${fieldKey}`;
+  }
+
+  protected isEditingDishField(sectionIndex: number, itemIndex: number, fieldKey: string): boolean {
+    return this.editingDishField_() === this.getDishFieldEditKey(sectionIndex, itemIndex, fieldKey);
+  }
+
+  protected startEditDishField(sectionIndex: number, itemIndex: number, fieldKey: string): void {
+    this.editingDishField_.set(this.getDishFieldEditKey(sectionIndex, itemIndex, fieldKey));
+  }
+
+  protected commitEditDishField(): void {
+    this.editingDishField_.set(null);
+  }
+
+  /** Width for inline dish-field input (ch units, min 4ch). */
+  protected getInputWidth(value: unknown): string {
+    const len = String(value ?? '').length;
+    return `${Math.max(4, len + 2)}ch`;
+  }
+
   protected getDishSearchQuery(sectionIndex: number, itemIndex: number): string {
     const key = this.getDishSearchKey(sectionIndex, itemIndex);
     const queries: Record<string, string> = this.dishSearchQueries_();
@@ -298,11 +400,29 @@ export class MenuIntelligencePage implements AfterViewInit {
   protected selectRecipe(sectionIndex: number, itemIndex: number, recipe: Recipe): void {
     const items = this.getItemsArray(sectionIndex);
     const group = items.at(itemIndex);
+    const derivedPortions = this.menuIntelligence.derivePortions(
+      this.form_.value.serving_type_ as ServingType,
+      Number(this.form_.value.guest_count_ || 0),
+      Number(group.get('predicted_take_rate_')?.value ?? 0.4),
+      0
+    );
+    const baseYield = Math.max(1, recipe.yield_amount_ || 1);
+    const multiplier = derivedPortions / baseYield;
+    const autoCost = this.recipeCostService.computeRecipeCost({
+      ...recipe,
+      ingredients_: recipe.ingredients_.map(ing => ({
+        ...ing,
+        amount_: (ing.amount_ || 0) * multiplier,
+      })),
+    });
     group.patchValue({
       recipe_id_: recipe._id,
       recipe_type_: this.isRecipeDish(recipe) ? 'dish' : 'preparation',
+      food_cost_money: Math.round(autoCost * 100) / 100,
+      serving_portions: recipe.yield_amount_ ?? 1,
     });
     this.setDishSearchQuery(sectionIndex, itemIndex, '');
+    this.expandedMetaKeys_.update(set => new Set(set).add(this.getDishMetaKey(sectionIndex, itemIndex)));
   }
 
   protected openSectionSearch(index: number): void {
@@ -340,6 +460,22 @@ export class MenuIntelligencePage implements AfterViewInit {
       this.sectionCategories_.update(cats => [...cats, name]);
     }
     this.selectSectionCategory(index, name);
+  }
+
+  protected async openAddCategoryModal(sectionIndex: number): Promise<void> {
+    const result = await this.addItemModal.open({
+      title: 'add_new_category',
+      label: 'menu_search_category',
+      placeholder: 'menu_search_category',
+      saveLabel: 'save',
+    });
+    if (result?.trim()) {
+      const name = result.trim();
+      if (!this.sectionCategories_().includes(name)) {
+        this.sectionCategories_.update(cats => [...cats, name]);
+      }
+      this.selectSectionCategory(sectionIndex, name);
+    }
   }
 
   protected startEditField(field: string): void {
@@ -417,11 +553,27 @@ export class MenuIntelligencePage implements AfterViewInit {
             recipe_id_: [item.recipe_id_, Validators.required],
             recipe_type_: [item.recipe_type_],
             predicted_take_rate_: [item.predicted_take_rate_, [Validators.required, Validators.min(0), Validators.max(1)]],
+            sell_price: [item.sell_price_ ?? 0],
+            food_cost_money: [item.food_cost_override_ ?? 0],
+            food_cost_pct: [0],
+            serving_portions: [item.serving_portions_ ?? 0],
+            serving_portions_pct: [0],
           })
         );
       });
       this.sectionsArray.push(sectionGroup);
     });
+
+    const firstExpanded = new Set<string>();
+    this.sectionsArray.controls.forEach((section, si) => {
+      const items = (section.get('items_') as FormArray<FormGroup>).controls;
+      items.forEach((item, ii) => {
+        if (item.get('recipe_id_')?.value && firstExpanded.size === 0) {
+          firstExpanded.add(this.getDishMetaKey(si, ii));
+        }
+      });
+    });
+    if (firstExpanded.size > 0) this.expandedMetaKeys_.set(firstExpanded);
 
     this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue());
   }
@@ -442,6 +594,9 @@ export class MenuIntelligencePage implements AfterViewInit {
         derived_portions_: this.menuIntelligence.derivePortions(
           servingType, guestCount, Number(item.predicted_take_rate_ || 0), 0
         ),
+        sell_price_: item.sell_price ?? undefined,
+        food_cost_override_: item.food_cost_money ?? undefined,
+        serving_portions_: item.serving_portions ?? undefined,
       })),
     }));
 

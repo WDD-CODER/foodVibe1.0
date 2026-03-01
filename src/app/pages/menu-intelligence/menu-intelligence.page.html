@@ -25,21 +25,22 @@
     <div class="paper" [formGroup]="form_">
       <div class="paper-inner">
     <div class="paper-ornament top"></div>
+    
+    <div class="meta-row">
+      <input
+        id="menu-focus-name_"
+        type="text"
+        class="meta-input menu-name-input"
+        formControlName="name_"
+        [attr.aria-label]="'menu_name_placeholder' | translatePipe"
+        [placeholder]="'menu_name_placeholder' | translatePipe"
+        (keydown)="onMetaKeydown('name_', $event)"
+      />
+    </div>
 
     <!-- Metadata column: title stays, value to the left (RTL: value on right) -->
     <div class="meta-column">
-      <!-- Menu Name: focus first, placeholder kept -->
-      <div class="meta-row">
-        <label class="meta-label" for="menu-focus-name_">{{ 'menu_name_placeholder' | translatePipe }}</label>
-        <input
-          id="menu-focus-name_"
-          type="text"
-          class="meta-input"
-          formControlName="name_"
-          [placeholder]="'menu_name_placeholder' | translatePipe"
-          (keydown)="onMetaKeydown('name_', $event)"
-        />
-      </div>
+      <!-- Menu Name: h1-style input, no label -->
 
       <!-- Event Type: label + value/trigger; click opens dropdown with search + add new -->
       <div class="meta-row">
@@ -59,14 +60,14 @@
                 (keydown.tab)="closeEventTypeDropdown(); focusField('serving_type_'); $event.preventDefault()"
                 (keydown.enter)="getFilteredEventTypes().length ? selectEventType(getFilteredEventTypes()[0]) : focusField('serving_type_'); $event.preventDefault()"
               />
-              <div class="event-type-list">
+              <app-scrollable-dropdown [maxHeight]="200">
                 @for (t of getFilteredEventTypes(); track t) {
                   <button type="button" class="dropdown-item" (click)="selectEventType(t)">{{ t }}</button>
                 }
                 <button type="button" class="dropdown-item add-new" (click)="addNewEventType()">
                   + {{ 'add_new_category' | translatePipe }}
                 </button>
-              </div>
+              </app-scrollable-dropdown>
             </div>
           } @else {
             <button type="button" id="menu-focus-event_type_" class="meta-trigger"
@@ -78,15 +79,14 @@
         </div>
       </div>
 
-      <!-- Serving Type -->
-      <div class="meta-row">
+      <!-- Serving Type (menu type from registry) -->
+      <div class="meta-row" (keydown)="onMetaKeydown('serving_type_', $event)">
         <span class="meta-label">{{ 'menu_serving_style' | translatePipe }}</span>
-        <select id="menu-focus-serving_type_" class="meta-input meta-select" formControlName="serving_type_"
-          (keydown)="onMetaKeydown('serving_type_', $event)">
-          <option value="buffet_family">Buffet / Family Style</option>
-          <option value="plated_course">Plated / Course Based</option>
-          <option value="cocktail_passed">Cocktail / Passed</option>
-        </select>
+        <app-custom-select
+          triggerId="menu-focus-serving_type_"
+          formControlName="serving_type_"
+          [options]="servingTypeOptions_()"
+          [placeholder]="'menu_serving_style'" />
       </div>
 
       <!-- Guest Count -->
@@ -116,7 +116,7 @@
 
           <div class="section-header">
             @if (sectionSearchOpen_() === sectionIndex) {
-              <div class="section-search-wrap">
+              <div class="section-search-wrap" (clickOutside)="closeSectionSearch()">
                 <input
                   type="text"
                   class="section-search-input"
@@ -127,10 +127,10 @@
                   (keydown.enter)="addNewSectionCategory(sectionIndex); closeSectionSearch()"
                   (keydown.escape)="closeSectionSearch()"
                 />
-                <div class="section-dropdown">
+                <app-scrollable-dropdown [maxHeight]="200">
                   @for (cat of getFilteredSectionCategories(sectionIndex); track cat) {
                     <button type="button" class="dropdown-item" (click)="selectSectionCategory(sectionIndex, cat)">
-                      {{ cat }}
+                      {{ cat | translatePipe }}
                     </button>
                   }
                   @if (getSectionSearchQuery(sectionIndex).trim()) {
@@ -138,7 +138,10 @@
                       + {{ getSectionSearchQuery(sectionIndex) }}
                     </button>
                   }
-                </div>
+                  <button type="button" class="dropdown-item add-new" (click)="openAddCategoryModal(sectionIndex)">
+                    + {{ 'add_new_category' | translatePipe }}
+                  </button>
+                </app-scrollable-dropdown>
               </div>
             } @else {
               <button type="button" class="section-title-plain" (click)="openSectionSearch(sectionIndex)">
@@ -153,28 +156,54 @@
           <div class="dish-list" formArrayName="items_">
             @for (item of getItemsArray(sectionIndex).controls; track $index; let itemIndex = $index) {
               <div class="dish-row" [formGroupName]="itemIndex">
-                @if (item.get('recipe_id_')?.value) {
-                  <span class="dish-name">{{ getRecipeName(item.get('recipe_id_')?.value) }}</span>
-                  <span class="dish-qty no-print">{{ getDerivedPortions(item.value) }}</span>
-                  <button type="button" class="dish-remove no-print" (click)="removeItem(sectionIndex, itemIndex)">
-                    <lucide-icon name="x" [size]="14"></lucide-icon>
-                  </button>
-                } @else {
-                  <div class="dish-search-wrap">
-                    <input type="text" class="dish-search-input"
-                      [ngModel]="getDishSearchQuery(sectionIndex, itemIndex)"
-                      [ngModelOptions]="{ standalone: true }"
-                      (ngModelChange)="setDishSearchQuery(sectionIndex, itemIndex, $event)"
-                      [placeholder]="'menu_search_dish' | translatePipe" />
-                    @if (getDishSearchQuery(sectionIndex, itemIndex).trim()) {
-                      <div class="dish-dropdown">
-                        @for (recipe of getFilteredRecipes(sectionIndex, itemIndex); track recipe._id) {
-                          <button type="button" class="dropdown-item" (click)="selectRecipe(sectionIndex, itemIndex, recipe)">
-                            {{ recipe.name_hebrew }}
-                          </button>
-                        }
-                        @if (getFilteredRecipes(sectionIndex, itemIndex).length === 0) {
-                          <span class="dropdown-empty">{{ 'no_recipes_match' | translatePipe }}</span>
+                <div class="dish-name-cell">
+                  @if (item.get('recipe_id_')?.value) {
+                    <span class="dish-name">{{ getRecipeName(item.get('recipe_id_')?.value) }}</span>
+                    <button type="button" class="dish-meta-toggle no-print"
+                      [attr.aria-label]="isDishMetaExpanded(sectionIndex, itemIndex) ? ('hide_metadata' | translatePipe) : ('show_metadata' | translatePipe)"
+                      (click)="toggleDishMeta(sectionIndex, itemIndex)">
+                      <lucide-icon [name]="isDishMetaExpanded(sectionIndex, itemIndex) ? 'chevron-up' : 'chevron-down'" [size]="16"></lucide-icon>
+                    </button>
+                    <button type="button" class="dish-remove no-print" (click)="removeItem(sectionIndex, itemIndex)">
+                      <lucide-icon name="x" [size]="14"></lucide-icon>
+                    </button>
+                  } @else {
+                    <div class="dish-search-wrap">
+                      <input type="text" class="dish-search-input"
+                        [ngModel]="getDishSearchQuery(sectionIndex, itemIndex)"
+                        [ngModelOptions]="{ standalone: true }"
+                        (ngModelChange)="setDishSearchQuery(sectionIndex, itemIndex, $event)"
+                        [placeholder]="'menu_search_dish' | translatePipe" />
+                      @if (getDishSearchQuery(sectionIndex, itemIndex).trim()) {
+                        <app-scrollable-dropdown [maxHeight]="200">
+                          @for (recipe of getFilteredRecipes(sectionIndex, itemIndex); track recipe._id) {
+                            <button type="button" class="dropdown-item" (click)="selectRecipe(sectionIndex, itemIndex, recipe)">
+                              {{ recipe.name_hebrew }}
+                            </button>
+                          }
+                          @if (getFilteredRecipes(sectionIndex, itemIndex).length === 0) {
+                            <span class="dropdown-empty">{{ 'no_recipes_match' | translatePipe }}</span>
+                          }
+                        </app-scrollable-dropdown>
+                      }
+                    </div>
+                  }
+                </div>
+                @if (item.get('recipe_id_')?.value && isDishMetaExpanded(sectionIndex, itemIndex)) {
+                  <div class="dish-data">
+                    @for (fieldKey of activeMenuTypeFields_(); track fieldKey) {
+                      <div class="dish-field" (click)="!isEditingDishField(sectionIndex, itemIndex, fieldKey) && startEditDishField(sectionIndex, itemIndex, fieldKey)">
+                        <span class="dish-field-label">{{ getDishFieldLabelKey(fieldKey) | translatePipe }}</span>
+                        @if (isEditingDishField(sectionIndex, itemIndex, fieldKey)) {
+                          <input [id]="'dish-' + sectionIndex + '-' + itemIndex + '-' + fieldKey"
+                            type="number" [formControlName]="fieldKey" min="0" step="0.01"
+                            class="dish-field-input-inline"
+                            [style.width]="getInputWidth(item.get(fieldKey)?.value)"
+                            (blur)="commitEditDishField()"
+                            (keydown.enter)="commitEditDishField()"
+                            (click)="$event.stopPropagation()" />
+                        } @else {
+                          <span class="dish-field-value">{{ item.get(fieldKey)?.value ?? '' }}</span>
                         }
                       </div>
                     }

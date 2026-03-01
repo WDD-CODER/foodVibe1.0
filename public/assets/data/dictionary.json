@@ -258,6 +258,8 @@
         "menu_total_cost": "עלות כוללת",
         "menu_save": "שמור תפריט",
         "menu_export_customer": "ייצוא ללקוח",
+        "show_metadata": "הצג נתוני מנה",
+        "hide_metadata": "הסתר נתוני מנה",
         "buffet_family": "בופה / משפחתי",
         "plated_course": "מנות / קורסים",
         "cocktail_passed": "קוקטייל / מועבר",
@@ -309,6 +311,19 @@
         "loader_loading": "טוען...",
         "loader_saving": "שומר...",
         "loader_please_wait": "רגע, מכינים הכל...",
-        "loader_cooking_up": "מבשלים את המידע..."
+        "loader_cooking_up": "מבשלים את המידע...",
+        "dish_sell_price": "מחיר מכירה",
+        "dish_food_cost_money": "עלות מזון (₪)",
+        "dish_food_cost_pct": "עלות מזון (%)",
+        "dish_serving_portions": "כמות מנות",
+        "dish_serving_portions_pct": "אחוז מנות",
+        "Amuse-Bouche": "אמוז-בוש",
+        "Appetizers": "מנות פתיחה",
+        "Soups": "מרקים",
+        "Salads": "סלטים",
+        "Main Course": "מנה עיקרית",
+        "Sides": "תוספות",
+        "Desserts": "קינוחים",
+        "Beverages": "משקאות"
     }
 }
