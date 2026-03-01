@@ -295,7 +295,8 @@
     display: flex;
     align-items: center;
 
-    flex: 1;
+    flex: 0 1 66.67%;
+    max-width: 66.67%;
     min-width: 0;
 
     padding-inline: var(--rb-gap-mid);
@@ -341,6 +342,35 @@
     border-radius: var(--radius-md);
     font-variant-numeric: tabular-nums;
     text-align: center;
+  }
+
+  .logistics-add-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding-inline: var(--rb-gap-mid);
+    padding-block: 0.5rem;
+
+    background: var(--color-primary);
+    color: var(--color-text-on-primary);
+    font-weight: 600;
+    font-size: 0.875rem;
+
+    border: none;
+    border-radius: var(--radius-md);
+
+    cursor: pointer;
+    transition: filter 0.2s ease;
+
+    &:hover:not(:disabled) {
+      filter: brightness(1.08);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
   }
 
   .logistics-tool-dropdown {

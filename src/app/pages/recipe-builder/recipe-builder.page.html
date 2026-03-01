@@ -56,6 +56,42 @@
           <h2 class="section-title">{{ 'dish_logistics' | translatePipe }}</h2>
           <p class="section-desc">{{ 'dish_logistics_desc' | translatePipe }}</p>
           <div class="logistics-grid" [formGroup]="recipeForm_" (clickOutside)="logisticsToolDropdownOpen_.set(false)">
+            <div class="logistics-add-wrap">
+              <div class="logistics-add-inner">
+                <div class="logistics-tool-search-wrap">
+                  <lucide-icon name="search" class="logistics-search-icon" [size]="18"></lucide-icon>
+                  <input type="text" class="logistics-tool-search"
+                    [value]="logisticsToolSearchQuery_()"
+                    (input)="onLogisticsSearchInput($any($event.target).value)"
+                    [placeholder]="'search_tool_placeholder' | translatePipe" />
+                </div>
+                <input type="number" class="logistics-qty-input" min="1"
+                  [value]="logisticsToolQuantity_()"
+                  (input)="logisticsToolQuantity_.set($any($event.target).valueAsNumber || 1)" />
+                <button type="button" class="logistics-add-btn"
+                  [disabled]="!logisticsSelectedToolId_()"
+                  (click)="addSelectedToolToBaseline()">
+                  {{ 'add' | translatePipe }}
+                </button>
+              </div>
+              @if (logisticsToolDropdownOpen_()) {
+                <app-scrollable-dropdown [maxHeight]="220" class="logistics-tool-dropdown">
+                  <ul role="listbox">
+                    <li role="option" class="logistics-tool-option logistics-tool-add-new"
+                      (click)="openAddNewToolModal()">
+                      <lucide-icon name="plus-circle" [size]="16"></lucide-icon>
+                      <span>{{ 'add_new_tool' | translatePipe }}</span>
+                    </li>
+                    @for (eq of filteredLogisticsTools_(); track eq._id) {
+                      <li role="option" class="logistics-tool-option"
+                        (click)="selectLogisticsTool(eq._id)">
+                        {{ eq.name_hebrew }}
+                      </li>
+                    }
+                  </ul>
+                </app-scrollable-dropdown>
+              }
+            </div>
             <div class="logistics-chips-wrap" formGroupName="logistics">
               <div class="logistics-chips" formArrayName="baseline_">
                 @for (ctrl of logisticsBaselineArray.controls; track $index; let i = $index) {
@@ -68,38 +104,6 @@
                   </button>
                 }
               </div>
-            </div>
-            <div class="logistics-add-wrap">
-              <div class="logistics-add-inner">
-                <div class="logistics-tool-search-wrap">
-                  <lucide-icon name="search" class="logistics-search-icon" [size]="18"></lucide-icon>
-                  <input type="text" class="logistics-tool-search"
-                    [value]="logisticsToolSearchQuery_()"
-                    (input)="logisticsToolSearchQuery_.set($any($event.target).value); logisticsToolDropdownOpen_.set(true)"
-                    (focus)="logisticsToolDropdownOpen_.set(true)"
-                    [placeholder]="'search_tool_placeholder' | translatePipe" />
-                </div>
-                <input type="number" class="logistics-qty-input" min="1"
-                  [value]="logisticsToolQuantity_()"
-                  (input)="logisticsToolQuantity_.set($any($event.target).valueAsNumber || 1)" />
-              </div>
-              @if (logisticsToolDropdownOpen_()) {
-                <app-scrollable-dropdown [maxHeight]="220" class="logistics-tool-dropdown">
-                  <ul role="listbox">
-                    <li role="option" class="logistics-tool-option logistics-tool-add-new"
-                      (click)="openAddNewToolModal()">
-                      <lucide-icon name="plus-circle" [size]="16"></lucide-icon>
-                      <span>{{ 'add_new_tool' | translatePipe }}</span>
-                    </li>
-                    @for (eq of filteredLogisticsTools_(); track eq._id) {
-                      <li role="option" class="logistics-tool-option"
-                        (click)="addToolToBaseline(eq._id)">
-                        {{ eq.name_hebrew }}
-                      </li>
-                    }
-                  </ul>
-                </app-scrollable-dropdown>
-              }
             </div>
           </div>
         </div>
