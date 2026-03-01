@@ -159,6 +159,35 @@ export class MetadataRegistryService {
     }
   }
 
+  async renameMenuType(oldKey: string, newKey: string): Promise<void> {
+    const trimmed = newKey.trim();
+    if (!trimmed || trimmed === oldKey) return;
+    if (this.menuTypes_().some(t => t.key === trimmed)) {
+      this.userMsgService.onSetErrorMsg(`סוג תפריט "${trimmed}" כבר קיים`);
+      return;
+    }
+    const current = this.menuTypes_();
+    const idx = current.findIndex(t => t.key === oldKey);
+    if (idx === -1) return;
+    const def = current[idx];
+    const updated = current.slice();
+    updated[idx] = { key: trimmed, fields: def.fields };
+    try {
+      const registries = await this.storageService.query<any>('MENU_TYPES');
+      const registry = registries[0];
+      if (registry?._id) {
+        await this.storageService.put('MENU_TYPES', { ...registry, items: updated });
+      } else {
+        await this.storageService.post('MENU_TYPES', { items: updated });
+      }
+      this.menuTypes_.set(updated);
+      this.userMsgService.onSetSuccessMsg(`סוג תפריט שונה ל-"${trimmed}"`);
+    } catch (err) {
+      this.userMsgService.onSetErrorMsg('שגיאה בשינוי שם סוג התפריט');
+      console.error(err);
+    }
+  }
+
   getLabelColor(key: string): string {
     const def = this.labels_().find(l => l.key === key);
     return def?.color ?? '#78716C';

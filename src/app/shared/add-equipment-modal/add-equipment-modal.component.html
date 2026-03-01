@@ -17,9 +17,10 @@
         <label>{{ 'category' | translatePipe }}</label>
         <app-custom-select
           [ngModel]="category_()"
-          (ngModelChange)="category_.set($event)"
-          [options]="categoryOptions"
-          [placeholder]="'category'" />
+          (ngModelChange)="onCategoryChange($event)"
+          [options]="categoryOptions()"
+          [placeholder]="'category'"
+          [translateLabels]="true" />
       </div>
     </div>
 

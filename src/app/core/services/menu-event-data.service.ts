@@ -59,4 +59,14 @@ export class MenuEventDataService {
     };
     return this.addMenuEvent(cloned);
   }
+
+  /** Updates all menu events that use oldServingType to newServingType. */
+  async updateServingTypeForAll(oldServingType: string, newServingType: string): Promise<void> {
+    if (oldServingType === newServingType) return;
+    const events = this.eventsStore_();
+    const toUpdate = events.filter(e => e.serving_type_ === oldServingType);
+    for (const event of toUpdate) {
+      await this.updateMenuEvent({ ...event, serving_type_: newServingType });
+    }
+  }
 }

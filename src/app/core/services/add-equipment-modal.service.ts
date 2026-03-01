@@ -11,9 +11,13 @@ export interface AddEquipmentResult {
 export class AddEquipmentModalService {
   private readonly resultSubject = new Subject<AddEquipmentResult | null>();
 
+  private readonly initialName_ = signal('');
   readonly isOpen_ = signal(false);
+  /** Initial name to pre-fill when opening (e.g. from logistics search). */
+  readonly initialName = this.initialName_.asReadonly();
 
-  open(): Promise<AddEquipmentResult | null> {
+  open(initialName?: string): Promise<AddEquipmentResult | null> {
+    this.initialName_.set(initialName?.trim() ?? '');
     this.isOpen_.set(true);
     return firstValueFrom(this.resultSubject);
   }
@@ -30,5 +34,6 @@ export class AddEquipmentModalService {
 
   private close(): void {
     this.isOpen_.set(false);
+    this.initialName_.set('');
   }
 }
