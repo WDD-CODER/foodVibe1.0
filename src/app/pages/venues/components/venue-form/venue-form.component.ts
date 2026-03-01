@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   EventEmitter,
   inject,
@@ -23,6 +24,7 @@ import {
 } from '@models/venue.model';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
+import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 
 const ENV_TYPES: EnvironmentType[] = [
   'professional_kitchen',
@@ -34,7 +36,7 @@ const ENV_TYPES: EnvironmentType[] = [
 @Component({
   selector: 'app-venue-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe, LoaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CustomSelectComponent],
   templateUrl: './venue-form.component.html',
   styleUrl: './venue-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -65,6 +67,11 @@ export class VenueFormComponent implements OnInit {
   protected get allEquipment_() {
     return this.equipmentData.allEquipment_();
   }
+
+  protected envOptions: { value: string; label: string }[] = ENV_TYPES.map((env) => ({ value: env, label: env }));
+  protected equipmentOptions_ = computed(() =>
+    this.equipmentData.allEquipment_().map((eq) => ({ value: eq._id, label: eq.name_hebrew }))
+  );
 
   ngOnInit(): void {
     this.buildForm();

@@ -17,20 +17,20 @@
   <div class="filters-bar">
     <label class="filter-item">
       <span>{{ 'menu_event_type' | translatePipe }}</span>
-      <select [ngModel]="eventTypeFilter_()" (ngModelChange)="eventTypeFilter_.set($event)">
-        @for (type of eventTypeOptions_(); track type) {
-          <option [value]="type">{{ type === 'all' ? ('all' | translatePipe) : (type | translatePipe) }}</option>
-        }
-      </select>
+      <app-custom-select
+        [ngModel]="eventTypeFilter_()"
+        (ngModelChange)="eventTypeFilter_.set($event)"
+        [options]="eventTypeSelectOptions_()"
+        placeholder="all" />
     </label>
 
     <label class="filter-item">
       <span>{{ 'menu_serving_style' | translatePipe }}</span>
-      <select [ngModel]="servingStyleFilter_()" (ngModelChange)="servingStyleFilter_.set($event)">
-        @for (opt of servingStyleOptions_; track opt.value) {
-          <option [value]="opt.value">{{ opt.label | translatePipe }}</option>
-        }
-      </select>
+      <app-custom-select
+        [ngModel]="servingStyleFilter_()"
+        (ngModelChange)="servingStyleFilter_.set($event)"
+        [options]="servingStyleOptions_"
+        placeholder="all" />
     </label>
 
     <div class="filter-item date-range-wrap">
@@ -43,12 +43,11 @@
     <div class="filter-item sort-wrap">
       <span class="sort-label">{{ 'sort' | translatePipe }}</span>
       <div class="sort-controls">
-        <select [ngModel]="sortBy_()" (ngModelChange)="sortBy_.set($event)">
-          <option value="date">{{ 'sort_by_date' | translatePipe }}</option>
-          <option value="name">{{ 'sort_by_name' | translatePipe }}</option>
-          <option value="food_cost">{{ 'menu_food_cost' | translatePipe }}</option>
-          <option value="guest_count">{{ 'menu_guest_count' | translatePipe }}</option>
-        </select>
+        <app-custom-select
+          [ngModel]="sortBy_()"
+          (ngModelChange)="sortBy_.set($event)"
+          [options]="sortBySelectOptions_"
+          placeholder="sort" />
         <button type="button" class="sort-order-btn" (click)="toggleSortOrder()" [attr.aria-label]="getSortOrderLabel()" [attr.title]="getSortOrderLabel()">
           {{ getSortOrderLabel() | translatePipe }}
         </button>

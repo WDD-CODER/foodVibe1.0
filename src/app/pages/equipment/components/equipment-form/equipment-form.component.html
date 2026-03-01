@@ -15,11 +15,11 @@
       </div>
       <div class="form-group">
         <label for="category_">{{ 'category' | translatePipe }}</label>
-        <select id="category_" formControlName="category_">
-          @for (cat of categories; track cat) {
-            <option [value]="cat">{{ cat | translatePipe }}</option>
-          }
-        </select>
+        <app-custom-select
+          triggerId="category_"
+          formControlName="category_"
+          [options]="categoryOptions"
+          placeholder="category" />
       </div>
       <div class="form-group">
         <label for="owned_quantity_">{{ 'owned_quantity' | translatePipe }}</label>

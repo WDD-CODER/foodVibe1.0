@@ -124,14 +124,12 @@
             </div>
 
             <div class="col-prep-category">
-              <select formControlName="category_name" class="grid-select category-select"
-                (change)="onCategoryChange(group, $any($event.target).value)">
-                <option value="">{{ 'choose_category' | translatePipe }}</option>
-                @for (cat of getPreparationCategories(); track cat) {
-                  <option [value]="cat">{{ cat | translatePipe }}</option>
-                }
-                <option value="__add_new__">{{ 'add_preparation_category' | translatePipe }}</option>
-              </select>
+              <app-custom-select
+                formControlName="category_name"
+                class="grid-select category-select"
+                [options]="categoryOptionsForGroup()"
+                placeholder="choose_category"
+                (valueChange)="onCategoryChange(group, $event)" />
             </div>
 
             <div class="col-prep-qty">
@@ -152,11 +150,11 @@
             </div>
 
             <div class="col-prep-unit">
-              <select formControlName="unit" class="grid-select">
-                @for (unit of getAllUnitKeys(); track unit) {
-                  <option [value]="unit">{{ unit | translatePipe }}</option>
-                }
-              </select>
+              <app-custom-select
+                formControlName="unit"
+                class="grid-select"
+                [options]="unitOptionsForWorkflow()"
+                placeholder="unit" />
             </div>
 
             <div class="col-prep-actions">

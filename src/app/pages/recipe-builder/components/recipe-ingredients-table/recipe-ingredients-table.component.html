@@ -49,12 +49,16 @@
 
       <div class="col-unit">
         @if (group.get('referenceId')?.value) {
-        <select formControlName="unit" class="grid-select" (change)="updateLineCalculations($index)"
-          (keydown)="onUnitKeydown($event, $index)" focusByRow [rowIndex]="$index" kind="unit">
-          @for (unit of getAvailableUnits(group); track unit) {
-          <option [value]="unit">{{ unit | translatePipe }}</option>
-          }
-        </select>
+        <app-custom-select
+          formControlName="unit"
+          class="grid-select"
+          [options]="getUnitOptions(group)"
+          placeholder="unit"
+          [triggerId]="'unit-row-' + $index"
+          focusByRow
+          [rowIndex]="$index"
+          kind="unit"
+          (valueChange)="updateLineCalculations($index)" />
         } @else {
         <span class="placeholder-dash">---</span>
         }

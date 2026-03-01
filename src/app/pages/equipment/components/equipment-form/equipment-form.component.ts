@@ -19,6 +19,7 @@ import {
 } from '@models/equipment.model';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
+import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 
 const CATEGORIES: EquipmentCategory[] = [
   'heat_source',
@@ -32,7 +33,7 @@ const CATEGORIES: EquipmentCategory[] = [
 @Component({
   selector: 'app-equipment-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe, LoaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CustomSelectComponent],
   templateUrl: './equipment-form.component.html',
   styleUrl: './equipment-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,6 +49,7 @@ export class EquipmentFormComponent implements OnInit {
   protected isEditMode_ = signal(false);
   protected isSaving_ = signal(false);
   protected categories = CATEGORIES;
+  protected categoryOptions = CATEGORIES.map((c) => ({ value: c, label: c }));
 
   ngOnInit(): void {
     this.buildForm();

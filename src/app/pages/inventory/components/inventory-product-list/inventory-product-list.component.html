@@ -68,12 +68,12 @@
           </div>
           <div class="col-supplier">{{ getSupplierNames(product.supplierIds_) || '—' }}</div>
           <div class="col-unit">
-            <select class="grid-select" [ngModel]="product.base_unit_"
-              (ngModelChange)="onUnitChange(product, $event)">
-              @for (u of getProductUnits(product); track u) {
-                <option [value]="u">{{ u | translatePipe }}</option>
-              }
-            </select>
+            <app-custom-select
+              class="grid-select"
+              [ngModel]="product.base_unit_"
+              (ngModelChange)="onUnitChange(product, $event)"
+              [options]="getUnitOptions(product)"
+              placeholder="unit" />
           </div>
           <div class="col-price">
             @if (savingPriceId_() === product._id) {

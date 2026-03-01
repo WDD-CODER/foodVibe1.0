@@ -209,79 +209,177 @@
     color: var(--color-text-muted);
   }
 
-  .baseline-rows {
+  .logistics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    gap: var(--rb-gap-mid);
+  }
+
+  .logistics-chips-wrap {
     display: flex;
     flex-direction: column;
 
-    gap: var(--rb-gap-tight);
-    margin-block-end: var(--rb-gap-mid);
+    min-height: 2.5rem;
+    padding: var(--rb-gap-tight);
+
+    background: var(--bg-muted);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
   }
 
-  .baseline-row {
-    display: flex;
+  .logistics-chips {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
+    grid-auto-rows: minmax(2rem, auto);
+    gap: 0.35rem;
+    grid-auto-flow: dense;
+  }
+
+  .logistics-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex-wrap: wrap;
+    gap: 0.2rem;
+
+    padding-inline: 0.5rem;
+    padding-block: 0.35rem;
+    min-height: 2rem;
+
+    background: var(--bg-glass-strong);
+    color: var(--color-text-secondary);
+    font-size: 0.8125rem;
+    font-weight: 500;
+
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+
+    &:hover {
+      background: var(--bg-danger-subtle);
+      border-color: var(--color-danger);
+      color: var(--color-danger);
+    }
+  }
+
+  .logistics-chip-label {
+    max-inline-size: 6rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .logistics-chip-qty {
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-muted);
+  }
+
+  .logistics-add-wrap {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+
+    gap: 0.25rem;
+  }
+
+  .logistics-add-inner {
+    display: flex;
+    align-items: center;
+    gap: var(--rb-gap-tight);
+  }
+
+  .logistics-tool-search-wrap {
+    display: flex;
     align-items: center;
 
-    gap: var(--rb-gap-tight);
+    flex: 1;
+    min-width: 0;
 
-    select {
-      flex: 1;
-      min-width: 8.75rem;
-      padding-block: 0.5rem;
-      padding-inline: var(--rb-gap-mid);
+    padding-inline: var(--rb-gap-mid);
+    padding-block: 0.5rem;
 
-      background: var(--bg-glass);
+    background: var(--bg-glass);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
 
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-md);
-      outline: none;
-
-      &:focus {
-        border-color: var(--border-focus);
-        box-shadow: var(--shadow-focus);
-      }
+    &:focus-within {
+      border-color: var(--border-focus);
+      box-shadow: var(--shadow-focus);
     }
+  }
 
-    .qty-input {
-      width: 3.75rem;
-      padding-block: 0.4rem;
-      padding-inline: 0.5rem;
+  .logistics-search-icon {
+    flex-shrink: 0;
 
-      background: var(--bg-glass);
+    margin-inline-end: 0.35rem;
 
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+  }
+
+  .logistics-tool-search {
+    flex: 1;
+    min-width: 0;
+
+    padding: 0;
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 0.875rem;
+    color: var(--color-text-main);
+  }
+
+  .logistics-qty-input {
+    width: 3.5rem;
+    padding-block: 0.4rem;
+    padding-inline: 0.5rem;
+
+    background: var(--bg-glass);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+
+  .logistics-tool-dropdown {
+    position: absolute;
+    inset-inline-start: 0;
+    inset-inline-end: 0;
+    top: 100%;
+    z-index: 50;
+
+    margin-block-start: 0.25rem;
+
+    background: var(--bg-pure);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+  }
+
+  .logistics-tool-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    padding-inline: var(--rb-gap-mid);
+    padding-block: 0.5rem;
+
+    font-size: 0.875rem;
+    color: var(--color-text-main);
+
+    cursor: pointer;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: var(--bg-glass-hover);
     }
+  }
 
-    .critical-check {
-      display: flex;
-      align-items: center;
-
-      gap: 0.25rem;
-
-      font-size: 0.875rem;
-
-      cursor: pointer;
-    }
-
-    .btn-remove {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-
-      padding: 0.25rem;
-
-      background: none;
-      border: none;
-      color: var(--color-text-muted);
-
-      cursor: pointer;
-      transition: color 0.2s ease;
-
-      &:hover {
-        color: var(--color-danger);
-      }
-    }
+  .logistics-tool-add-new {
+    color: var(--color-primary);
+    font-weight: 600;
   }
 }
 
@@ -321,17 +419,7 @@
     border-radius: var(--radius-md);
   }
 
-  .logistics-logic .baseline-row {
-    flex-direction: column;
-    align-items: stretch;
-
-    select,
-    .qty-input {
-      width: 100%;
-    }
-
-    .critical-check {
-      align-self: flex-start;
-    }
+  .logistics-logic .logistics-grid {
+    grid-template-columns: 1fr;
   }
 }

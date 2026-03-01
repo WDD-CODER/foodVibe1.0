@@ -1,11 +1,11 @@
-import { Component, inject, signal, output, input } from '@angular/core';
+import { Component, computed, inject, signal, output, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { ClickOutSideDirective } from '@directives/click-out-side';
-import { SelectOnFocusDirective } from "@directives/select-on-focus.directive";
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'; // Adjusted name
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
+import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 
 @Component({
   selector: 'unit-creator-modal',
@@ -16,7 +16,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'; // Adj
     LucideAngularModule,
     ClickOutSideDirective,
     SelectOnFocusDirective,
-    TranslatePipe // 👈 Added
+    CustomSelectComponent
   ],
   templateUrl: './unit-creator.component.html',
   styleUrl: './unit-creator.component.scss'
@@ -35,6 +35,9 @@ export class UnitCreatorModal {
   basisUnit_ = signal<string>(''); // 🛠️ REFACTORED: Use technical key 'gram'
 
   protected basisOptions_ = this.unitRegistryService.allUnitKeys_;
+  protected basisUnitOptions_ = computed(() =>
+    this.basisOptions_().map((k) => ({ value: k, label: k }))
+  );
 
   save() {
     if (this.newUnitName_() && this.newUnitValue_() > 0) {

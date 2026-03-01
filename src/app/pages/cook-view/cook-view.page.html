@@ -81,11 +81,12 @@
                   </button>
                 </div>
                 <div class="col-unit">
-                  <select class="unit-select" [value]="row.unit" (change)="setIngredientUnit(i, $any($event.target).value)">
-                    @for (u of row.availableUnits; track u) {
-                      <option [value]="u">{{ u | translatePipe }}</option>
-                    }
-                  </select>
+                  <app-custom-select
+                    class="unit-select"
+                    [ngModel]="row.unit"
+                    (ngModelChange)="setIngredientUnit(i, $event)"
+                    [options]="getUnitOptionsForRow(row)"
+                    placeholder="unit" />
                   <button type="button" class="remove-ingredient-btn" (click)="removeIngredient(i)" [attr.aria-label]="'remove' | translatePipe">
                     <lucide-icon name="trash-2" [size]="16"></lucide-icon>
                   </button>
@@ -94,11 +95,12 @@
                 <div class="col-amount">{{ formatAmount(getDisplayAmount(i, row)) }}</div>
                 <div class="col-unit">
                   @if (row.availableUnits.length > 1) {
-                    <select class="unit-select" [value]="getDisplayUnit(i, row)" (change)="setUnitOverride(i, $any($event.target).value)">
-                      @for (u of row.availableUnits; track u) {
-                        <option [value]="u">{{ u | translatePipe }}</option>
-                      }
-                    </select>
+                    <app-custom-select
+                      class="unit-select"
+                      [ngModel]="getDisplayUnit(i, row)"
+                      (ngModelChange)="setUnitOverride(i, $event)"
+                      [options]="getUnitOptionsForRow(row)"
+                      placeholder="unit" />
                   } @else {
                     <span>{{ getDisplayUnit(i, row) | translatePipe }}</span>
                   }

@@ -13,6 +13,7 @@ import { ConfirmModalService } from '@services/confirm-modal.service';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
+import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
 
@@ -21,7 +22,7 @@ const MOBILE_BREAKPOINT_PX = 768;
 @Component({
   selector: 'inventory-product-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, SelectOnFocusDirective, ClickOutSideDirective, LoaderComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, SelectOnFocusDirective, ClickOutSideDirective, LoaderComponent, CustomSelectComponent],
   templateUrl: './inventory-product-list.component.html',
   styleUrl: './inventory-product-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -283,6 +284,10 @@ export class InventoryProductListComponent implements OnDestroy {
     const fromOptions = (product.purchase_options_ || []).map(o => o.unit_symbol_).filter(Boolean);
     const all = [base, ...fromOptions];
     return [...new Set(all)];
+  }
+
+  protected getUnitOptions(product: Product): { value: string; label: string }[] {
+    return this.getProductUnits(product).map((u) => ({ value: u, label: u }));
   }
 
   /** Price per 1 of the given unit (converted from buy_price_global_ which is per base_unit) */

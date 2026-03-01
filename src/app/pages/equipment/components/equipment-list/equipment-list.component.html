@@ -19,16 +19,12 @@
     </div>
     <div class="filter-section">
       <label for="category-filter">{{ 'category' | translatePipe }}</label>
-      <select
-        id="category-filter"
+      <app-custom-select
+        triggerId="category-filter"
         [ngModel]="categoryFilter_()"
         (ngModelChange)="categoryFilter_.set($event)"
-      >
-        <option value="">{{ 'all' | translatePipe }}</option>
-        @for (cat of categories; track cat) {
-          <option [value]="cat">{{ categoryLabel(cat) | translatePipe }}</option>
-        }
-      </select>
+        [options]="categoryFilterOptions"
+        placeholder="category" />
     </div>
   </div>
 

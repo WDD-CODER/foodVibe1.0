@@ -15,11 +15,11 @@
 
       <div class="input-stack">
         <label>{{ 'category' | translatePipe }}</label>
-        <select [ngModel]="category_()" (ngModelChange)="category_.set($event)">
-          @for (cat of categories; track cat) {
-            <option [value]="cat">{{ cat | translatePipe }}</option>
-          }
-        </select>
+        <app-custom-select
+          [ngModel]="category_()"
+          (ngModelChange)="category_.set($event)"
+          [options]="categoryOptions"
+          [placeholder]="'category'" />
       </div>
     </div>
 

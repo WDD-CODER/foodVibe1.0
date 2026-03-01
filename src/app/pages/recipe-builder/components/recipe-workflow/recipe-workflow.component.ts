@@ -9,6 +9,7 @@ import { PreparationSearchComponent } from '../preparation-search/preparation-se
 import type { PreparationEntry } from '@services/preparation-registry.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 
 @Component({
   selector: 'app-recipe-workflow',
@@ -19,7 +20,8 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
     LucideAngularModule,
     PreparationSearchComponent,
     TranslatePipe,
-    SelectOnFocusDirective
+    SelectOnFocusDirective,
+    CustomSelectComponent
   ],
   templateUrl: './recipe-workflow.component.html',
   styleUrl: './recipe-workflow.component.scss'
@@ -76,6 +78,19 @@ export class RecipeWorkflowComponent implements OnChanges {
 
   getAllUnitKeys(): string[] {
     return this.unitRegistry_.allUnitKeys_()
+  }
+
+  protected categoryOptionsForGroup(): { value: string; label: string }[] {
+    const cats = this.getPreparationCategories()
+    return [
+      { value: '', label: 'choose_category' },
+      ...cats.map((c) => ({ value: c, label: c })),
+      { value: '__add_new__', label: 'add_preparation_category' },
+    ]
+  }
+
+  protected unitOptionsForWorkflow(): { value: string; label: string }[] {
+    return this.getAllUnitKeys().map((u) => ({ value: u, label: u }))
   }
 
   getPreparationCategories(): string[] {

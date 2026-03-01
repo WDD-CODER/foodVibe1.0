@@ -15,11 +15,11 @@
       </div>
       <div class="form-group">
         <label for="environment_type_">{{ 'environment_type' | translatePipe }}</label>
-        <select id="environment_type_" formControlName="environment_type_">
-          @for (env of envTypes; track env) {
-            <option [value]="env">{{ env | translatePipe }}</option>
-          }
-        </select>
+        <app-custom-select
+          triggerId="environment_type_"
+          formControlName="environment_type_"
+          [options]="envOptions"
+          [placeholder]="'environment_type'" />
       </div>
       <div class="form-group">
         <label for="notes_">{{ 'notes' | translatePipe }}</label>
@@ -37,12 +37,11 @@
       </div>
       @for (ctrl of infraArray.controls; track $index; let i = $index) {
         <div class="infra-row" [formGroupName]="i">
-          <select formControlName="equipment_id_">
-            <option value="">{{ 'choose_equipment' | translatePipe }}</option>
-            @for (eq of allEquipment_; track eq._id) {
-              <option [value]="eq._id">{{ eq.name_hebrew }}</option>
-            }
-          </select>
+          <app-custom-select
+            formControlName="equipment_id_"
+            [options]="equipmentOptions_()"
+            [placeholder]="'choose_equipment'"
+            [translateLabels]="false" />
           <input type="number" formControlName="available_quantity_" min="0" placeholder="0" />
           <button type="button" class="btn-icon" (click)="removeInfraRow(i)" [attr.aria-label]="'remove' | translatePipe">
             <lucide-icon name="trash-2" [size]="16"></lucide-icon>

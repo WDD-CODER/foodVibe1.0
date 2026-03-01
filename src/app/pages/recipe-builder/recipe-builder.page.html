@@ -50,45 +50,57 @@
       </div>
     </section>
 
-    @if (recipeType_() === 'dish' && !historyViewMode_()) {
+    @if (!historyViewMode_()) {
       <section class="builder-section">
         <div class="section-card logistics-logic">
           <h2 class="section-title">{{ 'dish_logistics' | translatePipe }}</h2>
           <p class="section-desc">{{ 'dish_logistics_desc' | translatePipe }}</p>
-          <div [formGroup]="recipeForm_">
-            <div class="logistics-baseline" formGroupName="logistics">
-            <div class="baseline-rows" formArrayName="baseline_">
-              @for (ctrl of logisticsBaselineArray.controls; track $index; let i = $index) {
-                <div class="baseline-row" [formGroupName]="i">
-                  <select formControlName="equipment_id_">
-                    <option value="">{{ 'choose_equipment' | translatePipe }}</option>
-                    @for (eq of allEquipment_; track eq._id) {
-                      <option [value]="eq._id">{{ eq.name_hebrew }}</option>
-                    }
-                  </select>
-                  <input type="number" formControlName="quantity_" min="0" class="qty-input" />
-                  <select formControlName="phase_">
-                    <option value="prep">{{ 'phase_prep' | translatePipe }}</option>
-                    <option value="service">{{ 'phase_service' | translatePipe }}</option>
-                    <option value="both">{{ 'phase_both' | translatePipe }}</option>
-                  </select>
-                  <label class="critical-check">
-                    <input type="checkbox" formControlName="is_critical_" />
-                    {{ 'critical' | translatePipe }}
-                  </label>
-                  <button type="button" class="btn-remove" (click)="removeBaselineRow(i)" [attr.aria-label]="'remove' | translatePipe">
-                    <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+          <div class="logistics-grid" [formGroup]="recipeForm_" (clickOutside)="logisticsToolDropdownOpen_.set(false)">
+            <div class="logistics-chips-wrap" formGroupName="logistics">
+              <div class="logistics-chips" formArrayName="baseline_">
+                @for (ctrl of logisticsBaselineArray.controls; track $index; let i = $index) {
+                  @let eqId = ctrl.get('equipment_id_')?.value;
+                  @let qty = ctrl.get('quantity_')?.value;
+                  <button type="button" class="logistics-chip"
+                    (click)="removeBaselineRow(i)" [attr.aria-label]="'remove' | translatePipe">
+                    <span class="logistics-chip-label">{{ getEquipmentNameById(eqId) }}</span>
+                    <span class="logistics-chip-qty">×{{ qty }}</span>
                   </button>
+                }
+              </div>
+            </div>
+            <div class="logistics-add-wrap">
+              <div class="logistics-add-inner">
+                <div class="logistics-tool-search-wrap">
+                  <lucide-icon name="search" class="logistics-search-icon" [size]="18"></lucide-icon>
+                  <input type="text" class="logistics-tool-search"
+                    [value]="logisticsToolSearchQuery_()"
+                    (input)="logisticsToolSearchQuery_.set($any($event.target).value); logisticsToolDropdownOpen_.set(true)"
+                    (focus)="logisticsToolDropdownOpen_.set(true)"
+                    [placeholder]="'search_tool_placeholder' | translatePipe" />
                 </div>
+                <input type="number" class="logistics-qty-input" min="1"
+                  [value]="logisticsToolQuantity_()"
+                  (input)="logisticsToolQuantity_.set($any($event.target).valueAsNumber || 1)" />
+              </div>
+              @if (logisticsToolDropdownOpen_()) {
+                <app-scrollable-dropdown [maxHeight]="220" class="logistics-tool-dropdown">
+                  <ul role="listbox">
+                    <li role="option" class="logistics-tool-option logistics-tool-add-new"
+                      (click)="openAddNewToolModal()">
+                      <lucide-icon name="plus-circle" [size]="16"></lucide-icon>
+                      <span>{{ 'add_new_tool' | translatePipe }}</span>
+                    </li>
+                    @for (eq of filteredLogisticsTools_(); track eq._id) {
+                      <li role="option" class="logistics-tool-option"
+                        (click)="addToolToBaseline(eq._id)">
+                        {{ eq.name_hebrew }}
+                      </li>
+                    }
+                  </ul>
+                </app-scrollable-dropdown>
               }
             </div>
-            <button type="button" class="add-row-btn" (click)="addBaselineRow()">
-              <div class="plus-icon-wrapper">
-                <lucide-icon name="plus-circle" [size]="18"></lucide-icon>
-              </div>
-              <span class="btn-text">{{ 'add_equipment_baseline' | translatePipe }}</span>
-            </button>
-          </div>
           </div>
         </div>
       </section>

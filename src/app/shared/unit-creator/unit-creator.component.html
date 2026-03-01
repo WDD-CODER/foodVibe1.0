@@ -26,15 +26,11 @@
 
       <div class="input-stack">
         <label>יחידת מידה להשוואה</label>
-        <select [ngModel]="basisUnit_()" 
-                (ngModelChange)="basisUnit_.set($event)">
-          <option value="" disabled selected hidden>בחר יחידה</option>
-          @for (unitKey of basisOptions_(); track unitKey) {
-            <option [value]="unitKey">
-              {{ unitKey | translatePipe }} ({{ unitKey }})
-            </option>
-          }
-        </select>
+        <app-custom-select
+          [ngModel]="basisUnit_()"
+          (ngModelChange)="basisUnit_.set($event)"
+          [options]="basisUnitOptions_()"
+          placeholder="choose_unit" />
       </div>
     </div>
 

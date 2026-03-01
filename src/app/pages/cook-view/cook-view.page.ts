@@ -11,10 +11,12 @@ import { RecipeCostService } from '@services/recipe-cost.service';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { ConfirmModalService } from '@services/confirm-modal.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
+import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { RecipeWorkflowComponent } from '@pages/recipe-builder/components/recipe-workflow/recipe-workflow.component';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
+import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 
 @Component({
   selector: 'app-cook-view-page',
@@ -22,12 +24,14 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     RouterLink,
     LucideAngularModule,
     TranslatePipe,
     SelectOnFocusDirective,
     RecipeWorkflowComponent,
-    LoaderComponent
+    LoaderComponent,
+    CustomSelectComponent
   ],
   templateUrl: './cook-view.page.html',
   styleUrl: './cook-view.page.scss'
@@ -271,6 +275,10 @@ export class CookViewPage implements OnInit {
   protected getDisplayUnit(rowIndex: number, row: ScaledIngredientRow): string {
     const overrides = this.unitOverrides_();
     return overrides[rowIndex] ?? row.unit;
+  }
+
+  protected getUnitOptionsForRow(row: ScaledIngredientRow): { value: string; label: string }[] {
+    return (row.availableUnits || []).map((u) => ({ value: u, label: u }));
   }
 
   protected getDisplayAmount(rowIndex: number, row: ScaledIngredientRow): number {

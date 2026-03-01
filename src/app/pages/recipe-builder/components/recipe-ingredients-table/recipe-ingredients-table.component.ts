@@ -9,6 +9,7 @@ import { IngredientSearchComponent } from '../ingredient-search/ingredient-searc
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { FocusByRowDirective } from '@directives/focus-by-row.directive';
+import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 
 @Component({
   selector: 'app-recipe-ingredients-table',
@@ -20,7 +21,8 @@ import { FocusByRowDirective } from '@directives/focus-by-row.directive';
     IngredientSearchComponent,
     TranslatePipe,
     SelectOnFocusDirective,
-    FocusByRowDirective
+    FocusByRowDirective,
+    CustomSelectComponent
   ],
   templateUrl: './recipe-ingredients-table.component.html',
   styleUrl: './recipe-ingredients-table.component.scss'
@@ -213,6 +215,10 @@ export class RecipeIngredientsTableComponent {
     if (meta.yield_unit_) units.add(meta.yield_unit_);
 
     return Array.from(units);
+  }
+
+  getUnitOptions(group: FormGroup): { value: string; label: string }[] {
+    return this.getAvailableUnits(group).map((u) => ({ value: u, label: u }));
   }
 
   getGrossWeight(index: number): number {

@@ -8,13 +8,14 @@ import { MenuEventDataService } from '@services/menu-event-data.service';
 import { MenuEvent, ServingType } from '@models/menu-event.model';
 import { ConfirmModalService } from '@services/confirm-modal.service';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
+import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 
 export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count';
 
 @Component({
   selector: 'app-menu-library-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CustomSelectComponent],
   templateUrl: './menu-library-list.component.html',
   styleUrl: './menu-library-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,6 +50,17 @@ export class MenuLibraryListComponent {
     });
     return ['all', ...Array.from(set)];
   });
+
+  protected readonly eventTypeSelectOptions_ = computed(() =>
+    this.eventTypeOptions_().map((t) => ({ value: t, label: t }))
+  );
+
+  protected readonly sortBySelectOptions_: { value: SortField; label: string }[] = [
+    { value: 'date', label: 'sort_by_date' },
+    { value: 'name', label: 'sort_by_name' },
+    { value: 'food_cost', label: 'menu_food_cost' },
+    { value: 'guest_count', label: 'menu_guest_count' },
+  ];
 
   protected readonly filteredEvents_ = computed(() => {
     const query = this.searchQuery_().trim().toLowerCase();

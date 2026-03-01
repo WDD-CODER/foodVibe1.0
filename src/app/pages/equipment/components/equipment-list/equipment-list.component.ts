@@ -7,13 +7,14 @@ import { EquipmentDataService } from '@services/equipment-data.service';
 import { Equipment, EquipmentCategory } from '@models/equipment.model';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
+import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 
 type SortField = 'name' | 'category' | 'owned';
 
 @Component({
   selector: 'app-equipment-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CustomSelectComponent],
   templateUrl: './equipment-list.component.html',
   styleUrl: './equipment-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -62,6 +63,10 @@ export class EquipmentListComponent {
     'packaging',
     'infrastructure',
     'consumable',
+  ];
+  protected categoryFilterOptions = [
+    { value: '', label: 'all' },
+    ...this.categories.map((c) => ({ value: c, label: c })),
   ];
 
   protected setSort(field: SortField): void {
