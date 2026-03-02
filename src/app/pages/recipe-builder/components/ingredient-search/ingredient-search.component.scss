@@ -1,6 +1,13 @@
 .search-container {
   position: relative;
+
   width: 100%;
+
+  app-scrollable-dropdown {
+    ::ng-deep .c-dropdown {
+      z-index: 100;
+    }
+  }
 }
 
 .input-wrapper {

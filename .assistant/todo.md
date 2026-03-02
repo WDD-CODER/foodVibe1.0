@@ -216,10 +216,6 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Add translation keys (labels, choose_label, create_new_label, no_label, label_name, label_color, auto_trigger_sources, save_label, add_new_label)
 - [x] Register label-creation-modal in app root
 
----
-
-## Ahead (Pending)
-
 ### Plan 051 — Recipe builder UX fixes (`plans/051-recipe-builder-ux-fixes.plan.md`)
 
 - [x] Remove border of unit select; same height for value containers; center header cells (except col-name)
@@ -227,11 +223,32 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Move "add new tool" to bottom of dropdown
 - [x] Collapsible section cards: state, markup, styling (table-logic, workflow-logic, logistics-logic)
 
+### Plan 012-2 — Kitchen demo data full values (`plans/012-2-kitchen-demo-data-full-values.plan.md`)
+
+- [x] demo-suppliers.json: 10 suppliers (add 2)
+- [x] demo-products.json: subset with purchase_options_ and variety
+- [x] demo-recipes.json: optional ingredient note_ on some
+- [x] demo-dishes.json: all 10 dishes have logistics_.baseline_, prep_items_ or mise_categories_
+- [x] demo-equipment.json: verify categories and scaling mix
+- [x] demo-venues.json: 10 venues (add 7)
+
+---
+
+## Ahead (Pending)
+
+### Plan 054 — Unify modal styles (`plans/054-unify-modal-styles.plan.md`)
+
+- [ ] Expand engine classes in styles.scss: .c-modal-card modifiers (--md, --fluid), .c-modal-actions, .c-modal-body, .c-input-stack, .c-btn-primary--danger/--warning, modal responsive rules
+- [ ] Update add-item-modal and add-equipment-modal HTML/SCSS
+- [ ] Update confirm-modal, restore-choice-modal, global-specific-modal HTML/SCSS
+- [ ] Update translation-key-modal, label-creation-modal, unit-creator HTML/SCSS
+- [ ] Run ng build and verify all 8 modals render correctly
+
 ### Plan 052 — Plan 047 audit report (`plans/052-plan-047-audit-report.plan.md`)
 
-- [ ] Update Plan 047 todo items in todo.md per audit findings (split L4, mark items per report)
-- [ ] Optional: implement quick wins (L1 column reorder, S2 timer fixed width, L4 sort by relevance)
-- [ ] Clarify B3 (volume conversion fix) and B4 (header unit dropdown polish) with spec or acceptance criteria
+- [x] Update Plan 047 todo items in todo.md per audit findings (split L4, mark items per report)
+- [x] Optional: implement quick wins (L1 column reorder, S2 timer fixed width, L4 sort by relevance)
+- [x] Clarify B3 (volume conversion fix) and B4 (header unit dropdown polish) with spec or acceptance criteria
 
 ### Plan 050 — Recipe list labels, panel, header, menu UX (`plans/050-recipe-list-labels-panel-header-menu-ux.plan.md`)
 
@@ -245,18 +262,19 @@ Update status after each sub-task. Link plan files here when applicable.
 
 ### Plan 047 — Recipe Builder Polish (`plans/047-recipe-builder-polish.plan.md`)
 
-- [x] L4: Reduce logistics search width by 20%; sort dropdown by relevance (closest match first)
+- [x] L4: Reduce logistics search width by 20% (done in Plan 051)
+- [x] L4: Sort logistics dropdown by relevance (closest match first)
 - [ ] S1: Ingredient row style (border, arrows, delete, add-btn match workflow)
-- [ ] S2: Timer value fixed-width container
-- [ ] S3: Textarea align + auto-grow
+- [x] S2: Timer value fixed-width container
+- [x] S3: Textarea align + auto-grow
 - [ ] S4: Workflow prep rows match ingredient rows
-- [ ] L1: Unit before amount in ingredient grid
-- [ ] L2: Smart shrinking grid + delete on hover
+- [x] L1: Unit before amount in ingredient grid
+- [x] L2: Smart shrinking grid + delete on hover
 - [ ] L3: Responsive tablet/mobile
-- [ ] B1: Labels add/remove + demo labels + translations
-- [ ] B2: Duplicate recipe/dish name validation
-- [ ] B3: Volume conversion fix
-- [ ] B4: Unit selectors in recipe-header
+- [x] B1: Labels add/remove (header + form + modal); demo labels + translations unclear
+- [x] B2: Duplicate recipe/dish name validation
+- [ ] B3: Volume conversion fix (unverifiable without spec; needs acceptance criteria)
+- [x] B4: Unit selectors in recipe-header (overflow visible + z-index 100)
 
 ### Plan 040 — Menu Intelligence Layout and Design (`plans/040-menu-intelligence-layout-design.plan.md`)
 
@@ -318,33 +336,24 @@ Update status after each sub-task. Link plan files here when applicable.
 
 ### Plan 046-1 — Cook-view scale-by UX fixes (`plans/046-1-cook-view-scale-by-ux-fixes.plan.md`)
 
-- [ ] HTML: Move "Set recipe by this item" into col-name (left of name); empty col-scale-action for normal rows
-- [ ] SCSS: Button visible only on row hover; full-row border/box-shadow on hover; yellow box-shadow for setting state; scaled-view shell + banner (edit-mode-like, different colors); spacing between containers
-
-### Plan 012-2 — Kitchen demo data full values (`plans/012-2-kitchen-demo-data-full-values.plan.md`)
-
-- [x] demo-suppliers.json: 10 suppliers (add 2)
-- [x] demo-products.json: subset with purchase_options_ and variety
-- [x] demo-recipes.json: optional ingredient note_ on some
-- [x] demo-dishes.json: all 10 dishes have logistics_.baseline_, prep_items_ or mise_categories_
-- [x] demo-equipment.json: verify categories and scaling mix
-- [x] demo-venues.json: 10 venues (add 7)
+- [x] HTML: Move "Set recipe by this item" into col-name (left of name); empty col-scale-action for normal rows
+- [x] SCSS: Button visible only on row hover; full-row border/box-shadow on hover; yellow box-shadow for setting state; scaled-view shell + banner (edit-mode-like, different colors); spacing between containers
 
 ### Plan 034 — Recipe Builder UI Fixes (`plans/034-recipe-builder-ui-fixes.plan.md`)
 
 - [x] a. Type toggle: pass recipeType from parent, add input in header, use in template
-- [ ] b. Header unit dropdowns: overflow visible + z-index for primary/secondary
+- [x] b. Header unit dropdowns: overflow visible + z-index for primary/secondary
 - [x] c. Add row button: justify-content center in recipe-builder.page.scss
-- [ ] d. Ingredient search dropdown: z-index 100, ensure no overflow clip
-- [ ] e. Ingredients table: container-aware grid + small-screen stacked cards
-- [ ] f. Workflow section: space-evenly + define prep-flat-grid styles
-- [ ] g. Add step button: width 100%, align with grid in recipe-workflow
+- [x] d. Ingredient search dropdown: z-index 100, ensure no overflow clip
+- [x] e. Ingredients table: container-aware grid + small-screen stacked cards
+- [x] f. Workflow section: space-evenly + define prep-flat-grid styles
+- [x] g. Add step button: width 100%, align with grid in recipe-workflow
 
 ### Phase 1 — Stabilize & Complete (`plans/010-product-roadmap.plan.md`)
 
 - [x] Add `recipe-book-list.spec.ts` and run tests (Plan 008 closure).
 - [x] Set up Playwright E2E tests: config + 3 critical flow tests (product CRUD, recipe creation with cost, recipe edit persistence).
-- [ ] Optionally expand minimal specs (e.g. recipe-builder page and subcomponents) with behavior tests when touching those areas.
+- [x] Optionally expand minimal specs (e.g. recipe-builder page and subcomponents) with behavior tests when touching those areas.
 - [x] Sync documentation: update `project-plan.md` checkboxes, update breadcrumbs.
 - [ ] When adding new features: add/update `.spec.ts` and mark related sub-tasks here; run tests before considering the task done.
 
@@ -388,7 +397,7 @@ Update status after each sub-task. Link plan files here when applicable.
 | — | Recipe Builder: scaling, bruto, weight/volume toggle, unconvertible notice | Done |
 | 012 | Kitchen Demo Data (original) | Done |
 | 012-1 | Kitchen Demo Data and Recipes | Done |
-| 012-2 | Kitchen Demo Data Full Values | Active |
+| 012-2 | Kitchen Demo Data Full Values | Done |
 | 012b | Supplier Management Page | Planned |
 | 013 | Recipe Quick Actions | Planned |
 | 014 | Low Stock Alerts | Planned |
@@ -411,7 +420,7 @@ Update status after each sub-task. Link plan files here when applicable.
 | 031 | Menu Library Style UX | Done |
 | 032 | Custom Cooking Loader | Done |
 | 033 | Liquid Glass Design System | Done |
-| 034 | Recipe Builder UI Fixes | Active |
+| 034 | Recipe Builder UI Fixes | Done |
 | 035 | Header and Navigation Refactor | Done |
 | 036 | Dashboard Control Panel Fixed Tabs | Done |
 | 037 | Recipe Labels Refactor | Done |
@@ -424,12 +433,14 @@ Update status after each sub-task. Link plan files here when applicable.
 | 044 | Custom dropdown for all selects | Done |
 | 045 | Logistics tools and menu type edit | Done |
 | 046 | Cook-view scale by ingredient | Done |
-| 046-1 | Cook-view scale-by UX fixes | Active |
+| 046-1 | Cook-view scale-by UX fixes | Done |
 | 047 | Recipe Builder Polish | Active |
 | 048 | Menu Intelligence UX Polish | Done |
 | 049 | Menu Intelligence Layout and UX Fixes | Done |
 | 050 | Recipe list labels, panel, header, menu UX | Active |
 | 051 | Recipe builder UX fixes | Done |
 | 052 | Plan 047 audit report | Planned |
+| 053 | Todo audit and fixes | Active |
+| 054 | Unify modal styles | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
