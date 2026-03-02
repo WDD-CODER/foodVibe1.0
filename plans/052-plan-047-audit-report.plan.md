@@ -142,6 +142,13 @@
 
 ## Recommended next steps
 
-1. **Todo list:** Update .assistant/todo.md so L4 is split into "width done" and "sort by relevance not done", and mark S1–S4, L1–L3, B2 as not done; B1/B4 with the caveats above.
-2. **Quick wins:** Implement L1 (column reorder), S2 (timer fixed width), and optionally "sort by relevance" for L4 (e.g. sort by match position or length).
+1. **Todo list:** Update .assistant/todo.md so L4 is split into "width done" and "sort by relevance not done", and mark S1–S4, L1–L3, B2 as not done; B1/B4 with the caveats above. *(Done.)*
+2. **Quick wins:** Implement L1 (column reorder), S2 (timer fixed width), and optionally "sort by relevance" for L4 (e.g. sort by match position or length). *(Done: L1, S2, L4 sort.)*
 3. **Clarify:** B3 (volume fix) and B4 (exact header polish) with a short spec or acceptance criteria so implementation and audit are unambiguous.
+
+---
+
+## B3 / B4 clarification (acceptance criteria)
+
+- **B3 — Volume conversion fix:** Until a concrete bug or requirement is documented (e.g. "convert L to ml using factor X", or "fix rounding in computeTotalVolumeL"), treat as N/A. To implement: add a short spec under this plan or a tech-debt ticket with steps to reproduce / expected vs actual; then implement and add test.
+- **B4 — Unit selectors in recipe-header:** Acceptance criteria: (1) Dropdown overflow visible (options not clipped by parent overflow). (2) z-index such that open dropdown appears above adjacent content and modals if needed. Verify in recipe-header unit switcher and scrollable dropdowns; if both hold, mark B4 done.
