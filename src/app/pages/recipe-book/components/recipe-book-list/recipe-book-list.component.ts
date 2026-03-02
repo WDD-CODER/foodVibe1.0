@@ -44,6 +44,8 @@ export class RecipeBookListComponent {
   protected expandedFilterCategories_ = signal<Set<string>>(new Set());
   protected allergenPopoverRecipeId_ = signal<string | null>(null);
   protected allergenExpandAll_ = signal<boolean>(false);
+  protected labelsPopoverRecipeId_ = signal<string | null>(null);
+  protected labelsExpandAll_ = signal<boolean>(false);
   protected hoveredCostRecipeId_ = signal<string | null>(null);
   protected tappedCostRecipeId_ = signal<string | null>(null);
   protected costTooltipAnchor_ = signal<DOMRect | null>(null);
@@ -304,6 +306,24 @@ export class RecipeBookListComponent {
     this.allergenPopoverRecipeId_.set(null);
   }
 
+  protected toggleLabelsExpandAll(): void {
+    this.labelsExpandAll_.update(v => !v);
+    this.labelsPopoverRecipeId_.set(null);
+  }
+
+  protected toggleLabelsPopover(recipeId: string): void {
+    this.labelsExpandAll_.set(false);
+    this.labelsPopoverRecipeId_.update(id => (id === recipeId ? null : recipeId));
+  }
+
+  /** Close labels chips view (single row or expand-all) on outside click. */
+  protected closeLabelsView(clickTarget?: EventTarget | null): void {
+    const el = clickTarget instanceof HTMLElement ? clickTarget : null;
+    if (el?.closest('.table-header .col-labels')) return;
+    this.labelsPopoverRecipeId_.set(null);
+    this.labelsExpandAll_.set(false);
+  }
+
   protected toggleFilter(categoryName: string, optionValue: string): void {
     this.activeFilters_.update(prev => {
       const current = { ...prev };
@@ -416,7 +436,7 @@ export class RecipeBookListComponent {
 
   protected onRowClick(recipe: Recipe, event: MouseEvent): void {
     const el = event.target as HTMLElement;
-    if (el.closest('button') || el.closest('a') || el.closest('.cost-cell-wrap') || el.closest('.allergen-btn-wrapper')) return;
+    if (el.closest('button') || el.closest('a') || el.closest('.cost-cell-wrap') || el.closest('.allergen-btn-wrapper') || el.closest('.labels-btn-wrapper')) return;
     this.router.navigate(['/cook', recipe._id]);
   }
 
