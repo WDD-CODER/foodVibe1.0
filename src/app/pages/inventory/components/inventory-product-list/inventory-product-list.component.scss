@@ -1,6 +1,9 @@
 /* Layout tokens (match recipe-book layout) */
 $products-grid-template: 2fr 1fr 1.5fr 1fr minmax(48px, 0.8fr) 1fr 80px;
 $panel-width-expanded: 220px;
+$header-break-grid: 640px;
+$header-break-stack: 360px;
+$header-title-min-width: 8rem;
 
 .inventory-container {
   display: grid;
@@ -14,29 +17,56 @@ $panel-width-expanded: 220px;
   gap: 0;
   overflow: hidden;
   box-sizing: border-box;
+  container-type: inline-size;
 }
 
 .list-header {
   grid-area: header;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
   gap: 1rem;
   flex-wrap: wrap;
   padding-block-end: 1rem;
   border-block-end: 1px solid var(--border-default);
+}
 
-  .page-title {
-    flex: 1;
-    margin: 0;
-    text-align: center;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--color-text-main);
-    letter-spacing: 0.02em;
-  }
+.header-spacer {
+  flex: 1;
+  min-width: 0;
+}
 
-  .open-panel-btn.header-menu-btn {
+.list-header .header-search {
+  flex: 1 1 30%;
+  width: 100%;
+  min-width: 30%;
+  max-width: 22.5rem;
+}
+
+.list-header .header-start {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.list-header .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+  margin-inline-start: 0;
+}
+
+.list-header .page-title {
+  flex-shrink: 0;
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  letter-spacing: 0.02em;
+}
+
+.list-header .open-panel-btn.header-menu-btn {
     display: grid;
     place-content: center;
     flex-shrink: 0;
@@ -56,51 +86,45 @@ $panel-width-expanded: 220px;
     }
   }
 
-  .header-search {
-    flex: 1;
-    min-width: 12.5rem;
-    max-width: 22.5rem;
+.list-header .header-search .input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding-inline: 0.75rem;
+  padding-block: 0.5rem;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
-    .input-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      width: 100%;
-      padding-inline: 0.75rem;
-      padding-block: 0.5rem;
-      background: var(--bg-glass);
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-md);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-
-      &:focus-within {
-        border-color: var(--border-focus);
-        box-shadow: var(--shadow-focus);
-      }
-
-      lucide-icon {
-        flex-shrink: 0;
-        color: var(--color-text-muted);
-      }
-
-      input {
-        flex: 1;
-        min-width: 0;
-        padding: 0;
-        background: transparent;
-        border: none;
-        outline: none;
-        font-size: 0.875rem;
-        color: var(--color-text-main);
-
-        &::placeholder {
-          color: var(--color-text-muted-light);
-        }
-      }
-    }
+  &:focus-within {
+    border-color: var(--border-focus);
+    box-shadow: var(--shadow-focus);
   }
 
-  .add-btn {
+  lucide-icon {
+    flex-shrink: 0;
+    color: var(--color-text-muted);
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 0.875rem;
+    color: var(--color-text-main);
+
+    &::placeholder {
+      color: var(--color-text-muted-light);
+    }
+  }
+}
+
+.list-header .add-btn {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -119,6 +143,60 @@ $panel-width-expanded: 220px;
     &:hover {
       background: var(--color-primary-hover);
     }
+}
+
+/* Header: 2-row grid when search can't keep 30% min — title full width, then search + actions row */
+@container (max-width: $header-break-grid) {
+  .list-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    grid-template-areas:
+      "title title"
+      "search actions";
+    gap: 1rem;
+  }
+
+  .list-header .header-start {
+    grid-area: title;
+    min-width: 0;
+  }
+
+  .list-header .header-search {
+    grid-area: search;
+    flex: none;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .list-header .header-actions {
+    grid-area: actions;
+    justify-content: flex-end;
+  }
+
+  .list-header .header-spacer {
+    display: none;
+  }
+}
+
+/* Header: single column when title would go below min width */
+@container (max-width: $header-break-stack) {
+  .list-header {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "title"
+      "search"
+      "actions";
+  }
+
+  .list-header .header-actions {
+    justify-content: stretch;
+  }
+
+  .list-header .add-btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 
@@ -187,6 +265,10 @@ $panel-width-expanded: 220px;
   align-items: center;
 }
 
+.product-grid-row > .col-allergens {
+  align-items: flex-start;
+}
+
 .product-grid-row:hover > * {
   background: var(--bg-glass);
 }
@@ -233,7 +315,7 @@ $panel-width-expanded: 220px;
   box-shadow: var(--shadow-glass);
   backdrop-filter: var(--blur-glass);
   -webkit-backdrop-filter: var(--blur-glass);
-  transition: width 0.3s var(--ease-smooth), min-width 0.3s var(--ease-smooth);
+  transition: width 0.25s var(--ease-spring), min-width 0.25s var(--ease-spring);
   scrollbar-width: none;
   -ms-overflow-style: none;
 
@@ -264,7 +346,6 @@ $panel-width-expanded: 220px;
   margin: 0.75rem;
   padding: 0;
   background: var(--bg-glass);
-  border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   color: var(--color-text-muted);
   cursor: pointer;
@@ -279,7 +360,7 @@ $panel-width-expanded: 220px;
 .panel-content {
   padding: 0 1rem 1rem;
   min-height: 12.5rem;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s var(--ease-spring);
 }
 
 .filter-section {
@@ -579,6 +660,7 @@ $panel-width-expanded: 220px;
 }
 
 /* Mobile: same layout, panel as icon strip; optional tweaks (match recipe-book) */
+/* Mobile: padding and table action tweaks; header layout by container query */
 @media (max-width: 768px) {
   .inventory-container {
     padding: 1rem;
@@ -587,16 +669,6 @@ $panel-width-expanded: 220px;
   .list-header .page-title {
     text-align: start;
     font-size: 1.25rem;
-  }
-
-  .list-header .header-search {
-    min-width: 0;
-    max-width: none;
-  }
-
-  .list-header .add-btn {
-    flex: 1;
-    justify-content: center;
   }
 
   .action-btn {
