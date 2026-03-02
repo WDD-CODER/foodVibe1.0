@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed, OnInit, DestroyRef, afterNextRender, Injector, runInInjectionContext } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { startWith, map, type Observable } from 'rxjs';
+import { startWith, map, timer, switchMap, of, type Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -17,6 +17,8 @@ import { Recipe, RecipeStep, MiseCategory, FlatPrepItem, PrepCategory } from '@m
 import type { BaselineEntry, EquipmentPhase } from '@models/logistics.model';
 import { EquipmentDataService } from '@services/equipment-data.service';
 import { AddEquipmentModalService } from '@services/add-equipment-modal.service';
+import { RecipeDataService } from '@services/recipe-data.service';
+import { DishDataService } from '@services/dish-data.service';
 import { RecipeHeaderComponent } from './components/recipe-header/recipe-header.component';
 import { RecipeIngredientsTableComponent } from './components/recipe-ingredients-table/recipe-ingredients-table.component';
 import { RecipeWorkflowComponent } from './components/recipe-workflow/recipe-workflow.component';
@@ -56,6 +58,8 @@ export class RecipeBuilderPage implements OnInit {
   private readonly equipmentData_ = inject(EquipmentDataService);
   private readonly addEquipmentModal_ = inject(AddEquipmentModalService);
   private readonly metadataRegistry_ = inject(MetadataRegistryService);
+  private readonly recipeDataService_ = inject(RecipeDataService);
+  private readonly dishDataService_ = inject(DishDataService);
 
   //SIGNALS
   protected isSaving_ = signal(false);
@@ -324,8 +328,29 @@ export class RecipeBuilderPage implements OnInit {
         this.workflowArray.push(this.createStepGroup(1));
       }
     }
+    this.recipeForm_.get('name_hebrew')?.setAsyncValidators([(ctrl) => this.duplicateNameValidator_(ctrl)]);
+    this.recipeForm_.get('recipe_type')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.recipeForm_.get('name_hebrew')?.updateValueAndValidity({ emitEvent: false }));
     this.updateTotalWeightG();
     this.recipeForm_.markAsPristine();
+  }
+
+  /** Async validator: duplicate recipe/dish name by type (excludes current id when editing). */
+  private duplicateNameValidator_(control: AbstractControl): Observable<ValidationErrors | null> {
+    return timer(300).pipe(
+      switchMap(() => {
+        const name = (control.value ?? '').toString().trim();
+        if (!name) return of(null);
+        const type = this.recipeForm_.get('recipe_type')?.value === 'dish' ? 'dish' : 'preparation';
+        const currentId = this.recipeId_();
+        const list = type === 'dish' ? this.dishDataService_.allDishes_() : this.recipeDataService_.allRecipes_();
+        const isDup = list.some(
+          (r) => (r.name_hebrew?.trim() ?? '') === name && r._id !== currentId
+        );
+        return of(isDup ? { duplicateName: true } : null);
+      })
+    );
   }
 
   private patchFormFromRecipe(recipe: Recipe): void {
@@ -455,7 +480,15 @@ export class RecipeBuilderPage implements OnInit {
     const available = this.toolsOnly_().filter((eq) => !alreadyAdded.has(eq._id));
     const q = this.logisticsToolSearchQuery_().trim().toLowerCase();
     if (!q) return available;
-    return available.filter((eq) => eq.name_hebrew.toLowerCase().includes(q));
+    const filtered = available.filter((eq) => eq.name_hebrew.toLowerCase().includes(q));
+    return filtered.slice().sort((a, b) => {
+      const aName = a.name_hebrew.toLowerCase();
+      const bName = b.name_hebrew.toLowerCase();
+      const aStarts = aName.startsWith(q) ? 0 : 1;
+      const bStarts = bName.startsWith(q) ? 0 : 1;
+      if (aStarts !== bStarts) return aStarts - bStarts;
+      return aName.indexOf(q) - bName.indexOf(q);
+    });
   });
 
   protected getEquipmentNameById(id: string): string {
@@ -726,6 +759,9 @@ export class RecipeBuilderPage implements OnInit {
     const errors: string[] = [];
 
     const name = (this.recipeForm_.get('name_hebrew')?.value ?? '').toString().trim();
+    if (this.recipeForm_.get('name_hebrew')?.errors?.['duplicateName']) {
+      errors.push(isDish ? 'שם מנה זה כבר קיים' : 'שם מתכון זה כבר קיים');
+    }
     if (!name) {
       errors.push(isDish ? 'שם המנה חסר' : 'שם המתכון חסר');
     }

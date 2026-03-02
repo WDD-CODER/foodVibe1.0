@@ -46,8 +46,15 @@ export class RecipeHeaderComponent {
 
   // LABELS
   protected showLabelDropdown_ = signal(false);
-  protected selectedLabels_ = computed(() => (this.form().get('labels')?.value ?? []) as string[]);
-  protected allLabelsForDisplay_ = computed(() => [...new Set([...this.selectedLabels_(), ...this.autoLabels()])]);
+  private labelTrigger_ = signal(0);
+  protected selectedLabels_ = computed(() => {
+    this.labelTrigger_();
+    return (this.form().get('labels')?.value ?? []) as string[];
+  });
+  protected allLabelsForDisplay_ = computed(() => {
+    this.labelTrigger_();
+    return [...new Set([...this.selectedLabels_(), ...this.autoLabels()])];
+  });
   protected filteredLabelOptions_ = computed(() =>
     this.metadataRegistry.allLabels_().filter(l => !this.allLabelsForDisplay_().includes(l.key))
   );
@@ -380,6 +387,7 @@ export class RecipeHeaderComponent {
     if (current.includes(key)) return;
     this.form().get('labels')?.setValue([...current, key], { emitEvent: true });
     this.form().markAsDirty();
+    this.labelTrigger_.update(v => v + 1);
     this.showLabelDropdown_.set(false);
   }
 
@@ -388,6 +396,7 @@ export class RecipeHeaderComponent {
     const current = (this.form().get('labels')?.value ?? []) as string[];
     this.form().get('labels')?.setValue(current.filter(k => k !== key), { emitEvent: true });
     this.form().markAsDirty();
+    this.labelTrigger_.update(v => v + 1);
   }
 
   protected isAutoLabel(key: string): boolean {

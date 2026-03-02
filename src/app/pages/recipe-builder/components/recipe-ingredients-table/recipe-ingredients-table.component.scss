@@ -1,5 +1,6 @@
 
-$ingredients-grid-template: minmax(0, 2.5fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 48px;
+/* name | unit | quantity | percent | cost | actions */
+$ingredients-grid-template: minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr) 48px;
 
 .ingredients-container {
   container-type: inline-size;
@@ -21,6 +22,16 @@ $ingredients-grid-template: minmax(0, 2.5fr) minmax(0, 1.5fr) minmax(0, 1fr) min
     display: grid;
     place-content: center;
   }
+}
+
+.ingredient-grid-row .col-actions .remove-btn {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.ingredient-grid-row:hover .col-actions .remove-btn,
+.ingredient-grid-row .col-actions .remove-btn:focus {
+  opacity: 1;
 }
 
 .ingredients-grid-header {
@@ -95,6 +106,13 @@ $ingredients-grid-template: minmax(0, 2.5fr) minmax(0, 1.5fr) minmax(0, 1fr) min
     flex: 1;
     min-width: 0;
     text-align: center;
+    appearance: textfield;
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      appearance: none;
+      margin: 0;
+    }
   }
 }
 
@@ -137,6 +155,10 @@ $ingredients-grid-template: minmax(0, 2.5fr) minmax(0, 1.5fr) minmax(0, 1fr) min
   &:focus {
     border: none;
     box-shadow: none;
+  }
+
+  lucide-icon {
+    display: none;
   }
 }
 

@@ -9,6 +9,7 @@ import { PreparationSearchComponent } from '../preparation-search/preparation-se
 import type { PreparationEntry } from '@services/preparation-registry.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.directive'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 
 @Component({
@@ -21,6 +22,7 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
     PreparationSearchComponent,
     TranslatePipe,
     SelectOnFocusDirective,
+    TextareaAutoGrowDirective,
     CustomSelectComponent
   ],
   templateUrl: './recipe-workflow.component.html',

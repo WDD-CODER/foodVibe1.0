@@ -86,14 +86,19 @@
 }
 
 .workflow-textarea {
+  display: block;
   width: 100%;
   min-height: 2.5rem;
-  border: 1px solid transparent;
-  background: transparent;
   padding: 0.5rem;
+  background: transparent;
+  color: var(--color-text-main);
   font-size: 0.95rem;
-  resize: none;
+  border: 1px solid transparent;
+  border-radius: 0;
   outline: none;
+  resize: none;
+  overflow-y: hidden;
+  field-sizing: content;
   transition: border-color 0.2s ease, background 0.2s ease;
 
   &:focus {
@@ -107,6 +112,15 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
+
+  .timer-field,
+  .timer-value {
+    display: inline-block;
+
+    min-width: 3rem;
+
+    text-align: center;
+  }
 
   .counter-btn {
     display: grid;

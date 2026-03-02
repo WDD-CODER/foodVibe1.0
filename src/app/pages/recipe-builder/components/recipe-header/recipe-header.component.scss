@@ -39,25 +39,43 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+  }
 
-    .recipe-name-input {
-      flex: 1;
-      background: transparent;
-      color: var(--color-text-main);
-      font-size: 1.4rem;
-      font-weight: 800;
-      border: none;
-      border-block-end: 2px solid var(--border-default);
-      outline: none;
-      transition: border-color 0.2s ease;
+  .recipe-name-wrap {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+  }
 
-      &:focus {
-        border-color: var(--color-primary);
-      }
+  .recipe-name-input {
+    width: 100%;
+    background: transparent;
+    color: var(--color-text-main);
+    font-size: 1.4rem;
+    font-weight: 800;
+    border: none;
+    border-block-end: 2px solid var(--border-default);
+    outline: none;
+    transition: border-color 0.2s ease;
+
+    &:focus {
+      border-color: var(--color-primary);
     }
 
-    .type-toggle-btn {
-      padding: 0.4rem 1rem;
+    &.has-error {
+      border-block-end-color: var(--color-danger);
+    }
+  }
+
+  .name-error-msg {
+    margin-block-start: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--color-danger);
+  }
+
+  .top-row .type-toggle-btn {
+    padding: 0.4rem 1rem;
       background: var(--bg-glass);
       color: var(--color-text-muted);
       font-size: 0.8rem;
@@ -72,7 +90,6 @@
         color: var(--text-success);
         border-color: rgba(167, 243, 208, 0.6);
       }
-    }
   }
 }
 
@@ -124,6 +141,9 @@
   .unit-dropdown-menu.primary-chip-dropdown,
   .unit-dropdown-menu.secondary-chip-dropdown {
     ::ng-deep .c-dropdown {
+      position: absolute;
+      z-index: 100;
+      overflow: visible;
       inset-inline: auto;
       right: 0;
       left: auto;

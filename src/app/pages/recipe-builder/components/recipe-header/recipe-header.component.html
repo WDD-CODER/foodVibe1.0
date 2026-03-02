@@ -12,9 +12,15 @@
                 {{ currentRecipeTypeDisplay_() | translatePipe }}
             </button>
             
-            <input formControlName="name_hebrew"
-                [placeholder]="((currentRecipeTypeDisplay_() === 'dish' ? 'dish_name_placeholder' : 'recipe_name_placeholder') | translatePipe) + '...'"
-                class="recipe-name-input" />
+            <div class="recipe-name-wrap">
+                <input formControlName="name_hebrew"
+                    [placeholder]="((currentRecipeTypeDisplay_() === 'dish' ? 'dish_name_placeholder' : 'recipe_name_placeholder') | translatePipe) + '...'"
+                    class="recipe-name-input"
+                    [class.has-error]="form().get('name_hebrew')?.invalid && form().get('name_hebrew')?.touched" />
+                @if (form().get('name_hebrew')?.errors?.['duplicateName'] && form().get('name_hebrew')?.touched) {
+                    <span class="name-error-msg">{{ (currentRecipeTypeDisplay_() === 'dish' ? 'duplicate_dish_name' : 'duplicate_recipe_name') | translatePipe }}</span>
+                }
+            </div>
         </div>
 
         <div class="scaling-dock-grid">

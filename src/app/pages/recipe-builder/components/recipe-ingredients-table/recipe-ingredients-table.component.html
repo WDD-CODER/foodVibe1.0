@@ -1,8 +1,8 @@
 <div class="ingredients-container" dir="rtl">
   <div class="ingredients-grid-header">
     <div class="col-name">{{ 'ingredient' | translatePipe }}</div>
-    <div class="col-quantity">{{ 'quantity' | translatePipe }}</div>
     <div class="col-unit">{{ 'unit' | translatePipe }}</div>
+    <div class="col-quantity">{{ 'quantity' | translatePipe }}</div>
     <div class="col-percent">{{ 'percent' | translatePipe }}</div>
     <div class="col-cost">{{ 'cost' | translatePipe }}</div>
     <!-- <div class="col-actions">{{ 'actions' | translatePipe }}</div> -->
@@ -27,6 +27,23 @@
         }
       </div>
 
+      <div class="col-unit">
+        @if (group.get('referenceId')?.value) {
+        <app-custom-select
+          formControlName="unit"
+          class="grid-select"
+          [options]="getUnitOptions(group)"
+          placeholder="unit"
+          [triggerId]="'unit-row-' + $index"
+          focusByRow
+          [rowIndex]="$index"
+          kind="unit"
+          (valueChange)="updateLineCalculations($index)" />
+        } @else {
+        <span class="placeholder-dash">---</span>
+        }
+      </div>
+
       <div class="col-quantity">
         @if (group.get('referenceId')?.value) {
         <div class="quantity-controls">
@@ -42,23 +59,6 @@
             <lucide-icon name="plus" [size]="16"></lucide-icon>
           </button>
         </div>
-        } @else {
-        <span class="placeholder-dash">---</span>
-        }
-      </div>
-
-      <div class="col-unit">
-        @if (group.get('referenceId')?.value) {
-        <app-custom-select
-          formControlName="unit"
-          class="grid-select"
-          [options]="getUnitOptions(group)"
-          placeholder="unit"
-          [triggerId]="'unit-row-' + $index"
-          focusByRow
-          [rowIndex]="$index"
-          kind="unit"
-          (valueChange)="updateLineCalculations($index)" />
         } @else {
         <span class="placeholder-dash">---</span>
         }
