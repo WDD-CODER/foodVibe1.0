@@ -184,6 +184,26 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] recipe-header styles: metric-group-weight-volume, metrics-notice-wrap, metrics-notice-icon, metrics-notice-floating, metrics-notice-item.
 - [x] Fix cost not updating when adding ingredients (computed depended on no signal; now depends on ingredientsFormVersion_ bumped in valueChanges).
 
+### Plan 048 — Menu Intelligence UX Polish (`plans/048-menu-intelligence-ux-polish.plan.md`)
+
+- [x] Auto-focus dish search input when a recipe is selected (addItem + selectRecipe)
+- [x] Replace X icons with trash-2; remove hover background; keep delete on left
+- [x] Change .meta-column to width: fit-content
+- [x] Glass style all dropdowns + add clickOutside to event-type and dish-search
+- [x] Remove borders from all meta rows for consistent borderless look
+- [x] Extend keyboard navigation for sections, dish rows, and dish field editing
+- [x] Replace chevron toggle with info icon (collapsed) / chevron-up (expanded); add spacing
+- [x] Center dish-data fields horizontally with justify-content: center
+
+### Plan 049 — Menu Intelligence Layout and UX Fixes (`plans/049-menu-intelligence-layout-ux-fixes.plan.md`)
+
+- [x] Meta-column to opposite side (margin-inline swap)
+- [x] Remove focus border from all inputs/selects on page
+- [x] Delete icons (section + dish) to opposite side
+- [x] Verify info/chevron-up toggle (no code change)
+- [x] Hide number input spinners on dish-field inputs
+- [x] Food cost (food_cost_money) read-only: no edit mode, span only
+
 ### Plan 037 — Recipe Labels Refactor (`plans/037-recipe-labels-refactor.plan.md`)
 
 - [x] Create LabelDefinition interface + labels_/autoLabels_ on Recipe model
@@ -200,35 +220,22 @@ Update status after each sub-task. Link plan files here when applicable.
 
 ## Ahead (Pending)
 
+### Plan 051 — Recipe builder UX fixes (`plans/051-recipe-builder-ux-fixes.plan.md`)
+
+- [x] Remove border of unit select; same height for value containers; center header cells (except col-name)
+- [x] Reduce logistics search width by 20%
+- [x] Move "add new tool" to bottom of dropdown
+- [x] Collapsible section cards: state, markup, styling (table-logic, workflow-logic, logistics-logic)
+
 ### Plan 050 — Recipe list labels, panel, header, menu UX (`plans/050-recipe-list-labels-panel-header-menu-ux.plan.md`)
 
-- [ ] 1. Labels column: compact/expand like allergens; header toggle expand-all; clickOutside close
-- [ ] 2. Row height: col-labels/col-allergens grow to fit expanded content (recipe-book + inventory)
-- [ ] 3. Panel: chevron-right icon, remove border; sharper animation (both list components)
-- [ ] 4. Header layout: title right, search center, same design (recipe-book + inventory)
-- [ ] 5. Menu Intelligence date: clickable label, open picker + focus; keyboard DD/MM/YYYY
-- [ ] 6. Guest number: remove default spinner (SCSS)
-- [ ] 7. Guest number: +/- buttons, disable minus at 0
-
-### Plan 049 — Menu Intelligence Layout and UX Fixes (`plans/049-menu-intelligence-layout-ux-fixes.plan.md`)
-
-- [ ] Meta-column to opposite side (margin-inline swap)
-- [ ] Remove focus border from all inputs/selects on page
-- [ ] Delete icons (section + dish) to opposite side
-- [ ] Verify info/chevron-up toggle (no code change)
-- [ ] Hide number input spinners on dish-field inputs
-- [ ] Food cost (food_cost_money) read-only: no edit mode, span only
-
-### Plan 048 — Menu Intelligence UX Polish (`plans/048-menu-intelligence-ux-polish.plan.md`)
-
-- [ ] Auto-focus dish search input when a recipe is selected (addItem + selectRecipe)
-- [ ] Replace X icons with trash-2; remove hover background; keep delete on left
-- [ ] Change .meta-column to width: fit-content
-- [ ] Glass style all dropdowns + add clickOutside to event-type and dish-search
-- [ ] Remove borders from all meta rows for consistent borderless look
-- [ ] Extend keyboard navigation for sections, dish rows, and dish field editing
-- [ ] Replace chevron toggle with info icon (collapsed) / chevron-up (expanded); add spacing
-- [ ] Center dish-data fields horizontally with justify-content: center
+- [x] 1. Labels column: compact/expand like allergens; header toggle expand-all; clickOutside close
+- [x] 2. Row height: col-labels/col-allergens grow to fit expanded content (recipe-book + inventory)
+- [x] 3. Panel: chevron-right icon, remove border; sharper animation (both list components)
+- [x] 4. Header layout: title right, search center, same design (recipe-book + inventory)
+- [x] 5. Menu Intelligence date: clickable label, open picker + focus; keyboard DD/MM/YYYY
+- [x] 6. Guest number: remove default spinner (SCSS)
+- [x] 7. Guest number: +/- buttons, disable minus at 0
 
 ### Plan 047 — Recipe Builder Polish (`plans/047-recipe-builder-polish.plan.md`)
 
@@ -413,8 +420,9 @@ Update status after each sub-task. Link plan files here when applicable.
 | 046 | Cook-view scale by ingredient | Done |
 | 046-1 | Cook-view scale-by UX fixes | Active |
 | 047 | Recipe Builder Polish | Active |
-| 048 | Menu Intelligence UX Polish | Active |
-| 049 | Menu Intelligence Layout and UX Fixes | Active |
+| 048 | Menu Intelligence UX Polish | Done |
+| 049 | Menu Intelligence Layout and UX Fixes | Done |
 | 050 | Recipe list labels, panel, header, menu UX | Active |
+| 051 | Recipe builder UX fixes | Done |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
