@@ -76,7 +76,7 @@ export class MenuIntelligencePage implements AfterViewInit {
     event_type_: ['', Validators.required],
     event_date_: [''],
     serving_type_: ['plated_course' as ServingType, Validators.required],
-    guest_count_: [50, [Validators.required, Validators.min(1)]],
+    guest_count_: [50, [Validators.required, Validators.min(0)]],
     sections_: this.fb.array<FormGroup>([]),
   });
 
@@ -139,8 +139,80 @@ export class MenuIntelligencePage implements AfterViewInit {
   /** Focus a field by name; 'name_' = menu name, then event_type_, serving_type_, guest_count_, event_date_, then 'section_0' */
   protected focusField(field: string): void {
     const el = document.getElementById(`menu-focus-${field}`);
-    if (el && typeof (el as HTMLInputElement).focus === 'function') (el as HTMLInputElement).focus();
-    else if (el) el.focus();
+    if (el && typeof (el as HTMLInputElement).focus === 'function') {
+      (el as HTMLInputElement).focus();
+      if (field === 'event_date_' && typeof (el as HTMLInputElement).showPicker === 'function') {
+        (el as HTMLInputElement).showPicker();
+      }
+    } else if (el) el.focus();
+  }
+
+  /** Open date picker and focus the date input (called from clickable date label). */
+  protected openDatePicker(): void {
+    this.dateDigitBuffer_.set('');
+    this.focusField('event_date_');
+  }
+
+  /** Format event_date_ for display (DD/MM/YYYY or placeholder). */
+  protected getEventDateDisplay(): string {
+    const raw = this.form_.get('event_date_')?.value as string | undefined;
+    if (!raw) return '';
+    const d = new Date(raw + 'T12:00:00');
+    if (Number.isNaN(d.getTime())) return raw;
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
+  private dateDigitBuffer_ = signal('');
+
+  /** Handle digit-only input for date: first 2 = day, next 2 = month, then 4 = year. */
+  protected onDateKeydown(e: KeyboardEvent): void {
+    if (e.key === 'Enter' || e.key === 'Tab' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      this.onMetaKeydown('event_date_', e);
+      return;
+    }
+    if (e.key.length === 1 && /\d/.test(e.key)) {
+      const buf = this.dateDigitBuffer_().slice(0, 8) + e.key;
+      if (buf.length <= 8) {
+        e.preventDefault();
+        this.dateDigitBuffer_.set(buf);
+        if (buf.length === 8) {
+          const dStr = buf.slice(0, 2);
+          const mStr = buf.slice(2, 4);
+          const yStr = buf.slice(4, 8);
+          const dNum = Math.min(31, Math.max(1, parseInt(dStr, 10) || 1));
+          const mNum = Math.min(12, Math.max(1, parseInt(mStr, 10) || 1));
+          const yNum = Math.max(1900, Math.min(2100, parseInt(yStr, 10) || new Date().getFullYear()));
+          const iso = `${yNum}-${String(mNum).padStart(2, '0')}-${String(dNum).padStart(2, '0')}`;
+          this.form_.patchValue({ event_date_: iso });
+          this.dateDigitBuffer_.set('');
+        }
+      }
+    } else if (e.key === 'Backspace') {
+      const current = this.dateDigitBuffer_();
+      if (current.length > 0) {
+        e.preventDefault();
+        this.dateDigitBuffer_.set(current.slice(0, -1));
+      }
+    }
+  }
+
+  protected incrementGuests(): void {
+    const ctrl = this.form_.get('guest_count_');
+    const v = Number(ctrl?.value ?? 0);
+    ctrl?.setValue(v + 1);
+  }
+
+  protected decrementGuests(): void {
+    const ctrl = this.form_.get('guest_count_');
+    const v = Number(ctrl?.value ?? 0);
+    if (v > 0) ctrl?.setValue(v - 1);
+  }
+
+  protected getGuestCount(): number {
+    return Number(this.form_.get('guest_count_')?.value ?? 0);
   }
 
   protected onMetaKeydown(field: string, e: KeyboardEvent): void {

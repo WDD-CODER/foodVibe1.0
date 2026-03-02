@@ -90,17 +90,28 @@
       </div>
 
       <!-- Guest Count -->
-      <div class="meta-row">
+      <div class="meta-row guest-row">
         <span class="meta-label">{{ 'menu_guests' | translatePipe }}</span>
-        <input id="menu-focus-guest_count_" type="number" class="meta-input meta-number" formControlName="guest_count_" min="1"
-          (keydown)="onMetaKeydown('guest_count_', $event)" />
+        <div class="guest-control">
+          <button type="button" class="guest-ctrl-btn minus" (click)="decrementGuests()" [disabled]="getGuestCount() <= 0" [attr.aria-label]="'decrease' | translatePipe">
+            <lucide-icon name="minus" [size]="16"></lucide-icon>
+          </button>
+          <input id="menu-focus-guest_count_" type="number" class="meta-input meta-number" formControlName="guest_count_" min="0"
+            (keydown)="onMetaKeydown('guest_count_', $event)" />
+          <button type="button" class="guest-ctrl-btn plus" (click)="incrementGuests()" [attr.aria-label]="'increase' | translatePipe">
+            <lucide-icon name="plus" [size]="16"></lucide-icon>
+          </button>
+        </div>
       </div>
 
       <!-- Event Date -->
-      <div class="meta-row">
+      <div class="meta-row date-row">
         <span class="meta-label">{{ 'menu_set_date' | translatePipe }}</span>
-        <input id="menu-focus-event_date_" type="date" class="meta-input meta-date" formControlName="event_date_"
-          (keydown)="onMetaKeydown('event_date_', $event)" />
+        <div class="meta-date-wrap" (click)="openDatePicker()" role="button" tabindex="0" (keydown.enter)="openDatePicker()" (keydown.space)="$event.preventDefault(); openDatePicker()" [attr.aria-label]="'menu_set_date' | translatePipe">
+          <span class="meta-date-display">{{ getEventDateDisplay() || ('menu_no_date' | translatePipe) }}</span>
+          <input id="menu-focus-event_date_" type="date" class="meta-date-input" formControlName="event_date_"
+            (keydown)="onDateKeydown($event)" />
+        </div>
       </div>
     </div>
 
