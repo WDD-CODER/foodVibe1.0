@@ -227,6 +227,12 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Move "add new tool" to bottom of dropdown
 - [x] Collapsible section cards: state, markup, styling (table-logic, workflow-logic, logistics-logic)
 
+### Plan 052 — Plan 047 audit report (`plans/052-plan-047-audit-report.plan.md`)
+
+- [ ] Update Plan 047 todo items in todo.md per audit findings (split L4, mark items per report)
+- [ ] Optional: implement quick wins (L1 column reorder, S2 timer fixed width, L4 sort by relevance)
+- [ ] Clarify B3 (volume conversion fix) and B4 (header unit dropdown polish) with spec or acceptance criteria
+
 ### Plan 050 — Recipe list labels, panel, header, menu UX (`plans/050-recipe-list-labels-panel-header-menu-ux.plan.md`)
 
 - [x] 1. Labels column: compact/expand like allergens; header toggle expand-all; clickOutside close
@@ -424,5 +430,6 @@ Update status after each sub-task. Link plan files here when applicable.
 | 049 | Menu Intelligence Layout and UX Fixes | Done |
 | 050 | Recipe list labels, panel, header, menu UX | Active |
 | 051 | Recipe builder UX fixes | Done |
+| 052 | Plan 047 audit report | Planned |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
