@@ -285,11 +285,18 @@ export class MenuIntelligencePage implements AfterViewInit {
         serving_portions_pct: [0],
       })
     );
-    this.setDishSearchQuery(sectionIndex, items.length - 1, '');
+    const newItemIndex = items.length - 1;
+    this.setDishSearchQuery(sectionIndex, newItemIndex, '');
+    this.focusDishSearchInput(sectionIndex, newItemIndex);
   }
 
   protected getDishFieldLabelKey(fieldKey: DishFieldKey): string {
     return ALL_DISH_FIELDS.find(f => f.key === fieldKey)?.labelKey ?? fieldKey;
+  }
+
+  /** Food cost is calculated from serving portions; not user-editable. */
+  protected isDishFieldReadOnly(fieldKey: DishFieldKey): boolean {
+    return fieldKey === 'food_cost_money';
   }
 
   protected getAutoFoodCost(sectionIndex: number, itemIndex: number): number {
@@ -422,7 +429,31 @@ export class MenuIntelligencePage implements AfterViewInit {
       serving_portions: recipe.yield_amount_ ?? 1,
     });
     this.setDishSearchQuery(sectionIndex, itemIndex, '');
-    this.expandedMetaKeys_.update(set => new Set(set).add(this.getDishMetaKey(sectionIndex, itemIndex)));
+    this.addItem(sectionIndex);
+  }
+
+  /** Focus the dish search input for a given section/item (e.g. after add or select). */
+  protected focusDishSearchInput(sectionIndex: number, itemIndex: number): void {
+    setTimeout(() => {
+      const el = document.getElementById(`dish-search-${sectionIndex}-${itemIndex}`) as HTMLInputElement | null;
+      el?.focus();
+    }, 50);
+  }
+
+  /** Clear dish search query (closes dropdown); used by clickOutside and Escape. */
+  protected clearDishSearch(sectionIndex: number, itemIndex: number): void {
+    this.setDishSearchQuery(sectionIndex, itemIndex, '');
+  }
+
+  /** Enter in dish search: select first recipe if any, else keep focus. */
+  protected onDishSearchKeydown(sectionIndex: number, itemIndex: number, e: Event): void {
+    const ke = e as KeyboardEvent;
+    if (ke.key !== 'Enter') return;
+    const recipes = this.getFilteredRecipes(sectionIndex, itemIndex);
+    if (recipes.length > 0) {
+      ke.preventDefault();
+      this.selectRecipe(sectionIndex, itemIndex, recipes[0]);
+    }
   }
 
   protected openSectionSearch(index: number): void {
@@ -564,17 +595,6 @@ export class MenuIntelligencePage implements AfterViewInit {
       this.sectionsArray.push(sectionGroup);
     });
 
-    const firstExpanded = new Set<string>();
-    this.sectionsArray.controls.forEach((section, si) => {
-      const items = (section.get('items_') as FormArray<FormGroup>).controls;
-      items.forEach((item, ii) => {
-        if (item.get('recipe_id_')?.value && firstExpanded.size === 0) {
-          firstExpanded.add(this.getDishMetaKey(si, ii));
-        }
-      });
-    });
-    if (firstExpanded.size > 0) this.expandedMetaKeys_.set(firstExpanded);
-
     this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue());
   }
 
@@ -583,11 +603,11 @@ export class MenuIntelligencePage implements AfterViewInit {
     const servingType = raw.serving_type_ as ServingType;
     const guestCount = Number(raw.guest_count_ || 0);
 
-    const sections: MenuSection[] = (raw.sections_ || []).map((section: any, index: number) => ({
+    const sections: MenuSection[] = (raw.sections_ || []).map((section: any, sectionIndex: number) => ({
       _id: section._id,
       name_: section.name_,
-      sort_order_: index + 1,
-      items_: (section.items_ || []).map((item: MenuItemForm) => ({
+      sort_order_: sectionIndex + 1,
+      items_: (section.items_ || []).map((item: MenuItemForm, itemIndex: number) => ({
         recipe_id_: item.recipe_id_,
         recipe_type_: item.recipe_type_,
         predicted_take_rate_: Number(item.predicted_take_rate_ || 0),
@@ -595,7 +615,7 @@ export class MenuIntelligencePage implements AfterViewInit {
           servingType, guestCount, Number(item.predicted_take_rate_ || 0), 0
         ),
         sell_price_: item.sell_price ?? undefined,
-        food_cost_override_: item.food_cost_money ?? undefined,
+        food_cost_override_: this.getAutoFoodCost(sectionIndex, itemIndex) || undefined,
         serving_portions_: item.serving_portions ?? undefined,
       })),
     }));
