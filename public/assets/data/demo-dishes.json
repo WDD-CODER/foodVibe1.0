@@ -4,15 +4,15 @@
     "name_hebrew": "שקשוקה",
     "recipe_type_": "dish",
     "ingredients_": [
-      {"_id": "dish_001_i1", "referenceId": "prep_003", "type": "recipe", "amount_": 0.5, "unit_": "kg"},
-      {"_id": "dish_001_i2", "referenceId": "demo_036", "type": "product", "amount_": 4, "unit_": "unit"},
-      {"_id": "dish_001_i3", "referenceId": "demo_001", "type": "product", "amount_": 0.1, "unit_": "kg"},
-      {"_id": "dish_001_i4", "referenceId": "demo_008", "type": "product", "amount_": 0.15, "unit_": "kg"},
-      {"_id": "dish_001_i5", "referenceId": "demo_004", "type": "product", "amount_": 0.01, "unit_": "kg"},
+      {"_id": "dish_001_i1", "referenceId": "prep_003", "type": "recipe", "amount_": 0.5, "unit_": "kg", "note_": "חם"},
+      {"_id": "dish_001_i2", "referenceId": "demo_036", "type": "product", "amount_": 4, "unit_": "unit", "note_": "חדר טמפרטורה"},
+      {"_id": "dish_001_i3", "referenceId": "demo_001", "type": "product", "amount_": 0.1, "unit_": "kg", "note_": "קצוץ דק"},
+      {"_id": "dish_001_i4", "referenceId": "demo_008", "type": "product", "amount_": 0.15, "unit_": "kg", "note_": "חתוך לקוביות"},
+      {"_id": "dish_001_i5", "referenceId": "demo_004", "type": "product", "amount_": 0.01, "unit_": "kg", "note_": "כתוש"},
       {"_id": "dish_001_i6", "referenceId": "demo_076", "type": "product", "amount_": 0.003, "unit_": "kg"},
       {"_id": "dish_001_i7", "referenceId": "demo_075", "type": "product", "amount_": 0.002, "unit_": "kg"},
       {"_id": "dish_001_i8", "referenceId": "demo_068", "type": "product", "amount_": 0.02, "unit_": "liter"},
-      {"_id": "dish_001_i9", "referenceId": "demo_022", "type": "product", "amount_": 0.02, "unit_": "kg"}
+      {"_id": "dish_001_i9", "referenceId": "demo_022", "type": "product", "amount_": 0.02, "unit_": "kg", "note_": "קצוץ גס"}
     ],
     "steps_": [
       {"order_": 1, "instruction_": "מחממים שמן במחבת, מטגנים בצל ופלפל. מוסיפים רוטב עגבניות וכמון.", "labor_time_minutes_": 5},
@@ -21,20 +21,42 @@
     "yield_amount_": 4,
     "yield_unit_": "dish",
     "default_station_": "stove",
-    "is_approved_": true
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_001", "quantity_": 1, "phase_": "both", "is_critical_": true, "notes_": "כיריים"},
+        {"equipment_id_": "eq_004", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "מחבת גדולה"},
+        {"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": false}
+      ],
+      "service_overrides_": [
+        {"service_style_": "plated", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
+        {"service_style_": "takeaway", "equipment_": [{"equipment_id_": "eq_010", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
+        {"service_style_": "buffet", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 2, "phase_": "service", "is_critical_": true}]}
+      ]
+    },
+    "prep_items_": [
+      {"preparation_name": "רוטב עגבניות ביתי", "category_name": "sauces", "quantity": 0.5, "unit": "kg"}
+    ],
+    "mise_categories_": [
+      {"category_name": "ירקות", "items": [{"item_name": "בצל קצוץ", "unit": "kg", "quantity": 0.1}, {"item_name": "פלפל אדום חתוך", "unit": "kg", "quantity": 0.15}]},
+      {"category_name": "תבלינים", "items": [{"item_name": "כמון", "unit": "kg", "quantity": 0.003}, {"item_name": "פפריקה", "unit": "kg", "quantity": 0.002}]},
+      {"category_name": "שומנים", "items": [{"item_name": "שמן זית", "unit": "liter", "quantity": 0.02}]},
+      {"category_name": "גarnish", "items": [{"item_name": "פטרוזיליה קצוצה", "unit": "kg", "quantity": 0.02}]}
+    ],
+    "labels_": ["vegetarian", "gluten_free"]
   },
   {
     "_id": "dish_002",
     "name_hebrew": "סלמון צלוי עם טחינה",
     "recipe_type_": "dish",
     "ingredients_": [
-      {"_id": "dish_002_i1", "referenceId": "demo_044", "type": "product", "amount_": 0.6, "unit_": "kg"},
-      {"_id": "dish_002_i2", "referenceId": "prep_004", "type": "recipe", "amount_": 0.2, "unit_": "kg"},
-      {"_id": "dish_002_i3", "referenceId": "demo_024", "type": "product", "amount_": 0.05, "unit_": "kg"},
+      {"_id": "dish_002_i1", "referenceId": "demo_044", "type": "product", "amount_": 0.6, "unit_": "kg", "note_": "מחולק ל-4 מנות"},
+      {"_id": "dish_002_i2", "referenceId": "prep_004", "type": "recipe", "amount_": 0.2, "unit_": "kg", "note_": "בטמפרטורת חדר"},
+      {"_id": "dish_002_i3", "referenceId": "demo_024", "type": "product", "amount_": 0.05, "unit_": "kg", "note_": "סחוט"},
       {"_id": "dish_002_i4", "referenceId": "demo_068", "type": "product", "amount_": 0.02, "unit_": "liter"},
       {"_id": "dish_002_i5", "referenceId": "demo_073", "type": "product", "amount_": 0.003, "unit_": "kg"},
       {"_id": "dish_002_i6", "referenceId": "demo_074", "type": "product", "amount_": 0.001, "unit_": "kg"},
-      {"_id": "dish_002_i7", "referenceId": "demo_022", "type": "product", "amount_": 0.01, "unit_": "kg"}
+      {"_id": "dish_002_i7", "referenceId": "demo_022", "type": "product", "amount_": 0.01, "unit_": "kg", "note_": "קצוץ"}
     ],
     "steps_": [
       {"order_": 1, "instruction_": "ממליחים ומפלפלים את הסלמון. צולים בתנור 180 מעלות כ-15 דקות.", "labor_time_minutes_": 15},
@@ -43,21 +65,42 @@
     "yield_amount_": 4,
     "yield_unit_": "dish",
     "default_station_": "oven",
-    "is_approved_": true
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_001", "quantity_": 1, "phase_": "both", "is_critical_": true, "notes_": "תנור"},
+        {"equipment_id_": "eq_004", "quantity_": 1, "phase_": "prep", "is_critical_": true},
+        {"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": false}
+      ],
+      "service_overrides_": [
+        {"service_style_": "plated", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
+        {"service_style_": "takeaway", "equipment_": [{"equipment_id_": "eq_010", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
+        {"service_style_": "buffet", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 2, "phase_": "service", "is_critical_": true}]}
+      ]
+    },
+    "prep_items_": [
+      {"preparation_name": "רוטב טחינה", "category_name": "sauces", "quantity": 0.2, "unit": "kg"}
+    ],
+    "mise_categories_": [
+      {"category_name": "חלבון", "items": [{"item_name": "סלמון ממולח ומפולפל", "unit": "kg", "quantity": 0.6}]},
+      {"category_name": "מצרכים רטובים", "items": [{"item_name": "לימון סחוט", "unit": "kg", "quantity": 0.05}]},
+      {"category_name": "גarnish", "items": [{"item_name": "פטרוזיליה קצוצה", "unit": "kg", "quantity": 0.01}]}
+    ],
+    "labels_": ["fish", "gluten_free"]
   },
   {
     "_id": "dish_003",
     "name_hebrew": "שניצל עוף עם סלט",
     "recipe_type_": "dish",
     "ingredients_": [
-      {"_id": "dish_003_i1", "referenceId": "demo_037", "type": "product", "amount_": 0.5, "unit_": "kg"},
+      {"_id": "dish_003_i1", "referenceId": "demo_037", "type": "product", "amount_": 0.5, "unit_": "kg", "note_": "פרוסות דקות"},
       {"_id": "dish_003_i2", "referenceId": "demo_049", "type": "product", "amount_": 0.05, "unit_": "kg"},
-      {"_id": "dish_003_i3", "referenceId": "demo_036", "type": "product", "amount_": 2, "unit_": "unit"},
+      {"_id": "dish_003_i3", "referenceId": "demo_036", "type": "product", "amount_": 2, "unit_": "unit", "note_": "מטורפות"},
       {"_id": "dish_003_i4", "referenceId": "demo_063", "type": "product", "amount_": 0.08, "unit_": "kg"},
       {"_id": "dish_003_i5", "referenceId": "demo_069", "type": "product", "amount_": 0.15, "unit_": "liter"},
-      {"_id": "dish_003_i6", "referenceId": "demo_010", "type": "product", "amount_": 0.15, "unit_": "kg"},
-      {"_id": "dish_003_i7", "referenceId": "demo_006", "type": "product", "amount_": 0.1, "unit_": "kg"},
-      {"_id": "dish_003_i8", "referenceId": "demo_007", "type": "product", "amount_": 0.1, "unit_": "kg"},
+      {"_id": "dish_003_i6", "referenceId": "demo_010", "type": "product", "amount_": 0.15, "unit_": "kg", "note_": "חתוך לרצועות"},
+      {"_id": "dish_003_i7", "referenceId": "demo_006", "type": "product", "amount_": 0.1, "unit_": "kg", "note_": "פרוסות"},
+      {"_id": "dish_003_i8", "referenceId": "demo_007", "type": "product", "amount_": 0.1, "unit_": "kg", "note_": "פרוסות"},
       {"_id": "dish_003_i9", "referenceId": "prep_005", "type": "recipe", "amount_": 0.1, "unit_": "liter"}
     ],
     "steps_": [
@@ -67,21 +110,42 @@
     "yield_amount_": 4,
     "yield_unit_": "dish",
     "default_station_": "fry",
-    "is_approved_": true
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_001", "quantity_": 1, "phase_": "both", "is_critical_": true},
+        {"equipment_id_": "eq_004", "quantity_": 2, "phase_": "prep", "is_critical_": true, "notes_": "לטגון"},
+        {"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": false}
+      ],
+      "service_overrides_": [
+        {"service_style_": "plated", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
+        {"service_style_": "takeaway", "equipment_": [{"equipment_id_": "eq_010", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
+        {"service_style_": "buffet", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 3, "phase_": "service", "is_critical_": true}]}
+      ]
+    },
+    "prep_items_": [
+      {"preparation_name": "ויניגרט בסיסי", "category_name": "sauces", "quantity": 0.1, "unit": "liter"}
+    ],
+    "mise_categories_": [
+      {"category_name": "חלבון", "items": [{"item_name": "חזה עוף מוכן לציפוי", "unit": "kg", "quantity": 0.5}]},
+      {"category_name": "סלט", "items": [{"item_name": "חסה חתוכה", "unit": "kg", "quantity": 0.15}, {"item_name": "עגבניה פרוסה", "unit": "kg", "quantity": 0.1}, {"item_name": "מלפפון פרוס", "unit": "kg", "quantity": 0.1}]},
+      {"category_name": "שומנים", "items": [{"item_name": "שמן לטגון", "unit": "liter", "quantity": 0.15}]}
+    ],
+    "labels_": ["gluten"]
   },
   {
     "_id": "dish_004",
     "name_hebrew": "כרובית צלויה עם טחינה",
     "recipe_type_": "dish",
     "ingredients_": [
-      {"_id": "dish_004_i1", "referenceId": "demo_012", "type": "product", "amount_": 1, "unit_": "kg"},
+      {"_id": "dish_004_i1", "referenceId": "demo_012", "type": "product", "amount_": 1, "unit_": "kg", "note_": "פרחים"},
       {"_id": "dish_004_i2", "referenceId": "prep_004", "type": "recipe", "amount_": 0.25, "unit_": "kg"},
       {"_id": "dish_004_i3", "referenceId": "demo_068", "type": "product", "amount_": 0.05, "unit_": "liter"},
       {"_id": "dish_004_i4", "referenceId": "demo_076", "type": "product", "amount_": 0.003, "unit_": "kg"},
       {"_id": "dish_004_i5", "referenceId": "demo_075", "type": "product", "amount_": 0.002, "unit_": "kg"},
       {"_id": "dish_004_i6", "referenceId": "demo_073", "type": "product", "amount_": 0.005, "unit_": "kg"},
-      {"_id": "dish_004_i7", "referenceId": "demo_022", "type": "product", "amount_": 0.01, "unit_": "kg"},
-      {"_id": "dish_004_i8", "referenceId": "demo_024", "type": "product", "amount_": 0.02, "unit_": "kg"}
+      {"_id": "dish_004_i7", "referenceId": "demo_022", "type": "product", "amount_": 0.01, "unit_": "kg", "note_": "קצוץ"},
+      {"_id": "dish_004_i8", "referenceId": "demo_024", "type": "product", "amount_": 0.02, "unit_": "kg", "note_": "פרוסות"}
     ],
     "steps_": [
       {"order_": 1, "instruction_": "פורסים כרובית לפרחים, מערבבים עם שמן ותבלינים. צולים 200 מעלות כ-25 דקות.", "labor_time_minutes_": 25},
@@ -90,18 +154,39 @@
     "yield_amount_": 4,
     "yield_unit_": "dish",
     "default_station_": "oven",
-    "is_approved_": true
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_001", "quantity_": 1, "phase_": "both", "is_critical_": true, "notes_": "תנור"},
+        {"equipment_id_": "eq_004", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "תבנית צלייה"},
+        {"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": false}
+      ],
+      "service_overrides_": [
+        {"service_style_": "plated", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
+        {"service_style_": "takeaway", "equipment_": [{"equipment_id_": "eq_010", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
+        {"service_style_": "buffet", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 2, "phase_": "service", "is_critical_": true}]}
+      ]
+    },
+    "prep_items_": [
+      {"preparation_name": "רוטב טחינה", "category_name": "sauces", "quantity": 0.25, "unit": "kg"}
+    ],
+    "mise_categories_": [
+      {"category_name": "ירקות", "items": [{"item_name": "כרובית לפרחים", "unit": "kg", "quantity": 1}]},
+      {"category_name": "תבלינים", "items": [{"item_name": "כמון", "unit": "kg", "quantity": 0.003}, {"item_name": "פפריקה", "unit": "kg", "quantity": 0.002}]},
+      {"category_name": "גarnish", "items": [{"item_name": "פטרוזיליה", "unit": "kg", "quantity": 0.01}, {"item_name": "לימון", "unit": "kg", "quantity": 0.02}]}
+    ],
+    "labels_": ["vegetarian", "vegan", "gluten_free"]
   },
   {
     "_id": "dish_005",
     "name_hebrew": "נזיד עדשים",
     "recipe_type_": "dish",
     "ingredients_": [
-      {"_id": "dish_005_i1", "referenceId": "demo_058", "type": "product", "amount_": 0.4, "unit_": "kg"},
-      {"_id": "dish_005_i2", "referenceId": "demo_001", "type": "product", "amount_": 0.2, "unit_": "kg"},
-      {"_id": "dish_005_i3", "referenceId": "demo_002", "type": "product", "amount_": 0.15, "unit_": "kg"},
-      {"_id": "dish_005_i4", "referenceId": "demo_005", "type": "product", "amount_": 0.2, "unit_": "kg"},
-      {"_id": "dish_005_i5", "referenceId": "demo_004", "type": "product", "amount_": 0.02, "unit_": "kg"},
+      {"_id": "dish_005_i1", "referenceId": "demo_058", "type": "product", "amount_": 0.4, "unit_": "kg", "note_": "שטוף"},
+      {"_id": "dish_005_i2", "referenceId": "demo_001", "type": "product", "amount_": 0.2, "unit_": "kg", "note_": "קצוץ"},
+      {"_id": "dish_005_i3", "referenceId": "demo_002", "type": "product", "amount_": 0.15, "unit_": "kg", "note_": "פרוס"},
+      {"_id": "dish_005_i4", "referenceId": "demo_005", "type": "product", "amount_": 0.2, "unit_": "kg", "note_": "קוביות"},
+      {"_id": "dish_005_i5", "referenceId": "demo_004", "type": "product", "amount_": 0.02, "unit_": "kg", "note_": "כתוש"},
       {"_id": "dish_005_i6", "referenceId": "prep_002", "type": "recipe", "amount_": 1, "unit_": "liter"},
       {"_id": "dish_005_i7", "referenceId": "demo_076", "type": "product", "amount_": 0.005, "unit_": "kg"},
       {"_id": "dish_005_i8", "referenceId": "demo_077", "type": "product", "amount_": 0.003, "unit_": "kg"},
@@ -115,19 +200,40 @@
     "yield_amount_": 6,
     "yield_unit_": "dish",
     "default_station_": "stove",
-    "is_approved_": true
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_001", "quantity_": 1, "phase_": "both", "is_critical_": true},
+        {"equipment_id_": "eq_005", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "סיר גדול"},
+        {"equipment_id_": "eq_009", "quantity_": 6, "phase_": "service", "is_critical_": false}
+      ],
+      "service_overrides_": [
+        {"service_style_": "plated", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 6, "phase_": "service", "is_critical_": true}]},
+        {"service_style_": "takeaway", "equipment_": [{"equipment_id_": "eq_010", "quantity_": 6, "phase_": "service", "is_critical_": true}]},
+        {"service_style_": "buffet", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 2, "phase_": "service", "is_critical_": true}]}
+      ]
+    },
+    "prep_items_": [
+      {"preparation_name": "ציר ירקות", "category_name": "stocks", "quantity": 1, "unit": "liter"}
+    ],
+    "mise_categories_": [
+      {"category_name": "קטניות", "items": [{"item_name": "עדשים ירוקות שטופות", "unit": "kg", "quantity": 0.4}]},
+      {"category_name": "ירקות", "items": [{"item_name": "בצל קצוץ", "unit": "kg", "quantity": 0.2}, {"item_name": "גזר פרוס", "unit": "kg", "quantity": 0.15}, {"item_name": "תפוחי אדמה קוביות", "unit": "kg", "quantity": 0.2}]},
+      {"category_name": "תבלינים", "items": [{"item_name": "כמון", "unit": "kg", "quantity": 0.005}, {"item_name": "כורכום", "unit": "kg", "quantity": 0.003}]}
+    ],
+    "labels_": ["vegetarian", "vegan", "gluten_free"]
   },
   {
     "_id": "dish_006",
     "name_hebrew": "פסטה ברוטב עגבניות",
     "recipe_type_": "dish",
     "ingredients_": [
-      {"_id": "dish_006_i1", "referenceId": "demo_055", "type": "product", "amount_": 0.4, "unit_": "kg"},
-      {"_id": "dish_006_i2", "referenceId": "prep_003", "type": "recipe", "amount_": 0.5, "unit_": "kg"},
-      {"_id": "dish_006_i3", "referenceId": "demo_004", "type": "product", "amount_": 0.01, "unit_": "kg"},
+      {"_id": "dish_006_i1", "referenceId": "demo_055", "type": "product", "amount_": 0.4, "unit_": "kg", "note_": "ספגטי"},
+      {"_id": "dish_006_i2", "referenceId": "prep_003", "type": "recipe", "amount_": 0.5, "unit_": "kg", "note_": "חם"},
+      {"_id": "dish_006_i3", "referenceId": "demo_004", "type": "product", "amount_": 0.01, "unit_": "kg", "note_": "כתוש"},
       {"_id": "dish_006_i4", "referenceId": "demo_068", "type": "product", "amount_": 0.02, "unit_": "liter"},
-      {"_id": "dish_006_i5", "referenceId": "demo_029", "type": "product", "amount_": 0.03, "unit_": "kg"},
-      {"_id": "dish_006_i6", "referenceId": "demo_082", "type": "product", "amount_": 0.005, "unit_": "kg"}
+      {"_id": "dish_006_i5", "referenceId": "demo_029", "type": "product", "amount_": 0.03, "unit_": "kg", "note_": "מגורד"},
+      {"_id": "dish_006_i6", "referenceId": "demo_082", "type": "product", "amount_": 0.005, "unit_": "kg", "note_": "טרי או יבש"}
     ],
     "steps_": [
       {"order_": 1, "instruction_": "מבשלים פסטה במי מלח עד אל דנטה. מסננים.", "labor_time_minutes_": 10},
@@ -136,19 +242,41 @@
     "yield_amount_": 4,
     "yield_unit_": "dish",
     "default_station_": "stove",
-    "is_approved_": true
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_001", "quantity_": 1, "phase_": "both", "is_critical_": true},
+        {"equipment_id_": "eq_004", "quantity_": 1, "phase_": "prep", "is_critical_": true},
+        {"equipment_id_": "eq_005", "quantity_": 1, "phase_": "prep", "is_critical_": false, "notes_": "לפסטה"},
+        {"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": false}
+      ],
+      "service_overrides_": [
+        {"service_style_": "plated", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
+        {"service_style_": "takeaway", "equipment_": [{"equipment_id_": "eq_010", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
+        {"service_style_": "buffet", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 2, "phase_": "service", "is_critical_": true}]}
+      ]
+    },
+    "prep_items_": [
+      {"preparation_name": "רוטב עגבניות ביתי", "category_name": "sauces", "quantity": 0.5, "unit": "kg"}
+    ],
+    "mise_categories_": [
+      {"category_name": "פסטה", "items": [{"item_name": "ספגטי יבש", "unit": "kg", "quantity": 0.4}]},
+      {"category_name": "רוטב", "items": [{"item_name": "רוטב עגבניות חם", "unit": "kg", "quantity": 0.5}]},
+      {"category_name": "גarnish", "items": [{"item_name": "פרמזן מגורד", "unit": "kg", "quantity": 0.03}, {"item_name": "בזיליקום", "unit": "kg", "quantity": 0.005}]}
+    ],
+    "labels_": ["vegetarian"]
   },
   {
     "_id": "dish_007",
     "name_hebrew": "שיפודי עוף עם אורז",
     "recipe_type_": "dish",
     "ingredients_": [
-      {"_id": "dish_007_i1", "referenceId": "demo_037", "type": "product", "amount_": 0.5, "unit_": "kg"},
+      {"_id": "dish_007_i1", "referenceId": "demo_037", "type": "product", "amount_": 0.5, "unit_": "kg", "note_": "קוביות"},
       {"_id": "dish_007_i2", "referenceId": "prep_009", "type": "recipe", "amount_": 0.03, "unit_": "kg"},
-      {"_id": "dish_007_i3", "referenceId": "demo_054", "type": "product", "amount_": 0.35, "unit_": "kg"},
-      {"_id": "dish_007_i4", "referenceId": "demo_001", "type": "product", "amount_": 0.1, "unit_": "kg"},
+      {"_id": "dish_007_i3", "referenceId": "demo_054", "type": "product", "amount_": 0.35, "unit_": "kg", "note_": "שטוף"},
+      {"_id": "dish_007_i4", "referenceId": "demo_001", "type": "product", "amount_": 0.1, "unit_": "kg", "note_": "פרוס"},
       {"_id": "dish_007_i5", "referenceId": "demo_068", "type": "product", "amount_": 0.03, "unit_": "liter"},
-      {"_id": "dish_007_i6", "referenceId": "demo_024", "type": "product", "amount_": 0.03, "unit_": "kg"},
+      {"_id": "dish_007_i6", "referenceId": "demo_024", "type": "product", "amount_": 0.03, "unit_": "kg", "note_": "פרוסות"},
       {"_id": "dish_007_i7", "referenceId": "demo_073", "type": "product", "amount_": 0.005, "unit_": "kg"}
     ],
     "steps_": [
@@ -158,20 +286,42 @@
     "yield_amount_": 4,
     "yield_unit_": "dish",
     "default_station_": "grill",
-    "is_approved_": true
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_002", "quantity_": 1, "phase_": "both", "is_critical_": true, "notes_": "גריל/מבער"},
+        {"equipment_id_": "eq_004", "quantity_": 1, "phase_": "prep", "is_critical_": true},
+        {"equipment_id_": "eq_005", "quantity_": 1, "phase_": "prep", "is_critical_": false},
+        {"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": false}
+      ],
+      "service_overrides_": [
+        {"service_style_": "plated", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
+        {"service_style_": "takeaway", "equipment_": [{"equipment_id_": "eq_010", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
+        {"service_style_": "buffet", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 3, "phase_": "service", "is_critical_": true}]}
+      ]
+    },
+    "prep_items_": [
+      {"preparation_name": "תערובת תבלינים", "category_name": "spices", "quantity": 0.03, "unit": "kg"}
+    ],
+    "mise_categories_": [
+      {"category_name": "חלבון", "items": [{"item_name": "עוף בקוביות מתובל", "unit": "kg", "quantity": 0.5}]},
+      {"category_name": "תבשיל", "items": [{"item_name": "אורז בסמטי מוכן", "unit": "kg", "quantity": 0.35}]},
+      {"category_name": "גarnish", "items": [{"item_name": "בצל פרוס", "unit": "kg", "quantity": 0.1}, {"item_name": "לימון", "unit": "kg", "quantity": 0.03}]}
+    ],
+    "labels_": ["gluten_free"]
   },
   {
     "_id": "dish_008",
     "name_hebrew": "דניס עם חמאת עשבי תיבול",
     "recipe_type_": "dish",
     "ingredients_": [
-      {"_id": "dish_008_i1", "referenceId": "demo_045", "type": "product", "amount_": 0.6, "unit_": "kg"},
-      {"_id": "dish_008_i2", "referenceId": "demo_034", "type": "product", "amount_": 0.05, "unit_": "kg"},
-      {"_id": "dish_008_i3", "referenceId": "demo_022", "type": "product", "amount_": 0.02, "unit_": "kg"},
-      {"_id": "dish_008_i4", "referenceId": "demo_021", "type": "product", "amount_": 0.01, "unit_": "kg"},
-      {"_id": "dish_008_i5", "referenceId": "demo_004", "type": "product", "amount_": 0.01, "unit_": "kg"},
-      {"_id": "dish_008_i6", "referenceId": "demo_024", "type": "product", "amount_": 0.03, "unit_": "kg"},
-      {"_id": "dish_008_i7", "referenceId": "demo_005", "type": "product", "amount_": 0.4, "unit_": "kg"},
+      {"_id": "dish_008_i1", "referenceId": "demo_045", "type": "product", "amount_": 0.6, "unit_": "kg", "note_": "פילטים"},
+      {"_id": "dish_008_i2", "referenceId": "demo_034", "type": "product", "amount_": 0.05, "unit_": "kg", "note_": "רכה"},
+      {"_id": "dish_008_i3", "referenceId": "demo_022", "type": "product", "amount_": 0.02, "unit_": "kg", "note_": "קצוץ"},
+      {"_id": "dish_008_i4", "referenceId": "demo_021", "type": "product", "amount_": 0.01, "unit_": "kg", "note_": "קצוץ"},
+      {"_id": "dish_008_i5", "referenceId": "demo_004", "type": "product", "amount_": 0.01, "unit_": "kg", "note_": "כתוש"},
+      {"_id": "dish_008_i6", "referenceId": "demo_024", "type": "product", "amount_": 0.03, "unit_": "kg", "note_": "פרוסות"},
+      {"_id": "dish_008_i7", "referenceId": "demo_005", "type": "product", "amount_": 0.4, "unit_": "kg", "note_": "קוביות לבישול"},
       {"_id": "dish_008_i8", "referenceId": "demo_073", "type": "product", "amount_": 0.003, "unit_": "kg"},
       {"_id": "dish_008_i9", "referenceId": "demo_074", "type": "product", "amount_": 0.001, "unit_": "kg"},
       {"_id": "dish_008_i10", "referenceId": "demo_068", "type": "product", "amount_": 0.02, "unit_": "liter"}
@@ -183,19 +333,43 @@
     "yield_amount_": 4,
     "yield_unit_": "dish",
     "default_station_": "stove",
-    "is_approved_": true
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_001", "quantity_": 1, "phase_": "both", "is_critical_": true},
+        {"equipment_id_": "eq_004", "quantity_": 2, "phase_": "prep", "is_critical_": true, "notes_": "מחבת לדניס + מחבת לחמאה"},
+        {"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": false}
+      ],
+      "service_overrides_": [
+        {"service_style_": "plated", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
+        {"service_style_": "takeaway", "equipment_": [{"equipment_id_": "eq_010", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
+        {"service_style_": "buffet", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 2, "phase_": "service", "is_critical_": true}]}
+      ]
+    },
+    "prep_items_": [
+      {"preparation_name": "תפוחי אדמה מבושלים", "category_name": "sides", "quantity": 0.4, "unit": "kg"},
+      {"preparation_name": "חמאת עשבי תיבול", "category_name": "compound_butter", "quantity": 0.05, "unit": "kg"}
+    ],
+    "mise_categories_": [
+      {"category_name": "חלבון", "items": [{"item_name": "דניס פילטים", "unit": "kg", "quantity": 0.6}]},
+      {"category_name": "תפוחי אדמה", "items": [{"item_name": "תפוחי אדמה מבושלים", "unit": "kg", "quantity": 0.4}]},
+      {"category_name": "חמאה", "items": [{"item_name": "חמאה רכה", "unit": "kg", "quantity": 0.05}]},
+      {"category_name": "עשבים", "items": [{"item_name": "פטרוזיליה קצוצה", "unit": "kg", "quantity": 0.02}, {"item_name": "שמיר קצוץ", "unit": "kg", "quantity": 0.01}]},
+      {"category_name": "גarnish", "items": [{"item_name": "לימון פרוס", "unit": "kg", "quantity": 0.03}]}
+    ],
+    "labels_": ["fish", "gluten_free"]
   },
   {
     "_id": "dish_009",
     "name_hebrew": "קערת חומוס",
     "recipe_type_": "dish",
     "ingredients_": [
-      {"_id": "dish_009_i1", "referenceId": "prep_008", "type": "recipe", "amount_": 0.5, "unit_": "kg"},
+      {"_id": "dish_009_i1", "referenceId": "prep_008", "type": "recipe", "amount_": 0.5, "unit_": "kg", "note_": "בטמפרטורת חדר"},
       {"_id": "dish_009_i2", "referenceId": "prep_007", "type": "recipe", "amount_": 0.3, "unit_": "kg"},
       {"_id": "dish_009_i3", "referenceId": "prep_004", "type": "recipe", "amount_": 0.1, "unit_": "kg"},
       {"_id": "dish_009_i4", "referenceId": "demo_068", "type": "product", "amount_": 0.02, "unit_": "liter"},
       {"_id": "dish_009_i5", "referenceId": "demo_075", "type": "product", "amount_": 0.002, "unit_": "kg"},
-      {"_id": "dish_009_i6", "referenceId": "demo_022", "type": "product", "amount_": 0.01, "unit_": "kg"}
+      {"_id": "dish_009_i6", "referenceId": "demo_022", "type": "product", "amount_": 0.01, "unit_": "kg", "note_": "קצוץ"}
     ],
     "steps_": [
       {"order_": 1, "instruction_": "מעבירים חומוס לצלחת. מניחים ירקות צלויים ומטפטפים טחינה ושמן זית.", "labor_time_minutes_": 5},
@@ -204,17 +378,39 @@
     "yield_amount_": 4,
     "yield_unit_": "dish",
     "default_station_": "cold",
-    "is_approved_": true
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": true, "notes_": "קערות הגשה"},
+        {"equipment_id_": "eq_010", "quantity_": 4, "phase_": "service", "is_critical_": false}
+      ],
+      "service_overrides_": [
+        {"service_style_": "plated", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
+        {"service_style_": "takeaway", "equipment_": [{"equipment_id_": "eq_010", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
+        {"service_style_": "buffet", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 2, "phase_": "service", "is_critical_": true}]}
+      ]
+    },
+    "prep_items_": [
+      {"preparation_name": "חומוס בסיסי", "category_name": "dips", "quantity": 0.5, "unit": "kg"},
+      {"preparation_name": "ירקות צלויים", "category_name": "vegetables", "quantity": 0.3, "unit": "kg"},
+      {"preparation_name": "רוטב טחינה", "category_name": "sauces", "quantity": 0.1, "unit": "kg"}
+    ],
+    "mise_categories_": [
+      {"category_name": "מטבלים", "items": [{"item_name": "חומוס", "unit": "kg", "quantity": 0.5}, {"item_name": "רוטב טחינה", "unit": "kg", "quantity": 0.1}]},
+      {"category_name": "ירקות", "items": [{"item_name": "ירקות צלויים", "unit": "kg", "quantity": 0.3}]},
+      {"category_name": "גarnish", "items": [{"item_name": "פפריקה", "unit": "kg", "quantity": 0.002}, {"item_name": "פטרוזיליה קצוצה", "unit": "kg", "quantity": 0.01}]}
+    ],
+    "labels_": ["vegetarian", "vegan", "gluten_free", "sesame"]
   },
   {
     "_id": "dish_010",
     "name_hebrew": "קרם ברולה",
     "recipe_type_": "dish",
     "ingredients_": [
-      {"_id": "dish_010_i1", "referenceId": "prep_010", "type": "recipe", "amount_": 0.5, "unit_": "kg"},
-      {"_id": "dish_010_i2", "referenceId": "demo_051", "type": "product", "amount_": 0.05, "unit_": "kg"},
+      {"_id": "dish_010_i1", "referenceId": "prep_010", "type": "recipe", "amount_": 0.5, "unit_": "kg", "note_": "מקורר"},
+      {"_id": "dish_010_i2", "referenceId": "demo_051", "type": "product", "amount_": 0.05, "unit_": "kg", "note_": "להקרמל"},
       {"_id": "dish_010_i3", "referenceId": "demo_027", "type": "product", "amount_": 0.2, "unit_": "liter"},
-      {"_id": "dish_010_i4", "referenceId": "demo_036", "type": "product", "amount_": 3, "unit_": "unit"},
+      {"_id": "dish_010_i4", "referenceId": "demo_036", "type": "product", "amount_": 3, "unit_": "unit", "note_": "מטורפות"},
       {"_id": "dish_010_i5", "referenceId": "demo_090", "type": "product", "amount_": 0.005, "unit_": "liter"}
     ],
     "steps_": [
@@ -224,6 +420,27 @@
     "yield_amount_": 6,
     "yield_unit_": "dish",
     "default_station_": "oven",
-    "is_approved_": true
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_001", "quantity_": 1, "phase_": "both", "is_critical_": true, "notes_": "תנור לאמבט מים"},
+        {"equipment_id_": "eq_004", "quantity_": 1, "phase_": "prep", "is_critical_": false},
+        {"equipment_id_": "eq_009", "quantity_": 6, "phase_": "service", "is_critical_": true, "notes_": "כוסות/ראמליקין"}
+      ],
+      "service_overrides_": [
+        {"service_style_": "plated", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 6, "phase_": "service", "is_critical_": true}]},
+        {"service_style_": "takeaway", "equipment_": [{"equipment_id_": "eq_010", "quantity_": 6, "phase_": "service", "is_critical_": true}]},
+        {"service_style_": "buffet", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 2, "phase_": "service", "is_critical_": true}]}
+      ]
+    },
+    "prep_items_": [
+      {"preparation_name": "קרם פטיסייר", "category_name": "pastry", "quantity": 0.5, "unit": "kg"}
+    ],
+    "mise_categories_": [
+      {"category_name": "קרם", "items": [{"item_name": "קרם פטיסייר מקורר", "unit": "kg", "quantity": 0.5}]},
+      {"category_name": "תוספות", "items": [{"item_name": "שמנת מתוקה", "unit": "liter", "quantity": 0.2}, {"item_name": "ביצים מטורפות", "unit": "unit", "quantity": 3}]},
+      {"category_name": "הקרמלה", "items": [{"item_name": "סוכר להקרמלה", "unit": "kg", "quantity": 0.05}]}
+    ],
+    "labels_": ["vegetarian", "gluten_free"]
   }
 ]
