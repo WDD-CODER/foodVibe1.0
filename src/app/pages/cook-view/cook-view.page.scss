@@ -36,7 +36,12 @@
   --cv-bg-step: var(--bg-glass);
   --cv-border-step: var(--border-default);
   --cv-shadow-setting: 0 0 0 2px rgba(245, 158, 11, 0.45);
+  --cv-shadow-glow: var(--shadow-glow);
+  --cv-border-amber: var(--border-warning);
 }
+
+/* Media queries cannot use var(); use rem value for --cv-break-md (56.25rem) */
+$cv-break-md: 56.25rem;
 
 .cook-view-container {
   display: block;
@@ -109,7 +114,7 @@
     box-shadow: var(--cv-shadow-glow);
   }
 
-  @media (min-width: var(--cv-break-md)) {
+  @media (min-width: $cv-break-md) {
     display: grid;
     grid-template-rows: auto 1fr;
     grid-template-columns: 1fr;
@@ -163,17 +168,15 @@
 }
 
 .save-btn {
-  background: var(--cv-bg-success) !important;
-  color: var(--cv-text-success) !important;
-
-  border-color: var(--cv-border-success) !important;
+  background: var(--cv-bg-success);
+  color: var(--cv-text-success);
+  border-color: var(--cv-border-success);
 }
 
 .undo-btn {
-  background: var(--cv-bg-banner) !important;
-  color: var(--cv-text-banner) !important;
-
-  border-color: var(--cv-border-warning) !important;
+  background: var(--cv-bg-banner);
+  color: var(--cv-text-banner);
+  border-color: var(--cv-border-warning);
 }
 
 .cook-view-main {
@@ -669,7 +672,7 @@
   border-inline-start: 0.25rem solid var(--cv-accent);
   border-radius: var(--cv-radius-2xl);
 
-  @media (min-width: var(--cv-break-md)) {
+  @media (min-width: $cv-break-md) {
     margin-bottom: 0.375rem;
     padding: 0.4rem 0.6rem;
   }

@@ -1,10 +1,10 @@
 @if (isOpen_()) {
-<div class="modal-overlay" (click)="resetAndClose()">
-  <div class="modal-card" dir="rtl" (click)="$event.stopPropagation()">
+<div class="c-modal-overlay" (click)="resetAndClose()">
+  <div class="c-modal-card" dir="rtl" (click)="$event.stopPropagation()">
     <h3>{{ 'add_equipment' | translatePipe }}</h3>
 
-    <div class="form-fields">
-      <div class="input-stack">
+    <div class="c-modal-body">
+      <div class="c-input-stack">
         <label>{{ 'equipment_name' | translatePipe }}</label>
         <input type="text"
                [ngModel]="name_()"
@@ -13,7 +13,7 @@
                (keydown.enter)="save()" />
       </div>
 
-      <div class="input-stack">
+      <div class="c-input-stack">
         <label>{{ 'category' | translatePipe }}</label>
         <app-custom-select
           [ngModel]="category_()"
@@ -24,9 +24,9 @@
       </div>
     </div>
 
-    <div class="modal-actions">
-      <button class="btn-ghost" (click)="cancel()">{{ 'cancel' | translatePipe }}</button>
-      <button class="btn-save"
+    <div class="c-modal-actions">
+      <button type="button" class="c-btn-ghost" (click)="cancel()">{{ 'cancel' | translatePipe }}</button>
+      <button type="button" class="c-btn-primary"
               (click)="save()"
               [disabled]="!name_().trim()">
         {{ 'save' | translatePipe }}

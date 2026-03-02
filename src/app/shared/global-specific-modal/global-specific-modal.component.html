@@ -1,18 +1,18 @@
 @if (modalService.isOpen()) {
-  <div class="modal-overlay" (click)="modalService.choose(null)">
-    <div class="modal-card" dir="rtl" (click)="$event.stopPropagation()">
+  <div class="c-modal-overlay" (click)="modalService.choose(null)">
+    <div class="c-modal-card c-modal-card--fluid" dir="rtl" (click)="$event.stopPropagation()">
       <h3>{{ 'category_change_prompt' | translatePipe }}</h3>
-      <p class="modal-detail">
+      <p class="global-specific-detail">
         {{ modalService.config()?.preparationName }}: {{ modalService.config()?.mainCategory | translatePipe }} → {{ modalService.config()?.newCategory | translatePipe }}
       </p>
-      <div class="modal-actions">
-        <button type="button" class="btn-ghost" (click)="modalService.choose(null)">
+      <div class="c-modal-actions">
+        <button type="button" class="c-btn-ghost" (click)="modalService.choose(null)">
           {{ 'cancel' | translatePipe }}
         </button>
-        <button type="button" class="btn-specific" (click)="modalService.choose('specific')">
+        <button type="button" class="global-specific-btn-secondary" (click)="modalService.choose('specific')">
           {{ 'add_as_specific' | translatePipe }}
         </button>
-        <button type="button" class="btn-global" (click)="modalService.choose('global')">
+        <button type="button" class="c-btn-primary" (click)="modalService.choose('global')">
           {{ 'change_global' | translatePipe }}
         </button>
       </div>

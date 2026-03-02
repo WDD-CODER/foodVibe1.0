@@ -3,8 +3,11 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: stretch;
   gap: 1.5rem;
+
   padding: 1.25rem;
+
   background: var(--bg-glass-strong);
+
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-glass);
@@ -14,10 +17,13 @@
 
 .image-square {
   align-self: center;
-  overflow: hidden;
-  width: 120px;
-  height: 120px;
+
+  width: 7.5rem;
+  height: 7.5rem;
   aspect-ratio: 1 / 1;
+
+  overflow: hidden;
+
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
 
@@ -95,11 +101,11 @@
 
 .scaling-dock-grid {
   display: grid;
-  grid-template-columns: 160px auto;
+  grid-template-columns: 10rem auto;
   align-items: center;
-  gap: 12px;
+  gap: 0.75rem;
 
-  margin-top: 1rem;
+  margin-block-start: 1rem;
 }
 
 .primary-chip-wrapper {
@@ -110,24 +116,25 @@
 
 .scaling-chip {
   position: relative;
-  overflow: visible;
   display: grid;
-  grid-template-columns: minmax(20px, 45px) minmax(60px, 1fr) auto;
+  grid-template-columns: minmax(1.25rem, 2.8125rem) minmax(3.75rem, 1fr) auto;
   align-items: center;
+  gap: 0.3125rem;
 
-  // min-width: 160px;
-  gap: 5px;
+  padding-inline: 0.6rem;
+  padding-block: 0.4rem;
 
-  padding: 0.4rem 0.6rem;
   background: var(--bg-glass);
 
   border: 1px solid var(--border-default);
-  border-radius: 50px;
-  transition: all 0.2s;
+  border-radius: var(--radius-full);
+
+  overflow: visible;
+  transition: all 0.2s ease;
 
   &.primary {
-    background: #eff6ff;
-    border-color: #93c5fd;
+    background: var(--color-primary-soft);
+    border-color: var(--border-focus);
 
     .unit-name {
       color: var(--color-primary);
@@ -138,35 +145,40 @@
     background: var(--bg-glass);
   }
 
+  /* TODO: remove ::ng-deep when dropdown is slotted or uses engine class */
   .unit-dropdown-menu.primary-chip-dropdown,
   .unit-dropdown-menu.secondary-chip-dropdown {
     ::ng-deep .c-dropdown {
       position: absolute;
+      inset-inline-end: 0;
+      inset-inline-start: auto;
+      inset-block-start: calc(100% + 0.25rem);
       z-index: 100;
+
+      min-width: 8.75rem;
+
       overflow: visible;
-      inset-inline: auto;
-      right: 0;
-      left: auto;
-      min-width: 140px;
-      top: calc(100% + 4px);
     }
 
     ::ng-deep .menu-item {
-      padding: 8px 12px;
+      padding-inline: 0.75rem;
+      padding-block: 0.5rem;
 
-      color: #1e293b;
+      color: var(--color-text-secondary);
       font-size: 0.85rem;
       font-weight: 600;
+
       cursor: pointer;
+      transition: background 0.15s ease;
 
       &:hover {
-        background: #f1f5f9;
+        background: var(--bg-muted);
       }
 
       &.menu-item-create {
         color: var(--color-primary);
         font-weight: 700;
-        border-top: 1px solid var(--border-default);
+        border-block-start: 1px solid var(--border-default);
       }
     }
   }
@@ -174,12 +186,13 @@
 
 .secondary-units-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(8.75rem, 1fr));
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
 
-  padding-right: 12px;
-  border-right: 2px solid #f1f5f9;
+  padding-inline-end: 0.75rem;
+
+  border-inline-end: 2px solid var(--bg-muted);
 
   .add-unit-wrapper {
     place-self: center;
@@ -189,10 +202,13 @@
 .unit-switcher-btn {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 0.25rem;
 
-  padding: 2px 8px;
-  border-radius: 20px;
+  padding-inline: 0.5rem;
+  padding-block: 0.125rem;
+
+  border-radius: var(--radius-full);
+
   cursor: pointer;
 
   .unit-name {
@@ -202,20 +218,21 @@
   }
 
   &:hover {
-    background: #eff6ff;
+    background: var(--color-primary-soft);
   }
 }
 
 .counter-grid {
   display: grid;
-  grid-template-columns: 24px auto 24px;
+  grid-template-columns: 1.5rem auto 1.5rem;
   align-items: center;
 
-  height: 28px;
+  height: 1.75rem;
+
   background: var(--bg-pure);
 
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
   overflow: hidden;
 
   .ctrl-btn {
@@ -227,10 +244,11 @@
     font-weight: bold;
 
     border: none;
+
     cursor: pointer;
 
     &:hover:not(:disabled) {
-      background: #f1f5f9;
+      background: var(--bg-muted);
     }
 
     &:disabled {
@@ -244,9 +262,9 @@
 
     background: transparent;
     color: var(--color-primary);
-    text-align: center;
     font-size: 0.85rem;
     font-weight: 800;
+    text-align: center;
 
     border: none;
     outline: none;
@@ -263,19 +281,21 @@
   align-items: center;
   justify-content: center;
 
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
   padding: 0;
 
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--bg-danger-subtle);
+  color: var(--color-danger);
 
   border: none;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
+
   cursor: pointer;
 
   &:hover {
-    background: #fecaca;
+    background: var(--bg-danger-subtle);
+    filter: brightness(0.95);
   }
 }
 
@@ -284,15 +304,17 @@
   align-items: center;
   justify-content: center;
 
-  width: 32px;
-  height: 32px;
+  width: 2rem;
+  height: 2rem;
 
   background: none;
-  color: #94a3b8;
+  color: var(--color-text-muted-light);
 
-  border: 2px dashed #cbd5e1;
-  border-radius: 50%;
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius-full);
+
   cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 
   &:hover {
     color: var(--color-primary);
@@ -305,22 +327,24 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  height: 120px;
-  gap: 0.75rem;
   align-self: center;
+  gap: 0.75rem;
 
-  min-width: 100px;
+  min-width: 6.25rem;
+  height: 7.5rem;
   padding: 1rem;
+
   background: var(--color-primary);
   color: var(--bg-pure);
-
-  border-radius: 8px;
+  font-size: 0.8rem;
   text-align: center;
+
+  border-radius: var(--radius-md);
 
   .metric-group {
     .label {
       display: block;
-      margin-bottom: 2px;
+      margin-block-end: 0.125rem;
       font-size: 0.65rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -340,43 +364,48 @@
   }
 
   .metric-group-weight-volume {
-    cursor: pointer;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.25rem;
     flex-wrap: wrap;
+    gap: 0.25rem;
+
+    cursor: pointer;
   }
 
   .metrics-notice-wrap {
+    position: relative;
     display: inline-flex;
     align-items: center;
-    position: relative;
   }
 
   .metrics-notice-icon {
-    color: #fecaca;
     flex-shrink: 0;
+    color: var(--bg-danger-subtle);
   }
 
   .metrics-notice-floating {
     position: absolute;
-    bottom: 100%;
-    left: 50%;
+    inset-block-end: 100%;
+    inset-inline-start: 50%;
     transform: translateX(-50%);
-    margin-bottom: 4px;
-    padding: 0.5rem 0.75rem;
-    background: #fff;
-    color: #1e293b;
-    border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     z-index: 10;
-    min-width: 120px;
-    max-width: 200px;
-    max-height: 180px;
-    overflow-y: auto;
+
+    margin-block-end: 0.25rem;
+    min-width: 7.5rem;
+    max-width: 12.5rem;
+    max-height: 11.25rem;
+    padding: 0.5rem 0.75rem;
+
+    background: var(--bg-pure);
+    color: var(--color-text-secondary);
     font-size: 0.8rem;
+
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-card);
+
+    overflow-y: auto;
   }
 
   .metrics-notice-item {
@@ -412,12 +441,16 @@
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    padding: 0.2rem 0.4rem;
-    border-radius: var(--radius-md);
+
+    padding-inline: 0.4rem;
+    padding-block: 0.2rem;
+
+    color: var(--color-text-on-primary);
     font-size: 0.75rem;
     font-weight: 600;
-    color: #fff;
     line-height: 1.2;
+
+    border-radius: var(--radius-md);
 
     button {
       padding: 0;
@@ -468,7 +501,7 @@ app-scrollable-dropdown.label-dropdown {
   }
 }
 
-@media (max-width: 650px) {
+@media (max-width: 40.625rem) {
   .header-dashboard-container {
     grid-template-columns: 50% 50%;
     grid-template-areas:
@@ -512,13 +545,15 @@ app-scrollable-dropdown.label-dropdown {
     grid-area: secondary-units;
     grid-column: 1/3;
 
-    border-right: none;
-    border-bottom: 2px solid #f1f5f9;
-    padding-right: 0;
-    padding-bottom: 1rem;
     width: 90%;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    }
+    padding-inline-end: 0;
+    padding-block-end: 1rem;
+
+    border-inline-end: none;
+    border-block-end: 2px solid var(--bg-muted);
+
+    grid-template-columns: repeat(auto-fill, minmax(9.375rem, 1fr));
+  }
 
   .image-square {
     grid-area: image;
