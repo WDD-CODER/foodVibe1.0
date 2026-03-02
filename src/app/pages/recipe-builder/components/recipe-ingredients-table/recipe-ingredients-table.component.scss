@@ -33,6 +33,13 @@ $ingredients-grid-template: minmax(0, 2.5fr) minmax(0, 1.5fr) minmax(0, 1fr) min
   border-block-end: 1px solid var(--border-default);
   border-radius: var(--radius-md) var(--radius-md) 0 0;
   backdrop-filter: var(--blur-glass);
+
+  .col-quantity,
+  .col-unit,
+  .col-percent,
+  .col-cost {
+    text-align: center;
+  }
 }
 
 .ingredient-grid-row {
@@ -44,6 +51,15 @@ $ingredients-grid-template: minmax(0, 2.5fr) minmax(0, 1.5fr) minmax(0, 1fr) min
 
   &:hover {
     background: var(--bg-glass);
+  }
+
+  .col-quantity,
+  .col-unit,
+  .col-percent,
+  .col-cost {
+    min-height: 2.5rem;
+    display: flex;
+    align-items: center;
   }
 }
 
@@ -98,19 +114,29 @@ $ingredients-grid-template: minmax(0, 2.5fr) minmax(0, 1.5fr) minmax(0, 1fr) min
   }
 }
 
-.grid-input, 
+.grid-input,
 .grid-select {
   width: 100%;
   padding: 8px;
 
-  background-color: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  background-color: var(--bg-pure);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
   outline: none;
 
   &:focus {
-    border-color: #0ea5e9;
-    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
+    border-color: var(--border-focus);
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+:host ::ng-deep .col-unit .custom-select-trigger {
+  border: none;
+  box-shadow: none;
+
+  &:focus {
+    border: none;
+    box-shadow: none;
   }
 }
 

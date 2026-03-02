@@ -8,7 +8,7 @@
       {"_id": "prep_001_i2", "referenceId": "demo_001", "type": "product", "amount_": 0.5, "unit_": "kg"},
       {"_id": "prep_001_i3", "referenceId": "demo_002", "type": "product", "amount_": 0.3, "unit_": "kg"},
       {"_id": "prep_001_i4", "referenceId": "demo_003", "type": "product", "amount_": 0.2, "unit_": "kg"},
-      {"_id": "prep_001_i5", "referenceId": "demo_004", "type": "product", "amount_": 0.05, "unit_": "kg"},
+      {"_id": "prep_001_i5", "referenceId": "demo_004", "type": "product", "amount_": 0.05, "unit_": "kg", "note_": "קצוץ דק"},
       {"_id": "prep_001_i6", "referenceId": "demo_080", "type": "product", "amount_": 0.01, "unit_": "kg"},
       {"_id": "prep_001_i7", "referenceId": "demo_074", "type": "product", "amount_": 0.005, "unit_": "kg"},
       {"_id": "prep_001_i8", "referenceId": "demo_073", "type": "product", "amount_": 0.02, "unit_": "kg"}
@@ -51,7 +51,7 @@
     "name_hebrew": "רוטב עגבניות ביתי",
     "recipe_type_": "preparation",
     "ingredients_": [
-      {"_id": "prep_003_i1", "referenceId": "demo_091", "type": "product", "amount_": 1, "unit_": "kg"},
+      {"_id": "prep_003_i1", "referenceId": "demo_091", "type": "product", "amount_": 1, "unit_": "kg", "note_": "רסק עגבניות מרוכז"},
       {"_id": "prep_003_i2", "referenceId": "demo_001", "type": "product", "amount_": 0.3, "unit_": "kg"},
       {"_id": "prep_003_i3", "referenceId": "demo_004", "type": "product", "amount_": 0.02, "unit_": "kg"},
       {"_id": "prep_003_i4", "referenceId": "demo_068", "type": "product", "amount_": 0.1, "unit_": "liter"},
@@ -76,7 +76,7 @@
     "recipe_type_": "preparation",
     "ingredients_": [
       {"_id": "prep_004_i1", "referenceId": "demo_086", "type": "product", "amount_": 0.5, "unit_": "kg"},
-      {"_id": "prep_004_i2", "referenceId": "demo_024", "type": "product", "amount_": 0.1, "unit_": "kg"},
+      {"_id": "prep_004_i2", "referenceId": "demo_024", "type": "product", "amount_": 0.1, "unit_": "kg", "note_": "סחוט טרי"},
       {"_id": "prep_004_i3", "referenceId": "demo_004", "type": "product", "amount_": 0.01, "unit_": "kg"},
       {"_id": "prep_004_i4", "referenceId": "demo_073", "type": "product", "amount_": 0.01, "unit_": "kg"}
     ],
@@ -153,7 +153,7 @@
     "name_hebrew": "חומוס בסיסי",
     "recipe_type_": "preparation",
     "ingredients_": [
-      {"_id": "prep_008_i1", "referenceId": "demo_059", "type": "product", "amount_": 0.5, "unit_": "kg"},
+      {"_id": "prep_008_i1", "referenceId": "demo_059", "type": "product", "amount_": 0.5, "unit_": "kg", "note_": "מושרה לילה"},
       {"_id": "prep_008_i2", "referenceId": "demo_086", "type": "product", "amount_": 0.15, "unit_": "kg"},
       {"_id": "prep_008_i3", "referenceId": "demo_024", "type": "product", "amount_": 0.05, "unit_": "kg"},
       {"_id": "prep_008_i4", "referenceId": "demo_004", "type": "product", "amount_": 0.01, "unit_": "kg"},

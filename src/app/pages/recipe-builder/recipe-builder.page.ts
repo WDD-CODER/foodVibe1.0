@@ -75,6 +75,21 @@ export class RecipeBuilderPage implements OnInit {
   /** True when viewing an old version from history (read-only, no save). */
   protected historyViewMode_ = signal(false);
 
+  /** Section cards collapsed by default (true = collapsed). */
+  protected tableLogicCollapsed_ = signal(true);
+  protected workflowLogicCollapsed_ = signal(true);
+  protected logisticsLogicCollapsed_ = signal(true);
+
+  protected toggleTableLogic(): void {
+    this.tableLogicCollapsed_.update((v) => !v);
+  }
+  protected toggleWorkflowLogic(): void {
+    this.workflowLogicCollapsed_.update((v) => !v);
+  }
+  protected toggleLogisticsLogic(): void {
+    this.logisticsLogicCollapsed_.update((v) => !v);
+  }
+
   //COMPUTED
   protected totalCost_ = computed(() => {
     this.ingredientsFormVersion_();

@@ -20,7 +20,7 @@ Vue/React/Vanilla: Use <style scoped> or modular files where available.
 * **Purpose**: For properties reused **across the application** (backgrounds, borders, colors, radii, shadows). Read this file before creating or editing component styles; reuse existing tokens where they fit.
 
 ## 3. Unification Rule (Mandatory)
-1.  **Unify First**: Before creating a selector, search for an existing **Engine** (e.g., `.c-button`, `.c-card`, `.c-chip`).
+1.  **Unify First**: Before creating a selector, search for an existing **Engine** (e.g., `.c-button`, `.c-card`, `.c-chip`). For dropdowns and scrollable list overlays, also check `src/app/shared/` for a shared component (e.g. scrollable-dropdown) before building a custom one.
 2.  **Engines & Modifiers**: Use shared blocks and apply modifiers (e.g., `.c-button.primary`) instead of one-off classes.
 3.  **Token placement (three tiers)**:
     * **Rule bodies**: Use `var(--token)` and `rem`/`em` when a token is used. Exception: when "No token" tier applies, the value may be used literally in the rule.

@@ -1,12 +1,19 @@
 # Commit to GitHub (project skill)
 
-Commit the current working-tree changes from this session to GitHub using the project’s process.
+This command will commit **only the changes made in this conversation**.
 
-**You must:**
+**Clarification:**
+When you run this command (per the skill), *only* the files and edits made explicitly as a result of the current chat/session will be included in the commit. Other staged or unstaged changes present in your working directory will **not** be committed unless they were changed in this session.
 
-1. **Read and follow** [.assistant/skills/commit-to-github/SKILL.md](.assistant/skills/commit-to-github/SKILL.md) from start to finish.
-2. **Evaluate** the working tree (Phase 1: `git status`, `git diff --stat`), **decide** branch/commit split (Phase 2–3), then **present the plan as the visual tree** in chat (Phase 4).
-3. **Do not** run `git add`, `git commit`, `git checkout -b`, or `git push` until I **approve** the visual plan in this conversation.
-4. After I approve, **execute** the plan (Phase 6), then update `.assistant/todo.md` for any tasks that match the committed work.
+**Summary of process (per skill):**
+1. **Read and follow** [.assistant/skills/commit-to-github/SKILL.md](.assistant/skills/commit-to-github/SKILL.md) start-to-finish.
+2. **Evaluate** which files were edited as part of the current chat/session. Present only these for commit.
+3. **Present** a visual plan (Phase 4) in chat, showing only these session changes for branch/commit planning.
+4. **Await explicit approval**. Absolutely no `git add`, `git commit`, `git checkout -b`, or `git push` until you approve the plan in this chat.
+5. **On approval**, commit/push exactly as planned, update `.assistant/todo.md` for relevant tasks.
 
-Use the skill as the single source of truth for branch names (`feat/…`, `fix/…`), commit message format, and execution steps.
+**Note:**  
+- Only changes that occurred in this chat/session will be included in the commit.
+- Other local/untracked changes are ignored unless you specify otherwise.
+
+Always use the referenced skill for naming (`feat/...`, `fix/...`), commit message craft, and process steps.
