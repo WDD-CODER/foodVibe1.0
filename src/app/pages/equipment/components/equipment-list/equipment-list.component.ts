@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { EquipmentDataService } from '@services/equipment-data.service';
 import { Equipment, EquipmentCategory } from '@models/equipment.model';
@@ -14,7 +14,7 @@ type SortField = 'name' | 'category' | 'owned';
 @Component({
   selector: 'app-equipment-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CustomSelectComponent],
+  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule, TranslatePipe, LoaderComponent, CustomSelectComponent],
   templateUrl: './equipment-list.component.html',
   styleUrl: './equipment-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,6 +22,15 @@ type SortField = 'name' | 'category' | 'owned';
 export class EquipmentListComponent {
   private readonly equipmentData = inject(EquipmentDataService);
   private readonly router = inject(Router);
+
+  /** True when this list is shown under /inventory/equipment (logistics from inventory). */
+  protected get isUnderInventory(): boolean {
+    return this.router.url.startsWith('/inventory/equipment');
+  }
+
+  protected get equipmentBasePath(): string[] {
+    return this.isUnderInventory ? ['/inventory/equipment'] : ['/equipment'];
+  }
 
   protected searchQuery_ = signal('');
   protected categoryFilter_ = signal<EquipmentCategory | ''>('');
@@ -82,8 +91,12 @@ export class EquipmentListComponent {
     return cat;
   }
 
+  protected onAdd(): void {
+    this.router.navigate([...this.equipmentBasePath, 'add']);
+  }
+
   onEdit(id: string): void {
-    this.router.navigate(['/equipment/edit', id]);
+    this.router.navigate([...this.equipmentBasePath, 'edit', id]);
   }
 
   async onDelete(item: Equipment): Promise<void> {

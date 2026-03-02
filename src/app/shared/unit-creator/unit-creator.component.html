@@ -1,30 +1,29 @@
 @if (isOpen_()) {
-<div class="modal-overlay" (click)="resetAndClose()">
-  <div class="modal-card" dir="rtl" (click)="$event.stopPropagation()" (clickOutside)="resetAndClose()">
+<div class="c-modal-overlay" (click)="resetAndClose()">
+  <div class="c-modal-card c-modal-card--md" dir="rtl" (click)="$event.stopPropagation()" (clickOutside)="resetAndClose()">
     <h3>הגדרת יחידת המרה חדשה</h3>
 
-    <div class="formula-grid">
-      <div class="input-stack">
+    <div class="c-modal-body unit-creator-formula-grid">
+      <div class="c-input-stack">
         <label>שם היחידה</label>
-        <input type="text" 
-               [ngModel]="newUnitName_()" 
-               (ngModelChange)="newUnitName_.set($event)" 
+        <input type="text"
+               [ngModel]="newUnitName_()"
+               (ngModelChange)="newUnitName_.set($event)"
                placeholder="למשל: דלי">
       </div>
 
-  <div class="input-stack amounte">
-  <label>כמות</label>
-  <div class="flex gap-2 items-center">
-    <span class="math-operator"> = </span>
-        <input SelectOnFocus 
-        type="number" 
-        [ngModel]="newUnitValue_()" 
-        (ngModelChange)="newUnitValue_.set($event)"
-        class="">
+      <div class="c-input-stack unit-creator-amount">
+        <label>כמות</label>
+        <div class="flex gap-2 items-center">
+          <span class="math-operator"> = </span>
+          <input SelectOnFocus
+                 type="number"
+                 [ngModel]="newUnitValue_()"
+                 (ngModelChange)="newUnitValue_.set($event)">
+        </div>
       </div>
-    </div>
 
-      <div class="input-stack">
+      <div class="c-input-stack">
         <label>יחידת מידה להשוואה</label>
         <app-custom-select
           [ngModel]="basisUnit_()"
@@ -41,10 +40,10 @@
     </div>
     }
 
-    <div class="modal-actions">
-      <button class="btn-ghost" (click)="resetAndClose()">ביטול</button>
-      <button class="btn-save" 
-              (click)="save()" 
+    <div class="c-modal-actions">
+      <button type="button" class="c-btn-ghost" (click)="resetAndClose()">ביטול</button>
+      <button type="button" class="c-btn-primary"
+              (click)="save()"
               [disabled]="!newUnitName_() || newUnitValue_() <= 0">
         אשר ושמור יחידה
       </button>

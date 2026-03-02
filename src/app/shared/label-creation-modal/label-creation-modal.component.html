@@ -1,17 +1,17 @@
 @if (modal.isOpen_()) {
-  <div class="modal-overlay" (click)="resetAndClose()">
-    <div class="modal-card" dir="rtl" (click)="$event.stopPropagation()" (clickOutside)="resetAndClose()">
+  <div class="c-modal-overlay" (click)="resetAndClose()">
+    <div class="c-modal-card c-modal-card--md" dir="rtl" (click)="$event.stopPropagation()" (clickOutside)="resetAndClose()">
       <h3>{{ 'add_new_label' | translatePipe }}</h3>
 
-      <div class="formula-grid">
-        <div class="input-stack full-width">
+      <div class="c-modal-body">
+        <div class="c-input-stack full-width">
           <label>{{ 'label_name' | translatePipe }} (עברית)</label>
           <input type="text"
                  [ngModel]="modal.hebrewLabel_()"
                  (ngModelChange)="modal.hebrewLabel_.set($event)"
                  placeholder="למשל: חלבי" />
         </div>
-        <div class="input-stack full-width">
+        <div class="c-input-stack full-width">
           <label>מפתח באנגלית (לדוגמה: dairy)</label>
           <input type="text"
                  [ngModel]="englishKey_()"
@@ -19,10 +19,10 @@
                  placeholder="dairy"
                  (keydown.enter)="save()" />
           @if (validationError_()) {
-            <span class="validation-error">{{ validationError_() }}</span>
+            <span class="label-creation-validation-error">{{ validationError_() }}</span>
           }
         </div>
-        <div class="input-stack full-width">
+        <div class="c-input-stack full-width">
           <label>{{ 'label_color' | translatePipe }}</label>
           <div class="color-swatches">
             @for (c of palette; track c) {
@@ -56,9 +56,9 @@
         </div>
       </div>
 
-      <div class="modal-actions">
-        <button type="button" class="btn-ghost" (click)="cancel()">{{ 'cancel' | translatePipe }}</button>
-        <button type="button" class="btn-save"
+      <div class="c-modal-actions">
+        <button type="button" class="c-btn-ghost" (click)="cancel()">{{ 'cancel' | translatePipe }}</button>
+        <button type="button" class="c-btn-primary"
                 (click)="save()"
                 [disabled]="!englishKey_().trim() || !modal.hebrewLabel_().trim()">
           {{ 'save_label' | translatePipe }}

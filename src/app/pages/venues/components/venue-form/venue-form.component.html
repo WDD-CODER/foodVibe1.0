@@ -11,7 +11,7 @@
     <div class="form-section">
       <div class="form-group">
         <label for="name_hebrew">{{ 'name' | translatePipe }}</label>
-        <input id="name_hebrew" type="text" formControlName="name_hebrew" />
+        <input id="name_hebrew" type="text" formControlName="name_hebrew" class="c-input" />
       </div>
       <div class="form-group">
         <label for="environment_type_">{{ 'environment_type' | translatePipe }}</label>
@@ -23,14 +23,14 @@
       </div>
       <div class="form-group">
         <label for="notes_">{{ 'notes' | translatePipe }}</label>
-        <textarea id="notes_" formControlName="notes_" rows="2"></textarea>
+        <textarea id="notes_" formControlName="notes_" rows="2" class="c-input"></textarea>
       </div>
     </div>
 
     <div class="form-section infra-section" formArrayName="available_infrastructure_">
       <div class="infra-header">
         <h3>{{ 'available_infrastructure' | translatePipe }}</h3>
-        <button type="button" class="btn btn-add" (click)="addInfraRow()">
+        <button type="button" class="c-btn-ghost" (click)="addInfraRow()">
           <lucide-icon name="plus" [size]="16"></lucide-icon>
           {{ 'add_row' | translatePipe }}
         </button>
@@ -51,10 +51,10 @@
     </div>
 
     <div class="form-actions">
-      <button type="button" class="btn btn-secondary" (click)="onCancel()">
+      <button type="button" class="c-btn-ghost" (click)="onCancel()">
         {{ 'cancel' | translatePipe }}
       </button>
-      <button type="submit" class="btn btn-primary" [disabled]="venueForm_.invalid || isSaving_()">
+      <button type="submit" class="c-btn-primary" [disabled]="venueForm_.invalid || isSaving_()">
         @if (isSaving_()) {
           <app-loader size="small" [inline]="true" />
         }

@@ -1,10 +1,15 @@
 :host {
-  --color-ink: var(--color-text-main, #1a1a1a);
+  --color-ink: var(--color-text-main);
   --font-serif: 'Heebo', sans-serif;
+  --color-ornament: var(--color-primary);
+  --color-frame-ink: var(--color-text-main);
+  --border-warm: var(--border-default);
 
   display: block;
+
   min-height: 100vh;
   min-height: 100dvh;
+
   background: var(--bg-body);
 }
 

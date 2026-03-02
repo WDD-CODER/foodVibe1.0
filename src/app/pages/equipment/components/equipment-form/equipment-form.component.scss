@@ -64,17 +64,9 @@
       font-weight: 500;
     }
 
-    input[type="text"],
-    input[type="number"],
-    select,
-    textarea {
-      padding-inline: 0.75rem;
-      padding-block: 0.5rem;
-
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius-md);
-
-      font-size: 1rem;
+    input.c-input,
+    textarea.c-input {
+      width: 100%;
     }
 
     &.checkbox-group label {
@@ -88,37 +80,6 @@
   .form-actions {
     display: flex;
     gap: 0.75rem;
-
     padding-block-start: 1rem;
-
-    .btn {
-      padding-inline: 1rem;
-      padding-block: 0.5rem;
-
-      background-color: transparent;
-      color: inherit;
-      font-weight: 500;
-
-      border: none;
-      border-radius: var(--radius-md);
-
-      cursor: pointer;
-      transition: opacity 0.2s ease;
-
-      &.btn-secondary {
-        background-color: var(--bg-subtle);
-        color: var(--color-text-secondary);
-      }
-
-      &.btn-primary {
-        background-color: var(--color-primary);
-        color: var(--bg-pure);
-
-        &:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-      }
-    }
   }
 }

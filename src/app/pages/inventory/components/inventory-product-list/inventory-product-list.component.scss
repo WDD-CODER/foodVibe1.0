@@ -1,9 +1,7 @@
-/* Layout tokens (match recipe-book layout) */
-$products-grid-template: 2fr 1fr 1.5fr 1fr minmax(48px, 0.8fr) 1fr 80px;
+/* Layout tokens (component-scoped) */
+$products-grid-template: 2fr 1fr 1.5fr 1fr 6.25rem 1fr 5rem;
 $panel-width-expanded: 220px;
-$header-break-grid: 640px;
-$header-break-stack: 360px;
-$header-title-min-width: 8rem;
+$panel-width-collapsed: 48px;
 
 .inventory-container {
   display: grid;
@@ -12,12 +10,11 @@ $header-title-min-width: 8rem;
   grid-template-areas:
     "header header"
     "panel  table";
-  height: 90dvh;
+  height: 100dvh;
   padding: 1rem 1.5rem;
   gap: 0;
   overflow: hidden;
   box-sizing: border-box;
-  container-type: inline-size;
 }
 
 .list-header {
@@ -67,142 +64,47 @@ $header-title-min-width: 8rem;
 }
 
 .list-header .open-panel-btn.header-menu-btn {
-    display: grid;
-    place-content: center;
-    flex-shrink: 0;
-    width: 2.5rem;
-    height: 2.5rem;
-    padding: 0;
-    background: var(--bg-glass);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-md);
-    color: var(--color-text-muted);
-    cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease;
-
-    &:hover {
-      background: var(--bg-glass-hover);
-      color: var(--color-text-main);
-    }
-  }
-
-.list-header .header-search .input-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: 100%;
-  padding-inline: 0.75rem;
-  padding-block: 0.5rem;
+  display: grid;
+  place-content: center;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
   background: var(--bg-glass);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
 
-  &:focus-within {
-    border-color: var(--border-focus);
-    box-shadow: var(--shadow-focus);
-  }
-
-  lucide-icon {
-    flex-shrink: 0;
-    color: var(--color-text-muted);
-  }
-
-  input {
-    flex: 1;
-    min-width: 0;
-    padding: 0;
-    background: transparent;
-    border: none;
-    outline: none;
-    font-size: 0.875rem;
+  &:hover {
+    background: var(--bg-glass-hover);
     color: var(--color-text-main);
-
-    &::placeholder {
-      color: var(--color-text-muted-light);
-    }
   }
 }
 
 .list-header .add-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding-inline: 1.25rem;
-    padding-block: 0.625rem;
-    background: var(--color-primary);
-    color: var(--color-text-on-primary);
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: var(--shadow-glow);
-    transition: background 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-inline: 1.25rem;
+  padding-block: 0.625rem;
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
 
-    &:hover {
-      background: var(--color-primary-hover);
-    }
-}
-
-/* Header: 2-row grid when search can't keep 30% min — title full width, then search + actions row */
-@container (max-width: $header-break-grid) {
-  .list-header {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto;
-    grid-template-areas:
-      "title title"
-      "search actions";
-    gap: 1rem;
-  }
-
-  .list-header .header-start {
-    grid-area: title;
-    min-width: 0;
-  }
-
-  .list-header .header-search {
-    grid-area: search;
-    flex: none;
-    min-width: 0;
-    max-width: none;
-  }
-
-  .list-header .header-actions {
-    grid-area: actions;
-    justify-content: flex-end;
-  }
-
-  .list-header .header-spacer {
-    display: none;
-  }
-}
-
-/* Header: single column when title would go below min width */
-@container (max-width: $header-break-stack) {
-  .list-header {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-    grid-template-areas:
-      "title"
-      "search"
-      "actions";
-  }
-
-  .list-header .header-actions {
-    justify-content: stretch;
-  }
-
-  .list-header .add-btn {
-    width: 100%;
-    justify-content: center;
+  &:hover {
+    background: var(--color-primary-hover);
   }
 }
 
 .table-area {
   grid-area: table;
-  position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -265,10 +167,6 @@ $header-title-min-width: 8rem;
   align-items: center;
 }
 
-.product-grid-row > .col-allergens {
-  align-items: flex-start;
-}
-
 .product-grid-row:hover > * {
   background: var(--bg-glass);
 }
@@ -301,7 +199,7 @@ $header-title-min-width: 8rem;
   }
 }
 
-/* Filter panel (fully hidden when collapsed; open via button on table area) */
+/* Filter panel (retractable to icon strip) */
 .filter-panel {
   grid-area: panel;
   display: flex;
@@ -315,7 +213,7 @@ $header-title-min-width: 8rem;
   box-shadow: var(--shadow-glass);
   backdrop-filter: var(--blur-glass);
   -webkit-backdrop-filter: var(--blur-glass);
-  transition: width 0.25s var(--ease-spring), min-width 0.25s var(--ease-spring);
+  transition: width 0.3s var(--ease-smooth), min-width 0.3s var(--ease-smooth);
   scrollbar-width: none;
   -ms-overflow-style: none;
 
@@ -324,10 +222,9 @@ $header-title-min-width: 8rem;
   }
 
   &.collapsed {
-    width: 0;
-    min-width: 0;
+    width: $panel-width-collapsed;
+    min-width: $panel-width-collapsed;
     overflow: hidden;
-    border-inline-start-width: 0;
 
     .panel-content {
       opacity: 0;
@@ -345,22 +242,107 @@ $header-title-min-width: 8rem;
   height: 2.25rem;
   margin: 0.75rem;
   padding: 0;
-  background: var(--bg-glass);
+  background: transparent;
+  border: none;
   border-radius: var(--radius-md);
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
 
-  &:hover {
-    background: var(--bg-glass-hover);
-    color: var(--color-text-main);
+  lucide-icon {
+    opacity: 0;
+    transition: opacity 0.4s ease 0.15s;
+  }
+
+  .filter-panel:hover & lucide-icon,
+  &:hover lucide-icon,
+  &:focus-visible lucide-icon {
+    opacity: 1;
   }
 }
 
 .panel-content {
   padding: 0 1rem 1rem;
   min-height: 12.5rem;
-  transition: opacity 0.2s var(--ease-spring);
+  transition: opacity 0.2s ease;
+}
+
+.control-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-block-end: 1rem;
+  padding-block-end: 1rem;
+  border-block-end: 1px solid var(--border-default);
+}
+
+.control-nav-link {
+  display: block;
+  padding-inline: 0.75rem;
+  padding-block: 0.5rem;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  transition: background 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    background: var(--bg-glass-hover);
+    color: var(--color-text-main);
+  }
+
+  &.active {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-hover);
+  }
+}
+
+.search-section {
+  margin-block-end: 1.25rem;
+
+  h3 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-inline: 0.75rem;
+  padding-block: 0.5rem;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus-within {
+    border-color: var(--border-focus);
+    box-shadow: var(--shadow-focus);
+  }
+
+  lucide-icon {
+    flex-shrink: 0;
+    color: var(--color-text-muted);
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 0.875rem;
+    color: var(--color-text-main);
+
+    &::placeholder {
+      color: var(--color-text-muted-light);
+    }
+  }
 }
 
 .filter-section {
@@ -475,7 +457,7 @@ $header-title-min-width: 8rem;
   border: 0;
 }
 
-/* Column and cell styles (inventory-specific) */
+/* Column and cell styles */
 .col-actions {
   padding-inline-end: 1rem;
   display: flex;
@@ -489,6 +471,7 @@ $header-title-min-width: 8rem;
   display: flex;
   justify-content: center;
   align-items: center;
+  text-align: center;
   min-width: 3rem;
 }
 
@@ -545,7 +528,7 @@ $header-title-min-width: 8rem;
 }
 
 .allergen-pill {
-  padding: 0.25rem 0.625rem;
+  padding: 0.125rem 0.5rem;
   font-size: 0.75rem;
   font-weight: 500;
   background: rgba(254, 243, 199, 0.5);
@@ -659,8 +642,7 @@ $header-title-min-width: 8rem;
   }
 }
 
-/* Mobile: same layout, panel as icon strip; optional tweaks (match recipe-book) */
-/* Mobile: padding and table action tweaks; header layout by container query */
+/* Mobile */
 @media (max-width: 768px) {
   .inventory-container {
     padding: 1rem;
@@ -669,6 +651,11 @@ $header-title-min-width: 8rem;
   .list-header .page-title {
     text-align: start;
     font-size: 1.25rem;
+  }
+
+  .list-header .header-search {
+    min-width: 0;
+    max-width: none;
   }
 
   .action-btn {

@@ -1,10 +1,12 @@
-import { Component, OnDestroy, inject, ChangeDetectionStrategy, signal, computed, afterNextRender } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 
 import { KitchenStateService } from '@services/kitchen-state.service';
-import { Router } from '@angular/router';
+import { EquipmentDataService } from '@services/equipment-data.service';
+import { UserMsgService } from '@services/user-msg.service';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { Product } from '@models/product.model';
 import { UnitRegistryService } from '@services/unit-registry.service';
@@ -13,34 +15,39 @@ import { ConfirmModalService } from '@services/confirm-modal.service';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
-import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
-
-const MOBILE_BREAKPOINT_PX = 768;
 
 @Component({
   selector: 'inventory-product-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, SelectOnFocusDirective, ClickOutSideDirective, LoaderComponent, CustomSelectComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    RouterLinkActive,
+    LucideAngularModule,
+    TranslatePipe,
+    SelectOnFocusDirective,
+    ClickOutSideDirective,
+    LoaderComponent,
+  ],
   templateUrl: './inventory-product-list.component.html',
   styleUrl: './inventory-product-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class InventoryProductListComponent implements OnDestroy {
+export class InventoryProductListComponent {
 
-  // INJECTIONS
   private readonly kitchenStateService = inject(KitchenStateService);
   private readonly router = inject(Router);
   private readonly translationService = inject(TranslationService);
   private readonly confirmModal = inject(ConfirmModalService);
+  private readonly equipmentData = inject(EquipmentDataService);
+  private readonly userMsg = inject(UserMsgService);
   protected readonly unitRegistry = inject(UnitRegistryService);
 
   private lastPriceEdit_ = { productId: '', unit: '', value: 0 };
-  private mediaQueryList: MediaQueryList | null = null;
-  private mediaListener: (() => void) | null = null;
 
-  // INITIAL STATE
   protected activeFilters_ = signal<Record<string, string[]>>({});
   protected searchQuery_ = signal<string>('');
   protected sortBy_ = signal<SortField | null>(null);
@@ -51,18 +58,6 @@ export class InventoryProductListComponent implements OnDestroy {
   protected allergenExpandAll_ = signal<boolean>(false);
   protected deletingId_ = signal<string | null>(null);
   protected savingPriceId_ = signal<string | null>(null);
-  protected isMobile_ = signal<boolean>(false);
-
-  constructor() {
-    afterNextRender(() => {
-      this.mediaQueryList = window.matchMedia(`(min-width: ${MOBILE_BREAKPOINT_PX + 1}px)`);
-      this.isMobile_.set(!this.mediaQueryList.matches);
-      this.mediaListener = () => {
-        this.isMobile_.set(!this.mediaQueryList!.matches);
-      };
-      this.mediaQueryList.addEventListener('change', this.mediaListener);
-    });
-  }
 
   // LISTING
   protected filterCategories_ = computed(() => {
@@ -117,6 +112,10 @@ export class InventoryProductListComponent implements OnDestroy {
 
   protected isCategoryExpanded(name: string): boolean {
     return this.expandedFilterCategories_().has(name);
+  }
+
+  protected togglePanel(): void {
+    this.isPanelOpen_.update(v => !v);
   }
 
   protected filteredProducts_ = computed(() => {
@@ -190,10 +189,6 @@ export class InventoryProductListComponent implements OnDestroy {
     }
   }
 
-  protected togglePanel(): void {
-    this.isPanelOpen_.update(v => !v);
-  }
-
   protected toggleAllergenExpandAll(): void {
     this.allergenExpandAll_.update(v => !v);
     this.allergenPopoverProductId_.set(null);
@@ -206,7 +201,7 @@ export class InventoryProductListComponent implements OnDestroy {
 
   protected closeAllergenView(clickTarget?: EventTarget | null): void {
     const el = clickTarget instanceof HTMLElement ? clickTarget : null;
-    if (el?.closest('.products-grid-header .col-allergens')) return;
+    if (el?.closest('.table-header .col-allergens')) return;
     this.allergenPopoverProductId_.set(null);
     this.allergenExpandAll_.set(false);
   }
@@ -244,11 +239,10 @@ export class InventoryProductListComponent implements OnDestroy {
     return category.options.filter(o => o.checked_).length;
   }
 
-  protected onAddProduce(): void {
+  protected onAddProduct(): void {
     this.router.navigate(['/inventory/add']);
   }
 
-  // UPDATE
   onEditProduct(_id: string): void {
     this.router.navigate(['/inventory/edit', _id]);
   }
@@ -284,10 +278,6 @@ export class InventoryProductListComponent implements OnDestroy {
     const fromOptions = (product.purchase_options_ || []).map(o => o.unit_symbol_).filter(Boolean);
     const all = [base, ...fromOptions];
     return [...new Set(all)];
-  }
-
-  protected getUnitOptions(product: Product): { value: string; label: string }[] {
-    return this.getProductUnits(product).map((u) => ({ value: u, label: u }));
   }
 
   /** Price per 1 of the given unit (converted from buy_price_global_ which is per base_unit) */
@@ -368,8 +358,4 @@ export class InventoryProductListComponent implements OnDestroy {
     });
   }
 
-  // DESTROY
-  ngOnDestroy(): void {
-    this.mediaQueryList?.removeEventListener('change', this.mediaListener ?? (() => {}));
-  }
 }

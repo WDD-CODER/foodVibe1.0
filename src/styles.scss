@@ -257,6 +257,11 @@ body::before {
   }
 }
 
+textarea.c-input {
+  min-height: 4rem;
+  resize: vertical;
+}
+
 /* ---- Engine: Input Wrapper (icon + input) ---- */
 .c-input-wrapper {
   display: flex;
@@ -338,6 +343,128 @@ body::before {
   box-shadow: var(--shadow-modal);
   backdrop-filter: var(--blur-modal);
   -webkit-backdrop-filter: var(--blur-modal);
+
+  h3 {
+    margin: 0 0 1.25rem 0;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+  }
+}
+
+.c-modal-card--md {
+  max-width: 34rem;
+}
+
+.c-modal-card--fluid {
+  min-width: 17.5rem;
+  max-width: 90vw;
+}
+
+/* ---- Engine: Modal actions (footer row) ---- */
+.c-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-block-start: 1rem;
+  border-block-start: 1px solid var(--border-default);
+}
+
+/* ---- Engine: Modal body (glass form area) ---- */
+.c-modal-body {
+  margin-block-end: 1.5rem;
+  padding: 1.25rem;
+  background: var(--bg-glass);
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius-md);
+  backdrop-filter: var(--blur-glass);
+}
+
+/* ---- Engine: Input stack (label + input column in modals) ---- */
+.c-input-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  label {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  input,
+  select {
+    width: 100%;
+    min-height: 2.75rem;
+    padding-inline: 0.75rem;
+    padding-block: 0.5rem;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &:focus {
+      border-color: var(--border-focus);
+      box-shadow: var(--shadow-focus);
+    }
+  }
+}
+
+.c-input-stack.full-width {
+  width: 100%;
+}
+
+.c-input-stack input.readonly-input {
+  background: var(--bg-muted);
+  color: var(--color-text-muted);
+}
+
+/* ---- Engine: Primary button modifiers (danger / warning) ---- */
+.c-btn-primary--danger {
+  background: var(--color-danger);
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.15);
+
+  @media (hover: hover) {
+    &:hover {
+      background: #b91c1c;
+    }
+  }
+}
+
+.c-btn-primary--warning {
+  background: var(--border-warning);
+  color: #fff;
+
+  @media (hover: hover) {
+    &:hover {
+      background: #b45309;
+    }
+  }
+}
+
+@media (max-width: $break-mobile) {
+  .c-modal-card {
+    max-width: none;
+    width: calc(100% - 2rem);
+    margin-inline: 1rem;
+    padding: 1.25rem;
+    border-radius: var(--radius-lg);
+    max-height: calc(100dvh - 4rem);
+    overflow-y: auto;
+  }
+
+  .c-modal-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+
+    button {
+      width: 100%;
+      justify-content: center;
+      min-height: 2.75rem;
+    }
+  }
 }
 
 /* ---- Engine: Scrollable dropdown (list overlay + scroll indicators) ---- */

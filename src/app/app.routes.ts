@@ -70,6 +70,15 @@ export const routes: Routes = [
         path: 'equipment',
         loadComponent: () => import('./pages/equipment/components/equipment-list/equipment-list.component').then(m => m.EquipmentListComponent),
       },
+      {
+        path: 'equipment/add',
+        loadComponent: () => import('./pages/equipment/components/equipment-form/equipment-form.component').then(m => m.EquipmentFormComponent),
+      },
+      {
+        path: 'equipment/edit/:id',
+        loadComponent: () => import('./pages/equipment/components/equipment-form/equipment-form.component').then(m => m.EquipmentFormComponent),
+        resolve: { equipment: equipmentResolver },
+      },
     ],
   },
   {

@@ -19,7 +19,7 @@
     </div>
     <div class="header-spacer"></div>
     <div class="header-actions">
-      <button type="button" class="add-btn" (click)="onAddProduce()">
+      <button type="button" class="add-btn" (click)="onAddProduct()">
         <lucide-icon name="plus" [size]="18"></lucide-icon>
         {{ 'add_product' | translatePipe }}
       </button>
@@ -74,12 +74,12 @@
           </div>
           <div class="col-supplier">{{ getSupplierNames(product.supplierIds_) || '—' }}</div>
           <div class="col-unit">
-            <app-custom-select
-              class="grid-select"
-              [ngModel]="product.base_unit_"
-              (ngModelChange)="onUnitChange(product, $event)"
-              [options]="getUnitOptions(product)"
-              placeholder="unit" />
+            <select class="grid-select" [ngModel]="product.base_unit_"
+              (ngModelChange)="onUnitChange(product, $event)">
+              @for (u of getProductUnits(product); track u) {
+                <option [value]="u">{{ u | translatePipe }}</option>
+              }
+            </select>
           </div>
           <div class="col-price">
             @if (savingPriceId_() === product._id) {
@@ -112,12 +112,14 @@
   </section>
 
   <aside class="filter-panel" [class.collapsed]="!isPanelOpen_()">
-    @if (isPanelOpen_()) {
-      <button type="button" class="panel-toggle-icon" (click)="togglePanel()" [attr.aria-label]="'close' | translatePipe">
-        <lucide-icon name="chevron-right" [size]="20"></lucide-icon>
-      </button>
-    }
+    <button type="button" class="panel-toggle-icon" (click)="togglePanel()" [attr.aria-label]="isPanelOpen_() ? ('close' | translatePipe) : ('filter' | translatePipe)">
+      <lucide-icon [name]="isPanelOpen_() ? 'panel-right-close' : 'panel-left-close'" [size]="20"></lucide-icon>
+    </button>
     <div class="panel-content">
+      <nav class="control-nav" aria-label="Inventory and logistics">
+        <a routerLink="/inventory/list" routerLinkActive="active" class="control-nav-link">{{ 'product_list' | translatePipe }}</a>
+        <a routerLink="/inventory/equipment" routerLinkActive="active" class="control-nav-link">{{ 'logistics' | translatePipe }}</a>
+      </nav>
       <div class="filter-section">
         <div class="filter-section-header">
           <h3>{{ 'filter' | translatePipe }}</h3>

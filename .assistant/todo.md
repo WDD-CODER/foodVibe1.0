@@ -236,13 +236,21 @@ Update status after each sub-task. Link plan files here when applicable.
 
 ## Ahead (Pending)
 
+### Plan 055 — SCSS cssLayer audit fix (`plans/055-scss-csslayer-audit-fix.plan.md`)
+
+- [x] Group A: product-form, recipe-header, preparation-search, menu-intelligence, recipe-ingredients-table, ingredient-search (tokens, logical, rhythm)
+- [x] Group B: cook-view (media query, !important, missing --cv-* tokens); other B files left for follow-up
+- [x] Group C: equipment/venues border-block-end; menu-library --bg-warm → --bg-body
+- [ ] Group E: shared modals, unit-creator, version-history-panel, custom-select, loader (deferred)
+- [x] Run ng build to verify
+
 ### Plan 054 — Unify modal styles (`plans/054-unify-modal-styles.plan.md`)
 
-- [ ] Expand engine classes in styles.scss: .c-modal-card modifiers (--md, --fluid), .c-modal-actions, .c-modal-body, .c-input-stack, .c-btn-primary--danger/--warning, modal responsive rules
-- [ ] Update add-item-modal and add-equipment-modal HTML/SCSS
-- [ ] Update confirm-modal, restore-choice-modal, global-specific-modal HTML/SCSS
-- [ ] Update translation-key-modal, label-creation-modal, unit-creator HTML/SCSS
-- [ ] Run ng build and verify all 8 modals render correctly
+- [x] Expand engine classes in styles.scss: .c-modal-card modifiers (--md, --fluid), .c-modal-actions, .c-modal-body, .c-input-stack, .c-btn-primary--danger/--warning, modal responsive rules
+- [x] Update add-item-modal and add-equipment-modal HTML/SCSS
+- [x] Update confirm-modal, restore-choice-modal, global-specific-modal HTML/SCSS
+- [x] Update translation-key-modal, label-creation-modal, unit-creator HTML/SCSS
+- [x] Run ng build and verify all 8 modals render correctly
 
 ### Plan 052 — Plan 047 audit report (`plans/052-plan-047-audit-report.plan.md`)
 
@@ -441,6 +449,7 @@ Update status after each sub-task. Link plan files here when applicable.
 | 051 | Recipe builder UX fixes | Done |
 | 052 | Plan 047 audit report | Planned |
 | 053 | Todo audit and fixes | Active |
-| 054 | Unify modal styles | Active |
+| 054 | Unify modal styles | Done |
+| 055 | SCSS cssLayer audit fix | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*

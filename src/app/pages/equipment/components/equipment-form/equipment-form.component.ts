@@ -140,13 +140,15 @@ export class EquipmentFormComponent implements OnInit {
           updated_at_: now,
         });
       }
-      this.router.navigate(['/equipment/list']);
+      const listPath = this.router.url.startsWith('/inventory/equipment') ? ['/inventory/equipment'] : ['/equipment/list'];
+      this.router.navigate(listPath);
     } finally {
       this.isSaving_.set(false);
     }
   }
 
   onCancel(): void {
-    this.router.navigate(['/equipment/list']);
+    const listPath = this.router.url.startsWith('/inventory/equipment') ? ['/inventory/equipment'] : ['/equipment/list'];
+    this.router.navigate(listPath);
   }
 }
