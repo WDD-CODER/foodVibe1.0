@@ -6,7 +6,7 @@
   <div class="toolbar">
     <div class="search-section">
       <label class="visually-hidden" for="venue-search">{{ 'search' | translatePipe }}</label>
-      <div class="input-wrapper">
+      <div class="c-input-wrapper">
         <lucide-icon name="search" [size]="18"></lucide-icon>
         <input
           id="venue-search"
@@ -17,9 +17,9 @@
         />
       </div>
     </div>
-    <button type="button" class="add-place-btn" (click)="onAddPlace()">
+    <button type="button" class="c-btn-primary" (click)="onAddPlace()">
       <lucide-icon name="plus" [size]="18"></lucide-icon>
-      <span>{{ 'add_venue' | translatePipe }}</span>
+      {{ 'add_venue' | translatePipe }}
     </button>
   </div>
 
@@ -45,13 +45,13 @@
             <td class="col-env">{{ item.environment_type_ | translatePipe }}</td>
             <td class="col-infra">{{ item.available_infrastructure_.length }}</td>
             <td class="col-actions">
-              <button type="button" class="btn-icon" (click)="onEdit(item._id)" [attr.aria-label]="'edit' | translatePipe">
+              <button type="button" class="c-icon-btn" (click)="onEdit(item._id)" [attr.aria-label]="'edit' | translatePipe">
                 <lucide-icon name="pencil" [size]="18"></lucide-icon>
               </button>
               @if (deletingId_() === item._id) {
                 <app-loader size="small" [inline]="true" />
               } @else {
-                <button type="button" class="btn-icon" (click)="onDelete(item)" [attr.aria-label]="'delete' | translatePipe">
+                <button type="button" class="c-icon-btn danger" (click)="onDelete(item)" [attr.aria-label]="'delete' | translatePipe">
                   <lucide-icon name="trash-2" [size]="18"></lucide-icon>
                 </button>
               }
