@@ -28,6 +28,8 @@ export class VenueListComponent {
   protected searchQuery_ = signal('');
   protected deletingId_ = signal<string | null>(null);
 
+  protected isEmptyList_ = computed(() => this.venueData.allVenues_().length === 0);
+
   protected filteredVenues_ = computed(() => {
     let list = this.venueData.allVenues_();
     const search = this.searchQuery_().trim().toLowerCase();

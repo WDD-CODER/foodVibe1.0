@@ -38,6 +38,8 @@ export class EquipmentListComponent {
   protected deletingId_ = signal<string | null>(null);
   protected sortOrder_ = signal<'asc' | 'desc'>('asc');
 
+  protected isEmptyList_ = computed(() => this.equipmentData.allEquipment_().length === 0);
+
   protected filteredEquipment_ = computed(() => {
     let list = this.equipmentData.allEquipment_();
     const search = this.searchQuery_().trim().toLowerCase();

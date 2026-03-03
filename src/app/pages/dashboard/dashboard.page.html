@@ -10,6 +10,10 @@
       <lucide-icon name="map-pin" size="16"></lucide-icon>
       {{ 'venue_list' | translatePipe }}
     </button>
+    <button type="button" class="tab-btn" [class.active]="activeTab() === 'suppliers'" (click)="setTab('suppliers')">
+      <lucide-icon name="truck" size="16"></lucide-icon>
+      {{ 'supplier_list' | translatePipe }}
+    </button>
     <button type="button" class="tab-btn tab-btn--trash" [class.active]="activeTab() === 'trash'" (click)="setTab('trash')">
       <lucide-icon name="trash-2" size="16"></lucide-icon>
       {{ 'trash' | translatePipe }}
@@ -25,6 +29,10 @@
       <app-venue-list [embeddedInDashboard]="true" (addVenueClick)="setTab('add-venue')" />
     } @else if (activeTab() === 'add-venue') {
       <app-venue-form [embeddedInDashboard]="true" (saved)="setTab('venues')" (cancel)="setTab('venues')" />
+    } @else if (activeTab() === 'suppliers') {
+      <app-supplier-list [embeddedInDashboard]="true" (addSupplierClick)="setTab('add-supplier')" />
+    } @else if (activeTab() === 'add-supplier') {
+      <app-supplier-form [embeddedInDashboard]="true" (saved)="setTab('suppliers')" (cancel)="setTab('suppliers')" />
     } @else if (activeTab() === 'trash') {
       <app-trash-page />
     }

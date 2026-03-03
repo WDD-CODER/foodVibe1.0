@@ -1,21 +1,12 @@
 <div class="equipment-list-container" dir="rtl">
   <header class="list-header">
-    <div class="header-start">
-      @if (isUnderInventory) {
-        <a routerLink="/inventory/list" class="back-link">
-          <lucide-icon name="chevron-right" [size]="20"></lucide-icon>
-          {{ 'product_list' | translatePipe }}
-        </a>
-      }
-      <h2 class="page-title">{{ isUnderInventory ? ('logistics' | translatePipe) : ('equipment_list' | translatePipe) }}</h2>
-    </div>
-    <div class="header-spacer"></div>
-    <div class="header-actions">
-      <button type="button" class="c-btn-primary" (click)="onAdd()">
-        <lucide-icon name="plus" [size]="18"></lucide-icon>
-        {{ 'add_equipment' | translatePipe }}
-      </button>
-    </div>
+    @if (isUnderInventory) {
+      <a routerLink="/inventory/list" class="back-link">
+        <lucide-icon name="chevron-right" [size]="20"></lucide-icon>
+        {{ 'product_list' | translatePipe }}
+      </a>
+    }
+    <h2 class="page-title">{{ isUnderInventory ? ('logistics' | translatePipe) : ('equipment_list' | translatePipe) }}</h2>
   </header>
 
   <div class="toolbar">
@@ -41,6 +32,10 @@
         [options]="categoryFilterOptions"
         placeholder="category" />
     </div>
+    <button type="button" class="c-btn-primary" (click)="onAdd()">
+      <lucide-icon name="plus" [size]="18"></lucide-icon>
+      {{ 'add_equipment' | translatePipe }}
+    </button>
   </div>
 
   <div class="table-wrap">
@@ -57,13 +52,23 @@
             {{ 'owned_quantity' | translatePipe }}
           </th>
           <th class="col-consumable">{{ 'is_consumable' | translatePipe }}</th>
-          <th class="col-actions">{{ 'actions' | translatePipe }}</th>
+          <th class="col-actions"><span class="col-actions-inner">{{ 'actions' | translatePipe }}</span></th>
         </tr>
       </thead>
       <tbody>
         @if (filteredEquipment_().length === 0) {
           <tr>
-            <td colspan="5" class="no-results">{{ 'no_equipment_match' | translatePipe }}</td>
+            <td colspan="5" class="no-results" [class.empty-state-cell]="isEmptyList_()">
+              @if (isEmptyList_()) {
+                <div class="empty-state">
+                  <lucide-icon name="package" [size]="48" class="empty-state-icon"></lucide-icon>
+                  <p class="empty-state-msg">{{ 'empty_equipment' | translatePipe }}</p>
+                  <button type="button" class="c-btn-primary" (click)="onAdd()">{{ 'add_first_equipment' | translatePipe }}</button>
+                </div>
+              } @else {
+                {{ 'no_equipment_match' | translatePipe }}
+              }
+            </td>
           </tr>
         }
         @for (item of filteredEquipment_(); track item._id) {
@@ -73,16 +78,18 @@
             <td class="col-owned">{{ item.owned_quantity_ }}</td>
             <td class="col-consumable">{{ item.is_consumable_ ? ('approved_yes' | translatePipe) : ('approved_no' | translatePipe) }}</td>
             <td class="col-actions">
-              <button type="button" class="c-icon-btn" (click)="onEdit(item._id)" [attr.aria-label]="'edit' | translatePipe">
-                <lucide-icon name="pencil" [size]="18"></lucide-icon>
-              </button>
-              @if (deletingId_() === item._id) {
-                <app-loader size="small" [inline]="true" />
-              } @else {
-                <button type="button" class="c-icon-btn danger" (click)="onDelete(item)" [attr.aria-label]="'delete' | translatePipe">
-                  <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+              <div class="col-actions-inner">
+                <button type="button" class="c-icon-btn" (click)="onEdit(item._id)" [attr.aria-label]="'edit' | translatePipe">
+                  <lucide-icon name="pencil" [size]="18"></lucide-icon>
                 </button>
-              }
+                @if (deletingId_() === item._id) {
+                  <app-loader size="small" [inline]="true" />
+                } @else {
+                  <button type="button" class="c-icon-btn danger" (click)="onDelete(item)" [attr.aria-label]="'delete' | translatePipe">
+                    <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+                  </button>
+                }
+              </div>
             </td>
           </tr>
         }
