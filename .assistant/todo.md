@@ -411,7 +411,7 @@ Update status after each sub-task. Link plan files here when applicable.
 ### Phase 2 — Product Enhancement
 
 - [ ] **Plan 011 (KPI expansion, optional)**: Further dashboard enhancements per roadmap if desired.
-- [ ] **Plan 012 — Supplier Management Page**: Dedicated CRUD page at `/suppliers` with list, edit, delete, linked products view.
+- [x] **Plan 012 — Supplier Management Page**: Dedicated CRUD page at `/suppliers` with list, edit, delete, linked products view.
 - [ ] **Plan 013 — Recipe Quick Actions**: Duplicate recipe, approval toggle in recipe book list, batch select/actions.
 - [ ] **Plan 014 — Low Stock Alerts**: Visual indicators in inventory list, filter toggle, dashboard card.
 
@@ -445,7 +445,7 @@ Update status after each sub-task. Link plan files here when applicable.
 | 012 | Kitchen Demo Data (original) | Done |
 | 012-1 | Kitchen Demo Data and Recipes | Done |
 | 012-2 | Kitchen Demo Data Full Values | Done |
-| 012b | Supplier Management Page | Planned |
+| 012b | Supplier Management Page | Done |
 | 013 | Recipe Quick Actions | Planned |
 | 014 | Low Stock Alerts | Planned |
 | 015 | Empty States & Onboarding | Planned |
