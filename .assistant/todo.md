@@ -161,6 +161,7 @@ Update status after each sub-task. Link plan files here when applicable.
 
 - [x] Extend DashboardTab to five tabs; query param; five tab buttons; sticky header
 - [x] Render five views (overview, metadata, venues, add-venue, trash); VenueForm embedded mode
+- [x] Suppliers tab in dashboard (suppliers + add-supplier); unified list layout and table (venue, equipment, supplier): fixed layout, col-actions-inner flex, empty states (feat/dashboard-suppliers-unified-lists)
 
 ### Plan 038 — Inverted-L List Layout (`plans/038-inverted-l-list-layout.plan.md`)
 
@@ -235,6 +236,23 @@ Update status after each sub-task. Link plan files here when applicable.
 ---
 
 ## Ahead (Pending)
+
+### Plan 059 — Unify design engine (`plans/059-unify-design-engine.plan.md`)
+
+- [ ] 1. Table/list action buttons: migrate recipe-book, inventory, menu-library to `.c-icon-btn` / `.c-icon-btn danger`; remove `.action-btn`
+- [ ] 2. Add button: replace `.add-btn` with `.c-btn-primary` in recipe-book, inventory, menu-library
+- [ ] 3. Search input: replace `.input-wrapper` with `.c-input-wrapper` in recipe-book, inventory, menu-library, ingredient-search, preparation-search
+- [ ] 4. Add `.visually-hidden` to global styles; remove from recipe-book, inventory, equipment, venue, supplier
+- [ ] 5. Add `.placeholder-dash` to global; remove from recipe-book, inventory
+- [ ] 6. Clear-filters and panel-toggle: add engine variants; unify recipe-book and inventory
+- [ ] 7. Filter panel: extract shared `.c-filter-panel*`; use in recipe-book and inventory
+- [ ] 8. Empty state: add `.c-empty-state*`; migrate all five list components
+- [ ] 9. Table-wrap and table base: add `.c-table-wrap`, `.c-table`; use in equipment, venue, supplier
+- [ ] 10. Sortable header and col-actions: add engine classes; migrate recipe-book and inventory
+- [ ] 11. Grid header/cell and chips/allergens: align on engine; fix `.chipe` typo
+- [ ] 12. Grid input/select: add engine; use in recipe-ingredients-table and inventory
+- [ ] 13. Breakpoint: use `$break-mobile` where 768px is hardcoded
+- [ ] 14. Transitions: standardize on tokens
 
 ### Plan 058 — Sidebar collapse and floating (`plans/058-sidebar-collapse-floating.plan.md`)
 
@@ -475,5 +493,6 @@ Update status after each sub-task. Link plan files here when applicable.
 | 056 | Table carousel columns | Active |
 | 057 | Plans folder full audit | Done |
 | 058 | Sidebar collapse and floating | Active |
+| 059 | Unify design engine | Pending |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*

@@ -1,0 +1,82 @@
+<div class="supplier-list-container" dir="rtl">
+  <header class="list-header">
+    <h2 class="page-title">{{ 'supplier_list' | translatePipe }}</h2>
+  </header>
+
+  <div class="toolbar">
+    <div class="search-section">
+      <label class="visually-hidden" for="supplier-search">{{ 'search' | translatePipe }}</label>
+      <div class="c-input-wrapper">
+        <lucide-icon name="search" [size]="18"></lucide-icon>
+        <input
+          id="supplier-search"
+          type="text"
+          [ngModel]="searchQuery_()"
+          (ngModelChange)="searchQuery_.set($event)"
+          [placeholder]="'search' | translatePipe"
+        />
+      </div>
+    </div>
+    <button type="button" class="c-btn-primary" (click)="onAdd()">
+      <lucide-icon name="plus" [size]="18"></lucide-icon>
+      {{ 'add_supplier' | translatePipe }}
+    </button>
+  </div>
+
+  <div class="table-wrap">
+    <table class="supplier-table">
+      <thead>
+        <tr>
+          <th class="col-name">{{ 'name' | translatePipe }}</th>
+          <th class="col-contact">{{ 'contact_person' | translatePipe }}</th>
+          <th class="col-delivery">{{ 'delivery_days' | translatePipe }}</th>
+          <th class="col-min-order">{{ 'min_order' | translatePipe }}</th>
+          <th class="col-lead">{{ 'lead_time' | translatePipe }}</th>
+          <th class="col-linked">{{ 'linked_products' | translatePipe }}</th>
+          <th class="col-actions"><span class="col-actions-inner">{{ 'actions' | translatePipe }}</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (filteredSuppliers_().length === 0) {
+          <tr>
+            <td colspan="7" class="no-results" [class.empty-state-cell]="isEmptyList_()">
+              @if (isEmptyList_()) {
+                <div class="empty-state">
+                  <lucide-icon name="truck" [size]="48" class="empty-state-icon"></lucide-icon>
+                  <p class="empty-state-msg">{{ 'empty_suppliers' | translatePipe }}</p>
+                  <button type="button" class="c-btn-primary" (click)="onAdd()">{{ 'add_supplier' | translatePipe }}</button>
+                </div>
+              } @else {
+                {{ 'no_suppliers_match' | translatePipe }}
+              }
+            </td>
+          </tr>
+        }
+        @for (item of filteredSuppliers_(); track item._id) {
+          <tr>
+            <td class="col-name">{{ item.name_hebrew }}</td>
+            <td class="col-contact">{{ item.contact_person_ ?? '—' }}</td>
+            <td class="col-delivery">{{ deliveryDaysDisplay(item.delivery_days_) }}</td>
+            <td class="col-min-order">{{ item.min_order_mov_ ?? 0 }}</td>
+            <td class="col-lead">{{ item.lead_time_days_ }}</td>
+            <td class="col-linked">{{ linkedProductCount_(item._id) }}</td>
+            <td class="col-actions">
+              <div class="col-actions-inner">
+                <button type="button" class="c-icon-btn" (click)="onEdit(item._id)" [attr.aria-label]="'edit' | translatePipe">
+                  <lucide-icon name="pencil" [size]="18"></lucide-icon>
+                </button>
+                @if (deletingId_() === item._id) {
+                  <app-loader size="small" [inline]="true" />
+                } @else {
+                  <button type="button" class="c-icon-btn danger" (click)="onDelete(item)" [attr.aria-label]="'delete' | translatePipe">
+                    <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+                  </button>
+                }
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
