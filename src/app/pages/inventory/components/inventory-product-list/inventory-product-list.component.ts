@@ -15,6 +15,7 @@ import { ConfirmModalService } from '@services/confirm-modal.service';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
+import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
 
@@ -31,6 +32,8 @@ export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
     SelectOnFocusDirective,
     ClickOutSideDirective,
     LoaderComponent,
+    CellCarouselComponent,
+    CellCarouselSlideDirective,
   ],
   templateUrl: './inventory-product-list.component.html',
   styleUrl: './inventory-product-list.component.scss',
@@ -56,6 +59,7 @@ export class InventoryProductListComponent {
   protected expandedFilterCategories_ = signal<Set<string>>(new Set());
   protected allergenPopoverProductId_ = signal<string | null>(null);
   protected allergenExpandAll_ = signal<boolean>(false);
+  protected lowStockOnly_ = signal<boolean>(false);
   protected deletingId_ = signal<string | null>(null);
   protected savingPriceId_ = signal<string | null>(null);
 
@@ -118,12 +122,19 @@ export class InventoryProductListComponent {
     this.isPanelOpen_.update(v => !v);
   }
 
+  protected isEmptyList_ = computed(() => this.kitchenStateService.products_().length === 0);
+
   protected filteredProducts_ = computed(() => {
     let products = this.kitchenStateService.products_();
     const filters = this.activeFilters_();
     const search = this.searchQuery_().trim().toLowerCase();
     const sortBy = this.sortBy_();
     const sortOrder = this.sortOrder_();
+    const lowStockOnly = this.lowStockOnly_();
+
+    if (lowStockOnly) {
+      products = products.filter(p => (p.min_stock_level_ ?? 0) > 0);
+    }
 
     // 1. Apply filters
     if (Object.keys(filters).length > 0) {
@@ -228,12 +239,21 @@ export class InventoryProductListComponent {
   }
 
   protected clearAllFilters(): void {
+    this.lowStockOnly_.set(false);
     this.activeFilters_.set({});
   }
 
+  protected isLowStock(product: Product): boolean {
+    return (product.min_stock_level_ ?? 0) > 0;
+  }
+
   protected hasActiveFilters_ = computed(() =>
-    Object.values(this.activeFilters_()).some(arr => arr.length > 0)
+    this.lowStockOnly_() || Object.values(this.activeFilters_()).some(arr => arr.length > 0)
   );
+
+  protected toggleLowStockOnly(): void {
+    this.lowStockOnly_.update(v => !v);
+  }
 
   protected selectedCountInCategory(category: { options: { checked_: boolean }[] }): number {
     return category.options.filter(o => o.checked_).length;

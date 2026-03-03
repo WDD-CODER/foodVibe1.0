@@ -16,6 +16,7 @@ import { VersionEntityType } from '@services/version-history.service';
 import { VersionHistoryPanelComponent } from 'src/app/shared/version-history-panel/version-history-panel.component';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
+import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
 
 export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens';
 
@@ -24,7 +25,7 @@ const MAX_ALLERGEN_RECURSION = 5;
 @Component({
   selector: 'recipe-book-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, ClickOutSideDirective, VersionHistoryPanelComponent, LoaderComponent, ScrollableDropdownComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, ClickOutSideDirective, VersionHistoryPanelComponent, LoaderComponent, ScrollableDropdownComponent, CellCarouselComponent, CellCarouselSlideDirective],
   templateUrl: './recipe-book-list.component.html',
   styleUrl: './recipe-book-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -53,6 +54,7 @@ export class RecipeBookListComponent {
   protected selectedProductIds_ = signal<string[]>([]);
   protected historyFor_ = signal<{ entityType: VersionEntityType; entityId: string; entityName: string } | null>(null);
   protected deletingId_ = signal<string | null>(null);
+  protected duplicatingId_ = signal<string | null>(null);
 
   protected categoryDisplayKey(internalName: string): string {
     const map: Record<string, string> = {
@@ -200,6 +202,8 @@ export class RecipeBookListComponent {
 
     return recipes;
   });
+
+  protected isEmptyList_ = computed(() => this.kitchenState.recipes_().length === 0);
 
   protected activeCostTooltipRecipe_ = computed(() => {
     const id = this.hoveredCostRecipeId_() ?? this.tappedCostRecipeId_();
@@ -448,6 +452,24 @@ export class RecipeBookListComponent {
         error: () => { this.deletingId_.set(null); }
       });
     }
+  }
+
+  protected onDuplicateRecipe(recipe: Recipe): void {
+    const copyOf = this.translationService.translate('copy_of');
+    const clone = JSON.parse(JSON.stringify(recipe)) as Recipe;
+    delete (clone as { _id?: string })._id;
+    clone.name_hebrew = `${copyOf} ${recipe.name_hebrew}`.trim();
+    clone.is_approved_ = false;
+    this.duplicatingId_.set(recipe._id);
+    this.kitchenState.saveRecipe(clone).subscribe({
+      next: () => { this.duplicatingId_.set(null); },
+      error: () => { this.duplicatingId_.set(null); }
+    });
+  }
+
+  protected onToggleApproval(recipe: Recipe): void {
+    const updated = { ...recipe, is_approved_: !recipe.is_approved_ };
+    this.kitchenState.saveRecipe(updated).subscribe();
   }
 
   protected getRecipeCost(recipe: Recipe): number {
