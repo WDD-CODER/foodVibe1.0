@@ -31,14 +31,27 @@
       <div class="col-name sortable-header" (click)="setSort('name')" (keydown.enter)="setSort('name')" (keydown.space)="$event.preventDefault(); setSort('name')" role="button" tabindex="0">
         {{ 'product' | translatePipe }}
       </div>
-      <div class="col-category sortable-header" (click)="setSort('category')" (keydown.enter)="setSort('category')" (keydown.space)="$event.preventDefault(); setSort('category')" role="button" tabindex="0">
-        {{ 'category' | translatePipe }}
-      </div>
-      <div class="col-allergens sortable-header" (click)="toggleAllergenExpandAll()" (keydown.enter)="toggleAllergenExpandAll()" (keydown.space)="$event.preventDefault(); toggleAllergenExpandAll()" role="button" tabindex="0">
-        {{ 'allergens' | translatePipe }}
-      </div>
-      <div class="col-supplier sortable-header" (click)="setSort('supplier')" (keydown.enter)="setSort('supplier')" (keydown.space)="$event.preventDefault(); setSort('supplier')" role="button" tabindex="0">
-        {{ 'supplier' | translatePipe }}
+      <div class="carousel-header-wrap">
+        <div class="col-category sortable-header carousel-header-cell" (click)="setSort('category')" (keydown.enter)="setSort('category')" (keydown.space)="$event.preventDefault(); setSort('category')" role="button" tabindex="0">
+          {{ 'category' | translatePipe }}
+        </div>
+        <div class="col-allergens sortable-header carousel-header-cell" (click)="toggleAllergenExpandAll()" (keydown.enter)="toggleAllergenExpandAll()" (keydown.space)="$event.preventDefault(); toggleAllergenExpandAll()" role="button" tabindex="0">
+          {{ 'allergens' | translatePipe }}
+        </div>
+        <div class="col-supplier sortable-header carousel-header-cell" (click)="setSort('supplier')" (keydown.enter)="setSort('supplier')" (keydown.space)="$event.preventDefault(); setSort('supplier')" role="button" tabindex="0">
+          {{ 'supplier' | translatePipe }}
+        </div>
+        <div class="carousel-header-label">
+          <span class="carousel-header-label-text">{{ 'details' | translatePipe }}</span>
+          <div class="carousel-header-nav">
+            <button type="button" class="carousel-header-arrow" (click)="carouselPrev(); $event.stopPropagation()" [attr.aria-label]="'Previous slide' | translatePipe">
+              <lucide-icon name="chevron-right" [size]="14"></lucide-icon>
+            </button>
+            <button type="button" class="carousel-header-arrow" (click)="carouselNext(); $event.stopPropagation()" [attr.aria-label]="'Next slide' | translatePipe">
+              <lucide-icon name="chevron-left" [size]="14"></lucide-icon>
+            </button>
+          </div>
+        </div>
       </div>
       <div class="col-unit">{{ 'unit' | translatePipe }}</div>
       <div class="col-price">{{ 'price' | translatePipe }}</div>
@@ -47,32 +60,47 @@
 
     <div class="table-body">
       @if (filteredProducts_().length === 0) {
-        <div class="no-results">{{ 'no_products_match' | translatePipe }}</div>
+        <div class="no-results" [class.empty-state]="isEmptyList_()">
+          @if (isEmptyList_()) {
+            <lucide-icon name="package" [size]="48" class="empty-state-icon"></lucide-icon>
+            <p class="empty-state-msg">{{ 'empty_inventory' | translatePipe }}</p>
+            <button type="button" class="c-btn-primary" (click)="onAddProduct()">{{ 'add_first_product' | translatePipe }}</button>
+          } @else {
+            {{ 'no_products_match' | translatePipe }}
+          }
+        </div>
       }
       @for (product of filteredProducts_(); track product._id) {
-        <div class="product-grid-row">
-          <div class="col-name">{{ product.name_hebrew }}</div>
-          <div class="col-category">{{ getCategoryDisplay(product.categories_) || '—' }}</div>
-          <div class="col-allergens">
-            @if (product.allergens_.length) {
-              <div class="allergen-btn-wrapper" [class.allergen-expanded-open]="allergenExpandAll_() || allergenPopoverProductId_() === product._id" (clickOutside)="closeAllergenView($event)">
-                <button type="button" class="allergen-btn" (click)="toggleAllergenPopover(product._id)">
-                  <lucide-icon name="shield-alert" [size]="16"></lucide-icon>
-                  {{ product.allergens_.length }}
-                </button>
-                @if (allergenExpandAll_() || allergenPopoverProductId_() === product._id) {
-                  <div class="allergen-expanded" [class.dense-grid]="true">
-                    @for (a of product.allergens_; track a) {
-                      <span class="allergen-pill">{{ a | translatePipe }}</span>
-                    }
-                  </div>
-                }
-              </div>
-            } @else {
-              <span class="placeholder-dash">—</span>
+        <div class="product-grid-row" [class.low-stock-row]="isLowStock(product)">
+          <div class="col-name">
+            @if (isLowStock(product)) {
+              <span class="low-stock-badge" [attr.title]="'low_stock' | translatePipe">{{ 'low_stock' | translatePipe }}</span>
             }
+            {{ product.name_hebrew }}
           </div>
-          <div class="col-supplier">{{ getSupplierNames(product.supplierIds_) || '—' }}</div>
+          <app-cell-carousel [activeIndex]="carouselIndex_()" (indexChange)="carouselIndex_.set($event)">
+            <div class="col-category" cellCarouselSlide [label]="'category' | translatePipe">{{ getCategoryDisplay(product.categories_) || '—' }}</div>
+            <div class="col-allergens" cellCarouselSlide [label]="'allergens' | translatePipe">
+              @if (product.allergens_.length) {
+                <div class="allergen-btn-wrapper" [class.allergen-expanded-open]="allergenExpandAll_() || allergenPopoverProductId_() === product._id" (clickOutside)="closeAllergenView($event)">
+                  <button type="button" class="allergen-btn" (click)="toggleAllergenPopover(product._id)">
+                    <lucide-icon name="shield-alert" [size]="16"></lucide-icon>
+                    {{ product.allergens_.length }}
+                  </button>
+                  @if (allergenExpandAll_() || allergenPopoverProductId_() === product._id) {
+                    <div class="allergen-expanded" [class.dense-grid]="true">
+                      @for (a of product.allergens_; track a) {
+                        <span class="allergen-pill">{{ a | translatePipe }}</span>
+                      }
+                    </div>
+                  }
+                </div>
+              } @else {
+                <span class="placeholder-dash">—</span>
+              }
+            </div>
+            <div class="col-supplier" cellCarouselSlide [label]="'supplier' | translatePipe">{{ getSupplierNames(product.supplierIds_) || '—' }}</div>
+          </app-cell-carousel>
           <div class="col-unit">
             <select class="grid-select" [ngModel]="product.base_unit_"
               (ngModelChange)="onUnitChange(product, $event)">
@@ -112,9 +140,11 @@
   </section>
 
   <aside class="filter-panel" [class.collapsed]="!isPanelOpen_()">
-    <button type="button" class="panel-toggle-icon" (click)="togglePanel()" [attr.aria-label]="isPanelOpen_() ? ('close' | translatePipe) : ('filter' | translatePipe)">
-      <lucide-icon [name]="isPanelOpen_() ? 'panel-right-close' : 'panel-left-close'" [size]="20"></lucide-icon>
-    </button>
+    @if (isPanelOpen_()) {
+      <button type="button" class="panel-toggle-icon" (click)="togglePanel()" [attr.aria-label]="'close' | translatePipe">
+        <lucide-icon name="chevron-left" [size]="20"></lucide-icon>
+      </button>
+    }
     <div class="panel-content">
       <nav class="control-nav" aria-label="Inventory and logistics">
         <a routerLink="/inventory/list" routerLinkActive="active" class="control-nav-link">{{ 'product_list' | translatePipe }}</a>
@@ -127,6 +157,10 @@
             <button type="button" class="clear-filters-btn" (click)="clearAllFilters()">{{ 'clear_filters' | translatePipe }}</button>
           }
         </div>
+        <label class="filter-option low-stock-toggle">
+          <input type="checkbox" [checked]="lowStockOnly_()" (change)="toggleLowStockOnly()" />
+          <span>{{ 'low_stock' | translatePipe }}</span>
+        </label>
         @for (category of filterCategories_(); track category.name) {
           <div class="filter-category">
             <button type="button" class="filter-category-header" [class.expanded]="isCategoryExpanded(category.name)" (click)="toggleFilterCategory(category.name)">

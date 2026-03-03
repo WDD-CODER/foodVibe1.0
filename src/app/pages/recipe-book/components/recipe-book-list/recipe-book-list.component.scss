@@ -214,7 +214,10 @@ $header-title-min-width: 8rem;
   display: contents;
 }
 
-.recipe-grid-row > * {
+/* Target grid cells by class so app-cell-carousel (display: contents) is not forced to flex */
+.recipe-grid-row > .col-name,
+.recipe-grid-row > .col-cost,
+.recipe-grid-row > .col-actions {
   min-width: 0;
   padding-inline: 0.75rem;
   padding-block: 0.625rem;
@@ -227,12 +230,38 @@ $header-title-min-width: 8rem;
   align-items: center;
 }
 
-.recipe-grid-row > .col-labels,
-.recipe-grid-row > .col-allergens {
-  align-items: flex-start;
+/* Carousel columns: only at desktop so carousel can control visibility at mobile */
+@media (min-width: 769px) {
+  .recipe-grid-row .col-type,
+  .recipe-grid-row .col-labels,
+  .recipe-grid-row .col-allergens {
+    min-width: 0;
+    padding-inline: 0.75rem;
+    padding-block: 0.625rem;
+    background: transparent;
+    border-block-end: 1px solid rgba(241, 245, 249, 0.4);
+    transition: background 0.15s ease;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .recipe-grid-row .col-labels,
+  .recipe-grid-row .col-allergens {
+    align-items: flex-start;
+  }
+
+  .recipe-grid-row:hover .col-type,
+  .recipe-grid-row:hover .col-labels,
+  .recipe-grid-row:hover .col-allergens {
+    background: var(--bg-glass);
+  }
 }
 
-.recipe-grid-row:hover > * {
+.recipe-grid-row:hover > .col-name,
+.recipe-grid-row:hover > .col-cost,
+.recipe-grid-row:hover > .col-actions {
   background: var(--bg-glass);
 }
 
@@ -248,6 +277,23 @@ $header-title-min-width: 8rem;
   font-size: 0.875rem;
   border-block-end: 1px solid var(--border-default);
   background: var(--bg-glass-strong);
+
+  &.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding-block: 3rem;
+
+    .empty-state-icon {
+      color: var(--color-text-muted-light);
+    }
+    .empty-state-msg {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--color-text-secondary);
+    }
+  }
 }
 
 .sortable-header {
@@ -274,7 +320,7 @@ $header-title-min-width: 8rem;
   overflow-y: auto;
   border-inline-start: 1px solid var(--border-glass);
   background: var(--bg-glass-strong);
-  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
   box-shadow: var(--shadow-glass);
   backdrop-filter: var(--blur-glass);
   -webkit-backdrop-filter: var(--blur-glass);
@@ -826,10 +872,32 @@ $header-title-min-width: 8rem;
   overflow: auto;
 }
 
-/* Mobile: padding and table action tweaks; header layout by container query */
+/* Carousel header: desktop = contents so three cells; mobile = single "Details" cell */
+.carousel-header-wrap {
+  display: contents;
+}
+
+.carousel-header-label {
+  display: none;
+}
+
+/* Mobile: padding, table action tweaks, and carousel column (4-column grid) */
 @media (max-width: 768px) {
   .recipe-book-container {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "table";
     padding: 1rem;
+    position: relative;
+  }
+
+  .filter-panel {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: 10;
+    max-height: 100%;
   }
 
   .list-header .page-title {
@@ -841,5 +909,60 @@ $header-title-min-width: 8rem;
     width: 2.75rem;
     height: 2.75rem;
     opacity: 1;
+  }
+
+  /* Collapse Type, Labels, Allergens into one carousel column */
+  $recipes-grid-mobile: 2fr 1fr 0.8fr 80px;
+
+  .table-header {
+    grid-template-columns: $recipes-grid-mobile;
+  }
+
+  .table-header .carousel-header-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .table-header .carousel-header-cell {
+    display: none;
+  }
+
+  .table-header .carousel-header-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+
+  .carousel-header-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
+  }
+
+  .carousel-header-arrow {
+    display: grid;
+    place-content: center;
+    padding: 0.25rem;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+
+    &:hover {
+      background: var(--bg-glass-hover);
+      color: var(--color-text-main);
+    }
+  }
+
+  .table-body {
+    grid-template-columns: $recipes-grid-mobile;
   }
 }
