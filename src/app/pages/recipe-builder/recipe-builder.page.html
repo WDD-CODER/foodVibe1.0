@@ -10,6 +10,12 @@
   <div class="builder-shell">
 
     <section class="builder-section">
+      <div class="print-btn-wrap no-print">
+        <button type="button" class="c-btn-ghost" (click)="onPrint()" [attr.aria-label]="'recipe_print' | translatePipe">
+          <lucide-icon name="printer" [size]="18"></lucide-icon>
+          {{ 'recipe_print' | translatePipe }}
+        </button>
+      </div>
       <app-recipe-header [form]="recipeForm_" [recipeType]="recipeType_()" [currentCost]="totalCost_()"
         [totalWeightG]="totalWeightG_()" [totalBrutoWeightG]="totalBrutoWeightG_()"
         [totalVolumeL]="totalVolumeL_()" [totalVolumeMl]="totalVolumeMl_()"

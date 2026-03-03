@@ -71,6 +71,12 @@
     .builder-section {
       position: relative;
 
+      .print-btn-wrap {
+        position: absolute;
+        inset-block-start: 0;
+        inset-inline-end: 0;
+      }
+
       &:nth-of-type(1) {
         z-index: 10;
       }

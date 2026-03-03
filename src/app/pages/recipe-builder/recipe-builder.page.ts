@@ -753,6 +753,10 @@ export class RecipeBuilderPage implements OnInit {
     this.router_.navigate(['/recipe-book']);
   }
 
+  onPrint(): void {
+    window.print();
+  }
+
   /** Returns a user-friendly validation error message listing exactly what is missing. */
   private getRecipeValidationError_(): string {
     const isDish = this.recipeForm_.get('recipe_type')?.value === 'dish';

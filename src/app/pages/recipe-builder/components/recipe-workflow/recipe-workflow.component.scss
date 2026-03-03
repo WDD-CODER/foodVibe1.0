@@ -17,11 +17,15 @@
     display: grid;
     grid-template-columns: 60px 1fr 120px 50px;
     justify-content: space-evenly;
+
+    padding-inline: 0.75rem;
+    padding-block: 0.625rem;
+
     background: var(--bg-glass);
-    border-block-end: 1px solid var(--border-default);
-    padding: 0.75rem;
     font-weight: 700;
     color: var(--color-primary);
+
+    border-block-end: 1px solid var(--border-default);
     backdrop-filter: var(--blur-glass);
   }
 
@@ -29,12 +33,39 @@
     display: grid;
     grid-template-columns: 60px 1fr 120px 50px;
     justify-content: space-evenly;
-    border-block-end: 1px solid rgba(241, 245, 249, 0.4);
-    padding: 1rem 0.75rem;
     align-items: center;
+
+    min-height: 4rem;
+    padding-inline: 1rem;
+    padding-block: 0.5rem;
+
+    background: transparent;
+
+    border-block-end: 1px solid var(--border-default);
+
+    transition: background 0.15s ease;
 
     &:last-child {
       border-block-end: none;
+    }
+
+    &:hover {
+      background: var(--bg-glass);
+    }
+
+    .col-actions {
+      display: grid;
+      place-content: center;
+    }
+
+    .col-actions .delete-btn {
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    &:hover .col-actions .delete-btn,
+    .col-actions .delete-btn:focus {
+      opacity: 1;
     }
   }
 }
@@ -52,23 +83,54 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr 50px;
     justify-content: space-evenly;
+
+    padding-inline: 0.75rem;
+    padding-block: 0.625rem;
+
     background: var(--bg-glass);
-    border-block-end: 1px solid var(--border-default);
-    padding: 0.75rem;
     font-weight: 700;
     color: var(--color-primary);
+
+    border-block-end: 1px solid var(--border-default);
   }
 
   .prep-grid-row {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr 50px;
     justify-content: space-evenly;
-    border-block-end: 1px solid rgba(241, 245, 249, 0.4);
-    padding: 1rem 0.75rem;
     align-items: center;
+
+    min-height: 4rem;
+    padding-inline: 1rem;
+    padding-block: 0.5rem;
+
+    background: transparent;
+
+    border-block-end: 1px solid var(--border-default);
+
+    transition: background 0.15s ease;
 
     &:last-child {
       border-block-end: none;
+    }
+
+    &:hover {
+      background: var(--bg-glass);
+    }
+
+    .col-prep-actions {
+      display: grid;
+      place-content: center;
+    }
+
+    .col-prep-actions .delete-btn {
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    &:hover .col-prep-actions .delete-btn,
+    .col-prep-actions .delete-btn:focus {
+      opacity: 1;
     }
   }
 }
@@ -166,6 +228,7 @@
   }
 }
 
+/* Recipe builder unified tablet/mobile breakpoint (align with recipe-builder.page 48rem / ingredients 640px) */
 @media (max-width: 768px) {
   .workflow-grid .grid-header {
     display: none;
@@ -175,7 +238,8 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    padding: 0.75rem;
+    padding-inline: 0.75rem;
+    padding-block: 0.75rem;
 
     .step-badge {
       flex: 0 0 auto;
@@ -188,6 +252,42 @@
 
     .timer-counter {
       flex: 0 0 auto;
+    }
+
+    .col-actions {
+      flex: 1 1 100%;
+      justify-content: flex-end;
+    }
+  }
+
+  .prep-flat-grid .grid-header.prep-grid-header {
+    display: none;
+  }
+
+  .prep-flat-grid .prep-grid-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto auto auto;
+    gap: 0.5rem;
+    padding-inline: 0.75rem;
+    padding-block: 0.75rem;
+    min-height: auto;
+
+    .col-prep-name {
+      grid-column: 1 / -1;
+    }
+    .col-prep-category {
+      grid-column: 1;
+    }
+    .col-prep-qty {
+      grid-column: 2;
+    }
+    .col-prep-unit {
+      grid-column: 1;
+    }
+    .col-prep-actions {
+      grid-column: 2;
+      justify-content: flex-end;
     }
   }
 }
