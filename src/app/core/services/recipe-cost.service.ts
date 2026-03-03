@@ -213,7 +213,8 @@ export class RecipeCostService {
 
   /**
    * Total volume in liters and list of ingredient names that could not be converted to volume.
-   * Uses 1 g = 1 ml fallback when product has no volume option.
+   * Uses registry conversion for L/ml (1 L = 1000 ml); 1 g = 1 ml fallback for weight-only ingredients.
+   * Returns totalL rounded to 4 decimal places for display consistency (B3 volume conversion spec).
    */
   computeTotalVolumeL(rows: IngredientWeightRow[], depth = 0): { totalL: number; unconvertibleNames: string[] } {
     if (depth >= MAX_RECURSION_DEPTH) return { totalL: 0, unconvertibleNames: [] };
@@ -227,7 +228,7 @@ export class RecipeCostService {
       const rowUnit = (row.unit ?? '').trim().toLowerCase();
       const key = unit(rowUnit);
 
-      const volFactor = this.unitRegistry_.getConversion(key) || 0;
+      const volFactor = this.unitRegistry_.getConversion(key) ?? 0;
       if (key === 'liter' || key === 'l') {
         totalMl += net * (volFactor || 1000);
         continue;
@@ -244,7 +245,8 @@ export class RecipeCostService {
       const name = row.name_hebrew?.trim();
       if (name && !unconvertibleNames.includes(name)) unconvertibleNames.push(name);
     }
-    return { totalL: totalMl / 1000, unconvertibleNames };
+    const totalL = Math.round((totalMl / 1000) * 10000) / 10000;
+    return { totalL, unconvertibleNames };
   }
 
   private computeIngredientCost(ing: Ingredient, depth: number): number {
