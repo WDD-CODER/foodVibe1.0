@@ -1,19 +1,19 @@
 .unit-creator-formula-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    align-items: flex-end;
-    gap: 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6.25rem, 1fr));
+  align-items: flex-end;
+  gap: 0.75rem;
 
-    .c-input-stack {
-      flex: 1;
-      width: fit-content;
-    }
+  .c-input-stack {
+    flex: 1;
+    width: fit-content;
+  }
 
-    .math-operator {
-      color: var(--color-text-muted-light);
-      font-size: 1.5rem;
-      font-weight: 700;
-    }
+  .math-operator {
+    color: var(--color-text-muted-light);
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
 }
 
 .unit-creator-amount .c-input-stack input[type="number"] {
@@ -38,11 +38,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   margin-block-end: 1.5rem;
   padding: 1rem;
+
   background: var(--bg-success);
-  border: 1px solid rgba(167, 243, 208, 0.5);
   color: var(--text-success);
+
+  border: 1px solid rgba(167, 243, 208, 0.5);
   border-radius: var(--radius-md);
 
   .label {

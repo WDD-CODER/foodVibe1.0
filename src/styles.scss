@@ -700,3 +700,34 @@ textarea.c-input {
 .c-input-wrapper:focus-within {
   animation: focusPulse 0.4s ease-out;
 }
+
+/* Plan 016: Print-friendly recipe view */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .recipe-builder-container,
+  .recipe-builder-container * {
+    visibility: visible;
+  }
+  .recipe-builder-container {
+    position: absolute;
+    inset: 0;
+    padding: 1rem;
+    background: #fff;
+  }
+  .no-print,
+  .history-view-banner,
+  .print-btn-wrap,
+  .section-card-header button,
+  .add-row-btn,
+  .add-step-btn,
+  button,
+  app-header,
+  .header-nav,
+  nav,
+  .hero-fab,
+  footer {
+    display: none !important;
+  }
+}

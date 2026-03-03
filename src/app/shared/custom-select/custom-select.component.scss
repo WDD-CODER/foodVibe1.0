@@ -57,7 +57,9 @@
 .custom-select-option {
   display: block;
   width: 100%;
-  padding: 0.5rem 0.75rem;
+
+  padding-block: 0.5rem;
+  padding-inline: 0.75rem;
 
   background: none;
   color: var(--color-text-main);
@@ -65,8 +67,8 @@
   text-align: start;
 
   border: none;
-  cursor: pointer;
 
+  cursor: pointer;
   transition: background 0.15s ease;
 
   &:hover {

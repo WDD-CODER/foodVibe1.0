@@ -1,10 +1,12 @@
 .version-history-panel {
+  min-width: 17.5rem;
+  max-width: 25rem;
+  padding: 1rem;
+
   background: var(--bg-glass-strong);
+
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-xl);
-  padding: 1rem;
-  min-width: 280px;
-  max-width: 400px;
   box-shadow: var(--shadow-modal);
   backdrop-filter: var(--blur-modal);
   -webkit-backdrop-filter: var(--blur-modal);
@@ -14,6 +16,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   margin-block-end: 0.75rem;
 
   h3 {
@@ -25,13 +28,17 @@
 }
 
 .btn-close {
+  padding-inline: 0.25rem;
+  padding-block: 0;
+
   background: none;
-  border: none;
+  color: var(--color-text-muted);
   font-size: 1.25rem;
   line-height: 1;
-  color: var(--color-text-muted);
+
+  border: none;
+
   cursor: pointer;
-  padding: 0 0.25rem;
   transition: color 0.2s ease;
 
   &:hover {
@@ -42,23 +49,28 @@
 .panel-loading,
 .panel-empty {
   margin: 0;
-  padding: 0.5rem 0;
+  padding-block: 0.5rem;
+  padding-inline: 0;
+
   color: var(--color-text-muted);
   font-size: 0.875rem;
 }
 
 .version-list {
-  list-style: none;
   margin: 0;
   padding: 0;
+  list-style: none;
 }
 
 .version-item {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+
   gap: 0.5rem;
-  padding: 0.5rem 0;
+  padding-block: 0.5rem;
+  padding-inline: 0;
+
   border-block-end: 1px solid var(--border-default);
 
   &:last-child {
@@ -67,9 +79,9 @@
 }
 
 .version-date {
+  flex: 1 1 100%;
   font-size: 0.8125rem;
   color: var(--color-text-muted);
-  flex: 1 1 100%;
 }
 
 .version-summary {
@@ -81,16 +93,20 @@
   display: flex;
   gap: 0.5rem;
   flex: 1 1 100%;
-  margin-top: 0.25rem;
+  margin-block-start: 0.25rem;
 }
 
 .btn-view {
-  padding: 0.3rem 0.6rem;
-  font-size: 0.75rem;
+  padding-block: 0.3rem;
+  padding-inline: 0.6rem;
+
   background: var(--bg-glass);
   color: var(--color-primary);
+  font-size: 0.75rem;
+
   border: 1px solid var(--border-focus);
   border-radius: var(--radius-sm);
+
   cursor: pointer;
   transition: background 0.2s ease;
 
@@ -100,25 +116,30 @@
 }
 
 .btn-restore {
-  padding: 0.3rem 0.6rem;
-  font-size: 0.75rem;
+  padding-block: 0.3rem;
+  padding-inline: 0.6rem;
+
   background: var(--bg-warning);
   color: var(--text-warning);
+  font-size: 0.75rem;
+
   border: 1px solid var(--border-warning);
   border-radius: var(--radius-sm);
+
   cursor: pointer;
   transition: background 0.2s ease;
 
   &:hover {
-    background: rgba(254, 243, 199, 0.95);
+    background: var(--bg-warning);
+    filter: brightness(1.05);
   }
 }
 
 @media (max-width: 768px) {
   .version-history-panel {
+    width: 100%;
     min-width: 0;
     max-width: calc(100vw - 2rem);
-    width: 100%;
   }
 
   .version-actions {

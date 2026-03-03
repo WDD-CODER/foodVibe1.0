@@ -1,5 +1,6 @@
 .restore-modal-message {
-  margin: 0 0 1.25rem 0;
+  margin-block-end: 1.25rem;
+
   font-size: 0.9375rem;
   color: var(--color-text-secondary);
 }
@@ -7,16 +8,19 @@
 .restore-btn-replace {
   padding-inline: 1.25rem;
   padding-block: 0.625rem;
+
   background: var(--border-warning);
-  color: #fff;
-  font-weight: 600;
+  color: var(--color-text-on-primary);
   font-size: 0.875rem;
+  font-weight: 600;
+
   border: none;
   border-radius: var(--radius-md);
+
   cursor: pointer;
   transition: background 0.2s ease;
 
   &:hover {
-    background: #b45309;
+    background: var(--text-warning);
   }
 }

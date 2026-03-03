@@ -1,5 +1,6 @@
 .global-specific-detail {
-  margin: 0 0 1.25rem 0;
+  margin-block-end: 1.25rem;
+
   font-size: 0.9375rem;
   color: var(--color-text-secondary);
 }
@@ -7,12 +8,15 @@
 .global-specific-btn-secondary {
   padding-inline: 1.25rem;
   padding-block: 0.625rem;
+
   background: var(--bg-glass);
   color: var(--color-text-secondary);
-  font-weight: 500;
   font-size: 0.875rem;
+  font-weight: 500;
+
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
+
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease;
 
