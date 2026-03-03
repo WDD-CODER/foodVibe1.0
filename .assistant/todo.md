@@ -236,12 +236,33 @@ Update status after each sub-task. Link plan files here when applicable.
 
 ## Ahead (Pending)
 
+### Plan 058 — Sidebar collapse and floating (`plans/058-sidebar-collapse-floating.plan.md`)
+
+- [x] Inventory: full collapse to width 0 (SCSS + HTML toggle wrap)
+- [x] Switch border-radius to right side in both SCSS files
+- [x] Add floating overlay behavior at 768px breakpoint in both SCSS files
+- [x] Change close icon to chevron-left in both HTML files
+
+### Plan 057 — Plans folder full audit (`plans/057-plans-folder-full-audit.plan.md`)
+
+- [x] Execute Plan 055 Group E (Five-Group rhythm: confirm-modal, translation-key-modal, restore-choice-modal, label-creation-modal, global-specific-modal, unit-creator, version-history-panel, custom-select, loader)
+- [x] Execute Plan 047 S1: Unify ingredient row style with workflow
+- [x] Execute Plan 047 S4: Workflow prep rows match ingredient rows
+- [x] Execute Plan 047 L3: Responsive tablet/mobile for recipe builder
+
+### Plan 056 — Table carousel columns (`plans/056-table-carousel-columns.plan.md`)
+
+- [x] Create shared CellCarouselComponent and CellCarouselSlideDirective in src/app/shared/cell-carousel/
+- [x] Wrap Type/Labels/Allergens columns in recipe-book-list with carousel; adjust header and grid template at 768px
+- [x] Wrap Category/Allergens/Supplier columns in inventory-product-list with carousel; adjust header and grid template at 768px
+- [x] Check lints on all modified files and fix any issues
+
 ### Plan 055 — SCSS cssLayer audit fix (`plans/055-scss-csslayer-audit-fix.plan.md`)
 
 - [x] Group A: product-form, recipe-header, preparation-search, menu-intelligence, recipe-ingredients-table, ingredient-search (tokens, logical, rhythm)
 - [x] Group B: cook-view (media query, !important, missing --cv-* tokens); other B files left for follow-up
 - [x] Group C: equipment/venues border-block-end; menu-library --bg-warm → --bg-body
-- [ ] Group E: shared modals, unit-creator, version-history-panel, custom-select, loader (deferred)
+- [x] Group E: shared modals, unit-creator, version-history-panel, custom-select, loader (Five-Group rhythm, logical props)
 - [x] Run ng build to verify
 
 ### Plan 054 — Unify modal styles (`plans/054-unify-modal-styles.plan.md`)
@@ -272,13 +293,13 @@ Update status after each sub-task. Link plan files here when applicable.
 
 - [x] L4: Reduce logistics search width by 20% (done in Plan 051)
 - [x] L4: Sort logistics dropdown by relevance (closest match first)
-- [ ] S1: Ingredient row style (border, arrows, delete, add-btn match workflow)
+- [x] S1: Ingredient row style (border, arrows, delete, add-btn match workflow)
 - [x] S2: Timer value fixed-width container
 - [x] S3: Textarea align + auto-grow
-- [ ] S4: Workflow prep rows match ingredient rows
+- [x] S4: Workflow prep rows match ingredient rows
 - [x] L1: Unit before amount in ingredient grid
 - [x] L2: Smart shrinking grid + delete on hover
-- [ ] L3: Responsive tablet/mobile
+- [x] L3: Responsive tablet/mobile (768px unified breakpoint, workflow prep-flat-grid mobile pass)
 - [x] B1: Labels add/remove (header + form + modal); demo labels + translations unclear
 - [x] B2: Duplicate recipe/dish name validation
 - [ ] B3: Volume conversion fix (unverifiable without spec; needs acceptance criteria)
@@ -442,7 +463,7 @@ Update status after each sub-task. Link plan files here when applicable.
 | 045 | Logistics tools and menu type edit | Done |
 | 046 | Cook-view scale by ingredient | Done |
 | 046-1 | Cook-view scale-by UX fixes | Done |
-| 047 | Recipe Builder Polish | Active |
+| 047 | Recipe Builder Polish | Done (B3 deferred until spec) |
 | 048 | Menu Intelligence UX Polish | Done |
 | 049 | Menu Intelligence Layout and UX Fixes | Done |
 | 050 | Recipe list labels, panel, header, menu UX | Active |
@@ -450,6 +471,9 @@ Update status after each sub-task. Link plan files here when applicable.
 | 052 | Plan 047 audit report | Planned |
 | 053 | Todo audit and fixes | Active |
 | 054 | Unify modal styles | Done |
-| 055 | SCSS cssLayer audit fix | Active |
+| 055 | SCSS cssLayer audit fix | Done |
+| 056 | Table carousel columns | Active |
+| 057 | Plans folder full audit | Done |
+| 058 | Sidebar collapse and floating | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
