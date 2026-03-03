@@ -3,6 +3,7 @@ import { productResolver } from './core/resolvers/product.resolver';
 import { recipeResolver } from './core/resolvers/recipe.resolver';
 import { equipmentResolver } from './core/resolvers/equipment.resolver';
 import { venueResolver } from './core/resolvers/venue.resolver';
+import { supplierResolver } from './core/resolvers/supplier.resolver';
 import { pendingChangesGuard } from './core/guards/pending-changes.guard';
 
 export const routes: Routes = [
@@ -124,6 +125,26 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/cook-view/cook-view.page').then(m => m.CookViewPage),
     resolve: { recipe: recipeResolver },
     canDeactivate: [pendingChangesGuard],
+  },
+  {
+    path: 'suppliers',
+    loadComponent: () => import('./pages/suppliers/suppliers.page').then(m => m.SuppliersPage),
+    children: [
+      { path: '', redirectTo: 'list', pathMatch: 'full' },
+      {
+        path: 'list',
+        loadComponent: () => import('./pages/suppliers/components/supplier-list/supplier-list.component').then(m => m.SupplierListComponent),
+      },
+      {
+        path: 'add',
+        loadComponent: () => import('./pages/suppliers/components/supplier-form/supplier-form.component').then(m => m.SupplierFormComponent),
+      },
+      {
+        path: 'edit/:id',
+        loadComponent: () => import('./pages/suppliers/components/supplier-form/supplier-form.component').then(m => m.SupplierFormComponent),
+        resolve: { supplier: supplierResolver },
+      },
+    ],
   },
   {
     path: 'dashboard',

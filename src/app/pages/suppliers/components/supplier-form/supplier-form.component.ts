@@ -1,0 +1,136 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnInit,
+  Output,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { LucideAngularModule } from 'lucide-angular';
+import { SupplierDataService } from '@services/supplier-data.service';
+import { Supplier } from '@models/supplier.model';
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
+import { LoaderComponent } from 'src/app/shared/loader/loader.component';
+
+const DAY_KEYS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fri', 'day_sat'];
+
+@Component({
+  selector: 'app-supplier-form',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe, LoaderComponent],
+  templateUrl: './supplier-form.component.html',
+  styleUrl: './supplier-form.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  inputs: ['embeddedInDashboard'],
+  outputs: ['saved', 'cancel'],
+})
+export class SupplierFormComponent implements OnInit {
+  @Input() embeddedInDashboard = false;
+  @Output() saved = new EventEmitter<void>();
+  @Output() cancel = new EventEmitter<void>();
+
+  private readonly fb = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly supplierData = inject(SupplierDataService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  protected supplierForm_!: FormGroup;
+  protected isEditMode_ = signal(false);
+  protected isSaving_ = signal(false);
+  protected dayKeys = DAY_KEYS;
+
+  protected get deliveryDaysArray(): FormArray {
+    return this.supplierForm_?.get('delivery_days_') as FormArray;
+  }
+
+  ngOnInit(): void {
+    this.buildForm();
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((data) => {
+      const supplier = data['supplier'] as Supplier | null | undefined;
+      if (supplier) {
+        this.isEditMode_.set(true);
+        this.hydrateForm(supplier);
+      }
+    });
+  }
+
+  private buildForm(): void {
+    const daysArray = this.fb.array(
+      Array.from({ length: 7 }, () => this.fb.control(false))
+    );
+    this.supplierForm_ = this.fb.group({
+      name_hebrew: ['', [Validators.required]],
+      contact_person_: [''],
+      delivery_days_: daysArray,
+      min_order_mov_: [0, [Validators.required, Validators.min(0)]],
+      lead_time_days_: [0, [Validators.required, Validators.min(0)]],
+    });
+  }
+
+  private hydrateForm(s: Supplier): void {
+    const days = s.delivery_days_ ?? [];
+    const dayControls = this.deliveryDaysArray;
+    for (let i = 0; i < 7; i++) {
+      dayControls.at(i).setValue(days.includes(i));
+    }
+    this.supplierForm_.patchValue({
+      name_hebrew: s.name_hebrew ?? '',
+      contact_person_: s.contact_person_ ?? '',
+      min_order_mov_: s.min_order_mov_ ?? 0,
+      lead_time_days_: s.lead_time_days_ ?? 0,
+    });
+  }
+
+  protected onSubmit(): void {
+    if (this.supplierForm_.invalid || this.isSaving_()) return;
+    const raw = this.supplierForm_.getRawValue();
+    const delivery_days_: number[] = [];
+    this.deliveryDaysArray.controls.forEach((c, i) => {
+      if (c.value) delivery_days_.push(i);
+    });
+    const payload = {
+      name_hebrew: raw.name_hebrew,
+      contact_person_: raw.contact_person_ || undefined,
+      delivery_days_,
+      min_order_mov_: Number(raw.min_order_mov_) || 0,
+      lead_time_days_: Number(raw.lead_time_days_) || 0,
+    };
+    this.isSaving_.set(true);
+    if (this.isEditMode_()) {
+      const supplier = this.route.snapshot.data['supplier'] as Supplier;
+      this.supplierData
+        .updateSupplier({ ...supplier, ...payload })
+        .then(() => {
+          if (this.embeddedInDashboard) this.saved.emit();
+          else this.router.navigate(['/suppliers/list']);
+        })
+        .catch((e) => console.error(e))
+        .finally(() => this.isSaving_.set(false));
+    } else {
+      this.supplierData
+        .addSupplier(payload)
+        .then(() => {
+          if (this.embeddedInDashboard) this.saved.emit();
+          else this.router.navigate(['/suppliers/list']);
+        })
+        .catch((e) => console.error(e))
+        .finally(() => this.isSaving_.set(false));
+    }
+  }
+
+  protected onCancel(): void {
+    if (this.embeddedInDashboard) {
+      this.cancel.emit();
+    } else {
+      this.router.navigate(['/suppliers/list']);
+    }
+  }
+}

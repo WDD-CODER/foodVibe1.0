@@ -25,6 +25,10 @@ export class SupplierDataService {
     this.suppliersStore_.set(Array.isArray(data) ? data : []);
   }
 
+  async getSupplierById(_id: string): Promise<Supplier> {
+    return this.storage.get<Supplier>(ENTITY, _id);
+  }
+
   async addSupplier(newSupplier: Omit<Supplier, '_id'>): Promise<Supplier> {
     const saved = await this.storage.post<Supplier>(ENTITY, newSupplier as Supplier);
     this.suppliersStore_.update(suppliers => [...suppliers, saved]);

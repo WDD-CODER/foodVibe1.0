@@ -1,0 +1,130 @@
+@layer components.supplier-list {
+  :host {
+    display: block;
+  }
+
+  .supplier-list-container {
+    .list-header {
+      margin-block-end: 1rem;
+
+      .page-title {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+      margin-block-end: 1rem;
+
+      .search-section .c-input-wrapper {
+        max-width: 17.5rem;
+      }
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      width: 100%;
+      background: var(--bg-glass-strong);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-glass);
+      backdrop-filter: var(--blur-glass);
+      -webkit-backdrop-filter: var(--blur-glass);
+    }
+
+    .supplier-table {
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: collapse;
+
+      th,
+      td {
+        padding-inline: 0.5rem;
+        padding-block: 0.5rem;
+        border-block-end: 1px solid var(--border-default);
+        text-align: end;
+        vertical-align: middle;
+      }
+
+      th {
+        background: var(--bg-glass);
+        color: var(--color-text-muted);
+        font-size: 0.8125rem;
+        font-weight: 600;
+        white-space: nowrap;
+        backdrop-filter: var(--blur-glass);
+      }
+
+      .col-name {
+        width: 18%;
+      }
+      .col-contact {
+        width: 15%;
+      }
+      .col-delivery {
+        width: 12%;
+      }
+      .col-min-order,
+      .col-lead {
+        width: 10%;
+      }
+      .col-linked {
+        width: 10%;
+      }
+      .col-actions {
+        width: 6.25rem;
+      }
+      .col-actions-inner {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.25rem;
+      }
+
+      .no-results {
+        padding: 2rem;
+        color: var(--color-text-muted);
+        text-align: end;
+
+        &.empty-state-cell .empty-state {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 1rem;
+          padding-block: 2rem;
+
+          .empty-state-icon {
+            color: var(--color-text-muted-light);
+          }
+          .empty-state-msg {
+            margin: 0;
+            font-size: 1rem;
+            color: var(--color-text-secondary);
+          }
+        }
+      }
+
+      .c-icon-btn {
+        margin-inline-start: 0.25rem;
+      }
+    }
+
+    .visually-hidden {
+      position: absolute;
+      inset: 0;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+  }
+}
