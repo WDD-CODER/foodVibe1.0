@@ -150,5 +150,5 @@
 
 ## B3 / B4 clarification (acceptance criteria)
 
-- **B3 — Volume conversion fix:** Until a concrete bug or requirement is documented (e.g. "convert L to ml using factor X", or "fix rounding in computeTotalVolumeL"), treat as N/A. To implement: add a short spec under this plan or a tech-debt ticket with steps to reproduce / expected vs actual; then implement and add test.
+- **B3 — Volume conversion fix (implemented):** Spec: (a) Use registry conversion factors for L/ml (1 L = 1000 ml). (b) Round totalL to 4 decimal places in `computeTotalVolumeL` for display consistency. (c) Keep 1 g = 1 ml fallback for weight-only ingredients. Implemented in RecipeCostService.
 - **B4 — Unit selectors in recipe-header:** Acceptance criteria: (1) Dropdown overflow visible (options not clipped by parent overflow). (2) z-index such that open dropdown appears above adjacent content and modals if needed. Verify in recipe-header unit switcher and scrollable dropdowns; if both hold, mark B4 done.
