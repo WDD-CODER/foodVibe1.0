@@ -1,7 +1,26 @@
 <nav class="header-nav" dir="rtl">
+  <div class="auth-section">
+    @if (isLoggedIn()) {
+      @if (user_()?.imgUrl) {
+        <img [src]="user_()!.imgUrl" alt="" class="avatar-img" />
+      } @else {
+        <span class="avatar-initials">{{ userInitial }}</span>
+      }
+      <button type="button" class="auth-username-btn" (click)="logout()" [attr.aria-label]="'log_out' | translatePipe">
+        {{ user_()!.name }}
+      </button>
+    } @else {
+      <button type="button" class="avatar-guest" (click)="openAuth('sign-in')" [attr.aria-label]="'sign_in' | translatePipe">
+        <lucide-icon name="circle-user-round" [size]="22"></lucide-icon>
+      </button>
+      <button type="button" class="auth-link" (click)="openAuth('sign-in')">{{ 'sign_in' | translatePipe }}</button>
+    }
+  </div>
+
   <button type="button" class="mobile-menu-btn" (click)="openMobileMenu()" [attr.aria-label]="'menu' | translatePipe">
     <lucide-icon name="menu" size="24"></lucide-icon>
   </button>
+
   <ul [class.menu-open]="isMobileMenuOpen()">
     <li>
       <button type="button" class="mobile-close-btn" (click)="closeMobileMenu()" [attr.aria-label]="'close' | translatePipe">
@@ -12,5 +31,21 @@
     <li><a routerLink="/inventory" routerLinkActive="active" (click)="closeMobileMenu()">{{ 'inventory' | translatePipe }}</a></li>
     <li><a routerLink="/recipe-book" routerLinkActive="active" (click)="closeMobileMenu()">{{ 'recipe_book' | translatePipe }}</a></li>
     <li><a routerLink="/menu-library" routerLinkActive="active" (click)="closeMobileMenu()">{{ 'menu_library' | translatePipe }}</a></li>
+
+    <li class="mobile-auth-section">
+      @if (isLoggedIn()) {
+        <button type="button" class="c-btn-ghost mobile-auth-btn" (click)="logout()">
+          <lucide-icon name="log-out" [size]="18"></lucide-icon>
+          {{ 'log_out' | translatePipe }}
+        </button>
+      } @else {
+        <button type="button" class="c-btn-primary mobile-auth-btn" (click)="openAuth('sign-in')">
+          {{ 'sign_in' | translatePipe }}
+        </button>
+        <button type="button" class="c-btn-ghost mobile-auth-btn" (click)="openAuth('sign-up')">
+          {{ 'sign_up' | translatePipe }}
+        </button>
+      }
+    </li>
   </ul>
 </nav>
