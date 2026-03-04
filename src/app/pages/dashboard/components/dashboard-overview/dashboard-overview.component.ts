@@ -137,4 +137,8 @@ export class DashboardOverviewComponent {
   protected goToRecipeBook(): void {
     void this.router.navigate(['/recipe-book']);
   }
+
+  protected goToSuppliers(): void {
+    void this.router.navigate(['/suppliers']);
+  }
 }
