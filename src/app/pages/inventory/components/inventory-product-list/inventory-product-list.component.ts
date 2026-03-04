@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, computed, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
@@ -12,9 +12,11 @@ import { Product } from '@models/product.model';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { TranslationService } from '@services/translation.service';
 import { ConfirmModalService } from '@services/confirm-modal.service';
-import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
+import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
+import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
+import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
 
@@ -28,9 +30,13 @@ export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
     RouterLinkActive,
     LucideAngularModule,
     TranslatePipe,
-    SelectOnFocusDirective,
     ClickOutSideDirective,
     LoaderComponent,
+    ListShellComponent,
+    CarouselHeaderComponent,
+    CarouselHeaderColumnDirective,
+    CellCarouselComponent,
+    CellCarouselSlideDirective,
   ],
   templateUrl: './inventory-product-list.component.html',
   styleUrl: './inventory-product-list.component.scss',
@@ -59,6 +65,19 @@ export class InventoryProductListComponent {
   protected lowStockOnly_ = signal<boolean>(false);
   protected deletingId_ = signal<string | null>(null);
   protected savingPriceId_ = signal<string | null>(null);
+  protected carouselHeaderIndex_ = signal<number>(0);
+
+  constructor() {
+    afterNextRender(() => {
+      const q = window.matchMedia('(max-width: 768px)');
+      if (q.matches) this.isPanelOpen_.set(false);
+      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); });
+    });
+  }
+
+  protected onCarouselHeaderChange(index: number): void {
+    this.carouselHeaderIndex_.set(index);
+  }
 
   // LISTING
   protected filterCategories_ = computed(() => {
