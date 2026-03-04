@@ -5,6 +5,7 @@ import { equipmentResolver } from './core/resolvers/equipment.resolver';
 import { venueResolver } from './core/resolvers/venue.resolver';
 import { supplierResolver } from './core/resolvers/supplier.resolver';
 import { pendingChangesGuard } from './core/guards/pending-changes.guard';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -19,11 +20,13 @@ export const routes: Routes = [
       {
         path: 'add',
         loadComponent: () => import('./pages/equipment/components/equipment-form/equipment-form.component').then(m => m.EquipmentFormComponent),
+        canActivate: [authGuard],
       },
       {
         path: 'edit/:id',
         loadComponent: () => import('./pages/equipment/components/equipment-form/equipment-form.component').then(m => m.EquipmentFormComponent),
         resolve: { equipment: equipmentResolver },
+        canActivate: [authGuard],
       },
     ],
   },
@@ -39,11 +42,13 @@ export const routes: Routes = [
       {
         path: 'add',
         loadComponent: () => import('./pages/venues/components/venue-form/venue-form.component').then(m => m.VenueFormComponent),
+        canActivate: [authGuard],
       },
       {
         path: 'edit/:id',
         loadComponent: () => import('./pages/venues/components/venue-form/venue-form.component').then(m => m.VenueFormComponent),
         resolve: { venue: venueResolver },
+        canActivate: [authGuard],
       },
     ],
   },
@@ -59,12 +64,14 @@ export const routes: Routes = [
       {
         path: 'add',
         loadComponent: () => import('./pages/inventory/components/product-form/product-form.component').then(m => m.ProductFormComponent),
+        canActivate: [authGuard],
         canDeactivate: [pendingChangesGuard]
       },
       {
         path: 'edit/:id',
         loadComponent: () => import('./pages/inventory/components/product-form/product-form.component').then(m => m.ProductFormComponent),
         resolve: { product: productResolver },
+        canActivate: [authGuard],
         canDeactivate: [pendingChangesGuard]
       },
       {
@@ -74,11 +81,13 @@ export const routes: Routes = [
       {
         path: 'equipment/add',
         loadComponent: () => import('./pages/equipment/components/equipment-form/equipment-form.component').then(m => m.EquipmentFormComponent),
+        canActivate: [authGuard],
       },
       {
         path: 'equipment/edit/:id',
         loadComponent: () => import('./pages/equipment/components/equipment-form/equipment-form.component').then(m => m.EquipmentFormComponent),
         resolve: { equipment: equipmentResolver },
+        canActivate: [authGuard],
       },
     ],
   },
@@ -90,12 +99,14 @@ export const routes: Routes = [
   {
     path: 'recipe-builder',
     loadComponent: () => import('./pages/recipe-builder/recipe-builder.page').then(m => m.RecipeBuilderPage),
+    canActivate: [authGuard],
     canDeactivate: [pendingChangesGuard]
   },
   {
     path: 'recipe-builder/:id',
     loadComponent: () => import('./pages/recipe-builder/recipe-builder.page').then(m => m.RecipeBuilderPage),
     resolve: { recipe: recipeResolver },
+    canActivate: [authGuard],
     canDeactivate: [pendingChangesGuard]
   },
   {
@@ -109,11 +120,13 @@ export const routes: Routes = [
   {
     path: 'menu-intelligence',
     loadComponent: () => import('@pages/menu-intelligence/menu-intelligence.page').then(m => m.MenuIntelligencePage),
+    canActivate: [authGuard],
     canDeactivate: [pendingChangesGuard],
   },
   {
     path: 'menu-intelligence/:id',
     loadComponent: () => import('@pages/menu-intelligence/menu-intelligence.page').then(m => m.MenuIntelligencePage),
+    canActivate: [authGuard],
     canDeactivate: [pendingChangesGuard],
   },
   {
@@ -138,11 +151,13 @@ export const routes: Routes = [
       {
         path: 'add',
         loadComponent: () => import('./pages/suppliers/components/supplier-form/supplier-form.component').then(m => m.SupplierFormComponent),
+        canActivate: [authGuard],
       },
       {
         path: 'edit/:id',
         loadComponent: () => import('./pages/suppliers/components/supplier-form/supplier-form.component').then(m => m.SupplierFormComponent),
         resolve: { supplier: supplierResolver },
+        canActivate: [authGuard],
       },
     ],
   },
@@ -153,6 +168,7 @@ export const routes: Routes = [
   {
     path: 'trash',
     loadComponent: () => import('./pages/trash/trash.page').then(m => m.TrashPage),
+    canActivate: [authGuard],
   },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 ];

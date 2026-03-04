@@ -244,23 +244,41 @@ Update status after each sub-task. Link plan files here when applicable.
 
 ### Plan 063 — Recipe book carousel media query, behavior, design (`plans/063-recipe-book-carousel-media-query-behavior-design.plan.md`)
 
-- [ ] Desktop: show 3 header columns, hide arrows, no sliding; mobile: carousel header with sliding strip and arrows
-- [ ] Remove (indexChange) binding from app-cell-carousel; keep [activeIndex]
-- [ ] Add small label above header carousel (getCarouselHeaderLabel_ or computed) for mobile
-- [ ] Mobile SCSS: style small label like cell; header arrows opacity 0, on hover opacity 1; match cell arrow size/position
+- [x] Desktop: show 3 header columns, hide arrows, no sliding; mobile: carousel header with sliding strip and arrows
+- [x] Remove (indexChange) binding from app-cell-carousel; keep [activeIndex]
+- [x] Add small label above header carousel (getCarouselHeaderLabel_ or computed) for mobile
+- [x] Mobile SCSS: style small label like cell; header arrows opacity 0, on hover opacity 1; match cell arrow size/position
+
+### Plan 065 — Carousel title and inventory carousel (`plans/065-carousel-title-and-inventory-carousel.plan.md`)
+
+- [ ] Recipe-book: remove small label; add one main title (getCarouselHeaderLabel_)
+- [ ] Inventory: add carousel (TS: signals + methods; HTML: carousel header + app-cell-carousel in rows; SCSS: desktop 7-col, mobile 5-col + carousel styles)
+- [ ] Build and verify
+
+### Plan 064 — Inventory list grid layout refactor (`plans/064-inventory-list-grid-layout-refactor.plan.md`)
+
+- [x] Refactor inventory HTML: replace table/thead/tbody with grid+divs (recipe-book pattern)
+- [x] Refactor inventory SCSS: grid template, table-area, table-header, table-body, product-grid-row
+- [x] Build and verify
 
 ### Plan 062 — Auth single source and sign-in/up (`plans/062-auth-single-source-sign-in-up.plan.md`)
 
-- [ ] Extend User model with imgUrl? field
-- [ ] Refactor UserService: StorageService as single source, unique-name rejection, persistent session via localStorage, auto-login on load
-- [ ] Remove dead code from UtilService (LoadFromStorage, saveToStorage, SIGNED_USERS, session methods)
-- [ ] Create authGuard (canActivate) and apply to all add/edit/builder/trash routes
-- [ ] Create AuthModalService (open/close/mode signals)
-- [ ] Create auth-modal component (sign-in / sign-up form with image upload, unique-name validation)
-- [ ] Add avatar section to header: guest state (icon + sign-in) vs signed-in state (image + name + log out)
-- [ ] Hide edit/delete/add buttons and FAB for guest users across all list components
-- [ ] Add auth-related keys to dictionary.json
-- [ ] Wire auth modal into app root, register Lucide icons, APP_INITIALIZER for auto-login, authGuard on routes
+- [x] Extend User model with imgUrl? field
+- [x] Refactor UserService: StorageService as single source, unique-name rejection, persistent session via localStorage, auto-login on load
+- [x] Remove dead code from UtilService (LoadFromStorage, saveToStorage, SIGNED_USERS, session methods)
+- [x] Create authGuard (canActivate) and apply to all add/edit/builder/trash routes
+- [x] Create AuthModalService (open/close/mode signals)
+- [x] Create auth-modal component (sign-in / sign-up form with image upload, unique-name validation)
+- [x] Add avatar section to header: guest state (icon + sign-in) vs signed-in state (image + name + log out)
+- [x] Hide edit/delete/add buttons and FAB for guest users across all list components
+- [x] Add auth-related keys to dictionary.json
+- [x] Wire auth modal into app root, register Lucide icons, APP_INITIALIZER for auto-login, authGuard on routes
+
+### Plan 062-1 — Fix FAB and cook-view guest access (`plans/062-1-fix-fab-cookview-guest.plan.md`)
+
+- [x] FAB always visible, gate only the recipe-builder action
+- [x] Remove authGuard from cook/:id route
+- [x] Gate edit actions inside cook-view for guests
 
 ### Plan 061 — Header carousel shift controls (`plans/061-header-carousel-shift-controls.plan.md`)
 
@@ -536,7 +554,10 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 059-1 | Unify design engine refactor (execution) | Active |
 | 060 | Data persistence and backup | Done |
 | 061 | Header carousel shift controls | Active |
-| 062 | Auth single source and sign-in/up | Active |
+| 062 | Auth single source and sign-in/up | Done |
+| 062-1 | Fix FAB and cook-view guest access | Active |
 | 063 | Recipe book carousel media query, behavior, design | Active |
+| 064 | Inventory list grid layout refactor | Active |
+| 065 | Carousel title and inventory carousel | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*

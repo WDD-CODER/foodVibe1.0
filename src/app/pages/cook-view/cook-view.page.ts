@@ -11,6 +11,7 @@ import { RecipeCostService } from '@services/recipe-cost.service';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { ConfirmModalService } from '@services/confirm-modal.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
+import { UserService } from '@services/user.service';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
@@ -46,6 +47,7 @@ export class CookViewPage implements OnInit {
   private readonly kitchenState = inject(KitchenStateService);
   private readonly confirmModal = inject(ConfirmModalService);
   private readonly unitRegistry = inject(UnitRegistryService);
+  protected readonly isLoggedIn = inject(UserService).isLoggedIn;
 
   protected recipe_ = signal<Recipe | null>(null);
   protected targetQuantity_ = signal<number>(1);

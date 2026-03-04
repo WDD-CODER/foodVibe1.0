@@ -32,7 +32,7 @@
                 {{ 'undo_changes' | translatePipe }}
               </button>
             </div>
-          } @else {
+          } @else if (isLoggedIn()) {
             <button type="button" class="edit-btn" (click)="enterEditMode()" [attr.aria-label]="'edit' | translatePipe">
               <lucide-icon name="pencil" [size]="18"></lucide-icon>
               {{ 'edit' | translatePipe }}
