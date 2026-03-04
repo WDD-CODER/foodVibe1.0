@@ -5,6 +5,7 @@ import { UnitRegistryService } from '@services/unit-registry.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
 import { ProductDataService } from '@services/product-data.service';
 import { DemoLoaderService } from '@services/demo-loader.service';
+import { BackupService } from '@services/backup.service';
 import { ConfirmModalService } from '@services/confirm-modal.service';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { MenuEventDataService } from '@services/menu-event-data.service';
@@ -31,6 +32,7 @@ export class MetadataManagerComponent implements OnInit {
   private metadataRegistry = inject(MetadataRegistryService);
   private productData = inject(ProductDataService);
   private demoLoader = inject(DemoLoaderService);
+  private backupService = inject(BackupService);
   private confirmModal = inject(ConfirmModalService);
   private translationService = inject(TranslationService);
   private userMsgService = inject(UserMsgService);
@@ -302,6 +304,41 @@ export class MetadataManagerComponent implements OnInit {
       await this.demoLoader.loadDemoData();
     } finally {
       this.isImporting_.set(false);
+    }
+  }
+
+  async onExportBackup(): Promise<void> {
+    await this.backupService.exportAllToFile();
+  }
+
+  async onRestoreFromBackup(): Promise<void> {
+    const message = this.translationService.translate('backup_restore_confirm');
+    const confirmed = await this.confirmModal.open(message, { variant: 'warning', saveLabel: 'backup_restore_from_backup' });
+    if (!confirmed) return;
+    this.isImporting_.set(true);
+    try {
+      await this.backupService.restoreFromBackup();
+    } finally {
+      this.isImporting_.set(false);
+    }
+  }
+
+  async onImportBackupFile(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    const message = this.translationService.translate('backup_import_confirm');
+    const confirmed = await this.confirmModal.open(message, { variant: 'warning', saveLabel: 'backup_import' });
+    if (!confirmed) {
+      input.value = '';
+      return;
+    }
+    this.isImporting_.set(true);
+    try {
+      await this.backupService.importFromFile(file);
+    } finally {
+      this.isImporting_.set(false);
+      input.value = '';
     }
   }
 

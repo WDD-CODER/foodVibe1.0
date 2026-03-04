@@ -396,3 +396,65 @@
     }
   }
 }
+
+.backup-section {
+  margin-top: 2rem;
+  max-width: 36rem;
+
+  .backup-desc {
+    margin: 0 0 1rem;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+  }
+
+  .backup-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .btn-backup {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-inline: 1rem;
+    padding-block: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-default);
+    background: var(--bg-glass);
+    color: var(--color-text-main);
+    cursor: pointer;
+    backdrop-filter: var(--blur-glass);
+    transition: background 0.2s ease, border-color 0.2s ease;
+
+    &:hover {
+      background: var(--bg-glass-hover);
+      border-color: var(--border-focus);
+    }
+  }
+
+  .btn-export {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    &:hover {
+      background: var(--color-primary-soft);
+    }
+  }
+
+  .btn-restore,
+  .btn-import {
+    &:hover {
+      border-color: var(--color-text-muted);
+    }
+  }
+
+  .backup-file-input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+}

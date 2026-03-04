@@ -163,6 +163,11 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Render five views (overview, metadata, venues, add-venue, trash); VenueForm embedded mode
 - [x] Suppliers tab in dashboard (suppliers + add-supplier); unified list layout and table (venue, equipment, supplier): fixed layout, col-actions-inner flex, empty states (feat/dashboard-suppliers-unified-lists)
 
+### feat/unify-table-and-design-engine (merged to main)
+
+- [x] refactor(styles): table justify and venue/supplier header layout (styles.scss, venue-list, supplier-list, angular.json)
+- [x] refactor(inventory): product list to HTML table and toolbar (inventory-product-list html, scss, ts)
+
 ### Plan 038 — Inverted-L List Layout (`plans/038-inverted-l-list-layout.plan.md`)
 
 - [x] Restructure recipe-book-list and inventory-product-list to inverted-L (header / table-area / filter-panel)
@@ -237,22 +242,56 @@ Update status after each sub-task. Link plan files here when applicable.
 
 ## Ahead (Pending)
 
+### Plan 063 — Recipe book carousel media query, behavior, design (`plans/063-recipe-book-carousel-media-query-behavior-design.plan.md`)
+
+- [ ] Desktop: show 3 header columns, hide arrows, no sliding; mobile: carousel header with sliding strip and arrows
+- [ ] Remove (indexChange) binding from app-cell-carousel; keep [activeIndex]
+- [ ] Add small label above header carousel (getCarouselHeaderLabel_ or computed) for mobile
+- [ ] Mobile SCSS: style small label like cell; header arrows opacity 0, on hover opacity 1; match cell arrow size/position
+
+### Plan 062 — Auth single source and sign-in/up (`plans/062-auth-single-source-sign-in-up.plan.md`)
+
+- [ ] Extend User model with imgUrl? field
+- [ ] Refactor UserService: StorageService as single source, unique-name rejection, persistent session via localStorage, auto-login on load
+- [ ] Remove dead code from UtilService (LoadFromStorage, saveToStorage, SIGNED_USERS, session methods)
+- [ ] Create authGuard (canActivate) and apply to all add/edit/builder/trash routes
+- [ ] Create AuthModalService (open/close/mode signals)
+- [ ] Create auth-modal component (sign-in / sign-up form with image upload, unique-name validation)
+- [ ] Add avatar section to header: guest state (icon + sign-in) vs signed-in state (image + name + log out)
+- [ ] Hide edit/delete/add buttons and FAB for guest users across all list components
+- [ ] Add auth-related keys to dictionary.json
+- [ ] Wire auth modal into app root, register Lucide icons, APP_INITIALIZER for auto-login, authGuard on routes
+
+### Plan 061 — Header carousel shift controls (`plans/061-header-carousel-shift-controls.plan.md`)
+
+- [x] Add carouselHeaderIndex_ and carouselHeaderPrev/Next in recipe-book-list.component.ts
+- [x] Add activeIndex input and indexChange output to CellCarouselComponent; sync and emit
+- [x] Header: sliding strip structure and prev/next buttons in recipe-book-list HTML
+- [x] Bind [activeIndex] and (indexChange) on each app-cell-carousel in template
+- [x] SCSS: carousel header as one grid cell, overflow hidden, inner strip and transform
+
+### Plan 060 — Data persistence and backup (`plans/060-data-persistence-and-backup.plan.md`)
+
+- [x] StorageService: wrap `_save()` in try/catch; re-throw with clear message. Harden UtilService and TranslationService direct localStorage writes.
+- [x] Demo loader: add confirmation step (modal or confirm) before `loadDemoData()` with copy that demo replaces recipes, dishes, products, suppliers, equipment, venues.
+- [x] Backup mirror: define backup entity list; in StorageService after successful save, write to `backup_<entityType>` for listed types.
+- [x] Export / Restore: implement `exportAllToFiles()` (download JSON per category) and “Restore from backup” / “Import from file(s)” with validation and reload.
+- [ ] Optional: debounced auto-download per category for physical JSON on every change.
+
 ### Plan 059 — Unify design engine (`plans/059-unify-design-engine.plan.md`)
 
-- [ ] 1. Table/list action buttons: migrate recipe-book, inventory, menu-library to `.c-icon-btn` / `.c-icon-btn danger`; remove `.action-btn`
-- [ ] 2. Add button: replace `.add-btn` with `.c-btn-primary` in recipe-book, inventory, menu-library
-- [ ] 3. Search input: replace `.input-wrapper` with `.c-input-wrapper` in recipe-book, inventory, menu-library, ingredient-search, preparation-search
-- [ ] 4. Add `.visually-hidden` to global styles; remove from recipe-book, inventory, equipment, venue, supplier
-- [ ] 5. Add `.placeholder-dash` to global; remove from recipe-book, inventory
-- [ ] 6. Clear-filters and panel-toggle: add engine variants; unify recipe-book and inventory
-- [ ] 7. Filter panel: extract shared `.c-filter-panel*`; use in recipe-book and inventory
-- [ ] 8. Empty state: add `.c-empty-state*`; migrate all five list components
-- [ ] 9. Table-wrap and table base: add `.c-table-wrap`, `.c-table`; use in equipment, venue, supplier
-- [ ] 10. Sortable header and col-actions: add engine classes; migrate recipe-book and inventory
-- [ ] 11. Grid header/cell and chips/allergens: align on engine; fix `.chipe` typo
-- [ ] 12. Grid input/select: add engine; use in recipe-ingredients-table and inventory
-- [ ] 13. Breakpoint: use `$break-mobile` where 768px is hardcoded
-- [ ] 14. Transitions: standardize on tokens
+Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
+
+- [x] Phase 1: Add missing engine classes to styles.scss (.visually-hidden, .placeholder-dash, .c-table-wrap, .c-data-table, .c-sortable-header, .c-col-actions, .c-empty-state, .c-btn-ghost--sm, .c-chip variants, .c-grid-input/.c-grid-select)
+- [x] Phase 2: Migrate .action-btn to .c-icon-btn in recipe-book-list, inventory-product-list, menu-library-list
+- [x] Phase 3: Migrate .add-btn to .c-btn-primary in recipe-book-list, inventory-product-list, menu-library-list
+- [x] Phase 4: Migrate .input-wrapper to .c-input-wrapper in 5 components
+- [x] Phase 5: Remove local .visually-hidden and .placeholder-dash from component SCSS files
+- [x] Phase 6: Migrate .table-wrap and th/td to .c-table-wrap/.c-data-table in equipment, venue, supplier
+- [x] Phase 7: Migrate sortable-header, col-actions, clear-filters-btn to engine classes in recipe-book + inventory
+- [x] Phase 8: Fixed .chipe typo, migrated ingredient chips to .c-chip--success
+- [ ] Phase 9: Deferred — grid header/cell too coupled to display:contents layout
+- [ ] Phase 10: Deferred — breakpoint/transition standardization for follow-up
 
 ### Plan 058 — Sidebar collapse and floating (`plans/058-sidebar-collapse-floating.plan.md`)
 
@@ -493,6 +532,11 @@ Update status after each sub-task. Link plan files here when applicable.
 | 056 | Table carousel columns | Active |
 | 057 | Plans folder full audit | Done |
 | 058 | Sidebar collapse and floating | Active |
-| 059 | Unify design engine | Pending |
+| 059 | Unify design engine | Active |
+| 059-1 | Unify design engine refactor (execution) | Active |
+| 060 | Data persistence and backup | Done |
+| 061 | Header carousel shift controls | Active |
+| 062 | Auth single source and sign-in/up | Active |
+| 063 | Recipe book carousel media query, behavior, design | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
