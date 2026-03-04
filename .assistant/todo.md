@@ -242,6 +242,21 @@ Update status after each sub-task. Link plan files here when applicable.
 
 ## Ahead (Pending)
 
+### Plan 070 — Recipe carousel header label sync (`plans/070-recipe-carousel-header-label-sync.plan.md`)
+
+- [ ] CellCarouselComponent: add activeIndexChange output; emit new index in next() and prev()
+- [ ] RecipeBookListComponent: add carouselHeaderIndex_ signal and getCarouselHeaderLabel_()
+- [ ] Recipe-book-list HTML: dynamic header label; [activeIndex] and (activeIndexChange) on app-cell-carousel
+
+### Plan 069 — Unused and redundant code cleanup (`plans/069-unused-redundant-code-cleanup.plan.md`)
+
+- [ ] Remove `@components/*` from tsconfig.json
+- [ ] Delete recipe.module.ts, system-health.ts, ingredient.service.ts
+- [ ] Update core/breadcrumbs.md and core/services/breadcrumbs.md
+- [ ] Remove commented block in metadata-manager.page.component.ts (lines ~219–263)
+- [ ] Unit-creator spec: minimal placeholder or delete file
+- [ ] Run build and tests to verify
+
 ### Plan 063 — Recipe book carousel media query, behavior, design (`plans/063-recipe-book-carousel-media-query-behavior-design.plan.md`)
 
 - [x] Desktop: show 3 header columns, hide arrows, no sliding; mobile: carousel header with sliding strip and arrows
@@ -281,6 +296,7 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Hide edit/delete/add buttons and FAB for guest users across all list components
 - [x] Add auth-related keys to dictionary.json
 - [x] Wire auth modal into app root, register Lucide icons, APP_INITIALIZER for auto-login, authGuard on routes
+- [x] Fix auth build errors: add UserService.isLoggedIn, inline session storage (replace removed UtilService methods), wire HeaderComponent auth (isLoggedIn, user_, userInitial, openAuth, logout), User.imgUrl (`fix/auth-isloggedin-storage-header` merged to main)
 
 ### Plan 062-1 — Fix FAB and cook-view guest access (`plans/062-1-fix-fab-cookview-guest.plan.md`)
 
@@ -568,5 +584,7 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 064 | Inventory list grid layout refactor | Active |
 | 065 | Carousel title and inventory carousel | Active |
 | 066 | Quick-add product modal | Active |
+| 069 | Unused and redundant code cleanup | Planned |
+| 070 | Recipe carousel header label sync | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*

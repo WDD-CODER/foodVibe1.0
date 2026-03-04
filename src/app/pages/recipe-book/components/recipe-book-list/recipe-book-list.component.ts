@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, computed, ViewChildren, QueryList } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -31,6 +31,8 @@ const MAX_ALLERGEN_RECURSION = 5;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RecipeBookListComponent {
+  @ViewChildren(CellCarouselComponent) protected carouselRefs!: QueryList<CellCarouselComponent>;
+
   private readonly kitchenState = inject(KitchenStateService);
   private readonly router = inject(Router);
   private readonly recipeCostService = inject(RecipeCostService);
@@ -55,6 +57,7 @@ export class RecipeBookListComponent {
   protected historyFor_ = signal<{ entityType: VersionEntityType; entityId: string; entityName: string } | null>(null);
   protected deletingId_ = signal<string | null>(null);
   protected duplicatingId_ = signal<string | null>(null);
+  protected carouselHeaderIndex_ = signal(0);
 
   protected categoryDisplayKey(internalName: string): string {
     const map: Record<string, string> = {
@@ -293,6 +296,23 @@ export class RecipeBookListComponent {
       default:
         return 0;
     }
+  }
+
+  protected getCarouselHeaderLabel_(): string {
+    const labels = ['type', 'labels', 'allergens'] as const;
+    return labels[this.carouselHeaderIndex_()] ?? 'type';
+  }
+
+  protected carouselHeaderPrev(): void {
+    this.carouselHeaderIndex_.update(i => (i <= 0 ? 2 : i - 1));
+    const idx = this.carouselHeaderIndex_();
+    this.carouselRefs?.forEach(c => c.setActiveIndex(idx));
+  }
+
+  protected carouselHeaderNext(): void {
+    this.carouselHeaderIndex_.update(i => (i >= 2 ? 0 : i + 1));
+    const idx = this.carouselHeaderIndex_();
+    this.carouselRefs?.forEach(c => c.setActiveIndex(idx));
   }
 
   protected setSort(field: SortField): void {
