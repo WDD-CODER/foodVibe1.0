@@ -1,5 +1,5 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { EntityId, StorageService } from './async-storage.service';
+import { EntityId, StorageService, STORAGE_ERROR_MESSAGE } from './async-storage.service';
 
 describe('StorageService', () => {
   let service: StorageService;
@@ -105,6 +105,16 @@ describe('StorageService', () => {
       const id = service.makeId(10);
       expect(id.length).toBe(10);
       expect(typeof id).toBe('string');
+    });
+  });
+
+  describe('Storage errors', () => {
+    it('should re-throw when localStorage.setItem fails', async () => {
+      spyOn(Storage.prototype, 'setItem').and.throwError('QuotaExceededError');
+      await expectAsync(service.post(ENTITY_TYPE, { name: 'x' }))
+        .toBeRejectedWithError(STORAGE_ERROR_MESSAGE);
+      const entities = await service.query(ENTITY_TYPE, 0);
+      expect(entities.length).toBe(0);
     });
   });
 });

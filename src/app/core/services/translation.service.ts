@@ -43,7 +43,11 @@ export class TranslationService {
 
       this.masterDict.set(finalDict);
 
-      localStorage.setItem('DICTIONARY_CACHE', JSON.stringify(finalDict));
+      try {
+        localStorage.setItem('DICTIONARY_CACHE', JSON.stringify(finalDict));
+      } catch (err) {
+        console.warn('Dictionary cache write failed (quota or access):', err);
+      }
 
       console.log('✅ Full Hybrid Dictionary Cached to LocalStorage');
     } catch (err) {
@@ -64,7 +68,11 @@ export class TranslationService {
     const rawCache = localStorage.getItem('DICTIONARY_CACHE');
     const cache = rawCache ? JSON.parse(rawCache) : {};
     cache[normalizedKey] = label.trim();
-    localStorage.setItem('DICTIONARY_CACHE', JSON.stringify(cache));
+    try {
+      localStorage.setItem('DICTIONARY_CACHE', JSON.stringify(cache));
+    } catch (err) {
+      console.warn('Dictionary cache write failed (quota or access):', err);
+    }
   }
 
   updateDictionary(key: string, label: string): void {
@@ -81,7 +89,11 @@ export class TranslationService {
           return acc;
         }, {} as Record<string, string>);
 
-      localStorage.setItem('DICTIONARY_CACHE', JSON.stringify(sortedDict));
+      try {
+        localStorage.setItem('DICTIONARY_CACHE', JSON.stringify(sortedDict));
+      } catch (err) {
+        console.warn('Dictionary cache write failed (quota or access):', err);
+      }
       return sortedDict;
     });
     console.log(`%c 📖 Dictionary Updated: "${normalizedKey}": "${sanitizedLabel}"`, 'color: #4CAF50; font-weight: bold;');
