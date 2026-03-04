@@ -15,7 +15,6 @@ import { ConfirmModalService } from '@services/confirm-modal.service';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
-import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
 
@@ -32,8 +31,6 @@ export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
     SelectOnFocusDirective,
     ClickOutSideDirective,
     LoaderComponent,
-    CellCarouselComponent,
-    CellCarouselSlideDirective,
   ],
   templateUrl: './inventory-product-list.component.html',
   styleUrl: './inventory-product-list.component.scss',
@@ -212,7 +209,7 @@ export class InventoryProductListComponent {
 
   protected closeAllergenView(clickTarget?: EventTarget | null): void {
     const el = clickTarget instanceof HTMLElement ? clickTarget : null;
-    if (el?.closest('.table-header .col-allergens')) return;
+    if (el?.closest('thead .col-allergens')) return;
     this.allergenPopoverProductId_.set(null);
     this.allergenExpandAll_.set(false);
   }
