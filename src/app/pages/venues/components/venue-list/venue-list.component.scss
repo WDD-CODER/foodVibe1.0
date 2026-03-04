@@ -6,13 +6,40 @@
 
 .venue-list-container {
   .list-header {
-    margin-block-end: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding-block-end: 1rem;
+    margin-block-end: 0;
+    border-block-end: 1px solid var(--border-default);
+  }
 
-    .page-title {
-      margin: 0;
-      font-size: 1.25rem;
-      font-weight: 600;
-    }
+  .header-start {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+  }
+
+  .header-spacer {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+  }
+
+  .page-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    letter-spacing: 0.02em;
   }
 
   .toolbar {
@@ -27,36 +54,7 @@
     }
   }
 
-  .table-wrap {
-    overflow-x: auto;
-    background: var(--bg-glass-strong);
-    border: 1px solid var(--border-glass);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-glass);
-    backdrop-filter: var(--blur-glass);
-    -webkit-backdrop-filter: var(--blur-glass);
-  }
-
   .venue-table {
-    width: 100%;
-    border-collapse: collapse;
-
-    th,
-    td {
-      padding-inline: 0.75rem;
-      padding-block: 0.625rem;
-      border-block-end: 1px solid var(--border-default);
-      text-align: end;
-    }
-
-    th {
-      background: var(--bg-glass);
-      color: var(--color-text-muted);
-      font-size: 0.8125rem;
-      font-weight: 600;
-      backdrop-filter: var(--blur-glass);
-    }
-
     .col-name {
       min-width: 10rem;
     }
@@ -81,15 +79,4 @@
     }
   }
 
-  .visually-hidden {
-    position: absolute;
-    inset: 0;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    border: 0;
-  }
 }

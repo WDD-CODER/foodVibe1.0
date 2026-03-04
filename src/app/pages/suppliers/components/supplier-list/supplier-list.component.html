@@ -1,6 +1,15 @@
 <div class="supplier-list-container" dir="rtl">
   <header class="list-header">
-    <h2 class="page-title">{{ 'supplier_list' | translatePipe }}</h2>
+    <div class="header-start">
+      <h2 class="page-title">{{ 'supplier_list' | translatePipe }}</h2>
+    </div>
+    <div class="header-spacer"></div>
+    <div class="header-actions">
+      <button type="button" class="c-btn-primary" (click)="onAdd()">
+        <lucide-icon name="plus" [size]="18"></lucide-icon>
+        {{ 'add_supplier' | translatePipe }}
+      </button>
+    </div>
   </header>
 
   <div class="toolbar">
@@ -17,14 +26,10 @@
         />
       </div>
     </div>
-    <button type="button" class="c-btn-primary" (click)="onAdd()">
-      <lucide-icon name="plus" [size]="18"></lucide-icon>
-      {{ 'add_supplier' | translatePipe }}
-    </button>
   </div>
 
-  <div class="table-wrap">
-    <table class="supplier-table">
+  <div class="c-table-wrap">
+    <table class="supplier-table c-data-table">
       <thead>
         <tr>
           <th class="col-name">{{ 'name' | translatePipe }}</th>

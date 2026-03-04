@@ -638,6 +638,177 @@ textarea.c-input {
   transition: background 0.15s ease;
 }
 
+/* ---- Engine: Visually Hidden (accessibility) ---- */
+.visually-hidden {
+  position: absolute;
+
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- Engine: Placeholder Dash (empty cell) ---- */
+.placeholder-dash {
+  color: var(--color-text-muted-light);
+  font-size: 0.875rem;
+}
+
+/* ---- Engine: Glass Table Wrapper ---- */
+.c-table-wrap {
+  overflow-x: auto;
+
+  background: var(--bg-glass-strong);
+
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+}
+
+/* ---- Engine: Data Table (th/td base) ---- */
+.c-data-table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding-inline: 0.75rem;
+    padding-block: 0.625rem;
+
+    border-block-end: 1px solid var(--border-default);
+    text-align: justify;
+  }
+
+  th {
+    background: var(--bg-glass);
+    color: var(--color-text-muted);
+    font-size: 0.8125rem;
+    font-weight: 600;
+
+    backdrop-filter: var(--blur-glass);
+  }
+
+  .col-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.25rem;
+
+    text-align: end;
+  }
+}
+
+/* ---- Engine: Sortable Header ---- */
+.c-sortable-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+
+  cursor: pointer;
+  transition: background 0.2s var(--ease-smooth), color 0.2s var(--ease-smooth);
+
+  &:hover {
+    background: var(--bg-glass-hover);
+    color: var(--color-text-main);
+  }
+}
+
+/* ---- Engine: Actions Column ---- */
+.c-col-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+
+  padding-inline-end: 1rem;
+}
+
+/* ---- Engine: Empty State ---- */
+.c-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+
+  padding-block: 3rem;
+
+  text-align: center;
+}
+
+.c-empty-state__icon {
+  color: var(--color-text-muted-light);
+}
+
+.c-empty-state__msg {
+  margin: 0;
+
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+}
+
+/* ---- Engine: Ghost Button (small) ---- */
+.c-btn-ghost--sm {
+  padding: 0.25rem 0.625rem;
+
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background: var(--bg-glass);
+
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+
+  cursor: pointer;
+  transition: background 0.2s var(--ease-smooth), color 0.2s var(--ease-smooth);
+
+  &:hover {
+    color: var(--color-text-main);
+    background: var(--bg-glass-hover);
+  }
+}
+
+/* ---- Engine: Chip Variants ---- */
+.c-chip--warning {
+  background: rgba(254, 243, 199, 0.5);
+  color: var(--text-warning);
+}
+
+.c-chip--success {
+  background: var(--bg-success);
+  color: var(--text-success);
+}
+
+/* ---- Engine: Grid Input / Grid Select (inline table controls) ---- */
+.c-grid-input,
+.c-grid-select {
+  padding-inline: 0.625rem;
+  padding-block: 0.375rem;
+
+  background: var(--bg-glass);
+  font-size: 0.875rem;
+
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  outline: none;
+  box-sizing: border-box;
+
+  transition: border-color 0.2s var(--ease-smooth), box-shadow 0.2s var(--ease-smooth);
+
+  &:focus {
+    border-color: var(--border-focus);
+    box-shadow: var(--shadow-focus);
+  }
+}
+
 /* ---- Part 7: Animation keyframes (use in components) ---- */
 @keyframes focusPulse {
   0%   { box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.4); }
