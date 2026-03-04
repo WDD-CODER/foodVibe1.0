@@ -7,19 +7,21 @@ import { EquipmentDataService } from '@services/equipment-data.service';
 import { Equipment, EquipmentCategory } from '@models/equipment.model';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
-import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
+import { UserService } from '@services/user.service';
+import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
 
 type SortField = 'name' | 'category' | 'owned';
 
 @Component({
   selector: 'app-equipment-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule, TranslatePipe, LoaderComponent, CustomSelectComponent],
+  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective],
   templateUrl: './equipment-list.component.html',
   styleUrl: './equipment-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EquipmentListComponent {
+  protected readonly isLoggedIn = inject(UserService).isLoggedIn;
   private readonly equipmentData = inject(EquipmentDataService);
   private readonly router = inject(Router);
 
@@ -33,23 +35,38 @@ export class EquipmentListComponent {
   }
 
   protected searchQuery_ = signal('');
-  protected categoryFilter_ = signal<EquipmentCategory | ''>('');
+  protected isPanelOpen_ = signal(true);
+  protected carouselHeaderIndex_ = signal(0);
+  /** Selected categories; empty set = show all. */
+  protected selectedCategories_ = signal<Set<EquipmentCategory>>(new Set());
+  /** null = no filter, true = consumable only, false = non-consumable only. */
+  protected consumableFilter_ = signal<boolean | null>(null);
   protected sortBy_ = signal<SortField>('name');
   protected deletingId_ = signal<string | null>(null);
   protected sortOrder_ = signal<'asc' | 'desc'>('asc');
 
+  protected hasActiveFilters_ = computed(() => {
+    const cats = this.selectedCategories_();
+    const cons = this.consumableFilter_();
+    return cats.size > 0 || cons !== null;
+  });
+
   protected filteredEquipment_ = computed(() => {
     let list = this.equipmentData.allEquipment_();
     const search = this.searchQuery_().trim().toLowerCase();
-    const cat = this.categoryFilter_();
+    const cats = this.selectedCategories_();
+    const consumableOnly = this.consumableFilter_();
     const sortBy = this.sortBy_();
     const order = this.sortOrder_();
 
     if (search) {
       list = list.filter(e => (e.name_hebrew ?? '').toLowerCase().includes(search));
     }
-    if (cat) {
-      list = list.filter(e => e.category_ === cat);
+    if (cats.size > 0) {
+      list = list.filter(e => cats.has(e.category_));
+    }
+    if (consumableOnly !== null) {
+      list = list.filter(e => e.is_consumable_ === consumableOnly);
     }
     list = [...list].sort((a, b) => {
       let cmp = 0;
@@ -73,10 +90,37 @@ export class EquipmentListComponent {
     'infrastructure',
     'consumable',
   ];
-  protected categoryFilterOptions = [
-    { value: '', label: 'all' },
-    ...this.categories.map((c) => ({ value: c, label: c })),
-  ];
+
+  protected togglePanel(): void {
+    this.isPanelOpen_.update(v => !v);
+  }
+
+  protected carouselHeaderPrev(): void {
+    this.carouselHeaderIndex_.update(i => (i <= 0 ? 2 : i - 1));
+  }
+
+  protected carouselHeaderNext(): void {
+    this.carouselHeaderIndex_.update(i => (i >= 2 ? 0 : i + 1));
+  }
+
+  protected getCarouselHeaderLabel_(): 'category' | 'owned_quantity' | 'is_consumable' {
+    const labels: ('category' | 'owned_quantity' | 'is_consumable')[] = ['category', 'owned_quantity', 'is_consumable'];
+    return labels[this.carouselHeaderIndex_()] ?? 'category';
+  }
+
+  protected toggleCategory(cat: EquipmentCategory): void {
+    this.selectedCategories_.update(set => {
+      const next = new Set(set);
+      if (next.has(cat)) next.delete(cat);
+      else next.add(cat);
+      return next;
+    });
+  }
+
+  protected clearAllFilters(): void {
+    this.selectedCategories_.set(new Set());
+    this.consumableFilter_.set(null);
+  }
 
   protected setSort(field: SortField): void {
     if (this.sortBy_() === field) {
@@ -85,10 +129,6 @@ export class EquipmentListComponent {
       this.sortBy_.set(field);
       this.sortOrder_.set('asc');
     }
-  }
-
-  protected categoryLabel(cat: EquipmentCategory): string {
-    return cat;
   }
 
   protected onAdd(): void {
