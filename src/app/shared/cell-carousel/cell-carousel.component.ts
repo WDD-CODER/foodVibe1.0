@@ -5,6 +5,8 @@ import {
   inject,
   input,
   Input,
+  Output,
+  EventEmitter,
   ContentChildren,
   QueryList,
   signal,
@@ -41,6 +43,8 @@ export class CellCarouselComponent implements AfterViewInit {
   @Input() set activeIndex(value: number | undefined) {
     this._activeIndex.set(value);
   }
+  /** Emitted when the user changes the slide via prev/next so parent can sync (e.g. header label). */
+  @Output() activeIndexChange = new EventEmitter<number>();
   private readonly _activeIndex = signal<number | undefined>(undefined);
 
   protected readonly currentIndex = signal(0);
@@ -90,11 +94,22 @@ export class CellCarouselComponent implements AfterViewInit {
     }
   }
 
+  /** Set active slide by index (e.g. when header "whole column" is used). */
+  setActiveIndex(index: number): void {
+    const list = this.slides?.toArray() ?? [];
+    if (list.length === 0) return;
+    const max = list.length - 1;
+    const clamped = Math.min(max, Math.max(0, index));
+    this.currentIndex.set(clamped);
+    this.updateActiveSlide();
+  }
+
   protected next(): void {
     const list = this.slides?.toArray() ?? [];
     if (list.length === 0) return;
     const idx = (this.currentIndex() + 1) % list.length;
     this.currentIndex.set(idx);
+    this.activeIndexChange.emit(this.currentIndex());
   }
 
   protected prev(): void {
@@ -102,5 +117,6 @@ export class CellCarouselComponent implements AfterViewInit {
     if (list.length === 0) return;
     const idx = this.currentIndex() - 1;
     this.currentIndex.set(idx < 0 ? list.length - 1 : idx);
+    this.activeIndexChange.emit(this.currentIndex());
   }
 }
