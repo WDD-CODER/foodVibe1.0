@@ -1,11 +1,10 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-suppliers-page',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe],
+  imports: [RouterOutlet],
   templateUrl: './suppliers.page.html',
   styleUrl: './suppliers.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
