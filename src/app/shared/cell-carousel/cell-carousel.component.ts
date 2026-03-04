@@ -4,6 +4,7 @@ import {
   ElementRef,
   inject,
   input,
+  Input,
   ContentChildren,
   QueryList,
   signal,
@@ -36,6 +37,12 @@ export class CellCarouselSlideDirective {
 export class CellCarouselComponent implements AfterViewInit {
   @ContentChildren(CellCarouselSlideDirective) slides!: QueryList<CellCarouselSlideDirective>;
 
+  /** When set, parent controls the active slide (e.g. header carousel index). */
+  @Input() set activeIndex(value: number | undefined) {
+    this._activeIndex.set(value);
+  }
+  private readonly _activeIndex = signal<number | undefined>(undefined);
+
   protected readonly currentIndex = signal(0);
 
   protected getCurrentLabel(): string {
@@ -59,10 +66,28 @@ export class CellCarouselComponent implements AfterViewInit {
       this.currentIndex();
       this.updateActiveSlide();
     });
+    effect(() => {
+      const external = this._activeIndex();
+      if (external === undefined || external === null) return;
+      const list = this.slides?.toArray() ?? [];
+      if (list.length === 0) return;
+      const max = list.length - 1;
+      const clamped = Math.min(max, Math.max(0, external));
+      this.currentIndex.set(clamped);
+      this.updateActiveSlide();
+    });
   }
 
   ngAfterViewInit(): void {
     this.updateActiveSlide();
+    const external = this._activeIndex();
+    if (external !== undefined && external !== null) {
+      const list = this.slides?.toArray() ?? [];
+      const max = Math.max(0, list.length - 1);
+      const clamped = Math.min(max, Math.max(0, external));
+      this.currentIndex.set(clamped);
+      this.updateActiveSlide();
+    }
   }
 
   protected next(): void {
