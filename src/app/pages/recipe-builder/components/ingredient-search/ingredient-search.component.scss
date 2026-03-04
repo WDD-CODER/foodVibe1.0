@@ -11,48 +11,6 @@
   }
 }
 
-.input-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-
-  padding-inline: 0.75rem;
-  padding-block: 0.5rem;
-
-  background: var(--bg-glass);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-
-  &:focus-within {
-    border-color: var(--border-focus);
-    box-shadow: var(--shadow-focus);
-  }
-
-  lucide-icon {
-    flex-shrink: 0;
-    color: var(--color-text-muted);
-  }
-
-  input {
-    flex: 1;
-    min-width: 0;
-    padding: 0;
-
-    background: transparent;
-    color: var(--color-text-main);
-    font-size: 0.875rem;
-
-    border: none;
-    outline: none;
-
-    &::placeholder {
-      color: var(--color-text-muted-light);
-    }
-  }
-}
-
 .result-item {
   display: flex;
   align-items: center;
@@ -70,6 +28,13 @@
 
   &.highlighted {
     background: var(--color-primary-soft);
+  }
+
+  &.result-item--add {
+    border-block-start: 1px dashed var(--border-default);
+    color: var(--color-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
   }
 }
 

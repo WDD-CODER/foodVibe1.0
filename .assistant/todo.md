@@ -249,6 +249,14 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Add small label above header carousel (getCarouselHeaderLabel_ or computed) for mobile
 - [x] Mobile SCSS: style small label like cell; header arrows opacity 0, on hover opacity 1; match cell arrow size/position
 
+### Plan 066 — Quick-add product modal (`plans/066-quick-add-product-modal.plan.md`)
+
+- [ ] Create QuickAddProductModalService (signal-based, Promise<Product|null>)
+- [ ] Create QuickAddProductModalComponent (compact + expandable, keyboard, OnPush, a11y)
+- [ ] Style modal SCSS (engine classes + cssLayer)
+- [ ] Update ingredient-search: dropdown condition, add-item row, keyboard fix, auto-select
+- [ ] Register modal in app.component; add dictionary keys
+
 ### Plan 065 — Carousel title and inventory carousel (`plans/065-carousel-title-and-inventory-carousel.plan.md`)
 
 - [ ] Recipe-book: remove small label; add one main title (getCarouselHeaderLabel_)
@@ -555,9 +563,10 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 060 | Data persistence and backup | Done |
 | 061 | Header carousel shift controls | Active |
 | 062 | Auth single source and sign-in/up | Done |
-| 062-1 | Fix FAB and cook-view guest access | Active |
+| 062-1 | Fix FAB and cook-view guest access | Done |
 | 063 | Recipe book carousel media query, behavior, design | Active |
 | 064 | Inventory list grid layout refactor | Active |
 | 065 | Carousel title and inventory carousel | Active |
+| 066 | Quick-add product modal | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*

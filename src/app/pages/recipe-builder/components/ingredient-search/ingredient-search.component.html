@@ -1,5 +1,5 @@
 <div class="search-container" dir="rtl" (clickOutside)="showResults_.set(false)">
-  <div class="input-wrapper">
+  <div class="c-input-wrapper">
     <lucide-icon name="search" size="18"></lucide-icon>
     <input 
       #searchInput
@@ -11,7 +11,7 @@
       placeholder="חפש מוצר או מתכון" />
   </div>
 
-  @if (showResults_() && filteredResults_().length > 0) {
+  @if (showResults_() && searchQuery_().trim().length > 0) {
     <app-scrollable-dropdown [maxHeight]="240">
       <ul role="listbox">
         @for (item of filteredResults_(); track item._id; let i = $index) {
@@ -29,6 +29,16 @@
             </span>
           </li>
         }
+        <li
+          role="option"
+          [attr.aria-selected]="highlightedIndex_() === filteredResults_().length"
+          [class.highlighted]="highlightedIndex_() === filteredResults_().length"
+          [class.result-item--add]="true"
+          class="result-item"
+          (click)="addNewProduct()">
+          <lucide-icon name="plus-circle" [size]="16"></lucide-icon>
+          <span>{{ 'add_as_new_product' | translatePipe }} "{{ searchQuery_() }}"</span>
+        </li>
       </ul>
     </app-scrollable-dropdown>
   }

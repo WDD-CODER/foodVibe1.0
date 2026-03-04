@@ -4,16 +4,19 @@ import { LucideAngularModule } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
+import { QuickAddProductModalService } from '@services/quick-add-product-modal.service';
 
 @Component({
   selector: 'app-ingredient-search',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, ClickOutSideDirective, ScrollableDropdownComponent],
+  imports: [CommonModule, LucideAngularModule, ClickOutSideDirective, ScrollableDropdownComponent, TranslatePipe],
   templateUrl: './ingredient-search.component.html',
   styleUrl: './ingredient-search.component.scss'
 })
 export class IngredientSearchComponent {
   private readonly state = inject(KitchenStateService);
+  private readonly quickAddModalService = inject(QuickAddProductModalService);
 
   /** Row index for focus trigger; when focusTrigger matches this row, we focus. */
   rowIndex = input<number>(0);
@@ -73,37 +76,48 @@ export class IngredientSearchComponent {
 
   protected onSearchKeydown(e: KeyboardEvent) {
     const results = this.filteredResults_();
-    if (results.length === 0) return;
-
+    const addItemIndex = results.length;
     const key = e.key;
+
+    if (key === 'Enter') {
+      const idx = this.highlightedIndex_();
+      if (idx === addItemIndex || (results.length === 0 && idx < 0)) {
+        e.preventDefault();
+        this.addNewProduct();
+        return;
+      }
+      if (results.length > 0) {
+        e.preventDefault();
+        this.selectItem(results[idx < 0 ? 0 : idx]);
+        return;
+      }
+      e.preventDefault();
+      this.addNewRowRequested.emit();
+      return;
+    }
+
     if (key === 'ArrowDown') {
       e.preventDefault();
-      this.highlightedIndex_.update(i => (i < 0 ? 0 : (i < results.length - 1 ? i + 1 : 0)));
+      this.highlightedIndex_.update(i => (i < 0 ? 0 : (i < addItemIndex ? i + 1 : 0)));
       this.scrollHighlightedIntoView();
       return;
     }
     if (key === 'ArrowUp') {
       e.preventDefault();
-      this.highlightedIndex_.update(i => (i <= 0 ? results.length - 1 : i - 1));
+      this.highlightedIndex_.update(i => (i <= 0 ? addItemIndex : i - 1));
       this.scrollHighlightedIntoView();
-      return;
-    }
-    if (key === 'Enter') {
-      let idx = this.highlightedIndex_();
-      if (results.length > 0) {
-        if (idx < 0) idx = 0;
-        e.preventDefault();
-        this.selectItem(results[idx]);
-      } else {
-        e.preventDefault();
-        this.addNewRowRequested.emit();
-      }
       return;
     }
     if (key === 'Escape') {
       this.showResults_.set(false);
       this.highlightedIndex_.set(-1);
     }
+  }
+
+  protected async addNewProduct(): Promise<void> {
+    const product = await this.quickAddModalService.open({ prefillName: this.searchQuery_() });
+    if (!product) return;
+    this.selectItem({ ...product, item_type_: 'product' });
   }
 
   private scrollHighlightedIntoView(): void {
