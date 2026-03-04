@@ -3,6 +3,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { LucideAngularModule } from 'lucide-angular';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
+import { UserService } from '@services/user.service';
 
 @Component({
   selector: 'app-hero-fab',
@@ -14,6 +15,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 })
 export class HeroFabComponent {
   private router = inject(Router);
+  protected readonly isLoggedIn = inject(UserService).isLoggedIn;
 
   readonly isExpanded_ = signal(false);
   /** True when on menu-intelligence so FAB can sit above the financial bar. */

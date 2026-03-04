@@ -4,7 +4,7 @@
       @if (user_()?.imgUrl) {
         <img [src]="user_()!.imgUrl" alt="" class="avatar-img" />
       } @else {
-        <span class="avatar-initials">{{ userInitial }}</span>
+        <span class="avatar-initials">{{ userInitial() }}</span>
       }
       <button type="button" class="auth-username-btn" (click)="logout()" [attr.aria-label]="'log_out' | translatePipe">
         {{ user_()!.name }}

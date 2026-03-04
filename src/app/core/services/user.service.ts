@@ -1,30 +1,30 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { User } from '../models/user.model';
-import { BehaviorSubject, filter, from, map, Observable, of, switchMap, take, tap, throwError } from 'rxjs';
+import { filter, from, map, of, switchMap, tap } from 'rxjs';
 import { Router } from '@angular/router';
-import { UtilService } from './util.service';
 import { UserMsgService } from './user-msg.service';
-import {  StorageService } from './async-storage.service';
+import { StorageService } from './async-storage.service';
 
 
-const SIGNED_USERS = 'signed-users-db'
+const SIGNED_USERS = 'signed-users-db';
+const SESSION_USER_KEY = 'loggedInUser';
+
 @Injectable({
   providedIn: 'root',
 })
-
 export class UserService {
 
-  utilService = inject(UtilService)
-  userMsgService = inject(UserMsgService)
-  storageService = inject(StorageService)
-  router = inject(Router)
+  private userMsgService = inject(UserMsgService);
+  private storageService = inject(StorageService);
+  private router = inject(Router);
 
-  
-  private _users_ = signal<User[] | null>(this.utilService.LoadFromStorage())
-  public users_ = this._users_.asReadonly()
+  private _users_ = signal<User[] | null>(this._loadUsersFromStorage());
+  public users_ = this._users_.asReadonly();
 
-  private _user_ = signal<User | null>(this.utilService.LoadUserFromSession())
-  public user_ = this._user_.asReadonly()
+  private _user_ = signal<User | null>(this._loadUserFromSession());
+  public user_ = this._user_.asReadonly();
+
+  public isLoggedIn = computed(() => this._user_() !== null);
 
   public signup(newUser: User) {
     return from(this.storageService.query<User>(SIGNED_USERS)).pipe(
@@ -74,8 +74,8 @@ export class UserService {
 }
 
 _saveUserLocal(user: User | null): void {
-  this._user_.set(user && { ...user })
-    this.utilService.saveUserToSession(user)
+  this._user_.set(user && { ...user });
+  this._saveUserToSession(user);
 }
 
 _clearSessionStorage() {
@@ -88,22 +88,26 @@ _clearSessionStorage() {
 _getLoggedInUser(): User {
   return this._user_()!
 }
-// _createMove(moveTo: Contact, amount: number): Move {
-//   return {
-//     toId: moveTo._id,
-//     to: moveTo.name,
-//     at: Date.now(),
-//     amount
-//   }
-// }
+private _loadUsersFromStorage(): User[] | null {
+  try {
+    const raw = localStorage.getItem(SIGNED_USERS);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
 
-// _createReceiveMove(moveFrom: User, amount: number): ReceiveMove {
-//   return {
-//     receivedFrom: moveFrom.name,
-//     at: Date.now(),
-//     amount
-//   }
-// }
+private _loadUserFromSession(): User | null {
+  try {
+    const raw = sessionStorage.getItem(SESSION_USER_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
 
+private _saveUserToSession(user: User | null): void {
+  if (user) {
+    sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(user));
+  } else {
+    sessionStorage.removeItem(SESSION_USER_KEY);
+  }
+}
 
 }
