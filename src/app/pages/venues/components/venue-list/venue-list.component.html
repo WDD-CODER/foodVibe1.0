@@ -1,69 +1,87 @@
-<div class="venue-list-container" dir="rtl">
-  <header class="list-header">
-    <div class="header-start">
-      <h2 class="page-title">{{ 'venue_list' | translatePipe }}</h2>
-    </div>
-    <div class="header-spacer"></div>
-    <div class="header-actions">
-      <button type="button" class="c-btn-primary" (click)="onAddPlace()">
-        <lucide-icon name="plus" [size]="18"></lucide-icon>
-        {{ 'add_venue' | translatePipe }}
-      </button>
-    </div>
-  </header>
+<app-list-shell
+  [isPanelOpen]="isPanelOpen_()"
+  (panelToggle)="togglePanel()"
+  [gridTemplate]="'2fr 1fr 0.8fr 80px'"
+  [mobileGridTemplate]="'2fr 1fr 80px'"
+  [dir]="'rtl'">
 
-  <div class="toolbar">
-    <div class="search-section">
-      <label class="visually-hidden" for="venue-search">{{ 'search' | translatePipe }}</label>
-      <div class="c-input-wrapper">
-        <lucide-icon name="search" [size]="18"></lucide-icon>
-        <input
-          id="venue-search"
-          type="text"
-          [ngModel]="searchQuery_()"
-          (ngModelChange)="searchQuery_.set($event)"
-          [placeholder]="'search' | translatePipe"
-        />
+  <h2 shell-title class="page-title">{{ 'venue_list' | translatePipe }}</h2>
+
+  <ng-container shell-search>
+    <label class="visually-hidden" for="venue-search">{{ 'search' | translatePipe }}</label>
+    <div class="c-input-wrapper">
+      <lucide-icon name="search" [size]="18"></lucide-icon>
+      <input
+        id="venue-search"
+        type="text"
+        [ngModel]="searchQuery_()"
+        (ngModelChange)="searchQuery_.set($event)"
+        [placeholder]="'search' | translatePipe"
+      />
+    </div>
+  </ng-container>
+
+  <button shell-actions type="button" class="c-btn-primary" (click)="onAddPlace()">
+    <lucide-icon name="plus" [size]="18"></lucide-icon>
+    {{ 'add_venue' | translatePipe }}
+  </button>
+
+  <ng-container shell-table-header>
+    <div class="col-name c-grid-header-cell" role="columnheader">{{ 'name' | translatePipe }}</div>
+    <app-carousel-header [activeIndex]="carouselHeaderIndex_()" (activeIndexChange)="onCarouselHeaderChange($event)">
+      <div class="col-env c-grid-header-cell" carouselHeaderColumn label="environment_type" role="presentation">{{ 'environment_type' | translatePipe }}</div>
+      <div class="col-infra c-grid-header-cell" carouselHeaderColumn label="infrastructure_items" role="presentation">{{ 'infrastructure_items' | translatePipe }}</div>
+    </app-carousel-header>
+    <div class="c-col-actions c-grid-header-cell" role="columnheader">{{ 'actions' | translatePipe }}</div>
+  </ng-container>
+
+  <ng-container shell-table-body>
+    @if (filteredVenues_().length === 0) {
+      <div class="no-results">{{ 'no_venues_match' | translatePipe }}</div>
+    }
+    @for (item of filteredVenues_(); track item._id) {
+      <div class="venue-grid-row" role="row">
+        <div class="col-name" role="cell">{{ item.name_hebrew }}</div>
+        <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
+          <div class="col-env" cellCarouselSlide [label]="'environment_type' | translatePipe">{{ item.environment_type_ | translatePipe }}</div>
+          <div class="col-infra" cellCarouselSlide [label]="'infrastructure_items' | translatePipe">{{ item.available_infrastructure_.length }}</div>
+        </app-cell-carousel>
+        <div class="c-col-actions" role="cell">
+          <button type="button" class="c-icon-btn" (click)="onEdit(item._id)" [attr.aria-label]="'edit' | translatePipe">
+            <lucide-icon name="pencil" [size]="18"></lucide-icon>
+          </button>
+          @if (deletingId_() === item._id) {
+            <app-loader size="small" [inline]="true" />
+          } @else {
+            <button type="button" class="c-icon-btn danger" (click)="onDelete(item)" [attr.aria-label]="'delete' | translatePipe">
+              <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </ng-container>
+
+  <ng-container shell-filters>
+    <div class="filter-section">
+      <div class="filter-section-header">
+        <h3>{{ 'filter' | translatePipe }}</h3>
+        @if (hasActiveFilters_()) {
+          <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">{{ 'clear_filters' | translatePipe }}</button>
+        }
+      </div>
+      <div class="filter-category">
+        <span class="filter-category-label">{{ 'environment_type' | translatePipe }}</span>
+        <div class="filter-options">
+          @for (env of envTypes; track env) {
+            <label class="filter-option">
+              <input type="checkbox" [checked]="selectedEnvTypes_().has(env)" (change)="toggleEnvType(env)" />
+              <span>{{ env | translatePipe }}</span>
+            </label>
+          }
+        </div>
       </div>
     </div>
-  </div>
+  </ng-container>
 
-  <div class="c-table-wrap">
-    <table class="venue-table c-data-table">
-      <thead>
-        <tr>
-          <th class="col-name">{{ 'name' | translatePipe }}</th>
-          <th class="col-env">{{ 'environment_type' | translatePipe }}</th>
-          <th class="col-infra">{{ 'infrastructure_items' | translatePipe }}</th>
-          <th class="col-actions">{{ 'actions' | translatePipe }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        @if (filteredVenues_().length === 0) {
-          <tr>
-            <td colspan="4" class="no-results">{{ 'no_venues_match' | translatePipe }}</td>
-          </tr>
-        }
-        @for (item of filteredVenues_(); track item._id) {
-          <tr>
-            <td class="col-name">{{ item.name_hebrew }}</td>
-            <td class="col-env">{{ item.environment_type_ | translatePipe }}</td>
-            <td class="col-infra">{{ item.available_infrastructure_.length }}</td>
-            <td class="col-actions">
-              <button type="button" class="c-icon-btn" (click)="onEdit(item._id)" [attr.aria-label]="'edit' | translatePipe">
-                <lucide-icon name="pencil" [size]="18"></lucide-icon>
-              </button>
-              @if (deletingId_() === item._id) {
-                <app-loader size="small" [inline]="true" />
-              } @else {
-                <button type="button" class="c-icon-btn danger" (click)="onDelete(item)" [attr.aria-label]="'delete' | translatePipe">
-                  <lucide-icon name="trash-2" [size]="18"></lucide-icon>
-                </button>
-              }
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-</div>
+</app-list-shell>
