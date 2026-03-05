@@ -45,6 +45,8 @@
         "search": "חיפוש",
         "search_preparation": "חפש הכנה",
         "search_by_name": "חיפוש לפי שם",
+        "search_product_or_recipe": "חפש מוצר או מתכון",
+        "recipe": "מתכון",
         "new_category": "קטגוריה חדשה",
         "add_new_category": "הוסף קטגוריה חדשה",
         "new_unit": "יחידה חדשה",
@@ -363,6 +365,8 @@
         "welcome_back": "ברוך שובך",
         "signup_success": "נרשמת בהצלחה",
         "choose_image": "בחר תמונה",
-        "profile_image": "תמונת פרופיל"
+        "profile_image": "תמונת פרופיל",
+        "password": "סיסמה",
+        "password_required": "נא להזין סיסמה"
     }
 }
