@@ -6,6 +6,9 @@ import { Equipment } from '../models/equipment.model'
 const ENTITY = 'EQUIPMENT_LIST'
 const TRASH_KEY = 'TRASH_EQUIPMENT'
 
+/** Thrown when add/update would create a duplicate equipment name. */
+export const ERR_DUPLICATE_EQUIPMENT_NAME = 'DUPLICATE_EQUIPMENT_NAME'
+
 @Injectable({ providedIn: 'root' })
 export class EquipmentDataService {
   private storage = inject(StorageService)
@@ -32,6 +35,10 @@ export class EquipmentDataService {
   }
 
   async addEquipment(newItem: Omit<Equipment, '_id'>): Promise<Equipment> {
+    const name = (newItem.name_hebrew ?? '').trim()
+    if (name && this.equipmentStore_().some(e => (e.name_hebrew ?? '').trim() === name)) {
+      throw new Error(ERR_DUPLICATE_EQUIPMENT_NAME)
+    }
     const now = new Date().toISOString()
     const withTimestamps = {
       ...newItem,
@@ -45,6 +52,10 @@ export class EquipmentDataService {
   }
 
   async updateEquipment(item: Equipment): Promise<Equipment> {
+    const name = (item.name_hebrew ?? '').trim()
+    if (name && this.equipmentStore_().some(e => e._id !== item._id && (e.name_hebrew ?? '').trim() === name)) {
+      throw new Error(ERR_DUPLICATE_EQUIPMENT_NAME)
+    }
     const updated = {
       ...item,
       updated_at_: new Date().toISOString(),

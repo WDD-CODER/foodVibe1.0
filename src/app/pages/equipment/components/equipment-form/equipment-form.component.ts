@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
-import { EquipmentDataService } from '@services/equipment-data.service';
+import { EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME } from '@services/equipment-data.service';
 import {
   Equipment,
   EquipmentCategory,
@@ -20,6 +20,8 @@ import {
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
+import { UserMsgService } from '@services/user-msg.service';
+import { TranslationService } from '@services/translation.service';
 
 const CATEGORIES: EquipmentCategory[] = [
   'heat_source',
@@ -44,6 +46,8 @@ export class EquipmentFormComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly equipmentData = inject(EquipmentDataService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly userMsg = inject(UserMsgService);
+  private readonly translation = inject(TranslationService);
 
   protected equipmentForm_!: FormGroup;
   protected isEditMode_ = signal(false);
@@ -142,6 +146,11 @@ export class EquipmentFormComponent implements OnInit {
       }
       const listPath = this.router.url.startsWith('/inventory/equipment') ? ['/inventory/equipment'] : ['/equipment/list'];
       this.router.navigate(listPath);
+    } catch (err) {
+      const msg = err instanceof Error && err.message === ERR_DUPLICATE_EQUIPMENT_NAME
+        ? (this.translation.translate('duplicate_equipment_name') ?? 'כלי עם שם זה כבר קיים')
+        : (this.translation.translate('save_failed') ?? 'שגיאה בשמירה');
+      this.userMsg.onSetErrorMsg(msg);
     } finally {
       this.isSaving_.set(false);
     }
