@@ -247,6 +247,23 @@ Update status after each sub-task. Link plan files here when applicable.
 
 ## Ahead (Pending)
 
+### Plan 081 — toFix Detailed Plans (`plans/081-tofix-detailed-plans.plan.md`)
+
+- [ ] Section 1 — Sign-in / Sign-up: auto-focus, dev user dropdown, Enter-to-submit, field-level errors
+- [ ] Section 2 — Quick-add default base unit: set signal to 'gram'
+- [ ] Section 3 — Recipe view: number formatting pipe, unit-before-scale, ingredient alignment
+- [ ] Section 4 — Recipe builder: persist container state, remove arrows, custom qty buttons, clickable headers, CDK drag-drop
+- [ ] Section 5 — Maison Plus (dish prep list): row style, qty buttons, category-first add flow, auto-focus
+- [ ] Section 6 — App-wide category/unit dropdowns: add 'add new' sentinel option to every dropdown
+- [ ] Section 7 — Logistics: chip fit-content width, keyboard navigation with highlighted index
+- [ ] Section 8 — Add-equipment modal: single-step category creation quick-save flow
+- [ ] Section 9 — Labels: selectable existing labels in delete UI and recipe builder
+
+### Plan 080 — Entity storage audit designated (`plans/080-entity-storage-audit-designated.plan.md`)
+
+- [x] Add MENU_SECTION_CATEGORIES storage; load/save in menu-intelligence; add to BACKUP_ENTITY_TYPES
+- [x] Add activity log key to BACKUP_ENTITY_TYPES; use constant in ActivityLogService
+
 ### Plan 079 — Unify logistics search, remove From library (`plans/079-unify-logistics-search-remove-from-library.plan.md`)
 
 - [x] Remove "From library" button and library-only dropdown (recipe-builder.page.html)
@@ -668,5 +685,7 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 077 | Excel export feature | Done |
 | 078 | Logistics designated storage | Active |
 | 079 | Unify logistics search, remove From library | Active |
+| 080 | Entity storage audit designated | Active |
+|| 081 | toFix Detailed Plans | Planned |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*

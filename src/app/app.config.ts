@@ -2,7 +2,7 @@ import { APP_INITIALIZER, ApplicationConfig, ErrorHandler, importProvidersFrom, 
 import { GlobalErrorHandler } from './core/services/global-error.handler'
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, ArrowUpDown, CalendarClock, ChevronDown, ChevronLeft, ChevronRight, Circle, CircleCheck, CircleX, CookingPot, Edit, FilePlus, Flame, FlaskConical, History, Image, LucideAngularModule, MapPin, Menu, Minus, Package, Pencil, Plus, PlusCircle, RotateCcw, Save, Scale, Search, ShieldAlert, Timer, Trash2, Truck, TrendingUp, Utensils, Tags, BookOpen, Copy, PanelRightClose, Filter, PanelLeftClose, Info, Printer, UtensilsCrossed, ChevronUp } from 'lucide-angular';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, ArrowUpDown, CalendarClock, ChevronDown, ChevronLeft, ChevronRight, Circle, CircleCheck, CircleX, CookingPot, Edit, FilePlus, Flame, FlaskConical, History, Image, LucideAngularModule, MapPin, Menu, Minus, Package, Pencil, Plus, PlusCircle, RotateCcw, Save, Scale, Search, ShieldAlert, Table2, Timer, Trash2, Truck, TrendingUp, Utensils, Tags, BookOpen, Copy, PanelRightClose, Filter, PanelLeftClose, Info, Printer, UtensilsCrossed, ChevronUp, Library } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { AlertCircle, AlertTriangle, Tag, X } from 'lucide-angular/src/icons';
 import { provideHttpClient, withInterceptors } from '@angular/common/http'
@@ -73,7 +73,9 @@ export const appConfig: ApplicationConfig = {
         ChevronUp,
         Circle,
         CircleCheck,
-        CircleX
+        CircleX,
+        Library,
+        Table2
       })
     )
   ]
