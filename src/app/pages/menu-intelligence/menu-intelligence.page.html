@@ -6,6 +6,14 @@
       {{ 'menu_library' | translatePipe }}
     </button>
     <div class="toolbar-actions">
+      <button type="button" class="toolbar-btn export" (click)="onExportMenuInfo()" [attr.aria-label]="'export_menu_info' | translatePipe">
+        <lucide-icon name="table-2" [size]="16"></lucide-icon>
+        {{ 'export_menu_info' | translatePipe }}
+      </button>
+      <button type="button" class="toolbar-btn export" (click)="onExportMenuShoppingList()" [attr.aria-label]="'export_menu_shopping_list' | translatePipe">
+        <lucide-icon name="shopping-cart" [size]="16"></lucide-icon>
+        {{ 'export_menu_shopping_list' | translatePipe }}
+      </button>
       <button type="button" class="toolbar-btn export" (click)="printMenu()">
         <lucide-icon name="printer" [size]="16"></lucide-icon>
         {{ 'menu_export_customer' | translatePipe }}

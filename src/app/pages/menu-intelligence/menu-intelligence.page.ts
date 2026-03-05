@@ -14,6 +14,7 @@ import { MenuEvent, MenuSection, ServingType, DEFAULT_DISH_FIELDS, ALL_DISH_FIEL
 import { Recipe } from '@models/recipe.model';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { RecipeCostService } from '@services/recipe-cost.service';
+import { ExportService } from '@services/export.service';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
@@ -53,10 +54,12 @@ export class MenuIntelligencePage implements AfterViewInit {
   private readonly addItemModal = inject(AddItemModalService);
   private readonly metadataRegistry = inject(MetadataRegistryService);
   private readonly recipeCostService = inject(RecipeCostService);
+  private readonly exportService = inject(ExportService);
 
   protected readonly editingId_ = signal<string | null>(null);
   protected readonly ALL_DISH_FIELDS = ALL_DISH_FIELDS;
   protected readonly recipes_ = this.kitchenState.recipes_;
+  protected readonly products_ = this.kitchenState.products_;
   protected readonly isSaving_ = signal(false);
   protected readonly showExport_ = signal(false);
 
@@ -717,5 +720,21 @@ export class MenuIntelligencePage implements AfterViewInit {
         primary_serving_style_: servingType,
       },
     };
+  }
+
+  /** Build current menu event for export (includes _id). */
+  private getCurrentMenuForExport(): MenuEvent {
+    const built = this.buildEventFromForm();
+    return { ...built, _id: this.editingId_() ?? '' };
+  }
+
+  protected onExportMenuInfo(): void {
+    const menu = this.getCurrentMenuForExport();
+    this.exportService.exportMenuInfo(menu, this.recipes_());
+  }
+
+  protected onExportMenuShoppingList(): void {
+    const menu = this.getCurrentMenuForExport();
+    this.exportService.exportMenuShoppingList(menu, this.recipes_(), this.products_());
   }
 }

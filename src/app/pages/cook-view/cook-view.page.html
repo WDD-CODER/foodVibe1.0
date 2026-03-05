@@ -32,10 +32,20 @@
                 {{ 'undo_changes' | translatePipe }}
               </button>
             </div>
-          } @else if (isLoggedIn()) {
-            <button type="button" class="edit-btn" (click)="enterEditMode()" [attr.aria-label]="'edit' | translatePipe">
-              <lucide-icon name="pencil" [size]="18"></lucide-icon>
-              {{ 'edit' | translatePipe }}
+          } @else {
+            @if (isLoggedIn()) {
+              <button type="button" class="edit-btn" (click)="enterEditMode()" [attr.aria-label]="'edit' | translatePipe">
+                <lucide-icon name="pencil" [size]="18"></lucide-icon>
+                {{ 'edit' | translatePipe }}
+              </button>
+            }
+            <button type="button" class="edit-btn export-info-btn" (click)="onExportInfo()" [attr.aria-label]="'export_recipe_info' | translatePipe">
+              <lucide-icon name="table-2" [size]="18"></lucide-icon>
+              {{ 'export_recipe_info' | translatePipe }}
+            </button>
+            <button type="button" class="edit-btn export-list-btn" (click)="onExportShoppingList()" [attr.aria-label]="'export_shopping_list' | translatePipe">
+              <lucide-icon name="shopping-cart" [size]="18"></lucide-icon>
+              {{ 'export_shopping_list' | translatePipe }}
             </button>
           }
         </div>

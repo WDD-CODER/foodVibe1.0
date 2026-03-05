@@ -39,6 +39,14 @@ export class RecipeCostService {
   private readonly unitRegistry_ = inject(UnitRegistryService);
 
   /**
+   * Cost for a single ingredient (used by export). Recursive for type 'recipe'.
+   */
+  getCostForIngredient(ing: Ingredient, depth = 0): number {
+    if (depth >= MAX_RECURSION_DEPTH) return 0;
+    return this.computeIngredientCost(ing, depth);
+  }
+
+  /**
    * Computes the total cost of a recipe from its ingredients (recursive, max depth 5).
    */
   computeRecipeCost(recipe: Recipe, depth = 0): number {

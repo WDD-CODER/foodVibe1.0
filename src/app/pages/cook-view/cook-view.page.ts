@@ -12,6 +12,7 @@ import { KitchenStateService } from '@services/kitchen-state.service';
 import { ConfirmModalService } from '@services/confirm-modal.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { UserService } from '@services/user.service';
+import { ExportService } from '@services/export.service';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
@@ -47,6 +48,7 @@ export class CookViewPage implements OnInit {
   private readonly kitchenState = inject(KitchenStateService);
   private readonly confirmModal = inject(ConfirmModalService);
   private readonly unitRegistry = inject(UnitRegistryService);
+  private readonly exportService = inject(ExportService);
   protected readonly isLoggedIn = inject(UserService).isLoggedIn;
 
   protected recipe_ = signal<Recipe | null>(null);
@@ -270,6 +272,18 @@ export class CookViewPage implements OnInit {
       this.editMode_.set(false);
       this.unitOverrides_.set({});
     }
+  }
+
+  protected onExportInfo(): void {
+    const recipe = this.recipe_();
+    const qty = this.targetQuantity_();
+    if (recipe) this.exportService.exportRecipeInfo(recipe, qty);
+  }
+
+  protected onExportShoppingList(): void {
+    const recipe = this.recipe_();
+    const qty = this.targetQuantity_();
+    if (recipe) this.exportService.exportShoppingList(recipe, qty);
   }
 
   /** For route guard: true when in edit mode with unsaved changes. */

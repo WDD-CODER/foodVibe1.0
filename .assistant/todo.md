@@ -247,6 +247,31 @@ Update status after each sub-task. Link plan files here when applicable.
 
 ## Ahead (Pending)
 
+### Plan 079 — Unify logistics search, remove From library (`plans/079-unify-logistics-search-remove-from-library.plan.md`)
+
+- [x] Remove "From library" button and library-only dropdown (recipe-builder.page.html)
+- [x] Use all equipment (not only tools) for search; single dropdown with library + equipment matches (recipe-builder.page.ts)
+- [x] Single select handler: library option → add baseline entry; equipment option → add baseline row (recipe-builder.page.ts)
+- [x] Keep "Save as template" on chips and "Add new tool" in dropdown
+
+### Plan 078 — Logistics designated storage (`plans/078-logistics-designated-storage.plan.md`)
+
+- [x] Add `LogisticsBaselineItem` type and storage wiring (logistics.model.ts, async-storage.service.ts)
+- [x] Create LogisticsBaselineDataService (query, getById, add, update, remove, allItems_ signal)
+- [x] Recipe builder: inject service; "Add from library" (dropdown + copy into form); "Save as template" per baseline row
+- [x] Add translation keys (from_library, save_as_template) and verify build
+
+### Plan 077 — Excel export feature (`plans/077-excel-export-feature.plan.md`)
+
+- [x] Install xlsx (SheetJS CE) via npm
+- [x] Create ExportService with all four export methods
+- [x] Add onExportInfo and onExportShoppingList to cook-view.page.ts
+- [x] Add Export Info and Shopping List buttons to cook-view.page.html
+- [x] Style export buttons (reuse .edit-btn / .toolbar-btn)
+- [x] Add onExportMenuInfo and onExportMenuShoppingList to menu-intelligence.page.ts
+- [x] Add two export buttons to menu-intelligence.page.html toolbar
+- [x] Add translation keys for all four export actions
+
 ### Plan 076 — Unified add-recipe skill and create-if-missing (`plans/076-unified-add-recipe-skill-create-if-missing.plan.md`)
 
 - [x] Unify image + text triggers and add "Text input" section in SKILL.md
@@ -640,5 +665,8 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 073 | Log file in project (dev) | Active |
 | 074 | Tech debt remediation | Active |
 | 076 | Unified add-recipe skill and create-if-missing | Done |
+| 077 | Excel export feature | Done |
+| 078 | Logistics designated storage | Active |
+| 079 | Unify logistics search, remove From library | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*

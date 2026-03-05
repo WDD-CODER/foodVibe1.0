@@ -39,7 +39,11 @@
         "recipe_print": "הדפסת מתכון",
         "recipe_email": "שליחת מתכון בדואר אלקטרוני",
         "recipe_sms": "שליחת מתכון בהודעת SMS",
-        "recipe_whatsapp": "שליחת מתכון בוואטסאפ"
+        "recipe_whatsapp": "שליחת מתכון בוואטסאפ",
+        "export_recipe_info": "ייצוא פרטי מתכון",
+        "export_shopping_list": "רשימת קניות",
+        "export_menu_info": "ייצוא תפריט",
+        "export_menu_shopping_list": "רשימת קניות תפריט"
     },
     "general": {
         "search": "חיפוש",
@@ -338,6 +342,12 @@
         "search_tool_placeholder": "חפש כלי...",
         "add_new_tool": "הוסף כלי חדש",
         "add": "הוסף",
+        "from_library": "מהספרייה",
+        "save_as_template": "שמור כתבנית",
+        "logistics_save_template_no_equipment": "נא לבחור ציוד לפני שמירה לספרייה",
+        "logistics_saved_as_template": "נשמר לספריית הלוגיסטיקה",
+        "save_failed": "השמירה נכשלה",
+        "logistics_library_empty": "אין פריטים בספרייה. שמור ציוד כתבנית מהמתכון.",
         "loader_loading": "טוען...",
         "loader_saving": "שומר...",
         "loader_please_wait": "רגע, מכינים הכל...",
