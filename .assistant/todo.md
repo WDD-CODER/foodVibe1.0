@@ -241,10 +241,19 @@ Update status after each sub-task. Link plan files here when applicable.
 ### Plan 075 — Cleanup demo products (`plans/075-cleanup-demo-products.plan.md`) — feat/cleanup-demo-products (not merged to main)
 
 - [x] Cleanup demo JSON (products, recipes, venues) and add plan; align app (list-shell, recipe-book, inventory, venue-list, equipment-list) and assistant todo.
+- [x] demo-products.json refactor (yield 1, min_stock/expiry 0, 2026 IL prices, allergens) — feat/demo-products-cleanup merged to main.
 
 ---
 
 ## Ahead (Pending)
+
+### Plan 076 — Unified add-recipe skill and create-if-missing (`plans/076-unified-add-recipe-skill-create-if-missing.plan.md`)
+
+- [x] Unify image + text triggers and add "Text input" section in SKILL.md
+- [x] Add gap-filling (ask for missing info) and single workflow in SKILL.md
+- [x] Add "Create-if-missing before writing" (products, then equipment) in SKILL.md
+- [x] Update SCHEMA.md with equipment schema and product-creation rules
+- [x] Update HOW-WE-WORK.md "Add recipe from image" to image or text + create-if-missing
 
 ### Plan 074 — Tech debt remediation (`plans/074-tech-debt-remediation.plan.md`)
 
@@ -630,5 +639,6 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 072 | Robust login, app-wide logging, security | Planned |
 | 073 | Log file in project (dev) | Active |
 | 074 | Tech debt remediation | Active |
+| 076 | Unified add-recipe skill and create-if-missing | Done |
 
-*Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*: `plans/recipe-builder-page.md` (recipe book plan).*
+*Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*

@@ -65,6 +65,11 @@ This file is the **entry point** for how agents (Cursor or other) should work on
 - **Path**: [.assistant/skills/elegant-fix/SKILL.md](.assistant/skills/elegant-fix/SKILL.md)
 - **When**: Refining a hacky solution into an elegant one after a fix that feels wrong.
 
+### Add recipe from image or text
+
+- **Path**: [.assistant/skills/add-recipe-from-image/SKILL.md](.assistant/skills/add-recipe-from-image/SKILL.md)
+- **When**: User adds a recipe from an image (e.g. app UI, screenshot) or from pasted/written text. The agent extracts data, asks for missing info (servings, type, station, prep time, logistics), shows a short bullet-point breakdown for confirmation, then creates any missing products in `demo-products.json` and equipment in `demo-equipment.json`, and adds one entry to `demo-recipes.json` or `demo-dishes.json` after the user confirms.
+
 ### GitHub sync
 
 - **Path**: [.assistant/skills/github-sync/SKILL.md](.assistant/skills/github-sync/SKILL.md)
