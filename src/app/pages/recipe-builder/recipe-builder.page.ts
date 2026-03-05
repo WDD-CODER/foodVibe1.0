@@ -14,12 +14,15 @@ import { VersionHistoryService } from '@services/version-history.service';
 import type { VersionEntityType } from '@services/version-history.service';
 import { Ingredient } from '@models/ingredient.model';
 import { Recipe, RecipeStep, MiseCategory, FlatPrepItem, PrepCategory } from '@models/recipe.model';
-import type { BaselineEntry, EquipmentPhase } from '@models/logistics.model';
-import { EquipmentDataService } from '@services/equipment-data.service';
+import type { BaselineEntry, EquipmentPhase, LogisticsBaselineItem } from '@models/logistics.model';
+import type { Equipment } from '@models/equipment.model';
+import { EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME } from '@services/equipment-data.service';
+import { LogisticsBaselineDataService } from '@services/logistics-baseline-data.service';
 import { AddEquipmentModalService } from '@services/add-equipment-modal.service';
 import { RecipeDataService } from '@services/recipe-data.service';
 import { RecipeFormService } from './services/recipe-form.service';
 import { DishDataService } from '@services/dish-data.service';
+import { TranslationService } from '@services/translation.service';
 import { RecipeHeaderComponent } from './components/recipe-header/recipe-header.component';
 import { RecipeIngredientsTableComponent } from './components/recipe-ingredients-table/recipe-ingredients-table.component';
 import { RecipeWorkflowComponent } from './components/recipe-workflow/recipe-workflow.component';
@@ -62,6 +65,8 @@ export class RecipeBuilderPage implements OnInit {
   private readonly recipeDataService_ = inject(RecipeDataService);
   private readonly dishDataService_ = inject(DishDataService);
   private readonly recipeFormService_ = inject(RecipeFormService);
+  private readonly logisticsBaselineData_ = inject(LogisticsBaselineDataService);
+  private readonly translation_ = inject(TranslationService);
 
   //SIGNALS
   protected isSaving_ = signal(false);
@@ -455,14 +460,12 @@ export class RecipeBuilderPage implements OnInit {
   protected logisticsToolSearchQuery_ = signal('');
   protected logisticsToolQuantity_ = signal(1);
   protected logisticsToolDropdownOpen_ = signal(false);
-  /** Selected equipment id from dropdown (user must click Add to add to list). */
+  /** Selected equipment id (from dropdown); user sets quantity then presses Add. */
   protected logisticsSelectedToolId_ = signal<string | null>(null);
+  /** When user selected a library item, we keep it so Add uses its phase/notes. */
+  private logisticsSelectedLibraryItem_ = signal<LogisticsBaselineItem | null>(null);
 
-  protected toolsOnly_ = computed(() =>
-    this.equipmentData_.allEquipment_().filter(eq => eq.category_ === 'tool')
-  );
-
-  /** Equipment IDs already in the logistics baseline (excluded from search options). */
+  /** Equipment IDs already in the logistics baseline (excluded from equipment search options). */
   private logisticsBaselineIds_ = toSignal(
     (this.logisticsBaselineArray.valueChanges as Observable<unknown>).pipe(
       startWith(this.logisticsBaselineArray.value),
@@ -473,20 +476,33 @@ export class RecipeBuilderPage implements OnInit {
     { initialValue: [] as string[] }
   );
 
-  protected filteredLogisticsTools_ = computed(() => {
-    const alreadyAdded = new Set(this.logisticsBaselineIds_() ?? []);
-    const available = this.toolsOnly_().filter((eq) => !alreadyAdded.has(eq._id));
+  /** Unified search options: library items (by equipment name) + all equipment (by name_hebrew). */
+  protected logisticsSearchOptions_ = computed((): ({ type: 'library'; item: LogisticsBaselineItem } | { type: 'equipment'; item: Equipment })[] => {
     const q = this.logisticsToolSearchQuery_().trim().toLowerCase();
-    if (!q) return available;
-    const filtered = available.filter((eq) => eq.name_hebrew.toLowerCase().includes(q));
-    return filtered.slice().sort((a, b) => {
-      const aName = a.name_hebrew.toLowerCase();
-      const bName = b.name_hebrew.toLowerCase();
-      const aStarts = aName.startsWith(q) ? 0 : 1;
-      const bStarts = bName.startsWith(q) ? 0 : 1;
-      if (aStarts !== bStarts) return aStarts - bStarts;
-      return aName.indexOf(q) - bName.indexOf(q);
-    });
+    if (!q) return [];
+    const alreadyAdded = new Set(this.logisticsBaselineIds_() ?? []);
+    const options: ({ type: 'library'; item: LogisticsBaselineItem } | { type: 'equipment'; item: Equipment })[] = [];
+    const allLibrary = this.logisticsBaselineData_.allItems_();
+    const allEquipment = this.equipmentData_.allEquipment_();
+    for (const item of allLibrary) {
+      const name = this.getEquipmentNameById(item.equipment_id_).toLowerCase();
+      if (name.includes(q)) {
+        options.push({ type: 'library', item });
+      }
+    }
+    const equipmentMatches = allEquipment
+      .filter((eq) => !alreadyAdded.has(eq._id) && eq.name_hebrew.toLowerCase().includes(q))
+      .slice()
+      .sort((a, b) => {
+        const aName = a.name_hebrew.toLowerCase();
+        const bName = b.name_hebrew.toLowerCase();
+        const aStarts = aName.startsWith(q) ? 0 : 1;
+        const bStarts = bName.startsWith(q) ? 0 : 1;
+        if (aStarts !== bStarts) return aStarts - bStarts;
+        return aName.indexOf(q) - bName.indexOf(q);
+      });
+    equipmentMatches.forEach((eq) => options.push({ type: 'equipment', item: eq }));
+    return options;
   });
 
   protected getEquipmentNameById(id: string): string {
@@ -494,27 +510,19 @@ export class RecipeBuilderPage implements OnInit {
     return eq?.name_hebrew ?? id;
   }
 
-  /** Add the currently selected tool and quantity to baseline. Called by Add button. */
-  protected addSelectedToolToBaseline(): void {
-    const id = this.logisticsSelectedToolId_();
-    if (!id) return;
-    const qty = this.logisticsToolQuantity_();
-    this.logisticsBaselineArray.push(this.recipeFormService_.createBaselineRow({
-      equipment_id_: id,
-      quantity_: qty,
-      phase_: 'both',
-      is_critical_: true
-    }));
-    this.logisticsSelectedToolId_.set(null);
-    this.logisticsToolSearchQuery_.set('');
-    this.logisticsToolDropdownOpen_.set(false);
-  }
-
-  /** Select a tool from dropdown (does not add to list until Add is clicked). */
-  protected selectLogisticsTool(equipmentId: string): void {
-    this.logisticsSelectedToolId_.set(equipmentId);
-    this.logisticsToolSearchQuery_.set(this.getEquipmentNameById(equipmentId));
-    this.logisticsToolQuantity_.set(1);
+  /** Select an option from dropdown (does not add yet; user sets quantity and presses Add). */
+  protected selectLogisticsOption(option: { type: 'library'; item: LogisticsBaselineItem } | { type: 'equipment'; item: Equipment }): void {
+    if (option.type === 'library') {
+      this.logisticsSelectedToolId_.set(option.item.equipment_id_);
+      this.logisticsToolQuantity_.set(option.item.quantity_);
+      this.logisticsSelectedLibraryItem_.set(option.item);
+      this.logisticsToolSearchQuery_.set(this.getEquipmentNameById(option.item.equipment_id_));
+    } else {
+      this.logisticsSelectedToolId_.set(option.item._id);
+      this.logisticsToolQuantity_.set(1);
+      this.logisticsSelectedLibraryItem_.set(null);
+      this.logisticsToolSearchQuery_.set(option.item.name_hebrew);
+    }
     this.logisticsToolDropdownOpen_.set(false);
   }
 
@@ -524,19 +532,39 @@ export class RecipeBuilderPage implements OnInit {
     const selectedId = this.logisticsSelectedToolId_();
     if (selectedId && this.getEquipmentNameById(selectedId) !== value) {
       this.logisticsSelectedToolId_.set(null);
+      this.logisticsSelectedLibraryItem_.set(null);
     }
   }
 
-  protected addToolToBaseline(equipmentId: string, quantity?: number): void {
-    const qty = quantity ?? this.logisticsToolQuantity_();
+  /** Add the currently selected item (with current quantity) to baseline. Called by Add button. */
+  protected addSelectedToolToBaseline(): void {
+    const id = this.logisticsSelectedToolId_();
+    if (!id) return;
+    const lib = this.logisticsSelectedLibraryItem_();
+    const qty = this.logisticsToolQuantity_();
     this.logisticsBaselineArray.push(this.recipeFormService_.createBaselineRow({
-      equipment_id_: equipmentId,
+      equipment_id_: id,
       quantity_: qty,
-      phase_: 'both',
-      is_critical_: true
+      phase_: lib ? lib.phase_ : 'both',
+      is_critical_: lib ? lib.is_critical_ : true,
+      notes_: lib?.notes_
     }));
+    this.logisticsSelectedToolId_.set(null);
+    this.logisticsSelectedLibraryItem_.set(null);
     this.logisticsToolSearchQuery_.set('');
+    this.logisticsToolQuantity_.set(1);
     this.logisticsToolDropdownOpen_.set(false);
+  }
+
+  /** Add button click: if something selected → add to baseline; if only search text → open add-new-equipment modal. */
+  protected onLogisticsAddClick(): void {
+    if (this.logisticsSelectedToolId_()) {
+      this.addSelectedToolToBaseline();
+      return;
+    }
+    if (this.logisticsToolSearchQuery_().trim()) {
+      this.openAddNewToolModal();
+    }
   }
 
   protected async openAddNewToolModal(): Promise<void> {
@@ -557,9 +585,12 @@ export class RecipeBuilderPage implements OnInit {
       this.logisticsSelectedToolId_.set(created._id);
       this.logisticsToolSearchQuery_.set(created.name_hebrew);
       this.logisticsToolQuantity_.set(1);
-      this.logisticsToolDropdownOpen_.set(false);
-    } catch {
-      this.userMsg_.onSetErrorMsg('שגיאה בהוספת הכלי');
+      this.logisticsSelectedLibraryItem_.set(null);
+    } catch (err) {
+      const msg = err instanceof Error && err.message === ERR_DUPLICATE_EQUIPMENT_NAME
+        ? (this.translation_.translate('duplicate_equipment_name') ?? 'כלי עם שם זה כבר קיים')
+        : 'שגיאה בהוספת הכלי';
+      this.userMsg_.onSetErrorMsg(msg);
     }
   }
 
@@ -611,6 +642,40 @@ export class RecipeBuilderPage implements OnInit {
 
   protected removeBaselineRow(index: number): void {
     this.logisticsBaselineArray.removeAt(index);
+  }
+
+  protected addFromLibrary(item: LogisticsBaselineItem): void {
+    this.logisticsBaselineArray.push(this.recipeFormService_.createBaselineRow({
+      equipment_id_: item.equipment_id_,
+      quantity_: item.quantity_,
+      phase_: item.phase_,
+      is_critical_: item.is_critical_,
+      notes_: item.notes_
+    }));
+    this.logisticsToolSearchQuery_.set('');
+    this.logisticsToolDropdownOpen_.set(false);
+  }
+
+  protected async saveBaselineRowAsTemplate(index: number): Promise<void> {
+    const ctrl = this.logisticsBaselineArray.at(index);
+    if (!ctrl) return;
+    const v = ctrl.value as { equipment_id_?: string; quantity_?: number; phase_?: string; is_critical_?: boolean; notes_?: string };
+    if (!v?.equipment_id_) {
+      this.userMsg_.onSetErrorMsg(this.translation_.translate('logistics_save_template_no_equipment') || 'Select equipment first');
+      return;
+    }
+    try {
+      await this.logisticsBaselineData_.add({
+        equipment_id_: v.equipment_id_,
+        quantity_: Number(v.quantity_) ?? 1,
+        phase_: (v.phase_ || 'both') as EquipmentPhase,
+        is_critical_: !!v.is_critical_,
+        notes_: v.notes_ || undefined
+      });
+      this.userMsg_.onSetSuccessMsg(this.translation_.translate('logistics_saved_as_template') || 'Saved to library');
+    } catch {
+      this.userMsg_.onSetErrorMsg(this.translation_.translate('save_failed') || 'Save failed');
+    }
   }
 
   addNewStep(): void {

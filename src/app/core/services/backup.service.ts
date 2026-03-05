@@ -10,6 +10,8 @@ import { DishDataService } from './dish-data.service';
 import { EquipmentDataService } from './equipment-data.service';
 import { VenueDataService } from './venue-data.service';
 import { MenuEventDataService } from './menu-event-data.service';
+import { MenuSectionCategoriesService } from './menu-section-categories.service';
+import { ActivityLogService } from './activity-log.service';
 import { UserMsgService } from './user-msg.service';
 
 export const BACKUP_FILE_VERSION = 1;
@@ -30,6 +32,8 @@ export class BackupService {
   private readonly equipmentData = inject(EquipmentDataService);
   private readonly venueData = inject(VenueDataService);
   private readonly menuEventData = inject(MenuEventDataService);
+  private readonly menuSectionCategories = inject(MenuSectionCategoriesService);
+  private readonly activityLog = inject(ActivityLogService);
   private readonly userMsg = inject(UserMsgService);
 
   /**
@@ -133,6 +137,8 @@ export class BackupService {
       this.equipmentData.reloadFromStorage(),
       this.venueData.reloadFromStorage(),
       this.menuEventData.reloadFromStorage(),
+      this.menuSectionCategories.reloadFromStorage(),
     ]);
+    this.activityLog.syncFromStorage();
   }
 }

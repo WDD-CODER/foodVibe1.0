@@ -10,6 +10,7 @@ import { MenuIntelligenceService } from '@services/menu-intelligence.service';
 import { UserMsgService } from '@services/user-msg.service';
 import { AddItemModalService } from '@services/add-item-modal.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
+import { MenuSectionCategoriesService } from '@services/menu-section-categories.service';
 import { MenuEvent, MenuSection, ServingType, DEFAULT_DISH_FIELDS, ALL_DISH_FIELDS, type DishFieldKey } from '@models/menu-event.model';
 import { Recipe } from '@models/recipe.model';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
@@ -30,11 +31,6 @@ type MenuItemForm = {
   serving_portions_pct?: number;
 };
 
-const DEFAULT_SECTION_CATEGORIES = [
-  'Amuse-Bouche', 'Appetizers', 'Soups', 'Salads',
-  'Main Course', 'Sides', 'Desserts', 'Beverages',
-];
-
 @Component({
   selector: 'app-menu-intelligence-page',
   standalone: true,
@@ -53,6 +49,7 @@ export class MenuIntelligencePage implements AfterViewInit {
   private readonly userMsg = inject(UserMsgService);
   private readonly addItemModal = inject(AddItemModalService);
   private readonly metadataRegistry = inject(MetadataRegistryService);
+  private readonly menuSectionCategories = inject(MenuSectionCategoriesService);
   private readonly recipeCostService = inject(RecipeCostService);
   private readonly exportService = inject(ExportService);
 
@@ -69,7 +66,7 @@ export class MenuIntelligencePage implements AfterViewInit {
   protected readonly sectionSearchQueries_ = signal<Record<number, string>>({});
   protected readonly sectionSearchOpen_ = signal<number | null>(null);
 
-  protected readonly sectionCategories_ = signal<string[]>([...DEFAULT_SECTION_CATEGORIES]);
+  protected readonly sectionCategories_ = this.menuSectionCategories.sectionCategories_;
 
   /** Track saved snapshot for dirty detection */
   private savedSnapshot_ = '';
@@ -559,12 +556,10 @@ export class MenuIntelligencePage implements AfterViewInit {
     this.closeSectionSearch();
   }
 
-  protected addNewSectionCategory(index: number): void {
+  protected async addNewSectionCategory(index: number): Promise<void> {
     const name = this.getSectionSearchQuery(index).trim();
     if (!name) return;
-    if (!this.sectionCategories_().includes(name)) {
-      this.sectionCategories_.update(cats => [...cats, name]);
-    }
+    await this.menuSectionCategories.addCategory(name);
     this.selectSectionCategory(index, name);
   }
 
@@ -577,9 +572,7 @@ export class MenuIntelligencePage implements AfterViewInit {
     });
     if (result?.trim()) {
       const name = result.trim();
-      if (!this.sectionCategories_().includes(name)) {
-        this.sectionCategories_.update(cats => [...cats, name]);
-      }
+      await this.menuSectionCategories.addCategory(name);
       this.selectSectionCategory(sectionIndex, name);
     }
   }

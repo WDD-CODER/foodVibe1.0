@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { ACTIVITY_STORAGE_KEY } from './activity-log.service';
 
 export type EntityId = {
   _id: string;
@@ -10,10 +11,11 @@ export const STORAGE_ERROR_MESSAGE = 'Storage failed: quota or access denied';
 /** Entity types that are mirrored to backup_<key> after every successful save. */
 export const BACKUP_ENTITY_TYPES = new Set<string>([
   'PRODUCT_LIST', 'RECIPE_LIST', 'DISH_LIST', 'KITCHEN_SUPPLIERS', 'EQUIPMENT_LIST',
+  'LOGISTICS_BASELINE_ITEMS',
   'VENUE_PROFILES', 'MENU_EVENT_LIST',
   'TRASH_RECIPES', 'TRASH_DISHES', 'TRASH_PRODUCTS', 'TRASH_EQUIPMENT', 'TRASH_VENUES', 'TRASH_MENU_EVENTS',
-  'VERSION_HISTORY', 'KITCHEN_UNITS', 'KITCHEN_PREPARATIONS',
-  'KITCHEN_CATEGORIES', 'KITCHEN_ALLERGENS', 'KITCHEN_LABELS', 'MENU_TYPES',
+  'VERSION_HISTORY', ACTIVITY_STORAGE_KEY, 'KITCHEN_UNITS', 'KITCHEN_PREPARATIONS',
+  'KITCHEN_CATEGORIES', 'KITCHEN_ALLERGENS', 'KITCHEN_LABELS', 'MENU_TYPES', 'MENU_SECTION_CATEGORIES',
   'signed-users-db'
 ]);
 
