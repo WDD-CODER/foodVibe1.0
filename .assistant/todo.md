@@ -242,11 +242,47 @@ Update status after each sub-task. Link plan files here when applicable.
 
 ## Ahead (Pending)
 
+### Plan 074 — Tech debt remediation (`plans/074-tech-debt-remediation.plan.md`)
+
+- [x] Migrate @Input/@Output to signals in recipe-ingredients-table and recipe-workflow
+- [x] Migrate @Input/@Output to signals in supplier-form and venue-form
+- [x] Migrate @Input/@Output to signals in cell-carousel and click-out-side
+- [x] Fix 'any' types in conversion.service and ingredient-search
+- [x] Extract RecipeFormService from recipe-builder.page.ts
+- [ ] Refactor menu-intelligence.page.scss into partials (deferred)
+- [x] Extract hardcoded Hebrew strings to dictionary (ingredient-search)
+
+### Plan 073 — Log file in project (`plans/073-log-file-in-project.plan.md`)
+
+- [x] Add Node log server script (scripts/log-server.js): POST /log, append to logs/app.log, CORS, GET /health
+- [x] Add logServerUrl to environment.ts (dev) and environment.prod.ts (empty); extend LoggingService to POST when set
+- [x] Add logs/ to .gitignore
+- [x] Add "Development logging" to docs and npm run log-server script
+
+### Plan 072 — Robust login, app-wide logging, security (`plans/072-robust-login-app-logging-security.plan.md`)
+
+- [ ] Create `.assistant/skills/auth-and-logging/SKILL.md`; update HOW-WE-WORK.md and copilot-instructions.md
+- [ ] Implement LoggingService; replace ad-hoc console.log in user.service and translation.service
+- [ ] Wire logging: auth (login/logout/signup/guard/401), HTTP interceptor, global ErrorHandler, critical CRUD in data services
+- [ ] Auth hardening: password in UI, credentials types, local hash-only storage, auth abstraction, guard/modal wiring
+- [ ] Backend-ready: environment files, API contract, HTTP provider, interceptor, token lifecycle
+- [ ] Add "Security & go-live" checklist to docs (HTTPS, headers, rate limiting, no secrets in repo, error exposure)
+
+### Plan 071 — Unified list design system (`plans/071-unified-list-design-system.plan.md`) — merged to main (feat/unified-list-design-system)
+
+- [x] Create `app-list-shell` shared component (TS, HTML, SCSS) with content projection slots and panel behavior
+- [x] Create `app-carousel-header` shared component for unified carousel column header navigation
+- [x] Migrate recipe-book-list to use list-shell + carousel-header (first/template migration)
+- [x] Migrate equipment-list to use list-shell + carousel-header
+- [x] Migrate supplier-list to use list-shell + carousel-header
+- [x] Migrate inventory-product-list: convert table to grid, remove inline editing, add carousel, use list-shell
+- [x] Migrate venue-list: convert table to grid, add carousel for Environment + Infrastructure, use list-shell
+
 ### Plan 070 — Recipe carousel header label sync (`plans/070-recipe-carousel-header-label-sync.plan.md`)
 
-- [ ] CellCarouselComponent: add activeIndexChange output; emit new index in next() and prev()
-- [ ] RecipeBookListComponent: add carouselHeaderIndex_ signal and getCarouselHeaderLabel_()
-- [ ] Recipe-book-list HTML: dynamic header label; [activeIndex] and (activeIndexChange) on app-cell-carousel
+- [x] CellCarouselComponent: add activeIndexChange output; emit new index in next() and prev()
+- [x] RecipeBookListComponent: add carouselHeaderIndex_ signal and getCarouselHeaderLabel_()
+- [x] Recipe-book-list HTML: dynamic header label; header arrows for whole column, cell-only arrows; matching bg
 
 ### Plan 069 — Unused and redundant code cleanup (`plans/069-unused-redundant-code-cleanup.plan.md`)
 
@@ -585,6 +621,10 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 065 | Carousel title and inventory carousel | Active |
 | 066 | Quick-add product modal | Active |
 | 069 | Unused and redundant code cleanup | Planned |
-| 070 | Recipe carousel header label sync | Active |
+| 070 | Recipe carousel header label sync | Done |
+| 071 | Unified list design system | Done |
+| 072 | Robust login, app-wide logging, security | Planned |
+| 073 | Log file in project (dev) | Active |
+| 074 | Tech debt remediation | Active |
 
-*Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
+*Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*: `plans/recipe-builder-page.md` (recipe book plan).*
