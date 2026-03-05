@@ -442,5 +442,37 @@
       {"category_name": "הקרמלה", "items": [{"item_name": "סוכר להקרמלה", "unit": "kg", "quantity": 0.05}]}
     ],
     "labels_": ["vegetarian", "gluten_free"]
+  },
+  {
+    "_id": "dish_011",
+    "name_hebrew": "אורן אסידו - טירת צבי",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_011_i1", "referenceId": "demo_101", "type": "product", "amount_": 1, "unit_": "unit", "note_": "או נקניקית בקר"},
+      {"_id": "dish_011_i2", "referenceId": "demo_102", "type": "product", "amount_": 0, "unit_": "unit"},
+      {"_id": "dish_011_i3", "referenceId": "demo_103", "type": "product", "amount_": 1, "unit_": "unit"},
+      {"_id": "dish_011_i4", "referenceId": "demo_104", "type": "product", "amount_": 1, "unit_": "unit"},
+      {"_id": "dish_011_i5", "referenceId": "demo_001", "type": "product", "amount_": 0.01, "unit_": "kg", "note_": "קצוץ"},
+      {"_id": "dish_011_i6", "referenceId": "demo_105", "type": "product", "amount_": 0.02, "unit_": "kg"},
+      {"_id": "dish_011_i7", "referenceId": "demo_106", "type": "product", "amount_": 0.015, "unit_": "kg"},
+      {"_id": "dish_011_i8", "referenceId": "demo_107", "type": "product", "amount_": 0.015, "unit_": "kg"},
+      {"_id": "dish_011_i9", "referenceId": "demo_084", "type": "product", "amount_": 0.015, "unit_": "kg"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "נקניקיות משופדות על יקיטורי.", "labor_time_minutes_": 2},
+      {"order_": 2, "instruction_": "רטבים בסקווירים.", "labor_time_minutes_": 0}
+    ],
+    "yield_amount_": 1,
+    "yield_unit_": "dish",
+    "default_station_": "stove",
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_001", "quantity_": 2, "phase_": "both", "is_critical_": true, "notes_": "מכונת נקניקיות"},
+        {"equipment_id_": "eq_004", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "שיפודי יקטורי"}
+      ],
+      "service_overrides_": []
+    },
+    "labels_": []
   }
 ]

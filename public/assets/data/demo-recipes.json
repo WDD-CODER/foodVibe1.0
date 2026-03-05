@@ -210,5 +210,58 @@
     "yield_unit_": "kg",
     "default_station_": "stove",
     "is_approved_": true
+  },
+  {
+    "_id": "prep_011",
+    "name_hebrew": "פשטידה ירוקה",
+    "recipe_type_": "preparation",
+    "ingredients_": [
+      {"_id": "prep_011_i1", "referenceId": "demo_036", "type": "product", "amount_": 20, "unit_": "unit"},
+      {"_id": "prep_011_i2", "referenceId": "demo_002", "type": "product", "amount_": 0.25, "unit_": "kg", "note_": "אספרגוס - להתאמה למוצר"},
+      {"_id": "prep_011_i3", "referenceId": "demo_019", "type": "product", "amount_": 0.25, "unit_": "kg", "note_": "תרד טורקי"},
+      {"_id": "prep_011_i4", "referenceId": "demo_010", "type": "product", "amount_": 0.25, "unit_": "kg", "note_": "בוק צוי - להתאמה למוצר"},
+      {"_id": "prep_011_i5", "referenceId": "demo_074", "type": "product", "amount_": 0.001, "unit_": "kg", "note_": "פלפל לבן"},
+      {"_id": "prep_011_i6", "referenceId": "demo_079", "type": "product", "amount_": 0.0002, "unit_": "kg"},
+      {"_id": "prep_011_i7", "referenceId": "demo_073", "type": "product", "amount_": 0.014, "unit_": "kg", "note_": "מלח דק"},
+      {"_id": "prep_011_i8", "referenceId": "prep_006", "type": "recipe", "amount_": 0.021, "unit_": "kg"},
+      {"_id": "prep_011_i9", "referenceId": "demo_001", "type": "product", "amount_": 0.25, "unit_": "kg", "note_": "בצל מקורמל"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "חולטים את האספרגוס ומצננים במי קרח ופורסים לפרוסות קטנות.", "labor_time_minutes_": 5},
+      {"order_": 2, "instruction_": "מטגנים את התרד על פלנצה עם שמן ושום. מסננים, סוחטים וקוצצים דק.", "labor_time_minutes_": 5},
+      {"order_": 3, "instruction_": "מאדים את הבוק צוי ארבע דקות. מצננים, פורסים לפרוסות קטנות וסוחטים מנוזלים.", "labor_time_minutes_": 4},
+      {"order_": 4, "instruction_": "מערבבים את כל הירוקים עם בצל מקורמל וביצים וכל התבלינים, טורפים היטב, מניחים בתבנית עם נייר אפייה ואופים כ-15 דקות ב-190 מעלות.", "labor_time_minutes_": 15}
+    ],
+    "yield_amount_": 1.8,
+    "yield_unit_": "kg",
+    "default_station_": "oven",
+    "is_approved_": true
+  },
+  {
+    "_id": "prep_012",
+    "name_hebrew": "רוטב פטריות יער שמן כמהין ושמנת",
+    "recipe_type_": "preparation",
+    "ingredients_": [
+      {"_id": "prep_012_i1", "referenceId": "demo_108", "type": "product", "amount_": 0.07, "unit_": "kg"},
+      {"_id": "prep_012_i2", "referenceId": "demo_109", "type": "product", "amount_": 0.03, "unit_": "liter"},
+      {"_id": "prep_012_i3", "referenceId": "demo_110", "type": "product", "amount_": 0.003, "unit_": "liter"},
+      {"_id": "prep_012_i4", "referenceId": "demo_111", "type": "product", "amount_": 0.0002, "unit_": "kg"},
+      {"_id": "prep_012_i5", "referenceId": "demo_112", "type": "product", "amount_": 0.002, "unit_": "kg"},
+      {"_id": "prep_012_i6", "referenceId": "demo_113", "type": "product", "amount_": 0.15, "unit_": "kg"},
+      {"_id": "prep_012_i7", "referenceId": "demo_034", "type": "product", "amount_": 0.02, "unit_": "kg"},
+      {"_id": "prep_012_i8", "referenceId": "demo_114", "type": "product", "amount_": 0.05, "unit_": "kg"},
+      {"_id": "prep_012_i9", "referenceId": "demo_004", "type": "product", "amount_": 0.003, "unit_": "kg", "note_": "פרוס"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "מטגנים בחמאה את השאלוט קצוץ עד לקבלת רכות ומוסיפים את השום והמלח.", "labor_time_minutes_": 0},
+      {"order_": 2, "instruction_": "מוסיפים את הפטריות כשהן חתוכות דק ומטגנים עד שהן מתרככות אך לא תופסות צבע.", "labor_time_minutes_": 0},
+      {"order_": 3, "instruction_": "מוסיפים את היין הלבן וכל שאר תבלינים ומאדים את האלכוהול.", "labor_time_minutes_": 0},
+      {"order_": 4, "instruction_": "מוסיפים את השמנת ומבשלים ברתיחה נמוכה עד שהשמנת מצטמצמת מעט.", "labor_time_minutes_": 0},
+      {"order_": 5, "instruction_": "מצננים היטב מאחסנים בקירור עד שימוש.", "labor_time_minutes_": 0}
+    ],
+    "yield_amount_": 0.328,
+    "yield_unit_": "kg",
+    "default_station_": "stove",
+    "is_approved_": true
   }
 ]

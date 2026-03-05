@@ -378,6 +378,8 @@
         "choose_image": "בחר תמונה",
         "profile_image": "תמונת פרופיל",
         "password": "סיסמה",
-        "password_required": "נא להזין סיסמה"
+        "password_required": "נא להזין סיסמה",
+        "dev_users": "משתמשים קיימים",
+        "name_required": "נא להזין שם משתמש"
     }
 }

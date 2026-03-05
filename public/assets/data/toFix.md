@@ -35,7 +35,6 @@ When the user is on the sign-in/sign-up screen:
 - The quantity control must use the custom button with plus and minus.
 - **Expandable containers:** allow the user to expand/collapse by clicking anywhere on the container, not only on the row with the arrow.
 - **Drag and drop:** add to the ingredient index and to the workflow containers. In the workflow, when the user reorders preparation steps, update the step numbers so the list shows 1, 2, 3, … (e.g. dragging step 3 to first makes it step 1; avoid showing step #3 then #2 then #1).
-
 ---
 
 ## Maison Plus
@@ -69,3 +68,12 @@ When the user is on the sign-in/sign-up screen:
 ## Labels
 
 - **Selectability of existing labels:** Labels that exist in the project (e.g. the system already shows “meat” exists when adding a new label) must be available for selection wherever labels are used. In particular: (1) In the delete-label container, allow the user to select from existing project labels. (2) In the recipe builder label container, ensure all existing project labels are available to select. Fix the inconsistency where an existing label is recognized (e.g. “ID already used”) but not offered or selectable in these UIs.
+
+
+////////////////////////3/5/26////////////////////////
+
+in the menu-bulder
+
+- the select options are not avilubel by deabord
+
+
