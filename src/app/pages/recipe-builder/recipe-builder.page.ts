@@ -18,6 +18,7 @@ import type { BaselineEntry, EquipmentPhase } from '@models/logistics.model';
 import { EquipmentDataService } from '@services/equipment-data.service';
 import { AddEquipmentModalService } from '@services/add-equipment-modal.service';
 import { RecipeDataService } from '@services/recipe-data.service';
+import { RecipeFormService } from './services/recipe-form.service';
 import { DishDataService } from '@services/dish-data.service';
 import { RecipeHeaderComponent } from './components/recipe-header/recipe-header.component';
 import { RecipeIngredientsTableComponent } from './components/recipe-ingredients-table/recipe-ingredients-table.component';
@@ -60,6 +61,7 @@ export class RecipeBuilderPage implements OnInit {
   private readonly metadataRegistry_ = inject(MetadataRegistryService);
   private readonly recipeDataService_ = inject(RecipeDataService);
   private readonly dishDataService_ = inject(DishDataService);
+  private readonly recipeFormService_ = inject(RecipeFormService);
 
   //SIGNALS
   protected isSaving_ = signal(false);
@@ -131,7 +133,7 @@ export class RecipeBuilderPage implements OnInit {
         baseline_: this.fb.array([])
       })
     },
-    { validators: this.recipeFormValidator_ }
+    { validators: (c) => this.recipeFormValidator_(c) }
   );
 
   protected portions_ = toSignal(
@@ -202,21 +204,17 @@ export class RecipeBuilderPage implements OnInit {
     this.workflowArray.clear();
     if (isDish) {
       if (this.cachedPrepItems_.length > 0) {
-        this.cachedPrepItems_.forEach(row => this.workflowArray.push(this.createPrepItemRow(row)));
+        this.cachedPrepItems_.forEach(row => this.workflowArray.push(this.recipeFormService_.createPrepItemRow(row)));
       } else {
-        this.workflowArray.push(this.createPrepItemRow());
+        this.workflowArray.push(this.recipeFormService_.createPrepItemRow());
       }
     } else {
       if (this.cachedSteps_.length > 0) {
         this.cachedSteps_.forEach((step, i) =>
-          this.workflowArray.push(this.fb.group({
-            order: [step.order ?? i + 1],
-            instruction: [step.instruction ?? '', Validators.required],
-            labor_time: [step.labor_time ?? 0]
-          }))
+      this.workflowArray.push(this.recipeFormService_.createStepGroup(step.order ?? i + 1))
         );
       } else {
-        this.workflowArray.push(this.createStepGroup(1));
+        this.workflowArray.push(this.recipeFormService_.createStepGroup(1));
       }
     }
   }
@@ -244,9 +242,8 @@ export class RecipeBuilderPage implements OnInit {
 
     this.ingredientsArray.clear();
     this.addNewIngredientRow();
-
     this.workflowArray.clear();
-    this.workflowArray.push(this.createStepGroup(1));
+    this.workflowArray.push(this.recipeFormService_.createStepGroup(1));
 
     this.logisticsBaselineArray.clear();
 
@@ -309,7 +306,7 @@ export class RecipeBuilderPage implements OnInit {
           this.yieldConversionsArray.clear();
           this.yieldConversionsArray.push(this.fb.group({ amount: [1], unit: ['dish'] }));
           this.workflowArray.clear();
-          this.workflowArray.push(this.createPrepItemRow());
+          this.workflowArray.push(this.recipeFormService_.createPrepItemRow());
         }
       }
     }
@@ -323,9 +320,9 @@ export class RecipeBuilderPage implements OnInit {
     if (this.workflowArray.length === 0) {
       const isDish = this.recipeForm_.get('recipe_type')?.value === 'dish';
       if (isDish) {
-        this.workflowArray.push(this.createPrepItemRow());
+        this.workflowArray.push(this.recipeFormService_.createPrepItemRow());
       } else {
-        this.workflowArray.push(this.createStepGroup(1));
+        this.workflowArray.push(this.recipeFormService_.createStepGroup(1));
       }
     }
     this.recipeForm_.get('name_hebrew')?.setAsyncValidators([(ctrl) => this.duplicateNameValidator_(ctrl)]);
@@ -384,7 +381,7 @@ export class RecipeBuilderPage implements OnInit {
         base_unit_: (item as { base_unit_?: string }).base_unit_ ?? ing.unit_,
         yield_percentage: 1
       } : null;
-      this.ingredientsArray.push(this.createIngredientGroup(itemForGroup as { _id: string; name_hebrew: string; item_type_: string; base_unit_: string; yield_percentage?: number } | null));
+      this.ingredientsArray.push(this.recipeFormService_.createIngredientGroup(itemForGroup as { _id: string; name_hebrew: string; item_type_: string; base_unit_: string; yield_percentage?: number } | null));
       const lastGroup = this.ingredientsArray.at(this.ingredientsArray.length - 1);
       lastGroup.patchValue({
         referenceId: ing.referenceId,
@@ -399,24 +396,25 @@ export class RecipeBuilderPage implements OnInit {
     if (isDish) {
       const prepRows = this.getPrepRowsFromRecipe(recipe);
       if (prepRows.length > 0) {
-        prepRows.forEach(row => this.workflowArray.push(this.createPrepItemRow(row)));
+        prepRows.forEach(row => this.workflowArray.push(this.recipeFormService_.createPrepItemRow(row)));
       } else {
-        this.workflowArray.push(this.createPrepItemRow());
+        this.workflowArray.push(this.recipeFormService_.createPrepItemRow());
       }
     } else {
       recipe.steps_.forEach((step, i) => {
-        this.workflowArray.push(this.fb.group({
-          order: [step.order_ ?? i + 1],
-          instruction: [step.instruction_, Validators.required],
-          labor_time: [step.labor_time_minutes_ ?? 0]
-        }));
+        const group = this.recipeFormService_.createStepGroup(step.order_ ?? i + 1);
+        group.patchValue({
+          instruction: step.instruction_,
+          labor_time: step.labor_time_minutes_ ?? 0
+        });
+        this.workflowArray.push(group);
       });
     }
 
     if (recipe.logistics_?.baseline_?.length) {
       this.logisticsBaselineArray.clear();
       recipe.logistics_.baseline_.forEach(entry =>
-        this.logisticsBaselineArray.push(this.createBaselineRow(entry))
+        this.logisticsBaselineArray.push(this.recipeFormService_.createBaselineRow(entry))
       );
     }
   }
@@ -501,7 +499,7 @@ export class RecipeBuilderPage implements OnInit {
     const id = this.logisticsSelectedToolId_();
     if (!id) return;
     const qty = this.logisticsToolQuantity_();
-    this.logisticsBaselineArray.push(this.createBaselineRow({
+    this.logisticsBaselineArray.push(this.recipeFormService_.createBaselineRow({
       equipment_id_: id,
       quantity_: qty,
       phase_: 'both',
@@ -531,7 +529,7 @@ export class RecipeBuilderPage implements OnInit {
 
   protected addToolToBaseline(equipmentId: string, quantity?: number): void {
     const qty = quantity ?? this.logisticsToolQuantity_();
-    this.logisticsBaselineArray.push(this.createBaselineRow({
+    this.logisticsBaselineArray.push(this.recipeFormService_.createBaselineRow({
       equipment_id_: equipmentId,
       quantity_: qty,
       phase_: 'both',
@@ -567,38 +565,6 @@ export class RecipeBuilderPage implements OnInit {
 
   //CREATE
 
-  private createStepGroup(order: number) {
-    return this.fb.group({
-      order: [order],
-      instruction: [''],
-      labor_time: [0]
-    });
-  }
-
-  private createIngredientGroup(item: any = null) {
-    const group = this.fb.group({
-      referenceId: [item?._id || null],
-      item_type: [item?.item_type_ || null], // product | recipe
-      name_hebrew: [item?.name_hebrew || ''],
-      amount_net: [item ? 1 : null, [Validators.min(0)]],
-      yield_percentage: [item?.yield_percentage || 1],
-      unit: [item?.base_unit_ || 'gram'],
-      total_cost: [{ value: 0, disabled: true }]
-    }, { validators: this.ingredientRowValidator });
-    return group;
-  }
-
-  /** Require amount > 0 when referenceId is set; empty rows are valid. */
-  private ingredientRowValidator(control: AbstractControl): ValidationErrors | null {
-    const refId = control.get('referenceId')?.value;
-    const amount = control.get('amount_net')?.value;
-    if (!refId) return null;
-    if (amount == null || amount === '') return { required: true };
-    const numAmt = typeof amount === 'number' ? amount : Number(amount);
-    if (isNaN(numAmt) || numAmt <= 0) return { min: true };
-    return null;
-  }
-
   /** Requires at least one ingredient with product/recipe selected and quantity > 0. */
   private recipeFormValidator_(control: AbstractControl): ValidationErrors | null {
     const ingredients = (control.get('ingredients')?.value || []) as { referenceId?: string; amount_net?: number | string }[];
@@ -609,34 +575,6 @@ export class RecipeBuilderPage implements OnInit {
       return amt != null && amt !== '' && !isNaN(num) && num > 0;
     });
     return hasValid ? null : { atLeastOneIngredient: true };
-  }
-
-  private createMiseCategory(name: string = '') {
-    return this.fb.group({
-      category_name: [name, Validators.required],
-      items: this.fb.array([]) // Array of MiseItemGroups
-    });
-  }
-
-  private createMiseItem(name: string = '', unit: string = 'unit') {
-    return this.fb.group({
-      item_name: [name, Validators.required],
-      unit: [unit, Validators.required]
-    });
-  }
-
-  private createMiseCategoryGroup(categoryName: string = '') {
-    return this.fb.group({
-      category_name: [categoryName, Validators.required],
-      items: this.fb.array([]) // This will hold 'MiseItem' groups
-    });
-  }
-
-  private createMiseItemGroup(itemName: string = '', unit: string = '') {
-    return this.fb.group({
-      item_name: [itemName, Validators.required],
-      unit: [unit, Validators.required] // Triggers Unit Creator if empty
-    });
   }
 
   private getPrepRowsFromRecipe(recipe: Recipe): { preparation_name: string; category_name: string; main_category_name: string; quantity: number; unit: string }[] {
@@ -667,34 +605,12 @@ export class RecipeBuilderPage implements OnInit {
     return [];
   }
 
-  private createBaselineRow(entry?: BaselineEntry) {
-    return this.fb.group({
-      equipment_id_: [entry?.equipment_id_ ?? '', Validators.required],
-      quantity_: [entry?.quantity_ ?? 1, [Validators.required, Validators.min(0)]],
-      phase_: [entry?.phase_ ?? 'both'],
-      is_critical_: [entry?.is_critical_ ?? true],
-      notes_: [entry?.notes_ ?? '']
-    });
-  }
-
   protected addBaselineRow(): void {
-    this.logisticsBaselineArray.push(this.createBaselineRow());
+    this.logisticsBaselineArray.push(this.recipeFormService_.createBaselineRow());
   }
 
   protected removeBaselineRow(index: number): void {
     this.logisticsBaselineArray.removeAt(index);
-  }
-
-  private createPrepItemRow(row?: { preparation_name?: string; category_name?: string; main_category_name?: string; quantity?: number; unit?: string }) {
-    const units = this.unitRegistry_.allUnitKeys_();
-    const defaultUnit = units[0] ?? 'unit';
-    return this.fb.group({
-      preparation_name: [row?.preparation_name ?? ''],
-      category_name: [row?.category_name ?? ''],
-      main_category_name: [row?.main_category_name ?? ''],
-      quantity: [row?.quantity ?? 1, [Validators.min(0)]],
-      unit: [row?.unit ?? defaultUnit, Validators.required]
-    });
   }
 
   addNewStep(): void {
@@ -703,8 +619,8 @@ export class RecipeBuilderPage implements OnInit {
 
     // Logic: Add a prep row if it's a Dish, or a Step if it's a Prep
     const newGroup = isDish
-      ? this.createPrepItemRow()
-      : this.createStepGroup(nextOrder);
+      ? this.recipeFormService_.createPrepItemRow()
+      : this.recipeFormService_.createStepGroup(nextOrder);
 
     this.workflowArray.push(newGroup);
     this.focusWorkflowRowAt_.set(this.workflowArray.length - 1);
@@ -713,7 +629,7 @@ export class RecipeBuilderPage implements OnInit {
   //UPDATE
 
   addNewIngredientRow(): void {
-    const newGroup = this.createIngredientGroup();
+    const newGroup = this.recipeFormService_.createIngredientGroup();
     this.ingredientsArray.push(newGroup);
     this.ingredientsArray.updateValueAndValidity();
     this.recipeForm_.get('ingredients')?.markAsDirty();
