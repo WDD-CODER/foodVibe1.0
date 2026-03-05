@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, viewChild, ElementRef, effect, isDevMode } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
@@ -17,6 +17,19 @@ export class AuthModalComponent {
   protected readonly modalService = inject(AuthModalService);
   private readonly userService = inject(UserService);
 
+  protected nameInput = viewChild<ElementRef>('nameInput');
+  protected passwordInput = viewChild<ElementRef>('passwordInput');
+  protected isDevMode = isDevMode;
+  protected users_ = this.userService.users_;
+
+  constructor() {
+    effect(() => {
+      if (this.modalService.isOpen()) {
+        setTimeout(() => this.nameInput()?.nativeElement.focus(), 0);
+      }
+    });
+  }
+
   protected name = ''
   protected email = ''
   protected password = ''
@@ -33,6 +46,15 @@ export class AuthModalComponent {
   protected switchMode(mode: 'sign-in' | 'sign-up'): void {
     this.modalService.mode.set(mode);
     this.errorKey.set(null);
+  }
+
+  protected onDevUserPick(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    if (select.value) {
+      this.name = select.value;
+      setTimeout(() => this.passwordInput()?.nativeElement.focus(), 0);
+      select.value = '';
+    }
   }
 
   protected onFileSelected(event: Event): void {
@@ -53,7 +75,10 @@ export class AuthModalComponent {
     if (this.isSubmitting()) return
 
     const trimmedName = this.name.trim()
-    if (!trimmedName) return
+    if (!trimmedName) {
+      this.errorKey.set('name_required');
+      return;
+    }
 
     this.errorKey.set(null)
     this.isSubmitting.set(true)

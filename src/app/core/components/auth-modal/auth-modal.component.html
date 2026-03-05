@@ -17,26 +17,46 @@
         </button>
       </div>
 
-      <form (ngSubmit)="onSubmit()" class="c-modal-body">
+      <form (ngSubmit)="onSubmit()" (keydown.enter)="onSubmit()" class="c-modal-body">
         <div class="auth-form-fields">
           <div class="c-input-stack">
-            <label for="auth-name">{{ 'username' | translatePipe }}</label>
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+              <label for="auth-name">{{ 'username' | translatePipe }}</label>
+              @if (isDevMode() && !isSignUp) {
+                <select class="c-grid-select" style="width: auto; padding: 2px 4px; font-size: 0.8rem;" (change)="onDevUserPick($event)">
+                  <option value="">-- {{ 'dev_users' | translatePipe }} --</option>
+                  @for (u of users_(); track u.name) {
+                    <option [value]="u.name">{{ u.name }}</option>
+                  }
+                </select>
+              }
+            </div>
             <input id="auth-name"
+                   #nameInput
                    type="text"
                    [(ngModel)]="name"
+                   (input)="errorKey.set(null)"
                    name="name"
                    autocomplete="username"
                    required />
+            @if (errorKey() === 'user_not_found' || errorKey() === 'name_required' || errorKey() === 'username_taken') {
+              <p class="auth-error" style="margin-top: 4px; font-size: 0.85rem; color: var(--color-danger);">{{ errorKey()! | translatePipe }}</p>
+            }
           </div>
 
           <div class="c-input-stack">
             <label for="auth-password">{{ 'password' | translatePipe }}</label>
             <input id="auth-password"
+                   #passwordInput
                    type="password"
                    [(ngModel)]="password"
+                   (input)="errorKey.set(null)"
                    name="password"
                    [autocomplete]="isSignUp ? 'new-password' : 'current-password'"
                    [required]="isSignUp" />
+            @if (errorKey() === 'password_required') {
+              <p class="auth-error" style="margin-top: 4px; font-size: 0.85rem; color: var(--color-danger);">{{ errorKey()! | translatePipe }}</p>
+            }
           </div>
 
           @if (isSignUp) {
@@ -72,9 +92,7 @@
             </div>
           }
 
-          @if (errorKey()) {
-            <p class="auth-error">{{ errorKey()! | translatePipe }}</p>
-          }
+          <!-- specific errors are now under inputs -->
         </div>
       </form>
 
