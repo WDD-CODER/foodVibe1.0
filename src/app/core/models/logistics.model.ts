@@ -17,6 +17,11 @@ export interface BaselineEntry {
   notes_?: string;
 }
 
+/** Stored logistics baseline item (reusable template) in LOGISTICS_BASELINE_ITEMS. */
+export interface LogisticsBaselineItem extends BaselineEntry {
+  _id: string;
+}
+
 export type ServiceStyleKey = 'plated' | 'takeaway' | 'buffet';
 
 export interface ServiceOverride {

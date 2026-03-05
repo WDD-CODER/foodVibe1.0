@@ -27,7 +27,8 @@ export interface ActivityEntry {
   changes?: ActivityChange[];
 }
 
-const ACTIVITY_STORAGE_KEY = 'activity_log';
+/** localStorage key for activity log; also used in backup/restore (BACKUP_ENTITY_TYPES). */
+export const ACTIVITY_STORAGE_KEY = 'activity_log';
 const MAX_ACTIVITY_ENTRIES = 100;
 
 @Injectable({
