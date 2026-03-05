@@ -4,9 +4,7 @@ import {
   ElementRef,
   inject,
   input,
-  Input,
-  Output,
-  EventEmitter,
+  model,
   ContentChildren,
   QueryList,
   signal,
@@ -39,13 +37,8 @@ export class CellCarouselSlideDirective {
 export class CellCarouselComponent implements AfterViewInit {
   @ContentChildren(CellCarouselSlideDirective) slides!: QueryList<CellCarouselSlideDirective>;
 
-  /** When set, parent controls the active slide (e.g. header carousel index). */
-  @Input() set activeIndex(value: number | undefined) {
-    this._activeIndex.set(value);
-  }
-  /** Emitted when the user changes the slide via prev/next so parent can sync (e.g. header label). */
-  @Output() activeIndexChange = new EventEmitter<number>();
-  private readonly _activeIndex = signal<number | undefined>(undefined);
+  /** Two-way: parent controls the active slide; component emits when user changes via prev/next. */
+  activeIndex = model<number>(0);
 
   protected readonly currentIndex = signal(0);
 
@@ -71,7 +64,7 @@ export class CellCarouselComponent implements AfterViewInit {
       this.updateActiveSlide();
     });
     effect(() => {
-      const external = this._activeIndex();
+      const external = this.activeIndex();
       if (external === undefined || external === null) return;
       const list = this.slides?.toArray() ?? [];
       if (list.length === 0) return;
@@ -84,7 +77,7 @@ export class CellCarouselComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.updateActiveSlide();
-    const external = this._activeIndex();
+    const external = this.activeIndex();
     if (external !== undefined && external !== null) {
       const list = this.slides?.toArray() ?? [];
       const max = Math.max(0, list.length - 1);
@@ -109,7 +102,7 @@ export class CellCarouselComponent implements AfterViewInit {
     if (list.length === 0) return;
     const idx = (this.currentIndex() + 1) % list.length;
     this.currentIndex.set(idx);
-    this.activeIndexChange.emit(this.currentIndex());
+    this.activeIndex.set(this.currentIndex());
   }
 
   protected prev(): void {
@@ -117,6 +110,6 @@ export class CellCarouselComponent implements AfterViewInit {
     if (list.length === 0) return;
     const idx = this.currentIndex() - 1;
     this.currentIndex.set(idx < 0 ? list.length - 1 : idx);
-    this.activeIndexChange.emit(this.currentIndex());
+    this.activeIndex.set(this.currentIndex());
   }
 }

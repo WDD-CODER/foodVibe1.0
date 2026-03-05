@@ -1,4 +1,4 @@
-import { Component, input, output, inject, ViewChildren, QueryList, Input } from '@angular/core';
+import { Component, input, output, inject, ViewChildren, QueryList, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormArray, FormGroup, FormBuilder } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -10,6 +10,8 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { FocusByRowDirective } from '@directives/focus-by-row.directive';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
+import type { Product } from '@models/product.model';
+import type { Recipe } from '@models/recipe.model';
 
 @Component({
   selector: 'app-recipe-ingredients-table',
@@ -27,18 +29,19 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
   templateUrl: './recipe-ingredients-table.component.html',
   styleUrl: './recipe-ingredients-table.component.scss'
 })
-export class RecipeIngredientsTableComponent {
+export class RecipeIngredientsTableComponent implements AfterViewInit {
   //INJECTIONS
   private readonly kitchenStateService = inject(KitchenStateService);
   private readonly recipeCostService = inject(RecipeCostService);
   private fb = inject(FormBuilder);
+  private readonly el = inject(ElementRef<HTMLElement>);
 
   @ViewChildren(FocusByRowDirective) private focusByRowRefs!: QueryList<FocusByRowDirective>;
 
   //INPUT OUTPUT
   ingredientsFormArray = input.required<FormArray>();
   portions = input<number>(1);
-  @Input() focusSearchAtRow: number | null = null;
+  focusSearchAtRow = input<number | null>(null);
   removeIngredient = output<number>();
   addIngredient = output<void>();
   focusSearchDone = output<void>();
@@ -230,7 +233,43 @@ export class RecipeIngredientsTableComponent {
     }
 
     const item = this.getItemMetadata(group);
-    const yieldValue = (item as any)?.yield_percentage || 1;
+    const yieldValue = (item as Product)?.yield_factor_ ?? 1;
     return net / yieldValue;
   }
+
+  // #region agent log
+  ngAfterViewInit(): void {
+    setTimeout(() => this.logIngredientsLayout(), 100);
+  }
+
+  private logIngredientsLayout(): void {
+    const host = this.el.nativeElement;
+    const container = host.querySelector('.ingredients-container') as HTMLElement | null;
+    const firstRow = host.querySelector('.ingredient-grid-row') as HTMLElement | null;
+    const firstQtyControls = host.querySelector('.quantity-controls') as HTMLElement | null;
+    const firstQtyBtn = host.querySelector('.qty-btn') as HTMLElement | null;
+    const getStyle = (el: HTMLElement | null, ...props: string[]) => {
+      if (!el) return null;
+      const s = getComputedStyle(el);
+      return props.reduce((acc, p) => ({ ...acc, [p]: s.getPropertyValue(p.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '')) }), {} as Record<string, string>);
+    };
+    const payload = {
+      sessionId: '632f09',
+      location: 'recipe-ingredients-table.component.ts:logIngredientsLayout',
+      message: 'ingredients layout computed',
+      data: {
+        containerWidth: container?.offsetWidth ?? null,
+        containerStyles: container ? { borderRadius: getComputedStyle(container).borderRadius, background: getComputedStyle(container).backgroundColor, border: getComputedStyle(container).border } : null,
+        rowStyles: firstRow ? { minHeight: getComputedStyle(firstRow).minHeight, gridTemplateColumns: getComputedStyle(firstRow).gridTemplateColumns } : null,
+        qtyControlsStyles: firstQtyControls ? { display: getComputedStyle(firstQtyControls).display, gap: getComputedStyle(firstQtyControls).gap, borderRadius: getComputedStyle(firstQtyControls).borderRadius, background: getComputedStyle(firstQtyControls).backgroundColor, border: getComputedStyle(firstQtyControls).border } : null,
+        qtyBtnStyles: firstQtyBtn ? { width: getComputedStyle(firstQtyBtn).width, height: getComputedStyle(firstQtyBtn).height, borderRadius: getComputedStyle(firstQtyBtn).borderRadius } : null,
+        hasRows: !!firstRow,
+        hasQtyControls: !!firstQtyControls,
+      },
+      timestamp: Date.now(),
+      hypothesisId: 'A,B,C,D,E',
+    };
+    fetch('http://127.0.0.1:7371/ingest/4b1f7a8a-853d-43fb-a4b0-16a30277ea08', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '632f09' }, body: JSON.stringify(payload) }).catch(() => {});
+  }
+  // #endregion
 }

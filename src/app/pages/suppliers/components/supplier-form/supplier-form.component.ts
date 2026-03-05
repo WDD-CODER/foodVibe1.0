@@ -2,11 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
-  EventEmitter,
   inject,
-  Input,
+  input,
   OnInit,
-  Output,
+  output,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -28,13 +27,11 @@ const DAY_KEYS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fr
   templateUrl: './supplier-form.component.html',
   styleUrl: './supplier-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  inputs: ['embeddedInDashboard'],
-  outputs: ['saved', 'cancel'],
 })
 export class SupplierFormComponent implements OnInit {
-  @Input() embeddedInDashboard = false;
-  @Output() saved = new EventEmitter<void>();
-  @Output() cancel = new EventEmitter<void>();
+  embeddedInDashboard = input<boolean>(false);
+  saved = output<void>();
+  cancel = output<void>();
 
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
@@ -109,7 +106,7 @@ export class SupplierFormComponent implements OnInit {
       this.supplierData
         .updateSupplier({ ...supplier, ...payload })
         .then(() => {
-          if (this.embeddedInDashboard) this.saved.emit();
+          if (this.embeddedInDashboard()) this.saved.emit();
           else this.router.navigate(['/suppliers/list']);
         })
         .catch((e) => console.error(e))
@@ -118,7 +115,7 @@ export class SupplierFormComponent implements OnInit {
       this.supplierData
         .addSupplier(payload)
         .then(() => {
-          if (this.embeddedInDashboard) this.saved.emit();
+          if (this.embeddedInDashboard()) this.saved.emit();
           else this.router.navigate(['/suppliers/list']);
         })
         .catch((e) => console.error(e))
@@ -127,7 +124,7 @@ export class SupplierFormComponent implements OnInit {
   }
 
   protected onCancel(): void {
-    if (this.embeddedInDashboard) {
+    if (this.embeddedInDashboard()) {
       this.cancel.emit();
     } else {
       this.router.navigate(['/suppliers/list']);

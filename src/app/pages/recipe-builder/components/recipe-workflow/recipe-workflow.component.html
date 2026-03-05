@@ -108,7 +108,7 @@
               @if (!group.get('preparation_name')?.value) {
                 <app-preparation-search
                   [selectedCategory]="group.get('category_name')?.value ?? ''"
-                  [focusTrigger]="focusRowAt_()"
+                  [focusTrigger]="focusRowAt()"
                   [rowIndex]="i"
                   (preparationSelected)="onPreparationSelected($event, group)"
                   (preparationAdded)="onPreparationSelected($event, group)"

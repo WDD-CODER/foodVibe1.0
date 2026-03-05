@@ -3,11 +3,10 @@ import {
   Component,
   computed,
   DestroyRef,
-  EventEmitter,
   inject,
-  Input,
+  input,
   OnInit,
-  Output,
+  output,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -40,13 +39,11 @@ const ENV_TYPES: EnvironmentType[] = [
   templateUrl: './venue-form.component.html',
   styleUrl: './venue-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  inputs: ['embeddedInDashboard'],
-  outputs: ['saved', 'cancel'],
 })
 export class VenueFormComponent implements OnInit {
-  @Input() embeddedInDashboard = false;
-  @Output() saved = new EventEmitter<void>();
-  @Output() cancel = new EventEmitter<void>();
+  embeddedInDashboard = input<boolean>(false);
+  saved = output<void>();
+  cancel = output<void>();
 
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
@@ -156,7 +153,7 @@ export class VenueFormComponent implements OnInit {
           created_at_: now,
         });
       }
-      if (this.embeddedInDashboard) {
+      if (this.embeddedInDashboard()) {
         this.saved.emit();
       } else {
         this.router.navigate(['/venues/list']);
@@ -167,7 +164,7 @@ export class VenueFormComponent implements OnInit {
   }
 
   onCancel(): void {
-    if (this.embeddedInDashboard) {
+    if (this.embeddedInDashboard()) {
       this.cancel.emit();
     } else {
       this.router.navigate(['/venues/list']);

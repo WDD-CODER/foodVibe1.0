@@ -1,4 +1,4 @@
-import { Component, input, output, inject, signal, computed, effect, ViewChildren, QueryList, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core'
+import { Component, input, output, inject, signal, computed, effect, ViewChildren, QueryList, ElementRef } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { ReactiveFormsModule, FormArray, FormGroup, FormBuilder } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
@@ -28,7 +28,7 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
   templateUrl: './recipe-workflow.component.html',
   styleUrl: './recipe-workflow.component.scss'
 })
-export class RecipeWorkflowComponent implements OnChanges {
+export class RecipeWorkflowComponent {
   private fb = inject(FormBuilder)
   private readonly unitRegistry_ = inject(UnitRegistryService)
   private readonly prepRegistry_ = inject(PreparationRegistryService)
@@ -39,14 +39,7 @@ export class RecipeWorkflowComponent implements OnChanges {
   resetTrigger = input<number>(0)
 
   /** When set, focus the instruction textarea (prep) or prep search (dish) at this row index; parent clears after focus. */
-  @Input() focusRowAt: number | null = null
-  protected focusRowAt_ = signal<number | null>(null)
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['focusRowAt']) {
-      this.focusRowAt_.set(this.focusRowAt ?? null)
-    }
-  }
+  focusRowAt = input<number | null>(null)
 
   addItem = output<void>()
   removeItem = output<number>()
@@ -60,7 +53,7 @@ export class RecipeWorkflowComponent implements OnChanges {
 
   constructor() {
     effect(() => {
-      const idx = this.focusRowAt_()
+      const idx = this.focusRowAt()
       if (idx === null || idx === undefined) return
       if (this.type() !== 'preparation') return
       setTimeout(() => {

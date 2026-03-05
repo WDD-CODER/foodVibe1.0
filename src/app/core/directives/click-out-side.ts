@@ -1,4 +1,4 @@
-import { Directive, ElementRef, Output, EventEmitter, HostListener, inject } from '@angular/core';
+import { Directive, ElementRef, output, HostListener, inject } from '@angular/core';
 
 @Directive({
   selector: '[clickOutside]',
@@ -7,7 +7,7 @@ import { Directive, ElementRef, Output, EventEmitter, HostListener, inject } fro
 export class ClickOutSideDirective {
   private elementRef = inject(ElementRef);
 
-  @Output() clickOutside = new EventEmitter<HTMLElement>();
+  clickOutside = output<HTMLElement>();
 
   @HostListener('document:click', ['$event.target'])
   public onClick(target: EventTarget | null): void {
