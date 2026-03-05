@@ -92,18 +92,22 @@
                   [value]="logisticsToolQuantity_()"
                   (input)="logisticsToolQuantity_.set($any($event.target).valueAsNumber || 1)" />
                 <button type="button" class="logistics-add-btn"
-                  [disabled]="!logisticsSelectedToolId_()"
-                  (click)="addSelectedToolToBaseline()">
+                  [disabled]="!logisticsSelectedToolId_() && !logisticsToolSearchQuery_().trim()"
+                  (click)="onLogisticsAddClick()">
                   {{ 'add' | translatePipe }}
                 </button>
               </div>
               @if (logisticsToolDropdownOpen_()) {
                 <app-scrollable-dropdown [maxHeight]="220" class="logistics-tool-dropdown">
                   <ul role="listbox">
-                    @for (eq of filteredLogisticsTools_(); track eq._id) {
+                    @for (opt of logisticsSearchOptions_(); track opt.type + '-' + opt.item._id) {
                       <li role="option" class="logistics-tool-option"
-                        (click)="selectLogisticsTool(eq._id)">
-                        {{ eq.name_hebrew }}
+                        (click)="selectLogisticsOption(opt)">
+                        @if (opt.type === 'library') {
+                          {{ getEquipmentNameById(opt.item.equipment_id_) }} ×{{ opt.item.quantity_ }}
+                        } @else {
+                          {{ opt.item.name_hebrew }}
+                        }
                       </li>
                     }
                     <li role="option" class="logistics-tool-option logistics-tool-add-new"
@@ -120,11 +124,19 @@
                 @for (ctrl of logisticsBaselineArray.controls; track $index; let i = $index) {
                   @let eqId = ctrl.get('equipment_id_')?.value;
                   @let qty = ctrl.get('quantity_')?.value;
-                  <button type="button" class="logistics-chip"
-                    (click)="removeBaselineRow(i)" [attr.aria-label]="'remove' | translatePipe">
-                    <span class="logistics-chip-label">{{ getEquipmentNameById(eqId) }}</span>
-                    <span class="logistics-chip-qty">×{{ qty }}</span>
-                  </button>
+                  <div class="logistics-chip-wrap">
+                    <button type="button" class="logistics-chip"
+                      (click)="removeBaselineRow(i)" [attr.aria-label]="'remove' | translatePipe">
+                      <span class="logistics-chip-label">{{ getEquipmentNameById(eqId) }}</span>
+                      <span class="logistics-chip-qty">×{{ qty }}</span>
+                    </button>
+                    <button type="button" class="logistics-chip-save-template"
+                      (click)="saveBaselineRowAsTemplate(i); $event.stopPropagation()"
+                      [attr.aria-label]="'save_as_template' | translatePipe"
+                      [attr.title]="'save_as_template' | translatePipe">
+                      <lucide-icon name="library" [size]="14"></lucide-icon>
+                    </button>
+                  </div>
                 }
               </div>
             </div>
