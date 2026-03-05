@@ -45,6 +45,11 @@ This file is the **entry point** for how agents (Cursor or other) should work on
 - **Path**: [.assistant/skills/util-standards/SKILL.md](.assistant/skills/util-standards/SKILL.md)
 - **When**: Adding or changing shared utility functions; purity and consistency rules for foodVibe 1.0.
 
+### Auth, logging & security
+
+- **Path**: [.assistant/skills/auth-and-logging/SKILL.md](.assistant/skills/auth-and-logging/SKILL.md)
+- **When**: Any feature touching routes, user data, auth, persistence, HTTP, or critical operations; or adding/refactoring services. Use **LoggingService** for auth, HTTP, CRUD, and errors; follow security rules (no secrets/PII in logs, validate input). When unsure whether to log, ask the user.
+
 ### Tech debt
 
 - **Path**: [.assistant/skills/techdebt/SKILL.md](.assistant/skills/techdebt/SKILL.md)

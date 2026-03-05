@@ -1,13 +1,15 @@
-import { Injectable, signal, inject } from '@angular/core';
-import { StorageService } from './async-storage.service';
-import { Recipe } from '../models/recipe.model';
+import { Injectable, signal, inject } from '@angular/core'
+import { StorageService } from './async-storage.service'
+import { LoggingService } from './logging.service'
+import { Recipe } from '../models/recipe.model'
 
-const ENTITY = 'RECIPE_LIST';
-const TRASH_KEY = 'TRASH_RECIPES';
+const ENTITY = 'RECIPE_LIST'
+const TRASH_KEY = 'TRASH_RECIPES'
 
 @Injectable({ providedIn: 'root' })
 export class RecipeDataService {
-  private storage = inject(StorageService);
+  private storage = inject(StorageService)
+  private logging = inject(LoggingService)
 
   private recipesStore_ = signal<Recipe[]>([]);
   readonly allRecipes_ = this.recipesStore_.asReadonly();
@@ -31,25 +33,28 @@ export class RecipeDataService {
   }
 
   async addRecipe(newRecipe: Omit<Recipe, '_id'>): Promise<Recipe> {
-    const saved = await this.storage.post<Recipe>(ENTITY, newRecipe as Recipe);
-    this.recipesStore_.update(recipes => [...recipes, saved]);
-    return saved;
+    const saved = await this.storage.post<Recipe>(ENTITY, newRecipe as Recipe)
+    this.recipesStore_.update(recipes => [...recipes, saved])
+    this.logging.info({ event: 'crud.recipe.create', message: 'Recipe created', context: { entityType: ENTITY, id: saved._id } })
+    return saved
   }
 
   async updateRecipe(recipe: Recipe): Promise<Recipe> {
-    const updated = await this.storage.put<Recipe>(ENTITY, recipe);
+    const updated = await this.storage.put<Recipe>(ENTITY, recipe)
     this.recipesStore_.update(recipes =>
       recipes.map(r => (r._id === updated._id ? updated : r))
-    );
-    return updated;
+    )
+    this.logging.info({ event: 'crud.recipe.update', message: 'Recipe updated', context: { entityType: ENTITY, id: updated._id } })
+    return updated
   }
 
   async deleteRecipe(_id: string): Promise<void> {
-    const recipe = await this.storage.get<Recipe>(ENTITY, _id);
-    const withDeleted = { ...recipe, deletedAt: Date.now() } as Recipe & { deletedAt: number };
-    await this.storage.appendExisting(TRASH_KEY, withDeleted);
-    await this.storage.remove(ENTITY, _id);
-    this.recipesStore_.update(recipes => recipes.filter(r => r._id !== _id));
+    const recipe = await this.storage.get<Recipe>(ENTITY, _id)
+    const withDeleted = { ...recipe, deletedAt: Date.now() } as Recipe & { deletedAt: number }
+    await this.storage.appendExisting(TRASH_KEY, withDeleted)
+    await this.storage.remove(ENTITY, _id)
+    this.recipesStore_.update(recipes => recipes.filter(r => r._id !== _id))
+    this.logging.info({ event: 'crud.recipe.delete', message: 'Recipe deleted', context: { entityType: ENTITY, id: _id } })
   }
 
   async getTrashRecipes(): Promise<(Recipe & { deletedAt: number })[]> {

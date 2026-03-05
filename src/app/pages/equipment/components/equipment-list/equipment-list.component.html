@@ -1,147 +1,127 @@
-<div class="equipment-list-container" dir="rtl">
-  <header class="list-header">
-    <div class="header-start">
-      @if (!isPanelOpen_()) {
-        <button type="button" class="open-panel-btn header-menu-btn" (click)="togglePanel()" [attr.aria-label]="'filter' | translatePipe">
-          <lucide-icon name="menu" [size]="24"></lucide-icon>
-        </button>
-      }
-      @if (isUnderInventory) {
-        <a routerLink="/inventory/list" class="back-link">
-          <lucide-icon name="chevron-right" [size]="20"></lucide-icon>
-          {{ 'product_list' | translatePipe }}
-        </a>
-      }
-      <h2 class="page-title">{{ isUnderInventory ? ('logistics' | translatePipe) : ('equipment_list' | translatePipe) }}</h2>
+<app-list-shell
+  [isPanelOpen]="isPanelOpen_()"
+  (panelToggle)="togglePanel()"
+  [gridTemplate]="'2fr 1fr minmax(48px, 0.8fr) 0.8fr 80px'"
+  [mobileGridTemplate]="'2fr 1fr 80px'">
+
+  <ng-container shell-title>
+    @if (isUnderInventory) {
+      <a routerLink="/inventory/list" class="back-link">
+        <lucide-icon name="chevron-right" [size]="20"></lucide-icon>
+        {{ 'product_list' | translatePipe }}
+      </a>
+    }
+    <h2 class="page-title">{{ isUnderInventory ? ('logistics' | translatePipe) : ('equipment_list' | translatePipe) }}</h2>
+  </ng-container>
+
+  <ng-container shell-search>
+    <label class="visually-hidden" for="equipment-search">{{ 'search' | translatePipe }}</label>
+    <div class="c-input-wrapper">
+      <lucide-icon name="search" [size]="18"></lucide-icon>
+      <input
+        id="equipment-search"
+        type="text"
+        [ngModel]="searchQuery_()"
+        (ngModelChange)="searchQuery_.set($event)"
+        [placeholder]="'search' | translatePipe"
+      />
     </div>
-    <div class="header-spacer"></div>
-    <div class="header-search">
-      <label class="visually-hidden" for="equipment-search">{{ 'search' | translatePipe }}</label>
-      <div class="c-input-wrapper">
-        <lucide-icon name="search" [size]="18"></lucide-icon>
-        <input
-          id="equipment-search"
-          type="text"
-          [ngModel]="searchQuery_()"
-          (ngModelChange)="searchQuery_.set($event)"
-          [placeholder]="'search' | translatePipe"
-        />
+  </ng-container>
+
+  @if (isLoggedIn()) {
+    <button shell-actions type="button" class="c-btn-primary" (click)="onAdd()">
+      <lucide-icon name="plus" [size]="18"></lucide-icon>
+      {{ 'add_equipment' | translatePipe }}
+    </button>
+  }
+
+  <ng-container shell-table-header>
+    <div class="col-name c-grid-header-cell c-sortable-header" (click)="setSort('name')" (keydown.enter)="setSort('name')" (keydown.space)="$event.preventDefault(); setSort('name')" role="columnheader" tabindex="0">
+      {{ 'name' | translatePipe }}
+    </div>
+    <app-carousel-header [activeIndex]="carouselHeaderIndex_()" (activeIndexChange)="onCarouselHeaderChange($event)">
+      <div class="col-category c-grid-header-cell c-sortable-header" carouselHeaderColumn label="category" (click)="setSort('category')" (keydown.enter)="setSort('category')" (keydown.space)="$event.preventDefault(); setSort('category')" role="button" tabindex="0">
+        {{ 'category' | translatePipe }}
       </div>
-    </div>
-    <div class="header-spacer"></div>
-    @if (isLoggedIn()) {
-      <div class="header-actions">
-        <button type="button" class="c-btn-primary" (click)="onAdd()">
-          <lucide-icon name="plus" [size]="18"></lucide-icon>
-          {{ 'add_equipment' | translatePipe }}
-        </button>
+      <div class="col-owned c-grid-header-cell c-sortable-header" carouselHeaderColumn label="owned_quantity" (click)="setSort('owned')" (keydown.enter)="setSort('owned')" (keydown.space)="$event.preventDefault(); setSort('owned')" role="button" tabindex="0">
+        {{ 'owned_quantity' | translatePipe }}
+      </div>
+      <div class="col-consumable c-grid-header-cell" carouselHeaderColumn label="is_consumable" role="presentation">
+        {{ 'is_consumable' | translatePipe }}
+      </div>
+    </app-carousel-header>
+    <div class="c-col-actions c-grid-header-cell" role="columnheader">{{ 'actions' | translatePipe }}</div>
+  </ng-container>
+
+  <ng-container shell-table-body>
+    @if (filteredEquipment_().length === 0) {
+      <div class="no-results">
+        {{ 'no_equipment_match' | translatePipe }}
       </div>
     }
-  </header>
-
-  <section class="table-area" role="table">
-    <div class="table-header" role="row">
-      <div class="col-name c-sortable-header" (click)="setSort('name')" (keydown.enter)="setSort('name')" (keydown.space)="$event.preventDefault(); setSort('name')" role="columnheader" tabindex="0">
-        {{ 'name' | translatePipe }}
-      </div>
-      <div class="carousel-header-wrap" role="columnheader">
-        <div class="carousel-header-slide-strip" [style.transform]="'translateX(' + (carouselHeaderIndex_() * 100 / 3) + '%)'">
-          <div class="col-category c-sortable-header carousel-header-cell" (click)="setSort('category')" (keydown.enter)="setSort('category')" (keydown.space)="$event.preventDefault(); setSort('category')" role="button" tabindex="0">
-            {{ 'category' | translatePipe }}
-          </div>
-          <div class="col-owned c-sortable-header carousel-header-cell" (click)="setSort('owned')" (keydown.enter)="setSort('owned')" (keydown.space)="$event.preventDefault(); setSort('owned')" role="button" tabindex="0">
-            {{ 'owned_quantity' | translatePipe }}
-          </div>
-          <div class="col-consumable carousel-header-cell" role="presentation">
-            {{ 'is_consumable' | translatePipe }}
-          </div>
-        </div>
-        <button type="button" class="carousel-header-arrow carousel-header-prev" (click)="carouselHeaderPrev(); $event.stopPropagation()" (keydown.enter)="carouselHeaderPrev(); $event.preventDefault()" (keydown.space)="$event.preventDefault(); carouselHeaderPrev()" [attr.aria-label]="'previous_column' | translatePipe">
-          <lucide-icon name="chevron-right" [size]="14"></lucide-icon>
-        </button>
-        <button type="button" class="carousel-header-arrow carousel-header-next" (click)="carouselHeaderNext(); $event.stopPropagation()" (keydown.enter)="carouselHeaderNext(); $event.preventDefault()" (keydown.space)="$event.preventDefault(); carouselHeaderNext()" [attr.aria-label]="'next_column' | translatePipe">
-          <lucide-icon name="chevron-left" [size]="14"></lucide-icon>
-        </button>
-      </div>
-      <div class="c-col-actions" role="columnheader">{{ 'actions' | translatePipe }}</div>
-    </div>
-
-    <div class="table-body">
-      @if (filteredEquipment_().length === 0) {
-        <div class="no-results">
-          {{ 'no_equipment_match' | translatePipe }}
-        </div>
-      }
-      @for (item of filteredEquipment_(); track item._id) {
-        <div class="equipment-grid-row" role="row">
-          <div class="col-name" role="cell">{{ item.name_hebrew }}</div>
-          <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
-            <div class="col-category" cellCarouselSlide [label]="'category' | translatePipe">{{ item.category_ | translatePipe }}</div>
-            <div class="col-owned" cellCarouselSlide [label]="'owned_quantity' | translatePipe">{{ item.owned_quantity_ }}</div>
-            <div class="col-consumable" cellCarouselSlide [label]="'is_consumable' | translatePipe">{{ item.is_consumable_ ? ('approved_yes' | translatePipe) : ('approved_no' | translatePipe) }}</div>
-          </app-cell-carousel>
-          <div class="c-col-actions" role="cell">
-            @if (isLoggedIn()) {
-              <button type="button" class="c-icon-btn" (click)="onEdit(item._id)" [attr.aria-label]="'edit' | translatePipe">
-                <lucide-icon name="pencil" [size]="18"></lucide-icon>
+    @for (item of filteredEquipment_(); track item._id) {
+      <div class="equipment-grid-row" role="row">
+        <div class="col-name" role="cell">{{ item.name_hebrew }}</div>
+        <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
+          <div class="col-category" cellCarouselSlide [label]="'category' | translatePipe">{{ item.category_ | translatePipe }}</div>
+          <div class="col-owned" cellCarouselSlide [label]="'owned_quantity' | translatePipe">{{ item.owned_quantity_ }}</div>
+          <div class="col-consumable" cellCarouselSlide [label]="'is_consumable' | translatePipe">{{ item.is_consumable_ ? ('approved_yes' | translatePipe) : ('approved_no' | translatePipe) }}</div>
+        </app-cell-carousel>
+        <div class="c-col-actions" role="cell">
+          @if (isLoggedIn()) {
+            <button type="button" class="c-icon-btn" (click)="onEdit(item._id)" [attr.aria-label]="'edit' | translatePipe">
+              <lucide-icon name="pencil" [size]="18"></lucide-icon>
+            </button>
+            @if (deletingId_() === item._id) {
+              <app-loader size="small" [inline]="true" />
+            } @else {
+              <button type="button" class="c-icon-btn danger" (click)="onDelete(item)" [attr.aria-label]="'delete' | translatePipe">
+                <lucide-icon name="trash-2" [size]="18"></lucide-icon>
               </button>
-              @if (deletingId_() === item._id) {
-                <app-loader size="small" [inline]="true" />
-              } @else {
-                <button type="button" class="c-icon-btn danger" (click)="onDelete(item)" [attr.aria-label]="'delete' | translatePipe">
-                  <lucide-icon name="trash-2" [size]="18"></lucide-icon>
-                </button>
-              }
             }
-          </div>
-        </div>
-      }
-    </div>
-  </section>
-
-  <aside class="filter-panel" [class.collapsed]="!isPanelOpen_()">
-    @if (isPanelOpen_()) {
-      <button type="button" class="panel-toggle-icon" (click)="togglePanel()" [attr.aria-label]="'close' | translatePipe">
-        <lucide-icon name="chevron-left" [size]="20"></lucide-icon>
-      </button>
-    }
-    <div class="panel-content">
-      <div class="filter-section">
-        <div class="filter-section-header">
-          <h3>{{ 'filter' | translatePipe }}</h3>
-          @if (hasActiveFilters_()) {
-            <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">{{ 'clear_filters' | translatePipe }}</button>
           }
         </div>
-        <div class="filter-category">
-          <span class="filter-category-label">{{ 'category' | translatePipe }}</span>
-          <div class="filter-options">
-            @for (cat of categories; track cat) {
-              <label class="filter-option">
-                <input type="checkbox" [checked]="selectedCategories_().has(cat)" (change)="toggleCategory(cat)" />
-                <span>{{ cat | translatePipe }}</span>
-              </label>
-            }
-          </div>
+      </div>
+    }
+  </ng-container>
+
+  <ng-container shell-filters>
+    <div class="filter-section">
+      <div class="filter-section-header">
+        <h3>{{ 'filter' | translatePipe }}</h3>
+        @if (hasActiveFilters_()) {
+          <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">{{ 'clear_filters' | translatePipe }}</button>
+        }
+      </div>
+      <div class="filter-category">
+        <span class="filter-category-label">{{ 'category' | translatePipe }}</span>
+        <div class="filter-options">
+          @for (cat of categories; track cat) {
+            <label class="filter-option">
+              <input type="checkbox" [checked]="selectedCategories_().has(cat)" (change)="toggleCategory(cat)" />
+              <span>{{ cat | translatePipe }}</span>
+            </label>
+          }
         </div>
-        <div class="filter-category consumable-filter">
-          <span class="filter-category-label">{{ 'is_consumable' | translatePipe }}</span>
-          <div class="filter-options filter-options-inline">
-            <label class="filter-option">
-              <input type="radio" name="consumable" [checked]="consumableFilter_() === null" (change)="consumableFilter_.set(null)" />
-              <span>{{ 'all' | translatePipe }}</span>
-            </label>
-            <label class="filter-option">
-              <input type="radio" name="consumable" [checked]="consumableFilter_() === true" (change)="consumableFilter_.set(true)" />
-              <span>{{ 'approved_yes' | translatePipe }}</span>
-            </label>
-            <label class="filter-option">
-              <input type="radio" name="consumable" [checked]="consumableFilter_() === false" (change)="consumableFilter_.set(false)" />
-              <span>{{ 'approved_no' | translatePipe }}</span>
-            </label>
-          </div>
+      </div>
+      <div class="filter-category consumable-filter">
+        <span class="filter-category-label">{{ 'is_consumable' | translatePipe }}</span>
+        <div class="filter-options filter-options-inline">
+          <label class="filter-option">
+            <input type="radio" name="consumable" [checked]="consumableFilter_() === null" (change)="consumableFilter_.set(null)" />
+            <span>{{ 'all' | translatePipe }}</span>
+          </label>
+          <label class="filter-option">
+            <input type="radio" name="consumable" [checked]="consumableFilter_() === true" (change)="consumableFilter_.set(true)" />
+            <span>{{ 'approved_yes' | translatePipe }}</span>
+          </label>
+          <label class="filter-option">
+            <input type="radio" name="consumable" [checked]="consumableFilter_() === false" (change)="consumableFilter_.set(false)" />
+            <span>{{ 'approved_no' | translatePipe }}</span>
+          </label>
         </div>
       </div>
     </div>
-  </aside>
-</div>
+  </ng-container>
+
+</app-list-shell>

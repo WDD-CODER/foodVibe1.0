@@ -1,60 +1,115 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
-import { User } from '../models/user.model';
-import { filter, from, map, of, switchMap, tap } from 'rxjs';
-import { Router } from '@angular/router';
-import { UserMsgService } from './user-msg.service';
-import { StorageService } from './async-storage.service';
+import { computed, inject, Injectable, signal } from '@angular/core'
+import { User } from '../models/user.model'
+import { from, map, of, switchMap, tap, throwError } from 'rxjs'
+import { UserMsgService } from './user-msg.service'
+import { StorageService } from './async-storage.service'
+import { LoggingService } from './logging.service'
+import { hashPassword, verifyPassword } from '../utils/auth-crypto'
 
+const SIGNED_USERS = 'signed-users-db'
+const SESSION_USER_KEY = 'loggedInUser'
 
-const SIGNED_USERS = 'signed-users-db';
-const SESSION_USER_KEY = 'loggedInUser';
+/** Stored record may include password hash; never expose hash to session or client. */
+type StoredUser = User & { passwordHash?: string }
 
-@Injectable({
-  providedIn: 'root',
-})
+export interface LoginCredentials {
+  name: string
+  password?: string
+}
+
+@Injectable({ providedIn: 'root' })
 export class UserService {
+  private userMsgService = inject(UserMsgService)
+  private storageService = inject(StorageService)
+  private logging = inject(LoggingService)
 
-  private userMsgService = inject(UserMsgService);
-  private storageService = inject(StorageService);
-  private router = inject(Router);
+  private _users_ = signal<User[] | null>(this._loadUsersFromStorage())
+  public users_ = this._users_.asReadonly()
 
-  private _users_ = signal<User[] | null>(this._loadUsersFromStorage());
-  public users_ = this._users_.asReadonly();
+  private _user_ = signal<User | null>(this._loadUserFromSession())
+  public user_ = this._user_.asReadonly()
 
-  private _user_ = signal<User | null>(this._loadUserFromSession());
-  public user_ = this._user_.asReadonly();
+  public isLoggedIn = computed(() => this._user_() !== null)
 
-  public isLoggedIn = computed(() => this._user_() !== null);
+  /** Current user (no password/hash). Use when backend exists for refreshSession(). */
+  get currentUser(): User | null {
+    return this._user_()
+  }
 
-  public signup(newUser: User) {
-    return from(this.storageService.query<User>(SIGNED_USERS)).pipe(
-      map(users => users.find(_user => _user.name === newUser.name)),
-      switchMap(user => user ?
-        of(user)
-        :
-        from(this.storageService.post(SIGNED_USERS, newUser))),
-      tap(user => {
+  public signup(newUser: User, password: string) {
+    return from(this.storageService.query<StoredUser>(SIGNED_USERS)).pipe(
+      map(users => users.find(u => u.name === newUser.name)),
+      switchMap(existing =>
+        existing
+          ? throwError(() => new Error('USERNAME_TAKEN'))
+          : from(hashPassword(password)).pipe(
+              switchMap(passwordHash =>
+                from(
+                  this.storageService.post(SIGNED_USERS, {
+                    ...newUser,
+                    passwordHash
+                  } as StoredUser)
+                )
+              )
+            )
+      ),
+      tap(stored => {
+        const user = this._toUser(stored)
         this.userMsgService.onSetSuccessMsg('Signup Successfully ')
         this._saveUserLocal(user)
-      }),
+        this.logging.info({ event: 'auth.signup', message: 'Signup success', context: { userId: user._id } })
+      })
     )
   }
-
 
   public logout() {
+    const userId = this._user_()?._id
     return of(null).pipe(
-      tap(() => this._saveUserLocal(null))
+      tap(() => {
+        this._saveUserLocal(null)
+        this.logging.info({ event: 'auth.logout', message: 'Logout', context: userId ? { userId } : undefined })
+      })
     )
   }
 
-  public login(userName: string) {
-    return from(this.storageService.query<User>(SIGNED_USERS)).pipe(
-      map(users => users.find(_user => _user.name === userName)),
-      filter(user => !!user),
-      tap(user => {
-        this._saveUserLocal(user as User)
-      }),
+  public login(credentials: LoginCredentials) {
+    const { name, password } = credentials
+    return from(this.storageService.query<StoredUser>(SIGNED_USERS)).pipe(
+      map(users => users.find(u => u.name === name)),
+      switchMap(stored => {
+        if (!stored) {
+          this.logging.warn({ event: 'auth.login.failure', message: 'Login failed: user not found', context: {} })
+          return throwError(() => new Error('USER_NOT_FOUND'))
+        }
+        const hasHash = !!stored.passwordHash
+        if (hasHash) {
+          if (!password || password.trim() === '') {
+            this.logging.warn({ event: 'auth.login.failure', message: 'Login failed: password required', context: {} })
+            return throwError(() => new Error('PASSWORD_REQUIRED'))
+          }
+          return from(verifyPassword(password, stored.passwordHash!)).pipe(
+            switchMap(ok => {
+              if (!ok) {
+                this.logging.warn({ event: 'auth.login.failure', message: 'Login failed: invalid password', context: {} })
+                return throwError(() => new Error('USER_NOT_FOUND'))
+              }
+              const user = this._toUser(stored)
+              this._saveUserLocal(user)
+              this.logging.info({ event: 'auth.login', message: 'Login success', context: { userId: user._id } })
+              return of(user)
+            })
+          )
+        }
+        const user = this._toUser(stored)
+        this._saveUserLocal(user)
+        this.logging.info({ event: 'auth.login', message: 'Login success (legacy)', context: { userId: user._id } })
+        return of(user)
+      })
     )
+  }
+
+  private _toUser(stored: StoredUser): User {
+    return { _id: stored._id, name: stored.name, email: stored.email, imgUrl: stored.imgUrl }
   }
 
 
@@ -79,8 +134,6 @@ _saveUserLocal(user: User | null): void {
 }
 
 _clearSessionStorage() {
-  console.log('variable')
-
   sessionStorage.clear()
   this._user_.set(null)
 }

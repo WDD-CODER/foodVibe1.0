@@ -1,0 +1,96 @@
+@if (modalService.isOpen()) {
+  <div class="c-modal-overlay" (click)="onClose()">
+    <div class="c-modal-card c-modal-card--md" dir="rtl" (click)="$event.stopPropagation()">
+
+      <div class="auth-tabs">
+        <button type="button"
+                class="auth-tab"
+                [class.active]="!isSignUp"
+                (click)="switchMode('sign-in')">
+          {{ 'sign_in' | translatePipe }}
+        </button>
+        <button type="button"
+                class="auth-tab"
+                [class.active]="isSignUp"
+                (click)="switchMode('sign-up')">
+          {{ 'sign_up' | translatePipe }}
+        </button>
+      </div>
+
+      <form (ngSubmit)="onSubmit()" class="c-modal-body">
+        <div class="auth-form-fields">
+          <div class="c-input-stack">
+            <label for="auth-name">{{ 'username' | translatePipe }}</label>
+            <input id="auth-name"
+                   type="text"
+                   [(ngModel)]="name"
+                   name="name"
+                   autocomplete="username"
+                   required />
+          </div>
+
+          <div class="c-input-stack">
+            <label for="auth-password">{{ 'password' | translatePipe }}</label>
+            <input id="auth-password"
+                   type="password"
+                   [(ngModel)]="password"
+                   name="password"
+                   [autocomplete]="isSignUp ? 'new-password' : 'current-password'"
+                   [required]="isSignUp" />
+          </div>
+
+          @if (isSignUp) {
+            <div class="c-input-stack">
+              <label for="auth-email">{{ 'email' | translatePipe }}</label>
+              <input id="auth-email"
+                     type="email"
+                     [(ngModel)]="email"
+                     name="email"
+                     autocomplete="email"
+                     required />
+            </div>
+
+            <div class="c-input-stack">
+              <label>{{ 'profile_image' | translatePipe }}</label>
+              <div class="image-upload-area">
+                @if (imgPreview()) {
+                  <img [src]="imgPreview()" alt="" class="image-preview" />
+                } @else {
+                  <div class="image-placeholder">
+                    <lucide-icon name="image" [size]="24"></lucide-icon>
+                  </div>
+                }
+                <label class="image-upload-btn" for="auth-img">
+                  {{ 'choose_image' | translatePipe }}
+                </label>
+                <input id="auth-img"
+                       type="file"
+                       accept="image/*"
+                       (change)="onFileSelected($event)"
+                       class="visually-hidden" />
+              </div>
+            </div>
+          }
+
+          @if (errorKey()) {
+            <p class="auth-error">{{ errorKey()! | translatePipe }}</p>
+          }
+        </div>
+      </form>
+
+      <div class="c-modal-actions">
+        <button type="button" class="c-btn-ghost" (click)="onClose()">
+          {{ 'cancel' | translatePipe }}
+        </button>
+        <button type="button" class="c-btn-primary" [disabled]="isSubmitting()" (click)="onSubmit()">
+          @if (isSignUp) {
+            {{ 'sign_up' | translatePipe }}
+          } @else {
+            {{ 'sign_in' | translatePipe }}
+          }
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

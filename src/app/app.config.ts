@@ -1,18 +1,21 @@
-import { APP_INITIALIZER, ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, ErrorHandler, importProvidersFrom, provideZoneChangeDetection } from '@angular/core'
+import { GlobalErrorHandler } from './core/services/global-error.handler'
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, ArrowUpDown, CalendarClock, ChevronDown, ChevronLeft, ChevronRight, Circle, CircleCheck, CookingPot, Edit, FilePlus, Flame, FlaskConical, History, Image, LucideAngularModule, MapPin, Menu, Minus, Package, Pencil, Plus, PlusCircle, RotateCcw, Save, Scale, Search, ShieldAlert, Timer, Trash2, Truck, TrendingUp, Utensils, Tags, BookOpen, Copy, PanelRightClose, Filter, PanelLeftClose, Info, Printer, UtensilsCrossed, ChevronUp } from 'lucide-angular';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, ArrowUpDown, CalendarClock, ChevronDown, ChevronLeft, ChevronRight, Circle, CircleCheck, CircleX, CookingPot, Edit, FilePlus, Flame, FlaskConical, History, Image, LucideAngularModule, MapPin, Menu, Minus, Package, Pencil, Plus, PlusCircle, RotateCcw, Save, Scale, Search, ShieldAlert, Timer, Trash2, Truck, TrendingUp, Utensils, Tags, BookOpen, Copy, PanelRightClose, Filter, PanelLeftClose, Info, Printer, UtensilsCrossed, ChevronUp } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { AlertCircle, AlertTriangle, Tag, X } from 'lucide-angular/src/icons';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http'
+import { authInterceptor } from './core/interceptors/auth.interceptor'
 import { TranslationService } from '@services/translation.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
+    { provide: ErrorHandler, useClass: GlobalErrorHandler },
     KitchenStateService,
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([authInterceptor])),
     {
       provide: APP_INITIALIZER,
       useFactory: (transService: TranslationService) => () => transService.loadGlobalDictionary(),
@@ -69,7 +72,8 @@ export const appConfig: ApplicationConfig = {
         UtensilsCrossed,
         ChevronUp,
         Circle,
-        CircleCheck
+        CircleCheck,
+        CircleX
       })
     )
   ]

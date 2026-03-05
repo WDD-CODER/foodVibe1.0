@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, output, signal, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,11 +12,13 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { UserService } from '@services/user.service';
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
+import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
+import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
 
 @Component({
   selector: 'app-supplier-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective],
   templateUrl: './supplier-list.component.html',
   styleUrl: './supplier-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,6 +40,14 @@ export class SupplierListComponent {
   protected deletingId_ = signal<string | null>(null);
   protected isPanelOpen_ = signal(true);
   protected carouselHeaderIndex_ = signal(0);
+
+  constructor() {
+    afterNextRender(() => {
+      if (typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches) {
+        this.isPanelOpen_.set(false);
+      }
+    });
+  }
   /** Delivery days to filter (0=Sun .. 6=Sat). Empty set = show all. */
   protected selectedDays_ = signal<Set<number>>(new Set());
   protected hasLinkedOnly_ = signal(false);
@@ -78,17 +88,8 @@ export class SupplierListComponent {
     this.isPanelOpen_.update(v => !v);
   }
 
-  protected carouselHeaderPrev(): void {
-    this.carouselHeaderIndex_.update(i => (i <= 0 ? 2 : i - 1));
-  }
-
-  protected carouselHeaderNext(): void {
-    this.carouselHeaderIndex_.update(i => (i >= 2 ? 0 : i + 1));
-  }
-
-  protected getCarouselHeaderLabel_(): 'contact_person' | 'delivery_days' | 'min_order' {
-    const labels: ('contact_person' | 'delivery_days' | 'min_order')[] = ['contact_person', 'delivery_days', 'min_order'];
-    return labels[this.carouselHeaderIndex_()] ?? 'contact_person';
+  protected onCarouselHeaderChange(index: number): void {
+    this.carouselHeaderIndex_.set(index);
   }
 
   protected toggleDay(day: number): void {

@@ -2,6 +2,7 @@ import { Injectable, signal, computed, inject } from '@angular/core'
 import { StorageService } from './async-storage.service'
 import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
+import { LoggingService } from './logging.service'
 
 const STORAGE_KEY = 'KITCHEN_PREPARATIONS'
 
@@ -21,6 +22,7 @@ export class PreparationRegistryService {
   private readonly storageService = inject(StorageService)
   private readonly userMsgService = inject(UserMsgService)
   private readonly translationService = inject(TranslationService)
+  private readonly logging = inject(LoggingService)
 
   private categories_ = signal<string[]>([])
   private preparations_ = signal<PreparationEntry[]>([])
@@ -85,7 +87,7 @@ export class PreparationRegistryService {
       this.userMsgService.onSetSuccessMsg(`הקטגוריה "${label}" נוספה בהצלחה`)
     } catch (err) {
       this.userMsgService.onSetErrorMsg('שגיאה בשמירת הקטגוריה')
-      console.error(err)
+      this.logging.error({ event: 'crud.preparations.category.save_error', message: 'Preparation category save error', context: { err } })
     }
   }
 
@@ -137,7 +139,7 @@ export class PreparationRegistryService {
       }
     } catch (err) {
       this.userMsgService.onSetErrorMsg('שגיאה בעדכון ההכנה')
-      console.error(err)
+      this.logging.error({ event: 'crud.preparations.update_error', message: 'Preparation update error', context: { err } })
     }
   }
 
@@ -178,7 +180,7 @@ export class PreparationRegistryService {
       this.userMsgService.onSetSuccessMsg(`ההכנה "${sanitizedName}" נוספה בהצלחה`)
     } catch (err) {
       this.userMsgService.onSetErrorMsg('שגיאה בשמירת ההכנה')
-      console.error(err)
+      this.logging.error({ event: 'crud.preparations.save_error', message: 'Preparation save error', context: { err } })
     }
   }
 }

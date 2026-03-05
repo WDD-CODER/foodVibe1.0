@@ -146,6 +146,7 @@ Agents share context through:
 * **Shared UI**: Before adding a new dropdown or scrollable list overlay, check `src/styles.scss` for engines (e.g. `.c-dropdown`) and `src/app/shared/` for reusable components (e.g. scrollable-dropdown). Use them instead of one-off markup and styles.
 
 ## 5. Security & QA
+* **Auth, logging & security**: Read [.assistant/skills/auth-and-logging/SKILL.md](.assistant/skills/auth-and-logging/SKILL.md) when touching auth, routes, persistence, HTTP, or critical operations. Use **LoggingService** for auth, HTTP, CRUD, and errors; never log passwords, tokens, or PII (use identifiers only). Follow security hardening: HTTPS in prod, no secrets in source (use environment), validate/sanitize input, no stack traces to client in prod. When unsure whether to log, ask the user.
 * **Secrets**: Read from `.env` only. Ensure `.env*` and local configs are in `.gitignore`. **NEVER** hardcode keys.
 * **Playwright**: Use `getByRole` or `getByTestId`. Prohibit `page.locator`. Use Web-first assertions.
 * **Testing**: TDD-first. Vitest/Jasmine required for all public service methods.

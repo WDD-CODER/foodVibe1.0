@@ -1,12 +1,13 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
-import { StorageService } from './async-storage.service';
-import { UserMsgService } from './user-msg.service';
+import { Injectable, signal, computed, inject } from '@angular/core'
+import { StorageService } from './async-storage.service'
+import { UserMsgService } from './user-msg.service'
+import { LoggingService } from './logging.service'
 
 @Injectable({ providedIn: 'root' })
 export class UnitRegistryService {
-  // INJECTIONS
-  private readonly userMsgService = inject(UserMsgService);
-  private readonly storageService = inject(StorageService);
+  private readonly userMsgService = inject(UserMsgService)
+  private readonly storageService = inject(StorageService)
+  private readonly logging = inject(LoggingService)
   private readonly STORAGE_KEY = 'KITCHEN_UNITS'; // Standardized key
 
   // SIGNALS
@@ -63,8 +64,8 @@ export class UnitRegistryService {
         this.globalUnits_.set(units);
       }
     } catch (err) {
-      console.error('Failed to hydrate units:', err);
-      this.userMsgService.onSetErrorMsg('שגיאה בטעינת יחידות המידה');
+      this.logging.error({ event: 'crud.units.hydrate_error', message: 'Failed to hydrate units', context: { err } })
+      this.userMsgService.onSetErrorMsg('שגיאה בטעינת יחידות המידה')
     }
   }
 
@@ -116,8 +117,8 @@ export class UnitRegistryService {
       this.userMsgService.onSetSuccessMsg(`היחידה ${sanitizedName} נוספה בהצלחה`);
 
     } catch (err) {
-      this.userMsgService.onSetErrorMsg('שגיאה בשמירת היחידה במערכת');
-      console.error(err);
+      this.userMsgService.onSetErrorMsg('שגיאה בשמירת היחידה במערכת')
+      this.logging.error({ event: 'crud.units.save_error', message: 'Unit save error', context: { err } })
     }
   }
 
@@ -147,8 +148,8 @@ export class UnitRegistryService {
         this.userMsgService.onSetSuccessMsg(`היחידה ${unitKey} הוסרה`);
       }
     } catch (err) {
-      this.userMsgService.onSetErrorMsg('שגיאה במחיקת היחידה מהשרת');
-      console.error(err);
+      this.userMsgService.onSetErrorMsg('שגיאה במחיקת היחידה מהשרת')
+      this.logging.error({ event: 'crud.units.delete_error', message: 'Unit delete error', context: { err } })
     }
   }
 }

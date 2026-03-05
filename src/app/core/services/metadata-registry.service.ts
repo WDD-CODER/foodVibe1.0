@@ -1,20 +1,21 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
-import { ProductDataService } from './product-data.service';
-import { UserMsgService } from './user-msg.service';
-import { StorageService } from './async-storage.service';
-import type { LabelDefinition } from '@models/label.model';
+import { Injectable, signal, computed, inject } from '@angular/core'
+import { ProductDataService } from './product-data.service'
+import { UserMsgService } from './user-msg.service'
+import { StorageService } from './async-storage.service'
+import { LoggingService } from './logging.service'
+import type { LabelDefinition } from '@models/label.model'
 import {
   type MenuTypeDefinition,
   type DishFieldKey,
   DEFAULT_DISH_FIELDS,
-} from '@models/menu-event.model';
+} from '@models/menu-event.model'
 
 @Injectable({ providedIn: 'root' })
 export class MetadataRegistryService {
-  //INJECTIONS
-  private readonly userMsgService = inject(UserMsgService);
-  private readonly productDataService = inject(ProductDataService);
-  private readonly storageService = inject(StorageService);
+  private readonly userMsgService = inject(UserMsgService)
+  private readonly productDataService = inject(ProductDataService)
+  private readonly storageService = inject(StorageService)
+  private readonly logging = inject(LoggingService)
 
   //PRIVATE SIGNALS
   private categories_ = signal<string[]>([]);
@@ -114,8 +115,8 @@ export class MetadataRegistryService {
       this.menuTypes_.set(updated);
       this.userMsgService.onSetSuccessMsg(`סוג תפריט "${key}" נוסף בהצלחה`);
     } catch (err) {
-      this.userMsgService.onSetErrorMsg('שגיאה בשמירת סוג התפריט');
-      console.error('MenuType Save Error:', err);
+      this.userMsgService.onSetErrorMsg('שגיאה בשמירת סוג התפריט')
+      this.logging.error({ event: 'crud.metadata.menuType.save_error', message: 'MenuType save error', context: { err } })
     }
   }
 
@@ -136,8 +137,8 @@ export class MetadataRegistryService {
       this.menuTypes_.set(updated);
       this.userMsgService.onSetSuccessMsg(`סוג תפריט "${key}" עודכן`);
     } catch (err) {
-      this.userMsgService.onSetErrorMsg('שגיאה בעדכון סוג התפריט');
-      console.error(err);
+      this.userMsgService.onSetErrorMsg('שגיאה בעדכון סוג התפריט')
+      this.logging.error({ event: 'crud.metadata.menuType.update_error', message: 'MenuType update error', context: { err } })
     }
   }
 
@@ -154,8 +155,8 @@ export class MetadataRegistryService {
       this.menuTypes_.set(updated);
       this.userMsgService.onSetSuccessMsg(`סוג תפריט "${key}" נמחק`);
     } catch (err) {
-      this.userMsgService.onSetErrorMsg('שגיאה במחיקת סוג התפריט');
-      console.error(err);
+      this.userMsgService.onSetErrorMsg('שגיאה במחיקת סוג התפריט')
+      this.logging.error({ event: 'crud.metadata.menuType.delete_error', message: 'MenuType delete error', context: { err } })
     }
   }
 
@@ -208,8 +209,8 @@ export class MetadataRegistryService {
       this.labels_.set(updated);
       this.userMsgService.onSetSuccessMsg(`תווית "${sanitized}" נוספה בהצלחה`);
     } catch (err) {
-      this.userMsgService.onSetErrorMsg('שגיאה בשמירת התווית');
-      console.error('Label Save Error:', err);
+      this.userMsgService.onSetErrorMsg('שגיאה בשמירת התווית')
+      this.logging.error({ event: 'crud.metadata.label.save_error', message: 'Label save error', context: { err } })
     }
   }
 
@@ -226,8 +227,8 @@ export class MetadataRegistryService {
       this.labels_.set(updated);
       this.userMsgService.onSetSuccessMsg(`תווית ${key} נמחקה בהצלחה`);
     } catch (err) {
-      this.userMsgService.onSetErrorMsg('שגיאה במחיקת התווית');
-      console.error(err);
+      this.userMsgService.onSetErrorMsg('שגיאה במחיקת התווית')
+      this.logging.error({ event: 'crud.metadata.label.delete_error', message: 'Label delete error', context: { err } })
     }
   }
 
@@ -247,8 +248,8 @@ export class MetadataRegistryService {
       }
       this.labels_.set(updated);
     } catch (err) {
-      this.userMsgService.onSetErrorMsg('שגיאה בעדכון התווית');
-      console.error(err);
+      this.userMsgService.onSetErrorMsg('שגיאה בעדכון התווית')
+      this.logging.error({ event: 'crud.metadata.label.update_error', message: 'Label update error', context: { err } })
     }
   }
 
@@ -317,8 +318,8 @@ export class MetadataRegistryService {
       this.userMsgService.onSetSuccessMsg(`הקטגוריה "${sanitized}" נוספה בהצלחה`);
 
     } catch (err) {
-      this.userMsgService.onSetErrorMsg('שגיאה בשמירת הקטגוריה');
-      console.error('Category Save Error:', err);
+      this.userMsgService.onSetErrorMsg('שגיאה בשמירת הקטגוריה')
+      this.logging.error({ event: 'crud.metadata.category.save_error', message: 'Category save error', context: { err } })
     }
   }
 
@@ -342,8 +343,8 @@ async deleteCategory(name: string): Promise<void> {
       this.userMsgService.onSetSuccessMsg(`הקטגוריה ${name} נמחקה בהצלחה`);
     }
   } catch (err) {
-    this.userMsgService.onSetErrorMsg('שגיאה במחיקת הקטגוריה מהשרת');
-    console.error(err);
+    this.userMsgService.onSetErrorMsg('שגיאה במחיקת הקטגוריה מהשרת')
+    this.logging.error({ event: 'crud.metadata.category.delete_error', message: 'Category delete error', context: { err } })
   }
 }
 

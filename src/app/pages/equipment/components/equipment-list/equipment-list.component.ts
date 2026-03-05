@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -9,13 +9,15 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { UserService } from '@services/user.service';
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
+import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
+import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
 
 type SortField = 'name' | 'category' | 'owned';
 
 @Component({
   selector: 'app-equipment-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective],
+  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective],
   templateUrl: './equipment-list.component.html',
   styleUrl: './equipment-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,6 +39,14 @@ export class EquipmentListComponent {
   protected searchQuery_ = signal('');
   protected isPanelOpen_ = signal(true);
   protected carouselHeaderIndex_ = signal(0);
+
+  constructor() {
+    afterNextRender(() => {
+      if (typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches) {
+        this.isPanelOpen_.set(false);
+      }
+    });
+  }
   /** Selected categories; empty set = show all. */
   protected selectedCategories_ = signal<Set<EquipmentCategory>>(new Set());
   /** null = no filter, true = consumable only, false = non-consumable only. */
@@ -95,17 +105,8 @@ export class EquipmentListComponent {
     this.isPanelOpen_.update(v => !v);
   }
 
-  protected carouselHeaderPrev(): void {
-    this.carouselHeaderIndex_.update(i => (i <= 0 ? 2 : i - 1));
-  }
-
-  protected carouselHeaderNext(): void {
-    this.carouselHeaderIndex_.update(i => (i >= 2 ? 0 : i + 1));
-  }
-
-  protected getCarouselHeaderLabel_(): 'category' | 'owned_quantity' | 'is_consumable' {
-    const labels: ('category' | 'owned_quantity' | 'is_consumable')[] = ['category', 'owned_quantity', 'is_consumable'];
-    return labels[this.carouselHeaderIndex_()] ?? 'category';
+  protected onCarouselHeaderChange(index: number): void {
+    this.carouselHeaderIndex_.set(index);
   }
 
   protected toggleCategory(cat: EquipmentCategory): void {

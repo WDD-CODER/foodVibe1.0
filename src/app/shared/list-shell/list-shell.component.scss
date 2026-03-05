@@ -177,7 +177,7 @@
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: var(--list-grid);
-    grid-auto-rows: auto;
+    grid-auto-rows: minmax(20px, 100px);;
 
     min-height: 0;
 

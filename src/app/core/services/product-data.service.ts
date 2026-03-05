@@ -1,13 +1,15 @@
-import { Injectable, signal, inject, computed } from '@angular/core';
-import { StorageService } from './async-storage.service';
-import { Product } from '../models/product.model'; 
+import { Injectable, signal, inject, computed } from '@angular/core'
+import { StorageService } from './async-storage.service'
+import { LoggingService } from './logging.service'
+import { Product } from '../models/product.model'
 
-const ENTITY = 'PRODUCT_LIST';
-const TRASH_KEY = 'TRASH_PRODUCTS';
+const ENTITY = 'PRODUCT_LIST'
+const TRASH_KEY = 'TRASH_PRODUCTS'
 
 @Injectable({ providedIn: 'root' })
 export class ProductDataService {
-  private storage = inject(StorageService);
+  private storage = inject(StorageService)
+  private logging = inject(LoggingService)
 
   // Signal now stores Product objects
   private ProductsStore_ = signal<Product[]>([]);
@@ -73,30 +75,28 @@ export class ProductDataService {
     return Product;
   }
 
-//CREATE
- async addProduct(newProduct: Omit<Product, '_id'>): Promise<Product> {
-  const saved = await this.storage.post<Product>(ENTITY, newProduct as Product);
-  this.ProductsStore_.update(products => [...products, saved]);
-  return saved;
-}
+  async addProduct(newProduct: Omit<Product, '_id'>): Promise<Product> {
+    const saved = await this.storage.post<Product>(ENTITY, newProduct as Product)
+    this.ProductsStore_.update(products => [...products, saved])
+    this.logging.info({ event: 'crud.product.create', message: 'Product created', context: { entityType: ENTITY, id: saved._id } })
+    return saved
+  }
 
-// UPDATE
+  async updateProduct(product: Product): Promise<void> {
+    const updated = await this.storage.put<Product>(ENTITY, product as Product)
+    this.ProductsStore_.update(products =>
+      products.map(p => p._id === updated._id ? updated : p)
+    )
+    this.logging.info({ event: 'crud.product.update', message: 'Product updated', context: { entityType: ENTITY, id: updated._id } })
+  }
 
- async updateProduct(product: Product): Promise<void> {
-  const updated = await this.storage.put<Product>(ENTITY, product as Product);
-  
-  this.ProductsStore_.update(products => 
-    products.map(p => p._id === updated._id ? updated : p)
-  );
-}
-
-  // REMOVE (soft delete: move to trash)
   async deleteProduct(_id: string): Promise<void> {
-    const product = await this.storage.get<Product>(ENTITY, _id);
-    const withDeleted = { ...product, deletedAt: Date.now() } as Product & { deletedAt: number };
-    await this.storage.appendExisting(TRASH_KEY, withDeleted);
-    await this.storage.remove(ENTITY, _id);
-    this.ProductsStore_.update(products => products.filter(p => p._id !== _id));
+    const product = await this.storage.get<Product>(ENTITY, _id)
+    const withDeleted = { ...product, deletedAt: Date.now() } as Product & { deletedAt: number }
+    await this.storage.appendExisting(TRASH_KEY, withDeleted)
+    await this.storage.remove(ENTITY, _id)
+    this.ProductsStore_.update(products => products.filter(p => p._id !== _id))
+    this.logging.info({ event: 'crud.product.delete', message: 'Product deleted', context: { entityType: ENTITY, id: _id } })
   }
 
   async getTrashProducts(): Promise<(Product & { deletedAt: number })[]> {

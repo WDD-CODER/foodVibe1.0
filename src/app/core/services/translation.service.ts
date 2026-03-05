@@ -1,12 +1,12 @@
-import { Injectable, signal, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
-// Ensure these imports match your actual file paths
+import { Injectable, signal, inject } from '@angular/core'
+import { HttpClient } from '@angular/common/http'
+import { firstValueFrom } from 'rxjs'
+import { LoggingService } from './logging.service'
 
 @Injectable({ providedIn: 'root' })
 export class TranslationService {
-  // --- INJECTIONS ---
-  private http = inject(HttpClient);
+  private http = inject(HttpClient)
+  private logging = inject(LoggingService)
 
   // --- SIGNALS ---
   private masterDict = signal<Record<string, string>>({});
@@ -44,14 +44,13 @@ export class TranslationService {
       this.masterDict.set(finalDict);
 
       try {
-        localStorage.setItem('DICTIONARY_CACHE', JSON.stringify(finalDict));
+        localStorage.setItem('DICTIONARY_CACHE', JSON.stringify(finalDict))
       } catch (err) {
-        console.warn('Dictionary cache write failed (quota or access):', err);
+        this.logging.warn({ event: 'translation.cache.write_failed', message: 'Dictionary cache write failed (quota or access)', context: { err } })
       }
-
-      console.log('✅ Full Hybrid Dictionary Cached to LocalStorage');
+      this.logging.info({ event: 'translation.dictionary.loaded', message: 'Full hybrid dictionary cached to localStorage' })
     } catch (err) {
-      console.error('❌ Dictionary Load Error:', err);
+      this.logging.error({ event: 'translation.dictionary.load_error', message: 'Dictionary load error', context: { err } })
     }
   }
 
@@ -69,9 +68,9 @@ export class TranslationService {
     const cache = rawCache ? JSON.parse(rawCache) : {};
     cache[normalizedKey] = label.trim();
     try {
-      localStorage.setItem('DICTIONARY_CACHE', JSON.stringify(cache));
+      localStorage.setItem('DICTIONARY_CACHE', JSON.stringify(cache))
     } catch (err) {
-      console.warn('Dictionary cache write failed (quota or access):', err);
+      this.logging.warn({ event: 'translation.cache.write_failed', message: 'Dictionary cache write failed (quota or access)', context: { err } })
     }
   }
 
@@ -90,13 +89,13 @@ export class TranslationService {
         }, {} as Record<string, string>);
 
       try {
-        localStorage.setItem('DICTIONARY_CACHE', JSON.stringify(sortedDict));
+        localStorage.setItem('DICTIONARY_CACHE', JSON.stringify(sortedDict))
       } catch (err) {
-        console.warn('Dictionary cache write failed (quota or access):', err);
+        this.logging.warn({ event: 'translation.cache.write_failed', message: 'Dictionary cache write failed (quota or access)', context: { err } })
       }
-      return sortedDict;
-    });
-    console.log(`%c 📖 Dictionary Updated: "${normalizedKey}": "${sanitizedLabel}"`, 'color: #4CAF50; font-weight: bold;');
+      return sortedDict
+    })
+    this.logging.info({ event: 'translation.dictionary.updated', message: 'Dictionary entry updated', context: { key: normalizedKey } })
   }
 
   translate(key: string | undefined): string {
@@ -134,17 +133,14 @@ export class TranslationService {
     const englishKey = prompt(`Enter English ID for "${hebrewLabel}" (e.g., olive_oil):`);
 
     if (!englishKey || !englishKey.trim()) {
-      console.warn('Translation addition cancelled by user.');
-      return null;
+      this.logging.warn({ event: 'translation.add.cancelled', message: 'Translation addition cancelled by user' })
+      return null
     }
 
-    const sanitizedKey = englishKey.trim().toLowerCase().replace(/\s+/g, '_');
-
-    this.updateInternalDictionaries(sanitizedKey, hebrewLabel);
-
-    console.log(`%c ✅ Dictionary Entry Created: "${sanitizedKey}": "${hebrewLabel}"`, 'color: green; font-weight: bold');
-
-    return sanitizedKey;
+    const sanitizedKey = englishKey.trim().toLowerCase().replace(/\s+/g, '_')
+    this.updateInternalDictionaries(sanitizedKey, hebrewLabel)
+    this.logging.info({ event: 'translation.entry.created', message: 'Dictionary entry created', context: { key: sanitizedKey } })
+    return sanitizedKey
   }
 
 

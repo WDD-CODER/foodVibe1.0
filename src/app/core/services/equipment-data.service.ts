@@ -1,13 +1,15 @@
-import { Injectable, signal, inject } from '@angular/core';
-import { StorageService } from './async-storage.service';
-import { Equipment } from '../models/equipment.model';
+import { Injectable, signal, inject } from '@angular/core'
+import { StorageService } from './async-storage.service'
+import { LoggingService } from './logging.service'
+import { Equipment } from '../models/equipment.model'
 
-const ENTITY = 'EQUIPMENT_LIST';
-const TRASH_KEY = 'TRASH_EQUIPMENT';
+const ENTITY = 'EQUIPMENT_LIST'
+const TRASH_KEY = 'TRASH_EQUIPMENT'
 
 @Injectable({ providedIn: 'root' })
 export class EquipmentDataService {
-  private storage = inject(StorageService);
+  private storage = inject(StorageService)
+  private logging = inject(LoggingService)
 
   private equipmentStore_ = signal<Equipment[]>([]);
   readonly allEquipment_ = this.equipmentStore_.asReadonly();
@@ -30,35 +32,38 @@ export class EquipmentDataService {
   }
 
   async addEquipment(newItem: Omit<Equipment, '_id'>): Promise<Equipment> {
-    const now = new Date().toISOString();
+    const now = new Date().toISOString()
     const withTimestamps = {
       ...newItem,
       created_at_: newItem.created_at_ ?? now,
       updated_at_: now,
-    };
-    const saved = await this.storage.post<Equipment>(ENTITY, withTimestamps as Equipment);
-    this.equipmentStore_.update(list => [...list, saved]);
-    return saved;
+    }
+    const saved = await this.storage.post<Equipment>(ENTITY, withTimestamps as Equipment)
+    this.equipmentStore_.update(list => [...list, saved])
+    this.logging.info({ event: 'crud.equipment.create', message: 'Equipment created', context: { entityType: ENTITY, id: saved._id } })
+    return saved
   }
 
   async updateEquipment(item: Equipment): Promise<Equipment> {
     const updated = {
       ...item,
       updated_at_: new Date().toISOString(),
-    };
-    const result = await this.storage.put<Equipment>(ENTITY, updated);
+    }
+    const result = await this.storage.put<Equipment>(ENTITY, updated)
     this.equipmentStore_.update(list =>
       list.map(e => (e._id === result._id ? result : e))
-    );
-    return result;
+    )
+    this.logging.info({ event: 'crud.equipment.update', message: 'Equipment updated', context: { entityType: ENTITY, id: result._id } })
+    return result
   }
 
   async deleteEquipment(_id: string): Promise<void> {
-    const item = await this.storage.get<Equipment>(ENTITY, _id);
-    const withDeleted = { ...item, deletedAt: Date.now() } as Equipment & { deletedAt: number };
-    await this.storage.appendExisting(TRASH_KEY, withDeleted);
-    await this.storage.remove(ENTITY, _id);
-    this.equipmentStore_.update(list => list.filter(e => e._id !== _id));
+    const item = await this.storage.get<Equipment>(ENTITY, _id)
+    const withDeleted = { ...item, deletedAt: Date.now() } as Equipment & { deletedAt: number }
+    await this.storage.appendExisting(TRASH_KEY, withDeleted)
+    await this.storage.remove(ENTITY, _id)
+    this.equipmentStore_.update(list => list.filter(e => e._id !== _id))
+    this.logging.info({ event: 'crud.equipment.delete', message: 'Equipment deleted', context: { entityType: ENTITY, id: _id } })
   }
 
   async getTrashEquipment(): Promise<(Equipment & { deletedAt: number })[]> {

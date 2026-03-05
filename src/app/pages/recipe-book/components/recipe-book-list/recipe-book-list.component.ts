@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy, signal, computed, ViewChildren, QueryList } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, computed, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -17,6 +17,8 @@ import { VersionHistoryPanelComponent } from 'src/app/shared/version-history-pan
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
+import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
+import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
 
 export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens';
 
@@ -25,14 +27,12 @@ const MAX_ALLERGEN_RECURSION = 5;
 @Component({
   selector: 'recipe-book-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, ClickOutSideDirective, VersionHistoryPanelComponent, LoaderComponent, ScrollableDropdownComponent, CellCarouselComponent, CellCarouselSlideDirective],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, ClickOutSideDirective, VersionHistoryPanelComponent, LoaderComponent, ScrollableDropdownComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective],
   templateUrl: './recipe-book-list.component.html',
   styleUrl: './recipe-book-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RecipeBookListComponent {
-  @ViewChildren(CellCarouselComponent) protected carouselRefs!: QueryList<CellCarouselComponent>;
-
   private readonly kitchenState = inject(KitchenStateService);
   private readonly router = inject(Router);
   private readonly recipeCostService = inject(RecipeCostService);
@@ -44,6 +44,14 @@ export class RecipeBookListComponent {
   protected sortBy_ = signal<SortField | null>(null);
   protected sortOrder_ = signal<'asc' | 'desc'>('asc');
   protected isPanelOpen_ = signal<boolean>(true);
+
+  constructor() {
+    afterNextRender(() => {
+      if (typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches) {
+        this.isPanelOpen_.set(false);
+      }
+    });
+  }
   protected expandedFilterCategories_ = signal<Set<string>>(new Set());
   protected allergenPopoverRecipeId_ = signal<string | null>(null);
   protected allergenExpandAll_ = signal<boolean>(false);
@@ -298,21 +306,8 @@ export class RecipeBookListComponent {
     }
   }
 
-  protected getCarouselHeaderLabel_(): string {
-    const labels = ['type', 'labels', 'allergens'] as const;
-    return labels[this.carouselHeaderIndex_()] ?? 'type';
-  }
-
-  protected carouselHeaderPrev(): void {
-    this.carouselHeaderIndex_.update(i => (i <= 0 ? 2 : i - 1));
-    const idx = this.carouselHeaderIndex_();
-    this.carouselRefs?.forEach(c => c.setActiveIndex(idx));
-  }
-
-  protected carouselHeaderNext(): void {
-    this.carouselHeaderIndex_.update(i => (i >= 2 ? 0 : i + 1));
-    const idx = this.carouselHeaderIndex_();
-    this.carouselRefs?.forEach(c => c.setActiveIndex(idx));
+  protected onCarouselHeaderChange(index: number): void {
+    this.carouselHeaderIndex_.set(index);
   }
 
   protected setSort(field: SortField): void {
