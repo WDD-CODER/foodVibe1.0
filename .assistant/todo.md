@@ -238,6 +238,10 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] demo-equipment.json: verify categories and scaling mix
 - [x] demo-venues.json: 10 venues (add 7)
 
+### Plan 075 — Cleanup demo products (`plans/075-cleanup-demo-products.plan.md`) — feat/cleanup-demo-products (not merged to main)
+
+- [x] Cleanup demo JSON (products, recipes, venues) and add plan; align app (list-shell, recipe-book, inventory, venue-list, equipment-list) and assistant todo.
+
 ---
 
 ## Ahead (Pending)
