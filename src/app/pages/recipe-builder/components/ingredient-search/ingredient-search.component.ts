@@ -6,6 +6,11 @@ import { ClickOutSideDirective } from '@directives/click-out-side';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { QuickAddProductModalService } from '@services/quick-add-product-modal.service';
+import type { Product } from '@models/product.model';
+import type { Recipe } from '@models/recipe.model';
+
+/** Product or Recipe with item_type_ for search results and emit. */
+export type SearchableItem = (Product | Recipe) & { item_type_: 'product' | 'recipe' };
 
 @Component({
   selector: 'app-ingredient-search',
@@ -22,7 +27,7 @@ export class IngredientSearchComponent {
   rowIndex = input<number>(0);
   focusTrigger = input<number | null>(null);
 
-  itemSelected = output<any>();
+  itemSelected = output<SearchableItem>();
   focusDone = output<void>();
   /** Emit when user presses Enter in search with no selection (e.g. add new row). */
   addNewRowRequested = output<void>();
@@ -58,8 +63,8 @@ export class IngredientSearchComponent {
     const query = (this.searchQuery_() ?? '').trim().toLowerCase();
     if (!query) return [];
 
-    const products = this.state.products_().map(p => ({ ...p, item_type_: 'product' }));
-    const recipes = this.state.recipes_().map(r => ({ ...r, item_type_: 'recipe' }));
+    const products = this.state.products_().map(p => ({ ...p, item_type_: 'product' as const }));
+    const recipes = this.state.recipes_().map(r => ({ ...r, item_type_: 'recipe' as const }));
 
     return [...products, ...recipes].filter(item => {
       const name = (item.name_hebrew ?? '').toLowerCase();
@@ -67,7 +72,7 @@ export class IngredientSearchComponent {
     });
   });
 
-  selectItem(item: any) {
+  selectItem(item: SearchableItem) {
     this.itemSelected.emit(item);
     this.searchQuery_.set('');
     this.showResults_.set(false);
@@ -117,7 +122,7 @@ export class IngredientSearchComponent {
   protected async addNewProduct(): Promise<void> {
     const product = await this.quickAddModalService.open({ prefillName: this.searchQuery_() });
     if (!product) return;
-    this.selectItem({ ...product, item_type_: 'product' });
+    this.selectItem({ ...product, item_type_: 'product' as const });
   }
 
   private scrollHighlightedIntoView(): void {

@@ -39,20 +39,20 @@ export class ConversionService {
 
   /** * Logic to sync Waste % and Yield Factor 
    */
-  handleWasteChange(wastePercent: any): { yieldFactor: number } {
+  handleWasteChange(wastePercent: number | string | null): { yieldFactor: number } {
     // Guard against non-numeric or empty values while typing 
     if (wastePercent === null || wastePercent === '') {
     return { yieldFactor: 1 };
   }
-    const val = parseFloat(wastePercent);
+    const val = parseFloat(String(wastePercent));
     if (isNaN(val)) return { yieldFactor: 1 };
 
     const yieldFactor = Math.max(0, (100 - val) / 100);
     return { yieldFactor: parseFloat(yieldFactor.toFixed(4)) }; // Avoid floating point junk 
   }
 
-  handleYieldChange(yieldFactor: any): { wastePercent: number } {
-    const val = parseFloat(yieldFactor);
+  handleYieldChange(yieldFactor: number | string): { wastePercent: number } {
+    const val = parseFloat(String(yieldFactor));
     if (isNaN(val)) return { wastePercent: 0 };
 
     const wastePercent = Math.max(0, 100 - (val * 100));
