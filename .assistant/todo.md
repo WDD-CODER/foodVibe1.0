@@ -10,6 +10,7 @@ Update status after each sub-task. Link plan files here when applicable.
 
 - [x] Recipe-builder plan executed: `plans/recipe-builder-page.md` — A1–A5, C1–C2 (currentCost, mise-en-place fix, persistence, RecipeDataService, edit flow, pendingChangesGuard, reactive portions).
 - [x] Recipe header labels: dense grid + Label dropdown, colored chips, clear all; Lucide icons (log-out, shopping-cart, grip-vertical, archive, download, upload) — `feat/recipe-builder-labels-and-icons` merged to main.
+- [x] feat/recipe-cook-quantity-and-ux merged to main: format-quantity pipe, unit registry, recipe-builder/workflow/ingredients/cook-view/metadata-manager/modals and styles, deps and demo data (3 commits).
 
 ### Unit Tests & Specs
 
@@ -250,12 +251,12 @@ Update status after each sub-task. Link plan files here when applicable.
 
 ### Plan 082 — Recipe/Dish date added (`plans/082-recipe-dish-date-added.plan.md`)
 
-- [ ] Add `addedAt_?: number` to Recipe model
-- [ ] RecipeDataService: set `addedAt_: Date.now()` in addRecipe; merge existing addedAt_ in updateRecipe
-- [ ] DishDataService: set `addedAt_: Date.now()` in addDish; merge existing addedAt_ in updateDish
-- [ ] Recipe book list: show "Date added" column/cell; add sort by dateAdded (SortField + compareRecipes)
-- [ ] i18n: add date_added / added_on key if needed
-- [ ] Optional: recipe builder show "נוסף בתאריך" when editing; tests for add/update preserving addedAt_
+- [x] Add `addedAt_?: number` to Recipe model
+- [x] RecipeDataService: set `addedAt_: Date.now()` in addRecipe; merge existing addedAt_ in updateRecipe
+- [x] DishDataService: set `addedAt_: Date.now()` in addDish; merge existing addedAt_ in updateDish
+- [x] Recipe book list: show "Date added" column/cell; add sort by dateAdded (SortField + compareRecipes)
+- [x] i18n: add date_added key (נוסף בתאריך)
+- [ ] Optional: recipe builder show "נוסף בתאריך" when editing; dedicated data-service specs for addedAt_
 
 ### Plan 081 — toFix Detailed Plans (`plans/081-tofix-detailed-plans.plan.md`)
 
