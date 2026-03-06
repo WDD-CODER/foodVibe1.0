@@ -45,7 +45,7 @@ export class RecipeHeaderComponent {
   autoLabels = input<string[]>([]);
 
   // LABELS
-  protected showLabelDropdown_ = signal(false);
+  protected labelDropdownOpen_ = signal(false);
   private labelTrigger_ = signal(0);
   protected selectedLabels_ = computed(() => {
     this.labelTrigger_();
@@ -58,6 +58,8 @@ export class RecipeHeaderComponent {
   protected filteredLabelOptions_ = computed(() =>
     this.metadataRegistry.allLabels_().filter(l => !this.allLabelsForDisplay_().includes(l.key))
   );
+  /** All labels for manual toggle list in template (exposes registry without making service public). */
+  protected allLabels_ = this.metadataRegistry.allLabels_;
 
   // OUTPUTS
   openUnitCreator = output<string>();
@@ -382,13 +384,16 @@ export class RecipeHeaderComponent {
     return conversions.controls.slice(1) as FormGroup[];
   }
 
+  protected setLabelDropdownOpen(open: boolean): void {
+    this.labelDropdownOpen_.set(open);
+  }
+
   protected addLabel(key: string): void {
     const current = (this.form().get('labels')?.value ?? []) as string[];
     if (current.includes(key)) return;
     this.form().get('labels')?.setValue([...current, key], { emitEvent: true });
     this.form().markAsDirty();
     this.labelTrigger_.update(v => v + 1);
-    this.showLabelDropdown_.set(false);
   }
 
   protected removeLabel(key: string): void {
@@ -403,8 +408,41 @@ export class RecipeHeaderComponent {
     return this.autoLabels().includes(key);
   }
 
+  protected toggleManualLabel(key: string): void {
+    const ctrl = this.form().get('labels');
+    if (!ctrl) return;
+    const current = (ctrl.value || []) as string[];
+    if (current.includes(key)) {
+      ctrl.setValue(current.filter(l => l !== key));
+    } else {
+      ctrl.setValue([...current, key]);
+    }
+    this.labelTrigger_.update(v => v + 1);
+  }
+
   protected getLabelColor(key: string): string {
     return this.metadataRegistry.getLabelColor(key);
+  }
+
+  /** Returns white or dark text color for contrast on label chip background. */
+  protected getLabelChipTextColor(key: string): string {
+    let hex = this.metadataRegistry.getLabelColor(key).trim();
+    if (hex.startsWith('#')) hex = hex.slice(1);
+    if (hex.length === 3) {
+      hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    }
+    if (hex.length !== 6) return '#0f172a';
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5 ? '#0f172a' : '#ffffff';
+  }
+
+  protected clearAllManualLabels(): void {
+    this.form().get('labels')?.setValue([], { emitEvent: true });
+    this.form().markAsDirty();
+    this.labelTrigger_.update(v => v + 1);
   }
 
   protected async openCreateLabel(): Promise<void> {
