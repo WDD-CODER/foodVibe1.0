@@ -9,6 +9,7 @@ Update status after each sub-task. Link plan files here when applicable.
 ### Recipe Builder (recipe-builder-page.md — excluded from plan audit per request)
 
 - [x] Recipe-builder plan executed: `plans/recipe-builder-page.md` — A1–A5, C1–C2 (currentCost, mise-en-place fix, persistence, RecipeDataService, edit flow, pendingChangesGuard, reactive portions).
+- [x] Recipe header labels: dense grid + Label dropdown, colored chips, clear all; Lucide icons (log-out, shopping-cart, grip-vertical, archive, download, upload) — `feat/recipe-builder-labels-and-icons` merged to main.
 
 ### Unit Tests & Specs
 
@@ -246,6 +247,15 @@ Update status after each sub-task. Link plan files here when applicable.
 ---
 
 ## Ahead (Pending)
+
+### Plan 082 — Recipe/Dish date added (`plans/082-recipe-dish-date-added.plan.md`)
+
+- [ ] Add `addedAt_?: number` to Recipe model
+- [ ] RecipeDataService: set `addedAt_: Date.now()` in addRecipe; merge existing addedAt_ in updateRecipe
+- [ ] DishDataService: set `addedAt_: Date.now()` in addDish; merge existing addedAt_ in updateDish
+- [ ] Recipe book list: show "Date added" column/cell; add sort by dateAdded (SortField + compareRecipes)
+- [ ] i18n: add date_added / added_on key if needed
+- [ ] Optional: recipe builder show "נוסף בתאריך" when editing; tests for add/update preserving addedAt_
 
 ### Plan 081 — toFix Detailed Plans (`plans/081-tofix-detailed-plans.plan.md`)
 
@@ -684,8 +694,9 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 076 | Unified add-recipe skill and create-if-missing | Done |
 | 077 | Excel export feature | Done |
 | 078 | Logistics designated storage | Active |
-| 079 | Unify logistics search, remove From library | Active |
+| 079 | Unify logistics search, remove From library | Done |
 | 080 | Entity storage audit designated | Active |
 || 081 | toFix Detailed Plans | Planned |
+| 082 | Recipe/Dish date added | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*

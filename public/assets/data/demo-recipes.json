@@ -263,5 +263,32 @@
     "yield_unit_": "kg",
     "default_station_": "stove",
     "is_approved_": true
+  },
+  {
+    "_id": "prep_013",
+    "name_hebrew": "משרה לפרגית בולגרית",
+    "recipe_type_": "preparation",
+    "ingredients_": [
+      {"_id": "prep_013_i1", "referenceId": "demo_115", "type": "product", "amount_": 0.15, "unit_": "kg"},
+      {"_id": "prep_013_i2", "referenceId": "demo_001", "type": "product", "amount_": 0.06, "unit_": "kg"},
+      {"_id": "prep_013_i3", "referenceId": "demo_004", "type": "product", "amount_": 0.009, "unit_": "kg"},
+      {"_id": "prep_013_i4", "referenceId": "demo_116", "type": "product", "amount_": 0.008, "unit_": "kg"},
+      {"_id": "prep_013_i5", "referenceId": "demo_052", "type": "product", "amount_": 0.05, "unit_": "kg"},
+      {"_id": "prep_013_i6", "referenceId": "demo_117", "type": "product", "amount_": 0.08, "unit_": "liter"},
+      {"_id": "prep_013_i7", "referenceId": "demo_118", "type": "product", "amount_": 0.03, "unit_": "liter"},
+      {"_id": "prep_013_i8", "referenceId": "demo_070", "type": "product", "amount_": 0.03, "unit_": "liter"},
+      {"_id": "prep_013_i9", "referenceId": "demo_119", "type": "product", "amount_": 0.03, "unit_": "liter"},
+      {"_id": "prep_013_i10", "referenceId": "demo_120", "type": "product", "amount_": 0.0025, "unit_": "kg"},
+      {"_id": "prep_013_i11", "referenceId": "demo_074", "type": "product", "amount_": 0.001, "unit_": "kg"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "טחינה: טוחנים את כל המרכיבים יחד בבלנדר עד לקבלת נוזל אחיד.", "labor_time_minutes_": 5},
+      {"order_": 2, "instruction_": "ערבוב: מעסים את הרוטב לתוך נתחי הפרגיות.", "labor_time_minutes_": 5},
+      {"order_": 3, "instruction_": "השריה: מניחים במקרר למשך 2–3 שעות.", "labor_time_minutes_": 0}
+    ],
+    "yield_amount_": 0.447,
+    "yield_unit_": "kg",
+    "default_station_": "stove",
+    "is_approved_": true
   }
 ]
