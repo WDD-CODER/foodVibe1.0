@@ -15,7 +15,7 @@
 
   .grid-header {
     display: grid;
-    grid-template-columns: 60px 1fr 120px 50px;
+    grid-template-columns: 24px 60px 1fr 120px 50px;
     justify-content: space-evenly;
 
     padding-inline: 0.75rem;
@@ -31,7 +31,7 @@
 
   .grid-row {
     display: grid;
-    grid-template-columns: 60px 1fr 120px 50px;
+    grid-template-columns: 24px 60px 1fr 120px 50px;
     justify-content: space-evenly;
     align-items: center;
 
@@ -81,7 +81,7 @@
 
   .grid-header.prep-grid-header {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 50px;
+    grid-template-columns: 24px 1fr 1fr 1fr 1fr 50px;
     justify-content: space-evenly;
 
     padding-inline: 0.75rem;
@@ -96,7 +96,7 @@
 
   .prep-grid-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 50px;
+    grid-template-columns: 24px 1fr 1fr 1fr 1fr 50px;
     justify-content: space-evenly;
     align-items: center;
 
@@ -289,5 +289,68 @@
       grid-column: 2;
       justify-content: flex-end;
     }
+  }
+}
+
+.col-drag {
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  &:active { cursor: grabbing; }
+}
+
+.cdk-drag-preview {
+  box-shadow: var(--shadow-card);
+  background: var(--bg-glass-strong);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-md);
+  opacity: 0.95;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  box-sizing: border-box;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.grid-body.cdk-drop-list-dragging .grid-row:not(.cdk-drag-placeholder),
+.grid-body.cdk-drop-list-dragging .prep-grid-row:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.inline-category-picker-wrapper {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 0.25rem;
+  z-index: 50;
+  min-width: 200px;
+  background: var(--bg-pure);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+.category-option-item {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-bottom: 1px solid var(--border-default);
+  color: var(--color-text-main);
+  &:last-child {
+    border-bottom: none;
+  }
+  &:hover {
+    background: var(--bg-glass-hover);
   }
 }

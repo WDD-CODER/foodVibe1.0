@@ -286,13 +286,13 @@
   }
 }
 
-.allergen-pool {
+.allergen-pool, .label-pool {
   display: flex;
   flex-wrap: wrap;
   place-content: center;
   gap: 0.5rem;
 
-  .allergen-pill {
+  .allergen-pill, .label-pill {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -308,6 +308,17 @@
     .btn-delete {
       opacity: 1;
       color: var(--color-danger);
+    }
+  }
+
+  .label-pill {
+    background: var(--bg-glass-strong);
+    color: var(--color-text-main);
+    border: 1px solid var(--border-default);
+    
+    .btn-delete {
+      color: var(--color-text-muted);
+      &:hover { color: var(--color-danger); }
     }
   }
 }

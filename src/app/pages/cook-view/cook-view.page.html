@@ -7,7 +7,7 @@
       @if (!editMode_() && isScaledView_() && scaledViewRow_(); as scaledRow) {
         <div class="scaled-view-banner">
           <span class="scaled-view-text">
-            {{ 'scaled_to' | translatePipe }} {{ formatAmount(scaleByIngredientAmount_()!) }} {{ scaledRow.unit | translatePipe }} {{ scaledRow.name }}
+            {{ 'scaled_to' | translatePipe }} {{ scaleByIngredientAmount_()! | formatQuantity }} {{ scaledRow.unit | translatePipe }} {{ scaledRow.name }}
           </span>
           <button type="button" class="back-to-full-recipe-btn" (click)="resetToFullRecipe()" [attr.aria-label]="'back_to_full_recipe' | translatePipe">
             <lucide-icon name="rotate-ccw" [size]="18"></lucide-icon>
@@ -65,7 +65,19 @@
                 <lucide-icon name="plus" [size]="18"></lucide-icon>
               </button>
             </div>
-            <span class="unit-label">{{ (recipe.yield_unit_ || 'unit') | translatePipe }}</span>
+            <app-custom-select
+              class="unit-select"
+              [ngModel]="selectedUnit_()"
+              (ngModelChange)="selectedUnit_.set($event)"
+              [options]="yieldUnitOptions_()"
+              placeholder="unit"
+              style="width: 100px; margin-right: 8px;">
+            </app-custom-select>
+            @if (recipe.yield_unit_ !== selectedUnit_()) {
+              <span class="conversion-badge" style="font-size: 0.8rem; background: var(--color-primary-tint); padding: 2px 6px; border-radius: var(--radius-sm); margin-right: 8px;">
+                ×{{ scaleFactor_() | number:'1.2-2' }}
+              </span>
+            }
           </div>
         }
         @if (scaledCost_() > 0) {
@@ -143,7 +155,7 @@
                       {{ 'set_recipe_by_this_item' | translatePipe }}
                     </button>
                   </div>
-                  <div class="col-amount">{{ formatAmount(getDisplayAmount(i, row)) }}</div>
+                  <div class="col-amount">{{ getDisplayAmount(i, row) | formatQuantity }}</div>
                   <div class="col-unit">
                     @if (row.availableUnits.length > 1) {
                       <app-custom-select
@@ -187,7 +199,7 @@
                 @for (row of scaledPrep_(); track row.name + row.unit + row.amount) {
                   <div class="prep-row">
                     <span class="prep-name">{{ row.name }}</span>
-                    <span class="prep-amount">{{ formatAmount(row.amount) }} {{ row.unit | translatePipe }}</span>
+                    <span class="prep-amount">{{ row.amount | formatQuantity }} {{ row.unit | translatePipe }}</span>
                   </div>
                 }
               </div>

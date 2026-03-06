@@ -357,15 +357,15 @@ $cv-break-md: 56.25rem;
 .ingredients-table-header,
 .ingredients-table-row {
   display: grid;
-  grid-template-columns: 60% 20% 20%;
-
-  gap: 0.75rem;
+  grid-template-columns: minmax(120px, 1fr) minmax(60px, auto) minmax(60px, auto);
+  align-items: start;
+  gap: var(--space-xs);
   padding: 0.625rem 0.875rem;
 }
 
 .ingredients-table-header.has-scale-action,
 .ingredients-table-row.view-mode-row {
-  grid-template-columns: 1fr auto auto auto;
+  grid-template-columns: minmax(120px, 1fr) minmax(60px, auto) minmax(60px, auto) minmax(80px, auto);
 }
 
 .ingredients-table-header {

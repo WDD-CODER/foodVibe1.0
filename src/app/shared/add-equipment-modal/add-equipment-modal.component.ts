@@ -63,15 +63,12 @@ export class AddEquipmentModalComponent {
     });
     if (result?.trim()) {
       const key = result.trim();
-      const baseMsg = this.translationService.translate('confirm_add_equipment_category');
-      const message = `${baseMsg} "${key}"?`;
-      const confirmed = await this.confirmModal.open(message, { saveLabel: 'save' });
-      if (confirmed) {
-        if (!this.customCategories_().includes(key)) {
-          this.customCategories_.update((list) => [...list, key]);
-        }
-        this.category_.set(key);
+      if (!this.customCategories_().includes(key)) {
+        this.customCategories_.update((list) => [...list, key]);
       }
+      this.category_.set(key);
+    } else {
+      this.category_.set('tool');
     }
   }
 

@@ -10,7 +10,11 @@ import type { PreparationEntry } from '@services/preparation-registry.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.directive'
+import { ClickOutSideDirective } from '@directives/click-out-side'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
+import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
+import { take } from 'rxjs/operators'
+import { CdkDragDrop, moveItemInArray, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop'
 
 @Component({
   selector: 'app-recipe-workflow',
@@ -23,7 +27,12 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
     TranslatePipe,
     SelectOnFocusDirective,
     TextareaAutoGrowDirective,
-    CustomSelectComponent
+    ClickOutSideDirective,
+    CustomSelectComponent,
+    ScrollableDropdownComponent,
+    CdkDrag,
+    CdkDropList,
+    CdkDragHandle
   ],
   templateUrl: './recipe-workflow.component.html',
   styleUrl: './recipe-workflow.component.scss'
@@ -41,10 +50,20 @@ export class RecipeWorkflowComponent {
   /** When set, focus the instruction textarea (prep) or prep search (dish) at this row index; parent clears after focus. */
   focusRowAt = input<number | null>(null)
 
-  addItem = output<void>()
+  addItem = output<string | void>()
   removeItem = output<number>()
-  sortByCategory = output<void>()
   focusRowDone = output<void>()
+
+  showAddCategoryPicker_ = signal(false);
+
+  toggleAddCategoryPicker() {
+    this.showAddCategoryPicker_.update(v => !v);
+  }
+
+  onAddWithCategory(category: string) {
+    this.showAddCategoryPicker_.set(false);
+    this.addItem.emit(category);
+  }
 
   @ViewChildren('instructionField') instructionFields!: QueryList<ElementRef<HTMLTextAreaElement>>
   @ViewChildren('laborTimeInput') laborTimeInputs!: QueryList<ElementRef<HTMLInputElement>>
@@ -71,6 +90,20 @@ export class RecipeWorkflowComponent {
     return this.workflowFormArray().controls as FormGroup[];
   })
 
+  onDropStep(event: CdkDragDrop<FormGroup[]>): void {
+    if (event.previousIndex === event.currentIndex) return;
+    const formArray = this.workflowFormArray();
+    const item = formArray.at(event.previousIndex);
+    formArray.removeAt(event.previousIndex);
+    formArray.insert(event.currentIndex, item);
+    
+    if (this.type() === 'preparation') {
+      formArray.controls.forEach((group, i) => {
+        group.get('order')?.setValue(i + 1);
+      });
+    }
+  }
+
   getAllUnitKeys(): string[] {
     return this.unitRegistry_.allUnitKeys_()
   }
@@ -85,7 +118,20 @@ export class RecipeWorkflowComponent {
   }
 
   protected unitOptionsForWorkflow(): { value: string; label: string }[] {
-    return this.getAllUnitKeys().map((u) => ({ value: u, label: u }))
+    const opts = this.getAllUnitKeys().map((u) => ({ value: u, label: u }));
+    return [...opts, { value: '__add_unit__', label: '+ יחידה חדשה' }];
+  }
+
+  onUnitChange(group: FormGroup, val: string): void {
+    if (val === '__add_unit__') {
+      group.get('unit')?.setValue('');
+      this.unitRegistry_.openUnitCreator();
+      this.unitRegistry_.unitAdded$.pipe(take(1)).subscribe(newUnit => {
+        group.get('unit')?.setValue(newUnit);
+      });
+    } else {
+      group.get('unit')?.setValue(val);
+    }
   }
 
   getPreparationCategories(): string[] {

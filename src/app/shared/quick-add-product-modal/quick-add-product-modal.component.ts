@@ -16,7 +16,9 @@ import { ProductDataService } from '@services/product-data.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
 import { UserMsgService } from '@services/user-msg.service';
+import { AddItemModalService } from '@services/add-item-modal.service';
 import { Product } from '@models/product.model';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-quick-add-product-modal',
@@ -32,12 +34,13 @@ export class QuickAddProductModalComponent {
   private readonly unitRegistry = inject(UnitRegistryService);
   private readonly metadataRegistry = inject(MetadataRegistryService);
   private readonly userMsg = inject(UserMsgService);
+  private readonly addItemModal = inject(AddItemModalService);
 
   protected isOpen_ = this.modalService.isOpen_;
   protected config = this.modalService.config;
 
   protected name_ = signal('');
-  protected baseUnit_ = signal('');
+  protected baseUnit_ = signal('gram');
   protected expanded_ = signal(false);
   protected buyPrice_ = signal(0);
   protected category_ = signal('');
@@ -65,7 +68,7 @@ export class QuickAddProductModalComponent {
       const cfg = this.modalService.config();
       if (cfg) {
         this.name_.set(cfg.prefillName);
-        this.baseUnit_.set('');
+        this.baseUnit_.set('gram');
         this.expanded_.set(false);
         this.buyPrice_.set(0);
         this.category_.set('');
@@ -97,6 +100,41 @@ export class QuickAddProductModalComponent {
       return;
     }
     this.advanceFocus(nextTarget);
+  }
+
+  protected async onCategoryChange(val: string): Promise<void> {
+    if (val === '__add_category__') {
+      const newCategory = await this.addItemModal.open({
+        title: 'add_new_category',
+        label: 'category_name',
+        placeholder: 'category_name',
+        saveLabel: 'save_category'
+      });
+      if (newCategory) {
+        await this.metadataRegistry.registerCategory(newCategory);
+        this.category_.set(newCategory);
+        this.onSelectChange(this.getNextFocusAfterCategory());
+      } else {
+        this.category_.set('');
+      }
+    } else {
+      this.category_.set(val);
+      this.onSelectChange(this.getNextFocusAfterCategory());
+    }
+  }
+
+  protected onBaseUnitChange(val: string): void {
+    if (val === '__add_unit__') {
+      this.baseUnit_.set(''); // Reset to placeholder
+      this.unitRegistry.openUnitCreator();
+      const sub = this.unitRegistry.unitAdded$.pipe(take(1)).subscribe(newUnit => {
+        this.baseUnit_.set(newUnit);
+        this.onSelectChange(this.getNextFocusAfterBaseUnit());
+      });
+    } else {
+      this.baseUnit_.set(val);
+      this.onSelectChange(this.getNextFocusAfterBaseUnit());
+    }
   }
 
   /** Arrow Up/Down: mark as navigating so (change) does not advance. Enter: commit and advance. */

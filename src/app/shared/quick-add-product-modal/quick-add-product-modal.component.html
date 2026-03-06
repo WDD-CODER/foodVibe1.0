@@ -32,11 +32,11 @@
                 id="quick-add-base-unit"
                 #baseUnitEl
                 [ngModel]="baseUnit_()"
-                (ngModelChange)="baseUnit_.set($event)"
-                (change)="onSelectChange(getNextFocusAfterBaseUnit())"
+                (ngModelChange)="onBaseUnitChange($event)"
                 (keydown)="onBaseUnitKeydown($event)"
                 name="base_unit_">
                 <option value="" disabled>{{ 'choose_unit' | translatePipe }}</option>
+                <option value="__add_unit__">+ {{ 'new_unit' | translatePipe }}</option>
                 @for (key of unitKeys_(); track key) {
                   <option [value]="key">{{ key | translatePipe }}</option>
                 }
@@ -61,11 +61,11 @@
                 id="quick-add-category"
                 #categoryEl
                 [ngModel]="category_()"
-                (ngModelChange)="category_.set($event)"
-                (change)="onSelectChange(getNextFocusAfterCategory())"
+                (ngModelChange)="onCategoryChange($event)"
                 (keydown)="onCategoryKeydown($event)"
                 name="category_">
                 <option value="">{{ 'choose_category' | translatePipe }}</option>
+                <option value="__add_category__">+ {{ 'new_category' | translatePipe }}</option>
                 @for (cat of categories_(); track cat) {
                   <option [value]="cat">{{ cat | translatePipe }}</option>
                 }

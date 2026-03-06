@@ -3,15 +3,20 @@
   @if (type() === 'preparation') {
     <div class="workflow-grid" formArrayName="workflow_items">
       <div class="grid-header">
+        <div class="col-drag"></div>
         <div class="col-id text-center">#</div>
         <div class="col-instruction">{{ 'instruction' | translatePipe }}</div>
         <div class="col-timer text-center">{{ 'labor_time_minutes' | translatePipe }}</div>
         <div class="col-actions"></div>
       </div>
 
-      <div class="grid-body">
+      <div class="grid-body" cdkDropList (cdkDropListDropped)="onDropStep($event)">
         @for (group of workflowGroups_(); track group; let i = $index) {
-          <div [formGroupName]="i" class="grid-row">
+          <div [formGroupName]="i" class="grid-row" cdkDrag>
+            <div class="cdk-custom-placeholder" *cdkDragPlaceholder></div>
+            <div class="col-drag" cdkDragHandle>
+              <lucide-icon name="grip-vertical" [size]="16" class="drag-handle-icon"></lucide-icon>
+            </div>
             <div class="col-id">
               <span class="step-badge">{{ i + 1 }}</span>
             </div>
@@ -91,19 +96,23 @@
   @else {
     <div class="prep-flat-grid" formArrayName="workflow_items">
       <div class="grid-header prep-grid-header">
+        <div class="col-drag"></div>
         <div class="col-prep-name">{{ 'preparation' | translatePipe }}</div>
-        <div class="col-prep-category sortable-header" (click)="sortByCategory.emit()">
+        <div class="col-prep-category">
           <span>{{ 'preparation_category' | translatePipe }}</span>
-          <lucide-icon name="arrow-up-down" class="sort-icon" [size]="14"></lucide-icon>
         </div>
         <div class="col-prep-qty">{{ 'quantity' | translatePipe }}</div>
         <div class="col-prep-unit">{{ 'unit' | translatePipe }}</div>
         <div class="col-prep-actions"></div>
       </div>
 
-      <div class="grid-body">
+      <div class="grid-body" cdkDropList (cdkDropListDropped)="onDropStep($event)">
         @for (group of workflowGroups_(); track group; let i = $index) {
-          <div [formGroupName]="i" class="prep-grid-row">
+          <div [formGroupName]="i" class="prep-grid-row" cdkDrag>
+            <div class="cdk-custom-placeholder" *cdkDragPlaceholder></div>
+            <div class="col-drag" cdkDragHandle>
+              <lucide-icon name="grip-vertical" [size]="16" class="drag-handle-icon"></lucide-icon>
+            </div>
             <div class="col-prep-name">
               @if (!group.get('preparation_name')?.value) {
                 <app-preparation-search
@@ -141,8 +150,7 @@
                   tabindex="-1">
                   <lucide-icon name="minus" [size]="16"></lucide-icon>
                 </button>
-                <input type="number" SelectOnFocus formControlName="quantity"
-                  class="grid-input qty-input" placeholder="1" />
+                <span class="amount-value" style="min-width: 2rem; text-align: center;">{{ group.get('quantity')?.value }}</span>
                 <button type="button" class="qty-btn plus" (click)="incrementQuantity(group, i)"
                   tabindex="-1">
                   <lucide-icon name="plus" [size]="16"></lucide-icon>
@@ -155,7 +163,8 @@
                 formControlName="unit"
                 class="grid-select"
                 [options]="unitOptionsForWorkflow()"
-                placeholder="unit" />
+                placeholder="unit"
+                (valueChange)="onUnitChange(group, $event)" />
             </div>
 
             <div class="col-prep-actions">
@@ -167,10 +176,25 @@
         }
       </div>
       
-      <button type="button" (click)="addItem.emit()" class="add-row-btn">
-        <lucide-icon name="plus" class="ml-2 h-4 w-4"></lucide-icon>
-        {{ 'add_preparation' | translatePipe }}
-      </button>
+      <div style="position: relative; display: flex; justify-content: center;">
+        <button type="button" (click)="toggleAddCategoryPicker(); $event.stopPropagation()" class="add-row-btn">
+          <lucide-icon name="plus" class="ml-2 h-4 w-4"></lucide-icon>
+          {{ 'add_preparation' | translatePipe }}
+        </button>
+        @if (showAddCategoryPicker_()) {
+          <div (clickOutside)="showAddCategoryPicker_.set(false)" class="inline-category-picker-wrapper">
+            <app-scrollable-dropdown [maxHeight]="240">
+              <ul role="listbox" style="margin: 0; padding: 0; list-style: none;">
+                @for (opt of categoryOptionsForGroup(); track opt.value) {
+                  <li role="option" (click)="onAddWithCategory(opt.value)" class="category-option-item">
+                    {{ opt.label | translatePipe }}
+                  </li>
+                }
+              </ul>
+            </app-scrollable-dropdown>
+          </div>
+        }
+      </div>
     </div>
   }
 </div>

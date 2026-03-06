@@ -12,6 +12,9 @@ import { FocusByRowDirective } from '@directives/focus-by-row.directive';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 import type { Product } from '@models/product.model';
 import type { Recipe } from '@models/recipe.model';
+import { UnitRegistryService } from '@services/unit-registry.service';
+import { take } from 'rxjs/operators';
+import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-recipe-ingredients-table',
@@ -24,7 +27,10 @@ import type { Recipe } from '@models/recipe.model';
     TranslatePipe,
     SelectOnFocusDirective,
     FocusByRowDirective,
-    CustomSelectComponent
+    CustomSelectComponent,
+    CdkDrag,
+    CdkDropList,
+    CdkDragHandle
   ],
   templateUrl: './recipe-ingredients-table.component.html',
   styleUrl: './recipe-ingredients-table.component.scss'
@@ -33,6 +39,7 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
   //INJECTIONS
   private readonly kitchenStateService = inject(KitchenStateService);
   private readonly recipeCostService = inject(RecipeCostService);
+  private readonly unitRegistry = inject(UnitRegistryService);
   private fb = inject(FormBuilder);
   private readonly el = inject(ElementRef<HTMLElement>);
 
@@ -47,6 +54,14 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
   focusSearchDone = output<void>();
 
   // GETTERS
+
+  onDropIngredient(event: CdkDragDrop<FormGroup[]>): void {
+    if (event.previousIndex === event.currentIndex) return;
+    const formArray = this.ingredientsFormArray();
+    const item = formArray.at(event.previousIndex);
+    formArray.removeAt(event.previousIndex);
+    formArray.insert(event.currentIndex, item);
+  }
 
   get ingredientGroups() {
     return [...this.ingredientsFormArray().controls] as FormGroup[];
@@ -221,7 +236,22 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
   }
 
   getUnitOptions(group: FormGroup): { value: string; label: string }[] {
-    return this.getAvailableUnits(group).map((u) => ({ value: u, label: u }));
+    const opts = this.getAvailableUnits(group).map((u) => ({ value: u, label: u }));
+    return [...opts, { value: '__add_unit__', label: '+ יחידה חדשה' }];
+  }
+
+  onUnitChange(group: FormGroup, index: number, val: string): void {
+    if (val === '__add_unit__') {
+      group.get('unit')?.setValue('');
+      this.unitRegistry.openUnitCreator();
+      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe(newUnit => {
+        group.get('unit')?.setValue(newUnit);
+        this.updateLineCalculations(index);
+      });
+    } else {
+      group.get('unit')?.setValue(val);
+      this.updateLineCalculations(index);
+    }
   }
 
   getGrossWeight(index: number): number {

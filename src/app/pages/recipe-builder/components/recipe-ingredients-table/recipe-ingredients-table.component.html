@@ -1,5 +1,6 @@
 <div class="ingredients-container" dir="rtl">
   <div class="ingredients-grid-header">
+    <div class="col-drag"></div>
     <div class="col-name">{{ 'ingredient' | translatePipe }}</div>
     <div class="col-unit">{{ 'unit' | translatePipe }}</div>
     <div class="col-quantity">{{ 'quantity' | translatePipe }}</div>
@@ -8,9 +9,13 @@
     <!-- <div class="col-actions">{{ 'actions' | translatePipe }}</div> -->
   </div>
 
-  <div class="ingredients-grid-body">
+  <div class="ingredients-grid-body" cdkDropList (cdkDropListDropped)="onDropIngredient($event)">
     @for (group of ingredientGroups; track $index) {
-    <div [formGroup]="group" class="ingredient-grid-row">
+    <div [formGroup]="group" class="ingredient-grid-row" cdkDrag>
+      <div class="cdk-custom-placeholder" *cdkDragPlaceholder></div>
+      <div class="col-drag" cdkDragHandle>
+        <lucide-icon name="grip-vertical" [size]="16" class="drag-handle-icon"></lucide-icon>
+      </div>
 
       <div class="col-name">
         @if (!group.get('referenceId')?.value) {
@@ -38,7 +43,7 @@
           focusByRow
           [rowIndex]="$index"
           kind="unit"
-          (valueChange)="updateLineCalculations($index)" />
+          (valueChange)="onUnitChange(group, $index, $event)" />
         } @else {
         <span class="placeholder-dash">---</span>
         }

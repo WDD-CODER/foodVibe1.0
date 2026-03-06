@@ -19,6 +19,7 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { RecipeWorkflowComponent } from '@pages/recipe-builder/components/recipe-workflow/recipe-workflow.component';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
+import { FormatQuantityPipe } from 'src/app/core/pipes/format-quantity.pipe';
 
 @Component({
   selector: 'app-cook-view-page',
@@ -33,7 +34,8 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
     SelectOnFocusDirective,
     RecipeWorkflowComponent,
     LoaderComponent,
-    CustomSelectComponent
+    CustomSelectComponent,
+    FormatQuantityPipe
   ],
   templateUrl: './cook-view.page.html',
   styleUrl: './cook-view.page.scss'
@@ -53,6 +55,7 @@ export class CookViewPage implements OnInit {
 
   protected recipe_ = signal<Recipe | null>(null);
   protected targetQuantity_ = signal<number>(1);
+  protected selectedUnit_ = signal<string>('');
   /** Per-row unit override (index -> unit key). */
   protected unitOverrides_ = signal<Record<number, string>>({});
   protected editMode_ = signal<boolean>(false);
@@ -83,11 +86,29 @@ export class CookViewPage implements OnInit {
     return this.getScaledIngredientAt(idx) ?? null;
   });
 
+  protected yieldUnitOptions_ = computed(() => {
+    const keys = this.unitRegistry.allUnitKeys_();
+    return keys.map(k => ({ value: k, label: k }));
+  });
+
+  protected convertedYieldAmount_ = computed(() => {
+    const recipe = this.recipe_();
+    if (!recipe) return 1;
+    const baseAmount = recipe.yield_amount_ ?? 1;
+    const baseUnit = recipe.yield_unit_ ?? 'unit';
+    const selUnit = this.selectedUnit_() || baseUnit;
+    if (baseUnit === selUnit) return baseAmount;
+    const baseConv = this.unitRegistry.getConversion(baseUnit);
+    const selConv = this.unitRegistry.getConversion(selUnit);
+    if (!baseConv || !selConv) return baseAmount;
+    return baseAmount * (baseConv / selConv);
+  });
+
   protected scaleFactor_ = computed(() => {
     const recipe = this.recipe_();
     const qty = this.targetQuantity_();
     if (!recipe) return 1;
-    return this.scalingService.getScaleFactor(recipe, qty);
+    return qty / this.convertedYieldAmount_();
   });
 
   protected scaledIngredients_ = computed(() => {
@@ -135,6 +156,7 @@ export class CookViewPage implements OnInit {
     const recipe = this.route.snapshot.data['recipe'] as Recipe | null;
     if (recipe) {
       this.recipe_.set(recipe);
+      this.selectedUnit_.set(recipe.yield_unit_ || 'unit');
       this.cookViewState.setLastViewedRecipeId(recipe._id);
       const base = recipe.yield_amount_ ?? 1;
       this.targetQuantity_.set(base);
@@ -393,11 +415,6 @@ export class CookViewPage implements OnInit {
     const basePerOne = this.recipeCostService.convertToBaseUnits(1, targetUnit);
     if (!basePerOne) return row.amount;
     return baseFrom / basePerOne;
-  }
-
-  protected formatAmount(amount: number): string {
-    if (Number.isInteger(amount)) return String(amount);
-    return amount.toFixed(2).replace(/\.?0+$/, '');
   }
 
   protected addWorkflowItem(): void {

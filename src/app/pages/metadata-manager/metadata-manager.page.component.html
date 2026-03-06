@@ -152,9 +152,9 @@
 
     <div class="list-container">
       @if (items.length > 0) {
-      <div [class]="type === 'allergen' ? 'allergen-pool' : 'list-stack'">
+      <div [class]="type === 'allergen' ? 'allergen-pool' : (type === 'label' ? 'label-pool' : 'list-stack')">
         @for (item of items; track item) {
-        <div [class]="type === 'allergen' ? 'allergen-pill' : 'list-item group'">
+        <div [class]="type === 'allergen' ? 'allergen-pill' : (type === 'label' ? 'label-pill' : 'list-item group')">
           @if (type === 'label') {
             <span class="label-color-dot" [style.background-color]="getLabelColor(item)"></span>
           }

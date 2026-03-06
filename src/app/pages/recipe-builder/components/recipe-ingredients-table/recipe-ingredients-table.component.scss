@@ -1,6 +1,6 @@
 
-/* name | unit | quantity | percent | cost | actions */
-$ingredients-grid-template: minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr) 3rem;
+/* drag | name | unit | quantity | percent | cost | actions */
+$ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr) 3rem;
 
 .ingredients-container {
   container-type: inline-size;
@@ -9,6 +9,40 @@ $ingredients-grid-template: minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
   width: 100%;
 
   overflow: visible;
+}
+
+.col-drag {
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  &:active { cursor: grabbing; }
+}
+
+.cdk-drag-preview {
+  box-shadow: var(--shadow-card);
+  background: var(--bg-glass-strong);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-md);
+  opacity: 0.95;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  box-sizing: border-box;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.ingredients-grid-body.cdk-drop-list-dragging .ingredient-grid-row:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 .ingredients-grid-header,

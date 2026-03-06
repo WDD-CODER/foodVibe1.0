@@ -92,13 +92,19 @@ export class RecipeBuilderPage implements OnInit {
   protected logisticsLogicCollapsed_ = signal(true);
 
   protected toggleTableLogic(): void {
-    this.tableLogicCollapsed_.update((v) => !v);
+    const next = !this.tableLogicCollapsed_();
+    this.tableLogicCollapsed_.set(next);
+    localStorage.setItem('rb_col_ingredients', JSON.stringify(next));
   }
   protected toggleWorkflowLogic(): void {
-    this.workflowLogicCollapsed_.update((v) => !v);
+    const next = !this.workflowLogicCollapsed_();
+    this.workflowLogicCollapsed_.set(next);
+    localStorage.setItem('rb_col_workflow', JSON.stringify(next));
   }
   protected toggleLogisticsLogic(): void {
-    this.logisticsLogicCollapsed_.update((v) => !v);
+    const next = !this.logisticsLogicCollapsed_();
+    this.logisticsLogicCollapsed_.set(next);
+    localStorage.setItem('rb_col_logistics', JSON.stringify(next));
   }
 
   //COMPUTED
@@ -273,6 +279,13 @@ export class RecipeBuilderPage implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
+    const lsIngredients = localStorage.getItem('rb_col_ingredients');
+    if (lsIngredients !== null) this.tableLogicCollapsed_.set(JSON.parse(lsIngredients));
+    const lsWorkflow = localStorage.getItem('rb_col_workflow');
+    if (lsWorkflow !== null) this.workflowLogicCollapsed_.set(JSON.parse(lsWorkflow));
+    const lsLogistics = localStorage.getItem('rb_col_logistics');
+    if (lsLogistics !== null) this.logisticsLogicCollapsed_.set(JSON.parse(lsLogistics));
+
     const q = this.route_.snapshot.queryParams;
     const view = q['view'];
     const entityType = q['entityType'] as string | undefined;
@@ -460,6 +473,7 @@ export class RecipeBuilderPage implements OnInit {
   protected logisticsToolSearchQuery_ = signal('');
   protected logisticsToolQuantity_ = signal(1);
   protected logisticsToolDropdownOpen_ = signal(false);
+  protected logisticsHighlightedIndex_ = signal(-1);
   /** Selected equipment id (from dropdown); user sets quantity then presses Add. */
   protected logisticsSelectedToolId_ = signal<string | null>(null);
   /** When user selected a library item, we keep it so Add uses its phase/notes. */
@@ -528,12 +542,55 @@ export class RecipeBuilderPage implements OnInit {
 
   protected onLogisticsSearchInput(value: string): void {
     this.logisticsToolSearchQuery_.set(value);
+    this.logisticsHighlightedIndex_.set(-1);
     this.logisticsToolDropdownOpen_.set(value.trim().length > 0);
     const selectedId = this.logisticsSelectedToolId_();
     if (selectedId && this.getEquipmentNameById(selectedId) !== value) {
       this.logisticsSelectedToolId_.set(null);
       this.logisticsSelectedLibraryItem_.set(null);
     }
+  }
+
+  protected onLogisticsSearchKeydown(event: KeyboardEvent): void {
+    if (!this.logisticsToolDropdownOpen_()) return;
+    const opts = this.logisticsSearchOptions_();
+    const len = opts.length + 1; // +1 for 'add new tool'
+    let idx = this.logisticsHighlightedIndex_();
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      idx = Math.min(idx + 1, len - 1);
+      this.logisticsHighlightedIndex_.set(idx);
+      this.scrollLogisticsDropdownToItem(idx);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      idx = Math.max(idx - 1, 0);
+      this.logisticsHighlightedIndex_.set(idx);
+      this.scrollLogisticsDropdownToItem(idx);
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      if (idx >= 0 && idx < opts.length) {
+        this.selectLogisticsOption(opts[idx]);
+        this.logisticsHighlightedIndex_.set(-1);
+      } else if (idx === opts.length) {
+        this.openAddNewToolModal();
+        this.logisticsHighlightedIndex_.set(-1);
+      }
+    } else if (event.key === 'Escape') {
+      this.logisticsToolDropdownOpen_.set(false);
+      this.logisticsHighlightedIndex_.set(-1);
+    }
+  }
+
+  private scrollLogisticsDropdownToItem(index: number) {
+    setTimeout(() => {
+      const dropdown = document.querySelector('.logistics-tool-dropdown');
+      if (!dropdown) return;
+      const items = dropdown.querySelectorAll('.logistics-tool-option');
+      if (items[index]) {
+        items[index].scrollIntoView({ block: 'nearest' });
+      }
+    }, 0);
   }
 
   /** Add the currently selected item (with current quantity) to baseline. Called by Add button. */
@@ -678,13 +735,12 @@ export class RecipeBuilderPage implements OnInit {
     }
   }
 
-  addNewStep(): void {
+  addNewStep(category?: string | void): void {
     const nextOrder = this.workflowArray.length + 1;
     const isDish = this.recipeForm_.get('recipe_type')?.value === 'dish';
 
-    // Logic: Add a prep row if it's a Dish, or a Step if it's a Prep
     const newGroup = isDish
-      ? this.recipeFormService_.createPrepItemRow()
+      ? this.recipeFormService_.createPrepItemRow({ category_name: (category as string) || '', main_category_name: (category as string) || '' })
       : this.recipeFormService_.createStepGroup(nextOrder);
 
     this.workflowArray.push(newGroup);
@@ -931,15 +987,4 @@ export class RecipeBuilderPage implements OnInit {
     }
   }
 
-  sortPrepByCategory(): void {
-    if (this.recipeForm_.get('recipe_type')?.value !== 'dish') return;
-    const controls = this.workflowArray.controls as FormGroup[];
-    const sorted = [...controls].sort((a, b) => {
-      const catA = (a.get('category_name')?.value ?? '') as string;
-      const catB = (b.get('category_name')?.value ?? '') as string;
-      return catA.localeCompare(catB);
-    });
-    this.workflowArray.clear();
-    sorted.forEach(c => this.workflowArray.push(c));
-  }
 }
