@@ -75,6 +75,7 @@
 
 .recipe-grid-row > .col-name,
 .recipe-grid-row > .col-cost,
+.recipe-grid-row > .col-date,
 .recipe-grid-row > .col-actions {
   display: flex;
   align-items: center;
@@ -126,6 +127,7 @@
 
 .recipe-grid-row:hover > .col-name,
 .recipe-grid-row:hover > .col-cost,
+.recipe-grid-row:hover > .col-date,
 .recipe-grid-row:hover > .col-actions {
   background: var(--bg-glass);
 }

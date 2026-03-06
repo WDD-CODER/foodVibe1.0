@@ -20,7 +20,7 @@ import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/share
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
 
-export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens';
+export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens' | 'dateAdded';
 
 const MAX_ALLERGEN_RECURSION = 5;
 
@@ -245,6 +245,11 @@ export class RecipeBookListComponent {
     return Array.from(set);
   }
 
+  protected formatAddedAt(addedAt: number | undefined): string {
+    if (addedAt == null) return '—';
+    return new Date(addedAt).toLocaleDateString('he-IL', { dateStyle: 'short' });
+  }
+
   protected getRecipeYieldDescription(recipe: Recipe): string {
     const amount = recipe.yield_amount_ ?? 1;
     const unit = recipe.yield_unit_ ? this.translationService.translate(recipe.yield_unit_) : '';
@@ -301,6 +306,8 @@ export class RecipeBookListComponent {
         const bVal = this.translationService.translate((bAll[0] ?? '') as string);
         return hebrewCompare(aVal, bVal);
       }
+      case 'dateAdded':
+        return (a.addedAt_ ?? 0) - (b.addedAt_ ?? 0);
       default:
         return 0;
     }

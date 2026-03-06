@@ -1,8 +1,8 @@
 <app-list-shell
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
-  [gridTemplate]="'2fr 1fr 1fr minmax(48px, 0.8fr) 0.8fr 80px'"
-  [mobileGridTemplate]="'2fr 1fr 0.8fr 80px'">
+  [gridTemplate]="'2fr 1fr 1fr minmax(48px, 0.8fr) 0.8fr minmax(72px, 0.85fr) 80px'"
+  [mobileGridTemplate]="'2fr 1fr 0.8fr minmax(72px, 0.85fr) 80px'">
 
   <h2 shell-title class="page-title">{{ 'recipe_book' | translatePipe }}</h2>
 
@@ -37,6 +37,9 @@
     </app-carousel-header>
     <div class="col-cost c-grid-header-cell sortable-header" (click)="setSort('cost')" (keydown.enter)="setSort('cost')" (keydown.space)="$event.preventDefault(); setSort('cost')" role="button" tabindex="0">
       {{ 'cost' | translatePipe }}
+    </div>
+    <div class="col-date c-grid-header-cell sortable-header" (click)="setSort('dateAdded')" (keydown.enter)="setSort('dateAdded')" (keydown.space)="$event.preventDefault(); setSort('dateAdded')" role="button" tabindex="0">
+      {{ 'date_added' | translatePipe }}
     </div>
     <div class="col-actions c-grid-header-cell">{{ 'actions' | translatePipe }}</div>
   </ng-container>
@@ -100,6 +103,7 @@
         <div class="col-cost cost-cell-wrap" (mouseenter)="showCostTooltip(recipe._id, $event)" (mouseleave)="hideCostTooltip()" (click)="toggleCostTooltipTap(recipe._id, $event)" [attr.aria-describedby]="(hoveredCostRecipeId_() === recipe._id || tappedCostRecipeId_() === recipe._id) ? 'cost-tooltip-' + recipe._id : null">
           ₪{{ getRecipeCost(recipe) | number:'1.2-2' }}
         </div>
+        <div class="col-date">{{ formatAddedAt(recipe.addedAt_) }}</div>
         <div class="col-actions">
           <button type="button" class="action-btn edit" (click)="onEditRecipe(recipe); $event.stopPropagation()" [attr.aria-label]="'edit' | translatePipe">
             <lucide-icon name="pencil" [size]="18"></lucide-icon>

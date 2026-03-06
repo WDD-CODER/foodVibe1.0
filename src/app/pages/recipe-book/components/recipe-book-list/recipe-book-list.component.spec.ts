@@ -80,6 +80,15 @@ describe('RecipeBookListComponent', () => {
     (component as any).setSort('cost');
     expect((component as any).sortBy_()).toBe('cost');
     expect((component as any).sortOrder_()).toBe('asc');
+
+    (component as any).setSort('dateAdded');
+    expect((component as any).sortBy_()).toBe('dateAdded');
+    expect((component as any).sortOrder_()).toBe('asc');
+  });
+
+  it('should format addedAt date or return placeholder when missing', () => {
+    expect((component as any).formatAddedAt(undefined)).toBe('—');
+    expect((component as any).formatAddedAt(1700000000000)).toMatch(/\d/);
   });
 
   it('should filter list when search input is set', () => {
