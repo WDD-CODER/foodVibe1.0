@@ -33,14 +33,17 @@ export class RecipeDataService {
   }
 
   async addRecipe(newRecipe: Omit<Recipe, '_id'>): Promise<Recipe> {
-    const saved = await this.storage.post<Recipe>(ENTITY, newRecipe as Recipe)
+    const toCreate = { ...newRecipe, addedAt_: Date.now() } as Recipe
+    const saved = await this.storage.post<Recipe>(ENTITY, toCreate)
     this.recipesStore_.update(recipes => [...recipes, saved])
     this.logging.info({ event: 'crud.recipe.create', message: 'Recipe created', context: { entityType: ENTITY, id: saved._id } })
     return saved
   }
 
   async updateRecipe(recipe: Recipe): Promise<Recipe> {
-    const updated = await this.storage.put<Recipe>(ENTITY, recipe)
+    const existing = await this.storage.get<Recipe>(ENTITY, recipe._id).catch(() => null)
+    const toSave: Recipe = { ...recipe, addedAt_: recipe.addedAt_ ?? existing?.addedAt_ }
+    const updated = await this.storage.put<Recipe>(ENTITY, toSave)
     this.recipesStore_.update(recipes =>
       recipes.map(r => (r._id === updated._id ? updated : r))
     )

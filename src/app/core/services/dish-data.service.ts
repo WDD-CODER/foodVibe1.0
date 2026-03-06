@@ -31,13 +31,16 @@ export class DishDataService {
   }
 
   async addDish(newDish: Omit<Recipe, '_id'>): Promise<Recipe> {
-    const saved = await this.storage.post<Recipe>(ENTITY, newDish as Recipe);
+    const toCreate = { ...newDish, addedAt_: Date.now() } as Recipe;
+    const saved = await this.storage.post<Recipe>(ENTITY, toCreate);
     this.dishesStore_.update(dishes => [...dishes, saved]);
     return saved;
   }
 
   async updateDish(dish: Recipe): Promise<Recipe> {
-    const updated = await this.storage.put<Recipe>(ENTITY, dish);
+    const existing = await this.storage.get<Recipe>(ENTITY, dish._id).catch(() => null);
+    const toSave: Recipe = { ...dish, addedAt_: dish.addedAt_ ?? existing?.addedAt_ };
+    const updated = await this.storage.put<Recipe>(ENTITY, toSave);
     this.dishesStore_.update(dishes =>
       dishes.map(d => (d._id === updated._id ? updated : d))
     );

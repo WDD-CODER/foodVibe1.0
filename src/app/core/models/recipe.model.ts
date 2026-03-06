@@ -57,4 +57,6 @@ export interface Recipe {
   labels_?: string[];
   /** Auto-applied labels from ingredient categories/allergens (computed on save) */
   autoLabels_?: string[];
+  /** Epoch ms when the recipe/dish was first added (set on create, preserved on update) */
+  addedAt_?: number;
 }
