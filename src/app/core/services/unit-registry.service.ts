@@ -2,6 +2,7 @@ import { Injectable, signal, computed, inject } from '@angular/core'
 import { StorageService } from './async-storage.service'
 import { UserMsgService } from './user-msg.service'
 import { LoggingService } from './logging.service'
+import { Subject } from 'rxjs'
 
 @Injectable({ providedIn: 'root' })
 export class UnitRegistryService {
@@ -9,6 +10,8 @@ export class UnitRegistryService {
   private readonly storageService = inject(StorageService)
   private readonly logging = inject(LoggingService)
   private readonly STORAGE_KEY = 'KITCHEN_UNITS'; // Standardized key
+
+  public readonly unitAdded$ = new Subject<string>();
 
   // SIGNALS
   private isCreatorOpen = signal(false);
@@ -114,6 +117,7 @@ export class UnitRegistryService {
 
       // 4. Update the Signal for UI reactivity
       this.globalUnits_.set(updatedUnits);
+      this.unitAdded$.next(sanitizedName);
       this.userMsgService.onSetSuccessMsg(`היחידה ${sanitizedName} נוספה בהצלחה`);
 
     } catch (err) {
