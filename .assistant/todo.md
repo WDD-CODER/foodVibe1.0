@@ -245,11 +245,7 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Cleanup demo JSON (products, recipes, venues) and add plan; align app (list-shell, recipe-book, inventory, venue-list, equipment-list) and assistant todo.
 - [x] demo-products.json refactor (yield 1, min_stock/expiry 0, 2026 IL prices, allergens) — feat/demo-products-cleanup merged to main.
 
----
-
-## Ahead (Pending)
-
-### Plan 082 — Recipe/Dish date added (`plans/082-recipe-dish-date-added.plan.md`)
+### Plan 082 — Recipe/Dish date added (`plans/082-recipe-dish-date-added.plan.md`) — merged to main
 
 - [x] Add `addedAt_?: number` to Recipe model
 - [x] RecipeDataService: set `addedAt_: Date.now()` in addRecipe; merge existing addedAt_ in updateRecipe
@@ -257,6 +253,10 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Recipe book list: show "Date added" column/cell; add sort by dateAdded (SortField + compareRecipes)
 - [x] i18n: add date_added key (נוסף בתאריך)
 - [ ] Optional: recipe builder show "נוסף בתאריך" when editing; dedicated data-service specs for addedAt_
+
+---
+
+## Ahead (Pending)
 
 ### Plan 081 — toFix Detailed Plans (`plans/081-tofix-detailed-plans.plan.md`)
 
@@ -698,6 +698,6 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 079 | Unify logistics search, remove From library | Done |
 | 080 | Entity storage audit designated | Active |
 || 081 | toFix Detailed Plans | Planned |
-| 082 | Recipe/Dish date added | Active |
+| 082 | Recipe/Dish date added | Done |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
