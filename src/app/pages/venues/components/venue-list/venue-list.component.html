@@ -40,13 +40,13 @@
       <div class="no-results">{{ 'no_venues_match' | translatePipe }}</div>
     }
     @for (item of filteredVenues_(); track item._id) {
-      <div class="venue-grid-row" role="row">
-        <div class="col-name" role="cell">{{ item.name_hebrew }}</div>
+      <div class="venue-grid-row c-list-row" role="row">
+        <div class="col-name c-list-body-cell" role="cell">{{ item.name_hebrew }}</div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
-          <div class="col-env" cellCarouselSlide [label]="'environment_type' | translatePipe">{{ item.environment_type_ | translatePipe }}</div>
-          <div class="col-infra" cellCarouselSlide [label]="'infrastructure_items' | translatePipe">{{ item.available_infrastructure_.length }}</div>
+          <div class="col-env c-list-body-cell" cellCarouselSlide [label]="'environment_type' | translatePipe">{{ item.environment_type_ | translatePipe }}</div>
+          <div class="col-infra c-list-body-cell" cellCarouselSlide [label]="'infrastructure_items' | translatePipe">{{ item.available_infrastructure_.length }}</div>
         </app-cell-carousel>
-        <div class="c-col-actions" role="cell">
+        <div class="c-col-actions c-list-body-cell" role="cell">
           <button type="button" class="c-icon-btn" (click)="onEdit(item._id)" [attr.aria-label]="'edit' | translatePipe">
             <lucide-icon name="pencil" [size]="18"></lucide-icon>
           </button>

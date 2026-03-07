@@ -19,32 +19,8 @@
     display: contents;
   }
 
-  .venue-grid-row > .col-name,
-  .venue-grid-row > app-cell-carousel,
-  .venue-grid-row > .c-col-actions {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    min-width: 0;
-    padding-inline: 0.75rem;
-    padding-block: 0.625rem;
-
-    background: var(--bg-glass);
-
-    border-block-end: 1px solid rgba(241, 245, 249, 0.4);
-
-    transition: background 0.15s ease;
-  }
-
-  .venue-grid-row > .col-name {
+  .venue-grid-row .col-name.c-list-body-cell {
     justify-content: flex-start;
-  }
-
-  .venue-grid-row:hover > .col-name,
-  .venue-grid-row:hover > app-cell-carousel,
-  .venue-grid-row:hover > .c-col-actions {
-    background: var(--bg-glass);
   }
 
   .venue-grid-row:hover .c-icon-btn {
@@ -53,30 +29,6 @@
 
   .c-col-actions .c-icon-btn {
     margin-inline-start: 0.25rem;
-  }
-
-  @media (min-width: 769px) {
-    .venue-grid-row .col-env,
-    .venue-grid-row .col-infra {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      min-width: 0;
-      padding-inline: 0.75rem;
-      padding-block: 0.625rem;
-
-      background: var(--bg-glass);
-
-      border-block-end: 1px solid rgba(241, 245, 249, 0.4);
-
-      transition: background 0.15s ease;
-    }
-
-    .venue-grid-row:hover .col-env,
-    .venue-grid-row:hover .col-infra {
-      background: var(--bg-glass);
-    }
   }
 
   .no-results {

@@ -48,30 +48,6 @@
     display: contents;
   }
 
-  .equipment-grid-row > .col-name,
-  .equipment-grid-row > app-cell-carousel,
-  .equipment-grid-row > .c-col-actions {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    min-width: 0;
-    padding-inline: 0.75rem;
-    padding-block: 0.625rem;
-
-    background: transparent;
-
-    border-block-end: 1px solid rgba(241, 245, 249, 0.4);
-
-    transition: background 0.15s ease;
-  }
-
-  .equipment-grid-row:hover > .col-name,
-  .equipment-grid-row:hover > app-cell-carousel,
-  .equipment-grid-row:hover > .c-col-actions {
-    background: var(--bg-glass);
-  }
-
   .equipment-grid-row:hover .c-icon-btn {
     opacity: 1;
   }

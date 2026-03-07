@@ -54,16 +54,16 @@
       </div>
     }
     @for (item of filteredSuppliers_(); track item._id) {
-      <div class="supplier-grid-row" role="row">
-        <div class="col-name" role="cell">{{ item.name_hebrew }}</div>
+      <div class="supplier-grid-row c-list-row" role="row">
+        <div class="col-name c-list-body-cell" role="cell">{{ item.name_hebrew }}</div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
-          <div class="col-contact" cellCarouselSlide [label]="'contact_person' | translatePipe">{{ item.contact_person_ ?? '—' }}</div>
-          <div class="col-delivery" cellCarouselSlide [label]="'delivery_days' | translatePipe">{{ deliveryDaysDisplay(item.delivery_days_) }}</div>
-          <div class="col-min-order" cellCarouselSlide [label]="'min_order' | translatePipe">{{ item.min_order_mov_ }}</div>
+          <div class="col-contact c-list-body-cell" cellCarouselSlide [label]="'contact_person' | translatePipe">{{ item.contact_person_ ?? '—' }}</div>
+          <div class="col-delivery c-list-body-cell" cellCarouselSlide [label]="'delivery_days' | translatePipe">{{ deliveryDaysDisplay(item.delivery_days_) }}</div>
+          <div class="col-min-order c-list-body-cell" cellCarouselSlide [label]="'min_order' | translatePipe">{{ item.min_order_mov_ }}</div>
         </app-cell-carousel>
-        <div class="col-lead" role="cell">{{ item.lead_time_days_ }}</div>
-        <div class="col-linked" role="cell">{{ linkedProductCount_(item._id) }}</div>
-        <div class="c-col-actions" role="cell">
+        <div class="col-lead c-list-body-cell" role="cell">{{ item.lead_time_days_ }}</div>
+        <div class="col-linked c-list-body-cell" role="cell">{{ linkedProductCount_(item._id) }}</div>
+        <div class="c-col-actions c-list-body-cell" role="cell">
           @if (isLoggedIn()) {
             <button type="button" class="c-icon-btn" (click)="onEdit(item._id)" [attr.aria-label]="'edit' | translatePipe">
               <lucide-icon name="pencil" [size]="18"></lucide-icon>

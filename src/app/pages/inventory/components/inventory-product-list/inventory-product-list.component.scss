@@ -19,36 +19,12 @@
     display: contents;
   }
 
-  .product-grid-row > .col-name,
-  .product-grid-row > app-cell-carousel,
-  .product-grid-row > .col-unit,
-  .product-grid-row > .col-price,
-  .product-grid-row > .c-col-actions {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    min-width: 0;
-    padding-inline: 0.75rem;
-    padding-block: 0.625rem;
-
-    background: var(--bg-glass);
-
-    border-block-end: 1px solid rgba(241, 245, 249, 0.4);
-
-    transition: background 0.15s ease;
-  }
-
-  .product-grid-row > .col-name {
+  .product-grid-row .col-name.c-list-body-cell {
     justify-content: flex-start;
   }
 
-  .product-grid-row:hover > .col-name,
-  .product-grid-row:hover > app-cell-carousel,
-  .product-grid-row:hover > .col-unit,
-  .product-grid-row:hover > .col-price,
-  .product-grid-row:hover > .c-col-actions {
-    background: var(--bg-glass);
+  .product-grid-row .col-allergens.c-list-body-cell {
+    align-items: flex-start;
   }
 
   .product-grid-row:hover .c-icon-btn {
@@ -57,36 +33,6 @@
 
   .c-col-actions .c-icon-btn {
     margin-inline-start: 0.25rem;
-  }
-
-  @media (min-width: 769px) {
-    .product-grid-row .col-category,
-    .product-grid-row .col-allergens,
-    .product-grid-row .col-supplier {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      min-width: 0;
-      padding-inline: 0.75rem;
-      padding-block: 0.625rem;
-
-      background: var(--bg-glass);
-
-      border-block-end: 1px solid rgba(241, 245, 249, 0.4);
-
-      transition: background 0.15s ease;
-    }
-
-    .product-grid-row .col-allergens {
-      align-items: flex-start;
-    }
-
-    .product-grid-row:hover .col-category,
-    .product-grid-row:hover .col-allergens,
-    .product-grid-row:hover .col-supplier {
-      background: var(--bg-glass);
-    }
   }
 
   .no-results {

@@ -18,121 +18,24 @@
   letter-spacing: 0.02em;
 }
 
-/* Add button */
-.add-btn {
-  display: inline-flex;
-  align-items: center;
-
-  gap: 0.5rem;
-  padding-inline: 1.25rem;
-  padding-block: 0.625rem;
-
-  background: var(--color-primary);
-  color: var(--color-text-on-primary);
-  font-size: 0.875rem;
-  font-weight: 600;
-
-  border: none;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-glow);
-
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: var(--color-primary-hover);
-  }
-}
-
 @container (max-width: #{$header-break-stack}) {
-  .add-btn {
+  :host ::ng-deep .header-actions .c-btn-primary {
     width: 100%;
     justify-content: center;
   }
 }
 
-/* Sortable header cells */
-.sortable-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  gap: 0.375rem;
-
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
-
-  &:hover {
-    background: var(--bg-glass-hover);
-    color: var(--color-text-main);
-  }
-}
-
-/* Grid row */
+/* Grid row: use c-list-row for layout; keep recipe-grid-row for row-specific overrides */
 .recipe-grid-row {
   display: contents;
 }
 
-.recipe-grid-row > .col-name,
-.recipe-grid-row > .col-cost,
-.recipe-grid-row > .col-date,
-.recipe-grid-row > .col-actions {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  min-width: 0;
-  padding-inline: 0.75rem;
-  padding-block: 0.625rem;
-
-  background: var(--bg-glass);
-  text-align: center;
-
-  border-block-end: 1px solid rgba(241, 245, 249, 0.4);
-
-  transition: background 0.15s ease;
+.recipe-grid-row .col-labels.c-list-body-cell,
+.recipe-grid-row .col-allergens.c-list-body-cell {
+  align-items: flex-start;
 }
 
-@media (min-width: 769px) {
-  .recipe-grid-row .col-type,
-  .recipe-grid-row .col-labels,
-  .recipe-grid-row .col-allergens {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    min-width: 0;
-    padding-inline: 0.75rem;
-    padding-block: 0.625rem;
-
-    background: var(--bg-glass);
-    text-align: center;
-
-    border-block-end: 1px solid rgba(241, 245, 249, 0.4);
-
-    transition: background 0.15s ease;
-  }
-
-  .recipe-grid-row .col-labels,
-  .recipe-grid-row .col-allergens {
-    align-items: flex-start;
-  }
-
-  .recipe-grid-row:hover .col-type,
-  .recipe-grid-row:hover .col-labels,
-  .recipe-grid-row:hover .col-allergens {
-    background: var(--bg-glass);
-  }
-}
-
-.recipe-grid-row:hover > .col-name,
-.recipe-grid-row:hover > .col-cost,
-.recipe-grid-row:hover > .col-date,
-.recipe-grid-row:hover > .col-actions {
-  background: var(--bg-glass);
-}
-
-.recipe-grid-row:hover .action-btn {
+.recipe-grid-row:hover .c-icon-btn {
   opacity: 1;
 }
 
@@ -168,16 +71,6 @@
       color: var(--color-text-secondary);
     }
   }
-}
-
-/* Actions column */
-.col-actions {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  gap: 0.25rem;
-  padding-inline-end: 1rem;
 }
 
 /* Labels & allergens columns */
@@ -342,49 +235,6 @@
   border-radius: var(--radius-xs);
 }
 
-/* Action buttons */
-.action-btn {
-  display: grid;
-  place-content: center;
-
-  width: 2.25rem;
-  height: 2.25rem;
-  padding: 0;
-
-  background: transparent;
-
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  opacity: 0.7;
-
-  cursor: pointer;
-  transition: opacity 0.2s ease, background 0.2s ease, color 0.2s ease, transform 0.15s ease;
-
-  &:hover {
-    opacity: 1;
-
-    transform: scale(1.08);
-  }
-
-  &.edit {
-    color: var(--color-text-muted);
-
-    &:hover {
-      background: var(--color-primary-soft);
-      color: var(--color-primary);
-    }
-  }
-
-  &.delete {
-    color: var(--color-text-muted);
-
-    &:hover {
-      background: var(--bg-danger-subtle);
-      color: var(--color-danger);
-    }
-  }
-}
-
 /* Filter panel content */
 .search-section {
   margin-block-end: 1.25rem;
@@ -542,26 +392,6 @@
   }
 }
 
-.clear-filters-btn {
-  padding: 0.25rem 0.625rem;
-
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--color-text-muted);
-  background: var(--bg-glass);
-
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-sm);
-
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
-
-  &:hover {
-    color: var(--color-text-main);
-    background: var(--bg-glass-hover);
-  }
-}
-
 .filter-category {
   margin-block-end: 0.75rem;
 }
@@ -693,13 +523,6 @@
 
 /* Mobile tweaks */
 @media (max-width: 768px) {
-  .action-btn {
-    width: 2.75rem;
-    height: 2.75rem;
-
-    opacity: 1;
-  }
-
   .recipe-grid-row app-cell-carousel {
     background: transparent;
 
@@ -711,5 +534,5 @@
   .recipe-grid-row:hover app-cell-carousel {
     background: var(--bg-glass);
   }
-  }
+}
 }

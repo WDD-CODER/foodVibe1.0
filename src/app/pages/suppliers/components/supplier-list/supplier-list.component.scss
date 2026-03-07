@@ -19,34 +19,6 @@
     display: contents;
   }
 
-  .supplier-grid-row > .col-name,
-  .supplier-grid-row > app-cell-carousel,
-  .supplier-grid-row > .col-lead,
-  .supplier-grid-row > .col-linked,
-  .supplier-grid-row > .c-col-actions {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    min-width: 0;
-    padding-inline: 0.75rem;
-    padding-block: 0.625rem;
-
-    background: var(--bg-glass);
-
-    border-block-end: 1px solid rgba(241, 245, 249, 0.4);
-
-    transition: background 0.15s ease;
-  }
-
-  .supplier-grid-row:hover > .col-name,
-  .supplier-grid-row:hover > app-cell-carousel,
-  .supplier-grid-row:hover > .col-lead,
-  .supplier-grid-row:hover > .col-linked,
-  .supplier-grid-row:hover > .c-col-actions {
-    background: var(--bg-glass);
-  }
-
   .supplier-grid-row:hover .c-icon-btn {
     opacity: 1;
   }

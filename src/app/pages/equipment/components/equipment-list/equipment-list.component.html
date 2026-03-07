@@ -60,14 +60,14 @@
       </div>
     }
     @for (item of filteredEquipment_(); track item._id) {
-      <div class="equipment-grid-row" role="row">
-        <div class="col-name" role="cell">{{ item.name_hebrew }}</div>
+      <div class="equipment-grid-row c-list-row" role="row">
+        <div class="col-name c-list-body-cell" role="cell">{{ item.name_hebrew }}</div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
-          <div class="col-category" cellCarouselSlide [label]="'category' | translatePipe">{{ item.category_ | translatePipe }}</div>
-          <div class="col-owned" cellCarouselSlide [label]="'owned_quantity' | translatePipe">{{ item.owned_quantity_ }}</div>
-          <div class="col-consumable" cellCarouselSlide [label]="'is_consumable' | translatePipe">{{ item.is_consumable_ ? ('approved_yes' | translatePipe) : ('approved_no' | translatePipe) }}</div>
+          <div class="col-category c-list-body-cell" cellCarouselSlide [label]="'category' | translatePipe">{{ item.category_ | translatePipe }}</div>
+          <div class="col-owned c-list-body-cell" cellCarouselSlide [label]="'owned_quantity' | translatePipe">{{ item.owned_quantity_ }}</div>
+          <div class="col-consumable c-list-body-cell" cellCarouselSlide [label]="'is_consumable' | translatePipe">{{ item.is_consumable_ ? ('approved_yes' | translatePipe) : ('approved_no' | translatePipe) }}</div>
         </app-cell-carousel>
-        <div class="c-col-actions" role="cell">
+        <div class="c-col-actions c-list-body-cell" role="cell">
           @if (isLoggedIn()) {
             <button type="button" class="c-icon-btn" (click)="onEdit(item._id)" [attr.aria-label]="'edit' | translatePipe">
               <lucide-icon name="pencil" [size]="18"></lucide-icon>

@@ -59,16 +59,16 @@
       </div>
     }
     @for (product of filteredProducts_(); track product._id) {
-      <div class="product-grid-row" role="row">
-        <div class="col-name" role="cell">
+      <div class="product-grid-row c-list-row" role="row">
+        <div class="col-name c-list-body-cell" role="cell">
           @if (isLowStock(product)) {
             <span class="low-stock-badge" [attr.title]="'low_stock' | translatePipe">{{ 'low_stock' | translatePipe }}</span>
           }
           {{ product.name_hebrew }}
         </div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
-          <div class="col-category" cellCarouselSlide [label]="'category' | translatePipe">{{ getCategoryDisplay(product.categories_) || '—' }}</div>
-          <div class="col-allergens" cellCarouselSlide [label]="'allergens' | translatePipe">
+          <div class="col-category c-list-body-cell" cellCarouselSlide [label]="'category' | translatePipe">{{ getCategoryDisplay(product.categories_) || '—' }}</div>
+          <div class="col-allergens c-list-body-cell" cellCarouselSlide [label]="'allergens' | translatePipe">
             @if (product.allergens_.length) {
               <div class="allergen-btn-wrapper" [class.allergen-expanded-open]="allergenExpandAll_() || allergenPopoverProductId_() === product._id" (clickOutside)="closeAllergenView($event)">
                 <button type="button" class="allergen-btn" (click)="toggleAllergenPopover(product._id)">
@@ -94,7 +94,7 @@
           <span class="price-value">{{ getPricePerUnit(product, product.base_unit_) | number:'1.2-2' }}</span>
           <span class="price-suffix">₪</span>
         </div>
-        <div class="c-col-actions" role="cell">
+        <div class="c-col-actions c-list-body-cell" role="cell">
           <button type="button" class="c-icon-btn" (click)="onEditProduct(product._id)" [attr.aria-label]="'edit' | translatePipe">
             <lucide-icon name="pencil" [size]="18"></lucide-icon>
           </button>

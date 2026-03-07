@@ -15,33 +15,33 @@
     </div>
   </ng-container>
 
-  <button shell-actions type="button" class="add-btn" (click)="onAddRecipe()">
+  <button shell-actions type="button" class="c-btn-primary" (click)="onAddRecipe()">
     <lucide-icon name="plus" [size]="18"></lucide-icon>
     {{ 'add_recipe_dish' | translatePipe }}
   </button>
 
   <ng-container shell-table-header>
-    <div class="col-name c-grid-header-cell sortable-header" (click)="setSort('name')" (keydown.enter)="setSort('name')" (keydown.space)="$event.preventDefault(); setSort('name')" role="button" tabindex="0">
+    <div class="col-name c-grid-header-cell c-sortable-header" (click)="setSort('name')" (keydown.enter)="setSort('name')" (keydown.space)="$event.preventDefault(); setSort('name')" role="button" tabindex="0">
       {{ 'name' | translatePipe }}
     </div>
     <app-carousel-header [activeIndex]="carouselHeaderIndex_()" (activeIndexChange)="onCarouselHeaderChange($event)">
-      <div class="col-type c-grid-header-cell sortable-header" carouselHeaderColumn label="type" (click)="setSort('type')" (keydown.enter)="setSort('type')" (keydown.space)="$event.preventDefault(); setSort('type')" role="button" tabindex="0">
+      <div class="col-type c-grid-header-cell c-sortable-header" carouselHeaderColumn label="type" (click)="setSort('type')" (keydown.enter)="setSort('type')" (keydown.space)="$event.preventDefault(); setSort('type')" role="button" tabindex="0">
         {{ 'type' | translatePipe }}
       </div>
-      <div class="col-labels c-grid-header-cell sortable-header" carouselHeaderColumn label="labels" (click)="toggleLabelsExpandAll()" (keydown.enter)="toggleLabelsExpandAll()" (keydown.space)="$event.preventDefault(); toggleLabelsExpandAll()" role="button" tabindex="0">
+      <div class="col-labels c-grid-header-cell c-sortable-header" carouselHeaderColumn label="labels" (click)="toggleLabelsExpandAll()" (keydown.enter)="toggleLabelsExpandAll()" (keydown.space)="$event.preventDefault(); toggleLabelsExpandAll()" role="button" tabindex="0">
         {{ 'labels' | translatePipe }}
       </div>
-      <div class="col-allergens c-grid-header-cell sortable-header" carouselHeaderColumn label="allergens" (click)="toggleAllergenExpandAll()" (keydown.enter)="toggleAllergenExpandAll()" (keydown.space)="$event.preventDefault(); toggleAllergenExpandAll()" role="button" tabindex="0">
+      <div class="col-allergens c-grid-header-cell c-sortable-header" carouselHeaderColumn label="allergens" (click)="toggleAllergenExpandAll()" (keydown.enter)="toggleAllergenExpandAll()" (keydown.space)="$event.preventDefault(); toggleAllergenExpandAll()" role="button" tabindex="0">
         {{ 'allergens' | translatePipe }}
       </div>
     </app-carousel-header>
-    <div class="col-cost c-grid-header-cell sortable-header" (click)="setSort('cost')" (keydown.enter)="setSort('cost')" (keydown.space)="$event.preventDefault(); setSort('cost')" role="button" tabindex="0">
+    <div class="col-cost c-grid-header-cell c-sortable-header" (click)="setSort('cost')" (keydown.enter)="setSort('cost')" (keydown.space)="$event.preventDefault(); setSort('cost')" role="button" tabindex="0">
       {{ 'cost' | translatePipe }}
     </div>
-    <div class="col-date c-grid-header-cell sortable-header" (click)="setSort('dateAdded')" (keydown.enter)="setSort('dateAdded')" (keydown.space)="$event.preventDefault(); setSort('dateAdded')" role="button" tabindex="0">
+    <div class="col-date c-grid-header-cell c-sortable-header" (click)="setSort('dateAdded')" (keydown.enter)="setSort('dateAdded')" (keydown.space)="$event.preventDefault(); setSort('dateAdded')" role="button" tabindex="0">
       {{ 'date_added' | translatePipe }}
     </div>
-    <div class="col-actions c-grid-header-cell">{{ 'actions' | translatePipe }}</div>
+    <div class="c-col-actions c-grid-header-cell">{{ 'actions' | translatePipe }}</div>
   </ng-container>
 
   <ng-container shell-table-body>
@@ -57,11 +57,11 @@
       </div>
     }
     @for (recipe of filteredRecipes_(); track recipe._id) {
-      <div class="recipe-grid-row" (click)="onRowClick(recipe, $event)" role="button" tabindex="0" (keydown.enter)="onCookRecipe(recipe)" (keydown.space)="$event.preventDefault(); onCookRecipe(recipe)">
-        <div class="col-name">{{ recipe.name_hebrew }}</div>
+      <div class="recipe-grid-row c-list-row" (click)="onRowClick(recipe, $event)" role="button" tabindex="0" (keydown.enter)="onCookRecipe(recipe)" (keydown.space)="$event.preventDefault(); onCookRecipe(recipe)">
+        <div class="col-name c-list-body-cell">{{ recipe.name_hebrew }}</div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()">
-          <div class="col-type" cellCarouselSlide [label]="'type' | translatePipe">{{ (isRecipeDish(recipe) ? 'dish' : 'preparation') | translatePipe }}</div>
-          <div class="col-labels" cellCarouselSlide [label]="'labels' | translatePipe">
+          <div class="col-type c-list-body-cell" cellCarouselSlide [label]="'type' | translatePipe">{{ (isRecipeDish(recipe) ? 'dish' : 'preparation') | translatePipe }}</div>
+          <div class="col-labels c-list-body-cell" cellCarouselSlide [label]="'labels' | translatePipe">
             @if (getAllRecipeLabels(recipe).length) {
               <div class="labels-btn-wrapper" [class.labels-expanded-open]="labelsExpandAll_() || labelsPopoverRecipeId_() === recipe._id" (clickOutside)="closeLabelsView($event)">
                 <button type="button" class="labels-btn" (click)="toggleLabelsPopover(recipe._id)">
@@ -80,7 +80,7 @@
               <span class="placeholder-dash">—</span>
             }
           </div>
-          <div class="col-allergens" cellCarouselSlide [label]="'allergens' | translatePipe">
+          <div class="col-allergens c-list-body-cell" cellCarouselSlide [label]="'allergens' | translatePipe">
             @if (getRecipeAllergens(recipe).length) {
               <div class="allergen-btn-wrapper" [class.allergen-expanded-open]="allergenExpandAll_() || allergenPopoverRecipeId_() === recipe._id" (clickOutside)="closeAllergenView($event)">
                 <button type="button" class="allergen-btn" (click)="toggleAllergenPopover(recipe._id)">
@@ -100,18 +100,18 @@
             }
           </div>
         </app-cell-carousel>
-        <div class="col-cost cost-cell-wrap" (mouseenter)="showCostTooltip(recipe._id, $event)" (mouseleave)="hideCostTooltip()" (click)="toggleCostTooltipTap(recipe._id, $event)" [attr.aria-describedby]="(hoveredCostRecipeId_() === recipe._id || tappedCostRecipeId_() === recipe._id) ? 'cost-tooltip-' + recipe._id : null">
+        <div class="col-cost c-list-body-cell cost-cell-wrap" (mouseenter)="showCostTooltip(recipe._id, $event)" (mouseleave)="hideCostTooltip()" (click)="toggleCostTooltipTap(recipe._id, $event)" [attr.aria-describedby]="(hoveredCostRecipeId_() === recipe._id || tappedCostRecipeId_() === recipe._id) ? 'cost-tooltip-' + recipe._id : null">
           ₪{{ getRecipeCost(recipe) | number:'1.2-2' }}
         </div>
-        <div class="col-date">{{ formatAddedAt(recipe.addedAt_) }}</div>
-        <div class="col-actions">
-          <button type="button" class="action-btn edit" (click)="onEditRecipe(recipe); $event.stopPropagation()" [attr.aria-label]="'edit' | translatePipe">
+        <div class="col-date c-list-body-cell">{{ formatAddedAt(recipe.addedAt_) }}</div>
+        <div class="c-col-actions c-list-body-cell">
+          <button type="button" class="c-icon-btn" (click)="onEditRecipe(recipe); $event.stopPropagation()" [attr.aria-label]="'edit' | translatePipe">
             <lucide-icon name="pencil" [size]="18"></lucide-icon>
           </button>
           @if (deletingId_() === recipe._id) {
             <app-loader size="small" [inline]="true" />
           } @else {
-            <button type="button" class="action-btn delete" (click)="onDeleteRecipe(recipe); $event.stopPropagation()" [attr.aria-label]="'delete' | translatePipe">
+            <button type="button" class="c-icon-btn danger" (click)="onDeleteRecipe(recipe); $event.stopPropagation()" [attr.aria-label]="'delete' | translatePipe">
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>
             </button>
           }
@@ -152,7 +152,7 @@
       <div class="filter-section-header">
         <h3>{{ 'filter' | translatePipe }}</h3>
         @if (hasActiveFilters_()) {
-          <button type="button" class="clear-filters-btn" (click)="clearAllFilters()">{{ 'clear_filters' | translatePipe }}</button>
+          <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">{{ 'clear_filters' | translatePipe }}</button>
         }
       </div>
       @for (category of filterCategories_(); track category.name) {
