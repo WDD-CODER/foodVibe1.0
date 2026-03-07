@@ -855,6 +855,6 @@
       {"category_name": "קרם", "items": [{"item_name": "קרם וניל", "unit": "kg", "quantity": 0.003}]},
       {"category_name": "garnish", "items": [{"item_name": "מרנג שוויצרי", "unit": "kg", "quantity": 0.003}, {"item_name": "עוגיית דיימונד", "unit": "kg", "quantity": 0.002}, {"item_name": "קראמבל", "unit": "kg", "quantity": 0.003}]}
     ],
-    "labels_": ["vegetarian", "sipur_shel_ochel"]
+    "labels_": ["sipur_shel_ochel", "dessert", "dairy"]
   }
 ]

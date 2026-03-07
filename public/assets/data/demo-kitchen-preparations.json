@@ -35,7 +35,12 @@
       "sauce/stocks",
       "roasting",
       "pickling",
-      "confectionery"
+      "confectionery",
+      "fry_mise",
+      "בישולים",
+      "חיתוכים",
+      "רטבים_צירים",
+      "טיגון"
     ],
     "preparations": [
       {"name": "רוטב עגבניות ביתי", "category": "sauces"},
@@ -101,7 +106,22 @@
       {"name": "אוניגירי ארוז", "category": "cooking"},
       {"name": "סויה בפורר", "category": "רטבים"},
       {"name": "קימצ'י", "category": "pickling"},
-      {"name": "בסיס גלידה מוכן", "category": "confectionery"}
+      {"name": "בסיס גלידה מוכן", "category": "confectionery"},
+      {"name": "קערה לערבוב הציפס", "category": "fry_mise"},
+      {"name": "נייר ידיים לספיגת שמן", "category": "fry_mise"},
+      {"name": "טופו מטוגן", "category": "בישולים"},
+      {"name": "מיקס אגוזים קלויים", "category": "חיתוכים"},
+      {"name": "דפי שעועית מסולסלים מבושלים ומסוננים", "category": "בישולים"},
+      {"name": "מלפפון פרוס ירחים בלי גרעינים", "category": "חיתוכים"},
+      {"name": "מיקס עלים קצוצים גס", "category": "חיתוכים"},
+      {"name": "גמבה פרוס דק", "category": "חיתוכים"},
+      {"name": "רוטב לסלט איטריות", "category": "רטבים_צירים"},
+      {"name": "פופקורן עוף מטוגן", "category": "טיגון"},
+      {"name": "פופקורן טבעוני מטוגן", "category": "טיגון"},
+      {"name": "בצל ירוק פרוס דק", "category": "חיתוכים"},
+      {"name": "שומשום צבעוני", "category": "garnish"},
+      {"name": "נמסיס מופשרת", "category": "confectionery"},
+      {"name": "בננה טריה פרוסה", "category": "חיתוכים"}
     ]
   }
 ]
