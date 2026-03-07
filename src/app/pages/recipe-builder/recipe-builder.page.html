@@ -24,14 +24,15 @@
     </section>
 
     <section class="builder-section">
-      <div class="section-card collapsible table-logic" [class.is-collapsed]="tableLogicCollapsed_()">
-        <div class="section-card-header" (click)="toggleTableLogic()" role="button" tabindex="0" (keydown.enter)="toggleTableLogic()" (keydown.space)="toggleTableLogic(); $event.preventDefault()">
+      <div class="section-card collapsible table-logic" [class.is-collapsed]="tableLogicCollapsed_()"
+        (click)="tableLogicCollapsed_() && toggleTableLogic()">
+        <div class="section-card-header" (click)="toggleTableLogic(); $event.stopPropagation()" role="button" tabindex="0" (keydown.enter)="toggleTableLogic()" (keydown.space)="toggleTableLogic(); $event.preventDefault()">
           <h2 class="section-title">{{ 'ingredients_index' | translatePipe }}</h2>
           <button type="button" class="section-toggle-btn" (click)="toggleTableLogic(); $event.stopPropagation()" [attr.aria-expanded]="!tableLogicCollapsed_()">
             <lucide-icon [name]="tableLogicCollapsed_() ? 'chevron-down' : 'chevron-up'" [size]="20"></lucide-icon>
           </button>
         </div>
-        <div class="section-card-body">
+        <div class="section-card-body" (click)="$event.stopPropagation()">
           <app-recipe-ingredients-table [ingredientsFormArray]="ingredientsArray"
             [portions]="portions_() ?? 1" [focusSearchAtRow]="focusIngredientSearchAtRow_()"
             (removeIngredient)="removeIngredient($event)" (addIngredient)="addNewIngredientRow()"
@@ -40,18 +41,17 @@
 
           @if (!historyViewMode_()) {
             <button type="button" class="add-row-btn" (click)="addNewIngredientRow();$event.stopPropagation()">
-              <div class="plus-icon-wrapper">
-                <lucide-icon name="plus-circle" [size]="18"></lucide-icon>
-              </div>
-              <span class="btn-text">{{ 'add_row' | translatePipe }}</span>
+              <lucide-icon name="plus" [size]="18"></lucide-icon>
+              {{ 'add_row' | translatePipe }}
             </button>
           }
         </div>
       </div>
     </section>
     <section class="builder-section">
-      <div class="section-card collapsible workflow-logic" [class.is-collapsed]="workflowLogicCollapsed_()">
-        <div class="section-card-header" (click)="toggleWorkflowLogic()" role="button" tabindex="0" (keydown.enter)="toggleWorkflowLogic()" (keydown.space)="toggleWorkflowLogic(); $event.preventDefault()">
+      <div class="section-card collapsible workflow-logic" [class.is-collapsed]="workflowLogicCollapsed_()"
+        (click)="workflowLogicCollapsed_() && toggleWorkflowLogic()">
+        <div class="section-card-header" (click)="toggleWorkflowLogic(); $event.stopPropagation()" role="button" tabindex="0" (keydown.enter)="toggleWorkflowLogic()" (keydown.space)="toggleWorkflowLogic(); $event.preventDefault()">
           <h2 class="section-title">
             {{ (recipeType_() === 'dish' ? 'prep_list_mise_en_place' : 'prep_workflow') | translatePipe }}
           </h2>
@@ -59,7 +59,7 @@
             <lucide-icon [name]="workflowLogicCollapsed_() ? 'chevron-down' : 'chevron-up'" [size]="20"></lucide-icon>
           </button>
         </div>
-        <div class="section-card-body">
+        <div class="section-card-body" (click)="$event.stopPropagation()">
           <app-recipe-workflow [workflowFormArray]="workflowArray" [type]="recipeType_()" [resetTrigger]="resetTrigger_()"
             [focusRowAt]="focusWorkflowRowAt_()" (addItem)="addNewStep($event)"
             (removeItem)="deleteStep($event)" (focusRowDone)="focusWorkflowRowAt_.set(null)">
@@ -70,14 +70,15 @@
 
     @if (!historyViewMode_()) {
       <section class="builder-section">
-        <div class="section-card collapsible logistics-logic" [class.is-collapsed]="logisticsLogicCollapsed_()">
-          <div class="section-card-header" (click)="toggleLogisticsLogic()" role="button" tabindex="0" (keydown.enter)="toggleLogisticsLogic()" (keydown.space)="toggleLogisticsLogic(); $event.preventDefault()">
+        <div class="section-card collapsible logistics-logic" [class.is-collapsed]="logisticsLogicCollapsed_()"
+          (click)="logisticsLogicCollapsed_() && toggleLogisticsLogic()">
+          <div class="section-card-header" (click)="toggleLogisticsLogic(); $event.stopPropagation()" role="button" tabindex="0" (keydown.enter)="toggleLogisticsLogic()" (keydown.space)="toggleLogisticsLogic(); $event.preventDefault()">
             <h2 class="section-title">{{ 'dish_logistics' | translatePipe }}</h2>
             <button type="button" class="section-toggle-btn" (click)="toggleLogisticsLogic(); $event.stopPropagation()" [attr.aria-expanded]="!logisticsLogicCollapsed_()">
               <lucide-icon [name]="logisticsLogicCollapsed_() ? 'chevron-down' : 'chevron-up'" [size]="20"></lucide-icon>
             </button>
           </div>
-          <div class="section-card-body">
+          <div class="section-card-body" (click)="$event.stopPropagation()">
           <div class="logistics-grid" [formGroup]="recipeForm_" (clickOutside)="logisticsToolDropdownOpen_.set(false)">
             <div class="logistics-add-wrap">
               <div class="logistics-add-inner">
@@ -132,12 +133,6 @@
                       (click)="removeBaselineRow(i)" [attr.aria-label]="'remove' | translatePipe">
                       <span class="logistics-chip-label">{{ getEquipmentNameById(eqId) }}</span>
                       <span class="logistics-chip-qty">×{{ qty }}</span>
-                    </button>
-                    <button type="button" class="logistics-chip-save-template"
-                      (click)="saveBaselineRowAsTemplate(i); $event.stopPropagation()"
-                      [attr.aria-label]="'save_as_template' | translatePipe"
-                      [attr.title]="'save_as_template' | translatePipe">
-                      <lucide-icon name="library" [size]="14"></lucide-icon>
                     </button>
                   </div>
                 }

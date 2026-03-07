@@ -177,6 +177,10 @@
     margin-block-start: 1rem;
   }
 
+  &.is-collapsed {
+    cursor: pointer;
+  }
+
   &.is-collapsed .section-card-body {
     display: none;
   }
@@ -224,50 +228,25 @@
   }
 }
 
-/* ---- Add row button ---- */
+/* ---- Add row button (match workflow add-row design) ---- */
 .add-row-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-
-  width: fit-content;
-  margin-block-start: 0.625rem;
-  padding-inline-end: var(--rb-gap-mid);
-
-  background: var(--color-primary);
-  color: var(--color-text-on-primary);
-
+  gap: 0.5rem;
+  width: 100%;
+  margin-block-start: 0.5rem;
+  padding: 0.5rem;
+  background: transparent;
   border: none;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-glow);
-
+  border-block-end: 1px solid var(--border-default);
+  color: var(--color-primary);
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.15s ease;
-
-  .plus-icon-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 2.375rem;
-    height: 2.375rem;
-  }
-
-  .btn-text {
-    display: inline-block;
-  }
+  transition: background 0.2s ease;
 
   &:hover {
-    background: var(--color-primary-hover);
-    transform: scale(1.02);
-  }
-
-  &:disabled {
-    background: var(--border-default);
-    box-shadow: none;
-
-    cursor: not-allowed;
-    transform: none;
+    background: var(--color-primary-soft);
   }
 }
 
@@ -311,28 +290,6 @@
     display: inline-flex;
     align-items: center;
     gap: 0.2rem;
-  }
-
-  .logistics-chip-save-template {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 0.2rem;
-
-    background: transparent;
-    color: var(--color-text-muted);
-
-    border: none;
-    border-radius: var(--radius-sm);
-
-    cursor: pointer;
-    transition: color 0.15s ease, background 0.15s ease;
-
-    &:hover {
-      background: var(--bg-glass-hover);
-      color: var(--color-primary);
-    }
   }
 
   .logistics-chip {
@@ -572,13 +529,6 @@
   .main-submit-btn {
     width: 100%;
     max-width: none;
-  }
-
-  .add-row-btn {
-    width: 100%;
-    justify-content: center;
-
-    border-radius: var(--radius-md);
   }
 
   .logistics-logic .logistics-grid {
