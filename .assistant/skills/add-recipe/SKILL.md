@@ -24,6 +24,7 @@ Extract data faithfully, validate against inventory, fill gaps via questions, sh
 5. **Dictionary sync.** New preparation categories must be added to `dictionary.json` under `preparation_categories` with Hebrew translations.
 6. **Mise categories are per preparation.** No fixed default list. Each is added with its category from the registry.
 7. **No service_overrides_.** Do not generate `service_overrides_` in `logistics_`. Only generate `baseline_`.
+8. **Label keys are English snake_case.** `labels_` on dishes must use keys matching `^[a-z0-9_]+$`. Never use Hebrew strings as label keys. Check `demo-labels.json` for existing keys; add new labels there and in `dictionary.json` (general) when needed.
 
 ## Input parsing
 
@@ -37,7 +38,7 @@ Extract data faithfully, validate against inventory, fill gaps via questions, sh
 
 ### Step 1 — EXTRACT, MATCH & VALIDATE
 
-**Read now:** `demo-products.json` and `demo-kitchen-preparations.json` only. Defer other files to later steps.
+**Read now:** `demo-products.json`, `demo-kitchen-preparations.json`, and `demo-labels.json` (for label keys). Defer other files to later steps.
 
 **Extract** from image/text: name, yield, ingredients, mise/steps, logistics.
 
@@ -71,12 +72,16 @@ For each such ingredient, try to split "product + prep action" so the recipe use
 
 **Validate units:** For each matched product, convert source unit to JSON unit (g→kg, ml→liter, יחידה→unit). Check if it matches `base_unit_` or any `purchase_options_[].unit_symbol_`. Mark OK or **MISMATCH**.
 
+**Labels (dishes only):** Decide which labels apply (diet, allergen, cuisine, campaign). Use only keys that exist in `demo-labels.json` (first doc’s `items` array). Key format: `^[a-z0-9_]+$`. If a needed label is missing, mark **NEW LABEL** and plan to add it in Step 4. Prefer existing keys: `vegetarian`, `vegan`, `gluten_free`, `fish`, `gluten`, `sesame`, `meat`, `asian`, `sipur_shel_ochel`.
+
+**Default yield (when user does not specify):** Apply only when the user has not provided yield and does not answer the yield question in Step 2. **Computation:** Sum all ingredient `amount_` where `unit_` is `kg` → `total_kg`. Sum all where `unit_` is `liter` → `total_liter`. **Result:** If there is any weight: set `yield_amount_` = total_kg + total_liter (treat liter as kg with factor 1), `yield_unit_` = `"kg"`. If only volume (all `liter`, no `kg`): set `yield_amount_` = total_liter, `yield_unit_` = `"liter"`. If only `unit` (no kg, no liter): use `yield_amount_: 1`, `yield_unit_: "unit"`. If the user does answer with a value (e.g. "סך המרכיבים", "באצ' אחד", "X מנות"), use that; the default applies only when yield is missing and the user does not answer.
+
 ### Step 2 — ASK
 
 Ask focused, numbered questions only for what is actually missing:
 
 1. **Type** (if ambiguous): dish or preparation?
-2. **Yield** (if missing): how many servings?
+2. **Yield** (if missing): **Ask** the user (e.g. "כמה מנות? או אשר ברירת מחדל: סך משקלי המרכיבים"). If the user does **not** answer (or replies "default" / "ברירת מחדל" / "סך המרכיבים"), apply the **Default yield** rule (sum of kg/liter). If the user answers with a value, use that. If the default cannot be applied (e.g. all ingredients in `unit`), ask and fall back to `yield_amount_: 1`, `yield_unit_: "unit"` when unanswered.
 3. **Station** (if unknown): stove / oven / cold / fry?
 4. **Unit mismatches**: ask per ingredient with specific conversion options.
 5. **Mise vs steps** (for dishes): use mise list as-is?
@@ -88,7 +93,7 @@ Do NOT mix food and logistics questions.
 
 **Before presenting the tree:** Search `demo-recipes.json` and `demo-dishes.json` for existing `name_hebrew` values to check for duplicates. If the name exists, disambiguate as "[name] (2)" (or (3), etc.) and notify the user in the tree.
 
-**Present the visual tree only.** Do not show detail tables unless the user asks.
+**Present the visual tree only.** Do not show detail tables unless the user asks. Present the tree with **Part 1 (מתכון/מנה)** and **Part 2 (לוגיסטיקה)** as two distinct top-level branches; do not use a flat list or inline arrows for equipment.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -97,23 +102,23 @@ Do NOT mix food and logistics questions.
 
 [Target] demo-dishes.json  →  dish_NNN   (or demo-recipes.json → prep_NNN)
   │
-  ├── 📌 שם:    [name_hebrew]
-  ├── 📌 סוג:   dish | תפוקה: [N] [unit] | תחנה: [default_station_]
-  ├── 🏷️  תוויות:  [labels_] or none
+  ├── Part 1 — מתכון / מנה
+  │     ├── 📌 שם:    [name_hebrew]
+  │     ├── 📌 סוג:   dish | תפוקה: [N] [unit] | תחנה: [default_station_]
+  │     ├── 🏷️  תוויות:  [labels_] (mark NEW LABEL if key not in demo-labels.json) or none
+  │     ├── 📦 מרכיבים ([N])
+  │     │     • [ingredient 1] [qty] [unit] ([product id or NEW])
+  │     │     • [product name] [qty] [unit] ([id])  ← פורק מ: "[original text]"   (when decomposed)
+  │     │     • …
+  │     └── 📋 שלבים / מיסום ([K])
+  │           • [step or mise item] → [category] ([Hebrew])
+  │           • [mise item] → [category] (אוטומטי מפירוק)   (when from decomposition)
+  │           • …
   │
-  ├── 📦 מרכיבים ([N])
-  │     • [ingredient 1] [qty] [unit] ([product id or NEW])
-  │     • [product name] [qty] [unit] ([id])  ← פורק מ: "[original text]"   (when decomposed)
-  │     • …
-  │
-  ├── 🔧 לוגיסטיקה ([M])
-  │     • [equipment name] × [qty] ([eq_id or חדש])
-  │     • …
-  │
-  └── 📋 מיסום ([K]) — קטגוריות
-        • [item] → [category] ([Hebrew])
-        • [mise item] → [category] (אוטומטי מפירוק)   (when from decomposition)
-        • …
+  └── Part 2 — לוגיסטיקה
+        └── 🔧 ציוד ([M])
+              • [equipment name] × [qty] ([eq_id or חדש])
+              • …
 
 ┌── קבצים שישתנו (אחרי אישור) ──┐
 │  📄 [list affected files]     │
@@ -129,18 +134,21 @@ If a duplicate name was detected, show after the tree: "**Name already in use:**
 
 ### Step 4 — WRITE
 
-**Only after explicit confirmation.** Now read the remaining files: `demo-equipment.json`, `dictionary.json`, and the target file (`demo-recipes.json` or `demo-dishes.json`).
+**Only after explicit confirmation.** Now read the remaining files: `demo-equipment.json`, `dictionary.json`, `demo-labels.json`, and the target file (`demo-recipes.json` or `demo-dishes.json`).
 
-1. **Create missing products** — next `demo_NNN`, `buy_price_global_: 0`. Append to `demo-products.json`.
-2. **Create missing equipment** — next `eq_NNN`, `owned_quantity_: 0`, `is_consumable_: false`. Append to `demo-equipment.json`.
-3. **Update kitchen preparations** — add new categories to `categories` array, add new `{ name, category }` to `preparations` array. Preserve array-of-one-doc structure.
-4. **Update dictionary** — for each NEW CATEGORY, add entry under `preparation_categories` with Hebrew translation.
-5. **Build the recipe/dish object:**
+1. **Create missing labels** — for each **NEW LABEL**: add `{ "key": "<snake_case>", "color": "<hex>", "autoTriggers": [] }` to the first doc’s `items` array in `demo-labels.json`; add the same key with Hebrew translation to `dictionary.json` under `general`. Use a color from the app palette (e.g. `#10B981`, `#84CC16`, `#EF4444`, `#8B5CF6`, `#EC4899`).
+2. **Create missing products** — next `demo_NNN`, `buy_price_global_: 0`. Append to `demo-products.json`.
+3. **Create missing equipment** — next `eq_NNN`, `owned_quantity_: 0`, `is_consumable_: false`. Append to `demo-equipment.json`.
+4. **Update kitchen preparations** — add new categories to `categories` array, add new `{ name, category }` to `preparations` array. Preserve array-of-one-doc structure.
+5. **Update dictionary** — for each NEW CATEGORY, add entry under `preparation_categories` with Hebrew translation; for each NEW LABEL, add entry under `general` with Hebrew translation.
+6. **Build the recipe/dish object:**
    - Next ID: `prep_NNN` or `dish_NNN` (max existing + 1, zero-padded to 3 digits).
    - Convert units: g→kg (/1000), ml→liter (/1000), unit stays.
-   - **Dishes**: `recipe_type_: "dish"`, include `mise_categories_`, `prep_items_`, one assembly step with `labor_time_minutes_: 0`, `logistics_: { baseline_: [...] }`.
+   - When yield was not provided by the user and the user did not answer the yield question, set `yield_amount_` and `yield_unit_` according to the **Default yield** rule (sum of kg, or sum of liter, or 1 unit as fallback).
+   - **Dishes**: `recipe_type_: "dish"`, include `mise_categories_`, `prep_items_`, `labels_` (array of English keys only), one assembly step with `labor_time_minutes_: 0`, `logistics_: { baseline_: [...] }`.
    - **Preparations**: `recipe_type_: "preparation"`, multi-step `steps_` with real times.
-6. **Append** to the target file array.
+7. **Append** to the target file array.
+
 
 ### Step 5 — VERIFY & REPORT
 
