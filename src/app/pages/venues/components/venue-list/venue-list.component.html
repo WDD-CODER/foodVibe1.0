@@ -21,7 +21,9 @@
     </div>
   </ng-container>
 
-  <button shell-actions type="button" class="c-btn-primary" (click)="onAddPlace()">
+  <button shell-actions type="button" class="c-btn-primary" (click)="onAddPlace()"
+    [disabled]="!isLoggedIn()"
+    [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
     <lucide-icon name="plus" [size]="18"></lucide-icon>
     {{ 'add_venue' | translatePipe }}
   </button>
@@ -47,13 +49,19 @@
           <div class="col-infra c-list-body-cell" cellCarouselSlide [label]="'infrastructure_items' | translatePipe">{{ item.available_infrastructure_.length }}</div>
         </app-cell-carousel>
         <div class="c-col-actions c-list-body-cell" role="cell">
-          <button type="button" class="c-icon-btn" (click)="onEdit(item._id)" [attr.aria-label]="'edit' | translatePipe">
+          <button type="button" class="c-icon-btn" (click)="onEdit(item._id)"
+            [disabled]="!isLoggedIn()"
+            [attr.aria-label]="'edit' | translatePipe"
+            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
             <lucide-icon name="pencil" [size]="18"></lucide-icon>
           </button>
           @if (deletingId_() === item._id) {
             <app-loader size="small" [inline]="true" />
           } @else {
-            <button type="button" class="c-icon-btn danger" (click)="onDelete(item)" [attr.aria-label]="'delete' | translatePipe">
+            <button type="button" class="c-icon-btn danger" (click)="onDelete(item)"
+              [disabled]="!isLoggedIn()"
+              [attr.aria-label]="'delete' | translatePipe"
+              [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>
             </button>
           }
@@ -63,18 +71,17 @@
   </ng-container>
 
   <ng-container shell-filters>
-    <div class="filter-section">
-      <div class="filter-section-header">
-        <h3>{{ 'filter' | translatePipe }}</h3>
+    <div class="c-filter-section">
+      <div class="c-filter-section-header">
         @if (hasActiveFilters_()) {
           <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">{{ 'clear_filters' | translatePipe }}</button>
         }
       </div>
-      <div class="filter-category">
-        <span class="filter-category-label">{{ 'environment_type' | translatePipe }}</span>
-        <div class="filter-options">
+      <div class="c-filter-category">
+        <span class="c-filter-category-label">{{ 'environment_type' | translatePipe }}</span>
+        <div class="c-filter-options">
           @for (env of envTypes; track env) {
-            <label class="filter-option">
+            <label class="c-filter-option">
               <input type="checkbox" [checked]="selectedEnvTypes_().has(env)" (change)="toggleEnvType(env)" />
               <span>{{ env | translatePipe }}</span>
             </label>

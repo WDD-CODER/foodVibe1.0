@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 
 import { KitchenStateService } from '@services/kitchen-state.service';
+import { UserService } from '@services/user.service';
 import { TranslationService } from '@services/translation.service';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { ActivityLogService, ActivityEntry, ActivityChange } from '@services/activity-log.service';
@@ -21,6 +22,7 @@ export class DashboardOverviewComponent {
   private readonly kitchenState = inject(KitchenStateService);
   private readonly router = inject(Router);
   private readonly activityLog = inject(ActivityLogService);
+  protected readonly isLoggedIn = inject(UserService).isLoggedIn;
   private readonly translation = inject(TranslationService);
   protected readonly openChange_ = signal<{
     activityId: string;

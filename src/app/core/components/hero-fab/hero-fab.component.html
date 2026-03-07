@@ -1,13 +1,13 @@
 <div class="hero-fab-container" [class.above-bar]="isOnMenuIntelligence_()" (mouseleave)="collapse()">
   <div class="fab-actions" [class.expanded]="isExpanded_()">
-    @if (isLoggedIn()) {
-      <button type="button"
-              class="fab-action"
-              [attr.aria-label]="'recipe_creation' | translatePipe"
-              (click)="goToRecipeBuilder()">
-        <lucide-icon name="plus" size="20"></lucide-icon>
-      </button>
-    }
+    <button type="button"
+            class="fab-action"
+            [attr.aria-label]="'recipe_creation' | translatePipe"
+            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+            [disabled]="!isLoggedIn()"
+            (click)="goToRecipeBuilder()">
+      <lucide-icon name="plus" size="20"></lucide-icon>
+    </button>
 
     <button type="button"
             class="fab-action"

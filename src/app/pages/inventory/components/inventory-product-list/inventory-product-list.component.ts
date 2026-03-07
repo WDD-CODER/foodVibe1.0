@@ -7,6 +7,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { EquipmentDataService } from '@services/equipment-data.service';
 import { UserMsgService } from '@services/user-msg.service';
+import { UserService } from '@services/user.service';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { Product } from '@models/product.model';
 import { UnitRegistryService } from '@services/unit-registry.service';
@@ -50,6 +51,7 @@ export class InventoryProductListComponent {
   private readonly confirmModal = inject(ConfirmModalService);
   private readonly equipmentData = inject(EquipmentDataService);
   private readonly userMsg = inject(UserMsgService);
+  protected readonly isLoggedIn = inject(UserService).isLoggedIn;
   protected readonly unitRegistry = inject(UnitRegistryService);
 
   private lastPriceEdit_ = { productId: '', unit: '', value: 0 };

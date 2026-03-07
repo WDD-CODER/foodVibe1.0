@@ -46,7 +46,9 @@
         <h2>סוגי תפריט (Menu Types)</h2>
       </div>
       <p class="card-desc">קביעת שדות לכל סוג תפריט (מחיר מכירה, עלות מזון, מנות וכו׳)</p>
-      <button type="button" class="btn-add" (click)="onAddMenuType()">הוסף סוג תפריט</button>
+      <button type="button" class="btn-add" (click)="onAddMenuType()"
+        [disabled]="!isLoggedIn()"
+        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">הוסף סוג תפריט</button>
       <div class="list-container">
         @if (allMenuTypes_().length > 0) {
           <div class="list-stack">
@@ -75,15 +77,23 @@
                   <div class="field-pills">
                     @for (f of def.fields; track f) {
                       <button type="button" class="field-pill field-pill-removable"
-                        (click)="removeFieldFromMenuType(def.key, f)">
+                        (click)="removeFieldFromMenuType(def.key, f)"
+                        [disabled]="!isLoggedIn()"
+                        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
                         {{ getDishFieldLabelKey(f) | translatePipe }}
                       </button>
                     }
                   </div>
-                  <button type="button" class="btn-edit" (click)="onEditMenuType(def.key)" [attr.aria-label]="'edit' | translatePipe">
+                  <button type="button" class="btn-edit" (click)="onEditMenuType(def.key)"
+                    [disabled]="!isLoggedIn()"
+                    [attr.aria-label]="'edit' | translatePipe"
+                    [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
                     <lucide-icon name="pencil" [size]="14"></lucide-icon>
                   </button>
-                  <button type="button" class="btn-delete" (click)="onRemoveMenuType(def.key)" [attr.aria-label]="'remove' | translatePipe">
+                  <button type="button" class="btn-delete" (click)="onRemoveMenuType(def.key)"
+                    [disabled]="!isLoggedIn()"
+                    [attr.aria-label]="'remove' | translatePipe"
+                    [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
                     <lucide-icon name="trash-2" [size]="16"></lucide-icon>
                   </button>
                 }
@@ -145,7 +155,9 @@
       <input #newInput type="text" [placeholder]="'הוסף ' + title + '...'"
         (keyup.enter)="onAddMetadata(newInput.value, type, newInput)">
 
-      <button (click)="onAddMetadata(newInput.value, type, newInput)" class="btn-add">
+      <button (click)="onAddMetadata(newInput.value, type, newInput)" class="btn-add"
+        [disabled]="!isLoggedIn()"
+        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
         הוסף
       </button>
     </div>
@@ -165,7 +177,9 @@
           ">
           }
 
-          <button class="btn-delete" (click)="onRemoveMetadata(item, type)">
+          <button class="btn-delete" (click)="onRemoveMetadata(item, type)"
+            [disabled]="!isLoggedIn()"
+            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
             <lucide-icon [name]="type === 'allergen' ? 'x' : 'trash-2'"
               [size]="type === 'allergen' ? 14 : 16"></lucide-icon>
           </button>

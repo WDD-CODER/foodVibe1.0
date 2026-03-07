@@ -8,6 +8,7 @@ import { KitchenStateService } from '@services/kitchen-state.service';
 import { RecipeCostService } from '@services/recipe-cost.service';
 import { TranslationService } from '@services/translation.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
+import { UserService } from '@services/user.service';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { Recipe } from '@models/recipe.model';
@@ -38,6 +39,7 @@ export class RecipeBookListComponent {
   private readonly recipeCostService = inject(RecipeCostService);
   private readonly translationService = inject(TranslationService);
   private readonly metadataRegistry = inject(MetadataRegistryService);
+  protected readonly isLoggedIn = inject(UserService).isLoggedIn;
 
   protected activeFilters_ = signal<Record<string, string[]>>({});
   protected searchQuery_ = signal<string>('');

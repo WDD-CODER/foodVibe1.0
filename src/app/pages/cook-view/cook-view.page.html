@@ -33,12 +33,13 @@
               </button>
             </div>
           } @else {
-            @if (isLoggedIn()) {
-              <button type="button" class="edit-btn" (click)="enterEditMode()" [attr.aria-label]="'edit' | translatePipe">
-                <lucide-icon name="pencil" [size]="18"></lucide-icon>
-                {{ 'edit' | translatePipe }}
-              </button>
-            }
+            <button type="button" class="edit-btn" (click)="enterEditMode()"
+              [disabled]="!isLoggedIn()"
+              [attr.aria-label]="'edit' | translatePipe"
+              [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+              <lucide-icon name="pencil" [size]="18"></lucide-icon>
+              {{ 'edit' | translatePipe }}
+            </button>
             <button type="button" class="edit-btn export-info-btn" (click)="onExportInfo()" [attr.aria-label]="'export_recipe_info' | translatePipe">
               <lucide-icon name="table-2" [size]="18"></lucide-icon>
               {{ 'export_recipe_info' | translatePipe }}

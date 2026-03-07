@@ -15,7 +15,9 @@
     </div>
   </ng-container>
 
-  <button shell-actions type="button" class="c-btn-primary" (click)="onAddRecipe()">
+  <button shell-actions type="button" class="c-btn-primary" (click)="onAddRecipe()"
+    [disabled]="!isLoggedIn()"
+    [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
     <lucide-icon name="plus" [size]="18"></lucide-icon>
     {{ 'add_recipe_dish' | translatePipe }}
   </button>
@@ -50,7 +52,9 @@
         @if (isEmptyList_()) {
           <lucide-icon name="book-open" [size]="48" class="empty-state-icon"></lucide-icon>
           <p class="empty-state-msg">{{ 'empty_recipe_book' | translatePipe }}</p>
-          <button type="button" class="c-btn-primary" (click)="onAddRecipe()">{{ 'add_first_recipe' | translatePipe }}</button>
+          <button type="button" class="c-btn-primary" (click)="onAddRecipe()"
+            [disabled]="!isLoggedIn()"
+            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">{{ 'add_first_recipe' | translatePipe }}</button>
         } @else {
           {{ 'no_recipes_match' | translatePipe }}
         }
@@ -105,13 +109,19 @@
         </div>
         <div class="col-date c-list-body-cell">{{ formatAddedAt(recipe.addedAt_) }}</div>
         <div class="c-col-actions c-list-body-cell">
-          <button type="button" class="c-icon-btn" (click)="onEditRecipe(recipe); $event.stopPropagation()" [attr.aria-label]="'edit' | translatePipe">
+          <button type="button" class="c-icon-btn" (click)="onEditRecipe(recipe); $event.stopPropagation()"
+            [disabled]="!isLoggedIn()"
+            [attr.aria-label]="'edit' | translatePipe"
+            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
             <lucide-icon name="pencil" [size]="18"></lucide-icon>
           </button>
           @if (deletingId_() === recipe._id) {
             <app-loader size="small" [inline]="true" />
           } @else {
-            <button type="button" class="c-icon-btn danger" (click)="onDeleteRecipe(recipe); $event.stopPropagation()" [attr.aria-label]="'delete' | translatePipe">
+            <button type="button" class="c-icon-btn danger" (click)="onDeleteRecipe(recipe); $event.stopPropagation()"
+              [disabled]="!isLoggedIn()"
+              [attr.aria-label]="'delete' | translatePipe"
+              [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>
             </button>
           }
@@ -140,7 +150,7 @@
         }
         <div class="ingredient-chips-wrap">
           @for (p of getSelectedProducts(); track p._id) {
-            <button type="button" class="chipe ingredient" (click)="removeIngredientProduct(p._id)">{{ p.name_hebrew }}</button>
+            <button type="button" class="c-filter-chip" (click)="removeIngredientProduct(p._id)">{{ p.name_hebrew }}</button>
           }
           @if (getSelectedProducts().length) {
             <button type="button" class="ingredient-clear-btn" (click)="clearIngredientProducts()">{{ 'clear' | translatePipe }}</button>
@@ -148,26 +158,25 @@
         </div>
       </div>
     </div>
-    <div class="filter-section">
-      <div class="filter-section-header">
-        <h3>{{ 'filter' | translatePipe }}</h3>
+    <div class="c-filter-section">
+      <div class="c-filter-section-header">
         @if (hasActiveFilters_()) {
           <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">{{ 'clear_filters' | translatePipe }}</button>
         }
       </div>
       @for (category of filterCategories_(); track category.name) {
-        <div class="filter-category">
-          <button type="button" class="filter-category-header" [class.expanded]="isCategoryExpanded(category.name)" (click)="toggleFilterCategory(category.name)">
+        <div class="c-filter-category">
+          <button type="button" class="c-filter-category-header" [class.expanded]="isCategoryExpanded(category.name)" (click)="toggleFilterCategory(category.name)">
             <span>{{ (category.name === 'Allergens' ? 'do_not_include_allergens' : category.displayKey) | translatePipe }}</span>
             @if (selectedCountInCategory(category) > 0) {
-              <span class="filter-category-count" aria-hidden="true">({{ selectedCountInCategory(category) }})</span>
+              <span class="c-filter-category-count" aria-hidden="true">{{ selectedCountInCategory(category) }}</span>
             }
             <lucide-icon [name]="isCategoryExpanded(category.name) ? 'chevron-down' : 'chevron-left'" [size]="16"></lucide-icon>
           </button>
           @if (isCategoryExpanded(category.name)) {
-            <div class="filter-options">
+            <div class="c-filter-options">
               @for (option of category.options; track option.value) {
-                <label class="filter-option">
+                <label class="c-filter-option">
                   <input type="checkbox" [checked]="option.checked_" (change)="toggleFilter(category.name, option.value)" />
                   <span>{{ option.label | translatePipe }}</span>
                 </label>

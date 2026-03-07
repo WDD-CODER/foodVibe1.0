@@ -20,12 +20,12 @@
     </div>
   </ng-container>
 
-  @if (isLoggedIn()) {
-    <button shell-actions type="button" class="c-btn-primary" (click)="onAdd()">
-      <lucide-icon name="plus" [size]="18"></lucide-icon>
-      {{ 'add_supplier' | translatePipe }}
-    </button>
-  }
+  <button shell-actions type="button" class="c-btn-primary" (click)="onAdd()"
+    [disabled]="!isLoggedIn()"
+    [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+    <lucide-icon name="plus" [size]="18"></lucide-icon>
+    {{ 'add_supplier' | translatePipe }}
+  </button>
 
   <ng-container shell-table-header>
     <div class="col-name c-grid-header-cell" role="columnheader">{{ 'name' | translatePipe }}</div>
@@ -45,9 +45,9 @@
         @if (isEmptyList_()) {
           <lucide-icon name="truck" [size]="48" class="empty-state-icon"></lucide-icon>
           <p class="empty-state-msg">{{ 'empty_suppliers' | translatePipe }}</p>
-          @if (isLoggedIn()) {
-            <button type="button" class="c-btn-primary" (click)="onAdd()">{{ 'add_supplier' | translatePipe }}</button>
-          }
+          <button type="button" class="c-btn-primary" (click)="onAdd()"
+            [disabled]="!isLoggedIn()"
+            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">{{ 'add_supplier' | translatePipe }}</button>
         } @else {
           {{ 'no_suppliers_match' | translatePipe }}
         }
@@ -64,17 +64,21 @@
         <div class="col-lead c-list-body-cell" role="cell">{{ item.lead_time_days_ }}</div>
         <div class="col-linked c-list-body-cell" role="cell">{{ linkedProductCount_(item._id) }}</div>
         <div class="c-col-actions c-list-body-cell" role="cell">
-          @if (isLoggedIn()) {
-            <button type="button" class="c-icon-btn" (click)="onEdit(item._id)" [attr.aria-label]="'edit' | translatePipe">
-              <lucide-icon name="pencil" [size]="18"></lucide-icon>
+          <button type="button" class="c-icon-btn" (click)="onEdit(item._id)"
+            [disabled]="!isLoggedIn()"
+            [attr.aria-label]="'edit' | translatePipe"
+            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+            <lucide-icon name="pencil" [size]="18"></lucide-icon>
+          </button>
+          @if (deletingId_() === item._id) {
+            <app-loader size="small" [inline]="true" />
+          } @else {
+            <button type="button" class="c-icon-btn danger" (click)="onDelete(item)"
+              [disabled]="!isLoggedIn()"
+              [attr.aria-label]="'delete' | translatePipe"
+              [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+              <lucide-icon name="trash-2" [size]="18"></lucide-icon>
             </button>
-            @if (deletingId_() === item._id) {
-              <app-loader size="small" [inline]="true" />
-            } @else {
-              <button type="button" class="c-icon-btn danger" (click)="onDelete(item)" [attr.aria-label]="'delete' | translatePipe">
-                <lucide-icon name="trash-2" [size]="18"></lucide-icon>
-              </button>
-            }
           }
         </div>
       </div>
@@ -82,25 +86,24 @@
   </ng-container>
 
   <ng-container shell-filters>
-    <div class="filter-section">
-      <div class="filter-section-header">
-        <h3>{{ 'filter' | translatePipe }}</h3>
+    <div class="c-filter-section">
+      <div class="c-filter-section-header">
         @if (hasActiveFilters_()) {
           <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">{{ 'clear_filters' | translatePipe }}</button>
         }
       </div>
-      <div class="filter-category">
-        <span class="filter-category-label">{{ 'delivery_days' | translatePipe }}</span>
-        <div class="filter-options filter-options-inline">
+      <div class="c-filter-category">
+        <span class="c-filter-category-label">{{ 'delivery_days' | translatePipe }}</span>
+        <div class="c-filter-options c-filter-options--inline">
           @for (day of [0,1,2,3,4,5,6]; track day) {
-            <label class="filter-option">
+            <label class="c-filter-option">
               <input type="checkbox" [checked]="selectedDays_().has(day)" (change)="toggleDay(day)" />
               <span>{{ deliveryDaysDisplay([day]) }}</span>
             </label>
           }
         </div>
       </div>
-      <label class="filter-option linked-only-toggle">
+      <label class="c-filter-option linked-only-toggle">
         <input type="checkbox" [checked]="hasLinkedOnly_()" (change)="hasLinkedOnly_.set(!hasLinkedOnly_())" />
         <span>{{ 'linked_products' | translatePipe }}</span>
       </label>

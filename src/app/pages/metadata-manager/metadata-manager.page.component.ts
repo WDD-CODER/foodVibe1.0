@@ -15,6 +15,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { TranslationService } from '@services/translation.service';
 import { UserMsgService } from '@services/user-msg.service';
 import { TranslationKeyModalService } from '@services/translation-key-modal.service';
+import { UserService } from '@services/user.service';
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { ALL_DISH_FIELDS, DEFAULT_DISH_FIELDS, type DishFieldKey, type MenuTypeDefinition } from '@models/menu-event.model';
@@ -41,6 +42,7 @@ export class MetadataManagerComponent implements OnInit {
   private kitchenState = inject(KitchenStateService);
   private menuEventData = inject(MenuEventDataService);
   private addItemModal = inject(AddItemModalService);
+  protected readonly isLoggedIn = inject(UserService).isLoggedIn;
 
   // SIGNALS
   allUnitKeys_ = this.unitRegistry.allUnitKeys_;

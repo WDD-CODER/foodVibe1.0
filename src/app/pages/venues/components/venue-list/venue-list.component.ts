@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { VenueDataService } from '@services/venue-data.service';
+import { UserService } from '@services/user.service';
 import { VenueProfile, EnvironmentType } from '@models/venue.model';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
@@ -41,6 +42,7 @@ const ENV_TYPES: EnvironmentType[] = [
 export class VenueListComponent {
   private readonly venueData = inject(VenueDataService);
   private readonly router = inject(Router);
+  protected readonly isLoggedIn = inject(UserService).isLoggedIn;
 
   /** When true, add button emits addVenueClick instead of navigating (e.g. dashboard tab switch). */
   embeddedInDashboard = false;

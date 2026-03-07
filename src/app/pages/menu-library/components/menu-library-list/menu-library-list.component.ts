@@ -7,6 +7,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { MenuEventDataService } from '@services/menu-event-data.service';
 import { MenuEvent, ServingType } from '@models/menu-event.model';
 import { ConfirmModalService } from '@services/confirm-modal.service';
+import { UserService } from '@services/user.service';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 
@@ -24,6 +25,7 @@ export class MenuLibraryListComponent {
   private readonly router = inject(Router);
   private readonly menuEventData = inject(MenuEventDataService);
   private readonly confirmModal = inject(ConfirmModalService);
+  protected readonly isLoggedIn = inject(UserService).isLoggedIn;
 
   protected readonly searchQuery_ = signal('');
   protected readonly eventTypeFilter_ = signal('all');
