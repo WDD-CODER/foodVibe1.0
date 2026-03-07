@@ -369,15 +369,34 @@ export class RecipeBuilderPage implements OnInit {
     );
   }
 
+  /** Normalize label keys: map Hebrew or orphan keys to current registry keys so dropdown filter works. */
+  private normalizeLabelKeys(rawLabels: string[]): string[] {
+    if (!rawLabels?.length) return [];
+    const registryKeys = new Set(this.metadataRegistry_.allLabels_().map((def) => def.key));
+    return rawLabels
+      .map((label) => {
+        const trimmed = (label ?? '').trim();
+        if (!trimmed) return null;
+        if (registryKeys.has(trimmed)) return trimmed;
+        const labelDisplay = this.translation_.translate(trimmed);
+        const match = this.metadataRegistry_.allLabels_().find(
+          (def) => this.translation_.translate(def.key) === labelDisplay
+        );
+        return match ? match.key : null;
+      })
+      .filter((k): k is string => k != null);
+  }
+
   private patchFormFromRecipe(recipe: Recipe): void {
     const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.mise_categories_?.length);
+    const normalizedLabels = this.normalizeLabelKeys(recipe.labels_ ?? []);
     this.recipeForm_.patchValue({
       name_hebrew: recipe.name_hebrew,
       recipe_type: isDish ? 'dish' : 'preparation',
       serving_portions: isDish ? recipe.yield_amount_ : 1,
       total_weight_g: 0,
       total_cost: 0,
-      labels: recipe.labels_ ?? []
+      labels: normalizedLabels
     });
 
     const yieldConv = this.yieldConversionsArray.at(0);
@@ -914,7 +933,9 @@ export class RecipeBuilderPage implements OnInit {
     const yieldAmount = isDish ? ((raw['serving_portions'] as number) ?? 1) : (yieldConv?.amount ?? 0);
     const yieldUnit = isDish ? 'מנה' : (yieldConv?.unit ?? 'gram');
 
-    const labels = (raw['labels'] as string[] | undefined) ?? [];
+    const rawLabels = (raw['labels'] as string[] | undefined) ?? [];
+    const validKeys = new Set(this.metadataRegistry_.allLabels_().map((def) => def.key));
+    const labels = rawLabels.filter((k) => validKeys.has((k ?? '').trim()));
     return {
       _id: (this.recipeId_() ?? '') as string,
       name_hebrew: (raw['name_hebrew'] as string)?.trim() ?? '',

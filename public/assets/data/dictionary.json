@@ -33,7 +33,12 @@
         "sauce/stocks": "רטבים/צירים",
         "roasting": "צליות/חריכות",
         "pickling": "כבישה/החמצה",
-        "confectionery": "קונדיטוריה"
+        "confectionery": "קונדיטוריה",
+        "fry_mise": "מיזום תחנת טיגון",
+        "בישולים": "בישולים",
+        "חיתוכים": "חיתוכים",
+        "רטבים_צירים": "רטבים/צירים",
+        "טיגון": "טיגון"
     },
     "allergens": {
         "eggs": "ביצים",
@@ -206,6 +211,12 @@
         "menu_type_rename_confirm": "שינוי שם סוג התפריט יעדכן את כל התפריטים שמשתמשים בו. לאשר?",
         "confirm_add_equipment_category": "להוסיף כקטגוריה חדשה",
         "add_new_label": "הוסף תווית חדשה",
+        "vegetarian": "צמחוני",
+        "vegan": "טבעוני",
+        "gluten_free": "ללא גלוטן",
+        "meat": "בשר",
+        "asian": "אסייתי",
+        "sipur_shel_ochel": "סיפור של אוכל",
         "search_by_ingredients": "חיפוש לפי מרכיבים",
         "clear": "נקה",
         "clear_all": "נקה הכל",

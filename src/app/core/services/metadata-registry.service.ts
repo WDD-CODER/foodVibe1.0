@@ -69,11 +69,7 @@ export class MetadataRegistryService {
     }
 
     // 3. Fetch Labels (recipe labels with color + optional auto-triggers)
-    const labelRegistry = await this.storageService.query<any>('KITCHEN_LABELS');
-    const existingLabels = labelRegistry[0]?.items ?? [];
-    if (Array.isArray(existingLabels) && existingLabels.length > 0) {
-      this.labels_.set(existingLabels);
-    }
+    await this.reloadLabelsFromStorage();
 
     // 4. Fetch Menu Types (serving-style config with dish-row fields)
     const defaultMenuTypes: MenuTypeDefinition[] = [
@@ -192,6 +188,13 @@ export class MetadataRegistryService {
   getLabelColor(key: string): string {
     const def = this.labels_().find(l => l.key === key);
     return def?.color ?? '#78716C';
+  }
+
+  /** Reload labels from storage (e.g. after demo data load). */
+  async reloadLabelsFromStorage(): Promise<void> {
+    const labelRegistry = await this.storageService.query<any>('KITCHEN_LABELS');
+    const items = labelRegistry[0]?.items ?? [];
+    this.labels_.set(Array.isArray(items) ? items : []);
   }
 
   async registerLabel(key: string, color: string, autoTriggers?: string[]): Promise<void> {

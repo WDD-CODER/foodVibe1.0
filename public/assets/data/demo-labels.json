@@ -1,0 +1,17 @@
+[
+  {
+    "items": [
+      { "key": "vegetarian", "color": "#10B981", "autoTriggers": [] },
+      { "key": "vegan", "color": "#84CC16", "autoTriggers": [] },
+      { "key": "gluten_free", "color": "#06B6D4", "autoTriggers": [] },
+      { "key": "fish", "color": "#3B82F6", "autoTriggers": ["fish"] },
+      { "key": "gluten", "color": "#F59E0B", "autoTriggers": ["gluten"] },
+      { "key": "sesame", "color": "#F97316", "autoTriggers": ["sesame"] },
+      { "key": "meat", "color": "#EF4444", "autoTriggers": ["meat"] },
+      { "key": "asian", "color": "#8B5CF6", "autoTriggers": [] },
+      { "key": "sipur_shel_ochel", "color": "#EC4899", "autoTriggers": [] },
+      { "key": "dessert", "color": "#A855F7", "autoTriggers": [] },
+      { "key": "dairy", "color": "#38BDF8", "autoTriggers": [] }
+    ]
+  }
+]

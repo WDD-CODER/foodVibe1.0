@@ -11,6 +11,8 @@ import { EquipmentDataService } from './equipment-data.service';
 import { VenueDataService } from './venue-data.service';
 import { UserMsgService } from './user-msg.service';
 import { PreparationRegistryService } from './preparation-registry.service';
+import { MetadataRegistryService } from './metadata-registry.service';
+import { TranslationService } from './translation.service';
 
 const ASSETS = 'assets/data';
 
@@ -25,6 +27,8 @@ export class DemoLoaderService {
   private readonly equipmentData = inject(EquipmentDataService);
   private readonly venueData = inject(VenueDataService);
   private readonly preparationRegistry = inject(PreparationRegistryService);
+  private readonly metadataRegistry = inject(MetadataRegistryService);
+  private readonly translation = inject(TranslationService);
   private readonly userMsg = inject(UserMsgService);
 
   /**
@@ -33,7 +37,7 @@ export class DemoLoaderService {
    */
   async loadDemoData(): Promise<void> {
     try {
-      const [suppliers, products, recipes, dishes, equipment, venues, preparations] = await Promise.all([
+      const [suppliers, products, recipes, dishes, equipment, venues, preparations, labels] = await Promise.all([
         firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-suppliers.json`)),
         firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-products.json`)),
         firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-recipes.json`)),
@@ -41,6 +45,7 @@ export class DemoLoaderService {
         firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-equipment.json`).pipe(catchError(() => of([])))),
         firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-venues.json`).pipe(catchError(() => of([])))),
         firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-kitchen-preparations.json`).pipe(catchError(() => of([])))),
+        firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-labels.json`).pipe(catchError(() => of([])))),
       ]);
 
       await this.storage.replaceAll('KITCHEN_SUPPLIERS', suppliers ?? []);
@@ -50,6 +55,9 @@ export class DemoLoaderService {
       await this.storage.replaceAll('EQUIPMENT_LIST', equipment ?? []);
       await this.storage.replaceAll('VENUE_PROFILES', venues ?? []);
       await this.storage.replaceAll('KITCHEN_PREPARATIONS', Array.isArray(preparations) ? preparations : []);
+      if (Array.isArray(labels) && labels.length > 0) {
+        await this.storage.replaceAll('KITCHEN_LABELS', labels);
+      }
 
       await Promise.all([
         this.supplierData.reloadFromStorage(),
@@ -59,7 +67,10 @@ export class DemoLoaderService {
         this.equipmentData.reloadFromStorage(),
         this.venueData.reloadFromStorage(),
         this.preparationRegistry.reloadFromStorage(),
+        this.metadataRegistry.reloadLabelsFromStorage(),
       ]);
+
+      await this.translation.loadGlobalDictionary();
 
       this.userMsg.onSetSuccessMsg('נתוני הדגמה נטענו בהצלחה');
     } catch (err) {

@@ -422,7 +422,7 @@
         {"equipment_id_": "eq_004", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "שיפודי יקטורי"}
       ]
     },
-    "labels_": []
+    "labels_": ["meat"]
   },
   {
     "_id": "dish_012",
@@ -462,7 +462,7 @@
       {"category_name": "לחם", "items": [{"item_name": "לחמניות פתוחות", "unit": "unit", "quantity": 1}]},
       {"category_name": "תוספות", "items": [{"item_name": "כלים עם תוספת בצל", "unit": "unit", "quantity": 3}, {"item_name": "כלים עם תוספת כרוב כבוש", "unit": "unit", "quantity": 3}]}
     ],
-    "labels_": []
+    "labels_": ["meat"]
   },
   {
     "_id": "dish_013",
@@ -502,7 +502,7 @@
       {"category_name": "לחם", "items": [{"item_name": "לחמניות פתוחות", "unit": "unit", "quantity": 1}]},
       {"category_name": "תוספות", "items": [{"item_name": "כלים עם תוספת בצל", "unit": "unit", "quantity": 3}, {"item_name": "כלים עם תוספת כרוב כבוש", "unit": "unit", "quantity": 3}]}
     ],
-    "labels_": ["סיפור של אוכל"]
+    "labels_": ["sipur_shel_ochel"]
   },
   {
     "_id": "dish_014",
@@ -556,7 +556,7 @@
       {"category_name": "רטבים ותוספות", "items": [{"item_name": "ריבת בצל", "unit": "kg", "quantity": 0.05}, {"item_name": "רוטב למטבל", "unit": "kg", "quantity": 0.04}, {"item_name": "קטשופ", "unit": "kg", "quantity": 0.02}, {"item_name": "מיונז", "unit": "kg", "quantity": 0.02}]},
       {"category_name": "צד", "items": [{"item_name": "תפוצ'יפס שבור", "unit": "kg", "quantity": 0.01}, {"item_name": "ציפס רשת מופשר", "unit": "kg", "quantity": 0.1}]}
     ],
-    "labels_": ["סיפור של אוכל", "בשר"]
+    "labels_": ["sipur_shel_ochel", "meat"]
   },
   {
     "_id": "dish_015",
@@ -595,7 +595,7 @@
       {"category_name": "cooking", "items": [{"item_name": "אורז עגול מוכן", "unit": "kg", "quantity": 0.12}]},
       {"category_name": "garnish", "items": [{"item_name": "פוריקקה", "unit": "kg", "quantity": 0.01}]}
     ],
-    "labels_": ["סיפור של אוכל"]
+    "labels_": ["sipur_shel_ochel"]
   },
   {
     "_id": "dish_016",
@@ -634,7 +634,7 @@
       {"category_name": "roasting", "items": [{"item_name": "עגבניות שרי צבעוניות צלויות", "unit": "kg", "quantity": 0.04}]},
       {"category_name": "garnish", "items": [{"item_name": "פטרוזיליה", "unit": "kg", "quantity": 0.005}]}
     ],
-    "labels_": ["סיפור של אוכל"]
+    "labels_": ["sipur_shel_ochel", "meat"]
   },
   {
     "_id": "dish_017",
@@ -674,7 +674,7 @@
       {"category_name": "confectionery", "items": [{"item_name": "בסיס גלידה מוכן", "unit": "kg", "quantity": 0}]},
       {"category_name": "garnish", "items": [{"item_name": "טופינג לגלידה", "unit": "kg", "quantity": 0}]}
     ],
-    "labels_": ["סיפור של אוכל", "דגים"]
+    "labels_": ["sipur_shel_ochel", "fish"]
   },
   {
     "_id": "dish_018",
@@ -698,7 +698,7 @@
       ]
     },
     "mise_categories_": [],
-    "labels_": ["בשר", "סיפור של אוכל"]
+    "labels_": ["meat", "sipur_shel_ochel"]
   },
   {
     "_id": "dish_019",
@@ -726,7 +726,7 @@
     "mise_categories_": [
       {"category_name": "fry_mise", "items": [{"item_name": "קערה לערבוב הציפס", "unit": "unit", "quantity": 1}, {"item_name": "נייר ידיים לספיגת שמן", "unit": "unit", "quantity": 1}]}
     ],
-    "labels_": ["סיפור של אוכל", "vegetarian", "vegan"]
+    "labels_": ["sipur_shel_ochel", "vegetarian", "vegan"]
   },
   {
     "_id": "dish_020",
@@ -764,6 +764,97 @@
       {"category_name": "חיתוכים", "items": [{"item_name": "מיקס אגוזים קלויים", "unit": "kg", "quantity": 0.02}, {"item_name": "מלפפון פרוס ירחים בלי גרעינים", "unit": "kg", "quantity": 0.00004}, {"item_name": "מיקס עלים קצוצים גס", "unit": "kg", "quantity": 0.00001}, {"item_name": "גמבה פרוס דק", "unit": "kg", "quantity": 0.00003}]},
       {"category_name": "רטבים_צירים", "items": [{"item_name": "רוטב לסלט איטריות", "unit": "kg", "quantity": 0.00004}]}
     ],
-    "labels_": []
+    "labels_": ["vegan"]
+  },
+  {
+    "_id": "dish_021",
+    "name_hebrew": "פופקורן עוף / טבעוני — בזיגוג רוטב קוריאני וטופינג צבעוני",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_021_i1", "referenceId": "demo_037", "type": "product", "amount_": 0.12, "unit_": "kg", "note_": "חזה עוף"},
+      {"_id": "dish_021_i2", "referenceId": "demo_062", "type": "product", "amount_": 0.0025, "unit_": "kg"},
+      {"_id": "dish_021_i3", "referenceId": "demo_137", "type": "product", "amount_": 0.0025, "unit_": "kg"},
+      {"_id": "dish_021_i4", "referenceId": "demo_192", "type": "product", "amount_": 0.04, "unit_": "kg"},
+      {"_id": "dish_021_i5", "referenceId": "demo_193", "type": "product", "amount_": 0.03, "unit_": "kg"},
+      {"_id": "dish_021_i6", "referenceId": "demo_020", "type": "product", "amount_": 0.01, "unit_": "kg", "note_": "בצל ירוק"},
+      {"_id": "dish_021_i7", "referenceId": "demo_173", "type": "product", "amount_": 0.002, "unit_": "kg"},
+      {"_id": "dish_021_i8", "referenceId": "demo_149", "type": "product", "amount_": 0.01, "unit_": "kg"},
+      {"_id": "dish_021_i9", "referenceId": "demo_185", "type": "product", "amount_": 1, "unit_": "unit"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "הרכבת המנה מהמיסום: פופקורן עוף או טבעוני עם גלייז קוריאני, בצל ירוק פרוס דק, שומשום צבעוני וטופינג בכלי הגשה.", "labor_time_minutes_": 0}
+    ],
+    "yield_amount_": 50,
+    "yield_unit_": "dish",
+    "default_station_": "fry",
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_020", "quantity_": 1, "phase_": "both", "is_critical_": true, "notes_": "ציפסר"},
+        {"equipment_id_": "eq_040", "quantity_": 6, "phase_": "service", "is_critical_": false, "notes_": "כפות הגשה"},
+        {"equipment_id_": "eq_032", "quantity_": 1, "phase_": "service", "is_critical_": false, "notes_": "כפפות חמות"},
+        {"equipment_id_": "eq_014", "quantity_": 6, "phase_": "service", "is_critical_": false, "notes_": "מלקחיים להגשה"},
+        {"equipment_id_": "eq_042", "quantity_": 1, "phase_": "service", "is_critical_": true, "notes_": "קראפ 12"},
+        {"equipment_id_": "eq_058", "quantity_": 6, "phase_": "service", "is_critical_": false, "notes_": "קערות קטנות לטופינג"},
+        {"equipment_id_": "eq_055", "quantity_": 3, "phase_": "prep", "is_critical_": true, "notes_": "קערת ערבוב"},
+        {"equipment_id_": "eq_021", "quantity_": 3, "phase_": "service", "is_critical_": false, "notes_": "שפין דיש לפופקורן"},
+        {"equipment_id_": "eq_015", "quantity_": 2, "phase_": "prep", "is_critical_": true, "notes_": "מקרר"},
+        {"equipment_id_": "eq_017", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "חיבור חשמל"}
+      ]
+    },
+    "prep_items_": [],
+    "mise_categories_": [
+      {"category_name": "טיגון", "items": [{"item_name": "פופקורן עוף מטוגן", "unit": "kg", "quantity": 0.12}, {"item_name": "פופקורן טבעוני מטוגן", "unit": "kg", "quantity": 0.12}]},
+      {"category_name": "רטבים", "items": [{"item_name": "גלייז קוריאני", "unit": "kg", "quantity": 0.04}]},
+      {"category_name": "חיתוכים", "items": [{"item_name": "בצל ירוק פרוס דק", "unit": "kg", "quantity": 0.01}]},
+      {"category_name": "garnish", "items": [{"item_name": "שומשום צבעוני", "unit": "kg", "quantity": 0.002}]}
+    ],
+    "labels_": ["meat", "asian", "vegan", "sipur_shel_ochel"]
+  },
+  {
+    "_id": "dish_022",
+    "name_hebrew": "פאג בננות",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_022_i1", "referenceId": "demo_162", "type": "product", "amount_": 0.1, "unit_": "kg", "note_": ""},
+      {"_id": "dish_022_i2", "referenceId": "demo_168", "type": "product", "amount_": 0.003, "unit_": "kg", "note_": ""},
+      {"_id": "dish_022_i3", "referenceId": "demo_169", "type": "product", "amount_": 0.003, "unit_": "kg", "note_": ""},
+      {"_id": "dish_022_i4", "referenceId": "demo_141", "type": "product", "amount_": 0.003, "unit_": "kg", "note_": ""},
+      {"_id": "dish_022_i5", "referenceId": "demo_166", "type": "product", "amount_": 0.003, "unit_": "kg", "note_": ""},
+      {"_id": "dish_022_i6", "referenceId": "demo_159", "type": "product", "amount_": 0.003, "unit_": "kg", "note_": ""},
+      {"_id": "dish_022_i7", "referenceId": "demo_165", "type": "product", "amount_": 0.003, "unit_": "kg", "note_": ""},
+      {"_id": "dish_022_i8", "referenceId": "demo_163", "type": "product", "amount_": 0.002, "unit_": "kg", "note_": ""},
+      {"_id": "dish_022_i9", "referenceId": "demo_185", "type": "product", "amount_": 1, "unit_": "unit", "note_": ""}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "הרכבת המנה מהמיסום: נמסיס מופשרת, רוטב טופי/קרמל ובננות, בננה טריה פרוסה, רוטב שוקולד, קרם וניל, מרנג שוויצרי חרוך, עוגיות ביסקויט.", "labor_time_minutes_": 0}
+    ],
+    "yield_amount_": 1,
+    "yield_unit_": "unit",
+    "default_station_": "cold",
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_040", "quantity_": 8, "phase_": "service", "is_critical_": false, "notes_": "כפות הגשה"},
+        {"equipment_id_": "eq_014", "quantity_": 6, "phase_": "service", "is_critical_": false, "notes_": "מלקחיים להגשה"},
+        {"equipment_id_": "eq_061", "quantity_": 4, "phase_": "service", "is_critical_": false, "notes_": "סקוייזרים לרוטב"},
+        {"equipment_id_": "eq_058", "quantity_": 8, "phase_": "service", "is_critical_": false, "notes_": "קערות קטנות לטופינג"},
+        {"equipment_id_": "eq_008", "quantity_": 20, "phase_": "both", "is_critical_": true, "notes_": "מכלי גז לברנר"},
+        {"equipment_id_": "eq_062", "quantity_": 4, "phase_": "service", "is_critical_": true, "notes_": "ברנר עדין"},
+        {"equipment_id_": "eq_047", "quantity_": 2, "phase_": "prep", "is_critical_": true, "notes_": "מקרר וטרינה"},
+        {"equipment_id_": "eq_015", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "מקרר"},
+        {"equipment_id_": "eq_063", "quantity_": 30, "phase_": "prep", "is_critical_": false, "notes_": "מגשים 60×40"},
+        {"equipment_id_": "eq_017", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "חיבור חשמל ישראלי"}
+      ]
+    },
+    "prep_items_": [],
+    "mise_categories_": [
+      {"category_name": "confectionery", "items": [{"item_name": "נמסיס מופשרת", "unit": "kg", "quantity": 0.1}]},
+      {"category_name": "חיתוכים", "items": [{"item_name": "בננה טריה פרוסה", "unit": "kg", "quantity": 0.003}]},
+      {"category_name": "רטבים", "items": [{"item_name": "רוטב טופי", "unit": "kg", "quantity": 0.003}, {"item_name": "רוטב שוקולד", "unit": "kg", "quantity": 0.003}]},
+      {"category_name": "קרם", "items": [{"item_name": "קרם וניל", "unit": "kg", "quantity": 0.003}]},
+      {"category_name": "garnish", "items": [{"item_name": "מרנג שוויצרי", "unit": "kg", "quantity": 0.003}, {"item_name": "עוגיית דיימונד", "unit": "kg", "quantity": 0.002}, {"item_name": "קראמבל", "unit": "kg", "quantity": 0.003}]}
+    ],
+    "labels_": ["vegetarian", "sipur_shel_ochel"]
   }
 ]
