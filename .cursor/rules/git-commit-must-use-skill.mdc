@@ -5,9 +5,7 @@ alwaysApply: true
 
 # Git commit / push — always use the skill
 
-When the user asks to **commit**, **push**, **save to GitHub**, **save to branches**, or similar (any phrasing, any chat):
+When the user asks to **commit**, **push**, **save to GitHub**, or similar:
 
-1. **Read and follow** `.assistant/skills/commit-to-github/SKILL.md` from start to finish.
-2. **Do not** run `git add`, `git commit`, `git checkout`, or `git push` until the user has approved the visual plan in that process.
-
-The skill is the single source of truth for phases, branch naming, and execution steps.
+1. **Read and follow** `.assistant/skills/commit-to-github/SKILL.md` — it is the single source of truth.
+2. **No git writes** until the user has approved the visual plan.

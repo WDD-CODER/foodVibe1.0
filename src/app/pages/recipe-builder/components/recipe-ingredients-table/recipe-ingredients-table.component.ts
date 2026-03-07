@@ -62,6 +62,7 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
     const item = formArray.at(event.previousIndex);
     formArray.removeAt(event.previousIndex);
     formArray.insert(event.currentIndex, item);
+    formArray.markAsDirty();
   }
 
   get ingredientGroups() {
@@ -82,6 +83,7 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
     const ctrl = group.get('amount_net');
     const current = ctrl?.value ?? 0;
     ctrl?.setValue(quantityIncrement(current, 0));
+    this.ingredientsFormArray().markAsDirty();
     this.updateLineCalculations(index);
   }
 
@@ -89,6 +91,7 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
     const ctrl = group.get('amount_net');
     const current = ctrl?.value ?? 0;
     ctrl?.setValue(quantityDecrement(current, 0));
+    this.ingredientsFormArray().markAsDirty();
     this.updateLineCalculations(index);
   }
 
@@ -124,6 +127,7 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
       unit: item.base_unit_ || '',
       amount_net: 0,
     });
+    this.ingredientsFormArray().markAsDirty();
 
     const index = this.ingredientGroups.indexOf(group);
     if (index !== -1) {
@@ -168,6 +172,7 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
       amount_net: null,
       unit: 'gram',
     });
+    this.ingredientsFormArray().markAsDirty();
     group.updateValueAndValidity();
     this.ingredientsFormArray().updateValueAndValidity();
   }
@@ -223,6 +228,7 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
     }
 
     group.get('total_cost')?.setValue(lineCost);
+    this.ingredientsFormArray().markAsDirty();
     this.ingredientsFormArray().parent?.updateValueAndValidity();
   }
   getAvailableUnits(group: FormGroup): string[] {
@@ -252,13 +258,16 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
   onUnitChange(group: FormGroup, index: number, val: string): void {
     if (val === '__add_unit__') {
       group.get('unit')?.setValue('');
+      this.ingredientsFormArray().markAsDirty();
       this.unitRegistry.openUnitCreator();
       this.unitRegistry.unitAdded$.pipe(take(1)).subscribe(newUnit => {
         group.get('unit')?.setValue(newUnit);
+        this.ingredientsFormArray().markAsDirty();
         this.updateLineCalculations(index);
       });
     } else {
       group.get('unit')?.setValue(val);
+      this.ingredientsFormArray().markAsDirty();
       this.updateLineCalculations(index);
     }
   }

@@ -457,6 +457,12 @@ export class RecipeBuilderPage implements OnInit {
     return (this.recipeForm_.get('logistics') as FormGroup)?.get('baseline_') as FormArray;
   }
 
+  /** For route guard: true when there are unsaved edits (excludes history view and disabled form). */
+  hasUnsavedEdits(): boolean {
+    if (this.historyViewMode_() || this.recipeForm_.disabled) return false;
+    return this.recipeForm_.dirty === true;
+  }
+
   protected get allEquipment_() {
     return this.equipmentData_.allEquipment_();
   }
@@ -615,6 +621,7 @@ export class RecipeBuilderPage implements OnInit {
       is_critical_: lib ? lib.is_critical_ : true,
       notes_: lib?.notes_
     }));
+    this.recipeForm_.markAsDirty();
     this.logisticsSelectedToolId_.set(null);
     this.logisticsSelectedLibraryItem_.set(null);
     this.logisticsToolSearchQuery_.set('');
@@ -704,10 +711,12 @@ export class RecipeBuilderPage implements OnInit {
 
   protected addBaselineRow(): void {
     this.logisticsBaselineArray.push(this.recipeFormService_.createBaselineRow());
+    this.recipeForm_.markAsDirty();
   }
 
   protected removeBaselineRow(index: number): void {
     this.logisticsBaselineArray.removeAt(index);
+    this.recipeForm_.markAsDirty();
   }
 
   protected addFromLibrary(item: LogisticsBaselineItem): void {
@@ -718,6 +727,7 @@ export class RecipeBuilderPage implements OnInit {
       is_critical_: item.is_critical_,
       notes_: item.notes_
     }));
+    this.recipeForm_.markAsDirty();
     this.logisticsToolSearchQuery_.set('');
     this.logisticsToolDropdownOpen_.set(false);
   }
