@@ -437,9 +437,8 @@
 }
 
 .labels-grid-dense {
-  display: grid;
-  grid-auto-flow: dense;
-  grid-template-columns: repeat(auto-fill, minmax(0, max-content));
+  display: flex;
+  flex-wrap: wrap;
   align-content: start;
   align-items: center;
   gap: 0.35rem;
@@ -480,7 +479,8 @@
 
   padding-inline: 0.75rem;
   padding-block: 0.25rem;
-  max-width: 100%;
+  width: max-content;
+  flex-shrink: 0;
 
   font-size: 0.875rem;
   font-weight: 600;
