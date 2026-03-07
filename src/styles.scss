@@ -618,6 +618,10 @@ textarea.c-input {
 
 /* ---- Engine: Glass Data Grid ---- */
 .c-grid-header-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   padding-inline: 0.75rem;
   padding-block: 0.625rem;
   background: var(--bg-glass);
@@ -626,6 +630,24 @@ textarea.c-input {
   font-weight: 600;
   border-bottom: 1px solid var(--border-default);
   backdrop-filter: var(--blur-glass);
+  cursor: default;
+}
+
+.c-list-row {
+  display: contents;
+}
+
+.c-list-body-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 0;
+  padding-inline: 0.75rem;
+  padding-block: 0.625rem;
+  background: var(--bg-glass);
+  border-block-end: 1px solid rgba(241, 245, 249, 0.4);
+  transition: background 0.15s ease;
 }
 
 .c-grid-cell {
