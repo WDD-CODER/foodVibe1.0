@@ -177,7 +177,7 @@
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: var(--list-grid);
-    grid-auto-rows: minmax(20px, 100px);;
+    // grid-auto-rows: minmax(20px, 100px);;
 
     min-height: 0;
 
@@ -205,7 +205,7 @@
 
     background: var(--bg-glass-strong);
 
-    border-inline-start: 1px solid var(--border-glass);
+    border-inline-start: 3px solid var(--color-primary);
     border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
     box-shadow: var(--shadow-glass);
     backdrop-filter: var(--blur-glass);
@@ -214,7 +214,10 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
 
-    transition: width 0.25s var(--ease-spring), min-width 0.25s var(--ease-spring);
+    transition:
+      width 0.3s var(--ease-spring),
+      min-width 0.3s var(--ease-spring),
+      opacity 0.25s var(--ease-smooth);
 
     &::-webkit-scrollbar {
       display: none;
@@ -229,6 +232,7 @@
 
       .panel-content {
         opacity: 0;
+        transform: translateX(8px);
 
         pointer-events: none;
       }
@@ -238,19 +242,19 @@
   .panel-toggle-icon {
     display: grid;
     place-content: center;
-    align-self: flex-start;
+    align-self: flex-end;
     flex-shrink: 0;
 
-    width: 2.25rem;
-    height: 2.25rem;
-    margin: 0.75rem;
+    width: 2rem;
+    height: 2rem;
+    margin: 0.625rem 0.625rem 0;
     padding: 0;
 
-    background: var(--bg-glass);
-    color: var(--color-text-muted);
+    background: transparent;
+    color: var(--color-text-muted-light);
 
     border: none;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
 
     cursor: pointer;
     opacity: 0;
@@ -268,11 +272,11 @@
   }
 
   .panel-content {
-    padding: 0 1rem 1rem;
+    padding: 0.5rem 1rem 1rem;
 
     min-height: 12.5rem;
 
-    transition: opacity 0.2s var(--ease-spring);
+    transition: opacity 0.25s var(--ease-spring), transform 0.25s var(--ease-spring);
   }
 
   @media (max-width: 768px) {
@@ -293,7 +297,23 @@
       z-index: 10;
 
       max-height: 100%;
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: var(--shadow-modal);
+    }
+
+    .filter-panel:not(.collapsed) ~ .table-area::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+
+      background: var(--overlay-backdrop);
+
+      pointer-events: auto;
+    }
+
+    .panel-toggle-icon {
+      opacity: 1;
     }
 
     .table-area {
