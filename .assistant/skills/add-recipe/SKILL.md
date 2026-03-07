@@ -116,38 +116,53 @@ Before presenting the confirmation (Step 5):
 
 This step is mandatory. The user must always see when a name was changed because it was taken.
 
-### Step 5 — CONFIRM (full summary + visual structure + tables)
+### Step 5 — CONFIRM (visual tree first, then detail tables)
 
 Present the following **in this order**. No write (Step 6) until the user explicitly confirms.
 
 ---
 
-**1. Visual structure (what will be written)**
+**1. Visual tree (required — show first so the user can scan quickly)**
 
-Show exactly where and how the entry will be stored:
+Use this **visual tree format** at the top of Step 5. All agents must present it automatically instead of only tables.
 
 ```
-Target file:     demo-dishes.json  (or demo-recipes.json)
-New ID:          dish_NNN         (or prep_NNN)
-Type:            dish             (or preparation)
-Structure:
-  ├── name_hebrew
-  ├── recipe_type_
-  ├── yield_amount_ + yield_unit_
-  ├── default_station_
-  ├── ingredients_     [N items]
-  ├── steps_           [1 assembly step for dish / multiple for preparation]
-  ├── logistics_.baseline_  [M items]   (if any)
-  └── mise_categories_  [K categories]  (dishes only; if any)
+┌─────────────────────────────────────────────────────────────────┐
+│  🍽️  הוספת מנה/מתכון — אישור לפני כתיבה                         │
+└─────────────────────────────────────────────────────────────────┘
+
+[Target] demo-dishes.json  →  dish_NNN   (or demo-recipes.json → prep_NNN)
+  │
+  ├── 📌 שם:    [name_hebrew]
+  ├── 📌 סוג:   dish | תפוקה: [N] [unit] | תחנה: [default_station_]
+  ├── 🏷️  תוויות:  [labels_] or none
+  │
+  ├── 📦 מרכיבים ([N])
+  │     • [ingredient 1] [qty] [unit] ([product id or NEW])
+  │     • …
+  │
+  ├── 🔧 לוגיסטיקה ([M])
+  │     • [equipment name] × [qty] ([eq_id or חדש])
+  │     • …
+  │
+  └── 📋 מיסום ([K]) — קטגוריות
+        • [item] → [category] ([Hebrew])
+        • …
+
+┌── קבצים שישתנו (אחרי אישור) ──┐
+│  📄 [list affected files]     │
+└───────────────────────────────┘
+
+  ✅ Reply  confirm  (או  yes / add it)  כדי לכתוב ל-demo
+  ❌ Reply  deny  וכתוב מה לשנות — לא נכתוב עד שתאשר
 ```
 
-If a similar recipe/dish already exists (same ingredients/structure), say so and ask: "Add as new entry (new ID) or update existing [id] (e.g. add label only)?"
-
-**If the name was changed in Step 4b (duplicate):** Right after the structure block, show the mandatory notice: "**Name already in use:** The name '[original]' already exists (as [id]). The new entry will be stored as **[name] (2)** so you can tell it's not the same one. You can rename it later if you prefer."
+If a similar recipe/dish already exists, say so and ask: "Add as new entry or update existing [id]?"  
+**If the name was changed in Step 4b (duplicate):** Right after the tree, show: "**Name already in use:** The name '[original]' already exists (as [id]). The new entry will be stored as **[name] (2)**. You can rename it later if you prefer."
 
 ---
 
-**2. Summary — main details (must all be visible)**
+**2. Summary table — main details (after the tree)**
 
 Present this block so the user can confirm or correct every key field:
 
@@ -207,7 +222,7 @@ If any mise or prep items were marked **NEW PREP** in Step 2, show a table of wh
 
 End with exactly:
 
-"Review the structure, summary, and tables above. Reply **confirm** (or yes / add it) to add this to the demo data, or **deny** and say what to change. I will not write any file until you confirm."
+"Review the **visual tree** (and tables above if needed). Reply **confirm** (or yes / add it) to add this to the demo data, or **deny** and say what to change. I will not write any file until you confirm."
 
 **Then stop. Do not run Step 6 until the user explicitly confirms (e.g. confirm, yes, add it).**
 
