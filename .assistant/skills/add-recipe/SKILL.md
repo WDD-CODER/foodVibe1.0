@@ -43,7 +43,31 @@ Extract data faithfully, validate against inventory, fill gaps via questions, sh
 
 **Match products:** For each ingredient, look up `name_hebrew` in `demo-products.json`. Record `_id`, `base_unit_`, `purchase_options_`. Mark unmatched as **NEW**.
 
-**Match preparations:** For each mise/prep item, check `demo-kitchen-preparations.json` (`[{ "categories": [...], "preparations": [{ "name", "category" }] }]`). Mark unmatched as **NEW PREP**. If category is missing from `categories` array, mark as **NEW CATEGORY**.
+**Step 1a — SMART DECOMPOSITION** (only for ingredients that did NOT get an exact product match):
+
+For each such ingredient, try to split "product + prep action" so the recipe uses the raw product (for costing/waste) and suggests a mise item for the action.
+
+1. **Tokenize** the ingredient name into words.
+2. **Greedy match from the left**: try matching the longest prefix of words against product `name_hebrew` values. For products with `/` in the name (e.g. "עירית/בצל ירוק"), match against each alias segment. Example: "בצל ירוק פרוס דק" → try "בצל ירוק פרוס דק", then "בצל ירוק פרוס", then "בצל ירוק" → matches demo_020 "עירית/בצל ירוק".
+3. **Extract the action suffix**: remaining words after the matched prefix = prep action (e.g. "פרוס דק").
+4. **Build mise suggestion**: product short name + action suffix = mise item name (e.g. "בצל ירוק פרוס דק"). If it exists in `demo-kitchen-preparations.json`, reuse it; else mark **NEW PREP** and auto-assign category from the **action keyword table** below.
+5. **Replace in ingredient list**: ingredient references the raw product (same qty/unit). For **dishes**, add the mise item to `mise_categories_`. For **preparations**, put the action in ingredient `note_` (no mise).
+6. In the visual tree, show decomposed ingredients with a marker and tag auto-generated mise items.
+
+**Action keyword table** (scan action suffix; assign first matching category; when multiple match, use priority rules):
+
+- **חיתוכים**: פרוס, קצוץ, חתוך, מגורד, קוביות, ירחים, פרוסות, רצועות, פירורים, קילוף, לפרחים
+- **בישולים**: מבושל, מטוגן, צלוי, אפוי, מוקפץ, מקורמל, מחומם, טיגון, בישול
+- **pickling**: כבוש, מוחמץ, מותסס, חמוץ, כבישה, החמצה, תסיסה, מומלח (בהקשר שימור)
+- **חלבון**: ממולח, מפולפל, מתובל, מוכן לציפוי, ממרינד
+- **garnish**: פרוס דק (for garnish vegetables), מגורד (for cheese garnish)
+- **מצרכים_רטובים**: סחוט
+
+**Priority when keyword matches multiple categories:** (1) Prefer category already used in this dish. (2) Protein product → prefer חלבון. (3) Heat action (מטוגן, צלוי, מבושל, מקורמל) → בישולים. (4) Fermentation (כבוש, מוחמץ, מותסס) → pickling. (5) Default → חיתוכים.
+
+**Decomposition rules:** Exact product match → do NOT decompose. Full name matches an existing preparation → treat as prep reference, no decomposition. No prefix matches any product → keep existing behavior (NEW product). User can deny and correct in the tree.
+
+**Match preparations:** For each mise/prep item (including those from decomposition), check `demo-kitchen-preparations.json` (`[{ "categories": [...], "preparations": [{ "name", "category" }] }]`). Mark unmatched as **NEW PREP**. If category is missing from `categories` array, mark as **NEW CATEGORY**.
 
 **Validate units:** For each matched product, convert source unit to JSON unit (g→kg, ml→liter, יחידה→unit). Check if it matches `base_unit_` or any `purchase_options_[].unit_symbol_`. Mark OK or **MISMATCH**.
 
@@ -79,6 +103,7 @@ Do NOT mix food and logistics questions.
   │
   ├── 📦 מרכיבים ([N])
   │     • [ingredient 1] [qty] [unit] ([product id or NEW])
+  │     • [product name] [qty] [unit] ([id])  ← פורק מ: "[original text]"   (when decomposed)
   │     • …
   │
   ├── 🔧 לוגיסטיקה ([M])
@@ -87,6 +112,7 @@ Do NOT mix food and logistics questions.
   │
   └── 📋 מיסום ([K]) — קטגוריות
         • [item] → [category] ([Hebrew])
+        • [mise item] → [category] (אוטומטי מפירוק)   (when from decomposition)
         • …
 
 ┌── קבצים שישתנו (אחרי אישור) ──┐
