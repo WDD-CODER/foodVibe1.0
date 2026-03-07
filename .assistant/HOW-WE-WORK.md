@@ -48,7 +48,7 @@ This file is the **entry point** for how agents (Cursor or other) should work on
 ### Auth, logging & security
 
 - **Path**: [.assistant/skills/auth-and-logging/SKILL.md](.assistant/skills/auth-and-logging/SKILL.md)
-- **When**: Any feature touching routes, user data, auth, persistence, HTTP, or critical operations; or adding/refactoring services. Use **LoggingService** for auth, HTTP, CRUD, and errors; follow security rules (no secrets/PII in logs, validate input). When unsure whether to log, ask the user.
+- **When**: Any feature touching routes, user data, auth, persistence, HTTP, or critical operations; or adding/refactoring services. When adding new add/edit/delete (or other protected) actions, follow the skill’s **guest action feedback** rules so guests always get a sign-in message and modal. Use **LoggingService** for auth, HTTP, CRUD, and errors; follow security rules (no secrets/PII in logs, validate input). When unsure whether to log, ask the user.
 
 ### Tech debt
 
