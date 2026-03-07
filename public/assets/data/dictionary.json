@@ -164,6 +164,7 @@
         "menu_library": "תפריטי אירוע",
         "add_recipe_dish": "הוסף מתכון/מנה",
         "no_recipes_match": "אין מתכונים או מנות התואמים את הסינון",
+        "no_ingredients_found": "לא נמצאו מוצרים",
         "name": "שם",
         "type": "סוג",
         "approved": "מאושר",

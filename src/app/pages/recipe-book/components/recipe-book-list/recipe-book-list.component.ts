@@ -161,8 +161,9 @@ export class RecipeBookListComponent {
   protected filteredProductsForIngredientSearch_ = computed(() => {
     const query = this.ingredientSearchQuery_().trim().toLowerCase();
     if (!query) return [];
+    const selected = new Set(this.selectedProductIds_());
     return this.kitchenState.products_().filter(p =>
-      (p.name_hebrew ?? '').toLowerCase().includes(query)
+      !selected.has(p._id) && (p.name_hebrew ?? '').toLowerCase().includes(query)
     );
   });
 

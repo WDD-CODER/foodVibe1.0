@@ -132,7 +132,6 @@
 
   <ng-container shell-filters>
     <div class="search-section">
-      <h3>{{ 'search_by_ingredients' | translatePipe }}</h3>
       <div class="ingredient-search-block">
         <div class="ingredient-search-input-wrap">
           <lucide-icon name="search" [size]="18"></lucide-icon>
@@ -142,6 +141,9 @@
         @if (ingredientSearchQuery_().trim()) {
           <app-scrollable-dropdown [maxHeight]="200">
             <ul class="ingredient-dropdown-list" role="listbox">
+              @if (filteredProductsForIngredientSearch_().length === 0) {
+                <li class="no-dropdown-results">{{ 'no_ingredients_found' | translatePipe }}</li>
+              }
               @for (p of filteredProductsForIngredientSearch_(); track p._id) {
                 <li role="option" (click)="addIngredientProduct(p)">{{ p.name_hebrew }}</li>
               }
