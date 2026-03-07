@@ -406,7 +406,7 @@ export class RecipeBuilderPage implements OnInit {
         item_type: ing.type,
         amount_net: ing.amount_,
         unit: ing.unit_,
-        total_cost: ing.calculatedCost_ ?? 0
+        total_cost: ing.calculatedCost_ ?? this.recipeCostService_.getCostForIngredient(ing)
       });
     });
 
