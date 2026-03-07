@@ -1,130 +1,70 @@
 ---
 name: add-recipe
-description: Extracts recipe or dish data from an image or from pasted/written text, validates units against product inventory, asks structured questions for missing info, presents a table-format breakdown for confirmation, then creates any missing products, equipment, and kitchen preparations in demo JSON and adds the entry to demo-recipes.json or demo-dishes.json. All new data (products, equipment, mise/prep items) is persisted to the relevant demo files so it is available after loading demo data. Use when the user wants to add a recipe or dish from a picture, from text, or says they are adding recipe info.
+description: Extracts recipe or dish data from an image or text, validates units against product inventory, asks structured questions for missing info, presents a visual tree for confirmation, then creates any missing products, equipment, and kitchen preparations in demo JSON and adds the entry to demo-recipes.json or demo-dishes.json.
 ---
 
 # Add Recipe or Dish
 
-When the user provides an **image** or **text** of a recipe/dish and wants to add it to the demo data, follow this workflow. The goal is to extract the data faithfully, validate it against the product inventory, fill gaps via structured questions, show a scannable confirmation table, then write the entry.
+Extract data faithfully, validate against inventory, fill gaps via questions, show a visual tree for confirmation, then write.
 
 ## When to use
 
-- User attaches or pastes an image of a recipe/dish screen (costing sheet, app UI, handwritten recipe).
-- User pastes or writes recipe text and says "add this recipe", "add this dish", or similar.
-- User says "add recipe from this picture", "break this apart and add to demo", or equivalent.
+- User provides an image or text of a recipe/dish and wants to add it to demo data.
 
 ## MANDATORY: No write without confirmation
 
-**You must NEVER append or modify `demo-recipes.json`, `demo-dishes.json`, `demo-products.json`, `demo-equipment.json`, or `demo-kitchen-preparations.json` until the user has explicitly confirmed the confirmation tables (Step 5).** This applies to you and to any agent that runs this skill or the add-recipe command. If the user has not said "yes", "confirm", "add it", or equivalent approval after seeing the tables — do not write. Stop after Step 5 and wait.
+**NEVER modify any demo JSON until the user has explicitly confirmed (Step 3).** Stop after the visual tree and wait.
 
 ## Core principles
 
-1. **Trust the source units.** Always preserve the original units from the image or text. If the sheet says "גרם", keep grams (convert to kg for JSON). If "יחידה", keep unit. Never change an ingredient's unit based on an unrelated user comment. If the user wants to override a specific ingredient's unit, they must name that ingredient explicitly.
-2. **Validate against inventory.** Before confirming, cross-check every ingredient's unit against its matched product's `base_unit_` and `purchase_options_`. Flag mismatches.
-3. **Separate food from logistics.** Food ingredients and service/logistics items are presented and discussed separately — never mix them.
-4. **Dishes use mise, preparations use steps.** Dishes get `mise_categories_` plus one assembly step. Preparations get multi-step `steps_` with real times.
-5. **Dictionary sync for display keys.** Any new item that stores or displays values in English (or keys used by translatePipe) must have the same keys added to `public/assets/data/dictionary.json` with a Hebrew translation. Otherwise the UI will show English keys (e.g. "stocks") instead of Hebrew. This applies especially to new preparation categories created in Step 6.
-6. **Mise categories are per preparation.** There is no fixed "default category list" for mise. Each preparation is added **with** its category from the registry; that is the only category for that item unless the user explicitly changes it (and chooses "only for this recipe" or "update globally" in the app). When creating new preparations or new categories in Step 6, add the category to the registry and to the dictionary (see principle 5).
+1. **Trust the source units.** Preserve original units (convert g→kg, ml→liter for JSON). Never change a unit without the user naming that ingredient.
+2. **Validate against inventory.** Cross-check every ingredient's unit against its product's `base_unit_` and `purchase_options_`. Flag mismatches.
+3. **Separate food from logistics.** Never mix ingredient questions with logistics questions.
+4. **Dishes use mise, preparations use steps.** Dishes get `mise_categories_` + one assembly step. Preparations get multi-step `steps_` with real times.
+5. **Dictionary sync.** New preparation categories must be added to `dictionary.json` under `preparation_categories` with Hebrew translations.
+6. **Mise categories are per preparation.** No fixed default list. Each is added with its category from the registry.
+7. **No service_overrides_.** Do not generate `service_overrides_` in `logistics_`. Only generate `baseline_`.
 
-## Image layout (typical)
+## Input parsing
 
-- **Right side (or list)**: Recipe/dish **name** (often Hebrew).
-- **Left / main panel, top row**: Servings, total grams, total ml, total units, total price.
-- **Below**: **Ingredients table** — columns for ingredient name, quantity in grams, in ml, in units, and price per line.
-- **Bottom**: Preparation instructions, prep time, logistics, mise/פיזום פלס.
+**Image:** Extract name, servings/yield, totals, ingredients (name + qty + unit), prep/mise, logistics, infrastructure.
 
-If the layout differs, extract whatever fields are visible.
-
-## Text input
-
-Parse for:
-- **Name**: "שם המנה" / "שם המתכון" or first heading.
-- **Type**: מנה (dish) vs מתכון (recipe/preparation).
-- **Ingredients**: each line as "[name] [quantity] [unit]".
-- **Preparation / Mise**: steps or mise list.
-- **Logistics**: equipment/tool names and quantities.
+**Text:** Parse name ("שם המנה"/"שם המתכון"), type (מנה/מתכון), ingredients ("[name] [qty] [unit]"), prep/mise, logistics.
 
 ---
 
 ## Workflow
 
-### Step 1 — EXTRACT
+### Step 1 — EXTRACT, MATCH & VALIDATE
 
-From the image or text, extract exactly as shown:
+**Read now:** `demo-products.json` and `demo-kitchen-preparations.json` only. Defer other files to later steps.
 
-- **Name** (Hebrew or other)
-- **Servings / yield**
-- **Totals** (grams, ml, units, price — if visible)
-- **Ingredients**: for each row — name, quantity, unit (preserve the source unit exactly)
-- **Preparation / Mise**: steps or mise-en-place list
-- **Logistics** (if present): equipment names and quantities
-- **Building/infrastructure** (if present): electrical connections, etc.
+**Extract** from image/text: name, yield, ingredients, mise/steps, logistics.
 
-### Step 2 — MATCH products and preparations
+**Match products:** For each ingredient, look up `name_hebrew` in `demo-products.json`. Record `_id`, `base_unit_`, `purchase_options_`. Mark unmatched as **NEW**.
 
-**Products (ingredients):**
+**Match preparations:** For each mise/prep item, check `demo-kitchen-preparations.json` (`[{ "categories": [...], "preparations": [{ "name", "category" }] }]`). Mark unmatched as **NEW PREP**. If category is missing from `categories` array, mark as **NEW CATEGORY**.
 
-For each extracted ingredient:
+**Validate units:** For each matched product, convert source unit to JSON unit (g→kg, ml→liter, יחידה→unit). Check if it matches `base_unit_` or any `purchase_options_[].unit_symbol_`. Mark OK or **MISMATCH**.
 
-1. Look up by name in `public/assets/data/demo-products.json` (`name_hebrew`).
-2. Record the product's `_id`, `base_unit_`, and `purchase_options_`.
-3. If no match found, mark as **NEW** (will be created).
+### Step 2 — ASK
 
-**Kitchen preparations (mise / prep items):**
+Ask focused, numbered questions only for what is actually missing:
 
-For each extracted mise-en-place item or prep-item (from the dish's mise list or `prep_items_`):
+1. **Type** (if ambiguous): dish or preparation?
+2. **Yield** (if missing): how many servings?
+3. **Station** (if unknown): stove / oven / cold / fry?
+4. **Unit mismatches**: ask per ingredient with specific conversion options.
+5. **Mise vs steps** (for dishes): use mise list as-is?
+6. **Logistics details**: ask per item if unclear.
 
-1. Read `public/assets/data/demo-kitchen-preparations.json`. The file is an array of one document: `[{ "categories": string[], "preparations": [{ "name", "category" }, ...] }]`.
-2. Check if the item name (and its category) already exists in that document's `preparations` array (match by `name` trimmed, case-insensitive; category normalized: trim, lowercase, spaces→underscores).
-3. If no match found, mark as **NEW PREP** (will be registered in Step 6).
-4. If the category is not in the document's `categories` array, mark that category as **NEW CATEGORY** (will be added in Step 6). Record each NEW CATEGORY for the dictionary in Step 6; if the source gives a Hebrew label for the category, keep it for that step.
+Do NOT mix food and logistics questions.
 
-### Step 3 — VALIDATE units
+### Step 3 — CONFIRM
 
-For each ingredient with a matched product:
+**Before presenting the tree:** Search `demo-recipes.json` and `demo-dishes.json` for existing `name_hebrew` values to check for duplicates. If the name exists, disambiguate as "[name] (2)" (or (3), etc.) and notify the user in the tree.
 
-1. Convert the source unit to the JSON unit (g→kg, ml→liter, יחידה→unit).
-2. Check: does the JSON unit match the product's `base_unit_`? Or does it appear in `purchase_options_[].unit_symbol_`?
-3. If **YES** → mark as OK.
-4. If **NO** → mark as **MISMATCH**. This will be flagged to the user in the confirmation step.
-
-### Step 4 — ASK (structured gap-filling)
-
-Ask focused, numbered questions — one topic per question. Only ask what is actually missing:
-
-1. **Type** (if ambiguous): "Is this a dish (מנה) or a preparation (הכנה)?"
-2. **Yield** (if missing): "How many servings/portions does this make?"
-3. **Station** (if unknown): "Which station? stove / oven / cold / fry"
-4. **Unit mismatches** (if any): For each mismatch, ask specifically:
-   > "כרוב כבוש is stored as kg in inventory, but the sheet says 'unit'. Should I use X grams (= 0.0X kg) or keep as 1 unit?"
-5. **Mise vs steps** (for dishes): "I see a mise list (פיזום פלס). Should I use it as-is?"
-6. **Logistics details** (if items need clarification): ask per item.
-
-Do NOT mix food ingredient questions with logistics/service questions.
-
-### Step 4b — Check duplicate name (before Step 5)
-
-Before presenting the confirmation (Step 5):
-
-1. **Read** `demo-recipes.json` and `demo-dishes.json` and collect every existing `name_hebrew`.
-2. **Compare** the name the user wants for the new recipe/dish (from extract or user override) to these existing names. Use exact match (trimmed, same string).
-3. **If the name already exists:**
-   - Do **not** use the same name for the new entry.
-   - Set the new entry's name to a **disambiguated** version so it is clearly a different one: use **"[name] (2)"**. If "[name] (2)" also exists, use **"[name] (3)"**, and so on until the name is unique.
-   - In Step 5 you **must explicitly tell the user**: "**Name already in use:** The name '[original name]' already exists in the recipe/dish list (as [existing _id]). To keep this as a separate entry, the new one will be stored as **[name] (2)**. This way you can tell it's not the same recipe/dish. You can rename it later if you prefer." Show the disambiguated name in the visual structure and in the summary table (שם).
-4. **If the name does not exist:** use it as-is; no notice needed.
-
-This step is mandatory. The user must always see when a name was changed because it was taken.
-
-### Step 5 — CONFIRM (visual tree first, then detail tables)
-
-Present the following **in this order**. No write (Step 6) until the user explicitly confirms.
-
----
-
-**1. Visual tree (required — show first so the user can scan quickly)**
-
-Use this **visual tree format** at the top of Step 5. All agents must present it automatically instead of only tables.
+**Present the visual tree only.** Do not show detail tables unless the user asks.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -157,130 +97,75 @@ Use this **visual tree format** at the top of Step 5. All agents must present it
   ❌ Reply  deny  וכתוב מה לשנות — לא נכתוב עד שתאשר
 ```
 
-If a similar recipe/dish already exists, say so and ask: "Add as new entry or update existing [id]?"  
-**If the name was changed in Step 4b (duplicate):** Right after the tree, show: "**Name already in use:** The name '[original]' already exists (as [id]). The new entry will be stored as **[name] (2)**. You can rename it later if you prefer."
+If a duplicate name was detected, show after the tree: "**Name already in use:** '[original]' exists as [id]. New entry stored as **[name] (2)**."
+
+**Stop here. Do not proceed until the user confirms.**
+
+### Step 4 — WRITE
+
+**Only after explicit confirmation.** Now read the remaining files: `demo-equipment.json`, `dictionary.json`, and the target file (`demo-recipes.json` or `demo-dishes.json`).
+
+1. **Create missing products** — next `demo_NNN`, `buy_price_global_: 0`. Append to `demo-products.json`.
+2. **Create missing equipment** — next `eq_NNN`, `owned_quantity_: 0`, `is_consumable_: false`. Append to `demo-equipment.json`.
+3. **Update kitchen preparations** — add new categories to `categories` array, add new `{ name, category }` to `preparations` array. Preserve array-of-one-doc structure.
+4. **Update dictionary** — for each NEW CATEGORY, add entry under `preparation_categories` with Hebrew translation.
+5. **Build the recipe/dish object:**
+   - Next ID: `prep_NNN` or `dish_NNN` (max existing + 1, zero-padded to 3 digits).
+   - Convert units: g→kg (/1000), ml→liter (/1000), unit stays.
+   - **Dishes**: `recipe_type_: "dish"`, include `mise_categories_`, `prep_items_`, one assembly step with `labor_time_minutes_: 0`, `logistics_: { baseline_: [...] }`.
+   - **Preparations**: `recipe_type_: "preparation"`, multi-step `steps_` with real times.
+6. **Append** to the target file array.
+
+### Step 5 — VERIFY & REPORT
+
+1. **Read back** the written entry. Check each ingredient's `unit_` against its product. Report mismatches immediately.
+2. **Report:** file path, `_id`, `name_hebrew`. List new products (need prices), new equipment (need quantities), new preparations/categories. Note any categories/labels/allergens for manual follow-up in Metadata.
 
 ---
 
-**2. Summary table — main details (after the tree)**
+## Schema Reference
 
-Present this block so the user can confirm or correct every key field:
+### Ingredient object
 
-| Field | Value |
-|-------|--------|
-| **שם (name_hebrew)** | [exact name as will be stored] |
-| **סוג (type)** | dish / preparation |
-| **תפוקה (yield)** | [number] [unit: dish / kg / liter] |
-| **תחנה (default_station_)** | stove / oven / cold / fry |
-| **יחידות מדידה (measurement units)** | e.g. kg for [list]; unit for [list] |
-| **תוויות (labels_)** | [list or "none"] |
-| **מספר מרכיבים** | [N] |
-| **מספר ציוד לוגיסטיקה** | [M] |
-| **מיסום (mise)** | [K] categories / none |
+| Field | Type | Notes |
+|-------|------|--------|
+| `_id` | string | `{parentId}_i{index}` (e.g. `prep_011_i1`) |
+| `referenceId` | string | Product `_id` or another prep `_id` |
+| `type` | string | `"product"` or `"recipe"` |
+| `amount_` | number | In kg, liter, or unit |
+| `unit_` | string | Must match product `base_unit_` or `purchase_options_[].unit_symbol_` |
+| `note_` | string | Optional |
 
----
+### Step object
 
-**3. מרכיבים (Food ingredients)** — full table
+| Field | Type | Notes |
+|-------|------|--------|
+| `order_` | number | 1, 2, 3... |
+| `instruction_` | string | One paragraph |
+| `labor_time_minutes_` | number | Minutes (or 0) |
 
-| # | מרכיב | כמות | יחידה | מוצר תואם | OK? |
-|---|--------|------|--------|------------|-----|
-| 1 | … | … | … | … | V/X |
+### Recipe fields (demo-recipes.json)
 
-(OK? = V when unit matches product, X + short reason when mismatch.)
+`_id` (`prep_NNN`), `name_hebrew`, `recipe_type_: "preparation"`, `ingredients_`, `steps_`, `yield_amount_`, `yield_unit_` (kg/liter/dish), `default_station_` (stove/oven/cold/fry), `is_approved_: true`.
 
----
+### Dish fields (demo-dishes.json)
 
-**4. לוגיסטיקה (Equipment & service)** — full table
+Same as recipe, plus: `recipe_type_: "dish"`, `logistics_: { baseline_: [...] }`, `prep_items_`, `mise_categories_`, `labels_`.
 
-| # | פריט | כמות | סוג |
-|---|------|------|-----|
-| 1 | … | … | … |
+### Product creation (demo-products.json)
 
----
+ID pattern: `demo_NNN`. Required: `_id`, `name_hebrew`, `base_unit_` (kg/liter/unit), `buy_price_global_: 0`, `purchase_options_: []`, `categories_: [...]`, `supplierIds_: [...]`, `yield_factor_: 1`, `allergens_: []`, `min_stock_level_: 0`, `expiry_days_default_: 0`.
 
-**5. מיסום (Mise-en-place)** — for dishes only
+### Equipment creation (demo-equipment.json)
 
-| # | פריט | כמות | יחידה |
-|---|------|------|-------|
-| 1 | … | … | … |
+ID pattern: `eq_NNN`. Required: `_id`, `name_hebrew`, `category_` (heat_source/tool/container/packaging/consumable), `owned_quantity_: 0`, `is_consumable_: false`, `created_at_`, `updated_at_` (ISO strings).
 
----
+### Kitchen preparations (demo-kitchen-preparations.json)
 
-**5b. New kitchen preparations** (if any)
+Array of one doc: `[{ "categories": string[], "preparations": [{ "name", "category" }] }]`. Category key: trim, lowercase, spaces→underscores.
 
-If any mise or prep items were marked **NEW PREP** in Step 2, show a table of what will be registered in `demo-kitchen-preparations.json` and in the dictionary:
+### Unit validation
 
-| # | פריט (name) | קטגוריה (category) | חדש? | תרגום קטגוריה (dictionary) |
-|---|--------------|---------------------|------|-----------------------------|
-| 1 | … | … | PREP / CATEGORY | [Hebrew label if NEW CATEGORY] |
-
-(New PREP = preparation name not yet in file; New CATEGORY = category key not yet in file. Each NEW CATEGORY will also be added to `dictionary.json` under `preparation_categories` so the UI shows Hebrew.)
-
----
-
-**6. Confirm or deny**
-
-End with exactly:
-
-"Review the **visual tree** (and tables above if needed). Reply **confirm** (or yes / add it) to add this to the demo data, or **deny** and say what to change. I will not write any file until you confirm."
-
-**Then stop. Do not run Step 6 until the user explicitly confirms (e.g. confirm, yes, add it).**
-
-### Step 6 — WRITE
-
-**Only after the user has explicitly confirmed** (e.g. "yes", "confirm", "add it"):
-
-1. **Read** `demo-products.json`, `demo-equipment.json`, `demo-kitchen-preparations.json`, and the target file (demo-recipes or demo-dishes).
-2. **Create missing products** (next `demo_NNN`, `buy_price_global_: 0`, required fields per [SCHEMA.md](SCHEMA.md)). Append to `demo-products.json`.
-3. **Create missing equipment** (next `eq_NNN`, required fields per [SCHEMA.md](SCHEMA.md)). Append to `demo-equipment.json`.
-4. **Update kitchen preparations:** Read `demo-kitchen-preparations.json` (array of one doc: `[{ "categories", "preparations" }]`). For each mise/prep item from the new recipe/dish that was marked **NEW PREP** or has a **NEW CATEGORY**:
-   - Normalize category: trim, lowercase, replace spaces with underscores.
-   - If the category is not in the doc's `categories` array, add it.
-   - If the preparation `{ name, category }` is not already in the doc's `preparations` array (same name + category, case-insensitive), append it.
-   - Write the updated document back to `demo-kitchen-preparations.json` (keep the same array-of-one-doc structure).
-5. **Update dictionary for new preparation categories:** Read `public/assets/data/dictionary.json`. For each **NEW CATEGORY** added in step 4 (categories that were not already in the file): add an entry under the top-level key `preparation_categories` with the normalized English category key and a Hebrew translation. Use the Hebrew label from the recipe/source or a sensible default; if no Hebrew is available, ask the user or derive from context (e.g. "stocks" → "ציר"). This ensures the app's translatePipe shows Hebrew for that category instead of the raw key.
-6. **Build the recipe/dish object:**
-   - Target: `demo-recipes.json` for preparations, `demo-dishes.json` for dishes.
-   - Next ID: `prep_NNN` or `dish_NNN` (scan existing max + 1).
-   - Convert units: g→kg (/1000), ml→liter (/1000), unit stays unit.
-   - **Dishes**: include `mise_categories_` from the mise list; set `steps_` to one assembly step with `labor_time_minutes_: 0`.
-   - **Preparations**: include multi-step `steps_` with real times.
-   - Include `logistics_` with `baseline_` entries for equipment.
-7. **Append** the new object to the target file array.
-
-### Step 7 — VERIFY
-
-After writing:
-
-1. **Read back** the entry just written.
-2. **Check** each ingredient's `unit_` against its product's `base_unit_` / `purchase_options_`.
-3. If any mismatch is found, report it immediately and offer to fix.
-
-### Step 8 — REPORT
-
-Tell the user:
-- File path, `_id`, and `name_hebrew` of what was added.
-- List any **new products** created (so they can set prices later).
-- List any **new equipment** created (so they can set quantities later).
-- List any **new kitchen preparations** and **new preparation categories** registered in `demo-kitchen-preparations.json` (so they appear in the app's preparation registry after demo load).
-- List **new dictionary keys added (preparation categories):** each new category key added to `dictionary.json` under `preparation_categories` (so the user knows the UI will show Hebrew for those categories).
-- If any new product uses a **category** not in the default list (vegetables, dairy, meat, dry, fish, spices), note that the user may need to add it in Metadata / Categories.
-- If the recipe/dish uses **labels** not already in the app, note that the user may add them in Metadata / Labels (with a color).
-- If any new product has **allergens** not in the default list, note that the user may add them in Metadata / Allergens.
-- Flag any issues found in verification.
-
----
-
-## Summary checklist
-
-- [ ] Extract all data from image/text — preserve original units exactly.
-- [ ] Match ingredients to products in `demo-products.json`.
-- [ ] Validate units against each product's `base_unit_` and `purchase_options_`.
-- [ ] Ask structured questions for missing info; flag unit mismatches explicitly.
-- [ ] **Check duplicate name (Step 4b):** If name_hebrew already exists in demo-recipes or demo-dishes, use "[name] (2)" (or (3), …) and in Step 5 explicitly tell the user the name was taken and why the number was added.
-- [ ] **Match preparations (Step 2):** For each mise/prep item, check `demo-kitchen-preparations.json`; mark NEW PREP / NEW CATEGORY as needed.
-- [ ] Present confirmation: (1) visual structure + target file/ID (+ duplicate-name notice if applicable), (2) summary table, (3) מרכיבים table, (4) לוגיסטיקה table, (5) מיסום table, (5b) New kitchen preparations table if any, (6) "Confirm or deny" prompt.
-- [ ] Wait for user confirmation. Do not write until they confirm.
-- [ ] Create missing products and equipment; update `demo-kitchen-preparations.json` with new preparations and categories; add new preparation categories to `dictionary.json` under `preparation_categories` with Hebrew translations; build and append recipe/dish.
-- [ ] Read back and verify units are valid.
-- [ ] Report what was added: recipe/dish, new products, new equipment, new kitchen preparations/categories; note any categories/labels/allergens for manual follow-up.
+1. `unit_` === product `base_unit_` → OK
+2. `unit_` in `purchase_options_[].unit_symbol_` → OK
+3. Otherwise → MISMATCH — flag for user, default to `base_unit_`

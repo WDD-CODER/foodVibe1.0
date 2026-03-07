@@ -27,11 +27,6 @@
         {"equipment_id_": "eq_001", "quantity_": 1, "phase_": "both", "is_critical_": true, "notes_": "כיריים"},
         {"equipment_id_": "eq_004", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "מחבת גדולה"},
         {"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": false}
-      ],
-      "service_overrides_": [
-        {"service_style_": "plated", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
-        {"service_style_": "takeaway", "equipment_": [{"equipment_id_": "eq_010", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
-        {"service_style_": "buffet", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 2, "phase_": "service", "is_critical_": true}]}
       ]
     },
     "prep_items_": [
@@ -71,11 +66,6 @@
         {"equipment_id_": "eq_001", "quantity_": 1, "phase_": "both", "is_critical_": true, "notes_": "תנור"},
         {"equipment_id_": "eq_004", "quantity_": 1, "phase_": "prep", "is_critical_": true},
         {"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": false}
-      ],
-      "service_overrides_": [
-        {"service_style_": "plated", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
-        {"service_style_": "takeaway", "equipment_": [{"equipment_id_": "eq_010", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
-        {"service_style_": "buffet", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 2, "phase_": "service", "is_critical_": true}]}
       ]
     },
     "prep_items_": [
@@ -116,11 +106,6 @@
         {"equipment_id_": "eq_001", "quantity_": 1, "phase_": "both", "is_critical_": true},
         {"equipment_id_": "eq_004", "quantity_": 2, "phase_": "prep", "is_critical_": true, "notes_": "לטגון"},
         {"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": false}
-      ],
-      "service_overrides_": [
-        {"service_style_": "plated", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
-        {"service_style_": "takeaway", "equipment_": [{"equipment_id_": "eq_010", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
-        {"service_style_": "buffet", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 3, "phase_": "service", "is_critical_": true}]}
       ]
     },
     "prep_items_": [
@@ -160,11 +145,6 @@
         {"equipment_id_": "eq_001", "quantity_": 1, "phase_": "both", "is_critical_": true, "notes_": "תנור"},
         {"equipment_id_": "eq_004", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "תבנית צלייה"},
         {"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": false}
-      ],
-      "service_overrides_": [
-        {"service_style_": "plated", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
-        {"service_style_": "takeaway", "equipment_": [{"equipment_id_": "eq_010", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
-        {"service_style_": "buffet", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 2, "phase_": "service", "is_critical_": true}]}
       ]
     },
     "prep_items_": [
@@ -206,11 +186,6 @@
         {"equipment_id_": "eq_001", "quantity_": 1, "phase_": "both", "is_critical_": true},
         {"equipment_id_": "eq_005", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "סיר גדול"},
         {"equipment_id_": "eq_009", "quantity_": 6, "phase_": "service", "is_critical_": false}
-      ],
-      "service_overrides_": [
-        {"service_style_": "plated", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 6, "phase_": "service", "is_critical_": true}]},
-        {"service_style_": "takeaway", "equipment_": [{"equipment_id_": "eq_010", "quantity_": 6, "phase_": "service", "is_critical_": true}]},
-        {"service_style_": "buffet", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 2, "phase_": "service", "is_critical_": true}]}
       ]
     },
     "prep_items_": [
@@ -249,11 +224,6 @@
         {"equipment_id_": "eq_004", "quantity_": 1, "phase_": "prep", "is_critical_": true},
         {"equipment_id_": "eq_005", "quantity_": 1, "phase_": "prep", "is_critical_": false, "notes_": "לפסטה"},
         {"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": false}
-      ],
-      "service_overrides_": [
-        {"service_style_": "plated", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
-        {"service_style_": "takeaway", "equipment_": [{"equipment_id_": "eq_010", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
-        {"service_style_": "buffet", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 2, "phase_": "service", "is_critical_": true}]}
       ]
     },
     "prep_items_": [
@@ -293,11 +263,6 @@
         {"equipment_id_": "eq_004", "quantity_": 1, "phase_": "prep", "is_critical_": true},
         {"equipment_id_": "eq_005", "quantity_": 1, "phase_": "prep", "is_critical_": false},
         {"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": false}
-      ],
-      "service_overrides_": [
-        {"service_style_": "plated", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
-        {"service_style_": "takeaway", "equipment_": [{"equipment_id_": "eq_010", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
-        {"service_style_": "buffet", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 3, "phase_": "service", "is_critical_": true}]}
       ]
     },
     "prep_items_": [
@@ -339,11 +304,6 @@
         {"equipment_id_": "eq_001", "quantity_": 1, "phase_": "both", "is_critical_": true},
         {"equipment_id_": "eq_004", "quantity_": 2, "phase_": "prep", "is_critical_": true, "notes_": "מחבת לדניס + מחבת לחמאה"},
         {"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": false}
-      ],
-      "service_overrides_": [
-        {"service_style_": "plated", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
-        {"service_style_": "takeaway", "equipment_": [{"equipment_id_": "eq_010", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
-        {"service_style_": "buffet", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 2, "phase_": "service", "is_critical_": true}]}
       ]
     },
     "prep_items_": [
@@ -383,11 +343,6 @@
       "baseline_": [
         {"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": true, "notes_": "קערות הגשה"},
         {"equipment_id_": "eq_010", "quantity_": 4, "phase_": "service", "is_critical_": false}
-      ],
-      "service_overrides_": [
-        {"service_style_": "plated", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
-        {"service_style_": "takeaway", "equipment_": [{"equipment_id_": "eq_010", "quantity_": 4, "phase_": "service", "is_critical_": true}]},
-        {"service_style_": "buffet", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 2, "phase_": "service", "is_critical_": true}]}
       ]
     },
     "prep_items_": [
@@ -426,11 +381,6 @@
         {"equipment_id_": "eq_001", "quantity_": 1, "phase_": "both", "is_critical_": true, "notes_": "תנור לאמבט מים"},
         {"equipment_id_": "eq_004", "quantity_": 1, "phase_": "prep", "is_critical_": false},
         {"equipment_id_": "eq_009", "quantity_": 6, "phase_": "service", "is_critical_": true, "notes_": "כוסות/ראמליקין"}
-      ],
-      "service_overrides_": [
-        {"service_style_": "plated", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 6, "phase_": "service", "is_critical_": true}]},
-        {"service_style_": "takeaway", "equipment_": [{"equipment_id_": "eq_010", "quantity_": 6, "phase_": "service", "is_critical_": true}]},
-        {"service_style_": "buffet", "equipment_": [{"equipment_id_": "eq_009", "quantity_": 2, "phase_": "service", "is_critical_": true}]}
       ]
     },
     "prep_items_": [
@@ -470,8 +420,7 @@
       "baseline_": [
         {"equipment_id_": "eq_001", "quantity_": 2, "phase_": "both", "is_critical_": true, "notes_": "מכונת נקניקיות"},
         {"equipment_id_": "eq_004", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "שיפודי יקטורי"}
-      ],
-      "service_overrides_": []
+      ]
     },
     "labels_": []
   },
@@ -505,8 +454,7 @@
         {"equipment_id_": "eq_016", "quantity_": 2, "phase_": "service", "is_critical_": false, "notes_": "סלסלת קש ללחמניות"},
         {"equipment_id_": "eq_017", "quantity_": 4, "phase_": "both", "is_critical_": true, "notes_": "חיבור ישראלי לחשמל"},
         {"equipment_id_": "eq_018", "quantity_": 2, "phase_": "both", "is_critical_": false, "notes_": "תלת פאזי תלוי במכונה"}
-      ],
-      "service_overrides_": []
+      ]
     },
     "mise_categories_": [
       {"category_name": "נקניקיות", "items": [{"item_name": "נקניקיות חרוצות", "unit": "unit", "quantity": 1}, {"item_name": "שיפודי נקניקים מוכנים", "unit": "unit", "quantity": 1}]},
@@ -546,8 +494,7 @@
         {"equipment_id_": "eq_016", "quantity_": 2, "phase_": "service", "is_critical_": false, "notes_": "סלסלת קש ללחמניות"},
         {"equipment_id_": "eq_017", "quantity_": 4, "phase_": "both", "is_critical_": true, "notes_": "חיבור ישראלי לחשמל"},
         {"equipment_id_": "eq_018", "quantity_": 2, "phase_": "both", "is_critical_": false, "notes_": "תלת פאזי תלוי במכונה"}
-      ],
-      "service_overrides_": []
+      ]
     },
     "mise_categories_": [
       {"category_name": "נקניקיות", "items": [{"item_name": "נקניקיות חרוצות", "unit": "unit", "quantity": 1}]},
@@ -601,8 +548,7 @@
         {"equipment_id_": "eq_035", "quantity_": 2, "phase_": "service", "is_critical_": false, "notes_": "כלי לטבילת הבורגר ברוטב"},
         {"equipment_id_": "eq_036", "quantity_": 2, "phase_": "prep", "is_critical_": false, "notes_": "קרש עבודה לשולחן אחורי"},
         {"equipment_id_": "eq_017", "quantity_": 4, "phase_": "both", "is_critical_": true, "notes_": "חיבור ישראלי לחשמל"}
-      ],
-      "service_overrides_": []
+      ]
     },
     "mise_categories_": [
       {"category_name": "חלבון", "items": [{"item_name": "קציצת המבורגר", "unit": "unit", "quantity": 1}, {"item_name": "בשר מפורק ברוטב", "unit": "kg", "quantity": 0.03}]},
@@ -641,8 +587,7 @@
         {"equipment_id_": "eq_042", "quantity_": 1, "phase_": "service", "is_critical_": false, "notes_": "קראפ עם שפה גבוהה (ריבוע 12x12 / קראפ 12)"},
         {"equipment_id_": "eq_015", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "מקרר קטן"},
         {"equipment_id_": "eq_017", "quantity_": 1, "phase_": "both", "is_critical_": true, "notes_": "חיבור ישראלי לחשמל"}
-      ],
-      "service_overrides_": []
+      ]
     },
     "mise_categories_": [
       {"category_name": "sauce/stocks", "items": [{"item_name": "מרינדה בולוגוגית", "unit": "kg", "quantity": 0.035}]},
@@ -681,8 +626,7 @@
         {"equipment_id_": "eq_037", "quantity_": 1, "phase_": "service", "is_critical_": false, "notes_": "שפין דיש לאורז"},
         {"equipment_id_": "eq_044", "quantity_": 1, "phase_": "service", "is_critical_": false, "notes_": "שפין דיש לקציצות ברוטב"},
         {"equipment_id_": "eq_012", "quantity_": 2, "phase_": "service", "is_critical_": false, "notes_": "כלים לתוספות"}
-      ],
-      "service_overrides_": []
+      ]
     },
     "mise_categories_": [
       {"category_name": "cooking", "items": [{"item_name": "קציצות מבושלות ברוטב", "unit": "kg", "quantity": 0.12}, {"item_name": "אורז צהוב מוכן", "unit": "kg", "quantity": 0.12}]},
@@ -721,8 +665,7 @@
         {"equipment_id_": "eq_017", "quantity_": 5, "phase_": "both", "is_critical_": true, "notes_": "חיבור ישראלי לחשמל"},
         {"equipment_id_": "eq_050", "quantity_": 1, "phase_": "both", "is_critical_": false, "notes_": "כיור או פח ניקוז נוזלים"},
         {"equipment_id_": "eq_018", "quantity_": 1, "phase_": "both", "is_critical_": false, "notes_": "תלת פאזי תלוי במכונה"}
-      ],
-      "service_overrides_": []
+      ]
     },
     "mise_categories_": [
       {"category_name": "cooking", "items": [{"item_name": "אוניגירי ארוז", "unit": "unit", "quantity": 1}]},
@@ -732,5 +675,95 @@
       {"category_name": "garnish", "items": [{"item_name": "טופינג לגלידה", "unit": "kg", "quantity": 0}]}
     ],
     "labels_": ["סיפור של אוכל", "דגים"]
+  },
+  {
+    "_id": "dish_018",
+    "name_hebrew": "שיפוד נקניקים של טירת צבי ומטבל",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_018_i1", "referenceId": "demo_103", "type": "product", "amount_": 2, "unit_": "unit", "note_": "שיפוד יקיטורי"},
+      {"_id": "dish_018_i2", "referenceId": "demo_123", "type": "product", "amount_": 0.00012, "unit_": "kg", "note_": "מיקס נקניקים"},
+      {"_id": "dish_018_i3", "referenceId": "demo_187", "type": "product", "amount_": 0.00003, "unit_": "kg", "note_": "רוטב למטבל"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "הרכבת המנה: שיפוד נקניקים עם מטבל.", "labor_time_minutes_": 0}
+    ],
+    "yield_amount_": 1,
+    "yield_unit_": "dish",
+    "default_station_": "fry",
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_051", "quantity_": 2, "phase_": "service", "is_critical_": false, "notes_": "בוצ'ר עץ רחב"}
+      ]
+    },
+    "mise_categories_": [],
+    "labels_": ["בשר", "סיפור של אוכל"]
+  },
+  {
+    "_id": "dish_019",
+    "name_hebrew": "ציפס מנה",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_019_i1", "referenceId": "demo_153", "type": "product", "amount_": 0.00012, "unit_": "kg", "note_": "ציפס"},
+      {"_id": "dish_019_i2", "referenceId": "demo_139", "type": "product", "amount_": 0.02, "unit_": "liter", "note_": "שמן רגיל / שמן טיגון"},
+      {"_id": "dish_019_i3", "referenceId": "demo_185", "type": "product", "amount_": 1, "unit_": "unit", "note_": "כלי הגשה מוערך"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "טיגון ציפס בציפסר, ספיגת שמן בנייר. הגשה בכלי הגשה.", "labor_time_minutes_": 0}
+    ],
+    "yield_amount_": 1,
+    "yield_unit_": "dish",
+    "default_station_": "fry",
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_020", "quantity_": 1, "phase_": "both", "is_critical_": true, "notes_": "ציפסר"},
+        {"equipment_id_": "eq_052", "quantity_": 1, "phase_": "service", "is_critical_": false, "notes_": "שייקר מלח"}
+      ],
+      "service_overrides_": []
+    },
+    "mise_categories_": [
+      {"category_name": "fry_mise", "items": [{"item_name": "קערה לערבוב הציפס", "unit": "unit", "quantity": 1}, {"item_name": "נייר ידיים לספיגת שמן", "unit": "unit", "quantity": 1}]}
+    ],
+    "labels_": ["סיפור של אוכל", "vegetarian", "vegan"]
+  },
+  {
+    "_id": "dish_020",
+    "name_hebrew": "סלט איטריות שעועית",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_020_i1", "referenceId": "demo_128", "type": "product", "amount_": 0.00003, "unit_": "kg", "note_": "טופו מטוגן"},
+      {"_id": "dish_020_i2", "referenceId": "demo_171", "type": "product", "amount_": 0.00667, "unit_": "kg", "note_": "קאשיו"},
+      {"_id": "dish_020_i3", "referenceId": "demo_170", "type": "product", "amount_": 0.00667, "unit_": "kg", "note_": "בוטנים קלויים"},
+      {"_id": "dish_020_i4", "referenceId": "demo_172", "type": "product", "amount_": 0.00667, "unit_": "kg", "note_": "קוקוס"},
+      {"_id": "dish_020_i5", "referenceId": "demo_150", "type": "product", "amount_": 0.00003, "unit_": "kg", "note_": "דפי שעועית מסולסלים"},
+      {"_id": "dish_020_i6", "referenceId": "demo_007", "type": "product", "amount_": 0.00004, "unit_": "kg", "note_": "מלפפון"},
+      {"_id": "dish_020_i7", "referenceId": "demo_190", "type": "product", "amount_": 0.00001, "unit_": "kg", "note_": "מיקס עשבי תיבול"},
+      {"_id": "dish_020_i8", "referenceId": "demo_191", "type": "product", "amount_": 0.00003, "unit_": "kg", "note_": "גמבה אדומה"},
+      {"_id": "dish_020_i9", "referenceId": "demo_189", "type": "product", "amount_": 0.00004, "unit_": "kg", "note_": "רוטב לסלט איטריות"},
+      {"_id": "dish_020_i10", "referenceId": "demo_185", "type": "product", "amount_": 1, "unit_": "unit", "note_": "כלי הגשה מוערך"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "איחוד מיזום והגשה: מערבבים את כל המרכיבים בקערת ערבוב, מעבירים לקערת הגשה, מגישים עם מלקחיים.", "labor_time_minutes_": 0}
+    ],
+    "yield_amount_": 35,
+    "yield_unit_": "dish",
+    "default_station_": "cold",
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_053", "quantity_": 2, "phase_": "service", "is_critical_": true, "notes_": "קערת הגשה רחבה לסלט"},
+        {"equipment_id_": "eq_054", "quantity_": 4, "phase_": "service", "is_critical_": false, "notes_": "מלקחיים"},
+        {"equipment_id_": "eq_055", "quantity_": 2, "phase_": "prep", "is_critical_": true, "notes_": "קערת ערבוב לעבודה"}
+      ]
+    },
+    "prep_items_": [],
+    "mise_categories_": [
+      {"category_name": "בישולים", "items": [{"item_name": "טופו מטוגן", "unit": "kg", "quantity": 0.00003}, {"item_name": "דפי שעועית מסולסלים מבושלים ומסוננים", "unit": "kg", "quantity": 0.00003}]},
+      {"category_name": "חיתוכים", "items": [{"item_name": "מיקס אגוזים קלויים", "unit": "kg", "quantity": 0.02}, {"item_name": "מלפפון פרוס ירחים בלי גרעינים", "unit": "kg", "quantity": 0.00004}, {"item_name": "מיקס עלים קצוצים גס", "unit": "kg", "quantity": 0.00001}, {"item_name": "גמבה פרוס דק", "unit": "kg", "quantity": 0.00003}]},
+      {"category_name": "רטבים_צירים", "items": [{"item_name": "רוטב לסלט איטריות", "unit": "kg", "quantity": 0.00004}]}
+    ],
+    "labels_": []
   }
 ]
