@@ -1,6 +1,6 @@
 # Demo recipe/dish JSON schema reference
 
-Used by the [add-recipe](SKILL.md) skill when writing to `public/assets/data/demo-recipes.json` or `public/assets/data/demo-dishes.json`.
+Used by the [add-recipe](SKILL.md) skill when writing to `public/assets/data/demo-recipes.json`, `public/assets/data/demo-dishes.json`, `public/assets/data/demo-products.json`, `public/assets/data/demo-equipment.json`, and `public/assets/data/demo-kitchen-preparations.json`.
 
 ## Demo products (for referenceId)
 
@@ -18,6 +18,14 @@ Used by the [add-recipe](SKILL.md) skill when writing to `public/assets/data/dem
 - Required fields: `_id`, `name_hebrew`, `category_`, `owned_quantity_`, `is_consumable_`, `created_at_`, `updated_at_` (ISO string).
 - Allowed `category_`: `heat_source`, `tool`, `container`, `packaging`, `consumable`.
 - When creating new equipment (create-if-missing): use `owned_quantity_: 0`, `is_consumable_: false` unless known otherwise; optional `scaling_rule_` can be added later.
+
+## Kitchen preparations — demo-kitchen-preparations.json
+
+- Path: `public/assets/data/demo-kitchen-preparations.json`
+- Format: **array of one document** — `[{ "categories": string[], "preparations": { "name": string, "category": string }[] }]`
+- The app loads this into `KITCHEN_PREPARATIONS` (localStorage); `PreparationRegistryService` uses it for mise-en-place and prep-item dropdowns.
+- **Category key:** Normalize as trim, lowercase, spaces → underscores (e.g. `"Sauces"` → `sauces`, `"תבלינים"` stays as-is after lowercase).
+- **When adding a recipe/dish:** For every item in the dish's `mise_categories_` (each `item_name` under a `category_name`) and `prep_items_` (each `preparation_name` and `category_name`), check if `{ name, category }` already exists in the document's `preparations` array. If not, add the category to `categories` (if missing) and add `{ name, category }` to `preparations`. Write the file back preserving the array-of-one-doc structure.
 
 ## Recipe (preparation) — demo-recipes.json
 

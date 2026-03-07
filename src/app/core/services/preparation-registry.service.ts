@@ -45,6 +45,11 @@ export class PreparationRegistryService {
     this.initRegistry()
   }
 
+  /** Reload categories and preparations from storage (e.g. after demo data load). */
+  async reloadFromStorage(): Promise<void> {
+    await this.initRegistry()
+  }
+
   private async initRegistry(): Promise<void> {
     try {
       const registries = await this.storageService.query<PreparationRegistryDoc>(STORAGE_KEY)

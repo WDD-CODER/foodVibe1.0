@@ -10,6 +10,7 @@ import { DishDataService } from './dish-data.service';
 import { EquipmentDataService } from './equipment-data.service';
 import { VenueDataService } from './venue-data.service';
 import { UserMsgService } from './user-msg.service';
+import { PreparationRegistryService } from './preparation-registry.service';
 
 const ASSETS = 'assets/data';
 
@@ -23,21 +24,23 @@ export class DemoLoaderService {
   private readonly dishData = inject(DishDataService);
   private readonly equipmentData = inject(EquipmentDataService);
   private readonly venueData = inject(VenueDataService);
+  private readonly preparationRegistry = inject(PreparationRegistryService);
   private readonly userMsg = inject(UserMsgService);
 
   /**
    * Fetches demo JSON files, replaces PRODUCT_LIST, KITCHEN_SUPPLIERS, RECIPE_LIST, DISH_LIST,
-   * EQUIPMENT_LIST, and VENUE_PROFILES in localStorage, then reloads all data services.
+   * EQUIPMENT_LIST, VENUE_PROFILES, and KITCHEN_PREPARATIONS in localStorage, then reloads all data services.
    */
   async loadDemoData(): Promise<void> {
     try {
-      const [suppliers, products, recipes, dishes, equipment, venues] = await Promise.all([
+      const [suppliers, products, recipes, dishes, equipment, venues, preparations] = await Promise.all([
         firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-suppliers.json`)),
         firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-products.json`)),
         firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-recipes.json`)),
         firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-dishes.json`)),
         firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-equipment.json`).pipe(catchError(() => of([])))),
         firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-venues.json`).pipe(catchError(() => of([])))),
+        firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-kitchen-preparations.json`).pipe(catchError(() => of([])))),
       ]);
 
       await this.storage.replaceAll('KITCHEN_SUPPLIERS', suppliers ?? []);
@@ -46,6 +49,7 @@ export class DemoLoaderService {
       await this.storage.replaceAll('DISH_LIST', dishes ?? []);
       await this.storage.replaceAll('EQUIPMENT_LIST', equipment ?? []);
       await this.storage.replaceAll('VENUE_PROFILES', venues ?? []);
+      await this.storage.replaceAll('KITCHEN_PREPARATIONS', Array.isArray(preparations) ? preparations : []);
 
       await Promise.all([
         this.supplierData.reloadFromStorage(),
@@ -54,6 +58,7 @@ export class DemoLoaderService {
         this.dishData.reloadFromStorage(),
         this.equipmentData.reloadFromStorage(),
         this.venueData.reloadFromStorage(),
+        this.preparationRegistry.reloadFromStorage(),
       ]);
 
       this.userMsg.onSetSuccessMsg('נתוני הדגמה נטענו בהצלחה');

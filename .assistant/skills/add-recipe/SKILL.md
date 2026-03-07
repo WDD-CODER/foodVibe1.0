@@ -1,6 +1,6 @@
 ---
 name: add-recipe
-description: Extracts recipe or dish data from an image or from pasted/written text, validates units against product inventory, asks structured questions for missing info, presents a table-format breakdown for confirmation, then creates any missing products and equipment in demo JSON and adds the entry to demo-recipes.json or demo-dishes.json. Use when the user wants to add a recipe or dish from a picture, from text, or says they are adding recipe info.
+description: Extracts recipe or dish data from an image or from pasted/written text, validates units against product inventory, asks structured questions for missing info, presents a table-format breakdown for confirmation, then creates any missing products, equipment, and kitchen preparations in demo JSON and adds the entry to demo-recipes.json or demo-dishes.json. All new data (products, equipment, mise/prep items) is persisted to the relevant demo files so it is available after loading demo data. Use when the user wants to add a recipe or dish from a picture, from text, or says they are adding recipe info.
 ---
 
 # Add Recipe or Dish
@@ -15,7 +15,7 @@ When the user provides an **image** or **text** of a recipe/dish and wants to ad
 
 ## MANDATORY: No write without confirmation
 
-**You must NEVER append or modify `demo-recipes.json`, `demo-dishes.json`, `demo-products.json`, or `demo-equipment.json` until the user has explicitly confirmed the confirmation tables (Step 5).** This applies to you and to any agent that runs this skill or the add-recipe command. If the user has not said "yes", "confirm", "add it", or equivalent approval after seeing the tables — do not write. Stop after Step 5 and wait.
+**You must NEVER append or modify `demo-recipes.json`, `demo-dishes.json`, `demo-products.json`, `demo-equipment.json`, or `demo-kitchen-preparations.json` until the user has explicitly confirmed the confirmation tables (Step 5).** This applies to you and to any agent that runs this skill or the add-recipe command. If the user has not said "yes", "confirm", "add it", or equivalent approval after seeing the tables — do not write. Stop after Step 5 and wait.
 
 ## Core principles
 
@@ -58,13 +58,24 @@ From the image or text, extract exactly as shown:
 - **Logistics** (if present): equipment names and quantities
 - **Building/infrastructure** (if present): electrical connections, etc.
 
-### Step 2 — MATCH products
+### Step 2 — MATCH products and preparations
+
+**Products (ingredients):**
 
 For each extracted ingredient:
 
 1. Look up by name in `public/assets/data/demo-products.json` (`name_hebrew`).
 2. Record the product's `_id`, `base_unit_`, and `purchase_options_`.
 3. If no match found, mark as **NEW** (will be created).
+
+**Kitchen preparations (mise / prep items):**
+
+For each extracted mise-en-place item or prep-item (from the dish's mise list or `prep_items_`):
+
+1. Read `public/assets/data/demo-kitchen-preparations.json`. The file is an array of one document: `[{ "categories": string[], "preparations": [{ "name", "category" }, ...] }]`.
+2. Check if the item name (and its category) already exists in that document's `preparations` array (match by `name` trimmed, case-insensitive; category normalized: trim, lowercase, spaces→underscores).
+3. If no match found, mark as **NEW PREP** (will be registered in Step 6).
+4. If the category is not in the document's `categories` array, mark that category as **NEW CATEGORY** (will be added in Step 6).
 
 ### Step 3 — VALIDATE units
 
@@ -178,6 +189,18 @@ Present this block so the user can confirm or correct every key field:
 
 ---
 
+**5b. New kitchen preparations** (if any)
+
+If any mise or prep items were marked **NEW PREP** in Step 2, show a table of what will be registered in `demo-kitchen-preparations.json`:
+
+| # | פריט (name) | קטגוריה (category) | חדש? |
+|---|--------------|---------------------|------|
+| 1 | … | … | PREP / CATEGORY |
+
+(New PREP = preparation name not yet in file; New CATEGORY = category key not yet in file.)
+
+---
+
 **6. Confirm or deny**
 
 End with exactly:
@@ -190,17 +213,22 @@ End with exactly:
 
 **Only after the user has explicitly confirmed** (e.g. "yes", "confirm", "add it"):
 
-1. **Read** `demo-products.json`, `demo-equipment.json`, and the target file.
-2. **Create missing products** (next `demo_NNN`, `buy_price_global_: 0`, required fields per [SCHEMA.md](SCHEMA.md)).
-3. **Create missing equipment** (next `eq_NNN`, required fields per [SCHEMA.md](SCHEMA.md)).
-4. **Build the recipe/dish object:**
+1. **Read** `demo-products.json`, `demo-equipment.json`, `demo-kitchen-preparations.json`, and the target file (demo-recipes or demo-dishes).
+2. **Create missing products** (next `demo_NNN`, `buy_price_global_: 0`, required fields per [SCHEMA.md](SCHEMA.md)). Append to `demo-products.json`.
+3. **Create missing equipment** (next `eq_NNN`, required fields per [SCHEMA.md](SCHEMA.md)). Append to `demo-equipment.json`.
+4. **Update kitchen preparations:** Read `demo-kitchen-preparations.json` (array of one doc: `[{ "categories", "preparations" }]`). For each mise/prep item from the new recipe/dish that was marked **NEW PREP** or has a **NEW CATEGORY**:
+   - Normalize category: trim, lowercase, replace spaces with underscores.
+   - If the category is not in the doc's `categories` array, add it.
+   - If the preparation `{ name, category }` is not already in the doc's `preparations` array (same name + category, case-insensitive), append it.
+   - Write the updated document back to `demo-kitchen-preparations.json` (keep the same array-of-one-doc structure).
+5. **Build the recipe/dish object:**
    - Target: `demo-recipes.json` for preparations, `demo-dishes.json` for dishes.
    - Next ID: `prep_NNN` or `dish_NNN` (scan existing max + 1).
    - Convert units: g→kg (/1000), ml→liter (/1000), unit stays unit.
    - **Dishes**: include `mise_categories_` from the mise list; set `steps_` to one assembly step with `labor_time_minutes_: 0`.
    - **Preparations**: include multi-step `steps_` with real times.
    - Include `logistics_` with `baseline_` entries for equipment.
-5. **Append** the new object to the target file array.
+6. **Append** the new object to the target file array.
 
 ### Step 7 — VERIFY
 
@@ -216,6 +244,10 @@ Tell the user:
 - File path, `_id`, and `name_hebrew` of what was added.
 - List any **new products** created (so they can set prices later).
 - List any **new equipment** created (so they can set quantities later).
+- List any **new kitchen preparations** and **new preparation categories** registered in `demo-kitchen-preparations.json` (so they appear in the app's preparation registry after demo load).
+- If any new product uses a **category** not in the default list (vegetables, dairy, meat, dry, fish, spices), note that the user may need to add it in Metadata / Categories.
+- If the recipe/dish uses **labels** not already in the app, note that the user may add them in Metadata / Labels (with a color).
+- If any new product has **allergens** not in the default list, note that the user may add them in Metadata / Allergens.
 - Flag any issues found in verification.
 
 ---
@@ -227,8 +259,9 @@ Tell the user:
 - [ ] Validate units against each product's `base_unit_` and `purchase_options_`.
 - [ ] Ask structured questions for missing info; flag unit mismatches explicitly.
 - [ ] **Check duplicate name (Step 4b):** If name_hebrew already exists in demo-recipes or demo-dishes, use "[name] (2)" (or (3), …) and in Step 5 explicitly tell the user the name was taken and why the number was added.
-- [ ] Present confirmation: (1) visual structure + target file/ID (+ duplicate-name notice if applicable), (2) summary table with name, type, yield, station, units, labels, counts, (3) מרכיבים table, (4) לוגיסטיקה table, (5) מיסום table, (6) "Confirm or deny" prompt.
+- [ ] **Match preparations (Step 2):** For each mise/prep item, check `demo-kitchen-preparations.json`; mark NEW PREP / NEW CATEGORY as needed.
+- [ ] Present confirmation: (1) visual structure + target file/ID (+ duplicate-name notice if applicable), (2) summary table, (3) מרכיבים table, (4) לוגיסטיקה table, (5) מיסום table, (5b) New kitchen preparations table if any, (6) "Confirm or deny" prompt.
 - [ ] Wait for user confirmation. Do not write until they confirm.
-- [ ] Create missing products and equipment; build and append recipe/dish.
+- [ ] Create missing products and equipment; update `demo-kitchen-preparations.json` with new preparations and categories; build and append recipe/dish.
 - [ ] Read back and verify units are valid.
-- [ ] Report what was added and any new items created.
+- [ ] Report what was added: recipe/dish, new products, new equipment, new kitchen preparations/categories; note any categories/labels/allergens for manual follow-up.
