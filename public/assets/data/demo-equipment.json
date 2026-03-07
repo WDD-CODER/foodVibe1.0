@@ -48,5 +48,15 @@
   {"_id":"eq_047","name_hebrew":"מקרר וטרינה לאוניגירי","category_":"container","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
   {"_id":"eq_048","name_hebrew":"משטחי מלמין להנחת אוניגירי במקרר","category_":"container","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
   {"_id":"eq_049","name_hebrew":"קישוטים לסושי","category_":"tool","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
-  {"_id":"eq_050","name_hebrew":"כיור או פח ניקוז נוזלים","category_":"tool","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"}
+  {"_id":"eq_050","name_hebrew":"כיור או פח ניקוז נוזלים","category_":"tool","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_051","name_hebrew":"בוצ'ר עץ רחב","category_":"container","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_052","name_hebrew":"שייקר מלח","category_":"tool","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_053","name_hebrew":"קערת הגשה רחבה לסלט","category_":"container","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_054","name_hebrew":"מלקחיים","category_":"tool","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_055","name_hebrew":"קערת ערבוב לעבודה","category_":"container","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_056","name_hebrew":"כלי סגור למשרה","category_":"container","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_057","name_hebrew":"מגימיקס","category_":"tool","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_058","name_hebrew":"קערות קטנות לטופינג","category_":"container","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_059","name_hebrew":"כף עץ לערבוב","category_":"tool","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_060","name_hebrew":"קערה קטנה לקורנפלור","category_":"container","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"}
 ]
