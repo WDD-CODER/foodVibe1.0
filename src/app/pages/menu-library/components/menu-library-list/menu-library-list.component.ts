@@ -8,6 +8,9 @@ import { MenuEventDataService } from '@services/menu-event-data.service';
 import { MenuEvent, ServingType } from '@models/menu-event.model';
 import { ConfirmModalService } from '@services/confirm-modal.service';
 import { UserService } from '@services/user.service';
+import { UserMsgService } from '@services/user-msg.service';
+import { AuthModalService } from '@services/auth-modal.service';
+import { TranslationService } from '@services/translation.service';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 
@@ -26,6 +29,9 @@ export class MenuLibraryListComponent {
   private readonly menuEventData = inject(MenuEventDataService);
   private readonly confirmModal = inject(ConfirmModalService);
   protected readonly isLoggedIn = inject(UserService).isLoggedIn;
+  private readonly userMsg = inject(UserMsgService);
+  private readonly authModal = inject(AuthModalService);
+  private readonly translation = inject(TranslationService);
 
   protected readonly searchQuery_ = signal('');
   protected readonly eventTypeFilter_ = signal('all');
@@ -139,6 +145,11 @@ export class MenuLibraryListComponent {
   }
 
   protected async onDelete(event: MenuEvent): Promise<void> {
+    if (!this.isLoggedIn()) {
+      this.userMsg.onSetWarningMsg(this.translation.translate('sign_in_to_use'));
+      this.authModal.open('sign-in');
+      return;
+    }
     const ok = await this.confirmModal.open('menu_confirm_delete', {
       saveLabel: 'delete',
       variant: 'danger',

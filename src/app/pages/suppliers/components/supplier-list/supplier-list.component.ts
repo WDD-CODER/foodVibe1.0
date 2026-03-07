@@ -11,6 +11,8 @@ import { Supplier } from '@models/supplier.model';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { UserService } from '@services/user.service';
+import { UserMsgService } from '@services/user-msg.service';
+import { AuthModalService } from '@services/auth-modal.service';
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
@@ -31,6 +33,8 @@ export class SupplierListComponent {
   private readonly addSupplierFlow = inject(AddSupplierFlowService);
   private readonly translation = inject(TranslationService);
   private readonly router = inject(Router);
+  private readonly userMsg = inject(UserMsgService);
+  private readonly authModal = inject(AuthModalService);
 
   /** When true, add button emits addSupplierClick instead of opening modal and navigating. */
   embeddedInDashboard = false;
@@ -113,6 +117,11 @@ export class SupplierListComponent {
   }
 
   protected async onAdd(): Promise<void> {
+    if (!this.isLoggedIn()) {
+      this.userMsg.onSetWarningMsg(this.translation.translate('sign_in_to_use'));
+      this.authModal.open('sign-in');
+      return;
+    }
     if (this.embeddedInDashboard) {
       this.addSupplierClick.emit();
       return;
@@ -128,6 +137,11 @@ export class SupplierListComponent {
   }
 
   async onDelete(item: Supplier): Promise<void> {
+    if (!this.isLoggedIn()) {
+      this.userMsg.onSetWarningMsg(this.translation.translate('sign_in_to_use'));
+      this.authModal.open('sign-in');
+      return;
+    }
     const count = this.linkedProductCount_(item._id);
     if (count > 0) {
       const msg = this.translation.translate('supplier_in_use_cannot_delete');

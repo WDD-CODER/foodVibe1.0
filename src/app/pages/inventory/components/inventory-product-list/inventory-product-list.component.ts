@@ -8,6 +8,7 @@ import { KitchenStateService } from '@services/kitchen-state.service';
 import { EquipmentDataService } from '@services/equipment-data.service';
 import { UserMsgService } from '@services/user-msg.service';
 import { UserService } from '@services/user.service';
+import { AuthModalService } from '@services/auth-modal.service';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { Product } from '@models/product.model';
 import { UnitRegistryService } from '@services/unit-registry.service';
@@ -51,6 +52,7 @@ export class InventoryProductListComponent {
   private readonly confirmModal = inject(ConfirmModalService);
   private readonly equipmentData = inject(EquipmentDataService);
   private readonly userMsg = inject(UserMsgService);
+  private readonly authModal = inject(AuthModalService);
   protected readonly isLoggedIn = inject(UserService).isLoggedIn;
   protected readonly unitRegistry = inject(UnitRegistryService);
 
@@ -287,6 +289,11 @@ export class InventoryProductListComponent {
 
   // DELETE
   protected onDeleteProduct(_id: string): void {
+    if (!this.isLoggedIn()) {
+      this.userMsg.onSetWarningMsg(this.translationService.translate('sign_in_to_use'));
+      this.authModal.open('sign-in');
+      return;
+    }
     if (confirm('האם אתה בטוח שברצונך למחוק חומר גלם זה?')) {
       this.deletingId_.set(_id);
       this.kitchenStateService.deleteProduct(_id).subscribe({

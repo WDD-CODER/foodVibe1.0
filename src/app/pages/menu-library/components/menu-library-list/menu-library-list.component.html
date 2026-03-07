@@ -74,7 +74,6 @@
         </div>
         <div class="card-actions" (click)="$event.stopPropagation()">
           <button type="button" class="action-btn edit" (click)="onOpen(event)"
-            [disabled]="!isLoggedIn()"
             [attr.aria-label]="'edit' | translatePipe"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
             <lucide-icon name="pencil" [size]="18"></lucide-icon>
@@ -83,7 +82,6 @@
             <app-loader size="small" [inline]="true" />
           } @else {
             <button type="button" class="action-btn clone" (click)="onClone(event)"
-              [disabled]="!isLoggedIn()"
               [attr.aria-label]="'menu_clone' | translatePipe"
               [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
               <lucide-icon name="copy" [size]="18"></lucide-icon>
@@ -93,7 +91,6 @@
             <app-loader size="small" [inline]="true" />
           } @else {
             <button type="button" class="action-btn delete" (click)="onDelete(event)"
-              [disabled]="!isLoggedIn()"
               [attr.aria-label]="'delete' | translatePipe"
               [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>

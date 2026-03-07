@@ -21,7 +21,6 @@
   </ng-container>
 
   <button shell-actions type="button" class="c-btn-primary" (click)="onAdd()"
-    [disabled]="!isLoggedIn()"
     [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
     <lucide-icon name="plus" [size]="18"></lucide-icon>
     {{ 'add_supplier' | translatePipe }}
@@ -46,7 +45,6 @@
           <lucide-icon name="truck" [size]="48" class="empty-state-icon"></lucide-icon>
           <p class="empty-state-msg">{{ 'empty_suppliers' | translatePipe }}</p>
           <button type="button" class="c-btn-primary" (click)="onAdd()"
-            [disabled]="!isLoggedIn()"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">{{ 'add_supplier' | translatePipe }}</button>
         } @else {
           {{ 'no_suppliers_match' | translatePipe }}
@@ -65,7 +63,6 @@
         <div class="col-linked c-list-body-cell" role="cell">{{ linkedProductCount_(item._id) }}</div>
         <div class="c-col-actions c-list-body-cell" role="cell">
           <button type="button" class="c-icon-btn" (click)="onEdit(item._id)"
-            [disabled]="!isLoggedIn()"
             [attr.aria-label]="'edit' | translatePipe"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
             <lucide-icon name="pencil" [size]="18"></lucide-icon>
@@ -74,7 +71,6 @@
             <app-loader size="small" [inline]="true" />
           } @else {
             <button type="button" class="c-icon-btn danger" (click)="onDelete(item)"
-              [disabled]="!isLoggedIn()"
               [attr.aria-label]="'delete' | translatePipe"
               [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>

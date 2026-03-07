@@ -5,6 +5,9 @@ import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { VenueDataService } from '@services/venue-data.service';
 import { UserService } from '@services/user.service';
+import { UserMsgService } from '@services/user-msg.service';
+import { AuthModalService } from '@services/auth-modal.service';
+import { TranslationService } from '@services/translation.service';
 import { VenueProfile, EnvironmentType } from '@models/venue.model';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
@@ -43,6 +46,9 @@ export class VenueListComponent {
   private readonly venueData = inject(VenueDataService);
   private readonly router = inject(Router);
   protected readonly isLoggedIn = inject(UserService).isLoggedIn;
+  private readonly userMsg = inject(UserMsgService);
+  private readonly authModal = inject(AuthModalService);
+  private readonly translation = inject(TranslationService);
 
   /** When true, add button emits addVenueClick instead of navigating (e.g. dashboard tab switch). */
   embeddedInDashboard = false;
@@ -111,6 +117,11 @@ export class VenueListComponent {
   }
 
   protected onAddPlace(): void {
+    if (!this.isLoggedIn()) {
+      this.userMsg.onSetWarningMsg(this.translation.translate('sign_in_to_use'));
+      this.authModal.open('sign-in');
+      return;
+    }
     if (this.embeddedInDashboard) {
       this.addVenueClick.emit();
     } else {
@@ -123,6 +134,11 @@ export class VenueListComponent {
   }
 
   async onDelete(item: VenueProfile): Promise<void> {
+    if (!this.isLoggedIn()) {
+      this.userMsg.onSetWarningMsg(this.translation.translate('sign_in_to_use'));
+      this.authModal.open('sign-in');
+      return;
+    }
     if (!confirm('למחוק את המיקום "' + (item.name_hebrew ?? '') + '"?')) return;
     this.deletingId_.set(item._id);
     try {

@@ -16,7 +16,6 @@
   </ng-container>
 
   <button shell-actions type="button" class="c-btn-primary" (click)="onAddRecipe()"
-    [disabled]="!isLoggedIn()"
     [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
     <lucide-icon name="plus" [size]="18"></lucide-icon>
     {{ 'add_recipe_dish' | translatePipe }}
@@ -53,7 +52,6 @@
           <lucide-icon name="book-open" [size]="48" class="empty-state-icon"></lucide-icon>
           <p class="empty-state-msg">{{ 'empty_recipe_book' | translatePipe }}</p>
           <button type="button" class="c-btn-primary" (click)="onAddRecipe()"
-            [disabled]="!isLoggedIn()"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">{{ 'add_first_recipe' | translatePipe }}</button>
         } @else {
           {{ 'no_recipes_match' | translatePipe }}
@@ -110,7 +108,6 @@
         <div class="col-date c-list-body-cell">{{ formatAddedAt(recipe.addedAt_) }}</div>
         <div class="c-col-actions c-list-body-cell">
           <button type="button" class="c-icon-btn" (click)="onEditRecipe(recipe); $event.stopPropagation()"
-            [disabled]="!isLoggedIn()"
             [attr.aria-label]="'edit' | translatePipe"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
             <lucide-icon name="pencil" [size]="18"></lucide-icon>
@@ -119,7 +116,6 @@
             <app-loader size="small" [inline]="true" />
           } @else {
             <button type="button" class="c-icon-btn danger" (click)="onDeleteRecipe(recipe); $event.stopPropagation()"
-              [disabled]="!isLoggedIn()"
               [attr.aria-label]="'delete' | translatePipe"
               [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>

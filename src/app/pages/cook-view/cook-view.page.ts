@@ -12,6 +12,9 @@ import { KitchenStateService } from '@services/kitchen-state.service';
 import { ConfirmModalService } from '@services/confirm-modal.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { UserService } from '@services/user.service';
+import { UserMsgService } from '@services/user-msg.service';
+import { AuthModalService } from '@services/auth-modal.service';
+import { TranslationService } from '@services/translation.service';
 import { ExportService } from '@services/export.service';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
@@ -52,6 +55,9 @@ export class CookViewPage implements OnInit {
   private readonly unitRegistry = inject(UnitRegistryService);
   private readonly exportService = inject(ExportService);
   protected readonly isLoggedIn = inject(UserService).isLoggedIn;
+  private readonly userMsg = inject(UserMsgService);
+  private readonly authModal = inject(AuthModalService);
+  private readonly translation = inject(TranslationService);
 
   protected recipe_ = signal<Recipe | null>(null);
   protected targetQuantity_ = signal<number>(1);
@@ -260,6 +266,11 @@ export class CookViewPage implements OnInit {
   }
 
   protected enterEditMode(): void {
+    if (!this.isLoggedIn()) {
+      this.userMsg.onSetWarningMsg(this.translation.translate('sign_in_to_use'));
+      this.authModal.open('sign-in');
+      return;
+    }
     const recipe = this.recipe_();
     if (!recipe) return;
     this.originalRecipe_.set(JSON.parse(JSON.stringify(recipe)));

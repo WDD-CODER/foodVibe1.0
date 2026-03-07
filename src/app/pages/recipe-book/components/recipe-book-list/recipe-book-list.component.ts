@@ -9,6 +9,8 @@ import { RecipeCostService } from '@services/recipe-cost.service';
 import { TranslationService } from '@services/translation.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
 import { UserService } from '@services/user.service';
+import { UserMsgService } from '@services/user-msg.service';
+import { AuthModalService } from '@services/auth-modal.service';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { Recipe } from '@models/recipe.model';
@@ -40,6 +42,8 @@ export class RecipeBookListComponent {
   private readonly translationService = inject(TranslationService);
   private readonly metadataRegistry = inject(MetadataRegistryService);
   protected readonly isLoggedIn = inject(UserService).isLoggedIn;
+  private readonly userMsg = inject(UserMsgService);
+  private readonly authModal = inject(AuthModalService);
 
   protected activeFilters_ = signal<Record<string, string[]>>({});
   protected searchQuery_ = signal<string>('');
@@ -470,6 +474,11 @@ export class RecipeBookListComponent {
   }
 
   protected onDeleteRecipe(recipe: Recipe): void {
+    if (!this.isLoggedIn()) {
+      this.userMsg.onSetWarningMsg(this.translationService.translate('sign_in_to_use'));
+      this.authModal.open('sign-in');
+      return;
+    }
     if (confirm('האם אתה בטוח שברצונך למחוק?')) {
       this.deletingId_.set(recipe._id);
       this.kitchenState.deleteRecipe(recipe).subscribe({

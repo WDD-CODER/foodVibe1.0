@@ -22,7 +22,6 @@
   </ng-container>
 
   <button shell-actions type="button" class="c-btn-primary" (click)="onAddProduct()"
-    [disabled]="!isLoggedIn()"
     [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
     <lucide-icon name="plus" [size]="18"></lucide-icon>
     {{ 'add_product' | translatePipe }}
@@ -55,7 +54,6 @@
           <lucide-icon name="package" [size]="48" class="empty-state-icon"></lucide-icon>
           <p class="empty-state-msg">{{ 'empty_inventory' | translatePipe }}</p>
           <button type="button" class="c-btn-primary" (click)="onAddProduct()"
-            [disabled]="!isLoggedIn()"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">{{ 'add_first_product' | translatePipe }}</button>
         } @else {
           {{ 'no_products_match' | translatePipe }}
@@ -100,7 +98,6 @@
         </div>
         <div class="c-col-actions c-list-body-cell" role="cell">
           <button type="button" class="c-icon-btn" (click)="onEditProduct(product._id)"
-            [disabled]="!isLoggedIn()"
             [attr.aria-label]="'edit' | translatePipe"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
             <lucide-icon name="pencil" [size]="18"></lucide-icon>
@@ -109,7 +106,6 @@
             <app-loader size="small" [inline]="true" />
           } @else {
             <button type="button" class="c-icon-btn danger" (click)="onDeleteProduct(product._id)"
-              [disabled]="!isLoggedIn()"
               [attr.aria-label]="'delete' | translatePipe"
               [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>

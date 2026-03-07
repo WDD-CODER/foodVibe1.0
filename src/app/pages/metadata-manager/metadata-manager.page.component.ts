@@ -16,6 +16,7 @@ import { TranslationService } from '@services/translation.service';
 import { UserMsgService } from '@services/user-msg.service';
 import { TranslationKeyModalService } from '@services/translation-key-modal.service';
 import { UserService } from '@services/user.service';
+import { AuthModalService } from '@services/auth-modal.service';
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { ALL_DISH_FIELDS, DEFAULT_DISH_FIELDS, type DishFieldKey, type MenuTypeDefinition } from '@models/menu-event.model';
@@ -43,6 +44,15 @@ export class MetadataManagerComponent implements OnInit {
   private menuEventData = inject(MenuEventDataService);
   private addItemModal = inject(AddItemModalService);
   protected readonly isLoggedIn = inject(UserService).isLoggedIn;
+  private readonly authModal = inject(AuthModalService);
+
+  /** Returns false if not signed in (shows message and opens sign-in modal). */
+  private requireSignIn(): boolean {
+    if (this.isLoggedIn()) return true;
+    this.userMsgService.onSetWarningMsg(this.translationService.translate('sign_in_to_use'));
+    this.authModal.open('sign-in');
+    return false;
+  }
 
   // SIGNALS
   allUnitKeys_ = this.unitRegistry.allUnitKeys_;
@@ -95,6 +105,7 @@ export class MetadataManagerComponent implements OnInit {
   }
 
   async onAddMetadata(hebrewLabel: string, type: MetadataType, inputElement: HTMLInputElement) {
+    if (!this.requireSignIn()) return;
     if (type === 'label') {
       await this.onAddLabel();
       return;
@@ -137,6 +148,7 @@ export class MetadataManagerComponent implements OnInit {
 
   //UPDATE
   updateUnitRate(unit: string, event: Event): void {
+    if (!this.requireSignIn()) return;
     const input = event.target as HTMLInputElement;
     const newRate = parseFloat(input.value);
 
@@ -149,6 +161,7 @@ export class MetadataManagerComponent implements OnInit {
 
   //DELETE
   async onRemoveMetadata(item: string, type: MetadataType) {
+  if (!this.requireSignIn()) return;
   const allProducts = this.productData.allProducts_();
   let isUsed = false;
 
@@ -298,6 +311,7 @@ export class MetadataManagerComponent implements OnInit {
   }
 
   async onLoadDemoData(): Promise<void> {
+    if (!this.requireSignIn()) return;
     const message = this.translationService.translate('load_demo_data_confirm');
     const confirmed = await this.confirmModal.open(message, { variant: 'warning', saveLabel: 'load_demo_data' });
     if (!confirmed) return;
@@ -310,10 +324,12 @@ export class MetadataManagerComponent implements OnInit {
   }
 
   async onExportBackup(): Promise<void> {
+    if (!this.requireSignIn()) return;
     await this.backupService.exportAllToFile();
   }
 
   async onRestoreFromBackup(): Promise<void> {
+    if (!this.requireSignIn()) return;
     const message = this.translationService.translate('backup_restore_confirm');
     const confirmed = await this.confirmModal.open(message, { variant: 'warning', saveLabel: 'backup_restore_from_backup' });
     if (!confirmed) return;
@@ -326,6 +342,7 @@ export class MetadataManagerComponent implements OnInit {
   }
 
   async onImportBackupFile(event: Event): Promise<void> {
+    if (!this.requireSignIn()) return;
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
@@ -346,6 +363,7 @@ export class MetadataManagerComponent implements OnInit {
 
   // Menu Types
   async onAddMenuType(): Promise<void> {
+    if (!this.requireSignIn()) return;
     const result = await this.addItemModal.open({
       title: 'add_new_category',
       label: 'menu_serving_style',
@@ -363,6 +381,7 @@ export class MetadataManagerComponent implements OnInit {
   }
 
   onEditMenuType(key: string): void {
+    if (!this.requireSignIn()) return;
     this.editingMenuTypeKey_.set(key);
     this.editingMenuTypeFields_.set([...this.metadataRegistry.getMenuTypeFields(key)]);
   }
@@ -384,6 +403,7 @@ export class MetadataManagerComponent implements OnInit {
   }
 
   async onSaveMenuTypeFields(): Promise<void> {
+    if (!this.requireSignIn()) return;
     const key = this.editingMenuTypeKey_();
     if (!key) return;
     await this.metadataRegistry.updateMenuType(key, this.editingMenuTypeFields_());
@@ -397,6 +417,7 @@ export class MetadataManagerComponent implements OnInit {
   }
 
   async onRemoveMenuType(key: string): Promise<void> {
+    if (!this.requireSignIn()) return;
     const isUsed = this.menuEventData.allMenuEvents_().some(e => e.serving_type_ === key);
     if (isUsed) {
       this.userMsgService.onSetErrorMsg(`לא ניתן למחוק: סוג התפריט "${key}" בשימוש בתפריטים שמורים`);
@@ -406,6 +427,7 @@ export class MetadataManagerComponent implements OnInit {
   }
 
   async onMenuTypeNameBlur(oldKey: string, newName: string): Promise<void> {
+    if (!this.requireSignIn()) return;
     const trimmed = (newName ?? '').trim();
     if (trimmed === oldKey || !trimmed) return;
     const msg = this.translationService.translate('menu_type_rename_confirm');
@@ -416,6 +438,7 @@ export class MetadataManagerComponent implements OnInit {
   }
 
   async removeFieldFromMenuType(key: string, fieldKey: DishFieldKey): Promise<void> {
+    if (!this.requireSignIn()) return;
     const current = this.metadataRegistry.getMenuTypeFields(key);
     const updated = current.filter(f => f !== fieldKey);
     await this.metadataRegistry.updateMenuType(key, updated);

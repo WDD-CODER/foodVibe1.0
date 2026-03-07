@@ -4,7 +4,6 @@
             class="fab-action"
             [attr.aria-label]="'recipe_creation' | translatePipe"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
-            [disabled]="!isLoggedIn()"
             (click)="goToRecipeBuilder()">
       <lucide-icon name="plus" size="20"></lucide-icon>
     </button>

@@ -48,6 +48,7 @@ export class UserMsgService {
     this._setMsg({ txt, type: 'error' })
   }
 
-
-
+  public onSetWarningMsg(txt: string) {
+    this._setMsg({ txt, type: 'warning' })
+  }
 }

@@ -34,7 +34,6 @@
             </div>
           } @else {
             <button type="button" class="edit-btn" (click)="enterEditMode()"
-              [disabled]="!isLoggedIn()"
               [attr.aria-label]="'edit' | translatePipe"
               [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
               <lucide-icon name="pencil" [size]="18"></lucide-icon>

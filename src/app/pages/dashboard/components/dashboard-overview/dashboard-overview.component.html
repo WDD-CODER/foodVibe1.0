@@ -3,19 +3,16 @@
     <h1 class="page-title">{{ 'dashboard' | translatePipe }}</h1>
     <div class="quick-actions">
       <button type="button" class="qa-btn primary" (click)="goToAddProduct()"
-        [disabled]="!isLoggedIn()"
         [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
         <lucide-icon name="plus-circle" [size]="18"></lucide-icon>
         <span>{{ 'add_product' | translatePipe }}</span>
       </button>
       <button type="button" class="qa-btn" (click)="goToRecipeBuilder('preparation')"
-        [disabled]="!isLoggedIn()"
         [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
         <lucide-icon name="file-plus" [size]="18"></lucide-icon>
         <span>{{ 'new_recipe' | translatePipe }}</span>
       </button>
       <button type="button" class="qa-btn" (click)="goToRecipeBuilder('dish')"
-        [disabled]="!isLoggedIn()"
         [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
         <lucide-icon name="utensils" [size]="18"></lucide-icon>
         <span>{{ 'new_dish' | translatePipe }}</span>
@@ -37,7 +34,6 @@
             {{ 'view_inventory' | translatePipe }}
           </button>
           <button type="button" class="link-btn" (click)="goToAddProduct()"
-            [disabled]="!isLoggedIn()"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
             {{ 'add_product' | translatePipe }}
           </button>

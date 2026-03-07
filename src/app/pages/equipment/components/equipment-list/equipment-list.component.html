@@ -29,7 +29,6 @@
   </ng-container>
 
   <button shell-actions type="button" class="c-btn-primary" (click)="onAdd()"
-    [disabled]="!isLoggedIn()"
     [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
     <lucide-icon name="plus" [size]="18"></lucide-icon>
     {{ 'add_equipment' | translatePipe }}
@@ -69,7 +68,6 @@
         </app-cell-carousel>
         <div class="c-col-actions c-list-body-cell" role="cell">
           <button type="button" class="c-icon-btn" (click)="onEdit(item._id)"
-            [disabled]="!isLoggedIn()"
             [attr.aria-label]="'edit' | translatePipe"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
             <lucide-icon name="pencil" [size]="18"></lucide-icon>
@@ -78,7 +76,6 @@
             <app-loader size="small" [inline]="true" />
           } @else {
             <button type="button" class="c-icon-btn danger" (click)="onDelete(item)"
-              [disabled]="!isLoggedIn()"
               [attr.aria-label]="'delete' | translatePipe"
               [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>
