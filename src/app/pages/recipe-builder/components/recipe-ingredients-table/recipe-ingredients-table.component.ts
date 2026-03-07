@@ -67,6 +67,14 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
     return [...this.ingredientsFormArray().controls] as FormGroup[];
   }
 
+  /** Names of ingredients already selected in the recipe (for excluding from search dropdown). */
+  get existingIngredientNames(): string[] {
+    return this.ingredientGroups
+      .filter(g => g.get('referenceId')?.value)
+      .map(g => (g.get('name_hebrew')?.value ?? '').toString().trim())
+      .filter(Boolean);
+  }
+
 
 
   incrementAmount(group: FormGroup, index: number): void {

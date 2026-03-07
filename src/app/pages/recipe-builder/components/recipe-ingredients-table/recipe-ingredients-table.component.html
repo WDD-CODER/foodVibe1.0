@@ -20,6 +20,7 @@
       <div class="col-name">
         @if (!group.get('referenceId')?.value) {
         <app-ingredient-search [rowIndex]="$index" [focusTrigger]="focusSearchAtRow()"
+          [excludeNames]="existingIngredientNames"
           (itemSelected)="onItemSelected($event, group)" (focusDone)="focusSearchDone.emit()"
           (addNewRowRequested)="addIngredient.emit()"></app-ingredient-search>
         } @else {

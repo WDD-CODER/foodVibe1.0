@@ -27,6 +27,9 @@ export class IngredientSearchComponent {
   rowIndex = input<number>(0);
   focusTrigger = input<number | null>(null);
 
+  /** Names of ingredients already in the recipe; these are excluded from search results. */
+  excludeNames = input<string[]>([]);
+
   itemSelected = output<SearchableItem>();
   focusDone = output<void>();
   /** Emit when user presses Enter in search with no selection (e.g. add new row). */
@@ -58,16 +61,21 @@ export class IngredientSearchComponent {
     this.searchInputRef()?.nativeElement?.focus();
   }
 
-  // Combine products and recipes for a unified search
+  // Combine products and recipes for a unified search; exclude ingredients already in the recipe
   protected filteredResults_ = computed(() => {
     const query = (this.searchQuery_() ?? '').trim().toLowerCase();
     if (!query) return [];
+
+    const excludeSet = new Set(
+      (this.excludeNames() ?? []).map(n => (n ?? '').trim().toLowerCase()).filter(Boolean)
+    );
 
     const products = this.state.products_().map(p => ({ ...p, item_type_: 'product' as const }));
     const recipes = this.state.recipes_().map(r => ({ ...r, item_type_: 'recipe' as const }));
 
     return [...products, ...recipes].filter(item => {
-      const name = (item.name_hebrew ?? '').toLowerCase();
+      const name = (item.name_hebrew ?? '').trim().toLowerCase();
+      if (excludeSet.has(name)) return false;
       return name.includes(query);
     });
   });

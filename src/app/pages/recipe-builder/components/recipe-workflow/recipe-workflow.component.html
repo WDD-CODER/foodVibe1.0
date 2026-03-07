@@ -150,7 +150,7 @@
                   tabindex="-1">
                   <lucide-icon name="minus" [size]="16"></lucide-icon>
                 </button>
-                <span class="amount-value" style="min-width: 2rem; text-align: center;">{{ group.get('quantity')?.value }}</span>
+                <span class="amount-value">{{ group.get('quantity')?.value }}</span>
                 <button type="button" class="qty-btn plus" (click)="incrementQuantity(group, i)"
                   tabindex="-1">
                   <lucide-icon name="plus" [size]="16"></lucide-icon>
@@ -177,23 +177,10 @@
       </div>
       
       <div style="position: relative; display: flex; justify-content: center;">
-        <button type="button" (click)="toggleAddCategoryPicker(); $event.stopPropagation()" class="add-row-btn">
+        <button type="button" (click)="addItem.emit(); $event.stopPropagation()" class="add-row-btn">
           <lucide-icon name="plus" class="ml-2 h-4 w-4"></lucide-icon>
           {{ 'add_preparation' | translatePipe }}
         </button>
-        @if (showAddCategoryPicker_()) {
-          <div (clickOutside)="showAddCategoryPicker_.set(false)" class="inline-category-picker-wrapper">
-            <app-scrollable-dropdown [maxHeight]="240">
-              <ul role="listbox" style="margin: 0; padding: 0; list-style: none;">
-                @for (opt of categoryOptionsForGroup(); track opt.value) {
-                  <li role="option" (click)="onAddWithCategory(opt.value)" class="category-option-item">
-                    {{ opt.label | translatePipe }}
-                  </li>
-                }
-              </ul>
-            </app-scrollable-dropdown>
-          </div>
-        }
       </div>
     </div>
   }
