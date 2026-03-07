@@ -13,6 +13,7 @@ import { AuthModalService } from '@services/auth-modal.service';
 import { TranslationService } from '@services/translation.service';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
+import { useListState, StringParam } from 'src/app/core/utils/list-state.util';
 
 export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count';
 
@@ -41,6 +42,17 @@ export class MenuLibraryListComponent {
   protected readonly sortOrder_ = signal<'asc' | 'desc'>('desc');
   protected readonly cloningId_ = signal<string | null>(null);
   protected readonly deletingId_ = signal<string | null>(null);
+
+  constructor() {
+    useListState('menu-library', [
+      { urlParam: 'q',         signal: this.searchQuery_,        serializer: StringParam },
+      { urlParam: 'sort',      signal: this.sortBy_,             serializer: StringParam as any },
+      { urlParam: 'order',     signal: this.sortOrder_,          serializer: StringParam as any },
+      { urlParam: 'eventType', signal: this.eventTypeFilter_,    serializer: StringParam },
+      { urlParam: 'style',     signal: this.servingStyleFilter_, serializer: StringParam },
+      { urlParam: 'dateFrom',  signal: this.dateFrom_,           serializer: StringParam },
+    ]);
+  }
 
   protected readonly events_ = this.menuEventData.allMenuEvents_;
 

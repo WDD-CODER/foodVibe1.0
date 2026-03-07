@@ -14,6 +14,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
+import { useListState, StringParam, StringSetParam } from 'src/app/core/utils/list-state.util';
 
 const ENV_TYPES: EnvironmentType[] = [
   'professional_kitchen',
@@ -63,6 +64,13 @@ export class VenueListComponent {
   protected envTypes = ENV_TYPES;
 
   constructor() {
+    if (!this.embeddedInDashboard) {
+      useListState('venues', [
+        { urlParam: 'q',        signal: this.searchQuery_,      serializer: StringParam },
+        { urlParam: 'envTypes',  signal: this.selectedEnvTypes_, serializer: StringSetParam as any },
+      ]);
+    }
+
     afterNextRender(() => {
       const q = window.matchMedia('(max-width: 768px)');
       if (q.matches) this.isPanelOpen_.set(false);

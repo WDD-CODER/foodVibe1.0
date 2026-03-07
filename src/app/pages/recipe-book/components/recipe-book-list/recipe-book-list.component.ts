@@ -22,6 +22,7 @@ import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
+import { useListState, StringParam, NullableStringParam, FilterRecordParam, StringArrayParam } from 'src/app/core/utils/list-state.util';
 
 export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens' | 'dateAdded';
 
@@ -52,6 +53,14 @@ export class RecipeBookListComponent {
   protected isPanelOpen_ = signal<boolean>(true);
 
   constructor() {
+    useListState('recipe-book', [
+      { urlParam: 'q',           signal: this.searchQuery_,        serializer: StringParam },
+      { urlParam: 'sort',        signal: this.sortBy_,             serializer: NullableStringParam as any },
+      { urlParam: 'order',       signal: this.sortOrder_,          serializer: StringParam as any },
+      { urlParam: 'filters',     signal: this.activeFilters_,      serializer: FilterRecordParam },
+      { urlParam: 'ingredients', signal: this.selectedProductIds_, serializer: StringArrayParam },
+    ]);
+
     afterNextRender(() => {
       if (typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches) {
         this.isPanelOpen_.set(false);

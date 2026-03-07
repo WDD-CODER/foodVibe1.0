@@ -14,6 +14,7 @@ import { TranslationService } from '@services/translation.service';
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
+import { useListState, StringParam, NullableBooleanParam, StringSetParam } from 'src/app/core/utils/list-state.util';
 
 type SortField = 'name' | 'category' | 'owned';
 
@@ -47,6 +48,14 @@ export class EquipmentListComponent {
   protected carouselHeaderIndex_ = signal(0);
 
   constructor() {
+    useListState('equipment', [
+      { urlParam: 'q',          signal: this.searchQuery_,        serializer: StringParam },
+      { urlParam: 'sort',       signal: this.sortBy_,             serializer: StringParam as any },
+      { urlParam: 'order',      signal: this.sortOrder_,          serializer: StringParam as any },
+      { urlParam: 'categories', signal: this.selectedCategories_, serializer: StringSetParam as any },
+      { urlParam: 'consumable', signal: this.consumableFilter_,   serializer: NullableBooleanParam },
+    ]);
+
     afterNextRender(() => {
       if (typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches) {
         this.isPanelOpen_.set(false);

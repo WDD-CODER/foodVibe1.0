@@ -19,6 +19,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
+import { useListState, StringParam, NullableStringParam, BooleanParam, FilterRecordParam } from 'src/app/core/utils/list-state.util';
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
 
@@ -72,6 +73,14 @@ export class InventoryProductListComponent {
   protected carouselHeaderIndex_ = signal<number>(0);
 
   constructor() {
+    useListState('inventory', [
+      { urlParam: 'q',        signal: this.searchQuery_,   serializer: StringParam },
+      { urlParam: 'sort',     signal: this.sortBy_,        serializer: NullableStringParam as any },
+      { urlParam: 'order',    signal: this.sortOrder_,     serializer: StringParam as any },
+      { urlParam: 'filters',  signal: this.activeFilters_, serializer: FilterRecordParam },
+      { urlParam: 'lowStock', signal: this.lowStockOnly_,  serializer: BooleanParam },
+    ]);
+
     afterNextRender(() => {
       const q = window.matchMedia('(max-width: 768px)');
       if (q.matches) this.isPanelOpen_.set(false);

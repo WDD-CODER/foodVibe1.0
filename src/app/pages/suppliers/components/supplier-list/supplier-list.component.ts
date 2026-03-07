@@ -16,6 +16,7 @@ import { AuthModalService } from '@services/auth-modal.service';
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
+import { useListState, StringParam, BooleanParam, NumberSetParam } from 'src/app/core/utils/list-state.util';
 
 @Component({
   selector: 'app-supplier-list',
@@ -46,6 +47,14 @@ export class SupplierListComponent {
   protected carouselHeaderIndex_ = signal(0);
 
   constructor() {
+    if (!this.embeddedInDashboard) {
+      useListState('suppliers', [
+        { urlParam: 'q',          signal: this.searchQuery_,   serializer: StringParam },
+        { urlParam: 'days',       signal: this.selectedDays_,  serializer: NumberSetParam },
+        { urlParam: 'linkedOnly', signal: this.hasLinkedOnly_, serializer: BooleanParam },
+      ]);
+    }
+
     afterNextRender(() => {
       if (typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches) {
         this.isPanelOpen_.set(false);
