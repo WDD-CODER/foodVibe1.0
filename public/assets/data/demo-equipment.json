@@ -8,5 +8,13 @@
   {"_id":"eq_007","name_hebrew":"קרח (ק\"ג)","category_":"consumable","owned_quantity_":0,"scaling_rule_":{"per_guests_":10,"min_quantity_":5,"max_quantity_":200},"is_consumable_":true,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
   {"_id":"eq_008","name_hebrew":"גז (מכל)","category_":"consumable","owned_quantity_":0,"scaling_rule_":{"per_guests_":50,"min_quantity_":1,"max_quantity_":20},"is_consumable_":true,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
   {"_id":"eq_009","name_hebrew":"מגש הגשה","category_":"packaging","owned_quantity_":20,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
-  {"_id":"eq_010","name_hebrew":"קופסת טייק אווי מאווררת","category_":"packaging","owned_quantity_":30,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"}
+  {"_id":"eq_010","name_hebrew":"קופסת טייק אווי מאווררת","category_":"packaging","owned_quantity_":30,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_011","name_hebrew":"ארון חימום","category_":"heat_source","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_012","name_hebrew":"כלים לתוספות","category_":"container","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_013","name_hebrew":"מכונת נקניקיות","category_":"tool","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_014","name_hebrew":"מלקחיים להגשה","category_":"tool","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_015","name_hebrew":"מקרר","category_":"container","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_016","name_hebrew":"סלסלת קש ללחמניות","category_":"container","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_017","name_hebrew":"חיבור ישראלי לחשמל","category_":"tool","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_018","name_hebrew":"תלת פאזי (תלוי במכונה)","category_":"tool","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"}
 ]

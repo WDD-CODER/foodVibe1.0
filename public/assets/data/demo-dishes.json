@@ -474,5 +474,87 @@
       "service_overrides_": []
     },
     "labels_": []
+  },
+  {
+    "_id": "dish_012",
+    "name_hebrew": "נקניקית עוף בלחמניה עם רטבים כרוב כבוש ובצל",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_012_i1", "referenceId": "demo_152", "type": "product", "amount_": 1, "unit_": "unit", "note_": "לחמניית נקניקיה כשל\"פ"},
+      {"_id": "dish_012_i2", "referenceId": "demo_122", "type": "product", "amount_": 0.13, "unit_": "kg", "note_": "נקניקיית עוף קרנץ תפז' קפוא 130g"},
+      {"_id": "dish_012_i3", "referenceId": "demo_105", "type": "product", "amount_": 0.03, "unit_": "kg", "note_": "כרוב כבוש"},
+      {"_id": "dish_012_i4", "referenceId": "demo_001", "type": "product", "amount_": 0.02, "unit_": "kg", "note_": "בצל"},
+      {"_id": "dish_012_i5", "referenceId": "demo_107", "type": "product", "amount_": 0.03, "unit_": "kg", "note_": "קטשופ"},
+      {"_id": "dish_012_i6", "referenceId": "demo_084", "type": "product", "amount_": 0.03, "unit_": "kg", "note_": "חרדל"},
+      {"_id": "dish_012_i7", "referenceId": "demo_185", "type": "product", "amount_": 1, "unit_": "unit", "note_": "כלי הגשה מוערך"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "הרכבת המנה מהמיסום: נקניקיה בלחמניה עם רטבים ותוספות.", "labor_time_minutes_": 0}
+    ],
+    "yield_amount_": 1,
+    "yield_unit_": "dish",
+    "default_station_": "stove",
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_011", "quantity_": 1, "phase_": "both", "is_critical_": true, "notes_": "ארון חימום"},
+        {"equipment_id_": "eq_012", "quantity_": 6, "phase_": "service", "is_critical_": false, "notes_": "כלים לתוספות"},
+        {"equipment_id_": "eq_013", "quantity_": 2, "phase_": "both", "is_critical_": true, "notes_": "מכונת נקניקיות"},
+        {"equipment_id_": "eq_014", "quantity_": 8, "phase_": "service", "is_critical_": false, "notes_": "מלקחיים להגשה סך הכל לעמדה"},
+        {"equipment_id_": "eq_015", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "מקרר"},
+        {"equipment_id_": "eq_016", "quantity_": 2, "phase_": "service", "is_critical_": false, "notes_": "סלסלת קש ללחמניות"},
+        {"equipment_id_": "eq_017", "quantity_": 4, "phase_": "both", "is_critical_": true, "notes_": "חיבור ישראלי לחשמל"},
+        {"equipment_id_": "eq_018", "quantity_": 2, "phase_": "both", "is_critical_": false, "notes_": "תלת פאזי תלוי במכונה"}
+      ],
+      "service_overrides_": []
+    },
+    "mise_categories_": [
+      {"category_name": "נקניקיות", "items": [{"item_name": "נקניקיות חרוצות", "unit": "unit", "quantity": 1}, {"item_name": "שיפודי נקניקים מוכנים", "unit": "unit", "quantity": 1}]},
+      {"category_name": "רטבים", "items": [{"item_name": "בקט של רוטב דיף", "unit": "unit", "quantity": 3}]},
+      {"category_name": "לחם", "items": [{"item_name": "לחמניות פתוחות", "unit": "unit", "quantity": 1}]},
+      {"category_name": "תוספות", "items": [{"item_name": "כלים עם תוספת בצל", "unit": "unit", "quantity": 3}, {"item_name": "כלים עם תוספת כרוב כבוש", "unit": "unit", "quantity": 3}]}
+    ],
+    "labels_": []
+  },
+  {
+    "_id": "dish_013",
+    "name_hebrew": "סיפור של אוכל",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_013_i1", "referenceId": "demo_152", "type": "product", "amount_": 1, "unit_": "unit", "note_": "לחמניית נקניקיה כשל\"פ"},
+      {"_id": "dish_013_i2", "referenceId": "demo_122", "type": "product", "amount_": 0.13, "unit_": "kg", "note_": "נקניקיית עוף קרנץ תפז' קפוא"},
+      {"_id": "dish_013_i3", "referenceId": "demo_105", "type": "product", "amount_": 0.03, "unit_": "kg", "note_": "כרוב כבוש"},
+      {"_id": "dish_013_i4", "referenceId": "demo_001", "type": "product", "amount_": 0.02, "unit_": "kg", "note_": "בצל"},
+      {"_id": "dish_013_i5", "referenceId": "demo_107", "type": "product", "amount_": 0.03, "unit_": "kg", "note_": "קטשופ"},
+      {"_id": "dish_013_i6", "referenceId": "demo_084", "type": "product", "amount_": 0.03, "unit_": "kg", "note_": "חרדל"},
+      {"_id": "dish_013_i7", "referenceId": "demo_185", "type": "product", "amount_": 1, "unit_": "unit", "note_": "כלי הגשה מוערך"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "הרכבת המנה מהמיסום: נקניקיה בלחמניה עם רטבים ותוספות.", "labor_time_minutes_": 0}
+    ],
+    "yield_amount_": 1,
+    "yield_unit_": "dish",
+    "default_station_": "stove",
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_011", "quantity_": 1, "phase_": "both", "is_critical_": true, "notes_": "ארון חימום"},
+        {"equipment_id_": "eq_012", "quantity_": 6, "phase_": "service", "is_critical_": false, "notes_": "כלים לתוספות"},
+        {"equipment_id_": "eq_013", "quantity_": 2, "phase_": "both", "is_critical_": true, "notes_": "מכונת נקניקיות"},
+        {"equipment_id_": "eq_014", "quantity_": 8, "phase_": "service", "is_critical_": false, "notes_": "מלקחיים להגשה"},
+        {"equipment_id_": "eq_015", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "מקרר"},
+        {"equipment_id_": "eq_016", "quantity_": 2, "phase_": "service", "is_critical_": false, "notes_": "סלסלת קש ללחמניות"},
+        {"equipment_id_": "eq_017", "quantity_": 4, "phase_": "both", "is_critical_": true, "notes_": "חיבור ישראלי לחשמל"},
+        {"equipment_id_": "eq_018", "quantity_": 2, "phase_": "both", "is_critical_": false, "notes_": "תלת פאזי תלוי במכונה"}
+      ],
+      "service_overrides_": []
+    },
+    "mise_categories_": [
+      {"category_name": "נקניקיות", "items": [{"item_name": "נקניקיות חרוצות", "unit": "unit", "quantity": 1}]},
+      {"category_name": "רטבים", "items": [{"item_name": "בקט של רוטב דיף", "unit": "unit", "quantity": 3}]},
+      {"category_name": "לחם", "items": [{"item_name": "לחמניות פתוחות", "unit": "unit", "quantity": 1}]},
+      {"category_name": "תוספות", "items": [{"item_name": "כלים עם תוספת בצל", "unit": "unit", "quantity": 3}, {"item_name": "כלים עם תוספת כרוב כבוש", "unit": "unit", "quantity": 3}]}
+    ],
+    "labels_": ["סיפור של אוכל"]
   }
 ]
