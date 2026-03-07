@@ -30,6 +30,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
 import { ClickOutSideDirective } from '@directives/click-out-side';
+import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util';
 
 @Component({
   selector: 'app-recipe-builder-page',
@@ -524,6 +525,14 @@ export class RecipeBuilderPage implements OnInit {
     return eq?.name_hebrew ?? id;
   }
 
+  protected incrementLogisticsQuantity(): void {
+    this.logisticsToolQuantity_.update(q => quantityIncrement(q, 1, { integerOnly: true }));
+  }
+
+  protected decrementLogisticsQuantity(): void {
+    this.logisticsToolQuantity_.update(q => quantityDecrement(q, 1, { integerOnly: true }));
+  }
+
   /** Select an option from dropdown (does not add yet; user sets quantity and presses Add). */
   protected selectLogisticsOption(option: { type: 'library'; item: LogisticsBaselineItem } | { type: 'equipment'; item: Equipment }): void {
     if (option.type === 'library') {
@@ -711,28 +720,6 @@ export class RecipeBuilderPage implements OnInit {
     }));
     this.logisticsToolSearchQuery_.set('');
     this.logisticsToolDropdownOpen_.set(false);
-  }
-
-  protected async saveBaselineRowAsTemplate(index: number): Promise<void> {
-    const ctrl = this.logisticsBaselineArray.at(index);
-    if (!ctrl) return;
-    const v = ctrl.value as { equipment_id_?: string; quantity_?: number; phase_?: string; is_critical_?: boolean; notes_?: string };
-    if (!v?.equipment_id_) {
-      this.userMsg_.onSetErrorMsg(this.translation_.translate('logistics_save_template_no_equipment') || 'Select equipment first');
-      return;
-    }
-    try {
-      await this.logisticsBaselineData_.add({
-        equipment_id_: v.equipment_id_,
-        quantity_: Number(v.quantity_) ?? 1,
-        phase_: (v.phase_ || 'both') as EquipmentPhase,
-        is_critical_: !!v.is_critical_,
-        notes_: v.notes_ || undefined
-      });
-      this.userMsg_.onSetSuccessMsg(this.translation_.translate('logistics_saved_as_template') || 'Saved to library');
-    } catch {
-      this.userMsg_.onSetErrorMsg(this.translation_.translate('save_failed') || 'Save failed');
-    }
   }
 
   addNewStep(category?: string | void): void {

@@ -13,6 +13,7 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
 import type { Product } from '@models/product.model';
 import type { Recipe } from '@models/recipe.model';
 import { UnitRegistryService } from '@services/unit-registry.service';
+import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util';
 import { take } from 'rxjs/operators';
 import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop';
 
@@ -79,15 +80,15 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
 
   incrementAmount(group: FormGroup, index: number): void {
     const ctrl = group.get('amount_net');
-    const val = (ctrl?.value ?? 0) + 1;
-    ctrl?.setValue(val);
+    const current = ctrl?.value ?? 0;
+    ctrl?.setValue(quantityIncrement(current, 0));
     this.updateLineCalculations(index);
   }
 
   decrementAmount(group: FormGroup, index: number): void {
     const ctrl = group.get('amount_net');
-    const val = Math.max(0, (ctrl?.value ?? 0) - 1);
-    ctrl?.setValue(val);
+    const current = ctrl?.value ?? 0;
+    ctrl?.setValue(quantityDecrement(current, 0));
     this.updateLineCalculations(index);
   }
 

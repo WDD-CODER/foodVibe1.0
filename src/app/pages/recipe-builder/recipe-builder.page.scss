@@ -387,16 +387,44 @@
     color: var(--color-text-main);
   }
 
-  .logistics-qty-input {
-    width: 3.5rem;
-    padding-block: 0.4rem;
-    padding-inline: 0.5rem;
+  .logistics-qty-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
 
-    background: var(--bg-glass);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-md);
-    font-variant-numeric: tabular-nums;
-    text-align: center;
+    .qty-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      padding: 0;
+      background: var(--bg-glass);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      color: var(--color-text-main);
+      cursor: pointer;
+
+      &:hover:not(:disabled) {
+        background: var(--color-primary-tint);
+        border-color: var(--color-primary);
+      }
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+
+    .logistics-qty-input {
+      width: 3rem;
+      padding-block: 0.4rem;
+      padding-inline: 0.35rem;
+      background: var(--bg-glass);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+    }
   }
 
   .logistics-add-btn {

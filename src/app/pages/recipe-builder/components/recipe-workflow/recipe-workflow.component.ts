@@ -13,6 +13,7 @@ import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.direct
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
+import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util'
 import { take } from 'rxjs/operators'
 import { CdkDragDrop, moveItemInArray, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop'
 
@@ -140,24 +141,26 @@ export class RecipeWorkflowComponent {
 
   incrementQuantity(group: FormGroup, index: number): void {
     const ctrl = group.get('quantity')
-    const val = (ctrl?.value ?? 0) + 1
-    ctrl?.setValue(val)
+    const current = ctrl?.value ?? 0
+    ctrl?.setValue(quantityIncrement(current, 0))
   }
 
   decrementQuantity(group: FormGroup, index: number): void {
     const ctrl = group.get('quantity')
-    const val = Math.max(0, (ctrl?.value ?? 0) - 1)
-    ctrl?.setValue(val)
+    const current = ctrl?.value ?? 0
+    ctrl?.setValue(quantityDecrement(current, 0))
   }
 
   incrementLaborTime(group: FormGroup): void {
     const ctrl = group.get('labor_time')
-    ctrl?.setValue((ctrl?.value ?? 0) + 1)
+    const current = ctrl?.value ?? 0
+    ctrl?.setValue(quantityIncrement(current, 0, { integerOnly: true }))
   }
 
   decrementLaborTime(group: FormGroup): void {
     const ctrl = group.get('labor_time')
-    ctrl?.setValue(Math.max(0, (ctrl?.value ?? 0) - 1))
+    const current = ctrl?.value ?? 0
+    ctrl?.setValue(quantityDecrement(current, 0, { integerOnly: true }))
   }
 
   enterLaborTimeEdit(index: number): void {

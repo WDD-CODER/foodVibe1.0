@@ -23,6 +23,7 @@ import { RecipeWorkflowComponent } from '@pages/recipe-builder/components/recipe
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 import { FormatQuantityPipe } from 'src/app/core/pipes/format-quantity.pipe';
+import { quantityIncrement, quantityDecrement } from '../../core/utils/quantity-step.util';
 
 @Component({
   selector: 'app-cook-view-page',
@@ -186,8 +187,9 @@ export class CookViewPage implements OnInit {
 
   protected incrementQuantity(): void {
     const recipe = this.recipe_();
-    const step = recipe?.yield_unit_ === 'dish' ? 1 : 1;
-    this.targetQuantity_.update(q => q + step);
+    const min = recipe?.yield_unit_ === 'dish' ? 1 : 0.01;
+    const options = recipe?.yield_unit_ === 'dish' ? { integerOnly: true } : undefined;
+    this.targetQuantity_.update(q => quantityIncrement(q, min, options));
     this.scaleByIngredientIndex_.set(null);
     this.scaleByIngredientAmount_.set(null);
   }
@@ -195,8 +197,8 @@ export class CookViewPage implements OnInit {
   protected decrementQuantity(): void {
     const recipe = this.recipe_();
     const min = recipe?.yield_unit_ === 'dish' ? 1 : 0.01;
-    const step = recipe?.yield_unit_ === 'dish' ? 1 : 1;
-    this.targetQuantity_.update(q => Math.max(min, q - step));
+    const options = recipe?.yield_unit_ === 'dish' ? { integerOnly: true } : undefined;
+    this.targetQuantity_.update(q => quantityDecrement(q, min, options));
     this.scaleByIngredientIndex_.set(null);
     this.scaleByIngredientAmount_.set(null);
   }
@@ -329,9 +331,10 @@ export class CookViewPage implements OnInit {
   }
 
   protected getEditAmountStep(currentAmount: number, delta: number): number {
-    const step = this.isDish_() ? 1 : 0.1;
-    const next = currentAmount + step * delta;
-    return Math.max(0, next);
+    const options = this.isDish_() ? { integerOnly: true } : undefined;
+    return delta > 0
+      ? quantityIncrement(currentAmount, 0, options)
+      : quantityDecrement(currentAmount, 0, options);
   }
 
   protected setIngredientAmount(index: number, scaledAmount: number): void {

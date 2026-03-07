@@ -90,9 +90,18 @@
                     (keydown)="onLogisticsSearchKeydown($event)"
                     [placeholder]="'search_tool_placeholder' | translatePipe" />
                 </div>
-                <input type="number" class="logistics-qty-input" min="1"
-                  [value]="logisticsToolQuantity_()"
-                  (input)="logisticsToolQuantity_.set($any($event.target).valueAsNumber || 1)" />
+                <div class="logistics-qty-controls">
+                  <button type="button" class="qty-btn minus" (click)="decrementLogisticsQuantity()"
+                    [disabled]="logisticsToolQuantity_() <= 1" [attr.aria-label]="'decrease' | translatePipe">
+                    <lucide-icon name="minus" [size]="16"></lucide-icon>
+                  </button>
+                  <input type="number" class="logistics-qty-input" min="1"
+                    [value]="logisticsToolQuantity_()"
+                    (input)="logisticsToolQuantity_.set($any($event.target).valueAsNumber || 1)" />
+                  <button type="button" class="qty-btn plus" (click)="incrementLogisticsQuantity()" [attr.aria-label]="'increase' | translatePipe">
+                    <lucide-icon name="plus" [size]="16"></lucide-icon>
+                  </button>
+                </div>
                 <button type="button" class="logistics-add-btn"
                   [disabled]="!logisticsSelectedToolId_() && !logisticsToolSearchQuery_().trim()"
                   (click)="onLogisticsAddClick()">

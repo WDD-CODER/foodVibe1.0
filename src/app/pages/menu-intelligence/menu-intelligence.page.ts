@@ -17,6 +17,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { RecipeCostService } from '@services/recipe-cost.service';
 import { ExportService } from '@services/export.service';
 import { ClickOutSideDirective } from '@directives/click-out-side';
+import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 
@@ -202,13 +203,13 @@ export class MenuIntelligencePage implements AfterViewInit {
   protected incrementGuests(): void {
     const ctrl = this.form_.get('guest_count_');
     const v = Number(ctrl?.value ?? 0);
-    ctrl?.setValue(v + 1);
+    ctrl?.setValue(quantityIncrement(v, 0, { integerOnly: true }));
   }
 
   protected decrementGuests(): void {
     const ctrl = this.form_.get('guest_count_');
     const v = Number(ctrl?.value ?? 0);
-    if (v > 0) ctrl?.setValue(v - 1);
+    ctrl?.setValue(quantityDecrement(v, 0, { integerOnly: true }));
   }
 
   protected getGuestCount(): number {
