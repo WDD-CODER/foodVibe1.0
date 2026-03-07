@@ -1,6 +1,6 @@
 
 /* drag | name | unit | quantity | percent | cost | actions */
-$ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr) 3rem;
+$ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr) 1rem;
 
 .ingredients-container {
   container-type: inline-size;
@@ -147,7 +147,7 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
 
   .qty-input {
     flex: 1;
-    min-width: 0;
+    min-width: 2.5rem;
     text-align: center;
     appearance: textfield;
 
@@ -175,13 +175,10 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   }
 }
 
-.grid-input,
-.grid-select {
+.grid-input {
   width: 100%;
   padding: 0.5rem;
-
   background-color: var(--bg-pure);
-
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
   outline: none;
@@ -192,18 +189,27 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   }
 }
 
-/* TODO: remove ::ng-deep when custom-select supports trigger styling via input */
-:host ::ng-deep .col-unit .custom-select-trigger {
+.grid-select {
+  width: 100%;
+  padding: 0.5rem;
+  background-color: var(--bg-pure);
   border: none;
-  box-shadow: none;
+  border-radius: var(--radius-sm);
+  outline: none;
 
   &:focus {
-    border: none;
-    box-shadow: none;
+    box-shadow: var(--shadow-focus);
   }
+}
 
-  lucide-icon {
-    display: none;
+/* TODO: remove ::ng-deep when custom-select supports trigger styling via input */
+:host ::ng-deep .col-unit .custom-select-trigger {
+  background-color: var(--bg-pure);
+  border: none;
+  border-radius: var(--radius-sm);
+
+  &:focus {
+    box-shadow: var(--shadow-focus);
   }
 }
 
@@ -258,6 +264,21 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
       grid-column: 1 / -1;
       justify-content: flex-end;
     }
+
+    .quantity-controls .qty-btn {
+      opacity: 0;
+      width: 0;
+      padding: 0;
+      border: none;
+      overflow: hidden;
+      transition: opacity 0.15s ease, width 0.15s ease;
+    }
+    .quantity-controls:hover .qty-btn,
+    .quantity-controls:focus-within .qty-btn {
+      opacity: 1;
+      width: 2rem;
+      border: 1px solid var(--border-default);
+    }
   }
 }
 
@@ -295,6 +316,21 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
     .col-actions {
       grid-column: 1 / -1;
       justify-content: flex-end;
+    }
+
+    .quantity-controls .qty-btn {
+      opacity: 0;
+      width: 0;
+      padding: 0;
+      border: none;
+      overflow: hidden;
+      transition: opacity 0.15s ease, width 0.15s ease;
+    }
+    .quantity-controls:hover .qty-btn,
+    .quantity-controls:focus-within .qty-btn {
+      opacity: 1;
+      width: 2rem;
+      border: 1px solid var(--border-default);
     }
   }
 }
