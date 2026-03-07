@@ -1,101 +1,36 @@
 # Technical Debt Analysis — foodVibe 1.0
 
-Scan the codebase for duplicated code, dead code, and tech debt patterns. Run at the end of sessions to keep the codebase clean.
+Scan for duplicated code, dead code, and tech debt. Run at end of session, before PRs, or after large features.
 
 ## When to Run
 
-- End of every development session
+- End of development session
 - Before creating a pull request
-- Weekly as part of codebase hygiene
+- Weekly hygiene
 - After large feature implementations
 
 ## Analysis Workflow
 
-### Phase 1: Duplicate Code Detection
+### Phase 1: Duplicate Code
+- Search for similar export signatures (functions, consts, classes) across `src/app/`.
+- Look for similar component selectors and signal patterns.
+- Use Explore agent for copy-pasted blocks (5+ lines) and consolidatable utilities. Report file:line.
 
-Search for similar code blocks that should be consolidated:
-
-```powershell
-# TypeScript: similar function signatures across files
-rg "export (function|const|class)" src/app/ --type ts | Sort-Object
-
-# Similar component patterns
-rg "selector:" src/app/ --type ts | Sort-Object
-
-# Duplicate signal patterns
-rg "signal\(" src/app/ --type ts | Sort-Object
-```
-
-Use the Explore agent for deeper analysis:
-```
-Search for duplicated code patterns in src/app/:
-1. Functions with similar names across files
-2. Copy-pasted code blocks (5+ lines)
-3. Similar utility functions that could be consolidated
-Report file paths and line numbers for each duplicate found.
-```
-
-### Phase 2: Dead Code Detection
-
-Find unused exports and functions:
-
-```powershell
-# Find exported symbols
-rg "export (function|const|class|interface|type) " src/app/ --type ts
-
-# Cross-reference: check if each export is imported elsewhere
-# (manual verification — check import count for each symbol)
-```
-
-Check for unused components:
-```powershell
-# Components declared but potentially not routed or used
-rg "selector: '" src/app/ --type ts
-rg "import.*Component" src/app/app.routes.ts
-```
+### Phase 2: Dead Code
+- List exported symbols (function, const, class, interface, type) in `src/app/`; cross-check imports.
+- Check components that may not be routed or used (selectors vs app.routes imports).
 
 ### Phase 3: TODO/FIXME/HACK Audit
+- Count and list TODO, FIXME, HACK, XXX in `src/` (ts, html, css). Spot-check age via git blame.
 
-```powershell
-# Count and list all debt markers
-rg "TODO|FIXME|HACK|XXX" src/ --type ts --type html --type css -c
-rg "TODO|FIXME|HACK|XXX" src/ --type ts -n | Select-Object -First 30
-
-# Age of TODOs via git blame
-# (spot check the oldest ones)
-```
-
-### Phase 4: File Size Audit
-
-Files over 300 lines violate project standards:
-
-```powershell
-# Find files exceeding 300 lines
-Get-ChildItem -Recurse -Include "*.ts","*.scss","*.html" src/app/ |
-  ForEach-Object { $lines = (Get-Content $_.FullName).Count; if ($lines -gt 300) { "$lines`t$($_.FullName)" } } |
-  Sort-Object -Descending
-```
+### Phase 4: File Size
+- List `.ts`, `.scss`, `.html` in `src/app/` over 300 lines (project standard).
 
 ### Phase 5: Style Violations
+- Search for: `@Input()`/`@Output()` (use input()/output()), BehaviorSubject (use signal()), `style=` in HTML, `any` types, semicolons in TS.
 
-```powershell
-# Check for prohibited patterns
-rg "@Input\(\)|@Output\(\)" src/app/ --type ts         # Should use input()/output()
-rg "BehaviorSubject" src/app/ --type ts                  # Should use signal()
-rg "style=" src/app/ --type html                         # Inline styles (should be SCSS)
-rg 'any[^a-zA-Z]' src/app/ --type ts | Select-Object -First 20  # any types
-rg '";' src/app/ --type ts | Select-Object -First 10    # Semicolons (prohibited)
-```
-
-### Phase 6: Translation Audit
-
-```powershell
-# Hardcoded Hebrew in templates (should use translatePipe)
-rg '[\u0590-\u05FF]' src/app/ --type html | Select-Object -First 20
-
-# translatePipe usage without dictionary key
-# (manual check: verify keys exist in dictionary.json)
-```
+### Phase 6: Translation
+- Search for Hebrew codepoints in HTML (should use translatePipe). Manually verify dictionary keys for translatePipe usage.
 
 ## Report Format
 
@@ -105,33 +40,13 @@ rg '[\u0590-\u05FF]' src/app/ --type html | Select-Object -First 20
 ## Critical (Fix Now)
 - [ ] **[file:line]**: Description — Impact — Fix
 
-## High Priority (Fix This Sprint)
-- [ ] **[file:line]**: Description
-
-## Medium Priority (Track)
-- [ ] **[file:line]**: Description
-
-## Low Priority (Nice to Have)
+## High / Medium / Low Priority
 - [ ] **[file:line]**: Description
 
 ## Metrics
-- Total TODOs: X
-- Duplicate code blocks: X
-- Files over 300 lines: X
-- Prohibited patterns found: X (BehaviorSubject, @Input, any, etc.)
-- Hardcoded Hebrew strings: X
+- Total TODOs: X | Duplicate blocks: X | Files >300 lines: X | Prohibited patterns: X | Hardcoded Hebrew: X
 ```
 
 ## Integration
 
-If new patterns are discovered, suggest additions to `.assistant/copilot-instructions.md`:
-```
-New pattern found: [description]
-Suggested rule addition: [rule text for copilot-instructions.md]
-```
-
-## Related Skills
-
-- `/update-docs` — Update documentation after cleanup
-- `/elegant-fix` — Refine solutions found during audit
-- `/github-sync` — Review recent changes for debt introduction
+If new patterns are found, suggest an addition to `.assistant/copilot-instructions.md`. Related: update-docs (after cleanup), elegant-fix (refine solutions), github-sync (recent changes).

@@ -123,49 +123,13 @@ If a duplicate name was detected, show after the tree: "**Name already in use:**
 
 ---
 
-## Schema Reference
+## Schema Reference (field names; see demo JSONs for full shape)
 
-### Ingredient object
-
-| Field | Type | Notes |
-|-------|------|--------|
-| `_id` | string | `{parentId}_i{index}` (e.g. `prep_011_i1`) |
-| `referenceId` | string | Product `_id` or another prep `_id` |
-| `type` | string | `"product"` or `"recipe"` |
-| `amount_` | number | In kg, liter, or unit |
-| `unit_` | string | Must match product `base_unit_` or `purchase_options_[].unit_symbol_` |
-| `note_` | string | Optional |
-
-### Step object
-
-| Field | Type | Notes |
-|-------|------|--------|
-| `order_` | number | 1, 2, 3... |
-| `instruction_` | string | One paragraph |
-| `labor_time_minutes_` | number | Minutes (or 0) |
-
-### Recipe fields (demo-recipes.json)
-
-`_id` (`prep_NNN`), `name_hebrew`, `recipe_type_: "preparation"`, `ingredients_`, `steps_`, `yield_amount_`, `yield_unit_` (kg/liter/dish), `default_station_` (stove/oven/cold/fry), `is_approved_: true`.
-
-### Dish fields (demo-dishes.json)
-
-Same as recipe, plus: `recipe_type_: "dish"`, `logistics_: { baseline_: [...] }`, `prep_items_`, `mise_categories_`, `labels_`.
-
-### Product creation (demo-products.json)
-
-ID pattern: `demo_NNN`. Required: `_id`, `name_hebrew`, `base_unit_` (kg/liter/unit), `buy_price_global_: 0`, `purchase_options_: []`, `categories_: [...]`, `supplierIds_: [...]`, `yield_factor_: 1`, `allergens_: []`, `min_stock_level_: 0`, `expiry_days_default_: 0`.
-
-### Equipment creation (demo-equipment.json)
-
-ID pattern: `eq_NNN`. Required: `_id`, `name_hebrew`, `category_` (heat_source/tool/container/packaging/consumable), `owned_quantity_: 0`, `is_consumable_: false`, `created_at_`, `updated_at_` (ISO strings).
-
-### Kitchen preparations (demo-kitchen-preparations.json)
-
-Array of one doc: `[{ "categories": string[], "preparations": [{ "name", "category" }] }]`. Category key: trim, lowercase, spaces→underscores.
-
-### Unit validation
-
-1. `unit_` === product `base_unit_` → OK
-2. `unit_` in `purchase_options_[].unit_symbol_` → OK
-3. Otherwise → MISMATCH — flag for user, default to `base_unit_`
+- **Ingredient**: `_id`, `referenceId`, `type`, `amount_`, `unit_`, `note_`. `unit_` must match product `base_unit_` or `purchase_options_[].unit_symbol_`.
+- **Step**: `order_`, `instruction_`, `labor_time_minutes_`.
+- **Recipe** (demo-recipes): `_id` (prep_NNN), `name_hebrew`, `recipe_type_: "preparation"`, `ingredients_`, `steps_`, `yield_amount_`, `yield_unit_`, `default_station_`, `is_approved_: true`.
+- **Dish** (demo-dishes): same as recipe plus `recipe_type_: "dish"`, `logistics_: { baseline_: [...] }`, `prep_items_`, `mise_categories_`, `labels_`.
+- **Product** (demo-products): `demo_NNN`; required `_id`, `name_hebrew`, `base_unit_`, `buy_price_global_: 0`, `purchase_options_`, `categories_`, `supplierIds_`, `yield_factor_: 1`, `allergens_`, `min_stock_level_: 0`, `expiry_days_default_: 0`.
+- **Equipment** (demo-equipment): `eq_NNN`; `_id`, `name_hebrew`, `category_`, `owned_quantity_: 0`, `is_consumable_: false`, `created_at_`, `updated_at_`.
+- **Kitchen preparations**: one doc `[{ "categories": [], "preparations": [{ "name", "category" }] }]`; category key trim, lowercase, spaces→underscores.
+- **Unit validation**: `unit_` === `base_unit_` or in `purchase_options_[].unit_symbol_` → OK; else MISMATCH, flag and default to `base_unit_`.

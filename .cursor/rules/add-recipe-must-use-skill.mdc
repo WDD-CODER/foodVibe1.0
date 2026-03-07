@@ -1,11 +1,6 @@
 ---
-description: When adding a recipe or dish (add-recipe command or user request), always use the add-recipe skill and visual-tree confirmation before any write
+description: Add recipe/dish requests must use the add-recipe skill; Step 3 confirmation before any write
 alwaysApply: true
 ---
 
-# Add recipe / dish — always use the skill
-
-When the user runs the **add-recipe** command or asks to **add a recipe / dish** from image or text:
-
-1. **Read and follow** [.assistant/skills/add-recipe/SKILL.md](.assistant/skills/add-recipe/SKILL.md) — it is the single source of truth.
-2. **Step 3 confirmation is mandatory.** Present only the visual tree and wait for explicit user confirmation before writing any demo JSON.
+When the user adds a recipe or dish from image or text, read [.assistant/skills/add-recipe/SKILL.md](.assistant/skills/add-recipe/SKILL.md) and present the visual tree for confirmation before writing.

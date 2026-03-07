@@ -1,98 +1,46 @@
 # GitHub Context Sync — foodVibe 1.0
 
-Pull recent GitHub activity into a single context dump. Essential for catching up after being away, understanding recent changes, and reviewing activity before starting work.
+Pull recent GitHub activity into a single context dump. Use at session start, after time away, or before code review.
 
 ## When to Run
 
 - Starting a new work session after time away
 - Beginning work on a new feature
-- Before code review to understand context
-- Weekly planning sessions
+- Before code review
+- Weekly planning
 
 ## Workflow
 
-### Phase 1: Recent Commits
+1. **Recent commits** — last 7 days (oneline, stat); identify files changed most frequently.
+2. **Pull requests** — list open and merged (e.g. `gh pr list`); details for recently merged.
+3. **Issues** — open and recently closed (e.g. `gh issue list`).
+4. **Branch activity** — active branches by recent commits (e.g. `git branch -r --sort=-committerdate`).
+5. **Generate summary** using the report template below.
+6. **Save** the summary to `notes/github-sync/YYYY-MM-DD.md` (create directory if needed).
 
-```powershell
-# Commits from last 7 days
-git log --since="7 days ago" --oneline --stat | Select-Object -First 60
-
-# Files changed most frequently
-git log --since="7 days ago" --name-only --pretty=format: | Sort-Object | Group-Object | Sort-Object Count -Descending | Select-Object -First 15
-```
-
-### Phase 2: Pull Requests
-
-```powershell
-# Recent PRs (open and merged)
-gh pr list --state all --limit 15 --json number,title,state,author,createdAt,mergedAt,url
-
-# Details for recently merged PRs
-gh pr list --state merged --limit 5 --json number,title,files,additions,deletions
-```
-
-### Phase 3: Issues
-
-```powershell
-# Open issues
-gh issue list --state open --limit 15 --json number,title,labels,createdAt
-
-# Recently closed
-gh issue list --state closed --limit 10 --json number,title,closedAt,labels
-```
-
-### Phase 4: Branch Activity
-
-```powershell
-# Active branches sorted by recent commits
-git branch -r --sort=-committerdate | Select-Object -First 10
-```
-
-### Phase 5: Generate Summary
-
-Compile into a structured report:
+## Report Template
 
 ```markdown
 # GitHub Sync — foodVibe 1.0 — [Date]
 
 ## Summary
-- **Commits**: X total (last 7 days)
-- **PRs Merged**: Y
-- **PRs Open**: Z
-- **Issues Open**: A
+- **Commits**: X (last 7 days) | **PRs Merged**: Y | **PRs Open**: Z | **Issues Open**: A
 
 ## Key Changes
-
-### Merged Pull Requests
+### Merged PRs
 | PR | Title | Files | +/- |
-|----|-------|-------|-----|
 
 ### Hot Files (Most Changed)
 1. [file] — [N] changes
-2. [file] — [N] changes
 
-### Open PRs Needing Attention
-| PR | Title | Days Open |
-|----|-------|-----------|
-
-### Open Issues
-| Issue | Title | Labels |
-|-------|-------|--------|
+### Open PRs / Open Issues
+| # | Title | Days Open / Labels |
 
 ## Impact on Current Work
-- [New patterns introduced]
-- [Breaking changes]
-- [Areas requiring attention before next feature]
+- [New patterns] [Breaking changes] [Areas to watch]
 ```
 
-### Phase 6: Save for Reference
+## Related
 
-```powershell
-New-Item -ItemType Directory -Force -Path "notes/github-sync"
-# Save the generated summary to notes/github-sync/YYYY-MM-DD.md
-```
-
-## Related Skills
-
-- `/techdebt` — Analyze debt from recent changes
-- `/update-docs` — Update docs after reviewing changes
+- techdebt — analyze debt from recent changes
+- update-docs — update docs after reviewing changes

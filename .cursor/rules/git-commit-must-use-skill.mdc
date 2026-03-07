@@ -1,11 +1,6 @@
 ---
-description: All commit/push requests must go through the commit-to-github skill (visual plan + approval)
+description: Commit/push requests must use the commit-to-github skill (visual plan + approval)
 alwaysApply: true
 ---
 
-# Git commit / push — always use the skill
-
-When the user asks to **commit**, **push**, **save to GitHub**, or similar:
-
-1. **Read and follow** `.assistant/skills/commit-to-github/SKILL.md` — it is the single source of truth.
-2. **No git writes** until the user has approved the visual plan.
+When the user asks to commit, push, or save to GitHub, read [.assistant/skills/commit-to-github/SKILL.md](.assistant/skills/commit-to-github/SKILL.md) and do not run any git writes until the user approves the visual plan.

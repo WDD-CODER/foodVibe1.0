@@ -1,8 +1,8 @@
 # Commit to GitHub — foodVibe 1.0
 
-Evaluates working-tree changes, decides how to split branches and commits, presents the plan as a **visual tree** for approval, then creates branches and commits safely and returns to the default branch. Use when the user asks to commit, push, or save work to branches.
+Evaluates working-tree changes, decides how to split branches and commits, presents the plan as a **visual tree** for approval, then creates branches and commits safely and returns to the default branch.
 
-**Important**: Do **not** create a file in `plans/` for this workflow. The plan is the visual tree in the conversation.
+**Safety rule**: No `git add`, `git commit`, `git push`, or branch creation until the user has explicitly approved the visual tree in chat. Do not create a file in `plans/` for this workflow — the plan is the tree in the conversation.
 
 ---
 
@@ -15,15 +15,7 @@ Evaluates working-tree changes, decides how to split branches and commits, prese
 
 ## Phase 1 — Evaluate (read-only)
 
-Before any git writes, gather the full picture:
-
-Run `git status` and `git diff --stat`. If needed for context, `git diff` or `git diff --name-only`. Detect default branch:
-
-```bash
-git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null || echo "main"
-```
-
-**Do not run** `git add`, `git commit`, `git checkout -b`, or `git stash` in this phase.
+Per the safety rule above. Gather the full picture: run `git status` and `git diff --stat` (and `git diff` or `git diff --name-only` if needed). Detect default branch: `git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null || echo "main"`. Do not run `git add`, `git commit`, `git checkout -b`, or `git stash` in this phase.
 
 ---
 
@@ -65,7 +57,7 @@ If the user **denies**: state that no git operations were performed and stop. If
 
 ## Phase 4 — Execute (only after approval)
 
-**Safety**: Never erase or discard user changes. No `git reset --hard`, `git clean -fd`, or force-push unless the user explicitly asks. Use stash to preserve work when switching context.
+Never erase or discard user changes: no `git reset --hard`, `git clean -fd`, or force-push unless the user explicitly asks. Use stash to preserve work when switching context.
 
 1. **Preserve work**
    If the plan has multiple branches or commits and there are uncommitted changes, stash first:

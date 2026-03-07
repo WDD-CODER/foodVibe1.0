@@ -1,12 +1,11 @@
 # Elegant Fix — Solution Refinement
 
-After implementing a fix that feels mediocre, use this workflow to refine it into an elegant solution.
+After implementing a fix that feels mediocre, refine it into an elegant solution.
 
 ## When to Use
 
 - After any fix that makes you uncomfortable
-- When you notice duplicated logic
-- When a solution requires too many special cases
+- When you notice duplicated logic or too many special cases
 - Before submitting a PR with "I know this isn't ideal" comments
 - When a workaround could be a proper abstraction
 
@@ -16,98 +15,20 @@ When you've made a fix that works but feels hacky, trigger a fresh perspective:
 
 > "Knowing everything you know now, scrap this and implement the elegant solution"
 
-This works because the initial implementation taught you the codebase constraints. The second pass leverages that knowledge.
+The first pass taught you the codebase constraints; the second pass leverages that.
 
 ## Workflow
 
-### Step 1: Complete the Initial Fix
-Get something working first. Don't overthink the first pass.
-
-### Step 2: Identify the Smell
-Notice when the fix feels:
-- Like a workaround rather than a solution
-- Too complex for what it accomplishes
-- Inconsistent with the surrounding Signal-based patterns
-- Like it might cause issues with change detection or reactivity
-
-### Step 3: Request Refinement
-
-```
-Context: I just implemented [brief description] but it feels hacky.
-
-Current implementation:
-[paste the code or describe approach]
-
-Issues I notice:
-- [list concerns]
-
-Knowing everything you know now about this codebase, scrap this and implement
-the elegant solution. Follow the project standards:
-- Signals-only (no BehaviorSubject)
-- input()/output()/model() (no decorators)
-- translatePipe for user-facing text
-- Adapter Pattern for storage
-```
-
-### Step 4: Compare and Decide
-Review both solutions:
-- Is the elegant solution actually better?
-- Does it introduce new risks?
-- Is the maintenance burden lower?
-- Does it follow existing patterns in the codebase?
-
-## Examples
-
-### Quick Hack → Proper Signal Computed
-
-**Initial (imperative)**:
-```typescript
-updateTotal() {
-  let sum = 0
-  for (const item of this.items_()) {
-    sum += item.quantity * item.price
-  }
-  this.total_.set(sum)
-}
-```
-
-**After refinement (declarative)**:
-```typescript
-total_ = computed(() =>
-  this.items_().reduce((sum, item) => sum + item.quantity * item.price, 0)
-)
-```
-
-### Copy-Paste → Shared Utility
-
-**Initial (duplicated across components)**:
-```typescript
-// In ComponentA
-const filtered = this.items_().filter(i => i.category === this.selectedCategory_())
-
-// In ComponentB
-const filtered = this.items_().filter(i => i.category === this.activeCategory_())
-```
-
-**After refinement (shared computed pattern)**:
-```typescript
-// In a shared utility or base service
-filterByCategory<T extends { category: string }>(
-  items: Signal<T[]>,
-  category: Signal<string>
-): Signal<T[]> {
-  return computed(() => items().filter(i => i.category === category()))
-}
-```
+1. **Complete the initial fix** — get something working first.
+2. **Identify the smell** — workaround vs solution, too complex, inconsistent with Signals, change-detection concerns.
+3. **Request refinement** — paste context, current implementation, and concerns; ask for the elegant solution per project standards (copilot-instructions: Signals, input/output/model, translatePipe, Adapter Pattern).
+4. **Compare and decide** — is the refined solution better, lower risk, lower maintenance, aligned with existing patterns?
 
 ## Integration
 
-After refinement, if you discovered a new pattern:
-1. Update `.assistant/copilot-instructions.md` with the pattern
-2. Update relevant `breadcrumbs.md` if structure changed
-3. Consider if it should be a utility in `core/utils/`
+After refinement, if you discovered a new pattern: update `.assistant/copilot-instructions.md`, relevant `breadcrumbs.md`, and consider adding a utility in `core/utils/`.
 
-## Related Skills
+## Related
 
-- `/techdebt` — Find other code that needs refinement
-- `/update-docs` — Document new patterns discovered
+- techdebt — find other code that needs refinement
+- update-docs — document new patterns

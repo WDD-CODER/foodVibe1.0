@@ -65,8 +65,4 @@ Before marking a task complete, verify:
 - **Large** (5 agents): New subsystem, major architecture change
 
 ## Project Context
-
-- **Stack**: Angular 19, Signals, Standalone Components, TypeScript Strict, SCSS, Ionic
-- **Domain**: Kitchen/recipe management with Hebrew UI via translation dictionary
-- **Key patterns**: Adapter Pattern (`IStorageAdapter`), Ingredient Ledger, Triple-Unit conversion
-- **File structure**: `core/` (services, models) → `shared/` (reusable UI) → `pages/` (routed views)
+Apply project standards from `.assistant/copilot-instructions.md` (Angular, folder structure, translation, patterns). Domain: kitchen/recipe management, Hebrew UI via dictionary.

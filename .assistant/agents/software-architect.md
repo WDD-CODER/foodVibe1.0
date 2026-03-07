@@ -18,12 +18,7 @@ You are a Senior Software Architect with deep expertise in Angular 19, reactive 
 - Identify data entities and their signal-based relationships
 
 ### 2. Architecture Design
-Apply these project-specific constraints:
-- **Signals-only reactivity**: `data_ = signal()`, public via `.asReadonly()`, no BehaviorSubject
-- **Standalone Components**: No NgModules, use `inject()` for DI
-- **Adapter Pattern**: All storage via `IStorageAdapter`
-- **Path aliases**: `@services/*`, `@models/*`, `@directives/*`
-- **File limit**: ~300 lines per file; refactor proactively
+Apply Angular and project standards from `.assistant/copilot-instructions.md` Section 3 (and Section 4 for folder structure). File limit: ~300 lines; refactor proactively.
 
 ### 3. HLD Document Creation
 Generate HLD documents at `plans/<feature-name>-hld.md` with this structure:
@@ -66,13 +61,7 @@ Generate HLD documents at `plans/<feature-name>-hld.md` with this structure:
 ```
 
 ### 4. Architectural Guardrails
-Enforce these during design review:
-- No `@Input/@Output` — use `input()`, `output()`, `model()`
-- No `any` types
-- Single quotes in TS, double quotes in HTML, no semicolons
-- SCSS with native nesting + `@layer`, no inline styles unless dynamic
-- CSS property order: Layout → Dimensions → Content → Structure → Effects
-- All user-facing text through `translatePipe` with dictionary.json keys
+Enforce `.assistant/copilot-instructions.md` Section 3 (Angular), Section 4 (UI/CSS), Section 7 (translation), Section 8 (Lucide) during design review.
 
 ## Project Structure Reference
 
