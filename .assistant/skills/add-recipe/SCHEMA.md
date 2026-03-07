@@ -1,12 +1,13 @@
 # Demo recipe/dish JSON schema reference
 
-Used by the [add-recipe-from-image](SKILL.md) skill when writing to `public/assets/data/demo-recipes.json` or `public/assets/data/demo-dishes.json`.
+Used by the [add-recipe](SKILL.md) skill when writing to `public/assets/data/demo-recipes.json` or `public/assets/data/demo-dishes.json`.
 
 ## Demo products (for referenceId)
 
 - Path: `public/assets/data/demo-products.json`
-- Each product has `_id` (e.g. `demo_001`) and `name_hebrew`. Match ingredient names to `name_hebrew` to get `referenceId`.
-- Common `base_unit_` in products: `kg`, `liter`, `unit`.
+- Each product has `_id` (e.g. `demo_001`), `name_hebrew`, and `base_unit_` (`kg` | `liter` | `unit`).
+- Match ingredient names to `name_hebrew` to get `referenceId`.
+- **Always check `base_unit_` and `purchase_options_`** to decide the correct `unit_` for the ingredient (see unit validation below).
 
 **Product creation (create-if-missing):** When adding a recipe and an ingredient has no matching product, create a new product: next `demo_NNN` (scan file for max), `name_hebrew` from ingredient, `buy_price_global_: 0`, plus any other required fields per existing entries. Append to `demo-products.json` and use the new `_id` as `referenceId`.
 
@@ -40,7 +41,7 @@ Used by the [add-recipe-from-image](SKILL.md) skill when writing to `public/asse
 | `referenceId` | string | Product `_id` from demo-products.json |
 | `type` | string | `"product"` (or `"recipe"` if referencing another prep) |
 | `amount_` | number | In kg, liter, or unit (convert from g/ml) |
-| `unit_` | string | `kg` \| `liter` \| `unit` |
+| `unit_` | string | Must match product `base_unit_` or a valid `purchase_options_[].unit_symbol_` |
 | `note_` | string | Optional (e.g. "קצוץ דק") |
 
 **Step object:**
@@ -64,13 +65,23 @@ Same as recipe above, plus:
 | `mise_categories_` | array | Optional; category_name, items |
 | `labels_` | array | Optional; e.g. ["vegetarian", "gluten_free"] |
 
-For add-from-image, you can add a dish with only the same core fields as a recipe (`_id`, `name_hebrew`, `recipe_type_: "dish"`, `ingredients_`, `steps_`, `yield_amount_`, `yield_unit_: "dish"`, `default_station_`, `is_approved_: true`) and leave `logistics_`, `prep_items_`, `mise_categories_`, `labels_` for later or omit them if the file allows.
+**Dishes vs preparations:**
+- **Dishes** get `mise_categories_` (mise-en-place list) and a single assembly step with `labor_time_minutes_: 0`. No detailed prep steps.
+- **Preparations** get multi-step `steps_` with real prep times.
 
 ## Unit conversion from image to JSON
 
 - **grams** → `unit_: "kg"`, `amount_`: value / 1000
 - **ml** → `unit_: "liter"`, `amount_`: value / 1000
-- **count / “יחידה”** → `unit_: "unit"`, `amount_`: numeric value
+- **count / "יחידה"** → `unit_: "unit"`, `amount_`: numeric value
+
+## Unit validation rule
+
+Before writing an ingredient, verify the chosen `unit_` is valid for the matched product:
+
+1. If `unit_` === product's `base_unit_` → OK
+2. If `unit_` appears in product's `purchase_options_[].unit_symbol_` → OK
+3. Otherwise → **MISMATCH** — flag for the user; default to the product's `base_unit_` and convert the amount accordingly.
 
 ## ID numbering
 

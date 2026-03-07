@@ -1,0 +1,15 @@
+---
+description: When adding a recipe or dish (add-recipe command or user request), always use the add-recipe skill and full Step 5 confirmation before any write
+alwaysApply: true
+---
+
+# Add recipe / dish — always use the skill and full confirmation
+
+When the user runs the **add-recipe** command or asks to **add a recipe**, **add a dish**, or add from an image/text:
+
+1. **Read and follow** [.assistant/skills/add-recipe/SKILL.md](.assistant/skills/add-recipe/SKILL.md) start-to-finish.
+2. **Duplicate name (Step 4b):** Before confirming, check if the recipe/dish name already exists in the demo list. If yes, use "[name] (2)" for the new entry and explicitly tell the user the name was taken and why the number was added.
+3. **Step 5 (confirm) must always be done in full.** Present in order: (1) visual structure (target file, new ID, type, structure tree; duplicate check if needed), (2) summary table (name, type, yield, station, units, labels, counts), (3) מרכיבים table, (4) לוגיסטיקה table, (5) מיסום table, (6) "Confirm or deny — I will not write until you confirm."
+4. **Do not write** to demo-recipes.json, demo-dishes.json, demo-products.json, or demo-equipment.json until the user explicitly confirms (e.g. confirm, yes, add it).
+
+The skill is the single source of truth. No shortcuts on Step 5.
