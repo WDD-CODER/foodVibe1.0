@@ -556,5 +556,181 @@
       {"category_name": "תוספות", "items": [{"item_name": "כלים עם תוספת בצל", "unit": "unit", "quantity": 3}, {"item_name": "כלים עם תוספת כרוב כבוש", "unit": "unit", "quantity": 3}]}
     ],
     "labels_": ["סיפור של אוכל"]
+  },
+  {
+    "_id": "dish_014",
+    "name_hebrew": "המבורגר בלחמניה של אבי ביטון ועידן תלם",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_014_i1", "referenceId": "demo_151", "type": "product", "amount_": 1, "unit_": "unit", "note_": "לחמניית בורגר כשל\"פ"},
+      {"_id": "dish_014_i2", "referenceId": "demo_124", "type": "product", "amount_": 0.12, "unit_": "kg", "note_": "קציצת בורגר"},
+      {"_id": "dish_014_i3", "referenceId": "demo_125", "type": "product", "amount_": 0.03, "unit_": "kg", "note_": "בשר מפורק הנדלס"},
+      {"_id": "dish_014_i4", "referenceId": "demo_186", "type": "product", "amount_": 0.05, "unit_": "kg", "note_": "ריבת בצל"},
+      {"_id": "dish_014_i5", "referenceId": "demo_154", "type": "product", "amount_": 0.01, "unit_": "kg", "note_": "תפוצ'יפס שבור"},
+      {"_id": "dish_014_i6", "referenceId": "demo_187", "type": "product", "amount_": 0.04, "unit_": "kg", "note_": "רוטב למטבל"},
+      {"_id": "dish_014_i7", "referenceId": "demo_185", "type": "product", "amount_": 1, "unit_": "unit", "note_": "כלי הגשה מוערך"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "הרכבת המנה מהמיסום: המבורגר בלחמניה עם ריבת בצל, בשר מפורק, תפוצ'יפס ורוטב למטבל.", "labor_time_minutes_": 0}
+    ],
+    "yield_amount_": 1,
+    "yield_unit_": "dish",
+    "default_station_": "hot_line",
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_019", "quantity_": 2, "phase_": "both", "is_critical_": true, "notes_": "חותמת הלחמה + ברנר ספייר"},
+        {"equipment_id_": "eq_020", "quantity_": 2, "phase_": "both", "is_critical_": true, "notes_": "ציפסר"},
+        {"equipment_id_": "eq_021", "quantity_": 1, "phase_": "service", "is_critical_": false, "notes_": "שפין דיש לציפס"},
+        {"equipment_id_": "eq_011", "quantity_": 2, "phase_": "both", "is_critical_": true, "notes_": "ארון חימום (1 ללחמניות 1 לבורגרים)"},
+        {"equipment_id_": "eq_022", "quantity_": 1, "phase_": "both", "is_critical_": true, "notes_": "פלאנצה פרונטלית"},
+        {"equipment_id_": "eq_023", "quantity_": 30, "phase_": "prep", "is_critical_": false, "notes_": "גסטרונומים לארון חימום עם רשת"},
+        {"equipment_id_": "eq_024", "quantity_": 3, "phase_": "both", "is_critical_": false, "notes_": "פלטה לפלאנצה"},
+        {"equipment_id_": "eq_025", "quantity_": 3, "phase_": "service", "is_critical_": false, "notes_": "כלי לריבת בצל"},
+        {"equipment_id_": "eq_026", "quantity_": 6, "phase_": "service", "is_critical_": false, "notes_": "בקטים לחיצים למיונז וקטשוף"},
+        {"equipment_id_": "eq_027", "quantity_": 6, "phase_": "service", "is_critical_": false, "notes_": "סקוויזר לפונדו צ'דר"},
+        {"equipment_id_": "eq_028", "quantity_": 1, "phase_": "both", "is_critical_": false, "notes_": "בן מארי לפונדו גבינה"},
+        {"equipment_id_": "eq_029", "quantity_": 1, "phase_": "service", "is_critical_": false, "notes_": "שפינג דיש לבשר מפורק"},
+        {"equipment_id_": "eq_014", "quantity_": 10, "phase_": "service", "is_critical_": false, "notes_": "מלקחיים להגשה סך הכל לעמדה"},
+        {"equipment_id_": "eq_015", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "מקרר"},
+        {"equipment_id_": "eq_030", "quantity_": 1, "phase_": "service", "is_critical_": false, "notes_": "מקרר/קלקרים שחורים בפרונט"},
+        {"equipment_id_": "eq_031", "quantity_": 1, "phase_": "prep", "is_critical_": false, "notes_": "סכין לחם משוננת לפריסת לחמניות"},
+        {"equipment_id_": "eq_032", "quantity_": 2, "phase_": "both", "is_critical_": false, "notes_": "כפפות חמות לעמדה (זוג)"},
+        {"equipment_id_": "eq_033", "quantity_": 1, "phase_": "prep", "is_critical_": false, "notes_": "מברשת ברזל לניקוי החותמת"},
+        {"equipment_id_": "eq_034", "quantity_": 2, "phase_": "both", "is_critical_": false, "notes_": "בולים לערבוב ציפס בעמדה"},
+        {"equipment_id_": "eq_035", "quantity_": 2, "phase_": "service", "is_critical_": false, "notes_": "כלי לטבילת הבורגר ברוטב"},
+        {"equipment_id_": "eq_036", "quantity_": 2, "phase_": "prep", "is_critical_": false, "notes_": "קרש עבודה לשולחן אחורי"},
+        {"equipment_id_": "eq_017", "quantity_": 4, "phase_": "both", "is_critical_": true, "notes_": "חיבור ישראלי לחשמל"}
+      ],
+      "service_overrides_": []
+    },
+    "mise_categories_": [
+      {"category_name": "חלבון", "items": [{"item_name": "קציצת המבורגר", "unit": "unit", "quantity": 1}, {"item_name": "בשר מפורק ברוטב", "unit": "kg", "quantity": 0.03}]},
+      {"category_name": "לחם", "items": [{"item_name": "לחמניות המבורגר פרוסות", "unit": "unit", "quantity": 1}]},
+      {"category_name": "רטבים ותוספות", "items": [{"item_name": "ריבת בצל", "unit": "kg", "quantity": 0.05}, {"item_name": "רוטב למטבל", "unit": "kg", "quantity": 0.04}, {"item_name": "קטשופ", "unit": "kg", "quantity": 0.02}, {"item_name": "מיונז", "unit": "kg", "quantity": 0.02}]},
+      {"category_name": "צד", "items": [{"item_name": "תפוצ'יפס שבור", "unit": "kg", "quantity": 0.01}, {"item_name": "ציפס רשת מופשר", "unit": "kg", "quantity": 0.1}]}
+    ],
+    "labels_": ["סיפור של אוכל", "בשר"]
+  },
+  {
+    "_id": "dish_015",
+    "name_hebrew": "שיפוד עוף בולגוגי מוגש על אורז עגול ופוריקקה",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_015_i1", "referenceId": "demo_127", "type": "product", "amount_": 0.12, "unit_": "kg", "note_": "פרגיות"},
+      {"_id": "dish_015_i2", "referenceId": "demo_103", "type": "product", "amount_": 1, "unit_": "unit", "note_": "שיפוד יקיטורי"},
+      {"_id": "dish_015_i3", "referenceId": "demo_133", "type": "product", "amount_": 0.035, "unit_": "kg", "note_": "משרה בולגוגי"},
+      {"_id": "dish_015_i4", "referenceId": "demo_147", "type": "product", "amount_": 0.12, "unit_": "kg", "note_": "אורז עגול"},
+      {"_id": "dish_015_i5", "referenceId": "demo_174", "type": "product", "amount_": 0.01, "unit_": "kg", "note_": "פוריקקה"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "הרכבת המנה מהמיסום: שיפוד עוף בולגוגי על אורז עגול עם פוריקקה.", "labor_time_minutes_": 0}
+    ],
+    "yield_amount_": 1,
+    "yield_unit_": "dish",
+    "default_station_": "stove",
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_037", "quantity_": 1, "phase_": "service", "is_critical_": false, "notes_": "שפין דיש לאורז"},
+        {"equipment_id_": "eq_038", "quantity_": 1, "phase_": "service", "is_critical_": false, "notes_": "שפין דיש לשיפודי עוף"},
+        {"equipment_id_": "eq_039", "quantity_": 1, "phase_": "service", "is_critical_": false, "notes_": "שפין דיש לרוטב"},
+        {"equipment_id_": "eq_040", "quantity_": 2, "phase_": "service", "is_critical_": false, "notes_": "כפות הגשה בעמדה"},
+        {"equipment_id_": "eq_014", "quantity_": 2, "phase_": "service", "is_critical_": false, "notes_": "מלקחיים הגשה בעמדה"},
+        {"equipment_id_": "eq_041", "quantity_": 1, "phase_": "service", "is_critical_": false, "notes_": "מצקת לרוטב"},
+        {"equipment_id_": "eq_042", "quantity_": 1, "phase_": "service", "is_critical_": false, "notes_": "קראפ עם שפה גבוהה (ריבוע 12x12 / קראפ 12)"},
+        {"equipment_id_": "eq_015", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "מקרר קטן"},
+        {"equipment_id_": "eq_017", "quantity_": 1, "phase_": "both", "is_critical_": true, "notes_": "חיבור ישראלי לחשמל"}
+      ],
+      "service_overrides_": []
+    },
+    "mise_categories_": [
+      {"category_name": "sauce/stocks", "items": [{"item_name": "מרינדה בולוגוגית", "unit": "kg", "quantity": 0.035}]},
+      {"category_name": "butchery", "items": [{"item_name": "שיפודי עוף במרינדה", "unit": "unit", "quantity": 1}]},
+      {"category_name": "cooking", "items": [{"item_name": "אורז עגול מוכן", "unit": "kg", "quantity": 0.12}]},
+      {"category_name": "garnish", "items": [{"item_name": "פוריקקה", "unit": "kg", "quantity": 0.01}]}
+    ],
+    "labels_": ["סיפור של אוכל"]
+  },
+  {
+    "_id": "dish_016",
+    "name_hebrew": "קציצות בקר ברוטב עגבניות שרי צלויות אורז צהוב ופטרוזיליה שיפונד",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_016_i1", "referenceId": "demo_126", "type": "product", "amount_": 0.12, "unit_": "kg", "note_": "קציצות מוכנות של אבי ביטון"},
+      {"_id": "dish_016_i2", "referenceId": "demo_138", "type": "product", "amount_": 0.1, "unit_": "kg", "note_": "רוטב עגבניות דליל לבישול"},
+      {"_id": "dish_016_i3", "referenceId": "demo_144", "type": "product", "amount_": 0.04, "unit_": "kg", "note_": "עגבניות שרי צבעוניות"},
+      {"_id": "dish_016_i4", "referenceId": "demo_148", "type": "product", "amount_": 0.12, "unit_": "kg", "note_": "אורז צהוב מוכן"},
+      {"_id": "dish_016_i5", "referenceId": "demo_022", "type": "product", "amount_": 0.005, "unit_": "kg", "note_": "פטרוזיליה"},
+      {"_id": "dish_016_i6", "referenceId": "demo_185", "type": "product", "amount_": 1, "unit_": "unit", "note_": "כלי הגשה מוערך"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "הרכבת המנה מהמיסום: קציצות ברוטב עגבניות עם עגבניות שרי צלויות, אורז צהוב ופטרוזיליה.", "labor_time_minutes_": 0}
+    ],
+    "yield_amount_": 1,
+    "yield_unit_": "dish",
+    "default_station_": "hot_line",
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_011", "quantity_": 1, "phase_": "both", "is_critical_": true, "notes_": "ארון חימום / פס חם"},
+        {"equipment_id_": "eq_043", "quantity_": 15, "phase_": "prep", "is_critical_": false, "notes_": "גסטרונום"},
+        {"equipment_id_": "eq_040", "quantity_": 2, "phase_": "service", "is_critical_": false, "notes_": "כפות הגשה בעמדה"},
+        {"equipment_id_": "eq_014", "quantity_": 2, "phase_": "service", "is_critical_": false, "notes_": "מלקחיים הגשה בעמדה"},
+        {"equipment_id_": "eq_041", "quantity_": 1, "phase_": "service", "is_critical_": false, "notes_": "מצקת לרוטב"},
+        {"equipment_id_": "eq_037", "quantity_": 1, "phase_": "service", "is_critical_": false, "notes_": "שפין דיש לאורז"},
+        {"equipment_id_": "eq_044", "quantity_": 1, "phase_": "service", "is_critical_": false, "notes_": "שפין דיש לקציצות ברוטב"},
+        {"equipment_id_": "eq_012", "quantity_": 2, "phase_": "service", "is_critical_": false, "notes_": "כלים לתוספות"}
+      ],
+      "service_overrides_": []
+    },
+    "mise_categories_": [
+      {"category_name": "cooking", "items": [{"item_name": "קציצות מבושלות ברוטב", "unit": "kg", "quantity": 0.12}, {"item_name": "אורז צהוב מוכן", "unit": "kg", "quantity": 0.12}]},
+      {"category_name": "sauce/stocks", "items": [{"item_name": "רוטב עגבניות דליל", "unit": "kg", "quantity": 0.1}]},
+      {"category_name": "roasting", "items": [{"item_name": "עגבניות שרי צבעוניות צלויות", "unit": "kg", "quantity": 0.04}]},
+      {"category_name": "garnish", "items": [{"item_name": "פטרוזיליה", "unit": "kg", "quantity": 0.005}]}
+    ],
+    "labels_": ["סיפור של אוכל"]
+  },
+  {
+    "_id": "dish_017",
+    "name_hebrew": "אוניגירי מוגש עם קימצי וסויה",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_017_i1", "referenceId": "demo_146", "type": "product", "amount_": 1, "unit_": "unit", "note_": "אוניגירי"},
+      {"_id": "dish_017_i2", "referenceId": "demo_188", "type": "product", "amount_": 0.03, "unit_": "kg", "note_": "קימצ'י (ירקות מוחמצים)"},
+      {"_id": "dish_017_i3", "referenceId": "demo_134", "type": "product", "amount_": 1, "unit_": "unit", "note_": "סויה אישית (כשל\"פ)"},
+      {"_id": "dish_017_i4", "referenceId": "demo_185", "type": "product", "amount_": 1, "unit_": "unit", "note_": "כלי הגשה מוערך"}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "הרכבת המנה מהמיסום: אוניגירי עם קימצ'י וסויה.", "labor_time_minutes_": 0}
+    ],
+    "yield_amount_": 2,
+    "yield_unit_": "dish",
+    "default_station_": "hot_line",
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_046", "quantity_": 3, "phase_": "both", "is_critical_": false, "notes_": "מכונת גלידה אמריקאית 2 טעמים"},
+        {"equipment_id_": "eq_014", "quantity_": 4, "phase_": "service", "is_critical_": false, "notes_": "מלקחיים הגשה בעמדה"},
+        {"equipment_id_": "eq_047", "quantity_": 1, "phase_": "service", "is_critical_": true, "notes_": "מקרר וטרינה לאוניגירי"},
+        {"equipment_id_": "eq_015", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "מקרר עבודה"},
+        {"equipment_id_": "eq_048", "quantity_": 1, "phase_": "service", "is_critical_": false, "notes_": "משטחי מלמין להנחת אוניגירי"},
+        {"equipment_id_": "eq_049", "quantity_": 1, "phase_": "service", "is_critical_": false, "notes_": "קישוטים לסושי"},
+        {"equipment_id_": "eq_045", "quantity_": 3, "phase_": "service", "is_critical_": false, "notes_": "קלקרים שחורים"},
+        {"equipment_id_": "eq_017", "quantity_": 5, "phase_": "both", "is_critical_": true, "notes_": "חיבור ישראלי לחשמל"},
+        {"equipment_id_": "eq_050", "quantity_": 1, "phase_": "both", "is_critical_": false, "notes_": "כיור או פח ניקוז נוזלים"},
+        {"equipment_id_": "eq_018", "quantity_": 1, "phase_": "both", "is_critical_": false, "notes_": "תלת פאזי תלוי במכונה"}
+      ],
+      "service_overrides_": []
+    },
+    "mise_categories_": [
+      {"category_name": "cooking", "items": [{"item_name": "אוניגירי ארוז", "unit": "unit", "quantity": 1}]},
+      {"category_name": "רטבים", "items": [{"item_name": "סויה בפורר", "unit": "unit", "quantity": 1}]},
+      {"category_name": "pickling", "items": [{"item_name": "קימצ'י", "unit": "kg", "quantity": 0.03}]},
+      {"category_name": "confectionery", "items": [{"item_name": "בסיס גלידה מוכן", "unit": "kg", "quantity": 0}]},
+      {"category_name": "garnish", "items": [{"item_name": "טופינג לגלידה", "unit": "kg", "quantity": 0}]}
+    ],
+    "labels_": ["סיפור של אוכל", "דגים"]
   }
 ]

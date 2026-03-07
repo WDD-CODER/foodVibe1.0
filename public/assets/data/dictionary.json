@@ -27,7 +27,13 @@
         "sides": "תוספות",
         "spices": "תבלינים",
         "stocks": "ציר",
-        "vegetables": "ירקות"
+        "vegetables": "ירקות",
+        "cooking": "בישולים",
+        "butchery": "קצבות",
+        "sauce/stocks": "רטבים/צירים",
+        "roasting": "צליות/חריכות",
+        "pickling": "כבישה/החמצה",
+        "confectionery": "קונדיטוריה"
     },
     "allergens": {
         "eggs": "ביצים",

@@ -29,7 +29,13 @@
       "הקרמלה",
       "נקניקיות",
       "רטבים",
-      "לחם"
+      "לחם",
+      "cooking",
+      "butchery",
+      "sauce/stocks",
+      "roasting",
+      "pickling",
+      "confectionery"
     ],
     "preparations": [
       {"name": "רוטב עגבניות ביתי", "category": "sauces"},
@@ -84,7 +90,18 @@
       {"name": "נקניקיות חרוצות", "category": "נקניקיות"},
       {"name": "שיפודי נקניקים מוכנים", "category": "נקניקיות"},
       {"name": "בקט של רוטב דיף", "category": "רטבים"},
-      {"name": "לחמניות פתוחות", "category": "לחם"}
+      {"name": "לחמניות פתוחות", "category": "לחם"},
+      {"name": "מרינדה בולוגוגית", "category": "sauce/stocks"},
+      {"name": "שיפודי עוף במרינדה", "category": "butchery"},
+      {"name": "אורז עגול מוכן", "category": "cooking"},
+      {"name": "קציצות מבושלות ברוטב", "category": "cooking"},
+      {"name": "רוטב עגבניות דליל", "category": "sauce/stocks"},
+      {"name": "עגבניות שרי צבעוניות צלויות", "category": "roasting"},
+      {"name": "אורז צהוב מוכן", "category": "cooking"},
+      {"name": "אוניגירי ארוז", "category": "cooking"},
+      {"name": "סויה בפורר", "category": "רטבים"},
+      {"name": "קימצ'י", "category": "pickling"},
+      {"name": "בסיס גלידה מוכן", "category": "confectionery"}
     ]
   }
 ]
