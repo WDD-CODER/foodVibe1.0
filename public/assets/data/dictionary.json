@@ -18,6 +18,17 @@
         "spices": "תבלינים",
         "vegetables": "ירקות"
     },
+    "preparation_categories": {
+        "compound_butter": "חמאת תיבול",
+        "dips": "מטבלים",
+        "garnish": "קישוט",
+        "pastry": "מאפה",
+        "sauces": "רטבים",
+        "sides": "תוספות",
+        "spices": "תבלינים",
+        "stocks": "ציר",
+        "vegetables": "ירקות"
+    },
     "allergens": {
         "eggs": "ביצים",
         "fish": "דגים",
@@ -174,6 +185,7 @@
         "approved_yes": "כן",
         "approved_no": "לא",
         "no_station": "ללא תחנה",
+        "hot_line": "פס חם",
         "main_category": "קטגוריה ראשית",
         "no_category": "ללא קטגוריה",
         "labels": "תוויות",

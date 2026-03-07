@@ -26,6 +26,7 @@ export class TranslationService {
         ...baseData.categories,
         ...baseData.allergens,
         ...(baseData.actions ?? {}),
+        ...(baseData.preparation_categories ?? {}),
         ...baseData.general
       };
 

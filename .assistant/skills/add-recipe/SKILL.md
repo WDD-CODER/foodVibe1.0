@@ -23,6 +23,8 @@ When the user provides an **image** or **text** of a recipe/dish and wants to ad
 2. **Validate against inventory.** Before confirming, cross-check every ingredient's unit against its matched product's `base_unit_` and `purchase_options_`. Flag mismatches.
 3. **Separate food from logistics.** Food ingredients and service/logistics items are presented and discussed separately — never mix them.
 4. **Dishes use mise, preparations use steps.** Dishes get `mise_categories_` plus one assembly step. Preparations get multi-step `steps_` with real times.
+5. **Dictionary sync for display keys.** Any new item that stores or displays values in English (or keys used by translatePipe) must have the same keys added to `public/assets/data/dictionary.json` with a Hebrew translation. Otherwise the UI will show English keys (e.g. "stocks") instead of Hebrew. This applies especially to new preparation categories created in Step 6.
+6. **Mise categories are per preparation.** There is no fixed "default category list" for mise. Each preparation is added **with** its category from the registry; that is the only category for that item unless the user explicitly changes it (and chooses "only for this recipe" or "update globally" in the app). When creating new preparations or new categories in Step 6, add the category to the registry and to the dictionary (see principle 5).
 
 ## Image layout (typical)
 
@@ -75,7 +77,7 @@ For each extracted mise-en-place item or prep-item (from the dish's mise list or
 1. Read `public/assets/data/demo-kitchen-preparations.json`. The file is an array of one document: `[{ "categories": string[], "preparations": [{ "name", "category" }, ...] }]`.
 2. Check if the item name (and its category) already exists in that document's `preparations` array (match by `name` trimmed, case-insensitive; category normalized: trim, lowercase, spaces→underscores).
 3. If no match found, mark as **NEW PREP** (will be registered in Step 6).
-4. If the category is not in the document's `categories` array, mark that category as **NEW CATEGORY** (will be added in Step 6).
+4. If the category is not in the document's `categories` array, mark that category as **NEW CATEGORY** (will be added in Step 6). Record each NEW CATEGORY for the dictionary in Step 6; if the source gives a Hebrew label for the category, keep it for that step.
 
 ### Step 3 — VALIDATE units
 
@@ -191,13 +193,13 @@ Present this block so the user can confirm or correct every key field:
 
 **5b. New kitchen preparations** (if any)
 
-If any mise or prep items were marked **NEW PREP** in Step 2, show a table of what will be registered in `demo-kitchen-preparations.json`:
+If any mise or prep items were marked **NEW PREP** in Step 2, show a table of what will be registered in `demo-kitchen-preparations.json` and in the dictionary:
 
-| # | פריט (name) | קטגוריה (category) | חדש? |
-|---|--------------|---------------------|------|
-| 1 | … | … | PREP / CATEGORY |
+| # | פריט (name) | קטגוריה (category) | חדש? | תרגום קטגוריה (dictionary) |
+|---|--------------|---------------------|------|-----------------------------|
+| 1 | … | … | PREP / CATEGORY | [Hebrew label if NEW CATEGORY] |
 
-(New PREP = preparation name not yet in file; New CATEGORY = category key not yet in file.)
+(New PREP = preparation name not yet in file; New CATEGORY = category key not yet in file. Each NEW CATEGORY will also be added to `dictionary.json` under `preparation_categories` so the UI shows Hebrew.)
 
 ---
 
@@ -221,14 +223,15 @@ End with exactly:
    - If the category is not in the doc's `categories` array, add it.
    - If the preparation `{ name, category }` is not already in the doc's `preparations` array (same name + category, case-insensitive), append it.
    - Write the updated document back to `demo-kitchen-preparations.json` (keep the same array-of-one-doc structure).
-5. **Build the recipe/dish object:**
+5. **Update dictionary for new preparation categories:** Read `public/assets/data/dictionary.json`. For each **NEW CATEGORY** added in step 4 (categories that were not already in the file): add an entry under the top-level key `preparation_categories` with the normalized English category key and a Hebrew translation. Use the Hebrew label from the recipe/source or a sensible default; if no Hebrew is available, ask the user or derive from context (e.g. "stocks" → "ציר"). This ensures the app's translatePipe shows Hebrew for that category instead of the raw key.
+6. **Build the recipe/dish object:**
    - Target: `demo-recipes.json` for preparations, `demo-dishes.json` for dishes.
    - Next ID: `prep_NNN` or `dish_NNN` (scan existing max + 1).
    - Convert units: g→kg (/1000), ml→liter (/1000), unit stays unit.
    - **Dishes**: include `mise_categories_` from the mise list; set `steps_` to one assembly step with `labor_time_minutes_: 0`.
    - **Preparations**: include multi-step `steps_` with real times.
    - Include `logistics_` with `baseline_` entries for equipment.
-6. **Append** the new object to the target file array.
+7. **Append** the new object to the target file array.
 
 ### Step 7 — VERIFY
 
@@ -245,6 +248,7 @@ Tell the user:
 - List any **new products** created (so they can set prices later).
 - List any **new equipment** created (so they can set quantities later).
 - List any **new kitchen preparations** and **new preparation categories** registered in `demo-kitchen-preparations.json` (so they appear in the app's preparation registry after demo load).
+- List **new dictionary keys added (preparation categories):** each new category key added to `dictionary.json` under `preparation_categories` (so the user knows the UI will show Hebrew for those categories).
 - If any new product uses a **category** not in the default list (vegetables, dairy, meat, dry, fish, spices), note that the user may need to add it in Metadata / Categories.
 - If the recipe/dish uses **labels** not already in the app, note that the user may add them in Metadata / Labels (with a color).
 - If any new product has **allergens** not in the default list, note that the user may add them in Metadata / Allergens.
@@ -262,6 +266,6 @@ Tell the user:
 - [ ] **Match preparations (Step 2):** For each mise/prep item, check `demo-kitchen-preparations.json`; mark NEW PREP / NEW CATEGORY as needed.
 - [ ] Present confirmation: (1) visual structure + target file/ID (+ duplicate-name notice if applicable), (2) summary table, (3) מרכיבים table, (4) לוגיסטיקה table, (5) מיסום table, (5b) New kitchen preparations table if any, (6) "Confirm or deny" prompt.
 - [ ] Wait for user confirmation. Do not write until they confirm.
-- [ ] Create missing products and equipment; update `demo-kitchen-preparations.json` with new preparations and categories; build and append recipe/dish.
+- [ ] Create missing products and equipment; update `demo-kitchen-preparations.json` with new preparations and categories; add new preparation categories to `dictionary.json` under `preparation_categories` with Hebrew translations; build and append recipe/dish.
 - [ ] Read back and verify units are valid.
 - [ ] Report what was added: recipe/dish, new products, new equipment, new kitchen preparations/categories; note any categories/labels/allergens for manual follow-up.
