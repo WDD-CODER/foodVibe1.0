@@ -76,7 +76,7 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] Update HOW-WE-WORK.md "Add recipe from image" to image or text + create-if-missing
 - [x] Add-recipe workflow: rename skill to add-recipe, add command + rule; full Step 5 (visual structure, summary, tables, confirm/deny); no write without confirmation; duplicate-name check; recipe-builder cost on load; dish_012 units fix, dish_013, equipment â€” `feat/add-recipe-workflow` merged to main
 - [x] Add-recipe full data persistence: demo-kitchen-preparations.json, DemoLoaderService + PreparationRegistryService.reloadFromStorage, SKILL.md Steps 2/5b/6/8 and SCHEMA.md for preparations â€” `feat/add-recipe-full-data-persistence` merged to main
-- [x] Add-recipe Step 5 visual tree format (SKILL.md) + dish_017 ××•× ×™×’×™×¨×™ ×ž×•×’×© ×¢× ×§×™×ž×¦×™ ×•×¡×•×™×” (demo data, eq_045â€“050, demo_188, pickling/confectionery) â€” `feat/add-recipe-onigiri-and-visual` merged to main
+- [x] Add-recipe Step 5 visual tree format (SKILL.md) + dish_017 ××•× ×™×’×™×¨×™ ×ž×•×’×© ×¢× ×§×™×ž×¦×™ ×•×¡×•×™×” (demo data, eq_045â€“050, demo_188, pickling/patisserie) â€” `feat/add-recipe-onigiri-and-visual` merged to main
 
 ### Plan 074 â€” Tech debt remediation (`plans/074-tech-debt-remediation.plan.md`)
 
