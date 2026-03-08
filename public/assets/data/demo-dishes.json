@@ -895,5 +895,62 @@
       {"category_name": "רטבים", "items": [{"item_name": "רוטב שוקולד אוונטז", "unit": "kg", "quantity": 0.02}, {"item_name": "רוטב וניל", "unit": "kg", "quantity": 0.02}]}
     ],
     "labels_": ["sipur_shel_ochel", "dessert", "dairy"]
+  },
+  {
+    "_id": "dish_024",
+    "name_hebrew": "מגנומוס — מגנום מצופה ו־2 רטבי שוקולד לציפוי לבד",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_024_i1", "referenceId": "demo_157", "type": "product", "amount_": 6, "unit_": "unit", "note_": ""},
+      {"_id": "dish_024_i2", "referenceId": "demo_169", "type": "product", "amount_": 0.12, "unit_": "kg", "note_": ""},
+      {"_id": "dish_024_i3", "referenceId": "demo_194", "type": "product", "amount_": 0.12, "unit_": "kg", "note_": "רוטב וניל אוונטז"},
+      {"_id": "dish_024_i4", "referenceId": "demo_185", "type": "product", "amount_": 6, "unit_": "unit", "note_": ""}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "הרכבת המנה מהמיסום: מגנום מהמקפיא, מזיגת רטבי שוקולד ווניל לקוקוטים, הגשה בכלי הגשה.", "labor_time_minutes_": 0}
+    ],
+    "yield_amount_": 6,
+    "yield_unit_": "unit",
+    "default_station_": "cold",
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_067", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "מקפיא פרזנטציה 600 מ\"ל"},
+        {"equipment_id_": "eq_070", "quantity_": 1, "phase_": "both", "is_critical_": true, "notes_": "כלים עם רוטב למזיגה לקוקוטים"}
+      ]
+    },
+    "prep_items_": [],
+    "mise_categories_": [
+      {"category_name": "patisserie", "items": [{"item_name": "מגננומים מוכנים במקפיא", "unit": "unit", "quantity": 6}]},
+      {"category_name": "רטבים", "items": [{"item_name": "רטבי שוקולד מוכנים לעבודה", "unit": "kg", "quantity": 0.24}]}
+    ],
+    "labels_": ["dessert", "sipur_shel_ochel", "dairy"]
+  },
+  {
+    "_id": "dish_025",
+    "name_hebrew": "מטיל זהב",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_025_i1", "referenceId": "demo_158", "type": "product", "amount_": 1, "unit_": "unit", "note_": "אוונטז"},
+      {"_id": "dish_025_i2", "referenceId": "demo_185", "type": "product", "amount_": 1, "unit_": "unit", "note_": ""}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "הרכבת מנה: מטיל זהב אוונטז בכלי הגשה מוערך, הגשה מקירור/וטרינה קינוחים.", "labor_time_minutes_": 0}
+    ],
+    "yield_amount_": 1,
+    "yield_unit_": "unit",
+    "default_station_": "cold",
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_015", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "מקרר"},
+        {"equipment_id_": "eq_064", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "וטרינה קינוחים"},
+        {"equipment_id_": "eq_069", "quantity_": 1, "phase_": "service", "is_critical_": false, "notes_": "פטיש"},
+        {"equipment_id_": "eq_068", "quantity_": 1, "phase_": "service", "is_critical_": true, "notes_": "עמדת שבירה עצמית"}
+      ]
+    },
+    "prep_items_": [],
+    "mise_categories_": [],
+    "labels_": ["sipur_shel_ochel", "dessert", "dairy"]
   }
 ]

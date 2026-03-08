@@ -124,7 +124,9 @@
       {"name": "בננה טריה פרוסה", "category": "חיתוכים"},
       {"name": "פאדג מופשר", "category": "patisserie"},
       {"name": "בלונדי מופשר", "category": "patisserie"},
-      {"name": "קוביות מרשמלו", "category": "חיתוכים"}
+      {"name": "קוביות מרשמלו", "category": "חיתוכים"},
+      {"name": "מגננומים מוכנים במקפיא", "category": "patisserie"},
+      {"name": "רטבי שוקולד מוכנים לעבודה", "category": "רטבים"}
     ]
   }
 ]

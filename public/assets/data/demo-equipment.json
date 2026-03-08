@@ -65,7 +65,8 @@
   {"_id":"eq_064","name_hebrew":"וטרינה לקינוחים","category_":"container","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
   {"_id":"eq_065","name_hebrew":"מטמפררת שוקולד חלב 4 שלבים","category_":"tool","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
   {"_id":"eq_066","name_hebrew":"מטמפררת שוקולד לבן 4 שלבים","category_":"tool","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
-  {"_id":"eq_067","name_hebrew":"מקפיא פזנטציה למגנומים","category_":"container","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_067","name_hebrew":"מקפיא פרזנטציה 600 מ\"ל","category_":"container","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
   {"_id":"eq_068","name_hebrew":"עמדת שבור את זה בעצמך","category_":"tool","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
-  {"_id":"eq_069","name_hebrew":"פטשים לעמדה","category_":"tool","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"}
+  {"_id":"eq_069","name_hebrew":"פטשים לעמדה","category_":"tool","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"},
+  {"_id":"eq_070","name_hebrew":"כלים עם רוטב למזיגה לקוקוטים","category_":"container","owned_quantity_":0,"is_consumable_":false,"created_at_":"2025-01-01T00:00:00.000Z","updated_at_":"2025-01-01T00:00:00.000Z"}
 ]

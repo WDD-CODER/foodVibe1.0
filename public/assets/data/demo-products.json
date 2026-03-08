@@ -191,5 +191,6 @@
   {"_id":"demo_190","name_hebrew":"מיקס עשבי תיבול","base_unit_":"kg","buy_price_global_":0,"purchase_options_":[],"categories_":["vegetables"],"supplierIds_":["sup_vegetable"],"yield_factor_":1,"allergens_":[],"min_stock_level_":0,"expiry_days_default_":0},
   {"_id":"demo_191","name_hebrew":"גמבה אדומה","base_unit_":"kg","buy_price_global_":0,"purchase_options_":[],"categories_":["vegetables"],"supplierIds_":["sup_vegetable"],"yield_factor_":1,"allergens_":[],"min_stock_level_":0,"expiry_days_default_":0},
   {"_id":"demo_192","name_hebrew":"גלייז קוריאני","base_unit_":"kg","buy_price_global_":0,"purchase_options_":[],"categories_":["spices"],"supplierIds_":["sup_spices"],"yield_factor_":1,"allergens_":[],"min_stock_level_":0,"expiry_days_default_":0},
-  {"_id":"demo_193","name_hebrew":"מרינדה פופקורן","base_unit_":"kg","buy_price_global_":0,"purchase_options_":[],"categories_":["spices"],"supplierIds_":["sup_spices"],"yield_factor_":1,"allergens_":[],"min_stock_level_":0,"expiry_days_default_":0}
+  {"_id":"demo_193","name_hebrew":"מרינדה פופקורן","base_unit_":"kg","buy_price_global_":0,"purchase_options_":[],"categories_":["spices"],"supplierIds_":["sup_spices"],"yield_factor_":1,"allergens_":[],"min_stock_level_":0,"expiry_days_default_":0},
+  {"_id":"demo_194","name_hebrew":"רוטב וניל אוונטז","base_unit_":"kg","buy_price_global_":0,"purchase_options_":[],"categories_":["dry"],"supplierIds_":["sup_dry"],"yield_factor_":1,"allergens_":[],"min_stock_level_":0,"expiry_days_default_":0}
 ]
