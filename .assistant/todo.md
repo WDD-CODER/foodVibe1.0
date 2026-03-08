@@ -52,6 +52,7 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [ ] D1: Tie food cost calculation to serving_portions * guest_count, update service and component
 - [ ] D2: Show sell_price inline next to dish name for all menu types
 - [x] D3: Enhance footer with 4 metrics: total cost, food cost %, total revenue, cost per guest (`fix/menu-intelligence-footer-totals` merged to main)
+- [x] E1a: Toolbar close on click outside, remove close button (`feat/menu-toolbar-click-outside` merged to main)
 - [ ] E1: Make toolbar collapsible with fixed overlay when opened
 - [ ] E2: Create floating FAB on right side with pop-up buttons for toolbar and back navigation
 - [ ] Dictionary: Add new Hebrew dictionary keys for new labels
@@ -68,6 +69,14 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [ ] Add SelectOnFocus to sell_price and dish-field inputs; import directive in component
 - [ ] Add onSellPriceKeydown and onDishFieldKeydown with 0.25 step for portion fields
 - [ ] Wrap dish name + meta toggle in .dish-name-meta; dish-name-cell as grid; .dish-remove out of absolute
+
+### Plan 092 — Demo Data Trim (`plans/092-demo-data-trim.plan.md`)
+
+- [x] Collect dependency IDs from 15 dishes + 3 preps (products, equipment, suppliers, prep categories)
+- [x] Trim demo-dishes.json to 15 dishes; set dish_023 name_hebrew to "פונדו"
+- [x] Trim demo-recipes.json to 3 preps + transitive
+- [x] Trim demo-products, demo-equipment, demo-suppliers, demo-venues, demo-labels
+- [x] Trim demo-kitchen-preparations.json to used categories and preparations only
 
 ### Plan 081 â€” toFix Detailed Plans (`plans/081-tofix-detailed-plans.plan.md`)
 
