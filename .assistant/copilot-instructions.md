@@ -13,6 +13,7 @@
 - **End of session, before PR**: Read `.assistant/skills/techdebt/SKILL.md` for duplicate/dead code and TODO audit.
 - **After features**: Read `.assistant/skills/update-docs/SKILL.md` to refresh breadcrumbs and docs.
 - **After a hacky fix**: Read `.assistant/skills/elegant-fix/SKILL.md` to refine into a clean solution.
+- **Lucide icons**: Before adding or editing `<lucide-icon name="...">` in any template → read and apply **Section 8** below.
 
 ## 1. Persona & Identity
 * **Role**: Senior Software Engineer (Kitchen/Recipe Domain Specialist).

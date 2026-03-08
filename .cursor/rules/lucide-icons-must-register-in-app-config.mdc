@@ -1,0 +1,8 @@
+---
+description: When adding or editing Lucide icons in templates, read copilot-instructions Section 8 and apply it
+globs:
+  - "src/**/*.html"
+alwaysApply: false
+---
+
+When you add or edit any `<lucide-icon name="...">` in a component template, read [.assistant/copilot-instructions.md](.assistant/copilot-instructions.md) Section 8 (Lucide Icons) and apply it. The rule and steps live there only; do not duplicate them here.

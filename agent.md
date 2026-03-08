@@ -4,6 +4,7 @@ Read this and `.assistant/copilot-instructions.md` at the start of every task.
 
 ## Core Rules & Source of Truth
 - **Primary Instructions**: `.assistant/copilot-instructions.md` — single source of truth for all project rules. New rules from the user go there. The `.cursor/rules/*.mdc` files are Cursor-specific pointers that reinforce triggers; canonical rules live in copilot-instructions.
+- **When adding or editing Lucide icons** in any template → read `.assistant/copilot-instructions.md` Section 8 and apply it.
 - **Active Tasks**: `.assistant/todo.md` (update status after each sub-task).
 - **Plans**: All plans in project `plans/` only (e.g. `plans/NNN-slug.plan.md`). When the user says "save the plan" after confirming, read `.assistant/skills/save-plan/SKILL.md` and follow it.
 
