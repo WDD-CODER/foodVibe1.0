@@ -59,4 +59,6 @@ export interface Recipe {
   autoLabels_?: string[];
   /** Epoch ms when the recipe/dish was first added (set on create, preserved on update) */
   addedAt_?: number;
+  /** Epoch ms when the recipe/dish was last updated (set on create and on every update) */
+  updatedAt_?: number;
 }

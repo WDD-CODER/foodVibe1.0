@@ -25,6 +25,23 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] F11: Deduplicate commit-to-github safety reminders
 - [x] F8: Trim add-recipe schema reference
 
+### Plan 087 — Timestamp All Added Items (`plans/087-timestamp-all-added-items.plan.md`)
+
+- [x] Update /add-recipe SKILL.md: mandate addedAt_ and updatedAt_ on recipe/dish, addedAt_ on products/prep/labels; equipment real ISO timestamps; Schema Reference
+- [x] Add addedAt_ to Product model; ProductDataService: normalizeProduct, stamp on add, preserve on update; set updatedAt on add and update
+- [x] Add updatedAt_ to Recipe model; recipe-data and dish-data: set on add and update
+- [x] Recipe-book-list: add formatUpdatedAt and "Updated at" column (date only); add date_updated to dictionary
+
+### Plan 088 — Metadata Manager Expansion (`plans/088-metadata-manager-expansion.plan.md`)
+
+- [x] Add deletePreparation, deleteCategory, renamePreparation, renameCategory to PreparationRegistryService
+- [x] Add removeCategory, renameCategory to MenuSectionCategoriesService
+- [x] Create PreparationManagerComponent (TS + HTML + SCSS) with full CRUD, confirmations, in-use notifications, usage checks
+- [x] Create SectionCategoryManagerComponent (TS + HTML + SCSS) with add/delete/rename, confirmations, in-use notifications
+- [x] Create LogisticsBaselineManagerComponent (TS + HTML + SCSS) with CRUD, equipment name resolution, confirmations, usage checks
+- [x] Import and add all 3 components to metadata-manager template; register any new Lucide icons
+- [x] Add all new translation keys to dictionary.json
+
 ### Plan 081 â€” toFix Detailed Plans (`plans/081-tofix-detailed-plans.plan.md`)
 
 - [ ] Section 1 â€” Sign-in / Sign-up: auto-focus, dev user dropdown, Enter-to-submit, field-level errors
@@ -472,6 +489,8 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 082 | Recipe/Dish date added | Done |
 | 085 | Optimize commit-GitHub skill | Done |
 | 086 | AI Tooling Optimization | Active |
+| 087 | Timestamp All Added Items | Active |
+| 088 | Metadata Manager Expansion | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 

@@ -66,7 +66,8 @@ export class ProductDataService {
       allergens_: (legacy.allergens_ ?? []) as string[],
       min_stock_level_: legacy.min_stock_level_ ?? 0,
       expiry_days_default_: legacy.expiry_days_default_ ?? 0,
-      updatedAt: legacy.updatedAt
+      addedAt_: legacy.addedAt_,
+      updatedAt: legacy.updatedAt,
     };
   }
 
@@ -76,14 +77,26 @@ export class ProductDataService {
   }
 
   async addProduct(newProduct: Omit<Product, '_id'>): Promise<Product> {
-    const saved = await this.storage.post<Product>(ENTITY, newProduct as Product)
+    const now = Date.now()
+    const toCreate = {
+      ...newProduct,
+      addedAt_: newProduct.addedAt_ ?? now,
+      updatedAt: new Date().toISOString(),
+    } as Product
+    const saved = await this.storage.post<Product>(ENTITY, toCreate)
     this.ProductsStore_.update(products => [...products, saved])
     this.logging.info({ event: 'crud.product.create', message: 'Product created', context: { entityType: ENTITY, id: saved._id } })
     return saved
   }
 
   async updateProduct(product: Product): Promise<void> {
-    const updated = await this.storage.put<Product>(ENTITY, product as Product)
+    const existing = await this.storage.get<Product>(ENTITY, product._id).catch(() => null)
+    const toSave: Product = {
+      ...product,
+      addedAt_: product.addedAt_ ?? existing?.addedAt_,
+      updatedAt: new Date().toISOString(),
+    }
+    const updated = await this.storage.put<Product>(ENTITY, toSave)
     this.ProductsStore_.update(products =>
       products.map(p => p._id === updated._id ? updated : p)
     )

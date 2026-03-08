@@ -136,13 +136,14 @@ If a duplicate name was detected, show after the tree: "**Name already in use:**
 
 **Only after explicit confirmation.** Now read the remaining files: `demo-equipment.json`, `dictionary.json`, `demo-labels.json`, and the target file (`demo-recipes.json` or `demo-dishes.json`).
 
-1. **Create missing labels** — for each **NEW LABEL**: add `{ "key": "<snake_case>", "color": "<hex>", "autoTriggers": [] }` to the first doc’s `items` array in `demo-labels.json`; add the same key with Hebrew translation to `dictionary.json` under `general`. Use a color from the app palette (e.g. `#10B981`, `#84CC16`, `#EF4444`, `#8B5CF6`, `#EC4899`).
-2. **Create missing products** — next `demo_NNN`, `buy_price_global_: 0`. Append to `demo-products.json`.
-3. **Create missing equipment** — next `eq_NNN`, `owned_quantity_: 0`, `is_consumable_: false`. Append to `demo-equipment.json`.
-4. **Update kitchen preparations** — add new categories to `categories` array, add new `{ name, category }` to `preparations` array. Preserve array-of-one-doc structure.
+1. **Create missing labels** — for each **NEW LABEL**: add `{ "key": "<snake_case>", "color": "<hex>", "autoTriggers": [], "addedAt_": Date.now() }` to the first doc’s `items` array in `demo-labels.json`; add the same key with Hebrew translation to `dictionary.json` under `general`. Use a color from the app palette (e.g. `#10B981`, `#84CC16`, `#EF4444`, `#8B5CF6`, `#EC4899`).
+2. **Create missing products** — next `demo_NNN`, `buy_price_global_: 0`, `"addedAt_": Date.now()`. Append to `demo-products.json`.
+3. **Create missing equipment** — next `eq_NNN`, `owned_quantity_: 0`, `is_consumable_: false`. Set `created_at_` and `updated_at_` to current ISO (`new Date().toISOString()`). Append to `demo-equipment.json`.
+4. **Update kitchen preparations** — add new categories to `categories` array; add new entries to `preparations` as `{ "name", "category", "addedAt_": Date.now() }`. Preserve array-of-one-doc structure.
 5. **Update dictionary** — for each NEW CATEGORY, add entry under `preparation_categories` with Hebrew translation; for each NEW LABEL, add entry under `general` with Hebrew translation.
 6. **Build the recipe/dish object:**
    - Next ID: `prep_NNN` or `dish_NNN` (max existing + 1, zero-padded to 3 digits).
+   - **Timestamps (mandatory):** set `"addedAt_": Date.now()` and `"updatedAt_": Date.now()`.
    - Convert units: g→kg (/1000), ml→liter (/1000), unit stays.
    - When yield was not provided by the user and the user did not answer the yield question, set `yield_amount_` and `yield_unit_` according to the **Default yield** rule (sum of kg, or sum of liter, or 1 unit as fallback).
    - **Dishes**: `recipe_type_: "dish"`, include `mise_categories_`, `prep_items_`, `labels_` (array of English keys only), one assembly step with `labor_time_minutes_: 0`, `logistics_: { baseline_: [...] }`.
@@ -161,9 +162,9 @@ If a duplicate name was detected, show after the tree: "**Name already in use:**
 
 - **Ingredient**: `_id`, `referenceId`, `type`, `amount_`, `unit_`, `note_`. `unit_` must match product `base_unit_` or `purchase_options_[].unit_symbol_`.
 - **Step**: `order_`, `instruction_`, `labor_time_minutes_`.
-- **Recipe** (demo-recipes): `_id` (prep_NNN), `name_hebrew`, `recipe_type_: "preparation"`, `ingredients_`, `steps_`, `yield_amount_`, `yield_unit_`, `default_station_`, `is_approved_: true`.
-- **Dish** (demo-dishes): same as recipe plus `recipe_type_: "dish"`, `logistics_: { baseline_: [...] }`, `prep_items_`, `mise_categories_`, `labels_`.
-- **Product** (demo-products): `demo_NNN`; required `_id`, `name_hebrew`, `base_unit_`, `buy_price_global_: 0`, `purchase_options_`, `categories_`, `supplierIds_`, `yield_factor_: 1`, `allergens_`, `min_stock_level_: 0`, `expiry_days_default_: 0`.
-- **Equipment** (demo-equipment): `eq_NNN`; `_id`, `name_hebrew`, `category_`, `owned_quantity_: 0`, `is_consumable_: false`, `created_at_`, `updated_at_`.
-- **Kitchen preparations**: one doc `[{ "categories": [], "preparations": [{ "name", "category" }] }]`; category key trim, lowercase, spaces→underscores.
+- **Recipe** (demo-recipes): `_id` (prep_NNN), `name_hebrew`, `recipe_type_: "preparation"`, `ingredients_`, `steps_`, `yield_amount_`, `yield_unit_`, `default_station_`, `is_approved_: true`, `addedAt_?: number`, `updatedAt_?: number`.
+- **Dish** (demo-dishes): same as recipe plus `recipe_type_: "dish"`, `logistics_: { baseline_: [...] }`, `prep_items_`, `mise_categories_`, `labels_`; include `addedAt_` and `updatedAt_`.
+- **Product** (demo-products): `demo_NNN`; required `_id`, `name_hebrew`, `base_unit_`, `buy_price_global_: 0`, `purchase_options_`, `categories_`, `supplierIds_`, `yield_factor_: 1`, `allergens_`, `min_stock_level_: 0`, `expiry_days_default_: 0`; when creating new products in Step 4 add `addedAt_?: number`.
+- **Equipment** (demo-equipment): `eq_NNN`; `_id`, `name_hebrew`, `category_`, `owned_quantity_: 0`, `is_consumable_: false`, `created_at_`, `updated_at_` (use current ISO when creating new equipment).
+- **Kitchen preparations**: one doc `[{ "categories": [], "preparations": [{ "name", "category", "addedAt_"? }] }]`; category key trim, lowercase, spaces→underscores.
 - **Unit validation**: `unit_` === `base_unit_` or in `purchase_options_[].unit_symbol_` → OK; else MISMATCH, flag and default to `base_unit_`.
