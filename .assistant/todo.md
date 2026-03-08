@@ -42,6 +42,33 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] Import and add all 3 components to metadata-manager template; register any new Lucide icons
 - [x] Add all new translation keys to dictionary.json
 
+
+### Plan 089 — Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
+
+- [ ] A: Auto-name menu with formatted date when name is empty on save, with duplicate handling (1), (2)
+- [ ] Timestamps: Add updated_at_ to MenuEvent model; set created_at_ on create and updated_at_ on every save
+- [ ] B: Set event_date_ default to today's date for new menus
+- [ ] C: Redesign guest counter as unified pill-shaped container with paper-blend styling
+- [ ] D1: Tie food cost calculation to serving_portions * guest_count, update service and component
+- [ ] D2: Show sell_price inline next to dish name for all menu types
+- [x] D3: Enhance footer with 4 metrics: total cost, food cost %, total revenue, cost per guest (`fix/menu-intelligence-footer-totals` merged to main)
+- [ ] E1: Make toolbar collapsible with fixed overlay when opened
+- [ ] E2: Create floating FAB on right side with pop-up buttons for toolbar and back navigation
+- [ ] Dictionary: Add new Hebrew dictionary keys for new labels
+
+### Plan 090 — Whole-project logging audit (`plans/090-whole-project-logging-audit.plan.md`)
+
+- [x] Core services: metadata-registry (rename + allergen save/delete), preparation-registry (load), demo-loader, backup
+- [x] Page/container: metadata-manager (delete + sync catches), trash
+- [x] List components: equipment-list, supplier-list, venue-list
+- [x] Form components: supplier-form, product-form, equipment-form, recipe-builder (catch blocks only)
+
+### Plan 091 — Menu Intelligence Inputs and Layout (`plans/091-menu-intelligence-inputs-layout.plan.md`)
+
+- [ ] Add SelectOnFocus to sell_price and dish-field inputs; import directive in component
+- [ ] Add onSellPriceKeydown and onDishFieldKeydown with 0.25 step for portion fields
+- [ ] Wrap dish name + meta toggle in .dish-name-meta; dish-name-cell as grid; .dish-remove out of absolute
+
 ### Plan 081 â€” toFix Detailed Plans (`plans/081-tofix-detailed-plans.plan.md`)
 
 - [ ] Section 1 â€” Sign-in / Sign-up: auto-focus, dev user dropdown, Enter-to-submit, field-level errors
@@ -491,6 +518,9 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 086 | AI Tooling Optimization | Active |
 | 087 | Timestamp All Added Items | Active |
 | 088 | Metadata Manager Expansion | Active |
+|| 089 | Menu Intelligence Upgrade | Active |
+| 090 | Whole-project logging audit | Active |
+| 091 | Menu intelligence inputs and layout | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 
