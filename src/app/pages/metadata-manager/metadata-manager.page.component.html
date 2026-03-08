@@ -101,47 +101,47 @@
         }
       </div>
     </section>
+
+    <section class="demo-section manager-card">
+      <div class="card-title">
+        <lucide-icon name="package" class="text-amber-600"></lucide-icon>
+        <h2>{{ 'load_demo_data' | translatePipe }}</h2>
+      </div>
+      <p class="demo-desc">נתוני הדגמה: כ-100 מוצרים, 8 ספקים, 10 הכנות ו-10 מנות. גיבוי ב-assets/data.</p>
+      <button type="button" class="btn-demo" (click)="onLoadDemoData()">
+        {{ 'load_demo_data' | translatePipe }}
+      </button>
+    </section>
+
+    <section class="backup-section manager-card">
+      <div class="card-title">
+        <lucide-icon name="archive" class="text-violet-600"></lucide-icon>
+        <h2>{{ 'backup_restore' | translatePipe }}</h2>
+      </div>
+      <p class="backup-desc">{{ 'backup_restore_desc' | translatePipe }}</p>
+      <div class="backup-actions">
+        <button type="button" class="btn-backup btn-export" (click)="onExportBackup()">
+          <lucide-icon name="download" [size]="18"></lucide-icon>
+          {{ 'backup_export' | translatePipe }}
+        </button>
+        <button type="button" class="btn-backup btn-restore" (click)="onRestoreFromBackup()">
+          <lucide-icon name="rotate-ccw" [size]="18"></lucide-icon>
+          {{ 'backup_restore_from_backup' | translatePipe }}
+        </button>
+        <button type="button" class="btn-backup btn-import" (click)="fileInputRef.click()">
+          <lucide-icon name="upload" [size]="18"></lucide-icon>
+          {{ 'backup_import' | translatePipe }}
+        </button>
+        <input #fileInputRef type="file" accept=".json,application/json" class="backup-file-input"
+          (change)="onImportBackupFile($event)" />
+      </div>
+    </section>
   </div>
-
-  <section class="demo-section manager-card">
-    <div class="card-title">
-      <lucide-icon name="package" class="text-amber-600"></lucide-icon>
-      <h2>{{ 'load_demo_data' | translatePipe }}</h2>
-    </div>
-    <p class="demo-desc">נתוני הדגמה: כ-100 מוצרים, 8 ספקים, 10 הכנות ו-10 מנות. גיבוי ב-assets/data.</p>
-    <button type="button" class="btn-demo" (click)="onLoadDemoData()">
-      {{ 'load_demo_data' | translatePipe }}
-    </button>
-  </section>
-
-  <section class="backup-section manager-card">
-    <div class="card-title">
-      <lucide-icon name="archive" class="text-violet-600"></lucide-icon>
-      <h2>{{ 'backup_restore' | translatePipe }}</h2>
-    </div>
-    <p class="backup-desc">{{ 'backup_restore_desc' | translatePipe }}</p>
-    <div class="backup-actions">
-      <button type="button" class="btn-backup btn-export" (click)="onExportBackup()">
-        <lucide-icon name="download" [size]="18"></lucide-icon>
-        {{ 'backup_export' | translatePipe }}
-      </button>
-      <button type="button" class="btn-backup btn-restore" (click)="onRestoreFromBackup()">
-        <lucide-icon name="rotate-ccw" [size]="18"></lucide-icon>
-        {{ 'backup_restore_from_backup' | translatePipe }}
-      </button>
-      <button type="button" class="btn-backup btn-import" (click)="fileInputRef.click()">
-        <lucide-icon name="upload" [size]="18"></lucide-icon>
-        {{ 'backup_import' | translatePipe }}
-      </button>
-      <input #fileInputRef type="file" accept=".json,application/json" class="backup-file-input"
-        (change)="onImportBackupFile($event)" />
-    </div>
-  </section>
 </div>
 
 <ng-template #managerCard let-title="title" let-icon="icon" let-colorClass="colorClass" let-items="items"
   let-type="type">
-  <section class="manager-card">
+  <section class="manager-card" [attr.data-type]="type">
     <div class="card-title">
       <lucide-icon [name]="icon" [class]="colorClass"></lucide-icon>
       <h2>{{ title }}</h2>

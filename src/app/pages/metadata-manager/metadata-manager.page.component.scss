@@ -26,6 +26,7 @@
 
   .admin-grid {
     display: grid;
+    grid-auto-flow: dense;
     grid-template-columns: repeat(auto-fit, minmax(335px, 1fr));
     place-content: center;
     gap: 2rem;
@@ -286,6 +287,25 @@
   }
 }
 
+.manager-card[data-type="unit"] .list-stack {
+  display: grid;
+  grid-auto-flow: dense;
+  grid-template-columns: repeat(auto-fit, minmax(135px, auto));
+}
+
+.manager-card[data-type="category"] {
+  .list-stack {
+    display: grid;
+    grid-auto-flow: dense;
+    grid-template-columns: repeat(auto-fit, minmax(115px, auto));
+  }
+
+  .list-item.group {
+    grid-template-columns: 1fr auto;
+    gap: 0.625rem;
+  }
+}
+
 .allergen-pool, .label-pool {
   display: flex;
   flex-wrap: wrap;
@@ -379,8 +399,6 @@
 }
 
 .demo-section {
-  margin-top: 2rem;
-  max-width: 28rem;
 
   .demo-desc {
     margin: 0 0 1rem;
@@ -409,8 +427,6 @@
 }
 
 .backup-section {
-  margin-top: 2rem;
-  max-width: 36rem;
 
   .backup-desc {
     margin: 0 0 1rem;
