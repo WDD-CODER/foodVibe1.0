@@ -1,0 +1,119 @@
+<section class="manager-card">
+  <div class="card-title">
+    <lucide-icon name="truck" class="text-blue-500"></lucide-icon>
+    <h2>{{ 'metadata_logistics_baseline_title' | translatePipe }}</h2>
+  </div>
+  <p class="card-desc">{{ 'metadata_logistics_baseline_desc' | translatePipe }}</p>
+
+  <button type="button" class="btn-add" (click)="onToggleAdd()"
+    [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+    {{ 'metadata_add_baseline' | translatePipe }}
+  </button>
+
+  @if (isAdding_()) {
+    <div class="add-form">
+      <div class="form-row">
+        <label>{{ 'metadata_baseline_equipment' | translatePipe }}</label>
+        <select #eqSelect>
+          <option value="">{{ 'metadata_select_equipment' | translatePipe }}</option>
+          @for (eq of equipment_(); track eq._id) {
+            <option [value]="eq._id">{{ eq.name_hebrew }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-row">
+        <label>{{ 'metadata_baseline_quantity' | translatePipe }}</label>
+        <input #qtyInput type="number" min="1" value="1" />
+      </div>
+      <div class="form-row">
+        <label>{{ 'metadata_baseline_phase' | translatePipe }}</label>
+        <select #phaseSelect>
+          <option value="prep">{{ 'metadata_phase_prep' | translatePipe }}</option>
+          <option value="service">{{ 'metadata_phase_service' | translatePipe }}</option>
+          <option value="both">{{ 'metadata_phase_both' | translatePipe }}</option>
+        </select>
+      </div>
+      <div class="form-row checkbox-row">
+        <label>
+          <input #criticalCheck type="checkbox" />
+          {{ 'metadata_baseline_critical' | translatePipe }}
+        </label>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn-save-small"
+          (click)="onSaveNew(eqSelect, qtyInput, phaseSelect, criticalCheck)">
+          {{ 'save' | translatePipe }}
+        </button>
+        <button type="button" class="btn-ghost-small" (click)="onToggleAdd()">
+          {{ 'cancel' | translatePipe }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <div class="list-container">
+    @if (items_().length > 0) {
+      <div class="list-stack">
+        @for (item of items_(); track item._id) {
+          <div class="list-item baseline-row">
+            @if (editingId_() === item._id) {
+              <div class="edit-form">
+                <span class="eq-name">{{ resolveEquipmentName(item.equipment_id_) }}</span>
+                <div class="edit-fields">
+                  <div class="form-row compact">
+                    <label>{{ 'metadata_baseline_quantity' | translatePipe }}</label>
+                    <input #editQty type="number" min="1" [value]="item.quantity_" />
+                  </div>
+                  <div class="form-row compact">
+                    <label>{{ 'metadata_baseline_phase' | translatePipe }}</label>
+                    <select #editPhase>
+                      <option value="prep" [selected]="item.phase_ === 'prep'">{{ 'metadata_phase_prep' | translatePipe }}</option>
+                      <option value="service" [selected]="item.phase_ === 'service'">{{ 'metadata_phase_service' | translatePipe }}</option>
+                      <option value="both" [selected]="item.phase_ === 'both'">{{ 'metadata_phase_both' | translatePipe }}</option>
+                    </select>
+                  </div>
+                  <div class="form-row checkbox-row compact">
+                    <label>
+                      <input #editCritical type="checkbox" [checked]="item.is_critical_" />
+                      {{ 'metadata_baseline_critical' | translatePipe }}
+                    </label>
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button type="button" class="btn-save-small"
+                    (click)="onSaveEdit(item, editQty, editPhase, editCritical)">
+                    {{ 'save' | translatePipe }}
+                  </button>
+                  <button type="button" class="btn-ghost-small" (click)="onCancelEdit()">
+                    {{ 'cancel' | translatePipe }}
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <div class="item-info">
+                <span class="eq-name">{{ resolveEquipmentName(item.equipment_id_) }}</span>
+                <span class="badge phase-badge">{{ getPhaseLabel(item.phase_) }}</span>
+                <span class="badge qty-badge">×{{ item.quantity_ }}</span>
+                @if (item.is_critical_) {
+                  <span class="badge critical-badge">{{ 'metadata_baseline_critical' | translatePipe }}</span>
+                }
+              </div>
+              <div class="item-actions">
+                <button type="button" class="btn-edit" (click)="onStartEdit(item)"
+                  [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+                  <lucide-icon name="pencil" [size]="14"></lucide-icon>
+                </button>
+                <button type="button" class="btn-delete" (click)="onRemove(item)"
+                  [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+                  <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">{{ 'metadata_no_baseline_items' | translatePipe }}</div>
+    }
+  </div>
+</section>

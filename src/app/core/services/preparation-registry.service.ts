@@ -148,6 +148,45 @@ export class PreparationRegistryService {
     }
   }
 
+  async deleteCategory(key: string): Promise<void> {
+    const trimmed = key.trim().toLowerCase()
+    const updated = this.categories_().filter(c => c !== trimmed)
+    if (updated.length === this.categories_().length) return
+    try {
+      const registries = await this.storageService.query<PreparationRegistryDoc>(STORAGE_KEY)
+      const doc = registries[0]
+      if (!doc?._id) return
+      const payload: PreparationRegistryDoc = { ...doc, categories: updated }
+      await this.storageService.put(STORAGE_KEY, { ...payload, _id: doc._id })
+      this.categories_.set(updated)
+    } catch (err) {
+      this.userMsgService.onSetErrorMsg('שגיאה במחיקת הקטגוריה')
+      this.logging.error({ event: 'crud.preparations.category.delete_error', message: 'Preparation category delete error', context: { err } })
+    }
+  }
+
+  async renameCategory(oldKey: string, newKey: string, newLabel: string): Promise<void> {
+    const sanitizedNew = newKey.trim().toLowerCase().replace(/\s+/g, '_')
+    if (!sanitizedNew || sanitizedNew === oldKey) return
+    const updatedCats = this.categories_().map(c => c === oldKey ? sanitizedNew : c)
+    const updatedPreps = this.preparations_().map(p =>
+      p.category === oldKey ? { ...p, category: sanitizedNew } : p
+    )
+    try {
+      const registries = await this.storageService.query<PreparationRegistryDoc>(STORAGE_KEY)
+      const doc = registries[0]
+      if (!doc?._id) return
+      const payload: PreparationRegistryDoc = { ...doc, categories: updatedCats, preparations: updatedPreps }
+      await this.storageService.put(STORAGE_KEY, { ...payload, _id: doc._id })
+      this.categories_.set(updatedCats)
+      this.preparations_.set(updatedPreps)
+      this.translationService.updateDictionary(sanitizedNew, newLabel.trim())
+    } catch (err) {
+      this.userMsgService.onSetErrorMsg('שגיאה בעדכון הקטגוריה')
+      this.logging.error({ event: 'crud.preparations.category.rename_error', message: 'Preparation category rename error', context: { err } })
+    }
+  }
+
   async registerPreparation(name: string, category: string): Promise<void> {
     const sanitizedName = name.trim()
     const sanitizedCategory = category.trim()

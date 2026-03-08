@@ -20,12 +20,15 @@ import { AuthModalService } from '@services/auth-modal.service';
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { ALL_DISH_FIELDS, DEFAULT_DISH_FIELDS, type DishFieldKey, type MenuTypeDefinition } from '@models/menu-event.model';
+import { PreparationCategoryManagerComponent } from './components/preparation-category-manager/preparation-category-manager.component';
+import { SectionCategoryManagerComponent } from './components/section-category-manager/section-category-manager.component';
+import { LogisticsBaselineManagerComponent } from './components/logistics-baseline-manager/logistics-baseline-manager.component';
 
 type MetadataType = 'category' | 'allergen' | 'unit' | 'label';
 @Component({
   selector: 'app-metadata-manager',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, PreparationCategoryManagerComponent, SectionCategoryManagerComponent, LogisticsBaselineManagerComponent],
   templateUrl: './metadata-manager.page.component.html',
   styleUrl: './metadata-manager.page.component.scss'
 })

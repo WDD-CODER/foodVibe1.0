@@ -1,0 +1,49 @@
+<section class="manager-card">
+  <div class="card-title">
+    <lucide-icon name="cooking-pot" class="text-orange-500"></lucide-icon>
+    <h2>{{ 'metadata_prep_categories' | translatePipe }}</h2>
+  </div>
+  <p class="card-desc">{{ 'metadata_preparations_desc' | translatePipe }}</p>
+
+  <div class="input-group">
+    <input #newInput type="text"
+      [placeholder]="'metadata_add_category' | translatePipe"
+      (keyup.enter)="onAdd(newInput.value, newInput)">
+    <button type="button" class="btn-add" (click)="onAdd(newInput.value, newInput)"
+      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+      {{ 'metadata_add' | translatePipe }}
+    </button>
+  </div>
+
+  <div class="list-container">
+    @if (categories_().length > 0) {
+      <div class="list-stack">
+        @for (key of categories_(); track key) {
+          <div class="list-item group">
+            @if (editingKey_() === key) {
+              <input type="text" class="inline-edit-input"
+                [value]="key | translatePipe"
+                (blur)="onRenameBlur(key, $any($event.target).value)"
+                (keydown.enter)="$any($event.target).blur()"
+                autofocus />
+            } @else {
+              <span class="item-label" (dblclick)="onStartRename(key)">{{ key | translatePipe }}</span>
+            }
+            <div class="item-actions">
+              <button type="button" class="btn-edit" (click)="onStartRename(key)"
+                [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+                <lucide-icon name="pencil" [size]="14"></lucide-icon>
+              </button>
+              <button type="button" class="btn-delete" (click)="onRemove(key)"
+                [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+                <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">{{ 'metadata_no_prep_categories' | translatePipe }}</div>
+    }
+  </div>
+</section>

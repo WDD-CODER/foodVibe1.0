@@ -59,20 +59,37 @@ export class MenuSectionCategoriesService {
     const current = this.categories_();
     if (current.includes(trimmed)) return;
     const updated = [...current, trimmed];
+    await this.persist(updated);
+  }
+
+  async removeCategory(name: string): Promise<void> {
+    const updated = this.categories_().filter(c => c !== name);
+    if (updated.length === this.categories_().length) return;
+    await this.persist(updated);
+  }
+
+  async renameCategory(oldName: string, newName: string): Promise<void> {
+    const trimmed = newName.trim();
+    if (!trimmed || trimmed === oldName) return;
+    const updated = this.categories_().map(c => c === oldName ? trimmed : c);
+    await this.persist(updated);
+  }
+
+  private async persist(items: string[]): Promise<void> {
     try {
       const registries = await this.storage.query<MenuSectionCategoriesDoc>(STORAGE_KEY);
       const doc = registries[0];
       const payload: MenuSectionCategoriesDoc & { _id?: string } = doc
-        ? { ...doc, items: updated }
-        : { items: updated };
+        ? { ...doc, items }
+        : { items };
       if (doc?._id) {
         await this.storage.put(STORAGE_KEY, { ...payload, _id: doc._id });
       } else {
         await this.storage.post(STORAGE_KEY, payload);
       }
-      this.categories_.set(updated);
+      this.categories_.set(items);
     } catch {
-      this.categories_.set(updated);
+      this.categories_.set(items);
     }
   }
 }
