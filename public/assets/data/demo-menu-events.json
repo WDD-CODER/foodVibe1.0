@@ -1,0 +1,89 @@
+[
+  {
+    "_id": "menu_demo_001",
+    "name_": "אירוע טעימה — סיפור של אוכל",
+    "event_type_": "טעימה",
+    "event_date_": "2025-06-15",
+    "serving_type_": "plated_course",
+    "guest_count_": 40,
+    "pieces_per_person_": 1,
+    "sections_": [
+      {
+        "_id": "sec_demo_001_a",
+        "name_": "מנות עיקריות",
+        "sort_order_": 1,
+        "items_": [
+          {
+            "recipe_id_": "dish_014",
+            "recipe_type_": "dish",
+            "predicted_take_rate_": 0.85,
+            "derived_portions_": 34,
+            "sell_price_": 52,
+            "serving_portions_": 1
+          },
+          {
+            "recipe_id_": "dish_015",
+            "recipe_type_": "dish",
+            "predicted_take_rate_": 0.7,
+            "derived_portions_": 28,
+            "sell_price_": 48,
+            "serving_portions_": 1
+          },
+          {
+            "recipe_id_": "dish_018",
+            "recipe_type_": "dish",
+            "predicted_take_rate_": 0.6,
+            "derived_portions_": 24,
+            "sell_price_": 38,
+            "serving_portions_": 1
+          },
+          {
+            "recipe_id_": "dish_019",
+            "recipe_type_": "dish",
+            "predicted_take_rate_": 0.9,
+            "derived_portions_": 36,
+            "sell_price_": 22,
+            "serving_portions_": 1
+          }
+        ]
+      },
+      {
+        "_id": "sec_demo_001_b",
+        "name_": "קינוחים",
+        "sort_order_": 2,
+        "items_": [
+          {
+            "recipe_id_": "dish_023",
+            "recipe_type_": "dish",
+            "predicted_take_rate_": 0.75,
+            "derived_portions_": 30,
+            "sell_price_": 44,
+            "serving_portions_": 1
+          },
+          {
+            "recipe_id_": "dish_024",
+            "recipe_type_": "dish",
+            "predicted_take_rate_": 0.65,
+            "derived_portions_": 26,
+            "sell_price_": 36,
+            "serving_portions_": 1
+          },
+          {
+            "recipe_id_": "dish_025",
+            "recipe_type_": "dish",
+            "predicted_take_rate_": 0.5,
+            "derived_portions_": 20,
+            "sell_price_": 28,
+            "serving_portions_": 1
+          }
+        ]
+      }
+    ],
+    "financial_targets_": {
+      "target_food_cost_pct_": 32,
+      "target_revenue_per_guest_": 120
+    },
+    "created_at_": 1718000000000,
+    "updated_at_": 1718000000000
+  }
+]
