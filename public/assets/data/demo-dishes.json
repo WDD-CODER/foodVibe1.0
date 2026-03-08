@@ -901,10 +901,10 @@
     "name_hebrew": "מגנומוס — מגנום מצופה ו־2 רטבי שוקולד לציפוי לבד",
     "recipe_type_": "dish",
     "ingredients_": [
-      {"_id": "dish_024_i1", "referenceId": "demo_157", "type": "product", "amount_": 6, "unit_": "unit", "note_": ""},
-      {"_id": "dish_024_i2", "referenceId": "demo_169", "type": "product", "amount_": 0.12, "unit_": "kg", "note_": ""},
-      {"_id": "dish_024_i3", "referenceId": "demo_194", "type": "product", "amount_": 0.12, "unit_": "kg", "note_": "רוטב וניל אוונטז"},
-      {"_id": "dish_024_i4", "referenceId": "demo_185", "type": "product", "amount_": 6, "unit_": "unit", "note_": ""}
+      {"_id": "dish_024_i1", "referenceId": "demo_157", "type": "product", "amount_": 1, "unit_": "unit", "note_": ""},
+      {"_id": "dish_024_i2", "referenceId": "demo_169", "type": "product", "amount_": 0.012, "unit_": "kg", "note_": ""},
+      {"_id": "dish_024_i3", "referenceId": "demo_194", "type": "product", "amount_": 0.012, "unit_": "kg", "note_": "רוטב וניל אוונטז"},
+      {"_id": "dish_024_i4", "referenceId": "demo_185", "type": "product", "amount_": 1, "unit_": "unit", "note_": ""}
     ],
     "steps_": [
       {"order_": 1, "instruction_": "הרכבת המנה מהמיסום: מגנום מהמקפיא, מזיגת רטבי שוקולד ווניל לקוקוטים, הגשה בכלי הגשה.", "labor_time_minutes_": 0}
