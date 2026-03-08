@@ -15,6 +15,7 @@ import { MetadataRegistryService } from './metadata-registry.service';
 import { TranslationService } from './translation.service';
 import { MenuSectionCategoriesService } from './menu-section-categories.service';
 import { LogisticsBaselineDataService } from './logistics-baseline-data.service';
+import { LoggingService } from './logging.service';
 
 const ASSETS = 'assets/data';
 
@@ -34,6 +35,7 @@ export class DemoLoaderService {
   private readonly logisticsBaselineData = inject(LogisticsBaselineDataService);
   private readonly translation = inject(TranslationService);
   private readonly userMsg = inject(UserMsgService);
+  private readonly logging = inject(LoggingService);
 
   /**
    * Fetches demo JSON files, replaces PRODUCT_LIST, KITCHEN_SUPPLIERS, RECIPE_LIST, DISH_LIST,
@@ -84,7 +86,7 @@ export class DemoLoaderService {
 
       this.userMsg.onSetSuccessMsg('נתוני הדגמה נטענו בהצלחה');
     } catch (err) {
-      console.error('Demo load failed:', err);
+      this.logging.error({ event: 'demo.load_error', message: 'Demo load failed', context: { err } });
       this.userMsg.onSetErrorMsg('שגיאה בטעינת נתוני הדגמה');
     }
   }

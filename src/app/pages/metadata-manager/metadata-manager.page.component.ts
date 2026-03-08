@@ -17,6 +17,7 @@ import { UserMsgService } from '@services/user-msg.service';
 import { TranslationKeyModalService } from '@services/translation-key-modal.service';
 import { UserService } from '@services/user.service';
 import { AuthModalService } from '@services/auth-modal.service';
+import { LoggingService } from '@services/logging.service';
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { ALL_DISH_FIELDS, DEFAULT_DISH_FIELDS, type DishFieldKey, type MenuTypeDefinition } from '@models/menu-event.model';
@@ -48,6 +49,7 @@ export class MetadataManagerComponent implements OnInit {
   private addItemModal = inject(AddItemModalService);
   protected readonly isLoggedIn = inject(UserService).isLoggedIn;
   private readonly authModal = inject(AuthModalService);
+  private readonly logging = inject(LoggingService);
 
   /** Returns false if not signed in (shows message and opens sign-in modal). */
   private requireSignIn(): boolean {
@@ -103,6 +105,7 @@ export class MetadataManagerComponent implements OnInit {
       await this.metadataRegistry.registerLabel(result.key, result.color, result.autoTriggers);
       this.userMsgService.onSetSuccessMsg('הנתונים נשמרו בהצלחה');
     } catch (err) {
+      this.logging.error({ event: 'metadata.sync_error', message: 'Metadata sync error (add label)', context: { err } });
       this.userMsgService.onSetErrorMsg('שגיאה בסנכרון הנתונים');
     }
   }
@@ -139,6 +142,7 @@ export class MetadataManagerComponent implements OnInit {
       inputElement.value = '';
       this.userMsgService.onSetSuccessMsg('הנתונים נשמרו בהצלחה');
     } catch (err) {
+      this.logging.error({ event: 'metadata.sync_error', message: 'Metadata sync error (add metadata)', context: { err } });
       this.userMsgService.onSetErrorMsg('שגיאה בסנכרון הנתונים');
     }
   }
@@ -229,7 +233,7 @@ export class MetadataManagerComponent implements OnInit {
     }
     this.userMsgService.onSetSuccessMsg('המחיקה בוצעה בהצלחה');
   } catch (err) {
-    console.error(`Failed to delete ${type}:`, err);
+    this.logging.error({ event: 'crud.metadata.delete_error', message: `Failed to delete ${type}`, context: { err } });
     this.userMsgService.onSetErrorMsg('שגיאה בביצוע המחיקה מול השרת');
   }
 }

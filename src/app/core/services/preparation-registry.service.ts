@@ -61,7 +61,7 @@ export class PreparationRegistryService {
         this.preparations_.set(doc.preparations)
       }
     } catch (err) {
-      console.error('Failed to load preparation registry:', err)
+      this.logging.error({ event: 'crud.preparations.load_error', message: 'Failed to load preparation registry', context: { err } });
       this.userMsgService.onSetErrorMsg('שגיאה בטעינת רישום ההכנות')
     }
   }

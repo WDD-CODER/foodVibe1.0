@@ -22,6 +22,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 import { UserMsgService } from '@services/user-msg.service';
 import { TranslationService } from '@services/translation.service';
+import { LoggingService } from '@services/logging.service';
 
 const CATEGORIES: EquipmentCategory[] = [
   'heat_source',
@@ -48,6 +49,7 @@ export class EquipmentFormComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly userMsg = inject(UserMsgService);
   private readonly translation = inject(TranslationService);
+  private readonly logging = inject(LoggingService);
 
   protected equipmentForm_!: FormGroup;
   protected isEditMode_ = signal(false);
@@ -147,6 +149,7 @@ export class EquipmentFormComponent implements OnInit {
       const listPath = this.router.url.startsWith('/inventory/equipment') ? ['/inventory/equipment'] : ['/equipment/list'];
       this.router.navigate(listPath);
     } catch (err) {
+      this.logging.error({ event: 'equipment.save_error', message: 'Equipment save error', context: { err } });
       const msg = err instanceof Error && err.message === ERR_DUPLICATE_EQUIPMENT_NAME
         ? (this.translation.translate('duplicate_equipment_name') ?? 'כלי עם שם זה כבר קיים')
         : (this.translation.translate('save_failed') ?? 'שגיאה בשמירה');
