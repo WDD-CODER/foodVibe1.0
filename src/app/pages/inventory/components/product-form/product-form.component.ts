@@ -18,6 +18,7 @@ import { MetadataRegistryService } from '@services/metadata-registry.service';
 import { TranslationService } from '@services/translation.service';
 import { TranslationKeyModalService } from '@services/translation-key-modal.service';
 import { AddSupplierFlowService } from '@services/add-supplier-flow.service';
+import { LoggingService } from '@services/logging.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
@@ -61,6 +62,7 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
   private readonly injector = inject(Injector);
   private readonly confirmModal = inject(ConfirmModalService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly logging = inject(LoggingService);
 
   unitRegistry = inject(UnitRegistryService);
   @ViewChildren('categoryDropdownItem') categoryDropdownItems!: QueryList<ElementRef<HTMLElement>>;
@@ -391,7 +393,7 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
         this.addCategory(result.englishKey);
       }
     } catch (err) {
-      console.error('Failed to add category:', err);
+      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context: { err } });
     }
   }
 
@@ -432,7 +434,7 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
         this.allergenSearchQuery_.set('');
       }
     } catch (err) {
-      console.error('Failed to add allergen:', err);
+      this.logging.error({ event: 'inventory.product.add_allergen_error', message: 'Failed to add allergen', context: { err } });
     }
   }
 

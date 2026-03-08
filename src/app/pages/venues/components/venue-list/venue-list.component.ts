@@ -8,6 +8,7 @@ import { UserService } from '@services/user.service';
 import { UserMsgService } from '@services/user-msg.service';
 import { AuthModalService } from '@services/auth-modal.service';
 import { TranslationService } from '@services/translation.service';
+import { LoggingService } from '@services/logging.service';
 import { VenueProfile, EnvironmentType } from '@models/venue.model';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
@@ -50,6 +51,7 @@ export class VenueListComponent {
   private readonly userMsg = inject(UserMsgService);
   private readonly authModal = inject(AuthModalService);
   private readonly translation = inject(TranslationService);
+  private readonly logging = inject(LoggingService);
 
   /** When true, add button emits addVenueClick instead of navigating (e.g. dashboard tab switch). */
   embeddedInDashboard = false;
@@ -152,7 +154,7 @@ export class VenueListComponent {
     try {
       await this.venueData.deleteVenue(item._id);
     } catch (e) {
-      console.error(e);
+      this.logging.error({ event: 'venue.list_error', message: 'Venue list error', context: { err: e } });
     } finally {
       this.deletingId_.set(null);
     }

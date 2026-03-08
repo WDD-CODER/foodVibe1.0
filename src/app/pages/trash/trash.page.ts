@@ -10,6 +10,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { TrashService } from '@services/trash.service';
 import { ConfirmModalService } from '@services/confirm-modal.service';
+import { LoggingService } from '@services/logging.service';
 import { VersionHistoryPanelComponent } from 'src/app/shared/version-history-panel/version-history-panel.component';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import type { VersionEntityType } from '@services/version-history.service';
@@ -25,6 +26,7 @@ import type { VersionEntityType } from '@services/version-history.service';
 export class TrashPage implements OnInit {
   private readonly trash = inject(TrashService);
   private readonly confirmModal = inject(ConfirmModalService);
+  private readonly logging = inject(LoggingService);
 
   readonly loading = signal(true);
   readonly loadError = signal<string | null>(null);
@@ -50,6 +52,7 @@ export class TrashPage implements OnInit {
     try {
       await this.trash.loadTrash();
     } catch (err) {
+      this.logging.error({ event: 'trash.load_error', message: 'Trash load error', context: { err } });
       this.loadError.set(err instanceof Error ? err.message : 'שגיאה בטעינת האשפה');
     } finally {
       this.loading.set(false);

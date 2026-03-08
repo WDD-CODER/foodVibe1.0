@@ -13,6 +13,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { UserService } from '@services/user.service';
 import { UserMsgService } from '@services/user-msg.service';
 import { AuthModalService } from '@services/auth-modal.service';
+import { LoggingService } from '@services/logging.service';
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
@@ -36,6 +37,7 @@ export class SupplierListComponent {
   private readonly router = inject(Router);
   private readonly userMsg = inject(UserMsgService);
   private readonly authModal = inject(AuthModalService);
+  private readonly logging = inject(LoggingService);
 
   /** When true, add button emits addSupplierClick instead of opening modal and navigating. */
   embeddedInDashboard = false;
@@ -160,7 +162,7 @@ export class SupplierListComponent {
     try {
       await this.supplierData.removeSupplier(item._id);
     } catch (e) {
-      console.error(e);
+      this.logging.error({ event: 'supplier.list_error', message: 'Supplier list error', context: { err: e } });
     } finally {
       this.deletingId_.set(null);
     }

@@ -11,6 +11,7 @@ import { UserService } from '@services/user.service';
 import { UserMsgService } from '@services/user-msg.service';
 import { AuthModalService } from '@services/auth-modal.service';
 import { TranslationService } from '@services/translation.service';
+import { LoggingService } from '@services/logging.service';
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
@@ -33,6 +34,7 @@ export class EquipmentListComponent {
   private readonly userMsg = inject(UserMsgService);
   private readonly authModal = inject(AuthModalService);
   private readonly translation = inject(TranslationService);
+  private readonly logging = inject(LoggingService);
 
   /** True when this list is shown under /inventory/equipment (logistics from inventory). */
   protected get isUnderInventory(): boolean {
@@ -166,7 +168,7 @@ export class EquipmentListComponent {
     try {
       await this.equipmentData.deleteEquipment(item._id);
     } catch (e) {
-      console.error(e);
+      this.logging.error({ event: 'equipment.list_error', message: 'Equipment list error', context: { err: e } });
     } finally {
       this.deletingId_.set(null);
     }

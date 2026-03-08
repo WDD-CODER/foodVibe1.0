@@ -14,6 +14,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } fr
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { SupplierDataService } from '@services/supplier-data.service';
+import { LoggingService } from '@services/logging.service';
 import { Supplier } from '@models/supplier.model';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
@@ -38,6 +39,7 @@ export class SupplierFormComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly supplierData = inject(SupplierDataService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly logging = inject(LoggingService);
 
   protected supplierForm_!: FormGroup;
   protected isEditMode_ = signal(false);
@@ -109,7 +111,9 @@ export class SupplierFormComponent implements OnInit {
           if (this.embeddedInDashboard()) this.saved.emit();
           else this.router.navigate(['/suppliers/list']);
         })
-        .catch((e) => console.error(e))
+        .catch((e) => {
+          this.logging.error({ event: 'supplier.save_error', message: 'Supplier save failed', context: { err: e } });
+        })
         .finally(() => this.isSaving_.set(false));
     } else {
       this.supplierData
@@ -118,7 +122,9 @@ export class SupplierFormComponent implements OnInit {
           if (this.embeddedInDashboard()) this.saved.emit();
           else this.router.navigate(['/suppliers/list']);
         })
-        .catch((e) => console.error(e))
+        .catch((e) => {
+          this.logging.error({ event: 'supplier.save_error', message: 'Supplier save failed', context: { err: e } });
+        })
         .finally(() => this.isSaving_.set(false));
     }
   }

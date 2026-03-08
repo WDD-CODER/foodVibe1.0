@@ -181,7 +181,7 @@ export class MetadataRegistryService {
       this.userMsgService.onSetSuccessMsg(`סוג תפריט שונה ל-"${trimmed}"`);
     } catch (err) {
       this.userMsgService.onSetErrorMsg('שגיאה בשינוי שם סוג התפריט');
-      console.error(err);
+      this.logging.error({ event: 'crud.metadata.menuType.rename_error', message: 'MenuType rename error', context: { err } });
     }
   }
 
@@ -286,6 +286,7 @@ export class MetadataRegistryService {
       this.userMsgService.onSetSuccessMsg(`אלרגן "${sanitized}" נוסף בהצלחה`);
     } catch (err) {
       this.userMsgService.onSetErrorMsg('שגיאה בשמירת האלרגן');
+      this.logging.error({ event: 'crud.metadata.allergen.save_error', message: 'Allergen save error', context: { err } });
     }
   }
 
@@ -369,6 +370,7 @@ async deleteCategory(name: string): Promise<void> {
       }
     } catch (err) {
       this.userMsgService.onSetErrorMsg('שגיאה במחיקת האלרגן מהשרת');
+      this.logging.error({ event: 'crud.metadata.allergen.delete_error', message: 'Allergen delete error', context: { err } });
     }
   }
 }

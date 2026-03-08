@@ -23,6 +23,7 @@ import { RecipeDataService } from '@services/recipe-data.service';
 import { RecipeFormService } from './services/recipe-form.service';
 import { DishDataService } from '@services/dish-data.service';
 import { TranslationService } from '@services/translation.service';
+import { LoggingService } from '@services/logging.service';
 import { RecipeHeaderComponent } from './components/recipe-header/recipe-header.component';
 import { RecipeIngredientsTableComponent } from './components/recipe-ingredients-table/recipe-ingredients-table.component';
 import { RecipeWorkflowComponent } from './components/recipe-workflow/recipe-workflow.component';
@@ -68,6 +69,7 @@ export class RecipeBuilderPage implements OnInit {
   private readonly recipeFormService_ = inject(RecipeFormService);
   private readonly logisticsBaselineData_ = inject(LogisticsBaselineDataService);
   private readonly translation_ = inject(TranslationService);
+  private readonly logging_ = inject(LoggingService);
 
   //SIGNALS
   protected isSaving_ = signal(false);
@@ -679,6 +681,7 @@ export class RecipeBuilderPage implements OnInit {
       this.logisticsToolQuantity_.set(1);
       this.logisticsSelectedLibraryItem_.set(null);
     } catch (err) {
+      this.logging_.error({ event: 'recipe_builder.save_error', message: 'Recipe builder save error (add tool)', context: { err } });
       const msg = err instanceof Error && err.message === ERR_DUPLICATE_EQUIPMENT_NAME
         ? (this.translation_.translate('duplicate_equipment_name') ?? 'כלי עם שם זה כבר קיים')
         : 'שגיאה בהוספת הכלי';

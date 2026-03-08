@@ -13,6 +13,7 @@ import { MenuEventDataService } from './menu-event-data.service';
 import { MenuSectionCategoriesService } from './menu-section-categories.service';
 import { ActivityLogService } from './activity-log.service';
 import { UserMsgService } from './user-msg.service';
+import { LoggingService } from './logging.service';
 
 export const BACKUP_FILE_VERSION = 1;
 
@@ -35,6 +36,7 @@ export class BackupService {
   private readonly menuSectionCategories = inject(MenuSectionCategoriesService);
   private readonly activityLog = inject(ActivityLogService);
   private readonly userMsg = inject(UserMsgService);
+  private readonly logging = inject(LoggingService);
 
   /**
    * Export all backup-backed keys to a single JSON file (download).
@@ -121,7 +123,7 @@ export class BackupService {
         const backupKey = `backup_${key}`;
         localStorage.setItem(backupKey, JSON.stringify(value));
       } catch (err) {
-        console.warn('BackupService: failed to write key', key, err);
+        this.logging.warn({ event: 'backup.write_failed', message: 'Backup write failed', context: { key, err } });
       }
     }
     await this.reloadAllDataServices();
