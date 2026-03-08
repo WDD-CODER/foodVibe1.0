@@ -1,31 +1,53 @@
 <div class="menu-editor-shell" dir="rtl">
-  <!-- Toolbar (hidden in print) -->
-  <div class="editor-toolbar no-print">
-    <button type="button" class="toolbar-btn back" (click)="goBack()">
-      <lucide-icon name="arrow-right" [size]="18"></lucide-icon>
-      {{ 'menu_library' | translatePipe }}
-    </button>
-    <div class="toolbar-actions">
-      <button type="button" class="toolbar-btn export" (click)="onExportMenuInfo()" [attr.aria-label]="'export_menu_info' | translatePipe">
-        <lucide-icon name="table-2" [size]="16"></lucide-icon>
-        {{ 'export_menu_info' | translatePipe }}
+  <!-- Toolbar overlay (fixed at top, toggled) -->
+  @if (toolbarOpen_()) {
+    <div class="toolbar-overlay no-print">
+      <div class="editor-toolbar">
+        <button type="button" class="toolbar-btn back" (click)="goBack()">
+          <lucide-icon name="arrow-right" [size]="18"></lucide-icon>
+          {{ 'menu_library' | translatePipe }}
+        </button>
+        <div class="toolbar-actions">
+          <button type="button" class="toolbar-btn export" (click)="onExportMenuInfo()" [attr.aria-label]="'export_menu_info' | translatePipe">
+            <lucide-icon name="table-2" [size]="16"></lucide-icon>
+            {{ 'export_menu_info' | translatePipe }}
+          </button>
+          <button type="button" class="toolbar-btn export" (click)="onExportMenuShoppingList()" [attr.aria-label]="'export_menu_shopping_list' | translatePipe">
+            <lucide-icon name="shopping-cart" [size]="16"></lucide-icon>
+            {{ 'export_menu_shopping_list' | translatePipe }}
+          </button>
+          <button type="button" class="toolbar-btn export" (click)="printMenu()">
+            <lucide-icon name="printer" [size]="16"></lucide-icon>
+            {{ 'menu_export_customer' | translatePipe }}
+          </button>
+          <button type="button" class="toolbar-btn save" (click)="save()" [disabled]="isSaving_()">
+            @if (isSaving_()) {
+              <app-loader size="small" [inline]="true" />
+            }
+            <lucide-icon name="save" [size]="16"></lucide-icon>
+            {{ isSaving_() ? ('saving' | translatePipe) : ('menu_save' | translatePipe) }}
+          </button>
+          <button type="button" class="toolbar-btn close-toolbar" (click)="closeToolbar()" [attr.aria-label]="'close' | translatePipe">
+            <lucide-icon name="x" [size]="18"></lucide-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Menu FAB (right side, opposite of hero-fab) -->
+  <div class="menu-fab-container no-print" (mouseleave)="collapseMenuFab()">
+    <div class="menu-fab-actions" [class.expanded]="menuFabExpanded_()">
+      <button type="button" class="menu-fab-action" [attr.aria-label]="'menu_toolbar_open' | translatePipe" (click)="openToolbar()">
+        <lucide-icon name="settings" size="20"></lucide-icon>
       </button>
-      <button type="button" class="toolbar-btn export" (click)="onExportMenuShoppingList()" [attr.aria-label]="'export_menu_shopping_list' | translatePipe">
-        <lucide-icon name="shopping-cart" [size]="16"></lucide-icon>
-        {{ 'export_menu_shopping_list' | translatePipe }}
-      </button>
-      <button type="button" class="toolbar-btn export" (click)="printMenu()">
-        <lucide-icon name="printer" [size]="16"></lucide-icon>
-        {{ 'menu_export_customer' | translatePipe }}
-      </button>
-      <button type="button" class="toolbar-btn save" (click)="save()" [disabled]="isSaving_()">
-        @if (isSaving_()) {
-          <app-loader size="small" [inline]="true" />
-        }
-        <lucide-icon name="save" [size]="16"></lucide-icon>
-        {{ isSaving_() ? ('saving' | translatePipe) : ('menu_save' | translatePipe) }}
+      <button type="button" class="menu-fab-action" [attr.aria-label]="'menu_library' | translatePipe" (click)="goBack()">
+        <lucide-icon name="arrow-right" size="20"></lucide-icon>
       </button>
     </div>
+    <button type="button" class="menu-fab-main" [class.active]="menuFabExpanded_()" (mouseenter)="expandMenuFab()" (click)="openToolbar()" aria-label="Menu actions">
+      <lucide-icon name="menu" size="24"></lucide-icon>
+    </button>
   </div>
 
   <!-- Paper in the middle of the screen -->
@@ -100,14 +122,14 @@
       <!-- Guest Count -->
       <div class="meta-row guest-row">
         <span class="meta-label">{{ 'menu_guests' | translatePipe }}</span>
-        <div class="guest-control">
-          <button type="button" class="guest-ctrl-btn minus" (click)="decrementGuests()" [disabled]="getGuestCount() <= 0" [attr.aria-label]="'decrease' | translatePipe">
-            <lucide-icon name="minus" [size]="16"></lucide-icon>
+        <div class="counter-pill">
+          <button type="button" class="counter-pill-btn" (click)="decrementGuests()" [disabled]="getGuestCount() <= 0" [attr.aria-label]="'decrease' | translatePipe">
+            <lucide-icon name="minus" [size]="14"></lucide-icon>
           </button>
-          <input id="menu-focus-guest_count_" type="number" class="meta-input meta-number" formControlName="guest_count_" min="0"
+          <input id="menu-focus-guest_count_" type="number" class="counter-pill-input" formControlName="guest_count_" min="0"
             (keydown)="onMetaKeydown('guest_count_', $event)" />
-          <button type="button" class="guest-ctrl-btn plus" (click)="incrementGuests()" [attr.aria-label]="'increase' | translatePipe">
-            <lucide-icon name="plus" [size]="16"></lucide-icon>
+          <button type="button" class="counter-pill-btn" (click)="incrementGuests()" [attr.aria-label]="'increase' | translatePipe">
+            <lucide-icon name="plus" [size]="14"></lucide-icon>
           </button>
         </div>
       </div>
@@ -183,6 +205,12 @@
                       (click)="toggleDishMeta(sectionIndex, itemIndex)">
                       <lucide-icon [name]="isDishMetaExpanded(sectionIndex, itemIndex) ? 'chevron-up' : 'info'" [size]="16"></lucide-icon>
                     </button>
+                    <span class="dish-sell-price no-print">
+                      <span class="dish-sell-currency">₪</span>
+                      <input type="number" [formControlName]="'sell_price'" min="0" step="1"
+                        class="dish-sell-input" [style.width]="getInputWidth(item.get('sell_price')?.value)"
+                        (click)="$event.stopPropagation()" />
+                    </span>
                     <button type="button" class="dish-remove no-print" (click)="removeItem(sectionIndex, itemIndex)">
                       <lucide-icon name="trash-2" [size]="14"></lucide-icon>
                     </button>
@@ -258,7 +286,15 @@
     </div>
     <div class="fin-metric">
       <span class="fin-label">{{ 'menu_food_cost' | translatePipe }} %</span>
-      <span class="fin-value">{{ foodCostPct_() | number:'1.1-1' }}%</span>
+      <span class="fin-value">@if (totalRevenue_() > 0) {{ foodCostPct_() | number:'1.1-1' }}% @else —</span>
+    </div>
+    <div class="fin-metric">
+      <span class="fin-label">{{ 'menu_total_revenue' | translatePipe }}</span>
+      <span class="fin-value">₪{{ totalRevenue_() | number:'1.2-2' }}</span>
+    </div>
+    <div class="fin-metric">
+      <span class="fin-label">{{ 'menu_cost_per_guest' | translatePipe }}</span>
+      <span class="fin-value">₪{{ costPerGuest_() | number:'1.2-2' }}</span>
     </div>
   </footer>
 </div>

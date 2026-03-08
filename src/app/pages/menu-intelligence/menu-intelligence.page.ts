@@ -1,8 +1,10 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
+import { startWith } from 'rxjs';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { MenuEventDataService } from '@services/menu-event-data.service';
@@ -53,6 +55,10 @@ export class MenuIntelligencePage implements AfterViewInit {
   private readonly menuSectionCategories = inject(MenuSectionCategoriesService);
   private readonly recipeCostService = inject(RecipeCostService);
   private readonly exportService = inject(ExportService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  /** Bumped when form value changes so footer computeds re-run (form is not a signal). */
+  private readonly formValueVersion_ = signal(0);
 
   protected readonly editingId_ = signal<string | null>(null);
   protected readonly ALL_DISH_FIELDS = ALL_DISH_FIELDS;
@@ -60,6 +66,8 @@ export class MenuIntelligencePage implements AfterViewInit {
   protected readonly products_ = this.kitchenState.products_;
   protected readonly isSaving_ = signal(false);
   protected readonly showExport_ = signal(false);
+  protected readonly toolbarOpen_ = signal(false);
+  protected readonly menuFabExpanded_ = signal(false);
 
   /** Per-section dish search query signals keyed by section index */
   protected readonly dishSearchQueries_ = signal<Record<number, string>>({});
@@ -73,9 +81,9 @@ export class MenuIntelligencePage implements AfterViewInit {
   private savedSnapshot_ = '';
 
   protected readonly form_ = this.fb.group({
-    name_: ['', Validators.required],
+    name_: [''],
     event_type_: ['', Validators.required],
-    event_date_: [''],
+    event_date_: [new Date().toISOString().slice(0, 10)],
     serving_type_: ['plated_course' as ServingType, Validators.required],
     guest_count_: [50, [Validators.required, Validators.min(0)]],
     sections_: this.fb.array<FormGroup>([]),
@@ -98,13 +106,41 @@ export class MenuIntelligencePage implements AfterViewInit {
   protected readonly FOCUS_ORDER = ['name_', 'event_type_', 'serving_type_', 'guest_count_', 'event_date_'] as const;
 
   protected readonly eventCost_ = computed(() => {
+    this.formValueVersion_(); // depend on form changes
     const event = this.buildEventFromForm();
     return this.menuIntelligence.computeEventIngredientCost(event);
   });
 
   protected readonly foodCostPct_ = computed(() => {
-    const event = this.buildEventFromForm();
-    return this.menuIntelligence.computeFoodCostPct(event);
+    this.formValueVersion_(); // depend on form changes
+    const revenue = this.totalRevenue_();
+    const cost = this.eventCost_();
+    if (revenue <= 0) return 0;
+    return (cost / revenue) * 100;
+  });
+
+  protected readonly totalRevenue_ = computed(() => {
+    this.formValueVersion_(); // depend on form changes
+    const guestCount = Number(this.form_.get('guest_count_')?.value ?? 0);
+    let total = 0;
+    const sections = this.sectionsArray;
+    for (let si = 0; si < sections.length; si++) {
+      const items = this.getItemsArray(si);
+      for (let ii = 0; ii < items.length; ii++) {
+        const item = items.at(ii);
+        const price = Number(item.get('sell_price')?.value ?? 0);
+        const sp = Number(item.get('serving_portions')?.value ?? 1);
+        total += price * sp * guestCount;
+      }
+    }
+    return total;
+  });
+
+  protected readonly costPerGuest_ = computed(() => {
+    this.formValueVersion_(); // depend on form changes
+    const guestCount = this.getGuestCount();
+    if (guestCount <= 0) return 0;
+    return this.eventCost_() / guestCount;
   });
 
   protected readonly menuTypeOptions_ = computed(() =>
@@ -119,10 +155,15 @@ export class MenuIntelligencePage implements AfterViewInit {
     const key = this.form_.value.serving_type_;
     if (!key) return [...DEFAULT_DISH_FIELDS];
     const fields = this.metadataRegistry.getMenuTypeFields(key);
-    return fields.length > 0 ? fields : [...DEFAULT_DISH_FIELDS];
+    const all = fields.length > 0 ? fields : [...DEFAULT_DISH_FIELDS];
+    return all.filter(f => f !== 'sell_price');
   });
 
   constructor() {
+    this.form_.valueChanges
+      .pipe(startWith(null), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.formValueVersion_.update(v => v + 1));
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.editingId_.set(id);
@@ -354,7 +395,7 @@ export class MenuIntelligencePage implements AfterViewInit {
         sell_price: [0],
         food_cost_money: [0],
         food_cost_pct: [0],
-        serving_portions: [0],
+        serving_portions: [1],
         serving_portions_pct: [0],
       })
     );
@@ -378,9 +419,11 @@ export class MenuIntelligencePage implements AfterViewInit {
     if (!recipeId) return 0;
     const recipe = this.recipes_().find(r => r._id === recipeId);
     if (!recipe) return 0;
-    const derivedPortions = this.getDerivedPortions(item.value as MenuItemForm);
+    const servingPortions = Number(item.get('serving_portions')?.value || 1);
+    const guestCount = this.getGuestCount();
+    const totalServings = servingPortions * guestCount;
     const baseYield = Math.max(1, recipe.yield_amount_ || 1);
-    const multiplier = derivedPortions / baseYield;
+    const multiplier = totalServings / baseYield;
     const scaledCost = this.recipeCostService.computeRecipeCost({
       ...recipe,
       ingredients_: recipe.ingredients_.map(ing => ({
@@ -499,7 +542,7 @@ export class MenuIntelligencePage implements AfterViewInit {
       recipe_id_: recipe._id,
       recipe_type_: this.isRecipeDish(recipe) ? 'dish' : 'preparation',
       food_cost_money: Math.round(autoCost * 100) / 100,
-      serving_portions: recipe.yield_amount_ ?? 1,
+      serving_portions: 1,
     });
     this.setDishSearchQuery(sectionIndex, itemIndex, '');
     this.addItem(sectionIndex);
@@ -602,14 +645,19 @@ export class MenuIntelligencePage implements AfterViewInit {
       return;
     }
 
+    if (!this.form_.value.name_?.trim()) {
+      this.form_.patchValue({ name_: this.generateDateName() });
+    }
+
     this.isSaving_.set(true);
     try {
       const event = this.menuIntelligence.hydrateDerivedPortions(this.buildEventFromForm());
+      const now = Date.now();
       const id = this.editingId_();
       if (id) {
-        await this.menuEventData.updateMenuEvent({ ...event, _id: id });
+        await this.menuEventData.updateMenuEvent({ ...event, _id: id, updated_at_: now });
       } else {
-        const created = await this.menuEventData.addMenuEvent(event);
+        const created = await this.menuEventData.addMenuEvent({ ...event, created_at_: now, updated_at_: now });
         this.editingId_.set(created._id);
       }
       this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue());
@@ -618,6 +666,35 @@ export class MenuIntelligencePage implements AfterViewInit {
     } finally {
       this.isSaving_.set(false);
     }
+  }
+
+  private generateDateName(): string {
+    const today = new Date();
+    const base = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+    const existing = this.menuEventData.allMenuEvents_()
+      .map(e => e.name_)
+      .filter(n => n === base || n.startsWith(`${base} (`));
+    if (!existing.includes(base)) return base;
+    let i = 1;
+    while (existing.includes(`${base} (${i})`)) i++;
+    return `${base} (${i})`;
+  }
+
+  protected openToolbar(): void {
+    this.toolbarOpen_.set(true);
+    this.menuFabExpanded_.set(false);
+  }
+
+  protected closeToolbar(): void {
+    this.toolbarOpen_.set(false);
+  }
+
+  protected expandMenuFab(): void {
+    this.menuFabExpanded_.set(true);
+  }
+
+  protected collapseMenuFab(): void {
+    this.menuFabExpanded_.set(false);
   }
 
   protected toggleExport(): void {
@@ -676,17 +753,18 @@ export class MenuIntelligencePage implements AfterViewInit {
       _id: section._id,
       name_: section.name_,
       sort_order_: sectionIndex + 1,
-      items_: (section.items_ || []).map((item: MenuItemForm, itemIndex: number) => ({
-        recipe_id_: item.recipe_id_,
-        recipe_type_: item.recipe_type_,
-        predicted_take_rate_: Number(item.predicted_take_rate_ || 0),
-        derived_portions_: this.menuIntelligence.derivePortions(
-          servingType, guestCount, Number(item.predicted_take_rate_ || 0), 0
-        ),
-        sell_price_: item.sell_price ?? undefined,
-        food_cost_override_: this.getAutoFoodCost(sectionIndex, itemIndex) || undefined,
-        serving_portions_: item.serving_portions ?? undefined,
-      })),
+      items_: (section.items_ || []).map((item: MenuItemForm, itemIndex: number) => {
+        const sp = Number(item.serving_portions || 1);
+        return {
+          recipe_id_: item.recipe_id_,
+          recipe_type_: item.recipe_type_,
+          predicted_take_rate_: Number(item.predicted_take_rate_ || 0),
+          derived_portions_: sp * guestCount,
+          sell_price_: item.sell_price ?? undefined,
+          food_cost_override_: this.getAutoFoodCost(sectionIndex, itemIndex) || undefined,
+          serving_portions_: sp,
+        };
+      }),
     }));
 
     const hydrated = this.menuIntelligence.hydrateDerivedPortions({
