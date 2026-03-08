@@ -1,7 +1,7 @@
 <div class="menu-editor-shell" dir="rtl">
   <!-- Toolbar overlay (fixed at top, toggled) -->
   @if (toolbarOpen_()) {
-    <div class="toolbar-overlay no-print">
+    <div class="toolbar-overlay no-print" (clickOutside)="closeToolbar()">
       <div class="editor-toolbar">
         <button type="button" class="toolbar-btn back" (click)="goBack()">
           <lucide-icon name="arrow-right" [size]="18"></lucide-icon>
@@ -26,9 +26,6 @@
             }
             <lucide-icon name="save" [size]="16"></lucide-icon>
             {{ isSaving_() ? ('saving' | translatePipe) : ('menu_save' | translatePipe) }}
-          </button>
-          <button type="button" class="toolbar-btn close-toolbar" (click)="closeToolbar()" [attr.aria-label]="'close' | translatePipe">
-            <lucide-icon name="x" [size]="18"></lucide-icon>
           </button>
         </div>
       </div>
@@ -82,19 +79,18 @@
                 id="menu-focus-event_type_search"
                 type="text"
                 class="meta-input event-type-search"
+                autocomplete="off"
                 [ngModel]="eventTypeSearch_()"
                 [ngModelOptions]="{ standalone: true }"
-                (ngModelChange)="eventTypeSearch_.set($event)"
+                (ngModelChange)="eventTypeSearch_.set($event); eventTypeHighlightedIndex_.set(0)"
                 [placeholder]="'search' | translatePipe"
-                (keydown.escape)="closeEventTypeDropdown(); focusField('event_type_')"
-                (keydown.tab)="closeEventTypeDropdown(); focusField('serving_type_'); $event.preventDefault()"
-                (keydown.enter)="getFilteredEventTypes().length ? selectEventType(getFilteredEventTypes()[0]) : focusField('serving_type_'); $event.preventDefault()"
+                (keydown)="onEventTypeSearchKeydown($event)"
               />
               <app-scrollable-dropdown [maxHeight]="200">
-                @for (t of getFilteredEventTypes(); track t) {
-                  <button type="button" class="dropdown-item" (click)="selectEventType(t)">{{ t }}</button>
+                @for (t of getFilteredEventTypes(); track t; let i = $index) {
+                  <button type="button" class="dropdown-item" [class.highlighted]="eventTypeHighlightedIndex_() === i" (click)="selectEventType(t)">{{ t }}</button>
                 }
-                <button type="button" class="dropdown-item add-new" (click)="addNewEventType()">
+                <button type="button" class="dropdown-item add-new" [class.highlighted]="eventTypeHighlightedIndex_() === getFilteredEventTypes().length" (click)="addNewEventType()">
                   + {{ 'add_new_category' | translatePipe }}
                 </button>
               </app-scrollable-dropdown>
@@ -161,25 +157,25 @@
                 <input
                   type="text"
                   class="section-search-input"
+                  autocomplete="off"
                   [ngModel]="getSectionSearchQuery(sectionIndex)"
                   [ngModelOptions]="{ standalone: true }"
-                  (ngModelChange)="setSectionSearchQuery(sectionIndex, $event)"
+                  (ngModelChange)="setSectionSearchQuery(sectionIndex, $event); sectionCategoryHighlightedIndex_.update(m => ({ ...m, [sectionIndex]: 0 }))"
                   [placeholder]="'menu_search_category' | translatePipe"
-                  (keydown.enter)="addNewSectionCategory(sectionIndex); closeSectionSearch()"
-                  (keydown.escape)="closeSectionSearch()"
+                  (keydown)="onSectionSearchKeydown(sectionIndex, $event)"
                 />
                 <app-scrollable-dropdown [maxHeight]="200">
-                  @for (cat of getFilteredSectionCategories(sectionIndex); track cat) {
-                    <button type="button" class="dropdown-item" (click)="selectSectionCategory(sectionIndex, cat)">
+                  @for (cat of getFilteredSectionCategories(sectionIndex); track cat; let ci = $index) {
+                    <button type="button" class="dropdown-item" [class.highlighted]="getSectionCategoryHighlightedIndex(sectionIndex) === ci" (click)="selectSectionCategory(sectionIndex, cat)">
                       {{ cat | translatePipe }}
                     </button>
                   }
                   @if (getSectionSearchQuery(sectionIndex).trim()) {
-                    <button type="button" class="dropdown-item add-new" (click)="addNewSectionCategory(sectionIndex)">
+                    <button type="button" class="dropdown-item add-new" [class.highlighted]="getSectionCategoryHighlightedIndex(sectionIndex) === getFilteredSectionCategories(sectionIndex).length" (click)="addNewSectionCategory(sectionIndex)">
                       + {{ getSectionSearchQuery(sectionIndex) }}
                     </button>
                   }
-                  <button type="button" class="dropdown-item add-new" (click)="openAddCategoryModal(sectionIndex)">
+                  <button type="button" class="dropdown-item add-new" [class.highlighted]="getSectionCategoryHighlightedIndex(sectionIndex) === getSectionCategoryOptionCount(sectionIndex) - 1" (click)="openAddCategoryModal(sectionIndex)">
                     + {{ 'add_new_category' | translatePipe }}
                   </button>
                 </app-scrollable-dropdown>
@@ -199,17 +195,23 @@
               <div class="dish-row" [formGroupName]="itemIndex">
                 <div class="dish-name-cell">
                   @if (item.get('recipe_id_')?.value) {
-                    <span class="dish-name">{{ getRecipeName(item.get('recipe_id_')?.value) }}</span>
-                    <button type="button" class="dish-meta-toggle no-print"
-                      [attr.aria-label]="isDishMetaExpanded(sectionIndex, itemIndex) ? ('hide_metadata' | translatePipe) : ('show_metadata' | translatePipe)"
-                      (click)="toggleDishMeta(sectionIndex, itemIndex)">
-                      <lucide-icon [name]="isDishMetaExpanded(sectionIndex, itemIndex) ? 'chevron-up' : 'info'" [size]="16"></lucide-icon>
-                    </button>
+                    <div class="dish-name-meta-wrap">
+                      <div class="dish-name-meta">
+                        <span class="dish-name">{{ getRecipeName(item.get('recipe_id_')?.value) }}</span>
+                        <button type="button" class="dish-meta-toggle no-print"
+                          [attr.aria-label]="isDishMetaExpanded(sectionIndex, itemIndex) ? ('hide_metadata' | translatePipe) : ('show_metadata' | translatePipe)"
+                          (click)="toggleDishMeta(sectionIndex, itemIndex)">
+                          <lucide-icon [name]="isDishMetaExpanded(sectionIndex, itemIndex) ? 'chevron-up' : 'info'" [size]="16"></lucide-icon>
+                        </button>
+                      </div>
+                    </div>
                     <span class="dish-sell-price no-print">
                       <span class="dish-sell-currency">₪</span>
                       <input type="number" [formControlName]="'sell_price'" min="0" step="1"
-                        class="dish-sell-input" [style.width]="getInputWidth(item.get('sell_price')?.value)"
-                        (click)="$event.stopPropagation()" />
+                        class="dish-sell-input" SelectOnFocus
+                        [style.width]="getInputWidth(item.get('sell_price')?.value)"
+                        (click)="$event.stopPropagation()"
+                        (keydown)="onSellPriceKeydown(sectionIndex, itemIndex, $event)" />
                     </span>
                     <button type="button" class="dish-remove no-print" (click)="removeItem(sectionIndex, itemIndex)">
                       <lucide-icon name="trash-2" [size]="14"></lucide-icon>
@@ -217,6 +219,7 @@
                   } @else {
                     <div class="dish-search-wrap" (clickOutside)="clearDishSearch(sectionIndex, itemIndex)">
                       <input type="text" class="dish-search-input"
+                        autocomplete="off"
                         [id]="'dish-search-' + sectionIndex + '-' + itemIndex"
                         [ngModel]="getDishSearchQuery(sectionIndex, itemIndex)"
                         [ngModelOptions]="{ standalone: true }"
@@ -249,10 +252,11 @@
                         } @else {
                           <input [id]="'dish-' + sectionIndex + '-' + itemIndex + '-' + fieldKey"
                             type="number" [formControlName]="fieldKey" min="0" step="0.01"
-                            class="dish-field-input-inline"
+                            class="dish-field-input-inline" SelectOnFocus
                             [style.width]="getInputWidth(item.get(fieldKey)?.value)"
                             (blur)="commitEditDishField()"
                             (keydown.enter)="commitEditDishField()"
+                            (keydown)="onDishFieldKeydown(sectionIndex, itemIndex, fieldKey, $event)"
                             (click)="$event.stopPropagation()" />
                         }
                       </div>
@@ -286,7 +290,13 @@
     </div>
     <div class="fin-metric">
       <span class="fin-label">{{ 'menu_food_cost' | translatePipe }} %</span>
-      <span class="fin-value">@if (totalRevenue_() > 0) {{ foodCostPct_() | number:'1.1-1' }}% @else —</span>
+      <span class="fin-value">
+        @if (totalRevenue_() > 0) {
+          {{ foodCostPct_() | number:'1.1-1' }}%
+        } @else {
+          —
+        }
+      </span>
     </div>
     <div class="fin-metric">
       <span class="fin-label">{{ 'menu_total_revenue' | translatePipe }}</span>
