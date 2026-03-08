@@ -78,6 +78,34 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] Trim demo-products, demo-equipment, demo-suppliers, demo-venues, demo-labels
 - [x] Trim demo-kitchen-preparations.json to used categories and preparations only
 
+### Plan 095 — Menu Intelligence Gap Report (`plans/095-menu-intelligence-gap-report.plan.md`)
+
+- [ ] Add `{ capture: true }` to @HostListener in menu-intelligence.page.ts
+- [ ] Wire dish search ngModelChange to onDishSearchQueryChange; add [class.highlighted] and let ri to dish dropdown in HTML
+- [ ] Replace dish name span with button + startEditDishName in menu-intelligence.page.html
+- [ ] Add .dropdown-item.highlighted and .dish-name-clickable in menu-intelligence.page.scss
+- [ ] Optional: section search ngModelChange to onSectionSearchQueryChange if NG5002 appears
+
+### Plan 094 — Inline Edit & Supplier Modal (`plans/094-inline-edit-supplier-modal.plan.md`)
+
+- [ ] Add editingId_, editForm_, dirty guard and inline save/cancel to equipment-list.component.ts
+- [ ] Add @if inline-edit-panel block in equipment-list.component.html
+- [ ] Add .inline-edit-panel styles to equipment-list.component.scss (cssLayer)
+- [ ] Create supplier-modal.service.ts
+- [ ] Create supplier-modal component (ts + html + scss)
+- [ ] Add supplierToEdit input and effect to supplier-form.component.ts
+- [ ] Swap onAdd/onEdit in supplier-list to use SupplierModalService
+- [ ] Add app-supplier-modal to app.component.html
+- [ ] Add/verify unsaved_changes_confirm in dictionary
+
+### Plan 093 — Shopping List Calculation Fix (`plans/093-shopping-list-calculation-fix.plan.md`)
+
+- [x] Update `derivePortions` in menu-intelligence.service.ts to accept and apply `servingPortions` parameter
+- [x] Update `hydrateDerivedPortions` to pass `item.serving_portions_` through to `derivePortions`
+- [x] Fix `getAutoFoodCost` in menu-intelligence.page.ts to use derived portions instead of `servingPortions * guestCount`
+- [x] Fix `getDerivedPortions` to pass actual `piecesPerPerson` and `servingPortions` instead of hardcoded 0
+- [x] Verify per-item cost, event total, and shopping list produce consistent results
+
 ### Plan 081 â€” toFix Detailed Plans (`plans/081-tofix-detailed-plans.plan.md`)
 
 - [ ] Section 1 â€” Sign-in / Sign-up: auto-focus, dev user dropdown, Enter-to-submit, field-level errors
@@ -530,6 +558,8 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 || 089 | Menu Intelligence Upgrade | Active |
 | 090 | Whole-project logging audit | Active |
 | 091 | Menu intelligence inputs and layout | Active |
+| 094 | Inline Edit & Supplier Modal | Active |
+| 095 | Menu Intelligence Gap Report | Planned |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 
