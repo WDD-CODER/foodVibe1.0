@@ -91,6 +91,11 @@ describe('RecipeBookListComponent', () => {
     expect((component as any).formatAddedAt(1700000000000)).toMatch(/\d/);
   });
 
+  it('should format updatedAt date or return placeholder when missing', () => {
+    expect((component as any).formatUpdatedAt(undefined)).toBe('—');
+    expect((component as any).formatUpdatedAt(1700000000000)).toMatch(/\d/);
+  });
+
   it('should filter list when search input is set', () => {
     let filtered = (component as any).filteredRecipes_();
     expect(filtered.length).toBe(1);

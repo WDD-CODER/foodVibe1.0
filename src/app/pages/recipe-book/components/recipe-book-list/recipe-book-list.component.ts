@@ -75,6 +75,8 @@ export class RecipeBookListComponent {
   protected hoveredCostRecipeId_ = signal<string | null>(null);
   protected tappedCostRecipeId_ = signal<string | null>(null);
   protected costTooltipAnchor_ = signal<DOMRect | null>(null);
+  protected hoveredDateRecipeId_ = signal<string | null>(null);
+  protected dateTooltipAnchor_ = signal<DOMRect | null>(null);
   protected ingredientSearchQuery_ = signal<string>('');
   protected selectedProductIds_ = signal<string[]>([]);
   protected historyFor_ = signal<{ entityType: VersionEntityType; entityId: string; entityName: string } | null>(null);
@@ -237,6 +239,11 @@ export class RecipeBookListComponent {
     return id ? this.filteredRecipes_().find(r => r._id === id) ?? null : null;
   });
 
+  protected activeDateTooltipRecipe_ = computed(() => {
+    const id = this.hoveredDateRecipeId_();
+    return id ? this.filteredRecipes_().find(r => r._id === id) ?? null : null;
+  });
+
   protected isRecipeDish(recipe: Recipe): boolean {
     return recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.mise_categories_?.length);
   }
@@ -264,6 +271,17 @@ export class RecipeBookListComponent {
   protected formatAddedAt(addedAt: number | undefined): string {
     if (addedAt == null) return '—';
     return new Date(addedAt).toLocaleDateString('he-IL', { dateStyle: 'short' });
+  }
+
+  protected formatUpdatedAt(updatedAt: number | undefined): string {
+    if (updatedAt == null) return '—';
+    return new Date(updatedAt).toLocaleDateString('he-IL', { dateStyle: 'short' });
+  }
+
+  /** Date and time for hover tooltip (last updated). */
+  protected formatUpdatedAtWithTime(updatedAt: number | undefined): string {
+    if (updatedAt == null) return '—';
+    return new Date(updatedAt).toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' });
   }
 
   protected getRecipeYieldDescription(recipe: Recipe): string {
@@ -434,6 +452,17 @@ export class RecipeBookListComponent {
   protected closeCostTooltipTap(): void {
     this.tappedCostRecipeId_.set(null);
     if (!this.hoveredCostRecipeId_()) this.costTooltipAnchor_.set(null);
+  }
+
+  protected showDateTooltip(recipeId: string, event?: Event): void {
+    const el = event?.currentTarget as HTMLElement | undefined;
+    if (el) this.dateTooltipAnchor_.set(el.getBoundingClientRect());
+    this.hoveredDateRecipeId_.set(recipeId);
+  }
+
+  protected hideDateTooltip(): void {
+    this.hoveredDateRecipeId_.set(null);
+    this.dateTooltipAnchor_.set(null);
   }
 
   protected addIngredientProduct(product: Product): void {

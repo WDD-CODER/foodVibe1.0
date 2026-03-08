@@ -1,8 +1,8 @@
 <app-list-shell
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
-  [gridTemplate]="'2fr 1fr 1fr minmax(48px, 0.8fr) 0.8fr minmax(72px, 0.85fr) 80px'"
-  [mobileGridTemplate]="'2fr 1fr 0.8fr minmax(72px, 0.85fr) 80px'">
+  [gridTemplate]="'2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) 0.8fr 80px'"
+  [mobileGridTemplate]="'2fr 1fr 0.8fr 80px'">
 
   <h2 shell-title class="page-title">{{ 'recipe_book' | translatePipe }}</h2>
 
@@ -35,12 +35,12 @@
       <div class="col-allergens c-grid-header-cell c-sortable-header" carouselHeaderColumn label="allergens" (click)="toggleAllergenExpandAll()" (keydown.enter)="toggleAllergenExpandAll()" (keydown.space)="$event.preventDefault(); toggleAllergenExpandAll()" role="button" tabindex="0">
         {{ 'allergens' | translatePipe }}
       </div>
+      <div class="col-date c-grid-header-cell c-sortable-header" carouselHeaderColumn label="date_added" (click)="setSort('dateAdded')" (keydown.enter)="setSort('dateAdded')" (keydown.space)="$event.preventDefault(); setSort('dateAdded')" role="button" tabindex="0">
+        {{ 'date_added' | translatePipe }}
+      </div>
     </app-carousel-header>
     <div class="col-cost c-grid-header-cell c-sortable-header" (click)="setSort('cost')" (keydown.enter)="setSort('cost')" (keydown.space)="$event.preventDefault(); setSort('cost')" role="button" tabindex="0">
       {{ 'cost' | translatePipe }}
-    </div>
-    <div class="col-date c-grid-header-cell c-sortable-header" (click)="setSort('dateAdded')" (keydown.enter)="setSort('dateAdded')" (keydown.space)="$event.preventDefault(); setSort('dateAdded')" role="button" tabindex="0">
-      {{ 'date_added' | translatePipe }}
     </div>
     <div class="c-col-actions c-grid-header-cell">{{ 'actions' | translatePipe }}</div>
   </ng-container>
@@ -101,11 +101,13 @@
               <span class="placeholder-dash">—</span>
             }
           </div>
+          <div class="col-date c-list-body-cell date-cell-wrap" cellCarouselSlide [label]="'date_added' | translatePipe" (mouseenter)="showDateTooltip(recipe._id, $event)" (mouseleave)="hideDateTooltip()" [attr.aria-describedby]="hoveredDateRecipeId_() === recipe._id ? 'date-tooltip-' + recipe._id : null">
+            {{ formatAddedAt(recipe.addedAt_) }}
+          </div>
         </app-cell-carousel>
         <div class="col-cost c-list-body-cell cost-cell-wrap" (mouseenter)="showCostTooltip(recipe._id, $event)" (mouseleave)="hideCostTooltip()" (click)="toggleCostTooltipTap(recipe._id, $event)" [attr.aria-describedby]="(hoveredCostRecipeId_() === recipe._id || tappedCostRecipeId_() === recipe._id) ? 'cost-tooltip-' + recipe._id : null">
           ₪{{ getRecipeCost(recipe) | number:'1.2-2' }}
         </div>
-        <div class="col-date c-list-body-cell">{{ formatAddedAt(recipe.addedAt_) }}</div>
         <div class="c-col-actions c-list-body-cell">
           <button type="button" class="c-icon-btn" (click)="onEditRecipe(recipe); $event.stopPropagation()"
             [attr.aria-label]="'edit' | translatePipe"
@@ -193,6 +195,15 @@
     <div class="cost-tooltip cost-tooltip-fixed" [id]="'cost-tooltip-' + recipe._id" (clickOutside)="closeCostTooltipTap()"
       [style.top.px]="anchor.bottom + 4" [style.left.px]="anchor.left + anchor.width / 2">
       {{ 'price_for' | translatePipe }}{{ getRecipeYieldDescription(recipe) }}
+    </div>
+  }
+}
+
+@if (activeDateTooltipRecipe_(); as recipe) {
+  @if (dateTooltipAnchor_(); as anchor) {
+    <div class="date-tooltip date-tooltip-fixed" [id]="'date-tooltip-' + recipe._id"
+      [style.top.px]="anchor.bottom + 4" [style.left.px]="anchor.left + anchor.width / 2">
+      {{ 'date_updated' | translatePipe }}: {{ formatUpdatedAtWithTime(recipe.updatedAt_) }}
     </div>
   }
 }
