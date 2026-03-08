@@ -35,7 +35,7 @@
       "sauce/stocks",
       "roasting",
       "pickling",
-      "confectionery",
+      "patisserie",
       "fry_mise",
       "בישולים",
       "חיתוכים",
@@ -106,7 +106,7 @@
       {"name": "אוניגירי ארוז", "category": "cooking"},
       {"name": "סויה בפורר", "category": "רטבים"},
       {"name": "קימצ'י", "category": "pickling"},
-      {"name": "בסיס גלידה מוכן", "category": "confectionery"},
+      {"name": "בסיס גלידה מוכן", "category": "patisserie"},
       {"name": "קערה לערבוב הציפס", "category": "fry_mise"},
       {"name": "נייר ידיים לספיגת שמן", "category": "fry_mise"},
       {"name": "טופו מטוגן", "category": "בישולים"},
@@ -120,8 +120,11 @@
       {"name": "פופקורן טבעוני מטוגן", "category": "טיגון"},
       {"name": "בצל ירוק פרוס דק", "category": "חיתוכים"},
       {"name": "שומשום צבעוני", "category": "garnish"},
-      {"name": "נמסיס מופשרת", "category": "confectionery"},
-      {"name": "בננה טריה פרוסה", "category": "חיתוכים"}
+      {"name": "נמסיס מופשרת", "category": "patisserie"},
+      {"name": "בננה טריה פרוסה", "category": "חיתוכים"},
+      {"name": "פאדג מופשר", "category": "patisserie"},
+      {"name": "בלונדי מופשר", "category": "patisserie"},
+      {"name": "קוביות מרשמלו", "category": "חיתוכים"}
     ]
   }
 ]

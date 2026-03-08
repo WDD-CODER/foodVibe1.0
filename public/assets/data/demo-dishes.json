@@ -671,7 +671,7 @@
       {"category_name": "cooking", "items": [{"item_name": "אוניגירי ארוז", "unit": "unit", "quantity": 1}]},
       {"category_name": "רטבים", "items": [{"item_name": "סויה בפורר", "unit": "unit", "quantity": 1}]},
       {"category_name": "pickling", "items": [{"item_name": "קימצ'י", "unit": "kg", "quantity": 0.03}]},
-      {"category_name": "confectionery", "items": [{"item_name": "בסיס גלידה מוכן", "unit": "kg", "quantity": 0}]},
+      {"category_name": "patisserie", "items": [{"item_name": "בסיס גלידה מוכן", "unit": "kg", "quantity": 0}]},
       {"category_name": "garnish", "items": [{"item_name": "טופינג לגלידה", "unit": "kg", "quantity": 0}]}
     ],
     "labels_": ["sipur_shel_ochel", "fish"]
@@ -817,13 +817,13 @@
     "recipe_type_": "dish",
     "ingredients_": [
       {"_id": "dish_022_i1", "referenceId": "demo_162", "type": "product", "amount_": 0.1, "unit_": "kg", "note_": ""},
-      {"_id": "dish_022_i2", "referenceId": "demo_168", "type": "product", "amount_": 0.003, "unit_": "kg", "note_": ""},
-      {"_id": "dish_022_i3", "referenceId": "demo_169", "type": "product", "amount_": 0.003, "unit_": "kg", "note_": ""},
-      {"_id": "dish_022_i4", "referenceId": "demo_141", "type": "product", "amount_": 0.003, "unit_": "kg", "note_": ""},
-      {"_id": "dish_022_i5", "referenceId": "demo_166", "type": "product", "amount_": 0.003, "unit_": "kg", "note_": ""},
-      {"_id": "dish_022_i6", "referenceId": "demo_159", "type": "product", "amount_": 0.003, "unit_": "kg", "note_": ""},
-      {"_id": "dish_022_i7", "referenceId": "demo_165", "type": "product", "amount_": 0.003, "unit_": "kg", "note_": ""},
-      {"_id": "dish_022_i8", "referenceId": "demo_163", "type": "product", "amount_": 0.002, "unit_": "kg", "note_": ""},
+      {"_id": "dish_022_i2", "referenceId": "demo_168", "type": "product", "amount_": 0.03, "unit_": "kg", "note_": ""},
+      {"_id": "dish_022_i3", "referenceId": "demo_169", "type": "product", "amount_": 0.03, "unit_": "kg", "note_": ""},
+      {"_id": "dish_022_i4", "referenceId": "demo_141", "type": "product", "amount_": 0.03, "unit_": "kg", "note_": ""},
+      {"_id": "dish_022_i5", "referenceId": "demo_166", "type": "product", "amount_": 0.03, "unit_": "kg", "note_": ""},
+      {"_id": "dish_022_i6", "referenceId": "demo_159", "type": "product", "amount_": 0.03, "unit_": "kg", "note_": ""},
+      {"_id": "dish_022_i7", "referenceId": "demo_165", "type": "product", "amount_": 0.03, "unit_": "kg", "note_": ""},
+      {"_id": "dish_022_i8", "referenceId": "demo_163", "type": "product", "amount_": 0.02, "unit_": "kg", "note_": ""},
       {"_id": "dish_022_i9", "referenceId": "demo_185", "type": "product", "amount_": 1, "unit_": "unit", "note_": ""}
     ],
     "steps_": [
@@ -849,11 +849,50 @@
     },
     "prep_items_": [],
     "mise_categories_": [
-      {"category_name": "confectionery", "items": [{"item_name": "נמסיס מופשרת", "unit": "kg", "quantity": 0.1}]},
+      {"category_name": "patisserie", "items": [{"item_name": "נמסיס מופשרת", "unit": "kg", "quantity": 0.1}]},
       {"category_name": "חיתוכים", "items": [{"item_name": "בננה טריה פרוסה", "unit": "kg", "quantity": 0.003}]},
       {"category_name": "רטבים", "items": [{"item_name": "רוטב טופי", "unit": "kg", "quantity": 0.003}, {"item_name": "רוטב שוקולד", "unit": "kg", "quantity": 0.003}]},
       {"category_name": "קרם", "items": [{"item_name": "קרם וניל", "unit": "kg", "quantity": 0.003}]},
       {"category_name": "garnish", "items": [{"item_name": "מרנג שוויצרי", "unit": "kg", "quantity": 0.003}, {"item_name": "עוגיית דיימונד", "unit": "kg", "quantity": 0.002}, {"item_name": "קראמבל", "unit": "kg", "quantity": 0.003}]}
+    ],
+    "labels_": ["sipur_shel_ochel", "dessert", "dairy"]
+  },
+  {
+    "_id": "dish_023",
+    "name_hebrew": "פיזום פלס",
+    "recipe_type_": "dish",
+    "ingredients_": [
+      {"_id": "dish_023_i1", "referenceId": "demo_164", "type": "product", "amount_": 0.025, "unit_": "kg", "note_": "מופשר"},
+      {"_id": "dish_023_i2", "referenceId": "demo_155", "type": "product", "amount_": 0.02, "unit_": "unit", "note_": "מופשר"},
+      {"_id": "dish_023_i3", "referenceId": "demo_160", "type": "product", "amount_": 0.04, "unit_": "kg", "note_": "קוביות"},
+      {"_id": "dish_023_i4", "referenceId": "demo_169", "type": "product", "amount_": 0.02, "unit_": "kg", "note_": ""},
+      {"_id": "dish_023_i5", "referenceId": "demo_167", "type": "product", "amount_": 0.02, "unit_": "kg", "note_": ""}
+    ],
+    "steps_": [
+      {"order_": 1, "instruction_": "הרכבת המנה מהמיסום: פאדג מופשר, בלונדי מופשר, קוביות מרשמלו, רוטב שוקולד אוונטז, רוטב וניל.", "labor_time_minutes_": 0}
+    ],
+    "yield_amount_": 1,
+    "yield_unit_": "unit",
+    "default_station_": "patisserie",
+    "is_approved_": true,
+    "logistics_": {
+      "baseline_": [
+        {"equipment_id_": "eq_015", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "מקרר"},
+        {"equipment_id_": "eq_064", "quantity_": 1, "phase_": "prep", "is_critical_": true, "notes_": "וטרינה לקינוחים"},
+        {"equipment_id_": "eq_065", "quantity_": 1, "phase_": "both", "is_critical_": true, "notes_": "מטמפררת שוקולד חלב"},
+        {"equipment_id_": "eq_066", "quantity_": 1, "phase_": "both", "is_critical_": true, "notes_": "מטמפררת שוקולד לבן"},
+        {"equipment_id_": "eq_067", "quantity_": 1, "phase_": "prep", "is_critical_": false, "notes_": "מקפיא פזנטציה"},
+        {"equipment_id_": "eq_068", "quantity_": 1, "phase_": "service", "is_critical_": true, "notes_": "עמדת שבור את זה"},
+        {"equipment_id_": "eq_069", "quantity_": 6, "phase_": "service", "is_critical_": false, "notes_": "פטשים לעמדה"},
+        {"equipment_id_": "eq_017", "quantity_": 3, "phase_": "both", "is_critical_": true, "notes_": "חיבור חשמל ישראלי"},
+        {"equipment_id_": "eq_018", "quantity_": 2, "phase_": "both", "is_critical_": false, "notes_": "תלת פאזי תלוי במטמפררות"}
+      ]
+    },
+    "prep_items_": [],
+    "mise_categories_": [
+      {"category_name": "patisserie", "items": [{"item_name": "פאדג מופשר", "unit": "kg", "quantity": 0.025}, {"item_name": "בלונדי מופשר", "unit": "unit", "quantity": 0.02}]},
+      {"category_name": "חיתוכים", "items": [{"item_name": "קוביות מרשמלו", "unit": "kg", "quantity": 0.04}]},
+      {"category_name": "רטבים", "items": [{"item_name": "רוטב שוקולד אוונטז", "unit": "kg", "quantity": 0.02}, {"item_name": "רוטב וניל", "unit": "kg", "quantity": 0.02}]}
     ],
     "labels_": ["sipur_shel_ochel", "dessert", "dairy"]
   }
