@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
-import { EquipmentDataService } from '@services/equipment-data.service';
-import { Equipment, EquipmentCategory } from '@models/equipment.model';
+import { EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME } from '@services/equipment-data.service';
+import { Equipment, EquipmentCategory, ScalingRule } from '@models/equipment.model';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { UserService } from '@services/user.service';
@@ -12,9 +12,11 @@ import { UserMsgService } from '@services/user-msg.service';
 import { AuthModalService } from '@services/auth-modal.service';
 import { TranslationService } from '@services/translation.service';
 import { LoggingService } from '@services/logging.service';
+import { ConfirmModalService } from '@services/confirm-modal.service';
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
+import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 import { useListState, StringParam, NullableBooleanParam, StringSetParam } from 'src/app/core/utils/list-state.util';
 
 type SortField = 'name' | 'category' | 'owned';
@@ -22,7 +24,7 @@ type SortField = 'name' | 'category' | 'owned';
 @Component({
   selector: 'app-equipment-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective, CustomSelectComponent],
   templateUrl: './equipment-list.component.html',
   styleUrl: './equipment-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,6 +37,8 @@ export class EquipmentListComponent {
   private readonly authModal = inject(AuthModalService);
   private readonly translation = inject(TranslationService);
   private readonly logging = inject(LoggingService);
+  private readonly confirmModal = inject(ConfirmModalService);
+  private readonly fb = inject(FormBuilder);
 
   /** True when this list is shown under /inventory/equipment (logistics from inventory). */
   protected get isUnderInventory(): boolean {
@@ -50,6 +54,7 @@ export class EquipmentListComponent {
   protected carouselHeaderIndex_ = signal(0);
 
   constructor() {
+    this.buildEditForm();
     useListState('equipment', [
       { urlParam: 'q',          signal: this.searchQuery_,        serializer: StringParam },
       { urlParam: 'sort',       signal: this.sortBy_,             serializer: StringParam as any },
@@ -71,6 +76,9 @@ export class EquipmentListComponent {
   protected sortBy_ = signal<SortField>('name');
   protected deletingId_ = signal<string | null>(null);
   protected sortOrder_ = signal<'asc' | 'desc'>('asc');
+  protected editingId_ = signal<string | null>(null);
+  protected isSavingEdit_ = signal(false);
+  protected editForm_!: FormGroup;
 
   protected hasActiveFilters_ = computed(() => {
     const cats = this.selectedCategories_();
@@ -117,6 +125,35 @@ export class EquipmentListComponent {
     'infrastructure',
     'consumable',
   ];
+  protected categoryOptions = this.categories.map((c) => ({ value: c, label: c }));
+
+  private buildEditForm(): void {
+    this.editForm_ = this.fb.group({
+      name_hebrew: ['', [Validators.required]],
+      category_: ['tool', [Validators.required]],
+      owned_quantity_: [1, [Validators.required, Validators.min(0)]],
+      is_consumable_: [false],
+      notes_: [''],
+      scaling_enabled_: [false],
+      per_guests_: [25, [Validators.min(1)]],
+      min_quantity_: [1, [Validators.min(0)]],
+      max_quantity_: [null as number | null],
+    });
+  }
+
+  private hydrateEditForm(e: Equipment): void {
+    this.editForm_.patchValue({
+      name_hebrew: e.name_hebrew ?? '',
+      category_: e.category_ ?? 'tool',
+      owned_quantity_: e.owned_quantity_ ?? 0,
+      is_consumable_: e.is_consumable_ ?? false,
+      notes_: e.notes_ ?? '',
+      scaling_enabled_: !!e.scaling_rule_,
+      per_guests_: e.scaling_rule_?.per_guests_ ?? 25,
+      min_quantity_: e.scaling_rule_?.min_quantity_ ?? 1,
+      max_quantity_: e.scaling_rule_?.max_quantity_ ?? null,
+    });
+  }
 
   protected togglePanel(): void {
     this.isPanelOpen_.update(v => !v);
@@ -153,8 +190,74 @@ export class EquipmentListComponent {
     this.router.navigate([...this.equipmentBasePath, 'add']);
   }
 
-  onEdit(id: string): void {
-    this.router.navigate([...this.equipmentBasePath, 'edit', id]);
+  async onEdit(item: Equipment): Promise<void> {
+    if (!this.isLoggedIn()) {
+      this.userMsg.onSetWarningMsg(this.translation.translate('sign_in_to_use'));
+      this.authModal.open('sign-in');
+      return;
+    }
+    const currentId = this.editingId_();
+    if (currentId !== null && currentId !== item._id && this.editForm_.dirty) {
+      const saveFirst = await this.confirmModal.open(
+        this.translation.translate('unsaved_changes_confirm') ?? 'יש שינויים שלא נשמרו. שמור לפני מעבר?',
+        { variant: 'warning', saveLabel: 'save' }
+      );
+      if (saveFirst) {
+        await this.saveCurrentInlineEdit();
+      }
+    }
+    this.editingId_.set(item._id);
+    this.hydrateEditForm(item);
+  }
+
+  private async saveCurrentInlineEdit(): Promise<boolean> {
+    const id = this.editingId_();
+    if (!id || this.editForm_.invalid) return false;
+    const equipment = this.equipmentData.allEquipment_().find((e) => e._id === id);
+    if (!equipment) return false;
+    this.isSavingEdit_.set(true);
+    try {
+      const v = this.editForm_.getRawValue();
+      const now = new Date().toISOString();
+      const scalingRule: ScalingRule | undefined = v.scaling_enabled_
+        ? {
+            per_guests_: Number(v.per_guests_),
+            min_quantity_: Number(v.min_quantity_),
+            max_quantity_: v.max_quantity_ != null && v.max_quantity_ !== '' ? Number(v.max_quantity_) : undefined,
+          }
+        : undefined;
+      const updated: Equipment = {
+        ...equipment,
+        name_hebrew: v.name_hebrew,
+        category_: v.category_,
+        owned_quantity_: Number(v.owned_quantity_),
+        is_consumable_: !!v.is_consumable_,
+        notes_: v.notes_ ?? undefined,
+        scaling_rule_: scalingRule,
+        updated_at_: now,
+      };
+      await this.equipmentData.updateEquipment(updated);
+      return true;
+    } catch (err) {
+      this.logging.error({ event: 'equipment.save_error', message: 'Equipment save error', context: { err } });
+      const msg =
+        err instanceof Error && err.message === ERR_DUPLICATE_EQUIPMENT_NAME
+          ? (this.translation.translate('duplicate_equipment_name') ?? 'כלי עם שם זה כבר קיים')
+          : (this.translation.translate('save_failed') ?? 'שגיאה בשמירה');
+      this.userMsg.onSetErrorMsg(msg);
+      return false;
+    } finally {
+      this.isSavingEdit_.set(false);
+    }
+  }
+
+  protected async onInlineSave(): Promise<void> {
+    const ok = await this.saveCurrentInlineEdit();
+    if (ok) this.editingId_.set(null);
+  }
+
+  protected onInlineCancel(): void {
+    this.editingId_.set(null);
   }
 
   async onDelete(item: Equipment): Promise<void> {

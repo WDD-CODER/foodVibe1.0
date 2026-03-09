@@ -67,7 +67,7 @@
           <div class="col-consumable c-list-body-cell" cellCarouselSlide [label]="'is_consumable' | translatePipe">{{ item.is_consumable_ ? ('approved_yes' | translatePipe) : ('approved_no' | translatePipe) }}</div>
         </app-cell-carousel>
         <div class="c-col-actions c-list-body-cell" role="cell">
-          <button type="button" class="c-icon-btn" (click)="onEdit(item._id)"
+          <button type="button" class="c-icon-btn" (click)="onEdit(item)"
             [attr.aria-label]="'edit' | translatePipe"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
             <lucide-icon name="pencil" [size]="18"></lucide-icon>
@@ -83,6 +83,79 @@
           }
         </div>
       </div>
+      @if (editingId_() === item._id) {
+        <div class="inline-edit-panel" [formGroup]="editForm_">
+          <h3 class="inline-edit-title">{{ 'edit' | translatePipe }}: {{ item.name_hebrew }}</h3>
+
+          <div class="inline-edit-section">
+            <div class="inline-edit-grid">
+              <div class="inline-edit-field">
+                <label for="inline-name">{{ 'name' | translatePipe }}</label>
+                <input id="inline-name" type="text" formControlName="name_hebrew" class="c-input" />
+              </div>
+              <div class="inline-edit-field">
+                <label for="inline-category">{{ 'category' | translatePipe }}</label>
+                <app-custom-select
+                  triggerId="inline-category"
+                  formControlName="category_"
+                  [options]="categoryOptions"
+                  placeholder="category" />
+              </div>
+              <div class="inline-edit-field">
+                <label for="inline-owned">{{ 'owned_quantity' | translatePipe }}</label>
+                <input id="inline-owned" type="number" formControlName="owned_quantity_" min="0" class="c-input" />
+              </div>
+            </div>
+            <div class="inline-edit-checkboxes">
+              <label class="inline-edit-check">
+                <input type="checkbox" formControlName="is_consumable_" />
+                <span>{{ 'is_consumable' | translatePipe }}</span>
+              </label>
+              <label class="inline-edit-check">
+                <input type="checkbox" formControlName="scaling_enabled_" />
+                <span>{{ 'scaling_enabled' | translatePipe }}</span>
+              </label>
+            </div>
+            <div class="inline-edit-field inline-edit-notes">
+              <label for="inline-notes">{{ 'notes' | translatePipe }}</label>
+              <textarea id="inline-notes" formControlName="notes_" rows="2" class="c-input"></textarea>
+            </div>
+          </div>
+
+          @if (editForm_.get('scaling_enabled_')?.value) {
+            <div class="inline-edit-section inline-edit-scaling">
+              <h4 class="inline-edit-section-title">{{ 'scaling_rule' | translatePipe }}</h4>
+              <div class="inline-edit-grid inline-edit-scaling-grid">
+                <div class="inline-edit-field">
+                  <label for="inline-per-guests">{{ 'per_guests' | translatePipe }}</label>
+                  <input id="inline-per-guests" type="number" formControlName="per_guests_" min="1" class="c-input" />
+                </div>
+                <div class="inline-edit-field">
+                  <label for="inline-min-qty">{{ 'min_quantity' | translatePipe }}</label>
+                  <input id="inline-min-qty" type="number" formControlName="min_quantity_" min="0" class="c-input" />
+                </div>
+                <div class="inline-edit-field">
+                  <label for="inline-max-qty">{{ 'max_quantity' | translatePipe }}</label>
+                  <input id="inline-max-qty" type="number" formControlName="max_quantity_" min="0" placeholder="—" class="c-input" />
+                </div>
+              </div>
+            </div>
+          }
+
+          <div class="inline-edit-actions">
+            <button type="button" class="c-btn-ghost" (click)="onInlineCancel()">
+              {{ 'cancel' | translatePipe }}
+            </button>
+            <button type="button" class="c-btn-primary" (click)="onInlineSave()"
+              [disabled]="editForm_.invalid || isSavingEdit_()">
+              @if (isSavingEdit_()) {
+                <app-loader size="small" [inline]="true" />
+              }
+              {{ 'save' | translatePipe }}
+            </button>
+          </div>
+        </div>
+      }
     }
   </ng-container>
 
