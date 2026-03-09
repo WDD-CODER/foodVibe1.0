@@ -160,7 +160,7 @@
                   autocomplete="off"
                   [ngModel]="getSectionSearchQuery(sectionIndex)"
                   [ngModelOptions]="{ standalone: true }"
-                  (ngModelChange)="setSectionSearchQuery(sectionIndex, $event); sectionCategoryHighlightedIndex_.update(m => ({ ...m, [sectionIndex]: 0 }))"
+                  (ngModelChange)="onSectionSearchQueryChange(sectionIndex, $event)"
                   [placeholder]="'menu_search_category' | translatePipe"
                   (keydown)="onSectionSearchKeydown(sectionIndex, $event)"
                 />

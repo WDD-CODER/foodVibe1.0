@@ -11,23 +11,30 @@ export class MenuIntelligenceService {
   private readonly kitchenState = inject(KitchenStateService);
   private readonly recipeCostService = inject(RecipeCostService);
 
+  /**
+   * Total portions to prepare for this dish.
+   * - Plated/buffet: guest_count × portions_per_guest (no take rate; supports fractional e.g. 0.25, 0.5).
+   * - Cocktail/passed: guest_count × pieces_per_person × take_rate (rounded).
+   */
   derivePortions(
     servingType: ServingType,
     guestCount: number,
     predictedTakeRate: number,
-    piecesPerPerson?: number
+    piecesPerPerson?: number,
+    servingPortions: number = 1
   ): number {
-    const boundedRate = Math.max(0, Math.min(1, predictedTakeRate));
+    const sp = Math.max(0, servingPortions ?? 1);
     if (servingType === 'cocktail_passed') {
+      const boundedRate = Math.max(0, Math.min(1, predictedTakeRate));
       const ppp = Math.max(0, piecesPerPerson ?? 0);
       return Math.round(guestCount * ppp * boundedRate);
     }
 
     if (servingType === 'buffet_family') {
-      return Math.round(guestCount * boundedRate * 1.15);
+      return guestCount * sp;
     }
 
-    return Math.round(guestCount * boundedRate);
+    return guestCount * sp;
   }
 
   hydrateDerivedPortions(event: MenuEventLike): MenuEventLike {
@@ -41,7 +48,8 @@ export class MenuIntelligenceService {
             event.serving_type_,
             event.guest_count_,
             item.predicted_take_rate_,
-            event.pieces_per_person_
+            event.pieces_per_person_,
+            item.serving_portions_ ?? 1
           ),
         })),
       })),

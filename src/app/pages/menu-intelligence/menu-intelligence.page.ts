@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, DestroyRef, HostListener, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
@@ -19,6 +19,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { RecipeCostService } from '@services/recipe-cost.service';
 import { ExportService } from '@services/export.service';
 import { ClickOutSideDirective } from '@directives/click-out-side';
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
@@ -37,7 +38,7 @@ type MenuItemForm = {
 @Component({
   selector: 'app-menu-intelligence-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, ClickOutSideDirective, ScrollableDropdownComponent, CustomSelectComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, ClickOutSideDirective, SelectOnFocusDirective, ScrollableDropdownComponent, CustomSelectComponent],
   templateUrl: './menu-intelligence.page.html',
   styleUrl: './menu-intelligence.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -74,6 +75,15 @@ export class MenuIntelligencePage implements AfterViewInit {
   /** Per-section header search query signals */
   protected readonly sectionSearchQueries_ = signal<Record<number, string>>({});
   protected readonly sectionSearchOpen_ = signal<number | null>(null);
+  /** Currently active dish search (for keyboard nav); null when none focused/has query. */
+  protected readonly activeDishSearch_ = signal<{ sectionIndex: number; itemIndex: number } | null>(null);
+  /** Dish row being edited (for restoring recipe_id_ on cancel). */
+  protected readonly editingDishAt_ = signal<{ sectionIndex: number; itemIndex: number; previousRecipeId: string } | null>(null);
+
+  /** Highlighted index for keyboard nav in dropdowns (-1 = none). */
+  protected readonly eventTypeHighlightedIndex_ = signal(0);
+  protected readonly sectionCategoryHighlightedIndex_ = signal<Record<number, number>>({});
+  protected readonly dishSearchHighlightedIndex_ = signal<Record<string, number>>({});
 
   protected readonly sectionCategories_ = this.menuSectionCategories.sectionCategories_;
 
@@ -326,6 +336,7 @@ export class MenuIntelligencePage implements AfterViewInit {
   protected openEventTypeDropdown(): void {
     this.eventTypeDropdownOpen_.set(true);
     this.eventTypeSearch_.set('');
+    this.eventTypeHighlightedIndex_.set(0);
     this.startEditField('event_type');
     setTimeout(() => document.getElementById('menu-focus-event_type_search')?.focus(), 50);
   }
@@ -333,6 +344,90 @@ export class MenuIntelligencePage implements AfterViewInit {
   protected closeEventTypeDropdown(): void {
     this.eventTypeDropdownOpen_.set(false);
     this.eventTypeSearch_.set('');
+    this.eventTypeHighlightedIndex_.set(-1);
+  }
+
+  protected onEventTypeSearchKeydown(e: KeyboardEvent): void {
+    const list = this.getFilteredEventTypes();
+    const addNewIndex = list.length;
+    const maxIndex = addNewIndex; // last option is "add new"
+    let idx = this.eventTypeHighlightedIndex_();
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      e.stopPropagation();
+      idx = Math.min(idx + 1, maxIndex);
+      this.eventTypeHighlightedIndex_.set(idx);
+      this.scrollDropdownHighlightIntoView('.event-type-dropdown');
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      e.stopPropagation();
+      idx = Math.max(0, idx - 1);
+      this.eventTypeHighlightedIndex_.set(idx);
+      this.scrollDropdownHighlightIntoView('.event-type-dropdown');
+      return;
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
+      if (idx >= 0 && idx < list.length) {
+        this.selectEventType(list[idx]);
+      } else if (idx === addNewIndex) {
+        void this.addNewEventType();
+      } else {
+        this.focusField('serving_type_');
+      }
+      return;
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      this.closeEventTypeDropdown();
+      this.focusField('event_type_');
+      return;
+    }
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      e.stopPropagation();
+      this.closeEventTypeDropdown();
+      this.focusField('serving_type_');
+    }
+  }
+
+  private scrollDropdownHighlightIntoView(containerClass: string): void {
+    setTimeout(() => {
+      const el = document.querySelector(`${containerClass} .dropdown-item.highlighted`);
+      el?.scrollIntoView({ block: 'nearest' });
+    }, 0);
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  protected onDocumentKeydown(e: KeyboardEvent): void {
+    const key = e.key;
+    if (key !== 'ArrowDown' && key !== 'ArrowUp' && key !== 'Enter') return;
+    const el = e.target as Element;
+
+    if (el.closest('.event-type-dropdown') && this.eventTypeDropdownOpen_()) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.onEventTypeSearchKeydown(e);
+      return;
+    }
+    const sectionOpen = this.sectionSearchOpen_();
+    if (el.closest('.section-search-wrap') && sectionOpen !== null) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.onSectionSearchKeydown(sectionOpen, e);
+      return;
+    }
+    const activeDish = this.activeDishSearch_();
+    if (el.closest('.dish-search-wrap') && activeDish !== null) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.onDishSearchKeydown(activeDish.sectionIndex, activeDish.itemIndex, e);
+    }
   }
 
   protected selectEventType(value: string): void {
@@ -419,11 +514,15 @@ export class MenuIntelligencePage implements AfterViewInit {
     if (!recipeId) return 0;
     const recipe = this.recipes_().find(r => r._id === recipeId);
     if (!recipe) return 0;
-    const servingPortions = Number(item.get('serving_portions')?.value || 1);
-    const guestCount = this.getGuestCount();
-    const totalServings = servingPortions * guestCount;
+    const derivedPortions = this.menuIntelligence.derivePortions(
+      this.form_.value.serving_type_ as ServingType,
+      this.getGuestCount(),
+      Number(item.get('predicted_take_rate_')?.value ?? 0),
+      Number((this.form_.value as { pieces_per_person_?: number }).pieces_per_person_ ?? 1),
+      Number(item.get('serving_portions')?.value ?? 1)
+    );
     const baseYield = Math.max(1, recipe.yield_amount_ || 1);
-    const multiplier = totalServings / baseYield;
+    const multiplier = derivedPortions / baseYield;
     const scaledCost = this.recipeCostService.computeRecipeCost({
       ...recipe,
       ingredients_: recipe.ingredients_.map(ing => ({
@@ -451,7 +550,8 @@ export class MenuIntelligencePage implements AfterViewInit {
       this.form_.value.serving_type_ as ServingType,
       Number(this.form_.value.guest_count_ || 0),
       Number(item.predicted_take_rate_ || 0),
-      0
+      Number((this.form_.value as { pieces_per_person_?: number }).pieces_per_person_ ?? 1),
+      Number(item.serving_portions ?? 1)
     );
   }
 
@@ -493,6 +593,33 @@ export class MenuIntelligencePage implements AfterViewInit {
     this.editingDishField_.set(null);
   }
 
+  protected onSellPriceKeydown(sectionIndex: number, itemIndex: number, e: KeyboardEvent): void {
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+    e.preventDefault();
+    const item = this.getItemsArray(sectionIndex).at(itemIndex);
+    const ctrl = item.get('sell_price');
+    const v = Number(ctrl?.value ?? 0);
+    const next = e.key === 'ArrowUp'
+      ? quantityIncrement(v, 0, { integerOnly: true })
+      : quantityDecrement(v, 0, { integerOnly: true });
+    ctrl?.setValue(next);
+  }
+
+  protected onDishFieldKeydown(sectionIndex: number, itemIndex: number, fieldKey: string, e: KeyboardEvent): void {
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+    e.preventDefault();
+    const item = this.getItemsArray(sectionIndex).at(itemIndex);
+    const ctrl = item.get(fieldKey);
+    if (!ctrl) return;
+    const v = Number(ctrl.value ?? 0);
+    const isPortionField = fieldKey === 'serving_portions' || fieldKey === 'serving_portions_pct';
+    const options = isPortionField ? { explicitStep: 0.25 } : { explicitStep: 0.01 };
+    const next = e.key === 'ArrowUp'
+      ? quantityIncrement(v, 0, options)
+      : quantityDecrement(v, 0, options);
+    ctrl.setValue(next);
+  }
+
   /** Width for inline dish-field input (ch units, min 4ch). */
   protected getInputWidth(value: unknown): string {
     const len = String(value ?? '').length;
@@ -512,6 +639,22 @@ export class MenuIntelligencePage implements AfterViewInit {
     }));
   }
 
+  protected onDishSearchQueryChange(sectionIndex: number, itemIndex: number, value: string): void {
+    this.setDishSearchQuery(sectionIndex, itemIndex, value);
+    const key = this.getDishSearchHighlightKey(sectionIndex, itemIndex);
+    this.dishSearchHighlightedIndex_.update(m => ({ ...m, [key]: 0 }));
+    if (value.trim().length > 0) {
+      this.activeDishSearch_.set({ sectionIndex, itemIndex });
+    } else {
+      this.activeDishSearch_.set(null);
+      const edit = this.editingDishAt_();
+      if (edit && edit.sectionIndex === sectionIndex && edit.itemIndex === itemIndex && edit.previousRecipeId) {
+        this.getItemsArray(sectionIndex).at(itemIndex).patchValue({ recipe_id_: edit.previousRecipeId });
+        this.editingDishAt_.set(null);
+      }
+    }
+  }
+
   protected getFilteredRecipes(sectionIndex: number, itemIndex: number): Recipe[] {
     const query = this.getDishSearchQuery(sectionIndex, itemIndex).trim().toLowerCase();
     if (!query) return [];
@@ -527,7 +670,8 @@ export class MenuIntelligencePage implements AfterViewInit {
       this.form_.value.serving_type_ as ServingType,
       Number(this.form_.value.guest_count_ || 0),
       Number(group.get('predicted_take_rate_')?.value ?? 0.4),
-      0
+      Number((this.form_.value as { pieces_per_person_?: number }).pieces_per_person_ ?? 1),
+      Number(group.get('serving_portions')?.value ?? 1)
     );
     const baseYield = Math.max(1, recipe.yield_amount_ || 1);
     const multiplier = derivedPortions / baseYield;
@@ -545,7 +689,30 @@ export class MenuIntelligencePage implements AfterViewInit {
       serving_portions: 1,
     });
     this.setDishSearchQuery(sectionIndex, itemIndex, '');
+    this.activeDishSearch_.set(null);
+    const editing = this.editingDishAt_();
+    if (editing && editing.sectionIndex === sectionIndex && editing.itemIndex === itemIndex) {
+      this.editingDishAt_.set(null);
+      return;
+    }
     this.addItem(sectionIndex);
+  }
+
+  /** Click on dish name: switch row to search and replace (select will replace, not add). */
+  protected startEditDishName(sectionIndex: number, itemIndex: number): void {
+    const group = this.getItemsArray(sectionIndex).at(itemIndex);
+    const recipeId = group.get('recipe_id_')?.value as string | undefined;
+    if (!recipeId) return;
+    const currentName = this.getRecipeName(recipeId);
+    this.editingDishAt_.set({ sectionIndex, itemIndex, previousRecipeId: recipeId });
+    group.patchValue({ recipe_id_: '' });
+    this.setDishSearchQuery(sectionIndex, itemIndex, currentName);
+    this.activeDishSearch_.set({ sectionIndex, itemIndex });
+    this.dishSearchHighlightedIndex_.update(m => ({
+      ...m,
+      [this.getDishSearchHighlightKey(sectionIndex, itemIndex)]: 0,
+    }));
+    this.focusDishSearchInput(sectionIndex, itemIndex);
   }
 
   /** Focus the dish search input for a given section/item (e.g. after add or select). */
@@ -559,26 +726,125 @@ export class MenuIntelligencePage implements AfterViewInit {
   /** Clear dish search query (closes dropdown); used by clickOutside and Escape. */
   protected clearDishSearch(sectionIndex: number, itemIndex: number): void {
     this.setDishSearchQuery(sectionIndex, itemIndex, '');
+    this.activeDishSearch_.set(null);
+    const edit = this.editingDishAt_();
+    if (edit && edit.sectionIndex === sectionIndex && edit.itemIndex === itemIndex && edit.previousRecipeId) {
+      const group = this.getItemsArray(sectionIndex).at(itemIndex);
+      group.patchValue({ recipe_id_: edit.previousRecipeId });
+      this.editingDishAt_.set(null);
+    }
   }
 
   /** Enter in dish search: select first recipe if any, else keep focus. */
+  protected getDishSearchHighlightKey(sectionIndex: number, itemIndex: number): string {
+    return `${sectionIndex}-${itemIndex}`;
+  }
+
+  protected getDishSearchHighlightedIndex(sectionIndex: number, itemIndex: number): number {
+    return this.dishSearchHighlightedIndex_()[this.getDishSearchHighlightKey(sectionIndex, itemIndex)] ?? 0;
+  }
+
   protected onDishSearchKeydown(sectionIndex: number, itemIndex: number, e: Event): void {
     const ke = e as KeyboardEvent;
-    if (ke.key !== 'Enter') return;
     const recipes = this.getFilteredRecipes(sectionIndex, itemIndex);
-    if (recipes.length > 0) {
+    const key = this.getDishSearchHighlightKey(sectionIndex, itemIndex);
+    let idx = this.getDishSearchHighlightedIndex(sectionIndex, itemIndex);
+    const maxIndex = Math.max(0, recipes.length - 1);
+
+    if (ke.key === 'ArrowDown') {
       ke.preventDefault();
-      this.selectRecipe(sectionIndex, itemIndex, recipes[0]);
+      ke.stopPropagation();
+      idx = recipes.length ? Math.min(idx + 1, maxIndex) : 0;
+      this.dishSearchHighlightedIndex_.update(m => ({ ...m, [key]: idx }));
+      this.scrollDropdownHighlightIntoView('.dish-search-wrap');
+      return;
+    }
+    if (ke.key === 'ArrowUp') {
+      ke.preventDefault();
+      ke.stopPropagation();
+      idx = Math.max(0, idx - 1);
+      this.dishSearchHighlightedIndex_.update(m => ({ ...m, [key]: idx }));
+      this.scrollDropdownHighlightIntoView('.dish-search-wrap');
+      return;
+    }
+    if (ke.key === 'Enter') {
+      if (recipes.length > 0) {
+        ke.preventDefault();
+        ke.stopPropagation();
+        const i = Math.min(idx, recipes.length - 1);
+        this.selectRecipe(sectionIndex, itemIndex, recipes[i]);
+      }
+      return;
+    }
+    if (ke.key === 'Escape') {
+      ke.preventDefault();
+      ke.stopPropagation();
+      this.clearDishSearch(sectionIndex, itemIndex);
     }
   }
 
   protected openSectionSearch(index: number): void {
     this.sectionSearchOpen_.set(index);
     this.sectionSearchQueries_.update(q => ({ ...q, [index]: '' }));
+    this.sectionCategoryHighlightedIndex_.update(m => ({ ...m, [index]: 0 }));
   }
 
   protected closeSectionSearch(): void {
     this.sectionSearchOpen_.set(null);
+  }
+
+  protected getSectionCategoryHighlightedIndex(sectionIndex: number): number {
+    return this.sectionCategoryHighlightedIndex_()[sectionIndex] ?? 0;
+  }
+
+  protected getSectionCategoryOptionCount(sectionIndex: number): number {
+    const cats = this.getFilteredSectionCategories(sectionIndex);
+    const hasQuery = this.getSectionSearchQuery(sectionIndex).trim().length > 0;
+    return cats.length + (hasQuery ? 2 : 1); // cats + [add with query?] + add new modal
+  }
+
+  protected onSectionSearchKeydown(sectionIndex: number, e: KeyboardEvent): void {
+    const maxIndex = this.getSectionCategoryOptionCount(sectionIndex) - 1;
+    let idx = this.getSectionCategoryHighlightedIndex(sectionIndex);
+    const cats = this.getFilteredSectionCategories(sectionIndex);
+    const hasQuery = this.getSectionSearchQuery(sectionIndex).trim().length > 0;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      e.stopPropagation();
+      idx = Math.min(idx + 1, maxIndex);
+      this.sectionCategoryHighlightedIndex_.update(m => ({ ...m, [sectionIndex]: idx }));
+      this.scrollDropdownHighlightIntoView('.section-search-wrap');
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      e.stopPropagation();
+      idx = Math.max(0, idx - 1);
+      this.sectionCategoryHighlightedIndex_.update(m => ({ ...m, [sectionIndex]: idx }));
+      this.scrollDropdownHighlightIntoView('.section-search-wrap');
+      return;
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
+      if (idx >= 0 && idx < cats.length) {
+        this.selectSectionCategory(sectionIndex, cats[idx]);
+        this.closeSectionSearch();
+      } else if (hasQuery && idx === cats.length) {
+        void this.addNewSectionCategory(sectionIndex);
+        this.closeSectionSearch();
+      } else if (idx === (cats.length + (hasQuery ? 1 : 0))) {
+        void this.openAddCategoryModal(sectionIndex);
+        this.closeSectionSearch();
+      }
+      return;
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      this.closeSectionSearch();
+    }
   }
 
   protected getSectionSearchQuery(index: number): string {
@@ -587,6 +853,11 @@ export class MenuIntelligencePage implements AfterViewInit {
 
   protected setSectionSearchQuery(index: number, value: string): void {
     this.sectionSearchQueries_.update(q => ({ ...q, [index]: value }));
+  }
+
+  protected onSectionSearchQueryChange(sectionIndex: number, value: string): void {
+    this.setSectionSearchQuery(sectionIndex, value);
+    this.sectionCategoryHighlightedIndex_.update(m => ({ ...m, [sectionIndex]: 0 }));
   }
 
   protected getFilteredSectionCategories(index: number): string[] {

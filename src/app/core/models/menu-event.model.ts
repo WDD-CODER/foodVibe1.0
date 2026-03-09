@@ -69,6 +69,7 @@ export interface MenuEvent {
   performance_tags_?: MenuPerformanceTags;
   cuisine_tags_?: string[];
   created_at_?: number;
+  updated_at_?: number;
   created_from_template_id_?: string;
   /** Resolved equipment + venue context (contextual logistics) */
   logistics_?: EventLogistics;
