@@ -1,10 +1,10 @@
-<!-- Reference form-modal: overlay + card + (h3 + c-modal-body + c-modal-actions from child). Reuse this structure for other form modals (see plans/096-supplier-modal-styling-upgrade.plan.md). -->
+<!-- Add-only modal (edit is inline in supplier list). Reference form-modal structure: plans/096-supplier-modal-styling-upgrade.plan.md -->
 @if (modalService.isOpen()) {
   <div class="c-modal-overlay" (click)="onOverlayClick()">
     <div class="c-modal-card c-modal-card--md" dir="rtl" (click)="$event.stopPropagation()">
       <app-supplier-form
         [embeddedInDashboard]="true"
-        [supplierToEdit]="modalService.editingSupplier()"
+        [supplierToEdit]="null"
         (saved)="modalService.close()"
         (cancel)="modalService.close()" />
     </div>

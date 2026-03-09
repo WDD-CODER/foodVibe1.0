@@ -78,6 +78,56 @@
           }
         </div>
       </div>
+      @if (editingId_() === item._id) {
+        <div class="inline-edit-panel" [formGroup]="editForm_" (clickOutside)="onInlinePanelClickOutside()">
+          <h3 class="inline-edit-title">{{ 'edit' | translatePipe }}: {{ item.name_hebrew }}</h3>
+
+          <div class="inline-edit-section">
+            <div class="inline-edit-grid">
+              <div class="inline-edit-field">
+                <label for="inline-supplier-name">{{ 'name' | translatePipe }}</label>
+                <input id="inline-supplier-name" type="text" formControlName="name_hebrew" class="c-input" />
+              </div>
+              <div class="inline-edit-field">
+                <label for="inline-supplier-contact">{{ 'contact_person' | translatePipe }}</label>
+                <input id="inline-supplier-contact" type="text" formControlName="contact_person_" class="c-input" />
+              </div>
+              <div class="inline-edit-field">
+                <label for="inline-supplier-min">{{ 'min_order' | translatePipe }}</label>
+                <input id="inline-supplier-min" type="number" formControlName="min_order_mov_" min="0" class="c-input" />
+              </div>
+              <div class="inline-edit-field">
+                <label for="inline-supplier-lead">{{ 'lead_time' | translatePipe }}</label>
+                <input id="inline-supplier-lead" type="number" formControlName="lead_time_days_" min="0" class="c-input" />
+              </div>
+            </div>
+            <div class="inline-edit-checkboxes">
+              <span class="inline-edit-check-label">{{ 'delivery_days' | translatePipe }}</span>
+              <div class="inline-edit-days-wrap" formArrayName="delivery_days_">
+                @for (ctrl of deliveryDaysArray.controls; track $index) {
+                  <label class="inline-edit-check">
+                    <input type="checkbox" [formControlName]="$index" />
+                    <span>{{ dayLabels[$index] }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="inline-edit-actions">
+            <button type="button" class="c-btn-ghost" (click)="onInlineCancel()">
+              {{ 'cancel' | translatePipe }}
+            </button>
+            <button type="button" class="c-btn-primary" (click)="onInlineSave()"
+              [disabled]="editForm_.invalid || isSavingEdit_()">
+              @if (isSavingEdit_()) {
+                <app-loader size="small" [inline]="true" />
+              }
+              {{ 'save' | translatePipe }}
+            </button>
+          </div>
+        </div>
+      }
     }
   </ng-container>
 
