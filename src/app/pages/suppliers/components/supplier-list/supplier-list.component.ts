@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { SupplierDataService } from '@services/supplier-data.service';
 import { KitchenStateService } from '@services/kitchen-state.service';
-import { AddSupplierFlowService } from '@services/add-supplier-flow.service';
+import { SupplierModalService } from '@services/supplier-modal.service';
 import { TranslationService } from '@services/translation.service';
 import { Supplier } from '@models/supplier.model';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
@@ -32,7 +32,7 @@ export class SupplierListComponent {
   protected readonly isLoggedIn = inject(UserService).isLoggedIn;
   private readonly supplierData = inject(SupplierDataService);
   private readonly kitchenState = inject(KitchenStateService);
-  private readonly addSupplierFlow = inject(AddSupplierFlowService);
+  private readonly supplierModal = inject(SupplierModalService);
   private readonly translation = inject(TranslationService);
   private readonly router = inject(Router);
   private readonly userMsg = inject(UserMsgService);
@@ -127,7 +127,7 @@ export class SupplierListComponent {
     ).length;
   }
 
-  protected async onAdd(): Promise<void> {
+  protected onAdd(): void {
     if (!this.isLoggedIn()) {
       this.userMsg.onSetWarningMsg(this.translation.translate('sign_in_to_use'));
       this.authModal.open('sign-in');
@@ -137,14 +137,16 @@ export class SupplierListComponent {
       this.addSupplierClick.emit();
       return;
     }
-    const added = await this.addSupplierFlow.open();
-    if (added) {
-      void this.router.navigate(['/suppliers/list']);
-    }
+    this.supplierModal.openAdd();
   }
 
-  onEdit(id: string): void {
-    this.router.navigate(['/suppliers/edit', id]);
+  onEdit(item: Supplier): void {
+    if (!this.isLoggedIn()) {
+      this.userMsg.onSetWarningMsg(this.translation.translate('sign_in_to_use'));
+      this.authModal.open('sign-in');
+      return;
+    }
+    this.supplierModal.openEdit(item);
   }
 
   async onDelete(item: Supplier): Promise<void> {

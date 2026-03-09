@@ -1,44 +1,42 @@
-<div class="supplier-form-container" dir="rtl">
-  <header class="form-header">
-    @if (isEditMode_()) {
-      <h2>{{ 'edit' | translatePipe }}: {{ supplierForm_.get('name_hebrew')?.value }}</h2>
-    } @else {
-      <h2>{{ 'add_supplier' | translatePipe }}</h2>
-    }
-  </header>
+@if (embeddedInDashboard()) {
+  @if (isEditMode_()) {
+    <h3>{{ 'edit' | translatePipe }}: {{ supplierForm_.get('name_hebrew')?.value }}</h3>
+  } @else {
+    <h3>{{ 'add_supplier' | translatePipe }}</h3>
+  }
 
-  <form [formGroup]="supplierForm_" (ngSubmit)="onSubmit()" class="form-body">
-    <div class="form-section">
-      <div class="form-group">
+  <form [formGroup]="supplierForm_" (ngSubmit)="onSubmit()">
+    <div class="c-modal-body">
+      <div class="c-input-stack full-width">
         <label for="name_hebrew">{{ 'name' | translatePipe }}</label>
-        <input id="name_hebrew" type="text" formControlName="name_hebrew" class="c-input" />
+        <input id="name_hebrew" type="text" formControlName="name_hebrew" />
       </div>
-      <div class="form-group">
+      <div class="c-input-stack full-width">
         <label for="contact_person_">{{ 'contact_person' | translatePipe }}</label>
-        <input id="contact_person_" type="text" formControlName="contact_person_" class="c-input" />
+        <input id="contact_person_" type="text" formControlName="contact_person_" />
       </div>
-      <div class="form-group">
+      <div class="c-input-stack full-width">
         <label>{{ 'delivery_days' | translatePipe }}</label>
-        <div class="delivery-days-wrap" formArrayName="delivery_days_">
+        <div class="c-filter-options c-filter-options--inline" formArrayName="delivery_days_">
           @for (ctrl of deliveryDaysArray.controls; track $index) {
-            <label class="day-check">
+            <label class="c-filter-option">
               <input type="checkbox" [formControlName]="$index" />
               {{ dayKeys[$index] | translatePipe }}
             </label>
           }
         </div>
       </div>
-      <div class="form-group">
+      <div class="c-input-stack full-width">
         <label for="min_order_mov_">{{ 'min_order' | translatePipe }}</label>
-        <input id="min_order_mov_" type="number" formControlName="min_order_mov_" min="0" class="c-input" />
+        <input id="min_order_mov_" type="number" formControlName="min_order_mov_" min="0" />
       </div>
-      <div class="form-group">
+      <div class="c-input-stack full-width">
         <label for="lead_time_days_">{{ 'lead_time' | translatePipe }}</label>
-        <input id="lead_time_days_" type="number" formControlName="lead_time_days_" min="0" class="c-input" />
+        <input id="lead_time_days_" type="number" formControlName="lead_time_days_" min="0" />
       </div>
     </div>
 
-    <div class="form-actions">
+    <div class="c-modal-actions">
       <button type="button" class="c-btn-ghost" (click)="onCancel()">
         {{ 'cancel' | translatePipe }}
       </button>
@@ -50,4 +48,58 @@
       </button>
     </div>
   </form>
-</div>
+} @else {
+  <div class="supplier-form-container" dir="rtl">
+    <header class="form-header">
+      @if (isEditMode_()) {
+        <h2>{{ 'edit' | translatePipe }}: {{ supplierForm_.get('name_hebrew')?.value }}</h2>
+      } @else {
+        <h2>{{ 'add_supplier' | translatePipe }}</h2>
+      }
+    </header>
+
+    <form [formGroup]="supplierForm_" (ngSubmit)="onSubmit()" class="form-body">
+      <div class="form-section">
+        <div class="form-group">
+          <label for="name_hebrew_page">{{ 'name' | translatePipe }}</label>
+          <input id="name_hebrew_page" type="text" formControlName="name_hebrew" class="c-input" />
+        </div>
+        <div class="form-group">
+          <label for="contact_person_page">{{ 'contact_person' | translatePipe }}</label>
+          <input id="contact_person_page" type="text" formControlName="contact_person_" class="c-input" />
+        </div>
+        <div class="form-group">
+          <label>{{ 'delivery_days' | translatePipe }}</label>
+          <div class="delivery-days-wrap" formArrayName="delivery_days_">
+            @for (ctrl of deliveryDaysArray.controls; track $index) {
+              <label class="day-check">
+                <input type="checkbox" [formControlName]="$index" />
+                {{ dayKeys[$index] | translatePipe }}
+              </label>
+            }
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="min_order_mov_page">{{ 'min_order' | translatePipe }}</label>
+          <input id="min_order_mov_page" type="number" formControlName="min_order_mov_" min="0" class="c-input" />
+        </div>
+        <div class="form-group">
+          <label for="lead_time_days_page">{{ 'lead_time' | translatePipe }}</label>
+          <input id="lead_time_days_page" type="number" formControlName="lead_time_days_" min="0" class="c-input" />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="c-btn-ghost" (click)="onCancel()">
+          {{ 'cancel' | translatePipe }}
+        </button>
+        <button type="submit" class="c-btn-primary" [disabled]="supplierForm_.invalid || isSaving_()">
+          @if (isSaving_()) {
+            <app-loader size="small" [inline]="true" />
+          }
+          {{ 'save' | translatePipe }}
+        </button>
+      </div>
+    </form>
+  </div>
+}

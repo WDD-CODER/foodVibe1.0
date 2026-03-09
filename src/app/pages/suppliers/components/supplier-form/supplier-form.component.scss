@@ -3,6 +3,7 @@
     display: block;
   }
 
+  /* Page mode only: modal mode uses engine .c-modal-body, .c-input-stack, .c-modal-actions */
   .supplier-form-container {
     max-width: 32rem;
 
@@ -33,10 +34,6 @@
 
         .c-input {
           width: 100%;
-          padding-inline: 0.75rem;
-          padding-block: 0.5rem;
-          border: 1px solid var(--border-default);
-          border-radius: var(--radius-md);
         }
 
         .delivery-days-wrap {

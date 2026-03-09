@@ -62,7 +62,7 @@
         <div class="col-lead c-list-body-cell" role="cell">{{ item.lead_time_days_ }}</div>
         <div class="col-linked c-list-body-cell" role="cell">{{ linkedProductCount_(item._id) }}</div>
         <div class="c-col-actions c-list-body-cell" role="cell">
-          <button type="button" class="c-icon-btn" (click)="onEdit(item._id)"
+          <button type="button" class="c-icon-btn" (click)="onEdit(item)"
             [attr.aria-label]="'edit' | translatePipe"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
             <lucide-icon name="pencil" [size]="18"></lucide-icon>

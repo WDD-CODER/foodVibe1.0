@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  effect,
   inject,
   input,
   OnInit,
@@ -31,6 +32,8 @@ const DAY_KEYS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fr
 })
 export class SupplierFormComponent implements OnInit {
   embeddedInDashboard = input<boolean>(false);
+  /** When set (e.g. from SupplierModalService), form is hydrated in modal mode without route resolver. */
+  supplierToEdit = input<Supplier | null>(null);
   saved = output<void>();
   cancel = output<void>();
 
@@ -50,15 +53,42 @@ export class SupplierFormComponent implements OnInit {
     return this.supplierForm_?.get('delivery_days_') as FormArray;
   }
 
-  ngOnInit(): void {
-    this.buildForm();
-    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((data) => {
-      const supplier = data['supplier'] as Supplier | null | undefined;
+  constructor() {
+    effect(() => {
+      const supplier = this.supplierToEdit();
+      if (!this.supplierForm_) return;
       if (supplier) {
         this.isEditMode_.set(true);
         this.hydrateForm(supplier);
+      } else if (supplier === null) {
+        this.isEditMode_.set(false);
+        this.supplierForm_.patchValue({
+          name_hebrew: '',
+          contact_person_: '',
+          min_order_mov_: 0,
+          lead_time_days_: 0,
+        });
+        const daysArray = this.supplierForm_.get('delivery_days_') as FormArray;
+        if (daysArray?.controls?.length === 7) {
+          for (let i = 0; i < 7; i++) {
+            daysArray.at(i).setValue(false);
+          }
+        }
       }
     });
+  }
+
+  ngOnInit(): void {
+    this.buildForm();
+    if (!this.embeddedInDashboard()) {
+      this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((data) => {
+        const supplier = data['supplier'] as Supplier | null | undefined;
+        if (supplier) {
+          this.isEditMode_.set(true);
+          this.hydrateForm(supplier);
+        }
+      });
+    }
   }
 
   private buildForm(): void {
@@ -104,7 +134,11 @@ export class SupplierFormComponent implements OnInit {
     };
     this.isSaving_.set(true);
     if (this.isEditMode_()) {
-      const supplier = this.route.snapshot.data['supplier'] as Supplier;
+      const supplier = this.embeddedInDashboard() ? (this.supplierToEdit() ?? undefined) : (this.route.snapshot.data['supplier'] as Supplier);
+      if (!supplier) {
+        this.isSaving_.set(false);
+        return;
+      }
       this.supplierData
         .updateSupplier({ ...supplier, ...payload })
         .then(() => {
