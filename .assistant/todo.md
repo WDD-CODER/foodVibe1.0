@@ -105,6 +105,19 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] Add app-supplier-modal to app.component.html
 - [x] Add/verify unsaved_changes_confirm in dictionary
 
+### Plan 098 — Remove Supplier Modal Edit Redundancy (`plans/098-remove-supplier-modal-edit-redundancy.plan.md`)
+
+- [x] Simplify supplier-modal.service.ts (remove edit API and state)
+- [x] Update supplier-modal.component.html to bind supplierToEdit to null
+
+### Plan 099 — Calculation and Shopping List Testing (`plans/099-calculation-shopping-list-testing.plan.md`)
+
+- [x] Add quantity-step.util.spec.ts (getQuantityStep, quantityIncrement, quantityDecrement)
+- [x] Add scaling.service.spec.ts (getScaleFactor, getScaledIngredients, getScaledPrepItems)
+- [x] Add menu-intelligence.service.spec.ts (derivePortions, hydrateDerivedPortions, computeEventIngredientCost, computeFoodCostPct)
+- [x] Add recipe-cost.service.spec.ts (computeRecipeCost, getCostForIngredient, getRecipeCostPerUnit, weight/volume)
+- [x] Add export.service.spec.ts (exportShoppingList, exportMenuShoppingList)
+
 ### Plan 097 — Portions Per Guest Formula Fix (`plans/097-portions-per-guest-formula-fix.plan.md`)
 
 - [x] In derivePortions: plated_course and buffet_family use guest_count × serving_portions (no take rate, no rounding)
@@ -574,6 +587,8 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 094 | Inline Edit & Supplier Modal | Done |
 | 095 | Menu Intelligence Gap Report | Planned |
 | 096 | Supplier Modal Styling Upgrade | Active |
+| 098 | Remove Supplier Modal Edit Redundancy | Active |
+| 099 | Calculation and Shopping List Testing | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 
