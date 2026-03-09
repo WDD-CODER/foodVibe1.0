@@ -95,15 +95,15 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ### Plan 094 — Inline Edit & Supplier Modal (`plans/094-inline-edit-supplier-modal.plan.md`)
 
-- [ ] Add editingId_, editForm_, dirty guard and inline save/cancel to equipment-list.component.ts
-- [ ] Add @if inline-edit-panel block in equipment-list.component.html
-- [ ] Add .inline-edit-panel styles to equipment-list.component.scss (cssLayer)
-- [ ] Create supplier-modal.service.ts
-- [ ] Create supplier-modal component (ts + html + scss)
-- [ ] Add supplierToEdit input and effect to supplier-form.component.ts
-- [ ] Swap onAdd/onEdit in supplier-list to use SupplierModalService
-- [ ] Add app-supplier-modal to app.component.html
-- [ ] Add/verify unsaved_changes_confirm in dictionary
+- [x] Add editingId_, editForm_, dirty guard and inline save/cancel to equipment-list.component.ts
+- [x] Add @if inline-edit-panel block in equipment-list.component.html
+- [x] Add .inline-edit-panel styles to equipment-list.component.scss (cssLayer)
+- [x] Create supplier-modal.service.ts
+- [x] Create supplier-modal component (ts + html + scss)
+- [x] Add supplierToEdit input and effect to supplier-form.component.ts
+- [x] Swap onAdd/onEdit in supplier-list to use SupplierModalService
+- [x] Add app-supplier-modal to app.component.html
+- [x] Add/verify unsaved_changes_confirm in dictionary
 
 ### Plan 097 — Portions Per Guest Formula Fix (`plans/097-portions-per-guest-formula-fix.plan.md`)
 
@@ -571,7 +571,7 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 || 089 | Menu Intelligence Upgrade | Active |
 | 090 | Whole-project logging audit | Active |
 | 091 | Menu intelligence inputs and layout | Active |
-| 094 | Inline Edit & Supplier Modal | Active |
+| 094 | Inline Edit & Supplier Modal | Done |
 | 095 | Menu Intelligence Gap Report | Planned |
 | 096 | Supplier Modal Styling Upgrade | Active |
 
