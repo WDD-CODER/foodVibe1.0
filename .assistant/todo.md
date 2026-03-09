@@ -78,6 +78,13 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] Trim demo-products, demo-equipment, demo-suppliers, demo-venues, demo-labels
 - [x] Trim demo-kitchen-preparations.json to used categories and preparations only
 
+### Plan 096 — Supplier Modal Styling Upgrade (`plans/096-supplier-modal-styling-upgrade.plan.md`)
+
+- [x] Align supplier form with shared modal pattern when embedded (h3, c-modal-body, c-input-stack, c-modal-actions)
+- [x] Delivery days via c-filter-options--inline + c-filter-option
+- [x] Supplier form SCSS: rely on engines, minimal overrides only
+- [x] Add reference comment to supplier-modal for reuse pattern
+
 ### Plan 095 — Menu Intelligence Gap Report (`plans/095-menu-intelligence-gap-report.plan.md`)
 
 - [ ] Add `{ capture: true }` to @HostListener in menu-intelligence.page.ts
@@ -97,6 +104,12 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [ ] Swap onAdd/onEdit in supplier-list to use SupplierModalService
 - [ ] Add app-supplier-modal to app.component.html
 - [ ] Add/verify unsaved_changes_confirm in dictionary
+
+### Plan 097 — Portions Per Guest Formula Fix (`plans/097-portions-per-guest-formula-fix.plan.md`)
+
+- [x] In derivePortions: plated_course and buffet_family use guest_count × serving_portions (no take rate, no rounding)
+- [x] Keep cocktail_passed as round(guest_count × pieces_per_person × take_rate)
+- [x] Verify 2 guests × 1 portion → 2 total; fractional 0.25/0.5 work
 
 ### Plan 093 — Shopping List Calculation Fix (`plans/093-shopping-list-calculation-fix.plan.md`)
 
@@ -560,6 +573,7 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 091 | Menu intelligence inputs and layout | Active |
 | 094 | Inline Edit & Supplier Modal | Active |
 | 095 | Menu Intelligence Gap Report | Planned |
+| 096 | Supplier Modal Styling Upgrade | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 
