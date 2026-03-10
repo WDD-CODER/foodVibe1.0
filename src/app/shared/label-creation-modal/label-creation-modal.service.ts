@@ -2,7 +2,7 @@ import { Injectable, signal, inject } from '@angular/core';
 import { Subject, firstValueFrom } from 'rxjs';
 import { TranslationService } from '@services/translation.service';
 
-export interface LabelCreationResult {
+interface LabelCreationResult {
   key: string;
   hebrewLabel: string;
   color: string;

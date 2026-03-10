@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 
-export type ConfirmModalVariant = 'default' | 'danger' | 'warning';
+type ConfirmModalVariant = 'default' | 'danger' | 'warning';
 
 export interface ConfirmModalOptions {
   /** Translation key for the confirm/save button. Derived from title if omitted. */

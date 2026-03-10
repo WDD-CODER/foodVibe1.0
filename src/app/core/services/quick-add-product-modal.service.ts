@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { Subject, firstValueFrom } from 'rxjs';
 import { Product } from '../models/product.model';
 
-export interface QuickAddProductConfig {
+interface QuickAddProductConfig {
   prefillName: string;
 }
 

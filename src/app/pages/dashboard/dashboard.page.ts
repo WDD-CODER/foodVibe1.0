@@ -16,7 +16,7 @@ import { VenueListComponent } from '../venues/components/venue-list/venue-list.c
 import { VenueFormComponent } from '../venues/components/venue-form/venue-form.component';
 import { TrashPage } from '../trash/trash.page';
 
-export type DashboardTab = 'overview' | 'metadata' | 'venues' | 'add-venue' | 'trash';
+type DashboardTab = 'overview' | 'metadata' | 'venues' | 'add-venue' | 'trash';
 
 const TAB_QUERY_VALUES: Record<DashboardTab, string | null> = {
   overview: null,

@@ -15,9 +15,9 @@ import { ActivityLogService } from './activity-log.service';
 import { UserMsgService } from './user-msg.service';
 import { LoggingService } from './logging.service';
 
-export const BACKUP_FILE_VERSION = 1;
+const BACKUP_FILE_VERSION = 1;
 
-export interface BackupExportPayload {
+interface BackupExportPayload {
   version: number;
   exportedAt: string;
   data: Record<string, unknown>;

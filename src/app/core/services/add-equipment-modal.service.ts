@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { Subject, firstValueFrom } from 'rxjs';
 import { EquipmentCategory } from '../models/equipment.model';
 
-export interface AddEquipmentResult {
+interface AddEquipmentResult {
   name: string;
   category: EquipmentCategory;
 }
