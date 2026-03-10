@@ -9,8 +9,8 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { UserService } from '@services/user.service';
 import { UserMsgService } from '@services/user-msg.service';
-import { AuthModalService } from '@services/auth-modal.service';
 import { TranslationService } from '@services/translation.service';
+import { RequireAuthService } from 'src/app/core/utils/require-auth.util';
 import { LoggingService } from '@services/logging.service';
 import { ConfirmModalService } from '@services/confirm-modal.service';
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
@@ -31,10 +31,10 @@ type SortField = 'name' | 'category' | 'owned';
 })
 export class EquipmentListComponent {
   protected readonly isLoggedIn = inject(UserService).isLoggedIn;
+  private readonly requireAuthService = inject(RequireAuthService);
   private readonly equipmentData = inject(EquipmentDataService);
   private readonly router = inject(Router);
   private readonly userMsg = inject(UserMsgService);
-  private readonly authModal = inject(AuthModalService);
   private readonly translation = inject(TranslationService);
   private readonly logging = inject(LoggingService);
   private readonly confirmModal = inject(ConfirmModalService);
@@ -191,11 +191,7 @@ export class EquipmentListComponent {
   }
 
   async onEdit(item: Equipment): Promise<void> {
-    if (!this.isLoggedIn()) {
-      this.userMsg.onSetWarningMsg(this.translation.translate('sign_in_to_use'));
-      this.authModal.open('sign-in');
-      return;
-    }
+    if (!this.requireAuthService.requireAuth()) return;
     const currentId = this.editingId_();
     if (currentId !== null && currentId !== item._id && this.editForm_.dirty) {
       const saveFirst = await this.confirmModal.open(
@@ -261,11 +257,7 @@ export class EquipmentListComponent {
   }
 
   async onDelete(item: Equipment): Promise<void> {
-    if (!this.isLoggedIn()) {
-      this.userMsg.onSetWarningMsg(this.translation.translate('sign_in_to_use'));
-      this.authModal.open('sign-in');
-      return;
-    }
+    if (!this.requireAuthService.requireAuth()) return;
     if (!confirm('האם למחוק את פריט הציוד "' + (item.name_hebrew ?? '') + '"?')) return;
     this.deletingId_.set(item._id);
     try {

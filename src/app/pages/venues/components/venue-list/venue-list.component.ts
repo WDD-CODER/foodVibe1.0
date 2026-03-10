@@ -6,8 +6,8 @@ import { LucideAngularModule } from 'lucide-angular';
 import { VenueDataService } from '@services/venue-data.service';
 import { UserService } from '@services/user.service';
 import { UserMsgService } from '@services/user-msg.service';
-import { AuthModalService } from '@services/auth-modal.service';
 import { TranslationService } from '@services/translation.service';
+import { RequireAuthService } from 'src/app/core/utils/require-auth.util';
 import { LoggingService } from '@services/logging.service';
 import { VenueProfile, EnvironmentType } from '@models/venue.model';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
@@ -48,8 +48,8 @@ export class VenueListComponent {
   private readonly venueData = inject(VenueDataService);
   private readonly router = inject(Router);
   protected readonly isLoggedIn = inject(UserService).isLoggedIn;
+  private readonly requireAuthService = inject(RequireAuthService);
   private readonly userMsg = inject(UserMsgService);
-  private readonly authModal = inject(AuthModalService);
   private readonly translation = inject(TranslationService);
   private readonly logging = inject(LoggingService);
 
@@ -127,11 +127,7 @@ export class VenueListComponent {
   }
 
   protected onAddPlace(): void {
-    if (!this.isLoggedIn()) {
-      this.userMsg.onSetWarningMsg(this.translation.translate('sign_in_to_use'));
-      this.authModal.open('sign-in');
-      return;
-    }
+    if (!this.requireAuthService.requireAuth()) return;
     if (this.embeddedInDashboard) {
       this.addVenueClick.emit();
     } else {
@@ -144,11 +140,7 @@ export class VenueListComponent {
   }
 
   async onDelete(item: VenueProfile): Promise<void> {
-    if (!this.isLoggedIn()) {
-      this.userMsg.onSetWarningMsg(this.translation.translate('sign_in_to_use'));
-      this.authModal.open('sign-in');
-      return;
-    }
+    if (!this.requireAuthService.requireAuth()) return;
     if (!confirm('למחוק את המיקום "' + (item.name_hebrew ?? '') + '"?')) return;
     this.deletingId_.set(item._id);
     try {
