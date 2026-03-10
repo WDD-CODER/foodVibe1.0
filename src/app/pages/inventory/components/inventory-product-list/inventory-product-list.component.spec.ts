@@ -1,9 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { InventoryProductListComponent } from './inventory-product-list.component';
 import { KitchenStateService } from '@services/kitchen-state.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { signal } from '@angular/core';
-import { LucideAngularModule, Search, Trash2, Pencil, PlusCircle, Menu, X, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-angular';
+import { of } from 'rxjs';
+import { LucideAngularModule, Search, Trash2, Pencil, PlusCircle, Plus, Menu, X, ArrowUpDown, ArrowUp, ArrowDown, ShieldAlert } from 'lucide-angular';
 import { Product } from '@models/product.model';
 import { TranslationService } from '@services/translation.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
@@ -40,7 +41,12 @@ describe('InventoryProductListComponent', () => {
   };
 
   beforeEach(async () => {
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+    mockRouter = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree', 'serializeUrl'], {
+      events: of(),
+      url: of('')
+    });
+    mockRouter.createUrlTree.and.returnValue({} as any);
+    mockRouter.serializeUrl.and.returnValue('');
 
     const mockSuppliersSignal = signal([
       { _id: 'Supplier A', name_hebrew: 'Supplier A' },
@@ -56,11 +62,12 @@ describe('InventoryProductListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         InventoryProductListComponent,
-        LucideAngularModule.pick({ Search, Trash2, Pencil, PlusCircle, Menu, X, ArrowUpDown, ArrowUp, ArrowDown })
+        LucideAngularModule.pick({ Search, Trash2, Pencil, PlusCircle, Plus, Menu, X, ArrowUpDown, ArrowUp, ArrowDown, ShieldAlert })
       ],
       providers: [
         { provide: KitchenStateService, useValue: mockKitchenState },
         { provide: Router, useValue: mockRouter },
+        { provide: ActivatedRoute, useValue: { queryParams: of({}), params: of({}), snapshot: { queryParams: {}, params: {} } } },
         { provide: TranslationService, useValue: { translate: (k: string) => k || '' } },
         { provide: UnitRegistryService, useValue: mockUnitRegistry }
       ]

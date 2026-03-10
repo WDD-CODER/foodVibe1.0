@@ -3,6 +3,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { HeaderComponent } from './header.component';
 import { provideRouter, RouterLinkWithHref } from '@angular/router';
 import { By } from '@angular/platform-browser';
+import { LucideAngularModule, Menu, X, CircleUserRound, LogOut } from 'lucide-angular';
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
@@ -10,7 +11,7 @@ describe('HeaderComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HeaderComponent, HttpClientTestingModule],
+      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick({ Menu, X, CircleUserRound, LogOut })],
       providers: [
         // מספקים נתיבים ריקים כדי לאפשר ל-RouterLink לעבוד בבדיקה
         provideRouter([
@@ -40,8 +41,8 @@ describe('HeaderComponent', () => {
 
     expect(hrefs).toContain('/dashboard');
     expect(hrefs).toContain('/inventory');
-    expect(hrefs).toContain('/recipe-builder');
     expect(hrefs).toContain('/recipe-book');
+    expect(hrefs).toContain('/menu-library');
   });
 
   it('should have 4 navigation links', () => {

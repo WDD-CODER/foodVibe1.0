@@ -4,7 +4,7 @@ import { of } from 'rxjs';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { DashboardPage } from './dashboard.page';
-import { LucideAngularModule, PlusCircle, FilePlus, Utensils } from 'lucide-angular';
+import { LucideAngularModule, PlusCircle, FilePlus, Utensils, MapPin, Trash2, Truck } from 'lucide-angular';
 
 describe('DashboardPage', () => {
   let fixture: ComponentFixture<DashboardPage>;
@@ -18,7 +18,7 @@ describe('DashboardPage', () => {
       imports: [
         DashboardPage,
         HttpClientTestingModule,
-        LucideAngularModule.pick({ PlusCircle, FilePlus, Utensils }),
+        LucideAngularModule.pick({ PlusCircle, FilePlus, Utensils, MapPin, Trash2, Truck }),
       ],
       providers: [
         { provide: Router, useValue: router },

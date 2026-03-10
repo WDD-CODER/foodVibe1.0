@@ -10,6 +10,7 @@ import { UnitRegistryService } from '@services/unit-registry.service';
 import { ConversionService } from '@services/conversion.service';
 import { UnitCreatorModal } from 'src/app/shared/unit-creator/unit-creator.component';
 import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
+import { LucideAngularModule, Menu, X, CircleUserRound, LogOut, Plus, CookingPot } from 'lucide-angular';
 
 // 1. Rigorous Mock to replace the problematic production component
 @Component({
@@ -32,9 +33,9 @@ describe('AppComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         AppComponent,
-        // We still import dependencies that don't crash
         HeaderComponent,
         UserMsg,
+        LucideAngularModule.pick({ Menu, X, CircleUserRound, LogOut, Plus, CookingPot }),
       ],
       providers: [
         provideRouter([]),

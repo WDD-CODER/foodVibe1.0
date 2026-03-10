@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, FormArray, ReactiveFormsModule } from '@angular/forms';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { LucideAngularModule, Plus, Trash2, Timer, Minus, ArrowUpDown, X } from 'lucide-angular';
+import { LucideAngularModule, Plus, Trash2, Timer, Minus, ArrowUpDown, X, GripVertical } from 'lucide-angular';
 import { RecipeWorkflowComponent } from './recipe-workflow.component';
 
 describe('RecipeWorkflowComponent', () => {
@@ -12,7 +12,7 @@ describe('RecipeWorkflowComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RecipeWorkflowComponent, ReactiveFormsModule, LucideAngularModule.pick({ Plus, Trash2, Timer, Minus, ArrowUpDown, X })],
+      imports: [RecipeWorkflowComponent, ReactiveFormsModule, LucideAngularModule.pick({ Plus, Trash2, Timer, Minus, ArrowUpDown, X, GripVertical })],
       providers: [FormBuilder, provideHttpClient(), provideHttpClientTesting()]
     }).compileComponents();
 

@@ -15,10 +15,12 @@ describe('ProductDataService', () => {
   ];
 
   beforeEach(fakeAsync(() => {
-    storageSpy = jasmine.createSpyObj('StorageService', ['query', 'get', 'post', 'put', 'remove']);
-    
+    storageSpy = jasmine.createSpyObj('StorageService', ['query', 'get', 'post', 'put', 'remove', 'appendExisting']);
+
+    storageSpy.appendExisting.and.returnValue(Promise.resolve());
     // Crucial: The constructor calls query() immediately
     storageSpy.query.and.returnValue(Promise.resolve(mockProducts));
+    storageSpy.get.and.returnValue(Promise.resolve(mockProducts[0]));
 
     TestBed.configureTestingModule({
       providers: [
@@ -54,6 +56,7 @@ describe('ProductDataService', () => {
   describe('CRUD Operations', () => {
     it('should update an existing product in the signal', fakeAsync(() => {
       const updatedProduct = { ...mockProducts[0], name_hebrew: 'Rotten Tomato', categories_: ['Veg'], supplierIds_: [] } as Product;
+      storageSpy.get.and.returnValue(Promise.resolve(mockProducts[0]));
       storageSpy.put.and.returnValue(Promise.resolve(updatedProduct));
 
       service.updateProduct(updatedProduct);

@@ -62,7 +62,7 @@ describe('RecipeHeaderComponent', () => {
   });
 
   it('should display totalWeightG from input', () => {
-    fixture.componentRef.setInput('totalWeightG', 350);
+    fixture.componentRef.setInput('totalBrutoWeightG', 350);
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
     expect(el.textContent).toContain('350g');

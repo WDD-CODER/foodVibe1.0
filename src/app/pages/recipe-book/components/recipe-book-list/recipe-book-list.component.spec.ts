@@ -2,11 +2,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RecipeBookListComponent } from './recipe-book-list.component';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { RecipeCostService } from '@services/recipe-cost.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { signal } from '@angular/core';
-import { LucideAngularModule, Search, Trash2, Pencil, Plus, Menu, X, ShieldAlert, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-angular';
+import { of } from 'rxjs';
+import { LucideAngularModule, Search, Trash2, Pencil, Plus, Menu, X, ShieldAlert, ArrowUpDown, ArrowUp, ArrowDown, ChevronRight, ChevronLeft, ChevronDown, BookOpen, Tag, CircleX } from 'lucide-angular';
 import { Recipe } from '@models/recipe.model';
 import { TranslationService } from '@services/translation.service';
+import { UserService } from '@services/user.service';
+import { UserMsgService } from '@services/user-msg.service';
+import { AuthModalService } from '@services/auth-modal.service';
 
 describe('RecipeBookListComponent', () => {
   let component: RecipeBookListComponent;
@@ -29,6 +33,7 @@ describe('RecipeBookListComponent', () => {
   const mockProductsSignal = signal([{ _id: 'p1', allergens_: ['gluten'] }]);
 
   beforeEach(async () => {
+    sessionStorage.removeItem('list-state:recipe-book');
     const mockKitchenState = {
       recipes_: mockRecipesSignal,
       products_: mockProductsSignal,
@@ -38,13 +43,17 @@ describe('RecipeBookListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         RecipeBookListComponent,
-        LucideAngularModule.pick({ Search, Trash2, Pencil, Plus, Menu, X, ShieldAlert, ArrowUpDown, ArrowUp, ArrowDown })
+        LucideAngularModule.pick({ Search, Trash2, Pencil, Plus, Menu, X, ShieldAlert, ArrowUpDown, ArrowUp, ArrowDown, ChevronRight, ChevronLeft, ChevronDown, BookOpen, Tag, CircleX })
       ],
       providers: [
         { provide: KitchenStateService, useValue: mockKitchenState },
         { provide: RecipeCostService, useValue: { computeRecipeCost: () => 10 } },
         { provide: Router, useValue: jasmine.createSpyObj('Router', ['navigate']) },
-        { provide: TranslationService, useValue: { translate: (k: string) => k || '' } }
+        { provide: ActivatedRoute, useValue: { queryParams: of({}), params: of({}), snapshot: { queryParams: {}, params: {} } } },
+        { provide: TranslationService, useValue: { translate: (k: string) => k || '' } },
+        { provide: UserService, useValue: { isLoggedIn: () => true } },
+        { provide: UserMsgService, useValue: { onSetWarningMsg: () => {} } },
+        { provide: AuthModalService, useValue: { open: () => {} } }
       ]
     }).compileComponents();
 

@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MetadataManagerComponent } from './metadata-manager.page.component';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
@@ -23,6 +25,8 @@ describe('MetadataManagerPageComponent', () => {
   const mockUnits = signal(['gram', 'ml']);
   const mockAllergens = signal(['gluten', 'nuts']);
   const mockCategories = signal(['vegetables', 'meat']);
+  const mockLabels = signal([{ key: 'label1', color: '#ccc' }]);
+  const mockMenuTypes = signal<{ key: string }[]>([]);
   const mockProducts = signal([]);
 
   beforeEach(async () => {
@@ -33,10 +37,13 @@ describe('MetadataManagerPageComponent', () => {
     });
     unitRegistrySpy.getConversion.and.returnValue(1);
 
-    const metadataRegistrySpy = jasmine.createSpyObj('MetadataRegistryService', ['registerAllergen'], {
+    const metadataRegistrySpy = jasmine.createSpyObj('MetadataRegistryService', ['registerAllergen', 'getLabelColor'], {
       allAllergens_: mockAllergens,
-      allCategories_: mockCategories
+      allCategories_: mockCategories,
+      allLabels_: mockLabels,
+      allMenuTypes_: mockMenuTypes
     });
+    metadataRegistrySpy.getLabelColor.and.returnValue('#999');
 
     const productDataSpy = jasmine.createSpyObj('ProductDataService', [], {
       allProducts_: mockProducts
@@ -48,6 +55,8 @@ describe('MetadataManagerPageComponent', () => {
         LucideAngularModule.pick({ Scale, AlertTriangle, X, ChevronLeft, Tag, Trash2 })
       ],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: UnitRegistryService, useValue: unitRegistrySpy },
         { provide: MetadataRegistryService, useValue: metadataRegistrySpy },
         { provide: ProductDataService, useValue: productDataSpy },
