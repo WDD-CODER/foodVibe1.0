@@ -1087,20 +1087,54 @@ textarea.c-input {
   }
 }
 
-/* Plan 016: Print-friendly recipe view */
+/* Plan 016: Print-friendly recipe view; menu-intelligence; export preview */
 @media print {
   body * {
     visibility: hidden;
   }
+  /* Path from body to printable content so subtree is visible */
+  app-root,
+  app-recipe-builder-page,
+  app-menu-intelligence-page,
   .recipe-builder-container,
-  .recipe-builder-container * {
+  .recipe-builder-container *,
+  .menu-editor-shell,
+  .menu-editor-shell * {
     visibility: visible;
   }
   .recipe-builder-container {
-    position: absolute;
-    inset: 0;
+    position: static;
+    min-height: 0;
     padding: 1rem;
     background: #fff;
+  }
+  .menu-editor-shell {
+    position: static;
+    padding: 0;
+    background: #fff;
+  }
+  /* Prevent blank trailing page: contain print to content height */
+  html,
+  body {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+  /* When export preview is open, print only the preview paper */
+  body.export-preview-visible * {
+    visibility: hidden;
+  }
+  body.export-preview-visible .export-preview-paper-wrap,
+  body.export-preview-visible .export-preview-paper-wrap * {
+    visibility: visible;
+  }
+  body.export-preview-visible .export-preview-overlay {
+    position: static;
+    background: transparent;
+    padding: 0;
+  }
+  body.export-preview-visible .export-preview-actions {
+    display: none !important;
   }
   .no-print,
   .history-view-banner,
