@@ -65,7 +65,10 @@
         "export_recipe_info": "ייצוא פרטי מתכון",
         "export_shopping_list": "רשימת קניות",
         "export_menu_info": "ייצוא תפריט",
-        "export_menu_shopping_list": "רשימת קניות תפריט"
+        "export_menu_shopping_list": "רשימת קניות תפריט",
+        "export_checklist": "ייצוא צ'קליסט",
+        "export_checklist_by_dish": "לפי מנה",
+        "export_checklist_by_category": "לפי קטגוריה"
     },
     "general": {
         "search": "חיפוש",

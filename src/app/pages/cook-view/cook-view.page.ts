@@ -309,16 +309,16 @@ export class CookViewPage implements OnInit {
     }
   }
 
-  protected onExportInfo(): void {
+  protected async onExportInfo(): Promise<void> {
     const recipe = this.recipe_();
     const qty = this.targetQuantity_();
-    if (recipe) this.exportService.exportRecipeInfo(recipe, qty);
+    if (recipe) await this.exportService.exportRecipeInfo(recipe, qty);
   }
 
-  protected onExportShoppingList(): void {
+  protected async onExportShoppingList(): Promise<void> {
     const recipe = this.recipe_();
     const qty = this.targetQuantity_();
-    if (recipe) this.exportService.exportShoppingList(recipe, qty);
+    if (recipe) await this.exportService.exportShoppingList(recipe, qty);
   }
 
   /** For route guard: true when in edit mode with unsaved changes. */

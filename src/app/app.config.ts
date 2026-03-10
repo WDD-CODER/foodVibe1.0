@@ -2,7 +2,7 @@ import { APP_INITIALIZER, ApplicationConfig, ErrorHandler, importProvidersFrom, 
 import { GlobalErrorHandler } from './core/services/global-error.handler'
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, ArrowUpDown, Archive, CalendarClock, ChevronDown, ChevronLeft, ChevronRight, Circle, CircleCheck, CircleX, CookingPot, Download, Edit, FilePlus, Flame, FlaskConical, GripVertical, History, Image, LucideAngularModule, MapPin, Menu, Minus, Package, Pencil, Plus, PlusCircle, RotateCcw, Save, Scale, Search, Settings, ShieldAlert, Table2, Timer, Trash2, Truck, TrendingUp, Upload, Utensils, Tags, BookOpen, Copy, PanelRightClose, Filter, PanelLeftClose, Info, Printer, UtensilsCrossed, ChevronUp, Library, CircleUserRound } from 'lucide-angular';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, ArrowUpDown, Archive, CalendarClock, ChevronDown, ChevronLeft, ChevronRight, Circle, CircleCheck, CircleX, ClipboardList, CookingPot, Download, Edit, FilePlus, Flame, FlaskConical, GripVertical, History, Image, LucideAngularModule, MapPin, Menu, Minus, Package, Pencil, Plus, PlusCircle, RotateCcw, Save, Scale, Search, Settings, ShieldAlert, Table2, Timer, Trash2, Truck, TrendingUp, Upload, Utensils, Tags, BookOpen, Copy, PanelRightClose, Filter, PanelLeftClose, Info, Printer, UtensilsCrossed, ChevronUp, Library, CircleUserRound } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { AlertCircle, AlertTriangle, Tag, X, LogOut, ShoppingCart } from 'lucide-angular/src/icons';
 import { provideHttpClient, withInterceptors } from '@angular/common/http'
@@ -83,6 +83,7 @@ export const appConfig: ApplicationConfig = {
         Download,
         Upload,
         CircleUserRound,
+        ClipboardList,
         Settings
       })
     )

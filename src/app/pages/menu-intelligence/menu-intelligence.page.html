@@ -16,6 +16,23 @@
             <lucide-icon name="shopping-cart" [size]="16"></lucide-icon>
             {{ 'export_menu_shopping_list' | translatePipe }}
           </button>
+          <div class="checklist-export-wrap">
+            <button type="button" class="toolbar-btn export" (click)="toggleExportChecklistDropdown()" [attr.aria-label]="'export_checklist' | translatePipe" [attr.aria-expanded]="exportChecklistDropdownOpen_()">
+              <lucide-icon name="clipboard-list" [size]="16"></lucide-icon>
+              {{ 'export_checklist' | translatePipe }}
+              <lucide-icon name="chevron-down" [size]="14"></lucide-icon>
+            </button>
+            @if (exportChecklistDropdownOpen_()) {
+              <div class="checklist-export-dropdown" (clickOutside)="closeExportChecklistDropdown()">
+                <button type="button" class="checklist-export-option" (click)="onExportChecklist('by_dish')">
+                  {{ 'export_checklist_by_dish' | translatePipe }}
+                </button>
+                <button type="button" class="checklist-export-option" (click)="onExportChecklist('by_category')">
+                  {{ 'export_checklist_by_category' | translatePipe }}
+                </button>
+              </div>
+            }
+          </div>
           <button type="button" class="toolbar-btn export" (click)="printMenu()">
             <lucide-icon name="printer" [size]="16"></lucide-icon>
             {{ 'menu_export_customer' | translatePipe }}

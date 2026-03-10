@@ -46,7 +46,7 @@ describe('ExportService', () => {
   });
 
   describe('exportShoppingList (single recipe)', () => {
-    it('should call getScaleFactor and getScaledIngredients with recipe and correct factor', () => {
+    it('should call getScaleFactor and getScaledIngredients with recipe and correct factor', async () => {
       const recipe: Recipe = {
         _id: 'r1',
         name_hebrew: 'Test Recipe',
@@ -57,7 +57,7 @@ describe('ExportService', () => {
         default_station_: '',
         is_approved_: false,
       };
-      service.exportShoppingList(recipe, 4);
+      await service.exportShoppingList(recipe, 4);
 
       expect(scalingSpy.getScaleFactor).toHaveBeenCalledWith(recipe, 4);
       expect(scalingSpy.getScaledIngredients).toHaveBeenCalledWith(recipe, 2); // 4/2
@@ -98,7 +98,7 @@ describe('ExportService', () => {
   });
 
   describe('exportMenuShoppingList', () => {
-    it('should call getScaledIngredients per dish with factor = derived_portions_ / yield_amount_', () => {
+    it('should call getScaledIngredients per dish with factor = derived_portions_ / yield_amount_', async () => {
       const recipe: Recipe = {
         _id: 'r1',
         name_hebrew: 'Dish',
@@ -147,14 +147,14 @@ describe('ExportService', () => {
         financial_targets_: { target_food_cost_pct_: 0, target_revenue_per_guest_: 0 },
         performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' },
       };
-      service.exportMenuShoppingList(menu, [recipe], [product]);
+      await service.exportMenuShoppingList(menu, [recipe], [product]);
 
       expect(scalingSpy.getScaledIngredients).toHaveBeenCalledWith(recipe, 2); // 20/10
       expect(scalingSpy.getScaledIngredients).toHaveBeenCalledWith(recipe, 0.5); // 5/10
       expect(scalingSpy.getScaledIngredients).toHaveBeenCalledTimes(2);
     });
 
-    it('should skip items with no recipe or no ingredients', () => {
+    it('should skip items with no recipe or no ingredients', async () => {
       const recipe: Recipe = {
         _id: 'r1',
         name_hebrew: 'Dish',
@@ -185,7 +185,7 @@ describe('ExportService', () => {
         financial_targets_: { target_food_cost_pct_: 0, target_revenue_per_guest_: 0 },
         performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' },
       };
-      service.exportMenuShoppingList(menu, [recipe], []);
+      await service.exportMenuShoppingList(menu, [recipe], []);
       expect(scalingSpy.getScaledIngredients).not.toHaveBeenCalled();
     });
   });

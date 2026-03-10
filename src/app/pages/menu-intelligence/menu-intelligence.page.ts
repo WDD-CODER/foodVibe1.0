@@ -1071,13 +1071,29 @@ export class MenuIntelligencePage implements AfterViewInit {
     return { ...built, _id: this.editingId_() ?? '' };
   }
 
-  protected onExportMenuInfo(): void {
+  protected async onExportMenuInfo(): Promise<void> {
     const menu = this.getCurrentMenuForExport();
-    this.exportService.exportMenuInfo(menu, this.recipes_());
+    await this.exportService.exportMenuInfo(menu, this.recipes_());
   }
 
-  protected onExportMenuShoppingList(): void {
+  protected async onExportMenuShoppingList(): Promise<void> {
     const menu = this.getCurrentMenuForExport();
-    this.exportService.exportMenuShoppingList(menu, this.recipes_(), this.products_());
+    await this.exportService.exportMenuShoppingList(menu, this.recipes_(), this.products_());
+  }
+
+  protected readonly exportChecklistDropdownOpen_ = signal(false);
+
+  protected toggleExportChecklistDropdown(): void {
+    this.exportChecklistDropdownOpen_.update(v => !v);
+  }
+
+  protected closeExportChecklistDropdown(): void {
+    this.exportChecklistDropdownOpen_.set(false);
+  }
+
+  protected async onExportChecklist(mode: 'by_dish' | 'by_category'): Promise<void> {
+    const menu = this.getCurrentMenuForExport();
+    await this.exportService.exportChecklist(menu, this.recipes_(), mode);
+    this.closeExportChecklistDropdown();
   }
 }
