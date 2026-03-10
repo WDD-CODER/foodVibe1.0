@@ -5,7 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { RecipeCostService } from '@services/recipe-cost.service';
 import type { IngredientWeightRow } from '@services/recipe-cost.service';
-import { IngredientSearchComponent } from '../ingredient-search/ingredient-search.component';
+import { IngredientSearchComponent, type SearchableItem } from '../ingredient-search/ingredient-search.component';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { FocusByRowDirective } from '@directives/focus-by-row.directive';
@@ -119,12 +119,13 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
     return `${((rowG / total) * 100).toFixed(1)}%`;
   }
 
-  onItemSelected(item: any, group: FormGroup) {
+  onItemSelected(item: SearchableItem, group: FormGroup) {
+    const unit = 'base_unit_' in item ? (item.base_unit_ ?? '') : ('yield_unit_' in item ? (item.yield_unit_ ?? '') : '');
     group.patchValue({
       name_hebrew: item.name_hebrew,
       referenceId: item._id,
       item_type: item.item_type_,
-      unit: item.base_unit_ || '',
+      unit,
       amount_net: 0,
     });
     this.ingredientsFormArray().markAsDirty();

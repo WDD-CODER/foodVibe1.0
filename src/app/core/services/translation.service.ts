@@ -24,6 +24,7 @@ export class TranslationService {
       const baseFlattened = {
         ...baseData.units,
         ...baseData.categories,
+        ...(baseData.section_categories ?? {}),
         ...baseData.allergens,
         ...(baseData.actions ?? {}),
         ...(baseData.preparation_categories ?? {}),

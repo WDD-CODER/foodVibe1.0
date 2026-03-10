@@ -39,6 +39,9 @@ type MenuItemForm = {
   serving_portions_pct?: number;
 };
 
+/** Raw section shape from form getRawValue() before mapping to MenuSection. */
+type MenuSectionFormRaw = { _id?: string; name_?: string; items_?: MenuItemForm[] };
+
 @Component({
   selector: 'app-menu-intelligence-page',
   standalone: true,
@@ -1048,9 +1051,9 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const servingType = raw.serving_type_ as ServingType;
     const guestCount = Number(raw.guest_count_ || 0);
 
-    const sections: MenuSection[] = (raw.sections_ || []).map((section: any, sectionIndex: number) => ({
-      _id: section._id,
-      name_: section.name_,
+    const sections: MenuSection[] = (raw.sections_ || []).map((section: MenuSectionFormRaw, sectionIndex: number) => ({
+      _id: section._id ?? '',
+      name_: section.name_ ?? '',
       sort_order_: sectionIndex + 1,
       items_: (section.items_ || []).map((item: MenuItemForm, itemIndex: number) => {
         const sp = Number(item.serving_portions || 1);

@@ -27,7 +27,7 @@
                 (keydown.enter)="$any($event.target).blur()"
                 autofocus />
             } @else {
-              <span class="item-label" (dblclick)="onStartRename(name)">{{ name }}</span>
+              <span class="item-label" (dblclick)="onStartRename(name)">{{ name | translatePipe }}</span>
             }
             <div class="item-actions">
               <button type="button" class="btn-edit" (click)="onStartRename(name)"

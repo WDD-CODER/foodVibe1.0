@@ -228,7 +228,7 @@
               </div>
             } @else {
               <button type="button" class="section-title-plain" (click)="openSectionSearch(sectionIndex)">
-                {{ section.get('name_')?.value || ('menu_section_placeholder' | translatePipe) }}
+                {{ ((section.get('name_')?.value ?? '') | translatePipe) || ('menu_section_placeholder' | translatePipe) }}
               </button>
             }
             <button type="button" class="section-remove no-print" (click)="removeSection(sectionIndex)">
