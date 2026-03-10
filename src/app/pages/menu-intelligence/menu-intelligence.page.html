@@ -1,8 +1,7 @@
 <div class="menu-editor-shell" dir="rtl">
-  <!-- Toolbar overlay (fixed at top, toggled) -->
+  <!-- Toolbar overlay (fixed at top, toggled) - shared component with transparent blur -->
   @if (toolbarOpen_()) {
-    <div class="toolbar-overlay no-print" (clickOutside)="closeToolbar()">
-      <div class="toolbar-export-grid" (click)="$event.stopPropagation()">
+    <app-export-toolbar-overlay (closeRequest)="closeToolbar()">
         <div class="view-export-wrap">
           <button type="button" class="toolbar-glass-btn" (click)="openViewExportModal('menu-info'); $event.stopPropagation()" [attr.aria-label]="'export_menu_info' | translatePipe" [attr.aria-expanded]="viewExportModal_() === 'menu-info'">
             <lucide-icon name="table-2" [size]="14"></lucide-icon>
@@ -91,8 +90,7 @@
           <lucide-icon name="save" [size]="14"></lucide-icon>
           {{ isSaving_() ? ('saving' | translatePipe) : ('menu_save' | translatePipe) }}
         </button>
-      </div>
-    </div>
+    </app-export-toolbar-overlay>
   }
 
   <!-- Paper in the middle of the screen -->

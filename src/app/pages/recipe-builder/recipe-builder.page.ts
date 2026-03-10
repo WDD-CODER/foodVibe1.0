@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit, DestroyRef, afterNextRender, Injector, runInInjectionContext } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy, DestroyRef, afterNextRender, Injector, runInInjectionContext } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { startWith, map, timer, switchMap, of, type Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -32,6 +32,11 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util';
+import { ExportService } from '@services/export.service';
+import { HeroFabService } from '@services/hero-fab.service';
+import type { ExportPayload } from '../../core/utils/export.util';
+import { ExportPreviewComponent } from '../../shared/export-preview/export-preview.component';
+import { ExportToolbarOverlayComponent } from '../../shared/export-toolbar-overlay/export-toolbar-overlay.component';
 
 @Component({
   selector: 'app-recipe-builder-page',
@@ -46,12 +51,14 @@ import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantit
     TranslatePipe,
     LoaderComponent,
     ScrollableDropdownComponent,
-    ClickOutSideDirective
+    ClickOutSideDirective,
+    ExportPreviewComponent,
+    ExportToolbarOverlayComponent
   ],
   templateUrl: './recipe-builder.page.html',
   styleUrl: './recipe-builder.page.scss'
 })
-export class RecipeBuilderPage implements OnInit {
+export class RecipeBuilderPage implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private readonly state_ = inject(KitchenStateService);
   private readonly userMsg_ = inject(UserMsgService);
@@ -70,6 +77,8 @@ export class RecipeBuilderPage implements OnInit {
   private readonly logisticsBaselineData_ = inject(LogisticsBaselineDataService);
   private readonly translation_ = inject(TranslationService);
   private readonly logging_ = inject(LoggingService);
+  private readonly exportService_ = inject(ExportService);
+  private readonly heroFab_ = inject(HeroFabService);
 
   //SIGNALS
   protected isSaving_ = signal(false);
@@ -93,6 +102,13 @@ export class RecipeBuilderPage implements OnInit {
   protected tableLogicCollapsed_ = signal(true);
   protected workflowLogicCollapsed_ = signal(true);
   protected logisticsLogicCollapsed_ = signal(true);
+
+  /** Export toolbar overlay (blur header, same pattern as menu-intelligence). */
+  protected exportToolbarOpen_ = signal(false);
+  /** Which View/Export dropdown is open in the toolbar. */
+  protected viewExportModal_ = signal<'recipe-info' | 'shopping-list' | 'cooking-steps' | 'dish-checklist' | null>(null);
+  protected exportPreviewPayload_ = signal<ExportPayload | null>(null);
+  private exportPreviewType_: 'recipe-info' | 'shopping-list' | 'cooking-steps' | 'dish-checklist' | null = null;
 
   protected toggleTableLogic(): void {
     const next = !this.tableLogicCollapsed_();
@@ -352,6 +368,38 @@ export class RecipeBuilderPage implements OnInit {
       .subscribe(() => this.recipeForm_.get('name_hebrew')?.updateValueAndValidity({ emitEvent: false }));
     this.updateTotalWeightG();
     this.recipeForm_.markAsPristine();
+
+    this.heroFab_.setPageActions(
+      [{ labelKey: 'export', icon: 'file-down', run: () => this.openExportFromHeroFab() }],
+      'append'
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.heroFab_.clearPageActions();
+  }
+
+  protected openExportFromHeroFab(): void {
+    // Defer to next tick so the opening click is not interpreted as click-outside
+    setTimeout(() => this.exportToolbarOpen_.set(true), 0);
+  }
+
+  protected closeExportToolbar(): void {
+    this.exportToolbarOpen_.set(false);
+    this.viewExportModal_.set(null);
+  }
+
+  protected openViewExportModal(key: 'recipe-info' | 'shopping-list' | 'cooking-steps' | 'dish-checklist'): void {
+    this.viewExportModal_.update(current => (current === key ? null : key));
+  }
+
+  protected closeViewExportModal(): void {
+    this.viewExportModal_.set(null);
+  }
+
+  protected goToCookFromHeroFab(): void {
+    const id = this.recipeId_();
+    void this.router_.navigate(id ? ['/cook', id] : ['/cook']);
   }
 
   /** Async validator: duplicate recipe/dish name by type (excludes current id when editing). */
@@ -811,6 +859,89 @@ export class RecipeBuilderPage implements OnInit {
 
   onPrint(): void {
     window.print();
+  }
+
+  /** Quantity for export (form snapshot): dish = serving_portions, recipe = yield amount; min 1. */
+  private exportQuantity_(): number {
+    const raw = this.recipeForm_.getRawValue() as { recipe_type?: string; serving_portions?: number; yield_conversions?: { amount?: number }[] };
+    if (raw?.recipe_type === 'dish') {
+      const n = Number(raw?.serving_portions);
+      return isNaN(n) || n < 1 ? 1 : n;
+    }
+    const conv = raw?.yield_conversions?.[0];
+    const n = conv?.amount != null ? Number(conv.amount) : 1;
+    return isNaN(n) || n < 1 ? 1 : n;
+  }
+
+  protected onViewRecipeInfo(): void {
+    const recipe = this.buildRecipeFromForm();
+    const qty = this.exportQuantity_();
+    this.exportPreviewPayload_.set(this.exportService_.getRecipeInfoPreviewPayload(recipe, qty));
+    this.exportPreviewType_ = 'recipe-info';
+  }
+
+  protected onViewShoppingList(): void {
+    const recipe = this.buildRecipeFromForm();
+    const qty = this.exportQuantity_();
+    this.exportPreviewPayload_.set(this.exportService_.getShoppingListPreviewPayload(recipe, qty));
+    this.exportPreviewType_ = 'shopping-list';
+  }
+
+  protected onViewCookingSteps(): void {
+    const recipe = this.buildRecipeFromForm();
+    const qty = this.exportQuantity_();
+    this.exportPreviewPayload_.set(this.exportService_.getCookingStepsPreviewPayload(recipe, qty));
+    this.exportPreviewType_ = 'cooking-steps';
+  }
+
+  protected onViewDishChecklist(): void {
+    const recipe = this.buildRecipeFromForm();
+    const qty = this.exportQuantity_();
+    this.exportPreviewPayload_.set(this.exportService_.getDishChecklistPreviewPayload(recipe, qty));
+    this.exportPreviewType_ = 'dish-checklist';
+  }
+
+  protected onExportFromPreview(): void {
+    const payload = this.exportPreviewPayload_();
+    const type = this.exportPreviewType_;
+    if (!payload || !type) return;
+    const recipe = this.buildRecipeFromForm();
+    const qty = this.exportQuantity_();
+    if (type === 'recipe-info') this.exportService_.exportRecipeInfo(recipe, qty);
+    else if (type === 'shopping-list') this.exportService_.exportShoppingList(recipe, qty);
+    else if (type === 'cooking-steps') this.exportService_.exportCookingSteps(recipe, qty);
+    else if (type === 'dish-checklist') this.exportService_.exportDishChecklist(recipe, qty);
+    this.exportPreviewPayload_.set(null);
+    this.exportPreviewType_ = null;
+  }
+
+  protected onExportRecipeInfo(): void {
+    this.exportService_.exportRecipeInfo(this.buildRecipeFromForm(), this.exportQuantity_());
+  }
+
+  protected onExportShoppingList(): void {
+    this.exportService_.exportShoppingList(this.buildRecipeFromForm(), this.exportQuantity_());
+  }
+
+  protected onExportCookingSteps(): void {
+    this.exportService_.exportCookingSteps(this.buildRecipeFromForm(), this.exportQuantity_());
+  }
+
+  protected onExportDishChecklist(): void {
+    this.exportService_.exportDishChecklist(this.buildRecipeFromForm(), this.exportQuantity_());
+  }
+
+  protected onExportAllTogether(): void {
+    this.exportService_.exportAllTogetherRecipe(this.buildRecipeFromForm(), this.exportQuantity_());
+  }
+
+  protected onPrintFromPreview(): void {
+    window.print();
+  }
+
+  protected onCloseExportPreview(): void {
+    this.exportPreviewPayload_.set(null);
+    this.exportPreviewType_ = null;
   }
 
   /** Returns a user-friendly validation error message listing exactly what is missing. */

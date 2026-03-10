@@ -7,15 +7,99 @@
       </button>
     </div>
   }
+
+  @if (exportToolbarOpen_()) {
+    <app-export-toolbar-overlay (closeRequest)="closeExportToolbar()">
+        <div class="view-export-wrap">
+          <button type="button" class="toolbar-glass-btn" (click)="openViewExportModal('recipe-info'); $event.stopPropagation()" [attr.aria-label]="'export_recipe_info' | translatePipe" [attr.aria-expanded]="viewExportModal_() === 'recipe-info'">
+            <lucide-icon name="table-2" [size]="14"></lucide-icon>
+            {{ 'export_recipe_info' | translatePipe }}
+          </button>
+          @if (viewExportModal_() === 'recipe-info') {
+            <div class="view-export-modal" (click)="$event.stopPropagation()" (clickOutside)="closeViewExportModal()">
+              <button type="button" class="view-export-option" (click)="onViewRecipeInfo(); closeViewExportModal()">
+                <lucide-icon name="eye" [size]="14"></lucide-icon>
+                {{ 'view' | translatePipe }}
+              </button>
+              <button type="button" class="view-export-option" (click)="onExportRecipeInfo(); closeViewExportModal()">
+                <lucide-icon name="download" [size]="14"></lucide-icon>
+                {{ 'export' | translatePipe }}
+              </button>
+            </div>
+          }
+        </div>
+        <div class="view-export-wrap">
+          <button type="button" class="toolbar-glass-btn" (click)="openViewExportModal('shopping-list'); $event.stopPropagation()" [attr.aria-label]="'export_shopping_list' | translatePipe" [attr.aria-expanded]="viewExportModal_() === 'shopping-list'">
+            <lucide-icon name="shopping-cart" [size]="14"></lucide-icon>
+            {{ 'export_shopping_list' | translatePipe }}
+          </button>
+          @if (viewExportModal_() === 'shopping-list') {
+            <div class="view-export-modal" (click)="$event.stopPropagation()" (clickOutside)="closeViewExportModal()">
+              <button type="button" class="view-export-option" (click)="onViewShoppingList(); closeViewExportModal()">
+                <lucide-icon name="eye" [size]="14"></lucide-icon>
+                {{ 'view' | translatePipe }}
+              </button>
+              <button type="button" class="view-export-option" (click)="onExportShoppingList(); closeViewExportModal()">
+                <lucide-icon name="download" [size]="14"></lucide-icon>
+                {{ 'export' | translatePipe }}
+              </button>
+            </div>
+          }
+        </div>
+        @if (recipeType_() === 'preparation') {
+          <div class="view-export-wrap">
+            <button type="button" class="toolbar-glass-btn" (click)="openViewExportModal('cooking-steps'); $event.stopPropagation()" [attr.aria-label]="'export_cooking_steps' | translatePipe" [attr.aria-expanded]="viewExportModal_() === 'cooking-steps'">
+              <lucide-icon name="clipboard-list" [size]="14"></lucide-icon>
+              {{ 'export_cooking_steps' | translatePipe }}
+            </button>
+            @if (viewExportModal_() === 'cooking-steps') {
+              <div class="view-export-modal" (click)="$event.stopPropagation()" (clickOutside)="closeViewExportModal()">
+                <button type="button" class="view-export-option" (click)="onViewCookingSteps(); closeViewExportModal()">
+                  <lucide-icon name="eye" [size]="14"></lucide-icon>
+                  {{ 'view' | translatePipe }}
+                </button>
+                <button type="button" class="view-export-option" (click)="onExportCookingSteps(); closeViewExportModal()">
+                  <lucide-icon name="download" [size]="14"></lucide-icon>
+                  {{ 'export' | translatePipe }}
+                </button>
+              </div>
+            }
+          </div>
+        }
+        @if (recipeType_() === 'dish') {
+          <div class="view-export-wrap">
+            <button type="button" class="toolbar-glass-btn" (click)="openViewExportModal('dish-checklist'); $event.stopPropagation()" [attr.aria-label]="'export_checklist' | translatePipe" [attr.aria-expanded]="viewExportModal_() === 'dish-checklist'">
+              <lucide-icon name="clipboard-list" [size]="14"></lucide-icon>
+              {{ 'export_checklist' | translatePipe }}
+            </button>
+            @if (viewExportModal_() === 'dish-checklist') {
+              <div class="view-export-modal" (click)="$event.stopPropagation()" (clickOutside)="closeViewExportModal()">
+                <button type="button" class="view-export-option" (click)="onViewDishChecklist(); closeViewExportModal()">
+                  <lucide-icon name="eye" [size]="14"></lucide-icon>
+                  {{ 'view' | translatePipe }}
+                </button>
+                <button type="button" class="view-export-option" (click)="onExportDishChecklist(); closeViewExportModal()">
+                  <lucide-icon name="download" [size]="14"></lucide-icon>
+                  {{ 'export' | translatePipe }}
+                </button>
+              </div>
+            }
+          </div>
+        }
+        <button type="button" class="toolbar-glass-btn" (click)="onExportAllTogether()" [attr.aria-label]="'export_all_together' | translatePipe">
+          <lucide-icon name="package" [size]="14"></lucide-icon>
+          {{ 'export_all_together' | translatePipe }}
+        </button>
+        <button type="button" class="toolbar-glass-btn" (click)="onPrint(); closeExportToolbar()" [attr.aria-label]="'recipe_print' | translatePipe">
+          <lucide-icon name="printer" [size]="14"></lucide-icon>
+          {{ 'recipe_print' | translatePipe }}
+        </button>
+    </app-export-toolbar-overlay>
+  }
+
   <div class="builder-shell">
 
     <section class="builder-section">
-      <div class="print-btn-wrap no-print">
-        <button type="button" class="c-btn-ghost" (click)="onPrint()" [attr.aria-label]="'recipe_print' | translatePipe">
-          <lucide-icon name="printer" [size]="18"></lucide-icon>
-          {{ 'recipe_print' | translatePipe }}
-        </button>
-      </div>
       <app-recipe-header [form]="recipeForm_" [recipeType]="recipeType_()" [currentCost]="totalCost_()"
         [totalWeightG]="totalWeightG_()" [totalBrutoWeightG]="totalBrutoWeightG_()"
         [totalVolumeL]="totalVolumeL_()" [totalVolumeMl]="totalVolumeMl_()"
@@ -165,4 +249,11 @@
     }
 
   </div>
+
+  @if (exportPreviewPayload_(); as payload) {
+    <app-export-preview [payload]="payload"
+      (exportClick)="onExportFromPreview()"
+      (printClick)="onPrintFromPreview()"
+      (close)="onCloseExportPreview()" />
+  }
 </div>

@@ -25,6 +25,7 @@ import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 import type { ExportPayload } from 'src/app/core/utils/export.util';
 import { ExportPreviewComponent } from 'src/app/shared/export-preview/export-preview.component';
+import { ExportToolbarOverlayComponent } from 'src/app/shared/export-toolbar-overlay/export-toolbar-overlay.component';
 import { HeroFabService } from '@services/hero-fab.service';
 
 type MenuItemForm = {
@@ -41,7 +42,7 @@ type MenuItemForm = {
 @Component({
   selector: 'app-menu-intelligence-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, ClickOutSideDirective, SelectOnFocusDirective, ScrollableDropdownComponent, CustomSelectComponent, ExportPreviewComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, ClickOutSideDirective, SelectOnFocusDirective, ScrollableDropdownComponent, CustomSelectComponent, ExportPreviewComponent, ExportToolbarOverlayComponent],
   templateUrl: './menu-intelligence.page.html',
   styleUrl: './menu-intelligence.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -194,11 +195,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.heroFab.setPageActions(
-      [
-        { labelKey: 'menu_toolbar_open', icon: 'settings', run: () => this.openToolbar() },
-        { labelKey: 'menu_library', icon: 'arrow-right', run: () => this.goBack() }
-      ],
-      'replace'
+      [{ labelKey: 'menu_toolbar_open', icon: 'file-down', run: () => this.openToolbar() }],
+      'append'
     );
   }
 
