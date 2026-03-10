@@ -18,6 +18,16 @@
         "spices": "תבלינים",
         "vegetables": "ירקות"
     },
+    "section_categories": {
+        "amuse-bouche": "מנה קטנה",
+        "appetizers": "מנות פתיחה",
+        "soups": "מרקים",
+        "salads": "סלטים",
+        "main course": "מנה עיקרית",
+        "sides": "תוספות",
+        "desserts": "קינוחים",
+        "beverages": "משקאות"
+    },
     "preparation_categories": {
         "compound_butter": "חמאת תיבול",
         "dips": "מטבלים",
@@ -118,7 +128,11 @@
         "checklist": "צ׳קליסט",
         "scale": "יחס",
         "steps": "שלבים",
-        "row_num": "#"
+        "row_num": "#",
+        "recipe_name": "שם המתכון",
+        "preparation_instructions": "הוראות הכנה",
+        "preparation_time": "זמן הכנה",
+        "ingredients_header": "מצרכים"
     },
     "general": {
         "search": "חיפוש",

@@ -45,6 +45,11 @@ export const EXPORT_HEADER_HE: Record<string, string> = {
   scale: 'יחס',
   steps: 'שלבים',
   row_num: '#',
+  /** Plan 108: recipe-sheet layout */
+  recipe_name: 'שם המתכון',
+  preparation_instructions: 'הוראות הכנה',
+  preparation_time: 'זמן הכנה',
+  ingredients_header: 'מצרכים',
 };
 
 /** Map English base unit keys to Hebrew display (matches dictionary units). */
@@ -139,6 +144,27 @@ export interface ExportSummaryItem {
   value: string | number;
 }
 
+/** Recipe-sheet block (Plan 108): header, yield, instructions, prep time. Ingredients stay in sections. */
+export interface RecipeSheetBlock {
+  date: string;
+  recipeName: string;
+  yieldQty: number;
+  yieldUnit: string;
+  preparationInstructions: string[];
+  preparationTime: number;
+}
+
+/** Labels for recipe-sheet preview (Hebrew from heHeader). */
+export interface RecipeSheetLabels {
+  date: string;
+  recipeName: string;
+  amount: string;
+  unit: string;
+  preparationInstructions: string;
+  preparationTime: string;
+  ingredients: string;
+}
+
 /** Payload for paper-style preview and for building Excel (single source of truth). */
 export interface ExportPayload {
   title: string;
@@ -146,4 +172,8 @@ export interface ExportPayload {
   exportedAt?: string;
   sections: ExportSection[];
   summary?: ExportSummaryItem[];
+  /** When set, preview and Excel use single-sheet recipe layout (header, yield, ingredients, instructions, prep time). */
+  recipeSheet?: RecipeSheetBlock;
+  /** When recipeSheet is set, optional labels for preview (Hebrew). */
+  recipeSheetLabels?: RecipeSheetLabels;
 }

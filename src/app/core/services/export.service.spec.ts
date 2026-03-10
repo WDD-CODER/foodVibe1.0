@@ -189,4 +189,49 @@ describe('ExportService', () => {
       expect(scalingSpy.getScaledIngredients).not.toHaveBeenCalled();
     });
   });
+
+  describe('getRecipeInfoPreviewPayload and exportRecipeInfo (Plan 108)', () => {
+    it('should return payload with recipeSheet, recipeSheetLabels, and ingredients section', () => {
+      const recipe: Recipe = {
+        _id: 'r1',
+        name_hebrew: 'Test Recipe',
+        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 100, unit_: 'gram' }],
+        steps_: [{ order_: 1, instruction_: 'Mix', labor_time_minutes_: 10 }],
+        yield_amount_: 2,
+        yield_unit_: 'unit',
+        default_station_: '',
+        is_approved_: false,
+      };
+      scalingSpy.getScaledIngredients.and.returnValue([
+        { name: 'Flour', amount: 200, unit: 'gram', availableUnits: [], referenceId: 'p1', type: 'product' },
+      ] as ScaledIngredientRow[]);
+
+      const payload = service.getRecipeInfoPreviewPayload(recipe, 4);
+
+      expect(payload.recipeSheet).toBeDefined();
+      expect(payload.recipeSheet?.date).toBeDefined();
+      expect(payload.recipeSheet?.recipeName).toBe('Test Recipe');
+      expect(payload.recipeSheet?.yieldQty).toBe(4);
+      expect(payload.recipeSheet?.preparationInstructions).toEqual(['Mix']);
+      expect(payload.recipeSheet?.preparationTime).toBe(10);
+      expect(payload.recipeSheetLabels).toBeDefined();
+      expect(payload.sections.length).toBe(1);
+      expect(payload.sections[0].headerRow?.length).toBe(4);
+    });
+
+    it('should export recipe info without throwing (single sheet)', async () => {
+      const recipe: Recipe = {
+        _id: 'r1',
+        name_hebrew: 'Test',
+        ingredients_: [],
+        steps_: [],
+        yield_amount_: 1,
+        yield_unit_: 'unit',
+        default_station_: '',
+        is_approved_: false,
+      };
+      await service.exportRecipeInfo(recipe, 1);
+      expect(scalingSpy.getScaleFactor).toHaveBeenCalledWith(recipe, 1);
+    });
+  });
 });

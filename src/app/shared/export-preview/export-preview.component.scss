@@ -182,6 +182,87 @@
     color: var(--color-text-main);
   }
 
+  /* Plan 108: recipe-sheet layout (header, yield, ingredients, instructions, prep time) */
+  .export-preview-recipe-sheet {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .export-preview-recipe-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem 1.5rem;
+
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--ep-color-frame);
+    border-radius: var(--radius-sm);
+  }
+
+  .export-preview-recipe-header-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .export-preview-recipe-yield {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--ep-color-frame);
+    border-radius: var(--radius-sm);
+  }
+
+  .export-preview-recipe-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+  }
+
+  .export-preview-recipe-value {
+    font-size: 0.9375rem;
+    color: var(--color-text-main);
+  }
+
+  .export-preview-recipe-ingredients {
+    margin-top: 0;
+  }
+
+  .export-preview-recipe-instructions {
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--ep-color-frame);
+    border-radius: var(--radius-sm);
+  }
+
+  .export-preview-recipe-instructions-block {
+    margin-top: 0.5rem;
+  }
+
+  .export-preview-recipe-instruction-line {
+    margin: 0 0 0.5rem;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--color-text-main);
+    text-align: right;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .export-preview-recipe-prep-time {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--ep-color-frame);
+    border-radius: var(--radius-sm);
+  }
+
   .export-preview-actions {
     display: flex;
     flex-wrap: wrap;

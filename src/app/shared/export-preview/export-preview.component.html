@@ -17,38 +17,102 @@
             @if (data.subtitle) {
               <p class="export-preview-subtitle">{{ data.subtitle }}</p>
             }
-            @if (data.exportedAt) {
-              <p class="export-preview-meta">{{ 'exported_at' | translatePipe }}: {{ data.exportedAt }}</p>
-            }
-            <div class="export-preview-sections">
-              @for (section of data.sections; track $index) {
-                <div class="export-preview-section">
-                  @if (section.title) {
-                    <h3 class="export-preview-section-title">{{ section.title }}</h3>
-                  }
-                  <table class="export-preview-table">
-                    @if (section.headerRow?.length) {
-                      <thead>
-                        <tr>
-                          @for (cell of section.headerRow; track $index) {
-                            <th>{{ cell }}</th>
-                          }
-                        </tr>
-                      </thead>
+            @if (data.recipeSheet && data.recipeSheetLabels) {
+              <div class="export-preview-recipe-sheet">
+                <div class="export-preview-recipe-header">
+                  <div class="export-preview-recipe-header-cell">
+                    <span class="export-preview-recipe-label">{{ data.recipeSheetLabels.date }}</span>
+                    <span class="export-preview-recipe-value">{{ data.recipeSheet.date }}</span>
+                  </div>
+                  <div class="export-preview-recipe-header-cell">
+                    <span class="export-preview-recipe-label">{{ data.recipeSheetLabels.recipeName }}</span>
+                    <span class="export-preview-recipe-value">{{ data.recipeSheet.recipeName }}</span>
+                  </div>
+                </div>
+                <div class="export-preview-recipe-yield">
+                  <span class="export-preview-recipe-label">{{ data.recipeSheetLabels.amount }}</span>
+                  <span class="export-preview-recipe-value">{{ data.recipeSheet.yieldQty }}</span>
+                  <span class="export-preview-recipe-label">{{ data.recipeSheetLabels.unit }}</span>
+                  <span class="export-preview-recipe-value">{{ data.recipeSheet.yieldUnit }}</span>
+                </div>
+                @for (section of data.sections; track $index) {
+                  <div class="export-preview-section export-preview-recipe-ingredients">
+                    @if (section.title) {
+                      <h3 class="export-preview-section-title">{{ section.title }}</h3>
                     }
-                    <tbody>
-                      @for (row of section.rows; track $index) {
-                        <tr>
-                          @for (cell of row; track $index) {
-                            <td>{{ cell }}</td>
-                          }
-                        </tr>
+                    <table class="export-preview-table">
+                      @if (section.headerRow?.length) {
+                        <thead>
+                          <tr>
+                            @for (cell of section.headerRow; track $index) {
+                              <th>{{ cell }}</th>
+                            }
+                          </tr>
+                        </thead>
                       }
-                    </tbody>
-                  </table>
+                      <tbody>
+                        @for (row of section.rows; track $index) {
+                          <tr>
+                            @for (cell of row; track $index) {
+                              <td>{{ cell }}</td>
+                            }
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+                <div class="export-preview-recipe-instructions">
+                  <h3 class="export-preview-section-title">{{ data.recipeSheetLabels.preparationInstructions }}</h3>
+                  @if (data.recipeSheet.preparationInstructions.length) {
+                    <div class="export-preview-recipe-instructions-block">
+                      @for (line of data.recipeSheet.preparationInstructions; track $index) {
+                        <p class="export-preview-recipe-instruction-line">{{ line }}</p>
+                      }
+                    </div>
+                  } @else {
+                    <p class="export-preview-recipe-instruction-line"></p>
+                  }
+                </div>
+                <div class="export-preview-recipe-prep-time">
+                  <span class="export-preview-recipe-label">{{ data.recipeSheetLabels.preparationTime }}</span>
+                  <span class="export-preview-recipe-value">{{ data.recipeSheet.preparationTime }}</span>
+                </div>
+              </div>
+            } @else {
+              @if (data.exportedAt) {
+                <p class="export-preview-meta">{{ 'exported_at' | translatePipe }}: {{ data.exportedAt }}</p>
+              }
+              <div class="export-preview-sections">
+                @for (section of data.sections; track $index) {
+                  <div class="export-preview-section">
+                    @if (section.title) {
+                      <h3 class="export-preview-section-title">{{ section.title }}</h3>
+                    }
+                    <table class="export-preview-table">
+                      @if (section.headerRow?.length) {
+                        <thead>
+                          <tr>
+                            @for (cell of section.headerRow; track $index) {
+                              <th>{{ cell }}</th>
+                            }
+                          </tr>
+                        </thead>
+                      }
+                      <tbody>
+                        @for (row of section.rows; track $index) {
+                          <tr>
+                            @for (cell of row; track $index) {
+                              <td>{{ cell }}</td>
+                            }
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
                 </div>
               }
             </div>
+            }
             @if (data.summary?.length) {
               <div class="export-preview-summary">
                 @for (item of data.summary; track item.label) {

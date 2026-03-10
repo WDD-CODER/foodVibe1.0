@@ -88,6 +88,20 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] Add Excel styling helpers and apply to checklist by_dish and all sheets
 - [x] Refactor export-preview HTML to table; update SCSS for alignment and RTL
 
+### Plan 108 — Recipe export and view spreadsheet layout (`plans/108-recipe-export-view-spreadsheet.plan.md`)
+
+- [x] Payload and translations: extend export.util with recipe-sheet structure; add recipe_name, preparation_instructions, preparation_time to EXPORT_HEADER_HE and dictionary
+- [x] Excel: single-sheet recipe layout in exportRecipeInfo (header, yield, ingredients, instructions, prep time); sheet 1 of exportAllTogetherRecipe same layout
+- [x] Preview: getRecipeInfoPreviewPayload returns recipe-sheet shape; export-preview template and SCSS for recipe-sheet layout (header block, yield, table, instructions block, prep time)
+- [x] Tests: update export.service.spec.ts for new recipe-info single-sheet structure
+
+### Plan 109 — Translate section categories (`plans/109-translate-section-categories.plan.md`)
+
+- [x] Add section_categories to dictionary.json (8 keys, Hebrew or same-as-key)
+- [x] Merge section_categories in TranslationService loadGlobalDictionary
+- [x] Menu Intelligence: translate section title with placeholder fallback
+- [x] Section category manager: display list label with translatePipe
+
 ### Plan 089 — Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
 
 - [ ] A: Auto-name menu with formatted date when name is empty on save, with duplicate handling (1), (2)
@@ -637,6 +651,8 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 102 | Unified export refactor | Active |
 | 105 | Persist sidebar open/close state | Active |
 | 107 | Export localization and design | Done |
+| 108 | Recipe export and view spreadsheet layout | Active |
+| 109 | Translate section categories | Planned |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 
