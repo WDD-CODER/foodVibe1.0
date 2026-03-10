@@ -70,11 +70,10 @@
               [ngModel]="selectedUnit_()"
               (ngModelChange)="selectedUnit_.set($event)"
               [options]="yieldUnitOptions_()"
-              placeholder="unit"
-              style="width: 100px; margin-right: 8px;">
+              placeholder="unit">
             </app-custom-select>
             @if (recipe.yield_unit_ !== selectedUnit_()) {
-              <span class="conversion-badge" style="font-size: 0.8rem; background: var(--color-primary-tint); padding: 2px 6px; border-radius: var(--radius-sm); margin-right: 8px;">
+              <span class="conversion-badge">
                 ×{{ scaleFactor_() | number:'1.2-2' }}
               </span>
             }

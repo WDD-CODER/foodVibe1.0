@@ -20,10 +20,10 @@
       <form (ngSubmit)="onSubmit()" (keydown.enter)="onSubmit()" class="c-modal-body">
         <div class="auth-form-fields">
           <div class="c-input-stack">
-            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <div class="auth-label-row">
               <label for="auth-name">{{ 'username' | translatePipe }}</label>
               @if (isDevMode() && !isSignUp) {
-                <select class="c-grid-select" style="width: auto; padding: 2px 4px; font-size: 0.8rem;" (change)="onDevUserPick($event)">
+                <select class="c-grid-select auth-dev-select" (change)="onDevUserPick($event)">
                   <option value="">-- {{ 'dev_users' | translatePipe }} --</option>
                   @for (u of users_(); track u.name) {
                     <option [value]="u.name">{{ u.name }}</option>
@@ -40,7 +40,7 @@
                    autocomplete="username"
                    required />
             @if (errorKey() === 'user_not_found' || errorKey() === 'name_required' || errorKey() === 'username_taken') {
-              <p class="auth-error" style="margin-top: 4px; font-size: 0.85rem; color: var(--color-danger);">{{ errorKey()! | translatePipe }}</p>
+              <p class="auth-error">{{ errorKey()! | translatePipe }}</p>
             }
           </div>
 
@@ -55,7 +55,7 @@
                    [autocomplete]="isSignUp ? 'new-password' : 'current-password'"
                    [required]="isSignUp" />
             @if (errorKey() === 'password_required') {
-              <p class="auth-error" style="margin-top: 4px; font-size: 0.85rem; color: var(--color-danger);">{{ errorKey()! | translatePipe }}</p>
+              <p class="auth-error">{{ errorKey()! | translatePipe }}</p>
             }
           </div>
 

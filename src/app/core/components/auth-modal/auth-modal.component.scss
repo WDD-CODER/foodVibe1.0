@@ -38,6 +38,18 @@
   }
 }
 
+.auth-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.auth-dev-select {
+  width: auto;
+  padding: 2px 4px;
+  font-size: 0.8rem;
+}
+
 .auth-form-fields {
   display: flex;
   flex-direction: column;
@@ -99,12 +111,13 @@
 
 .auth-error {
   margin: 0;
+  margin-top: 4px;
   padding-inline: 0.5rem;
   padding-block: 0.5rem;
 
   background: var(--bg-danger-subtle);
   color: var(--color-danger);
-  font-size: 0.8125rem;
+  font-size: 0.85rem;
   font-weight: 500;
 
   border-radius: var(--radius-sm);

@@ -416,7 +416,9 @@ $cv-break-md: 56.25rem;
 }
 
 .unit-select {
+  width: 100px;
   min-width: 4rem;
+  margin-inline-end: 8px;
   padding: 0.25rem 0.5rem;
 
   background: var(--bg-pure);
@@ -424,6 +426,15 @@ $cv-break-md: 56.25rem;
 
   border: 1px solid var(--cv-border-light);
   border-radius: var(--cv-radius-md);
+}
+
+.conversion-badge {
+  font-size: 0.8rem;
+  margin-inline-end: 8px;
+  padding: 2px 6px;
+
+  background: var(--color-primary-tint);
+  border-radius: var(--radius-sm);
 }
 
 .edit-amount {

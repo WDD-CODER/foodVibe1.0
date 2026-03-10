@@ -176,7 +176,7 @@
         }
       </div>
       
-      <div style="position: relative; display: flex; justify-content: center;">
+      <div class="add-row-wrap">
         <button type="button" (click)="addItem.emit(); $event.stopPropagation()" class="add-row-btn">
           <lucide-icon name="plus" class="ml-2 h-4 w-4"></lucide-icon>
           {{ 'add_preparation' | translatePipe }}

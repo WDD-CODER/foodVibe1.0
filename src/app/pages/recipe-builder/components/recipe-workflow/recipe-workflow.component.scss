@@ -292,6 +292,12 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
   }
 }
 
+.add-row-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
 .add-row-btn {
   display: flex;
   align-items: center;
