@@ -16,7 +16,9 @@ import {
   heHeader,
   heUnit,
   type ExportPayload,
-  type ExportSection
+  type ExportSection,
+  type RecipeSheetBlock,
+  type RecipeSheetLabels
 } from '../utils/export.util';
 
 const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -113,82 +115,94 @@ export class ExportService {
     row.height = 8;
   }
 
-  /**
-   * Export recipe/dish info to Excel: Info, Ingredients, Steps/Prep sheets.
-   * Filename: name_x{quantity}_{date}.xlsx
-   */
-  async exportRecipeInfo(recipe: Recipe, quantity: number): Promise<void> {
+  /** Build recipe-sheet block (header, yield, instructions, prep time) for Excel and preview. Plan 108. */
+  private buildRecipeSheetBlock(recipe: Recipe, quantity: number): RecipeSheetBlock {
+    const steps = (recipe.steps_ ?? []) as RecipeStep[];
+    const isDish = recipe.recipe_type_ === 'dish' || (recipe.prep_items_?.length ?? 0) > 0 || (recipe.mise_categories_?.length ?? 0) > 0;
+    const preparationInstructions = isDish
+      ? (steps.length ? steps.map(s => (s.instruction_ ?? '').trim()).filter(Boolean) : [])
+      : steps.map(s => (s.instruction_ ?? '').trim()).filter(Boolean);
+    const preparationTime = steps.reduce((sum, s) => sum + (s.labor_time_minutes_ ?? 0), 0);
+    return {
+      date: exportDateStr(),
+      recipeName: recipe.name_hebrew ?? '',
+      yieldQty: quantity,
+      yieldUnit: heUnit(recipe.yield_unit_ ?? 'unit'),
+      preparationInstructions,
+      preparationTime
+    };
+  }
+
+  /** Fill a worksheet with single-sheet recipe layout. Plan 108. */
+  private fillRecipeSheetWorksheet(ws: import('exceljs').Worksheet, recipe: Recipe, quantity: number): void {
     const factor = this.scaling_.getScaleFactor(recipe, quantity);
     const scaledIngredients = this.scaling_.getScaledIngredients(recipe, factor);
     const scaledRecipe: Recipe = {
       ...recipe,
-      ingredients_: (recipe.ingredients_ ?? []).map(ing => ({
-        ...ing,
-        amount_: (ing.amount_ ?? 0) * factor
-      }))
+      ingredients_: (recipe.ingredients_ ?? []).map(ing => ({ ...ing, amount_: (ing.amount_ ?? 0) * factor }))
     };
+    const sheetBlock = this.buildRecipeSheetBlock(recipe, quantity);
+    const numCols = 4;
+    let rowNum = 1;
 
-    const wb = new Workbook();
+    ws.addRow([heHeader('date'), sheetBlock.date]);
+    this.styleExcelDataRowBorders(ws, rowNum++, 2);
+    ws.addRow([heHeader('recipe_name'), sheetBlock.recipeName]);
+    this.styleExcelDataRowBorders(ws, rowNum++, 2);
+    ws.addRow([]);
+    this.styleExcelSeparator(ws, rowNum++);
 
-    const infoWs = wb.addWorksheet('Info');
-    const infoData: (string | number)[][] = [
-      [heHeader('name'), recipe.name_hebrew ?? ''],
-      [heHeader('type'), recipe.recipe_type_ === 'dish' ? 'dish' : 'preparation'],
-      [heHeader('yield'), quantity],
-      [heHeader('yield_unit'), heUnit(recipe.yield_unit_ ?? 'unit')],
-      [heHeader('station'), recipe.default_station_ ?? '']
-    ];
-    infoData.forEach((row, i) => infoWs.addRow(row));
-    infoWs.getColumn(1).width = 14;
-    infoWs.getColumn(2).width = 30;
+    ws.addRow([heHeader('amount'), sheetBlock.yieldQty]);
+    this.styleExcelDataRowBorders(ws, rowNum++, 2);
+    ws.addRow([heHeader('unit'), sheetBlock.yieldUnit]);
+    this.styleExcelDataRowBorders(ws, rowNum++, 2);
+    ws.addRow([]);
+    this.styleExcelSeparator(ws, rowNum++);
 
-    const ingWs = wb.addWorksheet('Ingredients');
-    ingWs.addRow([heHeader('row_num'), heHeader('ingredient'), heHeader('amount'), heHeader('unit'), heHeader('cost')]);
-    this.styleHeaderRow(ingWs, 1);
+    ws.addRow([heHeader('ingredients_header')]);
+    this.styleExcelTitle(ws, rowNum++, numCols);
+    ws.addRow([heHeader('ingredients_header'), heHeader('amount'), heHeader('unit'), heHeader('unit_price')]);
+    this.styleExcelColumnHeader(ws, rowNum++, numCols);
     scaledIngredients.forEach((row, i) => {
       const ing = scaledRecipe.ingredients_[i];
       const cost = ing ? this.recipeCost_.getCostForIngredient(ing) : 0;
-      ingWs.addRow([
-        i + 1,
-        row.name,
-        roundExportNumber(row.amount),
-        row.unit,
-        roundExportNumber(cost)
-      ]);
+      const unitPrice = row.amount > 0 ? cost / row.amount : 0;
+      ws.addRow([row.name, roundExportNumber(row.amount), heUnit(row.unit), roundExportNumber(unitPrice)]);
+      this.styleExcelDataRowBorders(ws, rowNum++, numCols);
     });
-    for (let r = 2; r <= scaledIngredients.length + 1; r++) this.styleDataRow(ingWs, r);
-    ingWs.getColumn(1).width = 6;
-    ingWs.getColumn(2).width = 28;
-    ingWs.getColumn(3).width = 12;
-    ingWs.getColumn(4).width = 10;
-    ingWs.getColumn(5).width = 10;
+    ws.addRow([]);
+    this.styleExcelSeparator(ws, rowNum++);
 
-    const isDish = recipe.recipe_type_ === 'dish' || (recipe.prep_items_?.length ?? 0) > 0 || (recipe.mise_categories_?.length ?? 0) > 0;
-    const stepWs = wb.addWorksheet('Steps');
-    stepWs.addRow([heHeader('order'), heHeader('instruction'), heHeader('time_min')]);
-    this.styleHeaderRow(stepWs, 1);
-    let stepRows: (string | number)[][];
-    if (isDish) {
-      const prep = this.scaling_.getScaledPrepItems(recipe, factor);
-      stepRows = prep.map((p, i) => [
-        i + 1,
-        p.name + (p.amount ? ` — ${roundExportNumber(p.amount)} ${heUnit(p.unit)}` : ''),
-        0
-      ]);
+    ws.addRow([heHeader('preparation_instructions')]);
+    this.styleExcelSubtitle(ws, rowNum++, numCols);
+    if (sheetBlock.preparationInstructions.length) {
+      sheetBlock.preparationInstructions.forEach(line => {
+        ws.addRow([line]);
+        this.styleDataRow(ws, rowNum++);
+      });
     } else {
-      const steps = (recipe.steps_ ?? []) as RecipeStep[];
-      stepRows = steps.map(s => [
-        s.order_,
-        s.instruction_ ?? '',
-        roundExportNumber(s.labor_time_minutes_ ?? 0)
-      ]);
+      ws.addRow(['']);
+      rowNum++;
     }
-    stepRows.forEach(row => stepWs.addRow(row));
-    for (let r = 2; r <= stepRows.length + 1; r++) this.styleDataRow(stepWs, r);
-    stepWs.getColumn(1).width = 8;
-    stepWs.getColumn(2).width = 50;
-    stepWs.getColumn(3).width = 12;
+    ws.addRow([]);
+    this.styleExcelSeparator(ws, rowNum++);
 
+    ws.addRow([heHeader('preparation_time'), roundExportNumber(sheetBlock.preparationTime)]);
+    this.styleExcelDataRowBorders(ws, rowNum, 2);
+
+    ws.getColumn(1).width = 22;
+    ws.getColumn(2).width = 28;
+    ws.getColumn(3).width = 12;
+    ws.getColumn(4).width = 14;
+  }
+
+  /**
+   * Export recipe/dish info to Excel: single sheet (header, yield, ingredients, instructions, prep time). Plan 108.
+   */
+  async exportRecipeInfo(recipe: Recipe, quantity: number): Promise<void> {
+    const wb = new Workbook();
+    const ws = wb.addWorksheet(heHeader('info'), { views: [{ rightToLeft: true }] });
+    this.fillRecipeSheetWorksheet(ws, recipe, quantity);
     const fileName = buildExportFileName('recipe-info', recipe.name_hebrew ?? 'recipe');
     await this.downloadWorkbook(wb, fileName);
   }
@@ -224,6 +238,11 @@ export class ExportService {
   async exportDishChecklist(recipe: Recipe, quantity: number): Promise<void> {
     const factor = this.scaling_.getScaleFactor(recipe, quantity);
     const prepRows = this.scaling_.getScaledPrepItems(recipe, factor);
+    const sortedPrep = [...prepRows].sort((a, b) => {
+      const catA = a.category_name ?? '';
+      const catB = b.category_name ?? '';
+      return catA.localeCompare(catB) || a.name.localeCompare(b.name);
+    });
     const wb = new Workbook();
     const ws = wb.addWorksheet('Checklist', { views: [{ rightToLeft: true }] });
     ws.addRow([recipe.name_hebrew ?? heHeader('dish'), `${heHeader('portions')}: ${quantity}`, `${heHeader('yield')}: ${recipe.yield_amount_ ?? 1} ${heUnit(recipe.yield_unit_ ?? 'unit')}`, `${heHeader('scale')}: x${roundExportNumber(factor)}`]);
@@ -231,7 +250,7 @@ export class ExportService {
     ws.addRow([heHeader('prep_item'), heHeader('category'), heHeader('quantity'), heHeader('unit')]);
     this.styleHeaderRow(ws, 2);
     let rowNum = 3;
-    prepRows.forEach(pr => {
+    sortedPrep.forEach(pr => {
       ws.addRow([pr.name, pr.category_name ?? '', roundExportNumber(pr.amount), heUnit(pr.unit)]);
       this.styleDataRow(ws, rowNum++);
     });
@@ -244,7 +263,7 @@ export class ExportService {
   }
 
   /**
-   * Build payload for recipe info preview (same data as export).
+   * Build payload for recipe info preview (same data as export). Plan 108: recipeSheet + ingredients with unit price.
    */
   getRecipeInfoPreviewPayload(recipe: Recipe, quantity: number): ExportPayload {
     const factor = this.scaling_.getScaleFactor(recipe, quantity);
@@ -256,30 +275,32 @@ export class ExportService {
         amount_: (ing.amount_ ?? 0) * factor
       }))
     };
-
-    const infoRows: (string | number)[][] = [
-      [heHeader('name'), recipe.name_hebrew ?? ''],
-      [heHeader('type'), recipe.recipe_type_ === 'dish' ? 'dish' : 'preparation'],
-      [heHeader('yield'), quantity],
-      [heHeader('yield_unit'), heUnit(recipe.yield_unit_ ?? 'unit')],
-      [heHeader('station'), recipe.default_station_ ?? '']
-    ];
-
+    const recipeSheet = this.buildRecipeSheetBlock(recipe, quantity);
     const ingredientRows: (string | number)[][] = scaledIngredients.map((row, i) => {
       const ing = scaledRecipe.ingredients_[i];
       const cost = ing ? this.recipeCost_.getCostForIngredient(ing) : 0;
-      return [i + 1, row.name, roundExportNumber(row.amount), heUnit(row.unit), roundExportNumber(cost)];
+      const unitPrice = row.amount > 0 ? cost / row.amount : 0;
+      return [row.name, roundExportNumber(row.amount), heUnit(row.unit), roundExportNumber(unitPrice)];
     });
 
     return {
       title: `${recipe.name_hebrew ?? 'Recipe'} — ${heHeader('info')}`,
       subtitle: `× ${quantity} ${heUnit(recipe.yield_unit_ ?? 'unit')}`,
       exportedAt: new Date().toISOString(),
+      recipeSheet,
+      recipeSheetLabels: {
+        date: heHeader('date'),
+        recipeName: heHeader('recipe_name'),
+        amount: heHeader('amount'),
+        unit: heHeader('unit'),
+        preparationInstructions: heHeader('preparation_instructions'),
+        preparationTime: heHeader('preparation_time'),
+        ingredients: heHeader('ingredients_header')
+      },
       sections: [
-        { title: heHeader('info'), rows: infoRows },
         {
-          title: heHeader('ingredients'),
-          headerRow: [heHeader('row_num'), heHeader('ingredient'), heHeader('amount'), heHeader('unit'), heHeader('cost')],
+          title: heHeader('ingredients_header'),
+          headerRow: [heHeader('ingredients_header'), heHeader('amount'), heHeader('unit'), heHeader('unit_price')],
           rows: ingredientRows
         }
       ]
@@ -354,7 +375,12 @@ export class ExportService {
   getDishChecklistPreviewPayload(recipe: Recipe, quantity: number): ExportPayload {
     const factor = this.scaling_.getScaleFactor(recipe, quantity);
     const prepRows = this.scaling_.getScaledPrepItems(recipe, factor);
-    const rows: (string | number)[][] = prepRows.map(pr => [
+    const sortedPrep = [...prepRows].sort((a, b) => {
+      const catA = a.category_name ?? '';
+      const catB = b.category_name ?? '';
+      return catA.localeCompare(catB) || a.name.localeCompare(b.name);
+    });
+    const rows: (string | number)[][] = sortedPrep.map(pr => [
       pr.name,
       pr.category_name ?? '',
       roundExportNumber(pr.amount),
@@ -682,7 +708,12 @@ export class ExportService {
           const factor = yieldAmount > 0 ? portions / yieldAmount : 0;
           const prepRows = this.scaling_.getScaledPrepItems(recipe, factor);
           if (prepRows.length === 0) continue;
-          const rows: (string | number)[][] = prepRows.map(pr => [
+          const sortedPrep = [...prepRows].sort((a, b) => {
+            const catA = a.category_name ?? '';
+            const catB = b.category_name ?? '';
+            return catA.localeCompare(catB) || a.name.localeCompare(b.name);
+          });
+          const rows: (string | number)[][] = sortedPrep.map(pr => [
             pr.name,
             pr.category_name ?? '',
             roundExportNumber(pr.amount),
@@ -705,15 +736,13 @@ export class ExportService {
 
     const groupKey = mode === 'by_station' ? 'station' : 'category';
     const categoryToAggregate = new Map<string, { name: string; amount: number; unit: string }[]>();
-    const byDishRows: { groupKey: string; name: string; amount: number; unit: string; dishName: string }[] = [];
 
-    const addPrep = (key: string, name: string, amount: number, unit: string, dishName: string): void => {
+    const addPrep = (key: string, name: string, amount: number, unit: string): void => {
       const arr = categoryToAggregate.get(key) ?? [];
       const existing = arr.find(x => x.name === name && x.unit === unit);
       if (existing) existing.amount += amount;
       else arr.push({ name, amount, unit });
       categoryToAggregate.set(key, arr);
-      byDishRows.push({ groupKey: key, name, amount, unit, dishName });
     };
 
     (menu.sections_ ?? []).forEach((section: MenuSection) => {
@@ -724,12 +753,11 @@ export class ExportService {
         const yieldAmount = recipe.yield_amount_ || 1;
         const factor = yieldAmount > 0 ? portions / yieldAmount : 0;
         const prepRows = this.scaling_.getScaledPrepItems(recipe, factor);
-        const dishName = recipe.name_hebrew ?? item.recipe_id_;
         prepRows.forEach(pr => {
           const key = mode === 'by_station'
             ? (recipe.default_station_ ?? 'כללי')
             : (pr.category_name ?? 'כללי');
-          addPrep(key, pr.name, pr.amount, pr.unit, dishName);
+          addPrep(key, pr.name, pr.amount, pr.unit);
         });
       });
     });
@@ -740,30 +768,19 @@ export class ExportService {
       const items = categoryToAggregate.get(cat) ?? [];
       items.forEach(it => accRows.push([cat, it.name, roundExportNumber(it.amount), heUnit(it.unit)]));
     }
-    const byDishPayloadRows: (string | number)[][] = [];
-    for (const cat of sortedGroups) {
-      byDishRows.filter(r => r.groupKey === cat).forEach(r =>
-        byDishPayloadRows.push([cat, r.name, roundExportNumber(r.amount), heUnit(r.unit), r.dishName])
-      );
-    }
-
     const headerAcc = groupKey === 'station' ? [heHeader('station'), heHeader('prep_item'), heHeader('quantity'), heHeader('unit')] : [heHeader('category'), heHeader('prep_item'), heHeader('quantity'), heHeader('unit')];
-    const headerByDish = groupKey === 'station' ? [heHeader('station'), heHeader('prep_item'), heHeader('quantity'), heHeader('unit'), heHeader('dish')] : [heHeader('category'), heHeader('prep_item'), heHeader('quantity'), heHeader('unit'), heHeader('dish')];
 
     return {
       title: `${menu.name_ ?? 'Menu'} — ${heHeader('checklist')}`,
       subtitle: modeLabel,
       exportedAt: new Date().toISOString(),
-      sections: [
-        { title: heHeader('accumulated'), headerRow: headerAcc, rows: accRows },
-        { title: heHeader('by_dish'), headerRow: headerByDish, rows: byDishPayloadRows }
-      ]
+      sections: [{ title: heHeader('accumulated'), headerRow: headerAcc, rows: accRows }]
     };
   }
 
   /**
    * Export menu checklist (mise en place / prep items). Mode: by_dish | by_category | by_station.
-   * When not by_dish: two sheets — Accumulated (summed) and By dish (each line with dish name).
+   * When by_dish: one sheet per dish. When by_category or by_station: one Accumulated sheet only.
    * Filename: check-list_{menuName}.xlsx (no date for menu).
    */
   async exportChecklist(menu: MenuEvent, recipes: Recipe[], mode: 'by_dish' | 'by_category' | 'by_station'): Promise<void> {
@@ -784,6 +801,11 @@ export class ExportService {
           const factor = yieldAmount > 0 ? portions / yieldAmount : 0;
           const prepRows: ScaledPrepRow[] = this.scaling_.getScaledPrepItems(recipe, factor);
           if (prepRows.length === 0) continue;
+          const sortedPrep = [...prepRows].sort((a, b) => {
+            const catA = a.category_name ?? '';
+            const catB = b.category_name ?? '';
+            return catA.localeCompare(catB) || a.name.localeCompare(b.name);
+          });
 
           ws.addRow([recipe.name_hebrew ?? item.recipe_id_]);
           this.styleExcelTitle(ws, rowNum++, numCols);
@@ -791,7 +813,7 @@ export class ExportService {
           this.styleExcelSubtitle(ws, rowNum++, numCols);
           ws.addRow([heHeader('prep_item'), heHeader('category'), heHeader('quantity'), heHeader('unit')]);
           this.styleExcelColumnHeader(ws, rowNum++, numCols);
-          prepRows.forEach(pr => {
+          sortedPrep.forEach(pr => {
             ws.addRow([pr.name, pr.category_name ?? '', roundExportNumber(pr.amount), heUnit(pr.unit)]);
             this.styleExcelDataRowBorders(ws, rowNum++, numCols);
           });
@@ -806,15 +828,13 @@ export class ExportService {
     } else {
       const groupKey = mode === 'by_station' ? 'station' : 'category';
       const categoryToAggregate = new Map<string, { name: string; amount: number; unit: string }[]>();
-      const byDishRows: { groupKey: string; name: string; amount: number; unit: string; dishName: string }[] = [];
 
-      const addPrep = (key: string, name: string, amount: number, unit: string, dishName: string): void => {
+      const addPrep = (key: string, name: string, amount: number, unit: string): void => {
         const arr = categoryToAggregate.get(key) ?? [];
         const existing = arr.find(x => x.name === name && x.unit === unit);
         if (existing) existing.amount += amount;
         else arr.push({ name, amount, unit });
         categoryToAggregate.set(key, arr);
-        byDishRows.push({ groupKey: key, name, amount, unit, dishName });
       };
 
       (menu.sections_ ?? []).forEach((section: MenuSection) => {
@@ -825,12 +845,11 @@ export class ExportService {
           const yieldAmount = recipe.yield_amount_ || 1;
           const factor = yieldAmount > 0 ? portions / yieldAmount : 0;
           const prepRows = this.scaling_.getScaledPrepItems(recipe, factor);
-          const dishName = recipe.name_hebrew ?? item.recipe_id_;
           prepRows.forEach(pr => {
             const key = mode === 'by_station'
               ? (recipe.default_station_ ?? 'כללי')
               : (pr.category_name ?? 'כללי');
-            addPrep(key, pr.name, pr.amount, pr.unit, dishName);
+            addPrep(key, pr.name, pr.amount, pr.unit);
           });
         });
       });
@@ -857,23 +876,6 @@ export class ExportService {
       wsAcc.getColumn(2).width = 28;
       wsAcc.getColumn(3).width = 12;
       wsAcc.getColumn(4).width = 10;
-
-      const wsByDish = wb.addWorksheet('By dish', { views: [{ rightToLeft: true }] });
-      wsByDish.addRow([groupKey === 'station' ? heHeader('station') : heHeader('category'), heHeader('prep_item'), heHeader('quantity'), heHeader('unit'), heHeader('dish')]);
-      this.styleHeaderRow(wsByDish, 1);
-      let rowNumDish = 2;
-      for (const cat of sortedGroups) {
-        const rowsInGroup = byDishRows.filter(r => r.groupKey === cat);
-        rowsInGroup.forEach(r => {
-          wsByDish.addRow([cat, r.name, roundExportNumber(r.amount), heUnit(r.unit), r.dishName]);
-          this.styleDataRow(wsByDish, rowNumDish++);
-        });
-      }
-      wsByDish.getColumn(1).width = 20;
-      wsByDish.getColumn(2).width = 28;
-      wsByDish.getColumn(3).width = 12;
-      wsByDish.getColumn(4).width = 10;
-      wsByDish.getColumn(5).width = 24;
     }
 
     const fileName = buildExportFileName('check-list', menu.name_ ?? 'menu', { includeDate: false });
@@ -936,7 +938,7 @@ export class ExportService {
   }
 
   /**
-   * Export all together (recipe/dish): sheet 1 = info + ingredients + workflow, sheet 2 = shopping list.
+   * Export all together (recipe/dish): sheet 1 = recipe sheet (Plan 108), sheet 2 = shopping list.
    * Filename: all_{recipeName}_{date}.xlsx
    */
   async exportAllTogetherRecipe(recipe: Recipe, quantity: number): Promise<void> {
@@ -946,47 +948,10 @@ export class ExportService {
       ...recipe,
       ingredients_: (recipe.ingredients_ ?? []).map(ing => ({ ...ing, amount_: (ing.amount_ ?? 0) * factor }))
     };
-    const isDish = recipe.recipe_type_ === 'dish' || (recipe.prep_items_?.length ?? 0) > 0 || (recipe.mise_categories_?.length ?? 0) > 0;
 
     const wb = new Workbook();
-
-    const ws1 = wb.addWorksheet('Item info + ingredients + workflow', { views: [{ rightToLeft: true }] });
-    let rowNum = 1;
-    ws1.addRow(['Name', recipe.name_hebrew ?? '']);
-    ws1.addRow(['Type', recipe.recipe_type_ === 'dish' ? 'dish' : 'preparation']);
-    ws1.addRow(['Yield', quantity, recipe.yield_unit_ ?? 'unit']);
-    ws1.addRow(['Station', recipe.default_station_ ?? '']);
-    ws1.addRow(['Exported', exportDateStr()]);
-    rowNum += 5;
-    ws1.addRow([]);
-    rowNum++;
-    ws1.addRow(['#', 'Ingredient', 'Amount', 'Unit', 'Cost']);
-    this.styleHeaderRow(ws1, rowNum++);
-    scaledIngredients.forEach((row, i) => {
-      const ing = scaledRecipe.ingredients_[i];
-      const cost = ing ? this.recipeCost_.getCostForIngredient(ing) : 0;
-      ws1.addRow([i + 1, row.name, roundExportNumber(row.amount), row.unit, roundExportNumber(cost)]);
-      this.styleDataRow(ws1, rowNum++);
-    });
-    ws1.addRow([]);
-    rowNum++;
-    ws1.addRow(['Order', 'Instruction', 'Time (min)']);
-    this.styleHeaderRow(ws1, rowNum++);
-    if (isDish) {
-      const prep = this.scaling_.getScaledPrepItems(recipe, factor);
-      prep.forEach((p, i) => {
-        ws1.addRow([i + 1, p.name + (p.amount ? ` — ${roundExportNumber(p.amount)} ${p.unit}` : ''), 0]);
-        this.styleDataRow(ws1, rowNum++);
-      });
-    } else {
-      const steps = (recipe.steps_ ?? []) as RecipeStep[];
-      steps.forEach(s => {
-        ws1.addRow([s.order_, s.instruction_ ?? '', roundExportNumber(s.labor_time_minutes_ ?? 0)]);
-        this.styleDataRow(ws1, rowNum++);
-      });
-    }
-    ws1.getColumn(1).width = 14;
-    ws1.getColumn(2).width = 36;
+    const ws1 = wb.addWorksheet(heHeader('info'), { views: [{ rightToLeft: true }] });
+    this.fillRecipeSheetWorksheet(ws1, recipe, quantity);
 
     const products = this.kitchenState_.products_();
     const categoryToRows = new Map<string, { name: string; amount: number; unit: string; unitPrice: number }[]>();
