@@ -6,6 +6,15 @@ Evaluates working-tree changes, decides how to split branches and commits, prese
 
 ---
 
+## Phase 0 — Tech debt check (before building commit plan)
+
+Before Phase 1 (Evaluate):
+
+- **If a tech-debt report was already produced in this conversation** (e.g. from workflow step 5.5 or because the user asked for a tech-debt run): **Do not run the techdebt skill again.** Use that existing report. If it listed critical or high-priority items, ask: **"Fix these first, or proceed with the commit plan anyway?"** Then continue to Phase 1.
+- **If no tech-debt report exists in this session**: Read `.assistant/skills/techdebt/SKILL.md` and run a quick tech-debt pass. If critical or high-priority items exist, list them briefly and ask: **"Fix these first, or proceed with the commit plan anyway?"** Do not block the commit tree indefinitely — the user may choose to proceed. Then continue to Phase 1.
+
+---
+
 ## When to Use
 
 - User says "commit to GitHub", "push my changes", "save to branches", or similar
