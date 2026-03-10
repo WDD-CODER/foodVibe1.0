@@ -102,6 +102,11 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] Menu Intelligence: translate section title with placeholder fallback
 - [x] Section category manager: display list label with translatePipe
 
+### Plan 111 — Unify metadata manager containers (`plans/111-unify-metadata-manager-containers.plan.md`)
+
+- [x] HTML: demo + backup use card-desc, card-actions; remove demo-section/backup-section
+- [x] SCSS: add .manager-card .card-desc and .card-actions; remove .menu-types-card .card-desc; replace .demo-section and .backup-section with .manager-card-scoped rules
+
 ### Plan 089 — Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
 
 - [ ] A: Auto-name menu with formatted date when name is empty on save, with duplicate handling (1), (2)
@@ -653,6 +658,7 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 107 | Export localization and design | Done |
 | 108 | Recipe export and view spreadsheet layout | Active |
 | 109 | Translate section categories | Planned |
+| 111 | Unify metadata manager containers | Done |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 
