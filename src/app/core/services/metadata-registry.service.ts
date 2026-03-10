@@ -1,7 +1,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core'
 import { ProductDataService } from './product-data.service'
 import { UserMsgService } from './user-msg.service'
-import { StorageService } from './async-storage.service'
+import { StorageService, type EntityId } from './async-storage.service'
 import { LoggingService } from './logging.service'
 import type { LabelDefinition } from '@models/label.model'
 import {
@@ -9,6 +9,15 @@ import {
   type DishFieldKey,
   DEFAULT_DISH_FIELDS,
 } from '@models/menu-event.model'
+
+/** Single-document registry shape returned by storage for metadata keys. */
+interface RegistryDoc<T> {
+  _id?: string
+  items: T[]
+}
+
+/** Payload for put/post (must extend EntityId). */
+type RegistryPayload<T> = EntityId & { items: T[] }
 
 @Injectable({ providedIn: 'root' })
 export class MetadataRegistryService {
@@ -39,12 +48,12 @@ export class MetadataRegistryService {
     const DEFAULT_ALLERGENS = ['gluten', 'eggs', 'peanuts', 'nuts', 'soy', 'milk_solids', 'sesame', 'fish', 'shellfish', 'seafood'];
 
     // 1. Fetch Categories
-    const catRegistry = await this.storageService.query<any>('KITCHEN_CATEGORIES');
+    const catRegistry = await this.storageService.query<RegistryDoc<string>>('KITCHEN_CATEGORIES');
     const existingCats = catRegistry[0]?.items || [];
 
     if (existingCats.length === 0) {
       if (catRegistry[0]?._id) {
-        await this.storageService.put('KITCHEN_CATEGORIES', { ...catRegistry[0], items: DEFAULT_CATEGORIES });
+        await this.storageService.put('KITCHEN_CATEGORIES', { ...catRegistry[0], items: DEFAULT_CATEGORIES } as RegistryPayload<string>);
       } else {
         await this.storageService.post('KITCHEN_CATEGORIES', { items: DEFAULT_CATEGORIES });
       }
@@ -54,12 +63,12 @@ export class MetadataRegistryService {
     }
 
     // 2. Fetch Allergens (Same Logic)
-    const allergenRegistry = await this.storageService.query<any>('KITCHEN_ALLERGENS');
+    const allergenRegistry = await this.storageService.query<RegistryDoc<string>>('KITCHEN_ALLERGENS');
     const existingAllergens = allergenRegistry[0]?.items || [];
 
     if (existingAllergens.length === 0) {
       if (allergenRegistry[0]?._id) {
-        await this.storageService.put('KITCHEN_ALLERGENS', { ...allergenRegistry[0], items: DEFAULT_ALLERGENS });
+        await this.storageService.put('KITCHEN_ALLERGENS', { ...allergenRegistry[0], items: DEFAULT_ALLERGENS } as RegistryPayload<string>);
       } else {
         await this.storageService.post('KITCHEN_ALLERGENS', { items: DEFAULT_ALLERGENS });
       }
@@ -83,7 +92,7 @@ export class MetadataRegistryService {
       this.menuTypes_.set(existingMenuTypes);
     } else {
       if (menuTypeRegistry[0]?._id) {
-        await this.storageService.put('MENU_TYPES', { ...menuTypeRegistry[0], items: defaultMenuTypes });
+        await this.storageService.put('MENU_TYPES', { ...menuTypeRegistry[0], items: defaultMenuTypes } as RegistryPayload<MenuTypeDefinition>);
       } else {
         await this.storageService.post('MENU_TYPES', { items: defaultMenuTypes });
       }
@@ -101,12 +110,12 @@ export class MetadataRegistryService {
     if (!key || this.menuTypes_().some(t => t.key === key)) return;
     const updated = [...this.menuTypes_(), { key, fields: def.fields ?? [...DEFAULT_DISH_FIELDS] }];
     try {
-      const registries = await this.storageService.query<any>('MENU_TYPES');
+      const registries = await this.storageService.query<RegistryDoc<MenuTypeDefinition>>('MENU_TYPES');
       const existing = registries[0];
       if (existing?._id) {
-        await this.storageService.put('MENU_TYPES', { ...existing, items: updated });
+        await this.storageService.put('MENU_TYPES', { ...existing, items: updated } as RegistryPayload<MenuTypeDefinition>);
       } else {
-        await this.storageService.post('MENU_TYPES', { items: updated });
+        await this.storageService.post('MENU_TYPES', { items: updated } as RegistryPayload<MenuTypeDefinition>);
       }
       this.menuTypes_.set(updated);
       this.userMsgService.onSetSuccessMsg(`סוג תפריט "${key}" נוסף בהצלחה`);
@@ -123,12 +132,12 @@ export class MetadataRegistryService {
     const updated = current.slice();
     updated[idx] = { ...updated[idx], fields };
     try {
-      const registries = await this.storageService.query<any>('MENU_TYPES');
+      const registries = await this.storageService.query<RegistryDoc<MenuTypeDefinition>>('MENU_TYPES');
       const registry = registries[0];
       if (registry?._id) {
-        await this.storageService.put('MENU_TYPES', { ...registry, items: updated });
+        await this.storageService.put('MENU_TYPES', { ...registry, items: updated } as RegistryPayload<MenuTypeDefinition>);
       } else {
-        await this.storageService.post('MENU_TYPES', { items: updated });
+        await this.storageService.post('MENU_TYPES', { items: updated } as RegistryPayload<MenuTypeDefinition>);
       }
       this.menuTypes_.set(updated);
       this.userMsgService.onSetSuccessMsg(`סוג תפריט "${key}" עודכן`);
@@ -144,9 +153,9 @@ export class MetadataRegistryService {
       const registries = await this.storageService.query<any>('MENU_TYPES');
       const registry = registries[0];
       if (registry?._id) {
-        await this.storageService.put('MENU_TYPES', { ...registry, items: updated });
+        await this.storageService.put('MENU_TYPES', { ...registry, items: updated } as RegistryPayload<MenuTypeDefinition>);
       } else {
-        await this.storageService.post('MENU_TYPES', { items: updated });
+        await this.storageService.post('MENU_TYPES', { items: updated } as RegistryPayload<MenuTypeDefinition>);
       }
       this.menuTypes_.set(updated);
       this.userMsgService.onSetSuccessMsg(`סוג תפריט "${key}" נמחק`);
@@ -170,12 +179,12 @@ export class MetadataRegistryService {
     const updated = current.slice();
     updated[idx] = { key: trimmed, fields: def.fields };
     try {
-      const registries = await this.storageService.query<any>('MENU_TYPES');
+      const registries = await this.storageService.query<RegistryDoc<MenuTypeDefinition>>('MENU_TYPES');
       const registry = registries[0];
       if (registry?._id) {
-        await this.storageService.put('MENU_TYPES', { ...registry, items: updated });
+        await this.storageService.put('MENU_TYPES', { ...registry, items: updated } as RegistryPayload<MenuTypeDefinition>);
       } else {
-        await this.storageService.post('MENU_TYPES', { items: updated });
+        await this.storageService.post('MENU_TYPES', { items: updated } as RegistryPayload<MenuTypeDefinition>);
       }
       this.menuTypes_.set(updated);
       this.userMsgService.onSetSuccessMsg(`סוג תפריט שונה ל-"${trimmed}"`);
@@ -192,7 +201,7 @@ export class MetadataRegistryService {
 
   /** Reload labels from storage (e.g. after demo data load). */
   async reloadLabelsFromStorage(): Promise<void> {
-    const labelRegistry = await this.storageService.query<any>('KITCHEN_LABELS');
+    const labelRegistry = await this.storageService.query<RegistryDoc<LabelDefinition>>('KITCHEN_LABELS');
     const items = labelRegistry[0]?.items ?? [];
     this.labels_.set(Array.isArray(items) ? items : []);
   }
@@ -202,12 +211,12 @@ export class MetadataRegistryService {
     if (!sanitized || this.labels_().some(l => l.key === sanitized)) return;
     const updated = [...this.labels_(), { key: sanitized, color: color || '#78716C', autoTriggers: autoTriggers ?? [] }];
     try {
-      const registries = await this.storageService.query<any>('KITCHEN_LABELS');
+      const registries = await this.storageService.query<RegistryDoc<LabelDefinition>>('KITCHEN_LABELS');
       const existing = registries[0];
       if (existing?._id) {
-        await this.storageService.put('KITCHEN_LABELS', { ...existing, items: updated });
+        await this.storageService.put('KITCHEN_LABELS', { ...existing, items: updated } as RegistryPayload<LabelDefinition>);
       } else {
-        await this.storageService.post('KITCHEN_LABELS', { items: updated });
+        await this.storageService.post('KITCHEN_LABELS', { items: updated } as RegistryPayload<LabelDefinition>);
       }
       this.labels_.set(updated);
       this.userMsgService.onSetSuccessMsg(`תווית "${sanitized}" נוספה בהצלחה`);
@@ -220,12 +229,12 @@ export class MetadataRegistryService {
   async deleteLabel(key: string): Promise<void> {
     const updated = this.labels_().filter(l => l.key !== key);
     try {
-      const registries = await this.storageService.query<any>('KITCHEN_LABELS');
+      const registries = await this.storageService.query<RegistryDoc<LabelDefinition>>('KITCHEN_LABELS');
       const registry = registries[0];
       if (registry?._id) {
-        await this.storageService.put('KITCHEN_LABELS', { ...registry, items: updated });
+        await this.storageService.put('KITCHEN_LABELS', { ...registry, items: updated } as RegistryPayload<LabelDefinition>);
       } else {
-        await this.storageService.post('KITCHEN_LABELS', { items: updated });
+        await this.storageService.post('KITCHEN_LABELS', { items: updated } as RegistryPayload<LabelDefinition>);
       }
       this.labels_.set(updated);
       this.userMsgService.onSetSuccessMsg(`תווית ${key} נמחקה בהצלחה`);
@@ -242,12 +251,12 @@ export class MetadataRegistryService {
     const updated = current.slice();
     updated[idx] = { ...updated[idx], ...changes };
     try {
-      const registries = await this.storageService.query<any>('KITCHEN_LABELS');
+      const registries = await this.storageService.query<RegistryDoc<LabelDefinition>>('KITCHEN_LABELS');
       const registry = registries[0];
       if (registry?._id) {
-        await this.storageService.put('KITCHEN_LABELS', { ...registry, items: updated });
+        await this.storageService.put('KITCHEN_LABELS', { ...registry, items: updated } as RegistryPayload<LabelDefinition>);
       } else {
-        await this.storageService.post('KITCHEN_LABELS', { items: updated });
+        await this.storageService.post('KITCHEN_LABELS', { items: updated } as RegistryPayload<LabelDefinition>);
       }
       this.labels_.set(updated);
     } catch (err) {
@@ -277,9 +286,9 @@ export class MetadataRegistryService {
       const registry = registries[0];
 
       if (registry?._id) {
-        await this.storageService.put('KITCHEN_ALLERGENS', { ...registry, items: updated });
+        await this.storageService.put('KITCHEN_ALLERGENS', { ...registry, items: updated } as RegistryPayload<string>);
       } else {
-        await this.storageService.post('KITCHEN_ALLERGENS', { items: updated });
+        await this.storageService.post('KITCHEN_ALLERGENS', { items: updated } as RegistryPayload<string>);
       }
 
       this.allergens_.set(updated);
@@ -301,20 +310,18 @@ export class MetadataRegistryService {
     try {
       // 2. Persistence Logic (POST vs PUT)
       // Query the storageService for the metadata collection
-      const registries = await this.storageService.query<any>('KITCHEN_CATEGORIES');
+      const registries = await this.storageService.query<RegistryDoc<string>>('KITCHEN_CATEGORIES');
       const existingRegistry = registries[0]; // We maintain one document for categories
 
       if (existingRegistry && existingRegistry._id) {
-        // Registry exists -> Update it (PUT)
         await this.storageService.put('KITCHEN_CATEGORIES', {
           ...existingRegistry,
           items: updatedCategories
-        });
+        } as RegistryPayload<string>);
       } else {
-        // Registry doesn't exist -> Create it (POST)
         await this.storageService.post('KITCHEN_CATEGORIES', {
           items: updatedCategories
-        });
+        } as RegistryPayload<string>);
       }
 
       // 3. Update the Signal for UI reactivity
@@ -333,14 +340,14 @@ async deleteCategory(name: string): Promise<void> {
 
   try {
     // 2. סנכרון מול ה-Storage
-    const registries = await this.storageService.query<any>('KITCHEN_CATEGORIES');
+    const registries = await this.storageService.query<RegistryDoc<string>>('KITCHEN_CATEGORIES');
     const registry = registries[0];
 
     if (registry?._id) {
       await this.storageService.put('KITCHEN_CATEGORIES', {
         ...registry,
-        items: updated // כאן אנחנו שומרים את המערך כפי שהוא, גם אם הוא ריק
-      });
+        items: updated
+      } as RegistryPayload<string>);
 
       // 3. עדכון ה-UI
       this.categories_.set(updated);
@@ -358,14 +365,14 @@ async deleteCategory(name: string): Promise<void> {
 
     try {
       // 2. Sync with "Server"
-      const registries = await this.storageService.query<any>('KITCHEN_ALLERGENS');
+      const registries = await this.storageService.query<RegistryDoc<string>>('KITCHEN_ALLERGENS');
       const registry = registries[0];
 
       if (registry?._id) {
         await this.storageService.put('KITCHEN_ALLERGENS', {
           ...registry,
           items: this.allergens_()
-        });
+        } as RegistryPayload<string>);
         this.userMsgService.onSetSuccessMsg(`האלרגן ${name} נמחק`);
       }
     } catch (err) {
