@@ -1,26 +1,21 @@
 <div class="hero-fab-container" [class.above-bar]="isOnMenuIntelligence_()" (mouseleave)="collapse()">
   <div class="fab-actions" [class.expanded]="isExpanded_()">
-    <button type="button"
-            class="fab-action"
-            [attr.aria-label]="'recipe_creation' | translatePipe"
-            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
-            (click)="goToRecipeBuilder()">
-      <lucide-icon name="plus" size="20"></lucide-icon>
-    </button>
-
-    <button type="button"
-            class="fab-action"
-            [attr.aria-label]="'cook' | translatePipe"
-            (click)="goToCook()">
-      <lucide-icon name="cooking-pot" size="20"></lucide-icon>
-    </button>
+    @for (action of effectiveActions_(); track action.labelKey + action.icon) {
+      <button type="button"
+              class="fab-action"
+              [attr.aria-label]="action.labelKey | translatePipe"
+              [attr.title]="action.labelKey === 'recipe_creation' && !isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+              (click)="runAction(action)">
+        <lucide-icon [name]="action.icon" size="20"></lucide-icon>
+      </button>
+    }
   </div>
 
   <button type="button"
           class="fab-main"
           [class.active]="isExpanded_()"
           (mouseenter)="expand()"
-          (click)="goToCook()"
+          (click)="goToRecipeBuilder()"
           aria-label="Quick actions">
     <lucide-icon name="flame" size="26"></lucide-icon>
   </button>

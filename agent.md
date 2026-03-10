@@ -56,5 +56,6 @@ Before changing a directory, check for `breadcrumbs.md` and read it.
 3. **Approval**: Wait for explicit user confirmation.
 4. **Execute**: Multi-file updates; keep files under ~300 lines.
 5. **Audit**: Run tests; confirm `.spec.ts` coverage.
+5.5 **Tech debt**: Before considering the task done (or before suggesting commit), read `.assistant/skills/techdebt/SKILL.md`. Run the analysis; fix critical/high items or attach a short tech-debt report and ask whether to fix or proceed.
 6. **Branch**: Not on `main`; use `feat/` branch if needed.
 7. **Commit/push**: User asks to commit or push → read `.assistant/skills/commit-to-github/SKILL.md`, follow phases, get approval before any git write.

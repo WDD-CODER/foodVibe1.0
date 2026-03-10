@@ -235,6 +235,38 @@ $cv-break-md: 56.25rem;
     }
   }
 
+  .export-bar-wrap {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 0.5rem;
+  }
+
+  .export-bar-actions {
+    display: none;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 0.5rem;
+
+    &.expanded {
+      display: flex;
+    }
+  }
+
+  .export-bar-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-inline-end: 0.25rem;
+  }
+
+  .export-bar-main {
+    display: inline-flex;
+  }
+
   .quantity-control-wrap {
     display: flex;
     align-items: center;

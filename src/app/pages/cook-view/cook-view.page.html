@@ -39,14 +39,45 @@
               <lucide-icon name="pencil" [size]="18"></lucide-icon>
               {{ 'edit' | translatePipe }}
             </button>
-            <button type="button" class="edit-btn export-info-btn" (click)="onExportInfo()" [attr.aria-label]="'export_recipe_info' | translatePipe">
-              <lucide-icon name="table-2" [size]="18"></lucide-icon>
-              {{ 'export_recipe_info' | translatePipe }}
-            </button>
-            <button type="button" class="edit-btn export-list-btn" (click)="onExportShoppingList()" [attr.aria-label]="'export_shopping_list' | translatePipe">
-              <lucide-icon name="shopping-cart" [size]="18"></lucide-icon>
-              {{ 'export_shopping_list' | translatePipe }}
-            </button>
+            <div class="export-bar-wrap" (mouseleave)="exportBarExpanded_.set(false)">
+              <div class="export-bar-actions" [class.expanded]="exportBarExpanded_()">
+                <span class="export-bar-label">{{ 'export_recipe_info' | translatePipe }}</span>
+                <button type="button" class="edit-btn export-view-btn" (click)="onViewRecipeInfo()" [attr.aria-label]="'view' | translatePipe">
+                  <lucide-icon name="eye" [size]="18"></lucide-icon>
+                </button>
+                <button type="button" class="edit-btn export-download-btn" (click)="onExportInfo()" [attr.aria-label]="'export_recipe_info' | translatePipe">
+                  <lucide-icon name="download" [size]="18"></lucide-icon>
+                </button>
+                <span class="export-bar-label">{{ 'export_shopping_list' | translatePipe }}</span>
+                <button type="button" class="edit-btn export-view-btn" (click)="onViewShoppingList()" [attr.aria-label]="'view' | translatePipe">
+                  <lucide-icon name="eye" [size]="18"></lucide-icon>
+                </button>
+                <button type="button" class="edit-btn export-download-btn" (click)="onExportShoppingList()" [attr.aria-label]="'export_shopping_list' | translatePipe">
+                  <lucide-icon name="download" [size]="18"></lucide-icon>
+                </button>
+                @if (isDish_()) {
+                  <span class="export-bar-label">{{ 'export_checklist' | translatePipe }}</span>
+                  <button type="button" class="edit-btn export-view-btn" (click)="onViewDishChecklist()" [attr.aria-label]="'view' | translatePipe">
+                    <lucide-icon name="eye" [size]="18"></lucide-icon>
+                  </button>
+                  <button type="button" class="edit-btn export-download-btn" (click)="onExportDishChecklist()" [attr.aria-label]="'export_checklist' | translatePipe">
+                    <lucide-icon name="download" [size]="18"></lucide-icon>
+                  </button>
+                } @else {
+                  <span class="export-bar-label">{{ 'export_cooking_steps' | translatePipe }}</span>
+                  <button type="button" class="edit-btn export-view-btn" (click)="onViewCookingSteps()" [attr.aria-label]="'view' | translatePipe">
+                    <lucide-icon name="eye" [size]="18"></lucide-icon>
+                  </button>
+                  <button type="button" class="edit-btn export-download-btn" (click)="onExportCookingSteps()" [attr.aria-label]="'export_cooking_steps' | translatePipe">
+                    <lucide-icon name="download" [size]="18"></lucide-icon>
+                  </button>
+                }
+              </div>
+              <button type="button" class="edit-btn export-bar-main" (click)="toggleExportBar()" [attr.aria-label]="'export' | translatePipe" [attr.aria-expanded]="exportBarExpanded_()">
+                <lucide-icon name="download" [size]="18"></lucide-icon>
+                {{ 'export' | translatePipe }}
+              </button>
+            </div>
           }
         </div>
         @if (!isScaledView_()) {
@@ -254,4 +285,9 @@
       <a routerLink="/recipe-book">{{ 'recipe_book' | translatePipe }}</a>
     </div>
   }
+  <app-export-preview
+    [payload]="exportPreviewPayload_()"
+    (exportClick)="onExportFromPreview()"
+    (printClick)="onPrintFromPreview()"
+    (close)="onExportPreviewClose()" />
 </div>

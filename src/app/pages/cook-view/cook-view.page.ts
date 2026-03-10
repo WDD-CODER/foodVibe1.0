@@ -16,6 +16,8 @@ import { UserMsgService } from '@services/user-msg.service';
 import { AuthModalService } from '@services/auth-modal.service';
 import { TranslationService } from '@services/translation.service';
 import { ExportService } from '@services/export.service';
+import type { ExportPayload } from '../../core/utils/export.util';
+import { ExportPreviewComponent } from '../../shared/export-preview/export-preview.component';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
@@ -39,7 +41,8 @@ import { quantityIncrement, quantityDecrement } from '../../core/utils/quantity-
     RecipeWorkflowComponent,
     LoaderComponent,
     CustomSelectComponent,
-    FormatQuantityPipe
+    FormatQuantityPipe,
+    ExportPreviewComponent
   ],
   templateUrl: './cook-view.page.html',
   styleUrl: './cook-view.page.scss'
@@ -82,6 +85,13 @@ export class CookViewPage implements OnInit {
   protected settingByIngredientIndex_ = signal<number | null>(null);
   /** Current value in the inline amount input for the row in setting state. */
   protected settingByIngredientAmount_ = signal<number>(0);
+
+  /** Payload for export preview popup (null = closed). */
+  protected exportPreviewPayload_ = signal<ExportPayload | null>(null);
+  /** Which export type is shown in preview (so we know what to run on Export click). */
+  private exportPreviewType_: 'recipe-info' | 'shopping-list' | 'cooking-steps' | 'dish-checklist' | null = null;
+  /** Floating export bar expanded. */
+  protected exportBarExpanded_ = signal<boolean>(false);
 
   /** True when we are in special scaled view (show banner + Back to full recipe). */
   protected isScaledView_ = computed(() => this.scaleByIngredientIndex_() !== null);
@@ -319,6 +329,87 @@ export class CookViewPage implements OnInit {
     const recipe = this.recipe_();
     const qty = this.targetQuantity_();
     if (recipe) await this.exportService.exportShoppingList(recipe, qty);
+  }
+
+  protected onViewRecipeInfo(): void {
+    const recipe = this.recipe_();
+    const qty = this.targetQuantity_();
+    if (!recipe) return;
+    const payload = this.exportService.getRecipeInfoPreviewPayload(recipe, qty);
+    this.exportPreviewType_ = 'recipe-info';
+    this.exportPreviewPayload_.set(payload);
+    this.exportBarExpanded_.set(false);
+  }
+
+  protected onViewShoppingList(): void {
+    const recipe = this.recipe_();
+    const qty = this.targetQuantity_();
+    if (!recipe) return;
+    const payload = this.exportService.getShoppingListPreviewPayload(recipe, qty);
+    this.exportPreviewType_ = 'shopping-list';
+    this.exportPreviewPayload_.set(payload);
+    this.exportBarExpanded_.set(false);
+  }
+
+  protected onExportPreviewClose(): void {
+    this.exportPreviewPayload_.set(null);
+    this.exportPreviewType_ = null;
+  }
+
+  protected async onExportFromPreview(): Promise<void> {
+    const recipe = this.recipe_();
+    const qty = this.targetQuantity_();
+    if (!recipe || !this.exportPreviewType_) return;
+    if (this.exportPreviewType_ === 'recipe-info') {
+      await this.exportService.exportRecipeInfo(recipe, qty);
+    } else if (this.exportPreviewType_ === 'shopping-list') {
+      await this.exportService.exportShoppingList(recipe, qty);
+    } else if (this.exportPreviewType_ === 'cooking-steps') {
+      await this.exportService.exportCookingSteps(recipe, qty);
+    } else if (this.exportPreviewType_ === 'dish-checklist') {
+      await this.exportService.exportDishChecklist(recipe, qty);
+    }
+    this.onExportPreviewClose();
+  }
+
+  protected onPrintFromPreview(): void {
+    window.print();
+  }
+
+  protected onViewCookingSteps(): void {
+    const recipe = this.recipe_();
+    const qty = this.targetQuantity_();
+    if (!recipe) return;
+    const payload = this.exportService.getCookingStepsPreviewPayload(recipe, qty);
+    this.exportPreviewType_ = 'cooking-steps';
+    this.exportPreviewPayload_.set(payload);
+    this.exportBarExpanded_.set(false);
+  }
+
+  protected onViewDishChecklist(): void {
+    const recipe = this.recipe_();
+    const qty = this.targetQuantity_();
+    if (!recipe) return;
+    const payload = this.exportService.getDishChecklistPreviewPayload(recipe, qty);
+    this.exportPreviewType_ = 'dish-checklist';
+    this.exportPreviewPayload_.set(payload);
+    this.exportBarExpanded_.set(false);
+  }
+
+  protected async onExportCookingSteps(): Promise<void> {
+    const recipe = this.recipe_();
+    const qty = this.targetQuantity_();
+    if (recipe) await this.exportService.exportCookingSteps(recipe, qty);
+  }
+
+  protected async onExportDishChecklist(): Promise<void> {
+    const recipe = this.recipe_();
+    const qty = this.targetQuantity_();
+    if (recipe) await this.exportService.exportDishChecklist(recipe, qty);
+  }
+
+  protected toggleExportBar(): void {
+    this.exportBarExpanded_.update((v: boolean) => !v);
   }
 
   /** For route guard: true when in edit mode with unsaved changes. */
