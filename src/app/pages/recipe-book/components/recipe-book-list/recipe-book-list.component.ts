@@ -23,6 +23,7 @@ import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/share
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
 import { useListState, StringParam, NullableStringParam, FilterRecordParam, StringArrayParam } from 'src/app/core/utils/list-state.util';
+import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 
 export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens' | 'dateAdded';
 
@@ -53,6 +54,7 @@ export class RecipeBookListComponent {
   protected isPanelOpen_ = signal<boolean>(true);
 
   constructor() {
+    this.isPanelOpen_.set(getPanelOpen('recipe-book'));
     useListState('recipe-book', [
       { urlParam: 'q',           signal: this.searchQuery_,        serializer: StringParam },
       { urlParam: 'sort',        signal: this.sortBy_,             serializer: NullableStringParam as any },
@@ -118,6 +120,7 @@ export class RecipeBookListComponent {
 
   protected togglePanel(): void {
     this.isPanelOpen_.update(v => !v);
+    setPanelOpen('recipe-book', this.isPanelOpen_());
   }
 
   protected filterCategories_ = computed(() => {

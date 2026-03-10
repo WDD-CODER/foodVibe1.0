@@ -20,6 +20,7 @@ import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.compone
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
 import { useListState, StringParam, NullableStringParam, BooleanParam, FilterRecordParam } from 'src/app/core/utils/list-state.util';
+import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
 
@@ -73,6 +74,7 @@ export class InventoryProductListComponent {
   protected carouselHeaderIndex_ = signal<number>(0);
 
   constructor() {
+    this.isPanelOpen_.set(getPanelOpen('inventory'));
     useListState('inventory', [
       { urlParam: 'q',        signal: this.searchQuery_,   serializer: StringParam },
       { urlParam: 'sort',     signal: this.sortBy_,        serializer: NullableStringParam as any },
@@ -149,6 +151,7 @@ export class InventoryProductListComponent {
 
   protected togglePanel(): void {
     this.isPanelOpen_.update(v => !v);
+    setPanelOpen('inventory', this.isPanelOpen_());
   }
 
   protected isEmptyList_ = computed(() => this.kitchenStateService.products_().length === 0);

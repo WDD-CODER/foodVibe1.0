@@ -18,6 +18,7 @@ import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.compone
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 import { useListState, StringParam, NullableBooleanParam, StringSetParam } from 'src/app/core/utils/list-state.util';
+import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 
 type SortField = 'name' | 'category' | 'owned';
 
@@ -53,7 +54,12 @@ export class EquipmentListComponent {
   protected isPanelOpen_ = signal(true);
   protected carouselHeaderIndex_ = signal(0);
 
+  private get panelContext(): 'inventory' | 'equipment' {
+    return this.router.url.startsWith('/inventory/equipment') ? 'inventory' : 'equipment';
+  }
+
   constructor() {
+    this.isPanelOpen_.set(getPanelOpen(this.panelContext));
     this.buildEditForm();
     useListState('equipment', [
       { urlParam: 'q',          signal: this.searchQuery_,        serializer: StringParam },
@@ -157,6 +163,7 @@ export class EquipmentListComponent {
 
   protected togglePanel(): void {
     this.isPanelOpen_.update(v => !v);
+    setPanelOpen(this.panelContext, this.isPanelOpen_());
   }
 
   protected onCarouselHeaderChange(index: number): void {

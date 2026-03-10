@@ -20,6 +20,7 @@ import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.compone
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { useListState, StringParam, BooleanParam, NumberSetParam } from 'src/app/core/utils/list-state.util';
+import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 
 const DAY_LABELS = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'];
 
@@ -59,6 +60,7 @@ export class SupplierListComponent {
   protected editForm_!: FormGroup;
 
   constructor() {
+    this.isPanelOpen_.set(getPanelOpen('suppliers'));
     this.buildEditForm();
     if (!this.embeddedInDashboard) {
       useListState('suppliers', [
@@ -112,6 +114,7 @@ export class SupplierListComponent {
 
   protected togglePanel(): void {
     this.isPanelOpen_.update(v => !v);
+    setPanelOpen('suppliers', this.isPanelOpen_());
   }
 
   protected onCarouselHeaderChange(index: number): void {

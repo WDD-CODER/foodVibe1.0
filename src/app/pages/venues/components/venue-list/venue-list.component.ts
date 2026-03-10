@@ -16,6 +16,7 @@ import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.compone
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
 import { useListState, StringParam, StringSetParam } from 'src/app/core/utils/list-state.util';
+import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 
 const ENV_TYPES: EnvironmentType[] = [
   'professional_kitchen',
@@ -66,6 +67,7 @@ export class VenueListComponent {
   protected envTypes = ENV_TYPES;
 
   constructor() {
+    this.isPanelOpen_.set(getPanelOpen('venues'));
     if (!this.embeddedInDashboard) {
       useListState('venues', [
         { urlParam: 'q',        signal: this.searchQuery_,      serializer: StringParam },
@@ -82,6 +84,7 @@ export class VenueListComponent {
 
   protected togglePanel(): void {
     this.isPanelOpen_.update((v) => !v);
+    setPanelOpen('venues', this.isPanelOpen_());
   }
 
   protected onCarouselHeaderChange(index: number): void {
