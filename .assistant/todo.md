@@ -82,11 +82,11 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ### Plan 107 — Export localization and design (`plans/107-export-localization-design.plan.md`)
 
-- [ ] Add export_headers to dictionary.json; create heHeader()/heUnit() in export.util.ts
-- [ ] Update all get*PreviewPayload methods to use Hebrew headers and translated units
-- [ ] Update all export* methods to use Hebrew headers and translated units
-- [ ] Add Excel styling helpers and apply to checklist by_dish and all sheets
-- [ ] Refactor export-preview HTML to table; update SCSS for alignment and RTL
+- [x] Add export_headers to dictionary.json; create heHeader()/heUnit() in export.util.ts
+- [x] Update all get*PreviewPayload methods to use Hebrew headers and translated units
+- [x] Update all export* methods to use Hebrew headers and translated units
+- [x] Add Excel styling helpers and apply to checklist by_dish and all sheets
+- [x] Refactor export-preview HTML to table; update SCSS for alignment and RTL
 
 ### Plan 089 — Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
 
@@ -636,7 +636,7 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 099 | Calculation and Shopping List Testing | Active |
 | 102 | Unified export refactor | Active |
 | 105 | Persist sidebar open/close state | Active |
-| 107 | Export localization and design | Active |
+| 107 | Export localization and design | Done |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 
