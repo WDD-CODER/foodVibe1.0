@@ -43,6 +43,43 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] Add all new translation keys to dictionary.json
 
 
+### Plan 104 — Sell price on dish change (`plans/104-sell-price-on-dish-change.plan.md`)
+
+- [x] Extend editingDishAt_ with previousSellPrice; store it in startEditDishName
+- [x] In selectRecipe when replacing: set sell_price to 0 (different recipe) or previousSellPrice (same recipe)
+
+### Plan 103 — Click dish name, food cost per portion, dividers (`plans/103-click-dish-name-food-cost-dividers.plan.md`)
+
+- [x] Make dish name clickable (button calling startEditDishName); add .dish-name-btn styles
+- [x] Add getFoodCostPerPortion + read-only field in dish-data
+- [x] Divider: info-menu boundary uses section-ornament style; between sections use section-divider (distinct style)
+- [x] Add i18n keys change_dish, dish_food_cost_per_portion
+
+### Plan 102 — Unified export refactor (`plans/102-unified-export-refactor.plan.md`)
+
+- [x] Unified export header: floating control + hidden bar on cook-view, recipe-builder; menu-intelligence toolbar with View+Export
+- [x] Two icons per export type (View + Export); export-preview component (paper-style popup, click-outside close)
+- [x] ExportService: view-model API (getRecipeInfoPreviewPayload, getShoppingListPreviewPayload, getMenuInfoPreviewPayload, getMenuShoppingListPreviewPayload); 2 decimals; file naming (recipe-info_, shopping-list_, check-list_, menu-info_)
+- [x] Recipe → cooking steps export; dish → checklist export (by item type in recipe/dish context)
+- [x] Menu checklist: by_station mode; two sheets (Accumulated + By dish) when not by_dish
+- [x] Unit prices only in shopping list exports; formulas for reactivity in menu shopping list
+- [x] Export all together: menu (sheet1 menu + sheets per type); recipe/dish (sheet1 info+ingredients+workflow, sheet2 shopping list)
+- [x] Cook-view: replace inline export buttons with floating bar; pass current quantity/scaling
+- [x] Recipe-builder: add floating export bar; form snapshot for export; cooking steps vs checklist by type
+- [x] Menu-intelligence: add by_station to checklist dropdown; Export all together button; View+Export for menu info and menu shopping list
+
+### Plan 105 — Persist sidebar state (`plans/105-persist-sidebar-state.plan.md`)
+
+- [x] Add panel-preference.util.ts (getPanelOpen, setPanelOpen)
+- [x] Wire inventory-product-list, supplier-list, recipe-book-list, equipment-list, venue-list to panel preference
+
+### Plan 106 — Hero FAB export and page actions (`plans/106-hero-fab-export-page-actions.plan.md`)
+
+- [x] Create HeroFabService (setPageActions, clearPageActions, pageActions signal)
+- [x] Hero FAB: main button click → recipe-builder; inject service; show replace/append actions
+- [x] Menu-intelligence: register Toolbar + Go back in hero FAB; remove menu FAB block and SCSS
+- [x] Recipe-builder: register Export, Cook (contextual), Recipe creation; openExportFromHeroFab, goToCookFromHeroFab
+
 ### Plan 089 — Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
 
 - [ ] A: Auto-name menu with formatted date when name is empty on save, with duplicate handling (1), (2)
@@ -589,6 +626,8 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 096 | Supplier Modal Styling Upgrade | Active |
 | 098 | Remove Supplier Modal Edit Redundancy | Active |
 | 099 | Calculation and Shopping List Testing | Active |
+| 102 | Unified export refactor | Active |
+| 105 | Persist sidebar open/close state | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 

@@ -2,67 +2,98 @@
   <!-- Toolbar overlay (fixed at top, toggled) -->
   @if (toolbarOpen_()) {
     <div class="toolbar-overlay no-print" (clickOutside)="closeToolbar()">
-      <div class="editor-toolbar">
-        <button type="button" class="toolbar-btn back" (click)="goBack()">
-          <lucide-icon name="arrow-right" [size]="18"></lucide-icon>
-          {{ 'menu_library' | translatePipe }}
-        </button>
-        <div class="toolbar-actions">
-          <button type="button" class="toolbar-btn export" (click)="onExportMenuInfo()" [attr.aria-label]="'export_menu_info' | translatePipe">
-            <lucide-icon name="table-2" [size]="16"></lucide-icon>
-            {{ 'export_menu_info' | translatePipe }}
+      <div class="toolbar-export-grid" (click)="$event.stopPropagation()">
+        <div class="view-export-wrap">
+          <button type="button" class="toolbar-glass-btn" (click)="openViewExportModal('menu-info'); $event.stopPropagation()" [attr.aria-label]="'export_menu_info' | translatePipe" [attr.aria-expanded]="viewExportModal_() === 'menu-info'">
+            <lucide-icon name="table-2" [size]="14"></lucide-icon>
+            {{ 'toolbar_menu' | translatePipe }}
           </button>
-          <button type="button" class="toolbar-btn export" (click)="onExportMenuShoppingList()" [attr.aria-label]="'export_menu_shopping_list' | translatePipe">
-            <lucide-icon name="shopping-cart" [size]="16"></lucide-icon>
-            {{ 'export_menu_shopping_list' | translatePipe }}
+          @if (viewExportModal_() === 'menu-info') {
+            <div class="view-export-modal" (click)="$event.stopPropagation()" (clickOutside)="closeViewExportModal()">
+              <button type="button" class="view-export-option" (click)="onViewMenuInfo(); closeViewExportModal()">
+                <lucide-icon name="eye" [size]="14"></lucide-icon>
+                {{ 'view' | translatePipe }}
+              </button>
+              <button type="button" class="view-export-option" (click)="onExportMenuInfo(); closeViewExportModal()">
+                <lucide-icon name="download" [size]="14"></lucide-icon>
+                {{ 'export' | translatePipe }}
+              </button>
+            </div>
+          }
+        </div>
+        <div class="view-export-wrap">
+          <button type="button" class="toolbar-glass-btn" (click)="openViewExportModal('shopping-list'); $event.stopPropagation()" [attr.aria-label]="'export_menu_shopping_list' | translatePipe" [attr.aria-expanded]="viewExportModal_() === 'shopping-list'">
+            <lucide-icon name="shopping-cart" [size]="14"></lucide-icon>
+            {{ 'toolbar_shopping' | translatePipe }}
           </button>
-          <div class="checklist-export-wrap">
-            <button type="button" class="toolbar-btn export" (click)="toggleExportChecklistDropdown()" [attr.aria-label]="'export_checklist' | translatePipe" [attr.aria-expanded]="exportChecklistDropdownOpen_()">
-              <lucide-icon name="clipboard-list" [size]="16"></lucide-icon>
-              {{ 'export_checklist' | translatePipe }}
-              <lucide-icon name="chevron-down" [size]="14"></lucide-icon>
-            </button>
-            @if (exportChecklistDropdownOpen_()) {
-              <div class="checklist-export-dropdown" (clickOutside)="closeExportChecklistDropdown()">
-                <button type="button" class="checklist-export-option" (click)="onExportChecklist('by_dish')">
-                  {{ 'export_checklist_by_dish' | translatePipe }}
+          @if (viewExportModal_() === 'shopping-list') {
+            <div class="view-export-modal" (click)="$event.stopPropagation()" (clickOutside)="closeViewExportModal()">
+              <button type="button" class="view-export-option" (click)="onViewMenuShoppingList(); closeViewExportModal()">
+                <lucide-icon name="eye" [size]="14"></lucide-icon>
+                {{ 'view' | translatePipe }}
+              </button>
+              <button type="button" class="view-export-option" (click)="onExportMenuShoppingList(); closeViewExportModal()">
+                <lucide-icon name="download" [size]="14"></lucide-icon>
+                {{ 'export' | translatePipe }}
+              </button>
+            </div>
+          }
+        </div>
+        <div class="checklist-export-wrap">
+          <button type="button" class="toolbar-glass-btn" (click)="toggleExportChecklistDropdown(); $event.stopPropagation()" [attr.aria-label]="'export_checklist' | translatePipe" [attr.aria-expanded]="exportChecklistDropdownOpen_()">
+            <lucide-icon name="clipboard-list" [size]="14"></lucide-icon>
+            {{ 'toolbar_checklist' | translatePipe }}
+            <lucide-icon name="chevron-down" [size]="12"></lucide-icon>
+          </button>
+          @if (exportChecklistDropdownOpen_()) {
+            <div class="checklist-export-dropdown" (click)="$event.stopPropagation()" (clickOutside)="closeExportChecklistDropdown()">
+              <div class="checklist-export-option-row">
+                <span class="checklist-export-option-label">{{ 'export_checklist_by_dish' | translatePipe }}</span>
+                <button type="button" class="toolbar-glass-btn icon" (click)="onViewChecklist('by_dish'); $event.stopPropagation()" [attr.aria-label]="'view' | translatePipe">
+                  <lucide-icon name="eye" [size]="12"></lucide-icon>
                 </button>
-                <button type="button" class="checklist-export-option" (click)="onExportChecklist('by_category')">
-                  {{ 'export_checklist_by_category' | translatePipe }}
+                <button type="button" class="toolbar-glass-btn icon" (click)="onExportChecklist('by_dish'); $event.stopPropagation()" [attr.aria-label]="'export' | translatePipe">
+                  <lucide-icon name="download" [size]="12"></lucide-icon>
                 </button>
               </div>
-            }
-          </div>
-          <button type="button" class="toolbar-btn export" (click)="printMenu()">
-            <lucide-icon name="printer" [size]="16"></lucide-icon>
-            {{ 'menu_export_customer' | translatePipe }}
-          </button>
-          <button type="button" class="toolbar-btn save" (click)="save()" [disabled]="isSaving_()">
-            @if (isSaving_()) {
-              <app-loader size="small" [inline]="true" />
-            }
-            <lucide-icon name="save" [size]="16"></lucide-icon>
-            {{ isSaving_() ? ('saving' | translatePipe) : ('menu_save' | translatePipe) }}
-          </button>
+              <div class="checklist-export-option-row">
+                <span class="checklist-export-option-label">{{ 'export_checklist_by_category' | translatePipe }}</span>
+                <button type="button" class="toolbar-glass-btn icon" (click)="onViewChecklist('by_category'); $event.stopPropagation()" [attr.aria-label]="'view' | translatePipe">
+                  <lucide-icon name="eye" [size]="12"></lucide-icon>
+                </button>
+                <button type="button" class="toolbar-glass-btn icon" (click)="onExportChecklist('by_category'); $event.stopPropagation()" [attr.aria-label]="'export' | translatePipe">
+                  <lucide-icon name="download" [size]="12"></lucide-icon>
+                </button>
+              </div>
+              <div class="checklist-export-option-row">
+                <span class="checklist-export-option-label">{{ 'export_checklist_by_station' | translatePipe }}</span>
+                <button type="button" class="toolbar-glass-btn icon" (click)="onViewChecklist('by_station'); $event.stopPropagation()" [attr.aria-label]="'view' | translatePipe">
+                  <lucide-icon name="eye" [size]="12"></lucide-icon>
+                </button>
+                <button type="button" class="toolbar-glass-btn icon" (click)="onExportChecklist('by_station'); $event.stopPropagation()" [attr.aria-label]="'export' | translatePipe">
+                  <lucide-icon name="download" [size]="12"></lucide-icon>
+                </button>
+              </div>
+            </div>
+          }
         </div>
+        <button type="button" class="toolbar-glass-btn" (click)="onExportAllTogether()" [attr.aria-label]="'export_all_together' | translatePipe">
+          <lucide-icon name="package" [size]="14"></lucide-icon>
+          {{ 'toolbar_all' | translatePipe }}
+        </button>
+        <button type="button" class="toolbar-glass-btn" (click)="printMenu()" [attr.aria-label]="'menu_export_customer' | translatePipe">
+          <lucide-icon name="printer" [size]="14"></lucide-icon>
+        </button>
+        <button type="button" class="toolbar-glass-btn save" (click)="save()" [disabled]="isSaving_()">
+          @if (isSaving_()) {
+            <app-loader size="small" [inline]="true" />
+          }
+          <lucide-icon name="save" [size]="14"></lucide-icon>
+          {{ isSaving_() ? ('saving' | translatePipe) : ('menu_save' | translatePipe) }}
+        </button>
       </div>
     </div>
   }
-
-  <!-- Menu FAB (right side, opposite of hero-fab) -->
-  <div class="menu-fab-container no-print" (mouseleave)="collapseMenuFab()">
-    <div class="menu-fab-actions" [class.expanded]="menuFabExpanded_()">
-      <button type="button" class="menu-fab-action" [attr.aria-label]="'menu_toolbar_open' | translatePipe" (click)="openToolbar()">
-        <lucide-icon name="settings" size="20"></lucide-icon>
-      </button>
-      <button type="button" class="menu-fab-action" [attr.aria-label]="'menu_library' | translatePipe" (click)="goBack()">
-        <lucide-icon name="arrow-right" size="20"></lucide-icon>
-      </button>
-    </div>
-    <button type="button" class="menu-fab-main" [class.active]="menuFabExpanded_()" (mouseenter)="expandMenuFab()" (click)="openToolbar()" aria-label="Menu actions">
-      <lucide-icon name="menu" size="24"></lucide-icon>
-    </button>
-  </div>
 
   <!-- Paper in the middle of the screen -->
   <div class="paper-outer">
@@ -158,14 +189,14 @@
       </div>
     </div>
 
-    <div class="paper-divider"></div>
+    <div class="info-menu-divider"></div>
 
     <!-- Sections: category looks like plain text; dropdown only on click -->
     <div class="sections-area" formArrayName="sections_">
       @for (section of sectionsArray.controls; track section.get('_id')?.value; let sectionIndex = $index) {
         <div class="menu-section" [formGroupName]="sectionIndex">
           @if (sectionIndex > 0) {
-            <div class="section-ornament"></div>
+            <div class="section-divider"></div>
           }
 
           <div class="section-header">
@@ -214,7 +245,11 @@
                   @if (item.get('recipe_id_')?.value) {
                     <div class="dish-name-meta-wrap">
                       <div class="dish-name-meta">
-                        <span class="dish-name">{{ getRecipeName(item.get('recipe_id_')?.value) }}</span>
+                        <button type="button" class="dish-name dish-name-btn"
+                          [attr.aria-label]="'change_dish' | translatePipe"
+                          (click)="startEditDishName(sectionIndex, itemIndex); $event.stopPropagation()">
+                        {{ getRecipeName(item.get('recipe_id_')?.value) }}
+                        </button>
                         <button type="button" class="dish-meta-toggle no-print"
                           [attr.aria-label]="isDishMetaExpanded(sectionIndex, itemIndex) ? ('hide_metadata' | translatePipe) : ('show_metadata' | translatePipe)"
                           (click)="toggleDishMeta(sectionIndex, itemIndex)">
@@ -278,6 +313,10 @@
                         }
                       </div>
                     }
+                    <div class="dish-field read-only">
+                      <span class="dish-field-label">{{ 'dish_food_cost_per_portion' | translatePipe }}</span>
+                      <span class="dish-field-value">₪{{ getFoodCostPerPortion(sectionIndex, itemIndex) }}</span>
+                    </div>
                   </div>
                 }
               </div>
@@ -324,4 +363,11 @@
       <span class="fin-value">₪{{ costPerGuest_() | number:'1.2-2' }}</span>
     </div>
   </footer>
+
+  @if (exportPreviewPayload_(); as payload) {
+    <app-export-preview [payload]="payload"
+      (exportClick)="onExportFromPreview()"
+      (printClick)="onPrintFromPreview()"
+      (close)="onCloseExportPreview()" />
+  }
 </div>

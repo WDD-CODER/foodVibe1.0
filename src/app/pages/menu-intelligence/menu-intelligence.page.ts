@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, computed, DestroyRef, HostListener, inject, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, DestroyRef, HostListener, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
@@ -23,6 +23,9 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
+import type { ExportPayload } from 'src/app/core/utils/export.util';
+import { ExportPreviewComponent } from 'src/app/shared/export-preview/export-preview.component';
+import { HeroFabService } from '@services/hero-fab.service';
 
 type MenuItemForm = {
   recipe_id_: string;
@@ -38,12 +41,12 @@ type MenuItemForm = {
 @Component({
   selector: 'app-menu-intelligence-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, ClickOutSideDirective, SelectOnFocusDirective, ScrollableDropdownComponent, CustomSelectComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, ClickOutSideDirective, SelectOnFocusDirective, ScrollableDropdownComponent, CustomSelectComponent, ExportPreviewComponent],
   templateUrl: './menu-intelligence.page.html',
   styleUrl: './menu-intelligence.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MenuIntelligencePage implements AfterViewInit {
+export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -56,6 +59,7 @@ export class MenuIntelligencePage implements AfterViewInit {
   private readonly menuSectionCategories = inject(MenuSectionCategoriesService);
   private readonly recipeCostService = inject(RecipeCostService);
   private readonly exportService = inject(ExportService);
+  private readonly heroFab = inject(HeroFabService);
   private readonly destroyRef = inject(DestroyRef);
 
   /** Bumped when form value changes so footer computeds re-run (form is not a signal). */
@@ -69,6 +73,10 @@ export class MenuIntelligencePage implements AfterViewInit {
   protected readonly showExport_ = signal(false);
   protected readonly toolbarOpen_ = signal(false);
   protected readonly menuFabExpanded_ = signal(false);
+  /** Export preview (View before export). */
+  protected readonly exportPreviewPayload_ = signal<ExportPayload | null>(null);
+  private exportPreviewType_: 'menu-info' | 'menu-shopping-list' | 'menu-checklist' | null = null;
+  private exportChecklistMode_: 'by_dish' | 'by_category' | 'by_station' | null = null;
 
   /** Per-section dish search query signals keyed by section index */
   protected readonly dishSearchQueries_ = signal<Record<number, string>>({});
@@ -182,6 +190,20 @@ export class MenuIntelligencePage implements AfterViewInit {
       this.addSection();
       this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue());
     }
+  }
+
+  ngOnInit(): void {
+    this.heroFab.setPageActions(
+      [
+        { labelKey: 'menu_toolbar_open', icon: 'settings', run: () => this.openToolbar() },
+        { labelKey: 'menu_library', icon: 'arrow-right', run: () => this.goBack() }
+      ],
+      'replace'
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.heroFab.clearPageActions();
   }
 
   ngAfterViewInit(): void {
@@ -531,6 +553,14 @@ export class MenuIntelligencePage implements AfterViewInit {
       })),
     });
     return Math.round(scaledCost * 100) / 100;
+  }
+
+  /** Food cost per portion (total auto food cost ÷ serving portions). Read-only in dish-data. */
+  protected getFoodCostPerPortion(sectionIndex: number, itemIndex: number): number {
+    const total = this.getAutoFoodCost(sectionIndex, itemIndex);
+    const item = this.getItemsArray(sectionIndex).at(itemIndex);
+    const portions = Math.max(1, Number(item?.get('serving_portions')?.value ?? 1));
+    return Math.round((total / portions) * 100) / 100;
   }
 
   protected removeItem(sectionIndex: number, itemIndex: number): void {
@@ -1071,9 +1101,21 @@ export class MenuIntelligencePage implements AfterViewInit {
     return { ...built, _id: this.editingId_() ?? '' };
   }
 
+  protected onViewMenuInfo(): void {
+    const menu = this.getCurrentMenuForExport();
+    this.exportPreviewPayload_.set(this.exportService.getMenuInfoPreviewPayload(menu, this.recipes_()));
+    this.exportPreviewType_ = 'menu-info';
+  }
+
   protected async onExportMenuInfo(): Promise<void> {
     const menu = this.getCurrentMenuForExport();
     await this.exportService.exportMenuInfo(menu, this.recipes_());
+  }
+
+  protected onViewMenuShoppingList(): void {
+    const menu = this.getCurrentMenuForExport();
+    this.exportPreviewPayload_.set(this.exportService.getMenuShoppingListPreviewPayload(menu, this.recipes_(), this.products_()));
+    this.exportPreviewType_ = 'menu-shopping-list';
   }
 
   protected async onExportMenuShoppingList(): Promise<void> {
@@ -1081,19 +1123,68 @@ export class MenuIntelligencePage implements AfterViewInit {
     await this.exportService.exportMenuShoppingList(menu, this.recipes_(), this.products_());
   }
 
+  protected onExportFromPreview(): void {
+    const type = this.exportPreviewType_;
+    const mode = this.exportChecklistMode_;
+    if (!type) return;
+    const menu = this.getCurrentMenuForExport();
+    if (type === 'menu-info') this.exportService.exportMenuInfo(menu, this.recipes_());
+    else if (type === 'menu-shopping-list') this.exportService.exportMenuShoppingList(menu, this.recipes_(), this.products_());
+    else if (type === 'menu-checklist' && mode) this.exportService.exportChecklist(menu, this.recipes_(), mode);
+    this.exportPreviewPayload_.set(null);
+    this.exportPreviewType_ = null;
+    this.exportChecklistMode_ = null;
+  }
+
+  protected onPrintFromPreview(): void {
+    window.print();
+  }
+
+  protected onCloseExportPreview(): void {
+    this.exportPreviewPayload_.set(null);
+    this.exportPreviewType_ = null;
+    this.exportChecklistMode_ = null;
+  }
+
+  protected onViewChecklist(mode: 'by_dish' | 'by_category' | 'by_station'): void {
+    const menu = this.getCurrentMenuForExport();
+    this.exportPreviewPayload_.set(this.exportService.getMenuChecklistPreviewPayload(menu, this.recipes_(), mode));
+    this.exportPreviewType_ = 'menu-checklist';
+    this.exportChecklistMode_ = mode;
+    this.closeExportChecklistDropdown();
+  }
+
   protected readonly exportChecklistDropdownOpen_ = signal(false);
+
+  /** Which view/export modal is open: menu-info (תפריט) or shopping-list (קניות). */
+  protected readonly viewExportModal_ = signal<'menu-info' | 'shopping-list' | null>(null);
 
   protected toggleExportChecklistDropdown(): void {
     this.exportChecklistDropdownOpen_.update(v => !v);
+    this.viewExportModal_.set(null);
   }
 
   protected closeExportChecklistDropdown(): void {
     this.exportChecklistDropdownOpen_.set(false);
   }
 
-  protected async onExportChecklist(mode: 'by_dish' | 'by_category'): Promise<void> {
+  protected openViewExportModal(type: 'menu-info' | 'shopping-list'): void {
+    this.viewExportModal_.update(current => (current === type ? null : type));
+    this.exportChecklistDropdownOpen_.set(false);
+  }
+
+  protected closeViewExportModal(): void {
+    this.viewExportModal_.set(null);
+  }
+
+  protected async onExportChecklist(mode: 'by_dish' | 'by_category' | 'by_station'): Promise<void> {
     const menu = this.getCurrentMenuForExport();
     await this.exportService.exportChecklist(menu, this.recipes_(), mode);
     this.closeExportChecklistDropdown();
+  }
+
+  protected async onExportAllTogether(): Promise<void> {
+    const menu = this.getCurrentMenuForExport();
+    await this.exportService.exportAllTogetherMenu(menu, this.recipes_(), this.products_(), 'by_category');
   }
 }
