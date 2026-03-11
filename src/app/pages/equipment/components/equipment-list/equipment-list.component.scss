@@ -48,6 +48,10 @@
     display: contents;
   }
 
+  .equipment-grid-row .c-list-body-cell {
+    cursor: pointer;
+  }
+
   .equipment-grid-row:hover .c-icon-btn {
     opacity: 1;
   }

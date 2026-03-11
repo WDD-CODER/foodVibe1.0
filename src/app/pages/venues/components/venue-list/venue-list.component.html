@@ -41,14 +41,17 @@
       <div class="no-results">{{ 'no_venues_match' | translatePipe }}</div>
     }
     @for (item of filteredVenues_(); track item._id) {
-      <div class="venue-grid-row c-list-row" role="row">
+      <div class="venue-grid-row c-list-row" role="button" tabindex="0"
+        (click)="onRowClick(item, $event)"
+        (keydown.enter)="onEdit(item._id)"
+        (keydown.space)="$event.preventDefault(); onEdit(item._id)">
         <div class="col-name c-list-body-cell" role="cell">{{ item.name_hebrew }}</div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
           <div class="col-env c-list-body-cell" cellCarouselSlide [label]="'environment_type' | translatePipe">{{ item.environment_type_ | translatePipe }}</div>
           <div class="col-infra c-list-body-cell" cellCarouselSlide [label]="'infrastructure_items' | translatePipe">{{ item.available_infrastructure_.length }}</div>
         </app-cell-carousel>
         <div class="c-col-actions c-list-body-cell" role="cell">
-          <button type="button" class="c-icon-btn" (click)="onEdit(item._id)"
+          <button type="button" class="c-icon-btn" (click)="onEdit(item._id); $event.stopPropagation()"
             [attr.aria-label]="'edit' | translatePipe"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
             <lucide-icon name="pencil" [size]="18"></lucide-icon>
@@ -56,7 +59,7 @@
           @if (deletingId_() === item._id) {
             <app-loader size="small" [inline]="true" />
           } @else {
-            <button type="button" class="c-icon-btn danger" (click)="onDelete(item)"
+            <button type="button" class="c-icon-btn danger" (click)="onDelete(item); $event.stopPropagation()"
               [attr.aria-label]="'delete' | translatePipe"
               [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>
