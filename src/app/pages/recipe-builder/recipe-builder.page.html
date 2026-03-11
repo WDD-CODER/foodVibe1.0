@@ -86,10 +86,24 @@
             }
           </div>
         }
-        <button type="button" class="toolbar-glass-btn" (click)="onExportAllTogether()" [attr.aria-label]="'export_all_together' | translatePipe">
-          <lucide-icon name="package" [size]="14"></lucide-icon>
-          {{ 'export_all_together' | translatePipe }}
-        </button>
+        <div class="view-export-wrap">
+          <button type="button" class="toolbar-glass-btn" (click)="openViewExportModal('all'); $event.stopPropagation()" [attr.aria-label]="'export_all_together' | translatePipe" [attr.aria-expanded]="viewExportModal_() === 'all'">
+            <lucide-icon name="package" [size]="14"></lucide-icon>
+            {{ 'export_all_together' | translatePipe }}
+          </button>
+          @if (viewExportModal_() === 'all') {
+            <div class="view-export-modal" (click)="$event.stopPropagation()" (clickOutside)="closeViewExportModal()">
+              <button type="button" class="view-export-option" (click)="onViewAll(); closeViewExportModal()">
+                <lucide-icon name="eye" [size]="14"></lucide-icon>
+                {{ 'view' | translatePipe }}
+              </button>
+              <button type="button" class="view-export-option" (click)="onExportAllTogether(); closeViewExportModal()">
+                <lucide-icon name="download" [size]="14"></lucide-icon>
+                {{ 'export' | translatePipe }}
+              </button>
+            </div>
+          }
+        </div>
         <button type="button" class="toolbar-glass-btn" (click)="onPrint(); closeExportToolbar()" [attr.aria-label]="'recipe_print' | translatePipe">
           <lucide-icon name="printer" [size]="14"></lucide-icon>
           {{ 'recipe_print' | translatePipe }}

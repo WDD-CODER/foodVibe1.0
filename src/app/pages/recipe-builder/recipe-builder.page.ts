@@ -104,9 +104,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   /** Export toolbar overlay (blur header, same pattern as menu-intelligence). */
   protected exportToolbarOpen_ = signal(false);
   /** Which View/Export dropdown is open in the toolbar. */
-  protected viewExportModal_ = signal<'recipe-info' | 'shopping-list' | 'cooking-steps' | 'dish-checklist' | null>(null);
+  protected viewExportModal_ = signal<'recipe-info' | 'shopping-list' | 'cooking-steps' | 'dish-checklist' | 'all' | null>(null);
   protected exportPreviewPayload_ = signal<ExportPayload | null>(null);
-  private exportPreviewType_: 'recipe-info' | 'shopping-list' | 'cooking-steps' | 'dish-checklist' | null = null;
+  private exportPreviewType_: 'recipe-info' | 'shopping-list' | 'cooking-steps' | 'dish-checklist' | 'recipe-all' | null = null;
 
   protected toggleTableLogic(): void {
     const next = !this.tableLogicCollapsed_();
@@ -406,7 +406,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     this.viewExportModal_.set(null);
   }
 
-  protected openViewExportModal(key: 'recipe-info' | 'shopping-list' | 'cooking-steps' | 'dish-checklist'): void {
+  protected openViewExportModal(key: 'recipe-info' | 'shopping-list' | 'cooking-steps' | 'dish-checklist' | 'all'): void {
     this.viewExportModal_.update(current => (current === key ? null : key));
   }
 
@@ -881,6 +881,14 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     this.exportPreviewType_ = 'dish-checklist';
   }
 
+  protected onViewAll(): void {
+    const recipe = this.buildRecipeFromForm();
+    const qty = this.exportQuantity_();
+    this.exportPreviewPayload_.set(this.exportService_.getRecipeInfoPreviewPayload(recipe, qty));
+    this.exportPreviewType_ = 'recipe-all';
+    this.closeViewExportModal();
+  }
+
   protected onExportFromPreview(): void {
     const payload = this.exportPreviewPayload_();
     const type = this.exportPreviewType_;
@@ -891,6 +899,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     else if (type === 'shopping-list') this.exportService_.exportShoppingList(recipe, qty);
     else if (type === 'cooking-steps') this.exportService_.exportCookingSteps(recipe, qty);
     else if (type === 'dish-checklist') this.exportService_.exportDishChecklist(recipe, qty);
+    else if (type === 'recipe-all') this.exportService_.exportAllTogetherRecipe(recipe, qty);
     this.exportPreviewPayload_.set(null);
     this.exportPreviewType_ = null;
   }

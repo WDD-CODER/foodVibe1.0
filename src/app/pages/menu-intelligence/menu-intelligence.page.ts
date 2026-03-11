@@ -79,7 +79,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected readonly menuFabExpanded_ = signal(false);
   /** Export preview (View before export). */
   protected readonly exportPreviewPayload_ = signal<ExportPayload | null>(null);
-  private exportPreviewType_: 'menu-info' | 'menu-shopping-list' | 'menu-checklist' | null = null;
+  private exportPreviewType_: 'menu-info' | 'menu-shopping-list' | 'menu-checklist' | 'menu-all' | null = null;
   private exportChecklistMode_: 'by_dish' | 'by_category' | 'by_station' | null = null;
 
   /** Per-section dish search query signals keyed by section index */
@@ -578,12 +578,12 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     return Math.round(scaledCost * 100) / 100;
   }
 
-  /** Food cost per portion (total auto food cost ÷ serving portions). Read-only in dish-data. */
+  /** Food cost per portion (total auto food cost ÷ derived portions). Read-only in dish-data. */
   protected getFoodCostPerPortion(sectionIndex: number, itemIndex: number): number {
     const total = this.getAutoFoodCost(sectionIndex, itemIndex);
     const item = this.getItemsArray(sectionIndex).at(itemIndex);
-    const portions = Math.max(1, Number(item?.get('serving_portions')?.value ?? 1));
-    return Math.round((total / portions) * 100) / 100;
+    const derivedPortions = item ? this.getDerivedPortions(item.value as MenuItemForm) : 1;
+    return Math.round((total / Math.max(1, derivedPortions)) * 100) / 100;
   }
 
   protected removeItem(sectionIndex: number, itemIndex: number): void {
@@ -1128,6 +1128,13 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     return { ...built, _id: this.editingId_() ?? '' };
   }
 
+  protected onViewAll(): void {
+    const menu = this.getCurrentMenuForExport();
+    this.exportPreviewPayload_.set(this.exportService.getMenuAllViewPreviewPayload(menu, this.recipes_()));
+    this.exportPreviewType_ = 'menu-all';
+    this.closeViewExportModal();
+  }
+
   protected onViewMenuInfo(): void {
     const menu = this.getCurrentMenuForExport();
     this.exportPreviewPayload_.set(this.exportService.getMenuInfoPreviewPayload(menu, this.recipes_()));
@@ -1158,6 +1165,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     if (type === 'menu-info') this.exportService.exportMenuInfo(menu, this.recipes_());
     else if (type === 'menu-shopping-list') this.exportService.exportMenuShoppingList(menu, this.recipes_(), this.products_());
     else if (type === 'menu-checklist' && mode) this.exportService.exportChecklist(menu, this.recipes_(), mode);
+    else if (type === 'menu-all') this.exportService.exportAllTogetherMenu(menu, this.recipes_(), this.products_(), 'by_category');
     this.exportPreviewPayload_.set(null);
     this.exportPreviewType_ = null;
     this.exportChecklistMode_ = null;
@@ -1183,8 +1191,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   protected readonly exportChecklistDropdownOpen_ = signal(false);
 
-  /** Which view/export modal is open: menu-info (תפריט) or shopping-list (קניות). */
-  protected readonly viewExportModal_ = signal<'menu-info' | 'shopping-list' | null>(null);
+  /** Which view/export modal is open: menu-info (תפריט), shopping-list (קניות), or all. */
+  protected readonly viewExportModal_ = signal<'menu-info' | 'shopping-list' | 'all' | null>(null);
 
   protected toggleExportChecklistDropdown(): void {
     this.exportChecklistDropdownOpen_.update(v => !v);
@@ -1195,7 +1203,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     this.exportChecklistDropdownOpen_.set(false);
   }
 
-  protected openViewExportModal(type: 'menu-info' | 'shopping-list'): void {
+  protected openViewExportModal(type: 'menu-info' | 'shopping-list' | 'all'): void {
     this.viewExportModal_.update(current => (current === type ? null : type));
     this.exportChecklistDropdownOpen_.set(false);
   }

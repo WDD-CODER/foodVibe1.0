@@ -153,6 +153,18 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] Add matchMedia('(max-width: 768px)').addEventListener('change', ...) in recipe-book-list, supplier-list, equipment-list
 - [x] In list-shell.component.scss @media (max-width: 768px): add transition: none for .filter-panel and .panel-content
 
+### Plan 119 — Content-driven list row heights (`plans/119-content-driven-list-row-heights.plan.md`)
+
+- [x] list-shell: set grid-template-rows: none and grid-auto-rows: auto for content-sized rows
+- [x] list-shell: .table-body .col-name — display: block, overflow-wrap: break-word, text-align: start (keep overflow: hidden)
+
+### Plan 120 — Export "All" view option + cost fix (`plans/120-recipe-builder-all-view-option.plan.md`)
+
+- [x] Part C: Fix getFoodCostPerPortion to divide by derived portions (menu-intelligence.page.ts)
+- [x] Part A: Recipe-builder — wrap "All" in view-export-wrap; add view-export-modal (View/Export); onViewAll, exportPreviewType_ 'recipe-all', onExportFromPreview for 'recipe-all'
+- [x] Part B: ExportService — add getMenuAllViewPreviewPayload(menu, recipes)
+- [x] Part B: Menu-intelligence — replace "All" button with view-export-wrap + view-export-modal; onViewAll, exportPreviewType_ 'menu-all', onExportFromPreview for 'menu-all'
+
 ### Plan 089 — Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
 
 - [ ] A: Auto-name menu with formatted date when name is empty on save, with duplicate handling (1), (2)
@@ -710,6 +722,7 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 116 | Center main loader in viewport | Done |
 | 117 | Dish row absolute actions | Done |
 | 118 | Sidebar close on breakpoint | Planned |
+| 120 | Export "All" view option (recipe + menu) + cost per portion fix | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 

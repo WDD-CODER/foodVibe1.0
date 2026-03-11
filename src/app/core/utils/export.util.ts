@@ -50,6 +50,9 @@ export const EXPORT_HEADER_HE: Record<string, string> = {
   preparation_instructions: 'הוראות הכנה',
   preparation_time: 'זמן הכנה',
   ingredients_header: 'מצרכים',
+  /** Menu all view: total food cost (₪), cost per 1 portion */
+  food_cost_money: 'עלות מזון (₪)',
+  dish_food_cost_per_portion: 'עלות למנה',
 };
 
 /** Map English base unit keys to Hebrew display (matches dictionary units). */
@@ -111,21 +114,24 @@ export type ExportListType =
   | 'all';
 
 /**
- * Build export filename per plan: {list-type}_{item-name}[_{date}].xlsx
+ * Build export filename per plan: {list-type}[_{variant}]_{item-name}[_{date}].xlsx
  * - Recipe/dish: include date.
  * - Menu: no date in filename.
+ * - variant: optional (e.g. 'by-dish', 'by-category', 'by-station') for checklists so the filename describes the export type.
  */
 export function buildExportFileName(
   listType: ExportListType,
   itemName: string,
-  options?: { includeDate?: boolean }
+  options?: { includeDate?: boolean; variant?: string }
 ): string {
   const safeName = sanitizeFileName(itemName);
   const includeDate = options?.includeDate ?? true;
+  const variant = options?.variant ? sanitizeFileName(options.variant) : '';
+  const mid = variant ? `_${variant}` : '';
   if (includeDate) {
-    return `${listType}_${safeName}_${exportDateStr()}.xlsx`;
+    return `${listType}${mid}_${safeName}_${exportDateStr()}.xlsx`;
   }
-  return `${listType}_${safeName}.xlsx`;
+  return `${listType}${mid}_${safeName}.xlsx`;
 }
 
 /** One row in an export section (array of cell values). */
