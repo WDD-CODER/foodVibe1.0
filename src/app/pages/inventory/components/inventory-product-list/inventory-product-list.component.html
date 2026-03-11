@@ -89,10 +89,10 @@
               <span class="placeholder-dash">—</span>
             }
           </div>
-          <div class="col-supplier" cellCarouselSlide [label]="'supplier' | translatePipe">{{ getSupplierNames(product.supplierIds_) || '—' }}</div>
+          <div class="col-supplier c-list-body-cell" cellCarouselSlide [label]="'supplier' | translatePipe">{{ getSupplierNames(product.supplierIds_) || '—' }}</div>
         </app-cell-carousel>
-        <div class="col-unit" role="cell">{{ product.base_unit_ | translatePipe }}</div>
-        <div class="col-price col-price-readonly" role="cell">
+        <div class="col-unit c-list-body-cell" role="cell">{{ product.base_unit_ | translatePipe }}</div>
+        <div class="col-price col-price-readonly c-list-body-cell" role="cell">
           <span class="price-value">{{ getPricePerUnit(product, product.base_unit_) | number:'1.2-2' }}</span>
           <span class="price-suffix">₪</span>
         </div>
