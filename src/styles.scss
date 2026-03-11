@@ -513,7 +513,8 @@ textarea.c-input {
 
   height: 2.5rem;
 
-  pointer-events: auto;
+  /* Allow clicks to pass through to list items (first row was unclickable). */
+  pointer-events: none;
 }
 
 .c-dropdown__scroll-zone--bottom {
@@ -525,7 +526,8 @@ textarea.c-input {
 
   height: 2.5rem;
 
-  pointer-events: auto;
+  /* Allow clicks to pass through to list items. */
+  pointer-events: none;
 }
 
 .c-dropdown__scroll-top,
@@ -559,12 +561,13 @@ textarea.c-input {
   background: linear-gradient(to top, var(--bg-glass-strong) 0%, transparent 100%);
 }
 
-.c-dropdown:has(.c-dropdown__list.can-scroll-up) .c-dropdown__scroll-zone--top:hover ~ .c-dropdown__scroll-top {
-  opacity: 1;
+/* Show scroll chevrons when list is scrollable (zones use pointer-events: none so list items are clickable). */
+.c-dropdown:has(.c-dropdown__list.can-scroll-up) .c-dropdown__scroll-top {
+  opacity: 0.7;
 }
 
-.c-dropdown:has(.c-dropdown__list.can-scroll-down) .c-dropdown__scroll-zone--bottom:hover ~ .c-dropdown__scroll-bottom {
-  opacity: 1;
+.c-dropdown:has(.c-dropdown__list.can-scroll-down) .c-dropdown__scroll-bottom {
+  opacity: 0.7;
 }
 
 /* ---- Engine: Page Title ---- */
