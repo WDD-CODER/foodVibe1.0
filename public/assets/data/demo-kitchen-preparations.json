@@ -1,20 +1,14 @@
+
 [
   {
     "categories": [
-      "garnish",
-      "חלבון",
-      "קרם",
+      "קישוט",
       "תוספות",
       "נקניקיות",
       "רטבים",
-      "לחם",
-      "cooking",
-      "butchery",
-      "sauce/stocks",
-      "roasting",
-      "pickling",
-      "patisserie",
-      "fry_mise",
+      "קצבות",
+      "קונדיטוריה",
+      "הפשרות",
       "בישולים",
       "חיתוכים",
       "רטבים_צירים",
@@ -23,7 +17,7 @@
     "preparations": [
       {
         "name": "פטרוזיליה",
-        "category": "garnish"
+        "category": "קישוט"
       },
       {
         "name": "כלים עם תוספת בצל",
@@ -47,39 +41,39 @@
       },
       {
         "name": "לחמניות פתוחות",
-        "category": "לחם"
+        "category": "חיתוכים"
       },
       {
         "name": "מרינדה בולוגוגית",
-        "category": "sauce/stocks"
+        "category": "רטבים_צירים"
       },
       {
         "name": "שיפודי עוף במרינדה",
-        "category": "butchery"
+        "category": "קצבות"
       },
       {
         "name": "אורז עגול מוכן",
-        "category": "cooking"
+        "category": "בישולים"
       },
       {
         "name": "קציצות מבושלות ברוטב",
-        "category": "cooking"
+        "category": "בישולים"
       },
       {
         "name": "רוטב עגבניות דליל",
-        "category": "sauce/stocks"
+        "category": "רטבים_צירים"
       },
       {
         "name": "עגבניות שרי צבעוניות צלויות",
-        "category": "roasting"
+        "category": "צלייה"
       },
       {
         "name": "אורז צהוב מוכן",
-        "category": "cooking"
+        "category": "בישולים"
       },
       {
         "name": "אוניגירי ארוז",
-        "category": "cooking"
+        "category": "בישולים"
       },
       {
         "name": "סויה בפורר",
@@ -87,19 +81,19 @@
       },
       {
         "name": "קימצ'י",
-        "category": "pickling"
+        "category": "החמצות"
       },
       {
         "name": "בסיס גלידה מוכן",
-        "category": "patisserie"
+        "category": ""
       },
       {
         "name": "קערה לערבוב הציפס",
-        "category": "fry_mise"
+        "category": "טיגון"
       },
       {
         "name": "נייר ידיים לספיגת שמן",
-        "category": "fry_mise"
+        "category": "טיגון"
       },
       {
         "name": "טופו מטוגן",
@@ -143,11 +137,11 @@
       },
       {
         "name": "שומשום צבעוני",
-        "category": "garnish"
+        "category": "קישוט"
       },
       {
         "name": "נמסיס מופשרת",
-        "category": "patisserie"
+        "category": "קונדיטוריה"
       },
       {
         "name": "בננה טריה פרוסה",
@@ -155,11 +149,11 @@
       },
       {
         "name": "פאדג מופשר",
-        "category": "patisserie"
+        "category": "הפשרות"
       },
       {
         "name": "בלונדי מופשר",
-        "category": "patisserie"
+        "category": "הפשרות"
       },
       {
         "name": "קוביות מרשמלו",
@@ -167,7 +161,7 @@
       },
       {
         "name": "מגננומים מוכנים במקפיא",
-        "category": "patisserie"
+        "category": "הפשרות"
       },
       {
         "name": "רטבי שוקולד מוכנים לעבודה",
