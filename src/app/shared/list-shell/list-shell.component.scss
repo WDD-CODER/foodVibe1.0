@@ -177,7 +177,7 @@
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: var(--list-grid);
-    // grid-auto-rows: minmax(20px, 100px);;
+    grid-auto-rows: minmax(auto, max-content);
 
     min-height: 0;
 
@@ -193,6 +193,13 @@
   :host ::ng-deep .table-header > *,
   :host ::ng-deep .table-body > * {
     min-width: 0;
+  }
+
+  :host ::ng-deep .table-body .col-name {
+    display: block;
+    // overflow: hidden;
+    overflow-wrap: break-word;
+    // text-align: start;
   }
 
   .filter-panel {
@@ -299,6 +306,12 @@
       max-height: 100%;
       background: rgba(255, 255, 255, 0.92);
       box-shadow: var(--shadow-modal);
+
+      transition: none;
+    }
+
+    .panel-content {
+      transition: none;
     }
 
     .filter-panel:not(.collapsed) ~ .table-area::before {

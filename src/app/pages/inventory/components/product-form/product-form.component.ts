@@ -295,6 +295,7 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
   }
 
   ngOnInit(): void {
+    this.unitRegistry.refreshFromStorage();
     this.initForm();
 
     runInInjectionContext(this.injector, () => {

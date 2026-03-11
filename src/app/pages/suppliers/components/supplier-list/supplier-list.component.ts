@@ -71,9 +71,10 @@ export class SupplierListComponent {
     }
 
     afterNextRender(() => {
-      if (typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches) {
-        this.isPanelOpen_.set(false);
-      }
+      if (typeof window === 'undefined') return;
+      const q = window.matchMedia('(max-width: 768px)');
+      if (q.matches) this.isPanelOpen_.set(false);
+      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); });
     });
   }
   /** Delivery days to filter (0=Sun .. 6=Sat). Empty set = show all. */

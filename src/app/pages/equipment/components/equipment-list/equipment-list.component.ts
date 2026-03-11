@@ -70,9 +70,10 @@ export class EquipmentListComponent {
     ]);
 
     afterNextRender(() => {
-      if (typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches) {
-        this.isPanelOpen_.set(false);
-      }
+      if (typeof window === 'undefined') return;
+      const q = window.matchMedia('(max-width: 768px)');
+      if (q.matches) this.isPanelOpen_.set(false);
+      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); });
     });
   }
   /** Selected categories; empty set = show all. */

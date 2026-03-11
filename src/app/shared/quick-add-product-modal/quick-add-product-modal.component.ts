@@ -85,6 +85,10 @@ export class QuickAddProductModalComponent {
         setTimeout(() => this.baseUnitRef()?.nativeElement?.focus(), 0);
       }
     });
+
+    effect(() => {
+      if (this.modalService.isOpen_()) this.unitRegistry.refreshFromStorage();
+    });
   }
 
   /** Accepts either an ElementRef or a native HTMLElement (template ref). */

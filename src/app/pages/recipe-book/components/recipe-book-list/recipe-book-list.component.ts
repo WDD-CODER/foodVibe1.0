@@ -64,9 +64,10 @@ export class RecipeBookListComponent {
     ]);
 
     afterNextRender(() => {
-      if (typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches) {
-        this.isPanelOpen_.set(false);
-      }
+      if (typeof window === 'undefined') return;
+      const q = window.matchMedia('(max-width: 768px)');
+      if (q.matches) this.isPanelOpen_.set(false);
+      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); });
     });
   }
   protected expandedFilterCategories_ = signal<Set<string>>(new Set());
@@ -103,8 +104,14 @@ export class RecipeBookListComponent {
     return [...new Set([...(recipe.labels_ ?? []), ...(recipe.autoLabels_ ?? [])])];
   }
 
-  protected getLabelColor(key: string): string {
-    return this.metadataRegistry.getLabelColor(key);
+  /** Resolves label color by registry key, or by display text (e.g. Hebrew) when recipe stores translated value. */
+  protected getLabelColor(keyOrDisplay: string): string {
+    const byKey = this.metadataRegistry.getLabelColor(keyOrDisplay);
+    if (byKey !== '#78716C') return byKey;
+    const byDisplay = this.metadataRegistry.allLabels_().find(
+      (def) => this.translationService.translate(def.key) === keyOrDisplay
+    );
+    return byDisplay?.color ?? byKey;
   }
 
   protected toggleFilterCategory(name: string): void {
