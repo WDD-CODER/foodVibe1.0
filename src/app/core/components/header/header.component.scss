@@ -13,7 +13,7 @@
   -webkit-backdrop-filter: var(--blur-nav);
 
   border-block-end: 1px solid var(--border-glass);
-  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-nav);
 
   .mobile-menu-btn,
   .mobile-close-btn {

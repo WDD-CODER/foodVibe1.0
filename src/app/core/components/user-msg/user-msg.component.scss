@@ -23,31 +23,31 @@
     font-size: 0.875rem;
     font-weight: 600;
     color: inherit;
-    background: rgba(255, 255, 255, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    background: var(--bg-glass);
+    border: 1px solid var(--border-glass);
     border-radius: var(--radius-sm);
     cursor: pointer;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.5);
+      background: var(--bg-glass-hover);
     }
   }
 
   &.success {
     background: var(--color-success);
-    color: white;
-    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--color-text-on-primary);
+    border-color: var(--border-glass);
   }
 
   &.error {
     background: var(--color-danger);
-    color: white;
-    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--color-text-on-primary);
+    border-color: var(--border-glass);
   }
 
   &.warning {
     background: var(--border-warning);
-    color: #fff;
-    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--color-text-on-primary);
+    border-color: var(--border-glass);
   }
 }

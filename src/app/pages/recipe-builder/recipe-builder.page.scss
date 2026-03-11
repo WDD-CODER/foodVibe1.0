@@ -210,30 +210,13 @@
   border-radius: var(--radius-md);
 }
 
-/* ---- Primary submit button ---- */
+/* ---- Primary submit button (layout only; .c-btn-primary provides appearance) ---- */
 .main-submit-btn {
   display: block;
 
   width: var(--rb-submit-width);
   margin-block: 2rem;
   margin-inline: auto;
-  padding-block: var(--rb-gap-mid);
-  padding-inline: 1.25rem;
-
-  background: var(--color-primary);
-  color: var(--color-text-on-primary);
-  font-weight: 700;
-
-  border: none;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-glow);
-
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: var(--color-primary-hover);
-  }
 }
 
 /* ---- Add row button (match workflow add-row design) ---- */

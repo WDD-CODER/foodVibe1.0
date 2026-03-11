@@ -18,7 +18,7 @@
   -webkit-backdrop-filter: var(--blur-nav);
 
   border-block-start: 1px solid var(--border-glass);
-  box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.03);
+  box-shadow: var(--shadow-nav-footer);
 
   .left-content,
   .right-content {

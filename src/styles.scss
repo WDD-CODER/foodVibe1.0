@@ -9,7 +9,12 @@ $break-mobile: 768px;
 $break-tablet: 900px;
 $break-desktop: 1200px;
 
-/* Designated global tokens (cssLayer): Liquid Glass design system */
+/* Designated global tokens (cssLayer): Liquid Glass design system
+ * Theme: Liquid Glass — frosted surfaces (--bg-glass, --blur-glass), teal primary (--color-primary).
+ * Engines: .c-glass-card (hover lift), .c-glass-panel (no lift), .c-btn-primary, .c-btn-ghost,
+ * .c-input, .c-input-wrapper, .c-select, .c-modal-*, .c-dropdown, .c-chip, .c-table-wrap, etc.
+ * New styles: use var(--*) and rem/em; prefer engines over one-off classes. See .assistant/skills/cssLayer/SKILL.md
+ */
 :root {
   font-family: 'Heebo', sans-serif;
 
@@ -28,6 +33,7 @@ $break-desktop: 1200px;
   --border-default: rgba(226, 232, 240, 0.6);
   --border-strong: rgba(203, 213, 225, 0.7);
   --border-focus: rgba(20, 184, 166, 0.5);
+  --border-row: rgba(241, 245, 249, 0.4);
 
   /* ---- Text ---- */
   --color-text-main: #0f172a;
@@ -41,6 +47,7 @@ $break-desktop: 1200px;
   --color-primary-hover: #0d9488;
   --color-primary-soft: rgba(20, 184, 166, 0.12);
   --color-primary-glow: rgba(20, 184, 166, 0.25);
+  --color-accent-gold: #a0833f;
 
   /* ---- Semantic: success ---- */
   --color-success: #10b981;
@@ -71,6 +78,8 @@ $break-desktop: 1200px;
   --shadow-glow: 0 0 20px rgba(20, 184, 166, 0.15);
   --shadow-focus: 0 0 0 3px rgba(20, 184, 166, 0.2);
   --shadow-hover: 0 8px 40px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.05);
+  --shadow-nav: 0 1px 8px rgba(0, 0, 0, 0.04);
+  --shadow-nav-footer: 0 -1px 8px rgba(0, 0, 0, 0.03);
 
   /* ---- Glass blur ---- */
   --blur-glass: blur(16px);
@@ -473,7 +482,6 @@ textarea.c-input {
   top: calc(100% + 0.25rem);
   inset-inline: 0;
   z-index: 10;
-
   margin: 0;
 
   background: var(--bg-glass-strong);
@@ -484,12 +492,12 @@ textarea.c-input {
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
 
-  pointer-events: auto;
+  /* Let clicks pass through except on the list so click-outside works when dropdown overlaps content below. */
+  pointer-events: none;
 }
 
 .c-dropdown__list {
   position: relative;
-  z-index: 0;
 
   margin: 0;
   padding: 0.25rem 0;
@@ -499,6 +507,9 @@ textarea.c-input {
   overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
+
+  /* Re-enable pointer so option clicks work; parent .c-dropdown uses pointer-events: none. */
+  pointer-events: auto;
 
   &::-webkit-scrollbar {
     display: none;
@@ -679,7 +690,7 @@ textarea.c-input {
   padding-block: 0.625rem;
   background: var(--bg-glass);
   text-align: center;
-  border-block-end: 1px solid rgba(241, 245, 249, 0.4);
+  border-block-end: 1px solid var(--border-row);
   transition: background 0.15s ease;
 }
 
@@ -689,7 +700,7 @@ textarea.c-input {
   background: transparent;
   color: var(--color-text-main);
   font-size: 0.875rem;
-  border-bottom: 1px solid rgba(241, 245, 249, 0.4);
+  border-bottom: 1px solid var(--border-row);
   transition: background 0.15s ease;
 }
 

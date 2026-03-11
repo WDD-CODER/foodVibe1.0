@@ -59,19 +59,19 @@
   }
 
   &--trash {
-    color: var(--color-danger, #ef4444);
-    border-color: color-mix(in srgb, var(--color-danger, #ef4444) 30%, transparent);
+    color: var(--color-danger);
+    border-color: color-mix(in srgb, var(--color-danger) 30%, transparent);
 
     &:hover {
       background: var(--bg-glass-hover);
-      color: var(--color-danger, #ef4444);
-      border-color: var(--color-danger, #ef4444);
+      color: var(--color-danger);
+      border-color: var(--color-danger);
     }
 
     &.active {
-      background: var(--color-danger, #ef4444);
-      color: #fff;
-      border-color: var(--color-danger, #ef4444);
+      background: var(--color-danger);
+      color: var(--color-text-on-primary);
+      border-color: var(--color-danger);
     }
   }
 }

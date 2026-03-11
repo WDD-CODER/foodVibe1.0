@@ -2,13 +2,13 @@
   <div class="action-bar">
     <h2 class="page-title">{{ 'menu_library' | translatePipe }}</h2>
     <div class="search-wrap">
-      <div class="input-wrapper">
+      <div class="c-input-wrapper">
         <lucide-icon name="search" [size]="18"></lucide-icon>
         <input type="text" [ngModel]="searchQuery_()" (ngModelChange)="searchQuery_.set($event)"
           [placeholder]="'search' | translatePipe" />
       </div>
     </div>
-    <button type="button" class="add-btn" (click)="onCreateNew()">
+    <button type="button" class="c-btn-primary" (click)="onCreateNew()">
       <lucide-icon name="plus" [size]="18"></lucide-icon>
       {{ 'menu_new_event' | translatePipe }}
     </button>

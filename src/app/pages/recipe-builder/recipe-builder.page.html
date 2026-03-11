@@ -249,7 +249,7 @@
 
     @if (!historyViewMode_()) {
       <footer class="action-footer">
-        <button class="main-submit-btn" [disabled]="isSaving_()" (click)="saveRecipe()">
+        <button class="c-btn-primary main-submit-btn" [disabled]="isSaving_()" (click)="saveRecipe()">
           @if (isSaving_()) {
             <app-loader size="small" [inline]="true" />
           }

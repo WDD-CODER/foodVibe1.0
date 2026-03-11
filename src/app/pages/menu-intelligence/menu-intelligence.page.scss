@@ -35,7 +35,7 @@
   margin: 0 auto;
   padding: 0.75rem;
   background: var(--bg-pure);
-  border: 3px solid #1a1a1a;
+  border: 3px solid var(--color-text-main);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
 }
@@ -412,7 +412,7 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #94a3b8;
+  color: var(--color-text-muted-light);
   opacity: 0;
   transition: opacity 0.2s, color 0.2s;
   padding: 4px;
@@ -486,7 +486,7 @@
   display: block;
   padding: 8px 12px;
   font-size: 0.8125rem;
-  color: #94a3b8;
+  color: var(--color-text-muted-light);
   text-align: center;
 }
 
@@ -779,7 +779,7 @@
   transition: color 0.2s;
 
   &:hover {
-    color: #a0833f;
+    color: var(--color-accent-gold);
   }
 }
 
@@ -796,7 +796,7 @@
   transition: color 0.2s;
 
   &:hover {
-    color: #a0833f;
+    color: var(--color-accent-gold);
   }
 }
 
@@ -919,7 +919,7 @@
   }
 
   :host {
-    background: #fff !important;
+    background: var(--bg-pure) !important;
   }
 
   .menu-editor-shell {
@@ -937,7 +937,7 @@
   }
 
   .paper-inner {
-    border: 1px solid #1a1a1a;
+    border: 1px solid var(--color-text-main);
     padding: 32px;
   }
 

@@ -102,7 +102,7 @@
     border-color: var(--border-warning);
 
     &:hover {
-      background: rgba(254, 243, 199, 0.95);
+      background: var(--bg-warning);
     }
   }
 
@@ -112,7 +112,7 @@
     border-color: var(--color-danger);
 
     &:hover {
-      background: rgba(254, 226, 226, 0.95);
+      background: var(--bg-danger-subtle);
     }
   }
 }
@@ -180,17 +180,17 @@
     border-color: var(--border-warning);
 
     &:hover {
-      background: #fde68a;
+      background: var(--bg-warning);
     }
   }
 
   &.btn-dispose {
     background: var(--bg-danger-subtle);
-    color: #991b1b;
+    color: var(--color-danger);
     border-color: var(--color-danger);
 
     &:hover {
-      background: #fecaca;
+      background: var(--bg-danger-subtle);
     }
   }
 
