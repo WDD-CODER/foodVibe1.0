@@ -78,6 +78,8 @@ export class RecipeBookListComponent {
   protected tappedCostRecipeId_ = signal<string | null>(null);
   protected costTooltipAnchor_ = signal<DOMRect | null>(null);
   protected hoveredDateRecipeId_ = signal<string | null>(null);
+  /** Set to false to show the "date added" column again. */
+  protected hideDateColumn_ = signal(true);
   protected dateTooltipAnchor_ = signal<DOMRect | null>(null);
   protected ingredientSearchQuery_ = signal<string>('');
   protected selectedProductIds_ = signal<string[]>([]);

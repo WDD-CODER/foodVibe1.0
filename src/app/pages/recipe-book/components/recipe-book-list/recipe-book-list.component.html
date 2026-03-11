@@ -1,7 +1,7 @@
 <app-list-shell
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
-  [gridTemplate]="'2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) 0.8fr 80px'"
+  [gridTemplate]="hideDateColumn_() ? '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) 80px' : '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) 0.8fr 80px'"
   [mobileGridTemplate]="'2fr 1fr 0.8fr 80px'">
 
   <h2 shell-title class="page-title">{{ 'recipe_book' | translatePipe }}</h2>
@@ -29,15 +29,17 @@
       <div class="col-type c-grid-header-cell c-sortable-header" carouselHeaderColumn label="type" (click)="setSort('type')" (keydown.enter)="setSort('type')" (keydown.space)="$event.preventDefault(); setSort('type')" role="button" tabindex="0">
         {{ 'type' | translatePipe }}
       </div>
-      <div class="col-labels c-grid-header-cell c-sortable-header" carouselHeaderColumn label="labels" (click)="toggleLabelsExpandAll()" (keydown.enter)="toggleLabelsExpandAll()" (keydown.space)="$event.preventDefault(); toggleLabelsExpandAll()" role="button" tabindex="0">
+      <div class="col-labels c-grid-header-cell c-sortable-header c-dense-chip-col" carouselHeaderColumn label="labels" (click)="toggleLabelsExpandAll()" (keydown.enter)="toggleLabelsExpandAll()" (keydown.space)="$event.preventDefault(); toggleLabelsExpandAll()" role="button" tabindex="0">
         {{ 'labels' | translatePipe }}
       </div>
-      <div class="col-allergens c-grid-header-cell c-sortable-header" carouselHeaderColumn label="allergens" (click)="toggleAllergenExpandAll()" (keydown.enter)="toggleAllergenExpandAll()" (keydown.space)="$event.preventDefault(); toggleAllergenExpandAll()" role="button" tabindex="0">
+      <div class="col-allergens c-grid-header-cell c-sortable-header c-dense-chip-col" carouselHeaderColumn label="allergens" (click)="toggleAllergenExpandAll()" (keydown.enter)="toggleAllergenExpandAll()" (keydown.space)="$event.preventDefault(); toggleAllergenExpandAll()" role="button" tabindex="0">
         {{ 'allergens' | translatePipe }}
       </div>
-      <div class="col-date c-grid-header-cell c-sortable-header" carouselHeaderColumn label="date_added" (click)="setSort('dateAdded')" (keydown.enter)="setSort('dateAdded')" (keydown.space)="$event.preventDefault(); setSort('dateAdded')" role="button" tabindex="0">
-        {{ 'date_added' | translatePipe }}
-      </div>
+      @if (!hideDateColumn_()) {
+        <div class="col-date c-grid-header-cell c-sortable-header" carouselHeaderColumn label="date_added" (click)="setSort('dateAdded')" (keydown.enter)="setSort('dateAdded')" (keydown.space)="$event.preventDefault(); setSort('dateAdded')" role="button" tabindex="0">
+          {{ 'date_added' | translatePipe }}
+        </div>
+      }
     </app-carousel-header>
     <div class="col-cost c-grid-header-cell c-sortable-header" (click)="setSort('cost')" (keydown.enter)="setSort('cost')" (keydown.space)="$event.preventDefault(); setSort('cost')" role="button" tabindex="0">
       {{ 'cost' | translatePipe }}
@@ -63,15 +65,15 @@
         <div class="col-name c-list-body-cell">{{ recipe.name_hebrew }}</div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()">
           <div class="col-type c-list-body-cell" cellCarouselSlide [label]="'type' | translatePipe">{{ (isRecipeDish(recipe) ? 'dish' : 'preparation') | translatePipe }}</div>
-          <div class="col-labels c-list-body-cell" cellCarouselSlide [label]="'labels' | translatePipe">
+          <div class="col-labels c-list-body-cell c-dense-chip-col" cellCarouselSlide [label]="'labels' | translatePipe">
             @if (getAllRecipeLabels(recipe).length) {
-              <div class="labels-btn-wrapper" [class.labels-expanded-open]="labelsExpandAll_() || labelsPopoverRecipeId_() === recipe._id" (clickOutside)="closeLabelsView($event)">
-                <button type="button" class="labels-btn" (click)="toggleLabelsPopover(recipe._id)">
+              <div class="labels-btn-wrapper" [class.labels-expanded-open]="labelsExpandAll_() || labelsPopoverRecipeId_() === recipe._id" (click)="toggleLabelsPopover(recipe._id); $event.stopPropagation()" (clickOutside)="closeLabelsView($event)" role="button" tabindex="0" (keydown.enter)="toggleLabelsPopover(recipe._id)" (keydown.space)="$event.preventDefault(); toggleLabelsPopover(recipe._id)">
+                <button type="button" class="labels-btn">
                   <lucide-icon name="tag" [size]="16"></lucide-icon>
                   {{ getAllRecipeLabels(recipe).length }}
                 </button>
                 @if (labelsExpandAll_() || labelsPopoverRecipeId_() === recipe._id) {
-                  <div class="labels-expanded dense-grid">
+                  <div class="c-dense-chip-grid">
                     @for (label of getAllRecipeLabels(recipe); track label) {
                       <span class="label-chip" [style.background-color]="getLabelColor(label)">{{ label | translatePipe }}</span>
                     }
@@ -82,7 +84,7 @@
               <span class="placeholder-dash">—</span>
             }
           </div>
-          <div class="col-allergens c-list-body-cell" cellCarouselSlide [label]="'allergens' | translatePipe">
+          <div class="col-allergens c-list-body-cell c-dense-chip-col" cellCarouselSlide [label]="'allergens' | translatePipe">
             @if (getRecipeAllergens(recipe).length) {
               <div class="allergen-btn-wrapper" [class.allergen-expanded-open]="allergenExpandAll_() || allergenPopoverRecipeId_() === recipe._id" (clickOutside)="closeAllergenView($event)">
                 <button type="button" class="allergen-btn" (click)="toggleAllergenPopover(recipe._id)">
@@ -90,7 +92,7 @@
                   {{ getRecipeAllergens(recipe).length }}
                 </button>
                 @if (allergenExpandAll_() || allergenPopoverRecipeId_() === recipe._id) {
-                  <div class="allergen-expanded" [class.dense-grid]="true">
+                  <div class="c-dense-chip-grid">
                     @for (a of getRecipeAllergens(recipe); track a) {
                       <span class="allergen-pill">{{ a | translatePipe }}</span>
                     }
@@ -101,9 +103,11 @@
               <span class="placeholder-dash">—</span>
             }
           </div>
-          <div class="col-date c-list-body-cell date-cell-wrap" cellCarouselSlide [label]="'date_added' | translatePipe" (mouseenter)="showDateTooltip(recipe._id, $event)" (mouseleave)="hideDateTooltip()" [attr.aria-describedby]="hoveredDateRecipeId_() === recipe._id ? 'date-tooltip-' + recipe._id : null">
-            {{ formatAddedAt(recipe.addedAt_) }}
-          </div>
+          @if (!hideDateColumn_()) {
+            <div class="col-date c-list-body-cell date-cell-wrap" cellCarouselSlide [label]="'date_added' | translatePipe" (mouseenter)="showDateTooltip(recipe._id, $event)" (mouseleave)="hideDateTooltip()" [attr.aria-describedby]="hoveredDateRecipeId_() === recipe._id ? 'date-tooltip-' + recipe._id : null">
+              {{ formatAddedAt(recipe.addedAt_) }}
+            </div>
+          }
         </app-cell-carousel>
         <div class="col-cost c-list-body-cell cost-cell-wrap" (mouseenter)="showCostTooltip(recipe._id, $event)" (mouseleave)="hideCostTooltip()" (click)="toggleCostTooltipTap(recipe._id, $event)" [attr.aria-describedby]="(hoveredCostRecipeId_() === recipe._id || tappedCostRecipeId_() === recipe._id) ? 'cost-tooltip-' + recipe._id : null">
           ₪{{ getRecipeCost(recipe) | number:'1.2-2' }}

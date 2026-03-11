@@ -73,7 +73,21 @@
   }
 }
 
-/* Labels & allergens columns */
+/* Chip container: flex wrap, centered, chips width = content */
+.c-dense-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.25rem;
+  width: 100%;
+}
+
+/* Labels & allergens columns (header + body) */
+.c-dense-chip-col.col-labels,
+.c-dense-chip-col.col-allergens,
 .col-labels,
 .col-allergens {
   position: relative;
@@ -93,6 +107,8 @@
   gap: 0.25rem;
   width: 100%;
 
+  cursor: pointer;
+
   &.labels-expanded-open .labels-btn {
     position: absolute;
     left: -9999px;
@@ -104,20 +120,6 @@
     opacity: 0;
 
     pointer-events: none;
-  }
-}
-
-.labels-expanded {
-  display: grid;
-  grid-auto-flow: dense;
-  align-content: start;
-  justify-content: center;
-
-  gap: 0.25rem;
-  width: 100%;
-
-  &.dense-grid {
-    grid-template-columns: repeat(auto-fill, minmax(3.75rem, 1fr));
   }
 }
 
@@ -170,20 +172,6 @@
   }
 }
 
-.allergen-expanded {
-  display: grid;
-  grid-auto-flow: dense;
-  align-content: start;
-  justify-content: center;
-
-  gap: 0.25rem;
-  width: 100%;
-
-  &.dense-grid {
-    grid-template-columns: repeat(auto-fill, minmax(3.75rem, 1fr));
-  }
-}
-
 .allergen-btn {
   display: inline-flex;
   align-items: center;
@@ -210,6 +198,10 @@
 }
 
 .allergen-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
   padding: 0.25rem 0.625rem;
 
   font-size: 0.75rem;
@@ -222,12 +214,13 @@
 }
 
 .label-chip {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-  padding: 0.2rem 0.5rem;
-  margin: 0.125rem;
+  padding: 0.25rem 0.625rem;
 
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 500;
   color: #fff;
   line-height: 1.2;
