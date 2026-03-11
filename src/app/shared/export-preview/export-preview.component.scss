@@ -111,7 +111,7 @@
   .export-preview-sections {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 2rem;
   }
 
   .export-preview-section {
@@ -139,7 +139,7 @@
   .export-preview-table th {
     padding: 0.5rem 0.75rem;
     text-align: right;
-    border-bottom: 2px solid var(--border-default);
+    border: 1px solid var(--border-default);
     font-weight: 700;
     color: var(--color-text-main);
   }
@@ -147,12 +147,8 @@
   .export-preview-table td {
     padding: 0.375rem 0.75rem;
     text-align: right;
-    border-bottom: 1px solid var(--border-default);
+    border: 1px solid var(--border-default);
     color: var(--color-text-secondary);
-  }
-
-  .export-preview-table tbody tr:last-child td {
-    border-bottom-width: 0;
   }
 
   .export-preview-summary {

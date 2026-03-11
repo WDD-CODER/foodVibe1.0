@@ -5,6 +5,7 @@ import { Recipe, RecipeStep } from '@models/recipe.model';
 import { MenuEvent, MenuSection, MenuItemSelection } from '@models/menu-event.model';
 import { Product } from '@models/product.model';
 import { KitchenStateService } from './kitchen-state.service';
+import { MenuIntelligenceService } from './menu-intelligence.service';
 import { ScalingService } from './scaling.service';
 import { RecipeCostService } from './recipe-cost.service';
 import type { ScaledPrepRow } from './scaling.service';
@@ -26,6 +27,7 @@ const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.s
 @Injectable({ providedIn: 'root' })
 export class ExportService {
   private readonly kitchenState_ = inject(KitchenStateService);
+  private readonly menuIntelligence_ = inject(MenuIntelligenceService);
   private readonly scaling_ = inject(ScalingService);
   private readonly recipeCost_ = inject(RecipeCostService);
 
@@ -58,35 +60,52 @@ export class ExportService {
   private static readonly EXCEL_HEADER_GRAY = 'FFE0E0E0';
   private static readonly EXCEL_SUBTITLE_GRAY = 'FFF5F5F5';
   private static readonly EXCEL_BORDER_THIN = { style: 'thin' as const };
+  private static readonly EXCEL_BORDER_MEDIUM = { style: 'medium' as const };
 
-  /** Merge cells in row across colSpan; style as title (teal fill, white bold). */
-  private styleExcelTitle(ws: import('exceljs').Worksheet, rowNum: number, colSpan: number): void {
+  /** Merge cells in row across colSpan; style as title (teal fill, white bold). Fill only content columns. */
+  private styleExcelTitle(ws: import('exceljs').Worksheet, rowNum: number, colSpan: number, horizontal: 'right' | 'center' = 'right'): void {
     if (colSpan > 1) ws.mergeCells(rowNum, 1, rowNum, colSpan);
     const row = ws.getRow(rowNum);
-    row.font = { bold: true, size: 13, color: { argb: 'FFFFFFFF' } };
-    row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: ExportService.EXCEL_TEAL } };
-    row.alignment = { horizontal: 'right', vertical: 'middle', wrapText: true };
     row.height = 22;
+    const fill = { type: 'pattern' as const, pattern: 'solid' as const, fgColor: { argb: ExportService.EXCEL_TEAL } };
+    const font = { bold: true, size: 13, color: { argb: 'FFFFFFFF' } };
+    const alignment = { horizontal, vertical: 'middle' as const, wrapText: true };
+    for (let c = 1; c <= colSpan; c++) {
+      const cell = row.getCell(c);
+      cell.fill = { ...fill };
+      cell.font = { ...font };
+      cell.alignment = { ...alignment };
+    }
   }
 
-  /** Merge cells in row across colSpan; style as subtitle (light gray, italic). */
+  /** Merge cells in row across colSpan; style as subtitle (light gray, italic). Fill only content columns. */
   private styleExcelSubtitle(ws: import('exceljs').Worksheet, rowNum: number, colSpan: number): void {
     if (colSpan > 1) ws.mergeCells(rowNum, 1, rowNum, colSpan);
     const row = ws.getRow(rowNum);
-    row.font = { size: 11, italic: true };
-    row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: ExportService.EXCEL_SUBTITLE_GRAY } };
-    row.alignment = { horizontal: 'right', vertical: 'middle', wrapText: true };
     row.height = 18;
+    const fill = { type: 'pattern' as const, pattern: 'solid' as const, fgColor: { argb: ExportService.EXCEL_SUBTITLE_GRAY } };
+    const font = { size: 11, italic: true };
+    const alignment = { horizontal: 'right' as const, vertical: 'middle' as const, wrapText: true };
+    for (let c = 1; c <= colSpan; c++) {
+      const cell = row.getCell(c);
+      cell.fill = { ...fill };
+      cell.font = { ...font };
+      cell.alignment = { ...alignment };
+    }
   }
 
-  /** Style row as column header: gray fill, bold, thin borders. */
+  /** Style row as column header: gray fill, bold, thin borders. Fill only content columns. */
   private styleExcelColumnHeader(ws: import('exceljs').Worksheet, rowNum: number, numCols: number): void {
     const row = ws.getRow(rowNum);
-    row.font = { bold: true, size: 10 };
-    row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: ExportService.EXCEL_HEADER_GRAY } };
-    row.alignment = { horizontal: 'right', vertical: 'top', wrapText: true };
+    const fill = { type: 'pattern' as const, pattern: 'solid' as const, fgColor: { argb: ExportService.EXCEL_HEADER_GRAY } };
+    const font = { bold: true, size: 10 };
+    const alignment = { horizontal: 'right' as const, vertical: 'top' as const, wrapText: true };
     for (let c = 1; c <= numCols; c++) {
-      row.getCell(c).border = {
+      const cell = row.getCell(c);
+      cell.fill = { ...fill };
+      cell.font = { ...font };
+      cell.alignment = { ...alignment };
+      cell.border = {
         top: ExportService.EXCEL_BORDER_THIN,
         left: ExportService.EXCEL_BORDER_THIN,
         bottom: ExportService.EXCEL_BORDER_THIN,
@@ -109,10 +128,34 @@ export class ExportService {
     row.alignment = { wrapText: true, vertical: 'top', horizontal: 'right' };
   }
 
-  /** Empty separator row with small height. */
-  private styleExcelSeparator(ws: import('exceljs').Worksheet, rowNum: number): void {
+  /** Separator row: small height, light gray fill only over content columns. */
+  private styleExcelSeparator(ws: import('exceljs').Worksheet, rowNum: number, numCols: number): void {
     const row = ws.getRow(rowNum);
     row.height = 8;
+    const fill = { type: 'pattern' as const, pattern: 'solid' as const, fgColor: { argb: ExportService.EXCEL_SUBTITLE_GRAY } };
+    for (let c = 1; c <= numCols; c++) {
+      row.getCell(c).fill = { ...fill };
+    }
+  }
+
+  /** Blank row between dish blocks: small height, no fill. */
+  private styleExcelBlankRow(ws: import('exceljs').Worksheet, rowNum: number): void {
+    ws.getRow(rowNum).height = 10;
+  }
+
+  /** Apply bold (medium) border around the perimeter of a block. Content columns only. */
+  private styleExcelBlockBorder(ws: import('exceljs').Worksheet, startRow: number, endRow: number, numCols: number): void {
+    const med = ExportService.EXCEL_BORDER_MEDIUM;
+    for (let c = 1; c <= numCols; c++) {
+      const topCell = ws.getCell(startRow, c);
+      topCell.border = { ...topCell.border, top: med };
+      const bottomCell = ws.getCell(endRow, c);
+      bottomCell.border = { ...bottomCell.border, bottom: med };
+    }
+    for (let r = startRow; r <= endRow; r++) {
+      ws.getCell(r, 1).border = { ...ws.getCell(r, 1).border, left: med };
+      ws.getCell(r, numCols).border = { ...ws.getCell(r, numCols).border, right: med };
+    }
   }
 
   /** Build recipe-sheet block (header, yield, instructions, prep time) for Excel and preview. Plan 108. */
@@ -150,14 +193,14 @@ export class ExportService {
     ws.addRow([heHeader('recipe_name'), sheetBlock.recipeName]);
     this.styleExcelDataRowBorders(ws, rowNum++, 2);
     ws.addRow([]);
-    this.styleExcelSeparator(ws, rowNum++);
+    this.styleExcelSeparator(ws, rowNum++, numCols);
 
     ws.addRow([heHeader('amount'), sheetBlock.yieldQty]);
     this.styleExcelDataRowBorders(ws, rowNum++, 2);
     ws.addRow([heHeader('unit'), sheetBlock.yieldUnit]);
     this.styleExcelDataRowBorders(ws, rowNum++, 2);
     ws.addRow([]);
-    this.styleExcelSeparator(ws, rowNum++);
+    this.styleExcelSeparator(ws, rowNum++, numCols);
 
     ws.addRow([heHeader('ingredients_header')]);
     this.styleExcelTitle(ws, rowNum++, numCols);
@@ -171,7 +214,7 @@ export class ExportService {
       this.styleExcelDataRowBorders(ws, rowNum++, numCols);
     });
     ws.addRow([]);
-    this.styleExcelSeparator(ws, rowNum++);
+    this.styleExcelSeparator(ws, rowNum++, numCols);
 
     ws.addRow([heHeader('preparation_instructions')]);
     this.styleExcelSubtitle(ws, rowNum++, numCols);
@@ -185,7 +228,7 @@ export class ExportService {
       rowNum++;
     }
     ws.addRow([]);
-    this.styleExcelSeparator(ws, rowNum++);
+    this.styleExcelSeparator(ws, rowNum++, numCols);
 
     ws.addRow([heHeader('preparation_time'), roundExportNumber(sheetBlock.preparationTime)]);
     this.styleExcelDataRowBorders(ws, rowNum, 2);
@@ -232,8 +275,8 @@ export class ExportService {
   }
 
   /**
-   * Export checklist for a single dish (prep/mise items).
-   * Filename: check-list_{dishName}_{date}.xlsx
+   * Export checklist for a single dish (prep/mise items, grouped by category then name).
+   * Filename: check-list_by-category_{dishName}_{date}.xlsx
    */
   async exportDishChecklist(recipe: Recipe, quantity: number): Promise<void> {
     const factor = this.scaling_.getScaleFactor(recipe, quantity);
@@ -258,7 +301,7 @@ export class ExportService {
     ws.getColumn(2).width = 14;
     ws.getColumn(3).width = 12;
     ws.getColumn(4).width = 10;
-    const fileName = buildExportFileName('check-list', recipe.name_hebrew ?? 'dish');
+    const fileName = buildExportFileName('check-list', recipe.name_hebrew ?? 'dish', { variant: 'by-category' });
     await this.downloadWorkbook(wb, fileName);
   }
 
@@ -433,6 +476,81 @@ export class ExportService {
     });
     return {
       title: menu.name_ ?? 'Menu',
+      subtitle: [menu.event_type_, menu.event_date_].filter(Boolean).join(' · ') || undefined,
+      exportedAt: new Date().toISOString(),
+      sections: exportSections
+    };
+  }
+
+  /**
+   * Build payload for menu "All" view: menu structure + dish data (cover, then one table per section with dish name, portions, food cost ₪, cost per portion, sell price).
+   */
+  getMenuAllViewPreviewPayload(menu: MenuEvent, recipes: Recipe[]): ExportPayload {
+    const recipeMap = new Map(recipes.map(r => [r._id, r]));
+    const guestCount = Number(menu.guest_count_ ?? 0);
+    const piecesPerPerson = Number((menu as { pieces_per_person_?: number }).pieces_per_person_ ?? 1);
+    const servingType = (menu.serving_type_ ?? 'plated_course') as import('@models/menu-event.model').ServingType;
+
+    const coverRows: (string | number)[][] = [
+      [heHeader('menu_name'), menu.name_ ?? ''],
+      [heHeader('event_type'), menu.event_type_ ?? ''],
+      [heHeader('date'), menu.event_date_ ?? ''],
+      [heHeader('guest_count'), menu.guest_count_ ?? 0],
+      [heHeader('pieces_per_person'), menu.pieces_per_person_ ?? '']
+    ];
+    const exportSections: ExportSection[] = [
+      { title: heHeader('menu_info'), headerRow: [heHeader('field'), heHeader('value')], rows: coverRows }
+    ];
+
+    const sections = (menu.sections_ ?? []).slice().sort((a, b) => (a.sort_order_ ?? 0) - (b.sort_order_ ?? 0));
+    for (const section of sections) {
+      const sectionRows: (string | number)[][] = (section.items_ ?? []).map((item: MenuItemSelection) => {
+        const recipe = recipeMap.get(item.recipe_id_);
+        const name = recipe?.name_hebrew ?? item.recipe_id_;
+        const derivedPortions = this.menuIntelligence_.derivePortions(
+          servingType,
+          guestCount,
+          Number(item.predicted_take_rate_ ?? 0),
+          piecesPerPerson,
+          Number(item.serving_portions_ ?? 1)
+        );
+        let totalCost = 0;
+        if (recipe?.ingredients_?.length) {
+          const baseYield = Math.max(1, recipe.yield_amount_ || 1);
+          const multiplier = derivedPortions / baseYield;
+          totalCost = this.recipeCost_.computeRecipeCost({
+            ...recipe,
+            ingredients_: recipe.ingredients_.map(ing => ({
+              ...ing,
+              amount_: (ing.amount_ || 0) * multiplier
+            }))
+          });
+        }
+        const costPerPortion = derivedPortions >= 1 ? totalCost / derivedPortions : totalCost;
+        return [
+          name,
+          roundExportNumber(derivedPortions),
+          roundExportNumber(totalCost),
+          roundExportNumber(costPerPortion),
+          item.sell_price_ !== undefined && item.sell_price_ !== null
+            ? roundExportNumber(Number(item.sell_price_))
+            : ''
+        ];
+      });
+      exportSections.push({
+        title: section.name_ ?? 'Section',
+        headerRow: [
+          heHeader('dish_name'),
+          heHeader('portions'),
+          heHeader('food_cost_money'),
+          heHeader('dish_food_cost_per_portion'),
+          heHeader('sell_price')
+        ],
+        rows: sectionRows
+      });
+    }
+    return {
+      title: `${menu.name_ ?? 'Menu'} — ${heHeader('info')}`,
       subtitle: [menu.event_type_, menu.event_date_].filter(Boolean).join(' · ') || undefined,
       exportedAt: new Date().toISOString(),
       sections: exportSections
@@ -735,13 +853,16 @@ export class ExportService {
     }
 
     const groupKey = mode === 'by_station' ? 'station' : 'category';
-    const categoryToAggregate = new Map<string, { name: string; amount: number; unit: string }[]>();
+    const isByStation = mode === 'by_station';
+    const categoryToAggregate = new Map<string, { name: string; amount: number; unit: string; categoryName?: string }[]>();
 
-    const addPrep = (key: string, name: string, amount: number, unit: string): void => {
+    const addPrep = (key: string, name: string, amount: number, unit: string, categoryName?: string): void => {
       const arr = categoryToAggregate.get(key) ?? [];
-      const existing = arr.find(x => x.name === name && x.unit === unit);
+      const existing = isByStation && categoryName !== undefined
+        ? arr.find(x => x.name === name && x.unit === unit && (x.categoryName ?? '') === categoryName)
+        : arr.find(x => x.name === name && x.unit === unit);
       if (existing) existing.amount += amount;
-      else arr.push({ name, amount, unit });
+      else arr.push(isByStation && categoryName !== undefined ? { name, amount, unit, categoryName } : { name, amount, unit });
       categoryToAggregate.set(key, arr);
     };
 
@@ -754,10 +875,10 @@ export class ExportService {
         const factor = yieldAmount > 0 ? portions / yieldAmount : 0;
         const prepRows = this.scaling_.getScaledPrepItems(recipe, factor);
         prepRows.forEach(pr => {
-          const key = mode === 'by_station'
+          const key = isByStation
             ? (recipe.default_station_ ?? 'כללי')
             : (pr.category_name ?? 'כללי');
-          addPrep(key, pr.name, pr.amount, pr.unit);
+          addPrep(key, pr.name, pr.amount, pr.unit, isByStation ? (pr.category_name ?? '') : undefined);
         });
       });
     });
@@ -765,10 +886,19 @@ export class ExportService {
     const sortedGroups = Array.from(categoryToAggregate.keys()).sort();
     const accRows: (string | number)[][] = [];
     for (const cat of sortedGroups) {
-      const items = categoryToAggregate.get(cat) ?? [];
-      items.forEach(it => accRows.push([cat, it.name, roundExportNumber(it.amount), heUnit(it.unit)]));
+      let items = categoryToAggregate.get(cat) ?? [];
+      items = items.slice().sort((a, b) => {
+        if (isByStation) return (a.categoryName ?? '').localeCompare(b.categoryName ?? '', 'he');
+        return (a.name ?? '').localeCompare(b.name ?? '', 'he');
+      });
+      items.forEach(it => {
+        if (isByStation) accRows.push([it.categoryName ?? '', it.name, roundExportNumber(it.amount), heUnit(it.unit)]);
+        else accRows.push([it.name, roundExportNumber(it.amount), heUnit(it.unit)]);
+      });
     }
-    const headerAcc = groupKey === 'station' ? [heHeader('station'), heHeader('prep_item'), heHeader('quantity'), heHeader('unit')] : [heHeader('category'), heHeader('prep_item'), heHeader('quantity'), heHeader('unit')];
+    const headerAcc = isByStation
+      ? [heHeader('category'), heHeader('prep_item'), heHeader('quantity'), heHeader('unit')]
+      : [heHeader('prep_item'), heHeader('quantity'), heHeader('unit')];
 
     return {
       title: `${menu.name_ ?? 'Menu'} — ${heHeader('checklist')}`,
@@ -781,7 +911,7 @@ export class ExportService {
   /**
    * Export menu checklist (mise en place / prep items). Mode: by_dish | by_category | by_station.
    * When by_dish: one sheet per dish. When by_category or by_station: one Accumulated sheet only.
-   * Filename: check-list_{menuName}.xlsx (no date for menu).
+   * Filename: check-list_{by-dish|by-category|by-station}_{menuName}.xlsx (no date for menu).
    */
   async exportChecklist(menu: MenuEvent, recipes: Recipe[], mode: 'by_dish' | 'by_category' | 'by_station'): Promise<void> {
     const recipeMap = new Map(recipes.map(r => [r._id, r]));
@@ -818,7 +948,7 @@ export class ExportService {
             this.styleExcelDataRowBorders(ws, rowNum++, numCols);
           });
           ws.addRow([]);
-          this.styleExcelSeparator(ws, rowNum++);
+          this.styleExcelBlankRow(ws, rowNum++);
         }
       }
       ws.getColumn(1).width = 28;
@@ -827,13 +957,16 @@ export class ExportService {
       ws.getColumn(4).width = 10;
     } else {
       const groupKey = mode === 'by_station' ? 'station' : 'category';
-      const categoryToAggregate = new Map<string, { name: string; amount: number; unit: string }[]>();
+      const isByStation = mode === 'by_station';
+      const categoryToAggregate = new Map<string, { name: string; amount: number; unit: string; categoryName?: string }[]>();
 
-      const addPrep = (key: string, name: string, amount: number, unit: string): void => {
+      const addPrep = (key: string, name: string, amount: number, unit: string, categoryName?: string): void => {
         const arr = categoryToAggregate.get(key) ?? [];
-        const existing = arr.find(x => x.name === name && x.unit === unit);
+        const existing = isByStation && categoryName !== undefined
+          ? arr.find(x => x.name === name && x.unit === unit && (x.categoryName ?? '') === categoryName)
+          : arr.find(x => x.name === name && x.unit === unit);
         if (existing) existing.amount += amount;
-        else arr.push({ name, amount, unit });
+        else arr.push(isByStation && categoryName !== undefined ? { name, amount, unit, categoryName } : { name, amount, unit });
         categoryToAggregate.set(key, arr);
       };
 
@@ -846,45 +979,63 @@ export class ExportService {
           const factor = yieldAmount > 0 ? portions / yieldAmount : 0;
           const prepRows = this.scaling_.getScaledPrepItems(recipe, factor);
           prepRows.forEach(pr => {
-            const key = mode === 'by_station'
+            const key = isByStation
               ? (recipe.default_station_ ?? 'כללי')
               : (pr.category_name ?? 'כללי');
-            addPrep(key, pr.name, pr.amount, pr.unit);
+            addPrep(key, pr.name, pr.amount, pr.unit, isByStation ? (pr.category_name ?? '') : undefined);
           });
         });
       });
 
       const sortedGroups = Array.from(categoryToAggregate.keys()).sort();
+      const numCols = isByStation ? 4 : 3;
+      const sectionTitlePrefix = isByStation ? heHeader('station') : heHeader('category');
 
       const wsAcc = wb.addWorksheet('Accumulated', { views: [{ rightToLeft: true }] });
-      wsAcc.addRow([groupKey === 'station' ? heHeader('station') : heHeader('category'), heHeader('prep_item'), heHeader('quantity'), heHeader('unit')]);
-      this.styleHeaderRow(wsAcc, 1);
-      let rowNumAcc = 2;
+      let rowNumAcc = 1;
       for (const cat of sortedGroups) {
-        wsAcc.addRow([cat, '', '', '']);
-        const catRow = wsAcc.getRow(rowNumAcc);
-        catRow.font = { bold: true };
-        catRow.alignment = { wrapText: true, vertical: 'top' };
+        const blockStartRow = rowNumAcc;
+        const titleRow = isByStation
+          ? [`${sectionTitlePrefix}: ${cat}`, '', '', '']
+          : [`${sectionTitlePrefix}: ${cat}`, '', ''];
+        wsAcc.addRow(titleRow);
+        this.styleExcelTitle(wsAcc, rowNumAcc, numCols, 'center');
         rowNumAcc++;
-        const items = categoryToAggregate.get(cat) ?? [];
-        items.forEach(it => {
-          wsAcc.addRow(['', it.name, roundExportNumber(it.amount), heUnit(it.unit)]);
-          this.styleDataRow(wsAcc, rowNumAcc++);
+        const headerRow = isByStation
+          ? [heHeader('category'), heHeader('prep_item'), heHeader('quantity'), heHeader('unit')]
+          : [heHeader('prep_item'), heHeader('quantity'), heHeader('unit')];
+        wsAcc.addRow(headerRow);
+        this.styleExcelColumnHeader(wsAcc, rowNumAcc, numCols);
+        rowNumAcc++;
+        let items = categoryToAggregate.get(cat) ?? [];
+        items = items.slice().sort((a, b) => {
+          if (isByStation) return (a.categoryName ?? '').localeCompare(b.categoryName ?? '', 'he');
+          return (a.name ?? '').localeCompare(b.name ?? '', 'he');
         });
+        items.forEach(it => {
+          const dataRow = isByStation
+            ? [it.categoryName ?? '', it.name, roundExportNumber(it.amount), heUnit(it.unit)]
+            : [it.name, roundExportNumber(it.amount), heUnit(it.unit)];
+          wsAcc.addRow(dataRow);
+          this.styleExcelDataRowBorders(wsAcc, rowNumAcc, numCols);
+          rowNumAcc++;
+        });
+        this.styleExcelBlockBorder(wsAcc, blockStartRow, rowNumAcc - 1, numCols);
       }
-      wsAcc.getColumn(1).width = 20;
-      wsAcc.getColumn(2).width = 28;
-      wsAcc.getColumn(3).width = 12;
-      wsAcc.getColumn(4).width = 10;
+      wsAcc.getColumn(1).width = isByStation ? 20 : 28;
+      wsAcc.getColumn(2).width = isByStation ? 28 : 12;
+      wsAcc.getColumn(3).width = isByStation ? 12 : 10;
+      if (isByStation) wsAcc.getColumn(4).width = 10;
     }
 
-    const fileName = buildExportFileName('check-list', menu.name_ ?? 'menu', { includeDate: false });
+    const modeVariant = mode === 'by_dish' ? 'by-dish' : mode === 'by_station' ? 'by-station' : 'by-category';
+    const fileName = buildExportFileName('check-list', menu.name_ ?? 'menu', { includeDate: false, variant: modeVariant });
     await this.downloadWorkbook(wb, fileName);
   }
 
   /**
    * Export all together (menu): one workbook with sheet 1 = menu info, then checklist (default by_category), then shopping list.
-   * Filename: all_{menuName}.xlsx
+   * Filename: all_{checklistMode}_{menuName}.xlsx
    */
   async exportAllTogetherMenu(
     menu: MenuEvent,
@@ -933,7 +1084,8 @@ export class ExportService {
     await this.addChecklistSheetsToWorkbook(wb, menu, recipeMap, checklistMode);
     await this.addMenuShoppingListSheetToWorkbook(wb, menu, recipeMap, products);
 
-    const fileName = buildExportFileName('all', menu.name_ ?? 'menu', { includeDate: false });
+    const checklistVariant = checklistMode === 'by_dish' ? 'by-dish' : checklistMode === 'by_station' ? 'by-station' : 'by-category';
+    const fileName = buildExportFileName('all', menu.name_ ?? 'menu', { includeDate: false, variant: checklistVariant });
     await this.downloadWorkbook(wb, fileName);
   }
 
@@ -1027,7 +1179,7 @@ export class ExportService {
             this.styleExcelDataRowBorders(ws, rowNum++, numCols);
           });
           ws.addRow([]);
-          this.styleExcelSeparator(ws, rowNum++);
+          this.styleExcelBlankRow(ws, rowNum++);
         }
       }
       ws.getColumn(1).width = 28;
@@ -1036,13 +1188,16 @@ export class ExportService {
       ws.getColumn(4).width = 10;
     } else {
       const groupKey = mode === 'by_station' ? 'station' : 'category';
-      const categoryToAggregate = new Map<string, { name: string; amount: number; unit: string }[]>();
+      const isByStation = mode === 'by_station';
+      const categoryToAggregate = new Map<string, { name: string; amount: number; unit: string; categoryName?: string }[]>();
       const byDishRows: { groupKey: string; name: string; amount: number; unit: string; dishName: string }[] = [];
-      const addPrep = (key: string, name: string, amount: number, unit: string, dishName: string): void => {
+      const addPrep = (key: string, name: string, amount: number, unit: string, dishName: string, categoryName?: string): void => {
         const arr = categoryToAggregate.get(key) ?? [];
-        const existing = arr.find(x => x.name === name && x.unit === unit);
+        const existing = isByStation && categoryName !== undefined
+          ? arr.find(x => x.name === name && x.unit === unit && (x.categoryName ?? '') === categoryName)
+          : arr.find(x => x.name === name && x.unit === unit);
         if (existing) existing.amount += amount;
-        else arr.push({ name, amount, unit });
+        else arr.push(isByStation && categoryName !== undefined ? { name, amount, unit, categoryName } : { name, amount, unit });
         categoryToAggregate.set(key, arr);
         byDishRows.push({ groupKey: key, name, amount, unit, dishName });
       };
@@ -1055,25 +1210,47 @@ export class ExportService {
           const prepRows = this.scaling_.getScaledPrepItems(recipe, factor);
           const dishName = recipe.name_hebrew ?? item.recipe_id_;
           prepRows.forEach(pr => {
-            const key = mode === 'by_station' ? (recipe.default_station_ ?? 'כללי') : (pr.category_name ?? 'כללי');
-            addPrep(key, pr.name, pr.amount, pr.unit, dishName);
+            const key = isByStation ? (recipe.default_station_ ?? 'כללי') : (pr.category_name ?? 'כללי');
+            addPrep(key, pr.name, pr.amount, pr.unit, dishName, isByStation ? (pr.category_name ?? '') : undefined);
           });
         });
       });
       const sortedGroups = Array.from(categoryToAggregate.keys()).sort();
+      const numColsAcc = isByStation ? 4 : 3;
+      const sectionTitlePrefix = isByStation ? heHeader('station') : heHeader('category');
       const wsAcc = wb.addWorksheet('Checklist Accumulated', { views: [{ rightToLeft: true }] });
-      wsAcc.addRow([groupKey === 'station' ? heHeader('station') : heHeader('category'), heHeader('prep_item'), heHeader('quantity'), heHeader('unit')]);
-      this.styleHeaderRow(wsAcc, 1);
-      let r = 2;
+      let r = 1;
       for (const cat of sortedGroups) {
-        wsAcc.addRow([cat, '', '', '']);
-        wsAcc.getRow(r).font = { bold: true };
+        const blockStartRow = r;
+        const titleRow = isByStation ? [`${sectionTitlePrefix}: ${cat}`, '', '', ''] : [`${sectionTitlePrefix}: ${cat}`, '', ''];
+        wsAcc.addRow(titleRow);
+        this.styleExcelTitle(wsAcc, r, numColsAcc, 'center');
         r++;
-        (categoryToAggregate.get(cat) ?? []).forEach(it => {
-          wsAcc.addRow(['', it.name, roundExportNumber(it.amount), heUnit(it.unit)]);
-          this.styleDataRow(wsAcc, r++);
+        const headerRow = isByStation
+          ? [heHeader('category'), heHeader('prep_item'), heHeader('quantity'), heHeader('unit')]
+          : [heHeader('prep_item'), heHeader('quantity'), heHeader('unit')];
+        wsAcc.addRow(headerRow);
+        this.styleExcelColumnHeader(wsAcc, r, numColsAcc);
+        r++;
+        let items = categoryToAggregate.get(cat) ?? [];
+        items = items.slice().sort((a, b) => {
+          if (isByStation) return (a.categoryName ?? '').localeCompare(b.categoryName ?? '', 'he');
+          return (a.name ?? '').localeCompare(b.name ?? '', 'he');
         });
+        items.forEach(it => {
+          const dataRow = isByStation
+            ? [it.categoryName ?? '', it.name, roundExportNumber(it.amount), heUnit(it.unit)]
+            : [it.name, roundExportNumber(it.amount), heUnit(it.unit)];
+          wsAcc.addRow(dataRow);
+          this.styleExcelDataRowBorders(wsAcc, r, numColsAcc);
+          r++;
+        });
+        this.styleExcelBlockBorder(wsAcc, blockStartRow, r - 1, numColsAcc);
       }
+      wsAcc.getColumn(1).width = isByStation ? 20 : 28;
+      wsAcc.getColumn(2).width = isByStation ? 28 : 12;
+      wsAcc.getColumn(3).width = isByStation ? 12 : 10;
+      if (isByStation) wsAcc.getColumn(4).width = 10;
       const wsByDish = wb.addWorksheet('Checklist By dish', { views: [{ rightToLeft: true }] });
       wsByDish.addRow([groupKey === 'station' ? heHeader('station') : heHeader('category'), heHeader('prep_item'), heHeader('quantity'), heHeader('unit'), heHeader('dish')]);
       this.styleHeaderRow(wsByDish, 1);
