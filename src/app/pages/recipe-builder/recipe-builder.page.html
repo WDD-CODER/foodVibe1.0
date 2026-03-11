@@ -195,15 +195,11 @@
               @if (logisticsToolDropdownOpen_()) {
                 <app-scrollable-dropdown [maxHeight]="220" class="logistics-tool-dropdown">
                   <ul role="listbox">
-                    @for (opt of logisticsSearchOptions_(); track opt.type + '-' + opt.item._id; let i = $index) {
+                    @for (opt of logisticsSearchOptions_(); track opt._id; let i = $index) {
                       <li role="option" class="logistics-tool-option"
                         [class.highlighted]="logisticsHighlightedIndex_() === i"
                         (click)="selectLogisticsOption(opt)">
-                        @if (opt.type === 'library') {
-                          {{ getEquipmentNameById(opt.item.equipment_id_) }} ×{{ opt.item.quantity_ }}
-                        } @else {
-                          {{ opt.item.name_hebrew }}
-                        }
+                        {{ opt.name_hebrew }}
                       </li>
                     }
                     <li role="option" class="logistics-tool-option logistics-tool-add-new"

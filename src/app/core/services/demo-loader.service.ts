@@ -14,7 +14,6 @@ import { PreparationRegistryService } from './preparation-registry.service';
 import { MetadataRegistryService } from './metadata-registry.service';
 import { TranslationService } from './translation.service';
 import { MenuSectionCategoriesService } from './menu-section-categories.service';
-import { LogisticsBaselineDataService } from './logistics-baseline-data.service';
 import { MenuEventDataService } from './menu-event-data.service';
 import { LoggingService } from './logging.service';
 
@@ -33,7 +32,6 @@ export class DemoLoaderService {
   private readonly preparationRegistry = inject(PreparationRegistryService);
   private readonly metadataRegistry = inject(MetadataRegistryService);
   private readonly menuSectionCategories = inject(MenuSectionCategoriesService);
-  private readonly logisticsBaselineData = inject(LogisticsBaselineDataService);
   private readonly menuEventData = inject(MenuEventDataService);
   private readonly translation = inject(TranslationService);
   private readonly userMsg = inject(UserMsgService);
@@ -45,7 +43,7 @@ export class DemoLoaderService {
    */
   async loadDemoData(): Promise<void> {
     try {
-      const [suppliers, products, recipes, dishes, equipment, venues, preparations, labels, sectionCategories, logisticsBaseline, menuEvents] = await Promise.all([
+      const [suppliers, products, recipes, dishes, equipment, venues, preparations, labels, sectionCategories, menuEvents] = await Promise.all([
         firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-suppliers.json`)),
         firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-products.json`)),
         firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-recipes.json`)),
@@ -55,7 +53,6 @@ export class DemoLoaderService {
         firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-kitchen-preparations.json`).pipe(catchError(() => of([])))),
         firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-labels.json`).pipe(catchError(() => of([])))),
         firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-section-categories.json`).pipe(catchError(() => of([])))),
-        firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-logistics-baseline.json`).pipe(catchError(() => of([])))),
         firstValueFrom(this.http.get<unknown[]>(`${ASSETS}/demo-menu-events.json`).pipe(catchError(() => of([])))),
       ]);
 
@@ -70,7 +67,6 @@ export class DemoLoaderService {
         await this.storage.replaceAll('KITCHEN_LABELS', labels);
       }
       await this.storage.replaceAll('MENU_SECTION_CATEGORIES', Array.isArray(sectionCategories) ? sectionCategories : []);
-      await this.storage.replaceAll('LOGISTICS_BASELINE_ITEMS', Array.isArray(logisticsBaseline) ? logisticsBaseline : []);
       await this.storage.replaceAll('MENU_EVENT_LIST', Array.isArray(menuEvents) ? menuEvents : []);
 
       await Promise.all([
@@ -83,7 +79,6 @@ export class DemoLoaderService {
         this.preparationRegistry.reloadFromStorage(),
         this.metadataRegistry.reloadLabelsFromStorage(),
         this.menuSectionCategories.reloadFromStorage(),
-        this.logisticsBaselineData.reloadFromStorage(),
         this.menuEventData.reloadFromStorage(),
       ]);
 

@@ -121,6 +121,16 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] Demo data: rename mise_categories_ to prep_categories_ in demo-dishes.json
 - [x] Tests: scaling.service.spec use prep_categories_; optional: dish-data normalizer for backward compat
 
+### Plan 114 — Remove logistics templates library (`plans/114-remove-logistics-templates-library.plan.md`)
+
+- [x] Recipe Builder: equipment-only logistics dropdown; remove library state/methods
+- [x] Metadata Manager: remove LogisticsBaselineManagerComponent and template usage
+- [x] Demo loader: remove logistics baseline fetch and reload
+- [x] Async storage: remove LOGISTICS_BASELINE_ITEMS from BACKUP_ENTITY_TYPES
+- [x] Delete logistics-baseline-manager component and logistics-baseline-data.service
+- [x] logistics.model.ts: remove LogisticsBaselineItem; dictionary: remove metadata_logistics_* keys
+- [x] Delete demo-logistics-baseline.json; remove dead .logistics-library-* SCSS
+
 ### Plan 089 — Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
 
 - [ ] A: Auto-name menu with formatted date when name is empty on save, with duplicate handling (1), (2)

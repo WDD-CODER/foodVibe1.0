@@ -14,10 +14,9 @@ import { VersionHistoryService } from '@services/version-history.service';
 import type { VersionEntityType } from '@services/version-history.service';
 import { Ingredient } from '@models/ingredient.model';
 import { Recipe, RecipeStep, FlatPrepItem, PrepCategory } from '@models/recipe.model';
-import type { BaselineEntry, EquipmentPhase, LogisticsBaselineItem } from '@models/logistics.model';
+import type { BaselineEntry, EquipmentPhase } from '@models/logistics.model';
 import type { Equipment } from '@models/equipment.model';
 import { EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME } from '@services/equipment-data.service';
-import { LogisticsBaselineDataService } from '@services/logistics-baseline-data.service';
 import { AddEquipmentModalService } from '@services/add-equipment-modal.service';
 import { RecipeDataService } from '@services/recipe-data.service';
 import { RecipeFormService } from './services/recipe-form.service';
@@ -74,7 +73,6 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private readonly recipeDataService_ = inject(RecipeDataService);
   private readonly dishDataService_ = inject(DishDataService);
   private readonly recipeFormService_ = inject(RecipeFormService);
-  private readonly logisticsBaselineData_ = inject(LogisticsBaselineDataService);
   private readonly translation_ = inject(TranslationService);
   private readonly logging_ = inject(LoggingService);
   private readonly exportService_ = inject(ExportService);
@@ -552,8 +550,6 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   protected logisticsHighlightedIndex_ = signal(-1);
   /** Selected equipment id (from dropdown); user sets quantity then presses Add. */
   protected logisticsSelectedToolId_ = signal<string | null>(null);
-  /** When user selected a library item, we keep it so Add uses its phase/notes. */
-  private logisticsSelectedLibraryItem_ = signal<LogisticsBaselineItem | null>(null);
 
   /** Equipment IDs already in the logistics baseline (excluded from equipment search options). */
   private logisticsBaselineIds_ = toSignal(
@@ -566,21 +562,13 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     { initialValue: [] as string[] }
   );
 
-  /** Unified search options: library items (by equipment name) + all equipment (by name_hebrew). */
-  protected logisticsSearchOptions_ = computed((): ({ type: 'library'; item: LogisticsBaselineItem } | { type: 'equipment'; item: Equipment })[] => {
+  /** Search options: equipment only (by name_hebrew). */
+  protected logisticsSearchOptions_ = computed((): Equipment[] => {
     const q = this.logisticsToolSearchQuery_().trim().toLowerCase();
     if (!q) return [];
     const alreadyAdded = new Set(this.logisticsBaselineIds_() ?? []);
-    const options: ({ type: 'library'; item: LogisticsBaselineItem } | { type: 'equipment'; item: Equipment })[] = [];
-    const allLibrary = this.logisticsBaselineData_.allItems_();
     const allEquipment = this.equipmentData_.allEquipment_();
-    for (const item of allLibrary) {
-      const name = this.getEquipmentNameById(item.equipment_id_).toLowerCase();
-      if (name.includes(q)) {
-        options.push({ type: 'library', item });
-      }
-    }
-    const equipmentMatches = allEquipment
+    return allEquipment
       .filter((eq) => !alreadyAdded.has(eq._id) && eq.name_hebrew.toLowerCase().includes(q))
       .slice()
       .sort((a, b) => {
@@ -591,8 +579,6 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         if (aStarts !== bStarts) return aStarts - bStarts;
         return aName.indexOf(q) - bName.indexOf(q);
       });
-    equipmentMatches.forEach((eq) => options.push({ type: 'equipment', item: eq }));
-    return options;
   });
 
   protected getEquipmentNameById(id: string): string {
@@ -609,18 +595,10 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   }
 
   /** Select an option from dropdown (does not add yet; user sets quantity and presses Add). */
-  protected selectLogisticsOption(option: { type: 'library'; item: LogisticsBaselineItem } | { type: 'equipment'; item: Equipment }): void {
-    if (option.type === 'library') {
-      this.logisticsSelectedToolId_.set(option.item.equipment_id_);
-      this.logisticsToolQuantity_.set(option.item.quantity_);
-      this.logisticsSelectedLibraryItem_.set(option.item);
-      this.logisticsToolSearchQuery_.set(this.getEquipmentNameById(option.item.equipment_id_));
-    } else {
-      this.logisticsSelectedToolId_.set(option.item._id);
-      this.logisticsToolQuantity_.set(1);
-      this.logisticsSelectedLibraryItem_.set(null);
-      this.logisticsToolSearchQuery_.set(option.item.name_hebrew);
-    }
+  protected selectLogisticsOption(option: Equipment): void {
+    this.logisticsSelectedToolId_.set(option._id);
+    this.logisticsToolQuantity_.set(1);
+    this.logisticsToolSearchQuery_.set(option.name_hebrew);
     this.logisticsToolDropdownOpen_.set(false);
   }
 
@@ -631,7 +609,6 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const selectedId = this.logisticsSelectedToolId_();
     if (selectedId && this.getEquipmentNameById(selectedId) !== value) {
       this.logisticsSelectedToolId_.set(null);
-      this.logisticsSelectedLibraryItem_.set(null);
     }
   }
 
@@ -681,18 +658,16 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   protected addSelectedToolToBaseline(): void {
     const id = this.logisticsSelectedToolId_();
     if (!id) return;
-    const lib = this.logisticsSelectedLibraryItem_();
     const qty = this.logisticsToolQuantity_();
     this.logisticsBaselineArray.push(this.recipeFormService_.createBaselineRow({
       equipment_id_: id,
       quantity_: qty,
-      phase_: lib ? lib.phase_ : 'both',
-      is_critical_: lib ? lib.is_critical_ : true,
-      notes_: lib?.notes_
+      phase_: 'both',
+      is_critical_: true,
+      notes_: undefined
     }));
     this.recipeForm_.markAsDirty();
     this.logisticsSelectedToolId_.set(null);
-    this.logisticsSelectedLibraryItem_.set(null);
     this.logisticsToolSearchQuery_.set('');
     this.logisticsToolQuantity_.set(1);
     this.logisticsToolDropdownOpen_.set(false);
@@ -727,7 +702,6 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       this.logisticsSelectedToolId_.set(created._id);
       this.logisticsToolSearchQuery_.set(created.name_hebrew);
       this.logisticsToolQuantity_.set(1);
-      this.logisticsSelectedLibraryItem_.set(null);
     } catch (err) {
       this.logging_.error({ event: 'recipe_builder.save_error', message: 'Recipe builder save error (add tool)', context: { err } });
       const msg = err instanceof Error && err.message === ERR_DUPLICATE_EQUIPMENT_NAME
@@ -787,19 +761,6 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   protected removeBaselineRow(index: number): void {
     this.logisticsBaselineArray.removeAt(index);
     this.recipeForm_.markAsDirty();
-  }
-
-  protected addFromLibrary(item: LogisticsBaselineItem): void {
-    this.logisticsBaselineArray.push(this.recipeFormService_.createBaselineRow({
-      equipment_id_: item.equipment_id_,
-      quantity_: item.quantity_,
-      phase_: item.phase_,
-      is_critical_: item.is_critical_,
-      notes_: item.notes_
-    }));
-    this.recipeForm_.markAsDirty();
-    this.logisticsToolSearchQuery_.set('');
-    this.logisticsToolDropdownOpen_.set(false);
   }
 
   addNewStep(category?: string | void): void {

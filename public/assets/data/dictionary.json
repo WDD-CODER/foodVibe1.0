@@ -19,7 +19,7 @@
         "vegetables": "ירקות"
     },
     "section_categories": {
-        "amuse-bouche": "מנה קטנה",
+        "amuse-bouche": "מרענן חך",
         "appetizers": "מנות פתיחה",
         "soups": "מרקים",
         "salads": "סלטים",
@@ -518,19 +518,6 @@
         "metadata_confirm_rename_section": "לשנות את שם המקטע?",
         "metadata_updated_success": "עודכן בהצלחה",
         "metadata_no_section_categories": "אין מקטעי תפריט. הוסף מקטע.",
-        "metadata_logistics_baseline_title": "תבניות לוגיסטיקה",
-        "metadata_logistics_baseline_desc": "פריטי ציוד לשימוש חוזר בתבניות לוגיסטיקה במתכונים",
-        "metadata_add_baseline": "הוסף תבנית",
-        "metadata_baseline_equipment": "ציוד",
-        "metadata_select_equipment": "בחר ציוד",
-        "metadata_baseline_quantity": "כמות",
-        "metadata_baseline_phase": "שלב",
-        "metadata_baseline_critical": "קריטי",
-        "metadata_phase_prep": "הכנה",
-        "metadata_phase_service": "הגשה",
-        "metadata_phase_both": "הכנה והגשה",
-        "metadata_confirm_remove_baseline": "להסיר את פריט התבנית?",
-        "metadata_no_baseline_items": "אין פריטי תבנית. הוסף תבנית.",
         "metadata_save_failed": "שגיאה בשמירה",
         "metadata_yes": "כן",
         "metadata_no": "לא"
