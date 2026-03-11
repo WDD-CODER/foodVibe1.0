@@ -165,6 +165,33 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] Part B: ExportService — add getMenuAllViewPreviewPayload(menu, recipes)
 - [x] Part B: Menu-intelligence — replace "All" button with view-export-wrap + view-export-modal; onViewAll, exportPreviewType_ 'menu-all', onExportFromPreview for 'menu-all'
 
+### Plan 121 — Product units display fix (`plans/121-product-units-display-fix.plan.md`)
+
+- [x] Harden hydrateForm: default missing `uom` from `base_unit_` so legacy purchase-option rows are valid and visible
+- [x] Merge global registry units into getAvailableUnits for products so custom units show in ingredient unit select
+
+### Plan 123 — Recipe builder product-only units + persist (`plans/123-recipe-builder-product-only-units-persist.plan.md`)
+
+- [x] Part A: Remove merge of allUnitKeys_() in getAvailableUnits so only product/recipe units shown
+- [x] Part B: On "+ יחידה חדשה" for product row, add new unit as purchase option and saveProduct
+
+### Plan 124 — Unified styling audit and theme (`plans/124-unified-styling-audit-theme.plan.md`)
+
+- [ ] Phase 1: Add --border-row, --shadow-nav to styles.scss; replace raw rgba in .c-list-body-cell, .c-grid-cell; add Liquid Glass comment block
+- [ ] Phase 2: Menu-intelligence, trash, dashboard — replace raw hex/rgba with tokens
+- [ ] Phase 3: export-preview, list-shell, recipe-book-list, header, footer, user-msg, recipe-header, unit-creator — use tokens
+- [ ] Phase 4: menu-library-list — use c-input-wrapper and c-btn-primary in HTML; recipe-builder main submit use c-btn-primary
+- [ ] Phase 5: Spot-check representative pages; search and replace remaining raw colors in src/**/*.scss
+
+### Plan 122 — AI Chatbot Gemini scope (`plans/122-ai-chatbot-gemini-scope.plan.md`)
+
+- [ ] Decide chat placement (sidebar / floating button / dedicated Assistant page)
+- [ ] Decide first use case (dictation → recipe and/or create menu for N people)
+- [ ] Decide backend approach for Gemini API key (proxy / serverless / existing API)
+- [ ] Decide language (Hebrew / English / both) for prompts and bot replies
+- [ ] Decide confirmation pattern (open edit screen with draft vs inline draft in chat vs both)
+- [ ] Write designated implementation plan once clarifications are set
+
 ### Plan 089 — Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
 
 - [ ] A: Auto-name menu with formatted date when name is empty on save, with duplicate handling (1), (2)
@@ -723,6 +750,10 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 117 | Dish row absolute actions | Done |
 | 118 | Sidebar close on breakpoint | Planned |
 | 120 | Export "All" view option (recipe + menu) + cost per portion fix | Active |
+| 121 | Product units display fix (Edit form + ingredient unit select) | Active |
+| 122 | AI Chatbot Gemini scope (conceptual) | Planned |
+| 123 | Recipe builder product-only units + persist new unit to product | Active |
+| 124 | Unified styling audit and theme | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 
