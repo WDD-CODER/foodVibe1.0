@@ -158,7 +158,7 @@ export class CookViewPage implements OnInit {
 
   protected isDish_ = computed(() => {
     const r = this.recipe_();
-    return !!(r?.recipe_type_ === 'dish' || (r?.prep_items_?.length ?? 0) > 0 || (r?.mise_categories_?.length ?? 0) > 0);
+    return !!(r?.recipe_type_ === 'dish' || (r?.prep_items_?.length ?? 0) > 0 || (r?.prep_categories_?.length ?? 0) > 0);
   });
 
   protected get workflowFormArray(): FormArray {
@@ -568,10 +568,10 @@ export class CookViewPage implements OnInit {
         unit: p.unit ?? 'unit'
       }));
     }
-    if (recipe.mise_categories_?.length) {
+    if (recipe.prep_categories_?.length) {
       const rows: { preparation_name: string; category_name: string; main_category_name: string; quantity: number; unit: string }[] = [];
-      recipe.mise_categories_.forEach(cat => {
-        cat.items.forEach(it => {
+      recipe.prep_categories_.forEach(cat => {
+        (cat.items ?? []).forEach(it => {
           rows.push({
             preparation_name: it.item_name,
             category_name: cat.category_name,
@@ -664,8 +664,7 @@ export class CookViewPage implements OnInit {
       this.recipe_.update(r => ({
         ...r,
         prep_items_: prepItems,
-        prep_categories_: prepCategories,
-        mise_categories_: prepCategories
+        prep_categories_: prepCategories
       } as Recipe));
     } else {
       const steps: RecipeStep[] = (raw || [])

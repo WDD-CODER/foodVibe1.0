@@ -113,6 +113,14 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] Narrow dish-search dropdown to 80% width (and center) in menu-intelligence SCSS
 - [x] Add [class.highlighted] and index to recipe @for; add .dropdown-item.highlighted style
 
+### Plan 113 — Use only prep_categories; discard mise_categories (`plans/113-use-only-prep-categories-discard-mise.plan.md`)
+
+- [x] Model: remove MiseCategory and mise_categories_ from Recipe
+- [x] Read paths: getPrepRowsFromRecipe, getScaledPrepItems, isDish — use prep_categories_ only
+- [x] Write paths: stop setting mise_categories_ in recipe-builder and cook-view
+- [x] Demo data: rename mise_categories_ to prep_categories_ in demo-dishes.json
+- [x] Tests: scaling.service.spec use prep_categories_; optional: dish-data normalizer for backward compat
+
 ### Plan 089 — Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
 
 - [ ] A: Auto-name menu with formatted date when name is empty on save, with duplicate handling (1), (2)
@@ -666,6 +674,7 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 109 | Translate section categories | Planned |
 | 111 | Unify metadata manager containers | Done |
 | 112 | Dish dropdown width and keyboard | Planned |
+| 113 | Use only prep_categories; discard mise_categories | Done |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 

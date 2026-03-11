@@ -248,7 +248,7 @@ export class RecipeBookListComponent {
   });
 
   protected isRecipeDish(recipe: Recipe): boolean {
-    return recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.mise_categories_?.length);
+    return recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length);
   }
 
   protected getRecipeAllergens(recipe: Recipe, depth = 0): string[] {

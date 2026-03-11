@@ -241,7 +241,7 @@
         }
       ]
     },
-    "mise_categories_": [
+    "prep_categories_": [
       {
         "category_name": "נקניקיות",
         "items": [
@@ -430,7 +430,7 @@
         }
       ]
     },
-    "mise_categories_": [
+    "prep_categories_": [
       {
         "category_name": "נקניקיות",
         "items": [
@@ -712,7 +712,7 @@
         }
       ]
     },
-    "mise_categories_": [
+    "prep_categories_": [
       {
         "category_name": "חלבון",
         "items": [
@@ -908,7 +908,7 @@
         }
       ]
     },
-    "mise_categories_": [
+    "prep_categories_": [
       {
         "category_name": "sauce/stocks",
         "items": [
@@ -1079,7 +1079,7 @@
         }
       ]
     },
-    "mise_categories_": [
+    "prep_categories_": [
       {
         "category_name": "cooking",
         "items": [
@@ -1254,7 +1254,7 @@
         }
       ]
     },
-    "mise_categories_": [
+    "prep_categories_": [
       {
         "category_name": "cooking",
         "items": [
@@ -1363,7 +1363,7 @@
         }
       ]
     },
-    "mise_categories_": [],
+    "prep_categories_": [],
     "labels_": [
       "meat",
       "sipur_shel_ochel"
@@ -1429,7 +1429,7 @@
       ],
       "service_overrides_": []
     },
-    "mise_categories_": [
+    "prep_categories_": [
       {
         "category_name": "fry_mise",
         "items": [
@@ -1575,7 +1575,7 @@
       ]
     },
     "prep_items_": [],
-    "mise_categories_": [
+    "prep_categories_": [
       {
         "category_name": "בישולים",
         "items": [
@@ -1788,7 +1788,7 @@
       ]
     },
     "prep_items_": [],
-    "mise_categories_": [
+    "prep_categories_": [
       {
         "category_name": "טיגון",
         "items": [
@@ -2006,7 +2006,7 @@
       ]
     },
     "prep_items_": [],
-    "mise_categories_": [
+    "prep_categories_": [
       {
         "category_name": "patisserie",
         "items": [
@@ -2204,7 +2204,7 @@
       ]
     },
     "prep_items_": [],
-    "mise_categories_": [
+    "prep_categories_": [
       {
         "category_name": "patisserie",
         "items": [
@@ -2320,7 +2320,7 @@
       ]
     },
     "prep_items_": [],
-    "mise_categories_": [
+    "prep_categories_": [
       {
         "category_name": "patisserie",
         "items": [
@@ -2414,7 +2414,7 @@
       ]
     },
     "prep_items_": [],
-    "mise_categories_": [],
+    "prep_categories_": [],
     "labels_": [
       "sipur_shel_ochel",
       "dessert",

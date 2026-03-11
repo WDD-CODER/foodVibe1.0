@@ -66,6 +66,12 @@ export class PreparationRegistryService {
     }
   }
 
+  /** Persist a single registry doc. Assigns _id if missing (e.g. after demo load) so future put() works. */
+  private async persistDoc(payload: PreparationRegistryDoc): Promise<void> {
+    const id = payload._id ?? this.storageService.makeId()
+    await this.storageService.replaceAll(STORAGE_KEY, [{ ...payload, _id: id }])
+  }
+
   /** Register category with English key (backend) and Hebrew label (dictionary). */
   async registerCategory(englishKey: string, hebrewLabel: string): Promise<void> {
     const key = englishKey.trim().toLowerCase().replace(/\s+/g, '_')
@@ -85,8 +91,7 @@ export class PreparationRegistryService {
       if (doc?._id) {
         await this.storageService.put(STORAGE_KEY, { ...payload, _id: doc._id })
       } else {
-        const saved = await this.storageService.post(STORAGE_KEY, payload)
-        if (saved.preparations) this.preparations_.set(saved.preparations)
+        await this.persistDoc(payload)
       }
       this.categories_.set(updated)
       this.userMsgService.onSetSuccessMsg(`הקטגוריה "${label}" נוספה בהצלחה`)
@@ -155,9 +160,12 @@ export class PreparationRegistryService {
     try {
       const registries = await this.storageService.query<PreparationRegistryDoc>(STORAGE_KEY)
       const doc = registries[0]
-      if (!doc?._id) return
-      const payload: PreparationRegistryDoc = { ...doc, categories: updated }
-      await this.storageService.put(STORAGE_KEY, { ...payload, _id: doc._id })
+      const payload: PreparationRegistryDoc = doc ? { ...doc, categories: updated } : { categories: updated, preparations: [] }
+      if (doc?._id) {
+        await this.storageService.put(STORAGE_KEY, { ...payload, _id: doc._id })
+      } else {
+        await this.persistDoc(payload)
+      }
       this.categories_.set(updated)
     } catch (err) {
       this.userMsgService.onSetErrorMsg('שגיאה במחיקת הקטגוריה')
@@ -175,9 +183,14 @@ export class PreparationRegistryService {
     try {
       const registries = await this.storageService.query<PreparationRegistryDoc>(STORAGE_KEY)
       const doc = registries[0]
-      if (!doc?._id) return
-      const payload: PreparationRegistryDoc = { ...doc, categories: updatedCats, preparations: updatedPreps }
-      await this.storageService.put(STORAGE_KEY, { ...payload, _id: doc._id })
+      const payload: PreparationRegistryDoc = doc
+        ? { ...doc, categories: updatedCats, preparations: updatedPreps }
+        : { categories: updatedCats, preparations: updatedPreps }
+      if (doc?._id) {
+        await this.storageService.put(STORAGE_KEY, { ...payload, _id: doc._id })
+      } else {
+        await this.persistDoc(payload)
+      }
       this.categories_.set(updatedCats)
       this.preparations_.set(updatedPreps)
       this.translationService.updateDictionary(sanitizedNew, newLabel.trim())
@@ -218,7 +231,7 @@ export class PreparationRegistryService {
       if (doc?._id) {
         await this.storageService.put(STORAGE_KEY, { ...payload, _id: doc._id })
       } else {
-        await this.storageService.post(STORAGE_KEY, payload)
+        await this.persistDoc(payload)
       }
       this.preparations_.set(updated)
       this.userMsgService.onSetSuccessMsg(`ההכנה "${sanitizedName}" נוספה בהצלחה`)

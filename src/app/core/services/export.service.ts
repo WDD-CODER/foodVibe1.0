@@ -118,7 +118,7 @@ export class ExportService {
   /** Build recipe-sheet block (header, yield, instructions, prep time) for Excel and preview. Plan 108. */
   private buildRecipeSheetBlock(recipe: Recipe, quantity: number): RecipeSheetBlock {
     const steps = (recipe.steps_ ?? []) as RecipeStep[];
-    const isDish = recipe.recipe_type_ === 'dish' || (recipe.prep_items_?.length ?? 0) > 0 || (recipe.mise_categories_?.length ?? 0) > 0;
+    const isDish = recipe.recipe_type_ === 'dish' || (recipe.prep_items_?.length ?? 0) > 0 || (recipe.prep_categories_?.length ?? 0) > 0;
     const preparationInstructions = isDish
       ? (steps.length ? steps.map(s => (s.instruction_ ?? '').trim()).filter(Boolean) : [])
       : steps.map(s => (s.instruction_ ?? '').trim()).filter(Boolean);

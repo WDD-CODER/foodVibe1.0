@@ -1,6 +1,6 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { StorageService } from './async-storage.service';
-import { Recipe } from '../models/recipe.model';
+import { Recipe, PrepCategory } from '../models/recipe.model';
 
 const ENTITY = 'DISH_LIST';
 const TRASH_KEY = 'TRASH_DISHES';
@@ -21,9 +21,20 @@ export class DishDataService {
     await this.loadInitialData();
   }
 
+  /** Normalize legacy mise_categories_ into prep_categories_ when loading from storage. */
+  private normalizeDish(d: Recipe & { mise_categories_?: PrepCategory[] }): Recipe {
+    if (d.mise_categories_?.length && !d.prep_categories_?.length) {
+      const { mise_categories_, ...rest } = d;
+      return { ...rest, prep_categories_: mise_categories_ };
+    }
+    const { mise_categories_: _m, ...rest } = d;
+    return rest as Recipe;
+  }
+
   private async loadInitialData(): Promise<void> {
-    const data = await this.storage.query<Recipe>(ENTITY);
-    this.dishesStore_.set(data);
+    const data = await this.storage.query<Recipe & { mise_categories_?: PrepCategory[] }>(ENTITY);
+    const normalized = data.map(d => this.normalizeDish(d));
+    this.dishesStore_.set(normalized);
   }
 
   async getDishById(_id: string): Promise<Recipe> {

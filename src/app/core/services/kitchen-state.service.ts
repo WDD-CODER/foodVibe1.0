@@ -245,7 +245,7 @@ export class KitchenStateService {
 
   // RECIPE / DISH CRUD
   deleteRecipe(recipe: Recipe): Observable<void> {
-    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.mise_categories_?.length);
+    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length);
     const operation$ = isDish
       ? from(this.dishDataService.deleteDish(recipe._id))
       : from(this.recipeDataService.deleteRecipe(recipe._id));
@@ -270,11 +270,11 @@ export class KitchenStateService {
   }
 
   saveRecipe(recipe: Recipe): Observable<Recipe> {
-    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.mise_categories_?.length);
+    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length);
     const isUpdate = !!(recipe._id && recipe._id.trim() !== '');
     const previous = isUpdate ? this.recipes_().find(r => r._id === recipe._id) : null;
     const previousIsDish = previous
-      ? (previous.recipe_type_ === 'dish' || !!(previous.prep_items_?.length || previous.mise_categories_?.length))
+      ? (previous.recipe_type_ === 'dish' || !!(previous.prep_items_?.length || previous.prep_categories_?.length))
       : false;
     const typeChanged = isUpdate && !!previous && previousIsDish !== isDish;
     const entityType = isDish ? 'dish' as const : 'recipe' as const;

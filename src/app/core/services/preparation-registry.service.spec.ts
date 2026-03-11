@@ -9,10 +9,12 @@ describe('PreparationRegistryService', () => {
   let storageSpy: jasmine.SpyObj<StorageService>
 
   beforeEach(fakeAsync(() => {
-    storageSpy = jasmine.createSpyObj('StorageService', ['query', 'put', 'post'])
+    storageSpy = jasmine.createSpyObj('StorageService', ['query', 'put', 'post', 'replaceAll', 'makeId'])
     storageSpy.query.and.returnValue(Promise.resolve([]))
     storageSpy.put.and.returnValue(Promise.resolve({ _id: 'p1' }))
     storageSpy.post.and.returnValue(Promise.resolve({ _id: 'p1', categories: [], preparations: [] }))
+    storageSpy.replaceAll.and.returnValue(Promise.resolve())
+    storageSpy.makeId.and.returnValue('p1')
 
     const userMsgSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
     const translationSpy = jasmine.createSpyObj('TranslationService', ['updateDictionary'])
@@ -41,7 +43,7 @@ describe('PreparationRegistryService', () => {
     service.registerCategory('cooking_station', 'עמדת בישול')
     tick()
     expect(service.preparationCategories_()).toContain('cooking_station')
-    expect(storageSpy.post).toHaveBeenCalled()
+    expect(storageSpy.replaceAll).toHaveBeenCalled()
   }))
 
   it('should register a preparation and persist', fakeAsync(() => {

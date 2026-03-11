@@ -573,7 +573,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected isRecipeDish(recipe: Recipe): boolean {
-    return recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.mise_categories_?.length);
+    return recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length);
   }
 
   protected getDerivedPortions(item: MenuItemForm): number {
@@ -818,6 +818,10 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     this.sectionSearchOpen_.set(index);
     this.sectionSearchQueries_.update(q => ({ ...q, [index]: '' }));
     this.sectionCategoryHighlightedIndex_.update(m => ({ ...m, [index]: 0 }));
+    setTimeout(() => {
+      const input = document.querySelector('.section-search-wrap .section-search-input') as HTMLInputElement;
+      input?.focus();
+    }, 0);
   }
 
   protected closeSectionSearch(): void {

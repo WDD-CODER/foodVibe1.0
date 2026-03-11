@@ -169,7 +169,7 @@ describe('ScalingService', () => {
       expect(rows[0].category_name).toBe('Veg');
     });
 
-    it('should scale mise_categories_ items by factor', () => {
+    it('should scale prep_categories_ items by factor', () => {
       const recipe: Recipe = {
         _id: 'r1',
         name_hebrew: 'Dish',
@@ -179,7 +179,7 @@ describe('ScalingService', () => {
         yield_unit_: 'unit',
         default_station_: '',
         is_approved_: false,
-        mise_categories_: [
+        prep_categories_: [
           {
             category_name: 'Mise',
             items: [{ item_name: 'Garlic', quantity: 1, unit: 'unit' }],
@@ -192,7 +192,7 @@ describe('ScalingService', () => {
       expect(rows[0].amount).toBe(4);
     });
 
-    it('should return empty array when recipe has no prep_items_ or mise_categories_', () => {
+    it('should return empty array when recipe has no prep_items_ or prep_categories_', () => {
       const recipe: Recipe = {
         _id: 'r1',
         name_hebrew: 'Simple',

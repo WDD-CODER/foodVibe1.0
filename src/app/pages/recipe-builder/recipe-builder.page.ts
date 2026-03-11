@@ -13,7 +13,7 @@ import { RecipeCostService } from '@services/recipe-cost.service';
 import { VersionHistoryService } from '@services/version-history.service';
 import type { VersionEntityType } from '@services/version-history.service';
 import { Ingredient } from '@models/ingredient.model';
-import { Recipe, RecipeStep, MiseCategory, FlatPrepItem, PrepCategory } from '@models/recipe.model';
+import { Recipe, RecipeStep, FlatPrepItem, PrepCategory } from '@models/recipe.model';
 import type { BaselineEntry, EquipmentPhase, LogisticsBaselineItem } from '@models/logistics.model';
 import type { Equipment } from '@models/equipment.model';
 import { EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME } from '@services/equipment-data.service';
@@ -438,7 +438,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   }
 
   private patchFormFromRecipe(recipe: Recipe): void {
-    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.mise_categories_?.length);
+    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length);
     const normalizedLabels = this.normalizeLabelKeys(recipe.labels_ ?? []);
     this.recipeForm_.patchValue({
       name_hebrew: recipe.name_hebrew,
@@ -761,10 +761,10 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         unit: p.unit ?? 'unit'
       }));
     }
-    if (recipe.mise_categories_?.length) {
+    if (recipe.prep_categories_?.length) {
       const rows: { preparation_name: string; category_name: string; main_category_name: string; quantity: number; unit: string }[] = [];
-      recipe.mise_categories_.forEach(cat => {
-        cat.items.forEach(it => {
+      recipe.prep_categories_.forEach(cat => {
+        (cat.items ?? []).forEach(it => {
           rows.push({
             preparation_name: it.item_name,
             category_name: cat.category_name,
@@ -1083,7 +1083,6 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       labels_: labels,
       ...(prepItems && prepItems.length > 0 && { prep_items_: prepItems }),
       ...(prepCategories && prepCategories.length > 0 && { prep_categories_: prepCategories }),
-      ...(prepCategories && prepCategories.length > 0 && { mise_categories_: prepCategories }),
       ...(() => {
         const baselineRaw = (raw['logistics'] as { baseline_?: { equipment_id_: string; quantity_: number; phase_: string; is_critical_: boolean; notes_?: string }[] })?.baseline_ ?? [];
         const baseline = baselineRaw

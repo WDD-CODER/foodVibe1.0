@@ -15,11 +15,6 @@ export interface MiseItem {
   category_name?: string;
 }
 
-export interface MiseCategory {
-  category_name: string;
-  items: MiseItem[];
-}
-
 /** Flat prep item for dish workflow (prep list) */
 export interface FlatPrepItem {
   preparation_name: string;
@@ -45,11 +40,9 @@ export interface Recipe {
   /** 'dish' | 'preparation' - determines storage (DISH_LIST vs RECIPE_LIST) */
   recipe_type_?: 'dish' | 'preparation';
   version_history_?: string[];
-  /** For recipe_type === 'dish': legacy nested structure (backward compat) */
-  mise_categories_?: MiseCategory[];
   /** For recipe_type === 'dish': flat prep list */
   prep_items_?: FlatPrepItem[];
-  /** For recipe_type === 'dish': grouped by category (backward compat) */
+  /** For recipe_type === 'dish': grouped by category */
   prep_categories_?: PrepCategory[];
   /** Baseline equipment + service-style overrides (contextual logistics) */
   logistics_?: DishLogistics;

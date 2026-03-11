@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { KitchenStateService } from './kitchen-state.service';
 import { Recipe } from '../models/recipe.model';
-import { FlatPrepItem, MiseCategory } from '../models/recipe.model';
+import { FlatPrepItem, PrepCategory } from '../models/recipe.model';
 
 export interface ScaledIngredientRow {
   name: string;
@@ -79,7 +79,7 @@ export class ScalingService {
   }
 
   /**
-   * Scaled prep items for dishes (prep_items_ and mise_categories_).
+   * Scaled prep items for dishes (prep_items_ and prep_categories_).
    */
   getScaledPrepItems(recipe: Recipe, factor: number): ScaledPrepRow[] {
     const rows: ScaledPrepRow[] = [];
@@ -95,8 +95,8 @@ export class ScalingService {
       });
     }
 
-    if (recipe.mise_categories_?.length) {
-      recipe.mise_categories_.forEach((cat: MiseCategory) => {
+    if (recipe.prep_categories_?.length) {
+      recipe.prep_categories_.forEach((cat: PrepCategory) => {
         (cat.items ?? []).forEach(it => {
           rows.push({
             name: it.item_name,
