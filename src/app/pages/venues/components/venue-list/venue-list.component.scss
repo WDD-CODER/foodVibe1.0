@@ -19,6 +19,10 @@
     display: contents;
   }
 
+  .venue-grid-row .c-list-body-cell {
+    cursor: pointer;
+  }
+
   .venue-grid-row:hover .c-icon-btn {
     opacity: 1;
   }

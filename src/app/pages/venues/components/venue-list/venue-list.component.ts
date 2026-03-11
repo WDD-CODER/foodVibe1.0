@@ -142,6 +142,12 @@ export class VenueListComponent {
     this.router.navigate(['/venues/edit', id]);
   }
 
+  protected onRowClick(item: VenueProfile, event: MouseEvent): void {
+    const el = event.target as HTMLElement;
+    if (el.closest('button') || el.closest('a')) return;
+    this.router.navigate(['/venues/edit', item._id]);
+  }
+
   async onDelete(item: VenueProfile): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return;
     if (!confirm('למחוק את המיקום "' + (item.name_hebrew ?? '') + '"?')) return;

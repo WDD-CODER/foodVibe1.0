@@ -198,6 +198,24 @@ export class EquipmentListComponent {
     this.router.navigate([...this.equipmentBasePath, 'add']);
   }
 
+  protected onRowClick(item: Equipment, event: MouseEvent): void {
+    const el = event.target as HTMLElement;
+    if (el.closest('button') || el.closest('a') || el.closest('.inline-edit-panel')) return;
+    if (this.editingId_() === item._id) {
+      this.editingId_.set(null);
+      return;
+    }
+    void this.onEdit(item);
+  }
+
+  protected toggleRowEdit(item: Equipment): void {
+    if (this.editingId_() === item._id) {
+      this.editingId_.set(null);
+    } else {
+      void this.onEdit(item);
+    }
+  }
+
   async onEdit(item: Equipment): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return;
     const currentId = this.editingId_();

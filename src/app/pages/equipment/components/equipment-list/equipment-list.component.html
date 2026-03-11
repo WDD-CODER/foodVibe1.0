@@ -59,7 +59,10 @@
       </div>
     }
     @for (item of filteredEquipment_(); track item._id) {
-      <div class="equipment-grid-row c-list-row" role="row">
+      <div class="equipment-grid-row c-list-row" role="button" tabindex="0"
+        (click)="onRowClick(item, $event)"
+        (keydown.enter)="toggleRowEdit(item)"
+        (keydown.space)="$event.preventDefault(); toggleRowEdit(item)">
         <div class="col-name c-list-body-cell" role="cell">{{ item.name_hebrew }}</div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
           <div class="col-category c-list-body-cell" cellCarouselSlide [label]="'category' | translatePipe">{{ item.category_ | translatePipe }}</div>
@@ -67,7 +70,7 @@
           <div class="col-consumable c-list-body-cell" cellCarouselSlide [label]="'is_consumable' | translatePipe">{{ item.is_consumable_ ? ('approved_yes' | translatePipe) : ('approved_no' | translatePipe) }}</div>
         </app-cell-carousel>
         <div class="c-col-actions c-list-body-cell" role="cell">
-          <button type="button" class="c-icon-btn" (click)="onEdit(item)"
+          <button type="button" class="c-icon-btn" (click)="onEdit(item); $event.stopPropagation()"
             [attr.aria-label]="'edit' | translatePipe"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
             <lucide-icon name="pencil" [size]="18"></lucide-icon>
@@ -75,7 +78,7 @@
           @if (deletingId_() === item._id) {
             <app-loader size="small" [inline]="true" />
           } @else {
-            <button type="button" class="c-icon-btn danger" (click)="onDelete(item)"
+            <button type="button" class="c-icon-btn danger" (click)="onDelete(item); $event.stopPropagation()"
               [attr.aria-label]="'delete' | translatePipe"
               [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>

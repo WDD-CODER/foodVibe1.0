@@ -180,6 +180,24 @@ export class SupplierListComponent {
     this.supplierModal.openAdd();
   }
 
+  protected onRowClick(item: Supplier, event: MouseEvent): void {
+    const el = event.target as HTMLElement;
+    if (el.closest('button') || el.closest('a') || el.closest('.inline-edit-panel')) return;
+    if (this.editingId_() === item._id) {
+      this.editingId_.set(null);
+      return;
+    }
+    void this.onEdit(item);
+  }
+
+  protected toggleRowEdit(item: Supplier): void {
+    if (this.editingId_() === item._id) {
+      this.editingId_.set(null);
+    } else {
+      void this.onEdit(item);
+    }
+  }
+
   async onEdit(item: Supplier): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return;
     const currentId = this.editingId_();
