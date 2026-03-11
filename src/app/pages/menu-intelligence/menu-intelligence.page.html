@@ -273,14 +273,14 @@
                         [id]="'dish-search-' + sectionIndex + '-' + itemIndex"
                         [ngModel]="getDishSearchQuery(sectionIndex, itemIndex)"
                         [ngModelOptions]="{ standalone: true }"
-                        (ngModelChange)="setDishSearchQuery(sectionIndex, itemIndex, $event)"
+                        (ngModelChange)="onDishSearchQueryChange(sectionIndex, itemIndex, $event)"
                         [placeholder]="'menu_search_dish' | translatePipe"
                         (keydown.escape)="clearDishSearch(sectionIndex, itemIndex)"
                         (keydown.enter)="onDishSearchKeydown(sectionIndex, itemIndex, $event)" />
                       @if (getDishSearchQuery(sectionIndex, itemIndex).trim()) {
                         <app-scrollable-dropdown [maxHeight]="200">
-                          @for (recipe of getFilteredRecipes(sectionIndex, itemIndex); track recipe._id) {
-                            <button type="button" class="dropdown-item" (click)="selectRecipe(sectionIndex, itemIndex, recipe)">
+                          @for (recipe of getFilteredRecipes(sectionIndex, itemIndex); track recipe._id; let i = $index) {
+                            <button type="button" class="dropdown-item" [class.highlighted]="getDishSearchHighlightedIndex(sectionIndex, itemIndex) === i" (click)="selectRecipe(sectionIndex, itemIndex, recipe)">
                               {{ recipe.name_hebrew }}
                             </button>
                           }

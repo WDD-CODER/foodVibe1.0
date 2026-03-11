@@ -107,6 +107,12 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] HTML: demo + backup use card-desc, card-actions; remove demo-section/backup-section
 - [x] SCSS: add .manager-card .card-desc and .card-actions; remove .menu-types-card .card-desc; replace .demo-section and .backup-section with .manager-card-scoped rules
 
+### Plan 112 — Dish dropdown width and keyboard (`plans/112-dish-dropdown-width-keyboard.plan.md`)
+
+- [x] Fix keyboard: wire (ngModelChange) to onDishSearchQueryChange so activeDishSearch_ is set when typing
+- [x] Narrow dish-search dropdown to 80% width (and center) in menu-intelligence SCSS
+- [x] Add [class.highlighted] and index to recipe @for; add .dropdown-item.highlighted style
+
 ### Plan 089 — Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
 
 - [ ] A: Auto-name menu with formatted date when name is empty on save, with duplicate handling (1), (2)
@@ -659,6 +665,7 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 108 | Recipe export and view spreadsheet layout | Active |
 | 109 | Translate section categories | Planned |
 | 111 | Unify metadata manager containers | Done |
+| 112 | Dish dropdown width and keyboard | Planned |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 
