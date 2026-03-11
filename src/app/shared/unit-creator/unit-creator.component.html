@@ -1,6 +1,6 @@
 @if (isOpen_()) {
 <div class="c-modal-overlay" (click)="resetAndClose()">
-  <div class="c-modal-card c-modal-card--md" dir="rtl" (click)="$event.stopPropagation()" (clickOutside)="resetAndClose()">
+  <div class="c-modal-card c-modal-card--md" dir="rtl" (click)="$event.stopPropagation()">
     <h3>הגדרת יחידת המרה חדשה</h3>
 
     <div class="c-modal-body unit-creator-formula-grid">
@@ -19,13 +19,15 @@
           <input SelectOnFocus
                  type="number"
                  [ngModel]="newUnitValue_()"
-                 (ngModelChange)="newUnitValue_.set($event)">
+                 (ngModelChange)="newUnitValue_.set($event)"
+                 (keydown.enter)="$event.preventDefault(); focusBasisUnitSelect()">
         </div>
       </div>
 
       <div class="c-input-stack">
         <label>יחידת מידה להשוואה</label>
         <app-custom-select
+          triggerId="unit-creator-basis-unit"
           [ngModel]="basisUnit_()"
           (ngModelChange)="basisUnit_.set($event)"
           [options]="basisUnitOptions_()"
@@ -44,7 +46,7 @@
       <button type="button" class="c-btn-ghost" (click)="resetAndClose()">ביטול</button>
       <button type="button" class="c-btn-primary"
               (click)="save()"
-              [disabled]="!newUnitName_() || newUnitValue_() <= 0">
+              [disabled]="!newUnitName_() || newUnitValue_() <= 0 || !basisUnit_() || isSaving_()">
         אשר ושמור יחידה
       </button>
     </div>

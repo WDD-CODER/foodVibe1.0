@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { UnitRegistryService } from '@services/unit-registry.service';
-import { ClickOutSideDirective } from '@directives/click-out-side';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 
@@ -14,7 +13,6 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
     CommonModule,
     FormsModule,
     LucideAngularModule,
-    ClickOutSideDirective,
     SelectOnFocusDirective,
     CustomSelectComponent
   ],
@@ -39,12 +37,20 @@ export class UnitCreatorModal {
     this.basisOptions_().map((k) => ({ value: k, label: k }))
   );
 
-  save() {
-    if (this.newUnitName_() && this.newUnitValue_() > 0) {
-      // We save the custom name as the key and the rate as the value
-      this.unitRegistryService.registerUnit(this.newUnitName_(), this.newUnitValue_());
+  protected isSaving_ = signal(false);
+
+  async save(): Promise<void> {
+    const name = this.newUnitName_();
+    const value = this.newUnitValue_();
+    const basis = this.basisUnit_();
+    if (!name || value <= 0 || !basis || this.isSaving_()) return;
+    this.isSaving_.set(true);
+    try {
+      await this.unitRegistryService.registerUnit(name, value, basis);
       this.unitRegistryService.closeUnitCreator();
       this.resetFields();
+    } finally {
+      this.isSaving_.set(false);
     }
   }
 
@@ -62,5 +68,10 @@ export class UnitCreatorModal {
   resetAndClose() {
     this.close();
     this.closed.emit();
+  }
+
+  /** Focus the basis-unit dropdown trigger so user can open it with Enter/Space and use arrows. */
+  focusBasisUnitSelect(): void {
+    document.getElementById('unit-creator-basis-unit')?.focus();
   }
 }
