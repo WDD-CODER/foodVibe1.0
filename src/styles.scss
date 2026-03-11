@@ -656,6 +656,7 @@ textarea.c-input {
   color: var(--color-text-muted);
   font-size: 0.8125rem;
   font-weight: 600;
+  text-align: center;
   border-bottom: 1px solid var(--border-default);
   backdrop-filter: var(--blur-glass);
   cursor: default;
@@ -674,6 +675,7 @@ textarea.c-input {
   padding-inline: 0.75rem;
   padding-block: 0.625rem;
   background: var(--bg-glass);
+  text-align: center;
   border-block-end: 1px solid rgba(241, 245, 249, 0.4);
   transition: background 0.15s ease;
 }
