@@ -556,7 +556,8 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
   protected addPurchaseOption(opt?: Partial<PurchaseOption_>): void {
     const unit = opt?.unit_symbol_ || '';
     const conv = opt ? opt.conversion_rate_ : null;
-    const uomValue = opt ? opt.uom : ''
+    const baseUnit = this.productForm_.get('base_unit_')?.value ?? '';
+    const uomValue = opt?.uom ?? baseUnit;
 
     const globalPrice = this.productForm_.get('buy_price_global_')?.value || 0;
 
@@ -566,6 +567,7 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
       unit_symbol_: [unit, Validators.required],
       conversion_rate_: [conv, [Validators.required, Validators.min(0.0001)]],
       uom: [uomValue, Validators.required],
+      show_special_price_: [!!(opt?.price_override_ != null && Number(opt?.price_override_) !== 0)],
       price_override_: [opt?.price_override_ || 0]
     });
 
@@ -618,6 +620,13 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
       }
       const conventional = this.getConventionalPriceForGroup_(group);
       group.get('price_override_')?.setValue(conventional, { emitEvent: false });
+    });
+
+    // When user unchecks "special price", clear price_override_ so the state persists on save (when they come back it stays unchecked)
+    group.get('show_special_price_')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((checked: boolean | null) => {
+      if (!checked) {
+        group.get('price_override_')?.setValue(0, { emitEvent: false });
+      }
     });
 
     this.purchaseOptions_.push(group);
@@ -721,6 +730,11 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
     const categories = (val.categories_ ?? []) as string[];
     categories.forEach(cat => this.metadataRegistry.registerCategory(cat));
 
+    const purchaseOptions = (val.purchase_options_ ?? []).map((opt: PurchaseOption_ & { show_special_price_?: boolean }) => {
+      const { show_special_price_: _, ...rest } = opt;
+      return rest as PurchaseOption_;
+    });
+
     const productToSave: Product = {
       ...this.curProduct_()!,
       name_hebrew: val.productName,
@@ -732,7 +746,7 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
       expiry_days_default_: val.expiry_days_default_ ?? 0,
       yield_factor_: val.yield_factor_,
       allergens_: val.allergens_,
-      purchase_options_: val.purchase_options_
+      purchase_options_: purchaseOptions
     };
 
     this.isSaving_.set(true);
