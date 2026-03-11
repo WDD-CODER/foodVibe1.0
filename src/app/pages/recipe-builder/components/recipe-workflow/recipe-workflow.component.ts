@@ -10,9 +10,7 @@ import type { PreparationEntry } from '@services/preparation-registry.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.directive'
-import { ClickOutSideDirective } from '@directives/click-out-side'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
-import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util'
 import { take } from 'rxjs/operators'
 import { CdkDragDrop, moveItemInArray, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop'
@@ -28,9 +26,7 @@ import { CdkDragDrop, moveItemInArray, CdkDrag, CdkDropList, CdkDragHandle } fro
     TranslatePipe,
     SelectOnFocusDirective,
     TextareaAutoGrowDirective,
-    ClickOutSideDirective,
     CustomSelectComponent,
-    ScrollableDropdownComponent,
     CdkDrag,
     CdkDropList,
     CdkDragHandle
