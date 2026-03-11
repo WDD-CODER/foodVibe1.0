@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy, signal, computed, afterNextRender } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
@@ -7,20 +7,17 @@ import { LucideAngularModule } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { EquipmentDataService } from '@services/equipment-data.service';
 import { UserMsgService } from '@services/user-msg.service';
-import { UserService } from '@services/user.service';
-import { RequireAuthService } from 'src/app/core/utils/require-auth.util';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { Product } from '@models/product.model';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { TranslationService } from '@services/translation.service';
 import { ConfirmModalService } from '@services/confirm-modal.service';
+import { UserService } from '@services/user.service';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
-import { useListState, StringParam, NullableStringParam, BooleanParam, FilterRecordParam } from 'src/app/core/utils/list-state.util';
-import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
 
@@ -54,9 +51,8 @@ export class InventoryProductListComponent {
   private readonly confirmModal = inject(ConfirmModalService);
   private readonly equipmentData = inject(EquipmentDataService);
   private readonly userMsg = inject(UserMsgService);
-  protected readonly isLoggedIn = inject(UserService).isLoggedIn;
-  private readonly requireAuthService = inject(RequireAuthService);
   protected readonly unitRegistry = inject(UnitRegistryService);
+  protected readonly isLoggedIn = inject(UserService).isLoggedIn;
 
   private lastPriceEdit_ = { productId: '', unit: '', value: 0 };
 
@@ -71,28 +67,7 @@ export class InventoryProductListComponent {
   protected lowStockOnly_ = signal<boolean>(false);
   protected deletingId_ = signal<string | null>(null);
   protected savingPriceId_ = signal<string | null>(null);
-  protected carouselHeaderIndex_ = signal<number>(0);
-
-  constructor() {
-    this.isPanelOpen_.set(getPanelOpen('inventory'));
-    useListState('inventory', [
-      { urlParam: 'q',        signal: this.searchQuery_,   serializer: StringParam },
-      { urlParam: 'sort',     signal: this.sortBy_,        serializer: NullableStringParam as any },
-      { urlParam: 'order',    signal: this.sortOrder_,     serializer: StringParam as any },
-      { urlParam: 'filters',  signal: this.activeFilters_, serializer: FilterRecordParam },
-      { urlParam: 'lowStock', signal: this.lowStockOnly_,  serializer: BooleanParam },
-    ]);
-
-    afterNextRender(() => {
-      const q = window.matchMedia('(max-width: 768px)');
-      if (q.matches) this.isPanelOpen_.set(false);
-      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); });
-    });
-  }
-
-  protected onCarouselHeaderChange(index: number): void {
-    this.carouselHeaderIndex_.set(index);
-  }
+  protected carouselHeaderIndex_ = signal(0);
 
   // LISTING
   protected filterCategories_ = computed(() => {
@@ -149,9 +124,12 @@ export class InventoryProductListComponent {
     return this.expandedFilterCategories_().has(name);
   }
 
-  protected togglePanel(): void {
+  protected onPanelToggled(): void {
     this.isPanelOpen_.update(v => !v);
-    setPanelOpen('inventory', this.isPanelOpen_());
+  }
+
+  protected onCarouselHeaderChange(index: number): void {
+    this.carouselHeaderIndex_.set(index);
   }
 
   protected isEmptyList_ = computed(() => this.kitchenStateService.products_().length === 0);
@@ -299,9 +277,14 @@ export class InventoryProductListComponent {
     this.router.navigate(['/inventory/edit', _id]);
   }
 
+  protected onRowClick(product: Product, event: MouseEvent): void {
+    const el = event.target as HTMLElement;
+    if (el.closest('button') || el.closest('a') || el.closest('.allergen-btn-wrapper')) return;
+    this.router.navigate(['/inventory/edit', product._id]);
+  }
+
   // DELETE
   protected onDeleteProduct(_id: string): void {
-    if (!this.requireAuthService.requireAuth()) return;
     if (confirm('האם אתה בטוח שברצונך למחוק חומר גלם זה?')) {
       this.deletingId_.set(_id);
       this.kitchenStateService.deleteProduct(_id).subscribe({

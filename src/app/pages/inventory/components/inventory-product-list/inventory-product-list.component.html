@@ -1,6 +1,6 @@
 <app-list-shell
   [isPanelOpen]="isPanelOpen_()"
-  (panelToggle)="togglePanel()"
+  (panelToggle)="onPanelToggled()"
   [gridTemplate]="'2fr 1fr 1fr 1fr minmax(48px, 0.8fr) 0.8fr 80px'"
   [mobileGridTemplate]="'2fr 1fr 0.8fr 0.8fr 80px'"
   [dir]="'rtl'">
@@ -61,7 +61,10 @@
       </div>
     }
     @for (product of filteredProducts_(); track product._id) {
-      <div class="product-grid-row c-list-row" role="row">
+      <div class="product-grid-row c-list-row" role="button" tabindex="0"
+        (click)="onRowClick(product, $event)"
+        (keydown.enter)="onEditProduct(product._id)"
+        (keydown.space)="$event.preventDefault(); onEditProduct(product._id)">
         <div class="col-name c-list-body-cell" role="cell">
           @if (isLowStock(product)) {
             <span class="low-stock-badge" [attr.title]="'low_stock' | translatePipe">{{ 'low_stock' | translatePipe }}</span>
@@ -97,7 +100,7 @@
           <span class="price-suffix">₪</span>
         </div>
         <div class="c-col-actions c-list-body-cell" role="cell">
-          <button type="button" class="c-icon-btn" (click)="onEditProduct(product._id)"
+          <button type="button" class="c-icon-btn" (click)="onEditProduct(product._id); $event.stopPropagation()"
             [attr.aria-label]="'edit' | translatePipe"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
             <lucide-icon name="pencil" [size]="18"></lucide-icon>
@@ -105,7 +108,7 @@
           @if (deletingId_() === product._id) {
             <app-loader size="small" [inline]="true" />
           } @else {
-            <button type="button" class="c-icon-btn danger" (click)="onDeleteProduct(product._id)"
+            <button type="button" class="c-icon-btn danger" (click)="onDeleteProduct(product._id); $event.stopPropagation()"
               [attr.aria-label]="'delete' | translatePipe"
               [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>

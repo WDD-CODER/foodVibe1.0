@@ -19,6 +19,10 @@
     display: contents;
   }
 
+  .product-grid-row .c-list-body-cell {
+    cursor: pointer;
+  }
+
   .product-grid-row .col-allergens.c-list-body-cell {
     align-items: flex-start;
   }
