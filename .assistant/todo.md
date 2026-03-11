@@ -137,6 +137,11 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] Add zone divs in scrollable-dropdown.component.html (scroll-zone--top, scroll-zone--bottom)
 - [x] Add zone styles and :has() hover visibility rules in src/styles.scss; remove global dropdown hover rules
 
+### Plan 116 — Center main loader in viewport (`plans/116-center-main-loader-viewport.plan.md`)
+
+- [ ] In loader.component.scss: set overlay to position: fixed, z-index: 150, border-radius: 0
+- [ ] Verify route-loading and metadata-manager overlay loaders are centered in viewport
+
 ### Plan 089 — Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
 
 - [ ] A: Auto-name menu with formatted date when name is empty on save, with duplicate handling (1), (2)
@@ -691,6 +696,7 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 111 | Unify metadata manager containers | Done |
 | 112 | Dish dropdown width and keyboard | Planned |
 | 113 | Use only prep_categories; discard mise_categories | Done |
+| 116 | Center main loader in viewport | Planned |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 

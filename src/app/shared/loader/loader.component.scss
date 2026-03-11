@@ -29,12 +29,12 @@
   }
 
   &.overlay {
-    position: absolute;
+    position: fixed;
     inset: 0;
-    z-index: 50;
+    z-index: 150;
 
     background: var(--bg-glass);
-    border-radius: inherit;
+    border-radius: 0;
     box-shadow: var(--shadow-glass);
     backdrop-filter: var(--blur-glass);
     -webkit-backdrop-filter: var(--blur-glass);
