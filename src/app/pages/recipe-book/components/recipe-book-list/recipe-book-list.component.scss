@@ -435,7 +435,7 @@
 /* Mobile tweaks */
 @media (max-width: 768px) {
   .recipe-grid-row app-cell-carousel {
-    background: transparent;
+    background: var(--bg-glass);
 
     border-block-end: 1px solid rgba(241, 245, 249, 0.4);
 
@@ -443,7 +443,7 @@
   }
 
   .recipe-grid-row:hover app-cell-carousel {
-    background: var(--bg-glass);
+    background: var(--bg-glass-hover);
   }
 }
 }

@@ -215,7 +215,7 @@
 
   @media (max-width: 768px) {
     .supplier-grid-row app-cell-carousel {
-      background: transparent;
+      background: var(--bg-glass);
 
       border-block-end: 1px solid rgba(241, 245, 249, 0.4);
 
@@ -223,7 +223,7 @@
     }
 
     .supplier-grid-row:hover app-cell-carousel {
-      background: var(--bg-glass);
+      background: var(--bg-glass-hover);
     }
   }
 }
