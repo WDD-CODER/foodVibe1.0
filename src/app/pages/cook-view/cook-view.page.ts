@@ -1,6 +1,7 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, NavigationStart, Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormArray, FormGroup, Validators } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -26,6 +27,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 import { FormatQuantityPipe } from 'src/app/core/pipes/format-quantity.pipe';
 import { quantityIncrement, quantityDecrement } from '../../core/utils/quantity-step.util';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-cook-view-page',
@@ -47,9 +49,10 @@ import { quantityIncrement, quantityDecrement } from '../../core/utils/quantity-
   templateUrl: './cook-view.page.html',
   styleUrl: './cook-view.page.scss'
 })
-export class CookViewPage implements OnInit {
+export class CookViewPage implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(FormBuilder);
   private readonly scalingService = inject(ScalingService);
   private readonly cookViewState = inject(CookViewStateService);
@@ -170,6 +173,16 @@ export class CookViewPage implements OnInit {
   }
 
   ngOnInit(): void {
+    this.router.events
+      .pipe(
+        filter((e): e is NavigationStart => e instanceof NavigationStart),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((e) => {
+        if (!e.url.startsWith('/cook')) {
+          this.closeAllExportOverlays();
+        }
+      });
     const recipe = this.route.snapshot.data['recipe'] as Recipe | null;
     if (recipe) {
       this.recipe_.set(recipe);
@@ -184,6 +197,17 @@ export class CookViewPage implements OnInit {
         return;
       }
     }
+  }
+
+  /** Close export bar and preview so state is clean when user navigates away. */
+  private closeAllExportOverlays(): void {
+    this.exportBarExpanded_.set(false);
+    this.exportPreviewPayload_.set(null);
+    this.exportPreviewType_ = null;
+  }
+
+  ngOnDestroy(): void {
+    this.closeAllExportOverlays();
   }
 
   protected setQuantity(value: number): void {

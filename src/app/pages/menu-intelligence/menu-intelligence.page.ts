@@ -2,9 +2,9 @@ import { AfterViewInit, ChangeDetectionStrategy, Component, computed, DestroyRef
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
-import { startWith } from 'rxjs';
+import { filter, startWith } from 'rxjs';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { MenuEventDataService } from '@services/menu-event-data.service';
@@ -201,9 +201,31 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       [{ labelKey: 'menu_toolbar_open', icon: 'file-down', run: () => this.openToolbar() }],
       'append'
     );
+    this.router.events
+      .pipe(
+        filter((e): e is NavigationStart => e instanceof NavigationStart),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((e) => {
+        if (!e.url.startsWith('/menu-intelligence')) {
+          this.closeAllExportOverlays();
+        }
+      });
+  }
+
+  /** Close export toolbar and all sub-modals so state is clean when user navigates away. */
+  private closeAllExportOverlays(): void {
+    this.showExport_.set(false);
+    this.toolbarOpen_.set(false);
+    this.menuFabExpanded_.set(false);
+    this.viewExportModal_.set(null);
+    this.exportChecklistDropdownOpen_.set(false);
+    this.exportPreviewPayload_.set(null);
+    this.exportPreviewType_ = null;
   }
 
   ngOnDestroy(): void {
+    this.closeAllExportOverlays();
     this.heroFab.clearPageActions();
   }
 

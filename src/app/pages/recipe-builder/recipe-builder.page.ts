@@ -1,9 +1,9 @@
 import { Component, inject, signal, computed, OnInit, OnDestroy, DestroyRef, afterNextRender, Injector, runInInjectionContext } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { startWith, map, timer, switchMap, of, type Observable } from 'rxjs';
+import { filter, startWith, map, timer, switchMap, of, type Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
@@ -371,9 +371,28 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       [{ labelKey: 'export', icon: 'file-down', run: () => this.openExportFromHeroFab() }],
       'append'
     );
+    this.router_.events
+      .pipe(
+        filter((e): e is NavigationStart => e instanceof NavigationStart),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((e) => {
+        if (!e.url.startsWith('/recipe-builder')) {
+          this.closeAllExportOverlays();
+        }
+      });
+  }
+
+  /** Close export toolbar and preview so state is clean when user navigates away. */
+  private closeAllExportOverlays(): void {
+    this.exportToolbarOpen_.set(false);
+    this.viewExportModal_.set(null);
+    this.exportPreviewPayload_.set(null);
+    this.exportPreviewType_ = null;
   }
 
   ngOnDestroy(): void {
+    this.closeAllExportOverlays();
     this.heroFab_.clearPageActions();
   }
 
