@@ -13,6 +13,11 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 125 — Restore collapse row equipment & suppliers (`plans/125-restore-collapse-row-equipment-suppliers.plan.md`)
+
+- [x] Equipment list: row click toggles inline edit panel; add toggleRowEdit; remove navigateToEquipmentEdit
+- [x] Supplier list: row click toggles inline edit panel; add toggleRowEdit; remove navigateToSupplierEdit
+
 ### Plan 086 â€” AI Tooling Optimization (`plans/086-ai-tooling-optimization.plan.md`)
 
 - [x] F1: Merge entry points (delete HOW-WE-WORK, reduce AGENTS.md, slim agent.md)
