@@ -177,9 +177,9 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ### Plan 124 — Unified styling audit and theme (`plans/124-unified-styling-audit-theme.plan.md`)
 
-- [ ] Phase 1: Add --border-row, --shadow-nav to styles.scss; replace raw rgba in .c-list-body-cell, .c-grid-cell; add Liquid Glass comment block
-- [ ] Phase 2: Menu-intelligence, trash, dashboard — replace raw hex/rgba with tokens
-- [ ] Phase 3: export-preview, list-shell, recipe-book-list, header, footer, user-msg, recipe-header, unit-creator — use tokens
+- [x] Phase 1: Add --border-row, --shadow-nav to styles.scss; replace raw rgba in .c-list-body-cell, .c-grid-cell; add Liquid Glass comment block
+- [x] Phase 2: Menu-intelligence, trash, dashboard — replace raw hex/rgba with tokens
+- [x] Phase 3: export-preview, list-shell, recipe-book-list, header, footer, user-msg, recipe-header, unit-creator — use tokens
 - [ ] Phase 4: menu-library-list — use c-input-wrapper and c-btn-primary in HTML; recipe-builder main submit use c-btn-primary
 - [ ] Phase 5: Spot-check representative pages; search and replace remaining raw colors in src/**/*.scss
 
