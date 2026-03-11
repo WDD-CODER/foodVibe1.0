@@ -139,8 +139,19 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ### Plan 116 — Center main loader in viewport (`plans/116-center-main-loader-viewport.plan.md`)
 
-- [ ] In loader.component.scss: set overlay to position: fixed, z-index: 150, border-radius: 0
-- [ ] Verify route-loading and metadata-manager overlay loaders are centered in viewport
+- [x] In loader.component.scss: set overlay to position: fixed, z-index: 150, border-radius: 0
+- [x] Verify route-loading and metadata-manager overlay loaders are centered in viewport
+
+### Plan 117 — Dish row absolute actions (`plans/117-dish-row-absolute-actions.plan.md`)
+
+- [x] .dish-name-cell: drop grid, add padding-inline-end for button reserve
+- [x] .dish-name-meta: content center (remove 100vw trick, text-align center)
+- [x] .dish-sell-price and .dish-remove: absolute positioning, vertically centered, inset-inline-end
+
+### Plan 118 — Sidebar close on breakpoint (`plans/118-sidebar-close-on-breakpoint.plan.md`)
+
+- [x] Add matchMedia('(max-width: 768px)').addEventListener('change', ...) in recipe-book-list, supplier-list, equipment-list
+- [x] In list-shell.component.scss @media (max-width: 768px): add transition: none for .filter-panel and .panel-content
 
 ### Plan 089 — Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
 
@@ -696,7 +707,9 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 111 | Unify metadata manager containers | Done |
 | 112 | Dish dropdown width and keyboard | Planned |
 | 113 | Use only prep_categories; discard mise_categories | Done |
-| 116 | Center main loader in viewport | Planned |
+| 116 | Center main loader in viewport | Done |
+| 117 | Dish row absolute actions | Done |
+| 118 | Sidebar close on breakpoint | Planned |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 

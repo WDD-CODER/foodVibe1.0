@@ -243,16 +243,18 @@
                   @if (item.get('recipe_id_')?.value) {
                     <div class="dish-name-meta-wrap">
                       <div class="dish-name-meta">
-                        <button type="button" class="dish-name dish-name-btn"
-                          [attr.aria-label]="'change_dish' | translatePipe"
-                          (click)="startEditDishName(sectionIndex, itemIndex); $event.stopPropagation()">
-                        {{ getRecipeName(item.get('recipe_id_')?.value) }}
-                        </button>
-                        <button type="button" class="dish-meta-toggle no-print"
-                          [attr.aria-label]="isDishMetaExpanded(sectionIndex, itemIndex) ? ('hide_metadata' | translatePipe) : ('show_metadata' | translatePipe)"
-                          (click)="toggleDishMeta(sectionIndex, itemIndex)">
-                          <lucide-icon [name]="isDishMetaExpanded(sectionIndex, itemIndex) ? 'chevron-up' : 'info'" [size]="16"></lucide-icon>
-                        </button>
+                        <span class="dish-name-meta-inner">
+                          <button type="button" class="dish-name dish-name-btn"
+                            [attr.aria-label]="'change_dish' | translatePipe"
+                            (click)="startEditDishName(sectionIndex, itemIndex); $event.stopPropagation()">
+                          {{ getRecipeName(item.get('recipe_id_')?.value) }}
+                          </button>
+                          <button type="button" class="dish-meta-toggle no-print"
+                            [attr.aria-label]="isDishMetaExpanded(sectionIndex, itemIndex) ? ('hide_metadata' | translatePipe) : ('show_metadata' | translatePipe)"
+                            (click)="toggleDishMeta(sectionIndex, itemIndex)">
+                            <lucide-icon [name]="isDishMetaExpanded(sectionIndex, itemIndex) ? 'chevron-up' : 'info'" [size]="16"></lucide-icon>
+                          </button>
+                        </span>
                       </div>
                     </div>
                     <span class="dish-sell-price no-print">
