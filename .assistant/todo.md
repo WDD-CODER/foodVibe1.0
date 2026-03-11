@@ -131,6 +131,12 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] logistics.model.ts: remove LogisticsBaselineItem; dictionary: remove metadata_logistics_* keys
 - [x] Delete demo-logistics-baseline.json; remove dead .logistics-library-* SCSS
 
+### Plan 115 — Dropdown scroll arrows fix (`plans/115-dropdown-scroll-arrows-fix.plan.md`)
+
+- [x] Pin up arrow inside container: add top: 0; bottom: auto for .c-dropdown__scroll-top in src/styles.scss
+- [x] Add zone divs in scrollable-dropdown.component.html (scroll-zone--top, scroll-zone--bottom)
+- [x] Add zone styles and :has() hover visibility rules in src/styles.scss; remove global dropdown hover rules
+
 ### Plan 089 — Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
 
 - [ ] A: Auto-name menu with formatted date when name is empty on save, with duplicate handling (1), (2)

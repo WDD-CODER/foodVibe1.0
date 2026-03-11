@@ -505,6 +505,29 @@ textarea.c-input {
   }
 }
 
+.c-dropdown__scroll-zone--top {
+  position: absolute;
+  top: 0;
+  inset-inline: 0;
+  z-index: 2;
+
+  height: 2.5rem;
+
+  pointer-events: auto;
+}
+
+.c-dropdown__scroll-zone--bottom {
+  position: absolute;
+  top: auto;
+  bottom: 0;
+  inset-inline: 0;
+  z-index: 2;
+
+  height: 2.5rem;
+
+  pointer-events: auto;
+}
+
 .c-dropdown__scroll-top,
 .c-dropdown__scroll-bottom {
   position: absolute;
@@ -525,17 +548,22 @@ textarea.c-input {
   transition: opacity 0.2s var(--ease-smooth);
 }
 
+.c-dropdown__scroll-top {
+  top: 0;
+  bottom: auto;
+}
+
 .c-dropdown__scroll-bottom {
   top: auto;
   bottom: 0;
   background: linear-gradient(to top, var(--bg-glass-strong) 0%, transparent 100%);
 }
 
-.c-dropdown:hover .c-dropdown__list.can-scroll-up ~ .c-dropdown__scroll-top {
+.c-dropdown:has(.c-dropdown__list.can-scroll-up) .c-dropdown__scroll-zone--top:hover ~ .c-dropdown__scroll-top {
   opacity: 1;
 }
 
-.c-dropdown:hover .c-dropdown__list.can-scroll-down ~ .c-dropdown__scroll-bottom {
+.c-dropdown:has(.c-dropdown__list.can-scroll-down) .c-dropdown__scroll-zone--bottom:hover ~ .c-dropdown__scroll-bottom {
   opacity: 1;
 }
 
