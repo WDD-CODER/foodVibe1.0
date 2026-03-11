@@ -319,6 +319,30 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
         }
       });
     }
+
+    this.unitRegistry.unitAdded$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(unitKey => {
+      const idx = this.activeRowIndex_();
+      if (idx === null || idx === undefined) return;
+      const baseUnit = this.productForm_.get('base_unit_')?.value ?? '';
+      const baseFactor = this.unitRegistry.getConversion(baseUnit) || 1;
+      const unitFactor = this.unitRegistry.getConversion(unitKey) || 1;
+      const conversion_rate_ = unitFactor > 0 ? baseFactor / unitFactor : 1;
+      const suggestedPrice = this.conversionService.getSuggestedPurchasePrice(
+        this.productForm_.get('buy_price_global_')?.value || 0,
+        conversion_rate_
+      );
+      const row = this.purchaseOptions_.at(idx);
+      if (row) {
+        row.patchValue({
+          unit_symbol_: unitKey,
+          uom: baseUnit,
+          conversion_rate_: conversion_rate_,
+          price_override_: suggestedPrice
+        }, { emitEvent: false });
+        this.productForm_.markAsDirty();
+      }
+      this.activeRowIndex_.set(null);
+    });
   }
 
   private initForm(): void {
@@ -681,8 +705,9 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
     this.purchaseOptions_.clear();
 
     if (data.purchase_options_ && data.purchase_options_.length > 0) {
+      const baseUom = data.base_unit_ ?? 'gram';
       data.purchase_options_.forEach(opt => {
-        this.addPurchaseOption(opt);
+        this.addPurchaseOption({ ...opt, uom: opt.uom ?? baseUom });
       });
     }
   }

@@ -1,3 +1,14 @@
+/* When the unit dropdown is open, stack the form body above the actions so options are clickable. */
+:host .c-modal-body:has(.custom-select-wrap.open) {
+  position: relative;
+  z-index: 1;
+}
+
+:host .c-modal-actions {
+  position: relative;
+  z-index: 0;
+}
+
 .unit-creator-formula-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(6.25rem, 1fr));
@@ -31,6 +42,23 @@
     .math-operator {
       display: none;
     }
+  }
+}
+
+.unit-creator-error {
+  grid-column: 1 / -1;
+
+  margin-block-end: 0.75rem;
+  padding: 0.75rem 1rem;
+
+  background: var(--bg-error, rgba(254, 226, 226, 0.95));
+  color: var(--color-error, #b91c1c);
+
+  border-radius: var(--radius-md);
+
+  .unit-creator-error__text {
+    font-size: 0.875rem;
+    font-weight: 600;
   }
 }
 

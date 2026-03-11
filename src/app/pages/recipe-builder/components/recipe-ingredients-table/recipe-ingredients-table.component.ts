@@ -207,7 +207,7 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
           (this.recipeCostService.convertToBaseUnits(1, yieldUnit) || 1);
       lineCost = amountInYieldUnit * costPerUnit;
     } else {
-      const prod = item as { purchase_options_?: { unit_symbol_: string; conversion_rate_?: number; price_override_?: number }[]; buy_price_global_?: number; yield_factor_?: number; calculated_cost_per_unit?: number };
+      const prod = item as { base_unit_?: string; purchase_options_?: { unit_symbol_: string; conversion_rate_?: number; price_override_?: number }[]; buy_price_global_?: number; yield_factor_?: number; calculated_cost_per_unit?: number };
       const unitOption = prod.purchase_options_?.find(o => o.unit_symbol_ === selectedUnit);
 
       if (unitOption) {
@@ -222,9 +222,14 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
           lineCost = (normalizedAmount / yieldFactor) * price;
         }
       } else {
+        // Selected unit not in purchase_options_ (e.g. custom unit like כפית): convert to product base unit via registry.
         const price = prod.buy_price_global_ || prod.calculated_cost_per_unit || 0;
         const yieldFactor = prod.yield_factor_ || 1;
-        lineCost = (netAmount / yieldFactor) * price;
+        const baseUnit = prod.base_unit_ || 'gram';
+        const amountG = this.recipeCostService.convertToBaseUnits(netAmount, selectedUnit);
+        const baseFactor = this.unitRegistry.getConversion(baseUnit) || 1;
+        const amountInBaseUnit = amountG / baseFactor;
+        lineCost = (amountInBaseUnit / yieldFactor) * price;
       }
     }
 
@@ -266,11 +271,40 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
     if (val === '__add_unit__') {
       group.get('unit')?.setValue('');
       this.ingredientsFormArray().markAsDirty();
-      this.unitRegistry.openUnitCreator();
+      setTimeout(() => this.unitRegistry.openUnitCreator(), 0);
       this.unitRegistry.unitAdded$.pipe(take(1)).subscribe(newUnit => {
-        group.get('unit')?.setValue(newUnit);
-        this.ingredientsFormArray().markAsDirty();
-        this.updateLineCalculations(index);
+        const setUnitAndUpdate = (): void => {
+          group.get('unit')?.setValue(newUnit);
+          this.ingredientsFormArray().markAsDirty();
+          this.updateLineCalculations(index);
+        };
+        if (group.get('item_type')?.value === 'product') {
+          const product = this.getItemMetadata(group) as Product | undefined;
+          if (product && product._id) {
+            const existing = product.purchase_options_?.some(o => o.unit_symbol_ === newUnit);
+            if (!existing) {
+              const baseFactor = this.unitRegistry.getConversion(product.base_unit_) || 1;
+              const unitFactor = this.unitRegistry.getConversion(newUnit) || 1;
+              const conversion_rate_ = unitFactor > 0 ? baseFactor / unitFactor : 1;
+              const newOption = {
+                unit_symbol_: newUnit,
+                conversion_rate_,
+                uom: product.base_unit_,
+                price_override_: 0
+              };
+              const updated: Product = {
+                ...product,
+                purchase_options_: [...(product.purchase_options_ ?? []), newOption]
+              };
+              this.kitchenStateService.saveProduct(updated).subscribe({
+                next: () => setUnitAndUpdate(),
+                error: () => setUnitAndUpdate()
+              });
+              return;
+            }
+          }
+        }
+        setUnitAndUpdate();
       });
     } else {
       group.get('unit')?.setValue(val);

@@ -51,6 +51,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
 
   protected open = signal(false);
   protected highlightedIndex = signal(-1);
+  private closeTimeout: ReturnType<typeof setTimeout> | null = null;
 
   /** When host receives programmatic focus (e.g. from FocusByRowDirective), forward to trigger. */
   @HostListener('focus')
@@ -91,6 +92,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
 
   protected toggle(): void {
     if (this._disabled()) return;
+    this.clearCloseTimeout();
     const next = !this.open();
     this.open.set(next);
     if (next) {
@@ -100,8 +102,25 @@ export class CustomSelectComponent implements ControlValueAccessor {
   }
 
   protected close(): void {
+    this.clearCloseTimeout();
     this.open.set(false);
     this._onTouched();
+  }
+
+  /** Close after a short delay so option click can run first when focus moves on mousedown. */
+  protected onTriggerBlur(): void {
+    if (!this.open()) return;
+    this.closeTimeout = setTimeout(() => {
+      this.closeTimeout = null;
+      this.close();
+    }, 120);
+  }
+
+  private clearCloseTimeout(): void {
+    if (this.closeTimeout != null) {
+      clearTimeout(this.closeTimeout);
+      this.closeTimeout = null;
+    }
   }
 
   protected select(value: string): void {

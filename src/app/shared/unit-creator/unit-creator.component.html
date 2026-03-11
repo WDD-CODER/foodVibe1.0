@@ -8,9 +8,15 @@
         <label>שם היחידה</label>
         <input type="text"
                [ngModel]="newUnitName_()"
-               (ngModelChange)="newUnitName_.set($event)"
+               (ngModelChange)="onUnitNameChange($event)"
                placeholder="למשל: דלי">
       </div>
+
+    @if (errorMessage_()) {
+    <div class="unit-creator-error" role="alert">
+      <span class="unit-creator-error__text">{{ errorMessage_() }}</span>
+    </div>
+    }
 
       <div class="c-input-stack unit-creator-amount">
         <label>כמות</label>

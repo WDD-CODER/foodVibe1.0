@@ -6,6 +6,10 @@
   position: relative;
 
   width: 100%;
+
+  &.open {
+    z-index: 1000;
+  }
 }
 
 .custom-select-trigger {

@@ -196,6 +196,7 @@
         "product_name": "שם הפריט",
         "buy_price": "מחיר קנייה  (₪)",
         "choose_unit": "בחר יחידה",
+        "compare_to_unit": "להשוואת ל-",
         "waste_yield_logic": "לוגיקת פחת ויבול",
         "waste_percent": "אחוז פחת",
         "yield_factor": "פקטור יבול",

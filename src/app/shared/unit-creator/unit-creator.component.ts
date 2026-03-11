@@ -38,17 +38,22 @@ export class UnitCreatorModal {
   );
 
   protected isSaving_ = signal(false);
+  protected errorMessage_ = signal<string | null>(null);
 
   async save(): Promise<void> {
     const name = this.newUnitName_();
     const value = this.newUnitValue_();
     const basis = this.basisUnit_();
     if (!name || value <= 0 || !basis || this.isSaving_()) return;
+    this.errorMessage_.set(null);
     this.isSaving_.set(true);
     try {
       await this.unitRegistryService.registerUnit(name, value, basis);
       this.unitRegistryService.closeUnitCreator();
       this.resetFields();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'שגיאה בשמירת היחידה במערכת';
+      this.errorMessage_.set(msg);
     } finally {
       this.isSaving_.set(false);
     }
@@ -60,6 +65,7 @@ export class UnitCreatorModal {
   }
 
   private resetFields() {
+    this.errorMessage_.set(null);
     this.newUnitName_.set('');
     this.newUnitValue_.set(1);
     this.basisUnit_.set(''); // 🛠️ REFACTORED: Use technical key 'gram'
@@ -68,6 +74,11 @@ export class UnitCreatorModal {
   resetAndClose() {
     this.close();
     this.closed.emit();
+  }
+
+  onUnitNameChange(value: string): void {
+    this.newUnitName_.set(value);
+    this.errorMessage_.set(null);
   }
 
   /** Focus the basis-unit dropdown trigger so user can open it with Enter/Space and use arrows. */

@@ -264,7 +264,7 @@ export class RecipeCostService {
       const yieldFactor = product.yield_factor_ || 1;
       const price = product.buy_price_global_ ?? 0;
       const unitOption = product.purchase_options_?.find(o => o.unit_symbol_ === ing.unit_);
-      let normalizedAmount = ing.amount_;
+      let normalizedAmount: number;
       if (unitOption) {
         if (unitOption.price_override_ != null) {
           const conv = unitOption.conversion_rate_ || 1;
@@ -272,6 +272,12 @@ export class RecipeCostService {
           return ing.amount_ * pricePerUnit;
         }
         normalizedAmount = ing.amount_ / (unitOption.conversion_rate_ || 1);
+      } else {
+        // Custom/registry unit not in purchase_options_: convert to product base unit.
+        const amountG = this.convertToBaseUnits(ing.amount_, ing.unit_);
+        const baseUnit = product.base_unit_ || 'gram';
+        const baseFactor = this.unitRegistry_.getConversion(baseUnit) || 1;
+        normalizedAmount = amountG / baseFactor;
       }
       return (normalizedAmount / yieldFactor) * price;
     }

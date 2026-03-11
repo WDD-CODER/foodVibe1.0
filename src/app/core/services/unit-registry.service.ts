@@ -103,12 +103,13 @@ export class UnitRegistryService {
     const sanitizedName = name.trim().toLowerCase();
     const curUnits = this.globalUnits_();
 
-    // 1. Validation Logic
+    // 1. Unit already in global registry (KITCHEN_UNITS): don't create again; emit so callers can add it to product
     if (curUnits[sanitizedName]) {
-      this.refreshFromStorage(); // Keep dropdown in sync with storage so the existing unit is visible
-      return this.userMsgService.onSetErrorMsg(
-        'יחידה קיימת בשם הנ"ל. נסה שם ייחודי (למשל: כף שף, צנצנת קטנה)'
-      );
+      this.refreshFromStorage();
+      this.unitAdded$.next(sanitizedName);
+      this.closeUnitCreator();
+      this.userMsgService.onSetSuccessMsg('היחידה כבר קיימת במערכת. נוספה לרשימת יחידות הרכש של המוצר.');
+      return;
     }
 
     // 2. Rate in gram-equivalent so getConversion() is consistent across the app
