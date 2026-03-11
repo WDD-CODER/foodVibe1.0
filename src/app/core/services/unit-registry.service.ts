@@ -36,15 +36,15 @@ export class UnitRegistryService {
 
   /**
    * Hydrates the registry from storage or persists defaults if empty.
+   * @param skipOverwriteIfNewer When true (e.g. initial load), do not replace in-memory state if it has more units than storage (avoids race where user added a unit before hydration completed).
    */
-  private async initUnits(): Promise<void> {
+  private async initUnits(skipOverwriteIfNewer = true): Promise<void> {
     const DEFAULT_UNITS = { 'kg': 1000, 'liter': 1000, 'gram': 1, 'ml': 1, 'unit': 1, 'dish': 1 };
 
     try {
       const registries = await this.storageService.query<any>(this.STORAGE_KEY);
       const existingRegistry = registries[0];
 
-      // בודקים אם המסמך חסר, או אם אובייקט היחידות ריק (ללא מפתחות)
       const hasNoUnits = !existingRegistry ||
         !existingRegistry.units ||
         Object.keys(existingRegistry.units).length === 0;
@@ -64,6 +64,10 @@ export class UnitRegistryService {
       } else {
         const units = { ...existingRegistry.units };
         if (!('dish' in units)) units['dish'] = 1;
+        if (skipOverwriteIfNewer) {
+          const currentKeys = Object.keys(this.globalUnits_());
+          if (currentKeys.length > Object.keys(units).length) return;
+        }
         this.globalUnits_.set(units);
       }
     } catch (err) {
@@ -73,8 +77,16 @@ export class UnitRegistryService {
   }
 
   // UI CONTROL
-  openUnitCreator() { this.isCreatorOpen.set(true); }
+  openUnitCreator() {
+    this.isCreatorOpen.set(true);
+    this.refreshFromStorage();
+  }
   closeUnitCreator() { this.isCreatorOpen.set(false); }
+
+  /** Re-load units from storage so dropdowns show the latest (e.g. after add in another tab or previous session). */
+  async refreshFromStorage(): Promise<void> {
+    await this.initUnits(false);
+  }
 
   // GET
   getConversion(key: string): number {
@@ -83,21 +95,31 @@ export class UnitRegistryService {
 
   /**
    * Registers a new unit or updates an existing one using POST/PUT logic.
+   * @param name Display name for the unit (e.g. "צנצנת")
+   * @param rate Amount of basis units that equal 1 of the new unit (e.g. 330 when basis is gram)
+   * @param basisUnitKey Key of the reference unit (e.g. "gram"). Rate is stored in gram-equivalent.
    */
-  async registerUnit(name: string, rate: number): Promise<void> {
+  async registerUnit(name: string, rate: number, basisUnitKey?: string): Promise<void> {
     const sanitizedName = name.trim().toLowerCase();
     const curUnits = this.globalUnits_();
 
     // 1. Validation Logic
     if (curUnits[sanitizedName]) {
-      return this.userMsgService.onSetErrorMsg('יחידה קיימת בשם הנ"ל - נסה שוב');
+      this.refreshFromStorage(); // Keep dropdown in sync with storage so the existing unit is visible
+      return this.userMsgService.onSetErrorMsg(
+        'יחידה קיימת בשם הנ"ל. נסה שם ייחודי (למשל: כף שף, צנצנת קטנה)'
+      );
     }
 
-    // 2. Prepare the updated state
-    const updatedUnits = { ...curUnits, [sanitizedName]: rate };
+    // 2. Rate in gram-equivalent so getConversion() is consistent across the app
+    const factor = basisUnitKey ? this.getConversion(basisUnitKey) : 1;
+    const rateInGrams = rate * factor;
+
+    // 3. Prepare the updated state
+    const updatedUnits = { ...curUnits, [sanitizedName]: rateInGrams };
 
     try {
-      // 3. Persistence Logic (POST vs PUT)
+      // 4. Persistence Logic (POST vs PUT)
       // We treat the entire unit collection as one registry document
       const registries = await this.storageService.query<any>(this.STORAGE_KEY);
       const existingRegistry = registries[0];
@@ -115,14 +137,15 @@ export class UnitRegistryService {
         });
       }
 
-      // 4. Update the Signal for UI reactivity
+      // 5. Update the Signal for UI reactivity
       this.globalUnits_.set(updatedUnits);
       this.unitAdded$.next(sanitizedName);
       this.userMsgService.onSetSuccessMsg(`היחידה ${sanitizedName} נוספה בהצלחה`);
 
     } catch (err) {
-      this.userMsgService.onSetErrorMsg('שגיאה בשמירת היחידה במערכת')
-      this.logging.error({ event: 'crud.units.save_error', message: 'Unit save error', context: { err } })
+      this.userMsgService.onSetErrorMsg('שגיאה בשמירת היחידה במערכת');
+      this.logging.error({ event: 'crud.units.save_error', message: 'Unit save error', context: { err } });
+      throw err;
     }
   }
 

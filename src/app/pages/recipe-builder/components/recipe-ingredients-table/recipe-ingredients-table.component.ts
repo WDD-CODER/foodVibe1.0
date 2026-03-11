@@ -252,7 +252,13 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
   }
 
   getUnitOptions(group: FormGroup): { value: string; label: string }[] {
-    const opts = this.getAvailableUnits(group).map((u) => ({ value: u, label: u }));
+    const available = this.getAvailableUnits(group);
+    const currentUnit = group.get('unit')?.value;
+    const unitsSet = new Set(available);
+    if (currentUnit && typeof currentUnit === 'string' && currentUnit.trim() && !unitsSet.has(currentUnit.trim())) {
+      unitsSet.add(currentUnit.trim());
+    }
+    const opts = Array.from(unitsSet).map((u) => ({ value: u, label: u }));
     return [...opts, { value: '__add_unit__', label: '+ יחידה חדשה' }];
   }
 
