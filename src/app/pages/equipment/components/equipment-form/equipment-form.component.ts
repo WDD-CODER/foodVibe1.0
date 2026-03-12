@@ -5,6 +5,9 @@ import {
   inject,
   OnInit,
   signal,
+  AfterViewInit,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
@@ -41,7 +44,9 @@ const CATEGORIES: EquipmentCategory[] = [
   styleUrl: './equipment-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EquipmentFormComponent implements OnInit {
+export class EquipmentFormComponent implements OnInit, AfterViewInit {
+  @ViewChild('nameInput') private nameInputRef?: ElementRef<HTMLInputElement>;
+
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -68,6 +73,10 @@ export class EquipmentFormComponent implements OnInit {
         this.patchScalingDefaults();
       }
     });
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => this.nameInputRef?.nativeElement?.focus(), 0);
   }
 
   private buildForm(): void {

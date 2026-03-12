@@ -13,6 +13,30 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 137 — Techdebt and spec coverage agent adherence (`plans/137-techdebt-spec-coverage-agent-adherence.plan.md`)
+
+- [x] commit-to-github SKILL.md: add Phase 0 mandate and checklist
+- [x] .cursor/commands/commit-github.md: add explicit Phase 0 step
+- [x] .assistant/copilot-instructions.md: tie commit trigger to Phase 0
+- [x] agent.md: step 7 Phase 0 mandatory; step 5.5 cross-ref
+- [x] .cursor/rules/git-commit-must-use-skill.mdc: require Phase 0 before Phase 1
+
+### Plan 138 — Product form header redesign (`plans/138-product-form-header-redesign.plan.md`)
+
+- [ ] Move header into form; remove edit-mode subtitle (product-form.component.html)
+- [ ] Move .form-header under .form-container; compact header; optional card border (product-form.component.scss)
+- [ ] Update spec if tests reference removed text/DOM (product-form.component.spec.ts)
+
+### Plan 136 — Product form keyboard focus (`plans/136-product-form-keyboard-focus.plan.md`)
+
+- [x] Product form: initial focus to name input (ViewChild + ngAfterViewInit); template ref on name input
+- [x] Category: Space to select in onCategoryDropdownKeydown
+- [x] Custom-select: Space to select when open
+- [x] Supplier: tabindex="0", keyboard open/navigate/select/close (HTML + TS)
+- [x] Allergen: highlight index + keydown Arrow/Enter/Space/Escape (HTML + TS)
+- [x] Collapsible headers: (keydown.space) with preventDefault
+- [x] Equipment form: initial focus to name input (ViewChild + template ref + ngAfterViewInit)
+
 ### Plan 135 — Translation modal cancel guard title fix (`plans/135-translation-modal-cancel-guard-title-fix.plan.md`)
 
 - [x] Guard: `else { break }` → `else { return false }` (cancel = stay on page)
@@ -841,6 +865,9 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 131 | Spec coverage techdebt commit | Active |
 | 132 | Translation add-value flow | Done |
 | 133 | List quick-edit inline | Planned |
+| 136 | Product form keyboard focus | Active |
+| 137 | Techdebt spec coverage agent adherence | Active |
+| 138 | Product form header redesign | Active |
 | 135 | Translation modal cancel guard title fix | Active |
 | 134 | Translation and confirmation modals unified | Active |
 

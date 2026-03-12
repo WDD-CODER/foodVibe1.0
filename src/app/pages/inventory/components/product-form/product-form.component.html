@@ -1,21 +1,20 @@
 <div class="product-form-container" [class.edit-mode]="isEditMode_()">
 
-  <header class="form-header">
-    @if (isEditMode_()) {
-    <h2 class="text-emerald-600">עריכת מוצר: {{ initialProduct_()?.name_hebrew }}</h2>
-    <p class="subtitle">עדכון נתונים במנוע התמחור הרקורסיבי</p>
-    } @else {
-    <h2 class="text-slate-900">הוספת מוצר חדש למלאי </h2>
-    <p class="subtitle">{{ 'add_product_subtitle' | translatePipe }}</p>
-    }
-  </header>
-
   <form [formGroup]="productForm_" (ngSubmit)="onSubmit()" class="form-container" dir="rtl">
+
+    <header class="form-header">
+      @if (isEditMode_()) {
+      <h2 class="form-header__title">עריכת מוצר: {{ initialProduct_()?.name_hebrew }}</h2>
+      } @else {
+      <h2 class="form-header__title">הוספת מוצר חדש למלאי</h2>
+      <p class="subtitle">{{ 'add_product_subtitle' | translatePipe }}</p>
+      }
+    </header>
 
     <div class="form-section form-section--mandatory">
       <div class="form-group">
         <label>{{ 'product_name' | translatePipe }}</label>
-        <input formControlName="productName" type="text" placeholder="למשל: עגבניות מגי">
+        <input #productNameInput formControlName="productName" type="text" placeholder="למשל: עגבניות מגי">
         @if (productForm_.get('productName')?.invalid && productForm_.get('productName')?.touched && productForm_.get('productName')?.errors?.['duplicateName']) {
           <span class="form-error">כבר קיים חומר גלם בשם זה</span>
         }
@@ -33,6 +32,7 @@
                tabindex="0"
                (click)="showCategoryDropdown_.set(true)"
                (keydown.enter)="showCategoryDropdown_.set(true)"
+               (keydown.space)="onCategoryTriggerKeydown($event)"
                (keydown.arrowDown)="onCategoryKeyboardOpen($event)"
                (keydown.arrowUp)="onCategoryKeyboardOpen($event)">
             @for (cat of selectedCategories_(); track cat) {
@@ -120,7 +120,7 @@
             [class.field-error]="option.get('conversion_rate_')?.invalid && (option.get('conversion_rate_')?.dirty || isSubmitted)">
             <label class="flex items-center gap-2">
               <span class="math-text">=</span>
-              <input type="number" formControlName="conversion_rate_" placeholder="כמות">
+              <input type="number" formControlName="conversion_rate_" placeholder="כמות" step="any" min="0.0001">
             </label>
           </div>
 
@@ -128,7 +128,6 @@
             [class.field-error]="option.get('uom')?.invalid && (option.get('uom')?.dirty || isSubmitted)">
             <label class="flex items-center gap-2">
               <span class="math-text flex">:</span>
-              <span class="math-text">{{ 'special_purchase_price' | translatePipe }}</span>
 
               <app-custom-select
                 formControlName="uom"
@@ -139,12 +138,14 @@
           </div>
 
           <div class="price-override-wrapper">
+            <span class="math-text">{{ 'special_purchase_price' | translatePipe }}</span>
+
             <label class="price-override-label">
               <input type="checkbox" formControlName="show_special_price_">
             </label>
             @if (option.get('show_special_price_')?.value) {
               <input type="number" formControlName="price_override_" [placeholder]="'price' | translatePipe"
-                class="override-input"
+                class="override-input" step="0.01"
                 (blur)="onPriceOverrideBlur(option)">
               <span class="math-text">₪</span>
             }
@@ -176,7 +177,12 @@
           </label>
           <div class="supplier-input-box" (clickOutside)="showSupplierDropdown_.set(false)"
             [class.no-chips]="selectedSupplierIds_().length === 0">
-            <div class="selected-chips" (click)="showSupplierDropdown_.set(true)">
+            <div class="selected-chips" #supplierTrigger tabindex="0"
+              (click)="showSupplierDropdown_.set(true)"
+              (keydown.enter)="showSupplierDropdown_.set(true)"
+              (keydown.space)="onSupplierTriggerKeydown($event)"
+              (keydown.arrowDown)="onSupplierKeyboardOpen($event)"
+              (keydown.arrowUp)="onSupplierKeyboardOpen($event)">
               @for (id of selectedSupplierIds_(); track id) {
                 <span class="chipe supplier" (click)="removeSupplierId(id); $event.stopPropagation()">
                   {{ getSupplierName(id) }}
@@ -188,19 +194,30 @@
               </span>
             </div>
 
-            <app-scrollable-dropdown *ngIf="showSupplierDropdown_()" [maxHeight]="200" class="supplier dropdown">
-              @for (s of filteredSupplierOptions_(); track s._id) {
-                <div class="dropdown-item" (click)="addSupplierId(s._id)">
+            <app-scrollable-dropdown *ngIf="showSupplierDropdown_()" [maxHeight]="200" class="supplier dropdown"
+              (keydown)="onSupplierDropdownKeydown($event)"
+              role="listbox"
+              [attr.aria-activedescendant]="'supplier-option-' + supplierDropdownHighlightIndex_()">
+              @for (s of filteredSupplierOptions_(); track s._id; let i = $index) {
+                <div class="dropdown-item" #supplierDropdownItem
+                  [id]="'supplier-option-' + i"
+                  [class.dropdown-item--highlight]="supplierDropdownHighlightIndex_() === i"
+                  tabindex="-1" role="option"
+                  (click)="addSupplierId(s._id)">
                   {{ s.name_hebrew }}
                 </div>
               }
-              <div class="dropdown-item dropdown-item-add" (click)="openAddSupplier(); $event.stopPropagation()">
+              <div class="dropdown-item dropdown-item-add" #supplierDropdownItem
+                [id]="'supplier-option-' + filteredSupplierOptions_().length"
+                [class.dropdown-item--highlight]="supplierDropdownHighlightIndex_() === filteredSupplierOptions_().length"
+                tabindex="-1" role="option"
+                (click)="openAddSupplier(); $event.stopPropagation()">
                 {{ 'add_supplier' | translatePipe }}
               </div>
             </app-scrollable-dropdown>
           </div>
         </div>
-        <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedSupplier_()" (click)="toggleSupplier()" (keydown.enter)="toggleSupplier()" role="button" tabindex="0">
+        <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedSupplier_()" (click)="toggleSupplier()" (keydown.enter)="toggleSupplier()" (keydown.space)="toggleSupplier(); $event.preventDefault()" role="button" tabindex="0">
           <lucide-icon name="truck" class="icon-xs text-slate-500"></lucide-icon>
           <span>{{ 'supplier' | translatePipe }}</span>
         </div>
@@ -222,22 +239,30 @@
                   <lucide-icon name="x" class="icon"></lucide-icon>
                 </span>
               </section>
-              <input type="text"
+              <input type="text" #allergenSearchInput
                  [ngModel]="allergenSearchQuery_()"
                  (ngModelChange)="allergenSearchQuery_.set($event)"
                  [ngModelOptions]="{standalone: true}"
                  placeholder="חפש או בחר אלרגן..."
-                 (focus)="showSuggestions = true"
+                 (focus)="onAllergenSearchFocus()"
+                 (keydown)="onAllergenKeydown($event)"
                  [class.no-chips]="selectedAllergensSignal_().length === 0">
             </div>
 
-            <app-scrollable-dropdown *ngIf="showSuggestions" [maxHeight]="200" class="allergen dropdown">
-              <div *ngFor="let allergen of filteredAllergenOptions_()" (click)="toggleAllergen(allergen)"
-                class="dropdown-item">
-                {{ allergen | translatePipe }}
-              </div>
+            <app-scrollable-dropdown *ngIf="showSuggestions" [maxHeight]="200" class="allergen dropdown"
+              role="listbox"
+              [attr.aria-activedescendant]="allergenDropdownHighlightIndex_() >= 0 ? 'allergen-option-' + allergenDropdownHighlightIndex_() : null">
+              @for (allergen of filteredAllergenOptions_(); track allergen; let i = $index) {
+                <div class="dropdown-item" [id]="'allergen-option-' + i"
+                  [class.dropdown-item--highlight]="allergenDropdownHighlightIndex_() === i"
+                  (click)="toggleAllergen(allergen)">
+                  {{ allergen | translatePipe }}
+                </div>
+              }
               @if (allergenSearchQuery_().trim() && !filteredAllergenOptions_().includes(allergenSearchQuery_().trim()) && !productForm_.get('allergens_')?.value?.includes(allergenSearchQuery_().trim())) {
-              <div class="dropdown-item text-emerald-600 font-bold" (click)="onAddNewAllergen(allergenSearchQuery_())">
+              <div class="dropdown-item text-emerald-600 font-bold" [id]="'allergen-option-' + filteredAllergenOptions_().length"
+                [class.dropdown-item--highlight]="allergenDropdownHighlightIndex_() === filteredAllergenOptions_().length"
+                (click)="onAddNewAllergen(allergenSearchQuery_())">
                 {{ 'add_new_allergen' | translatePipe }} "{{ allergenSearchQuery_() }}"
               </div>
               }
@@ -247,7 +272,7 @@
             </app-scrollable-dropdown>
           </div>
         </div>
-        <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedAllergens_()" (click)="toggleAllergens()" (keydown.enter)="toggleAllergens()" role="button" tabindex="0">
+        <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedAllergens_()" (click)="toggleAllergens()" (keydown.enter)="toggleAllergens()" (keydown.space)="toggleAllergens(); $event.preventDefault()" role="button" tabindex="0">
           <lucide-icon name="shield-alert" class="icon-xs text-amber-500"></lucide-icon>
           <span>{{ 'allergens' | translatePipe }}</span>
         </div>
@@ -274,7 +299,7 @@
             <div class="form-group yield-logic ">
               <label>{{ 'yield_factor' | translatePipe }}</label>
               <div class="relative-input">
-                <input class="yield-factor-input" SelectOnFocus type="number" formControlName="yield_factor_" step="0.01" placeholder="1.00">
+                <input class="yield-factor-input" SelectOnFocus type="number" formControlName="yield_factor_" step="0.001" placeholder="1.00">
               </div>
               <p class="helper-text text-xs text-slate-400 mt-1">מקדם הניצולת (1.0 = ללא פחת)</p>
             </div>
@@ -302,7 +327,7 @@
           </label>
           <input type="number" formControlName="min_stock_level_" min="0" placeholder="0" />
         </div>
-        <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedMinStock_()" (click)="toggleMinStock()" (keydown.enter)="toggleMinStock()" role="button" tabindex="0">
+        <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedMinStock_()" (click)="toggleMinStock()" (keydown.enter)="toggleMinStock()" (keydown.space)="toggleMinStock(); $event.preventDefault()" role="button" tabindex="0">
           <lucide-icon name="package" class="icon-xs text-slate-500"></lucide-icon>
           <span>{{ 'min_stock_level' | translatePipe }}</span>
         </div>
@@ -316,7 +341,7 @@
           </label>
           <input type="number" formControlName="expiry_days_default_" min="0" placeholder="0" />
         </div>
-        <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedExpiryDays_()" (click)="toggleExpiryDays()" (keydown.enter)="toggleExpiryDays()" role="button" tabindex="0">
+        <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedExpiryDays_()" (click)="toggleExpiryDays()" (keydown.enter)="toggleExpiryDays()" (keydown.space)="toggleExpiryDays(); $event.preventDefault()" role="button" tabindex="0">
           <lucide-icon name="calendar-clock" class="icon-xs text-slate-500"></lucide-icon>
           <span>{{ 'expiry_days_default' | translatePipe }}</span>
         </div>

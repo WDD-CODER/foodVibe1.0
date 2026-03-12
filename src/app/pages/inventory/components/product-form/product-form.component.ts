@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed, input, Signal, runInInjectionContext, Injector, effect, ViewChildren, QueryList, ElementRef, AfterViewChecked, DestroyRef } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, input, Signal, runInInjectionContext, Injector, effect, ViewChildren, QueryList, ElementRef, AfterViewChecked, AfterViewInit, ViewChild, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule, FormArray, AbstractControl } from '@angular/forms';
@@ -16,7 +16,7 @@ import { UnitRegistryService } from '@services/unit-registry.service';
 import { ConfirmModalService } from '@services/confirm-modal.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
 import { TranslationService } from '@services/translation.service';
-import { TranslationKeyModalService } from '@services/translation-key-modal.service';
+import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service';
 import { AddSupplierFlowService } from '@services/add-supplier-flow.service';
 import { LoggingService } from '@services/logging.service';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -45,8 +45,10 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
   styleUrl: './product-form.component.scss'
 })
 
-export class ProductFormComponent implements OnInit, AfterViewChecked {
+export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChecked {
   initialProduct_ = input<Product | null>(null);
+
+  @ViewChild('productNameInput') private productNameInputRef?: ElementRef<HTMLInputElement>;
 
   private readonly fb_ = inject(FormBuilder);
   private readonly conversionService = inject(ConversionService);
@@ -68,6 +70,9 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
   @ViewChildren('categoryDropdownItem') categoryDropdownItems!: QueryList<ElementRef<HTMLElement>>;
   @ViewChildren('categoryTrigger') categoryTriggerQuery!: QueryList<ElementRef<HTMLElement>>;
   get categoryTriggerRef(): ElementRef<HTMLElement> | undefined { return this.categoryTriggerQuery?.first; }
+  @ViewChildren('supplierDropdownItem') supplierDropdownItems!: QueryList<ElementRef<HTMLElement>>;
+  @ViewChildren('supplierTrigger') supplierTriggerQuery!: QueryList<ElementRef<HTMLElement>>;
+  get supplierTriggerRef(): ElementRef<HTMLElement> | undefined { return this.supplierTriggerQuery?.first; }
   // RESTORED UI SIGNALS
 
   protected readonly categoryOptions_ = computed(() => this.metadataRegistry.allCategories_());
@@ -95,6 +100,8 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
   private formValue_!: Signal<any>
   protected showSuggestions = false;
   protected productForm_!: FormGroup;
+  /** Snapshot of form value when user entered the item (for hasRealChanges). */
+  private initialFormSnapshot_: string | null = null;
   // protected readonly KitchenUnit = KitchenUnit;
   isSubmitted = false;
 
@@ -134,11 +141,14 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
   });
 
   protected allergenSearchQuery_ = signal('');
+  protected allergenDropdownHighlightIndex_ = signal(-1);
 
   protected showCategoryDropdown_ = signal(false);
   protected showSupplierDropdown_ = signal(false);
   protected categoryDropdownHighlightIndex_ = signal(-1);
+  protected supplierDropdownHighlightIndex_ = signal(-1);
   private categoryDropdownFocusPending_ = false;
+  private supplierDropdownFocusPending_ = false;
 
   protected expandedMinStock_ = signal(false);
   protected expandedExpiryDays_ = signal(false);
@@ -209,19 +219,42 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
     }
   }
 
+  ngAfterViewInit(): void {
+    setTimeout(() => this.productNameInputRef?.nativeElement?.focus(), 0);
+  }
+
   ngAfterViewChecked(): void {
-    if (!this.categoryDropdownFocusPending_ || !this.showCategoryDropdown_()) return;
-    this.categoryDropdownFocusPending_ = false;
-    const idx = this.categoryDropdownHighlightIndex_();
-    const items = this.categoryDropdownItems;
-    if (items?.length && idx >= 0 && idx < items.length) {
-      (items.get(idx) as ElementRef<HTMLElement>)?.nativeElement?.focus();
+    if (this.categoryDropdownFocusPending_ && this.showCategoryDropdown_()) {
+      this.categoryDropdownFocusPending_ = false;
+      const idx = this.categoryDropdownHighlightIndex_();
+      const items = this.categoryDropdownItems;
+      if (items?.length && idx >= 0 && idx < items.length) {
+        (items.get(idx) as ElementRef<HTMLElement>)?.nativeElement?.focus();
+      }
     }
+    if (this.supplierDropdownFocusPending_ && this.showSupplierDropdown_()) {
+      this.supplierDropdownFocusPending_ = false;
+      const idx = this.supplierDropdownHighlightIndex_();
+      const items = this.supplierDropdownItems;
+      if (items?.length && idx >= 0 && idx < items.length) {
+        (items.get(idx) as ElementRef<HTMLElement>)?.nativeElement?.focus();
+      }
+    }
+  }
+
+  protected onCategoryTriggerKeydown(event: Event): void {
+    const e = event as KeyboardEvent;
+    if (e.key !== ' ') return;
+    e.preventDefault();
+    this.showCategoryDropdown_.set(true);
+    const total = this.filteredCategoryOptions_().length + 1;
+    this.categoryDropdownHighlightIndex_.set(0);
+    this.categoryDropdownFocusPending_ = true;
   }
 
   protected onCategoryDropdownKeydown(event: Event): void {
     const key = (event as KeyboardEvent).key;
-    if (key !== 'ArrowDown' && key !== 'ArrowUp' && key !== 'Enter' && key !== 'Escape') return;
+    if (key !== 'ArrowDown' && key !== 'ArrowUp' && key !== 'Enter' && key !== ' ' && key !== 'Escape') return;
     event.preventDefault();
     const options = this.filteredCategoryOptions_();
     const total = options.length + 1;
@@ -235,7 +268,7 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
       idx = idx > 0 ? idx - 1 : total - 1;
       this.categoryDropdownHighlightIndex_.set(idx);
       this.focusCategoryItem(idx);
-    } else if (key === 'Enter') {
+    } else if (key === 'Enter' || key === ' ') {
       if (idx >= 0 && idx < options.length) {
         this.addCategory(options[idx]);
       } else if (idx === options.length) {
@@ -254,6 +287,71 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
   private focusCategoryItem(index: number): void {
     setTimeout(() => {
       const items = this.categoryDropdownItems;
+      if (items?.length && index >= 0 && index < items.length) {
+        (items.get(index) as ElementRef<HTMLElement>)?.nativeElement?.focus();
+      }
+    }, 0);
+  }
+
+  protected onSupplierTriggerKeydown(event: Event): void {
+    const e = event as KeyboardEvent;
+    if (e.key !== ' ') return;
+    e.preventDefault();
+    this.showSupplierDropdown_.set(true);
+    const total = this.filteredSupplierOptions_().length + 1;
+    this.supplierDropdownHighlightIndex_.set(0);
+    this.supplierDropdownFocusPending_ = true;
+  }
+
+  protected onSupplierKeyboardOpen(event: Event): void {
+    const e = event as KeyboardEvent;
+    e.preventDefault();
+    this.showSupplierDropdown_.set(true);
+    const total = this.filteredSupplierOptions_().length + 1;
+    if (e.key === 'ArrowDown') {
+      this.supplierDropdownHighlightIndex_.set(0);
+      this.supplierDropdownFocusPending_ = true;
+    } else if (e.key === 'ArrowUp') {
+      this.supplierDropdownHighlightIndex_.set(Math.max(0, total - 1));
+      this.supplierDropdownFocusPending_ = true;
+    }
+  }
+
+  protected onSupplierDropdownKeydown(event: Event): void {
+    const key = (event as KeyboardEvent).key;
+    if (key !== 'ArrowDown' && key !== 'ArrowUp' && key !== 'Enter' && key !== ' ' && key !== 'Escape') return;
+    event.preventDefault();
+    const options = this.filteredSupplierOptions_();
+    const total = options.length + 1;
+    let idx = this.supplierDropdownHighlightIndex_();
+
+    if (key === 'ArrowDown') {
+      idx = idx < total - 1 ? idx + 1 : 0;
+      this.supplierDropdownHighlightIndex_.set(idx);
+      this.focusSupplierItem(idx);
+    } else if (key === 'ArrowUp') {
+      idx = idx > 0 ? idx - 1 : total - 1;
+      this.supplierDropdownHighlightIndex_.set(idx);
+      this.focusSupplierItem(idx);
+    } else if (key === 'Enter' || key === ' ') {
+      if (idx >= 0 && idx < options.length) {
+        this.addSupplierId(options[idx]._id);
+      } else if (idx === options.length) {
+        this.openAddSupplier();
+      }
+      this.showSupplierDropdown_.set(false);
+      this.supplierDropdownHighlightIndex_.set(-1);
+      this.supplierTriggerRef?.nativeElement?.focus();
+    } else if (key === 'Escape') {
+      this.showSupplierDropdown_.set(false);
+      this.supplierDropdownHighlightIndex_.set(-1);
+      this.supplierTriggerRef?.nativeElement?.focus();
+    }
+  }
+
+  private focusSupplierItem(index: number): void {
+    setTimeout(() => {
+      const items = this.supplierDropdownItems;
       if (items?.length && index >= 0 && index < items.length) {
         (items.get(index) as ElementRef<HTMLElement>)?.nativeElement?.focus();
       }
@@ -315,7 +413,8 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
         } else {
           this.isEditMode_.set(false);
           this.curProduct_.set(this.utilService.getEmptyProduct());
-          this.productForm_.patchValue({ base_unit_: 'kg' })
+          this.productForm_.patchValue({ base_unit_: 'kg' });
+          this.initialFormSnapshot_ = this.getFormSnapshotForComparison();
         }
       });
     }
@@ -326,7 +425,8 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
       const baseUnit = this.productForm_.get('base_unit_')?.value ?? '';
       const baseFactor = this.unitRegistry.getConversion(baseUnit) || 1;
       const unitFactor = this.unitRegistry.getConversion(unitKey) || 1;
-      const conversion_rate_ = unitFactor > 0 ? baseFactor / unitFactor : 1;
+      // conversion_rate_ = base units per 1 purchase unit (e.g. 0.33 kg per jar when 1 jar = 330g)
+      const conversion_rate_ = baseFactor > 0 && unitFactor > 0 ? unitFactor / baseFactor : 1;
       const suggestedPrice = this.conversionService.getSuggestedPurchasePrice(
         this.productForm_.get('buy_price_global_')?.value || 0,
         conversion_rate_
@@ -412,11 +512,10 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
   protected async openAddNewCategory(): Promise<void> {
     try {
       const result = await this.translationKeyModal.open('', 'category');
-      if (result?.englishKey && result?.hebrewLabel) {
-        await this.metadataRegistry.registerCategory(result.englishKey);
-        this.translationService.updateDictionary(result.englishKey, result.hebrewLabel);
-        this.addCategory(result.englishKey);
-      }
+      if (!isTranslationKeyResult(result)) return;
+      this.translationService.updateDictionary(result.englishKey, result.hebrewLabel);
+      await this.metadataRegistry.registerCategory(result.hebrewLabel);
+      this.addCategory(result.englishKey);
     } catch (err) {
       this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context: { err } });
     }
@@ -450,14 +549,27 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
 
   protected async onAddNewAllergen(hebrewLabel: string): Promise<void> {
     if (!hebrewLabel?.trim()) return;
+    const trimmed = hebrewLabel.trim();
     try {
-      const result = await this.translationKeyModal.open(hebrewLabel.trim(), 'allergen');
-      if (result) {
-        await this.metadataRegistry.registerAllergen(result.englishKey);
-        this.translationService.updateDictionary(result.englishKey, result.hebrewLabel);
-        this.toggleAllergen(result.englishKey);
-        this.allergenSearchQuery_.set('');
+      let englishKey: string;
+      const resolved = this.translationService.resolveAllergen(trimmed);
+      if (resolved) {
+        englishKey = resolved;
+      } else {
+        const result = await this.translationKeyModal.open(trimmed, 'allergen');
+        if (!isTranslationKeyResult(result)) return;
+        englishKey = result.englishKey;
+        await this.metadataRegistry.registerAllergen(englishKey);
+        this.translationService.updateDictionary(englishKey, result.hebrewLabel);
       }
+      const current = (this.productForm_.get('allergens_')?.value || []) as string[];
+      if (current.includes(englishKey)) {
+        this.userMsgService.onSetErrorMsg(this.translationService.translate('allergen_already_on_product'));
+        this.allergenSearchQuery_.set('');
+        return;
+      }
+      this.toggleAllergen(englishKey);
+      this.allergenSearchQuery_.set('');
     } catch (err) {
       this.logging.error({ event: 'inventory.product.add_allergen_error', message: 'Failed to add allergen', context: { err } });
     }
@@ -476,7 +588,10 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
     if (value === 'NEW_UNIT') {
       this.activeRowIndex_.set(index);
       this.isBaseUnitMode_.set(false);
-      this.unitRegistry.openUnitCreator();
+      const existingSymbols = (this.purchaseOptions_.value as { unit_symbol_?: string }[])
+        ?.map((o) => o?.unit_symbol_)
+        ?.filter(Boolean) as string[] ?? [];
+      this.unitRegistry.openUnitCreator({ existingUnitSymbols: existingSymbols });
       (this.productForm_.get('purchase_options_') as FormArray)
         ?.at(index)
         ?.patchValue({ unit_symbol_: '' });
@@ -484,9 +599,51 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
   }
 
 
+  protected onAllergenSearchFocus(): void {
+    this.showSuggestions = true;
+    this.allergenDropdownHighlightIndex_.set(0);
+  }
+
+  protected onAllergenKeydown(event: Event): void {
+    if (!this.showSuggestions) return;
+    const e = event as KeyboardEvent;
+    const key = e.key;
+    const filtered = this.filteredAllergenOptions_();
+    const hasAddNew = this.allergenSearchQuery_().trim() !== ''
+      && !filtered.includes(this.allergenSearchQuery_().trim())
+      && !(this.productForm_.get('allergens_')?.value as string[] || []).includes(this.allergenSearchQuery_().trim());
+    const total = filtered.length + (hasAddNew ? 1 : 0);
+    if (key === 'Escape') {
+      event.preventDefault();
+      this.showSuggestions = false;
+      this.allergenDropdownHighlightIndex_.set(-1);
+      return;
+    }
+    if (total === 0) return;
+
+    if (key === 'ArrowDown' || key === 'ArrowUp' || key === 'Enter' || key === ' ') {
+      event.preventDefault();
+    }
+
+    let idx = this.allergenDropdownHighlightIndex_();
+    if (key === 'ArrowDown') {
+      idx = idx < total - 1 ? idx + 1 : 0;
+      this.allergenDropdownHighlightIndex_.set(idx);
+    } else if (key === 'ArrowUp') {
+      idx = idx > 0 ? idx - 1 : total - 1;
+      this.allergenDropdownHighlightIndex_.set(idx);
+    } else if (key === 'Enter' || key === ' ') {
+      if (idx >= 0 && idx < filtered.length) {
+        this.toggleAllergen(filtered[idx]);
+      } else if (hasAddNew && idx === filtered.length) {
+        this.onAddNewAllergen(this.allergenSearchQuery_());
+      }
+    }
+  }
+
   protected toggleAllergen(allergen: string): void {
     const ctrl = this.productForm_.get('allergens_');
-    const current = ctrl?.value || [];
+    const current = (ctrl?.value || []) as string[];
     const updated = current.includes(allergen)
       ? current.filter((a: string) => a !== allergen)
       : [...current, allergen];
@@ -499,10 +656,12 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
     if (!cat?.trim()) return;
     const ctrl = this.productForm_.get('categories_');
     const current = (ctrl?.value || []) as string[];
-    if (!current.includes(cat)) {
-      ctrl?.setValue([...current, cat]);
-      ctrl?.markAsDirty();
+    if (current.includes(cat)) {
+      this.userMsgService.onSetErrorMsg(this.translationService.translate('category_already_on_product'));
+      return;
     }
+    ctrl?.setValue([...current, cat]);
+    ctrl?.markAsDirty();
   }
 
   protected removeCategory(cat: string): void {
@@ -552,6 +711,67 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
     return this.productForm_;
   }
 
+  /** For pendingChangesGuard: values on this item (categories, allergens) that are not in the dictionary so we ask for English key in a modal before leaving. */
+  getValuesNeedingTranslation(): string[] {
+    if (!this.productForm_) return [];
+    const raw = this.productForm_.getRawValue();
+    const categories = (raw?.categories_ ?? []) as string[];
+    const allergens = (raw?.allergens_ ?? []) as string[];
+    const combined = [...categories, ...allergens]
+      .map((v) => (v != null ? String(v).trim() : ''))
+      .filter((v) => v !== '');
+    const unique = [...new Set(combined)];
+    return unique.filter((v) => !this.translationService.hasKey(v));
+  }
+
+  /** For pendingChangesGuard: remove untranslated values from categories_ and allergens_ when user chooses "continue without saving". */
+  removeValuesNeedingTranslation(): void {
+    if (!this.productForm_) return;
+    const toRemove = this.getValuesNeedingTranslation();
+    if (toRemove.length === 0) return;
+    const catCtrl = this.productForm_.get('categories_');
+    const allCtrl = this.productForm_.get('allergens_');
+    const currentCat = ((catCtrl?.value ?? []) as string[]).filter((v) => !toRemove.includes(String(v).trim()));
+    const currentAll = ((allCtrl?.value ?? []) as string[]).filter((v) => !toRemove.includes(String(v).trim()));
+    catCtrl?.setValue(currentCat);
+    allCtrl?.setValue(currentAll);
+    catCtrl?.markAsDirty();
+    allCtrl?.markAsDirty();
+  }
+
+  /** For pendingChangesGuard: true when current form value differs from initial state when user entered the item. */
+  hasRealChanges(): boolean {
+    if (!this.productForm_ || this.initialFormSnapshot_ === null) return this.productForm_?.dirty ?? false;
+    return this.getFormSnapshotForComparison() !== this.initialFormSnapshot_;
+  }
+
+  /** Normalized form value for comparison (sorted arrays, comparable purchase_options_). */
+  private getFormSnapshotForComparison(): string {
+    const raw = this.productForm_.getRawValue();
+    const opts = (raw?.purchase_options_ ?? []) as Array<{ unit_symbol_?: string; conversion_rate_?: number; uom?: string; price_override_?: number }>;
+    const normalized = {
+      productName: raw?.productName ?? '',
+      base_unit_: raw?.base_unit_ ?? '',
+      buy_price_global_: Number(raw?.buy_price_global_) || 0,
+      categories_: [...((raw?.categories_ ?? []) as string[])].sort(),
+      supplierIds_: [...(raw?.supplierIds_ ?? [])].sort(),
+      min_stock_level_: Number(raw?.min_stock_level_) ?? 0,
+      expiry_days_default_: Number(raw?.expiry_days_default_) ?? 0,
+      yield_factor_: Number(raw?.yield_factor_) ?? 1,
+      waste_percent_: Number(raw?.waste_percent_) ?? 0,
+      allergens_: [...((raw?.allergens_ ?? []) as string[])].sort(),
+      purchase_options_: opts
+        .map((o) => ({
+          unit_symbol_: o?.unit_symbol_ ?? '',
+          conversion_rate_: Number(o?.conversion_rate_) ?? 0,
+          uom: o?.uom ?? '',
+          price_override_: Number(o?.price_override_) ?? 0
+        }))
+        .sort((a, b) => (a.unit_symbol_ || '').localeCompare(b.unit_symbol_ || ''))
+    };
+    return JSON.stringify(normalized);
+  }
+
 
   protected addPurchaseOption(opt?: Partial<PurchaseOption_>): void {
     const unit = opt?.unit_symbol_ || '';
@@ -588,8 +808,8 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
       const baseUnitKey = this.productForm_.get('base_unit_')?.value ?? '';
       const baseFactor = this.unitRegistry.getConversion(baseUnitKey) || 1;
       const unitFactor = this.unitRegistry.getConversion(newUnit) || 1;
-      // conversion_rate_ = how many purchase units per 1 base unit
-      const suggestedConv = baseFactor / unitFactor;
+      // conversion_rate_ = base units per 1 purchase unit (e.g. 0.33 kg per jar when 1 jar = 330g)
+      const suggestedConv = baseFactor > 0 && unitFactor > 0 ? unitFactor / baseFactor : 1;
       const currentGlobal = this.productForm_.get('buy_price_global_')?.value || 0;
 
       // 1. Get the actual base unit selected at the top of the form (e.g., 'gram')
@@ -719,6 +939,8 @@ export class ProductFormComponent implements OnInit, AfterViewChecked {
         this.addPurchaseOption({ ...opt, uom: opt.uom ?? baseUom });
       });
     }
+
+    this.initialFormSnapshot_ = this.getFormSnapshotForComparison();
   }
   protected onSubmit(): void {
     if (!this.productForm_.valid) {

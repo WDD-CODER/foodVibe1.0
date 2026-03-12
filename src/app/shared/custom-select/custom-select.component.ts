@@ -154,7 +154,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
       this.close();
       return;
     }
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       if (idx >= 0 && opts[idx]) this.select(opts[idx].value);
       return;
