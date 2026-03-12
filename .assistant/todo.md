@@ -13,6 +13,34 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 135 — Translation modal cancel guard title fix (`plans/135-translation-modal-cancel-guard-title-fix.plan.md`)
+
+- [x] Guard: `else { break }` → `else { return false }` (cancel = stay on page)
+- [x] Guard: add `.toLowerCase()` to `getPending` filter
+- [x] dictionary.json: add `translation_modal_title` key
+- [x] translation-key-modal.component.ts: use `translation_modal_title` for generic
+- [x] translation-key-modal.service.ts: remove `throw` in `save()`
+
+### Plan 134 — Translation and confirmation modals unified (`plans/134-translation-confirmation-modals-unified.plan.md`)
+
+- [x] Translation modal: Hebrew always editable (both add-time and generic); focus English key on open; template ref + ViewChild
+- [x] Product form allergen: resolveAllergen first; open modal only when null; then "already on product" check
+- [ ] Other entry points: align with resolve first → modal if needed → already in parameter (metadata-manager, preparation-*, menu-section-categories, add-equipment-modal, recipe-workflow, add-supplier-flow)
+- [x] Agent guides: Section 7.2 + Section 0 trigger 7.1+7.2 in copilot-instructions; one-line pointer in agent.md (one source of truth; no Cursor rule)
+- [x] Guard/dictionary: confirm getValuesNeedingTranslation and guard unchanged
+
+### Plan 133 — List quick-edit inline (`plans/133-list-quick-edit-inline.plan.md`)
+
+- [ ] Row-blur detection and batch "Save these changes?" confirm; pending-edits store per row
+- [ ] Inventory product list: editable cells (supplier, category, unit); value click → inline dropdown; row click → edit page
+- [ ] Supplier list: keep panel on row click; add quick-edit for chosen cells (e.g. contact, delivery, min order)
+- [ ] Equipment list: keep panel on row click; add quick-edit for chosen cells (e.g. category, owned qty, is_consumable)
+- [ ] Carousel: only cell value clickable for quick-edit; arrows unchanged
+- [ ] Validation: empty required field → error message + red border + aria-invalid; no save
+- [ ] Keyboard and a11y: focus model, focus trap in inline control, Esc/Enter, return focus, screen reader labels
+- [ ] Venue list / Recipe-book list: optional quick-edit columns as needed
+- [ ] i18n: batch save confirm key, validation error key(s)
+
 ### Plan 132 — Translation and add-value flow (`plans/132-translation-add-value-flow.plan.md`)
 
 - [x] Step 0: Guard — save-confirmation last; product form hasRealChanges() + initial snapshot
@@ -811,6 +839,10 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 129 | Post-execute verification bullets | Active |
 | 130 | Numeric precision audit | Done |
 | 131 | Spec coverage techdebt commit | Active |
+| 132 | Translation add-value flow | Done |
+| 133 | List quick-edit inline | Planned |
+| 135 | Translation modal cancel guard title fix | Active |
+| 134 | Translation and confirmation modals unified | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 

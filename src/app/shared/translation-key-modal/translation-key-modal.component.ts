@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, effect, viewChild, ElementRef, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClickOutSideDirective } from '@directives/click-out-side';
@@ -21,24 +21,37 @@ export class TranslationKeyModalComponent {
   protected englishKey_ = signal('');
   protected validationError_ = signal<string | null>(null);
 
-  protected isHebrewReadonly_ = computed(() => {
-    const label = this.hebrewLabel_();
-    const ctx = this.context_();
-    return (ctx === 'allergen' || ctx === 'supplier' || ctx === 'unit') && !!label;
-  });
+  private englishKeyInputRef = viewChild<ElementRef<HTMLInputElement>>('englishKeyInput');
+  private hebrewInputRef = viewChild<ElementRef<HTMLInputElement>>('hebrewInput');
+
+  constructor() {
+    effect(() => {
+      if (this.isOpen_()) {
+        this.englishKey_.set('');
+        this.validationError_.set(null);
+      }
+    });
+    effect(() => {
+      if (!this.isOpen_()) return;
+      const hebrewEmpty = !untracked(() => this.hebrewLabel_())?.trim();
+      setTimeout(() => {
+        if (hebrewEmpty) {
+          this.hebrewInputRef()?.nativeElement?.focus();
+        } else {
+          this.englishKeyInputRef()?.nativeElement?.focus();
+        }
+      }, 0);
+    });
+  }
+
+  /** Label for the first field: "Value on item" for generic (on-leave), "Hebrew value" otherwise. */
+  protected firstFieldLabelKey_ = computed(() => (this.context_() === 'generic' ? 'value_on_item' : 'hebrew_value'));
 
   protected updateHebrew(value: string): void {
     this.modalService.hebrewLabel_.set(value);
   }
 
-  protected title_ = computed(() => {
-    const ctx = this.context_();
-    if (ctx === 'category') return 'add_new_category';
-    if (ctx === 'allergen') return 'add_new_allergen';
-    if (ctx === 'supplier') return 'add_supplier_translation_key';
-    if (ctx === 'unit') return 'add_new_unit';
-    return 'הזן מפתח אנגלי';
-  });
+  protected title_ = computed(() => 'translation_modal_title');
 
   /** Translation key for the save button based on context (e.g. save_category, save_supplier). */
   protected saveLabelKey_ = computed(() => {
@@ -55,7 +68,7 @@ export class TranslationKeyModalComponent {
     const hebrew = this.hebrewLabel_().trim();
     if (!key || !hebrew) return;
 
-    const validation = this.modalService.validateKey(key);
+    const validation = this.modalService.validateKeyForHebrew(key, hebrew);
     if (!validation.valid) {
       this.validationError_.set(validation.error ?? null);
       return;
@@ -69,6 +82,12 @@ export class TranslationKeyModalComponent {
     this.validationError_.set(null);
     this.englishKey_.set('');
     this.modalService.cancel();
+  }
+
+  protected continueWithoutSaving(): void {
+    this.validationError_.set(null);
+    this.englishKey_.set('');
+    this.modalService.continueWithoutSaving();
   }
 
   protected resetAndClose(): void {
