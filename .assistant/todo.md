@@ -13,6 +13,37 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 130 — Numeric precision audit (`plans/130-numeric-precision-audit.plan.md`)
+
+- [x] Add `step="0.001"` to recipe-ingredients `amount_net` input
+- [x] Add `step="0.01"` to product-form `price_override_` input
+- [x] Change `yield_factor_` to `step="0.001"` in product-form and quick-add-product-modal
+- [x] Add `step="0.001"` to recipe-header primary and secondary amount inputs
+
+### Plan 129 — Post-execute verification bullets (`plans/129-post-execute-verification-bullets.plan.md`)
+
+- [x] Add Phase 5 "How to verify" requirement to Gatekeeper Protocol in copilot-instructions.md
+
+### Plan 128 — Hebrew canonical value resolution (`plans/128-hebrew-canonical-value-resolution.plan.md`)
+
+- [x] TranslationService: reverse maps (Hebrew→key) + resolveUnit/Category/Allergen/SectionCategory; add key+Hebrew when user supplies English key
+- [x] UnitRegistryService: resolve unit name before register; no match → get English key and update dictionary; product-level check when adding purchase option
+- [x] MetadataRegistryService: resolve in registerCategory and registerAllergen; no match → prompt for English key and update dictionary
+- [x] MenuSectionCategoriesService, add-equipment-modal, preparation-registry: resolve from Hebrew; no match → modal for English key then register + dictionary
+- [x] copilot-instructions: add Section 7.1 (Hebrew canonical values) and Section 0 trigger bullet
+
+### Plan 127 — Recipe builder cost display fix (`plans/127-recipe-builder-cost-display-fix.plan.md`)
+
+- [x] Show "ממתין" only when total_cost is null/undefined; show ₪0.00 or amount for any number
+- [x] Enable total_cost control in recipe-form.service (was disabled)
+- [x] Call cdr.markForCheck() at end of updateLineCalculations
+
+### Plan 126 — Purchase unit recipe builder fix (`plans/126-purchase-unit-recipe-builder-fix.plan.md`)
+
+- [x] Recipe cost service: getRowWeightContributionG use net * conversion_rate_; computeIngredientCost multiply and price_override_ per 1 unit
+- [x] Recipe ingredients table: updateLineCalculations same conversion/price fix; onItemSelected default unit/amount for purchase unit; increment/decrement step 1 for purchase units
+- [x] recipe-cost.service.spec.ts: add/update tests for purchase_options_ and price_override_
+
 ### Plan 125 — Restore collapse row equipment & suppliers (`plans/125-restore-collapse-row-equipment-suppliers.plan.md`)
 
 - [x] Equipment list: row click toggles inline edit panel; add toggleRowEdit; remove navigateToEquipmentEdit
@@ -759,6 +790,10 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 122 | AI Chatbot Gemini scope (conceptual) | Planned |
 | 123 | Recipe builder product-only units + persist new unit to product | Active |
 | 124 | Unified styling audit and theme | Active |
+| 126 | Purchase unit recipe builder fix | Active |
+| 127 | Recipe builder cost display fix | Active |
+| 128 | Hebrew canonical value resolution | Done |
+| 129 | Post-execute verification bullets | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 
