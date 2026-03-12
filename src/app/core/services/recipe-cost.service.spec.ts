@@ -137,6 +137,20 @@ describe('RecipeCostService', () => {
       expect(service.computeTotalWeightG(rows)).toBe(1100); // 100 + 1000
     });
 
+    it('should convert purchase unit to base (conversion_rate_ = base per 1 purchase unit)', () => {
+      const product = createProduct({
+        _id: 'p1',
+        base_unit_: 'kg',
+        purchase_options_: [{ unit_symbol_: 'unit', conversion_rate_: 0.3 }],
+      });
+      productsSignal.set([product]);
+      const rows = [
+        { amount_net: 1, unit: 'unit', referenceId: 'p1', item_type: 'product' },
+      ];
+      // 1 unit * 0.3 kg/unit = 0.3 kg = 300 g
+      expect(service.computeTotalWeightG(rows)).toBe(300);
+    });
+
     it('should return 0 at max recursion depth', () => {
       const rows = [{ amount_net: 100, unit: 'gram' }];
       expect(service.computeTotalWeightG(rows, 5)).toBe(0);
@@ -174,6 +188,39 @@ describe('RecipeCostService', () => {
     it('should return 0 at max recursion depth', () => {
       const ing: Ingredient = { _id: 'i1', referenceId: 'p1', type: 'product', amount_: 100, unit_: 'gram' };
       expect(service.getCostForIngredient(ing, 5)).toBe(0);
+    });
+
+    it('should use purchase unit conversion_rate_ as base per 1 unit (multiply)', () => {
+      const product = createProduct({
+        _id: 'p1',
+        buy_price_global_: 10,
+        base_unit_: 'kg',
+        yield_factor_: 1,
+        purchase_options_: [{ unit_symbol_: 'unit', conversion_rate_: 0.3 }],
+      });
+      productsSignal.set([product]);
+      const recipe = createRecipe({
+        _id: 'r1',
+        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 1, unit_: 'unit' }],
+      });
+      // 1 unit = 0.3 kg; cost = (0.3 / 1) * 10 = 3
+      expect(service.computeRecipeCost(recipe)).toBe(3);
+    });
+
+    it('should use price_override_ as price per 1 purchase unit', () => {
+      const product = createProduct({
+        _id: 'p1',
+        buy_price_global_: 10,
+        base_unit_: 'kg',
+        yield_factor_: 1,
+        purchase_options_: [{ unit_symbol_: 'unit', conversion_rate_: 0.3, price_override_: 4.9 }],
+      });
+      productsSignal.set([product]);
+      const recipe = createRecipe({
+        _id: 'r1',
+        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 1, unit_: 'unit' }],
+      });
+      expect(service.computeRecipeCost(recipe)).toBe(4.9);
     });
   });
 });

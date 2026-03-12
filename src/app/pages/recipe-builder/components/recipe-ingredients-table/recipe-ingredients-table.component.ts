@@ -1,4 +1,4 @@
-import { Component, input, output, inject, ViewChildren, QueryList, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, input, output, inject, ViewChildren, QueryList, ElementRef, AfterViewInit, effect, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormArray, FormGroup, FormBuilder } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -43,8 +43,17 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
   private readonly unitRegistry = inject(UnitRegistryService);
   private fb = inject(FormBuilder);
   private readonly el = inject(ElementRef<HTMLElement>);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   @ViewChildren(FocusByRowDirective) private focusByRowRefs!: QueryList<FocusByRowDirective>;
+
+  constructor() {
+    effect(() => {
+      this.kitchenStateService.products_();
+      this.kitchenStateService.recipes_();
+      this.refreshAllLineCalculations();
+    });
+  }
 
   //INPUT OUTPUT
   ingredientsFormArray = input.required<FormArray>();
@@ -79,10 +88,20 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
 
 
 
+  /** True when the row's unit is a product purchase unit (use step 1 for +/-). */
+  private isPurchaseUnitRow(group: FormGroup): boolean {
+    const item = this.getItemMetadata(group);
+    if (!item || (item as { item_type_?: string }).item_type_ !== 'product') return false;
+    const prod = item as Product;
+    const unit = group.get('unit')?.value;
+    return prod.purchase_options_?.some(o => o.unit_symbol_ === unit) ?? false;
+  }
+
   incrementAmount(group: FormGroup, index: number): void {
     const ctrl = group.get('amount_net');
     const current = ctrl?.value ?? 0;
-    ctrl?.setValue(quantityIncrement(current, 0));
+    const stepOpts = this.isPurchaseUnitRow(group) ? { integerOnly: true } : undefined;
+    ctrl?.setValue(quantityIncrement(current, 0, stepOpts));
     this.ingredientsFormArray().markAsDirty();
     this.updateLineCalculations(index);
   }
@@ -90,7 +109,8 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
   decrementAmount(group: FormGroup, index: number): void {
     const ctrl = group.get('amount_net');
     const current = ctrl?.value ?? 0;
-    ctrl?.setValue(quantityDecrement(current, 0));
+    const stepOpts = this.isPurchaseUnitRow(group) ? { integerOnly: true } : undefined;
+    ctrl?.setValue(quantityDecrement(current, 0, stepOpts));
     this.ingredientsFormArray().markAsDirty();
     this.updateLineCalculations(index);
   }
@@ -120,13 +140,17 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
   }
 
   onItemSelected(item: SearchableItem, group: FormGroup) {
-    const unit = 'base_unit_' in item ? (item.base_unit_ ?? '') : ('yield_unit_' in item ? (item.yield_unit_ ?? '') : '');
+    const product = item.item_type_ === 'product' ? (item as Product) : null;
+    const hasPurchaseOptions = product?.purchase_options_?.length;
+    const unit = hasPurchaseOptions
+      ? (product!.purchase_options_![0].unit_symbol_ ?? product!.base_unit_ ?? '')
+      : ('base_unit_' in item ? (item.base_unit_ ?? '') : ('yield_unit_' in item ? (item.yield_unit_ ?? '') : ''));
     group.patchValue({
       name_hebrew: item.name_hebrew,
       referenceId: item._id,
       item_type: item.item_type_,
       unit,
-      amount_net: 0,
+      amount_net: hasPurchaseOptions ? 1 : 0,
     });
     this.ingredientsFormArray().markAsDirty();
 
@@ -211,24 +235,22 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
       const unitOption = prod.purchase_options_?.find(o => o.unit_symbol_ === selectedUnit);
 
       if (unitOption) {
-        if (unitOption.price_override_ != null) {
-          const conv = unitOption.conversion_rate_ || 1;
-          const pricePerUnit = unitOption.price_override_ / conv;
-          lineCost = netAmount * pricePerUnit;
+        if (unitOption.price_override_ != null && unitOption.price_override_ > 0) {
+          lineCost = netAmount * unitOption.price_override_;
         } else {
-          const normalizedAmount = netAmount / (unitOption.conversion_rate_ || 1);
+          const normalizedAmount = netAmount * (unitOption.conversion_rate_ || 1);
           const price = prod.buy_price_global_ || 0;
           const yieldFactor = prod.yield_factor_ || 1;
           lineCost = (normalizedAmount / yieldFactor) * price;
         }
       } else {
-        // Selected unit not in purchase_options_ (e.g. custom unit like כפית): convert to product base unit via registry.
+        // Selected unit not in purchase_options_ (e.g. base unit or custom like כפית): convert to product base unit.
         const price = prod.buy_price_global_ || prod.calculated_cost_per_unit || 0;
         const yieldFactor = prod.yield_factor_ || 1;
         const baseUnit = prod.base_unit_ || 'gram';
         const amountG = this.recipeCostService.convertToBaseUnits(netAmount, selectedUnit);
-        const baseFactor = this.unitRegistry.getConversion(baseUnit) || 1;
-        const amountInBaseUnit = amountG / baseFactor;
+        const baseGPerUnit = this.recipeCostService.convertToBaseUnits(1, baseUnit) || 1;
+        const amountInBaseUnit = amountG / baseGPerUnit;
         lineCost = (amountInBaseUnit / yieldFactor) * price;
       }
     }
@@ -236,7 +258,19 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
     group.get('total_cost')?.setValue(lineCost);
     this.ingredientsFormArray().markAsDirty();
     this.ingredientsFormArray().parent?.updateValueAndValidity();
+    this.cdr.markForCheck();
   }
+
+  /** Re-run line cost for every row with referenceId (e.g. when products/recipes load). */
+  private refreshAllLineCalculations(): void {
+    const groups = this.ingredientGroups;
+    if (!groups.length) return;
+    for (let i = 0; i < groups.length; i++) {
+      if (groups[i].get('referenceId')?.value) this.updateLineCalculations(i);
+    }
+    this.cdr.markForCheck();
+  }
+
   getAvailableUnits(group: FormGroup): string[] {
     const item = this.getItemMetadata(group);
     if (!item) return [];
@@ -271,7 +305,9 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
     if (val === '__add_unit__') {
       group.get('unit')?.setValue('');
       this.ingredientsFormArray().markAsDirty();
-      setTimeout(() => this.unitRegistry.openUnitCreator(), 0);
+      const product = group.get('item_type')?.value === 'product' ? (this.getItemMetadata(group) as Product | undefined) : undefined;
+      const existingSymbols = product?.purchase_options_?.map((o) => o.unit_symbol_) ?? [];
+      setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols: existingSymbols }), 0);
       this.unitRegistry.unitAdded$.pipe(take(1)).subscribe(newUnit => {
         const setUnitAndUpdate = (): void => {
           group.get('unit')?.setValue(newUnit);
@@ -279,22 +315,23 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
           this.updateLineCalculations(index);
         };
         if (group.get('item_type')?.value === 'product') {
-          const product = this.getItemMetadata(group) as Product | undefined;
-          if (product && product._id) {
-            const existing = product.purchase_options_?.some(o => o.unit_symbol_ === newUnit);
+          const prod = this.getItemMetadata(group) as Product | undefined;
+          if (prod && prod._id) {
+            const existing = prod.purchase_options_?.some(o => o.unit_symbol_ === newUnit);
             if (!existing) {
-              const baseFactor = this.unitRegistry.getConversion(product.base_unit_) || 1;
+              const baseFactor = this.unitRegistry.getConversion(prod.base_unit_) || 1;
               const unitFactor = this.unitRegistry.getConversion(newUnit) || 1;
-              const conversion_rate_ = unitFactor > 0 ? baseFactor / unitFactor : 1;
+              // conversion_rate_ = base units per 1 purchase unit (e.g. 0.33 kg per jar when 1 jar = 330g)
+              const conversion_rate_ = baseFactor > 0 && unitFactor > 0 ? unitFactor / baseFactor : 1;
               const newOption = {
                 unit_symbol_: newUnit,
                 conversion_rate_,
-                uom: product.base_unit_,
+                uom: prod.base_unit_,
                 price_override_: 0
               };
               const updated: Product = {
-                ...product,
-                purchase_options_: [...(product.purchase_options_ ?? []), newOption]
+                ...prod,
+                purchase_options_: [...(prod.purchase_options_ ?? []), newOption]
               };
               this.kitchenStateService.saveProduct(updated).subscribe({
                 next: () => setUnitAndUpdate(),

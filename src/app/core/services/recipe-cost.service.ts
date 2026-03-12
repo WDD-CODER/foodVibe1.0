@@ -7,12 +7,13 @@ import { Ingredient } from '../models/ingredient.model';
 
 const MAX_RECURSION_DEPTH = 5;
 
-/** Normalizes unit keys for conversion lookup (e.g. 'gr' -> 'gram'). */
+/** Normalizes unit keys for conversion lookup (e.g. 'gr' -> 'gram'). Includes Hebrew display names. */
 const UNIT_ALIASES: Record<string, string> = {
   gr: 'gram',
   grams: 'gram',
   g: 'gram',
   kg: 'kg',
+  'ק"ג': 'kg',
   liter: 'liter',
   l: 'liter',
   ml: 'ml',
@@ -136,7 +137,7 @@ export class RecipeCostService {
         if (opt?.conversion_rate_ && product.base_unit_) {
           const baseKey = (UNIT_ALIASES[product.base_unit_] ?? product.base_unit_).toLowerCase();
           if (baseKey === 'gram' || baseKey === 'kg' || MASS_UNITS.has(baseKey)) {
-            const amountInBaseUnits = net / (opt.conversion_rate_ || 1);
+            const amountInBaseUnits = net * (opt.conversion_rate_ || 1);
             const gramsPerBaseUnit = baseKey === 'kg' ? 1000 : 1;
             return amountInBaseUnits * gramsPerBaseUnit;
           }
@@ -266,12 +267,10 @@ export class RecipeCostService {
       const unitOption = product.purchase_options_?.find(o => o.unit_symbol_ === ing.unit_);
       let normalizedAmount: number;
       if (unitOption) {
-        if (unitOption.price_override_ != null) {
-          const conv = unitOption.conversion_rate_ || 1;
-          const pricePerUnit = unitOption.price_override_ / conv;
-          return ing.amount_ * pricePerUnit;
+        if (unitOption.price_override_ != null && unitOption.price_override_ > 0) {
+          return ing.amount_ * unitOption.price_override_;
         }
-        normalizedAmount = ing.amount_ / (unitOption.conversion_rate_ || 1);
+        normalizedAmount = ing.amount_ * (unitOption.conversion_rate_ || 1);
       } else {
         // Custom/registry unit not in purchase_options_: convert to product base unit.
         const amountG = this.convertToBaseUnits(ing.amount_, ing.unit_);

@@ -37,7 +37,7 @@ export class RecipeFormService {
         amount_net: [item ? 1 : null, [Validators.min(0)]],
         yield_percentage: [item?.yield_percentage ?? 1],
         unit: [item?.base_unit_ ?? 'gram'],
-        total_cost: [{ value: 0, disabled: true }]
+        total_cost: [0]
       },
       { validators: (c) => this.ingredientRowValidator(c) }
     );
