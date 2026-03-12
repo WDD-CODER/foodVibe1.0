@@ -10,8 +10,8 @@ Evaluates working-tree changes, decides how to split branches and commits, prese
 
 Before Phase 1 (Evaluate):
 
-- **If a tech-debt report was already produced in this conversation** (e.g. from workflow step 5.5 or because the user asked for a tech-debt run): **Do not run the techdebt skill again.** Use that existing report. If it listed critical or high-priority items, ask: **"Fix these first, or proceed with the commit plan anyway?"** Then continue to Phase 1.
-- **If no tech-debt report exists in this session**: Read `.assistant/skills/techdebt/SKILL.md` and run a quick tech-debt pass. If critical or high-priority items exist, list them briefly and ask: **"Fix these first, or proceed with the commit plan anyway?"** Do not block the commit tree indefinitely — the user may choose to proceed. Then continue to Phase 1.
+- **If a tech-debt report was already produced in this conversation** (e.g. from workflow step 5.5 or because the user asked for a tech-debt run): **Do not run the techdebt skill again.** Use that existing report. If it listed critical or high-priority items, ask: **"Fix these first, or proceed with the commit plan anyway?"** If the report includes a **Spec coverage** section (files needing `.spec.ts` added or updated), add or update those specs so `npm test -- --no-watch --browsers=ChromeHeadless` passes; if the list is long, list the files and ask: **"Add/update specs for these before building the commit plan?"** then do them if the user agrees. Then continue to Phase 1.
+- **If no tech-debt report exists in this session**: Read `.assistant/skills/techdebt/SKILL.md` and run a quick tech-debt pass. If critical or high-priority items exist, list them briefly and ask: **"Fix these first, or proceed with the commit plan anyway?"** If the report includes a **Spec coverage** section, add or update those specs (or list and ask: **"Add/update specs for these before building the commit plan?"**). Do not block the commit tree indefinitely — the user may choose to proceed. Then continue to Phase 1.
 
 ---
 

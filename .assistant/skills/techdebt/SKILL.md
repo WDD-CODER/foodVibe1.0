@@ -32,6 +32,11 @@ Scan for duplicated code, dead code, and tech debt. Run at end of session, befor
 ### Phase 6: Translation
 - Search for Hebrew codepoints in HTML (should use translatePipe). Manually verify dictionary keys for translatePipe usage.
 
+### Phase 7: Spec coverage
+- Using the working tree (e.g. `git status`, `git diff --name-only`), identify components (`.component.ts`) and services (`.service.ts`) in `src/app/` that are **new** or **materially changed**.
+- For each, check if a co-located `.spec.ts` exists and is adequate (e.g. not just a stub if the unit has non-trivial behavior). List those that **need** a new or updated spec.
+- **Output**: Report as a "Spec coverage" section — list file paths needing `.spec.ts` added or updated. Report-only; the commit-to-github flow acts on it.
+
 ## Report Format
 
 ```markdown
@@ -43,8 +48,11 @@ Scan for duplicated code, dead code, and tech debt. Run at end of session, befor
 ## High / Medium / Low Priority
 - [ ] **[file:line]**: Description
 
+## Spec coverage (add/update .spec.ts)
+- [ ] **path/to/component-or-service.ts**: add or update spec
+
 ## Metrics
-- Total TODOs: X | Duplicate blocks: X | Files >300 lines: X | Prohibited patterns: X | Hardcoded Hebrew: X
+- Total TODOs: X | Duplicate blocks: X | Files >300 lines: X | Prohibited patterns: X | Hardcoded Hebrew: X | Specs to add/update: X
 ```
 
 ## Integration

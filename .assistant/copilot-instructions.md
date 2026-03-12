@@ -14,6 +14,7 @@
 - **After features**: Read `.assistant/skills/update-docs/SKILL.md` to refresh breadcrumbs and docs.
 - **After a hacky fix**: Read `.assistant/skills/elegant-fix/SKILL.md` to refine into a clean solution.
 - **Lucide icons**: Before adding or editing `<lucide-icon name="...">` in any template → read and apply **Section 8** below.
+- **Hebrew canonical values**: When adding or editing flows that accept user-entered canonical values (units, categories, allergens, section categories) in Hebrew → read and apply **Section 7.1** below.
 
 ## 1. Persona & Identity
 * **Role**: Senior Software Engineer (Kitchen/Recipe Domain Specialist).
@@ -29,7 +30,7 @@
 * **Phase 2 (Hard Pause)**: Stop after planning. Output: *"The plan is ready in plans/XXX.plan.md. I have [N] questions for you before I proceed."*
 * **Phase 3 (Ledger Sync)**: On "Yes chef!", first action: append sub-tasks to `.assistant/todo.md`.
 * **Phase 4 (Atomic Execution)**: Full autonomous file operations post-approval. Commit each sub-task with Conventional Commits. Update `.assistant/todo.md` to `[x]` after each commit.
-* **Phase 5 (QA Loop)**: After all `[x]`, ask: *"Update .spec.ts now?"*
+* **Phase 5 (QA Loop)**: After all `[x]`, output a **How to verify** section: bullet list where each item states where in the app to go (e.g. "Add modal", "Recipe builder") and what to do or what to expect so the user can visually confirm the change.
 
 ## 3. Angular 19 & Reactivity
 * **Architecture**: Adapter Pattern via `IStorageAdapter`. Standalone Components + `inject()`.
@@ -39,7 +40,7 @@
 * **Syntax**: Path aliases `@services/*`, no `any`, single quotes in TS, double quotes in HTML, no semicolons.
 * **Naming**: Selectors kebab-case; `app-` prefix only for native HTML collisions. Filename matches selector. Classes PascalCase; boolean flags `is`/`has`.
 * **Utils**: Put shared helpers in `src/app/core/services/util.service.ts` (or `core/utils/`); no one-off helpers in components. Utilities must be pure (same inputs → same outputs; no I/O or mutation of arguments/shared state).
-* **Services**: All services in `src/app/core/services/`, suffix `.service.ts`. `@Injectable({ providedIn: 'root' })`, Signals for state, `AsyncStorageService` for persistence, `UserMsgService` for feedback. Expose read-only state via `.asReadonly()`. Add `.spec.ts` per service.
+* **Services**: All services in `src/app/core/services/`, suffix `.service.ts`. `@Injectable({ providedIn: 'root' })`, Signals for state, `AsyncStorageService` for persistence, `UserMsgService` for feedback. Expose read-only state via `.asReadonly()`. Add `.spec.ts` per service when the service is finalized. Do not add or update specs during iterative execution — only when running commit-to-github or when the user explicitly asks.
 
 ## 4. UI, CSS & Folder Structure
 * **Hierarchy**: `core/` (services, models, guards, pipes, directives), `shared/` (reusable UI), `pages/[name]/` (routed views + local `components/`).
@@ -56,6 +57,13 @@
 
 ## 7. Translation (Hebrew UI)
 * All user-facing text via `translatePipe` and `dictionary.json` (`public/assets/data/dictionary.json`). Keys: lowercase, underscores. Sections: `units`, `categories`, `allergens`, `general`. When adding a key, add Hebrew translation to the right section; never hardcode Hebrew in templates.
+
+## 7.1 Hebrew-primary canonical values (avoid duplicates)
+* When the app accepts user input that is stored as a **canonical identifier** (unit symbol, category, allergen, section category, preparation category), resolve Hebrew input to the existing canonical key from the dictionary so the same concept is not stored twice (e.g. "יחידה" → "unit").
+* Use `TranslationService`: `resolveUnit`, `resolveCategory`, `resolveAllergen`, `resolveSectionCategory`, `resolvePreparationCategory`. Each returns the canonical key if the trimmed input equals a known Hebrew value; otherwise returns `null`.
+* **If there is no matching key**: Prompt the user for the **English** value (canonical key), then call `translationService.promptForEnglishKeyAndAdd(hebrewLabel)` or `updateDictionary(englishKey, hebrewLabel)` so the dictionary grows and future input resolves correctly.
+* **Units only**: When adding a measurement unit to a product (e.g. purchase option), after resolving or creating the unit, check whether **this product** already has that unit symbol; if yes, do not add a duplicate — use existing or show "already on this product".
+* New add-item / add-unit / add-category flows must use this resolution flow before persisting.
 
 ## 8. Lucide Icons
 * **Mandatory**: Every icon used in a template (`<lucide-icon name="...">`) MUST be registered in `src/app/app.config.ts`. If you add a new icon in any component template, in the same change add: (1) import from `lucide-angular` (PascalCase, e.g. `CircleUserRound`), (2) add it to `LucideAngularModule.pick({ ... })`. Template uses kebab-case (`circle-user-round`); TypeScript uses PascalCase (`CircleUserRound`). Missing registration causes runtime: *"The '...' icon has not been provided by any available icon providers."* Cursor rule: `.cursor/rules/lucide-icons-must-register-in-app-config.mdc`.

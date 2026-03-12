@@ -13,6 +13,21 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 132 — Translation and add-value flow (`plans/132-translation-add-value-flow.plan.md`)
+
+- [x] Step 0: Guard — save-confirmation last; product form hasRealChanges() + initial snapshot
+- [x] Step 1: Translation modal — Hebrew editable for add flows (unit/category/allergen/supplier)
+- [x] Step 2: Product form — "already on this product" message for category/allergen
+- [x] Step 3: Translation modal — three outcomes + "Continue without saving" button for generic
+- [x] Step 4: Guard + product form — removeValuesNeedingTranslation() and notification
+
+### Plan 131 — Spec coverage in techdebt and commit (`plans/131-spec-coverage-techdebt-commit.plan.md`)
+
+- [x] Techdebt: add Phase 7 (Spec coverage) and update report format
+- [x] Commit-to-github: Phase 0 handle spec-coverage items from report
+- [x] Copilot-instructions: Phase 5 remove spec ask; add Section 5.1; Section 3 qualifier
+- [x] agent.md: Audit step — no spec updates here, ref to Section 5.1
+
 ### Plan 130 — Numeric precision audit (`plans/130-numeric-precision-audit.plan.md`)
 
 - [x] Add `step="0.001"` to recipe-ingredients `amount_net` input
@@ -794,6 +809,8 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 127 | Recipe builder cost display fix | Active |
 | 128 | Hebrew canonical value resolution | Done |
 | 129 | Post-execute verification bullets | Active |
+| 130 | Numeric precision audit | Done |
+| 131 | Spec coverage techdebt commit | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 
