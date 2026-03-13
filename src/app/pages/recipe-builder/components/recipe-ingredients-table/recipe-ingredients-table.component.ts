@@ -71,7 +71,6 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
     const item = formArray.at(event.previousIndex);
     formArray.removeAt(event.previousIndex);
     formArray.insert(event.currentIndex, item);
-    formArray.markAsDirty();
   }
 
   get ingredientGroups() {
@@ -102,7 +101,6 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
     const current = ctrl?.value ?? 0;
     const stepOpts = this.isPurchaseUnitRow(group) ? { integerOnly: true } : undefined;
     ctrl?.setValue(quantityIncrement(current, 0, stepOpts));
-    this.ingredientsFormArray().markAsDirty();
     this.updateLineCalculations(index);
   }
 
@@ -111,7 +109,6 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
     const current = ctrl?.value ?? 0;
     const stepOpts = this.isPurchaseUnitRow(group) ? { integerOnly: true } : undefined;
     ctrl?.setValue(quantityDecrement(current, 0, stepOpts));
-    this.ingredientsFormArray().markAsDirty();
     this.updateLineCalculations(index);
   }
 
@@ -152,7 +149,6 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
       unit,
       amount_net: hasPurchaseOptions ? 1 : 0,
     });
-    this.ingredientsFormArray().markAsDirty();
 
     const index = this.ingredientGroups.indexOf(group);
     if (index !== -1) {
@@ -197,7 +193,6 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
       amount_net: null,
       unit: 'gram',
     });
-    this.ingredientsFormArray().markAsDirty();
     group.updateValueAndValidity();
     this.ingredientsFormArray().updateValueAndValidity();
   }
@@ -256,7 +251,6 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
     }
 
     group.get('total_cost')?.setValue(lineCost);
-    this.ingredientsFormArray().markAsDirty();
     this.ingredientsFormArray().parent?.updateValueAndValidity();
     this.cdr.markForCheck();
   }
@@ -304,14 +298,12 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
   onUnitChange(group: FormGroup, index: number, val: string): void {
     if (val === '__add_unit__') {
       group.get('unit')?.setValue('');
-      this.ingredientsFormArray().markAsDirty();
       const product = group.get('item_type')?.value === 'product' ? (this.getItemMetadata(group) as Product | undefined) : undefined;
       const existingSymbols = product?.purchase_options_?.map((o) => o.unit_symbol_) ?? [];
       setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols: existingSymbols }), 0);
       this.unitRegistry.unitAdded$.pipe(take(1)).subscribe(newUnit => {
         const setUnitAndUpdate = (): void => {
           group.get('unit')?.setValue(newUnit);
-          this.ingredientsFormArray().markAsDirty();
           this.updateLineCalculations(index);
         };
         if (group.get('item_type')?.value === 'product') {
@@ -345,7 +337,6 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
       });
     } else {
       group.get('unit')?.setValue(val);
-      this.ingredientsFormArray().markAsDirty();
       this.updateLineCalculations(index);
     }
   }

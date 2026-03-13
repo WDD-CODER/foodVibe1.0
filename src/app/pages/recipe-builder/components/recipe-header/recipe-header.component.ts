@@ -154,7 +154,6 @@ export class RecipeHeaderComponent {
     }
     this.activeUnit.set(null);
     this.manualTrigger_.update(v => v + 1);
-    this.form().markAsDirty();
   }
 
 
@@ -196,7 +195,6 @@ export class RecipeHeaderComponent {
     // Refresh UI trigger
     this.manualTrigger_.update(v => v + 1);
     this.activeUnit.set(null);
-    this.form().markAsDirty();
   }
 
   updatePrimaryAmount(delta: number): void {
@@ -225,7 +223,6 @@ export class RecipeHeaderComponent {
     this.manualTrigger_.update(v => v + 1);
 
     this.form().updateValueAndValidity({ emitEvent: true });
-    this.form().markAsDirty();
   }
 
 
@@ -328,7 +325,6 @@ export class RecipeHeaderComponent {
     group.get('unit')?.setValue(newUnit);
     this.activeSecondaryEdit_.set(null);
     this.manualTrigger_.update(v => v + 1);
-    this.form().markAsDirty();
   }
 
   /** Add a secondary chip immediately with amount=1 and first available unit. */
@@ -350,7 +346,6 @@ export class RecipeHeaderComponent {
       amountControl.patchValue(isNaN(parsed) ? 0 : Math.max(0, parsed), { emitEvent: true });
     }
     this.manualTrigger_.update(v => v + 1);
-    this.form().markAsDirty();
   }
 
   updateSecondaryAmount(index: number, delta: number): void {
@@ -364,7 +359,6 @@ export class RecipeHeaderComponent {
     const next = Math.max(0, current + delta);
     amountControl.setValue(next, { emitEvent: true });
     this.manualTrigger_.update(v => v + 1);
-    this.form().markAsDirty();
   }
 
   //DELETE
@@ -373,7 +367,6 @@ export class RecipeHeaderComponent {
     // We add 1 because index 0 is always the Primary Unit
     conversions.removeAt(index + 1);
     this.manualTrigger_.update(v => v + 1);
-    this.form().markAsDirty();
   }
 
   //GETTERS
@@ -392,7 +385,6 @@ export class RecipeHeaderComponent {
     const current = (this.form().get('labels')?.value ?? []) as string[];
     if (current.includes(key)) return;
     this.form().get('labels')?.setValue([...current, key], { emitEvent: true });
-    this.form().markAsDirty();
     this.labelTrigger_.update(v => v + 1);
   }
 
@@ -400,7 +392,6 @@ export class RecipeHeaderComponent {
     if (this.autoLabels().includes(key)) return;
     const current = (this.form().get('labels')?.value ?? []) as string[];
     this.form().get('labels')?.setValue(current.filter(k => k !== key), { emitEvent: true });
-    this.form().markAsDirty();
     this.labelTrigger_.update(v => v + 1);
   }
 
@@ -441,7 +432,6 @@ export class RecipeHeaderComponent {
 
   protected clearAllManualLabels(): void {
     this.form().get('labels')?.setValue([], { emitEvent: true });
-    this.form().markAsDirty();
     this.labelTrigger_.update(v => v + 1);
   }
 

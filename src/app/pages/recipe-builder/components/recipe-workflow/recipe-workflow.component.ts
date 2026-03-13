@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormArray, FormGroup, FormBuilder } from '@angular
 import { LucideAngularModule } from 'lucide-angular'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { PreparationRegistryService } from '@services/preparation-registry.service'
+import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service'
 import { GlobalSpecificModalService } from '@services/global-specific-modal.service'
 import { PreparationSearchComponent } from '../preparation-search/preparation-search.component'
 import type { PreparationEntry } from '@services/preparation-registry.service'
@@ -38,6 +39,7 @@ export class RecipeWorkflowComponent {
   private fb = inject(FormBuilder)
   private readonly unitRegistry_ = inject(UnitRegistryService)
   private readonly prepRegistry_ = inject(PreparationRegistryService)
+  private readonly translationKeyModal_ = inject(TranslationKeyModalService)
   private readonly globalSpecificModal_ = inject(GlobalSpecificModalService)
 
   workflowFormArray = input.required<FormArray>()
@@ -93,7 +95,6 @@ export class RecipeWorkflowComponent {
     const item = formArray.at(event.previousIndex);
     formArray.removeAt(event.previousIndex);
     formArray.insert(event.currentIndex, item);
-    formArray.markAsDirty();
     if (this.type() === 'preparation') {
       formArray.controls.forEach((group, i) => {
         group.get('order')?.setValue(i + 1);
@@ -122,15 +123,12 @@ export class RecipeWorkflowComponent {
   onUnitChange(group: FormGroup, val: string): void {
     if (val === '__add_unit__') {
       group.get('unit')?.setValue('');
-      this.workflowFormArray().markAsDirty();
       this.unitRegistry_.openUnitCreator();
       this.unitRegistry_.unitAdded$.pipe(take(1)).subscribe(newUnit => {
         group.get('unit')?.setValue(newUnit);
-        this.workflowFormArray().markAsDirty();
       });
     } else {
       group.get('unit')?.setValue(val);
-      this.workflowFormArray().markAsDirty();
     }
   }
 
@@ -142,28 +140,24 @@ export class RecipeWorkflowComponent {
     const ctrl = group.get('quantity')
     const current = ctrl?.value ?? 0
     ctrl?.setValue(quantityIncrement(current, 0))
-    this.workflowFormArray().markAsDirty()
   }
 
   decrementQuantity(group: FormGroup, index: number): void {
     const ctrl = group.get('quantity')
     const current = ctrl?.value ?? 0
     ctrl?.setValue(quantityDecrement(current, 0))
-    this.workflowFormArray().markAsDirty()
   }
 
   incrementLaborTime(group: FormGroup): void {
     const ctrl = group.get('labor_time')
     const current = ctrl?.value ?? 0
     ctrl?.setValue(quantityIncrement(current, 0, { integerOnly: true }))
-    this.workflowFormArray().markAsDirty()
   }
 
   decrementLaborTime(group: FormGroup): void {
     const ctrl = group.get('labor_time')
     const current = ctrl?.value ?? 0
     ctrl?.setValue(quantityDecrement(current, 0, { integerOnly: true }))
-    this.workflowFormArray().markAsDirty()
   }
 
   enterLaborTimeEdit(index: number): void {
@@ -185,7 +179,6 @@ export class RecipeWorkflowComponent {
     const parsed = typeof raw === 'number' ? raw : parseInt(String(raw ?? ''), 10)
     const sanitized = !isNaN(parsed) && parsed >= 0 ? parsed : 0
     ctrl?.setValue(sanitized)
-    this.workflowFormArray().markAsDirty()
     this.editingLaborTimeIndex_.set(null)
   }
 
@@ -206,27 +199,14 @@ export class RecipeWorkflowComponent {
   }
 
   async onCategoryChange(group: FormGroup, value: string): Promise<void> {
-    const markDirty = () => this.workflowFormArray().markAsDirty();
     if (value === '__add_new__') {
-      const hebrewLabel = prompt('Enter category name (Hebrew):')
-      if (!hebrewLabel?.trim()) {
+      const result = await this.translationKeyModal_.open('', 'category')
+      if (!isTranslationKeyResult(result) || !result.englishKey?.trim() || !result.hebrewLabel?.trim()) {
         group.patchValue({ category_name: '' })
-        markDirty()
         return
       }
-      const englishKey = prompt(
-        'Enter English value for this category (e.g., vegetables, cuts):',
-        hebrewLabel.toLowerCase().replace(/\s+/g, '_')
-      )
-      if (!englishKey?.trim()) {
-        group.patchValue({ category_name: '' })
-        markDirty()
-        return
-      }
-      const key = englishKey.trim().toLowerCase().replace(/\s+/g, '_')
-      await this.prepRegistry_.registerCategory(key, hebrewLabel)
-      group.patchValue({ category_name: key })
-      markDirty()
+      await this.prepRegistry_.registerCategory(result.englishKey, result.hebrewLabel)
+      group.patchValue({ category_name: result.englishKey })
       return
     }
 
@@ -235,12 +215,10 @@ export class RecipeWorkflowComponent {
 
     if (!preparationName || !mainCategory) {
       group.patchValue({ category_name: value })
-      markDirty()
       return
     }
     if (value === mainCategory) {
       group.patchValue({ category_name: value })
-      markDirty()
       return
     }
 
@@ -262,7 +240,6 @@ export class RecipeWorkflowComponent {
     } else {
       group.patchValue({ category_name: mainCategory })
     }
-    markDirty()
   }
 
   onInstructionEnter(event: Event): void {

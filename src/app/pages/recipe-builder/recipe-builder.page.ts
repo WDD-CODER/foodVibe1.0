@@ -32,7 +32,7 @@ import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util';
 import { ExportService } from '@services/export.service';
-import { HeroFabService } from '@services/hero-fab.service';
+import { HeroFabService, type HeroFabAction } from '@services/hero-fab.service';
 import type { ExportPayload } from '../../core/utils/export.util';
 import { ExportPreviewComponent } from '../../shared/export-preview/export-preview.component';
 import { ExportToolbarOverlayComponent } from '../../shared/export-toolbar-overlay/export-toolbar-overlay.component';
@@ -86,6 +86,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   /** Bumped when ingredients change so cost/weight computeds re-run (form is not a signal). */
   private ingredientsFormVersion_ = signal(0);
+
+  /** Snapshot of form value when user entered the page (for hasRealChanges). */
+  private initialRecipeSnapshot_: string | null = null;
 
   /** When set, the ingredients table will focus the search input at this row index; cleared after focus. */
   protected focusIngredientSearchAtRow_ = signal<number | null>(null);
@@ -366,11 +369,22 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       .subscribe(() => this.recipeForm_.get('name_hebrew')?.updateValueAndValidity({ emitEvent: false }));
     this.updateTotalWeightG();
     this.recipeForm_.markAsPristine();
+    if (!this.historyViewMode_() && !this.recipeForm_.disabled) {
+      this.initialRecipeSnapshot_ = this.getRecipeSnapshotForComparison();
+    }
 
-    this.heroFab_.setPageActions(
-      [{ labelKey: 'export', icon: 'file-down', run: () => this.openExportFromHeroFab() }],
-      'append'
-    );
+    const actions: HeroFabAction[] = [
+      { labelKey: 'export', icon: 'file-down', run: () => this.openExportFromHeroFab() }
+    ];
+    const id = this.recipeId_();
+    if (id) {
+      actions.push({
+        labelKey: 'cook_view',
+        icon: 'cooking-pot',
+        run: () => this.router_.navigate(['/cook', id])
+      });
+    }
+    this.heroFab_.setPageActions(actions, 'replace');
     this.router_.events
       .pipe(
         filter((e): e is NavigationStart => e instanceof NavigationStart),
@@ -543,10 +557,70 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     return (this.recipeForm_.get('logistics') as FormGroup)?.get('baseline_') as FormArray;
   }
 
-  /** For route guard: true when there are unsaved edits (excludes history view and disabled form). */
-  hasUnsavedEdits(): boolean {
+  /** For pendingChangesGuard: true when current form value differs from initial state when user entered the page. */
+  hasRealChanges(): boolean {
     if (this.historyViewMode_() || this.recipeForm_.disabled) return false;
-    return this.recipeForm_.dirty === true;
+    if (this.initialRecipeSnapshot_ === null) return this.recipeForm_.dirty === true;
+    return this.getRecipeSnapshotForComparison() !== this.initialRecipeSnapshot_;
+  }
+
+  /** Normalized form value for comparison (numbers coerced, labels sorted). */
+  private getRecipeSnapshotForComparison(): string {
+    const raw = this.recipeForm_.getRawValue() as Record<string, unknown>;
+    const labels = (raw?.['labels'] ?? []) as string[];
+    const normalizedLabels = [...labels].sort((a, b) => (a ?? '').localeCompare(b ?? ''));
+    const yieldConv = (raw?.['yield_conversions'] ?? []) as { amount?: number | string; unit?: string }[];
+    const yieldNorm = yieldConv.map((c) => ({
+      amount: Number(c?.amount ?? 0),
+      unit: (c?.unit ?? '').toString()
+    }));
+    const ingredients = (raw?.['ingredients'] ?? []) as { referenceId?: string; item_type?: string; amount_net?: number | string; unit?: string; total_cost?: number }[];
+    const ingNorm = ingredients.map((ing) => ({
+      referenceId: (ing?.referenceId ?? '').toString(),
+      item_type: (ing?.item_type ?? '').toString(),
+      amount_net: Number(ing?.amount_net ?? 0),
+      unit: (ing?.unit ?? '').toString(),
+      total_cost: Number(ing?.total_cost ?? 0)
+    }));
+    const workflow = (raw?.['workflow_items'] ?? []) as Record<string, unknown>[];
+    const workflowNorm = workflow.map((row) => {
+      if (row?.['order'] != null || row?.['instruction'] != null || row?.['labor_time'] != null) {
+        return {
+          order: Number(row?.['order'] ?? 0),
+          instruction: (row?.['instruction'] ?? '').toString(),
+          labor_time: Number(row?.['labor_time'] ?? 0)
+        };
+      }
+      return {
+        preparation_name: (row?.['preparation_name'] ?? '').toString(),
+        category_name: (row?.['category_name'] ?? '').toString(),
+        main_category_name: (row?.['main_category_name'] ?? '').toString(),
+        quantity: Number(row?.['quantity'] ?? 0),
+        unit: (row?.['unit'] ?? '').toString()
+      };
+    });
+    const logistics = raw?.['logistics'] as { baseline_?: unknown[] } | undefined;
+    const baselineRaw = (logistics?.['baseline_'] ?? []) as { equipment_id_?: string; quantity_?: number; phase_?: string; is_critical_?: boolean; notes_?: string }[];
+    const baselineNorm = baselineRaw.map((r) => ({
+      equipment_id_: (r?.equipment_id_ ?? '').toString(),
+      quantity_: Number(r?.quantity_ ?? 0),
+      phase_: (r?.phase_ ?? 'both').toString(),
+      is_critical_: !!r?.is_critical_,
+      notes_: (r?.notes_ ?? '').toString()
+    }));
+    const normalized = {
+      name_hebrew: (raw?.['name_hebrew'] ?? '').toString(),
+      recipe_type: (raw?.['recipe_type'] ?? 'preparation').toString(),
+      serving_portions: Number(raw?.['serving_portions'] ?? 1),
+      total_weight_g: Number(raw?.['total_weight_g'] ?? 0),
+      total_cost: Number(raw?.['total_cost'] ?? 0),
+      labels: normalizedLabels,
+      yield_conversions: yieldNorm,
+      ingredients: ingNorm,
+      workflow_items: workflowNorm,
+      logistics_baseline: baselineNorm
+    };
+    return JSON.stringify(normalized);
   }
 
   protected get allEquipment_() {
@@ -685,7 +759,6 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       is_critical_: true,
       notes_: undefined
     }));
-    this.recipeForm_.markAsDirty();
     this.logisticsSelectedToolId_.set(null);
     this.logisticsToolSearchQuery_.set('');
     this.logisticsToolQuantity_.set(1);
@@ -774,12 +847,10 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   protected addBaselineRow(): void {
     this.logisticsBaselineArray.push(this.recipeFormService_.createBaselineRow());
-    this.recipeForm_.markAsDirty();
   }
 
   protected removeBaselineRow(index: number): void {
     this.logisticsBaselineArray.removeAt(index);
-    this.recipeForm_.markAsDirty();
   }
 
   addNewStep(category?: string | void): void {
@@ -800,7 +871,6 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const newGroup = this.recipeFormService_.createIngredientGroup();
     this.ingredientsArray.push(newGroup);
     this.ingredientsArray.updateValueAndValidity();
-    this.recipeForm_.get('ingredients')?.markAsDirty();
     this.focusIngredientSearchAtRow_.set(this.ingredientsArray.length - 1);
   }
 
