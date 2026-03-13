@@ -5,7 +5,7 @@ import { RecipeCostService } from '@services/recipe-cost.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { signal } from '@angular/core';
 import { of } from 'rxjs';
-import { LucideAngularModule, Search, Trash2, Pencil, Plus, Menu, X, ShieldAlert, ArrowUpDown, ArrowUp, ArrowDown, ChevronRight, ChevronLeft, ChevronDown, BookOpen, Tag, CircleX } from 'lucide-angular';
+import { LucideAngularModule, Search, Trash2, Pencil, Plus, Menu, X, ShieldAlert, ArrowUpDown, ArrowUp, ArrowDown, ChevronRight, ChevronLeft, ChevronDown, BookOpen, Tag, CircleX, CookingPot, CookingPotIcon } from 'lucide-angular';
 import { Recipe } from '@models/recipe.model';
 import { TranslationService } from '@services/translation.service';
 import { UserService } from '@services/user.service';
@@ -43,7 +43,7 @@ describe('RecipeBookListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         RecipeBookListComponent,
-        LucideAngularModule.pick({ Search, Trash2, Pencil, Plus, Menu, X, ShieldAlert, ArrowUpDown, ArrowUp, ArrowDown, ChevronRight, ChevronLeft, ChevronDown, BookOpen, Tag, CircleX })
+        LucideAngularModule.pick({ Search, Trash2, Pencil, Plus, Menu, X, ShieldAlert, ArrowUpDown, ArrowUp, ArrowDown, ChevronRight, ChevronLeft, ChevronDown, BookOpen, Tag, CircleX, CookingPot, CookingPotIcon })
       ],
       providers: [
         { provide: KitchenStateService, useValue: mockKitchenState },
