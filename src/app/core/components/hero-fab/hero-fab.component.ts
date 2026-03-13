@@ -24,16 +24,11 @@ export class HeroFabComponent {
   readonly isOnMenuIntelligence_ = signal(false);
   readonly isOnRecipeBuilder_ = signal(false);
 
-  /** Actions to show: page-only (replace), page + default (append), or default only. */
+  /** Actions to show: page-specific only; empty when no page has registered actions. */
   protected readonly effectiveActions_ = computed(() => {
     const state = this.heroFab_.pageActions();
-    const defaultActions: HeroFabAction[] = [
-      { labelKey: 'recipe_creation', icon: 'plus', run: () => this.goToRecipeBuilder() },
-      { labelKey: 'cook', icon: 'cooking-pot', run: () => this.goToCook() }
-    ];
-    if (!state) return defaultActions;
-    if (state.mode === 'replace') return state.actions;
-    return [...state.actions, ...defaultActions];
+    if (!state) return [];
+    return state.actions;
   });
 
   constructor() {

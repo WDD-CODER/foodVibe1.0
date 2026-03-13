@@ -346,6 +346,7 @@
         "unsaved_changes_confirm": "יש שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?",
         "leave_without_saving": "יציאה בלי לשמור",
         "cook": "בישול",
+        "cook_view": "מצב בישול",
         "make_quantity": "כמות להכנה",
         "no_recipe_selected": "לא נבחר מתכון או מנה",
         "decrease": "הקטן",

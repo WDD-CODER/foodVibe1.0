@@ -198,7 +198,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.heroFab.setPageActions(
-      [{ labelKey: 'menu_toolbar_open', icon: 'file-down', run: () => this.openToolbar() }],
+      [{ labelKey: 'menu_toolbar_open', icon: 'printer', run: () => this.openToolbar() }],
       'replace'
     );
     this.router.events
