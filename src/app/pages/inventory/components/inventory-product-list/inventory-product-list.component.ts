@@ -1,7 +1,7 @@
 import { Component, inject, ChangeDetectionStrategy, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 
 import { KitchenStateService } from '@services/kitchen-state.service';
@@ -46,6 +46,7 @@ export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
 })
 export class InventoryProductListComponent implements OnInit, OnDestroy {
   private readonly kitchenStateService = inject(KitchenStateService);
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly heroFab = inject(HeroFabService);
   private readonly translationService = inject(TranslationService);
@@ -71,6 +72,10 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected carouselHeaderIndex_ = signal(0);
 
   ngOnInit(): void {
+    const lowStock = this.route.snapshot.queryParams['lowStock'];
+    if (lowStock === '1') {
+      this.lowStockOnly_.set(true);
+    }
     this.heroFab.setPageActions(
       [{ labelKey: 'add_product', icon: 'plus', run: () => this.router.navigate(['/inventory/add']) }],
       'replace'

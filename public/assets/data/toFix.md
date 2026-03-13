@@ -80,7 +80,7 @@ in the menu-bulder
 
  ////////////////////////3/12/26////////////////////////
  
-recipe-builder / edit
+recipe-builder / edit *(completed 2026-03-13 — Plan 147)*
 
 - Add the option to change the item by clicking on the item's name and writing a different item.Inside the ingredient index.
 
@@ -94,28 +94,12 @@ unit-creator-modal
 - Make a better.Keyboard .Adjustments so it will be easier to add.Using only key. First thing window.Add model opens. The focus needs to go to the.Search of the name of the item.Once selected using Enter or with the mouse.Focus needs to turn straight away to the quantity.With.Select and focus directive.Once the user clicked enter.He needs to pass him straight into the.Select Unit.And straight away allow the user to scroll up and down.The year is even if the user went using tab or if he went using clicking the.Mouse once you've heated this, select unit.It needs to open the drop down and allow him to travel using the keyboard. Right now the behavior that we have is when I'm traveling from the amount using tab into the select of the unit only.Highlights it, but if I'm pressing up and down with the keyboard it's not moving through the drop down, it's just moving the scroll of the main screen up and down. Causing the user to need to literally click it.This select with the mouse or inner, press enter when it's.Active to start scrolling.
 
 
-dashboard 
+dashboard
 
--       <button type="button" class="qa-btn primary" (click)="goToAddProduct()"
-        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
-        <lucide-icon name="plus-circle" [size]="18"></lucide-icon>
-        <span>{{ 'add_product' | translatePipe }}</span>
-      </button>
-
-This button has.A different style from the rest of the buttons.In this container that is sitting in.We need to align it according to all of them.They need to be the same in this window. 
-
-- Dashboard sections - This is like a header inside.The page which doesn't align to the rest of the layout that we have in the.Application we need to align this style to be according to what we already used. So we won't have a double header inside the page. We are using it across the different.Options inside the dashboard like the.Core definitions and the venues.But I'm thinking of maybe we should.Just design it a little bit better so it will look.Unified with the whole application. 
-
--       <article class="kpi-card info">
-        <h2 class="kpi-label">{{ 'unapproved_recipes' | translatePipe }}</h2>
-        <p class="kpi-value">{{ unapprovedCount_() }}</p>
-      </article>
-    </section>
-
- - Over here I want to add a button to watch only the unsaved.Or unauthorized recipes or dishes.So like in the different Kpis that I have this.Clickable link.I want to like to apply a clickable link over here that will send me straight away to the recipe-book .With the filtering of.Not approved.So when the user clicks this, it will straightaway send them to.Recipe book.With the relevant filtering of unapproved and show only this unapproved items. 
-
-- The same concept I want to have a button. And the low inventory?That would show me.Only the low inventory items in the inventory list.
-
+- Add Product quick-action button had a different style from the rest in that container; align so all quick-actions look the same in this window.
+- Dashboard sections — header inside the page did not align with the rest of the layout; align section style across Overview, Core definitions, and Venues so it looks unified with the whole application (no double header).
+- Unapproved recipes KPI — add a clickable link that sends the user to Recipe book with filtering for not approved, showing only unapproved items.
+- Low stock KPI — add a clickable link that sends the user to Inventory with filtering for low stock only.
 
 activity-section
 
@@ -134,3 +118,11 @@ lists
 - Make sure whenever the.Media query goes underneath the first one.The sidebar is closed.Automatically without a transition.So if the user.Screens get shrinked.We won't see the sidebar until the user would.Click that hamburger icon.  -  I'm kind of sure that I've made it yesterday and was working accordingly. I don't know why now it's not working. Something got **** **** 
 
 - allergen-expanded dense-grid - Over here, we need to.State that in case that it's only one item inside it needs to show it only one item centered. If more than one item it should.Work accordingly. The issue right now is that when there's only one allergen.It doesn't appear at the center, it appears to the right, looking awkward.We need to fix it. 
+
+
+Add new.Category modal - 
+-There should be two cases this model opens.
+1. In case that the add new category model have opened using the Drop down button of add new category. The focus will go straight away to the Hebrew. Allowing the user to start typing. Once he presses enter or tab it moves him into the English value, allowing him to start typing Again, now as he presses enter at this point, it will save.
+
+2. In case that The user has added a new Hebrew value that is Already untranslated  in our application.This model will open shoung the Hebrew value already in the Hebrew input. And the focus will start in the English.Input allowing the user to start typing the English value. Once he presses enter, it saves.
+

@@ -9,11 +9,12 @@ import { TranslationService } from '@services/translation.service';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { ActivityLogService, ActivityEntry, ActivityChange } from '@services/activity-log.service';
 import { ClickOutSideDirective } from '@directives/click-out-side';
+import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive';
 
 @Component({
   selector: 'app-dashboard-overview',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, TranslatePipe, ClickOutSideDirective],
+  imports: [CommonModule, LucideAngularModule, TranslatePipe, ClickOutSideDirective, ScrollIndicatorsDirective],
   templateUrl: './dashboard-overview.component.html',
   styleUrl: './dashboard-overview.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -138,6 +139,20 @@ export class DashboardOverviewComponent {
 
   protected goToRecipeBook(): void {
     void this.router.navigate(['/recipe-book']);
+  }
+
+  protected goToRecipeBookUnapproved(): void {
+    void this.router.navigate(['/recipe-book'], {
+      queryParams: { filters: 'Approved:false' },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  protected goToInventoryLowStock(): void {
+    void this.router.navigate(['/inventory'], {
+      queryParams: { lowStock: '1' },
+      queryParamsHandling: 'merge',
+    });
   }
 
   protected goToSuppliers(): void {

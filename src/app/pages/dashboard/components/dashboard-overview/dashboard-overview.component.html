@@ -2,7 +2,7 @@
   <header class="dashboard-header">
     <h1 class="page-title">{{ 'dashboard' | translatePipe }}</h1>
     <div class="quick-actions">
-      <button type="button" class="qa-btn primary" (click)="goToAddProduct()"
+      <button type="button" class="qa-btn" (click)="goToAddProduct()"
         [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
         <lucide-icon name="plus-circle" [size]="18"></lucide-icon>
         <span>{{ 'add_product' | translatePipe }}</span>
@@ -51,11 +51,17 @@
       <article class="kpi-card warning">
         <h2 class="kpi-label">{{ 'low_stock' | translatePipe }}</h2>
         <p class="kpi-value">{{ lowStockCount_() }}</p>
+        <button type="button" class="link-btn" (click)="goToInventoryLowStock()">
+          {{ 'view_inventory' | translatePipe }}
+        </button>
       </article>
 
       <article class="kpi-card info">
         <h2 class="kpi-label">{{ 'unapproved_recipes' | translatePipe }}</h2>
         <p class="kpi-value">{{ unapprovedCount_() }}</p>
+        <button type="button" class="link-btn" (click)="goToRecipeBookUnapproved()">
+          {{ 'view_recipes' | translatePipe }}
+        </button>
       </article>
     </section>
 
@@ -64,8 +70,9 @@
         <h2>{{ 'recent_activity' | translatePipe }}</h2>
       </header>
 
-      <div class="activity-list" *ngIf="getRecentActivity().length; else noActivity">
-        <div class="activity-item" *ngFor="let item of getRecentActivity(); trackBy: trackByActivityId">
+      <div class="activity-list-scroll-wrap" *ngIf="getRecentActivity().length; else noActivity">
+        <div class="activity-list" scrollIndicators>
+          <div class="activity-item" *ngFor="let item of getRecentActivity(); trackBy: trackByActivityId">
           <span class="entity-type-tag" [attr.data-entity]="item.entityType">
             {{ (item.entityType === 'product'
               ? 'product'
@@ -110,6 +117,15 @@
           <span class="activity-type" [attr.data-action]="item.action">
             {{ ('activity_' + item.action) | translatePipe }}
           </span>
+          </div>
+        </div>
+        <div class="activity-scroll-zone activity-scroll-zone--top" aria-hidden="true"></div>
+        <div class="activity-scroll-zone activity-scroll-zone--bottom" aria-hidden="true"></div>
+        <div class="activity-scroll-indicator activity-scroll-indicator--top" aria-hidden="true">
+          <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
+        </div>
+        <div class="activity-scroll-indicator activity-scroll-indicator--bottom" aria-hidden="true">
+          <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
         </div>
       </div>
 
