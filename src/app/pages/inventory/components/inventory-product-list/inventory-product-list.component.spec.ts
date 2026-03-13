@@ -4,7 +4,7 @@ import { KitchenStateService } from '@services/kitchen-state.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { signal } from '@angular/core';
 import { of } from 'rxjs';
-import { LucideAngularModule, Search, Trash2, Pencil, PlusCircle, Plus, Menu, X, ArrowUpDown, ArrowUp, ArrowDown, ShieldAlert } from 'lucide-angular';
+import { LucideAngularModule, Search, Trash2, Pencil, PlusCircle, Plus, Menu, X, ArrowUpDown, ArrowUp, ArrowDown, ShieldAlert, ChevronRight, ChevronLeft, ChevronDown, Package, CircleX } from 'lucide-angular';
 import { Product } from '@models/product.model';
 import { TranslationService } from '@services/translation.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
@@ -62,7 +62,7 @@ describe('InventoryProductListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         InventoryProductListComponent,
-        LucideAngularModule.pick({ Search, Trash2, Pencil, PlusCircle, Plus, Menu, X, ArrowUpDown, ArrowUp, ArrowDown, ShieldAlert })
+        LucideAngularModule.pick({ Search, Trash2, Pencil, PlusCircle, Plus, Menu, X, ArrowUpDown, ArrowUp, ArrowDown, ShieldAlert, ChevronRight, ChevronLeft, ChevronDown, Package, CircleX })
       ],
       providers: [
         { provide: KitchenStateService, useValue: mockKitchenState },

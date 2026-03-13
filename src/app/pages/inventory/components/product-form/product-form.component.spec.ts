@@ -8,7 +8,7 @@ import { UnitRegistryService } from '@services/unit-registry.service';
 import { UtilService } from '@services/util.service';
 import { UserMsgService } from '@services/user-msg.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { signal } from '@angular/core';
 import { LucideAngularModule, ShieldAlert, X, FlaskConical, Plus, Trash2, ArrowRight, Save, ChevronDown, ChevronUp, Tags, Truck, Package, CalendarClock } from 'lucide-angular';
 import { Product } from '@models/product.model';
@@ -38,12 +38,14 @@ describe('ProductFormComponent', () => {
     mockConversionService.handleYieldChange.and.returnValue({ wastePercent: 0 });
     mockConversionService.getSuggestedPurchasePrice.and.returnValue(0);
     mockUnitRegistry = jasmine.createSpyObj('UnitRegistryService',
-      ['getConversion', 'openUnitCreator'],
+      ['getConversion', 'openUnitCreator', 'refreshFromStorage'],
       {
         allUnitKeys_: mockUnitKeys,
-        isCreatorOpen_: mockIsCreatorOpen // This satisfies line 88 in your component
+        isCreatorOpen_: mockIsCreatorOpen,
+        unitAdded$: new Subject<string>()
       }
     );
+    mockUnitRegistry.refreshFromStorage.and.returnValue(Promise.resolve());
 
     const mockMetadata = jasmine.createSpyObj('MetadataRegistryService', ['registerCategory'], {
       allCategories_: mockCategories,
@@ -136,8 +138,8 @@ describe('ProductFormComponent', () => {
       // 4. Trigger unit change - this calls getConversion and getSuggestedPurchasePrice
       firstRow.get('unit_symbol_')?.setValue('kg');
 
-      // 5. Assert
-      expect(firstRow.get('conversion_rate_')?.value).toBe(1000);
+      // 5. Assert — conversion_rate_ = base units per 1 purchase unit; kg/kg => 1
+      expect(firstRow.get('conversion_rate_')?.value).toBe(1);
       expect(firstRow.get('price_override_')?.value).toBe(10000);
     });
   });
