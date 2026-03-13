@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, output, signal, afterNextRender } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, output, signal, afterNextRender, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -16,6 +16,7 @@ import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.compone
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
 import { useListState, StringParam, StringSetParam } from 'src/app/core/utils/list-state.util';
+import { HeroFabService } from '@services/hero-fab.service';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 
 const ENV_TYPES: EnvironmentType[] = [
@@ -45,9 +46,10 @@ const ENV_TYPES: EnvironmentType[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   inputs: ['embeddedInDashboard'],
 })
-export class VenueListComponent {
+export class VenueListComponent implements OnInit, OnDestroy {
   private readonly venueData = inject(VenueDataService);
   private readonly router = inject(Router);
+  private readonly heroFab = inject(HeroFabService);
   protected readonly isLoggedIn = inject(UserService).isLoggedIn;
   private readonly requireAuthService = inject(RequireAuthService);
   private readonly userMsg = inject(UserMsgService);
@@ -80,6 +82,25 @@ export class VenueListComponent {
       if (q.matches) this.isPanelOpen_.set(false);
       q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); });
     });
+  }
+
+  ngOnInit(): void {
+    if (!this.embeddedInDashboard) {
+      this.heroFab.setPageActions(
+        [{
+          labelKey: 'add_venue',
+          icon: 'plus',
+          run: () => {
+            if (this.requireAuthService.requireAuth()) void this.router.navigate(['/venues/add']);
+          }
+        }],
+        'replace'
+      );
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.heroFab.clearPageActions();
   }
 
   protected togglePanel(): void {

@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
@@ -18,6 +18,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
+import { HeroFabService } from '@services/hero-fab.service';
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
 
@@ -43,10 +44,10 @@ export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
   styleUrl: './inventory-product-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class InventoryProductListComponent {
-
+export class InventoryProductListComponent implements OnInit, OnDestroy {
   private readonly kitchenStateService = inject(KitchenStateService);
   private readonly router = inject(Router);
+  private readonly heroFab = inject(HeroFabService);
   private readonly translationService = inject(TranslationService);
   private readonly confirmModal = inject(ConfirmModalService);
   private readonly equipmentData = inject(EquipmentDataService);
@@ -68,6 +69,17 @@ export class InventoryProductListComponent {
   protected deletingId_ = signal<string | null>(null);
   protected savingPriceId_ = signal<string | null>(null);
   protected carouselHeaderIndex_ = signal(0);
+
+  ngOnInit(): void {
+    this.heroFab.setPageActions(
+      [{ labelKey: 'add_product', icon: 'plus', run: () => this.router.navigate(['/inventory/add']) }],
+      'replace'
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.heroFab.clearPageActions();
+  }
 
   // LISTING
   protected filterCategories_ = computed(() => {

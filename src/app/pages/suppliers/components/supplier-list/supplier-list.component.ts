@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, output, signal, afterNextRender } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, output, signal, afterNextRender, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -21,6 +21,7 @@ import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { useListState, StringParam, BooleanParam, NumberSetParam } from 'src/app/core/utils/list-state.util';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
+import { HeroFabService } from '@services/hero-fab.service';
 
 const DAY_LABELS = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'];
 
@@ -33,11 +34,12 @@ const DAY_LABELS = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'];
   changeDetection: ChangeDetectionStrategy.OnPush,
   inputs: ['embeddedInDashboard'],
 })
-export class SupplierListComponent {
+export class SupplierListComponent implements OnInit, OnDestroy {
   protected readonly isLoggedIn = inject(UserService).isLoggedIn;
   private readonly supplierData = inject(SupplierDataService);
   private readonly kitchenState = inject(KitchenStateService);
   private readonly supplierModal = inject(SupplierModalService);
+  private readonly heroFab = inject(HeroFabService);
   private readonly translation = inject(TranslationService);
   private readonly router = inject(Router);
   private readonly userMsg = inject(UserMsgService);
@@ -77,6 +79,26 @@ export class SupplierListComponent {
       q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); });
     });
   }
+
+  ngOnInit(): void {
+    if (!this.embeddedInDashboard) {
+      this.heroFab.setPageActions(
+        [{
+          labelKey: 'add_supplier',
+          icon: 'plus',
+          run: () => {
+            if (this.requireAuthService.requireAuth()) this.supplierModal.openAdd();
+          }
+        }],
+        'replace'
+      );
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.heroFab.clearPageActions();
+  }
+
   /** Delivery days to filter (0=Sun .. 6=Sat). Empty set = show all. */
   protected selectedDays_ = signal<Set<number>>(new Set());
   protected hasLinkedOnly_ = signal(false);

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, afterNextRender } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, afterNextRender, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -19,6 +19,7 @@ import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 import { useListState, StringParam, NullableBooleanParam, StringSetParam } from 'src/app/core/utils/list-state.util';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
+import { HeroFabService } from '@services/hero-fab.service';
 
 type SortField = 'name' | 'category' | 'owned';
 
@@ -30,11 +31,12 @@ type SortField = 'name' | 'category' | 'owned';
   styleUrl: './equipment-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EquipmentListComponent {
+export class EquipmentListComponent implements OnInit, OnDestroy {
   protected readonly isLoggedIn = inject(UserService).isLoggedIn;
   private readonly requireAuthService = inject(RequireAuthService);
   private readonly equipmentData = inject(EquipmentDataService);
   private readonly router = inject(Router);
+  private readonly heroFab = inject(HeroFabService);
   private readonly userMsg = inject(UserMsgService);
   private readonly translation = inject(TranslationService);
   private readonly logging = inject(LoggingService);
@@ -76,6 +78,18 @@ export class EquipmentListComponent {
       q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); });
     });
   }
+
+  ngOnInit(): void {
+    this.heroFab.setPageActions(
+      [{ labelKey: 'add_equipment', icon: 'plus', run: () => this.router.navigate([...this.equipmentBasePath, 'add']) }],
+      'replace'
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.heroFab.clearPageActions();
+  }
+
   /** Selected categories; empty set = show all. */
   protected selectedCategories_ = signal<Set<EquipmentCategory>>(new Set());
   /** null = no filter, true = consumable only, false = non-consumable only. */
