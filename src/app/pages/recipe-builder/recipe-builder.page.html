@@ -126,7 +126,7 @@
         (click)="tableLogicCollapsed_() && toggleTableLogic()">
         <div class="section-card-header" (click)="toggleTableLogic(); $event.stopPropagation()" role="button" tabindex="0" (keydown.enter)="toggleTableLogic()" (keydown.space)="toggleTableLogic(); $event.preventDefault()">
           <h2 class="section-title">{{ 'ingredients_index' | translatePipe }}</h2>
-          <button type="button" class="section-toggle-btn" (click)="toggleTableLogic(); $event.stopPropagation()" [attr.aria-expanded]="!tableLogicCollapsed_()">
+          <button type="button" class="section-toggle-btn" tabindex="-1" (click)="toggleTableLogic(); $event.stopPropagation()" [attr.aria-expanded]="!tableLogicCollapsed_()">
             <lucide-icon [name]="tableLogicCollapsed_() ? 'chevron-down' : 'chevron-up'" [size]="20"></lucide-icon>
           </button>
         </div>
@@ -153,7 +153,7 @@
           <h2 class="section-title">
             {{ (recipeType_() === 'dish' ? 'prep_list_mise_en_place' : 'prep_workflow') | translatePipe }}
           </h2>
-          <button type="button" class="section-toggle-btn" (click)="toggleWorkflowLogic(); $event.stopPropagation()" [attr.aria-expanded]="!workflowLogicCollapsed_()">
+          <button type="button" class="section-toggle-btn" tabindex="-1" (click)="toggleWorkflowLogic(); $event.stopPropagation()" [attr.aria-expanded]="!workflowLogicCollapsed_()">
             <lucide-icon [name]="workflowLogicCollapsed_() ? 'chevron-down' : 'chevron-up'" [size]="20"></lucide-icon>
           </button>
         </div>
@@ -172,7 +172,7 @@
           (click)="logisticsLogicCollapsed_() && toggleLogisticsLogic()">
           <div class="section-card-header" (click)="toggleLogisticsLogic(); $event.stopPropagation()" role="button" tabindex="0" (keydown.enter)="toggleLogisticsLogic()" (keydown.space)="toggleLogisticsLogic(); $event.preventDefault()">
             <h2 class="section-title">{{ 'dish_logistics' | translatePipe }}</h2>
-            <button type="button" class="section-toggle-btn" (click)="toggleLogisticsLogic(); $event.stopPropagation()" [attr.aria-expanded]="!logisticsLogicCollapsed_()">
+            <button type="button" class="section-toggle-btn" tabindex="-1" (click)="toggleLogisticsLogic(); $event.stopPropagation()" [attr.aria-expanded]="!logisticsLogicCollapsed_()">
               <lucide-icon [name]="logisticsLogicCollapsed_() ? 'chevron-down' : 'chevron-up'" [size]="20"></lucide-icon>
             </button>
           </div>
@@ -189,14 +189,14 @@
                     [placeholder]="'search_tool_placeholder' | translatePipe" />
                 </div>
                 <div class="logistics-qty-controls">
-                  <button type="button" class="qty-btn minus" (click)="decrementLogisticsQuantity()"
+                  <button type="button" class="qty-btn minus" tabindex="-1" (click)="decrementLogisticsQuantity()"
                     [disabled]="logisticsToolQuantity_() <= 1" [attr.aria-label]="'decrease' | translatePipe">
                     <lucide-icon name="minus" [size]="16"></lucide-icon>
                   </button>
                   <input type="number" class="logistics-qty-input" min="1"
                     [value]="logisticsToolQuantity_()"
                     (input)="logisticsToolQuantity_.set($any($event.target).valueAsNumber || 1)" />
-                  <button type="button" class="qty-btn plus" (click)="incrementLogisticsQuantity()" [attr.aria-label]="'increase' | translatePipe">
+                  <button type="button" class="qty-btn plus" tabindex="-1" (click)="incrementLogisticsQuantity()" [attr.aria-label]="'increase' | translatePipe">
                     <lucide-icon name="plus" [size]="16"></lucide-icon>
                   </button>
                 </div>

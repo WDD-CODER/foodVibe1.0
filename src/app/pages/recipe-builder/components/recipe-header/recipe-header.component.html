@@ -26,7 +26,10 @@
         <div class="scaling-dock-grid">
             <div class="primary-chip-wrapper" (clickOutside)="setActivePrimaryEdit(false)">
                 <div class="scaling-chip primary">
-                    <div class="unit-switcher-btn" (click)="setActivePrimaryEdit(!activePrimaryEdit_())">
+                    <div class="unit-switcher-btn" role="button" tabindex="0"
+                        (click)="setActivePrimaryEdit(!activePrimaryEdit_())"
+                        (keydown.enter)="setActivePrimaryEdit(!activePrimaryEdit_())"
+                        (keydown.space)="$event.preventDefault(); setActivePrimaryEdit(!activePrimaryEdit_())">
                         <span class="unit-name">{{ primaryUnitLabel_() | translatePipe }}</span>
                         <lucide-icon name="chevron-down" [size]="10"></lucide-icon>
                     </div>
@@ -45,7 +48,7 @@
                     }
 
                     <div class="counter-grid small">
-                        <button type="button" class="ctrl-btn"
+                        <button type="button" class="ctrl-btn" tabindex="-1"
                             [disabled]="!(primaryAmount_() > (currentRecipeTypeDisplay_() === 'dish' ? 1 : 0))"
                             (click)="updatePrimaryAmount(-1)">-</button>
 
@@ -54,10 +57,11 @@
                                 [value]="primaryAmount_()"
                                 (input)="onAmountManualChange(priInput.value)"
                                 (blur)="onAmountManualChange(priInput.value)"
-                                (keydown.enter)="$event.preventDefault(); priInput.blur()">
+                                (keydown.enter)="$event.preventDefault(); priInput.blur()"
+                                step="0.001">
                         </div>
 
-                        <button type="button" class="ctrl-btn" (click)="updatePrimaryAmount(1)">+</button>
+                        <button type="button" class="ctrl-btn" tabindex="-1" (click)="updatePrimaryAmount(1)">+</button>
                     </div>
                 </div>
             </div>
@@ -65,7 +69,10 @@
             <div class="secondary-units-container">
                 @for (group of secondaryConversions; track $index) {
                 <div class="scaling-chip secondary" (clickOutside)="setActiveSecondaryEdit(null)">
-                    <div class="unit-switcher-btn" (click)="setActiveSecondaryEdit($index)">
+                    <div class="unit-switcher-btn" role="button" tabindex="0"
+                        (click)="setActiveSecondaryEdit(activeSecondaryEdit_() === $index ? null : $index)"
+                        (keydown.enter)="setActiveSecondaryEdit(activeSecondaryEdit_() === $index ? null : $index)"
+                        (keydown.space)="$event.preventDefault(); setActiveSecondaryEdit(activeSecondaryEdit_() === $index ? null : $index)">
                         <span class="unit-name">{{ group.get('unit')?.value | translatePipe }}</span>
                         <lucide-icon name="chevron-down" [size]="10"></lucide-icon>
                     </div>
@@ -81,7 +88,7 @@
                     }
 
                     <div class="counter-grid small">
-                        <button type="button" class="ctrl-btn" 
+                        <button type="button" class="ctrl-btn" tabindex="-1"
                             [disabled]="!(group.get('amount')?.value > 0)"
                             (click)="updateSecondaryAmount($index, -1)">-</button>
                         
@@ -90,13 +97,14 @@
                                 [value]="group.get('amount')?.value"
                                 (input)="onSecondaryAmountInput(group, secInput.value)"
                                 (blur)="onSecondaryAmountInput(group, secInput.value)"
-                                (keydown.enter)="$event.preventDefault(); secInput.blur()">
+                                (keydown.enter)="$event.preventDefault(); secInput.blur()"
+                                step="0.001">
                         </div>
                         
-                        <button type="button" class="ctrl-btn" (click)="updateSecondaryAmount($index, 1)">+</button>
+                        <button type="button" class="ctrl-btn" tabindex="-1" (click)="updateSecondaryAmount($index, 1)">+</button>
                     </div>
 
-                    <button type="button" class="remove-btn" (click)="removeSecondaryUnit($index)">
+                    <button type="button" class="remove-btn" tabindex="-1" (click)="removeSecondaryUnit($index)">
                         <lucide-icon name="x" [size]="10"></lucide-icon>
                     </button>
                 </div>
@@ -140,13 +148,13 @@
                     }
                 </div>
                 <div class="labels-actions">
-                    <button type="button" class="labels-btn-label"
+                    <button type="button" class="labels-btn-label" tabindex="-1"
                         (click)="setLabelDropdownOpen(!labelDropdownOpen_()); $event.stopPropagation()"
                         [attr.aria-expanded]="labelDropdownOpen_()">
                         {{ 'labels' | translatePipe }}
                     </button>
                     @if (selectedLabels_().length > 0) {
-                        <button type="button" class="labels-btn-clear"
+                        <button type="button" class="labels-btn-clear" tabindex="-1"
                             (click)="clearAllManualLabels(); $event.stopPropagation()">
                             {{ 'clear_all' | translatePipe }}
                         </button>

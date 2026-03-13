@@ -4,14 +4,18 @@ Evaluates working-tree changes, decides how to split branches and commits, prese
 
 **Safety rule**: No `git add`, `git commit`, `git push`, or branch creation until the user has explicitly approved the visual tree in chat. Do not create a file in `plans/` for this workflow — the plan is the tree in the conversation.
 
+**Phase 0 must be completed before Phase 1.** Do not run Phase 1 (Evaluate) until Phase 0 is done.
+
 ---
 
-## Phase 0 — Tech debt check (before building commit plan)
+## Phase 0 — Tech debt check and test gate (before building commit plan)
 
 Before Phase 1 (Evaluate):
 
-- **If a tech-debt report was already produced in this conversation** (e.g. from workflow step 5.5 or because the user asked for a tech-debt run): **Do not run the techdebt skill again.** Use that existing report. If it listed critical or high-priority items, ask: **"Fix these first, or proceed with the commit plan anyway?"** If the report includes a **Spec coverage** section (files needing `.spec.ts` added or updated), add or update those specs so `npm test -- --no-watch --browsers=ChromeHeadless` passes; if the list is long, list the files and ask: **"Add/update specs for these before building the commit plan?"** then do them if the user agrees. Then continue to Phase 1.
-- **If no tech-debt report exists in this session**: Read `.assistant/skills/techdebt/SKILL.md` and run a quick tech-debt pass. If critical or high-priority items exist, list them briefly and ask: **"Fix these first, or proceed with the commit plan anyway?"** If the report includes a **Spec coverage** section, add or update those specs (or list and ask: **"Add/update specs for these before building the commit plan?"**). Do not block the commit tree indefinitely — the user may choose to proceed. Then continue to Phase 1.
+- **Checklist:** (1) If no tech-debt report exists in this session → read `.assistant/skills/techdebt/SKILL.md` and run the analysis; produce the report. (2) If the report lists critical/high items → ask the user: fix first or proceed? (3) If the report has a **Spec coverage** section → add or update those specs so tests pass, or list the files and ask the user. (4) **Run the full test suite:** `npm test -- --no-watch --browsers=ChromeHeadless`. If it fails, report the failure and ask: "Fix before building the commit plan, or proceed anyway?" Do not proceed to Phase 1 until tests pass or the user chooses to proceed. Then continue to Phase 1.
+
+- **If a tech-debt report was already produced in this conversation** (e.g. from workflow step 5.5 or because the user asked for a tech-debt run): **Do not run the techdebt skill again.** Use that existing report. If it listed critical or high-priority items, ask: **"Fix these first, or proceed with the commit plan anyway?"** If the report includes a **Spec coverage** section (files needing `.spec.ts` added or updated), add or update those specs so `npm test -- --no-watch --browsers=ChromeHeadless` passes; if the list is long, list the files and ask: **"Add/update specs for these before building the commit plan?"** then do them if the user agrees. **(4) Run the full test suite:** `npm test -- --no-watch --browsers=ChromeHeadless`. If it fails, report and ask: "Fix before building the commit plan, or proceed anyway?" Then continue to Phase 1.
+- **If no tech-debt report exists in this session**: Read `.assistant/skills/techdebt/SKILL.md` and run a quick tech-debt pass. If critical or high-priority items exist, list them briefly and ask: **"Fix these first, or proceed with the commit plan anyway?"** If the report includes a **Spec coverage** section, add or update those specs (or list and ask: **"Add/update specs for these before building the commit plan?"**). **(4) Run the full test suite:** `npm test -- --no-watch --browsers=ChromeHeadless`. If it fails, report and ask: "Fix before building the commit plan, or proceed anyway?" Do not block the commit tree indefinitely — the user may choose to proceed. Then continue to Phase 1.
 
 ---
 
@@ -100,6 +104,35 @@ Never erase or discard user changes: no `git reset --hard`, `git clean -fd`, or 
 ## End State
 
 After Execute: all planned changes are committed on the intended branches, current branch is the default, no planned changes left uncommitted, and `.assistant/todo.md` updated for matching tasks.
+
+---
+
+## Recipe builder tab order (canonical)
+
+When changing the recipe-builder page or its child components, keep this Tab order so keyboard-only users can move predictably. Irrelevant controls (e.g. plus/minus buttons) use `tabindex="-1"` and are skipped.
+
+1. **Dish or recipe** — Type toggle (recipe-header).
+2. **Name** — Recipe/dish name input.
+3. **Main unit** — Primary unit selector (unit-switcher open with Enter/Space; arrows to choose).
+4. **Counter value** — Value inside the primary portions/servings input (arrows to change).
+5. **Add another measurement unit** — Add-unit button.
+6. **Added unit select** — Each secondary unit’s selector (if present).
+7. **Value inside new unit** — Each secondary amount input (if present).
+8. **Label** — Labels container (open with Enter/Space).
+9. **Ingredient index** — Ingredients section header (expand/collapse with Enter/Space).
+10. **First ingredient search** — First row ingredient search.
+11. **Ingredient rows** — Per row: search (or display), unit select, quantity input; then next row.
+12. **Add row** — Add ingredient row button.
+13. **Workflow container** — Workflow section header (expand/collapse).
+14. **Text area** — Instruction textarea (prep) or first workflow control (dish).
+15. **Time value** — Labor-time field (prep) per row.
+16. **Add another row** — Add workflow step button.
+17. **Logistics container** — Logistics section header (expand/collapse).
+18. **Search (logistics)** — Tool search input.
+19. **Quantity (logistics)** — Qty input (arrows to change; +/- skipped).
+20. **Add (logistics)** — Add tool button.
+21. **Items in grid** — Logistics chips (added tools).
+22. **Save** — Save recipe/dish button.
 
 ---
 
