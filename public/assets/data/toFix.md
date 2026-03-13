@@ -77,3 +77,60 @@ in the menu-bulder
 - the select options are not avilubel by deabord
 
 
+
+ ////////////////////////3/12/26////////////////////////
+ 
+recipe-builder / edit
+
+- Add the option to change the item by clicking on the item's name and writing a different item.Inside the ingredient index.
+
+- Make sure all the values are aligned underneath the title in the index in the ingredient index.As it seems right now, most of them are not centered. 
+
+- metrics-square - We need to fix the calculation of.Convert in grams to.Volume. In order for it to truly work. Right now it just takes.Gram value and turns it to one milliliter without taking in consideration if the different components has this unit measurement or not.
+
+- category-input-box - Let's.Multi select.Container have a search option too. So instead of the user only needs to click one of the options, he could try to write it and receive the matched items according to the taxi fits. 
+
+unit-creator-modal
+- Make a better.Keyboard .Adjustments so it will be easier to add.Using only key. First thing window.Add model opens. The focus needs to go to the.Search of the name of the item.Once selected using Enter or with the mouse.Focus needs to turn straight away to the quantity.With.Select and focus directive.Once the user clicked enter.He needs to pass him straight into the.Select Unit.And straight away allow the user to scroll up and down.The year is even if the user went using tab or if he went using clicking the.Mouse once you've heated this, select unit.It needs to open the drop down and allow him to travel using the keyboard. Right now the behavior that we have is when I'm traveling from the amount using tab into the select of the unit only.Highlights it, but if I'm pressing up and down with the keyboard it's not moving through the drop down, it's just moving the scroll of the main screen up and down. Causing the user to need to literally click it.This select with the mouse or inner, press enter when it's.Active to start scrolling.
+
+
+dashboard 
+
+-       <button type="button" class="qa-btn primary" (click)="goToAddProduct()"
+        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+        <lucide-icon name="plus-circle" [size]="18"></lucide-icon>
+        <span>{{ 'add_product' | translatePipe }}</span>
+      </button>
+
+This button has.A different style from the rest of the buttons.In this container that is sitting in.We need to align it according to all of them.They need to be the same in this window. 
+
+- Dashboard sections - This is like a header inside.The page which doesn't align to the rest of the layout that we have in the.Application we need to align this style to be according to what we already used. So we won't have a double header inside the page. We are using it across the different.Options inside the dashboard like the.Core definitions and the venues.But I'm thinking of maybe we should.Just design it a little bit better so it will look.Unified with the whole application. 
+
+-       <article class="kpi-card info">
+        <h2 class="kpi-label">{{ 'unapproved_recipes' | translatePipe }}</h2>
+        <p class="kpi-value">{{ unapprovedCount_() }}</p>
+      </article>
+    </section>
+
+ - Over here I want to add a button to watch only the unsaved.Or unauthorized recipes or dishes.So like in the different Kpis that I have this.Clickable link.I want to like to apply a clickable link over here that will send me straight away to the recipe-book .With the filtering of.Not approved.So when the user clicks this, it will straightaway send them to.Recipe book.With the relevant filtering of unapproved and show only this unapproved items. 
+
+- The same concept I want to have a button. And the low inventory?That would show me.Only the low inventory items in the inventory list.
+
+
+activity-section
+
+- change-tag - This is the tag that it supposedly needs to show.Difference that has been made inside.The item that was edited or. Whatever. We need to make sure that inside here we will show a better representation of what was made. Right now it's not working according.And visually it's not understood.What changed from what to who?So what we need to do is a make sure that it's showing the relevant values that's needed, because right now it doesn't really.Show the value of the difference and we need to make sure that the visual representation of it will be better and understood. 
+
+- We need to remove the scroll from the side.Adding the logic of.The drop down scrolls that we have across the application which doesn't show the default scroll bar but instead if there's value below it shows a hovering.Arrow down.Allowing user to understand there is more info to Scroll down and same thing with the arrow U. 
+
+
+
+
+lists
+- All the lists that have sidebar.Needs to fix the.Corners that Are. Close to the sidebar.The general idea says that if the sidebar is.Then the radi the border radius at the side of the Sidebar.Both the upper and lower corner.Should have border radius zero.So they're aligned and it looks like they're.Part of the sidebar together.When the sidebar is closed.These corners need to come back.To have their border radius so when the sideburn is closed.It looks like it's all rounded corners.We need to make sure that the.Animation takes in consideration.The time that it takes though.Sidebar to open so it will look.Good when this transition is happening.
+
+- When the first media query.Passes and the sidebar becomes a different sidebar. We need to make sure that it's aligned to the.List container. Right now what happens is.The sidebar.It's growing over everything. We need to make sure that even when the.Small screen sidebar is open, it's still aligned to the.Of the list container.
+
+- Make sure whenever the.Media query goes underneath the first one.The sidebar is closed.Automatically without a transition.So if the user.Screens get shrinked.We won't see the sidebar until the user would.Click that hamburger icon.  -  I'm kind of sure that I've made it yesterday and was working accordingly. I don't know why now it's not working. Something got **** **** 
+
+- allergen-expanded dense-grid - Over here, we need to.State that in case that it's only one item inside it needs to show it only one item centered. If more than one item it should.Work accordingly. The issue right now is that when there's only one allergen.It doesn't appear at the center, it appears to the right, looking awkward.We need to fix it. 
