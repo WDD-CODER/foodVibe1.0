@@ -35,6 +35,8 @@ export interface Recipe {
   steps_: RecipeStep[];
   yield_amount_: number;
   yield_unit_: string;
+  /** Equivalent yields per unit for the same batch (e.g. [{ amount: 1, unit: 'kg' }, { amount: 4, unit: 'unit' }]). Used in cook-view for recipe-specific unit options and conversion. */
+  yield_conversions_?: { amount: number; unit: string }[];
   default_station_: string;
   is_approved_: boolean;
   /** 'dish' | 'preparation' - determines storage (DISH_LIST vs RECIPE_LIST) */
