@@ -4,7 +4,7 @@
 
     <header class="form-header">
       @if (isEditMode_()) {
-      <h2 class="form-header__title">עריכת מוצר: {{ initialProduct_()?.name_hebrew }}</h2>
+      <h2 class="form-header__title">עריכת מוצר: {{ productForm_.get('productName')?.value ?? initialProduct_()?.name_hebrew ?? '' }}</h2>
       } @else {
       <h2 class="form-header__title">הוספת מוצר חדש למלאי</h2>
       <p class="subtitle">{{ 'add_product_subtitle' | translatePipe }}</p>
