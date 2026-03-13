@@ -2,6 +2,7 @@ import { Injectable, signal, computed, inject } from '@angular/core'
 import { StorageService } from './async-storage.service'
 import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
+import { TranslationKeyModalService, isTranslationKeyResult } from './translation-key-modal.service'
 import { LoggingService } from './logging.service'
 
 const STORAGE_KEY = 'KITCHEN_PREPARATIONS'
@@ -22,6 +23,7 @@ export class PreparationRegistryService {
   private readonly storageService = inject(StorageService)
   private readonly userMsgService = inject(UserMsgService)
   private readonly translationService = inject(TranslationService)
+  private readonly translationKeyModal = inject(TranslationKeyModalService)
   private readonly logging = inject(LoggingService)
 
   private categories_ = signal<string[]>([])
@@ -202,12 +204,21 @@ export class PreparationRegistryService {
 
   async registerPreparation(name: string, category: string): Promise<void> {
     const sanitizedName = name.trim()
-    const sanitizedCategory = category.trim()
+    const sanitizedCategory = (category ?? '').trim()
     if (!sanitizedName) return
 
-    const key = sanitizedCategory.toLowerCase().replace(/\s+/g, '_')
+    let key: string | null = this.translationService.resolvePreparationCategory(sanitizedCategory);
+    if (!key) {
+      const modalResult = await this.translationKeyModal.open(sanitizedCategory, 'generic');
+      if (isTranslationKeyResult(modalResult)) {
+        this.translationService.addKeyAndHebrew(modalResult.englishKey, modalResult.hebrewLabel);
+        key = modalResult.englishKey;
+      } else {
+        key = sanitizedCategory.toLowerCase().replace(/\s+/g, '_');
+      }
+    }
     const cats = this.categories_()
-    const categoryExists = cats.includes(key)
+    const categoryExists = key != null && cats.includes(key)
     if (!categoryExists && key) {
       await this.registerCategory(key, sanitizedCategory)
     }
@@ -218,7 +229,7 @@ export class PreparationRegistryService {
     )
     if (exists) return
 
-    const entry: PreparationEntry = { name: sanitizedName, category: key }
+    const entry: PreparationEntry = { name: sanitizedName, category: key ?? '' }
     const updated = [...preps, entry]
 
     try {

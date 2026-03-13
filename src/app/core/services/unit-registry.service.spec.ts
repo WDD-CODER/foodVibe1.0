@@ -2,6 +2,9 @@ import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { UnitRegistryService } from './unit-registry.service';
 import { StorageService } from './async-storage.service';
 import { UserMsgService } from './user-msg.service';
+import { LoggingService } from './logging.service';
+import { TranslationService } from './translation.service';
+import { TranslationKeyModalService } from './translation-key-modal.service';
 
 describe('UnitRegistryService', () => {
   let service: UnitRegistryService;
@@ -13,12 +16,21 @@ describe('UnitRegistryService', () => {
     storageSpy.post.and.returnValue(Promise.resolve());
 
     const userMsgSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg']);
+    const loggingSpy = jasmine.createSpyObj('LoggingService', ['error', 'warn', 'info']);
+    const translationSpy = jasmine.createSpyObj('TranslationService', ['translate', 'validateKeyForHebrew', 'resolveUnit']);
+    translationSpy.validateKeyForHebrew.and.returnValue({ valid: true });
+    translationSpy.resolveUnit.and.callFake((s: string) => s?.trim().toLowerCase().replace(/\s+/g, '_') ?? null);
+    const modalSpy = jasmine.createSpyObj('TranslationKeyModalService', ['open']);
+    modalSpy.open.and.returnValue(Promise.resolve(null));
 
     TestBed.configureTestingModule({
       providers: [
         UnitRegistryService,
         { provide: StorageService, useValue: storageSpy },
-        { provide: UserMsgService, useValue: userMsgSpy }
+        { provide: UserMsgService, useValue: userMsgSpy },
+        { provide: LoggingService, useValue: loggingSpy },
+        { provide: TranslationService, useValue: translationSpy },
+        { provide: TranslationKeyModalService, useValue: modalSpy }
       ]
     });
 

@@ -3,6 +3,8 @@ import { ProductDataService } from './product-data.service'
 import { UserMsgService } from './user-msg.service'
 import { StorageService, type EntityId } from './async-storage.service'
 import { LoggingService } from './logging.service'
+import { TranslationService } from './translation.service'
+import { TranslationKeyModalService, isTranslationKeyResult } from './translation-key-modal.service'
 import type { LabelDefinition } from '@models/label.model'
 import {
   type MenuTypeDefinition,
@@ -25,6 +27,8 @@ export class MetadataRegistryService {
   private readonly productDataService = inject(ProductDataService)
   private readonly storageService = inject(StorageService)
   private readonly logging = inject(LoggingService)
+  private readonly translationService = inject(TranslationService)
+  private readonly translationKeyModal = inject(TranslationKeyModalService)
 
   //PRIVATE SIGNALS
   private categories_ = signal<string[]>([]);
@@ -276,10 +280,22 @@ export class MetadataRegistryService {
   }
 
   async registerAllergen(name: string): Promise<void> {
-    const sanitized = name.trim();
-    if (!sanitized || this.allergens_().includes(sanitized)) return;
+    const trimmed = (name ?? '').trim();
+    if (!trimmed) return;
 
-    const updated = [...this.allergens_(), sanitized];
+    let keyToUse: string = this.translationService.resolveAllergen(trimmed) ?? '';
+    if (!keyToUse) {
+      const modalResult = await this.translationKeyModal.open(trimmed, 'allergen');
+      if (isTranslationKeyResult(modalResult)) {
+        this.translationService.addKeyAndHebrew(modalResult.englishKey, modalResult.hebrewLabel);
+        keyToUse = modalResult.englishKey;
+      } else {
+        keyToUse = trimmed;
+      }
+    }
+    if (this.allergens_().includes(keyToUse)) return;
+
+    const updated: string[] = [...this.allergens_(), keyToUse];
 
     try {
       const registries = await this.storageService.query<any>('KITCHEN_ALLERGENS');
@@ -292,7 +308,7 @@ export class MetadataRegistryService {
       }
 
       this.allergens_.set(updated);
-      this.userMsgService.onSetSuccessMsg(`אלרגן "${sanitized}" נוסף בהצלחה`);
+      this.userMsgService.onSetSuccessMsg(`אלרגן "${keyToUse}" נוסף בהצלחה`);
     } catch (err) {
       this.userMsgService.onSetErrorMsg('שגיאה בשמירת האלרגן');
       this.logging.error({ event: 'crud.metadata.allergen.save_error', message: 'Allergen save error', context: { err } });
@@ -300,12 +316,22 @@ export class MetadataRegistryService {
   }
 
   async registerCategory(name: string): Promise<void> {
-    const sanitized = name.trim();
-    // Validation: Check if empty or already exists in the signal
-    if (!sanitized || this.categories_().includes(sanitized)) return;
+    const trimmed = (name ?? '').trim();
+    if (!trimmed) return;
 
-    // 1. Calculate the new state
-    const updatedCategories = [...this.categories_(), sanitized];
+    let keyToUse: string = this.translationService.resolveCategory(trimmed) ?? '';
+    if (!keyToUse) {
+      const modalResult = await this.translationKeyModal.open(trimmed, 'category');
+      if (isTranslationKeyResult(modalResult)) {
+        this.translationService.addKeyAndHebrew(modalResult.englishKey, modalResult.hebrewLabel);
+        keyToUse = modalResult.englishKey;
+      } else {
+        keyToUse = trimmed;
+      }
+    }
+    if (this.categories_().includes(keyToUse)) return;
+
+    const updatedCategories: string[] = [...this.categories_(), keyToUse];
 
     try {
       // 2. Persistence Logic (POST vs PUT)
@@ -324,9 +350,8 @@ export class MetadataRegistryService {
         } as RegistryPayload<string>);
       }
 
-      // 3. Update the Signal for UI reactivity
       this.categories_.set(updatedCategories);
-      this.userMsgService.onSetSuccessMsg(`הקטגוריה "${sanitized}" נוספה בהצלחה`);
+      this.userMsgService.onSetSuccessMsg(`הקטגוריה "${keyToUse}" נוספה בהצלחה`);
 
     } catch (err) {
       this.userMsgService.onSetErrorMsg('שגיאה בשמירת הקטגוריה')

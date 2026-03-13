@@ -2,16 +2,27 @@ import { Injectable, signal, computed, inject } from '@angular/core'
 import { StorageService } from './async-storage.service'
 import { UserMsgService } from './user-msg.service'
 import { LoggingService } from './logging.service'
+import { TranslationService } from './translation.service'
+import { TranslationKeyModalService, isTranslationKeyResult } from './translation-key-modal.service'
 import { Subject } from 'rxjs'
+
+export type RegisterUnitResult =
+  | { success: true; alreadyInRegistry?: boolean }
+  | { success: false; alreadyOnProduct?: boolean; error?: string };
 
 @Injectable({ providedIn: 'root' })
 export class UnitRegistryService {
   private readonly userMsgService = inject(UserMsgService)
   private readonly storageService = inject(StorageService)
   private readonly logging = inject(LoggingService)
+  private readonly translationService = inject(TranslationService)
+  private readonly translationKeyModal = inject(TranslationKeyModalService)
   private readonly STORAGE_KEY = 'KITCHEN_UNITS'; // Standardized key
 
   public readonly unitAdded$ = new Subject<string>();
+
+  /** When opening the unit creator from a product form, pass this product's purchase unit symbols so duplicate names can be rejected in-modal. */
+  private unitCreatorContext = signal<{ existingUnitSymbols?: string[] } | null>(null);
 
   // SIGNALS
   private isCreatorOpen = signal(false);
@@ -77,11 +88,15 @@ export class UnitRegistryService {
   }
 
   // UI CONTROL
-  openUnitCreator() {
+  openUnitCreator(context?: { existingUnitSymbols?: string[] }) {
+    this.unitCreatorContext.set(context ?? null);
     this.isCreatorOpen.set(true);
     this.refreshFromStorage();
   }
-  closeUnitCreator() { this.isCreatorOpen.set(false); }
+  closeUnitCreator() {
+    this.isCreatorOpen.set(false);
+    this.unitCreatorContext.set(null);
+  }
 
   /** Re-load units from storage so dropdowns show the latest (e.g. after add in another tab or previous session). */
   async refreshFromStorage(): Promise<void> {
@@ -95,29 +110,53 @@ export class UnitRegistryService {
 
   /**
    * Registers a new unit or updates an existing one using POST/PUT logic.
-   * @param name Display name for the unit (e.g. "צנצנת")
+   * Resolves Hebrew input to canonical key (e.g. "יחידה" -> "unit"); if no match, prompts for English key and adds to dictionary.
+   * @param name Display name for the unit (e.g. "צנצנת" or "יחידה")
    * @param rate Amount of basis units that equal 1 of the new unit (e.g. 330 when basis is gram)
    * @param basisUnitKey Key of the reference unit (e.g. "gram"). Rate is stored in gram-equivalent.
+   * @returns Result so caller can show in-modal error when unit already exists on product (modal stays open).
    */
-  async registerUnit(name: string, rate: number, basisUnitKey?: string): Promise<void> {
-    const sanitizedName = name.trim().toLowerCase();
-    const curUnits = this.globalUnits_();
-
-    // 1. Unit already in global registry (KITCHEN_UNITS): don't create again; emit so callers can add it to product
-    if (curUnits[sanitizedName]) {
-      this.refreshFromStorage();
-      this.unitAdded$.next(sanitizedName);
-      this.closeUnitCreator();
-      this.userMsgService.onSetSuccessMsg('היחידה כבר קיימת במערכת. נוספה לרשימת יחידות הרכש של המוצר.');
-      return;
+  async registerUnit(name: string, rate: number, basisUnitKey?: string): Promise<RegisterUnitResult> {
+    const trimmed = (name ?? '').trim();
+    if (!trimmed) {
+      return { success: false, error: 'שם היחידה ריק' };
     }
 
-    // 2. Rate in gram-equivalent so getConversion() is consistent across the app
+    let keyToUse: string | null = this.translationService.resolveUnit(trimmed);
+    if (!keyToUse) {
+      const modalResult = await this.translationKeyModal.open(trimmed, 'unit');
+      if (!isTranslationKeyResult(modalResult)) {
+        return { success: false, error: 'בוטל על ידי המשתמש' };
+      }
+      this.translationService.addKeyAndHebrew(modalResult.englishKey, modalResult.hebrewLabel);
+      keyToUse = modalResult.englishKey;
+    }
+    const key = keyToUse.toLowerCase();
+    const curUnits = this.globalUnits_();
+    const context = this.unitCreatorContext();
+
+    // 1. Unit already on this product's purchase list (compare by resolved key): reject
+    const existingResolved = (context?.existingUnitSymbols ?? []).map((s) =>
+      this.translationService.resolveUnit(s ?? '') ?? (s ?? '').trim().toLowerCase()
+    );
+    if (existingResolved.includes(key)) {
+      return { success: false, alreadyOnProduct: true };
+    }
+
+    // 2. Unit already in global registry: add to product only; single success message; modal will close
+    if (curUnits[key]) {
+      this.refreshFromStorage();
+      this.unitAdded$.next(key);
+      this.userMsgService.onSetSuccessMsg('נוספה לרשימת יחידות הרכש של המוצר.');
+      return { success: true, alreadyInRegistry: true };
+    }
+
+    // 3. Rate in gram-equivalent so getConversion() is consistent across the app
     const factor = basisUnitKey ? this.getConversion(basisUnitKey) : 1;
     const rateInGrams = rate * factor;
 
-    // 3. Prepare the updated state
-    const updatedUnits = { ...curUnits, [sanitizedName]: rateInGrams };
+    // 4. Prepare the updated state
+    const updatedUnits = { ...curUnits, [key]: rateInGrams };
 
     try {
       // 4. Persistence Logic (POST vs PUT)
@@ -140,13 +179,13 @@ export class UnitRegistryService {
 
       // 5. Update the Signal for UI reactivity
       this.globalUnits_.set(updatedUnits);
-      this.unitAdded$.next(sanitizedName);
-      this.userMsgService.onSetSuccessMsg(`היחידה ${sanitizedName} נוספה בהצלחה`);
-
+      this.unitAdded$.next(key);
+      this.userMsgService.onSetSuccessMsg(`היחידה ${key} נוספה בהצלחה`);
+      return { success: true };
     } catch (err) {
       this.userMsgService.onSetErrorMsg('שגיאה בשמירת היחידה במערכת');
       this.logging.error({ event: 'crud.units.save_error', message: 'Unit save error', context: { err } });
-      throw err;
+      return { success: false, error: err instanceof Error ? err.message : 'שגיאה בשמירת היחידה במערכת' };
     }
   }
 

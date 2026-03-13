@@ -3,7 +3,7 @@ import { Supplier } from '@models/supplier.model';
 import { SupplierDataService } from './supplier-data.service';
 import { UserMsgService } from './user-msg.service';
 import { TranslationService } from './translation.service';
-import { TranslationKeyModalService } from './translation-key-modal.service';
+import { TranslationKeyModalService, isTranslationKeyResult } from './translation-key-modal.service';
 import { AddItemModalService } from './add-item-modal.service';
 
 @Injectable({ providedIn: 'root' })
@@ -24,7 +24,7 @@ export class AddSupplierFlowService {
 
     if (!this.translationService.isHebrewLabelDuplicate(nameHebrew)) {
       const result = await this.translationKeyModal.open(nameHebrew, 'supplier');
-      if (!result?.englishKey || !result?.hebrewLabel) return null;
+      if (!isTranslationKeyResult(result)) return null;
       this.translationService.updateDictionary(result.englishKey, result.hebrewLabel);
     }
 

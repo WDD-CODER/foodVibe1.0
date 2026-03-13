@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing'
+import { TestBed, fakeAsync, tick, flush } from '@angular/core/testing'
 import { PreparationRegistryService } from './preparation-registry.service'
 import { StorageService } from './async-storage.service'
 import { UserMsgService } from './user-msg.service'
@@ -17,7 +17,8 @@ describe('PreparationRegistryService', () => {
     storageSpy.makeId.and.returnValue('p1')
 
     const userMsgSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
-    const translationSpy = jasmine.createSpyObj('TranslationService', ['updateDictionary'])
+    const translationSpy = jasmine.createSpyObj('TranslationService', ['updateDictionary', 'resolvePreparationCategory'])
+    translationSpy.resolvePreparationCategory.and.returnValue('מטבח')
 
     TestBed.configureTestingModule({
       providers: [
@@ -51,7 +52,7 @@ describe('PreparationRegistryService', () => {
       Promise.resolve([{ _id: 'p1', categories: ['מטבח'], preparations: [] }])
     )
     service.registerPreparation('רוטב עגבניות', 'מטבח')
-    tick()
+    flush()
     expect(service.allPreparations_().length).toBe(1)
     expect(service.allPreparations_()[0].name).toBe('רוטב עגבניות')
     expect(service.allPreparations_()[0].category).toBe('מטבח')

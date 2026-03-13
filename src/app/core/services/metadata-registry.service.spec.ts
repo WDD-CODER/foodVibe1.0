@@ -3,6 +3,9 @@ import { MetadataRegistryService } from './metadata-registry.service';
 import { ProductDataService } from './product-data.service';
 import { StorageService } from './async-storage.service';
 import { UserMsgService } from './user-msg.service';
+import { LoggingService } from './logging.service';
+import { TranslationService } from './translation.service';
+import { TranslationKeyModalService } from './translation-key-modal.service';
 import { signal } from '@angular/core';
 import { Product } from '../models/product.model';
 
@@ -30,13 +33,22 @@ describe('MetadataRegistryService', () => {
     storageSpy.post.and.returnValue(Promise.resolve());
 
     const userMsgSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg']);
+    const loggingSpy = jasmine.createSpyObj('LoggingService', ['error', 'warn', 'info']);
+    const translationSpy = jasmine.createSpyObj('TranslationService', ['translate', 'validateKeyForHebrew', 'resolveAllergen']);
+    translationSpy.validateKeyForHebrew.and.returnValue({ valid: true });
+    translationSpy.resolveAllergen.and.callFake((s: string) => s?.trim().toLowerCase().replace(/\s+/g, '_') ?? null);
+    const modalSpy = jasmine.createSpyObj('TranslationKeyModalService', ['open']);
+    modalSpy.open.and.returnValue(Promise.resolve(null));
 
     TestBed.configureTestingModule({
       providers: [
         MetadataRegistryService,
         { provide: ProductDataService, useValue: pSpy },
         { provide: StorageService, useValue: storageSpy },
-        { provide: UserMsgService, useValue: userMsgSpy }
+        { provide: UserMsgService, useValue: userMsgSpy },
+        { provide: LoggingService, useValue: loggingSpy },
+        { provide: TranslationService, useValue: translationSpy },
+        { provide: TranslationKeyModalService, useValue: modalSpy }
       ]
     });
 

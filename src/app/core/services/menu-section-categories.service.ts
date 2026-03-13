@@ -1,5 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { StorageService } from './async-storage.service';
+import { TranslationService } from './translation.service';
+import { TranslationKeyModalService, isTranslationKeyResult } from './translation-key-modal.service';
 
 const STORAGE_KEY = 'MENU_SECTION_CATEGORIES';
 
@@ -16,6 +18,8 @@ interface MenuSectionCategoriesDoc {
 @Injectable({ providedIn: 'root' })
 export class MenuSectionCategoriesService {
   private readonly storage = inject(StorageService);
+  private readonly translationService = inject(TranslationService);
+  private readonly translationKeyModal = inject(TranslationKeyModalService);
 
   private categories_ = signal<string[]>([]);
   readonly sectionCategories_ = this.categories_.asReadonly();
@@ -52,13 +56,23 @@ export class MenuSectionCategoriesService {
     }
   }
 
-  /** Add a section category if not already present; persists to storage. */
+  /** Add a section category if not already present; resolves Hebrew to key, or opens translation-key modal for English key; persists to storage. */
   async addCategory(name: string): Promise<void> {
-    const trimmed = name.trim();
+    const trimmed = (name ?? '').trim();
     if (!trimmed) return;
+    let keyToUse: string | null = this.translationService.resolveSectionCategory(trimmed);
+    if (!keyToUse) {
+      const modalResult = await this.translationKeyModal.open(trimmed, 'category');
+      if (isTranslationKeyResult(modalResult)) {
+        this.translationService.addKeyAndHebrew(modalResult.englishKey, modalResult.hebrewLabel);
+        keyToUse = modalResult.englishKey;
+      } else {
+        keyToUse = trimmed;
+      }
+    }
     const current = this.categories_();
-    if (current.includes(trimmed)) return;
-    const updated = [...current, trimmed];
+    if (keyToUse == null || current.includes(keyToUse)) return;
+    const updated = [...current, keyToUse];
     await this.persist(updated);
   }
 
