@@ -61,7 +61,7 @@
       </div>
     }
     @for (recipe of filteredRecipes_(); track recipe._id) {
-      <div class="recipe-grid-row c-list-row" (click)="onRowClick(recipe, $event)" role="button" tabindex="0" (keydown.enter)="onCookRecipe(recipe)" (keydown.space)="$event.preventDefault(); onCookRecipe(recipe)">
+      <div class="recipe-grid-row c-list-row" (click)="onRowClick(recipe, $event)" role="button" tabindex="0" (keydown.enter)="onEditRecipe(recipe)" (keydown.space)="$event.preventDefault(); onEditRecipe(recipe)">
         <div class="col-name c-list-body-cell">{{ recipe.name_hebrew }}</div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()">
           <div class="col-type c-list-body-cell" cellCarouselSlide [label]="'type' | translatePipe">{{ (isRecipeDish(recipe) ? 'dish' : 'preparation') | translatePipe }}</div>
@@ -113,10 +113,10 @@
           ₪{{ getRecipeCost(recipe) | number:'1.2-2' }}
         </div>
         <div class="c-col-actions c-list-body-cell">
-          <button type="button" class="c-icon-btn" (click)="onEditRecipe(recipe); $event.stopPropagation()"
-            [attr.aria-label]="'edit' | translatePipe"
+          <button type="button" class="c-icon-btn" (click)="onCookRecipe(recipe); $event.stopPropagation()"
+            [attr.aria-label]="'cook' | translatePipe"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
-            <lucide-icon name="pencil" [size]="18"></lucide-icon>
+            <lucide-icon name="cooking-pot" [size]="18"></lucide-icon>
           </button>
           @if (deletingId_() === recipe._id) {
             <app-loader size="small" [inline]="true" />

@@ -520,7 +520,7 @@ export class RecipeBookListComponent {
   protected onRowClick(recipe: Recipe, event: MouseEvent): void {
     const el = event.target as HTMLElement;
     if (el.closest('button') || el.closest('a') || el.closest('.cost-cell-wrap') || el.closest('.allergen-btn-wrapper') || el.closest('.labels-btn-wrapper')) return;
-    this.router.navigate(['/cook', recipe._id]);
+    this.onEditRecipe(recipe);
   }
 
   protected onDeleteRecipe(recipe: Recipe): void {
