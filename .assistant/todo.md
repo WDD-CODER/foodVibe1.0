@@ -13,6 +13,28 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 149 — Recipe-builder and metrics notice fixes (`plans/149-recipe-builder-metrics-notice-fixes.plan.md`)
+
+- [x] Preserve quantity when changing ingredient by name
+- [x] Fix metrics-notice-floating position in recipe-header
+- [x] Clarify category search (label/styling) in product-form
+
+### Plan 148 — Dashboard toFix items (`plans/148-dashboard-tofix-items.plan.md`)
+
+- [x] Align Add Product button (remove primary)
+- [x] Unify dashboard section headers
+- [x] Unapproved KPI link to recipe-book with filter
+- [x] Low stock KPI link + inventory lowStock=1 URL
+- [x] Update toFix.md (dashboard items unmarked)
+
+### Plan 147 — Recipe-builder edit toFix items (`plans/147-recipe-builder-edit-tofix-items.plan.md`)
+
+- [x] Ingredient index: click item name to change item (state + template + ingredient-search initialQuery)
+- [x] Ingredient index: align values under titles (SCSS justify-content center)
+- [x] metrics-square: fix grams-to-volume in recipe-cost.service
+- [x] category-input-box: add search to product-form category multi-select
+- [x] Update toFix.md (items remain unmarked)
+
 ### Plan 145 — Secondary unit dropdown fix (`plans/145-secondary-unit-dropdown-fix.plan.md`)
 
 - [x] Wrap unit-switcher + dropdown in `.unit-switcher-cell` in recipe-header (secondary chip)
