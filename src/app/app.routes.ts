@@ -65,14 +65,14 @@ export const routes: Routes = [
         path: 'add',
         loadComponent: () => import('./pages/inventory/components/product-form/product-form.component').then(m => m.ProductFormComponent),
         canActivate: [authGuard],
-        canDeactivate: [pendingChangesGuard]
+        canDeactivate: [pendingChangesGuard],
       },
       {
         path: 'edit/:id',
         loadComponent: () => import('./pages/inventory/components/product-form/product-form.component').then(m => m.ProductFormComponent),
         resolve: { product: productResolver },
         canActivate: [authGuard],
-        canDeactivate: [pendingChangesGuard]
+        canDeactivate: [pendingChangesGuard],
       },
       {
         path: 'equipment',
@@ -100,14 +100,14 @@ export const routes: Routes = [
     path: 'recipe-builder',
     loadComponent: () => import('./pages/recipe-builder/recipe-builder.page').then(m => m.RecipeBuilderPage),
     canActivate: [authGuard],
-    canDeactivate: [pendingChangesGuard]
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: 'recipe-builder/:id',
     loadComponent: () => import('./pages/recipe-builder/recipe-builder.page').then(m => m.RecipeBuilderPage),
     resolve: { recipe: recipeResolver },
     canActivate: [authGuard],
-    canDeactivate: [pendingChangesGuard]
+    canDeactivate: [pendingChangesGuard],
   },
   {
     path: 'recipe-book',

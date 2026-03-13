@@ -10,7 +10,7 @@ import { UnitRegistryService } from '@services/unit-registry.service';
 import { ConversionService } from '@services/conversion.service';
 import { UnitCreatorModal } from 'src/app/shared/unit-creator/unit-creator.component';
 import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
-import { LucideAngularModule, Menu, X, CircleUserRound, LogOut, Plus, CookingPot } from 'lucide-angular';
+import { LucideAngularModule, Menu, X, CircleUserRound, LogOut, Plus, CookingPot, Flame } from 'lucide-angular';
 
 // 1. Rigorous Mock to replace the problematic production component
 @Component({
@@ -35,7 +35,7 @@ describe('AppComponent', () => {
         AppComponent,
         HeaderComponent,
         UserMsg,
-        LucideAngularModule.pick({ Menu, X, CircleUserRound, LogOut, Plus, CookingPot }),
+        LucideAngularModule.pick({ Menu, X, CircleUserRound, LogOut, Plus, CookingPot, Flame }),
       ],
       providers: [
         provideRouter([]),
