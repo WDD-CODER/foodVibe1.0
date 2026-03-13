@@ -193,9 +193,10 @@
                     [disabled]="logisticsToolQuantity_() <= 1" [attr.aria-label]="'decrease' | translatePipe">
                     <lucide-icon name="minus" [size]="16"></lucide-icon>
                   </button>
-                  <input type="number" class="logistics-qty-input" min="1"
+                  <input type="number" class="logistics-qty-input" min="1" step="1"
                     [value]="logisticsToolQuantity_()"
-                    (input)="logisticsToolQuantity_.set($any($event.target).valueAsNumber || 1)" />
+                    (input)="logisticsToolQuantity_.set($any($event.target).valueAsNumber || 1)"
+                    (keydown)="onLogisticsQuantityKeydown($event)" />
                   <button type="button" class="qty-btn plus" tabindex="-1" (click)="incrementLogisticsQuantity()" [attr.aria-label]="'increase' | translatePipe">
                     <lucide-icon name="plus" [size]="16"></lucide-icon>
                   </button>

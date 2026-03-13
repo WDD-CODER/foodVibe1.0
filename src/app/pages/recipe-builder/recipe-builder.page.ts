@@ -374,7 +374,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     }
 
     const actions: HeroFabAction[] = [
-      { labelKey: 'export', icon: 'file-down', run: () => this.openExportFromHeroFab() }
+      { labelKey: 'export', icon: 'printer', run: () => this.openExportFromHeroFab() }
     ];
     const id = this.recipeId_();
     if (id) {
@@ -480,13 +480,18 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       labels: normalizedLabels
     });
 
-    const yieldConv = this.yieldConversionsArray.at(0);
-    if (yieldConv) {
-      if (isDish) {
-        yieldConv.patchValue({ amount: recipe.yield_amount_, unit: 'dish' });
-      } else {
-        yieldConv.patchValue({ amount: recipe.yield_amount_, unit: recipe.yield_unit_ });
-      }
+    const yieldArr = this.yieldConversionsArray;
+    const conversions = recipe.yield_conversions_?.length
+      ? recipe.yield_conversions_
+      : [{ amount: recipe.yield_amount_, unit: isDish ? 'dish' : recipe.yield_unit_ }];
+    while (yieldArr.length > 0) yieldArr.removeAt(0);
+    conversions.forEach((c, i) => {
+      const amount = isDish && i === 0 ? recipe.yield_amount_ : (c.amount ?? 0);
+      const unit = isDish && i === 0 ? 'dish' : (c.unit ?? 'gram');
+      yieldArr.push(this.fb.group({ amount: [amount], unit: [unit] }));
+    });
+    if (yieldArr.length === 0) {
+      yieldArr.push(this.fb.group({ amount: [recipe.yield_amount_], unit: [isDish ? 'dish' : recipe.yield_unit_] }));
     }
 
     this.ingredientsArray.clear();
@@ -685,6 +690,16 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   protected decrementLogisticsQuantity(): void {
     this.logisticsToolQuantity_.update(q => quantityDecrement(q, 1, { integerOnly: true }));
+  }
+
+  protected onLogisticsQuantityKeydown(e: KeyboardEvent): void {
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+    e.preventDefault();
+    const current = this.logisticsToolQuantity_();
+    const next = e.key === 'ArrowUp'
+      ? quantityIncrement(current, 1, { integerOnly: true })
+      : quantityDecrement(current, 1, { integerOnly: true });
+    this.logisticsToolQuantity_.set(next);
   }
 
   /** Select an option from dropdown (does not add yet; user sets quantity and presses Add). */
@@ -1122,9 +1137,13 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         });
     }
 
-    const yieldConv = (raw['yield_conversions'] as { amount?: number; unit?: string }[])?.[0];
+    const yieldConvRows = (raw['yield_conversions'] as { amount?: number; unit?: string }[] | undefined) ?? [];
+    const yieldConv = yieldConvRows[0];
     const yieldAmount = isDish ? ((raw['serving_portions'] as number) ?? 1) : (yieldConv?.amount ?? 0);
     const yieldUnit = isDish ? 'מנה' : (yieldConv?.unit ?? 'gram');
+    const yieldConversions = yieldConvRows
+      .filter((r) => r?.unit != null && r.unit !== '')
+      .map((r) => ({ amount: Number(r?.amount ?? 0), unit: String(r.unit) }));
 
     const rawLabels = (raw['labels'] as string[] | undefined) ?? [];
     const validKeys = new Set(this.metadataRegistry_.allLabels_().map((def) => def.key));
@@ -1136,6 +1155,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       steps_: steps,
       yield_amount_: yieldAmount,
       yield_unit_: yieldUnit,
+      ...(yieldConversions.length > 0 ? { yield_conversions_: yieldConversions } : {}),
       default_station_: '',
       is_approved_: true,
       recipe_type_: isDish ? 'dish' : 'preparation',

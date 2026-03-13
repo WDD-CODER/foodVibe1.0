@@ -13,6 +13,36 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 145 — Secondary unit dropdown fix (`plans/145-secondary-unit-dropdown-fix.plan.md`)
+
+- [x] Wrap unit-switcher + dropdown in `.unit-switcher-cell` in recipe-header (secondary chip)
+- [x] SCSS: `.unit-switcher-cell` + dropdown host position so dropdown does not take grid cell
+- [x] Add "Create new unit" menu item to secondary unit dropdown
+
+### Plan 144 — Precision-based counter step (`plans/144-precision-based-counter-step.plan.md`)
+
+- [x] quantity-step.util: magnitude for integers (1–9→1, 10–99→10, 100→100), precision for decimals; keep integerOnly/explicitStep
+- [x] quantity-step.util.spec: tests for magnitude and precision step + increment/decrement
+- [x] Cook-view: keydown on main quantity and ingredient amount inputs; call increment/decrement
+- [x] Recipe-ingredients-table: onQuantityKeydown ArrowUp/ArrowDown with util + stepOpts
+- [x] Recipe-builder: logistics qty input keydown (integerOnly min 1) + step="1"
+- [x] Recipe-header: updatePrimaryAmount/updateSecondaryAmount use util; keydown on primary/secondary inputs
+- [x] Recipe-header.spec: update expectations for precision/magnitude (e.g. 1.2→1.3, 10→20)
+
+### Plan 143 — Cook-view recipe yield units (`plans/143-cook-view-recipe-yield-units.plan.md`)
+
+- [x] Recipe model: add optional yield_conversions_
+- [x] Recipe-builder: persist full yield_conversions on save; load yield_conversions_ into form when editing
+- [x] Cook-view: yieldUnitOptions_ from recipe; convertedYieldAmount_ from recipe when present
+- [x] Cook-view: onYieldUnitChange — update quantity to equivalent in new unit
+
+### Plan 142 — FAB Add-new for list pages (`plans/142-fab-add-new-list-pages.plan.md`)
+
+- [x] Inventory list: FAB action Add product → /inventory/add
+- [x] Equipment list: FAB action Add equipment (use equipmentBasePath)
+- [x] Venue list: FAB action Add venue when not embeddedInDashboard
+- [x] Supplier list: FAB action Add supplier (modal) when not embeddedInDashboard
+
 ### Plan 141 — Hero FAB refactor and page-specific actions (`plans/141-hero-fab-refactor-and-page-actions.plan.md`)
 
 - [x] Hero FAB: effectiveActions_ empty when no state; template cleanup
@@ -899,6 +929,10 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 135 | Translation modal cancel guard title fix | Active |
 | 134 | Translation and confirmation modals unified | Active |
 | 141 | Hero FAB refactor and page-specific actions | Active |
+| 142 | FAB Add-new for list pages | Active |
+| 143 | Cook-view recipe yield units | Done |
+| 144 | Precision-based counter step | Active |
+| 145 | Secondary unit dropdown fix | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 

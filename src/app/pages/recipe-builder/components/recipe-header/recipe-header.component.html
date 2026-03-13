@@ -57,6 +57,7 @@
                                 [value]="primaryAmount_()"
                                 (input)="onAmountManualChange(priInput.value)"
                                 (blur)="onAmountManualChange(priInput.value)"
+                                (keydown)="onPrimaryAmountKeydown($event)"
                                 (keydown.enter)="$event.preventDefault(); priInput.blur()"
                                 step="0.001">
                         </div>
@@ -69,23 +70,28 @@
             <div class="secondary-units-container">
                 @for (group of secondaryConversions; track $index) {
                 <div class="scaling-chip secondary" (clickOutside)="setActiveSecondaryEdit(null)">
-                    <div class="unit-switcher-btn" role="button" tabindex="0"
-                        (click)="setActiveSecondaryEdit(activeSecondaryEdit_() === $index ? null : $index)"
-                        (keydown.enter)="setActiveSecondaryEdit(activeSecondaryEdit_() === $index ? null : $index)"
-                        (keydown.space)="$event.preventDefault(); setActiveSecondaryEdit(activeSecondaryEdit_() === $index ? null : $index)">
-                        <span class="unit-name">{{ group.get('unit')?.value | translatePipe }}</span>
-                        <lucide-icon name="chevron-down" [size]="10"></lucide-icon>
-                    </div>
-
-                    @if (activeSecondaryEdit_() === $index) {
-                    <app-scrollable-dropdown [maxHeight]="200" class="unit-dropdown-menu secondary-chip-dropdown">
-                        @for (unit of availableUnitsForSecondaryChip_($index); track unit) {
-                        <div class="menu-item" (click)="changeSecondaryUnit($index, unit)">
-                            {{ unit | translatePipe }}
+                    <div class="unit-switcher-cell">
+                        <div class="unit-switcher-btn" role="button" tabindex="0"
+                            (click)="setActiveSecondaryEdit(activeSecondaryEdit_() === $index ? null : $index)"
+                            (keydown.enter)="setActiveSecondaryEdit(activeSecondaryEdit_() === $index ? null : $index)"
+                            (keydown.space)="$event.preventDefault(); setActiveSecondaryEdit(activeSecondaryEdit_() === $index ? null : $index)">
+                            <span class="unit-name">{{ group.get('unit')?.value | translatePipe }}</span>
+                            <lucide-icon name="chevron-down" [size]="10"></lucide-icon>
                         </div>
+
+                        @if (activeSecondaryEdit_() === $index) {
+                        <app-scrollable-dropdown [maxHeight]="200" class="unit-dropdown-menu secondary-chip-dropdown">
+                            @for (unit of availableUnitsForSecondaryChip_($index); track unit) {
+                            <div class="menu-item" (click)="changeSecondaryUnit($index, unit)">
+                                {{ unit | translatePipe }}
+                            </div>
+                            }
+                            <div class="menu-item menu-item-create" (click)="openUnitCreator.emit('unit'); setActiveSecondaryEdit(null)">
+                                {{ 'create_new_unit' | translatePipe }}
+                            </div>
+                        </app-scrollable-dropdown>
                         }
-                    </app-scrollable-dropdown>
-                    }
+                    </div>
 
                     <div class="counter-grid small">
                         <button type="button" class="ctrl-btn" tabindex="-1"
@@ -97,6 +103,7 @@
                                 [value]="group.get('amount')?.value"
                                 (input)="onSecondaryAmountInput(group, secInput.value)"
                                 (blur)="onSecondaryAmountInput(group, secInput.value)"
+                                (keydown)="onSecondaryAmountKeydown($event, $index)"
                                 (keydown.enter)="$event.preventDefault(); secInput.blur()"
                                 step="0.001">
                         </div>

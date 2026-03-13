@@ -1,8 +1,7 @@
 /**
  * Unified quantity step logic for +/- controls across the app.
- * Plus adds one "in" (step); minus subtracts it.
- * - Value >= 1: step = 1 (e.g. 1 → 2).
- * - Value < 1: step = 0.001 (e.g. 0.004 → 0.005).
+ * - Whole numbers: step by magnitude (1–9 → 1, 10–99 → 10, 100–999 → 100, …).
+ * - Decimals: step by precision (1.2 → 0.1, 1.15 → 0.01, 1.001 → 0.001).
  */
 
 export interface QuantityStepOptions {
@@ -13,6 +12,8 @@ export interface QuantityStepOptions {
 }
 
 const DECIMAL_PRECISION = 3;
+const NORMALIZE_PRECISION = 6;
+const EPS = 1e-9;
 
 function roundToPrecision(value: number, precision: number): number {
   const factor = Math.pow(10, precision);
@@ -20,8 +21,8 @@ function roundToPrecision(value: number, precision: number): number {
 }
 
 /**
- * Returns the step ("in") for the given value.
- * Default: value >= 1 → 1, value < 1 → 0.001.
+ * Returns the step for the given value.
+ * Whole numbers: step = 10^floor(log10(max(1,|value|))). Decimals: step = 0.1 | 0.01 | 0.001 by displayed precision.
  */
 export function getQuantityStep(
   value: number,
@@ -35,7 +36,17 @@ export function getQuantityStep(
   }
   const num = Number(value);
   if (!Number.isFinite(num)) return 1;
-  return num >= 1 ? 1 : 0.001;
+  const r = roundToPrecision(num, NORMALIZE_PRECISION);
+  const absR = Math.abs(r);
+  const isWhole =
+    absR < 1e-15 || Math.abs(r - Math.round(r)) < EPS;
+  if (isWhole) {
+    if (absR < 1) return 1;
+    return Math.pow(10, Math.floor(Math.log10(absR)));
+  }
+  if (Math.abs(r * 10 - Math.round(r * 10)) < EPS) return 0.1;
+  if (Math.abs(r * 100 - Math.round(r * 100)) < EPS) return 0.01;
+  return 0.001;
 }
 
 /**

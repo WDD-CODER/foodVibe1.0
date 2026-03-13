@@ -90,6 +90,7 @@
               </button>
               <input type="number" class="quantity-input" [value]="targetQuantity_()"
                 (input)="setQuantity($any($event.target).valueAsNumber)"
+                (keydown)="onQuantityKeydown($event)"
                 SelectOnFocus
                 [min]="isDish_() ? 1 : 0.01" [step]="isDish_() ? 1 : 0.1" />
               <button type="button" class="qty-btn plus" (click)="incrementQuantity()" [attr.aria-label]="'increase' | translatePipe">
@@ -99,7 +100,7 @@
             <app-custom-select
               class="unit-select"
               [ngModel]="selectedUnit_()"
-              (ngModelChange)="selectedUnit_.set($event)"
+              (ngModelChange)="onYieldUnitChange($event)"
               [options]="yieldUnitOptions_()"
               placeholder="unit">
             </app-custom-select>
@@ -143,6 +144,7 @@
                   </button>
                   <input type="number" class="amount-input" [value]="row.amount"
                     (input)="setIngredientAmount(i, $any($event.target).valueAsNumber ?? 0)"
+                    (keydown)="onEditAmountKeydown($event, i, row.amount)"
                     [min]="0" [step]="isDish_() ? 1 : 0.1" />
                   <button type="button" class="qty-btn plus small" (click)="setIngredientAmount(i, getEditAmountStep(row.amount, 1))" [attr.aria-label]="'increase' | translatePipe">
                     <lucide-icon name="plus" [size]="14"></lucide-icon>
@@ -165,6 +167,7 @@
                   <div class="col-amount set-by-amount">
                     <input type="number" class="amount-input" [ngModel]="settingByIngredientAmount_()"
                       (ngModelChange)="onSettingAmountChange($event)"
+                      (keydown)="onSettingAmountKeydown($event)"
                       [min]="0.01" [step]="isDish_() ? 1 : 0.1" />
                   </div>
                   <div class="col-unit"><span>{{ row.unit | translatePipe }}</span></div>

@@ -172,6 +172,20 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
   }
 
   onQuantityKeydown(e: KeyboardEvent, rowIndex: number): void {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      const group = this.ingredientsFormArray().at(rowIndex) as FormGroup;
+      const ctrl = group?.get('amount_net');
+      if (!ctrl) return;
+      e.preventDefault();
+      const current = ctrl.value ?? 0;
+      const stepOpts = this.isPurchaseUnitRow(group) ? { integerOnly: true } : undefined;
+      const next = e.key === 'ArrowUp'
+        ? quantityIncrement(current, 0, stepOpts)
+        : quantityDecrement(current, 0, stepOpts);
+      ctrl.setValue(next);
+      this.updateLineCalculations(rowIndex);
+      return;
+    }
     if (e.key === 'Enter') {
       e.preventDefault();
       this.addIngredient.emit();

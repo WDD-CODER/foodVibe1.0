@@ -28,6 +28,7 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
 import { FormatQuantityPipe } from 'src/app/core/pipes/format-quantity.pipe';
 import { quantityIncrement, quantityDecrement } from '../../core/utils/quantity-step.util';
 import { filter } from 'rxjs';
+import { HeroFabService } from '@services/hero-fab.service';
 
 @Component({
   selector: 'app-cook-view-page',
@@ -65,6 +66,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   private readonly userMsg = inject(UserMsgService);
   private readonly authModal = inject(AuthModalService);
   private readonly translation = inject(TranslationService);
+  private readonly heroFab = inject(HeroFabService);
 
   protected recipe_ = signal<Recipe | null>(null);
   protected targetQuantity_ = signal<number>(1);
@@ -107,8 +109,17 @@ export class CookViewPage implements OnInit, OnDestroy {
   });
 
   protected yieldUnitOptions_ = computed(() => {
-    const keys = this.unitRegistry.allUnitKeys_();
-    return keys.map(k => ({ value: k, label: k }));
+    const recipe = this.recipe_();
+    if (!recipe) return [];
+    const convs = recipe.yield_conversions_?.length ? recipe.yield_conversions_ : null;
+    if (convs?.length) {
+      const seen = new Set<string>();
+      return convs
+        .filter(c => c?.unit && !seen.has(c.unit) && (seen.add(c.unit), true))
+        .map(c => ({ value: c.unit, label: c.unit }));
+    }
+    const u = recipe.yield_unit_ || 'unit';
+    return [{ value: u, label: u }];
   });
 
   protected convertedYieldAmount_ = computed(() => {
@@ -118,6 +129,11 @@ export class CookViewPage implements OnInit, OnDestroy {
     const baseUnit = recipe.yield_unit_ ?? 'unit';
     const selUnit = this.selectedUnit_() || baseUnit;
     if (baseUnit === selUnit) return baseAmount;
+    const convs = recipe.yield_conversions_;
+    if (convs?.length) {
+      const entry = convs.find(c => c?.unit === selUnit);
+      if (entry != null) return entry.amount;
+    }
     const baseConv = this.unitRegistry.getConversion(baseUnit);
     const selConv = this.unitRegistry.getConversion(selUnit);
     if (!baseConv || !selConv) return baseAmount;
@@ -208,6 +224,7 @@ export class CookViewPage implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.closeAllExportOverlays();
+    this.heroFab.clearPageActions();
   }
 
   protected setQuantity(value: number): void {
@@ -215,6 +232,22 @@ export class CookViewPage implements OnInit, OnDestroy {
     const recipe = this.recipe_();
     const min = recipe?.yield_unit_ === 'dish' ? 1 : 0.01;
     this.targetQuantity_.set(Math.max(min, num));
+    this.scaleByIngredientIndex_.set(null);
+    this.scaleByIngredientAmount_.set(null);
+  }
+
+  /** When user changes the yield unit, convert quantity to equivalent in the new unit (e.g. 1 kg → 4 when switching to "unit"). */
+  protected onYieldUnitChange(newUnit: string): void {
+    const prevYield = this.convertedYieldAmount_();
+    this.selectedUnit_.set(newUnit);
+    if (prevYield > 0) {
+      const batches = this.targetQuantity_() / prevYield;
+      const newYield = this.convertedYieldAmount_();
+      const newQty = newYield > 0 ? batches * newYield : this.targetQuantity_();
+      const recipe = this.recipe_();
+      const min = recipe?.yield_unit_ === 'dish' ? 1 : 0.01;
+      this.targetQuantity_.set(Math.max(min, newQty));
+    }
     this.scaleByIngredientIndex_.set(null);
     this.scaleByIngredientAmount_.set(null);
   }
@@ -235,6 +268,33 @@ export class CookViewPage implements OnInit, OnDestroy {
     this.targetQuantity_.update(q => quantityDecrement(q, min, options));
     this.scaleByIngredientIndex_.set(null);
     this.scaleByIngredientAmount_.set(null);
+  }
+
+  protected onQuantityKeydown(e: KeyboardEvent): void {
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+    e.preventDefault();
+    if (e.key === 'ArrowUp') this.incrementQuantity();
+    else this.decrementQuantity();
+  }
+
+  protected onEditAmountKeydown(e: KeyboardEvent, index: number, currentAmount: number): void {
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+    e.preventDefault();
+    const next = e.key === 'ArrowUp'
+      ? quantityIncrement(currentAmount, 0, this.isDish_() ? { integerOnly: true } : undefined)
+      : quantityDecrement(currentAmount, 0, this.isDish_() ? { integerOnly: true } : undefined);
+    this.setIngredientAmount(index, next);
+  }
+
+  protected onSettingAmountKeydown(e: KeyboardEvent): void {
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+    e.preventDefault();
+    const current = this.settingByIngredientAmount_();
+    const options = this.isDish_() ? { integerOnly: true } : undefined;
+    const next = e.key === 'ArrowUp'
+      ? quantityIncrement(current, 0.01, options)
+      : quantityDecrement(current, 0.01, options);
+    this.settingByIngredientAmount_.set(next);
   }
 
   /** Enter "setting by this ingredient" state for row at index; prefilled with current scaled amount. */

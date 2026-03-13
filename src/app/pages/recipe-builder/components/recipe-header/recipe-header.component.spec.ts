@@ -79,7 +79,7 @@ describe('RecipeHeaderComponent', () => {
     expect(form.get('recipe_type')?.value).toBe('preparation');
   });
 
-  it('should update primary amount when updatePrimaryAmount is called', () => {
+  it('should update primary amount when updatePrimaryAmount is called (precision/magnitude step)', () => {
     const form = createRecipeForm({ recipe_type: 'preparation' });
     const conversions = form.get('yield_conversions') as FormArray;
     conversions.at(0).get('amount')?.setValue(2);
@@ -87,8 +87,8 @@ describe('RecipeHeaderComponent', () => {
     fixture.detectChanges();
     component.updatePrimaryAmount(1);
     expect(conversions.at(0).get('amount')?.value).toBe(3);
-    component.updatePrimaryAmount(-2);
-    expect(conversions.at(0).get('amount')?.value).toBe(1);
+    component.updatePrimaryAmount(-1);
+    expect(conversions.at(0).get('amount')?.value).toBe(2);
   });
 
   it('should emit openUnitCreator when NEW_UNIT is selected', (done) => {
@@ -120,7 +120,7 @@ describe('RecipeHeaderComponent', () => {
     expect(minusBtn).toBeTruthy();
   });
 
-  it('should update secondary chip amount when +/- is clicked', () => {
+  it('should update secondary chip amount when +/- is clicked (precision/magnitude step)', () => {
     const conversions = fb.array([
       fb.group({ unit: ['gram'], amount: [1] }),
       fb.group({ unit: ['liter'], amount: [2] })
@@ -130,8 +130,8 @@ describe('RecipeHeaderComponent', () => {
     fixture.detectChanges();
     component.updateSecondaryAmount(0, 1);
     expect(conversions.at(1).get('amount')?.value).toBe(3);
-    component.updateSecondaryAmount(0, -2);
-    expect(conversions.at(1).get('amount')?.value).toBe(1);
+    component.updateSecondaryAmount(0, -1);
+    expect(conversions.at(1).get('amount')?.value).toBe(2);
   });
 
   it('should exclude used units from availableSecondaryUnits_', () => {

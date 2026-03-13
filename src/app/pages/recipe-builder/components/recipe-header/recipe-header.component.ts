@@ -12,6 +12,7 @@ import { TranslationService } from '@services/translation.service';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
+import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util';
 
 @Component({
   selector: 'app-recipe-header',
@@ -199,7 +200,12 @@ export class RecipeHeaderComponent {
 
   updatePrimaryAmount(delta: number): void {
     const current = this.primaryAmount_();
-    this.applyPrimaryUpdate(current + delta);
+    const type = this.form().get('recipe_type')?.value;
+    const min = type === 'dish' ? 1 : 0;
+    const next = delta > 0
+      ? quantityIncrement(current, min, undefined)
+      : quantityDecrement(current, min, undefined);
+    this.applyPrimaryUpdate(next);
   }
 
   onAmountManualChange(rawValue: string): void {
@@ -356,9 +362,29 @@ export class RecipeHeaderComponent {
     const amountControl = group.get('amount');
     if (!amountControl) return;
     const current = amountControl.value ?? 0;
-    const next = Math.max(0, current + delta);
-    amountControl.setValue(next, { emitEvent: true });
+    const next = delta > 0
+      ? quantityIncrement(current, 0, undefined)
+      : quantityDecrement(current, 0, undefined);
+    amountControl.setValue(Math.max(0, next), { emitEvent: true });
     this.manualTrigger_.update(v => v + 1);
+  }
+
+  protected onPrimaryAmountKeydown(e: KeyboardEvent): void {
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+    e.preventDefault();
+    const current = this.primaryAmount_();
+    const type = this.form().get('recipe_type')?.value;
+    const min = type === 'dish' ? 1 : 0;
+    const next = e.key === 'ArrowUp'
+      ? quantityIncrement(current, min, undefined)
+      : quantityDecrement(current, min, undefined);
+    this.applyPrimaryUpdate(next);
+  }
+
+  protected onSecondaryAmountKeydown(e: KeyboardEvent, index: number): void {
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+    e.preventDefault();
+    this.updateSecondaryAmount(index, e.key === 'ArrowUp' ? 1 : -1);
   }
 
   //DELETE
