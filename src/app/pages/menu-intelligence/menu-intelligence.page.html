@@ -179,12 +179,12 @@
       <div class="meta-row guest-row">
         <span class="meta-label">{{ 'menu_guests' | translatePipe }}</span>
         <div class="counter-pill">
-          <button type="button" class="counter-pill-btn" (click)="decrementGuests()" [disabled]="getGuestCount() <= 0" [attr.aria-label]="'decrease' | translatePipe">
+          <button type="button" class="counter-pill-btn" tabindex="-1" (click)="decrementGuests()" [disabled]="getGuestCount() <= 0" [attr.aria-label]="'decrease' | translatePipe">
             <lucide-icon name="minus" [size]="14"></lucide-icon>
           </button>
           <input id="menu-focus-guest_count_" type="number" class="counter-pill-input" formControlName="guest_count_" min="0"
             (keydown)="onMetaKeydown('guest_count_', $event)" />
-          <button type="button" class="counter-pill-btn" (click)="incrementGuests()" [attr.aria-label]="'increase' | translatePipe">
+          <button type="button" class="counter-pill-btn" tabindex="-1" (click)="incrementGuests()" [attr.aria-label]="'increase' | translatePipe">
             <lucide-icon name="plus" [size]="14"></lucide-icon>
           </button>
         </div>
@@ -241,7 +241,9 @@
                 </app-scrollable-dropdown>
               </div>
             } @else {
-              <button type="button" class="section-title-plain" (click)="openSectionSearch(sectionIndex)">
+              <button type="button" class="section-title-plain" [id]="'section-title-' + sectionIndex"
+                (click)="openSectionSearch(sectionIndex)"
+                (keydown.space)="$event.preventDefault(); openSectionSearch(sectionIndex)">
                 {{ ((section.get('name_')?.value ?? '') | translatePipe) || ('menu_section_placeholder' | translatePipe) }}
               </button>
             }
@@ -258,7 +260,7 @@
                     <div class="dish-name-meta-wrap">
                       <div class="dish-name-meta">
                         <span class="dish-name-meta-inner">
-                          <button type="button" class="dish-name dish-name-btn"
+                          <button type="button" class="dish-name dish-name-btn" [id]="'dish-name-' + sectionIndex + '-' + itemIndex"
                             [attr.aria-label]="'change_dish' | translatePipe"
                             (click)="startEditDishName(sectionIndex, itemIndex); $event.stopPropagation()">
                           {{ getRecipeName(item.get('recipe_id_')?.value) }}
@@ -274,6 +276,7 @@
                     <span class="dish-sell-price no-print">
                       <span class="dish-sell-currency">₪</span>
                       <input type="number" [formControlName]="'sell_price'" min="0" step="1"
+                        [id]="'dish-sell-' + sectionIndex + '-' + itemIndex"
                         class="dish-sell-input" SelectOnFocus
                         [style.width]="getInputWidth(item.get('sell_price')?.value)"
                         (click)="$event.stopPropagation()"
@@ -291,8 +294,7 @@
                         [ngModelOptions]="{ standalone: true }"
                         (ngModelChange)="onDishSearchQueryChange(sectionIndex, itemIndex, $event)"
                         [placeholder]="'menu_search_dish' | translatePipe"
-                        (keydown.escape)="clearDishSearch(sectionIndex, itemIndex)"
-                        (keydown.enter)="onDishSearchKeydown(sectionIndex, itemIndex, $event)" />
+                        (keydown)="onDishSearchKeydown(sectionIndex, itemIndex, $event)" />
                       @if (getDishSearchQuery(sectionIndex, itemIndex).trim()) {
                         <app-scrollable-dropdown [maxHeight]="200">
                           @for (recipe of getFilteredRecipes(sectionIndex, itemIndex); track recipe._id; let i = $index) {
@@ -337,7 +339,7 @@
             }
           </div>
 
-          <button type="button" class="add-dish-btn no-print" (click)="addItem(sectionIndex)">
+          <button type="button" class="add-dish-btn no-print" [id]="'add-dish-' + sectionIndex" (click)="addItem(sectionIndex)">
             + {{ 'menu_add_dish' | translatePipe }}
           </button>
         </div>

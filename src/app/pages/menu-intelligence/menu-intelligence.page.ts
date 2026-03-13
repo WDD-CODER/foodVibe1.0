@@ -199,7 +199,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   ngOnInit(): void {
     this.heroFab.setPageActions(
       [{ labelKey: 'menu_toolbar_open', icon: 'file-down', run: () => this.openToolbar() }],
-      'append'
+      'replace'
     );
     this.router.events
       .pipe(
@@ -314,7 +314,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   protected onMetaKeydown(field: string, e: KeyboardEvent): void {
     if (field === 'event_type_') {
-      if (e.key === 'Enter' || e.key === 'Tab' || e.key === 'ArrowDown') {
+      if (e.key === 'Enter' || e.key === 'Tab' || e.key === 'ArrowDown' || e.key === ' ') {
         e.preventDefault();
         this.openEventTypeDropdown();
         return;
@@ -414,7 +414,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       this.scrollDropdownHighlightIntoView('.event-type-dropdown');
       return;
     }
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       e.stopPropagation();
       if (idx >= 0 && idx < list.length) {
@@ -647,6 +647,23 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected onSellPriceKeydown(sectionIndex: number, itemIndex: number, e: KeyboardEvent): void {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const s = sectionIndex;
+      const i = itemIndex;
+      const items = this.getItemsArray(s);
+      setTimeout(() => {
+        if (e.shiftKey) {
+          document.getElementById('dish-name-' + s + '-' + i)?.focus();
+        } else {
+          const nextSearch = document.getElementById('dish-search-' + s + '-' + (i + 1));
+          const nextSell = document.getElementById('dish-sell-' + s + '-' + (i + 1));
+          const addDish = document.getElementById('add-dish-' + s);
+          (nextSearch ?? nextSell ?? addDish)?.focus();
+        }
+      }, 0);
+      return;
+    }
     if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
     e.preventDefault();
     const item = this.getItemsArray(sectionIndex).at(itemIndex);
@@ -820,7 +837,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       this.scrollDropdownHighlightIntoView('.dish-search-wrap');
       return;
     }
-    if (ke.key === 'Enter') {
+    if (ke.key === 'Enter' || ke.key === ' ') {
       if (recipes.length > 0) {
         ke.preventDefault();
         ke.stopPropagation();
@@ -833,6 +850,30 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       ke.preventDefault();
       ke.stopPropagation();
       this.clearDishSearch(sectionIndex, itemIndex);
+      return;
+    }
+    if (ke.key === 'Tab') {
+      ke.preventDefault();
+      ke.stopPropagation();
+      const s = sectionIndex;
+      const i = itemIndex;
+      const items = this.getItemsArray(s);
+      const hasRecipe = (items.at(i)?.get('recipe_id_')?.value ?? '') !== '';
+      setTimeout(() => {
+        if (ke.shiftKey) {
+          const prev = document.getElementById('dish-search-' + s + '-' + (i - 1));
+          const sectionTitle = document.getElementById('section-title-' + s);
+          (prev ?? sectionTitle)?.focus();
+        } else {
+          if (hasRecipe) {
+            document.getElementById('dish-sell-' + s + '-' + i)?.focus();
+          } else {
+            const next = document.getElementById('dish-search-' + s + '-' + (i + 1));
+            const addDish = document.getElementById('add-dish-' + s);
+            (next ?? addDish)?.focus();
+          }
+        }
+      }, 0);
     }
   }
 
@@ -901,6 +942,22 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       e.preventDefault();
       e.stopPropagation();
       this.closeSectionSearch();
+      return;
+    }
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      e.stopPropagation();
+      this.closeSectionSearch();
+      const sectionIdx = sectionIndex;
+      setTimeout(() => {
+        if (e.shiftKey) {
+          document.getElementById('section-title-' + sectionIdx)?.focus();
+        } else {
+          const firstDish = document.getElementById('dish-search-' + sectionIdx + '-0');
+          const addDish = document.getElementById('add-dish-' + sectionIdx);
+          (firstDish ?? addDish)?.focus();
+        }
+      }, 0);
     }
   }
 
