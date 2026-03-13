@@ -48,7 +48,15 @@ export class UnitCreatorModal {
     this.errorMessage_.set(null);
     this.isSaving_.set(true);
     try {
-      await this.unitRegistryService.registerUnit(name, value, basis);
+      const result = await this.unitRegistryService.registerUnit(name, value, basis);
+      if (!result.success) {
+        if (result.alreadyOnProduct) {
+          this.errorMessage_.set('היחידה כבר קיימת במוצר זה. בחר שם אחר.');
+        } else if (result.error) {
+          this.errorMessage_.set(result.error);
+        }
+        return;
+      }
       this.unitRegistryService.closeUnitCreator();
       this.resetFields();
     } catch (err) {

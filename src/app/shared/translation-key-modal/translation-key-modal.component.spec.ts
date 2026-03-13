@@ -14,7 +14,7 @@ describe('TranslationKeyModalComponent', () => {
     context_: WritableSignal<'category' | 'allergen' | 'supplier' | 'unit' | 'generic'>;
     save: jasmine.Spy;
     cancel: jasmine.Spy;
-    validateKey: jasmine.Spy;
+    validateKeyForHebrew: jasmine.Spy;
   };
 
   beforeEach(async () => {
@@ -24,7 +24,7 @@ describe('TranslationKeyModalComponent', () => {
       context_: signal<'category' | 'allergen' | 'supplier' | 'unit' | 'generic'>('generic'),
       save: jasmine.createSpy('save'),
       cancel: jasmine.createSpy('cancel'),
-      validateKey: jasmine.createSpy('validateKey').and.returnValue({ valid: true })
+      validateKeyForHebrew: jasmine.createSpy('validateKeyForHebrew').and.returnValue({ valid: true })
     };
 
     await TestBed.configureTestingModule({
@@ -57,8 +57,8 @@ describe('TranslationKeyModalComponent', () => {
     expect(mockModalService.cancel).toHaveBeenCalled();
   });
 
-  it('should set validation error when validateKey returns invalid', () => {
-    mockModalService.validateKey.and.returnValue({ valid: false, error: 'Invalid key' });
+  it('should set validation error when validateKeyForHebrew returns invalid', () => {
+    mockModalService.validateKeyForHebrew.and.returnValue({ valid: false, error: 'Invalid key' });
     component['englishKey_'].set('test');
     mockModalService.hebrewLabel_.set('מבחן');
     (component as any).save();

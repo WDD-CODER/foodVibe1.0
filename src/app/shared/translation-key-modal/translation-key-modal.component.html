@@ -5,17 +5,21 @@
 
     <div class="c-modal-body">
       <div class="c-input-stack full-width">
-        <label>ערך בעברית</label>
-        <input type="text"
+        <label>{{ firstFieldLabelKey_() | translatePipe }}</label>
+        <input #hebrewInput
+               type="text"
                [ngModel]="hebrewLabel_()"
                (ngModelChange)="updateHebrew($event)"
-               [placeholder]="context_() === 'category' ? 'למשל: קטגוריה חדשה' : 'ערך בעברית'"
-               [readOnly]="isHebrewReadonly_()"
-               [class.readonly-input]="isHebrewReadonly_()" />
+               [placeholder]="context_() === 'category' ? 'למשל: קטגוריה חדשה' : ('hebrew_value' | translatePipe)"
+               aria-describedby="hebrew-hint" />
+        @if (context_() === 'generic') {
+        <span id="hebrew-hint" class="translation-key-modal-hint">{{ 'enter_english_key_for_value_above' | translatePipe }}</span>
+        }
       </div>
       <div class="c-input-stack full-width">
-        <label>מפתח באנגלית (לדוגמה: olive_oil)</label>
-        <input type="text"
+        <label>{{ 'english_key_label' | translatePipe }}</label>
+        <input #englishKeyInput
+               type="text"
                [ngModel]="englishKey_()"
                (ngModelChange)="englishKey_.set($event); validationError_.set(null)"
                placeholder="olive_oil"
@@ -28,6 +32,9 @@
 
     <div class="c-modal-actions">
       <button type="button" class="c-btn-ghost" (click)="cancel()">{{ 'cancel' | translatePipe }}</button>
+      @if (context_() === 'generic') {
+      <button type="button" class="c-btn-ghost" (click)="continueWithoutSaving()">{{ 'continue_without_saving' | translatePipe }}</button>
+      }
       <button type="button" class="c-btn-primary"
               (click)="save()"
               [disabled]="!englishKey_().trim() || !hebrewLabel_().trim()">

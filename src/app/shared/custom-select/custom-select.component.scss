@@ -6,9 +6,8 @@
   position: relative;
 
   width: 100%;
-
   &.open {
-    z-index: 1000;
+    z-index: 9999;
   }
 }
 
@@ -28,22 +27,19 @@
   font-size: 0.875rem;
   text-align: start;
 
-  border: none;
+  border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
 
   cursor: pointer;
-  transition: box-shadow 0.2s ease;
-
-  lucide-icon {
-    display: none;
-  }
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: var(--bg-glass-hover);
+    border-color: var(--border-strong);
   }
 
   &:focus {
     outline: none;
+    border-color: var(--border-focus);
     box-shadow: var(--shadow-focus);
   }
 

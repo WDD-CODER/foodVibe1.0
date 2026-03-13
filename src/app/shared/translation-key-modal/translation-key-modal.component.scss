@@ -1,6 +1,14 @@
-.translation-key-validation-error {
-  font-size: 0.75rem;
-  font-weight: 500;
+@layer components.translation-key-modal {
+  .translation-key-validation-error {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-danger);
+  }
 
-  color: var(--color-danger);
+  .translation-key-modal-hint {
+    display: block;
+    font-size: 0.8125rem;
+    color: var(--color-text-muted, #64748b);
+    margin-top: 0.25rem;
+  }
 }

@@ -6,6 +6,7 @@ import { AddEquipmentModalService } from '@services/add-equipment-modal.service'
 import { AddItemModalService } from '@services/add-item-modal.service';
 import { ConfirmModalService } from '@services/confirm-modal.service';
 import { TranslationService } from '@services/translation.service';
+import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service';
 import { EquipmentCategory } from 'src/app/core/models/equipment.model';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 
@@ -23,6 +24,7 @@ export class AddEquipmentModalComponent {
   private addItemModal = inject(AddItemModalService);
   private confirmModal = inject(ConfirmModalService);
   private translationService = inject(TranslationService);
+  private translationKeyModal = inject(TranslationKeyModalService);
 
   protected isOpen_ = this.modalService.isOpen_;
   protected name_ = signal('');
@@ -62,11 +64,20 @@ export class AddEquipmentModalComponent {
       saveLabel: 'save'
     });
     if (result?.trim()) {
-      const key = result.trim();
-      if (!this.customCategories_().includes(key)) {
-        this.customCategories_.update((list) => [...list, key]);
+      let keyToUse: string = this.translationService.resolveCategory(result.trim()) ?? '';
+      if (!keyToUse) {
+        const modalResult = await this.translationKeyModal.open(result.trim(), 'category');
+        if (isTranslationKeyResult(modalResult)) {
+          this.translationService.addKeyAndHebrew(modalResult.englishKey, modalResult.hebrewLabel);
+          keyToUse = modalResult.englishKey;
+        } else {
+          keyToUse = result.trim();
+        }
       }
-      this.category_.set(key);
+      if (!this.customCategories_().includes(keyToUse)) {
+        this.customCategories_.update((list) => [...list, keyToUse]);
+      }
+      this.category_.set(keyToUse);
     } else {
       this.category_.set('tool');
     }
