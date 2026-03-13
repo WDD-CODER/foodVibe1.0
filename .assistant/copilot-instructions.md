@@ -5,7 +5,7 @@
 ## 0. Skill Triggers (portable — when X, read skill Y)
 
 - **Save plan**: User says "save the plan" after confirming → read `.assistant/skills/save-plan/SKILL.md` and follow it.
-- **Commit / push to GitHub**: User says commit, push, save to branches → read `.assistant/skills/commit-to-github/SKILL.md`; no `git add`/`commit`/`push` until user approves the visual tree in chat.
+- **Commit / push to GitHub**: User says commit, push, save to branches → read `.assistant/skills/commit-to-github/SKILL.md`. Before building the commit plan (Phase 1), complete Phase 0: tech-debt pass **in working-tree scope only** (only files to be committed), handle Spec coverage (add/update specs or list and ask), then run the full test suite (`npm test -- --no-watch --browsers=ChromeHeadless`); if tests fail, report and ask fix or proceed. No `git add`/`commit`/`push` until user approves the visual tree in chat.
 - **CSS/SCSS**: Before creating or editing any `.scss`/`.css` in `src/` → read `.assistant/skills/cssLayer/SKILL.md` and apply it (tokens, five-group rhythm, logical properties).
 - **Add recipe/dish**: User adds recipe from image or text → read `.assistant/skills/add-recipe/SKILL.md`; Step 3 confirmation required before any write.
 - **Auth, logging, routes, CRUD**: Read `.assistant/skills/auth-and-logging/SKILL.md` when touching auth, persistence, HTTP, or critical operations.
@@ -14,7 +14,7 @@
 - **After features**: Read `.assistant/skills/update-docs/SKILL.md` to refresh breadcrumbs and docs.
 - **After a hacky fix**: Read `.assistant/skills/elegant-fix/SKILL.md` to refine into a clean solution.
 - **Lucide icons**: Before adding or editing `<lucide-icon name="...">` in any template → read and apply **Section 8** below.
-- **Hebrew canonical values**: When adding or editing flows that accept user-entered canonical values (units, categories, allergens, section categories) in Hebrew → read and apply **Section 7.1** below.
+- **Hebrew canonical values**: When adding or editing flows that accept user-entered canonical values (units, categories, allergens, section categories) in Hebrew → read and apply **Section 7.1 and 7.2** below.
 
 ## 1. Persona & Identity
 * **Role**: Senior Software Engineer (Kitchen/Recipe Domain Specialist).
@@ -64,6 +64,9 @@
 * **If there is no matching key**: Prompt the user for the **English** value (canonical key), then call `translationService.promptForEnglishKeyAndAdd(hebrewLabel)` or `updateDictionary(englishKey, hebrewLabel)` so the dictionary grows and future input resolves correctly.
 * **Units only**: When adding a measurement unit to a product (e.g. purchase option), after resolving or creating the unit, check whether **this product** already has that unit symbol; if yes, do not add a duplicate — use existing or show "already on this product".
 * New add-item / add-unit / add-category flows must use this resolution flow before persisting.
+
+## 7.2 Translation modal UX (Hebrew → English key)
+* Use the **translation-key modal**: Hebrew in an **editable** text input (all contexts); **focus the English key** input when the modal opens; **no** "Continue without saving" in add-time (only in generic/on-leave).
 
 ## 8. Lucide Icons
 * **Mandatory**: Every icon used in a template (`<lucide-icon name="...">`) MUST be registered in `src/app/app.config.ts`. If you add a new icon in any component template, in the same change add: (1) import from `lucide-angular` (PascalCase, e.g. `CircleUserRound`), (2) add it to `LucideAngularModule.pick({ ... })`. Template uses kebab-case (`circle-user-round`); TypeScript uses PascalCase (`CircleUserRound`). Missing registration causes runtime: *"The '...' icon has not been provided by any available icon providers."* Cursor rule: `.cursor/rules/lucide-icons-must-register-in-app-config.mdc`.

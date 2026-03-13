@@ -30,6 +30,7 @@ Read this and `.assistant/copilot-instructions.md` at the start of every task.
 | elegant-fix | After a fix that feels hacky |
 | angularComponentStructure | Creating/refactoring Angular components |
 | auth-and-logging | Routes, auth, persistence, HTTP, CRUD, logging |
+| Hebrew→English key flows | When a plan adds or changes flows where the user enters a Hebrew value that must have an English key → apply `.assistant/copilot-instructions.md` Section 7.1–7.2 |
 
 ## Commands (`.assistant/commands/`)
 | Command | Purpose |
@@ -56,6 +57,6 @@ Before changing a directory, check for `breadcrumbs.md` and read it.
 3. **Approval**: Wait for explicit user confirmation.
 4. **Execute**: Multi-file updates; keep files under ~300 lines.
 5. **Audit**: Run tests to confirm nothing is broken.
-5.5 **Tech debt**: Before considering the task done (or before suggesting commit), read `.assistant/skills/techdebt/SKILL.md`. Run the analysis; fix critical/high items or attach a short tech-debt report and ask whether to fix or proceed.
+5.5 **Tech debt**: Before considering the task done (or before suggesting commit), read `.assistant/skills/techdebt/SKILL.md`. Run the analysis; fix critical/high items or attach a short tech-debt report and ask whether to fix or proceed. If the user later runs commit-to-github in the same session, Phase 0 of that skill will use this report (no second techdebt run).
 6. **Branch**: Not on `main`; use `feat/` branch if needed.
-7. **Commit/push**: User asks to commit or push → read `.assistant/skills/commit-to-github/SKILL.md`, follow phases, get approval before any git write.
+7. **Commit/push**: User asks to commit or push → read `.assistant/skills/commit-to-github/SKILL.md`, follow all phases in order. Phase 0 (techdebt + spec coverage + run full test suite; if tests fail, ask fix or proceed) is mandatory before Phase 1; do not evaluate the working tree until Phase 0 is done. Get approval before any git write.

@@ -13,6 +13,32 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 141 — Hero FAB refactor and page-specific actions (`plans/141-hero-fab-refactor-and-page-actions.plan.md`)
+
+- [x] Hero FAB: effectiveActions_ empty when no state; template cleanup
+- [x] Recipe-builder: setPageActions replace, add Cook-view when edit
+- [x] Menu-intelligence: setPageActions replace
+- [x] Cook-view: FAB action Edit recipe when /cook/:id
+- [x] Menu-library: FAB action New menu
+- [x] Recipe-book list: replace edit button with cook button in row
+- [x] Add cook_view translation key
+
+### Plan 140 — Recipe builder real-changes confirmation (`plans/140-recipe-builder-real-changes-confirmation.plan.md`)
+
+- [x] Add initialRecipeSnapshot_ + getRecipeSnapshotForComparison() + hasRealChanges() in recipe-builder.page.ts
+- [x] Set initialRecipeSnapshot_ in ngOnInit when editable; remove hasUnsavedEdits()
+- [x] Remove markAsDirty in recipe-builder.page.ts
+- [x] Remove markAsDirty in recipe-header, recipe-workflow, recipe-ingredients-table
+
+### Plan 139 — Menu intelligence keyboard focus (`plans/139-menu-intelligence-keyboard-focus.plan.md`)
+
+- [x] HTML: guest count tabindex="-1"; section title Space + id; sell price/add-dish/dish name ids
+- [x] TS: event type Space to open and Space to select
+- [x] TS: section search Tab/Shift+Tab
+- [x] TS: dish search Tab/Shift+Tab
+- [x] TS: sell price Tab/Shift+Tab
+- [x] Optional: commit-to-github skill "Menu intelligence tab order" subsection
+
 ### Plan 137 — Techdebt and spec coverage agent adherence (`plans/137-techdebt-spec-coverage-agent-adherence.plan.md`)
 
 - [x] commit-to-github SKILL.md: add Phase 0 mandate and checklist
@@ -23,9 +49,9 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ### Plan 138 — Product form header redesign (`plans/138-product-form-header-redesign.plan.md`)
 
-- [ ] Move header into form; remove edit-mode subtitle (product-form.component.html)
-- [ ] Move .form-header under .form-container; compact header; optional card border (product-form.component.scss)
-- [ ] Update spec if tests reference removed text/DOM (product-form.component.spec.ts)
+- [x] Move header into form; remove edit-mode subtitle (product-form.component.html)
+- [x] Move .form-header under .form-container; compact header; optional card border (product-form.component.scss)
+- [x] Update spec if tests reference removed text/DOM (product-form.component.spec.ts)
 
 ### Plan 136 — Product form keyboard focus (`plans/136-product-form-keyboard-focus.plan.md`)
 
@@ -867,9 +893,12 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 133 | List quick-edit inline | Planned |
 | 136 | Product form keyboard focus | Active |
 | 137 | Techdebt spec coverage agent adherence | Active |
+| 139 | Menu intelligence keyboard focus | Active |
+| 140 | Recipe builder real-changes confirmation | Active |
 | 138 | Product form header redesign | Active |
 | 135 | Translation modal cancel guard title fix | Active |
 | 134 | Translation and confirmation modals unified | Active |
+| 141 | Hero FAB refactor and page-specific actions | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 

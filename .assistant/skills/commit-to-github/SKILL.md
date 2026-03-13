@@ -12,10 +12,10 @@ Evaluates working-tree changes, decides how to split branches and commits, prese
 
 Before Phase 1 (Evaluate):
 
-- **Checklist:** (1) If no tech-debt report exists in this session → read `.assistant/skills/techdebt/SKILL.md` and run the analysis; produce the report. (2) If the report lists critical/high items → ask the user: fix first or proceed? (3) If the report has a **Spec coverage** section → add or update those specs so tests pass, or list the files and ask the user. (4) **Run the full test suite:** `npm test -- --no-watch --browsers=ChromeHeadless`. If it fails, report the failure and ask: "Fix before building the commit plan, or proceed anyway?" Do not proceed to Phase 1 until tests pass or the user chooses to proceed. Then continue to Phase 1.
+- **Checklist:** (1) If no tech-debt report exists in this session → read `.assistant/skills/techdebt/SKILL.md` and run the analysis **in working-tree scope only** (files to be committed; get the list from `git status` and `git diff --name-only`). Produce the report. (2) If the report lists critical/high items → ask the user: fix first or proceed? (3) If the report has a **Spec coverage** section → add or update those specs so tests pass, or list the files and ask the user. (4) **Run the full test suite:** `npm test -- --no-watch --browsers=ChromeHeadless`. If it fails, report the failure and ask: "Fix before building the commit plan, or proceed anyway?" Do not proceed to Phase 1 until tests pass or the user chooses to proceed. Then continue to Phase 1.
 
 - **If a tech-debt report was already produced in this conversation** (e.g. from workflow step 5.5 or because the user asked for a tech-debt run): **Do not run the techdebt skill again.** Use that existing report. If it listed critical or high-priority items, ask: **"Fix these first, or proceed with the commit plan anyway?"** If the report includes a **Spec coverage** section (files needing `.spec.ts` added or updated), add or update those specs so `npm test -- --no-watch --browsers=ChromeHeadless` passes; if the list is long, list the files and ask: **"Add/update specs for these before building the commit plan?"** then do them if the user agrees. **(4) Run the full test suite:** `npm test -- --no-watch --browsers=ChromeHeadless`. If it fails, report and ask: "Fix before building the commit plan, or proceed anyway?" Then continue to Phase 1.
-- **If no tech-debt report exists in this session**: Read `.assistant/skills/techdebt/SKILL.md` and run a quick tech-debt pass. If critical or high-priority items exist, list them briefly and ask: **"Fix these first, or proceed with the commit plan anyway?"** If the report includes a **Spec coverage** section, add or update those specs (or list and ask: **"Add/update specs for these before building the commit plan?"**). **(4) Run the full test suite:** `npm test -- --no-watch --browsers=ChromeHeadless`. If it fails, report and ask: "Fix before building the commit plan, or proceed anyway?" Do not block the commit tree indefinitely — the user may choose to proceed. Then continue to Phase 1.
+- **If no tech-debt report exists in this session**: Read `.assistant/skills/techdebt/SKILL.md` and run a quick tech-debt pass **in working-tree scope only** (analysis only for files to be committed; see techdebt SKILL "Scope — Working tree (commit flow)"). If critical or high-priority items exist, list them briefly and ask: **"Fix these first, or proceed with the commit plan anyway?"** If the report includes a **Spec coverage** section, add or update those specs (or list and ask: **"Add/update specs for these before building the commit plan?"**). **(4) Run the full test suite:** `npm test -- --no-watch --browsers=ChromeHeadless`. If it fails, report and ask: "Fix before building the commit plan, or proceed anyway?" Do not block the commit tree indefinitely — the user may choose to proceed. Then continue to Phase 1.
 
 ---
 
@@ -133,6 +133,26 @@ When changing the recipe-builder page or its child components, keep this Tab ord
 20. **Add (logistics)** — Add tool button.
 21. **Items in grid** — Logistics chips (added tools).
 22. **Save** — Save recipe/dish button.
+
+---
+
+## Menu intelligence tab order (canonical)
+
+When changing the menu-intelligence page, keep this Tab order so keyboard-only users can move predictably. Guest count +/- and similar controls use `tabindex="-1"` and are skipped.
+
+1. **Menu name** — Text input (initial focus).
+2. **Event type** — Trigger button; Enter/Space/ArrowDown open dropdown; ArrowUp/Down move, Enter/Space select; Escape close.
+3. **Serving type** — Custom-select (Enter/Space open, Arrow move, Enter/Space select).
+4. **Guest count** — Number input (ArrowUp/Down change value; +/- skipped).
+5. **Event date** — Date wrap (Enter/Space open picker); date input for value.
+6. **Section 1 title** — Button; Enter/Space open section category search.
+7. **Section 1 category search** — When open: type to filter, ArrowUp/Down, Enter/Space select; Tab → first dish in section.
+8. **Section 1 — Dish 1** — If empty: dish search input (Arrow/Enter/Space to select). If filled: dish name (optional edit), then **sell price** input (Arrow to change). Tab from dish search or sell price → next dish or add-dish.
+9. **Section 1 — Dish 2, …** — Same pattern per row.
+10. **Section 1 — Add dish** — Button.
+11. **Section 2 title**, **Section 2 category search**, **Section 2 dishes**, **Add dish**, …
+12. **Add section** — Button.
+13. **Toolbar (when open)** — Export/Save etc.; **Save** as final action.
 
 ---
 
