@@ -6,7 +6,7 @@ import { KitchenStateService } from '@services/kitchen-state.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
-import { TranslationKeyModalService } from '@services/translation-key-modal.service'
+import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service'
 import { UserService } from '@services/user.service'
 import { AuthModalService } from '@services/auth-modal.service'
 
@@ -56,7 +56,7 @@ export class PreparationCategoryManagerComponent {
     }
 
     const result = await this.translationKeyModal.open(sanitized, 'category')
-    if (!result?.englishKey || !result?.hebrewLabel) return
+    if (!isTranslationKeyResult(result)) return
 
     this.translation.updateDictionary(result.englishKey, result.hebrewLabel)
     await this.prepRegistry.registerCategory(result.englishKey, result.hebrewLabel)

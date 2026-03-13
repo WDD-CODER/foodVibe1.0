@@ -12,7 +12,17 @@ import {
   X,
   ChevronLeft,
   Tag,
+  Tags,
   Trash2,
+  UtensilsCrossed,
+  Pencil,
+  Package,
+  Archive,
+  Download,
+  RotateCcw,
+  Upload,
+  CookingPot,
+  BookOpen,
 } from 'lucide-angular';
 import { signal } from '@angular/core';
 import { TranslationService } from '@services/translation.service';
@@ -52,7 +62,7 @@ describe('MetadataManagerPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         MetadataManagerComponent,
-        LucideAngularModule.pick({ Scale, AlertTriangle, X, ChevronLeft, Tag, Trash2 })
+        LucideAngularModule.pick({ Scale, AlertTriangle, X, ChevronLeft, Tag, Tags, Trash2, UtensilsCrossed, Pencil, Package, Archive, Download, RotateCcw, Upload, CookingPot, BookOpen })
       ],
       providers: [
         provideHttpClient(),

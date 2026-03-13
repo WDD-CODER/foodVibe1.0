@@ -14,7 +14,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { TranslationService } from '@services/translation.service';
 import { UserMsgService } from '@services/user-msg.service';
-import { TranslationKeyModalService } from '@services/translation-key-modal.service';
+import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service';
 import { UserService } from '@services/user.service';
 import { AuthModalService } from '@services/auth-modal.service';
 import { LoggingService } from '@services/logging.service';
@@ -130,14 +130,18 @@ export class MetadataManagerComponent implements OnInit {
     // --- LAYER 2: ENGLISH KEY GUARD ---
     const contextMap = { category: 'category' as const, allergen: 'allergen' as const, unit: 'unit' as const };
     const result = await this.translationKeyModal.open(sanitizedHebrew, contextMap[type]);
-    if (!result?.englishKey || !result?.hebrewLabel) return;
+    if (!isTranslationKeyResult(result)) return;
 
     const sanitizedKey = result.englishKey;
 
     // --- LAYER 3: EXECUTION ---
     try {
       this.translationService.updateDictionary(sanitizedKey, result.hebrewLabel);
-      await this.registerInService(sanitizedKey, type);
+      if (type === 'category') {
+        await this.metadataRegistry.registerCategory(result.hebrewLabel);
+      } else {
+        await this.registerInService(sanitizedKey, type);
+      }
       inputElement.value = '';
       this.userMsgService.onSetSuccessMsg('הנתונים נשמרו בהצלחה');
     } catch (err) {
