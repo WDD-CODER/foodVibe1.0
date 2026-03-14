@@ -250,11 +250,7 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
     if (itemType === 'recipe') {
       const recipe = item as import('@models/recipe.model').Recipe;
       const costPerUnit = this.recipeCostService.getRecipeCostPerUnit(recipe);
-      const yieldUnit = recipe.yield_unit_ || 'unit';
-      const amountInYieldUnit = selectedUnit === yieldUnit
-        ? netAmount
-        : this.recipeCostService.convertToBaseUnits(netAmount, selectedUnit) /
-          (this.recipeCostService.convertToBaseUnits(1, yieldUnit) || 1);
+      const amountInYieldUnit = this.recipeCostService.amountInRecipeYieldUnit(netAmount, selectedUnit, recipe);
       lineCost = amountInYieldUnit * costPerUnit;
     } else {
       const prod = item as { base_unit_?: string; purchase_options_?: { unit_symbol_: string; conversion_rate_?: number; price_override_?: number }[]; buy_price_global_?: number; yield_factor_?: number; calculated_cost_per_unit?: number };
@@ -301,7 +297,13 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
     if (!item) return [];
 
     const units = new Set<string>();
-    const meta = item as { base_unit_?: string; purchase_options_?: { unit_symbol_?: string }[]; unit_options_?: { unit_symbol_?: string }[]; yield_unit_?: string };
+    const meta = item as {
+      base_unit_?: string;
+      purchase_options_?: { unit_symbol_?: string }[];
+      unit_options_?: { unit_symbol_?: string }[];
+      yield_unit_?: string;
+      yield_conversions_?: { amount: number; unit: string }[];
+    };
 
     if (meta.base_unit_) units.add(meta.base_unit_);
     if (meta.purchase_options_?.length) {
@@ -311,6 +313,9 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
       meta.unit_options_.forEach(o => { if (o.unit_symbol_) units.add(o.unit_symbol_); });
     }
     if (meta.yield_unit_) units.add(meta.yield_unit_);
+    if (meta.yield_conversions_?.length) {
+      meta.yield_conversions_.forEach(c => { if (c?.unit) units.add(c.unit); });
+    }
 
     return Array.from(units);
   }
