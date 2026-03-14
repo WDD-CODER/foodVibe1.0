@@ -222,7 +222,7 @@ export class RecipeCostService {
 
   /**
    * Total volume in liters and list of ingredient names that could not be converted to volume.
-   * Uses registry conversion for L/ml (1 L = 1000 ml); 1 g = 1 ml fallback for weight-only ingredients.
+   * Only rows with a volume unit (L, ml) contribute; weight-only rows are not converted (no 1g=1ml).
    * Returns totalL rounded to 4 decimal places for display consistency (B3 volume conversion spec).
    */
   computeTotalVolumeL(rows: IngredientWeightRow[], depth = 0): { totalL: number; unconvertibleNames: string[] } {
@@ -244,11 +244,6 @@ export class RecipeCostService {
       }
       if (key === 'ml') {
         totalMl += net * (volFactor || 1);
-        continue;
-      }
-      const netG = this.getRowWeightContributionG(row, depth);
-      if (netG > 0) {
-        totalMl += netG;
         continue;
       }
       const name = row.name_hebrew?.trim();
