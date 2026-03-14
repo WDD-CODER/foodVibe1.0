@@ -168,6 +168,37 @@
           <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">{{ 'clear_filters' | translatePipe }}</button>
         }
       </div>
+      <div class="c-filter-category date-filter-category">
+        <button type="button" class="c-filter-category-header" [class.expanded]="isCategoryExpanded('Date')" (click)="toggleFilterCategory('Date')">
+          <span>{{ 'date_filter' | translatePipe }}</span>
+          @if (dateFrom_() != null || dateTo_() != null) {
+            <span class="c-filter-category-count" aria-hidden="true">1</span>
+          }
+          <lucide-icon [name]="isCategoryExpanded('Date') ? 'chevron-down' : 'chevron-left'" [size]="16"></lucide-icon>
+        </button>
+        @if (isCategoryExpanded('Date')) {
+          <div class="c-filter-options date-filter-options">
+            <div class="date-sort-buttons">
+              <button type="button" class="c-btn-ghost--sm" (click)="setSortDateNewestFirst()">{{ 'sort_newest_first' | translatePipe }}</button>
+              <button type="button" class="c-btn-ghost--sm" (click)="setSortDateOldestFirst()">{{ 'sort_oldest_first' | translatePipe }}</button>
+            </div>
+            <div class="date-range-inputs">
+              <label class="date-range-label">
+                <span>{{ 'date_from' | translatePipe }}</span>
+                <input type="date" [ngModel]="dateFrom_()" (ngModelChange)="dateFrom_.set($event)" />
+              </label>
+              <label class="date-range-label">
+                <span>{{ 'date_to' | translatePipe }}</span>
+                <input type="date" [ngModel]="dateTo_()" (ngModelChange)="dateTo_.set($event)" />
+              </label>
+            </div>
+            <label class="c-filter-option">
+              <input type="checkbox" [checked]="dateIncludeByUpdated_()" (change)="dateIncludeByUpdated_.set(!dateIncludeByUpdated_())" />
+              <span>{{ 'date_filter_by_updated' | translatePipe }}</span>
+            </label>
+          </div>
+        }
+      </div>
       @for (category of filterCategories_(); track category.name) {
         <div class="c-filter-category">
           <button type="button" class="c-filter-category-header" [class.expanded]="isCategoryExpanded(category.name)" (click)="toggleFilterCategory(category.name)">

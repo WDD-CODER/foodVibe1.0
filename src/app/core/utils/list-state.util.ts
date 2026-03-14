@@ -1,4 +1,5 @@
-import { WritableSignal, effect, inject, untracked } from '@angular/core';
+import { DestroyRef, WritableSignal, effect, inject, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 
 export interface ParamSerializer<T> {
@@ -26,6 +27,14 @@ export const NullableStringParam: ParamSerializer<string | null> = {
   fromUrl: (r) => r ?? null,
   toSession: (v) => v,
   fromSession: (r) => (typeof r === 'string' ? r : null),
+};
+
+/** 'created' | 'updated'; URL only when 'updated'. */
+export const DateFieldParam: ParamSerializer<'created' | 'updated'> = {
+  toUrl: (v) => (v === 'updated' ? 'updated' : null),
+  fromUrl: (r) => (r === 'updated' ? 'updated' : 'created'),
+  toSession: (v) => v,
+  fromSession: (r) => (r === 'updated' ? 'updated' : 'created'),
 };
 
 export const BooleanParam: ParamSerializer<boolean> = {
@@ -169,6 +178,20 @@ export function useListState(
   }
 
   let skipFirstUrlWrite = hasUrlState;
+
+  // Sync signals from URL when query params change (e.g. KPI link to list with filters).
+  // Only update when URL value differs to avoid feedback loop with the effect below.
+  const destroyRef = inject(DestroyRef);
+  route.queryParams.pipe(takeUntilDestroyed(destroyRef)).subscribe((params) => {
+    for (const d of descriptors) {
+      const raw = params[d.urlParam];
+      if (raw == null) continue;
+      const currentUrl = d.serializer.toUrl(d.signal());
+      if (raw !== currentUrl) {
+        d.signal.set(d.serializer.fromUrl(raw));
+      }
+    }
+  });
 
   effect(() => {
     const queryParams: Record<string, string | null> = {};

@@ -7,443 +7,495 @@
 
   /* Page title */
   .page-title {
-  flex-shrink: 0;
+    flex-shrink: 0;
 
-  margin: 0;
+    margin: 0;
 
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-text-main);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text-main);
 
-  letter-spacing: 0.02em;
-}
-
-@container (max-width: #{$header-break-stack}) {
-  :host ::ng-deep .header-actions .c-btn-primary {
-    width: 100%;
-    justify-content: center;
+    letter-spacing: 0.02em;
   }
-}
 
-/* Grid row: use c-list-row for layout; keep recipe-grid-row for row-specific overrides */
-.recipe-grid-row {
-  display: contents;
-}
+  @container (max-width: #{$header-break-stack}) {
+    :host ::ng-deep .header-actions .c-btn-primary {
+      width: 100%;
+      justify-content: center;
+    }
+  }
 
-.recipe-grid-row .col-labels.c-list-body-cell,
-.recipe-grid-row .col-allergens.c-list-body-cell {
-  align-items: flex-start;
-}
+  /* Grid row: use c-list-row for layout; keep recipe-grid-row for row-specific overrides */
+  .recipe-grid-row {
+    display: contents;
+  }
 
-.recipe-grid-row:hover .c-icon-btn {
-  opacity: 1;
-}
+  .recipe-grid-row .col-labels.c-list-body-cell,
+  .recipe-grid-row .col-allergens.c-list-body-cell {
+    align-items: flex-start;
+  }
 
-/* No results / empty state */
-.no-results {
-  grid-column: 1 / -1;
+  .recipe-grid-row:hover .c-icon-btn {
+    opacity: 1;
+  }
 
-  padding: 2rem 1rem;
+  /* No results / empty state */
+  .no-results {
+    grid-column: 1 / -1;
 
-  text-align: center;
-  color: var(--color-text-muted);
-  font-size: 0.875rem;
+    padding: 2rem 1rem;
 
-  border-block-end: 1px solid var(--border-default);
-  background: var(--bg-glass-strong);
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
 
-  &.empty-state {
+    border-block-end: 1px solid var(--border-default);
+    background: var(--bg-glass-strong);
+
+    &.empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      gap: 1rem;
+      padding-block: 3rem;
+
+      .empty-state-icon {
+        color: var(--color-text-muted-light);
+      }
+
+      .empty-state-msg {
+        margin: 0;
+
+        font-size: 1rem;
+        color: var(--color-text-secondary);
+      }
+    }
+  }
+
+  /* Chip container: flex wrap, centered, chips width = content */
+  .c-dense-chip-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+
+    gap: 0.25rem;
+    width: 100%;
+  }
+
+  /* Labels & allergens columns (header + body) */
+  .c-dense-chip-col.col-labels,
+  .c-dense-chip-col.col-allergens,
+  .col-labels,
+  .col-allergens {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 3rem;
+  }
+
+  .labels-btn-wrapper {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
 
-    gap: 1rem;
-    padding-block: 3rem;
+    gap: 0.25rem;
+    width: 100%;
 
-    .empty-state-icon {
-      color: var(--color-text-muted-light);
+    cursor: pointer;
+
+    &.labels-expanded-open .labels-btn {
+      position: absolute;
+      left: -9999px;
+
+      width: 1px;
+      height: 1px;
+
+      overflow: hidden;
+      opacity: 0;
+
+      pointer-events: none;
+    }
+  }
+
+  .labels-btn {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+
+    background: var(--bg-glass);
+    color: var(--color-text-muted);
+    font-size: 0.8125rem;
+    font-weight: 500;
+
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+
+    &:hover {
+      background: var(--bg-glass-hover);
+      color: var(--color-text-main);
+
+      transform: scale(1.02);
+    }
+  }
+
+  .allergen-btn-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 0.25rem;
+    width: 100%;
+
+    &.allergen-expanded-open .allergen-btn {
+      position: absolute;
+      left: -9999px;
+
+      width: 1px;
+      height: 1px;
+
+      overflow: hidden;
+      opacity: 0;
+
+      pointer-events: none;
+    }
+  }
+
+  .allergen-btn {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+
+    background: var(--bg-warning);
+    color: var(--text-warning);
+    font-size: 0.8125rem;
+    font-weight: 500;
+
+    border: 1px solid var(--border-warning);
+    border-radius: var(--radius-sm);
+
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.15s ease;
+
+    &:hover {
+      background: rgba(254, 243, 199, 0.9);
+
+      transform: scale(1.02);
+    }
+  }
+
+  .allergen-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0.25rem 0.625rem;
+
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: rgba(254, 243, 199, 0.5);
+    color: var(--text-warning);
+
+    border-radius: var(--radius-xs);
+    backdrop-filter: var(--blur-glass);
+  }
+
+  .label-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0.25rem 0.625rem;
+
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #fff;
+    line-height: 1.2;
+
+    border-radius: var(--radius-xs);
+  }
+
+  /* Filter panel content */
+  .search-section {
+    margin-block-end: 1.25rem;
+  }
+
+  .no-dropdown-results {
+    padding: 0.75rem;
+
+    text-align: center;
+    font-size: 0.8125rem;
+    color: var(--color-text-muted-light);
+  }
+
+  .ingredient-search-block {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+
+    gap: 0.5rem;
+  }
+
+  .ingredient-search-input-wrap {
+    display: flex;
+    align-items: center;
+
+    gap: 0.5rem;
+    padding-inline: 0.75rem;
+    padding-block: 0.5rem;
+
+    background: var(--bg-glass);
+
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &:focus-within {
+      border-color: var(--border-focus);
+      box-shadow: var(--shadow-focus);
     }
 
-    .empty-state-msg {
-      margin: 0;
+    lucide-icon {
+      flex-shrink: 0;
 
-      font-size: 1rem;
+      color: var(--color-text-muted);
+    }
+
+    input {
+      flex: 1;
+
+      min-width: 0;
+      padding: 0;
+
+      background: transparent;
+      color: var(--color-text-main);
+      font-size: 0.875rem;
+
+      border: none;
+      outline: none;
+
+      &::placeholder {
+        color: var(--color-text-muted-light);
+      }
+    }
+  }
+
+  :host ::ng-deep app-scrollable-dropdown .ingredient-dropdown-list {
+    list-style: none;
+
+    margin: 0;
+    padding: 0;
+
+    li {
+      padding: 0.5rem 0.75rem;
+
+      font-size: 0.875rem;
+      color: var(--color-text-main);
+
+      cursor: pointer;
+      transition: background 0.15s ease;
+
+      &:hover {
+        background: var(--bg-glass);
+      }
+    }
+  }
+
+  .ingredient-chips-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+
+    gap: 0.375rem;
+  }
+
+
+  .ingredient-clear-btn {
+    padding: 0.25rem 0.625rem;
+
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    background: var(--bg-glass);
+
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+
+    &:hover {
+      background: var(--bg-glass-hover);
       color: var(--color-text-secondary);
     }
   }
-}
 
-/* Chip container: flex wrap, centered, chips width = content */
-.c-dense-chip-grid {
-  display: flex;
-  flex-wrap: wrap;
-  align-content: center;
-  align-items: center;
-  justify-content: center;
 
-  gap: 0.25rem;
-  width: 100%;
-}
+  /* Cost tooltip */
+  .cost-cell-wrap {
+    position: relative;
+  }
 
-/* Labels & allergens columns (header + body) */
-.c-dense-chip-col.col-labels,
-.c-dense-chip-col.col-allergens,
-.col-labels,
-.col-allergens {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  min-width: 3rem;
-}
-
-.labels-btn-wrapper {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  gap: 0.25rem;
-  width: 100%;
-
-  cursor: pointer;
-
-  &.labels-expanded-open .labels-btn {
+  .cost-tooltip {
     position: absolute;
-    left: -9999px;
+    top: 100%;
+    left: 50%;
+    z-index: 50;
 
-    width: 1px;
-    height: 1px;
+    margin-block-start: 0.25rem;
+    padding: 0.375rem 0.625rem;
 
-    overflow: hidden;
-    opacity: 0;
+    background: var(--bg-success);
+    color: var(--text-success);
+    font-size: 0.8rem;
 
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-glass);
+    white-space: nowrap;
+
+    transform: translateX(-50%);
     pointer-events: none;
   }
-}
 
-.labels-btn {
-  display: inline-flex;
-  align-items: center;
+  .cost-tooltip-fixed {
+    position: fixed;
 
-  gap: 0.375rem;
-  padding: 0.25rem 0.625rem;
+    transform: translateX(-50%);
 
-  background: var(--bg-glass);
-  color: var(--color-text-muted);
-  font-size: 0.8125rem;
-  font-weight: 500;
-
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-sm);
-
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
-
-  &:hover {
-    background: var(--bg-glass-hover);
-    color: var(--color-text-main);
-
-    transform: scale(1.02);
+    pointer-events: auto;
   }
-}
 
-.allergen-btn-wrapper {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  /* Date cell hover tooltip (last updated) */
+  .date-cell-wrap {
+    position: relative;
+  }
 
-  gap: 0.25rem;
-  width: 100%;
-
-  &.allergen-expanded-open .allergen-btn {
+  .date-tooltip {
     position: absolute;
-    left: -9999px;
+    top: 100%;
+    left: 50%;
+    z-index: 50;
 
-    width: 1px;
-    height: 1px;
+    margin-block-start: 0.25rem;
+    padding: 0.375rem 0.625rem;
 
-    overflow: hidden;
-    opacity: 0;
+    background: var(--bg-success);
+    color: var(--text-success);
+    font-size: 0.8rem;
 
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-glass);
+    white-space: nowrap;
+
+    transform: translateX(-50%);
     pointer-events: none;
   }
-}
 
-.allergen-btn {
-  display: inline-flex;
-  align-items: center;
+  .date-tooltip-fixed {
+    position: fixed;
 
-  gap: 0.375rem;
-  padding: 0.25rem 0.625rem;
+    transform: translateX(-50%);
 
-  background: var(--bg-warning);
-  color: var(--text-warning);
-  font-size: 0.8125rem;
-  font-weight: 500;
-
-  border: 1px solid var(--border-warning);
-  border-radius: var(--radius-sm);
-
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.15s ease;
-
-  &:hover {
-    background: rgba(254, 243, 199, 0.9);
-
-    transform: scale(1.02);
-  }
-}
-
-.allergen-pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 0.25rem 0.625rem;
-
-  font-size: 0.75rem;
-  font-weight: 500;
-  background: rgba(254, 243, 199, 0.5);
-  color: var(--text-warning);
-
-  border-radius: var(--radius-xs);
-  backdrop-filter: var(--blur-glass);
-}
-
-.label-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 0.25rem 0.625rem;
-
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #fff;
-  line-height: 1.2;
-
-  border-radius: var(--radius-xs);
-}
-
-/* Filter panel content */
-.search-section {
-  margin-block-end: 1.25rem;
-}
-
-.no-dropdown-results {
-  padding: 0.75rem;
-
-  text-align: center;
-  font-size: 0.8125rem;
-  color: var(--color-text-muted-light);
-}
-
-.ingredient-search-block {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-
-  gap: 0.5rem;
-}
-
-.ingredient-search-input-wrap {
-  display: flex;
-  align-items: center;
-
-  gap: 0.5rem;
-  padding-inline: 0.75rem;
-  padding-block: 0.5rem;
-
-  background: var(--bg-glass);
-
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-
-  &:focus-within {
-    border-color: var(--border-focus);
-    box-shadow: var(--shadow-focus);
+    pointer-events: auto;
   }
 
-  lucide-icon {
-    flex-shrink: 0;
+  /* History overlay */
+  .history-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
 
+    background: var(--overlay-backdrop);
+
+    backdrop-filter: blur(0.375rem);
+  }
+
+  .history-overlay-panel {
+    max-height: 90vh;
+
+    overflow: auto;
+  }
+
+  /* Date filter sidebar */
+  .date-filter-options {
+    display: flex;
+    flex-direction: column;
+    place-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .date-sort-buttons {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 0.5rem;
+  }
+
+  .date-range-inputs {
+    display: flex;
+    flex-direction: column;
+width: min-content;
+    gap: 0.5rem;
+  }
+
+  .date-range-label {
+    display: flex;
+    flex-direction: column;
+
+    gap: 0.25rem;
+
+    font-size: 0.8125rem;
     color: var(--color-text-muted);
-  }
 
-  input {
-    flex: 1;
+    input[type="date"] {
+      min-height: 2.25rem;
+      padding-inline: 0.75rem;
+      padding-block: 0.375rem;
 
-    min-width: 0;
-    padding: 0;
-
-    background: transparent;
-    color: var(--color-text-main);
-    font-size: 0.875rem;
-
-    border: none;
-    outline: none;
-
-    &::placeholder {
-      color: var(--color-text-muted-light);
-    }
-  }
-}
-
-:host ::ng-deep app-scrollable-dropdown .ingredient-dropdown-list {
-  list-style: none;
-
-  margin: 0;
-  padding: 0;
-
-  li {
-    padding: 0.5rem 0.75rem;
-
-    font-size: 0.875rem;
-    color: var(--color-text-main);
-
-    cursor: pointer;
-    transition: background 0.15s ease;
-
-    &:hover {
       background: var(--bg-glass);
+      font-size: 0.875rem;
+      color: var(--color-text-main);
+
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+      &:focus {
+        border-color: var(--border-focus);
+        box-shadow: var(--shadow-focus);
+      }
     }
   }
-}
 
-.ingredient-chips-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  /* Mobile tweaks */
+  @media (max-width: 768px) {
+    .recipe-grid-row app-cell-carousel {
+      background: var(--bg-glass);
 
-  gap: 0.375rem;
-}
+      border-block-end: 1px solid var(--border-row);
 
+      transition: background 0.15s ease;
+    }
 
-.ingredient-clear-btn {
-  padding: 0.25rem 0.625rem;
-
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-  background: var(--bg-glass);
-
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-sm);
-
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
-
-  &:hover {
-    background: var(--bg-glass-hover);
-    color: var(--color-text-secondary);
+    .recipe-grid-row:hover app-cell-carousel {
+      background: var(--bg-glass-hover);
+    }
   }
-}
-
-
-/* Cost tooltip */
-.cost-cell-wrap {
-  position: relative;
-}
-
-.cost-tooltip {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  z-index: 50;
-
-  margin-block-start: 0.25rem;
-  padding: 0.375rem 0.625rem;
-
-  background: var(--bg-success);
-  color: var(--text-success);
-  font-size: 0.8rem;
-
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-glass);
-  white-space: nowrap;
-
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-
-.cost-tooltip-fixed {
-  position: fixed;
-
-  transform: translateX(-50%);
-
-  pointer-events: auto;
-}
-
-/* Date cell hover tooltip (last updated) */
-.date-cell-wrap {
-  position: relative;
-}
-
-.date-tooltip {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  z-index: 50;
-
-  margin-block-start: 0.25rem;
-  padding: 0.375rem 0.625rem;
-
-  background: var(--bg-success);
-  color: var(--text-success);
-  font-size: 0.8rem;
-
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-glass);
-  white-space: nowrap;
-
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-
-.date-tooltip-fixed {
-  position: fixed;
-
-  transform: translateX(-50%);
-
-  pointer-events: auto;
-}
-
-/* History overlay */
-.history-overlay {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-
-  background: var(--overlay-backdrop);
-
-  backdrop-filter: blur(0.375rem);
-}
-
-.history-overlay-panel {
-  max-height: 90vh;
-
-  overflow: auto;
-}
-
-/* Mobile tweaks */
-@media (max-width: 768px) {
-  .recipe-grid-row app-cell-carousel {
-    background: var(--bg-glass);
-
-    border-block-end: 1px solid var(--border-row);
-
-    transition: background 0.15s ease;
-  }
-
-  .recipe-grid-row:hover app-cell-carousel {
-    background: var(--bg-glass-hover);
-  }
-}
 }

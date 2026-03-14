@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy, signal, computed, afterNextRender } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, computed, effect, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -22,10 +22,10 @@ import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
-import { useListState, StringParam, NullableStringParam, FilterRecordParam, StringArrayParam } from 'src/app/core/utils/list-state.util';
+import { useListState, StringParam, NullableStringParam, FilterRecordParam, StringArrayParam, BooleanParam } from 'src/app/core/utils/list-state.util';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 
-export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens' | 'dateAdded';
+export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens' | 'dateAdded' | 'dateUpdated';
 
 const MAX_ALLERGEN_RECURSION = 5;
 
@@ -52,15 +52,22 @@ export class RecipeBookListComponent {
   protected sortBy_ = signal<SortField | null>(null);
   protected sortOrder_ = signal<'asc' | 'desc'>('asc');
   protected isPanelOpen_ = signal<boolean>(true);
+  protected dateFrom_ = signal<string | null>(null);
+  protected dateTo_ = signal<string | null>(null);
+  /** When true: show items in range by creation OR by update. When false: by creation only. */
+  protected dateIncludeByUpdated_ = signal<boolean>(false);
 
   constructor() {
     this.isPanelOpen_.set(getPanelOpen('recipe-book'));
     useListState('recipe-book', [
-      { urlParam: 'q',           signal: this.searchQuery_,        serializer: StringParam },
-      { urlParam: 'sort',        signal: this.sortBy_,             serializer: NullableStringParam as any },
-      { urlParam: 'order',       signal: this.sortOrder_,          serializer: StringParam as any },
-      { urlParam: 'filters',     signal: this.activeFilters_,      serializer: FilterRecordParam },
-      { urlParam: 'ingredients', signal: this.selectedProductIds_, serializer: StringArrayParam },
+      { urlParam: 'q',               signal: this.searchQuery_,          serializer: StringParam },
+      { urlParam: 'sort',            signal: this.sortBy_,               serializer: NullableStringParam as any },
+      { urlParam: 'order',           signal: this.sortOrder_,             serializer: StringParam as any },
+      { urlParam: 'filters',         signal: this.activeFilters_,        serializer: FilterRecordParam },
+      { urlParam: 'ingredients',     signal: this.selectedProductIds_,  serializer: StringArrayParam },
+      { urlParam: 'dateFrom',        signal: this.dateFrom_,             serializer: NullableStringParam },
+      { urlParam: 'dateTo',          signal: this.dateTo_,               serializer: NullableStringParam },
+      { urlParam: 'dateByUpdated',   signal: this.dateIncludeByUpdated_, serializer: BooleanParam },
     ]);
 
     afterNextRender(() => {
@@ -68,6 +75,20 @@ export class RecipeBookListComponent {
       const q = window.matchMedia('(max-width: 768px)');
       if (q.matches) this.isPanelOpen_.set(false);
       q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); });
+    });
+
+    // Expand any filter category that has selected values (e.g. when opened via URL like ?filters=Approved:false).
+    effect(() => {
+      const filters = this.activeFilters_();
+      const withValues = Object.keys(filters).filter((name) => (filters[name]?.length ?? 0) > 0);
+      const hasDateRange = this.dateFrom_() != null || this.dateTo_() != null;
+      if (withValues.length === 0 && !hasDateRange) return;
+      this.expandedFilterCategories_.update((set) => {
+        const next = new Set(set);
+        withValues.forEach((name) => next.add(name));
+        if (hasDateRange) next.add('Date');
+        return next;
+      });
     });
   }
   protected expandedFilterCategories_ = signal<Set<string>>(new Set());
@@ -168,6 +189,10 @@ export class RecipeBookListComponent {
       categories['Station'].add(station);
     });
 
+    // Always show both Approved options (כן/לא) so the sidebar can show selected state when filtering by URL.
+    if (!categories['Approved']) categories['Approved'] = new Set();
+    categories['Approved'].add('true').add('false');
+
     const optionLabel = (name: string, value: string): string => {
       if (name === 'Approved') return value === 'true' ? 'approved_yes' : 'approved_no';
       if (name === 'Station' && value === '_none') return 'no_station';
@@ -234,10 +259,29 @@ export class RecipeBookListComponent {
       recipes = recipes.filter(r => (r.name_hebrew ?? '').toLowerCase().includes(search));
     }
 
+    const dateFrom = this.dateFrom_();
+    const dateTo = this.dateTo_();
+    const includeByUpdated = this.dateIncludeByUpdated_();
+    if (dateFrom != null || dateTo != null) {
+      const fromMs = dateFrom != null ? this.parseDateToStartOfDay(dateFrom) : null;
+      const toMs = dateTo != null ? this.parseDateToEndOfDay(dateTo) : null;
+      recipes = recipes.filter(recipe => {
+        const inRange = (ts: number) => {
+          if (fromMs != null && ts < fromMs) return false;
+          if (toMs != null && ts > toMs) return false;
+          return true;
+        };
+        const createdInRange = inRange(recipe.addedAt_ ?? 0);
+        const updatedInRange = includeByUpdated && inRange(recipe.updatedAt_ ?? 0);
+        return createdInRange || updatedInRange;
+      });
+    }
+
     if (sortBy) {
+      const isAsc = sortOrder === 'asc';
       recipes = [...recipes].sort((a, b) => {
         const cmp = this.compareRecipes(a, b, sortBy);
-        return sortOrder === 'asc' ? cmp : -cmp;
+        return isAsc ? cmp : -cmp;
       });
     }
 
@@ -278,6 +322,22 @@ export class RecipeBookListComponent {
       }
     }
     return Array.from(set);
+  }
+
+  /** Parse YYYY-MM-DD to start of day (00:00:00.000) in local timezone. */
+  private parseDateToStartOfDay(dateStr: string): number | null {
+    const parts = dateStr.split('-').map(Number);
+    if (parts.length !== 3 || parts.some(isNaN)) return null;
+    const [y, m, d] = parts;
+    return new Date(y, m - 1, d).getTime();
+  }
+
+  /** Parse YYYY-MM-DD to end of day (23:59:59.999) in local timezone. */
+  private parseDateToEndOfDay(dateStr: string): number | null {
+    const parts = dateStr.split('-').map(Number);
+    if (parts.length !== 3 || parts.some(isNaN)) return null;
+    const [y, m, d] = parts;
+    return new Date(y, m - 1, d, 23, 59, 59, 999).getTime();
   }
 
   protected formatAddedAt(addedAt: number | undefined): string {
@@ -354,6 +414,8 @@ export class RecipeBookListComponent {
       }
       case 'dateAdded':
         return (a.addedAt_ ?? 0) - (b.addedAt_ ?? 0);
+      case 'dateUpdated':
+        return (a.updatedAt_ ?? 0) - (b.updatedAt_ ?? 0);
       default:
         return 0;
     }
@@ -371,6 +433,18 @@ export class RecipeBookListComponent {
       this.sortBy_.set(field);
       this.sortOrder_.set('asc');
     }
+  }
+
+  /** Set sort to date (newest first). */
+  protected setSortDateNewestFirst(): void {
+    this.sortBy_.set('dateAdded');
+    this.sortOrder_.set('desc');
+  }
+
+  /** Set sort to date (oldest first). */
+  protected setSortDateOldestFirst(): void {
+    this.sortBy_.set('dateAdded');
+    this.sortOrder_.set('asc');
   }
 
   protected toggleAllergenExpandAll(): void {
@@ -412,10 +486,15 @@ export class RecipeBookListComponent {
 
   protected clearAllFilters(): void {
     this.activeFilters_.set({});
+    this.dateFrom_.set(null);
+    this.dateTo_.set(null);
+    this.dateIncludeByUpdated_.set(false);
   }
 
   protected hasActiveFilters_ = computed(() =>
-    Object.values(this.activeFilters_()).some(arr => arr.length > 0)
+    Object.values(this.activeFilters_()).some(arr => arr.length > 0) ||
+    this.dateFrom_() != null ||
+    this.dateTo_() != null
   );
 
   protected selectedCountInCategory(category: { options: { checked_: boolean }[] }): number {
