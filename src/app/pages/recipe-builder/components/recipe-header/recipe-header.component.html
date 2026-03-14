@@ -68,21 +68,21 @@
             </div>
 
             <div class="secondary-units-container">
-                @for (group of secondaryConversions; track $index) {
-                <div class="scaling-chip secondary" (clickOutside)="setActiveSecondaryEdit(null)">
+                @for (group of secondaryConversions; track $index; let chipIdx = $index) {
+                <div class="scaling-chip secondary" [class.dropdown-open]="activeSecondaryEdit_() === chipIdx" (clickOutside)="setActiveSecondaryEdit(null)">
                     <div class="unit-switcher-cell">
                         <div class="unit-switcher-btn" role="button" tabindex="0"
-                            (click)="setActiveSecondaryEdit(activeSecondaryEdit_() === $index ? null : $index)"
-                            (keydown.enter)="setActiveSecondaryEdit(activeSecondaryEdit_() === $index ? null : $index)"
-                            (keydown.space)="$event.preventDefault(); setActiveSecondaryEdit(activeSecondaryEdit_() === $index ? null : $index)">
+                            (click)="openSecondaryUnitDropdown(chipIdx)"
+                            (keydown.enter)="openSecondaryUnitDropdown(chipIdx)"
+                            (keydown.space)="$event.preventDefault(); openSecondaryUnitDropdown(chipIdx)">
                             <span class="unit-name">{{ group.get('unit')?.value | translatePipe }}</span>
                             <lucide-icon name="chevron-down" [size]="10"></lucide-icon>
                         </div>
 
-                        @if (activeSecondaryEdit_() === $index) {
+                        @if (activeSecondaryEdit_() === chipIdx) {
                         <app-scrollable-dropdown [maxHeight]="200" class="unit-dropdown-menu secondary-chip-dropdown">
-                            @for (unit of availableUnitsForSecondaryChip_($index); track unit) {
-                            <div class="menu-item" (click)="changeSecondaryUnit($index, unit)">
+                            @for (unit of availableUnitsForSecondaryChip_(chipIdx); track unit) {
+                            <div class="menu-item" (click)="changeSecondaryUnit(chipIdx, unit)">
                                 {{ unit | translatePipe }}
                             </div>
                             }
@@ -96,22 +96,22 @@
                     <div class="counter-grid small">
                         <button type="button" class="ctrl-btn" tabindex="-1"
                             [disabled]="!(group.get('amount')?.value > 0)"
-                            (click)="updateSecondaryAmount($index, -1)">-</button>
+                            (click)="updateSecondaryAmount(chipIdx, -1)">-</button>
                         
                         <div class="input-wrapper">
                             <input type="number" #secInput SelectOnFocus class="chip-input-native"
                                 [value]="group.get('amount')?.value"
                                 (input)="onSecondaryAmountInput(group, secInput.value)"
                                 (blur)="onSecondaryAmountInput(group, secInput.value)"
-                                (keydown)="onSecondaryAmountKeydown($event, $index)"
+                                (keydown)="onSecondaryAmountKeydown($event, chipIdx)"
                                 (keydown.enter)="$event.preventDefault(); secInput.blur()"
                                 step="0.001">
                         </div>
                         
-                        <button type="button" class="ctrl-btn" tabindex="-1" (click)="updateSecondaryAmount($index, 1)">+</button>
+                        <button type="button" class="ctrl-btn" tabindex="-1" (click)="updateSecondaryAmount(chipIdx, 1)">+</button>
                     </div>
 
-                    <button type="button" class="remove-btn" tabindex="-1" (click)="removeSecondaryUnit($index)">
+                    <button type="button" class="remove-btn" tabindex="-1" (click)="removeSecondaryUnit(chipIdx)">
                         <lucide-icon name="x" [size]="10"></lucide-icon>
                     </button>
                 </div>
@@ -194,7 +194,8 @@
         </div>
         <div class="divider"></div>
         <div class="metric-group metric-group-weight-volume" (click)="toggleMetricsDisplayMode()"
-            (clickOutside)="closeMetricsNotice()">
+            (clickOutside)="closeMetricsNotice()"
+            (mouseenter)="onMetricsNoticeZoneEnter()" (mouseleave)="onMetricsNoticeZoneLeave()">
             <span class="label">{{ metricsDisplayMode_() === 'weight' ? ('weight' | translatePipe) : ('volume' | translatePipe) }}</span>
             <span class="value">
                 @if (metricsDisplayMode_() === 'weight') {
@@ -208,17 +209,29 @@
                 }
             </span>
             @if (showMetricsNoticeIcon_()) {
-                <span class="metrics-notice-wrap" (click)="$event.stopPropagation(); toggleMetricsNotice()"
-                    (mouseenter)="metricsNoticeOpen_.set(true)" (mouseleave)="metricsNoticeOpen_.set(false)">
+                <span class="metrics-notice-wrap" (click)="$event.stopPropagation(); toggleMetricsNotice()">
                     <lucide-icon name="alert-circle" class="metrics-notice-icon" [size]="16" [title]="'items_not_convertible' | translatePipe"></lucide-icon>
-                    @if (metricsNoticeOpen_()) {
-                        <div class="metrics-notice-floating" (click)="$event.stopPropagation()">
-                            @for (name of unconvertibleNamesForCurrentMode_(); track name) {
-                                <div class="metrics-notice-item">{{ name }}</div>
-                            }
-                        </div>
-                    }
                 </span>
+                @if (metricsNoticeOpen_()) {
+                    <div class="metrics-notice-floating" (click)="$event.stopPropagation()"
+                        (mouseenter)="onMetricsNoticeZoneEnter()" (mouseleave)="onMetricsNoticeZoneLeave()">
+                        <div class="metrics-notice-list-wrap">
+                            <div class="metrics-notice-list" scrollIndicators>
+                                @for (name of unconvertibleNamesForCurrentMode_(); track name) {
+                                    <div class="metrics-notice-item">{{ name }}</div>
+                                }
+                            </div>
+                            <div class="metrics-notice-scroll-zone metrics-notice-scroll-zone--top" aria-hidden="true"></div>
+                            <div class="metrics-notice-scroll-zone metrics-notice-scroll-zone--bottom" aria-hidden="true"></div>
+                            <div class="metrics-notice-scroll-indicator metrics-notice-scroll-indicator--top" aria-hidden="true">
+                                <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
+                            </div>
+                            <div class="metrics-notice-scroll-indicator metrics-notice-scroll-indicator--bottom" aria-hidden="true">
+                                <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
+                            </div>
+                        </div>
+                    </div>
+                }
             }
         </div>
     </div>

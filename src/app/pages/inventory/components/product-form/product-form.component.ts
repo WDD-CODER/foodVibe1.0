@@ -134,6 +134,14 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
     return all.filter((c: string) => !selected.includes(c));
   });
 
+  protected categorySearchQuery_ = signal('');
+  /** Category options filtered by search text (key match). */
+  protected categoryOptionsFilteredBySearch_ = computed(() => {
+    const q = this.categorySearchQuery_().trim().toLowerCase();
+    const opts = this.filteredCategoryOptions_();
+    return q ? opts.filter((c: string) => c.toLowerCase().includes(q)) : opts;
+  });
+
   protected filteredSupplierOptions_ = computed(() => {
     const all = this.kitchenStateService.suppliers_();
     const selectedIds = (this.formValue_?.()?.supplierIds_ ?? []) as string[];
@@ -203,12 +211,24 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
     }
   }
 
+  protected openCategoryDropdown(): void {
+    this.showCategoryDropdown_.set(true);
+    this.categorySearchQuery_.set('');
+    this.categoryDropdownHighlightIndex_.set(-1);
+  }
+
+  protected closeCategoryDropdown(): void {
+    this.showCategoryDropdown_.set(false);
+    this.categorySearchQuery_.set('');
+    this.categoryDropdownHighlightIndex_.set(-1);
+  }
+
   protected onCategoryKeyboardOpen(event: Event): void {
     const e = event as KeyboardEvent;
     e.preventDefault();
     const key = e.key;
-    this.showCategoryDropdown_.set(true);
-    const options = this.filteredCategoryOptions_();
+    this.openCategoryDropdown();
+    const options = this.categoryOptionsFilteredBySearch_();
     const total = options.length + 1; // +1 for "add new"
     if (key === 'ArrowDown') {
       this.categoryDropdownHighlightIndex_.set(0);
@@ -246,8 +266,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
     const e = event as KeyboardEvent;
     if (e.key !== ' ') return;
     e.preventDefault();
-    this.showCategoryDropdown_.set(true);
-    const total = this.filteredCategoryOptions_().length + 1;
+    this.openCategoryDropdown();
     this.categoryDropdownHighlightIndex_.set(0);
     this.categoryDropdownFocusPending_ = true;
   }
@@ -256,9 +275,11 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
     const key = (event as KeyboardEvent).key;
     if (key !== 'ArrowDown' && key !== 'ArrowUp' && key !== 'Enter' && key !== ' ' && key !== 'Escape') return;
     event.preventDefault();
-    const options = this.filteredCategoryOptions_();
+    const options = this.categoryOptionsFilteredBySearch_();
     const total = options.length + 1;
     let idx = this.categoryDropdownHighlightIndex_();
+    if (idx >= total) idx = total - 1;
+    if (idx < -1) idx = -1;
 
     if (key === 'ArrowDown') {
       idx = idx < total - 1 ? idx + 1 : 0;
@@ -274,12 +295,10 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
       } else if (idx === options.length) {
         this.openAddNewCategory();
       }
-      this.showCategoryDropdown_.set(false);
-      this.categoryDropdownHighlightIndex_.set(-1);
+      this.closeCategoryDropdown();
       this.categoryTriggerRef?.nativeElement?.focus();
     } else if (key === 'Escape') {
-      this.showCategoryDropdown_.set(false);
-      this.categoryDropdownHighlightIndex_.set(-1);
+      this.closeCategoryDropdown();
       this.categoryTriggerRef?.nativeElement?.focus();
     }
   }

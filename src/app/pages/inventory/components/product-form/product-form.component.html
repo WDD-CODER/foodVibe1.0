@@ -25,12 +25,12 @@
           <lucide-icon name="tags" class="icon-xs text-slate-500"></lucide-icon>
           {{ 'category' | translatePipe }}
         </label>
-        <div class="category-input-box" (clickOutside)="showCategoryDropdown_.set(false)"
+        <div class="category-input-box" (clickOutside)="closeCategoryDropdown()"
           [class.no-chips]="selectedCategories_().length === 0">
           <div class="selected-chips"
                #categoryTrigger
                tabindex="0"
-               (click)="showCategoryDropdown_.set(true)"
+               (click)="openCategoryDropdown()"
                (keydown.enter)="showCategoryDropdown_.set(true)"
                (keydown.space)="onCategoryTriggerKeydown($event)"
                (keydown.arrowDown)="onCategoryKeyboardOpen($event)"
@@ -43,7 +43,7 @@
             }
             <span class="category-placeholder"
                   *ngIf="selectedCategories_().length === 0"
-                  (click)="showCategoryDropdown_.set(true)">
+                  (click)="openCategoryDropdown()">
               {{ 'choose_category' | translatePipe }}
             </span>
           </div>
@@ -54,7 +54,16 @@
                (keydown)="onCategoryDropdownKeydown($event)"
                role="listbox"
                [attr.aria-activedescendant]="'category-option-' + categoryDropdownHighlightIndex_()">
-            @for (cat of filteredCategoryOptions_(); track cat; let i = $index) {
+            <div class="category-dropdown-search">
+              <label class="category-search-label">{{ 'filter' | translatePipe }}</label>
+              <input type="text"
+                     #categorySearchInput
+                     class="category-search-input"
+                     [value]="categorySearchQuery_()"
+                     (input)="categorySearchQuery_.set($any($event.target).value); categoryDropdownHighlightIndex_.set(-1)"
+                     [placeholder]="'menu_search_category' | translatePipe" />
+            </div>
+            @for (cat of categoryOptionsFilteredBySearch_(); track cat; let i = $index) {
               <div class="dropdown-item"
                    #categoryDropdownItem
                    [id]="'category-option-' + i"
@@ -67,8 +76,8 @@
             }
             <div class="dropdown-item dropdown-item-add"
                  #categoryDropdownItem
-                 [id]="'category-option-' + filteredCategoryOptions_().length"
-                 [class.dropdown-item--highlight]="categoryDropdownHighlightIndex_() === filteredCategoryOptions_().length"
+                 [id]="'category-option-' + categoryOptionsFilteredBySearch_().length"
+                 [class.dropdown-item--highlight]="categoryDropdownHighlightIndex_() === categoryOptionsFilteredBySearch_().length"
                  tabindex="-1"
                  role="option"
                  (click)="openAddNewCategory(); $event.stopPropagation()">

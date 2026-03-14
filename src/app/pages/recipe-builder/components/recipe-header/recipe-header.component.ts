@@ -12,12 +12,13 @@ import { TranslationService } from '@services/translation.service';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
+import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive';
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util';
 
 @Component({
   selector: 'app-recipe-header',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, SelectOnFocusDirective, ClickOutSideDirective, TranslatePipe, ScrollableDropdownComponent],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, SelectOnFocusDirective, ClickOutSideDirective, TranslatePipe, ScrollableDropdownComponent, ScrollIndicatorsDirective],
   templateUrl: './recipe-header.component.html',
   styleUrl: './recipe-header.component.scss'
 })
@@ -178,7 +179,6 @@ export class RecipeHeaderComponent {
 
   addSecondaryUnit(unitSymbol: string): void {
     const conversions = this.form().get('yield_conversions') as FormArray;
-
     // Safety check: Don't add if unit already exists in the conversions
     const exists = conversions.value.some((c: any) => c.unit === unitSymbol);
     if (exists) {
@@ -277,6 +277,29 @@ export class RecipeHeaderComponent {
     this.metricsNoticeOpen_.set(false);
   }
 
+  private metricsNoticeCloseTimeout_: ReturnType<typeof setTimeout> | null = null;
+
+  /** Keep floating open when hovering metrics box or floating panel; close only when leaving both. */
+  onMetricsNoticeZoneEnter(): void {
+    if (this.metricsNoticeCloseTimeout_ != null) {
+      clearTimeout(this.metricsNoticeCloseTimeout_);
+      this.metricsNoticeCloseTimeout_ = null;
+    }
+    if (this.unconvertibleNamesForCurrentMode_().length > 0) {
+      this.metricsNoticeOpen_.set(true);
+    }
+  }
+
+  onMetricsNoticeZoneLeave(): void {
+    if (this.metricsNoticeCloseTimeout_ != null) {
+      clearTimeout(this.metricsNoticeCloseTimeout_);
+    }
+    this.metricsNoticeCloseTimeout_ = setTimeout(() => {
+      this.metricsNoticeCloseTimeout_ = null;
+      this.metricsNoticeOpen_.set(false);
+    }, 150);
+  }
+
   /** Unconvertible names for the current scale (weight or volume). */
   protected unconvertibleNamesForCurrentMode_ = computed(() => {
     return this.metricsDisplayMode_() === 'weight'
@@ -297,13 +320,13 @@ export class RecipeHeaderComponent {
   /** Which secondary chip index has its unit dropdown open (null = none). */
   activeSecondaryEdit_ = signal<number | null>(null);
 
-  /** Units available when changing a specific secondary chip's unit. */
-  availableUnitsForSecondaryChip_(excludeIndex: number): string[] {
+  /** Units available for a secondary chip: exclude every unit already in use (primary + all secondaries). */
+  availableUnitsForSecondaryChip_(_chipIdx: number): string[] {
     const conversions = this.form().get('yield_conversions') as FormArray;
     const used = new Set<string>();
-    used.add(conversions.at(0)?.get('unit')?.value ?? 'gram');
-    conversions.controls.forEach((c, i) => {
-      if (i > 0 && i !== excludeIndex + 1) used.add(c.get('unit')?.value);
+    conversions.controls.forEach((c) => {
+      const u = c.get('unit')?.value;
+      if (u) used.add(u);
     });
     return this.allUnitKeys_().filter(u => !used.has(u));
   }
@@ -311,6 +334,18 @@ export class RecipeHeaderComponent {
   setActiveSecondaryEdit(index: number | null): void {
     this.activeSecondaryEdit_.set(this.activeSecondaryEdit_() === index ? null : index);
     if (index !== null) this.activePrimaryEdit_.set(false);
+  }
+
+  /** Open secondary unit dropdown; deferred so clickOutside on sibling chips doesn't close it. */
+  openSecondaryUnitDropdown(chipIdx: number): void {
+    if (this.activeSecondaryEdit_() === chipIdx) {
+      this.setActiveSecondaryEdit(null);
+      return;
+    }
+    setTimeout(() => {
+      this.activeSecondaryEdit_.set(chipIdx);
+      this.activePrimaryEdit_.set(false);
+    }, 0);
   }
 
   changeSecondaryUnit(chipIndex: number, newUnit: string): void {
@@ -328,9 +363,10 @@ export class RecipeHeaderComponent {
       this.activeSecondaryEdit_.set(null);
       return;
     }
-    group.get('unit')?.setValue(newUnit);
+    group.get('unit')?.setValue(newUnit, { emitEvent: true });
     this.activeSecondaryEdit_.set(null);
     this.manualTrigger_.update(v => v + 1);
+    this.cdr.detectChanges();
   }
 
   /** Add a secondary chip immediately with amount=1 and first available unit. */

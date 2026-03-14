@@ -453,6 +453,33 @@
     }
   }
 
+  .category-dropdown-search {
+    padding: 0.5rem 0.75rem;
+    border-block-end: 1px solid var(--border-default);
+    background: var(--bg-glass);
+  }
+
+  .category-search-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    margin-block-end: 0.25rem;
+  }
+
+  .category-search-input {
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    outline: none;
+
+    &:focus {
+      border-color: var(--color-success);
+    }
+  }
+
   // Shared Chip/Tag Engine
   .chipe {
     display: inline-flex;
