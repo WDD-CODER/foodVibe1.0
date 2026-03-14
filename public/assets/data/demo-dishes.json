@@ -85,7 +85,7 @@
     "yield_amount_": 1,
     "yield_unit_": "dish",
     "default_station_": "stove",
-    "is_approved_": true,
+    "is_approved_": false,
     "logistics_": {
       "baseline_": [
         {
@@ -180,7 +180,7 @@
     "yield_amount_": 1,
     "yield_unit_": "dish",
     "default_station_": "stove",
-    "is_approved_": true,
+    "is_approved_": false,
     "logistics_": {
       "baseline_": [
         {
@@ -369,7 +369,7 @@
     "yield_amount_": 1,
     "yield_unit_": "dish",
     "default_station_": "stove",
-    "is_approved_": true,
+    "is_approved_": false,
     "logistics_": {
       "baseline_": [
         {
@@ -553,7 +553,7 @@
     "yield_amount_": 1,
     "yield_unit_": "dish",
     "default_station_": "hot_line",
-    "is_approved_": true,
+    "is_approved_": false,
     "logistics_": {
       "baseline_": [
         {
@@ -840,7 +840,7 @@
     "yield_amount_": 1,
     "yield_unit_": "dish",
     "default_station_": "stove",
-    "is_approved_": true,
+    "is_approved_": false,
     "logistics_": {
       "baseline_": [
         {
@@ -1018,7 +1018,7 @@
     "yield_amount_": 1,
     "yield_unit_": "dish",
     "default_station_": "hot_line",
-    "is_approved_": true,
+    "is_approved_": false,
     "logistics_": {
       "baseline_": [
         {
@@ -1179,7 +1179,7 @@
     "yield_amount_": 2,
     "yield_unit_": "dish",
     "default_station_": "hot_line",
-    "is_approved_": true,
+    "is_approved_": false,
     "logistics_": {
       "baseline_": [
         {
@@ -1351,7 +1351,7 @@
     "yield_amount_": 1,
     "yield_unit_": "dish",
     "default_station_": "fry",
-    "is_approved_": true,
+    "is_approved_": false,
     "logistics_": {
       "baseline_": [
         {
@@ -1409,7 +1409,7 @@
     "yield_amount_": 1,
     "yield_unit_": "dish",
     "default_station_": "fry",
-    "is_approved_": true,
+    "is_approved_": false,
     "logistics_": {
       "baseline_": [
         {
@@ -1548,7 +1548,7 @@
     "yield_amount_": 35,
     "yield_unit_": "dish",
     "default_station_": "cold",
-    "is_approved_": true,
+    "is_approved_": false,
     "logistics_": {
       "baseline_": [
         {
@@ -1712,7 +1712,7 @@
     "yield_amount_": 50,
     "yield_unit_": "dish",
     "default_station_": "fry",
-    "is_approved_": true,
+    "is_approved_": false,
     "logistics_": {
       "baseline_": [
         {
@@ -1930,7 +1930,7 @@
     "yield_amount_": 1,
     "yield_unit_": "unit",
     "default_station_": "cold",
-    "is_approved_": true,
+    "is_approved_": false,
     "logistics_": {
       "baseline_": [
         {
@@ -2135,7 +2135,7 @@
     "yield_amount_": 1,
     "yield_unit_": "unit",
     "default_station_": "patisserie",
-    "is_approved_": true,
+    "is_approved_": false,
     "logistics_": {
       "baseline_": [
         {
@@ -2300,7 +2300,7 @@
     "yield_amount_": 6,
     "yield_unit_": "unit",
     "default_station_": "cold",
-    "is_approved_": true,
+    "is_approved_": false,
     "logistics_": {
       "baseline_": [
         {
@@ -2380,7 +2380,7 @@
     "yield_amount_": 1,
     "yield_unit_": "unit",
     "default_station_": "cold",
-    "is_approved_": true,
+    "is_approved_": false,
     "logistics_": {
       "baseline_": [
         {

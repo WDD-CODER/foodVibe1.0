@@ -13,6 +13,32 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 153 — Recipe approve stamp button (`plans/153-recipe-approve-stamp-button.plan.md`)
+- [x] Recipe builder: add isApproved_ signal, set from loaded recipe and in resetToNewForm_; use in buildRecipeFromForm(); add saveRecipe(options?) and onApproveStamp()
+- [x] Recipe builder template: add ApproveStamp component when !historyViewMode_()
+- [x] Cook view: add onApproveStamp() that saves with is_approved_: true and updates recipe_()
+- [x] Cook view template: add ApproveStamp component when recipe_() is set
+- [x] Create ApproveStampComponent (shared): wax-seal style, theme colors, fixed bottom-right, inputs approved/disabled, output approve
+- [x] Add approve_recipe translation key; use for stamp aria-label
+
+### Plan 152 — Recipe book date filter sidebar (`plans/152-recipe-book-date-filter-sidebar.plan.md`)
+- [x] Add dateFrom_/dateTo_/dateField_ signals and useListState descriptors
+- [x] Date-range filter in filteredRecipes_ + clear/hasActiveFilters
+- [x] Add dateUpdated to SortField and compareRecipes; sidebar sort buttons
+- [x] Date collapsible section in sidebar (From/To inputs, checkbox, sort)
+- [x] Expand Date section when date range active; translations and SCSS
+
+### Plan 151 — Recipe secondary unit conversion (`plans/151-recipe-secondary-unit-conversion.plan.md`)
+
+- [x] Add amountInRecipeYieldUnit in RecipeCostService; use in getRowWeightContributionG and computeIngredientCost
+- [x] Use recipe-scoped conversion in ingredients table updateLineCalculations
+- [x] Add recipe-cost tests for yield_conversions_
+
+### Plan 150 — Secondary units in ingredient dropdown (`plans/150-secondary-units-in-ingredient-dropdown.plan.md`)
+
+- [x] Extend getAvailableUnits metadata type with yield_conversions_
+- [x] Add recipe yield_conversions_ units to dropdown in recipe-ingredients-table
+
 ### Plan 149 — Recipe-builder and metrics notice fixes (`plans/149-recipe-builder-metrics-notice-fixes.plan.md`)
 
 - [x] Preserve quantity when changing ingredient by name
@@ -955,6 +981,10 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 143 | Cook-view recipe yield units | Done |
 | 144 | Precision-based counter step | Active |
 | 145 | Secondary unit dropdown fix | Active |
+| 150 | Secondary units in ingredient dropdown | Active |
+| 153 | Recipe approve stamp button | Active |
+| 152 | Recipe book date filter sidebar | Planned |
+| 151 | Recipe secondary unit conversion | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 
