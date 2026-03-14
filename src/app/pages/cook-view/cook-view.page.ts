@@ -19,6 +19,7 @@ import { TranslationService } from '@services/translation.service';
 import { ExportService } from '@services/export.service';
 import type { ExportPayload } from '../../core/utils/export.util';
 import { ExportPreviewComponent } from '../../shared/export-preview/export-preview.component';
+import { ApproveStampComponent } from 'src/app/shared/approve-stamp/approve-stamp.component';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
@@ -45,7 +46,8 @@ import { HeroFabService } from '@services/hero-fab.service';
     LoaderComponent,
     CustomSelectComponent,
     FormatQuantityPipe,
-    ExportPreviewComponent
+    ExportPreviewComponent,
+    ApproveStampComponent
   ],
   templateUrl: './cook-view.page.html',
   styleUrl: './cook-view.page.scss'
@@ -401,6 +403,41 @@ export class CookViewPage implements OnInit, OnDestroy {
       this.editMode_.set(false);
       this.unitOverrides_.set({});
     }
+  }
+
+  protected onApproveStamp(): void {
+    const recipe = this.recipe_();
+    if (!recipe) return;
+    if (this.hasUnsavedEdits()) {
+      this.applyWorkflowFormToRecipe();
+      this.confirmModal.open('approve_stamp_unsaved_confirm', { saveLabel: 'save_changes' }).then(confirmed => {
+        if (!confirmed) return;
+        this.saveRecipeWithToggledApproval();
+      });
+      return;
+    }
+    this.saveRecipeWithToggledApproval();
+  }
+
+  private saveRecipeWithToggledApproval(): void {
+    const recipe = this.recipe_();
+    if (!recipe) return;
+    this.isSaving_.set(true);
+    this.kitchenState.saveRecipe({ ...recipe, is_approved_: !recipe.is_approved_ }).subscribe({
+      next: (saved) => {
+        this.recipe_.set(saved);
+        this.originalRecipe_.set(null);
+        this.editMode_.set(false);
+        this.isSaving_.set(false);
+        this.userMsg.onSetSuccessMsg(
+          this.translation.translate(saved.is_approved_ ? 'approval_success' : 'unapproval_success')
+        );
+      },
+      error: () => {
+        this.isSaving_.set(false);
+        this.userMsg.onSetErrorMsg(this.translation.translate('approval_error'));
+      }
+    });
   }
 
   protected async onExportInfo(): Promise<void> {

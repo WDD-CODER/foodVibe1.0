@@ -1,0 +1,14 @@
+<button type="button"
+        class="approve-stamp"
+        [class.stamped]="approved()"
+        [class.disabled]="disabled()"
+        [disabled]="disabled()"
+        [attr.aria-label]="(approved() ? 'unapprove_recipe' : 'approve_recipe') | translatePipe"
+        [attr.title]="(approved() ? 'unapprove_recipe' : 'approve_recipe') | translatePipe"
+        (click)="onStampClick()">
+  <img [src]="approved() ? stampApprovedUrl : stampNotApprovedUrl"
+       class="approve-stamp__img"
+       [alt]="(approved() ? 'unapprove_recipe' : 'approve_recipe') | translatePipe"
+       width="52"
+       height="52" />
+</button>

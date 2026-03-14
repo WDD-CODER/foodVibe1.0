@@ -36,6 +36,8 @@ import { HeroFabService, type HeroFabAction } from '@services/hero-fab.service';
 import type { ExportPayload } from '../../core/utils/export.util';
 import { ExportPreviewComponent } from '../../shared/export-preview/export-preview.component';
 import { ExportToolbarOverlayComponent } from '../../shared/export-toolbar-overlay/export-toolbar-overlay.component';
+import { ApproveStampComponent } from 'src/app/shared/approve-stamp/approve-stamp.component';
+import { ConfirmModalService } from '@services/confirm-modal.service';
 
 @Component({
   selector: 'app-recipe-builder-page',
@@ -52,7 +54,8 @@ import { ExportToolbarOverlayComponent } from '../../shared/export-toolbar-overl
     ScrollableDropdownComponent,
     ClickOutSideDirective,
     ExportPreviewComponent,
-    ExportToolbarOverlayComponent
+    ExportToolbarOverlayComponent,
+    ApproveStampComponent
   ],
   templateUrl: './recipe-builder.page.html',
   styleUrl: './recipe-builder.page.scss'
@@ -76,6 +79,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private readonly translation_ = inject(TranslationService);
   private readonly logging_ = inject(LoggingService);
   private readonly exportService_ = inject(ExportService);
+  private readonly confirmModal_ = inject(ConfirmModalService);
   private readonly heroFab_ = inject(HeroFabService);
 
   //SIGNALS
@@ -98,6 +102,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   /** True when viewing an old version from history (read-only, no save). */
   protected historyViewMode_ = signal(false);
+
+  /** Whether the current recipe is marked approved (stamp sets this; used in buildRecipeFromForm and for stamp UI). */
+  protected isApproved_ = signal(false);
 
   /** Section cards collapsed by default (true = collapsed). */
   protected tableLogicCollapsed_ = signal(true);
@@ -253,6 +260,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   /** Resets the form to a blank state for creating a new recipe/dish. */
   private resetToNewForm_(): void {
     this.recipeId_.set(null);
+    this.isApproved_.set(false);
     this.cachedPrepItems_ = [];
     this.cachedSteps_ = [];
 
@@ -469,6 +477,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   }
 
   private patchFormFromRecipe(recipe: Recipe): void {
+    this.isApproved_.set(recipe.is_approved_);
     const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length);
     const normalizedLabels = this.normalizeLabelKeys(recipe.labels_ ?? []);
     this.recipeForm_.patchValue({
@@ -893,7 +902,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     this.focusIngredientSearchAtRow_.set(null);
   }
 
-  saveRecipe(): void {
+  saveRecipe(options?: { navigateOnSuccess?: boolean }): void {
     if (this.recipeForm_.invalid) {
       this.recipeForm_.markAllAsTouched();
       const msg = this.getRecipeValidationError_();
@@ -901,6 +910,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       return;
     }
 
+    const navigateOnSuccess = options?.navigateOnSuccess !== false;
     this.isSaving_.set(true);
     const recipe = this.buildRecipeFromForm();
     recipe.autoLabels_ = this.computeAutoLabels_(recipe);
@@ -908,14 +918,38 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     this.state_.saveRecipe(recipe).subscribe({
       next: () => {
         this.isSaving_.set(false);
-        this.isSubmitted = true;
-        this.resetToNewForm_();
-        this.router_.navigate(['/recipe-book']);
+        if (navigateOnSuccess) {
+          this.isSubmitted = true;
+          this.resetToNewForm_();
+          this.router_.navigate(['/recipe-book']);
+        } else {
+          this.userMsg_.onSetSuccessMsg(
+            this.translation_.translate(this.isApproved_() ? 'approval_success' : 'unapproval_success')
+          );
+        }
       },
       error: () => {
         this.isSaving_.set(false);
+        if (!navigateOnSuccess) {
+          this.userMsg_.onSetErrorMsg(this.translation_.translate('approval_error'));
+        }
       }
     });
+  }
+
+  protected onApproveStamp(): void {
+    if (this.recipeId_() && this.hasRealChanges()) {
+      this.confirmModal_.open('approve_stamp_unsaved_confirm', { saveLabel: 'save_changes' }).then(confirmed => {
+        if (!confirmed) return;
+        this.isApproved_.set(!this.isApproved_());
+        this.saveRecipe({ navigateOnSuccess: false });
+      });
+      return;
+    }
+    this.isApproved_.set(!this.isApproved_());
+    if (this.recipeId_()) {
+      this.saveRecipe({ navigateOnSuccess: false });
+    }
   }
 
   navigateBackFromHistory(): void {
@@ -1157,7 +1191,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       yield_unit_: yieldUnit,
       ...(yieldConversions.length > 0 ? { yield_conversions_: yieldConversions } : {}),
       default_station_: '',
-      is_approved_: true,
+      is_approved_: this.isApproved_(),
       recipe_type_: isDish ? 'dish' : 'preparation',
       labels_: labels,
       ...(prepItems && prepItems.length > 0 && { prep_items_: prepItems }),

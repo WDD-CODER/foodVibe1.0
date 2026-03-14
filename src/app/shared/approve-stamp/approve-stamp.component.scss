@@ -1,0 +1,115 @@
+.approve-stamp {
+    position: fixed;
+    right:0rem;
+    bottom: 0;
+    z-index: 90;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    // width: 5.5rem;
+    // height:5.5rem;
+    padding: 0;
+    margin: 0;
+
+    background: transparent;
+    border: none;
+
+    border-radius: 50%;
+    box-shadow: none;
+    overflow: visible;
+
+    cursor: pointer;
+    /* Keep on compositor layer so scale transition doesn't re-rasterize at end (no blur). */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    transition: transform 0.2s ease-out;
+
+    &:hover:not(.stamped):not(.disabled) {
+      transform: translateZ(0) scale(1.05);
+      filter: brightness(1.08) 
+    }
+
+    &:disabled,
+    &.stamped,
+    &.disabled {
+      cursor: default;
+    }
+
+    &.stamped .approve-stamp__seal {
+      opacity: 0.85;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    .approve-stamp__img{
+width: 5rem;
+height: 5rem;
+    }
+  }
+
+  .approve-stamp__seal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 5.25rem;
+    height: 5.25rem;
+    padding: 0;
+
+    background: linear-gradient(
+      145deg,
+      var(--color-primary) 0%,
+      var(--color-primary-hover) 50%,
+      var(--color-primary) 100%
+    );
+    color: var(--color-text-on-primary);
+
+    border-radius: 50%;
+    box-shadow:
+      var(--shadow-glow),
+      0 4px 16px rgba(0, 0, 0, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+
+    transition: box-shadow 0.2s ease, opacity 0.2s ease;
+  }
+
+  .approve-stamp__text {
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+    line-height: 1.1;
+    text-align: center;
+    max-width: 2.5rem;
+  }
+
+  .approve-stamp__icon {
+    color: var(--color-text-on-primary);
+  }
+
+  @media (max-width: 768px) {
+    .approve-stamp {
+      // right: 0.5rem;
+      // bottom: 0.5rem;
+
+      // width: 4rem;
+      // height: 4rem;
+    }
+
+    .approve-stamp__seal {
+      width: 3.75rem;
+      height:3.75rem;
+    }
+
+    .approve-stamp__text {
+      font-size: 0.45rem;
+    }
+    .approve-stamp__img{
+
+    }
+  }
+
+  

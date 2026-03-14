@@ -261,6 +261,13 @@
 
   </div>
 
+  @if (!historyViewMode_()) {
+    <app-approve-stamp
+      [approved]="isApproved_()"
+      [disabled]="isSaving_()"
+      (approve)="onApproveStamp()" />
+  }
+
   @if (exportPreviewPayload_(); as payload) {
     <app-export-preview [payload]="payload"
       (exportClick)="onExportFromPreview()"

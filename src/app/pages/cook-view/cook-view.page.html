@@ -281,6 +281,10 @@
       }
       </div>
     </div>
+    <app-approve-stamp
+      [approved]="recipe.is_approved_"
+      [disabled]="isSaving_()"
+      (approve)="onApproveStamp()" />
   } @else {
     <div class="cook-view-empty">
       <lucide-icon name="utensils" [size]="48"></lucide-icon>
