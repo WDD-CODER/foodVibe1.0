@@ -13,6 +13,7 @@
   <button type="button"
           class="fab-main"
           [class.active]="isExpanded_()"
+          [class.grow-only]="useGrowAnimation_()"
           (mouseenter)="expand()"
           (click)="goToRecipeBuilder()"
           aria-label="Quick actions">

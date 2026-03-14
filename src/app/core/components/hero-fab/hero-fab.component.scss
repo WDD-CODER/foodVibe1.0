@@ -37,6 +37,10 @@
   &.active {
     transform: rotate(45deg);
   }
+
+  &.grow-only.active {
+    transform: scale(1.12);
+  }
 }
 
 .fab-actions {

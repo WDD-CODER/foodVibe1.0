@@ -31,6 +31,9 @@ export class HeroFabComponent {
     return state.actions;
   });
 
+  /** When there are no sub-actions, use grow animation on the main FAB instead of rotation. */
+  protected readonly useGrowAnimation_ = computed(() => this.effectiveActions_().length === 0);
+
   constructor() {
     const setRoute = (): void => {
       const url = this.router.url;
