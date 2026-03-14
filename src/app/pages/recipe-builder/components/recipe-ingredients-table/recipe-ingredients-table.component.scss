@@ -113,6 +113,7 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   .col-cost {
     display: flex;
     align-items: center;
+    justify-content: center;
     min-height: 2.5rem;
   }
 }

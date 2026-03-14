@@ -1,4 +1,4 @@
-import { Component, input, output, inject, ViewChildren, QueryList, ElementRef, AfterViewInit, effect, ChangeDetectorRef } from '@angular/core';
+import { Component, input, output, inject, signal, ViewChildren, QueryList, ElementRef, AfterViewInit, effect, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormArray, FormGroup, FormBuilder } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -85,6 +85,17 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
       .filter(Boolean);
   }
 
+  /** When set, this row index shows ingredient-search instead of selected-item-display (click name to change item). */
+  protected editingNameAtRow_ = signal<number | null>(null);
+
+  /** Exclude names from search for a given row (other rows only), so user can re-select the same item when editing. */
+  getExcludeNamesForRow(rowIndex: number): string[] {
+    return this.ingredientGroups
+      .filter((g, i) => i !== rowIndex && g.get('referenceId')?.value)
+      .map(g => (g.get('name_hebrew')?.value ?? '').toString().trim())
+      .filter(Boolean);
+  }
+
 
 
   /** True when the row's unit is a product purchase unit (use step 1 for +/-). */
@@ -137,23 +148,29 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
   }
 
   onItemSelected(item: SearchableItem, group: FormGroup) {
+    const index = this.ingredientGroups.indexOf(group);
+    const isEditingName = this.editingNameAtRow_() === index;
     const product = item.item_type_ === 'product' ? (item as Product) : null;
     const hasPurchaseOptions = product?.purchase_options_?.length;
     const unit = hasPurchaseOptions
       ? (product!.purchase_options_![0].unit_symbol_ ?? product!.base_unit_ ?? '')
       : ('base_unit_' in item ? (item.base_unit_ ?? '') : ('yield_unit_' in item ? (item.yield_unit_ ?? '') : ''));
+    const amount_net = isEditingName
+      ? (group.get('amount_net')?.value ?? (hasPurchaseOptions ? 1 : 0))
+      : (hasPurchaseOptions ? 1 : 0);
     group.patchValue({
       name_hebrew: item.name_hebrew,
       referenceId: item._id,
       item_type: item.item_type_,
       unit,
-      amount_net: hasPurchaseOptions ? 1 : 0,
+      amount_net,
     });
 
-    const index = this.ingredientGroups.indexOf(group);
     if (index !== -1) {
       this.updateLineCalculations(index);
     }
+
+    this.editingNameAtRow_.set(null);
 
     // Focus quantity so user can type immediately (no new row yet; Enter in qty/unit adds row).
     setTimeout(() => this.focusQuantityAtRow(index), 0);

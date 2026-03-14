@@ -910,7 +910,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         this.isSaving_.set(false);
         this.isSubmitted = true;
         this.resetToNewForm_();
-        this.router_.navigate(['/recipe-builder']);
+        this.router_.navigate(['/recipe-book']);
       },
       error: () => {
         this.isSaving_.set(false);

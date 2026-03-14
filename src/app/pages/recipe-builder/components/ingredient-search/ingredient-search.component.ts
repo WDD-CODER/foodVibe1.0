@@ -30,10 +30,15 @@ export class IngredientSearchComponent {
   /** Names of ingredients already in the recipe; these are excluded from search results. */
   excludeNames = input<string[]>([]);
 
+  /** Optional initial search query (e.g. when editing an existing ingredient name). */
+  initialQuery = input<string>('');
+
   itemSelected = output<SearchableItem>();
   focusDone = output<void>();
   /** Emit when user presses Enter in search with no selection (e.g. add new row). */
   addNewRowRequested = output<void>();
+  /** Emit when user cancels (e.g. Escape) so parent can close edit mode. */
+  cancelSearch = output<void>();
 
   protected searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInput');
   searchQuery_ = signal<string>('');
@@ -53,6 +58,14 @@ export class IngredientSearchComponent {
         this.focusDone.emit();
       }
       if (trigger === null) this.lastHandledFocusTrigger = null;
+    });
+    effect(() => {
+      const q = this.initialQuery()?.trim() ?? '';
+      if (q && !this.searchQuery_()) {
+        this.searchQuery_.set(q);
+        this.showResults_.set(true);
+      }
+      if (q) this.highlightedIndex_.set(-1);
     });
   }
 
@@ -124,6 +137,7 @@ export class IngredientSearchComponent {
     if (key === 'Escape') {
       this.showResults_.set(false);
       this.highlightedIndex_.set(-1);
+      this.cancelSearch.emit();
     }
   }
 
