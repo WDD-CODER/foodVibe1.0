@@ -80,6 +80,27 @@ export class RecipeCostService {
   }
 
   /**
+   * Converts amount in a given unit to the recipe's yield_unit quantity.
+   * Uses recipe's yield_conversions_ when the unit is one of its declared units (primary or secondary);
+   * otherwise falls back to global registry via normalizeToRecipeYieldUnit.
+   */
+  amountInRecipeYieldUnit(amount: number, unit: string, recipe: Recipe): number {
+    const convs = recipe.yield_conversions_;
+    if (convs?.length) {
+      const u = (unit ?? '').trim().toLowerCase();
+      const entry = convs.find(
+        (c) => (c?.unit ?? '').trim().toLowerCase() === u
+      );
+      if (entry != null && entry.amount != null && entry.amount > 0) {
+        const yieldAmount = recipe.yield_amount_ ?? 1;
+        return amount * (yieldAmount / entry.amount);
+      }
+    }
+    const yieldUnit = recipe.yield_unit_ || 'unit';
+    return this.normalizeToRecipeYieldUnit(amount, unit, yieldUnit);
+  }
+
+  /**
    * Returns the weight in grams for a single row, or null if the unit cannot be converted to grams.
    */
   getRowWeightG(row: IngredientWeightRow, depth = 0): number | null {
@@ -151,7 +172,7 @@ export class RecipeCostService {
         const yieldKey = UNIT_ALIASES[subRecipe.yield_unit_] ?? subRecipe.yield_unit_;
         const yieldFactor = this.unitRegistry_.getConversion(yieldKey);
         if (yieldFactor && (yieldKey === 'gram' || yieldKey === 'kg' || MASS_UNITS.has(yieldKey))) {
-          const amountInYield = this.normalizeToRecipeYieldUnit(net, unit, subRecipe.yield_unit_);
+          const amountInYield = this.amountInRecipeYieldUnit(net, unit, subRecipe);
           const totalRecipeG = this.computeTotalWeightG(
             subRecipe.ingredients_?.map((i: Ingredient) => ({
               amount_net: i.amount_,
@@ -280,9 +301,7 @@ export class RecipeCostService {
       const subRecipe = this.kitchenState_.recipes_().find(r => r._id === ing.referenceId) as Recipe | undefined;
       if (!subRecipe) return 0;
       const costPerUnit = this.getRecipeCostPerUnit(subRecipe, depth + 1);
-      const yieldAmount = subRecipe.yield_amount_ || 1;
-      const yieldUnit = subRecipe.yield_unit_ || 'unit';
-      const amountInYieldUnit = this.normalizeToRecipeYieldUnit(ing.amount_, ing.unit_, yieldUnit);
+      const amountInYieldUnit = this.amountInRecipeYieldUnit(ing.amount_, ing.unit_, subRecipe);
       return amountInYieldUnit * costPerUnit;
     }
 

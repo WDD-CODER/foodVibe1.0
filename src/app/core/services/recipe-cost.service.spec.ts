@@ -36,6 +36,7 @@ describe('RecipeCostService', () => {
       steps_: overrides.steps_ ?? [],
       yield_amount_: overrides.yield_amount_ ?? 1,
       yield_unit_: overrides.yield_unit_ ?? 'unit',
+      ...(overrides.yield_conversions_ != null && { yield_conversions_: overrides.yield_conversions_ }),
       default_station_: overrides.default_station_ ?? '',
       is_approved_: overrides.is_approved_ ?? false,
     };
@@ -221,6 +222,104 @@ describe('RecipeCostService', () => {
         ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 1, unit_: 'unit' }],
       });
       expect(service.computeRecipeCost(recipe)).toBe(4.9);
+    });
+  });
+
+  describe('amountInRecipeYieldUnit and yield_conversions_', () => {
+    it('should convert secondary units using yield_conversions_ (1 unit = 446g)', () => {
+      const recipe = createRecipe({
+        _id: 'r1',
+        yield_amount_: 446,
+        yield_unit_: 'gram',
+        yield_conversions_: [
+          { amount: 446, unit: 'gram' },
+          { amount: 1, unit: 'unit' },
+          { amount: 1, unit: 'כפות' },
+        ],
+        ingredients_: [],
+      });
+      expect(service.amountInRecipeYieldUnit(1, 'unit', recipe)).toBe(446);
+      expect(service.amountInRecipeYieldUnit(1, 'כפות', recipe)).toBe(446);
+      expect(service.amountInRecipeYieldUnit(446, 'gram', recipe)).toBe(446);
+      expect(service.amountInRecipeYieldUnit(2, 'unit', recipe)).toBe(892);
+    });
+
+    it('should fall back to registry when unit not in yield_conversions_', () => {
+      const recipe = createRecipe({
+        _id: 'r1',
+        yield_amount_: 446,
+        yield_unit_: 'gram',
+        yield_conversions_: [{ amount: 446, unit: 'gram' }, { amount: 1, unit: 'unit' }],
+        ingredients_: [],
+      });
+      // kg not in conversions; registry has kg: 1000, gram: 1 → 1 kg = 1000 in gram terms
+      expect(service.amountInRecipeYieldUnit(1, 'kg', recipe)).toBe(1000);
+    });
+
+    it('should give same cost for 1 unit as 446 gram when recipe has yield_conversions_', () => {
+      const product = createProduct({
+        _id: 'p1',
+        buy_price_global_: 0.01,
+        base_unit_: 'gram',
+        yield_factor_: 1,
+        purchase_options_: [],
+      });
+      productsSignal.set([product]);
+      const subRecipe = createRecipe({
+        _id: 'sub',
+        yield_amount_: 446,
+        yield_unit_: 'gram',
+        yield_conversions_: [
+          { amount: 446, unit: 'gram' },
+          { amount: 1, unit: 'unit' },
+        ],
+        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 446, unit_: 'gram' }],
+      });
+      recipesSignal.set([subRecipe]);
+      const costFor446Gram = service.getCostForIngredient({
+        _id: 'i1',
+        referenceId: 'sub',
+        type: 'recipe',
+        amount_: 446,
+        unit_: 'gram',
+      });
+      const costFor1Unit = service.getCostForIngredient({
+        _id: 'i2',
+        referenceId: 'sub',
+        type: 'recipe',
+        amount_: 1,
+        unit_: 'unit',
+      });
+      expect(costFor1Unit).toBe(costFor446Gram);
+      expect(costFor446Gram).toBeCloseTo(4.46, 2); // 446 * 0.01
+    });
+
+    it('should give same row weight for 1 unit as 446 gram when recipe has yield_conversions_', () => {
+      const subRecipe = createRecipe({
+        _id: 'sub',
+        yield_amount_: 446,
+        yield_unit_: 'gram',
+        yield_conversions_: [
+          { amount: 446, unit: 'gram' },
+          { amount: 1, unit: 'unit' },
+        ],
+        ingredients_: [
+          { _id: 'i1', referenceId: 'p1', type: 'product', amount_: 446, unit_: 'gram' },
+        ],
+      });
+      const product = createProduct({
+        _id: 'p1',
+        base_unit_: 'gram',
+        purchase_options_: [],
+      });
+      productsSignal.set([product]);
+      recipesSignal.set([subRecipe]);
+      const rowGram = { amount_net: 446, unit: 'gram', referenceId: 'sub', item_type: 'recipe', name_hebrew: 'Sub' };
+      const rowUnit = { amount_net: 1, unit: 'unit', referenceId: 'sub', item_type: 'recipe', name_hebrew: 'Sub' };
+      const weightGram = service.computeTotalWeightG([rowGram]);
+      const weightUnit = service.computeTotalWeightG([rowUnit]);
+      expect(weightUnit).toBe(weightGram);
+      expect(weightGram).toBe(446);
     });
   });
 });
