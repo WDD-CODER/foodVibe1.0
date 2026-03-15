@@ -90,7 +90,7 @@
           }
         </div>
         <div class="col-select c-list-body-cell" role="cell">
-          <app-list-row-checkbox [checked]="selection.isSelected(item._id ?? '')" (toggle)="selection.toggle(item._id ?? '')" />
+          <app-list-row-checkbox [checked]="selection.isSelected(item._id)" (toggle)="selection.toggle(item._id)" />
         </div>
       </div>
       @if (editingId_() === item._id) {

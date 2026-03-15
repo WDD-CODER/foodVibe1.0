@@ -9,7 +9,6 @@ import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { DashboardOverviewComponent } from './components/dashboard-overview/dashboard-overview.component';
 import { MetadataManagerComponent } from '../metadata-manager/metadata-manager.page.component';
 import { VenueListComponent } from '../venues/components/venue-list/venue-list.component';
@@ -32,7 +31,6 @@ const TAB_QUERY_VALUES: Record<DashboardTab, string | null> = {
   imports: [
     CommonModule,
     LucideAngularModule,
-    TranslatePipe,
     DashboardOverviewComponent,
     MetadataManagerComponent,
     VenueListComponent,

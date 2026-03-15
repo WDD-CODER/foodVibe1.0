@@ -138,7 +138,7 @@
           }
         </div>
         <div class="col-select c-list-body-cell" role="cell">
-          <app-list-row-checkbox [checked]="selection.isSelected(recipe._id ?? '')" (toggle)="selection.toggle(recipe._id ?? '')" />
+          <app-list-row-checkbox [checked]="selection.isSelected(recipe._id)" (toggle)="selection.toggle(recipe._id)" />
         </div>
       </div>
     }
