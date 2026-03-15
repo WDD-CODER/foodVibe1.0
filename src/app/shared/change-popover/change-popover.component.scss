@@ -1,0 +1,55 @@
+@layer components.change-popover {
+  .change-popover-anchor {
+    position: fixed;
+    z-index: 1000;
+
+    transform: translateX(-50%);
+    margin-top: 0.25rem;
+
+    background: transparent;
+    pointer-events: none;
+  }
+
+  .change-popover-anchor app-floating-info-container {
+    pointer-events: auto;
+  }
+
+  .change-popover-label {
+    margin: 0 0 0.5rem 0;
+    padding-block-end: 0.35rem;
+
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+
+    border-block-end: 1px solid var(--border-default);
+  }
+
+  .change-popover-values {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    font-size: 0.8125rem;
+    color: var(--color-text-main);
+    line-height: 1.35;
+  }
+
+  .change-popover-from {
+    color: var(--color-text-muted);
+    text-decoration: line-through;
+  }
+
+  .change-popover-arrow {
+    flex-shrink: 0;
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+
+  .change-popover-to {
+    font-weight: 600;
+    color: var(--color-primary-hover);
+  }
+}

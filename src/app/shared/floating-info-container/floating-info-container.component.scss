@@ -1,0 +1,107 @@
+@layer components.floating-info-container {
+  :host {
+    display: block;
+  }
+
+  .floating-info-card {
+    display: flex;
+    flex-direction: column;
+
+    min-width: 7.5rem;
+    padding: 0.5rem 0.75rem;
+
+    background: var(--bg-glass-strong);
+    color: var(--color-text-main);
+    font-size: 0.8rem;
+
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+
+    backdrop-filter: var(--blur-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+  }
+
+  .floating-info-card--scroll-vertical .floating-info-scroll-wrap {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .floating-info-scroll {
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .floating-info-scroll-zone--top {
+    position: absolute;
+    top: 0;
+    inset-inline: 0;
+    z-index: 2;
+
+    height: 2rem;
+
+    pointer-events: none;
+  }
+
+  .floating-info-scroll-zone--bottom {
+    position: absolute;
+    bottom: 0;
+    inset-inline: 0;
+    z-index: 2;
+
+    height: 2rem;
+
+    pointer-events: none;
+  }
+
+  .floating-info-scroll-indicator--top,
+  .floating-info-scroll-indicator--bottom {
+    position: absolute;
+    inset-inline: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding-block: 0.2rem;
+    min-height: 1.25rem;
+
+    background: linear-gradient(to bottom, var(--bg-glass-strong) 0%, transparent 100%);
+    color: var(--color-text-muted);
+
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s var(--ease-smooth);
+  }
+
+  .floating-info-scroll-indicator--top {
+    top: 0;
+    bottom: auto;
+  }
+
+  .floating-info-scroll-indicator--bottom {
+    top: auto;
+    bottom: 0;
+    background: linear-gradient(to top, var(--bg-glass-strong) 0%, transparent 100%);
+  }
+
+  .floating-info-scroll-wrap:has(.floating-info-scroll.can-scroll-up) .floating-info-scroll-indicator--top {
+    opacity: 0.8;
+  }
+
+  .floating-info-scroll-wrap:has(.floating-info-scroll.can-scroll-down) .floating-info-scroll-indicator--bottom {
+    opacity: 0.8;
+  }
+
+  .floating-info-content {
+    display: block;
+  }
+}

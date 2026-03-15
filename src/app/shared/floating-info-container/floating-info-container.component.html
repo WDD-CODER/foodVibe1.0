@@ -1,0 +1,25 @@
+<div class="floating-info-card" [class.floating-info-card--scroll-vertical]="scrollAxis() === 'vertical'">
+  @if (scrollAxis() === 'vertical') {
+    <div class="floating-info-scroll-wrap">
+      <div
+        class="floating-info-scroll"
+        scrollIndicators
+        [style.max-height.px]="maxHeight()"
+      >
+        <ng-content></ng-content>
+      </div>
+      <div class="floating-info-scroll-zone floating-info-scroll-zone--top" aria-hidden="true"></div>
+      <div class="floating-info-scroll-zone floating-info-scroll-zone--bottom" aria-hidden="true"></div>
+      <div class="floating-info-scroll-indicator floating-info-scroll-indicator--top" aria-hidden="true">
+        <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
+      </div>
+      <div class="floating-info-scroll-indicator floating-info-scroll-indicator--bottom" aria-hidden="true">
+        <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
+      </div>
+    </div>
+  } @else {
+    <div class="floating-info-content">
+      <ng-content></ng-content>
+    </div>
+  }
+</div>

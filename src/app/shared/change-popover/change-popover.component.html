@@ -1,0 +1,21 @@
+@if (open(); as o) {
+  <div
+    class="change-popover-anchor"
+    [style.top.px]="o.top"
+    [style.left.px]="o.left"
+    (clickOutside)="closeRequest.emit($event)"
+  >
+    @if (activity(); as act) {
+      @if (getChange(act, o.field); as c) {
+        <app-floating-info-container scrollAxis="none">
+          <p class="change-popover-label">{{ c.label | translatePipe }}</p>
+          <div class="change-popover-values">
+            <span class="change-popover-from">{{ formatChangeValue(c.from) }}</span>
+            <span class="change-popover-arrow" aria-hidden="true">→</span>
+            <span class="change-popover-to">{{ formatChangeValue(c.to) }}</span>
+          </div>
+        </app-floating-info-container>
+      }
+    }
+  </div>
+}
