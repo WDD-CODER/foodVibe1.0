@@ -13,6 +13,13 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 154 — Floating container and change-popover refactor (`plans/154-floating-container-change-popover.plan.md`)
+- [x] Create FloatingInfoContainer component (shared) with vertical scroll + arrows
+- [x] Create ChangePopover component using FloatingInfoContainer
+- [x] Integrate ChangePopover in dashboard-overview; remove inline popover
+- [x] Refactor recipe-header metrics-notice to use FloatingInfoContainer
+- [x] Remove old popover/metrics styles; verify and clean up
+
 ### Plan 153 — Recipe approve stamp button (`plans/153-recipe-approve-stamp-button.plan.md`)
 - [x] Recipe builder: add isApproved_ signal, set from loaded recipe and in resetToNewForm_; use in buildRecipeFromForm(); add saveRecipe(options?) and onApproveStamp()
 - [x] Recipe builder template: add ApproveStamp component when !historyViewMode_()
