@@ -159,10 +159,14 @@
     backdrop-filter: var(--blur-glass);
     -webkit-backdrop-filter: var(--blur-glass);
     overflow: hidden;
+
+    transition: border-inline-start-radius 0.3s var(--ease-spring);
   }
 
   .list-container.panel-open .table-area {
-    border-inline-start-radius: 0;
+border-top-right-radius: 0;    
+border-bottom-right-radius: 0;
+    // border-inline-start-radius: 0;
   }
 
   .table-header {
@@ -300,10 +304,11 @@
     .filter-panel {
       position: absolute;
       inset-block: 0;
-      inset-inline-start: 0;
+      inset-inline-start: 1rem;
       z-index: 10;
 
-      max-height: 100%;
+      max-height: calc(100% - 2rem);
+      margin-block: 1rem;
       background: var(--bg-glass-strong);
       box-shadow: var(--shadow-modal);
 

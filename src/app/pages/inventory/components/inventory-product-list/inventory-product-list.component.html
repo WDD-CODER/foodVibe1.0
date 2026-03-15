@@ -1,8 +1,8 @@
 <app-list-shell
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="onPanelToggled()"
-  [gridTemplate]="'2fr 1fr 1fr 1fr minmax(48px, 0.8fr) 0.8fr 80px'"
-  [mobileGridTemplate]="'2fr 1fr 0.8fr 0.8fr 80px'"
+  [gridTemplate]="'2fr 1fr 1fr 1fr minmax(48px, 0.8fr) 0.8fr 80px minmax(44px, auto)'"
+  [mobileGridTemplate]="'2fr 1fr 0.8fr 0.8fr 80px minmax(44px, auto)'"
   [dir]="'rtl'">
 
   <h2 shell-title class="page-title">{{ 'product_list' | translatePipe }}</h2>
@@ -21,11 +21,17 @@
     </div>
   </ng-container>
 
-  <button shell-actions type="button" class="c-btn-primary" (click)="onAddProduct()"
-    [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
-    <lucide-icon name="plus" [size]="18"></lucide-icon>
-    {{ 'add_product' | translatePipe }}
-  </button>
+  <ng-container shell-actions>
+    @if (selection.selectionMode()) {
+      <button type="button" class="c-btn-ghost" (click)="selection.clear()">{{ 'clear_selection' | translatePipe }}</button>
+      <button type="button" class="c-btn-ghost danger" (click)="onBulkDeleteSelected()">{{ 'remove_selected' | translatePipe }}</button>
+    }
+    <button type="button" class="c-btn-primary" (click)="onAddProduct()"
+      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+      <lucide-icon name="plus" [size]="18"></lucide-icon>
+      {{ 'add_product' | translatePipe }}
+    </button>
+  </ng-container>
 
   <ng-container shell-table-header>
     <div class="col-name c-grid-header-cell c-sortable-header" (click)="setSort('name')" (keydown.enter)="setSort('name')" (keydown.space)="$event.preventDefault(); setSort('name')" role="columnheader" tabindex="0">
@@ -45,6 +51,9 @@
     <div class="col-unit c-grid-header-cell" role="columnheader">{{ 'unit' | translatePipe }}</div>
     <div class="col-price c-grid-header-cell" role="columnheader">{{ 'price' | translatePipe }}</div>
     <div class="c-col-actions c-grid-header-cell" role="columnheader">{{ 'actions' | translatePipe }}</div>
+    <div class="col-select c-grid-header-cell" role="columnheader">
+      <app-list-row-checkbox [checked]="filteredProductIds_().length > 0 && selection.allSelected(filteredProductIds_())" (toggle)="selection.toggleSelectAll(filteredProductIds_())" />
+    </div>
   </ng-container>
 
   <ng-container shell-table-body>
@@ -114,6 +123,9 @@
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>
             </button>
           }
+        </div>
+        <div class="col-select c-list-body-cell" role="cell">
+          <app-list-row-checkbox [checked]="selection.isSelected(product._id ?? '')" (toggle)="selection.toggle(product._id ?? '')" />
         </div>
       </div>
     }

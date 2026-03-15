@@ -19,6 +19,8 @@ import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/share
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
 import { ClickOutSideDirective } from '@directives/click-out-side';
+import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state';
+import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component';
 import { useListState, StringParam, BooleanParam, NumberSetParam } from 'src/app/core/utils/list-state.util';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 import { HeroFabService } from '@services/hero-fab.service';
@@ -28,7 +30,7 @@ const DAY_LABELS = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'];
 @Component({
   selector: 'app-supplier-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective, ClickOutSideDirective],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective, ClickOutSideDirective, ListRowCheckboxComponent],
   templateUrl: './supplier-list.component.html',
   styleUrl: './supplier-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -58,6 +60,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   protected isSavingEdit_ = signal(false);
   protected isPanelOpen_ = signal(true);
   protected carouselHeaderIndex_ = signal(0);
+  protected selection = new ListSelectionState();
   protected dayLabels = DAY_LABELS;
   protected editForm_!: FormGroup;
 
@@ -135,6 +138,11 @@ export class SupplierListComponent implements OnInit, OnDestroy {
     );
   });
 
+  /** Visible supplier IDs for header select-all. */
+  protected filteredSupplierIds_ = computed(() =>
+    this.filteredSuppliers_().map(s => s._id ?? '').filter(Boolean)
+  );
+
   protected togglePanel(): void {
     this.isPanelOpen_.update(v => !v);
     setPanelOpen('suppliers', this.isPanelOpen_());
@@ -204,7 +212,11 @@ export class SupplierListComponent implements OnInit, OnDestroy {
 
   protected onRowClick(item: Supplier, event: MouseEvent): void {
     const el = event.target as HTMLElement;
-    if (el.closest('button') || el.closest('a') || el.closest('.inline-edit-panel')) return;
+    if (el.closest('button') || el.closest('a') || el.closest('.inline-edit-panel') || el.closest('app-list-row-checkbox')) return;
+    if (this.selection.selectionMode()) {
+      this.selection.toggle(item._id ?? '');
+      return;
+    }
     if (this.editingId_() === item._id) {
       this.editingId_.set(null);
       return;
@@ -302,6 +314,24 @@ export class SupplierListComponent implements OnInit, OnDestroy {
     } finally {
       this.deletingId_.set(null);
     }
+  }
+
+  protected async onBulkDeleteSelected(): Promise<void> {
+    const ids = Array.from(this.selection.selectedIds()) as string[];
+    if (ids.length === 0) return;
+    if (!this.requireAuthService.requireAuth()) return;
+    if (!confirm(`למחוק ${ids.length} ספקים?`)) return;
+    for (const id of ids) {
+      this.deletingId_.set(id);
+      try {
+        await this.supplierData.removeSupplier(id);
+      } catch (e) {
+        this.logging.error({ event: 'supplier.list_error', message: 'Supplier list error', context: { err: e } });
+      } finally {
+        this.deletingId_.set(null);
+      }
+    }
+    this.selection.clear();
   }
 
   protected deliveryDaysDisplay(days: number[] | undefined): string {

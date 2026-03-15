@@ -19,6 +19,8 @@ import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.compone
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
 import { HeroFabService } from '@services/hero-fab.service';
+import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state';
+import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component';
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
 
@@ -39,6 +41,7 @@ export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
     CarouselHeaderColumnDirective,
     CellCarouselComponent,
     CellCarouselSlideDirective,
+    ListRowCheckboxComponent,
   ],
   templateUrl: './inventory-product-list.component.html',
   styleUrl: './inventory-product-list.component.scss',
@@ -70,6 +73,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected deletingId_ = signal<string | null>(null);
   protected savingPriceId_ = signal<string | null>(null);
   protected carouselHeaderIndex_ = signal(0);
+  protected selection = new ListSelectionState();
 
   ngOnInit(): void {
     const lowStock = this.route.snapshot.queryParams['lowStock'];
@@ -192,6 +196,11 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     return products;
   });
 
+  /** Visible product IDs for header select-all. */
+  protected filteredProductIds_ = computed(() =>
+    this.filteredProducts_().map(p => p._id ?? '').filter(Boolean)
+  );
+
   private compareProducts(a: Product, b: Product, field: SortField): number {
     const hebrewCompare = (aStr: string, bStr: string) =>
       (aStr || '').localeCompare(bStr || '', 'he');
@@ -296,7 +305,11 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
   protected onRowClick(product: Product, event: MouseEvent): void {
     const el = event.target as HTMLElement;
-    if (el.closest('button') || el.closest('a') || el.closest('.allergen-btn-wrapper')) return;
+    if (el.closest('button') || el.closest('a') || el.closest('.allergen-btn-wrapper') || el.closest('app-list-row-checkbox')) return;
+    if (this.selection.selectionMode()) {
+      this.selection.toggle(product._id ?? '');
+      return;
+    }
     this.router.navigate(['/inventory/edit', product._id]);
   }
 
@@ -309,6 +322,16 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
         error: () => { this.deletingId_.set(null); }
       });
     }
+  }
+
+  protected onBulkDeleteSelected(): void {
+    const ids = Array.from(this.selection.selectedIds());
+    if (ids.length === 0) return;
+    if (!confirm(`למחוק ${ids.length} מוצרים?`)) return;
+    ids.forEach(id => {
+      this.kitchenStateService.deleteProduct(id).subscribe({ next: () => {}, error: () => {} });
+    });
+    this.selection.clear();
   }
 
   protected getSupplierName(supplierId: string): string {
