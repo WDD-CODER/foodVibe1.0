@@ -90,6 +90,10 @@
       box-shadow: var(--shadow-focus);
     }
   }
+
+  app-custom-select {
+    width: 100%;
+  }
 }
 
 .quick-add-product-modal__field--span {

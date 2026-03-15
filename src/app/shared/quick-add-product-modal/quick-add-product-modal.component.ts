@@ -3,6 +3,7 @@ import {
   Component,
   inject,
   signal,
+  computed,
   viewChild,
   effect,
   ElementRef,
@@ -19,11 +20,12 @@ import { UserMsgService } from '@services/user-msg.service';
 import { AddItemModalService } from '@services/add-item-modal.service';
 import { Product } from '@models/product.model';
 import { take } from 'rxjs/operators';
+import { CustomSelectComponent } from '../custom-select/custom-select.component';
 
 @Component({
   selector: 'app-quick-add-product-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, CustomSelectComponent],
   templateUrl: './quick-add-product-modal.component.html',
   styleUrl: './quick-add-product-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,18 +52,31 @@ export class QuickAddProductModalComponent {
   protected expiryDays_ = signal(0);
   protected isSubmitting_ = signal(false);
 
-  protected baseUnitRef = viewChild<ElementRef<HTMLSelectElement>>('baseUnitEl');
+  protected baseUnitRef = viewChild<ElementRef<HTMLElement>>('baseUnitSelect');
   protected buyPriceRef = viewChild<ElementRef<HTMLInputElement>>('buyPriceEl');
-  protected categoryRef = viewChild<ElementRef<HTMLSelectElement>>('categoryEl');
+  protected categoryRef = viewChild<ElementRef<HTMLElement>>('categorySelect');
   protected yieldFactorRef = viewChild<ElementRef<HTMLInputElement>>('yieldFactorEl');
   protected saveBtnRef = viewChild<ElementRef<HTMLButtonElement>>('saveBtnEl');
-
-  /** True when user is navigating select options with Arrow Up/Down; Enter or mouse commit then advances. */
-  private selectNavigatingWithArrow_ = false;
 
   protected unitKeys_ = this.unitRegistry.allUnitKeys_;
   protected categories_ = this.metadataRegistry.allCategories_;
   protected allergens_ = this.metadataRegistry.allAllergens_;
+
+  protected baseUnitOptions_ = computed(() => {
+    const keys = this.unitKeys_();
+    return [
+      ...keys.map((k) => ({ value: k, label: k })),
+      { value: '__add_unit__', label: 'add_new_unit' },
+    ];
+  });
+
+  protected categoryOptions_ = computed(() => {
+    const cats = this.categories_();
+    return [
+      ...cats.map((c) => ({ value: c, label: c })),
+      { value: '__add_category__', label: 'add_new_category' },
+    ];
+  });
 
   constructor() {
     effect(() => {
@@ -97,12 +112,8 @@ export class QuickAddProductModalComponent {
     (el as HTMLElement)?.focus();
   }
 
-  /** On select: advance only if user committed with mouse (not Arrow keys). Enter commits and we advance in keydown. */
+  /** After select change: advance focus to next field. */
   protected onSelectChange(nextTarget: HTMLElement | null): void {
-    if (this.selectNavigatingWithArrow_) {
-      this.selectNavigatingWithArrow_ = false;
-      return;
-    }
     this.advanceFocus(nextTarget);
   }
 
@@ -129,40 +140,15 @@ export class QuickAddProductModalComponent {
 
   protected onBaseUnitChange(val: string): void {
     if (val === '__add_unit__') {
-      this.baseUnit_.set(''); // Reset to placeholder
+      this.baseUnit_.set('');
       this.unitRegistry.openUnitCreator();
-      const sub = this.unitRegistry.unitAdded$.pipe(take(1)).subscribe(newUnit => {
+      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
         this.baseUnit_.set(newUnit);
         this.onSelectChange(this.getNextFocusAfterBaseUnit());
       });
     } else {
       this.baseUnit_.set(val);
       this.onSelectChange(this.getNextFocusAfterBaseUnit());
-    }
-  }
-
-  /** Arrow Up/Down: mark as navigating so (change) does not advance. Enter: commit and advance. */
-  protected onBaseUnitKeydown(e: KeyboardEvent): void {
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      this.selectNavigatingWithArrow_ = true;
-      return;
-    }
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      this.selectNavigatingWithArrow_ = false;
-      this.advanceFocus(this.getNextFocusAfterBaseUnit());
-    }
-  }
-
-  protected onCategoryKeydown(e: KeyboardEvent): void {
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      this.selectNavigatingWithArrow_ = true;
-      return;
-    }
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      this.selectNavigatingWithArrow_ = false;
-      this.advanceFocus(this.getNextFocusAfterCategory());
     }
   }
 

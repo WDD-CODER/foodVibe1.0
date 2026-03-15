@@ -1,36 +1,60 @@
 <div class="custom-select-wrap" [class.open]="open()" (clickOutside)="close()">
-  <button
-    #triggerRef
-    type="button"
-    [id]="triggerId()"
-    class="c-select custom-select-trigger"
-    [class.open]="open()"
-    [disabled]="disabled"
-    (click)="onTriggerClick()"
-    (blur)="onTriggerBlur()"
-    [attr.aria-expanded]="open()"
-    aria-haspopup="listbox"
-    [attr.aria-label]="placeholder()">
-    <span class="custom-select-label">
-      @if (selectedLabel()) {
-        @if (translateLabels()) {
-          {{ selectedLabel() | translatePipe }}
+  @if (typeToFilter()) {
+    <div class="custom-select-trigger custom-select-trigger--input"
+      [class.custom-select-trigger--compact]="compact()"
+      [class.open]="open()"
+      (click)="inputRef?.focus()">
+      <input #inputRef
+        type="text"
+        [id]="triggerId()"
+        class="custom-select-input form-input--no-focus-ring"
+        [value]="inputDisplayValue_()"
+        (input)="onInputInput($any($event.target).value)"
+        (focus)="openDropdown()"
+        (blur)="onTriggerBlur()"
+        (keydown)="onInputKeydown($event)"
+        [attr.aria-expanded]="open()"
+        aria-haspopup="listbox"
+        [attr.aria-label]="placeholder() | translatePipe"
+        [placeholder]="placeholder() | translatePipe" />
+      <lucide-icon name="chevron-down" [size]="14"></lucide-icon>
+    </div>
+  } @else {
+    <button
+      #triggerRef
+      type="button"
+      [id]="triggerId()"
+      class="c-select custom-select-trigger"
+      [class.custom-select-trigger--compact]="compact()"
+      [class.open]="open()"
+      [disabled]="disabled"
+      (click)="onTriggerClick()"
+      (blur)="onTriggerBlur()"
+      [attr.aria-expanded]="open()"
+      aria-haspopup="listbox"
+      [attr.aria-label]="placeholder()">
+      <span class="custom-select-label">
+        @if (selectedLabel()) {
+          @if (translateLabels()) {
+            {{ selectedLabel() | translatePipe }}
+          } @else {
+            {{ selectedLabel() }}
+          }
         } @else {
-          {{ selectedLabel() }}
+          {{ placeholder() | translatePipe }}
         }
-      } @else {
-        {{ placeholder() | translatePipe }}
-      }
-    </span>
-    <lucide-icon name="chevron-down" [size]="14"></lucide-icon>
-  </button>
+      </span>
+      <lucide-icon name="chevron-down" [size]="14"></lucide-icon>
+    </button>
+  }
 
   @if (open()) {
-    <app-scrollable-dropdown [maxHeight]="maxHeight()">
-      @for (opt of options(); track opt.value; let i = $index) {
+    <app-scrollable-dropdown [maxHeight]="maxHeight()" [attr.aria-activedescendant]="typeToFilter() && highlightedIndex() >= 0 ? triggerId() + '-opt-' + highlightedIndex() : null">
+      @for (opt of (typeToFilter() ? filteredOptions_() : options()); track opt.value; let i = $index) {
         <button
           type="button"
           class="custom-select-option"
+          [id]="triggerId() ? triggerId() + '-opt-' + i : null"
           [class.highlighted]="highlightedIndex() === i"
           role="option"
           [attr.aria-selected]="value === opt.value"

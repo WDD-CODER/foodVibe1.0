@@ -6,7 +6,8 @@ import {
   computed,
   HostListener,
   ViewChild,
-  ElementRef
+  ElementRef,
+  inject
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -14,6 +15,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { ClickOutSideDirective } from '../../core/directives/click-out-side';
 import { ScrollableDropdownComponent } from '../scrollable-dropdown/scrollable-dropdown.component';
 import { LucideAngularModule } from 'lucide-angular';
+import { TranslationService } from '../../core/services/translation.service';
 
 @Component({
   selector: 'app-custom-select',
@@ -37,8 +39,12 @@ export class CustomSelectComponent implements ControlValueAccessor {
   placeholder = input<string>('');
   maxHeight = input<number>(240);
   translateLabels = input<boolean>(true);
+  /** When true, trigger is an input and options are filtered by typing ("starts with" + script). Default false to preserve existing layout. */
+  typeToFilter = input<boolean>(false);
   /** Optional id for the trigger (e.g. for focus management). */
   triggerId = input<string>('');
+  /** When true, use compact sizing to match native select in dense forms (e.g. quick-add modal). */
+  compact = input<boolean>(false);
 
   valueChange = output<string>();
 
@@ -46,17 +52,24 @@ export class CustomSelectComponent implements ControlValueAccessor {
   private _onChange: (value: string) => void = () => {};
   private _onTouched: () => void = () => {};
   private _disabled = signal(false);
+  private readonly translationService = inject(TranslationService);
 
   @ViewChild('triggerRef') protected triggerRef?: ElementRef<HTMLButtonElement>;
+  @ViewChild('inputRef') protected inputRef?: ElementRef<HTMLInputElement>;
 
   protected open = signal(false);
   protected highlightedIndex = signal(-1);
+  protected searchQuery_ = signal('');
   private closeTimeout: ReturnType<typeof setTimeout> | null = null;
 
   /** When host receives programmatic focus (e.g. from FocusByRowDirective), forward to trigger. */
   @HostListener('focus')
   protected onHostFocus(): void {
-    this.triggerRef?.nativeElement?.focus();
+    if (this.typeToFilter()) {
+      this.inputRef?.nativeElement?.focus();
+    } else {
+      this.triggerRef?.nativeElement?.focus();
+    }
   }
 
   protected selectedLabel = computed(() => {
@@ -64,6 +77,31 @@ export class CustomSelectComponent implements ControlValueAccessor {
     const opts = this.options();
     const opt = opts.find((o) => o.value === v);
     return opt ? opt.label : '';
+  });
+
+  /** Options filtered by search: "starts with" + Hebrew vs Latin by script. */
+  protected filteredOptions_ = computed(() => {
+    const raw = this.searchQuery_().trim();
+    const opts = this.options();
+    if (!raw) return opts;
+    const qLower = raw.toLowerCase();
+    const isHebrew = /[\u0590-\u05FF]/.test(raw);
+    const isLatin = /[a-zA-Z]/.test(raw);
+    return opts.filter((opt) => {
+      const display = this.translateLabels() ? this.translationService.translate(opt.label) : opt.label;
+      if (isHebrew) return display.startsWith(raw);
+      if (isLatin) return /[a-zA-Z]/.test(display) && display.toLowerCase().startsWith(qLower);
+      return display.toLowerCase().startsWith(qLower);
+    });
+  });
+
+  /** Input display value: when open show search query, when closed show selected label (translated if needed). */
+  protected inputDisplayValue_ = computed(() => {
+    if (this.open()) return this.searchQuery_();
+    const v = this._value();
+    if (!v) return '';
+    const label = this.selectedLabel();
+    return this.translateLabels() ? this.translationService.translate(label) : label;
   });
 
   writeValue(value: string): void {
@@ -104,7 +142,66 @@ export class CustomSelectComponent implements ControlValueAccessor {
   protected close(): void {
     this.clearCloseTimeout();
     this.open.set(false);
+    if (this.typeToFilter()) this.searchQuery_.set('');
     this._onTouched();
+  }
+
+  protected openDropdown(): void {
+    if (this._disabled()) return;
+    this.clearCloseTimeout();
+    this.open.set(true);
+    this.searchQuery_.set('');
+    const filtered = this.filteredOptions_();
+    this.highlightedIndex.set(filtered.length > 0 ? 0 : -1);
+    setTimeout(() => this.inputRef?.nativeElement?.focus(), 0);
+  }
+
+  protected onInputInput(value: string): void {
+    this.searchQuery_.set(value ?? '');
+    if (!this.open()) {
+      this.open.set(true);
+      const filtered = this.filteredOptions_();
+      this.highlightedIndex.set(filtered.length > 0 ? 0 : -1);
+    } else {
+      const filtered = this.filteredOptions_();
+      this.highlightedIndex.set(filtered.length > 0 ? 0 : -1);
+    }
+  }
+
+  protected onInputKeydown(e: KeyboardEvent): void {
+    if (!this.open()) {
+      if (e.key === 'Escape') return;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        this.openDropdown();
+      }
+      return;
+    }
+    const opts = this.filteredOptions_();
+    let idx = this.highlightedIndex();
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      this.close();
+      this.inputRef?.nativeElement?.blur();
+      return;
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (idx >= 0 && opts[idx]) this.select(opts[idx].value);
+      return;
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      idx = Math.min(idx + 1, opts.length - 1);
+      this.highlightedIndex.set(idx);
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      idx = Math.max(idx - 1, 0);
+      this.highlightedIndex.set(idx);
+      return;
+    }
   }
 
   /** Close after a short delay so option click can run first when focus moves on mousedown. */
@@ -140,6 +237,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
 
   @HostListener('keydown', ['$event'])
   protected onKeydown(e: KeyboardEvent): void {
+    if (this.typeToFilter() && (e.target as HTMLElement)?.tagName === 'INPUT') return;
     if (!this.open()) {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
@@ -147,7 +245,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
       }
       return;
     }
-    const opts = this.options();
+    const opts = this.typeToFilter() ? this.filteredOptions_() : this.options();
     let idx = this.highlightedIndex();
     if (e.key === 'Escape') {
       e.preventDefault();

@@ -28,19 +28,16 @@
             </div>
             <div class="quick-add-product-modal__field">
               <label for="quick-add-base-unit">{{ 'base_unit' | translatePipe }}</label>
-              <select
-                id="quick-add-base-unit"
-                #baseUnitEl
+              <app-custom-select
+                #baseUnitSelect
+                triggerId="quick-add-base-unit"
+                [typeToFilter]="true"
+                [compact]="true"
+                [options]="baseUnitOptions_()"
+                [placeholder]="'choose_unit' | translatePipe"
                 [ngModel]="baseUnit_()"
                 (ngModelChange)="onBaseUnitChange($event)"
-                (keydown)="onBaseUnitKeydown($event)"
-                name="base_unit_">
-                <option value="" disabled>{{ 'choose_unit' | translatePipe }}</option>
-                <option value="__add_unit__">+ {{ 'new_unit' | translatePipe }}</option>
-                @for (key of unitKeys_(); track key) {
-                  <option [value]="key">{{ key | translatePipe }}</option>
-                }
-              </select>
+                name="base_unit_" />
             </div>
             <div class="quick-add-product-modal__field">
               <label for="quick-add-price">{{ 'buy_price' | translatePipe }}</label>
@@ -57,19 +54,16 @@
             </div>
             <div class="quick-add-product-modal__field">
               <label for="quick-add-category">{{ 'category' | translatePipe }}</label>
-              <select
-                id="quick-add-category"
-                #categoryEl
+              <app-custom-select
+                #categorySelect
+                triggerId="quick-add-category"
+                [typeToFilter]="true"
+                [compact]="true"
+                [options]="categoryOptions_()"
+                [placeholder]="'choose_category' | translatePipe"
                 [ngModel]="category_()"
                 (ngModelChange)="onCategoryChange($event)"
-                (keydown)="onCategoryKeydown($event)"
-                name="category_">
-                <option value="">{{ 'choose_category' | translatePipe }}</option>
-                <option value="__add_category__">+ {{ 'new_category' | translatePipe }}</option>
-                @for (cat of categories_(); track cat) {
-                  <option [value]="cat">{{ cat | translatePipe }}</option>
-                }
-              </select>
+                name="category_" />
             </div>
           </div>
         </section>
