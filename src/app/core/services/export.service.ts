@@ -8,6 +8,7 @@ import { KitchenStateService } from './kitchen-state.service';
 import { MenuIntelligenceService } from './menu-intelligence.service';
 import { ScalingService } from './scaling.service';
 import { RecipeCostService } from './recipe-cost.service';
+import { TranslationService } from './translation.service';
 import type { ScaledPrepRow } from './scaling.service';
 import {
   sanitizeFileName,
@@ -30,6 +31,12 @@ export class ExportService {
   private readonly menuIntelligence_ = inject(MenuIntelligenceService);
   private readonly scaling_ = inject(ScalingService);
   private readonly recipeCost_ = inject(RecipeCostService);
+  private readonly translation_ = inject(TranslationService);
+
+  /** Translate preparation category for export (Hebrew label when in dictionary). */
+  private heCategory(cat: string | undefined): string {
+    return this.translation_.translate(cat ?? '');
+  }
 
   /** Download workbook as .xlsx file. */
   private async downloadWorkbook(wb: Workbook, fileName: string): Promise<void> {
@@ -294,7 +301,7 @@ export class ExportService {
     this.styleHeaderRow(ws, 2);
     let rowNum = 3;
     sortedPrep.forEach(pr => {
-      ws.addRow([pr.name, pr.category_name ?? '', roundExportNumber(pr.amount), heUnit(pr.unit)]);
+      ws.addRow([pr.name, this.heCategory(pr.category_name), roundExportNumber(pr.amount), heUnit(pr.unit)]);
       this.styleDataRow(ws, rowNum++);
     });
     ws.getColumn(1).width = 28;
@@ -425,7 +432,7 @@ export class ExportService {
     });
     const rows: (string | number)[][] = sortedPrep.map(pr => [
       pr.name,
-      pr.category_name ?? '',
+      this.heCategory(pr.category_name),
       roundExportNumber(pr.amount),
       heUnit(pr.unit)
     ]);
@@ -833,7 +840,7 @@ export class ExportService {
           });
           const rows: (string | number)[][] = sortedPrep.map(pr => [
             pr.name,
-            pr.category_name ?? '',
+            this.heCategory(pr.category_name),
             roundExportNumber(pr.amount),
             heUnit(pr.unit)
           ]);
@@ -892,7 +899,7 @@ export class ExportService {
         return (a.name ?? '').localeCompare(b.name ?? '', 'he');
       });
       items.forEach(it => {
-        if (isByStation) accRows.push([it.categoryName ?? '', it.name, roundExportNumber(it.amount), heUnit(it.unit)]);
+        if (isByStation) accRows.push([this.heCategory(it.categoryName), it.name, roundExportNumber(it.amount), heUnit(it.unit)]);
         else accRows.push([it.name, roundExportNumber(it.amount), heUnit(it.unit)]);
       });
     }
@@ -944,7 +951,7 @@ export class ExportService {
           ws.addRow([heHeader('prep_item'), heHeader('category'), heHeader('quantity'), heHeader('unit')]);
           this.styleExcelColumnHeader(ws, rowNum++, numCols);
           sortedPrep.forEach(pr => {
-            ws.addRow([pr.name, pr.category_name ?? '', roundExportNumber(pr.amount), heUnit(pr.unit)]);
+            ws.addRow([pr.name, this.heCategory(pr.category_name), roundExportNumber(pr.amount), heUnit(pr.unit)]);
             this.styleExcelDataRowBorders(ws, rowNum++, numCols);
           });
           ws.addRow([]);
@@ -1014,7 +1021,7 @@ export class ExportService {
         });
         items.forEach(it => {
           const dataRow = isByStation
-            ? [it.categoryName ?? '', it.name, roundExportNumber(it.amount), heUnit(it.unit)]
+            ? [this.heCategory(it.categoryName), it.name, roundExportNumber(it.amount), heUnit(it.unit)]
             : [it.name, roundExportNumber(it.amount), heUnit(it.unit)];
           wsAcc.addRow(dataRow);
           this.styleExcelDataRowBorders(wsAcc, rowNumAcc, numCols);
@@ -1175,7 +1182,7 @@ export class ExportService {
           ws.addRow([heHeader('prep_item'), heHeader('category'), heHeader('quantity'), heHeader('unit')]);
           this.styleExcelColumnHeader(ws, rowNum++, numCols);
           prepRows.forEach(pr => {
-            ws.addRow([pr.name, pr.category_name ?? '', roundExportNumber(pr.amount), heUnit(pr.unit)]);
+            ws.addRow([pr.name, this.heCategory(pr.category_name), roundExportNumber(pr.amount), heUnit(pr.unit)]);
             this.styleExcelDataRowBorders(ws, rowNum++, numCols);
           });
           ws.addRow([]);
@@ -1239,7 +1246,7 @@ export class ExportService {
         });
         items.forEach(it => {
           const dataRow = isByStation
-            ? [it.categoryName ?? '', it.name, roundExportNumber(it.amount), heUnit(it.unit)]
+            ? [this.heCategory(it.categoryName), it.name, roundExportNumber(it.amount), heUnit(it.unit)]
             : [it.name, roundExportNumber(it.amount), heUnit(it.unit)];
           wsAcc.addRow(dataRow);
           this.styleExcelDataRowBorders(wsAcc, r, numColsAcc);

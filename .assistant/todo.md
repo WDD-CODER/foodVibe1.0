@@ -13,6 +13,22 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 165 — Maison Plus row style (`plans/165-maison-plus-row-style.plan.md`)
+- [x] Add --space-sm to src/styles.scss :root (optional; or use component token)
+- [x] Update recipe-workflow .prep-grid-row: border var(--border-row), padding var(--space-sm), hover var(--bg-glass-hover)
+- [x] Update mobile override: padding var(--space-sm); ensure border/hover (inherit or explicit)
+- [x] Verify ng build and manual check desktop/mobile
+
+### Plan 165 — Global-specific modal behavior and size (`plans/165-global-specific-modal-behavior-and-size.plan.md`)
+- [x] Propagate category change to all dishes that reference the preparation with the old category; wire into recipe-workflow when user chooses "change globally"
+- [x] Add optional main_category_name to FlatPrepItem; persist and restore in recipe-builder and cook-view so "only for this recipe" survives reload
+- [x] Size global-specific modal to content (remove --fluid)
+
+### Plan 166 — Preparation category chip translation (`plans/166-preparation-category-chip-translation.plan.md`)
+- [x] preparation-search: add translatePipe to category header and category pill
+- [x] export.service: inject TranslationService; heCategory(); use for all prep/checklist category columns
+- [x] dictionary.json: add missing preparation_categories (e.g. knife_work)
+
 ### Plan 164 — Custom select preserve text on focus (`plans/164-custom-select-preserve-text-on-focus.plan.md`)
 - [x] openDropdown(): set searchQuery_ to current selection label (translated if needed) instead of clearing; set highlightedIndex from current value in filtered list
 
@@ -1051,6 +1067,7 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 150 | Secondary units in ingredient dropdown | Active |
 | 163 | toFix audit PRD | Planned |
 | 163-1 | Cook-view ingredient alignment (2.1) | Active |
+| 165 | Maison Plus row style | Done |
 | 164 | Custom select preserve text on focus | Planned |
 | 162 | No-auto-test agent rule | Active |
 | 160 | Global user message queue | Active |

@@ -4,6 +4,7 @@ import { ExportService } from './export.service';
 import { KitchenStateService } from './kitchen-state.service';
 import { ScalingService } from './scaling.service';
 import { RecipeCostService } from './recipe-cost.service';
+import { TranslationService } from './translation.service';
 import { Recipe } from '../models/recipe.model';
 import { Product } from '../models/product.model';
 import { MenuEvent } from '@models/menu-event.model';
@@ -33,6 +34,8 @@ describe('ExportService', () => {
     const costSpy = jasmine.createSpyObj('RecipeCostService', ['getCostForIngredient', 'computeRecipeCost']);
     costSpy.getCostForIngredient.and.returnValue(0);
     costSpy.computeRecipeCost.and.returnValue(0);
+    const translationSpy = jasmine.createSpyObj('TranslationService', ['translate']);
+    translationSpy.translate.and.callFake((k: string) => k ?? '');
 
     TestBed.configureTestingModule({
       providers: [
@@ -40,6 +43,7 @@ describe('ExportService', () => {
         { provide: KitchenStateService, useValue: kitchenSpy },
         { provide: ScalingService, useValue: scalingSpy },
         { provide: RecipeCostService, useValue: costSpy },
+        { provide: TranslationService, useValue: translationSpy },
       ],
     });
     service = TestBed.inject(ExportService);
