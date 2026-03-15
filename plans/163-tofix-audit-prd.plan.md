@@ -30,6 +30,7 @@
 | **App-wide — Category/unit dropdowns** | Audit + “add new” where applicable | 🔲 Partial | quick-add + recipe-ingredients-table + recipe-workflow have `__add_unit__`; add-equipment has add category. Audit product-form, other screens per 081 |
 | **Logistics** | Chips width fit content (no truncation) | ✅ Done | `.logistics-chip-label { width: fit-content; white-space: nowrap }` |
 | | Search dropdown: Arrow Up/Down + Enter | ✅ Done | recipe-builder logistics + custom-select have keyboard nav; plan 159 done for type-to-filter |
+| **Custom select (type-to-filter)** | Do not clear input on focus; preserve current selection label when opening | ✅ Fixed | [plans/164-custom-select-preserve-text-on-focus.plan.md](plans/164-custom-select-preserve-text-on-focus.plan.md): openDropdown() sets searchQuery_ to current label instead of clearing |
 | **Add-item modal (equipment)** | Add new category → open modal immediately; quick save flow | ✅ Partial | add-equipment opens addItemModal on add-new; sets category and stays open. Optional: remove translationKeyModal step when possible |
 | **Labels** | Selectability of existing labels (delete container + recipe builder) | 🔲 Left | Plan 081: delete-label from `allLabels_()`; recipe builder manual selector from registry; “already exists” → offer to select |
 | **Menu-builder / menu-library** | Select options available by keyboard | 🔲 Left | toFix: “select options are not available by keyboard”. Menu-library uses `app-custom-select` without `typeToFilter`; ensure Arrow Up/Down + Enter work when open (custom-select has it; verify focus/trigger) |
@@ -170,6 +171,7 @@ Only items marked **Left**, **Partial**, or **Verify** above are specified below
 - [plans/147-recipe-builder-edit-tofix-items.plan.md](plans/147-recipe-builder-edit-tofix-items.plan.md) — Recipe-builder edit items (done).
 - [plans/148-dashboard-tofix-items.plan.md](plans/148-dashboard-tofix-items.plan.md) — Dashboard items (done).
 - [plans/159-type-to-filter-all-dropdowns.plan.md](plans/159-type-to-filter-all-dropdowns.plan.md) — Type-to-filter and keyboard (done).
+- [plans/164-custom-select-preserve-text-on-focus.plan.md](plans/164-custom-select-preserve-text-on-focus.plan.md) — Custom select type-to-filter: do not clear input on focus; preserve current selection label when opening (fixed).
 - [plans/118-sidebar-close-on-breakpoint.plan.md](plans/118-sidebar-close-on-breakpoint.plan.md) — Sidebar close at 768px (done).
 - [plans/105-persist-sidebar-state.plan.md](plans/105-persist-sidebar-state.plan.md) — Panel state persistence (done).
 

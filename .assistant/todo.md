@@ -13,20 +13,25 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 164 — Custom select preserve text on focus (`plans/164-custom-select-preserve-text-on-focus.plan.md`)
+- [x] openDropdown(): set searchQuery_ to current selection label (translated if needed) instead of clearing; set highlightedIndex from current value in filtered list
+
+### Plan 163-1 — Cook-view ingredient alignment (`plans/163-1-cook-view-ingredient-alignment.plan.md`)
+- [x] Verify alignment in cook-view (view + edit mode); apply min-width to col-amount/col-unit if needed
+- [x] Mark Plan 163 item 2.1 done
+
 ### Plan 163 — toFix audit PRD (`plans/163-tofix-audit-prd.plan.md`)
-- [ ] 2.1 Recipe view: verify align values in ingredient list (cook-view SCSS/html)
+- [x] Recipe header: labels dropdown keyboard nav (focus to dropdown, Arrow Up/Down, Enter, Escape)
+- [x] 2.1 Recipe view: verify align values in ingredient list (cook-view SCSS/html)
 - [ ] 2.2 Recipe builder: verify remove up/down arrows in category title (recipe-workflow)
-- [ ] 2.3 Maison Plus: row style (borders, padding, hover) in recipe-workflow
-- [ ] 2.4 Maison Plus: category before add + focus new row after add
-- [ ] 2.5 App-wide: audit category/unit dropdowns for "add new" where applicable
-- [ ] 2.6 Labels: selectability in delete-label + recipe builder manual selector
-- [ ] 2.7 Menu-library: keyboard (Arrow Up/Down, Enter) on custom-select options
-- [ ] 2.8 unit-creator-modal: full keyboard flow (focus name → quantity → unit; prevent scroll)
-- [ ] 2.9 Dashboard: header alignment/styling
-- [ ] 2.10 Lists: sidebar aligned to list container at 768px (list-shell)
+- [ ] 2.3 App-wide: audit category/unit dropdowns for "add new" where applicable
+- [ ] 2.4 Labels: selectability in delete-label + recipe builder manual selector
+- [ ] 2.5 Menu-library: keyboard (Arrow Up/Down, Enter) on custom-select options
+- [ ] 2.6 unit-creator-modal: full keyboard flow (focus name → quantity → unit; prevent scroll)
+- [ ] 2.7 Lists: sidebar aligned to list container at 768px (list-shell)
 
 ### Plan 162 — No-auto-test agent rule (`plans/162-no-auto-test-agent-rule.plan.md`)
-- [x] agent.md: Replace Step 5 Audit with build-only, no full test suite unless commit or user asks
+- [x] AGENTS.md: Replace Step 5 Audit with build-only, no full test suite unless commit or user asks
 - [x] copilot-instructions.md: Append no-auto-run sentence to Section 3 Services bullet
 - [x] .assistant/todo.md: Update pending spec item to clarify full suite only at commit or on request
 
@@ -184,7 +189,7 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] commit-to-github SKILL.md: add Phase 0 mandate and checklist
 - [x] .cursor/commands/commit-github.md: add explicit Phase 0 step
 - [x] .assistant/copilot-instructions.md: tie commit trigger to Phase 0
-- [x] agent.md: step 7 Phase 0 mandatory; step 5.5 cross-ref
+- [x] AGENTS.md: step 7 Phase 0 mandatory; step 5.5 cross-ref
 - [x] .cursor/rules/git-commit-must-use-skill.mdc: require Phase 0 before Phase 1
 
 ### Plan 138 — Product form header redesign (`plans/138-product-form-header-redesign.plan.md`)
@@ -216,7 +221,7 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] Translation modal: Hebrew always editable (both add-time and generic); focus English key on open; template ref + ViewChild
 - [x] Product form allergen: resolveAllergen first; open modal only when null; then "already on product" check
 - [ ] Other entry points: align with resolve first → modal if needed → already in parameter (metadata-manager, preparation-*, menu-section-categories, add-equipment-modal, recipe-workflow, add-supplier-flow)
-- [x] Agent guides: Section 7.2 + Section 0 trigger 7.1+7.2 in copilot-instructions; one-line pointer in agent.md (one source of truth; no Cursor rule)
+- [x] Agent guides: Section 7.2 + Section 0 trigger 7.1+7.2 in copilot-instructions; one-line pointer in AGENTS.md (one source of truth; no Cursor rule)
 - [x] Guard/dictionary: confirm getValuesNeedingTranslation and guard unchanged
 
 ### Plan 133 — List quick-edit inline (`plans/133-list-quick-edit-inline.plan.md`)
@@ -244,7 +249,7 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] Techdebt: add Phase 7 (Spec coverage) and update report format
 - [x] Commit-to-github: Phase 0 handle spec-coverage items from report
 - [x] Copilot-instructions: Phase 5 remove spec ask; add Section 5.1; Section 3 qualifier
-- [x] agent.md: Audit step — no spec updates here, ref to Section 5.1
+- [x] AGENTS.md: Audit step — no spec updates here, ref to Section 5.1
 
 ### Plan 130 — Numeric precision audit (`plans/130-numeric-precision-audit.plan.md`)
 
@@ -284,7 +289,7 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ### Plan 086 â€” AI Tooling Optimization (`plans/086-ai-tooling-optimization.plan.md`)
 
-- [x] F1: Merge entry points (delete HOW-WE-WORK, reduce AGENTS.md, slim agent.md)
+- [x] F1: Merge entry points (delete HOW-WE-WORK, reduce AGENTS.md, slim AGENTS.md)
 - [x] F3: Refactor copilot-instructions (portable triggers, dedup, fix Section 0)
 - [x] F2: Trim .cursor/rules/*.mdc to 3-line pointers
 - [x] F5: Inline util-standards + serviceLayer; delete skill files
@@ -1045,6 +1050,8 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 145 | Secondary unit dropdown fix | Active |
 | 150 | Secondary units in ingredient dropdown | Active |
 | 163 | toFix audit PRD | Planned |
+| 163-1 | Cook-view ingredient alignment (2.1) | Active |
+| 164 | Custom select preserve text on focus | Planned |
 | 162 | No-auto-test agent rule | Active |
 | 160 | Global user message queue | Active |
 | 159 | Type-to-filter all dropdowns | Active |
