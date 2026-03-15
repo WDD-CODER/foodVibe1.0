@@ -147,7 +147,7 @@
       place-content: center;
     }
 
-    input,
+    input:not(.form-input--no-focus-ring),
     select {
       border: 1px solid var(--border-default);
       border-radius: var(--radius-md);
@@ -453,33 +453,6 @@
     }
   }
 
-  .category-dropdown-search {
-    padding: 0.5rem 0.75rem;
-    border-block-end: 1px solid var(--border-default);
-    background: var(--bg-glass);
-  }
-
-  .category-search-label {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--color-text-muted);
-    margin-block-end: 0.25rem;
-  }
-
-  .category-search-input {
-    width: 100%;
-    padding: 0.4rem 0.5rem;
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-sm);
-    font-size: 0.875rem;
-    outline: none;
-
-    &:focus {
-      border-color: var(--color-success);
-    }
-  }
-
   // Shared Chip/Tag Engine
   .chipe {
     display: inline-flex;
@@ -509,29 +482,39 @@
 
 
   .allergen-container {
-    .allergen-search-box {
+    .allergen-input-box {
       position: relative;
 
-      padding: 0.5rem;
-
-      border: 1px solid var(--border-default);
-      border-radius: 0.5rem;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 0.25rem 0.75rem;
+      min-height: 2.5rem;
       background: white;
 
-      input {
-        width: 100%;
-        margin-block-start: 0.3125rem;
+      .allergen-chips-and-input {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.4rem;
 
-        &.no-chips {
-          margin-top: 0
-        }
+        min-height: 1.5rem;
       }
 
-      &.no-chips {
+      .allergen-type-in-input {
+        flex: 1;
+        min-width: 6rem;
+
+        padding: 0.2rem 0;
         border: none;
-        padding: 0;
+        border-radius: 0;
+        font-size: 0.9rem;
+        outline: none;
+        background: transparent;
       }
 
+      &.no-chips .allergen-chips-and-input {
+        min-height: auto;
+      }
 
       // .allergen-dropdown {
       //   position: absolute;
@@ -640,68 +623,72 @@
 
   .category-input-box {
     position: relative;
-    place-content: center;
+
     border: 1px solid var(--border-strong);
     border-radius: var(--radius-sm);
-    padding: 0.1rem 0.75rem;
-    background: white;
+    padding: 0.25rem 0.75rem;
     min-height: 2.5rem;
+    background: white;
 
-    &:focus-within {
-      border-color: var(--color-success);
-      box-shadow: var(--shadow-focus);
-    }
-
-    .selected-chips {
+    .category-chips-and-input {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.4rem;
       align-items: center;
-      min-height: 1.5rem;
+      gap: 0.4rem;
 
-      .category-placeholder {
-        color: var(--color-text-muted-light);
-        font-size: 0.9rem;
-        cursor: pointer;
-      }
+      min-height: 1.5rem;
     }
 
-    &.no-chips .selected-chips {
+    .category-type-in-input {
+      flex: 1;
+      min-width: 6rem;
+
+      padding: 0.2rem 0;
+      border: none;
+      border-radius: 0;
+      font-size: 0.9rem;
+      outline: none;
+      background: transparent;
+    }
+
+    &.no-chips .category-chips-and-input {
       min-height: auto;
     }
   }
 
   .supplier-input-box {
     position: relative;
+
     border: 1px solid var(--border-strong);
     border-radius: var(--radius-sm);
-    padding: 0.5rem 0.75rem;
-    background: white;
+    padding: 0.25rem 0.75rem;
     min-height: 2.5rem;
+    background: white;
 
-    &:focus-within {
-      border-color: var(--color-success);
-      box-shadow: var(--shadow-focus);
-    }
-
-    .selected-chips {
+    .supplier-chips-and-input {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.4rem;
       align-items: center;
-      min-height: 1.5rem;
+      gap: 0.4rem;
 
-      .supplier-placeholder {
-        color: var(--color-text-muted-light);
-        font-size: 0.9rem;
-        cursor: pointer;
-      }
+      min-height: 1.5rem;
     }
 
-    &.no-chips .selected-chips {
+    .supplier-type-in-input {
+      flex: 1;
+      min-width: 6rem;
+
+      padding: 0.2rem 0;
+      border: none;
+      border-radius: 0;
+      font-size: 0.9rem;
+      outline: none;
+      background: transparent;
+    }
+
+    &.no-chips .supplier-chips-and-input {
       min-height: auto;
     }
-
   }
 
   select[multiple] {
