@@ -13,6 +13,61 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 163 — toFix audit PRD (`plans/163-tofix-audit-prd.plan.md`)
+- [ ] 2.1 Recipe view: verify align values in ingredient list (cook-view SCSS/html)
+- [ ] 2.2 Recipe builder: verify remove up/down arrows in category title (recipe-workflow)
+- [ ] 2.3 Maison Plus: row style (borders, padding, hover) in recipe-workflow
+- [ ] 2.4 Maison Plus: category before add + focus new row after add
+- [ ] 2.5 App-wide: audit category/unit dropdowns for "add new" where applicable
+- [ ] 2.6 Labels: selectability in delete-label + recipe builder manual selector
+- [ ] 2.7 Menu-library: keyboard (Arrow Up/Down, Enter) on custom-select options
+- [ ] 2.8 unit-creator-modal: full keyboard flow (focus name → quantity → unit; prevent scroll)
+- [ ] 2.9 Dashboard: header alignment/styling
+- [ ] 2.10 Lists: sidebar aligned to list container at 768px (list-shell)
+
+### Plan 162 — No-auto-test agent rule (`plans/162-no-auto-test-agent-rule.plan.md`)
+- [x] agent.md: Replace Step 5 Audit with build-only, no full test suite unless commit or user asks
+- [x] copilot-instructions.md: Append no-auto-run sentence to Section 3 Services bullet
+- [x] .assistant/todo.md: Update pending spec item to clarify full suite only at commit or on request
+
+### Plan 161 — Copilot Q&A format refactor (`plans/161-copilot-qa-format-refactor.plan.md`)
+- [x] Replace Section 1.1 with single tight "Q&A format" rule (chat, plans, recommendations)
+- [x] Add minimal Bad vs Good example; require at least one question for new features
+- [x] Align Section 1 Decision Logic to reference Q&A format only
+
+### Plan 160 — Global user message queue (`plans/160-global-user-message-queue.plan.md`)
+- [ ] Refactor UserMsgService to use explicit state (current message, timer, pending queue) instead of concatMap pipeline
+- [ ] Success/warning: when current is success/warning, replace text and reset timer; do not enqueue
+- [ ] Error: interrupt success/warning; when current is error, enqueue so each error shown in order
+- [ ] Add user-msg.service.spec.ts with coalesce and error-priority tests
+
+### Plan 159 — Type-to-filter all dropdowns (`plans/159-type-to-filter-all-dropdowns.plan.md`)
+- [ ] Phase 1: Enhance CustomSelectComponent with typeToFilter (input trigger, filter by "starts with" + script)
+- [ ] Phase 2: Replace native selects in quick-add-product-modal with app-custom-select
+- [ ] Phase 3: Align recipe-builder logistics, ingredient-search, preparation-search, recipe-book-list, menu-intelligence to "starts with" + script
+
+### Plan 158 — List shell multi-select (`plans/158-list-shell-multi-select.plan.md`)
+- [x] Add ListSelectionState with selectAll, allSelected, toggleSelectAll
+- [x] Add ListRowCheckboxComponent (shared)
+- [x] Wire inventory-product-list, venue-list, equipment-list, supplier-list, recipe-book-list: checkbox column, header select-all, row click, bulk actions
+- [x] Add translations clear_selection, remove_selected, select_all
+
+### Plan 157 — Fix sidebar alignment and close on breakpoint (`plans/157-fix-sidebar-alignment-close-breakpoint.plan.md`)
+- [ ] List-shell: remove margin-block and max-height from .filter-panel in 768px block
+- [ ] Inventory list: add afterNextRender + matchMedia to close panel when viewport <= 768px
+
+### Plan 156 — Category single-input type-in (`plans/156-category-single-input-type-in.plan.md`)
+- [x] product-form: restructure category block to chips + single input; remove Filter block from dropdown
+- [x] product-form: focus single input on open/after select; ArrowDown-from-input to list; use categoryInputRef
+- [x] product-form SCSS: remove in-dropdown search styles; style single input in category box
+
+### Plan 155 — List shell and cell expand (`plans/155-list-shell-and-cell-expand.plan.md`)
+- [x] List-shell: add border-radius transition on .table-area to match panel (0.3s var(--ease-spring))
+- [x] List-shell: align small-screen (768px) overlay panel to list container
+- [x] Recipe-book-list: replace single-ID signals with Set-based allergen/labels expanded IDs
+- [x] Recipe-book-list: cell click toggles one row; header click toggles all; outside click closes all
+- [x] Recipe-book-list: reset expanded state when landing on recipe-book (Router.events NavigationEnd)
+
 ### Plan 154 — Floating container and change-popover refactor (`plans/154-floating-container-change-popover.plan.md`)
 - [x] Create FloatingInfoContainer component (shared) with vertical scroll + arrows
 - [x] Create ChangePopover component using FloatingInfoContainer
@@ -826,7 +881,7 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 - [x] Set up Playwright E2E tests: config + 3 critical flow tests (product CRUD, recipe creation with cost, recipe edit persistence).
 - [x] Optionally expand minimal specs (e.g. recipe-builder page and subcomponents) with behavior tests when touching those areas.
 - [x] Sync documentation: update `project-plan.md` checkboxes, update breadcrumbs.
-- [ ] When adding new features: add/update `.spec.ts` and mark related sub-tasks here; run tests before considering the task done.
+- [ ] When adding new features: add/update `.spec.ts` and mark related sub-tasks here; run the full test suite only at commit time (Phase 0) or when the user explicitly asks — not after every iteration.
 
 ### Plan 011 â€” Dashboard & Command Center Unification (done)
 
@@ -989,6 +1044,13 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 144 | Precision-based counter step | Active |
 | 145 | Secondary unit dropdown fix | Active |
 | 150 | Secondary units in ingredient dropdown | Active |
+| 163 | toFix audit PRD | Planned |
+| 162 | No-auto-test agent rule | Active |
+| 160 | Global user message queue | Active |
+| 159 | Type-to-filter all dropdowns | Active |
+| 157 | Fix sidebar alignment and close on breakpoint | Active |
+| 156 | Category single-input type-in | Active |
+| 155 | List shell and cell expand | Active |
 | 153 | Recipe approve stamp button | Active |
 | 152 | Recipe book date filter sidebar | Planned |
 | 151 | Recipe secondary unit conversion | Active |
