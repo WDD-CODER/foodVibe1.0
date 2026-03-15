@@ -58,19 +58,35 @@
 }
 
 .custom-select-trigger--input {
-  cursor: text;
+  position: relative;
+  cursor: pointer;
+
+  &:focus-within {
+    cursor: text;
+  }
 
   .custom-select-input {
-    flex: 1;
-    min-width: 0;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding-inline: inherit;
+    padding-inline-end: 2rem;
+    padding-block: inherit;
 
-    padding: 0;
     border: none;
-    border-radius: 0;
+    border-radius: inherit;
     background: transparent;
     font: inherit;
     color: inherit;
     outline: none;
+  }
+
+  lucide-icon {
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
   }
 }
 
