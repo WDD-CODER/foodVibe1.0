@@ -31,6 +31,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util';
+import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util';
 import { ExportService } from '@services/export.service';
 import { HeroFabService, type HeroFabAction } from '@services/hero-fab.service';
 import type { ExportPayload } from '../../core/utils/export.util';
@@ -669,23 +670,22 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     { initialValue: [] as string[] }
   );
 
-  /** Search options: equipment only (by name_hebrew). */
+  /** Search options: equipment only (by name_hebrew), "starts with" + Hebrew/Latin script. */
   protected logisticsSearchOptions_ = computed((): Equipment[] => {
-    const q = this.logisticsToolSearchQuery_().trim().toLowerCase();
-    if (!q) return [];
+    const raw = this.logisticsToolSearchQuery_().trim();
+    if (!raw) return [];
     const alreadyAdded = new Set(this.logisticsBaselineIds_() ?? []);
-    const allEquipment = this.equipmentData_.allEquipment_();
-    return allEquipment
-      .filter((eq) => !alreadyAdded.has(eq._id) && eq.name_hebrew.toLowerCase().includes(q))
-      .slice()
-      .sort((a, b) => {
-        const aName = a.name_hebrew.toLowerCase();
-        const bName = b.name_hebrew.toLowerCase();
-        const aStarts = aName.startsWith(q) ? 0 : 1;
-        const bStarts = bName.startsWith(q) ? 0 : 1;
-        if (aStarts !== bStarts) return aStarts - bStarts;
-        return aName.indexOf(q) - bName.indexOf(q);
-      });
+    const allEquipment = this.equipmentData_.allEquipment_().filter((eq) => !alreadyAdded.has(eq._id));
+    const filtered = filterOptionsByStartsWith(allEquipment, raw, (eq) => eq.name_hebrew);
+    const qLower = raw.toLowerCase();
+    return filtered.slice().sort((a, b) => {
+      const aName = a.name_hebrew.toLowerCase();
+      const bName = b.name_hebrew.toLowerCase();
+      const aStarts = aName.startsWith(qLower) ? 0 : 1;
+      const bStarts = bName.startsWith(qLower) ? 0 : 1;
+      if (aStarts !== bStarts) return aStarts - bStarts;
+      return aName.indexOf(qLower) - bName.indexOf(qLower);
+    });
   });
 
   protected getEquipmentNameById(id: string): string {

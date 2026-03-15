@@ -21,6 +21,7 @@ import { ExportService } from '@services/export.service';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util';
+import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 import type { ExportPayload } from 'src/app/core/utils/export.util';
@@ -372,10 +373,10 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   });
 
   protected getFilteredEventTypes(): string[] {
-    const q = this.eventTypeSearch_().trim().toLowerCase();
+    const raw = this.eventTypeSearch_().trim();
     const list = this.eventTypeOptions_();
-    if (!q) return list;
-    return list.filter(t => t.toLowerCase().includes(q));
+    if (!raw) return list;
+    return filterOptionsByStartsWith(list, raw, (t) => t);
   }
 
   protected openEventTypeDropdown(): void {
@@ -726,11 +727,10 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected getFilteredRecipes(sectionIndex: number, itemIndex: number): Recipe[] {
-    const query = this.getDishSearchQuery(sectionIndex, itemIndex).trim().toLowerCase();
-    if (!query) return [];
-    return this.recipes_().filter(r =>
-      (r.name_hebrew ?? '').toLowerCase().includes(query)
-    ).slice(0, 12);
+    const raw = this.getDishSearchQuery(sectionIndex, itemIndex).trim();
+    if (!raw) return [];
+    const filtered = filterOptionsByStartsWith(this.recipes_(), raw, (r) => r.name_hebrew ?? '');
+    return filtered.slice(0, 12);
   }
 
   protected selectRecipe(sectionIndex: number, itemIndex: number, recipe: Recipe): void {
@@ -975,9 +975,9 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected getFilteredSectionCategories(index: number): string[] {
-    const query = this.getSectionSearchQuery(index).trim().toLowerCase();
-    if (!query) return this.sectionCategories_();
-    return this.sectionCategories_().filter(c => c.toLowerCase().includes(query));
+    const raw = this.getSectionSearchQuery(index).trim();
+    if (!raw) return this.sectionCategories_();
+    return filterOptionsByStartsWith(this.sectionCategories_(), raw, (c) => c);
   }
 
   protected selectSectionCategory(index: number, category: string): void {

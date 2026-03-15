@@ -5,6 +5,7 @@ import { KitchenStateService } from '@services/kitchen-state.service';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
+import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util';
 import { QuickAddProductModalService } from '@services/quick-add-product-modal.service';
 import type { Product } from '@models/product.model';
 import type { Recipe } from '@models/recipe.model';
@@ -74,10 +75,10 @@ export class IngredientSearchComponent {
     this.searchInputRef()?.nativeElement?.focus();
   }
 
-  // Combine products and recipes for a unified search; exclude ingredients already in the recipe
+  // Combine products and recipes; exclude ingredients already in the recipe; filter by "starts with" + script
   protected filteredResults_ = computed(() => {
-    const query = (this.searchQuery_() ?? '').trim().toLowerCase();
-    if (!query) return [];
+    const raw = (this.searchQuery_() ?? '').trim();
+    if (!raw) return [];
 
     const excludeSet = new Set(
       (this.excludeNames() ?? []).map(n => (n ?? '').trim().toLowerCase()).filter(Boolean)
@@ -85,12 +86,10 @@ export class IngredientSearchComponent {
 
     const products = this.state.products_().map(p => ({ ...p, item_type_: 'product' as const }));
     const recipes = this.state.recipes_().map(r => ({ ...r, item_type_: 'recipe' as const }));
-
-    return [...products, ...recipes].filter(item => {
-      const name = (item.name_hebrew ?? '').trim().toLowerCase();
-      if (excludeSet.has(name)) return false;
-      return name.includes(query);
-    });
+    const candidates = [...products, ...recipes].filter(
+      (item) => !excludeSet.has((item.name_hebrew ?? '').trim().toLowerCase())
+    );
+    return filterOptionsByStartsWith(candidates, raw, (item) => (item.name_hebrew ?? '').trim());
   });
 
   selectItem(item: SearchableItem) {

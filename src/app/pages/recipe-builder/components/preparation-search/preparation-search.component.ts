@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { PreparationRegistryService, type PreparationEntry } from '@services/preparation-registry.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
 
@@ -52,11 +53,11 @@ export class PreparationSearchComponent {
   }
 
   protected filteredResults_ = computed(() => {
-    const query = this.searchQuery_().toLowerCase().trim()
-    if (query.length < 2) return []
+    const raw = this.searchQuery_().trim()
+    if (raw.length < 2) return []
 
     const preps = this.prepRegistry.allPreparations_()
-    return preps.filter(p => p.name.toLowerCase().includes(query))
+    return filterOptionsByStartsWith(preps, raw, (p) => p.name)
   })
 
   protected groupedResults_ = computed(() => {
