@@ -17,6 +17,8 @@ import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/share
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
+import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state';
+import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component';
 import { useListState, StringParam, NullableBooleanParam, StringSetParam } from 'src/app/core/utils/list-state.util';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 import { HeroFabService } from '@services/hero-fab.service';
@@ -26,7 +28,7 @@ type SortField = 'name' | 'category' | 'owned';
 @Component({
   selector: 'app-equipment-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective, CustomSelectComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective, CustomSelectComponent, ListRowCheckboxComponent],
   templateUrl: './equipment-list.component.html',
   styleUrl: './equipment-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -98,6 +100,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   protected deletingId_ = signal<string | null>(null);
   protected sortOrder_ = signal<'asc' | 'desc'>('asc');
   protected editingId_ = signal<string | null>(null);
+  protected selection = new ListSelectionState();
   protected isSavingEdit_ = signal(false);
   protected editForm_!: FormGroup;
 
@@ -137,6 +140,11 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     });
     return list;
   });
+
+  /** Visible equipment IDs for header select-all. */
+  protected filteredEquipmentIds_ = computed(() =>
+    this.filteredEquipment_().map(e => e._id ?? '').filter(Boolean)
+  );
 
   protected categories: EquipmentCategory[] = [
     'heat_source',
@@ -214,7 +222,11 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
 
   protected onRowClick(item: Equipment, event: MouseEvent): void {
     const el = event.target as HTMLElement;
-    if (el.closest('button') || el.closest('a') || el.closest('.inline-edit-panel')) return;
+    if (el.closest('button') || el.closest('a') || el.closest('.inline-edit-panel') || el.closest('app-list-row-checkbox')) return;
+    if (this.selection.selectionMode()) {
+      this.selection.toggle(item._id ?? '');
+      return;
+    }
     if (this.editingId_() === item._id) {
       this.editingId_.set(null);
       return;
@@ -307,5 +319,23 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     } finally {
       this.deletingId_.set(null);
     }
+  }
+
+  protected async onBulkDeleteSelected(): Promise<void> {
+    const ids = Array.from(this.selection.selectedIds());
+    if (ids.length === 0) return;
+    if (!this.requireAuthService.requireAuth()) return;
+    if (!confirm(`למחוק ${ids.length} פריטי ציוד?`)) return;
+    for (const id of ids) {
+      this.deletingId_.set(id);
+      try {
+        await this.equipmentData.deleteEquipment(id);
+      } catch (e) {
+        this.logging.error({ event: 'equipment.list_error', message: 'Equipment list error', context: { err: e } });
+      } finally {
+        this.deletingId_.set(null);
+      }
+    }
+    this.selection.clear();
   }
 }

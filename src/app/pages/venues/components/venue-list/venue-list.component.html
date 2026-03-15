@@ -1,8 +1,8 @@
 <app-list-shell
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
-  [gridTemplate]="'2fr 1fr 0.8fr 80px'"
-  [mobileGridTemplate]="'2fr 1fr 80px'"
+  [gridTemplate]="'2fr 1fr 0.8fr 80px minmax(44px, auto)'"
+  [mobileGridTemplate]="'2fr 1fr 80px minmax(44px, auto)'"
   [dir]="'rtl'">
 
   <h2 shell-title class="page-title">{{ 'venue_list' | translatePipe }}</h2>
@@ -21,11 +21,17 @@
     </div>
   </ng-container>
 
-  <button shell-actions type="button" class="c-btn-primary" (click)="onAddPlace()"
-    [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
-    <lucide-icon name="plus" [size]="18"></lucide-icon>
-    {{ 'add_venue' | translatePipe }}
-  </button>
+  <ng-container shell-actions>
+    @if (selection.selectionMode()) {
+      <button type="button" class="c-btn-ghost" (click)="selection.clear()">{{ 'clear_selection' | translatePipe }}</button>
+      <button type="button" class="c-btn-ghost danger" (click)="onBulkDeleteSelected()">{{ 'remove_selected' | translatePipe }}</button>
+    }
+    <button type="button" class="c-btn-primary" (click)="onAddPlace()"
+      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+      <lucide-icon name="plus" [size]="18"></lucide-icon>
+      {{ 'add_venue' | translatePipe }}
+    </button>
+  </ng-container>
 
   <ng-container shell-table-header>
     <div class="col-name c-grid-header-cell" role="columnheader">{{ 'name' | translatePipe }}</div>
@@ -34,6 +40,9 @@
       <div class="col-infra c-grid-header-cell" carouselHeaderColumn label="infrastructure_items" role="presentation">{{ 'infrastructure_items' | translatePipe }}</div>
     </app-carousel-header>
     <div class="c-col-actions c-grid-header-cell" role="columnheader">{{ 'actions' | translatePipe }}</div>
+    <div class="col-select c-grid-header-cell" role="columnheader">
+      <app-list-row-checkbox [checked]="filteredVenueIds_().length > 0 && selection.allSelected(filteredVenueIds_())" (toggle)="selection.toggleSelectAll(filteredVenueIds_())" />
+    </div>
   </ng-container>
 
   <ng-container shell-table-body>
@@ -65,6 +74,9 @@
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>
             </button>
           }
+        </div>
+        <div class="col-select c-list-body-cell" role="cell">
+          <app-list-row-checkbox [checked]="selection.isSelected(item._id)" (toggle)="selection.toggle(item._id)" />
         </div>
       </div>
     }

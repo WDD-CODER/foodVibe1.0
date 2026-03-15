@@ -15,6 +15,8 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
+import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state';
+import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component';
 import { useListState, StringParam, StringSetParam } from 'src/app/core/utils/list-state.util';
 import { HeroFabService } from '@services/hero-fab.service';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
@@ -40,6 +42,7 @@ const ENV_TYPES: EnvironmentType[] = [
     CarouselHeaderColumnDirective,
     CellCarouselComponent,
     CellCarouselSlideDirective,
+    ListRowCheckboxComponent,
   ],
   templateUrl: './venue-list.component.html',
   styleUrl: './venue-list.component.scss',
@@ -65,6 +68,7 @@ export class VenueListComponent implements OnInit, OnDestroy {
   protected isPanelOpen_ = signal(true);
   protected carouselHeaderIndex_ = signal(0);
   protected selectedEnvTypes_ = signal<Set<EnvironmentType>>(new Set());
+  protected selection = new ListSelectionState();
 
   protected envTypes = ENV_TYPES;
 
@@ -127,6 +131,11 @@ export class VenueListComponent implements OnInit, OnDestroy {
     this.selectedEnvTypes_.set(new Set());
   }
 
+  /** Visible venue IDs for header select-all. */
+  protected filteredVenueIds_ = computed(() =>
+    this.filteredVenues_().map(v => v._id ?? '').filter(Boolean)
+  );
+
   protected filteredVenues_ = computed(() => {
     let list = this.venueData.allVenues_();
     const search = this.searchQuery_().trim().toLowerCase();
@@ -165,8 +174,32 @@ export class VenueListComponent implements OnInit, OnDestroy {
 
   protected onRowClick(item: VenueProfile, event: MouseEvent): void {
     const el = event.target as HTMLElement;
-    if (el.closest('button') || el.closest('a')) return;
+    if (el.closest('button') || el.closest('a') || el.closest('app-list-row-checkbox')) return;
+    if (this.selection.selectionMode()) {
+      this.selection.toggle(item._id ?? '');
+      return;
+    }
     this.router.navigate(['/venues/edit', item._id]);
+  }
+
+  protected onBulkDeleteSelected(): void {
+    const ids = Array.from(this.selection.selectedIds());
+    if (ids.length === 0) return;
+    if (!this.requireAuthService.requireAuth()) return;
+    if (!confirm(`למחוק ${ids.length} מיקומים?`)) return;
+    (async () => {
+      for (const id of ids) {
+        this.deletingId_.set(id);
+        try {
+          await this.venueData.deleteVenue(id);
+        } catch (e) {
+          this.logging.error({ event: 'venue.list_error', message: 'Venue list error', context: { err: e } });
+        } finally {
+          this.deletingId_.set(null);
+        }
+      }
+      this.selection.clear();
+    })();
   }
 
   async onDelete(item: VenueProfile): Promise<void> {

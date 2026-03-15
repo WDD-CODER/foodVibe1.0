@@ -1,8 +1,8 @@
 <app-list-shell
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
-  [gridTemplate]="hideDateColumn_() ? '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) 80px' : '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) 0.8fr 80px'"
-  [mobileGridTemplate]="'2fr 1fr 0.8fr 80px'">
+  [gridTemplate]="hideDateColumn_() ? '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) 80px minmax(44px, auto)' : '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) 0.8fr 80px minmax(44px, auto)'"
+  [mobileGridTemplate]="'2fr 1fr 0.8fr 80px minmax(44px, auto)'">
 
   <h2 shell-title class="page-title">{{ 'recipe_book' | translatePipe }}</h2>
 
@@ -15,11 +15,17 @@
     </div>
   </ng-container>
 
-  <button shell-actions type="button" class="c-btn-primary" (click)="onAddRecipe()"
-    [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
-    <lucide-icon name="plus" [size]="18"></lucide-icon>
-    {{ 'add_recipe_dish' | translatePipe }}
-  </button>
+  <ng-container shell-actions>
+    @if (selection.selectionMode()) {
+      <button type="button" class="c-btn-ghost" (click)="selection.clear()">{{ 'clear_selection' | translatePipe }}</button>
+      <button type="button" class="c-btn-ghost danger" (click)="onBulkDeleteSelected()">{{ 'remove_selected' | translatePipe }}</button>
+    }
+    <button type="button" class="c-btn-primary" (click)="onAddRecipe()"
+      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+      <lucide-icon name="plus" [size]="18"></lucide-icon>
+      {{ 'add_recipe_dish' | translatePipe }}
+    </button>
+  </ng-container>
 
   <ng-container shell-table-header>
     <div class="col-name c-grid-header-cell c-sortable-header" (click)="setSort('name')" (keydown.enter)="setSort('name')" (keydown.space)="$event.preventDefault(); setSort('name')" role="button" tabindex="0">
@@ -45,6 +51,9 @@
       {{ 'cost' | translatePipe }}
     </div>
     <div class="c-col-actions c-grid-header-cell">{{ 'actions' | translatePipe }}</div>
+    <div class="col-select c-grid-header-cell" role="columnheader">
+      <app-list-row-checkbox [checked]="filteredRecipeIds_().length > 0 && selection.allSelected(filteredRecipeIds_())" (toggle)="selection.toggleSelectAll(filteredRecipeIds_())" />
+    </div>
   </ng-container>
 
   <ng-container shell-table-body>
@@ -67,12 +76,12 @@
           <div class="col-type c-list-body-cell" cellCarouselSlide [label]="'type' | translatePipe">{{ (isRecipeDish(recipe) ? 'dish' : 'preparation') | translatePipe }}</div>
           <div class="col-labels c-list-body-cell c-dense-chip-col" cellCarouselSlide [label]="'labels' | translatePipe">
             @if (getAllRecipeLabels(recipe).length) {
-              <div class="labels-btn-wrapper" [class.labels-expanded-open]="labelsExpandAll_() || labelsPopoverRecipeId_() === recipe._id" (click)="toggleLabelsPopover(recipe._id); $event.stopPropagation()" (clickOutside)="closeLabelsView($event)" role="button" tabindex="0" (keydown.enter)="toggleLabelsPopover(recipe._id)" (keydown.space)="$event.preventDefault(); toggleLabelsPopover(recipe._id)">
+              <div class="labels-btn-wrapper" [class.labels-expanded-open]="isLabelsCellExpanded(recipe._id)" (click)="toggleLabelsPopover(recipe._id); $event.stopPropagation()" (clickOutside)="closeLabelsView($event)" role="button" tabindex="0" (keydown.enter)="toggleLabelsPopover(recipe._id)" (keydown.space)="$event.preventDefault(); toggleLabelsPopover(recipe._id)">
                 <button type="button" class="labels-btn">
                   <lucide-icon name="tag" [size]="16"></lucide-icon>
                   {{ getAllRecipeLabels(recipe).length }}
                 </button>
-                @if (labelsExpandAll_() || labelsPopoverRecipeId_() === recipe._id) {
+                @if (isLabelsCellExpanded(recipe._id)) {
                   <div class="c-dense-chip-grid">
                     @for (label of getAllRecipeLabels(recipe); track label) {
                       <span class="label-chip" [style.background-color]="getLabelColor(label)">{{ label | translatePipe }}</span>
@@ -86,12 +95,12 @@
           </div>
           <div class="col-allergens c-list-body-cell c-dense-chip-col" cellCarouselSlide [label]="'allergens' | translatePipe">
             @if (getRecipeAllergens(recipe).length) {
-              <div class="allergen-btn-wrapper" [class.allergen-expanded-open]="allergenExpandAll_() || allergenPopoverRecipeId_() === recipe._id" (clickOutside)="closeAllergenView($event)">
+              <div class="allergen-btn-wrapper" [class.allergen-expanded-open]="isAllergenCellExpanded(recipe._id)" (clickOutside)="closeAllergenView($event)">
                 <button type="button" class="allergen-btn" (click)="toggleAllergenPopover(recipe._id)">
                   <lucide-icon name="shield-alert" [size]="16"></lucide-icon>
                   {{ getRecipeAllergens(recipe).length }}
                 </button>
-                @if (allergenExpandAll_() || allergenPopoverRecipeId_() === recipe._id) {
+                @if (isAllergenCellExpanded(recipe._id)) {
                   <div class="c-dense-chip-grid">
                     @for (a of getRecipeAllergens(recipe); track a) {
                       <span class="allergen-pill">{{ a | translatePipe }}</span>
@@ -127,6 +136,9 @@
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>
             </button>
           }
+        </div>
+        <div class="col-select c-list-body-cell" role="cell">
+          <app-list-row-checkbox [checked]="selection.isSelected(recipe._id ?? '')" (toggle)="selection.toggle(recipe._id ?? '')" />
         </div>
       </div>
     }
