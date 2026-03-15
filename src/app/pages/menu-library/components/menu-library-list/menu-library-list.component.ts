@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { MenuEventDataService } from '@services/menu-event-data.service';
+import { MenuIntelligenceService } from '@services/menu-intelligence.service';
 import { MenuEvent, ServingType } from '@models/menu-event.model';
 import { ConfirmModalService } from '@services/confirm-modal.service';
 import { UserService } from '@services/user.service';
@@ -28,6 +29,7 @@ export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count';
 export class MenuLibraryListComponent {
   private readonly router = inject(Router);
   private readonly menuEventData = inject(MenuEventDataService);
+  private readonly menuIntelligence = inject(MenuIntelligenceService);
   private readonly confirmModal = inject(ConfirmModalService);
   protected readonly isLoggedIn = inject(UserService).isLoggedIn;
   private readonly userMsg = inject(UserMsgService);
@@ -114,6 +116,11 @@ export class MenuLibraryListComponent {
     return events;
   });
 
+  private getFoodCostPctForSort(event: MenuEvent): number {
+    const hydrated = this.menuIntelligence.hydrateDerivedPortions(event);
+    return this.menuIntelligence.computeFoodCostPctFromActualRevenue(hydrated);
+  }
+
   private compareEvents(a: MenuEvent, b: MenuEvent, field: SortField): number {
     switch (field) {
       case 'name':
@@ -121,7 +128,7 @@ export class MenuLibraryListComponent {
       case 'date':
         return (a.event_date_ || '').localeCompare(b.event_date_ || '');
       case 'food_cost':
-        return (a.performance_tags_?.food_cost_pct_ ?? 0) - (b.performance_tags_?.food_cost_pct_ ?? 0);
+        return this.getFoodCostPctForSort(a) - this.getFoodCostPctForSort(b);
       case 'guest_count':
         return (a.guest_count_ ?? 0) - (b.guest_count_ ?? 0);
       default:
@@ -171,9 +178,31 @@ export class MenuLibraryListComponent {
     }
   }
 
+  /** Food cost % from actual revenue (same logic as menu-intelligence page). Computed live so card matches detail view. */
   protected getFoodCostPctDisplay(event: MenuEvent): string {
-    const pct = event.performance_tags_?.food_cost_pct_ ?? 0;
+    const hydrated = this.menuIntelligence.hydrateDerivedPortions(event);
+    const pct = this.menuIntelligence.computeFoodCostPctFromActualRevenue(hydrated);
     return `${pct.toFixed(1)}%`;
+  }
+
+  /** Total sale price (revenue): sum of sell_price × derived_portions for all items. */
+  protected getTotalSalePriceDisplay(event: MenuEvent): string {
+    const total = this.computeEventRevenue(event);
+    if (total <= 0) return '—';
+    return `₪${total.toLocaleString('he-IL', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+  }
+
+  private computeEventRevenue(event: MenuEvent): number {
+    let sum = 0;
+    const guestCount = event.guest_count_ ?? 0;
+    (event.sections_ || []).forEach(section => {
+      (section.items_ || []).forEach(item => {
+        const price = item.sell_price_ ?? 0;
+        const portions = item.derived_portions_ ?? guestCount * (item.serving_portions_ ?? 1);
+        sum += price * portions;
+      });
+    });
+    return sum;
   }
 
   protected getGuestCountDisplay(event: MenuEvent): string {

@@ -1173,7 +1173,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     return {
       ...hydrated,
       performance_tags_: {
-        food_cost_pct_: this.menuIntelligence.computeFoodCostPct(hydrated),
+        food_cost_pct_: this.menuIntelligence.computeFoodCostPctFromActualRevenue(hydrated),
         primary_serving_style_: servingType,
       },
     };

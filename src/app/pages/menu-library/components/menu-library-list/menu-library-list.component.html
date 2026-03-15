@@ -70,6 +70,7 @@
         </div>
         <div class="card-tags">
           <span class="tag cost">{{ 'menu_food_cost' | translatePipe }}: {{ getFoodCostPctDisplay(event) }}</span>
+          <span class="tag sale">{{ 'menu_total_revenue' | translatePipe }}: <span class="tag-value" dir="ltr">{{ getTotalSalePriceDisplay(event) }}</span></span>
           <span class="tag guests">{{ 'menu_guests' | translatePipe }} <span class="tag-value" dir="ltr">{{ getGuestCountDisplay(event) }}</span></span>
         </div>
         <div class="card-actions" (click)="$event.stopPropagation()">
