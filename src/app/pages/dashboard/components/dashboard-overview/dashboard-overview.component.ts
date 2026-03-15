@@ -1,30 +1,32 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { UserService } from '@services/user.service';
-import { TranslationService } from '@services/translation.service';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
-import { ActivityLogService, ActivityEntry, ActivityChange } from '@services/activity-log.service';
-import { ClickOutSideDirective } from '@directives/click-out-side';
+import { ActivityLogService, ActivityEntry } from '@services/activity-log.service';
 import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive';
+import { ChangePopoverComponent } from '../../../../shared/change-popover/change-popover.component';
+import type { DashboardTab } from '../../dashboard.page';
 
 @Component({
   selector: 'app-dashboard-overview',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, TranslatePipe, ClickOutSideDirective, ScrollIndicatorsDirective],
+  imports: [CommonModule, LucideAngularModule, TranslatePipe, ScrollIndicatorsDirective, ChangePopoverComponent],
   templateUrl: './dashboard-overview.component.html',
   styleUrl: './dashboard-overview.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardOverviewComponent {
+  readonly activeTab = input.required<DashboardTab>();
+  readonly tabChange = output<DashboardTab>();
+
   private readonly kitchenState = inject(KitchenStateService);
   private readonly router = inject(Router);
   private readonly activityLog = inject(ActivityLogService);
   protected readonly isLoggedIn = inject(UserService).isLoggedIn;
-  private readonly translation = inject(TranslationService);
   protected readonly openChange_ = signal<{
     activityId: string;
     field: string;
@@ -92,10 +94,6 @@ export class DashboardOverviewComponent {
     return this.getRecentActivity().find(e => e.id === open.activityId);
   }
 
-  protected getChange(activity: ActivityEntry, field: string): ActivityChange | undefined {
-    return activity.changes?.find(c => c.field === field);
-  }
-
   /** Close popover when clicking outside; ignore clicks on change tags (they toggle instead). */
   protected closeChangePopoverOnOutsideClick(target: HTMLElement): void {
     if (target.closest?.('.change-tag')) return;
@@ -113,28 +111,12 @@ export class DashboardOverviewComponent {
     changesEl.scrollBy({ left: step, behavior: 'smooth' });
   }
 
-  /** Format change value: translate each comma-separated segment (e.g. categories, allergens). */
-  protected formatChangeValue(value: string | undefined): string {
-    if (value == null || value === '') return '';
-    return value
-      .split(',')
-      .map(s => this.translation.translate(s.trim()))
-      .join(', ');
-  }
-
   protected goToInventory(): void {
     void this.router.navigate(['/inventory']);
   }
 
   protected goToAddProduct(): void {
     void this.router.navigate(['/inventory', 'add']);
-  }
-
-  protected goToRecipeBuilder(type: 'preparation' | 'dish' = 'preparation'): void {
-    void this.router.navigate(['/recipe-builder'], {
-      queryParams: type === 'dish' ? { type: 'dish' } : {},
-      queryParamsHandling: type === 'dish' ? 'merge' : '',
-    });
   }
 
   protected goToRecipeBook(): void {

@@ -1,26 +1,32 @@
 <div class="dashboard-overview" dir="rtl">
   <header class="dashboard-header">
     <h1 class="page-title">{{ 'dashboard' | translatePipe }}</h1>
-    <div class="quick-actions">
-      <button type="button" class="qa-btn" (click)="goToAddProduct()"
+    <div class="header-actions" role="group" aria-label="Dashboard actions">
+      <nav class="header-actions__nav" aria-label="Dashboard sections">
+        <button type="button" class="header-btn" [class.active]="activeTab() === 'overview'" (click)="tabChange.emit('overview')">
+          {{ 'overview' | translatePipe }}
+        </button>
+        <button type="button" class="header-btn" [class.active]="activeTab() === 'metadata'" (click)="tabChange.emit('metadata')">
+          {{ 'core_settings' | translatePipe }}
+        </button>
+        <button type="button" class="header-btn" [class.active]="activeTab() === 'venues'" (click)="tabChange.emit('venues')">
+          <lucide-icon name="map-pin" size="16"></lucide-icon>
+          {{ 'venue_list' | translatePipe }}
+        </button>
+        <button type="button" class="header-btn header-btn--trash" [class.active]="activeTab() === 'trash'" (click)="tabChange.emit('trash')">
+          <lucide-icon name="trash-2" size="16"></lucide-icon>
+          {{ 'trash' | translatePipe }}
+        </button>
+        <button type="button" class="header-btn" (click)="goToAddProduct()"
         [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
-        <lucide-icon name="plus-circle" [size]="18"></lucide-icon>
+        <lucide-icon name="plus-circle" size="16"></lucide-icon>
         <span>{{ 'add_product' | translatePipe }}</span>
       </button>
-      <button type="button" class="qa-btn" (click)="goToRecipeBuilder('preparation')"
-        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
-        <lucide-icon name="file-plus" [size]="18"></lucide-icon>
-        <span>{{ 'new_recipe' | translatePipe }}</span>
-      </button>
-      <button type="button" class="qa-btn" (click)="goToRecipeBuilder('dish')"
-        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
-        <lucide-icon name="utensils" [size]="18"></lucide-icon>
-        <span>{{ 'new_dish' | translatePipe }}</span>
-      </button>
-      <button type="button" class="qa-btn" (click)="goToSuppliers()">
-        <lucide-icon name="truck" [size]="18"></lucide-icon>
+      <button type="button" class="header-btn" (click)="goToSuppliers()">
+        <lucide-icon name="truck" size="16"></lucide-icon>
         <span>{{ 'suppliers' | translatePipe }}</span>
       </button>
+    </nav>
     </div>
   </header>
 
@@ -137,21 +143,9 @@
     </section>
   </main>
 
-  <!-- Fixed popover above all content, positioned under the clicked tag; no backdrop -->
-  <div
-    class="change-popover-fixed"
-    *ngIf="openChange_() as open"
-    [style.top.px]="open.top"
-    [style.left.px]="open.left"
-    (clickOutside)="closeChangePopoverOnOutsideClick($event)"
-  >
-    <ng-container *ngIf="getOpenActivity() as activity" >
-      <div *ngIf="getChange(activity, open.field) as c" class="change-popover">
-        <!-- <span class="change-label">{{ c.label | translatePipe }}</span> -->
-        <span class="change-from">{{ formatChangeValue(c.from) }}</span>
-        <span class="change-arrow">←</span>
-        <span class="change-to">{{ formatChangeValue(c.to) }}</span>
-      </div>
-    </ng-container>
-  </div>
+  <app-change-popover
+    [open]="openChange_()"
+    [activity]="getOpenActivity()"
+    (closeRequest)="closeChangePopoverOnOutsideClick($event)"
+  />
 </div>
