@@ -684,7 +684,7 @@ export class CookViewPage implements OnInit, OnDestroy {
       return recipe.prep_items_.map(p => ({
         preparation_name: p.preparation_name,
         category_name: p.category_name,
-        main_category_name: p.category_name,
+        main_category_name: p.main_category_name ?? p.category_name,
         quantity: p.quantity ?? 1,
         unit: p.unit ?? 'unit'
       }));
@@ -763,14 +763,18 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (isDish) {
       const prepItems: FlatPrepItem[] = (raw || [])
         .filter((r: { preparation_name?: string }) => !!r?.preparation_name?.trim())
-        .map((r: { preparation_name?: string; category_name?: string; quantity?: number | string; unit?: string }) => {
+        .map((r: { preparation_name?: string; category_name?: string; main_category_name?: string; quantity?: number | string; unit?: string }) => {
           const qty = typeof r.quantity === 'number' ? r.quantity : (Number(r.quantity) || 1);
-          return {
+          const item: FlatPrepItem = {
             preparation_name: r.preparation_name ?? '',
             category_name: r.category_name ?? '',
             quantity: qty,
             unit: r.unit ?? 'unit'
           };
+          if (r.main_category_name !== undefined && r.main_category_name !== '') {
+            item.main_category_name = r.main_category_name;
+          }
+          return item;
         });
       const byCategory = new Map<string, { item_name: string; unit: string; quantity?: number }[]>();
       prepItems.forEach(p => {

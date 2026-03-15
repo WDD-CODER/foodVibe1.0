@@ -4,6 +4,8 @@ import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
 import { TranslationKeyModalService, isTranslationKeyResult } from './translation-key-modal.service'
 import { LoggingService } from './logging.service'
+import { DishDataService } from './dish-data.service'
+import type { Recipe, FlatPrepItem, PrepCategory } from '../models/recipe.model'
 
 const STORAGE_KEY = 'KITCHEN_PREPARATIONS'
 
@@ -25,6 +27,7 @@ export class PreparationRegistryService {
   private readonly translationService = inject(TranslationService)
   private readonly translationKeyModal = inject(TranslationKeyModalService)
   private readonly logging = inject(LoggingService)
+  private readonly dishDataService = inject(DishDataService)
 
   private categories_ = signal<string[]>([])
   private preparations_ = signal<PreparationEntry[]>([])
@@ -103,6 +106,58 @@ export class PreparationRegistryService {
     }
   }
 
+  /**
+   * Updates all dishes that contain this preparation with the old category to use the new category.
+   * Only DISH_LIST is updated (per plan 165 recommendation).
+   */
+  private async propagateCategoryToDishes(
+    preparationName: string,
+    oldCategory: string,
+    newCategory: string
+  ): Promise<void> {
+    const nameLower = preparationName.toLowerCase()
+    const dishes = this.dishDataService.allDishes_()
+    for (const dish of dishes) {
+      const items = dish.prep_items_
+      if (!items?.length) continue
+      let changed = false
+      const updatedItems: FlatPrepItem[] = items.map(p => {
+        const match =
+          p.preparation_name.trim().toLowerCase() === nameLower &&
+          (p.category_name?.trim() ?? '') === oldCategory
+        if (!match) return p
+        changed = true
+        return {
+          ...p,
+          category_name: newCategory,
+          ...(p.main_category_name !== undefined && { main_category_name: newCategory })
+        }
+      })
+      if (!changed) continue
+      const byCategory = new Map<string, { item_name: string; unit: string; quantity?: number }[]>()
+      updatedItems.forEach(p => {
+        const list = byCategory.get(p.category_name) ?? []
+        list.push({
+          item_name: p.preparation_name,
+          unit: p.unit,
+          quantity: p.quantity
+        })
+        byCategory.set(p.category_name, list)
+      })
+      const prepCategories: PrepCategory[] = Array.from(byCategory.entries()).map(
+        ([category_name, items]) => ({
+          category_name,
+          items: items.map(it => ({ item_name: it.item_name, unit: it.unit }))
+        })
+      )
+      await this.dishDataService.updateDish({
+        ...dish,
+        prep_items_: updatedItems,
+        prep_categories_: prepCategories
+      })
+    }
+  }
+
   /** Returns the first matching preparation by name (case-insensitive). */
   getPreparationByName(name: string): PreparationEntry | undefined {
     const q = name.trim().toLowerCase()
@@ -142,6 +197,7 @@ export class PreparationRegistryService {
       this.preparations_.set(updated)
 
       if (!options?.silent) {
+        await this.propagateCategoryToDishes(name.trim(), oldCategory.trim(), sanitizedNew)
         const onRevert = options?.onRevert
         const undo = () =>
           this.updatePreparationCategory(name, sanitizedNew, oldCategory, { silent: true }).then(

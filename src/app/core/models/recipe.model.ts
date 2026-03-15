@@ -19,6 +19,8 @@ export interface MiseItem {
 export interface FlatPrepItem {
   preparation_name: string;
   category_name: string;
+  /** When set, global (registry) category; when absent, treat as equal to category_name (backward compatible). */
+  main_category_name?: string;
   quantity: number;
   unit: string;
 }

@@ -1,6 +1,6 @@
 @if (modalService.isOpen()) {
   <div class="c-modal-overlay" (click)="modalService.choose(null)">
-    <div class="c-modal-card c-modal-card--fluid" dir="rtl" (click)="$event.stopPropagation()">
+    <div class="c-modal-card" dir="rtl" (click)="$event.stopPropagation()">
       <h3>{{ 'category_change_prompt' | translatePipe }}</h3>
       <p class="global-specific-detail">
         {{ modalService.config()?.preparationName }}: {{ modalService.config()?.mainCategory | translatePipe }} → {{ modalService.config()?.newCategory | translatePipe }}
