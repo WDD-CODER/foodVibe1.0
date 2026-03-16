@@ -1,0 +1,44 @@
+<div class="counter-grid">
+  <button
+    type="button"
+    class="ctrl-btn"
+    tabindex="-1"
+    [disabled]="minusDisabled_()"
+    (click)="$event.preventDefault()"
+    (mousedown)="onMinusMouseDown()"
+    (mouseup)="onCtrlMouseUp()"
+    (mouseleave)="onCtrlMouseLeave()"
+    [attr.aria-label]="'decrease' | translatePipe"
+  >−</button>
+
+  <div
+    class="value-cell"
+    [style.--value-width.px]="valueWidthPx_()"
+  >
+    <span #mirrorSpan class="value-mirror" aria-hidden="true">{{ (inputValue_() || displayValue_()) }}</span>
+    <input
+      #valueInput
+      type="number"
+      class="value-input"
+      SelectOnFocus
+      [value]="value()"
+      (input)="onInput($event)"
+      (blur)="onBlur($event)"
+      (keydown)="onKeydown($event)"
+      (keydown.enter)="onEnterKey($event)"
+      [step]="stepOptions()?.integerOnly ? 1 : 0.001"
+    />
+  </div>
+
+  <button
+    type="button"
+    class="ctrl-btn"
+    tabindex="-1"
+    [disabled]="plusDisabled_()"
+    (click)="$event.preventDefault()"
+    (mousedown)="onPlusMouseDown()"
+    (mouseup)="onCtrlMouseUp()"
+    (mouseleave)="onCtrlMouseLeave()"
+    [attr.aria-label]="'increase' | translatePipe"
+  >+</button>
+</div>
