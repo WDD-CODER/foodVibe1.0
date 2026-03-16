@@ -13,6 +13,28 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 170 — Add-new option and styling (`plans/170-add-new-option-and-styling.plan.md`)
+- [ ] CustomSelect: isAddNewOption() + .custom-select-option--add-new class
+- [ ] custom-select.component.scss: style .custom-select-option--add-new with primary color
+- [ ] Equipment-list: add "add new category" (sentinel, customCategories_, handler, quick-edit + inline)
+
+### Plan 169 — List quick-edit UX overlay (`plans/169-list-quick-edit-ux-overlay.plan.md`)
+- [x] CustomSelect: add openOnShow input; effect to open dropdown when shown
+- [x] CustomSelect: CDK Overlay for dropdown (attach to body, position from trigger)
+- [x] Equipment list: [openOnShow]="true" on quick-edit CustomSelects
+- [ ] Verify first-click open, carousel dropdown visible, row-blur confirm only
+
+### Plan 168 — Menu-library full keyboard access (`plans/168-menu-library-full-keyboard-access.plan.md`)
+- [ ] custom-select: Arrow Down/Up open dropdown when closed (button trigger)
+- [ ] menu-library-list: Date-from wrap tabindex="0" + keydown.enter/space
+- [ ] menu-library-list: Event cards keydown.enter/space to open
+
+### Plan 167 — Category/unit add-new audit (`plans/167-category-unit-add-new-audit.plan.md`)
+- [x] Fix product-form base-unit "add new" flow (unitAdded$ patch base_unit_ when isBaseUnitMode_)
+- [x] Add "add new category" to equipment-form (sentinel, handler, custom categories, set new value in dropdown)
+- [x] Verify add-equipment sets new value in category dropdown
+- [ ] Optional: Cook-view "add new unit" so user can add from there
+
 ### Plan 165 — Maison Plus row style (`plans/165-maison-plus-row-style.plan.md`)
 - [x] Add --space-sm to src/styles.scss :root (optional; or use component token)
 - [x] Update recipe-workflow .prep-grid-row: border var(--border-row), padding var(--space-sm), hover var(--bg-glass-hover)
@@ -240,17 +262,17 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] Agent guides: Section 7.2 + Section 0 trigger 7.1+7.2 in copilot-instructions; one-line pointer in AGENTS.md (one source of truth; no Cursor rule)
 - [x] Guard/dictionary: confirm getValuesNeedingTranslation and guard unchanged
 
-### Plan 133 — List quick-edit inline (`plans/133-list-quick-edit-inline.plan.md`)
+### Plan 133 — List quick-edit inline (`plans/unused-133-list-quick-edit-inline.plan.md`)
 
-- [ ] Row-blur detection and batch "Save these changes?" confirm; pending-edits store per row
+- [x] Row-blur detection and batch "Save these changes?" confirm; pending-edits store per row (equipment pilot)
 - [ ] Inventory product list: editable cells (supplier, category, unit); value click → inline dropdown; row click → edit page
 - [ ] Supplier list: keep panel on row click; add quick-edit for chosen cells (e.g. contact, delivery, min order)
-- [ ] Equipment list: keep panel on row click; add quick-edit for chosen cells (e.g. category, owned qty, is_consumable)
-- [ ] Carousel: only cell value clickable for quick-edit; arrows unchanged
-- [ ] Validation: empty required field → error message + red border + aria-invalid; no save
-- [ ] Keyboard and a11y: focus model, focus trap in inline control, Esc/Enter, return focus, screen reader labels
+- [x] Equipment list: keep panel on row click; add quick-edit for category, owned qty, is_consumable (pilot done)
+- [x] Carousel: only cell value clickable for quick-edit (equipment); arrows unchanged
+- [x] Validation: empty required field → error message + red border + aria-invalid (equipment pilot)
+- [ ] Keyboard and a11y: focus model, focus trap in inline control, Esc/Enter, return focus, screen reader labels (partial: aria-label on buttons)
 - [ ] Venue list / Recipe-book list: optional quick-edit columns as needed
-- [ ] i18n: batch save confirm key, validation error key(s)
+- [x] i18n: save_these_changes, this_item_cannot_be_saved_like_this
 
 ### Plan 132 — Translation and add-value flow (`plans/132-translation-add-value-flow.plan.md`)
 
@@ -1066,6 +1088,8 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 145 | Secondary unit dropdown fix | Active |
 | 150 | Secondary units in ingredient dropdown | Active |
 | 163 | toFix audit PRD | Planned |
+| 169 | List quick-edit UX overlay | Active |
+| 167 | Category/unit add-new audit | Active |
 | 163-1 | Cook-view ingredient alignment (2.1) | Active |
 | 165 | Maison Plus row style | Done |
 | 164 | Custom select preserve text on focus | Planned |

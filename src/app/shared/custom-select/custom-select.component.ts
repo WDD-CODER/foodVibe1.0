@@ -239,7 +239,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
   protected onKeydown(e: KeyboardEvent): void {
     if (this.typeToFilter() && (e.target as HTMLElement)?.tagName === 'INPUT') return;
     if (!this.open()) {
-      if (e.key === 'Enter' || e.key === ' ') {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault();
         this.toggle();
       }

@@ -35,7 +35,7 @@
 
     <div class="filter-item date-range-wrap">
       <span class="date-range-label">{{ 'menu_date_from' | translatePipe }}</span>
-      <div class="date-input-wrap" (click)="onDateWrapClick(dateFromRef)" role="button" tabindex="-1">
+      <div class="date-input-wrap" (click)="onDateWrapClick(dateFromRef)" (keydown.enter)="onDateWrapClick(dateFromRef)" (keydown.space)="$event.preventDefault(); onDateWrapClick(dateFromRef)" role="button" tabindex="0">
         <input #dateFromRef type="date" [ngModel]="dateFrom_()" (ngModelChange)="dateFrom_.set($event)" />
       </div>
     </div>
@@ -63,7 +63,7 @@
       </div>
     }
     @for (event of filteredEvents_(); track event._id) {
-      <article class="event-card" (click)="onOpen(event)" tabindex="0" role="button">
+      <article class="event-card" (click)="onOpen(event)" (keydown.enter)="onOpen(event)" (keydown.space)="$event.preventDefault(); onOpen(event)" tabindex="0" role="button">
         <div class="card-main">
           <h3 class="card-title">{{ event.name_ }}</h3>
           <p class="card-subtitle">{{ event.event_type_ | translatePipe }} · {{ event.event_date_ || ('menu_no_date' | translatePipe) }}</p>
