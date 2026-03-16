@@ -7,8 +7,11 @@
 When the user is on the sign-in/sign-up screen:
 
 - On component load, move focus to the input and show already signed-up users in the dropdown (development only; to be removed later).
+
 - User must have a password; use a crypt library to encrypt it.
+
 - When the user selects a user and presses Enter: if the user is valid, close the container.
+
 - On error (no such user, no input entered, wrong password), show a clear notice: display the error message in red text under the relevant input.
 
 ---

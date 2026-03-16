@@ -28,7 +28,7 @@ Before Phase 1 (Evaluate):
 
 ## Phase 1 — Evaluate (read-only)
 
-Per the safety rule above. Gather the full picture: run `git status` and `git diff --stat` (and `git diff` or `git diff --name-only` if needed). Detect default branch: `git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null || echo "main"`. Do not run `git add`, `git commit`, `git checkout -b`, or `git stash` in this phase.
+Per the safety rule above. Gather the full picture: run `git status` and `git diff --stat` (and `git diff` or `git diff --name-only` if needed). Detect default branch: `git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null || echo "main"`. Do not run `git add`, `git commit`, `git checkout -b`, or `git stash` in this phase. Note modified/untracked `plans/*.plan.md`.
 
 ---
 
@@ -39,6 +39,7 @@ Per the safety rule above. Gather the full picture: run `git status` and `git di
 3. **Practical rule**: Split so that reverting one commit is straightforward; avoid one giant commit when logical steps are clear.
 4. **Branch names**: `feat/<short-name>` or `fix/<short-name>`.
 5. **Output**: For each branch — branch name. For each commit — list of file paths and a short commit message (`type(scope): message`).
+6. **Plans:** Include related `plans/` file in the commit when scope matches.
 
 ---
 
