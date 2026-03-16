@@ -14,9 +14,9 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 ## Ahead (Pending)
 
 ### Plan 170 — Add-new option and styling (`plans/170-add-new-option-and-styling.plan.md`)
-- [ ] CustomSelect: isAddNewOption() + .custom-select-option--add-new class
-- [ ] custom-select.component.scss: style .custom-select-option--add-new with primary color
-- [ ] Equipment-list: add "add new category" (sentinel, customCategories_, handler, quick-edit + inline)
+- [x] CustomSelect: isAddNewOption() + .custom-select-option--add-new class
+- [x] custom-select.component.scss: style .custom-select-option--add-new with primary color
+- [x] Equipment-list: add "add new category" (sentinel, customCategories_, handler, inline edit)
 
 ### Plan 169 — List quick-edit UX overlay (`plans/169-list-quick-edit-ux-overlay.plan.md`)
 - [x] CustomSelect: add openOnShow input; effect to open dropdown when shown
@@ -25,9 +25,9 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [ ] Verify first-click open, carousel dropdown visible, row-blur confirm only
 
 ### Plan 168 — Menu-library full keyboard access (`plans/168-menu-library-full-keyboard-access.plan.md`)
-- [ ] custom-select: Arrow Down/Up open dropdown when closed (button trigger)
-- [ ] menu-library-list: Date-from wrap tabindex="0" + keydown.enter/space
-- [ ] menu-library-list: Event cards keydown.enter/space to open
+- [x] custom-select: Arrow Down/Up open dropdown when closed (button trigger)
+- [x] menu-library-list: Date-from wrap tabindex="0" + keydown.enter/space
+- [x] menu-library-list: Event cards keydown.enter/space to open
 
 ### Plan 167 — Category/unit add-new audit (`plans/167-category-unit-add-new-audit.plan.md`)
 - [x] Fix product-form base-unit "add new" flow (unitAdded$ patch base_unit_ when isBaseUnitMode_)
@@ -58,6 +58,11 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] Verify alignment in cook-view (view + edit mode); apply min-width to col-amount/col-unit if needed
 - [x] Mark Plan 163 item 2.1 done
 
+### Plan 163-2 — Unit-creator keyboard flow (`plans/163-2-unit-creator-keyboard-flow.plan.md`)
+- [x] unit-creator: focus name on open (effect + setTimeout); id on name/quantity inputs
+- [x] unit-creator: Enter on name → focus quantity; focusQuantityInput()
+- [x] custom-select: open on trigger focus when not from mouse (mousedown flag + onTriggerFocus)
+
 ### Plan 163 — toFix audit PRD (`plans/163-tofix-audit-prd.plan.md`)
 - [x] Recipe header: labels dropdown keyboard nav (focus to dropdown, Arrow Up/Down, Enter, Escape)
 - [x] 2.1 Recipe view: verify align values in ingredient list (cook-view SCSS/html)
@@ -65,7 +70,7 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [ ] 2.3 App-wide: audit category/unit dropdowns for "add new" where applicable
 - [ ] 2.4 Labels: selectability in delete-label + recipe builder manual selector
 - [ ] 2.5 Menu-library: keyboard (Arrow Up/Down, Enter) on custom-select options
-- [ ] 2.6 unit-creator-modal: full keyboard flow (focus name → quantity → unit; prevent scroll)
+- [ ] 2.6 unit-creator-modal: full keyboard flow (focus name → quantity → unit; prevent scroll) — Plan 163-2
 - [ ] 2.7 Lists: sidebar aligned to list container at 768px (list-shell)
 
 ### Plan 162 — No-auto-test agent rule (`plans/162-no-auto-test-agent-rule.plan.md`)
@@ -1088,6 +1093,7 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 145 | Secondary unit dropdown fix | Active |
 | 150 | Secondary units in ingredient dropdown | Active |
 | 163 | toFix audit PRD | Planned |
+| 163-2 | Unit-creator keyboard flow | Active |
 | 169 | List quick-edit UX overlay | Active |
 | 167 | Category/unit add-new audit | Active |
 | 163-1 | Cook-view ingredient alignment (2.1) | Active |
