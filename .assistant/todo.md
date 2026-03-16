@@ -13,6 +13,14 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 182 — toFix.md verification (undone) (`plans/182-tofix-verification-undone.plan.md`)
+- [ ] Recipe builder: remove chevron up/down arrows in section titles
+- [ ] Recipe builder: expandable containers — allow collapse by clicking anywhere on card
+- [ ] Logistics: chips grid — chip width fit content so full label visible
+- [ ] Activity: change-tag — show clear "what changed" (values, from → to)
+- [ ] Add new category modal: two-case focus flow (Hebrew then English, or prefill Hebrew + focus English)
+- [ ] Verify/clarify: recipe view alignment; Maison Plus; labels; menu builder keyboard; Plan 147; dashboard; activity scroll; lists sidebar; unit-creator focus; metrics-square gram→volume
+
 ### Plan 181 — Remove native select app-wide (`plans/181-remove-native-select-app-wide.plan.md`)
 - [x] Replace auth-modal native `<select>` with app-custom-select
 - [x] Remove `.c-grid-select` from styles.scss; remove `.auth-dev-select` from auth-modal SCSS
