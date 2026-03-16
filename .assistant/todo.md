@@ -13,6 +13,36 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 177 — Workflow select behavior (`plans/177-workflow-select-behavior.plan.md`)
+- [x] Enable type-to-filter and add-new on workflow category select (typeToFilter, addNewValue __add_new__)
+- [x] Enable type-to-filter and add-new on workflow unit select (typeToFilter, addNewValue __add_unit__)
+- [x] Optional: add translateLabels to both if options use translation keys (custom-select defaults translateLabels=true)
+
+### Plan 176 — Hold-based tiered step logic (`plans/176-hold-based-tiered-step-logic.plan.md`)
+- [x] quantity-step.util: add continuousPress to options; single-click step 1, hold = tiered increment/decrement
+- [x] counter: restore hold-to-repeat; pass continuousPress true from repeat, false/omit from click
+- [x] quantity-step.util.spec: tests for single-click (step 1) and hold (tiered)
+
+### Plan 175 — Tiered quantity step behavior (`plans/175-tiered-quantity-step-behavior.plan.md`)
+- [x] quantity-step.util: add getQuantityStepIncrement / getQuantityStepDecrement and wire into quantityIncrement / quantityDecrement for whole numbers
+- [x] quantity-step.util.spec: update/add tests for tiered increment and decrement; keep integerOnly, decimal, explicitStep tests
+
+### Plan 174 — Custom select chip and standalone state (`plans/174-custom-select-chip-and-standalone-state.plan.md`)
+- [x] Save plan to plans/174; document current custom-select state (chip, standaloneValue, recipe header + ingredients table)
+- [ ] Cook-view ingredients index: add variant="chip" and typeToFilter to unit selects for consistency with recipe builder
+- [ ] Verify in app: recipe builder and cook-view ingredients index unit dropdowns
+
+### Plan 173 — Selected-item-display whole clickable (`plans/173-selected-item-display-whole-clickable.plan.md`)
+- [ ] recipe-ingredients-table: move click/keyboard from span to .selected-item-display div; stopPropagation on clear button
+- [ ] recipe-ingredients-table.component.scss: add cursor: pointer to .selected-item-display (Effects group)
+- [ ] Verify whole chip clickable, clear button does not open search
+
+### Plan 171 — Custom select chip pilot (`plans/171-custom-select-chip-pilot.plan.md`)
+- [x] CustomSelect: add variant and addNewValue inputs; template chip/add-new classes and chevron size 10 when chip
+- [x] custom-select.component.scss: chip trigger, chip option, chip add-new (menu-item-create) styles per cssLayer
+- [x] recipe-ingredients-table: variant="chip" on unit app-custom-select; remove ::ng-deep .col-unit .custom-select-trigger
+- [x] Verify build and unit column behavior
+
 ### Plan 170 — Add-new option and styling (`plans/170-add-new-option-and-styling.plan.md`)
 - [x] CustomSelect: isAddNewOption() + .custom-select-option--add-new class
 - [x] custom-select.component.scss: style .custom-select-option--add-new with primary color
@@ -1095,6 +1125,7 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 163 | toFix audit PRD | Planned |
 | 163-2 | Unit-creator keyboard flow | Active |
 | 169 | List quick-edit UX overlay | Active |
+| 170 | Add-new option and styling | Done |
 | 167 | Category/unit add-new audit | Active |
 | 163-1 | Cook-view ingredient alignment (2.1) | Active |
 | 165 | Maison Plus row style | Done |
@@ -1108,6 +1139,8 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 153 | Recipe approve stamp button | Active |
 | 152 | Recipe book date filter sidebar | Planned |
 | 151 | Recipe secondary unit conversion | Active |
+| 173 | Selected-item-display whole clickable | Active |
+| 177 | Workflow select behavior | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 

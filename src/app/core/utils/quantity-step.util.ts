@@ -1,7 +1,9 @@
 /**
  * Unified quantity step logic for +/- controls across the app.
- * - Whole numbers: step by magnitude (1–9 → 1, 10–99 → 10, 100–999 → 100, …).
- * - Decimals: step by precision (1.2 → 0.1, 1.15 → 0.01, 1.001 → 0.001).
+ * - When continuousPress !== true (single click): whole-number step = 1. Plan 176.
+ * - When continuousPress === true (hold): tiered increment 0→9 (+1), 10→100 (+10), 100→1000 (+100), 1000+ (+1000);
+ *   decrement: step 1 to next multiple of 10, then step 10/100 by range (e.g. 99→90, 1090→1000, 1000→900).
+ * - integerOnly / explicitStep / decimals unchanged.
  */
 
 export interface QuantityStepOptions {
@@ -9,6 +11,8 @@ export interface QuantityStepOptions {
   explicitStep?: number;
   /** When true, step is always 1 (e.g. guest count, labor minutes). */
   integerOnly?: boolean;
+  /** When true, use tiered steps (hold mode); when false/omit, use step 1 for whole numbers (single click). Plan 176. */
+  continuousPress?: boolean;
 }
 
 const DECIMAL_PRECISION = 3;
@@ -20,9 +24,42 @@ function roundToPrecision(value: number, precision: number): number {
   return Math.round(value * factor) / factor;
 }
 
+function isWholeNumber(value: number): boolean {
+  const r = roundToPrecision(value, NORMALIZE_PRECISION);
+  const absR = Math.abs(r);
+  return absR < 1e-15 || Math.abs(r - Math.round(r)) < EPS;
+}
+
+/** Hold-mode tiered step for increment. Plan 176: 0→9 +1, 10→100 +10, 100→1000 +100, 1000+ +1000. */
+function getHoldStepIncrement(value: number): number {
+  const v = Math.max(0, Math.floor(value));
+  if (v <= 9) return 1;
+  if (v <= 90) return 10;
+  if (v <= 900) return 100;
+  return 1000;
+}
+
+/** Hold-mode tiered step for decrement. Plan 176: step 1 to next mult of 10, then 10/100 by range. */
+function getHoldStepDecrement(value: number): number {
+  const v = Math.max(0, Math.ceil(value));
+  if (v <= 10) return 1;
+  if (v <= 100) {
+    return v % 10 === 0 ? 10 : 1;
+  }
+  if (v <= 1000) {
+    if (v % 100 === 0) return 100;
+    if (v % 10 === 0) return 10;
+    return 1;
+  }
+  if (v % 100 === 0) return 100;
+  if (v % 10 === 0) return 10;
+  return 1;
+}
+
 /**
  * Returns the step for the given value.
- * Whole numbers: step = 10^floor(log10(max(1,|value|))). Decimals: step = 0.1 | 0.01 | 0.001 by displayed precision.
+ * Whole numbers: legacy magnitude (see tiered logic in quantityIncrement/quantityDecrement when not integerOnly).
+ * Decimals: step = 0.1 | 0.01 | 0.001 by displayed precision.
  */
 export function getQuantityStep(
   value: number,
@@ -50,7 +87,7 @@ export function getQuantityStep(
 }
 
 /**
- * Returns value + step, optionally clamped to min, rounded for decimal steps.
+ * Returns value + step, optionally clamped to min. Plan 176: single-click step 1; hold = tiered.
  */
 export function quantityIncrement(
   value: number,
@@ -58,17 +95,29 @@ export function quantityIncrement(
   options?: QuantityStepOptions
 ): number {
   const num = Number(value);
-  const step = getQuantityStep(Number.isFinite(num) ? num : 0, options);
-  let next = (Number.isFinite(num) ? num : 0) + step;
-  if (step < 1) {
-    next = roundToPrecision(next, DECIMAL_PRECISION);
+  const base = Number.isFinite(num) ? num : 0;
+  if (options?.explicitStep != null && options.explicitStep > 0) {
+    const next = base + options.explicitStep;
+    return min != null && next < min ? min : next;
   }
-  if (min != null && next < min) return min;
-  return next;
+  if (options?.integerOnly) {
+    const next = base + 1;
+    return min != null && next < min ? min : next;
+  }
+  if (!isWholeNumber(base)) {
+    const step = getQuantityStep(base, options);
+    let next = base + step;
+    if (step < 1) next = roundToPrecision(next, DECIMAL_PRECISION);
+    return min != null && next < min ? min : next;
+  }
+  const useHoldTiered = options?.continuousPress === true;
+  const step = useHoldTiered ? getHoldStepIncrement(base) : 1;
+  const next = base + step;
+  return min != null && next < min ? min : next;
 }
 
 /**
- * Returns value - step, optionally clamped to min, rounded for decimal steps.
+ * Returns value - step, optionally clamped to min. Plan 176: single-click step 1; hold = tiered.
  */
 export function quantityDecrement(
   value: number,
@@ -76,11 +125,23 @@ export function quantityDecrement(
   options?: QuantityStepOptions
 ): number {
   const num = Number(value);
-  const step = getQuantityStep(Number.isFinite(num) ? num : 0, options);
-  let next = (Number.isFinite(num) ? num : 0) - step;
-  if (step < 1) {
-    next = roundToPrecision(next, DECIMAL_PRECISION);
+  const base = Number.isFinite(num) ? num : 0;
+  if (options?.explicitStep != null && options.explicitStep > 0) {
+    const next = base - options.explicitStep;
+    return min != null && next < min ? min : next;
   }
-  if (min != null && next < min) return min;
-  return next;
+  if (options?.integerOnly) {
+    const next = base - 1;
+    return min != null && next < min ? min : next;
+  }
+  if (!isWholeNumber(base)) {
+    const step = getQuantityStep(base, options);
+    let next = base - step;
+    if (step < 1) next = roundToPrecision(next, DECIMAL_PRECISION);
+    return min != null && next < min ? min : next;
+  }
+  const useHoldTiered = options?.continuousPress === true;
+  const step = useHoldTiered ? getHoldStepDecrement(base) : 1;
+  const next = base - step;
+  return min != null && next < min ? min : next;
 }

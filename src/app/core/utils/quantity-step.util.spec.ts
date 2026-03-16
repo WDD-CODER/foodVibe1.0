@@ -42,12 +42,25 @@ describe('quantity-step.util', () => {
   });
 
   describe('quantityIncrement', () => {
-    it('should add magnitude step for whole numbers (1→2, 10→20, 100→200)', () => {
-      expect(quantityIncrement(1)).toBe(2);
+    it('should use step 1 for whole numbers when single-click (no continuousPress). Plan 176', () => {
+      expect(quantityIncrement(0)).toBe(1);
       expect(quantityIncrement(5)).toBe(6);
       expect(quantityIncrement(9)).toBe(10);
-      expect(quantityIncrement(10)).toBe(20);
-      expect(quantityIncrement(100)).toBe(200);
+      expect(quantityIncrement(10)).toBe(11);
+      expect(quantityIncrement(99)).toBe(100);
+      expect(quantityIncrement(100)).toBe(101);
+      expect(quantityIncrement(1000)).toBe(1001);
+    });
+
+    it('should use tiered steps when continuousPress (hold). Plan 176: 0→9 +1, 10→100 +10, 100→1000 +100, 1000+ +1000', () => {
+      const hold = { continuousPress: true };
+      expect(quantityIncrement(0, undefined, hold)).toBe(1);
+      expect(quantityIncrement(9, undefined, hold)).toBe(10);
+      expect(quantityIncrement(10, undefined, hold)).toBe(20);
+      expect(quantityIncrement(90, undefined, hold)).toBe(100);
+      expect(quantityIncrement(100, undefined, hold)).toBe(200);
+      expect(quantityIncrement(900, undefined, hold)).toBe(1000);
+      expect(quantityIncrement(1000, undefined, hold)).toBe(2000);
     });
 
     it('should add precision step for decimals (1.2→1.3, 1.15→1.16)', () => {
@@ -73,12 +86,23 @@ describe('quantity-step.util', () => {
   });
 
   describe('quantityDecrement', () => {
-    it('should subtract magnitude step for whole numbers (2→1, 20→10, 200→100)', () => {
+    it('should use step 1 for whole numbers when single-click (no continuousPress). Plan 176', () => {
+      expect(quantityDecrement(1000)).toBe(999);
+      expect(quantityDecrement(100)).toBe(99);
+      expect(quantityDecrement(10)).toBe(9);
       expect(quantityDecrement(2)).toBe(1);
-      expect(quantityDecrement(6)).toBe(5);
-      expect(quantityDecrement(10)).toBe(0);
-      expect(quantityDecrement(20)).toBe(10);
-      expect(quantityDecrement(200)).toBe(100);
+    });
+
+    it('should use tiered steps when continuousPress (hold). Plan 176: step 1 to mult of 10, then 10/100', () => {
+      const hold = { continuousPress: true };
+      expect(quantityDecrement(99, undefined, hold)).toBe(98);
+      expect(quantityDecrement(91, undefined, hold)).toBe(90);
+      expect(quantityDecrement(90, undefined, hold)).toBe(80);
+      expect(quantityDecrement(100, undefined, hold)).toBe(90);
+      expect(quantityDecrement(10, undefined, hold)).toBe(9);
+      expect(quantityDecrement(1099, undefined, hold)).toBe(1098);
+      expect(quantityDecrement(1090, undefined, hold)).toBe(1080);
+      expect(quantityDecrement(1000, undefined, hold)).toBe(900);
     });
 
     it('should subtract precision step for decimals (1.3→1.2, 1.16→1.15)', () => {
