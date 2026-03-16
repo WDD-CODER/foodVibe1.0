@@ -23,6 +23,7 @@ import {
   Upload,
   CookingPot,
   BookOpen,
+  MapPin,
 } from 'lucide-angular';
 import { signal } from '@angular/core';
 import { TranslationService } from '@services/translation.service';
@@ -62,7 +63,7 @@ describe('MetadataManagerPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         MetadataManagerComponent,
-        LucideAngularModule.pick({ Scale, AlertTriangle, X, ChevronLeft, Tag, Tags, Trash2, UtensilsCrossed, Pencil, Package, Archive, Download, RotateCcw, Upload, CookingPot, BookOpen })
+        LucideAngularModule.pick({ Scale, AlertTriangle, X, ChevronLeft, Tag, Tags, Trash2, UtensilsCrossed, Pencil, Package, Archive, Download, RotateCcw, Upload, CookingPot, BookOpen, MapPin })
       ],
       providers: [
         provideHttpClient(),
