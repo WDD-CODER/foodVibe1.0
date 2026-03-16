@@ -853,9 +853,8 @@ textarea.c-input {
   color: var(--text-success);
 }
 
-/* ---- Engine: Grid Input / Grid Select (inline table controls) ---- */
-.c-grid-input,
-.c-grid-select {
+/* ---- Engine: Grid Input (inline table controls) ---- */
+.c-grid-input {
   padding-inline: 0.625rem;
   padding-block: 0.375rem;
 

@@ -13,10 +13,37 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 181 — Remove native select app-wide (`plans/181-remove-native-select-app-wide.plan.md`)
+- [x] Replace auth-modal native `<select>` with app-custom-select
+- [x] Remove `.c-grid-select` from styles.scss; remove `.auth-dev-select` from auth-modal SCSS
+- [x] Add lint:no-native-select script and npm script for prevention
+
+### Plan 180 — Secondary chips and grid layout (`plans/180-secondary-chips-and-grid-layout.plan.md`)
+- [x] Recipe-header HTML: secondary chips as app-scaling-chip
+- [x] Recipe-header TS: getSecondaryUnitOptions, onSecondaryScalingChipAmountChange; remove activeSecondaryEdit_ etc.
+- [x] Recipe-header SCSS: two-part grid + secondary flex-wrap; remove obsolete styles
+- [x] Recipe-header spec: update tests for secondary chips
+
+### Plan 179 — Unified scaling chip component (`plans/179-unified-scaling-chip-component.plan.md`)
+- [x] Custom-select: chip variant width max-content
+- [x] Create shared scaling-chip component (TS, HTML, SCSS)
+- [x] Recipe-header: use app-scaling-chip for primary chip
+- [x] Recipe-header SCSS: trim primary chip styles
+- [x] Recipe-header spec: primary chip still updates form
+
+### Plan 178 — App-wide custom-select behavior (`plans/178-app-wide-custom-select-behavior.plan.md`)
+- [x] Recipe workflow: typeToFilter + addNewValue (category __add_new__, unit __add_unit__)
+- [x] Recipe ingredients table: variant=chip, typeToFilter, addNewValue __add_unit__
+- [x] Product form: typeToFilter on base_unit_, unit_symbol_, uom; addNewValue NEW_UNIT on first two
+- [x] Cook-view: typeToFilter on yield + 2 unit selects
+- [x] Menu intelligence + menu library list: typeToFilter on all filter selects
+- [x] Equipment list/form/add-equipment modal: typeToFilter; addNewValue __add_new__ where options have it
+- [x] Venue form, unit creator, quick-add modal: typeToFilter; addNewValue on quick-add base unit + category
+
 ### Plan 177 — Workflow select behavior (`plans/177-workflow-select-behavior.plan.md`)
+- [x] Merged into Plan 178
 - [x] Enable type-to-filter and add-new on workflow category select (typeToFilter, addNewValue __add_new__)
 - [x] Enable type-to-filter and add-new on workflow unit select (typeToFilter, addNewValue __add_unit__)
-- [x] Optional: add translateLabels to both if options use translation keys (custom-select defaults translateLabels=true)
 
 ### Plan 176 — Hold-based tiered step logic (`plans/176-hold-based-tiered-step-logic.plan.md`)
 - [x] quantity-step.util: add continuousPress to options; single-click step 1, hold = tiered increment/decrement
@@ -1140,7 +1167,8 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 152 | Recipe book date filter sidebar | Planned |
 | 151 | Recipe secondary unit conversion | Active |
 | 173 | Selected-item-display whole clickable | Active |
-| 177 | Workflow select behavior | Active |
+| 177 | Workflow select behavior | Merged into 178 |
+| 178 | App-wide custom-select behavior | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 

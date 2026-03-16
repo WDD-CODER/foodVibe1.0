@@ -1,14 +1,15 @@
-import { ChangeDetectionStrategy, Component, inject, signal, viewChild, ElementRef, effect, isDevMode } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, viewChild, ElementRef, effect, isDevMode } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
+import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 import { AuthModalService } from '@services/auth-modal.service';
 import { UserService } from '@services/user.service';
 
 @Component({
   selector: 'app-auth-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, TranslatePipe],
+  imports: [FormsModule, LucideAngularModule, TranslatePipe, CustomSelectComponent],
   templateUrl: './auth-modal.component.html',
   styleUrl: './auth-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -21,6 +22,10 @@ export class AuthModalComponent {
   protected passwordInput = viewChild<ElementRef>('passwordInput');
   protected isDevMode = isDevMode;
   protected users_ = this.userService.users_;
+  protected devPickValue_ = signal('');
+  protected devUserOptions_ = computed(() =>
+    (this.users_() ?? []).map((u) => ({ value: u.name, label: u.name }))
+  );
 
   constructor() {
     effect(() => {
@@ -48,12 +53,11 @@ export class AuthModalComponent {
     this.errorKey.set(null);
   }
 
-  protected onDevUserPick(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    if (select.value) {
-      this.name = select.value;
+  protected onDevUserPick(value: string): void {
+    if (value) {
+      this.name = value;
+      this.devPickValue_.set('');
       setTimeout(() => this.passwordInput()?.nativeElement.focus(), 0);
-      select.value = '';
     }
   }
 
@@ -140,6 +144,7 @@ export class AuthModalComponent {
     this.name = ''
     this.email = ''
     this.password = ''
+    this.devPickValue_.set('')
     this.imgBase64 = null
     this.imgPreview.set(null)
     this.errorKey.set(null)

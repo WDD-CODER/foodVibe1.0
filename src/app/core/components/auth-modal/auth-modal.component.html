@@ -23,12 +23,13 @@
             <div class="auth-label-row">
               <label for="auth-name">{{ 'username' | translatePipe }}</label>
               @if (isDevMode() && !isSignUp) {
-                <select class="c-grid-select auth-dev-select" (change)="onDevUserPick($event)">
-                  <option value="">-- {{ 'dev_users' | translatePipe }} --</option>
-                  @for (u of users_(); track u.name) {
-                    <option [value]="u.name">{{ u.name }}</option>
-                  }
-                </select>
+                <app-custom-select
+                  [options]="devUserOptions_()"
+                  [ngModel]="devPickValue_()"
+                  (ngModelChange)="onDevUserPick($event)"
+                  placeholder="dev_users"
+                  [translateLabels]="false"
+                  [compact]="true" />
               }
             </div>
             <input id="auth-name"
