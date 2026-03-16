@@ -1,7 +1,8 @@
-<div class="custom-select-wrap" [class.open]="open()" (clickOutside)="close()">
+<div class="custom-select-wrap" [class.open]="open()" [class.custom-select-wrap--chip]="variant() === 'chip'" (clickOutside)="close()">
   @if (typeToFilter()) {
     <div class="custom-select-trigger custom-select-trigger--input"
       [class.custom-select-trigger--compact]="compact()"
+      [class.custom-select-trigger--chip]="variant() === 'chip'"
       [class.open]="open()"
       (click)="inputRef?.focus()">
       <input #inputRef
@@ -17,7 +18,7 @@
         aria-haspopup="listbox"
         [attr.aria-label]="placeholder() | translatePipe"
         [placeholder]="placeholder() | translatePipe" />
-      <lucide-icon name="chevron-down" [size]="14"></lucide-icon>
+      <lucide-icon name="chevron-down" [size]="variant() === 'chip' ? 10 : 14"></lucide-icon>
     </div>
   } @else {
     <button
@@ -26,6 +27,7 @@
       [id]="triggerId()"
       class="c-select custom-select-trigger"
       [class.custom-select-trigger--compact]="compact()"
+      [class.custom-select-trigger--chip]="variant() === 'chip'"
       [class.open]="open()"
       [disabled]="disabled"
       (mousedown)="onTriggerMousedown()"
@@ -56,6 +58,8 @@
         <button
           type="button"
           class="custom-select-option"
+          [class.custom-select-option--add-new]="opt.value === addNewValue()"
+          [class.custom-select-option--chip]="variant() === 'chip'"
           [id]="triggerId() ? triggerId() + '-opt-' + i : null"
           [class.highlighted]="highlightedIndex() === i"
           role="option"

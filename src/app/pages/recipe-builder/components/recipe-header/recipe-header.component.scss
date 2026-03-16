@@ -101,7 +101,7 @@
 
 .scaling-dock-grid {
   display: grid;
-  grid-template-columns: 10rem auto;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 0.75rem;
 
@@ -114,188 +114,19 @@
   overflow: visible;
 }
 
-.scaling-chip {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(1.25rem, 2.8125rem) minmax(3.75rem, 1fr) auto;
-  align-items: center;
-  gap: 0.3125rem;
-
-  padding-inline: 0.6rem;
-  padding-block: 0.4rem;
-
-  background: var(--bg-glass);
-
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-full);
-
-  overflow: visible;
-  transition: all 0.2s ease;
-
-  &.primary {
-    background: var(--color-primary-soft);
-    border-color: var(--border-focus);
-
-    .unit-name {
-      color: var(--color-primary);
-    }
-  }
-
-  &.secondary {
-    background: var(--bg-glass);
-  }
-
-  /* TODO: remove ::ng-deep when dropdown is slotted or uses engine class */
-  .unit-dropdown-menu.primary-chip-dropdown,
-  .unit-dropdown-menu.secondary-chip-dropdown {
-    ::ng-deep .c-dropdown {
-      position: absolute;
-      inset-inline-end: 0;
-      inset-inline-start: auto;
-      inset-block-start: calc(100% + 0.25rem);
-      z-index: 100;
-
-      min-width: 8.75rem;
-
-      overflow: visible;
-    }
-
-    ::ng-deep .menu-item {
-      padding-inline: 0.75rem;
-      padding-block: 0.5rem;
-
-      color: var(--color-text-secondary);
-      font-size: 0.85rem;
-      font-weight: 600;
-
-      cursor: pointer;
-      transition: background 0.15s ease;
-
-      &:hover {
-        background: var(--bg-muted);
-      }
-
-      &.menu-item-create {
-        color: var(--color-primary);
-        font-weight: 700;
-        border-block-start: 1px solid var(--border-default);
-      }
-    }
-  }
-}
-
 .secondary-units-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(8.75rem, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
 
   padding-inline-end: 0.75rem;
+  overflow: visible;
 
   border-inline-end: 2px solid var(--bg-muted);
 
   .add-unit-wrapper {
-    place-self: center;
-  }
-}
-
-.unit-switcher-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-
-  padding-inline: 0.5rem;
-  padding-block: 0.125rem;
-
-  border-radius: var(--radius-full);
-
-  cursor: pointer;
-
-  .unit-name {
-    color: var(--color-primary);
-    font-size: 0.85rem;
-    font-weight: 800;
-  }
-
-  &:hover {
-    background: var(--color-primary-soft);
-  }
-}
-
-.counter-grid {
-  display: grid;
-  grid-template-columns: 1.5rem auto 1.5rem;
-  align-items: center;
-
-  height: 1.75rem;
-
-  background: var(--bg-pure);
-
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-
-  .ctrl-btn {
-    height: 100%;
-
-    background: var(--bg-glass);
-    color: var(--color-primary);
-    font-size: 0.95rem;
-    font-weight: bold;
-
-    border: none;
-
-    cursor: pointer;
-
-    &:hover:not(:disabled) {
-      background: var(--bg-muted);
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
-
-  .chip-input-native {
-    width: 100%;
-
-    background: transparent;
-    color: var(--color-primary);
-    font-size: 0.85rem;
-    font-weight: 800;
-    text-align: center;
-
-    border: none;
-    outline: none;
-    appearance: textfield;
-
-    &::-webkit-inner-spin-button {
-      appearance: none;
-    }
-  }
-}
-
-.remove-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 1.25rem;
-  height: 1.25rem;
-  padding: 0;
-
-  background: var(--bg-danger-subtle);
-  color: var(--color-danger);
-
-  border: none;
-  border-radius: var(--radius-full);
-
-  cursor: pointer;
-
-  &:hover {
-    background: var(--bg-danger-subtle);
-    filter: brightness(0.95);
+    flex-shrink: 0;
   }
 }
 
@@ -665,8 +496,6 @@
 
     border-inline-end: none;
     border-block-end: 2px solid var(--bg-muted);
-
-    grid-template-columns: repeat(auto-fill, minmax(9.375rem, 1fr));
   }
 
   .image-square {

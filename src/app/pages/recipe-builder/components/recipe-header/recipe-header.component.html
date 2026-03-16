@@ -24,99 +24,32 @@
         </div>
 
         <div class="scaling-dock-grid">
-            <div class="primary-chip-wrapper" (clickOutside)="setActivePrimaryEdit(false)">
-                <div class="scaling-chip primary">
-                    <div class="unit-switcher-btn" role="button" tabindex="0"
-                        (click)="setActivePrimaryEdit(!activePrimaryEdit_())"
-                        (keydown.enter)="setActivePrimaryEdit(!activePrimaryEdit_())"
-                        (keydown.space)="$event.preventDefault(); setActivePrimaryEdit(!activePrimaryEdit_())">
-                        <span class="unit-name">{{ primaryUnitLabel_() | translatePipe }}</span>
-                        <lucide-icon name="chevron-down" [size]="10"></lucide-icon>
-                    </div>
-
-                    @if (activePrimaryEdit_()) {
-                    <app-scrollable-dropdown [maxHeight]="200" class="unit-dropdown-menu primary-chip-dropdown">
-                        @for (unit of availablePrimaryUnits_(); track unit) {
-                        <div class="menu-item" (click)="setPrimaryUnit(unit); setActivePrimaryEdit(false)">
-                            {{ unit | translatePipe }}
-                        </div>
-                        }
-                        <div class="menu-item menu-item-create" (click)="openUnitCreator.emit('unit'); setActivePrimaryEdit(false)">
-                            {{ 'create_new_unit' | translatePipe }}
-                        </div>
-                    </app-scrollable-dropdown>
-                    }
-
-                    <div class="counter-grid small">
-                        <button type="button" class="ctrl-btn" tabindex="-1"
-                            [disabled]="!(primaryAmount_() > (currentRecipeTypeDisplay_() === 'dish' ? 1 : 0))"
-                            (click)="updatePrimaryAmount(-1)">-</button>
-
-                        <div class="input-wrapper">
-                            <input type="number" #priInput SelectOnFocus class="chip-input-native"
-                                [value]="primaryAmount_()"
-                                (input)="onAmountManualChange(priInput.value)"
-                                (blur)="onAmountManualChange(priInput.value)"
-                                (keydown)="onPrimaryAmountKeydown($event)"
-                                (keydown.enter)="$event.preventDefault(); priInput.blur()"
-                                step="0.001">
-                        </div>
-
-                        <button type="button" class="ctrl-btn" tabindex="-1" (click)="updatePrimaryAmount(1)">+</button>
-                    </div>
-                </div>
+            <div class="primary-chip-wrapper">
+                <app-scaling-chip
+                    [value]="primaryAmount_()"
+                    [unit]="primaryUnitLabel_()"
+                    [unitOptions]="primaryUnitOptions_()"
+                    [minAmount]="currentRecipeTypeDisplay_() === 'dish' ? 1 : 0"
+                    variant="primary"
+                    (valueChange)="onScalingChipAmountChange($event)"
+                    (unitChange)="setPrimaryUnit($event)"
+                    (createUnit)="openUnitCreator.emit('unit')" />
             </div>
 
             <div class="secondary-units-container">
                 @for (group of secondaryConversions; track $index; let chipIdx = $index) {
-                <div class="scaling-chip secondary" [class.dropdown-open]="activeSecondaryEdit_() === chipIdx" (clickOutside)="setActiveSecondaryEdit(null)">
-                    <div class="unit-switcher-cell">
-                        <div class="unit-switcher-btn" role="button" tabindex="0"
-                            (click)="openSecondaryUnitDropdown(chipIdx)"
-                            (keydown.enter)="openSecondaryUnitDropdown(chipIdx)"
-                            (keydown.space)="$event.preventDefault(); openSecondaryUnitDropdown(chipIdx)">
-                            <span class="unit-name">{{ group.get('unit')?.value | translatePipe }}</span>
-                            <lucide-icon name="chevron-down" [size]="10"></lucide-icon>
-                        </div>
-
-                        @if (activeSecondaryEdit_() === chipIdx) {
-                        <app-scrollable-dropdown [maxHeight]="200" class="unit-dropdown-menu secondary-chip-dropdown">
-                            @for (unit of availableUnitsForSecondaryChip_(chipIdx); track unit) {
-                            <div class="menu-item" (click)="changeSecondaryUnit(chipIdx, unit)">
-                                {{ unit | translatePipe }}
-                            </div>
-                            }
-                            <div class="menu-item menu-item-create" (click)="openUnitCreator.emit('unit'); setActiveSecondaryEdit(null)">
-                                {{ 'create_new_unit' | translatePipe }}
-                            </div>
-                        </app-scrollable-dropdown>
-                        }
-                    </div>
-
-                    <div class="counter-grid small">
-                        <button type="button" class="ctrl-btn" tabindex="-1"
-                            [disabled]="!(group.get('amount')?.value > 0)"
-                            (click)="updateSecondaryAmount(chipIdx, -1)">-</button>
-                        
-                        <div class="input-wrapper">
-                            <input type="number" #secInput SelectOnFocus class="chip-input-native"
-                                [value]="group.get('amount')?.value"
-                                (input)="onSecondaryAmountInput(group, secInput.value)"
-                                (blur)="onSecondaryAmountInput(group, secInput.value)"
-                                (keydown)="onSecondaryAmountKeydown($event, chipIdx)"
-                                (keydown.enter)="$event.preventDefault(); secInput.blur()"
-                                step="0.001">
-                        </div>
-                        
-                        <button type="button" class="ctrl-btn" tabindex="-1" (click)="updateSecondaryAmount(chipIdx, 1)">+</button>
-                    </div>
-
-                    <button type="button" class="remove-btn" tabindex="-1" (click)="removeSecondaryUnit(chipIdx)">
-                        <lucide-icon name="x" [size]="10"></lucide-icon>
-                    </button>
-                </div>
+                <app-scaling-chip
+                    [value]="group.get('amount')?.value ?? 0"
+                    [unit]="group.get('unit')?.value ?? ''"
+                    [unitOptions]="getSecondaryUnitOptions(chipIdx)"
+                    [minAmount]="0"
+                    variant="secondary"
+                    [showRemove]="true"
+                    (valueChange)="onSecondaryScalingChipAmountChange(chipIdx, $event)"
+                    (unitChange)="changeSecondaryUnit(chipIdx, $event)"
+                    (createUnit)="openUnitCreator.emit('unit')"
+                    (remove)="removeSecondaryUnit(chipIdx)" />
                 }
-
                 <div class="add-unit-wrapper">
                     <button type="button" class="add-custom-chip" (click)="addSecondaryChipWithDefault()">
                         <lucide-icon name="plus" [size]="16"></lucide-icon>

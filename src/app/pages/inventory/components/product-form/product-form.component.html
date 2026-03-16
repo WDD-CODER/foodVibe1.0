@@ -89,6 +89,8 @@
           formControlName="base_unit_"
           [options]="baseUnitOptions_()"
           placeholder="choose_unit"
+          [typeToFilter]="true"
+          [addNewValue]="'NEW_UNIT'"
           (valueChange)="onBaseUnitValueChange($event)" />
       </div>
     </div>
@@ -110,6 +112,8 @@
               formControlName="unit_symbol_"
               [options]="unitSymbolOptions_()"
               placeholder="choose_unit"
+              [typeToFilter]="true"
+              [addNewValue]="'NEW_UNIT'"
               (valueChange)="onUnitSymbolValueChange($event, idx)" />
           </div>
 
@@ -130,6 +134,7 @@
                 formControlName="uom"
                 [options]="uomOptions_()"
                 [placeholder]="productForm_.get('base_unit_')?.value || 'compare_to_unit'"
+                [typeToFilter]="true"
                 />
             </label>
           </div>

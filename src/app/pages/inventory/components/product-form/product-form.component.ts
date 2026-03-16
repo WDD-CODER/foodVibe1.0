@@ -254,11 +254,13 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
     }
   }
 
-  protected openCategoryDropdown(): void {
+  protected openCategoryDropdown(skipInputFocus = false): void {
     this.showCategoryDropdown_.set(true);
     this.categorySearchQuery_.set('');
     this.categoryDropdownHighlightIndex_.set(-1);
-    setTimeout(() => this.categoryInputRef?.nativeElement?.focus(), 0);
+    if (!skipInputFocus) {
+      setTimeout(() => this.categoryInputRef?.nativeElement?.focus(), 0);
+    }
   }
 
   protected onCategoryBoxClick(ev: MouseEvent): void {
@@ -270,12 +272,12 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
     const key = ev.key;
     if (key === 'ArrowDown') {
       ev.preventDefault();
-      this.openCategoryDropdown();
+      if (!this.showCategoryDropdown_()) this.openCategoryDropdown(true);
       this.categoryDropdownHighlightIndex_.set(0);
       this.categoryDropdownFocusPending_ = true;
     } else if (key === 'ArrowUp') {
       ev.preventDefault();
-      this.openCategoryDropdown();
+      if (!this.showCategoryDropdown_()) this.openCategoryDropdown(true);
       const total = this.categoryOptionsFilteredBySearch_().length + 1;
       this.categoryDropdownHighlightIndex_.set(Math.max(0, total - 1));
       this.categoryDropdownFocusPending_ = true;
@@ -290,11 +292,13 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
     this.categoryDropdownHighlightIndex_.set(-1);
   }
 
-  protected openAllergenDropdown(): void {
+  protected openAllergenDropdown(skipInputFocus = false): void {
     this.showAllergenDropdown_.set(true);
     this.allergenSearchQuery_.set('');
     this.allergenDropdownHighlightIndex_.set(-1);
-    setTimeout(() => this.allergenInputRef?.nativeElement?.focus(), 0);
+    if (!skipInputFocus) {
+      setTimeout(() => this.allergenInputRef?.nativeElement?.focus(), 0);
+    }
   }
 
   protected closeAllergenDropdown(): void {
@@ -312,12 +316,12 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
     const key = ev.key;
     if (key === 'ArrowDown') {
       ev.preventDefault();
-      this.openAllergenDropdown();
+      if (!this.showAllergenDropdown_()) this.openAllergenDropdown(true);
       this.allergenDropdownHighlightIndex_.set(0);
       this.allergenDropdownFocusPending_ = true;
     } else if (key === 'ArrowUp') {
       ev.preventDefault();
-      this.openAllergenDropdown();
+      if (!this.showAllergenDropdown_()) this.openAllergenDropdown(true);
       const filtered = this.allergenOptionsFilteredBySearch_();
       const hasAddNew = this.allergenSearchQuery_().trim() !== ''
         && !filtered.includes(this.allergenSearchQuery_().trim())
@@ -330,11 +334,13 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
     }
   }
 
-  protected openSupplierDropdown(): void {
+  protected openSupplierDropdown(skipInputFocus = false): void {
     this.showSupplierDropdown_.set(true);
     this.supplierSearchQuery_.set('');
     this.supplierDropdownHighlightIndex_.set(-1);
-    setTimeout(() => this.supplierInputRef?.nativeElement?.focus(), 0);
+    if (!skipInputFocus) {
+      setTimeout(() => this.supplierInputRef?.nativeElement?.focus(), 0);
+    }
   }
 
   protected closeSupplierDropdown(): void {
@@ -352,12 +358,12 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
     const key = ev.key;
     if (key === 'ArrowDown') {
       ev.preventDefault();
-      this.openSupplierDropdown();
+      if (!this.showSupplierDropdown_()) this.openSupplierDropdown(true);
       this.supplierDropdownHighlightIndex_.set(0);
       this.supplierDropdownFocusPending_ = true;
     } else if (key === 'ArrowUp') {
       ev.preventDefault();
-      this.openSupplierDropdown();
+      if (!this.showSupplierDropdown_()) this.openSupplierDropdown(true);
       const total = this.supplierOptionsFilteredBySearch_().length + 1;
       this.supplierDropdownHighlightIndex_.set(Math.max(0, total - 1));
       this.supplierDropdownFocusPending_ = true;

@@ -37,7 +37,8 @@
           [ngModel]="basisUnit_()"
           (ngModelChange)="basisUnit_.set($event)"
           [options]="basisUnitOptions_()"
-          placeholder="choose_unit" />
+          placeholder="choose_unit"
+          [typeToFilter]="true" />
       </div>
     </div>
 

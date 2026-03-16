@@ -45,6 +45,10 @@ export class CustomSelectComponent implements ControlValueAccessor {
   triggerId = input<string>('');
   /** When true, use compact sizing to match native select in dense forms (e.g. quick-add modal). */
   compact = input<boolean>(false);
+  /** 'chip' = pill trigger (e.g. recipe ingredients unit). Default = bordered trigger. */
+  variant = input<'default' | 'chip'>('default');
+  /** Option value treated as "add new" for styling and pinned at end when filtering. Parent handles in valueChange. */
+  addNewValue = input<string>('__add_unit__');
 
   valueChange = output<string>();
 
@@ -81,20 +85,24 @@ export class CustomSelectComponent implements ControlValueAccessor {
     return opt ? opt.label : '';
   });
 
-  /** Options filtered by search: "starts with" + Hebrew vs Latin by script. */
+  /** Options filtered by search: "starts with" + Hebrew vs Latin by script. Add-new option is always pinned at end. */
   protected filteredOptions_ = computed(() => {
     const raw = this.searchQuery_().trim();
     const opts = this.options();
+    const addNewVal = this.addNewValue();
+    const addNewOpt = opts.find((o) => o.value === addNewVal);
+    const rest = addNewOpt ? opts.filter((o) => o.value !== addNewVal) : opts;
     if (!raw) return opts;
     const qLower = raw.toLowerCase();
     const isHebrew = /[\u0590-\u05FF]/.test(raw);
     const isLatin = /[a-zA-Z]/.test(raw);
-    return opts.filter((opt) => {
+    const filtered = rest.filter((opt) => {
       const display = this.translateLabels() ? this.translationService.translate(opt.label) : opt.label;
       if (isHebrew) return display.startsWith(raw);
       if (isLatin) return /[a-zA-Z]/.test(display) && display.toLowerCase().startsWith(qLower);
       return display.toLowerCase().startsWith(qLower);
     });
+    return addNewOpt ? [...filtered, addNewOpt] : filtered;
   });
 
   /** Input display value: when open show search query, when closed show selected label (translated if needed). */
@@ -154,7 +162,10 @@ export class CustomSelectComponent implements ControlValueAccessor {
     this.open.set(true);
     this.searchQuery_.set('');
     const filtered = this.filteredOptions_();
-    this.highlightedIndex.set(filtered.length > 0 ? 0 : -1);
+    const currentIdx = this._value()
+      ? filtered.findIndex((o) => o.value === this._value())
+      : -1;
+    this.highlightedIndex.set(currentIdx >= 0 ? currentIdx : (filtered.length > 0 ? 0 : -1));
     setTimeout(() => this.inputRef?.nativeElement?.focus(), 0);
   }
 

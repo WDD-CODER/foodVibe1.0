@@ -20,6 +20,8 @@
           (ngModelChange)="onCategoryChange($event)"
           [options]="categoryOptions()"
           [placeholder]="'category'"
+          [typeToFilter]="true"
+          [addNewValue]="'__add_new__'"
           [translateLabels]="true" />
       </div>
     </div>

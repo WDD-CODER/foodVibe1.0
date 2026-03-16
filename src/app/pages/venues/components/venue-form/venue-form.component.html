@@ -19,7 +19,8 @@
           triggerId="environment_type_"
           formControlName="environment_type_"
           [options]="envOptions"
-          [placeholder]="'environment_type'" />
+          [placeholder]="'environment_type'"
+          [typeToFilter]="true" />
       </div>
       <div class="form-group">
         <label for="notes_">{{ 'notes' | translatePipe }}</label>
@@ -41,6 +42,7 @@
             formControlName="equipment_id_"
             [options]="equipmentOptions_()"
             [placeholder]="'choose_equipment'"
+            [typeToFilter]="true"
             [translateLabels]="false" />
           <input type="number" formControlName="available_quantity_" min="0" placeholder="0" />
           <button type="button" class="btn-icon" (click)="removeInfraRow(i)" [attr.aria-label]="'remove' | translatePipe">

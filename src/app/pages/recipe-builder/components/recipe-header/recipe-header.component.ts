@@ -2,7 +2,6 @@ import { Component, input, inject, output, signal, computed, ChangeDetectorRef }
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormArray, Validators } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { KitchenStateService } from '@services/kitchen-state.service';
@@ -13,12 +12,13 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
 import { FloatingInfoContainerComponent } from 'src/app/shared/floating-info-container/floating-info-container.component';
+import { ScalingChipComponent } from 'src/app/shared/scaling-chip/scaling-chip.component';
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util';
 
 @Component({
   selector: 'app-recipe-header',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, SelectOnFocusDirective, ClickOutSideDirective, TranslatePipe, ScrollableDropdownComponent, FloatingInfoContainerComponent],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, ClickOutSideDirective, TranslatePipe, ScrollableDropdownComponent, FloatingInfoContainerComponent, ScalingChipComponent],
   templateUrl: './recipe-header.component.html',
   styleUrl: './recipe-header.component.scss'
 })
@@ -91,6 +91,12 @@ export class RecipeHeaderComponent {
       ? new Set(conversions.controls.slice(1).map(c => c.get('unit')?.value).filter(Boolean))
       : new Set<string>();
     return all.filter(u => !usedSecondary.has(u));
+  });
+
+  /** Options for primary scaling-chip unit select (value/label + create new unit). */
+  protected primaryUnitOptions_ = computed(() => {
+    const units = this.availablePrimaryUnits_().map(u => ({ value: u, label: u }));
+    return [...units, { value: '__add_unit__', label: 'create_new_unit' }];
   });
 
   protected availableSecondaryUnits_ = computed(() => {
@@ -215,6 +221,10 @@ export class RecipeHeaderComponent {
     }
   }
 
+  onScalingChipAmountChange(value: number): void {
+    this.applyPrimaryUpdate(value);
+  }
+
   private applyPrimaryUpdate(newValue: number): void {
     const type = this.form().get('recipe_type')?.value;
     const sanitizedValue = Math.max(type === 'dish' ? 1 : 0, newValue);
@@ -309,19 +319,8 @@ export class RecipeHeaderComponent {
 
   protected showMetricsNoticeIcon_ = computed(() => this.unconvertibleNamesForCurrentMode_().length > 0);
 
-  /** Whether the primary chip unit dropdown is open. */
-  activePrimaryEdit_ = signal<boolean>(false);
-
-  setActivePrimaryEdit(open: boolean): void {
-    this.activePrimaryEdit_.set(open);
-    if (open) this.activeSecondaryEdit_.set(null);
-  }
-
-  /** Which secondary chip index has its unit dropdown open (null = none). */
-  activeSecondaryEdit_ = signal<number | null>(null);
-
   /** Units available for a secondary chip: exclude every unit already in use (primary + all secondaries). */
-  availableUnitsForSecondaryChip_(_chipIdx: number): string[] {
+  availableUnitsForSecondaryChip_(chipIdx: number): string[] {
     const conversions = this.form().get('yield_conversions') as FormArray;
     const used = new Set<string>();
     conversions.controls.forEach((c) => {
@@ -331,21 +330,29 @@ export class RecipeHeaderComponent {
     return this.allUnitKeys_().filter(u => !used.has(u));
   }
 
-  setActiveSecondaryEdit(index: number | null): void {
-    this.activeSecondaryEdit_.set(this.activeSecondaryEdit_() === index ? null : index);
-    if (index !== null) this.activePrimaryEdit_.set(false);
+  /** Unit options for a secondary scaling-chip select (current unit + available + create new). */
+  getSecondaryUnitOptions(chipIdx: number): { value: string; label: string }[] {
+    const available = this.availableUnitsForSecondaryChip_(chipIdx);
+    const group = this.secondaryConversions[chipIdx];
+    const currentUnit = group?.get('unit')?.value;
+    let units = available;
+    if (currentUnit && !available.includes(currentUnit)) {
+      units = [currentUnit, ...available];
+    }
+    const options = units.map(u => ({ value: u, label: u }));
+    return [...options, { value: '__add_unit__', label: 'create_new_unit' }];
   }
 
-  /** Open secondary unit dropdown; deferred so clickOutside on sibling chips doesn't close it. */
-  openSecondaryUnitDropdown(chipIdx: number): void {
-    if (this.activeSecondaryEdit_() === chipIdx) {
-      this.setActiveSecondaryEdit(null);
-      return;
+  onSecondaryScalingChipAmountChange(chipIdx: number, value: number): void {
+    const conversions = this.form().get('yield_conversions') as FormArray;
+    const groupIndex = chipIdx + 1;
+    if (groupIndex >= conversions.length) return;
+    const group = conversions.at(groupIndex) as FormGroup;
+    const amountControl = group.get('amount');
+    if (amountControl) {
+      amountControl.setValue(Math.max(0, value), { emitEvent: true });
     }
-    setTimeout(() => {
-      this.activeSecondaryEdit_.set(chipIdx);
-      this.activePrimaryEdit_.set(false);
-    }, 0);
+    this.manualTrigger_.update(v => v + 1);
   }
 
   changeSecondaryUnit(chipIndex: number, newUnit: string): void {
@@ -354,17 +361,10 @@ export class RecipeHeaderComponent {
     if (groupIndex >= conversions.length) return;
     const group = conversions.at(groupIndex) as FormGroup;
     const currentUnit = group.get('unit')?.value;
-    if (currentUnit === newUnit) {
-      this.activeSecondaryEdit_.set(null);
-      return;
-    }
+    if (currentUnit === newUnit) return;
     const exists = conversions.controls.some((c, i) => i !== groupIndex && c.get('unit')?.value === newUnit);
-    if (exists) {
-      this.activeSecondaryEdit_.set(null);
-      return;
-    }
+    if (exists) return;
     group.get('unit')?.setValue(newUnit, { emitEvent: true });
-    this.activeSecondaryEdit_.set(null);
     this.manualTrigger_.update(v => v + 1);
     this.cdr.detectChanges();
   }

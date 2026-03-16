@@ -91,6 +91,16 @@ describe('RecipeHeaderComponent', () => {
     expect(conversions.at(0).get('amount')?.value).toBe(2);
   });
 
+  it('should update primary amount when scaling chip emits valueChange', () => {
+    const form = createRecipeForm({ recipe_type: 'preparation' });
+    const conversions = form.get('yield_conversions') as FormArray;
+    conversions.at(0).get('amount')?.setValue(2);
+    fixture.componentRef.setInput('form', form);
+    fixture.detectChanges();
+    component.onScalingChipAmountChange(5);
+    expect(conversions.at(0).get('amount')?.value).toBe(5);
+  });
+
   it('should emit openUnitCreator when NEW_UNIT is selected', (done) => {
     component.openUnitCreator.subscribe(() => {
       expect().nothing();
@@ -116,8 +126,20 @@ describe('RecipeHeaderComponent', () => {
     const form = createRecipeForm({ yield_conversions: conversions });
     fixture.componentRef.setInput('form', form);
     fixture.detectChanges();
-    const minusBtn = fixture.nativeElement.querySelector('.scaling-chip.secondary .ctrl-btn[disabled]');
+    const minusBtn = fixture.nativeElement.querySelector('.scaling-chip--secondary .ctrl-btn[disabled]');
     expect(minusBtn).toBeTruthy();
+  });
+
+  it('should update secondary amount when scaling chip emits valueChange', () => {
+    const conversions = fb.array([
+      fb.group({ unit: ['gram'], amount: [1] }),
+      fb.group({ unit: ['liter'], amount: [2] })
+    ]);
+    const form = createRecipeForm({ yield_conversions: conversions });
+    fixture.componentRef.setInput('form', form);
+    fixture.detectChanges();
+    component.onSecondaryScalingChipAmountChange(0, 5);
+    expect(conversions.at(1).get('amount')?.value).toBe(5);
   });
 
   it('should update secondary chip amount when +/- is clicked (precision/magnitude step)', () => {

@@ -1,0 +1,29 @@
+<div
+  class="scaling-chip"
+  [class.scaling-chip--primary]="variant() === 'primary'"
+  [class.scaling-chip--secondary]="variant() === 'secondary'"
+  [class.scaling-chip--has-remove]="showRemove()">
+  <app-custom-select
+    [formControl]="unitControl"
+    variant="chip"
+    [options]="unitOptions()"
+    [addNewValue]="addNewValue"
+    [translateLabels]="true"
+    [typeToFilter]="true"
+    placeholder="unit"
+    [maxHeight]="200" />
+  <app-counter
+    [value]="value()"
+    [min]="minAmount()"
+    (valueChange)="valueChange.emit($event)" />
+  @if (showRemove()) {
+    <button
+      type="button"
+      class="scaling-chip-remove"
+      tabindex="-1"
+      (click)="onRemove()"
+      [attr.aria-label]="'remove' | translatePipe">
+      <lucide-icon name="x" [size]="10"></lucide-icon>
+    </button>
+  }
+</div>

@@ -40,6 +40,9 @@
         <app-custom-select
           formControlName="unit"
           class="grid-select"
+          variant="chip"
+          [typeToFilter]="true"
+          [addNewValue]="'__add_unit__'"
           [options]="getUnitOptions(group)"
           placeholder="unit"
           [triggerId]="'unit-row-' + $index"

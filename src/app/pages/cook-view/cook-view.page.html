@@ -102,7 +102,8 @@
               [ngModel]="selectedUnit_()"
               (ngModelChange)="onYieldUnitChange($event)"
               [options]="yieldUnitOptions_()"
-              placeholder="unit">
+              placeholder="unit"
+              [typeToFilter]="true">
             </app-custom-select>
             @if (recipe.yield_unit_ !== selectedUnit_()) {
               <span class="conversion-badge">
@@ -156,7 +157,8 @@
                     [ngModel]="row.unit"
                     (ngModelChange)="setIngredientUnit(i, $event)"
                     [options]="getUnitOptionsForRow(row)"
-                    placeholder="unit" />
+                    placeholder="unit"
+                    [typeToFilter]="true" />
                   <button type="button" class="remove-ingredient-btn" (click)="removeIngredient(i)" [attr.aria-label]="'remove' | translatePipe">
                     <lucide-icon name="trash-2" [size]="16"></lucide-icon>
                   </button>
@@ -196,7 +198,8 @@
                         [ngModel]="getDisplayUnit(i, row)"
                         (ngModelChange)="setUnitOverride(i, $event)"
                         [options]="getUnitOptionsForRow(row)"
-                        placeholder="unit" />
+                        placeholder="unit"
+                        [typeToFilter]="true" />
                     } @else {
                       <span>{{ getDisplayUnit(i, row) | translatePipe }}</span>
                     }

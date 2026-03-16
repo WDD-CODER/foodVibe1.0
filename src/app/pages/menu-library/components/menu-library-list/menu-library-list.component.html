@@ -21,7 +21,8 @@
         [ngModel]="eventTypeFilter_()"
         (ngModelChange)="eventTypeFilter_.set($event)"
         [options]="eventTypeSelectOptions_()"
-        placeholder="all" />
+        placeholder="all"
+        [typeToFilter]="true" />
     </label>
 
     <label class="filter-item">
@@ -30,7 +31,8 @@
         [ngModel]="servingStyleFilter_()"
         (ngModelChange)="servingStyleFilter_.set($event)"
         [options]="servingStyleOptions_"
-        placeholder="all" />
+        placeholder="all"
+        [typeToFilter]="true" />
     </label>
 
     <div class="filter-item date-range-wrap">
@@ -47,7 +49,8 @@
           [ngModel]="sortBy_()"
           (ngModelChange)="sortBy_.set($event)"
           [options]="sortBySelectOptions_"
-          placeholder="sort" />
+          placeholder="sort"
+          [typeToFilter]="true" />
         <button type="button" class="sort-order-btn" (click)="toggleSortOrder()" [attr.aria-label]="getSortOrderLabel()" [attr.title]="getSortOrderLabel()">
           {{ getSortOrderLabel() | translatePipe }}
         </button>

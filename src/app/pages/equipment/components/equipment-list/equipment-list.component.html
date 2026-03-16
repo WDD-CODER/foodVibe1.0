@@ -115,6 +115,8 @@
                   formControlName="category_"
                   [options]="categoryOptions()"
                   placeholder="category"
+                  [typeToFilter]="true"
+                  [addNewValue]="'__add_new__'"
                   (valueChange)="onCategoryValueChange($event, 'inline')" />
               </div>
               <div class="inline-edit-field">
