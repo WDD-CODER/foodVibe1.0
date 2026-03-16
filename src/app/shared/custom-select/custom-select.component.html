@@ -28,6 +28,8 @@
       [class.custom-select-trigger--compact]="compact()"
       [class.open]="open()"
       [disabled]="disabled"
+      (mousedown)="onTriggerMousedown()"
+      (focus)="onTriggerFocus()"
       (click)="onTriggerClick()"
       (blur)="onTriggerBlur()"
       [attr.aria-expanded]="open()"

@@ -122,4 +122,19 @@
   &.highlighted {
     background: var(--color-primary-soft);
   }
+
+  &.custom-select-option--add-new {
+    color: var(--color-primary);
+    font-weight: 600;
+
+    padding-inline-start: calc(0.75rem - 3px);
+    border-inline-start: 3px solid var(--color-primary);
+    background: var(--color-primary-soft);
+
+    &:hover,
+    &.highlighted {
+      color: var(--color-primary-hover);
+      background: var(--color-primary-glow);
+    }
+  }
 }

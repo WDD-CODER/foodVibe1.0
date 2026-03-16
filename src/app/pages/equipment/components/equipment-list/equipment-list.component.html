@@ -113,8 +113,9 @@
                 <app-custom-select
                   triggerId="inline-category"
                   formControlName="category_"
-                  [options]="categoryOptions"
-                  placeholder="category" />
+                  [options]="categoryOptions()"
+                  placeholder="category"
+                  (valueChange)="onCategoryValueChange($event, 'inline')" />
               </div>
               <div class="inline-edit-field">
                 <label for="inline-owned">{{ 'owned_quantity' | translatePipe }}</label>

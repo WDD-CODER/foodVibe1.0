@@ -22,6 +22,10 @@ import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row
 import { useListState, StringParam, NullableBooleanParam, StringSetParam } from 'src/app/core/utils/list-state.util';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 import { HeroFabService } from '@services/hero-fab.service';
+import { AddItemModalService } from '@services/add-item-modal.service';
+import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service';
+
+const ADD_NEW_CATEGORY_VALUE = '__add_new__';
 
 type SortField = 'name' | 'category' | 'owned';
 
@@ -44,6 +48,8 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   private readonly logging = inject(LoggingService);
   private readonly confirmModal = inject(ConfirmModalService);
   private readonly fb = inject(FormBuilder);
+  private readonly addItemModal = inject(AddItemModalService);
+  private readonly translationKeyModal = inject(TranslationKeyModalService);
 
   /** True when this list is shown under /inventory/equipment (logistics from inventory). */
   protected get isUnderInventory(): boolean {
@@ -154,7 +160,12 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     'infrastructure',
     'consumable',
   ];
-  protected categoryOptions = this.categories.map((c) => ({ value: c, label: c }));
+  protected customCategories_ = signal<string[]>([]);
+  protected categoryOptions = computed(() => {
+    const fixed = this.categories.map((c) => ({ value: c, label: c }));
+    const custom = this.customCategories_().map((c) => ({ value: c, label: c }));
+    return [...fixed, ...custom, { value: ADD_NEW_CATEGORY_VALUE, label: 'add_new_category' }];
+  });
 
   private buildEditForm(): void {
     this.editForm_ = this.fb.group({
@@ -171,9 +182,14 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   }
 
   private hydrateEditForm(e: Equipment): void {
+    const cat = (e.category_ ?? 'tool') as string;
+    if (cat && cat !== ADD_NEW_CATEGORY_VALUE && !this.categories.includes(cat as EquipmentCategory)) {
+      this.customCategories_.update((list) => (list.includes(cat) ? list : [...list, cat]));
+    }
+    this.lastCategory_.set(cat && cat !== ADD_NEW_CATEGORY_VALUE ? cat : 'tool');
     this.editForm_.patchValue({
       name_hebrew: e.name_hebrew ?? '',
-      category_: e.category_ ?? 'tool',
+      category_: cat,
       owned_quantity_: e.owned_quantity_ ?? 0,
       is_consumable_: e.is_consumable_ ?? false,
       notes_: e.notes_ ?? '',
@@ -182,6 +198,51 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
       min_quantity_: e.scaling_rule_?.min_quantity_ ?? 1,
       max_quantity_: e.scaling_rule_?.max_quantity_ ?? null,
     });
+  }
+
+  /** Last non-sentinel category used so we can restore when user cancels add-new. */
+  private lastCategory_ = signal<string>('tool');
+
+  protected onCategoryValueChange(value: string, context: 'inline'): void {
+    if (value === ADD_NEW_CATEGORY_VALUE) {
+      void this.openAddNewCategory(context);
+      return;
+    }
+    this.lastCategory_.set(value);
+    if (context === 'inline') {
+      this.editForm_.patchValue({ category_: value });
+    }
+  }
+
+  protected async openAddNewCategory(context: 'inline'): Promise<void> {
+    const previousCategory = this.lastCategory_();
+    const result = await this.addItemModal.open({
+      title: 'add_new_category',
+      label: 'category',
+      placeholder: 'category',
+      saveLabel: 'save'
+    });
+    if (result?.trim()) {
+      let keyToUse: string = this.translation.resolveCategory(result.trim()) ?? '';
+      if (!keyToUse) {
+        const modalResult = await this.translationKeyModal.open(result.trim(), 'category');
+        if (isTranslationKeyResult(modalResult)) {
+          this.translation.addKeyAndHebrew(modalResult.englishKey, modalResult.hebrewLabel);
+          keyToUse = modalResult.englishKey;
+        } else {
+          keyToUse = result.trim();
+        }
+      }
+      if (!this.customCategories_().includes(keyToUse)) {
+        this.customCategories_.update((list) => [...list, keyToUse]);
+      }
+      if (context === 'inline') {
+        this.lastCategory_.set(keyToUse);
+        this.editForm_.patchValue({ category_: keyToUse });
+      }
+    } else if (context === 'inline') {
+      this.editForm_.patchValue({ category_: previousCategory });
+    }
   }
 
   protected togglePanel(): void {
@@ -277,7 +338,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
       const updated: Equipment = {
         ...equipment,
         name_hebrew: v.name_hebrew,
-        category_: v.category_,
+        category_: v.category_ as EquipmentCategory,
         owned_quantity_: Number(v.owned_quantity_),
         is_consumable_: !!v.is_consumable_,
         notes_: v.notes_ ?? undefined,
