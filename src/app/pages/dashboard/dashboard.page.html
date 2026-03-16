@@ -3,7 +3,10 @@
     @if (activeTab() === 'overview') {
       <app-dashboard-overview [activeTab]="activeTab()" (tabChange)="setTab($event)" />
     } @else if (activeTab() === 'metadata') {
-      <app-metadata-manager />
+      <div class="dashboard-metadata-layout">
+        <app-dashboard-header [activeTab]="activeTab()" (tabChange)="setTab($event)" />
+        <app-metadata-manager />
+      </div>
     } @else if (activeTab() === 'venues') {
       <app-venue-list [embeddedInDashboard]="true" (addVenueClick)="setTab('add-venue')" />
     } @else if (activeTab() === 'add-venue') {

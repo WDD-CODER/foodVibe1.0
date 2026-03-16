@@ -10,6 +10,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 
 import { DashboardOverviewComponent } from './components/dashboard-overview/dashboard-overview.component';
+import { DashboardHeaderComponent } from './components/dashboard-header/dashboard-header.component';
 import { MetadataManagerComponent } from '../metadata-manager/metadata-manager.page.component';
 import { VenueListComponent } from '../venues/components/venue-list/venue-list.component';
 import { VenueFormComponent } from '../venues/components/venue-form/venue-form.component';
@@ -32,6 +33,7 @@ const TAB_QUERY_VALUES: Record<DashboardTab, string | null> = {
     CommonModule,
     LucideAngularModule,
     DashboardOverviewComponent,
+    DashboardHeaderComponent,
     MetadataManagerComponent,
     VenueListComponent,
     VenueFormComponent,

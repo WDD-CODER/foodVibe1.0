@@ -3,30 +3,37 @@
     <h1 class="page-title">{{ 'dashboard' | translatePipe }}</h1>
     <div class="header-actions" role="group" aria-label="Dashboard actions">
       <nav class="header-actions__nav" aria-label="Dashboard sections">
-        <button type="button" class="header-btn" [class.active]="activeTab() === 'overview'" (click)="tabChange.emit('overview')">
-          {{ 'overview' | translatePipe }}
-        </button>
-        <button type="button" class="header-btn" [class.active]="activeTab() === 'metadata'" (click)="tabChange.emit('metadata')">
+        <button
+          type="button"
+          class="header-btn"
+          [class.active]="activeTab() === 'metadata'"
+          (click)="tabChange.emit('metadata')"
+        >
           {{ 'core_settings' | translatePipe }}
         </button>
-        <button type="button" class="header-btn" [class.active]="activeTab() === 'venues'" (click)="tabChange.emit('venues')">
+        <button
+          type="button"
+          class="header-btn"
+          [class.active]="activeTab() === 'venues'"
+          (click)="tabChange.emit('venues')"
+        >
           <lucide-icon name="map-pin" size="16"></lucide-icon>
           {{ 'venue_list' | translatePipe }}
         </button>
-        <button type="button" class="header-btn header-btn--trash" [class.active]="activeTab() === 'trash'" (click)="tabChange.emit('trash')">
+        <button
+          type="button"
+          class="header-btn header-btn--trash"
+          [class.active]="activeTab() === 'trash'"
+          (click)="tabChange.emit('trash')"
+        >
           <lucide-icon name="trash-2" size="16"></lucide-icon>
           {{ 'trash' | translatePipe }}
         </button>
-        <button type="button" class="header-btn" (click)="goToAddProduct()"
-        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
-        <lucide-icon name="plus-circle" size="16"></lucide-icon>
-        <span>{{ 'add_product' | translatePipe }}</span>
-      </button>
-      <button type="button" class="header-btn" (click)="goToSuppliers()">
-        <lucide-icon name="truck" size="16"></lucide-icon>
-        <span>{{ 'suppliers' | translatePipe }}</span>
-      </button>
-    </nav>
+        <button type="button" class="header-btn" (click)="goToSuppliers()">
+          <lucide-icon name="truck" size="16"></lucide-icon>
+          <span>{{ 'suppliers' | translatePipe }}</span>
+        </button>
+      </nav>
     </div>
   </header>
 
