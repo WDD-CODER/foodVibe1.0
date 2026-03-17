@@ -222,13 +222,13 @@
     left: 50%;
     transform: translateX(-50%);
     z-index: 20;
-
+    gap: 0.5rem;
     margin-block-end: 0.35rem;
     min-width: 7.5rem;
     max-width: 12.5rem;
     max-height: 9rem;
-    padding: 0.5rem 0.75rem;
-
+    padding: 0.2rem 0.5rem 0.7rem 0.5rem;
+    
     background: var(--bg-glass-strong);
     color: var(--color-text-secondary);
     font-size: 0.8rem;
@@ -255,7 +255,7 @@
   }
 
   .metrics-notice-list-wrap {
-    position: relative;
+    // position: relative;
     flex: 0 1 auto;
     min-height: 0;
     overflow: hidden;
@@ -310,13 +310,13 @@
   }
 
   .metrics-notice-scroll-indicator--top {
-    top: 0px;
+    top: 18px;
     bottom: auto;
   }
 
   .metrics-notice-scroll-indicator--bottom {
     top: auto;
-    bottom: 0;
+    bottom: -7px;
     // background: linear-gradient(to top, var(--bg-glass-strong) 0%, transparent 100%);
   }
 

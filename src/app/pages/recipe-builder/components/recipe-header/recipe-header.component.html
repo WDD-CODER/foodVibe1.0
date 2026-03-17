@@ -145,7 +145,7 @@
                 <span class="metrics-notice-wrap" (click)="$event.stopPropagation(); toggleMetricsNotice()">
                     <lucide-icon name="alert-circle" class="metrics-notice-icon" [size]="16" [title]="'items_not_convertible' | translatePipe"></lucide-icon>
                 </span>
-                <!-- @if (metricsNoticeOpen_()) { -->
+                @if (metricsNoticeOpen_()) {
                     <div class="metrics-notice-floating" (click)="$event.stopPropagation()"
                         (mouseenter)="onMetricsNoticeZoneEnter()" (mouseleave)="onMetricsNoticeZoneLeave()">
                         <p class="metrics-notice-title">{{ 'not_convertible' | translatePipe }}</p>
@@ -165,7 +165,7 @@
                             </div>
                         </div>
                     </div>
-                <!-- } -->
+                }
             }
         </div>
     </div>
