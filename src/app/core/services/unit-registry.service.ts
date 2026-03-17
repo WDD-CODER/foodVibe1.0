@@ -3,7 +3,7 @@ import { StorageService } from './async-storage.service'
 import { UserMsgService } from './user-msg.service'
 import { LoggingService } from './logging.service'
 import { TranslationService } from './translation.service'
-import { TranslationKeyModalService, isTranslationKeyResult } from './translation-key-modal.service'
+import { KeyResolutionService } from './key-resolution.service'
 import { Subject } from 'rxjs'
 
 export type RegisterUnitResult =
@@ -16,7 +16,7 @@ export class UnitRegistryService {
   private readonly storageService = inject(StorageService)
   private readonly logging = inject(LoggingService)
   private readonly translationService = inject(TranslationService)
-  private readonly translationKeyModal = inject(TranslationKeyModalService)
+  private readonly keyResolution = inject(KeyResolutionService)
   private readonly STORAGE_KEY = 'KITCHEN_UNITS'; // Standardized key
 
   public readonly unitAdded$ = new Subject<string>();
@@ -117,19 +117,9 @@ export class UnitRegistryService {
    * @returns Result so caller can show in-modal error when unit already exists on product (modal stays open).
    */
   async registerUnit(name: string, rate: number, basisUnitKey?: string): Promise<RegisterUnitResult> {
-    const trimmed = (name ?? '').trim();
-    if (!trimmed) {
-      return { success: false, error: 'שם היחידה ריק' };
-    }
-
-    let keyToUse: string | null = this.translationService.resolveUnit(trimmed);
+    const keyToUse = await this.keyResolution.ensureKeyForContext(name, 'unit');
     if (!keyToUse) {
-      const modalResult = await this.translationKeyModal.open(trimmed, 'unit');
-      if (!isTranslationKeyResult(modalResult)) {
-        return { success: false, error: 'בוטל על ידי המשתמש' };
-      }
-      this.translationService.addKeyAndHebrew(modalResult.englishKey, modalResult.hebrewLabel);
-      keyToUse = modalResult.englishKey;
+      return { success: false, error: (name ?? '').trim() ? 'cancelled_by_user' : 'unit_name_empty' };
     }
     const key = keyToUse.toLowerCase();
     const curUnits = this.globalUnits_();
@@ -185,7 +175,7 @@ export class UnitRegistryService {
     } catch (err) {
       this.userMsgService.onSetErrorMsg('שגיאה בשמירת היחידה במערכת');
       this.logging.error({ event: 'crud.units.save_error', message: 'Unit save error', context: { err } });
-      return { success: false, error: err instanceof Error ? err.message : 'שגיאה בשמירת היחידה במערכת' };
+      return { success: false, error: 'unit_save_error' };
     }
   }
 

@@ -4,7 +4,7 @@ import { UserMsgService } from './user-msg.service'
 import { StorageService, type EntityId } from './async-storage.service'
 import { LoggingService } from './logging.service'
 import { TranslationService } from './translation.service'
-import { TranslationKeyModalService, isTranslationKeyResult } from './translation-key-modal.service'
+import { KeyResolutionService } from './key-resolution.service'
 import type { LabelDefinition } from '@models/label.model'
 import {
   type MenuTypeDefinition,
@@ -28,7 +28,7 @@ export class MetadataRegistryService {
   private readonly storageService = inject(StorageService)
   private readonly logging = inject(LoggingService)
   private readonly translationService = inject(TranslationService)
-  private readonly translationKeyModal = inject(TranslationKeyModalService)
+  private readonly keyResolution = inject(KeyResolutionService)
 
   //PRIVATE SIGNALS
   private categories_ = signal<string[]>([]);
@@ -280,19 +280,8 @@ export class MetadataRegistryService {
   }
 
   async registerAllergen(name: string): Promise<void> {
-    const trimmed = (name ?? '').trim();
-    if (!trimmed) return;
-
-    let keyToUse: string = this.translationService.resolveAllergen(trimmed) ?? '';
-    if (!keyToUse) {
-      const modalResult = await this.translationKeyModal.open(trimmed, 'allergen');
-      if (isTranslationKeyResult(modalResult)) {
-        this.translationService.addKeyAndHebrew(modalResult.englishKey, modalResult.hebrewLabel);
-        keyToUse = modalResult.englishKey;
-      } else {
-        keyToUse = trimmed;
-      }
-    }
+    const keyToUse = await this.keyResolution.ensureKeyForContext(name, 'allergen');
+    if (!keyToUse) return;
     if (this.allergens_().includes(keyToUse)) return;
 
     const updated: string[] = [...this.allergens_(), keyToUse];
@@ -316,19 +305,8 @@ export class MetadataRegistryService {
   }
 
   async registerCategory(name: string): Promise<string | null> {
-    const trimmed = (name ?? '').trim();
-    if (!trimmed) return null;
-
-    let keyToUse: string = this.translationService.resolveCategory(trimmed) ?? '';
-    if (!keyToUse) {
-      const modalResult = await this.translationKeyModal.open(trimmed, 'category');
-      if (isTranslationKeyResult(modalResult)) {
-        this.translationService.addKeyAndHebrew(modalResult.englishKey, modalResult.hebrewLabel);
-        keyToUse = modalResult.englishKey;
-      } else {
-        keyToUse = trimmed;
-      }
-    }
+    const keyToUse = await this.keyResolution.ensureKeyForContext(name, 'category');
+    if (!keyToUse) return null;
     if (this.categories_().includes(keyToUse)) return keyToUse;
 
     const updatedCategories: string[] = [...this.categories_(), keyToUse];

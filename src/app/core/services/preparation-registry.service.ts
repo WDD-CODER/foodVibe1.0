@@ -2,7 +2,7 @@ import { Injectable, signal, computed, inject } from '@angular/core'
 import { StorageService } from './async-storage.service'
 import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
-import { TranslationKeyModalService, isTranslationKeyResult } from './translation-key-modal.service'
+import { KeyResolutionService } from './key-resolution.service'
 import { LoggingService } from './logging.service'
 import { DishDataService } from './dish-data.service'
 import type { Recipe, FlatPrepItem, PrepCategory } from '../models/recipe.model'
@@ -25,7 +25,7 @@ export class PreparationRegistryService {
   private readonly storageService = inject(StorageService)
   private readonly userMsgService = inject(UserMsgService)
   private readonly translationService = inject(TranslationService)
-  private readonly translationKeyModal = inject(TranslationKeyModalService)
+  private readonly keyResolution = inject(KeyResolutionService)
   private readonly logging = inject(LoggingService)
   private readonly dishDataService = inject(DishDataService)
 
@@ -263,16 +263,8 @@ export class PreparationRegistryService {
     const sanitizedCategory = (category ?? '').trim()
     if (!sanitizedName) return
 
-    let key: string | null = this.translationService.resolvePreparationCategory(sanitizedCategory);
-    if (!key) {
-      const modalResult = await this.translationKeyModal.open(sanitizedCategory, 'generic');
-      if (isTranslationKeyResult(modalResult)) {
-        this.translationService.addKeyAndHebrew(modalResult.englishKey, modalResult.hebrewLabel);
-        key = modalResult.englishKey;
-      } else {
-        key = sanitizedCategory.toLowerCase().replace(/\s+/g, '_');
-      }
-    }
+    const key = await this.keyResolution.ensureKeyForContext(sanitizedCategory, 'preparation_category');
+    if (sanitizedCategory && !key) return;
     const cats = this.categories_()
     const categoryExists = key != null && cats.includes(key)
     if (!categoryExists && key) {

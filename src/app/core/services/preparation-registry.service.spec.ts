@@ -3,6 +3,7 @@ import { PreparationRegistryService } from './preparation-registry.service'
 import { StorageService } from './async-storage.service'
 import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
+import { KeyResolutionService } from './key-resolution.service'
 
 describe('PreparationRegistryService', () => {
   let service: PreparationRegistryService
@@ -19,13 +20,18 @@ describe('PreparationRegistryService', () => {
     const userMsgSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
     const translationSpy = jasmine.createSpyObj('TranslationService', ['updateDictionary', 'resolvePreparationCategory'])
     translationSpy.resolvePreparationCategory.and.returnValue('מטבח')
+    const keyResolutionSpy = jasmine.createSpyObj('KeyResolutionService', ['ensureKeyForContext'])
+    keyResolutionSpy.ensureKeyForContext.and.callFake((v: string) =>
+      Promise.resolve(v?.trim() ? v.trim().toLowerCase().replace(/\s+/g, '_') : null)
+    )
 
     TestBed.configureTestingModule({
       providers: [
         PreparationRegistryService,
         { provide: StorageService, useValue: storageSpy },
         { provide: UserMsgService, useValue: userMsgSpy },
-        { provide: TranslationService, useValue: translationSpy }
+        { provide: TranslationService, useValue: translationSpy },
+        { provide: KeyResolutionService, useValue: keyResolutionSpy }
       ]
     })
 

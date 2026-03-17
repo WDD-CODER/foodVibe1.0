@@ -5,7 +5,7 @@ import { StorageService } from './async-storage.service';
 import { UserMsgService } from './user-msg.service';
 import { LoggingService } from './logging.service';
 import { TranslationService } from './translation.service';
-import { TranslationKeyModalService } from './translation-key-modal.service';
+import { KeyResolutionService } from './key-resolution.service';
 import { signal } from '@angular/core';
 import { Product } from '../models/product.model';
 
@@ -37,8 +37,10 @@ describe('MetadataRegistryService', () => {
     const translationSpy = jasmine.createSpyObj('TranslationService', ['translate', 'validateKeyForHebrew', 'resolveAllergen']);
     translationSpy.validateKeyForHebrew.and.returnValue({ valid: true });
     translationSpy.resolveAllergen.and.callFake((s: string) => s?.trim().toLowerCase().replace(/\s+/g, '_') ?? null);
-    const modalSpy = jasmine.createSpyObj('TranslationKeyModalService', ['open']);
-    modalSpy.open.and.returnValue(Promise.resolve(null));
+    const keyResolutionSpy = jasmine.createSpyObj('KeyResolutionService', ['ensureKeyForContext']);
+    keyResolutionSpy.ensureKeyForContext.and.callFake((v: string) =>
+      Promise.resolve(v?.trim() ? v.trim().toLowerCase().replace(/\s+/g, '_') : null)
+    );
 
     TestBed.configureTestingModule({
       providers: [
@@ -48,7 +50,7 @@ describe('MetadataRegistryService', () => {
         { provide: UserMsgService, useValue: userMsgSpy },
         { provide: LoggingService, useValue: loggingSpy },
         { provide: TranslationService, useValue: translationSpy },
-        { provide: TranslationKeyModalService, useValue: modalSpy }
+        { provide: KeyResolutionService, useValue: keyResolutionSpy }
       ]
     });
 
