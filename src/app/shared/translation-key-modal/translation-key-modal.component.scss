@@ -1,3 +1,8 @@
+/* Stack above other modals (e.g. quick-add, add-item) when opened from within them */
+:host .c-modal-overlay {
+  z-index: 1200;
+}
+
 @layer components.translation-key-modal {
   .translation-key-validation-error {
     font-size: 0.75rem;
