@@ -20,6 +20,7 @@ import { TranslationKeyModalService, isTranslationKeyResult } from '@services/tr
 import { AddSupplierFlowService } from '@services/add-supplier-flow.service';
 import { LoggingService } from '@services/logging.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { take } from 'rxjs/operators';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { duplicateNameValidator } from 'src/app/core/validators/item.validators';
@@ -706,6 +707,9 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
       this.isBaseUnitMode_.set(true);
       this.unitRegistry.openUnitCreator();
       this.productForm_.patchValue({ base_unit_: '' });
+      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
+        this.productForm_.patchValue({ base_unit_: newUnit });
+      });
     }
   }
 
@@ -720,6 +724,11 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
       (this.productForm_.get('purchase_options_') as FormArray)
         ?.at(index)
         ?.patchValue({ unit_symbol_: '' });
+      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
+        (this.productForm_.get('purchase_options_') as FormArray)
+          ?.at(index)
+          ?.patchValue({ unit_symbol_: newUnit });
+      });
     }
   }
 
