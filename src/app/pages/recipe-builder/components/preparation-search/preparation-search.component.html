@@ -4,6 +4,7 @@
     <input
       #searchInput
       type="text"
+      SelectOnFocus
       [value]="searchQuery_()"
       (input)="searchQuery_.set($any($event.target).value); showResults_.set(true)"
       (focus)="showResults_.set(true)"

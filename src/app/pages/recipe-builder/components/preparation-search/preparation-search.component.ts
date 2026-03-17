@@ -6,11 +6,12 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 @Component({
   selector: 'app-preparation-search',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, ClickOutSideDirective, TranslatePipe, ScrollableDropdownComponent],
+  imports: [CommonModule, LucideAngularModule, ClickOutSideDirective, TranslatePipe, ScrollableDropdownComponent, SelectOnFocusDirective],
   templateUrl: './preparation-search.component.html',
   styleUrl: './preparation-search.component.scss'
 })
@@ -23,6 +24,8 @@ export class PreparationSearchComponent {
   /** When set, focus the search input if rowIndex matches (used when a new workflow row is added). */
   focusTrigger = input<number | null>(null)
   rowIndex = input<number>(0)
+  /** Optional initial search query (e.g. when editing an existing preparation name). */
+  initialQuery = input<string>('')
 
   preparationSelected = output<PreparationEntry>()
   preparationAdded = output<PreparationEntry>()
@@ -44,6 +47,14 @@ export class PreparationSearchComponent {
         this.focusDone.emit()
       }
       if (trigger === null) this.lastHandledFocusTrigger = null
+    })
+    effect(() => {
+      const q = this.initialQuery()?.trim() ?? ''
+      if (q) {
+        this.searchQuery_.set(q)
+        this.showResults_.set(true)
+        setTimeout(() => this.focusSearch(), 0)
+      }
     })
   }
 

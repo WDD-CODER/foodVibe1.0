@@ -114,19 +114,23 @@
               <lucide-icon name="grip-vertical" [size]="16" class="drag-handle-icon"></lucide-icon>
             </div>
             <div class="col-prep-name">
-              @if (!group.get('preparation_name')?.value) {
+              @if (!group.get('preparation_name')?.value || editingPreparationNameAtRow_() === i) {
                 <app-preparation-search
                   [selectedCategory]="group.get('category_name')?.value ?? ''"
                   [focusTrigger]="focusRowAt()"
                   [rowIndex]="i"
+                  [initialQuery]="editingPreparationNameAtRow_() === i ? (group.get('preparation_name')?.value ?? '') : ''"
                   (preparationSelected)="onPreparationSelected($event, group)"
                   (preparationAdded)="onPreparationSelected($event, group)"
                   (focusDone)="focusRowDone.emit()">
                 </app-preparation-search>
               } @else {
-                <div class="selected-item-display">
+                <div class="selected-item-display" role="button" tabindex="0"
+                  (click)="editingPreparationNameAtRow_.set(i)"
+                  (keydown.enter)="editingPreparationNameAtRow_.set(i)"
+                  (keydown.space)="$event.preventDefault(); editingPreparationNameAtRow_.set(i)">
                   <span class="item-text">{{ group.get('preparation_name')?.value }}</span>
-                  <button type="button" class="clear-btn" (click)="clearPreparation(group)">
+                  <button type="button" class="clear-btn" (click)="$event.stopPropagation(); clearPreparation(group)">
                     <lucide-icon name="x" [size]="14"></lucide-icon>
                   </button>
                 </div>

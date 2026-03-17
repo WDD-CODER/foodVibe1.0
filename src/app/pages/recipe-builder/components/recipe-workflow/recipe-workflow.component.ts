@@ -68,6 +68,8 @@ export class RecipeWorkflowComponent {
   @ViewChildren('laborTimeInput') laborTimeInputs!: QueryList<ElementRef<HTMLInputElement>>
 
   editingLaborTimeIndex_ = signal<number | null>(null)
+  /** When set, show preparation-search for this row with current name as initialQuery (click display to edit). */
+  editingPreparationNameAtRow_ = signal<number | null>(null)
 
   constructor() {
     effect(() => {
@@ -188,6 +190,7 @@ export class RecipeWorkflowComponent {
       category_name: entry.category,
       main_category_name: entry.category
     })
+    this.editingPreparationNameAtRow_.set(null)
   }
 
   clearPreparation(group: FormGroup): void {

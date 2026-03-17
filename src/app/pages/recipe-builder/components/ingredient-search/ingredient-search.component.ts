@@ -5,6 +5,7 @@ import { KitchenStateService } from '@services/kitchen-state.service';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util';
 import { QuickAddProductModalService } from '@services/quick-add-product-modal.service';
 import type { Product } from '@models/product.model';
@@ -16,7 +17,7 @@ export type SearchableItem = (Product | Recipe) & { item_type_: 'product' | 'rec
 @Component({
   selector: 'app-ingredient-search',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, ClickOutSideDirective, ScrollableDropdownComponent, TranslatePipe],
+  imports: [CommonModule, LucideAngularModule, ClickOutSideDirective, ScrollableDropdownComponent, TranslatePipe, SelectOnFocusDirective],
   templateUrl: './ingredient-search.component.html',
   styleUrl: './ingredient-search.component.scss'
 })
@@ -65,6 +66,7 @@ export class IngredientSearchComponent {
       if (q && !this.searchQuery_()) {
         this.searchQuery_.set(q);
         this.showResults_.set(true);
+        setTimeout(() => this.focus(), 0);
       }
       if (q) this.highlightedIndex_.set(-1);
     });

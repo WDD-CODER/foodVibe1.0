@@ -25,10 +25,12 @@
           (itemSelected)="onItemSelected($event, group)" (focusDone)="focusSearchDone.emit()"
           (addNewRowRequested)="addIngredient.emit()" (cancelSearch)="editingNameAtRow_.set(null)"></app-ingredient-search>
         } @else {
-        <div class="selected-item-display">
-          <span class="item-text" (click)="editingNameAtRow_.set($index)" role="button" tabindex="0"
-            (keydown.enter)="editingNameAtRow_.set($index)" (keydown.space)="$event.preventDefault(); editingNameAtRow_.set($index)">{{ group.get('name_hebrew')?.value }}</span>
-          <button type="button" class="clear-btn" (click)="clearIngredient(group)">
+        <div class="selected-item-display" role="button" tabindex="0"
+          (click)="editingNameAtRow_.set($index)"
+          (keydown.enter)="editingNameAtRow_.set($index)"
+          (keydown.space)="$event.preventDefault(); editingNameAtRow_.set($index)">
+          <span class="item-text">{{ group.get('name_hebrew')?.value }}</span>
+          <button type="button" class="clear-btn" (click)="$event.stopPropagation(); clearIngredient(group)">
             <lucide-icon name="x" [size]="14"></lucide-icon>
           </button>
         </div>
