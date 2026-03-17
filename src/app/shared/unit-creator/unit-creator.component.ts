@@ -1,10 +1,13 @@
-import { Component, computed, inject, signal, output, input } from '@angular/core';
+import { Component, computed, effect, inject, signal, output, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { UnitRegistryService } from '@services/unit-registry.service';
+import { TranslationService } from '@services/translation.service';
+import { KeyResolutionService } from '@services/key-resolution.service';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 
 @Component({
   selector: 'unit-creator-modal',
@@ -14,14 +17,25 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
     FormsModule,
     LucideAngularModule,
     SelectOnFocusDirective,
-    CustomSelectComponent
+    CustomSelectComponent,
+    TranslatePipe
   ],
   templateUrl: './unit-creator.component.html',
   styleUrl: './unit-creator.component.scss'
 })
 export class UnitCreatorModal {
   private unitRegistryService = inject(UnitRegistryService);
+  private translationService = inject(TranslationService);
+  private keyResolution = inject(KeyResolutionService);
   protected isOpen_ = this.unitRegistryService.isCreatorOpen_;
+
+  constructor() {
+    effect(() => {
+      if (this.isOpen_()) {
+        setTimeout(() => document.getElementById('unit-creator-name')?.focus(), 0);
+      }
+    });
+  }
 
   netUnitCost = input<number>(0);
   unitSaved = output<{ symbol: string, rate: number }>();
@@ -51,7 +65,7 @@ export class UnitCreatorModal {
       const result = await this.unitRegistryService.registerUnit(name, value, basis);
       if (!result.success) {
         if (result.alreadyOnProduct) {
-          this.errorMessage_.set('היחידה כבר קיימת במוצר זה. בחר שם אחר.');
+          this.errorMessage_.set('unit_already_on_product');
         } else if (result.error) {
           this.errorMessage_.set(result.error);
         }
@@ -60,8 +74,7 @@ export class UnitCreatorModal {
       this.unitRegistryService.closeUnitCreator();
       this.resetFields();
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'שגיאה בשמירת היחידה במערכת';
-      this.errorMessage_.set(msg);
+      this.errorMessage_.set('unit_save_error');
     } finally {
       this.isSaving_.set(false);
     }
@@ -92,5 +105,31 @@ export class UnitCreatorModal {
   /** Focus the basis-unit dropdown trigger so user can open it with Enter/Space and use arrows. */
   focusBasisUnitSelect(): void {
     document.getElementById('unit-creator-basis-unit')?.focus();
+  }
+
+  /** Focus the amount input (after name resolution). */
+  focusAmountInput(): void {
+    document.getElementById('unit-creator-amount')?.focus();
+  }
+
+  /**
+   * On Enter/Tab from name: if name is empty or resolves to a key, focus amount;
+   * else open translation modal; on confirm focus amount, on cancel stay on name.
+   */
+  async onNameLeave(event: Event): Promise<void> {
+    event.preventDefault();
+    const trimmed = this.newUnitName_().trim();
+    if (!trimmed) {
+      this.focusAmountInput();
+      return;
+    }
+    if (this.translationService.resolveUnit(trimmed)) {
+      this.focusAmountInput();
+      return;
+    }
+    const key = await this.keyResolution.ensureKeyForContext(trimmed, 'unit');
+    if (key != null) {
+      this.focusAmountInput();
+    }
   }
 }

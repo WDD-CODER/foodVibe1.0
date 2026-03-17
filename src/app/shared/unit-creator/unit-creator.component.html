@@ -1,37 +1,42 @@
 @if (isOpen_()) {
 <div class="c-modal-overlay" (click)="resetAndClose()">
   <div class="c-modal-card c-modal-card--md" dir="rtl" (click)="$event.stopPropagation()">
-    <h3>הגדרת יחידת המרה חדשה</h3>
+    <h3>{{ 'unit_creator_title' | translatePipe }}</h3>
 
     <div class="c-modal-body unit-creator-formula-grid">
       <div class="c-input-stack">
-        <label>שם היחידה</label>
-        <input type="text"
+        <label>{{ 'unit_name' | translatePipe }}</label>
+        <input id="unit-creator-name"
+               type="text"
                [ngModel]="newUnitName_()"
                (ngModelChange)="onUnitNameChange($event)"
-               placeholder="למשל: דלי">
+               [placeholder]="'unit_name_placeholder' | translatePipe"
+               (keydown.enter)="onNameLeave($event)"
+               (keydown.tab)="onNameLeave($event)">
       </div>
 
     @if (errorMessage_()) {
     <div class="unit-creator-error" role="alert">
-      <span class="unit-creator-error__text">{{ errorMessage_() }}</span>
+      <span class="unit-creator-error__text">{{ (errorMessage_() ?? '') | translatePipe }}</span>
     </div>
     }
 
       <div class="c-input-stack unit-creator-amount">
-        <label>כמות</label>
+        <label>{{ 'amount' | translatePipe }}</label>
         <div class="flex gap-2 items-center">
           <span class="math-operator"> = </span>
-          <input SelectOnFocus
+          <input id="unit-creator-amount"
+                 SelectOnFocus
                  type="number"
                  [ngModel]="newUnitValue_()"
                  (ngModelChange)="newUnitValue_.set($event)"
-                 (keydown.enter)="$event.preventDefault(); focusBasisUnitSelect()">
+                 (keydown.enter)="$event.preventDefault(); focusBasisUnitSelect()"
+                 (keydown.tab)="$event.preventDefault(); focusBasisUnitSelect()">
         </div>
       </div>
 
       <div class="c-input-stack">
-        <label>יחידת מידה להשוואה</label>
+        <label>{{ 'basis_unit_label' | translatePipe }}</label>
         <app-custom-select
           triggerId="unit-creator-basis-unit"
           [ngModel]="basisUnit_()"
@@ -44,17 +49,17 @@
 
     @if (netUnitCost() > 0) {
     <div class="cost-preview">
-      <span class="label">עלות נטו מחושבת:</span>
+      <span class="label">{{ 'net_cost_calculated' | translatePipe }}</span>
       <span class="value">₪{{ (netUnitCost() * newUnitValue_()) | number:'1.2-2' }}</span>
     </div>
     }
 
     <div class="c-modal-actions">
-      <button type="button" class="c-btn-ghost" (click)="resetAndClose()">ביטול</button>
+      <button type="button" class="c-btn-ghost" (click)="resetAndClose()">{{ 'cancel' | translatePipe }}</button>
       <button type="button" class="c-btn-primary"
               (click)="save()"
               [disabled]="!newUnitName_() || newUnitValue_() <= 0 || !basisUnit_() || isSaving_()">
-        אשר ושמור יחידה
+        {{ 'approve_and_save_unit' | translatePipe }}
       </button>
     </div>
   </div>
