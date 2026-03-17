@@ -13,11 +13,27 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 190 — Labels UI glass theme (`plans/190-labels-ui-glass-theme.plan.md`)
+- [ ] custom-multi-select: trigger glass (border, backdrop-filter, box-shadow); chip variant hover
+- [ ] custom-multi-select: colored chips glass alignment (light border, optional shadow); keep label colors
+- [ ] styles.scss: .c-dropdown use --shadow-glass
+
+### Plan 189 — Custom multi-select component (`plans/189-custom-multi-select-component.plan.md`)
+- [ ] Create CustomMultiSelectComponent (TS, HTML, SCSS, spec) with ControlValueAccessor for string[], keyboard/click-outside/ARIA
+- [ ] Refactor recipe-header labels to use app-custom-multi-select; labelMultiSelectOptions_, readonlyChips, addNewChosen
+- [ ] Recipe-header SCSS: remove or reduce labels-specific styles; run tests
+
+### Plan 188 — Units metadata and system defaults (`plans/188-units-metadata-system-defaults.plan.md`)
+- [ ] Unit registry: SYSTEM_UNITS (kg, liter, gram, ml, unit, dish); initUnits merge; deleteUnit block system; registerUnit no overwrite
+- [ ] Metadata manager: remove unit rate input and updateUnitRate; add isSystemUnit; hide delete for system units
+- [ ] Metadata manager SCSS: align units card layout with category (two-column list-item)
+- [ ] unit-registry.service.spec.ts and metadata-manager.page.component.spec.ts: update for system units and removed rate UI
+
 ### Plan 187 — Unit creator i18n and focus (`plans/187-unit-creator-i18n-and-focus.plan.md`)
-- [ ] Unit-creator template: TranslatePipe for all strings; id on name/amount; keydown.enter/tab on name; error | translatePipe
-- [ ] Unit-creator component: TranslatePipe, TranslationService, KeyResolutionService; effect focus name; onNameLeave, focusAmountInput; error keys
-- [ ] Dictionary: add unit_creator_title, unit_name, unit_name_placeholder, basis_unit_label, net_cost_calculated, approve_and_save_unit, unit_already_on_product, unit_save_error, cancelled_by_user, unit_name_empty
-- [ ] Unit-registry: return error keys in registerUnit result
+- [x] Unit-creator template: TranslatePipe for all strings; id on name/amount; keydown.enter/tab on name; error | translatePipe
+- [x] Unit-creator component: TranslatePipe, TranslationService, KeyResolutionService; effect focus name; onNameLeave, focusAmountInput; error keys
+- [x] Dictionary: add unit_creator_title, unit_name, unit_name_placeholder, basis_unit_label, net_cost_calculated, approve_and_save_unit, unit_already_on_product, unit_save_error, cancelled_by_user, unit_name_empty
+- [x] Unit-registry: return error keys in registerUnit result
 
 ### Plan 186 — Select-on-focus display click (`plans/186-select-on-focus-display-click.plan.md`)
 - [x] Recipe ingredients table: whole-div click + keyboard, clear button stopPropagation
@@ -1224,7 +1240,9 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 183 | Agent Intelligence Map and Optimization | Done |
 | 184 | Recipe header SCSS dedupe | Done |
 | 186 | Select-on-focus display click | Active |
-| 187 | Unit creator i18n and focus | Active |
+| 187 | Unit creator i18n and focus | Done |
+| 188 | Units metadata and system defaults | Planned |
+| 190 | Labels UI glass theme | Planned |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 
