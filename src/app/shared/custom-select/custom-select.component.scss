@@ -12,7 +12,7 @@
   }
 
   &.custom-select-wrap--chip {
-    width: auto;
+    width: fit-content;
     min-width: 0;
   }
 }
@@ -92,6 +92,11 @@
     color: inherit;
     outline: none;
     padding: 0;
+  }
+
+  &.custom-select-trigger--chip .custom-select-input {
+    flex: 0 0 auto;
+    min-width: 4ch;
   }
 
   lucide-icon {

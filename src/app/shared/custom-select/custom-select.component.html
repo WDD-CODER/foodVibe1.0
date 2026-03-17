@@ -10,6 +10,7 @@
         [id]="triggerId()"
         class="custom-select-input form-input--no-focus-ring"
         [value]="inputDisplayValue_()"
+        [attr.size]="variant() === 'chip' ? chipInputSize_() : null"
         (input)="onInputInput($any($event.target).value)"
         (focus)="openDropdown()"
         (blur)="onTriggerBlur()"

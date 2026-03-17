@@ -85,24 +85,41 @@ export class CustomSelectComponent implements ControlValueAccessor {
     return opt ? opt.label : '';
   });
 
-  /** Options filtered by search: "starts with" + Hebrew vs Latin by script. Add-new option is always pinned at end. */
+  /** Options filtered by search: "starts with" + Hebrew vs Latin by script. Add-new option is always pinned at end. Deduplicated by translated label (prefer current value). */
   protected filteredOptions_ = computed(() => {
     const raw = this.searchQuery_().trim();
     const opts = this.options();
     const addNewVal = this.addNewValue();
     const addNewOpt = opts.find((o) => o.value === addNewVal);
     const rest = addNewOpt ? opts.filter((o) => o.value !== addNewVal) : opts;
-    if (!raw) return opts;
-    const qLower = raw.toLowerCase();
-    const isHebrew = /[\u0590-\u05FF]/.test(raw);
-    const isLatin = /[a-zA-Z]/.test(raw);
-    const filtered = rest.filter((opt) => {
+    const currentValue = this._value();
+    let baseList: { value: string; label: string }[];
+    if (!raw) {
+      baseList = rest;
+    } else {
+      const qLower = raw.toLowerCase();
+      const isHebrew = /[\u0590-\u05FF]/.test(raw);
+      const isLatin = /[a-zA-Z]/.test(raw);
+      baseList = rest.filter((opt) => {
+        const display = this.translateLabels() ? this.translationService.translate(opt.label) : opt.label;
+        if (isHebrew) return display.startsWith(raw);
+        if (isLatin) return /[a-zA-Z]/.test(display) && display.toLowerCase().startsWith(qLower);
+        return display.toLowerCase().startsWith(qLower);
+      });
+    }
+    const deduped: { value: string; label: string }[] = [];
+    const seenDisplay = new Map<string, number>();
+    for (const opt of baseList) {
       const display = this.translateLabels() ? this.translationService.translate(opt.label) : opt.label;
-      if (isHebrew) return display.startsWith(raw);
-      if (isLatin) return /[a-zA-Z]/.test(display) && display.toLowerCase().startsWith(qLower);
-      return display.toLowerCase().startsWith(qLower);
-    });
-    return addNewOpt ? [...filtered, addNewOpt] : filtered;
+      const existingIdx = seenDisplay.get(display);
+      if (existingIdx !== undefined) {
+        if (opt.value === currentValue) deduped[existingIdx] = opt;
+      } else {
+        seenDisplay.set(display, deduped.length);
+        deduped.push(opt);
+      }
+    }
+    return addNewOpt ? [...deduped, addNewOpt] : deduped;
   });
 
   /** Input display value: when open show search query, when closed show selected label (translated if needed). */
@@ -112,6 +129,15 @@ export class CustomSelectComponent implements ControlValueAccessor {
     if (!v) return '';
     const label = this.selectedLabel();
     return this.translateLabels() ? this.translationService.translate(label) : label;
+  });
+
+  /** For chip + typeToFilter: input size attribute so width matches placeholder or value. Min 4 so "בחר" fits. */
+  protected chipInputSize_ = computed(() => {
+    if (this.variant() !== 'chip' || !this.typeToFilter()) return null;
+    const placeholderText = this.translationService.translate(this.placeholder());
+    const displayLen = this.inputDisplayValue_().length;
+    const placeholderLen = placeholderText.length;
+    return Math.max(4, placeholderLen, displayLen);
   });
 
   writeValue(value: string): void {
