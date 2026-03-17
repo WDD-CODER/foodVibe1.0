@@ -226,6 +226,29 @@
     margin-block-end: 0.35rem;
     min-width: 7.5rem;
     max-width: 12.5rem;
+
+    /* Projected content lives inside app-floating-info-container, so it is under .metrics-notice-floating but not .metrics-square; style it here so it is visible. */
+    .metrics-notice-heading {
+      margin: 0 0 0.35rem 0;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--color-text-main);
+    }
+
+    .metrics-notice-item {
+      padding: 0.2rem 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--color-text-main);
+    }
+  }
+
+  .metrics-notice-heading {
+    margin: 0 0 0.35rem 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-text-main);
   }
 
   .metrics-notice-item {
@@ -233,6 +256,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--color-text-main);
   }
 }
 

@@ -11,14 +11,13 @@ import { TranslationService } from '@services/translation.service';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
-import { FloatingInfoContainerComponent } from 'src/app/shared/floating-info-container/floating-info-container.component';
 import { ScalingChipComponent } from 'src/app/shared/scaling-chip/scaling-chip.component';
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util';
 
 @Component({
   selector: 'app-recipe-header',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, ClickOutSideDirective, TranslatePipe, ScrollableDropdownComponent, FloatingInfoContainerComponent, ScalingChipComponent],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, ClickOutSideDirective, TranslatePipe, ScrollableDropdownComponent, ScalingChipComponent],
   templateUrl: './recipe-header.component.html',
   styleUrl: './recipe-header.component.scss'
 })
@@ -295,7 +294,7 @@ export class RecipeHeaderComponent {
       clearTimeout(this.metricsNoticeCloseTimeout_);
       this.metricsNoticeCloseTimeout_ = null;
     }
-    if (this.unconvertibleNamesForCurrentMode_().length > 0) {
+    if (this.unconvertibleNamesFiltered_().length > 0) {
       this.metricsNoticeOpen_.set(true);
     }
   }
@@ -317,7 +316,12 @@ export class RecipeHeaderComponent {
       : this.unconvertibleForVolume();
   });
 
-  protected showMetricsNoticeIcon_ = computed(() => this.unconvertibleNamesForCurrentMode_().length > 0);
+  /** Non-empty names only; use for icon visibility and list content so we never show icon or empty container. */
+  protected unconvertibleNamesFiltered_ = computed(() =>
+    this.unconvertibleNamesForCurrentMode_().filter((n) => (n != null && String(n).trim().length > 0))
+  );
+
+  protected showMetricsNoticeIcon_ = computed(() => this.unconvertibleNamesFiltered_().length > 0);
 
   /** Units available for a secondary chip: exclude every unit already in use (primary + all secondaries). */
   availableUnitsForSecondaryChip_(chipIdx: number): string[] {
