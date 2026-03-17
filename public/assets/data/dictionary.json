@@ -147,6 +147,7 @@
         "price": "מחיר",
         "add_new_unit": "הוסף יחידה חדשה",
         "add_new_allergen": "הוסף אלרגן",
+        "unit_default_unremovable": "ברירת מחדל - לא ניתן להסרה",
         "cost": "עלות",
         "price_for": "מחיר עבור : ",
         "weight": "משקל",

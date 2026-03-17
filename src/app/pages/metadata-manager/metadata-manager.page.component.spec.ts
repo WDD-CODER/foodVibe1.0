@@ -24,6 +24,7 @@ import {
   CookingPot,
   BookOpen,
   MapPin,
+  Lock,
 } from 'lucide-angular';
 import { signal } from '@angular/core';
 import { TranslationService } from '@services/translation.service';
@@ -63,7 +64,7 @@ describe('MetadataManagerPageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         MetadataManagerComponent,
-        LucideAngularModule.pick({ Scale, AlertTriangle, X, ChevronLeft, Tag, Tags, Trash2, UtensilsCrossed, Pencil, Package, Archive, Download, RotateCcw, Upload, CookingPot, BookOpen, MapPin })
+        LucideAngularModule.pick({ Scale, AlertTriangle, X, ChevronLeft, Tag, Tags, Trash2, UtensilsCrossed, Pencil, Package, Archive, Download, RotateCcw, Upload, CookingPot, BookOpen, MapPin, Lock })
       ],
       providers: [
         provideHttpClient(),
@@ -83,5 +84,12 @@ describe('MetadataManagerPageComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should identify system units via isSystemUnit', () => {
+    expect(component.isSystemUnit('gram')).toBe(true);
+    expect(component.isSystemUnit('kg')).toBe(true);
+    expect(component.isSystemUnit('dish')).toBe(true);
+    expect(component.isSystemUnit('jar')).toBe(false);
   });
 });

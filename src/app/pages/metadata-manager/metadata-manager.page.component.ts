@@ -1,7 +1,7 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UnitRegistryService } from '@services/unit-registry.service';
+import { UnitRegistryService, SYSTEM_UNITS } from '@services/unit-registry.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
 import { ProductDataService } from '@services/product-data.service';
 import { DemoLoaderService } from '@services/demo-loader.service';
@@ -32,7 +32,7 @@ type MetadataType = 'category' | 'allergen' | 'unit' | 'label';
   templateUrl: './metadata-manager.page.component.html',
   styleUrl: './metadata-manager.page.component.scss'
 })
-export class MetadataManagerComponent implements OnInit {
+export class MetadataManagerComponent {
   private unitRegistry = inject(UnitRegistryService);
   private metadataRegistry = inject(MetadataRegistryService);
   private productData = inject(ProductDataService);
@@ -60,7 +60,6 @@ export class MetadataManagerComponent implements OnInit {
 
   // SIGNALS
   allUnitKeys_ = this.unitRegistry.allUnitKeys_;
-  tempUnitRates = signal<Record<string, number>>({});
   allAllergens_ = this.metadataRegistry.allAllergens_;
   allCategories_ = this.metadataRegistry.allCategories_;
   allLabels_ = this.metadataRegistry.allLabels_;
@@ -78,14 +77,9 @@ export class MetadataManagerComponent implements OnInit {
   }
 
 
-  ngOnInit(): void {
-    const initialRates: Record<string, number> = {};
-    this.allUnitKeys_().forEach(unit => {
-      initialRates[unit] = this.unitRegistry.getConversion(unit);
-    });
-    this.tempUnitRates.set(initialRates);
+  isSystemUnit(unitKey: string): boolean {
+    return unitKey in SYSTEM_UNITS;
   }
-
 
   //CREATE
 
@@ -156,19 +150,6 @@ export class MetadataManagerComponent implements OnInit {
   //   }
   // }
 
-  //UPDATE
-  updateUnitRate(unit: string, event: Event): void {
-    if (!this.requireSignIn()) return;
-    const input = event.target as HTMLInputElement;
-    const newRate = parseFloat(input.value);
-
-    if (!isNaN(newRate)) {
-      this.unitRegistry.registerUnit(unit, newRate);
-      this.tempUnitRates.update(prev => ({ ...prev, [unit]: newRate }));
-    }
-  }
-
-
   //DELETE
   async onRemoveMetadata(item: string, type: MetadataType) {
   if (!this.requireSignIn()) return;
@@ -218,11 +199,6 @@ export class MetadataManagerComponent implements OnInit {
     switch (type) {
       case 'unit':
         await this.unitRegistry.deleteUnit(item);
-        this.tempUnitRates.update(prev => {
-          const updated = { ...prev };
-          delete updated[item];
-          return updated;
-        });
         break;
       case 'allergen':
         await this.metadataRegistry.deleteAllergen(item);

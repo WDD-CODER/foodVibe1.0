@@ -122,24 +122,8 @@
 
     &.group {
       display: grid;
-      grid-template-columns: 1fr auto 30px;
+      grid-template-columns: 1fr auto;
       gap: 0.625rem;
-
-      input {
-        width: 5rem;
-        padding: 0.25rem;
-        text-align: center;
-        border: 1px solid var(--border-default);
-        border-radius: var(--radius-sm);
-        font-family: 'JetBrains Mono', monospace;
-        background: var(--bg-glass);
-
-        &:focus {
-          border-color: var(--border-focus);
-          outline: none;
-          box-shadow: var(--shadow-focus);
-        }
-      }
     }
   }
 
@@ -162,6 +146,20 @@
 
   .list-item:hover .btn-delete {
     opacity: 1;
+  }
+
+  .unit-default-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.875rem;
+    height: 1.875rem;
+    color: var(--color-text-muted);
+    cursor: default;
+
+    &:hover {
+      color: var(--color-text-muted);
+    }
   }
 }
 
@@ -296,10 +294,17 @@
   }
 }
 
-.manager-card[data-type="unit"] .list-stack {
-  display: grid;
-  grid-auto-flow: dense;
-  grid-template-columns: repeat(auto-fit, minmax(135px, auto));
+.manager-card[data-type="unit"] {
+  .list-stack {
+    display: grid;
+    grid-auto-flow: dense;
+    grid-template-columns: repeat(auto-fit, minmax(115px, auto));
+  }
+
+  .list-item.group {
+    grid-template-columns: 1fr auto;
+    gap: 0.625rem;
+  }
 }
 
 .manager-card[data-type="category"] {

@@ -167,16 +167,17 @@
           }
           <span>{{ item | translatePipe }}</span>
 
-          @if (type === 'unit') {
-          <input type="number" [value]="tempUnitRates()[item]" (change)="updateUnitRate(item, $event)
-          ">
-          }
-
+          @if (type === 'unit' && isSystemUnit(item)) {
+          <span class="unit-default-badge" [attr.title]="'unit_default_unremovable' | translatePipe" aria-label="default unit">
+            <lucide-icon name="lock" [size]="14"></lucide-icon>
+          </span>
+          } @else if (type !== 'unit' || !isSystemUnit(item)) {
           <button class="btn-delete" (click)="onRemoveMetadata(item, type)"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
             <lucide-icon [name]="type === 'allergen' ? 'x' : 'trash-2'"
               [size]="type === 'allergen' ? 14 : 16"></lucide-icon>
           </button>
+          }
         </div>
         }
       </div>

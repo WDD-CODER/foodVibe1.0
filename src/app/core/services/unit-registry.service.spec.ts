@@ -9,13 +9,15 @@ import { KeyResolutionService } from './key-resolution.service';
 describe('UnitRegistryService', () => {
   let service: UnitRegistryService;
 
+  let userMsgSpy: jasmine.SpyObj<Pick<UserMsgService, 'onSetSuccessMsg' | 'onSetErrorMsg'>>;
+
   beforeEach(fakeAsync(() => {
     const storageSpy = jasmine.createSpyObj('StorageService', ['query', 'put', 'post']);
     storageSpy.query.and.returnValue(Promise.resolve([]));
     storageSpy.put.and.returnValue(Promise.resolve());
     storageSpy.post.and.returnValue(Promise.resolve());
 
-    const userMsgSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg']);
+    userMsgSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg']);
     const loggingSpy = jasmine.createSpyObj('LoggingService', ['error', 'warn', 'info']);
     const translationSpy = jasmine.createSpyObj('TranslationService', ['translate', 'validateKeyForHebrew', 'resolveUnit']);
     translationSpy.validateKeyForHebrew.and.returnValue({ valid: true });
@@ -62,6 +64,13 @@ describe('UnitRegistryService', () => {
       service.registerUnit('gram', 2);
       tick();
       expect(service.getConversion('gram')).toBe(rateBefore);
+    }));
+
+    it('should not delete system units and should show error message', fakeAsync(() => {
+      service.deleteUnit('gram');
+      tick();
+      expect(userMsgSpy.onSetErrorMsg).toHaveBeenCalledWith('לא ניתן למחוק יחידות בסיס');
+      expect(service.allUnitKeys_()).toContain('gram');
     }));
 
     it('should return 1 as a fallback for unknown units', () => {

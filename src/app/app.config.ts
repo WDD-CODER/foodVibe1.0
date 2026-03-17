@@ -38,6 +38,7 @@ import {
   Image,
   Info,
   Library,
+  Lock,
   LogOut,
   LucideAngularModule,
   MapPin,
@@ -154,7 +155,8 @@ export const appConfig: ApplicationConfig = {
         Eye,
         FileDown,
         CookingPotIcon,
-        Star
+        Star,
+        Lock
       })
     )
   ]

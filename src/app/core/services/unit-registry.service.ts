@@ -10,6 +10,16 @@ export type RegisterUnitResult =
   | { success: true; alreadyInRegistry?: boolean }
   | { success: false; alreadyOnProduct?: boolean; error?: string };
 
+/** System units: constant, non-removable, values never overwritten. */
+export const SYSTEM_UNITS: Readonly<Record<string, number>> = {
+  kg: 1000,
+  liter: 1000,
+  gram: 1,
+  ml: 1,
+  unit: 1,
+  dish: 1
+};
+
 @Injectable({ providedIn: 'root' })
 export class UnitRegistryService {
   private readonly userMsgService = inject(UserMsgService)
@@ -30,12 +40,7 @@ export class UnitRegistryService {
 
   // Initial defaults - will be overwritten by hydration if storage exists
   public globalUnits_ = signal<Record<string, number>>({
-    'kg': 1000,
-    'liter': 1000,
-    'gram': 1,
-    'ml': 1,
-    'unit': 1,
-    'dish': 1
+    ...SYSTEM_UNITS
   });
 
   // COMPUTED
@@ -50,8 +55,6 @@ export class UnitRegistryService {
    * @param skipOverwriteIfNewer When true (e.g. initial load), do not replace in-memory state if it has more units than storage (avoids race where user added a unit before hydration completed).
    */
   private async initUnits(skipOverwriteIfNewer = true): Promise<void> {
-    const DEFAULT_UNITS = { 'kg': 1000, 'liter': 1000, 'gram': 1, 'ml': 1, 'unit': 1, 'dish': 1 };
-
     try {
       const registries = await this.storageService.query<any>(this.STORAGE_KEY);
       const existingRegistry = registries[0];
@@ -61,20 +64,22 @@ export class UnitRegistryService {
         Object.keys(existingRegistry.units).length === 0;
 
       if (hasNoUnits) {
+        const defaultUnits = { ...SYSTEM_UNITS };
         if (existingRegistry?._id) {
           await this.storageService.put(this.STORAGE_KEY, {
             ...existingRegistry,
-            units: DEFAULT_UNITS
+            units: defaultUnits
           });
         } else {
           await this.storageService.post(this.STORAGE_KEY, {
-            units: DEFAULT_UNITS
+            units: defaultUnits
           });
         }
-        this.globalUnits_.set(DEFAULT_UNITS);
+        this.globalUnits_.set(defaultUnits);
       } else {
         const units = { ...existingRegistry.units };
-        if (!('dish' in units)) units['dish'] = 1;
+        // Merge system units over storage so their values are never overwritten
+        Object.keys(SYSTEM_UNITS).forEach(k => { units[k] = SYSTEM_UNITS[k]; });
         if (skipOverwriteIfNewer) {
           const currentKeys = Object.keys(this.globalUnits_());
           if (currentKeys.length > Object.keys(units).length) return;
@@ -144,9 +149,11 @@ export class UnitRegistryService {
     // 3. Rate in gram-equivalent so getConversion() is consistent across the app
     const factor = basisUnitKey ? this.getConversion(basisUnitKey) : 1;
     const rateInGrams = rate * factor;
+    // System units: never overwrite with a different value
+    const valueToStore = key in SYSTEM_UNITS ? SYSTEM_UNITS[key] : rateInGrams;
 
     // 4. Prepare the updated state
-    const updatedUnits = { ...curUnits, [key]: rateInGrams };
+    const updatedUnits = { ...curUnits, [key]: valueToStore };
 
     try {
       // 4. Persistence Logic (POST vs PUT)
@@ -180,14 +187,14 @@ export class UnitRegistryService {
   }
 
   /**
-   * Deletes a custom unit from the registry. 
-   * Protects base system units from being removed.
+   * Deletes a custom unit from the registry.
+   * System units (kg, liter, gram, ml, unit, dish) cannot be removed.
    */
   async deleteUnit(unitKey: string): Promise<void> {
-    // const protectedUnits = ['kg', 'liter', 'gram', 'ml', 'unit'];
-    // if (protectedUnits.includes(unitKey)) {
-    //   return this.userMsgService.onSetErrorMsg('לא ניתן למחוק יחידות בסיס');
-    // }
+    if (unitKey in SYSTEM_UNITS) {
+      this.userMsgService.onSetErrorMsg('לא ניתן למחוק יחידות בסיס');
+      return;
+    }
 
     const updatedUnits = { ...this.globalUnits_() };
     delete updatedUnits[unitKey];
