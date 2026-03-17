@@ -218,31 +218,121 @@
 
   .metrics-notice-floating {
     position: absolute;
-    top: 100%;
+    bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
     z-index: 20;
 
     margin-block-end: 0.35rem;
-    max-width: 6rem;
+    min-width: 7.5rem;
+    max-width: 12.5rem;
+    max-height: 9rem;
+    padding: 0.5rem 0.75rem;
 
-    /* Projected content (title + items) inside app-floating-info-container */
-    ::ng-deep app-floating-info-container {
-      .metrics-notice-title {
-        margin: 0 0 0.35rem 0;
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: var(--color-danger);
-      }
+    background: var(--bg-glass-strong);
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
 
-      .metrics-notice-item {
-        padding: 0.2rem 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: var(--color-text-main);
-      }
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-glass);
+    overflow: hidden;
+    backdrop-filter: var(--blur-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+
+    display: flex;
+    flex-direction: column;
+  }
+
+  .metrics-notice-title {
+    flex-shrink: 0;
+
+    margin: 0 0 0.35rem 0;
+
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-danger);
+  }
+
+  .metrics-notice-list-wrap {
+    position: relative;
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .metrics-notice-list {
+    min-height: 1.5rem;
+    max-height: 8rem;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
     }
+  }
+
+  .metrics-notice-scroll-zone--top {
+    position: absolute;
+    top: 0;
+    inset-inline: 0;
+    z-index: 2;
+    height: 2rem;
+    pointer-events: none;
+  }
+
+  .metrics-notice-scroll-zone--bottom {
+    position: absolute;
+    bottom: 0;
+    inset-inline: 0;
+    z-index: 2;
+    height: 2rem;
+    pointer-events: none;
+  }
+
+  .metrics-notice-scroll-indicator--top,
+  .metrics-notice-scroll-indicator--bottom {
+    position: absolute;
+    inset-inline: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-block: 0.2rem;
+    min-height: 1.25rem;
+
+    // background: linear-gradient(to bottom, var(--bg-glass-strong) 0%, transparent 100%);
+    color: var(--color-text-secondary);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s var(--ease-smooth);
+  }
+
+  .metrics-notice-scroll-indicator--top {
+    top: 0px;
+    bottom: auto;
+  }
+
+  .metrics-notice-scroll-indicator--bottom {
+    top: auto;
+    bottom: 0;
+    // background: linear-gradient(to top, var(--bg-glass-strong) 0%, transparent 100%);
+  }
+
+  .metrics-notice-list-wrap:has(.metrics-notice-list.can-scroll-up) .metrics-notice-scroll-indicator--top {
+    opacity: 0.8;
+  }
+
+  .metrics-notice-list-wrap:has(.metrics-notice-list.can-scroll-down) .metrics-notice-scroll-indicator--bottom {
+    opacity: 0.8;
+  }
+
+  .metrics-notice-item {
+    padding: 0.2rem 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 

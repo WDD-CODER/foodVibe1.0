@@ -26,30 +26,30 @@
         <div class="scaling-dock-grid">
             <div class="primary-chip-wrapper">
                 <app-scaling-chip
+                    variant="primary"
                     [value]="primaryAmount_()"
                     [unit]="primaryUnitLabel_()"
                     [unitOptions]="primaryUnitOptions_()"
                     [minAmount]="currentRecipeTypeDisplay_() === 'dish' ? 1 : 0"
-                    variant="primary"
                     (valueChange)="onScalingChipAmountChange($event)"
                     (unitChange)="setPrimaryUnit($event)"
-                    (createUnit)="openUnitCreator.emit('unit')" />
+                    (createUnit)="onCreateUnit()" />
             </div>
 
             <div class="secondary-units-container">
                 @for (group of secondaryConversions; track $index; let chipIdx = $index) {
                 <app-scaling-chip
+                    variant="secondary"
                     [value]="group.get('amount')?.value ?? 0"
                     [unit]="group.get('unit')?.value ?? ''"
                     [unitOptions]="getSecondaryUnitOptions(chipIdx)"
-                    [minAmount]="0"
-                    variant="secondary"
                     [showRemove]="true"
                     (valueChange)="onSecondaryScalingChipAmountChange(chipIdx, $event)"
                     (unitChange)="changeSecondaryUnit(chipIdx, $event)"
-                    (createUnit)="openUnitCreator.emit('unit')"
+                    (createUnit)="onCreateUnit(chipIdx)"
                     (remove)="removeSecondaryUnit(chipIdx)" />
                 }
+
                 <div class="add-unit-wrapper">
                     <button type="button" class="add-custom-chip" (click)="addSecondaryChipWithDefault()">
                         <lucide-icon name="plus" [size]="16"></lucide-icon>
@@ -148,16 +148,25 @@
                 <!-- @if (metricsNoticeOpen_()) { -->
                     <div class="metrics-notice-floating" (click)="$event.stopPropagation()"
                         (mouseenter)="onMetricsNoticeZoneEnter()" (mouseleave)="onMetricsNoticeZoneLeave()">
-                        <app-floating-info-container [maxHeight]="128">
-                            <p class="metrics-notice-title">{{ 'items_not_convertible' | translatePipe }}</p>
-                            @for (name of unconvertibleNamesForCurrentMode_(); track name) {
-                               
-                                <div class="metrics-notice-item">{{ name }} sss</div>
-                            }
-                        </app-floating-info-container>
+                        <p class="metrics-notice-title">{{ 'not_convertible' | translatePipe }}</p>
+                        <div class="metrics-notice-list-wrap">
+                            <div class="metrics-notice-list" scrollIndicators>
+                                @for (name of unconvertibleNamesFiltered_(); track name) {
+                                    <div class="metrics-notice-item">{{ name }}</div>
+                                }
+                            </div>
+                            <div class="metrics-notice-scroll-zone metrics-notice-scroll-zone--top" aria-hidden="true"></div>
+                            <div class="metrics-notice-scroll-zone metrics-notice-scroll-zone--bottom" aria-hidden="true"></div>
+                            <div class="metrics-notice-scroll-indicator metrics-notice-scroll-indicator--top" aria-hidden="true">
+                                <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
+                            </div>
+                            <div class="metrics-notice-scroll-indicator metrics-notice-scroll-indicator--bottom" aria-hidden="true">
+                                <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
+                            </div>
+                        </div>
                     </div>
-                }
-            <!-- } -->
+                <!-- } -->
+            }
         </div>
     </div>
 </div>

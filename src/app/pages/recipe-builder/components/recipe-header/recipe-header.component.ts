@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, FormArray, Validators } fr
 import { LucideAngularModule } from 'lucide-angular';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { take } from 'rxjs/operators';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
@@ -12,13 +13,13 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
 import { ScalingChipComponent } from 'src/app/shared/scaling-chip/scaling-chip.component';
-import { FloatingInfoContainerComponent } from 'src/app/shared/floating-info-container/floating-info-container.component';
+import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive';
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util';
 
 @Component({
   selector: 'app-recipe-header',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, ClickOutSideDirective, TranslatePipe, ScrollableDropdownComponent, ScalingChipComponent, FloatingInfoContainerComponent],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, ClickOutSideDirective, TranslatePipe, ScrollableDropdownComponent, ScalingChipComponent, ScrollIndicatorsDirective],
   templateUrl: './recipe-header.component.html',
   styleUrl: './recipe-header.component.scss'
 })
@@ -65,6 +66,18 @@ export class RecipeHeaderComponent {
 
   // OUTPUTS
   openUnitCreator = output<string>();
+
+  /** When scaling-chip "add new unit" is used: open creator and set the new unit on the chip that requested it. */
+  protected onCreateUnit(secondaryChipIndex?: number): void {
+    this.unitRegistryService.openUnitCreator();
+    this.unitRegistryService.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
+      if (secondaryChipIndex === undefined) {
+        this.setPrimaryUnit(newUnit);
+      } else {
+        this.changeSecondaryUnit(secondaryChipIndex, newUnit);
+      }
+    });
+  }
 
   // SIGNALS & CONSTANTS
   readonly placeholderPath = 'assets/style/img/recipe_placeholder.png';
@@ -322,7 +335,10 @@ export class RecipeHeaderComponent {
     this.unconvertibleNamesForCurrentMode_().filter((n) => (n != null && String(n).trim().length > 0))
   );
 
-  protected showMetricsNoticeIcon_ = computed(() => this.unconvertibleNamesFiltered_().length > 0);
+  /** Show alert icon only in volume mode and only when there are unconverted (unconvertible) volume values. */
+  protected showMetricsNoticeIcon_ = computed(() =>
+    this.metricsDisplayMode_() === 'volume' && this.unconvertibleNamesFiltered_().length > 0
+  );
 
   /** Units available for a secondary chip: exclude every unit already in use (primary + all secondaries). */
   availableUnitsForSecondaryChip_(chipIdx: number): string[] {
