@@ -1,1 +1,6 @@
 /* Uses engine: .c-modal-overlay, .c-modal-card, .c-modal-body, .c-input-stack, .c-modal-actions, .c-btn-ghost, .c-btn-primary */
+
+/* Stack above other app modals (e.g. quick-add) when opened from within them */
+:host .c-modal-overlay {
+  z-index: 1100;
+}
