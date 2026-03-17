@@ -168,3 +168,15 @@ If a duplicate name was detected, show after the tree: "**Name already in use:**
 - **Equipment** (demo-equipment): `eq_NNN`; `_id`, `name_hebrew`, `category_`, `owned_quantity_: 0`, `is_consumable_: false`, `created_at_`, `updated_at_` (use current ISO when creating new equipment).
 - **Kitchen preparations**: one doc `[{ "categories": [], "preparations": [{ "name", "category", "addedAt_"? }] }]`; category key trim, lowercase, spaces→underscores.
 - **Unit validation**: `unit_` === `base_unit_` or in `purchase_options_[].unit_symbol_` → OK; else MISMATCH, flag and default to `base_unit_`.
+
+---
+
+## Recovery
+
+If something goes wrong during the workflow:
+
+- **Ambiguous product match** (multiple products could match an ingredient name): list all candidates with their `_id` and `name_hebrew`, ask the user to pick one. Do not guess.
+- **JSON write fails** (parse error or malformed file): read back the target file, validate it is valid JSON, report the exact error. Do not retry blindly -- show the user the issue.
+- **Duplicate name detected after write**: if the duplicate check in Step 3 was missed and the write created a duplicate `name_hebrew`, report it immediately in Step 5 and offer to rename or remove.
+- **Unit mismatch unresolved**: if the user does not answer the unit question in Step 2, default to the product's `base_unit_` and flag it in the Step 5 report for manual follow-up.
+- **Image extraction incomplete** (blurry, partial, multi-page): extract what is readable, list the gaps explicitly in Step 2, and ask the user to fill in missing fields before proceeding to Step 3.

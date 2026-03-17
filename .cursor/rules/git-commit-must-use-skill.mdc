@@ -3,4 +3,4 @@ description: Commit/push requests must use the commit-to-github skill (visual pl
 alwaysApply: true
 ---
 
-When the user asks to commit, push, or save to GitHub, read [.assistant/skills/commit-to-github/SKILL.md](.assistant/skills/commit-to-github/SKILL.md). Execute Phase 0 (tech-debt in working-tree scope only, Spec coverage, run full test suite — if tests fail, ask fix or proceed) before Phase 1 (Evaluate). Do not run `git status` or build the visual tree until Phase 0 is complete. Do not run any git writes until the user approves the visual plan.
+When the user asks to commit, push, or save to GitHub, read [.assistant/skills/commit-to-github/SKILL.md](.assistant/skills/commit-to-github/SKILL.md) and follow all phases in order. No git writes until the user approves the visual plan.

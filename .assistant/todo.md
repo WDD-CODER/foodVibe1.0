@@ -13,6 +13,21 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 183 — Agent Intelligence Map and Optimization (`plans/183-agent-intelligence-map-optimization.plan.md`)
+- [x] R1: Slim `.cursor/commands/` files to one-liner pointers (remove restated Phase 0 / Step 3 details)
+- [x] R2: Remove Phase 0 restatements from `copilot-instructions.md` Section 0, `agent.md` step 7, and `.mdc` rules — keep only "read the SKILL"
+- [x] R3: Extract tab-order sections from `commit-to-github/SKILL.md` to standalone reference file `.assistant/references/tab-orders.md`
+- [x] R4: Slim agent files — replace repeated standards with cross-references to copilot-instructions.md sections
+- [x] R5: Add CI flow disambiguation note (commit-to-github vs test-pr-review-merge) to `agent.md`
+- [x] R6: Archive or verify staleness of `docs/tech-debt-2025-03-05.md`
+- [ ] R7: Consider extracting add-recipe schema reference and action keyword table to data files (deferred)
+- [x] N1: Create session-handoff skill (`.assistant/skills/session-handoff/SKILL.md`)
+- [x] N2: Add "Recovery" sections to commit-to-github and add-recipe skills
+- [x] N3: Add skill priority hierarchy to `copilot-instructions.md`
+- [x] N4: Create cross-reference validation command (`.assistant/commands/validate-agent-refs.md`)
+- [x] N5: Add preflight checklist to `agent.md`
+- [x] N6: Add context-budget awareness note to `copilot-instructions.md`
+
 ### Plan 182 — toFix.md verification (undone) (`plans/182-tofix-verification-undone.plan.md`)
 - [ ] Recipe builder: remove chevron up/down arrows in section titles
 - [ ] Recipe builder: expandable containers — allow collapse by clicking anywhere on card
@@ -26,6 +41,9 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] Remove `.c-grid-select` from styles.scss; remove `.auth-dev-select` from auth-modal SCSS
 - [x] Add lint:no-native-select script and npm script for prevention
 
+### Plan 181 — Scaling-chip placeholder and dedupe options (`plans/181-scaling-chip-placeholder-and-dedupe-options.plan.md`)
+- [x] Scaling-chip placeholder "choose"; add "choose" to dictionary; custom-select dedupe by translated label
+
 ### Plan 180 — Secondary chips and grid layout (`plans/180-secondary-chips-and-grid-layout.plan.md`)
 - [x] Recipe-header HTML: secondary chips as app-scaling-chip
 - [x] Recipe-header TS: getSecondaryUnitOptions, onSecondaryScalingChipAmountChange; remove activeSecondaryEdit_ etc.
@@ -34,6 +52,7 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ### Plan 179 — Unified scaling chip component (`plans/179-unified-scaling-chip-component.plan.md`)
 - [x] Custom-select: chip variant width max-content
+- [x] Custom-select chip: width to placeholder and grow with text (fit-content + size attr) — feat/chip-select-content-width
 - [x] Create shared scaling-chip component (TS, HTML, SCSS)
 - [x] Recipe-header: use app-scaling-chip for primary chip
 - [x] Recipe-header SCSS: trim primary chip styles
@@ -1177,6 +1196,8 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 173 | Selected-item-display whole clickable | Active |
 | 177 | Workflow select behavior | Merged into 178 |
 | 178 | App-wide custom-select behavior | Active |
+| 182 | toFix verification undone | Planned |
+| 183 | Agent Intelligence Map and Optimization | Done |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 

@@ -108,52 +108,21 @@ After Execute: all planned changes are committed on the intended branches, curre
 
 ---
 
-## Recipe builder tab order (canonical)
+## Tab Orders
 
-When changing the recipe-builder page or its child components, keep this Tab order so keyboard-only users can move predictably. Irrelevant controls (e.g. plus/minus buttons) use `tabindex="-1"` and are skipped.
-
-1. **Dish or recipe** — Type toggle (recipe-header).
-2. **Name** — Recipe/dish name input.
-3. **Main unit** — Primary unit selector (unit-switcher open with Enter/Space; arrows to choose).
-4. **Counter value** — Value inside the primary portions/servings input (arrows to change).
-5. **Add another measurement unit** — Add-unit button.
-6. **Added unit select** — Each secondary unit’s selector (if present).
-7. **Value inside new unit** — Each secondary amount input (if present).
-8. **Label** — Labels container (open with Enter/Space).
-9. **Ingredient index** — Ingredients section header (expand/collapse with Enter/Space).
-10. **First ingredient search** — First row ingredient search.
-11. **Ingredient rows** — Per row: search (or display), unit select, quantity input; then next row.
-12. **Add row** — Add ingredient row button.
-13. **Workflow container** — Workflow section header (expand/collapse).
-14. **Text area** — Instruction textarea (prep) or first workflow control (dish).
-15. **Time value** — Labor-time field (prep) per row.
-16. **Add another row** — Add workflow step button.
-17. **Logistics container** — Logistics section header (expand/collapse).
-18. **Search (logistics)** — Tool search input.
-19. **Quantity (logistics)** — Qty input (arrows to change; +/- skipped).
-20. **Add (logistics)** — Add tool button.
-21. **Items in grid** — Logistics chips (added tools).
-22. **Save** — Save recipe/dish button.
+When changing the recipe-builder or menu-intelligence page, see `.assistant/references/tab-orders.md` for canonical keyboard navigation order.
 
 ---
 
-## Menu intelligence tab order (canonical)
+## Recovery
 
-When changing the menu-intelligence page, keep this Tab order so keyboard-only users can move predictably. Guest count +/- and similar controls use `tabindex="-1"` and are skipped.
+If something goes wrong during execution:
 
-1. **Menu name** — Text input (initial focus).
-2. **Event type** — Trigger button; Enter/Space/ArrowDown open dropdown; ArrowUp/Down move, Enter/Space select; Escape close.
-3. **Serving type** — Custom-select (Enter/Space open, Arrow move, Enter/Space select).
-4. **Guest count** — Number input (ArrowUp/Down change value; +/- skipped).
-5. **Event date** — Date wrap (Enter/Space open picker); date input for value.
-6. **Section 1 title** — Button; Enter/Space open section category search.
-7. **Section 1 category search** — When open: type to filter, ArrowUp/Down, Enter/Space select; Tab → first dish in section.
-8. **Section 1 — Dish 1** — If empty: dish search input (Arrow/Enter/Space to select). If filled: dish name (optional edit), then **sell price** input (Arrow to change). Tab from dish search or sell price → next dish or add-dish.
-9. **Section 1 — Dish 2, …** — Same pattern per row.
-10. **Section 1 — Add dish** — Button.
-11. **Section 2 title**, **Section 2 category search**, **Section 2 dishes**, **Add dish**, …
-12. **Add section** — Button.
-13. **Toolbar (when open)** — Export/Save etc.; **Save** as final action.
+- **Stash fails** (untracked files): use `git stash push -u` with the `-u` flag; if still failing, `git add` untracked files first.
+- **Tests fail in Phase 0**: report the specific failure, ask the user: "Fix before building the commit plan, or proceed anyway?" Never silently skip.
+- **Branch already exists**: ask the user to rename or append `-v2`. Do not force-delete existing branches.
+- **Push fails** (auth/remote): report the exact error message. Suggest `gh auth status` for auth issues or `git remote -v` for remote issues.
+- **Merge conflict during stash pop**: report the conflicting files. Do not resolve automatically — list them and ask.
 
 ---
 

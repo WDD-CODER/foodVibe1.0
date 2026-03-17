@@ -30,15 +30,25 @@ Read this and `.assistant/copilot-instructions.md` at the start of every task.
 | elegant-fix | After a fix that feels hacky |
 | angularComponentStructure | Creating/refactoring Angular components |
 | auth-and-logging | Routes, auth, persistence, HTTP, CRUD, logging |
+| session-handoff | User says "wrap up" / "session end" — structured session summary for next session |
 | Hebrew→English key flows | When a plan adds or changes flows where the user enters a Hebrew value that must have an English key → apply `.assistant/copilot-instructions.md` Section 7.1–7.2 |
 
 ## Commands (`.assistant/commands/`)
 | Command | Purpose |
 |---------|----------|
 | test-pr-review-merge.md | Full CI: test, PR, review, merge |
+| validate-agent-refs.md | Periodic health check: verify all agent file cross-references are valid |
 
-## Breadcrumbs
-Before changing a directory, check for `breadcrumbs.md` and read it.
+**Which flow to use?** `commit-to-github` = organize changes into branches and commits. `test-pr-review-merge` = full CI pipeline: test, create PR, review, merge to main.
+
+## Preflight Checklist
+Before starting any task:
+1. Read this file and `.assistant/copilot-instructions.md` (mandatory).
+2. Check `.assistant/todo.md` for related pending work.
+3. Check `breadcrumbs.md` in the target directory before changing it.
+4. If touching SCSS/CSS: read `.assistant/skills/cssLayer/SKILL.md`.
+5. If creating/refactoring components: read `.assistant/skills/angularComponentStructure/SKILL.md`.
+6. Verify you are NOT on `main` branch for code changes.
 
 ## Autonomous Permissions
 - **Terminal**: Non-destructive commands (`npm test`, `ng build`, `ls`, `mkdir`) allowed.
@@ -59,4 +69,4 @@ Before changing a directory, check for `breadcrumbs.md` and read it.
 5. **Audit**: Verify the build compiles (`ng build` if uncertain). Do NOT run the full test suite here — it runs only in the commit-to-github flow (Phase 0) or when the user explicitly asks.
 5.5 **Tech debt**: Before considering the task done (or before suggesting commit), read `.assistant/skills/techdebt/SKILL.md`. Run the analysis; fix critical/high items or attach a short tech-debt report and ask whether to fix or proceed. If the user later runs commit-to-github in the same session, Phase 0 of that skill will use this report (no second techdebt run).
 6. **Branch**: Not on `main`; use `feat/` branch if needed.
-7. **Commit/push**: User asks to commit or push → read `.assistant/skills/commit-to-github/SKILL.md`, follow all phases in order. Phase 0 (techdebt + spec coverage + run full test suite; if tests fail, ask fix or proceed) is mandatory before Phase 1; do not evaluate the working tree until Phase 0 is done. Get approval before any git write.
+7. **Commit/push**: User asks to commit or push → read `.assistant/skills/commit-to-github/SKILL.md` and follow all phases in order. Get approval before any git write.

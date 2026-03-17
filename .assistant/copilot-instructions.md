@@ -5,7 +5,7 @@
 ## 0. Skill Triggers (portable — when X, read skill Y)
 
 - **Save plan**: User says "save the plan" after confirming → read `.assistant/skills/save-plan/SKILL.md` and follow it.
-- **Commit / push to GitHub**: User says commit, push, save to branches → read `.assistant/skills/commit-to-github/SKILL.md`. Before building the commit plan (Phase 1), complete Phase 0: tech-debt pass **in working-tree scope only** (only files to be committed), handle Spec coverage (add/update specs or list and ask), then run the full test suite (`npm test -- --no-watch --browsers=ChromeHeadless`); if tests fail, report and ask fix or proceed. No `git add`/`commit`/`push` until user approves the visual tree in chat.
+- **Commit / push to GitHub**: User says commit, push, save to branches → read `.assistant/skills/commit-to-github/SKILL.md` and follow all phases in order. No git writes until user approves the visual tree in chat.
 - **CSS/SCSS**: Before creating or editing any `.scss`/`.css` in `src/` → read `.assistant/skills/cssLayer/SKILL.md` and apply it (tokens, five-group rhythm, logical properties).
 - **Add recipe/dish**: User adds recipe from image or text → read `.assistant/skills/add-recipe/SKILL.md`; Step 3 confirmation required before any write.
 - **Auth, logging, routes, CRUD**: Read `.assistant/skills/auth-and-logging/SKILL.md` when touching auth, persistence, HTTP, or critical operations.
@@ -13,8 +13,24 @@
 - **End of session, before PR**: Read `.assistant/skills/techdebt/SKILL.md` for duplicate/dead code and TODO audit.
 - **After features**: Read `.assistant/skills/update-docs/SKILL.md` to refresh breadcrumbs and docs.
 - **After a hacky fix**: Read `.assistant/skills/elegant-fix/SKILL.md` to refine into a clean solution.
+- **Session end / wrap up**: User says "wrap up", "session end", or "handoff" → read `.assistant/skills/session-handoff/SKILL.md` and produce the summary.
 - **Lucide icons**: Before adding or editing `<lucide-icon name="...">` in any template → read and apply **Section 8** below.
 - **Hebrew canonical values**: When adding or editing flows that accept user-entered canonical values (units, categories, allergens, section categories) in Hebrew → read and apply **Section 7.1 and 7.2** below.
+
+## 0.1 Priority Hierarchy (when guidance conflicts)
+
+When two or more sources give conflicting instructions, follow this precedence (highest wins):
+
+1. **User's explicit instruction** in the current conversation
+2. **This file** (`copilot-instructions.md`) — single source of truth
+3. **Active SKILL** being executed (context-specific rules for the current workflow)
+4. **Agent persona** file (role-specific guidance)
+5. **Breadcrumbs** (directory-local context)
+6. **Historical docs and reports** (tech-debt reports, session handoffs, etc.)
+
+## 0.2 Context Budget
+
+Load skills on-demand at the point of need — do not pre-load all skills at session start. Each skill is ~400-3,500 tokens. Load only what the current task requires.
 
 ## 1. Persona & Identity
 * **Role**: Senior Software Engineer (Kitchen/Recipe Domain Specialist).
