@@ -13,6 +13,11 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 184 — Recipe header SCSS dedupe (`plans/184-recipe-header-scss-dedupe.plan.md`)
+- [x] Remove duplicate `.metrics-notice-heading` and `.metrics-notice-item` blocks from recipe-header.component.scss
+- [x] Update comment for metrics-notice-floating content (optional)
+- [ ] Verify metrics notice popover styling unchanged
+
 ### Plan 183 — Agent Intelligence Map and Optimization (`plans/183-agent-intelligence-map-optimization.plan.md`)
 - [x] R1: Slim `.cursor/commands/` files to one-liner pointers (remove restated Phase 0 / Step 3 details)
 - [x] R2: Remove Phase 0 restatements from `copilot-instructions.md` Section 0, `agent.md` step 7, and `.mdc` rules — keep only "read the SKILL"
@@ -1198,6 +1203,7 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 178 | App-wide custom-select behavior | Active |
 | 182 | toFix verification undone | Planned |
 | 183 | Agent Intelligence Map and Optimization | Done |
+| 184 | Recipe header SCSS dedupe | Done |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 
