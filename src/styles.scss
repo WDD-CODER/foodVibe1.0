@@ -490,7 +490,7 @@ textarea.c-input {
 
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-glass);
 
   /* Let clicks pass through except on the list so click-outside works when dropdown overlaps content below. */
   pointer-events: none;

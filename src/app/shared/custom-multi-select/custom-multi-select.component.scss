@@ -1,0 +1,180 @@
+:host {
+  display: block;
+}
+
+  .custom-multi-select-wrap {
+    position: relative;
+
+    width: 100%;
+
+    &.open {
+      z-index: 9999;
+    }
+
+    &.custom-multi-select-wrap--chip {
+      width: fit-content;
+      min-width: 0;
+    }
+  }
+
+  .custom-multi-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+
+    width: 100%;
+    min-height: 2.25rem;
+    padding-inline: 0.75rem;
+    padding-block: 0.5rem;
+
+    background: var(--bg-glass);
+    color: var(--color-text-main);
+    font-size: 0.875rem;
+    text-align: start;
+
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-glass);
+    backdrop-filter: var(--blur-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background: var(--bg-glass-hover);
+      border-color: var(--border-strong);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: var(--shadow-focus);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    &.custom-select-trigger--compact {
+      min-height: 1.75rem;
+      padding-inline: 0.375rem;
+      padding-block: 0.25rem;
+      font-size: 0.8125rem;
+      border-radius: var(--radius-sm);
+    }
+
+    &.custom-select-trigger--chip {
+      min-height: auto;
+      padding-inline: 0.5rem;
+      padding-block: 0.25rem;
+      border-radius: 9999px;
+      font-size: 0.8125rem;
+
+      &:hover:not(:disabled) {
+        border-color: var(--border-focus);
+      }
+    }
+  }
+
+  .custom-multi-select-trigger-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem;
+
+    flex: 1;
+    min-width: 0;
+  }
+
+  .custom-multi-select-placeholder {
+    color: var(--color-text-muted);
+  }
+
+  .custom-multi-select-chip {
+    display: inline-flex;
+    align-items: center;
+
+    padding-inline: 0.5rem;
+    padding-block: 0.2rem;
+
+    font-size: 0.8125rem;
+    border-radius: 9999px;
+
+    border: none;
+
+    cursor: default;
+
+    &.custom-multi-select-chip--colored {
+      // Background and color set dynamically for option-based chip color (single exception)
+      border: 1px solid var(--border-glass);
+      box-shadow: var(--shadow-glass);
+    }
+
+    &:not(.custom-multi-select-chip--colored) {
+      background: var(--bg-muted);
+      color: var(--color-text-main);
+    }
+
+    &.custom-multi-select-chip--removable {
+      cursor: pointer;
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+  }
+
+  .custom-select-option {
+    display: block;
+    width: 100%;
+
+    padding-block: 0.5rem;
+    padding-inline: 0.75rem;
+
+    background: none;
+    color: var(--color-text-main);
+    font-size: 0.875rem;
+    text-align: start;
+
+    border: none;
+
+    cursor: pointer;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: var(--bg-glass);
+    }
+
+    &.highlighted {
+      background: var(--color-primary-soft);
+    }
+
+    &.custom-select-option--chip {
+      padding-block: 0.375rem;
+      padding-inline: 0.5rem;
+      font-size: 0.8125rem;
+    }
+
+    &.custom-select-option--add-new {
+      color: var(--color-primary);
+      font-weight: 600;
+
+      padding-inline-start: calc(0.75rem - 3px);
+      border-inline-start: 3px solid var(--color-primary);
+      background: var(--color-primary-soft);
+
+      &:hover,
+      &.highlighted {
+        color: var(--color-primary-hover);
+        background: var(--color-primary-glow);
+      }
+    }
+  }
+
+  lucide-icon {
+    flex-shrink: 0;
+    pointer-events: none;
+  }

@@ -5,6 +5,8 @@ import { RecipeHeaderComponent } from './recipe-header.component';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { TranslationService } from '@services/translation.service';
+import { MetadataRegistryService } from '@services/metadata-registry.service';
+import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service';
 import { signal } from '@angular/core';
 
 describe('RecipeHeaderComponent', () => {
@@ -20,7 +22,8 @@ describe('RecipeHeaderComponent', () => {
       serving_portions: [overrides.serving_portions ?? 1],
       yield_conversions: conversions,
       name_hebrew: [''],
-      total_weight_g: [0]
+      total_weight_g: [0],
+      labels: [[] as string[]]
     });
   }
 
@@ -30,13 +33,21 @@ describe('RecipeHeaderComponent', () => {
     });
     unitRegistrySpy.getConversion.and.returnValue(1);
 
+    const metadataRegistrySpy = jasmine.createSpyObj('MetadataRegistryService', [], {
+      allLabels_: signal([{ key: 'vegan', color: '#10B981' }, { key: 'gluten-free', color: '#F59E0B' }])
+    });
+    const labelCreationModalSpy = jasmine.createSpyObj('LabelCreationModalService', ['open']);
+    labelCreationModalSpy.open.and.returnValue(Promise.resolve(null));
+
     await TestBed.configureTestingModule({
       imports: [RecipeHeaderComponent, ReactiveFormsModule, LucideAngularModule.pick({ ChevronDown, Plus, X })],
       providers: [
         FormBuilder,
         { provide: UnitRegistryService, useValue: unitRegistrySpy },
         { provide: KitchenStateService, useValue: {} },
-        { provide: TranslationService, useValue: { translate: (k: string) => k || '' } }
+        { provide: TranslationService, useValue: { translate: (k: string) => k || '' } },
+        { provide: MetadataRegistryService, useValue: metadataRegistrySpy },
+        { provide: LabelCreationModalService, useValue: labelCreationModalSpy }
       ]
     }).compileComponents();
 

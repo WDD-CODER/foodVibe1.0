@@ -1,0 +1,89 @@
+<div
+  class="custom-multi-select-wrap"
+  [class.open]="open()"
+  [class.custom-multi-select-wrap--chip]="variant() === 'chip'"
+  (clickOutside)="close()">
+  <button
+    #triggerRef
+    type="button"
+    [id]="triggerId()"
+    class="c-select custom-select-trigger custom-multi-select-trigger"
+    [class.custom-select-trigger--compact]="compact()"
+    [class.custom-select-trigger--chip]="variant() === 'chip'"
+    [class.open]="open()"
+    [disabled]="disabled"
+    (mousedown)="onTriggerMousedown()"
+    (focus)="onTriggerFocus()"
+    (click)="onTriggerClick()"
+    (blur)="onTriggerBlur()"
+    [attr.aria-expanded]="open()"
+    aria-haspopup="listbox"
+    [attr.aria-label]="placeholder() | translatePipe">
+    <span class="custom-multi-select-trigger-inner">
+      @for (key of readonlyChips(); track key) {
+        @let opt = getOptionForValue(key);
+        <span
+          class="custom-multi-select-chip custom-multi-select-chip--readonly"
+          [class.custom-multi-select-chip--colored]="opt.color"
+          [style.background-color]="opt.color || null"
+          [style.color]="opt.color ? getChipTextColor(opt.color) : null">
+          @if (translateLabels()) {
+            {{ opt.label | translatePipe }}
+          } @else {
+            {{ opt.label }}
+          }
+        </span>
+      }
+      @for (key of value; track key) {
+        @let opt = getOptionForValue(key);
+        <button
+          type="button"
+          class="custom-multi-select-chip custom-multi-select-chip--removable"
+          [class.custom-multi-select-chip--colored]="opt.color"
+          [style.background-color]="opt.color || null"
+          [style.color]="opt.color ? getChipTextColor(opt.color) : null"
+          (click)="removeOption(key); $event.stopPropagation()"
+          [attr.aria-label]="'remove' | translatePipe">
+          @if (translateLabels()) {
+            {{ opt.label | translatePipe }}
+          } @else {
+            {{ opt.label }}
+          }
+        </button>
+      }
+      @if (value.length === 0 && readonlyChips().length === 0) {
+        <span class="custom-multi-select-placeholder">
+          {{ placeholder() | translatePipe }}
+        </span>
+      }
+    </span>
+    <lucide-icon name="chevron-down" [size]="variant() === 'chip' ? 10 : 14"></lucide-icon>
+  </button>
+
+  @if (open()) {
+    <app-scrollable-dropdown
+      [maxHeight]="maxHeight()"
+      role="listbox"
+      aria-multiselectable="true"
+      [attr.aria-activedescendant]="triggerId() && highlightedIndex() >= 0 ? triggerId() + '-opt-' + highlightedIndex() : null">
+      @for (opt of dropdownOptions_(); track opt.value; let i = $index) {
+        <button
+          type="button"
+          class="custom-select-option"
+          [class.custom-select-option--add-new]="opt.value === addNewValue()"
+          [class.custom-select-option--chip]="variant() === 'chip'"
+          [id]="triggerId() ? triggerId() + '-opt-' + i : null"
+          [class.highlighted]="highlightedIndex() === i"
+          role="option"
+          [attr.aria-selected]="value.includes(opt.value)"
+          (click)="onOptionClick(opt)">
+          @if (translateLabels()) {
+            {{ opt.label | translatePipe }}
+          } @else {
+            {{ opt.label }}
+          }
+        </button>
+      }
+    </app-scrollable-dropdown>
+  }
+</div>

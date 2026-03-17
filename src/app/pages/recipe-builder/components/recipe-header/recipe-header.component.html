@@ -58,64 +58,28 @@
             </div>
         </div>
 
-        <div class="labels-container" (clickOutside)="setLabelDropdownOpen(false)">
+        <div class="labels-container">
             <div class="labels-grid-row-wrap">
-            <div class="labels-grid-row">
-                <div class="labels-grid-dense"
-                    [class.has-chips]="(autoLabels().length + selectedLabels_().length) > 0"
-                    (click)="setLabelDropdownOpen(true)"
-                    role="button"
-                    tabindex="0"
-                    (keydown.enter)="setLabelDropdownOpen(true)"
-                    (keydown.space)="$event.preventDefault(); setLabelDropdownOpen(true)"
-                    [attr.aria-label]="'labels' | translatePipe"
-                    [attr.aria-expanded]="labelDropdownOpen_()">
-                    @for (key of autoLabels(); track key) {
-                        <span class="label-chip label-chip-auto"
-                            [style.background-color]="getLabelColor(key)"
-                            [style.color]="getLabelChipTextColor(key)">
-                            {{ key | translatePipe }}
-                        </span>
-                    }
-                    @for (key of selectedLabels_(); track key) {
-                        <button type="button" class="label-chip label-chip-manual"
-                            [style.background-color]="getLabelColor(key)"
-                            [style.color]="getLabelChipTextColor(key)"
-                            (click)="removeLabel(key); $event.stopPropagation()"
-                            [attr.aria-label]="'remove' | translatePipe">
-                            {{ key | translatePipe }}
-                        </button>
-                    }
-                </div>
-                <div class="labels-actions">
-                    <button type="button" class="labels-btn-label" tabindex="-1"
-                        (click)="setLabelDropdownOpen(!labelDropdownOpen_()); $event.stopPropagation()"
-                        [attr.aria-expanded]="labelDropdownOpen_()">
-                        {{ 'labels' | translatePipe }}
-                    </button>
-                    @if (selectedLabels_().length > 0) {
-                        <button type="button" class="labels-btn-clear" tabindex="-1"
-                            (click)="clearAllManualLabels(); $event.stopPropagation()">
-                            {{ 'clear_all' | translatePipe }}
-                        </button>
-                    }
-                </div>
-            </div>
-            @if (labelDropdownOpen_()) {
-                <app-scrollable-dropdown [maxHeight]="200" class="labels-dropdown">
-                    @for (labelDef of filteredLabelOptions_(); track labelDef.key) {
-                        <div class="labels-dropdown-item"
-                            (click)="addLabel(labelDef.key)">
-                            <span class="color-dot" [style.background-color]="labelDef.color"></span>
-                            {{ labelDef.key | translatePipe }}
-                        </div>
-                    }
-                    <div class="labels-dropdown-item labels-dropdown-create" (click)="openCreateLabel(); setLabelDropdownOpen(false)">
-                        <lucide-icon name="plus" [size]="14"></lucide-icon>
-                        {{ 'create_new_label' | translatePipe }}
+                <div class="labels-grid-row">
+                    <app-custom-multi-select
+                        [formControl]="labelsControl"
+                        [options]="labelMultiSelectOptions_()"
+                        [readonlyChips]="autoLabels()"
+                        placeholder="labels"
+                        addNewValue="__add_label__"
+                        variant="chip"
+                        [maxHeight]="200"
+                        (addNewChosen)="openCreateLabel()" />
+                    <div class="labels-actions">
+                        <span class="labels-btn-label">{{ 'labels' | translatePipe }}</span>
+                        @if (hasAnyLabelsInContainer_()) {
+                            <button type="button" class="labels-btn-clear" tabindex="-1"
+                                (click)="clearAllManualLabels(); $event.stopPropagation()">
+                                {{ 'clear_all' | translatePipe }}
+                            </button>
+                        }
                     </div>
-                </app-scrollable-dropdown>
-            }
+                </div>
             </div>
         </div>
     </div>

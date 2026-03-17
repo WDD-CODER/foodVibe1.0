@@ -1,6 +1,6 @@
 import { Component, input, inject, output, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, FormArray, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, FormArray, FormControl, Validators } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -11,7 +11,7 @@ import { MetadataRegistryService } from '@services/metadata-registry.service';
 import { TranslationService } from '@services/translation.service';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service';
-import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
+import { CustomMultiSelectComponent } from 'src/app/shared/custom-multi-select/custom-multi-select.component';
 import { ScalingChipComponent } from 'src/app/shared/scaling-chip/scaling-chip.component';
 import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive';
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util';
@@ -19,7 +19,7 @@ import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantit
 @Component({
   selector: 'app-recipe-header',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, ClickOutSideDirective, TranslatePipe, ScrollableDropdownComponent, ScalingChipComponent, ScrollIndicatorsDirective],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, ClickOutSideDirective, TranslatePipe, CustomMultiSelectComponent, ScalingChipComponent, ScrollIndicatorsDirective],
   templateUrl: './recipe-header.component.html',
   styleUrl: './recipe-header.component.scss'
 })
@@ -48,21 +48,31 @@ export class RecipeHeaderComponent {
   autoLabels = input<string[]>([]);
 
   // LABELS
-  protected labelDropdownOpen_ = signal(false);
-  private labelTrigger_ = signal(0);
-  protected selectedLabels_ = computed(() => {
-    this.labelTrigger_();
-    return (this.form().get('labels')?.value ?? []) as string[];
+  /** Options for multi-select: all labels (with color) + create-new. Component filters dropdown to available. */
+  protected labelMultiSelectOptions_ = computed(() => {
+    const all = this.metadataRegistry.allLabels_().map((l) => ({
+      value: l.key,
+      label: l.key,
+      color: l.color
+    }));
+    return [...all, { value: '__add_label__', label: 'create_new_label' }];
   });
-  protected allLabelsForDisplay_ = computed(() => {
-    this.labelTrigger_();
-    return [...new Set([...this.selectedLabels_(), ...this.autoLabels()])];
+
+  protected get labelsControl(): FormControl<string[]> {
+    return this.form().get('labels') as FormControl<string[]>;
+  }
+
+  protected hasManualLabels_ = computed(() => {
+    const arr = (this.form().get('labels')?.value ?? []) as string[];
+    return arr.length > 0;
   });
-  protected filteredLabelOptions_ = computed(() =>
-    this.metadataRegistry.allLabels_().filter(l => !this.allLabelsForDisplay_().includes(l.key))
-  );
-  /** All labels for manual toggle list in template (exposes registry without making service public). */
-  protected allLabels_ = this.metadataRegistry.allLabels_;
+
+  /** True when the labels container shows any chips (manual or auto) — used to show "Clear all" button. */
+  protected hasAnyLabelsInContainer_ = computed(() => {
+    const manual = (this.form().get('labels')?.value ?? []) as string[];
+    const auto = this.autoLabels();
+    return manual.length > 0 || auto.length > 0;
+  });
 
   // OUTPUTS
   openUnitCreator = output<string>();
@@ -460,62 +470,8 @@ export class RecipeHeaderComponent {
     return conversions.controls.slice(1) as FormGroup[];
   }
 
-  protected setLabelDropdownOpen(open: boolean): void {
-    this.labelDropdownOpen_.set(open);
-  }
-
-  protected addLabel(key: string): void {
-    const current = (this.form().get('labels')?.value ?? []) as string[];
-    if (current.includes(key)) return;
-    this.form().get('labels')?.setValue([...current, key], { emitEvent: true });
-    this.labelTrigger_.update(v => v + 1);
-  }
-
-  protected removeLabel(key: string): void {
-    if (this.autoLabels().includes(key)) return;
-    const current = (this.form().get('labels')?.value ?? []) as string[];
-    this.form().get('labels')?.setValue(current.filter(k => k !== key), { emitEvent: true });
-    this.labelTrigger_.update(v => v + 1);
-  }
-
-  protected isAutoLabel(key: string): boolean {
-    return this.autoLabels().includes(key);
-  }
-
-  protected toggleManualLabel(key: string): void {
-    const ctrl = this.form().get('labels');
-    if (!ctrl) return;
-    const current = (ctrl.value || []) as string[];
-    if (current.includes(key)) {
-      ctrl.setValue(current.filter(l => l !== key));
-    } else {
-      ctrl.setValue([...current, key]);
-    }
-    this.labelTrigger_.update(v => v + 1);
-  }
-
-  protected getLabelColor(key: string): string {
-    return this.metadataRegistry.getLabelColor(key);
-  }
-
-  /** Returns white or dark text color for contrast on label chip background. */
-  protected getLabelChipTextColor(key: string): string {
-    let hex = this.metadataRegistry.getLabelColor(key).trim();
-    if (hex.startsWith('#')) hex = hex.slice(1);
-    if (hex.length === 3) {
-      hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-    }
-    if (hex.length !== 6) return '#0f172a';
-    const r = parseInt(hex.slice(0, 2), 16);
-    const g = parseInt(hex.slice(2, 4), 16);
-    const b = parseInt(hex.slice(4, 6), 16);
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    return luminance > 0.5 ? '#0f172a' : '#ffffff';
-  }
-
   protected clearAllManualLabels(): void {
     this.form().get('labels')?.setValue([], { emitEvent: true });
-    this.labelTrigger_.update(v => v + 1);
   }
 
   protected async openCreateLabel(): Promise<void> {
@@ -524,7 +480,10 @@ export class RecipeHeaderComponent {
     try {
       this.translationService.updateDictionary(result.key, result.hebrewLabel);
       await this.metadataRegistry.registerLabel(result.key, result.color, result.autoTriggers);
-      this.addLabel(result.key);
+      const current = (this.form().get('labels')?.value ?? []) as string[];
+      if (!current.includes(result.key)) {
+        this.form().get('labels')?.setValue([...current, result.key], { emitEvent: true });
+      }
     } catch {
       // Error already shown by registry
     }
