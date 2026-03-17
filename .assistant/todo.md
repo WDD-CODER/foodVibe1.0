@@ -13,6 +13,25 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 187 — Unit creator i18n and focus (`plans/187-unit-creator-i18n-and-focus.plan.md`)
+- [ ] Unit-creator template: TranslatePipe for all strings; id on name/amount; keydown.enter/tab on name; error | translatePipe
+- [ ] Unit-creator component: TranslatePipe, TranslationService, KeyResolutionService; effect focus name; onNameLeave, focusAmountInput; error keys
+- [ ] Dictionary: add unit_creator_title, unit_name, unit_name_placeholder, basis_unit_label, net_cost_calculated, approve_and_save_unit, unit_already_on_product, unit_save_error, cancelled_by_user, unit_name_empty
+- [ ] Unit-registry: return error keys in registerUnit result
+
+### Plan 186 — Select-on-focus display click (`plans/186-select-on-focus-display-click.plan.md`)
+- [x] Recipe ingredients table: whole-div click + keyboard, clear button stopPropagation
+- [x] Ingredient search: SelectOnFocus on input; focus when initialQuery set
+- [x] Recipe workflow: editingPreparationNameAtRow_ signal + show search in edit mode with initialQuery; div click + clear stopPropagation
+- [x] Preparation search: initialQuery input, effect to set query + focus, SelectOnFocus on input
+
+### Plan 185 — Hebrew-key rule for key-based fields (`plans/185-hebrew-key-rule-key-based-fields.plan.md`)
+- [x] Add ensureKeyForContext helper (resolve → if Hebrew and no key, translation modal → return key)
+- [x] Use helper in metadata-registry (registerCategory, registerAllergen) and unit-registry (registerUnit)
+- [x] Use helper in preparation-registry and menu-section-categories
+- [x] Ensure all key-based add-new callers set returned key in UI (quick-add already does)
+- [ ] Do not apply rule to display-only fields (recipe name, venue name; ID-based) — document only
+
 ### Plan 184 — Recipe header SCSS dedupe (`plans/184-recipe-header-scss-dedupe.plan.md`)
 - [x] Remove duplicate `.metrics-notice-heading` and `.metrics-notice-item` blocks from recipe-header.component.scss
 - [x] Update comment for metrics-notice-floating content (optional)
@@ -1204,6 +1223,8 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 182 | toFix verification undone | Planned |
 | 183 | Agent Intelligence Map and Optimization | Done |
 | 184 | Recipe header SCSS dedupe | Done |
+| 186 | Select-on-focus display click | Active |
+| 187 | Unit creator i18n and focus | Active |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 
