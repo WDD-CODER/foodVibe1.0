@@ -12,12 +12,13 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
 import { ScalingChipComponent } from 'src/app/shared/scaling-chip/scaling-chip.component';
+import { FloatingInfoContainerComponent } from 'src/app/shared/floating-info-container/floating-info-container.component';
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util';
 
 @Component({
   selector: 'app-recipe-header',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, ClickOutSideDirective, TranslatePipe, ScrollableDropdownComponent, ScalingChipComponent],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, ClickOutSideDirective, TranslatePipe, ScrollableDropdownComponent, ScalingChipComponent, FloatingInfoContainerComponent],
   templateUrl: './recipe-header.component.html',
   styleUrl: './recipe-header.component.scss'
 })

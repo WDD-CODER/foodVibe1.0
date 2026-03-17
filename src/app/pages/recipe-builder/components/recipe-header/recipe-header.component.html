@@ -145,27 +145,19 @@
                 <span class="metrics-notice-wrap" (click)="$event.stopPropagation(); toggleMetricsNotice()">
                     <lucide-icon name="alert-circle" class="metrics-notice-icon" [size]="16" [title]="'items_not_convertible' | translatePipe"></lucide-icon>
                 </span>
-                @if (metricsNoticeOpen_()) {
+                <!-- @if (metricsNoticeOpen_()) { -->
                     <div class="metrics-notice-floating" (click)="$event.stopPropagation()"
                         (mouseenter)="onMetricsNoticeZoneEnter()" (mouseleave)="onMetricsNoticeZoneLeave()">
-                        <div class="metrics-notice-list-wrap">
-                            <div class="metrics-notice-list" scrollIndicators>
-                                @for (name of unconvertibleNamesForCurrentMode_(); track name) {
-                                    <div class="metrics-notice-item">{{ name }}</div>
-                                }
-                            </div>
-                            <div class="metrics-notice-scroll-zone metrics-notice-scroll-zone--top" aria-hidden="true"></div>
-                            <div class="metrics-notice-scroll-zone metrics-notice-scroll-zone--bottom" aria-hidden="true"></div>
-                            <div class="metrics-notice-scroll-indicator metrics-notice-scroll-indicator--top" aria-hidden="true">
-                                <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
-                            </div>
-                            <div class="metrics-notice-scroll-indicator metrics-notice-scroll-indicator--bottom" aria-hidden="true">
-                                <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
-                            </div>
-                        </div>
+                        <app-floating-info-container [maxHeight]="128">
+                            <p class="metrics-notice-title">{{ 'items_not_convertible' | translatePipe }}</p>
+                            @for (name of unconvertibleNamesForCurrentMode_(); track name) {
+                               
+                                <div class="metrics-notice-item">{{ name }} sss</div>
+                            }
+                        </app-floating-info-container>
                     </div>
                 }
-            }
+            <!-- } -->
         </div>
     </div>
 </div>
