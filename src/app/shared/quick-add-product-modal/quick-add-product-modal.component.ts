@@ -126,9 +126,13 @@ export class QuickAddProductModalComponent {
         saveLabel: 'save_category'
       });
       if (newCategory) {
-        await this.metadataRegistry.registerCategory(newCategory);
-        this.category_.set(newCategory);
-        this.onSelectChange(this.getNextFocusAfterCategory());
+        const key = await this.metadataRegistry.registerCategory(newCategory);
+        if (key) {
+          this.category_.set(key);
+          this.onSelectChange(this.getNextFocusAfterCategory());
+        } else {
+          this.category_.set('');
+        }
       } else {
         this.category_.set('');
       }

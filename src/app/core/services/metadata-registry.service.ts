@@ -315,9 +315,9 @@ export class MetadataRegistryService {
     }
   }
 
-  async registerCategory(name: string): Promise<void> {
+  async registerCategory(name: string): Promise<string | null> {
     const trimmed = (name ?? '').trim();
-    if (!trimmed) return;
+    if (!trimmed) return null;
 
     let keyToUse: string = this.translationService.resolveCategory(trimmed) ?? '';
     if (!keyToUse) {
@@ -329,7 +329,7 @@ export class MetadataRegistryService {
         keyToUse = trimmed;
       }
     }
-    if (this.categories_().includes(keyToUse)) return;
+    if (this.categories_().includes(keyToUse)) return keyToUse;
 
     const updatedCategories: string[] = [...this.categories_(), keyToUse];
 
@@ -352,10 +352,11 @@ export class MetadataRegistryService {
 
       this.categories_.set(updatedCategories);
       this.userMsgService.onSetSuccessMsg(`הקטגוריה "${keyToUse}" נוספה בהצלחה`);
-
+      return keyToUse;
     } catch (err) {
       this.userMsgService.onSetErrorMsg('שגיאה בשמירת הקטגוריה')
       this.logging.error({ event: 'crud.metadata.category.save_error', message: 'Category save error', context: { err } })
+      return null;
     }
   }
 
