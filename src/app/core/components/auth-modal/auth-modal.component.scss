@@ -103,6 +103,41 @@
   }
 }
 
+.password-field-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  input {
+    flex: 1;
+    padding-inline-end: 2.5rem;
+  }
+
+  .password-toggle {
+    position: absolute;
+    inset-inline-end: 0.5rem;
+
+    display: grid;
+    place-content: center;
+
+    width: 1.75rem;
+    height: 1.75rem;
+
+    background: transparent;
+    color: var(--color-text-muted);
+
+    border: none;
+    border-radius: var(--radius-sm);
+
+    cursor: pointer;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--color-text-main);
+    }
+  }
+}
+
 .auth-error {
   margin: 0;
   margin-top: 4px;

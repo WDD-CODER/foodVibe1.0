@@ -1,15 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, viewChild, ElementRef, effect, isDevMode } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
-import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 import { AuthModalService } from '@services/auth-modal.service';
 import { UserService } from '@services/user.service';
 
 @Component({
   selector: 'app-auth-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, TranslatePipe, CustomSelectComponent],
+  imports: [FormsModule, LucideAngularModule, TranslatePipe],
   templateUrl: './auth-modal.component.html',
   styleUrl: './auth-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -19,13 +18,6 @@ export class AuthModalComponent {
   private readonly userService = inject(UserService);
 
   protected nameInput = viewChild<ElementRef>('nameInput');
-  protected passwordInput = viewChild<ElementRef>('passwordInput');
-  protected isDevMode = isDevMode;
-  protected users_ = this.userService.users_;
-  protected devPickValue_ = signal('');
-  protected devUserOptions_ = computed(() =>
-    (this.users_() ?? []).map((u) => ({ value: u.name, label: u.name }))
-  );
 
   constructor() {
     effect(() => {
@@ -35,14 +27,17 @@ export class AuthModalComponent {
     });
   }
 
-  protected name = ''
-  protected email = ''
-  protected password = ''
-  protected imgPreview = signal<string | null>(null)
-  protected errorKey = signal<string | null>(null)
-  protected isSubmitting = signal(false)
+  protected name = '';
+  protected email = '';
+  protected password = '';
+  protected confirmPassword = '';
+  protected imgPreview = signal<string | null>(null);
+  protected errorKey = signal<string | null>(null);
+  protected isSubmitting = signal(false);
+  protected showPassword_ = signal(false);
+  protected showConfirmPassword_ = signal(false);
 
-  private imgBase64: string | null = null
+  private imgBase64: string | null = null;
 
   protected get isSignUp(): boolean {
     return this.modalService.mode() === 'sign-up';
@@ -50,22 +45,13 @@ export class AuthModalComponent {
 
   protected switchMode(mode: 'sign-in' | 'sign-up'): void {
     this.modalService.mode.set(mode);
-    this.errorKey.set(null);
-  }
-
-  protected onDevUserPick(value: string): void {
-    if (value) {
-      this.name = value;
-      this.devPickValue_.set('');
-      setTimeout(() => this.passwordInput()?.nativeElement.focus(), 0);
-    }
+    this._reset();
   }
 
   protected onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result as string;
@@ -76,45 +62,48 @@ export class AuthModalComponent {
   }
 
   protected onSubmit(): void {
-    if (this.isSubmitting()) return
+    if (this.isSubmitting()) return;
 
-    const trimmedName = this.name.trim()
+    const trimmedName = this.name.trim();
     if (!trimmedName) {
       this.errorKey.set('name_required');
       return;
     }
 
-    this.errorKey.set(null)
-    this.isSubmitting.set(true)
+    const trimmedPassword = this.password.trim();
+    if (!trimmedPassword) {
+      this.errorKey.set('password_required');
+      return;
+    }
 
     if (this.isSignUp) {
-      const trimmedEmail = this.email.trim()
-      const trimmedPassword = this.password.trim()
+      const trimmedEmail = this.email.trim();
       if (!trimmedEmail) {
-        this.isSubmitting.set(false)
-        return
+        this.errorKey.set('email_required');
+        return;
       }
-      if (!trimmedPassword) {
-        this.errorKey.set('password_required')
-        this.isSubmitting.set(false)
-        return
+      if (this.password !== this.confirmPassword) {
+        this.errorKey.set('passwords_do_not_match');
+        return;
       }
+    }
+
+    this.errorKey.set(null);
+    this.isSubmitting.set(true);
+
+    if (this.isSignUp) {
       this.userService.signup(
-        {
-          name: trimmedName,
-          email: trimmedEmail,
-          imgUrl: this.imgBase64 ?? undefined
-        },
+        { name: trimmedName, email: this.email.trim(), imgUrl: this.imgBase64 ?? undefined },
         trimmedPassword
       ).subscribe({
         next: () => this._onSuccess(),
         error: (err: Error) => this._onError(err)
-      })
+      });
     } else {
-      this.userService.login({ name: trimmedName, password: this.password.trim() || undefined }).subscribe({
+      this.userService.login({ name: trimmedName, password: trimmedPassword }).subscribe({
         next: () => this._onSuccess(),
         error: (err: Error) => this._onError(err)
-      })
+      });
     }
   }
 
@@ -130,23 +119,25 @@ export class AuthModalComponent {
   }
 
   private _onError(err: Error): void {
-    this.isSubmitting.set(false)
+    this.isSubmitting.set(false);
     if (err.message === 'USERNAME_TAKEN') {
-      this.errorKey.set('username_taken')
+      this.errorKey.set('username_taken');
     } else if (err.message === 'PASSWORD_REQUIRED') {
-      this.errorKey.set('password_required')
+      this.errorKey.set('password_required');
     } else {
-      this.errorKey.set('user_not_found')
+      this.errorKey.set('user_not_found');
     }
   }
 
   private _reset(): void {
-    this.name = ''
-    this.email = ''
-    this.password = ''
-    this.devPickValue_.set('')
-    this.imgBase64 = null
-    this.imgPreview.set(null)
-    this.errorKey.set(null)
+    this.name = '';
+    this.email = '';
+    this.password = '';
+    this.confirmPassword = '';
+    this.showPassword_.set(false);
+    this.showConfirmPassword_.set(false);
+    this.imgBase64 = null;
+    this.imgPreview.set(null);
+    this.errorKey.set(null);
   }
 }

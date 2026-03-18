@@ -1,4 +1,4 @@
-import { computed, inject, Injectable, signal } from '@angular/core'
+import { inject, Injectable, signal } from '@angular/core'
 import { User } from '../models/user.model'
 import { from, map, of, switchMap, tap, throwError } from 'rxjs'
 import { UserMsgService } from './user-msg.service'
@@ -14,7 +14,7 @@ type StoredUser = User & { passwordHash?: string }
 
 export interface LoginCredentials {
   name: string
-  password?: string
+  password: string
 }
 
 @Injectable({ providedIn: 'root' })
@@ -23,15 +23,11 @@ export class UserService {
   private storageService = inject(StorageService)
   private logging = inject(LoggingService)
 
-  private _users_ = signal<User[] | null>(this._loadUsersFromStorage())
-  public users_ = this._users_.asReadonly()
-
   private _user_ = signal<User | null>(this._loadUserFromSession())
   public user_ = this._user_.asReadonly()
 
-  public isLoggedIn = computed(() => this._user_() !== null)
+  public isLoggedIn = () => this._user_() !== null
 
-  /** Current user (no password/hash). Use when backend exists for refreshSession(). */
   get currentUser(): User | null {
     return this._user_()
   }
@@ -81,29 +77,22 @@ export class UserService {
           this.logging.warn({ event: 'auth.login.failure', message: 'Login failed: user not found', context: {} })
           return throwError(() => new Error('USER_NOT_FOUND'))
         }
-        const hasHash = !!stored.passwordHash
-        if (hasHash) {
-          if (!password || password.trim() === '') {
-            this.logging.warn({ event: 'auth.login.failure', message: 'Login failed: password required', context: {} })
-            return throwError(() => new Error('PASSWORD_REQUIRED'))
-          }
-          return from(verifyPassword(password, stored.passwordHash!)).pipe(
-            switchMap(ok => {
-              if (!ok) {
-                this.logging.warn({ event: 'auth.login.failure', message: 'Login failed: invalid password', context: {} })
-                return throwError(() => new Error('USER_NOT_FOUND'))
-              }
-              const user = this._toUser(stored)
-              this._saveUserLocal(user)
-              this.logging.info({ event: 'auth.login', message: 'Login success', context: { userId: user._id } })
-              return of(user)
-            })
-          )
+        if (!stored.passwordHash) {
+          this.logging.warn({ event: 'auth.login.failure', message: 'Login failed: no password hash on record', context: {} })
+          return throwError(() => new Error('USER_NOT_FOUND'))
         }
-        const user = this._toUser(stored)
-        this._saveUserLocal(user)
-        this.logging.info({ event: 'auth.login', message: 'Login success (legacy)', context: { userId: user._id } })
-        return of(user)
+        return from(verifyPassword(password, stored.passwordHash)).pipe(
+          switchMap(ok => {
+            if (!ok) {
+              this.logging.warn({ event: 'auth.login.failure', message: 'Login failed: invalid password', context: {} })
+              return throwError(() => new Error('USER_NOT_FOUND'))
+            }
+            const user = this._toUser(stored)
+            this._saveUserLocal(user)
+            this.logging.info({ event: 'auth.login', message: 'Login success', context: { userId: user._id } })
+            return of(user)
+          })
+        )
       })
     )
   }
@@ -112,55 +101,32 @@ export class UserService {
     return { _id: stored._id, name: stored.name, email: stored.email, imgUrl: stored.imgUrl }
   }
 
-
-
-  private _updateUser(user: User): void {
-    this._users_.update(prevUsers => {
-      const users = prevUsers ? [...prevUsers] : []
-      const idx = users.findIndex(u => u.name === user.name)
-      if (idx !== -1) {
-        users[idx] = user
-      } else {
-        users.push(user)
-      }
-      return users
-    })
-    this._saveUserLocal(user)
-}
-
-_saveUserLocal(user: User | null): void {
-  this._user_.set(user && { ...user });
-  this._saveUserToSession(user);
-}
-
-_clearSessionStorage() {
-  sessionStorage.clear()
-  this._user_.set(null)
-}
-
-_getLoggedInUser(): User {
-  return this._user_()!
-}
-private _loadUsersFromStorage(): User[] | null {
-  try {
-    const raw = localStorage.getItem(SIGNED_USERS);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
-}
-
-private _loadUserFromSession(): User | null {
-  try {
-    const raw = sessionStorage.getItem(SESSION_USER_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
-}
-
-private _saveUserToSession(user: User | null): void {
-  if (user) {
-    sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(user));
-  } else {
-    sessionStorage.removeItem(SESSION_USER_KEY);
+  _saveUserLocal(user: User | null): void {
+    this._user_.set(user && { ...user });
+    this._saveUserToSession(user);
   }
-}
 
+  _clearSessionStorage() {
+    sessionStorage.clear()
+    this._user_.set(null)
+  }
+
+  _getLoggedInUser(): User {
+    return this._user_()!
+  }
+
+  private _loadUserFromSession(): User | null {
+    try {
+      const raw = sessionStorage.getItem(SESSION_USER_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  }
+
+  private _saveUserToSession(user: User | null): void {
+    if (user) {
+      sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(user));
+    } else {
+      sessionStorage.removeItem(SESSION_USER_KEY);
+    }
+  }
 }

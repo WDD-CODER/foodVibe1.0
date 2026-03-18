@@ -19,19 +19,10 @@
 
       <form (ngSubmit)="onSubmit()" (keydown.enter)="onSubmit()" class="c-modal-body">
         <div class="auth-form-fields">
+
+          <!-- Username -->
           <div class="c-input-stack">
-            <div class="auth-label-row">
-              <label for="auth-name">{{ 'username' | translatePipe }}</label>
-              @if (isDevMode() && !isSignUp) {
-                <app-custom-select
-                  [options]="devUserOptions_()"
-                  [ngModel]="devPickValue_()"
-                  (ngModelChange)="onDevUserPick($event)"
-                  placeholder="dev_users"
-                  [translateLabels]="false"
-                  [compact]="true" />
-              }
-            </div>
+            <label for="auth-name">{{ 'username' | translatePipe }}</label>
             <input id="auth-name"
                    #nameInput
                    type="text"
@@ -45,32 +36,71 @@
             }
           </div>
 
+          @if (isSignUp) {
+            <!-- Email (sign-up only) -->
+            <div class="c-input-stack">
+              <label for="auth-email">{{ 'email' | translatePipe }}</label>
+              <input id="auth-email"
+                     type="email"
+                     [(ngModel)]="email"
+                     (input)="errorKey.set(null)"
+                     name="email"
+                     autocomplete="email"
+                     required />
+              @if (errorKey() === 'email_required') {
+                <p class="auth-error">{{ errorKey()! | translatePipe }}</p>
+              }
+            </div>
+          }
+
+          <!-- Password -->
           <div class="c-input-stack">
             <label for="auth-password">{{ 'password' | translatePipe }}</label>
-            <input id="auth-password"
-                   #passwordInput
-                   type="password"
-                   [(ngModel)]="password"
-                   (input)="errorKey.set(null)"
-                   name="password"
-                   [autocomplete]="isSignUp ? 'new-password' : 'current-password'"
-                   [required]="isSignUp" />
+            <div class="password-field-wrap">
+              <input id="auth-password"
+                     [type]="showPassword_() ? 'text' : 'password'"
+                     [(ngModel)]="password"
+                     (input)="errorKey.set(null)"
+                     name="password"
+                     [autocomplete]="isSignUp ? 'new-password' : 'current-password'"
+                     required />
+              <button type="button"
+                      class="password-toggle"
+                      (click)="showPassword_.set(!showPassword_())"
+                      [attr.aria-label]="(showPassword_() ? 'hide_password' : 'show_password') | translatePipe">
+                <lucide-icon [name]="showPassword_() ? 'eye-off' : 'eye'" [size]="16"></lucide-icon>
+              </button>
+            </div>
             @if (errorKey() === 'password_required') {
               <p class="auth-error">{{ errorKey()! | translatePipe }}</p>
             }
           </div>
 
           @if (isSignUp) {
+            <!-- Confirm Password -->
             <div class="c-input-stack">
-              <label for="auth-email">{{ 'email' | translatePipe }}</label>
-              <input id="auth-email"
-                     type="email"
-                     [(ngModel)]="email"
-                     name="email"
-                     autocomplete="email"
-                     required />
+              <label for="auth-confirm-password">{{ 'confirm_password' | translatePipe }}</label>
+              <div class="password-field-wrap">
+                <input id="auth-confirm-password"
+                       [type]="showConfirmPassword_() ? 'text' : 'password'"
+                       [(ngModel)]="confirmPassword"
+                       (input)="errorKey.set(null)"
+                       name="confirmPassword"
+                       autocomplete="new-password"
+                       required />
+                <button type="button"
+                        class="password-toggle"
+                        (click)="showConfirmPassword_.set(!showConfirmPassword_())"
+                        [attr.aria-label]="(showConfirmPassword_() ? 'hide_password' : 'show_password') | translatePipe">
+                  <lucide-icon [name]="showConfirmPassword_() ? 'eye-off' : 'eye'" [size]="16"></lucide-icon>
+                </button>
+              </div>
+              @if (errorKey() === 'passwords_do_not_match') {
+                <p class="auth-error">{{ errorKey()! | translatePipe }}</p>
+              }
             </div>
 
+            <!-- Profile Image -->
             <div class="c-input-stack">
               <label>{{ 'profile_image' | translatePipe }}</label>
               <div class="image-upload-area">
@@ -93,7 +123,6 @@
             </div>
           }
 
-          <!-- specific errors are now under inputs -->
         </div>
       </form>
 
@@ -102,7 +131,9 @@
           {{ 'cancel' | translatePipe }}
         </button>
         <button type="button" class="c-btn-primary" [disabled]="isSubmitting()" (click)="onSubmit()">
-          @if (isSignUp) {
+          @if (isSubmitting()) {
+            {{ 'saving' | translatePipe }}
+          } @else if (isSignUp) {
             {{ 'sign_up' | translatePipe }}
           } @else {
             {{ 'sign_in' | translatePipe }}
