@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep:*)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); g=d.get\\(''''general'''',{}\\); [print\\(k,'''':'''',v\\) for k,v in g.items\\(\\) if any\\(x in k for x in [''''sign'''',''''auth'''',''''login'''',''''user'''',''''pass'''',''''email'''',''''confirm'''',''''name_req'''',''''user_not'''',''''username_tak'''']\\)]\")",
+      "Bash(node:*)",
+      "Bash(npx tsc:*)"
+    ]
+  }
+}
