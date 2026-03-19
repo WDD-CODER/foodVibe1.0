@@ -2,7 +2,7 @@
 
 ## Reference (mandatory before editing any SCSS)
 
-- **Skill**: [.assistant/skills/cssLayer/SKILL.md](.assistant/skills/cssLayer/SKILL.md)
+- **Skill**: [.claude/skills/cssLayer/SKILL.md](.claude/skills/cssLayer/SKILL.md)
 - **Global tokens**: [src/styles.scss](src/styles.scss) (`:root` and `.c-*` engines)
 
 ## Rules summary

@@ -24,7 +24,7 @@ overview: Add epoch-ms `addedAt_` and `updatedAt_` timestamps so every entity tr
 
 ## 1 — Update `/add-recipe` Skill
 
-**File:** [.assistant/skills/add-recipe/SKILL.md](.assistant/skills/add-recipe/SKILL.md)
+**File:** [.claude/skills/add-recipe/SKILL.md](.claude/skills/add-recipe/SKILL.md)
 
 Add the following rules in **Step 4 — WRITE**:
 
@@ -76,7 +76,7 @@ Add one optional field: `addedAt_?: number` (epoch ms, set once on create).
 
 ## Files changed
 
-- `.assistant/skills/add-recipe/SKILL.md`
+- `.claude/skills/add-recipe/SKILL.md`
 - `src/app/core/models/product.model.ts`
 - `src/app/core/models/recipe.model.ts`
 - `src/app/core/services/product-data.service.ts`

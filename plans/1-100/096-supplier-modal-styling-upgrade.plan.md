@@ -32,4 +32,4 @@ todos:
 
 ## Design tokens and conventions
 
-- Follow `.assistant/skills/cssLayer/SKILL.md`: use `var(--…)` from `src/styles.scss`, `rem`/`em`, five-group property order.
+- Follow `.claude/skills/cssLayer/SKILL.md`: use `var(--…)` from `src/styles.scss`, `rem`/`em`, five-group property order.

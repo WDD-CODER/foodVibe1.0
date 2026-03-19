@@ -21,7 +21,7 @@
 ## Execution steps
 
 1. **Read and apply cssLayer**  
-   Read [.assistant/skills/cssLayer/SKILL.md](.assistant/skills/cssLayer/SKILL.md). Before editing SCSS: (1) Read `src/styles.scss`; (2) Reuse `:root` variables; (3) Use Five-Group vertical rhythm and blank lines between groups; (4) Use `var(--*)` and rem/em.
+   Read [.claude/skills/cssLayer/SKILL.md](.claude/skills/cssLayer/SKILL.md). Before editing SCSS: (1) Read `src/styles.scss`; (2) Reuse `:root` variables; (3) Use Five-Group vertical rhythm and blank lines between groups; (4) Use `var(--*)` and rem/em.
 
 2. **Add global space token**  
    In [src/styles.scss](src/styles.scss) inside `:root`, add a spacing scale entry, e.g. `--space-sm: 0.5rem;`.

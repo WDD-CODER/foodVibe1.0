@@ -1,6 +1,6 @@
 # Tech Debt Report — foodVibe — 2026-03-13
 
-Generated per [.assistant/skills/techdebt/SKILL.md](.assistant/skills/techdebt/SKILL.md).
+Generated per [.claude/skills/techdebt/SKILL.md](.claude/skills/techdebt/SKILL.md).
 
 ## Critical (Fix Now)
 

@@ -4,7 +4,7 @@ Refactor and optimize all AI rules, skills, agents, and entry points for token e
 
 ## Execution Order
 
-1. Merge entry points: delete HOW-WE-WORK, reduce AGENTS.md to 2-line pointer, consolidate agent.md
+1. Merge entry points: delete HOW-WE-WORK, reduce agent.md to 2-line pointer, consolidate agent.md
 2. Refactor copilot-instructions.md: remove verbose duplicates, add concise portable skill-triggers, fix .cursor/rules contradiction
 3. Trim .cursor/rules/*.mdc to bare 3-line pointers (Cursor bonus layer)
 4. Inline util-standards and serviceLayer into copilot-instructions, delete skill files
@@ -17,12 +17,12 @@ Refactor and optimize all AI rules, skills, agents, and entry points for token e
 
 ## Portability Architecture
 
-- **Layer 1 (portable)**: AGENTS.md → agent.md → copilot-instructions.md → .assistant/skills/*/SKILL.md
+- **Layer 1 (portable)**: agent.md → agent.md → copilot-instructions.md → .claude/skills/*/SKILL.md
 - **Layer 2 (Cursor-only)**: .cursor/rules/*.mdc (bare pointers), .cursor/commands/*.md
 
 ## Atomic Sub-tasks
 
-- [x] F1: Delete HOW-WE-WORK.md; reduce AGENTS.md to pointer; slim agent.md
+- [x] F1: Delete HOW-WE-WORK.md; reduce agent.md to pointer; slim agent.md
 - [x] F3: Refactor copilot-instructions (triggers, dedup, fix Section 0)
 - [x] F2: Trim all four .mdc files to 3 lines each
 - [x] F5: Inline util-standards + serviceLayer into copilot-instructions; delete skill dirs

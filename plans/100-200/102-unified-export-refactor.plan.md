@@ -40,7 +40,7 @@ Refactor all exports to use a **unified export header** (floating button → hid
 
 - New **export-preview** (or **view-before-export**) component: input = export payload (title, sections, summary); output = paper-styled DOM + optional Export/Print/Close. Use `ClickOutSideDirective` (or overlay click) and Escape to close.
 - ExportService (or shared helper) exposes a method that returns the **view model** for a given export type and context (recipe + quantity, menu + mode, etc.). Pages call “getExportPreviewPayload(type, context)” for the preview and “exportToExcel(type, context)” for the file; both use the same data shape.
-- Paper styles can live in a shared SCSS file or the preview component, reusing CSS vars and patterns from the menu paper (e.g. `--bg-pure`, `--color-frame-ink`, `--font-serif`). Follow [.assistant/skills/cssLayer/SKILL.md](.assistant/skills/cssLayer/SKILL.md) for layers.
+- Paper styles can live in a shared SCSS file or the preview component, reusing CSS vars and patterns from the menu paper (e.g. `--bg-pure`, `--color-frame-ink`, `--font-serif`). Follow [.claude/skills/cssLayer/SKILL.md](.claude/skills/cssLayer/SKILL.md) for layers.
 
 ---
 

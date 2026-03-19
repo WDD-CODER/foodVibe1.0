@@ -12,7 +12,7 @@ Quick-edit for list items inside the list-shell: click an **editable parameter v
 - **Carousel**: [CellCarouselComponent](src/app/shared/cell-carousel/cell-carousel.component.ts) + [CarouselHeaderComponent](src/app/shared/carousel-header/carousel-header.component.ts) used in inventory, supplier, equipment, venue, recipe-book. Content is projected via `ng-content`; arrows use `stopPropagation`. Only the **value** inside each slide (e.g. text or control) should be the quick-edit target; arrows keep current behaviour.
 - **ConfirmModalService** ([confirm-modal.service.ts](src/app/core/services/confirm-modal.service.ts)): `open(message: string, options?: ConfirmModalOptions)` — `message` is a translation key; options include `saveLabel`, `title`, `variant`. Reuse for batch-save confirmation.
 - **Dropdowns**: Reuse [CustomSelectComponent](src/app/shared/custom-select/custom-select.component.ts) for inline dropdowns (already used in equipment-list inline-edit-panel and elsewhere). Path aliases: use `@services/`, `@models/` per project standards.
-- **Styling**: Before creating or editing any list or shared `.scss`, read and apply [.assistant/skills/cssLayer/SKILL.md](.assistant/skills/cssLayer/SKILL.md) (tokens, `@layer`, five-group rhythm).
+- **Styling**: Before creating or editing any list or shared `.scss`, read and apply [.claude/skills/cssLayer/SKILL.md](.claude/skills/cssLayer/SKILL.md) (tokens, `@layer`, five-group rhythm).
 
 ---
 
@@ -88,7 +88,7 @@ Quick-edit for list items inside the list-shell: click an **editable parameter v
    - Add keys in **general** section of [dictionary.json](public/assets/data/dictionary.json): e.g. `save_these_changes`, `this_item_cannot_be_saved_like_this` (or per-field), `edit` for aria labels if not already present.
 
 7. **Styles**
-   - Before creating or editing any list or shared component `.scss`, read and apply [.assistant/skills/cssLayer/SKILL.md](.assistant/skills/cssLayer/SKILL.md).
+   - Before creating or editing any list or shared component `.scss`, read and apply [.claude/skills/cssLayer/SKILL.md](.claude/skills/cssLayer/SKILL.md).
 
 ---
 

@@ -17,11 +17,11 @@ The only reason agents run the full test suite after executing a plan is **agent
 
 **Replace with:** `5. **Audit**: Verify the build compiles (`ng build` if uncertain). Do NOT run the full test suite here — it runs only in the commit-to-github flow (Phase 0) or when the user explicitly asks.`
 
-### 2. .assistant/copilot-instructions.md — Section 3 (Services)
+### 2. .claude/copilot-instructions.md — Section 3 (Services)
 
 Append to the Services bullet: `Do not run the full test suite after executing a plan — only in the commit-to-github flow (Phase 0) or when the user explicitly asks.`
 
-### 3. .assistant/todo.md — Pending item line 867
+### 3. .claude/todo.md — Pending item line 867
 
 **Current:** `run tests before considering the task done.`  
 **Replace with:** `run the full test suite only at commit time (Phase 0) or when the user explicitly asks — not after every iteration.`

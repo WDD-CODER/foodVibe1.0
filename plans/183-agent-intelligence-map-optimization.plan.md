@@ -33,7 +33,7 @@ These changes trim restated details from non-canonical locations. Every trigger 
 
 **Current problem:** Phase 0 logic (techdebt scope, spec coverage, test suite command) is described in 5 places. The canonical source is `commit-to-github/SKILL.md`.
 
-**Change:** Each trigger location says only: "read `.assistant/skills/commit-to-github/SKILL.md` and follow all phases in order." Remove the inline Phase 0 bullet-point summaries.
+**Change:** Each trigger location says only: "read `.claude/skills/commit-to-github/SKILL.md` and follow all phases in order." Remove the inline Phase 0 bullet-point summaries.
 
 **Token savings:** ~390
 
@@ -41,21 +41,21 @@ These changes trim restated details from non-canonical locations. Every trigger 
 
 ### R3: Extract tab-order sections from commit-to-github
 
-**Files:** `.assistant/skills/commit-to-github/SKILL.md` -> new file `.assistant/references/tab-orders.md`
+**Files:** `.claude/skills/commit-to-github/SKILL.md` -> new file `.claude/references/tab-orders.md`
 
 **Current problem:** The commit skill contains ~60 lines of recipe-builder and menu-intelligence tab-order reference that have nothing to do with committing. Every commit flow loads this.
 
-**Change:** Move both tab-order sections to `.assistant/references/tab-orders.md`. Add a one-line link in the commit skill: "Tab orders: see `.assistant/references/tab-orders.md`." Add a breadcrumb reference from recipe-builder and menu-intelligence component directories.
+**Change:** Move both tab-order sections to `.claude/references/tab-orders.md`. Add a one-line link in the commit skill: "Tab orders: see `.claude/references/tab-orders.md`." Add a breadcrumb reference from recipe-builder and menu-intelligence component directories.
 
 **Token savings:** ~500
 
 ### R4: Slim agent files
 
-**Files:** `.assistant/agents/team-leader.md`, `software-architect.md`, `product-manager.md`, `qa-engineer.md`
+**Files:** `.claude/agents/team-leader.md`, `software-architect.md`, `product-manager.md`, `qa-engineer.md`
 
 **Current problem:** Each agent re-summarizes project standards (test commands, file size limits, folder structure, Q&A format) already in `copilot-instructions.md`.
 
-**Change:** Replace repeated blocks with: "Apply standards from `.assistant/copilot-instructions.md` Sections X, Y." Keep only the agent-unique responsibilities and output templates.
+**Change:** Replace repeated blocks with: "Apply standards from `.claude/copilot-instructions.md` Sections X, Y." Keep only the agent-unique responsibilities and output templates.
 
 **Token savings:** ~400-500
 
@@ -75,11 +75,11 @@ These changes trim restated details from non-canonical locations. Every trigger 
 
 ### R7: Extract add-recipe data to reference files
 
-**Files:** `.assistant/skills/add-recipe/SKILL.md`
+**Files:** `.claude/skills/add-recipe/SKILL.md`
 
 **Current problem:** The action keyword table and schema reference add ~800 tokens to the heaviest skill.
 
-**Change:** Extract to `.assistant/references/add-recipe-schema.md` and `.assistant/references/action-keywords.md`. Link from SKILL.
+**Change:** Extract to `.claude/references/add-recipe-schema.md` and `.claude/references/action-keywords.md`. Link from SKILL.
 
 **Token savings:** ~800 (deferred — only do if add-recipe is causing context pressure)
 
@@ -89,7 +89,7 @@ These changes trim restated details from non-canonical locations. Every trigger 
 
 ### N1: Session Handoff Skill
 
-**New file:** `.assistant/skills/session-handoff/SKILL.md`
+**New file:** `.claude/skills/session-handoff/SKILL.md`
 
 **Purpose:** When ending a session or when the user says "wrap up" / "session end", the agent produces a structured handoff note so the next session starts with full context.
 
@@ -104,7 +104,7 @@ These changes trim restated details from non-canonical locations. Every trigger 
 
 ### N2: Recovery sections in complex skills
 
-**Files:** `.assistant/skills/commit-to-github/SKILL.md`, `.assistant/skills/add-recipe/SKILL.md`
+**Files:** `.claude/skills/commit-to-github/SKILL.md`, `.claude/skills/add-recipe/SKILL.md`
 
 **Purpose:** Add a "Recovery" section to each that tells the agent what to do when things fail mid-skill.
 
@@ -142,12 +142,12 @@ Priority (highest to lowest):
 
 ### N4: Cross-reference validation command
 
-**New file:** `.assistant/commands/validate-agent-refs.md`
+**New file:** `.claude/commands/validate-agent-refs.md`
 
 **Purpose:** A periodic health check that verifies all internal links in agent files are valid.
 
 **Content:** Script or checklist:
-- For every `[text](path)` link in `.assistant/`, `agent.md`, `AGENTS.md`: verify the target file exists
+- For every `[text](path)` link in `.claude/`, `agent.md`, `agent.md`: verify the target file exists
 - For every skill referenced in `copilot-instructions.md` Section 0: verify the SKILL.md exists
 - For every agent listed in `agent.md`: verify the agent file exists
 - For every `.mdc` rule: verify the linked SKILL exists
@@ -190,7 +190,7 @@ Before starting any task:
 
 - [ ] A1: R1 — Slim `.cursor/commands/` to one-liners
 - [ ] A2: R2 — Remove Phase 0 restatements from copilot-instructions, agent.md, .mdc
-- [ ] A3: R3 — Extract tab-orders to `.assistant/references/tab-orders.md`
+- [ ] A3: R3 — Extract tab-orders to `.claude/references/tab-orders.md`
 - [ ] A4: R4 — Slim agent files (team-leader, software-architect, product-manager, qa-engineer)
 - [ ] A5: R5 — Add CI flow disambiguation to agent.md
 - [ ] A6: R6 — Verify and archive stale docs
@@ -233,9 +233,9 @@ Recommendation: b
 
 | # | File | Layer | Est. Tokens | Loading |
 |---|------|-------|-------------|---------|
-| 1 | `AGENTS.md` | Entry | ~50 | Always |
+| 1 | `agent.md` | Entry | ~50 | Always |
 | 2 | `agent.md` | Entry | ~900 | Always |
-| 3 | `.assistant/copilot-instructions.md` | Rules | ~2,500 | Always |
+| 3 | `.claude/copilot-instructions.md` | Rules | ~2,500 | Always |
 | 4 | `.cursor/rules/git-commit-must-use-skill.mdc` | Cursor | ~120 | Always |
 | 5 | `.cursor/rules/scss-styling-must-use-cssLayer.mdc` | Cursor | ~80 | Always |
 | 6 | `.cursor/rules/add-recipe-must-use-skill.mdc` | Cursor | ~80 | Always |
@@ -243,27 +243,27 @@ Recommendation: b
 | 8 | `.cursor/rules/lucide-icons-must-register-in-app-config.mdc` | Cursor | ~100 | On HTML edit |
 | 9 | `.cursor/commands/commit-github.md` | Command | ~150 | On invoke |
 | 10 | `.cursor/commands/add-recipe.md` | Command | ~100 | On invoke |
-| 11 | `.assistant/skills/commit-to-github/SKILL.md` | Skill | ~2,500 | On trigger |
-| 12 | `.assistant/skills/add-recipe/SKILL.md` | Skill | ~3,500 | On trigger |
-| 13 | `.assistant/skills/cssLayer/SKILL.md` | Skill | ~1,500 | On trigger |
-| 14 | `.assistant/skills/auth-and-logging/SKILL.md` | Skill | ~1,200 | On trigger |
-| 15 | `.assistant/skills/techdebt/SKILL.md` | Skill | ~1,000 | On trigger |
-| 16 | `.assistant/skills/save-plan/SKILL.md` | Skill | ~1,000 | On trigger |
-| 17 | `.assistant/skills/update-docs/SKILL.md` | Skill | ~1,000 | On trigger |
-| 18 | `.assistant/skills/angularComponentStructure/SKILL.md` | Skill | ~800 | On trigger |
-| 19 | `.assistant/skills/github-sync/SKILL.md` | Skill | ~500 | On trigger |
-| 20 | `.assistant/skills/elegant-fix/SKILL.md` | Skill | ~400 | On trigger |
-| 21 | `.assistant/agents/team-leader.md` | Agent | ~700 | On invoke |
-| 22 | `.assistant/agents/software-architect.md` | Agent | ~800 | On invoke |
-| 23 | `.assistant/agents/product-manager.md` | Agent | ~900 | On invoke |
-| 24 | `.assistant/agents/qa-engineer.md` | Agent | ~800 | On invoke |
-| 25 | `.assistant/agents/breadcrumb-navigator.md` | Agent | ~700 | On invoke |
-| 26 | `.assistant/commands/test-pr-review-merge.md` | Command | ~600 | On invoke |
-| 27 | `.assistant/prompts/deploy-angular-github.md` | Prompt | ~200 | Rare |
-| 28 | `.assistant/workflows/deploy.yml` | Workflow | ~200 | Rare |
-| 29 | `.assistant/todo.md` | State | ~2,000 | On reference |
-| 30 | `.assistant/todo-archive.md` | State | Variable | Rare |
-| 31 | `.assistant/BUILD-FIXES-AUDIT.md` | Audit | ~800 | On reference |
+| 11 | `.claude/skills/commit-to-github/SKILL.md` | Skill | ~2,500 | On trigger |
+| 12 | `.claude/skills/add-recipe/SKILL.md` | Skill | ~3,500 | On trigger |
+| 13 | `.claude/skills/cssLayer/SKILL.md` | Skill | ~1,500 | On trigger |
+| 14 | `.claude/skills/auth-and-logging/SKILL.md` | Skill | ~1,200 | On trigger |
+| 15 | `.claude/skills/techdebt/SKILL.md` | Skill | ~1,000 | On trigger |
+| 16 | `.claude/skills/save-plan/SKILL.md` | Skill | ~1,000 | On trigger |
+| 17 | `.claude/skills/update-docs/SKILL.md` | Skill | ~1,000 | On trigger |
+| 18 | `.claude/skills/angularComponentStructure/SKILL.md` | Skill | ~800 | On trigger |
+| 19 | `.claude/skills/github-sync/SKILL.md` | Skill | ~500 | On trigger |
+| 20 | `.claude/skills/elegant-fix/SKILL.md` | Skill | ~400 | On trigger |
+| 21 | `.claude/agents/team-leader.md` | Agent | ~700 | On invoke |
+| 22 | `.claude/agents/software-architect.md` | Agent | ~800 | On invoke |
+| 23 | `.claude/agents/product-manager.md` | Agent | ~900 | On invoke |
+| 24 | `.claude/agents/qa-engineer.md` | Agent | ~800 | On invoke |
+| 25 | `.claude/agents/breadcrumb-navigator.md` | Agent | ~700 | On invoke |
+| 26 | `.claude/commands/test-pr-review-merge.md` | Command | ~600 | On invoke |
+| 27 | `.claude/prompts/deploy-angular-github.md` | Prompt | ~200 | Rare |
+| 28 | `.claude/workflows/deploy.yml` | Workflow | ~200 | Rare |
+| 29 | `.claude/todo.md` | State | ~2,000 | On reference |
+| 30 | `.claude/todo-archive.md` | State | Variable | Rare |
+| 31 | `.claude/BUILD-FIXES-AUDIT.md` | Audit | ~800 | On reference |
 | 32 | `src/app/core/breadcrumbs.md` | Context | ~600 | Per directory |
 | 33 | `src/app/core/services/breadcrumbs.md` | Context | ~600 | Per directory |
 | 34 | `src/app/core/models/breadcrumbs.md` | Context | ~600 | Per directory |
@@ -278,7 +278,7 @@ Recommendation: b
 ### Dependency Map
 
 ```
-AGENTS.md --> agent.md --> copilot-instructions.md (always loaded chain)
+agent.md --> agent.md --> copilot-instructions.md (always loaded chain)
                        --> todo.md (task state)
 
 .mdc rules (always injected) --> trigger skills on-demand

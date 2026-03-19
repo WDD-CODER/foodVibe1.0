@@ -1,6 +1,6 @@
 # Tech Debt Report — foodVibe — 2026-03-10
 
-Generated per [.assistant/skills/techdebt/SKILL.md](.assistant/skills/techdebt/SKILL.md).
+Generated per [.claude/skills/techdebt/SKILL.md](.claude/skills/techdebt/SKILL.md).
 
 ---
 
@@ -46,5 +46,5 @@ Generated per [.assistant/skills/techdebt/SKILL.md](.assistant/skills/techdebt/S
 
 ## Integration
 
-- No new patterns suggested for `.assistant/copilot-instructions.md` this run.
+- No new patterns suggested for `.claude/copilot-instructions.md` this run.
 - For cleanup: consider Phase 1 (duplicate code) via Explore agent; then update-docs after fixes.

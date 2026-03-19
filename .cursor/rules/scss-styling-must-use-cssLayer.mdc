@@ -3,4 +3,4 @@ description: SCSS/CSS work must follow the cssLayer skill (tokens, five-group rh
 alwaysApply: true
 ---
 
-When creating, updating, or refactoring any `.scss`/`.css` in `src/`, read and follow [.assistant/skills/cssLayer/SKILL.md](.assistant/skills/cssLayer/SKILL.md) first.
+When creating, updating, or refactoring any `.scss`/`.css` in `src/`, read and follow [.claude/skills/cssLayer/SKILL.md](.claude/skills/cssLayer/SKILL.md) first.

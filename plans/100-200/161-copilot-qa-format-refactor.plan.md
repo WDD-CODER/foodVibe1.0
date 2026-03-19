@@ -1,6 +1,6 @@
 # Plan 161 — Copilot Q&A format refactor
 
-Refactor [.assistant/copilot-instructions.md](.assistant/copilot-instructions.md) so the agent always uses American-style Q&A (question? then a. b. c.), never embeds options in prose, and asks at least one question when creating new features.
+Refactor [.claude/copilot-instructions.md](.claude/copilot-instructions.md) so the agent always uses American-style Q&A (question? then a. b. c.), never embeds options in prose, and asks at least one question when creating new features.
 
 ## Atomic Sub-tasks
 

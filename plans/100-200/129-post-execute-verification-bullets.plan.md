@@ -11,7 +11,7 @@ When the user says "save and execute" (or equivalent) and the agent completes ex
 
 ## Implementation (Option A)
 
-- **Where**: [.assistant/copilot-instructions.md](.assistant/copilot-instructions.md) Section 2 — The Gatekeeper Protocol.
+- **Where**: [.claude/copilot-instructions.md](.claude/copilot-instructions.md) Section 2 — The Gatekeeper Protocol.
 - **Change**: Extend Phase 5 (QA Loop) so that after all `[x]`, the agent must output a **How to verify** section (bullet list: where in the app + what to do/expect), then ask *"Update .spec.ts now?"*
 - **No** new skill file; **no** new Cursor rule. Single source of truth only.
 

@@ -17,7 +17,7 @@ No changes to Angular/services are required: the app already loads products and 
 
 ## 1. Skill: Unify image and text input
 
-**File:** `.assistant/skills/add-recipe-from-image/SKILL.md`
+**File:** `.claude/skills/add-recipe-from-image/SKILL.md`
 
 - **Rename concept** (in title and description) to "Add recipe from image or text" (keep skill name `add-recipe-from-image` for backward compatibility).
 - **Trigger (When to use):**
@@ -36,7 +36,7 @@ No changes to Angular/services are required: the app already loads products and 
 
 ## 2. Skill: Create-if-missing (recursive) behavior
 
-**File:** `.assistant/skills/add-recipe-from-image/SKILL.md`
+**File:** `.claude/skills/add-recipe-from-image/SKILL.md`
 
 Add a dedicated subsection **"Create-if-missing before writing"** that runs **before** appending the recipe/dish:
 
@@ -50,7 +50,7 @@ Add a dedicated subsection **"Create-if-missing before writing"** that runs **be
 
 ## 3. Schema reference: equipment and product creation
 
-**File:** `.assistant/skills/add-recipe-from-image/SCHEMA.md`
+**File:** `.claude/skills/add-recipe-from-image/SCHEMA.md`
 
 - **Equipment (demo-equipment.json):** Path, ID pattern eq_NNN, required fields; allowed category_: heat_source, tool, container, packaging, consumable.
 - **Product creation (for create-if-missing):** Same path and demo_NNN; use buy_price_global_: 0 when creating.
@@ -59,7 +59,7 @@ Add a dedicated subsection **"Create-if-missing before writing"** that runs **be
 
 ## 4. HOW-WE-WORK and skill description
 
-**File:** `.assistant/HOW-WE-WORK.md`
+**File:** `.claude/HOW-WE-WORK.md`
 
 - Update the "Add recipe from image" entry to state that the skill applies when the user adds a recipe **from an image or from text**; the agent extracts data, asks for missing info, shows a breakdown for confirmation, then adds the entry and **creates any missing products and equipment** in the demo JSON.
 

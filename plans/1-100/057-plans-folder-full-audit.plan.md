@@ -3,7 +3,7 @@
 ## Scope
 
 - **Plans folder**: 60 `*.plan.md` files in [plans/](plans/) (excluding `recipe-builder-page.md` and `oldCssRule.md` as non-numbered references).
-- **Sources of truth**: [.assistant/todo.md](.assistant/todo.md) (Done / Ahead sections and Plan Index), [plans/052-plan-047-audit-report.plan.md](plans/052-plan-047-audit-report.plan.md) for Plan 047, and direct code checks where needed.
+- **Sources of truth**: [.claude/todo.md](.claude/todo.md) (Done / Ahead sections and Plan Index), [plans/052-plan-047-audit-report.plan.md](plans/052-plan-047-audit-report.plan.md) for Plan 047, and direct code checks where needed.
 
 ---
 

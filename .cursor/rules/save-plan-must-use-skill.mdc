@@ -3,4 +3,4 @@ description: "Save the plan" requests must use the save-plan skill (plans/ folde
 alwaysApply: true
 ---
 
-When the user says to save the plan, read [.assistant/skills/save-plan/SKILL.md](.assistant/skills/save-plan/SKILL.md) and write only to the project `plans/` folder with correct numbering.
+When the user says to save the plan, read [.claude/skills/save-plan/SKILL.md](.claude/skills/save-plan/SKILL.md) and write only to the project `plans/` folder with correct numbering.

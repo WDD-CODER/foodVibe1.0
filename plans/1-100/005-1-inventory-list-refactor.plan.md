@@ -134,7 +134,7 @@ The inventory page enhancement ([plans/005-inventory-page-enhancement.plan.md](p
 - Update "Files to Modify" and "Atomic Sub-tasks" to reflect the new work.
 - Mark completed items and add the new sub-tasks.
 
-**2. Update [.assistant/todo.md](.assistant/todo.md):**
+**2. Update [.claude/todo.md](.claude/todo.md):**
 
 - Under "Done": Keep existing inventory enhancement item; add a bullet for "Inventory refinements: column-header sort, hamburger visibility, remove add button, center-align rows" (to be marked done after implementation).
 - Under "Ahead": Add "Inventory refinements (a–d)" as a single task or split into sub-tasks, and mark as pending until complete.

@@ -12,15 +12,15 @@ isProject: false
 ### 1.1 Entry point and mandatory reads
 
 - **[agent.md](agent.md)** (~60 lines)  
-  - Instructs: read this + `.assistant/copilot-instructions.md` at the start of every task.  
+  - Instructs: read this + `.claude/copilot-instructions.md` at the start of every task.  
   - Defines: rule location (no `.cursor/rules/`), plans folder, agent list, skills list, commands, autonomous permissions, tech stack, workflow (Recon → Plan → Approval → Execute → Audit).
-- **[.assistant/copilot-instructions.md](.assistant/copilot-instructions.md)** (~165 lines)  
+- **[.claude/copilot-instructions.md](.claude/copilot-instructions.md)** (~165 lines)  
   - Single source of truth for all project rules.  
   - Contains: Agent System Overview (when to use each agent, workflow chain, Task invocation, skills table, commands), Persona ("Yes chef!"), Gatekeeper Protocol (phases 1–5), Angular 19/Signals/Adapter rules, UI/CSS/folder structure, Security/QA, Git, Translation (Hebrew/dictionary), Lucide icons.
 
 **Token impact:** Every task loads both files. That is your fixed "bootstrap" cost (~225 lines of markdown).
 
-### 1.2 Agents (`.assistant/agents/`)
+### 1.2 Agents (`.claude/agents/`)
 
 | Agent                   | Lines (approx) | When invoked                                  |
 | ----------------------- | -------------- | --------------------------------------------- |
@@ -32,7 +32,7 @@ isProject: false
 
 Agents are loaded only when the Task tool (or user) invokes them; they are not all read every time.
 
-### 1.3 Skills (`.assistant/skills/`)
+### 1.3 Skills (`.claude/skills/`)
 
 | Skill                     | Purpose                                             | Trigger                              | Approx size |
 | ------------------------- | --------------------------------------------------- | ------------------------------------ | ----------- |
@@ -51,7 +51,7 @@ Skills are referenced in `agent.md` and `copilot-instructions.md` by name and "w
 
 ### 1.4 Commands
 
-- **test-pr-review-merge** ([.assistant/commands/test-pr-review-merge.md](.assistant/commands/test-pr-review-merge.md)): Preconditions, sync trunk, run tests, push, create PR, review, merge. Used on demand.
+- **test-pr-review-merge** ([.claude/commands/test-pr-review-merge.md](.claude/commands/test-pr-review-merge.md)): Preconditions, sync trunk, run tests, push, create PR, review, merge. Used on demand.
 
 ### 1.5 Plans (`plans/`)
 
@@ -113,8 +113,8 @@ So the **maximum token use** typically occurs when: (1) **Planning + save-plan**
 
 ### 4.2 Reduce duplication between agent.md and copilot-instructions
 
-- **Option A:** agent.md stays short: entry point, "read copilot-instructions," plan folder, Gatekeeper in one short paragraph, and **one** table: "Agents: see .assistant/agents/; Skills: see .assistant/skills/; Commands: see .assistant/commands/." Remove the full agent/skill tables from agent.md so they exist only in copilot-instructions.  
-- **Option B:** Keep agent.md as the only place with the full agent/skill/command tables; in copilot-instructions, replace the long "Agent System Overview" and "Available Skills" with: "Agent and skill list: see agent.md. Use Task tool with subagent_type and read the relevant .assistant/agents/<name>.md or .assistant/skills/<name>/SKILL.md when invoking."  
+- **Option A:** agent.md stays short: entry point, "read copilot-instructions," plan folder, Gatekeeper in one short paragraph, and **one** table: "Agents: see .claude/agents/; Skills: see .claude/skills/; Commands: see .claude/commands/." Remove the full agent/skill tables from agent.md so they exist only in copilot-instructions.  
+- **Option B:** Keep agent.md as the only place with the full agent/skill/command tables; in copilot-instructions, replace the long "Agent System Overview" and "Available Skills" with: "Agent and skill list: see agent.md. Use Task tool with subagent_type and read the relevant .claude/agents/<name>.md or .claude/skills/<name>/SKILL.md when invoking."  
 - **Effect:** One place for "what agents/skills exist and when" — saves ~40–50 lines per task.
 
 ### 4.3 Tier copilot-instructions (optional, larger change)
@@ -170,7 +170,7 @@ flowchart LR
 
 ## 6. Deliverable: The Pre-Report Artifact
 
-The pre-report itself can be a single markdown file (e.g. `docs/ai-agent-usage-pre-report.md` or `.assistant/ai-agent-usage-pre-report.md`) containing:
+The pre-report itself can be a single markdown file (e.g. `docs/ai-agent-usage-pre-report.md` or `.claude/ai-agent-usage-pre-report.md`) containing:
 
 - **Section 1:** Inventory (entry point, mandatory reads, agents, skills, commands, plans count).
 - **Section 2:** "When you use the most" (by feature area, by session phase, by task type), with the tables above.

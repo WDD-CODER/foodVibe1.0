@@ -51,7 +51,7 @@ Checklist building already groups by `category_name` from the recipe's prep item
 
 **Changes:**
 
-- In [global-specific-modal.component.html](src/app/shared/global-specific-modal/global-specific-modal.component.html), remove the `c-modal-card--fluid` modifier so the card uses the default engine sizing from [styles.scss](src/styles.scss) (e.g. `width: 90%; max-width: 28rem`). If the design still feels too wide, add a small content-sized modifier in `styles.scss` (e.g. `c-modal-card--sm` with `max-width: 20rem` or `width: max-content`) and apply it to this modal only; follow [.assistant/skills/cssLayer/SKILL.md](.assistant/skills/cssLayer/SKILL.md) for any new SCSS.
+- In [global-specific-modal.component.html](src/app/shared/global-specific-modal/global-specific-modal.component.html), remove the `c-modal-card--fluid` modifier so the card uses the default engine sizing from [styles.scss](src/styles.scss) (e.g. `width: 90%; max-width: 28rem`). If the design still feels too wide, add a small content-sized modifier in `styles.scss` (e.g. `c-modal-card--sm` with `max-width: 20rem` or `width: max-content`) and apply it to this modal only; follow [.claude/skills/cssLayer/SKILL.md](.claude/skills/cssLayer/SKILL.md) for any new SCSS.
 
 ---
 
@@ -143,7 +143,7 @@ Recommendation: a.
 
 ## Why the questions were not in this structure initially
 
-The first version of this plan listed "Critical questions" at the end of the plan document in prose (e.g. "Should …?" and "Prefer …?"). The project rules (`.assistant/copilot-instructions.md` Section 1.1 and Section 2) require:
+The first version of this plan listed "Critical questions" at the end of the plan document in prose (e.g. "Should …?" and "Prefer …?"). The project rules (`.claude/copilot-instructions.md` Section 1.1 and Section 2) require:
 
 1. **Q&A format**: One question line ending with `?`, then options as `a.` `b.` `c.` on separate lines — **never** embed options in paragraphs.
 2. **Ask in chat**: Questions must be **asked to the user in the conversation** in this format, not only written inside the plan. After the plan, the agent must output: *"The plan is ready in … I have [N] questions for you before I proceed."* and then pose each question in that format so the user can answer before any execution.

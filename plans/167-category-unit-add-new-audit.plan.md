@@ -59,4 +59,4 @@ Implement "add new unit" so user can add a unit from cook-view if they wish: app
 3. Verify: Add-equipment sets new value in category dropdown (step 3).
 4. Optional: Cook-view "add new unit" (step 4).
 
-Before editing any `.scss`/`.css` in `src/`, read and apply .assistant/skills/cssLayer/SKILL.md if new styles are added.
+Before editing any `.scss`/`.css` in `src/`, read and apply .claude/skills/cssLayer/SKILL.md if new styles are added.

@@ -67,7 +67,7 @@ The application is **written in English** (keys, IDs, code) but **serves Hebrew 
 
 ## Next Steps
 - Follow the phased roadmap in `plans/010-product-roadmap.plan.md`.
-- Track progress in `.assistant/todo.md`.
+- Track progress in `.claude/todo.md`.
 - Align any new features with this plan and the `plans/` folder.
-- Keep `agent.md` and `.assistant/copilot-instructions.md` as the source of truth for AI agents.
+- Keep `agent.md` and `.claude/copilot-instructions.md` as the source of truth for AI agents.
 - **i18n**: For every new user-facing string, add the English key to `dictionary.json` and use `translatePipe` in templates (or `translationService.translate()` in code).

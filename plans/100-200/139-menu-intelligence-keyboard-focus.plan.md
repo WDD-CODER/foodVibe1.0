@@ -20,10 +20,10 @@ Implements [KEYBOARD-FOCUS-REPORT.md](src/app/pages/menu-intelligence/KEYBOARD-F
 
 ## 3. Optional
 
-- In .assistant/skills/commit-to-github/SKILL.md add "Menu intelligence tab order (canonical)" subsection with the 13-step list.
+- In .claude/skills/commit-to-github/SKILL.md add "Menu intelligence tab order (canonical)" subsection with the 13-step list.
 
 ## Files
 
 - src/app/pages/menu-intelligence/menu-intelligence.page.html
 - src/app/pages/menu-intelligence/menu-intelligence.page.ts
-- .assistant/skills/commit-to-github/SKILL.md (optional)
+- .claude/skills/commit-to-github/SKILL.md (optional)

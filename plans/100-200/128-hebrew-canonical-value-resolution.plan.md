@@ -36,7 +36,7 @@ Downstream **matching** (recipe-cost, scaling, product-form options) already com
 2. **Unit flow** — In [UnitRegistryService.registerUnit](src/app/core/services/unit-registry.service.ts): resolve name via TranslationService; if no match, obtain English key (unit-creator or modal) and update dictionary; then use key to store. Product-level check when adding purchase option: if product already has that unit_symbol_, do not add duplicate.
 3. **Category / allergen flows** — In [MetadataRegistryService](src/app/core/services/metadata-registry.service.ts): resolve at entry in registerCategory and registerAllergen; if no match, prompt for English key and update dictionary.
 4. **Section categories, equipment, preparation** — Resolve in addCategory/openAddNewCategory; when no match, open modal for English key then register + dictionary.
-5. **Agent guidance** — In [.assistant/copilot-instructions.md](.assistant/copilot-instructions.md): add Section 7.1 (Hebrew canonical values) and in Section 0 add trigger bullet pointing to 7.1 when adding/editing canonical-value flows. No new Cursor rule file.
+5. **Agent guidance** — In [.claude/copilot-instructions.md](.claude/copilot-instructions.md): add Section 7.1 (Hebrew canonical values) and in Section 0 add trigger bullet pointing to 7.1 when adding/editing canonical-value flows. No new Cursor rule file.
 
 ## Optional enhancements
 
@@ -49,4 +49,4 @@ Downstream **matching** (recipe-cost, scaling, product-form options) already com
 - **Change**: Product-form and recipe-ingredients-table — when adding purchase unit, check this product already has that unit symbol.
 - **Change**: [metadata-registry.service.ts](src/app/core/services/metadata-registry.service.ts) — resolve in registerCategory and registerAllergen; no match → prompt for English key.
 - **Change**: [menu-section-categories.service.ts](src/app/core/services/menu-section-categories.service.ts), [add-equipment-modal](src/app/shared/add-equipment-modal/add-equipment-modal.component.ts), [preparation-registry.service.ts](src/app/core/services/preparation-registry.service.ts) — resolve from Hebrew; no match → modal for English key.
-- **Change**: [.assistant/copilot-instructions.md](.assistant/copilot-instructions.md) — Section 7.1 + Section 0 trigger. No new Cursor rule.
+- **Change**: [.claude/copilot-instructions.md](.claude/copilot-instructions.md) — Section 7.1 + Section 0 trigger. No new Cursor rule.

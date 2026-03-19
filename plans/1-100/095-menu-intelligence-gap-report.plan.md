@@ -106,7 +106,7 @@ So most of the TypeScript and structure is still there. The gaps are wiring and 
 - Under `.dish-name` (or next to it), add:
   - `.dish-name-clickable`: button reset, cursor pointer, text styling matching the current name, hover underline (e.g. `text-decoration: underline`) so it's clear the name is clickable.
 
-(Follow the project's [cssLayer skill](.assistant/skills/cssLayer/SKILL.md) for layer placement.)
+(Follow the project's [cssLayer skill](.claude/skills/cssLayer/SKILL.md) for layer placement.)
 
 ---
 

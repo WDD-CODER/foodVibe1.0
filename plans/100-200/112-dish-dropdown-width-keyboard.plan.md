@@ -18,7 +18,7 @@ isProject: false
 - **Where**: [menu-intelligence.page.scss](src/app/pages/menu-intelligence/menu-intelligence.page.scss), in the same area as `.dish-search-wrap` (around 711).
 - **What**: Scope only the dish-search dropdown so it uses 80% of the wrap width. The host of `app-scrollable-dropdown` is the containing block for the inner `.c-dropdown` (which has `inset-inline: 0`), so constraining the host constrains the dropdown.
   - Add a rule: `.dish-search-wrap app-scrollable-dropdown` with `width: 80%` (and, if desired, `margin-inline: auto` to center it). No change to [scrollable-dropdown.component](src/app/shared/scrollable-dropdown/scrollable-dropdown.component.html) or global `.c-dropdown`; this keeps the change local to the dish-search context.
-- **Standards**: Follow [.assistant/skills/cssLayer/SKILL.md](.assistant/skills/cssLayer/SKILL.md) (five property groups, tokens from `src/styles.scss` or component-scoped, logical properties).
+- **Standards**: Follow [.claude/skills/cssLayer/SKILL.md](.claude/skills/cssLayer/SKILL.md) (five property groups, tokens from `src/styles.scss` or component-scoped, logical properties).
 
 ## 2. Fix keyboard handling so arrows and Enter work
 

@@ -19,8 +19,8 @@ Refactor of the login/auth plan: **application-wide logging** (not only auth) an
 
 ### 1.1 Where to save
 
-- **Rules**: [.assistant/copilot-instructions.md](.assistant/copilot-instructions.md) (single source of truth; do not add to `.cursor/rules/`).
-- **Skill**: New `.assistant/skills/auth-and-logging/SKILL.md` linked from [.assistant/HOW-WE-WORK.md](.assistant/HOW-WE-WORK.md).
+- **Rules**: [.claude/copilot-instructions.md](.claude/copilot-instructions.md) (single source of truth; do not add to `.cursor/rules/`).
+- **Skill**: New `.claude/skills/auth-and-logging/SKILL.md` linked from [.claude/HOW-WE-WORK.md](.claude/HOW-WE-WORK.md).
 
 ### 1.2 Skill content (auth-and-logging)
 
@@ -38,7 +38,7 @@ Refactor of the login/auth plan: **application-wide logging** (not only auth) an
 - **User model**: Keep `name`, `email`, `imgUrl`, `_id`; do **not** store password in the entity. Use credentials types only at login/signup.
 - **Password**: Local path — store only a **hash** (e.g. Web Crypto SHA-256) in the user record; compare on login. Production: backend hashes (e.g. bcrypt) over HTTPS; frontend never stores password.
 - **Auth abstraction**: Single facade (auth service or refactored UserService) with `login(credentials)`, `signup(user + password)`, `logout()`, `refreshSession()`, `isLoggedIn`, `currentUser`. Current impl: StorageService + sessionStorage + local hashing.
-- **Auth modal**: Add password field to sign-in and sign-up; wire to new methods; follow [cssLayer](.assistant/skills/cssLayer/SKILL.md) for styles.
+- **Auth modal**: Add password field to sign-in and sign-up; wire to new methods; follow [cssLayer](.claude/skills/cssLayer/SKILL.md) for styles.
 - **Guard**: Unchanged surface; use same `isLoggedIn` from auth facade.
 - Remove stray `console.log('variable')` in UserService.
 
@@ -79,13 +79,13 @@ The **auth-and-logging** skill will state: use LoggingService for these categori
 - **Rate limiting**: When backend exists, rate-limit login/signup (and optionally password reset) to mitigate brute force; document as backend requirement.
 - **Security headers (when deployed)**: When serving the app (e.g. via a server or CDN), set CSP, X-Frame-Options, X-Content-Type-Options, and similar; keep a short "go-live" checklist in docs or plan.
 - **Audit trail**: Logging critical CRUD + auth (with user identifier when logged in) provides a minimal audit trail; no PII in logs.
-- **Dependencies**: Keep packages updated for known vulnerabilities; use existing [techdebt](.assistant/skills/techdebt/SKILL.md) and add a note to run `npm audit` / update deps before going online.
+- **Dependencies**: Keep packages updated for known vulnerabilities; use existing [techdebt](.claude/skills/techdebt/SKILL.md) and add a note to run `npm audit` / update deps before going online.
 
 ---
 
 ## Part 3 — Order of implementation
 
-1. **Skills first**: Create `.assistant/skills/auth-and-logging/SKILL.md` (include application-wide logging scope and security rules), update HOW-WE-WORK.md and copilot-instructions.md.
+1. **Skills first**: Create `.claude/skills/auth-and-logging/SKILL.md` (include application-wide logging scope and security rules), update HOW-WE-WORK.md and copilot-instructions.md.
 2. **Logging service**: Implement LoggingService; replace ad-hoc `console.log` in [user.service](src/app/core/services/user.service.ts) and [translation.service](src/app/core/services/translation.service.ts) where appropriate.
 3. **Wire logging**: Auth (login/logout/signup/guard/401), then HTTP interceptor (when backend exists), then global ErrorHandler, then critical CRUD in services that use StorageService for key entities.
 4. **Auth hardening**: Password in UI, credentials types, local hash-only storage, auth abstraction, guard/modal wiring.
@@ -98,7 +98,7 @@ The **auth-and-logging** skill will state: use LoggingService for these categori
 
 | Part | What | Where |
 |------|------|--------|
-| 1 | Auth + app-wide logging + security rules for agents | Skill `.assistant/skills/auth-and-logging/SKILL.md`; HOW-WE-WORK; copilot-instructions |
+| 1 | Auth + app-wide logging + security rules for agents | Skill `.claude/skills/auth-and-logging/SKILL.md`; HOW-WE-WORK; copilot-instructions |
 | 2.1 | Passwords, no plaintext, auth abstraction | User model, auth service, modal, guard |
 | 2.2 | Backend-ready: env, API, HTTP provider, interceptor, token lifecycle | environments; auth provider; interceptor |
 | 2.3 | Single LoggingService | `src/app/core/services/` |

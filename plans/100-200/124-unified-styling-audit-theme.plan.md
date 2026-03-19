@@ -85,7 +85,7 @@ So the "added recipe" and "recipe builder" you mentioned: **Recipe Builder** is 
 
 - Add missing tokens used in multiple places: e.g. `--border-row` for list/table row borders (replace `rgba(241,245,249,0.4)`), `--shadow-nav` for header/footer if desired.
 - In [src/styles.scss](src/styles.scss), replace any remaining raw rgba in **engine** definitions (e.g. `.c-list-body-cell`, `.c-grid-cell`) with these tokens.
-- Document in one place (e.g. short comment block in styles.scss) the "Liquid Glass" theme: when to use `.c-glass-card` vs `.c-glass-panel`, when to use `.c-btn-primary` vs `.c-btn-ghost`, and that all new styles should use `var(--*)` and `rem`/`em` per [.assistant/skills/cssLayer/SKILL.md](.assistant/skills/cssLayer/SKILL.md).
+- Document in one place (e.g. short comment block in styles.scss) the "Liquid Glass" theme: when to use `.c-glass-card` vs `.c-glass-panel`, when to use `.c-btn-primary` vs `.c-btn-ghost`, and that all new styles should use `var(--*)` and `rem`/`em` per [.claude/skills/cssLayer/SKILL.md](.claude/skills/cssLayer/SKILL.md).
 
 ### Phase 2: High-impact pages
 

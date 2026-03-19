@@ -20,7 +20,7 @@ Without writing this down, future work (new lists, new modals, new "add X" butto
 
 ## Where to change
 
-**Single place:** [.assistant/skills/auth-and-logging/SKILL.md](.assistant/skills/auth-and-logging/SKILL.md)
+**Single place:** [.claude/skills/auth-and-logging/SKILL.md](.claude/skills/auth-and-logging/SKILL.md)
 
 - This skill is already the authority for auth, routes, and critical operations.
 - HOW-WE-WORK already tells agents to use it for "any feature touching routes, user data, auth, persistence, HTTP, or critical operations" — no change needed there; the skill content is what we extend.
@@ -38,7 +38,7 @@ Content: when it applies, two cases (route vs non-route), pattern for non-route 
 
 ## Optional: HOW-WE-WORK hint
 
-In [.assistant/HOW-WE-WORK.md](.assistant/HOW-WE-WORK.md), under the **"Auth, logging & security"** bullet, extend the "When" line so agents think about guest feedback when adding new add/edit/delete actions.
+In [.claude/HOW-WE-WORK.md](.claude/HOW-WE-WORK.md), under the **"Auth, logging & security"** bullet, extend the "When" line so agents think about guest feedback when adding new add/edit/delete actions.
 
 ---
 
@@ -46,7 +46,7 @@ In [.assistant/HOW-WE-WORK.md](.assistant/HOW-WE-WORK.md), under the **"Auth, lo
 
 | What | Where | Action |
 |------|--------|--------|
-| Guest action feedback rules + pattern + references | `.assistant/skills/auth-and-logging/SKILL.md` | Added subsection under "1. Auth awareness" |
-| Reminder for new protected actions | `.assistant/HOW-WE-WORK.md` | Extended "When" for Auth skill |
+| Guest action feedback rules + pattern + references | `.claude/skills/auth-and-logging/SKILL.md` | Added subsection under "1. Auth awareness" |
+| Reminder for new protected actions | `.claude/HOW-WE-WORK.md` | Extended "When" for Auth skill |
 
 Done. No new skills, no new Cursor rules, no workflow changes.

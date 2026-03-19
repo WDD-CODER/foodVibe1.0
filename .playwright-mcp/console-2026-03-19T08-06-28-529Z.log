@@ -1,0 +1,3 @@
+[     481ms] [WARNING] NG0912: Component ID generation collision detected. Components 'LucideAngularComponent' and 'LucideAngularComponent' with selector 'lucide-angular,lucide-icon,i-lucide,span-lucide' generated the same component ID. To fix this, you can change the selector of one of those components or add an extra host attribute to force a different ID. Find more at https://angular.dev/errors/NG0912 @ http://localhost:4200/@fs/C:/foodCo/foodVibe1.0/.angular/cache/19.2.19/foodVibe1.0/vite/deps/chunk-6LOEWBBQ.js?v=b1f12e84:14150
+[    2977ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:9765/log:0
+[    3006ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:9765/log:0

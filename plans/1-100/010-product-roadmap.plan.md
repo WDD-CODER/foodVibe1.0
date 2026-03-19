@@ -113,7 +113,7 @@ Set up Playwright and write tests for three critical user flows:
 ### 1.3 — Documentation Sync
 
 - Update `project-plan.md` feature checkboxes to reflect actual completion.
-- Update `.assistant/todo.md` with Phase 2–3 roadmap items.
+- Update `.claude/todo.md` with Phase 2–3 roadmap items.
 
 ---
 
@@ -285,7 +285,7 @@ Set up Playwright and write tests for three critical user flows:
 
 ### Deployment Pipeline
 
-- Validate existing `.assistant/workflows/deploy.yml` for GitHub Actions
+- Validate existing `.claude/workflows/deploy.yml` for GitHub Actions
 - Configure Angular build for production (`ng build --configuration production`)
 - Set base href for GitHub Pages
 - Test deployment end-to-end

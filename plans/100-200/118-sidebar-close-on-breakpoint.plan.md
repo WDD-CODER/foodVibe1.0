@@ -44,7 +44,7 @@ In [list-shell.component.scss](src/app/shared/list-shell/list-shell.component.sc
 - On **`.filter-panel`**: set `transition: none` (override the existing `transition` from the default block so width/min-width/opacity do not animate).
 - On **`.panel-content`**: set `transition: none` (override the opacity/transform transition).
 
-This keeps behavior above 768px unchanged (smooth open/close) and makes below 768px close instant. Follow existing [cssLayer SKILL](.assistant/skills/cssLayer/SKILL.md) and keep the file in `@layer components.list-shell`.
+This keeps behavior above 768px unchanged (smooth open/close) and makes below 768px close instant. Follow existing [cssLayer SKILL](.claude/skills/cssLayer/SKILL.md) and keep the file in `@layer components.list-shell`.
 
 ### 3. Scope of "all sidebars"
 

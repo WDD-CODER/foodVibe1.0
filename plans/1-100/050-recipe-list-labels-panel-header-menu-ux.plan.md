@@ -158,4 +158,4 @@ overview: Implement labels column with allergen-style compact/expand UX, row hei
 6. Guest number: remove spinner (SCSS).
 7. Guest number: +/- buttons, disable minus at 0.
 
-All SCSS changes must follow [.assistant/skills/cssLayer/SKILL.md](.assistant/skills/cssLayer/SKILL.md) and reuse tokens from [src/styles.scss](src/styles.scss).
+All SCSS changes must follow [.claude/skills/cssLayer/SKILL.md](.claude/skills/cssLayer/SKILL.md) and reuse tokens from [src/styles.scss](src/styles.scss).

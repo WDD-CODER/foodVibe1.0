@@ -9,7 +9,7 @@ isProject: false
 
 ## Current state
 
-- **Skill**: `.assistant/skills/commit-to-github/SKILL.md` — 6 phases, ~143 lines
+- **Skill**: `.claude/skills/commit-to-github/SKILL.md` — 6 phases, ~143 lines
 - **Command**: `.cursor/commands/commit-github.md` — 20 lines, restates skill steps
 - **Rule**: `.cursor/rules/git-commit-must-use-skill.mdc` — 15 lines, already lean
 

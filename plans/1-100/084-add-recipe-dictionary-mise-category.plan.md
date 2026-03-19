@@ -20,7 +20,7 @@ isProject: false
 
 **Current state:**
 
-- [.assistant/skills/add-recipe/SKILL.md](.assistant/skills/add-recipe/SKILL.md) Step 6 updates `demo-kitchen-preparations.json` (new categories and preparations) but does **not** update `dictionary.json`.
+- [.claude/skills/add-recipe/SKILL.md](.claude/skills/add-recipe/SKILL.md) Step 6 updates `demo-kitchen-preparations.json` (new categories and preparations) but does **not** update `dictionary.json`.
 - [translation.service.ts](src/app/core/services/translation.service.ts) builds the flat dictionary from `units`, `categories`, `allergens`, `actions`, and `general` only. Preparation category keys (e.g. `stocks`, `sauces`, `garnish`) are not in `dictionary.json`, so they render in English.
 
 **Proposed changes:**

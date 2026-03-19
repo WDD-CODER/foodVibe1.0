@@ -35,7 +35,7 @@ So **align-items: start** and a single set of column definitions are already in 
    - Consider adding explicit `min-width` to `.col-amount` and `.col-unit` in [cook-view.page.scss](src/app/pages/cook-view/cook-view.page.scss) (e.g. `min-width: 3.5rem` or a token) so the quantity/unit columns don't shrink and misalign. Keep existing `white-space: nowrap` so values don't wrap and spread.
 
 3. **Standards:**  
-   Any new or edited rules in the component SCSS must follow [.assistant/skills/cssLayer/SKILL.md](.assistant/skills/cssLayer/SKILL.md) (five-group vertical rhythm, tokens from `src/styles.scss` or `:host`, logical properties).
+   Any new or edited rules in the component SCSS must follow [.claude/skills/cssLayer/SKILL.md](.claude/skills/cssLayer/SKILL.md) (five-group vertical rhythm, tokens from `src/styles.scss` or `:host`, logical properties).
 
 ## Deliverable
 

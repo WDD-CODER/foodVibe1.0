@@ -34,7 +34,7 @@ Add an option on **top of the header** to move the carousel content left/right (
 4. **Layout and styles**
    - In [recipe-book-list.component.scss](src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.scss):
      - **Desktop**: `.carousel-header-wrap` becomes one grid cell spanning the three carousel columns: e.g. `grid-column: 2 / 5`, `overflow: hidden`, and an inner strip (flex or grid) with three equal-width segments; `transform: translateX(...)` based on a CSS variable or class tied to the current index (or use inline style from the component, e.g. `[style.transform]` bound to `carouselHeaderIndex_()`).
-     - Follow the existing [cssLayer skill](.assistant/skills/cssLayer/SKILL.md) and [src/styles.scss](src/styles.scss) tokens; use logical properties and the five-group vertical rhythm where applicable.
+     - Follow the existing [cssLayer skill](.claude/skills/cssLayer/SKILL.md) and [src/styles.scss](src/styles.scss) tokens; use logical properties and the five-group vertical rhythm where applicable.
    - Ensure the header strip's column widths align with the body's carousel column (one logical column when we show one slide).
 
 5. **Accessibility and UX**

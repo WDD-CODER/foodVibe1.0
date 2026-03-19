@@ -13,7 +13,7 @@ isProject: true
 - **Persistence**: [recipe-book-list](src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.ts) toggles approval via `onToggleApproval` → `kitchenState.saveRecipe(updated)`.
 - **Recipe builder**: [recipe-builder.page.ts](src/app/pages/recipe-builder/recipe-builder.page.ts) currently hardcodes `is_approved_: true` in `buildRecipeFromForm()` (line 1160). New recipes should default to **unapproved**; approval only when user clicks the stamp.
 - **Hero FAB**: [hero-fab.component.scss](src/app/core/components/hero-fab/hero-fab.component.scss) is fixed at `left: 0.75rem; bottom: 0.75rem; z-index: 90`. The stamp will mirror this at **right: 0.75rem; bottom: 0.75rem** (same bottom, opposite side).
-- **Styling**: Follow [.assistant/skills/cssLayer/SKILL.md](.assistant/skills/cssLayer/SKILL.md) and reuse tokens from [src/styles.scss](src/styles.scss). The stamp uses **app theme colors** (e.g. `--color-primary`, `--color-primary-hover`, `--color-text-on-primary`) so it fits the Liquid Glass design—not red.
+- **Styling**: Follow [.claude/skills/cssLayer/SKILL.md](.claude/skills/cssLayer/SKILL.md) and reuse tokens from [src/styles.scss](src/styles.scss). The stamp uses **app theme colors** (e.g. `--color-primary`, `--color-primary-hover`, `--color-text-on-primary`) so it fits the Liquid Glass design—not red.
 
 ## 1. Data and approval state
 

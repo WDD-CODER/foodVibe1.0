@@ -3,4 +3,4 @@ description: Add recipe/dish requests must use the add-recipe skill; Step 3 conf
 alwaysApply: true
 ---
 
-When the user adds a recipe or dish from image or text, read [.assistant/skills/add-recipe/SKILL.md](.assistant/skills/add-recipe/SKILL.md) and present the visual tree for confirmation before writing.
+When the user adds a recipe or dish from image or text, read [.claude/skills/add-recipe/SKILL.md](.claude/skills/add-recipe/SKILL.md) and present the visual tree for confirmation before writing.

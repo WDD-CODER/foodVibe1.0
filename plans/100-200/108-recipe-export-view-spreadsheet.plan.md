@@ -133,7 +133,7 @@ Optional: Keep a separate "export detailed (3 sheets)" if product owner wants bo
   - **Ingredients**: Same table as now but with columns matching Excel (מצרכים | כמות | יחידת מידה | מחיר ליחידה); subtle borders/grid so it looks like a spreadsheet.
   - **Preparation instructions**: Section title "הוראות הכנה" + a block of text (or numbered lines) from steps — no table, just readable paragraph/list.
   - **Preparation time**: Section "זמן הכנה" with one number.
-- Styling: Follow [.assistant/skills/cssLayer/SKILL.md](.assistant/skills/cssLayer/SKILL.md); reuse paper/outer/inner and tokens from `src/styles.scss`; keep RTL (`dir="rtl"` already on the paper wrap).
+- Styling: Follow [.claude/skills/cssLayer/SKILL.md](.claude/skills/cssLayer/SKILL.md); reuse paper/outer/inner and tokens from `src/styles.scss`; keep RTL (`dir="rtl"` already on the paper wrap).
 
 ---
 

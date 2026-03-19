@@ -83,7 +83,7 @@ Optional: small helper (shared or per-component) for "resolve for type X → if 
 
 ## Agent guides (one source of truth: copilot-instructions only; no Cursor rule)
 
-- **[.assistant/copilot-instructions.md](.assistant/copilot-instructions.md)** — single source of truth:
+- **[.claude/copilot-instructions.md](.claude/copilot-instructions.md)** — single source of truth:
   - **Section 7.2** (canonical rule — keep short): Use the translation-key modal: Hebrew in an **editable** text input (all contexts); **focus the English key** input when the modal opens; **no** "Continue without saving" in add-time (only in generic/on-leave).
   - **Section 0** (Skill Triggers): Extend the existing Hebrew canonical values trigger to "**Section 7.1 and 7.2**" so one trigger pulls both when the agent is in that flow.
 - **[agent.md](agent.md)**: One-line pointer only (no duplication): "Hebrew→English key flows: apply copilot-instructions 7.1–7.2." In Skills table. No separate Cursor rule — one source of truth only.

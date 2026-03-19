@@ -2,7 +2,7 @@
 
 ## Context
 
-- **CSS layer**: All styling must follow `.assistant/skills/cssLayer/SKILL.md`: use tokens from `src/styles.scss` (`:root`), component-scoped tokens in `:host`, five-group vertical rhythm, and existing engines where applicable.
+- **CSS layer**: All styling must follow `.claude/skills/cssLayer/SKILL.md`: use tokens from `src/styles.scss` (`:root`), component-scoped tokens in `:host`, five-group vertical rhythm, and existing engines where applicable.
 - **Scope**: `src/app/pages/menu-library/` — mainly `menu-library-list.component` (HTML, SCSS, TS).
 - **Reference**: Other list pages (e.g. equipment, venues) use `--radius-md` for the main content container; global radii are in `styles.scss`.
 

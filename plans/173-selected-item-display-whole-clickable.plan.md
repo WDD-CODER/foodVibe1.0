@@ -36,7 +36,7 @@ The whole `.selected-item-display` (the chip/input-like block) should be clickab
 
 ### 2. Styles ([recipe-ingredients-table.component.scss](src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.scss))
 
-- Before editing SCSS, read and apply [.assistant/skills/cssLayer/SKILL.md](.assistant/skills/cssLayer/SKILL.md) (per workspace rules).
+- Before editing SCSS, read and apply [.claude/skills/cssLayer/SKILL.md](.claude/skills/cssLayer/SKILL.md) (per workspace rules).
 - In `.selected-item-display`, add `cursor: pointer` in the **Effects** group (per cssLayer five-group ordering) so the entire chip looks clickable.
 
 ## Out of scope

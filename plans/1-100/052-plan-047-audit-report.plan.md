@@ -1,6 +1,6 @@
 # Plan 047 — Recipe Builder Polish: Audit Report
 
-**Note:** The plan file `plans/047-recipe-builder-polish.plan.md` was not found in the repo; audit is based on the todo list in [.assistant/todo.md](.assistant/todo.md) (lines 240–253) and direct code inspection.
+**Note:** The plan file `plans/047-recipe-builder-polish.plan.md` was not found in the repo; audit is based on the todo list in [.claude/todo.md](.claude/todo.md) (lines 240–253) and direct code inspection.
 
 ---
 
@@ -142,7 +142,7 @@
 
 ## Recommended next steps
 
-1. **Todo list:** Update .assistant/todo.md so L4 is split into "width done" and "sort by relevance not done", and mark S1–S4, L1–L3, B2 as not done; B1/B4 with the caveats above. *(Done.)*
+1. **Todo list:** Update .claude/todo.md so L4 is split into "width done" and "sort by relevance not done", and mark S1–S4, L1–L3, B2 as not done; B1/B4 with the caveats above. *(Done.)*
 2. **Quick wins:** Implement L1 (column reorder), S2 (timer fixed width), and optionally "sort by relevance" for L4 (e.g. sort by match position or length). *(Done: L1, S2, L4 sort.)*
 3. **Clarify:** B3 (volume fix) and B4 (exact header polish) with a short spec or acceptance criteria so implementation and audit are unambiguous.
 

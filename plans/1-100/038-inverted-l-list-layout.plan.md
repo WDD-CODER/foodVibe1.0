@@ -65,4 +65,4 @@ The "inverted L" means: the header spans full width; the filter panel lives only
 - **Table header stickiness**: header is a non-scrolling flex sibling above the scrollable body (no `position: sticky`).
 - **Panel collapsed**: toggle button visible in 48px column; panel content hidden with `opacity: 0` + `pointer-events: none`.
 - **RTL**: `dir="rtl"`; `border-inline-start` and grid respect direction.
-- **Styling**: Follow `.assistant/skills/cssLayer/SKILL.md` (Five Groups, tokens from `src/styles.scss`, component-scoped tokens where needed).
+- **Styling**: Follow `.claude/skills/cssLayer/SKILL.md` (Five Groups, tokens from `src/styles.scss`, component-scoped tokens where needed).

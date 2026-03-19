@@ -1,11 +1,11 @@
 ---
 name: Tech debt analysis execution
-overview: Plan for running the full technical debt analysis defined in .assistant/skills/techdebt/SKILL.md — scope selection, all seven phases, report output, and optional copilot-instructions updates.
+overview: Plan for running the full technical debt analysis defined in .claude/skills/techdebt/SKILL.md — scope selection, all seven phases, report output, and optional copilot-instructions updates.
 ---
 
 # Tech Debt Analysis — Execution Plan
 
-Execute the workflow in [.assistant/skills/techdebt/SKILL.md](.assistant/skills/techdebt/SKILL.md) and produce a dated report. Existing report format precedent: [tech-debt-report-2026-03-12.md](tech-debt-report-2026-03-12.md).
+Execute the workflow in [.claude/skills/techdebt/SKILL.md](.claude/skills/techdebt/SKILL.md) and produce a dated report. Existing report format precedent: [tech-debt-report-2026-03-12.md](tech-debt-report-2026-03-12.md).
 
 ## Scope
 
@@ -60,11 +60,11 @@ Decide scope at start; all phases then apply to that scope.
   - **High / Medium / Low Priority** — file:line and short description.
   - **Spec coverage (add/update .spec.ts)** — list of paths.
   - **Metrics:** Total TODOs, duplicate blocks, files >300 lines, prohibited patterns, hardcoded Hebrew, specs to add/update.
-- Add a one-line note: "Generated per [.assistant/skills/techdebt/SKILL.md](.assistant/skills/techdebt/SKILL.md)."
+- Add a one-line note: "Generated per [.claude/skills/techdebt/SKILL.md](.claude/skills/techdebt/SKILL.md)."
 
 ## After the report
 
-- If new recurring patterns are found, suggest a short addition to [.assistant/copilot-instructions.md](.assistant/copilot-instructions.md).
+- If new recurring patterns are found, suggest a short addition to [.claude/copilot-instructions.md](.claude/copilot-instructions.md).
 - If this run was **full project** and the user will later run commit-to-github in the same session, that flow can reuse this report (no second techdebt run); Phase 0 of commit-to-github will still run tests and handle Spec coverage from the report.
 
 ## Execution order

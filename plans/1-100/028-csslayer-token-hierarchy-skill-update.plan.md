@@ -2,7 +2,7 @@
 
 ## Current state (what the skill says today)
 
-- **.assistant/skills/cssLayer/SKILL.md** §2 "Unification Rule" says: *"Tokens: Zero tolerance for hex codes or raw px. Use var(--token)."* It does **not** define:
+- **.claude/skills/cssLayer/SKILL.md** §2 "Unification Rule" says: *"Tokens: Zero tolerance for hex codes or raw px. Use var(--token)."* It does **not** define:
   - A single designated file for app-wide CSS variables.
   - When to put a token in a global file vs in the component vs not at all.
   - A step to read that file before creating/editing styles.

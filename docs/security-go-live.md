@@ -22,7 +22,7 @@ All over **HTTPS** in production. Frontend: set `useBackendAuth: true` and `auth
 | **Error exposure** | In production, do not expose stack traces or internal error details to the client; show generic messages; log full details server-side or via LoggingService to a backend log sink. |
 | **Security headers** | When serving the app (e.g. via server or CDN), set: **CSP**, **X-Frame-Options**, **X-Content-Type-Options**, and similar. |
 | **Rate limiting** | When backend exists, rate-limit login/signup (and optionally password reset) to mitigate brute force. |
-| **Dependencies** | Run `npm audit` and update dependencies for known vulnerabilities before going online. See [techdebt](.assistant/skills/techdebt/SKILL.md). |
+| **Dependencies** | Run `npm audit` and update dependencies for known vulnerabilities before going online. See [techdebt](.claude/skills/techdebt/SKILL.md). |
 
 ---
 
@@ -40,5 +40,5 @@ If the log server is not running, the app still logs to the console only; no err
 
 ## References
 
-- Auth, logging and security rules for agents: [.assistant/skills/auth-and-logging/SKILL.md](../.assistant/skills/auth-and-logging/SKILL.md)
-- Project rules: [.assistant/copilot-instructions.md](../.assistant/copilot-instructions.md)
+- Auth, logging and security rules for agents: [.claude/skills/auth-and-logging/SKILL.md](../.claude/skills/auth-and-logging/SKILL.md)
+- Project rules: [.claude/copilot-instructions.md](../.claude/copilot-instructions.md)

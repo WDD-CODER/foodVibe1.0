@@ -73,4 +73,4 @@ isProject: true
 1. **List-shell (visual):** Add border-radius transition; then adjust 768px panel alignment.
 2. **Recipe-book-list (state + UX):** Introduce Set-based state, update template conditions, implement cell/header/outside-click and navigation-reset behavior.
 
-All SCSS must follow [.assistant/skills/cssLayer/SKILL.md](.assistant/skills/cssLayer/SKILL.md).
+All SCSS must follow [.claude/skills/cssLayer/SKILL.md](.claude/skills/cssLayer/SKILL.md).
