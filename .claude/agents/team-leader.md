@@ -41,25 +41,8 @@ Before marking a task complete, verify all sub-tasks in `.claude/todo.md` are `[
 
 ## Output Format
 
-```
-## Task Analysis
-[Breakdown: domains involved, complexity, subsystems affected]
-
-## Recommended Task Force
-1. [Agent]: [Focus] — [Why]
-2. [Agent]: [Focus] — [Why]
-
-## Coordination Plan
-- Sequence: [Order of engagement]
-- Dependencies: [What feeds into what]
-- Plan file: plans/XXX.plan.md
-
-## Success Criteria
-- [Specific, measurable outcomes]
-
-## Risks
-- [Identified risks and mitigations]
-```
+Use `.claude/references/team-leader-output-template.md` for the standard output format.
+Include: Task Analysis, Recommended Task Force, Coordination Plan, Success Criteria, Risks.
 
 ### Task Force Sizing
 - **Small** (1-2 agents): Bug fix, single component, docs update

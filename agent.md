@@ -9,30 +9,26 @@ Read this and `.claude/copilot-instructions.md` at the start of every task.
 - **Plans**: All plans in project `plans/` only (e.g. `plans/NNN-slug.plan.md`). When the user says "save the plan" after confirming, read `.claude/skills/save-plan/SKILL.md` and follow it.
 
 ## Agent System (`.claude/agents/`)
-| Agent | File | Purpose |
-|-------|------|---------|
-| Team Leader | `team-leader.md` | Orchestrate multi-agent tasks, resolve conflicts |
-| Software Architect | `software-architect.md` | Architecture, HLD documents |
-| Product Manager | `product-manager.md` | PRDs, feature scoping, plans/ |
-| Breadcrumb Navigator | `breadcrumb-navigator.md` | Codebase docs, breadcrumbs.md |
-| QA Engineer | `qa-engineer.md` | Testing, specs, E2E |
+- team-leader.md — Orchestrate multi-agent tasks, resolve conflicts
+- software-architect.md — Architecture, HLD documents
+- product-manager.md — PRDs, feature scoping, plans/
+- breadcrumb-navigator.md — Codebase docs, breadcrumbs.md
+- qa-engineer.md — Testing, specs, E2E
 
 ## Skills (`.claude/skills/`)
-| Skill | When to use |
-|-------|--------------|
-| save-plan | User says "save the plan" after confirming |
-| commit-to-github | User says commit, push, save to GitHub — read skill first; no git writes until approval |
-| deploy-github-pages | User says deploy, publish app, GitHub Pages |
-| cssLayer | Before creating or editing any `.scss`/`.css` in `src/` |
-| add-recipe | User adds recipe/dish from image or text — Step 3 confirmation before any write |
-| github-sync | Start of session, after time away |
-| techdebt | End of session, before PRs |
-| update-docs | After completing features |
-| elegant-fix | After a fix that feels hacky |
-| angularComponentStructure | Creating/refactoring Angular components |
-| auth-and-logging | Routes, auth, persistence, HTTP, CRUD, logging |
-| session-handoff | User says "wrap up" / "session end" — structured session summary for next session |
-| Hebrew→English key flows | When a plan adds or changes flows where the user enters a Hebrew value that must have an English key → apply `.claude/copilot-instructions.md` Section 7.1–7.2 |
+- save-plan — User says "save the plan" after confirming
+- commit-to-github — User says commit, push, save to GitHub — read skill first; no git writes until approval
+- deploy-github-pages — User says deploy, publish app, GitHub Pages
+- cssLayer — Before creating or editing any `.scss`/`.css` in `src/`
+- add-recipe — User adds recipe/dish from image or text — Step 3 confirmation before any write
+- github-sync — Start of session, after time away
+- techdebt — End of session, before PRs
+- update-docs — After completing features
+- elegant-fix — After a fix that feels hacky
+- angularComponentStructure — Creating/refactoring Angular components
+- auth-and-logging — Routes, auth, persistence, HTTP, CRUD, logging
+- session-handoff — User says "wrap up" / "session end" — structured session summary for next session
+- Hebrew→English key flows — When a plan adds or changes flows where the user enters a Hebrew value that must have an English key → apply `.claude/copilot-instructions.md` Section 7.1–7.2
 
 ## Commands (`.claude/commands/`)
 | Command | Purpose |
@@ -45,11 +41,12 @@ Read this and `.claude/copilot-instructions.md` at the start of every task.
 ## Preflight Checklist
 Before starting any task:
 1. Read this file and `.claude/copilot-instructions.md` (mandatory).
-2. Check `.claude/todo.md` for related pending work.
-3. Check `breadcrumbs.md` in the target directory before changing it.
-4. If touching SCSS/CSS: read `.claude/skills/cssLayer/SKILL.md`.
-5. If creating/refactoring components: read `.claude/skills/angularComponentStructure/SKILL.md`.
-6. Verify you are NOT on `main` branch for code changes.
+2. Check `notes/session-handoffs/` for a handoff file from the last 3 days. If found, read it and summarize key context in your first response.
+3. Check `.claude/todo.md` for related pending work.
+4. Check `breadcrumbs.md` in the target directory before changing it.
+5. If touching SCSS/CSS: read `.claude/skills/cssLayer/SKILL.md`.
+6. If creating/refactoring components: read `.claude/skills/angularComponentStructure/SKILL.md`.
+7. Verify you are NOT on `main` branch for code changes.
 
 ## Autonomous Permissions
 - **Terminal**: Non-destructive commands (`npm test`, `ng build`, `ls`, `mkdir`) allowed.

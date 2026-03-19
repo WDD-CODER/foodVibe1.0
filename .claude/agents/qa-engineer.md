@@ -34,64 +34,9 @@ Apply all project standards from `.claude/copilot-instructions.md` — especiall
 
 ## Core Responsibilities
 
-### 1. Unit Test Strategy
+Follow patterns in the nearest existing `.spec.ts` file in the codebase.
 
-Every public service method and component behavior needs a spec. Follow these patterns:
-
-**Services**: Test the public API, signal state changes, and edge cases.
-```typescript
-describe('MyService', () => {
-  let service: MyService
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [MyService]
-    })
-    service = TestBed.inject(MyService)
-  })
-
-  it('should return computed value from signal', () => {
-    service.setSomeData(testData)
-    expect(service.computedValue_()).toBe(expected)
-  })
-})
-```
-
-**Components**: Test inputs, outputs, template bindings, and user interactions.
-```typescript
-describe('MyComponent', () => {
-  let fixture: ComponentFixture<MyComponent>
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [MyComponent]
-    }).compileComponents()
-    fixture = TestBed.createComponent(MyComponent)
-  })
-})
-```
-
-### 2. Common Testing Patterns
-
-**Providing TranslationService**:
-```typescript
-providers: [
-  { provide: TranslationService, useValue: { translate: (k: string) => k } }
-]
-```
-
-**Satisfying required inputs** (Angular 19 signal inputs):
-```typescript
-fixture.componentRef.setInput('myInput', testValue)
-fixture.detectChanges()
-```
-
-**Lucide icons** (if component uses them):
-```typescript
-imports: [LucideAngularModule.pick({ IconName })]
-```
-
-### 3. Regression Testing
+### Regression Testing
 
 When fixing a bug:
 1. Write a failing test that reproduces the bug first (TDD)
