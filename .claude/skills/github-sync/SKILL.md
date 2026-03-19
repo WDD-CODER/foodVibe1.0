@@ -9,6 +9,10 @@ Pull recent GitHub activity into a single context dump. Use at session start, af
 - Before code review
 - Weekly planning
 
+## MCP Note
+
+When GitHub MCP is available (`mcp__github__*` tools), prefer it for PR and issue data over `gh` CLI. Fall back to `gh` CLI if unavailable.
+
 ## Workflow
 
 1. **Recent commits** — last 7 days (oneline, stat); identify files changed most frequently.

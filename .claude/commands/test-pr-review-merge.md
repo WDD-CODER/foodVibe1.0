@@ -48,6 +48,10 @@ npx playwright test
 git push -u origin HEAD
 ```
 
+## MCP Note
+
+When GitHub MCP is available (`mcp__github__*` tools), use it for PR creation and review. Fall back to `gh` CLI if unavailable.
+
 ## 4. Create PR
 
 ```bash

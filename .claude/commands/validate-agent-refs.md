@@ -32,6 +32,8 @@ Periodic health check that verifies all internal links in the agent guidance sys
 - `lucide-icons-must-register-in-app-config.mdc`
 - `save-plan-must-use-skill.mdc`
 - `scss-styling-must-use-cssLayer.mdc`
+- `session-start.mdc`
+- `session-end.mdc`
 
 ### Cursor commands (`.cursor/commands/`)
 - `add-recipe.md`
@@ -79,7 +81,7 @@ Cross-check each path printed above against the filesystem. Any path that does n
 ### Inventory Check
 - Expected agents: 5 — found: [count]
 - Expected skills: 13 — found: [count]
-- Expected cursor rules: 5 — found: [count]
+- Expected cursor rules: 7 — found: [count]
 - Expected cursor commands: 3 — found: [count]
 
 ### Link Check
