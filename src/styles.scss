@@ -13,7 +13,7 @@ $break-desktop: 1200px;
  * Theme: Liquid Glass — frosted surfaces (--bg-glass, --blur-glass), teal primary (--color-primary).
  * Engines: .c-glass-card (hover lift), .c-glass-panel (no lift), .c-btn-primary, .c-btn-ghost,
  * .c-input, .c-input-wrapper, .c-select, .c-modal-*, .c-dropdown, .c-chip, .c-table-wrap, etc.
- * New styles: use var(--*) and rem/em; prefer engines over one-off classes. See .assistant/skills/cssLayer/SKILL.md
+ * New styles: use var(--*) and rem/em; prefer engines over one-off classes. See .claude/skills/cssLayer/SKILL.md
  */
 :root {
   font-family: 'Heebo', sans-serif;

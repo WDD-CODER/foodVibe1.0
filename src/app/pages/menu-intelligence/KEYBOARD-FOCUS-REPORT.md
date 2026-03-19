@@ -29,7 +29,7 @@ This report describes how to make the menu creation page fully keyboard-navigabl
 7. **Sell price — Tab to next** — `onSellPriceKeydown` only handles ArrowUp/ArrowDown. Add Tab: focus next row’s dish name button or dish search, or add-dish; Shift+Tab: focus previous focusable in same row (dish name) or previous row. This keeps a clear “row by row” flow.
 8. **Section remove / dish remove / dish meta toggle** — Optional: add `tabindex="-1"` to **section-remove** and **dish-remove** and **dish-meta-toggle** so the primary Tab path is: section title → section search (when open) → dish search 1 → sell price 1 → dish search 2 → … → add-dish → (then add-section). Users can still reach remove/meta via other means (e.g. a separate “actions” pass or leave them in tab order). Recommendation: leave them in tab order for now; add tabindex="-1" only if the flow feels noisy after the above changes.
 9. **Add-section and Save** — Ensure “Add section” and toolbar “Save” remain in tab order after the last section. Currently they are focusable; no change needed unless you introduce a “skip to Save” shortcut.
-10. **Canonical tab order (document)** — Add a short “Menu intelligence tab order” section (e.g. in `.assistant/skills/commit-to-github/SKILL.md` or a dedicated doc) listing the intended steps so future changes preserve the flow (see Section 2 below).
+10. **Canonical tab order (document)** — Add a short “Menu intelligence tab order” section (e.g. in `.claude/skills/commit-to-github/SKILL.md` or a dedicated doc) listing the intended steps so future changes preserve the flow (see Section 2 below).
 
 ---
 
@@ -64,7 +64,7 @@ After implementation, the intended sequence is:
 | 5 | Section search — Tab to first dish / add-dish | `menu-intelligence.page.ts` | In `onSectionSearchKeydown`, handle `e.key === 'Tab'`: closeSectionSearch(); focus first dish search in section or add-dish button. Handle Shift+Tab: focus section title. |
 | 6 | Dish search — Tab to sell price / next row / add-dish | `menu-intelligence.page.ts` | In `onDishSearchKeydown`, handle Tab: if row has recipe, focus sell price; else focus next row dish search or add-dish. Shift+Tab: previous row or section title. |
 | 7 | Sell price — Tab to next row / add-dish | `menu-intelligence.page.ts` | In `onSellPriceKeydown`, handle Tab: focus next row’s dish name or dish search, or add-dish. Shift+Tab: previous focusable in row or previous row. |
-| 8 | Document tab order section | `.assistant/skills/commit-to-github/SKILL.md` or `KEYBOARD-FOCUS-REPORT.md` | Add “Menu intelligence tab order” with the canonical steps (Section 2 above) for reference. |
+| 8 | Document tab order section | `.claude/skills/commit-to-github/SKILL.md` or `KEYBOARD-FOCUS-REPORT.md` | Add “Menu intelligence tab order” with the canonical steps (Section 2 above) for reference. |
 
 ---
 
@@ -72,7 +72,7 @@ After implementation, the intended sequence is:
 
 - **`src/app/pages/menu-intelligence/menu-intelligence.page.html`** — tabindex on guest +/-; Space on section title.
 - **`src/app/pages/menu-intelligence/menu-intelligence.page.ts`** — Space on event type open/select; Tab/Shift+Tab in section search, dish search, sell price.
-- **`.assistant/skills/commit-to-github/SKILL.md`** (optional) — Add “Menu intelligence tab order” subsection with the canonical list.
+- **`.claude/skills/commit-to-github/SKILL.md`** (optional) — Add “Menu intelligence tab order” subsection with the canonical list.
 
 ---
 

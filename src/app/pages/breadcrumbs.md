@@ -37,7 +37,7 @@ Lazy-loaded via `app.routes.ts`. Each page uses `core/services` and often `share
 ## Development Notes
 
 - New page: add directory, page component, add route in `app.routes.ts`, add nav link in header if needed.
-- Styling: follow `.assistant/skills/cssLayer/SKILL.md` (tokens, five-group rhythm).
+- Styling: follow `.claude/skills/cssLayer/SKILL.md` (tokens, five-group rhythm).
 
 ## Recent Changes
 
