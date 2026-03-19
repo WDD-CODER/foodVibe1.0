@@ -13,6 +13,12 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 190 — Agent process optimization (`plans/190-agent-process-optimization.plan.md`)
+- [ ] Pillar 1 (A1–A7): Token reduction — slim CLAUDE.md, compress agent.md, extract templates to `.claude/references/`, compact Section 0 triggers
+- [ ] Pillar 2 (A8–A12): MCP integration — `.cursor/mcp.json`, GitHub/Playwright, MCP-aware skills and validate-agent-refs
+- [ ] Pillar 3 (A13–A17): Reactive process — session-start/end rules, todo hygiene + breadcrumb hint in commit-to-github, sweep-stale-todos command
+- [ ] Resolve Critical Questions Q1–Q3 before or during execution
+
 ### Plan 183 — Agent Intelligence Map and Optimization (`plans/183-agent-intelligence-map-optimization.plan.md`)
 - [x] R1: Slim `.cursor/commands/` files to one-liner pointers (remove restated Phase 0 / Step 3 details)
 - [x] R2: Remove Phase 0 restatements from `copilot-instructions.md` Section 0, `agent.md` step 7, and `.mdc` rules — keep only "read the SKILL"
@@ -1198,6 +1204,7 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 178 | App-wide custom-select behavior | Active |
 | 182 | toFix verification undone | Planned |
 | 183 | Agent Intelligence Map and Optimization | Done |
+| 190 | Agent process optimization | Planned |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 
