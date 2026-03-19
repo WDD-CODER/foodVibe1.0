@@ -4,9 +4,9 @@
 
     <header class="form-header">
       @if (isEditMode_()) {
-      <h2 class="form-header__title">עריכת מוצר: {{ productForm_.get('productName')?.value ?? initialProduct_()?.name_hebrew ?? '' }}</h2>
+      <h2 class="form-header__title">{{ 'edit_product_title' | translatePipe }}: {{ productForm_.get('productName')?.value ?? initialProduct_()?.name_hebrew ?? '' }}</h2>
       } @else {
-      <h2 class="form-header__title">הוספת מוצר חדש למלאי</h2>
+      <h2 class="form-header__title">{{ 'add_product_inventory_title' | translatePipe }}</h2>
       <p class="subtitle">{{ 'add_product_subtitle' | translatePipe }}</p>
       }
     </header>
@@ -14,9 +14,9 @@
     <div class="form-section form-section--mandatory">
       <div class="form-group">
         <label>{{ 'product_name' | translatePipe }}</label>
-        <input #productNameInput formControlName="productName" type="text" placeholder="למשל: עגבניות מגי">
+        <input #productNameInput formControlName="productName" type="text" [placeholder]="'product_name_example_placeholder' | translatePipe">
         @if (productForm_.get('productName')?.invalid && productForm_.get('productName')?.touched && productForm_.get('productName')?.errors?.['duplicateName']) {
-          <span class="form-error">כבר קיים חומר גלם בשם זה</span>
+          <span class="form-error">{{ 'duplicate_product_name_error' | translatePipe }}</span>
         }
       </div>
 
@@ -97,7 +97,7 @@
 
     <div class="form-section form-section--purchase border-top" formArrayName="purchase_options_">
       <label class="section-header">
-        <button type="button" class="btn-text-add" (click)="addPurchaseOption()">
+        <button type="button" class="c-btn-ghost" (click)="addPurchaseOption()">
           <lucide-icon name="plus" class="icon-xs"></lucide-icon> {{ 'add_purchase_unit' | translatePipe }}
         </button>
       </label>
@@ -121,7 +121,7 @@
             [class.field-error]="option.get('conversion_rate_')?.invalid && (option.get('conversion_rate_')?.dirty || isSubmitted)">
             <label class="flex items-center gap-2">
               <span class="math-text">=</span>
-              <input type="number" formControlName="conversion_rate_" placeholder="כמות" step="any" min="0.0001">
+              <input type="number" formControlName="conversion_rate_" [placeholder]="'quantity' | translatePipe" step="any" min="0.0001">
             </label>
           </div>
 
@@ -153,7 +153,7 @@
             }
           </div>
 
-          <button type="button" class="btn-delete-row" (click)="onDeletePurchaseOption(idx)" [attr.aria-label]="'remove' | translatePipe">
+          <button type="button" class="c-icon-btn danger" (click)="onDeletePurchaseOption(idx)" [attr.aria-label]="'remove' | translatePipe">
             <lucide-icon name="trash-2" class="icon-sm"></lucide-icon>
           </button>
         </div>
@@ -161,7 +161,7 @@
         @if (option.invalid && (option.dirty || isSubmitted)) {
         <div class="error-message-row">
           <lucide-icon name="alert-circle" class="icon-xs"></lucide-icon>
-          אנא מלא את כל פרטי יחידת הרכש בצורה תקינה
+          {{ 'purchase_unit_details_invalid' | translatePipe }}
         </div>
         }
       </div>
@@ -169,7 +169,7 @@
     </div>
 
     <div class="form-section form-section--optional border-top">
-      <!-- <h3 class="form-section__heading text-slate-600 text-sm font-semibold mb-3">שדות אופציונליים</h3> -->
+      <!-- Optional fields heading kept hidden by design -->
 
       <div class="form-group collapsible-field">
         <div class="collapsible-field__content" [class.collapsible-field__content--hidden]="!expandedSupplier_()" (clickOutside)="onSupplierBlur($event)">
@@ -245,7 +245,7 @@
                 (ngModelChange)="allergenSearchQuery_.set($event); allergenDropdownHighlightIndex_.set(-1)"
                 [ngModelOptions]="{standalone: true}"
                 class="allergen-type-in-input form-input--no-focus-ring"
-                placeholder="חפש או בחר אלרגן..."
+                [placeholder]="'search_or_choose_allergen' | translatePipe"
                 (focus)="openAllergenDropdown()"
                 (keydown)="onAllergenInputKeydown($event)">
             </div>
@@ -271,7 +271,7 @@
               </div>
               }
               <div *ngIf="allergenOptionsFilteredBySearch_().length === 0 && !allergenSearchQuery_().trim()" class="dropdown-item text-slate-400 italic">
-                כל האלרגנים נבחרו
+                {{ 'all_allergens_selected' | translatePipe }}
               </div>
             </app-scrollable-dropdown>
           </div>
@@ -297,7 +297,7 @@
                 <input SelectOnFocus type="number" formControlName="waste_percent_" placeholder="0" min="0" max="99">
                 <span class="prefix text-slate-400">%</span>
               </div>
-              <p class="helper-text text-xs text-slate-400 mt-1">אחוז החומר שנזרק (קליפות, עצמות וכו')</p>
+              <p class="helper-text text-xs text-slate-400 mt-1">{{ 'waste_percent_help_text' | translatePipe }}</p>
             </div>
 
             <div class="form-group yield-logic ">
@@ -305,14 +305,14 @@
               <div class="relative-input">
                 <input class="yield-factor-input" SelectOnFocus type="number" formControlName="yield_factor_" step="0.001" placeholder="1.00">
               </div>
-              <p class="helper-text text-xs text-slate-400 mt-1">מקדם הניצולת (1.0 = ללא פחת)</p>
+              <p class="helper-text text-xs text-slate-400 mt-1">{{ 'yield_factor_help_text' | translatePipe }}</p>
             </div>
           </div>
 
           <div
             class="cost-impact-alert mt-4 p-3 bg-emerald-50 border border-emerald-100 rounded-lg flex justify-between items-center"
             *ngIf="productForm_.get('buy_price_global_')?.value > 0">
-            <span class="text-sm text-emerald-800 font-medium">עלות נטו מחושבת (לאחר פחת):</span>
+            <span class="text-sm text-emerald-800 font-medium">{{ 'net_cost_calculated_with_waste' | translatePipe }}</span>
             <span class="text-lg font-bold text-emerald-700">₪{{ netUnitCost_() | number:'1.2-2' }}</span>
           </div>
         </div>
@@ -353,11 +353,11 @@
     </div>
 
     <div class="form-actions">
-      <button type="button" class="btn-primary" (click)="onCancel()">
+      <button type="button" class="c-btn-primary" (click)="onCancel()">
         <lucide-icon name="arrow-right" class="icon-sm"></lucide-icon>
         {{ 'back_to_list' | translatePipe }}
       </button>
-      <button type="submit" [disabled]="productForm_.invalid || isSaving_()" class="btn-primary">
+      <button type="submit" [disabled]="productForm_.invalid || isSaving_()" class="c-btn-primary">
         @if (isSaving_()) {
           <app-loader size="small" [inline]="true" />
         }

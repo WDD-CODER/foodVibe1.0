@@ -5,14 +5,14 @@
 
       <div class="c-modal-body">
         <div class="c-input-stack full-width">
-          <label>{{ 'label_name' | translatePipe }} (עברית)</label>
+          <label>{{ 'label_name_hebrew' | translatePipe }}</label>
           <input type="text"
                  [ngModel]="modal.hebrewLabel_()"
                  (ngModelChange)="modal.hebrewLabel_.set($event)"
-                 placeholder="למשל: חלבי" />
+                 [placeholder]="'label_name_example_placeholder' | translatePipe" />
         </div>
         <div class="c-input-stack full-width">
-          <label>מפתח באנגלית (לדוגמה: dairy)</label>
+          <label>{{ 'english_key_example_label' | translatePipe }}</label>
           <input type="text"
                  [ngModel]="englishKey_()"
                  (ngModelChange)="englishKey_.set($event); validationError_.set(null)"

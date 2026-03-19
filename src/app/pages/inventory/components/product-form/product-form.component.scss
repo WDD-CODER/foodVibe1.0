@@ -77,22 +77,10 @@
         box-shadow: var(--shadow-glass);
       }
 
-      button {
+      .c-btn-ghost {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: var(--radius-md);
-        font-weight: 600;
-        font-size: 0.875rem;
-        transition: background 0.2s ease;
-        color: var(--color-text-on-primary);
-        border: none;
-        background: var(--color-primary);
-
-        &:hover:not(:disabled) {
-          background: var(--color-primary-hover);
-        }
       }
     }
 
@@ -262,22 +250,16 @@
       }
     }
 
-    .btn-delete-row {
+    .c-icon-btn.danger {
       opacity: 0;
-      background: none;
-      border: none;
-      padding: 0.5rem;
-      cursor: pointer;
       transition: opacity 0.2s ease, transform 0.2s ease;
-      color: var(--color-danger);
     }
 
-    .scaling-row:hover .btn-delete-row {
+    .scaling-row:hover .c-icon-btn.danger {
       opacity: 1;
 
       &:hover {
         transform: scale(1.1);
-        color: var(--color-danger);
       }
     }
 
@@ -345,27 +327,6 @@
       }
     }
 
-    .btn-primary {
-      background: var(--color-primary);
-      color: var(--color-text-on-primary);
-      border: none;
-      box-shadow: var(--shadow-glow);
-
-      &:hover:not(:disabled) {
-        background: var(--color-primary-hover);
-      }
-    }
-
-    .btn-ghost {
-      background: var(--bg-glass);
-      color: var(--color-text-secondary);
-      border: 1px solid var(--border-default);
-
-      &:hover:not(:disabled) {
-        background: var(--bg-glass-hover);
-        border-color: var(--border-strong);
-      }
-    }
   }
 
 

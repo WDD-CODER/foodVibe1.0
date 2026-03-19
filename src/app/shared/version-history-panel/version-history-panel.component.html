@@ -1,7 +1,7 @@
 <div class="version-history-panel" dir="rtl">
   <div class="panel-header">
     <h3>{{ 'history' | translatePipe }}</h3>
-    <button type="button" class="btn-close" (click)="close()" aria-label="סגור">×</button>
+    <button type="button" class="c-btn-ghost--sm" (click)="close()" [attr.aria-label]="'close' | translatePipe">×</button>
   </div>
   @if (loading()) {
     <app-loader size="medium" label="loader_loading" />

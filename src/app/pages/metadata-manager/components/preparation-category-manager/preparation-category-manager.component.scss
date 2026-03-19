@@ -78,26 +78,6 @@
     }
   }
 
-  .btn-add {
-    padding-inline: 1.25rem;
-    padding-block: 0.625rem;
-
-    background: var(--color-primary);
-    color: var(--color-text-on-primary);
-    font-weight: 600;
-    font-size: 0.875rem;
-
-    border: none;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-glow);
-
-    cursor: pointer;
-    transition: background 0.2s ease;
-
-    &:hover {
-      background: var(--color-primary-hover);
-    }
-  }
 }
 
 .list-container {
@@ -172,7 +152,7 @@
   }
 
   .btn-edit,
-  .btn-delete {
+  .c-icon-btn.danger {
     display: flex;
     place-content: center;
 
@@ -194,18 +174,8 @@
     }
   }
 
-  .btn-delete {
-    color: var(--color-text-muted);
-
-    &:hover {
-      color: var(--color-danger);
-      background: var(--bg-danger-subtle);
-      border-radius: var(--radius-xs);
-    }
-  }
-
   .list-item:hover .btn-edit,
-  .list-item:hover .btn-delete {
+  .list-item:hover .c-icon-btn.danger {
     opacity: 1;
   }
 }

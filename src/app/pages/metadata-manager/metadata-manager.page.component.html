@@ -4,7 +4,7 @@
   }
   <div class="admin-grid">
     <ng-container *ngTemplateOutlet="managerCard; context: { 
-      title: 'יחידות והמרות', 
+      title: 'metadata_units_and_conversions_title', 
       icon: 'scale', 
       colorClass: 'text-emerald-600',
       items: allUnitKeys_(),
@@ -12,7 +12,7 @@
     }"></ng-container>
 
     <ng-container *ngTemplateOutlet="managerCard; context: { 
-      title: 'קטגוריות מוצרים', 
+      title: 'metadata_product_categories_title', 
       icon: 'tag', 
       colorClass: 'text-indigo-600',
       items: allCategories_(),
@@ -20,7 +20,7 @@
     }"></ng-container>
 
     <ng-container *ngTemplateOutlet="managerCard; context: { 
-      title: 'מאגר אלרגנים גלובלי', 
+      title: 'metadata_global_allergens_title', 
       icon: 'alert-triangle', 
       colorClass: 'text-rose-500',
       items: allAllergens_(),
@@ -28,7 +28,7 @@
     }"></ng-container>
 
     <ng-container *ngTemplateOutlet="managerCard; context: { 
-      title: 'תוויות מתכונים', 
+      title: 'metadata_recipe_labels_title', 
       icon: 'tags', 
       colorClass: 'text-sky-600',
       items: allLabelKeys_(),
@@ -38,11 +38,11 @@
     <section class="manager-card menu-types-card">
       <div class="card-title">
         <lucide-icon name="utensils-crossed" class="text-teal-600"></lucide-icon>
-        <h2>סוגי תפריט (Menu Types)</h2>
+        <h2>{{ 'metadata_menu_types_title' | translatePipe }}</h2>
       </div>
-      <p class="card-desc">קביעת שדות לכל סוג תפריט (מחיר מכירה, עלות מזון, מנות וכו׳)</p>
-      <button type="button" class="btn-add" (click)="onAddMenuType()"
-        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">הוסף סוג תפריט</button>
+      <p class="card-desc">{{ 'metadata_menu_types_desc' | translatePipe }}</p>
+      <button type="button" class="c-btn-primary" (click)="onAddMenuType()"
+        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">{{ 'metadata_add_menu_type' | translatePipe }}</button>
       <div class="list-container">
         @if (allMenuTypes_().length > 0) {
           <div class="list-stack">
@@ -60,8 +60,8 @@
                       }
                     </div>
                     <div class="edit-actions">
-                      <button type="button" class="btn-save-small" (click)="onSaveMenuTypeFields()">שמור</button>
-                      <button type="button" class="btn-ghost-small" (click)="onCancelEditMenuType()">ביטול</button>
+                      <button type="button" class="c-btn-primary" (click)="onSaveMenuTypeFields()">{{ 'save' | translatePipe }}</button>
+                      <button type="button" class="c-btn-ghost--sm" (click)="onCancelEditMenuType()">{{ 'cancel' | translatePipe }}</button>
                     </div>
                   </div>
                 } @else {
@@ -82,7 +82,7 @@
                     [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
                     <lucide-icon name="pencil" [size]="14"></lucide-icon>
                   </button>
-                  <button type="button" class="btn-delete" (click)="onRemoveMenuType(def.key)"
+                  <button type="button" class="c-icon-btn danger" (click)="onRemoveMenuType(def.key)"
                     [attr.aria-label]="'remove' | translatePipe"
                     [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
                     <lucide-icon name="trash-2" [size]="16"></lucide-icon>
@@ -92,7 +92,7 @@
             }
           </div>
         } @else {
-          <div class="empty-state">אין סוגי תפריט. לחץ "הוסף סוג תפריט".</div>
+          <div class="empty-state">{{ 'metadata_no_menu_types' | translatePipe }}</div>
         }
       </div>
     </section>
@@ -105,7 +105,7 @@
         <lucide-icon name="package" class="text-amber-600"></lucide-icon>
         <h2>{{ 'load_demo_data' | translatePipe }}</h2>
       </div>
-      <p class="card-desc">נתוני הדגמה: כ-100 מוצרים, 8 ספקים, 10 הכנות ו-10 מנות. גיבוי ב-assets/data.</p>
+      <p class="card-desc">{{ 'metadata_demo_data_desc' | translatePipe }}</p>
       <div class="card-actions">
         <button type="button" class="btn-demo" (click)="onLoadDemoData()">
           {{ 'load_demo_data' | translatePipe }}
@@ -144,16 +144,16 @@
   <section class="manager-card" [attr.data-type]="type">
     <div class="card-title">
       <lucide-icon [name]="icon" [class]="colorClass"></lucide-icon>
-      <h2>{{ title }}</h2>
+      <h2>{{ title | translatePipe }}</h2>
     </div>
 
     <div class="input-group">
-      <input #newInput type="text" [placeholder]="'הוסף ' + title + '...'"
+      <input #newInput type="text" [placeholder]="('add' | translatePipe) + ' ' + (title | translatePipe) + '...'"
         (keyup.enter)="onAddMetadata(newInput.value, type, newInput)">
 
-      <button (click)="onAddMetadata(newInput.value, type, newInput)" class="btn-add"
+      <button (click)="onAddMetadata(newInput.value, type, newInput)" class="c-btn-primary"
         [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
-        הוסף
+        {{ 'add' | translatePipe }}
       </button>
     </div>
 
@@ -172,7 +172,7 @@
             <lucide-icon name="lock" [size]="14"></lucide-icon>
           </span>
           } @else if (type !== 'unit' || !isSystemUnit(item)) {
-          <button class="btn-delete" (click)="onRemoveMetadata(item, type)"
+          <button class="c-icon-btn danger" (click)="onRemoveMetadata(item, type)"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
             <lucide-icon [name]="type === 'allergen' ? 'x' : 'trash-2'"
               [size]="type === 'allergen' ? 14 : 16"></lucide-icon>
@@ -182,7 +182,7 @@
         }
       </div>
       } @else {
-      <div class="empty-state">אין {{ title }} רשומים במערכת</div>
+      <div class="empty-state">{{ 'metadata_no_items_prefix' | translatePipe }} {{ title | translatePipe }} {{ 'metadata_no_items_suffix' | translatePipe }}</div>
       }
     </div>
   </section>
