@@ -100,6 +100,12 @@ Never erase or discard user changes: no `git reset --hard`, `git clean -fd`, or 
 5. **Update todo**
    Open `.claude/todo.md`. Using committed branch names, messages, and file paths, mark matching tasks as done (`[x]`). Do not change unrelated tasks.
 
+6. **Archive completed plan sections**
+   Scan `.claude/todo.md` for plan sections where ALL items are `[x]`. Move any such sections to `todo-archive.md` (create if needed), appended with today's date and plan number. Note: "Archived Plan NNN to todo-archive.md."
+
+7. **Breadcrumb check**
+   If any committed files added, removed, or renamed components/services/pages, list the affected directories and ask: "Run breadcrumb-navigator for [dirs]?" Do not block the commit flow.
+
 ---
 
 ## End State

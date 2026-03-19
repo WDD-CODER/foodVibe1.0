@@ -1,0 +1,7 @@
+---
+description: Session end — produce structured summary when user says wrap up / done for today / handoff
+globs: []
+---
+
+When the user says "wrap up", "done for today", "session end", or "handoff":
+Read `.claude/skills/session-handoff/SKILL.md` and produce the structured session summary.

@@ -1,0 +1,8 @@
+---
+description: Session start — read handoff notes and sync GitHub context
+alwaysApply: true
+---
+
+At the start of every session:
+1. Check `notes/session-handoffs/` for a handoff file from the last 3 days. If found, read it and summarize key context in your first response.
+2. Trigger: `Session start / after time away` → read `.claude/skills/github-sync/SKILL.md` to pull recent GitHub context.
