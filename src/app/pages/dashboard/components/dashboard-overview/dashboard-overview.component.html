@@ -6,6 +6,7 @@
         <button
           type="button"
           class="header-btn"
+          data-testid="btn-nav-metadata"
           [class.active]="activeTab() === 'metadata'"
           (click)="tabChange.emit('metadata')"
         >
@@ -14,6 +15,7 @@
         <button
           type="button"
           class="header-btn"
+          data-testid="btn-nav-venues"
           [class.active]="activeTab() === 'venues'"
           (click)="tabChange.emit('venues')"
         >
@@ -23,13 +25,14 @@
         <button
           type="button"
           class="header-btn header-btn--trash"
+          data-testid="btn-nav-trash"
           [class.active]="activeTab() === 'trash'"
           (click)="tabChange.emit('trash')"
         >
           <lucide-icon name="trash-2" size="16"></lucide-icon>
           {{ 'trash' | translatePipe }}
         </button>
-        <button type="button" class="header-btn" (click)="goToSuppliers()">
+        <button type="button" class="header-btn" data-testid="btn-nav-suppliers" (click)="goToSuppliers()">
           <lucide-icon name="truck" size="16"></lucide-icon>
           <span>{{ 'suppliers' | translatePipe }}</span>
         </button>
@@ -39,40 +42,40 @@
 
   <main class="dashboard-main">
     <section class="kpi-grid">
-      <article class="kpi-card">
+      <article class="kpi-card" data-testid="kpi-total-products">
         <h2 class="kpi-label">{{ 'total_products' | translatePipe }}</h2>
         <p class="kpi-value">{{ totalProducts_() }}</p>
         <div class="kpi-actions">
-          <button type="button" class="link-btn" (click)="goToInventory()">
+          <button type="button" class="link-btn" data-testid="btn-view-inventory" (click)="goToInventory()">
             {{ 'view_inventory' | translatePipe }}
           </button>
-          <button type="button" class="link-btn" (click)="goToAddProduct()"
+          <button type="button" class="link-btn" data-testid="btn-add-product" (click)="goToAddProduct()"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
             {{ 'add_product' | translatePipe }}
           </button>
         </div>
       </article>
 
-      <article class="kpi-card">
+      <article class="kpi-card" data-testid="kpi-total-recipes">
         <h2 class="kpi-label">{{ 'total_recipes' | translatePipe }}</h2>
         <p class="kpi-value">{{ totalRecipes_() }}</p>
-        <button type="button" class="link-btn" (click)="goToRecipeBook()">
+        <button type="button" class="link-btn" data-testid="btn-view-recipes" (click)="goToRecipeBook()">
           {{ 'view_recipes' | translatePipe }}
         </button>
       </article>
 
-      <article class="kpi-card warning">
+      <article class="kpi-card warning" data-testid="kpi-low-stock">
         <h2 class="kpi-label">{{ 'low_stock' | translatePipe }}</h2>
         <p class="kpi-value">{{ lowStockCount_() }}</p>
-        <button type="button" class="link-btn" (click)="goToInventoryLowStock()">
+        <button type="button" class="link-btn" data-testid="btn-view-low-stock" (click)="goToInventoryLowStock()">
           {{ 'view_inventory' | translatePipe }}
         </button>
       </article>
 
-      <article class="kpi-card info">
+      <article class="kpi-card info" data-testid="kpi-unapproved">
         <h2 class="kpi-label">{{ 'unapproved_recipes' | translatePipe }}</h2>
         <p class="kpi-value">{{ unapprovedCount_() }}</p>
-        <button type="button" class="link-btn" (click)="goToRecipeBookUnapproved()">
+        <button type="button" class="link-btn" data-testid="btn-view-unapproved" (click)="goToRecipeBookUnapproved()">
           {{ 'view_recipes' | translatePipe }}
         </button>
       </article>
@@ -83,70 +86,73 @@
         <h2>{{ 'recent_activity' | translatePipe }}</h2>
       </header>
 
-      <div class="activity-list-scroll-wrap" *ngIf="getRecentActivity().length; else noActivity">
-        <div class="activity-list" scrollIndicators>
-          <div class="activity-item" *ngFor="let item of getRecentActivity(); trackBy: trackByActivityId">
-          <span class="entity-type-tag" [attr.data-entity]="item.entityType">
-            {{ (item.entityType === 'product'
-              ? 'product'
-              : item.entityType === 'dish'
-                ? 'dish'
-                : 'preparation') | translatePipe }}
-          </span>
+      @if (getRecentActivity().length) {
+        <div class="activity-list-scroll-wrap">
+          <div class="activity-list" data-testid="activity-list" scrollIndicators>
+            @for (item of getRecentActivity(); track item.id) {
+              <div class="activity-item" data-testid="activity-item">
+                <span class="entity-type-tag" [attr.data-entity]="item.entityType">
+                  {{ (item.entityType === 'product'
+                    ? 'product'
+                    : item.entityType === 'dish'
+                      ? 'dish'
+                      : 'preparation') | translatePipe }}
+                </span>
 
-          <span class="activity-name">
-            {{ item.entityName }}
-          </span>
+                <span class="activity-name">
+                  {{ item.entityName }}
+                </span>
 
-          <div class="activity-changes-wrapper">
-            <button
-              type="button"
-              class="activity-scroll-btn activity-scroll-left"
-              (click)="scrollActivityChanges($event, 'left')"
-              aria-label="Scroll changes left"
-            >
-              <lucide-icon name="chevron-right" [size]="16"></lucide-icon>
-            </button>
-            <div class="activity-changes">
-              <button
-                type="button"
-                class="change-tag"
-                *ngFor="let change of item.changes || []"
-                (click)="toggleChangePopover(item.id, change.field, $event)"
-              >
-                {{ change.label | translatePipe }}
-              </button>
-            </div>
-            <button
-              type="button"
-              class="activity-scroll-btn activity-scroll-right"
-              (click)="scrollActivityChanges($event, 'right')"
-              aria-label="Scroll changes right"
-            >
-              <lucide-icon name="chevron-left" [size]="16"></lucide-icon>
-            </button>
+                <div class="activity-changes-wrapper">
+                  <button
+                    type="button"
+                    class="activity-scroll-btn activity-scroll-left"
+                    (click)="scrollActivityChanges($event, 'left')"
+                    aria-label="Scroll changes left"
+                  >
+                    <lucide-icon name="chevron-right" [size]="16"></lucide-icon>
+                  </button>
+                  <div class="activity-changes">
+                    @for (change of item.changes || []; track change.field) {
+                      <button
+                        type="button"
+                        class="change-tag"
+                        (click)="toggleChangePopover(item.id, change.field, $event)"
+                      >
+                        {{ change.label | translatePipe }}
+                      </button>
+                    }
+                  </div>
+                  <button
+                    type="button"
+                    class="activity-scroll-btn activity-scroll-right"
+                    (click)="scrollActivityChanges($event, 'right')"
+                    aria-label="Scroll changes right"
+                  >
+                    <lucide-icon name="chevron-left" [size]="16"></lucide-icon>
+                  </button>
+                </div>
+
+                <span class="activity-type" [attr.data-action]="item.action">
+                  {{ ('activity_' + item.action) | translatePipe }}
+                </span>
+              </div>
+            }
           </div>
-
-          <span class="activity-type" [attr.data-action]="item.action">
-            {{ ('activity_' + item.action) | translatePipe }}
-          </span>
+          <div class="activity-scroll-zone activity-scroll-zone--top" aria-hidden="true"></div>
+          <div class="activity-scroll-zone activity-scroll-zone--bottom" aria-hidden="true"></div>
+          <div class="activity-scroll-indicator activity-scroll-indicator--top" aria-hidden="true">
+            <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
+          </div>
+          <div class="activity-scroll-indicator activity-scroll-indicator--bottom" aria-hidden="true">
+            <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
           </div>
         </div>
-        <div class="activity-scroll-zone activity-scroll-zone--top" aria-hidden="true"></div>
-        <div class="activity-scroll-zone activity-scroll-zone--bottom" aria-hidden="true"></div>
-        <div class="activity-scroll-indicator activity-scroll-indicator--top" aria-hidden="true">
-          <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
-        </div>
-        <div class="activity-scroll-indicator activity-scroll-indicator--bottom" aria-hidden="true">
-          <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
-        </div>
-      </div>
-
-      <ng-template #noActivity>
-        <p class="empty-copy">
+      } @else {
+        <p class="empty-copy" data-testid="activity-empty">
           {{ 'no_recent_activity' | translatePipe }}
         </p>
-      </ng-template>
+      }
     </section>
   </main>
 

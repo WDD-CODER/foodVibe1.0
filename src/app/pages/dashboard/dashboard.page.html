@@ -1,18 +1,18 @@
 <div class="dashboard-shell" dir="rtl">
   <div class="dashboard-content">
     @if (activeTab() === 'overview') {
-      <app-dashboard-overview [activeTab]="activeTab()" (tabChange)="setTab($event)" />
+      <app-dashboard-overview data-testid="dashboard-tab-overview" [activeTab]="activeTab()" (tabChange)="setTab($event)" />
     } @else if (activeTab() === 'metadata') {
-      <div class="dashboard-metadata-layout">
+      <div class="dashboard-metadata-layout" data-testid="dashboard-tab-metadata">
         <app-dashboard-header [activeTab]="activeTab()" (tabChange)="setTab($event)" />
         <app-metadata-manager />
       </div>
     } @else if (activeTab() === 'venues') {
-      <app-venue-list [embeddedInDashboard]="true" (addVenueClick)="setTab('add-venue')" />
+      <app-venue-list data-testid="dashboard-tab-venues" [embeddedInDashboard]="true" (addVenueClick)="setTab('add-venue')" />
     } @else if (activeTab() === 'add-venue') {
-      <app-venue-form [embeddedInDashboard]="true" (saved)="setTab('venues')" (cancel)="setTab('venues')" />
+      <app-venue-form data-testid="dashboard-tab-add-venue" [embeddedInDashboard]="true" (saved)="setTab('venues')" (cancel)="setTab('venues')" />
     } @else if (activeTab() === 'trash') {
-      <app-trash-page />
+      <app-trash-page data-testid="dashboard-tab-trash" />
     }
   </div>
 </div>
