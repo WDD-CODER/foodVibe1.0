@@ -1,14 +1,35 @@
 {
   "permissions": {
     "allow": [
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(sed:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(wc:*)",
+      "Bash(echo:*)",
+      "Bash(pwd:*)",
+      "Bash(which:*)",
+      "Bash(grep:*)",
       "Bash(xargs grep:*)",
-      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); g=d.get\\(''''general'''',{}\\); [print\\(k,'''':'''',v\\) for k,v in g.items\\(\\) if any\\(x in k for x in [''''sign'''',''''auth'''',''''login'''',''''user'''',''''pass'''',''''email'''',''''confirm'''',''''name_req'''',''''user_not'''',''''username_tak'''']\\)]\")",
-      "Bash(node:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git branch:*)",
+      "Bash(git show:*)",
+      "Bash(git remote:*)",
+      "Bash(git checkout:*)",
+      "Bash(npm test:*)",
+      "Bash(npx ng:*)",
       "Bash(npx tsc:*)",
+      "Bash(node:*)",
+      "Bash(python3:*)",
       "Bash(while read:*)",
       "Bash(do wc:*)",
       "Bash(done)",
-      "Bash(npm test:*)"
+      "Skill(update-config)",
+      "Bash(npm start:*)"
     ]
   }
 }
