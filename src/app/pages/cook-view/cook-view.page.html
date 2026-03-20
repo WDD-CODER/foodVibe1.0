@@ -83,20 +83,11 @@
         @if (!isScaledView_()) {
           <div class="quantity-control-wrap">
             <span class="quantity-label">{{ 'make_quantity' | translatePipe }}</span>
-            <div class="quantity-controls">
-              <button type="button" class="qty-btn minus" (click)="decrementQuantity()" [attr.aria-label]="'decrease' | translatePipe"
-              [disabled]="targetQuantity_() <= (isDish_() ? 1 : 0.01)">
-                <lucide-icon name="minus" [size]="18"></lucide-icon>
-              </button>
-              <input type="number" class="quantity-input" [value]="targetQuantity_()"
-                (input)="setQuantity($any($event.target).valueAsNumber)"
-                (keydown)="onQuantityKeydown($event)"
-                SelectOnFocus
-                [min]="isDish_() ? 1 : 0.01" [step]="isDish_() ? 1 : 0.1" />
-              <button type="button" class="qty-btn plus" (click)="incrementQuantity()" [attr.aria-label]="'increase' | translatePipe">
-                <lucide-icon name="plus" [size]="18"></lucide-icon>
-              </button>
-            </div>
+            <app-counter
+              [value]="targetQuantity_()"
+              [min]="isDish_() ? 1 : 0.01"
+              [stepOptions]="isDish_() ? {integerOnly: true} : undefined"
+              (valueChange)="setQuantity($event)" />
             <app-custom-select
               class="unit-select"
               [ngModel]="selectedUnit_()"

@@ -39,6 +39,8 @@ import { ExportPreviewComponent } from '../../shared/export-preview/export-previ
 import { ExportToolbarOverlayComponent } from '../../shared/export-toolbar-overlay/export-toolbar-overlay.component';
 import { ApproveStampComponent } from 'src/app/shared/approve-stamp/approve-stamp.component';
 import { ConfirmModalService } from '@services/confirm-modal.service';
+import { useSavingState } from 'src/app/core/utils/saving-state.util';
+import { CounterComponent } from 'src/app/shared/counter/counter.component';
 
 @Component({
   selector: 'app-recipe-builder-page',
@@ -56,7 +58,8 @@ import { ConfirmModalService } from '@services/confirm-modal.service';
     ClickOutSideDirective,
     ExportPreviewComponent,
     ExportToolbarOverlayComponent,
-    ApproveStampComponent
+    ApproveStampComponent,
+    CounterComponent
   ],
   templateUrl: './recipe-builder.page.html',
   styleUrl: './recipe-builder.page.scss'
@@ -84,7 +87,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private readonly heroFab_ = inject(HeroFabService);
 
   //SIGNALS
-  protected isSaving_ = signal(false);
+  private readonly saving = useSavingState();
+  protected readonly isSaving_ = this.saving.isSaving_;
   private recipeId_ = signal<string | null>(null);
   protected resetTrigger_ = signal(0);
   isSubmitted = false;
@@ -911,13 +915,13 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     }
 
     const navigateOnSuccess = options?.navigateOnSuccess !== false;
-    this.isSaving_.set(true);
+    this.saving.setSaving(true);
     const recipe = this.buildRecipeFromForm();
     recipe.autoLabels_ = this.computeAutoLabels_(recipe);
 
     this.state_.saveRecipe(recipe).subscribe({
       next: () => {
-        this.isSaving_.set(false);
+        this.saving.setSaving(false);
         if (navigateOnSuccess) {
           this.isSubmitted = true;
           this.resetToNewForm_();
@@ -929,7 +933,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         }
       },
       error: () => {
-        this.isSaving_.set(false);
+        this.saving.setSaving(false);
         if (!navigateOnSuccess) {
           this.userMsg_.onSetErrorMsg(this.translation_.translate('approval_error'));
         }

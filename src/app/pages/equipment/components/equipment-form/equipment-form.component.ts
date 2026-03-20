@@ -26,6 +26,7 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
 import { UserMsgService } from '@services/user-msg.service';
 import { TranslationService } from '@services/translation.service';
 import { LoggingService } from '@services/logging.service';
+import { useSavingState } from 'src/app/core/utils/saving-state.util';
 
 const CATEGORIES: EquipmentCategory[] = [
   'heat_source',
@@ -58,7 +59,8 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
 
   protected equipmentForm_!: FormGroup;
   protected isEditMode_ = signal(false);
-  protected isSaving_ = signal(false);
+  private readonly saving = useSavingState();
+  protected readonly isSaving_ = this.saving.isSaving_;
   protected categories = CATEGORIES;
   protected categoryOptions = CATEGORIES.map((c) => ({ value: c, label: c }));
 
@@ -118,7 +120,7 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
 
   async onSubmit(): Promise<void> {
     if (this.equipmentForm_.invalid) return;
-    this.isSaving_.set(true);
+    await this.saving.withSaving(async () => {
     try {
       const v = this.equipmentForm_.getRawValue();
       const now = new Date().toISOString();
@@ -163,9 +165,8 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
         ? (this.translation.translate('duplicate_equipment_name') ?? 'כלי עם שם זה כבר קיים')
         : (this.translation.translate('save_failed') ?? 'שגיאה בשמירה');
       this.userMsg.onSetErrorMsg(msg);
-    } finally {
-      this.isSaving_.set(false);
     }
+    });
   }
 
   onCancel(): void {

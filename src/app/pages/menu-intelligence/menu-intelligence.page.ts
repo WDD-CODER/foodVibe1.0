@@ -28,6 +28,7 @@ import type { ExportPayload } from 'src/app/core/utils/export.util';
 import { ExportPreviewComponent } from 'src/app/shared/export-preview/export-preview.component';
 import { ExportToolbarOverlayComponent } from 'src/app/shared/export-toolbar-overlay/export-toolbar-overlay.component';
 import { HeroFabService } from '@services/hero-fab.service';
+import { useSavingState } from 'src/app/core/utils/saving-state.util';
 
 type MenuItemForm = {
   recipe_id_: string;
@@ -74,7 +75,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected readonly ALL_DISH_FIELDS = ALL_DISH_FIELDS;
   protected readonly recipes_ = this.kitchenState.recipes_;
   protected readonly products_ = this.kitchenState.products_;
-  protected readonly isSaving_ = signal(false);
+  private readonly saving = useSavingState();
+  protected readonly isSaving_ = this.saving.isSaving_;
   protected readonly showExport_ = signal(false);
   protected readonly toolbarOpen_ = signal(false);
   protected readonly menuFabExpanded_ = signal(false);
@@ -1034,8 +1036,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       this.form_.patchValue({ name_: this.generateDateName() });
     }
 
-    this.isSaving_.set(true);
-    try {
+    await this.saving.withSaving(async () => {
       const event = this.menuIntelligence.hydrateDerivedPortions(this.buildEventFromForm());
       const now = Date.now();
       const id = this.editingId_();
@@ -1048,9 +1049,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue());
       this.userMsg.onSetSuccessMsg('Menu saved successfully');
       this.router.navigate(['/menu-library']);
-    } finally {
-      this.isSaving_.set(false);
-    }
+    });
   }
 
   private generateDateName(): string {

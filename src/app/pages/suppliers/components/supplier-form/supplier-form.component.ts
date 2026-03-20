@@ -19,6 +19,7 @@ import { LoggingService } from '@services/logging.service';
 import { Supplier } from '@models/supplier.model';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
+import { useSavingState } from 'src/app/core/utils/saving-state.util';
 
 const DAY_KEYS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fri', 'day_sat'];
 
@@ -46,7 +47,8 @@ export class SupplierFormComponent implements OnInit {
 
   protected supplierForm_!: FormGroup;
   protected isEditMode_ = signal(false);
-  protected isSaving_ = signal(false);
+  private readonly saving = useSavingState();
+  protected readonly isSaving_ = this.saving.isSaving_;
   protected dayKeys = DAY_KEYS;
 
   protected get deliveryDaysArray(): FormArray {
@@ -132,11 +134,11 @@ export class SupplierFormComponent implements OnInit {
       min_order_mov_: Number(raw.min_order_mov_) || 0,
       lead_time_days_: Number(raw.lead_time_days_) || 0,
     };
-    this.isSaving_.set(true);
+    this.saving.setSaving(true);
     if (this.isEditMode_()) {
       const supplier = this.embeddedInDashboard() ? (this.supplierToEdit() ?? undefined) : (this.route.snapshot.data['supplier'] as Supplier);
       if (!supplier) {
-        this.isSaving_.set(false);
+        this.saving.setSaving(false);
         return;
       }
       this.supplierData
@@ -148,7 +150,7 @@ export class SupplierFormComponent implements OnInit {
         .catch((e) => {
           this.logging.error({ event: 'supplier.save_error', message: 'Supplier save failed', context: { err: e } });
         })
-        .finally(() => this.isSaving_.set(false));
+        .finally(() => this.saving.setSaving(false));
     } else {
       this.supplierData
         .addSupplier(payload)
@@ -159,7 +161,7 @@ export class SupplierFormComponent implements OnInit {
         .catch((e) => {
           this.logging.error({ event: 'supplier.save_error', message: 'Supplier save failed', context: { err: e } });
         })
-        .finally(() => this.isSaving_.set(false));
+        .finally(() => this.saving.setSaving(false));
     }
   }
 

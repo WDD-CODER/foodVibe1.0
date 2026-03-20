@@ -27,6 +27,7 @@ import { duplicateNameValidator } from 'src/app/core/validators/item.validators'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
+import { useSavingState } from 'src/app/core/utils/saving-state.util';
 
 @Component({
   selector: 'product-form',
@@ -93,7 +94,8 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
   );
   protected allergenOptions_ = computed(() => this.metadataRegistry.allAllergens_());
   protected isEditMode_ = signal<boolean>(false);
-  protected isSaving_ = signal(false);
+  private readonly saving = useSavingState();
+  protected readonly isSaving_ = this.saving.isSaving_;
   protected curProduct_ = signal<Product | null>(null);
   protected isBaseUnitMode_ = signal(false);
 
@@ -1112,15 +1114,15 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
       purchase_options_: purchaseOptions
     };
 
-    this.isSaving_.set(true);
+    this.saving.setSaving(true);
     this.kitchenStateService.saveProduct(productToSave).subscribe({
       next: () => {
-        this.isSaving_.set(false);
+        this.saving.setSaving(false);
         this.isSubmitted = true;
         this.router.navigate(['/inventory/list']);
       },
       error: () => {
-        this.isSaving_.set(false);
+        this.saving.setSaving(false);
         this.isSubmitted = false;
       }
     });

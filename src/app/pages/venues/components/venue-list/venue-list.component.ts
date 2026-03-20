@@ -17,6 +17,7 @@ import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state';
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component';
+import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component';
 import { useListState, StringParam, StringSetParam } from 'src/app/core/utils/list-state.util';
 import { HeroFabService } from '@services/hero-fab.service';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
@@ -43,6 +44,7 @@ const ENV_TYPES: EnvironmentType[] = [
     CellCarouselComponent,
     CellCarouselSlideDirective,
     ListRowCheckboxComponent,
+    SelectionBarComponent,
   ],
   templateUrl: './venue-list.component.html',
   styleUrl: './venue-list.component.scss',
@@ -182,8 +184,7 @@ export class VenueListComponent implements OnInit, OnDestroy {
     this.router.navigate(['/venues/edit', item._id]);
   }
 
-  protected onBulkDeleteSelected(): void {
-    const ids = Array.from(this.selection.selectedIds());
+  protected onBulkDeleteSelected(ids: string[]): void {
     if (ids.length === 0) return;
     if (!this.requireAuthService.requireAuth()) return;
     if (!confirm(`למחוק ${ids.length} מיקומים?`)) return;
