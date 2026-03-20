@@ -1,6 +1,12 @@
 @layer components.supplier-form {
   :host {
     display: block;
+
+    .form-error {
+      font-size: 0.75rem;
+
+      color: var(--color-danger);
+    }
   }
 
   /* Page mode only: modal mode uses engine .c-modal-body, .c-input-stack, .c-modal-actions */

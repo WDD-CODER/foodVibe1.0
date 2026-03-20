@@ -14,6 +14,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
+import { duplicateEntityNameValidator } from 'src/app/core/validators/item.validators';
 import { VenueDataService } from '@services/venue-data.service';
 import { EquipmentDataService } from '@services/equipment-data.service';
 import {
@@ -83,7 +84,13 @@ export class VenueFormComponent implements OnInit {
 
   private buildForm(): void {
     this.venueForm_ = this.fb.group({
-      name_hebrew: ['', [Validators.required]],
+      name_hebrew: ['', [
+        Validators.required,
+        duplicateEntityNameValidator(
+          () => this.venueData.allVenues_(),
+          () => (this.route.snapshot.data['venue'] as VenueProfile)?._id ?? null
+        ),
+      ]],
       environment_type_: ['outdoor_field', [Validators.required]],
       notes_: [''],
       available_infrastructure_: this.fb.array([]),
