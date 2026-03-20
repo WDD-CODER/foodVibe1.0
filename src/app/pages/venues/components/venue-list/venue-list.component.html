@@ -22,10 +22,7 @@
   </ng-container>
 
   <ng-container shell-actions>
-    @if (selection.selectionMode()) {
-      <button type="button" class="c-btn-ghost" (click)="selection.clear()">{{ 'clear_selection' | translatePipe }}</button>
-      <button type="button" class="c-btn-ghost danger" (click)="onBulkDeleteSelected()">{{ 'remove_selected' | translatePipe }}</button>
-    }
+    <app-selection-bar [selectionState]="selection" (bulkDelete)="onBulkDeleteSelected($event)" />
     <button type="button" class="c-btn-primary" (click)="onAddPlace()"
       [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
       <lucide-icon name="plus" [size]="18"></lucide-icon>

@@ -26,6 +26,8 @@ import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.compone
 import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state';
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component';
+import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component';
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component';
 import { useListState, StringParam, NullableStringParam, FilterRecordParam, StringArrayParam, BooleanParam } from 'src/app/core/utils/list-state.util';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util';
@@ -37,7 +39,7 @@ const MAX_ALLERGEN_RECURSION = 5;
 @Component({
   selector: 'recipe-book-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, ClickOutSideDirective, VersionHistoryPanelComponent, LoaderComponent, ScrollableDropdownComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective, ListRowCheckboxComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, ClickOutSideDirective, VersionHistoryPanelComponent, LoaderComponent, ScrollableDropdownComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective, ListRowCheckboxComponent, SelectionBarComponent, EmptyStateComponent],
   templateUrl: './recipe-book-list.component.html',
   styleUrl: './recipe-book-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -659,8 +661,7 @@ export class RecipeBookListComponent {
     }
   }
 
-  protected onBulkDeleteSelected(): void {
-    const ids = Array.from(this.selection.selectedIds());
+  protected onBulkDeleteSelected(ids: string[]): void {
     if (ids.length === 0) return;
     if (!this.requireAuthService.requireAuth()) return;
     if (!confirm(`למחוק ${ids.length} מתכונים?`)) return;

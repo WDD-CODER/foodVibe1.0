@@ -15,6 +15,7 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util'
 import { take } from 'rxjs/operators'
 import { CdkDragDrop, moveItemInArray, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop'
+import { CounterComponent } from 'src/app/shared/counter/counter.component'
 
 @Component({
   selector: 'app-recipe-workflow',
@@ -30,7 +31,8 @@ import { CdkDragDrop, moveItemInArray, CdkDrag, CdkDropList, CdkDragHandle } fro
     CustomSelectComponent,
     CdkDrag,
     CdkDropList,
-    CdkDragHandle
+    CdkDragHandle,
+    CounterComponent
   ],
   templateUrl: './recipe-workflow.component.html',
   styleUrl: './recipe-workflow.component.scss'
@@ -138,16 +140,8 @@ export class RecipeWorkflowComponent {
     return this.prepRegistry_.preparationCategories_()
   }
 
-  incrementQuantity(group: FormGroup, index: number): void {
-    const ctrl = group.get('quantity')
-    const current = ctrl?.value ?? 0
-    ctrl?.setValue(quantityIncrement(current, 0))
-  }
-
-  decrementQuantity(group: FormGroup, index: number): void {
-    const ctrl = group.get('quantity')
-    const current = ctrl?.value ?? 0
-    ctrl?.setValue(quantityDecrement(current, 0))
+  onPrepQtyChange(group: FormGroup, value: number): void {
+    group.get('quantity')?.setValue(value)
   }
 
   incrementLaborTime(group: FormGroup): void {

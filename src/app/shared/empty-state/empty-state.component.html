@@ -1,0 +1,11 @@
+<div class="c-empty-state">
+  @if (icon()) {
+    <lucide-icon [name]="icon()!" [size]="48" class="c-empty-state__icon" />
+  }
+  <p class="c-empty-state__msg">{{ messageKey() | translatePipe }}</p>
+  @if (ctaLabelKey()) {
+    <button type="button" class="c-btn-primary" [disabled]="ctaDisabled()" (click)="ctaClick.emit()">
+      {{ ctaLabelKey()! | translatePipe }}
+    </button>
+  }
+</div>

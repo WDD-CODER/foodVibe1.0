@@ -16,10 +16,7 @@
   </ng-container>
 
   <ng-container shell-actions>
-    @if (selection.selectionMode()) {
-      <button type="button" class="c-btn-ghost" (click)="selection.clear()">{{ 'clear_selection' | translatePipe }}</button>
-      <button type="button" class="c-btn-ghost danger" (click)="onBulkDeleteSelected()">{{ 'remove_selected' | translatePipe }}</button>
-    }
+    <app-selection-bar [selectionState]="selection" (bulkDelete)="onBulkDeleteSelected($event)" />
     <button type="button" class="c-btn-primary" (click)="onAddRecipe()"
       [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
       <lucide-icon name="plus" [size]="18"></lucide-icon>
@@ -58,12 +55,11 @@
 
   <ng-container shell-table-body>
     @if (filteredRecipes_().length === 0) {
-      <div class="no-results" [class.empty-state]="isEmptyList_()">
+      <div class="no-results">
         @if (isEmptyList_()) {
-          <lucide-icon name="book-open" [size]="48" class="empty-state-icon"></lucide-icon>
-          <p class="empty-state-msg">{{ 'empty_recipe_book' | translatePipe }}</p>
-          <button type="button" class="c-btn-primary" (click)="onAddRecipe()"
-            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">{{ 'add_first_recipe' | translatePipe }}</button>
+          <app-empty-state messageKey="empty_recipe_book" icon="book-open"
+            ctaLabelKey="add_first_recipe" [ctaDisabled]="!isLoggedIn()"
+            (ctaClick)="onAddRecipe()" />
         } @else {
           {{ 'no_recipes_match' | translatePipe }}
         }

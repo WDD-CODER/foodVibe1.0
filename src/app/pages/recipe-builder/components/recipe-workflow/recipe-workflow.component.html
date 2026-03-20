@@ -149,19 +149,10 @@
             </div>
 
             <div class="col-prep-qty">
-              <div class="quantity-controls">
-                <button type="button" class="qty-btn minus"
-                  [disabled]="(group.get('quantity')?.value ?? 0) <= 0"
-                  (click)="decrementQuantity(group, i)"
-                  tabindex="-1">
-                  <lucide-icon name="minus" [size]="16"></lucide-icon>
-                </button>
-                <span class="amount-value">{{ group.get('quantity')?.value }}</span>
-                <button type="button" class="qty-btn plus" (click)="incrementQuantity(group, i)"
-                  tabindex="-1">
-                  <lucide-icon name="plus" [size]="16"></lucide-icon>
-                </button>
-              </div>
+              <app-counter
+                [value]="group.get('quantity')?.value ?? 0"
+                [min]="0"
+                (valueChange)="onPrepQtyChange(group, $event)" />
             </div>
 
             <div class="col-prep-unit">

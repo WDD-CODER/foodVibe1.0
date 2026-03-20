@@ -19,6 +19,7 @@ import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state';
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component';
+import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component';
 import { useListState, StringParam, NullableBooleanParam, StringSetParam } from 'src/app/core/utils/list-state.util';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 import { HeroFabService } from '@services/hero-fab.service';
@@ -32,7 +33,7 @@ type SortField = 'name' | 'category' | 'owned';
 @Component({
   selector: 'app-equipment-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective, CustomSelectComponent, ListRowCheckboxComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective, CustomSelectComponent, ListRowCheckboxComponent, SelectionBarComponent],
   templateUrl: './equipment-list.component.html',
   styleUrl: './equipment-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -382,8 +383,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected async onBulkDeleteSelected(): Promise<void> {
-    const ids = Array.from(this.selection.selectedIds());
+  protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
     if (!this.requireAuthService.requireAuth()) return;
     if (!confirm(`למחוק ${ids.length} פריטי ציוד?`)) return;

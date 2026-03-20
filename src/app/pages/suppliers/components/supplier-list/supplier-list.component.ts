@@ -21,6 +21,8 @@ import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state';
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component';
+import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component';
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component';
 import { useListState, StringParam, BooleanParam, NumberSetParam } from 'src/app/core/utils/list-state.util';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 import { HeroFabService } from '@services/hero-fab.service';
@@ -30,7 +32,7 @@ const DAY_LABELS = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'];
 @Component({
   selector: 'app-supplier-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective, ClickOutSideDirective, ListRowCheckboxComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective, ClickOutSideDirective, ListRowCheckboxComponent, SelectionBarComponent, EmptyStateComponent],
   templateUrl: './supplier-list.component.html',
   styleUrl: './supplier-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -316,8 +318,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected async onBulkDeleteSelected(): Promise<void> {
-    const ids = Array.from(this.selection.selectedIds()) as string[];
+  protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
     if (!this.requireAuthService.requireAuth()) return;
     if (!confirm(`למחוק ${ids.length} ספקים?`)) return;

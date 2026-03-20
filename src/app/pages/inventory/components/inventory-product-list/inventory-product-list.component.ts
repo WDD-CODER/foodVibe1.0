@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, computed, OnInit, OnDestroy, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
@@ -21,6 +21,10 @@ import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/share
 import { HeroFabService } from '@services/hero-fab.service';
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state';
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component';
+import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component';
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component';
+import { useListState, StringParam, NullableStringParam, FilterRecordParam, BooleanParam } from 'src/app/core/utils/list-state.util';
+import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
 
@@ -42,6 +46,8 @@ export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
     CellCarouselComponent,
     CellCarouselSlideDirective,
     ListRowCheckboxComponent,
+    SelectionBarComponent,
+    EmptyStateComponent,
   ],
   templateUrl: './inventory-product-list.component.html',
   styleUrl: './inventory-product-list.component.scss',
@@ -65,7 +71,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected searchQuery_ = signal<string>('');
   protected sortBy_ = signal<SortField | null>(null);
   protected sortOrder_ = signal<'asc' | 'desc'>('asc');
-  protected isPanelOpen_ = signal<boolean>(true);
+  protected isPanelOpen_ = signal<boolean>(getPanelOpen('inventory'));
   protected expandedFilterCategories_ = signal<Set<string>>(new Set());
   protected allergenPopoverProductId_ = signal<string | null>(null);
   protected allergenExpandAll_ = signal<boolean>(false);
@@ -75,11 +81,24 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected carouselHeaderIndex_ = signal(0);
   protected selection = new ListSelectionState();
 
+  constructor() {
+    useListState('inventory', [
+      { urlParam: 'q',        signal: this.searchQuery_,    serializer: StringParam },
+      { urlParam: 'sort',     signal: this.sortBy_,         serializer: NullableStringParam as any },
+      { urlParam: 'order',    signal: this.sortOrder_,      serializer: StringParam as any },
+      { urlParam: 'filters',  signal: this.activeFilters_,  serializer: FilterRecordParam },
+      { urlParam: 'lowStock', signal: this.lowStockOnly_,   serializer: BooleanParam },
+    ]);
+
+    afterNextRender(() => {
+      if (typeof window === 'undefined') return;
+      const q = window.matchMedia('(max-width: 768px)');
+      if (q.matches) this.isPanelOpen_.set(false);
+      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); });
+    });
+  }
+
   ngOnInit(): void {
-    const lowStock = this.route.snapshot.queryParams['lowStock'];
-    if (lowStock === '1') {
-      this.lowStockOnly_.set(true);
-    }
     this.heroFab.setPageActions(
       [{ labelKey: 'add_product', icon: 'plus', run: () => this.router.navigate(['/inventory/add']) }],
       'replace'
@@ -147,6 +166,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
   protected onPanelToggled(): void {
     this.isPanelOpen_.update(v => !v);
+    setPanelOpen('inventory', this.isPanelOpen_());
   }
 
   protected onCarouselHeaderChange(index: number): void {
@@ -324,8 +344,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected onBulkDeleteSelected(): void {
-    const ids = Array.from(this.selection.selectedIds());
+  protected onBulkDeleteSelected(ids: string[]): void {
     if (ids.length === 0) return;
     if (!confirm(`למחוק ${ids.length} מוצרים?`)) return;
     ids.forEach(id => {

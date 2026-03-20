@@ -1,4 +1,6 @@
 import { Component, DestroyRef, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import { useSavingState } from 'src/app/core/utils/saving-state.util';
+import { CounterComponent } from 'src/app/shared/counter/counter.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, NavigationStart, Router, RouterLink } from '@angular/router';
@@ -47,7 +49,8 @@ import { HeroFabService } from '@services/hero-fab.service';
     CustomSelectComponent,
     FormatQuantityPipe,
     ExportPreviewComponent,
-    ApproveStampComponent
+    ApproveStampComponent,
+    CounterComponent
   ],
   templateUrl: './cook-view.page.html',
   styleUrl: './cook-view.page.scss'
@@ -78,7 +81,8 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected editMode_ = signal<boolean>(false);
   /** Snapshot when entering edit mode; restored on Undo. */
   private originalRecipe_ = signal<Recipe | null>(null);
-  protected isSaving_ = signal(false);
+  private readonly saving = useSavingState();
+  protected readonly isSaving_ = this.saving.isSaving_;
   /** Parent form for workflow_items FormArray; used in edit mode only. */
   private readonly workflowParentForm_ = this.fb.group({ workflow_items: this.fb.array([]) });
   /** Focus workflow row at index (for add step/prep); cleared after focus. */
@@ -383,14 +387,14 @@ export class CookViewPage implements OnInit, OnDestroy {
       if (!confirmed) return;
       const recipe = this.recipe_();
       if (!recipe) return;
-      this.isSaving_.set(true);
+      this.saving.setSaving(true);
       this.kitchenState.saveRecipe(recipe).subscribe({
         next: () => {
           this.originalRecipe_.set(null);
           this.editMode_.set(false);
-          this.isSaving_.set(false);
+          this.saving.setSaving(false);
         },
-        error: () => { this.isSaving_.set(false); }
+        error: () => { this.saving.setSaving(false); }
       });
     });
   }
@@ -422,19 +426,19 @@ export class CookViewPage implements OnInit, OnDestroy {
   private saveRecipeWithToggledApproval(): void {
     const recipe = this.recipe_();
     if (!recipe) return;
-    this.isSaving_.set(true);
+    this.saving.setSaving(true);
     this.kitchenState.saveRecipe({ ...recipe, is_approved_: !recipe.is_approved_ }).subscribe({
       next: (saved) => {
         this.recipe_.set(saved);
         this.originalRecipe_.set(null);
         this.editMode_.set(false);
-        this.isSaving_.set(false);
+        this.saving.setSaving(false);
         this.userMsg.onSetSuccessMsg(
           this.translation.translate(saved.is_approved_ ? 'approval_success' : 'unapproval_success')
         );
       },
       error: () => {
-        this.isSaving_.set(false);
+        this.saving.setSaving(false);
         this.userMsg.onSetErrorMsg(this.translation.translate('approval_error'));
       }
     });

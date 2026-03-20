@@ -14,6 +14,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
+import { useSavingState } from 'src/app/core/utils/saving-state.util';
 import { VenueDataService } from '@services/venue-data.service';
 import { EquipmentDataService } from '@services/equipment-data.service';
 import {
@@ -54,7 +55,8 @@ export class VenueFormComponent implements OnInit {
 
   protected venueForm_!: FormGroup;
   protected isEditMode_ = signal(false);
-  protected isSaving_ = signal(false);
+  private readonly saving = useSavingState();
+  protected readonly isSaving_ = this.saving.isSaving_;
   protected envTypes = ENV_TYPES;
 
   protected get infraArray(): FormArray {
@@ -123,8 +125,7 @@ export class VenueFormComponent implements OnInit {
 
   async onSubmit(): Promise<void> {
     if (this.venueForm_.invalid) return;
-    this.isSaving_.set(true);
-    try {
+    await this.saving.withSaving(async () => {
       const v = this.venueForm_.getRawValue();
       const infra: VenueInfraItem[] = (v.available_infrastructure_ ?? [])
         .filter((row: { equipment_id_: string }) => row.equipment_id_)
@@ -158,9 +159,7 @@ export class VenueFormComponent implements OnInit {
       } else {
         this.router.navigate(['/venues/list']);
       }
-    } finally {
-      this.isSaving_.set(false);
-    }
+    });
   }
 
   onCancel(): void {
