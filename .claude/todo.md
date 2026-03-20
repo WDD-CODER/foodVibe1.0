@@ -13,11 +13,28 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 191 — Dashboard QA: Specs, `data-testid`, Pattern Fixes (`plans/191-dashboard-qa-testid-and-specs.plan.md`)
+- [x] Sub-task 1: Add `data-testid` to `dashboard.page.html`, `dashboard-header.component.html`; add `data-testid` + migrate `*ngIf`/`*ngFor` → `@if`/`@for` in `dashboard-overview.component.html`
+- [x] Sub-task 2: Fix `dashboard.page.spec.ts` (V1 HttpClientTestingModule, V2 unknown casts) + add 11 new tests
+- [x] Sub-task 3: Fix `dashboard-header.component.spec.ts` (V2–V4 violations) + add 7 new tests
+- [x] Sub-task 4: Create `dashboard-overview.component.spec.ts` with 20 tests
+
+### Plan 190 — Master De-Spaghettification Map (`plans/190-master-de-spaghettification-map.plan.md`)
+- [ ] Phase A1: Replace hardcoded Hebrew strings with `translatePipe` keys and dictionary entries (SW-4)
+- [ ] Phase A2: Replace orphan button classes with design-system `c-*` tokens in product/metadata flows (HI-1)
+- [ ] Phase A3: Extract shared saving-state composable or mixin for `isSaving_` pattern reuse (HI-3)
+- [ ] Phase B1: Replace duplicated qty stepper implementations with shared `<app-counter>` usage (HI-5)
+- [ ] Phase B2: Create shared `<app-selection-bar>` and migrate all list pages (HI-2)
+- [ ] Phase B3: Create shared `<app-empty-state>` and migrate current variants (SW-6)
+- [ ] Phase C1: Consolidate list-page signal clusters into shared list state base/composable (HI-4)
+- [ ] Phase C2: Consolidate scroll-indicator scaffold into shared scroll-zone infrastructure (HI-6)
+- [ ] Phase C3: Decompose god files into page services/sub-components (`menu-intelligence`, `recipe-builder`, `product-form`) (SW-5)
+
 ### Plan 190 — Agent process optimization (`plans/190-agent-process-optimization.plan.md`)
-- [ ] Pillar 1 (A1–A7): Token reduction — slim CLAUDE.md, compress agent.md, extract templates to `.claude/references/`, compact Section 0 triggers
-- [ ] Pillar 2 (A8–A12): MCP integration — `.cursor/mcp.json`, GitHub/Playwright, MCP-aware skills and validate-agent-refs
-- [ ] Pillar 3 (A13–A17): Reactive process — session-start/end rules, todo hygiene + breadcrumb hint in commit-to-github, sweep-stale-todos command
-- [ ] Resolve Critical Questions Q1–Q3 before or during execution
+- [x] Pillar 1 (A1–A7): Token reduction — slim CLAUDE.md, compress agent.md, extract templates to `.claude/references/`, compact Section 0 triggers
+- [x] Pillar 2 (A8–A12): MCP integration — `.cursor/mcp.json`, GitHub/Playwright, MCP-aware skills and validate-agent-refs
+- [x] Pillar 3 (A13–A17): Reactive process — session-start/end rules, todo hygiene + breadcrumb hint in commit-to-github, sweep-stale-todos command
+- [x] Resolve Critical Questions Q1–Q3 before or during execution
 
 ### Plan 183 — Agent Intelligence Map and Optimization (`plans/183-agent-intelligence-map-optimization.plan.md`)
 - [x] R1: Slim `.cursor/commands/` files to one-liner pointers (remove restated Phase 0 / Step 3 details)
@@ -1205,6 +1222,8 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 182 | toFix verification undone | Planned |
 | 183 | Agent Intelligence Map and Optimization | Done |
 | 190 | Agent process optimization | Planned |
+| 191 | Dashboard QA: Specs, data-testid, Pattern Fixes | Active |
+| 190 | Master De-Spaghettification Map | Planned |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 

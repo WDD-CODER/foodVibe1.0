@@ -8,7 +8,8 @@
       "Bash(while read:*)",
       "Bash(do wc:*)",
       "Bash(done)",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(npx ng:*)"
     ]
   }
 }
