@@ -13,6 +13,13 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 192 — Pillar 3 Reactive Loop Hardening (A13–A17) (`plans/192-reactive-loop-hardening-a13-a17.plan.md`)
+- [ ] A13: Modify `.cursor/rules/session-start.mdc` with first-message guard, state decision tree, and "wrap up" tip
+- [ ] A14: Modify `.cursor/rules/session-end.mdc` with expanded trigger phrases and sweep-first prompt
+- [ ] A15: Harden Phase 4 Step 6 in `.claude/skills/commit-to-github/SKILL.md` with archive safety gates
+- [ ] A17: Modify `.claude/commands/sweep-stale-todos.md` with deferred filter, precise git verification, and 7-day age threshold
+- [ ] Validation: Run `validate-agent-refs` and verify no broken references
+
 ### Plan 191 — Dashboard QA: Specs, `data-testid`, Pattern Fixes (`plans/191-dashboard-qa-testid-and-specs.plan.md`)
 - [x] Sub-task 1: Add `data-testid` to `dashboard.page.html`, `dashboard-header.component.html`; add `data-testid` + migrate `*ngIf`/`*ngFor` → `@if`/`@for` in `dashboard-overview.component.html`
 - [x] Sub-task 2: Fix `dashboard.page.spec.ts` (V1 HttpClientTestingModule, V2 unknown casts) + add 11 new tests
@@ -22,10 +29,15 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 ### Plan 190 — Master De-Spaghettification Map (`plans/190-master-de-spaghettification-map.plan.md`)
 - [ ] Phase A1: Replace hardcoded Hebrew strings with `translatePipe` keys and dictionary entries (SW-4)
 - [ ] Phase A2: Replace orphan button classes with design-system `c-*` tokens in product/metadata flows (HI-1)
-- [ ] Phase A3: Extract shared saving-state composable or mixin for `isSaving_` pattern reuse (HI-3)
-- [ ] Phase B1: Replace duplicated qty stepper implementations with shared `<app-counter>` usage (HI-5)
-- [ ] Phase B2: Create shared `<app-selection-bar>` and migrate all list pages (HI-2)
-- [ ] Phase B3: Create shared `<app-empty-state>` and migrate current variants (SW-6)
+- [x] SW-1: Add `c-form-actions` token; replace `form-actions` in equipment-form, venue-form, supplier-form (branch: feat/despaghetti-low-risk)
+- [x] SW-2: Extract shared `inline-edit-panel` CSS to `styles.scss`; remove duplicates from equipment-list + supplier-list SCSS
+- [x] HI-2: Create `app-selection-bar`; migrate all 5 list pages (branch: feat/despaghetti-low-risk)
+- [x] SW-6: Create `app-empty-state`; replace icon+message variants in supplier-list, recipe-book-list, inventory-product-list
+- [x] HI-3: Extract shared `useSavingState` composable (8 components) — signal/composable sprint
+- [x] HI-5: Replace duplicated qty stepper with `<app-counter>` (3 of 6 sites) — signal/composable sprint
+- [x] HI-4: Wire `useListState` into inventory-product-list; panel pref + mobile collapse parity with other 4 list pages
+- [ ] HI-6: Consolidate scroll-zone scaffold into shared `app-scroll-zone` component
+- [ ] SW-5: Decompose god files (`menu-intelligence`, `recipe-builder`, `product-form`)
 - [ ] Phase C1: Consolidate list-page signal clusters into shared list state base/composable (HI-4)
 - [ ] Phase C2: Consolidate scroll-indicator scaffold into shared scroll-zone infrastructure (HI-6)
 - [ ] Phase C3: Decompose god files into page services/sub-components (`menu-intelligence`, `recipe-builder`, `product-form`) (SW-5)
@@ -1224,6 +1236,7 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 190 | Agent process optimization | Planned |
 | 191 | Dashboard QA: Specs, data-testid, Pattern Fixes | Active |
 | 190 | Master De-Spaghettification Map | Planned |
+| 192 | Pillar 3 Reactive Loop Hardening (A13–A17) | Planned |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 
