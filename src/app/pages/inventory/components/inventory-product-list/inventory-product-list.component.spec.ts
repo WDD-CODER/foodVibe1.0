@@ -14,33 +14,33 @@ describe('InventoryProductListComponent', () => {
   let fixture: ComponentFixture<InventoryProductListComponent>;
   let mockRouter: jasmine.SpyObj<Router>;
 
-  const mockProductsSignal = signal<Product[]>([
-    {
-      _id: '1',
-      name_hebrew: 'Tomato',
-      categories_: ['Vegetables'],
-      supplierIds_: ['Supplier A'],
-      allergens_: ['Gluten'],
-      base_unit_: 'gram',
-      buy_price_global_: 5
-    } as Product,
-    {
-      _id: '2',
-      name_hebrew: 'Milk',
-      categories_: ['Dairy'],
-      supplierIds_: ['Supplier B'],
-      allergens_: ['milk products'],
-      base_unit_: 'liter',
-      buy_price_global_: 12
-    } as Product
-  ]);
-
   const mockUnitRegistry = {
     allUnitKeys_: signal(['gram', 'kg', 'liter', 'unit']),
     getConversion: (key: string) => ({ gram: 1, kg: 1000, liter: 1000, ml: 1, unit: 1 }[key] ?? 1)
   };
 
   beforeEach(async () => {
+    const mockProductsSignal = signal<Product[]>([
+      {
+        _id: '1',
+        name_hebrew: 'Tomato',
+        categories_: ['Vegetables'],
+        supplierIds_: ['Supplier A'],
+        allergens_: ['Gluten'],
+        base_unit_: 'gram',
+        buy_price_global_: 5
+      } as Product,
+      {
+        _id: '2',
+        name_hebrew: 'Milk',
+        categories_: ['Dairy'],
+        supplierIds_: ['Supplier B'],
+        allergens_: ['milk products'],
+        base_unit_: 'liter',
+        buy_price_global_: 12
+      } as Product
+    ]);
+
     mockRouter = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree', 'serializeUrl'], {
       events: of(),
       url: of('')
@@ -88,7 +88,11 @@ describe('InventoryProductListComponent', () => {
   });
 
   it('should filter items when a filter is toggled', () => {
-    // FIX: Property name matched to 'filteredProducts_'
+    // Ensure no state leaks from URL/list-state persistence.
+    (component as any).searchQuery_.set('');
+    (component as any).lowStockOnly_.set(false);
+    (component as any).activeFilters_.set({});
+
     (component as any).toggleFilter('Category', 'Dairy');
     fixture.detectChanges();
 

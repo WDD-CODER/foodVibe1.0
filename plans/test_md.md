@@ -1,159 +1,50 @@
-or each of these, do the save action and confirm the loader/spinner shows while      
-
-  saving, then disappears after.
-
-  ┌─────┬──────────────────────────┬──────────────────────────┬─────────────────────┐   
-
-  │  #  │       Where to go        │        What to do        │   What to expect    │   
-
-  ├─────┼──────────────────────────┼──────────────────────────┼─────────────────────┤   
-   
-
-  ├─────┼──────────────────────────┼──────────────────────────┼─────────────────────┤   
-
-  │     │                          │ Fill name + environment, │ Loader shows →      │   
-
-  │ 3   │ /venues/new              │  hit Save                │ navigates to venues │   
-it allowd me to save venues with the sma name! not good 
-
-  │     │                          │                          │  list               │   
-
-  ├─────┼──────────────────────────┼──────────────────────────┼─────────────────────┤   
-
-  │     │                          │                          │ Loader shows →      │   
-
-  │ 5   │ /suppliers/new           │ Fill name, hit Save      │ navigates to        │   
-it allowd me to save supliaer with the sma name! not good 
-  │     │                          │                          │ suppliers list      │   
-
-  ├─────┼──────────────────────────┼──────────────────────────┼─────────────────────┤   
-
-  │     │                          │                          │ Loader shows →      │   
-
-  │ 6   │ /suppliers/:id/edit      │ Change name, hit Save    │ navigates to        │   
-
-  │     │                          │                          │ suppliers list      │   
-
-  ├─────┼──────────────────────────┼──────────────────────────┼─────────────────────┤   
-
-  │     │                          │ Fill product name + unit │ Loader shows →      │   
-
-  │ 7   │ /inventory/new           │  + price + category, hit │ navigates to        │   
-
-  │     │                          │  Save                    │ inventory list      │   
-
-  ├─────┼──────────────────────────┼──────────────────────────┼─────────────────────┤   
-
-  │ 8   │ Unit creator modal (any  │ Type a unit name + basis │ Loader shows →      │   
-
-  │     │ page with it)            │  + amount, hit Save      │ modal closes        │   
-
-  ├─────┼──────────────────────────┼──────────────────────────┼─────────────────────┤   
-
-  │     │ Recipe builder — any     │                          │ Loader shows →      │   
-
-  │ 9   │ recipe                   │ Hit the Save button      │ navigates to recipe │   
-
-  │     │                          │                          │  book               │   
-
-  ├─────┼──────────────────────────┼──────────────────────────┼─────────────────────┤   
-
-  │ 10  │ Cook-view — any recipe   │ Enter Edit mode → make a │ Loader shows →      │   
-
-  │     │                          │  change → hit Save       │ exits edit mode     │   
-
-  ├─────┼──────────────────────────┼──────────────────────────┼─────────────────────┤   
-
-  │ 11  │ Cook-view — any recipe   │ Hit the approve stamp    │ Loader shows →      │   
-
-  │     │                          │                          │ stamp toggles       │   
-
-  ├─────┼──────────────────────────┼──────────────────────────┼─────────────────────┤   
-
-  │ 12  │ Menu Intelligence page   │ Trigger a save event     │ Loader shows → save │   
-
-  │     │                          │                          │  completes          │   
-
-  └─────┴──────────────────────────┴──────────────────────────┴─────────────────────┘   
-
-  ---
-
-  HI-5 — <app-counter> (3 swapped sites)
-
-  ┌─────┬────────────────────┬──────────────────────────────────────────────────────┐   
-
-  │  #  │    Where to go     │                    What to check                     │   
-
-  ├─────┼────────────────────┼──────────────────────────────────────────────────────┤   
-
-  │     │                    │ The Make Quantity control renders with − input +     │   
-
-  │ 13  │ Cook-view — any    │ layout. Clicking +/− changes the quantity. Typing a  │   
-
-  │     │ recipe             │ value in the input updates the quantity. Long-press  │   
-
-  │     │                    │ + or − accelerates.                                  │   
-
-  ├─────┼────────────────────┼──────────────────────────────────────────────────────┤   
-
-  │ 14  │ Cook-view — dish   │ Quantity goes 1, 2, 3… (integers only, min 1).       │   
-
-  │     │ recipe             │ Cannot go below 1.                                   │   
-
-  ├─────┼────────────────────┼──────────────────────────────────────────────────────┤   
-
-  │ 15  │ Cook-view —        │ Quantity allows decimals (0.01 steps, min 0.01).     │   
-
-  │     │ preparation recipe │ Cannot go below 0.01.                                │   
-
-  ├─────┼────────────────────┼──────────────────────────────────────────────────────┤   
-
-  │     │                    │ Open a recipe, expand Logistics. The tool quantity   │   
-
-  │ 16  │ Recipe builder →   │ field shows − input +. Clicking                      │   
-
-  │     │ Logistics section  │ increments/decrements by integers. Cannot go below   │   
-
-  │     │                    │ 1.                                                   │   
-
-  ├─────┼────────────────────┼──────────────────────────────────────────────────────┤   
-
-  │     │ Recipe builder →   │ Switch recipe type to Dish. Each prep row's quantity │   
-
-  │ 17  │ Workflow section   │  column shows − input +. Clicking changes the value. │   
-
-  │     │ (dish type)        │  Cannot go below 0.                                  │   
-
-  └─────┴────────────────────┴──────────────────────────────────────────────────────┘   
-
-  ---
-
-  Regressions to spot-check (unchanged paths)
-
-  ┌─────┬──────────────────────┬────────────────────────────────────────────────────┐   
-
-  │  #  │         What         │               Why worth a quick look               │   
-
-  ├─────┼──────────────────────┼────────────────────────────────────────────────────┤   
-
-  │     │ Recipe builder       │ These were not swapped — confirm they still work   │   
-
-  │ 18  │ ingredients table    │ (increment/decrement amount and recalculate cost). │   
-
-  │     │ qty +/−              │                                                    │   
-
-  ├─────┼──────────────────────┼────────────────────────────────────────────────────┤   
-
-  │ 19  │ Cook-view edit-mode  │ Also not swapped — confirm the small −/+ buttons   │   
-
-  │     │ ingredient +/−       │ on each ingredient row still change the amount.    │   
-
-  ├─────┼──────────────────────┼────────────────────────────────────────────────────┤   
-
-  │     │ Any list page        │ Select items → bulk delete — confirm selection bar │   
-
-  │ 20  │ bulk-delete flow     │  still shows and delete fires correctly (from      │   
-
-  │     │                      │ SW-2/HI-2 session).                                │   
-
-  └─────┴──────────────────────┴────────────────────────────────────────────────────┘
+# QA Flow Table (Short + Page Ordered)
+
+Use this order. For each save action, confirm spinner appears during save and disappears after.
+
+## 1) Save Flow
+
+| Step | Page | Action | Expected | Status | Issue |
+|---|---|---|---|---|---|
+| 1 | `/venues/new` | Fill name + environment, save | Loader shows, then navigates to venues list | Issue found | Duplicate venue name was allowed |
+| 2 | `/suppliers/new` | Fill name, save | Loader shows, then navigates to suppliers list | Issue found | Duplicate supplier name was allowed |
+| 3 | `/suppliers/:id/edit` | Change name, save | Loader shows, then navigates to suppliers list | Not done | Not tested yet |
+| 4 | `/inventory/new` | Fill product fields, save | Loader shows, then navigates to inventory list | Not done | Not tested yet |
+| 5 | Unit creator modal | Create unit, save | Loader shows, modal closes | Not done | Not tested yet |
+| 6 | Recipe builder (any recipe) | Save recipe | Loader shows, then navigates to recipe book | Not done | Not tested yet |
+| 7 | Cook view (any recipe) | Edit + save | Loader shows, exits edit mode | Not done | Not tested yet |
+| 8 | Cook view (any recipe) | Toggle approve stamp | Loader shows, stamp toggles | Not done | Not tested yet |
+| 9 | Menu Intelligence | Trigger save | Loader shows, save completes | Not done | Not tested yet |
+
+## 2) Counter Flow (`app-counter`)
+
+| Step | Page | Check | Status | Issue |
+|---|---|---|---|---|
+| 10 | Cook view (any recipe) | `- input +` works, typing updates, long-press accelerates | Not done | Not tested yet |
+| 11 | Cook view (dish recipe) | Integer only, min `1` | Not done | Not tested yet |
+| 12 | Cook view (preparation recipe) | Decimal steps `0.01`, min `0.01` | Not done | Not tested yet |
+| 13 | Recipe builder -> Logistics | Tool quantity uses `- input +`, integer steps, min `1` | Not done | Not tested yet |
+| 14 | Recipe builder -> Workflow (dish) | Prep row quantity uses `- input +`, cannot go below `0` | Not done | Not tested yet |
+
+## 3) Regression Spot Check
+
+| Step | Page | Check | Status | Issue |
+|---|---|---|---|---|
+| 15 | Recipe builder ingredients table | Qty +/- still updates amount and cost | Not done | Not tested yet |
+| 16 | Cook view edit mode ingredients | Small +/- buttons still change amount | Not done | Not tested yet |
+| 17 | Any list page bulk delete | Selection bar appears and delete works | Not done | Not tested yet |
+
+## Clear Issue Explanation
+
+### Done
+- Duplicate-name validation check was executed for:
+  - `/venues/new`
+  - `/suppliers/new`
+
+### Not done
+- All other checks are still pending and marked `Not done`.
+
+### Problem found
+- **Duplicate names are currently accepted** on venue and supplier creation.
+- **Why this is an issue**: it creates ambiguous records, can break search/filter behavior, and makes future edits/deletes error-prone because multiple items share the same identifier text.
+- **Expected behavior**: save should be blocked when name already exists (case-insensitive + trimmed), and user should see a clear validation message.
