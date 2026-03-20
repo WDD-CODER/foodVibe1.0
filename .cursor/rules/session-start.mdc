@@ -3,6 +3,26 @@ description: Session start — read handoff notes and sync GitHub context
 alwaysApply: true
 ---
 
-At the start of every session:
-1. Check `notes/session-handoffs/` for a handoff file from the last 3 days. If found, read it and summarize key context in your first response.
-2. Trigger: `Session start / after time away` → read `.claude/skills/github-sync/SKILL.md` to pull recent GitHub context.
+**Execute Steps 1 and 2 only if this is the first user message in the conversation — i.e., there are no prior assistant responses visible in context. Skip silently on all subsequent messages.**
+
+### Decision tree
+
+```
+First message in conversation?
+  └── No  → skip both steps silently
+  └── Yes →
+        Step 1: Check notes/session-handoffs/ for files from the last 3 days
+          └── Found  → summarize key context; append tip: "Tip: Say 'I'm done' or 'wrap up' when you're done for the day to save a session handoff."
+          └── Not found → note the gap; append same tip
+        Step 2: Does notes/github-sync/YYYY-MM-DD.md exist for today?
+          └── Yes → skip (already synced this session)
+          └── No  → read .claude/skills/github-sync/SKILL.md and run sync
+```
+
+### Step 1 — Handoff check
+Read `notes/session-handoffs/`. Look for files dated within the last 3 days. If found, summarize key context (open work, blockers, next steps). Always end the summary with:
+> Tip: Say "I'm done" or "wrap up" when you're done for the day to save a session handoff.
+
+### Step 2 — GitHub sync
+Only if `notes/github-sync/<today's date>.md` does NOT already exist:
+Read `.claude/skills/github-sync/SKILL.md` and run the sync workflow.

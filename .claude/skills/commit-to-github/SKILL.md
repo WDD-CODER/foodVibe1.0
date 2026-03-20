@@ -101,7 +101,26 @@ Never erase or discard user changes: no `git reset --hard`, `git clean -fd`, or 
    Open `.claude/todo.md`. Using committed branch names, messages, and file paths, mark matching tasks as done (`[x]`). Do not change unrelated tasks.
 
 6. **Archive completed plan sections**
-   Scan `.claude/todo.md` for plan sections where ALL items are `[x]`. Move any such sections to `todo-archive.md` (create if needed), appended with today's date and plan number. Note: "Archived Plan NNN to todo-archive.md."
+   Scan `.claude/todo.md` for plan sections where ALL items are `[x]`, then apply all four safety gates before archiving:
+
+   **Rule 1 — All-items-checked gate** (required)
+   Only consider a section if every `[ ]` in it has been changed to `[x]`. Sections with any open items are skipped.
+
+   **Rule 2 — No-deferred gate** (new)
+   Do not archive if any item in the section contains `(deferred)`, `(skipped)`, `[~]`, or `<!-- TODO -->`. These signal intentional incompleteness. Keep the section and note reason: "contains deferred items."
+
+   **Rule 3 — Git verification gate** (new)
+   Before archiving, run:
+   ```bash
+   git log --oneline | grep -i "<plan-keyword>"
+   gh pr list --state merged --search "<plan-keyword>"
+   ```
+   If neither returns results, surface a warning: "No commits or merged PRs found for Plan NNN — skip archive or confirm manually?" Do not archive without at least one result or explicit user confirmation.
+
+   **Rule 4 — User confirmation for large plans** (new)
+   If the section has 5 or more items, require explicit confirmation before archiving: "Archive Plan NNN (N items) to todo-archive.md?" Proceed only on approval.
+
+   Once all gates pass, move the section (heading + items) to `todo-archive.md` (create if needed), appended with today's date and plan number. Note: "Archived Plan NNN to todo-archive.md."
 
 7. **Breadcrumb check**
    If any committed files added, removed, or renamed components/services/pages, list the affected directories and ask: "Run breadcrumb-navigator for [dirs]?" Do not block the commit flow.

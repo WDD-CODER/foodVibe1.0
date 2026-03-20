@@ -1,7 +1,29 @@
 ---
-description: Session end — produce structured summary when user says wrap up / done for today / handoff
+description: Session end — produce structured summary when user signals end of session
 globs: []
 ---
 
-When the user says "wrap up", "done for today", "session end", or "handoff":
+Trigger when the user says any of the following (case-insensitive, partial match acceptable):
+
+> "wrap up", "done for today", "session end", "handoff",
+> "I'm done", "that's it for today", "goodbye", "EOD",
+> "end of day", "logging off", "I'll stop here"
+
+### Workflow
+
+**Step 1 — Offer sweep**
+Before producing the handoff, ask:
+> "Before saving the handoff — run stale-todo sweep? (Recommended: removes noise from the handoff summary)"
+> a. Yes — run sweep first, then produce handoff.
+> b. No — skip sweep and go straight to handoff.
+
+**Step 2a — If sweep approved**
+Run `.claude/commands/sweep-stale-todos.md`, wait for completion, then proceed to Step 3.
+
+**Step 2b — If sweep skipped**
+Proceed directly to Step 3.
+
+**Step 3 — Produce handoff**
 Read `.claude/skills/session-handoff/SKILL.md` and produce the structured session summary.
+Write the result to `notes/session-handoffs/YYYY-MM-DD.md`.
+If a file for today already exists, append a timestamped section rather than overwriting.

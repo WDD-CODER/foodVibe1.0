@@ -46,7 +46,10 @@ Before starting any task:
 4. Check `breadcrumbs.md` in the target directory before changing it.
 5. If touching SCSS/CSS: read `.claude/skills/cssLayer/SKILL.md`.
 6. If creating/refactoring components: read `.claude/skills/angularComponentStructure/SKILL.md`.
-7. Verify you are NOT on `main` branch for code changes.
+7. **[Claude Code only]** Before any work, check the current git branch (`git branch --show-current`).
+   If on `main` or `master` — **STOP. Do not proceed.**
+   Create an isolated worktree: `claude --worktree <descriptive-branch-name>` (name must reflect the actual task, e.g. `feat/add-recipe-search`).
+   Never commit directly to `main` or `master`. Only begin work after confirming you are inside a dedicated worktree branch.
 
 ## Autonomous Permissions
 - **Terminal**: Non-destructive commands (`npm test`, `ng build`, `ls`, `mkdir`) allowed.
