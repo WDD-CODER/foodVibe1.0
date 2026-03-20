@@ -8,6 +8,7 @@ import { KeyResolutionService } from '@services/key-resolution.service';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
+import { useSavingState } from 'src/app/core/utils/saving-state.util';
 
 @Component({
   selector: 'unit-creator-modal',
@@ -51,7 +52,8 @@ export class UnitCreatorModal {
     this.basisOptions_().map((k) => ({ value: k, label: k }))
   );
 
-  protected isSaving_ = signal(false);
+  private readonly saving = useSavingState();
+  protected readonly isSaving_ = this.saving.isSaving_;
   protected errorMessage_ = signal<string | null>(null);
 
   async save(): Promise<void> {
@@ -60,24 +62,23 @@ export class UnitCreatorModal {
     const basis = this.basisUnit_();
     if (!name || value <= 0 || !basis || this.isSaving_()) return;
     this.errorMessage_.set(null);
-    this.isSaving_.set(true);
-    try {
-      const result = await this.unitRegistryService.registerUnit(name, value, basis);
-      if (!result.success) {
-        if (result.alreadyOnProduct) {
-          this.errorMessage_.set('unit_already_on_product');
-        } else if (result.error) {
-          this.errorMessage_.set(result.error);
+    await this.saving.withSaving(async () => {
+      try {
+        const result = await this.unitRegistryService.registerUnit(name, value, basis);
+        if (!result.success) {
+          if (result.alreadyOnProduct) {
+            this.errorMessage_.set('unit_already_on_product');
+          } else if (result.error) {
+            this.errorMessage_.set(result.error);
+          }
+          return;
         }
-        return;
+        this.unitRegistryService.closeUnitCreator();
+        this.resetFields();
+      } catch (err) {
+        this.errorMessage_.set('unit_save_error');
       }
-      this.unitRegistryService.closeUnitCreator();
-      this.resetFields();
-    } catch (err) {
-      this.errorMessage_.set('unit_save_error');
-    } finally {
-      this.isSaving_.set(false);
-    }
+    });
   }
 
   close() {

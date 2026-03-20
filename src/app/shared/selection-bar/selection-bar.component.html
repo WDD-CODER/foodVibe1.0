@@ -1,0 +1,8 @@
+@if (selectionState().selectionMode()) {
+  <button type="button" class="c-btn-ghost" (click)="selectionState().clear()">
+    {{ 'clear_selection' | translatePipe }}
+  </button>
+  <button type="button" class="c-btn-ghost danger" (click)="onBulkDelete()">
+    {{ 'remove_selected' | translatePipe }}
+  </button>
+}
