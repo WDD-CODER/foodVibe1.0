@@ -28,7 +28,9 @@
       "Bash(while read:*)",
       "Bash(do wc:*)",
       "Bash(done)",
-      "Skill(update-config)"
+      "Skill(update-config)",
+      "Bash(npm start:*)",
+      "Bash(gh pr:*)"
     ]
   }
 }
