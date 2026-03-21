@@ -29,7 +29,8 @@
       "Bash(do wc:*)",
       "Bash(done)",
       "Skill(update-config)",
-      "Bash(npm start:*)"
+      "Bash(npm start:*)",
+      "Bash(gh pr:*)"
     ]
   }
 }
