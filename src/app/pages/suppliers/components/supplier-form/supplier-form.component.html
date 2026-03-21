@@ -10,6 +10,9 @@
       <div class="c-input-stack full-width">
         <label for="name_hebrew">{{ 'name' | translatePipe }}</label>
         <input id="name_hebrew" type="text" formControlName="name_hebrew" />
+        @if (supplierForm_.get('name_hebrew')?.errors?.['duplicateName'] && supplierForm_.get('name_hebrew')?.touched) {
+          <span class="form-error">{{ 'duplicate_supplier_name' | translatePipe }}</span>
+        }
       </div>
       <div class="c-input-stack full-width">
         <label for="contact_person_">{{ 'contact_person' | translatePipe }}</label>
@@ -63,6 +66,9 @@
         <div class="form-group">
           <label for="name_hebrew_page">{{ 'name' | translatePipe }}</label>
           <input id="name_hebrew_page" type="text" formControlName="name_hebrew" class="c-input" />
+          @if (supplierForm_.get('name_hebrew')?.errors?.['duplicateName'] && supplierForm_.get('name_hebrew')?.touched) {
+            <span class="form-error">{{ 'duplicate_supplier_name' | translatePipe }}</span>
+          }
         </div>
         <div class="form-group">
           <label for="contact_person_page">{{ 'contact_person' | translatePipe }}</label>

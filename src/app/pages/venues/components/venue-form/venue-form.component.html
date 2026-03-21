@@ -12,6 +12,9 @@
       <div class="form-group">
         <label for="name_hebrew">{{ 'name' | translatePipe }}</label>
         <input id="name_hebrew" type="text" formControlName="name_hebrew" class="c-input" />
+        @if (venueForm_.get('name_hebrew')?.errors?.['duplicateName'] && venueForm_.get('name_hebrew')?.touched) {
+          <span class="form-error">{{ 'duplicate_venue_name' | translatePipe }}</span>
+        }
       </div>
       <div class="form-group">
         <label for="environment_type_">{{ 'environment_type' | translatePipe }}</label>

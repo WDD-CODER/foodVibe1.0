@@ -14,6 +14,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
+import { duplicateEntityNameValidator } from 'src/app/core/validators/item.validators';
 import { SupplierDataService } from '@services/supplier-data.service';
 import { LoggingService } from '@services/logging.service';
 import { Supplier } from '@models/supplier.model';
@@ -98,7 +99,17 @@ export class SupplierFormComponent implements OnInit {
       Array.from({ length: 7 }, () => this.fb.control(false))
     );
     this.supplierForm_ = this.fb.group({
-      name_hebrew: ['', [Validators.required]],
+      name_hebrew: ['', [
+        Validators.required,
+        duplicateEntityNameValidator(
+          () => this.supplierData.allSuppliers_(),
+          () => {
+            if (!this.isEditMode_()) return null
+            if (this.embeddedInDashboard()) return this.supplierToEdit()?._id ?? null
+            return (this.route.snapshot.data['supplier'] as Supplier)?._id ?? null
+          }
+        ),
+      ]],
       contact_person_: [''],
       delivery_days_: daysArray,
       min_order_mov_: [0, [Validators.required, Validators.min(0)]],

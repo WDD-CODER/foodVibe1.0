@@ -175,6 +175,8 @@
         "duplicate_recipe_name": "שם מתכון זה כבר קיים",
         "duplicate_dish_name": "שם מנה זה כבר קיים",
         "duplicate_equipment_name": "כלי עם שם זה כבר קיים",
+        "duplicate_venue_name": "מיקום עם שם זה כבר קיים",
+        "duplicate_supplier_name": "ספק עם שם זה כבר קיים",
         "ingredient": "מרכיב",
         "quantity": "כמות נטו",
         "percent": "אחוז",
