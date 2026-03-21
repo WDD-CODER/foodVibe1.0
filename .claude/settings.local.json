@@ -30,7 +30,10 @@
       "Bash(done)",
       "Skill(update-config)",
       "Bash(npm start:*)",
-      "Bash(gh pr:*)"
+      "Bash(gh pr:*)",
+      "Bash(gh auth:*)",
+      "Bash(rm -rf .claude/worktrees/fix/duplicate-name-validation-venues-suppliers)",
+      "Bash(git worktree:*)"
     ]
   }
 }
