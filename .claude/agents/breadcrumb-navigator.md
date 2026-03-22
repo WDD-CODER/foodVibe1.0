@@ -34,42 +34,7 @@ Create and maintain `breadcrumbs.md` files that provide immediate context about:
 4. Identify relationships and signal flows between files
 5. Create or update `breadcrumbs.md`
 
-### breadcrumbs.md Template
-
-```markdown
-# [Directory Name] — Breadcrumbs
-
-## Purpose
-[1-2 sentences: what this directory does in the project]
-
-## Navigation
-| File/Directory | Purpose | Key Exports |
-|---------------|---------|-------------|
-| filename.ts | Brief purpose | exported symbols |
-| subdirectory/ | Brief purpose | → see subdirectory/breadcrumbs.md |
-
-## Architecture Context
-[How this directory fits into core/ → shared/ → pages/ hierarchy]
-
-## Patterns & Conventions
-- [Signal naming: data_ = signal()]
-- [Component patterns: standalone, inject()]
-- [Any local conventions]
-
-## Dependencies
-- **Imports from**: [key internal dependencies]
-- **Used by**: [what depends on this directory]
-
-## Development Notes
-[Gotchas, TODOs, things to watch out for]
-
-## Recent Changes
-[Date]: [Brief description]
-
----
-*Last updated: [timestamp]*
-*Updated by: breadcrumb-navigator*
-```
+**Template**: Use the template defined in `.claude/skills/breadcrumb-navigator/SKILL.md` — do not use a different template. The SKILL is the canonical source.
 
 ### Content Guidelines
 

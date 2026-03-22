@@ -72,4 +72,4 @@ Apply each phase to the **scope** (full project or working-tree file list) deter
 
 ## Integration
 
-If new patterns are found, suggest an addition to `.claude/copilot-instructions.md`. Related: update-docs (after cleanup), elegant-fix (refine solutions), github-sync (recent changes).
+If new patterns are found, suggest an addition to `.claude/copilot-instructions.md`.

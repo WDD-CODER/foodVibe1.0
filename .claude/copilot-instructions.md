@@ -23,6 +23,7 @@
 - **Hebrew canonical values**: When adding or editing flows that accept user-entered canonical values (units, categories, allergens, section categories) in Hebrew → read and apply **Section 7.1 and 7.2** below.
 - **Deploy to GitHub Pages**: User says deploy, publish app, GitHub Pages → read `.claude/skills/deploy-github-pages/SKILL.md` and follow it. Run only on explicit request.
 - **After any structural UI change**: After `.html`/`.scss`/`.css` edits in `src/` that affect layout (sizing, spacing, positioning, display) → invoke `ui-inspector` agent (model: haiku) with: component name, page URL, dev server port, worktreeRoot, and navigation hint to reveal the element. Skip for purely aesthetic changes (color, shadow, opacity, border-radius). Skip if user explicitly opts out — current task only.
+- **Security review** (post-feature or pre-deploy): After completing any change that touches `auth.guard.ts`, `auth.interceptor.ts`, `auth-crypto.ts`, `user.service.ts`, localStorage/sessionStorage access, new routes in `app.routes.ts`, or `[innerHTML]`/`bypassSecurityTrust*` → invoke `security-officer` agent as the final step before committing. Also invoke: during planning of features requiring backend auth or new data persistence; on pre-deployment go-live check; on explicit user request ("security review", "audit", "check security"). Never invoke for changes that don't touch the security surface (UI, CSS, recipes, docs).
 
 ## 0.1 Priority Hierarchy (when guidance conflicts)
 
@@ -50,6 +51,7 @@ Agent persona files live in `.claude/agents/`. Load on demand — do not pre-loa
 | Product Manager | `product-manager.md` | Planning a new feature; writing a plan file; scoping work |
 | Breadcrumb Navigator | `breadcrumb-navigator/SKILL.md` (`.claude/skills/`) | New `pages/<x>/` or app subtree; structural changes; after update-docs; unfamiliar directory; **Breadcrumbs only** (Skill Triggers) |
 | QA Engineer | `qa-engineer.md` | commit-to-github Phase 0 spec gap; diagnosing failing tests |
+| Security Officer | `security-officer.md` | Post-feature review of auth/storage/route changes; pre-deploy go-live check; security consultation during planning |
 
 Read only the file for the agent you need. Each file defines its own output format.
 
@@ -60,8 +62,7 @@ Read only the file for the agent you need. Each file defines its own output form
 * **Decision Logic**: Only ask when a decision can't be inferred. When presenting choices, use **only** the Q&A format below (never embed options in prose).
 
 ## 1.1 Q&A format (chat, plans, recommendations)
-* **Structure**: One question line ending with `?`, then options as `a.` `b.` `c.` (more as needed). One line per option. Optional one-line "Recommendation: a" after the list.
-* **Structure**: For questions, show the question text, then below it show each answer option (a., b., c., etc.) each on its own line to create a true Q&A block appearance.
+* **Structure**: One question line ending with `?`, then options as `a.` `b.` `c.` (more as needed), each on its own line. Optional one-line "Recommendation: a" after the list.
 * **New features**: When creating a new feature or plan, ask **at least one question** in this format before proceeding.
 * **Bad**: *"Phase 4: Options: (a) add text input in dropdown or (b) leave click-to-open. Recommendation: ship Phase 1–3 first."*
 * **Good**: *"How should we handle type-to-filter for Phase 4 dropdowns?\na. Add text input inside dropdown when open.\nb. Click-to-open only; filter after open.\nc. Defer Phase 4; ship Phase 1–3 first."* Then one line: *Recommendation: c.*

@@ -10,6 +10,8 @@ Periodic health check that verifies all internal links in the agent guidance sys
 - `product-manager.md`
 - `breadcrumb-navigator.md`
 - `qa-engineer.md`
+- `ui-inspector.md`
+- `security-officer.md`
 
 ### Skills (`.claude/skills/*/SKILL.md`)
 - `save-plan/SKILL.md`
@@ -25,6 +27,7 @@ Periodic health check that verifies all internal links in the agent guidance sys
 - `session-handoff/SKILL.md`
 - `breadcrumb-navigator/SKILL.md`
 - `deploy-github-pages/SKILL.md`
+- `end-session/SKILL.md`
 
 ### Cursor rules (`.cursor/rules/`)
 - `add-recipe-must-use-skill.mdc`
@@ -58,12 +61,12 @@ Periodic health check that verifies all internal links in the agent guidance sys
 
 ```bash
 # Verify all expected agent files exist
-for f in team-leader software-architect product-manager breadcrumb-navigator qa-engineer; do
+for f in team-leader software-architect product-manager breadcrumb-navigator qa-engineer ui-inspector security-officer; do
   [ -f ".claude/agents/$f.md" ] || echo "MISSING: .claude/agents/$f.md"
 done
 
 # Verify all expected skill files exist
-for s in save-plan commit-to-github cssLayer add-recipe github-sync techdebt update-docs elegant-fix angularComponentStructure auth-and-logging session-handoff breadcrumb-navigator deploy-github-pages; do
+for s in save-plan commit-to-github cssLayer add-recipe github-sync techdebt update-docs elegant-fix angularComponentStructure auth-and-logging session-handoff breadcrumb-navigator deploy-github-pages end-session; do
   [ -f ".claude/skills/$s/SKILL.md" ] || echo "MISSING: .claude/skills/$s/SKILL.md"
 done
 
@@ -79,8 +82,8 @@ Cross-check each path printed above against the filesystem. Any path that does n
 ## Agent Reference Validation — [Date]
 
 ### Inventory Check
-- Expected agents: 5 — found: [count]
-- Expected skills: 13 — found: [count]
+- Expected agents: 7 — found: [count]
+- Expected skills: 14 — found: [count]
 - Expected cursor rules: 7 — found: [count]
 - Expected cursor commands: 3 — found: [count]
 

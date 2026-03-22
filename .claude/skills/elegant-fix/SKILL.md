@@ -28,7 +28,3 @@ The first pass taught you the codebase constraints; the second pass leverages th
 
 After refinement, if you discovered a new pattern: update `.claude/copilot-instructions.md`, relevant `breadcrumbs.md`, and consider adding a utility in `core/utils/`.
 
-## Related
-
-- techdebt — find other code that needs refinement
-- update-docs — document new patterns
