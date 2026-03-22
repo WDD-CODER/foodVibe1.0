@@ -1,207 +1,214 @@
 # End Session — foodVibe 1.0
 
-> **[Claude Code only]** Read this skill when the user says "done", "end session", "I'm done", "wrap up", or "finish up" while on any branch other than `main`/`master`.
+> **[Claude Code only]** Read this skill when the user says "ship it", "ship", "end session",
+> "done", "I'm done", "wrap up", or "finish up" while on any branch other than `main`/`master`.
 > If on `main`, use `session-handoff` instead.
 
 ## Automatic Trigger
 
-Phrases that activate this skill (while NOT on `main`/`master`):
-`done` · `end session` · `I'm done` · `wrap up` · `finish up` · `we're done` · `that's it` · `finish up`
+Phrases that activate this skill:
+`ship it` · `ship` · `done` · `end session` · `I'm done` · `wrap up` · `finish up` · `we're done` · `that's it`
 
 ---
 
-## Phase 0 — Situational Awareness + Intent
+## Phase 1 — Silent Preparation (Zero Prompts)
 
-Run these first (read-only):
+Run all of the following **silently** — no output to the user yet:
+
 ```bash
+# Context
+git rev-parse --show-toplevel
 git branch --show-current
+git worktree list --porcelain
+cat .worktree-port 2>/dev/null || true
+
+# Changes
 git status --short
 git log main..HEAD --oneline 2>/dev/null | head -20
-git worktree list
-cat .worktree-port 2>/dev/null || echo "(no port assigned)"
+git diff --stat HEAD
 ```
 
-Report: branch name, N uncommitted files, N commits ahead of main, assigned dev port if any.
+From these results, determine:
+- `mainRepoPath` — absolute path from `git rev-parse --show-toplevel`
+- `currentBranch` — from `git branch --show-current`
+- `worktreePath` — from `git worktree list --porcelain`: the path for `currentBranch` IF it differs from `mainRepoPath`; otherwise empty (branch lives in main repo)
+- `uncommittedFiles` — list of files from `git status --short`
+- `commitsAhead` — count from `git log main..HEAD`
+- `commitGroups` — apply commit-to-github grouping logic (feat/fix/chore splits) silently; apply never-stage filter (see below)
 
-Then ask **before doing anything else**:
+**Never-stage filter** — silently exclude these regardless of git status:
+- `.gitignore`
+- `.playwright-mcp/`, `.ui-inspector/`
+- `*.png`, `*.jpg`, `*.jpeg` at repo root
 
-**How do you want to end this session?**
-a. Save — commit, open PR, merge to main, remove worktree
-b. Pause — leave everything as-is, keep worktree for later (saves session summary only)
-c. Discard — delete the worktree and branch, throw away all changes
+**Early-exit conditions** (the only output before the Ship Plan):
 
-**If b (Pause):** Skip directly to Phase 6.
-Output: "Worktree `<branch>` kept. Resume anytime by returning to this branch."
+- If `currentBranch` is `main` or `master`:
+  > "You're on main. Use `session-handoff` instead."
+  Stop.
 
-**If c (Discard):**
-Ask one confirmation before doing anything destructive:
-> "This will permanently delete all uncommitted changes on branch `<branch>` and remove the worktree. Are you sure? (yes / no)"
+- If `uncommittedFiles` is empty AND `commitsAhead` is 0:
+  > "Nothing to ship. Branch `<currentBranch>` is clean."
+  Stop.
 
-If yes:
-```bash
-BRANCH=$(git branch --show-current)
-WORKTREE_PATH=$(git worktree list --porcelain | grep -A2 "branch refs/heads/$BRANCH" | grep "^worktree" | awk '{print $2}')
-git checkout main
-git worktree remove "$WORKTREE_PATH" --force 2>/dev/null || true
-git branch -D "$BRANCH" 2>/dev/null || true
-```
-Then go to Phase 6.
-If no: return to the Phase 0 question.
-
-**If a (Save):** Continue to Phase 1.
+Then proceed to Phase 2.
 
 ---
 
-## Phase 1 — Commit Uncommitted Changes
+## Phase 2 — The Unified Ship Plan (The Only Gate)
 
-If `git status --short` showed no changes, skip to Phase 2.
+Render ONE combined visual. Never split this into multiple questions.
 
-If changes exist, list every changed file and ask:
+```
+🚢 Ship Plan — <currentBranch>
 
-**Uncommitted changes detected. What would you like to do?**
-a. Commit now — runs the `commit-to-github` skill (read `.claude/skills/commit-to-github/SKILL.md` and execute in full). Return here after all commits complete.
-b. Skip — leave changes uncommitted, continue to PR
-c. Abort end-session — stop now, leave everything as-is
+[1/4] 📦 Commit & Push
+       <type(scope): commit message> (<+N/-N lines>)
+       📄 path/to/file1
+       📄 path/to/file2
 
-If c: Output: "End session aborted. Your changes are safe on branch `<branch>`." Stop.
+       (repeat for each commit group if multiple)
+
+[2/4] 🌿 Create Pull Request
+       Target: main  |  Title: <commit message or branch name>
+
+[3/4] ✅ Auto-Merge
+       Method: --merge  |  Runs from main repo (avoids worktree lock)
+
+[4/4] 🗑  Cleanup
+       Remove worktree at <worktreePath>
+
+       (omit [4/4] entirely if worktreePath is empty — branch lives in main repo)
+
+──────────────────────────────────────────────────────
+Reply "A", "Yes", or "Go" → execute the full pipeline
+Or: "Skip merge" · "Keep worktree" · "X" to cancel
+```
+
+If there is no worktree to remove (branch lives in main repo), show `[3/3]` instead and omit [4/4].
+
+Wait for user response. Do not proceed until response arrives.
+
+**Response handling:**
+- `A` / `Yes` / `Go` → full pipeline (Phase 3, all steps)
+- `Skip merge` → Phase 3 Steps 1–2 only (commit + push + PR, no merge, no cleanup)
+- `Keep worktree` → Phase 3 Steps 1–4 (commit + push + PR + merge + sync, skip Step 5)
+- `X` / `cancel` → output "Cancelled. Your changes are safe on branch `<currentBranch>`." Stop.
 
 ---
 
-## Phase 2 — Open Pull Request
+## Phase 3 — The Automated Chain (Zero Further Prompts)
 
-Check if a PR already exists:
+Execute every step sequentially without pausing for approval.
+
+### Step 1 — Commit & Push
+
+For each commit group from Phase 1:
 ```bash
-gh pr list --head "$(git branch --show-current)" --state open --json number,title,url 2>/dev/null
+git add <file1> <file2> ...        # targeted — never git add . (never-stage filter applied)
+git commit -m "type(scope): message"
 ```
 
-If a PR already exists: report it and ask:
-**A PR already exists for this branch. Proceed to review and merge?**
-a. Yes — skip to Phase 3
-b. No — stop here
-
-If no PR exists, ask:
-**Ready to open a PR for `<branch>` → `main`. Proceed?**
-a. Yes — create PR
-b. No — stop here
-
-If a (create):
+After all commits:
 ```bash
-BRANCH=$(git branch --show-current)
-COMMITS=$(git log main..HEAD --oneline 2>/dev/null | head -20)
-gh pr create \
-  --base main \
-  --head "$BRANCH" \
-  --title "$BRANCH" \
-  --body "$(printf '## Summary\n\n%s\n\n## Test Plan\n\n- [ ] Unit tests pass\n- [ ] Build succeeds\n- [ ] Manual verification\n' "$COMMITS")"
+git push -u origin <currentBranch>
 ```
-Report the PR URL. Continue to Phase 3.
+
+### Step 2 — Create Pull Request
+
+```bash
+gh pr create --base main --head <currentBranch> --fill
+```
+
+Capture the PR number from the output for Step 3.
+
+### Step 3 — Merge to Main
+
+**CRITICAL:** Run from `mainRepoPath` context, not from inside the worktree.
+This avoids `fatal: 'main' is already used by worktree`.
+
+```bash
+cd "<mainRepoPath>" && gh pr merge <PR_NUMBER> --merge --delete-branch
+```
+
+### Step 4 — Sync Main
+
+```bash
+git -C "<mainRepoPath>" pull origin main
+```
+
+No `--ff-only` flag. This avoids `fatal: Cannot fast-forward to multiple branches`.
+
+### Step 5 — Remove Worktree
+
+Only run this step if `worktreePath` is non-empty (a real worktree directory exists).
+
+```bash
+git -C "<mainRepoPath>" worktree remove "<worktreePath>" --force
+```
+
+`--force` is needed because `node_modules` and `.angular/cache` are present.
 
 ---
 
-## Phase 3 — Review (read-only)
+### Mid-Pipeline Pause: CI Failure Only
 
-No user confirmation needed here — this is informational only.
-
+After Step 2 (PR creation), check CI:
 ```bash
-PR=$(gh pr view --json number -q .number 2>/dev/null)
-gh pr checks "$PR" 2>/dev/null || echo "No CI checks configured."
-gh pr diff "$PR" 2>/dev/null | head -100
+gh pr checks <PR_NUMBER> 2>/dev/null | head -20
 ```
 
-Summarize: CI status, files changed, lines added/removed, any review comments.
+If CI is **failing**:
+> "CI checks are failing: [list]. Merge anyway? (Y / N)"
 
-If CI is failing, ask:
-**CI checks are failing. What would you like to do?**
-a. Fix the failures now — describe what is failing and I will help
-b. Merge anyway — I accept the risk
-c. Stop — I will fix and re-run end session later
+- Y → continue to Step 3
+- N → output "PR `<URL>` left open. Re-run `ship it` after fixing CI." Stop.
 
-If c: Output: "End session paused. PR `<URL>` is open. Re-run end session when ready." Stop.
+If CI passes or no CI is configured → continue to Step 3 without pausing.
 
 ---
 
-## Phase 4 — Merge to Main
+## End State
 
-**PR `<URL>` is ready. Merge into main?**
-a. Yes — merge now
-b. No — leave PR open and stop
+After Phase 3 completes, report in one line:
+> "Shipped. `<currentBranch>` → PR #N → merged. Main is now at `<hash>`."
 
-If b: Output: "PR left open. Run end session again to merge when ready." Stop.
-
-If a:
-```bash
-PR=$(gh pr view --json number -q .number)
-gh pr merge "$PR" --merge --delete-branch
-```
-
-After merge, sync main:
-```bash
-git checkout main
-git pull --ff-only origin main
-git log -1 --oneline
-```
-
-Report: "Merged. Main is now at `<hash>`."
-
-### Conflict Handling (if merge fails)
-
-If the merge command fails with a conflict:
-
-**Merge conflict detected in: `<files>`. How to resolve?**
-a. Rebase my branch on main — walk me through each conflict
-b. Show me the conflicting sections, I will tell you what to do
-c. Abort — leave PR open, do not merge
-
-If a (rebase):
-```bash
-git checkout <branch>
-git fetch origin main
-git rebase origin/main
-```
-For each conflict: show the `<<<<<<<` / `=======` / `>>>>>>>` markers. Ask per file:
-**Keep mine (a), keep theirs (b), or manual edit (c)?**
-Apply choice → `git add <file>` → `git rebase --continue`.
-After clean rebase: `git push --force-with-lease origin <branch>`.
-Return to Phase 4 and re-attempt merge.
-
-If c: `git rebase --abort`. Output: "Rebase aborted. PR `<URL>` is still open. No changes to main."
-
----
-
-## Phase 5 — Remove Worktree
-
-**Remove worktree for `<branch>`? Branch and commits are safe on GitHub. This will delete the entire local folder including `.angular/cache`, `dist`, and `node_modules`.**
-a. Yes — remove it
-b. No — keep it
-
-If a:
-```bash
-BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
-WORKTREE_PATH=$(git worktree list --porcelain | grep -B2 "branch refs/heads/$BRANCH" | grep "^worktree" | awk '{print $2}')
-git checkout main
-git worktree remove "$WORKTREE_PATH" --force
-git branch -d "$BRANCH" 2>/dev/null || echo "Branch already deleted by PR merge."
-```
-
-`git worktree remove --force` deletes the entire worktree directory — no extra cleanup needed.
-
-If the path cannot be resolved: "Run `git worktree list` manually and give me the path for branch `<branch>`."
+Or if worktree was removed:
+> "Shipped. `<currentBranch>` → PR #N → merged. Worktree removed. Main is now at `<hash>`."
 
 ---
 
 ## Safety Rules
 
-1. Never run `git reset --hard` or `git push --force` (only `--force-with-lease` during rebase recovery).
-2. Never delete the worktree before the branch is either merged or the user explicitly chooses Discard.
+1. Never run `git reset --hard` or `git push --force`.
+2. Never delete uncommitted work — Step 1 commits everything before any cleanup.
 3. Never commit directly to `main`.
-4. If the user says "abort" or "stop" at any prompt — halt immediately. All work stays intact.
+4. If user says "abort" or "stop" at any prompt — halt immediately. All work stays intact.
+5. Never stage files from the never-stage list.
 
-> **No session summary here.** Session-handoff is a separate skill that runs only when the user is on `main` and says "wrap up" / "session end". End-session handles worktree cleanup only.
+---
+
+## Discard Path (rare — explicit user request only)
+
+If the user explicitly says "discard", "throw away", or "delete branch":
+
+Ask ONE confirmation:
+> "This will permanently delete all uncommitted changes on branch `<currentBranch>` and remove the worktree. Are you sure? (yes / no)"
+
+If yes:
+```bash
+BRANCH="<currentBranch>"
+WPATH="<worktreePath>"
+cd "<mainRepoPath>"
+git worktree remove "$WPATH" --force 2>/dev/null || true
+git branch -D "$BRANCH" 2>/dev/null || true
+```
+
+If no: return to Phase 2.
 
 ---
 
 ## Related Skills
 
-- `.claude/skills/commit-to-github/SKILL.md` — called from Phase 1
-- `.claude/skills/session-handoff/SKILL.md` — template used in Phase 6
-- `.claude/commands/test-pr-review-merge.md` — alternative full CI pipeline
+- `.claude/skills/commit-to-github/SKILL.md` — standalone commit tool (when user explicitly asks to commit, not end session)
+- `.claude/skills/session-handoff/SKILL.md` — use when on `main` (no worktree)
