@@ -32,6 +32,7 @@ From these results, determine:
 - `mainRepoPath` — absolute path from `git rev-parse --show-toplevel`
 - `currentBranch` — from `git branch --show-current`
 - `worktreePath` — from `git worktree list --porcelain`: the path for `currentBranch` IF it differs from `mainRepoPath`; otherwise empty (branch lives in main repo)
+- `worktreePort` — from `cat .worktree-port`: the port number if present, otherwise empty
 - `uncommittedFiles` — list of files from `git status --short`
 - `commitsAhead` — count from `git log main..HEAD`
 - `commitGroups` — apply commit-to-github grouping logic (feat/fix/chore splits) silently; apply never-stage filter (see below)
@@ -75,9 +76,11 @@ Render ONE combined visual. Never split this into multiple questions.
        Method: --merge  |  Runs from main repo (avoids worktree lock)
 
 [4/4] 🗑  Cleanup
+       Kill dev server on port <worktreePort>  (if port was active)
        Remove worktree at <worktreePath>
 
        (omit [4/4] entirely if worktreePath is empty — branch lives in main repo)
+       (omit port line if worktreePort is empty)
 
 ──────────────────────────────────────────────────────
 Reply "A", "Yes", or "Go" → execute the full pipeline
@@ -138,9 +141,25 @@ git -C "<mainRepoPath>" pull origin main
 
 No `--ff-only` flag. This avoids `fatal: Cannot fast-forward to multiple branches`.
 
-### Step 5 — Remove Worktree
+### Step 5 — Kill Dev Server & Remove Worktree
 
 Only run this step if `worktreePath` is non-empty (a real worktree directory exists).
+
+**5a — Kill the dev server (if a port was recorded)**
+
+If `worktreePort` is non-empty, find and kill the process listening on that port before removing the worktree.
+Killing first prevents file-lock errors on Windows when deleting `node_modules` / `.angular/cache`.
+
+```bash
+# Windows (bash shell)
+PORT=<worktreePort>
+PID=$(netstat -ano 2>/dev/null | grep ":${PORT}" | grep LISTENING | awk '{print $5}' | head -1)
+[ -n "$PID" ] && taskkill /PID "$PID" /F 2>/dev/null || true
+```
+
+If `worktreePort` is empty, skip 5a silently.
+
+**5b — Remove the worktree**
 
 ```bash
 git -C "<mainRepoPath>" worktree remove "<worktreePath>" --force
@@ -173,7 +192,9 @@ After Phase 3 completes, report in one line:
 > "Shipped. `<currentBranch>` → PR #N → merged. Main is now at `<hash>`."
 
 Or if worktree was removed:
-> "Shipped. `<currentBranch>` → PR #N → merged. Worktree removed. Main is now at `<hash>`."
+> "Shipped. `<currentBranch>` → PR #N → merged. Port <worktreePort> closed. Worktree removed. Main is now at `<hash>`."
+
+(omit the port line if `worktreePort` was empty)
 
 ---
 

@@ -56,7 +56,11 @@
       "mcp__playwright__browser_evaluate",
       "mcp__playwright__browser_snapshot",
       "Bash(find /c/Users/danwe/.claude -maxdepth 2 -type f \\\\\\(-name settings.json -o -name *.json \\\\\\))",
-      "Bash(gh pr:*)"
+      "Bash(gh pr:*)",
+      "Bash(tasklist:*)",
+      "Bash(powershell -Command \"Get-Process -Id 5444 | Select-Object Id, ProcessName, MainWindowTitle\")",
+      "Bash(powershell -Command \"Stop-Process -Id 5444 -Force\")",
+      "Bash(powershell -Command \"Get-Process -Id 50820 | Select-Object Id, ProcessName, MainWindowTitle\")"
     ]
   },
   "hooks": {
