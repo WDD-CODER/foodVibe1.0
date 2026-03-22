@@ -8,12 +8,39 @@ Evaluates working-tree changes, decides how to split branches and commits, prese
 
 ---
 
+## Output Format Rules (apply throughout this skill)
+
+- **Suppress preamble**: Do not narrate what files you are reading, do not summarize the session handoff, do not mention github-sync status. Go straight to Phase 0.
+- **Phases 0 + 0.5**: Report as a **single combined one-liner** after both are resolved. Format:
+  - `Phase 0–0.5: ⚡ No app TS — debt skipped. No open PR.`
+  - `Phase 0–0.5: ⚠ N high debt items (listed below). No open PR.`
+  - `Phase 0–0.5: ⚡ No app TS — debt skipped. Open PR #N found — review comments surfaced below.`
+- **Phase 1–2**: Output **only** the file table (path + state + diff stat). Get line counts from `git diff --stat`. No prose summary, no narration. Example:
+  ```
+  Phase 1–2
+  Path                                        State
+  .claude/skills/commit-to-github/SKILL.md   modified (+26/-6 lines)
+  .claude/skills/techdebt/SKILL.md           modified (+1 line)
+  notes/commit-process-audit.md              untracked
+  ```
+- **Phase 3**: Output the visual tree first, then the approval prompt after it. Never put the approval prompt before the tree.
+
+---
+
 ## Phase 0 — Tech debt check and targeted test gate (before building commit plan)
 
 Before Phase 1 (Evaluate):
 
 **Step 1 — Tech debt (working-tree scope only)**
-- If no tech-debt report exists in this session → read `.claude/skills/techdebt/SKILL.md` and run the analysis for files to be committed only (get list from `git status` and `git diff --name-only`).
+
+**Fast path (skip tech-debt for non-app commits):**
+Run `git diff --name-only HEAD` and collect untracked files from `git status`. If **zero** files match `src/app/**/*.ts`, emit:
+> ⚡ Fast path: no app TypeScript changed — skipping tech-debt scan.
+
+Then skip the rest of Step 1 and go directly to Step 2.
+
+**Full path (app TypeScript present):**
+- If no tech-debt report exists in this session → read `.claude/skills/techdebt/SKILL.md` and run the analysis for files to be committed only.
 - If a report already exists this session → use it, do not re-run.
 - If the report lists critical/high items → ask: "Fix these first, or proceed anyway?"
 - If the report has a **Spec coverage** section → add or update those specs, or list and ask the user.
@@ -52,7 +79,7 @@ fi
 
 ---
 
-## Phase 0.5 — PR Context Check (MCP-first, read-only)
+## Phase 0.5 — PR Context Check (conditional)
 
 After Phase 0 passes, before building the commit plan:
 
@@ -60,13 +87,13 @@ After Phase 0 passes, before building the commit plan:
 2. Check if an open PR exists for this branch:
    - MCP: `mcp__github__list_pull_requests` filtered to current branch
    - Fallback: `gh pr list --head <branch> --state open`
-3. **If open PR found**:
+3. **If no open PR**: skip this phase entirely — no further calls. Proceed to Phase 1.
+4. **If open PR found**:
    - Read its body and review comments: `mcp__github__get_pull_request` + `mcp__github__list_pull_request_review_comments`
    - Surface any pending review requests or "changes requested" to the user before committing
    - Include the PR number in the commit plan summary
-4. **If no open PR**: proceed silently to Phase 1.
 
-> If MCP unavailable, fall back to `gh pr view --json reviews,comments` silently.
+> If MCP unavailable, fall back to `gh pr list --head <branch> --state open` silently.
 
 ---
 
@@ -107,7 +134,12 @@ Output the plan **only** in this visual format. No `plans/` file.
 - For multiple branches, add another `└── 🌿 Branch: …` under `[Current: main]`.
 - Under each branch: `├──` or `└──` for commits, `📦 Commit N: message`, then `📄 path` for files.
 
-After the tree, ask: **"Approve to proceed, or deny to cancel. No git writes until you approve."**
+**Security check for `settings.local.json`:** If `settings.local.json` appears in the commit tree, read only its `permissions` and `env` keys. If no API keys or secret-looking values are found, add a note to the tree output: `✓ settings.local.json: no secrets detected`. Only escalate to a separate Ask turn if an actual secret is found.
+
+After the tree, ask:
+
+**"Approve to proceed, or deny to cancel. No git writes until you approve.**
+*Tip: reply "approve + merge to main" or "approve + push" in one message to skip a round-trip."*
 
 If the user **denies**: state that no git operations were performed and stop. If they **approve**: proceed to Phase 4.
 
@@ -192,6 +224,7 @@ If something goes wrong during execution:
 - **Branch already exists**: ask the user to rename or append `-v2`. Do not force-delete existing branches.
 - **Push fails** (auth/remote): report the exact error message. Suggest `gh auth status` for auth issues or `git remote -v` for remote issues.
 - **Merge conflict during stash pop**: report the conflicting files. Do not resolve automatically — list them and ask.
+- **Windows / PowerShell**: Do not use `&&` or `||` to chain git commands — PowerShell does not support bash `&&`/`||` syntax and will throw "unexpected token" errors. Run each git command in a separate shell call, or use `;` to chain (runs regardless of exit code). Use `Set-Location` instead of `cd` in scripts. Example: instead of `git checkout main && git merge feat/x`, run them as two separate Bash calls.
 
 ---
 

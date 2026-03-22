@@ -14,6 +14,7 @@ Scan for duplicated code, dead code, and tech debt. Run at end of session, befor
 
 - **Full project:** When run at end of session, before PR, or weekly hygiene — analyze all of `src/app/` (Phases 1–6) and working tree for Spec coverage (Phase 7).
 - **Working tree (commit flow):** When **invoked from commit-to-github**, analyze **only the files that are to be committed**. First obtain the file list: run `git status` and `git diff --name-only` (include modified, deleted, and untracked files that will be part of the commit). Then run every phase only for those files. Do not scan the rest of the project. This keeps the commit flow fast and relevant.
+  - **Fast path:** If the scoped file list contains **zero** files matching `src/app/**/*.ts`, emit: `⚡ No app TypeScript in scope — tech-debt skipped.` and return immediately without running Phases 1–7.
 
 ## Analysis Workflow
 
