@@ -1,8 +1,8 @@
 # End Session — foodVibe 1.0
 
 > **[Claude Code only]** Read this skill when the user says "ship it", "ship", "end session",
-> "done", "I'm done", "wrap up", or "finish up" while on any branch other than `main`/`master`.
-> If on `main`, use `session-handoff` instead.
+> "done", "I'm done", "wrap up", or "finish up" — on **any** branch including `main`/`master`.
+> If on `main`/`master`, auto-redirect to `session-handoff`. Never ask the user to do it manually.
 
 ## Automatic Trigger
 
@@ -44,8 +44,7 @@ From these results, determine:
 **Early-exit conditions** (the only output before the Ship Plan):
 
 - If `currentBranch` is `main` or `master`:
-  > "You're on main. Use `session-handoff` instead."
-  Stop.
+  Automatically invoke the `session-handoff` skill (`.claude/skills/session-handoff/SKILL.md`) and follow it in full. Do NOT stop or ask the user to run it manually.
 
 - If `uncommittedFiles` is empty AND `commitsAhead` is 0:
   > "Nothing to ship. Branch `<currentBranch>` is clean."

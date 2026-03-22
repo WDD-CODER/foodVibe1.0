@@ -27,8 +27,7 @@ Read this and `.claude/copilot-instructions.md` at the start of every task.
 - elegant-fix — After a fix that feels hacky
 - angularComponentStructure — Creating/refactoring Angular components
 - auth-and-logging — Routes, auth, persistence, HTTP, CRUD, logging
-- session-handoff — User says "wrap up" / "session end" while on `main` (no worktree) — structured session summary for next session. When inside a worktree, `end-session` runs instead.
-- end-session — User says "done", "end session", "I'm done", "wrap up", "finish up" while on a non-main branch → read `.claude/skills/end-session/SKILL.md` immediately. Replaces session-handoff when in a worktree.
+- session-end routing — User says "done", "I'm done", "end session", "wrap up", "finish up", "ship", "ship it", "we're done", "that's it", or "handoff" → run `git branch --show-current`, then: on `main`/`master` → `session-handoff`; on any other branch → `end-session`. Never ask the user which to use.
 - Hebrew→English key flows — When a plan adds or changes flows where the user enters a Hebrew value that must have an English key → apply `.claude/copilot-instructions.md` Section 7.1–7.2
 
 ## Commands (`.claude/commands/`)

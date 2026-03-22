@@ -14,8 +14,10 @@
 - **After features**: Read `.claude/skills/update-docs/SKILL.md` to refresh breadcrumbs and docs.
 - **Breadcrumbs only** (e.g. user agrees after commit-to-github, or new hub without full doc pass): Read `.claude/skills/breadcrumb-navigator/SKILL.md` and follow it.
 - **After a hacky fix**: Read `.claude/skills/elegant-fix/SKILL.md` to refine into a clean solution.
-- **Session end / wrap up (on main / no worktree)**: User says "wrap up", "session end", or "handoff" while on `main`/`master` → read `.claude/skills/session-handoff/SKILL.md` and produce the summary.
-- **Session end / wrap up (in worktree / feature branch)**: User says "done", "end session", "I'm done", "wrap up", or "finish up" while NOT on `main`/`master` → read `.claude/skills/end-session/SKILL.md` immediately and begin Phase 0.
+- **Session end / wrap up**: User says "done", "I'm done", "end session", "wrap up", "finish up", "ship", "ship it", "we're done", "that's it", or "handoff" → run `git branch --show-current` first, then:
+  - On `main` or `master` → read `.claude/skills/session-handoff/SKILL.md` and follow it in full.
+  - On any other branch → read `.claude/skills/end-session/SKILL.md` and begin Phase 1.
+  Never ask the user which skill to use — detect and route automatically.
 - **Creating or refactoring Angular components**: Read `.claude/skills/angularComponentStructure/SKILL.md` before creating or restructuring any Angular component class.
 - **Lucide icons**: Before adding or editing `<lucide-icon name="...">` in any template → read and apply **Section 8** below.
 - **Hebrew canonical values**: When adding or editing flows that accept user-entered canonical values (units, categories, allergens, section categories) in Hebrew → read and apply **Section 7.1 and 7.2** below.
