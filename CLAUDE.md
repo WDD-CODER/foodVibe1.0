@@ -66,8 +66,5 @@ cd ../worktree-<branch-name> && npm install
 4. Write the port: `echo <PORT> > ../worktree-<branch-name>/.worktree-port`
 5. Tell the user: "Worktree ready on branch `<branch>`. Dev server port: `<PORT>`. Use `ng serve --port <PORT>`."
 
-**Step 6 — Write local artifact excludes (idempotent)**
-```bash
-grep -q ".playwright-mcp" .git/info/exclude 2>/dev/null || printf '\n# Playwright MCP console logs and UI Inspector screenshots — never commit\n.playwright-mcp/\n.ui-inspector/\n' >> .git/info/exclude
-```
-This writes to `.git/info/exclude` in the **main repo** — a local-only file that is never committed and applies to all worktrees. Prevents Playwright console logs and UI Inspector screenshots from appearing in `git status` without modifying the shared `.gitignore`.
+**Step 6 — Verify artifact excludes**
+`.playwright-mcp/` and `.ui-inspector/` are already covered by `.gitignore` — no action needed. This step is a reminder only: confirm those entries are present if `.gitignore` was recently reset or replaced.
