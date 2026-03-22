@@ -293,4 +293,16 @@ Moved from todo.md to reduce token load.
 
 ---
 
+### Plan 173 — Selected-item-display whole clickable (`plans/173-selected-item-display-whole-clickable.plan.md`)
+- [x] recipe-ingredients-table: move click/keyboard from span to .selected-item-display div; stopPropagation on clear button
+- [x] recipe-ingredients-table.component.scss: add cursor: pointer to .selected-item-display (Effects group)
+- [x] Verify whole chip clickable, clear button does not open search
+
+### Plan 159 — Type-to-filter all dropdowns (`plans/159-type-to-filter-all-dropdowns.plan.md`)
+- [x] Phase 1: Enhance CustomSelectComponent with typeToFilter (input trigger, filter by "starts with" + script)
+- [x] Phase 2: Replace native selects in quick-add-product-modal with app-custom-select
+- [x] Phase 3: Align recipe-builder logistics, ingredient-search, preparation-search, recipe-book-list, menu-intelligence to "starts with" + script — completed via Plan 178
+
+---
+
 
