@@ -33,7 +33,8 @@
       "Bash(gh pr:*)",
       "Bash(gh auth:*)",
       "Bash(rm -rf .claude/worktrees/fix/duplicate-name-validation-venues-suppliers)",
-      "Bash(git worktree:*)"
+      "Bash(git worktree:*)",
+      "Bash(git:*)"
     ]
   }
 }
