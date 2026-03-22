@@ -275,3 +275,12 @@ After this session's fixes, a complete worktree provisioning + commit + end-sess
 | `cfbf15f` | `main` | Merge pull request #2 from feat/ui-inspector-agent |
 | `3c2cc50` | `fix/metadata-btn-alignment` | fix(metadata): align buttons in preparation and section category managers |
 | `f7a9e40` | `main` | Merge pull request #3 from fix/metadata-btn-alignment |
+
+---
+
+## 2026-03-22 — Amendment: never-stage list removed
+
+The never-stage list (`.gitignore`, `.playwright-mcp/`, `.ui-inspector/`, `*.png/jpg/jpeg`)
+was removed from the commit-to-github skill. All exclusions are now handled by `.gitignore`
+directly, which is the correct single source of truth. `.gitignore` is now treated as a
+normal committable file.
