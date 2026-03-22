@@ -20,6 +20,7 @@
 - **Lucide icons**: Before adding or editing `<lucide-icon name="...">` in any template → read and apply **Section 8** below.
 - **Hebrew canonical values**: When adding or editing flows that accept user-entered canonical values (units, categories, allergens, section categories) in Hebrew → read and apply **Section 7.1 and 7.2** below.
 - **Deploy to GitHub Pages**: User says deploy, publish app, GitHub Pages → read `.claude/skills/deploy-github-pages/SKILL.md` and follow it. Run only on explicit request.
+- **After any structural UI change**: After `.html`/`.scss`/`.css` edits in `src/` that affect layout (sizing, spacing, positioning, display) → invoke `ui-inspector` agent (model: haiku) with: component name, page URL, dev server port, worktreeRoot, and navigation hint to reveal the element. Skip for purely aesthetic changes (color, shadow, opacity, border-radius). Skip if user explicitly opts out — current task only.
 
 ## 0.1 Priority Hierarchy (when guidance conflicts)
 

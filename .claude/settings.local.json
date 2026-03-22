@@ -31,7 +31,8 @@
       "Skill(update-config)",
       "Bash(npm start:*)",
       "Bash(gh:*)",
-      "Bash(rm -rf .claude/worktrees/fix/duplicate-name-validation-venues-suppliers)",
+      "Bash(cd:*)",
+      "Bash([ -f:*)",
       "Bash(git worktree:*)",
       "Bash(git:*)",
       "Bash(awk:*)",
@@ -42,16 +43,17 @@
       "Bash(sort:*)",
       "Bash(uniq:*)",
       "Bash(tr:*)",
-      "Read(//c/foodCo/worktree-fix-metadata-btn-alignment/**)",
+      "Read(//c/foodCo/worktree-*/**)",
       "Bash(npm install:*)",
-      "Bash(findstr :4201)",
-      "Bash(findstr :4202)",
+      "Bash(findstr:*)",
       "Bash(ng serve:*)",
       "mcp__playwright__browser_navigate",
       "mcp__playwright__browser_hover",
       "mcp__playwright__browser_take_screenshot",
       "mcp__playwright__browser_evaluate",
-      "mcp__playwright__browser_snapshot"
+      "mcp__playwright__browser_snapshot",
+      "Bash(find /c/Users/danwe/.claude -maxdepth 2 -type f \\\\\\(-name settings.json -o -name *.json \\\\\\))",
+      "Bash(gh pr:*)"
     ]
   },
   "hooks": {
