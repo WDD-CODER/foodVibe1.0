@@ -47,8 +47,11 @@ Focus on: `width`, `height`, `display`, `alignItems`, `justifyContent`, `overflo
 
 ### Step 5 — Screenshot (conditional only)
 Take `browser_take_screenshot` ONLY if a specific issue is detected.
-Save to: `<worktreeRoot>/.ui-inspector/<componentName>-<timestamp>.png`
-Never save to the main repo CWD.
+**Path is mandatory:** `<worktreeRoot>/.ui-inspector/<componentName>-<timestamp>.png`
+- `worktreeRoot` is always provided by the main agent (e.g. `C:/foodCo/worktree-fix-metadata-btn-alignment`)
+- The `.ui-inspector/` folder is gitignored locally — it will NOT appear in `git status`
+- **NEVER** save to the current working directory, the main repo root, or any flat filename like `section-cat-aligned.png`
+- If `worktreeRoot` was not provided, omit the screenshot entirely and note it in the report
 
 ### Step 6 — Report
 Return a structured report to the main agent (NOT to the user):
