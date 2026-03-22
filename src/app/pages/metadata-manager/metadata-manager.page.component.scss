@@ -153,7 +153,7 @@
 
 .menu-types-card {
   .menu-type-row {
-    grid-template-columns: 1fr auto 30px 30px;
+    grid-template-columns: 1fr auto auto auto;
     align-items: center;
     gap: 0.75rem;
   }
@@ -256,13 +256,19 @@
   }
 
   .btn-edit {
-    opacity: 0;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: var(--color-text-muted);
-    padding: 4px;
     display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 4px;
+
+    background: transparent;
+    color: var(--color-text-muted);
+
+    border: none;
+
+    opacity: 0;
+    cursor: pointer;
     transition: opacity 0.2s ease;
 
     &:hover {
