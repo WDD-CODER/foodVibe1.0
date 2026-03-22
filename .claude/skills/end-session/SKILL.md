@@ -38,10 +38,7 @@ From these results, determine:
 - `commitGroups` — apply commit-to-github grouping logic (feat/fix/chore splits) silently; apply never-stage filter (see below)
 - `prDraft` — draft the PR title and body now: title = `type(scope): short description` (under 70 chars); body = 2–4 bullet summary of what changed + a short test plan checklist. Derive from commit messages and changed file paths.
 
-**Never-stage filter** — silently exclude these regardless of git status:
-- `.gitignore`
-- `.playwright-mcp/`, `.ui-inspector/`
-- `*.png`, `*.jpg`, `*.jpeg` at repo root
+**Never-stage**: `.gitignore` handles exclusions (settings.local.json, tooling artifacts, screenshots). No manual filter needed.
 
 **Early-exit conditions** (the only output before the Ship Plan):
 
@@ -138,7 +135,8 @@ Do NOT use `--fill` — that overwrites the drafted text. Capture the PR number 
 This avoids `fatal: 'main' is already used by worktree`.
 
 ```bash
-cd "<mainRepoPath>" && gh pr merge <PR_NUMBER> --merge --delete-branch
+cd "<mainRepoPath>"
+gh pr merge <PR_NUMBER> --merge --delete-branch
 ```
 
 ### Step 4 — Sync Main

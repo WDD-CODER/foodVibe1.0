@@ -109,7 +109,3 @@ Follow-up needed:
   - [Any files whose purpose could not be determined from code alone]
 ```
 
-## Related
-
-- `update-docs` skill — Phase 2 invokes this skill
-- `agent.md` — Preflight Checklist step 3: read breadcrumbs before changing a directory

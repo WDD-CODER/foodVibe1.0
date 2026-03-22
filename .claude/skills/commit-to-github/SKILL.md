@@ -96,10 +96,24 @@ if [ -n "$SPECS" ]; then
 fi
 ```
 
-- If matching specs exist and pass → proceed to Phase 0.5.
+- If matching specs exist and pass → proceed to Step 3.
 - If matching specs exist and fail → report the failure and ask: "Fix before building the commit plan, or proceed anyway?"
-- If no matching specs exist → note "No specs for changed files" and proceed.
+- If no matching specs exist → note "No specs for changed files" and proceed to Step 3.
 - **Do not run the full test suite here.** Full suite runs at session-handoff (end of day) and in `test-pr-review-merge` before merge.
+
+**Step 3 — Security gate (auth-sensitive commits only)**
+
+Check if any file being committed matches a sensitive pattern:
+```bash
+git diff --name-only HEAD | grep -E "auth\.guard|auth\.interceptor|auth-crypto|user\.service|app\.routes"
+git diff HEAD | grep -E "localStorage\.setItem|sessionStorage\.setItem|\[innerHTML\]|bypassSecurityTrust"
+```
+
+- If **zero** matches → emit: `⚡ Security fast-path: no auth/storage-sensitive files — security gate skipped.` Then proceed to Phase 0.5.
+- If **matches found** → ask:
+  > "Security-sensitive files in this commit ([list]). Run security-officer review first, or proceed anyway?
+  > a. Run security review — invoke `security-officer` agent; wait for its report before continuing
+  > b. Proceed anyway"
 
 ---
 

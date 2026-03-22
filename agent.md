@@ -14,6 +14,7 @@ Read this and `.claude/copilot-instructions.md` at the start of every task.
 - product-manager.md — PRDs, feature scoping, plans/
 - breadcrumb-navigator — Workflow: `.claude/skills/breadcrumb-navigator/SKILL.md`; persona: `.claude/agents/breadcrumb-navigator.md`
 - qa-engineer.md — Testing, specs, E2E
+- security-officer.md — Final security review for auth/route/storage changes; pre-deploy go-live; security consultation
 
 ## Skills (`.claude/skills/`)
 - save-plan — User says "save the plan" after confirming
@@ -27,7 +28,7 @@ Read this and `.claude/copilot-instructions.md` at the start of every task.
 - elegant-fix — After a fix that feels hacky
 - angularComponentStructure — Creating/refactoring Angular components
 - auth-and-logging — Routes, auth, persistence, HTTP, CRUD, logging
-- session-end routing — User says "done", "I'm done", "end session", "wrap up", "finish up", "ship", "ship it", "we're done", "that's it", or "handoff" → run `git branch --show-current`, then: on `main`/`master` → `session-handoff`; on any other branch → `end-session`. Never ask the user which to use.
+- session-end routing — see copilot-instructions.md Section 0
 - Hebrew→English key flows — When a plan adds or changes flows where the user enters a Hebrew value that must have an English key → apply `.claude/copilot-instructions.md` Section 7.1–7.2
 
 ## Commands (`.claude/commands/`)

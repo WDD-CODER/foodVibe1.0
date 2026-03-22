@@ -38,16 +38,7 @@ Identify:
 
 Use the breadcrumb-navigator agent to scan and update `breadcrumbs.md` files:
 
-```
-Read .claude/agents/breadcrumb-navigator.md for instructions, then:
-Scan the codebase and update all breadcrumbs.md files to reflect current
-directory structures, file purposes, and navigation context. Focus on:
-- src/app/core/services/ (data services, registries)
-- src/app/core/models/ (interfaces, types)
-- src/app/pages/ (each page and its components/)
-- src/app/shared/ (reusable UI components)
-Create or refresh `breadcrumbs.md` for **major** hubs still missing or stale — not every leaf folder (see **breadcrumbs.md** in `.claude/copilot-instructions.md` section 4).
-```
+Read and follow `.claude/skills/breadcrumb-navigator/SKILL.md` for affected directories.
 
 ### Phase 3: Update copilot-instructions.md
 
@@ -116,7 +107,3 @@ Recommended Follow-ups:
   - [Manual review suggestions]
 ```
 
-## Related Skills
-
-- `/github-sync` — Review recent changes before updating docs
-- `/techdebt` — Find issues to document

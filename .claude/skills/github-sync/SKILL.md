@@ -2,13 +2,6 @@
 
 Pull recent GitHub activity into a single context dump. Use at session start, after time away, or before code review.
 
-## When to Run
-
-- Starting a new work session after time away
-- Beginning work on a new feature
-- Before code review
-- Weekly planning
-
 ## Workflow
 
 1. **Recent commits** — `git log --oneline --since=7.days.ago --stat`; identify files changed most frequently.
@@ -43,7 +36,3 @@ Pull recent GitHub activity into a single context dump. Use at session start, af
 - [New patterns] [Breaking changes] [Areas to watch]
 ```
 
-## Related
-
-- techdebt — analyze debt from recent changes
-- update-docs — update docs after reviewing changes
