@@ -8,14 +8,40 @@ Evaluates working-tree changes, decides how to split branches and commits, prese
 
 ---
 
-## Phase 0 — Tech debt check and test gate (before building commit plan)
+## Phase 0 — Tech debt check and targeted test gate (before building commit plan)
 
 Before Phase 1 (Evaluate):
 
-- **Checklist:** (1) If no tech-debt report exists in this session → read `.claude/skills/techdebt/SKILL.md` and run the analysis **in working-tree scope only** (files to be committed; get the list from `git status` and `git diff --name-only`). Produce the report. (2) If the report lists critical/high items → ask the user: fix first or proceed? (3) If the report has a **Spec coverage** section → add or update those specs so tests pass, or list the files and ask the user. (4) **Run the full test suite:** `npm test -- --no-watch --browsers=ChromeHeadless`. If it fails, report the failure and ask: "Fix before building the commit plan, or proceed anyway?" Do not proceed to Phase 1 until tests pass or the user chooses to proceed. Then continue to Phase 1.
+**Step 1 — Tech debt (working-tree scope only)**
+- If no tech-debt report exists in this session → read `.claude/skills/techdebt/SKILL.md` and run the analysis for files to be committed only (get list from `git status` and `git diff --name-only`).
+- If a report already exists this session → use it, do not re-run.
+- If the report lists critical/high items → ask: "Fix these first, or proceed anyway?"
+- If the report has a **Spec coverage** section → add or update those specs, or list and ask the user.
 
-- **If a tech-debt report was already produced in this conversation** (e.g. from workflow step 5.5 or because the user asked for a tech-debt run): **Do not run the techdebt skill again.** Use that existing report. If it listed critical or high-priority items, ask: **"Fix these first, or proceed with the commit plan anyway?"** If the report includes a **Spec coverage** section (files needing `.spec.ts` added or updated), add or update those specs so `npm test -- --no-watch --browsers=ChromeHeadless` passes; if the list is long, list the files and ask: **"Add/update specs for these before building the commit plan?"** then do them if the user agrees. **(4) Run the full test suite:** `npm test -- --no-watch --browsers=ChromeHeadless`. If it fails, report and ask: "Fix before building the commit plan, or proceed anyway?" Then continue to Phase 1.
-- **If no tech-debt report exists in this session**: Read `.claude/skills/techdebt/SKILL.md` and run a quick tech-debt pass **in working-tree scope only** (analysis only for files to be committed; see techdebt SKILL "Scope — Working tree (commit flow)"). If critical or high-priority items exist, list them briefly and ask: **"Fix these first, or proceed with the commit plan anyway?"** If the report includes a **Spec coverage** section, add or update those specs (or list and ask: **"Add/update specs for these before building the commit plan?"**). **(4) Run the full test suite:** `npm test -- --no-watch --browsers=ChromeHeadless`. If it fails, report and ask: "Fix before building the commit plan, or proceed anyway?" Do not block the commit tree indefinitely — the user may choose to proceed. Then continue to Phase 1.
+**Step 2 — Targeted specs only (not the full suite)**
+
+Run specs only for the files being committed:
+```bash
+# Get changed .ts files (exclude spec files themselves)
+CHANGED=$(git diff --name-only HEAD | grep '\.ts$' | grep -v '\.spec\.ts$')
+
+# For each changed file, check if a matching spec exists and collect them
+SPECS=""
+for f in $CHANGED; do
+  spec="${f%.ts}.spec.ts"
+  [ -f "$spec" ] && SPECS="$SPECS $spec"
+done
+
+# Run only those specs (skip if none found)
+if [ -n "$SPECS" ]; then
+  npx ng test --include="$SPECS" --no-watch --browsers=ChromeHeadless
+fi
+```
+
+- If matching specs exist and pass → proceed to Phase 0.5.
+- If matching specs exist and fail → report the failure and ask: "Fix before building the commit plan, or proceed anyway?"
+- If no matching specs exist → note "No specs for changed files" and proceed.
+- **Do not run the full test suite here.** Full suite runs at session-handoff (end of day) and in `test-pr-review-merge` before merge.
 
 ---
 
@@ -23,6 +49,24 @@ Before Phase 1 (Evaluate):
 
 - User says "commit to GitHub", "push my changes", "save to branches", or similar
 - User wants working changes organized into branches and commits with a reviewable plan first
+
+---
+
+## Phase 0.5 — PR Context Check (MCP-first, read-only)
+
+After Phase 0 passes, before building the commit plan:
+
+1. Detect current branch: `git branch --show-current`
+2. Check if an open PR exists for this branch:
+   - MCP: `mcp__github__list_pull_requests` filtered to current branch
+   - Fallback: `gh pr list --head <branch> --state open`
+3. **If open PR found**:
+   - Read its body and review comments: `mcp__github__get_pull_request` + `mcp__github__list_pull_request_review_comments`
+   - Surface any pending review requests or "changes requested" to the user before committing
+   - Include the PR number in the commit plan summary
+4. **If no open PR**: proceed silently to Phase 1.
+
+> If MCP unavailable, fall back to `gh pr view --json reviews,comments` silently.
 
 ---
 
@@ -144,7 +188,7 @@ When changing the recipe-builder or menu-intelligence page, see `.claude/referen
 If something goes wrong during execution:
 
 - **Stash fails** (untracked files): use `git stash push -u` with the `-u` flag; if still failing, `git add` untracked files first.
-- **Tests fail in Phase 0**: report the specific failure, ask the user: "Fix before building the commit plan, or proceed anyway?" Never silently skip.
+- **Targeted specs fail in Phase 0**: report the specific failure and which spec file failed, ask the user: "Fix before building the commit plan, or proceed anyway?" Never silently skip.
 - **Branch already exists**: ask the user to rename or append `-v2`. Do not force-delete existing branches.
 - **Push fails** (auth/remote): report the exact error message. Suggest `gh auth status` for auth issues or `git remote -v` for remote issues.
 - **Merge conflict during stash pop**: report the conflicting files. Do not resolve automatically — list them and ask.

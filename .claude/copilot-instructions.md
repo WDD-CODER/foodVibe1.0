@@ -14,7 +14,8 @@
 - **After features**: Read `.claude/skills/update-docs/SKILL.md` to refresh breadcrumbs and docs.
 - **Breadcrumbs only** (e.g. user agrees after commit-to-github, or new hub without full doc pass): Read `.claude/skills/breadcrumb-navigator/SKILL.md` and follow it.
 - **After a hacky fix**: Read `.claude/skills/elegant-fix/SKILL.md` to refine into a clean solution.
-- **Session end / wrap up**: User says "wrap up", "session end", or "handoff" → read `.claude/skills/session-handoff/SKILL.md` and produce the summary.
+- **Session end / wrap up (on main / no worktree)**: User says "wrap up", "session end", or "handoff" while on `main`/`master` → read `.claude/skills/session-handoff/SKILL.md` and produce the summary.
+- **Session end / wrap up (in worktree / feature branch)**: User says "done", "end session", "I'm done", "wrap up", or "finish up" while NOT on `main`/`master` → read `.claude/skills/end-session/SKILL.md` immediately and begin Phase 0.
 - **Creating or refactoring Angular components**: Read `.claude/skills/angularComponentStructure/SKILL.md` before creating or restructuring any Angular component class.
 - **Lucide icons**: Before adding or editing `<lucide-icon name="...">` in any template → read and apply **Section 8** below.
 - **Hebrew canonical values**: When adding or editing flows that accept user-entered canonical values (units, categories, allergens, section categories) in Hebrew → read and apply **Section 7.1 and 7.2** below.
@@ -110,3 +111,25 @@ Read only the file for the agent you need. Each file defines its own output form
 
 ## 8. Lucide Icons
 * **Mandatory**: Every icon used in a template (`<lucide-icon name="...">`) MUST be registered in `src/app/app.config.ts`. If you add a new icon in any component template, in the same change add: (1) import from `lucide-angular` (PascalCase, e.g. `CircleUserRound`), (2) add it to `LucideAngularModule.pick({ ... })`. Template uses kebab-case (`circle-user-round`); TypeScript uses PascalCase (`CircleUserRound`). Missing registration causes runtime: *"The '...' icon has not been provided by any available icon providers."* Cursor rule: `.cursor/rules/lucide-icons-must-register-in-app-config.mdc`.
+
+## 9. GitHub MCP — Hybrid Read/Write Pattern
+
+**Rule**: MCP = read. Skills = write. Never use MCP tools to push, merge, or create PRs.
+
+| Operation | Tool |
+|-----------|------|
+| Read PR body, diff, reviews | `mcp__github__*` (primary) → `gh pr view` (fallback) |
+| Read issues, labels, milestones | `mcp__github__*` (primary) → `gh issue list` (fallback) |
+| Read CI/check status | `mcp__github__*` (primary) → `gh pr checks` (fallback) |
+| Commit, push, create PR, merge | `commit-to-github` or `test-pr-review-merge` skill only |
+
+**Autonomous PR reading**: Agent may read any PR without asking. Reading PR content to understand context or plan work is a fully autonomous action — no user confirmation needed.
+
+**MCP availability**: Both `.mcp.json` (Claude Code) and `.cursor/mcp.json` (Cursor) are configured with the GitHub MCP server using `${GITHUB_TOKEN}` from the Windows environment. If `mcp__github__*` tools are not available in a session, fall back to `gh` CLI silently — do not block the workflow.
+
+**Key MCP tools**:
+- `mcp__github__list_pull_requests` — list open/closed PRs
+- `mcp__github__get_pull_request` — full PR body, status, labels
+- `mcp__github__list_pull_request_reviews` — review status and decisions
+- `mcp__github__list_pull_request_review_comments` — inline code comments
+- `mcp__github__list_issues` — open/closed issues

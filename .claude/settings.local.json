@@ -36,5 +36,18 @@
       "Bash(git worktree:*)",
       "Bash(git:*)"
     ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'BRANCH=$(git branch --show-current 2>/dev/null); if [ -z \"$BRANCH\" ] || [ \"$BRANCH\" = \"main\" ] || [ \"$BRANCH\" = \"master\" ]; then exit 0; fi; COUNT=$(git status --porcelain 2>/dev/null | wc -l | tr -d \" \"); if [ \"$COUNT\" -gt \"0\" ]; then printf \"\\n========================================\\n  WORKTREE REMINDER\\n  Branch : %s\\n  Changed: %s file(s) uncommitted\\n  Say: end session  to commit+merge+cleanup\\n========================================\\n\\n\" \"$BRANCH\" \"$COUNT\"; fi'"
+          }
+        ]
+      }
+    ]
   }
 }

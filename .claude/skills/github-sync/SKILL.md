@@ -9,18 +9,17 @@ Pull recent GitHub activity into a single context dump. Use at session start, af
 - Before code review
 - Weekly planning
 
-## MCP Note
-
-When GitHub MCP is available (`mcp__github__*` tools), prefer it for PR and issue data over `gh` CLI. Fall back to `gh` CLI if unavailable.
-
 ## Workflow
 
-1. **Recent commits** — last 7 days (oneline, stat); identify files changed most frequently.
-2. **Pull requests** — list open and merged (e.g. `gh pr list`); details for recently merged.
-3. **Issues** — open and recently closed (e.g. `gh issue list`).
-4. **Branch activity** — active branches by recent commits (e.g. `git branch -r --sort=-committerdate`).
-5. **Generate summary** using the report template below.
-6. **Save** the summary to `notes/github-sync/YYYY-MM-DD.md` (create directory if needed).
+1. **Recent commits** — `git log --oneline --since=7.days.ago --stat`; identify files changed most frequently.
+2. **Pull requests (MCP-first)** — `mcp__github__list_pull_requests` for open PRs; for each open PR call `mcp__github__get_pull_request` to read body, review status, and labels. Fall back to `gh pr list` if MCP unavailable.
+3. **Issues (MCP-first)** — `mcp__github__list_issues` for open and recently closed. Fall back to `gh issue list`.
+4. **PR reviews** — For any open PR: call `mcp__github__list_pull_request_reviews` to surface pending review requests or change requests.
+5. **Branch activity** — `git branch -r --sort=-committerdate`
+6. **Generate summary** using the report template below.
+7. **Save** the summary to `notes/github-sync/YYYY-MM-DD.md` (create directory if needed).
+
+> **MCP fallback**: If `mcp__github__*` tools are unavailable in the session, fall back to `gh` CLI silently — do not block the workflow.
 
 ## Report Template
 

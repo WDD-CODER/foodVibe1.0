@@ -27,7 +27,8 @@ Read this and `.claude/copilot-instructions.md` at the start of every task.
 - elegant-fix — After a fix that feels hacky
 - angularComponentStructure — Creating/refactoring Angular components
 - auth-and-logging — Routes, auth, persistence, HTTP, CRUD, logging
-- session-handoff — User says "wrap up" / "session end" — structured session summary for next session
+- session-handoff — User says "wrap up" / "session end" while on `main` (no worktree) — structured session summary for next session. When inside a worktree, `end-session` runs instead.
+- end-session — User says "done", "end session", "I'm done", "wrap up", "finish up" while on a non-main branch → read `.claude/skills/end-session/SKILL.md` immediately. Replaces session-handoff when in a worktree.
 - Hebrew→English key flows — When a plan adds or changes flows where the user enters a Hebrew value that must have an English key → apply `.claude/copilot-instructions.md` Section 7.1–7.2
 
 ## Commands (`.claude/commands/`)
@@ -47,9 +48,7 @@ Before starting any task:
 5. If touching SCSS/CSS: read `.claude/skills/cssLayer/SKILL.md`.
 6. If creating/refactoring components: read `.claude/skills/angularComponentStructure/SKILL.md`.
 7. **[Claude Code only]** Before any work, check the current git branch (`git branch --show-current`).
-   If on `main` or `master` — **STOP. Do not proceed.**
-   Create an isolated worktree: `claude --worktree <descriptive-branch-name>` (name must reflect the actual task, e.g. `feat/add-recipe-search`).
-   Never commit directly to `main` or `master`. Only begin work after confirming you are inside a dedicated worktree branch.
+   If on `main` or `master` — follow the Branch Gate in `CLAUDE.md`: ask the user whether to create a worktree (multi-agent/complex) or proceed directly (quick task). When creating a worktree, follow Worktree Provisioning in `CLAUDE.md` in exact order (prune → create → .env copy → npm install → port assignment).
 
 ## Autonomous Permissions
 - **Terminal**: Non-destructive commands (`npm test`, `ng build`, `ls`, `mkdir`) allowed.
