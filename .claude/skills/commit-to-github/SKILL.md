@@ -6,13 +6,42 @@ Evaluates working-tree changes, decides how to split branches and commits, prese
 
 **Bash command rule**: Never combine git inspection commands into compound pipelines using `&&` or `|`. Always issue each command as a **separate Bash tool call**. Compound commands like `git diff ... && echo ... | grep ... | awk ...` will trigger a permission prompt even when individual commands are allowed. Use one Bash call per command.
 
-**Phase 0 must be completed before Phase 1.** Do not run Phase 1 (Evaluate) until Phase 0 is done.
+---
+
+## Fast-Lane Eligibility (runs before Phase 0)
+
+Collect the working-tree snapshot using **four separate Bash calls** (Windows-safe — no `&&`):
+
+1. `git status --short`
+2. `git diff --name-only HEAD`
+3. `git diff --numstat HEAD`
+4. `git branch --show-current`
+
+**Fast lane is active when ALL of the following are true:**
+- Every changed/untracked file path matches the allowlist: `.claude/**`, `notes/**`, `plans/**`, `*.md` at repo root, `.cursor/**`
+- Zero changed files match `src/app/**/*.ts`
+- User did NOT request a multi-branch split
+
+**If fast lane is active:** emit `⚡ Fast lane: all changes in allowlist paths — Phase 0 and Phase 0.5 skipped.` then jump directly to Phase 1. The snapshot data already collected is reused — no additional git calls needed.
+
+**If fast lane is NOT active:** proceed through Phase 0 → Phase 0.5 → Phase 1 as normal.
+
+---
+
+**Phase 0 must be completed before Phase 1 (full path only).** Do not run Phase 1 (Evaluate) until Phase 0 is done.
 
 ---
 
 ## Output Format Rules (apply throughout this skill)
 
+- **Batch all bash commands before any text output**: Run every inspection command needed for Phases 0, 0.5, 1, and 2 first — do not output any formatted text until ALL data gathering is complete. This keeps all tool-call noise at the top and produces one clean output block at the end.
 - **Suppress preamble**: Do not narrate what files you are reading, do not summarize the session handoff, do not mention github-sync status. Go straight to Phase 0.
+- **Single output block**: After all bash commands have run, emit this sequence once with no interruptions:
+  1. `Phase 0–0.5:` one-liner
+  2. blank line
+  3. `Phase 1–2` file table
+  4. blank line
+  5. The visual tree + approval prompt
 - **Phases 0 + 0.5**: Report as a **single combined one-liner** after both are resolved. Format:
   - `Phase 0–0.5: ⚡ No app TS — debt skipped. No open PR.`
   - `Phase 0–0.5: ⚠ N high debt items (listed below). No open PR.`
@@ -79,11 +108,17 @@ fi
 - User says "commit to GitHub", "push my changes", "save to branches", or similar
 - User wants working changes organized into branches and commits with a reviewable plan first
 
+**Cursor users:** Default command scope is "this conversation only." Add `all` in the same message to include all working-tree changes and avoid an extra round-trip. Example: `/commit-github all`
+
 ---
 
 ## Phase 0.5 — PR Context Check (conditional)
 
-After Phase 0 passes, before building the commit plan:
+**Fast-lane entrants skip this phase entirely** — PR presence was already resolved during eligibility snapshot. Do not issue a second `gh` call.
+
+**When on `main`/`master` (full path):** also skip this phase — no PR can be open against the default branch in this workflow.
+
+After Phase 0 passes (non-fast-lane, non-main branch), before building the commit plan:
 
 1. Detect current branch: `git branch --show-current`
 2. Check if an open PR exists for this branch:
@@ -118,6 +153,7 @@ Per the safety rule above. Gather the full picture: run `git status` and `git di
 4. **Branch names**: `feat/<short-name>` or `fix/<short-name>`.
 5. **Output**: For each branch — branch name. For each commit — list of file paths and a short commit message (`type(scope): message`).
 6. **Plans:** Include related `plans/` file in the commit when scope matches.
+7. **Draft the PR**: For each branch, draft the PR title and body now. Title: `type(scope): short description` (under 70 chars). Body: 2–4 bullet summary + test plan checklist. This draft is shown in Phase 3 and executed in Phase 4 — no separate approval.
 
 ---
 
@@ -135,18 +171,26 @@ Output the plan **only** in this visual format. No `plans/` file.
       │    📄 path/to/file2.js
       └── 📦 Commit 2: type(scope): short message
            📄 path/to/file3.js
+
+
+      🔀 PR: "type(scope): short description"
+           • bullet summary of change 1
+           • bullet summary of change 2
+           Test plan: [ ] item 1  [ ] item 2
 ```
 
 - Use `[Current: main]` (or actual default branch) at the top.
 - For multiple branches, add another `└── 🌿 Branch: …` under `[Current: main]`.
 - Under each branch: `├──` or `└──` for commits, `📦 Commit N: message`, then `📄 path` for files.
+- After the last commit on each branch, always show `🔀 PR:` with the drafted title and body inline. This PR will be created automatically on approve — no second prompt.
 
 **Security check for `settings.local.json`:** If `settings.local.json` appears in the commit tree, read only its `permissions` and `env` keys. If no API keys or secret-looking values are found, add a note to the tree output: `✓ settings.local.json: no secrets detected`. Only escalate to a separate Ask turn if an actual secret is found.
 
 After the tree, ask:
 
 **"Approve to proceed, or deny to cancel. No git writes until you approve.**
-*Tip: reply "approve + merge" or just "A" to approve and merge to main in one step. Use "approve + push" or "P" to approve and push without merging.*
+*Approving executes all commits AND creates the PR(s) above — no further prompts. To tweak the PR text, say so before approving.*
+*A = approve + merge · P = approve + push*
 
 If the user **denies**: state that no git operations were performed and stop. If they **approve**: proceed to Phase 4.
 
@@ -181,6 +225,11 @@ Never erase or discard user changes: no `git reset --hard`, `git clean -fd`, or 
    ```
    Do NOT run `git pull` after this — the merge commit is already present locally (you just created it via `gh pr merge`). A pull here is a redundant network roundtrip.
 
+   > **Speed tip — push vs merge:**
+   > - `approve + push` (or "P"): commits, pushes branch, opens PR. Fastest — merge happens separately when ready.
+   > - `approve + merge` (or "A"): commits, pushes, creates PR, merges to main in one flow. Costs ~5–15 s extra (second push + merge round-trip).
+   > For fast-lane (config/docs-only) commits, `approve + push` is usually the right call.
+
 5. **Update todo**
    Open `.claude/todo.md`. Using committed branch names, messages, and file paths, mark matching tasks as done (`[x]`). Do not change unrelated tasks.
 
@@ -206,7 +255,14 @@ Never erase or discard user changes: no `git reset --hard`, `git clean -fd`, or 
 
    Once all gates pass, move the section (heading + items) to `todo-archive.md` (create if needed), appended with today's date and plan number. Note: "Archived Plan NNN to todo-archive.md."
 
-7. **Breadcrumb check**
+7. **Create PR (automatic — no extra prompt)**
+   After all commits on a branch are done and pushed, create the PR using the title and body drafted in Phase 2/3:
+   ```bash
+   gh pr create --title "<drafted-title>" --body "<drafted-body>"
+   ```
+   Use the exact title and body shown in the Phase 3 tree. Do NOT ask for approval again — the user already approved the full plan including the PR. If the user amended the PR text before approving, use the amended version.
+
+8. **Breadcrumb check**
    If any committed files added, removed, or renamed components/services/pages, list the affected directories and ask: "Run breadcrumb-navigator for [dirs]?" If the user agrees, read `.claude/skills/breadcrumb-navigator/SKILL.md` and follow it for those hubs. Do not block the commit flow.
 
 ---

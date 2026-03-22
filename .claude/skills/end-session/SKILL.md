@@ -36,6 +36,7 @@ From these results, determine:
 - `uncommittedFiles` — list of files from `git status --short`
 - `commitsAhead` — count from `git log main..HEAD`
 - `commitGroups` — apply commit-to-github grouping logic (feat/fix/chore splits) silently; apply never-stage filter (see below)
+- `prDraft` — draft the PR title and body now: title = `type(scope): short description` (under 70 chars); body = 2–4 bullet summary of what changed + a short test plan checklist. Derive from commit messages and changed file paths.
 
 **Never-stage filter** — silently exclude these regardless of git status:
 - `.gitignore`
@@ -70,7 +71,12 @@ Render ONE combined visual. Never split this into multiple questions.
        (repeat for each commit group if multiple)
 
 [2/4] 🌿 Create Pull Request
-       Target: main  |  Title: <commit message or branch name>
+       Target: main
+       Title: <prDraft title>
+       • <bullet 1>
+       • <bullet 2>
+       Test plan: [ ] <item 1>  [ ] <item 2>
+       (edit the PR text before replying if you want to change it)
 
 [3/4] ✅ Auto-Merge
        Method: --merge  |  Runs from main repo (avoids worktree lock)
@@ -118,11 +124,13 @@ git push -u origin <currentBranch>
 
 ### Step 2 — Create Pull Request
 
+Use the title and body drafted in Phase 1 and shown in the Phase 2 ship plan. If the user amended the PR text before approving, use the amended version.
+
 ```bash
-gh pr create --base main --head <currentBranch> --fill
+gh pr create --base main --head <currentBranch> --title "<prDraft title>" --body "<prDraft body>"
 ```
 
-Capture the PR number from the output for Step 3.
+Do NOT use `--fill` — that overwrites the drafted text. Capture the PR number from the output for Step 3.
 
 ### Step 3 — Merge to Main
 
