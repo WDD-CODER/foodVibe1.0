@@ -43,6 +43,9 @@ testem.log
 # Worktree port assignment
 .worktree-port
 
+# Claude Code local config (never commit)
+.claude/settings.local.json
+
 # Environment & secrets (never commit)
 .env
 .env.*
@@ -50,6 +53,15 @@ testem.log
 .env.*.local
 *.pem
 *.key
+
+# Playwright MCP and UI Inspector artifacts (never commit)
+.playwright-mcp/
+.ui-inspector/
+
+# Stray screenshots from browser automation (never commit)
+*.png
+*.jpg
+*.jpeg
 
 # System files
 .DS_Store

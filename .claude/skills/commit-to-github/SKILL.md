@@ -138,12 +138,6 @@ After Phase 0 passes (non-fast-lane, non-main branch), before building the commi
 
 Per the safety rule above. Gather the full picture: run `git status` and `git diff --stat` (and `git diff` or `git diff --name-only` if needed). Detect default branch: `git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null || echo "main"`. Do not run `git add`, `git commit`, `git checkout -b`, or `git stash` in this phase. Note modified/untracked `plans/*.plan.md`.
 
-**Never-stage list** — silently exclude these from every commit, regardless of their state:
-- `.gitignore` — managed explicitly by the user; agents must never auto-stage it
-- `.claude/settings.local.json` — local permissions config; never auto-stage, always preserve as working-tree only
-- `.playwright-mcp/` and `.ui-inspector/` — Playwright MCP console logs and UI Inspector screenshots; tooling artifacts, not source
-- `*.png`, `*.jpg`, `*.jpeg` at the repo root — stray screenshots from browser automation; always exclude
-
 ---
 
 ## Phase 2 — Decide & Build Plan
