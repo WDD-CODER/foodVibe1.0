@@ -52,7 +52,8 @@
       "mcp__playwright__browser_take_screenshot",
       "mcp__playwright__browser_evaluate",
       "mcp__playwright__browser_snapshot",
-      "Bash(find /c/Users/danwe/.claude -maxdepth 2 -type f \\\\\\(-name settings.json -o -name *.json \\\\\\))"
+      "Bash(find /c/Users/danwe/.claude -maxdepth 2 -type f \\\\\\(-name settings.json -o -name *.json \\\\\\))",
+      "Bash(gh pr:*)"
     ]
   },
   "hooks": {
