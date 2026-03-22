@@ -202,7 +202,20 @@ Never erase or discard user changes: no `git reset --hard`, `git clean -fd`, or 
    ```
    This applies even on single-branch plans — locally-modified files like `settings.local.json` that are not being committed must be stashed to allow `git checkout main` to succeed.
 
-2. **Per branch**
+2. **Sync with remote before branching**
+   Fetch and check divergence — run as two separate Bash calls:
+   ```bash
+   git fetch origin
+   git rev-list --count HEAD..origin/main
+   ```
+   - If count is `0` → local main is current, proceed.
+   - If count is `> 0` → local main is behind. Rebase immediately before creating the branch:
+     ```bash
+     git rebase origin/main
+     ```
+     If the rebase produces a conflict → **stop**. Report the conflicting file(s) and ask the user to resolve them before continuing. Do NOT create the branch on a conflicted state.
+
+3. **Per branch**
    - Checkout default branch (e.g. `git checkout main`).
    - Create branch: `git checkout -b <branch-name>`.
    - For each commit: stage and commit in a single shell call (`;` is Windows-safe):
@@ -211,10 +224,10 @@ Never erase or discard user changes: no `git reset --hard`, `git clean -fd`, or 
      ```
    - If stashed: after committing all commits on this branch, stash remaining changes before switching. Ensure every planned change is committed and nothing is dropped.
 
-3. **Between branches**
+4. **Between branches**
    Checkout default, create the next branch from default, repeat. Use stash so uncommitted planned changes are never lost.
 
-4. **Return to default**
+5. **Return to default**
    Before checking out, verify the working tree is clean:
    ```bash
    git status --porcelain
@@ -234,10 +247,10 @@ Never erase or discard user changes: no `git reset --hard`, `git clean -fd`, or 
    > - `approve + merge` (or "A"): commits, pushes, creates PR, merges to main in one flow. Costs ~5–15 s extra (second push + merge round-trip).
    > For fast-lane (config/docs-only) commits, `approve + push` is usually the right call.
 
-5. **Update todo**
+6. **Update todo**
    Open `.claude/todo.md`. Using committed branch names, messages, and file paths, mark matching tasks as done (`[x]`). Do not change unrelated tasks.
 
-6. **Archive completed plan sections**
+7. **Archive completed plan sections**
    Scan `.claude/todo.md` for plan sections where ALL items are `[x]`, then apply all four safety gates before archiving:
 
    **Rule 1 — All-items-checked gate** (required)
@@ -259,7 +272,7 @@ Never erase or discard user changes: no `git reset --hard`, `git clean -fd`, or 
 
    Once all gates pass, move the section (heading + items) to `todo-archive.md` (create if needed), appended with today's date and plan number. Note: "Archived Plan NNN to todo-archive.md."
 
-7. **Create PR (automatic — no extra prompt)**
+8. **Create PR (automatic — no extra prompt)**
    After all commits on a branch are done and pushed, create the PR using the title and body drafted in Phase 2/3.
 
    **Windows-safe body file**: Use the **Write tool** to save the body to a Windows-native temp path, then pass it via `--body-file`:
@@ -280,9 +293,18 @@ Never erase or discard user changes: no `git reset --hard`, `git clean -fd`, or 
    gh pr merge <pr-number> --merge
    gh pr view <pr-number> --json state
    ```
-   The `state` field must equal `"MERGED"` before proceeding to Step 4 (return to default). Do NOT use `--auto` — it is asynchronous and returns before the merge completes, causing `git checkout main` to pull a pre-merge state.
+   The `state` field must equal `"MERGED"` before proceeding to Step 5 (return to default). Do NOT use `--auto` — it is asynchronous and returns before the merge completes, causing `git checkout main` to pull a pre-merge state.
 
-8. **Breadcrumb check**
+9. **Mergeability gate (approve + merge only)**
+   Before running `gh pr merge`, verify the PR is actually mergeable:
+   ```bash
+   gh pr view <pr-number> --json mergeable --jq '.mergeable'
+   ```
+   - `"MERGEABLE"` → proceed with merge.
+   - `"CONFLICTING"` → **stop**. Report: "PR #N has a conflict — local main was likely stale. Run: `git fetch origin main && git rebase origin/main`, resolve any conflicts, then `git push --force-with-lease`." Do not attempt merge.
+   - `"UNKNOWN"` → GitHub is still computing. Wait 4 seconds (`sleep 4`) and retry once. If still `"UNKNOWN"`, report and ask the user to check the PR manually.
+
+10. **Breadcrumb check**
    If any committed files added, removed, or renamed components/services/pages, list the affected directories and ask: "Run breadcrumb-navigator for [dirs]?" If the user agrees, read `.claude/skills/breadcrumb-navigator/SKILL.md` and follow it for those hubs. Do not block the commit flow.
 
 ---
@@ -308,6 +330,7 @@ If something goes wrong during execution:
 - **Branch already exists**: ask the user to rename or append `-v2`. Do not force-delete existing branches.
 - **Push fails** (auth/remote): report the exact error message. Suggest `gh auth status` for auth issues or `git remote -v` for remote issues.
 - **Merge conflict during stash pop**: Run `git status --short` immediately. Report every `UU` file to the user. Do NOT resolve automatically. Ask which version to keep for each conflicting file. After the user confirms: open each file and remove conflict markers keeping the chosen version, then run `git add <file>` for each, then run `git status --porcelain` to verify zero `UU` lines. Only continue after status is fully clean. Run `git stash drop` to discard the now-resolved stash entry.
+- **PR not mergeable — stale branch**: local `main` was behind remote when the branch was created. Run `git fetch origin main`, then `git rebase origin/main`. Resolve any conflicts (see conflict recovery above), then `git push --force-with-lease`. Retry `gh pr merge`. This is prevented in future runs by Step 2 (sync check), but can still occur if a PR merges between the sync check and the push.
 - **Windows / PowerShell**: Do not use `&&` or `||` to chain git commands — PowerShell does not support bash `&&`/`||` syntax and will throw "unexpected token" errors. Run each git command in a separate shell call, or use `;` to chain (runs regardless of exit code). Use `Set-Location` instead of `cd` in scripts. Example: instead of `git checkout main && git merge feat/x`, run them as two separate Bash calls.
 
 ---
