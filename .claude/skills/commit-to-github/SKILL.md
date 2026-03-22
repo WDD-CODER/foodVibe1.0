@@ -4,6 +4,8 @@ Evaluates working-tree changes, decides how to split branches and commits, prese
 
 **Safety rule**: No `git add`, `git commit`, `git push`, or branch creation until the user has explicitly approved the visual tree in chat. Do not create a file in `plans/` for this workflow — the plan is the tree in the conversation.
 
+**Bash command rule**: Never combine git inspection commands into compound pipelines using `&&` or `|`. Always issue each command as a **separate Bash tool call**. Compound commands like `git diff ... && echo ... | grep ... | awk ...` will trigger a permission prompt even when individual commands are allowed. Use one Bash call per command.
+
 **Phase 0 must be completed before Phase 1.** Do not run Phase 1 (Evaluate) until Phase 0 is done.
 
 ---
@@ -152,10 +154,11 @@ If the user **denies**: state that no git operations were performed and stop. If
 
 ## Phase 4 — Execute (only after approval)
 
-Never erase or discard user changes: no `git reset --hard`, `git clean -fd`, or force-push unless the user explicitly asks. Use stash to preserve work when switching context.
+Never erase or discard user changes: no `git reset --hard`, `git clean -fd`, or force-push unless the user explicitly asks. Use stash only when switching between multiple branches.
 
-1. **Preserve work**
-   If the plan has multiple branches or commits and there are uncommitted changes, stash first:
+1. **Preserve work (multi-branch plans only)**
+   Skip this step entirely if the plan has only one branch — stash is unnecessary overhead when there is no context switching.
+   If the plan has **two or more branches** and there are uncommitted changes, stash first:
    ```bash
    git stash push -u -m "commit-skill-work"
    ```
@@ -163,10 +166,9 @@ Never erase or discard user changes: no `git reset --hard`, `git clean -fd`, or 
 2. **Per branch**
    - Checkout default branch (e.g. `git checkout main`).
    - Create branch: `git checkout -b <branch-name>`.
-   - For each commit: restore only the files for that commit (from stash or working tree), then:
+   - For each commit: stage and commit in a single shell call (`;` is Windows-safe):
      ```bash
-     git add <path1> <path2> ...
-     git commit -m "type(scope): message"
+     git add <path1> <path2> ... ; git commit -m "type(scope): message"
      ```
    - If stashed: after committing all commits on this branch, stash remaining changes before switching. Ensure every planned change is committed and nothing is dropped.
 
@@ -177,6 +179,7 @@ Never erase or discard user changes: no `git reset --hard`, `git clean -fd`, or 
    ```bash
    git checkout main
    ```
+   Do NOT run `git pull` after this — the merge commit is already present locally (you just created it via `gh pr merge`). A pull here is a redundant network roundtrip.
 
 5. **Update todo**
    Open `.claude/todo.md`. Using committed branch names, messages, and file paths, mark matching tasks as done (`[x]`). Do not change unrelated tasks.
