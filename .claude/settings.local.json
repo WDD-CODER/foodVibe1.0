@@ -30,11 +30,18 @@
       "Bash(done)",
       "Skill(update-config)",
       "Bash(npm start:*)",
-      "Bash(gh pr:*)",
-      "Bash(gh auth:*)",
+      "Bash(gh:*)",
       "Bash(rm -rf .claude/worktrees/fix/duplicate-name-validation-venues-suppliers)",
       "Bash(git worktree:*)",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "Bash(awk:*)",
+      "Bash(jq:*)",
+      "Bash(netstat:*)",
+      "Bash(cp:*)",
+      "Bash(mkdir:*)",
+      "Bash(sort:*)",
+      "Bash(uniq:*)",
+      "Bash(tr:*)"
     ]
   },
   "hooks": {
