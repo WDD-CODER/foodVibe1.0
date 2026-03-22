@@ -8,6 +8,7 @@ Create and maintain `breadcrumbs.md` files that serve as navigation guides for a
 - Before working in an unfamiliar directory (read existing breadcrumbs first)
 - As part of the `update-docs` skill Phase 2
 - After any structural refactor that moves or renames files
+- When adding a **new** `pages/<feature>/` or top-level subtree under `src/app/` — add or refresh `breadcrumbs.md` at the hub (not every leaf folder; see **breadcrumbs.md** in `.claude/copilot-instructions.md` section 4)
 
 ## MANDATORY: Read before write
 

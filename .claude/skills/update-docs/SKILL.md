@@ -46,7 +46,7 @@ directory structures, file purposes, and navigation context. Focus on:
 - src/app/core/models/ (interfaces, types)
 - src/app/pages/ (each page and its components/)
 - src/app/shared/ (reusable UI components)
-Create new breadcrumbs.md files for directories missing them.
+Create or refresh `breadcrumbs.md` for **major** hubs still missing or stale — not every leaf folder (see **breadcrumbs.md** in `.claude/copilot-instructions.md` section 4).
 ```
 
 ### Phase 3: Update copilot-instructions.md

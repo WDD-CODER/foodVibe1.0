@@ -12,6 +12,7 @@
 - **Session start / after time away**: Read `.claude/skills/github-sync/SKILL.md` to pull recent GitHub context.
 - **End of session, before PR**: Read `.claude/skills/techdebt/SKILL.md` for duplicate/dead code and TODO audit.
 - **After features**: Read `.claude/skills/update-docs/SKILL.md` to refresh breadcrumbs and docs.
+- **Breadcrumbs only** (e.g. user agrees after commit-to-github, or new hub without full doc pass): Read `.claude/skills/breadcrumb-navigator/SKILL.md` and follow it.
 - **After a hacky fix**: Read `.claude/skills/elegant-fix/SKILL.md` to refine into a clean solution.
 - **Session end / wrap up**: User says "wrap up", "session end", or "handoff" → read `.claude/skills/session-handoff/SKILL.md` and produce the summary.
 - **Creating or refactoring Angular components**: Read `.claude/skills/angularComponentStructure/SKILL.md` before creating or restructuring any Angular component class.
@@ -43,7 +44,7 @@ Agent persona files live in `.claude/agents/`. Load on demand — do not pre-loa
 | Team Leader | `team-leader.md` | Task spans >2 subsystems; agents conflict; progress report needed |
 | Software Architect | `software-architect.md` | PRD exists and needs HLD; architecture trade-offs to evaluate |
 | Product Manager | `product-manager.md` | Planning a new feature; writing a plan file; scoping work |
-| Breadcrumb Navigator | `breadcrumb-navigator.md` | After structural changes; exploring an unfamiliar directory |
+| Breadcrumb Navigator | `breadcrumb-navigator/SKILL.md` (`.claude/skills/`) | New `pages/<x>/` or app subtree; structural changes; after update-docs; unfamiliar directory; **Breadcrumbs only** (Skill Triggers) |
 | QA Engineer | `qa-engineer.md` | commit-to-github Phase 0 spec gap; diagnosing failing tests |
 
 Read only the file for the agent you need. Each file defines its own output format.
@@ -56,7 +57,7 @@ Read only the file for the agent you need. Each file defines its own output form
 
 ## 1.1 Q&A format (chat, plans, recommendations)
 * **Structure**: One question line ending with `?`, then options as `a.` `b.` `c.` (more as needed). One line per option. Optional one-line "Recommendation: a" after the list.
-* **Never**: Embed options in paragraphs (e.g. no "Options: (a) ... or (b) ..." in prose). Same rule for plan "Critical Questions" and any recommendations.
+* **Structure**: For questions, show the question text, then below it show each answer option (a., b., c., etc.) each on its own line to create a true Q&A block appearance.
 * **New features**: When creating a new feature or plan, ask **at least one question** in this format before proceeding.
 * **Bad**: *"Phase 4: Options: (a) add text input in dropdown or (b) leave click-to-open. Recommendation: ship Phase 1–3 first."*
 * **Good**: *"How should we handle type-to-filter for Phase 4 dropdowns?\na. Add text input inside dropdown when open.\nb. Click-to-open only; filter after open.\nc. Defer Phase 4; ship Phase 1–3 first."* Then one line: *Recommendation: c.*
@@ -76,16 +77,19 @@ Read only the file for the agent you need. Each file defines its own output form
 * **Syntax**: Path aliases `@services/*`, no `any`, single quotes in TS, double quotes in HTML, no semicolons.
 * **Naming**: Selectors kebab-case; `app-` prefix only for native HTML collisions. Filename matches selector. Classes PascalCase; boolean flags `is`/`has`.
 * **Utils**: Put shared helpers in `src/app/core/services/util.service.ts` (or `core/utils/`); no one-off helpers in components. Utilities must be pure (same inputs → same outputs; no I/O or mutation of arguments/shared state).
-* **Services**: All services in `src/app/core/services/`, suffix `.service.ts`. `@Injectable({ providedIn: 'root' })`, Signals for state, `AsyncStorageService` for persistence, `UserMsgService` for feedback. Expose read-only state via `.asReadonly()`. Add `.spec.ts` per service when the service is finalized. Do not add or update specs during iterative execution — only when running commit-to-github or when the user explicitly asks. Do not run the full test suite after executing a plan — only in the commit-to-github flow (Phase 0) or when the user explicitly asks.
+* **Services**: All services in `src/app/core/services/`, suffix `.service.ts`. `@Injectable({ providedIn: 'root' })`, Signals for state, `AsyncStorageService` for persistence, `UserMsgService` for feedback. Expose read-only state via `.asReadonly()`. Add `.spec.ts` when the service is finalized; when to edit/run specs → **Unit tests** under Security & QA.
 
 ## 4. UI, CSS & Folder Structure
 * **Hierarchy**: `core/` (services, models, guards, pipes, directives), `shared/` (reusable UI), `pages/[name]/` (routed views + local `components/`).
+* **breadcrumbs.md**: Keep maps at **major** seams (`src/app/core/`, `core/services`, `core/models`, `core/components`, `shared/`, `pages/`) — not in every leaf folder. If you add a **new** `pages/<feature>/` or another **new** top-level subtree under `src/app/`, add or refresh the nearest `breadcrumbs.md` via `.claude/skills/breadcrumb-navigator/SKILL.md` (or **update-docs**, which runs that workflow in Phase 2). Before editing a directory, **read** `breadcrumbs.md` there if it exists.
 * **Styles**: Scoped SCSS, native nesting, `@layer`. No inline styles unless dynamic. Before any new or edited `.scss`/`.css` in `src/`, read `.claude/skills/cssLayer/SKILL.md` (see Skill Triggers above).
 * **Property order**: Layout → Dimensions → Content → Structure → Effects.
-* **Shared UI**: Before adding a dropdown or scrollable overlay, check `src/styles.scss` for engines (e.g. `.c-dropdown`) and `src/app/shared/` for existing components.
+* **Shared UI**: Before any new UI (control, layout, or pattern), scan `src/app/shared/` and `src/styles.scss` (`.c-*` engines) for something composable; prefer shared structures for a unified app—add page-local markup only when nothing fits.
+* **Shared modals**: Before any modal (translation-key, confirm, leave guard, destructive action, etc.), search `src/app/shared/` for an existing dialog pattern and reuse it; avoid one-off modals for the same job. If a new kind is needed across features, implement or extend it in `shared/`.
 
 ## 5. Security & QA
 * **Auth/logging**: Read `.claude/skills/auth-and-logging/SKILL.md` when touching auth, routes, persistence, HTTP. LoggingService for auth/HTTP/CRUD/errors; never log passwords, tokens, or PII. HTTPS in prod, no secrets in source, validate input, no stack traces to client in prod.
+* **Unit tests**: Add or update `.spec.ts` when a unit is finalized, during commit-to-github, or when the user asks — avoid churn mid-iteration. While developing, you may run **targeted** specs for files you changed. Run the **full** suite only in commit-to-github Phase 0 or when the user asks.
 * **Playwright**: `getByRole` or `getByTestId`; no `page.locator`. Web-first assertions. TDD-first; Jasmine/Vitest for public service methods.
 
 ## 6. Git & Workflow
@@ -101,8 +105,8 @@ Read only the file for the agent you need. Each file defines its own output form
 * **Units only**: When adding a measurement unit to a product (e.g. purchase option), after resolving or creating the unit, check whether **this product** already has that unit symbol; if yes, do not add a duplicate — use existing or show "already on this product".
 * New add-item / add-unit / add-category flows must use this resolution flow before persisting.
 
-## 7.2 Translation modal UX (Hebrew → English key)
-* Use the **translation-key modal**: Hebrew in an **editable** text input (all contexts); **focus the English key** input when the modal opens; **no** "Continue without saving" in add-time (only in generic/on-leave).
+## 7.2 Translation modal (Hebrew → English key)
+* For flows in 7.1 that need a prompt for the English canonical key, use the existing **translation-key modal** in `src/app/shared/` — not a new dialog (see **Shared modals**, section 4). Match its implementation for editable Hebrew, initial focus, and when "Continue without saving" appears.
 
 ## 8. Lucide Icons
 * **Mandatory**: Every icon used in a template (`<lucide-icon name="...">`) MUST be registered in `src/app/app.config.ts`. If you add a new icon in any component template, in the same change add: (1) import from `lucide-angular` (PascalCase, e.g. `CircleUserRound`), (2) add it to `LucideAngularModule.pick({ ... })`. Template uses kebab-case (`circle-user-round`); TypeScript uses PascalCase (`CircleUserRound`). Missing registration causes runtime: *"The '...' icon has not been provided by any available icon providers."* Cursor rule: `.cursor/rules/lucide-icons-must-register-in-app-config.mdc`.

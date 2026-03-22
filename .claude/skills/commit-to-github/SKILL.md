@@ -123,7 +123,7 @@ Never erase or discard user changes: no `git reset --hard`, `git clean -fd`, or 
    Once all gates pass, move the section (heading + items) to `todo-archive.md` (create if needed), appended with today's date and plan number. Note: "Archived Plan NNN to todo-archive.md."
 
 7. **Breadcrumb check**
-   If any committed files added, removed, or renamed components/services/pages, list the affected directories and ask: "Run breadcrumb-navigator for [dirs]?" Do not block the commit flow.
+   If any committed files added, removed, or renamed components/services/pages, list the affected directories and ask: "Run breadcrumb-navigator for [dirs]?" If the user agrees, read `.claude/skills/breadcrumb-navigator/SKILL.md` and follow it for those hubs. Do not block the commit flow.
 
 ---
 

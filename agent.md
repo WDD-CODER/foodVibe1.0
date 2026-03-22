@@ -12,7 +12,7 @@ Read this and `.claude/copilot-instructions.md` at the start of every task.
 - team-leader.md — Orchestrate multi-agent tasks, resolve conflicts
 - software-architect.md — Architecture, HLD documents
 - product-manager.md — PRDs, feature scoping, plans/
-- breadcrumb-navigator.md — Codebase docs, breadcrumbs.md
+- breadcrumb-navigator — Workflow: `.claude/skills/breadcrumb-navigator/SKILL.md`; persona: `.claude/agents/breadcrumb-navigator.md`
 - qa-engineer.md — Testing, specs, E2E
 
 ## Skills (`.claude/skills/`)
@@ -43,7 +43,7 @@ Before starting any task:
 1. Read this file and `.claude/copilot-instructions.md` (mandatory).
 2. Check `notes/session-handoffs/` for a handoff file from the last 3 days. If found, read it and summarize key context in your first response.
 3. Check `.claude/todo.md` for related pending work.
-4. Check `breadcrumbs.md` in the target directory before changing it.
+4. Read `breadcrumbs.md` in the target directory before changing it (if present). If the task adds a new `pages/<feature>/` or top-level subtree under `src/app/`, add or refresh `breadcrumbs.md` for that hub — see **UI, CSS & Folder Structure** in `.claude/copilot-instructions.md`.
 5. If touching SCSS/CSS: read `.claude/skills/cssLayer/SKILL.md`.
 6. If creating/refactoring components: read `.claude/skills/angularComponentStructure/SKILL.md`.
 7. **[Claude Code only]** Before any work, check the current git branch (`git branch --show-current`).

@@ -2,47 +2,48 @@
 
 ## Purpose
 
-Feature areas, one directory per route segment. Each page owns its layout (tabs, sidebar, router-outlet) and loads child components for list/detail/add/edit.
+Feature areas: one folder per lazy-loaded route segment. Each page owns layout (tabs, sidebars, `router-outlet`) and local `components/` for list, form, and detail views.
 
 ## Navigation
 
 | File/Directory | Purpose | Key Exports |
 |---------------|---------|-------------|
-| dashboard/ | Default route; overview + core settings (metadata) tabs; `/command-center` redirects here | DashboardPage |
-| equipment/ | Equipment CRUD; list, add, edit/:id; equipmentResolver | EquipmentPage |
-| venues/ | Venues CRUD; list, add, edit/:id; venueResolver | VenuesPage |
-| inventory/ | Product list + product form (add/edit); productResolver, pendingChangesGuard | InventoryPage |
-| recipe-book/ | Recipe list, filters, add/edit/delete; KitchenStateService for navigation | RecipeBook list page |
-| recipe-builder/ | Single-recipe edit: header, ingredients table, workflow; pendingChangesGuard | RecipeBuilderPage |
-| cook-view/ | Cook view workflow (prep, steps) | CookViewPage |
-| menu-library/ | Menu library list, filters, from-date, sort | MenuLibrary page |
+| dashboard/ | Default/overview; metadata entry | DashboardPage |
+| equipment/ | Equipment CRUD; `equipmentResolver` | EquipmentPage |
+| venues/ | Venues CRUD; `venueResolver` | VenuesPage |
+| suppliers/ | Suppliers CRUD; `supplierResolver` | SuppliersPage |
+| inventory/ | Products list + form; `productResolver`, `pendingChangesGuard` | InventoryPage |
+| recipe-book/ | Recipe list and filters | RecipeBookPage |
+| recipe-builder/ | Single-recipe editor; `pendingChangesGuard` | RecipeBuilderPage |
+| cook-view/ | Cook workflow | CookViewPage |
+| menu-library/ | Menu library list and filters | MenuLibraryPage |
 | menu-intelligence/ | Menu intelligence views | MenuIntelligencePage |
-| metadata-manager/ | Categories, allergens, units management | MetadataManagerPage |
-| trash/ | Trash list and restore | TrashPage |
+| metadata-manager/ | Categories, allergens, units, preparations | MetadataManagerComponent |
+| trash/ | Trash and restore | TrashPage |
 
 ## Architecture Context
 
-Lazy-loaded via `app.routes.ts`. Each page uses `core/services` and often `shared/` modals. Equipment and venues use resolvers for edit routes.
+Lazy-loaded from `app.routes.ts`. Pages depend on `core/services`, `core/guards`, `core/resolvers`, and `shared/` modals/components.
 
 ## Patterns & Conventions
 
-- Page = container with `<router-outlet>`; children = list, form, or detail components.
-- Naming: `*.page.ts` for page component; `components/` subfolder for list/form components.
+- Page container with optional child routes; local UI under `components/`.
+- Naming: `*.page.ts` for routed pages; metadata-manager uses `metadata-manager.page.component.ts` + `MetadataManagerComponent`.
 
 ## Dependencies
 
-- **Imports from**: `../../core/services`, `../../core/models`, `../../shared`.
-- **Used by**: `app.routes.ts` only; no other app code imports pages directly (lazy load).
+- **Imports from**: `../../core/services`, `../../core/models`, `../../shared`, `../../core/guards`, `../../core/resolvers`.
+- **Used by**: Router config only (lazy `loadComponent` / `loadChildren`).
 
 ## Development Notes
 
-- New page: add directory, page component, add route in `app.routes.ts`, add nav link in header if needed.
-- Styling: follow `.claude/skills/cssLayer/SKILL.md` (tokens, five-group rhythm).
+- New feature area: add folder, page component, route in `app.routes.ts`, header link if user-facing.
+- Styling: `.claude/skills/cssLayer/SKILL.md`.
 
 ## Recent Changes
 
-- 2025-02: Equipment and venues pages with list/form components; menu-library styling and filters.
+- 2026-03-22: Added suppliers; fixed page class names (RecipeBookPage, MetadataManagerComponent, MenuLibraryPage); resolver notes updated.
 
 ---
-*Last updated: 2025-02-28*
+*Last updated: 2026-03-22*
 *Updated by: breadcrumb-navigator*

@@ -2,49 +2,50 @@
 
 ## Purpose
 
-TypeScript interfaces, types, and enums for domain entities and shared structures. No logic; used by services, components, and resolvers.
+TypeScript interfaces, types, and small constants for domain entities and shared structures. No business logic; consumed by services, components, and resolvers.
 
 ## Navigation
 
 | File/Directory | Purpose | Key Exports |
 |---------------|---------|-------------|
-| product.model.ts | Product entity (supplier, allergens, stock, etc.) | Product, product interface |
-| recipe.model.ts | Recipe structure (ingredients, prep, header, cost) | Recipe, ingredient/prep types |
-| recipe/ | Recipe-related sub-models (if any) | → see recipe/ |
-| ingredient.model.ts | Ingredient row / ingredient model | Ingredient types |
+| product.model.ts | Product entity, purchase options | Product, PurchaseOption_ |
+| recipe.model.ts | Recipe, prep, steps | Recipe, RecipeStep, PrepCategory, MiseItem, FlatPrepItem |
+| ingredient.model.ts | Ingredient row types | Ingredient |
 | supplier.model.ts | Supplier entity | Supplier |
-| equipment.model.ts | Equipment entity (logistics) | Equipment |
-| venue.model.ts | Venue entity (logistics) | Venue |
-| logistics.model.ts | Shared logistics types | Logistics types |
-| menu-event.model.ts | Menu event structure | MenuEvent types |
-| user.model.ts | User/session model | User |
-| msg.model.ts | User message / toast model | Msg types |
-| filter-category.model.ts | Filter category for sidebars/lists | FilterCategory |
-| filter-option.model.ts | Filter option (e.g. checkbox) | FilterOption |
-| units.enum.ts | Unit enum (mass, volume, etc.) | Units enum |
+| equipment.model.ts | Equipment entity, scaling rules | Equipment, EquipmentCategory, ScalingRule |
+| venue.model.ts | Venue profile / infra | VenueProfile, VenueInfraItem, EnvironmentType |
+| logistics.model.ts | Event/dish logistics | EventLogistics, DishLogistics, BaselineEntry, ServiceOverride, etc. |
+| menu-event.model.ts | Menu builder event model | MenuEvent, MenuSection, MenuTypeDefinition, ALL_DISH_FIELDS |
+| user.model.ts | User/session | User |
+| msg.model.ts | User message / toast | Msg |
+| label.model.ts | Label definitions for UI | LabelDefinition, LABEL_COLOR_PALETTE |
+| filter-category.model.ts | Sidebar/list filter groups | FilterCategory |
+| filter-option.model.ts | Filter checkbox option | FilterOption |
+| units.enum.ts | Kitchen unit string union | KitchenUnit |
 
 ## Architecture Context
 
-Models are the single source of type definitions for `core/services` and `pages/`. Recipe and product models are the most central; equipment and venue added for logistics layer.
+Models are the type layer for `core/services` and `pages/`. Product and recipe models are the most central; logistics and menu-event support menu intelligence and library flows.
 
 ## Patterns & Conventions
 
-- Interfaces for entities; enums for fixed sets (e.g. units).
-- Naming: entity name matches file (e.g. `Product` in product.model.ts).
+- Prefer interfaces for entities; `export type` for unions and aliases.
+- File name aligns with primary type (`product.model.ts` → `Product`).
 
 ## Dependencies
 
-- **Imports from**: Minimal (Angular/core only if needed).
-- **Used by**: Services, resolvers, page components, shared components.
+- **Imports from**: None between model files (pure types; Angular only in consuming layers).
+- **Used by**: Services, resolvers, page and shared components.
 
 ## Development Notes
 
-- When adding a new entity (e.g. equipment, venue): add model here, then data service, resolver, and routes.
+- New persisted entity: add model here, then data service, resolver, and routes.
 
 ## Recent Changes
 
-- 2025-02: equipment.model, venue.model, logistics.model; recipe/menu-event updates.
+- 2026-03-22: Aligned exports with code (label, KitchenUnit); removed inaccurate "recipe/ sub-models" wording.
+- 2026-03-22: Removed unused empty `recipe/recipe.module.ts` (no references).
 
 ---
-*Last updated: 2025-02-28*
+*Last updated: 2026-03-22*
 *Updated by: breadcrumb-navigator*

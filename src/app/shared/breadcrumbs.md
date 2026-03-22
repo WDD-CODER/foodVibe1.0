@@ -2,38 +2,64 @@
 
 ## Purpose
 
-Reusable UI components and modals used by multiple pages. Modals are driven by corresponding services in `core/services/`.
+Reusable standalone components, modals, and list/table primitives used across pages. Modal behavior is coordinated by matching services in `core/services/` (or colocated `*.service.ts` in this folder).
 
 ## Navigation
 
 | File/Directory | Purpose | Key Exports |
 |---------------|---------|-------------|
-| add-item-modal/ | Modal for adding items (supplier, etc.); AddItemModalService | AddItemModalComponent |
-| confirm-modal/ | Confirm/cancel dialog; ConfirmModalService | ConfirmModalComponent |
-| global-specific-modal/ | "Change global" vs "Add as specific" (e.g. preparation category) | GlobalSpecificModalComponent |
-| restore-choice-modal/ | Restore from trash choice | RestoreChoiceModalComponent |
-| translation-key-modal/ | Enter translation key (metadata manager); TranslationKeyModalService | TranslationKeyModalComponent |
-| unit-creator/ | Create/edit unit in registry | UnitCreatorComponent |
-| version-history-panel/ | Version history UI; VersionHistoryService | VersionHistoryPanelComponent |
+| add-item-modal/ | Generic add-item flow | AddItemModalComponent |
+| add-equipment-modal/ | Add equipment dialog | AddEquipmentModalComponent |
+| approve-stamp/ | Approval stamp UI | ApproveStampComponent |
+| carousel-header/ | Table carousel header row | CarouselHeaderComponent, CarouselHeaderColumnDirective |
+| cell-carousel/ | Carousel cells / slides | CellCarouselComponent, CellCarouselSlideDirective |
+| change-popover/ | Inline change preview popover | ChangePopoverComponent |
+| confirm-modal/ | Confirm/cancel | ConfirmModalComponent |
+| counter/ | Numeric counter control | CounterComponent |
+| custom-multi-select/ | Multi-select CVA | CustomMultiSelectComponent |
+| custom-select/ | Select CVA | CustomSelectComponent |
+| empty-state/ | Empty list placeholder | EmptyStateComponent |
+| export-preview/ | Export preview panel | ExportPreviewComponent |
+| export-toolbar-overlay/ | Export toolbar overlay | ExportToolbarOverlayComponent |
+| floating-info-container/ | Floating info host | FloatingInfoContainerComponent |
+| global-specific-modal/ | Global vs specific choice | GlobalSpecificModalComponent |
+| label-creation-modal/ | Label editor + `LabelCreationModalService` | LabelCreationModalComponent |
+| list-selection/ | Row selection + `ListSelectionState` | ListRowCheckboxComponent, ListSelectionState |
+| list-shell/ | Reusable list/table shell | ListShellComponent |
+| loader/ | Loading indicator | LoaderComponent |
+| quick-add-product-modal/ | Quick add product | QuickAddProductModalComponent |
+| restore-choice-modal/ | Restore from trash | RestoreChoiceModalComponent |
+| scaling-chip/ | Recipe scaling chip | ScalingChipComponent |
+| scrollable-dropdown/ | Scrollable dropdown | ScrollableDropdownComponent |
+| selection-bar/ | Bulk selection bar | SelectionBarComponent |
+| supplier-modal/ | Supplier picker | SupplierModalComponent |
+| translation-key-modal/ | Hebrew → English key | TranslationKeyModalComponent |
+| unit-creator/ | Unit registry editor | UnitCreatorModal |
+| version-history-panel/ | Version history UI | VersionHistoryPanelComponent |
 
 ## Architecture Context
 
-Shared by pages and sometimes core components. Each modal has a matching service in `core/services/` that controls open/close and data.
+Shared between pages (inventory, recipe-builder, metadata-manager, menu flows, etc.). Prefer extending these before adding one-off dialogs.
 
 ## Patterns & Conventions
 
-- Standalone components; `inject()` for service and optional inputs.
-- Styling: tokens and five-group rhythm per cssLayer skill.
+- Standalone components; `inject()` for services.
+- SCSS: project tokens and `@layer` per cssLayer skill.
 
 ## Dependencies
 
-- **Imports from**: `../core/services`, `../core/models`, `@angular/core`.
-- **Used by**: Inventory, recipe-builder, metadata-manager, recipe-book, and other pages.
+- **Imports from**: `../core/services`, `../core/models`, `@angular/core`, `@angular/forms` (CVA components).
+- **Used by**: Page components under `pages/*`.
 
 ## Development Notes
 
-- New modal: add component here + service in `core/services/`, register in app root or page.
+- New cross-page modal: implement here + service in `core/services/` (or colocated service file), register usage from pages.
+- Translation-key flows: reuse `translation-key-modal/` per copilot-instructions §7.2.
+
+## Recent Changes
+
+- 2026-03-22: Full directory sync (list shell, export, loader, supplier/quick-add modals, selection primitives, etc.).
 
 ---
-*Last updated: 2025-02-28*
+*Last updated: 2026-03-22*
 *Updated by: breadcrumb-navigator*

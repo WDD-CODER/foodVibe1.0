@@ -2,70 +2,81 @@
 
 ## Purpose
 
-Singleton services for data, state, modals, and cross-cutting concerns. Used by pages and shared components via `inject()`. Persistence goes through `StorageService` (async-storage); domain data services (product, recipe, equipment, venue, etc.) use it.
+Singleton services for data, state, modals, HTTP concerns, logging, export, backup, and cross-cutting behavior. Pages and shared components use `inject()`. Domain persistence goes through `StorageService` (async-storage); data services use shared storage keys and signals where applicable.
 
 ## Navigation
 
 | File/Directory | Purpose | Key Exports |
 |---------------|---------|-------------|
-| async-storage.service.ts | Key-value persistence (IndexedDB/localStorage); used by all data services | StorageService |
-| product-data.service.ts | Product CRUD, KITCHEN_PRODUCTS | ProductDataService |
-| dish-data.service.ts | Dish recipes CRUD | DishDataService |
-| recipe-data.service.ts | Recipe CRUD, recipe_type_ routing | RecipeDataService |
-| supplier-data.service.ts | Supplier CRUD, KITCHEN_SUPPLIERS | SupplierDataService |
-| equipment-data.service.ts | Equipment CRUD, demo + storage | EquipmentDataService |
-| venue-data.service.ts | Venue CRUD, demo + storage | VenueDataService |
-| kitchen-state.service.ts | Central app state; recipe/dish/product routing; deleteRecipe | KitchenStateService |
-| metadata-registry.service.ts | Categories, allergens, units registry; NEW_CATEGORY/NEW_ALLERGEN | MetadataRegistryService |
-| unit-registry.service.ts | Units (mass, volume, dish); primary/secondary filtering | UnitRegistryService |
-| preparation-registry.service.ts | Preparation entries; getPreparationByName, updatePreparationCategory | PreparationRegistryService |
-| conversion.service.ts | Unit conversion (e.g. volume→grams) | ConversionService |
-| recipe-cost.service.ts | Recipe cost, totals, bruto/volume, unconvertible lists | RecipeCostService |
-| scaling.service.ts | Scale recipe by yield; ScaledIngredientRow, ScaledPrepRow | ScalingService |
+| async-storage.service.ts | Key-value persistence (IndexedDB/localStorage) | StorageService, BACKUP_ENTITY_TYPES, STORAGE_ERROR_MESSAGE |
+| product-data.service.ts | Product CRUD | ProductDataService |
+| dish-data.service.ts | Dish CRUD | DishDataService |
+| recipe-data.service.ts | Recipe CRUD, routing helpers | RecipeDataService |
+| supplier-data.service.ts | Supplier CRUD | SupplierDataService |
+| equipment-data.service.ts | Equipment CRUD | EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME |
+| venue-data.service.ts | Venue CRUD | VenueDataService |
+| kitchen-state.service.ts | Central navigation/state for kitchen flows | KitchenStateService |
+| metadata-registry.service.ts | Categories, allergens, units registry | MetadataRegistryService |
+| unit-registry.service.ts | Units (mass, volume, dish) | UnitRegistryService, SYSTEM_UNITS |
+| preparation-registry.service.ts | Preparation entries | PreparationRegistryService |
+| menu-section-categories.service.ts | Menu section category registry | MenuSectionCategoriesService |
+| conversion.service.ts | Unit conversion | ConversionService |
+| recipe-cost.service.ts | Recipe costing, bruto/volume | RecipeCostService |
+| scaling.service.ts | Scale by yield | ScalingService, ScaledIngredientRow, ScaledPrepRow |
 | cook-view-state.service.ts | Cook-view workflow state | CookViewStateService |
 | menu-event-data.service.ts | Menu events CRUD | MenuEventDataService |
 | menu-intelligence.service.ts | Menu intelligence logic | MenuIntelligenceService |
-| trash.service.ts | Trash/restore for recipes, products | TrashService |
-| activity-log.service.ts | Activity log entries; ActivityEntry, ActivityChange | ActivityLogService |
-| version-history.service.ts | Version history; VersionEntry | VersionHistoryService |
-| translation.service.ts | Dictionary-based translation (Hebrew/English) | TranslationService |
-| user-msg.service.ts | Global user messages (toast-style) | UserMsgService |
-| add-item-modal.service.ts | Add-item modal orchestration; AddItemConfig | AddItemModalService |
-| add-supplier-flow.service.ts | Add-supplier flow from product form | AddSupplierFlowService |
-| confirm-modal.service.ts | Confirm dialog; ConfirmModalOptions | ConfirmModalService |
-| global-specific-modal.service.ts | Global vs specific modal (e.g. preparation category); GlobalSpecificModalConfig | GlobalSpecificModalService |
-| restore-choice-modal.service.ts | Restore-from-trash choice modal | RestoreChoiceModalService |
-| translation-key-modal.service.ts | Translation key modal (metadata manager) | TranslationKeyModalService |
-| demo-loader.service.ts | Load demo data (equipment, venues, etc.) | DemoLoaderService |
-| ingredient.service.ts | Ingredient helpers | IngredientService |
-| user.service.ts | User/session | UserService |
+| trash.service.ts | Trash/restore | TrashService |
+| activity-log.service.ts | Activity log | ActivityLogService, ActivityEntry, ACTIVITY_STORAGE_KEY |
+| version-history.service.ts | Version history | VersionHistoryService, VersionEntry |
+| translation.service.ts | Dictionary / Hebrew resolution | TranslationService |
+| key-resolution.service.ts | Canonical key resolution helpers | KeyResolutionService |
+| user-msg.service.ts | Global user messages | UserMsgService |
+| logging.service.ts | App-wide logging | LoggingService, LogEvent |
+| add-item-modal.service.ts | Add-item modal orchestration | AddItemModalService, AddItemConfig |
+| add-supplier-flow.service.ts | Add-supplier from product form | AddSupplierFlowService |
+| add-equipment-modal.service.ts | Add-equipment modal | AddEquipmentModalService |
+| auth-modal.service.ts | Sign-in / auth modal | AuthModalService |
+| supplier-modal.service.ts | Supplier picker modal | SupplierModalService |
+| quick-add-product-modal.service.ts | Quick-add product modal | QuickAddProductModalService |
+| confirm-modal.service.ts | Confirm dialog | ConfirmModalService, ConfirmModalOptions |
+| global-specific-modal.service.ts | Global vs specific choice | GlobalSpecificModalService |
+| restore-choice-modal.service.ts | Restore-from-trash choice | RestoreChoiceModalService |
+| translation-key-modal.service.ts | English key + Hebrew modal | TranslationKeyModalService |
+| demo-loader.service.ts | Load demo JSON | DemoLoaderService |
+| user.service.ts | User/session | UserService, LoginCredentials |
 | util.service.ts | Shared utilities | UtilService |
-| *.spec.ts | Unit tests (Jasmine/Karma) | — |
+| hero-fab.service.ts | Floating action button state per route | HeroFabService |
+| export.service.ts | Data export orchestration | ExportService |
+| backup.service.ts | Backup/restore flows | BackupService |
+| global-error.handler.ts | Angular ErrorHandler implementation | GlobalErrorHandler |
 
 ## Architecture Context
 
-Services sit in `core/` and are injected into pages and shared components. Data services (product, recipe, equipment, venue, dish) delegate persistence to `StorageService`. Modals are driven by dedicated services (confirm, add-item, global-specific, restore-choice, translation-key).
+Services live under `core/` and are injected into pages and shared UI. Data services delegate to `StorageService`. Modal flows pair with components under `shared/` or `core/components`.
 
 ## Patterns & Conventions
 
-- Standalone injectables; `inject()` in constructors.
-- Data services: typical methods `getAll()`, `getById()`, `add()`, `update()`, `delete()`; storage keys like `KITCHEN_PRODUCTS`, `KITCHEN_RECIPES`.
-- Signal naming in consumers: `data_ = signal()` for mutable state.
+- `@Injectable({ providedIn: 'root' })` unless scoped otherwise.
+- Data services: typical `getAll`, `getById`, `add`, `update`, `delete`; storage keys such as `KITCHEN_PRODUCTS`.
+- Expose mutable state via signals with `.asReadonly()` where used.
 
 ## Dependencies
 
-- **Imports from**: `../models/*`, `async-storage.service` (data services), `@angular/core`.
-- **Used by**: All pages, shared components, resolvers.
+- **Imports from**: `../models/*`, `async-storage.service`, `@angular/core`, `@angular/common/http` where needed.
+- **Used by**: All pages, shared components, resolvers, interceptors.
 
 ## Development Notes
 
-- New entity CRUD: add model in `core/models/`, data service here, resolver in `core/resolvers/`, route in `app.routes.ts`.
-- Demo data: `DemoLoaderService` and `public/assets/data/demo-*.json`.
+- New entity CRUD: model in `core/models/`, service here, resolver in `core/resolvers/`, routes in `app.routes.ts`.
+- Demo data: `DemoLoaderService` + `public/assets/data/demo-*.json`.
+- Jasmine specs colocated as `*.spec.ts`.
 
 ## Recent Changes
 
-- 2025-02: Equipment and venue data services, resolvers, demo loader and demo JSON.
+- 2026-03-22: Synced file list with repo (auth, export, backup, logging, key-resolution, menu-section-categories, modals, global error handler).
+- 2026-03-22: Removed unused commented `ingredient.service.ts` stub (no imports).
 
 ---
-*Last updated: 2025-02-28*
+*Last updated: 2026-03-22*
 *Updated by: breadcrumb-navigator*

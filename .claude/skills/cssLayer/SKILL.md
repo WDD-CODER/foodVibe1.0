@@ -20,14 +20,14 @@ Vue/React/Vanilla: Use <style scoped> or modular files where available.
 * **Purpose**: For properties reused **across the application** (backgrounds, borders, colors, radii, shadows). Read this file before creating or editing component styles; reuse existing tokens where they fit.
 
 ## 3. Unification Rule (Mandatory)
-1.  **Unify First**: Before creating a selector, search for an existing **Engine** (e.g., `.c-button`, `.c-card`, `.c-chip`). Global Engine classes (`.c-*`) are defined in `src/styles.scss`; their component implementations live in `src/app/shared/`. For dropdowns and scrollable list overlays, also check `src/app/shared/` for a shared component (e.g. scrollable-dropdown) before building a custom one.
+1.  **Unify First**: Before new markup or a new selector, check `src/app/shared/` for a composable component and `src/styles.scss` for an existing **Engine** (e.g. `.c-button`, `.c-card`, `.c-chip`, `.c-dropdown`). Prefer reuse and modifiers; custom UI only when nothing fits.
 2.  **Engines & Modifiers**: Use shared blocks and apply modifiers (e.g., `.c-button.primary`) instead of one-off classes.
 3.  **Token placement (three tiers)**:
     * **Rule bodies**: Use `var(--token)` and `rem`/`em` when a token is used. Exception: when "No token" tier applies, the value may be used literally in the rule.
     * **Global**: Value reused in **multiple components or pages** → define in `src/styles.scss` inside `:root`; use `var(--name)` everywhere. If a suitable token is missing, add it to `:root` and use it in the component(s).
     * **Component-scoped**: Value reused **only inside the current component** (e.g. several times in the same file) → define in that file's `:host { --local-name: value; }`; use `var(--local-name)` only in that file.
     * **No token**: Value used **once or twice** in the component → do not create a token; use the value directly in the rule.
-4.  **Before styling (workflow)**: Before creating or editing any component `.scss`/`.css`: (1) Read `src/styles.scss`. (2) Reuse existing `:root` variables where they apply. (3) For any new value, decide tier (global / component-scoped / no token) and create or reference tokens accordingly.
+4.  **Before styling (workflow)**: Before creating or editing any component `.scss`/`.css`: (0) If the change adds UI, align with **Unify First** (shared/ + `.c-*`). (1) Read `src/styles.scss`. (2) Reuse existing `:root` variables where they apply. (3) For any new value, decide tier (global / component-scoped / no token) and create or reference tokens accordingly.
 5.  **Token naming**: Global tokens: use a consistent scheme (e.g. `--color-*`, `--bg-*`, `--radius-*`, `--shadow-*`). Component-scoped: use a prefix or suffix to avoid collisions (e.g. `--ml-bg` for menu-library).
 6.  **Where hex/px are allowed**: (a) In `src/styles.scss` inside `:root { --name: value; }`. (b) In component `:host { --local: value; }` token definitions. (c) In rule bodies only when "No token" applies (value used 1–2 times in the file). Everywhere else use `var(--...)` and `rem`/`em`.
 
@@ -41,7 +41,7 @@ Every selector MUST group properties into these five blocks, separated by **exac
 5.  **Effects**: `cursor`, `transition`, `transform`, `animation`, `pointer-events`, `user-select`.
 
 ## 5. Per-Selector Checklist
-1.  [ ] Can I reuse an existing Engine (`.c-`)?
+1.  [ ] Can I reuse an existing Engine (`.c-*`) or a `shared/` component?
 2.  [ ] Did I check `src/styles.scss` and apply the three-tier rule (global / component-scoped / no token)?
 3.  [ ] Are properties sorted into the 5 groups?
 4.  [ ] Is there a blank line between each group?
