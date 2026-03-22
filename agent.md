@@ -66,6 +66,7 @@ Before starting any task:
 2. **Plan**: Write `plans/XXX.plan.md` with "Critical Questions" section. If the plan touches `.scss`/`.css`, add a step: read and apply `.claude/skills/cssLayer/SKILL.md` before writing styles. **STOP** — no `src/` changes until approved.
 3. **Approval**: Wait for explicit user confirmation.
 4. **Execute**: Multi-file updates; keep files under ~300 lines.
+4.5 **UI Inspect**: After structural `.html`/`.scss` edits → invoke `ui-inspector` agent (subagent_type: "ui-inspector", model: "haiku") with: changed files, page URL, worktreeRoot, navigation hint. Fix issues; confirm with re-run. Skip: aesthetic-only changes or explicit user opt-out.
 5. **Audit**: Verify the build compiles (`ng build` if uncertain). Do NOT run the full test suite here — it runs only in the commit-to-github flow (Phase 0) or when the user explicitly asks.
 5.5 **Tech debt**: Before considering the task done (or before suggesting commit), read `.claude/skills/techdebt/SKILL.md`. Run the analysis; fix critical/high items or attach a short tech-debt report and ask whether to fix or proceed. If the user later runs commit-to-github in the same session, Phase 0 of that skill will use this report (no second techdebt run).
 6. **Branch**: Not on `main`; use `feat/` branch if needed.
