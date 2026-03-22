@@ -127,6 +127,7 @@
 
   .item-actions {
     display: flex;
+    align-items: center;
 
     gap: 0.25rem;
   }
@@ -155,6 +156,9 @@
   .c-icon-btn.danger {
     display: flex;
     place-content: center;
+
+    width: 2.25rem;
+    height: 2.25rem;
 
     opacity: 0;
 
