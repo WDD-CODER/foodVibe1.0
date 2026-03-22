@@ -41,7 +41,17 @@
       "Bash(mkdir:*)",
       "Bash(sort:*)",
       "Bash(uniq:*)",
-      "Bash(tr:*)"
+      "Bash(tr:*)",
+      "Read(//c/foodCo/worktree-fix-metadata-btn-alignment/**)",
+      "Bash(npm install:*)",
+      "Bash(findstr :4201)",
+      "Bash(findstr :4202)",
+      "Bash(ng serve:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_hover",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_snapshot"
     ]
   },
   "hooks": {

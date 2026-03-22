@@ -121,10 +121,6 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [ ] Cook-view ingredients index: add variant="chip" and typeToFilter to unit selects for consistency with recipe builder
 - [ ] Verify in app: recipe builder and cook-view ingredients index unit dropdowns
 
-### Plan 173 — Selected-item-display whole clickable (`plans/173-selected-item-display-whole-clickable.plan.md`)
-- [ ] recipe-ingredients-table: move click/keyboard from span to .selected-item-display div; stopPropagation on clear button
-- [ ] recipe-ingredients-table.component.scss: add cursor: pointer to .selected-item-display (Effects group)
-- [ ] Verify whole chip clickable, clear button does not open search
 
 ### Plan 171 — Custom select chip pilot (`plans/171-custom-select-chip-pilot.plan.md`)
 - [x] CustomSelect: add variant and addNewValue inputs; template chip/add-new classes and chevron size 10 when chip
@@ -189,7 +185,7 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [ ] 2.3 App-wide: audit category/unit dropdowns for "add new" where applicable
 - [ ] 2.4 Labels: selectability in delete-label + recipe builder manual selector
 - [ ] 2.5 Menu-library: keyboard (Arrow Up/Down, Enter) on custom-select options
-- [ ] 2.6 unit-creator-modal: full keyboard flow (focus name → quantity → unit; prevent scroll) — Plan 163-2
+- [x] 2.6 unit-creator-modal: full keyboard flow (focus name → quantity → unit; prevent scroll) — Plan 163-2
 - [ ] 2.7 Lists: sidebar aligned to list container at 768px (list-shell)
 
 ### Plan 162 — No-auto-test agent rule (`plans/162-no-auto-test-agent-rule.plan.md`)
@@ -208,10 +204,6 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [ ] Error: interrupt success/warning; when current is error, enqueue so each error shown in order
 - [ ] Add user-msg.service.spec.ts with coalesce and error-priority tests
 
-### Plan 159 — Type-to-filter all dropdowns (`plans/159-type-to-filter-all-dropdowns.plan.md`)
-- [ ] Phase 1: Enhance CustomSelectComponent with typeToFilter (input trigger, filter by "starts with" + script)
-- [ ] Phase 2: Replace native selects in quick-add-product-modal with app-custom-select
-- [ ] Phase 3: Align recipe-builder logistics, ingredient-search, preparation-search, recipe-book-list, menu-intelligence to "starts with" + script
 
 ### Plan 158 — List shell multi-select (`plans/158-list-shell-multi-select.plan.md`)
 - [x] Add ListSelectionState with selectAll, allSelected, toggleSelectAll
@@ -789,8 +781,8 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ### Plan 072 â€” Robust login, app-wide logging, security (`plans/072-robust-login-app-logging-security.plan.md`)
 
-- [ ] Create `.claude/skills/auth-and-logging/SKILL.md`; update HOW-WE-WORK.md and copilot-instructions.md
-- [ ] Implement LoggingService; replace ad-hoc console.log in user.service and translation.service
+- [x] Create `.claude/skills/auth-and-logging/SKILL.md`; update HOW-WE-WORK.md and copilot-instructions.md
+- [x] Implement LoggingService; replace ad-hoc console.log in user.service and translation.service
 - [ ] Wire logging: auth (login/logout/signup/guard/401), HTTP interceptor, global ErrorHandler, critical CRUD in data services
 - [ ] Auth hardening: password in UI, credentials types, local hash-only storage, auth abstraction, guard/modal wiring
 - [ ] Backend-ready: environment files, API contract, HTTP provider, interceptor, token lifecycle

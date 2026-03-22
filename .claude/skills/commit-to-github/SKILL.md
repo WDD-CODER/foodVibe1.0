@@ -139,7 +139,7 @@ Output the plan **only** in this visual format. No `plans/` file.
 After the tree, ask:
 
 **"Approve to proceed, or deny to cancel. No git writes until you approve.**
-*Tip: reply "approve + merge to main" or "approve + push" in one message to skip a round-trip."*
+*Tip: reply "approve + merge" or just "A" to approve and merge to main in one step. Use "approve + push" or "P" to approve and push without merging.*
 
 If the user **denies**: state that no git operations were performed and stop. If they **approve**: proceed to Phase 4.
 
