@@ -43,6 +43,8 @@ Any UI action that creates, updates, or deletes data (or otherwise requires a si
 - Handler-level check (embedded add): `src/app/pages/venues/components/venue-list/venue-list.component.ts` (`onAddPlace`)
 - Many handlers in one place: `src/app/pages/metadata-manager/metadata-manager.page.component.ts` (`requireSignIn()` and its use in add/edit/remove/backup handlers)
 
+⚠️ **Common mistake:** Adding `isLoggedIn()` only to route-based flows and forgetting non-route handlers (modals, FABs, inline buttons). The guard never fires there. Every handler that mutates data needs the check — use `requireSignIn()` to avoid repeating it.
+
 ---
 
 ## 2. Logging (application-wide)
@@ -56,6 +58,9 @@ Use the project **LoggingService** for all categories below. Prefer **structured
 | **Critical data (CRUD)** | Create/update/delete of recipes, products, inventory, equipment, venues, suppliers, metadata (categories, allergens, labels, menu types, units, preparations). Log **what** (e.g. "recipe created") and entity type + id, **not** full payload or PII | Data services that call StorageService post/put/remove |
 | **Errors & exceptions** | Unhandled errors: message + stack (or correlation id); caught errors that affect user-visible outcomes (e.g. "save failed") | Global ErrorHandler; try/catch in services that show UserMsgService |
 | **Optional** | Route changes (support/debug); slow or heavy operations (e.g. large list load) | Router events; specific services |
+
+✓ **Log after the action succeeds** (in the `.then()` / success path) — not before. A pre-call log that outlives a failure is a false record.
+⚠️ **Log in the service, not the component.** Components are created and destroyed; their logs are inconsistent. The data service that calls `StorageService` is always alive — that's where CRUD events belong.
 
 **When in doubt** whether to log, ask the user.
 

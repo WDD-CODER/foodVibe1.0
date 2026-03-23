@@ -11,8 +11,8 @@ description: Unified CSS Protocol; enforces designated global tokens file, three
 3. **Encapsulation** :
 Angular: Use Component-Scoped SCSS. Avoid ::ng-deep for internal logic.
 Vue/React/Vanilla: Use <style scoped> or modular files where available.
-4. **Zero Inline**: Strictly PROHIBITED: style="..." attributes.
-5. **Tailwind Override**: Use Tailwind utility classes only for minor, non-reusable layout adjustments (e.g., flex-1, m-auto) to avoid selector bloat.
+4. **Zero Inline**: Strictly PROHIBITED: `style="..."` attributes in HTML templates. If a value is truly dynamic, use `[style.property]` binding — never a style attribute block.
+5. **No Tailwind**: Not used. Use `.c-*` engines and component SCSS for all styling. Exception: `[style.property]` for dynamic values only.
 
 ## 2. Designated Global Tokens File
 * **Path**: `src/styles.scss` — the single file that holds app-wide CSS variables.
@@ -22,7 +22,8 @@ Vue/React/Vanilla: Use <style scoped> or modular files where available.
 ## 3. Unification Rule (Mandatory)
 1.  **Unify First**: Before new markup or a new selector, check `src/app/shared/` for a composable component and `src/styles.scss` for an existing **Engine** (e.g. `.c-button`, `.c-card`, `.c-chip`, `.c-dropdown`). Prefer reuse and modifiers; custom UI only when nothing fits.
 2.  **Engines & Modifiers**: Use shared blocks and apply modifiers (e.g., `.c-button.primary`) instead of one-off classes.
-3.  **Token placement (three tiers)**:
+3.  **Engine placement (hard rule)**: `.c-*` engine classes MUST be defined only in `src/styles.scss`. **Never define a `.c-*` class in a component `.scss` file.** Angular view encapsulation scopes component styles — a `.c-*` engine defined there will not work outside that component and breaks the shared system. If a new engine is needed, add it to `src/styles.scss` and apply it in the template.
+4.  **Token placement (three tiers)**:
     * **Rule bodies**: Use `var(--token)` and `rem`/`em` when a token is used. Exception: when "No token" tier applies, the value may be used literally in the rule.
     * **Global**: Value reused in **multiple components or pages** → define in `src/styles.scss` inside `:root`; use `var(--name)` everywhere. If a suitable token is missing, add it to `:root` and use it in the component(s).
     * **Component-scoped**: Value reused **only inside the current component** (e.g. several times in the same file) → define in that file's `:host { --local-name: value; }`; use `var(--local-name)` only in that file.

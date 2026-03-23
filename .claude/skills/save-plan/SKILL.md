@@ -29,7 +29,7 @@ When the user has **confirmed a plan** and says to **save the plan**, follow thi
 - Find the **highest 3-digit base number** among files matching: `^(\d{3})-[^-].*\.plan\.md` (e.g. `012-kitchen-demo-data.plan.md` → 012).
 - **Next plan number** = that number + 1, zero-padded to 3 digits (e.g. 012 → **013**).
 - **Filename**: `plans/NNN-slug.plan.md` (e.g. `plans/013-dashboard-recent-activity.plan.md`).
-- **Slug**: Short kebab-case descriptor of the plan (no spaces; optional hash/suffix for uniqueness is allowed, e.g. `013-dashboard_recent_activity_refactor_9c01aaca.plan.md`).
+- **Slug**: Short kebab-case descriptor. Specific enough to be searchable by filename alone — `196-excel-export-fix` is useful; `196-plan` is not. No underscores, no hash suffixes. Example: `plans/013-dashboard-recent-activity.plan.md`.
 
 ### 3. Refactor plan (derived from an existing plan)
 
@@ -55,6 +55,8 @@ When the user has **confirmed a plan** and says to **save the plan**, follow thi
 - Preserve existing structure, headings, and formatting in `todo.md`; only insert the new plan’s block and index row.
 
 This keeps "what needs to be done" in sync with the plan as soon as it is saved.
+
+⚠️ **Never write a plan file manually.** Creating a `plans/` file by hand (or via Write tool without this skill) bypasses the numbering check and todo sync. Always go through "save the plan" so both steps happen atomically.
 
 ## Workflow (checklist)
 
