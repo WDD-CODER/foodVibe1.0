@@ -13,6 +13,23 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 195 — Agent System Refactor 2.0 (`plans/195-agent-system-refactor-2.plan.md`)
+- [x] Phase 1: CLAUDE.md rewrite + agent.md lightweight index
+- [x] Phase 2: Create worktree-setup on-demand skill
+- [x] Phase 3: worktree-session-end (rename + guard + delegation) + commit-to-github tech debt removal
+- [x] Phase 4: UI Inspector opt-in (copilot-instructions, ui-inspector HMR fix, team-leader, qa-engineer)
+- [x] Phase 6: copilot-instructions dual-tool tagging (CC vs Cursor scope)
+- [x] Phase 7: Cursor .mdc upgrades (scss glob+embed, lucide embed, session-end cleanup)
+- [x] Phase 8: New Cursor .mdc files (core-angular, angular-component-structure, translation, security)
+- [x] Phase 9: validate-agent-refs inventory update
+
+### Plan 194 — Agent System Cleanup: Impact Report (`plans/194-agent-system-cleanup-impact.plan.md`)
+- [x] Audit all agent/skill files for redundancy, bugs, and wiring gaps
+- [x] Fix 4 bugs/regressions (end-session `&&`, never-stage sync, validate-agent-refs inventory, template inconsistency)
+- [x] Wire security-officer into workflow (4 trigger points)
+- [x] Remove ~500 tokens/session of redundant content from 7 skill files
+- [x] Document before/after impact (lines, tokens, time savings)
+
 ### Plan 192 — Pillar 3 Reactive Loop Hardening (A13–A17) (`plans/192-reactive-loop-hardening-a13-a17.plan.md`)
 - [ ] A13: Modify `.cursor/rules/session-start.mdc` with first-message guard, state decision tree, and "wrap up" tip
 - [ ] A14: Modify `.cursor/rules/session-end.mdc` with expanded trigger phrases and sweep-first prompt
