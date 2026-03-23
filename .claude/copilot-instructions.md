@@ -17,10 +17,10 @@
 - **After features** `[SHARED]`: Read `.claude/skills/update-docs/SKILL.md` to refresh breadcrumbs and docs.
 - **Breadcrumbs only** `[SHARED]` (e.g. user agrees after commit-to-github, or new hub without full doc pass): Read `.claude/skills/breadcrumb-navigator/SKILL.md` and follow it.
 - **After a hacky fix** `[SHARED]`: Read `.claude/skills/elegant-fix/SKILL.md` to refine into a clean solution.
-- **Session end / wrap up** `[CC]`: User says "done", "I'm done", "end session", "wrap up", "finish up", "ship", "ship it", "we're done", "that's it", or "handoff" → run `git branch --show-current` first, then:
+- **Session end / wrap up** `[CC]`: User says "done", "I'm done", "end session", "wrap up", "finish up", "ship", "ship it", "we're done", "that's it", or "handoff" → run `git rev-parse --git-dir` first, then:
  - **Quick chat** `[SHARED]`: User invokes `/quick-chat` → skip handoff check and GitHub sync for this chat only (mandatory gate reads remain active).
-  - On `main` or `master` → read `.claude/skills/session-handoff/SKILL.md` and follow it in full.
-  - On any other branch → read `.claude/skills/worktree-session-end/SKILL.md` and begin Phase 1.
+  - Returns `.git/worktrees/*` (inside a real git worktree directory) → read `.claude/skills/worktree-session-end/SKILL.md` and begin Phase 1.
+  - Returns `.git` (main repo, any branch including feature branches) → read `.claude/skills/session-handoff/SKILL.md` and follow it in full.
   Never ask the user which skill to use — detect and route automatically.
   Cursor uses `session-end.mdc` which runs session-handoff directly.
 - **Creating or refactoring Angular components** `[SHARED]`: Read `.claude/skills/angularComponentStructure/SKILL.md` before creating or restructuring any Angular component class.
