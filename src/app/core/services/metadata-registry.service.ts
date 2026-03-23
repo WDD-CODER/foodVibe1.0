@@ -90,7 +90,7 @@ export class MetadataRegistryService {
       { key: 'plated_course', fields: [...DEFAULT_DISH_FIELDS] },
       { key: 'cocktail_passed', fields: ['food_cost_pct', 'serving_portions_pct'] },
     ];
-    const menuTypeRegistry = await this.storageService.query<any>('MENU_TYPES');
+    const menuTypeRegistry = await this.storageService.query<RegistryDoc<MenuTypeDefinition>>('MENU_TYPES');
     const existingMenuTypes = menuTypeRegistry[0]?.items ?? [];
     if (Array.isArray(existingMenuTypes) && existingMenuTypes.length > 0) {
       this.menuTypes_.set(existingMenuTypes);
@@ -154,7 +154,7 @@ export class MetadataRegistryService {
   async deleteMenuType(key: string): Promise<void> {
     const updated = this.menuTypes_().filter(t => t.key !== key);
     try {
-      const registries = await this.storageService.query<any>('MENU_TYPES');
+      const registries = await this.storageService.query<RegistryDoc<MenuTypeDefinition>>('MENU_TYPES');
       const registry = registries[0];
       if (registry?._id) {
         await this.storageService.put('MENU_TYPES', { ...registry, items: updated } as RegistryPayload<MenuTypeDefinition>);
@@ -287,7 +287,7 @@ export class MetadataRegistryService {
     const updated: string[] = [...this.allergens_(), keyToUse];
 
     try {
-      const registries = await this.storageService.query<any>('KITCHEN_ALLERGENS');
+      const registries = await this.storageService.query<RegistryDoc<string>>('KITCHEN_ALLERGENS');
       const registry = registries[0];
 
       if (registry?._id) {

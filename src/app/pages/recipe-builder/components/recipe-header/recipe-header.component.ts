@@ -209,7 +209,7 @@ export class RecipeHeaderComponent {
   addSecondaryUnit(unitSymbol: string): void {
     const conversions = this.form().get('yield_conversions') as FormArray;
     // Safety check: Don't add if unit already exists in the conversions
-    const exists = conversions.value.some((c: any) => c.unit === unitSymbol);
+    const exists = conversions.value.some((c: { amount: number; unit: string }) => c.unit === unitSymbol);
     if (exists) {
       this.activeUnit.set(null); // Just close the menu
       return;
