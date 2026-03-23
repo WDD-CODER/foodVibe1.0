@@ -27,7 +27,10 @@ Periodic health check that verifies all internal links in the agent guidance sys
 - `session-handoff/SKILL.md`
 - `breadcrumb-navigator/SKILL.md`
 - `deploy-github-pages/SKILL.md`
-- `end-session/SKILL.md`
+- `worktree-session-end/SKILL.md`
+- `worktree-setup/SKILL.md`
+
+> Note: `end-session/SKILL.md` is a deprecated redirect stub — not a functional skill. Intentionally kept as a pointer only.
 
 ### Cursor rules (`.cursor/rules/`)
 - `add-recipe-must-use-skill.mdc`
@@ -37,6 +40,10 @@ Periodic health check that verifies all internal links in the agent guidance sys
 - `scss-styling-must-use-cssLayer.mdc`
 - `session-start.mdc`
 - `session-end.mdc`
+- `core-angular.mdc`
+- `angular-component-structure.mdc`
+- `translation.mdc`
+- `security.mdc`
 
 ### Cursor commands (`.cursor/commands/`)
 - `add-recipe.md`
@@ -66,7 +73,7 @@ for f in team-leader software-architect product-manager breadcrumb-navigator qa-
 done
 
 # Verify all expected skill files exist
-for s in save-plan commit-to-github cssLayer add-recipe github-sync techdebt update-docs elegant-fix angularComponentStructure auth-and-logging session-handoff breadcrumb-navigator deploy-github-pages end-session; do
+for s in save-plan commit-to-github cssLayer add-recipe github-sync techdebt update-docs elegant-fix angularComponentStructure auth-and-logging session-handoff breadcrumb-navigator deploy-github-pages worktree-session-end worktree-setup; do
   [ -f ".claude/skills/$s/SKILL.md" ] || echo "MISSING: .claude/skills/$s/SKILL.md"
 done
 

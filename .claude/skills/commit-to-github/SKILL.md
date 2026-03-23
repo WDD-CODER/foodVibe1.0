@@ -58,25 +58,13 @@ Collect the working-tree snapshot using **four separate Bash calls** (Windows-sa
 
 ---
 
-## Phase 0 — Tech debt check and targeted test gate (before building commit plan)
+## Phase 0 — Targeted test gate and security check (before building commit plan)
+
+> Tech-debt analysis runs at task-completion time (agent.md step 5.5), not here. If a report was already generated this session, surface any critical/high items at the top of this phase before continuing.
 
 Before Phase 1 (Evaluate):
 
-**Step 1 — Tech debt (working-tree scope only)**
-
-**Fast path (skip tech-debt for non-app commits):**
-Run `git diff --name-only HEAD` and collect untracked files from `git status`. If **zero** files match `src/app/**/*.ts`, emit:
-> ⚡ Fast path: no app TypeScript changed — skipping tech-debt scan.
-
-Then skip the rest of Step 1 and go directly to Step 2.
-
-**Full path (app TypeScript present):**
-- If no tech-debt report exists in this session → read `.claude/skills/techdebt/SKILL.md` and run the analysis for files to be committed only.
-- If a report already exists this session → use it, do not re-run.
-- If the report lists critical/high items → ask: "Fix these first, or proceed anyway?"
-- If the report has a **Spec coverage** section → add or update those specs, or list and ask the user.
-
-**Step 2 — Targeted specs only (not the full suite)**
+**Step 1 — Targeted specs only (not the full suite)**
 
 Run specs only for the files being committed:
 ```bash

@@ -1,0 +1,51 @@
+---
+description: Auth guard pattern, guest feedback, security hardening rules. Auto-loads when editing auth-sensitive files.
+globs:
+  - "src/**/auth*"
+  - "src/**/user.service*"
+  - "src/**/app.routes*"
+  - "src/**/*guard*"
+  - "src/**/*interceptor*"
+alwaysApply: false
+---
+
+## Auth Guards
+
+- Protected routes use `authGuard` in `app.routes.ts`
+- Check `UserService.isLoggedIn()` for current user state
+- Never store or log passwords, tokens, or PII (full name, email) — use identifiers only
+
+## Guest Action Feedback
+
+Any action that creates, updates, or deletes data must handle unauthenticated users:
+
+**Route-based actions** (navigate to add/edit/delete page): `authGuard` handles it — shows warning toast + sign-in modal before redirecting. No extra handler logic needed.
+
+**Non-route actions** (modal, embedded view, in-place button): At the START of every handler that writes data:
+
+```typescript
+if (!this.userService.isLoggedIn()) {
+  this.userMsgService.onSetWarningMsg(
+    this.translationService.translate('sign_in_to_use')
+  );
+  this.authModal.open('sign-in');
+  return;
+}
+```
+
+**Buttons:** Do not disable-only (disabled gives no click feedback). Let the button run the handler so the guard check fires and shows the toast + modal.
+
+## Security Hardening
+
+- **No secrets in source** — use environment variables; never commit API keys
+- **Input validation** — validate and sanitize user input before persistence or display
+- **Token storage** — prefer in-memory; if using sessionStorage, document it
+- **Error exposure** — in production, never expose stack traces to the client; use generic messages; log full details via `LoggingService`
+- **HTTPS** — all auth and API traffic over HTTPS in production
+
+## Logging (via LoggingService)
+
+Log: auth events, HTTP failures (4xx/5xx), critical CRUD (create/update/delete with entity type + id).
+Never log: passwords, tokens, PII, full request/response bodies.
+
+For full rules: `.claude/skills/auth-and-logging/SKILL.md`

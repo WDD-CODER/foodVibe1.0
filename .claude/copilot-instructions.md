@@ -2,28 +2,32 @@
 
 > **Single source of truth**: All project rules live here. When the user gives a new rule, add it to this file. The `.cursor/rules/*.mdc` files are Cursor-specific pointers that reinforce triggers; canonical rules stay here so the setup works in any IDE/agent.
 
-## 0. Skill Triggers (portable — when X, read skill Y)
+## 0. Skill Triggers
 
-- **Save plan**: User says "save the plan" after confirming → read `.claude/skills/save-plan/SKILL.md` and follow it.
-- **Commit / push to GitHub**: User says commit, push, save to branches → read `.claude/skills/commit-to-github/SKILL.md` and follow all phases in order. No git writes until user approves the visual tree in chat.
-- **CSS/SCSS**: Before creating or editing any `.scss`/`.css` in `src/` → read `.claude/skills/cssLayer/SKILL.md` and apply it (tokens, five-group rhythm, logical properties).
-- **Add recipe/dish**: User adds recipe from image or text → read `.claude/skills/add-recipe/SKILL.md`; Step 3 confirmation required before any write.
-- **Auth, logging, routes, CRUD**: Read `.claude/skills/auth-and-logging/SKILL.md` when touching auth, persistence, HTTP, or critical operations.
-- **Session start / after time away**: Read `.claude/skills/github-sync/SKILL.md` to pull recent GitHub context.
-- **End of session, before PR**: Read `.claude/skills/techdebt/SKILL.md` for duplicate/dead code and TODO audit.
-- **After features**: Read `.claude/skills/update-docs/SKILL.md` to refresh breadcrumbs and docs.
-- **Breadcrumbs only** (e.g. user agrees after commit-to-github, or new hub without full doc pass): Read `.claude/skills/breadcrumb-navigator/SKILL.md` and follow it.
-- **After a hacky fix**: Read `.claude/skills/elegant-fix/SKILL.md` to refine into a clean solution.
-- **Session end / wrap up**: User says "done", "I'm done", "end session", "wrap up", "finish up", "ship", "ship it", "we're done", "that's it", or "handoff" → run `git branch --show-current` first, then:
+> **Tool scope:** `[CC]` = Claude Code only · `[SHARED]` = both Claude Code and Cursor
+> Cursor receives these rules via `.cursor/rules/*.mdc`. Cursor cannot spawn subagents — `[CC]` triggers do not apply to Cursor.
+
+- **Save plan** `[SHARED]`: User says "save the plan" after confirming → read `.claude/skills/save-plan/SKILL.md` and follow it.
+- **Commit / push to GitHub** `[SHARED]`: User says commit, push, save to branches → read `.claude/skills/commit-to-github/SKILL.md` and follow all phases in order. No git writes until user approves the visual tree in chat.
+- **CSS/SCSS** `[SHARED]`: Before creating or editing any `.scss`/`.css` in `src/` → read `.claude/skills/cssLayer/SKILL.md` and apply it (tokens, five-group rhythm, logical properties).
+- **Add recipe/dish** `[SHARED]`: User adds recipe from image or text → read `.claude/skills/add-recipe/SKILL.md`; Step 3 confirmation required before any write.
+- **Auth, logging, routes, CRUD** `[SHARED]`: Read `.claude/skills/auth-and-logging/SKILL.md` when touching auth, persistence, HTTP, or critical operations.
+- **Session start / after time away** `[SHARED]`: Read `.claude/skills/github-sync/SKILL.md` to pull recent GitHub context.
+- **End of session, before PR** `[SHARED]`: Read `.claude/skills/techdebt/SKILL.md` for duplicate/dead code and TODO audit.
+- **After features** `[SHARED]`: Read `.claude/skills/update-docs/SKILL.md` to refresh breadcrumbs and docs.
+- **Breadcrumbs only** `[SHARED]` (e.g. user agrees after commit-to-github, or new hub without full doc pass): Read `.claude/skills/breadcrumb-navigator/SKILL.md` and follow it.
+- **After a hacky fix** `[SHARED]`: Read `.claude/skills/elegant-fix/SKILL.md` to refine into a clean solution.
+- **Session end / wrap up** `[CC]`: User says "done", "I'm done", "end session", "wrap up", "finish up", "ship", "ship it", "we're done", "that's it", or "handoff" → run `git branch --show-current` first, then:
   - On `main` or `master` → read `.claude/skills/session-handoff/SKILL.md` and follow it in full.
-  - On any other branch → read `.claude/skills/end-session/SKILL.md` and begin Phase 1.
+  - On any other branch → read `.claude/skills/worktree-session-end/SKILL.md` and begin Phase 1.
   Never ask the user which skill to use — detect and route automatically.
-- **Creating or refactoring Angular components**: Read `.claude/skills/angularComponentStructure/SKILL.md` before creating or restructuring any Angular component class.
-- **Lucide icons**: Before adding or editing `<lucide-icon name="...">` in any template → read and apply **Section 8** below.
-- **Hebrew canonical values**: When adding or editing flows that accept user-entered canonical values (units, categories, allergens, section categories) in Hebrew → read and apply **Section 7.1 and 7.2** below.
-- **Deploy to GitHub Pages**: User says deploy, publish app, GitHub Pages → read `.claude/skills/deploy-github-pages/SKILL.md` and follow it. Run only on explicit request.
-- **After any structural UI change**: After `.html`/`.scss`/`.css` edits in `src/` that affect layout (sizing, spacing, positioning, display) → invoke `ui-inspector` agent (model: haiku) with: component name, page URL, dev server port, worktreeRoot, and navigation hint to reveal the element. Skip for purely aesthetic changes (color, shadow, opacity, border-radius). Skip if user explicitly opts out — current task only.
-- **Security review** (post-feature or pre-deploy): After completing any change that touches `auth.guard.ts`, `auth.interceptor.ts`, `auth-crypto.ts`, `user.service.ts`, localStorage/sessionStorage access, new routes in `app.routes.ts`, or `[innerHTML]`/`bypassSecurityTrust*` → invoke `security-officer` agent as the final step before committing. Also invoke: during planning of features requiring backend auth or new data persistence; on pre-deployment go-live check; on explicit user request ("security review", "audit", "check security"). Never invoke for changes that don't touch the security surface (UI, CSS, recipes, docs).
+  Cursor uses `session-end.mdc` which runs session-handoff directly.
+- **Creating or refactoring Angular components** `[SHARED]`: Read `.claude/skills/angularComponentStructure/SKILL.md` before creating or restructuring any Angular component class.
+- **Lucide icons** `[SHARED]`: Before adding or editing `<lucide-icon name="...">` in any template → read and apply **Section 8** below.
+- **Hebrew canonical values** `[SHARED]`: When adding or editing flows that accept user-entered canonical values (units, categories, allergens, section categories) in Hebrew → read and apply **Section 7.1 and 7.2** below.
+- **Deploy to GitHub Pages** `[SHARED]`: User says deploy, publish app, GitHub Pages → read `.claude/skills/deploy-github-pages/SKILL.md` and follow it. Run only on explicit request.
+- **UI Inspector** `[CC]`: Available for visual QA on explicit request. Invoke when: user asks ("inspect", "check visually", "ui check"), team-leader needs visual verification for a layout task, or qa-engineer needs structural QA. **NOT auto-triggered** on layout edits or structural HTML/SCSS changes. See `.claude/agents/ui-inspector.md` for protocol. Port resolution: read `.worktree-port` in active worktree; if on main with no worktree: port = `4200`, worktreeRoot = `C:/foodCo/foodVibe1.0`.
+- **Security review** `[CC]`: After completing any change that touches `auth.guard.ts`, `auth.interceptor.ts`, `auth-crypto.ts`, `user.service.ts`, localStorage/sessionStorage access, new routes in `app.routes.ts`, or `[innerHTML]`/`bypassSecurityTrust*` → invoke `security-officer` agent as the final step before committing. Also invoke: during planning of features requiring backend auth or new data persistence; on pre-deployment go-live check; on explicit user request ("security review", "audit", "check security"). Never invoke for changes that don't touch the security surface (UI, CSS, recipes, docs).
 
 ## 0.1 Priority Hierarchy (when guidance conflicts)
 

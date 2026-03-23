@@ -21,7 +21,12 @@
       "Bash(gh pr view:*)",
       "Bash(gh pr merge:*)",
       "Bash(gh pr list:*)",
-      "Bash(gh auth status:*)"
+      "Bash(gh auth status:*)",
+      "Edit(src/**/*)","Edit(.claude/**/*)",
+      "Bash(ng build:*)",
+      "Bash(ng serve:*)",
+      "Bash(npm run:*)",
+      "Bash(netstat:*)"
     ]
   }
 }

@@ -26,6 +26,14 @@ Apply all project standards from `.claude/copilot-instructions.md` — especiall
 > During active development, diagnosis and strategy are in scope; writing specs is not.
 > This aligns with `copilot-instructions.md` Section 3.
 
+## Visual Inspection
+
+When verifying UI correctness after layout, alignment, or structural changes, invoke the `ui-inspector` agent (subagent_type: `ui-inspector`, model: `haiku`). Provide:
+- `componentName`, `pageUrl`, `worktreeRoot`, `navigationHint`
+- Port: read `.worktree-port` in active worktree; if on main: port = `4200`, worktreeRoot = `C:/foodCo/foodVibe1.0`
+
+Use the inspector report as structural QA evidence — it checks alignment, overflow, button sizing, and spacing. It does NOT check colors, shadows, or animations.
+
 ## Test Stack
 
 - **Unit Tests**: Jasmine + Karma
