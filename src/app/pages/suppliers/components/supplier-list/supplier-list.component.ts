@@ -27,7 +27,15 @@ import { useListState, StringParam, BooleanParam, NumberSetParam } from 'src/app
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 import { HeroFabService } from '@services/hero-fab.service';
 
-const DAY_LABELS = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'];
+const DAY_LABELS = [
+  'general.day_sun',
+  'general.day_mon',
+  'general.day_tue',
+  'general.day_wed',
+  'general.day_thu',
+  'general.day_fri',
+  'general.day_sat',
+];
 
 @Component({
   selector: 'app-supplier-list',
@@ -337,7 +345,6 @@ export class SupplierListComponent implements OnInit, OnDestroy {
 
   protected deliveryDaysDisplay(days: number[] | undefined): string {
     if (!days?.length) return '—';
-    const dayNames = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'];
-    return days.map(d => dayNames[d] ?? String(d)).join(', ');
+    return days.map(d => this.translation.translate(DAY_LABELS[d]) || String(d)).join(', ');
   }
 }

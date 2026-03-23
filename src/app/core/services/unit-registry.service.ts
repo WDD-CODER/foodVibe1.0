@@ -11,6 +11,12 @@ export type RegisterUnitResult =
   | { success: false; alreadyOnProduct?: boolean; error?: string };
 
 /** System units: constant, non-removable, values never overwritten. */
+/** Shape of the single registry document stored under KITCHEN_UNITS. */
+interface UnitRegistryEntry {
+  _id?: string
+  units: Record<string, number>
+}
+
 export const SYSTEM_UNITS: Readonly<Record<string, number>> = {
   kg: 1000,
   liter: 1000,
@@ -56,7 +62,7 @@ export class UnitRegistryService {
    */
   private async initUnits(skipOverwriteIfNewer = true): Promise<void> {
     try {
-      const registries = await this.storageService.query<any>(this.STORAGE_KEY);
+      const registries = await this.storageService.query<UnitRegistryEntry>(this.STORAGE_KEY);
       const existingRegistry = registries[0];
 
       const hasNoUnits = !existingRegistry ||
@@ -69,7 +75,7 @@ export class UnitRegistryService {
           await this.storageService.put(this.STORAGE_KEY, {
             ...existingRegistry,
             units: defaultUnits
-          });
+          } as UnitRegistryEntry & { _id: string });
         } else {
           await this.storageService.post(this.STORAGE_KEY, {
             units: defaultUnits
@@ -158,7 +164,7 @@ export class UnitRegistryService {
     try {
       // 4. Persistence Logic (POST vs PUT)
       // We treat the entire unit collection as one registry document
-      const registries = await this.storageService.query<any>(this.STORAGE_KEY);
+      const registries = await this.storageService.query<UnitRegistryEntry>(this.STORAGE_KEY);
       const existingRegistry = registries[0];
 
       if (existingRegistry && existingRegistry._id) {
@@ -166,7 +172,7 @@ export class UnitRegistryService {
         await this.storageService.put(this.STORAGE_KEY, {
           ...existingRegistry,
           units: updatedUnits
-        });
+        } as UnitRegistryEntry & { _id: string });
       } else {
         // Doesn't exist -> Create new document (POST)
         await this.storageService.post(this.STORAGE_KEY, {
@@ -200,14 +206,14 @@ export class UnitRegistryService {
     delete updatedUnits[unitKey];
 
     try {
-      const registries = await this.storageService.query<any>(this.STORAGE_KEY);
+      const registries = await this.storageService.query<UnitRegistryEntry>(this.STORAGE_KEY);
       const registry = registries[0];
 
       if (registry?._id) {
         await this.storageService.put(this.STORAGE_KEY, {
           ...registry,
           units: updatedUnits
-        });
+        } as UnitRegistryEntry & { _id: string });
         this.globalUnits_.set(updatedUnits);
         this.userMsgService.onSetSuccessMsg(`היחידה ${unitKey} הוסרה`);
       }

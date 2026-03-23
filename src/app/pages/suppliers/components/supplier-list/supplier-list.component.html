@@ -118,7 +118,7 @@
                 @for (ctrl of deliveryDaysArray.controls; track $index) {
                   <label class="inline-edit-check">
                     <input type="checkbox" [formControlName]="$index" />
-                    <span>{{ dayLabels[$index] }}</span>
+                    <span>{{ dayLabels[$index] | translatePipe }}</span>
                   </label>
                 }
               </div>

@@ -2,7 +2,7 @@
   <header class="trash-header">
     <h1>{{ 'trash' | translatePipe }}</h1>
     <button type="button" class="btn-refresh" (click)="refresh()" [disabled]="loading()">
-      {{ loading() ? ('pending' | translatePipe) : 'רענן' }}
+      {{ loading() ? ('pending' | translatePipe) : ('general.refresh' | translatePipe) }}
     </button>
   </header>
 
@@ -10,7 +10,7 @@
     <app-loader size="medium" label="loader_loading" />
   } @else if (loadError()) {
     <p class="trash-error">{{ loadError() }}</p>
-    <button type="button" class="btn-refresh" (click)="refresh()">רענן שוב</button>
+    <button type="button" class="btn-refresh" (click)="refresh()">{{ 'general.refresh_again' | translatePipe }}</button>
   } @else {
     <div class="trash-sections">
       <!-- 1. Dishes -->

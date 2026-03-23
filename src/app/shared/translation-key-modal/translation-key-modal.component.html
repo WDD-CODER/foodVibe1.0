@@ -10,7 +10,7 @@
                type="text"
                [ngModel]="hebrewLabel_()"
                (ngModelChange)="updateHebrew($event)"
-               [placeholder]="context_() === 'category' ? 'למשל: קטגוריה חדשה' : ('hebrew_value' | translatePipe)"
+               [placeholder]="context_() === 'category' ? ('general.category_placeholder' | translatePipe) : ('hebrew_value' | translatePipe)"
                aria-describedby="hebrew-hint" />
         @if (context_() === 'generic') {
         <span id="hebrew-hint" class="translation-key-modal-hint">{{ 'enter_english_key_for_value_above' | translatePipe }}</span>
