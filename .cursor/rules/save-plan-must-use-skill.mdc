@@ -1,6 +1,8 @@
 ---
-description: "Save the plan" requests must use the save-plan skill (plans/ folder, NNN numbering)
+description: Save-plan skill — fires when message contains "save" + it/that/this/plan with a plan in context
 alwaysApply: true
 ---
 
-When the user says to save the plan, read [.claude/skills/save-plan/SKILL.md](.claude/skills/save-plan/SKILL.md) and write only to the project `plans/` folder with correct numbering.
+Trigger (case-insensitive) when the message contains "save" AND one of: `it`, `that`, `this`, `plan` — and a plan has been confirmed in this conversation.
+
+When triggered, read [.claude/skills/save-plan/SKILL.md](.claude/skills/save-plan/SKILL.md) and write only to the project `plans/` folder with correct numbering.

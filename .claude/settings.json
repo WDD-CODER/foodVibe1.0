@@ -26,7 +26,7 @@
       "Bash(ng build:*)",
       "Bash(ng serve:*)",
       "Bash(npm run:*)",
-      "Bash(netstat:*)"
+      "Bash(netstat:*)",
       "Edit(src/**)",
       "Edit(.claude/**)",
       "mcp__playwright__browser_navigate",
