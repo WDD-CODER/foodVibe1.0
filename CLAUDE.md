@@ -16,3 +16,4 @@ If a file cannot be read, respond **"No chef! I cannot read [filename]"** and st
 - Never commit directly to `main` or `master`.
 - Writing code on `main`? Run `git checkout -b feat/<name>` or `fix/<name>` first.
 - Need an isolated worktree for parallel multi-agent work? Use `/worktree-setup` on demand — **not automatic**.
+- **Worktree boundary**: When working inside an isolated worktree, never attempt `git checkout main` from within it. All PR creation and merges must be executed using `git -C <mainRepoPath>` from the root repository path to avoid `fatal: main is already used` errors.
