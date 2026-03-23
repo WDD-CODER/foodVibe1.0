@@ -7,7 +7,7 @@
 > **Tool scope:** `[CC]` = Claude Code only · `[SHARED]` = both Claude Code and Cursor
 > Cursor receives these rules via `.cursor/rules/*.mdc`. Cursor cannot spawn subagents — `[CC]` triggers do not apply to Cursor.
 
-- **Save plan** `[SHARED]`: User says "save the plan" after confirming → read `.claude/skills/save-plan/SKILL.md` and follow it.
+- **Save plan** `[SHARED]`: Message contains "save" + one of "it / that / this / plan" (case-insensitive) while a plan is in context → read `.claude/skills/save-plan/SKILL.md` and follow it.
 - **Commit / push to GitHub** `[SHARED]`: User says commit, push, save to branches → read `.claude/skills/commit-to-github/SKILL.md` and follow all phases in order. No git writes until user approves the visual tree in chat.
 - **CSS/SCSS** `[SHARED]`: Before creating or editing any `.scss`/`.css` in `src/` → read `.claude/skills/cssLayer/SKILL.md` and apply it (tokens, five-group rhythm, logical properties).
 - **Add recipe/dish** `[SHARED]`: User adds recipe from image or text → read `.claude/skills/add-recipe/SKILL.md`; Step 3 confirmation required before any write.

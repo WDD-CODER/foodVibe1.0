@@ -9,8 +9,9 @@ When the user has **confirmed a plan** and says to **save the plan**, follow thi
 
 ## Trigger
 
-- User says "save the plan", "save plan", or equivalent after having seen and confirmed a plan. This applies even when combined with other requests (e.g. "save the plan and execute", "execute and save the plan").
-- Plan content is already agreed; the agent must only determine the filename and write the file. When the request includes other actions, perform the save step first using this skill, then proceed.
+- Message contains "save" (case-insensitive) + one of: **it / that / this / plan**, while a plan has been confirmed in the current conversation.
+- Applies even when combined with other requests (e.g. "save it and execute"). Perform the save step first, then proceed.
+- Plan content is already agreed; the agent must only determine the filename and write the file.
 
 ## Location (MANDATORY)
 
