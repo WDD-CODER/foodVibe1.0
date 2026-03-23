@@ -1,8 +1,31 @@
 ---
-description: When adding or editing Lucide icons in templates, read copilot-instructions Section 8 and apply it
+description: Lucide icon registration rule — every icon used in a template must be registered in app.config.ts. Auto-loads when editing HTML templates.
 globs:
   - "src/**/*.html"
 alwaysApply: false
 ---
 
-When you add or edit any `<lucide-icon name="...">` in a component template, read [.claude/copilot-instructions.md](.claude/copilot-instructions.md) Section 8 (Lucide Icons) and apply it. The rule and steps live there only; do not duplicate them here.
+## Lucide Icon Rule (mandatory)
+
+When adding or editing `<lucide-icon name="...">` in any component template, you MUST also register the icon in `src/app/app.config.ts`.
+
+**Two places to update — always both:**
+
+1. **Import** the icon from `lucide-angular` (PascalCase):
+   ```typescript
+   import { CircleUserRound, ChefHat, Trash2 } from 'lucide-angular';
+   ```
+
+2. **Add** to `LucideAngularModule.pick({ ... })` in `app.config.ts`:
+   ```typescript
+   LucideAngularModule.pick({ CircleUserRound, ChefHat, Trash2 })
+   ```
+
+**Naming convention:**
+- Template: kebab-case → `<lucide-icon name="circle-user-round">`
+- TypeScript: PascalCase → `CircleUserRound`
+
+**Missing registration causes this runtime error:**
+> "The 'circle-user-round' icon has not been provided by any available icon providers."
+
+This error only appears at runtime, not at build time — always register before committing.

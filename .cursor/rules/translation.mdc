@@ -1,0 +1,53 @@
+---
+description: Hebrew UI translation rules — translatePipe, dictionary.json, canonical Hebrew values. Always active.
+alwaysApply: true
+---
+
+## Translation Rules
+
+**All user-facing text** must go through `translatePipe` and `dictionary.json`.
+
+```
+public/assets/data/dictionary.json
+```
+
+- Keys: lowercase, underscores only (e.g. `sign_in_to_use`, `add_recipe`)
+- Sections: `units`, `categories`, `allergens`, `general`, `preparation_categories`
+- Never hardcode Hebrew strings in templates or TypeScript
+
+**Template usage:**
+```html
+{{ 'my_key' | translatePipe }}
+<button [title]="'my_key' | translatePipe">...</button>
+```
+
+---
+
+## Canonical Hebrew Values (7.1)
+
+When the app stores user input as a **canonical identifier** (unit symbol, category, allergen, section category, preparation category), resolve Hebrew input to the existing English key — never store the Hebrew string as the ID.
+
+Use `TranslationService` resolution methods:
+- `resolveUnit(hebrewInput)` → canonical key or `null`
+- `resolveCategory(hebrewInput)` → canonical key or `null`
+- `resolveAllergen(hebrewInput)` → canonical key or `null`
+- `resolveSectionCategory(hebrewInput)` → canonical key or `null`
+- `resolvePreparationCategory(hebrewInput)` → canonical key or `null`
+
+**If no matching key exists:** prompt the user for the English key, then call `translationService.updateDictionary(englishKey, hebrewLabel)` to grow the dictionary.
+
+**Units:** After resolving the unit, check if the product already has that unit symbol — do not add a duplicate.
+
+---
+
+## Translation Modal (7.2)
+
+For flows that need a prompt for the English canonical key, use the existing **translation-key modal** in `src/app/shared/` — not a new dialog. Match its implementation for editable Hebrew, initial focus, and "Continue without saving" behaviour.
+
+---
+
+## Adding New Keys
+
+1. Add to `dictionary.json` in the correct section with Hebrew translation
+2. Use the English key everywhere in templates and TypeScript
+3. Never commit Hebrew strings outside `dictionary.json`

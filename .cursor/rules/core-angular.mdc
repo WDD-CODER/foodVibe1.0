@@ -1,0 +1,47 @@
+---
+description: Angular 19 + TypeScript core rules — Signals, component API, naming conventions, service patterns. Always active.
+alwaysApply: true
+---
+
+## Persona
+Start ALL responses with **"Yes chef!"** or **"No chef!"**. No conversational fillers.
+
+## Angular 19 — Reactivity
+- **Signals only** — no BehaviorSubject, no Subject for state
+- `signal()`, `computed()`, `effect()` for all reactive state
+- Private signals: `data_ = signal<T>(initialValue)` (trailing underscore)
+- Public read-only: expose via `.asReadonly()` — never expose the writable signal
+- Component API: `input()`, `input.required()`, `output()`, `model()` — never `@Input()` / `@Output()`
+
+## TypeScript Standards
+- No `any` types
+- Single quotes in TypeScript files
+- Double quotes in HTML templates
+- No semicolons at end of statements
+- Strict mode — handle all nulls explicitly
+
+## Naming Conventions
+- Selectors: kebab-case; `app-` prefix only for native HTML element collisions
+- Filename matches selector (`app-recipe-card.component.ts` → `app-recipe-card`)
+- Classes: PascalCase
+- Boolean flags: `is` or `has` prefix (`isLoading`, `hasError`)
+- Services: suffix `.service.ts`; all in `src/app/core/services/`
+
+## Services
+- `@Injectable({ providedIn: 'root' })` on every service
+- Signals for state, `AsyncStorageService` for persistence
+- `UserMsgService` for user feedback toasts
+- Expose read-only state via `.asReadonly()`
+- Add `.spec.ts` when the service is finalized
+
+## Folder Structure
+- `core/` — services, models, guards, pipes, directives
+- `shared/` — reusable UI components
+- `pages/[name]/` — routed views + local `components/`
+- Path aliases: `@services/*`, `@models/*`, `@directives/*`
+
+## Shared UI
+Before creating any new UI control, layout, or pattern: scan `src/app/shared/` and `src/styles.scss` (`.c-*` engines) for something composable. Add page-local markup only when nothing fits.
+
+## Utilities
+Shared helpers → `src/app/core/services/util.service.ts` or `core/utils/`. Must be pure functions (same inputs → same outputs, no I/O or side effects).

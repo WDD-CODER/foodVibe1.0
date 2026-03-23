@@ -1,0 +1,71 @@
+---
+description: Angular component class structure — declaration order and CRDUL method grouping. Auto-loads when editing component TypeScript files.
+globs:
+  - "src/**/*.component.ts"
+alwaysApply: false
+---
+
+## Component Class Declaration Order
+
+Always follow this top-to-bottom order:
+
+```typescript
+export class MyComponent {
+  // INJECTED
+  private someService = inject(SomeService);
+  private fb = inject(FormBuilder);
+
+  // INPUTS
+  item = input.required<Item>();
+  label = input<string>('');
+
+  // OUTPUTS
+  itemChange = output<Item>();
+
+  // SIGNALS & CONSTANTS
+  readonly MAX_ITEMS = 10;
+  private state_ = signal<State>(initialState);
+
+  // COMPUTED SIGNALS
+  protected derived_ = computed(() => this.state_() * 2);
+
+  // CREATE
+  addItem(): void { }
+
+  // READ
+  getItemById(id: string): Item | undefined { }
+
+  // DELETE
+  removeItem(index: number): void { }
+
+  // UPDATE
+  updateItem(index: number, value: T): void { }
+
+  // LIST
+  get items(): Item[] { }
+}
+```
+
+## Section Definitions
+
+| Section | Contents |
+|---------|----------|
+| `// INJECTED` | All `inject()` calls |
+| `// INPUTS` | `input()`, `input.required()` |
+| `// OUTPUTS` | `output()` |
+| `// SIGNALS & CONSTANTS` | `signal()`, `readonly` constants |
+| `// COMPUTED SIGNALS` | `computed()` |
+
+## CRDUL Method Groups
+
+| Label | Intent | Examples |
+|-------|--------|---------|
+| `// CREATE` | Add new items | `addItem`, `addUnit` |
+| `// READ` | Return single value | `getById`, getters |
+| `// DELETE` | Remove items | `removeItem`, `removeUnit` |
+| `// UPDATE` | Modify existing state | `updateItem`, `toggleType` |
+| `// LIST` | Return collections | `get items()`, `get units()` |
+
+- Private helpers that don't fit CRDUL → place under nearest related section or `// HELPERS`
+- Keep sections in order even if a section has only one method
+- Omit empty sections entirely (except always keep `// INJECTED` if the class has any injections)

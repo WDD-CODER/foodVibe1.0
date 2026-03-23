@@ -1,6 +1,66 @@
 ---
-description: SCSS/CSS work must follow the cssLayer skill (tokens, five-group rhythm)
-alwaysApply: true
+description: CSS/SCSS rules — token tiers, Five-Group Vertical Rhythm, unification-first. Auto-loads when editing .scss or .css files in src/.
+globs:
+  - "src/**/*.scss"
+  - "src/**/*.css"
+alwaysApply: false
 ---
 
-When creating, updating, or refactoring any `.scss`/`.css` in `src/`, read and follow [.claude/skills/cssLayer/SKILL.md](.claude/skills/cssLayer/SKILL.md) first.
+## Before writing any styles
+
+1. Read `src/styles.scss` — reuse existing `:root` tokens before creating new ones.
+2. Check `src/app/shared/` for a composable component and `src/styles.scss` for an existing engine (`.c-button`, `.c-card`, `.c-chip`, `.c-dropdown`). Prefer reuse.
+
+## Three-Tier Token Rule
+
+| Tier | When | Where |
+|------|------|-------|
+| **Global** | Value used across multiple components | `src/styles.scss` `:root { --name: value; }` → use `var(--name)` everywhere |
+| **Component-scoped** | Value reused only inside this file | `:host { --local: value; }` → use `var(--local)` only here |
+| **No token** | Value used once or twice | Write the value directly — no variable needed |
+
+Use `var(--token)` and `rem`/`em` in rule bodies. Hex/px only inside `:root` or `:host` token definitions.
+
+## Five-Group Vertical Rhythm (mandatory)
+
+Every selector MUST group properties into these five blocks, separated by **one blank line**. Omit empty groups.
+
+```scss
+.selector {
+  /* 1 — Layout */
+  display: flex;
+  position: relative;
+  align-items: center;
+
+  /* 2 — Dimensions */
+  width: 100%;
+  padding: 0.5rem 1rem;
+  gap: 0.5rem;
+
+  /* 3 — Content / Typography */
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+
+  /* 4 — Structure */
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+
+  /* 5 — Effects */
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+```
+
+Group order: Layout → Dimensions → Content/Typo → Structure → Effects.
+
+## Per-Selector Checklist
+
+- [ ] Can I reuse an existing engine (`.c-*`) or `shared/` component?
+- [ ] Did I check `src/styles.scss` and pick the right token tier?
+- [ ] Are properties sorted into the 5 groups with blank lines between?
+- [ ] Are values using `var(--)` and `rem`/`em` where a token applies?
+- [ ] No `style="..."` attributes — zero inline styles.
+
+For full rules and edge cases: `.claude/skills/cssLayer/SKILL.md`
