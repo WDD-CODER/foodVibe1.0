@@ -11,6 +11,8 @@ If a file cannot be read, respond **"No chef! I cannot read [filename]"** and st
 > **Claude Code:** Read both files once at session start (first message only). They remain in context for the rest of the conversation — do not re-read on subsequent messages.
 > **Cursor:** Read them at the start of each new task context.
 
+> **Command in first message**: If the first message also contains a command or task (e.g. `/commit-github`), confirm **"Yes chef!"** and immediately execute it — do not stop after the confirmation.
+
 ## Branch Rule
 
 - Never commit directly to `main` or `master`.

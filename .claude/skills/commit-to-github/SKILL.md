@@ -60,21 +60,15 @@ git diff --stat HEAD
 - **If on `main` or `master`** → do NOT auto-create a generic name. Infer a meaningful branch name from the changed files:
   - Determine the **type**: `feat` (new capability), `fix` (bug), `refactor` (restructure, no behavior change), `chore` (config, docs, tooling), `style` (CSS/SCSS only)
   - Derive a **short slug** from the file paths and nature of changes (e.g. `feat/recipe-yield-logic`, `fix/inventory-unit-duplicate`, `refactor/auth-interceptor-cleanup`)
-  - Propose it to the user:
-    > `"On main — proposed branch: feat/your-slug-here`
-    > `Approve or type a different name:"`
-  - Wait for the user to confirm (press Enter / "y" / "ok") or provide a custom name.
-  - Create the branch only after confirmation:
-    ```bash
-    git checkout -b <confirmed-branch-name>
-    ```
+  - Hold the proposed name — show it in the tree header (Step 3). Do not ask separately.
+  - Create the branch only after the user approves the tree.
 
 ### Step 3 — Minimal Visual Tree
 
-Draft the tree in chat using the current branch name and all changed files:
+Draft the tree in chat. When on `main`, use `[Proposed: feat/your-slug-here]` as the header. On a feature branch, use `[Current: branch-name]`.
 
 ```
-[Current: feat/checkpoint-20260323-1400]
+[Proposed: feat/checkpoint-20260323-1400]
  └── 📦 Commit: feat: checkpoint - <auto-summary of changes>
       📄 path/to/file1
       📄 path/to/file2
