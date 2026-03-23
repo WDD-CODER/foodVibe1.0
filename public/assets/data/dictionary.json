@@ -594,6 +594,16 @@
         "net_cost_calculated_with_waste": "עלות נטו מחושבת (לאחר פחת):",
         "label_name_hebrew": "שם תווית (עברית)",
         "label_name_example_placeholder": "למשל: חלבי",
-        "english_key_example_label": "מפתח באנגלית (לדוגמה: dairy)"
+        "english_key_example_label": "מפתח באנגלית (לדוגמה: dairy)",
+        "refresh": "רענן",
+        "refresh_again": "רענן שוב",
+        "category_placeholder": "למשל: קטגוריה חדשה",
+        "day_sun": "א",
+        "day_mon": "ב",
+        "day_tue": "ג",
+        "day_wed": "ד",
+        "day_thu": "ה",
+        "day_fri": "ו",
+        "day_sat": "ש"
     }
 }
