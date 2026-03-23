@@ -39,6 +39,15 @@ When approaches conflict:
 ### 4. Quality Gate
 Before marking a task complete, verify all sub-tasks in `.claude/todo.md` are `[x]`, the build compiles, and the branch is not `main`.
 
+### 5. Visual QA
+When a task involves layout, alignment, or visual output changes, include a UI verification step in the task sequence. Invoke the `ui-inspector` agent (subagent_type: `ui-inspector`, model: `haiku`) with:
+- `componentName` — name of the changed component
+- `pageUrl` — full URL to inspect (e.g. `http://localhost:4201/dashboard`)
+- `worktreeRoot` — read `.worktree-port` in the active worktree for port; if on main: port = `4200`, worktreeRoot = `C:/foodCo/foodVibe1.0`
+- `navigationHint` — steps to reveal hidden elements, or "no navigation needed"
+
+Use the report as evidence before considering the visual task complete.
+
 ## Output Format
 
 Use `.claude/references/team-leader-output-template.md` for the standard output format.

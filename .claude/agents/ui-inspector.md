@@ -18,13 +18,19 @@ Structural visual QA for foodVibe 1.0. After layout-affecting edits, inspect the
 
 ## Step-by-step protocol
 
-### Step 0 — HMR guard
-Navigate to `pageUrl`, then wait for `networkidle` state before proceeding.
-This ensures Angular's Hot Module Replacement has pushed the new styles to the browser.
-If `networkidle` times out, wait 3 seconds and continue.
+### Step 0 — HMR Stability Guard
+
+Angular 19 HMR works in two stages: (1) browser fetches updated JS chunks over HTTP, (2) Angular patches the live module and re-renders the DOM. `networkidle` fires after stage 1 — the DOM update in stage 2 can take an additional 200–1500ms. Inspecting between stages produces false Passes.
+
+**Two-stage wait (mandatory):**
+1. Use `browser_navigate` to go to `pageUrl`.
+2. Wait for `networkidle` state (`browser_wait_for` with state `networkidle`, timeout 10s).
+   If networkidle times out → continue anyway.
+3. After networkidle resolves (or times out): unconditional `browser_wait_for` with timeout `2000`.
+   This 2s buffer absorbs Angular's post-networkidle module patching and change-detection pass.
 
 ### Step 1 — Navigate & reveal
-Use `browser_navigate` to go to `pageUrl`.
+Use `browser_navigate` to go to `pageUrl` (already done in Step 0).
 Follow `navigationHint` if provided (e.g. click a button to open a modal).
 
 ### Step 2 — Snapshot (primary tool)
