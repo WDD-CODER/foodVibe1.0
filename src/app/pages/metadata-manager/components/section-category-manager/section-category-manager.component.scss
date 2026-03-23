@@ -128,6 +128,7 @@
   .item-actions {
     display: flex;
     align-items: center;
+    align-self: center;
 
     gap: 0.25rem;
   }
@@ -154,7 +155,7 @@
 
   .btn-edit,
   .c-icon-btn.danger {
-    display: flex;
+    display: grid;
     place-content: center;
 
     width: 2.25rem;
