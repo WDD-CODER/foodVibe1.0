@@ -27,6 +27,12 @@
   }
 }
 
+.amount-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .unit-creator-amount .c-input-stack input[type="number"] {
   text-align: center;
 

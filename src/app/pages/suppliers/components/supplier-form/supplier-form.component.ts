@@ -17,6 +17,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { duplicateEntityNameValidator } from 'src/app/core/validators/item.validators';
 import { SupplierDataService } from '@services/supplier-data.service';
 import { LoggingService } from '@services/logging.service';
+import { RequireAuthService } from 'src/app/core/utils/require-auth.util';
 import { Supplier } from '@models/supplier.model';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
@@ -45,6 +46,7 @@ export class SupplierFormComponent implements OnInit {
   private readonly supplierData = inject(SupplierDataService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly logging = inject(LoggingService);
+  private readonly requireAuth = inject(RequireAuthService);
 
   protected supplierForm_!: FormGroup;
   protected isEditMode_ = signal(false);
@@ -132,6 +134,7 @@ export class SupplierFormComponent implements OnInit {
   }
 
   protected onSubmit(): void {
+    if (!this.requireAuth.requireAuth()) return;
     if (this.supplierForm_.invalid || this.isSaving_()) return;
     const raw = this.supplierForm_.getRawValue();
     const delivery_days_: number[] = [];

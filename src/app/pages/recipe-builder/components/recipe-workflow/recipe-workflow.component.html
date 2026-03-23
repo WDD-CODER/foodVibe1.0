@@ -1,12 +1,12 @@
-<div class="workflow-container shadow-sm" dir="rtl" [formGroup]="$any(workflowFormArray().parent)">
-  
+<div class="workflow-container" dir="rtl" [formGroup]="$any(workflowFormArray().parent)">
+
   @if (type() === 'preparation') {
     <div class="workflow-grid" formArrayName="workflow_items">
       <div class="grid-header">
         <div class="col-drag"></div>
-        <div class="col-id text-center">#</div>
+        <div class="col-id col-center">#</div>
         <div class="col-instruction">{{ 'instruction' | translatePipe }}</div>
-        <div class="col-timer text-center">{{ 'labor_time_minutes' | translatePipe }}</div>
+        <div class="col-timer col-center">{{ 'labor_time_minutes' | translatePipe }}</div>
         <div class="col-actions"></div>
       </div>
 
@@ -34,7 +34,7 @@
 
             <div class="col-timer">
               <div class="timer-counter">
-                <lucide-icon name="timer" class="h-4 w-4 text-slate-400"></lucide-icon>
+                <lucide-icon name="timer" class="wf-icon icon-muted"></lucide-icon>
                 <button
                   type="button"
                   class="counter-btn minus"
@@ -42,7 +42,7 @@
                   (click)="decrementLaborTime(group)"
                   tabindex="-1"
                 >
-                  <lucide-icon name="minus" class="h-4 w-4"></lucide-icon>
+                  <lucide-icon name="minus" class="wf-icon"></lucide-icon>
                 </button>
                 @if (editingLaborTimeIndex_() === i) {
                   <input
@@ -72,22 +72,22 @@
                   (click)="incrementLaborTime(group)"
                   tabindex="-1"
                 >
-                  <lucide-icon name="plus" class="h-4 w-4"></lucide-icon>
+                  <lucide-icon name="plus" class="wf-icon"></lucide-icon>
                 </button>
               </div>
             </div>
 
-            <div class="col-actions place-self-center h-4">
+            <div class="col-actions">
               <button (click)="removeItem.emit(i)" class="delete-btn">
-                <lucide-icon name="trash-2" class="h-4 w-4"></lucide-icon>
+                <lucide-icon name="trash-2" class="wf-icon"></lucide-icon>
               </button>
             </div>
           </div>
         }
       </div>
-      
+
       <button type="button" (click)="addItem.emit()" class="add-row-btn">
-        <lucide-icon name="plus" class="ml-2 h-4 w-4"></lucide-icon>
+        <lucide-icon name="plus" class="wf-icon"></lucide-icon>
         {{ 'add_prep_stage' | translatePipe }}
       </button>
     </div>
@@ -168,16 +168,16 @@
 
             <div class="col-prep-actions">
               <button type="button" (click)="removeItem.emit(i)" class="delete-btn">
-                <lucide-icon name="trash-2" class="h-4 w-4"></lucide-icon>
+                <lucide-icon name="trash-2" class="wf-icon"></lucide-icon>
               </button>
             </div>
           </div>
         }
       </div>
-      
+
       <div class="add-row-wrap">
         <button type="button" (click)="addItem.emit(); $event.stopPropagation()" class="add-row-btn">
-          <lucide-icon name="plus" class="ml-2 h-4 w-4"></lucide-icon>
+          <lucide-icon name="plus" class="wf-icon"></lucide-icon>
           {{ 'add_preparation' | translatePipe }}
         </button>
       </div>
