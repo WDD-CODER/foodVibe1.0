@@ -1,30 +1,19 @@
-import { Injectable, signal, inject } from '@angular/core'
+import { Injectable, Signal, inject } from '@angular/core'
 import { StorageService } from './async-storage.service'
 import { LoggingService } from './logging.service'
 import { VenueProfile } from '../models/venue.model'
+import { BaseEntityDataService } from './base-entity-data.service'
 
 const ENTITY = 'VENUE_PROFILES'
 const TRASH_KEY = 'TRASH_VENUES'
 
 @Injectable({ providedIn: 'root' })
-export class VenueDataService {
-  private storage = inject(StorageService)
-  private logging = inject(LoggingService)
-
-  private venueStore_ = signal<VenueProfile[]>([]);
-  readonly allVenues_ = this.venueStore_.asReadonly();
+export class VenueDataService extends BaseEntityDataService<VenueProfile> {
+  /** Domain alias for the base-class signal. */
+  readonly allVenues_: Signal<VenueProfile[]> = this.all_
 
   constructor() {
-    this.loadInitialData();
-  }
-
-  async reloadFromStorage(): Promise<void> {
-    await this.loadInitialData();
-  }
-
-  private async loadInitialData(): Promise<void> {
-    const data = await this.storage.query<VenueProfile>(ENTITY);
-    this.venueStore_.set(data);
+    super(ENTITY)
   }
 
   async getVenueById(_id: string): Promise<VenueProfile> {
@@ -38,16 +27,14 @@ export class VenueDataService {
       created_at_: newItem.created_at_ ?? now,
     }
     const saved = await this.storage.post<VenueProfile>(ENTITY, withTimestamp as VenueProfile)
-    this.venueStore_.update(list => [...list, saved])
+    this.updateItems(list => [...list, saved])
     this.logging.info({ event: 'crud.venue.create', message: 'Venue created', context: { entityType: ENTITY, id: saved._id } })
     return saved
   }
 
   async updateVenue(item: VenueProfile): Promise<VenueProfile> {
     const result = await this.storage.put<VenueProfile>(ENTITY, item)
-    this.venueStore_.update(list =>
-      list.map(v => (v._id === result._id ? result : v))
-    )
+    this.updateItems(list => list.map(v => (v._id === result._id ? result : v)))
     this.logging.info({ event: 'crud.venue.update', message: 'Venue updated', context: { entityType: ENTITY, id: result._id } })
     return result
   }
@@ -57,7 +44,7 @@ export class VenueDataService {
     const withDeleted = { ...item, deletedAt: Date.now() } as VenueProfile & { deletedAt: number }
     await this.storage.appendExisting(TRASH_KEY, withDeleted)
     await this.storage.remove(ENTITY, _id)
-    this.venueStore_.update(list => list.filter(v => v._id !== _id))
+    this.updateItems(list => list.filter(v => v._id !== _id))
     this.logging.info({ event: 'crud.venue.delete', message: 'Venue deleted', context: { entityType: ENTITY, id: _id } })
   }
 
@@ -73,7 +60,7 @@ export class VenueDataService {
     const rest = trash.filter(v => v._id !== _id);
     await this.storage.replaceAll(TRASH_KEY, rest);
     await this.storage.appendExisting(ENTITY, item);
-    this.venueStore_.update(list => [...list, item]);
+    this.updateItems(list => [...list, item]);
     return item;
   }
 }

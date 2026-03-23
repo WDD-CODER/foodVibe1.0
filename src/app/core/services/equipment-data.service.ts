@@ -1,7 +1,8 @@
-import { Injectable, signal, inject } from '@angular/core'
+import { Injectable, Signal, inject } from '@angular/core'
 import { StorageService } from './async-storage.service'
 import { LoggingService } from './logging.service'
 import { Equipment } from '../models/equipment.model'
+import { BaseEntityDataService } from './base-entity-data.service'
 
 const ENTITY = 'EQUIPMENT_LIST'
 const TRASH_KEY = 'TRASH_EQUIPMENT'
@@ -10,24 +11,12 @@ const TRASH_KEY = 'TRASH_EQUIPMENT'
 export const ERR_DUPLICATE_EQUIPMENT_NAME = 'DUPLICATE_EQUIPMENT_NAME'
 
 @Injectable({ providedIn: 'root' })
-export class EquipmentDataService {
-  private storage = inject(StorageService)
-  private logging = inject(LoggingService)
-
-  private equipmentStore_ = signal<Equipment[]>([]);
-  readonly allEquipment_ = this.equipmentStore_.asReadonly();
+export class EquipmentDataService extends BaseEntityDataService<Equipment> {
+  /** Domain alias for the base-class signal. */
+  readonly allEquipment_: Signal<Equipment[]> = this.all_
 
   constructor() {
-    this.loadInitialData();
-  }
-
-  async reloadFromStorage(): Promise<void> {
-    await this.loadInitialData();
-  }
-
-  private async loadInitialData(): Promise<void> {
-    const data = await this.storage.query<Equipment>(ENTITY);
-    this.equipmentStore_.set(data);
+    super(ENTITY)
   }
 
   async getEquipmentById(_id: string): Promise<Equipment> {
@@ -36,7 +25,7 @@ export class EquipmentDataService {
 
   async addEquipment(newItem: Omit<Equipment, '_id'>): Promise<Equipment> {
     const name = (newItem.name_hebrew ?? '').trim()
-    if (name && this.equipmentStore_().some(e => (e.name_hebrew ?? '').trim() === name)) {
+    if (name && this.currentItems().some(e => (e.name_hebrew ?? '').trim() === name)) {
       throw new Error(ERR_DUPLICATE_EQUIPMENT_NAME)
     }
     const now = new Date().toISOString()
@@ -46,14 +35,14 @@ export class EquipmentDataService {
       updated_at_: now,
     }
     const saved = await this.storage.post<Equipment>(ENTITY, withTimestamps as Equipment)
-    this.equipmentStore_.update(list => [...list, saved])
+    this.updateItems(list => [...list, saved])
     this.logging.info({ event: 'crud.equipment.create', message: 'Equipment created', context: { entityType: ENTITY, id: saved._id } })
     return saved
   }
 
   async updateEquipment(item: Equipment): Promise<Equipment> {
     const name = (item.name_hebrew ?? '').trim()
-    if (name && this.equipmentStore_().some(e => e._id !== item._id && (e.name_hebrew ?? '').trim() === name)) {
+    if (name && this.currentItems().some(e => e._id !== item._id && (e.name_hebrew ?? '').trim() === name)) {
       throw new Error(ERR_DUPLICATE_EQUIPMENT_NAME)
     }
     const updated = {
@@ -61,9 +50,7 @@ export class EquipmentDataService {
       updated_at_: new Date().toISOString(),
     }
     const result = await this.storage.put<Equipment>(ENTITY, updated)
-    this.equipmentStore_.update(list =>
-      list.map(e => (e._id === result._id ? result : e))
-    )
+    this.updateItems(list => list.map(e => (e._id === result._id ? result : e)))
     this.logging.info({ event: 'crud.equipment.update', message: 'Equipment updated', context: { entityType: ENTITY, id: result._id } })
     return result
   }
@@ -73,7 +60,7 @@ export class EquipmentDataService {
     const withDeleted = { ...item, deletedAt: Date.now() } as Equipment & { deletedAt: number }
     await this.storage.appendExisting(TRASH_KEY, withDeleted)
     await this.storage.remove(ENTITY, _id)
-    this.equipmentStore_.update(list => list.filter(e => e._id !== _id))
+    this.updateItems(list => list.filter(e => e._id !== _id))
     this.logging.info({ event: 'crud.equipment.delete', message: 'Equipment deleted', context: { entityType: ENTITY, id: _id } })
   }
 
@@ -89,7 +76,7 @@ export class EquipmentDataService {
     const rest = trash.filter(e => e._id !== _id);
     await this.storage.replaceAll(TRASH_KEY, rest);
     await this.storage.appendExisting(ENTITY, item);
-    this.equipmentStore_.update(list => [...list, item]);
+    this.updateItems(list => [...list, item]);
     return item;
   }
 }
