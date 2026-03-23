@@ -1,0 +1,17 @@
+---
+description: Mandatory gate — physically read agent.md and .claude/copilot-instructions.md before the first response
+alwaysApply: true
+---
+
+**Execute only if this is the first user message in the conversation — i.e., there are no prior assistant responses visible in context. Skip silently on all subsequent messages.**
+
+Use your file-read tool to open and read both files below in order. Do not paraphrase, infer, or skip. Each file must be a real tool call that returns file content.
+
+1. Open and read [`agent.md`](../../agent.md)
+2. Open and read [`.claude/copilot-instructions.md`](../../.claude/copilot-instructions.md)
+
+Once both files have been read and their content is present in context, emit exactly:
+
+> Yes chef!
+
+Then stop. Do not continue, do not answer the original request, do not start any task. Wait for the user's next message.

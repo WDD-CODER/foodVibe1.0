@@ -1,0 +1,12 @@
+---
+description: Engine classes (.c-*) must never be defined in component SCSS files — they belong in src/styles.scss only
+alwaysApply: false
+globs: ["src/**/*.component.scss", "src/**/*.scss", "!src/styles.scss"]
+---
+
+Never define a `.c-*` engine class (e.g. `.c-button`, `.c-card`, `.c-chip`, `.c-dropdown`) in this file.
+
+Engine classes belong exclusively in `src/styles.scss`. Angular's view encapsulation will scope any `.c-*` class defined here, making it invisible to other components and breaking the shared engine system.
+
+**If you need a new engine**: add it to `src/styles.scss`, then apply it in this component's template.
+**If you need component-only styles**: use a descriptive local class (e.g. `.header-wrapper`) — not a `.c-*` name.
