@@ -27,6 +27,37 @@
       "Bash(ng serve:*)",
       "Bash(npm run:*)",
       "Bash(netstat:*)"
+      "Edit(src/**)",
+      "Edit(.claude/**)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_hover",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_evaluate",
+      "mcp__playwright__browser_run_code",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_fill_form",
+      "mcp__playwright__browser_press_key",
+      "mcp__playwright__browser_navigate_back",
+      "mcp__playwright__browser_resize",
+      "mcp__playwright__browser_close",
+      "mcp__playwright__browser_tabs"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Examine tool_input.file_path from $ARGUMENTS. If the path contains '/plans/' and ends with '.md', return ONLY this JSON (no explanation): {\"continue\": false, \"stopReason\": \"To save plan files properly, use the phrase 'save the plan' in chat. This ensures correct numbering, todo.md sync, and file placement through the save-plan skill.\"}. If the path does NOT match plans/*.md pattern, return: {\"continue\": true}"
+          }
+        ]
+      }
     ]
   }
 }

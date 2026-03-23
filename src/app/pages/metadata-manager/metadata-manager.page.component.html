@@ -6,7 +6,7 @@
     <ng-container *ngTemplateOutlet="managerCard; context: { 
       title: 'metadata_units_and_conversions_title', 
       icon: 'scale', 
-      colorClass: 'text-emerald-600',
+      colorClass: 'icon-success',
       items: allUnitKeys_(),
       type: 'unit'
     }"></ng-container>
@@ -14,7 +14,7 @@
     <ng-container *ngTemplateOutlet="managerCard; context: { 
       title: 'metadata_product_categories_title', 
       icon: 'tag', 
-      colorClass: 'text-indigo-600',
+      colorClass: 'icon-primary',
       items: allCategories_(),
       type: 'category'
     }"></ng-container>
@@ -22,7 +22,7 @@
     <ng-container *ngTemplateOutlet="managerCard; context: { 
       title: 'metadata_global_allergens_title', 
       icon: 'alert-triangle', 
-      colorClass: 'text-rose-500',
+      colorClass: 'icon-danger',
       items: allAllergens_(),
       type: 'allergen'
     }"></ng-container>
@@ -30,14 +30,14 @@
     <ng-container *ngTemplateOutlet="managerCard; context: { 
       title: 'metadata_recipe_labels_title', 
       icon: 'tags', 
-      colorClass: 'text-sky-600',
+      colorClass: 'icon-info',
       items: allLabelKeys_(),
       type: 'label'
     }"></ng-container>
 
     <section class="manager-card menu-types-card">
       <div class="card-title">
-        <lucide-icon name="utensils-crossed" class="text-teal-600"></lucide-icon>
+        <lucide-icon name="utensils-crossed" class="icon-primary"></lucide-icon>
         <h2>{{ 'metadata_menu_types_title' | translatePipe }}</h2>
       </div>
       <p class="card-desc">{{ 'metadata_menu_types_desc' | translatePipe }}</p>
@@ -102,7 +102,7 @@
 
     <section class="manager-card">
       <div class="card-title">
-        <lucide-icon name="package" class="text-amber-600"></lucide-icon>
+        <lucide-icon name="package" class="icon-warning"></lucide-icon>
         <h2>{{ 'load_demo_data' | translatePipe }}</h2>
       </div>
       <p class="card-desc">{{ 'metadata_demo_data_desc' | translatePipe }}</p>
@@ -115,7 +115,7 @@
 
     <section class="manager-card">
       <div class="card-title">
-        <lucide-icon name="archive" class="text-violet-600"></lucide-icon>
+        <lucide-icon name="archive" class="icon-accent"></lucide-icon>
         <h2>{{ 'backup_restore' | translatePipe }}</h2>
       </div>
       <p class="card-desc">{{ 'backup_restore_desc' | translatePipe }}</p>

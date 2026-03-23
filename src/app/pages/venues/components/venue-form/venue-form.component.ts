@@ -18,6 +18,7 @@ import { duplicateEntityNameValidator } from 'src/app/core/validators/item.valid
 import { useSavingState } from 'src/app/core/utils/saving-state.util';
 import { VenueDataService } from '@services/venue-data.service';
 import { EquipmentDataService } from '@services/equipment-data.service';
+import { RequireAuthService } from 'src/app/core/utils/require-auth.util';
 import {
   VenueProfile,
   VenueInfraItem,
@@ -53,6 +54,7 @@ export class VenueFormComponent implements OnInit {
   private readonly venueData = inject(VenueDataService);
   private readonly equipmentData = inject(EquipmentDataService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly requireAuth = inject(RequireAuthService);
 
   protected venueForm_!: FormGroup;
   protected isEditMode_ = signal(false);
@@ -131,6 +133,7 @@ export class VenueFormComponent implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
+    if (!this.requireAuth.requireAuth()) return;
     if (this.venueForm_.invalid) return;
     await this.saving.withSaving(async () => {
       const v = this.venueForm_.getRawValue();

@@ -81,9 +81,9 @@ For each such ingredient, try to split "product + prep action" so the recipe use
 Ask focused, numbered questions only for what is actually missing:
 
 1. **Type** (if ambiguous): dish or preparation?
-2. **Yield** (if missing): **Ask** the user (e.g. "כמה מנות? או אשר ברירת מחדל: סך משקלי המרכיבים"). If the user does **not** answer (or replies "default" / "ברירת מחדל" / "סך המרכיבים"), apply the **Default yield** rule (sum of kg/liter). If the user answers with a value, use that. If the default cannot be applied (e.g. all ingredients in `unit`), ask and fall back to `yield_amount_: 1`, `yield_unit_: "unit"` when unanswered.
+2. **Yield** (if missing): **Ask** the user (e.g. "כמה מנות? או אשר ברירת מחדל: סך משקלי המרכיבים"). If the user does **not** answer (or replies "default" / "ברירת מחדל" / "סך המרכיבים"), apply the **Default yield** rule (sum of kg/liter). If the user answers with a value, use that. If the default cannot be applied (e.g. all ingredients are in `unit` like "3 eggs"), ask once. If still unanswered, strictly fall back to `yield_amount_: 1`, `yield_unit_: "unit"`. Do not estimate weights for unit-based ingredients.
 3. **Station** (if unknown): stove / oven / cold / fry?
-4. **Unit mismatches**: ask per ingredient with specific conversion options.
+4. **Unit mismatches**: ask per ingredient with specific conversion options. If the user does not answer a mismatch question, re-ask it once before proceeding to Step 3. Do not silently default — an unanswered mismatch is a risk to costing accuracy.
 5. **Mise vs steps** (for dishes): use mise list as-is?
 6. **Logistics details**: ask per item if unclear.
 
@@ -181,5 +181,5 @@ If something goes wrong during the workflow:
 - **Ambiguous product match** (multiple products could match an ingredient name): list all candidates with their `_id` and `name_hebrew`, ask the user to pick one. Do not guess.
 - **JSON write fails** (parse error or malformed file): read back the target file, validate it is valid JSON, report the exact error. Do not retry blindly -- show the user the issue.
 - **Duplicate name detected after write**: if the duplicate check in Step 3 was missed and the write created a duplicate `name_hebrew`, report it immediately in Step 5 and offer to rename or remove.
-- **Unit mismatch unresolved**: if the user does not answer the unit question in Step 2, default to the product's `base_unit_` and flag it in the Step 5 report for manual follow-up.
+- **Unit mismatch unresolved**: re-ask once before Step 3. If still unanswered after the second ask, default to `base_unit_` and flag in the Step 5 report.
 - **Image extraction incomplete** (blurry, partial, multi-page): extract what is readable, list the gaps explicitly in Step 2, and ask the user to fill in missing fields before proceeding to Step 3.

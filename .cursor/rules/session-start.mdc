@@ -3,7 +3,7 @@ description: Session start — read handoff notes and sync GitHub context
 alwaysApply: true
 ---
 
-**Execute Steps 1 and 2 only if this is the first user message in the conversation — i.e., there are no prior assistant responses visible in context. Skip silently on all subsequent messages.**
+**Execute Steps 1 and 2 only if this is the first user message in the conversation — i.e., there are no prior assistant responses visible in context. Skip silently on all subsequent messages. Also skip both steps if quick-mode is active.**
 
 ### Decision tree
 
@@ -11,12 +11,15 @@ alwaysApply: true
 First message in conversation?
   └── No  → skip both steps silently
   └── Yes →
-        Step 1: Check notes/session-handoffs/ for files from the last 3 days
-          └── Found  → summarize key context; append tip: "Tip: Say 'I'm done' or 'wrap up' when you're done for the day to save a session handoff."
-          └── Not found → note the gap; append same tip
-        Step 2: Does notes/github-sync/YYYY-MM-DD.md exist for today?
-          └── Yes → skip (already synced this session)
-          └── No  → read .claude/skills/github-sync/SKILL.md and run sync
+        Quick mode active (QUICK_MODE_ENABLED marker present)?
+          └── Yes → skip both steps silently
+          └── No  →
+                Step 1: Check notes/session-handoffs/ for files from the last 3 days
+                  └── Found  → summarize key context; append tip: "Tip: Say 'I'm done' or 'wrap up' when you're done for the day to save a session handoff."
+                  └── Not found → note the gap; append same tip
+                Step 2: Does notes/github-sync/YYYY-MM-DD.md exist for today?
+                  └── Yes → skip (already synced this session)
+                  └── No  → read .claude/skills/github-sync/SKILL.md and run sync
 ```
 
 ### Step 1 — Handoff check

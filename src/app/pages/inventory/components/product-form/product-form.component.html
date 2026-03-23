@@ -21,8 +21,8 @@
       </div>
 
       <div class="form-group">
-        <label class="flex items-center gap-2 collapsible-field__label-with-icon">
-          <lucide-icon name="tags" class="icon-xs text-slate-500"></lucide-icon>
+        <label class="label-row collapsible-field__label-with-icon">
+          <lucide-icon name="tags" class="icon-xs icon-muted"></lucide-icon>
           {{ 'category' | translatePipe }}
         </label>
         <div class="category-input-box" (clickOutside)="closeCategoryDropdown()"
@@ -119,7 +119,7 @@
 
           <div class="input-wrapper"
             [class.field-error]="option.get('conversion_rate_')?.invalid && (option.get('conversion_rate_')?.dirty || isSubmitted)">
-            <label class="flex items-center gap-2">
+            <label class="label-row">
               <span class="math-text">=</span>
               <input type="number" formControlName="conversion_rate_" [placeholder]="'quantity' | translatePipe" step="any" min="0.0001">
             </label>
@@ -127,7 +127,7 @@
 
           <div class="input-wrapper"
             [class.field-error]="option.get('uom')?.invalid && (option.get('uom')?.dirty || isSubmitted)">
-            <label class="flex items-center gap-2">
+            <label class="label-row">
               <span class="math-text flex">:</span>
 
               <app-custom-select
@@ -173,8 +173,8 @@
 
       <div class="form-group collapsible-field">
         <div class="collapsible-field__content" [class.collapsible-field__content--hidden]="!expandedSupplier_()" (clickOutside)="onSupplierBlur($event)">
-          <label class="collapsible-field__label-with-icon flex items-center gap-2">
-            <lucide-icon name="truck" class="icon-xs text-slate-500"></lucide-icon>
+          <label class="collapsible-field__label-with-icon">
+            <lucide-icon name="truck" class="icon-xs icon-muted"></lucide-icon>
             {{ 'supplier' | translatePipe }}
           </label>
           <div class="supplier-input-box" (clickOutside)="closeSupplierDropdown()"
@@ -220,15 +220,15 @@
           </div>
         </div>
         <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedSupplier_()" (click)="toggleSupplier()" (keydown.enter)="toggleSupplier()" (keydown.space)="toggleSupplier(); $event.preventDefault()" role="button" tabindex="0">
-          <lucide-icon name="truck" class="icon-xs text-slate-500"></lucide-icon>
+          <lucide-icon name="truck" class="icon-xs icon-muted"></lucide-icon>
           <span>{{ 'supplier' | translatePipe }}</span>
         </div>
       </div>
 
       <div class="form-group allergen-container collapsible-field">
         <div class="collapsible-field__content" [class.collapsible-field__content--hidden]="!expandedAllergens_()" (clickOutside)="onAllergensBlur($event)">
-          <label class="collapsible-field__label-with-icon flex items-center gap-2">
-            <lucide-icon name="shield-alert" class="icon-xs text-amber-500"></lucide-icon>
+          <label class="collapsible-field__label-with-icon">
+            <lucide-icon name="shield-alert" class="icon-xs icon-warning"></lucide-icon>
             {{ 'allergens' | translatePipe }}
           </label>
           <div class="allergen-input-box" (clickOutside)="closeAllergenDropdown()"
@@ -263,41 +263,41 @@
                 </div>
               }
               @if (allergenSearchQuery_().trim() && !allergenOptionsFilteredBySearch_().includes(allergenSearchQuery_().trim()) && !productForm_.get('allergens_')?.value?.includes(allergenSearchQuery_().trim())) {
-              <div class="dropdown-item text-emerald-600 font-bold" #allergenDropdownItem [id]="'allergen-option-' + allergenOptionsFilteredBySearch_().length"
+              <div class="dropdown-item dropdown-item--add-new" #allergenDropdownItem [id]="'allergen-option-' + allergenOptionsFilteredBySearch_().length"
                 [class.dropdown-item--highlight]="allergenDropdownHighlightIndex_() === allergenOptionsFilteredBySearch_().length"
                 tabindex="-1" role="option"
                 (click)="onAddNewAllergen(allergenSearchQuery_())">
                 {{ 'add_new_allergen' | translatePipe }} "{{ allergenSearchQuery_() }}"
               </div>
               }
-              <div *ngIf="allergenOptionsFilteredBySearch_().length === 0 && !allergenSearchQuery_().trim()" class="dropdown-item text-slate-400 italic">
+              <div *ngIf="allergenOptionsFilteredBySearch_().length === 0 && !allergenSearchQuery_().trim()" class="dropdown-item dropdown-item--empty">
                 {{ 'all_allergens_selected' | translatePipe }}
               </div>
             </app-scrollable-dropdown>
           </div>
         </div>
         <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedAllergens_()" (click)="toggleAllergens()" (keydown.enter)="toggleAllergens()" (keydown.space)="toggleAllergens(); $event.preventDefault()" role="button" tabindex="0">
-          <lucide-icon name="shield-alert" class="icon-xs text-amber-500"></lucide-icon>
+          <lucide-icon name="shield-alert" class="icon-xs icon-warning"></lucide-icon>
           <span>{{ 'allergens' | translatePipe }}</span>
         </div>
       </div>
 
 
-      
+
       <div class="form-group collapsible-field">
         <div class="collapsible-field__content" [class.collapsible-field__content--hidden]="!expandedWasteYield_()" (clickOutside)="onWasteYieldBlur($event)">
-          <div class="collapsible-field__label-with-icon flex items-center gap-2 mb-2">
-            <lucide-icon name="flask-conical" class="icon-xs text-indigo-500"></lucide-icon>
-            <span class="font-medium text-slate-700">{{ 'waste_yield_logic' | translatePipe }}</span>
+          <div class="collapsible-field__label-with-icon">
+            <lucide-icon name="flask-conical" class="icon-xs icon-primary"></lucide-icon>
+            <span class="label-text">{{ 'waste_yield_logic' | translatePipe }}</span>
           </div>
-          <div class="grid grid-cols-2 gap-4">
+          <div class="two-col-grid">
             <div class="form-group yield-logic">
               <label>{{ 'waste_percent' | translatePipe }}</label>
               <div class="relative-input">
                 <input SelectOnFocus type="number" formControlName="waste_percent_" placeholder="0" min="0" max="99">
-                <span class="prefix text-slate-400">%</span>
+                <span class="prefix">%</span>
               </div>
-              <p class="helper-text text-xs text-slate-400 mt-1">{{ 'waste_percent_help_text' | translatePipe }}</p>
+              <p class="helper-text">{{ 'waste_percent_help_text' | translatePipe }}</p>
             </div>
 
             <div class="form-group yield-logic ">
@@ -305,48 +305,47 @@
               <div class="relative-input">
                 <input class="yield-factor-input" SelectOnFocus type="number" formControlName="yield_factor_" step="0.001" placeholder="1.00">
               </div>
-              <p class="helper-text text-xs text-slate-400 mt-1">{{ 'yield_factor_help_text' | translatePipe }}</p>
+              <p class="helper-text">{{ 'yield_factor_help_text' | translatePipe }}</p>
             </div>
           </div>
 
-          <div
-            class="cost-impact-alert mt-4 p-3 bg-emerald-50 border border-emerald-100 rounded-lg flex justify-between items-center"
+          <div class="cost-impact-alert"
             *ngIf="productForm_.get('buy_price_global_')?.value > 0">
-            <span class="text-sm text-emerald-800 font-medium">{{ 'net_cost_calculated_with_waste' | translatePipe }}</span>
-            <span class="text-lg font-bold text-emerald-700">₪{{ netUnitCost_() | number:'1.2-2' }}</span>
+            <span class="cost-alert__label">{{ 'net_cost_calculated_with_waste' | translatePipe }}</span>
+            <span class="cost-alert__value">₪{{ netUnitCost_() | number:'1.2-2' }}</span>
           </div>
         </div>
 
-        
+
         <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedWasteYield_()" (click)="toggleWasteYield()" (keydown.enter)="toggleWasteYield()" role="button" tabindex="0">
-          <lucide-icon name="flask-conical" class="icon-xs text-indigo-500"></lucide-icon>
+          <lucide-icon name="flask-conical" class="icon-xs icon-primary"></lucide-icon>
           <span>{{ 'waste_yield_logic' | translatePipe }}</span>
         </div>
       </div>
       <div class="form-group collapsible-field">
         <div class="collapsible-field__content" [class.collapsible-field__content--hidden]="!expandedMinStock_()" (clickOutside)="onMinStockBlur($event)">
-          <label class="collapsible-field__label-with-icon flex items-center gap-2">
-            <lucide-icon name="package" class="icon-xs text-slate-500"></lucide-icon>
+          <label class="collapsible-field__label-with-icon">
+            <lucide-icon name="package" class="icon-xs icon-muted"></lucide-icon>
             {{ 'min_stock_level' | translatePipe }}
           </label>
           <input type="number" formControlName="min_stock_level_" min="0" placeholder="0" />
         </div>
         <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedMinStock_()" (click)="toggleMinStock()" (keydown.enter)="toggleMinStock()" (keydown.space)="toggleMinStock(); $event.preventDefault()" role="button" tabindex="0">
-          <lucide-icon name="package" class="icon-xs text-slate-500"></lucide-icon>
+          <lucide-icon name="package" class="icon-xs icon-muted"></lucide-icon>
           <span>{{ 'min_stock_level' | translatePipe }}</span>
         </div>
       </div>
 
       <div class="form-group collapsible-field">
         <div class="collapsible-field__content" [class.collapsible-field__content--hidden]="!expandedExpiryDays_()" (clickOutside)="onExpiryDaysBlur($event)">
-          <label class="collapsible-field__label-with-icon flex items-center gap-2">
-            <lucide-icon name="calendar-clock" class="icon-xs text-slate-500"></lucide-icon>
+          <label class="collapsible-field__label-with-icon">
+            <lucide-icon name="calendar-clock" class="icon-xs icon-muted"></lucide-icon>
             {{ 'expiry_days_default' | translatePipe }}
           </label>
           <input type="number" formControlName="expiry_days_default_" min="0" placeholder="0" />
         </div>
         <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedExpiryDays_()" (click)="toggleExpiryDays()" (keydown.enter)="toggleExpiryDays()" (keydown.space)="toggleExpiryDays(); $event.preventDefault()" role="button" tabindex="0">
-          <lucide-icon name="calendar-clock" class="icon-xs text-slate-500"></lucide-icon>
+          <lucide-icon name="calendar-clock" class="icon-xs icon-muted"></lucide-icon>
           <span>{{ 'expiry_days_default' | translatePipe }}</span>
         </div>
       </div>

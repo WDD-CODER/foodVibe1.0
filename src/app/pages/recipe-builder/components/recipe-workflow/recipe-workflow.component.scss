@@ -4,6 +4,17 @@
   justify-content: space-evenly;
 }
 
+// ---- Icon utilities (replaces Tailwind h-4 w-4 / text-slate-400) ----
+.wf-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.icon-muted { color: var(--color-text-muted); }
+
+// ---- Column alignment ----
+.col-center { text-align: center; }
+
 .workflow-grid {
   background: var(--bg-glass-strong);
   border: 1px solid var(--border-glass);

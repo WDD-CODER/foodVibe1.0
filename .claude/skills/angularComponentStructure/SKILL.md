@@ -54,8 +54,8 @@ export class MyComponent {
 | `// INJECTED` | All `inject()` calls (services, FormBuilder, etc.) |
 | `// INPUTS` | `input()`, `input.required()` |
 | `// OUTPUTS` | `output()` |
-| `// SIGNALS & CONSTANTS` | `signal()`, `readonly` constants |
-| `// COMPUTED SIGNALS` | `computed()` |
+| `// SIGNALS & CONSTANTS` | `signal()`, `readonly` constants. **Not** `computed()`. |
+| `// COMPUTED SIGNALS` | `computed()` — reactive derivations; always separate from signals so data flow is explicit. |
 
 ## 3. CRDUL Method Grouping
 
@@ -71,6 +71,7 @@ Group public methods by intent:
 
 ## 4. Notes
 
+- `computed()` belongs in `// COMPUTED SIGNALS`, never in `// SIGNALS & CONSTANTS`. It derives from signals; keeping it below makes the dependency direction obvious.
 - Private helpers that don't fit CRDUL can stay under the nearest related section or a small `// HELPERS` block.
 - Use `// GETTERS` only if you prefer it over splitting READ/LIST; otherwise use READ for single values and LIST for collections.
 - Keep sections in order even when empty; omit sections that don't apply.

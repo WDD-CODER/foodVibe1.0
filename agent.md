@@ -20,6 +20,22 @@ Read this and `.claude/copilot-instructions.md` at the start of every task.
 | Security Officer | `security-officer.md` | Post-feature review of auth/storage/route changes; pre-deploy; security consult |
 | UI Inspector | `ui-inspector.md` | Visual QA on explicit request or when team-leader/qa-engineer needs visual verification |
 
+## Skills (`.claude/skills/`)
+- save-plan — User says "save the plan" after confirming
+- commit-to-github — User says commit, push, save to GitHub — read skill first; no git writes until approval
+- deploy-github-pages — User says deploy, publish app, GitHub Pages
+- cssLayer — Before creating or editing any `.scss`/`.css` in `src/`
+- add-recipe — User adds recipe/dish from image or text — Step 3 confirmation before any write
+- github-sync — Start of session, after time away
+- quick-chat — User invokes `/quick-chat` → skip handoff check and GitHub sync (mandatory gate reads remain)
+- techdebt — End of session, before PRs
+- update-docs — After completing features
+- elegant-fix — After a fix that feels hacky
+- angularComponentStructure — Creating/refactoring Angular components
+- auth-and-logging — Routes, auth, persistence, HTTP, CRUD, logging
+- session-end routing — see copilot-instructions.md Section 0
+- Hebrew→English key flows — When a plan adds or changes flows where the user enters a Hebrew value that must have an English key → apply `.claude/copilot-instructions.md` Section 7.1–7.2
+
 ## Commands (`.claude/commands/`)
 | Command | Purpose |
 |---------|---------|

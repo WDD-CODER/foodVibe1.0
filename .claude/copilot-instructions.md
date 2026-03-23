@@ -18,6 +18,7 @@
 - **Breadcrumbs only** `[SHARED]` (e.g. user agrees after commit-to-github, or new hub without full doc pass): Read `.claude/skills/breadcrumb-navigator/SKILL.md` and follow it.
 - **After a hacky fix** `[SHARED]`: Read `.claude/skills/elegant-fix/SKILL.md` to refine into a clean solution.
 - **Session end / wrap up** `[CC]`: User says "done", "I'm done", "end session", "wrap up", "finish up", "ship", "ship it", "we're done", "that's it", or "handoff" → run `git branch --show-current` first, then:
+ - **Quick chat** `[SHARED]`: User invokes `/quick-chat` → skip handoff check and GitHub sync for this chat only (mandatory gate reads remain active).
   - On `main` or `master` → read `.claude/skills/session-handoff/SKILL.md` and follow it in full.
   - On any other branch → read `.claude/skills/worktree-session-end/SKILL.md` and begin Phase 1.
   Never ask the user which skill to use — detect and route automatically.
@@ -72,9 +73,10 @@ Read only the file for the agent you need. Each file defines its own output form
 * **Good**: *"How should we handle type-to-filter for Phase 4 dropdowns?\na. Add text input inside dropdown when open.\nb. Click-to-open only; filter after open.\nc. Defer Phase 4; ship Phase 1–3 first."* Then one line: *Recommendation: c.*
 
 ## 2. The Gatekeeper Protocol
-* **Phase 1 (Decomposition)**: If task spans >2 sub-systems, decompose into `plans/XXX.plan.md`. Every plan MUST include `# Atomic Sub-tasks`. For **new features**, include at least one question in Q&A format (Section 1.1). Plans go in project `plans/` only (never `~/.cursor/plans/`). If the plan touches `.scss`/`.css`, add a step: read and apply `.claude/skills/cssLayer/SKILL.md` before writing styles. When user says "save the plan" after confirming, read `.claude/skills/save-plan/SKILL.md` and follow it.
-* **Phase 2 (Hard Pause)**: Stop after planning. Output: *"The plan is ready in plans/XXX.plan.md. I have [N] questions for you before I proceed."*
-* **Phase 3 (Ledger Sync)**: On "Yes chef!", first action: append sub-tasks to `.claude/todo.md`.
+* **Phase 1 (Decomposition)**: If task spans >2 sub-systems, decompose the task mentally. Identify all decisions that can't be inferred. Do NOT write the plan file yet.
+* **Phase 1.5 (Pre-Plan Q&A)**: If any questions exist → ask them ALL in chat now using Q&A format (Section 1.1). Stop and wait for answers. Do NOT write or save the plan until the user has answered. If no questions → proceed directly to Phase 2.
+* **Phase 2 (Plan + Hard Pause)**: Write `plans/XXX.plan.md` incorporating all answers as settled decisions. Every plan MUST include `# Atomic Sub-tasks`. Plans go in project `plans/` only (never `~/.cursor/plans/`). If the plan touches `.scss`/`.css`, add a step: read and apply `.claude/skills/cssLayer/SKILL.md` before writing styles. Stop after writing. Output: *"Plan ready. Review it and say 'save the plan' to proceed."*
+* **Phase 3 (Ledger Sync)**: On "Yes chef!" or "save the plan", first action: append sub-tasks to `.claude/todo.md`. Then read `.claude/skills/save-plan/SKILL.md` and follow it.
 * **Phase 4 (Atomic Execution)**: Full autonomous file operations post-approval. Commit each sub-task with Conventional Commits. Update `.claude/todo.md` to `[x]` after each commit.
 * **Phase 5 (QA Loop)**: After all `[x]`, output a **How to verify** section: bullet list where each item states where in the app to go (e.g. "Add modal", "Recipe builder") and what to do or what to expect so the user can visually confirm the change.
 
@@ -92,6 +94,7 @@ Read only the file for the agent you need. Each file defines its own output form
 * **Hierarchy**: `core/` (services, models, guards, pipes, directives), `shared/` (reusable UI), `pages/[name]/` (routed views + local `components/`).
 * **breadcrumbs.md**: Keep maps at **major** seams (`src/app/core/`, `core/services`, `core/models`, `core/components`, `shared/`, `pages/`) — not in every leaf folder. If you add a **new** `pages/<feature>/` or another **new** top-level subtree under `src/app/`, add or refresh the nearest `breadcrumbs.md` via `.claude/skills/breadcrumb-navigator/SKILL.md` (or **update-docs**, which runs that workflow in Phase 2). Before editing a directory, **read** `breadcrumbs.md` there if it exists.
 * **Styles**: Scoped SCSS, native nesting, `@layer`. No inline styles unless dynamic. Before any new or edited `.scss`/`.css` in `src/`, read `.claude/skills/cssLayer/SKILL.md` (see Skill Triggers above).
+* **Engine placement (hard rule)**: `.c-*` engine classes (`.c-button`, `.c-card`, `.c-chip`, etc.) belong **only** in `src/styles.scss`. Never define a `.c-*` class in a component `.scss` file — Angular view encapsulation will scope it and it won't work outside that component.
 * **Property order**: Layout → Dimensions → Content → Structure → Effects.
 * **Shared UI**: Before any new UI (control, layout, or pattern), scan `src/app/shared/` and `src/styles.scss` (`.c-*` engines) for something composable; prefer shared structures for a unified app—add page-local markup only when nothing fits.
 * **Shared modals**: Before any modal (translation-key, confirm, leave guard, destructive action, etc.), search `src/app/shared/` for an existing dialog pattern and reuse it; avoid one-off modals for the same job. If a new kind is needed across features, implement or extend it in `shared/`.

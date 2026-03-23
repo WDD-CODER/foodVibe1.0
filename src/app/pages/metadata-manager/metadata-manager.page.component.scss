@@ -340,6 +340,13 @@
   }
 }
 
+.icon-primary { color: var(--color-primary); }
+.icon-success { color: var(--color-success); }
+.icon-danger  { color: var(--color-danger); }
+.icon-warning { color: var(--text-warning); }
+.icon-info    { color: var(--color-info, #0ea5e9); }
+.icon-accent  { color: var(--color-accent, #8b5cf6); }
+
 .empty-state {
   text-align: center;
   padding: 2rem;
