@@ -13,6 +13,13 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 196 — Commit flow speed audit (`plans/196-commit-flow-speed-audit.plan.md`)
+- [ ] Add approved-tree drift check before any git write and auto-replan logic
+- [ ] Rebase/sync branch before commit plan generation when behind origin/main
+- [ ] Create conflict-resolution policy for known files with auto/manual boundaries
+- [ ] Split PR merge and remote branch deletion into explicit verified steps
+- [ ] Record per-phase timing metrics for each commit workflow run
+
 ### Plan 195 — Agent System Refactor 2.0 (`plans/195-agent-system-refactor-2.plan.md`)
 - [x] Phase 1: CLAUDE.md rewrite + agent.md lightweight index
 - [x] Phase 2: Create worktree-setup on-demand skill
@@ -1246,6 +1253,7 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 191 | Dashboard QA: Specs, data-testid, Pattern Fixes | Active |
 | 190 | Master De-Spaghettification Map | Planned |
 | 192 | Pillar 3 Reactive Loop Hardening (A13–A17) | Planned |
+| 196 | Commit flow speed audit | Planned |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 
