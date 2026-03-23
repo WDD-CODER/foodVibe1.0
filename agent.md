@@ -73,4 +73,4 @@ Before starting any task:
 5. **Audit**: Verify the build compiles (`ng build` if uncertain). Do NOT run the full test suite here — it runs only in the commit-to-github flow or when the user explicitly asks.
 5.5 **Tech debt**: When considering a task complete, read `.claude/skills/techdebt/SKILL.md`. Run the analysis scoped to files changed this task. Fix critical/high items or attach a short report and ask whether to fix or proceed.
 6. **Branch**: Not on `main`; use `feat/` or `fix/` branch.
-7. **Commit/push**: User asks to commit or push → read `.claude/skills/commit-to-github/SKILL.md` and follow all phases in order. Get approval before any git write.
+7. **Commit/push**: User asks to commit or push → read `.claude/skills/commit-to-github/SKILL.md`. The skill opens with a **Path Selection gate**: **[C] Checkpoint** (auto-branch from main if needed, fast local commit, no PR) or **[S] Ship** (full sync, diagnostics, automated PR/merge). Argument shortcut: `commit c` → [C] directly; `commit s` → [S] directly. Get approval before any git write.
