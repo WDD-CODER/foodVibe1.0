@@ -91,18 +91,10 @@ export class VenueListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (!this.embeddedInDashboard) {
-      this.heroFab.setPageActions(
-        [{
-          labelKey: 'add_venue',
-          icon: 'plus',
-          run: () => {
-            if (this.requireAuthService.requireAuth()) void this.router.navigate(['/venues/add']);
-          }
-        }],
-        'replace'
-      );
-    }
+    this.heroFab.setPageActions(
+      [{ labelKey: 'add_venue', icon: 'plus', run: () => this.onAddPlace() }],
+      'replace'
+    );
   }
 
   ngOnDestroy(): void {
