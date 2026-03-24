@@ -12,7 +12,7 @@
 - **CSS/SCSS** `[SHARED]`: Before creating or editing any `.scss`/`.css` in `src/` → read `.claude/skills/cssLayer/SKILL.md` and apply it (tokens, five-group rhythm, logical properties).
 - **Add recipe/dish** `[SHARED]`: User adds recipe from image or text → read `.claude/skills/add-recipe/SKILL.md`; Step 3 confirmation required before any write.
 - **Auth, logging, routes, CRUD** `[SHARED]`: Read `.claude/skills/auth-and-logging/SKILL.md` when touching auth, persistence, HTTP, or critical operations.
-- **Session start / after time away** `[SHARED]`: Read `.claude/skills/github-sync/SKILL.md` to pull recent GitHub context.
+- **Session start / after time away** `[SHARED]`: Check `notes/github-sync/<today-date>.md` first. If it exists → skip (`✓ GitHub sync already ran today`). If missing → read `.claude/skills/github-sync/SKILL.md` and run it (saves the file automatically). **Once per calendar day only.**
 - **End of session, before PR** `[SHARED]`: Read `.claude/skills/techdebt/SKILL.md` for duplicate/dead code and TODO audit.
 - **After features** `[SHARED]`: Read `.claude/skills/update-docs/SKILL.md` to refresh breadcrumbs and docs.
 - **Breadcrumbs only** `[SHARED]` (e.g. user agrees after commit-to-github, or new hub without full doc pass): Read `.claude/skills/breadcrumb-navigator/SKILL.md` and follow it.
@@ -106,6 +106,7 @@ Read only the file for the agent you need. Each file defines its own output form
 
 ## 6. Git & Workflow
 * **Branching**: `main` protected. If on `main`, run `git checkout -b feat/<name>`. No new features with uncommitted dirty changes.
+* **Permission rules** (`settings.local.json` / `settings.json`): Prefix-wildcard syntax: `"Bash(command:*)"` — `:*` must be the last characters, nothing after. Exact-match syntax: `"Bash(exact command)"`. **Never** include instruction text, comments, or descriptions inside the rule string — the validator rejects the entire file if any entry is malformed.
 
 ## 7. Translation (Hebrew UI)
 * All user-facing text via `translatePipe` and `dictionary.json` (`public/assets/data/dictionary.json`). Keys: lowercase, underscores. Sections: `units`, `categories`, `allergens`, `general`. When adding a key, add Hebrew translation to the right section; never hardcode Hebrew in templates.
