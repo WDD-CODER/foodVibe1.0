@@ -5,6 +5,11 @@ alwaysApply: true
 
 **Execute Steps 1 and 2 only if this is the first user message in the conversation — i.e., there are no prior assistant responses visible in context. Skip silently on all subsequent messages. Also skip both steps if quick-mode is active.**
 
+Order of operations on first message:
+1. Run mandatory gate reads/confirmation first.
+2. Run this session-start workflow.
+3. If the first message is actionable (command/task/question), continue executing that same user request in the same turn.
+
 ### Decision tree
 
 ```
