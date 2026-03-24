@@ -13,6 +13,14 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 197 — AI Framework Redundancy Fix (`plans/197-ai-framework-redundancy-fix.plan.md`)
+- [ ] Phase 1: Add subagent gate exemption to `CLAUDE.md`
+- [ ] Phase 2: Add main-session-only scope note to `agent.md` preflight
+- [ ] Phase 3: Remove duplicate §0.3 agent table from `copilot-instructions.md`
+- [ ] Phase 4: Tighten "Apply all project standards" → targeted section refs in 6 agent files
+- [ ] Phase 5: Add "Context Scope: gate-exempt" header to `ui-inspector.md`
+- [ ] Verification: run `/validate-agent-refs`
+
 ### Plan 196 — Commit flow speed audit (`plans/196-commit-flow-speed-audit.plan.md`)
 - [ ] Add approved-tree drift check before any git write and auto-replan logic
 - [ ] Rebase/sync branch before commit plan generation when behind origin/main

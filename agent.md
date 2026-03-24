@@ -26,7 +26,7 @@ Read this and `.claude/copilot-instructions.md` at the start of every task.
 - deploy-github-pages — User says deploy, publish app, GitHub Pages
 - cssLayer — Before creating or editing any `.scss`/`.css` in `src/`
 - add-recipe — User adds recipe/dish from image or text — Step 3 confirmation before any write
-- github-sync — Start of session, after time away
+- github-sync — Start of session, after time away. **Once-per-day gate**: check `notes/github-sync/<today>.md` first — if it exists, skip sync and print `✓ GitHub sync already ran today`. Only run if missing.
 - quick-chat — User invokes `/quick-chat` → skip handoff check and GitHub sync (mandatory gate reads remain)
 - techdebt — End of session, before PRs
 - update-docs — After completing features
@@ -48,7 +48,8 @@ Read this and `.claude/copilot-instructions.md` at the start of every task.
 Before starting any task:
 1. Read this file and `.claude/copilot-instructions.md` (mandatory).
    - If the first user message is a command/task, confirm `Yes chef!` and continue handling it in the same turn (do not hard-stop after confirmation).
-2. Check `notes/session-handoffs/` for a handoff file from the last 3 days. If found, read it and summarize key context in your first response.
+2. **GitHub sync (once-per-day)**: Check `notes/github-sync/<today-date>.md`. If it exists → skip sync (`✓ GitHub sync already ran today`). If missing → run `github-sync` skill (it saves the file automatically).
+   Check `notes/session-handoffs/` for a handoff file from the last 3 days. If found, read it and summarize key context in your first response.
 3. Check `.claude/todo.md` for related pending work.
 4. Read `breadcrumbs.md` in the target directory before changing it (if present). If the task adds a new `pages/<feature>/` or top-level subtree under `src/app/`, add or refresh `breadcrumbs.md` for that hub — see **UI, CSS & Folder Structure** in `.claude/copilot-instructions.md`.
 5. If touching SCSS/CSS: read `.claude/skills/cssLayer/SKILL.md`.

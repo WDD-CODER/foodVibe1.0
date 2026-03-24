@@ -26,8 +26,10 @@
       "Bash(gh api:*)",
       "Bash(rm:*)",
       "Write(C:/Users/danwe/AppData/Local/Temp/*)",
+      "Write(plans/*)",
       "Bash(npx ng test:*)",
-      "Edit(src/**/*)","Edit(.claude/**/*)",
+      "Edit(src/**/*)",
+      "Edit(.claude/**/*)",
       "Bash(ng build:*)",
       "Bash(ng serve:*)",
       "Bash(npm run:*)",
@@ -50,19 +52,6 @@
       "mcp__playwright__browser_resize",
       "mcp__playwright__browser_close",
       "mcp__playwright__browser_tabs"
-    ]
-  },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Examine tool_input.file_path from $ARGUMENTS. If the path contains '/plans/' and ends with '.md', return ONLY this JSON (no explanation): {\"continue\": false, \"stopReason\": \"To save plan files properly, use the phrase 'save the plan' in chat. This ensures correct numbering, todo.md sync, and file placement through the save-plan skill.\"}. If the path does NOT match plans/*.md pattern, return: {\"continue\": true}"
-          }
-        ]
-      }
     ]
   }
 }

@@ -1,14 +1,27 @@
-# Commit to GitHub — foodVibe 1.0 (v3.0)
+# Commit to GitHub — foodVibe 1.0 (v4.0)
 
 **Role**: Context-aware lifecycle manager for code changes.
 **Safety Rule**: No `git add`, `git commit`, `git push`, or branch creation until the user has explicitly approved the visual tree in chat.
-**Bash Rule**: Never combine git commands with `&&` or `|`. Issue each command as a **separate Bash tool call** (Windows/PowerShell safe).
+**Bash Rule**: Never combine git commands with `&&` or `|`. Issue each command as a **separate Bash tool call** (Windows/PowerShell safe). Exception: `;` is allowed to chain inspection-only commands that don't depend on each other's exit code.
 
 ---
 
-## 🚦 Context Detection (Always First)
+## 🚦 Empty-Tree Guard (Runs Before Everything)
 
-Before anything else, run:
+The very first command on every invocation:
+
+```bash
+git status --porcelain
+```
+
+If output is **empty** → reply `Nothing to commit. Working tree clean.` and **STOP.**
+No context detection, no gates, no Batch-0 — all skipped.
+
+---
+
+## 🚦 Context Detection (Runs Second)
+
+After the empty-tree guard passes, run:
 
 ```bash
 git rev-parse --git-dir
@@ -42,7 +55,6 @@ This single check routes every subsequent decision. No user prompt needed.
 - Worktree mode → [S/Worktree]
 - Any `.ts`, `.scss`, `.css`, `.html`, `package.json`, `angular.json`, `tsconfig*.json` in changed files → [S-full]
 - Otherwise (only `.md`, skill files, plan files, notes, `.yaml`, `.txt`, non-config `.json`) → [S-light]
-- Zero changed files → report "Nothing to commit." Stop.
 
 ---
 
@@ -173,18 +185,34 @@ When stopped: run `git status --short`. Report every `UU` file. Ask: `"Keep mine
 
 **Applies to**: `.md`, skill files, plan files, notes, config `.json` (non-`package.json`/`angular.json`), `.yaml`, `.txt` — no `.ts`, `.scss`, `.css`, `.html`, or Angular configs.
 
-### Batch-0 (9 commands, all silent before any output)
+### Branch Planning — Max-2-Branch Rule
 
+Group ALL changed files into at most **2 batches**:
+- **App batch** — `.ts`, `.scss`, `.css`, `.html` in `src/`
+- **Chore batch** — everything else (`.md`, skills, `.mdc`, `agent.md`, configs, `.yaml`)
+
+1 batch → 1 branch. 2 batches → 2 branches. **Never more than 2.**
+Never split within a batch by sub-concern (two `.md` files touching different skills = still 1 chore branch).
+
+Branch names:
+- App batch → `fix/<slug>` or `feat/<slug>` inferred from dominant change
+- Chore batch → `chore/<slug>` inferred from dominant changed file/skill
+
+### Batch-0 (3 grouped calls, all silent before any output)
+
+**Group A — local, instant (determines which gates and batches apply):**
 ```bash
-git branch --show-current
-git fetch origin
-git rev-list --count HEAD..origin/main
-git diff --name-only HEAD
-git diff --name-only HEAD..origin/main
-git status --short
-git diff --stat HEAD
+git status --short ; git branch --show-current ; git diff --name-only HEAD ; git diff --stat HEAD
+```
+
+**Group B — network (run only if `rev-list` rebase check is needed):**
+```bash
+git fetch origin ; git rev-list --count HEAD..origin/main ; git diff --name-only HEAD..origin/main
+```
+
+**Group C — GitHub API (run only if open PR detection is needed):**
+```bash
 gh pr list --head <branch> --state open
-git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null || echo "main"
 ```
 
 Plus — if rebase needed (count > 0 and no file overlap): stash push + rebase + stash pop.
@@ -242,12 +270,30 @@ After tree:
 
 **Applies to**: any `.ts`, `.scss`, `.css`, `.html`, `package.json`, `angular.json`, `tsconfig*.json` in changed files.
 
-### Batch-0 (10 commands, all silent before any output)
+### Branch Planning — Max-2-Branch Rule
 
-Same 9 as [S-light] plus:
+Same rule as [S-light]: group into at most 2 batches — **app batch** (`.ts`/`.scss`/`.css`/`.html` in `src/`) and **chore batch** (everything else). Never more than 2 branches.
 
+### Batch-0 (3 grouped calls + full diff, all silent before any output)
+
+**Group A — local, instant:**
+```bash
+git status --short ; git branch --show-current ; git diff --name-only HEAD ; git diff --stat HEAD
+```
+
+**Group A2 — full diff (for gate analysis):**
 ```bash
 git diff HEAD
+```
+
+**Group B — network (only if rebase check needed):**
+```bash
+git fetch origin ; git rev-list --count HEAD..origin/main ; git diff --name-only HEAD..origin/main
+```
+
+**Group C — GitHub API (only if open PR detection needed):**
+```bash
+gh pr list --head <branch> --state open
 ```
 
 Plus conditional rebase (same smart rebase rule).
@@ -435,11 +481,24 @@ For each planned branch:
 2. `git add <file1> <file2> ...` — stage **only this branch's files**
 3. `git commit -m "type(scope): message"`
 4. `git push -u origin <branch-name>`
-5. `git status --porcelain` — verify other branches' files still present
-6. `git checkout main` — safe because no overlapping committed files
-7. Repeat for next branch
+5. `git checkout main` — safe because no overlapping committed files
+6. Repeat for next branch
 
 > **When stash IS needed between branches**: Only if two planned branches touch the same file. After committing + pushing branch A: `git stash push -m "branch-b" -- <branch-b-files>` before switching; pop after creating branch B.
+
+### 4.2b — Direct-Merge for Chore Batch (no GitHub PR)
+
+If the planned branch is a **chore batch** (no `.ts`, `.scss`, `.css`, `.html` files):
+
+After commit + push on `chore/<slug>`, while on `main`:
+```bash
+git merge chore/<slug> --no-ff -m "Merge chore/<slug>: <commit message>"
+git push origin main
+```
+
+**Skip 4.3, 4.4, 4.5 for this branch.** The `--no-ff` merge commit in `main`'s history is the audit trail. To revert: `git revert <merge-hash>`.
+
+Only app batches (with `.ts`/`.scss`/`.html`) proceed to 4.3.
 
 ### 4.3 — PR Creation
 
@@ -459,35 +518,34 @@ Do NOT hardcode a username. Do NOT use `/tmp/`.
 
 > **Why `--body-file`**: `--body "..."` with markdown `#` headings triggers Claude Code's security check and forces a permission prompt.
 
-### 4.4 — Mergeability Gate (approve + merge "A" only)
+### 4.4 — Merge App PR (reactive)
 
-```bash
-gh pr view <pr-number> --json mergeable --jq '.mergeable'
-```
-
-- `"MERGEABLE"` → proceed.
-- `"CONFLICTING"` → **stop.** Report: "PR #N has a conflict. Run: `git fetch origin main && git rebase origin/main`, resolve, then `git push --force-with-lease`." Do not attempt merge.
-- `"UNKNOWN"` → `sleep 4`, retry once. If still `"UNKNOWN"` → report and ask user.
-
-### 4.5 — Merge + Return to Default
+Run merge directly — **no pre-check**:
 
 ```bash
 gh pr merge <pr-number> --merge
-gh pr view <pr-number> --json state
 ```
 
 > **Do NOT use `--auto`** — asynchronous, returns before merge completes.
 
-`state` must equal `"MERGED"` before proceeding.
+- **Exit code 0** → success. Proceed immediately.
+- **Exit non-zero** → diagnose reactively:
+  ```bash
+  gh pr view <pr-number> --json mergeable --jq '.mergeable'
+  ```
+  - `"CONFLICTING"` → stop. Report: "PR #N has a conflict. Run: `git fetch origin main && git rebase origin/main`, resolve, then `git push --force-with-lease`." Do not retry.
+  - `"UNKNOWN"` → `sleep 4`, retry merge once. If still failing → report and ask user.
+
+### 4.5 — Return to Default
+
+After merge (exit code 0), return to main:
 
 ```bash
-git status --porcelain
+git checkout main
 ```
 
-If dirty:
+If the working tree was dirty before Phase 4 (stash was created in 4.1):
 ```bash
-git stash push -u -m "commit-skill-return"
-git checkout main
 git stash pop
 ```
 
