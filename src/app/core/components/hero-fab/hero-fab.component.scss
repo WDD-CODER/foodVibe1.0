@@ -78,8 +78,10 @@
   backdrop-filter: var(--blur-glass);
   -webkit-backdrop-filter: var(--blur-glass);
   cursor: pointer;
-  display: grid;
-  place-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
 
   opacity: 0;
   transform: scale(0.4) translateY(0.5rem);
