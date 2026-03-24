@@ -122,6 +122,18 @@ export class CustomSelectComponent implements ControlValueAccessor {
     return addNewOpt ? [...deduped, addNewOpt] : deduped;
   });
 
+  /** The add-new option from the full options list, or null if not present. */
+  protected addNewOption_ = computed(() =>
+    this.options().find(o => o.value === this.addNewValue()) ?? null
+  );
+
+  /** Options for the scrollable list — excludes the add-new sentinel (rendered separately as footer). */
+  protected visibleOptions_ = computed(() => {
+    const all = this.typeToFilter() ? this.filteredOptions_() : this.options();
+    const addNewVal = this.addNewValue();
+    return all.filter(o => o.value !== addNewVal);
+  });
+
   /** Input display value: when open show search query, when closed show selected label (translated if needed). */
   protected inputDisplayValue_ = computed(() => {
     if (this.open()) return this.searchQuery_();
