@@ -1,54 +1,71 @@
-# Commit to GitHub — foodVibe 1.0 (v2.0)
+# Commit to GitHub — foodVibe 1.0 (v3.0)
 
-**Role**: High-performance lifecycle manager for code changes.
+**Role**: Context-aware lifecycle manager for code changes.
 **Safety Rule**: No `git add`, `git commit`, `git push`, or branch creation until the user has explicitly approved the visual tree in chat.
 **Bash Rule**: Never combine git commands with `&&` or `|`. Issue each command as a **separate Bash tool call** (Windows/PowerShell safe).
 
 ---
 
-## 🚦 Selection Gate (Always First)
+## 🚦 Context Detection (Always First)
 
-**Check for an argument first.** If the user's invocation included a path letter, skip the question:
+Before anything else, run:
 
-- `/commit-to-github c` or `commit c` → go directly to **Path [C]**. Emit: `⚡ Path [C] selected — skipping gate.`
-- `/commit-to-github s` or `commit s` → go directly to **Path [S]**. Emit: `⚡ Path [S] selected — skipping gate.`
+```bash
+git rev-parse --git-dir
+```
 
-**If no argument**, ask before gathering ANY data:
+- Output contains `/worktrees/` or `\worktrees\` → **Worktree mode**
+- Otherwise → **Main-repo mode**
+
+This single check routes every subsequent decision. No user prompt needed.
+
+---
+
+## 🚦 Selection Gate
+
+**Check for an argument first.**
+
+| Argument | Action |
+|----------|--------|
+| `c` | Auto-route: [C/Main] (checkpoint) or [C/Worktree] (push) based on context |
+| `s` | Auto-route: [S-light], [S-full], or [S/Worktree] based on context + file types |
+| `sl` | Force [S-light] — main repo only |
+| `sf` | Force [S-full] — main repo only |
+
+**If no argument**, ask:
 
 > "Yes Chef! How are we handling this?
-> **[C]** Checkpoint Save — fast local commit, no PR
-> **[S]** Ship to Main — full sync, diagnostics, PR/merge"
+> **[C]** Checkpoint / Worktree Push — save locally (main) or push branch (worktree)
+> **[S]** Ship — PR + merge (auto-detects light/full/worktree based on context)"
+
+**[S] auto-detection logic** (runs after context detection + `git diff --name-only HEAD`):
+- Worktree mode → [S/Worktree]
+- Any `.ts`, `.scss`, `.css`, `.html`, `package.json`, `angular.json`, `tsconfig*.json` in changed files → [S-full]
+- Otherwise (only `.md`, skill files, plan files, notes, `.yaml`, `.txt`, non-config `.json`) → [S-light]
+- Zero changed files → report "Nothing to commit." Stop.
 
 ---
 
 ## Output Format Rules (apply throughout this skill)
 
-- **Batch all bash commands before any text output**: Run every inspection command needed for the chosen path first — do not output any formatted text until ALL data gathering is complete.
-- **Suppress preamble**: Do not narrate what files you are reading, do not summarize session handoffs, do not mention github-sync status. Go straight to work.
-- **Single output block**: After all bash commands have run, emit one clean block — no interruptions between phases.
-- **Phase reporting**: Report combined phase status as a one-liner. Format:
-  - `⚡ Path [C] — on branch feat/checkpoint-20260323-1400. N files staged.`
-  - `Phase 0–1: ⚡ No auth/TS changes — debt skipped. No open PR.`
-  - `Phase 0–1: ⚠ N high debt items (listed below). Open PR #N found — review comments surfaced.`
-- **Phase 1 file table**: Output only the file table (path + state + diff stat). No prose. Example:
-  ```
-  Phase 1
-  Path                                         State
-  .claude/skills/commit-to-github/SKILL.md    modified (+42/-18 lines)
-  src/app/core/models/recipe.model.ts         modified (+6/-2 lines)
-  notes/session-handoff.md                    untracked
-  ```
-- **Phase 3 tree first**: Output the visual tree, then the approval prompt. Never put the approval prompt before the tree.
+- **Batch all bash commands before any text output**: Run every inspection command for the chosen path first — do not output any formatted text until ALL data gathering is complete.
+- **Suppress preamble**: Go straight to work.
+- **Single output block**: After all bash commands have run, emit one clean block.
+- **Phase reporting**: Report gate status as one-liners. Format:
+  - `⚡ Auto-rebased 3 commits from origin/main — clean.`
+  - `⚡ No auth/TS changes — debt/spec/security/CSS gates skipped.`
+  - `⚠ Spec FAIL — see below.`
+- **File table**: Path + state + diff stat. No prose.
+- **Tree first**: Output the visual tree before the approval prompt. Never reverse.
+- **Commit message from diff only**: Draft commit type, scope, and message from `git diff HEAD` and `git diff --stat HEAD`. Never open changed files via the Read tool for this purpose.
 
 ---
 
-## Path [C] — Checkpoint Save
+## Path [C/Main] — Checkpoint
 
-**Goal**: Fast named save point. No sync with main. No diagnostics. No PR.
+**Goal**: Fast named save point. No push, no PR, no diagnostics.
 
-### Step 1 — Collect & Branch Guard
-
-Run as separate calls first — needed for branch name inference:
+### Batch (3 commands, silent)
 
 ```bash
 git branch --show-current
@@ -56,327 +73,461 @@ git status --short
 git diff --stat HEAD
 ```
 
-- **If already on a feature branch** → stay on it. No checkout needed. Proceed to Step 2.
-- **If on `main` or `master`** → do NOT auto-create a generic name. Infer a meaningful branch name from the changed files:
-  - Determine the **type**: `feat` (new capability), `fix` (bug), `refactor` (restructure, no behavior change), `chore` (config, docs, tooling), `style` (CSS/SCSS only)
-  - Derive a **short slug** from the file paths and nature of changes (e.g. `feat/recipe-yield-logic`, `fix/inventory-unit-duplicate`, `refactor/auth-interceptor-cleanup`)
-  - Hold the proposed name — show it in the tree header (Step 3). Do not ask separately.
-  - Create the branch only after the user approves the tree.
+### Branch Guard
 
-### Step 3 — Minimal Visual Tree
+- Already on a feature branch → stay. Proceed to tree.
+- On `main`/`master` → infer branch name from changed files:
+  - Type: `feat`, `fix`, `refactor`, `chore`, `style`
+  - Slug: derived from file paths and nature of changes
+  - Show as `[Proposed: chore/your-slug-here]` in tree header
 
-Draft the tree in chat. When on `main`, use `[Proposed: feat/your-slug-here]` as the header. On a feature branch, use `[Current: branch-name]`.
+### Visual Tree
 
 ```
-[Proposed: feat/checkpoint-20260323-1400]
- └── 📦 Commit: feat: checkpoint - <auto-summary of changes>
+[Proposed: chore/update-commit-skill]
+ └── 📦 Commit: chore(skills): <auto-summary>
       📄 path/to/file1
       📄 path/to/file2
 ```
 
 Ask: **"Approve? Y to commit · N to cancel"**
 
-### Step 4 — Execute (only after approval)
+### Execute (after approval only)
 
-Stage and commit all changed files:
+```bash
+git checkout -b <branch-name>   # only if on main
+git add <file1> <file2> ...
+git commit -m "chore: checkpoint - <brief summary>"
+```
+
+**STOP.** No push. No PR. Report: `"✓ Checkpoint saved on <branch>."`
+
+---
+
+## Path [C/Worktree] — Worktree Push
+
+**Goal**: Save progress on a worktree feature branch to remote. No PR, no merge.
+
+### Batch (4 commands, silent)
+
+```bash
+git rev-parse --show-toplevel
+git branch --show-current
+git status --short
+git diff --stat HEAD
+```
+
+### Visual Tree
+
+```
+[Worktree: feat/recipe-search — push only]
+ └── 📦 Commit: feat(recipe-search): <auto-summary>
+      📄 path/to/file.ts  (+N/-N)
+
+Push only — no PR, no merge.
+```
+
+Ask: **"Approve? Y to commit + push · N to cancel"**
+
+### Execute (after approval only)
 
 ```bash
 git add <file1> <file2> ...
-git commit -m "feat: checkpoint - <brief summary>"
+git commit -m "type(scope): message"
+git push -u origin <branch>
 ```
 
-**STOP.** No push. No PR. Report: `"✓ Checkpoint saved on feat/checkpoint-<timestamp>."`
+Report: `"✓ Pushed <branch> to origin. Branch stays open — no merge."`
 
 ---
 
-## Path [S] — Ship to Main
+## Smart Rebase Rule (applies to all [S/Main] paths)
 
-**Goal**: Production-ready merge to main. Full diagnostics. Automated PR.
+**Never ask "Rebase? y/n" mid-flow.** Auto-rebase when safe. Stop only on actual conflict.
 
----
+**Auto-rebase silently when ALL hold:**
+1. `git rev-list --count HEAD..origin/main` > 0
+2. `git diff --name-only HEAD..origin/main` does NOT overlap `git diff --name-only HEAD`
+3. Working tree has no surprise untracked files outside the planned commit
 
-### Phase 0 — Sync & Early Discovery
-
-> Run all Phase 0 steps as separate Bash calls. Batch results — report as a single one-liner after all steps complete.
-
-**Step 0.1 — Fetch & Divergence**
+**Procedure (silent, part of Batch-0 processing):**
 
 ```bash
-git fetch origin
-git rev-list --count HEAD..origin/main
+git stash push -u -m "commit-skill-pre-rebase"
+git rebase origin/main
+git stash pop
 ```
 
-- Count = `0` → Proceed.
-- Count > `0` → **Stop.** Ask: `"Branch is behind origin/main by N commit(s). Rebase now before planning? (y/n)"`
-  - If `y` → `git rebase origin/main`
-  - If rebase fails → **stop.** Run `git status --short`. Report every conflicting file. Ask: `"Keep mine / Keep theirs / Manual?"` Never auto-resolve. Proceed only after user confirms resolution.
+Report as one line in the output block: `⚡ Auto-rebased N commits from origin/main — clean.`
 
-**Step 0.2 — PR Context Check**
+**Stop and ask only when:**
+- File overlap exists between incoming origin/main commits and local changes
+- `git rebase` exits non-zero (conflict markers)
+- `git stash pop` exits with conflict markers
 
-Detect current branch:
+When stopped: run `git status --short`. Report every `UU` file. Ask: `"Keep mine / Keep theirs / Manual?"` Never auto-resolve.
+
+---
+
+## Path [S-light] — Ship Light
+
+**Applies to**: `.md`, skill files, plan files, notes, config `.json` (non-`package.json`/`angular.json`), `.yaml`, `.txt` — no `.ts`, `.scss`, `.css`, `.html`, or Angular configs.
+
+### Batch-0 (9 commands, all silent before any output)
+
 ```bash
 git branch --show-current
+git fetch origin
+git rev-list --count HEAD..origin/main
+git diff --name-only HEAD
+git diff --name-only HEAD..origin/main
+git status --short
+git diff --stat HEAD
+gh pr list --head <branch> --state open
+git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null || echo "main"
 ```
 
-Check for an open PR on this branch:
-- MCP (primary): `mcp__github__list_pull_requests` filtered to current branch
-- Fallback: `gh pr list --head <branch> --state open`
+Plus — if rebase needed (count > 0 and no file overlap): stash push + rebase + stash pop.
 
-- **No open PR** → skip. No further calls.
-- **Open PR found** → read body and review comments:
-  - `mcp__github__get_pull_request` + `mcp__github__list_pull_request_review_comments`
-  - Surface any "changes requested" or pending review items before continuing.
-  - Include PR number in the commit plan summary.
+### Skipped Gates
 
-**Step 0.3 — Targeted Spec Gate**
+| Gate | Reason |
+|------|--------|
+| Spec gate | No `.ts` files |
+| Security gate | Auth filename patterns never match `.md`/config files |
+| Tech debt | No app `.ts` in scope |
+| CSS layer | No `.scss`/`.css` |
 
-Run specs only for changed `.ts` files — not the full suite:
+### Single Output Block
+
+```
+⚡ Auto-rebased 3 commits from origin/main — clean.    (omit if no rebase needed)
+⚠ Open PR #12 found on branch — updating it.           (omit if no open PR)
+⚡ No TS/scss/auth changes — spec/debt/security/CSS gates skipped.
+
+Phase 1
+Path                                         State
+.claude/skills/commit-to-github/SKILL.md    modified (+142/-89 lines)
+```
+
+Then immediately: visual tree + approval prompt.
+
+### Visual Tree
+
+```
+[Current: main]
+ └── 🌿 Branch: chore/commit-skill-v3
+      └── 📦 Commit: chore(skills): rewrite commit-to-github v3 flow
+           📄 .claude/skills/commit-to-github/SKILL.md  (+142/-89)
+
+      🔀 PR: "chore(skills): rewrite commit-to-github v3 flow"
+           • Adds context-aware routing (main vs worktree)
+           • Eliminates blocking rebase prompt with smart auto-rebase
+           • Adds [S-light] fast path for docs/config/skills
+           Test plan: [ ] commit sl on .md file  [ ] verify PR created  [ ] verify merge
+```
+
+**`settings.local.json` check**: If present in tree → read only its `permissions` and `env` keys. No secrets → add `✓ settings.local.json: no secrets detected`. Only escalate if an actual secret is found.
+
+After tree:
+
+> **"Approve to proceed, or deny to cancel. No git writes until you approve.**
+> *A = approve + merge · P = approve + push · N = cancel*"
+
+### Execute → Phase 4
+
+---
+
+## Path [S-full] — Ship Full
+
+**Applies to**: any `.ts`, `.scss`, `.css`, `.html`, `package.json`, `angular.json`, `tsconfig*.json` in changed files.
+
+### Batch-0 (10 commands, all silent before any output)
+
+Same 9 as [S-light] plus:
 
 ```bash
-git diff --name-only HEAD | grep '\.ts$' | grep -v '\.spec\.ts$'
+git diff HEAD
 ```
 
-For each changed file, check if a matching `.spec.ts` exists and collect them. Run only those specs:
+Plus conditional rebase (same smart rebase rule).
+
+### Gate Processing (all silent, in one internal pass)
+
+**Spec gate**: from `git diff --name-only HEAD` output, find non-spec `.ts` files → find matching `.spec.ts` → if found, run:
 
 ```bash
 npx ng test --include="<spec1> <spec2>" --no-watch --browsers=ChromeHeadless
 ```
 
-- Pass → proceed.
-- Fail → **stop.** Report the specific failure and spec file. Ask: `"Fix before building the plan, or proceed anyway?"`
-- No matching specs found → note `"No specs for changed files"` and proceed.
+- Pass → `✅ Spec gate: N specs — PASS`
+- Fail → `❌ Spec gate: FAIL — <spec file>` (surfaces in output block)
+- No matching specs → `⚡ Spec gate: no specs for changed files`
 
-> **Do not run the full test suite here.** Full suite runs at session-handoff and in `test-pr-review-merge` before merge.
+**Security gate**: grep captured `git diff --name-only HEAD` against `auth\.guard|auth\.interceptor|auth-crypto|user\.service|app\.routes`. Grep `git diff HEAD` for `localStorage\.setItem|sessionStorage\.setItem|\[innerHTML\]|bypassSecurityTrust`.
 
-**Step 0.4 — Security Gate**
+- Zero matches → `⚡ Security gate: clean`
+- Matches → `⚠ Security gate: <file list>` (surfaces in output block with question)
 
-```bash
-git diff --name-only HEAD | grep -E "auth\.guard|auth\.interceptor|auth-crypto|user\.service|app\.routes"
-git diff HEAD | grep -E "localStorage\.setItem|sessionStorage\.setItem|\[innerHTML\]|bypassSecurityTrust"
+**Tech debt**: if any `src/app/**/*.ts` in scope → read `.claude/skills/techdebt/SKILL.md`, run scoped analysis. List Critical/High only.
+
+**CSS layer**: if any `.scss`/`.css` in scope → verify against `.claude/skills/cssLayer/SKILL.md`. Report violations.
+
+### Single Output Block
+
+```
+⚡ Auto-rebased 3 commits from origin/main — clean.
+✅ Spec gate: 2 specs — PASS.
+⚡ Security gate: clean.
+⚠ Tech debt: 1 High item — RecipeService: missing error handler (line 42)
+⚡ CSS layer: no violations.
+
+Phase 1
+Path                                          State
+src/app/core/services/recipe.service.ts      modified (+28/-4 lines)
 ```
 
-- Zero matches → emit: `⚡ Security fast-path: no auth/storage-sensitive files — gate skipped.`
-- Matches found → ask:
-  > "Security-sensitive files in this commit ([list]). Run security-officer review first, or proceed anyway?
-  > a. Run security review — invoke `security-officer` agent; wait for its report
-  > b. Proceed anyway"
+If spec FAIL or security match found → surface blocking question IN this same output block before the tree:
+
+```
+❌ Spec gate FAIL: recipe.service.spec.ts — "should return empty array" failed.
+Fix before building the plan, or proceed anyway? (fix / proceed)
+```
+
+Then: visual tree + approval prompt (same format as [S-light]).
+
+### Execute → Phase 4
 
 ---
 
-### Phase 1 — Evaluate & Audit
+## Path [S/Worktree] — Worktree Ship
 
-**Step 1.1 — Collection**
+**Goal**: Full ship pipeline from a worktree — commit, push, PR, merge to main, cleanup.
+
+### Batch-0 (9 commands, all silent)
 
 ```bash
+git rev-parse --show-toplevel
+git branch --show-current
+git worktree list --porcelain
+cat .worktree-port 2>/dev/null || true
 git status --short
 git diff --stat HEAD
+git log main..HEAD --oneline 2>/dev/null | head -20
+git diff --name-only HEAD
+git diff HEAD
 ```
 
-Detect the default branch:
-```bash
-git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null || echo "main"
-```
+Apply spec + security gates (same logic as [S-full]) if `.ts` files present.
 
-Output the file table (path + state + diff stat). No prose. Note any modified/untracked `plans/*.plan.md` files.
-
-**Step 1.2 — Diagnostic Audit**
-
-- **Tech Debt**: Read `.claude/skills/techdebt/SKILL.md`. List **Critical/High items only**. Surface at the top of the output block.
-  > Tech-debt analysis normally runs at task-completion (agent.md step 5.5). If a report was already generated this session, reuse it — do not re-run.
-- **CSS Layer**: If any `.scss` or `.css` file changed → verify against `.claude/skills/cssLayer/SKILL.md`. Report violations.
-- **Security**: Covered in Phase 0.4 — do not re-run here.
-
----
-
-### Phase 2 — Decide & Build Plan
-
-1. **One branch vs several**: One branch if all changes are one logical unit. Multiple branches when changes belong to different concerns (each can be reviewed/merged/reverted independently).
-2. **One vs several commits per branch**: Prefer multiple commits when revert granularity matters. One commit when changes are small and inseparable.
-3. **Practical rule**: Split so reverting one commit is straightforward. Avoid one giant commit when logical steps are clear.
-4. **Branch names**: `feat/<short-name>` or `fix/<short-name>`.
-5. **Include related plan files**: If a `plans/*.plan.md` matches the scope of this commit, include it in the commit.
-6. **Draft the PR**: Title `type(scope): short description` (under 70 chars). Body: 3-bullet summary + test plan checklist. This draft is shown in Phase 3 and executed in Phase 4 — no separate approval round-trip.
-
----
-
-### Phase 3 — Visual Tree + Approval
-
-Output the full tree first, then the approval prompt. Never reverse the order.
-
-**Required format:**
+### Ship Plan (single output block)
 
 ```
-[Current: main]
- └── 🌿 Branch: feat/example-branch
-      ├── 📦 Commit 1: type(scope): short message
-      │    📄 path/to/file1.ts
-      │    📄 path/to/file2.ts
-      └── 📦 Commit 2: type(scope): short message
-           📄 path/to/file3.ts
+🚢 Ship Plan — feat/recipe-search
 
-      🔀 PR: "type(scope): short description"
-           • bullet summary 1
-           • bullet summary 2
-           • bullet summary 3
-           Test plan: [ ] item 1  [ ] item 2
+[1/4] 📦 Commit & Push
+       feat(recipe-search): add fuzzy filter to ingredient list (+28/-4)
+       📄 src/app/pages/recipe-search/recipe-search.component.ts
+
+[2/4] 🌿 Create Pull Request
+       Target: main
+       Title: feat(recipe-search): fuzzy ingredient filter
+       • Adds debounced input filter to ingredient list panel
+       • Matches against name and unit using includes()
+       Test plan: [ ] open recipe builder  [ ] type filter  [ ] verify list narrows
+
+[3/4] ✅ Auto-Merge
+       Method: --merge  |  Runs from main repo path
+
+[4/4] 🗑 Cleanup
+       Remove worktree at <worktreePath>
+       (omit [4/4] if not in a real worktree directory)
+       (omit port line if .worktree-port absent)
 ```
 
-- Use `[Current: main]` (or actual default branch) at the top.
-- For multiple branches, add another `└── 🌿 Branch:` under `[Current: main]`.
+If no worktree to remove → show `[3/3]` and omit [4/4].
 
-**`settings.local.json` check**: If this file appears in the commit tree, read only its `permissions` and `env` keys. If no API keys or secret-looking values → add `✓ settings.local.json: no secrets detected` to the tree. Only escalate to a separate Ask if an actual secret is found.
+> **"A = approve + merge + cleanup  ·  P = push + PR only  ·  N = cancel"**
 
-After the tree, ask:
+### Execute
 
-> **"Approve to proceed, or deny to cancel. No git writes until you approve.**
-> *Approving executes all commits AND creates the PR(s) above — no further prompts. To tweak the PR text, say so before approving.*
-> *A = approve + merge · P = approve + push*"
-
-If the user **denies** → state that no git operations were performed and stop. If they **approve** → proceed to Phase 4.
-
----
-
-### Phase 4 — Execute (The Delegation Boundary)
-
-> **PLAN MODE RE-ENTRY**: If plan mode is unexpectedly triggered during Phase 4, update this plan file with "Execution resumed at step X" and immediately call `ExitPlanMode`. Do **not** restart from Phase 0.
-
-Never erase or discard user changes. No `git reset --hard`, `git clean -fd`, or force-push unless the user explicitly asks.
-
-**4.1 — Clean Tree Gate (Mandatory)**
-
-Check the current branch:
-```bash
-git branch --show-current
-git status --porcelain
-```
-
-- **Already on the default branch (main)**: Modified files survive `git checkout -b` — **no stash needed**. Proceed directly to 4.2.
-- **On a non-default branch**: Files may conflict on checkout. Stash everything first:
-  ```bash
-  git stash push -u -m "commit-skill-pre-sync"
-  git checkout main
-  ```
-- **Two planned branches touch the same file**: Stash is also required between those branch switches (see 4.2 note).
-
-**4.2 — Stashless Multi-Branch Execution**
-
-For each branch in the plan:
-
-1. `git checkout -b <branch-name>` — creates branch from current HEAD; all modified files remain in the working tree
-2. `git add <file1> <file2> ...` — stage **only this branch's files** (leave other branches' files unstaged)
-3. `git commit -m "type(scope): message"`
-4. `git push -u origin <branch-name>`
-5. Create PR + merge (see 4.3–4.5)
-6. `git status --porcelain` — other branches' unstaged files are still present
-7. `git checkout main` — safe because this branch only touched its own files; other modifications survive
-8. `git pull` — modifications survive the pull (no conflict since they are unstaged)
-9. Repeat for the next branch
-
-> **Why this works**: `git checkout` only overwrites working-tree files if the target branch has a different committed version of them. Since each planned branch touches exclusive files, the other branches' modifications are untouched.
-
-> **When stash IS still needed between branches**: Only if two planned branches touch the same file. In that case: after committing + pushing branch A, run `git stash push -m "branch-b" -- <branch-b-files>` before switching; pop after creating branch B.
-
-**4.3 — Root Repo Context (PR + Merge)**
-
-> All PR creation and merge operations must use `git -C <mainRepoPath>` when in a worktree context to avoid `fatal: main is already used` errors.
-
-Write the PR body to a Windows-native temp path, then pass via `--body-file`:
+**Step 1 — Commit (on worktree branch — NEVER `git checkout main` from worktree)**
 
 ```bash
-# Detect temp dir dynamically — works for any user
+git add <file1> <file2> ...
+git commit -m "type(scope): message"
+git push -u origin <currentBranch>
+```
+
+**Step 2 — Create PR**
+
+```bash
 echo $USERPROFILE
 ```
 
 ```
 Write tool → $USERPROFILE/AppData/Local/Temp/pr-body-<branch-slug>.md
-gh pr create --title "<drafted-title>" --body-file "$USERPROFILE/AppData/Local/Temp/pr-body-<branch-slug>.md"
+gh pr create --base main --head <currentBranch> --title "<title>" --body-file "$USERPROFILE/AppData/Local/Temp/pr-body-<branch-slug>.md"
 ```
 
-Use `$USERPROFILE` from the shell — do **not** hardcode a username. Do **NOT** use `/tmp/pr-body.md` — that path does not exist on Windows.
+Capture PR number.
 
-> **Why `--body-file`**: passing `--body "..."` with markdown headings (lines starting with `#`) triggers Claude Code's built-in security check and forces a permission prompt. `--body-file` bypasses this entirely.
+**Step 3 — Mergeability Gate**
 
-**`--body-file` fallback**: If the file is not found, fall back to `--body` with the body inline. Strip any lines starting with `#` from the body (rewrite headings as bold text) to avoid the security prompt.
+```bash
+gh pr view <PR_NUMBER> --json mergeable --jq '.mergeable'
+```
 
-**4.4 — Mergeability Gate (approve + merge "A" only)**
+- `"MERGEABLE"` → proceed
+- `"CONFLICTING"` → stop. Instruct: `git fetch origin main && git rebase origin/main`, resolve, `git push --force-with-lease`. Do not merge.
+- `"UNKNOWN"` → `sleep 4`, retry once. If still unknown → ask user to check manually.
 
-Before running `gh pr merge`, verify:
+**Step 4 — Merge (from main repo path)**
+
+```bash
+git -C "<mainRepoPath>" gh pr merge <PR_NUMBER> --merge
+git -C "<mainRepoPath>" pull origin main
+```
+
+Verify: `gh pr view <PR_NUMBER> --json state` must equal `"MERGED"` before cleanup.
+
+**Step 5 — Cleanup (only if `A` and worktreePath non-empty)**
+
+Kill dev server if port recorded:
+```bash
+PORT=<worktreePort>
+PID=$(netstat -ano 2>/dev/null | grep ":${PORT}" | grep LISTENING | awk '{print $5}' | head -1)
+[ -n "$PID" ] && taskkill /PID "$PID" /F 2>/dev/null || true
+```
+
+Remove worktree:
+```bash
+git -C "<mainRepoPath>" worktree remove "<worktreePath>" --force
+```
+
+**End state**: `"Shipped. <branch> → PR #N → merged. Main is at <hash>. Worktree removed."`
+
+---
+
+## Phase 4 — Execute ([S-light] and [S-full] on main repo)
+
+Never erase or discard user changes. No `git reset --hard`, `git clean -fd`, or force-push unless the user explicitly asks.
+
+### 4.1 — Clean Tree Gate (Mandatory)
+
+```bash
+git branch --show-current
+git status --porcelain
+```
+
+- **Already on `main`/default**: Modified files survive `git checkout -b` — **no stash needed**. Proceed.
+- **On a non-default branch**: Stash first:
+  ```bash
+  git stash push -u -m "commit-skill-pre-sync"
+  git checkout main
+  ```
+
+### 4.2 — Stashless Multi-Branch Execution
+
+For each planned branch:
+
+1. `git checkout -b <branch-name>` — creates branch from current HEAD; all modified files remain
+2. `git add <file1> <file2> ...` — stage **only this branch's files**
+3. `git commit -m "type(scope): message"`
+4. `git push -u origin <branch-name>`
+5. `git status --porcelain` — verify other branches' files still present
+6. `git checkout main` — safe because no overlapping committed files
+7. Repeat for next branch
+
+> **When stash IS needed between branches**: Only if two planned branches touch the same file. After committing + pushing branch A: `git stash push -m "branch-b" -- <branch-b-files>` before switching; pop after creating branch B.
+
+### 4.3 — PR Creation
+
+Detect temp dir:
+```bash
+echo $USERPROFILE
+```
+
+```
+Write tool → $USERPROFILE/AppData/Local/Temp/pr-body-<branch-slug>.md
+gh pr create --title "<title>" --body-file "$USERPROFILE/AppData/Local/Temp/pr-body-<branch-slug>.md"
+```
+
+Do NOT hardcode a username. Do NOT use `/tmp/`.
+
+**`--body-file` fallback**: If file not found → fall back to `--body` inline. Strip all lines starting with `#` (rewrite as bold text).
+
+> **Why `--body-file`**: `--body "..."` with markdown `#` headings triggers Claude Code's security check and forces a permission prompt.
+
+### 4.4 — Mergeability Gate (approve + merge "A" only)
+
 ```bash
 gh pr view <pr-number> --json mergeable --jq '.mergeable'
 ```
+
 - `"MERGEABLE"` → proceed.
-- `"CONFLICTING"` → **stop.** Report: `"PR #N has a conflict — local main was likely stale. Run: git fetch origin main && git rebase origin/main, resolve conflicts, then git push --force-with-lease."` Do not attempt merge.
-- `"UNKNOWN"` → GitHub is still computing. Wait 4 seconds (`sleep 4`) and retry once. If still `"UNKNOWN"` → report and ask the user to check the PR manually.
+- `"CONFLICTING"` → **stop.** Report: "PR #N has a conflict. Run: `git fetch origin main && git rebase origin/main`, resolve, then `git push --force-with-lease`." Do not attempt merge.
+- `"UNKNOWN"` → `sleep 4`, retry once. If still `"UNKNOWN"` → report and ask user.
 
-**4.5 — Merge + Return to Default**
+### 4.5 — Merge + Return to Default
 
-For approve + merge ("A"):
 ```bash
 gh pr merge <pr-number> --merge
 gh pr view <pr-number> --json state
 ```
-> **Do NOT use `--auto`** — it is asynchronous and returns before the merge completes, causing `git checkout main` to pull a pre-merge state.
 
-The `state` field must equal `"MERGED"` before proceeding.
+> **Do NOT use `--auto`** — asynchronous, returns before merge completes.
 
-Before checking out the default branch, verify the working tree is clean:
+`state` must equal `"MERGED"` before proceeding.
+
 ```bash
 git status --porcelain
 ```
-If dirty → stash with `-u` first, then checkout:
+
+If dirty:
 ```bash
 git stash push -u -m "commit-skill-return"
 git checkout main
 git stash pop
 ```
-If `git stash pop` exits with a conflict → **stop immediately.** Do not silently resolve. Run `git status --short` and report every `UU` file. Ask which version to keep for each. After user confirms: run `git add <file>` for each resolved file, then `git stash drop`, then run `git status --porcelain` to verify zero `UU` lines. Never continue past a stash pop conflict without a fully clean status.
 
-> **Do NOT run `git pull` after checkout** — the merge commit is already present locally. A pull here is a redundant network round-trip.
+If `git stash pop` conflicts → **stop immediately.** Run `git status --short`. Report every `UU` file. Ask which version to keep. After user confirms: `git add <file>`, `git stash drop`, verify `git status --porcelain` shows zero `UU` lines. Never continue past this without clean status.
 
-If in a worktree context after a successful merge:
-```bash
-git -C <mainRepoPath> pull origin main
-git -C <mainRepoPath> worktree remove <worktreePath> --force
-```
-
-> **Speed tip — push vs merge:**
-> - `P` (approve + push): commits, pushes branch, opens PR. Fastest — merge happens separately when ready.
-> - `A` (approve + merge): commits, pushes, creates PR, merges to main in one flow. Costs ~5–15 s extra.
-> For checkpoint-adjacent or config/docs-only [S] commits, `P` is usually the right call.
+> **Do NOT run `git pull` after checkout** — merge commit is already present locally.
 
 ---
 
-### Phase 5 — Post-Execution
+## Phase 5 — Post-Execution ([S/Main] paths only)
 
-**5.1 — Update Todo**
+### 5.1 — Update Todo
 
-Open `.claude/todo.md`. Using committed branch names, messages, and file paths, mark matching tasks `[x]`. Do not change unrelated tasks.
+Open `.claude/todo.md`. Mark matching tasks `[x]` using committed branch names, messages, and file paths. Do not change unrelated tasks.
 
-**5.2 — Archive Completed Plan Sections**
+### 5.2 — Archive Completed Plan Sections
 
-Scan `.claude/todo.md` for plan sections where ALL items are `[x]`, then apply all four safety gates:
+Scan `.claude/todo.md` for plan sections where ALL items are `[x]`, then apply four gates:
 
-- **Gate 1 — All-items-checked**: Every `[ ]` in the section must be `[x]`. Skip if any open items remain.
-- **Gate 2 — No-deferred**: Skip if any item contains `(deferred)`, `(skipped)`, `[~]`, or `<!-- TODO -->`.
-- **Gate 3 — Git verification**: Before archiving, run:
+- **Gate 1**: Every `[ ]` must be `[x]`. Skip if any open items.
+- **Gate 2**: Skip if any item contains `(deferred)`, `(skipped)`, `[~]`, or `<!-- TODO -->`.
+- **Gate 3**: Before archiving:
   ```bash
   git log --oneline | grep -i "<plan-keyword>"
   gh pr list --state merged --search "<plan-keyword>"
   ```
-  If neither returns results → surface warning: `"No commits or merged PRs found for Plan NNN — skip archive or confirm manually?"` Do not archive without at least one result or explicit user confirmation.
-- **Gate 4 — Large plan confirmation**: If the section has 5 or more items → require explicit confirmation: `"Archive Plan NNN (N items) to todo-archive.md?"` Proceed only on approval.
+  If neither returns results → warn: "No commits/PRs found for Plan NNN — skip archive?" Do not archive without at least one result or explicit user confirmation.
+- **Gate 4**: If section has 5+ items → require explicit confirmation before archiving.
 
-Once all gates pass, move the section to `todo-archive.md` (create if needed), appended with today's date and plan number.
+Move section to `todo-archive.md` (create if needed), appended with today's date and plan number.
 
-**5.3 — Breadcrumb Check**
+### 5.3 — Breadcrumb Check
 
-If any committed files added, removed, or renamed components, services, or pages → list the affected directories and ask: `"Run breadcrumb-navigator for [dirs]?"` If the user agrees, read `.claude/skills/breadcrumb-navigator/SKILL.md` and follow it. Do not block the commit flow waiting for this answer.
+If any committed files added, removed, or renamed components, services, or pages → ask: `"Run breadcrumb-navigator for [dirs]?"` Do not block commit flow waiting for this answer.
 
 ---
 
 ## End State
 
-After Execute: all planned changes are committed on the intended branches, current branch is the default, no planned changes left uncommitted, and `.claude/todo.md` updated for matching tasks.
+After execute: all planned changes committed on intended branches, current branch is the default, no planned changes uncommitted, `.claude/todo.md` updated.
 
 ---
 
@@ -388,18 +539,18 @@ When changing the recipe-builder or menu-intelligence page, see `.claude/referen
 
 ## Recovery
 
-- **Rebase conflict**: Stop. Report every `UU` file. Ask: `"Keep mine / Keep theirs / Manual?"` Never auto-resolve. Proceed only after user confirms.
-- **PR CONFLICTING**: Stop. Report: local main is stale. Instruct: `git fetch origin main && git rebase origin/main`, resolve, then `git push --force-with-lease`. Retry merge after push.
-- **Stash pop conflict**: Stop immediately. Run `git status --short`. Report every `UU` file. Do NOT resolve automatically. After user confirms resolution for each file: run `git add <file>`, then `git stash drop`, then `git status --porcelain` to verify zero `UU` lines. Never proceed past this without a fully clean status.
-- **git stash push syntax**: `-m` flag MUST come before `--`.
-  - ✅ `git stash push -m "message" -- file1 file2`
-  - ❌ `git stash push -- file1 file2 -m "message"` ← fails with pathspec error
-- **Branch already exists**: Ask the user to rename or append `-v2`. Do not force-delete existing branches.
-- **Push fails (auth/remote)**: Report the exact error message. Suggest `gh auth status` for auth issues or `git remote -v` for remote issues.
-- **Windows / PowerShell**: Do not use `&&` or `||` to chain git commands. Run each git command in a separate Bash call, or use `;` (runs regardless of exit code). Never chain inspection + write commands in a single call.
+- **Rebase conflict**: Stop. Report every `UU` file. Ask: `"Keep mine / Keep theirs / Manual?"` Never auto-resolve.
+- **PR CONFLICTING**: Stop. Instruct: `git fetch origin main && git rebase origin/main`, resolve, then `git push --force-with-lease`. Retry merge after push.
+- **Stash pop conflict**: Stop immediately. Run `git status --short`. Report every `UU` file. Do NOT auto-resolve. After user confirms: `git add <file>`, then `git stash drop`, then `git status --porcelain`. Never proceed past this without clean status.
+- **`git stash push` syntax**: `-m` flag MUST come before `--`. ✅ `git stash push -m "msg" -- file1` ❌ `git stash push -- file1 -m "msg"`
+- **Branch already exists**: Ask user to rename or append `-v2`. Never force-delete.
+- **Push fails (auth/remote)**: Report exact error. Suggest `gh auth status` or `git remote -v`.
+- **Windows / PowerShell**: No `&&` / `||` between git commands. Separate Bash calls or `;`.
 
 ---
 
 ## Related
 
-See **GitHub Sync** (`github-sync/`) and **Test-PR-Merge** (`.claude/commands/`) for pull/PR flows.
+- `worktree-session-end` — triggered by session-end words ("done", "ship it", "wrap up"). Handles dev server kill, port cleanup, and session-handoff. NOT the same as [S/Worktree] — this skill handles explicit `/commit-to-github` invocations only.
+- `github-sync` — pull recent GitHub activity at session start.
+- `test-pr-review-merge` — full CI pipeline with test suite before merge.
