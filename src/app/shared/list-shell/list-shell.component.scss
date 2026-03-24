@@ -2,6 +2,8 @@
   $panel-width-expanded: 220px;
   $header-break-grid: 640px;
   $header-break-stack: 360px;
+  $panel-overlay-break: 1024px;
+  $phone-break: 768px;
 
   :host {
     display: block;
@@ -163,10 +165,12 @@
     transition: border-inline-start-radius 0.3s var(--ease-spring);
   }
 
-  .list-container.panel-open .table-area {
-border-top-right-radius: 0;    
-border-bottom-right-radius: 0;
-    // border-inline-start-radius: 0;
+  // Desktop only: flatten the table edge that meets the open panel
+  @media (min-width: 1025px) {
+    .list-container.panel-open .table-area {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
   }
 
   .table-header {
@@ -201,11 +205,11 @@ border-bottom-right-radius: 0;
 
   :host ::ng-deep .table-body .col-name {
     display: block;
-    // overflow: hidden;
+
     overflow-wrap: break-word;
-    // text-align: start;
   }
 
+  // ─── FILTER PANEL — desktop base ──────────────────────────────────────
   .filter-panel {
     grid-area: panel;
     display: flex;
@@ -290,8 +294,33 @@ border-bottom-right-radius: 0;
     transition: opacity 0.25s var(--ease-spring), transform 0.25s var(--ease-spring);
   }
 
-  @media (max-width: 768px) {
+  // ─── BACKDROP — hidden at desktop ─────────────────────────────────────
+  .panel-backdrop {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 9;
+
+    background: var(--overlay-backdrop);
+
+    opacity: 0;
+
+    pointer-events: none;
+    transition: opacity 0.25s var(--ease-smooth);
+  }
+
+  // ─── TABLET (769–1024px) — right-edge drawer, aligned to table height ─
+  //
+  // CSS Grid absolute-in-area trick: when position:absolute is set on a
+  // grid item that also has explicit grid-row/column placement, the CSS
+  // spec uses that grid AREA as the containing block — not the whole
+  // grid container. Placing both the backdrop and panel at grid-row:2
+  // (the table row) means inset:0 fills exactly the table's bounds.
+  // The header (row 1) is excluded — the drawer never covers it.
+  @media (max-width: #{$panel-overlay-break}) {
     .list-container {
+      display: grid;
+      grid-template-rows: auto 1fr;
       grid-template-columns: 1fr;
       grid-template-areas:
         "header"
@@ -301,37 +330,112 @@ border-bottom-right-radius: 0;
       padding: 1rem;
     }
 
+    .panel-backdrop {
+      display: block;
+      grid-row: 2;
+      grid-column: 1;
+      position: absolute;
+      inset: 0;
+      z-index: 9;
+
+      &.visible {
+        opacity: 1;
+
+        pointer-events: auto;
+      }
+    }
+
     .filter-panel {
+      grid-row: 2;
+      grid-column: 1;
       position: absolute;
       inset-block: 0;
-      inset-inline-start: 1rem;
+      right: 0;
+      left: auto;
       z-index: 10;
 
-      max-height: calc(100% - 2rem);
-      margin-block: 1rem;
-      background: var(--bg-glass-strong);
-      box-shadow: var(--shadow-modal);
+      width: 300px;
+      min-width: 0;
 
-      transition: none;
+      background: var(--bg-glass-strong);
+      backdrop-filter: var(--blur-glass);
+      -webkit-backdrop-filter: var(--blur-glass);
+
+      border-inline-start: none;
+      border-top-left-radius: var(--radius-lg);
+      border-bottom-left-radius: var(--radius-lg);
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      box-shadow: var(--shadow-modal);
+      overflow-y: auto;
+
+      transform: translateX(110%);
+      opacity: 0;
+      pointer-events: none;
+
+      transition:
+        transform 0.35s var(--ease-spring),
+        opacity 0.2s var(--ease-smooth);
+
+      // Override desktop width-collapse behaviour — use transform instead
+      &.collapsed {
+        width: 300px;
+        min-width: 0;
+
+        border-inline-start-width: 0;
+        overflow: hidden;
+
+        .panel-content {
+          transform: none;
+        }
+      }
+
+      // Slide in from the right edge
+      &:not(.collapsed) {
+        transform: translateX(0);
+        opacity: 1;
+
+        pointer-events: auto;
+      }
     }
 
     .panel-content {
-      transition: none;
+      transition: opacity 0.25s var(--ease-spring), transform 0.25s var(--ease-spring);
     }
 
-    .filter-panel:not(.collapsed) ~ .table-area::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      z-index: 5;
-
-      background: var(--overlay-backdrop);
-
-      pointer-events: auto;
-    }
-
+    // Always show close button — no hover available on touch
     .panel-toggle-icon {
       opacity: 1;
+    }
+  }
+
+  // ─── PHONE (≤768px) — fixed drawer, nearly full screen width ──────────
+  //
+  // Switches to position:fixed so the drawer covers the full viewport
+  // height (minus breathing room). The grid-row placement is ignored for
+  // fixed elements — the viewport becomes the containing block.
+  @media (max-width: #{$phone-break}) {
+    .filter-panel {
+      position: fixed;
+      inset-block: 1rem;
+      right: 0;
+      left: auto;
+      z-index: 1000;
+
+      width: min(85vw, 340px);
+      max-height: calc(100dvh - 2rem);
+
+      border-top-left-radius: var(--radius-xl);
+      border-bottom-left-radius: var(--radius-xl);
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    // Backdrop covers the full viewport on phone
+    .panel-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
     }
 
     .table-area {
