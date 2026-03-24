@@ -1,118 +1,60 @@
-# Skill: Deploy to GitHub Pages — foodVibe 1.0
+---
+name: deploy-github-pages
+description: Configures and deploys the foodVibe 1.0 Angular SPA to GitHub Pages. Run only on explicit user request.
+---
 
-Configure and deploy this Angular SPA to GitHub Pages.
+# Skill: deploy-github-pages
 
-## When to Run
+**Trigger:** User says "deploy", "publish app", "set up GitHub Pages", or "deploy to GitHub Pages".
+**Standard:** Follows Section 6 (Git & Workflow) of the Master Instructions.
 
-**Only on explicit user request.** Trigger phrase: user says "deploy", "publish the app", "set up GitHub Pages", or "deploy to GitHub Pages".
-
-Do NOT run this skill automatically. It modifies CI/CD configuration and requires deliberate intent.
+> **Not automatic.** Run only on explicit user request — this skill modifies CI/CD configuration.
 
 ---
 
-## Workflow
+## Phase 1: Pre-Flight Check `[Procedural — Haiku/Composer (Fast/Flash)]`
 
-### Phase 1 — Preflight
+**Branch Verification:** Ensure the active branch is `main` or a stable `feat/` branch.
 
-1. Confirm the user wants GitHub Pages (not Vercel, Netlify, or another host).
-2. Confirm the repository name — needed for `--base-href`. For this project: `foodVibe1.0`.
-3. Run a production build to catch type errors before touching CI config:
-   ```bash
-   npm run build
-   ```
-   If the build fails, stop and report the errors. Do not proceed until the build is clean.
+**Build Audit:** Verify `package.json` contains the `build:gh-pages` script.
 
-### Phase 2 — Angular Build Configuration
-
-Ensure `angular.json` production build uses the correct `base-href`:
-
-```bash
-npx ng build --configuration=production --base-href "/foodVibe1.0/"
-```
-
-Verify the output directory: `dist/food-vibe1.0/browser/` (adjust if `angular.json` `outputPath` differs).
-
-### Phase 3 — Routing Strategy
-
-GitHub Pages serves static files and cannot handle Angular's HTML5 pushState routing. Choose one:
-
-**Option A — Hash location strategy (recommended for GitHub Pages):**
-- In `app.config.ts`, use `withHashLocation()` in `provideRouter(routes, withHashLocation())`.
-- URLs become `/#/route` — no 404 on refresh.
-
-**Option B — SPA fallback (requires a 404.html redirect trick):**
-- Copy `dist/.../index.html` to `dist/.../404.html` in the build step.
-- Requires extra GitHub Actions configuration.
-
-Present the choice to the user if not already configured. Recommendation: Option A.
-
-### Phase 4 — GitHub Actions Workflow
-
-Create or update `.github/workflows/deploy.yml`:
-
-```yaml
-name: Deploy to GitHub Pages
-
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run build
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist/food-vibe1.0/browser
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/deploy-pages@v4
-        id: deployment
-```
-
-**Adjust `path: dist/food-vibe1.0/browser`** to match the actual Angular output path from `angular.json`.
-
-### Phase 5 — Secrets & Security
-
-- Do not commit API keys or secrets.
-- Reference secrets via `${{ secrets.SECRET_NAME }}` in the workflow.
-- Verify `.env*` files are in `.gitignore`.
-
-### Phase 6 — Verify
-
-1. Push to `main` (or trigger manually via `gh workflow run deploy`).
-2. Monitor: `gh run list --workflow=deploy.yml`
-3. When complete, open the Pages URL from the Actions run output.
-4. Confirm routing works (navigate to a deep route, refresh — should not 404 if hash strategy is used).
+**Environment Check:** Ensure the repository has a configured `gh-pages` branch or is set to deploy via GitHub Actions.
 
 ---
 
-## Recovery
+## Phase 2: Build & Optimization `[Procedural — Haiku/Composer (Fast/Flash)]`
 
-- **Build fails in CI but not locally**: check Node version mismatch — CI uses `20.x`, confirm local matches.
-- **404 on page refresh**: hash strategy is not configured — apply Phase 3 Option A.
-- **Blank page**: `base-href` is wrong — verify it matches `/<repo-name>/` exactly.
-- **Permissions error in Actions**: ensure Pages is enabled in repo Settings → Pages → Source: GitHub Actions.
+**Clean Build:** Run `npm run build` with the `--base-href` flag set for the repository name (e.g., `--base-href "/foodVibe1.0/"`) to ensure assets resolve correctly on GitHub's sub-paths.
+
+**Asset Check:** Verify `dist/` folder contains the correct `index.html` and bundled assets before proceeding.
+
+---
+
+## Phase 3: Deployment Execution `[Procedural — Haiku/Composer (Fast/Flash)]`
+
+**Push to Branch:** Execute `npx gh-pages -d dist/food-vibe-1.0` (adjust to the specific project `dist` folder).
+
+**Remote Sync:** Ensure the deployment commit is pushed to `origin`.
+
+---
+
+## Phase 4: URL Verification `[High Reasoning — Sonnet/Gemini 1.5 Pro]`
+
+**Link Generation:** Construct the final URL (`https://[user].github.io/[repo]/`).
+
+**Smoke Test:** If UI Inspector (Section 0.4) is requested, suggest a visual check of the live URL to confirm icons and styles loaded correctly.
+
+---
+
+## Completion Gate
+
+Output: `"Deployment successful. App is live at: [URL]"`
+
+Update the session handoff with the deployment timestamp and version if applicable.
+
+---
+
+## Cursor Tip
+> Deployment is CLI-heavy. Use Composer 2.0 (Fast/Flash) for Phases 1, 2, and 3 (~95% of the work).
+> Reserve Gemini 1.5 Pro for Phase 4 **only** if the build fails due to dependency or base-href pathing issues.
+> Credit-saver: ~75% of this skill is Flash-eligible.

@@ -1,38 +1,54 @@
-# GitHub Context Sync — foodVibe 1.0
+---
+name: github-sync
+description: Pulls recent GitHub activity and syncs the local branch at session start or after time away — runs once per calendar day.
+---
 
-Pull recent GitHub activity into a single context dump. Use at session start, after time away, or before code review.
+# Skill: github-sync
 
-## Workflow
+**Trigger:** Session start or after time away. **Once-per-day gate:** Check `notes/github-sync/<today-date>.md` first — if it exists, skip and print `✓ GitHub sync already ran today`. Only run if missing.
+**Standard:** Follows Section 0 (Session Start) of the Master Instructions.
 
-1. **Recent commits** — `git log --oneline --since=7.days.ago --stat`; identify files changed most frequently.
-2. **Pull requests (MCP-first)** — `mcp__github__list_pull_requests` for open PRs; for each open PR call `mcp__github__get_pull_request` to read body, review status, and labels. Fall back to `gh pr list` if MCP unavailable.
-3. **Issues (MCP-first)** — `mcp__github__list_issues` for open and recently closed. Fall back to `gh issue list`.
-4. **PR reviews** — For any open PR: call `mcp__github__list_pull_request_reviews` to surface pending review requests or change requests.
-5. **Branch activity** — `git branch -r --sort=-committerdate`
-6. **Generate summary** using the report template below.
-7. **Save** the summary to `notes/github-sync/YYYY-MM-DD.md` (create directory if needed).
+---
 
-> **MCP fallback**: If `mcp__github__*` tools are unavailable in the session, fall back to `gh` CLI silently — do not block the workflow.
+## Phase 1: Environment Audit `[Procedural — Haiku/Composer (Fast/Flash)]`
 
-## Report Template
+**Status Check:** Run `git status` and `git fetch`.
 
-```markdown
-# GitHub Sync — foodVibe 1.0 — [Date]
+**Conflict Check:** Identify if local changes conflict with remote `main` or active `feat/` branch.
 
-## Summary
-- **Commits**: X (last 7 days) | **PRs Merged**: Y | **PRs Open**: Z | **Issues Open**: A
+**Worktree Detection:** Identify if operating in a worktree; verify `.worktree-port` and `.worktree-root`.
 
-## Key Changes
-### Merged PRs
-| PR | Title | Files | +/- |
+---
 
-### Hot Files (Most Changed)
-1. [file] — [N] changes
+## Phase 2: Synchronization `[Procedural — Haiku/Composer (Fast/Flash)]`
 
-### Open PRs / Open Issues
-| # | Title | Days Open / Labels |
+**Pull / Rebase:** Execute `git pull --rebase` for clean history.
 
-## Impact on Current Work
-- [New patterns] [Breaking changes] [Areas to watch]
-```
+**Stash Management:** If uncommitted changes exist: `git stash` → sync → `git stash pop`.
 
+**Branch Cleanup:** Identify merged local branches safe to delete.
+
+---
+
+## Phase 3: Session Intelligence `[High Reasoning — Sonnet/Gemini 1.5 Pro]`
+
+**Daily Log Audit:** Read latest `notes/session-handoffs/` and `notes/github-sync/` files. Summarize the "State of the Project" for the current session.
+
+**GitHub Context:** Read open PRs via MCP (`mcp__github__list_pull_requests`) → fallback to `gh pr list`. Surface any pending reviews or CI failures.
+
+**Todo Alignment:** Verify `.claude/todo.md` matches the current branch state.
+
+---
+
+## Completion Gate
+
+Output: `"GitHub sync complete. Remote changes merged. Local branch is up to date."`
+
+Save sync log to `notes/github-sync/<today-date>.md`.
+
+---
+
+## Cursor Tip
+> Git syncing is a utility task. Always use Composer 2.0 (Fast/Flash) for Phases 1 & 2.
+> Reserve Gemini 1.5 Pro for Phase 3 only — the morning state-of-project analysis.
+> Credit-saver: ~67% of this skill (Phases 1 + 2) is Flash-eligible.

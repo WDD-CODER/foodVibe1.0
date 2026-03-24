@@ -13,6 +13,29 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 200 — Lite skills refactor validation report (`plans/200-lite-skills-refactor-validation-report.plan.md`)
+- [ ] Pre-write verification: content check (`toBe/skills/commit-to-github.md`, `toBe/agents/breadcrumb-navigator.md`); Master §3–5 completeness in `toBe/copilot-instructions.md`; confirm no legacy `quick-chat` skill
+- [ ] Write `notes/comparative-analysis-report.md` (15 sections + appendices A–C per plan)
+- [ ] Cross-check Go/No-Go §9 vs Plan 198; reference Plans 198 and 199 in report
+- [ ] Post-write: tables render, Appendix B sums match session headline, internal consistency pass
+
+### Plan 199 — Lite refactor workflow comparative analysis (`plans/199-lite-refactor-workflow-comparative-analysis.plan.md`)
+- [ ] Policy: Treat Master (`copilot-instructions.md`) as OS; agents/skills as thin apps — no duplicate rule blocks in agent files
+- [ ] Enforce Efficiency Tier routing (High Reasoning vs Fast/Flash) for planning, decomposition, and procedural phases
+- [ ] Keep skills phase-based procedural workflows; use argument shortcuts (`c`, `s`, `sl`, `sf`) per commit-to-github skill
+- [ ] Track context-load goal (~73% reduction vs Legacy) when editing agent/skill bundles — avoid re-bloating personas
+- [ ] Cross-link: execution work continues under Plan 198 (promote `.claude/toBe/`, §0.5 Model Routing, security migration QA)
+
+### Plan 198 — Lite agent refactor adoption (`plans/198-lite-agent-refactor-adoption.plan.md`)
+- [ ] CRITICAL: Verify Legacy security-officer requirements + 30-item checklist fully migrated to copilot-instructions §5 before retiring Legacy agent
+- [ ] HIGH: Fix `.claude/toBe/agents/breadcrumb-navigator.md` content (Navigator vs Architect mismatch)
+- [ ] HIGH: Add copilot-instructions §0.5 Model Routing table (Efficiency Tiers, central discoverability)
+- [ ] MEDIUM: Lite QA agent — prominent spec-authoring callout (no `.spec.ts` during iterative plan execution)
+- [ ] MEDIUM: One Master-section pointer line per Lite agent (delegation cross-references)
+- [ ] LOW: Document UI Inspector mixed-tier pattern as reference for future agents
+- [ ] Adoption: Promote `.claude/toBe/` foundation + agents to canonical paths when 1–3 satisfied; run validate-agent-refs
+- [ ] Verification: breadcrumb-navigator + ui-inspector SKILLs hold canonical protocol detail before stripping Legacy agents
+
 ### Plan 197 — AI Framework Redundancy Fix (`plans/197-ai-framework-redundancy-fix.plan.md`)
 - [ ] Phase 1: Add subagent gate exemption to `CLAUDE.md`
 - [ ] Phase 2: Add main-session-only scope note to `agent.md` preflight
@@ -1098,6 +1121,9 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 
 | Plan | Name | Status |
 |------|------|--------|
+| 200 | Lite skills refactor validation report | Planned |
+| 199 | Lite refactor workflow comparative analysis | Planned |
+| 198 | Lite agent refactor adoption | Planned |
 | 002 | Recipe Header Scaling & Dish Mode | Done |
 | 003 | Recipe Ingredients Table Enhancement | Done |
 | 004 | Recipe Workflow Enhancement | Done |

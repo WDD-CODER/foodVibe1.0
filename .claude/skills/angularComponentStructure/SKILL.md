@@ -1,77 +1,73 @@
 ---
-description: Angular component class structure - section order and CRDUL method grouping
-globs: "**/*.component.ts"
-alwaysApply: false
+name: angularComponentStructure
+description: Defines the mandatory class structure, section ordering, and CRDUL method grouping for every Angular component in foodVibe 1.0.
 ---
 
-# Angular Component Class Structure
+# Skill: angularComponentStructure
 
-When creating or refactoring Angular components, follow this section order and method grouping.
+**Trigger:** Before creating or refactoring any Angular component class.
+**Standard:** Follows Section 3 (Angular 19 & Reactivity) and Section 4 (Styles/Folder Structure) of the Master Instructions.
 
-## 1. Declaration Order (top to bottom)
+---
 
-```typescript
-export class MyComponent {
-  // INJECTED
-  private fb = inject(FormBuilder);
-  private someService = inject(SomeService);
+## Phase 1: Boilerplate Generation `[Procedural — Haiku/Composer (Fast/Flash)]`
 
-  // INPUTS
-  form = input.required<FormGroup>();
-  label = input<string>('');
+**File Creation:** Standard four-file split: `.ts`, `.html`, `.scss`, `.spec.ts` (unless `inlineTemplate` requested).
 
-  // OUTPUTS
-  valueChange = output<string>();
+**Class Skeleton — mandatory:**
+- `standalone: true`
+- `changeDetection: ChangeDetectionStrategy.OnPush`
+- `inject()` for all service dependencies (no constructor injection)
 
-  // SIGNALS & CONSTANTS
-  readonly someConstant = 'value';
-  private state_ = signal(0);
+**Class Section Order (strict):**
+1. INJECTED services
+2. INPUTS (`input()`, `model()`)
+3. OUTPUTS (`output()`)
+4. SIGNALS & CONSTANTS (`signal()`, `readonly`)
+5. COMPUTED SIGNALS (`computed()`)
+6. CRDUL methods — Create, Read, Delete, Update, List (grouped in this order)
 
-  // COMPUTED SIGNALS
-  protected derived_ = computed(() => this.state_() * 2);
+---
 
-  // CREATE
-  addItem(): void { /* ... */ }
+## Phase 2: Reactive State Definition `[High Reasoning — Sonnet/Gemini 1.5 Pro]`
 
-  // READ
-  get items(): Item[] { /* ... */ }
+**Signal Mapping:** Define internal state using `signal()`. Expose public state via `.asReadonly()`.
 
-  // DELETE
-  removeItem(index: number): void { /* ... */ }
+**Derived State:** Implement `computed()` values to prevent unnecessary `effect()` calls.
 
-  // UPDATE
-  updateItem(index: number, value: T): void { /* ... */ }
+**API Definition:** Use `input()`, `output()`, `model()` for component communication (Section 3).
 
-  // LIST
-  get listItems(): Item[] { /* ... */ }
-}
-```
+---
 
-## 2. Section Definitions
+## Phase 3: Template & Style Integration `[Procedural — Haiku/Composer (Fast/Flash)]`
 
-| Section | Contents |
-|---------|----------|
-| `// INJECTED` | All `inject()` calls (services, FormBuilder, etc.) |
-| `// INPUTS` | `input()`, `input.required()` |
-| `// OUTPUTS` | `output()` |
-| `// SIGNALS & CONSTANTS` | `signal()`, `readonly` constants. **Not** `computed()`. |
-| `// COMPUTED SIGNALS` | `computed()` — reactive derivations; always separate from signals so data flow is explicit. |
+**HTML:** Apply double quotes, Lucide icon registry checks (Section 8), semantic element choice.
 
-## 3. CRDUL Method Grouping
+**SCSS:** Apply cssLayer skill rules (logical properties, five-group vertical rhythm).
 
-Group public methods by intent:
+**Engine Check:** No `.c-*` classes defined locally — use engines from `src/styles.scss` only.
 
-| Section | Intent | Examples |
-|---------|--------|----------|
-| `// CREATE` | Add new items, create resources | `addItem`, `addSecondaryUnit` |
-| `// READ` | Return single value or derived data | getters, `getItemById` |
-| `// DELETE` | Remove items | `removeItem`, `removeSecondaryUnit` |
-| `// UPDATE` | Modify existing state | `setValue`, `updateAmount`, `toggleType` |
-| `// LIST` | Return collections for iteration | `get items`, `get secondaryConversions` |
+---
 
-## 4. Notes
+## Phase 4: Unit Test Strategy `[High Reasoning — Sonnet/Gemini 1.5 Pro]`
 
-- `computed()` belongs in `// COMPUTED SIGNALS`, never in `// SIGNALS & CONSTANTS`. It derives from signals; keeping it below makes the dependency direction obvious.
-- Private helpers that don't fit CRDUL can stay under the nearest related section or a small `// HELPERS` block.
-- Use `// GETTERS` only if you prefer it over splitting READ/LIST; otherwise use READ for single values and LIST for collections.
-- Keep sections in order even when empty; omit sections that don't apply.
+**Spec Logic:** Define core testing requirements for the component's Signal-driven logic.
+
+**Signal Testing:** Ensure `.spec.ts` correctly triggers and asserts signal changes.
+
+> Write `.spec.ts` only during `commit-to-github` Phase 0 or when the user explicitly requests tests.
+
+---
+
+## Completion Gate
+
+Output: `"Component [Name] created with [X] signals and [Y] inputs. Verifying Lucide registry..."`
+
+Update `.claude/todo.md` and proceed to the next atomic task.
+
+---
+
+## Cursor Tip
+> Use Composer 2.0 (Fast/Flash) for Phase 1 and Phase 3 — boilerplate and markup follow the Master patterns exactly.
+> Reserve Gemini 1.5 Pro for Phase 2 (Signal architecture) and Phase 4 (test strategy) only.
+> Credit-saver: ~50% of component work (Phases 1 + 3) is Flash-eligible.

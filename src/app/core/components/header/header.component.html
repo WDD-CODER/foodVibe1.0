@@ -49,3 +49,10 @@
     </li>
   </ul>
 </nav>
+
+<div
+  class="mobile-nav-backdrop"
+  [class.open]="isMobileMenuOpen()"
+  (click)="closeMobileMenu()"
+  aria-hidden="true">
+</div>

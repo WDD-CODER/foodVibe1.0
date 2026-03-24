@@ -1,79 +1,55 @@
 ---
 name: save-plan
-description: Determines the next plan number from the plans folder and writes the plan file when the user confirms a plan and says to save it. Use when the user says "save the plan", "save plan", or confirms a plan and asks to persist it to the plans folder.
+description: Determines the next plan number, syncs atomic sub-tasks to the ledger, and writes the plan file to plans/ when the user confirms a plan.
 ---
 
-# Save Plan
+# Skill: save-plan
 
-When the user has **confirmed a plan** and says to **save the plan**, follow this skill so the plan is written to the project's `plans/` folder with the correct numbering. **Before** writing the plan file, the agent must update **`.claude/todo.md`** with what needs to be done (pending tasks derived from the plan). No extra confirmation is needed—the user has already approved the plan content.
+**Trigger:** User says "save the plan", "save plan", or confirms a plan and asks to persist it.
+**Standard:** Follows Section 2 (Gatekeeper Protocol — Phase 3: Ledger Sync) of the Master Instructions.
 
-## Trigger
+---
 
-- Message contains "save" (case-insensitive) + one of: **it / that / this / plan**, while a plan has been confirmed in the current conversation.
-- Applies even when combined with other requests (e.g. "save it and execute"). Perform the save step first, then proceed.
-- Plan content is already agreed; the agent must only determine the filename and write the file.
+## Phase 1: Ledger Sync `[Procedural — Haiku/Composer (Fast/Flash)]`
 
-## Location (MANDATORY)
+**Todo Update (first action):** Extract `# Atomic Sub-tasks` from the `.plan.md` and append to `.claude/todo.md` before writing the plan file.
 
-- **All plans** MUST be saved under the project root folder **`plans/`** (e.g. `plans/013-feature-name.plan.md`).
-- **NEVER** use Cursor's default plans folder (`~/.cursor/plans/`) or any path outside the project's `plans/` folder.
+**Sub-task Formatting:** Prepend every task with `[ ]` and include a brief description of the target file(s).
 
-## Numbering Rules
+**State Verification:** Confirm all previous session tasks are `[x]` or moved to "Deferred" before starting the new feature.
 
-### 1. List existing plans
+**Numbering:**
+- List files in `plans/` to determine the next number (`NNN = highest + 1`, zero-padded to 3 digits)
+- Refactor variant: `NNN-R`
+- No plans yet → start at `001`
 
-- List or glob all `*.plan.md` files in **`plans/`** (project root).
-- Parse filenames to determine the next number or refactor suffix.
+---
 
-### 2. New plan (next in sequence)
+## Phase 2: Logic Validation `[High Reasoning — Sonnet/Gemini 1.5 Pro]`
 
-- Find the **highest 3-digit base number** among files matching: `^(\d{3})-[^-].*\.plan\.md` (e.g. `012-kitchen-demo-data.plan.md` → 012).
-- **Next plan number** = that number + 1, zero-padded to 3 digits (e.g. 012 → **013**).
-- **Filename**: `plans/NNN-slug.plan.md` (e.g. `plans/013-dashboard-recent-activity.plan.md`).
-- **Slug**: Short kebab-case descriptor. Specific enough to be searchable by filename alone — `196-excel-export-fix` is useful; `196-plan` is not. No underscores, no hash suffixes. Example: `plans/013-dashboard-recent-activity.plan.md`.
+**PRD Alignment:** Verify atomic sub-tasks satisfy 100% of the plan's requirements.
 
-### 3. Refactor plan (derived from an existing plan)
+**Risk Audit:** If the plan is "Medium" or "Large" (Section 0.4) and touches auth/storage → notify the Security Officer (Section 0.3).
 
-- When the plan is a **refactor or follow-up** of an existing plan (e.g. plan 012), the filename uses the **base number plus a refactor index**.
-- **Pattern**: `plans/NNN-R-slug.plan.md` where:
-  - `NNN` = the existing plan's 3-digit number (e.g. 012).
-  - `R` = refactor index: 1, 2, 3, … (next available for that base).
-- **How to get R**: List all files matching `NNN-*.plan.md` (e.g. `012-*.plan.md`). If only `012-something.plan.md` exists (no refactors yet), next refactor is **012-1**. If `012-1-...` and `012-2-...` exist, next is **012-3**.
-- **Filename example**: `plans/012-1-dashboard-refactor.plan.md`, `plans/012-2-another-refactor.plan.md`.
+---
 
-### 4. Edge cases
+## Phase 3: Environment Prep `[Procedural — Haiku/Composer (Fast/Flash)]`
 
-- If **no plans exist** in `plans/`, the first plan is **001** (e.g. `plans/001-initial-feature.plan.md`).
-- When in doubt whether it's a **new** plan vs a **refactor**, treat as new (increment global sequence) unless the user or context clearly states it is a refactor of a specific plan number.
+**Worktree Verification:** If not on a worktree and the plan involves code changes → suggest `feat/` branch checkout per Section 6.
 
-## Todo sync (before writing the plan)
+**Port Discovery:** Ensure `.worktree-port` is mapped if the plan involves UI changes.
 
-**Before** writing the plan file, update **`.claude/todo.md`** so it reflects what needs to be done for this plan:
+**Write Plan File:** Write to `plans/<NNN>-<slug>.plan.md` (project `plans/` only — never `~/.cursor/plans/`).
 
-- **Extract** from the agreed plan the main tasks or steps (e.g. sections, phases, or bullet points that represent work items).
-- **Under "Ahead (Pending)"**: add a subsection for this plan, e.g. `### Plan NNN — Short title (\`plans/NNN-slug.plan.md\`)`, with one `- [ ]` checkbox per task (or per logical group). Use the exact plan path you are about to write.
-- **Plan Index**: if the file has a "Plan Index" table, add a row for this plan with status "Planned" (or "Active" if the user indicated it).
-- Preserve existing structure, headings, and formatting in `todo.md`; only insert the new plan’s block and index row.
+---
 
-This keeps "what needs to be done" in sync with the plan as soon as it is saved.
+## Completion Gate
 
-⚠️ **Never write a plan file manually.** Creating a `plans/` file by hand (or via Write tool without this skill) bypasses the numbering check and todo sync. Always go through "save the plan" so both steps happen atomically.
+Output: `"Plan saved. Ledger updated. Ready to execute Task 1: [Task Name]."`
 
-## Workflow (checklist)
+---
 
-1. User has confirmed the plan and said to save it.
-2. List `plans/*.plan.md` and determine:
-   - **New plan** → next NNN (max existing NNN + 1).
-   - **Refactor of NNN** → next NNN-R (max existing R for that NNN + 1).
-3. Build filename: `plans/NNN-slug.plan.md` or `plans/NNN-R-slug.plan.md`.
-4. **Update `.claude/todo.md`** with what needs to be done (see **Todo sync** above): add pending tasks and, if present, Plan Index row.
-5. Write the agreed plan content to that path using the **write** tool (no other plan tool that might save elsewhere).
-6. Confirm to the user: *"Plan saved to plans/NNN[-R]-slug.plan.md. Todo updated with pending tasks."*
-
-## Summary
-
-| Type    | Example existing        | Next filename example                    |
-|---------|-------------------------|------------------------------------------|
-| New     | 012-kitchen-demo-data   | 013-dashboard-recent-activity.plan.md    |
-| Refactor| 012-…                   | 012-1-dashboard-refactor.plan.md         |
-| Refactor| 012-1-…, 012-2-…        | 012-3-another-refactor.plan.md           |
+## Cursor Tip
+> Moving sub-tasks to the todo list is a pure data-transfer task. Always use Composer 2.0 (Fast/Flash) to transition from planning to coding instantly.
+> Reserve Gemini 1.5 Pro for Phase 2 only when validating PRD alignment on a complex plan.
+> Credit-saver: ~67% of this skill (Phases 1 + 3) is Flash-eligible.

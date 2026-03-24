@@ -1,75 +1,62 @@
-# Technical Debt Analysis — foodVibe 1.0
+---
+name: techdebt
+description: Scans for duplicated code, dead code, style violations, and TODO debt in foodVibe 1.0 — run before PRs, after features, or at session end.
+---
 
-Scan for duplicated code, dead code, and tech debt. Run at end of session, before PRs, or after large features.
+# Skill: techdebt
 
-## When to Run
+**Trigger:** End of development session, before a PR, after large features, or user says "audit tech debt" / "cleanup" / "check todos".
+**Standard:** Follows Section 3 (Architecture) and Section 5 (Security & QA) of the Master Instructions.
 
-- End of development session
-- Before creating a pull request
-- Weekly hygiene
-- After large feature implementations
-- **From commit-to-github (Phase 0):** run in **working-tree scope** only (see Scope below).
+---
 
-## Scope
+## Scope Modes
 
-- **Full project:** When run at end of session, before PR, or weekly hygiene — analyze all of `src/app/` (Phases 1–6) and working tree for Spec coverage (Phase 7).
-- **Working tree (commit flow):** When **invoked from commit-to-github**, analyze **only the files that are to be committed**. First obtain the file list: run `git status` and `git diff --name-only` (include modified, deleted, and untracked files that will be part of the commit). Then run every phase only for those files. Do not scan the rest of the project. This keeps the commit flow fast and relevant.
-  - **Fast path:** If the scoped file list contains **zero** files matching `src/app/**/*.ts`, emit: `⚡ No app TypeScript in scope — tech-debt skipped.` and return immediately without running Phases 1–7.
+- **Working-tree mode** (invoked from `commit-to-github` [S-full] Phase 0): scope = only files staged for commit
+- **Full-project mode** (invoked at session end): scope = all of `src/app/`
+- **Fast-path skip:** If no app `.ts` files are in scope → skip entirely and report clean
 
-## Analysis Workflow
+---
 
-Apply each phase to the **scope** (full project or working-tree file list) determined above.
+## Phase 1: Static Analysis `[Procedural — Haiku/Composer (Fast/Flash)]`
 
-### Phase 1: Duplicate Code
-- **Full project:** Search for similar export signatures (functions, consts, classes) across `src/app/`.
-- **Working tree:** Search only within or between the scoped files; report file:line.
-- Look for similar component selectors and signal patterns. Use Grep or Glob to find copy-pasted blocks (5+ lines): search for repeated function signatures, similar class structures, or duplicated utility logic. Report `file:line` for each consolidatable pair.
+**Duplicate Detection:** Scan for redundant utility functions or UI patterns that should move to `shared/` or `core/utils/`.
 
-### Phase 2: Dead Code
-- **Full project:** List exported symbols in `src/app/`; cross-check imports.
-- **Working tree:** List exported symbols only in the scoped files; cross-check whether they are imported elsewhere.
-- Check components that may not be routed or used (selectors vs app.routes imports) only for scoped files when in working-tree scope.
+**Dead Code:** Identify unused imports, variables, and commented-out code blocks.
 
-### Phase 3: TODO/FIXME/HACK Audit
-- **Full project:** Count and list TODO, FIXME, HACK, XXX in `src/` (ts, html, css).
-- **Working tree:** Count and list only in the scoped files.
-- Spot-check age via git blame when relevant.
+**TODO Audit:** Scan for `// TODO` or `// FIXME` comments; categorize by urgency.
 
-### Phase 4: File Size
-- **Full project:** List `.ts`, `.scss`, `.html` in `src/app/` over 300 lines (project standard).
-- **Working tree:** List only scoped files over 300 lines.
+**Style Violations (Section 3):** Flag `@Input`/`@Output` decorators, `BehaviorSubject`, `any` types, semicolons in TS.
 
-### Phase 5: Style Violations
-- **Full project:** Search `src/app/` for: `@Input()`/`@Output()` (use input()/output()), BehaviorSubject (use signal()), `style=` in HTML, `any` types, semicolons in TS.
-- **Working tree:** Search only the scoped files for the same patterns.
+---
 
-### Phase 6: Translation
-- **Full project:** Search for Hebrew codepoints in HTML in `src/`.
-- **Working tree:** Search only the scoped files. Manually verify dictionary keys for translatePipe usage in those files.
+## Phase 2: Logic & Complexity Pruning `[High Reasoning — Sonnet/Gemini 1.5 Pro]`
 
-### Phase 7: Spec coverage
-- Using the working tree (e.g. `git status`, `git diff --name-only`), identify components (`.component.ts`) and services (`.service.ts`) in `src/app/` that are **new** or **materially changed** (always scoped to files to be committed).
-- For each, check if a co-located `.spec.ts` exists and is adequate (e.g. not just a stub if the unit has non-trivial behavior). List those that **need** a new or updated spec.
-- **Output**: Report as a "Spec coverage" section — list file paths needing `.spec.ts` added or updated. Report-only; the commit-to-github flow acts on it.
+**Refactor Candidates:** Identify components or services exceeding 300 lines.
 
-## Report Format
+**Signal Optimization:** Identify imperative logic convertible to declarative Signals or `computed()` values.
 
-```markdown
-# Tech Debt Report — foodVibe — [Date]
+**Security Surface:** Ensure no temporary auth bypasses or hardcoded keys were left behind.
 
-## Critical (Fix Now)
-- [ ] **[file:line]**: Description — Impact — Fix
+---
 
-## High / Medium / Low Priority
-- [ ] **[file:line]**: Description
+## Phase 3: Documentation & Sync `[Procedural — Haiku/Composer (Fast/Flash)]`
 
-## Spec coverage (add/update .spec.ts)
-- [ ] **path/to/component-or-service.ts**: add or update spec
+**Breadcrumb Check:** Run `update-docs` (Section 0) to ensure navigation maps reflect the cleaned state.
 
-## Metrics
-- Total TODOs: X | Duplicate blocks: X | Files >300 lines: X | Prohibited patterns: X | Hardcoded Hebrew: X | Specs to add/update: X
-```
+**Ledger Update:** Mark completed items in `.claude/todo.md`; move unresolved debt to a "Tech Debt" section.
 
-## Integration
+---
 
-If new patterns are found, suggest an addition to `.claude/copilot-instructions.md`.
+## Completion Gate
+
+Output: `"Tech debt audit complete. [X] unused imports removed, [Y] TODOs logged, [Z] components flagged for refactor."`
+
+If critical logic was changed → invoke the QA Engineer (Section 0.3) for verification.
+
+---
+
+## Cursor Tip
+> Tech debt cleanup is pattern-matching and deletion. Use Composer 2.0 (Fast/Flash) for ~90% of this work (Phases 1 + 3).
+> Reserve Gemini 1.5 Pro for Phase 2 only when determining how to decouple complex logic or optimize Signal architecture.
+> Credit-saver: ~67% of this skill is Flash-eligible.

@@ -1,109 +1,57 @@
-# Update Project Documentation — foodVibe 1.0
+---
+name: update-docs
+description: Refreshes breadcrumb navigation maps and project documentation after feature completion in foodVibe 1.0.
+---
 
-Refresh project documentation to reflect recent code changes. Ensures agents and developers have accurate, up-to-date navigation context.
+# Skill: update-docs
 
-## When to Run
+**Trigger:** After completing a significant development task, adding new features/components/services, or before a PR.
+**Standard:** Follows Section 4 of the Master Instructions for breadcrumb placement and Major Seam definitions.
 
-- After completing a significant development task
-- After adding new features, components, or services
-- After creating new directories or restructuring code
-- Before creating a pull request
+---
 
-## Workflow
+## Phase 1: Structural Scan `[Procedural — Haiku/Composer (Fast/Flash)]`
 
-### Phase 1: Gather Context
+**Detect Changes:** Identify new directories, moved files, or deleted subtrees since the last session.
 
-Understand what changed recently:
+**Seam Verification:** Ensure `breadcrumbs.md` files exist **only** at Major Seams as defined in **Section 4 of the Master Instructions**:
+- `src/app/core/` (and immediate sub-folders: `services/`, `models/`, `components/`)
+- `src/app/shared/`
+- `src/app/pages/`
 
-```bash
-# Recent commits
-git log --oneline -10
+> **Rule:** No `breadcrumbs.md` in leaf folders. Delete any found outside these seam locations.
 
-# Recently modified files
-git diff --name-only HEAD~5..HEAD
+---
 
-# List key directories
-ls src/app/core/services/
-ls src/app/pages/
-ls src/app/shared/
-```
+## Phase 2: Map Maintenance `[Procedural — Haiku/Composer (Fast/Flash)]`
 
-Identify:
-- New components or services added
-- New pages or routes
-- Changed models or interfaces
-- New translation keys
+**Sync Content:** Update the internal directory maps within each breadcrumb file.
 
-### Phase 2: Update Breadcrumbs
+**Prune:** Delete breadcrumb files no longer at a Major Seam or in empty directories.
 
-Use the breadcrumb-navigator agent to scan and update `breadcrumbs.md` files:
+**API / Interface Update:** If a core service or model changed, update the "Key Exports" section of the relevant breadcrumb.
 
-Read and follow `.claude/skills/breadcrumb-navigator/SKILL.md` for affected directories.
+---
 
-### Phase 3: Update copilot-instructions.md
+## Phase 3: Agent Handoff `[High Reasoning — Sonnet/Gemini 1.5 Pro]`
 
-Review `.claude/copilot-instructions.md` for needed updates:
+> **Only invoke Phase 3 if the project has undergone a major architectural shift. Otherwise stay in Flash.**
 
-1. Read the current file
-2. Check if any new conventions were established during development
-3. Verify the agent table is current
-4. Add new rules if patterns were discovered
+**Complex Reorg:** Invoke the Breadcrumb Navigator agent (Section 0.3) to redefine the seams.
 
-Key sections to verify:
-- Agent system overview matches actual agents
-- Technical guardrails are up to date
-- Translation workflow reflects current dictionary structure
-- Lucide icon registry is current
+**Doc Refinement:** Improve "Context/Purpose" descriptions in breadcrumbs if the file content has significantly evolved.
 
-### Phase 4: Update todo.md
+---
 
-Review `.claude/todo.md`:
-1. Mark completed tasks as `[x]`
-2. Add new pending tasks discovered during development
-3. Update the Plan Index table
-4. Verify plan file references are accurate
+## Completion Gate
 
-### Phase 5: Verify Plan Files
+Output: `"Documentation refreshed. Breadcrumbs updated at [List of Seams]."`
 
-```bash
-# List all plans
-ls plans/
+Trigger the Breadcrumb Navigator (Section 0.3) if the user asks for a structural overview after the update.
 
-# Check for plans not referenced in todo.md
-# (manual cross-reference)
-```
+---
 
-Ensure:
-- Each plan in `plans/` is referenced in `.claude/todo.md`
-- Completed plans are marked done
-- Plan numbers follow sequence
-
-### Phase 6: Verification
-
-```bash
-# Check for broken internal references
-rg "\[.*\]\(.*\.md\)" agent.md .claude/ --type md
-
-# Verify agent files exist
-ls .claude/agents/
-ls .claude/skills/
-```
-
-## Final Report
-
-```
-== DOCUMENTATION UPDATE COMPLETE ==
-
-Updated Files:
-  - [x] breadcrumbs.md — [count] files created/updated
-  - [x] copilot-instructions.md — [changes or "No changes needed"]
-  - [x] todo.md — [changes or "No changes needed"]
-  - [x] agent.md — [changes or "No changes needed"]
-
-Key Changes:
-  - [List significant updates]
-
-Recommended Follow-ups:
-  - [Manual review suggestions]
-```
-
+## Cursor Tip
+> This skill is a "Credit Saver." Always run breadcrumb updates using Composer 2.0 (Fast/Flash) — it is a pattern-matching task that requires no Intelligence tokens.
+> Only escalate to Gemini 1.5 Pro for Phase 3 during a major architectural reorganization.
+> Credit-saver: ~95% of routine runs are fully Flash-eligible.

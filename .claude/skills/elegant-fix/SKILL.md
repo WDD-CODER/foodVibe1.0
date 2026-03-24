@@ -1,30 +1,54 @@
-# Elegant Fix — Solution Refinement
+---
+name: elegant-fix
+description: Refines a working but mediocre fix into a clean, idiomatic solution for foodVibe 1.0 after the initial implementation is confirmed to work.
+---
 
-After implementing a fix that feels mediocre, refine it into an elegant solution.
+# Skill: elegant-fix
 
-## When to Use
+**Trigger:** After any fix that feels hacky, before submitting a PR with "I know this isn't ideal" comments, or when duplicate logic or too many special cases are noticed.
+**Standard:** Follows Section 3 (Architecture & Reactivity) of the Master Instructions.
 
-- After any fix that makes you uncomfortable
-- When you notice duplicated logic or too many special cases
-- Before submitting a PR with "I know this isn't ideal" comments
-- When a workaround could be a proper abstraction
+---
 
-## The Pattern
+## Phase 1: Complexity Audit `[Procedural — Haiku/Composer (Fast/Flash)]`
 
-When you've made a fix that works but feels hacky, trigger a fresh perspective:
+**Identify Smell:** Scan for nested subscriptions, large components (>300 lines), or one-off utility functions that belong in `core/utils/`.
 
-> "Knowing everything you know now, scrap this and implement the elegant solution"
+**State Check:** Identify any "Signal-Leaking" or untracked state per Section 3.
 
-The first pass taught you the codebase constraints; the second pass leverages that.
+**Duplication Scan:** Flag any copied logic blocks that should be extracted as pure functions.
 
-## Workflow
+---
 
-1. **Complete the initial fix** — get something working first.
-2. **Identify the smell** — workaround vs solution, too complex, inconsistent with Signals, change-detection concerns.
-3. **Request refinement** — paste context, current implementation, and concerns; ask for the elegant solution per project standards (copilot-instructions: Signals, input/output/model, translatePipe, Adapter Pattern).
-4. **Compare and decide** — is the refined solution better, lower risk, lower maintenance, aligned with existing patterns?
+## Phase 2: Structural Refinement `[High Reasoning — Sonnet/Gemini 1.5 Pro]`
 
-## Integration
+**Pattern Application:** Apply Adapter Pattern or Facade Pattern if the logic is too coupled to external APIs or storage.
 
-After refinement, if you discovered a new pattern: update `.claude/copilot-instructions.md`, relevant `breadcrumbs.md`, and consider adding a utility in `core/utils/`.
+**Reactive Logic:** Convert imperative logic to declarative Signals using `computed()` and `effect()` correctly.
 
+**Pure Functions:** Extract reusable logic into `src/app/core/services/util.service.ts`.
+
+---
+
+## Phase 3: Cleanup & Verification `[Procedural — Haiku/Composer (Fast/Flash)]`
+
+**Dead Code:** Remove unused imports, commented-out code, temporary console logs.
+
+**Naming:** Ensure all variables follow Section 3 naming conventions (PascalCase classes, kebab-case selectors, `is`/`has` boolean flags).
+
+**CSS Alignment:** Apply cssLayer (Section 4) to any local styles touched during refactor.
+
+---
+
+## Completion Gate
+
+Output: `"Refactored [Component/Service] for elegance. Moved [X] functions to core/utils and converted [Y] variables to Signals."`
+
+Run QA Engineer (Section 0.3) if the refactor touches critical business logic.
+
+---
+
+## Cursor Tip
+> For simple code cleaning and naming fixes, use Composer 2.0 (Fast/Flash) — it follows the style rules in the Master Instructions without expensive reasoning.
+> Reserve Gemini 1.5 Pro for Phase 2 only when restructuring logic or applying architectural patterns.
+> Credit-saver: ~67% of this skill (Phases 1 + 3) is Flash-eligible.

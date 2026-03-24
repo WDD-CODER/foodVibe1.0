@@ -1,111 +1,52 @@
-# Skill: Breadcrumb Navigator — foodVibe 1.0
+---
+name: breadcrumb-navigator
+description: Creates and maintains breadcrumbs.md navigation files at major directory seams in foodVibe 1.0 so agents and developers instantly understand any directory.
+---
 
-Create and maintain `breadcrumbs.md` files that serve as navigation guides for agents and developers.
+# Skill: breadcrumb-navigator
 
-## When to Run
-
-- After completing significant development (new components, services, pages, or directories)
-- Before working in an unfamiliar directory (read existing breadcrumbs first)
-- As part of the `update-docs` skill Phase 2
-- After any structural refactor that moves or renames files
-- When adding a **new** `pages/<feature>/` or top-level subtree under `src/app/` — add or refresh `breadcrumbs.md` at the hub (not every leaf folder; see **breadcrumbs.md** in `.claude/copilot-instructions.md` section 4)
-
-## MANDATORY: Read before write
-
-Before updating or creating a `breadcrumbs.md`, read the existing one (if it exists) to preserve intent and avoid overwriting accurate sections.
+**Trigger:** New `pages/<x>/` or top-level subtree added; structural changes; after `update-docs`; user is navigating an unfamiliar directory.
+**Standard:** Follows Section 4 (Folder Structure) of the Master Instructions for seam definitions and breadcrumb placement rules.
 
 ---
 
-## Workflow
+## Phase 1: Structural Audit `[Procedural — Haiku/Composer (Fast/Flash)]`
 
-### Phase 1 — Scan
+**Map Verification:** Scan the current directory and neighbors for existing `breadcrumbs.md` files.
 
-1. Check for an existing `breadcrumbs.md` in the target directory. If found, read it.
-2. List all files and immediate subdirectories in the target directory.
-3. For each file: read it briefly to understand its purpose, exports, and relationships.
-4. Identify the directory priority order (process in this sequence):
-   - `src/app/core/services/` — most critical, used everywhere
-   - `src/app/core/models/` — data structures
-   - `src/app/pages/` — each page and its `components/`
-   - `src/app/shared/` — reusable UI components
-   - `src/app/core/` — guards, pipes, directives
-   - Root config files
+**Seam Validation:** Check if the current location is a Major Seam (Section 4): `core/`, `shared/`, `pages/`, `core/services/`, `core/models/`, `core/components/`.
 
-### Phase 2 — Analyze
-
-For each file in scope, determine:
-- **Purpose**: what does this file do in one sentence?
-- **Key exports**: what symbols does it export that other files use?
-- **Relationships**: what does it depend on, and what depends on it?
-- **Patterns**: any local conventions (signal naming, component patterns)?
-- **Gotchas**: anything a developer should know before modifying this file?
-
-Skip: `node_modules/`, `.angular/`, `dist/`, `.git/`
-
-### Phase 3 — Write
-
-Write or update the `breadcrumbs.md` using this template:
-
-```markdown
-# [Directory Name] — Breadcrumbs
-
-## Purpose
-[1-2 sentences: what this directory does in the project]
-
-## Navigation
-| File/Directory | Purpose | Key Exports |
-|---------------|---------|-------------|
-| filename.ts | Brief purpose | ExportedSymbol |
-| subdirectory/ | Brief purpose | → see subdirectory/breadcrumbs.md |
-
-## Architecture Context
-[How this directory fits into core/ → shared/ → pages/ hierarchy]
-
-## Patterns & Conventions
-- [Signal naming: data_ = signal(), public via .asReadonly()]
-- [Component patterns: standalone, inject()]
-- [Any local conventions specific to this directory]
-
-## Dependencies
-- **Imports from**: [key internal dependencies]
-- **Used by**: [what depends on this directory]
-
-## Development Notes
-[Gotchas, active TODOs, things to watch out for when modifying files here]
-
----
-*Last updated: [YYYY-MM-DD]*
-*Updated by: breadcrumb-navigator*
-```
-
-**Content rules:**
-- Every file listed must exist — verify before writing
-- Every description must be verifiable from the code
-- Be precise and actionable; no generic filler
-- A developer unfamiliar with the codebase should understand the directory's purpose within 30 seconds
-
-### Phase 4 — Verify
-
-1. Read back the file you just wrote.
-2. Confirm every file path in the Navigation table resolves to a real file.
-3. Confirm no section references a symbol or pattern that no longer exists in the code.
-4. Report: directories updated, files listed, any gaps that need follow-up.
+**Pruning:** Identify and delete breadcrumb files in "leaf" folders or non-seam directories to prevent clutter.
 
 ---
 
-## Output
+## Phase 2: Map Authoring `[Procedural — Haiku/Composer (Fast/Flash)]`
 
-```
-== BREADCRUMBS UPDATE COMPLETE ==
+**Directory Indexing:** List all sub-directories and primary files (`.service.ts`, `.component.ts`, `.model.ts`).
 
-Directories updated:
-  - [x] src/app/core/services/ — [N] files documented
-  - [x] src/app/pages/recipe-builder/ — [N] files documented
+**Context Extraction:** Read component headers or service class names to provide a one-line purpose for each major folder.
 
-Skipped (no changes needed):
-  - src/app/shared/ — breadcrumbs.md is current
+**File Write:** Generate or update `breadcrumbs.md` with a clean, hierarchical navigation table.
 
-Follow-up needed:
-  - [Any files whose purpose could not be determined from code alone]
-```
+---
 
+## Phase 3: High-Level Navigation `[High Reasoning — Sonnet/Gemini 1.5 Pro]`
+
+**Entry Point Discovery:** If the user is lost, analyze the project root and provide a "You Are Here" summary across the entire app tree.
+
+**Structural Recommendations:** Suggest moving files or creating new seams if a folder exceeds 3 levels deep or 10+ files.
+
+---
+
+## Completion Gate
+
+Output: `"Navigation map updated for [Directory]. Breadcrumbs active at [Major Seams]."`
+
+If a new directory was created, remind the user to run `update-docs` (Section 0) for a global refresh.
+
+---
+
+## Cursor Tip
+> Updating breadcrumbs is a pure data-transfer task. Always use Composer 2.0 (Fast/Flash) — it is extremely fast at scanning directories and writing the markdown maps.
+> Reserve Gemini 1.5 Pro for Phase 3 only when providing high-level architectural navigation advice.
+> Credit-saver: ~95% of this skill is procedural (Phases 1 + 2).
