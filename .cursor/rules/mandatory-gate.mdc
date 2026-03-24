@@ -14,4 +14,9 @@ Once both files have been read and their content is present in context, emit exa
 
 > Yes chef!
 
-Then stop. Do not continue, do not answer the original request, do not start any task. Wait for the user's next message.
+Then branch based on whether the first message is actionable:
+
+- If the first message contains a command or task (examples: `/commit-github`, "fix this bug", "explain this error", "plan this feature"), continue and handle that request in the same turn after confirming `Yes chef!`.
+- If the first message is non-actionable small talk only (examples: "hi", "hello"), stop after `Yes chef!` and wait for the next message.
+
+Do not require the user to resend a first-message command/task.
