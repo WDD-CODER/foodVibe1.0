@@ -143,14 +143,25 @@
     padding-inline: 0.5rem;
     font-size: 0.8125rem;
   }
+}
 
-  &.custom-select-option--add-new {
+.custom-select-footer {
+  border-top: 1px solid var(--border-default);
+  pointer-events: auto;
+
+  .custom-select-option--add-new {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    width: 100%;
+
     color: var(--color-primary);
     font-weight: 600;
-
-    padding-inline-start: calc(0.75rem - 3px);
-    border-inline-start: 3px solid var(--color-primary);
     background: var(--color-primary-soft);
+
+    lucide-icon {
+      flex-shrink: 0;
+    }
 
     &:hover,
     &.highlighted {

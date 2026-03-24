@@ -55,11 +55,10 @@
 
   @if (open()) {
     <app-scrollable-dropdown [maxHeight]="maxHeight()" [attr.aria-activedescendant]="typeToFilter() && highlightedIndex() >= 0 ? triggerId() + '-opt-' + highlightedIndex() : null">
-      @for (opt of (typeToFilter() ? filteredOptions_() : options()); track opt.value; let i = $index) {
+      @for (opt of visibleOptions_(); track opt.value; let i = $index) {
         <button
           type="button"
           class="custom-select-option"
-          [class.custom-select-option--add-new]="opt.value === addNewValue()"
           [class.custom-select-option--chip]="variant() === 'chip'"
           [id]="triggerId() ? triggerId() + '-opt-' + i : null"
           [class.highlighted]="highlightedIndex() === i"
@@ -72,6 +71,25 @@
             {{ opt.label }}
           }
         </button>
+      }
+      @if (addNewOption_()) {
+        <div slot="footer" class="custom-select-footer">
+          <button
+            type="button"
+            class="custom-select-option custom-select-option--add-new"
+            [class.custom-select-option--chip]="variant() === 'chip'"
+            [class.highlighted]="highlightedIndex() === visibleOptions_().length"
+            role="option"
+            [attr.aria-selected]="value === addNewOption_()!.value"
+            (click)="onOptionClick(addNewOption_()!)">
+            <lucide-icon name="plus" [size]="12"></lucide-icon>
+            @if (translateLabels()) {
+              {{ addNewOption_()!.label | translatePipe }}
+            } @else {
+              {{ addNewOption_()!.label }}
+            }
+          </button>
+        </div>
       }
     </app-scrollable-dropdown>
   }

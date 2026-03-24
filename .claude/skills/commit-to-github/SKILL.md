@@ -238,35 +238,43 @@ If the user **denies** → state that no git operations were performed and stop.
 
 ### Phase 4 — Execute (The Delegation Boundary)
 
+> **PLAN MODE RE-ENTRY**: If plan mode is unexpectedly triggered during Phase 4, update this plan file with "Execution resumed at step X" and immediately call `ExitPlanMode`. Do **not** restart from Phase 0.
+
 Never erase or discard user changes. No `git reset --hard`, `git clean -fd`, or force-push unless the user explicitly asks.
 
 **4.1 — Clean Tree Gate (Mandatory)**
 
-Before touching any branch:
+Check the current branch:
 ```bash
+git branch --show-current
 git status --porcelain
 ```
-If ANY output (modified, untracked, or staged files not in the commit plan) → stash immediately:
-```bash
-git stash push -u -m "commit-skill-pre-sync"
-```
-This applies even on single-branch plans — locally-modified files like `settings.local.json` that are not being committed must be stashed to allow `git checkout main` to succeed.
 
-**4.2 — Worktree Context (commits + push)**
+- **Already on the default branch (main)**: Modified files survive `git checkout -b` — **no stash needed**. Proceed directly to 4.2.
+- **On a non-default branch**: Files may conflict on checkout. Stash everything first:
+  ```bash
+  git stash push -u -m "commit-skill-pre-sync"
+  git checkout main
+  ```
+- **Two planned branches touch the same file**: Stash is also required between those branch switches (see 4.2 note).
 
-For each branch:
+**4.2 — Stashless Multi-Branch Execution**
 
-1. Checkout the default branch: `git checkout main`
-2. Create the branch: `git checkout -b <branch-name>`
-3. For each commit, stage and commit (`;` is Windows-safe):
-   ```bash
-   git add <path1> <path2> ...
-   git commit -m "type(scope): message"
-   ```
-4. If stashed: after committing all commits on this branch, stash remaining planned changes before switching to the next branch. Ensure every planned change is committed — nothing dropped.
-5. Push: `git push -u origin <branch>`
+For each branch in the plan:
 
-For multiple branches: checkout default → create next branch from default → repeat. Use stash so uncommitted planned changes are never lost between branch switches.
+1. `git checkout -b <branch-name>` — creates branch from current HEAD; all modified files remain in the working tree
+2. `git add <file1> <file2> ...` — stage **only this branch's files** (leave other branches' files unstaged)
+3. `git commit -m "type(scope): message"`
+4. `git push -u origin <branch-name>`
+5. Create PR + merge (see 4.3–4.5)
+6. `git status --porcelain` — other branches' unstaged files are still present
+7. `git checkout main` — safe because this branch only touched its own files; other modifications survive
+8. `git pull` — modifications survive the pull (no conflict since they are unstaged)
+9. Repeat for the next branch
+
+> **Why this works**: `git checkout` only overwrites working-tree files if the target branch has a different committed version of them. Since each planned branch touches exclusive files, the other branches' modifications are untouched.
+
+> **When stash IS still needed between branches**: Only if two planned branches touch the same file. In that case: after committing + pushing branch A, run `git stash push -m "branch-b" -- <branch-b-files>` before switching; pop after creating branch B.
 
 **4.3 — Root Repo Context (PR + Merge)**
 
@@ -274,12 +282,17 @@ For multiple branches: checkout default → create next branch from default → 
 
 Write the PR body to a Windows-native temp path, then pass via `--body-file`:
 
-```
-Write tool → C:/Users/<username>/AppData/Local/Temp/pr-body.md
-gh pr create --title "<drafted-title>" --body-file "C:/Users/<username>/AppData/Local/Temp/pr-body.md"
+```bash
+# Detect temp dir dynamically — works for any user
+echo $USERPROFILE
 ```
 
-Detect the username from `git config user.name` or the working directory path. Do **NOT** use `/tmp/pr-body.md` — that path does not exist on Windows.
+```
+Write tool → $USERPROFILE/AppData/Local/Temp/pr-body-<branch-slug>.md
+gh pr create --title "<drafted-title>" --body-file "$USERPROFILE/AppData/Local/Temp/pr-body-<branch-slug>.md"
+```
+
+Use `$USERPROFILE` from the shell — do **not** hardcode a username. Do **NOT** use `/tmp/pr-body.md` — that path does not exist on Windows.
 
 > **Why `--body-file`**: passing `--body "..."` with markdown headings (lines starting with `#`) triggers Claude Code's built-in security check and forces a permission prompt. `--body-file` bypasses this entirely.
 
@@ -378,6 +391,9 @@ When changing the recipe-builder or menu-intelligence page, see `.claude/referen
 - **Rebase conflict**: Stop. Report every `UU` file. Ask: `"Keep mine / Keep theirs / Manual?"` Never auto-resolve. Proceed only after user confirms.
 - **PR CONFLICTING**: Stop. Report: local main is stale. Instruct: `git fetch origin main && git rebase origin/main`, resolve, then `git push --force-with-lease`. Retry merge after push.
 - **Stash pop conflict**: Stop immediately. Run `git status --short`. Report every `UU` file. Do NOT resolve automatically. After user confirms resolution for each file: run `git add <file>`, then `git stash drop`, then `git status --porcelain` to verify zero `UU` lines. Never proceed past this without a fully clean status.
+- **git stash push syntax**: `-m` flag MUST come before `--`.
+  - ✅ `git stash push -m "message" -- file1 file2`
+  - ❌ `git stash push -- file1 file2 -m "message"` ← fails with pathspec error
 - **Branch already exists**: Ask the user to rename or append `-v2`. Do not force-delete existing branches.
 - **Push fails (auth/remote)**: Report the exact error message. Suggest `gh auth status` for auth issues or `git remote -v` for remote issues.
 - **Windows / PowerShell**: Do not use `&&` or `||` to chain git commands. Run each git command in a separate Bash call, or use `;` (runs regardless of exit code). Never chain inspection + write commands in a single call.

@@ -5,6 +5,7 @@
     [style.max-height.px]="maxHeight()">
     <ng-content></ng-content>
   </div>
+  <ng-content select="[slot=footer]"></ng-content>
   <div class="c-dropdown__scroll-zone c-dropdown__scroll-zone--top" aria-hidden="true"></div>
   <div class="c-dropdown__scroll-zone c-dropdown__scroll-zone--bottom" aria-hidden="true"></div>
   <div class="c-dropdown__scroll-top" aria-hidden="true">
