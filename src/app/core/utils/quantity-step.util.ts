@@ -51,6 +51,8 @@ function getHoldStepDecrement(value: number): number {
     if (v % 10 === 0) return 10;
     return 1;
   }
+  // v > 1000: mirror increment tiers so 3000→2000→1000→900 is symmetric
+  if (v % 1000 === 0) return 1000;
   if (v % 100 === 0) return 100;
   if (v % 10 === 0) return 10;
   return 1;

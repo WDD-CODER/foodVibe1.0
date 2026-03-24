@@ -80,7 +80,7 @@ export class CounterComponent implements AfterViewChecked, OnDestroy {
   private repeatTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private repeatIntervalId: ReturnType<typeof setInterval> | null = null;
 
-  private static readonly REPEAT_DELAY_MS = 400;
+  private static readonly REPEAT_DELAY_MS = 600;
   private static readonly REPEAT_INTERVAL_MS = 80;
 
   constructor() {
