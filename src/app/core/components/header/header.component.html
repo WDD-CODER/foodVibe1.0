@@ -27,10 +27,30 @@
         <lucide-icon name="x" size="24"></lucide-icon>
       </button>
     </li>
-    <li><a routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">{{ 'dashboard' | translatePipe }}</a></li>
-    <li><a routerLink="/inventory" routerLinkActive="active" (click)="closeMobileMenu()">{{ 'inventory' | translatePipe }}</a></li>
-    <li><a routerLink="/recipe-book" routerLinkActive="active" (click)="closeMobileMenu()">{{ 'recipe_book' | translatePipe }}</a></li>
-    <li><a routerLink="/menu-library" routerLinkActive="active" (click)="closeMobileMenu()">{{ 'menu_library' | translatePipe }}</a></li>
+    <li>
+      <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">
+        <lucide-icon name="layout-dashboard" [size]="16"></lucide-icon>
+        {{ 'dashboard' | translatePipe }}
+      </a>
+    </li>
+    <li>
+      <a routerLink="/inventory" routerLinkActive="active" (click)="closeMobileMenu()">
+        <lucide-icon name="package" [size]="16"></lucide-icon>
+        {{ 'inventory' | translatePipe }}
+      </a>
+    </li>
+    <li>
+      <a routerLink="/recipe-book" routerLinkActive="active" (click)="closeMobileMenu()">
+        <lucide-icon name="book-open" [size]="16"></lucide-icon>
+        {{ 'recipe_book' | translatePipe }}
+      </a>
+    </li>
+    <li>
+      <a routerLink="/menu-library" routerLinkActive="active" (click)="closeMobileMenu()">
+        <lucide-icon name="library" [size]="16"></lucide-icon>
+        {{ 'menu_library' | translatePipe }}
+      </a>
+    </li>
 
     <li class="mobile-auth-section">
       @if (isLoggedIn()) {
@@ -56,3 +76,23 @@
   (click)="closeMobileMenu()"
   aria-hidden="true">
 </div>
+
+<!-- Bottom tab bar — mobile only (≤ 767px), shown via CSS -->
+<nav class="bottom-nav" dir="rtl" aria-label="main navigation">
+  <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">
+    <lucide-icon name="layout-dashboard" [size]="22"></lucide-icon>
+    <span>{{ 'dashboard' | translatePipe }}</span>
+  </a>
+  <a routerLink="/inventory" routerLinkActive="active" (click)="closeMobileMenu()">
+    <lucide-icon name="package" [size]="22"></lucide-icon>
+    <span>{{ 'inventory' | translatePipe }}</span>
+  </a>
+  <a routerLink="/recipe-book" routerLinkActive="active" (click)="closeMobileMenu()">
+    <lucide-icon name="book-open" [size]="22"></lucide-icon>
+    <span>{{ 'recipe_book' | translatePipe }}</span>
+  </a>
+  <a routerLink="/menu-library" routerLinkActive="active" (click)="closeMobileMenu()">
+    <lucide-icon name="library" [size]="22"></lucide-icon>
+    <span>{{ 'menu_library' | translatePipe }}</span>
+  </a>
+</nav>
