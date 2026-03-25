@@ -35,10 +35,10 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 ### Plan 198 — Lite agent refactor adoption (`plans/198-lite-agent-refactor-adoption.plan.md`)
 - [ ] CRITICAL: Verify Legacy security-officer requirements + 30-item checklist fully migrated to copilot-instructions §5 before retiring Legacy agent
 - [ ] HIGH: Fix `.claude/toBe/agents/breadcrumb-navigator.md` content (Navigator vs Architect mismatch)
-- [ ] HIGH: Add copilot-instructions §0.5 Model Routing table (Efficiency Tiers, central discoverability)
+- [x] HIGH: Add copilot-instructions §0.5 Model Routing table (Efficiency Tiers, central discoverability)
 - [ ] MEDIUM: Lite QA agent — prominent spec-authoring callout (no `.spec.ts` during iterative plan execution)
 - [ ] MEDIUM: One Master-section pointer line per Lite agent (delegation cross-references)
-- [ ] LOW: Document UI Inspector mixed-tier pattern as reference for future agents
+- [x] LOW: Document UI Inspector mixed-tier pattern as reference for future agents
 - [ ] Adoption: Promote `.claude/toBe/` foundation + agents to canonical paths when 1–3 satisfied; run validate-agent-refs
 - [ ] Verification: breadcrumb-navigator + ui-inspector SKILLs hold canonical protocol detail before stripping Legacy agents
 
@@ -56,23 +56,6 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [ ] Create conflict-resolution policy for known files with auto/manual boundaries
 - [ ] Split PR merge and remote branch deletion into explicit verified steps
 - [ ] Record per-phase timing metrics for each commit workflow run
-
-### Plan 195 — Agent System Refactor 2.0 (`plans/195-agent-system-refactor-2.plan.md`)
-- [x] Phase 1: CLAUDE.md rewrite + agent.md lightweight index
-- [x] Phase 2: Create worktree-setup on-demand skill
-- [x] Phase 3: worktree-session-end (rename + guard + delegation) + commit-to-github tech debt removal
-- [x] Phase 4: UI Inspector opt-in (copilot-instructions, ui-inspector HMR fix, team-leader, qa-engineer)
-- [x] Phase 6: copilot-instructions dual-tool tagging (CC vs Cursor scope)
-- [x] Phase 7: Cursor .mdc upgrades (scss glob+embed, lucide embed, session-end cleanup)
-- [x] Phase 8: New Cursor .mdc files (core-angular, angular-component-structure, translation, security)
-- [x] Phase 9: validate-agent-refs inventory update
-
-### Plan 194 — Agent System Cleanup: Impact Report (`plans/194-agent-system-cleanup-impact.plan.md`)
-- [x] Audit all agent/skill files for redundancy, bugs, and wiring gaps
-- [x] Fix 4 bugs/regressions (end-session `&&`, never-stage sync, validate-agent-refs inventory, template inconsistency)
-- [x] Wire security-officer into workflow (4 trigger points)
-- [x] Remove ~500 tokens/session of redundant content from 7 skill files
-- [x] Document before/after impact (lines, tokens, time savings)
 
 ### Plan 192 — Pillar 3 Reactive Loop Hardening (A13–A17) (`plans/192-reactive-loop-hardening-a13-a17.plan.md`)
 - [ ] A13: Modify `.cursor/rules/session-start.mdc` with first-message guard, state decision tree, and "wrap up" tip
@@ -103,27 +86,6 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [ ] Phase C2: Consolidate scroll-indicator scaffold into shared scroll-zone infrastructure (HI-6)
 - [ ] Phase C3: Decompose god files into page services/sub-components (`menu-intelligence`, `recipe-builder`, `product-form`) (SW-5)
 
-### Plan 190 — Agent process optimization (`plans/190-agent-process-optimization.plan.md`)
-- [x] Pillar 1 (A1–A7): Token reduction — slim CLAUDE.md, compress agent.md, extract templates to `.claude/references/`, compact Section 0 triggers
-- [x] Pillar 2 (A8–A12): MCP integration — `.cursor/mcp.json`, GitHub/Playwright, MCP-aware skills and validate-agent-refs
-- [x] Pillar 3 (A13–A17): Reactive process — session-start/end rules, todo hygiene + breadcrumb hint in commit-to-github, sweep-stale-todos command
-- [x] Resolve Critical Questions Q1–Q3 before or during execution
-
-### Plan 183 — Agent Intelligence Map and Optimization (`plans/183-agent-intelligence-map-optimization.plan.md`)
-- [x] R1: Slim `.cursor/commands/` files to one-liner pointers (remove restated Phase 0 / Step 3 details)
-- [x] R2: Remove Phase 0 restatements from `copilot-instructions.md` Section 0, `agent.md` step 7, and `.mdc` rules — keep only "read the SKILL"
-- [x] R3: Extract tab-order sections from `commit-to-github/SKILL.md` to standalone reference file `.claude/references/tab-orders.md`
-- [x] R4: Slim agent files — replace repeated standards with cross-references to copilot-instructions.md sections
-- [x] R5: Add CI flow disambiguation note (commit-to-github vs test-pr-review-merge) to `agent.md`
-- [x] R6: Archive or verify staleness of `docs/tech-debt-2025-03-05.md`
-- [ ] R7: Consider extracting add-recipe schema reference and action keyword table to data files (deferred)
-- [x] N1: Create session-handoff skill (`.claude/skills/session-handoff/SKILL.md`)
-- [x] N2: Add "Recovery" sections to commit-to-github and add-recipe skills
-- [x] N3: Add skill priority hierarchy to `copilot-instructions.md`
-- [x] N4: Create cross-reference validation command (`.claude/commands/validate-agent-refs.md`)
-- [x] N5: Add preflight checklist to `agent.md`
-- [x] N6: Add context-budget awareness note to `copilot-instructions.md`
-
 ### Plan 182 — toFix.md verification (undone) (`plans/182-tofix-verification-undone.plan.md`)
 - [ ] Recipe builder: remove chevron up/down arrows in section titles
 - [ ] Recipe builder: expandable containers — allow collapse by clicking anywhere on card
@@ -132,62 +94,11 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [ ] Add new category modal: two-case focus flow (Hebrew then English, or prefill Hebrew + focus English)
 - [ ] Verify/clarify: recipe view alignment; Maison Plus; labels; menu builder keyboard; Plan 147; dashboard; activity scroll; lists sidebar; unit-creator focus; metrics-square gram→volume
 
-### Plan 181 — Remove native select app-wide (`plans/181-remove-native-select-app-wide.plan.md`)
-- [x] Replace auth-modal native `<select>` with app-custom-select
-- [x] Remove `.c-grid-select` from styles.scss; remove `.auth-dev-select` from auth-modal SCSS
-- [x] Add lint:no-native-select script and npm script for prevention
-
-### Plan 181 — Scaling-chip placeholder and dedupe options (`plans/181-scaling-chip-placeholder-and-dedupe-options.plan.md`)
-- [x] Scaling-chip placeholder "choose"; add "choose" to dictionary; custom-select dedupe by translated label
-
-### Plan 180 — Secondary chips and grid layout (`plans/180-secondary-chips-and-grid-layout.plan.md`)
-- [x] Recipe-header HTML: secondary chips as app-scaling-chip
-- [x] Recipe-header TS: getSecondaryUnitOptions, onSecondaryScalingChipAmountChange; remove activeSecondaryEdit_ etc.
-- [x] Recipe-header SCSS: two-part grid + secondary flex-wrap; remove obsolete styles
-- [x] Recipe-header spec: update tests for secondary chips
-
-### Plan 179 — Unified scaling chip component (`plans/179-unified-scaling-chip-component.plan.md`)
-- [x] Custom-select: chip variant width max-content
-- [x] Custom-select chip: width to placeholder and grow with text (fit-content + size attr) — feat/chip-select-content-width
-- [x] Create shared scaling-chip component (TS, HTML, SCSS)
-- [x] Recipe-header: use app-scaling-chip for primary chip
-- [x] Recipe-header SCSS: trim primary chip styles
-- [x] Recipe-header spec: primary chip still updates form
-
-### Plan 178 — App-wide custom-select behavior (`plans/178-app-wide-custom-select-behavior.plan.md`)
-- [x] Recipe workflow: typeToFilter + addNewValue (category __add_new__, unit __add_unit__)
-- [x] Recipe ingredients table: variant=chip, typeToFilter, addNewValue __add_unit__
-- [x] Product form: typeToFilter on base_unit_, unit_symbol_, uom; addNewValue NEW_UNIT on first two
-- [x] Cook-view: typeToFilter on yield + 2 unit selects
-- [x] Menu intelligence + menu library list: typeToFilter on all filter selects
-- [x] Equipment list/form/add-equipment modal: typeToFilter; addNewValue __add_new__ where options have it
-- [x] Venue form, unit creator, quick-add modal: typeToFilter; addNewValue on quick-add base unit + category
-
-### Plan 177 — Workflow select behavior (`plans/177-workflow-select-behavior.plan.md`)
-- [x] Merged into Plan 178
-- [x] Enable type-to-filter and add-new on workflow category select (typeToFilter, addNewValue __add_new__)
-- [x] Enable type-to-filter and add-new on workflow unit select (typeToFilter, addNewValue __add_unit__)
-
-### Plan 176 — Hold-based tiered step logic (`plans/176-hold-based-tiered-step-logic.plan.md`)
-- [x] quantity-step.util: add continuousPress to options; single-click step 1, hold = tiered increment/decrement
-- [x] counter: restore hold-to-repeat; pass continuousPress true from repeat, false/omit from click
-- [x] quantity-step.util.spec: tests for single-click (step 1) and hold (tiered)
-
-### Plan 175 — Tiered quantity step behavior (`plans/175-tiered-quantity-step-behavior.plan.md`)
-- [x] quantity-step.util: add getQuantityStepIncrement / getQuantityStepDecrement and wire into quantityIncrement / quantityDecrement for whole numbers
-- [x] quantity-step.util.spec: update/add tests for tiered increment and decrement; keep integerOnly, decimal, explicitStep tests
-
 ### Plan 174 — Custom select chip and standalone state (`plans/174-custom-select-chip-and-standalone-state.plan.md`)
 - [x] Save plan to plans/174; document current custom-select state (chip, standaloneValue, recipe header + ingredients table)
 - [ ] Cook-view ingredients index: add variant="chip" and typeToFilter to unit selects for consistency with recipe builder
 - [ ] Verify in app: recipe builder and cook-view ingredients index unit dropdowns
 
-
-### Plan 171 — Custom select chip pilot (`plans/171-custom-select-chip-pilot.plan.md`)
-- [x] CustomSelect: add variant and addNewValue inputs; template chip/add-new classes and chevron size 10 when chip
-- [x] custom-select.component.scss: chip trigger, chip option, chip add-new (menu-item-create) styles per cssLayer
-- [x] recipe-ingredients-table: variant="chip" on unit app-custom-select; remove ::ng-deep .col-unit .custom-select-trigger
-- [x] Verify build and unit column behavior
 
 ### Plan 170 — Add-new option and styling (`plans/170-add-new-option-and-styling.plan.md`)
 - [x] CustomSelect: isAddNewOption() + .custom-select-option--add-new class

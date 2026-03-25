@@ -14,6 +14,7 @@ description: Single source of truth for all foodVibe 1.0 project rules, standard
 
 - **Save plan** `[SHARED]`: Message contains "save" + one of "it / that / this / plan" (case-insensitive) while a plan is in context → read `.claude/skills/save-plan/SKILL.md` and follow it.
 - **Commit / push to GitHub** `[SHARED]`: User says "commit", "push", "commit to github", or uses `/commit-to-github` → read `.claude/skills/commit-to-github/SKILL.md` and follow all phases in order. No git writes until user approves the visual tree in chat. **Context-aware**: skill auto-detects main-repo vs worktree via `git rev-parse --git-dir`. **Argument shortcuts**: `c` = checkpoint (main) or push (worktree); `s` = ship auto-detect (light/full/worktree); `sl` = force ship-light; `sf` = force ship-full. **Do NOT trigger for general "save" or file update requests.**
+
 - **CSS/SCSS** `[SHARED]`: Before creating or editing any `.scss`/`.css` in `src/` → read `.claude/skills/cssLayer/SKILL.md` and apply it (tokens, five-group rhythm, logical properties).
 - **Add recipe/dish** `[SHARED]`: User adds recipe from image or text → read `.claude/skills/add-recipe/SKILL.md`; Step 3 confirmation required before any write.
 - **Auth, logging, routes, CRUD** `[SHARED]`: Read `.claude/skills/auth-and-logging/SKILL.md` when touching auth, persistence, HTTP, or critical operations.
