@@ -27,6 +27,13 @@
     </div>
   </section>
 
+  <div
+    class="panel-backdrop"
+    [class.visible]="isPanelOpen()"
+    (click)="panelToggle.emit()"
+    aria-hidden="true">
+  </div>
+
   <aside class="filter-panel" [class.collapsed]="!isPanelOpen()">
     @if (isPanelOpen()) {
       <button type="button" class="panel-toggle-icon" (click)="panelToggle.emit()" aria-label="Close filters">
