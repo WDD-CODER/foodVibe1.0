@@ -33,7 +33,7 @@ description: Refreshes breadcrumb navigation maps and project documentation afte
 
 ---
 
-## Phase 3: Agent Handoff 
+## Phase 3: Agent Handoff `[High Reasoning — Sonnet/Gemini 1.5 Pro]`
 
 > **Only invoke Phase 3 if the project has undergone a major architectural shift. Otherwise stay in Flash.**
 

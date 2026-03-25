@@ -1,16 +1,19 @@
 ---
 name: agent
-description: Entry point for foodVibe 1.0 — points to the Master Instructions, agent roster, and core skills
+description: Entry point — points to the Master Instructions, agent roster, and core skills
 ---
 
-# Agent Guide: foodVibe 1.0
+# Agent Guide
 
 Read this and `.claude/copilot-instructions.md` at the start of every task.
+
+> **Model Guidance:** Routine session tasks (file reads, preflight checks, todo updates, git status) → use Haiku/Flash always. Only escalate to Sonnet when a skill or agent phase explicitly requires High Reasoning.
 
 ## Core Rules & Source of Truth
 - **Master Instructions**: `.claude/copilot-instructions.md` — single source of truth for all project rules, skill triggers, security requirements, model routing (§0.5), and task force doctrine (§0.4).
 - **Active Tasks**: `.claude/todo.md` (update status after each sub-task).
 - **Plans**: `plans/NNN-slug.plan.md` — write with save-plan skill on user confirmation.
+- **Skills are self-contained**: Do NOT re-read `copilot-instructions.md` when executing a skill — each skill carries its own inline rules.
 
 ## Agent Task Force (`.claude/agents/`) — Claude Code only
 | Agent | File | Invoke when |
@@ -41,9 +44,7 @@ All skill triggers defined in `copilot-instructions.md §0`.
 
 ## Preflight Checklist
 1. Read this file + `copilot-instructions.md` (mandatory gate).
-2. **GitHub sync (once-per-day)**: Check `notes/github-sync/<today>.md` — if missing, run `github-sync` skill.
+2. **GitHub sync (once-per-day):** Check `notes/github-sync/<today>.md` — if missing, run `github-sync` skill.
 3. Check session handoff: `notes/session-handoffs/` (last 3 days).
 4. Check `.claude/todo.md` for related pending work.
-5. If touching SCSS/CSS: read `cssLayer` skill first.
-6. If creating/refactoring components: read `angularComponentStructure` skill first.
-7. **[Claude Code]** Verify current branch (`git branch --show-current`). Never commit to `main`.
+5. **[Claude Code]** Verify current branch (`git branch --show-current`). Never commit to `main`.

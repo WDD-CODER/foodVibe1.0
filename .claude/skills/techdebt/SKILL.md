@@ -1,12 +1,20 @@
 ---
 name: techdebt
-description: Scans for duplicated code, dead code, style violations, and TODO debt in foodVibe 1.0 — run before PRs, after features, or at session end.
+description: Scans for duplicated code, dead code, style violations, and TODO debt — run before PRs, after features, or at session end.
 ---
 
 # Skill: techdebt
 
 **Trigger:** End of development session, before a PR, after large features, or user says "audit tech debt" / "cleanup" / "check todos".
-**Standard:** Follows Section 3 (Architecture) and Section 5 (Security & QA) of the Master Instructions.
+
+**Style Violation Rules (inline — no guide read required):**
+- Flag: `@Input`/`@Output` decorators → replace with `input()`, `output()`, `model()`
+- Flag: `BehaviorSubject` → replace with `signal()`
+- Flag: `any` types → replace with explicit types
+- Flag: semicolons in TypeScript files
+- Flag: components or services exceeding 300 lines → refactor candidate
+- Flag: temporary auth bypasses or hardcoded keys → security risk, must fix before PR
+- Reusable logic → move to `shared/` or `core/utils/`
 
 ---
 
@@ -14,7 +22,7 @@ description: Scans for duplicated code, dead code, style violations, and TODO de
 
 - **Working-tree mode** (invoked from `commit-to-github` [S-full] Phase 0): scope = only files staged for commit
 - **Full-project mode** (invoked at session end): scope = all of `src/app/`
-- **Fast-path skip:** If no app `.ts` files are in scope → skip entirely and report clean
+- **Fast-path skip:** If no `.ts` files are in scope → skip entirely and report clean
 
 ---
 
@@ -24,27 +32,29 @@ description: Scans for duplicated code, dead code, style violations, and TODO de
 
 **Dead Code:** Identify unused imports, variables, and commented-out code blocks.
 
-**TODO Audit:** Scan for `// TODO` or `// FIXME` comments; categorize by urgency.
+**TODO Audit:** Scan for `// TODO` or `// FIXME` comments — categorize by urgency (critical / nice-to-have).
 
-**Style Violations (Section 3):** Flag `@Input`/`@Output` decorators, `BehaviorSubject`, `any` types, semicolons in TS.
+**Style Violations:** Flag all violations listed in the rules above.
 
 ---
 
-## Phase 2: Logic & Complexity Pruning `[High Reasoning — Sonnet/Gemini 1.5 Pro]`
+## Phase 2: Logic & Complexity Pruning 
 
-**Refactor Candidates:** Identify components or services exceeding 300 lines.
+> **Only invoke if** style violations, refactor candidates, or security flags were found in Phase 1.
+
+**Refactor Candidates:** Identify components or services exceeding 300 lines — propose split strategy.
 
 **Signal Optimization:** Identify imperative logic convertible to declarative Signals or `computed()` values.
 
-**Security Surface:** Ensure no temporary auth bypasses or hardcoded keys were left behind.
+**Security Surface:** Verify no temporary auth bypasses or hardcoded keys remain — these are blocking, must be resolved before PR.
 
 ---
 
 ## Phase 3: Documentation & Sync `[Procedural — Haiku/Composer (Fast/Flash)]`
 
-**Breadcrumb Check:** Run `update-docs` (Section 0) to ensure navigation maps reflect the cleaned state.
+**Breadcrumb Check:** Run `update-docs` skill to ensure navigation maps reflect the cleaned state.
 
-**Ledger Update:** Mark completed items in `.claude/todo.md`; move unresolved debt to a "Tech Debt" section.
+**Ledger Update:** Mark completed items in `.claude/todo.md` — move unresolved debt to a dedicated "Tech Debt" section.
 
 ---
 
@@ -52,7 +62,7 @@ description: Scans for duplicated code, dead code, style violations, and TODO de
 
 Output: `"Tech debt audit complete. [X] unused imports removed, [Y] TODOs logged, [Z] components flagged for refactor."`
 
-If critical logic was changed → invoke the QA Engineer (Section 0.3) for verification.
+If critical logic was changed → invoke QA Engineer for verification before committing.
 
 ---
 

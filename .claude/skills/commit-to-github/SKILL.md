@@ -3,10 +3,18 @@ name: commit-to-github
 description: Orchestrates the full git commit → push → PR → merge pipeline for foodVibe 1.0 with context-aware routing between main-repo and worktree modes.
 ---
 
+**Model Guidance:** Use Haiku/Flash for all phases. Use Sonnet for Phase 2 only when generating a PR body for a major `sf` feature.
+
 # Skill: commit-to-github
 
 **Trigger:** User says "commit", "push", "commit to github", or invokes `/commit-to-github`.
-**Standard:** Follows Section 6 (Git & Workflow) of the Master Instructions.
+
+**Git Rules (inline — no guide read required):**
+- Conventional Commits types: `feat` | `fix` | `docs` | `style` | `refactor` | `test` | `chore`
+- Branch naming: `feat/<name>` — never commit directly to `main`
+- No `&&` or `||` chaining between git commands (Windows/PowerShell) — separate Bash calls only
+- Never force push (`--force`)
+- Q&A format for any user decision: numbered options, one question at a time
 
 ---
 
@@ -21,21 +29,26 @@ description: Orchestrates the full git commit → push → PR → merge pipeline
 
 ---
 
-## Phase 0: Verification `[Procedural — Haiku/Composer (Fast/Flash)]`
+## Phase 0: Verification 
 
 **Status Check:** Run `git status`. If nothing to commit → stop and report clean tree.
 
-**Spec Audit:** If any `.ts` or Angular files changed, invoke the QA Engineer (Section 0.3) to verify `.spec.ts` coverage. On FAIL → ask: fix now or proceed anyway?
+**Spec Audit:** If any `.ts` or Angular files changed AND this is NOT a `c` (checkpoint) commit → invoke QA Engineer to verify `.spec.ts` coverage.
+- QA PASS → continue
+- QA FAIL → ask: `"1. Fix specs now  2. Proceed anyway  3. Cancel"`
+- Skip spec audit entirely for `c`, `sl`, or docs/config-only changes
 
 **Lint/Build:** Run targeted build check to prevent "Broken Window" commits.
 
 ---
 
-## Phase 1: Interactive Staging `[Procedural — Haiku/Composer (Fast/Flash)]`
+## Phase 1: Interactive Staging 
 
-**Visual Tree:** Present a visual tree of all changed files grouped by type. Use this shape so the commit intent stays scannable in chat (branch + Conventional Commit line + files):
+**Context Detection:** Auto-detect via `git rev-parse --git-dir`:
+- Returns `.git` → main-repo mode
+- Returns `.git/worktrees/*` → worktree mode
 
-### Visual Tree
+**Visual Tree:** Present all changed files grouped by type using this exact shape:
 
 ```
 [Proposed: chore/update-commit-skill]
@@ -44,33 +57,33 @@ description: Orchestrates the full git commit → push → PR → merge pipeline
       📄 path/to/file2
 ```
 
-Ask: **"Approve? Y to commit · N to cancel"**
+Replace `[Proposed: …]` with the current branch name (or proposed branch if creating one).
+Replace `<auto-summary>` with the Phase 2 Conventional Commit subject line.
+List every path to be included; nest folders if it helps readability.
 
-Replace `[Proposed: …]` with the current branch name (or proposed branch if creating one). Replace `<auto-summary>` with the Phase 2 Conventional Commit subject line. List every path to be included; nest folders if it helps readability.
+Ask: **"Approve? Y to commit · N to cancel"**
 
 > **Hard Gate: No git writes (`git add`, `git commit`, `git push`) until the user explicitly approves the visual tree.**
 
-**Selection:** Ask (Q&A format, Section 1.1) which changes to include if not already staged.
-
-**Context Detection:** Auto-detect via `git rev-parse --git-dir`:
-- Returns `.git` → main-repo mode
-- Returns `.git/worktrees/*` → worktree mode
+**Partial Staging:** If user wants to exclude files, ask: `"Which files should I exclude? List numbers or 'all'."` — then re-present the updated tree for final approval.
 
 ---
 
-## Phase 2: Metadata Generation `[High Reasoning — Sonnet/Gemini 1.5 Pro]`
+## Phase 2: Metadata Generation 
 
-**Commit Message:** Conventional Commits format (`feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`).
+**Commit Message:** Conventional Commits format — `type(scope): subject` (imperative, max 72 chars).
 
 **PR Body (if shipping):** Concise summary with linked issues and verification steps.
 
+> Use High Reasoning only for `sf` (Ship-Full) PR bodies. For `c` and `sl`, stay in Flash — the commit message is sufficient.
+
 ---
 
-## Phase 3: Atomic Write `[Procedural — Haiku/Composer (Fast/Flash)]`
+## Phase 3: Atomic Write 
 
 Execute only after user approves visual tree (Phase 1) and metadata (Phase 2).
 
-**Commit:** `git commit -m "..."` — issue as a separate Bash call (no `&&` chaining).
+**Commit:** `git add <files>` → `git commit -m "..."` — separate Bash calls, never chained.
 
 **Push / PR:** `git push` or `gh pr create` — only after explicit approval.
 
@@ -84,15 +97,18 @@ Output: `"Committed: [message]. [Pushed to branch / PR #N created / Merged to ma
 
 ---
 
+## Troubleshooting
+
+- **Push fails (auth/remote):** Report exact error. Suggest `gh auth status` or `git remote -v`.
+- **Windows / PowerShell:** No `&&` / `||` between git commands — separate Bash calls or `;`.
+- **Nothing to commit:** Report clean tree, do not proceed.
+
+---
+
 ## Cursor Tip
-> Use Composer 2.0 (Fast/Flash) for routine checkpoints — the entire skill can run in Flash for standard `c` commits.
-> Switch to Gemini 1.5 Pro **only** for Phase 2 when generating a descriptive PR body for a major feature (`sf`).
+> Use Composer 2.0 (Fast/Flash) for routine checkpoints — the entire skill can run in Flash for `c` and `sl` commits.
+> Switch to Gemini 1.5 Pro **only** for Phase 2 when generating a PR body for a major `sf` feature.
 > Credit-saver: ~75% of this skill's execution is procedural (Phases 0, 1, 3).
-
-### Troubleshooting
-
-- **Push fails (auth/remote)**: Report exact error. Suggest `gh auth status` or `git remote -v`.
-- **Windows / PowerShell**: No `&&` / `||` between git commands. Separate Bash calls or `;`.
 
 ---
 

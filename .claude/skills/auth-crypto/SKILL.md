@@ -1,46 +1,54 @@
 ---
 name: auth-crypto
-description: Implements and audits hashing, encryption, and token management in foodVibe 1.0's auth-crypto.ts with mandatory Security Officer sign-off.
+description: Implements and audits hashing, encryption, and token management in auth-crypto.ts with mandatory Security Officer sign-off.
 ---
 
 # Skill: auth-crypto
+**Model Guidance:** Use Haiku/Flash for Phases 1 and 3. Use Sonnet for Phase 2 only.
 
 **Trigger:** Implementing or refactoring hashing, encryption, or token management in `src/app/core/auth-crypto.ts`.
-**Standard:** Follows Section 5 (Security & QA) and Section 9 (Prompt Injection / Zero-Trust) of the Master Instructions.
+
+**Crypto Rules (inline — no guide read required):**
+- Minimum algorithms: PBKDF2 for hashing, AES-256 for encryption — nothing weaker
+- Never hardcode salts or IVs — generate securely at runtime, never log them
+- Generic error messages only for crypto failures — no timing/padding side-channel leakage
+- No PII, keys, salts, or raw inputs in any log statement — including test logs
+- External crypto libraries must be approved, correctly typed, and in `package.json`
+- **Security Officer sign-off mandatory before any commit — no exceptions**
 
 ---
 
-## Phase 1: Security Surface Audit `[Procedural — Haiku/Composer (Fast/Flash)]`
+## Phase 1: Security Surface Audit
 
-**Algorithm Check:** Ensure hashing/encryption algorithms meet project hardening standards (PBKDF2, AES-256 minimum).
+**Algorithm Check:** Verify hashing/encryption algorithms meet minimum standards (PBKDF2, AES-256). Flag anything weaker immediately.
 
 **Dependency Scan:** Verify any external crypto libraries are approved, correctly typed, and registered in `package.json`.
 
 ---
 
-## Phase 2: Core Implementation `[High Reasoning — Sonnet/Gemini 1.5 Pro]`
+## Phase 2: Core Implementation 
 
 **Logic Hardening:** Implement or refactor core crypto functions (`hashPassword`, `encryptData`, `verifyToken`).
 
-**Salt / IV Management:** Generate salts and initialization vectors (IVs) securely per the Zero-Trust policy (Section 9). Never hardcode or log these values.
+**Salt / IV Management:** Generate salts and IVs securely at runtime. Never hardcode, never log — zero-trust policy applies.
 
-**Error Masking:** Implement generic error messages for crypto failures to prevent side-channel information leakage (timing / padding attacks).
+**Error Masking:** Implement generic error messages for all crypto failures — no information that could enable timing or padding attacks.
 
 ---
 
-## Phase 3: Verification & Spec `[Procedural — Haiku/Composer (Fast/Flash)]`
+## Phase 3: Verification & Spec
 
 **Unit Testing:** Write or update `.spec.ts` to test hashing consistency and encryption/decryption cycles.
 
-**PII Leakage Check:** Ensure no sensitive keys, salts, or raw inputs are accidentally logged during testing (Section 5 compliance).
+**PII Leakage Check:** Scan all test logs and assertions — ensure no sensitive keys, salts, or raw inputs are accidentally logged.
 
 ---
 
 ## Completion Gate
 
-**Mandatory Security Officer Trigger:** Invoke the Security Officer agent (Section 0.3) for a logic-flow audit before committing. No exceptions.
+**Mandatory Security Officer Trigger:** Invoke Security Officer agent for a logic-flow audit before committing. This is non-negotiable — do not skip even if changes seem minor.
 
-Output: `"Crypto logic updated. Algorithms verified and spec coverage confirmed. Invoking Security Officer for final audit..."`
+Output: `"Crypto logic updated. Algorithms verified, spec coverage confirmed. Invoking Security Officer for final audit..."`
 
 ---
 

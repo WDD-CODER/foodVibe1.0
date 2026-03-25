@@ -4,42 +4,49 @@ description: Determines the next plan number, syncs atomic sub-tasks to the ledg
 ---
 
 # Skill: save-plan
+**Model Guidance:** Use Haiku/Flash for Phases 1 and 3. Use Sonnet for Phase 2 only when validating PRD alignment on a complex plan.
 
 **Trigger:** User says "save the plan", "save plan", or confirms a plan and asks to persist it.
-**Standard:** Follows Section 2 (Gatekeeper Protocol — Phase 3: Ledger Sync) of the Master Instructions.
+
+**Plan Rules (inline — no guide read required):**
+- Plan numbering: `NNN = highest existing + 1`, zero-padded to 3 digits (e.g. `001`, `002`)
+- Refactor variant suffix: `NNN-R`
+- No plans yet → start at `001`
+- Write to `plans/<NNN>-<slug>.plan.md` in project root only — never `~/.cursor/plans/`
+- Todo update happens FIRST — before writing the plan file
+- Every sub-task formatted as `[ ] Brief description of target file(s)`
+- Medium/Large plan touching auth/storage → notify Security Officer before execution
+- Not on a worktree + plan involves code changes → suggest `feat/` branch checkout
 
 ---
 
-## Phase 1: Ledger Sync `[Procedural — Haiku/Composer (Fast/Flash)]`
+## Phase 1: Ledger Sync 
 
-**Todo Update (first action):** Extract `# Atomic Sub-tasks` from the `.plan.md` and append to `.claude/todo.md` before writing the plan file.
+**Todo Update (first action):** Extract `# Atomic Sub-tasks` from the plan and append to `.claude/todo.md` before anything else.
 
 **Sub-task Formatting:** Prepend every task with `[ ]` and include a brief description of the target file(s).
 
-**State Verification:** Confirm all previous session tasks are `[x]` or moved to "Deferred" before starting the new feature.
+**State Verification:** Confirm all previous session tasks are `[x]` or moved to "Deferred" before starting the new feature. If open tasks exist → surface them to the user before proceeding.
 
-**Numbering:**
-- List files in `plans/` to determine the next number (`NNN = highest + 1`, zero-padded to 3 digits)
-- Refactor variant: `NNN-R`
-- No plans yet → start at `001`
+**Numbering:** List files in `plans/` to determine next number. `NNN = highest + 1`, zero-padded. Refactor variant: `NNN-R`. No plans yet → start at `001`.
 
 ---
 
-## Phase 2: Logic Validation `[High Reasoning — Sonnet/Gemini 1.5 Pro]`
+## Phase 2: Logic Validation 
 
-**PRD Alignment:** Verify atomic sub-tasks satisfy 100% of the plan's requirements.
+**PRD Alignment:** Verify atomic sub-tasks satisfy 100% of the plan's requirements — no requirement left without a corresponding task.
 
-**Risk Audit:** If the plan is "Medium" or "Large" (Section 0.4) and touches auth/storage → notify the Security Officer (Section 0.3).
+**Risk Audit:** If the plan is Medium or Large and touches auth/storage → notify Security Officer now, before execution begins.
 
 ---
 
-## Phase 3: Environment Prep `[Procedural — Haiku/Composer (Fast/Flash)]`
+## Phase 3: Environment Prep 
 
-**Worktree Verification:** If not on a worktree and the plan involves code changes → suggest `feat/` branch checkout per Section 6.
+**Worktree Verification:** If not on a worktree and plan involves code changes → suggest `feat/` branch checkout before execution.
 
 **Port Discovery:** Ensure `.worktree-port` is mapped if the plan involves UI changes.
 
-**Write Plan File:** Write to `plans/<NNN>-<slug>.plan.md` (project `plans/` only — never `~/.cursor/plans/`).
+**Write Plan File:** Write to `plans/<NNN>-<slug>.plan.md` in project root only — never `~/.cursor/plans/`.
 
 ---
 

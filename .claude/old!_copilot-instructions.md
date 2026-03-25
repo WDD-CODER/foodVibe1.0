@@ -1,9 +1,9 @@
 ---
 name: copilot-instructions
-description: Single source of truth for all project rules, standards, and skill/agent triggers
+description: Single source of truth for all foodVibe 1.0 project rules, standards, and skill/agent triggers
 ---
 
-# Unified Technical Standards
+# foodVibe 1.0: Unified Technical Standards
 
 > **Single source of truth**: All project rules live here. When the user gives a new rule, add it to this file. The `.cursor/rules/*.mdc` files are Cursor-specific pointers that reinforce triggers; canonical rules stay here so the setup works in any IDE/agent.
 
@@ -33,7 +33,7 @@ description: Single source of truth for all project rules, standards, and skill/
 - **Lucide icons** `[SHARED]`: Before adding or editing `<lucide-icon name="...">` in any template → read and apply **Section 8** below.
 - **Hebrew canonical values** `[SHARED]`: When adding or editing flows that accept user-entered canonical values (units, categories, allergens, section categories) in Hebrew → read and apply **Section 7.1 and 7.2** below.
 - **Deploy to GitHub Pages** `[SHARED]`: User says deploy, publish app, GitHub Pages → read `.claude/skills/deploy-github-pages/SKILL.md` and follow it. Run only on explicit request.
-- **UI Inspector** `[CC]`: Available for visual QA on explicit request. Invoke when: user asks ("inspect", "check visually", "ui check"), team-leader needs visual verification for a layout task, or qa-engineer needs structural QA. **NOT auto-triggered** on layout edits or structural HTML/SCSS changes. See `.claude/agents/ui-inspector.md` for protocol. Port resolution: read `.worktree-port` in active worktree; if on main with no worktree: port = `4200`, worktreeRoot = detect from `.worktree-root` file, fallback to current working directory.
+- **UI Inspector** `[CC]`: Available for visual QA on explicit request. Invoke when: user asks ("inspect", "check visually", "ui check"), team-leader needs visual verification for a layout task, or qa-engineer needs structural QA. **NOT auto-triggered** on layout edits or structural HTML/SCSS changes. See `.claude/agents/ui-inspector.md` for protocol. Port resolution: read `.worktree-port` in active worktree; if on main with no worktree: port = `4200`, worktreeRoot = `C:/foodCo/foodVibe1.0`.
 - **Angular Pipes & Directives** `[SHARED]`: Before creating or refactoring any Angular Pipe or Directive → read `.claude/skills/angular-pipe-logic/SKILL.md`.
 - **Crypto / token management** `[SHARED]`: Before creating or modifying `auth-crypto.ts` → read `.claude/skills/auth-crypto/SKILL.md`. Security Officer invocation is mandatory at completion.
 - **Global doc finalization** `[SHARED]`: User says "finalize docs" or "global audit" → read `.claude/skills/finalize-docs/SKILL.md`.
@@ -53,8 +53,6 @@ When two or more sources give conflicting instructions, follow this precedence (
 ## 0.2 Context Budget
 
 Load skills on-demand at the point of need — do not pre-load all skills at session start. Each skill is ~400-3,500 tokens. Load only what the current task requires.
-
-> **Skills are self-contained**: Each skill carries its own inline rules. When a skill is active, its inline rules are authoritative — do not load `copilot-instructions.md` sections to supplement them unless the skill explicitly instructs it.
 
 ## 0.3 Agent Personas (when to invoke)
 
@@ -146,7 +144,7 @@ Read only the file for the agent you need. Each file defines its own output form
 * `LoggingService` for all auth/HTTP/CRUD/errors — structured `{ event, message, context? }` format. Never log passwords, tokens, PII (names, emails). Use user `_id` only.
 * HTTPS in prod, no secrets in source, validate input, no stack traces to client in prod.
 
-### 5.2 Project Security Requirements (Non-Negotiable)
+### 5.2 foodVibe Security Requirements (Non-Negotiable)
 1. **Auth Guard Coverage**: Every protected route MUST use `authGuard` (`canActivate: [authGuard]`). Non-route handlers (modal add/edit/delete) MUST check `userService.isLoggedIn()` at entry.
 2. **Password Hashing**: Client-side passwords MUST be hashed via `auth-crypto.ts` using PBKDF2 (100k iterations, SHA-256, random 16-byte salt). Raw SHA-256 without salt is legacy read-only — never use for new user creation.
 3. **Session Storage**: Logged-in user session MUST be stored in `sessionStorage` only (key: `loggedInUser`). No password, hash, or token ever written to `localStorage`.
