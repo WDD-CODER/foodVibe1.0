@@ -6,7 +6,7 @@ description: Refreshes breadcrumb navigation maps and project documentation afte
 # Skill: update-docs
 
 **Trigger:** After completing a significant development task, adding new features/components/services, or before a PR.
-**Standard:** Follows Section 4 of the Master Instructions for breadcrumb placement and Major Seam definitions.
+**Standard:** Breadcrumb placement and Major Seam definitions are in '.claude/standards-angular.md'.
 
 ---
 

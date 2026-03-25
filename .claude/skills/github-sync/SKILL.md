@@ -6,7 +6,7 @@ description: Pulls recent GitHub activity and syncs the local branch at session 
 # Skill: github-sync
 
 **Trigger:** Session start or after time away. **Once-per-day gate:** Check `notes/github-sync/<today-date>.md` first — if it exists, skip and print `✓ GitHub sync already ran today`. Only run if missing.
-**Standard:** Follows Section 0 (Session Start) of the Master Instructions.
+**Standard:** Session start rules are in session context from startup — no file reload needed.
 
 ---
 

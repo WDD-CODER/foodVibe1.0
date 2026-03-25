@@ -6,7 +6,7 @@ description: Closes a worktree branch session for foodVibe 1.0 — commits, push
 # Skill: worktree-session-end
 
 **Trigger:** User says "wrap up", "done", "handoff", or "ship" inside a git worktree.
-**Standard:** Follows Section 0 (Session End routing) and Section 6 (Git & Workflow) of the Master Instructions.
+**Standard:** Read '.claude/standards-git.md' for branching and workflow rules. Session end routing is self-contained in this skill.
 
 > **Hard Guard:** If `git rev-parse --git-dir` returns `.git` (main repo) → redirect to `session-handoff` immediately. This skill is worktree-only.
 

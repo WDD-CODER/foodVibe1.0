@@ -6,7 +6,7 @@ description: Bypasses standard planning gates for a fast, credit-efficient singl
 # Skill: quick-chat
 
 **Trigger:** User invokes `/quick-chat` or explicitly requests skipping standard gates for a brief interaction.
-**Standard:** Follows Section 0 (Quick Chat) of the Master Instructions.
+**Standard:** Quick-chat rules are self-contained in this skill — no standards files needed.
 
 > This skill disables `github-sync` and `session-handoff` auto-triggers for the **duration of this turn only**. Mandatory gate reads (CLAUDE.md, agent.md, copilot-instructions.md) remain active.
 

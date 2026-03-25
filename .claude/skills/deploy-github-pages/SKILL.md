@@ -6,7 +6,7 @@ description: Configures and deploys the foodVibe 1.0 Angular SPA to GitHub Pages
 # Skill: deploy-github-pages
 
 **Trigger:** User says "deploy", "publish app", "set up GitHub Pages", or "deploy to GitHub Pages".
-**Standard:** Follows Section 6 (Git & Workflow) of the Master Instructions.
+**Standard:** Read '.claude/standards-git.md' before any deployment step.
 
 > **Not automatic.** Run only on explicit user request — this skill modifies CI/CD configuration.
 
