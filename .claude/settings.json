@@ -31,6 +31,8 @@
       "Bash(gh pr list:*)",
       "Bash(gh auth status:*)",
       "Bash(gh api:*)",
+      "Bash(grep:*)",
+      "Bash(echo:*)",
       "Bash(rm:*)",
       "Write(C:/Users/danwe/AppData/Local/Temp/*)",
       "Write(plans/*)",
