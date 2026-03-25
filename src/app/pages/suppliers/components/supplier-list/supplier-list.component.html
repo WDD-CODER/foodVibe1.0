@@ -21,6 +21,12 @@
   </ng-container>
 
   <ng-container shell-actions>
+    <button type="button" class="header-btn header-btn--back"
+      data-testid="btn-back-to-dashboard-suppliers"
+      (click)="backToDashboard()">
+      <lucide-icon name="arrow-right" size="16"></lucide-icon>
+      {{ 'back_to_dashboard' | translatePipe }}
+    </button>
     <app-selection-bar [selectionState]="selection" (bulkDelete)="onBulkDeleteSelected($event)" />
     <button type="button" class="c-btn-primary" (click)="onAdd()"
       [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">

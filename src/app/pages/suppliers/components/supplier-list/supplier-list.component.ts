@@ -343,6 +343,10 @@ export class SupplierListComponent implements OnInit, OnDestroy {
     this.selection.clear();
   }
 
+  backToDashboard(): void {
+    this.router.navigate(['/dashboard']);
+  }
+
   protected deliveryDaysDisplay(days: number[] | undefined): string {
     if (!days?.length) return '—';
     return days.map(d => this.translation.translate(DAY_LABELS[d]) || String(d)).join(', ');

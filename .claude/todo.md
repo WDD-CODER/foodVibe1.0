@@ -13,6 +13,12 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Ahead (Pending)
 
+### Plan 202 — Back Button Reuse + Venues Nav Rework (`plans/202-back-button-reuse-venues-nav-rework.plan.md`)
+- [x] Sub-task 1: Add back button to venue-list shell-actions (`venue-list.component.html/ts/scss`)
+- [x] Sub-task 2: Add back button to supplier-list shell-actions (`supplier-list.component.html/ts/scss`)
+- [x] Sub-task 3: Add back-to-list button in venues-nav for edit page (`venues.page.html/ts/scss`)
+- [x] Sub-task 4: Hide venues-nav on /venues/list route (`venues.page.html/ts`)
+
 ### Plan 200 — Lite skills refactor validation report (`plans/200-lite-skills-refactor-validation-report.plan.md`)
 - [ ] Pre-write verification: content check (`toBe/skills/commit-to-github.md`, `toBe/agents/breadcrumb-navigator.md`); Master §3–5 completeness in `toBe/copilot-instructions.md`; confirm no legacy `quick-chat` skill
 - [ ] Write `notes/comparative-analysis-report.md` (15 sections + appendices A–C per plan)

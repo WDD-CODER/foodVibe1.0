@@ -81,6 +81,22 @@
           }
         </div>
         @if (!isScaledView_()) {
+          @if (!editMode_()) {
+            <!-- Multiplier chip row — hidden during edit and scale-by-ingredient mode -->
+            <div class="cv-multiplier-chips">
+              @for (chip of multiplierChips; track chip.factor) {
+                <!-- 0.5x chip on dish recipes: intentional — produces fractional yield (e.g. 1.5 dishes). Conscious design choice per QA review. -->
+                <button
+                  type="button"
+                  class="c-chip cv-chip-btn"
+                  [class.cv-chip--active]="activeMultiplier_() === chip.factor"
+                  (click)="selectMultiplier(chip.factor)"
+                  [attr.aria-pressed]="activeMultiplier_() === chip.factor">
+                  {{ chip.key | translatePipe }}
+                </button>
+              }
+            </div>
+          }
           <div class="quantity-control-wrap">
             <span class="quantity-label">{{ 'make_quantity' | translatePipe }}</span>
             <app-counter
@@ -127,7 +143,16 @@
             }
           </div>
           @for (row of scaledIngredients_(); track row.referenceId + row.unit + row.amount; let i = $index) {
-            <div class="ingredients-table-row" [class.field-changed]="editMode_() && ingredientChanged(i)" [class.view-mode-row]="!editMode_()" [class.row-highlight]="!editMode_() && (settingByIngredientIndex_() === i)" [class.setting-by]="!editMode_() && settingByIngredientIndex_() === i">
+            <div
+              class="ingredients-table-row"
+              [class.field-changed]="editMode_() && ingredientChanged(i)"
+              [class.view-mode-row]="!editMode_()"
+              [class.row-highlight]="!editMode_() && (settingByIngredientIndex_() === i)"
+              [class.setting-by]="!editMode_() && settingByIngredientIndex_() === i"
+              [class.cv-ingredient-row--checked]="!editMode_() && checkedIngredients_().has(i)"
+              [attr.role]="!editMode_() ? 'checkbox' : null"
+              [attr.aria-checked]="!editMode_() ? checkedIngredients_().has(i) : null"
+              (click)="!editMode_() && settingByIngredientIndex_() !== i ? toggleIngredientCheck(i) : null">
               @if (editMode_()) {
                 <div class="col-name">{{ row.name }}</div>
                 <div class="col-amount edit-amount">
@@ -242,6 +267,9 @@
           <h2 class="section-title">
             <lucide-icon name="timer" [size]="20"></lucide-icon>
             {{ 'prep_workflow' | translatePipe }}
+            @if (totalStepCount_() > 0) {
+              <span class="cv-step-counter">{{ completedStepCount_() }}/{{ totalStepCount_() }}</span>
+            }
           </h2>
           @if (editMode_()) {
             <app-recipe-workflow
@@ -257,12 +285,30 @@
           } @else {
             @if (recipe.steps_ && recipe.steps_.length) {
               <ol class="steps-list">
-                @for (step of recipe.steps_; track step.order_) {
-                  <li class="step-item">
+                @for (step of recipe.steps_; track step.order_; let si = $index) {
+                  <li class="step-item" [class.cv-step-item--checked]="checkedSteps_().has(si)">
+                    <button
+                      type="button"
+                      class="cv-step-check-btn"
+                      (click)="toggleStepCheck(si)"
+                      [attr.aria-label]="'ingredient_checked' | translatePipe">
+                      @if (checkedSteps_().has(si)) {
+                        <lucide-icon name="circle-check" [size]="20"></lucide-icon>
+                      } @else {
+                        <lucide-icon name="circle" [size]="20"></lucide-icon>
+                      }
+                    </button>
                     <span class="step-order">{{ step.order_ }}</span>
                     <span class="step-instruction">{{ step.instruction_ }}</span>
                     @if (step.labor_time_minutes_ > 0) {
-                      <span class="step-time">{{ step.labor_time_minutes_ }} {{ 'min' | translatePipe }}</span>
+                      <button
+                        type="button"
+                        class="step-time"
+                        (click)="onTimerHintTap(step.labor_time_minutes_)"
+                        [attr.aria-label]="'voice_timer_hint' | translatePipe">
+                        <lucide-icon name="timer" [size]="14"></lucide-icon>
+                        {{ step.labor_time_minutes_ }} {{ 'min' | translatePipe }}
+                      </button>
                     }
                   </li>
                 }
@@ -280,10 +326,19 @@
       [disabled]="isSaving_()"
       (approve)="onApproveStamp()" />
   } @else {
+    <!-- Enhanced empty state: friendly icon, CTA, recent recipe quick-picks -->
     <div class="cook-view-empty">
       <lucide-icon name="utensils" [size]="48"></lucide-icon>
-      <p>{{ 'no_recipe_selected' | translatePipe }}</p>
-      <a routerLink="/recipe-book">{{ 'recipe_book' | translatePipe }}</a>
+      <p>{{ 'pick_recipe_to_cook' | translatePipe }}</p>
+      <a routerLink="/recipe-book" class="c-btn-primary">{{ 'recipe_book' | translatePipe }}</a>
+      @if (cookViewState.recentIds().length > 0) {
+        <div class="cv-recent-chips">
+          <span class="cv-recent-label">{{ 'recent_recipes' | translatePipe }}</span>
+          @for (id of cookViewState.recentIds(); track id) {
+            <a [routerLink]="['/cook', id]" class="c-chip">{{ id }}</a>
+          }
+        </div>
+      }
     </div>
   }
   <app-export-preview

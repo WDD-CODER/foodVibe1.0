@@ -83,6 +83,8 @@ Read only the file for the agent you need. Each file defines its own output form
 
 **UI Verification Gate**: After any layout-affecting change, invoke UI Inspector before marking task complete. Provide: `componentName`, `pageUrl`, `worktreeRoot`, `navigationHint`.
 
+**Build Verification Gate**: After any agent-written code (parallel or sequential), run `mcp__ide__getDiagnostics` or `ng build` before marking tasks `[x]` or declaring a plan done. Agent output summaries are not sufficient — trust the compiler, not the agent's self-report.
+
 ## 0.5 Model Routing — Efficiency Tiers
 
 | Agent | High Reasoning (Sonnet / Gemini 1.5 Pro / o1) | Procedural (Haiku / Composer Fast/Flash / 4o-mini) |

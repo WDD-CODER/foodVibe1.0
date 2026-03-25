@@ -1,8 +1,14 @@
-<nav class="venues-nav" dir="rtl">
-  @for (item of navRoutes_(); track item.path) {
-    <a [routerLink]="item.path" routerLinkActive="active" class="nav-link">
-      {{ item.labelKey | translatePipe }}
-    </a>
-  }
-</nav>
+@if (!isListRoute_()) {
+  <nav class="venues-nav" dir="rtl">
+    <button type="button" class="nav-link nav-link--back" (click)="goBackToList()">
+      <lucide-icon name="arrow-right" size="16"></lucide-icon>
+      {{ 'venue_list' | translatePipe }}
+    </button>
+    @for (item of navRoutes_(); track item.path) {
+      <a [routerLink]="item.path" routerLinkActive="active" class="nav-link">
+        {{ item.labelKey | translatePipe }}
+      </a>
+    }
+  </nav>
+}
 <router-outlet></router-outlet>
