@@ -1,0 +1,71 @@
+:host {
+  display: block;
+  position: relative;
+}
+
+.csd-box {
+  position: relative;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.75rem;
+  min-height: 2.5rem;
+  background: white;
+  cursor: text;
+
+  .csd-chips-and-input {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 1.5rem;
+  }
+
+  .csd-input {
+    flex: 1;
+    min-width: 6rem;
+    padding: 0.2rem 0;
+    border: none;
+    border-radius: 0;
+    font-size: 0.9rem;
+    outline: none;
+    background: transparent;
+  }
+
+  &.no-chips .csd-chips-and-input {
+    min-height: auto;
+  }
+
+  app-scrollable-dropdown {
+    ::ng-deep .dropdown-item {
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s ease;
+
+      &:hover {
+        background: var(--bg-glass);
+      }
+
+      &.dropdown-item--highlight {
+        background: var(--border-default);
+      }
+
+      &.selected {
+        color: var(--color-primary);
+        font-weight: 600;
+      }
+
+      &.dropdown-item--add-new {
+        color: var(--text-success);
+        font-weight: 700;
+      }
+
+      &.dropdown-item--empty {
+        color: var(--color-text-muted);
+        font-style: italic;
+      }
+    }
+  }
+}

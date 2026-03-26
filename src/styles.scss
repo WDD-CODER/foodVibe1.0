@@ -1367,3 +1367,30 @@ textarea.c-input {
     display: none !important;
   }
 }
+
+/* ---- Engine: Chip / Tag ---- */
+.chipe {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.25rem;
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+
+  &.allergen {
+    background: var(--bg-warning);
+    color: var(--text-warning);
+  }
+
+  &.supplier {
+    background: var(--bg-success);
+    color: var(--text-success);
+  }
+
+  &.category {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-hover);
+  }
+}

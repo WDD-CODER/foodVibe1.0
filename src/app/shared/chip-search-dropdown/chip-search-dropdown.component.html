@@ -1,0 +1,54 @@
+<div class="csd-box"
+     [class.no-chips]="selected().length === 0"
+     (clickOutside)="onBlurred()"
+     (click)="onBoxClick($event)">
+
+  <div class="csd-chips-and-input">
+    @for (item of selected(); track item) {
+      <span [class]="chipClass()" (click)="remove.emit(item); $event.stopPropagation()">
+        {{ displayFn()(item) }}
+        <lucide-icon name="x" class="icon"></lucide-icon>
+      </span>
+    }
+    <input #searchInput
+           type="text"
+           class="csd-input form-input--no-focus-ring"
+           [value]="searchQuery_()"
+           (input)="searchQuery_.set($any($event.target).value); highlightIndex_.set(-1)"
+           (focus)="openDropdown()"
+           (keydown)="onInputKeydown($event)"
+           [placeholder]="placeholder()" />
+  </div>
+
+  @if (showDropdown_()) {
+    <app-scrollable-dropdown [maxHeight]="200"
+                             (keydown)="onDropdownKeydown($event)"
+                             role="listbox">
+      @for (opt of filteredOptions_(); track opt; let i = $index) {
+        <div class="dropdown-item"
+             #dropdownItem
+             [id]="'csd-option-' + i"
+             [class.dropdown-item--highlight]="highlightIndex_() === i"
+             tabindex="-1"
+             role="option"
+             (click)="add.emit(opt); $event.stopPropagation()">
+          {{ displayFn()(opt) }}
+        </div>
+      }
+      @if (hasAddNew_()) {
+        <div class="dropdown-item dropdown-item--add-new"
+             #dropdownItem
+             [id]="'csd-option-' + filteredOptions_().length"
+             [class.dropdown-item--highlight]="highlightIndex_() === filteredOptions_().length"
+             tabindex="-1"
+             role="option"
+             (click)="emitAddNew(); $event.stopPropagation()">
+          + {{ addNewLabel() }}@if (searchQuery_().trim()) { "{{ searchQuery_() }}" }
+        </div>
+      }
+      @if (noOptionsLabel() && filteredOptions_().length === 0 && !searchQuery_().trim()) {
+        <div class="dropdown-item dropdown-item--empty">{{ noOptionsLabel() }}</div>
+      }
+    </app-scrollable-dropdown>
+  }
+</div>
