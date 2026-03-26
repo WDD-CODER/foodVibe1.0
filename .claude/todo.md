@@ -5,6 +5,15 @@ Update status after each sub-task. Link plan files here when applicable.
 ---
 
 
+### Plan 203-R — Recipe-book allergen + cell-expand refactor (`plans/203-R-recipe-book-allergen-cell-expand-refactor.plan.md`)
+- [ ] Create `src/app/core/utils/recipe-allergens.util.ts` — export `MAX_ALLERGEN_RECURSION` + pure `resolveRecipeAllergens` fn
+- [ ] Create `src/app/core/utils/cell-expand-state.util.ts` — `CellExpandState` class with signals + helpers
+- [ ] Update `recipe-book-list.component.ts` — import constants/util, replace 4 signals with 2 `CellExpandState` instances
+- [ ] Update `recipe-book-list.component.ts` — replace `getRecipeAllergens` body with thin wrapper; update `getRecipeProductIds` to import `MAX_ALLERGEN_RECURSION`
+- [ ] Update `recipe-book-list.component.ts` — delete 6 expand methods + 2 expand helper methods; add close wrappers + update `resetExpandedCells`
+- [ ] Update `recipe-book-list.component.html` — replace 6 method calls in header/body with `allergenExpand.*` / `labelsExpand.*`
+- [ ] Verify: `ng build` passes; component under ~600 LOC
+
 ## Done
 
 Completed entries are in [todo-archive.md](todo-archive.md).
@@ -176,6 +185,11 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [ ] Auth hardening: password in UI, credentials types, local hash-only storage, auth abstraction, guard/modal wiring
 - [ ] Backend-ready: environment files, API contract, HTTP provider, interceptor, token lifecycle
 - [ ] Add "Security & go-live" checklist to docs (HTTPS, headers, rate limiting, no secrets in repo, error exposure)
+
+### Tech Debt — Audit 2026-03-26 (unplanned items)
+- [ ] Extract `trim().toLowerCase().replace(/\s+/g, '_')` key-sanitization into `core/utils/sanitize-key.util.ts` (2 services: `translation-key-modal.service.ts:30`, `label-creation-modal.service.ts:33`)
+- [ ] Remove commented import `ProductDataService` at `product-form.component.ts:8` and commented statement at line 927
+- [ ] Create typed URL-param wrapper to eliminate 5× `StringParam as any` casts (venue-list, menu-library-list, equipment-list, inventory-product-list, recipe-book-list)
 
 ### Plan 069 â€” Unused and redundant code cleanup (`plans/069-unused-redundant-code-cleanup.plan.md`)
 
