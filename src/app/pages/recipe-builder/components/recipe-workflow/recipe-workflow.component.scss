@@ -69,13 +69,15 @@
       place-content: center;
     }
 
-    .col-actions .delete-btn {
+    .col-actions .c-icon-btn {
+      width: 1.5rem;
+      height: 1.5rem;
       opacity: 0;
       transition: opacity 0.15s ease;
     }
 
-    &:hover .col-actions .delete-btn,
-    .col-actions .delete-btn:focus {
+    &:hover .col-actions .c-icon-btn,
+    .col-actions .c-icon-btn:focus {
       opacity: 1;
     }
   }
@@ -141,13 +143,15 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
       place-content: center;
     }
 
-    .col-prep-actions .delete-btn {
+    .col-prep-actions .c-icon-btn {
+      width: 1.5rem;
+      height: 1.5rem;
       opacity: 0;
       transition: opacity 0.15s ease;
     }
 
-    &:hover .col-prep-actions .delete-btn,
-    .col-prep-actions .delete-btn:focus {
+    &:hover .col-prep-actions .c-icon-btn,
+    .col-prep-actions .c-icon-btn:focus {
       opacity: 1;
     }
   }

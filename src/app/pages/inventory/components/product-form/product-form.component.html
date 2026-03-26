@@ -103,7 +103,7 @@
       </label>
 
       <div *ngFor="let option of purchaseOptions_.controls; let idx = index" [formGroupName]="idx"
-        class="form-group scaling-box mb-4" [class.row-invalid]="option.invalid && (option.dirty || isSubmitted)">
+        class="form-group scaling-box" [class.row-invalid]="option.invalid && (option.dirty || isSubmitted)">
 
         <div class="scaling-row">
           <div class="input-wrapper"
@@ -128,7 +128,7 @@
           <div class="input-wrapper"
             [class.field-error]="option.get('uom')?.invalid && (option.get('uom')?.dirty || isSubmitted)">
             <label class="label-row">
-              <span class="math-text flex">:</span>
+              <span class="math-text">:</span>
 
               <app-custom-select
                 formControlName="uom"

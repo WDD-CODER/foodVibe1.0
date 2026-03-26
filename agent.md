@@ -39,6 +39,8 @@ All skill triggers defined in `copilot-instructions.md §0`.
 ## Commands (`.claude/commands/`)
 | Command | Purpose |
 |---------|---------|
+| `plan-implementation.md` | Architectural brief → codebase scan → implementation plan (read-only phase) |
+| `execute-it.md` | Execute the implementation plan from this conversation (full write phase) |
 | `test-pr-review-merge.md` | Full CI: test, PR, review, merge to main |
 | `validate-agent-refs.md` | Health check: verify all agent file cross-references are valid |
 
@@ -48,3 +50,9 @@ All skill triggers defined in `copilot-instructions.md §0`.
 3. Check session handoff: `notes/session-handoffs/` (last 3 days).
 4. Check `.claude/todo.md` for related pending work.
 5. **[Claude Code]** Verify current branch (`git branch --show-current`). Never commit to `main`.
+
+## Post-Execution Gate
+After completing any plan execution:
+1. Run `ng build` or full `getDiagnostics` — mandatory, no exceptions. Do not skip because changes look "mechanical" or "safe".
+2. If build fails → fix before reporting completion.
+3. Do NOT run the full test suite here — tests run only in commit-to-github Phase 0 or on explicit user request.

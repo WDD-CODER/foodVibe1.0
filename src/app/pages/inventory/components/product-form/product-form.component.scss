@@ -179,6 +179,8 @@
   }
 
   .scaling-box {
+    margin-block-end: 1rem;
+
     background: var(--bg-glass);
     padding: 1.25rem;
     border-radius: var(--radius-md);
