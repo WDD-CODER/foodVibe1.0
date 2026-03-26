@@ -4,6 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "serve:mobile": "node scripts/secure-mobile-server.js",
+    "ssl:generate": "bash scripts/generate-ssl.sh",
     "log-server": "node scripts/log-server.js",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
