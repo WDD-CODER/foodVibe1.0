@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "serve:mobile": "node scripts/secure-mobile-server.js",
+    "serve:remote": "node scripts/secure-mobile-server.js --tunnel",
     "ssl:generate": "bash scripts/generate-ssl.sh",
     "log-server": "node scripts/log-server.js",
     "build": "ng build",
