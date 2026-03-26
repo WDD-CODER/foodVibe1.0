@@ -737,9 +737,9 @@ export class CookViewPage implements OnInit, OnDestroy {
     const arr = this.workflowFormArray
     const isDish = this.isDish_()
     if (isDish) {
-      arr.push(this.createPrepItemRow())
+      arr.push(this.recipeFormService.createPrepItemRow())
     } else {
-      arr.push(this.createStepGroup(arr.length + 1))
+      arr.push(this.recipeFormService.createStepGroup(arr.length + 1))
     }
     this.focusWorkflowRowAt_.set(arr.length - 1)
   }
@@ -769,53 +769,28 @@ export class CookViewPage implements OnInit, OnDestroy {
     this.focusWorkflowRowAt_.set(null)
   }
 
-  private getPrepRowsFromRecipe(recipe: Recipe) {
-    return this.recipeFormService.getPrepRowsFromRecipe(recipe)
-  }
-
-  private createStepGroup(order: number): FormGroup {
-    return this.fb.group({
-      order: [order],
-      instruction: [''],
-      labor_time: [0]
-    })
-  }
-
-  private createPrepItemRow(row?: { preparation_name?: string; category_name?: string; main_category_name?: string; quantity?: number; unit?: string }): FormGroup {
-    const units = this.unitRegistry.allUnitKeys_()
-    const defaultUnit = units[0] ?? 'unit'
-    return this.fb.group({
-      preparation_name: [row?.preparation_name ?? ''],
-      category_name: [row?.category_name ?? ''],
-      main_category_name: [row?.main_category_name ?? ''],
-      quantity: [row?.quantity ?? 1, [Validators.min(0)]],
-      unit: [row?.unit ?? defaultUnit, Validators.required]
-    })
-  }
-
   private buildWorkflowFormFromRecipe(recipe: Recipe): void {
     const arr = this.workflowFormArray
     arr.clear()
     const isDish = this.isDish_()
     if (isDish) {
-      const prepRows = this.getPrepRowsFromRecipe(recipe)
+      const prepRows = this.recipeFormService.getPrepRowsFromRecipe(recipe)
       if (prepRows.length > 0) {
-        prepRows.forEach(row => arr.push(this.createPrepItemRow(row)))
+        prepRows.forEach(row => arr.push(this.recipeFormService.createPrepItemRow(row)))
       } else {
-        arr.push(this.createPrepItemRow())
+        arr.push(this.recipeFormService.createPrepItemRow())
       }
     } else {
       const steps = recipe.steps_ ?? []
       if (steps.length > 0) {
-        steps.forEach((step, i) =>
-          arr.push(this.fb.group({
-            order: [step.order_ ?? i + 1],
-            instruction: [step.instruction_ ?? '', Validators.required],
-            labor_time: [step.labor_time_minutes_ ?? 0]
-          }))
-        )
+        steps.forEach((step, i) => {
+          const group = this.recipeFormService.createStepGroup(step.order_ ?? i + 1)
+          group.get('instruction')?.addValidators(Validators.required)
+          group.patchValue({ instruction: step.instruction_ ?? '', labor_time: step.labor_time_minutes_ ?? 0 })
+          arr.push(group)
+        })
       } else {
-        arr.push(this.createStepGroup(1))
+        arr.push(this.recipeFormService.createStepGroup(1))
       }
     }
     this.workflowResetTrigger_ += 1
