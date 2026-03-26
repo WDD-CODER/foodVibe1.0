@@ -24,7 +24,7 @@ Read this and `.claude/copilot-instructions.md` at the start of every task.
 | Breadcrumb Navigator | `breadcrumb-navigator.md` | New `pages/<x>/` or app subtree; structural changes; after update-docs |
 | QA Engineer | `qa-engineer.md` | Spec gaps; diagnosing failing tests; E2E creation |
 | Security Officer | `security-officer.md` | Post-feature review of auth/storage/route changes; pre-deploy; security consult |
-| UI Inspector | `ui-inspector.md` | Visual QA on explicit request or when layout changes need verification |
+| UI Inspector | `ui-inspector.md` | Manual only — invoke `/ui-inspector` in dedicated session with Playwright MCP enabled |
 
 See `copilot-instructions.md §0.4` for Task Force sizing and standard sequence.
 See `copilot-instructions.md §0.5` for model routing (Efficiency Tiers).

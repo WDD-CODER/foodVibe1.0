@@ -29,6 +29,10 @@ Periodic health check that verifies all internal links in the agent guidance sys
 - `deploy-github-pages/SKILL.md`
 - `worktree-session-end/SKILL.md`
 - `worktree-setup/SKILL.md`
+- `auth-crypto/SKILL.md`
+- `angular-pipe-logic/SKILL.md`
+- `finalize-docs/SKILL.md`
+- `quick-chat/SKILL.md`
 
 > Note: `end-session/SKILL.md` is a deprecated redirect stub — not a functional skill. Intentionally kept as a pointer only.
 
@@ -49,6 +53,7 @@ Periodic health check that verifies all internal links in the agent guidance sys
 - `add-recipe.md`
 - `commit-github.md`
 - `deploy-github-pages.md`
+- `quick-chat.md`
 
 ## Checklist
 
@@ -73,7 +78,7 @@ for f in team-leader software-architect product-manager breadcrumb-navigator qa-
 done
 
 # Verify all expected skill files exist
-for s in save-plan commit-to-github cssLayer add-recipe github-sync techdebt update-docs elegant-fix angularComponentStructure auth-and-logging session-handoff breadcrumb-navigator deploy-github-pages worktree-session-end worktree-setup; do
+for s in save-plan commit-to-github cssLayer add-recipe github-sync techdebt update-docs elegant-fix angularComponentStructure auth-and-logging session-handoff breadcrumb-navigator deploy-github-pages worktree-session-end worktree-setup auth-crypto angular-pipe-logic finalize-docs quick-chat; do
   [ -f ".claude/skills/$s/SKILL.md" ] || echo "MISSING: .claude/skills/$s/SKILL.md"
 done
 

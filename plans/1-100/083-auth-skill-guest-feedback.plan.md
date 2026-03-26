@@ -38,7 +38,7 @@ Content: when it applies, two cases (route vs non-route), pattern for non-route 
 
 ## Optional: HOW-WE-WORK hint
 
-In [.claude/HOW-WE-WORK.md](.claude/HOW-WE-WORK.md), under the **"Auth, logging & security"** bullet, extend the "When" line so agents think about guest feedback when adding new add/edit/delete actions.
+In [.claude/copilot-instructions.md](.claude/copilot-instructions.md), under the **"Auth, logging & security"** bullet, extend the "When" line so agents think about guest feedback when adding new add/edit/delete actions.
 
 ---
 
@@ -47,6 +47,6 @@ In [.claude/HOW-WE-WORK.md](.claude/HOW-WE-WORK.md), under the **"Auth, logging 
 | What | Where | Action |
 |------|--------|--------|
 | Guest action feedback rules + pattern + references | `.claude/skills/auth-and-logging/SKILL.md` | Added subsection under "1. Auth awareness" |
-| Reminder for new protected actions | `.claude/HOW-WE-WORK.md` | Extended "When" for Auth skill |
+| Reminder for new protected actions | `.claude/copilot-instructions.md` | Extended "When" for Auth skill |
 
 Done. No new skills, no new Cursor rules, no workflow changes.

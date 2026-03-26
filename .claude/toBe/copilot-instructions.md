@@ -44,7 +44,7 @@ Hebrew canonical values [SHARED]: When adding or editing flows that accept user-
 
 Deploy to GitHub Pages [SHARED]: User says deploy, publish app, GitHub Pages → read .claude/skills/deploy-github-pages/SKILL.md and follow it. Run only on explicit request.
 
-UI Inspector [CC]: Available for visual QA on explicit request. Invoke when: user asks ("inspect", "check visually", "ui check"), team-leader needs visual verification for a layout task, or qa-engineer needs structural QA. NOT auto-triggered on layout edits or structural HTML/SCSS changes. See .claude/agents/ui-inspector.md for protocol. Port resolution: read .worktree-port in active worktree; if on main with no worktree: port = 4200, worktreeRoot = C:/foodCo/foodVibe1.0.
+- **UI Inspector** `[CC]`: Manual only — invoke via `/ui-inspector` slash command only when Playwright MCP is confirmed active (`/mcp` to verify). Never auto-triggered by agents mid-task. If visual QA is needed after a task, agents will flag it to the user. Port resolution: read `.worktree-port` in active worktree; if on main with no worktree: port = `4200`, worktreeRoot = detect from `.worktree-root` file, fallback to current working directory.
 
 Security review [CC]: After completing any change that touches auth.guard.ts, auth.interceptor.ts, auth-crypto.ts, user.service.ts, localStorage/sessionStorage access, new routes in app.routes.ts, or [innerHTML]/bypassSecurityTrust* → invoke security-officer agent as the final step before committing. Also invoke: during planning of features requiring backend auth or new data persistence; on pre-deployment go-live check; on explicit user request ("security review", "audit", "check security"). Never invoke for changes that don't touch the security surface (UI, CSS, recipes, docs).
 
@@ -134,13 +134,7 @@ PRD (Plan): plans/XXX-feature.plan.md. Authored by Product Manager. Defines prob
 
 HLD (Design): plans/XXX-feature-hld.md. Authored by Software Architect. Defines component tree, signal relationships, and data flow.
 
-UI-Inspector Protocol:
-
-Mandatory Inputs: pageUrl, componentName.
-
-Port Check: Read .worktree-port; fallback to 4200 on main.
-
-Wait Rule: Always include a 2s buffer after networkidle to absorb post-HMR module patching.
+**UI Verification Gate:** After any layout-affecting change, agents will flag visual QA is recommended. User invokes `/ui-inspector` manually in a dedicated session with Playwright MCP enabled.
 
 1. Persona & Identity
 

@@ -20,7 +20,7 @@ Refactor of the login/auth plan: **application-wide logging** (not only auth) an
 ### 1.1 Where to save
 
 - **Rules**: [.claude/copilot-instructions.md](.claude/copilot-instructions.md) (single source of truth; do not add to `.cursor/rules/`).
-- **Skill**: New `.claude/skills/auth-and-logging/SKILL.md` linked from [.claude/HOW-WE-WORK.md](.claude/HOW-WE-WORK.md).
+- **Skill**: New `.claude/skills/auth-and-logging/SKILL.md` linked from [.claude/copilot-instructions.md](.claude/copilot-instructions.md).
 
 ### 1.2 Skill content (auth-and-logging)
 

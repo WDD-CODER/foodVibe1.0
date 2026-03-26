@@ -44,7 +44,7 @@ description: Single source of truth for all project rules, standards, and skill/
 - **Lucide icons** `[SHARED]`: Before adding or editing `<lucide-icon name="...">` → read `.claude/standards-domain.md` Lucide section.
 - **Hebrew canonical values** `[SHARED]`: When adding or editing canonical value flows → read `.claude/standards-domain.md` Hebrew sections.
 - **Deploy to GitHub Pages** `[SHARED]`: User says deploy, publish app, GitHub Pages → read `.claude/skills/deploy-github-pages/SKILL.md`. Run only on explicit request.
-- **UI Inspector** `[CC]`: Available for visual QA on explicit request. See `.claude/agents/ui-inspector.md` for protocol. Port resolution: read `.worktree-port` in active worktree; if on main with no worktree: port = `4200`, worktreeRoot = detect from `.worktree-root` file, fallback to current working directory.
+- **UI Inspector** `[CC]`: Manual only — invoke via `/ui-inspector` slash command only when Playwright MCP is confirmed active (`/mcp` to verify). Never auto-triggered by agents mid-task. If visual QA is needed after a task, agents will flag it to the user. Port resolution: read `.worktree-port` in active worktree; if on main with no worktree: port = `4200`, worktreeRoot = detect from `.worktree-root` file, fallback to current working directory.
 - **Angular Pipes & Directives** `[SHARED]`: Before creating or refactoring any Angular Pipe or Directive → read `.claude/skills/angular-pipe-logic/SKILL.md`.
 - **Crypto / token management** `[SHARED]`: Before creating or modifying `auth-crypto.ts` → read `.claude/skills/auth-crypto/SKILL.md`. Security Officer invocation is mandatory at completion.
 - **Global doc finalization** `[SHARED]`: User says "finalize docs" or "global audit" → read `.claude/skills/finalize-docs/SKILL.md`.
@@ -99,7 +99,7 @@ Agent persona files live in `.claude/agents/`. Load on demand — do not pre-loa
 
 **Documentation Gate**: After any structural change to `pages/` or `src/app/` top-level subtrees, run Breadcrumb Navigator to update `breadcrumbs.md` at affected seams.
 
-**UI Verification Gate**: After any layout-affecting change, invoke UI Inspector before marking task complete. Provide: `componentName`, `pageUrl`, `worktreeRoot`, `navigationHint`.
+**UI Verification Gate:** After any layout-affecting change, agents will flag visual QA is recommended. User invokes `/ui-inspector` manually in a dedicated session with Playwright MCP enabled.
 
 **Build Verification Gate**: After any agent-written code, run `mcp__ide__getDiagnostics` or `ng build` before marking tasks `[x]`. Trust the compiler, not the agent's self-report.
 

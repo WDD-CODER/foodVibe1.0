@@ -66,5 +66,11 @@
       "mcp__playwright__browser_close",
       "mcp__playwright__browser_tabs"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": false,
+  "disabledMcpjsonServers": [
+    "playwright",
+    "github",
+    "context7"
+  ]
 }
