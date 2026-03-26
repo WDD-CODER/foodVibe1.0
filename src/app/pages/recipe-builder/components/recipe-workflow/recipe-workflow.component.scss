@@ -70,6 +70,8 @@
     }
 
     .col-actions .c-icon-btn {
+      width: 1.5rem;
+      height: 1.5rem;
       opacity: 0;
       transition: opacity 0.15s ease;
     }
@@ -142,6 +144,8 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
     }
 
     .col-prep-actions .c-icon-btn {
+      width: 1.5rem;
+      height: 1.5rem;
       opacity: 0;
       transition: opacity 0.15s ease;
     }
