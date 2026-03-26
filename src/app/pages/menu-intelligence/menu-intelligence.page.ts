@@ -29,6 +29,7 @@ import { ExportPreviewComponent } from 'src/app/shared/export-preview/export-pre
 import { ExportToolbarOverlayComponent } from 'src/app/shared/export-toolbar-overlay/export-toolbar-overlay.component';
 import { HeroFabService } from '@services/hero-fab.service';
 import { useSavingState } from 'src/app/core/utils/saving-state.util';
+import { MenuDishRowComponent } from './components/menu-dish-row/menu-dish-row.component';
 
 type MenuItemForm = {
   recipe_id_: string;
@@ -47,7 +48,7 @@ type MenuSectionFormRaw = { _id?: string; name_?: string; items_?: MenuItemForm[
 @Component({
   selector: 'app-menu-intelligence-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, ClickOutSideDirective, SelectOnFocusDirective, ScrollableDropdownComponent, CustomSelectComponent, ExportPreviewComponent, ExportToolbarOverlayComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, ClickOutSideDirective, ScrollableDropdownComponent, CustomSelectComponent, ExportPreviewComponent, ExportToolbarOverlayComponent, MenuDishRowComponent],
   templateUrl: './menu-intelligence.page.html',
   styleUrl: './menu-intelligence.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -547,18 +548,21 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     this.focusDishSearchInput(sectionIndex, newItemIndex);
   }
 
-  protected getDishFieldLabelKey(fieldKey: DishFieldKey): string {
-    return ALL_DISH_FIELDS.find(f => f.key === fieldKey)?.labelKey ?? fieldKey;
+  protected removeItem(sectionIndex: number, itemIndex: number): void {
+    this.getItemsArray(sectionIndex).removeAt(itemIndex);
   }
 
-  /** Food cost is calculated from serving portions; not user-editable. */
-  protected isDishFieldReadOnly(fieldKey: DishFieldKey): boolean {
-    return fieldKey === 'food_cost_money';
+  protected isRecipeDish(recipe: Recipe): boolean {
+    return recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length);
   }
 
-  protected getAutoFoodCost(sectionIndex: number, itemIndex: number): number {
+  protected getPiecesPerPerson(): number {
+    return (this.form_.value as { pieces_per_person_?: number }).pieces_per_person_ ?? 1;
+  }
+
+  private getAutoFoodCost(sectionIndex: number, itemIndex: number): number {
     const item = this.getItemsArray(sectionIndex).at(itemIndex);
-    const recipeId = item?.get('recipe_id_')?.value;
+    const recipeId = item?.get('recipe_id_')?.value as string | undefined;
     if (!recipeId) return 0;
     const recipe = this.recipes_().find(r => r._id === recipeId);
     if (!recipe) return 0;
@@ -566,7 +570,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       this.form_.value.serving_type_ as ServingType,
       this.getGuestCount(),
       Number(item.get('predicted_take_rate_')?.value ?? 0),
-      Number((this.form_.value as { pieces_per_person_?: number }).pieces_per_person_ ?? 1),
+      this.getPiecesPerPerson(),
       Number(item.get('serving_portions')?.value ?? 1)
     );
     const baseYield = Math.max(1, recipe.yield_amount_ || 1);
@@ -579,36 +583,6 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       })),
     });
     return Math.round(scaledCost * 100) / 100;
-  }
-
-  /** Food cost per portion (total auto food cost ÷ derived portions). Read-only in dish-data. */
-  protected getFoodCostPerPortion(sectionIndex: number, itemIndex: number): number {
-    const total = this.getAutoFoodCost(sectionIndex, itemIndex);
-    const item = this.getItemsArray(sectionIndex).at(itemIndex);
-    const derivedPortions = item ? this.getDerivedPortions(item.value as MenuItemForm) : 1;
-    return Math.round((total / Math.max(1, derivedPortions)) * 100) / 100;
-  }
-
-  protected removeItem(sectionIndex: number, itemIndex: number): void {
-    this.getItemsArray(sectionIndex).removeAt(itemIndex);
-  }
-
-  protected getRecipeName(recipeId: string): string {
-    return this.recipes_().find(r => r._id === recipeId)?.name_hebrew || '';
-  }
-
-  protected isRecipeDish(recipe: Recipe): boolean {
-    return recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length);
-  }
-
-  protected getDerivedPortions(item: MenuItemForm): number {
-    return this.menuIntelligence.derivePortions(
-      this.form_.value.serving_type_ as ServingType,
-      Number(this.form_.value.guest_count_ || 0),
-      Number(item.predicted_take_rate_ || 0),
-      Number((this.form_.value as { pieces_per_person_?: number }).pieces_per_person_ ?? 1),
-      Number(item.serving_portions ?? 1)
-    );
   }
 
   protected getDishSearchKey(sectionIndex: number, itemIndex: number): string {
@@ -693,12 +667,6 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     ctrl.setValue(next);
   }
 
-  /** Width for inline dish-field input (ch units, min 4ch). */
-  protected getInputWidth(value: unknown): string {
-    const len = String(value ?? '').length;
-    return `${Math.max(4, len + 2)}ch`;
-  }
-
   protected getDishSearchQuery(sectionIndex: number, itemIndex: number): string {
     const key = this.getDishSearchKey(sectionIndex, itemIndex);
     const queries: Record<string, string> = this.dishSearchQueries_();
@@ -726,13 +694,6 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
         this.editingDishAt_.set(null);
       }
     }
-  }
-
-  protected getFilteredRecipes(sectionIndex: number, itemIndex: number): Recipe[] {
-    const raw = this.getDishSearchQuery(sectionIndex, itemIndex).trim();
-    if (!raw) return [];
-    const filtered = filterOptionsByStartsWith(this.recipes_(), raw, (r) => r.name_hebrew ?? '');
-    return filtered.slice(0, 12);
   }
 
   protected selectRecipe(sectionIndex: number, itemIndex: number, recipe: Recipe): void {
@@ -775,7 +736,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const group = this.getItemsArray(sectionIndex).at(itemIndex);
     const recipeId = group.get('recipe_id_')?.value as string | undefined;
     if (!recipeId) return;
-    const currentName = this.getRecipeName(recipeId);
+    const currentName = this.recipes_().find(r => r._id === recipeId)?.name_hebrew || '';
     this.editingDishAt_.set({ sectionIndex, itemIndex, previousRecipeId: recipeId });
     group.patchValue({ recipe_id_: '' });
     this.setDishSearchQuery(sectionIndex, itemIndex, currentName);
@@ -814,6 +775,13 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   protected getDishSearchHighlightedIndex(sectionIndex: number, itemIndex: number): number {
     return this.dishSearchHighlightedIndex_()[this.getDishSearchHighlightKey(sectionIndex, itemIndex)] ?? 0;
+  }
+
+  private getFilteredRecipes(sectionIndex: number, itemIndex: number): Recipe[] {
+    const raw = this.getDishSearchQuery(sectionIndex, itemIndex).trim();
+    if (!raw) return [];
+    const filtered = filterOptionsByStartsWith(this.recipes_(), raw, (r) => r.name_hebrew ?? '');
+    return filtered.slice(0, 12);
   }
 
   protected onDishSearchKeydown(sectionIndex: number, itemIndex: number, e: Event): void {

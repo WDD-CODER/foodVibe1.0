@@ -255,88 +255,31 @@
 
           <div class="dish-list" formArrayName="items_">
             @for (item of getItemsArray(sectionIndex).controls; track $index; let itemIndex = $index) {
-              <div class="dish-row" [formGroupName]="itemIndex">
-                <div class="dish-name-cell">
-                  @if (item.get('recipe_id_')?.value) {
-                    <div class="dish-name-meta-wrap">
-                      <div class="dish-name-meta">
-                        <span class="dish-name-meta-inner">
-                          <button type="button" class="dish-name dish-name-btn" [id]="'dish-name-' + sectionIndex + '-' + itemIndex"
-                            [attr.aria-label]="'change_dish' | translatePipe"
-                            (click)="startEditDishName(sectionIndex, itemIndex); $event.stopPropagation()">
-                          {{ getRecipeName(item.get('recipe_id_')?.value) }}
-                          </button>
-                          <button type="button" class="dish-meta-toggle no-print"
-                            [attr.aria-label]="isDishMetaExpanded(sectionIndex, itemIndex) ? ('hide_metadata' | translatePipe) : ('show_metadata' | translatePipe)"
-                            (click)="toggleDishMeta(sectionIndex, itemIndex)">
-                            <lucide-icon [name]="isDishMetaExpanded(sectionIndex, itemIndex) ? 'chevron-up' : 'info'" [size]="16"></lucide-icon>
-                          </button>
-                        </span>
-                      </div>
-                    </div>
-                    <span class="dish-sell-price no-print">
-                      <span class="dish-sell-currency">₪</span>
-                      <input type="number" [formControlName]="'sell_price'" min="0" step="1"
-                        [id]="'dish-sell-' + sectionIndex + '-' + itemIndex"
-                        class="dish-sell-input" SelectOnFocus
-                        [style.width]="getInputWidth(item.get('sell_price')?.value)"
-                        (click)="$event.stopPropagation()"
-                        (keydown)="onSellPriceKeydown(sectionIndex, itemIndex, $event)" />
-                    </span>
-                    <button type="button" class="dish-remove no-print" (click)="removeItem(sectionIndex, itemIndex)">
-                      <lucide-icon name="trash-2" [size]="14"></lucide-icon>
-                    </button>
-                  } @else {
-                    <div class="dish-search-wrap" (clickOutside)="clearDishSearch(sectionIndex, itemIndex)">
-                      <input type="text" class="dish-search-input"
-                        autocomplete="off"
-                        [id]="'dish-search-' + sectionIndex + '-' + itemIndex"
-                        [ngModel]="getDishSearchQuery(sectionIndex, itemIndex)"
-                        [ngModelOptions]="{ standalone: true }"
-                        (ngModelChange)="onDishSearchQueryChange(sectionIndex, itemIndex, $event)"
-                        [placeholder]="'menu_search_dish' | translatePipe"
-                        (keydown)="onDishSearchKeydown(sectionIndex, itemIndex, $event)" />
-                      @if (getDishSearchQuery(sectionIndex, itemIndex).trim()) {
-                        <app-scrollable-dropdown [maxHeight]="200">
-                          @for (recipe of getFilteredRecipes(sectionIndex, itemIndex); track recipe._id; let i = $index) {
-                            <button type="button" class="dropdown-item" [class.highlighted]="getDishSearchHighlightedIndex(sectionIndex, itemIndex) === i" (click)="selectRecipe(sectionIndex, itemIndex, recipe)">
-                              {{ recipe.name_hebrew }}
-                            </button>
-                          }
-                          @if (getFilteredRecipes(sectionIndex, itemIndex).length === 0) {
-                            <span class="dropdown-empty">{{ 'no_recipes_match' | translatePipe }}</span>
-                          }
-                        </app-scrollable-dropdown>
-                      }
-                    </div>
-                  }
-                </div>
-                @if (item.get('recipe_id_')?.value && isDishMetaExpanded(sectionIndex, itemIndex)) {
-                  <div class="dish-data">
-                    @for (fieldKey of activeMenuTypeFields_(); track fieldKey) {
-                      <div class="dish-field" (click)="!isDishFieldReadOnly(fieldKey) && !isEditingDishField(sectionIndex, itemIndex, fieldKey) && startEditDishField(sectionIndex, itemIndex, fieldKey)">
-                        <span class="dish-field-label">{{ getDishFieldLabelKey(fieldKey) | translatePipe }}</span>
-                        @if (isDishFieldReadOnly(fieldKey) || !isEditingDishField(sectionIndex, itemIndex, fieldKey)) {
-                          <span class="dish-field-value">{{ fieldKey === 'food_cost_money' ? getAutoFoodCost(sectionIndex, itemIndex) : (item.get(fieldKey)?.value ?? '') }}</span>
-                        } @else {
-                          <input [id]="'dish-' + sectionIndex + '-' + itemIndex + '-' + fieldKey"
-                            type="number" [formControlName]="fieldKey" min="0" step="0.01"
-                            class="dish-field-input-inline" SelectOnFocus
-                            [style.width]="getInputWidth(item.get(fieldKey)?.value)"
-                            (blur)="commitEditDishField()"
-                            (keydown.enter)="commitEditDishField()"
-                            (keydown)="onDishFieldKeydown(sectionIndex, itemIndex, fieldKey, $event)"
-                            (click)="$event.stopPropagation()" />
-                        }
-                      </div>
-                    }
-                    <div class="dish-field read-only">
-                      <span class="dish-field-label">{{ 'dish_food_cost_per_portion' | translatePipe }}</span>
-                      <span class="dish-field-value">₪{{ getFoodCostPerPortion(sectionIndex, itemIndex) }}</span>
-                    </div>
-                  </div>
-                }
-              </div>
+              <app-menu-dish-row
+                [itemGroup]="item"
+                [sectionIndex]="sectionIndex"
+                [itemIndex]="itemIndex"
+                [recipes]="recipes_()"
+                [activeFields]="activeMenuTypeFields_()"
+                [dishSearchQuery]="getDishSearchQuery(sectionIndex, itemIndex)"
+                [highlightedIndex]="getDishSearchHighlightedIndex(sectionIndex, itemIndex)"
+                [isMetaExpanded]="isDishMetaExpanded(sectionIndex, itemIndex)"
+                [editingDishField]="editingDishField_()"
+                [servingType]="form_.value.serving_type_ || 'plated_course'"
+                [guestCount]="getGuestCount()"
+                [piecesPerPerson]="getPiecesPerPerson()"
+                (remove)="removeItem(sectionIndex, itemIndex)"
+                (selectRecipe)="selectRecipe(sectionIndex, itemIndex, $event.recipe)"
+                (startEditName)="startEditDishName(sectionIndex, itemIndex)"
+                (searchQueryChange)="onDishSearchQueryChange(sectionIndex, itemIndex, $event)"
+                (metaToggle)="toggleDishMeta(sectionIndex, itemIndex)"
+                (editDishFieldStart)="startEditDishField(sectionIndex, itemIndex, $event)"
+                (editDishFieldCommit)="commitEditDishField()"
+                (sellPriceKeydown)="onSellPriceKeydown(sectionIndex, itemIndex, $event)"
+                (dishFieldKeydown)="onDishFieldKeydown(sectionIndex, itemIndex, $event.fieldKey, $event.event)"
+                (dishSearchKeydown)="onDishSearchKeydown(sectionIndex, itemIndex, $event)"
+                (clearSearch)="clearDishSearch(sectionIndex, itemIndex)"
+              />
             }
           </div>
 

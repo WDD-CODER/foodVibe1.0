@@ -1,0 +1,86 @@
+<div class="dish-row" [formGroup]="itemGroup()">
+  <div class="dish-name-cell">
+    @if (itemGroup().get('recipe_id_')?.value) {
+      <div class="dish-name-meta-wrap">
+        <div class="dish-name-meta">
+          <span class="dish-name-meta-inner">
+            <button type="button" class="dish-name dish-name-btn"
+              [id]="'dish-name-' + sectionIndex() + '-' + itemIndex()"
+              [attr.aria-label]="'change_dish' | translatePipe"
+              (click)="startEditName.emit(); $event.stopPropagation()">
+              {{ getRecipeName(itemGroup().get('recipe_id_')?.value) }}
+            </button>
+            <button type="button" class="dish-meta-toggle no-print"
+              [attr.aria-label]="isMetaExpanded() ? ('hide_metadata' | translatePipe) : ('show_metadata' | translatePipe)"
+              (click)="metaToggle.emit()">
+              <lucide-icon [name]="isMetaExpanded() ? 'chevron-up' : 'info'" [size]="16"></lucide-icon>
+            </button>
+          </span>
+        </div>
+      </div>
+      <span class="dish-sell-price no-print">
+        <span class="dish-sell-currency">₪</span>
+        <input type="number" formControlName="sell_price" min="0" step="1"
+          [id]="'dish-sell-' + sectionIndex() + '-' + itemIndex()"
+          class="dish-sell-input" SelectOnFocus
+          [style.width]="getInputWidth(itemGroup().get('sell_price')?.value)"
+          (click)="$event.stopPropagation()"
+          (keydown)="sellPriceKeydown.emit($event)" />
+      </span>
+      <button type="button" class="dish-remove no-print" (click)="remove.emit()">
+        <lucide-icon name="trash-2" [size]="14"></lucide-icon>
+      </button>
+    } @else {
+      <div class="dish-search-wrap" (clickOutside)="clearSearch.emit()">
+        <input type="text" class="dish-search-input"
+          autocomplete="off"
+          [id]="'dish-search-' + sectionIndex() + '-' + itemIndex()"
+          [ngModel]="dishSearchQuery()"
+          [ngModelOptions]="{ standalone: true }"
+          (ngModelChange)="searchQueryChange.emit($event)"
+          [placeholder]="'menu_search_dish' | translatePipe"
+          (keydown)="dishSearchKeydown.emit($event)" />
+        @if (dishSearchQuery().trim()) {
+          <app-scrollable-dropdown [maxHeight]="200">
+            @for (recipe of getFilteredRecipes(); track recipe._id; let i = $index) {
+              <button type="button" class="dropdown-item"
+                [class.highlighted]="highlightedIndex() === i"
+                (click)="selectRecipe.emit({ recipe })">
+                {{ recipe.name_hebrew }}
+              </button>
+            }
+            @if (getFilteredRecipes().length === 0) {
+              <span class="dropdown-empty">{{ 'no_recipes_match' | translatePipe }}</span>
+            }
+          </app-scrollable-dropdown>
+        }
+      </div>
+    }
+  </div>
+  @if (itemGroup().get('recipe_id_')?.value && isMetaExpanded()) {
+    <div class="dish-data">
+      @for (fieldKey of activeFields(); track fieldKey) {
+        <div class="dish-field"
+          (click)="!isDishFieldReadOnly(fieldKey) && !isEditingField(fieldKey) && editDishFieldStart.emit(fieldKey)">
+          <span class="dish-field-label">{{ getDishFieldLabelKey(fieldKey) | translatePipe }}</span>
+          @if (isDishFieldReadOnly(fieldKey) || !isEditingField(fieldKey)) {
+            <span class="dish-field-value">{{ fieldKey === 'food_cost_money' ? getAutoFoodCost() : (itemGroup().get(fieldKey)?.value ?? '') }}</span>
+          } @else {
+            <input [id]="'dish-' + sectionIndex() + '-' + itemIndex() + '-' + fieldKey"
+              type="number" [formControlName]="fieldKey" min="0" step="0.01"
+              class="dish-field-input-inline" SelectOnFocus
+              [style.width]="getInputWidth(itemGroup().get(fieldKey)?.value)"
+              (blur)="editDishFieldCommit.emit()"
+              (keydown.enter)="editDishFieldCommit.emit()"
+              (keydown)="dishFieldKeydown.emit({ fieldKey: fieldKey, event: $event })"
+              (click)="$event.stopPropagation()" />
+          }
+        </div>
+      }
+      <div class="dish-field read-only">
+        <span class="dish-field-label">{{ 'dish_food_cost_per_portion' | translatePipe }}</span>
+        <span class="dish-field-value">₪{{ getFoodCostPerPortion() }}</span>
+      </div>
+    </div>
+  }
+</div>
