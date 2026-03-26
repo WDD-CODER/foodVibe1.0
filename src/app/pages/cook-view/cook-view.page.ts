@@ -31,6 +31,7 @@ import { FormatQuantityPipe } from 'src/app/core/pipes/format-quantity.pipe'
 import { quantityIncrement, quantityDecrement } from '../../core/utils/quantity-step.util'
 import { filter } from 'rxjs'
 import { HeroFabService } from '@services/hero-fab.service'
+import { RecipeFormService } from '@pages/recipe-builder/services/recipe-form.service'
 
 /** Multiplier chip definitions — factor is the multiplier applied to `convertedYieldAmount_()`. */
 const MULTIPLIER_CHIPS = [
@@ -80,6 +81,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   private readonly authModal = inject(AuthModalService)
   private readonly translation = inject(TranslationService)
   private readonly heroFab = inject(HeroFabService)
+  private readonly recipeFormService = inject(RecipeFormService)
 
   // ---- SIGNALS & CONSTANTS ----
   protected recipe_ = signal<Recipe | null>(null)
@@ -767,32 +769,8 @@ export class CookViewPage implements OnInit, OnDestroy {
     this.focusWorkflowRowAt_.set(null)
   }
 
-  private getPrepRowsFromRecipe(recipe: Recipe): { preparation_name: string; category_name: string; main_category_name: string; quantity: number; unit: string }[] {
-    if (recipe.prep_items_?.length) {
-      return recipe.prep_items_.map(p => ({
-        preparation_name: p.preparation_name,
-        category_name: p.category_name,
-        main_category_name: p.main_category_name ?? p.category_name,
-        quantity: p.quantity ?? 1,
-        unit: p.unit ?? 'unit'
-      }))
-    }
-    if (recipe.prep_categories_?.length) {
-      const rows: { preparation_name: string; category_name: string; main_category_name: string; quantity: number; unit: string }[] = []
-      recipe.prep_categories_.forEach(cat => {
-        (cat.items ?? []).forEach(it => {
-          rows.push({
-            preparation_name: it.item_name,
-            category_name: cat.category_name,
-            main_category_name: cat.category_name,
-            quantity: it.quantity ?? 1,
-            unit: it.unit ?? 'unit'
-          })
-        })
-      })
-      return rows
-    }
-    return []
+  private getPrepRowsFromRecipe(recipe: Recipe) {
+    return this.recipeFormService.getPrepRowsFromRecipe(recipe)
   }
 
   private createStepGroup(order: number): FormGroup {
