@@ -25,6 +25,7 @@ description: Single source of truth for all project rules, standards, and skill/
 > **Tool scope:** `[CC]` = Claude Code only · `[SHARED]` = both Claude Code and Cursor
 > Cursor receives these rules via `.cursor/rules/*.mdc`. Cursor cannot spawn subagents — `[CC]` triggers do not apply to Cursor.
 
+- **Plan & execute** `[SHARED]`: User presents architectural brief → invoke `/plan-implementation` command (read-only codebase scan, produce plan, wait for approval). On approval, invoke `/execute-it` command (full autonomous implementation).
 - **Save plan** `[SHARED]`: Message contains "save" + one of "it / that / this / plan" (case-insensitive) while a plan is in context → read `.claude/skills/save-plan/SKILL.md` and follow it.
 - **Commit / push to GitHub** `[SHARED]`: User says "commit", "push", "commit to github", or uses `/commit-to-github` → read `.claude/skills/commit-to-github/SKILL.md` and follow all phases in order. No git writes until user approves the visual tree in chat. **Context-aware**: skill auto-detects main-repo vs worktree via `git rev-parse --git-dir`. **Argument shortcuts**: `c` = checkpoint; `s` = ship auto-detect; `sl` = force ship-light; `sf` = force ship-full. **Do NOT trigger for general "save" or file update requests.**
 - **CSS/SCSS** `[SHARED]`: Before creating or editing any `.scss`/`.css` in `src/` → read `.claude/skills/cssLayer/SKILL.md` and apply it.

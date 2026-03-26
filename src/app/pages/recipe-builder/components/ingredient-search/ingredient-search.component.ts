@@ -148,8 +148,8 @@ export class IngredientSearchComponent {
     this.selectItem({ ...product, item_type_: 'product' as const });
   }
 
-  protected onSearchTab(e: KeyboardEvent): void {
-    if (e.shiftKey) return;
+  protected onSearchTab(e: Event): void {
+    if ((e as KeyboardEvent).shiftKey) return;
     if (!this.showResults_()) return;
     if (this.filteredResults_().length === 0) return;
     e.preventDefault();
