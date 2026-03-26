@@ -6,6 +6,8 @@ import { LucideAngularModule } from 'lucide-angular';
 
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { EquipmentDataService } from '@services/equipment-data.service';
+import { MetadataRegistryService } from '@services/metadata-registry.service';
+import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model';
 import { UserMsgService } from '@services/user-msg.service';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { Product } from '@models/product.model';
@@ -25,8 +27,10 @@ import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-ba
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component';
 import { useListState, StringParam, NullableStringParam, FilterRecordParam, BooleanParam } from 'src/app/core/utils/list-state.util';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
+import { getPricePerUnit, calcBuyPriceGlobal } from 'src/app/core/utils/product-price.util';
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
+type ProductBulkField = 'categories_' | 'supplierIds_' | 'allergens_' | 'base_unit_';
 
 @Component({
   selector: 'inventory-product-list',
@@ -64,6 +68,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   private readonly userMsg = inject(UserMsgService);
   protected readonly unitRegistry = inject(UnitRegistryService);
   protected readonly isLoggedIn = inject(UserService).isLoggedIn;
+  private readonly metadataRegistry = inject(MetadataRegistryService);
 
   private lastPriceEdit_ = { productId: '', unit: '', value: 0 };
 
@@ -80,6 +85,33 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected savingPriceId_ = signal<string | null>(null);
   protected carouselHeaderIndex_ = signal(0);
   protected selection = new ListSelectionState();
+
+  protected editableFields_ = computed<BulkEditableField[]>(() => [
+    {
+      key: 'categories_',
+      label: 'category',
+      options: this.metadataRegistry.allCategories_().map(c => ({ value: c, label: c })),
+      multi: true,
+    },
+    {
+      key: 'supplierIds_',
+      label: 'supplier',
+      options: this.kitchenStateService.suppliers_().map(s => ({ value: s._id, label: s.name_hebrew })),
+      multi: true,
+    },
+    {
+      key: 'allergens_',
+      label: 'allergens',
+      options: this.metadataRegistry.allAllergens_().map(a => ({ value: a, label: a })),
+      multi: true,
+    },
+    {
+      key: 'base_unit_',
+      label: 'unit',
+      options: this.unitRegistry.allUnitKeys_().map(u => ({ value: u, label: u })),
+      multi: false,
+    },
+  ])
 
   constructor() {
     useListState('inventory', [
@@ -367,28 +399,9 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     return ((ids ?? []).map(id => this.translationService.translate(id)).filter(Boolean).join(', ')) || '';
   }
 
-  /** Units available for this product: base_unit + purchase_options */
-  protected getProductUnits(product: Product): string[] {
-    const base = product.base_unit_ || 'unit';
-    const fromOptions = (product.purchase_options_ || []).map(o => o.unit_symbol_).filter(Boolean);
-    const all = [base, ...fromOptions];
-    return [...new Set(all)];
-  }
-
   /** Price per 1 of the given unit (converted from buy_price_global_ which is per base_unit) */
   protected getPricePerUnit(product: Product, unit: string): number {
-    const base = product.base_unit_ || 'unit';
-    if (unit === base) return product.buy_price_global_ ?? 0;
-    const opt = (product.purchase_options_ || []).find(o => o.unit_symbol_ === unit);
-    if (opt?.conversion_rate_) {
-      return (product.buy_price_global_ ?? 0) * opt.conversion_rate_;
-    }
-    const baseConv = this.unitRegistry.getConversion(base);
-    const unitConv = this.unitRegistry.getConversion(unit);
-    if (baseConv && unitConv) {
-      return (product.buy_price_global_ ?? 0) * (unitConv / baseConv);
-    }
-    return product.buy_price_global_ ?? 0;
+    return getPricePerUnit(product, unit, this.unitRegistry)
   }
 
   // INLINE UPDATE
@@ -431,20 +444,27 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected onPriceChange(product: Product, displayUnit: string, value: string | number): void {
-    const pricePerUnit = typeof value === 'string' ? parseFloat(value) || 0 : (value as number);
-    const base = product.base_unit_ || 'unit';
-    let buyPriceGlobal = pricePerUnit;
-    if (displayUnit !== base) {
-      const opt = (product.purchase_options_ || []).find(o => o.unit_symbol_ === displayUnit);
-      if (opt?.conversion_rate_) {
-        buyPriceGlobal = pricePerUnit / opt.conversion_rate_;
+  protected onBulkEdit(event: { field: string; value: string; ids: string[] }): void {
+    const field = event.field as ProductBulkField
+    const products = this.kitchenStateService.products_()
+    for (const id of event.ids) {
+      const product = products.find(p => p._id === id)
+      if (!product) continue
+      let updated: Product
+      if (field === 'supplierIds_' || field === 'categories_' || field === 'allergens_') {
+        const current = (product[field] ?? []) as string[]
+        if (current.includes(event.value)) continue
+        updated = { ...product, [field]: [...current, event.value] }
       } else {
-        const baseConv = this.unitRegistry.getConversion(base);
-        const unitConv = this.unitRegistry.getConversion(displayUnit);
-        if (baseConv && unitConv) buyPriceGlobal = pricePerUnit * (baseConv / unitConv);
+        updated = { ...product, base_unit_: event.value }
       }
+      this.kitchenStateService.saveProduct(updated).subscribe({ next: () => {}, error: () => {} })
     }
+  }
+
+  protected onPriceChange(product: Product, displayUnit: string, value: string | number): void {
+    const pricePerUnit = typeof value === 'string' ? parseFloat(value) || 0 : (value as number)
+    const buyPriceGlobal = calcBuyPriceGlobal(product, displayUnit, pricePerUnit, this.unitRegistry)
     const updated: Product = { ...product, buy_price_global_: buyPriceGlobal };
     this.savingPriceId_.set(product._id ?? '');
     this.kitchenStateService.saveProduct(updated).subscribe({

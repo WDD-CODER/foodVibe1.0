@@ -5,6 +5,14 @@ Update status after each sub-task. Link plan files here when applicable.
 ---
 
 
+### Plan 204-R — Inventory product-price util extraction (`plans/204-R-inventory-product-price-util.plan.md`)
+- [ ] Create `src/app/core/utils/product-price.util.ts` — three pure exports: `getProductUnits`, `getPricePerUnit`, `calcBuyPriceGlobal`
+- [ ] Delete dead `getProductUnits` method from component (no call sites)
+- [ ] Replace `getPricePerUnit` body in component with 3-line wrapper (keeps 2-arg template signature)
+- [ ] Replace `onPriceChange` conversion block with `calcBuyPriceGlobal(...)` call; add util import
+- [ ] Leave `onUnitChange` conversion block unchanged (inverse math — cannot reuse)
+- [ ] Verify `ng build` passes
+
 ### Plan 203-R — Recipe-book allergen + cell-expand refactor (`plans/203-R-recipe-book-allergen-cell-expand-refactor.plan.md`)
 - [ ] Create `src/app/core/utils/recipe-allergens.util.ts` — export `MAX_ALLERGEN_RECURSION` + pure `resolveRecipeAllergens` fn
 - [ ] Create `src/app/core/utils/cell-expand-state.util.ts` — `CellExpandState` class with signals + helpers
