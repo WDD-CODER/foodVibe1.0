@@ -5,20 +5,20 @@
 
     <div class="center-controls">
         <div class="top-row">
-            <button type="button" 
-                (click)="toggleType()" 
+            <button type="button"
+                (click)="toggleTypeWrapper()"
                 class="type-toggle-btn"
-                [class.dish-mode]="currentRecipeTypeDisplay_() === 'dish'">
-                {{ currentRecipeTypeDisplay_() | translatePipe }}
+                [class.dish-mode]="yield.currentRecipeTypeDisplay_() === 'dish'">
+                {{ yield.currentRecipeTypeDisplay_() | translatePipe }}
             </button>
-            
+
             <div class="recipe-name-wrap">
                 <input formControlName="name_hebrew"
-                    [placeholder]="((currentRecipeTypeDisplay_() === 'dish' ? 'dish_name_placeholder' : 'recipe_name_placeholder') | translatePipe) + '...'"
+                    [placeholder]="((yield.currentRecipeTypeDisplay_() === 'dish' ? 'dish_name_placeholder' : 'recipe_name_placeholder') | translatePipe) + '...'"
                     class="recipe-name-input"
                     [class.has-error]="form().get('name_hebrew')?.invalid && form().get('name_hebrew')?.touched" />
                 @if (form().get('name_hebrew')?.errors?.['duplicateName'] && form().get('name_hebrew')?.touched) {
-                    <span class="name-error-msg">{{ (currentRecipeTypeDisplay_() === 'dish' ? 'duplicate_dish_name' : 'duplicate_recipe_name') | translatePipe }}</span>
+                    <span class="name-error-msg">{{ (yield.currentRecipeTypeDisplay_() === 'dish' ? 'duplicate_dish_name' : 'duplicate_recipe_name') | translatePipe }}</span>
                 }
             </div>
         </div>
@@ -27,31 +27,31 @@
             <div class="primary-chip-wrapper">
                 <app-scaling-chip
                     variant="primary"
-                    [value]="primaryAmount_()"
-                    [unit]="primaryUnitLabel_()"
-                    [unitOptions]="primaryUnitOptions_()"
-                    [minAmount]="currentRecipeTypeDisplay_() === 'dish' ? 1 : 0"
-                    (valueChange)="onScalingChipAmountChange($event)"
-                    (unitChange)="setPrimaryUnit($event)"
+                    [value]="yield.primaryAmount_()"
+                    [unit]="yield.primaryUnitLabel_()"
+                    [unitOptions]="yield.primaryUnitOptions_()"
+                    [minAmount]="yield.currentRecipeTypeDisplay_() === 'dish' ? 1 : 0"
+                    (valueChange)="yield.onScalingChipAmountChange($event)"
+                    (unitChange)="yield.setPrimaryUnit($event)"
                     (createUnit)="onCreateUnit()" />
             </div>
 
             <div class="secondary-units-container">
-                @for (group of secondaryConversions; track $index; let chipIdx = $index) {
+                @for (group of yield.secondaryConversions; track $index; let chipIdx = $index) {
                 <app-scaling-chip
                     variant="secondary"
                     [value]="group.get('amount')?.value ?? 0"
                     [unit]="group.get('unit')?.value ?? ''"
-                    [unitOptions]="getSecondaryUnitOptions(chipIdx)"
+                    [unitOptions]="yield.getSecondaryUnitOptions(chipIdx)"
                     [showRemove]="true"
-                    (valueChange)="onSecondaryScalingChipAmountChange(chipIdx, $event)"
-                    (unitChange)="changeSecondaryUnit(chipIdx, $event)"
+                    (valueChange)="yield.onSecondaryScalingChipAmountChange(chipIdx, $event)"
+                    (unitChange)="changeSecondaryUnitWrapper(chipIdx, $event)"
                     (createUnit)="onCreateUnit(chipIdx)"
-                    (remove)="removeSecondaryUnit(chipIdx)" />
+                    (remove)="yield.removeSecondaryUnit(chipIdx)" />
                 }
 
                 <div class="add-unit-wrapper">
-                    <button type="button" class="add-custom-chip" (click)="addSecondaryChipWithDefault()">
+                    <button type="button" class="add-custom-chip" (click)="yield.addSecondaryChipWithDefault()">
                         <lucide-icon name="plus" [size]="16"></lucide-icon>
                     </button>
                 </div>

@@ -5,6 +5,17 @@ Update status after each sub-task. Link plan files here when applicable.
 ---
 
 
+### Plan 208-R — dedupeAndFilterOptions util extraction (`plans/208-R-dedupe-select-options-util.plan.md`)
+- [x] Create `src/app/core/utils/dedupe-select-options.util.ts` — export `dedupeAndFilterOptions`, delegate filter step to `filterOptionsByStartsWith`
+- [x] Replace filter+dedup block in `custom-select.component.ts` with call to `dedupeAndFilterOptions`; fix `translateLabels` conditional in lambda
+- [x] Add import for `dedupeAndFilterOptions` to `custom-select.component.ts`
+- [x] Verify `ng build` passes; confirm `dedupe-select-options.util.ts` exists
+
+### Plan 207-R — RecipeCostService constants extraction (`plans/207-R-recipe-cost-constants-extraction.plan.md`)
+- [x] Create `src/app/core/utils/recipe-cost.constants.ts` — export all four constants verbatim with JSDoc comments
+- [x] Update `recipe-cost.service.ts` — delete four constant declarations (lines 8–28) and add import from new util file
+- [x] Verify `ng build` passes with no errors
+
 ### Plan 206-R — RecipeYieldManager extraction (`plans/206-R-recipe-yield-manager-extraction.plan.md`)
 - [ ] Create `src/app/core/utils/recipe-yield-manager.util.ts` — plain class with all yield/scaling computeds and methods
 - [ ] Update `recipe-header.component.ts` — instantiate manager, delete moved members, add CDR/output wrappers
@@ -12,22 +23,22 @@ Update status after each sub-task. Link plan files here when applicable.
 - [ ] Update `recipe-header.component.spec.ts` — update method paths and rewrite `onPrimaryUnitChange` test
 
 ### Plan 205-R — MetadataRegistryService persistRegistry helper (`plans/205-R-metadata-registry-persist-helper.plan.md`)
-- [ ] Add `private async persistRegistry<T>()` helper to `metadata-registry.service.ts`
-- [ ] Replace initMetadata categories write block with `persistRegistry` call
-- [ ] Replace initMetadata allergens write block with `persistRegistry` call
-- [ ] Replace initMetadata menuTypes write block with `persistRegistry` call
-- [ ] Replace `registerCategory` inline block with `persistRegistry` call
-- [ ] Replace `deleteCategory` block — restructure control flow, then `persistRegistry`
-- [ ] Replace `registerAllergen` inline block with `persistRegistry` call
-- [ ] Replace `deleteAllergen` block — compute `updated` first, then `persistRegistry`
-- [ ] Replace `registerLabel` inline block with `persistRegistry` call
-- [ ] Replace `deleteLabel` inline block with `persistRegistry` call
-- [ ] Replace `updateLabel` inline block with `persistRegistry` call
-- [ ] Replace `registerMenuType` inline block with `persistRegistry` call
-- [ ] Replace `updateMenuType` inline block with `persistRegistry` call
-- [ ] Replace `deleteMenuType` inline block with `persistRegistry` call
-- [ ] Replace `renameMenuType` inline block with `persistRegistry` call
-- [ ] Verify `ng build` passes; confirm file under 320 LOC
+- [x] Add `private async persistRegistry<T>()` helper to `metadata-registry.service.ts`
+- [x] Replace initMetadata categories write block with `persistRegistry` call
+- [x] Replace initMetadata allergens write block with `persistRegistry` call
+- [x] Replace initMetadata menuTypes write block with `persistRegistry` call
+- [x] Replace `registerCategory` inline block with `persistRegistry` call
+- [x] Replace `deleteCategory` block — restructure control flow, then `persistRegistry`
+- [x] Replace `registerAllergen` inline block with `persistRegistry` call
+- [x] Replace `deleteAllergen` block — compute `updated` first, then `persistRegistry`
+- [x] Replace `registerLabel` inline block with `persistRegistry` call
+- [x] Replace `deleteLabel` inline block with `persistRegistry` call
+- [x] Replace `updateLabel` inline block with `persistRegistry` call
+- [x] Replace `registerMenuType` inline block with `persistRegistry` call
+- [x] Replace `updateMenuType` inline block with `persistRegistry` call
+- [x] Replace `deleteMenuType` inline block with `persistRegistry` call
+- [x] Replace `renameMenuType` inline block with `persistRegistry` call
+- [x] Verify `ng build` passes; confirm file under 320 LOC
 
 ### Plan 204-R — Inventory product-price util extraction (`plans/204-R-inventory-product-price-util.plan.md`)
 - [ ] Create `src/app/core/utils/product-price.util.ts` — three pure exports: `getProductUnits`, `getPricePerUnit`, `calcBuyPriceGlobal`
