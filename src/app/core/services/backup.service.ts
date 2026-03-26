@@ -12,6 +12,9 @@ import { VenueDataService } from './venue-data.service';
 import { MenuEventDataService } from './menu-event-data.service';
 import { MenuSectionCategoriesService } from './menu-section-categories.service';
 import { ActivityLogService } from './activity-log.service';
+import { UnitRegistryService } from './unit-registry.service';
+import { PreparationRegistryService } from './preparation-registry.service';
+import { MetadataRegistryService } from './metadata-registry.service';
 import { UserMsgService } from './user-msg.service';
 import { LoggingService } from './logging.service';
 
@@ -35,6 +38,9 @@ export class BackupService {
   private readonly menuEventData = inject(MenuEventDataService);
   private readonly menuSectionCategories = inject(MenuSectionCategoriesService);
   private readonly activityLog = inject(ActivityLogService);
+  private readonly unitRegistry = inject(UnitRegistryService);
+  private readonly preparationRegistry = inject(PreparationRegistryService);
+  private readonly metadataRegistry = inject(MetadataRegistryService);
   private readonly userMsg = inject(UserMsgService);
   private readonly logging = inject(LoggingService);
 
@@ -140,6 +146,9 @@ export class BackupService {
       this.venueData.reloadFromStorage(),
       this.menuEventData.reloadFromStorage(),
       this.menuSectionCategories.reloadFromStorage(),
+      this.unitRegistry.reloadFromStorage(),
+      this.preparationRegistry.reloadFromStorage(),
+      this.metadataRegistry.reloadFromStorage(),
     ]);
     this.activityLog.syncFromStorage();
   }

@@ -47,6 +47,11 @@ export class MetadataRegistryService {
     this.initMetadata();
   }
 
+  /** Reload all metadata signals from storage after a backup import/restore. */
+  async reloadFromStorage(): Promise<void> {
+    await this.initMetadata();
+  }
+
   private async initMetadata() {
     const DEFAULT_CATEGORIES = ['vegetables', 'dairy', 'meat', 'dry', 'fish', 'spices'];
     const DEFAULT_ALLERGENS = ['gluten', 'eggs', 'peanuts', 'nuts', 'soy', 'milk_solids', 'sesame', 'fish', 'shellfish', 'seafood'];
