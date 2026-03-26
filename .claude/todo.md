@@ -5,6 +5,30 @@ Update status after each sub-task. Link plan files here when applicable.
 ---
 
 
+### Plan 206-R — RecipeYieldManager extraction (`plans/206-R-recipe-yield-manager-extraction.plan.md`)
+- [ ] Create `src/app/core/utils/recipe-yield-manager.util.ts` — plain class with all yield/scaling computeds and methods
+- [ ] Update `recipe-header.component.ts` — instantiate manager, delete moved members, add CDR/output wrappers
+- [ ] Update `recipe-header.component.html` — replace all direct method calls with `yield.*` or wrapper calls
+- [ ] Update `recipe-header.component.spec.ts` — update method paths and rewrite `onPrimaryUnitChange` test
+
+### Plan 205-R — MetadataRegistryService persistRegistry helper (`plans/205-R-metadata-registry-persist-helper.plan.md`)
+- [ ] Add `private async persistRegistry<T>()` helper to `metadata-registry.service.ts`
+- [ ] Replace initMetadata categories write block with `persistRegistry` call
+- [ ] Replace initMetadata allergens write block with `persistRegistry` call
+- [ ] Replace initMetadata menuTypes write block with `persistRegistry` call
+- [ ] Replace `registerCategory` inline block with `persistRegistry` call
+- [ ] Replace `deleteCategory` block — restructure control flow, then `persistRegistry`
+- [ ] Replace `registerAllergen` inline block with `persistRegistry` call
+- [ ] Replace `deleteAllergen` block — compute `updated` first, then `persistRegistry`
+- [ ] Replace `registerLabel` inline block with `persistRegistry` call
+- [ ] Replace `deleteLabel` inline block with `persistRegistry` call
+- [ ] Replace `updateLabel` inline block with `persistRegistry` call
+- [ ] Replace `registerMenuType` inline block with `persistRegistry` call
+- [ ] Replace `updateMenuType` inline block with `persistRegistry` call
+- [ ] Replace `deleteMenuType` inline block with `persistRegistry` call
+- [ ] Replace `renameMenuType` inline block with `persistRegistry` call
+- [ ] Verify `ng build` passes; confirm file under 320 LOC
+
 ### Plan 204-R — Inventory product-price util extraction (`plans/204-R-inventory-product-price-util.plan.md`)
 - [ ] Create `src/app/core/utils/product-price.util.ts` — three pure exports: `getProductUnits`, `getPricePerUnit`, `calcBuyPriceGlobal`
 - [ ] Delete dead `getProductUnits` method from component (no call sites)
