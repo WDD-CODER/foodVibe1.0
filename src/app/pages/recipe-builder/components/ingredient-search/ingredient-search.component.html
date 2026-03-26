@@ -9,6 +9,7 @@
       (input)="searchQuery_.set($any($event.target).value); showResults_.set(true); highlightedIndex_.set(-1)"
       (focus)="showResults_.set(true); highlightedIndex_.set(-1)"
       (keydown)="onSearchKeydown($event)"
+      (keydown.tab)="onSearchTab($event)"
       [placeholder]="'search_product_or_recipe' | translatePipe" />
   </div>
 
@@ -18,12 +19,14 @@
         @for (item of filteredResults_(); track item._id; let i = $index) {
           <li
             role="option"
+            tabindex="0"
             [attr.aria-selected]="highlightedIndex_() === i"
             [class.highlighted]="highlightedIndex_() === i"
             (click)="selectItem(item)"
+            (keydown)="onResultItemKeydown($event, i)"
             class="result-item">
             <span class="item-name">{{ item.name_hebrew }}</span>
-            <span class="type-pill" 
+            <span class="type-pill"
                   [class.recipe]="item.item_type_ === 'recipe'"
                   [class.product]="item.item_type_ !== 'recipe'">
               {{ (item.item_type_ === 'recipe' ? 'recipe' : 'product') | translatePipe }}
@@ -32,11 +35,13 @@
         }
         <li
           role="option"
+          tabindex="0"
           [attr.aria-selected]="highlightedIndex_() === filteredResults_().length"
           [class.highlighted]="highlightedIndex_() === filteredResults_().length"
           [class.result-item--add]="true"
           class="result-item"
-          (click)="addNewProduct()">
+          (click)="addNewProduct()"
+          (keydown)="onAddItemKeydown($event)">
           <lucide-icon name="plus-circle" [size]="16"></lucide-icon>
           <span>{{ 'add_as_new_product' | translatePipe }} "{{ searchQuery_() }}"</span>
         </li>

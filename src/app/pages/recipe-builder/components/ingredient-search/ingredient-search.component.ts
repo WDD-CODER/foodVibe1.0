@@ -148,6 +148,55 @@ export class IngredientSearchComponent {
     this.selectItem({ ...product, item_type_: 'product' as const });
   }
 
+  protected onSearchTab(e: KeyboardEvent): void {
+    if (e.shiftKey) return;
+    if (!this.showResults_()) return;
+    if (this.filteredResults_().length === 0) return;
+    e.preventDefault();
+    const first = document.querySelector<HTMLElement>('.result-item');
+    first?.focus();
+  }
+
+  protected onResultItemKeydown(e: KeyboardEvent, index: number): void {
+    if (e.key !== 'Tab') return;
+    e.preventDefault();
+    const allItems = Array.from(document.querySelectorAll<HTMLElement>('.result-item'));
+    if (e.shiftKey) {
+      const prev = allItems[index - 1];
+      if (prev) {
+        prev.focus();
+      } else {
+        this.showResults_.set(false);
+        this.searchInputRef()?.nativeElement?.focus();
+      }
+    } else {
+      const next = allItems[index + 1];
+      if (next) {
+        next.focus();
+      } else {
+        this.showResults_.set(false);
+        this.searchInputRef()?.nativeElement?.focus();
+      }
+    }
+  }
+
+  protected onAddItemKeydown(e: KeyboardEvent): void {
+    if (e.key !== 'Tab') return;
+    e.preventDefault();
+    const allItems = Array.from(document.querySelectorAll<HTMLElement>('.result-item'));
+    if (e.shiftKey) {
+      const prev = allItems[allItems.length - 2];
+      if (prev) {
+        prev.focus();
+      } else {
+        this.searchInputRef()?.nativeElement?.focus();
+      }
+    } else {
+      this.showResults_.set(false);
+      this.searchInputRef()?.nativeElement?.focus();
+    }
+  }
+
   private scrollHighlightedIntoView(): void {
     setTimeout(() => {
       const list = document.querySelector('.c-dropdown__list');
