@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed, input, Signal, runInInjectionContext, Injector, effect, ViewChildren, QueryList, ElementRef, AfterViewChecked, AfterViewInit, ViewChild, DestroyRef } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, input, Signal, runInInjectionContext, Injector, effect, ElementRef, AfterViewInit, ViewChild, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule, FormArray, AbstractControl } from '@angular/forms';
@@ -25,8 +25,8 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { duplicateNameValidator } from 'src/app/core/validators/item.validators';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
-import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
+import { ChipSearchDropdownComponent } from 'src/app/shared/chip-search-dropdown/chip-search-dropdown.component';
 import { useSavingState } from 'src/app/core/utils/saving-state.util';
 
 @Component({
@@ -40,14 +40,14 @@ import { useSavingState } from 'src/app/core/utils/saving-state.util';
     SelectOnFocusDirective,
     TranslatePipe,
     LoaderComponent,
-    ScrollableDropdownComponent,
-    CustomSelectComponent
+    CustomSelectComponent,
+    ChipSearchDropdownComponent
   ],
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.scss'
 })
 
-export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChecked {
+export class ProductFormComponent implements OnInit, AfterViewInit {
   initialProduct_ = input<Product | null>(null);
 
   @ViewChild('productNameInput') private productNameInputRef?: ElementRef<HTMLInputElement>;
@@ -69,13 +69,6 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
   private readonly logging = inject(LoggingService);
 
   unitRegistry = inject(UnitRegistryService);
-  @ViewChildren('categoryDropdownItem') categoryDropdownItems!: QueryList<ElementRef<HTMLElement>>;
-  @ViewChild('categoryInput') categoryInputRef?: ElementRef<HTMLInputElement>;
-  @ViewChildren('supplierDropdownItem') supplierDropdownItems!: QueryList<ElementRef<HTMLElement>>;
-  @ViewChild('supplierInput') supplierInputRef?: ElementRef<HTMLInputElement>;
-  @ViewChild('allergenInput') allergenInputRef?: ElementRef<HTMLInputElement>;
-  @ViewChildren('allergenDropdownItem') allergenDropdownItems!: QueryList<ElementRef<HTMLElement>>;
-  // RESTORED UI SIGNALS
 
   protected readonly categoryOptions_ = computed(() => this.metadataRegistry.allCategories_());
   protected readonly suppliers_ = computed(() => this.kitchenStateService.suppliers_());
@@ -130,43 +123,10 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
     return all.filter(allergen => !selected.includes(allergen));
   });
 
-  /** Allergen options filtered by search: match must start with typed text (Hebrew vs Latin by script). */
-  protected allergenOptionsFilteredBySearch_ = computed(() => {
-    const raw = this.allergenSearchQuery_().trim();
-    const opts = this.filteredAllergenOptions_();
-    if (!raw) return opts;
-    const qLower = raw.toLowerCase();
-    const isHebrew = /[\u0590-\u05FF]/.test(raw);
-    const isLatin = /[a-zA-Z]/.test(raw);
-    return opts.filter((a: string) => {
-      const display = this.translationService.translate(a);
-      if (isHebrew) return display.startsWith(raw);
-      if (isLatin) return /[a-zA-Z]/.test(display) && display.toLowerCase().startsWith(qLower);
-      return display.toLowerCase().startsWith(qLower);
-    });
-  });
-
   protected filteredCategoryOptions_ = computed(() => {
     const all = this.metadataRegistry.allCategories_();
     const selected = (this.formValue_?.()?.categories_ ?? []) as string[];
     return all.filter((c: string) => !selected.includes(c));
-  });
-
-  protected categorySearchQuery_ = signal('');
-  /** Category options filtered by search: match must start with typed text (Hebrew vs Latin by script). */
-  protected categoryOptionsFilteredBySearch_ = computed(() => {
-    const raw = this.categorySearchQuery_().trim();
-    const opts = this.filteredCategoryOptions_();
-    if (!raw) return opts;
-    const qLower = raw.toLowerCase();
-    const isHebrew = /[\u0590-\u05FF]/.test(raw);
-    const isLatin = /[a-zA-Z]/.test(raw);
-    return opts.filter((c: string) => {
-      const display = this.translationService.translate(c);
-      if (isHebrew) return display.startsWith(raw);
-      if (isLatin) return /[a-zA-Z]/.test(display) && display.toLowerCase().startsWith(qLower);
-      return display.toLowerCase().startsWith(qLower);
-    });
   });
 
   protected filteredSupplierOptions_ = computed(() => {
@@ -175,34 +135,10 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
     return all.filter((s: { _id: string }) => !selectedIds.includes(s._id));
   });
 
-  protected supplierSearchQuery_ = signal('');
-  /** Supplier options filtered by search: match must start with typed text on name_hebrew (Hebrew vs Latin by script). */
-  protected supplierOptionsFilteredBySearch_ = computed(() => {
-    const raw = this.supplierSearchQuery_().trim();
-    const opts = this.filteredSupplierOptions_();
-    if (!raw) return opts;
-    const qLower = raw.toLowerCase();
-    const isHebrew = /[\u0590-\u05FF]/.test(raw);
-    const isLatin = /[a-zA-Z]/.test(raw);
-    return opts.filter((s: { _id: string; name_hebrew?: string }) => {
-      const display = s.name_hebrew ?? '';
-      if (isHebrew) return display.startsWith(raw);
-      if (isLatin) return /[a-zA-Z]/.test(display) && display.toLowerCase().startsWith(qLower);
-      return display.toLowerCase().startsWith(qLower);
-    });
-  });
+  protected filteredSupplierIds_ = computed(() => this.filteredSupplierOptions_().map(s => s._id));
 
-  protected allergenSearchQuery_ = signal('');
-  protected allergenDropdownHighlightIndex_ = signal(-1);
-
-  protected showCategoryDropdown_ = signal(false);
-  protected showAllergenDropdown_ = signal(false);
-  protected showSupplierDropdown_ = signal(false);
-  protected categoryDropdownHighlightIndex_ = signal(-1);
-  protected supplierDropdownHighlightIndex_ = signal(-1);
-  private categoryDropdownFocusPending_ = false;
-  private allergenDropdownFocusPending_ = false;
-  private supplierDropdownFocusPending_ = false;
+  protected readonly translateFn = (key: string) => this.translationService.translate(key);
+  protected readonly supplierDisplayFn = (id: string) => this.getSupplierName(id);
 
   protected expandedMinStock_ = signal(false);
   protected expandedExpiryDays_ = signal(false);
@@ -257,233 +193,8 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
     }
   }
 
-  protected openCategoryDropdown(skipInputFocus = false): void {
-    this.showCategoryDropdown_.set(true);
-    this.categorySearchQuery_.set('');
-    this.categoryDropdownHighlightIndex_.set(-1);
-    if (!skipInputFocus) {
-      setTimeout(() => this.categoryInputRef?.nativeElement?.focus(), 0);
-    }
-  }
-
-  protected onCategoryBoxClick(ev: MouseEvent): void {
-    if ((ev.target as HTMLElement).closest?.('.chipe.category')) return;
-    this.openCategoryDropdown();
-  }
-
-  protected onCategoryInputKeydown(ev: KeyboardEvent): void {
-    const key = ev.key;
-    if (key === 'ArrowDown') {
-      ev.preventDefault();
-      if (!this.showCategoryDropdown_()) this.openCategoryDropdown(true);
-      this.categoryDropdownHighlightIndex_.set(0);
-      this.categoryDropdownFocusPending_ = true;
-    } else if (key === 'ArrowUp') {
-      ev.preventDefault();
-      if (!this.showCategoryDropdown_()) this.openCategoryDropdown(true);
-      const total = this.categoryOptionsFilteredBySearch_().length + 1;
-      this.categoryDropdownHighlightIndex_.set(Math.max(0, total - 1));
-      this.categoryDropdownFocusPending_ = true;
-    } else if (key === 'Escape') {
-      this.closeCategoryDropdown();
-    }
-  }
-
-  protected closeCategoryDropdown(): void {
-    this.showCategoryDropdown_.set(false);
-    this.categorySearchQuery_.set('');
-    this.categoryDropdownHighlightIndex_.set(-1);
-  }
-
-  protected openAllergenDropdown(skipInputFocus = false): void {
-    this.showAllergenDropdown_.set(true);
-    this.allergenSearchQuery_.set('');
-    this.allergenDropdownHighlightIndex_.set(-1);
-    if (!skipInputFocus) {
-      setTimeout(() => this.allergenInputRef?.nativeElement?.focus(), 0);
-    }
-  }
-
-  protected closeAllergenDropdown(): void {
-    this.showAllergenDropdown_.set(false);
-    this.allergenSearchQuery_.set('');
-    this.allergenDropdownHighlightIndex_.set(-1);
-  }
-
-  protected onAllergenBoxClick(ev: MouseEvent): void {
-    if ((ev.target as HTMLElement).closest?.('.chipe.allergen')) return;
-    this.openAllergenDropdown();
-  }
-
-  protected onAllergenInputKeydown(ev: KeyboardEvent): void {
-    const key = ev.key;
-    if (key === 'ArrowDown') {
-      ev.preventDefault();
-      if (!this.showAllergenDropdown_()) this.openAllergenDropdown(true);
-      this.allergenDropdownHighlightIndex_.set(0);
-      this.allergenDropdownFocusPending_ = true;
-    } else if (key === 'ArrowUp') {
-      ev.preventDefault();
-      if (!this.showAllergenDropdown_()) this.openAllergenDropdown(true);
-      const filtered = this.allergenOptionsFilteredBySearch_();
-      const hasAddNew = this.allergenSearchQuery_().trim() !== ''
-        && !filtered.includes(this.allergenSearchQuery_().trim())
-        && !(this.productForm_.get('allergens_')?.value as string[] || []).includes(this.allergenSearchQuery_().trim());
-      const total = filtered.length + (hasAddNew ? 1 : 0);
-      this.allergenDropdownHighlightIndex_.set(Math.max(0, total - 1));
-      this.allergenDropdownFocusPending_ = true;
-    } else if (key === 'Escape') {
-      this.closeAllergenDropdown();
-    }
-  }
-
-  protected openSupplierDropdown(skipInputFocus = false): void {
-    this.showSupplierDropdown_.set(true);
-    this.supplierSearchQuery_.set('');
-    this.supplierDropdownHighlightIndex_.set(-1);
-    if (!skipInputFocus) {
-      setTimeout(() => this.supplierInputRef?.nativeElement?.focus(), 0);
-    }
-  }
-
-  protected closeSupplierDropdown(): void {
-    this.showSupplierDropdown_.set(false);
-    this.supplierSearchQuery_.set('');
-    this.supplierDropdownHighlightIndex_.set(-1);
-  }
-
-  protected onSupplierBoxClick(ev: MouseEvent): void {
-    if ((ev.target as HTMLElement).closest?.('.chipe.supplier')) return;
-    this.openSupplierDropdown();
-  }
-
-  protected onSupplierInputKeydown(ev: KeyboardEvent): void {
-    const key = ev.key;
-    if (key === 'ArrowDown') {
-      ev.preventDefault();
-      if (!this.showSupplierDropdown_()) this.openSupplierDropdown(true);
-      this.supplierDropdownHighlightIndex_.set(0);
-      this.supplierDropdownFocusPending_ = true;
-    } else if (key === 'ArrowUp') {
-      ev.preventDefault();
-      if (!this.showSupplierDropdown_()) this.openSupplierDropdown(true);
-      const total = this.supplierOptionsFilteredBySearch_().length + 1;
-      this.supplierDropdownHighlightIndex_.set(Math.max(0, total - 1));
-      this.supplierDropdownFocusPending_ = true;
-    } else if (key === 'Escape') {
-      this.closeSupplierDropdown();
-    }
-  }
-
   ngAfterViewInit(): void {
     setTimeout(() => this.productNameInputRef?.nativeElement?.focus(), 0);
-  }
-
-  ngAfterViewChecked(): void {
-    if (this.categoryDropdownFocusPending_ && this.showCategoryDropdown_()) {
-      this.categoryDropdownFocusPending_ = false;
-      const idx = this.categoryDropdownHighlightIndex_();
-      const items = this.categoryDropdownItems;
-      if (items?.length && idx >= 0 && idx < items.length) {
-        (items.get(idx) as ElementRef<HTMLElement>)?.nativeElement?.focus();
-      }
-    }
-    if (this.allergenDropdownFocusPending_ && this.showAllergenDropdown_()) {
-      this.allergenDropdownFocusPending_ = false;
-      const idx = this.allergenDropdownHighlightIndex_();
-      const items = this.allergenDropdownItems;
-      if (items?.length && idx >= 0 && idx < items.length) {
-        (items.get(idx) as ElementRef<HTMLElement>)?.nativeElement?.focus();
-      }
-    }
-    if (this.supplierDropdownFocusPending_ && this.showSupplierDropdown_()) {
-      this.supplierDropdownFocusPending_ = false;
-      const idx = this.supplierDropdownHighlightIndex_();
-      const items = this.supplierDropdownItems;
-      if (items?.length && idx >= 0 && idx < items.length) {
-        (items.get(idx) as ElementRef<HTMLElement>)?.nativeElement?.focus();
-      }
-    }
-  }
-
-  protected onCategoryDropdownKeydown(event: Event): void {
-    const key = (event as KeyboardEvent).key;
-    if (key !== 'ArrowDown' && key !== 'ArrowUp' && key !== 'Enter' && key !== ' ' && key !== 'Escape') return;
-    event.preventDefault();
-    const options = this.categoryOptionsFilteredBySearch_();
-    const total = options.length + 1;
-    let idx = this.categoryDropdownHighlightIndex_();
-    if (idx >= total) idx = total - 1;
-    if (idx < -1) idx = -1;
-
-    if (key === 'ArrowDown') {
-      idx = idx < total - 1 ? idx + 1 : 0;
-      this.categoryDropdownHighlightIndex_.set(idx);
-      this.focusCategoryItem(idx);
-    } else if (key === 'ArrowUp') {
-      idx = idx > 0 ? idx - 1 : total - 1;
-      this.categoryDropdownHighlightIndex_.set(idx);
-      this.focusCategoryItem(idx);
-    } else if (key === 'Enter' || key === ' ') {
-      if (idx >= 0 && idx < options.length) {
-        this.addCategory(options[idx]);
-      } else if (idx === options.length) {
-        this.openAddNewCategory();
-      }
-      this.closeCategoryDropdown();
-      this.categoryInputRef?.nativeElement?.focus();
-    } else if (key === 'Escape') {
-      this.closeCategoryDropdown();
-      this.categoryInputRef?.nativeElement?.focus();
-    }
-  }
-
-  private focusCategoryItem(index: number): void {
-    setTimeout(() => {
-      const items = this.categoryDropdownItems;
-      if (items?.length && index >= 0 && index < items.length) {
-        (items.get(index) as ElementRef<HTMLElement>)?.nativeElement?.focus();
-      }
-    }, 0);
-  }
-
-  protected onSupplierDropdownKeydown(event: Event): void {
-    const key = (event as KeyboardEvent).key;
-    if (key !== 'ArrowDown' && key !== 'ArrowUp' && key !== 'Enter' && key !== ' ' && key !== 'Escape') return;
-    event.preventDefault();
-    const options = this.supplierOptionsFilteredBySearch_();
-    const total = options.length + 1;
-    let idx = this.supplierDropdownHighlightIndex_();
-
-    if (key === 'ArrowDown') {
-      idx = idx < total - 1 ? idx + 1 : 0;
-      this.supplierDropdownHighlightIndex_.set(idx);
-      this.focusSupplierItem(idx);
-    } else if (key === 'ArrowUp') {
-      idx = idx > 0 ? idx - 1 : total - 1;
-      this.supplierDropdownHighlightIndex_.set(idx);
-      this.focusSupplierItem(idx);
-    } else if (key === 'Enter' || key === ' ') {
-      if (idx >= 0 && idx < options.length) {
-        this.addSupplierId(options[idx]._id);
-      } else if (idx === options.length) {
-        this.openAddSupplier();
-      }
-      this.closeSupplierDropdown();
-      this.supplierInputRef?.nativeElement?.focus();
-    } else if (key === 'Escape') {
-      this.closeSupplierDropdown();
-      this.supplierInputRef?.nativeElement?.focus();
-    }
-  }
-
-  private focusSupplierItem(index: number): void {
-    setTimeout(() => {
-      const items = this.supplierDropdownItems;
-      if (items?.length && index >= 0 && index < items.length) {
-        (items.get(index) as ElementRef<HTMLElement>)?.nativeElement?.focus();
-      }
-    }, 0);
   }
 
 
@@ -693,11 +404,9 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
       const current = (this.productForm_.get('allergens_')?.value || []) as string[];
       if (current.includes(englishKey)) {
         this.userMsgService.onSetErrorMsg(this.translationService.translate('allergen_already_on_product'));
-        this.allergenSearchQuery_.set('');
         return;
       }
       this.toggleAllergen(englishKey);
-      this.allergenSearchQuery_.set('');
     } catch (err) {
       this.logging.error({ event: 'inventory.product.add_allergen_error', message: 'Failed to add allergen', context: { err } });
     }
@@ -734,55 +443,6 @@ export class ProductFormComponent implements OnInit, AfterViewInit, AfterViewChe
     }
   }
 
-
-  protected onAllergenKeydown(event: Event): void {
-    if (!this.showAllergenDropdown_()) return;
-    const e = event as KeyboardEvent;
-    const key = e.key;
-    const filtered = this.allergenOptionsFilteredBySearch_();
-    const hasAddNew = this.allergenSearchQuery_().trim() !== ''
-      && !filtered.includes(this.allergenSearchQuery_().trim())
-      && !(this.productForm_.get('allergens_')?.value as string[] || []).includes(this.allergenSearchQuery_().trim());
-    const total = filtered.length + (hasAddNew ? 1 : 0);
-    if (key === 'Escape') {
-      event.preventDefault();
-      this.closeAllergenDropdown();
-      this.allergenInputRef?.nativeElement?.focus();
-      return;
-    }
-    if (total === 0) return;
-
-    if (key === 'ArrowDown' || key === 'ArrowUp' || key === 'Enter' || key === ' ') {
-      event.preventDefault();
-    }
-
-    let idx = this.allergenDropdownHighlightIndex_();
-    if (key === 'ArrowDown') {
-      idx = idx < total - 1 ? idx + 1 : 0;
-      this.allergenDropdownHighlightIndex_.set(idx);
-      this.focusAllergenItem(idx);
-    } else if (key === 'ArrowUp') {
-      idx = idx > 0 ? idx - 1 : total - 1;
-      this.allergenDropdownHighlightIndex_.set(idx);
-      this.focusAllergenItem(idx);
-    } else if (key === 'Enter' || key === ' ') {
-      if (idx >= 0 && idx < filtered.length) {
-        this.toggleAllergen(filtered[idx]);
-      } else if (hasAddNew && idx === filtered.length) {
-        this.onAddNewAllergen(this.allergenSearchQuery_());
-      }
-      this.allergenInputRef?.nativeElement?.focus();
-    }
-  }
-
-  private focusAllergenItem(index: number): void {
-    setTimeout(() => {
-      const items = this.allergenDropdownItems;
-      if (items?.length && index >= 0 && index < items.length) {
-        (items.get(index) as ElementRef<HTMLElement>)?.nativeElement?.focus();
-      }
-    }, 0);
-  }
 
   protected toggleAllergen(allergen: string): void {
     const ctrl = this.productForm_.get('allergens_');
