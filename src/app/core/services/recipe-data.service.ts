@@ -50,6 +50,8 @@ export class RecipeDataService {
       ...recipe,
       addedAt_: recipe.addedAt_ ?? existing?.addedAt_,
       updatedAt_: Date.now(),
+      createdBy: existing?.createdBy ?? recipe.createdBy,
+      hiddenBy: existing?.hiddenBy ?? recipe.hiddenBy,
     }
     const updated = await this.storage.put<Recipe>(ENTITY, toSave)
     this.recipesStore_.update(recipes =>
@@ -63,7 +65,7 @@ export class RecipeDataService {
     const userId = this.userService.user_()?._id
     if (!userId) throw new Error('NOT_AUTHENTICATED')
     const recipe = await this.storage.get<Recipe>(ENTITY, _id)
-    const hiddenBy = [...(recipe.hiddenBy ?? []), userId]
+    const hiddenBy = [...new Set([...(recipe.hiddenBy ?? []), userId])]
     const updated = await this.storage.put<Recipe>(ENTITY, { ...recipe, hiddenBy })
     this.recipesStore_.update(recipes => recipes.map(r => (r._id === _id ? updated : r)))
     this.logging.info({ event: 'crud.recipe.hide', message: 'Recipe hidden by user', context: { entityType: ENTITY, id: _id, userId } })

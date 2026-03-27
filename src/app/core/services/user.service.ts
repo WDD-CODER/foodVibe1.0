@@ -42,7 +42,11 @@ export class UserService {
               switchMap(passwordHash =>
                 from(
                   this.storageService.post(SIGNED_USERS, {
-                    ...newUser,
+                    name: newUser.name,
+                    email: newUser.email,
+                    imgUrl: newUser.imgUrl,
+                    // role is always 'user' at signup; admin must be set out-of-band
+                    role: 'user' as const,
                     passwordHash
                   } as StoredUser)
                 )
