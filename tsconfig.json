@@ -11,9 +11,6 @@
       "@services/*": [
         "src/app/core/services/*"
       ],
-      "@components/*": [
-        "src/app/components/*"
-      ],
       "@directives/*": [
         "src/app/core/directives/*"
       ],
