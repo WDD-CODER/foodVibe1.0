@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { Subject, firstValueFrom } from 'rxjs';
 import { TranslationService } from './translation.service';
+import { sanitizeKey } from '../utils/sanitize-key.util';
 
 export type TranslationKeyResult = { englishKey: string; hebrewLabel: string };
 export type TranslationKeyModalResult = TranslationKeyResult | null | { continueWithoutSaving: true };
@@ -27,7 +28,7 @@ export class TranslationKeyModalService {
   }
 
   save(englishKey: string, hebrewLabel: string): void {
-    const sanitizedKey = englishKey.trim().toLowerCase().replace(/\s+/g, '_');
+    const sanitizedKey = sanitizeKey(englishKey);
     const label = hebrewLabel.trim();
     const validation = this.translationService.validateKeyForHebrew(sanitizedKey, label);
     if (!validation.valid) {

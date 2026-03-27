@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { TranslationService } from './translation.service';
 import { TranslationKeyModalService, isTranslationKeyResult } from './translation-key-modal.service';
+import { sanitizeKey } from '../utils/sanitize-key.util';
 
 export type KeyResolutionContext =
   | 'category'
@@ -31,7 +32,7 @@ export class KeyResolutionService {
     if (existingKey) return existingKey;
 
     if (!HEBREW_SCRIPT.test(trimmed)) {
-      return this.sanitizeAsKey(trimmed);
+      return sanitizeKey(trimmed);
     }
 
     const modalContext = this.toModalContext(context);
@@ -40,7 +41,7 @@ export class KeyResolutionService {
       return null;
     }
     this.translation.addKeyAndHebrew(result.englishKey, result.hebrewLabel);
-    return result.englishKey.trim().toLowerCase().replace(/\s+/g, '_');
+    return sanitizeKey(result.englishKey);
   }
 
   private resolveForContext(trimmed: string, context: KeyResolutionContext): string | null {
@@ -67,7 +68,4 @@ export class KeyResolutionService {
     return context;
   }
 
-  private sanitizeAsKey(input: string): string {
-    return input.trim().toLowerCase().replace(/\s+/g, '_');
-  }
 }

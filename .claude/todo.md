@@ -3,13 +3,13 @@
 ---
 
 ### Plan 214-R — Extract sanitizeKey utility (`plans/214-R-sanitize-key-util-extraction.plan.md`)
-- [ ] Create `src/app/core/utils/sanitize-key.util.ts` with `sanitizeKey` export
-- [ ] `translation-key-modal.service.ts:30` — replace inline expression; add import
-- [ ] `label-creation-modal.service.ts:33` — replace inline expression; add import
-- [ ] `key-resolution.service.ts:34` — replace `this.sanitizeAsKey(trimmed)` with `sanitizeKey(trimmed)`
-- [ ] `key-resolution.service.ts:43` — replace inline expression with `sanitizeKey(result.englishKey)`
-- [ ] `key-resolution.service.ts:70-72` — delete `sanitizeAsKey` private method; add import
-- [ ] `ng build` verify clean
+- [x] Create `src/app/core/utils/sanitize-key.util.ts` with `sanitizeKey` export
+- [x] `translation-key-modal.service.ts:30` — replace inline expression; add import
+- [x] `label-creation-modal.service.ts:33` — replace inline expression; add import
+- [x] `key-resolution.service.ts:34` — replace `this.sanitizeAsKey(trimmed)` with `sanitizeKey(trimmed)`
+- [x] `key-resolution.service.ts:43` — replace inline expression with `sanitizeKey(result.englishKey)`
+- [x] `key-resolution.service.ts:70-72` — delete `sanitizeAsKey` private method; add import
+- [x] `ng build` verify clean
 
 ---
 

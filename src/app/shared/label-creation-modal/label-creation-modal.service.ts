@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { Subject, firstValueFrom } from 'rxjs';
 import { TranslationService } from '@services/translation.service';
+import { sanitizeKey } from '../../core/utils/sanitize-key.util';
 
 interface LabelCreationResult {
   key: string;
@@ -30,7 +31,7 @@ export class LabelCreationModalService {
   }
 
   save(englishKey: string, hebrewLabel: string, color: string, autoTriggers: string[]): void {
-    const sanitizedKey = englishKey.trim().toLowerCase().replace(/\s+/g, '_');
+    const sanitizedKey = sanitizeKey(englishKey);
     const validation = this.translationService.validateEnglishKey(sanitizedKey);
     if (!validation.valid) {
       throw new Error(validation.error);
