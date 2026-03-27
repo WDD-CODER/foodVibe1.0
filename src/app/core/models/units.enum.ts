@@ -1,1 +1,0 @@
-export type KitchenUnit = 'gram' | 'kg' | 'ml' | 'liter' | 'unit' | string;
