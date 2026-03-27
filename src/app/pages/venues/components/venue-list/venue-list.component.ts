@@ -18,6 +18,7 @@ import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/share
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state';
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component';
 import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component';
+import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model';
 import { useListState, StringParam, StringSetParam } from 'src/app/core/utils/list-state.util';
 import { HeroFabService } from '@services/hero-fab.service';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
@@ -28,6 +29,7 @@ const ENV_TYPES: EnvironmentType[] = [
   'client_home',
   'popup_venue',
 ];
+type VenueBulkField = 'environment_type_';
 
 @Component({
   selector: 'app-venue-list',
@@ -74,12 +76,21 @@ export class VenueListComponent implements OnInit, OnDestroy {
 
   protected envTypes = ENV_TYPES;
 
+  protected editableFields_ = computed<BulkEditableField[]>(() => [
+    {
+      key: 'environment_type_',
+      label: 'environment_type',
+      options: this.envTypes.map(e => ({ value: e, label: e })),
+      multi: false,
+    },
+  ])
+
   constructor() {
     this.isPanelOpen_.set(getPanelOpen('venues'));
     if (!this.embeddedInDashboard) {
       useListState('venues', [
         { urlParam: 'q',        signal: this.searchQuery_,      serializer: StringParam },
-        { urlParam: 'envTypes',  signal: this.selectedEnvTypes_, serializer: StringSetParam as any },
+        { urlParam: 'envTypes',  signal: this.selectedEnvTypes_, serializer: StringSetParam },
       ]);
     }
 
@@ -178,6 +189,18 @@ export class VenueListComponent implements OnInit, OnDestroy {
       return;
     }
     this.router.navigate(['/venues/edit', item._id]);
+  }
+
+  protected onBulkEdit(event: { field: string; value: string; ids: string[] }): void {
+    const field = event.field as VenueBulkField
+    const venues = this.venueData.allVenues_()
+    for (const id of event.ids) {
+      const item = venues.find(v => v._id === id)
+      if (!item) continue
+      if (field === 'environment_type_') {
+        void this.venueData.updateVenue({ ...item, environment_type_: event.value as EnvironmentType })
+      }
+    }
   }
 
   protected onBulkDeleteSelected(ids: string[]): void {

@@ -1,6 +1,8 @@
 ---
-description: Commit/push requests must use the commit-to-github skill (visual plan + approval)
+description: Git operations must use the git-agent (visual plan + approval)
 alwaysApply: true
 ---
 
-When the user asks to commit, push, or save to GitHub, read [.claude/skills/commit-to-github/SKILL.md](.claude/skills/commit-to-github/SKILL.md) and follow all phases in order. No git writes until the user approves the visual plan.
+When the user asks to commit, push, create a PR, merge, or perform any git operation,
+read `.claude/agents/git-agent.md` and follow it. No git writes until the user approves
+the visual plan.

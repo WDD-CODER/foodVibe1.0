@@ -114,6 +114,11 @@ export class UnitRegistryService {
     await this.initUnits(false);
   }
 
+  /** Reload from storage after a backup import/restore. */
+  async reloadFromStorage(): Promise<void> {
+    await this.initUnits(false);
+  }
+
   // GET
   getConversion(key: string): number {
     return this.globalUnits_()[key] || 1;

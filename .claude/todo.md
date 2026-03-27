@@ -1,9 +1,121 @@
 # Active Tasks
 
+---
+
+### Plan 214-R — Extract sanitizeKey utility (`plans/214-R-sanitize-key-util-extraction.plan.md`)
+- [x] Create `src/app/core/utils/sanitize-key.util.ts` with `sanitizeKey` export
+- [x] `translation-key-modal.service.ts:30` — replace inline expression; add import
+- [x] `label-creation-modal.service.ts:33` — replace inline expression; add import
+- [x] `key-resolution.service.ts:34` — replace `this.sanitizeAsKey(trimmed)` with `sanitizeKey(trimmed)`
+- [x] `key-resolution.service.ts:43` — replace inline expression with `sanitizeKey(result.englishKey)`
+- [x] `key-resolution.service.ts:70-72` — delete `sanitizeAsKey` private method; add import
+- [x] `ng build` verify clean
+
+---
+
+### Plan 213 — Counter Unified Unit-Aware Stepping (`plans/213-counter-unified-unit-aware-stepping.plan.md`)
+- [x] `quantity-step.util.ts`: widen unit to string; replace Plan 210 bucket logic; add UNIT_AWARE_SET/isUnitAware/getUnitAwareStep; wire into quantityIncrement/quantityDecrement/getQuantityStep
+- [x] `counter.component.ts`: remove unitAwareIncrement/unitAwareDecrement; simplify routing
+- [x] `counter.component.html`: update [step] binding for unit-aware
+- [x] `scaling-chip.component.ts`: add stepOptions input
+- [x] `scaling-chip.component.html`: add [stepOptions] to app-counter
+- [x] `cook-view.page.ts`: add cookViewStepOpts_; update incrementQuantity/decrementQuantity/onEditAmountKeydown/getEditAmountStep
+- [x] `cook-view.page.html`: bind cookViewStepOpts_; update keydown/step calls
+- [x] `recipe-ingredients-table.component.ts`: add unit to stepOpts
+- [x] `recipe-header.component.html`: add [stepOptions] to scaling-chips
+- [x] `quantity-step.util.spec.ts`: add unit-aware describe block
+
+---
+
+### Plan 212-R — Slim worktree-session-end + deprecate commit-to-github (`plans/212-R-slim-worktree-session-end-deprecate-commit-skill.plan.md`)
+- [x] Rewrite `.claude/skills/worktree-session-end/SKILL.md` — cleanup-only, delegate commit/push/PR to git-agent
+- [x] Delete `.claude/skills/commit-to-github/skill-commit-to-github.md` (stale duplicate)
+- [x] Delete `.claude/skills/worktree-session-end/skill-worktree-session-end.md` (stale duplicate)
+- [x] Overwrite `.claude/skills/commit-to-github/SKILL.md` with DEPRECATED notice → git-agent
+- [x] Rewrite `.cursor/commands/commit-github.md` → redirect to git-agent
+
+---
+
+### Plan 211 — Git Agent: replace commit-to-github skill (`plans/211-git-agent-replace-commit-skill.plan.md`)
+- [x] Create `.claude/agents/git-agent.md` — full agent spec under 1,000 tokens
+- [x] Create `.claude/commands/git.md` — 3-line command pointer to git-agent
+- [x] Create `.cursor/commands/git.md` — 3-line Cursor equivalent
+- [x] Update `copilot-instructions.md` line 30 — replace commit-to-github trigger; scope to exclude session-end keywords
+- [x] Update `.cursor/rules/git-commit-must-use-skill.mdc` — new content per brief
+- [x] Update `agent.md` lines 33 and 58 — rename skill pointer; remove stale Phase 0 reference
+- [x] Update `standards-git.md` line 28 — replace `commit-to-github` with `git-agent`
+
 Update status after each sub-task. Link plan files here when applicable.
 
 ---
 
+### Plan 210 — Counter Smart Step Logic (`plans/210-counter-smart-step-logic.plan.md`)
+- [x] Extend `QuantityStepOptions` with `unit` and `ticks` fields in `quantity-step.util.ts`
+- [x] Add `unitAwareIncrement` to `quantity-step.util.ts`
+- [x] Add `unitAwareDecrement` to `quantity-step.util.ts`
+- [x] Add `ticks_` signal + tick tracking in `counter.component.ts`; reset in `stopRepeat()`
+- [x] Route `increment()` / `decrement()` through unit-aware functions when unit is set
+- [x] Update `onKeydown` to use unit-aware functions when unit is set
+
+---
+
+### Plan 209 — UI Inspector circuit-breaker rewrite (`plans/209-ui-inspector-circuit-breaker-rewrite.plan.md`)
+- [x] Rewrite `.claude/agents/ui-inspector.md` — circuit-breaker pipeline, scope filtering, inline rules, dual-route output, model routing
+
+---
+
+
+### Plan 208-R — dedupeAndFilterOptions util extraction (`plans/208-R-dedupe-select-options-util.plan.md`)
+- [x] Create `src/app/core/utils/dedupe-select-options.util.ts` — export `dedupeAndFilterOptions`, delegate filter step to `filterOptionsByStartsWith`
+- [x] Replace filter+dedup block in `custom-select.component.ts` with call to `dedupeAndFilterOptions`; fix `translateLabels` conditional in lambda
+- [x] Add import for `dedupeAndFilterOptions` to `custom-select.component.ts`
+- [x] Verify `ng build` passes; confirm `dedupe-select-options.util.ts` exists
+
+### Plan 207-R — RecipeCostService constants extraction (`plans/207-R-recipe-cost-constants-extraction.plan.md`)
+- [x] Create `src/app/core/utils/recipe-cost.constants.ts` — export all four constants verbatim with JSDoc comments
+- [x] Update `recipe-cost.service.ts` — delete four constant declarations (lines 8–28) and add import from new util file
+- [x] Verify `ng build` passes with no errors
+
+### Plan 206-R — RecipeYieldManager extraction (`plans/206-R-recipe-yield-manager-extraction.plan.md`)
+- [x] Create `src/app/core/utils/recipe-yield-manager.util.ts` — plain class with all yield/scaling computeds and methods
+- [x] Update `recipe-header.component.ts` — instantiate manager, delete moved members, add CDR/output wrappers
+- [x] Update `recipe-header.component.html` — replace all direct method calls with `yield.*` or wrapper calls
+- [x] Update `recipe-header.component.spec.ts` — update method paths and rewrite `onPrimaryUnitChange` test
+
+### Plan 205-R — MetadataRegistryService persistRegistry helper (`plans/205-R-metadata-registry-persist-helper.plan.md`)
+- [x] Add `private async persistRegistry<T>()` helper to `metadata-registry.service.ts`
+- [x] Replace initMetadata categories write block with `persistRegistry` call
+- [x] Replace initMetadata allergens write block with `persistRegistry` call
+- [x] Replace initMetadata menuTypes write block with `persistRegistry` call
+- [x] Replace `registerCategory` inline block with `persistRegistry` call
+- [x] Replace `deleteCategory` block — restructure control flow, then `persistRegistry`
+- [x] Replace `registerAllergen` inline block with `persistRegistry` call
+- [x] Replace `deleteAllergen` block — compute `updated` first, then `persistRegistry`
+- [x] Replace `registerLabel` inline block with `persistRegistry` call
+- [x] Replace `deleteLabel` inline block with `persistRegistry` call
+- [x] Replace `updateLabel` inline block with `persistRegistry` call
+- [x] Replace `registerMenuType` inline block with `persistRegistry` call
+- [x] Replace `updateMenuType` inline block with `persistRegistry` call
+- [x] Replace `deleteMenuType` inline block with `persistRegistry` call
+- [x] Replace `renameMenuType` inline block with `persistRegistry` call
+- [x] Verify `ng build` passes; confirm file under 320 LOC
+
+### Plan 204-R — Inventory product-price util extraction (`plans/204-R-inventory-product-price-util.plan.md`)
+- [ ] Create `src/app/core/utils/product-price.util.ts` — three pure exports: `getProductUnits`, `getPricePerUnit`, `calcBuyPriceGlobal`
+- [ ] Delete dead `getProductUnits` method from component (no call sites)
+- [ ] Replace `getPricePerUnit` body in component with 3-line wrapper (keeps 2-arg template signature)
+- [ ] Replace `onPriceChange` conversion block with `calcBuyPriceGlobal(...)` call; add util import
+- [ ] Leave `onUnitChange` conversion block unchanged (inverse math — cannot reuse)
+- [ ] Verify `ng build` passes
+
+### Plan 203-R — Recipe-book allergen + cell-expand refactor (`plans/203-R-recipe-book-allergen-cell-expand-refactor.plan.md`)
+- [ ] Create `src/app/core/utils/recipe-allergens.util.ts` — export `MAX_ALLERGEN_RECURSION` + pure `resolveRecipeAllergens` fn
+- [ ] Create `src/app/core/utils/cell-expand-state.util.ts` — `CellExpandState` class with signals + helpers
+- [ ] Update `recipe-book-list.component.ts` — import constants/util, replace 4 signals with 2 `CellExpandState` instances
+- [ ] Update `recipe-book-list.component.ts` — replace `getRecipeAllergens` body with thin wrapper; update `getRecipeProductIds` to import `MAX_ALLERGEN_RECURSION`
+- [ ] Update `recipe-book-list.component.ts` — delete 6 expand methods + 2 expand helper methods; add close wrappers + update `resetExpandedCells`
+- [ ] Update `recipe-book-list.component.html` — replace 6 method calls in header/body with `allergenExpand.*` / `labelsExpand.*`
+- [ ] Verify: `ng build` passes; component under ~600 LOC
 
 ## Done
 
@@ -176,6 +288,19 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [ ] Auth hardening: password in UI, credentials types, local hash-only storage, auth abstraction, guard/modal wiring
 - [ ] Backend-ready: environment files, API contract, HTTP provider, interceptor, token lifecycle
 - [ ] Add "Security & go-live" checklist to docs (HTTPS, headers, rate limiting, no secrets in repo, error exposure)
+
+### Plan 215-R — Fix list-state ParamDescriptor<any>[] to remove as any casts (`plans/215-R-list-state-param-descriptor-any.plan.md`)
+- [x] `list-state.util.ts`: change `writeSession` param from `ParamDescriptor[]` to `ParamDescriptor<any>[]`
+- [x] `list-state.util.ts`: change `useListState` param from `ParamDescriptor[]` to `ParamDescriptor<any>[]`
+- [x] `equipment-list.component.ts`: remove 3 `as any` casts (StringParam ×2, StringSetParam ×1)
+- [x] `inventory-product-list.component.ts`: remove 2 `as any` casts (NullableStringParam, StringParam)
+- [x] `recipe-book-list.component.ts`: remove 2 `as any` casts (NullableStringParam, StringParam)
+- [x] `menu-library-list.component.ts`: remove 2 `as any` casts (StringParam ×2)
+- [x] `venues-list.component.ts`: remove 1 `as any` cast (StringSetParam)
+
+### Tech Debt — Audit 2026-03-26 (unplanned items)
+- [ ] Extract `trim().toLowerCase().replace(/\s+/g, '_')` key-sanitization into `core/utils/sanitize-key.util.ts` (2 services: `translation-key-modal.service.ts:30`, `label-creation-modal.service.ts:33`)
+- [ ] Remove commented import `ProductDataService` at `product-form.component.ts:8` and commented statement at line 927
 
 ### Plan 069 â€” Unused and redundant code cleanup (`plans/069-unused-redundant-code-cleanup.plan.md`)
 

@@ -1,37 +1,62 @@
-# Execute Implementation Brief
+---
+description: Execute the implementation plan from this conversation
+allowed-tools: Read, Write, Edit, Bash
+---
 
-Execute the verified brief step by step. Follow it to the letter.
+# Skill: execute-it
+
+Execute the implementation plan from this conversation, incorporating any findings from plan-implementation verification.
+
+## Step 0: Compose & Save
+
+Before executing, persist the plan so it's tracked in `plans/` and `todo.md`.
+
+1. **Scan the conversation** for two sources:
+   - **Architectural brief** — the handoff from the planning brain (has `## Goal`, `## Steps`, `## Rules`, `## Done when`)
+   - **Plan-implementation output** — verification results (✓/✗ items, deviations, gaps, corrections)
+2. **Compose one concise plan** from both:
+   - Frontmatter: `name` (from Goal), `overview` (one sentence), `todos: []`, `isProject: false`
+   - Body: brief's Goal as heading, brief's Steps merged with every ✗ fix/amendment from plan-implementation as `# Atomic Sub-tasks` (each `[ ] description`), brief's Rules as constraints, brief's "Done when" as verification
+3. **Invoke save-plan**: read `.claude/skills/save-plan/SKILL.md` and follow it — handles numbering, `plans/` write, and `todo.md` sync
+
+**Skip Step 0** if no architectural brief is found in conversation — go straight to Step 1.
+
+---
 
 ## Workflow
 
-1. **Follow steps in order** — no additions, no skipped steps
-2. **Read before editing** — always read a file immediately before modifying it
-3. **One logical unit per commit** — conventional commits (feat/fix/refactor)
-4. **Stop on surprises** — if code differs from the brief, STOP and report
-5. **Mark progress** — confirm each step completion
+1. **Build the merged execution list** — combine the original brief's steps WITH every ✗ fix, missing method, injection, or deviation flagged during plan-implementation. Treat verified items (✓) as confirmed context.
+2. **Execute atomically** — one logical unit per commit
+3. **Stop only on NEW surprises** — if you hit something not covered by the brief OR the plan-implementation findings, stop and report. Do not improvise.
+4. **Update progress** — mark completed tasks
 
-## Rules
+## The Rule: Brief + Verification = Full Plan
 
-- **Brief is law** — do not add features, refactor beyond scope, or "improve" things not in the brief
-- **Verify after changes** — run `ng build` or relevant checks when applicable
-- **Stop on conflict** — do not improvise. User will re-plan externally.
+The original brief is the base. Anything plan-implementation flagged as ✗ or "needs to be created" is an **amendment to the plan**, not a deviation. Execute both together as one unified task list.
+
+Example: if the brief says "add reload calls for three services" and plan-implementation found that two need the method created first — create the methods, then add the calls. Don't stop to ask.
+
+## Tools Available
+- `Read` — examine files before modifying
+- `Write` — create new files
+- `Edit` — modify existing files
+- `Bash` — run commands (build, test, git)
+
+## Execution Rules
+
+- **Read first** — always read a file before editing it
+- **Commit often** — use conventional commits (feat/fix/docs/refactor) for each atomic change
+- **Verify** — after each file change, run diagnostics or build checks if applicable
+- **Stop on NEW conflict** — if the code differs from what BOTH the brief and plan-implementation expected, stop and report
 
 ## Output
 
-### Complete:
+When complete:
 ```
 ✓ Execution complete
-- Tasks: [N/N completed]
+- Plan saved: plans/NNN-slug.plan.md (or "skipped — no brief found")
+- Brief tasks: [N completed]
+- Plan-implementation fixes: [N incorporated]
 - Files modified: [list]
-- How to verify: [where in the app + what to check]
-```
-
-### Stopped:
-```
-✗ Stopped at step [N]
-- Expected: [what the brief said]
-- Found: [what the code shows]
-- Completed so far: [list]
-
-→ Take this back to the planning session for re-plan.
+- How to verify: [steps/checks]
 ```

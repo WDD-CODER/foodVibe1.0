@@ -1,4 +1,4 @@
-import { getQuantityStep, quantityIncrement, quantityDecrement } from './quantity-step.util';
+import { getQuantityStep, quantityIncrement, quantityDecrement, QuantityStepOptions } from './quantity-step.util';
 
 describe('quantity-step.util', () => {
   describe('getQuantityStep', () => {
@@ -124,6 +124,85 @@ describe('quantity-step.util', () => {
 
     it('should treat non-finite value as 0 for step calculation (step 1)', () => {
       expect(quantityDecrement(NaN)).toBe(-1);
+    });
+  });
+
+  describe('unit-aware stepping (Plan 214 — value-range-based)', () => {
+    // ── Single click ──────────────────────────────────────────────────────────
+    it('single click on whole number steps +0.1', () => {
+      expect(quantityIncrement(1, 0, { unit: 'kg' })).toBe(1.1);
+      expect(quantityIncrement(5, 0, { unit: 'g' })).toBe(5.1);
+    });
+
+    it('single click on 1dp value steps +0.1', () => {
+      expect(quantityIncrement(1.5, 0, { unit: 'kg' })).toBe(1.6);
+    });
+
+    it('single click on 2dp value steps +0.01', () => {
+      expect(quantityIncrement(1.51, 0, { unit: 'kg' })).toBe(1.52);
+      expect(quantityIncrement(0.99, 0, { unit: 'kg' })).toBe(1);
+    });
+
+    it('single click decrement from whole number steps -0.1', () => {
+      expect(quantityDecrement(1, 0, { unit: 'kg' })).toBe(0.9);
+    });
+
+    it('single click decrement on 2dp value steps -0.01', () => {
+      expect(quantityDecrement(1.51, 0, { unit: 'kg' })).toBe(1.5);
+    });
+
+    // ── Hold — snap to tier boundary first ───────────────────────────────────
+    it('hold incr on dirty value snaps to tier boundary (1.55 → 1.6)', () => {
+      expect(quantityIncrement(1.55, 0, { unit: 'kg', continuousPress: true })).toBe(1.6);
+    });
+
+    it('hold incr on tier boundary steps by range (1.9 → 2.0, tier exit)', () => {
+      expect(quantityIncrement(1.9, 0, { unit: 'kg', continuousPress: true })).toBe(2);
+    });
+
+    it('hold incr tier transitions: 2→3, 9→10, 10→20, 90→100', () => {
+      const h = { unit: 'kg', continuousPress: true } as QuantityStepOptions;
+      expect(quantityIncrement(2, 0, h)).toBe(3);
+      expect(quantityIncrement(9, 0, h)).toBe(10);
+      expect(quantityIncrement(10, 0, h)).toBe(20);
+      expect(quantityIncrement(90, 0, h)).toBe(100);
+    });
+
+    // ── Hold decrement — fine zone ────────────────────────────────────────────
+    it('hold decr fine zone: 1.0 → 0.99', () => {
+      expect(quantityDecrement(1.0, 0, { unit: 'kg', continuousPress: true })).toBe(0.99);
+    });
+
+    it('hold decr fine zone: 0.91 → 0.90', () => {
+      expect(quantityDecrement(0.91, 0, { unit: 'kg', continuousPress: true })).toBe(0.90);
+    });
+
+    it('hold decr exits fine zone at 0.90 → 0.80 (back to 0.1 steps)', () => {
+      expect(quantityDecrement(0.9, 0, { unit: 'kg', continuousPress: true })).toBe(0.8);
+    });
+
+    it('hold decr tier transitions: 2.0→1.9, 3→2, 10→9, 20→10', () => {
+      const h = { unit: 'kg', continuousPress: true } as QuantityStepOptions;
+      expect(quantityDecrement(2.0, 0, h)).toBe(1.9);
+      expect(quantityDecrement(3, 0, h)).toBe(2);
+      expect(quantityDecrement(10, 0, h)).toBe(9);
+      expect(quantityDecrement(20, 0, h)).toBe(10);
+    });
+
+    // ── Floor at 0 ───────────────────────────────────────────────────────────
+    it('floors at 0 on decrement', () => {
+      expect(quantityDecrement(0.01, 0, { unit: 'kg' })).toBe(0);
+      expect(quantityDecrement(0.05, 0, { unit: 'kg', continuousPress: true })).toBe(0);
+    });
+
+    // ── getQuantityStep ───────────────────────────────────────────────────────
+    it('getQuantityStep returns 0.1 for unit-aware (Plan 214)', () => {
+      expect(getQuantityStep(5, { unit: 'kg' })).toBe(0.1);
+    });
+
+    // ── Non-unit-aware falls through ─────────────────────────────────────────
+    it('non-unit-aware unit falls through to normal path', () => {
+      expect(quantityIncrement(1, 0, { unit: 'unit' })).toBe(2);
     });
   });
 });

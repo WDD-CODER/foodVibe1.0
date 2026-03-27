@@ -179,10 +179,11 @@ export class CounterComponent implements AfterViewChecked, OnDestroy {
     const current = this.value();
     const minV = this.minVal_();
     const opts = this.stepOptions();
+    const kbOpts: QuantityStepOptions = { ...(opts ?? {}) };
     const next =
       e.key === 'ArrowUp'
-        ? quantityIncrement(current, minV, opts)
-        : quantityDecrement(current, minV, opts);
+        ? quantityIncrement(current, minV, kbOpts)
+        : quantityDecrement(current, minV, kbOpts);
     const maxV = this.maxVal_();
     const clamped =
       maxV != null ? Math.min(next, maxV) : Math.max(next, minV);
@@ -197,7 +198,10 @@ export class CounterComponent implements AfterViewChecked, OnDestroy {
     const current = this.value();
     const minV = this.minVal_();
     const opts = this.stepOptions();
-    const merged = continuousPress ? { ...(opts ?? {}), continuousPress: true } : opts;
+    const merged: QuantityStepOptions = {
+      ...(opts ?? {}),
+      ...(continuousPress ? { continuousPress: true } : {}),
+    };
     const next = quantityDecrement(current, minV, merged);
     this.emitValue(next);
     if (next <= this.minVal_()) this.stopRepeat();
@@ -211,7 +215,10 @@ export class CounterComponent implements AfterViewChecked, OnDestroy {
     const current = this.value();
     const minV = this.minVal_();
     const opts = this.stepOptions();
-    const merged = continuousPress ? { ...(opts ?? {}), continuousPress: true } : opts;
+    const merged: QuantityStepOptions = {
+      ...(opts ?? {}),
+      ...(continuousPress ? { continuousPress: true } : {}),
+    };
     let next = quantityIncrement(current, minV, merged);
     const maxV = this.maxVal_();
     if (maxV != null && next > maxV) next = maxV;

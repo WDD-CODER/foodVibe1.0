@@ -130,7 +130,7 @@ function readSession(routeKey: string): Record<string, unknown> | null {
 
 function writeSession(
   routeKey: string,
-  descriptors: ParamDescriptor[]
+  descriptors: ParamDescriptor<any>[]
 ): void {
   try {
     const obj: Record<string, unknown> = {};
@@ -153,7 +153,7 @@ function writeSession(
  */
 export function useListState(
   routeKey: string,
-  descriptors: ParamDescriptor[]
+  descriptors: ParamDescriptor<any>[]
 ): void {
   const router = inject(Router);
   const route = inject(ActivatedRoute);

@@ -41,6 +41,7 @@
       "Write(src/**)",
       "Write(C:/Users/danwe/.claude/**)",
       "Bash(npx ng test:*)",
+      "Bash(npx ng build:*)",
       "Edit(src/**/*)",
       "Edit(.claude/**/*)",
       "Bash(ng build:*)",

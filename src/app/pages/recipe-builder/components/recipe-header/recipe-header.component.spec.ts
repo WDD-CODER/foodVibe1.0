@@ -84,9 +84,9 @@ describe('RecipeHeaderComponent', () => {
     fixture.componentRef.setInput('form', form);
     fixture.detectChanges();
     expect(form.get('recipe_type')?.value).toBe('preparation');
-    component.toggleType();
+    component['toggleTypeWrapper']();
     expect(form.get('recipe_type')?.value).toBe('dish');
-    component.toggleType();
+    component['toggleTypeWrapper']();
     expect(form.get('recipe_type')?.value).toBe('preparation');
   });
 
@@ -96,9 +96,9 @@ describe('RecipeHeaderComponent', () => {
     conversions.at(0).get('amount')?.setValue(2);
     fixture.componentRef.setInput('form', form);
     fixture.detectChanges();
-    component.updatePrimaryAmount(1);
+    component.yield.updatePrimaryAmount(1);
     expect(conversions.at(0).get('amount')?.value).toBe(3);
-    component.updatePrimaryAmount(-1);
+    component.yield.updatePrimaryAmount(-1);
     expect(conversions.at(0).get('amount')?.value).toBe(2);
   });
 
@@ -108,16 +108,13 @@ describe('RecipeHeaderComponent', () => {
     conversions.at(0).get('amount')?.setValue(2);
     fixture.componentRef.setInput('form', form);
     fixture.detectChanges();
-    component.onScalingChipAmountChange(5);
+    component.yield.onScalingChipAmountChange(5);
     expect(conversions.at(0).get('amount')?.value).toBe(5);
   });
 
-  it('should emit openUnitCreator when NEW_UNIT is selected', (done) => {
-    component.openUnitCreator.subscribe(() => {
-      expect().nothing();
-      done();
-    });
-    component.onPrimaryUnitChange({ target: { value: 'NEW_UNIT' } } as unknown as Event);
+  it('should call openUnitCreator service when onPrimaryUnitChange returns create_unit', () => {
+    const result = component.yield.onPrimaryUnitChange('NEW_UNIT');
+    expect(result).toBe('create_unit');
   });
 
   it('should resolve primary unit label to dish when recipe_type is dish', () => {
@@ -126,7 +123,7 @@ describe('RecipeHeaderComponent', () => {
     conversions.at(0).patchValue({ unit: 'dish', amount: 4 });
     fixture.componentRef.setInput('form', form);
     fixture.detectChanges();
-    expect(component['primaryUnitLabel_']()).toBe('dish');
+    expect(component.yield.primaryUnitLabel_()).toBe('dish');
   });
 
   it('should disable secondary chip minus button when amount is zero', () => {
@@ -149,7 +146,7 @@ describe('RecipeHeaderComponent', () => {
     const form = createRecipeForm({ yield_conversions: conversions });
     fixture.componentRef.setInput('form', form);
     fixture.detectChanges();
-    component.onSecondaryScalingChipAmountChange(0, 5);
+    component.yield.onSecondaryScalingChipAmountChange(0, 5);
     expect(conversions.at(1).get('amount')?.value).toBe(5);
   });
 
@@ -161,9 +158,9 @@ describe('RecipeHeaderComponent', () => {
     const form = createRecipeForm({ yield_conversions: conversions });
     fixture.componentRef.setInput('form', form);
     fixture.detectChanges();
-    component.updateSecondaryAmount(0, 1);
+    component.yield.updateSecondaryAmount(0, 1);
     expect(conversions.at(1).get('amount')?.value).toBe(3);
-    component.updateSecondaryAmount(0, -1);
+    component.yield.updateSecondaryAmount(0, -1);
     expect(conversions.at(1).get('amount')?.value).toBe(2);
   });
 
@@ -175,7 +172,7 @@ describe('RecipeHeaderComponent', () => {
     const form = createRecipeForm({ yield_conversions: conversions });
     fixture.componentRef.setInput('form', form);
     fixture.detectChanges();
-    const available = component['availableSecondaryUnits_']();
+    const available = component.yield.availableSecondaryUnits_();
     expect(available).not.toContain('gram');
     expect(available).not.toContain('liter');
   });
@@ -188,7 +185,7 @@ describe('RecipeHeaderComponent', () => {
     const form = createRecipeForm({ yield_conversions: conversions });
     fixture.componentRef.setInput('form', form);
     fixture.detectChanges();
-    const available = component['availablePrimaryUnits_']();
+    const available = component.yield.availablePrimaryUnits_();
     expect(available).not.toContain('liter');
     expect(available).toContain('gram');
   });
@@ -201,10 +198,10 @@ describe('RecipeHeaderComponent', () => {
     const form = createRecipeForm({ yield_conversions: conversions });
     fixture.componentRef.setInput('form', form);
     fixture.detectChanges();
-    expect(component['availableSecondaryUnits_']()).not.toContain('liter');
-    component.removeSecondaryUnit(0);
+    expect(component.yield.availableSecondaryUnits_()).not.toContain('liter');
+    component.yield.removeSecondaryUnit(0);
     fixture.detectChanges();
     expect(conversions.length).toBe(1);
-    expect(component['availableSecondaryUnits_']()).toContain('liter');
+    expect(component.yield.availableSecondaryUnits_()).toContain('liter');
   });
 });

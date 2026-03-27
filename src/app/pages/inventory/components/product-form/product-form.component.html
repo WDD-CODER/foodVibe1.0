@@ -25,54 +25,17 @@
           <lucide-icon name="tags" class="icon-xs icon-muted"></lucide-icon>
           {{ 'category' | translatePipe }}
         </label>
-        <div class="category-input-box" (clickOutside)="closeCategoryDropdown()"
-          [class.no-chips]="selectedCategories_().length === 0"
-          (click)="onCategoryBoxClick($event)">
-          <div class="category-chips-and-input">
-            @for (cat of selectedCategories_(); track cat) {
-              <span class="chipe category" (click)="removeCategory(cat); $event.stopPropagation()">
-                {{ cat | translatePipe }}
-                <lucide-icon name="x" class="icon"></lucide-icon>
-              </span>
-            }
-            <input type="text"
-                   #categoryInput
-                   class="category-type-in-input form-input--no-focus-ring"
-                   [value]="categorySearchQuery_()"
-                   (input)="categorySearchQuery_.set($any($event.target).value); categoryDropdownHighlightIndex_.set(-1)"
-                   (focus)="openCategoryDropdown()"
-                   (keydown)="onCategoryInputKeydown($event)"
-                   [placeholder]="'choose_category' | translatePipe" />
-          </div>
-
-          <app-scrollable-dropdown *ngIf="showCategoryDropdown_()"
-               [maxHeight]="200"
-               class="category dropdown"
-               (keydown)="onCategoryDropdownKeydown($event)"
-               role="listbox"
-               [attr.aria-activedescendant]="'category-option-' + categoryDropdownHighlightIndex_()">
-            @for (cat of categoryOptionsFilteredBySearch_(); track cat; let i = $index) {
-              <div class="dropdown-item"
-                   #categoryDropdownItem
-                   [id]="'category-option-' + i"
-                   [class.dropdown-item--highlight]="categoryDropdownHighlightIndex_() === i"
-                   tabindex="-1"
-                   role="option"
-                   (click)="addCategory(cat)">
-                {{ cat | translatePipe }}
-              </div>
-            }
-            <div class="dropdown-item dropdown-item-add"
-                 #categoryDropdownItem
-                 [id]="'category-option-' + categoryOptionsFilteredBySearch_().length"
-                 [class.dropdown-item--highlight]="categoryDropdownHighlightIndex_() === categoryOptionsFilteredBySearch_().length"
-                 tabindex="-1"
-                 role="option"
-                 (click)="openAddNewCategory(); $event.stopPropagation()">
-              {{ 'add_new_category' | translatePipe }}
-            </div>
-          </app-scrollable-dropdown>
-        </div>
+        <app-chip-search-dropdown
+          [options]="filteredCategoryOptions_()"
+          [selected]="selectedCategories_()"
+          [displayFn]="translateFn"
+          [placeholder]="'choose_category' | translatePipe"
+          [addNewLabel]="'add_new_category' | translatePipe"
+          [showAddNewAlways]="true"
+          chipClass="chipe category"
+          (add)="addCategory($event)"
+          (remove)="removeCategory($event)"
+          (addNew)="openAddNewCategory()" />
       </div>
 
       <div class="form-group">
@@ -177,47 +140,17 @@
             <lucide-icon name="truck" class="icon-xs icon-muted"></lucide-icon>
             {{ 'supplier' | translatePipe }}
           </label>
-          <div class="supplier-input-box" (clickOutside)="closeSupplierDropdown()"
-            [class.no-chips]="selectedSupplierIds_().length === 0"
-            (click)="onSupplierBoxClick($event)">
-            <div class="supplier-chips-and-input">
-              @for (id of selectedSupplierIds_(); track id) {
-                <span class="chipe supplier" (click)="removeSupplierId(id); $event.stopPropagation()">
-                  {{ getSupplierName(id) }}
-                  <lucide-icon name="x" class="icon"></lucide-icon>
-                </span>
-              }
-              <input type="text" #supplierInput
-                class="supplier-type-in-input form-input--no-focus-ring"
-                [value]="supplierSearchQuery_()"
-                (input)="supplierSearchQuery_.set($any($event.target).value); supplierDropdownHighlightIndex_.set(-1)"
-                (focus)="openSupplierDropdown()"
-                (keydown)="onSupplierInputKeydown($event)"
-                [placeholder]="'choose_supplier' | translatePipe" />
-            </div>
-
-            <app-scrollable-dropdown *ngIf="showSupplierDropdown_()" [maxHeight]="200" class="supplier dropdown"
-              (keydown)="onSupplierDropdownKeydown($event)"
-              role="listbox"
-              [attr.aria-activedescendant]="'supplier-option-' + supplierDropdownHighlightIndex_()">
-              @for (s of supplierOptionsFilteredBySearch_(); track s._id; let i = $index) {
-                <div class="dropdown-item" #supplierDropdownItem
-                  [id]="'supplier-option-' + i"
-                  [class.dropdown-item--highlight]="supplierDropdownHighlightIndex_() === i"
-                  tabindex="-1" role="option"
-                  (click)="addSupplierId(s._id)">
-                  {{ s.name_hebrew }}
-                </div>
-              }
-              <div class="dropdown-item dropdown-item-add" #supplierDropdownItem
-                [id]="'supplier-option-' + supplierOptionsFilteredBySearch_().length"
-                [class.dropdown-item--highlight]="supplierDropdownHighlightIndex_() === supplierOptionsFilteredBySearch_().length"
-                tabindex="-1" role="option"
-                (click)="openAddSupplier(); $event.stopPropagation()">
-                {{ 'add_supplier' | translatePipe }}
-              </div>
-            </app-scrollable-dropdown>
-          </div>
+          <app-chip-search-dropdown
+            [options]="filteredSupplierIds_()"
+            [selected]="selectedSupplierIds_()"
+            [displayFn]="supplierDisplayFn"
+            [placeholder]="'choose_supplier' | translatePipe"
+            [addNewLabel]="'add_supplier' | translatePipe"
+            [showAddNewAlways]="true"
+            chipClass="chipe supplier"
+            (add)="addSupplierId($event)"
+            (remove)="removeSupplierId($event)"
+            (addNew)="openAddSupplier()" />
         </div>
         <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedSupplier_()" (click)="toggleSupplier()" (keydown.enter)="toggleSupplier()" (keydown.space)="toggleSupplier(); $event.preventDefault()" role="button" tabindex="0">
           <lucide-icon name="truck" class="icon-xs icon-muted"></lucide-icon>
@@ -231,50 +164,17 @@
             <lucide-icon name="shield-alert" class="icon-xs icon-warning"></lucide-icon>
             {{ 'allergens' | translatePipe }}
           </label>
-          <div class="allergen-input-box" (clickOutside)="closeAllergenDropdown()"
-            [class.no-chips]="selectedAllergensSignal_().length === 0"
-            (click)="onAllergenBoxClick($event)">
-            <div class="allergen-chips-and-input">
-              <span *ngFor="let selected of productForm_.get('allergens_')?.value" (click)="toggleAllergen(selected); $event.stopPropagation()"
-                class="chipe allergen">
-                {{ selected | translatePipe }}
-                <lucide-icon name="x" class="icon"></lucide-icon>
-              </span>
-              <input type="text" #allergenInput
-                [ngModel]="allergenSearchQuery_()"
-                (ngModelChange)="allergenSearchQuery_.set($event); allergenDropdownHighlightIndex_.set(-1)"
-                [ngModelOptions]="{standalone: true}"
-                class="allergen-type-in-input form-input--no-focus-ring"
-                [placeholder]="'search_or_choose_allergen' | translatePipe"
-                (focus)="openAllergenDropdown()"
-                (keydown)="onAllergenInputKeydown($event)">
-            </div>
-
-            <app-scrollable-dropdown *ngIf="showAllergenDropdown_()" [maxHeight]="200" class="allergen dropdown"
-              role="listbox"
-              (keydown)="onAllergenKeydown($event)"
-              [attr.aria-activedescendant]="allergenDropdownHighlightIndex_() >= 0 ? 'allergen-option-' + allergenDropdownHighlightIndex_() : null">
-              @for (allergen of allergenOptionsFilteredBySearch_(); track allergen; let i = $index) {
-                <div class="dropdown-item" #allergenDropdownItem [id]="'allergen-option-' + i"
-                  [class.dropdown-item--highlight]="allergenDropdownHighlightIndex_() === i"
-                  tabindex="-1" role="option"
-                  (click)="toggleAllergen(allergen)">
-                  {{ allergen | translatePipe }}
-                </div>
-              }
-              @if (allergenSearchQuery_().trim() && !allergenOptionsFilteredBySearch_().includes(allergenSearchQuery_().trim()) && !productForm_.get('allergens_')?.value?.includes(allergenSearchQuery_().trim())) {
-              <div class="dropdown-item dropdown-item--add-new" #allergenDropdownItem [id]="'allergen-option-' + allergenOptionsFilteredBySearch_().length"
-                [class.dropdown-item--highlight]="allergenDropdownHighlightIndex_() === allergenOptionsFilteredBySearch_().length"
-                tabindex="-1" role="option"
-                (click)="onAddNewAllergen(allergenSearchQuery_())">
-                {{ 'add_new_allergen' | translatePipe }} "{{ allergenSearchQuery_() }}"
-              </div>
-              }
-              <div *ngIf="allergenOptionsFilteredBySearch_().length === 0 && !allergenSearchQuery_().trim()" class="dropdown-item dropdown-item--empty">
-                {{ 'all_allergens_selected' | translatePipe }}
-              </div>
-            </app-scrollable-dropdown>
-          </div>
+          <app-chip-search-dropdown
+            [options]="filteredAllergenOptions_()"
+            [selected]="selectedAllergensSignal_()"
+            [displayFn]="translateFn"
+            [placeholder]="'search_or_choose_allergen' | translatePipe"
+            [addNewLabel]="'add_new_allergen' | translatePipe"
+            [noOptionsLabel]="'all_allergens_selected' | translatePipe"
+            chipClass="chipe allergen"
+            (add)="toggleAllergen($event)"
+            (remove)="toggleAllergen($event)"
+            (addNew)="onAddNewAllergen($event)" />
         </div>
         <div class="collapsible-field__header collapsible-field__header--btn" [class.collapsible-field__header--hidden]="expandedAllergens_()" (click)="toggleAllergens()" (keydown.enter)="toggleAllergens()" (keydown.space)="toggleAllergens(); $event.preventDefault()" role="button" tabindex="0">
           <lucide-icon name="shield-alert" class="icon-xs icon-warning"></lucide-icon>

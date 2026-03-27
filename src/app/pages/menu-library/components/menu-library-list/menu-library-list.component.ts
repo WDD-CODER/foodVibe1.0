@@ -48,8 +48,8 @@ export class MenuLibraryListComponent {
   constructor() {
     useListState('menu-library', [
       { urlParam: 'q',         signal: this.searchQuery_,        serializer: StringParam },
-      { urlParam: 'sort',      signal: this.sortBy_,             serializer: StringParam as any },
-      { urlParam: 'order',     signal: this.sortOrder_,          serializer: StringParam as any },
+      { urlParam: 'sort',      signal: this.sortBy_,             serializer: StringParam },
+      { urlParam: 'order',     signal: this.sortOrder_,          serializer: StringParam },
       { urlParam: 'eventType', signal: this.eventTypeFilter_,    serializer: StringParam },
       { urlParam: 'style',     signal: this.servingStyleFilter_, serializer: StringParam },
       { urlParam: 'dateFrom',  signal: this.dateFrom_,           serializer: StringParam },

@@ -27,14 +27,16 @@ import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state';
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component';
 import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component';
+import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model';
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component';
 import { useListState, StringParam, NullableStringParam, FilterRecordParam, StringArrayParam, BooleanParam } from 'src/app/core/utils/list-state.util';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util';
+import { resolveRecipeAllergens, MAX_ALLERGEN_RECURSION } from 'src/app/core/utils/recipe-allergens.util';
+import { CellExpandState } from 'src/app/core/utils/cell-expand-state.util';
 
 export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens' | 'dateAdded' | 'dateUpdated';
-
-const MAX_ALLERGEN_RECURSION = 5;
+type RecipeBulkField = 'labels_' | 'recipe_type_';
 
 @Component({
   selector: 'recipe-book-list',
@@ -68,8 +70,8 @@ export class RecipeBookListComponent {
     this.isPanelOpen_.set(getPanelOpen('recipe-book'));
     useListState('recipe-book', [
       { urlParam: 'q',               signal: this.searchQuery_,          serializer: StringParam },
-      { urlParam: 'sort',            signal: this.sortBy_,               serializer: NullableStringParam as any },
-      { urlParam: 'order',           signal: this.sortOrder_,             serializer: StringParam as any },
+      { urlParam: 'sort',            signal: this.sortBy_,               serializer: NullableStringParam },
+      { urlParam: 'order',           signal: this.sortOrder_,             serializer: StringParam },
       { urlParam: 'filters',         signal: this.activeFilters_,        serializer: FilterRecordParam },
       { urlParam: 'ingredients',     signal: this.selectedProductIds_,  serializer: StringArrayParam },
       { urlParam: 'dateFrom',        signal: this.dateFrom_,             serializer: NullableStringParam },
@@ -111,16 +113,13 @@ export class RecipeBookListComponent {
   }
 
   private resetExpandedCells(): void {
-    this.allergenExpandAll_.set(false);
-    this.allergenExpandedRecipeIds_.set(new Set());
-    this.labelsExpandAll_.set(false);
-    this.labelsExpandedRecipeIds_.set(new Set());
+    this.allergenExpand.reset()
+    this.labelsExpand.reset()
   }
+
   protected expandedFilterCategories_ = signal<Set<string>>(new Set());
-  protected allergenExpandedRecipeIds_ = signal<Set<string>>(new Set());
-  protected allergenExpandAll_ = signal<boolean>(false);
-  protected labelsExpandedRecipeIds_ = signal<Set<string>>(new Set());
-  protected labelsExpandAll_ = signal<boolean>(false);
+  protected readonly allergenExpand = new CellExpandState()
+  protected readonly labelsExpand = new CellExpandState()
   protected hoveredCostRecipeId_ = signal<string | null>(null);
   protected tappedCostRecipeId_ = signal<string | null>(null);
   protected costTooltipAnchor_ = signal<DOMRect | null>(null);
@@ -129,6 +128,24 @@ export class RecipeBookListComponent {
   protected hideDateColumn_ = signal(true);
   protected dateTooltipAnchor_ = signal<DOMRect | null>(null);
   protected selection = new ListSelectionState();
+
+  protected editableFields_ = computed<BulkEditableField[]>(() => [
+    {
+      key: 'labels_',
+      label: 'labels',
+      options: this.metadataRegistry.allLabels_().map(l => ({ value: l.key, label: l.key })),
+      multi: true,
+    },
+    {
+      key: 'recipe_type_',
+      label: 'recipe_type',
+      options: [
+        { value: 'dish', label: 'dish' },
+        { value: 'preparation', label: 'preparation' },
+      ],
+      multi: false,
+    },
+  ])
   protected ingredientSearchQuery_ = signal<string>('');
   protected selectedProductIds_ = signal<string[]>([]);
   protected historyFor_ = signal<{ entityType: VersionEntityType; entityId: string; entityName: string } | null>(null);
@@ -334,24 +351,8 @@ export class RecipeBookListComponent {
     return recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length);
   }
 
-  protected getRecipeAllergens(recipe: Recipe, depth = 0): string[] {
-    if (depth >= MAX_ALLERGEN_RECURSION || !recipe?.ingredients_?.length) return [];
-    const set = new Set<string>();
-    const products = this.kitchenState.products_();
-    const recipes = this.kitchenState.recipes_();
-
-    for (const ing of recipe.ingredients_) {
-      if (ing.type === 'product') {
-        const product = products.find(p => p._id === ing.referenceId) as Product | undefined;
-        (product?.allergens_ || []).forEach(a => set.add(a));
-      } else if (ing.type === 'recipe') {
-        const subRecipe = recipes.find(r => r._id === ing.referenceId);
-        if (subRecipe) {
-          this.getRecipeAllergens(subRecipe, depth + 1).forEach(a => set.add(a));
-        }
-      }
-    }
-    return Array.from(set);
+  protected getRecipeAllergens(recipe: Recipe): string[] {
+    return resolveRecipeAllergens(recipe, this.kitchenState.recipes_(), this.kitchenState.products_())
   }
 
   /** Parse YYYY-MM-DD to start of day (00:00:00.000) in local timezone. */
@@ -477,33 +478,18 @@ export class RecipeBookListComponent {
     this.sortOrder_.set('asc');
   }
 
-  protected toggleAllergenExpandAll(): void {
-    const next = !this.allergenExpandAll_();
-    this.allergenExpandAll_.set(next);
-    this.allergenExpandedRecipeIds_.set(new Set());
+  /** Close allergen chips view on outside click — guard header column clicks. */
+  protected closeAllergenView(clickTarget?: EventTarget | null): void {
+    const el = clickTarget instanceof HTMLElement ? clickTarget : null
+    if (el?.closest('.table-header .col-allergens')) return
+    this.allergenExpand.closeAll()
   }
 
-  protected toggleLabelsExpandAll(): void {
-    const next = !this.labelsExpandAll_();
-    this.labelsExpandAll_.set(next);
-    this.labelsExpandedRecipeIds_.set(new Set());
-  }
-
-  protected toggleLabelsPopover(recipeId: string): void {
-    this.labelsExpandedRecipeIds_.update((set) => {
-      const next = new Set(set);
-      if (next.has(recipeId)) next.delete(recipeId);
-      else next.add(recipeId);
-      return next;
-    });
-  }
-
-  /** Close labels chips view (all rows and expand-all) on outside click. */
+  /** Close labels chips view on outside click — guard header column clicks. */
   protected closeLabelsView(clickTarget?: EventTarget | null): void {
-    const el = clickTarget instanceof HTMLElement ? clickTarget : null;
-    if (el?.closest('.table-header .col-labels')) return;
-    this.labelsExpandedRecipeIds_.set(new Set());
-    this.labelsExpandAll_.set(false);
+    const el = clickTarget instanceof HTMLElement ? clickTarget : null
+    if (el?.closest('.table-header .col-labels')) return
+    this.labelsExpand.closeAll()
   }
 
   protected toggleFilter(categoryName: string, optionValue: string): void {
@@ -535,31 +521,6 @@ export class RecipeBookListComponent {
 
   protected selectedCountInCategory(category: { options: { checked_: boolean }[] }): number {
     return category.options.filter(o => o.checked_).length;
-  }
-
-  protected toggleAllergenPopover(recipeId: string): void {
-    this.allergenExpandedRecipeIds_.update((set) => {
-      const next = new Set(set);
-      if (next.has(recipeId)) next.delete(recipeId);
-      else next.add(recipeId);
-      return next;
-    });
-  }
-
-  /** Close allergen chips view (all rows and expand-all) on outside click. */
-  protected closeAllergenView(clickTarget?: EventTarget | null): void {
-    const el = clickTarget instanceof HTMLElement ? clickTarget : null;
-    if (el?.closest('.table-header .col-allergens')) return;
-    this.allergenExpandedRecipeIds_.set(new Set());
-    this.allergenExpandAll_.set(false);
-  }
-
-  protected isAllergenCellExpanded(recipeId: string): boolean {
-    return this.allergenExpandAll_() || this.allergenExpandedRecipeIds_().has(recipeId);
-  }
-
-  protected isLabelsCellExpanded(recipeId: string): boolean {
-    return this.labelsExpandAll_() || this.labelsExpandedRecipeIds_().has(recipeId);
   }
 
   protected showCostTooltip(recipeId: string, event?: Event): void {
@@ -658,6 +619,24 @@ export class RecipeBookListComponent {
         next: () => { this.deletingId_.set(null); },
         error: () => { this.deletingId_.set(null); }
       });
+    }
+  }
+
+  protected onBulkEdit(event: { field: string; value: string; ids: string[] }): void {
+    const field = event.field as RecipeBulkField
+    const recipes = this.kitchenState.recipes_()
+    for (const id of event.ids) {
+      const recipe = recipes.find(r => r._id === id)
+      if (!recipe) continue
+      let updated: Recipe
+      if (field === 'labels_') {
+        const current = recipe.labels_ ?? []
+        if (current.includes(event.value)) continue
+        updated = { ...recipe, labels_: [...current, event.value] }
+      } else {
+        updated = { ...recipe, recipe_type_: event.value as 'dish' | 'preparation' }
+      }
+      this.kitchenState.saveRecipe(updated).subscribe({ next: () => {}, error: () => {} })
     }
   }
 

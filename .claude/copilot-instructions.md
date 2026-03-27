@@ -27,7 +27,7 @@ description: Single source of truth for all project rules, standards, and skill/
 
 - **Plan & execute** `[SHARED]`: User presents architectural brief → invoke `/plan-implementation` command (read-only codebase scan, produce plan, wait for approval). On approval, invoke `/execute-it` command (full autonomous implementation).
 - **Save plan** `[SHARED]`: Message contains "save" + one of "it / that / this / plan" (case-insensitive) while a plan is in context → read `.claude/skills/save-plan/SKILL.md` and follow it.
-- **Commit / push to GitHub** `[SHARED]`: User says "commit", "push", "commit to github", or uses `/commit-to-github` → read `.claude/skills/commit-to-github/SKILL.md` and follow all phases in order. No git writes until user approves the visual tree in chat. **Context-aware**: skill auto-detects main-repo vs worktree via `git rev-parse --git-dir`. **Argument shortcuts**: `c` = checkpoint; `s` = ship auto-detect; `sl` = force ship-light; `sf` = force ship-full. **Do NOT trigger for general "save" or file update requests.**
+- **Git operations** `[SHARED]`: User mentions "commit", "push", "merge", "PR", "branch", git status, or any git workflow (but NOT "ship", "done", "wrap up", "end session", "handoff" — those route to session-end skills above) → read `.claude/agents/git-agent.md` and follow it. No git writes until user approves the visual plan.
 - **CSS/SCSS** `[SHARED]`: Before creating or editing any `.scss`/`.css` in `src/` → read `.claude/skills/cssLayer/SKILL.md` and apply it.
 - **Add recipe/dish** `[SHARED]`: User adds recipe from image or text → read `.claude/skills/add-recipe/SKILL.md`; Step 3 confirmation required before any write.
 - **Auth, logging, routes, CRUD** `[SHARED]`: Read `.claude/skills/auth-and-logging/SKILL.md` when touching auth, persistence, HTTP, or critical operations.
@@ -45,7 +45,11 @@ description: Single source of truth for all project rules, standards, and skill/
 - **Lucide icons** `[SHARED]`: Before adding or editing `<lucide-icon name="...">` → read `.claude/standards-domain.md` Lucide section.
 - **Hebrew canonical values** `[SHARED]`: When adding or editing canonical value flows → read `.claude/standards-domain.md` Hebrew sections.
 - **Deploy to GitHub Pages** `[SHARED]`: User says deploy, publish app, GitHub Pages → read `.claude/skills/deploy-github-pages/SKILL.md`. Run only on explicit request.
-- **UI Inspector** `[CC]`: Manual only — invoke via `/ui-inspector` slash command only when Playwright MCP is confirmed active (`/mcp` to verify). Never auto-triggered by agents mid-task. If visual QA is needed after a task, agents will flag it to the user. Port resolution: read `.worktree-port` in active worktree; if on main with no worktree: port = `4200`, worktreeRoot = detect from `.worktree-root` file, fallback to current working directory.
+- **UI Inspector** `[CC]`: Manual only — invoke via `/ui-inspector` slash command only when Playwright MCP is confirmed active (`/mcp` to verify). Never auto-triggered by agents mid-task. If visual QA is needed after a task, agents will flag it to the user.
+  Before invoking, answer: "Is there genuine visual ambiguity that CANNOT be resolved from static code?" If NO — known CSS fix, missing property, wrong value — apply the fix directly with Edit first. Use inspector for before/after screenshots only. Never embed fix instructions into the inspector prompt.
+  Good use: unknown layout breakage, z-index stacking, responsive issues, "something looks wrong but I can't find it."
+  Bad use: overflow clip already found in SCSS, missing box-shadow, wrong color — deterministic fixes, apply directly.
+  Port resolution: read `.worktree-port` in active worktree; if on main with no worktree: port = 4200, worktreeRoot = detect from `.worktree-root` file, fallback to current working directory.
 - **Angular Pipes & Directives** `[SHARED]`: Before creating or refactoring any Angular Pipe or Directive → read `.claude/skills/angular-pipe-logic/SKILL.md`.
 - **Crypto / token management** `[SHARED]`: Before creating or modifying `auth-crypto.ts` → read `.claude/skills/auth-crypto/SKILL.md`. Security Officer invocation is mandatory at completion.
 - **Global doc finalization** `[SHARED]`: User says "finalize docs" or "global audit" → read `.claude/skills/finalize-docs/SKILL.md`.

@@ -16,7 +16,11 @@
   </ng-container>
 
   <ng-container shell-actions>
-    <app-selection-bar [selectionState]="selection" (bulkDelete)="onBulkDeleteSelected($event)" />
+    <app-selection-bar
+      [selectionState]="selection"
+      [editableFields]="editableFields_()"
+      (bulkDelete)="onBulkDeleteSelected($event)"
+      (bulkEdit)="onBulkEdit($event)" />
     <button type="button" class="c-btn-primary" (click)="onAddRecipe()"
       [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
       <lucide-icon name="plus" [size]="18"></lucide-icon>
@@ -32,10 +36,10 @@
       <div class="col-type c-grid-header-cell c-sortable-header" carouselHeaderColumn label="type" (click)="setSort('type')" (keydown.enter)="setSort('type')" (keydown.space)="$event.preventDefault(); setSort('type')" role="button" tabindex="0">
         {{ 'type' | translatePipe }}
       </div>
-      <div class="col-labels c-grid-header-cell c-sortable-header c-dense-chip-col" carouselHeaderColumn label="labels" (click)="toggleLabelsExpandAll()" (keydown.enter)="toggleLabelsExpandAll()" (keydown.space)="$event.preventDefault(); toggleLabelsExpandAll()" role="button" tabindex="0">
+      <div class="col-labels c-grid-header-cell c-sortable-header c-dense-chip-col" carouselHeaderColumn label="labels" (click)="labelsExpand.toggleAll()" (keydown.enter)="labelsExpand.toggleAll()" (keydown.space)="$event.preventDefault(); labelsExpand.toggleAll()" role="button" tabindex="0">
         {{ 'labels' | translatePipe }}
       </div>
-      <div class="col-allergens c-grid-header-cell c-sortable-header c-dense-chip-col" carouselHeaderColumn label="allergens" (click)="toggleAllergenExpandAll()" (keydown.enter)="toggleAllergenExpandAll()" (keydown.space)="$event.preventDefault(); toggleAllergenExpandAll()" role="button" tabindex="0">
+      <div class="col-allergens c-grid-header-cell c-sortable-header c-dense-chip-col" carouselHeaderColumn label="allergens" (click)="allergenExpand.toggleAll()" (keydown.enter)="allergenExpand.toggleAll()" (keydown.space)="$event.preventDefault(); allergenExpand.toggleAll()" role="button" tabindex="0">
         {{ 'allergens' | translatePipe }}
       </div>
       @if (!hideDateColumn_()) {
@@ -72,12 +76,12 @@
           <div class="col-type c-list-body-cell" cellCarouselSlide [label]="'type' | translatePipe">{{ (isRecipeDish(recipe) ? 'dish' : 'preparation') | translatePipe }}</div>
           <div class="col-labels c-list-body-cell c-dense-chip-col" cellCarouselSlide [label]="'labels' | translatePipe">
             @if (getAllRecipeLabels(recipe).length) {
-              <div class="labels-btn-wrapper" [class.labels-expanded-open]="isLabelsCellExpanded(recipe._id)" (click)="toggleLabelsPopover(recipe._id); $event.stopPropagation()" (clickOutside)="closeLabelsView($event)" role="button" tabindex="0" (keydown.enter)="toggleLabelsPopover(recipe._id)" (keydown.space)="$event.preventDefault(); toggleLabelsPopover(recipe._id)">
+              <div class="labels-btn-wrapper" [class.labels-expanded-open]="labelsExpand.isExpanded(recipe._id)" (click)="labelsExpand.toggleOne(recipe._id); $event.stopPropagation()" (clickOutside)="closeLabelsView($event)" role="button" tabindex="0" (keydown.enter)="labelsExpand.toggleOne(recipe._id)" (keydown.space)="$event.preventDefault(); labelsExpand.toggleOne(recipe._id)">
                 <button type="button" class="labels-btn">
                   <lucide-icon name="tag" [size]="16"></lucide-icon>
                   {{ getAllRecipeLabels(recipe).length }}
                 </button>
-                @if (isLabelsCellExpanded(recipe._id)) {
+                @if (labelsExpand.isExpanded(recipe._id)) {
                   <div class="c-dense-chip-grid">
                     @for (label of getAllRecipeLabels(recipe); track label) {
                       <span class="label-chip" [style.background-color]="getLabelColor(label)">{{ label | translatePipe }}</span>
@@ -91,12 +95,12 @@
           </div>
           <div class="col-allergens c-list-body-cell c-dense-chip-col" cellCarouselSlide [label]="'allergens' | translatePipe">
             @if (getRecipeAllergens(recipe).length) {
-              <div class="allergen-btn-wrapper" [class.allergen-expanded-open]="isAllergenCellExpanded(recipe._id)" (clickOutside)="closeAllergenView($event)">
-                <button type="button" class="allergen-btn" (click)="toggleAllergenPopover(recipe._id)">
+              <div class="allergen-btn-wrapper" [class.allergen-expanded-open]="allergenExpand.isExpanded(recipe._id)" (clickOutside)="closeAllergenView($event)">
+                <button type="button" class="allergen-btn" (click)="allergenExpand.toggleOne(recipe._id)">
                   <lucide-icon name="shield-alert" [size]="16"></lucide-icon>
                   {{ getRecipeAllergens(recipe).length }}
                 </button>
-                @if (isAllergenCellExpanded(recipe._id)) {
+                @if (allergenExpand.isExpanded(recipe._id)) {
                   <div class="c-dense-chip-grid">
                     @for (a of getRecipeAllergens(recipe); track a) {
                       <span class="allergen-pill">{{ a | translatePipe }}</span>

@@ -30,7 +30,7 @@ See `copilot-instructions.md §0.4` for Task Force sizing and standard sequence.
 See `copilot-instructions.md §0.5` for model routing (Efficiency Tiers).
 
 ## Core Skills (`.claude/skills/`)
-- **GitHub**: `commit-to-github`, `github-sync`, `worktree-setup`, `deploy-github-pages`
+- **GitHub**: `git-agent` (`.claude/agents/git-agent.md`), `github-sync`, `worktree-setup`, `deploy-github-pages`
 - **Development**: `add-recipe`, `cssLayer`, `angularComponentStructure`, `elegant-fix`
 - **Lifecycle**: `save-plan`, `session-handoff`, `worktree-session-end`, `techdebt`, `update-docs`
 
@@ -55,4 +55,4 @@ All skill triggers defined in `copilot-instructions.md §0`.
 After completing any plan execution:
 1. Run `ng build` or full `getDiagnostics` — mandatory, no exceptions. Do not skip because changes look "mechanical" or "safe".
 2. If build fails → fix before reporting completion.
-3. Do NOT run the full test suite here — tests run only in commit-to-github Phase 0 or on explicit user request.
+3. Do NOT run the full test suite here — run tests only on explicit user request.
