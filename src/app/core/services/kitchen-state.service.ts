@@ -5,6 +5,7 @@ import { Product } from '../models/product.model';
 import { Recipe } from '../models/recipe.model';
 import { Supplier } from '@models/supplier.model';
 import { UserMsgService } from './user-msg.service';
+import { UserService } from './user.service';
 import { ProductDataService } from './product-data.service';
 import { RecipeDataService } from './recipe-data.service';
 import { DishDataService } from './dish-data.service';
@@ -21,6 +22,7 @@ export class KitchenStateService {
   private dishDataService = inject(DishDataService);
   private supplierDataService = inject(SupplierDataService);
   private userMsgService = inject(UserMsgService);
+  private userService = inject(UserService);
   private activityLogService = inject(ActivityLogService);
   private versionHistoryService = inject(VersionHistoryService);
 
@@ -31,6 +33,11 @@ export class KitchenStateService {
     ...this.recipeDataService.allRecipes_(),
     ...this.dishDataService.allDishes_()
   ]);
+  /** Recipes visible to the current user — hides entries where the user's id is in hiddenBy[]. */
+  visibleRecipes_ = computed(() => {
+    const userId = this.userService.user_()?._id;
+    return this.recipes_().filter(r => !userId || !(r.hiddenBy ?? []).includes(userId));
+  });
   suppliers_ = computed(() => this.supplierDataService.allSuppliers_());
   selectedProductId_ = signal<string | null>(null);
   isDrawerOpen_ = signal<boolean>(false);
@@ -265,6 +272,44 @@ export class KitchenStateService {
         const errorMsg = isDish ? 'שגיאה במחיקת המנה' : 'שגיאה במחיקת המתכון';
         this.userMsgService.onSetErrorMsg(errorMsg);
         return throwError(() => new Error(errorMsg));
+      })
+    );
+  }
+
+  hideRecipe(recipe: Recipe): Observable<Recipe> {
+    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length);
+    const operation$ = isDish
+      ? from(this.dishDataService.hideDish(recipe._id))
+      : from(this.recipeDataService.hideRecipe(recipe._id));
+    return operation$.pipe(
+      catchError((err: unknown) => {
+        const msg = err instanceof Error && err.message === 'NOT_AUTHENTICATED'
+          ? 'יש להתחבר כדי להסתיר מתכון'
+          : 'שגיאה בהסתרת המתכון';
+        this.userMsgService.onSetErrorMsg(msg);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  permanentlyDeleteRecipe(recipe: Recipe): Observable<void> {
+    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length);
+    const operation$ = isDish
+      ? from(this.dishDataService.permanentlyDeleteDish(recipe._id))
+      : from(this.recipeDataService.permanentlyDeleteRecipe(recipe._id));
+    return operation$.pipe(
+      tap(() => {
+        this.userMsgService.onSetSuccessMsg(isDish ? 'המנה נמחקה לצמיתות' : 'המתכון נמחק לצמיתות');
+        this.activityLogService.recordActivity({
+          action: 'deleted',
+          entityType: isDish ? 'dish' : 'recipe',
+          entityId: recipe._id,
+          entityName: recipe.name_hebrew,
+        });
+      }),
+      catchError(() => {
+        this.userMsgService.onSetErrorMsg('שגיאה במחיקה הקבועה');
+        return throwError(() => new Error('permanentDelete failed'));
       })
     );
   }
