@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core'
 import { StorageService } from './async-storage.service'
 import { LoggingService } from './logging.service'
+import { UserService } from './user.service'
 import { Recipe } from '../models/recipe.model'
 
 const ENTITY = 'RECIPE_LIST'
@@ -10,6 +11,7 @@ const TRASH_KEY = 'TRASH_RECIPES'
 export class RecipeDataService {
   private storage = inject(StorageService)
   private logging = inject(LoggingService)
+  private userService = inject(UserService)
 
   private recipesStore_ = signal<Recipe[]>([]);
   readonly allRecipes_ = this.recipesStore_.asReadonly();
@@ -34,7 +36,8 @@ export class RecipeDataService {
 
   async addRecipe(newRecipe: Omit<Recipe, '_id'>): Promise<Recipe> {
     const now = Date.now()
-    const toCreate = { ...newRecipe, addedAt_: now, updatedAt_: now } as Recipe
+    const userId = this.userService.user_()?._id
+    const toCreate = { ...newRecipe, addedAt_: now, updatedAt_: now, ...(userId ? { createdBy: userId } : {}) } as Recipe
     const saved = await this.storage.post<Recipe>(ENTITY, toCreate)
     this.recipesStore_.update(recipes => [...recipes, saved])
     this.logging.info({ event: 'crud.recipe.create', message: 'Recipe created', context: { entityType: ENTITY, id: saved._id } })
@@ -54,6 +57,23 @@ export class RecipeDataService {
     )
     this.logging.info({ event: 'crud.recipe.update', message: 'Recipe updated', context: { entityType: ENTITY, id: updated._id } })
     return updated
+  }
+
+  async hideRecipe(_id: string): Promise<Recipe> {
+    const userId = this.userService.user_()?._id
+    if (!userId) throw new Error('NOT_AUTHENTICATED')
+    const recipe = await this.storage.get<Recipe>(ENTITY, _id)
+    const hiddenBy = [...(recipe.hiddenBy ?? []), userId]
+    const updated = await this.storage.put<Recipe>(ENTITY, { ...recipe, hiddenBy })
+    this.recipesStore_.update(recipes => recipes.map(r => (r._id === _id ? updated : r)))
+    this.logging.info({ event: 'crud.recipe.hide', message: 'Recipe hidden by user', context: { entityType: ENTITY, id: _id, userId } })
+    return updated
+  }
+
+  async permanentlyDeleteRecipe(_id: string): Promise<void> {
+    await this.storage.remove(ENTITY, _id)
+    this.recipesStore_.update(recipes => recipes.filter(r => r._id !== _id))
+    this.logging.info({ event: 'crud.recipe.hardDelete', message: 'Recipe permanently deleted', context: { entityType: ENTITY, id: _id } })
   }
 
   async deleteRecipe(_id: string): Promise<void> {
