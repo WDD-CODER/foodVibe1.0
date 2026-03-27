@@ -314,6 +314,7 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
 }
 
 .add-row-btn {
+  gap: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;

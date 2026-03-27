@@ -90,6 +90,13 @@
       z-index: 1;
       overflow: visible;
 
+      // Fix 3: primary color background matching .c-btn-primary accent
+      &.border-top {
+        background: var(--color-primary-soft);
+        border-radius: var(--radius-md);
+        padding: 1.25rem;
+      }
+
       .section-header {
         grid-column: 1 / -1;
       }
@@ -123,9 +130,21 @@
       font-weight: 600;
       color: var(--color-text-secondary);
       height: 24px;
+      text-align: center;
 
       &.danger-label {
         color: var(--color-danger);
+      }
+    }
+
+    // Fix 2: remove spinner arrows from number inputs in regular form groups
+    input[type="number"] {
+      -moz-appearance: textfield;
+
+      &::-webkit-inner-spin-button,
+      &::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
       }
     }
 
@@ -219,10 +238,11 @@
 
     .price-override-wrapper {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 0.5rem;
       margin-inline-end: 1rem;
-      padding-inline-end: 1rem;
+      padding-inline-end: 0.5rem;
       border-inline-end: 1px solid var(--border-default);
 
       .price-override-label {
@@ -252,33 +272,31 @@
       }
     }
 
-    .c-icon-btn.danger {
-      opacity: 0;
-      transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-
-    .scaling-row:hover .c-icon-btn.danger {
-      opacity: 1;
-
-      &:hover {
-        transform: scale(1.1);
-      }
+    .scaling-row .c-icon-btn.danger:hover {
+      transform: scale(1.1);
     }
 
     .scaling-row {
-      display: grid; // S
-      grid-template-columns:minmax(20%, 100px) auto auto  auto  auto;
+      // Constrain cols 1 and 4 via minmax so the delete button never overflows in RTL
+      display: grid;
+      grid-template-columns: minmax(90px, 9rem) auto minmax(90px, 1fr) minmax(auto, 12rem) min-content;
       align-items: center;
       gap: 0.75rem;
       margin-block-start: 0.5rem;
+      overflow: visible;
+
+      // Fix 4a: app-custom-select min-width only; grid column handles the max
+      app-custom-select {
+        min-width: 90px;
+      }
 
       select {
         width: auto;
-        min-width: 120px;
-        max-width: 150px;
-        //   padding: 0.4rem 2rem 0.4rem 0.75rem; // Space for arrow
+        min-width: 90px;
+        max-width: none;
       }
 
+      // Fix 4b: other inputs also size to content
       input {
         width: 70px;
         text-align: center;
@@ -299,18 +317,27 @@
         width: 1.25rem;
         height: 1.25rem;
       }
+
+      // Fix 1: trash button always visible, never pushed off-screen
+      .c-icon-btn.danger {
+        flex-shrink: 0;
+        min-width: 2rem;
+      }
     }
   }
 
   .form-actions {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 1rem;
     border-block-start: 1px solid var(--border-default);
     padding-block-start: 1.5rem;
 
-    // Button Base Styles
+    // Fix 6: back and submit buttons always share equal width
     button {
       display: flex;
+      min-width: 10rem;
+      justify-content: center;
       gap: 0.5rem;
       padding: 0.6rem 1.5rem;
       border-radius: var(--radius-sm);
@@ -420,8 +447,15 @@
       grid-template-columns: 1fr;
     }
 
-    .scaling-row {
+    // Fix 1 & 4b: match base selector depth (.scaling-box .scaling-row) so media query wins specificity
+    .scaling-box .scaling-row {
+      display: flex;
       flex-wrap: wrap;
+      align-items: center;
+
+      .c-icon-btn.danger {
+        margin-inline-start: auto;
+      }
     }
   }
 
@@ -440,13 +474,7 @@
     }
 
     .form-actions {
-      flex-direction: column;
-      gap: 0.5rem;
-
-      button {
-        width: 100%;
-        justify-content: center;
-      }
+      gap: 0.75rem;
     }
   }
 }

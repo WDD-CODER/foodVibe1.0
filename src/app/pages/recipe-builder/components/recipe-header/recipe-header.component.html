@@ -31,6 +31,7 @@
                     [unit]="yield.primaryUnitLabel_()"
                     [unitOptions]="yield.primaryUnitOptions_()"
                     [minAmount]="yield.currentRecipeTypeDisplay_() === 'dish' ? 1 : 0"
+                    [stepOptions]="{ unit: yield.primaryUnitLabel_() }"
                     (valueChange)="yield.onScalingChipAmountChange($event)"
                     (unitChange)="yield.setPrimaryUnit($event)"
                     (createUnit)="onCreateUnit()" />
@@ -44,6 +45,7 @@
                     [unit]="group.get('unit')?.value ?? ''"
                     [unitOptions]="yield.getSecondaryUnitOptions(chipIdx)"
                     [showRemove]="true"
+                    [stepOptions]="{ unit: group.get('unit')?.value }"
                     (valueChange)="yield.onSecondaryScalingChipAmountChange(chipIdx, $event)"
                     (unitChange)="changeSecondaryUnitWrapper(chipIdx, $event)"
                     (createUnit)="onCreateUnit(chipIdx)"
