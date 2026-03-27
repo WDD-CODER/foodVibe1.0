@@ -7,8 +7,7 @@
     flex-direction: column;
     align-items: stretch;
 
-    inline-size: fit-content;
-    min-inline-size: 14rem;
+    min-inline-size: 22rem;
 
     border: 1px solid var(--border-glass);
     border-radius: var(--radius-lg);
@@ -64,27 +63,7 @@
     justify-content: center;
     gap: 0.25rem;
 
-    color: var(--color-text-main);
-    font-size: 0.8125rem;
-    font-weight: 500;
     white-space: nowrap;
-
-    min-block-size: 1.75rem;
-    padding-block: 0.25rem;
-    padding-inline: 0.625rem;
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-
-    background: var(--bg-glass);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 1px 2px rgba(0, 0, 0, 0.12);
-    transition: border-color 0.2s ease, background 0.15s ease, color 0.15s ease,
-      box-shadow 0.15s ease;
-
-    &:hover:not(:disabled) {
-      border-color: var(--border-strong);
-      background: var(--bg-glass-hover);
-    }
 
     &.selection-bar__btn--danger:hover {
       color: var(--color-danger);
@@ -116,20 +95,6 @@
     block-size: 1.75rem;
     inline-size: 1.75rem;
 
-    color: var(--color-text);
-
     padding: 0;
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-
-    background: var(--bg-glass);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 1px 2px rgba(0, 0, 0, 0.12);
-    transition: border-color 0.2s ease, background 0.15s ease, box-shadow 0.15s ease;
-
-    &:hover {
-      border-color: var(--border-strong);
-      background: var(--bg-glass-hover);
-    }
   }
 }
