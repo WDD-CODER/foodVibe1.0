@@ -52,9 +52,13 @@ export class RecipeBookListComponent {
   private readonly recipeCostService = inject(RecipeCostService);
   private readonly translationService = inject(TranslationService);
   private readonly metadataRegistry = inject(MetadataRegistryService);
-  protected readonly isLoggedIn = inject(UserService).isLoggedIn;
+  private readonly userService = inject(UserService);
+  protected readonly isLoggedIn = this.userService.isLoggedIn;
   private readonly requireAuthService = inject(RequireAuthService);
   private readonly userMsg = inject(UserMsgService);
+
+  protected readonly currentUserId_ = computed(() => this.userService.user_()?._id ?? null);
+  protected readonly isAdmin_ = computed(() => this.userService.user_()?.role === 'admin');
 
   protected activeFilters_ = signal<Record<string, string[]>>({});
   protected searchQuery_ = signal<string>('');
@@ -150,6 +154,8 @@ export class RecipeBookListComponent {
   protected selectedProductIds_ = signal<string[]>([]);
   protected historyFor_ = signal<{ entityType: VersionEntityType; entityId: string; entityName: string } | null>(null);
   protected deletingId_ = signal<string | null>(null);
+  protected hidingId_ = signal<string | null>(null);
+  protected permanentDeletingId_ = signal<string | null>(null);
   protected duplicatingId_ = signal<string | null>(null);
   protected carouselHeaderIndex_ = signal(0);
 
@@ -197,7 +203,7 @@ export class RecipeBookListComponent {
   }
 
   protected filterCategories_ = computed(() => {
-    const recipes = this.kitchenState.recipes_();
+    const recipes = this.kitchenState.visibleRecipes_();
     const filters = this.activeFilters_();
     const categories: Record<string, Set<string>> = {};
 
@@ -262,7 +268,7 @@ export class RecipeBookListComponent {
   });
 
   protected filteredRecipes_ = computed(() => {
-    let recipes = this.kitchenState.recipes_();
+    let recipes = this.kitchenState.visibleRecipes_();
     const filters = this.activeFilters_();
     const search = this.searchQuery_().trim().toLowerCase();
     const sortBy = this.sortBy_();
@@ -335,7 +341,7 @@ export class RecipeBookListComponent {
     this.filteredRecipes_().map(r => r._id ?? '').filter(Boolean)
   );
 
-  protected isEmptyList_ = computed(() => this.kitchenState.recipes_().length === 0);
+  protected isEmptyList_ = computed(() => this.kitchenState.visibleRecipes_().length === 0);
 
   protected activeCostTooltipRecipe_ = computed(() => {
     const id = this.hoveredCostRecipeId_() ?? this.tappedCostRecipeId_();
@@ -618,6 +624,26 @@ export class RecipeBookListComponent {
       this.kitchenState.deleteRecipe(recipe).subscribe({
         next: () => { this.deletingId_.set(null); },
         error: () => { this.deletingId_.set(null); }
+      });
+    }
+  }
+
+  protected onHideRecipe(recipe: Recipe): void {
+    if (!this.requireAuthService.requireAuth()) return;
+    this.hidingId_.set(recipe._id);
+    this.kitchenState.hideRecipe(recipe).subscribe({
+      next: () => { this.hidingId_.set(null); },
+      error: () => { this.hidingId_.set(null); }
+    });
+  }
+
+  protected onPermanentlyDeleteRecipe(recipe: Recipe): void {
+    if (!this.requireAuthService.requireAuth()) return;
+    if (confirm('מחיקה קבועה — לא ניתן לשחזר. להמשיך?')) {
+      this.permanentDeletingId_.set(recipe._id);
+      this.kitchenState.permanentlyDeleteRecipe(recipe).subscribe({
+        next: () => { this.permanentDeletingId_.set(null); },
+        error: () => { this.permanentDeletingId_.set(null); }
       });
     }
   }
