@@ -1,5 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { StorageService } from './async-storage.service';
+import { UserService } from './user.service';
+import { LoggingService } from './logging.service';
 import { Recipe, PrepCategory } from '../models/recipe.model';
 
 const ENTITY = 'DISH_LIST';
@@ -8,6 +10,8 @@ const TRASH_KEY = 'TRASH_DISHES';
 @Injectable({ providedIn: 'root' })
 export class DishDataService {
   private storage = inject(StorageService);
+  private userService = inject(UserService);
+  private logging = inject(LoggingService);
 
   private dishesStore_ = signal<Recipe[]>([]);
   readonly allDishes_ = this.dishesStore_.asReadonly();
@@ -43,7 +47,8 @@ export class DishDataService {
 
   async addDish(newDish: Omit<Recipe, '_id'>): Promise<Recipe> {
     const now = Date.now();
-    const toCreate = { ...newDish, addedAt_: now, updatedAt_: now } as Recipe;
+    const userId = this.userService.user_()?._id;
+    const toCreate = { ...newDish, addedAt_: now, updatedAt_: now, ...(userId ? { createdBy: userId } : {}) } as Recipe;
     const saved = await this.storage.post<Recipe>(ENTITY, toCreate);
     this.dishesStore_.update(dishes => [...dishes, saved]);
     return saved;
@@ -55,12 +60,30 @@ export class DishDataService {
       ...dish,
       addedAt_: dish.addedAt_ ?? existing?.addedAt_,
       updatedAt_: Date.now(),
+      createdBy: existing?.createdBy ?? dish.createdBy,
+      hiddenBy: existing?.hiddenBy ?? dish.hiddenBy,
     };
     const updated = await this.storage.put<Recipe>(ENTITY, toSave);
     this.dishesStore_.update(dishes =>
       dishes.map(d => (d._id === updated._id ? updated : d))
     );
     return updated;
+  }
+
+  async hideDish(_id: string): Promise<Recipe> {
+    const userId = this.userService.user_()?._id;
+    if (!userId) throw new Error('NOT_AUTHENTICATED');
+    const dish = await this.storage.get<Recipe>(ENTITY, _id);
+    const hiddenBy = [...new Set([...(dish.hiddenBy ?? []), userId])];
+    const updated = await this.storage.put<Recipe>(ENTITY, { ...dish, hiddenBy });
+    this.dishesStore_.update(dishes => dishes.map(d => (d._id === _id ? updated : d)));
+    return updated;
+  }
+
+  async permanentlyDeleteDish(_id: string): Promise<void> {
+    await this.storage.remove(ENTITY, _id);
+    this.dishesStore_.update(dishes => dishes.filter(d => d._id !== _id));
+    this.logging.info({ event: 'crud.dish.hardDelete', message: 'Dish permanently deleted', context: { entityType: ENTITY, id: _id } });
   }
 
   async deleteDish(_id: string): Promise<void> {
