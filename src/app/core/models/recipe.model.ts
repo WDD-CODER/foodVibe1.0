@@ -58,4 +58,8 @@ export interface Recipe {
   addedAt_?: number;
   /** Epoch ms when the recipe/dish was last updated (set on create and on every update) */
   updatedAt_?: number;
+  /** _id of the user who created this recipe/dish */
+  createdBy?: string;
+  /** List of user _ids who have hidden this recipe from their view (soft-delete per user) */
+  hiddenBy?: string[];
 }
