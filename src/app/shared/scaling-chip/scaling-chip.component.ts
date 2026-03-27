@@ -12,6 +12,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
 import { CounterComponent } from 'src/app/shared/counter/counter.component';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
+import { QuantityStepOptions } from 'src/app/core/utils/quantity-step.util';
 import { LucideAngularModule } from 'lucide-angular';
 
 const ADD_NEW_UNIT_VALUE = '__add_unit__';
@@ -35,6 +36,7 @@ export class ScalingChipComponent implements OnDestroy {
   unit = input.required<string>();
   unitOptions = input.required<{ value: string; label: string }[]>();
   minAmount = input<number>(0);
+  stepOptions = input<QuantityStepOptions | undefined>(undefined);
   variant = input<'primary' | 'secondary'>('primary');
   showRemove = input<boolean>(false);
 

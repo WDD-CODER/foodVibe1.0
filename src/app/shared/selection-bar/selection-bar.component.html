@@ -1,8 +1,46 @@
 @if (selectionState().selectionMode()) {
-  <button type="button" class="c-btn-ghost" (click)="selectionState().clear()">
-    {{ 'clear_selection' | translatePipe }}
-  </button>
-  <button type="button" class="c-btn-ghost danger" (click)="onBulkDelete()">
-    {{ 'remove_selected' | translatePipe }}
-  </button>
+  <div class="selection-bar">
+    <header class="selection-bar__header">
+      <span class="selection-bar__count">{{ selectionState().selectedIds().size }}</span>
+      <span class="selection-bar__count-label">{{ 'items_selected' | translatePipe }}</span>
+    </header>
+
+    <div class="selection-bar__actions">
+      <button type="button" class="selection-bar__btn" (click)="selectionState().clear()">
+        <lucide-icon name="x" [size]="16" />
+        {{ 'clear' | translatePipe }}
+      </button>
+
+      <button type="button" class="selection-bar__btn selection-bar__btn--danger" (click)="onBulkDelete()">
+        <lucide-icon name="trash-2" [size]="16" />
+        {{ 'delete' | translatePipe }}
+      </button>
+
+      @if (editableFields().length > 0) {
+        @if (!activeField_()) {
+          <app-custom-select
+            [options]="fieldOptions_()"
+            [placeholder]="'change_field'"
+            [translateLabels]="true"
+            [compact]="true"
+            (valueChange)="onFieldSelect($event)" />
+        } @else {
+          <div class="selection-bar__edit-flow">
+            <span class="selection-bar__edit-label">{{ activeField_()!.label | translatePipe }}:</span>
+            <app-custom-select
+              [options]="activeField_()!.options"
+              [placeholder]="'select_value'"
+              [translateLabels]="true"
+              [addNewValue]="activeField_()!.addNewValue ?? ''"
+              [typeToFilter]="true"
+              [compact]="true"
+              (valueChange)="onValueSelect($event)" />
+            <button type="button" class="selection-bar__btn--cancel" (click)="onCancelEdit()">
+              <lucide-icon name="x" [size]="14" />
+            </button>
+          </div>
+        }
+      }
+    </div>
+  </div>
 }
