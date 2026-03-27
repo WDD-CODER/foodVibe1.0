@@ -4,27 +4,7 @@ import { UnitRegistryService } from './unit-registry.service';
 import { Recipe } from '../models/recipe.model';
 import { Product } from '../models/product.model';
 import { Ingredient } from '../models/ingredient.model';
-
-const MAX_RECURSION_DEPTH = 5;
-
-/** Normalizes unit keys for conversion lookup (e.g. 'gr' -> 'gram'). Includes Hebrew display names. */
-const UNIT_ALIASES: Record<string, string> = {
-  gr: 'gram',
-  grams: 'gram',
-  g: 'gram',
-  kg: 'kg',
-  'ק"ג': 'kg',
-  liter: 'liter',
-  l: 'liter',
-  ml: 'ml',
-  unit: 'unit'
-};
-
-/** Units that have a direct conversion to grams in the registry (mass units). */
-const MASS_UNITS = new Set(['gram', 'gr', 'grams', 'g', 'kg']);
-
-/** Units that can be used for weight or volume total (registry fallback). */
-const VOLUME_OR_WEIGHT_KEYS = new Set(['gram', 'gr', 'grams', 'g', 'kg', 'liter', 'l', 'ml']);
+import { MAX_RECURSION_DEPTH, UNIT_ALIASES, MASS_UNITS, VOLUME_OR_WEIGHT_KEYS } from '../utils/recipe-cost.constants';
 
 export type IngredientWeightRow = {
   amount_net?: number;
