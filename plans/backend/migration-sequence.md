@@ -31,6 +31,13 @@ without disrupting any active user's data.
 
 **Goal:** Export every user's localStorage data into Atlas so Phase 3 is lossless.
 
+> **SECURITY WARNING — migration-dump.json**
+> The dump produced by the export script contains PBKDF2 password hashes from `signed-users-db`.
+> - **Never commit** `migration-dump.json` to git — it is in `.gitignore`
+> - **Delete** the dump file from your local machine immediately after seeding
+> - **Never share** the dump file — treat it as a credentials file
+> - Run the seed script with `--confirm-seed` flag only (see `scripts/seed-from-dump.js`)
+
 ### 2a. Export script (browser console, run once per user)
 
 Open the app, open DevTools console, run:
@@ -119,6 +126,12 @@ Existing `_id` values are preserved exactly, so no Angular code needs to change.
 6. Push to `main` → GitHub Actions deploys to GitHub Pages.
 7. Run smoke tests from `plans/backend/deployment.md § 4`.
 8. Monitor Atlas → Charts for first 24 hours.
+9. Verify all security hardening from Plan 217 is active:
+   - GET /api/v1/data/:type returns 401 without JWT
+   - POST /api/v1/auth/login returns 429 after 10 failed attempts
+   - POST with body > 2MB returns 413
+   - npm audit in server/ reports zero critical/high vulnerabilities
+   - server/package-lock.json is committed to git
 
 ### Rollback plan
 
