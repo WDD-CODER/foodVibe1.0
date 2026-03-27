@@ -1,0 +1,18 @@
+{
+  "name": "foodvibe-server",
+  "version": "1.0.0",
+  "description": "foodVibe Node/Express/MongoDB backend",
+  "main": "index.js",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.2"
+  }
+}

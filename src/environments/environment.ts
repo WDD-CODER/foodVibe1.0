@@ -3,5 +3,6 @@ export const environment = {
   apiUrl: '',
   authApiUrl: '',
   useBackendAuth: false,
+  useBackend: false,
   logServerUrl: 'http://localhost:9765'
 }
