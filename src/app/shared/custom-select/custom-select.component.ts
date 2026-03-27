@@ -16,6 +16,7 @@ import { ClickOutSideDirective } from '../../core/directives/click-out-side';
 import { ScrollableDropdownComponent } from '../scrollable-dropdown/scrollable-dropdown.component';
 import { LucideAngularModule } from 'lucide-angular';
 import { TranslationService } from '../../core/services/translation.service';
+import { dedupeAndFilterOptions } from '../../core/utils/dedupe-select-options.util';
 
 @Component({
   selector: 'app-custom-select',
@@ -93,32 +94,10 @@ export class CustomSelectComponent implements ControlValueAccessor {
     const addNewOpt = opts.find((o) => o.value === addNewVal);
     const rest = addNewOpt ? opts.filter((o) => o.value !== addNewVal) : opts;
     const currentValue = this._value();
-    let baseList: { value: string; label: string }[];
-    if (!raw) {
-      baseList = rest;
-    } else {
-      const qLower = raw.toLowerCase();
-      const isHebrew = /[\u0590-\u05FF]/.test(raw);
-      const isLatin = /[a-zA-Z]/.test(raw);
-      baseList = rest.filter((opt) => {
-        const display = this.translateLabels() ? this.translationService.translate(opt.label) : opt.label;
-        if (isHebrew) return display.startsWith(raw);
-        if (isLatin) return /[a-zA-Z]/.test(display) && display.toLowerCase().startsWith(qLower);
-        return display.toLowerCase().startsWith(qLower);
-      });
-    }
-    const deduped: { value: string; label: string }[] = [];
-    const seenDisplay = new Map<string, number>();
-    for (const opt of baseList) {
-      const display = this.translateLabels() ? this.translationService.translate(opt.label) : opt.label;
-      const existingIdx = seenDisplay.get(display);
-      if (existingIdx !== undefined) {
-        if (opt.value === currentValue) deduped[existingIdx] = opt;
-      } else {
-        seenDisplay.set(display, deduped.length);
-        deduped.push(opt);
-      }
-    }
+    const deduped = dedupeAndFilterOptions(
+      rest, raw, currentValue,
+      (k) => this.translateLabels() ? this.translationService.translate(k) : k
+    );
     return addNewOpt ? [...deduped, addNewOpt] : deduped;
   });
 

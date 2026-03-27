@@ -15,6 +15,7 @@
   <app-counter
     [value]="value()"
     [min]="minAmount()"
+    [stepOptions]="stepOptions()"
     (valueChange)="valueChange.emit($event)" />
   @if (showRemove()) {
     <button
