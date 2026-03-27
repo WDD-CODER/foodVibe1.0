@@ -25,7 +25,7 @@ description: Git workflow, branching rules, permission syntax, and GitHub MCP pa
 | Read PR body, diff, reviews | `mcp__github__*` (primary) → `gh pr view` (fallback) |
 | Read issues, labels, milestones | `mcp__github__*` (primary) → `gh issue list` (fallback) |
 | Read CI/check status | `mcp__github__*` (primary) → `gh pr checks` (fallback) |
-| Commit, push, create PR, merge | `commit-to-github` or `test-pr-review-merge` skill only |
+| Commit, push, create PR, merge | `git-agent` (`.claude/agents/git-agent.md`) or `test-pr-review-merge` skill only |
 
 **Autonomous PR reading**: Agent may read any PR without asking. Reading PR content to understand context or plan work is a fully autonomous action — no user confirmation needed.
 
