@@ -98,7 +98,7 @@ export class UserService {
   }
 
   private _toUser(stored: StoredUser): User {
-    return { _id: stored._id, name: stored.name, email: stored.email, imgUrl: stored.imgUrl }
+    return { _id: stored._id, name: stored.name, email: stored.email, imgUrl: stored.imgUrl, role: stored.role }
   }
 
   _saveUserLocal(user: User | null): void {
