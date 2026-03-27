@@ -1,5 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ACTIVITY_STORAGE_KEY } from './activity-log.service';
+import { environment } from '../../../environments/environment';
+import { HttpStorageAdapter } from './http-storage.adapter';
 
 export type EntityId = {
   _id: string;
@@ -22,7 +24,12 @@ export const BACKUP_ENTITY_TYPES = new Set<string>([
   providedIn: 'root'
 })
 export class StorageService {
+  /** Injected unconditionally so Angular's DI graph is stable.
+   *  Only used at runtime when environment.useBackend is true. */
+  private httpAdapter = inject(HttpStorageAdapter);
+
   async query<T>(entityType: string, delay = 100): Promise<T[]> {
+    if (environment.useBackend) return this.httpAdapter.query<T>(entityType, delay);
     let entities: T[] = [];
     try {
       const raw = localStorage.getItem(entityType) || 'null';
@@ -38,6 +45,7 @@ export class StorageService {
   }
 
   async get<T extends EntityId>(entityType: string, entityId: string): Promise<T> {
+    if (environment.useBackend) return this.httpAdapter.get<T>(entityType, entityId);
     const entities = await this.query<T>(entityType);
     const entity = entities.find(entity => entity._id === entityId);
     if (!entity) throw new Error(`Cannot get, Item ${entityId} of type: ${entityType} does not exist`);
@@ -45,6 +53,7 @@ export class StorageService {
   }
 
   async post<T>(entityType: string, newEntity: T): Promise<T & EntityId> {
+    if (environment.useBackend) return this.httpAdapter.post<T>(entityType, newEntity);
     const entityToSave = { ...newEntity, _id: this.makeId() };
     const entities = await this.query<T & EntityId>(entityType, 0);
     entities.push(entityToSave);
@@ -53,6 +62,7 @@ export class StorageService {
   }
 
   async put<T extends EntityId>(entityType: string, updatedEntity: T): Promise<T> {
+    if (environment.useBackend) return this.httpAdapter.put<T>(entityType, updatedEntity);
     const entities = await this.query<T>(entityType, 0);
     const idx = entities.findIndex(entity => entity._id === updatedEntity._id);
     if (idx === -1) throw new Error(`Cannot update, product ${updatedEntity._id} does not exist`);
@@ -63,6 +73,7 @@ export class StorageService {
   }
 
   async remove(entityType: string, entityId: string): Promise<void> {
+    if (environment.useBackend) return this.httpAdapter.remove(entityType, entityId);
     const entities = await this.query<EntityId>(entityType, 0);
     const idx = entities.findIndex(entity => entity._id === entityId);
     if (idx !== -1) {
@@ -84,6 +95,7 @@ export class StorageService {
 
   /** Append an entity (e.g. with existing _id) to a list and save. Use delay 0 to avoid artificial delay. */
   async appendExisting<T extends EntityId>(entityType: string, entity: T): Promise<void> {
+    if (environment.useBackend) return this.httpAdapter.appendExisting<T>(entityType, entity);
     const list = await this.query<T>(entityType, 0);
     list.push(entity);
     this._save(entityType, list);
@@ -91,6 +103,7 @@ export class StorageService {
 
   /** Replace the entire list for an entity type (e.g. trash list after remove). */
   async replaceAll<T>(entityType: string, entities: T[]): Promise<void> {
+    if (environment.useBackend) return this.httpAdapter.replaceAll<T>(entityType, entities);
     this._save(entityType, entities);
   }
 
