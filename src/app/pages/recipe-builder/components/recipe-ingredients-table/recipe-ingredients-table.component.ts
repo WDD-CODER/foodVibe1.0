@@ -13,7 +13,7 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
 import type { Product } from '@models/product.model';
 import type { Recipe } from '@models/recipe.model';
 import { UnitRegistryService } from '@services/unit-registry.service';
-import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util';
+import { quantityIncrement, quantityDecrement, QuantityStepOptions } from 'src/app/core/utils/quantity-step.util';
 import { take } from 'rxjs/operators';
 import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop';
 
@@ -110,7 +110,8 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
   incrementAmount(group: FormGroup, index: number): void {
     const ctrl = group.get('amount_net');
     const current = ctrl?.value ?? 0;
-    const stepOpts = this.isPurchaseUnitRow(group) ? { integerOnly: true } : undefined;
+    const unit = group.get('unit')?.value as string | undefined;
+    const stepOpts: QuantityStepOptions = this.isPurchaseUnitRow(group) ? { integerOnly: true } : (unit ? { unit } : {});
     ctrl?.setValue(quantityIncrement(current, 0, stepOpts));
     this.updateLineCalculations(index);
   }
@@ -118,7 +119,8 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
   decrementAmount(group: FormGroup, index: number): void {
     const ctrl = group.get('amount_net');
     const current = ctrl?.value ?? 0;
-    const stepOpts = this.isPurchaseUnitRow(group) ? { integerOnly: true } : undefined;
+    const unit = group.get('unit')?.value as string | undefined;
+    const stepOpts: QuantityStepOptions = this.isPurchaseUnitRow(group) ? { integerOnly: true } : (unit ? { unit } : {});
     ctrl?.setValue(quantityDecrement(current, 0, stepOpts));
     this.updateLineCalculations(index);
   }
@@ -195,7 +197,8 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
       if (!ctrl) return;
       e.preventDefault();
       const current = ctrl.value ?? 0;
-      const stepOpts = this.isPurchaseUnitRow(group) ? { integerOnly: true } : undefined;
+      const unit = group.get('unit')?.value as string | undefined;
+      const stepOpts: QuantityStepOptions = this.isPurchaseUnitRow(group) ? { integerOnly: true } : (unit ? { unit } : {});
       const next = e.key === 'ArrowUp'
         ? quantityIncrement(current, 0, stepOpts)
         : quantityDecrement(current, 0, stepOpts);

@@ -28,7 +28,7 @@ import { RecipeWorkflowComponent } from '@pages/recipe-builder/components/recipe
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { FormatQuantityPipe } from 'src/app/core/pipes/format-quantity.pipe'
-import { quantityIncrement, quantityDecrement } from '../../core/utils/quantity-step.util'
+import { quantityIncrement, quantityDecrement, QuantityStepOptions } from '../../core/utils/quantity-step.util'
 import { filter } from 'rxjs'
 import { HeroFabService } from '@services/hero-fab.service'
 import { RecipeFormService } from '@pages/recipe-builder/services/recipe-form.service'
@@ -213,6 +213,12 @@ export class CookViewPage implements OnInit, OnDestroy {
     return !!(r?.recipe_type_ === 'dish' || (r?.prep_items_?.length ?? 0) > 0 || (r?.prep_categories_?.length ?? 0) > 0)
   })
 
+  protected cookViewStepOpts_ = computed((): QuantityStepOptions | undefined => {
+    if (this.isDish_()) return { integerOnly: true }
+    const unit = this.selectedUnit_()
+    return unit ? { unit } : undefined
+  })
+
   /** Number of steps marked as done. */
   protected completedStepCount_ = computed(() => this.checkedSteps_().size)
 
@@ -310,9 +316,8 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   protected incrementQuantity(): void {
-    const recipe = this.recipe_()
-    const min = recipe?.yield_unit_ === 'dish' ? 1 : 0.01
-    const options = recipe?.yield_unit_ === 'dish' ? { integerOnly: true } : undefined
+    const min = this.isDish_() ? 1 : 0.01
+    const options = this.cookViewStepOpts_()
     this.targetQuantity_.update(q => quantityIncrement(q, min, options))
     this.scaleByIngredientIndex_.set(null)
     this.scaleByIngredientAmount_.set(null)
@@ -320,9 +325,8 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   protected decrementQuantity(): void {
-    const recipe = this.recipe_()
-    const min = recipe?.yield_unit_ === 'dish' ? 1 : 0.01
-    const options = recipe?.yield_unit_ === 'dish' ? { integerOnly: true } : undefined
+    const min = this.isDish_() ? 1 : 0.01
+    const options = this.cookViewStepOpts_()
     this.targetQuantity_.update(q => quantityDecrement(q, min, options))
     this.scaleByIngredientIndex_.set(null)
     this.scaleByIngredientAmount_.set(null)
@@ -336,12 +340,13 @@ export class CookViewPage implements OnInit, OnDestroy {
     else this.decrementQuantity()
   }
 
-  protected onEditAmountKeydown(e: KeyboardEvent, index: number, currentAmount: number): void {
+  protected onEditAmountKeydown(e: KeyboardEvent, index: number, currentAmount: number, rowUnit?: string): void {
     if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return
     e.preventDefault()
+    const opts: QuantityStepOptions | undefined = this.isDish_() ? { integerOnly: true } : (rowUnit ? { unit: rowUnit } : undefined)
     const next = e.key === 'ArrowUp'
-      ? quantityIncrement(currentAmount, 0, this.isDish_() ? { integerOnly: true } : undefined)
-      : quantityDecrement(currentAmount, 0, this.isDish_() ? { integerOnly: true } : undefined)
+      ? quantityIncrement(currentAmount, 0, opts)
+      : quantityDecrement(currentAmount, 0, opts)
     this.setIngredientAmount(index, next)
   }
 
@@ -600,8 +605,8 @@ export class CookViewPage implements OnInit, OnDestroy {
     return JSON.stringify(current) !== JSON.stringify(orig)
   }
 
-  protected getEditAmountStep(currentAmount: number, delta: number): number {
-    const options = this.isDish_() ? { integerOnly: true } : undefined
+  protected getEditAmountStep(currentAmount: number, delta: number, rowUnit?: string): number {
+    const options: QuantityStepOptions | undefined = this.isDish_() ? { integerOnly: true } : (rowUnit ? { unit: rowUnit } : undefined)
     return delta > 0
       ? quantityIncrement(currentAmount, 0, options)
       : quantityDecrement(currentAmount, 0, options)

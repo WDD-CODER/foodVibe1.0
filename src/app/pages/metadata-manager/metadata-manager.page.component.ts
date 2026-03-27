@@ -217,52 +217,6 @@ export class MetadataManagerComponent {
   }
 }
 
-  // async removeUnit(unit: string): Promise<void> {
-  //   const allProducts = this.productData.allProducts_();
-  //   const isUnitInUse = allProducts.some(product => {
-  //     const isUsedAsBase = product.base_unit_ === unit;
-  //     const isUsedInPurchaseOptions = product.purchase_options_?.some(
-  //       opt => opt.unit_symbol_ === unit
-  //     );
-  //     return isUsedAsBase || isUsedInPurchaseOptions;
-  //   });
-
-  //   if (isUnitInUse) {
-  //     return this.metadataRegistry['userMsgService'].onSetErrorMsg(
-  //       `לא ניתן למחוק את היחידה "${unit}" - היא נמצאת בשימוש במוצרים קיימים במלאי`
-  //     );
-  //   }
-  //   try {
-  //     await this.unitRegistry.deleteUnit(unit);
-  //     this.tempUnitRates.update(prev => {
-  //       const updated = { ...prev };
-  //       delete updated[unit];
-  //       return updated;
-  //     });
-  //   } catch (err) {
-  //     console.error('Failed to delete unit:', err);
-  //   }
-  // }
-
-  // removeAllergen(name: string): void {
-  //   const isUsed = this.productData.allProducts_().some(p => p.allergens_?.includes(name));
-  //   if (isUsed) {
-  //     console.error(`Deletion blocked: ${name} is active in inventory.`);
-  //     return;
-  //   }
-  //   this.metadataRegistry.deleteAllergen(name);
-  // }
-
-  // removeCategory(name: string): void {
-  //   const isUsed = this.productData.allProducts_().some(p => p.category_ === name);
-  //   if (isUsed) {
-  //     return this.metadataRegistry['userMsgService'].onSetErrorMsg(
-  //       `לא ניתן למחוק: הקטגוריה "${name}" נמצאת בשימוש במלאי`
-  //     );
-  //   }
-  //   this.metadataRegistry.deleteCategory(name);
-  // }
-
   //HELPERS
   private async registerInService(key: string, type: MetadataType): Promise<void> {
     switch (type) {

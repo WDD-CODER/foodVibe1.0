@@ -22,6 +22,7 @@ import { ClickOutSideDirective } from '@directives/click-out-side';
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state';
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component';
 import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component';
+import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model';
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component';
 import { useListState, StringParam, BooleanParam, NumberSetParam } from 'src/app/core/utils/list-state.util';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
@@ -36,6 +37,7 @@ const DAY_LABELS = [
   'general.day_fri',
   'general.day_sat',
 ];
+type SupplierBulkField = 'delivery_days_' | 'lead_time_days_';
 
 @Component({
   selector: 'app-supplier-list',
@@ -73,6 +75,21 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   protected selection = new ListSelectionState();
   protected dayLabels = DAY_LABELS;
   protected editForm_!: FormGroup;
+
+  protected editableFields_: BulkEditableField[] = [
+    {
+      key: 'delivery_days_',
+      label: 'delivery_days',
+      options: DAY_LABELS.map((label, i) => ({ value: String(i), label })),
+      multi: true,
+    },
+    {
+      key: 'lead_time_days_',
+      label: 'lead_time',
+      options: ['1', '2', '3', '5', '7', '10', '14', '21', '30'].map(d => ({ value: d, label: d })),
+      multi: false,
+    },
+  ]
 
   constructor() {
     this.isPanelOpen_.set(getPanelOpen('suppliers'));
@@ -341,6 +358,25 @@ export class SupplierListComponent implements OnInit, OnDestroy {
       }
     }
     this.selection.clear();
+  }
+
+  protected async onBulkEdit(event: { field: string; value: string; ids: string[] }): Promise<void> {
+    const field = event.field as SupplierBulkField
+    const suppliers = this.supplierData.allSuppliers_()
+    for (const id of event.ids) {
+      const supplier = suppliers.find(s => s._id === id)
+      if (!supplier) continue
+      let updated: Supplier
+      if (field === 'delivery_days_') {
+        const day = parseInt(event.value, 10)
+        const current = supplier.delivery_days_ ?? []
+        if (current.includes(day)) continue
+        updated = { ...supplier, delivery_days_: [...current, day] }
+      } else {
+        updated = { ...supplier, lead_time_days_: parseInt(event.value, 10) }
+      }
+      void this.supplierData.updateSupplier(updated)
+    }
   }
 
   backToDashboard(): void {

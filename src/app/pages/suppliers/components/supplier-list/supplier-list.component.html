@@ -27,7 +27,11 @@
       <lucide-icon name="arrow-right" size="16"></lucide-icon>
       {{ 'back_to_dashboard' | translatePipe }}
     </button>
-    <app-selection-bar [selectionState]="selection" (bulkDelete)="onBulkDeleteSelected($event)" />
+    <app-selection-bar
+      [selectionState]="selection"
+      [editableFields]="editableFields_"
+      (bulkDelete)="onBulkDeleteSelected($event)"
+      (bulkEdit)="onBulkEdit($event)" />
     <button type="button" class="c-btn-primary" (click)="onAdd()"
       [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
       <lucide-icon name="plus" [size]="18"></lucide-icon>

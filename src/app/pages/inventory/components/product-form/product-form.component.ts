@@ -5,7 +5,6 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule, F
 import { LucideAngularModule } from 'lucide-angular';
 import { ActivatedRoute, Router } from '@angular/router';
 
-// import { ProductDataService } from '@services/product-data.service';
 import { ConversionService } from '@services/conversion.service';
 import { UserMsgService } from '@services/user-msg.service';
 import { KitchenStateService } from '@services/kitchen-state.service';
@@ -97,7 +96,6 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   protected productForm_!: FormGroup;
   /** Snapshot of form value when user entered the item (for hasRealChanges). */
   private initialFormSnapshot_: string | null = null;
-  // protected readonly KitchenUnit = KitchenUnit;
   isSubmitted = false;
 
   // Tracks per-row state for purchase options (e.g., whether a manual override was confirmed)
@@ -583,8 +581,6 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     const uomValue = opt?.uom ?? baseUnit;
 
     const globalPrice = this.productForm_.get('buy_price_global_')?.value || 0;
-
-    // const currentBaseUnit = this.productForm_.get('base_unit_')?.value || '';
 
     const group = this.fb_.group({
       unit_symbol_: [unit, Validators.required],

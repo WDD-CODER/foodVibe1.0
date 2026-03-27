@@ -102,7 +102,7 @@
             <app-counter
               [value]="targetQuantity_()"
               [min]="isDish_() ? 1 : 0.01"
-              [stepOptions]="isDish_() ? {integerOnly: true} : undefined"
+              [stepOptions]="cookViewStepOpts_()"
               (valueChange)="setQuantity($event)" />
             <app-custom-select
               class="unit-select"
@@ -156,14 +156,14 @@
               @if (editMode_()) {
                 <div class="col-name">{{ row.name }}</div>
                 <div class="col-amount edit-amount">
-                  <button type="button" class="qty-btn minus small" (click)="setIngredientAmount(i, getEditAmountStep(row.amount, -1))" [attr.aria-label]="'decrease' | translatePipe">
+                  <button type="button" class="qty-btn minus small" (click)="setIngredientAmount(i, getEditAmountStep(row.amount, -1, row.unit))" [attr.aria-label]="'decrease' | translatePipe">
                     <lucide-icon name="minus" [size]="14"></lucide-icon>
                   </button>
                   <input type="number" class="amount-input" [value]="row.amount"
                     (input)="setIngredientAmount(i, $any($event.target).valueAsNumber ?? 0)"
-                    (keydown)="onEditAmountKeydown($event, i, row.amount)"
-                    [min]="0" [step]="isDish_() ? 1 : 0.1" />
-                  <button type="button" class="qty-btn plus small" (click)="setIngredientAmount(i, getEditAmountStep(row.amount, 1))" [attr.aria-label]="'increase' | translatePipe">
+                    (keydown)="onEditAmountKeydown($event, i, row.amount, row.unit)"
+                    [min]="0" [step]="isDish_() ? 1 : 0.01" />
+                  <button type="button" class="qty-btn plus small" (click)="setIngredientAmount(i, getEditAmountStep(row.amount, 1, row.unit))" [attr.aria-label]="'increase' | translatePipe">
                     <lucide-icon name="plus" [size]="14"></lucide-icon>
                   </button>
                 </div>

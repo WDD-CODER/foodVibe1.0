@@ -84,7 +84,7 @@
             [class.field-error]="option.get('conversion_rate_')?.invalid && (option.get('conversion_rate_')?.dirty || isSubmitted)">
             <label class="label-row">
               <span class="math-text">=</span>
-              <input type="number" formControlName="conversion_rate_" [placeholder]="'quantity' | translatePipe" step="any" min="0.0001">
+              <input type="number" formControlName="conversion_rate_" [placeholder]="'quantity' | translatePipe" [attr.aria-label]="'quantity' | translatePipe" step="any" min="0.0001">
             </label>
           </div>
 
@@ -106,7 +106,7 @@
             <span class="math-text">{{ 'special_purchase_price' | translatePipe }}</span>
 
             <label class="price-override-label">
-              <input type="checkbox" formControlName="show_special_price_">
+              <input type="checkbox" formControlName="show_special_price_" [attr.aria-label]="'special_purchase_price' | translatePipe">
             </label>
             @if (option.get('show_special_price_')?.value) {
               <input type="number" formControlName="price_override_" [placeholder]="'price' | translatePipe"
