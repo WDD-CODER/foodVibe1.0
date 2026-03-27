@@ -49,6 +49,19 @@ From user prompt + git state, determine action:
 7. If user wants PR: `gh pr create --base main --head <branch> --title "..." --body "..."`
 8. If user wants merge: `gh pr merge <n> --merge --delete-branch`
 9. Report result. Done.
+10. **Todo Update + Auto-Archive:**
+    - In `.claude/todo.md`, set any sub-tasks completed by this commit to `[x]`.
+    - Then scan every plan section (heading + items) for sections where **all** items are `[x]`:
+      - **Skip** if the section contains `(deferred)`, `(skipped)`, or `[~]` anywhere.
+      - **Skip** if the plan file is fewer than 7 days old:
+        ```bash
+        git log --oneline -- plans/<NNN>-*.plan.md | tail -1
+        ```
+        If the earliest commit is < 7 days ago → keep, no report.
+      - Otherwise: move the section (heading + all items) from `todo.md` to `todo-archive.md`,
+        appending under the format `## Plan NNN — [title] (archived YYYY-MM-DD)`.
+        Report: `"Archived: Plan NNN — [title]"`
+    - If nothing qualifies → continue silently.
 
 ## Batch Operations (multi-branch)
 
