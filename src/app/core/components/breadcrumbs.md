@@ -2,14 +2,13 @@
 
 ## Purpose
 
-Global shell UI: header (primary nav), footer, floating hero FAB, auth modal, and global user-message host. Mounted from the root app layout.
+Global shell UI: header (primary nav), floating hero FAB, auth modal, and global user-message host. Mounted from the root app layout.
 
 ## Navigation
 
 | File/Directory | Purpose | Key Exports |
 |---------------|---------|-------------|
 | header/ | Top bar, route links | HeaderComponent |
-| footer/ | App footer | FooterComponent |
 | hero-fab/ | Contextual primary FAB | HeroFabComponent |
 | auth-modal/ | Sign-in / registration UI | AuthModalComponent |
 | user-msg/ | Toast / user message strip | UserMsg |
