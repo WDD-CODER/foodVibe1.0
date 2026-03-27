@@ -70,8 +70,8 @@ export class RecipeBookListComponent {
     this.isPanelOpen_.set(getPanelOpen('recipe-book'));
     useListState('recipe-book', [
       { urlParam: 'q',               signal: this.searchQuery_,          serializer: StringParam },
-      { urlParam: 'sort',            signal: this.sortBy_,               serializer: NullableStringParam as any },
-      { urlParam: 'order',           signal: this.sortOrder_,             serializer: StringParam as any },
+      { urlParam: 'sort',            signal: this.sortBy_,               serializer: NullableStringParam },
+      { urlParam: 'order',           signal: this.sortOrder_,             serializer: StringParam },
       { urlParam: 'filters',         signal: this.activeFilters_,        serializer: FilterRecordParam },
       { urlParam: 'ingredients',     signal: this.selectedProductIds_,  serializer: StringArrayParam },
       { urlParam: 'dateFrom',        signal: this.dateFrom_,             serializer: NullableStringParam },

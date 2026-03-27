@@ -116,8 +116,8 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   constructor() {
     useListState('inventory', [
       { urlParam: 'q',        signal: this.searchQuery_,    serializer: StringParam },
-      { urlParam: 'sort',     signal: this.sortBy_,         serializer: NullableStringParam as any },
-      { urlParam: 'order',    signal: this.sortOrder_,      serializer: StringParam as any },
+      { urlParam: 'sort',     signal: this.sortBy_,         serializer: NullableStringParam },
+      { urlParam: 'order',    signal: this.sortOrder_,      serializer: StringParam },
       { urlParam: 'filters',  signal: this.activeFilters_,  serializer: FilterRecordParam },
       { urlParam: 'lowStock', signal: this.lowStockOnly_,   serializer: BooleanParam },
     ]);

@@ -20,6 +20,7 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state';
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component';
 import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component';
+import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model';
 import { useListState, StringParam, NullableBooleanParam, StringSetParam } from 'src/app/core/utils/list-state.util';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 import { HeroFabService } from '@services/hero-fab.service';
@@ -29,6 +30,7 @@ import { TranslationKeyModalService, isTranslationKeyResult } from '@services/tr
 const ADD_NEW_CATEGORY_VALUE = '__add_new__';
 
 type SortField = 'name' | 'category' | 'owned';
+type EquipmentBulkField = 'category_' | 'is_consumable_';
 
 @Component({
   selector: 'app-equipment-list',
@@ -74,9 +76,9 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     this.buildEditForm();
     useListState('equipment', [
       { urlParam: 'q',          signal: this.searchQuery_,        serializer: StringParam },
-      { urlParam: 'sort',       signal: this.sortBy_,             serializer: StringParam as any },
-      { urlParam: 'order',      signal: this.sortOrder_,          serializer: StringParam as any },
-      { urlParam: 'categories', signal: this.selectedCategories_, serializer: StringSetParam as any },
+      { urlParam: 'sort',       signal: this.sortBy_,             serializer: StringParam },
+      { urlParam: 'order',      signal: this.sortOrder_,          serializer: StringParam },
+      { urlParam: 'categories', signal: this.selectedCategories_, serializer: StringSetParam },
       { urlParam: 'consumable', signal: this.consumableFilter_,   serializer: NullableBooleanParam },
     ]);
 
@@ -109,6 +111,21 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   protected editingId_ = signal<string | null>(null);
   protected selection = new ListSelectionState();
   protected isSavingEdit_ = signal(false);
+
+  protected editableFields_ = computed<BulkEditableField[]>(() => [
+    {
+      key: 'category_',
+      label: 'category',
+      options: this.categories.map(c => ({ value: c, label: c })),
+      multi: false,
+    },
+    {
+      key: 'is_consumable_',
+      label: 'consumable',
+      options: [{ value: 'true', label: 'yes' }, { value: 'false', label: 'no' }],
+      multi: false,
+    },
+  ])
   protected editForm_!: FormGroup;
 
   protected hasActiveFilters_ = computed(() => {
@@ -380,6 +397,22 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
       this.logging.error({ event: 'equipment.list_error', message: 'Equipment list error', context: { err: e } });
     } finally {
       this.deletingId_.set(null);
+    }
+  }
+
+  protected async onBulkEdit(event: { field: string; value: string; ids: string[] }): Promise<void> {
+    const field = event.field as EquipmentBulkField
+    const equipment = this.equipmentData.allEquipment_()
+    for (const id of event.ids) {
+      const item = equipment.find(e => e._id === id)
+      if (!item) continue
+      let updated: Equipment
+      if (field === 'category_') {
+        updated = { ...item, category_: event.value as EquipmentCategory }
+      } else {
+        updated = { ...item, is_consumable_: event.value === 'true' }
+      }
+      void this.equipmentData.updateEquipment(updated)
     }
   }
 
