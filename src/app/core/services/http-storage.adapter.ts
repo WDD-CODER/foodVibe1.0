@@ -29,13 +29,13 @@ const TOKEN_KEY = 'fv_token';
  * No data-service files need to change — only StorageService's delegation logic.
  *
  * Endpoints:
- *   query        → GET    /api/data/:entityType
- *   get          → GET    /api/data/:entityType/:id
- *   post         → POST   /api/data/:entityType        (body includes _id assigned here)
- *   put          → PUT    /api/data/:entityType/:id
- *   remove       → DELETE /api/data/:entityType/:id
- *   appendExisting → POST /api/data/:entityType        (body already has _id)
- *   replaceAll   → PUT    /api/data/:entityType        (body is full array, no :id segment)
+ *   query        → GET    /api/v1/data/:entityType
+ *   get          → GET    /api/v1/data/:entityType/:id
+ *   post         → POST   /api/v1/data/:entityType        (body includes _id assigned here)
+ *   put          → PUT    /api/v1/data/:entityType/:id
+ *   remove       → DELETE /api/v1/data/:entityType/:id
+ *   appendExisting → POST /api/v1/data/:entityType        (body already has _id)
+ *   replaceAll   → PUT    /api/v1/data/:entityType        (body is full array, no :id segment)
  */
 @Injectable({ providedIn: 'root' })
 export class HttpStorageAdapter {
@@ -64,14 +64,14 @@ export class HttpStorageAdapter {
    */
   async query<T>(entityType: string, _delay = 100): Promise<T[]> {
     return firstValueFrom(
-      this.http.get<T[]>(`${this.base}/api/data/${entityType}`, { headers: this.headers() })
+      this.http.get<T[]>(`${this.base}/api/v1/data/${entityType}`, { headers: this.headers() })
     );
   }
 
   /** Returns one entity by id. Throws if not found (404 → HttpErrorResponse). */
   async get<T extends EntityId>(entityType: string, entityId: string): Promise<T> {
     return firstValueFrom(
-      this.http.get<T>(`${this.base}/api/data/${entityType}/${entityId}`, { headers: this.headers() })
+      this.http.get<T>(`${this.base}/api/v1/data/${entityType}/${entityId}`, { headers: this.headers() })
     );
   }
 
@@ -82,7 +82,7 @@ export class HttpStorageAdapter {
   async post<T>(entityType: string, newEntity: T): Promise<T & EntityId> {
     const entityWithId = { ...(newEntity as object), _id: this.makeId() } as T & EntityId;
     return firstValueFrom(
-      this.http.post<T & EntityId>(`${this.base}/api/data/${entityType}`, entityWithId, { headers: this.headers() })
+      this.http.post<T & EntityId>(`${this.base}/api/v1/data/${entityType}`, entityWithId, { headers: this.headers() })
     );
   }
 
@@ -90,7 +90,7 @@ export class HttpStorageAdapter {
   async put<T extends EntityId>(entityType: string, updatedEntity: T): Promise<T> {
     return firstValueFrom(
       this.http.put<T>(
-        `${this.base}/api/data/${entityType}/${updatedEntity._id}`,
+        `${this.base}/api/v1/data/${entityType}/${updatedEntity._id}`,
         updatedEntity,
         { headers: this.headers() }
       )
@@ -100,7 +100,7 @@ export class HttpStorageAdapter {
   /** Removes one entity by id. */
   async remove(entityType: string, entityId: string): Promise<void> {
     await firstValueFrom(
-      this.http.delete<void>(`${this.base}/api/data/${entityType}/${entityId}`, { headers: this.headers() })
+      this.http.delete<void>(`${this.base}/api/v1/data/${entityType}/${entityId}`, { headers: this.headers() })
     );
   }
 
@@ -124,17 +124,21 @@ export class HttpStorageAdapter {
    */
   async appendExisting<T extends EntityId>(entityType: string, entity: T): Promise<void> {
     await firstValueFrom(
-      this.http.post<unknown>(`${this.base}/api/data/${entityType}`, entity, { headers: this.headers() })
+      this.http.post<unknown>(`${this.base}/api/v1/data/${entityType}`, entity, { headers: this.headers() })
     );
   }
 
   /**
    * Replaces the entire entity collection (e.g. clearing trash after dispose-all).
-   * Sends array to PUT /api/data/:entityType (no id segment — server does deleteMany + insertMany).
+   * Sends array to PUT /api/v1/data/:entityType (no id segment — server does deleteMany + insertMany).
    */
   async replaceAll<T>(entityType: string, entities: T[]): Promise<void> {
     await firstValueFrom(
-      this.http.put<unknown>(`${this.base}/api/data/${entityType}`, entities, { headers: this.headers() })
+      this.http.put<unknown>(
+        `${this.base}/api/v1/data/${entityType}`,
+        entities,
+        { headers: this.headers().set('X-Confirm-Replace', 'true'), withCredentials: true }
+      )
     );
   }
 }

@@ -1,74 +1,41 @@
 const { Router } = require('express');
 const crypto = require('crypto');
-const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 const Entity = require('../models/entity.model');
 
 const router = Router();
 
-/** localStorage key that holds the user registry — matches Angular's SIGNED_USERS constant. */
 const AUTH_ENTITY_TYPE = 'signed-users-db';
-
-/** JWT validity period — matches the "stay logged in" behaviour (plan 062). */
-const JWT_EXPIRY = '30d';
+const ACCESS_TOKEN_EXPIRY = '15m';
+const REFRESH_TOKEN_EXPIRY = '30d';
 
 // ---------------------------------------------------------------------------
-// PBKDF2 helpers — mirror auth-crypto.ts parameters exactly so hashes
-// produced on the server are verifiable by the Angular client and vice-versa.
-//   iterations : 100 000
-//   digest     : sha256
-//   keylen     : 32 bytes (256 bits)
-//   salt       : 16 random bytes
-//   format     : "<saltHex>:<hashHex>"  (32 hex + ':' + 64 hex)
-// Legacy bare-SHA-256 hashes (no colon) are still verified for users migrated
-// from the localStorage-only era.
+// Rate limiters
 // ---------------------------------------------------------------------------
 
-const pbkdf2Async = promisify(crypto.pbkdf2);
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many login attempts, please try again later' },
+});
 
-const PBKDF2_ITERATIONS = 100_000;
-const PBKDF2_KEYLEN = 32;
-const PBKDF2_DIGEST = 'sha256';
+const signupLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many signup attempts, please try again later' },
+});
 
-/**
- * Hash a plaintext password using PBKDF2.
- * @param {string} plain
- * @returns {Promise<string>} "<saltHex>:<hashHex>"
- */
-async function hashPassword(plain) {
-  const salt = crypto.randomBytes(16);
-  const key = await pbkdf2Async(plain, salt, PBKDF2_ITERATIONS, PBKDF2_KEYLEN, PBKDF2_DIGEST);
-  return `${salt.toString('hex')}:${key.toString('hex')}`;
-}
-
-/**
- * Verify a plaintext password against a stored hash.
- * Supports both PBKDF2 ("<saltHex>:<hashHex>") and legacy bare SHA-256 (no colon).
- * @param {string} plain
- * @param {string} stored
- * @returns {Promise<boolean>}
- */
-async function verifyPassword(plain, stored) {
-  if (!stored.includes(':')) {
-    // Legacy SHA-256 path — no salt, single digest comparison
-    const legacyHash = crypto.createHash('sha256').update(plain).digest('hex');
-    return legacyHash === stored;
-  }
-  const [saltHex, hashHex] = stored.split(':');
-  const salt = Buffer.from(saltHex, 'hex');
-  const key = await pbkdf2Async(plain, salt, PBKDF2_ITERATIONS, PBKDF2_KEYLEN, PBKDF2_DIGEST);
-  // Constant-time comparison to prevent timing attacks
-  const computed = Buffer.from(key.toString('hex'));
-  const expected = Buffer.from(hashHex);
-  if (computed.length !== expected.length) return false;
-  return crypto.timingSafeEqual(computed, expected);
-}
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
 /**
  * Generates a 5-char alphanumeric ID.
- * Matches Angular StorageService.makeId() so IDs are interchangeable during migration.
- * @param {number} [length=5]
- * @returns {string}
  */
 function makeId(length = 5) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -77,20 +44,22 @@ function makeId(length = 5) {
   return id;
 }
 
+/**
+ * Constant-time string comparison. Returns false if lengths differ (no timing leak via length).
+ * Used to compare Angular's PBKDF2 hash (saltHex:hashHex) directly against the stored hash.
+ */
+function safeCompare(a, b) {
+  const bufA = Buffer.from(String(a));
+  const bufB = Buffer.from(String(b));
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
 // ---------------------------------------------------------------------------
-// Routes
+// POST /signup
 // ---------------------------------------------------------------------------
 
-/**
- * POST /api/auth/signup
- *
- * Body: { name: string, email: string, imgUrl?: string, password: string }
- * password is the plaintext password sent over HTTPS — the server hashes it
- * server-side using PBKDF2 before storing. The plaintext is never persisted.
- *
- * Returns: { token: string, user: { _id, name, email, imgUrl } }
- */
-router.post('/signup', async (req, res) => {
+router.post('/signup', signupLimiter, async (req, res) => {
   try {
     const { name, email, imgUrl, password } = req.body;
 
@@ -98,15 +67,31 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ error: 'name, email, and password are required' });
     }
 
-    const exists = await Entity.findOne({ entityType: AUTH_ENTITY_TYPE, 'data.name': name }).lean();
-    if (exists) return res.status(409).json({ error: 'USERNAME_TAKEN' });
+    // Check username uniqueness
+    const nameExists = await Entity.findOne({ entityType: AUTH_ENTITY_TYPE, 'data.name': name }).lean();
+    if (nameExists) return res.status(409).json({ error: 'USERNAME_TAKEN' });
 
-    const passwordHash = await hashPassword(password);
+    // Check email uniqueness
+    const emailExists = await Entity.findOne({ entityType: AUTH_ENTITY_TYPE, 'data.email': email }).lean();
+    if (emailExists) return res.status(409).json({ error: 'EMAIL_TAKEN' });
+
+    // Angular already hashed the password client-side (PBKDF2 saltHex:hashHex).
+    // Store it as-is — never re-hash.
+    const passwordHash = password;
     const _id = makeId();
     const userData = { _id, name, email, imgUrl: imgUrl || '', passwordHash };
     await Entity.create({ _id, entityType: AUTH_ENTITY_TYPE, data: userData });
 
-    const token = jwt.sign({ userId: _id, name }, process.env.JWT_SECRET, { expiresIn: JWT_EXPIRY });
+    const token = jwt.sign({ userId: _id, name }, process.env.JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+    const refreshToken = jwt.sign({ userId: _id }, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+
+    res.cookie('fv_refresh', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
+
     const publicUser = { _id, name, email, imgUrl: userData.imgUrl };
     return res.status(201).json({ token, user: publicUser });
   } catch (err) {
@@ -115,16 +100,11 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-/**
- * POST /api/auth/login
- *
- * Body: { name: string, password: string }
- * password is the plaintext password sent over HTTPS — the server extracts the
- * stored salt and re-derives the PBKDF2 key for comparison. Plaintext is never stored.
- *
- * Returns: { token: string, user: { _id, name, email, imgUrl } }
- */
-router.post('/login', async (req, res) => {
+// ---------------------------------------------------------------------------
+// POST /login
+// ---------------------------------------------------------------------------
+
+router.post('/login', loginLimiter, async (req, res) => {
   try {
     const { name, password } = req.body;
 
@@ -136,20 +116,95 @@ router.post('/login', async (req, res) => {
     if (!doc) return res.status(401).json({ error: 'USER_NOT_FOUND' });
 
     const stored = doc.data;
+
+    // Account lockout check
+    if (stored.lockedUntil && stored.lockedUntil > Date.now()) {
+      return res.status(423).json({ error: 'ACCOUNT_LOCKED' });
+    }
+
     if (!stored.passwordHash) return res.status(401).json({ error: 'USER_NOT_FOUND' });
 
-    const ok = await verifyPassword(password, stored.passwordHash);
-    if (!ok) return res.status(401).json({ error: 'USER_NOT_FOUND' });
+    // Angular sends the PBKDF2 hash (saltHex:hashHex) as the password field.
+    // Compare directly against the stored hash using constant-time comparison.
+    // Legacy bare-SHA-256 hashes (no colon, 64 chars) are also compared this way.
+    const ok = safeCompare(password, stored.passwordHash);
+
+    if (!ok) {
+      // Increment failed attempts; lock after 5 consecutive failures for 15 minutes
+      const failedAttempts = (stored.failedAttempts || 0) + 1;
+      const lockedUntil = failedAttempts >= 5 ? Date.now() + 15 * 60 * 1000 : null;
+      await Entity.updateOne(
+        { _id: doc._id },
+        { 'data.failedAttempts': failedAttempts, 'data.lockedUntil': lockedUntil }
+      );
+      return res.status(401).json({ error: 'USER_NOT_FOUND' });
+    }
+
+    // Reset failed attempts on success
+    if (stored.failedAttempts) {
+      await Entity.updateOne({ _id: doc._id }, { 'data.failedAttempts': 0, 'data.lockedUntil': null });
+    }
 
     const token = jwt.sign(
       { userId: stored._id, name: stored.name },
       process.env.JWT_SECRET,
-      { expiresIn: JWT_EXPIRY }
+      { expiresIn: ACCESS_TOKEN_EXPIRY }
     );
+    const refreshToken = jwt.sign({ userId: stored._id }, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+
+    res.cookie('fv_refresh', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
+
     const publicUser = { _id: stored._id, name: stored.name, email: stored.email, imgUrl: stored.imgUrl };
     return res.json({ token, user: publicUser });
   } catch (err) {
     console.error('[auth/login]', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /refresh
+// Reads the fv_refresh httpOnly cookie, verifies it, issues a new 15m access token.
+// ---------------------------------------------------------------------------
+
+router.post('/refresh', async (req, res) => {
+  try {
+    const refreshToken = req.cookies && req.cookies.fv_refresh;
+    if (!refreshToken) return res.status(401).json({ error: 'NO_REFRESH_TOKEN' });
+
+    let payload;
+    try {
+      payload = jwt.verify(refreshToken, process.env.JWT_SECRET);
+    } catch {
+      return res.status(401).json({ error: 'INVALID_REFRESH_TOKEN' });
+    }
+
+    const doc = await Entity.findOne({ entityType: AUTH_ENTITY_TYPE, 'data._id': payload.userId }).lean();
+    if (!doc) return res.status(401).json({ error: 'USER_NOT_FOUND' });
+
+    const stored = doc.data;
+    const token = jwt.sign(
+      { userId: stored._id, name: stored.name },
+      process.env.JWT_SECRET,
+      { expiresIn: ACCESS_TOKEN_EXPIRY }
+    );
+
+    const newRefreshToken = jwt.sign({ userId: stored._id }, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+    res.cookie('fv_refresh', newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.json({ token });
+  } catch (err) {
+    console.error('[auth/refresh]', err);
     return res.status(500).json({ error: 'Server error' });
   }
 });

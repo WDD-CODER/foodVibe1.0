@@ -4,13 +4,8 @@ const { verifyToken } = require('../middleware/auth');
 
 const router = Router();
 
-/** HTTP methods that mutate data — require a valid JWT. */
-const WRITE_METHODS = new Set(['POST', 'PUT', 'DELETE', 'PATCH']);
-
-router.use((req, res, next) => {
-  if (WRITE_METHODS.has(req.method)) return verifyToken(req, res, next);
-  next();
-});
+// All routes require a valid JWT — reads are not public.
+router.use(verifyToken);
 
 // ---------------------------------------------------------------------------
 // GET /api/data/:type
@@ -19,7 +14,9 @@ router.use((req, res, next) => {
 // ---------------------------------------------------------------------------
 router.get('/:type', async (req, res) => {
   try {
-    const docs = await Entity.find({ entityType: req.params.type }).lean();
+    const limit = Math.min(parseInt(req.query.limit) || 500, 1000);
+    const skip = parseInt(req.query.skip) || 0;
+    const docs = await Entity.find({ entityType: req.params.type }).skip(skip).limit(limit).lean();
     res.json(docs.map(d => d.data));
   } catch (err) {
     console.error('[data/query]', err);
@@ -106,6 +103,9 @@ router.put('/:type/:id', async (req, res) => {
 // ---------------------------------------------------------------------------
 router.put('/:type', async (req, res) => {
   try {
+    if (req.headers['x-confirm-replace'] !== 'true') {
+      return res.status(400).json({ error: 'X-Confirm-Replace: true header is required for bulk replace' });
+    }
     const entities = req.body;
     if (!Array.isArray(entities)) {
       return res.status(400).json({ error: 'Body must be an array of entity objects' });

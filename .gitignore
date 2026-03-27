@@ -54,6 +54,7 @@ testem.log
 .env.*.local
 *.pem
 *.key
+migration-dump.json
 
 # Playwright MCP and UI Inspector artifacts (never commit)
 .playwright-mcp/
