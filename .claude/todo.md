@@ -2,6 +2,18 @@
 
 ---
 
+### Plan 216 — Dead Code Audit Cleanup (`plans/216-dead-code-audit-cleanup.plan.md`)
+- [x] `tsconfig.json` — remove `@components/*` alias
+- [x] `metadata-manager.page.component.ts` — remove commented block ~lines 219–263 (already done)
+- [x] Delete `src/app/core/components/footer/` (4 files: .ts, .html, .scss, .spec.ts)
+- [x] `src/app/core/components/breadcrumbs.md` — remove footer/ row
+- [x] Delete `src/app/core/models/filter-category.model.ts`
+- [x] Delete `src/app/core/models/filter-option.model.ts`
+- [x] Delete `src/app/core/models/units.enum.ts`
+- [x] `ng build` — verify zero errors
+
+---
+
 ### Plan 214-R — Extract sanitizeKey utility (`plans/214-R-sanitize-key-util-extraction.plan.md`)
 - [x] Create `src/app/core/utils/sanitize-key.util.ts` with `sanitizeKey` export
 - [x] `translation-key-modal.service.ts:30` — replace inline expression; add import

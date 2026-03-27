@@ -19,12 +19,6 @@ c. מחיר רכישה מיוחד - cange it to מחיר מיוחד
  
 
 
-app-counter 
-1. The Category CheckFirst, the system must identify which "math bucket" to use.Bucket A (Large): Kilograms and Liters.Bucket B (Small): Grams and Milliliters.2. The "Interaction" SensorYou need a way to track how many numbers have passed during a single press.On Press: Start a counter (let’s call it "Ticks").On Release: Reset Ticks to 0.The Rule: A single click is always 1 Tick. A long press adds +1 Tick every time the number changes.3. The Big Unit Logic (kg / L)This is based on how many ticks have passed.Ticks 1 through 5: Change the value by 0.1 (e.g., $1.0 \rightarrow 1.1$).Tick 6 and beyond: Change the value by 1.0 (e.g., $1.5 \rightarrow 2.5 \rightarrow 3.5$).If the user lets go: The next click starts back at Tick 1 (moving by 0.1 again).4. The Small Unit Logic (g / ml)This ignores the "Ticks" and looks at where the value currently is (the Range).When Going UP:Range 0.0 to 1.15: Add 0.05.Range 1.15 to 1.25: Jump straight to 1.25.Range 1.25 to 2.0: Add 0.25 (reaching $1.5, 1.75, 2.0$).Range 2.0 to 10.0: Add 1.0.Above 10.0: Add 10.0.When Going DOWN:Range Above 0.8: Subtract 0.05.Range 0.8 to 0.5: Jump straight to 0.5.Range 0.5 to 0.25: Jump straight to 0.25.Range 0.25 to 0: Jump straight to 0.5. The "Safety" Rules (Crucial for Node/Code)Precision Guard: Every time you do math with decimals (like $1.0 + 0.1$), the computer might result in $1.10000004$. You must round the result to 2 decimal places after every calculation.The Floor: The value should never go below 0.Single Tick Rule: If the user just taps the button once, it counts as "Not continuous," so it should only move by the smallest possible step for that unit (0.1 for kg, 0.05 for g).Summary of the WorkflowIdentify if it's a Big or Small unit.Check if this is a new click or a continuous hold.Apply the "Tick-based" math (for kg/L) OR the "Range-based" math (for g/ml).Round the number to keep it clean.Display the new number.
-
-
-
-
 
 
 
