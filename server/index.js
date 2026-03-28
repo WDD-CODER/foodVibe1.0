@@ -1,4 +1,5 @@
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -10,7 +11,7 @@ const genericRouter = require('./routes/generic');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || 'http://localhost:4200';
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGIN || 'http://localhost:4200').split(',').map(s => s.trim())
 
 // ---------------------------------------------------------------------------
 // Middleware
@@ -20,10 +21,16 @@ app.use(helmet());
 app.use(morgan('tiny'));
 
 const corsOptions = {
-  origin: ALLOWED_ORIGIN,
+  origin(origin, callback) {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+      callback(null, true)
+    } else {
+      callback(new Error('CORS origin not allowed'))
+    }
+  },
   credentials: true,
   optionsSuccessStatus: 204,
-};
+}
 
 // Respond 204 to OPTIONS preflights on every route before they reach handlers.
 app.options('*', cors(corsOptions));
@@ -44,6 +51,16 @@ app.use('/api/v1/data', genericRouter);
 app.get('/api/v1/health', (_req, res) => res.json({ ok: true, ts: Date.now() }));
 
 // ---------------------------------------------------------------------------
+// Static files — Angular production build
+// MUST come after all /api/ routes so the catch-all does not swallow API calls
+// ---------------------------------------------------------------------------
+const STATIC_DIR = path.join(__dirname, '..', 'dist', 'food-vibe1.0', 'browser')
+app.use(express.static(STATIC_DIR))
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(STATIC_DIR, 'index.html'))
+})
+
+// ---------------------------------------------------------------------------
 // Global error handler — never expose stack traces in production
 // ---------------------------------------------------------------------------
 app.use((err, req, res, _next) => {
@@ -61,7 +78,7 @@ connectDb()
   .then(() => {
     app.listen(PORT, () => {
       console.log(`foodVibe server listening on port ${PORT}`);
-      console.log(`CORS origin: ${ALLOWED_ORIGIN}`);
+      console.log(`CORS origins: ${ALLOWED_ORIGINS.join(', ')}`);
     });
   })
   .catch(err => {
