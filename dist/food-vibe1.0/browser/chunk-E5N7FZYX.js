@@ -1,1 +1,0 @@
-import{Ra as s,ca as n,na as c,ta as o}from"./chunk-EPX2Y7DR.js";var r=class t{constructor(i){this.el=i}onFocus(){this.el.nativeElement.select()}static \u0275fac=function(e){return new(e||t)(c(n))};static \u0275dir=o({type:t,selectors:[["","SelectOnFocus",""]],hostBindings:function(e,l){e&1&&s("focus",function(){return l.onFocus()})}})};export{r as a};

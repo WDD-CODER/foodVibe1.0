@@ -1,7 +1,7 @@
 .approve-stamp {
     position: fixed;
-    inset-inline-end: 0;
-    inset-block-end: 0;
+    right: 0.75rem; // intentionally physical — stamp is always bottom-right chrome regardless of dir
+    inset-block-end: 0.75rem;
     z-index: 90;
 
     display: flex;
@@ -92,11 +92,8 @@ height: 5rem;
 
   @media (max-width: 768px) {
     .approve-stamp {
-      // right: 0.5rem;
-      // bottom: 0.5rem;
-
-      // width: 4rem;
-      // height: 4rem;
+      right: 0.5rem;
+      inset-block-end: 0.5rem;
     }
 
     .approve-stamp__seal {

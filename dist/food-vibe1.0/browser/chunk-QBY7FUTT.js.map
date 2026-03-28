@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/core/services/hero-fab.service.ts"],
+  "sourcesContent": ["import { Injectable, signal } from '@angular/core';\r\n\r\nexport interface HeroFabAction {\r\n  labelKey: string;\r\n  icon: string;\r\n  run: () => void;\r\n}\r\n\r\nexport type HeroFabPageMode = 'replace' | 'append';\r\n\r\nexport interface HeroFabPageState {\r\n  actions: HeroFabAction[];\r\n  mode: HeroFabPageMode;\r\n}\r\n\r\n@Injectable({ providedIn: 'root' })\r\nexport class HeroFabService {\r\n  private readonly pageState_ = signal<HeroFabPageState | null>(null);\r\n\r\n  readonly pageActions = this.pageState_.asReadonly();\r\n\r\n  setPageActions(actions: HeroFabAction[], mode: HeroFabPageMode): void {\r\n    this.pageState_.set({ actions, mode });\r\n  }\r\n\r\n  clearPageActions(): void {\r\n    this.pageState_.set(null);\r\n  }\r\n}\r\n"],
+  "mappings": ";;;;;;;;AAgBM,IAAO,iBAAP,MAAO,gBAAc;EACR,aAAa,OAAgC,IAAI;EAEzD,cAAc,KAAK,WAAW,WAAU;EAEjD,eAAe,SAA0B,MAAqB;AAC5D,SAAK,WAAW,IAAI,EAAE,SAAS,KAAI,CAAE;EACvC;EAEA,mBAAgB;AACd,SAAK,WAAW,IAAI,IAAI;EAC1B;;qCAXW,iBAAc;EAAA;4EAAd,iBAAc,SAAd,gBAAc,WAAA,YADD,OAAM,CAAA;;;sEACnB,gBAAc,CAAA;UAD1B;WAAW,EAAE,YAAY,OAAM,CAAE;;;",
+  "names": []
+}

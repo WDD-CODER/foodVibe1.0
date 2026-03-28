@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/core/utils/saving-state.util.ts"],
+  "sourcesContent": ["import { signal } from '@angular/core';\r\n\r\n/**\r\n * Composable for async save-state tracking.\r\n *\r\n * Usage:\r\n *   private readonly saving = useSavingState();\r\n *   protected readonly isSaving_ = this.saving.isSaving_;   // for template\r\n *\r\n *   // async/await flows:\r\n *   await this.saving.withSaving(async () => { ... });\r\n *\r\n *   // Observable/Promise flows:\r\n *   this.saving.setSaving(true);\r\n *   obs.subscribe({ next: () => this.saving.setSaving(false), error: () => this.saving.setSaving(false) });\r\n */\r\nexport function useSavingState() {\r\n  const saving_ = signal(false);\r\n\r\n  async function withSaving<T>(fn: () => Promise<T>): Promise<T> {\r\n    saving_.set(true);\r\n    try {\r\n      return await fn();\r\n    } finally {\r\n      saving_.set(false);\r\n    }\r\n  }\r\n\r\n  function setSaving(value: boolean): void {\r\n    saving_.set(value);\r\n  }\r\n\r\n  return {\r\n    isSaving_: saving_.asReadonly(),\r\n    withSaving,\r\n    setSaving,\r\n  };\r\n}\r\n"],
+  "mappings": ";;;;;;AAgBM,SAAU,iBAAc;AAC5B,QAAM,UAAU,OAAO,KAAK;AAE5B,WAAe,WAAc,IAAoB;;AAC/C,cAAQ,IAAI,IAAI;AAChB,UAAI;AACF,eAAO,MAAM,GAAE;MACjB;AACE,gBAAQ,IAAI,KAAK;MACnB;IACF;;AAEA,WAAS,UAAU,OAAc;AAC/B,YAAQ,IAAI,KAAK;EACnB;AAEA,SAAO;IACL,WAAW,QAAQ,WAAU;IAC7B;IACA;;AAEJ;",
+  "names": []
+}

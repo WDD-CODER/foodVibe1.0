@@ -1,1 +1,0 @@
-import{J as s,da as t}from"./chunk-EPX2Y7DR.js";var i=class e{isOpen_=t(!1);resolve_=null;open(){return this.isOpen_.set(!0),new Promise(o=>{this.resolve_=o})}close(){this.resolve_?.(),this.resolve_=null,this.isOpen_.set(!1)}static \u0275fac=function(r){return new(r||e)};static \u0275prov=s({token:e,factory:e.\u0275fac,providedIn:"root"})};export{i as a};

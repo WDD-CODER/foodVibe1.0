@@ -305,6 +305,8 @@
         "ai_recipe_save_key": "שמור מפתח",
         "ai_recipe_error": "שגיאה ביצירת המתכון. בדוק את המפתח ונסה שוב.",
         "ai_recipe_generate_again": "צור שוב",
+        "ai_recipe_preview_ingredients": "מרכיבים",
+        "ai_recipe_preview_steps": "שלבים",
         "import_text_btn": "ייבוא מטקסט",
         "import_text_modal_title": "ייבוא מתכון/מנה מטקסט",
         "import_text_placeholder": "הדבק כאן טקסט של מתכון או מנה...",

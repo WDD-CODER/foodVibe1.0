@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/appRoot/app.component.scss"],
+  "sourcesContent": [".app-content {\r\n  position: relative;\r\n  display: flex;\r\n  flex-direction: column;\r\n  box-sizing: border-box;\r\n}\r\n\r\n@media (max-width: 767px) {\r\n  .app-content {\r\n    padding-block-end: calc(3.5rem + env(safe-area-inset-bottom, 0px));\r\n  }\r\n}\r\n"],
+  "mappings": ";AAAA,CAAA;AACE,YAAA;AACA,WAAA;AACA,kBAAA;AACA,cAAA;;AAGF,OAAA,CAAA,SAAA,EAAA;AACE,GARF;AASI,uBAAA,KAAA,OAAA,EAAA,IAAA,sBAAA,EAAA;;;",
+  "names": []
+}

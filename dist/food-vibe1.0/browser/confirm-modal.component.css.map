@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/confirm-modal/confirm-modal.component.scss"],
+  "sourcesContent": [".confirm-modal-message {\r\n  margin-block-end: 1.25rem;\r\n\r\n  font-size: 0.9375rem;\r\n  color: var(--color-text-secondary);\r\n}\r\n\r\n.c-modal-card--danger .confirm-modal-message {\r\n  color: var(--color-text-main);\r\n}\r\n\r\n.c-modal-card--warning .confirm-modal-message {\r\n  color: var(--text-warning);\r\n}\r\n"],
+  "mappings": ";AAAA,CAAA;AACE,oBAAA;AAEA,aAAA;AACA,SAAA,IAAA;;AAGF,CAAA,qBAAA,CAPA;AAQE,SAAA,IAAA;;AAGF,CAAA,sBAAA,CAXA;AAYE,SAAA,IAAA;;",
+  "names": []
+}

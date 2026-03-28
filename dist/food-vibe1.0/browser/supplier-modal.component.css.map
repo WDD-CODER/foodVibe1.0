@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/supplier-modal/supplier-modal.component.scss"],
+  "sourcesContent": ["@layer components.supplier-modal {\r\n  /* Uses engine: .c-modal-overlay, .c-modal-card, .c-modal-card--md */\r\n}\r\n"],
+  "mappings": ";AAAA;;",
+  "names": []
+}

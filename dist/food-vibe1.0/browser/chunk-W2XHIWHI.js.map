@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/core/directives/select-on-focus.directive.ts"],
+  "sourcesContent": ["import { Directive, HostListener, ElementRef } from '@angular/core';\r\n\r\n@Directive({\r\n  selector: '[SelectOnFocus]',\r\n  standalone: true\r\n})\r\nexport class SelectOnFocusDirective {\r\n  constructor(private el: ElementRef<HTMLInputElement | HTMLTextAreaElement>) {}\r\n\r\n  @HostListener('focus')\r\n  onFocus() {\r\n    this.el.nativeElement.select();\r\n  }\r\n}"],
+  "mappings": ";;;;;;;;;;;AAMM,IAAO,yBAAP,MAAO,wBAAsB;EACb;EAApB,YAAoB,IAAsD;AAAtD,SAAA,KAAA;EAAyD;EAG7E,UAAO;AACL,SAAK,GAAG,cAAc,OAAM;EAC9B;;qCANW,yBAAsB,4BAAA,UAAA,CAAA;EAAA;yEAAtB,yBAAsB,WAAA,CAAA,CAAA,IAAA,iBAAA,EAAA,CAAA,GAAA,cAAA,SAAA,oCAAA,IAAA,KAAA;AAAA,QAAA,KAAA,GAAA;AAAtB,MAAA,qBAAA,SAAA,SAAA,kDAAA;AAAA,eAAA,IAAA,QAAA;MAAS,CAAA;;;;;sEAAT,wBAAsB,CAAA;UAJlC;WAAU;MACT,UAAU;MACV,YAAY;KACb;sCAKC,SAAO,CAAA;UADN;WAAa,OAAO;;;",
+  "names": []
+}
