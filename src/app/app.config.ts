@@ -12,6 +12,7 @@ import {
   ArrowUpDown,
   Archive,
   BookOpen,
+  Camera,
   LayoutDashboard,
   CalendarClock,
   ChevronDown,
@@ -92,6 +93,7 @@ export const appConfig: ApplicationConfig = {
     },
     importProvidersFrom(
       LucideAngularModule.pick({
+        Camera,
         Minus,
         Plus,
         Trash2,

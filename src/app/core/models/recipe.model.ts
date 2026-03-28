@@ -62,4 +62,6 @@ export interface Recipe {
   createdBy?: string;
   /** List of user _ids who have hidden this recipe from their view (soft-delete per user) */
   hiddenBy?: string[];
+  /** Base64 data-URL of the recipe photo, set by user upload in recipe-builder. */
+  imageUrl_?: string;
 }

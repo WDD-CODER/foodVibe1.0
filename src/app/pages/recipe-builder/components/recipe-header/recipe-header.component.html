@@ -1,6 +1,19 @@
 <div class="header-dashboard-container" [formGroup]="form()" dir="rtl">
-    <div class="image-square">
-        <img [src]="imageUrl() || placeholderPath" class="header-img" alt="" />
+    <div class="image-square" [class.is-readonly]="readonlyMode()">
+        <label class="img-upload-label">
+            <img [src]="imageUrl() || placeholderPath" class="header-img" alt="" />
+            @if (!imageUrl()) {
+                <span class="img-upload-prompt">
+                    <lucide-icon name="camera" [size]="20" />
+                </span>
+            }
+            @if (!readonlyMode()) {
+                <span class="img-upload-hover-overlay">
+                    <lucide-icon name="camera" [size]="18" />
+                </span>
+                <input type="file" accept="image/*" class="img-file-input" (change)="onImageSelected($event)" />
+            }
+        </label>
     </div>
 
     <div class="center-controls">

@@ -2,6 +2,19 @@
 
 ---
 
+### Plan 219 — Recipe header photo-picker (`plans/219-recipe-header-photo-picker.plan.md`)
+- [ ] recipe.model.ts — add `imageUrl_?: string` after `hiddenBy?`
+- [ ] recipe-builder.page.ts — add `recipeImageUrl_` signal after `isApproved_`
+- [ ] recipe-builder.page.ts — patch `patchFormFromRecipe` to set `recipeImageUrl_`
+- [ ] recipe-builder.page.ts — replace `buildRecipeFromForm` body to spread `imageUrl_`
+- [ ] recipe-builder.page.ts — add `recipeImageUrl_.set(null)` as first line of `resetToNewForm_`
+- [ ] recipe-builder.page.ts — add `onImageChange` method to `//UPDATE` group
+- [ ] recipe-builder.page.html — add `[imageUrl]`, `(imageChange)`, `[readonlyMode]` to `<app-recipe-header>`
+- [ ] recipe-header.component.ts — add `readonlyMode` input, `imageChange` output, `onImageSelected` method
+- [ ] recipe-header.component.html — replace `.image-square` div with label+input+overlay structure
+- [ ] app.config.ts — import `Camera` and add to `LucideAngularModule.pick`
+- [ ] recipe-header.component.scss — add cursor + `.img-upload-label` rules
+
 
 ### Plan 204-R — Inventory product-price util extraction (`plans/204-R-inventory-product-price-util.plan.md`)
 - [ ] Create `src/app/core/utils/product-price.util.ts` — three pure exports: `getProductUnits`, `getPricePerUnit`, `calcBuyPriceGlobal`
