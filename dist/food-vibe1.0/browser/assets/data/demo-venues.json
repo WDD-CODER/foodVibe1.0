@@ -1,0 +1,26 @@
+[
+  {
+    "_id": "ven_001",
+    "name_hebrew": "מטבח סטודיו (מקצועי)",
+    "environment_type_": "professional_kitchen",
+    "available_infrastructure_": [
+      {
+        "equipment_id_": "eq_001",
+        "available_quantity_": 4
+      },
+      {
+        "equipment_id_": "eq_003",
+        "available_quantity_": 2
+      },
+      {
+        "equipment_id_": "eq_004",
+        "available_quantity_": 10
+      },
+      {
+        "equipment_id_": "eq_005",
+        "available_quantity_": 6
+      }
+    ],
+    "created_at_": "2025-01-01T00:00:00.000Z"
+  }
+]
