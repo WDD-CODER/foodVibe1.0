@@ -347,6 +347,11 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 
 ---
 
+### Plan 229 — Point dev environment at local Express/MongoDB (`plans/229-dev-env-local-backend.plan.md`)
+
+- [ ] Edit `src/environments/environment.ts`: set apiUrl/authApiUrl to localhost:3000, useBackend/useBackendAuth to true
+- [ ] Run `ng build --configuration production` and confirm zero errors
+
 ## Plan Index (for reference)
 
 | Plan | Name | Status |
