@@ -10,6 +10,7 @@
       [placeholder]="'metadata_add_category' | translatePipe"
       (keyup.enter)="onAdd(newInput.value, newInput)">
     <button type="button" class="c-btn-primary" (click)="onAdd(newInput.value, newInput)"
+      [disabled]="!isLoggedIn()"
       [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
       {{ 'metadata_add' | translatePipe }}
     </button>
@@ -31,10 +32,12 @@
             }
             <div class="item-actions">
               <button type="button" class="btn-edit" (click)="onStartRename(key)"
+                [disabled]="!isLoggedIn()"
                 [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
                 <lucide-icon name="pencil" [size]="14"></lucide-icon>
               </button>
               <button type="button" class="c-icon-btn danger" (click)="onRemove(key)"
+                [disabled]="!isLoggedIn()"
                 [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
                 <lucide-icon name="trash-2" [size]="16"></lucide-icon>
               </button>

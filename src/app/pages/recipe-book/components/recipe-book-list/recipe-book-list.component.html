@@ -22,6 +22,7 @@
       (bulkDelete)="onBulkDeleteSelected($event)"
       (bulkEdit)="onBulkEdit($event)" />
     <button type="button" class="c-btn-primary" (click)="onAddRecipe()"
+      [disabled]="!isLoggedIn()"
       [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
       <lucide-icon name="plus" [size]="18"></lucide-icon>
       {{ 'add_recipe_dish' | translatePipe }}
@@ -124,28 +125,29 @@
         <div class="c-col-actions c-list-body-cell">
           <button type="button" class="c-icon-btn" (click)="onCookRecipe(recipe); $event.stopPropagation()"
             [attr.aria-label]="'cook' | translatePipe"
+            [disabled]="!isLoggedIn()"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
             <lucide-icon name="cooking-pot" [size]="18"></lucide-icon>
           </button>
-          @if (currentUserId_() && recipe.createdBy === currentUserId_()) {
-            @if (hidingId_() === recipe._id) {
-              <app-loader size="small" [inline]="true" />
-            } @else {
-              <button type="button" class="c-icon-btn" (click)="onHideRecipe(recipe); $event.stopPropagation()"
-                [attr.aria-label]="'hide' | translatePipe">
-                <lucide-icon name="eye-off" [size]="18"></lucide-icon>
-              </button>
-            }
+          @if (hidingId_() === recipe._id) {
+            <app-loader size="small" [inline]="true" />
+          } @else {
+            <button type="button" class="c-icon-btn" (click)="onHideRecipe(recipe); $event.stopPropagation()"
+              [attr.aria-label]="'hide' | translatePipe"
+              [disabled]="!currentUserId_() || recipe.createdBy !== currentUserId_()"
+              [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : (recipe.createdBy !== currentUserId_() ? ('not_your_recipe' | translatePipe) : null)">
+              <lucide-icon name="eye-off" [size]="18"></lucide-icon>
+            </button>
           }
-          @if (isAdmin_()) {
-            @if (permanentDeletingId_() === recipe._id) {
-              <app-loader size="small" [inline]="true" />
-            } @else {
-              <button type="button" class="c-icon-btn danger" (click)="onPermanentlyDeleteRecipe(recipe); $event.stopPropagation()"
-                [attr.aria-label]="'delete' | translatePipe">
-                <lucide-icon name="trash-2" [size]="18"></lucide-icon>
-              </button>
-            }
+          @if (permanentDeletingId_() === recipe._id) {
+            <app-loader size="small" [inline]="true" />
+          } @else {
+            <button type="button" class="c-icon-btn danger" (click)="onPermanentlyDeleteRecipe(recipe); $event.stopPropagation()"
+              [attr.aria-label]="'delete' | translatePipe"
+              [disabled]="!isAdmin_()"
+              [attr.title]="!isAdmin_() ? ('admin_only' | translatePipe) : null">
+              <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+            </button>
           }
         </div>
         <div class="col-select c-list-body-cell" role="cell">

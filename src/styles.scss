@@ -673,6 +673,21 @@ textarea.c-input {
     height: 2.75rem;
     opacity: 1;
   }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    filter: saturate(0);
+
+    @media (hover: hover) {
+      &:hover {
+        opacity: 0.3;
+        background: transparent;
+        color: var(--color-text-muted);
+        transform: none;
+      }
+    }
+  }
 }
 
 @media (max-width: $break-mobile) {
