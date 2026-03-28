@@ -30,6 +30,14 @@ const signupLimiter = rateLimit({
   message: { error: 'Too many signup attempts, please try again later' },
 });
 
+const refreshLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many refresh attempts, please try again later' },
+});
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -96,7 +104,11 @@ router.post('/signup', signupLimiter, async (req, res) => {
     if (emailExists) return res.status(409).json({ error: 'EMAIL_TAKEN' });
 
     // Angular already hashed the password client-side (PBKDF2 saltHex:hashHex).
-    // Store it as-is — never re-hash.
+    // Validate format before storing — reject anything that doesn't match.
+    const PBKDF2_FORMAT = /^[0-9a-f]{32}:[0-9a-f]{64}$/;
+    if (!PBKDF2_FORMAT.test(password)) {
+      return res.status(400).json({ error: 'INVALID_PASSWORD_FORMAT' });
+    }
     const passwordHash = password;
     const _id = makeId();
     const userData = { _id, name, email, imgUrl: imgUrl || '', passwordHash };
@@ -190,7 +202,7 @@ router.post('/login', loginLimiter, async (req, res) => {
 // Reads the fv_refresh httpOnly cookie, verifies it, issues a new 15m access token.
 // ---------------------------------------------------------------------------
 
-router.post('/refresh', async (req, res) => {
+router.post('/refresh', refreshLimiter, async (req, res) => {
   try {
     const refreshToken = req.cookies && req.cookies.fv_refresh;
     if (!refreshToken) return res.status(401).json({ error: 'NO_REFRESH_TOKEN' });
@@ -225,6 +237,20 @@ router.post('/refresh', async (req, res) => {
     console.error('[auth/refresh]', err);
     return res.status(500).json({ error: 'Server error' });
   }
+});
+
+// ---------------------------------------------------------------------------
+// POST /logout
+// Clears the httpOnly refresh cookie so the session cannot be silently renewed.
+// ---------------------------------------------------------------------------
+
+router.post('/logout', (req, res) => {
+  res.clearCookie('fv_refresh', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+  });
+  return res.json({ ok: true });
 });
 
 module.exports = router;

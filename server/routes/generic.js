@@ -7,6 +7,16 @@ const router = Router();
 // All routes require a valid JWT — reads are not public.
 router.use(verifyToken);
 
+// The auth entity type is managed exclusively by the auth router.
+// Block direct access via the generic data API.
+const BLOCKED_ENTITY_TYPES = new Set(['signed-users-db']);
+router.use('/:type', (req, res, next) => {
+  if (BLOCKED_ENTITY_TYPES.has(req.params.type)) {
+    return res.status(403).json({ error: 'Access to this entity type is not permitted' });
+  }
+  next();
+});
+
 // ---------------------------------------------------------------------------
 // GET /api/data/:type
 // Returns all entities of a given type as an array of their data objects.
