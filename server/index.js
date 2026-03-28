@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
 const { connectDb } = require('./db');
 const authRouter = require('./routes/auth');
 const genericRouter = require('./routes/generic');
@@ -30,6 +31,7 @@ app.options('*', cors(corsOptions));
 app.use(cors(corsOptions));
 
 app.use(express.json({ limit: '2mb' }));
+app.use(cookieParser());
 
 // ---------------------------------------------------------------------------
 // Routes

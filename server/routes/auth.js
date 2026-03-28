@@ -46,13 +46,33 @@ function makeId(length = 5) {
 
 /**
  * Constant-time string comparison. Returns false if lengths differ (no timing leak via length).
- * Used to compare Angular's PBKDF2 hash (saltHex:hashHex) directly against the stored hash.
  */
 function safeCompare(a, b) {
   const bufA = Buffer.from(String(a));
   const bufB = Buffer.from(String(b));
   if (bufA.length !== bufB.length) return false;
   return crypto.timingSafeEqual(bufA, bufB);
+}
+
+/**
+ * Verifies a plain-text password against a stored PBKDF2 hash of the form "saltHex:hashHex".
+ * Mirrors the client-side hashPassword() in auth-crypto.ts (100 000 iterations, SHA-256, 256-bit key).
+ * Legacy bare SHA-256 hashes (no colon, 64 chars) are also handled for backwards compatibility.
+ */
+function verifyPbkdf2(plain, stored) {
+  return new Promise((resolve, reject) => {
+    if (!stored.includes(':')) {
+      // Legacy SHA-256 (no salt) path
+      const digest = crypto.createHash('sha256').update(plain).digest('hex');
+      return resolve(safeCompare(digest, stored));
+    }
+    const [saltHex, hashHex] = stored.split(':');
+    const salt = Buffer.from(saltHex, 'hex');
+    crypto.pbkdf2(plain, salt, 100_000, 32, 'sha256', (err, derivedKey) => {
+      if (err) return reject(err);
+      resolve(safeCompare(derivedKey.toString('hex'), hashHex));
+    });
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -124,10 +144,8 @@ router.post('/login', loginLimiter, async (req, res) => {
 
     if (!stored.passwordHash) return res.status(401).json({ error: 'USER_NOT_FOUND' });
 
-    // Angular sends the PBKDF2 hash (saltHex:hashHex) as the password field.
-    // Compare directly against the stored hash using constant-time comparison.
-    // Legacy bare-SHA-256 hashes (no colon, 64 chars) are also compared this way.
-    const ok = safeCompare(password, stored.passwordHash);
+    // Re-derive using the salt embedded in the stored PBKDF2 hash, then constant-time compare.
+    const ok = await verifyPbkdf2(password, stored.passwordHash);
 
     if (!ok) {
       // Increment failed attempts; lock after 5 consecutive failures for 15 minutes
