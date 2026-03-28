@@ -54,9 +54,11 @@ $break-desktop: 1200px;
   --bg-warning: rgba(254, 243, 199, 0.7);
   --text-warning: #92400e;
   --border-warning: #f59e0b;
+  --color-warning-hover: #b45309;
 
   /* ---- Semantic: danger ---- */
   --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
   --bg-danger-subtle: rgba(254, 226, 226, 0.7);
 
   /* ---- Radii ---- */
@@ -477,7 +479,7 @@ textarea.c-input {
 
   @media (hover: hover) {
     &:hover {
-      background: #b91c1c;
+      background: var(--color-danger-hover);
     }
   }
 }
@@ -488,7 +490,7 @@ textarea.c-input {
 
   @media (hover: hover) {
     &:hover {
-      background: #b45309;
+      background: var(--color-warning-hover);
     }
   }
 }
@@ -726,7 +728,7 @@ textarea.c-input {
   font-size: 0.8125rem;
   font-weight: 600;
   text-align: center;
-  border-bottom: 1px solid var(--border-default);
+  border-block-end: 1px solid var(--border-default);
   backdrop-filter: var(--blur-glass);
   cursor: default;
 }
@@ -755,7 +757,7 @@ textarea.c-input {
   background: transparent;
   color: var(--color-text-main);
   font-size: 0.875rem;
-  border-bottom: 1px solid var(--border-row);
+  border-block-end: 1px solid var(--border-row);
   transition: background 0.15s ease;
 }
 

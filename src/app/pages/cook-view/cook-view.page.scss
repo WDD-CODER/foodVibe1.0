@@ -442,7 +442,7 @@ $cv-break-md: 56.25rem;
   overflow: hidden;
 
   border: 1px solid var(--cv-border-light);
-  border-radius: 0.625rem;
+  border-radius: var(--radius-md);
 }
 
 .ingredients-table-header,
@@ -451,7 +451,7 @@ $cv-break-md: 56.25rem;
   grid-template-columns: minmax(120px, 1fr) minmax(60px, auto) minmax(60px, auto);
   align-items: start;
 
-  gap: var(--space-xs);
+  gap: 0.375rem;
   padding: 0.625rem 0.875rem;
 }
 
@@ -567,7 +567,7 @@ $cv-break-md: 56.25rem;
 .conversion-badge {
   font-size: 0.8rem;
 
-  background: var(--color-primary-tint);
+  background: var(--color-primary-soft);
 
   border-radius: var(--radius-sm);
   margin-inline-end: 8px;

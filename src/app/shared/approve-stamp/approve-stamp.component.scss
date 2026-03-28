@@ -1,7 +1,7 @@
 .approve-stamp {
     position: fixed;
-    right:0rem;
-    bottom: 0;
+    inset-inline-end: 0;
+    inset-block-end: 0;
     z-index: 90;
 
     display: flex;
