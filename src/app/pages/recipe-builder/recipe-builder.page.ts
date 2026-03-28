@@ -348,23 +348,23 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         this.recipeId_.set(recipe._id);
         this.patchFormFromRecipe(recipe);
       } else {
-        const type = this.route_.snapshot.queryParams['type'] as string | undefined;
-        if (type === 'dish') {
-          this.recipeForm_.patchValue({
-            recipe_type: 'dish',
-            serving_portions: 1,
-          }, { emitEvent: false });
-          this.yieldConversionsArray.clear();
-          this.yieldConversionsArray.push(this.fb.group({ amount: [1], unit: ['dish'] }));
-          this.workflowArray.clear();
-          this.workflowArray.push(this.recipeFormService_.createPrepItemRow());
+        const aiDraft = this.aiRecipeDraft_.consume()
+        if (aiDraft) {
+          this.prefillFromAiDraft(aiDraft)
+        } else {
+          const type = this.route_.snapshot.queryParams['type'] as string | undefined;
+          if (type === 'dish') {
+            this.recipeForm_.patchValue({
+              recipe_type: 'dish',
+              serving_portions: 1,
+            }, { emitEvent: false });
+            this.yieldConversionsArray.clear();
+            this.yieldConversionsArray.push(this.fb.group({ amount: [1], unit: ['dish'] }));
+            this.workflowArray.clear();
+            this.workflowArray.push(this.recipeFormService_.createPrepItemRow());
+          }
         }
       }
-    }
-
-    const aiDraft = this.aiRecipeDraft_.consume()
-    if (aiDraft) {
-      this.prefillFromAiDraft(aiDraft)
     }
 
     if (this.ingredientsArray.length === 0) {

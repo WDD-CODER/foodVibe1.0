@@ -2,6 +2,25 @@
 
 ---
 
+### Plan 231 — Mongo URI Env Split (`plans/231-mongo-uri-env-split.plan.md`)
+- [x] `server/db.js` — rewrite to read single MONGO_URI (remove NODE_ENV branch, MONGO_LOCAL_URI/MONGO_REMOTE_URI)
+- [x] `server/.env` — replace split URIs with MONGO_URI=localhost, add PORT=3000, ALLOWED_ORIGIN
+- [x] Secrets audit — confirmed server/.env was never committed to git history
+
+---
+
+### Plan 230 — AI Recipe Flow Completion (`plans/230-ai-recipe-flow-completion.plan.md`)
+- [x] `recipe-book-list.component.spec.ts` — add Sparkles + HeroFabService + AiRecipeModalService mocks
+- [x] `ai-recipe-modal.service.ts` — void open(), private isOpen_, public isOpen accessor
+- [x] `ai-recipe-modal.component.ts` — add ChangeDetectionStrategy.OnPush
+- [x] `ai-recipe-modal.component.html` — update isOpen_() → isOpen()
+- [x] `recipe-builder.page.ts` — move draft consume() inside else block
+- [x] `dictionary.json` — add ai_recipe_preview_ingredients + ai_recipe_preview_steps
+- [x] Run ng build — zero errors confirmed
+- [x] Run ng test — recipe-book-list 9/9 passing; 49 pre-existing failures unchanged
+
+---
+
 ### Plan 228 — Backend Awareness in Agent Docs (`plans/228-backend-awareness-agents.plan.md`)
 - [x] `.claude/agents/software-architect.md` — add Backend Stack section
 - [x] `.claude/agents/product-manager.md` — add backend items to Quality Checklist

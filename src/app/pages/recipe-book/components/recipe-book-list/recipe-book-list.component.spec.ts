@@ -5,12 +5,15 @@ import { RecipeCostService } from '@services/recipe-cost.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { signal } from '@angular/core';
 import { of } from 'rxjs';
-import { LucideAngularModule, Search, Trash2, Pencil, Plus, Menu, X, ShieldAlert, ArrowUpDown, ArrowUp, ArrowDown, ChevronRight, ChevronLeft, ChevronDown, BookOpen, Tag, CircleX, CookingPot, CookingPotIcon } from 'lucide-angular';
+import { LucideAngularModule, Search, Trash2, Pencil, Plus, Menu, X, ShieldAlert, ArrowUpDown, ArrowUp, ArrowDown, ChevronRight, ChevronLeft, ChevronDown, BookOpen, Tag, CircleX, CookingPot, CookingPotIcon, Sparkles } from 'lucide-angular';
 import { Recipe } from '@models/recipe.model';
 import { TranslationService } from '@services/translation.service';
 import { UserService } from '@services/user.service';
 import { UserMsgService } from '@services/user-msg.service';
 import { AuthModalService } from '@services/auth-modal.service';
+import { HeroFabService } from '@services/hero-fab.service';
+import { AiRecipeModalService } from 'src/app/shared/ai-recipe-modal/ai-recipe-modal.service';
+import { MetadataRegistryService } from '@services/metadata-registry.service';
 
 describe('RecipeBookListComponent', () => {
   let component: RecipeBookListComponent;
@@ -36,6 +39,7 @@ describe('RecipeBookListComponent', () => {
     sessionStorage.removeItem('list-state:recipe-book');
     const mockKitchenState = {
       recipes_: mockRecipesSignal,
+      visibleRecipes_: mockRecipesSignal,
       products_: mockProductsSignal,
       deleteRecipe: jasmine.createSpy('deleteRecipe').and.returnValue({ subscribe: () => {} })
     };
@@ -43,7 +47,7 @@ describe('RecipeBookListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         RecipeBookListComponent,
-        LucideAngularModule.pick({ Search, Trash2, Pencil, Plus, Menu, X, ShieldAlert, ArrowUpDown, ArrowUp, ArrowDown, ChevronRight, ChevronLeft, ChevronDown, BookOpen, Tag, CircleX, CookingPot, CookingPotIcon })
+        LucideAngularModule.pick({ Search, Trash2, Pencil, Plus, Menu, X, ShieldAlert, ArrowUpDown, ArrowUp, ArrowDown, ChevronRight, ChevronLeft, ChevronDown, BookOpen, Tag, CircleX, CookingPot, CookingPotIcon, Sparkles })
       ],
       providers: [
         { provide: KitchenStateService, useValue: mockKitchenState },
@@ -53,7 +57,10 @@ describe('RecipeBookListComponent', () => {
         { provide: TranslationService, useValue: { translate: (k: string) => k || '' } },
         { provide: UserService, useValue: { isLoggedIn: () => true } },
         { provide: UserMsgService, useValue: { onSetWarningMsg: () => {} } },
-        { provide: AuthModalService, useValue: { open: () => {} } }
+        { provide: AuthModalService, useValue: { open: () => {} } },
+        { provide: HeroFabService, useValue: { setPageActions: jasmine.createSpy('setPageActions'), clearPageActions: jasmine.createSpy('clearPageActions') } },
+        { provide: AiRecipeModalService, useValue: { open: jasmine.createSpy('open'), isOpen: signal(false) } },
+        { provide: MetadataRegistryService, useValue: { allLabels_: signal([]), getLabelColor: () => '#78716C' } }
       ]
     }).compileComponents();
 

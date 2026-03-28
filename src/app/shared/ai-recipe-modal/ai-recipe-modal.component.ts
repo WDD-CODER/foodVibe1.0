@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
@@ -15,6 +15,7 @@ import { UserMsgService } from '@services/user-msg.service'
   imports: [CommonModule, LucideAngularModule, TranslatePipe, LoaderComponent],
   templateUrl: './ai-recipe-modal.component.html',
   styleUrl: './ai-recipe-modal.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AiRecipeModalComponent {
   protected readonly modalService = inject(AiRecipeModalService)
