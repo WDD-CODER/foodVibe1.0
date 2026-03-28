@@ -169,8 +169,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected selectedProductIds_ = signal<string[]>([]);
   protected historyFor_ = signal<{ entityType: VersionEntityType; entityId: string; entityName: string } | null>(null);
   protected deletingId_ = signal<string | null>(null);
-  protected hidingId_ = signal<string | null>(null);
-  protected permanentDeletingId_ = signal<string | null>(null);
+  protected removingId_ = signal<string | null>(null);
   protected duplicatingId_ = signal<string | null>(null);
   protected carouselHeaderIndex_ = signal(0);
 
@@ -643,23 +642,32 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected onHideRecipe(recipe: Recipe): void {
-    if (!this.requireAuthService.requireAuth()) return;
-    this.hidingId_.set(recipe._id);
+  private onHideRecipe(recipe: Recipe): void {
+    this.removingId_.set(recipe._id);
     this.kitchenState.hideRecipe(recipe).subscribe({
-      next: () => { this.hidingId_.set(null); },
-      error: () => { this.hidingId_.set(null); }
+      next: () => { this.removingId_.set(null); },
+      error: () => { this.removingId_.set(null); }
     });
   }
 
-  protected onPermanentlyDeleteRecipe(recipe: Recipe): void {
-    if (!this.requireAuthService.requireAuth()) return;
+  private onPermanentlyDeleteRecipe(recipe: Recipe): void {
     if (confirm('מחיקה קבועה — לא ניתן לשחזר. להמשיך?')) {
-      this.permanentDeletingId_.set(recipe._id);
+      this.removingId_.set(recipe._id);
       this.kitchenState.permanentlyDeleteRecipe(recipe).subscribe({
-        next: () => { this.permanentDeletingId_.set(null); },
-        error: () => { this.permanentDeletingId_.set(null); }
+        next: () => { this.removingId_.set(null); },
+        error: () => { this.removingId_.set(null); }
       });
+    }
+  }
+
+  protected onRemoveRecipe(recipe: Recipe): void {
+    if (!this.requireAuthService.requireAuth()) return;
+    if (this.isAdmin_()) {
+      this.onPermanentlyDeleteRecipe(recipe);
+    } else {
+      if (confirm('האם אתה בטוח שברצונך למחוק?')) {
+        this.onHideRecipe(recipe);
+      }
     }
   }
 
@@ -686,9 +694,15 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     if (!this.requireAuthService.requireAuth()) return;
     if (!confirm(`למחוק ${ids.length} מתכונים?`)) return;
     const recipes = this.kitchenState.recipes_().filter((r) => ids.includes(r._id ?? ''));
-    recipes.forEach((recipe) => {
-      this.kitchenState.deleteRecipe(recipe).subscribe({ next: () => {}, error: () => {} });
-    });
+    if (this.isAdmin_()) {
+      recipes.forEach((recipe) => {
+        this.kitchenState.permanentlyDeleteRecipe(recipe).subscribe({ next: () => {}, error: () => {} });
+      });
+    } else {
+      recipes.forEach((recipe) => {
+        this.kitchenState.hideRecipe(recipe).subscribe({ next: () => {}, error: () => {} });
+      });
+    }
     this.selection.clear();
   }
 

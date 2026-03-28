@@ -2,6 +2,13 @@
 
 ---
 
+### Plan 221 — Unify recipe delete button (`plans/221-unify-recipe-delete-button.plan.md`)
+- [x] `recipe-book-list.component.ts` — add `removingId_` signal; remove `hidingId_` and `permanentDeletingId_`
+- [x] `recipe-book-list.component.ts` — mark `onHideRecipe` and `onPermanentlyDeleteRecipe` private; update both to use `removingId_`
+- [x] `recipe-book-list.component.ts` — add `onRemoveRecipe(recipe)` unified public method with requireAuth gate + role-based confirm + routing
+- [x] `recipe-book-list.component.ts` — update `onBulkDeleteSelected` to call `hideRecipe` (non-admin) or `permanentlyDeleteRecipe` (admin) per recipe
+- [x] `recipe-book-list.component.html` — replace two-button block with single unified trash-2 button block guarded by `@if (isLoggedIn())`
+
 ### Plan 220 — Add recipe via AI (`plans/220-add-recipe-via-ai.plan.md`)
 - [x] `src/app/core/services/ai-recipe-draft.service.ts` — create AiRecipeDraft interface + AiRecipeDraftService
 - [x] `src/app/core/services/gemini.service.ts` — create GeminiService with localStorage key, fetch-based generateRecipe
