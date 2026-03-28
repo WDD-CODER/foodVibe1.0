@@ -1,19 +1,19 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
-/**
- * Connects to MongoDB Atlas using the MONGO_URI environment variable.
- * Throws if MONGO_URI is not set.
- * @returns {Promise<void>}
- */
 async function connectDb() {
-  const uri = process.env.NODE_ENV === 'production'
+  const isProduction = process.env.NODE_ENV === 'production'
+  const uri = isProduction
     ? process.env.MONGO_REMOTE_URI
-    : process.env.MONGO_LOCAL_URI;
-  if (!uri) throw new Error('MONGO_LOCAL_URI / MONGO_REMOTE_URI environment variable is required');
-  const jwtSecret = process.env.JWT_SECRET;
-  if (!jwtSecret) throw new Error('JWT_SECRET environment variable is required');
-  await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
-  console.log('MongoDB connected');
+    : process.env.MONGO_LOCAL_URI
+
+  if (!uri) {
+    const missing = isProduction ? 'MONGO_REMOTE_URI' : 'MONGO_LOCAL_URI'
+    throw new Error(`${missing} is not set in .env`)
+  }
+  if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET is not set in .env')
+
+  await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 })
+  console.log(`MongoDB connected [${isProduction ? 'Atlas' : 'Compass'}]`)
 }
 
-module.exports = { connectDb };
+module.exports = { connectDb }
