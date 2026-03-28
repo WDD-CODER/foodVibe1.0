@@ -2,16 +2,24 @@
 
 ---
 
+### Plan 227 — Render Deploy Config (`plans/227-render-deploy-config.plan.md`)
+- [x] `render.yaml` — create at repo root with web service config (rootDir: server, MONGO_REMOTE_URI, JWT_SECRET, ALLOWED_ORIGIN)
+- [x] `angular.json` — verify outputPath matches `dist/food-vibe1.0/browser` in server/index.js
+
+---
+
 ### Plan 226 — AI Text Import Parser (`plans/226-ai-text-import-parser.plan.md`)
-- [ ] `parsed-result.model.ts` — ParsedIngredient, ParsedStep, ParsedRecipe, ParsedDish, ParsedResult
-- [ ] `gemini.service.ts` — add generateRaw() generic method
-- [ ] `recipe-text-import-modal.service.ts` — signal-based open/close + result
-- [ ] `recipe-parser.service.ts` — wraps GeminiService; Observable<ParsedResult>; catchError
-- [ ] `recipe-text-import-modal/` — standalone component, 3 states, confidence warning
-- [ ] `recipe-header.component.ts+html` — importTextClick output + "ייבוא מטקסט" button
-- [ ] `recipe-builder.page.ts` — inject, patch form, type mismatch toasts
-- [ ] `recipe-builder.page.scss` — .just-filled animation
-- [ ] `app.component.ts+html` — register modal at root
+- [x] `parsed-result.model.ts` — ParsedIngredient, ParsedStep, ParsedRecipe, ParsedDish, ParsedResult
+- [x] `gemini.service.ts` — add parseText() via proxy
+- [x] `recipe-text-import-modal.service.ts` — signal-based open/close + result
+- [x] `recipe-parser.service.ts` — wraps GeminiService; Observable<ParsedResult>; catchError
+- [x] `recipe-text-import-modal/` — standalone component, 3 states, confidence warning
+- [x] `recipe-header.component.ts+html` — importTextClick output + "ייבוא מטקסט" button
+- [x] `recipe-builder.page.ts` — inject, patch form, type mismatch toasts
+- [x] `recipe-builder.page.scss` — .just-filled animation
+- [x] `app.component.ts+html` — register modal at root
+- [x] `dictionary.json` — Hebrew translation keys
+- [x] `server/routes/ai.js` — POST /parse-text route
 - [ ] `dictionary.json` — Hebrew translation keys
 
 ---
