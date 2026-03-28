@@ -9,22 +9,7 @@
         </button>
       </div>
 
-      @if (!geminiService.apiKey_()) {
-        <!-- Configure API key panel -->
-        <div class="ai-config-panel">
-          <p class="ai-config-label">{{ 'ai_recipe_configure_key' | translatePipe }}</p>
-          <input
-            type="password"
-            class="ai-key-input"
-            [placeholder]="'ai_recipe_key_placeholder' | translatePipe"
-            [value]="keyInput_()"
-            (input)="keyInput_.set($any($event.target).value)"
-          />
-          <button type="button" class="c-btn-primary" [disabled]="!keyInput_()" (click)="onSaveKey()">
-            {{ 'ai_recipe_save_key' | translatePipe }}
-          </button>
-        </div>
-      } @else if (!draft_()) {
+      @if (!draft_()) {
         <!-- Prompt input -->
         <div class="ai-prompt-panel">
           <textarea
@@ -35,28 +20,6 @@
             rows="4"
           ></textarea>
           <div class="ai-modal-footer">
-            <button
-              type="button"
-              class="c-btn-ghost ai-configure-link"
-              (click)="configuring_.set(!configuring_())"
-            >
-              <lucide-icon name="settings" [size]="14"></lucide-icon>
-              {{ 'ai_recipe_configure_key' | translatePipe }}
-            </button>
-            @if (configuring_()) {
-              <div class="ai-config-inline">
-                <input
-                  type="password"
-                  class="ai-key-input"
-                  [placeholder]="'ai_recipe_key_placeholder' | translatePipe"
-                  [value]="keyInput_()"
-                  (input)="keyInput_.set($any($event.target).value)"
-                />
-                <button type="button" class="c-btn-ghost" [disabled]="!keyInput_()" (click)="onSaveKey()">
-                  {{ 'ai_recipe_save_key' | translatePipe }}
-                </button>
-              </div>
-            }
             <button
               type="button"
               class="c-btn-primary"

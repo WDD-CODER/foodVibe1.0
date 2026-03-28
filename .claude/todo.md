@@ -2,6 +2,31 @@
 
 ---
 
+### Plan 226 — AI Text Import Parser (`plans/226-ai-text-import-parser.plan.md`)
+- [ ] `parsed-result.model.ts` — ParsedIngredient, ParsedStep, ParsedRecipe, ParsedDish, ParsedResult
+- [ ] `gemini.service.ts` — add generateRaw() generic method
+- [ ] `recipe-text-import-modal.service.ts` — signal-based open/close + result
+- [ ] `recipe-parser.service.ts` — wraps GeminiService; Observable<ParsedResult>; catchError
+- [ ] `recipe-text-import-modal/` — standalone component, 3 states, confidence warning
+- [ ] `recipe-header.component.ts+html` — importTextClick output + "ייבוא מטקסט" button
+- [ ] `recipe-builder.page.ts` — inject, patch form, type mismatch toasts
+- [ ] `recipe-builder.page.scss` — .just-filled animation
+- [ ] `app.component.ts+html` — register modal at root
+- [ ] `dictionary.json` — Hebrew translation keys
+
+---
+
+### Plan 225 — Gemini AI Proxy — Key Off Client (`plans/225-gemini-ai-proxy.plan.md`)
+- [x] `server/routes/ai.js` — create: POST /generate behind verifyToken, calls Gemini with process.env.GEMINI_API_KEY
+- [x] `server/index.js` — mount aiRouter at /api/v1/ai
+- [x] `.env` — add GEMINI_API_KEY= placeholder
+- [x] `gemini.service.ts` — remove apiKey_ signal + localStorage; inject HttpClient; proxy call to /api/v1/ai/generate
+- [x] `ai-recipe-modal.component.ts` — remove configuring_, keyInput_, onSaveKey()
+- [x] `ai-recipe-modal.component.html` — remove key-config panel blocks
+- [x] Run ng build — verify zero errors
+
+---
+
 ### Plan 223 — Backend Auth Wire + cookie-parser Fix (`plans/223-backend-auth-wire.plan.md`)
 - [x] `server/` — npm install cookie-parser
 - [x] `server/index.js` — add cookieParser() middleware after express.json()
