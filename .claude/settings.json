@@ -67,7 +67,13 @@
       "mcp__playwright__browser_navigate_back",
       "mcp__playwright__browser_resize",
       "mcp__playwright__browser_close",
-      "mcp__playwright__browser_tabs"
+      "mcp__playwright__browser_tabs",
+      "Write(.interface-design/**)",
+      "Edit(.interface-design/**)",
+      "Bash(mkdir:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(git -C:*)"
     ]
   },
   "enableAllProjectMcpServers": false,
