@@ -50,6 +50,7 @@
             {{ 'view_inventory' | translatePipe }}
           </button>
           <button type="button" class="link-btn" data-testid="btn-add-product" (click)="goToAddProduct()"
+            [disabled]="!isLoggedIn()"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
             {{ 'add_product' | translatePipe }}
           </button>

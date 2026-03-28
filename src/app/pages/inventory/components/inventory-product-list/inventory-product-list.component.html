@@ -28,6 +28,7 @@
       (bulkDelete)="onBulkDeleteSelected($event)"
       (bulkEdit)="onBulkEdit($event)" />
     <button type="button" class="c-btn-primary" (click)="onAddProduct()"
+      [disabled]="!isLoggedIn()"
       [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
       <lucide-icon name="plus" [size]="18"></lucide-icon>
       {{ 'add_product' | translatePipe }}
@@ -111,6 +112,7 @@
         <div class="c-col-actions c-list-body-cell" role="cell">
           <button type="button" class="c-icon-btn" (click)="onEditProduct(product._id); $event.stopPropagation()"
             [attr.aria-label]="'edit' | translatePipe"
+            [disabled]="!isLoggedIn()"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
             <lucide-icon name="pencil" [size]="18"></lucide-icon>
           </button>
@@ -119,6 +121,7 @@
           } @else {
             <button type="button" class="c-icon-btn danger" (click)="onDeleteProduct(product._id); $event.stopPropagation()"
               [attr.aria-label]="'delete' | translatePipe"
+              [disabled]="!isLoggedIn()"
               [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>
             </button>
