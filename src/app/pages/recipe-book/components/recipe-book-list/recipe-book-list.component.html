@@ -133,7 +133,7 @@
             @if (removingId_() === recipe._id) {
               <app-loader size="small" [inline]="true" />
             } @else {
-              <button type="button" class="c-icon-btn" (click)="onRemoveRecipe(recipe); $event.stopPropagation()"
+              <button type="button" class="c-icon-btn danger" (click)="onRemoveRecipe(recipe); $event.stopPropagation()"
                 [attr.aria-label]="'delete' | translatePipe">
                 <lucide-icon name="trash-2" [size]="18"></lucide-icon>
               </button>

@@ -47,8 +47,21 @@ export class GeminiService {
 
     const data = await response.json() as { candidates?: { content?: { parts?: { text?: string }[] } }[] }
     const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
-    const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
 
-    return JSON.parse(cleaned) as AiRecipeDraft
+    // Strip fences anywhere in the string — Gemini sometimes adds preamble text
+    const fencePattern = /```(?:json)?\s*([\s\S]*?)```/i
+    const fenceMatch = fencePattern.exec(raw)
+    const cleaned = (fenceMatch ? fenceMatch[1] : raw).trim()
+
+    if (!cleaned) {
+      throw new Error('Gemini החזיר תשובה ריקה')
+    }
+
+    try {
+      return JSON.parse(cleaned) as AiRecipeDraft
+    } catch {
+      console.error('[GeminiService] parse failed, raw response:', raw)
+      throw new Error('Gemini החזיר JSON לא תקין — נסה שוב')
+    }
   }
 }
