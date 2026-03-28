@@ -14,8 +14,8 @@ Update `src/environments/environment.ts` so `apiUrl`, `authApiUrl`, `useBackend`
 
 ## Atomic Sub-tasks
 
-- [ ] Edit `src/environments/environment.ts`: set `apiUrl` and `authApiUrl` to `'http://localhost:3000'`, `useBackend` and `useBackendAuth` to `true`
-- [ ] Run `ng build --configuration production` and confirm zero errors
+- [x] Edit `src/environments/environment.ts`: set `apiUrl` and `authApiUrl` to `'http://localhost:3000'`, `useBackend` and `useBackendAuth` to `true`
+- [x] Run `ng build --configuration production` and confirm zero errors
 
 ## Constraints
 
