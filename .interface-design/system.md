@@ -53,6 +53,8 @@ Teal (herb) + amber (pass lamp) + sky (steel reflection). Do not remove or simpl
 | `--color-primary-glow` | `rgba(20,184,166,0.25)` | Focus glow |
 | `--color-accent-gold` | `#a0833f` | Pass lamp amber / saffron |
 | `--color-danger` | `#dc2626` | Destructive actions only |
+| `--color-danger-hover` | `#b91c1c` | Danger button hover state |
+| `--color-warning-hover` | `#b45309` | Warning button hover state |
 | `--color-success` | `#10b981` | Approval / saved states |
 
 ### Surfaces (elevation, light → high)
@@ -163,6 +165,8 @@ Base unit: **4px (0.25rem)**. All spacing is multiples of 4.
 
 Sharper = more technical. Rounder = more approachable. Mix within this scale only — never ad-hoc values.
 
+**`50%` rule:** `border-radius: 50%` is permitted only on elements with an explicit equal `width` and `height` (avatars, FABs, circular badges). For pill shapes with variable width, always use `--radius-full` (999px).
+
 ---
 
 ## Animation
@@ -217,6 +221,7 @@ Full engine source: `src/styles.scss`. New patterns must extend these — no div
 - All layouts use logical properties: `padding-inline`, `margin-inline`, `border-inline-start`, `inset-inline`
 - Root containers carry `dir="rtl"`
 - Never use `left`/`right` in new styles — always `inline-start`/`inline-end`
+- Exception: fixed-position chrome elements with an intentional physical corner (e.g. the hero FAB is always bottom-left). Use physical `left`/`right` and add a comment explaining the exception.
 - Text direction: Hebrew canonical values flow RTL; Latin metadata may appear inline
 
 ---

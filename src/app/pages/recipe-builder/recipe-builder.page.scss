@@ -285,7 +285,7 @@
   .logistics-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-xs);
+    gap: 0.375rem;
   }
 
   .logistics-chip-wrap {
@@ -408,7 +408,7 @@
       cursor: pointer;
 
       &:hover:not(:disabled) {
-        background: var(--color-primary-tint);
+        background: var(--color-primary-soft);
         border-color: var(--color-primary);
       }
       &:disabled {

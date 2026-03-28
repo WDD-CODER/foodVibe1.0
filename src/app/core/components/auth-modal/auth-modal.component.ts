@@ -31,6 +31,7 @@ export class AuthModalComponent {
   protected email = '';
   protected password = '';
   protected confirmPassword = '';
+  protected isAdminSignup = false;
   protected imgPreview = signal<string | null>(null);
   protected errorKey = signal<string | null>(null);
   protected isSubmitting = signal(false);
@@ -93,7 +94,7 @@ export class AuthModalComponent {
 
     if (this.isSignUp) {
       this.userService.signup(
-        { name: trimmedName, email: this.email.trim(), imgUrl: this.imgBase64 ?? undefined },
+        { name: trimmedName, email: this.email.trim(), imgUrl: this.imgBase64 ?? undefined, role: this.isAdminSignup ? 'admin' : 'user' },
         trimmedPassword
       ).subscribe({
         next: () => this._onSuccess(),
@@ -134,6 +135,7 @@ export class AuthModalComponent {
     this.email = '';
     this.password = '';
     this.confirmPassword = '';
+    this.isAdminSignup = false;
     this.showPassword_.set(false);
     this.showConfirmPassword_.set(false);
     this.imgBase64 = null;

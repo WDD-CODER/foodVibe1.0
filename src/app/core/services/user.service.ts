@@ -45,8 +45,7 @@ export class UserService {
                     name: newUser.name,
                     email: newUser.email,
                     imgUrl: newUser.imgUrl,
-                    // role is always 'user' at signup; admin must be set out-of-band
-                    role: 'user' as const,
+                    role: (newUser.role ?? 'user') as 'admin' | 'user',
                     passwordHash
                   } as StoredUser)
                 )
