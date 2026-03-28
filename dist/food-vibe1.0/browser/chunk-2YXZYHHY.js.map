@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/core/services/restore-choice-modal.service.ts"],
-  "sourcesContent": ["import { Injectable, signal } from '@angular/core';\r\n\r\nexport type RestoreChoice = 'replace' | 'add-new';\r\n\r\n@Injectable({ providedIn: 'root' })\r\nexport class RestoreChoiceModalService {\r\n  private readonly isOpen_ = signal(false);\r\n  private resolve_: ((value: RestoreChoice | null) => void) | null = null;\r\n\r\n  readonly isOpen = this.isOpen_.asReadonly();\r\n\r\n  open(): Promise<RestoreChoice | null> {\r\n    this.isOpen_.set(true);\r\n    return new Promise(resolve => {\r\n      this.resolve_ = resolve;\r\n    });\r\n  }\r\n\r\n  choose(choice: RestoreChoice | null): void {\r\n    this.resolve_?.(choice);\r\n    this.resolve_ = null;\r\n    this.isOpen_.set(false);\r\n  }\r\n}\r\n"],
-  "mappings": ";;;;;;;;AAKM,IAAO,4BAAP,MAAO,2BAAyB;EACnB,UAAU,OAAO,KAAK;EAC/B,WAA2D;EAE1D,SAAS,KAAK,QAAQ,WAAU;EAEzC,OAAI;AACF,SAAK,QAAQ,IAAI,IAAI;AACrB,WAAO,IAAI,QAAQ,aAAU;AAC3B,WAAK,WAAW;IAClB,CAAC;EACH;EAEA,OAAO,QAA4B;AACjC,SAAK,WAAW,MAAM;AACtB,SAAK,WAAW;AAChB,SAAK,QAAQ,IAAI,KAAK;EACxB;;qCAjBW,4BAAyB;EAAA;4EAAzB,4BAAyB,SAAzB,2BAAyB,WAAA,YADZ,OAAM,CAAA;;;sEACnB,2BAAyB,CAAA;UADrC;WAAW,EAAE,YAAY,OAAM,CAAE;;;",
-  "names": []
-}

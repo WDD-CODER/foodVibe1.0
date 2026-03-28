@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/pages/menu-library/menu-library.page.scss"],
-  "sourcesContent": ["/* menu-library.page — cssLayer: global token, five-group vertical rhythm */\r\n:host {\r\n  display: block;\r\n\r\n  min-height: 100vh;\r\n\r\n  background-color: var(--bg-body);\r\n}\r\n"],
-  "mappings": ";;;AACA;AACE,WAAA;AAEA,cAAA;AAEA,oBAAA,IAAA;;",
-  "names": []
-}

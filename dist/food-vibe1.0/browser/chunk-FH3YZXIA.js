@@ -1,0 +1,1 @@
+import{da as a,g as i}from"./chunk-EPX2Y7DR.js";function r(){let n=a(!1);function e(t){return i(this,null,function*(){n.set(!0);try{return yield t()}finally{n.set(!1)}})}function s(t){n.set(t)}return{isSaving_:n.asReadonly(),withSaving:e,setSaving:s}}export{r as a};

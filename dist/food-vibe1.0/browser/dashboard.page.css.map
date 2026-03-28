@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/pages/dashboard/dashboard.page.scss"],
-  "sourcesContent": [".dashboard-shell {\n  display: flex;\n  flex-direction: column;\n  gap: 0;\n  padding: 0;\n  // min-height: 100vh;\n}\n\n.dashboard-content {\n  flex: 1;\n  min-height: 0;\n  padding: 1.5rem;\n}\n\n.dashboard-metadata-layout {\n  display: flex;\n  flex-direction: column;\n\n  gap: 1.5rem;\n}\n"],
-  "mappings": ";AAAA,CAAA;AACE,WAAA;AACA,kBAAA;AACA,OAAA;AACA,WAAA;;AAIF,CAAA;AACE,QAAA;AACA,cAAA;AACA,WAAA;;AAGF,CAAA;AACE,WAAA;AACA,kBAAA;AAEA,OAAA;;",
-  "names": []
-}

@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/pages/suppliers/suppliers.page.ts", "src/app/pages/suppliers/suppliers.page.html"],
-  "sourcesContent": ["import { ChangeDetectionStrategy, Component } from '@angular/core';\r\nimport { RouterOutlet } from '@angular/router';\r\n\r\n@Component({\r\n  selector: 'app-suppliers-page',\r\n  standalone: true,\r\n  imports: [RouterOutlet],\r\n  templateUrl: './suppliers.page.html',\r\n  styleUrl: './suppliers.page.scss',\r\n  changeDetection: ChangeDetectionStrategy.OnPush,\r\n})\r\nexport class SuppliersPage {}\r\n", "<router-outlet></router-outlet>\r\n"],
-  "mappings": ";;;;;;;;;;;AAWM,IAAO,gBAAP,MAAO,eAAa;;qCAAb,gBAAa;EAAA;yEAAb,gBAAa,WAAA,CAAA,CAAA,oBAAA,CAAA,GAAA,OAAA,GAAA,MAAA,GAAA,UAAA,SAAA,uBAAA,IAAA,KAAA;AAAA,QAAA,KAAA,GAAA;ACX1B,MAAA,oBAAA,GAAA,eAAA;;oBDMY,YAAY,GAAA,QAAA,CAAA,sIAAA,GAAA,iBAAA,EAAA,CAAA;;;sEAKX,eAAa,CAAA;UARzB;uBACW,sBAAoB,YAClB,MAAI,SACP,CAAC,YAAY,GAAC,iBAGN,wBAAwB,QAAM,UAAA,uCAAA,QAAA,CAAA,4KAAA,EAAA,CAAA;;;;6EAEpC,eAAa,EAAA,WAAA,iBAAA,UAAA,6CAAA,YAAA,GAAA,CAAA;AAAA,GAAA;",
-  "names": []
-}

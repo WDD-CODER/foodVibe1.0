@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/shared/list-selection/list-row-checkbox.component.scss"],
-  "sourcesContent": ["@layer components.list-selection {\r\n\r\n  :host {\r\n    display: block;\r\n  }\r\n\r\n  .list-row-checkbox {\r\n    display: flex;\r\n    align-items: center;\r\n    justify-content: center;\r\n\r\n    min-width: 0;\r\n    padding: 0.25rem;\r\n\r\n    cursor: pointer;\r\n\r\n    input[type='checkbox'] {\r\n      width: 0.75rem;\r\n      height: 0.75rem;\r\n      margin: 0;\r\n\r\n      cursor: pointer;\r\n      accent-color: var(--color-primary);\r\n    }\r\n  }\r\n}\r\n"],
-  "mappings": ";AAAA;AAEE;AACE,aAAA;;AAGF,GAAA;AACE,aAAA;AACA,iBAAA;AACA,qBAAA;AAEA,eAAA;AACA,aAAA;AAEA,YAAA;;AAEA,GAVF,kBAUE,KAAA,CAAA;AACE,WAAA;AACA,YAAA;AACA,YAAA;AAEA,YAAA;AACA,kBAAA,IAAA;;;",
-  "names": []
-}
