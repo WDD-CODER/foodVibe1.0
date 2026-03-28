@@ -2,6 +2,14 @@
 
 ---
 
+### Plan 228 — Backend Awareness in Agent Docs (`plans/228-backend-awareness-agents.plan.md`)
+- [x] `.claude/agents/software-architect.md` — add Backend Stack section
+- [x] `.claude/agents/product-manager.md` — add backend items to Quality Checklist
+- [x] `.claude/agents/qa-engineer.md` — add API Coverage to Test Strategy
+- [x] `server/breadcrumbs.md` — create
+
+---
+
 ### Plan 227 — Render Deploy Config (`plans/227-render-deploy-config.plan.md`)
 - [x] `render.yaml` — create at repo root with web service config (rootDir: server, MONGO_REMOTE_URI, JWT_SECRET, ALLOWED_ORIGIN)
 - [x] `angular.json` — verify outputPath matches `dist/food-vibe1.0/browser` in server/index.js

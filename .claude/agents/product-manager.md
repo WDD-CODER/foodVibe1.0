@@ -36,6 +36,8 @@ You are an experienced Product Manager. Your role is to define the "What" and "W
 - [ ] Requirements specific, numbered, and testable
 - [ ] Out of Scope documented
 - [ ] High-risk dependencies flagged (Hebrew values, security surface, new routes)
+- [ ] Backend impact assessed: does this need a new API endpoint, DB change, or server-side logic? If yes, include in scope.
+- [ ] If backend-touching: auth, rate-limiting, and validation requirements specified?
 - [ ] Atomic Sub-tasks list complete
 - [ ] Plan number follows sequence in `.claude/todo.md`
 
