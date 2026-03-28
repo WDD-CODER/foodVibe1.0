@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy, signal, computed, effect, afterNextRender } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal, computed, effect, afterNextRender, OnInit, OnDestroy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,6 +7,8 @@ import { filter } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 
 import { KitchenStateService } from '@services/kitchen-state.service';
+import { HeroFabService } from '@services/hero-fab.service';
+import { AiRecipeModalService } from 'src/app/shared/ai-recipe-modal/ai-recipe-modal.service';
 import { RecipeCostService } from '@services/recipe-cost.service';
 import { TranslationService } from '@services/translation.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
@@ -46,7 +48,7 @@ type RecipeBulkField = 'labels_' | 'recipe_type_';
   styleUrl: './recipe-book-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RecipeBookListComponent {
+export class RecipeBookListComponent implements OnInit, OnDestroy {
   private readonly kitchenState = inject(KitchenStateService);
   private readonly router = inject(Router);
   private readonly recipeCostService = inject(RecipeCostService);
@@ -56,6 +58,19 @@ export class RecipeBookListComponent {
   protected readonly isLoggedIn = this.userService.isLoggedIn;
   private readonly requireAuthService = inject(RequireAuthService);
   private readonly userMsg = inject(UserMsgService);
+  private readonly heroFab = inject(HeroFabService);
+  private readonly aiRecipeModal = inject(AiRecipeModalService);
+
+  ngOnInit(): void {
+    this.heroFab.setPageActions(
+      [{ labelKey: 'add_recipe_ai', icon: 'sparkles', run: () => { void this.aiRecipeModal.open() } }],
+      'replace'
+    )
+  }
+
+  ngOnDestroy(): void {
+    this.heroFab.clearPageActions()
+  }
 
   protected readonly currentUserId_ = computed(() => this.userService.user_()?._id ?? null);
   protected readonly isAdmin_ = computed(() => this.userService.user_()?.role === 'admin');
