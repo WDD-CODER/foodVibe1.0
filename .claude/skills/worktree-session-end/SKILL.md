@@ -37,5 +37,5 @@ Present options:
 
 1. Kill dev server by port: read `.worktree-port`, then `netstat -ano` + `taskkill /PID <pid> /F`
 2. `git -C <mainRepoPath> pull origin main`
-3. `git worktree remove <path>`
-4. Report: `"Worktree removed. Back on main."`
+3. Output: `"Type /exit → select 'Remove worktree' to complete cleanup. Claude Code handles the directory removal safely after exiting."`
+4. Report: `"Ready to exit. Run /exit → Remove worktree to complete cleanup."`
