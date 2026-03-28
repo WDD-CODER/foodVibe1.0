@@ -2,11 +2,9 @@ const { Router } = require('express');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
-const Entity = require('../models/entity.model');
+const User = require('../models/user.model');
 
 const router = Router();
-
-const AUTH_ENTITY_TYPE = 'signed-users-db';
 const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '30d';
 
@@ -96,11 +94,11 @@ router.post('/signup', signupLimiter, async (req, res) => {
     }
 
     // Check username uniqueness
-    const nameExists = await Entity.findOne({ entityType: AUTH_ENTITY_TYPE, 'data.name': name }).lean();
+    const nameExists = await User.findOne({ name }).lean();
     if (nameExists) return res.status(409).json({ error: 'USERNAME_TAKEN' });
 
     // Check email uniqueness
-    const emailExists = await Entity.findOne({ entityType: AUTH_ENTITY_TYPE, 'data.email': email }).lean();
+    const emailExists = await User.findOne({ email }).lean();
     if (emailExists) return res.status(409).json({ error: 'EMAIL_TAKEN' });
 
     // Angular already hashed the password client-side (PBKDF2 saltHex:hashHex).
@@ -111,8 +109,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
     }
     const passwordHash = password;
     const _id = makeId();
-    const userData = { _id, name, email, imgUrl: imgUrl || '', passwordHash };
-    await Entity.create({ _id, entityType: AUTH_ENTITY_TYPE, data: userData });
+    await User.create({ _id, name, email, imgUrl: imgUrl || '', passwordHash });
 
     const token = jwt.sign({ userId: _id, name }, process.env.JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
     const refreshToken = jwt.sign({ userId: _id }, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
@@ -124,7 +121,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
-    const publicUser = { _id, name, email, imgUrl: userData.imgUrl };
+    const publicUser = { _id, name, email, imgUrl: imgUrl || '' };
     return res.status(201).json({ token, user: publicUser });
   } catch (err) {
     console.error('[auth/signup]', err);
@@ -144,43 +141,38 @@ router.post('/login', loginLimiter, async (req, res) => {
       return res.status(400).json({ error: 'name and password are required' });
     }
 
-    const doc = await Entity.findOne({ entityType: AUTH_ENTITY_TYPE, 'data.name': name }).lean();
-    if (!doc) return res.status(401).json({ error: 'USER_NOT_FOUND' });
-
-    const stored = doc.data;
+    const user = await User.findOne({ name }).lean();
+    if (!user) return res.status(401).json({ error: 'USER_NOT_FOUND' });
 
     // Account lockout check
-    if (stored.lockedUntil && stored.lockedUntil > Date.now()) {
+    if (user.lockedUntil && user.lockedUntil > Date.now()) {
       return res.status(423).json({ error: 'ACCOUNT_LOCKED' });
     }
 
-    if (!stored.passwordHash) return res.status(401).json({ error: 'USER_NOT_FOUND' });
+    if (!user.passwordHash) return res.status(401).json({ error: 'USER_NOT_FOUND' });
 
     // Re-derive using the salt embedded in the stored PBKDF2 hash, then constant-time compare.
-    const ok = await verifyPbkdf2(password, stored.passwordHash);
+    const ok = await verifyPbkdf2(password, user.passwordHash);
 
     if (!ok) {
       // Increment failed attempts; lock after 5 consecutive failures for 15 minutes
-      const failedAttempts = (stored.failedAttempts || 0) + 1;
+      const failedAttempts = (user.failedAttempts || 0) + 1;
       const lockedUntil = failedAttempts >= 5 ? Date.now() + 15 * 60 * 1000 : null;
-      await Entity.updateOne(
-        { _id: doc._id },
-        { 'data.failedAttempts': failedAttempts, 'data.lockedUntil': lockedUntil }
-      );
+      await User.updateOne({ _id: user._id }, { failedAttempts, lockedUntil });
       return res.status(401).json({ error: 'USER_NOT_FOUND' });
     }
 
     // Reset failed attempts on success
-    if (stored.failedAttempts) {
-      await Entity.updateOne({ _id: doc._id }, { 'data.failedAttempts': 0, 'data.lockedUntil': null });
+    if (user.failedAttempts) {
+      await User.updateOne({ _id: user._id }, { failedAttempts: 0, lockedUntil: null });
     }
 
     const token = jwt.sign(
-      { userId: stored._id, name: stored.name },
+      { userId: user._id, name: user.name },
       process.env.JWT_SECRET,
       { expiresIn: ACCESS_TOKEN_EXPIRY }
     );
-    const refreshToken = jwt.sign({ userId: stored._id }, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+    const refreshToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 
     res.cookie('fv_refresh', refreshToken, {
       httpOnly: true,
@@ -189,7 +181,7 @@ router.post('/login', loginLimiter, async (req, res) => {
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
-    const publicUser = { _id: stored._id, name: stored.name, email: stored.email, imgUrl: stored.imgUrl };
+    const publicUser = { _id: user._id, name: user.name, email: user.email, imgUrl: user.imgUrl };
     return res.json({ token, user: publicUser });
   } catch (err) {
     console.error('[auth/login]', err);
@@ -214,17 +206,16 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
       return res.status(401).json({ error: 'INVALID_REFRESH_TOKEN' });
     }
 
-    const doc = await Entity.findOne({ entityType: AUTH_ENTITY_TYPE, 'data._id': payload.userId }).lean();
-    if (!doc) return res.status(401).json({ error: 'USER_NOT_FOUND' });
+    const user = await User.findById(payload.userId).lean();
+    if (!user) return res.status(401).json({ error: 'USER_NOT_FOUND' });
 
-    const stored = doc.data;
     const token = jwt.sign(
-      { userId: stored._id, name: stored.name },
+      { userId: user._id, name: user.name },
       process.env.JWT_SECRET,
       { expiresIn: ACCESS_TOKEN_EXPIRY }
     );
 
-    const newRefreshToken = jwt.sign({ userId: stored._id }, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+    const newRefreshToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
     res.cookie('fv_refresh', newRefreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
