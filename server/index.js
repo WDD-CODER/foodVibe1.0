@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');
 const { connectDb } = require('./db');
 const authRouter = require('./routes/auth');
 const genericRouter = require('./routes/generic');
+const aiRouter = require('./routes/ai');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -47,6 +48,7 @@ app.use(cookieParser());
 // ---------------------------------------------------------------------------
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/data', genericRouter);
+app.use('/api/v1/ai', aiRouter);
 
 app.get('/api/v1/health', (_req, res) => res.json({ ok: true, ts: Date.now() }));
 

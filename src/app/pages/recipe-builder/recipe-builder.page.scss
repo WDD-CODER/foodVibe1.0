@@ -628,3 +628,14 @@
     gap: 0.25rem;
   }
 }
+
+/* Text-import just-filled highlight: brief glow on patched fields */
+.recipe-builder-container.just-filled .recipe-name-input,
+.recipe-builder-container.just-filled .section-card {
+  animation: just-filled-fade 1.5s ease forwards;
+}
+
+@keyframes just-filled-fade {
+  0%   { box-shadow: 0 0 0 2px var(--color-primary, #4CAF50); }
+  100% { box-shadow: none; }
+}

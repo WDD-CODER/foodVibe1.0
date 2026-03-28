@@ -32,6 +32,7 @@ import {
   Eye,
   EyeOff,
   Sparkles,
+  ScanText,
   FileDown,
   FilePlus,
   Filter,
@@ -164,7 +165,8 @@ export const appConfig: ApplicationConfig = {
         CookingPotIcon,
         Star,
         Lock,
-        Sparkles
+        Sparkles,
+        ScanText
       })
     )
   ]

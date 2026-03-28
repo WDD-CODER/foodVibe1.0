@@ -6,8 +6,10 @@ const mongoose = require('mongoose');
  * @returns {Promise<void>}
  */
 async function connectDb() {
-  const uri = process.env.MONGO_URI;
-  if (!uri) throw new Error('MONGO_URI environment variable is required');
+  const uri = process.env.NODE_ENV === 'production'
+    ? process.env.MONGO_REMOTE_URI
+    : process.env.MONGO_LOCAL_URI;
+  if (!uri) throw new Error('MONGO_LOCAL_URI / MONGO_REMOTE_URI environment variable is required');
   const jwtSecret = process.env.JWT_SECRET;
   if (!jwtSecret) throw new Error('JWT_SECRET environment variable is required');
   await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });

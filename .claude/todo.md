@@ -2,10 +2,35 @@
 
 ---
 
-### Plan 224 — Auth Refresh Guard + withCredentials Hardening (`plans/224-auth-refresh-guard-withcredentials.plan.md`)
-- [x] `auth.interceptor.ts` — add `isRefreshing` flag + `refreshSubject$` Subject to queue concurrent 401s during token refresh
-- [x] `http-storage.adapter.ts` — add `withCredentials: true` to all HTTP calls (query, get, post, put, remove, appendExisting)
-- [x] Run `ng build` — verify zero errors
+### Plan 227 — Render Deploy Config (`plans/227-render-deploy-config.plan.md`)
+- [x] `render.yaml` — create at repo root with web service config (rootDir: server, MONGO_REMOTE_URI, JWT_SECRET, ALLOWED_ORIGIN)
+- [x] `angular.json` — verify outputPath matches `dist/food-vibe1.0/browser` in server/index.js
+
+---
+
+### Plan 226 — AI Text Import Parser (`plans/226-ai-text-import-parser.plan.md`)
+- [x] `parsed-result.model.ts` — ParsedIngredient, ParsedStep, ParsedRecipe, ParsedDish, ParsedResult
+- [x] `gemini.service.ts` — add parseText() via proxy
+- [x] `recipe-text-import-modal.service.ts` — signal-based open/close + result
+- [x] `recipe-parser.service.ts` — wraps GeminiService; Observable<ParsedResult>; catchError
+- [x] `recipe-text-import-modal/` — standalone component, 3 states, confidence warning
+- [x] `recipe-header.component.ts+html` — importTextClick output + "ייבוא מטקסט" button
+- [x] `recipe-builder.page.ts` — inject, patch form, type mismatch toasts
+- [x] `recipe-builder.page.scss` — .just-filled animation
+- [x] `app.component.ts+html` — register modal at root
+- [x] `dictionary.json` — Hebrew translation keys
+- [x] `server/routes/ai.js` — POST /parse-text route
+
+---
+
+### Plan 225 — Gemini AI Proxy — Key Off Client (`plans/225-gemini-ai-proxy.plan.md`)
+- [x] `server/routes/ai.js` — create: POST /generate behind verifyToken, calls Gemini with process.env.GEMINI_API_KEY
+- [x] `server/index.js` — mount aiRouter at /api/v1/ai
+- [x] `.env` — add GEMINI_API_KEY= placeholder
+- [x] `gemini.service.ts` — remove apiKey_ signal + localStorage; inject HttpClient; proxy call to /api/v1/ai/generate
+- [x] `ai-recipe-modal.component.ts` — remove configuring_, keyInput_, onSaveKey()
+- [x] `ai-recipe-modal.component.html` — remove key-config panel blocks
+- [x] Run ng build — verify zero errors
 
 ---
 

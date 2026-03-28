@@ -37,6 +37,8 @@ import { ExportToolbarOverlayComponent } from '../../shared/export-toolbar-overl
 import { ApproveStampComponent } from 'src/app/shared/approve-stamp/approve-stamp.component';
 import { ConfirmModalService } from '@services/confirm-modal.service';
 import { AiRecipeDraftService, type AiRecipeDraft } from '@services/ai-recipe-draft.service';
+import { RecipeTextImportModalService } from '@services/recipe-text-import-modal.service';
+import type { ParsedResult, ParsedRecipe, ParsedDish } from '@models/parsed-result.model';
 import { useSavingState } from 'src/app/core/utils/saving-state.util';
 import { CounterComponent } from 'src/app/shared/counter/counter.component';
 
@@ -83,6 +85,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private readonly confirmModal_ = inject(ConfirmModalService);
   private readonly heroFab_ = inject(HeroFabService);
   private readonly aiRecipeDraft_ = inject(AiRecipeDraftService);
+  private readonly textImportModal_ = inject(RecipeTextImportModalService);
 
   //SIGNALS
   private readonly saving = useSavingState();
@@ -464,6 +467,80 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       }
     }
   }
+
+  // ─── Text Import ─────────────────────────────────────────────────
+
+  protected onImportTextClick(): void {
+    this.textImportModal_.open((result) => this.prefillFromParsedResult(result))
+  }
+
+  private prefillFromParsedResult(result: ParsedResult): void {
+    const currentType = this.recipeForm_.get('recipe_type')?.value as string
+
+    if (result.type === 'recipe' && currentType === 'dish') {
+      this.userMsg_.onSetWarningMsg(this.translation_.translate('import_text_type_mismatch_dish_in_recipe'))
+      return
+    }
+    if (result.type === 'dish' && currentType !== 'dish') {
+      this.userMsg_.onSetWarningMsg(this.translation_.translate('import_text_type_mismatch_recipe_in_dish'))
+      return
+    }
+
+    if (result.type === 'recipe') {
+      const data = result.data as ParsedRecipe
+
+      this.recipeForm_.patchValue(
+        {
+          name_hebrew: data.name_hebrew ?? '',
+          serving_portions: data.serving_portions ?? 1,
+          labels: data.labels ?? []
+        },
+        { emitEvent: false }
+      )
+
+      this.ingredientsArray.clear()
+      for (const ing of data.ingredients ?? []) {
+        this.ingredientsArray.push(this.recipeFormService_.createIngredientGroup())
+        const last = this.ingredientsArray.at(this.ingredientsArray.length - 1)
+        last.patchValue({ name_hebrew: ing.name_hebrew, amount_net: ing.amount_net, unit: ing.unit })
+      }
+      if (this.ingredientsArray.length === 0) this.addNewIngredientRow()
+
+      this.workflowArray.clear()
+      const steps = data.steps ?? []
+      if (steps.length > 0) {
+        steps.forEach((step, i) => {
+          const group = this.recipeFormService_.createStepGroup(step.order ?? i + 1)
+          group.patchValue({ instruction: step.instruction })
+          this.workflowArray.push(group)
+        })
+      } else {
+        this.workflowArray.push(this.recipeFormService_.createStepGroup(1))
+      }
+    } else {
+      const data = result.data as ParsedDish
+
+      this.recipeForm_.patchValue(
+        {
+          name_hebrew: data.name_hebrew ?? '',
+          serving_portions: data.serving_portions ?? 1,
+          labels: data.labels ?? []
+        },
+        { emitEvent: false }
+      )
+    }
+
+    this.applyJustFilledHighlight_()
+    this.ingredientsFormVersion_.update(v => v + 1)
+  }
+
+  private applyJustFilledHighlight_(): void {
+    const el = document.querySelector('.recipe-builder-container') as HTMLElement | null
+    el?.classList.add('just-filled')
+    setTimeout(() => el?.classList.remove('just-filled'), 1500)
+  }
+
+  // ─── Export ───────────────────────────────────────────────────────
 
   protected openExportFromHeroFab(): void {
     // Defer to next tick so the opening click is not interpreted as click-outside

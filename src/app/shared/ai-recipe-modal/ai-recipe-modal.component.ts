@@ -18,7 +18,7 @@ import { UserMsgService } from '@services/user-msg.service'
 })
 export class AiRecipeModalComponent {
   protected readonly modalService = inject(AiRecipeModalService)
-  protected readonly geminiService = inject(GeminiService)
+  private readonly geminiService = inject(GeminiService)
   private readonly aiDraftService = inject(AiRecipeDraftService)
   private readonly router = inject(Router)
   private readonly userMsg = inject(UserMsgService)
@@ -26,8 +26,6 @@ export class AiRecipeModalComponent {
   protected readonly prompt_ = signal('')
   protected readonly loading_ = signal(false)
   protected readonly draft_ = signal<AiRecipeDraft | null>(null)
-  protected readonly configuring_ = signal(false)
-  protected readonly keyInput_ = signal('')
 
   async onGenerate(): Promise<void> {
     this.loading_.set(true)
@@ -53,9 +51,4 @@ export class AiRecipeModalComponent {
     this.modalService.close()
   }
 
-  onSaveKey(): void {
-    this.geminiService.setApiKey(this.keyInput_())
-    this.configuring_.set(false)
-    this.keyInput_.set('')
-  }
 }
