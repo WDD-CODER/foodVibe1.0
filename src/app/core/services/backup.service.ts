@@ -17,6 +17,7 @@ import { PreparationRegistryService } from './preparation-registry.service';
 import { MetadataRegistryService } from './metadata-registry.service';
 import { UserMsgService } from './user-msg.service';
 import { LoggingService } from './logging.service';
+import { environment } from '../../../environments/environment';
 
 const BACKUP_FILE_VERSION = 1;
 
@@ -46,17 +47,30 @@ export class BackupService {
 
   /**
    * Export all backup-backed keys to a single JSON file (download).
+   * In backend mode: reads from MongoDB via StorageService.query().
+   * In localStorage mode: reads from backup_<key> / <key> in localStorage.
    */
   async exportAllToFile(): Promise<void> {
     const data: Record<string, unknown> = {};
-    for (const key of BACKUP_ENTITY_TYPES) {
-      const backupKey = `backup_${key}`;
-      const raw = localStorage.getItem(backupKey) ?? localStorage.getItem(key);
-      if (raw != null) {
+    if (environment.useBackend) {
+      for (const key of BACKUP_ENTITY_TYPES) {
         try {
-          data[key] = JSON.parse(raw);
+          const entities = await this.storage.query(key, 0);
+          if (entities.length > 0) data[key] = entities;
         } catch {
-          data[key] = raw;
+          // Key may not exist yet — skip
+        }
+      }
+    } else {
+      for (const key of BACKUP_ENTITY_TYPES) {
+        const backupKey = `backup_${key}`;
+        const raw = localStorage.getItem(backupKey) ?? localStorage.getItem(key);
+        if (raw != null) {
+          try {
+            data[key] = JSON.parse(raw);
+          } catch {
+            data[key] = raw;
+          }
         }
       }
     }
@@ -79,8 +93,13 @@ export class BackupService {
 
   /**
    * Restore from in-app backup keys (backup_*) into main keys and reload data services.
+   * Only supported in localStorage mode — in backend mode the DB is the source of truth.
    */
   async restoreFromBackup(): Promise<void> {
+    if (environment.useBackend) {
+      this.userMsg.onSetWarningMsg('שחזור מגיבוי פנימי אינו זמין במצב שרת — ייבא קובץ גיבוי במקום');
+      return;
+    }
     let restored = 0;
     for (const key of BACKUP_ENTITY_TYPES) {
       const backupKey = `backup_${key}`;
@@ -103,6 +122,8 @@ export class BackupService {
 
   /**
    * Import from a previously exported backup file. Overwrites current data for keys present in the file.
+   * In backend mode: writes to MongoDB via StorageService.replaceAll().
+   * In localStorage mode: writes to localStorage (main key + backup_<key>).
    */
   async importFromFile(file: File): Promise<void> {
     const text = await file.text();
@@ -122,14 +143,25 @@ export class BackupService {
       this.userMsg.onSetErrorMsg('אין נתונים נתמכים בקובץ');
       return;
     }
-    for (const key of keys) {
-      const value = payload.data[key];
-      try {
-        localStorage.setItem(key, JSON.stringify(value));
-        const backupKey = `backup_${key}`;
-        localStorage.setItem(backupKey, JSON.stringify(value));
-      } catch (err) {
-        this.logging.warn({ event: 'backup.write_failed', message: 'Backup write failed', context: { key, err } });
+    if (environment.useBackend) {
+      for (const key of keys) {
+        const value = payload.data[key];
+        try {
+          const entities = Array.isArray(value) ? value : (value != null ? [value] : []);
+          await this.storage.replaceAll(key, entities);
+        } catch (err) {
+          this.logging.warn({ event: 'backup.write_failed', message: 'Backup write failed', context: { key, err } });
+        }
+      }
+    } else {
+      for (const key of keys) {
+        const value = payload.data[key];
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+          localStorage.setItem(`backup_${key}`, JSON.stringify(value));
+        } catch (err) {
+          this.logging.warn({ event: 'backup.write_failed', message: 'Backup write failed', context: { key, err } });
+        }
       }
     }
     await this.reloadAllDataServices();
