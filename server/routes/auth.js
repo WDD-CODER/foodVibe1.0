@@ -30,6 +30,14 @@ const signupLimiter = rateLimit({
   message: { error: 'Too many signup attempts, please try again later' },
 });
 
+const refreshLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many refresh attempts, please try again later' },
+});
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -46,13 +54,33 @@ function makeId(length = 5) {
 
 /**
  * Constant-time string comparison. Returns false if lengths differ (no timing leak via length).
- * Used to compare Angular's PBKDF2 hash (saltHex:hashHex) directly against the stored hash.
  */
 function safeCompare(a, b) {
   const bufA = Buffer.from(String(a));
   const bufB = Buffer.from(String(b));
   if (bufA.length !== bufB.length) return false;
   return crypto.timingSafeEqual(bufA, bufB);
+}
+
+/**
+ * Verifies a plain-text password against a stored PBKDF2 hash of the form "saltHex:hashHex".
+ * Mirrors the client-side hashPassword() in auth-crypto.ts (100 000 iterations, SHA-256, 256-bit key).
+ * Legacy bare SHA-256 hashes (no colon, 64 chars) are also handled for backwards compatibility.
+ */
+function verifyPbkdf2(plain, stored) {
+  return new Promise((resolve, reject) => {
+    if (!stored.includes(':')) {
+      // Legacy SHA-256 (no salt) path
+      const digest = crypto.createHash('sha256').update(plain).digest('hex');
+      return resolve(safeCompare(digest, stored));
+    }
+    const [saltHex, hashHex] = stored.split(':');
+    const salt = Buffer.from(saltHex, 'hex');
+    crypto.pbkdf2(plain, salt, 100_000, 32, 'sha256', (err, derivedKey) => {
+      if (err) return reject(err);
+      resolve(safeCompare(derivedKey.toString('hex'), hashHex));
+    });
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -76,7 +104,11 @@ router.post('/signup', signupLimiter, async (req, res) => {
     if (emailExists) return res.status(409).json({ error: 'EMAIL_TAKEN' });
 
     // Angular already hashed the password client-side (PBKDF2 saltHex:hashHex).
-    // Store it as-is — never re-hash.
+    // Validate format before storing — reject anything that doesn't match.
+    const PBKDF2_FORMAT = /^[0-9a-f]{32}:[0-9a-f]{64}$/;
+    if (!PBKDF2_FORMAT.test(password)) {
+      return res.status(400).json({ error: 'INVALID_PASSWORD_FORMAT' });
+    }
     const passwordHash = password;
     const _id = makeId();
     const userData = { _id, name, email, imgUrl: imgUrl || '', passwordHash };
@@ -124,10 +156,8 @@ router.post('/login', loginLimiter, async (req, res) => {
 
     if (!stored.passwordHash) return res.status(401).json({ error: 'USER_NOT_FOUND' });
 
-    // Angular sends the PBKDF2 hash (saltHex:hashHex) as the password field.
-    // Compare directly against the stored hash using constant-time comparison.
-    // Legacy bare-SHA-256 hashes (no colon, 64 chars) are also compared this way.
-    const ok = safeCompare(password, stored.passwordHash);
+    // Re-derive using the salt embedded in the stored PBKDF2 hash, then constant-time compare.
+    const ok = await verifyPbkdf2(password, stored.passwordHash);
 
     if (!ok) {
       // Increment failed attempts; lock after 5 consecutive failures for 15 minutes
@@ -172,7 +202,7 @@ router.post('/login', loginLimiter, async (req, res) => {
 // Reads the fv_refresh httpOnly cookie, verifies it, issues a new 15m access token.
 // ---------------------------------------------------------------------------
 
-router.post('/refresh', async (req, res) => {
+router.post('/refresh', refreshLimiter, async (req, res) => {
   try {
     const refreshToken = req.cookies && req.cookies.fv_refresh;
     if (!refreshToken) return res.status(401).json({ error: 'NO_REFRESH_TOKEN' });
@@ -207,6 +237,20 @@ router.post('/refresh', async (req, res) => {
     console.error('[auth/refresh]', err);
     return res.status(500).json({ error: 'Server error' });
   }
+});
+
+// ---------------------------------------------------------------------------
+// POST /logout
+// Clears the httpOnly refresh cookie so the session cannot be silently renewed.
+// ---------------------------------------------------------------------------
+
+router.post('/logout', (req, res) => {
+  res.clearCookie('fv_refresh', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+  });
+  return res.json({ ok: true });
 });
 
 module.exports = router;

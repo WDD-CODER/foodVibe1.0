@@ -2,6 +2,29 @@
 
 ---
 
+### Plan 223 — Backend Auth Wire + cookie-parser Fix (`plans/223-backend-auth-wire.plan.md`)
+- [x] `server/` — npm install cookie-parser
+- [x] `server/index.js` — add cookieParser() middleware after express.json()
+- [x] `server/routes/auth.js` — fix login: replace direct safeCompare with PBKDF2 re-derivation
+- [x] `user.service.ts` — add HttpClient import + inject; add environment import + authBase
+- [x] `user.service.ts` — add storeToken() / clearToken() helpers using 'fv_token'
+- [x] `user.service.ts` — add callBackendLogin(), callBackendSignup(), callBackendRefresh(), callBackendLogout()
+- [x] `user.service.ts` — update login() with useBackendAuth branch + HTTP error mapping
+- [x] `user.service.ts` — update signup() with useBackendAuth branch (hash before send) + error mapping
+- [x] `user.service.ts` — update logout() — add clearToken() + fire-and-forget logout POST
+- [x] `auth.interceptor.ts` — add silent token refresh on 401 with URL guard to prevent infinite loop
+- [x] Run ng build — verify zero errors
+
+---
+
+### Plan 222 — Dev Machine Open Ports Security Hardening (`plans/222-dev-machine-open-ports-security.plan.md`)
+- [ ] Disable Dell SupportAssist service in `services.msc` — verify port 9012 closed
+- [ ] Identify and resolve port 5700 (VMware/Hyper-V/Windows component)
+- [ ] Verify MongoDB auth enabled in `mongod.cfg` — confirm `--auth` flag present
+- [ ] Evaluate SMB usage — disable ports 445/139 if not file-sharing on LAN
+
+---
+
 ### Plan 221 — Unify recipe delete button (`plans/221-unify-recipe-delete-button.plan.md`)
 - [x] `recipe-book-list.component.ts` — add `removingId_` signal; remove `hidingId_` and `permanentDeletingId_`
 - [x] `recipe-book-list.component.ts` — mark `onHideRecipe` and `onPermanentlyDeleteRecipe` private; update both to use `removingId_`
@@ -455,5 +478,6 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 190 | Master De-Spaghettification Map | Planned |
 | 192 | Pillar 3 Reactive Loop Hardening (A13–A17) | Planned |
 | 196 | Commit flow speed audit | Planned |
+| 222 | Dev Machine Open Ports Security Hardening | Planned |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
