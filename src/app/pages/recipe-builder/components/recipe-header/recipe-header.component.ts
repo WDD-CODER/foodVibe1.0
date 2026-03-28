@@ -36,6 +36,7 @@ export class RecipeHeaderComponent {
   form = input.required<FormGroup>();
   recipeType = input<'dish' | 'preparation'>();
   imageUrl = input<string | null>(null);
+  readonlyMode = input<boolean>(false);
   currentCost = input<number>(0);
   totalWeightG = input<number>(0);
   totalBrutoWeightG = input<number>(0);
@@ -48,6 +49,7 @@ export class RecipeHeaderComponent {
 
   // OUTPUTS
   openUnitCreator = output<string>();
+  imageChange = output<string>();
 
   // YIELD MANAGER
   readonly yield = new RecipeYieldManager(
@@ -190,5 +192,17 @@ export class RecipeHeaderComponent {
     } catch {
       // Error already shown by registry
     }
+  }
+
+  // UPDATE
+  onImageSelected(event: Event): void {
+    if (this.readonlyMode()) return
+    const file = (event.target as HTMLInputElement).files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      this.imageChange.emit(reader.result as string)
+    }
+    reader.readAsDataURL(file)
   }
 }

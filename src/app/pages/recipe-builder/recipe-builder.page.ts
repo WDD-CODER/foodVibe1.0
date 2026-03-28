@@ -107,6 +107,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   /** Whether the current recipe is marked approved (stamp sets this; used in buildRecipeFromForm and for stamp UI). */
   protected isApproved_ = signal(false);
 
+  /** User-uploaded recipe image as base64 data-URL; lives outside the form. */
+  protected recipeImageUrl_ = signal<string | null>(null)
+
   /** Section cards collapsed by default (true = collapsed). */
   protected tableLogicCollapsed_ = signal(true);
   protected workflowLogicCollapsed_ = signal(true);
@@ -260,6 +263,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   /** Resets the form to a blank state for creating a new recipe/dish. */
   private resetToNewForm_(): void {
+    this.recipeImageUrl_.set(null)
     this.recipeId_.set(null);
     this.isApproved_.set(false);
     this.cachedPrepItems_ = [];
@@ -457,6 +461,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private patchFormFromRecipe(recipe: Recipe): void {
     this.isApproved_.set(recipe.is_approved_);
     this.recipeFormService_.patchFormFromRecipe(this.recipeForm_, recipe);
+    this.recipeImageUrl_.set(recipe.imageUrl_ ?? null)
   }
 
 
@@ -757,6 +762,10 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   //UPDATE
 
+  protected onImageChange(url: string): void {
+    this.recipeImageUrl_.set(url)
+  }
+
   addNewIngredientRow(): void {
     const newGroup = this.recipeFormService_.createIngredientGroup();
     this.ingredientsArray.push(newGroup);
@@ -978,7 +987,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   }
 
   private buildRecipeFromForm(): Recipe {
-    return this.recipeFormService_.buildRecipeFromForm(this.recipeForm_, this.recipeId_(), this.isApproved_());
+    const recipe = this.recipeFormService_.buildRecipeFromForm(this.recipeForm_, this.recipeId_(), this.isApproved_())
+    const url = this.recipeImageUrl_()
+    return url ? { ...recipe, imageUrl_: url } : recipe
   }
 
   //DELETE
