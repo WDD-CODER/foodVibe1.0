@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/shared/add-item-modal/add-item-modal.component.scss"],
-  "sourcesContent": ["/* Uses engine: .c-modal-overlay, .c-modal-card, .c-modal-body, .c-input-stack, .c-modal-actions, .c-btn-ghost, .c-btn-primary */\r\n\r\n/* Stack above other app modals (e.g. quick-add) when opened from within them */\r\n:host .c-modal-overlay {\r\n  z-index: 1100;\r\n}\r\n"],
-  "mappings": ";AAGA,MAAA,CAAA;AACE,WAAA;;",
-  "names": []
-}

@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/core/services/auth-modal.service.ts"],
-  "sourcesContent": ["import { Injectable, signal } from '@angular/core';\r\n\r\nexport type AuthMode = 'sign-in' | 'sign-up';\r\n\r\n@Injectable({ providedIn: 'root' })\r\nexport class AuthModalService {\r\n  readonly isOpen = signal(false);\r\n  readonly mode = signal<AuthMode>('sign-in');\r\n\r\n  open(mode: AuthMode = 'sign-in'): void {\r\n    this.mode.set(mode);\r\n    this.isOpen.set(true);\r\n  }\r\n\r\n  close(): void {\r\n    this.isOpen.set(false);\r\n  }\r\n}\r\n"],
-  "mappings": ";;;;;;;;AAKM,IAAO,mBAAP,MAAO,kBAAgB;EAClB,SAAS,OAAO,KAAK;EACrB,OAAO,OAAiB,SAAS;EAE1C,KAAK,OAAiB,WAAS;AAC7B,SAAK,KAAK,IAAI,IAAI;AAClB,SAAK,OAAO,IAAI,IAAI;EACtB;EAEA,QAAK;AACH,SAAK,OAAO,IAAI,KAAK;EACvB;;qCAXW,mBAAgB;EAAA;4EAAhB,mBAAgB,SAAhB,kBAAgB,WAAA,YADH,OAAM,CAAA;;;sEACnB,kBAAgB,CAAA;UAD5B;WAAW,EAAE,YAAY,OAAM,CAAE;;;",
-  "names": []
-}

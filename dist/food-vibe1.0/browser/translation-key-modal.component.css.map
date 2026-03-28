@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/shared/translation-key-modal/translation-key-modal.component.scss"],
-  "sourcesContent": ["/* Stack above other modals (e.g. quick-add, add-item) when opened from within them */\r\n:host .c-modal-overlay {\r\n  z-index: 1200;\r\n}\r\n\r\n@layer components.translation-key-modal {\r\n  .translation-key-validation-error {\r\n    font-size: 0.75rem;\r\n    font-weight: 500;\r\n    color: var(--color-danger);\r\n  }\r\n\r\n  .translation-key-modal-hint {\r\n    display: block;\r\n    font-size: 0.8125rem;\r\n    color: var(--color-text-muted, #64748b);\r\n    margin-top: 0.25rem;\r\n  }\r\n}\r\n"],
-  "mappings": ";AACA,MAAA,CAAA;AACE,WAAA;;AAGF;AACE,GAAA;AACE,eAAA;AACA,iBAAA;AACA,WAAA,IAAA;;AAGF,GAAA;AACE,aAAA;AACA,eAAA;AACA,WAAA,IAAA,kBAAA,EAAA;AACA,gBAAA;;;",
-  "names": []
-}
