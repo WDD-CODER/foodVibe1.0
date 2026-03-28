@@ -16,10 +16,11 @@ import { HeroFabComponent } from '../core/components/hero-fab/hero-fab.component
 import { LabelCreationModalComponent } from 'src/app/shared/label-creation-modal/label-creation-modal.component';
 import { AuthModalComponent } from '../core/components/auth-modal/auth-modal.component';
 import { SupplierModalComponent } from '../shared/supplier-modal/supplier-modal.component';
+import { AiRecipeModalComponent } from '../shared/ai-recipe-modal/ai-recipe-modal.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, HeaderComponent, UserMsg, UnitCreatorModal, TranslationKeyModalComponent, LabelCreationModalComponent, AddItemModalComponent, QuickAddProductModalComponent, AddEquipmentModalComponent, GlobalSpecificModalComponent, ConfirmModalComponent, RestoreChoiceModalComponent, LoaderComponent, HeroFabComponent, AuthModalComponent, SupplierModalComponent],
+  imports: [RouterOutlet, HeaderComponent, UserMsg, UnitCreatorModal, TranslationKeyModalComponent, LabelCreationModalComponent, AddItemModalComponent, QuickAddProductModalComponent, AddEquipmentModalComponent, GlobalSpecificModalComponent, ConfirmModalComponent, RestoreChoiceModalComponent, LoaderComponent, HeroFabComponent, AuthModalComponent, SupplierModalComponent, AiRecipeModalComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

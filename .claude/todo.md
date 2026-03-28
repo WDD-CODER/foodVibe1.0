@@ -2,6 +2,16 @@
 
 ---
 
+### Plan 220 — Add recipe via AI (`plans/220-add-recipe-via-ai.plan.md`)
+- [ ] `src/app/core/services/ai-recipe-draft.service.ts` — create AiRecipeDraft interface + AiRecipeDraftService
+- [ ] `src/app/core/services/gemini.service.ts` — create GeminiService with localStorage key, fetch-based generateRecipe
+- [ ] `src/app/shared/ai-recipe-modal/ai-recipe-modal.service.ts` — create promise-based modal service
+- [ ] `src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts + .html + .scss` — create modal component
+- [ ] `src/app/appRoot/app.component.ts + .html` — wire AiRecipeModalComponent into root
+- [ ] `recipe-book-list.component.ts` — add OnInit/OnDestroy + FAB action for AI recipe
+- [ ] `recipe-builder.page.ts` — inject AiRecipeDraftService, add prefillFromAiDraft, call from ngOnInit
+- [ ] `public/assets/data/dictionary.json` — add AI recipe translation keys to "general" section
+
 ### Plan 219 — Recipe header photo-picker (`plans/219-recipe-header-photo-picker.plan.md`)
 - [ ] recipe.model.ts — add `imageUrl_?: string` after `hiddenBy?`
 - [ ] recipe-builder.page.ts — add `recipeImageUrl_` signal after `isApproved_`
