@@ -15,6 +15,13 @@ const PORT = process.env.PORT || 3000;
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGIN || 'http://localhost:4200').split(',').map(s => s.trim())
 
 // ---------------------------------------------------------------------------
+// Static files — served BEFORE CORS so Angular assets are never blocked
+// MUST also come before /api/ catch-all
+// ---------------------------------------------------------------------------
+const STATIC_DIR = path.join(__dirname, '..', 'dist', 'food-vibe1.0', 'browser')
+app.use(express.static(STATIC_DIR))
+
+// ---------------------------------------------------------------------------
 // Middleware
 // ---------------------------------------------------------------------------
 app.use(helmet());
@@ -53,11 +60,8 @@ app.use('/api/v1/ai', aiRouter);
 app.get('/api/v1/health', (_req, res) => res.json({ ok: true, ts: Date.now() }));
 
 // ---------------------------------------------------------------------------
-// Static files — Angular production build
-// MUST come after all /api/ routes so the catch-all does not swallow API calls
+// Angular SPA fallback — catch-all after all /api/ routes
 // ---------------------------------------------------------------------------
-const STATIC_DIR = path.join(__dirname, '..', 'dist', 'food-vibe1.0', 'browser')
-app.use(express.static(STATIC_DIR))
 app.get('*', (_req, res) => {
   res.sendFile(path.join(STATIC_DIR, 'index.html'))
 })

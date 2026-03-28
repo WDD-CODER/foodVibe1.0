@@ -14,4 +14,4 @@ services:
       - key: JWT_SECRET
         sync: false
       - key: ALLOWED_ORIGIN
-        value: https://foodvibe0-1.onrender.com
+        value: https://foodvibe1-0-1.onrender.com
