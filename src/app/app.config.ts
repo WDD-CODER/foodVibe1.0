@@ -30,6 +30,8 @@ import {
   Download,
   Edit,
   Eye,
+  EyeOff,
+  Sparkles,
   FileDown,
   FilePlus,
   Filter,
@@ -157,10 +159,12 @@ export const appConfig: ApplicationConfig = {
         ClipboardList,
         Settings,
         Eye,
+        EyeOff,
         FileDown,
         CookingPotIcon,
         Star,
-        Lock
+        Lock,
+        Sparkles
       })
     )
   ]
