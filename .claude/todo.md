@@ -2,6 +2,13 @@
 
 ---
 
+### Plan 224 — Auth Refresh Guard + withCredentials Hardening (`plans/224-auth-refresh-guard-withcredentials.plan.md`)
+- [x] `auth.interceptor.ts` — add `isRefreshing` flag + `refreshSubject$` Subject to queue concurrent 401s during token refresh
+- [x] `http-storage.adapter.ts` — add `withCredentials: true` to all HTTP calls (query, get, post, put, remove, appendExisting)
+- [x] Run `ng build` — verify zero errors
+
+---
+
 ### Plan 223 — Backend Auth Wire + cookie-parser Fix (`plans/223-backend-auth-wire.plan.md`)
 - [x] `server/` — npm install cookie-parser
 - [x] `server/index.js` — add cookieParser() middleware after express.json()
