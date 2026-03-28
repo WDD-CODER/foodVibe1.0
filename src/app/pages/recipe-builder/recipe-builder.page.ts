@@ -36,6 +36,7 @@ import { ExportPreviewComponent } from '../../shared/export-preview/export-previ
 import { ExportToolbarOverlayComponent } from '../../shared/export-toolbar-overlay/export-toolbar-overlay.component';
 import { ApproveStampComponent } from 'src/app/shared/approve-stamp/approve-stamp.component';
 import { ConfirmModalService } from '@services/confirm-modal.service';
+import { AiRecipeDraftService, type AiRecipeDraft } from '@services/ai-recipe-draft.service';
 import { useSavingState } from 'src/app/core/utils/saving-state.util';
 import { CounterComponent } from 'src/app/shared/counter/counter.component';
 
@@ -81,6 +82,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private readonly exportService_ = inject(ExportService);
   private readonly confirmModal_ = inject(ConfirmModalService);
   private readonly heroFab_ = inject(HeroFabService);
+  private readonly aiRecipeDraft_ = inject(AiRecipeDraftService);
 
   //SIGNALS
   private readonly saving = useSavingState();
@@ -357,6 +359,11 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       }
     }
 
+    const aiDraft = this.aiRecipeDraft_.consume()
+    if (aiDraft) {
+      this.prefillFromAiDraft(aiDraft)
+    }
+
     if (this.ingredientsArray.length === 0) {
       this.addNewIngredientRow();
       runInInjectionContext(this.injector_, () => {
@@ -416,6 +423,46 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.closeAllExportOverlays();
     this.heroFab_.clearPageActions();
+  }
+
+  private prefillFromAiDraft(draft: AiRecipeDraft): void {
+    const isDish = draft.recipe_type === 'dish'
+
+    this.recipeForm_.patchValue({ name_hebrew: draft.name_hebrew, recipe_type: draft.recipe_type }, { emitEvent: false })
+
+    this.yieldConversionsArray.clear()
+    if (isDish) {
+      this.recipeForm_.patchValue({ serving_portions: draft.yield_amount }, { emitEvent: false })
+      this.yieldConversionsArray.push(this.fb.group({ amount: [draft.yield_amount], unit: ['dish'] }))
+    } else {
+      this.yieldConversionsArray.push(this.fb.group({ amount: [draft.yield_amount], unit: [draft.yield_unit] }))
+    }
+
+    this.ingredientsArray.clear()
+    for (const ing of draft.ingredients) {
+      this.ingredientsArray.push(this.recipeFormService_.createIngredientGroup())
+      const last = this.ingredientsArray.at(this.ingredientsArray.length - 1)
+      last.patchValue({ name_hebrew: ing.name, amount_net: ing.amount, unit: ing.unit })
+    }
+
+    this.workflowArray.clear()
+    if (isDish) {
+      for (const step of draft.steps) {
+        this.workflowArray.push(this.recipeFormService_.createPrepItemRow({ preparation_name: step }))
+      }
+      if (this.workflowArray.length === 0) {
+        this.workflowArray.push(this.recipeFormService_.createPrepItemRow())
+      }
+    } else {
+      draft.steps.forEach((step, i) => {
+        const group = this.recipeFormService_.createStepGroup(i + 1)
+        group.patchValue({ instruction: step })
+        this.workflowArray.push(group)
+      })
+      if (this.workflowArray.length === 0) {
+        this.workflowArray.push(this.recipeFormService_.createStepGroup(1))
+      }
+    }
   }
 
   protected openExportFromHeroFab(): void {
