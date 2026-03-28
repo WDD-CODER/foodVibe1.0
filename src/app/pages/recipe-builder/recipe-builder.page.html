@@ -119,7 +119,8 @@
         [totalVolumeL]="totalVolumeL_()" [totalVolumeMl]="totalVolumeMl_()"
         [unconvertibleForWeight]="unconvertibleForWeight_()" [unconvertibleForVolume]="unconvertibleForVolume_()"
         [resetTrigger]="resetTrigger_()" [autoLabels]="liveAutoLabels_()" (openUnitCreator)="onOpenUnitCreator()"
-        [imageUrl]="recipeImageUrl_()" (imageChange)="onImageChange($event)" [readonlyMode]="historyViewMode_()"></app-recipe-header>
+        [imageUrl]="recipeImageUrl_()" (imageChange)="onImageChange($event)" [readonlyMode]="historyViewMode_()"
+        (importTextClick)="onImportTextClick()"></app-recipe-header>
     </section>
 
     <section class="builder-section">

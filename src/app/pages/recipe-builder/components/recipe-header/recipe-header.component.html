@@ -25,6 +25,11 @@
                 {{ yield.currentRecipeTypeDisplay_() | translatePipe }}
             </button>
 
+            <button type="button" class="import-text-btn" (click)="importTextClick.emit()">
+                <lucide-icon name="scan-text" [size]="15"></lucide-icon>
+                {{ 'import_text_btn' | translatePipe }}
+            </button>
+
             <div class="recipe-name-wrap">
                 <input formControlName="name_hebrew"
                     [placeholder]="((yield.currentRecipeTypeDisplay_() === 'dish' ? 'dish_name_placeholder' : 'recipe_name_placeholder') | translatePipe) + '...'"

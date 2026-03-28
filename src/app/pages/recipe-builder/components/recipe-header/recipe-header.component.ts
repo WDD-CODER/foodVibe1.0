@@ -50,6 +50,7 @@ export class RecipeHeaderComponent {
   // OUTPUTS
   openUnitCreator = output<string>();
   imageChange = output<string>();
+  importTextClick = output<void>();
 
   // YIELD MANAGER
   readonly yield = new RecipeYieldManager(
