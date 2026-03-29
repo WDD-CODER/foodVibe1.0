@@ -15,6 +15,11 @@
 - [x] `pending-changes.guard.ts` — saveAndWait interface + ternary vs binary flow
 - [x] `recipe-builder.page.ts` — saveAndWait() + hasRealChanges() failsafe for new recipes
 
+### Plan 239b — AI Recipe: product matching + unit seeding (`plans/239-ai-recipe-product-match-unit-seed.plan.md`)
+- [x] `unit-registry.service.ts` — add tablespoon/teaspoon/cup/pinch/portion to `SYSTEM_UNITS`
+- [x] `recipe-builder.page.ts` — in `prefillFromAiDraft`, after patchValue, attempt name-match against `products_()` and `recipes_()`; if matched, patchValue `referenceId` + `item_type`
+- [x] `recipe-builder.page.ts` — use live `this.unitRegistry_.allUnitKeys_()` signal call inside loop (not one-time Set snapshot) to fix hydration race
+
 ### Plan 236/237/238 — AI Recipe: ingredients fix + prompt engineering + few-shot loop
 - [x] `gemini.service.ts` — Replace SYSTEM_PROMPT with domain-aware rules + English canonical units
 - [x] `recipe-builder.page.ts` — Unit fallback in `prefillFromAiDraft` (safeUnit via `allUnitKeys_()`)
