@@ -1,12 +1,24 @@
 @if (modalService.isOpen()) {
-  <div class="c-modal-overlay" (click)="modalService.choose(false)">
-    <div class="c-modal-card" [class.c-modal-card--danger]="modalService.variant() === 'danger'" [class.c-modal-card--warning]="modalService.variant() === 'warning'" dir="rtl" (click)="$event.stopPropagation()">
+  <div class="c-modal-overlay" (click)="modalService.choose('cancel')">
+    <div class="c-modal-card"
+      [class.c-modal-card--danger]="modalService.variant() === 'danger'"
+      [class.c-modal-card--warning]="modalService.variant() === 'warning'"
+      dir="rtl"
+      (click)="$event.stopPropagation()">
       <p class="confirm-modal-message">{{ modalService.message() | translatePipe }}</p>
       <div class="c-modal-actions">
-        <button type="button" class="c-btn-ghost" (click)="modalService.choose(false)">
+        <button type="button" class="c-btn-ghost" (click)="modalService.choose('cancel')">
           {{ 'cancel' | translatePipe }}
         </button>
-        <button type="button" class="c-btn-primary" [class.c-btn-primary--danger]="modalService.variant() === 'danger'" [class.c-btn-primary--warning]="modalService.variant() === 'warning'" (click)="modalService.choose(true)">
+        @if (modalService.showSaveButton()) {
+          <button type="button" class="c-btn-primary" (click)="modalService.choose('save')">
+            {{ modalService.saveButtonLabel() | translatePipe }}
+          </button>
+        }
+        <button type="button" class="c-btn-primary"
+          [class.c-btn-primary--danger]="modalService.variant() === 'danger'"
+          [class.c-btn-primary--warning]="modalService.variant() === 'warning'"
+          (click)="modalService.choose('confirm')">
           {{ modalService.saveLabel() | translatePipe }}
         </button>
       </div>

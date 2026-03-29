@@ -614,8 +614,50 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   /** For pendingChangesGuard: true when current form value differs from initial state when user entered the page. */
   hasRealChanges(): boolean {
     if (this.historyViewMode_() || this.recipeForm_.disabled) return false;
+
+    if (!this.recipeId_()) {
+      // New recipe: failsafe checks for any real content
+      if (this.ingredientsArray.controls.some(
+        g => !!(g as FormGroup).get('referenceId')?.value
+      )) return true
+      if ((this.recipeForm_.get('name_hebrew')?.value ?? '').trim()) return true
+      return false // blank new recipe — nothing to guard
+    }
+
     if (this.initialRecipeSnapshot_ === null) return this.recipeForm_.dirty === true;
     return this.getRecipeSnapshotForComparison() !== this.initialRecipeSnapshot_;
+  }
+
+  /** For pendingChangesGuard: save the recipe and resolve once done. */
+  saveAndWait(): Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
+      if (this.recipeForm_.invalid) {
+        this.recipeForm_.markAllAsTouched()
+        const msg = this.getRecipeValidationError_()
+        this.userMsg_.onSetErrorMsg(msg)
+        resolve(false)
+        return
+      }
+
+      this.saving.setSaving(true)
+      const recipe = this.buildRecipeFromForm()
+      recipe.autoLabels_ = this.recipeFormService_.computeAutoLabels(recipe)
+
+      this.state_.saveRecipe(recipe).subscribe({
+        next: () => {
+          this.saving.setSaving(false)
+          this.isSubmitted = true
+          resolve(true)
+        },
+        error: () => {
+          this.saving.setSaving(false)
+          this.userMsg_.onSetErrorMsg(
+            this.translation_.translate('error_saving_recipe')
+          )
+          resolve(false)
+        }
+      })
+    })
   }
 
   /** Normalized form value for comparison (numbers coerced, labels sorted). */

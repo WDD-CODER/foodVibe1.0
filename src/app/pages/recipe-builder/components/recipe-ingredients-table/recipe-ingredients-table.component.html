@@ -26,10 +26,18 @@
           (addNewRowRequested)="addIngredient.emit()" (cancelSearch)="editingNameAtRow_.set(null)"></app-ingredient-search>
         } @else {
         <div class="selected-item-display" role="button" tabindex="0"
+          [class.incomplete-row]="isProductIncomplete(group)"
           (click)="editingNameAtRow_.set($index)"
           (keydown.enter)="editingNameAtRow_.set($index)"
           (keydown.space)="$event.preventDefault(); editingNameAtRow_.set($index)">
           <span class="item-text">{{ group.get('name_hebrew')?.value }}</span>
+          @if (isProductIncomplete(group)) {
+            <button type="button" class="incomplete-badge"
+              (click)="$event.stopPropagation(); navigateToEditProduct(group)"
+              [title]="'product_incomplete_hint' | translatePipe">
+              <lucide-icon name="alert-triangle" [size]="14"></lucide-icon>
+            </button>
+          }
           <button type="button" class="clear-btn" (click)="$event.stopPropagation(); clearIngredient(group)">
             <lucide-icon name="x" [size]="14"></lucide-icon>
           </button>
