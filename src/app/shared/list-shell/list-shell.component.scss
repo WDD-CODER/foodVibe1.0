@@ -9,6 +9,14 @@
     display: block;
   }
 
+  // Suppress all filter-panel transitions until after the first browser paint.
+  // The class is added synchronously in the constructor and removed via rAF
+  // after afterNextRender — so the panel snaps to its saved state with no animation.
+  :host.panel-init .filter-panel,
+  :host.panel-init .filter-panel .panel-content {
+    transition: none !important;
+  }
+
   .list-container {
     display: grid;
     grid-template-rows: auto 1fr;
@@ -232,7 +240,9 @@
     transition:
       width 0.3s var(--ease-spring),
       min-width 0.3s var(--ease-spring),
-      opacity 0.25s var(--ease-smooth);
+      opacity 0.25s var(--ease-smooth),
+      border-inline-start-width 0.3s var(--ease-spring),
+      border-inline-start-color 0.25s var(--ease-smooth);
 
     &::-webkit-scrollbar {
       display: none;
@@ -243,6 +253,7 @@
       min-width: 0;
 
       border-inline-start-width: 0;
+      border-inline-start-color: transparent;
       overflow: hidden;
 
       .panel-content {
@@ -328,6 +339,7 @@
       position: relative;
 
       padding: 1rem;
+      overflow: visible;
     }
 
     .panel-backdrop {

@@ -96,7 +96,6 @@ export class VenueListComponent implements OnInit, OnDestroy {
 
     afterNextRender(() => {
       const q = window.matchMedia('(max-width: 768px)');
-      if (q.matches) this.isPanelOpen_.set(false);
       q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); });
     });
   }
