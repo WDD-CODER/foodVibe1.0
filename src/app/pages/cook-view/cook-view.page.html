@@ -175,6 +175,7 @@
                     (ngModelChange)="setIngredientUnit(i, $event)"
                     [options]="getUnitOptionsForRow(row)"
                     placeholder="unit"
+                    variant="chip"
                     [typeToFilter]="true" />
                   <button type="button" class="remove-ingredient-btn" (click)="removeIngredient(i)" [attr.aria-label]="'remove' | translatePipe">
                     <lucide-icon name="trash-2" [size]="16"></lucide-icon>
@@ -216,7 +217,9 @@
                         (ngModelChange)="setUnitOverride(i, $event)"
                         [options]="getUnitOptionsForRow(row)"
                         placeholder="unit"
-                        [typeToFilter]="true" />
+                        variant="chip"
+                        [typeToFilter]="true"
+                        (click)="$event.stopPropagation()" />
                     } @else {
                       <span>{{ getDisplayUnit(i, row) | translatePipe }}</span>
                     }
