@@ -59,6 +59,17 @@
             </div>
           }
 
+          <div class="ai-usage-bar" [attr.data-status]="usageColor_()">
+            <span class="ai-usage-label">בקשות היום</span>
+            <span class="ai-usage-count">{{ geminiUsage_().count }} / 1,000</span>
+            <div class="ai-usage-track">
+              <div
+                class="ai-usage-fill"
+                [style.width.%]="(geminiUsage_().count / 1000) * 100">
+              </div>
+            </div>
+          </div>
+
           <div class="ai-modal-footer">
             <button
               type="button"

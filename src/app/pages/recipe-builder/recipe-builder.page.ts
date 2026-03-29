@@ -431,7 +431,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private prefillFromAiDraft(draft: AiRecipeDraft): void {
     const isDish = draft.recipe_type === 'dish'
 
-    this.recipeForm_.patchValue({ name_hebrew: draft.name_hebrew, recipe_type: draft.recipe_type }, { emitEvent: false })
+    // Emit recipe_type so recipeType_ signal updates before workflowArray is rebuilt
+    this.recipeForm_.patchValue({ recipe_type: draft.recipe_type })
+    this.recipeForm_.patchValue({ name_hebrew: draft.name_hebrew }, { emitEvent: false })
 
     this.yieldConversionsArray.clear()
     if (isDish) {
@@ -442,10 +444,12 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     }
 
     this.ingredientsArray.clear()
+    const knownUnits = new Set(this.unitRegistry_.allUnitKeys_())
     for (const ing of draft.ingredients) {
       this.ingredientsArray.push(this.recipeFormService_.createIngredientGroup())
       const last = this.ingredientsArray.at(this.ingredientsArray.length - 1)
-      last.patchValue({ name_hebrew: ing.name, amount_net: ing.amount, unit: ing.unit })
+      const safeUnit = knownUnits.has(ing.unit) ? ing.unit : 'unit'
+      last.patchValue({ name_hebrew: ing.name, amount_net: ing.amount, unit: safeUnit })
     }
 
     this.workflowArray.clear()

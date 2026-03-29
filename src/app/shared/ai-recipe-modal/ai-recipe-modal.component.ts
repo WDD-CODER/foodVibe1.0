@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
@@ -8,6 +8,8 @@ import { AiRecipeModalService } from './ai-recipe-modal.service'
 import { GeminiService } from '@services/gemini.service'
 import { AiRecipeDraftService, type AiRecipeDraft } from '@services/ai-recipe-draft.service'
 import { UserMsgService } from '@services/user-msg.service'
+import { getGeminiUsage, DAILY_LIMIT } from '../../core/utils/gemini-usage.util'
+import { addGeminiShot } from '../../core/utils/gemini-shots.util'
 
 type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
 
@@ -19,7 +21,7 @@ type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
   styleUrl: './ai-recipe-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AiRecipeModalComponent {
+export class AiRecipeModalComponent implements OnInit {
   protected readonly modalService = inject(AiRecipeModalService)
   protected readonly gemini = inject(GeminiService)
   private readonly aiDraft = inject(AiRecipeDraftService)
@@ -32,6 +34,21 @@ export class AiRecipeModalComponent {
   protected readonly configuringKey_ = signal(false)
   protected readonly keyInput_ = signal('')
   protected readonly status_ = signal<GenerationStatus>('idle')
+  protected readonly geminiUsage_ = signal(getGeminiUsage())
+  protected readonly usageColor_ = computed(() => {
+    const pct = this.geminiUsage_().count / DAILY_LIMIT
+    if (pct >= 0.9) return 'danger'
+    if (pct >= 0.7) return 'warning'
+    return 'ok'
+  })
+
+  ngOnInit(): void {
+    this.refreshUsage()
+  }
+
+  refreshUsage(): void {
+    this.geminiUsage_.set(getGeminiUsage())
+  }
 
   async onGenerate(): Promise<void> {
     if (!this.gemini.hasKey()) {
@@ -49,6 +66,7 @@ export class AiRecipeModalComponent {
       this.userMsg.onSetErrorMsg('ai_recipe_error')
     } finally {
       this.loading_.set(false)
+      this.refreshUsage()
     }
   }
 
@@ -65,6 +83,7 @@ export class AiRecipeModalComponent {
   onOpenInBuilder(): void {
     const draft = this.draft_()
     if (!draft) return
+    addGeminiShot(this.prompt_(), draft)
     this.aiDraft.set(draft)
     void this.router.navigate(['/recipe-builder'])
     this.modalService.close()

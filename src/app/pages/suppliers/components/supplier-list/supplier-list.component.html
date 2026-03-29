@@ -102,8 +102,8 @@
           <app-list-row-checkbox [checked]="selection.isSelected(item._id)" (toggle)="selection.toggle(item._id)" />
         </div>
       </div>
-      @if (editingId_() === item._id) {
-        <div class="inline-edit-panel" [formGroup]="editForm_" (clickOutside)="onInlinePanelClickOutside()">
+      @if (editingId_() === item._id || closingId_() === item._id) {
+        <div class="inline-edit-panel" [class.closing]="closingId_() === item._id" [formGroup]="editForm_" (clickOutside)="onInlinePanelClickOutside()">
           <h3 class="inline-edit-title">{{ 'edit' | translatePipe }}: {{ item.name_hebrew }}</h3>
 
           <div class="inline-edit-section">
