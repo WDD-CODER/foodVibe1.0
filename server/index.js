@@ -12,7 +12,7 @@ const aiRouter = require('./routes/ai');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGIN || 'http://localhost:4200').split(',').map(s => s.trim())
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGIN || 'http://localhost:4200,http://localhost:4300').split(',').map(s => s.trim())
 
 // ---------------------------------------------------------------------------
 // Static files — served BEFORE CORS so Angular assets are never blocked
