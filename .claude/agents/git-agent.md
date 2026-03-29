@@ -37,14 +37,20 @@ From user prompt + git state, determine action:
 1. State assessment (already done)
 2. If on main → `git checkout -b feat/<name>` or `fix/<name>` first
 3. Group changes into logical commits (auto-propose, user can adjust)
-4. Present visual tree:
-```
-[branch-name]
+4. Present visual tree using this EXACT format — always wrap in a markdown code block tagged `text` so it renders as a fixed-width block in every context:
+
+~~~text
+Branch: [branch-name]
+
 └── 📦 type(scope): subject
-    📄 file1
-    📄 file2
-```
-5. "Approve? Y/N" — **no git writes until Y**
+    ├── 📄 file1
+    ├── 📄 file2
+    └── 📄 file3
+~~~
+
+If splitting into multiple branches, repeat a block per branch, separated by a blank line.
+
+5. End the proposal with a bold single line: **Approve? (Y/N)** — **no git writes until Y**
 6. Execute: `git add` → `git commit` → `git push` (separate Bash calls, never chained)
 7. If user wants PR: `gh pr create --base main --head <branch> --title "..." --body "..."`
 8. If user wants merge: `gh pr merge <n> --merge --delete-branch`
@@ -70,28 +76,31 @@ When multiple branches need the same action (merge, PR, push), batch into ONE pl
 ### Batch Merge Flow
 1. Identify all branches to merge (from user prompt or prior split)
 2. For each branch: name, commit count, one-line summary
-3. Present ONE plan:
-```
+3. Present ONE plan using this EXACT format — always wrap in a `text` code block:
+
+~~~text
 Batch merge → main (N branches)
 
-1. [feat/counter]        3 commits — counter refactor
+1. feat/counter        3 commits — counter refactor
    → PR: "refactor(shared): counter"
-2. [feat/scaling-chip]   2 commits — chip updates
+2. feat/scaling-chip   2 commits — chip updates
    → PR: "refactor(shared): scaling-chip"
 ...
 
 After merge: all branches deleted, main synced.
-```
-4. "Approve all? Y/N" — ONE gate for the entire batch
+~~~
+
+4. End with: **Approve all? (Y/N)** — ONE gate for the entire batch
 5. Execute sequentially, NO mid-batch prompts:
    - Per branch: `git push` → `gh pr create` → `gh pr merge --merge` → `git push origin --delete <branch>`
    - After all: `git checkout main` → `git pull origin main`
-6. ONE summary at end:
-```
+6. ONE summary at end, wrapped in a `text` block:
+
+~~~text
 ✅ Merged 5/5 to main
 PR #12 feat/counter — merged
 PR #13 feat/scaling-chip — merged
-```
+~~~
 7. If a PR fails (conflict, CI): skip it, continue others, report failures at end
 
 ### When to batch
