@@ -1,9 +1,9 @@
 /**
  * One-time seed script: imports a migration-dump.json into MongoDB Atlas.
  *
- * Usage: MONGO_URI=<atlas-uri> node scripts/seed-from-dump.js <path-to-dump.json> --confirm-seed
+ * Usage: node scripts/seed-from-dump.js <path-to-dump.json> --confirm-seed
  *
- * SECURITY WARNING: migration-dump.json contains PBKDF2 password hashes.
+ * SECURITY WARNING: migration-dump.json may contain sensitive data.
  * - NEVER commit migration-dump.json to git (it is in .gitignore)
  * - NEVER run this script in production without the --confirm-seed flag
  * - Delete migration-dump.json from your local machine after seeding
@@ -26,7 +26,6 @@ if (!process.argv.includes('--confirm-seed')) {
 
 require('dotenv').config({ path: './server/.env' });
 const mongoose = require('mongoose');
-const Entity = require('./server/models/entity.model');
 const fs = require('fs');
 
 const dumpFile = process.argv.find(a => a.endsWith('.json'));
@@ -41,12 +40,23 @@ async function seed() {
   await mongoose.connect(process.env.MONGO_URI);
   console.log('[seed] Connected to MongoDB.');
 
+  const db = mongoose.connection.db;
+
   for (const [entityType, items] of Object.entries(dump)) {
     const arr = Array.isArray(items) ? items : [items];
+    const col = db.collection(entityType);
+
     for (const item of arr) {
-      await Entity.updateOne(
-        { _id: item._id, entityType },
-        { $setOnInsert: { _id: item._id, entityType, data: item } },
+      await col.updateOne(
+        { _id: item._id },
+        {
+          $setOnInsert: {
+            ...item,
+            userId: '__master__',
+            _masterId: null,
+            _userModified: false,
+          },
+        },
         { upsert: true }
       );
     }

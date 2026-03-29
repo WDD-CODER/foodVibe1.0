@@ -12,6 +12,9 @@ const SIGNED_USERS = 'signed-users-db'
 const SESSION_USER_KEY = 'loggedInUser'
 const TOKEN_KEY = 'fv_token'
 
+/** 13 minutes — access token expires at 15m; refresh early to avoid 401s mid-session. */
+const REFRESH_INTERVAL_MS = 13 * 60 * 1000
+
 /** Stored record may include password hash; never expose hash to session or client. */
 type StoredUser = User & { passwordHash?: string }
 
@@ -32,10 +35,27 @@ export class UserService {
   private _user_ = signal<User | null>(this._loadUserFromSession())
   public user_ = this._user_.asReadonly()
 
+  private _refreshTimer: ReturnType<typeof setInterval> | null = null
+
   public isLoggedIn = () => this._user_() !== null
 
   get currentUser(): User | null {
     return this._user_()
+  }
+
+  constructor() {
+    // Attempt silent session restore on page reload.
+    // If the httpOnly refresh cookie is still valid, this issues a new access token.
+    if (environment.useBackendAuth) {
+      this.refreshToken().subscribe({
+        next: () => {},
+        error: () => {
+          // Refresh failed (cookie expired or absent) — clear any stale session state.
+          this._saveUserLocal(null)
+          this.clearToken()
+        },
+      })
+    }
   }
 
   // -------------------------------------------------------------------------
@@ -86,6 +106,42 @@ export class UserService {
   }
 
   // -------------------------------------------------------------------------
+  // Silent token refresh — used on construction and by the 13-minute timer
+  // -------------------------------------------------------------------------
+
+  /**
+   * Posts to /auth/refresh using the httpOnly cookie.
+   * On success: stores the new access token and (if user is not yet in session)
+   * updates the user signal from the existing session storage.
+   */
+  refreshToken(): Observable<{ token: string }> {
+    return this.callBackendRefresh().pipe(
+      tap(({ token }) => {
+        this.storeToken(token)
+        // Restore user signal from session if not already set (page reload case).
+        if (!this._user_()) {
+          const sessionUser = this._loadUserFromSession()
+          if (sessionUser) this._user_.set(sessionUser)
+        }
+      })
+    )
+  }
+
+  private _startRefreshTimer(): void {
+    this._stopRefreshTimer()
+    this._refreshTimer = setInterval(() => {
+      this.refreshToken().subscribe({ error: () => {} })
+    }, REFRESH_INTERVAL_MS)
+  }
+
+  private _stopRefreshTimer(): void {
+    if (this._refreshTimer !== null) {
+      clearInterval(this._refreshTimer)
+      this._refreshTimer = null
+    }
+  }
+
+  // -------------------------------------------------------------------------
   // Public auth methods
   // -------------------------------------------------------------------------
 
@@ -96,6 +152,7 @@ export class UserService {
         tap(({ token, user }) => {
           this.storeToken(token)
           this._saveUserLocal(user)
+          this._startRefreshTimer()
           this.logging.info({ event: 'auth.signup', message: 'Signup success', context: { userId: user._id } })
         }),
         map(({ user }) => user),
@@ -139,6 +196,7 @@ export class UserService {
     const userId = this._user_()?._id
     return of(null).pipe(
       tap(() => {
+        this._stopRefreshTimer()
         this._saveUserLocal(null)
         this.clearToken()
         if (environment.useBackendAuth) {
@@ -157,6 +215,7 @@ export class UserService {
         tap(({ token, user }) => {
           this.storeToken(token)
           this._saveUserLocal(user)
+          this._startRefreshTimer()
           this.logging.info({ event: 'auth.login', message: 'Login success', context: { userId: user._id } })
         }),
         map(({ user }) => user),

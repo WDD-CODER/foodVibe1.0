@@ -1,0 +1,1 @@
+import{Ma as s,Wb as o,ra as p}from"./chunk-QUMV6NWP.js";var i=class t{static \u0275fac=function(e){return new(e||t)};static \u0275cmp=p({type:t,selectors:[["app-suppliers-page"]],decls:1,vars:0,template:function(e,a){e&1&&s(0,"router-outlet")},dependencies:[o],styles:["@layer components.suppliers{[_nghost-%COMP%]{display:block}}"],changeDetection:0})};export{i as SuppliersPage};

@@ -36,14 +36,17 @@ function makeId(length = 5) {
 
 // ---------------------------------------------------------------------------
 // GET /api/v1/data/:type
-// Returns all documents in the collection as an array.
-// Mirrors StorageService.query().
+// Returns all documents belonging to the authenticated user.
 // ---------------------------------------------------------------------------
 router.get('/:type', async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit) || 500, 1000);
     const skip = parseInt(req.query.skip) || 0;
-    const docs = await col(req.params.type).find({}).skip(skip).limit(limit).toArray();
+    const docs = await col(req.params.type)
+      .find({ userId: req.user.userId })
+      .skip(skip)
+      .limit(limit)
+      .toArray();
     res.json(docs);
   } catch (err) {
     console.error('[data/query]', err);
@@ -53,12 +56,14 @@ router.get('/:type', async (req, res) => {
 
 // ---------------------------------------------------------------------------
 // GET /api/v1/data/:type/:id
-// Returns one document by _id.
-// Mirrors StorageService.get().
+// Returns one document by _id, scoped to the authenticated user.
 // ---------------------------------------------------------------------------
 router.get('/:type/:id', async (req, res) => {
   try {
-    const doc = await col(req.params.type).findOne({ _id: req.params.id });
+    const doc = await col(req.params.type).findOne({
+      _id: req.params.id,
+      userId: req.user.userId,
+    });
     if (!doc) {
       return res.status(404).json({ error: `Cannot get, Item ${req.params.id} of type: ${req.params.type} does not exist` });
     }
@@ -71,8 +76,7 @@ router.get('/:type/:id', async (req, res) => {
 
 // ---------------------------------------------------------------------------
 // POST /api/v1/data/:type
-// Inserts a new document. _id must be present in the request body.
-// Mirrors StorageService.post() and appendExisting().
+// Inserts a new document stamped with the authenticated user's id.
 // ---------------------------------------------------------------------------
 router.post('/:type', async (req, res) => {
   try {
@@ -80,8 +84,19 @@ router.post('/:type', async (req, res) => {
     if (!entity._id) {
       return res.status(400).json({ error: '_id is required in the request body' });
     }
-    await col(req.params.type).insertOne(entity);
-    res.status(201).json(entity);
+
+    // Strip any userId the client may have sent — always use the verified JWT value.
+    const { userId: _u, _masterId: _m, _userModified: _um, ...safeEntity } = entity;
+
+    const doc = {
+      ...safeEntity,
+      userId: req.user.userId,
+      _masterId: null,
+      _userModified: false,
+    };
+
+    await col(req.params.type).insertOne(doc);
+    res.status(201).json(doc);
   } catch (err) {
     if (err.code === 11000) {
       return res.status(409).json({ error: 'Entity already exists' });
@@ -93,14 +108,17 @@ router.post('/:type', async (req, res) => {
 
 // ---------------------------------------------------------------------------
 // PUT /api/v1/data/:type/:id
-// Replaces one document by _id.
-// Mirrors StorageService.put().
+// Updates one document. Preserves userId, _masterId; sets _userModified: true.
+// Strips reserved fields from req.body to prevent userId/master spoofing.
 // ---------------------------------------------------------------------------
 router.put('/:type/:id', async (req, res) => {
   try {
-    const result = await col(req.params.type).findOneAndReplace(
-      { _id: req.params.id },
-      req.body,
+    // Destructure reserved fields out of req.body — client must not override them.
+    const { userId: _, _masterId: __, _userModified: ___, ...safeBody } = req.body;
+
+    const result = await col(req.params.type).findOneAndUpdate(
+      { _id: req.params.id, userId: req.user.userId },
+      { $set: { ...safeBody, _userModified: true } },
       { returnDocument: 'after' }
     );
     if (!result) {
@@ -115,9 +133,8 @@ router.put('/:type/:id', async (req, res) => {
 
 // ---------------------------------------------------------------------------
 // PUT /api/v1/data/:type  (no id segment)
-// Replaces the entire collection — deleteMany + insertMany.
+// Replaces the entire collection for the authenticated user — deleteMany + insertMany.
 // Body must be an array of entity objects. Each must have _id.
-// Mirrors StorageService.replaceAll().
 // ---------------------------------------------------------------------------
 router.put('/:type', async (req, res) => {
   try {
@@ -129,11 +146,20 @@ router.put('/:type', async (req, res) => {
       return res.status(400).json({ error: 'Body must be an array of entity objects' });
     }
 
-    await col(req.params.type).deleteMany({});
+    // Only delete the authenticated user's documents — never touch master or other users.
+    await col(req.params.type).deleteMany({ userId: req.user.userId });
 
     if (entities.length > 0) {
-      // Ensure every entity has a string _id before inserting.
-      const docs = entities.map(e => e._id ? e : { ...e, _id: makeId() });
+      const docs = entities.map(e => {
+        const { userId: _u, _masterId: _m, _userModified: _um, ...safeEntity } = e;
+        return {
+          ...safeEntity,
+          _id: safeEntity._id || makeId(),
+          userId: req.user.userId,
+          _masterId: null,
+          _userModified: false,
+        };
+      });
       await col(req.params.type).insertMany(docs, { ordered: false });
     }
 
@@ -146,11 +172,14 @@ router.put('/:type', async (req, res) => {
 
 // ---------------------------------------------------------------------------
 // DELETE /api/v1/data/:type/:id
-// Removes one document. Mirrors StorageService.remove().
+// Removes one document, scoped to the authenticated user.
 // ---------------------------------------------------------------------------
 router.delete('/:type/:id', async (req, res) => {
   try {
-    const result = await col(req.params.type).deleteOne({ _id: req.params.id });
+    const result = await col(req.params.type).deleteOne({
+      _id: req.params.id,
+      userId: req.user.userId,
+    });
     if (result.deletedCount === 0) {
       return res.status(404).json({ error: `Cannot remove, item ${req.params.id} of type: ${req.params.type} does not exist` });
     }

@@ -61,8 +61,12 @@ app.get('/api/v1/health', (_req, res) => res.json({ ok: true, ts: Date.now() }))
 
 // ---------------------------------------------------------------------------
 // Angular SPA fallback — catch-all after all /api/ routes
+// API 404s must return JSON, not index.html.
 // ---------------------------------------------------------------------------
-app.get('*', (_req, res) => {
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'Not found' })
+  }
   res.sendFile(path.join(STATIC_DIR, 'index.html'))
 })
 

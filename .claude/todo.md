@@ -2,6 +2,54 @@
 
 ---
 
+### Plan 234 — Per-User Collections + Render Deployment (`plans/234-per-user-collections-render-deploy.plan.md`)
+
+**Brief 1 — Schema & Migration**
+- [ ] Create `server/constants/cloneable-types.js` — exports CLONEABLE_TYPES array
+- [ ] Fix `scripts/seed-from-dump.js` — replace broken Entity model with native MongoDB driver; add userId/__masterId/_userModified to $setOnInsert
+- [ ] Create `scripts/stamp-master-userId.js` — --confirm-stamp flag; production guard; updateMany per CLONEABLE_TYPES collection
+- [ ] `ng build` smoke check
+- [ ] Run stamp migration against Atlas; verify in Compass
+- [ ] PR + merge `feat/user-scoped-schema`
+
+**Brief 2 — Backend User Scoping**
+- [ ] `server/routes/generic.js` — GET /:type: add userId filter
+- [ ] `server/routes/generic.js` — GET /:type/:id: add userId filter
+- [ ] `server/routes/generic.js` — POST /:type: stamp userId/_masterId/_userModified
+- [ ] `server/routes/generic.js` — PUT /:type/:id: spoof-safe merge update with userId scope
+- [ ] `server/routes/generic.js` — PUT /:type (replaceAll): userId-scoped deleteMany + stamp on insert
+- [ ] `server/routes/generic.js` — DELETE /:type/:id: add userId filter
+- [ ] Create `server/services/clone-master.js` — flat-doc cloning per CLONEABLE_TYPES
+- [ ] Create `server/services/sync-master.js` — 4-rule sync per CLONEABLE_TYPES
+- [ ] `server/routes/auth.js` — wire cloneMasterDataToUser on signup
+- [ ] `server/routes/auth.js` — wire syncMasterToUser on login (try/catch)
+- [ ] `server/routes/auth.js` — wire syncMasterToUser on refresh (try/catch)
+- [ ] Build verification + manual API test
+- [ ] Security Officer review
+- [ ] PR + merge `feat/user-scoped-backend`
+
+**Brief 3 — Frontend Auth Wiring (refresh only)**
+- [ ] `user.service.ts` — add refreshToken() method
+- [ ] `user.service.ts` — call refreshToken() on construction
+- [ ] `user.service.ts` — 13-minute interval timer; start on login/refresh; clear on logout
+- [ ] `ng build` verification
+- [ ] Security Officer review
+- [ ] PR + merge `feat/frontend-auth-wiring`
+
+**Brief 4 — Express Static Serving**
+- [ ] `server/index.js` — add /api/ guard to SPA catch-all
+- [ ] `package.json` (root) — add build:render script
+- [ ] Build + serve verification
+- [ ] PR + merge `feat/express-static-serving`
+
+**Brief 5 — Deploy to Render**
+- [ ] Rewrite `render.yaml` — fix buildCommand, MONGO_URI key, JWT_SECRET generateValue, remove PORT
+- [ ] `package.json` (root) — add engines field
+- [ ] PR + merge `feat/render-deploy`
+- [ ] Manual deploy + smoke test
+
+---
+
 ### Plan 233 — Gemini Direct API + Modal Status Feedback (`plans/233-gemini-direct-api-modal-status.plan.md`)
 - [x] `gemini.service.ts` — rewrite: fetch-based direct Gemini API call, apiKey_ signal, hasKey computed, setApiKey(), remove HttpClient/dead imports
 - [x] `ai-recipe-modal.component.ts` — add configuringKey_/keyInput_/status_ signals, onSaveKey/onClose methods, API key guard in onGenerate(), FormsModule in imports
