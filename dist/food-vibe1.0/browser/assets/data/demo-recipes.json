@@ -1,0 +1,349 @@
+[
+  {
+    "_id": "prep_014",
+    "name_hebrew": "משרה לפרגית בולגוגית",
+    "recipe_type_": "preparation",
+    "ingredients_": [
+      {
+        "_id": "prep_014_i1",
+        "referenceId": "demo_140",
+        "type": "product",
+        "amount_": 0.15,
+        "unit_": "kg"
+      },
+      {
+        "_id": "prep_014_i2",
+        "referenceId": "demo_001",
+        "type": "product",
+        "amount_": 0.06,
+        "unit_": "kg"
+      },
+      {
+        "_id": "prep_014_i3",
+        "referenceId": "demo_004",
+        "type": "product",
+        "amount_": 0.009,
+        "unit_": "kg"
+      },
+      {
+        "_id": "prep_014_i4",
+        "referenceId": "demo_116",
+        "type": "product",
+        "amount_": 0.008,
+        "unit_": "kg"
+      },
+      {
+        "_id": "prep_014_i5",
+        "referenceId": "demo_052",
+        "type": "product",
+        "amount_": 0.05,
+        "unit_": "kg"
+      },
+      {
+        "_id": "prep_014_i6",
+        "referenceId": "demo_136",
+        "type": "product",
+        "amount_": 0.08,
+        "unit_": "kg"
+      },
+      {
+        "_id": "prep_014_i7",
+        "referenceId": "demo_118",
+        "type": "product",
+        "amount_": 0.028,
+        "unit_": "liter"
+      },
+      {
+        "_id": "prep_014_i8",
+        "referenceId": "demo_139",
+        "type": "product",
+        "amount_": 0.028,
+        "unit_": "liter"
+      },
+      {
+        "_id": "prep_014_i9",
+        "referenceId": "demo_119",
+        "type": "product",
+        "amount_": 0.03,
+        "unit_": "liter"
+      },
+      {
+        "_id": "prep_014_i10",
+        "referenceId": "demo_120",
+        "type": "product",
+        "amount_": 0.0025,
+        "unit_": "kg"
+      },
+      {
+        "_id": "prep_014_i11",
+        "referenceId": "demo_074",
+        "type": "product",
+        "amount_": 0.001,
+        "unit_": "kg"
+      }
+    ],
+    "steps_": [
+      {
+        "order_": 1,
+        "instruction_": "לטחון הכל, לערבב עם הפרגיות, להשרות 2–3 שעות.",
+        "labor_time_minutes_": 5
+      },
+      {
+        "order_": 2,
+        "instruction_": "לשמור בקירור עד שימוש.",
+        "labor_time_minutes_": 0
+      }
+    ],
+    "yield_amount_": 0.4465,
+    "yield_unit_": "kg",
+    "default_station_": "cold",
+    "labels_": [
+      "מרינדה",
+      "אסייתי",
+      "סיפור של אוכל"
+    ],
+    "logistics_": {
+      "baseline_": [
+        {
+          "equipment_id_": "eq_055",
+          "quantity_": 1,
+          "phase_": "prep",
+          "is_critical_": true
+        },
+        {
+          "equipment_id_": "eq_056",
+          "quantity_": 1,
+          "phase_": "prep",
+          "is_critical_": true
+        }
+      ]
+    },
+    "is_approved_": false
+  },
+  {
+    "_id": "prep_015",
+    "name_hebrew": "רוטב לסלט איטריות",
+    "recipe_type_": "preparation",
+    "ingredients_": [
+      {
+        "_id": "prep_015_i1",
+        "referenceId": "demo_086",
+        "type": "product",
+        "amount_": 0.6,
+        "unit_": "kg"
+      },
+      {
+        "_id": "prep_015_i2",
+        "referenceId": "demo_132",
+        "type": "product",
+        "amount_": 0.415,
+        "unit_": "kg"
+      },
+      {
+        "_id": "prep_015_i3",
+        "referenceId": "demo_129",
+        "type": "product",
+        "amount_": 0.23,
+        "unit_": "kg"
+      },
+      {
+        "_id": "prep_015_i4",
+        "referenceId": "demo_131",
+        "type": "product",
+        "amount_": 0.62,
+        "unit_": "liter"
+      },
+      {
+        "_id": "prep_015_i5",
+        "referenceId": "demo_135",
+        "type": "product",
+        "amount_": 0.315,
+        "unit_": "kg"
+      },
+      {
+        "_id": "prep_015_i6",
+        "referenceId": "demo_118",
+        "type": "product",
+        "amount_": 0.05,
+        "unit_": "liter"
+      },
+      {
+        "_id": "prep_015_i7",
+        "referenceId": "demo_119",
+        "type": "product",
+        "amount_": 0.4,
+        "unit_": "liter"
+      }
+    ],
+    "steps_": [
+      {
+        "order_": 1,
+        "instruction_": "טוחנים יחד גולדן סירופ חמאת בוטנים וטחינה",
+        "labor_time_minutes_": 5
+      },
+      {
+        "order_": 2,
+        "instruction_": "מערבבים בנפרד את שאר המרכיבים בכד מדידה",
+        "labor_time_minutes_": 2
+      },
+      {
+        "order_": 3,
+        "instruction_": "תוך טחינה מוסיפים את שאר המרכיבים עד אמולסיה",
+        "labor_time_minutes_": 3
+      },
+      {
+        "order_": 4,
+        "instruction_": "מאחסנים בקירור עד שימוש",
+        "labor_time_minutes_": 0
+      }
+    ],
+    "yield_amount_": 2.63,
+    "yield_unit_": "kg",
+    "default_station_": "cold",
+    "labels_": [
+      "סיפור של אוכל",
+      "טבעוני",
+      "צמחוני",
+      "סלט"
+    ],
+    "logistics_": {
+      "baseline_": [
+        {
+          "equipment_id_": "eq_057",
+          "quantity_": 1,
+          "phase_": "prep",
+          "is_critical_": true
+        }
+      ]
+    },
+    "is_approved_": false
+  },
+  {
+    "_id": "prep_016",
+    "name_hebrew": "גלייז קוריאני",
+    "recipe_type_": "preparation",
+    "ingredients_": [
+      {
+        "_id": "prep_016_i1",
+        "referenceId": "demo_116",
+        "type": "product",
+        "amount_": 0.008,
+        "unit_": "kg",
+        "note_": "קלוף מגורד"
+      },
+      {
+        "_id": "prep_016_i2",
+        "referenceId": "demo_004",
+        "type": "product",
+        "amount_": 0.009,
+        "unit_": "kg",
+        "note_": "כתוש"
+      },
+      {
+        "_id": "prep_016_i3",
+        "referenceId": "demo_130",
+        "type": "product",
+        "amount_": 0.02,
+        "unit_": "kg"
+      },
+      {
+        "_id": "prep_016_i4",
+        "referenceId": "demo_087",
+        "type": "product",
+        "amount_": 0.112,
+        "unit_": "kg"
+      },
+      {
+        "_id": "prep_016_i5",
+        "referenceId": "demo_085",
+        "type": "product",
+        "amount_": 0.054,
+        "unit_": "liter"
+      },
+      {
+        "_id": "prep_016_i6",
+        "referenceId": "demo_118",
+        "type": "product",
+        "amount_": 0.0025,
+        "unit_": "liter"
+      },
+      {
+        "_id": "prep_016_i7",
+        "referenceId": "demo_073",
+        "type": "product",
+        "amount_": 0.003,
+        "unit_": "kg"
+      },
+      {
+        "_id": "prep_016_i8",
+        "referenceId": "demo_074",
+        "type": "product",
+        "amount_": 0.001,
+        "unit_": "kg"
+      },
+      {
+        "_id": "prep_016_i9",
+        "referenceId": "demo_062",
+        "type": "product",
+        "amount_": 0.01,
+        "unit_": "kg"
+      },
+      {
+        "_id": "prep_016_i10",
+        "referenceId": "demo_119",
+        "type": "product",
+        "amount_": 0.03,
+        "unit_": "liter"
+      }
+    ],
+    "steps_": [
+      {
+        "order_": 1,
+        "instruction_": "ערבב את כף הקורנפלור (10 גרם) עם טיפה מים.",
+        "labor_time_minutes_": 1
+      },
+      {
+        "order_": 2,
+        "instruction_": "הביאו את הרוטב לרתיחה, שפכו פנימה את הקורנפלור המדולל ובשלו תוך ערבוב כ־1–2 דקות עד שהרוטב מסמיך מעט.",
+        "labor_time_minutes_": 2
+      },
+      {
+        "order_": 3,
+        "instruction_": "אחסנו בקירור עד שימוש.",
+        "labor_time_minutes_": 0
+      }
+    ],
+    "yield_amount_": 1,
+    "yield_unit_": "kg",
+    "default_station_": "stove",
+    "labels_": [
+      "אסייתי",
+      "סיפור של אוכל",
+      "רוטב",
+      "גלייז"
+    ],
+    "logistics_": {
+      "baseline_": [
+        {
+          "equipment_id_": "eq_005",
+          "quantity_": 1,
+          "phase_": "prep",
+          "is_critical_": true
+        },
+        {
+          "equipment_id_": "eq_059",
+          "quantity_": 1,
+          "phase_": "prep",
+          "is_critical_": true
+        },
+        {
+          "equipment_id_": "eq_060",
+          "quantity_": 1,
+          "phase_": "prep",
+          "is_critical_": true
+        }
+      ]
+    },
+    "is_approved_": false
+  }
+]
