@@ -17,6 +17,7 @@ description: Single source of truth for all project rules, standards, and skill/
 | `.claude/standards-security.md` | Touching auth, routes, storage, crypto, security surface, pre-deploy |
 | `.claude/standards-domain.md` | Translation, Hebrew canonical values, Lucide icons, domain logic |
 | `.claude/standards-git.md` | Committing, pushing, PRs, deploying, GitHub MCP |
+| `.claude/standards-backend.md` | Adding/modifying persisted entities, new data services, CRUD changes, backend API |
 
 ---
 
@@ -31,6 +32,7 @@ description: Single source of truth for all project rules, standards, and skill/
 - **CSS/SCSS** `[SHARED]`: Before creating or editing any `.scss`/`.css` in `src/` → read `.claude/skills/cssLayer/SKILL.md` and apply it.
 - **Add recipe/dish** `[SHARED]`: User adds recipe from image or text → read `.claude/skills/add-recipe/SKILL.md`; Step 3 confirmation required before any write.
 - **Auth, logging, routes, CRUD** `[SHARED]`: Read `.claude/skills/auth-and-logging/SKILL.md` when touching auth, persistence, HTTP, or critical operations.
+- **Backend persistence** `[SHARED]`: When a feature or plan adds, modifies, or removes persisted data → read `.claude/standards-backend.md`. Every plan touching persistence MUST include a `## Backend Impact` section.
 - **Session start / after time away** `[SHARED]`: Check `notes/github-sync/<today-date>.md` first. If it exists → skip. If missing → read `.claude/skills/github-sync/SKILL.md` and run it. **Once per calendar day only.**
 - **End of session, before PR** `[SHARED]`: Read `.claude/skills/techdebt/SKILL.md` for duplicate/dead code and TODO audit.
 - **After features** `[SHARED]`: Read `.claude/skills/update-docs/SKILL.md` to refresh breadcrumbs and docs.

@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/core/services/supplier-modal.service.ts"],
-  "sourcesContent": ["import { Injectable, signal } from '@angular/core';\n\n@Injectable({ providedIn: 'root' })\nexport class SupplierModalService {\n  private readonly isOpen_ = signal(false);\n\n  readonly isOpen = this.isOpen_.asReadonly();\n\n  openAdd(): void {\n    this.isOpen_.set(true);\n  }\n\n  close(): void {\n    this.isOpen_.set(false);\n  }\n}\n"],
-  "mappings": ";;;;;;;;AAGM,IAAO,uBAAP,MAAO,sBAAoB;EACd,UAAU,OAAO,KAAK;EAE9B,SAAS,KAAK,QAAQ,WAAU;EAEzC,UAAO;AACL,SAAK,QAAQ,IAAI,IAAI;EACvB;EAEA,QAAK;AACH,SAAK,QAAQ,IAAI,KAAK;EACxB;;qCAXW,uBAAoB;EAAA;4EAApB,uBAAoB,SAApB,sBAAoB,WAAA,YADP,OAAM,CAAA;;;sEACnB,sBAAoB,CAAA;UADhC;WAAW,EAAE,YAAY,OAAM,CAAE;;;",
-  "names": []
-}

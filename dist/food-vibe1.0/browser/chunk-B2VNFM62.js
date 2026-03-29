@@ -1,0 +1,1 @@
+import{J as o,da as t}from"./chunk-EPX2Y7DR.js";var n=class e{isOpen=t(!1);mode=t("sign-in");open(i="sign-in"){this.mode.set(i),this.isOpen.set(!0)}close(){this.isOpen.set(!1)}static \u0275fac=function(s){return new(s||e)};static \u0275prov=o({token:e,factory:e.\u0275fac,providedIn:"root"})};export{n as a};
