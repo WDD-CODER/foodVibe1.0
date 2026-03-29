@@ -6,6 +6,123 @@ Moved from todo.md to reduce token load.
 
 ## Done
 
+---
+
+### Plan 233 — Gemini Direct API + Modal Status Feedback (`plans/233-gemini-direct-api-modal-status.plan.md`)
+- [x] `gemini.service.ts` — rewrite: fetch-based direct Gemini API call, apiKey_ signal, hasKey computed, setApiKey(), remove HttpClient/dead imports
+- [x] `ai-recipe-modal.component.ts` — add configuringKey_/keyInput_/status_ signals, onSaveKey/onClose methods, API key guard in onGenerate(), FormsModule in imports
+- [x] `ai-recipe-modal.component.html` — add key config panel + status bar (sending/done/error states)
+- [x] `ng build` — verify zero errors
+
+---
+
+### Plan 232 — Backend Collection Registry Standard (`plans/232-backend-collection-registry.plan.md`)
+- [x] `.claude/standards-backend.md` — create with 6 sections (22-row collection registry, corrected count)
+- [x] `.claude/copilot-instructions.md` — add standards table row for standards-backend.md
+- [x] `.claude/copilot-instructions.md` — add §0 Backend persistence trigger bullet
+- [x] `.cursor/rules/backend-persistence.mdc` — create with data-service globs
+- [x] `.claude/commands/plan-implementation.md` — add Backend Impact output block
+- [x] `.claude/commands/execute-it.md` — add Backend Impact check to Execution Rules
+
+---
+
+### Plan 231 — Mongo URI Env Split (`plans/231-mongo-uri-env-split.plan.md`)
+- [x] `server/db.js` — rewrite to read single MONGO_URI (remove NODE_ENV branch, MONGO_LOCAL_URI/MONGO_REMOTE_URI)
+- [x] `server/.env` — replace split URIs with MONGO_URI=localhost, add PORT=3000, ALLOWED_ORIGIN
+- [x] Secrets audit — confirmed server/.env was never committed to git history
+
+---
+
+### Plan 230 — AI Recipe Flow Completion (`plans/230-ai-recipe-flow-completion.plan.md`)
+- [x] `recipe-book-list.component.spec.ts` — add Sparkles + HeroFabService + AiRecipeModalService mocks
+- [x] `ai-recipe-modal.service.ts` — void open(), private isOpen_, public isOpen accessor
+- [x] `ai-recipe-modal.component.ts` — add ChangeDetectionStrategy.OnPush
+- [x] `ai-recipe-modal.component.html` — update isOpen_() → isOpen()
+- [x] `recipe-builder.page.ts` — move draft consume() inside else block
+- [x] `dictionary.json` — add ai_recipe_preview_ingredients + ai_recipe_preview_steps
+- [x] Run ng build — zero errors confirmed
+- [x] Run ng test — recipe-book-list 9/9 passing; 49 pre-existing failures unchanged
+
+---
+
+### Plan 228 — Backend Awareness in Agent Docs (`plans/228-backend-awareness-agents.plan.md`)
+- [x] `.claude/agents/software-architect.md` — add Backend Stack section
+- [x] `.claude/agents/product-manager.md` — add backend items to Quality Checklist
+- [x] `.claude/agents/qa-engineer.md` — add API Coverage to Test Strategy
+- [x] `server/breadcrumbs.md` — create
+
+---
+
+### Plan 227 — Render Deploy Config (`plans/227-render-deploy-config.plan.md`)
+- [x] `render.yaml` — create at repo root with web service config (rootDir: server, MONGO_REMOTE_URI, JWT_SECRET, ALLOWED_ORIGIN)
+- [x] `angular.json` — verify outputPath matches `dist/food-vibe1.0/browser` in server/index.js
+
+---
+
+### Plan 226 — AI Text Import Parser (`plans/226-ai-text-import-parser.plan.md`)
+- [x] `parsed-result.model.ts` — ParsedIngredient, ParsedStep, ParsedRecipe, ParsedDish, ParsedResult
+- [x] `gemini.service.ts` — add parseText() via proxy
+- [x] `recipe-text-import-modal.service.ts` — signal-based open/close + result
+- [x] `recipe-parser.service.ts` — wraps GeminiService; Observable<ParsedResult>; catchError
+- [x] `recipe-text-import-modal/` — standalone component, 3 states, confidence warning
+- [x] `recipe-header.component.ts+html` — importTextClick output + "ייבוא מטקסט" button
+- [x] `recipe-builder.page.ts` — inject, patch form, type mismatch toasts
+- [x] `recipe-builder.page.scss` — .just-filled animation
+- [x] `app.component.ts+html` — register modal at root
+- [x] `dictionary.json` — Hebrew translation keys
+- [x] `server/routes/ai.js` — POST /parse-text route
+
+---
+
+### Plan 225 — Gemini AI Proxy — Key Off Client (`plans/225-gemini-ai-proxy.plan.md`)
+- [x] `server/routes/ai.js` — create: POST /generate behind verifyToken, calls Gemini with process.env.GEMINI_API_KEY
+- [x] `server/index.js` — mount aiRouter at /api/v1/ai
+- [x] `.env` — add GEMINI_API_KEY= placeholder
+- [x] `gemini.service.ts` — remove apiKey_ signal + localStorage; inject HttpClient; proxy call to /api/v1/ai/generate
+- [x] `ai-recipe-modal.component.ts` — remove configuring_, keyInput_, onSaveKey()
+- [x] `ai-recipe-modal.component.html` — remove key-config panel blocks
+- [x] Run ng build — verify zero errors
+
+---
+
+### Plan 223 — Backend Auth Wire + cookie-parser Fix (`plans/223-backend-auth-wire.plan.md`)
+- [x] `server/` — npm install cookie-parser
+- [x] `server/index.js` — add cookieParser() middleware after express.json()
+- [x] `server/routes/auth.js` — fix login: replace direct safeCompare with PBKDF2 re-derivation
+- [x] `user.service.ts` — add HttpClient import + inject; add environment import + authBase
+- [x] `user.service.ts` — add storeToken() / clearToken() helpers using 'fv_token'
+- [x] `user.service.ts` — add callBackendLogin(), callBackendSignup(), callBackendRefresh(), callBackendLogout()
+- [x] `user.service.ts` — update login() with useBackendAuth branch + HTTP error mapping
+- [x] `user.service.ts` — update signup() with useBackendAuth branch (hash before send) + error mapping
+- [x] `user.service.ts` — update logout() — add clearToken() + fire-and-forget logout POST
+- [x] `auth.interceptor.ts` — add silent token refresh on 401 with URL guard to prevent infinite loop
+- [x] Run ng build — verify zero errors
+
+---
+
+### Plan 221 — Unify recipe delete button (`plans/221-unify-recipe-delete-button.plan.md`)
+- [x] `recipe-book-list.component.ts` — add `removingId_` signal; remove `hidingId_` and `permanentDeletingId_`
+- [x] `recipe-book-list.component.ts` — mark `onHideRecipe` and `onPermanentlyDeleteRecipe` private; update both to use `removingId_`
+- [x] `recipe-book-list.component.ts` — add `onRemoveRecipe(recipe)` unified public method with requireAuth gate + role-based confirm + routing
+- [x] `recipe-book-list.component.ts` — update `onBulkDeleteSelected` to call `hideRecipe` (non-admin) or `permanentlyDeleteRecipe` (admin) per recipe
+- [x] `recipe-book-list.component.html` — replace two-button block with single unified trash-2 button block guarded by `@if (isLoggedIn())`
+
+### Plan 220 — Add recipe via AI (`plans/220-add-recipe-via-ai.plan.md`)
+- [x] `src/app/core/services/ai-recipe-draft.service.ts` — create AiRecipeDraft interface + AiRecipeDraftService
+- [x] `src/app/core/services/gemini.service.ts` — create GeminiService with localStorage key, fetch-based generateRecipe
+- [x] `src/app/shared/ai-recipe-modal/ai-recipe-modal.service.ts` — create promise-based modal service
+- [x] `src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts + .html + .scss` — create modal component
+- [x] `src/app/appRoot/app.component.ts + .html` — wire AiRecipeModalComponent into root
+- [x] `recipe-book-list.component.ts` — add OnInit/OnDestroy + FAB action for AI recipe
+- [x] `recipe-builder.page.ts` — inject AiRecipeDraftService, add prefillFromAiDraft, call from ngOnInit
+- [x] `public/assets/data/dictionary.json` — add AI recipe translation keys to "general" section
+
+---
+
+### Tech Debt — Audit 2026-03-26 (completed)
+- [x] Extract `trim().toLowerCase().replace(/\s+/g, '_')` key-sanitization into `core/utils/sanitize-key.util.ts` (2 services: `translation-key-modal.service.ts:30`, `label-creation-modal.service.ts:33`)
+
+---
 
 ### Plan 216 — Dead Code Audit Cleanup (`plans/216-dead-code-audit-cleanup.plan.md`)
 - [x] `tsconfig.json` — remove `@components/*` alias

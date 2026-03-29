@@ -21,7 +21,7 @@
         @if (!group.get('referenceId')?.value || editingNameAtRow_() === $index) {
         <app-ingredient-search [rowIndex]="$index" [focusTrigger]="focusSearchAtRow()"
           [excludeNames]="editingNameAtRow_() === $index ? getExcludeNamesForRow($index) : existingIngredientNames"
-          [initialQuery]="editingNameAtRow_() === $index ? (group.get('name_hebrew')?.value ?? '') : ''"
+          [initialQuery]="(editingNameAtRow_() === $index || (!group.get('referenceId')?.value && group.get('name_hebrew')?.value)) ? (group.get('name_hebrew')?.value ?? '') : ''"
           (itemSelected)="onItemSelected($event, group)" (focusDone)="focusSearchDone.emit()"
           (addNewRowRequested)="addIngredient.emit()" (cancelSearch)="editingNameAtRow_.set(null)"></app-ingredient-search>
         } @else {
