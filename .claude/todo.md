@@ -94,14 +94,6 @@
 
 ---
 
-### Plan 222 — Dev Machine Open Ports Security Hardening (`plans/222-dev-machine-open-ports-security.plan.md`)
-- [ ] Disable Dell SupportAssist service in `services.msc` — verify port 9012 closed
-- [ ] Identify and resolve port 5700 (VMware/Hyper-V/Windows component)
-- [ ] Verify MongoDB auth enabled in `mongod.cfg` — confirm `--auth` flag present
-- [ ] Evaluate SMB usage — disable ports 445/139 if not file-sharing on LAN
-
----
-
 ### Plan 221 — Unify recipe delete button (`plans/221-unify-recipe-delete-button.plan.md`)
 - [x] `recipe-book-list.component.ts` — add `removingId_` signal; remove `hidingId_` and `permanentDeletingId_`
 - [x] `recipe-book-list.component.ts` — mark `onHideRecipe` and `onPermanentlyDeleteRecipe` private; update both to use `removingId_`
@@ -119,6 +111,45 @@
 - [x] `recipe-builder.page.ts` — inject AiRecipeDraftService, add prefillFromAiDraft, call from ngOnInit
 - [x] `public/assets/data/dictionary.json` — add AI recipe translation keys to "general" section
 
+---
+
+## 🔴 Quick Fixes
+
+### Plan 229 — Point dev environment at local Express/MongoDB (`plans/229-dev-env-local-backend.plan.md`)
+
+- [ ] Edit `src/environments/environment.ts`: set apiUrl/authApiUrl to localhost:3000, useBackend/useBackendAuth to true
+- [ ] Run `ng build --configuration production` and confirm zero errors
+
+### Plan 157 — Fix sidebar alignment and close on breakpoint (`plans/157-fix-sidebar-alignment-close-breakpoint.plan.md`)
+- [ ] List-shell: remove margin-block and max-height from .filter-panel in 768px block
+- [ ] Inventory list: add afterNextRender + matchMedia to close panel when viewport <= 768px
+
+### Plan 174 — Custom select chip and standalone state (`plans/174-custom-select-chip-and-standalone-state.plan.md`)
+- [ ] Cook-view ingredients index: add variant=”chip” and typeToFilter to unit selects for consistency with recipe builder
+- [ ] Verify in app: recipe builder and cook-view ingredients index unit dropdowns
+
+### Plan 169 — List quick-edit UX overlay (`plans/169-list-quick-edit-ux-overlay.plan.md`)
+- [ ] Verify first-click open, carousel dropdown visible, row-blur confirm only
+
+### Plan 134 — Translation and confirmation modals unified (`plans/134-translation-confirmation-modals-unified.plan.md`)
+
+- [ ] Other entry points: align with resolve first → modal if needed → already in parameter (metadata-manager, preparation-*, menu-section-categories, add-equipment-modal, recipe-workflow, add-supplier-flow)
+
+### Tech Debt — Audit 2026-03-26 (unplanned items)
+- [x] Extract `trim().toLowerCase().replace(/\s+/g, '_')` key-sanitization into `core/utils/sanitize-key.util.ts` (2 services: `translation-key-modal.service.ts:30`, `label-creation-modal.service.ts:33`)
+- [ ] Remove commented import `ProductDataService` at `product-form.component.ts:8` and commented statement at line 927
+
+### Plan 074 â€” Tech debt remediation (`plans/074-tech-debt-remediation.plan.md`)
+
+- [ ] Refactor menu-intelligence.page.scss into partials (deferred)
+
+### Plan 167 — Category/unit add-new audit (`plans/167-category-unit-add-new-audit.plan.md`)
+- [ ] Optional: Cook-view “add new unit” so user can add from there
+
+---
+
+## 🟡 Medium
+
 ### Plan 219 — Recipe header photo-picker (`plans/219-recipe-header-photo-picker.plan.md`)
 - [ ] recipe.model.ts — add `imageUrl_?: string` after `hiddenBy?`
 - [ ] recipe-builder.page.ts — add `recipeImageUrl_` signal after `isApproved_`
@@ -132,7 +163,6 @@
 - [ ] app.config.ts — import `Camera` and add to `LucideAngularModule.pick`
 - [ ] recipe-header.component.scss — add cursor + `.img-upload-label` rules
 
-
 ### Plan 204-R — Inventory product-price util extraction (`plans/204-R-inventory-product-price-util.plan.md`)
 - [ ] Create `src/app/core/utils/product-price.util.ts` — three pure exports: `getProductUnits`, `getPricePerUnit`, `calcBuyPriceGlobal`
 - [ ] Delete dead `getProductUnits` method from component (no call sites)
@@ -141,98 +171,32 @@
 - [ ] Leave `onUnitChange` conversion block unchanged (inverse math — cannot reuse)
 - [ ] Verify `ng build` passes
 
-### Plan 203-R — Recipe-book allergen + cell-expand refactor (`plans/203-R-recipe-book-allergen-cell-expand-refactor.plan.md`)
-- [ ] Create `src/app/core/utils/recipe-allergens.util.ts` — export `MAX_ALLERGEN_RECURSION` + pure `resolveRecipeAllergens` fn
-- [ ] Create `src/app/core/utils/cell-expand-state.util.ts` — `CellExpandState` class with signals + helpers
-- [ ] Update `recipe-book-list.component.ts` — import constants/util, replace 4 signals with 2 `CellExpandState` instances
-- [ ] Update `recipe-book-list.component.ts` — replace `getRecipeAllergens` body with thin wrapper; update `getRecipeProductIds` to import `MAX_ALLERGEN_RECURSION`
-- [ ] Update `recipe-book-list.component.ts` — delete 6 expand methods + 2 expand helper methods; add close wrappers + update `resetExpandedCells`
-- [ ] Update `recipe-book-list.component.html` — replace 6 method calls in header/body with `allergenExpand.*` / `labelsExpand.*`
-- [ ] Verify: `ng build` passes; component under ~600 LOC
-
-## Done
-
-Completed entries are in [todo-archive.md](todo-archive.md).
-
----
-
-## Ahead (Pending)
-
-
-### Plan 200 — Lite skills refactor validation report (`plans/200-lite-skills-refactor-validation-report.plan.md`)
-- [ ] Pre-write verification: content check (`toBe/skills/commit-to-github.md`, `toBe/agents/breadcrumb-navigator.md`); Master §3–5 completeness in `toBe/copilot-instructions.md`; confirm no legacy `quick-chat` skill
-- [ ] Write `notes/comparative-analysis-report.md` (15 sections + appendices A–C per plan)
-- [ ] Cross-check Go/No-Go §9 vs Plan 198; reference Plans 198 and 199 in report
-- [ ] Post-write: tables render, Appendix B sums match session headline, internal consistency pass
-
-### Plan 199 — Lite refactor workflow comparative analysis (`plans/199-lite-refactor-workflow-comparative-analysis.plan.md`)
-- [ ] Policy: Treat Master (`copilot-instructions.md`) as OS; agents/skills as thin apps — no duplicate rule blocks in agent files
-- [ ] Enforce Efficiency Tier routing (High Reasoning vs Fast/Flash) for planning, decomposition, and procedural phases
-- [ ] Keep skills phase-based procedural workflows; use argument shortcuts (`c`, `s`, `sl`, `sf`) per commit-to-github skill
-- [ ] Track context-load goal (~73% reduction vs Legacy) when editing agent/skill bundles — avoid re-bloating personas
-- [ ] Cross-link: execution work continues under Plan 198 (promote `.claude/toBe/`, §0.5 Model Routing, security migration QA)
-
-### Plan 198 — Lite agent refactor adoption (`plans/198-lite-agent-refactor-adoption.plan.md`)
-- [ ] CRITICAL: Verify Legacy security-officer requirements + 30-item checklist fully migrated to copilot-instructions §5 before retiring Legacy agent
-- [ ] HIGH: Fix `.claude/toBe/agents/breadcrumb-navigator.md` content (Navigator vs Architect mismatch)
-- [ ] MEDIUM: Lite QA agent — prominent spec-authoring callout (no `.spec.ts` during iterative plan execution)
-- [ ] MEDIUM: One Master-section pointer line per Lite agent (delegation cross-references)
-- [ ] Adoption: Promote `.claude/toBe/` foundation + agents to canonical paths when 1–3 satisfied; run validate-agent-refs
-- [ ] Verification: breadcrumb-navigator + ui-inspector SKILLs hold canonical protocol detail before stripping Legacy agents
-
 ### Plan 197 — AI Framework Redundancy Fix (`plans/197-ai-framework-redundancy-fix.plan.md`)
 - [ ] Phase 1: Add subagent gate exemption to `CLAUDE.md`
 - [ ] Phase 2: Add main-session-only scope note to `agent.md` preflight
 - [ ] Phase 3: Remove duplicate §0.3 agent table from `copilot-instructions.md`
-- [ ] Phase 4: Tighten "Apply all project standards" → targeted section refs in 6 agent files
-- [ ] Phase 5: Add "Context Scope: gate-exempt" header to `ui-inspector.md`
+- [ ] Phase 4: Tighten “Apply all project standards” → targeted section refs in 6 agent files
+- [ ] Phase 5: Add “Context Scope: gate-exempt” header to `ui-inspector.md`
 - [ ] Verification: run `/validate-agent-refs`
 
-### Plan 196 — Commit flow speed audit (`plans/196-commit-flow-speed-audit.plan.md`)
-- [ ] Add approved-tree drift check before any git write and auto-replan logic
-- [ ] Rebase/sync branch before commit plan generation when behind origin/main
-- [ ] Create conflict-resolution policy for known files with auto/manual boundaries
-- [ ] Split PR merge and remote branch deletion into explicit verified steps
-- [ ] Record per-phase timing metrics for each commit workflow run
-
 ### Plan 192 — Pillar 3 Reactive Loop Hardening (A13–A17) (`plans/192-reactive-loop-hardening-a13-a17.plan.md`)
-- [ ] A13: Modify `.cursor/rules/session-start.mdc` with first-message guard, state decision tree, and "wrap up" tip
+- [ ] A13: Modify `.cursor/rules/session-start.mdc` with first-message guard, state decision tree, and “wrap up” tip
 - [ ] A14: Modify `.cursor/rules/session-end.mdc` with expanded trigger phrases and sweep-first prompt
 - [ ] A15: Harden Phase 4 Step 6 in `.claude/skills/commit-to-github/SKILL.md` with archive safety gates
 - [ ] A17: Modify `.claude/commands/sweep-stale-todos.md` with deferred filter, precise git verification, and 7-day age threshold
 - [ ] Validation: Run `validate-agent-refs` and verify no broken references
 
-### Plan 190 — Master De-Spaghettification Map (`plans/190-master-de-spaghettification-map.plan.md`)
-- [ ] Phase A1: Replace hardcoded Hebrew strings with `translatePipe` keys and dictionary entries (SW-4)
-- [ ] Phase A2: Replace orphan button classes with design-system `c-*` tokens in product/metadata flows (HI-1)
-- [ ] HI-6: Consolidate scroll-zone scaffold into shared `app-scroll-zone` component
-- [ ] SW-5: Decompose god files (`menu-intelligence`, `recipe-builder`, `product-form`)
-- [ ] Phase C1: Consolidate list-page signal clusters into shared list state base/composable (HI-4)
-- [ ] Phase C2: Consolidate scroll-indicator scaffold into shared scroll-zone infrastructure (HI-6)
-- [ ] Phase C3: Decompose god files into page services/sub-components (`menu-intelligence`, `recipe-builder`, `product-form`) (SW-5)
-
 ### Plan 182 — toFix.md verification (undone) (`plans/182-tofix-verification-undone.plan.md`)
 - [ ] Recipe builder: remove chevron up/down arrows in section titles
 - [ ] Recipe builder: expandable containers — allow collapse by clicking anywhere on card
 - [ ] Logistics: chips grid — chip width fit content so full label visible
-- [ ] Activity: change-tag — show clear "what changed" (values, from → to)
+- [ ] Activity: change-tag — show clear “what changed” (values, from → to)
 - [ ] Add new category modal: two-case focus flow (Hebrew then English, or prefill Hebrew + focus English)
 - [ ] Verify/clarify: recipe view alignment; Maison Plus; labels; menu builder keyboard; Plan 147; dashboard; activity scroll; lists sidebar; unit-creator focus; metrics-square gram→volume
 
-### Plan 174 — Custom select chip and standalone state (`plans/174-custom-select-chip-and-standalone-state.plan.md`)
-- [ ] Cook-view ingredients index: add variant="chip" and typeToFilter to unit selects for consistency with recipe builder
-- [ ] Verify in app: recipe builder and cook-view ingredients index unit dropdowns
-
-
-### Plan 169 — List quick-edit UX overlay (`plans/169-list-quick-edit-ux-overlay.plan.md`)
-- [ ] Verify first-click open, carousel dropdown visible, row-blur confirm only
-
-### Plan 167 — Category/unit add-new audit (`plans/167-category-unit-add-new-audit.plan.md`)
-- [ ] Optional: Cook-view "add new unit" so user can add from there
-
 ### Plan 163 — toFix audit PRD (`plans/163-tofix-audit-prd.plan.md`)
 - [ ] 2.2 Recipe builder: verify remove up/down arrows in category title (recipe-workflow)
-- [ ] 2.3 App-wide: audit category/unit dropdowns for "add new" where applicable
+- [ ] 2.3 App-wide: audit category/unit dropdowns for “add new” where applicable
 - [ ] 2.4 Labels: selectability in delete-label + recipe builder manual selector
 - [ ] 2.5 Menu-library: keyboard (Arrow Up/Down, Enter) on custom-select options
 - [ ] 2.7 Lists: sidebar aligned to list container at 768px (list-shell)
@@ -243,53 +207,10 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [ ] Error: interrupt success/warning; when current is error, enqueue so each error shown in order
 - [ ] Add user-msg.service.spec.ts with coalesce and error-priority tests
 
-
-### Plan 157 — Fix sidebar alignment and close on breakpoint (`plans/157-fix-sidebar-alignment-close-breakpoint.plan.md`)
-- [ ] List-shell: remove margin-block and max-height from .filter-panel in 768px block
-- [ ] Inventory list: add afterNextRender + matchMedia to close panel when viewport <= 768px
-
-### Plan 134 — Translation and confirmation modals unified (`plans/134-translation-confirmation-modals-unified.plan.md`)
-
-- [ ] Other entry points: align with resolve first → modal if needed → already in parameter (metadata-manager, preparation-*, menu-section-categories, add-equipment-modal, recipe-workflow, add-supplier-flow)
-
-### Plan 133 — List quick-edit inline (`plans/unused-133-list-quick-edit-inline.plan.md`)
-
-- [ ] Inventory product list: editable cells (supplier, category, unit); value click → inline dropdown; row click → edit page
-- [ ] Supplier list: keep panel on row click; add quick-edit for chosen cells (e.g. contact, delivery, min order)
-- [ ] Keyboard and a11y: focus model, focus trap in inline control, Esc/Enter, return focus, screen reader labels (partial: aria-label on buttons)
-- [ ] Venue list / Recipe-book list: optional quick-edit columns as needed
-
 ### Plan 124 — Unified styling audit and theme (`plans/124-unified-styling-audit-theme.plan.md`)
 
 - [ ] Phase 4: menu-library-list — use c-input-wrapper and c-btn-primary in HTML; recipe-builder main submit use c-btn-primary
 - [ ] Phase 5: Spot-check representative pages; search and replace remaining raw colors in src/**/*.scss
-
-### Plan 122 — AI Chatbot Gemini scope (`plans/122-ai-chatbot-gemini-scope.plan.md`)
-
-- [ ] Decide chat placement (sidebar / floating button / dedicated Assistant page)
-- [ ] Decide first use case (dictation → recipe and/or create menu for N people)
-- [ ] Decide backend approach for Gemini API key (proxy / serverless / existing API)
-- [ ] Decide language (Hebrew / English / both) for prompts and bot replies
-- [ ] Decide confirmation pattern (open edit screen with draft vs inline draft in chat vs both)
-- [ ] Write designated implementation plan once clarifications are set
-
-### Plan 089 — Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
-
-- [ ] A: Auto-name menu with formatted date when name is empty on save, with duplicate handling (1), (2)
-- [ ] Timestamps: Add updated_at_ to MenuEvent model; set created_at_ on create and updated_at_ on every save
-- [ ] B: Set event_date_ default to today's date for new menus
-- [ ] C: Redesign guest counter as unified pill-shaped container with paper-blend styling
-- [ ] D1: Tie food cost calculation to serving_portions * guest_count, update service and component
-- [ ] D2: Show sell_price inline next to dish name for all menu types
-- [ ] E1: Make toolbar collapsible with fixed overlay when opened
-- [ ] E2: Create floating FAB on right side with pop-up buttons for toolbar and back navigation
-- [ ] Dictionary: Add new Hebrew dictionary keys for new labels
-
-### Plan 091 — Menu Intelligence Inputs and Layout (`plans/091-menu-intelligence-inputs-layout.plan.md`)
-
-- [ ] Add SelectOnFocus to sell_price and dish-field inputs; import directive in component
-- [ ] Add onSellPriceKeydown and onDishFieldKeydown with 0.25 step for portion fields
-- [ ] Wrap dish name + meta toggle in .dish-name-meta; dish-name-cell as grid; .dish-remove out of absolute
 
 ### Plan 095 — Menu Intelligence Gap Report (`plans/095-menu-intelligence-gap-report.plan.md`)
 
@@ -299,40 +220,18 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [ ] Add .dropdown-item.highlighted and .dish-name-clickable in menu-intelligence.page.scss
 - [ ] Optional: section search ngModelChange to onSectionSearchQueryChange if NG5002 appears
 
-### Plan 081 â€” toFix Detailed Plans (`plans/081-tofix-detailed-plans.plan.md`)
+### Plan 091 — Menu Intelligence Inputs and Layout (`plans/091-menu-intelligence-inputs-layout.plan.md`)
 
-- [ ] Section 1 â€” Sign-in / Sign-up: auto-focus, dev user dropdown, Enter-to-submit, field-level errors
-- [ ] Section 2 â€” Quick-add default base unit: set signal to 'gram'
-- [ ] Section 3 â€” Recipe view: number formatting pipe, unit-before-scale, ingredient alignment
-- [ ] Section 4 â€” Recipe builder: persist container state, remove arrows, custom qty buttons, clickable headers, CDK drag-drop
-- [ ] Section 5 â€” Maison Plus (dish prep list): row style, qty buttons, category-first add flow, auto-focus
-- [ ] Section 6 â€” App-wide category/unit dropdowns: add 'add new' sentinel option to every dropdown
-- [ ] Section 7 â€” Logistics: chip fit-content width, keyboard navigation with highlighted index
-- [ ] Section 8 â€” Add-equipment modal: single-step category creation quick-save flow
-- [ ] Section 9 â€” Labels: selectable existing labels in delete UI and recipe builder
-
-### Plan 074 â€” Tech debt remediation (`plans/074-tech-debt-remediation.plan.md`)
-
-- [ ] Refactor menu-intelligence.page.scss into partials (deferred)
-
-### Plan 072 â€” Robust login, app-wide logging, security (`plans/072-robust-login-app-logging-security.plan.md`)
-
-- [ ] Wire logging: auth (login/logout/signup/guard/401), HTTP interceptor, global ErrorHandler, critical CRUD in data services
-- [ ] Auth hardening: password in UI, credentials types, local hash-only storage, auth abstraction, guard/modal wiring
-- [ ] Backend-ready: environment files, API contract, HTTP provider, interceptor, token lifecycle
-- [ ] Add "Security & go-live" checklist to docs (HTTPS, headers, rate limiting, no secrets in repo, error exposure)
-
-
-### Tech Debt — Audit 2026-03-26 (unplanned items)
-- [x] Extract `trim().toLowerCase().replace(/\s+/g, '_')` key-sanitization into `core/utils/sanitize-key.util.ts` (2 services: `translation-key-modal.service.ts:30`, `label-creation-modal.service.ts:33`)
-- [ ] Remove commented import `ProductDataService` at `product-form.component.ts:8` and commented statement at line 927
+- [ ] Add SelectOnFocus to sell_price and dish-field inputs; import directive in component
+- [ ] Add onSellPriceKeydown and onDishFieldKeydown with 0.25 step for portion fields
+- [ ] Wrap dish name + meta toggle in .dish-name-meta; dish-name-cell as grid; .dish-remove out of absolute
 
 ### Plan 069 â€” Unused and redundant code cleanup (`plans/069-unused-redundant-code-cleanup.plan.md`)
 
 - [ ] Remove `@components/*` from tsconfig.json
 - [ ] Delete recipe.module.ts, system-health.ts, ingredient.service.ts
 - [ ] Update core/breadcrumbs.md and core/services/breadcrumbs.md
-- [ ] Remove commented block in metadata-manager.page.component.ts (lines ~219â€“263)
+- [ ] Remove commented block in metadata-manager.page.component.ts (lines ~219â€”263)
 - [ ] Unit-creator spec: minimal placeholder or delete file
 - [ ] Run build and tests to verify
 
@@ -350,20 +249,95 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [ ] Inventory: add carousel (TS: signals + methods; HTML: carousel header + app-cell-carousel in rows; SCSS: desktop 7-col, mobile 5-col + carousel styles)
 - [ ] Build and verify
 
-### Plan 060 â€” Data persistence and backup (`plans/060-data-persistence-and-backup.plan.md`)
+---
 
-- [ ] Optional: debounced auto-download per category for physical JSON on every change.
+## 🟠 Large Refactors
 
-### Plan 059 â€” Unify design engine (`plans/059-unify-design-engine.plan.md`)
+### Plan 203-R — Recipe-book allergen + cell-expand refactor (`plans/203-R-recipe-book-allergen-cell-expand-refactor.plan.md`)
+- [ ] Create `src/app/core/utils/recipe-allergens.util.ts` — export `MAX_ALLERGEN_RECURSION` + pure `resolveRecipeAllergens` fn
+- [ ] Create `src/app/core/utils/cell-expand-state.util.ts` — `CellExpandState` class with signals + helpers
+- [ ] Update `recipe-book-list.component.ts` — import constants/util, replace 4 signals with 2 `CellExpandState` instances
+- [ ] Update `recipe-book-list.component.ts` — replace `getRecipeAllergens` body with thin wrapper; update `getRecipeProductIds` to import `MAX_ALLERGEN_RECURSION`
+- [ ] Update `recipe-book-list.component.ts` — delete 6 expand methods + 2 expand helper methods; add close wrappers + update `resetExpandedCells`
+- [ ] Update `recipe-book-list.component.html` — replace 6 method calls in header/body with `allergenExpand.*` / `labelsExpand.*`
+- [ ] Verify: `ng build` passes; component under ~600 LOC
 
-Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
+### Plan 089 — Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
 
-- [ ] Phase 9: Deferred â€” grid header/cell too coupled to display:contents layout
-- [ ] Phase 10: Deferred â€” breakpoint/transition standardization for follow-up
+- [ ] A: Auto-name menu with formatted date when name is empty on save, with duplicate handling (1), (2)
+- [ ] Timestamps: Add updated_at_ to MenuEvent model; set created_at_ on create and updated_at_ on every save
+- [ ] B: Set event_date_ default to today's date for new menus
+- [ ] C: Redesign guest counter as unified pill-shaped container with paper-blend styling
+- [ ] D1: Tie food cost calculation to serving_portions * guest_count, update service and component
+- [ ] D2: Show sell_price inline next to dish name for all menu types
+- [ ] E1: Make toolbar collapsible with fixed overlay when opened
+- [ ] E2: Create floating FAB on right side with pop-up buttons for toolbar and back navigation
+- [ ] Dictionary: Add new Hebrew dictionary keys for new labels
 
-### Plan 047 â€” Recipe Builder Polish (`plans/047-recipe-builder-polish.plan.md`)
+### Plan 081 â€” toFix Detailed Plans (`plans/081-tofix-detailed-plans.plan.md`)
 
-- [ ] B3: Volume conversion fix (unverifiable without spec; needs acceptance criteria)
+- [ ] Section 1 â€” Sign-in / Sign-up: auto-focus, dev user dropdown, Enter-to-submit, field-level errors
+- [ ] Section 2 â€” Quick-add default base unit: set signal to 'gram'
+- [ ] Section 3 â€” Recipe view: number formatting pipe, unit-before-scale, ingredient alignment
+- [ ] Section 4 â€” Recipe builder: persist container state, remove arrows, custom qty buttons, clickable headers, CDK drag-drop
+- [ ] Section 5 â€” Maison Plus (dish prep list): row style, qty buttons, category-first add flow, auto-focus
+- [ ] Section 6 â€” App-wide category/unit dropdowns: add 'add new' sentinel option to every dropdown
+- [ ] Section 7 â€” Logistics: chip fit-content width, keyboard navigation with highlighted index
+- [ ] Section 8 â€” Add-equipment modal: single-step category creation quick-save flow
+- [ ] Section 9 â€” Labels: selectable existing labels in delete UI and recipe builder
+
+### Plan 133 — List quick-edit inline (`plans/unused-133-list-quick-edit-inline.plan.md`)
+
+- [ ] Inventory product list: editable cells (supplier, category, unit); value click → inline dropdown; row click → edit page
+- [ ] Supplier list: keep panel on row click; add quick-edit for chosen cells (e.g. contact, delivery, min order)
+- [ ] Keyboard and a11y: focus model, focus trap in inline control, Esc/Enter, return focus, screen reader labels (partial: aria-label on buttons)
+- [ ] Venue list / Recipe-book list: optional quick-edit columns as needed
+
+### Plan 072 â€” Robust login, app-wide logging, security (`plans/072-robust-login-app-logging-security.plan.md`)
+
+- [ ] Wire logging: auth (login/logout/signup/guard/401), HTTP interceptor, global ErrorHandler, critical CRUD in data services
+- [ ] Auth hardening: password in UI, credentials types, local hash-only storage, auth abstraction, guard/modal wiring
+- [ ] Backend-ready: environment files, API contract, HTTP provider, interceptor, token lifecycle
+- [ ] Add “Security & go-live” checklist to docs (HTTPS, headers, rate limiting, no secrets in repo, error exposure)
+
+---
+
+## 🔵 Infrastructure / Planning
+
+### Plan 222 — Dev Machine Open Ports Security Hardening (`plans/222-dev-machine-open-ports-security.plan.md`)
+- [ ] Disable Dell SupportAssist service in `services.msc` — verify port 9012 closed
+- [ ] Identify and resolve port 5700 (VMware/Hyper-V/Windows component)
+- [ ] Verify MongoDB auth enabled in `mongod.cfg` — confirm `--auth` flag present
+- [ ] Evaluate SMB usage — disable ports 445/139 if not file-sharing on LAN
+
+### Plan 200 — Lite skills refactor validation report (`plans/200-lite-skills-refactor-validation-report.plan.md`)
+- [ ] Pre-write verification: content check (`toBe/skills/commit-to-github.md`, `toBe/agents/breadcrumb-navigator.md`); Master §3–5 completeness in `toBe/copilot-instructions.md`; confirm no legacy `quick-chat` skill
+- [ ] Write `notes/comparative-analysis-report.md` (15 sections + appendices A–C per plan)
+- [ ] Cross-check Go/No-Go §9 vs Plan 198; reference Plans 198 and 199 in report
+- [ ] Post-write: tables render, Appendix B sums match session headline, internal consistency pass
+
+### Plan 199 — Lite refactor workflow comparative analysis (`plans/199-lite-refactor-workflow-comparative-analysis.plan.md`)
+- [ ] Policy: Treat Master (`copilot-instructions.md`) as OS; agents/skills as thin apps — no duplicate rule blocks in agent files
+- [ ] Enforce Efficiency Tier routing (High Reasoning vs Fast/Flash) for planning, decomposition, and procedural phases
+- [ ] Keep skills phase-based procedural workflows; use argument shortcuts (`c`, `s`, `sl`, `sf`) per commit-to-github skill
+- [ ] Track context-load goal (~73% reduction vs Legacy) when editing agent/skill bundles — avoid re-bloating personas
+- [ ] Cross-link: execution work continues under Plan 198 (promote `.claude/toBe/`, §0.5 Model Routing, security migration QA)
+
+### Plan 196 — Commit flow speed audit (`plans/196-commit-flow-speed-audit.plan.md`)
+- [ ] Add approved-tree drift check before any git write and auto-replan logic
+- [ ] Rebase/sync branch before commit plan generation when behind origin/main
+- [ ] Create conflict-resolution policy for known files with auto/manual boundaries
+- [ ] Split PR merge and remote branch deletion into explicit verified steps
+- [ ] Record per-phase timing metrics for each commit workflow run
+
+### Plan 122 — AI Chatbot Gemini scope (`plans/122-ai-chatbot-gemini-scope.plan.md`)
+
+- [ ] Decide chat placement (sidebar / floating button / dedicated Assistant page)
+- [ ] Decide first use case (dictation → recipe and/or create menu for N people)
+- [ ] Decide backend approach for Gemini API key (proxy / serverless / existing API)
+- [ ] Decide language (Hebrew / English / both) for prompts and bot replies
+- [ ] Decide confirmation pattern (open edit screen with draft vs inline draft in chat vs both)
+- [ ] Write designated implementation plan once clarifications are set
 
 ### Phase 1 â€” Stabilize & Complete (`plans/010-product-roadmap.plan.md`)
 
@@ -382,12 +356,26 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 - [ ] **Plan 018 â€” Backend API Preparation**: Formalize `IStorageAdapter`, document REST API contract, audit adapter compliance.
 - [ ] **Deployment Pipeline**: Validate and activate GitHub Actions workflow for GitHub Pages.
 
+### Plan 060 â€” Data persistence and backup (`plans/060-data-persistence-and-backup.plan.md`)
+
+- [ ] Optional: debounced auto-download per category for physical JSON on every change.
+
+### Plan 059 â€” Unify design engine (`plans/059-unify-design-engine.plan.md`)
+
+Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
+
+- [ ] Phase 9: Deferred â€” grid header/cell too coupled to display:contents layout
+- [ ] Phase 10: Deferred â€” breakpoint/transition standardization for follow-up
+
+### Plan 047 â€” Recipe Builder Polish (`plans/047-recipe-builder-polish.plan.md`)
+
+- [ ] B3: Volume conversion fix (unverifiable without spec; needs acceptance criteria)
+
 ---
 
-### Plan 229 — Point dev environment at local Express/MongoDB (`plans/229-dev-env-local-backend.plan.md`)
+## Done
 
-- [ ] Edit `src/environments/environment.ts`: set apiUrl/authApiUrl to localhost:3000, useBackend/useBackendAuth to true
-- [ ] Run `ng build --configuration production` and confirm zero errors
+Completed entries are in [todo-archive.md](todo-archive.md).
 
 ## Plan Index (for reference)
 
@@ -395,7 +383,7 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 |------|------|--------|
 | 200 | Lite skills refactor validation report | Planned |
 | 199 | Lite refactor workflow comparative analysis | Planned |
-| 198 | Lite agent refactor adoption | Planned |
+| 198 | Lite agent refactor adoption | Done |
 | 002 | Recipe Header Scaling & Dish Mode | Done |
 | 003 | Recipe Ingredients Table Enhancement | Done |
 | 004 | Recipe Workflow Enhancement | Done |
@@ -454,8 +442,7 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 049 | Menu Intelligence Layout and UX Fixes | Done |
 | 050 | Recipe list labels, panel, header, menu UX | Active |
 | 051 | Recipe builder UX fixes | Done |
-| 052 | Plan 047 audit report | Planned |
-| 053 | Todo audit and fixes | Active |
+| 053 | Todo audit and fixes | Done |
 | 054 | Unify modal styles | Done |
 | 055 | SCSS cssLayer audit fix | Done |
 | 056 | Table carousel columns | Active |
@@ -555,9 +542,9 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 | 178 | App-wide custom-select behavior | Active |
 | 182 | toFix verification undone | Planned |
 | 183 | Agent Intelligence Map and Optimization | Done |
-| 190 | Agent process optimization | Planned |
-| 191 | Dashboard QA: Specs, data-testid, Pattern Fixes | Active |
-| 190 | Master De-Spaghettification Map | Planned |
+| 190 | Agent process optimization | Done |
+| 191 | Dashboard QA: Specs, data-testid, Pattern Fixes | Done |
+| 190 | Master De-Spaghettification Map | Done |
 | 192 | Pillar 3 Reactive Loop Hardening (A13–A17) | Planned |
 | 196 | Commit flow speed audit | Planned |
 | 222 | Dev Machine Open Ports Security Hardening | Planned |

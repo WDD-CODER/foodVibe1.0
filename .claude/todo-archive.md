@@ -1291,3 +1291,26 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Remove dead service_overrides_ from all 18 dishes in demo-dishes.json
 - [x] Slim command (7â†’3 lines) and rule (15â†’6 lines)
 - [x] Save plan 085 â€” optimize-commit-github-skill
+
+---
+
+## 2026-03-29 â€” Audit cleanup: archived with open tasks deferred
+
+### Plan 190 â€” Master De-Spaghettification Map â€” deferred tasks (`plans/190-master-de-spaghettification-map.plan.md`)
+
+- [ ] Phase A1: Replace hardcoded Hebrew strings with `translatePipe` keys and dictionary entries (SW-4)
+- [ ] Phase A2: Replace orphan button classes with design-system `c-*` tokens in product/metadata flows (HI-1)
+- [ ] HI-6: Consolidate scroll-zone scaffold into shared `app-scroll-zone` component
+- [ ] SW-5: Decompose god files (`menu-intelligence`, `recipe-builder`, `product-form`)
+- [ ] Phase C1: Consolidate list-page signal clusters into shared list state base/composable (HI-4)
+- [ ] Phase C2: Consolidate scroll-indicator scaffold into shared scroll-zone infrastructure (HI-6)
+- [ ] Phase C3: Decompose god files into page services/sub-components (`menu-intelligence`, `recipe-builder`, `product-form`) (SW-5)
+
+### Plan 198 â€” Lite agent refactor adoption â€” deferred tasks (`plans/198-lite-agent-refactor-adoption.plan.md`)
+
+- [ ] CRITICAL: Verify Legacy security-officer requirements + 30-item checklist fully migrated to copilot-instructions §5 before retiring Legacy agent
+- [ ] HIGH: Fix `.claude/toBe/agents/breadcrumb-navigator.md` content (Navigator vs Architect mismatch)
+- [ ] MEDIUM: Lite QA agent â€” prominent spec-authoring callout (no `.spec.ts` during iterative plan execution)
+- [ ] MEDIUM: One Master-section pointer line per Lite agent (delegation cross-references)
+- [ ] Adoption: Promote `.claude/toBe/` foundation + agents to canonical paths when 1â€”3 satisfied; run validate-agent-refs
+- [ ] Verification: breadcrumb-navigator + ui-inspector SKILLs hold canonical protocol detail before stripping Legacy agents
