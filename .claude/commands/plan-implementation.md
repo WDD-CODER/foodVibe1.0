@@ -73,3 +73,18 @@ Only blockers and should-fix items get folded into the execution plan. Nice-to-h
 ```
 
 The "Merged Execution Plan" is what execute-it will use. It combines the original brief steps with all ✗ fixes, prerequisite gaps, and neighborhood blockers into one ordered task list.
+
+---
+
+## Backend Impact (append when plan touches persisted data)
+
+If any task in the plan reads or writes persisted data, append this section after the Merged Execution Plan:
+
+```markdown
+## Backend Impact
+- Collections affected: [list entityType keys from .claude/standards-backend.md §1]
+- New collections: [yes/no — if yes, list with justification]
+- Server changes needed: [yes/no — if yes, describe]
+```
+
+If none of the tasks touch persisted data, write `## Backend Impact — None` explicitly.

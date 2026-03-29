@@ -2,6 +2,24 @@
 
 ---
 
+### Plan 233 — Gemini Direct API + Modal Status Feedback (`plans/233-gemini-direct-api-modal-status.plan.md`)
+- [x] `gemini.service.ts` — rewrite: fetch-based direct Gemini API call, apiKey_ signal, hasKey computed, setApiKey(), remove HttpClient/dead imports
+- [x] `ai-recipe-modal.component.ts` — add configuringKey_/keyInput_/status_ signals, onSaveKey/onClose methods, API key guard in onGenerate(), FormsModule in imports
+- [x] `ai-recipe-modal.component.html` — add key config panel + status bar (sending/done/error states)
+- [x] `ng build` — verify zero errors
+
+---
+
+### Plan 232 — Backend Collection Registry Standard (`plans/232-backend-collection-registry.plan.md`)
+- [x] `.claude/standards-backend.md` — create with 6 sections (22-row collection registry, corrected count)
+- [x] `.claude/copilot-instructions.md` — add standards table row for standards-backend.md
+- [x] `.claude/copilot-instructions.md` — add §0 Backend persistence trigger bullet
+- [x] `.cursor/rules/backend-persistence.mdc` — create with data-service globs
+- [x] `.claude/commands/plan-implementation.md` — add Backend Impact output block
+- [x] `.claude/commands/execute-it.md` — add Backend Impact check to Execution Rules
+
+---
+
 ### Plan 231 — Mongo URI Env Split (`plans/231-mongo-uri-env-split.plan.md`)
 - [x] `server/db.js` — rewrite to read single MONGO_URI (remove NODE_ENV branch, MONGO_LOCAL_URI/MONGO_REMOTE_URI)
 - [x] `server/.env` — replace split URIs with MONGO_URI=localhost, add PORT=3000, ALLOWED_ORIGIN

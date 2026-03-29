@@ -48,6 +48,7 @@ Example: if the brief says "add reload calls for three services" and plan-implem
 - **No auto-commit** — after all file changes are complete, present a summary of what was changed and ask the user for confirmation before running any `git commit` or `git push`
 - **Verify** — after each file change, run diagnostics or build checks if applicable
 - **Stop on NEW conflict** — if the code differs from what BOTH the brief and plan-implementation expected, stop and report
+- **Backend Impact check** — if the plan includes a `## Backend Impact` section with new collections, verify the new `entityType` key is added to `BACKUP_ENTITY_TYPES` in `async-storage.service.ts` before marking the task done
 
 ## Output
 

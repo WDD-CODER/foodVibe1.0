@@ -1,0 +1,22 @@
+---
+description: Backend collection registry and persistence rules. Auto-loads when editing data services.
+globs:
+  - "src/**/services/*-data.service*"
+  - "src/**/services/async-storage*"
+  - "src/**/services/metadata-registry*"
+  - "src/**/services/preparation-registry*"
+  - "src/**/services/menu-section-categories*"
+  - "src/**/services/unit-registry*"
+  - "src/**/services/backup*"
+  - "server/**"
+alwaysApply: false
+---
+
+## Backend Persistence
+
+When creating or modifying data services or persisted entities:
+1. Check `.claude/standards-backend.md` for the collection registry
+2. New entity types need: model → data service → `BACKUP_ENTITY_TYPES` entry → BackupService wiring
+3. Plans MUST include `## Backend Impact` section
+
+For full rules: `.claude/standards-backend.md`
