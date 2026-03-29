@@ -1,15 +1,38 @@
 @if (modalService.isOpen()) {
-  <div class="c-modal-overlay" (click)="modalService.close()">
+  <div class="c-modal-overlay" (click)="onClose()">
     <div class="c-modal-card ai-recipe-modal-card" dir="rtl" (click)="$event.stopPropagation()">
 
       <div class="ai-modal-header">
         <h2 class="ai-modal-title">{{ 'ai_recipe_modal_title' | translatePipe }}</h2>
-        <button type="button" class="c-icon-btn" (click)="modalService.close()">
+        <button type="button" class="c-icon-btn" (click)="onClose()">
           <lucide-icon name="x" [size]="20"></lucide-icon>
         </button>
       </div>
 
-      @if (!draft_()) {
+      @if (configuringKey_() || !gemini.hasKey()) {
+        <!-- API key config panel -->
+        <div class="ai-key-panel">
+          <p class="ai-key-label">{{ 'ai_recipe_configure_key' | translatePipe }}</p>
+          <input
+            type="password"
+            class="ai-key-input"
+            [placeholder]="'ai_recipe_key_placeholder' | translatePipe"
+            [value]="keyInput_()"
+            (input)="keyInput_.set($any($event.target).value)"
+          />
+          <div class="ai-modal-footer">
+            <button
+              type="button"
+              class="c-btn-primary"
+              [disabled]="!keyInput_()"
+              (click)="onSaveKey()"
+            >
+              {{ 'ai_recipe_save_key' | translatePipe }}
+            </button>
+          </div>
+        </div>
+
+      } @else if (!draft_()) {
         <!-- Prompt input -->
         <div class="ai-prompt-panel">
           <textarea
@@ -19,6 +42,23 @@
             (input)="prompt_.set($any($event.target).value)"
             rows="4"
           ></textarea>
+
+          <!-- Status bar -->
+          @if (status_() !== 'idle') {
+            <div class="ai-status-bar" [class.ai-status--sending]="status_() === 'sending'" [class.ai-status--done]="status_() === 'done'" [class.ai-status--error]="status_() === 'error'">
+              @if (status_() === 'sending') {
+                <app-loader size="small" [inline]="true" />
+                <span>שולח בקשה לגמיני...</span>
+              } @else if (status_() === 'done') {
+                <lucide-icon name="circle-check" [size]="16"></lucide-icon>
+                <span>תשובה התקבלה</span>
+              } @else if (status_() === 'error') {
+                <lucide-icon name="circle-x" [size]="16"></lucide-icon>
+                <span>{{ 'ai_recipe_error' | translatePipe }}</span>
+              }
+            </div>
+          }
+
           <div class="ai-modal-footer">
             <button
               type="button"
@@ -35,6 +75,7 @@
             </button>
           </div>
         </div>
+
       } @else {
         <!-- Preview card -->
         <div class="ai-draft-preview">
@@ -51,7 +92,7 @@
             <span class="ai-draft-value">{{ draft_()!.yield_amount }} {{ draft_()!.yield_unit }}</span>
           </div>
           <div class="ai-draft-field">
-            <span class="ai-draft-label">{{ 'ingredients' | translatePipe }}</span>
+            <span class="ai-draft-label">{{ 'ai_recipe_preview_ingredients' | translatePipe }}</span>
             <ul class="ai-draft-ingredients">
               @for (ing of draft_()!.ingredients; track ing.name) {
                 <li>{{ ing.amount }} {{ ing.unit }} {{ ing.name }}</li>
@@ -59,7 +100,7 @@
             </ul>
           </div>
           <div class="ai-draft-field">
-            <span class="ai-draft-label">{{ 'steps' | translatePipe }}</span>
+            <span class="ai-draft-label">{{ 'ai_recipe_preview_steps' | translatePipe }}</span>
             <span class="ai-draft-value">{{ draft_()!.steps.length }}</span>
           </div>
         </div>

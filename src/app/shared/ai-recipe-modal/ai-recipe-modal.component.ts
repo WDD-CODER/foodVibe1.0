@@ -9,6 +9,8 @@ import { GeminiService } from '@services/gemini.service'
 import { AiRecipeDraftService, type AiRecipeDraft } from '@services/ai-recipe-draft.service'
 import { UserMsgService } from '@services/user-msg.service'
 
+type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
+
 @Component({
   selector: 'app-ai-recipe-modal',
   standalone: true,
@@ -19,37 +21,61 @@ import { UserMsgService } from '@services/user-msg.service'
 })
 export class AiRecipeModalComponent {
   protected readonly modalService = inject(AiRecipeModalService)
-  private readonly geminiService = inject(GeminiService)
-  private readonly aiDraftService = inject(AiRecipeDraftService)
+  protected readonly gemini = inject(GeminiService)
+  private readonly aiDraft = inject(AiRecipeDraftService)
   private readonly router = inject(Router)
   private readonly userMsg = inject(UserMsgService)
 
   protected readonly prompt_ = signal('')
   protected readonly loading_ = signal(false)
   protected readonly draft_ = signal<AiRecipeDraft | null>(null)
+  protected readonly configuringKey_ = signal(false)
+  protected readonly keyInput_ = signal('')
+  protected readonly status_ = signal<GenerationStatus>('idle')
 
   async onGenerate(): Promise<void> {
+    if (!this.gemini.hasKey()) {
+      this.configuringKey_.set(true)
+      return
+    }
     this.loading_.set(true)
+    this.status_.set('sending')
     try {
-      const draft = await this.geminiService.generateRecipe(this.prompt_())
+      const draft = await this.gemini.generateRecipe(this.prompt_())
       this.draft_.set(draft)
+      this.status_.set('done')
     } catch {
+      this.status_.set('error')
       this.userMsg.onSetErrorMsg('ai_recipe_error')
     } finally {
       this.loading_.set(false)
     }
   }
 
+  onSaveKey(): void {
+    this.gemini.setApiKey(this.keyInput_())
+    this.configuringKey_.set(false)
+  }
+
   onGenerateAgain(): void {
     this.draft_.set(null)
+    this.status_.set('idle')
   }
 
   onOpenInBuilder(): void {
     const draft = this.draft_()
     if (!draft) return
-    this.aiDraftService.set(draft)
+    this.aiDraft.set(draft)
     void this.router.navigate(['/recipe-builder'])
     this.modalService.close()
   }
 
+  onClose(): void {
+    this.modalService.close()
+    this.draft_.set(null)
+    this.prompt_.set('')
+    this.loading_.set(false)
+    this.status_.set('idle')
+    this.configuringKey_.set(false)
+  }
 }
