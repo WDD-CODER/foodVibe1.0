@@ -13,6 +13,8 @@ describe('ConfirmModalComponent', () => {
     message: WritableSignal<string>;
     saveLabel: WritableSignal<string>;
     variant: () => string;
+    showSaveButton: () => boolean;
+    saveButtonLabel: () => string;
     choose: jasmine.Spy;
   };
 
@@ -21,11 +23,15 @@ describe('ConfirmModalComponent', () => {
     const message = signal('');
     const saveLabel = signal('save');
     const variant = signal<'default' | 'danger' | 'warning'>('default');
+    const showSaveButton = signal(false);
+    const saveButtonLabel = signal('save');
     mockModalService = {
       isOpen,
       message,
       saveLabel,
       variant: variant as () => string,
+      showSaveButton: showSaveButton as () => boolean,
+      saveButtonLabel: saveButtonLabel as () => string,
       choose: jasmine.createSpy('choose')
     };
 
@@ -47,19 +53,19 @@ describe('ConfirmModalComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should call choose(false) when cancel is clicked', () => {
+  it('should call choose(cancel) when cancel is clicked', () => {
     mockModalService.isOpen.set(true);
     fixture.detectChanges();
     const cancelBtn = fixture.nativeElement.querySelector('.c-btn-ghost');
     cancelBtn?.click();
-    expect(mockModalService.choose).toHaveBeenCalledWith(false);
+    expect(mockModalService.choose).toHaveBeenCalledWith('cancel');
   });
 
-  it('should call choose(true) when confirm is clicked', () => {
+  it('should call choose(confirm) when confirm is clicked', () => {
     mockModalService.isOpen.set(true);
     fixture.detectChanges();
     const confirmBtn = fixture.nativeElement.querySelector('.c-btn-primary');
     confirmBtn?.click();
-    expect(mockModalService.choose).toHaveBeenCalledWith(true);
+    expect(mockModalService.choose).toHaveBeenCalledWith('confirm');
   });
 });

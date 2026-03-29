@@ -1,4 +1,5 @@
 import { Component, input, output, inject, signal, ViewChildren, QueryList, ElementRef, AfterViewInit, effect, ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router'
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormArray, FormGroup, FormBuilder } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -43,7 +44,8 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
   private readonly unitRegistry = inject(UnitRegistryService);
   private fb = inject(FormBuilder);
   private readonly el = inject(ElementRef<HTMLElement>);
-  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly cdr = inject(ChangeDetectorRef)
+  private readonly router_ = inject(Router)
 
   @ViewChildren(FocusByRowDirective) private focusByRowRefs!: QueryList<FocusByRowDirective>;
 
@@ -237,6 +239,21 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
     return type === 'product'
       ? this.kitchenStateService.products_().find(p => p._id === id)
       : this.kitchenStateService.recipes_().find(r => r._id === id);
+  }
+
+  /** True when the row's product exists but has no price set (skeleton from quick-add or AI). */
+  isProductIncomplete(group: FormGroup): boolean {
+    if (group.get('item_type')?.value !== 'product') return false
+    const product = this.getItemMetadata(group) as Product | undefined
+    if (!product) return false
+    return product.buy_price_global_ === 0
+  }
+
+  /** Navigate to the full product edit form so the user can complete the product. */
+  navigateToEditProduct(group: FormGroup): void {
+    const id = group.get('referenceId')?.value
+    if (!id) return
+    void this.router_.navigate(['/inventory/edit', id])
   }
 
   updateLineCalculations(index: number): void {

@@ -4,6 +4,17 @@
 
 ## 🔴 Quick Fixes
 
+### Plan 239 — Incomplete badge + ternary guard modal + AI-prefill fix (`plans/239-incomplete-badge-ternary-modal-guard-fix.plan.md`)
+- [x] `recipe-ingredients-table.component.ts` — Router inject + isProductIncomplete + navigateToEditProduct
+- [x] `recipe-ingredients-table.component.html` — incomplete-row class + badge button
+- [x] `recipe-ingredients-table.component.scss` — .incomplete-row, .incomplete-badge, pulse animation
+- [x] `dictionary.json` — product_incomplete_hint, save_and_leave, error_saving_recipe
+- [x] `confirm-modal.service.ts` — openTernary(), showSaveButton, saveButtonLabel, ConfirmModalResult
+- [x] `confirm-modal.component.html` — string choose() calls + conditional 3rd button
+- [x] `confirm-modal.component.spec.ts` — update mock + assertions
+- [x] `pending-changes.guard.ts` — saveAndWait interface + ternary vs binary flow
+- [x] `recipe-builder.page.ts` — saveAndWait() + hasRealChanges() failsafe for new recipes
+
 ### Plan 236/237/238 — AI Recipe: ingredients fix + prompt engineering + few-shot loop
 - [x] `gemini.service.ts` — Replace SYSTEM_PROMPT with domain-aware rules + English canonical units
 - [x] `recipe-builder.page.ts` — Unit fallback in `prefillFromAiDraft` (safeUnit via `allUnitKeys_()`)
