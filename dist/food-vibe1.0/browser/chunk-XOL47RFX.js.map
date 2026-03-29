@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/shared/ai-recipe-modal/ai-recipe-modal.service.ts"],
-  "sourcesContent": ["import { Injectable, signal } from '@angular/core'\n\n@Injectable({ providedIn: 'root' })\nexport class AiRecipeModalService {\n  private readonly isOpen_ = signal(false)\n  readonly isOpen = this.isOpen_.asReadonly()\n\n  open(): void {\n    this.isOpen_.set(true)\n  }\n\n  close(): void {\n    this.isOpen_.set(false)\n  }\n}\n"],
-  "mappings": ";;;;;;;;AAGM,IAAO,uBAAP,MAAO,sBAAoB;EACd,UAAU,OAAO,KAAK;EAC9B,SAAS,KAAK,QAAQ,WAAU;EAEzC,OAAI;AACF,SAAK,QAAQ,IAAI,IAAI;EACvB;EAEA,QAAK;AACH,SAAK,QAAQ,IAAI,KAAK;EACxB;;qCAVW,uBAAoB;EAAA;4EAApB,uBAAoB,SAApB,sBAAoB,WAAA,YADP,OAAM,CAAA;;;sEACnB,sBAAoB,CAAA;UADhC;WAAW,EAAE,YAAY,OAAM,CAAE;;;",
-  "names": []
-}

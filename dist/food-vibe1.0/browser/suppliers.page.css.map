@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/pages/suppliers/suppliers.page.scss"],
-  "sourcesContent": ["@layer components.suppliers {\r\n  :host {\r\n    display: block;\r\n  }\r\n}\r\n"],
-  "mappings": ";AAAA;AACE;AACE,aAAA;;;",
-  "names": []
-}
