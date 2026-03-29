@@ -4,18 +4,7 @@
 
 ## 🔴 Quick Fixes
 
-### Plan 239 — Incomplete badge + ternary guard modal + AI-prefill fix (`plans/239-incomplete-badge-ternary-modal-guard-fix.plan.md`)
-- [x] `recipe-ingredients-table.component.ts` — Router inject + isProductIncomplete + navigateToEditProduct
-- [x] `recipe-ingredients-table.component.html` — incomplete-row class + badge button
-- [x] `recipe-ingredients-table.component.scss` — .incomplete-row, .incomplete-badge, pulse animation
-- [x] `dictionary.json` — product_incomplete_hint, save_and_leave, error_saving_recipe
-- [x] `confirm-modal.service.ts` — openTernary(), showSaveButton, saveButtonLabel, ConfirmModalResult
-- [x] `confirm-modal.component.html` — string choose() calls + conditional 3rd button
-- [x] `confirm-modal.component.spec.ts` — update mock + assertions
-- [x] `pending-changes.guard.ts` — saveAndWait interface + ternary vs binary flow
-- [x] `recipe-builder.page.ts` — saveAndWait() + hasRealChanges() failsafe for new recipes
-
-### Plan 239b — AI Recipe: product matching + unit seeding (`plans/239-ai-recipe-product-match-unit-seed.plan.md`)
+### Plan 239 — AI Recipe: product matching + unit seeding (`plans/239-ai-recipe-product-match-unit-seed.plan.md`)
 - [x] `unit-registry.service.ts` — add tablespoon/teaspoon/cup/pinch/portion to `SYSTEM_UNITS`
 - [x] `recipe-builder.page.ts` — in `prefillFromAiDraft`, after patchValue, attempt name-match against `products_()` and `recipes_()`; if matched, patchValue `referenceId` + `item_type`
 - [x] `recipe-builder.page.ts` — use live `this.unitRegistry_.allUnitKeys_()` signal call inside loop (not one-time Set snapshot) to fix hydration race
