@@ -1,3 +1,5 @@
+@.claude/instructions/validation-checklist.md
+
 ---
 description: Execute the implementation plan from this conversation
 allowed-tools: Read, Write, Edit, Bash

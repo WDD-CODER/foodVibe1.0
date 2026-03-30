@@ -8,7 +8,5 @@
         (click)="onStampClick()">
   <img [src]="approved() ? stampApprovedUrl : stampNotApprovedUrl"
        class="approve-stamp__img"
-       [alt]="(approved() ? 'unapprove_recipe' : 'approve_recipe') | translatePipe"
-       width="52"
-       height="52" />
+       [alt]="(approved() ? 'unapprove_recipe' : 'approve_recipe') | translatePipe" />
 </button>
