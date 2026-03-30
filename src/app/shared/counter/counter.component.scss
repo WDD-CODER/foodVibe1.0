@@ -1,5 +1,16 @@
 @layer components.counter {
 
+  @media (max-width: 620px) {
+    .counter-grid {
+      height: auto;
+      min-height: 44px;
+    }
+
+    .ctrl-btn {
+      min-height: 44px;
+    }
+  }
+
   .counter-grid {
     display: inline-grid;
     grid-template-columns: 2rem auto 2rem;

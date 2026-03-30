@@ -23,4 +23,11 @@
       accent-color: var(--color-primary);
     }
   }
+
+  @media (max-width: 620px) {
+    .list-row-checkbox {
+      min-width: 44px;
+      min-height: 44px;
+    }
+  }
 }

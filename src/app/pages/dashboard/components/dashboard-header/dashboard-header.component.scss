@@ -55,6 +55,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  justify-content: center;
 
   gap: 0.5rem;
 }
@@ -117,5 +118,16 @@
       color: var(--color-primary-hover);
       border-color: var(--color-primary);
     }
+  }
+}
+
+@media (max-width: 620px) {
+  .header-btn {
+    min-block-size: 44px;
+  }
+
+  .header-actions__nav {
+    justify-content: center;
+    flex-wrap: wrap;
   }
 }

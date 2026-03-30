@@ -29,13 +29,13 @@ import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.
 import { HeroFabService } from '@services/hero-fab.service';
 
 const DAY_LABELS = [
-  'general.day_sun',
-  'general.day_mon',
-  'general.day_tue',
-  'general.day_wed',
-  'general.day_thu',
-  'general.day_fri',
-  'general.day_sat',
+  'day_sun',
+  'day_mon',
+  'day_tue',
+  'day_wed',
+  'day_thu',
+  'day_fri',
+  'day_sat',
 ];
 type SupplierBulkField = 'delivery_days_' | 'lead_time_days_';
 

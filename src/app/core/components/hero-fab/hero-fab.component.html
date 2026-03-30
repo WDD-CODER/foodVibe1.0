@@ -1,4 +1,4 @@
-<div class="hero-fab-container" [class.above-bar]="isOnMenuIntelligence_()" (mouseleave)="collapse()">
+<div class="hero-fab-container" [class.above-bar]="isOnMenuIntelligence_()">
   <div class="fab-actions" [class.expanded]="isExpanded_()">
     @for (action of effectiveActions_(); track action.labelKey + action.icon) {
       <button type="button"
@@ -8,14 +8,22 @@
         <lucide-icon [name]="action.icon" size="20"></lucide-icon>
       </button>
     }
+
+    @if (!isOnRecipeBuilder_()) {
+      <button type="button"
+              class="fab-action"
+              [attr.aria-label]="'recipe_builder' | translatePipe"
+              (click)="goToRecipeBuilder()">
+        <lucide-icon name="chef-hat" size="20"></lucide-icon>
+      </button>
+    }
   </div>
 
   <button type="button"
           class="fab-main"
           [class.active]="isExpanded_()"
           [class.grow-only]="useGrowAnimation_()"
-          (mouseenter)="expand()"
-          (click)="goToRecipeBuilder()"
+          (click)="toggle()"
           aria-label="Quick actions">
     <lucide-icon name="flame" size="26"></lucide-icon>
   </button>

@@ -544,6 +544,33 @@
   font-size: 1rem;
 }
 
+@media (max-width: 620px) {
+  .meta-trigger,
+  .section-title-plain,
+  .add-dish-btn,
+  .add-section-btn {
+    min-block-size: 44px;
+  }
+
+  .counter-pill-btn {
+    min-inline-size: 44px;
+    min-block-size: 44px;
+  }
+
+  // Sub-fix 1: menu title wraps on narrow screens
+  .meta-input.menu-name-input {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  // Sub-fix 2: serving-style select — width fits content, not full row
+  .meta-row app-custom-select {
+    width: fit-content;
+    max-width: 12rem;
+  }
+}
+
 /* ---------- Financial Footer ---------- */
 
 .financial-bar {

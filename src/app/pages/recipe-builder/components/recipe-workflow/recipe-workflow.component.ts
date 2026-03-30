@@ -57,6 +57,25 @@ export class RecipeWorkflowComponent {
 
   showAddCategoryPicker_ = signal(false);
 
+  /** Tracks which prep-step rows have the timer counter open. */
+  timerOpenRows_ = signal<Set<number>>(new Set());
+
+  isTimerOpen(index: number): boolean {
+    return this.timerOpenRows_().has(index);
+  }
+
+  toggleTimer(index: number): void {
+    this.timerOpenRows_.update(set => {
+      const next = new Set(set);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
+  }
+
   toggleAddCategoryPicker() {
     this.showAddCategoryPicker_.update(v => !v);
   }
