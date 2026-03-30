@@ -4,6 +4,11 @@
 
 ## 🔴 Quick Fixes
 
+### Plan 240 — Validation Checklist Workflow Integration (`plans/240-validation-checklist-workflow-integration.plan.md`)
+- [x] Create `.claude/instructions/` directory (prerequisite — path didn't exist)
+- [x] Create `.claude/instructions/validation-checklist.md` — reusable checklist instruction with tree-format output
+- [x] Add `@.claude/instructions/validation-checklist.md` to top of `.claude/commands/execute-it.md`
+
 ### Plan 239 — Incomplete badge + ternary guard modal + AI-prefill fix (`plans/239-incomplete-badge-ternary-modal-guard-fix.plan.md`)
 - [x] `recipe-ingredients-table.component.ts` — Router inject + isProductIncomplete + navigateToEditProduct
 - [x] `recipe-ingredients-table.component.html` — incomplete-row class + badge button
