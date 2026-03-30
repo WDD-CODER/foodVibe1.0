@@ -31,8 +31,8 @@ export class HeroFabComponent {
     return state.actions;
   });
 
-  /** When there are no sub-actions, use grow animation on the main FAB instead of rotation. */
-  protected readonly useGrowAnimation_ = computed(() => this.effectiveActions_().length === 0);
+  /** Always rotate — chef-hat action is always present in the template. */
+  protected readonly useGrowAnimation_ = computed(() => false);
 
   constructor() {
     const setRoute = (): void => {
@@ -46,8 +46,8 @@ export class HeroFabComponent {
       .subscribe(setRoute);
   }
 
-  expand(): void {
-    this.isExpanded_.set(true);
+  toggle(): void {
+    this.isExpanded_.update(v => !v);
   }
 
   collapse(): void {
@@ -57,11 +57,6 @@ export class HeroFabComponent {
   protected runAction(action: HeroFabAction): void {
     action.run();
     this.collapse();
-  }
-
-  goToCook(): void {
-    this.collapse();
-    void this.router.navigate(['/cook']);
   }
 
   goToRecipeBuilder(): void {

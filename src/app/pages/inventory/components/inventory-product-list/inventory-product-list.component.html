@@ -1,8 +1,8 @@
 <app-list-shell
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="onPanelToggled()"
-  [gridTemplate]="'2fr 1fr 1fr 1fr minmax(48px, 0.8fr) 0.8fr 80px minmax(44px, auto)'"
-  [mobileGridTemplate]="'2fr 1fr 0.8fr 0.8fr 80px minmax(44px, auto)'"
+  [gridTemplate]="'2fr 1fr 1fr 1fr minmax(48px, 0.8fr) 0.8fr 80px auto'"
+  [mobileGridTemplate]="'2fr 1fr 0.8fr 0.8fr 80px auto'"
   [dir]="'rtl'">
 
   <h2 shell-title class="page-title">{{ 'product_list' | translatePipe }}</h2>

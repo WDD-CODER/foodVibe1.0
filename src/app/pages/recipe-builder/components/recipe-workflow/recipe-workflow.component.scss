@@ -25,61 +25,94 @@
   justify-content: space-evenly;
 
   .grid-header {
-    display: grid;
-    grid-template-columns: 24px 60px 1fr 120px 50px;
-    justify-content: space-evenly;
-
-    padding-inline: 0.75rem;
-    padding-block: 0.625rem;
-
-    background: var(--bg-glass);
-    font-weight: 700;
-    color: var(--color-primary);
-
-    border-block-end: 1px solid var(--border-default);
-    backdrop-filter: var(--blur-glass);
+    display: none;
   }
 
   .grid-row {
     display: grid;
-    grid-template-columns: 24px 60px 1fr 120px 50px;
-    justify-content: space-evenly;
+    // RTL: right=drag+badge | center=instruction | left=actions
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto;
     align-items: center;
+    gap: 0.5rem;
 
-    min-height: 4rem;
-    padding-inline: 1rem;
-    padding-block: 0.5rem;
+    margin: 0.375rem 0.5rem;
+    padding: 0.625rem 0.75rem;
 
-    background: transparent;
+    background: color-mix(in srgb, var(--color-primary) 6%, var(--bg-glass-strong));
+    border: 1px solid color-mix(in srgb, var(--color-primary) 20%, var(--border-glass));
+    border-radius: var(--radius-md);
 
-    border-block-end: 1px solid var(--border-default);
-
-    transition: background 0.15s ease;
-
-    &:last-child {
-      border-block-end: none;
-    }
+    transition: background 0.15s ease, border-color 0.15s ease;
 
     &:hover {
-      background: var(--bg-glass);
+      background: color-mix(in srgb, var(--color-primary) 10%, var(--bg-glass-strong));
     }
 
-    .col-actions {
-      display: grid;
-      place-content: center;
+    &.timer-open {
+      grid-template-rows: auto auto;
     }
+  }
+}
 
-    .col-actions .c-icon-btn {
-      width: 1.5rem;
-      height: 1.5rem;
-      opacity: 0;
-      transition: opacity 0.15s ease;
-    }
+.col-drag-id {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  cursor: grab;
+  color: var(--color-text-muted);
+  &:active { cursor: grabbing; }
+}
 
-    &:hover .col-actions .c-icon-btn,
-    .col-actions .c-icon-btn:focus {
-      opacity: 1;
-    }
+.col-step-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  .step-delete-btn {
+    width: 1.75rem;
+    height: 1.75rem;
+    opacity: 0.4;
+    transition: opacity 0.15s ease;
+  }
+}
+
+.grid-row:hover .step-delete-btn,
+.step-delete-btn:focus {
+  opacity: 1;
+}
+
+.timer-row {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding-block-start: 0.5rem;
+  border-block-start: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
+  margin-block-start: 0.25rem;
+}
+
+.timer-row-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .timer-row .counter-btn {
+    display: none;
+  }
+
+  .timer-row .timer-value {
+    min-width: 3rem;
+    padding: 0.375rem 0.5rem;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    text-align: center;
+    font-weight: 700;
   }
 }
 
@@ -269,6 +302,42 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
   }
 }
 
+.timer-toggle-btn {
+  display: grid;
+  place-content: center;
+
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+
+  background: transparent;
+  color: var(--color-text-muted-light);
+
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    background: var(--bg-glass);
+    border-color: var(--border-default);
+    color: var(--color-text-muted);
+  }
+
+  &.timer-active {
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
+  }
+}
+
+.col-timer {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
 .timer-counter {
   display: flex;
   align-items: center;
@@ -334,66 +403,48 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
   }
 }
 
-/* Recipe builder unified tablet/mobile breakpoint (align with recipe-builder.page 48rem / ingredients 640px) */
+/* Recipe builder unified tablet/mobile breakpoint */
 @media (max-width: 768px) {
-  .workflow-grid .grid-header {
-    display: none;
-  }
-
-  .workflow-grid .grid-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    padding-inline: 0.75rem;
-    padding-block: 0.75rem;
-
-    .step-badge {
-      flex: 0 0 auto;
-    }
-
-    .workflow-textarea {
-      flex: 1 1 100%;
-      min-height: 3rem;
-    }
-
-    .timer-counter {
-      flex: 0 0 auto;
-    }
-
-    .col-actions {
-      flex: 1 1 100%;
-      justify-content: flex-end;
-    }
-  }
-
   .prep-flat-grid .grid-header.prep-grid-header {
     display: none;
   }
 
   .prep-flat-grid .prep-grid-row {
     display: grid;
+    // 2×2 grid: row 1 = name | category, row 2 = unit | qty+actions
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto auto auto auto;
+    grid-template-rows: auto auto;
     gap: 0.5rem;
     padding-inline: 0.75rem;
     padding-block: 0.75rem;
     min-height: auto;
 
+    .col-drag {
+      display: none;
+    }
+
+    // Row 1: product search (left 50%) | category select (right 50%)
     .col-prep-name {
-      grid-column: 1 / -1;
+      grid-column: 1;
+      grid-row: 1;
     }
     .col-prep-category {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    // Row 2: unit select (left 50%) | quantity (right 50%)
+    .col-prep-unit {
       grid-column: 1;
+      grid-row: 2;
     }
     .col-prep-qty {
       grid-column: 2;
+      grid-row: 2;
     }
-    .col-prep-unit {
-      grid-column: 1;
-    }
+
     .col-prep-actions {
-      grid-column: 2;
-      justify-content: flex-end;
+      display: none;
     }
 
     .quantity-controls .qty-btn {

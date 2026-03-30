@@ -118,4 +118,21 @@
       background: var(--bg-glass-hover);
     }
   }
+
+  @media (max-width: 620px) {
+    // T16 — prevent carousel cells from wrapping (text clips instead of inflating row height)
+    .col-env {
+      min-inline-size: 80px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    // T17 — compact header buttons so back + add both fit on one row at 375px
+    .header-btn {
+      padding-inline: 0.5rem;
+      font-size: 0.8rem;
+      gap: 0.25rem;
+    }
+  }
 }

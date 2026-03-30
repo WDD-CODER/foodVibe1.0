@@ -1,8 +1,8 @@
 <app-list-shell
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
-  [gridTemplate]="'2fr 1fr minmax(48px, 0.8fr) 0.8fr 0.8fr 0.8fr 80px minmax(44px, auto)'"
-  [mobileGridTemplate]="'2fr 1fr 0.8fr 0.8fr 80px minmax(44px, auto)'">
+  [gridTemplate]="'2fr 1fr minmax(48px, 0.8fr) 0.8fr 0.8fr 0.8fr 80px auto'"
+  [mobileGridTemplate]="'2fr 1fr 80px auto'">
 
   <h2 shell-title class="page-title">{{ 'supplier_list' | translatePipe }}</h2>
 
@@ -27,17 +27,20 @@
       <lucide-icon name="arrow-right" size="16"></lucide-icon>
       {{ 'back_to_dashboard' | translatePipe }}
     </button>
-    <app-selection-bar
-      [selectionState]="selection"
-      [editableFields]="editableFields_"
-      (bulkDelete)="onBulkDeleteSelected($event)"
-      (bulkEdit)="onBulkEdit($event)" />
     <button type="button" class="c-btn-primary" (click)="onAdd()"
       [disabled]="!isLoggedIn()"
       [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
       <lucide-icon name="plus" [size]="18"></lucide-icon>
       {{ 'add_supplier' | translatePipe }}
     </button>
+  </ng-container>
+
+  <ng-container shell-selection-bar>
+    <app-selection-bar
+      [selectionState]="selection"
+      [editableFields]="editableFields_"
+      (bulkDelete)="onBulkDeleteSelected($event)"
+      (bulkEdit)="onBulkEdit($event)" />
   </ng-container>
 
   <ng-container shell-table-header>

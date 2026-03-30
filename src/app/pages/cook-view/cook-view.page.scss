@@ -916,6 +916,17 @@ $cv-break-md: 56.25rem;
   }
 }
 
+@media (max-width: 620px) {
+  .cv-chip-btn {
+    min-inline-size: 44px;
+    min-block-size: 44px;
+  }
+
+  .step-time {
+    min-block-size: 44px;
+  }
+}
+
 .empty-state-text {
   color: var(--color-text-muted);
   font-style: italic;

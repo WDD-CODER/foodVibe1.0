@@ -25,12 +25,7 @@
                 {{ yield.currentRecipeTypeDisplay_() | translatePipe }}
             </button>
 
-            <button type="button" class="import-text-btn" (click)="importTextClick.emit()">
-                <lucide-icon name="scan-text" [size]="15"></lucide-icon>
-                {{ 'import_text_btn' | translatePipe }}
-            </button>
-
-            <div class="recipe-name-wrap">
+<div class="recipe-name-wrap">
                 <input formControlName="name_hebrew"
                     [placeholder]="((yield.currentRecipeTypeDisplay_() === 'dish' ? 'dish_name_placeholder' : 'recipe_name_placeholder') | translatePipe) + '...'"
                     class="recipe-name-input"
@@ -90,15 +85,14 @@
                         variant="chip"
                         [maxHeight]="200"
                         (addNewChosen)="openCreateLabel()" />
-                    <div class="labels-actions">
-                        <span class="labels-btn-label">{{ 'labels' | translatePipe }}</span>
-                        @if (hasAnyLabelsInContainer_()) {
+                    @if (hasAnyLabelsInContainer_()) {
+                        <div class="labels-actions">
                             <button type="button" class="labels-btn-clear" tabindex="-1"
                                 (click)="clearAllManualLabels(); $event.stopPropagation()">
                                 {{ 'clear_all' | translatePipe }}
                             </button>
-                        }
-                    </div>
+                        </div>
+                    }
                 </div>
             </div>
         </div>

@@ -392,6 +392,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     }
 
     const actions: HeroFabAction[] = [
+      { labelKey: 'import_text_btn', icon: 'scan-text', run: () => this.onImportTextClick() },
       { labelKey: 'export', icon: 'printer', run: () => this.openExportFromHeroFab() }
     ];
     const id = this.recipeId_();

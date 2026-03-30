@@ -107,4 +107,10 @@ $cell-carousel-break: 768px;
       opacity: 0.6;
     }
   }
+
+  @media (max-width: 620px) {
+    .carousel-arrow {
+      min-width: 44px;
+    }
+  }
 }

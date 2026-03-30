@@ -3,6 +3,7 @@ import { GlobalErrorHandler } from './core/services/global-error.handler'
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import {
+  ChefHat,
   AlertCircle,
   AlertTriangle,
   ArrowDown,
@@ -166,7 +167,8 @@ export const appConfig: ApplicationConfig = {
         Star,
         Lock,
         Sparkles,
-        ScanText
+        ScanText,
+        ChefHat
       })
     )
   ]

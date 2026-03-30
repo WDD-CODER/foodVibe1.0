@@ -1,8 +1,8 @@
 <app-list-shell
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
-  [gridTemplate]="hideDateColumn_() ? '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) 80px minmax(44px, auto)' : '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) 0.8fr 80px minmax(44px, auto)'"
-  [mobileGridTemplate]="'2fr 1fr 0.8fr 80px minmax(44px, auto)'">
+  [gridTemplate]="hideDateColumn_() ? '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) 80px auto' : '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) 0.8fr 80px auto'"
+  [mobileGridTemplate]="'2fr 1fr 0.8fr 80px auto'">
 
   <h2 shell-title class="page-title">{{ 'recipe_book' | translatePipe }}</h2>
 
