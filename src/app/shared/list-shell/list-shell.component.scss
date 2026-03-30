@@ -19,10 +19,11 @@
 
   .list-container {
     display: grid;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto auto 1fr;
     grid-template-columns: auto 1fr;
     grid-template-areas:
       "header header"
+      "selbar selbar"
       "panel  table";
     container-type: inline-size;
 
@@ -32,6 +33,17 @@
 
     overflow: hidden;
     box-sizing: border-box;
+  }
+
+  .selection-bar-area {
+    grid-area: selbar;
+    display: flex;
+    justify-content: center;
+    padding-block-start: 0.5rem;
+
+    &:empty {
+      display: none;
+    }
   }
 
   .list-header {
@@ -55,9 +67,14 @@
   .header-start {
     display: flex;
     align-items: center;
-    flex-shrink: 0;
+    flex: 1;
 
     gap: 1rem;
+  }
+
+  :host ::ng-deep .page-title {
+    flex: 1;
+    text-align: center;
   }
 
   .header-search {
@@ -331,10 +348,11 @@
   @media (max-width: #{$panel-overlay-break}) {
     .list-container {
       display: grid;
-      grid-template-rows: auto 1fr;
+      grid-template-rows: auto auto 1fr;
       grid-template-columns: 1fr;
       grid-template-areas:
         "header"
+        "selbar"
         "table";
       position: relative;
 

@@ -61,8 +61,14 @@
         gap: 0.5rem;
         margin-block-end: 0.5rem;
 
+        app-custom-select {
+          flex: 1;
+          min-width: 0;
+        }
+
         input.c-input {
           width: 5rem;
+          flex-shrink: 0;
         }
       }
     }

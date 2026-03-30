@@ -81,6 +81,33 @@
   }
 }
 
+@media (max-width: 768px) {
+  // Sub-fix 3: info icon always visible on touch devices
+  .dish-meta-toggle {
+    opacity: 1;
+  }
+
+  // Sub-fix 3: delete + sell price always reserved/visible on mobile
+  .dish-remove {
+    opacity: 1;
+    position: static;
+    transform: none;
+    inset-inline-end: unset;
+    flex-shrink: 0;
+  }
+
+  .dish-sell-price {
+    position: static;
+    transform: none;
+    inset-inline-end: unset;
+    flex-shrink: 0;
+  }
+
+  .dish-name-cell {
+    gap: 0.375rem;
+  }
+}
+
 .dish-name {
   font-family: var(--font-serif);
   font-size: 1.05rem;

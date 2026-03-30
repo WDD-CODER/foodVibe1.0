@@ -277,6 +277,17 @@
   }
 }
 
+@media (max-width: 620px) {
+  .sort-order-btn {
+    min-block-size: 44px;
+  }
+
+  .action-btn {
+    min-inline-size: 44px;
+    min-block-size: 44px;
+  }
+}
+
 @media (max-width: 768px) {
   .menu-library-container {
     padding: 1rem;

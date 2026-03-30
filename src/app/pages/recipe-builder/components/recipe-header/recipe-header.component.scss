@@ -148,26 +148,6 @@
     }
   }
 
-  .import-text-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.35rem 0.75rem;
-    background: transparent;
-    color: var(--color-text-muted);
-    font-size: 0.75rem;
-    font-weight: 600;
-    border: 1px dashed var(--border-default);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    white-space: nowrap;
-    transition: border-color 0.2s ease, color 0.2s ease;
-
-    &:hover {
-      border-color: var(--color-primary);
-      color: var(--color-primary);
-    }
-  }
 }
 
 .scaling-dock-grid {
@@ -450,23 +430,43 @@
   align-items: center;
   justify-content: center;
 
-  padding-inline: 0.5rem;
+  padding-inline: 0.625rem;
   padding-block: 0.35rem;
 
-  background: transparent;
-  color: var(--color-text-muted);
+  background: var(--bg-glass);
+  color: var(--color-text-secondary);
   font-size: 0.75rem;
   font-weight: 600;
 
-  border: none;
-  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
 
   cursor: pointer;
-  transition: color 0.15s ease, background 0.15s ease;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
 
   &:hover {
     color: var(--color-danger);
     background: var(--bg-danger-subtle);
+    border-color: var(--color-danger);
+  }
+}
+
+@media (max-width: 620px) {
+  .recipe-name-input {
+    min-block-size: 44px;
+    inline-size: 100%;
+  }
+
+  .top-row .type-toggle-btn {
+    min-block-size: 44px;
+    flex-shrink: 0;
+  }
+
+  // Name input takes all available space
+  .recipe-name-wrap {
+    flex: 1;
+    min-width: 0;
   }
 }
 

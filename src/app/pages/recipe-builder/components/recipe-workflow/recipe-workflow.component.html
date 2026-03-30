@@ -12,15 +12,16 @@
 
       <div class="grid-body" cdkDropList (cdkDropListDropped)="onDropStep($event)">
         @for (group of workflowGroups_(); track group; let i = $index) {
-          <div [formGroupName]="i" class="grid-row" cdkDrag>
+          <div [formGroupName]="i" class="grid-row" [class.timer-open]="isTimerOpen(i)" cdkDrag>
             <div class="cdk-custom-placeholder" *cdkDragPlaceholder></div>
-            <div class="col-drag" cdkDragHandle>
+
+            <!-- Right: drag handle + step badge -->
+            <div class="col-drag-id" cdkDragHandle>
               <lucide-icon name="grip-vertical" [size]="16" class="drag-handle-icon"></lucide-icon>
-            </div>
-            <div class="col-id">
               <span class="step-badge">{{ i + 1 }}</span>
             </div>
 
+            <!-- Center: textarea -->
             <div class="col-instruction">
               <textarea
                 #instructionField
@@ -32,56 +33,68 @@
                 (keydown.enter)="onInstructionEnter($event)"></textarea>
             </div>
 
-            <div class="col-timer">
-              <div class="timer-counter">
-                <lucide-icon name="timer" class="wf-icon icon-muted"></lucide-icon>
-                <button
-                  type="button"
-                  class="counter-btn minus"
-                  [disabled]="(group.get('labor_time')?.value ?? 0) <= 0"
-                  (click)="decrementLaborTime(group)"
-                  tabindex="-1"
-                >
-                  <lucide-icon name="minus" class="wf-icon"></lucide-icon>
-                </button>
-                @if (editingLaborTimeIndex_() === i) {
-                  <input
-                    #laborTimeInput
-                    type="number"
-                    formControlName="labor_time"
-                    class="timer-field"
-                    min="0"
-                    SelectOnFocus
-                    (blur)="exitLaborTimeEdit(group)"
-                    (keydown.enter)="exitLaborTimeEdit(group); $event.preventDefault()"
-                    (keydown.arrowDown)="onLaborTimeKeydown($event, group)"
-                    (keydown.arrowUp)="onLaborTimeKeydown($event, group)"
-                  />
-                } @else {
-                  <span
-                    class="timer-value"
-                    (click)="enterLaborTimeEdit(i)"
-                    (focus)="enterLaborTimeEdit(i)"
-                    tabindex="0"
-                    role="button"
-                  >{{ group.get('labor_time')?.value ?? 0 }}</span>
-                }
-                <button
-                  type="button"
-                  class="counter-btn plus"
-                  (click)="incrementLaborTime(group)"
-                  tabindex="-1"
-                >
-                  <lucide-icon name="plus" class="wf-icon"></lucide-icon>
-                </button>
-              </div>
-            </div>
-
-            <div class="col-actions">
-              <button type="button" (click)="removeItem.emit(i)" class="c-icon-btn danger">
+            <!-- Left: timer + delete -->
+            <div class="col-step-actions">
+              <button type="button"
+                class="timer-toggle-btn"
+                [class.timer-active]="isTimerOpen(i)"
+                (click)="toggleTimer(i)"
+                [attr.aria-label]="'labor_time_minutes' | translatePipe"
+                tabindex="-1">
+                <lucide-icon name="timer" class="wf-icon"></lucide-icon>
+              </button>
+              <button type="button" (click)="removeItem.emit(i)" class="c-icon-btn danger step-delete-btn">
                 <lucide-icon name="trash-2" class="wf-icon"></lucide-icon>
               </button>
             </div>
+
+            <!-- Timer counter row — spans full width, shows below when active -->
+            @if (isTimerOpen(i)) {
+              <div class="timer-row">
+                <span class="timer-row-label">{{ 'labor_time_minutes' | translatePipe }}</span>
+                <div class="timer-counter">
+                  <button
+                    type="button"
+                    class="counter-btn minus"
+                    [disabled]="(group.get('labor_time')?.value ?? 0) <= 0"
+                    (click)="decrementLaborTime(group)"
+                    tabindex="-1"
+                  >
+                    <lucide-icon name="minus" class="wf-icon"></lucide-icon>
+                  </button>
+                  @if (editingLaborTimeIndex_() === i) {
+                    <input
+                      #laborTimeInput
+                      type="number"
+                      formControlName="labor_time"
+                      class="timer-field"
+                      min="0"
+                      SelectOnFocus
+                      (blur)="exitLaborTimeEdit(group)"
+                      (keydown.enter)="exitLaborTimeEdit(group); $event.preventDefault()"
+                      (keydown.arrowDown)="onLaborTimeKeydown($event, group)"
+                      (keydown.arrowUp)="onLaborTimeKeydown($event, group)"
+                    />
+                  } @else {
+                    <span
+                      class="timer-value"
+                      (click)="enterLaborTimeEdit(i)"
+                      (focus)="enterLaborTimeEdit(i)"
+                      tabindex="0"
+                      role="button"
+                    >{{ group.get('labor_time')?.value ?? 0 }}</span>
+                  }
+                  <button
+                    type="button"
+                    class="counter-btn plus"
+                    (click)="incrementLaborTime(group)"
+                    tabindex="-1"
+                  >
+                    <lucide-icon name="plus" class="wf-icon"></lucide-icon>
+                  </button>
+                </div>
+              </div>
+            }
           </div>
         }
       </div>
