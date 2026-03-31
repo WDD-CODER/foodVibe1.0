@@ -21,3 +21,28 @@ If a file cannot be read, respond **"No chef! I cannot read [filename]"** and st
 - Writing code on `main`? Run `git checkout -b feat/<name>` or `fix/<name>` first.
 - Need an isolated worktree for parallel multi-agent work? Use `/worktree-setup` on demand — **not automatic**.
 - **Worktree boundary**: When working inside an isolated worktree, never attempt `git checkout main` from within it. All PR creation and merges must be executed using `git -C <mainRepoPath>` from the root repository path to avoid `fatal: main is already used` errors.
+
+## gstack — Browser QA & Extended Tooling
+
+gstack is installed at `~/.claude/skills/gstack/`. It provides browser automation, visual QA, safety guardrails, and lifecycle tools that complement our existing workflow.
+
+**Use /browse from gstack for all web browsing. Never use mcp__claude-in-chrome__* tools.**
+
+### gstack skills available in this project:
+- **Browser QA**: `/browse`, `/qa`, `/qa-only`, `/connect-chrome`, `/setup-browser-cookies`, `/canary`, `/benchmark`
+- **Review & Security**: `/review`, `/cso`, `/investigate`
+- **Shipping & Deploy**: `/ship`, `/land-and-deploy`, `/setup-deploy`, `/document-release`
+- **Safety**: `/careful`, `/freeze`, `/guard`, `/unfreeze`
+- **Lifecycle**: `/retro`, `/gstack-upgrade`
+- **Design**: `/design-review`, `/design-shotgun`, `/design-consultation`
+
+### What gstack does NOT replace (our own workflow remains primary):
+- Planning: briefs come from the Claude.ai planning brain → `/plan-implementation` → `/execute-it`
+- Git: `git-agent` handles all commit/push/PR/batch operations
+- Domain skills: `cssLayer`, `angularComponentStructure`, `add-recipe`, `elegant-fix`
+- Agent orchestration: Team Leader, Software Architect, Product Manager, Breadcrumb Navigator
+- Standards: `standards-angular.md`, `standards-security.md`, `standards-domain.md`, `standards-git.md`
+
+### gstack skills NOT used (redundant with our workflow):
+- `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`, `/plan-design-review`, `/autoplan` — our planning brain + brief workflow is superior
+- `/codex` — requires OpenAI Codex CLI, not in our stack

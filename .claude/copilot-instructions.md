@@ -47,11 +47,9 @@ description: Single source of truth for all project rules, standards, and skill/
 - **Lucide icons** `[SHARED]`: Before adding or editing `<lucide-icon name="...">` → read `.claude/standards-domain.md` Lucide section.
 - **Hebrew canonical values** `[SHARED]`: When adding or editing canonical value flows → read `.claude/standards-domain.md` Hebrew sections.
 - **Deploy to GitHub Pages** `[SHARED]`: User says deploy, publish app, GitHub Pages → read `.claude/skills/deploy-github-pages/SKILL.md`. Run only on explicit request.
-- **UI Inspector** `[CC]`: Manual only — invoke via `/ui-inspector` slash command only when Playwright MCP is confirmed active (`/mcp` to verify). Never auto-triggered by agents mid-task. If visual QA is needed after a task, agents will flag it to the user.
-  Before invoking, answer: "Is there genuine visual ambiguity that CANNOT be resolved from static code?" If NO — known CSS fix, missing property, wrong value — apply the fix directly with Edit first. Use inspector for before/after screenshots only. Never embed fix instructions into the inspector prompt.
-  Good use: unknown layout breakage, z-index stacking, responsive issues, "something looks wrong but I can't find it."
-  Bad use: overflow clip already found in SCSS, missing box-shadow, wrong color — deterministic fixes, apply directly.
-  Port resolution: read `.worktree-port` in active worktree; if on main with no worktree: port = 4200, worktreeRoot = detect from `.worktree-root` file, fallback to current working directory.
+- **Visual QA (via gstack)** `[CC]`: After any layout-affecting change, run `/qa http://localhost:<port>/<page>`. Port: read `.worktree-port`, fallback 4200. If dev server unreachable, flag to user. This replaces the deprecated UI Inspector.
+- **Root-cause debugging** `[CC]`: For complex bugs where cause is unclear → invoke `/investigate`. It auto-freezes scope to the module under investigation and enforces a 3-failed-hypotheses stop rule.
+- **Security audit (formal)** `[CC]`: For pre-deploy or comprehensive security reviews → invoke `/cso` (OWASP Top 10 + STRIDE). For targeted file-specific audits during development → invoke `security-officer` agent as before.
 - **Angular Pipes & Directives** `[SHARED]`: Before creating or refactoring any Angular Pipe or Directive → read `.claude/skills/angular-pipe-logic/SKILL.md`.
 - **Crypto / token management** `[SHARED]`: Before creating or modifying `auth-crypto.ts` → read `.claude/skills/auth-crypto/SKILL.md`. Security Officer invocation is mandatory at completion.
 - **Global doc finalization** `[SHARED]`: User says "finalize docs" or "global audit" → read `.claude/skills/finalize-docs/SKILL.md`.
@@ -106,7 +104,7 @@ Agent persona files live in `.claude/agents/`. Load on demand — do not pre-loa
 
 **Documentation Gate**: After any structural change to `pages/` or `src/app/` top-level subtrees, run Breadcrumb Navigator to update `breadcrumbs.md` at affected seams.
 
-**UI Verification Gate:** After any layout-affecting change, agents will flag visual QA is recommended. User invokes `/ui-inspector` manually in a dedicated session with Playwright MCP enabled.
+**UI Verification Gate:** After any layout-affecting change, agents run `/qa http://localhost:<port>/<relevant-page>` directly via gstack's browser daemon. If the dev server is unreachable, agents flag it to the user. No separate session required.
 
 **Build Verification Gate**: After any agent-written code, run `mcp__ide__getDiagnostics` or `ng build` before marking tasks `[x]`. Trust the compiler, not the agent's self-report.
 
@@ -122,7 +120,6 @@ Agent persona files live in `.claude/agents/`. Load on demand — do not pre-loa
 | Security Officer | Threat Modeling, Logic-Flow Audit | Vulnerability Grepping, Injection Awareness |
 | QA Engineer | Test Strategy, Diagnostic Reasoning | Spec Authoring, Visual QA Verification |
 | Breadcrumb Navigator | — (all procedural) | All phases (pure scan/read/write) |
-| UI Inspector | Visual Verification, Accessibility Audit | Structural QA, Report Generation |
 
 ---
 

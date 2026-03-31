@@ -103,7 +103,7 @@
 - [ ] Phase 2: Add main-session-only scope note to `agent.md` preflight
 - [ ] Phase 3: Remove duplicate §0.3 agent table from `copilot-instructions.md`
 - [ ] Phase 4: Tighten “Apply all project standards” → targeted section refs in 6 agent files
-- [ ] Phase 5: Add “Context Scope: gate-exempt” header to `ui-inspector.md`
+- [x] Phase 5: ~~Add “Context Scope: gate-exempt” header to `ui-inspector.md`~~ — OBSOLETE: `ui-inspector.md` deleted in gstack integration (replaced by `/qa`)
 - [ ] Verification: run `/validate-agent-refs`
 
 ### Plan 192 — Pillar 3 Reactive Loop Hardening (A13–A17) (`plans/192-reactive-loop-hardening-a13-a17.plan.md`)
@@ -230,6 +230,26 @@
 ---
 
 ## 🔵 Infrastructure / Planning
+
+### Plan 241 — gstack Integration & Agent Rewiring (`plans/241-gstack-integration-agent-rewiring.plan.md`)
+- [x] Phase 2: `CLAUDE.md` — append gstack section after Branch Rule
+- [x] Phase 3: Delete `.claude/agents/ui-inspector.md`
+- [x] Phase 4: `team-leader.md` — delete UI Inspector callout + rewrite Section 4 Visual QA
+- [x] Phase 5: `qa-engineer.md` — delete UI Inspector callout + rewrite Section 4 + append /investigate to Section 2
+- [x] Phase 6: `security-officer.md` — append /cso callout after Model Guidance line
+- [x] Phase 7A: `copilot-instructions.md` — delete UI Inspector trigger block (lines 50–54)
+- [x] Phase 7B: `copilot-instructions.md` — insert gstack Visual QA + /investigate + /cso triggers
+- [x] Phase 7C: `copilot-instructions.md` — rewrite UI Verification Gate to reference /qa
+- [x] Phase 7D: `copilot-instructions.md` — delete UI Inspector row from §0.5 Model Routing table
+- [x] Phase 8A: `agent.md` — delete UI Inspector row from Agent Task Force table
+- [x] Phase 8B: `agent.md` — append gstack line to Core Skills section
+- [x] Phase 8C: `agent.md` — rewrite Post-Execution Gate to add /qa step for layout changes
+- [x] Phase 9A: `validate-agent-refs.md` — delete ui-inspector.md from expected agents list
+- [x] Phase 9B: `validate-agent-refs.md` — remove ui-inspector from bash loop
+- [x] Phase 9C: `validate-agent-refs.md` — update expected agent count 7→6
+- [x] Phase 10A: `todo.md` — mark Plan 197 Phase 5 as OBSOLETE
+- [x] Phase 10B: `todo.md` — check Plan 198 section for ui-inspector reference (Plan 198 is Done, no open tasks)
+- [x] Phase 10C: `truly-open-tasks.md` — mark Plan 197 Phase 5 as OBSOLETE
 
 ### Plan 222 — Dev Machine Open Ports Security Hardening (`plans/222-dev-machine-open-ports-security.plan.md`)
 - [ ] Disable Dell SupportAssist service in `services.msc` — verify port 9012 closed
