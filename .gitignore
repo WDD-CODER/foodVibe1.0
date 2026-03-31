@@ -69,3 +69,4 @@ migration-dump.json
 # System files
 .DS_Store
 Thumbs.db
+.gstack/
