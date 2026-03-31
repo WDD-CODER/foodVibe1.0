@@ -1,1 +1,0 @@
-import{J as o,da as r}from"./chunk-QUMV6NWP.js";var n=class e{pageState_=r(null);pageActions=this.pageState_.asReadonly();setPageActions(t,a){this.pageState_.set({actions:t,mode:a})}clearPageActions(){this.pageState_.set(null)}static \u0275fac=function(a){return new(a||e)};static \u0275prov=o({token:e,factory:e.\u0275fac,providedIn:"root"})};export{n as a};

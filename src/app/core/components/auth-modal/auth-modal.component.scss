@@ -138,6 +138,19 @@
   }
 }
 
+.dev-guest-btn {
+  color: var(--color-warning, #d97706);
+  border-color: var(--color-warning, #d97706);
+  opacity: 0.85;
+  font-size: 0.8rem;
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-warning, #d97706) 10%, transparent);
+    color: var(--color-warning, #d97706);
+    opacity: 1;
+  }
+}
+
 .auth-error {
   margin: 0;
   margin-top: 4px;

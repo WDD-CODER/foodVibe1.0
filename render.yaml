@@ -9,9 +9,9 @@ services:
         value: production
       - key: PORT
         value: 10000
-      - key: MONGO_REMOTE_URI
+      - key: MONGO_URI
         sync: false
       - key: JWT_SECRET
         sync: false
       - key: ALLOWED_ORIGIN
-        value: https://foodvibe1-0-1.onrender.com
+        value: https://foodvibe1-0-1.onrender.com,http://localhost:4200

@@ -1,1 +1,0 @@
-import{a}from"./chunk-XKCCYOXL.js";import"./chunk-XRDQ4Q2G.js";import"./chunk-PF3WA5D6.js";import"./chunk-5ZXCLYLN.js";import"./chunk-IGEVP5HH.js";import"./chunk-GZ5KLGQW.js";import"./chunk-RCP3WB7Y.js";import"./chunk-NPM2YBFW.js";import"./chunk-MGH5ITHY.js";import"./chunk-IL5A7KRC.js";import"./chunk-BK6ASW54.js";import"./chunk-QUMV6NWP.js";export{a as TrashPage};

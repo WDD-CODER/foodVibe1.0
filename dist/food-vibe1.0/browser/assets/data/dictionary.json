@@ -649,6 +649,10 @@
         "day_wed": "ד",
         "day_thu": "ה",
         "day_fri": "ו",
-        "day_sat": "ש"
+        "day_sat": "ש",
+        "low_stock": "מלאי נמוך",
+        "supplier_list": "רשימת ספקים",
+        "contact_person": "איש קשר",
+        "linked_products": "מוצרים מקושרים"
     }
 }

@@ -4,6 +4,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { AuthModalService } from '@services/auth-modal.service';
 import { UserService } from '@services/user.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-auth-modal',
@@ -37,6 +38,8 @@ export class AuthModalComponent {
   protected isSubmitting = signal(false);
   protected showPassword_ = signal(false);
   protected showConfirmPassword_ = signal(false);
+
+  protected readonly isDev = !environment.production;
 
   private imgBase64: string | null = null;
 
@@ -106,6 +109,17 @@ export class AuthModalComponent {
         error: (err: Error) => this._onError(err)
       });
     }
+  }
+
+  protected loginAsGuest(): void {
+    this.userService._saveUserLocal({
+      _id: 'dev-guest',
+      name: 'Guest Admin',
+      email: 'guest@dev.local',
+      role: 'admin'
+    });
+    this._reset();
+    this.modalService.close();
   }
 
   protected onClose(): void {

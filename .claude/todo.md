@@ -43,10 +43,19 @@
 - [x] `list-shell.component.scss` — add `border-inline-start-width 0.3s var(--ease-spring)` to desktop `.filter-panel` transition
 - [x] `ng build` — verify zero errors
 
-### Plan 229 — Point dev environment at local Express/MongoDB (`plans/229-dev-env-local-backend.plan.md`)
+### Plan 241 — Switch FoodVibe to MongoDB Backend Mode (`plans/241-backend-switch.plan.md`)
 
-- [ ] Edit `src/environments/environment.ts`: set apiUrl/authApiUrl to localhost:3000, useBackend/useBackendAuth to true
-- [ ] Run `ng build --configuration production` and confirm zero errors
+- [x] `server/routes/generic.js` — remove blanket verifyToken; add per-route middleware on write routes; update comment
+- [x] `src/environments/environment.ts` — revert to useBackend: false, useBackendAuth: false
+- [x] Create `src/environments/environment.local.ts` — useBackend: true, useBackendAuth: true
+- [x] `angular.json` — add local build + serve configurations
+- [x] `package.json` — add dev:local script
+- [x] `user.service.ts` — fix login() backend path to hash password before sending
+
+### Plan 229 — Point dev environment at local Express/MongoDB (`plans/229-dev-env-local-backend.plan.md`) — superseded by Plan 241
+
+- [x] Edit `src/environments/environment.ts`: set apiUrl/authApiUrl to localhost:3000, useBackend/useBackendAuth to true (reverted in Plan 241 — replaced by environment.local.ts approach)
+- [x] Run `ng build --configuration production` and confirm zero errors
 
 ### Plan 157 — Fix sidebar alignment and close on breakpoint (`plans/157-fix-sidebar-alignment-close-breakpoint.plan.md`)
 - [ ] List-shell: remove margin-block and max-height from .filter-panel in 768px block

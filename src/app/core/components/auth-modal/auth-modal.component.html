@@ -133,6 +133,11 @@
       </form>
 
       <div class="c-modal-actions">
+        @if (isDev) {
+          <button type="button" class="c-btn-ghost dev-guest-btn" (click)="loginAsGuest()">
+            Guest (Dev)
+          </button>
+        }
         <button type="button" class="c-btn-ghost" (click)="onClose()">
           {{ 'cancel' | translatePipe }}
         </button>
