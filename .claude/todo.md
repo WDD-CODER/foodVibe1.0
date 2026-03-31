@@ -2,20 +2,6 @@
 
 ---
 
-## 🟡 Features
-
-### Plan 242 — UnitPeelContainerComponent drag-to-promote (`plans/242-unit-peel-container-drag-promote.plan.md`)
-- [ ] `recipe-yield-manager.util.ts` — add `swapPrimaryWithSecondary(secondaryIdx)`
-- [ ] Create `unit-peel-container.component.ts`
-- [ ] Create `unit-peel-container.component.html`
-- [ ] Create `unit-peel-container.component.scss`
-- [ ] `recipe-header.component.ts` — import + imports[], `secondaryPeelData_`, `onPromotePill()`
-- [ ] `recipe-header.component.html` — replace `.scaling-dock-grid` block
-- [ ] `recipe-header.component.scss` — delete old selectors (lines 153-206)
-- [ ] `recipe-header.component.scss` mobile block — drop "primary-unit" row, add upc grid-area
-
----
-
 ## 🔴 Quick Fixes
 
 ### Plan 240 — Validation Checklist Workflow Integration (`plans/240-validation-checklist-workflow-integration.plan.md`)
