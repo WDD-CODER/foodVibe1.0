@@ -23,7 +23,12 @@ export const SYSTEM_UNITS: Readonly<Record<string, number>> = {
   gram: 1,
   ml: 1,
   unit: 1,
-  dish: 1
+  dish: 1,
+  tablespoon: 15,
+  teaspoon: 5,
+  cup: 240,
+  pinch: 1,
+  portion: 1,
 };
 
 @Injectable({ providedIn: 'root' })

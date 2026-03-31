@@ -445,12 +445,23 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     }
 
     this.ingredientsArray.clear()
-    const knownUnits = new Set(this.unitRegistry_.allUnitKeys_())
     for (const ing of draft.ingredients) {
       this.ingredientsArray.push(this.recipeFormService_.createIngredientGroup())
       const last = this.ingredientsArray.at(this.ingredientsArray.length - 1)
+      const knownUnits = new Set(this.unitRegistry_.allUnitKeys_())
       const safeUnit = knownUnits.has(ing.unit) ? ing.unit : 'unit'
-      last.patchValue({ name_hebrew: ing.name, amount_net: ing.amount, unit: safeUnit })
+      const matchedProduct = this.state_.products_().find(p => p.name_hebrew === ing.name)
+      const matchedRecipe = !matchedProduct ? this.state_.recipes_().find(r => r.name_hebrew === ing.name) : null
+      const matched = matchedProduct ?? matchedRecipe
+      last.patchValue({
+        name_hebrew: ing.name,
+        amount_net: ing.amount,
+        unit: safeUnit,
+        ...(matched && {
+          referenceId: matched._id,
+          item_type: matchedProduct ? 'product' : 'recipe',
+        }),
+      })
     }
 
     this.workflowArray.clear()
