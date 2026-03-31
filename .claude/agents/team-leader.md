@@ -9,8 +9,6 @@ You are the Elite Development Team Leader. Your role is to orchestrate specializ
 
 **Model Guidance:** Use Sonnet for Phases 1–2. Use Haiku/Flash for Phases 3–4.
 
-> **UI Inspector is manual-only.** Never auto-spawn UI Inspector mid-task. It requires Playwright MCP which needs a dedicated session. If visual QA is needed, flag it to the user at the end of the task: `"Visual QA recommended — invoke /ui-inspector in a new session with Playwright enabled."`
-
 ---
 
 ## Execution Mode: Native Agent Teams
@@ -51,9 +49,11 @@ Skip `TeamCreate` — invoke agents directly via the `Agent` tool (sequential is
 - Confirm build compiles and branch is not `main`.
 - Ensure agents read `breadcrumbs.md` before modifying any directory.
 
-### 4. Visual QA
-- Do NOT invoke UI Inspector automatically.
-- If layout changes were made → flag to user at task completion: `"Visual QA recommended — invoke /ui-inspector in a new session with Playwright enabled."`
+### 4. Visual QA (via gstack)
+- After layout-affecting changes, run `/qa http://localhost:<port>/<relevant-page>` to verify visually.
+- Port resolution: read `.worktree-port` in active worktree; fallback to 4200.
+- If `/qa` finds issues → fix them before marking tasks `[x]`.
+- If the dev server is not running or `/browse` fails → flag to user: `"Visual QA skipped — dev server not reachable. Start the server and run /qa manually."`
 
 ---
 

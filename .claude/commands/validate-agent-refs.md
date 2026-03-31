@@ -10,7 +10,6 @@ Periodic health check that verifies all internal links in the agent guidance sys
 - `product-manager.md`
 - `breadcrumb-navigator.md`
 - `qa-engineer.md`
-- `ui-inspector.md`
 - `security-officer.md`
 
 ### Skills (`.claude/skills/*/SKILL.md`)
@@ -73,7 +72,7 @@ Periodic health check that verifies all internal links in the agent guidance sys
 
 ```bash
 # Verify all expected agent files exist
-for f in team-leader software-architect product-manager breadcrumb-navigator qa-engineer ui-inspector security-officer; do
+for f in team-leader software-architect product-manager breadcrumb-navigator qa-engineer security-officer; do
   [ -f ".claude/agents/$f.md" ] || echo "MISSING: .claude/agents/$f.md"
 done
 
@@ -94,7 +93,7 @@ Cross-check each path printed above against the filesystem. Any path that does n
 ## Agent Reference Validation — [Date]
 
 ### Inventory Check
-- Expected agents: 7 — found: [count]
+- Expected agents: 6 — found: [count]
 - Expected skills: 14 — found: [count]
 - Expected cursor rules: 7 — found: [count]
 - Expected cursor commands: 3 — found: [count]
