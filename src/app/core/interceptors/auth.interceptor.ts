@@ -7,7 +7,8 @@ import { UserService } from '@services/user.service'
 import { AuthModalService } from '@services/auth-modal.service'
 import { environment } from '../../../environments/environment'
 
-const AUTH_URLS = ['/api/v1/auth/refresh', '/api/v1/auth/login']
+const REFRESH_URL = '/api/v1/auth/refresh'
+const LOGIN_URL = '/api/v1/auth/login'
 const REFRESH_TIMEOUT_MS = 10_000
 
 // Guard against concurrent 401s: only one refresh call in-flight at a time.
@@ -35,8 +36,13 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((err: HttpErrorResponse) => {
       if (err.status === 401 && environment.useBackendAuth) {
-        // Do not attempt refresh for auth endpoints themselves — avoids infinite loop
-        if (AUTH_URLS.some(url => req.url.includes(url))) {
+        // Do not attempt refresh for auth endpoints themselves — avoids infinite loop.
+        // /login 401 means bad credentials — just propagate; no session to clear.
+        // /refresh 401 means the refresh token is gone/expired — session truly dead, sign out.
+        if (req.url.includes(LOGIN_URL)) {
+          return throwError(() => err)
+        }
+        if (req.url.includes(REFRESH_URL)) {
           logging.info({ event: 'auth.session_expired', message: 'Session expired or unauthorized (401)' })
           signOut(userService, authModal, router)
           return throwError(() => err)
