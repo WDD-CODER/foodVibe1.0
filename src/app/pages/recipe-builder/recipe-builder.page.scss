@@ -635,6 +635,6 @@
 }
 
 @keyframes just-filled-fade {
-  0%   { box-shadow: 0 0 0 2px var(--color-primary, #4CAF50); }
+  0%   { box-shadow: 0 0 0 2px var(--color-primary); }
   100% { box-shadow: none; }
 }

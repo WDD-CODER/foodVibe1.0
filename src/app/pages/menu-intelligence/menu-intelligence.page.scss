@@ -46,7 +46,7 @@
   min-height: 320px;
   // padding: 36px 40px 44px;
   padding: 14px 20px 14px 20px;
-  border: 1px solid #1a1a1a;
+  border: 1px solid #1a1a1a; /* intentional: near-black inner border for paper frame, no token at this depth */
   border-radius: var(--radius-lg);
   background: transparent;
 

@@ -55,7 +55,7 @@
   align-items: center;
   gap: 0.375rem;
   font-size: 0.875rem;
-  color: var(--color-danger, #e74c3c);
+  color: var(--color-danger);
   margin: 0;
 }
 
@@ -73,14 +73,14 @@
   gap: 0.75rem;
   padding: 0.875rem 1rem;
   background: var(--color-warning-bg, rgba(255, 193, 7, 0.12));
-  border: 1px solid var(--color-warning, #f0ad4e);
+  border: 1px solid var(--border-warning);
   border-radius: var(--radius-sm);
   font-size: 0.9rem;
   color: var(--color-text-main);
 
   lucide-icon {
     flex-shrink: 0;
-    color: var(--color-warning, #f0ad4e);
+    color: var(--border-warning);
   }
 
   span {
