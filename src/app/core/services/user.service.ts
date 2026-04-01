@@ -85,6 +85,24 @@ export class UserService {
     )
   }
 
+  private callBackendGuestLogin(): Observable<{ token: string; user: User }> {
+    return this.http.post<{ token: string; user: User }>(
+      `${this.authBase}/api/v1/auth/guest`,
+      {},
+      { withCredentials: true }
+    )
+  }
+
+  public loginAsGuestBackend(): Observable<User> {
+    return this.callBackendGuestLogin().pipe(
+      tap(({ token, user }) => {
+        this.storeToken(token)
+        this._saveUserLocal(user)
+      }),
+      map(({ user }) => user)
+    )
+  }
+
   // -------------------------------------------------------------------------
   // Public auth methods
   // -------------------------------------------------------------------------
