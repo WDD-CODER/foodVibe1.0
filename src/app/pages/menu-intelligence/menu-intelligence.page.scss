@@ -490,6 +490,32 @@
   text-align: center;
 }
 
+/* ---------- Dish Name Clickable ---------- */
+
+.dish-name-clickable {
+  display: inline;
+
+  padding: 0;
+
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+
+  cursor: pointer;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: var(--color-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
 /* ---------- Dish Rows ---------- */
 
 .dish-list {
