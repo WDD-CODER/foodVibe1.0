@@ -9,30 +9,7 @@
         </button>
       </div>
 
-      @if (configuringKey_() || !gemini.hasKey()) {
-        <!-- API key config panel -->
-        <div class="ai-key-panel">
-          <p class="ai-key-label">{{ 'ai_recipe_configure_key' | translatePipe }}</p>
-          <input
-            type="password"
-            class="ai-key-input"
-            [placeholder]="'ai_recipe_key_placeholder' | translatePipe"
-            [value]="keyInput_()"
-            (input)="keyInput_.set($any($event.target).value)"
-          />
-          <div class="ai-modal-footer">
-            <button
-              type="button"
-              class="c-btn-primary"
-              [disabled]="!keyInput_()"
-              (click)="onSaveKey()"
-            >
-              {{ 'ai_recipe_save_key' | translatePipe }}
-            </button>
-          </div>
-        </div>
-
-      } @else if (!draft_()) {
+      @if (!draft_()) {
         <!-- Prompt input -->
         <div class="ai-prompt-panel">
           <textarea

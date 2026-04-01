@@ -3,22 +3,75 @@ const { verifyToken } = require('../middleware/auth');
 
 const router = Router();
 
-const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
-const SYSTEM_PROMPT = `You are a professional recipe assistant for a Hebrew-language kitchen management app called FoodVibe.
-The user will describe a recipe. Return ONLY a valid JSON object with this exact shape:
-{
-  "name_hebrew": "<recipe name in Hebrew>",
-  "recipe_type": "dish" | "preparation",
-  "yield_amount": <number>,
-  "yield_unit": "<unit in Hebrew, e.g. מנות/ק\"ג/ליטר>",
-  "ingredients": [{ "name": "<ingredient name in Hebrew>", "amount": <number>, "unit": "<unit in Hebrew>" }],
-  "steps": ["<step 1 in Hebrew>", "<step 2 in Hebrew>", ...]
+const CANONICAL_UNITS = new Set([
+  'gram', 'ml', 'kg', 'liter', 'unit', 'tablespoon', 'teaspoon', 'cup', 'pinch', 'portion',
+]);
+
+const RECIPE_TYPES = new Set(['dish', 'preparation']);
+
+/**
+ * Validates the shape and unit values of a Gemini-generated AiRecipeDraft.
+ * Returns an array of error strings; empty means valid.
+ */
+function validateRecipeDraft(recipe) {
+  const errors = [];
+  if (!recipe || typeof recipe !== 'object') return ['recipe must be an object'];
+  if (typeof recipe.name_hebrew !== 'string' || !recipe.name_hebrew.trim()) errors.push('name_hebrew is required');
+  if (!RECIPE_TYPES.has(recipe.recipe_type)) errors.push(`recipe_type must be "dish" or "preparation", got "${recipe.recipe_type}"`);
+  if (typeof recipe.yield_amount !== 'number') errors.push('yield_amount must be a number');
+  if (typeof recipe.yield_unit !== 'string' || !recipe.yield_unit.trim()) errors.push('yield_unit is required');
+  if (!Array.isArray(recipe.ingredients)) {
+    errors.push('ingredients must be an array');
+  } else {
+    recipe.ingredients.forEach((ing, i) => {
+      if (typeof ing.name !== 'string' || !ing.name.trim()) errors.push(`ingredients[${i}].name is required`);
+      if (typeof ing.amount !== 'number') errors.push(`ingredients[${i}].amount must be a number`);
+      if (!CANONICAL_UNITS.has(ing.unit)) errors.push(`ingredients[${i}].unit "${ing.unit}" is not a canonical key`);
+    });
+  }
+  if (!Array.isArray(recipe.steps) || recipe.steps.length === 0) errors.push('steps must be a non-empty array');
+  return errors;
 }
-Do not include any text before or after the JSON. No markdown, no explanation.
-Recipe description:
-`;
+
+const SYSTEM_PROMPT = `אתה מנתח מתכונים מקצועי. תפקידך: לקבל תיאור חופשי (עברית או אנגלית) ולהחזיר JSON מובנה בלבד.
+
+## כלל 1 — סוג המתכון (recipe_type)
+- "dish" — מנה מוכנה לאכילה שמוגשת לסועד: סלט, מרק, פסטה, עוגה, שניצל, קציצות.
+- "preparation" — בסיס שמשמש לבניית מנה אחרת: רוטב, ציר, בלילה, מרינדה, קרם, תערובת תבלינים.
+כלל הכרעה: מוגש ישירות? → "dish". משמש כמרכיב אחר? → "preparation".
+
+## כלל 2 — חילוץ מרכיבים (חשוב מאוד)
+חפש מרכיבים בכל הטקסט — לא רק ברשימה מפורשת:
+- בתוך שלבי הכנה: "מבשלים 5 ביצים" → { name: "ביצים", amount: 5, unit: "unit" }
+- כמויות מרומזות: "מוסיפים מלח ופלפל" → מלח: amount 1 unit "pinch", פלפל: amount 1 unit "pinch"
+- חומרים בלי כמות: הנח כמות סבירה בהתאם למנה
+המרת כמויות מילוליות:
+"רבע" / "¼" → 0.25 | "שליש" / "⅓" → 0.33 | "חצי" / "½" → 0.5 | "שלושה רבעים" → 0.75
+"כף" → amount: 1, unit: "tablespoon" | "כפית" → amount: 1, unit: "teaspoon" | "קורט" → amount: 1, unit: "pinch"
+שמות מרכיבים תמיד בעברית.
+unit חייב להיות מפתח אנגלי קנוני מהרשימה הזו בלבד:
+gram | ml | kg | liter | unit | tablespoon | teaspoon | cup | pinch | portion
+
+## כלל 3 — תפוקה (yield)
+- "dish": yield_unit = "portion" (אלא אם צוין אחרת). yield_amount = מספר מנות משוער.
+- "preparation": yield_unit = יחידת משקל/נפח מהרשימה למעלה. yield_amount = כמות.
+- אם לא צוין — הערך לפי הכמויות.
+
+## כלל 4 — שלבים
+כל שלב — ניסוח פעיל קצר בעברית. לא לחזור על מרכיבים כרשימה — רק הוראות.
+
+החזר JSON בלבד, ללא markdown, ללא הסברים:
+{
+  "name_hebrew": "...",
+  "recipe_type": "dish" | "preparation",
+  "yield_amount": number,
+  "yield_unit": "...",
+  "ingredients": [{ "name": "...", "amount": number, "unit": "..." }],
+  "steps": ["..."]
+}`;
 
 // ---------------------------------------------------------------------------
 // POST /generate
@@ -69,6 +122,12 @@ router.post('/generate', verifyToken, async (req, res) => {
     } catch {
       console.error('[ai/generate] JSON parse failed, raw:', raw);
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
+    }
+
+    const validationErrors = validateRecipeDraft(recipe);
+    if (validationErrors.length > 0) {
+      console.error('[ai/generate] validation failed:', validationErrors, 'raw:', raw);
+      return res.status(502).json({ error: 'Gemini returned a malformed recipe', details: validationErrors });
     }
 
     return res.json({ recipe });
