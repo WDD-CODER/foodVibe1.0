@@ -13,5 +13,8 @@ services:
         sync: false
       - key: JWT_SECRET
         sync: false
+      # Set in Render dashboard — never commit the value
+      - key: GEMINI_API_KEY
+        sync: false
       - key: ALLOWED_ORIGIN
         value: https://foodvibe1-0-1.onrender.com,http://localhost:4200

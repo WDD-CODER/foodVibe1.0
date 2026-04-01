@@ -142,11 +142,8 @@ router.post('/login', loginLimiter, async (req, res) => {
     }
 
     const user = await User.findOne({ name }).lean();
-    if (!user) return res.status(401).json({ error: 'USER_NOT_FOUND' });
-
-    // Account lockout check
-    if (user.lockedUntil && user.lockedUntil > Date.now()) {
-      return res.status(423).json({ error: 'ACCOUNT_LOCKED' });
+    if (!user || (user.lockedUntil && user.lockedUntil > Date.now())) {
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     if (!user.passwordHash) return res.status(401).json({ error: 'USER_NOT_FOUND' });

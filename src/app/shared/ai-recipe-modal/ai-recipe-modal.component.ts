@@ -31,8 +31,6 @@ export class AiRecipeModalComponent implements OnInit {
   protected readonly prompt_ = signal('')
   protected readonly loading_ = signal(false)
   protected readonly draft_ = signal<AiRecipeDraft | null>(null)
-  protected readonly configuringKey_ = signal(false)
-  protected readonly keyInput_ = signal('')
   protected readonly status_ = signal<GenerationStatus>('idle')
   protected readonly geminiUsage_ = signal(getGeminiUsage())
   protected readonly usageColor_ = computed(() => {
@@ -51,10 +49,6 @@ export class AiRecipeModalComponent implements OnInit {
   }
 
   async onGenerate(): Promise<void> {
-    if (!this.gemini.hasKey()) {
-      this.configuringKey_.set(true)
-      return
-    }
     this.loading_.set(true)
     this.status_.set('sending')
     try {
@@ -68,11 +62,6 @@ export class AiRecipeModalComponent implements OnInit {
       this.loading_.set(false)
       this.refreshUsage()
     }
-  }
-
-  onSaveKey(): void {
-    this.gemini.setApiKey(this.keyInput_())
-    this.configuringKey_.set(false)
   }
 
   onGenerateAgain(): void {
@@ -95,6 +84,5 @@ export class AiRecipeModalComponent implements OnInit {
     this.prompt_.set('')
     this.loading_.set(false)
     this.status_.set('idle')
-    this.configuringKey_.set(false)
   }
 }
