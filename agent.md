@@ -16,15 +16,8 @@ Read this and `.claude/copilot-instructions.md` at the start of every task.
 - **Skills are self-contained**: Do NOT re-read `copilot-instructions.md` when executing a skill — each skill carries its own inline rules.
 
 ## Agent Task Force (`.claude/agents/`) — Claude Code only
-| Agent | File | Invoke when |
-|-------|------|-------------|
-| Team Leader | `team-leader.md` | Task spans >2 subsystems; agents conflict; progress report needed |
-| Software Architect | `software-architect.md` | PRD exists and needs HLD; architecture trade-offs to evaluate |
-| Product Manager | `product-manager.md` | Planning a new feature; writing a plan file; scoping work |
-| Breadcrumb Navigator | `breadcrumb-navigator.md` | New `pages/<x>/` or app subtree; structural changes; after update-docs |
-| QA Engineer | `qa-engineer.md` | Spec gaps; diagnosing failing tests; E2E creation |
-| Security Officer | `security-officer.md` | Post-feature review of auth/storage/route changes; pre-deploy; security consult |
 
+See `copilot-instructions.md §0.3` for the full agent roster and when to invoke each.
 See `copilot-instructions.md §0.4` for Task Force sizing and standard sequence.
 See `copilot-instructions.md §0.5` for model routing (Efficiency Tiers).
 

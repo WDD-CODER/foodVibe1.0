@@ -15,6 +15,10 @@ If a file cannot be read, respond **"No chef! I cannot read [filename]"** and st
 
 > **Skills are self-contained**: Individual skills carry their own inline rules. Do NOT re-read `copilot-instructions.md` when executing a skill unless the skill explicitly instructs it.
 
+## Subagent Gate Exemption
+
+Subagents spawned via the Agent tool are running inside a task — they do **not** perform the session-start preflight ("Yes chef!" gate). The gate applies to main-session Claude only.
+
 ## Branch Rule
 
 - Never commit directly to `main` or `master`.
