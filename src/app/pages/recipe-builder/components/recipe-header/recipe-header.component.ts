@@ -2,18 +2,23 @@ import { Component, input, inject, output, signal, computed, ChangeDetectorRef }
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
+import { ClickOutSideDirective } from '@directives/click-out-side';
 import { take } from 'rxjs/operators';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
 import { TranslationService } from '@services/translation.service';
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service';
+import { CustomMultiSelectComponent } from 'src/app/shared/custom-multi-select/custom-multi-select.component';
+import { ScalingChipComponent } from 'src/app/shared/scaling-chip/scaling-chip.component';
+import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive';
 import { RecipeYieldManager } from 'src/app/core/utils/recipe-yield-manager.util';
 
 @Component({
   selector: 'app-recipe-header',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, ClickOutSideDirective, TranslatePipe, CustomMultiSelectComponent, ScalingChipComponent, ScrollIndicatorsDirective],
   templateUrl: './recipe-header.component.html',
   styleUrl: './recipe-header.component.scss'
 })
