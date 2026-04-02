@@ -36,6 +36,7 @@ All skill triggers defined in `copilot-instructions.md §0`.
 | `execute-it.md` | Execute the implementation plan from this conversation (full write phase) |
 | `test-pr-review-merge.md` | Full CI: test, PR, review, merge to main |
 | `validate-agent-refs.md` | Health check: verify all agent file cross-references are valid |
+| `auto-solve.md` | Autonomous plan executor — finds, validates, executes, surfaces for approval |
 
 ## Preflight Checklist
 1. Read this file + `copilot-instructions.md` (mandatory gate).
