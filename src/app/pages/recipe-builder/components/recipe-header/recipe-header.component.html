@@ -1,12 +1,11 @@
 <div class="header-dashboard-container" [formGroup]="form()" dir="rtl">
-in the recipe header merg conflict
     <div class="image-square">
         <img [src]="imageUrl() || placeholderPath" class="header-img" />
     </div>
 
     <div class="center-controls">
         <div class="top-row">
-            <button type="button" (click)="toggleType()" class="type-toggle-btn"
+            <button type="button" (click)="toggleTypeWrapper()" class="type-toggle-btn"
                 [class.dish-mode]="form().get('recipe_type')?.value === 'dish'">
                 {{ form().get('recipe_type')?.value === 'dish' ? 'מנה' : 'הכנה' }}
             </button>
@@ -17,11 +16,11 @@ in the recipe header merg conflict
 
         <div class="scaling-dock-grid">
             <div class="scaling-chip active primary">
-                <div class="unit-switcher-btn" (click)="setActiveUnit('primary')">
+                <div class="unit-switcher-btn" (click)="activeUnit.set('primary')">
                     <div class="unit-select-wrapper">
-                        <select class="native-unit-select" [value]="primaryUnitLabel_()"
-                            (change)="onPrimaryUnitChange($event)">
-                            @for (key of availableUnits_(); track key) {
+                        <select class="native-unit-select" [value]="yield.primaryUnitLabel_()"
+                            (change)="onPrimaryUnitChangeWrapper($event)">
+                            @for (key of yield.availablePrimaryUnits_(); track key) {
                             <option [value]="key">{{ key  }}</option>
                             }
                             <option value="NEW_UNIT" class="add-new-option">
@@ -32,20 +31,20 @@ in the recipe header merg conflict
                 </div>
 
                 <div class="counter-grid">
-                    <button type="button" class="ctrl-btn disabled" [disabled]="primaryAmount_() === 0"
-                        (click)="updatePrimaryAmount(-1)">-</button>
+                    <button type="button" class="ctrl-btn disabled" [disabled]="yield.primaryAmount_() === 0"
+                        (click)="yield.updatePrimaryAmount(-1)">-</button>
                     <div class="input-wrapper">
-                        <input type="number" #primaryInput SelectOnFocus class="chip-input-native"
-                            [value]="primaryAmount_()" (input)="onAmountManualChange(primaryInput.value)"
-                            (blur)="onAmountManualChange(primaryInput.value)"
+                        <input type="number" #primaryInput class="chip-input-native"
+                            [value]="yield.primaryAmount_()" (input)="yield.onAmountManualChange(primaryInput.value)"
+                            (blur)="yield.onAmountManualChange(primaryInput.value)"
                             (keydown.enter)="$event.preventDefault(); primaryInput.blur()">
                     </div>
-                    <button type="button" class="ctrl-btn" (click)="updatePrimaryAmount(1)">+</button>
+                    <button type="button" class="ctrl-btn" (click)="yield.updatePrimaryAmount(1)">+</button>
                 </div>
             </div>
 
             <div class="secondary-units-container">
-                @for (group of secondaryConversions; track $index) {
+                @for (group of yield.secondaryConversions; track $index) {
                 <div class="scaling-chip secondary">
                     <span class="unit-name">{{ group.get('unit')?.value }}</span>
 
@@ -54,21 +53,21 @@ in the recipe header merg conflict
                             (input)="group.get('amount')?.patchValue($any($event.target).value)">
                     </div>
 
-                    <button type="button" class="remove-btn" (click)="removeSecondaryUnit($index)">
+                    <button type="button" class="remove-btn" (click)="yield.removeSecondaryUnit($index)">
                         <lucide-icon name="x" [size]="10"></lucide-icon>
                     </button>
                 </div>
                 }
 
                 <div class="add-unit-wrapper">
-                    <button type="button" class="add-custom-chip" (click)="setActiveUnit('selector')">
+                    <button type="button" class="add-custom-chip" (click)="activeUnit.set('selector')">
                         <lucide-icon name="plus" [size]="16"></lucide-icon>
                     </button>
 
                     @if (activeUnit() === 'selector') {
                     <div class="unit-dropdown-menu">
-                        @for (unit of availableUnits_(); track unit) {
-                        <div class="menu-item" (click)="addSecondaryUnit(unit)">
+                        @for (unit of yield.availableSecondaryUnits_(); track unit) {
+                        <div class="menu-item" (click)="yield.addSecondaryUnit(unit)">
                             {{ unit }}
                         </div>
                         }
