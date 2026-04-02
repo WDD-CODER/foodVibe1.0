@@ -4,70 +4,12 @@
 
 ## 🔴 Quick Fixes
 
-### Plan 243 — Auto-solve command (`plans/243-auto-solve-command.plan.md`)
+### Plan 244 — Auto-solve command (`plans/243-auto-solve-command.plan.md`)
 - [x] Create `.claude/commands/auto-solve.md` with full command content (both Playwright prefixes in allowed-tools)
 - [x] Edit `.claude/settings.json` — remove "playwright" from disabledMcpjsonServers
 - [x] Edit `agent.md` — add auto-solve row to commands table
 - [x] Edit `.claude/copilot-instructions.md` — add /auto-solve trigger after Security review line
 
-### Plan 240 — Validation Checklist Workflow Integration (`plans/240-validation-checklist-workflow-integration.plan.md`)
-- [x] Create `.claude/instructions/` directory (prerequisite — path didn't exist)
-- [x] Create `.claude/instructions/validation-checklist.md` — reusable checklist instruction with tree-format output
-- [x] Add `@.claude/instructions/validation-checklist.md` to top of `.claude/commands/execute-it.md`
-
-### Plan 239 — Incomplete badge + ternary guard modal + AI-prefill fix (`plans/239-incomplete-badge-ternary-modal-guard-fix.plan.md`)
-- [x] `recipe-ingredients-table.component.ts` — Router inject + isProductIncomplete + navigateToEditProduct
-- [x] `recipe-ingredients-table.component.html` — incomplete-row class + badge button
-- [x] `recipe-ingredients-table.component.scss` — .incomplete-row, .incomplete-badge, pulse animation
-- [x] `dictionary.json` — product_incomplete_hint, save_and_leave, error_saving_recipe
-- [x] `confirm-modal.service.ts` — openTernary(), showSaveButton, saveButtonLabel, ConfirmModalResult
-- [x] `confirm-modal.component.html` — string choose() calls + conditional 3rd button
-- [x] `confirm-modal.component.spec.ts` — update mock + assertions
-- [x] `pending-changes.guard.ts` — saveAndWait interface + ternary vs binary flow
-- [x] `recipe-builder.page.ts` — saveAndWait() + hasRealChanges() failsafe for new recipes
-
-### Plan 236/237/238 — AI Recipe: ingredients fix + prompt engineering + few-shot loop
-- [x] `gemini.service.ts` — Replace SYSTEM_PROMPT with domain-aware rules + English canonical units
-- [x] `recipe-builder.page.ts` — Unit fallback in `prefillFromAiDraft` (safeUnit via `allUnitKeys_()`)
-- [x] `recipe-ingredients-table.component.html` — Extend `[initialQuery]` to pre-fill AI-suggested names
-- [x] Create `src/app/core/utils/gemini-shots.util.ts` — few-shot localStorage util
-- [x] `gemini.service.ts` — Inject few-shot block into generateRecipe prompt
-- [x] `ai-recipe-modal.component.ts` — Call `addGeminiShot` on "Open in Builder"
-
-### Plan 235 — Gemini model fix + usage tracker (`plans/235-gemini-model-fix-usage-tracker.plan.md`)
-- [x] `gemini.service.ts` — change model URL from `gemini-2.0-flash` to `gemini-2.5-flash-lite`
-- [x] `gemini.service.ts` — replace two-pass fence regex with single non-anchored `/\`\`\`json|\`\`\`/g`
-- [x] Create `src/app/core/utils/gemini-usage.util.ts` — localStorage usage tracker with limit guard
-- [x] `gemini.service.ts` — import util, add limit guard before fetch, call increment after success
-- [x] `ai-recipe-modal.component.ts` — add `computed` + `OnInit` imports; implement interface; add usage signal, computed, refreshUsage
-- [x] `ai-recipe-modal.component.html` — insert `.ai-usage-bar` block above generate button
-- [x] `ai-recipe-modal.component.scss` — append `.ai-usage-bar` styles
-
-### Plan 234 — Filter panel default-closed + animation fix (`plans/234-filter-panel-default-closed-animation-fix.plan.md`)
-- [x] `panel-preference.util.ts` — change both `return true` fallbacks to `return false`
-- [x] `list-shell.component.scss` — add `overflow: visible` to `.list-container` in tablet media block
-- [x] `list-shell.component.scss` — add `border-inline-start-width 0.3s var(--ease-spring)` to desktop `.filter-panel` transition
-- [x] `ng build` — verify zero errors
-
-### Plan 242 — Dev Guest Backend Token (`plans/242-dev-guest-backend-token.plan.md`)
-- [x] `server/models/user.model.js` — add `role` field; make `passwordHash` optional
-- [x] `server/routes/auth.js` — add `POST /guest` dev-only route with JWT + refresh cookie
-- [x] `src/app/core/services/user.service.ts` — add `callBackendGuestLogin()` + `loginAsGuestBackend()`
-- [x] `src/app/core/components/auth-modal/auth-modal.component.ts` — restore `isDev`; branch `loginAsGuest()` on `useBackendAuth`
-
-### Plan 241 — Switch FoodVibe to MongoDB Backend Mode (`plans/241-backend-switch.plan.md`)
-
-- [x] `server/routes/generic.js` — remove blanket verifyToken; add per-route middleware on write routes; update comment
-- [x] `src/environments/environment.ts` — revert to useBackend: false, useBackendAuth: false
-- [x] Create `src/environments/environment.local.ts` — useBackend: true, useBackendAuth: true
-- [x] `angular.json` — add local build + serve configurations
-- [x] `package.json` — add dev:local script
-- [x] `user.service.ts` — fix login() backend path to hash password before sending
-
-### Plan 229 — Point dev environment at local Express/MongoDB (`plans/229-dev-env-local-backend.plan.md`) — superseded by Plan 241
-
-- [x] Edit `src/environments/environment.ts`: set apiUrl/authApiUrl to localhost:3000, useBackend/useBackendAuth to true (reverted in Plan 241 — replaced by environment.local.ts approach)
-- [x] Run `ng build --configuration production` and confirm zero errors
 
 ### Plan 157 — Fix sidebar alignment and close on breakpoint (`plans/157-fix-sidebar-alignment-close-breakpoint.plan.md`)
 - [x] List-shell: remove margin-block and max-height from .filter-panel in 768px block
@@ -228,25 +170,16 @@
 
 ## 🔵 Infrastructure / Planning
 
-### Plan 241 — gstack Integration & Agent Rewiring (`plans/241-gstack-integration-agent-rewiring.plan.md`)
-- [x] Phase 2: `CLAUDE.md` — append gstack section after Branch Rule
-- [x] Phase 3: Delete `.claude/agents/ui-inspector.md`
-- [x] Phase 4: `team-leader.md` — delete UI Inspector callout + rewrite Section 4 Visual QA
-- [x] Phase 5: `qa-engineer.md` — delete UI Inspector callout + rewrite Section 4 + append /investigate to Section 2
-- [x] Phase 6: `security-officer.md` — append /cso callout after Model Guidance line
-- [x] Phase 7A: `copilot-instructions.md` — delete UI Inspector trigger block (lines 50–54)
-- [x] Phase 7B: `copilot-instructions.md` — insert gstack Visual QA + /investigate + /cso triggers
-- [x] Phase 7C: `copilot-instructions.md` — rewrite UI Verification Gate to reference /qa
-- [x] Phase 7D: `copilot-instructions.md` — delete UI Inspector row from §0.5 Model Routing table
-- [x] Phase 8A: `agent.md` — delete UI Inspector row from Agent Task Force table
-- [x] Phase 8B: `agent.md` — append gstack line to Core Skills section
-- [x] Phase 8C: `agent.md` — rewrite Post-Execution Gate to add /qa step for layout changes
-- [x] Phase 9A: `validate-agent-refs.md` — delete ui-inspector.md from expected agents list
-- [x] Phase 9B: `validate-agent-refs.md` — remove ui-inspector from bash loop
-- [x] Phase 9C: `validate-agent-refs.md` — update expected agent count 7→6
-- [x] Phase 10A: `todo.md` — mark Plan 197 Phase 5 as OBSOLETE
-- [x] Phase 10B: `todo.md` — check Plan 198 section for ui-inspector reference (Plan 198 is Done, no open tasks)
-- [x] Phase 10C: `truly-open-tasks.md` — mark Plan 197 Phase 5 as OBSOLETE
+### Plan 243 — Post-Migration System Validation (`plans/243-post-migration-validation-run.plan.md`)
+- [x] Create branch `feat/validation-run` from `main`
+- [x] Run validate-agent-refs — verify 6 agents, 19 skills, 11 cursor rules, 4 cursor commands, broken links
+- [x] Run git status — report dirty files
+- [x] Run ng build — zero errors required
+- [x] Run npm run lint:icons — BROKEN: scripts/check-lucide-icons.mjs missing
+- [x] Run npm run lint:no-native-select — PASS (zero violations)
+- [x] Run github-sync skill — write notes/github-sync/2026-04-02.md
+- [x] Fix 3 stale counts in validate-agent-refs.md output template (skills: 14→19, cursor rules: 7→11, cursor commands: 3→4)
+- [x] Write project state summary report
 
 ### Plan 222 — Dev Machine Open Ports Security Hardening (`plans/222-dev-machine-open-ports-security.plan.md`)
 - [ ] Disable Dell SupportAssist service in `services.msc` — verify port 9012 closed
