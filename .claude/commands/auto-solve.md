@@ -54,6 +54,25 @@ sleep 5
 
 ---
 
+## Phase 1.5 — Git History Check (before any modification)
+
+Before touching any file mentioned in the plan:
+
+1. **Check recent commits on target files:**
+```bash
+git log --oneline -5 -- <file>
+```
+
+2. **If plan involves restoration or revert:**
+```bash
+git diff <base>..HEAD -- <file>
+```
+Review what would be lost. Surface to user if significant changes detected.
+
+3. **Rule:** Never add methods, restore code, or make structural changes without first verifying current state via git history. This prevents wasted tool calls on already-done work.
+
+---
+
 ## Phase 2 — Pre-Validate Checkboxes
 
 For each checkbox in the plan:
@@ -96,7 +115,12 @@ After each task: update checkbox in `.claude/todo.md` to `[x]`.
 
 Run validation checklist:
 ```bash
-ng build
+ng build 2>&1 | tee /tmp/build-output.txt
+if grep -q "ERROR" /tmp/build-output.txt; then
+  echo "BUILD FAILED — errors detected:"
+  grep "ERROR" /tmp/build-output.txt
+  exit 1
+fi
 ```
 
 ```bash
@@ -158,7 +182,11 @@ Commands:
 
 ## Phase 6 — Handle User Response
 
-- **"approve"** → Commit with conventional message (read `.claude/agents/git-agent.md`), then loop back to Phase 0 for next plan
+- **"approve":**
+  1. Before committing, verify plan file number is still unique (re-check `plans/` directory)
+  2. If collision detected (another worktree created same-numbered plan), rename current plan to next available number and update `todo.md` reference
+  3. Commit with conventional message (read `.claude/agents/git-agent.md`)
+  4. Loop back to Phase 0 for next plan
 - **"approve and stop"** → Commit, then run session-handoff skill
 - **"show diff"** → Run `git diff`, then wait for next command
 - **"abort"** → Run `git checkout .` to discard, end session

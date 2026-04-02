@@ -4,7 +4,7 @@
 
 ## 🔴 Quick Fixes
 
-### Plan 244 — Auto-solve command (`plans/243-auto-solve-command.plan.md`)
+### Plan 244 — Auto-solve command (`plans/244-auto-solve-command.plan.md`)
 - [x] Create `.claude/commands/auto-solve.md` with full command content (both Playwright prefixes in allowed-tools)
 - [x] Edit `.claude/settings.json` — remove "playwright" from disabledMcpjsonServers
 - [x] Edit `agent.md` — add auto-solve row to commands table
