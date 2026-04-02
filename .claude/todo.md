@@ -67,25 +67,25 @@
 - [ ] List-shell: remove margin-block and max-height from .filter-panel in 768px block
 - [ ] Inventory list: add afterNextRender + matchMedia to close panel when viewport <= 768px
 
-### Plan 174 — Custom select chip and standalone state (`plans/174-custom-select-chip-and-standalone-state.plan.md`)
+### Plan 174 — Custom select chip and standalone state (`plans/174-custom-select-chip-and-standalone-state.plan.md`) [TRIAGED 2026-04-02]
 - [ ] Cook-view ingredients index: add variant=”chip” and typeToFilter to unit selects for consistency with recipe builder
 - [ ] Verify in app: recipe builder and cook-view ingredients index unit dropdowns
 
 ### Plan 169 — List quick-edit UX overlay (`plans/169-list-quick-edit-ux-overlay.plan.md`)
 - [ ] Verify first-click open, carousel dropdown visible, row-blur confirm only
 
-### Plan 134 — Translation and confirmation modals unified (`plans/134-translation-confirmation-modals-unified.plan.md`)
+### Plan 134 — Translation and confirmation modals unified (`plans/134-translation-confirmation-modals-unified.plan.md`) [TRIAGED 2026-04-02]
 
 - [ ] Other entry points: align with resolve first → modal if needed → already in parameter (metadata-manager, preparation-*, menu-section-categories, add-equipment-modal, recipe-workflow, add-supplier-flow)
 
 ### Tech Debt — Audit 2026-03-26 (unplanned items)
 - [ ] Remove commented import `ProductDataService` at `product-form.component.ts:8` and commented statement at line 927
 
-### Plan 074 â€” Tech debt remediation (`plans/074-tech-debt-remediation.plan.md`)
+### Plan 074 â€” Tech debt remediation (`plans/074-tech-debt-remediation.plan.md`) [TRIAGED 2026-04-02]
 
 - [ ] Refactor menu-intelligence.page.scss into partials (deferred)
 
-### Plan 167 — Category/unit add-new audit (`plans/167-category-unit-add-new-audit.plan.md`)
+### Plan 167 — Category/unit add-new audit (`plans/167-category-unit-add-new-audit.plan.md`) [TRIAGED 2026-04-02]
 - [ ] Optional: Cook-view “add new unit” so user can add from there
 
 ---
