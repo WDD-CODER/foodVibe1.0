@@ -94,9 +94,9 @@ Cross-check each path printed above against the filesystem. Any path that does n
 
 ### Inventory Check
 - Expected agents: 6 — found: [count]
-- Expected skills: 14 — found: [count]
-- Expected cursor rules: 7 — found: [count]
-- Expected cursor commands: 3 — found: [count]
+- Expected skills: 19 — found: [count]
+- Expected cursor rules: 11 — found: [count]
+- Expected cursor commands: 4 — found: [count]
 
 ### Link Check
 - Links scanned: [count]
