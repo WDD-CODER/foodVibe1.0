@@ -241,4 +241,47 @@ router.post('/logout', (req, res) => {
   return res.json({ ok: true });
 });
 
+// ---------------------------------------------------------------------------
+// POST /guest
+// Dev-only endpoint — issues a JWT for the built-in guest account so the
+// frontend can make authenticated backend requests without signing up.
+// Blocked in production.
+// ---------------------------------------------------------------------------
+
+router.post('/guest', async (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ error: 'Not found' });
+  }
+
+  try {
+    await User.findOneAndUpdate(
+      { _id: 'dev-guest' },
+      { _id: 'dev-guest', name: 'Guest Admin', email: 'guest@dev.local', role: 'admin', passwordHash: null },
+      { upsert: true, new: true }
+    );
+
+    const token = jwt.sign(
+      { userId: 'dev-guest', name: 'Guest Admin' },
+      process.env.JWT_SECRET,
+      { expiresIn: ACCESS_TOKEN_EXPIRY }
+    );
+    const refreshToken = jwt.sign({ userId: 'dev-guest' }, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+
+    res.cookie('fv_refresh', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.json({
+      token,
+      user: { _id: 'dev-guest', name: 'Guest Admin', email: 'guest@dev.local', role: 'admin' },
+    });
+  } catch (err) {
+    console.error('[auth/guest]', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;

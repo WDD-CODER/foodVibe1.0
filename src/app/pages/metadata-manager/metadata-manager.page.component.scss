@@ -349,7 +349,7 @@
     gap: 0.5rem;
     padding: 0.25rem 0.75rem;
     background: rgba(254, 226, 226, 0.5);
-    color: #9f1239;
+    color: #9f1239; /* intentional: rose-900 — allergen pill text, no design token at this shade */
     border: 1px solid rgba(254, 205, 213, 0.6);
     border-radius: var(--radius-full);
     font-size: 0.875rem;

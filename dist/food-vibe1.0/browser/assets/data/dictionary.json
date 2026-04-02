@@ -1,11 +1,16 @@
 {
     "units": {
         "cup": "כוס",
+        "dish": "מנה",
         "gram": "גרם",
         "kg": "ק\"ג",
         "liter": "ליטר",
         "ml": "מ\"ל",
+        "pinch": "קורט",
+        "portion": "מנה",
+        "tablespoon": "כף",
         "tbsp": "כף",
+        "teaspoon": "כפית",
         "tsp": "כפית",
         "unit": "יחידה",
         "milliliter": "מיליליטר"

@@ -255,7 +255,7 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   animation: incomplete-pulse 2s ease-in-out infinite;
 
   &:hover {
-    color: var(--color-danger-hover, #b91c1c);
+    color: var(--color-danger-hover);
     transform: scale(1.15);
   }
 }

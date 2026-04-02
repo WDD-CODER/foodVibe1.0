@@ -43,6 +43,12 @@
 - [x] `list-shell.component.scss` — add `border-inline-start-width 0.3s var(--ease-spring)` to desktop `.filter-panel` transition
 - [x] `ng build` — verify zero errors
 
+### Plan 242 — Dev Guest Backend Token (`plans/242-dev-guest-backend-token.plan.md`)
+- [x] `server/models/user.model.js` — add `role` field; make `passwordHash` optional
+- [x] `server/routes/auth.js` — add `POST /guest` dev-only route with JWT + refresh cookie
+- [x] `src/app/core/services/user.service.ts` — add `callBackendGuestLogin()` + `loginAsGuestBackend()`
+- [x] `src/app/core/components/auth-modal/auth-modal.component.ts` — restore `isDev`; branch `loginAsGuest()` on `useBackendAuth`
+
 ### Plan 241 — Switch FoodVibe to MongoDB Backend Mode (`plans/241-backend-switch.plan.md`)
 
 - [x] `server/routes/generic.js` — remove blanket verifyToken; add per-route middleware on write routes; update comment
@@ -107,35 +113,17 @@
 - [ ] Leave `onUnitChange` conversion block unchanged (inverse math — cannot reuse)
 - [ ] Verify `ng build` passes
 
-### Plan 197 — AI Framework Redundancy Fix (`plans/197-ai-framework-redundancy-fix.plan.md`)
-- [ ] Phase 1: Add subagent gate exemption to `CLAUDE.md`
-- [ ] Phase 2: Add main-session-only scope note to `agent.md` preflight
-- [ ] Phase 3: Remove duplicate §0.3 agent table from `copilot-instructions.md`
-- [ ] Phase 4: Tighten “Apply all project standards” → targeted section refs in 6 agent files
-- [x] Phase 5: ~~Add “Context Scope: gate-exempt” header to `ui-inspector.md`~~ — OBSOLETE: `ui-inspector.md` deleted in gstack integration (replaced by `/qa`)
-- [ ] Verification: run `/validate-agent-refs`
 
-### Plan 192 — Pillar 3 Reactive Loop Hardening (A13–A17) (`plans/192-reactive-loop-hardening-a13-a17.plan.md`)
-- [ ] A13: Modify `.cursor/rules/session-start.mdc` with first-message guard, state decision tree, and “wrap up” tip
-- [ ] A14: Modify `.cursor/rules/session-end.mdc` with expanded trigger phrases and sweep-first prompt
-- [ ] A15: Harden Phase 4 Step 6 in `.claude/skills/commit-to-github/SKILL.md` with archive safety gates
-- [ ] A17: Modify `.claude/commands/sweep-stale-todos.md` with deferred filter, precise git verification, and 7-day age threshold
-- [ ] Validation: Run `validate-agent-refs` and verify no broken references
-
-### Plan 182 — toFix.md verification (undone) (`plans/182-tofix-verification-undone.plan.md`)
-- [ ] Recipe builder: remove chevron up/down arrows in section titles
-- [ ] Recipe builder: expandable containers — allow collapse by clicking anywhere on card
-- [ ] Logistics: chips grid — chip width fit content so full label visible
-- [ ] Activity: change-tag — show clear “what changed” (values, from → to)
-- [ ] Add new category modal: two-case focus flow (Hebrew then English, or prefill Hebrew + focus English)
-- [ ] Verify/clarify: recipe view alignment; Maison Plus; labels; menu builder keyboard; Plan 147; dashboard; activity scroll; lists sidebar; unit-creator focus; metrics-square gram→volume
-
-### Plan 163 — toFix audit PRD (`plans/163-tofix-audit-prd.plan.md`)
-- [ ] 2.2 Recipe builder: verify remove up/down arrows in category title (recipe-workflow)
-- [ ] 2.3 App-wide: audit category/unit dropdowns for “add new” where applicable
-- [ ] 2.4 Labels: selectability in delete-label + recipe builder manual selector
-- [ ] 2.5 Menu-library: keyboard (Arrow Up/Down, Enter) on custom-select options
-- [ ] 2.7 Lists: sidebar aligned to list container at 768px (list-shell)
+### Plan 182 + 163 — Visual & UX fix backlog (`plans/182-tofix-verification-undone.plan.md`, `plans/163-tofix-audit-prd.plan.md`)
+- [ ] Recipe builder: remove up/down arrows in section titles
+- [ ] Recipe builder: clicking a card header collapses/expands it (currently only the arrow does)
+- [ ] Logistics: chip labels get cut off — make chip width fit the full text
+- [ ] Activity: “what changed” tag should show the old and new value (e.g. “Unit: kg → g”), not just that something changed
+- [ ] Add new category modal: focus flows Hebrew first, then English (or pre-fills Hebrew and focuses English)
+- [ ] App-wide: audit every category/unit dropdown — add “add new” option where it's missing
+- [ ] Labels: you should be able to select existing labels in the delete-label screen and recipe builder
+- [ ] Menu library: keyboard navigation (arrow keys + Enter) on dropdown options
+- [ ] Lists: sidebar aligns correctly to the list container on smaller screens (768px)
 
 ### Plan 160 — Global user message queue (`plans/160-global-user-message-queue.plan.md`)
 - [ ] Refactor UserMsgService to use explicit state (current message, timer, pending queue) instead of concatMap pipeline
@@ -178,12 +166,6 @@
 - [ ] Style modal SCSS (engine classes + cssLayer)
 - [ ] Update ingredient-search: dropdown condition, add-item row, keyboard fix, auto-select
 - [ ] Register modal in app.component; add dictionary keys
-
-### Plan 065 â€” Carousel title and inventory carousel (`plans/065-carousel-title-and-inventory-carousel.plan.md`)
-
-- [ ] Recipe-book: remove small label; add one main title (getCarouselHeaderLabel_)
-- [ ] Inventory: add carousel (TS: signals + methods; HTML: carousel header + app-cell-carousel in rows; SCSS: desktop 7-col, mobile 5-col + carousel styles)
-- [ ] Build and verify
 
 ---
 
@@ -412,7 +394,7 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 | 062-1 | Fix FAB and cook-view guest access | Done |
 | 063 | Recipe book carousel media query, behavior, design | Active |
 | 064 | Inventory list grid layout refactor | Active |
-| 065 | Carousel title and inventory carousel | Active |
+| 065 | Carousel title and inventory carousel | Done |
 | 066 | Quick-add product modal | Active |
 | 069 | Unused and redundant code cleanup | Planned |
 | 070 | Recipe carousel header label sync | Done |
@@ -501,7 +483,7 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 | 190 | Agent process optimization | Done |
 | 191 | Dashboard QA: Specs, data-testid, Pattern Fixes | Done |
 | 190 | Master De-Spaghettification Map | Done |
-| 192 | Pillar 3 Reactive Loop Hardening (A13–A17) | Planned |
+| 192 | Pillar 3 Reactive Loop Hardening (A13–A17) | Done |
 | 196 | Commit flow speed audit | Planned |
 | 222 | Dev Machine Open Ports Security Hardening | Planned |
 
