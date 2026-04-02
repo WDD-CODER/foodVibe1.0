@@ -62,7 +62,6 @@ export class RecipeHeaderComponent {
 
   // SIGNALS & CONSTANTS
   readonly placeholderPath = 'assets/style/img/recipe_placeholder.png';
-  activeUnit = signal<string | null>(null);
 
   // LABELS
   protected labelMultiSelectOptions_ = computed(() => {

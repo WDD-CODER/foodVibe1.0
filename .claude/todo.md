@@ -4,9 +4,16 @@
 
 ## 🔴 Quick Fixes
 
+### Plan 244 — Auto-solve command (`plans/243-auto-solve-command.plan.md`)
+- [x] Create `.claude/commands/auto-solve.md` with full command content (both Playwright prefixes in allowed-tools)
+- [x] Edit `.claude/settings.json` — remove "playwright" from disabledMcpjsonServers
+- [x] Edit `agent.md` — add auto-solve row to commands table
+- [x] Edit `.claude/copilot-instructions.md` — add /auto-solve trigger after Security review line
+
+
 ### Plan 157 — Fix sidebar alignment and close on breakpoint (`plans/157-fix-sidebar-alignment-close-breakpoint.plan.md`)
-- [ ] List-shell: remove margin-block and max-height from .filter-panel in 768px block
-- [ ] Inventory list: add afterNextRender + matchMedia to close panel when viewport <= 768px
+- [x] List-shell: remove margin-block and max-height from .filter-panel in 768px block
+- [x] Inventory list: add afterNextRender + matchMedia to close panel when viewport <= 768px
 
 ### Plan 174 — Custom select chip and standalone state (`plans/174-custom-select-chip-and-standalone-state.plan.md`) [TRIAGED 2026-04-02]
 - [ ] Cook-view ingredients index: add variant=”chip” and typeToFilter to unit selects for consistency with recipe builder

@@ -54,6 +54,7 @@ description: Single source of truth for all project rules, standards, and skill/
 - **Crypto / token management** `[SHARED]`: Before creating or modifying `auth-crypto.ts` → read `.claude/skills/auth-crypto/SKILL.md`. Security Officer invocation is mandatory at completion.
 - **Global doc finalization** `[SHARED]`: User says "finalize docs" or "global audit" → read `.claude/skills/finalize-docs/SKILL.md`.
 - **Security review** `[CC]`: After any change touching `auth.guard.ts`, `auth.interceptor.ts`, `auth-crypto.ts`, `user.service.ts`, localStorage/sessionStorage, new routes, or `[innerHTML]`/`bypassSecurityTrust*` → invoke `security-officer` agent as the final step before committing.
+- **Autonomous plan execution** `[CC]`: User invokes `/auto-solve` or says "start auto-solve" → read `.claude/commands/auto-solve.md` and follow it.
 
 ---
 
