@@ -241,8 +241,11 @@ export class RecipeIngredientsTableComponent implements AfterViewInit {
       : this.kitchenStateService.recipes_().find(r => r._id === id);
   }
 
-  /** True when the row's product exists but has no price set (skeleton from quick-add or AI). */
-  isProductIncomplete(group: FormGroup): boolean {
+  /** True when the row is unresolved (AI-added name with no match) or when a product has no price set. */
+  isIncompleteRow(group: FormGroup): boolean {
+    // Unresolved: has a name but no referenceId (e.g. AI added an unknown ingredient)
+    if (group.get('name_hebrew')?.value && !group.get('referenceId')?.value) return true
+    // Matched product with no price
     if (group.get('item_type')?.value !== 'product') return false
     const product = this.getItemMetadata(group) as Product | undefined
     if (!product) return false

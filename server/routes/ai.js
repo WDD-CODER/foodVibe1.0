@@ -243,4 +243,113 @@ router.post('/parse-text', verifyToken, async (req, res) => {
   }
 });
 
+// ---------------------------------------------------------------------------
+// POST /patch-recipe
+// Accepts { currentRecipe: AiRecipeDraft, instruction: string }.
+// Gemini reads the current recipe + user instruction and returns ONLY the
+// fields that should change as a sparse patch object.
+// Response: { changes: { name_hebrew?, ingredients?, steps?, yield_amount?, yield_unit? } }
+// Requires a valid JWT.
+// ---------------------------------------------------------------------------
+
+const PATCH_SYSTEM_PROMPT = `You are an intelligent recipe editor. You will receive:
+1. The CURRENT RECIPE as a JSON object
+2. The USER'S INSTRUCTION — a natural-language request (possibly spoken, informal, Hebrew or English)
+
+Your job is to produce a SPARSE PATCH — a JSON object containing ONLY the fields the user asked to change.
+Do NOT include fields that were not mentioned or implied by the instruction.
+
+## Rules
+
+### Field keys you may include in the patch:
+- "name_hebrew" — string: new recipe name
+- "yield_amount" — number: new yield amount
+- "yield_unit" — string: canonical unit key (gram | ml | kg | liter | unit | tablespoon | teaspoon | cup | pinch | portion)
+- "ingredients" — array: FULL replacement array [ { name, amount, unit } ] — only if user asked to change ingredients
+- "steps" — array: FULL replacement string array [ "step text", ... ] — only if user asked to change steps/instructions
+
+### Decision rules:
+- If user says "only add steps" / "add preparation steps" / "create the instructions" → include ONLY "steps"
+- If user says "change the name to X" → include ONLY "name_hebrew"
+- If user pastes a full recipe text → extract all fields and include all of them
+- If ambiguous, prefer minimal changes — only include what is clearly requested
+
+### Ingredient rules (when included):
+- unit must be a canonical key: gram | ml | kg | liter | unit | tablespoon | teaspoon | cup | pinch | portion
+- name always in Hebrew
+- amount is a number
+
+### Step rules (when included):
+- Each step is a short active Hebrew sentence
+- Do not repeat ingredients as a list — only instructions
+
+Return ONLY valid JSON. No markdown, no explanation, no code blocks. Raw JSON only.
+
+Format:
+{
+  "changes": {
+    ... only the fields being changed ...
+  }
+}`;
+
+router.post('/patch-recipe', verifyToken, async (req, res) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ error: 'AI generation is not configured on this server' });
+  }
+
+  const { currentRecipe, instruction } = req.body;
+  if (!instruction || typeof instruction !== 'string' || !instruction.trim()) {
+    return res.status(400).json({ error: 'instruction is required' });
+  }
+  if (!currentRecipe || typeof currentRecipe !== 'object') {
+    return res.status(400).json({ error: 'currentRecipe is required' });
+  }
+
+  const userContent = `CURRENT RECIPE:\n${JSON.stringify(currentRecipe, null, 2)}\n\nUSER INSTRUCTION:\n${instruction.trim()}`;
+
+  try {
+    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: PATCH_SYSTEM_PROMPT + '\n\n' + userContent }] }],
+      }),
+    });
+
+    if (!geminiRes.ok) {
+      console.error('[ai/patch-recipe] Gemini API error:', geminiRes.status);
+      return res.status(502).json({ error: `Gemini API error: ${geminiRes.status}` });
+    }
+
+    const data = await geminiRes.json();
+    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+
+    const fencePattern = /```(?:json)?\s*([\s\S]*?)```/i;
+    const fenceMatch = fencePattern.exec(raw);
+    const cleaned = (fenceMatch ? fenceMatch[1] : raw).trim();
+
+    if (!cleaned) {
+      return res.status(502).json({ error: 'Gemini returned an empty response' });
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch {
+      console.error('[ai/patch-recipe] JSON parse failed, raw:', raw);
+      return res.status(502).json({ error: 'Gemini returned invalid JSON' });
+    }
+
+    if (!parsed.changes || typeof parsed.changes !== 'object') {
+      return res.status(502).json({ error: 'Gemini response missing "changes" key' });
+    }
+
+    return res.json({ changes: parsed.changes });
+  } catch (err) {
+    console.error('[ai/patch-recipe]', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;
