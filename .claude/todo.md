@@ -16,8 +16,8 @@
 - [x] Inventory list: add afterNextRender + matchMedia to close panel when viewport <= 768px
 
 ### Plan 174 — Custom select chip and standalone state (`plans/174-custom-select-chip-and-standalone-state.plan.md`) [TRIAGED 2026-04-02]
-- [ ] Cook-view ingredients index: add variant=”chip” and typeToFilter to unit selects for consistency with recipe builder
-- [ ] Verify in app: recipe builder and cook-view ingredients index unit dropdowns
+- [x] Cook-view ingredients index: add variant=”chip” and typeToFilter to unit selects for consistency with recipe builder
+- [x] Verify in app: recipe builder and cook-view ingredients index unit dropdowns
 
 ### Plan 169 — List quick-edit UX overlay (`plans/169-list-quick-edit-ux-overlay.plan.md`)
 - [ ] Verify first-click open, carousel dropdown visible, row-blur confirm only
