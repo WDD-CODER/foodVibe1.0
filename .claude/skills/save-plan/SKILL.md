@@ -30,6 +30,13 @@ description: Determines the next plan number, syncs atomic sub-tasks to the ledg
 
 **Numbering:** List files in `plans/` to determine next number. `NNN = highest + 1`, zero-padded. Refactor variant: `NNN-R`. No plans yet → start at `001`.
 
+**Collision Guard (concurrent worktree safety):**
+1. After determining `NNN`, check if `plans/<NNN>-*.plan.md` already exists
+2. If file exists but was created in the last 60 seconds → collision likely from parallel worktree
+3. Re-scan `plans/` and increment to next available number
+4. If in a worktree (`.worktree-root` exists): also check main repo's `plans/` via `git -C $(cat .worktree-root) ls-files plans/`
+5. Use the higher of (local max + 1) or (main repo max + 1)
+
 ---
 
 ## Phase 2: Logic Validation 
