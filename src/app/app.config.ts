@@ -21,6 +21,7 @@ import {
   ChevronRight,
   ChevronUp,
   Circle,
+  Check,
   CircleCheck,
   CircleUserRound,
   CircleX,
@@ -33,7 +34,6 @@ import {
   Eye,
   EyeOff,
   Sparkles,
-  ScanText,
   FileDown,
   FilePlus,
   Filter,
@@ -146,6 +146,7 @@ export const appConfig: ApplicationConfig = {
         UtensilsCrossed,
         ChevronUp,
         Circle,
+        Check,
         CircleCheck,
         CircleX,
         LayoutDashboard,
@@ -167,7 +168,6 @@ export const appConfig: ApplicationConfig = {
         Star,
         Lock,
         Sparkles,
-        ScanText,
         ChefHat
       })
     )

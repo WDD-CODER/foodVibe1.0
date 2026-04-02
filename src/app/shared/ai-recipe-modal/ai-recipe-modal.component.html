@@ -3,104 +3,189 @@
     <div class="c-modal-card ai-recipe-modal-card" dir="rtl" (click)="$event.stopPropagation()">
 
       <div class="ai-modal-header">
-        <h2 class="ai-modal-title">{{ 'ai_recipe_modal_title' | translatePipe }}</h2>
+        <h2 class="ai-modal-title">
+          {{ (modalService.mode() === 'edit' ? 'ai_recipe_edit_title' : 'ai_recipe_modal_title') | translatePipe }}
+        </h2>
         <button type="button" class="c-icon-btn" (click)="onClose()">
           <lucide-icon name="x" [size]="20"></lucide-icon>
         </button>
       </div>
 
-      @if (!draft_()) {
-        <!-- Prompt input -->
-        <div class="ai-prompt-panel">
-          <textarea
-            class="ai-prompt-textarea"
-            [placeholder]="'ai_recipe_prompt_placeholder' | translatePipe"
-            [value]="prompt_()"
-            (input)="prompt_.set($any($event.target).value)"
-            rows="4"
-          ></textarea>
+      @if (modalService.mode() === 'edit') {
+        <!-- ── Edit mode ── -->
+        @if (!patch_()) {
+          <div class="ai-prompt-panel">
+            <textarea
+              class="ai-prompt-textarea"
+              dir="auto"
+              [placeholder]="'ai_recipe_edit_placeholder' | translatePipe"
+              [value]="instruction_()"
+              (input)="instruction_.set($any($event.target).value)"
+              rows="4"
+              [disabled]="status_() === 'sending'"
+            ></textarea>
 
-          <!-- Status bar -->
-          @if (status_() !== 'idle') {
-            <div class="ai-status-bar" [class.ai-status--sending]="status_() === 'sending'" [class.ai-status--done]="status_() === 'done'" [class.ai-status--error]="status_() === 'error'">
-              @if (status_() === 'sending') {
-                <app-loader size="small" [inline]="true" />
-                <span>שולח בקשה לגמיני...</span>
-              } @else if (status_() === 'done') {
-                <lucide-icon name="circle-check" [size]="16"></lucide-icon>
-                <span>תשובה התקבלה</span>
-              } @else if (status_() === 'error') {
-                <lucide-icon name="circle-x" [size]="16"></lucide-icon>
-                <span>{{ 'ai_recipe_error' | translatePipe }}</span>
-              }
-            </div>
-          }
+            @if (status_() !== 'idle') {
+              <div class="ai-status-bar" [class.ai-status--sending]="status_() === 'sending'" [class.ai-status--done]="status_() === 'done'" [class.ai-status--error]="status_() === 'error'">
+                @if (status_() === 'sending') {
+                  <app-loader size="small" [inline]="true" />
+                  <span>שולח בקשה לגמיני...</span>
+                } @else if (status_() === 'error') {
+                  <lucide-icon name="circle-x" [size]="16"></lucide-icon>
+                  <span>{{ 'ai_recipe_error' | translatePipe }}</span>
+                }
+              </div>
+            }
 
-          <div class="ai-usage-bar" [attr.data-status]="usageColor_()">
-            <span class="ai-usage-label">בקשות היום</span>
-            <span class="ai-usage-count">{{ geminiUsage_().count }} / 1,000</span>
-            <div class="ai-usage-track">
-              <div
-                class="ai-usage-fill"
-                [style.width.%]="(geminiUsage_().count / 1000) * 100">
+            <div class="ai-usage-bar" [attr.data-status]="usageColor_()">
+              <span class="ai-usage-label">בקשות היום</span>
+              <span class="ai-usage-count">{{ geminiUsage_().count }} / 1,000</span>
+              <div class="ai-usage-track">
+                <div class="ai-usage-fill" [style.width.%]="(geminiUsage_().count / 1000) * 100"></div>
               </div>
             </div>
+
+            <div class="ai-modal-footer">
+              <button type="button" class="c-btn-ghost" (click)="onClose()">
+                {{ 'cancel' | translatePipe }}
+              </button>
+              @if (status_() === 'error') {
+                <button type="button" class="c-btn-primary" (click)="status_.set('idle')">
+                  {{ 'retry' | translatePipe }}
+                </button>
+              } @else {
+                <button
+                  type="button"
+                  class="c-btn-primary"
+                  [disabled]="!instruction_().trim() || status_() === 'sending'"
+                  (click)="onEdit()"
+                >
+                  @if (status_() === 'sending') {
+                    <app-loader size="small" [inline]="true" />
+                  } @else {
+                    <lucide-icon name="sparkles" [size]="16"></lucide-icon>
+                  }
+                  {{ 'ai_recipe_edit_send' | translatePipe }}
+                </button>
+              }
+            </div>
           </div>
 
+        } @else {
+          <!-- Patch preview -->
+          <div class="ai-draft-preview">
+            <p class="ai-patch-preview-label">{{ 'ai_recipe_patch_preview' | translatePipe }}</p>
+            @for (item of patchSummary_(); track item) {
+              <div class="ai-patch-item">
+                <lucide-icon name="check" [size]="14"></lucide-icon>
+                <span>{{ item }}</span>
+              </div>
+            }
+          </div>
           <div class="ai-modal-footer">
-            <button
-              type="button"
-              class="c-btn-primary"
-              [disabled]="!prompt_() || loading_()"
-              (click)="onGenerate()"
-            >
-              @if (loading_()) {
-                <app-loader size="small" [inline]="true" />
-              } @else {
-                <lucide-icon name="sparkles" [size]="16"></lucide-icon>
-              }
-              {{ 'ai_recipe_generate' | translatePipe }}
+            <button type="button" class="c-btn-ghost" (click)="onEditAgain()">
+              {{ 'ai_recipe_generate_again' | translatePipe }}
+            </button>
+            <button type="button" class="c-btn-primary" (click)="onApplyPatch()">
+              <lucide-icon name="check" [size]="16"></lucide-icon>
+              {{ 'ai_recipe_apply_patch' | translatePipe }}
             </button>
           </div>
-        </div>
+        }
 
       } @else {
-        <!-- Preview card -->
-        <div class="ai-draft-preview">
-          <div class="ai-draft-field">
-            <span class="ai-draft-label">{{ 'name' | translatePipe }}</span>
-            <span class="ai-draft-value">{{ draft_()!.name_hebrew }}</span>
+        <!-- ── Create mode ── -->
+        @if (!draft_()) {
+          <div class="ai-prompt-panel">
+            <textarea
+              class="ai-prompt-textarea"
+              [placeholder]="'ai_recipe_prompt_placeholder' | translatePipe"
+              [value]="prompt_()"
+              (input)="prompt_.set($any($event.target).value)"
+              rows="4"
+            ></textarea>
+
+            @if (status_() !== 'idle') {
+              <div class="ai-status-bar" [class.ai-status--sending]="status_() === 'sending'" [class.ai-status--done]="status_() === 'done'" [class.ai-status--error]="status_() === 'error'">
+                @if (status_() === 'sending') {
+                  <app-loader size="small" [inline]="true" />
+                  <span>שולח בקשה לגמיני...</span>
+                } @else if (status_() === 'done') {
+                  <lucide-icon name="circle-check" [size]="16"></lucide-icon>
+                  <span>תשובה התקבלה</span>
+                } @else if (status_() === 'error') {
+                  <lucide-icon name="circle-x" [size]="16"></lucide-icon>
+                  <span>{{ 'ai_recipe_error' | translatePipe }}</span>
+                }
+              </div>
+            }
+
+            <div class="ai-usage-bar" [attr.data-status]="usageColor_()">
+              <span class="ai-usage-label">בקשות היום</span>
+              <span class="ai-usage-count">{{ geminiUsage_().count }} / 1,000</span>
+              <div class="ai-usage-track">
+                <div
+                  class="ai-usage-fill"
+                  [style.width.%]="(geminiUsage_().count / 1000) * 100">
+                </div>
+              </div>
+            </div>
+
+            <div class="ai-modal-footer">
+              <button
+                type="button"
+                class="c-btn-primary"
+                [disabled]="!prompt_() || loading_()"
+                (click)="onGenerate()"
+              >
+                @if (loading_()) {
+                  <app-loader size="small" [inline]="true" />
+                } @else {
+                  <lucide-icon name="sparkles" [size]="16"></lucide-icon>
+                }
+                {{ 'ai_recipe_generate' | translatePipe }}
+              </button>
+            </div>
           </div>
-          <div class="ai-draft-field">
-            <span class="ai-draft-label">{{ 'type' | translatePipe }}</span>
-            <span class="ai-draft-value">{{ (draft_()!.recipe_type === 'dish' ? 'dish' : 'preparation') | translatePipe }}</span>
+
+        } @else {
+          <!-- Create preview card -->
+          <div class="ai-draft-preview">
+            <div class="ai-draft-field">
+              <span class="ai-draft-label">{{ 'name' | translatePipe }}</span>
+              <span class="ai-draft-value">{{ draft_()!.name_hebrew }}</span>
+            </div>
+            <div class="ai-draft-field">
+              <span class="ai-draft-label">{{ 'type' | translatePipe }}</span>
+              <span class="ai-draft-value">{{ (draft_()!.recipe_type === 'dish' ? 'dish' : 'preparation') | translatePipe }}</span>
+            </div>
+            <div class="ai-draft-field">
+              <span class="ai-draft-label">{{ 'yield' | translatePipe }}</span>
+              <span class="ai-draft-value">{{ draft_()!.yield_amount }} {{ draft_()!.yield_unit }}</span>
+            </div>
+            <div class="ai-draft-field">
+              <span class="ai-draft-label">{{ 'ai_recipe_preview_ingredients' | translatePipe }}</span>
+              <ul class="ai-draft-ingredients">
+                @for (ing of draft_()!.ingredients; track ing.name) {
+                  <li>{{ ing.amount }} {{ ing.unit }} {{ ing.name }}</li>
+                }
+              </ul>
+            </div>
+            <div class="ai-draft-field">
+              <span class="ai-draft-label">{{ 'ai_recipe_preview_steps' | translatePipe }}</span>
+              <span class="ai-draft-value">{{ draft_()!.steps.length }}</span>
+            </div>
           </div>
-          <div class="ai-draft-field">
-            <span class="ai-draft-label">{{ 'yield' | translatePipe }}</span>
-            <span class="ai-draft-value">{{ draft_()!.yield_amount }} {{ draft_()!.yield_unit }}</span>
+          <div class="ai-modal-footer">
+            <button type="button" class="c-btn-ghost" (click)="onGenerateAgain()">
+              {{ 'ai_recipe_generate_again' | translatePipe }}
+            </button>
+            <button type="button" class="c-btn-primary" (click)="onOpenInBuilder()">
+              <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
+              {{ 'ai_recipe_open_builder' | translatePipe }}
+            </button>
           </div>
-          <div class="ai-draft-field">
-            <span class="ai-draft-label">{{ 'ai_recipe_preview_ingredients' | translatePipe }}</span>
-            <ul class="ai-draft-ingredients">
-              @for (ing of draft_()!.ingredients; track ing.name) {
-                <li>{{ ing.amount }} {{ ing.unit }} {{ ing.name }}</li>
-              }
-            </ul>
-          </div>
-          <div class="ai-draft-field">
-            <span class="ai-draft-label">{{ 'ai_recipe_preview_steps' | translatePipe }}</span>
-            <span class="ai-draft-value">{{ draft_()!.steps.length }}</span>
-          </div>
-        </div>
-        <div class="ai-modal-footer">
-          <button type="button" class="c-btn-ghost" (click)="onGenerateAgain()">
-            {{ 'ai_recipe_generate_again' | translatePipe }}
-          </button>
-          <button type="button" class="c-btn-primary" (click)="onOpenInBuilder()">
-            <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
-            {{ 'ai_recipe_open_builder' | translatePipe }}
-          </button>
-        </div>
+        }
       }
 
     </div>

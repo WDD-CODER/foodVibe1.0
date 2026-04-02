@@ -2,6 +2,24 @@
 
 ---
 
+### Plan 245 — Unified context-aware AI modal (`plans/245-unified-ai-modal.plan.md`)
+- [x] server/routes/ai.js — add POST /api/v1/ai/patch-recipe endpoint with smart partial-patch system prompt
+- [x] gemini.service.ts — add `patchRecipe(currentRecipe, instruction)` method calling new endpoint
+- [x] ai-recipe-modal.service.ts — extend to support `open('create')` and `open('edit', currentRecipe, onPatch)`
+- [x] ai-recipe-modal.component.ts + .html — add edit-mode UI (instruction textarea + patch preview card)
+- [x] recipe-builder.page.ts — replace `onImportTextClick` + `RecipeTextImportModalService` with `onAiEditClick` wired to AiRecipeModalService edit mode
+- [x] recipe-header.component.ts + .html — remove `importTextClick` output + `import-text-btn`
+- [x] app.component.ts + .html — remove RecipeTextImportModalComponent
+- [x] Delete recipe-text-import-modal component (3 files) + recipe-text-import-modal.service.ts
+- [x] ng build — verify zero errors
+
+---
+
+### Plan 246 — Create /evaluate-me command (`plans/246-evaluate-me-command.plan.md`)
+- [ ] Create `.claude/retrospectives/` directory with `.gitkeep`
+- [ ] Create `.claude/commands/evaluate-me.md` with full retrospective prompt
+- [ ] Update `agent.md` commands table to include evaluate-me
+
 ## 🔴 Quick Fixes
 
 ### Plan 244 — Auto-solve command (`plans/244-auto-solve-command.plan.md`)
