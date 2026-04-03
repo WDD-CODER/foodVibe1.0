@@ -58,6 +58,7 @@ export class AiRecipeModalComponent implements OnInit {
     if (p.yield_amount !== undefined || p.yield_unit !== undefined) {
       items.push(`תפוקה: ${p.yield_amount ?? ''} ${p.yield_unit ?? ''}`.trim())
     }
+    if (p.equipment !== undefined) items.push(`ציוד: ${p.equipment.length} פריטים`)
     return items
   })
 

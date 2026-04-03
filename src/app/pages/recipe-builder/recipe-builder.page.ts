@@ -480,6 +480,22 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         this.workflowArray.push(this.recipeFormService_.createStepGroup(1))
       }
     }
+
+    if (draft.equipment?.length) {
+      this.logisticsBaselineArray.clear()
+      for (const item of draft.equipment) {
+        const matched = this.findEquipmentMatch_(item.name)
+        this.logisticsBaselineArray.push(
+          this.recipeFormService_.createBaselineRow({
+            equipment_id_: matched?._id ?? '',
+            quantity_: item.quantity,
+            phase_: 'both',
+            is_critical_: true,
+            name_hebrew_: matched ? '' : item.name,
+          } as any)
+        )
+      }
+    }
   }
 
   // ─── AI Edit ─────────────────────────────────────────────────────
@@ -504,6 +520,14 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       .map(v => (v.instruction as string | undefined) ?? (v.preparation_name as string | undefined) ?? '')
       .filter(s => s.length > 0)
 
+    const equipment = (this.logisticsBaselineArray.controls as FormGroup[])
+      .map(g => g.getRawValue())
+      .filter(v => v.equipment_id_)
+      .map(v => {
+        const eq = this.equipmentData_.allEquipment_().find(e => e._id === v.equipment_id_)
+        return { name: eq?.name_hebrew ?? v.equipment_id_, quantity: v.quantity_ as number }
+      })
+
     return {
       name_hebrew: formVal.name_hebrew ?? '',
       recipe_type: isDish ? 'dish' : 'preparation',
@@ -511,6 +535,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       yield_unit: primaryYield.unit,
       ingredients,
       steps,
+      ...(equipment.length > 0 ? { equipment } : {}),
     }
   }
 
@@ -523,6 +548,13 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const recipe = this.state_.recipes_().find(r => norm(r.name_hebrew) === q)
     if (recipe) return { entity: recipe, type: 'recipe' }
     return null
+  }
+
+  /** Case-insensitive, trimmed lookup for equipment by Hebrew name. */
+  private findEquipmentMatch_(name: string): Equipment | null {
+    const norm = (s: string) => s.trim().toLowerCase()
+    const q = norm(name)
+    return this.equipmentData_.allEquipment_().find(e => norm(e.name_hebrew) === q) ?? null
   }
 
   private applyAiPatch(patch: AiRecipePatch): void {
@@ -580,6 +612,22 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         if (this.workflowArray.length === 0) {
           this.workflowArray.push(this.recipeFormService_.createStepGroup(1))
         }
+      }
+    }
+
+    if (patch.equipment !== undefined) {
+      this.logisticsBaselineArray.clear()
+      for (const item of patch.equipment) {
+        const matched = this.findEquipmentMatch_(item.name)
+        this.logisticsBaselineArray.push(
+          this.recipeFormService_.createBaselineRow({
+            equipment_id_: matched?._id ?? '',
+            quantity_: item.quantity,
+            phase_: 'both',
+            is_critical_: true,
+            name_hebrew_: matched ? '' : item.name,
+          } as any)
+        )
       }
     }
 

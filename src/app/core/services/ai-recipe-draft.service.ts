@@ -7,6 +7,7 @@ export interface AiRecipeDraft {
   yield_unit: string
   ingredients: { name: string; amount: number; unit: string }[]
   steps: string[]
+  equipment?: { name: string; quantity: number }[]
 }
 
 @Injectable({ providedIn: 'root' })

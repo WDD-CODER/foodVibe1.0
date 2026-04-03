@@ -223,12 +223,16 @@
             <div class="logistics-chips-wrap" formGroupName="logistics">
               <div class="logistics-chips" formArrayName="baseline_">
                 @for (ctrl of logisticsBaselineArray.controls; track $index; let i = $index) {
-                  @let eqId = ctrl.get('equipment_id_')?.value;
                   @let qty = ctrl.get('quantity_')?.value;
                   <div class="logistics-chip-wrap">
                     <button type="button" class="logistics-chip"
+                      [class.logistics-chip--unresolved]="!ctrl.get('equipment_id_')?.value"
                       (click)="removeBaselineRow(i)" [attr.aria-label]="'remove' | translatePipe">
-                      <span class="logistics-chip-label">{{ getEquipmentNameById(eqId) }}</span>
+                      <span class="logistics-chip-label">
+                        {{ ctrl.get('equipment_id_')?.value
+                            ? getEquipmentNameById(ctrl.get('equipment_id_')?.value)
+                            : ctrl.get('name_hebrew_')?.value }}
+                      </span>
                       <span class="logistics-chip-qty">×{{ qty }}</span>
                     </button>
                   </div>

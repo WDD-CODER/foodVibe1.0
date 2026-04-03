@@ -95,13 +95,14 @@ export class RecipeFormService {
     })
   }
 
-  createBaselineRow(entry?: BaselineEntry): FormGroup {
+  createBaselineRow(entry?: BaselineEntry & { name_hebrew_?: string }): FormGroup {
     return this.fb.group({
       equipment_id_: [entry?.equipment_id_ ?? '', Validators.required],
       quantity_: [entry?.quantity_ ?? 1, [Validators.required, Validators.min(0)]],
       phase_: [entry?.phase_ ?? 'both'],
       is_critical_: [entry?.is_critical_ ?? true],
-      notes_: [entry?.notes_ ?? '']
+      notes_: [entry?.notes_ ?? ''],
+      name_hebrew_: [entry?.name_hebrew_ ?? ''],
     })
   }
 

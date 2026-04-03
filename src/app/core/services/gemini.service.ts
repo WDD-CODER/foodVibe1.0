@@ -12,6 +12,7 @@ export interface AiRecipePatch {
   yield_unit?: string
   ingredients?: { name: string; amount: number; unit: string }[]
   steps?: string[]
+  equipment?: { name: string; quantity: number }[]
 }
 
 const MAX_RETRIES = 5

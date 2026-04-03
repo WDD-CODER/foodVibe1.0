@@ -33,7 +33,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authModal = inject(AuthModalService)
   const router = inject(Router)
 
-  return next(req).pipe(
+  const token = userService.getToken()
+  const outgoing = token
+    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+    : req
+
+  return next(outgoing).pipe(
     catchError((err: HttpErrorResponse) => {
       if (err.status === 401 && environment.useBackendAuth) {
         // Do not attempt refresh for auth endpoints themselves — avoids infinite loop.

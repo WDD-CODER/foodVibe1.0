@@ -63,6 +63,12 @@ gram | ml | kg | liter | unit | tablespoon | teaspoon | cup | pinch | portion
 ## כלל 4 — שלבים
 כל שלב — ניסוח פעיל קצר בעברית. לא לחזור על מרכיבים כרשימה — רק הוראות.
 
+## כלל 5 — ציוד מטבח (equipment) — אופציונלי
+כלול את השדה "equipment" רק אם הטקסט מזכיר כלי בישול ספציפיים (סיר, מחבת, תנור, בלנדר וכד׳).
+- כל פריט: { "name": "<שם עברי>", "quantity": <מספר> }
+- שמות ציוד תמיד בעברית.
+- אם הטקסט לא מזכיר ציוד ספציפי — אל תכלול את השדה כלל.
+
 החזר JSON בלבד, ללא markdown, ללא הסברים:
 {
   "name_hebrew": "...",
@@ -70,8 +76,10 @@ gram | ml | kg | liter | unit | tablespoon | teaspoon | cup | pinch | portion
   "yield_amount": number,
   "yield_unit": "...",
   "ingredients": [{ "name": "...", "amount": number, "unit": "..." }],
-  "steps": ["..."]
-}`;
+  "steps": ["..."],
+  "equipment": [{ "name": "...", "quantity": number }]
+}
+השדה "equipment" הוא אופציונלי — השמט אותו אם אין ציוד.`;
 
 // ---------------------------------------------------------------------------
 // POST /generate
@@ -248,7 +256,7 @@ router.post('/parse-text', verifyToken, async (req, res) => {
 // Accepts { currentRecipe: AiRecipeDraft, instruction: string }.
 // Gemini reads the current recipe + user instruction and returns ONLY the
 // fields that should change as a sparse patch object.
-// Response: { changes: { name_hebrew?, ingredients?, steps?, yield_amount?, yield_unit? } }
+// Response: { changes: { name_hebrew?, ingredients?, steps?, yield_amount?, yield_unit?, equipment? } }
 // Requires a valid JWT.
 // ---------------------------------------------------------------------------
 
@@ -267,12 +275,14 @@ Do NOT include fields that were not mentioned or implied by the instruction.
 - "yield_unit" — string: canonical unit key (gram | ml | kg | liter | unit | tablespoon | teaspoon | cup | pinch | portion)
 - "ingredients" — array: FULL replacement array [ { name, amount, unit } ] — only if user asked to change ingredients
 - "steps" — array: FULL replacement string array [ "step text", ... ] — only if user asked to change steps/instructions
+- "equipment" — array: FULL replacement array [ { "name": "<Hebrew name>", "quantity": <number> } ] — only if user explicitly mentions tools, equipment, or kitchen gear
 
 ### Decision rules:
 - If user says "only add steps" / "add preparation steps" / "create the instructions" → include ONLY "steps"
 - If user says "change the name to X" → include ONLY "name_hebrew"
 - If user pastes a full recipe text → extract all fields and include all of them
 - If ambiguous, prefer minimal changes — only include what is clearly requested
+- Include "equipment" ONLY when the user explicitly mentions tools, equipment, kitchen gear, or utensils — do not infer equipment from steps
 
 ### Ingredient rules (when included):
 - unit must be a canonical key: gram | ml | kg | liter | unit | tablespoon | teaspoon | cup | pinch | portion
@@ -282,6 +292,11 @@ Do NOT include fields that were not mentioned or implied by the instruction.
 ### Step rules (when included):
 - Each step is a short active Hebrew sentence
 - Do not repeat ingredients as a list — only instructions
+
+### Equipment rules (when included):
+- Each item: { "name": "<Hebrew name>", "quantity": <number> }
+- Equipment names must be in Hebrew
+- quantity is a whole number (how many of that item are needed)
 
 Return ONLY valid JSON. No markdown, no explanation, no code blocks. Raw JSON only.
 
