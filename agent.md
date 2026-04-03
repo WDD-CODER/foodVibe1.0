@@ -38,6 +38,7 @@ All skill triggers defined in `copilot-instructions.md §0`.
 | `validate-agent-refs.md` | Health check: verify all agent file cross-references are valid |
 | `auto-solve.md` | Autonomous plan executor — finds, validates, executes, surfaces for approval |
 | `evaluate-me.md` | Session retrospective — evaluates agent performance, saves actionable report with file change suggestions |
+| `reflect.md` | Two paths: `/reflect` (session retrospective) or `/reflect <skill> [budget]` (autonomous improvement loop with optional iteration budget) |
 
 ## Preflight Checklist
 1. Read this file + `copilot-instructions.md` (mandatory gate).
