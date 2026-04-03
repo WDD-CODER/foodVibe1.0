@@ -341,6 +341,7 @@ $cv-break-md: 56.25rem;
 }
 
 .cv-ing-pane {
+  order: 2;
   overflow-y: auto;
 }
 
@@ -506,6 +507,7 @@ $cv-break-md: 56.25rem;
 }
 
 .cv-step-pane {
+  order: 1;
   display: flex;
   flex-direction: column;
 

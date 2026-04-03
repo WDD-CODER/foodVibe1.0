@@ -658,6 +658,7 @@
         "cooking_complete": "הכנה הושלמה",
         "all_ingredients_ready": "הכל מוכן ✓",
         "mark_step_done": "סיימתי שלב זה",
+        "step": "שלב",
         "step_active": "פעיל",
         "step_pending": "ממתין",
         "step_done_label": "הושלם ✓",
