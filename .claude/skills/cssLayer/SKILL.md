@@ -36,7 +36,7 @@ Apply the **Five-Group Vertical Rhythm** in every selector — in this order, ea
 2. **Dimensions** — `width`, `height`, `aspect-ratio`
 3. **Content** — typography, colors, `content`
 4. **Structure** — `margin`, `padding`, `border`
-5. **Effects** — `transition`, `shadow`, `opacity`
+5. **Effects** — `transition`, `animation`, `shadow`, `opacity`
 
 Use logical properties throughout (`margin-inline`, `padding-block`). Use native CSS nesting syntax.
 
