@@ -323,6 +323,19 @@
     }
   }
 
+  .logistics-chip--unresolved {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+
+    .logistics-chip-label {
+      color: var(--color-danger);
+    }
+
+    .logistics-chip-qty {
+      color: var(--color-danger);
+    }
+  }
+
   .logistics-chip-label {
     width: fit-content;
     white-space: nowrap;
