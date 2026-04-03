@@ -810,7 +810,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       yield_conversions: yieldNorm,
       ingredients: ingNorm,
       workflow_items: workflowNorm,
-      logistics_baseline: baselineNorm
+      logistics_baseline: baselineNorm,
+      imageUrl_: this.recipeImageUrl_() ?? null
     };
     return JSON.stringify(normalized);
   }

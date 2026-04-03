@@ -27,9 +27,9 @@
 ---
 
 ### Plan 246 — Create /evaluate-me command (`plans/246-evaluate-me-command.plan.md`)
-- [ ] Create `.claude/retrospectives/` directory with `.gitkeep`
-- [ ] Create `.claude/commands/evaluate-me.md` with full retrospective prompt
-- [ ] Update `agent.md` commands table to include evaluate-me
+- [x] Create `.claude/retrospectives/` directory with `.gitkeep`
+- [x] Create `.claude/commands/evaluate-me.md` with full retrospective prompt
+- [x] Update `agent.md` commands table to include evaluate-me
 
 ## 🔴 Quick Fixes
 
@@ -56,7 +56,7 @@
 - [ ] Other entry points: align with resolve first → modal if needed → already in parameter (metadata-manager, preparation-*, menu-section-categories, add-equipment-modal, recipe-workflow, add-supplier-flow)
 
 ### Tech Debt — Audit 2026-03-26 (unplanned items)
-- [ ] Remove commented import `ProductDataService` at `product-form.component.ts:8` and commented statement at line 927
+- [x] Remove commented import `ProductDataService` at `product-form.component.ts:8` and commented statement at line 927
 
 ### Plan 074 â€” Tech debt remediation (`plans/074-tech-debt-remediation.plan.md`) [TRIAGED 2026-04-02]
 
@@ -70,25 +70,25 @@
 ## 🟡 Medium
 
 ### Plan 219 — Recipe header photo-picker (`plans/219-recipe-header-photo-picker.plan.md`)
-- [ ] recipe.model.ts — add `imageUrl_?: string` after `hiddenBy?`
-- [ ] recipe-builder.page.ts — add `recipeImageUrl_` signal after `isApproved_`
-- [ ] recipe-builder.page.ts — patch `patchFormFromRecipe` to set `recipeImageUrl_`
-- [ ] recipe-builder.page.ts — replace `buildRecipeFromForm` body to spread `imageUrl_`
-- [ ] recipe-builder.page.ts — add `recipeImageUrl_.set(null)` as first line of `resetToNewForm_`
-- [ ] recipe-builder.page.ts — add `onImageChange` method to `//UPDATE` group
-- [ ] recipe-builder.page.html — add `[imageUrl]`, `(imageChange)`, `[readonlyMode]` to `<app-recipe-header>`
-- [ ] recipe-header.component.ts — add `readonlyMode` input, `imageChange` output, `onImageSelected` method
-- [ ] recipe-header.component.html — replace `.image-square` div with label+input+overlay structure
-- [ ] app.config.ts — import `Camera` and add to `LucideAngularModule.pick`
-- [ ] recipe-header.component.scss — add cursor + `.img-upload-label` rules
+- [x] recipe.model.ts — add `imageUrl_?: string` after `hiddenBy?`
+- [x] recipe-builder.page.ts — add `recipeImageUrl_` signal after `isApproved_`
+- [x] recipe-builder.page.ts — patch `patchFormFromRecipe` to set `recipeImageUrl_`
+- [x] recipe-builder.page.ts — replace `buildRecipeFromForm` body to spread `imageUrl_`
+- [x] recipe-builder.page.ts — add `recipeImageUrl_.set(null)` as first line of `resetToNewForm_`
+- [x] recipe-builder.page.ts — add `onImageChange` method to `//UPDATE` group
+- [x] recipe-builder.page.html — add `[imageUrl]`, `(imageChange)`, `[readonlyMode]` to `<app-recipe-header>`
+- [x] recipe-header.component.ts — add `readonlyMode` input, `imageChange` output, `onImageSelected` method
+- [x] recipe-header.component.html — replace `.image-square` div with label+input+overlay structure
+- [x] app.config.ts — import `Camera` and add to `LucideAngularModule.pick`
+- [x] recipe-header.component.scss — add cursor + `.img-upload-label` rules (+ fix: display:block + object-position:center)
 
 ### Plan 204-R — Inventory product-price util extraction (`plans/204-R-inventory-product-price-util.plan.md`)
-- [ ] Create `src/app/core/utils/product-price.util.ts` — three pure exports: `getProductUnits`, `getPricePerUnit`, `calcBuyPriceGlobal`
-- [ ] Delete dead `getProductUnits` method from component (no call sites)
-- [ ] Replace `getPricePerUnit` body in component with 3-line wrapper (keeps 2-arg template signature)
-- [ ] Replace `onPriceChange` conversion block with `calcBuyPriceGlobal(...)` call; add util import
-- [ ] Leave `onUnitChange` conversion block unchanged (inverse math — cannot reuse)
-- [ ] Verify `ng build` passes
+- [x] Create `src/app/core/utils/product-price.util.ts` — three pure exports: `getProductUnits`, `getPricePerUnit`, `calcBuyPriceGlobal`
+- [x] Delete dead `getProductUnits` method from component (no call sites)
+- [x] Replace `getPricePerUnit` body in component with 3-line wrapper (keeps 2-arg template signature)
+- [x] Replace `onPriceChange` conversion block with `calcBuyPriceGlobal(...)` call; add util import
+- [x] Leave `onUnitChange` conversion block unchanged (inverse math — cannot reuse)
+- [x] Verify `ng build` passes
 
 
 ### Plan 182 + 163 — Visual & UX fix backlog (`plans/182-tofix-verification-undone.plan.md`, `plans/163-tofix-audit-prd.plan.md`)
@@ -149,13 +149,13 @@
 ## 🟠 Large Refactors
 
 ### Plan 203-R — Recipe-book allergen + cell-expand refactor (`plans/203-R-recipe-book-allergen-cell-expand-refactor.plan.md`)
-- [ ] Create `src/app/core/utils/recipe-allergens.util.ts` — export `MAX_ALLERGEN_RECURSION` + pure `resolveRecipeAllergens` fn
-- [ ] Create `src/app/core/utils/cell-expand-state.util.ts` — `CellExpandState` class with signals + helpers
-- [ ] Update `recipe-book-list.component.ts` — import constants/util, replace 4 signals with 2 `CellExpandState` instances
-- [ ] Update `recipe-book-list.component.ts` — replace `getRecipeAllergens` body with thin wrapper; update `getRecipeProductIds` to import `MAX_ALLERGEN_RECURSION`
-- [ ] Update `recipe-book-list.component.ts` — delete 6 expand methods + 2 expand helper methods; add close wrappers + update `resetExpandedCells`
-- [ ] Update `recipe-book-list.component.html` — replace 6 method calls in header/body with `allergenExpand.*` / `labelsExpand.*`
-- [ ] Verify: `ng build` passes; component under ~600 LOC
+- [x] Create `src/app/core/utils/recipe-allergens.util.ts` — export `MAX_ALLERGEN_RECURSION` + pure `resolveRecipeAllergens` fn
+- [x] Create `src/app/core/utils/cell-expand-state.util.ts` — `CellExpandState` class with signals + helpers
+- [x] Update `recipe-book-list.component.ts` — import constants/util, replace 4 signals with 2 `CellExpandState` instances
+- [x] Update `recipe-book-list.component.ts` — replace `getRecipeAllergens` body with thin wrapper; update `getRecipeProductIds` to import `MAX_ALLERGEN_RECURSION`
+- [x] Update `recipe-book-list.component.ts` — delete 6 expand methods + 2 expand helper methods; add close wrappers + update `resetExpandedCells`
+- [x] Update `recipe-book-list.component.html` — replace 6 method calls in header/body with `allergenExpand.*` / `labelsExpand.*`
+- [x] Verify: `ng build` passes; component under ~600 LOC
 
 ### Plan 089 — Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
 
