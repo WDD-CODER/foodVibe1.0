@@ -32,7 +32,7 @@ description: Enforces the project CSS architecture — engine placement, five-gr
 
 Apply the **Five-Group Vertical Rhythm** in every selector — in this order, each group separated by a blank line:
 
-1. **Layout** — `display`, `flex`, `grid`, `position`
+1. **Layout** — `display`, `flex`, `grid`, `position`, `gap`, `z-index`
 2. **Dimensions** — `width`, `height`, `aspect-ratio`
 3. **Content** — typography, colors, `content`
 4. **Structure** — `margin`, `padding`, `border`
