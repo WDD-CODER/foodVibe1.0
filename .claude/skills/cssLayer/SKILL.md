@@ -46,7 +46,7 @@ Use logical properties throughout (`margin-inline`, `padding-block`). Use native
 
 > **Only invoke if** the same styles are repeated across more than two components.
 
-**Abstraction:** Propose a new `.c-*` engine class for `src/styles.scss` — name it, define it, register it.
+**Abstraction:** Propose a new `.c-*` engine class for `src/styles.scss` — name it, define it, register it. Then replace the repeated styles in each affected component file with the new `.c-*` class.
 
 **Performance:** Optimize for layout stability (avoid CLS) and minimal selector depth.
 
