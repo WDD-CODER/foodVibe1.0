@@ -263,7 +263,7 @@
                 <lucide-icon name="timer" [size]="18"></lucide-icon>
                 {{ isDish_() ? ('prep_list_mise_en_place' | translatePipe) : ('prep_workflow' | translatePipe) }}
               </span>
-              <span class="cv-step-counter">{{ stepDoneSet_().size }}/{{ isDish_() ? scaledPrep_().length : (recipe.steps_ ?? []).length }}</span>
+              <span class="cv-step-counter">{{ stepDoneSet_().size }}/{{ isDish_() ? scaledPrep_().length : recipe.steps_.length }}</span>
             </div>
 
             @if (editMode_()) {
