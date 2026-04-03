@@ -38,7 +38,7 @@ Apply the **Five-Group Vertical Rhythm** in every selector — in this order, ea
 4. **Structure** — `margin`, `padding`, `border`, `border-radius`
 5. **Effects** — `transition`, `animation`, `shadow`, `opacity`
 
-Use logical properties throughout (`margin-inline`, `padding-block`). Use native CSS nesting syntax.
+Use logical properties throughout (`margin-inline`, `padding-block`). Use native CSS nesting syntax. Place responsive breakpoint blocks after the base selector — never before the base styles.
 
 ---
 
