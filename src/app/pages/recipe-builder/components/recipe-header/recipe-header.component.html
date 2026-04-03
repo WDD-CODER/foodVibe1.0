@@ -29,15 +29,20 @@
                 <input formControlName="name_hebrew"
                     [placeholder]="((yield.currentRecipeTypeDisplay_() === 'dish' ? 'dish_name_placeholder' : 'recipe_name_placeholder') | translatePipe) + '...'"
                     class="recipe-name-input"
-                    [class.has-error]="form().get('name_hebrew')?.invalid && form().get('name_hebrew')?.touched" />
+                    [class.has-error]="form().get('name_hebrew')?.invalid && form().get('name_hebrew')?.touched"
+                    [class.c-input--invalid]="validationErrors_()['name_hebrew']"
+                    [attr.aria-invalid]="validationErrors_()['name_hebrew'] ? true : null" />
                 @if (form().get('name_hebrew')?.errors?.['duplicateName'] && form().get('name_hebrew')?.touched) {
                     <span class="name-error-msg">{{ (yield.currentRecipeTypeDisplay_() === 'dish' ? 'duplicate_dish_name' : 'duplicate_recipe_name') | translatePipe }}</span>
+                }
+                @if (validationErrors_()['name_hebrew']) {
+                    <span class="c-field-error">{{ 'field_name_required' | translatePipe }}</span>
                 }
             </div>
         </div>
 
         <div class="scaling-dock-grid">
-            <div class="primary-chip-wrapper">
+            <div class="primary-chip-wrapper" [class.c-input--invalid]="validationErrors_()['yield_amount'] || validationErrors_()['yield_unit']">
                 <app-scaling-chip
                     variant="primary"
                     [value]="yield.primaryAmount_()"
@@ -48,6 +53,19 @@
                     (valueChange)="yield.onScalingChipAmountChange($event)"
                     (unitChange)="yield.setPrimaryUnit($event)"
                     (createUnit)="onCreateUnit()" />
+                @if (yield.yieldDiffersFromComputed_()) {
+                    <button type="button" class="yield-sync-badge"
+                        (click)="yield.resetManualOverride(); $event.stopPropagation()"
+                        [title]="'yield_sync_to_total' | translatePipe">
+                        <lucide-icon name="refresh-cw" [size]="12"></lucide-icon>
+                    </button>
+                }
+                @if (validationErrors_()['yield_amount']) {
+                    <span class="c-field-error">{{ 'field_amount_required' | translatePipe }}</span>
+                }
+                @if (validationErrors_()['yield_unit']) {
+                    <span class="c-field-error">{{ 'field_unit_required' | translatePipe }}</span>
+                }
             </div>
 
             <div class="secondary-units-container">

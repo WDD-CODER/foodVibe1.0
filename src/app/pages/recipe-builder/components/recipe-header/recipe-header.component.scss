@@ -162,9 +162,34 @@
 }
 
 .primary-chip-wrapper {
+  position: relative;
   display: flex;
   align-items: center;
   overflow: visible;
+}
+
+.yield-sync-badge {
+  position: absolute;
+  top: -0.375rem;
+  inset-inline-end: -0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  background: var(--bg-warning);
+  color: var(--text-warning);
+  border: 1.5px solid var(--border-warning);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  z-index: 1;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: var(--border-warning);
+    color: white;
+  }
 }
 
 .secondary-units-container {

@@ -17,6 +17,8 @@ import { LucideAngularModule } from 'lucide-angular';
 import { duplicateEntityNameValidator } from 'src/app/core/validators/item.validators';
 import { SupplierDataService } from '@services/supplier-data.service';
 import { LoggingService } from '@services/logging.service';
+import { UserMsgService } from '@services/user-msg.service';
+import { TranslationService } from '@services/translation.service';
 import { RequireAuthService } from 'src/app/core/utils/require-auth.util';
 import { Supplier } from '@models/supplier.model';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
@@ -46,6 +48,8 @@ export class SupplierFormComponent implements OnInit {
   private readonly supplierData = inject(SupplierDataService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly logging = inject(LoggingService);
+  private readonly userMsg = inject(UserMsgService);
+  private readonly translation = inject(TranslationService);
   private readonly requireAuth = inject(RequireAuthService);
 
   protected supplierForm_!: FormGroup;
@@ -53,6 +57,7 @@ export class SupplierFormComponent implements OnInit {
   private readonly saving = useSavingState();
   protected readonly isSaving_ = this.saving.isSaving_;
   protected dayKeys = DAY_KEYS;
+  protected validationErrors_ = signal<Record<string, string>>({});
 
   protected get deliveryDaysArray(): FormArray {
     return this.supplierForm_?.get('delivery_days_') as FormArray;
@@ -133,8 +138,21 @@ export class SupplierFormComponent implements OnInit {
     });
   }
 
+  private validateForm_(): boolean {
+    const errors: Record<string, string> = {};
+    const val = this.supplierForm_.getRawValue();
+    if (!val.name_hebrew?.trim()) errors['name_hebrew'] = 'field_name_required';
+    this.validationErrors_.set(errors);
+    return Object.keys(errors).length === 0;
+  }
+
   protected onSubmit(): void {
     if (!this.requireAuth.requireAuth()) return;
+    if (!this.validateForm_()) {
+      this.supplierForm_.markAllAsTouched();
+      this.userMsg.onSetErrorMsg(this.translation.translate('form_has_errors'));
+      return;
+    }
     if (this.supplierForm_.invalid || this.isSaving_()) return;
     const raw = this.supplierForm_.getRawValue();
     const delivery_days_: number[] = [];
