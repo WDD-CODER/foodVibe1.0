@@ -16,6 +16,7 @@ description: Defines the mandatory class structure, section ordering, and CRDUL 
 - No `.c-*` classes defined in component `.scss` — use `src/styles.scss` engines only
 - Lucide icons must be registered in `app.config.ts` before use in templates
 - `.spec.ts` only during `commit-to-github` Phase 0 or explicit user request — never during iterative work
+- No `any` types — use explicit TypeScript types for all method parameters and return values
 
 ---
 

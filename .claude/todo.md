@@ -2,6 +2,17 @@
 
 ---
 
+### Plan 247 — Reflect: self-improving skills system (`plans/247-reflect-skill-improvement-loop.plan.md`)
+- [ ] Create `.claude/reflect/test-suites/` directory
+- [ ] Create `.claude/reflect/test-suite-template.md`
+- [ ] Create `.claude/reflect/evaluator.md` (immutable scoring)
+- [ ] Create `.claude/reflect/reflection-log.tsv` (header only)
+- [ ] Create `.claude/reflect/test-suites/angularComponentStructure.tests.md`
+- [ ] Create `.claude/commands/reflect.md` (orchestrator)
+- [ ] Verify all files exist and paths are correct
+
+---
+
 ### Plan 245 — Unified context-aware AI modal (`plans/245-unified-ai-modal.plan.md`)
 - [x] server/routes/ai.js — add POST /api/v1/ai/patch-recipe endpoint with smart partial-patch system prompt
 - [x] gemini.service.ts — add `patchRecipe(currentRecipe, instruction)` method calling new endpoint
