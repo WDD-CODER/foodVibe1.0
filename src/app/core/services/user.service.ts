@@ -46,6 +46,10 @@ export class UserService {
     sessionStorage.setItem(TOKEN_KEY, token)
   }
 
+  getToken(): string | null {
+    return sessionStorage.getItem(TOKEN_KEY)
+  }
+
   private clearToken(): void {
     sessionStorage.removeItem(TOKEN_KEY)
   }
