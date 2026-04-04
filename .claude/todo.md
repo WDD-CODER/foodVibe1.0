@@ -31,6 +31,12 @@
 - [x] Create `.claude/commands/evaluate-me.md` with full retrospective prompt
 - [x] Update `agent.md` commands table to include evaluate-me
 
+### Plan 248 — Cook View Focus Mode Redesign (`plans/248-cook-view-focus-mode.plan.md`)
+- [x] A: Add new signals & methods to cook-view.page.ts (activeStepIndex_, stepDoneSet_, timer, cookingComplete_, markStepDone, etc.)
+- [x] B: Template rewrite — two-bar header, ingredient checklist pane, step card pane, completion screen
+- [x] C: SCSS rewrite + 9 new translation keys in dictionary.json
+- [x] D: Remove dead code (checkedSteps_, toggleStepCheck, onTimerHintTap)
+
 ## 🔴 Quick Fixes
 
 ### Plan 244 — Auto-solve command (`plans/244-auto-solve-command.plan.md`)

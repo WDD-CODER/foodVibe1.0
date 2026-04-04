@@ -1,6 +1,6 @@
 <div class="cook-view-container" dir="rtl">
   @if (recipe_(); as recipe) {
-    <div class="cook-view-shell" [class.edit-mode]="editMode_()" [class.scaled-view]="isScaledView_()">
+    <div class="cv-shell" [class.edit-mode]="editMode_()" [class.scaled-view]="isScaledView_()">
       @if (editMode_()) {
         <div class="edit-mode-banner">{{ 'edit_mode' | translatePipe }}</div>
       }
@@ -15,9 +15,11 @@
           </button>
         </div>
       }
-      <header class="cook-view-header">
-        <div class="header-top">
-          <h1 class="recipe-name">{{ recipe.name_hebrew }}</h1>
+
+      <!-- Header bar: recipe name + actions + cost -->
+      <div class="cv-header-bar">
+        <h1 class="cv-recipe-name">{{ recipe.name_hebrew }}</h1>
+        <div class="cv-header-actions">
           @if (editMode_()) {
             <div class="edit-actions">
               <button type="button" class="edit-btn save-btn" (click)="saveEdits()" [disabled]="isSaving_()" [attr.aria-label]="'save_changes' | translatePipe">
@@ -80,13 +82,18 @@
               </button>
             </div>
           }
+          @if (scaledCost_() > 0) {
+            <span class="cv-cost">{{ 'cost' | translatePipe }}: ₪{{ scaledCost_() | number:'1.2-2' }}</span>
+          }
         </div>
+      </div>
+
+      <!-- Scale bar: multiplier chips + quantity stepper -->
+      <div class="cv-scale-bar">
         @if (!isScaledView_()) {
           @if (!editMode_()) {
-            <!-- Multiplier chip row — hidden during edit and scale-by-ingredient mode -->
             <div class="cv-multiplier-chips">
               @for (chip of multiplierChips; track chip.factor) {
-                <!-- 0.5x chip on dish recipes: intentional — produces fractional yield (e.g. 1.5 dishes). Conscious design choice per QA review. -->
                 <button
                   type="button"
                   class="c-chip cv-chip-btn"
@@ -120,210 +127,246 @@
             }
           </div>
         }
-        @if (scaledCost_() > 0) {
-          <div class="scaled-cost-badge">
-            <lucide-icon name="scale" [size]="16"></lucide-icon>
-            <span>{{ 'cost' | translatePipe }}: ₪{{ scaledCost_() | number:'1.2-2' }}</span>
-          </div>
-        }
-      </header>
+      </div>
 
-      <div class="cook-view-main">
-      <section class="cook-view-section ingredients-section">
-        <h2 class="section-title">
-          <lucide-icon name="flask-conical" [size]="20"></lucide-icon>
-          {{ 'ingredients_index' | translatePipe }}
-        </h2>
-        <div class="ingredients-table">
-          <div class="ingredients-table-header" [class.has-scale-action]="!editMode_()">
-            <div class="col-name">{{ 'ingredient' | translatePipe }}</div>
-            <div class="col-amount">{{ 'quantity' | translatePipe }}</div>
-            <div class="col-unit">{{ 'unit' | translatePipe }}</div>
-            @if (!editMode_()) {
-              <div class="col-scale-action"></div>
-            }
+      <!-- Completion screen OR two-column body -->
+      @if (cookingComplete_() && !editMode_()) {
+        <div class="cv-completion-screen">
+          <lucide-icon name="circle-check" [size]="56"></lucide-icon>
+          <h2>{{ recipe.name_hebrew }}</h2>
+          <h3>{{ 'cooking_complete' | translatePipe }}</h3>
+          <div class="cv-completion-actions">
+            <button type="button" class="c-btn-primary" (click)="onApproveStamp()">{{ 'confirm_dish' | translatePipe }}</button>
+            <a routerLink="/recipe-book" class="c-btn-ghost">{{ 'back_to_list' | translatePipe }}</a>
           </div>
-          @for (row of scaledIngredients_(); track row.referenceId + row.unit + row.amount; let i = $index) {
-            <div
-              class="ingredients-table-row"
-              [class.field-changed]="editMode_() && ingredientChanged(i)"
-              [class.view-mode-row]="!editMode_()"
-              [class.row-highlight]="!editMode_() && (settingByIngredientIndex_() === i)"
-              [class.setting-by]="!editMode_() && settingByIngredientIndex_() === i"
-              [class.cv-ingredient-row--checked]="!editMode_() && checkedIngredients_().has(i)"
-              [attr.role]="!editMode_() ? 'checkbox' : null"
-              [attr.aria-checked]="!editMode_() ? checkedIngredients_().has(i) : null"
-              (click)="!editMode_() && settingByIngredientIndex_() !== i ? toggleIngredientCheck(i) : null">
-              @if (editMode_()) {
-                <div class="col-name">{{ row.name }}</div>
-                <div class="col-amount edit-amount">
-                  <button type="button" class="qty-btn minus small" (click)="setIngredientAmount(i, getEditAmountStep(row.amount, -1, row.unit))" [attr.aria-label]="'decrease' | translatePipe">
-                    <lucide-icon name="minus" [size]="14"></lucide-icon>
-                  </button>
-                  <input type="number" class="amount-input" [value]="row.amount"
-                    (input)="setIngredientAmount(i, $any($event.target).valueAsNumber ?? 0)"
-                    (keydown)="onEditAmountKeydown($event, i, row.amount, row.unit)"
-                    [min]="0" [step]="isDish_() ? 1 : 0.01" />
-                  <button type="button" class="qty-btn plus small" (click)="setIngredientAmount(i, getEditAmountStep(row.amount, 1, row.unit))" [attr.aria-label]="'increase' | translatePipe">
-                    <lucide-icon name="plus" [size]="14"></lucide-icon>
-                  </button>
-                </div>
-                <div class="col-unit">
-                  <app-custom-select
-                    class="unit-select"
-                    [ngModel]="row.unit"
-                    (ngModelChange)="setIngredientUnit(i, $event)"
-                    [options]="getUnitOptionsForRow(row)"
-                    placeholder="unit"
-                    variant="chip"
-                    [typeToFilter]="true" />
-                  <button type="button" class="remove-ingredient-btn" (click)="removeIngredient(i)" [attr.aria-label]="'remove' | translatePipe">
-                    <lucide-icon name="trash-2" [size]="16"></lucide-icon>
-                  </button>
-                </div>
+        </div>
+      } @else {
+        <div class="cv-body">
+          <!-- Ingredient pane -->
+          <div class="cv-ing-pane">
+            <div class="cv-ing-pane-header" [class.cv-ing-pane-header--complete]="allIngredientsChecked_()">
+              <span class="cv-ing-pane-title">
+                <lucide-icon name="flask-conical" [size]="18"></lucide-icon>
+                {{ 'ingredients_index' | translatePipe }}
+              </span>
+              @if (allIngredientsChecked_()) {
+                <span class="cv-ing-badge cv-ing-badge--complete">{{ 'all_ingredients_ready' | translatePipe }}</span>
               } @else {
-                @if (settingByIngredientIndex_() === i) {
-                  <div class="col-name">{{ row.name }}</div>
-                  <div class="col-amount set-by-amount">
-                    <input type="number" class="amount-input" [ngModel]="settingByIngredientAmount_()"
-                      (ngModelChange)="onSettingAmountChange($event)"
-                      (keydown)="onSettingAmountKeydown($event)"
-                      [min]="0.01" [step]="isDish_() ? 1 : 0.1" />
-                  </div>
-                  <div class="col-unit"><span>{{ row.unit | translatePipe }}</span></div>
-                  <div class="col-scale-action">
-                    <button type="button" class="convert-scale-btn" (click)="confirmScaleByIngredient(i, settingByIngredientAmount_())" [attr.aria-label]="'convert' | translatePipe">
-                      <lucide-icon name="scale" [size]="16"></lucide-icon>
-                      {{ 'convert' | translatePipe }}
-                    </button>
-                    <button type="button" class="cancel-set-by-btn" (click)="cancelSetByIngredient()" [attr.aria-label]="'cancel' | translatePipe">
-                      {{ 'cancel' | translatePipe }}
-                    </button>
-                  </div>
-                } @else {
-                  <div class="col-name col-name-with-set-by">
-                    <span class="col-name-text">{{ row.name }}</span>
-                    <button type="button" class="set-by-ingredient-btn" (click)="startSetByIngredient(i)" [attr.aria-label]="'set_recipe_by_this_item' | translatePipe">
-                      <lucide-icon name="scale" [size]="14"></lucide-icon>
-                      {{ 'set_recipe_by_this_item' | translatePipe }}
-                    </button>
-                  </div>
-                  <div class="col-amount">{{ getDisplayAmount(i, row) | formatQuantity }}</div>
-                  <div class="col-unit">
-                    @if (row.availableUnits.length > 1) {
+                <span class="cv-ing-badge">{{ ingredientCheckProgress_().done }}/{{ ingredientCheckProgress_().total }}</span>
+              }
+              <div class="cv-ing-progress-bar">
+                <div class="cv-ing-progress-fill" [style.width.%]="ingredientCheckProgress_().total > 0 ? (ingredientCheckProgress_().done / ingredientCheckProgress_().total) * 100 : 0"></div>
+              </div>
+            </div>
+
+            @if (editMode_()) {
+              <!-- Edit mode: original ingredient table -->
+              <div class="ingredients-table">
+                <div class="ingredients-table-header">
+                  <div class="col-name">{{ 'ingredient' | translatePipe }}</div>
+                  <div class="col-amount">{{ 'quantity' | translatePipe }}</div>
+                  <div class="col-unit">{{ 'unit' | translatePipe }}</div>
+                </div>
+                @for (row of scaledIngredients_(); track row.referenceId + row.unit + row.amount; let i = $index) {
+                  <div class="ingredients-table-row" [class.field-changed]="ingredientChanged(i)">
+                    <div class="col-name">{{ row.name }}</div>
+                    <div class="col-amount edit-amount">
+                      <button type="button" class="qty-btn minus small" (click)="setIngredientAmount(i, getEditAmountStep(row.amount, -1, row.unit))" [attr.aria-label]="'decrease' | translatePipe">
+                        <lucide-icon name="minus" [size]="14"></lucide-icon>
+                      </button>
+                      <input type="number" class="amount-input" [value]="row.amount"
+                        (input)="setIngredientAmount(i, $any($event.target).valueAsNumber ?? 0)"
+                        (keydown)="onEditAmountKeydown($event, i, row.amount, row.unit)"
+                        [min]="0" [step]="isDish_() ? 1 : 0.01" />
+                      <button type="button" class="qty-btn plus small" (click)="setIngredientAmount(i, getEditAmountStep(row.amount, 1, row.unit))" [attr.aria-label]="'increase' | translatePipe">
+                        <lucide-icon name="plus" [size]="14"></lucide-icon>
+                      </button>
+                    </div>
+                    <div class="col-unit">
                       <app-custom-select
                         class="unit-select"
-                        [ngModel]="getDisplayUnit(i, row)"
-                        (ngModelChange)="setUnitOverride(i, $event)"
+                        [ngModel]="row.unit"
+                        (ngModelChange)="setIngredientUnit(i, $event)"
                         [options]="getUnitOptionsForRow(row)"
                         placeholder="unit"
                         variant="chip"
-                        [typeToFilter]="true"
-                        (click)="$event.stopPropagation()" />
-                    } @else {
-                      <span>{{ getDisplayUnit(i, row) | translatePipe }}</span>
-                    }
-                  </div>
-                  <div class="col-scale-action"></div>
-                }
-              }
-            </div>
-          }
-        </div>
-      </section>
-
-      @if (isDish_()) {
-        <section class="cook-view-section prep-section">
-          <h2 class="section-title">
-            <lucide-icon name="utensils" [size]="20"></lucide-icon>
-            {{ 'prep_list_mise_en_place' | translatePipe }}
-          </h2>
-          @if (editMode_()) {
-            <app-recipe-workflow
-              [workflowFormArray]="workflowFormArray"
-              [type]="'dish'"
-              [resetTrigger]="workflowResetTrigger"
-              [focusRowAt]="focusWorkflowRowAt_()"
-              (addItem)="addWorkflowItem()"
-              (removeItem)="removeWorkflowItem($event)"
-              (sortByCategory)="sortPrepByCategory()"
-              (focusRowDone)="onWorkflowFocusRowDone()">
-            </app-recipe-workflow>
-          } @else {
-            @if (scaledPrep_().length > 0) {
-              <div class="prep-list">
-                @for (row of scaledPrep_(); track row.name + row.unit + row.amount) {
-                  <div class="prep-row">
-                    <span class="prep-name">{{ row.name }}</span>
-                    <span class="prep-amount">{{ row.amount | formatQuantity }} {{ row.unit | translatePipe }}</span>
+                        [typeToFilter]="true" />
+                      <button type="button" class="remove-ingredient-btn" (click)="removeIngredient(i)" [attr.aria-label]="'remove' | translatePipe">
+                        <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                      </button>
+                    </div>
                   </div>
                 }
               </div>
             } @else {
-              <p class="empty-state-text">{{ 'no_preparations_defined' | translatePipe }}</p>
-            }
-          }
-        </section>
-      }
-
-      @if (!isDish_()) {
-        <section class="cook-view-section steps-section">
-          <h2 class="section-title">
-            <lucide-icon name="timer" [size]="20"></lucide-icon>
-            {{ 'prep_workflow' | translatePipe }}
-            @if (totalStepCount_() > 0) {
-              <span class="cv-step-counter">{{ completedStepCount_() }}/{{ totalStepCount_() }}</span>
-            }
-          </h2>
-          @if (editMode_()) {
-            <app-recipe-workflow
-              [workflowFormArray]="workflowFormArray"
-              [type]="'preparation'"
-              [resetTrigger]="workflowResetTrigger"
-              [focusRowAt]="focusWorkflowRowAt_()"
-              (addItem)="addWorkflowItem()"
-              (removeItem)="removeWorkflowItem($event)"
-              (sortByCategory)="sortPrepByCategory()"
-              (focusRowDone)="onWorkflowFocusRowDone()">
-            </app-recipe-workflow>
-          } @else {
-            @if (recipe.steps_ && recipe.steps_.length) {
-              <ol class="steps-list">
-                @for (step of recipe.steps_; track step.order_; let si = $index) {
-                  <li class="step-item" [class.cv-step-item--checked]="checkedSteps_().has(si)">
-                    <button
-                      type="button"
-                      class="cv-step-check-btn"
-                      (click)="toggleStepCheck(si)"
-                      [attr.aria-label]="'ingredient_checked' | translatePipe">
-                      @if (checkedSteps_().has(si)) {
-                        <lucide-icon name="circle-check" [size]="20"></lucide-icon>
-                      } @else {
-                        <lucide-icon name="circle" [size]="20"></lucide-icon>
-                      }
-                    </button>
-                    <span class="step-order">{{ step.order_ }}</span>
-                    <span class="step-instruction">{{ step.instruction_ }}</span>
-                    @if (step.labor_time_minutes_ > 0) {
-                      <button
-                        type="button"
-                        class="step-time"
-                        (click)="onTimerHintTap(step.labor_time_minutes_)"
-                        [attr.aria-label]="'voice_timer_hint' | translatePipe">
-                        <lucide-icon name="timer" [size]="14"></lucide-icon>
-                        {{ step.labor_time_minutes_ }} {{ 'min' | translatePipe }}
+              <!-- View mode: Focus Mode ingredient checklist -->
+              @for (row of scaledIngredients_(); track row.referenceId + row.unit + row.amount; let i = $index) {
+                <div
+                  class="cv-ing-row"
+                  [class.cv-ing-row--done]="checkedIngredients_().has(i)"
+                  [class.row-highlight]="settingByIngredientIndex_() === i"
+                  [class.setting-by]="settingByIngredientIndex_() === i"
+                  [attr.role]="'checkbox'"
+                  [attr.aria-checked]="checkedIngredients_().has(i)"
+                  (click)="settingByIngredientIndex_() !== i ? toggleIngredientCheck(i) : null">
+                  @if (settingByIngredientIndex_() === i) {
+                    <div class="col-name">{{ row.name }}</div>
+                    <div class="col-amount set-by-amount">
+                      <input type="number" class="amount-input" [ngModel]="settingByIngredientAmount_()"
+                        (ngModelChange)="onSettingAmountChange($event)"
+                        (keydown)="onSettingAmountKeydown($event)"
+                        [min]="0.01" [step]="isDish_() ? 1 : 0.1"
+                        (click)="$event.stopPropagation()" />
+                    </div>
+                    <div class="col-unit"><span>{{ row.unit | translatePipe }}</span></div>
+                    <div class="col-scale-action">
+                      <button type="button" class="convert-scale-btn" (click)="$event.stopPropagation(); confirmScaleByIngredient(i, settingByIngredientAmount_())" [attr.aria-label]="'convert' | translatePipe">
+                        <lucide-icon name="scale" [size]="16"></lucide-icon>
+                        {{ 'convert' | translatePipe }}
                       </button>
-                    }
-                  </li>
-                }
-              </ol>
-            } @else {
-              <p class="empty-state-text">{{ 'no_steps_defined' | translatePipe }}</p>
+                      <button type="button" class="cancel-set-by-btn" (click)="$event.stopPropagation(); cancelSetByIngredient()" [attr.aria-label]="'cancel' | translatePipe">
+                        {{ 'cancel' | translatePipe }}
+                      </button>
+                    </div>
+                  } @else {
+                    <span class="cv-ing-check" [class.cv-ing-check--done]="checkedIngredients_().has(i)"></span>
+                    <span class="cv-ing-name">{{ row.name }}</span>
+                    <span class="cv-ing-amt">{{ getDisplayAmount(i, row) | formatQuantity }}</span>
+                    <span class="cv-ing-unit">
+                      @if (row.availableUnits.length > 1) {
+                        <app-custom-select
+                          class="unit-select"
+                          [ngModel]="getDisplayUnit(i, row)"
+                          (ngModelChange)="setUnitOverride(i, $event)"
+                          [options]="getUnitOptionsForRow(row)"
+                          placeholder="unit"
+                          variant="chip"
+                          [typeToFilter]="true"
+                          (click)="$event.stopPropagation()" />
+                      } @else {
+                        {{ getDisplayUnit(i, row) | translatePipe }}
+                      }
+                    </span>
+                    <button type="button" class="set-by-ingredient-btn" (click)="$event.stopPropagation(); startSetByIngredient(i)" [attr.aria-label]="'set_recipe_by_this_item' | translatePipe">
+                      <lucide-icon name="scale" [size]="14"></lucide-icon>
+                    </button>
+                  }
+                </div>
+              }
             }
-          }
-        </section>
+          </div>
+
+          <!-- Step pane -->
+          <div class="cv-step-pane">
+            <div class="cv-step-pane-header">
+              <span class="cv-step-pane-title">
+                <lucide-icon name="timer" [size]="18"></lucide-icon>
+                {{ isDish_() ? ('prep_list_mise_en_place' | translatePipe) : ('prep_workflow' | translatePipe) }}
+              </span>
+              <span class="cv-step-counter">{{ stepDoneSet_().size }}/{{ isDish_() ? scaledPrep_().length : recipe.steps_.length }}</span>
+            </div>
+
+            @if (editMode_()) {
+              <!-- Edit mode: original workflow editor -->
+              <app-recipe-workflow
+                [workflowFormArray]="workflowFormArray"
+                [type]="isDish_() ? 'dish' : 'preparation'"
+                [resetTrigger]="workflowResetTrigger"
+                [focusRowAt]="focusWorkflowRowAt_()"
+                (addItem)="addWorkflowItem()"
+                (removeItem)="removeWorkflowItem($event)"
+                (sortByCategory)="sortPrepByCategory()"
+                (focusRowDone)="onWorkflowFocusRowDone()">
+              </app-recipe-workflow>
+            } @else {
+              <!-- View mode: Focus Mode step cards -->
+              @if (isDish_()) {
+                <!-- Dish mode: prep items as cards -->
+                @if (scaledPrep_().length > 0) {
+                  @for (row of scaledPrep_(); track row.name + row.unit + row.amount; let si = $index) {
+                    <div class="cv-step-card"
+                      [class.cv-step-card--active]="activeStepIndex_() === si && !stepDoneSet_().has(si)"
+                      [class.cv-step-card--done]="stepDoneSet_().has(si)"
+                      [class.cv-step-card--peeked]="peekedStepIndex_() === si">
+                      <div class="cv-step-card-head"
+                        (click)="activeStepIndex_() !== si && !stepDoneSet_().has(si) ? toggleStepPeek(si) : null">
+                        <span class="cv-step-num"
+                          [class.cv-step-num--active]="activeStepIndex_() === si && !stepDoneSet_().has(si)"
+                          [class.cv-step-num--done]="stepDoneSet_().has(si)">{{ si + 1 }}</span>
+                        <span class="cv-step-label">{{ row.name }}</span>
+                        @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
+                          <span class="cv-step-status-chip cv-step-status-chip--active">{{ 'step_active' | translatePipe }}</span>
+                        } @else if (stepDoneSet_().has(si)) {
+                          <span class="cv-step-status-chip cv-step-status-chip--done">{{ 'step_done_label' | translatePipe }}</span>
+                        } @else {
+                          <span class="cv-step-status-chip cv-step-status-chip--pending">{{ 'step_pending' | translatePipe }}</span>
+                        }
+                      </div>
+                      @if (activeStepIndex_() === si || peekedStepIndex_() === si) {
+                        <div class="cv-step-card-body">
+                          <span>{{ row.amount | formatQuantity }} {{ row.unit | translatePipe }}</span>
+                        </div>
+                      }
+                      @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
+                        <button type="button" class="cv-step-done-btn" (click)="markStepDone(si)">✓ {{ 'mark_step_done' | translatePipe }}</button>
+                      }
+                    </div>
+                  }
+                } @else {
+                  <p class="empty-state-text">{{ 'no_preparations_defined' | translatePipe }}</p>
+                }
+              } @else {
+                <!-- Recipe mode: steps as cards -->
+                @if (recipe.steps_ && recipe.steps_.length) {
+                  @for (step of recipe.steps_; track step.order_; let si = $index) {
+                    <div class="cv-step-card"
+                      [class.cv-step-card--active]="activeStepIndex_() === si && !stepDoneSet_().has(si)"
+                      [class.cv-step-card--done]="stepDoneSet_().has(si)"
+                      [class.cv-step-card--peeked]="peekedStepIndex_() === si">
+                      <div class="cv-step-card-head"
+                        (click)="activeStepIndex_() !== si && !stepDoneSet_().has(si) ? toggleStepPeek(si) : null">
+                        <span class="cv-step-num"
+                          [class.cv-step-num--active]="activeStepIndex_() === si && !stepDoneSet_().has(si)"
+                          [class.cv-step-num--done]="stepDoneSet_().has(si)">{{ step.order_ }}</span>
+                        <span class="cv-step-label">{{ 'step' | translatePipe }} {{ step.order_ }}</span>
+                        @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
+                          <span class="cv-step-status-chip cv-step-status-chip--active">{{ 'step_active' | translatePipe }}</span>
+                        } @else if (stepDoneSet_().has(si)) {
+                          <span class="cv-step-status-chip cv-step-status-chip--done">{{ 'step_done_label' | translatePipe }}</span>
+                        } @else {
+                          <span class="cv-step-status-chip cv-step-status-chip--pending">{{ 'step_pending' | translatePipe }}</span>
+                        }
+                      </div>
+                      @if (activeStepIndex_() === si || peekedStepIndex_() === si) {
+                        <div class="cv-step-card-body">
+                          <p>{{ step.instruction_ }}</p>
+                          @if (step.labor_time_minutes_ > 0) {
+                            @if (activeTimerStepIndex_() === si) {
+                              <button type="button" class="cv-timer-pill cv-timer-pill--active" (click)="cancelTimer()">
+                                ⏱ {{ timerDisplay_() }}
+                                <span class="cv-timer-cancel">{{ 'timer_cancel' | translatePipe }}</span>
+                              </button>
+                            } @else {
+                              <button type="button" class="cv-timer-pill" (click)="startTimer(si, step.labor_time_minutes_)">
+                                ⏱ {{ step.labor_time_minutes_ }} {{ 'min' | translatePipe }}
+                              </button>
+                            }
+                          }
+                        </div>
+                      }
+                      @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
+                        <button type="button" class="cv-step-done-btn" (click)="markStepDone(si)">✓ {{ 'mark_step_done' | translatePipe }}</button>
+                      }
+                    </div>
+                  }
+                } @else {
+                  <p class="empty-state-text">{{ 'no_steps_defined' | translatePipe }}</p>
+                }
+              }
+            }
+          </div>
+        </div>
       }
-      </div>
     </div>
     <app-approve-stamp
       [approved]="recipe.is_approved_"
