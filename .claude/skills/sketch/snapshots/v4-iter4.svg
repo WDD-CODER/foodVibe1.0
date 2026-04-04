@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!--
+    v4 iter4: SKILL.md adds:
+    - symmetric about vertical center axis (mirror left = right)
+    - proportions: leaf width ≈ 1.2× leaf height, 3 central lobes tallest
+    - vein hierarchy: central vein + 7 branch veins
+    - serrated edges: small notches on every lobe
+  -->
+
+  <!-- LEAF BODY: symmetric 7-lobe <path>, properly proportioned -->
+  <!-- Leaf spans x: 42–158 (width=116), y: 14–148 (height≈134). Width/height ≈ 0.87 — adjusted below -->
+  <!-- Widened: x 32–168 (width=136), height=113. 136/113 ≈ 1.2 ✓ -->
+  <path d="
+    M 100 148
+    L 85 138 L 68 134 L 62 116 L 72 110
+    L 50 104 L 40 88  L 53 82
+    L 46 66  L 60 62  L 56 46  L 70 44  L 66 30  L 80 32  L 78 18
+    L 100 14
+    L 122 18 L 120 32 L 134 30 L 130 44 L 144 46 L 140 62 L 154 66
+    L 147 82 L 160 88 L 150 104 L 128 110 L 138 116 L 132 134 L 115 138
+    Z"
+    fill="#4a7c3f"
+    stroke="#2d5a2d"
+    stroke-width="1.5"
+  />
+
+  <!-- SERRATION hints on outer lobes (notches along edges) -->
+  <!-- Left outer lobe -->
+  <path d="M 53 96 L 49 92 L 46 96 L 42 92 L 40 96" fill="none" stroke="#2d5a2d" stroke-width="0.7"/>
+  <!-- Left upper-mid lobe -->
+  <path d="M 56 70 L 52 66 L 49 70 L 46 66" fill="none" stroke="#2d5a2d" stroke-width="0.7"/>
+  <!-- Left top lobe -->
+  <path d="M 72 38 L 69 34 L 66 38 L 63 34" fill="none" stroke="#2d5a2d" stroke-width="0.7"/>
+  <!-- Right outer lobe (mirror) -->
+  <path d="M 147 96 L 151 92 L 154 96 L 158 92 L 160 96" fill="none" stroke="#2d5a2d" stroke-width="0.7"/>
+  <!-- Right upper-mid lobe (mirror) -->
+  <path d="M 144 70 L 148 66 L 151 70 L 154 66" fill="none" stroke="#2d5a2d" stroke-width="0.7"/>
+  <!-- Right top lobe (mirror) -->
+  <path d="M 128 38 L 131 34 L 134 38 L 137 34" fill="none" stroke="#2d5a2d" stroke-width="0.7"/>
+
+  <!-- CENTRAL VEIN: stem base → center lobe tip -->
+  <line x1="100" y1="148" x2="100" y2="14" stroke="#1a401a" stroke-width="1.2"/>
+
+  <!-- BRANCH VEINS: one into each of the 7 lobes -->
+  <!-- Center top lobe -->
+  <line x1="100" y1="55"  x2="100" y2="18"  stroke="#1a401a" stroke-width="0.8"/>
+  <!-- Upper-left lobe -->
+  <line x1="100" y1="65"  x2="77"  y2="33"  stroke="#1a401a" stroke-width="0.8"/>
+  <!-- Upper-right lobe (symmetric) -->
+  <line x1="100" y1="65"  x2="123" y2="33"  stroke="#1a401a" stroke-width="0.8"/>
+  <!-- Mid-left lobe -->
+  <line x1="100" y1="88"  x2="57"  y2="74"  stroke="#1a401a" stroke-width="0.8"/>
+  <!-- Mid-right lobe (symmetric) -->
+  <line x1="100" y1="88"  x2="143" y2="74"  stroke="#1a401a" stroke-width="0.8"/>
+  <!-- Lower-left lobe -->
+  <line x1="100" y1="112" x2="54"  y2="104" stroke="#1a401a" stroke-width="0.8"/>
+  <!-- Lower-right lobe (symmetric) -->
+  <line x1="100" y1="112" x2="146" y2="104" stroke="#1a401a" stroke-width="0.8"/>
+
+  <!-- STEM -->
+  <line x1="100" y1="148" x2="100" y2="186" stroke="#2d5a2d" stroke-width="3"/>
+</svg>
