@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
+  localDev: false,
   apiUrl: '',
   authApiUrl: '',
   useBackendAuth: true,
