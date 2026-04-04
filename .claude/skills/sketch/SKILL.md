@@ -32,7 +32,16 @@ Draw the cannabis leaf outline using a `<path>` element:
 
 ---
 
-## Phase 3: Stem
+## Phase 3: Vein Pattern
+
+Add internal veins using thin `<line>` elements:
+- **Central vein**: a single line running from the stem base to the tip of the center lobe
+- **Branch veins**: one vein extending from the central vein into each of the 7 lobes
+- Stroke: slightly darker green, width 0.5–1px — veins should be subtle, not dominant
+
+---
+
+## Phase 4: Stem
 
 Add a stem below the leaf base:
 - Use a `<line>` or narrow `<rect>` element
