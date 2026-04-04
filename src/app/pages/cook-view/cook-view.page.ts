@@ -124,8 +124,19 @@ export class CookViewPage implements OnInit, OnDestroy {
   /** Ingredient check-off state (session-only, keyed by row index). */
   protected checkedIngredients_ = signal<Set<number>>(new Set())
 
-  /** Step check-off state (session-only, keyed by step index). */
-  protected checkedSteps_ = signal<Set<number>>(new Set())
+  // ---- FOCUS MODE SIGNALS ----
+  /** Index of the currently active (hero) step in the workflow. */
+  protected activeStepIndex_ = signal<number>(0)
+  /** Set of step indices that have been marked done. */
+  protected stepDoneSet_ = signal<Set<number>>(new Set())
+  /** Index of the step currently "peeked" (expanded preview without being active). */
+  protected peekedStepIndex_ = signal<number | null>(null)
+  /** Which step card has an active countdown timer (null = none). */
+  protected activeTimerStepIndex_ = signal<number | null>(null)
+  /** Current countdown value in seconds. */
+  protected timerSecondsLeft_ = signal<number>(0)
+  /** Interval handle for the countdown timer — not a signal, just for cleanup. */
+  private timerIntervalId_: ReturnType<typeof setInterval> | null = null
 
   /** Multiplier chip definitions exposed to template. */
   protected readonly multiplierChips = MULTIPLIER_CHIPS
@@ -219,11 +230,40 @@ export class CookViewPage implements OnInit, OnDestroy {
     return unit ? { unit } : undefined
   })
 
-  /** Number of steps marked as done. */
-  protected completedStepCount_ = computed(() => this.checkedSteps_().size)
+  /** Number of steps marked as done (uses stepDoneSet_ for Focus Mode). */
+  protected completedStepCount_ = computed(() => this.stepDoneSet_().size)
 
   /** Total step count for the current recipe. */
   protected totalStepCount_ = computed(() => this.recipe_()?.steps_?.length ?? 0)
+
+  // ---- FOCUS MODE COMPUTED SIGNALS ----
+  /** True when all ingredients have been checked off. */
+  protected allIngredientsChecked_ = computed(() =>
+    this.checkedIngredients_().size >= (this.recipe_()?.ingredients_?.length ?? 0)
+  )
+
+  /** Progress object for ingredient check-off (done/total). */
+  protected ingredientCheckProgress_ = computed(() => ({
+    done: this.checkedIngredients_().size,
+    total: this.recipe_()?.ingredients_?.length ?? 0
+  }))
+
+  /** True when all steps have been marked done. */
+  protected cookingComplete_ = computed(() => {
+    const recipe = this.recipe_()
+    if (!recipe) return false
+    const steps = recipe.steps_ ?? []
+    if (steps.length === 0) return false
+    return this.stepDoneSet_().size >= steps.length
+  })
+
+  /** Formatted timer display (m:ss). */
+  protected timerDisplay_ = computed(() => {
+    const s = this.timerSecondsLeft_()
+    const m = Math.floor(s / 60)
+    const sec = s % 60
+    return `${m}:${sec.toString().padStart(2, '0')}`
+  })
 
   protected get workflowFormArray(): FormArray {
     return this.workflowParentForm_.get('workflow_items') as FormArray
@@ -247,6 +287,11 @@ export class CookViewPage implements OnInit, OnDestroy {
     const recipe = this.route.snapshot.data['recipe'] as Recipe | null
     if (recipe) {
       this.recipe_.set(recipe)
+      this.activeStepIndex_.set(0)
+      this.stepDoneSet_.set(new Set())
+      this.checkedIngredients_.set(new Set())
+      this.peekedStepIndex_.set(null)
+      this.cancelTimer()
       this.selectedUnit_.set(recipe.yield_unit_ || 'unit')
       this.cookViewState.setLastViewedRecipeId(recipe._id)
       const base = recipe.yield_amount_ ?? 1
@@ -268,6 +313,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.cancelTimer()
     this.closeAllExportOverlays()
     this.heroFab.clearPageActions()
   }
@@ -691,23 +737,61 @@ export class CookViewPage implements OnInit, OnDestroy {
     })
   }
 
-  /** Toggle check-off state for cooking step at index (session-only). */
-  protected toggleStepCheck(index: number): void {
-    this.checkedSteps_.update(s => {
+  // ---- FOCUS MODE METHODS ----
+
+  /** Mark a step as done and advance activeStepIndex_ to the next undone step. */
+  protected markStepDone(index: number): void {
+    this.stepDoneSet_.update(s => {
       const next = new Set(s)
-      if (next.has(index)) {
-        next.delete(index)
-      } else {
-        next.add(index)
-      }
+      next.add(index)
       return next
     })
+    const recipe = this.recipe_()
+    const steps = recipe?.steps_ ?? []
+    const doneSet = this.stepDoneSet_()
+    for (let i = index + 1; i < steps.length; i++) {
+      if (!doneSet.has(i)) {
+        this.activeStepIndex_.set(i)
+        return
+      }
+    }
+    for (let i = 0; i < index; i++) {
+      if (!doneSet.has(i)) {
+        this.activeStepIndex_.set(i)
+        return
+      }
+    }
   }
 
-  /** Show voice timer hint snackbar for the given step duration. */
-  protected onTimerHintTap(minutes: number): void {
-    const hint = this.translation.translate('voice_timer_hint').replace('{0}', String(minutes))
-    this.userMsg.onSetSuccessMsg(hint)
+  /** Toggle peek (expanded preview) on a pending step. Cannot peek the active step. */
+  protected toggleStepPeek(index: number): void {
+    if (index === this.activeStepIndex_()) return
+    this.peekedStepIndex_.set(this.peekedStepIndex_() === index ? null : index)
+  }
+
+  /** Start a countdown timer on a step card. */
+  protected startTimer(stepIndex: number, minutes: number): void {
+    if (this.timerIntervalId_ !== null) {
+      clearInterval(this.timerIntervalId_)
+    }
+    this.activeTimerStepIndex_.set(stepIndex)
+    this.timerSecondsLeft_.set(minutes * 60)
+    this.timerIntervalId_ = setInterval(() => {
+      this.timerSecondsLeft_.update(s => s - 1)
+      if (this.timerSecondsLeft_() <= 0) {
+        this.cancelTimer()
+      }
+    }, 1000)
+  }
+
+  /** Cancel the active countdown timer. */
+  protected cancelTimer(): void {
+    if (this.timerIntervalId_ !== null) {
+      clearInterval(this.timerIntervalId_)
+      this.timerIntervalId_ = null
+    }
+    this.activeTimerStepIndex_.set(null)
+    this.timerSecondsLeft_.set(0)
   }
 
   protected onEdit(): void {

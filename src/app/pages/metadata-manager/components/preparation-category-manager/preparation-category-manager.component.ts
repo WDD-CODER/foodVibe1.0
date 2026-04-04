@@ -55,6 +55,17 @@ export class PreparationCategoryManagerComponent {
       return
     }
 
+    const existingKey = this.translation.resolvePreparationCategory(sanitized);
+    if (existingKey) {
+      if (this.categories_().includes(existingKey)) {
+        this.userMsg.onSetErrorMsg(this.translation.translate('metadata_category_exists'));
+        return;
+      }
+      await this.prepRegistry.registerCategory(existingKey, sanitized);
+      inputEl.value = '';
+      return;
+    }
+
     const result = await this.translationKeyModal.open(sanitized, 'category')
     if (!isTranslationKeyResult(result)) return
 

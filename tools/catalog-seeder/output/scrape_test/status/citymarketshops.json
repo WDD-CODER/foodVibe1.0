@@ -1,0 +1,60 @@
+{
+    "20260404142645": [
+        {
+            "status": "started",
+            "when": "2026-04-04 14:26:45.799054+03:00",
+            "limit": 1,
+            "files_requested": [
+                "PRICE_FULL_FILE"
+            ],
+            "store_id": null,
+            "files_names_to_scrape": null,
+            "when_date": null,
+            "filter_nul": false,
+            "filter_zero": false,
+            "suppress_exception": true
+        },
+        {
+            "status": "collected",
+            "when": "2026-04-04 14:26:51.522723+03:00",
+            "file_name_collected_from_site": [
+                "PriceFull7290000000003-066-202604041329.xml.gz"
+            ],
+            "links_collected_from_site": [
+                "http://www.citymarket-shops.co.il//downloadFile/d2eedae8-75b9-492d-bf0b-d8c0cb806194"
+            ]
+        },
+        {
+            "status": "downloaded",
+            "when": "2026-04-04 14:26:53.926878+03:00",
+            "results": [
+                {
+                    "file_name": "PriceFull7290000000003-066-202604041329.xml.gz",
+                    "downloaded": true,
+                    "extract_succefully": true,
+                    "error": null,
+                    "restart_and_retry": false
+                }
+            ]
+        },
+        {
+            "status": "estimated_size",
+            "when": "2026-04-04 14:26:53.937942+03:00",
+            "folder_size": {
+                "size": 801,
+                "unit": "MB",
+                "folder": "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\CityMarketShops",
+                "folder_content": [
+                    "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\CityMarketShops\\PriceFull7290000000003-066-202604041329.xml.xml"
+                ]
+            },
+            "completed_successfully": true
+        }
+    ],
+    "verified_downloads": [
+        {
+            "file_name": "PriceFull7290000000003-066-202604041329.xml.gz",
+            "when": "2026-04-04 14:26:53.933916+03:00"
+        }
+    ]
+}

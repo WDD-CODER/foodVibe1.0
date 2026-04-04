@@ -51,10 +51,54 @@ export class GeminiService {
   }
 
   parseText(rawText: string): Observable<ParsedResult> {
+    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
     return this.http_.post<{ result: ParsedResult }>(
       `${this.authBase_}/api/v1/ai/parse-text`,
       { rawText }
-    ).pipe(map(res => res.result))
+    ).pipe(
+      map(res => {
+        incrementGeminiUsage()
+        return res.result
+      })
+    )
+  }
+
+  async generateFromImage(file: File): Promise<AiRecipeDraft> {
+    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
+
+    const imageBase64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const result = reader.result as string
+        // Strip the data-url prefix (e.g. "data:image/jpeg;base64,")
+        resolve(result.split(',')[1])
+      }
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
+
+    const data = await withRetry(() =>
+      firstValueFrom(
+        this.http_.post<{ recipe: AiRecipeDraft }>(`${this.authBase_}/api/v1/ai/generate-from-image`, {
+          imageBase64,
+          mimeType: file.type,
+        })
+      )
+    )
+    incrementGeminiUsage()
+    return data.recipe
+  }
+
+  async generateFromUrl(url: string): Promise<AiRecipeDraft> {
+    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
+
+    const data = await withRetry(() =>
+      firstValueFrom(
+        this.http_.post<{ recipe: AiRecipeDraft }>(`${this.authBase_}/api/v1/ai/generate-from-url`, { url })
+      )
+    )
+    incrementGeminiUsage()
+    return data.recipe
   }
 
   async patchRecipe(currentRecipe: AiRecipeDraft, instruction: string): Promise<AiRecipePatch> {

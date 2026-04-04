@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit, OnDestroy, DestroyRef, afterNextRender, Injector, runInInjectionContext } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy, DestroyRef, afterNextRender, Injector, runInInjectionContext, viewChild } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { filter, startWith, map, timer, switchMap, of, type Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -86,6 +86,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private readonly heroFab_ = inject(HeroFabService);
   private readonly aiRecipeDraft_ = inject(AiRecipeDraftService);
   private readonly aiModal_ = inject(AiRecipeModalService);
+
+  // CHILD REFS
+  private readonly recipeHeaderRef_ = viewChild(RecipeHeaderComponent);
 
   //SIGNALS
   private readonly saving = useSavingState();
@@ -727,7 +730,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   /** For pendingChangesGuard: save the recipe and resolve once done. */
   saveAndWait(): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
-      if (this.recipeForm_.invalid) {
+      const headerValid = this.recipeHeaderRef_()?.validate() ?? true;
+      if (this.recipeForm_.invalid || !headerValid) {
         this.recipeForm_.markAllAsTouched()
         const msg = this.getRecipeValidationError_()
         this.userMsg_.onSetErrorMsg(msg)
@@ -810,7 +814,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       yield_conversions: yieldNorm,
       ingredients: ingNorm,
       workflow_items: workflowNorm,
-      logistics_baseline: baselineNorm
+      logistics_baseline: baselineNorm,
+      imageUrl_: this.recipeImageUrl_() ?? null
     };
     return JSON.stringify(normalized);
   }
@@ -1044,7 +1049,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   }
 
   saveRecipe(options?: { navigateOnSuccess?: boolean }): void {
-    if (this.recipeForm_.invalid) {
+    const headerValid = this.recipeHeaderRef_()?.validate() ?? true;
+    if (this.recipeForm_.invalid || !headerValid) {
       this.recipeForm_.markAllAsTouched();
       const msg = this.getRecipeValidationError_();
       this.userMsg_.onSetErrorMsg(msg);

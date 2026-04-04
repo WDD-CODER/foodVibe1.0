@@ -1,10 +1,74 @@
 const { Router } = require('express');
+const mongoose = require('mongoose');
 const { verifyToken } = require('../middleware/auth');
 
 const router = Router();
 
 const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+
+// ---------------------------------------------------------------------------
+// Shared daily call counter — stored in MongoDB so all users + the Python
+// seeder share a single 1,000 calls/day limit.
+//
+// Collection: GEMINI_USAGE
+// Document:   { _id: "YYYY-MM-DD", count: N }
+// ---------------------------------------------------------------------------
+
+const DAILY_LIMIT = 1000;
+const USAGE_COLLECTION = 'GEMINI_USAGE';
+
+function todayKey() {
+  return new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+}
+
+function usageCol() {
+  return mongoose.connection.db.collection(USAGE_COLLECTION);
+}
+
+/**
+ * Returns today's call count without modifying it.
+ */
+async function getUsageCount() {
+  try {
+    const doc = await usageCol().findOne({ _id: todayKey() });
+    return doc ? doc.count : 0;
+  } catch {
+    return 0; // treat DB errors as non-blocking
+  }
+}
+
+/**
+ * Atomically increments today's counter by 1.
+ * Returns the new count after increment.
+ */
+async function incrementUsage() {
+  try {
+    const result = await usageCol().findOneAndUpdate(
+      { _id: todayKey() },
+      { $inc: { count: 1 } },
+      { upsert: true, returnDocument: 'after' }
+    );
+    return result?.count ?? 1;
+  } catch {
+    return null; // non-blocking — don't crash the AI call
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/v1/ai/usage
+// Public endpoint — returns today's call count, limit, and remaining quota.
+// Used by the Angular frontend to show a live usage indicator.
+// ---------------------------------------------------------------------------
+router.get('/usage', async (_req, res) => {
+  const count = await getUsageCount();
+  res.json({
+    date:      todayKey(),
+    count,
+    limit:     DAILY_LIMIT,
+    remaining: Math.max(0, DAILY_LIMIT - count),
+  });
+});
 
 const CANONICAL_UNITS = new Set([
   'gram', 'ml', 'kg', 'liter', 'unit', 'tablespoon', 'teaspoon', 'cup', 'pinch', 'portion',
@@ -93,6 +157,11 @@ router.post('/generate', verifyToken, async (req, res) => {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
   }
 
+  const currentCount = await getUsageCount();
+  if (currentCount >= DAILY_LIMIT) {
+    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
+  }
+
   const { prompt } = req.body;
   if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
     return res.status(400).json({ error: 'prompt is required' });
@@ -138,6 +207,7 @@ router.post('/generate', verifyToken, async (req, res) => {
       return res.status(502).json({ error: 'Gemini returned a malformed recipe', details: validationErrors });
     }
 
+    await incrementUsage();
     return res.json({ recipe });
   } catch (err) {
     console.error('[ai/generate]', err);
@@ -206,6 +276,11 @@ router.post('/parse-text', verifyToken, async (req, res) => {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
   }
 
+  const currentCount = await getUsageCount();
+  if (currentCount >= DAILY_LIMIT) {
+    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
+  }
+
   const { rawText } = req.body;
   if (!rawText || typeof rawText !== 'string' || !rawText.trim()) {
     return res.status(400).json({ error: 'rawText is required' });
@@ -244,6 +319,7 @@ router.post('/parse-text', verifyToken, async (req, res) => {
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
     }
 
+    await incrementUsage();
     return res.json({ result });
   } catch (err) {
     console.error('[ai/parse-text]', err);
@@ -313,6 +389,11 @@ router.post('/patch-recipe', verifyToken, async (req, res) => {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
   }
 
+  const currentCount = await getUsageCount();
+  if (currentCount >= DAILY_LIMIT) {
+    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
+  }
+
   const { currentRecipe, instruction } = req.body;
   if (!instruction || typeof instruction !== 'string' || !instruction.trim()) {
     return res.status(400).json({ error: 'instruction is required' });
@@ -360,9 +441,205 @@ router.post('/patch-recipe', verifyToken, async (req, res) => {
       return res.status(502).json({ error: 'Gemini response missing "changes" key' });
     }
 
+    await incrementUsage();
     return res.json({ changes: parsed.changes });
   } catch (err) {
     console.error('[ai/patch-recipe]', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /generate-from-image
+// Accepts { imageBase64: string, mimeType: string }.
+// Sends the image to Gemini via inline_data alongside the SYSTEM_PROMPT and
+// returns { recipe: AiRecipeDraft }.
+// Requires a valid JWT.
+// ---------------------------------------------------------------------------
+
+router.post('/generate-from-image', verifyToken, async (req, res) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ error: 'AI generation is not configured on this server' });
+  }
+
+  const { imageBase64, mimeType } = req.body;
+  if (!imageBase64 || typeof imageBase64 !== 'string' || !imageBase64.trim()) {
+    return res.status(400).json({ error: 'imageBase64 is required' });
+  }
+  if (!mimeType || typeof mimeType !== 'string' || !mimeType.startsWith('image/')) {
+    return res.status(400).json({ error: 'mimeType must be a valid image MIME type' });
+  }
+
+  try {
+    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { text: SYSTEM_PROMPT },
+            { inlineData: { mimeType, data: imageBase64 } },
+          ],
+        }],
+      }),
+    });
+
+    if (!geminiRes.ok) {
+      console.error('[ai/generate-from-image] Gemini API error:', geminiRes.status);
+      return res.status(502).json({ error: `Gemini API error: ${geminiRes.status}` });
+    }
+
+    const data = await geminiRes.json();
+    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+
+    const fencePattern = /```(?:json)?\s*([\s\S]*?)```/i;
+    const fenceMatch = fencePattern.exec(raw);
+    const cleaned = (fenceMatch ? fenceMatch[1] : raw).trim();
+
+    if (!cleaned) {
+      return res.status(502).json({ error: 'Gemini returned an empty response' });
+    }
+
+    let recipe;
+    try {
+      recipe = JSON.parse(cleaned);
+    } catch {
+      console.error('[ai/generate-from-image] JSON parse failed, raw:', raw);
+      return res.status(502).json({ error: 'Gemini returned invalid JSON' });
+    }
+
+    const validationErrors = validateRecipeDraft(recipe);
+    if (validationErrors.length > 0) {
+      console.error('[ai/generate-from-image] validation failed:', validationErrors, 'raw:', raw);
+      return res.status(502).json({ error: 'Gemini returned a malformed recipe', details: validationErrors });
+    }
+
+    return res.json({ recipe });
+  } catch (err) {
+    console.error('[ai/generate-from-image]', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /generate-from-url
+// Accepts { url: string }.
+// Fetches the URL server-side, extracts recipe text (ld+json first, then
+// stripped HTML fallback), sends to Gemini, returns { recipe: AiRecipeDraft }.
+// Requires a valid JWT.
+// ---------------------------------------------------------------------------
+
+function extractTextFromHtml(html) {
+  // 1. Try ld+json Recipe schema first
+  const ldJsonPattern = /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  let match;
+  while ((match = ldJsonPattern.exec(html)) !== null) {
+    try {
+      const parsed = JSON.parse(match[1]);
+      const entries = Array.isArray(parsed) ? parsed : [parsed];
+      for (const entry of entries) {
+        if (entry['@type'] === 'Recipe') {
+          return JSON.stringify(entry);
+        }
+      }
+    } catch {
+      // malformed ld+json — continue
+    }
+  }
+
+  // 2. Fallback: strip tags, collapse whitespace, truncate
+  const stripped = html
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&#?\w+;/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+
+  return stripped.slice(0, 8000);
+}
+
+router.post('/generate-from-url', verifyToken, async (req, res) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ error: 'AI generation is not configured on this server' });
+  }
+
+  const { url } = req.body;
+  if (!url || typeof url !== 'string' || !url.trim()) {
+    return res.status(400).json({ error: 'url is required' });
+  }
+  if (!/^https?:\/\//i.test(url.trim())) {
+    return res.status(400).json({ error: 'url must start with http:// or https://' });
+  }
+
+  let pageText;
+  try {
+    const pageRes = await fetch(url.trim(), {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; FoodVibeBot/1.0)' },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!pageRes.ok) {
+      return res.status(502).json({ error: `Failed to fetch URL: ${pageRes.status}` });
+    }
+    const html = await pageRes.text();
+    pageText = extractTextFromHtml(html);
+  } catch (err) {
+    console.error('[ai/generate-from-url] fetch error:', err);
+    return res.status(502).json({ error: 'Could not fetch the provided URL' });
+  }
+
+  if (!pageText.trim()) {
+    return res.status(422).json({ error: 'No usable text found at the provided URL' });
+  }
+
+  try {
+    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: SYSTEM_PROMPT + '\n\nטקסט לניתוח:\n' + pageText }] }],
+      }),
+    });
+
+    if (!geminiRes.ok) {
+      console.error('[ai/generate-from-url] Gemini API error:', geminiRes.status);
+      return res.status(502).json({ error: `Gemini API error: ${geminiRes.status}` });
+    }
+
+    const data = await geminiRes.json();
+    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+
+    const fencePattern = /```(?:json)?\s*([\s\S]*?)```/i;
+    const fenceMatch = fencePattern.exec(raw);
+    const cleaned = (fenceMatch ? fenceMatch[1] : raw).trim();
+
+    if (!cleaned) {
+      return res.status(502).json({ error: 'Gemini returned an empty response' });
+    }
+
+    let recipe;
+    try {
+      recipe = JSON.parse(cleaned);
+    } catch {
+      console.error('[ai/generate-from-url] JSON parse failed, raw:', raw);
+      return res.status(502).json({ error: 'Gemini returned invalid JSON' });
+    }
+
+    const validationErrors = validateRecipeDraft(recipe);
+    if (validationErrors.length > 0) {
+      console.error('[ai/generate-from-url] validation failed:', validationErrors, 'raw:', raw);
+      return res.status(502).json({ error: 'Gemini returned a malformed recipe', details: validationErrors });
+    }
+
+    return res.json({ recipe });
+  } catch (err) {
+    console.error('[ai/generate-from-url]', err);
     return res.status(500).json({ error: 'Server error' });
   }
 });

@@ -1,0 +1,60 @@
+{
+    "20260404142630": [
+        {
+            "status": "started",
+            "when": "2026-04-04 14:26:30.371000+03:00",
+            "limit": 1,
+            "files_requested": [
+                "PRICE_FULL_FILE"
+            ],
+            "store_id": null,
+            "files_names_to_scrape": null,
+            "when_date": null,
+            "filter_nul": false,
+            "filter_zero": false,
+            "suppress_exception": true
+        },
+        {
+            "status": "collected",
+            "when": "2026-04-04 14:26:32.971455+03:00",
+            "file_name_collected_from_site": [
+                "PriceFull7290055700007-0002-202604040510.gz"
+            ],
+            "links_collected_from_site": [
+                "https://prices.carrefour.co.il/20260404/PriceFull7290055700007-0002-202604040510.gz"
+            ]
+        },
+        {
+            "status": "downloaded",
+            "when": "2026-04-04 14:26:34.971294+03:00",
+            "results": [
+                {
+                    "file_name": "PriceFull7290055700007-0002-202604040510.gz",
+                    "downloaded": true,
+                    "extract_succefully": true,
+                    "error": null,
+                    "restart_and_retry": false
+                }
+            ]
+        },
+        {
+            "status": "estimated_size",
+            "when": "2026-04-04 14:26:34.978330+03:00",
+            "folder_size": {
+                "size": 1702612,
+                "unit": "MB",
+                "folder": "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\YaynotBitanAndCarrefour",
+                "folder_content": [
+                    "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\YaynotBitanAndCarrefour\\PriceFull7290055700007-0002-202604040510.xml"
+                ]
+            },
+            "completed_successfully": true
+        }
+    ],
+    "verified_downloads": [
+        {
+            "file_name": "PriceFull7290055700007-0002-202604040510.gz",
+            "when": "2026-04-04 14:26:34.973802+03:00"
+        }
+    ]
+}

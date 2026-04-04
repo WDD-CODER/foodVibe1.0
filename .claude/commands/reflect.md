@@ -47,9 +47,13 @@ Inspired by Karpathy's autoresearch pattern.
 ```
 THESE FILES ARE READ-ONLY — never edit them during /reflect:
 ├── .claude/reflect/evaluator.md                    # Scoring rules — READ FIRST
+├── .claude/reflect/evaluator-agent-prompt.md       # Blind evaluator agent system prompt — READ-ONLY
+├── .claude/reflect/behavior-runner-prompt.md       # Behavior executor agent system prompt — READ-ONLY
+├── .claude/reflect/reflect-runner-prompt.md        # Background loop agent system prompt — READ-ONLY
+├── .claude/reflect/test-runner.sh                  # Executable machine scorer — IMMUTABLE
 ├── .claude/reflect/test-suites/<skill>.tests.md    # Test cases — the "dataset"
 
-THIS IS THE ONLY FILE YOU MAY EDIT:
+THIS IS THE ONLY FILE YOU MAY EDIT — like train.py in Karpathy's system:
 ├── .claude/skills/<skill>/SKILL.md                 # The skill being improved
 
 THIS FILE IS APPEND-ONLY — add one row per evaluation, never edit old rows:
@@ -175,6 +179,27 @@ Output this report — the ONLY output the user sees:
 
 ---
 
+## PHASE 0: Background Dispatch (runs before everything else in Path 2)
+
+When the user types `/reflect <skill-name> [budget]` in the main session:
+
+1. Read `.claude/reflect/reflect-runner-prompt.md`
+2. Spawn a background agent via the Agent tool:
+   - prompt: "Read .claude/reflect/reflect-runner-prompt.md for your instructions. Then run /reflect for skill=<skill_name>, budget=<budget>, repo_root=<current working directory>"
+   - run_in_background: true
+   - subagent_type: general-purpose
+3. Tell the user: "Reflect loop running in background for <skill_name>. You'll be notified when it completes."
+4. STOP — do not execute Phases 1-5 inline. The background agent handles everything.
+
+**Exception -- baseline mode only:**
+If `--mode baseline` was passed, run Phase 2 inline (score + report only, no loop, minimal context impact). Do not spawn a background agent for baseline mode.
+
+**Why background dispatch?** The /reflect loop runs multiple iterations, each consuming significant context (read skill, run test-runner, spawn evaluator agent, hypothesize, edit, re-evaluate). After 5 iterations the session context is polluted. A background agent runs its full conversation in its own context — the main session receives ONE summary message.
+
+**Why no worktree?** /reflect only writes to one file (SKILL.md). The background agent commits to the current `reflect/<skill>` branch. No isolated copy of the full repo is needed.
+
+---
+
 ## PHASE 1: Setup (always runs first, once)
 
 ### Step 1.1: Parse inputs
@@ -247,52 +272,17 @@ This is your revert point. Save it.
 This is the core scoring logic. Run it fully every time — do not skip or carry
 over results from a previous iteration. The skill may have changed.
 
-### Step 2.1: For each test case — evaluate with evidence
+**Two-agent architecture (GAP 1 fix):** The machine score (70%) comes from
+running `test-runner.sh`. The agent score (30%) comes from a SEPARATE evaluator
+agent spawned via the Agent tool — it has no knowledge of what changed or why.
+You (the researcher) only see the final numbers, not the evaluator's reasoning.
 
-Work through the test suite one TC at a time.
+### Step 2.1: Run test-runner.sh → exec_score
 
-**For each TC:**
-
-**A. Read the prompt.** This is what a hypothetical user typed.
-
-**B. Trigger accuracy check.**
-Find the skill's "Trigger" line (usually near the top of SKILL.md).
-- Does the trigger condition match this prompt? → would the skill activate?
-- Compare what the TC *expects* against what would actually happen.
-- Record: correct or incorrect trigger.
-
-**C. For each Expected Behavior checkbox — apply the Evidence Rule.**
-
-The Evidence Rule (from evaluator.md) is MANDATORY:
-- Find the specific line in SKILL.md that would produce this behavior
-- Write evidence in this exact format:
-  ```
-  - [x] <behavior>
-    EVIDENCE: SKILL.md line NN: "<exact quoted text>"
-    REASONING: <why this line causes the behavior>
-  ```
-- If you cannot find a specific line → the behavior is NOT passed:
-  ```
-  - [ ] <behavior>
-    EVIDENCE: No rule in SKILL.md addresses this behavior.
-  ```
-
-No vague evidence ("the skill generally promotes X") is acceptable. Line number
-and quote are required. No citation = no checkmark. This is the anti-gaming rule.
-
-**D. For each Anti-Pattern — check if the skill prevents it.**
-
-- Does SKILL.md have a rule that explicitly prevents this anti-pattern?
-- If yes → not triggered [ ]
-- If no rule exists → triggered [x] (this becomes a score penalty)
-
-**E. Record results for this TC:**
-```
-TC-XXX: <name>
-  Behaviors passed: N/M
-  Anti-patterns triggered: N/M
-  Trigger: correct / incorrect
-  Fully passed: YES/NO
+```bash
+bash .claude/reflect/test-runner.sh \
+  .claude/skills/<skill_name>/SKILL.md \
+  .claude/reflect/test-suites/<skill_name>.tests.md
 ```
 
 **F. Accumulate evidence in memory (written to file in Step 2.4b):**
@@ -310,33 +300,74 @@ For each anti-pattern, record:
 
 ### Step 2.2: Calculate score
 
+**Three-tier weight adjustment:**
+- If the test suite has `**Behavior Checks**` sections: `exec_score = (raw_score / 70) * 40`
+- If the test suite has NO Behavior Checks: `exec_score = raw_score` (stays 0–70)
+
+### Step 2.1B: Run behavior checks → behavior_score (if Behavior Checks exist)
+
+Check if the test suite contains any `**Behavior Checks**` sections. If yes:
+
+1. Read `.claude/reflect/behavior-runner-prompt.md`
+2. For each `RUN_AGENT:` line in the test suite:
+   a. Spawn a behavior runner agent via the Agent tool:
+      - System prompt: behavior-runner-prompt.md contents
+      - Input: SKILL.md as instructions + the test prompt from the RUN_AGENT line
+   b. Capture the agent's output
+   c. Run the OUTPUT-GREP / OUTPUT-GREP-NOT / OUTPUT-GREP-BEFORE checks against the output
+3. Calculate: `behavior_score = (behavior_checks_passed / total_behavior_checks) * 30`
+
+If no Behavior Checks exist → `behavior_score = 0` (weight rolled into exec_score).
+
+### Step 2.2: Spawn evaluator agent → agent_score
+
+Spawn a fresh agent using the Agent tool with these inputs:
+
+**Prompt to the evaluator agent:**
 ```
-behaviors_passed     = sum of all [x] Expected Behaviors across all TCs
-antipatterns_hit     = sum of all [x] Anti-Patterns across all TCs
-total_behaviors      = total Expected Behavior checkboxes across all TCs
+Read this file for your system prompt and follow it exactly:
+.claude/reflect/evaluator-agent-prompt.md
 
-skill_score = ((behaviors_passed - antipatterns_hit) / total_behaviors) * 100
+You receive:
+- Skill file: .claude/skills/<skill_name>/SKILL.md
+- Test suite: .claude/reflect/test-suites/<skill_name>.tests.md
+- Evaluator rules: .claude/reflect/evaluator.md
+- exec_score: <exec_score from Step 2.1>
+- behavior_score: <behavior_score from Step 2.1B> (0.0 if no Behavior Checks)
+
+Output ONLY the EVALUATION RESULTS block.
 ```
 
-Round to one decimal place.
+The evaluator agent has access to: Read, Grep.
+The evaluator agent does NOT have access to: Bash (no git commands), Write, Edit.
 
-### Step 2.3: Collect secondary metrics
+Wait for the agent to return. Parse the `agent_score:` and `final_score:` lines
+from its EVALUATION RESULTS block.
+
+### Step 2.3: Combine → final_score
+
+```
+final_score = exec_score + behavior_score + agent_score
+```
+
+Round to one decimal place. Record all three components — you need them for the log.
+
+### Step 2.4: Collect secondary metrics
 
 ```bash
 wc -c .claude/skills/<skill_name>/SKILL.md    # file size in bytes
 git rev-parse --short HEAD                     # current commit hash
 ```
 
-```
-test_cases_passed = count of TCs where ALL behaviors passed AND 0 anti-patterns
-trigger_accuracy  = (correct_triggers / total_TCs) * 100
-```
+### Step 2.5: Log this evaluation to reflection-log.tsv
 
-### Step 2.4: Log this evaluation to reflection-log.tsv
+> **Schema note:** Rows written before 2026-04-04 use the old 8-column schema
+> (date, skill, commit, skill_score, size_bytes, status, hypothesis, notes).
+> New rows use the 9-column schema below. Do not modify old rows.
 
 Append one tab-separated row:
 ```
-<YYYY-MM-DD>\t<skill_name>\t<commit>\t<score>\t<size_bytes>\t<status>\t<hypothesis>\t<notes>
+<YYYY-MM-DD>\t<skill_name>\t<commit>\t<final_score>\t<exec_score>\t<behavior_score>\t<agent_score>\t<size_bytes>\t<status>\t<hypothesis>
 ```
 
 For the first evaluation of a session: `status = baseline`, `hypothesis = initial`
@@ -376,23 +407,41 @@ If the file already exists for today → overwrite it (this run is the latest).
 
 ### Step 2.5: Check the stop condition
 
-**If score = 100.0** → ALL test cases fully pass, no anti-patterns anywhere.
-The skill is perfect against this test suite. Jump to PHASE 5: Final Report.
-Do NOT continue the loop.
+Write the evaluator agent's raw output to:
+`.claude/reflect/evidence/<skill_name>-<YYYY-MM-DD>.evidence.md`
 
-**If score < 100.0 AND mode = baseline** → skip PHASE 3 and 4. Jump to PHASE 5.
+```markdown
+# Evidence Log: <skill_name> — <YYYY-MM-DD>
+Skill commit: <hash> | exec_score: <X> | agent_score: <X> | final_score: <X>
 
-**If score < 100.0 AND mode = auto** → show the estimate (first iteration only),
+## Evaluator Agent Output
+<paste the full EVALUATION RESULTS block returned by the evaluator agent>
+
+## test-runner.sh Output
+<paste the full output from Step 2.1>
+```
+
+If the file already exists for today → overwrite it (this run is the latest).
+
+### Step 2.7: Check the stop condition
+
+**If final_score = 100.0** → skill passes all machine checks and all agent behaviors.
+Jump to PHASE 5: Final Report. Do NOT continue the loop.
+
+**If final_score < 100.0 AND mode = baseline** → skip PHASE 3 and 4. Jump to PHASE 5.
+
+**If final_score < 100.0 AND mode = auto** → show the estimate (first iteration only),
 then continue to PHASE 3.
 
-### Step 2.6: Show estimate (first iteration only)
+### Step 2.8: Show estimate (first iteration only)
 
 On the FIRST evaluation of a run (not on re-evaluations), display this before
 continuing to Phase 3:
 
 ```
 Starting improvement loop for <skill_name>
-Current score: <score> | Gaps remaining: <N> (<failing_behaviors> behaviors + <triggered_antipatterns> anti-patterns)
+exec_score: <X> / 70 | agent_score: <X> / 30 | final_score: <X> / 100
+Gaps: <N failing agent behaviors> + <N failing machine checks>
 Estimated iterations to convergence: <min>–<max>
 Budget: <N iterations / unlimited> (stops at 3 consecutive discards or 10 iterations)
 
@@ -468,23 +517,33 @@ Edit `.claude/skills/<skill_name>/SKILL.md` with the minimum change needed.
 Do NOT reorganize, reformat, or touch unrelated sections.
 Change only what the hypothesis specifies.
 
-### Step 4.2: Re-run PHASE 2 on the modified skill
+### Step 4.2: Re-evaluate the modified skill (both layers)
 
-Score the new version. You now have:
-- `score_before`: the score from before this change
-- `score_after`: the score from this re-evaluation
+Run the full PHASE 2 evaluation on the modified skill:
+
+1. `bash test-runner.sh ...` → new `exec_score`
+2. Run behavior checks (if Behavior Checks exist in suite) → new `behavior_score`
+3. Spawn evaluator agent (blind — no knowledge of what changed) → new `agent_score`
+4. `new_final_score = new_exec_score + new_behavior_score + new_agent_score`
+
+You now have:
+- `final_score_before`: the score from before this change
+- `final_score_after`: the score from this re-evaluation
+- `exec_score_before` / `exec_score_after`
+- `behavior_score_before` / `behavior_score_after`
+- `agent_score_before` / `agent_score_after`
 - `size_before` / `size_after`: bytes
 
 ### Step 4.3: Apply the Keep or Discard rule
 
 **KEEP if:**
-- `score_after > score_before` (any improvement at all)
-- OR `score_after == score_before` AND the skill is genuinely simpler (fewer lines,
-  removed redundancy, clearer phrasing) — this is a soft judgment, not a formula
+- `final_score_after > final_score_before` (any improvement at all)
+- OR `final_score_after == final_score_before` AND the skill is genuinely simpler
+  (fewer lines, removed redundancy, clearer phrasing) — soft judgment, not a formula
 
 **DISCARD if:**
-- `score_after < score_before`
-- OR `score_after == score_before` AND the skill is not simpler
+- `final_score_after < final_score_before`
+- OR `final_score_after == final_score_before` AND the skill is not simpler
 
 **If KEEP:**
 ```bash
@@ -728,10 +787,23 @@ Recovery: git checkout -- .claude/skills/<skill_name>/SKILL.md
 |--------|----------|
 | Read evaluator.md | YES — read once at start |
 | Edit evaluator.md | NO — NEVER |
+| Read evaluator-agent-prompt.md | YES — read once at start |
+| Edit evaluator-agent-prompt.md | NO — NEVER |
+| Read behavior-runner-prompt.md | YES — read once at start |
+| Edit behavior-runner-prompt.md | NO — NEVER |
+| Spawn behavior runner agent via Agent tool | YES — Step 2.1B (skill executor) |
+| Read reflect-runner-prompt.md | YES — Phase 0 |
+| Edit reflect-runner-prompt.md | NO — NEVER |
+| Spawn reflect runner agent via Agent tool | YES — Phase 0 (background loop) |
+| Run test-runner.sh | YES — Step 2.1 and Step 4.2 |
+| Edit test-runner.sh | NO — IMMUTABLE |
 | Read test suite | YES |
 | Edit test suite | NO — NEVER |
 | Read skill file | YES |
 | Edit skill file | YES — only this (Path 2 only) |
+| Spawn evaluator agent via Agent tool | YES — Step 2.2 and Step 4.2 (blind agent) |
+| Give evaluator agent git access | NO — NEVER |
+| Give evaluator agent hypothesis context | NO — NEVER |
 | Append to reflection-log.tsv | YES — one row per evaluation |
 | Edit existing log rows | NO — append only |
 | Create git commits | YES (Path 2 only) |
@@ -785,18 +857,23 @@ PHASE 1: Setup
 
 LOOP ITERATION 1
   PHASE 2: Evaluate
-    skill_score = 68.2
-    Estimate: 3 gaps, ~2-3 iterations to converge
+    Step 2.1: bash test-runner.sh → exec_score = 47.7 (out of 70)
+    Step 2.2: Spawn evaluator agent (blind) → agent_score = 20.5 (out of 30)
+    Step 2.3: final_score = 68.2
+    Estimate: 3 machine gaps + 1 agent gap, ~2-3 iterations
     Budget: 2 iterations
 
   PHASE 3: Hypothesize → expand-layout-group
-  PHASE 4: Experiment → score 68.2 → 81.8, KEEP ✓
+  PHASE 4: Experiment
+    test-runner.sh → exec_score 47.7 → 57.2
+    evaluator agent → agent_score 20.5 → 24.6
+    final_score 68.2 → 81.8, KEEP ✓
     iterations_completed = 1, budget = 2 → continue
 
 LOOP ITERATION 2
-  PHASE 2: Evaluate → 81.8
+  PHASE 2: Evaluate → final_score = 81.8 (exec=57.2, agent=24.6)
   PHASE 3: Hypothesize → expand-effects-add-animation
-  PHASE 4: Experiment → score 81.8 → 90.9, KEEP ✓
+  PHASE 4: Experiment → final_score 81.8 → 90.9, KEEP ✓
     iterations_completed = 2, budget = 2 → STOP (budget exhausted)
 
 PHASE 5: Final Report

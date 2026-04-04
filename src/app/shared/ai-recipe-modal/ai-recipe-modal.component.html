@@ -97,13 +97,78 @@
         <!-- ── Create mode ── -->
         @if (!draft_()) {
           <div class="ai-prompt-panel">
-            <textarea
-              class="ai-prompt-textarea"
-              [placeholder]="'ai_recipe_prompt_placeholder' | translatePipe"
-              [value]="prompt_()"
-              (input)="prompt_.set($any($event.target).value)"
-              rows="4"
-            ></textarea>
+
+            <!-- Input mode tabs -->
+            <div class="ai-input-mode-tabs">
+              <button
+                type="button"
+                class="ai-tab-btn"
+                [class.ai-tab-btn--active]="inputMode_() === 'text'"
+                (click)="inputMode_.set('text')"
+                title="הזן טקסט"
+              >
+                <lucide-icon name="type" [size]="16"></lucide-icon>
+              </button>
+              <button
+                type="button"
+                class="ai-tab-btn"
+                [class.ai-tab-btn--active]="inputMode_() === 'image'"
+                (click)="inputMode_.set('image')"
+                title="העלה תמונה"
+              >
+                <lucide-icon name="camera" [size]="16"></lucide-icon>
+              </button>
+              <button
+                type="button"
+                class="ai-tab-btn"
+                [class.ai-tab-btn--active]="inputMode_() === 'url'"
+                (click)="inputMode_.set('url')"
+                title="הזן קישור"
+              >
+                <lucide-icon name="link" [size]="16"></lucide-icon>
+              </button>
+            </div>
+
+            <!-- Text input -->
+            @if (inputMode_() === 'text') {
+              <textarea
+                class="ai-prompt-textarea"
+                [placeholder]="'ai_recipe_prompt_placeholder' | translatePipe"
+                [value]="prompt_()"
+                (input)="prompt_.set($any($event.target).value)"
+                rows="4"
+              ></textarea>
+            }
+
+            <!-- Image input -->
+            @if (inputMode_() === 'image') {
+              <label class="ai-image-upload">
+                <input
+                  type="file"
+                  accept="image/*"
+                  style="display:none"
+                  (change)="onImageSelected($event)"
+                />
+                @if (imagePreviewUrl_()) {
+                  <img class="ai-image-preview" [src]="imagePreviewUrl_()!" alt="תצוגה מקדימה" />
+                } @else {
+                  <lucide-icon name="image" [size]="32"></lucide-icon>
+                  <span>לחץ להעלאת תמונה של מתכון</span>
+                }
+              </label>
+            }
+
+            <!-- URL input -->
+            @if (inputMode_() === 'url') {
+              <input
+                type="url"
+                class="ai-url-input"
+                placeholder="https://example.com/recipe"
+                dir="ltr"
+                [value]="urlInput_()"
+                (input)="urlInput_.set($any($event.target).value)"
+              />
+            }
 
             @if (status_() !== 'idle') {
               <div class="ai-status-bar" [class.ai-status--sending]="status_() === 'sending'" [class.ai-status--done]="status_() === 'done'" [class.ai-status--error]="status_() === 'error'">
@@ -135,8 +200,11 @@
               <button
                 type="button"
                 class="c-btn-primary"
-                [disabled]="!prompt_() || loading_()"
-                (click)="onGenerate()"
+                [disabled]="loading_() ||
+                  (inputMode_() === 'text' && !prompt_().trim()) ||
+                  (inputMode_() === 'image' && !imageFile_()) ||
+                  (inputMode_() === 'url' && !urlInput_().trim())"
+                (click)="inputMode_() === 'image' ? onGenerateFromImage() : inputMode_() === 'url' ? onGenerateFromUrl() : onGenerate()"
               >
                 @if (loading_()) {
                   <app-loader size="small" [inline]="true" />
