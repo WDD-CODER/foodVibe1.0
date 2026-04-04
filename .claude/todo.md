@@ -3,13 +3,27 @@
 ---
 
 ### Plan 247 — Reflect: self-improving skills system (`plans/247-reflect-skill-improvement-loop.plan.md`)
-- [ ] Create `.claude/reflect/test-suites/` directory
-- [ ] Create `.claude/reflect/test-suite-template.md`
-- [ ] Create `.claude/reflect/evaluator.md` (immutable scoring)
-- [ ] Create `.claude/reflect/reflection-log.tsv` (header only)
-- [ ] Create `.claude/reflect/test-suites/angularComponentStructure.tests.md`
-- [ ] Create `.claude/commands/reflect.md` (orchestrator)
-- [ ] Verify all files exist and paths are correct
+- [x] Create `.claude/reflect/test-suites/` directory
+- [x] Create `.claude/reflect/test-suite-template.md`
+- [x] Create `.claude/reflect/evaluator.md` (immutable scoring)
+- [x] Create `.claude/reflect/reflection-log.tsv` (header only)
+- [x] Create `.claude/reflect/test-suites/angularComponentStructure.tests.md`
+- [x] Create `.claude/commands/reflect.md` (orchestrator)
+- [x] Verify all files exist and paths are correct
+
+---
+
+### Plan 248 — Reflect: Karpathy gap-closure — two-agent split, executable score, concrete checks (`plans/248-reflect-karpathy-gaps.plan.md`)
+- [x] Update `.claude/reflect/test-suite-template.md` — add Concrete Checks + Agent-Evaluated Behaviors sections
+- [x] 🧑‍🍳 GATE A: Show migrated angularComponentStructure.tests.md draft (machine-check split) for approval
+- [x] Migrate `.claude/reflect/test-suites/angularComponentStructure.tests.md` to new format
+- [x] 🧑‍🍳 GATE B: Show 2–3 example TCs with grep checks + 70/30 vs 80/20 vs 60/40 ratio for approval
+- [x] Create `.claude/reflect/test-runner.sh` — executable scoring script
+- [x] Update `.claude/reflect/evaluator.md` — document dual-scoring (70% executable + 30% agent)
+- [x] Validate test-runner.sh — run twice, verify same score (70.0 both runs, 21/21 checks)
+- [x] 🧑‍🍳 GATE C: Show evaluator-agent-prompt.md draft + flow diagram for approval
+- [x] Create `.claude/reflect/evaluator-agent-prompt.md` — blind evaluator agent prompt
+- [x] Update `.claude/commands/reflect.md` — new Phase 2/4 two-agent flow + TSV schema migration
 
 ---
 
