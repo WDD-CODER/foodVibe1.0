@@ -13,50 +13,14 @@
 
 ---
 
-### Plan 245 — Unified context-aware AI modal (`plans/245-unified-ai-modal.plan.md`)
-- [x] server/routes/ai.js — add POST /api/v1/ai/patch-recipe endpoint with smart partial-patch system prompt
-- [x] gemini.service.ts — add `patchRecipe(currentRecipe, instruction)` method calling new endpoint
-- [x] ai-recipe-modal.service.ts — extend to support `open('create')` and `open('edit', currentRecipe, onPatch)`
-- [x] ai-recipe-modal.component.ts + .html — add edit-mode UI (instruction textarea + patch preview card)
-- [x] recipe-builder.page.ts — replace `onImportTextClick` + `RecipeTextImportModalService` with `onAiEditClick` wired to AiRecipeModalService edit mode
-- [x] recipe-header.component.ts + .html — remove `importTextClick` output + `import-text-btn`
-- [x] app.component.ts + .html — remove RecipeTextImportModalComponent
-- [x] Delete recipe-text-import-modal component (3 files) + recipe-text-import-modal.service.ts
-- [x] ng build — verify zero errors
-
----
-
-### Plan 246 — Create /evaluate-me command (`plans/246-evaluate-me-command.plan.md`)
-- [x] Create `.claude/retrospectives/` directory with `.gitkeep`
-- [x] Create `.claude/commands/evaluate-me.md` with full retrospective prompt
-- [x] Update `agent.md` commands table to include evaluate-me
-
 ## 🔴 Quick Fixes
-
-### Plan 244 — Auto-solve command (`plans/244-auto-solve-command.plan.md`)
-- [x] Create `.claude/commands/auto-solve.md` with full command content (both Playwright prefixes in allowed-tools)
-- [x] Edit `.claude/settings.json` — remove "playwright" from disabledMcpjsonServers
-- [x] Edit `agent.md` — add auto-solve row to commands table
-- [x] Edit `.claude/copilot-instructions.md` — add /auto-solve trigger after Security review line
-
-
-### Plan 157 — Fix sidebar alignment and close on breakpoint (`plans/157-fix-sidebar-alignment-close-breakpoint.plan.md`)
-- [x] List-shell: remove margin-block and max-height from .filter-panel in 768px block
-- [x] Inventory list: add afterNextRender + matchMedia to close panel when viewport <= 768px
-
-### Plan 174 — Custom select chip and standalone state (`plans/174-custom-select-chip-and-standalone-state.plan.md`) [TRIAGED 2026-04-02]
-- [x] Cook-view ingredients index: add variant=”chip” and typeToFilter to unit selects for consistency with recipe builder
-- [x] Verify in app: recipe builder and cook-view ingredients index unit dropdowns
 
 ### Plan 169 — List quick-edit UX overlay (`plans/169-list-quick-edit-ux-overlay.plan.md`)
 - [ ] Verify first-click open, carousel dropdown visible, row-blur confirm only
 
 ### Plan 134 — Translation and confirmation modals unified (`plans/134-translation-confirmation-modals-unified.plan.md`) [TRIAGED 2026-04-02]
 
-- [ ] Other entry points: align with resolve first → modal if needed → already in parameter (metadata-manager, preparation-*, menu-section-categories, add-equipment-modal, recipe-workflow, add-supplier-flow)
-
-### Tech Debt — Audit 2026-03-26 (unplanned items)
-- [x] Remove commented import `ProductDataService` at `product-form.component.ts:8` and commented statement at line 927
+- [x] Other entry points: align with resolve first → modal if needed → already in parameter (metadata-manager, preparation-*, menu-section-categories, add-equipment-modal, recipe-workflow, add-supplier-flow)
 
 ### Plan 074 â€” Tech debt remediation (`plans/074-tech-debt-remediation.plan.md`) [TRIAGED 2026-04-02]
 
@@ -68,28 +32,6 @@
 ---
 
 ## 🟡 Medium
-
-### Plan 219 — Recipe header photo-picker (`plans/219-recipe-header-photo-picker.plan.md`)
-- [x] recipe.model.ts — add `imageUrl_?: string` after `hiddenBy?`
-- [x] recipe-builder.page.ts — add `recipeImageUrl_` signal after `isApproved_`
-- [x] recipe-builder.page.ts — patch `patchFormFromRecipe` to set `recipeImageUrl_`
-- [x] recipe-builder.page.ts — replace `buildRecipeFromForm` body to spread `imageUrl_`
-- [x] recipe-builder.page.ts — add `recipeImageUrl_.set(null)` as first line of `resetToNewForm_`
-- [x] recipe-builder.page.ts — add `onImageChange` method to `//UPDATE` group
-- [x] recipe-builder.page.html — add `[imageUrl]`, `(imageChange)`, `[readonlyMode]` to `<app-recipe-header>`
-- [x] recipe-header.component.ts — add `readonlyMode` input, `imageChange` output, `onImageSelected` method
-- [x] recipe-header.component.html — replace `.image-square` div with label+input+overlay structure
-- [x] app.config.ts — import `Camera` and add to `LucideAngularModule.pick`
-- [x] recipe-header.component.scss — add cursor + `.img-upload-label` rules (+ fix: display:block + object-position:center)
-
-### Plan 204-R — Inventory product-price util extraction (`plans/204-R-inventory-product-price-util.plan.md`)
-- [x] Create `src/app/core/utils/product-price.util.ts` — three pure exports: `getProductUnits`, `getPricePerUnit`, `calcBuyPriceGlobal`
-- [x] Delete dead `getProductUnits` method from component (no call sites)
-- [x] Replace `getPricePerUnit` body in component with 3-line wrapper (keeps 2-arg template signature)
-- [x] Replace `onPriceChange` conversion block with `calcBuyPriceGlobal(...)` call; add util import
-- [x] Leave `onUnitChange` conversion block unchanged (inverse math — cannot reuse)
-- [x] Verify `ng build` passes
-
 
 ### Plan 182 + 163 — Visual & UX fix backlog (`plans/182-tofix-verification-undone.plan.md`, `plans/163-tofix-audit-prd.plan.md`)
 - [ ] Recipe builder: remove up/down arrows in section titles
