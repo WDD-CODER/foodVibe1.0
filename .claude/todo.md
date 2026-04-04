@@ -45,6 +45,15 @@
 
 ---
 
+### Plan 247 — Form field-level inline validation (`plans/247-form-field-validation.plan.md`)
+- [x] Task 1: `src/styles.scss` — add `.c-field-error` and `.c-input--invalid` engine classes
+- [x] Task 2: `dictionary.json` — add field validation Hebrew keys
+- [x] Task 3–8: product-form — validationErrors_ signal, validateForm_(), onSubmit wire, HTML error bindings
+- [x] Task 9–11: recipe-header + recipe-builder — validate() method, viewChild, HTML error bindings
+- [x] Task 12–17: equipment-form, supplier-form, venue-form — validation signal + method + HTML
+- [x] Task 18: auth-modal — add c-input--invalid + aria-invalid bindings
+- [x] Task 19: ng build — zero errors
+
 ## 🔴 Quick Fixes
 
 ### Plan 169 — List quick-edit UX overlay (`plans/169-list-quick-edit-ux-overlay.plan.md`)

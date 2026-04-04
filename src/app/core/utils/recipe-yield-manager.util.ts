@@ -1,15 +1,24 @@
 import { signal, computed, type Signal } from '@angular/core'
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms'
 import { quantityIncrement, quantityDecrement } from './quantity-step.util'
+import { MASS_UNITS, VOLUME_UNITS } from './recipe-cost.constants'
+
+export interface YieldAutoSyncConfig {
+  totalWeightG: Signal<number>;
+  totalVolumeMl: Signal<number>;
+  getConversion: (unitKey: string) => number;
+}
 
 export class RecipeYieldManager {
   private readonly manualTrigger_ = signal(0)
+  readonly isManualOverride_ = signal(false)
 
   constructor(
     private readonly form: Signal<FormGroup>,
     private readonly allUnitKeys: Signal<string[]>,
     private readonly resetTrigger: Signal<number>,
-    private readonly fb: FormBuilder
+    private readonly fb: FormBuilder,
+    private readonly autoSyncConfig?: YieldAutoSyncConfig
   ) {}
 
   // --- Computeds ---
@@ -78,6 +87,56 @@ export class RecipeYieldManager {
     return conversions?.at(0)?.get('amount')?.value ?? 0
   })
 
+  // --- Auto-sync computeds ---
+
+  readonly computedYieldAmount_ = computed<number | null>(() => {
+    if (!this.autoSyncConfig) return null
+    this.manualTrigger_()
+    this.resetTrigger()
+
+    const type = this.form().get('recipe_type')?.value
+    if (type === 'dish') return null
+
+    const unit = this.primaryUnitLabel_()
+    const factor = this.autoSyncConfig.getConversion(unit)
+    if (!factor || factor <= 0) return null
+
+    if (MASS_UNITS.has(unit)) {
+      const totalG = this.autoSyncConfig.totalWeightG()
+      if (totalG <= 0) return null
+      return Math.round((totalG / factor) * 100) / 100
+    }
+
+    if (VOLUME_UNITS.has(unit)) {
+      const totalMl = this.autoSyncConfig.totalVolumeMl()
+      if (totalMl <= 0) return null
+      return Math.round((totalMl / factor) * 100) / 100
+    }
+
+    return null
+  })
+
+  readonly yieldDiffersFromComputed_ = computed(() => {
+    const computed = this.computedYieldAmount_()
+    if (computed === null) return false
+    const current = this.primaryAmount_()
+    return Math.abs(current - computed) > 0.01
+  })
+
+  // --- Auto-sync methods ---
+
+  syncYieldFromMetrics(): void {
+    const computed = this.computedYieldAmount_()
+    if (computed === null) return
+    this.isManualOverride_.set(false)
+    this.applyPrimaryUpdate(computed)
+  }
+
+  resetManualOverride(): void {
+    this.isManualOverride_.set(false)
+    this.syncYieldFromMetrics()
+  }
+
   // --- Getters ---
 
   get secondaryConversions(): FormGroup[] {
@@ -106,6 +165,7 @@ export class RecipeYieldManager {
         conversions.at(0).get('unit')?.setValue(newUnit)
       }
     }
+    this.isManualOverride_.set(false)
     this.manualTrigger_.update(v => v + 1)
   }
 
@@ -123,17 +183,20 @@ export class RecipeYieldManager {
       ? quantityIncrement(current, min, undefined)
       : quantityDecrement(current, min, undefined)
     this.applyPrimaryUpdate(next)
+    this.isManualOverride_.set(true)
   }
 
   onAmountManualChange(rawValue: string): void {
     const parsedValue = parseFloat(rawValue)
     if (!isNaN(parsedValue)) {
       this.applyPrimaryUpdate(parsedValue)
+      this.isManualOverride_.set(true)
     }
   }
 
   onScalingChipAmountChange(value: number): void {
     this.applyPrimaryUpdate(value)
+    this.isManualOverride_.set(true)
   }
 
   private applyPrimaryUpdate(newValue: number): void {
@@ -161,6 +224,7 @@ export class RecipeYieldManager {
       ? quantityIncrement(current, min, undefined)
       : quantityDecrement(current, min, undefined)
     this.applyPrimaryUpdate(next)
+    this.isManualOverride_.set(true)
   }
 
   // --- Secondary methods ---
@@ -286,6 +350,7 @@ export class RecipeYieldManager {
         const portions = this.form().get('serving_portions')?.value ?? 1
         conversions.at(0).patchValue({ amount: portions, unit: 'gram' })
       }
+      this.isManualOverride_.set(false)
     } else {
       this.form().get('recipe_type')?.setValue('dish')
       if (conversions?.length > 0) {

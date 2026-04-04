@@ -13,6 +13,7 @@ import { getGeminiUsage, DAILY_LIMIT, fetchGeminiUsageFromServer } from '../../c
 import { addGeminiShot } from '../../core/utils/gemini-shots.util'
 
 type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
+type InputMode = 'text' | 'image' | 'url'
 
 @Component({
   selector: 'app-ai-recipe-modal',
@@ -30,7 +31,11 @@ export class AiRecipeModalComponent implements OnInit {
   private readonly userMsg = inject(UserMsgService)
 
   // Create mode
+  protected readonly inputMode_ = signal<InputMode>('text')
   protected readonly prompt_ = signal('')
+  protected readonly imageFile_ = signal<File | null>(null)
+  protected readonly imagePreviewUrl_ = signal<string | null>(null)
+  protected readonly urlInput_ = signal('')
   protected readonly draft_ = signal<AiRecipeDraft | null>(null)
 
   // Edit mode
@@ -94,6 +99,58 @@ export class AiRecipeModalComponent implements OnInit {
   onGenerateAgain(): void {
     this.draft_.set(null)
     this.status_.set('idle')
+    this.imageFile_.set(null)
+    this.imagePreviewUrl_.set(null)
+    this.urlInput_.set('')
+  }
+
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0] ?? null
+    this.imageFile_.set(file)
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = () => this.imagePreviewUrl_.set(reader.result as string)
+      reader.readAsDataURL(file)
+    } else {
+      this.imagePreviewUrl_.set(null)
+    }
+  }
+
+  async onGenerateFromImage(): Promise<void> {
+    const file = this.imageFile_()
+    if (!file) return
+    this.loading_.set(true)
+    this.status_.set('sending')
+    try {
+      const draft = await this.gemini.generateFromImage(file)
+      this.draft_.set(draft)
+      this.status_.set('done')
+    } catch {
+      this.status_.set('error')
+      this.userMsg.onSetErrorMsg('ai_recipe_error')
+    } finally {
+      this.loading_.set(false)
+      this.refreshUsage()
+    }
+  }
+
+  async onGenerateFromUrl(): Promise<void> {
+    const url = this.urlInput_().trim()
+    if (!url) return
+    this.loading_.set(true)
+    this.status_.set('sending')
+    try {
+      const draft = await this.gemini.generateFromUrl(url)
+      this.draft_.set(draft)
+      this.status_.set('done')
+    } catch {
+      this.status_.set('error')
+      this.userMsg.onSetErrorMsg('ai_recipe_error')
+    } finally {
+      this.loading_.set(false)
+      this.refreshUsage()
+    }
   }
 
   onOpenInBuilder(): void {
@@ -147,6 +204,10 @@ export class AiRecipeModalComponent implements OnInit {
     this.patch_.set(null)
     this.prompt_.set('')
     this.instruction_.set('')
+    this.imageFile_.set(null)
+    this.imagePreviewUrl_.set(null)
+    this.urlInput_.set('')
+    this.inputMode_.set('text')
     this.loading_.set(false)
     this.status_.set('idle')
   }

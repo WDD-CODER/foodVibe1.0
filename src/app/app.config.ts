@@ -57,6 +57,7 @@ import {
   Plus,
   PlusCircle,
   Printer,
+  RefreshCw,
   RotateCcw,
   Save,
   Scale,
@@ -75,7 +76,9 @@ import {
   Upload,
   Utensils,
   UtensilsCrossed,
-  X
+  X,
+  Type,
+  Link
 } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { provideHttpClient, withInterceptors } from '@angular/common/http'
@@ -131,6 +134,7 @@ export const appConfig: ApplicationConfig = {
         Truck,
         Package,
         CalendarClock,
+        RefreshCw,
         RotateCcw,
         History,
         BookOpen,
@@ -168,7 +172,9 @@ export const appConfig: ApplicationConfig = {
         Star,
         Lock,
         Sparkles,
-        ChefHat
+        ChefHat,
+        Type,
+        Link
       })
     )
   ]

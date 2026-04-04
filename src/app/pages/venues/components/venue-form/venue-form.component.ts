@@ -27,6 +27,8 @@ import {
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
+import { UserMsgService } from '@services/user-msg.service';
+import { TranslationService } from '@services/translation.service';
 
 const ENV_TYPES: EnvironmentType[] = [
   'professional_kitchen',
@@ -55,12 +57,15 @@ export class VenueFormComponent implements OnInit {
   private readonly equipmentData = inject(EquipmentDataService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly requireAuth = inject(RequireAuthService);
+  private readonly userMsg = inject(UserMsgService);
+  private readonly translation = inject(TranslationService);
 
   protected venueForm_!: FormGroup;
   protected isEditMode_ = signal(false);
   private readonly saving = useSavingState();
   protected readonly isSaving_ = this.saving.isSaving_;
   protected envTypes = ENV_TYPES;
+  protected validationErrors_ = signal<Record<string, string>>({});
 
   protected get infraArray(): FormArray {
     return this.venueForm_?.get('available_infrastructure_') as FormArray;
@@ -132,8 +137,21 @@ export class VenueFormComponent implements OnInit {
     this.infraArray.removeAt(index);
   }
 
+  private validateForm_(): boolean {
+    const errors: Record<string, string> = {};
+    const val = this.venueForm_.getRawValue();
+    if (!val.name_hebrew?.trim()) errors['name_hebrew'] = 'field_name_required';
+    this.validationErrors_.set(errors);
+    return Object.keys(errors).length === 0;
+  }
+
   async onSubmit(): Promise<void> {
     if (!this.requireAuth.requireAuth()) return;
+    if (!this.validateForm_()) {
+      this.venueForm_.markAllAsTouched();
+      this.userMsg.onSetErrorMsg(this.translation.translate('form_has_errors'));
+      return;
+    }
     if (this.venueForm_.invalid) return;
     await this.saving.withSaving(async () => {
       const v = this.venueForm_.getRawValue();
