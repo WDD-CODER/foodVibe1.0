@@ -18,7 +18,7 @@
       </div>
 
       <div class="col-name">
-        @if (!group.get('referenceId')?.value || editingNameAtRow_() === $index) {
+        @if ((!group.get('referenceId')?.value && !group.get('name_hebrew')?.value) || editingNameAtRow_() === $index) {
         <app-ingredient-search [rowIndex]="$index" [focusTrigger]="focusSearchAtRow()"
           [excludeNames]="editingNameAtRow_() === $index ? getExcludeNamesForRow($index) : existingIngredientNames"
           [initialQuery]="editingNameAtRow_() === $index ? (group.get('name_hebrew')?.value ?? '') : ''"
@@ -26,10 +26,18 @@
           (addNewRowRequested)="addIngredient.emit()" (cancelSearch)="editingNameAtRow_.set(null)"></app-ingredient-search>
         } @else {
         <div class="selected-item-display" role="button" tabindex="0"
+          [class.incomplete-row]="isIncompleteRow(group)"
           (click)="editingNameAtRow_.set($index)"
           (keydown.enter)="editingNameAtRow_.set($index)"
           (keydown.space)="$event.preventDefault(); editingNameAtRow_.set($index)">
           <span class="item-text">{{ group.get('name_hebrew')?.value }}</span>
+          @if (isIncompleteRow(group)) {
+            <button type="button" class="incomplete-badge"
+              (click)="$event.stopPropagation(); group.get('referenceId')?.value ? navigateToEditProduct(group) : editingNameAtRow_.set($index)"
+              [title]="'product_incomplete_hint' | translatePipe">
+              <lucide-icon name="alert-triangle" [size]="14"></lucide-icon>
+            </button>
+          }
           <button type="button" class="clear-btn" (click)="$event.stopPropagation(); clearIngredient(group)">
             <lucide-icon name="x" [size]="14"></lucide-icon>
           </button>
@@ -38,7 +46,6 @@
       </div>
 
       <div class="col-unit">
-        @if (group.get('referenceId')?.value) {
         <app-custom-select
           formControlName="unit"
           class="grid-select"
@@ -52,13 +59,9 @@
           [rowIndex]="$index"
           kind="unit"
           (valueChange)="onUnitChange(group, $index, $event)" />
-        } @else {
-        <span class="placeholder-dash">---</span>
-        }
       </div>
 
       <div class="col-quantity">
-        @if (group.get('referenceId')?.value) {
         <div class="quantity-controls">
           <button type="button" class="qty-btn minus" tabindex="-1"
             [disabled]="(group.get('amount_net')?.value ?? 0) <= 0"
@@ -72,9 +75,6 @@
             <lucide-icon name="plus" [size]="16"></lucide-icon>
           </button>
         </div>
-        } @else {
-        <span class="placeholder-dash">---</span>
-        }
       </div>
 
       <div class="col-percent">

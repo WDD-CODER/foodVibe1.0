@@ -63,6 +63,7 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
   protected readonly isSaving_ = this.saving.isSaving_;
   protected categories = CATEGORIES;
   protected categoryOptions = CATEGORIES.map((c) => ({ value: c, label: c }));
+  protected validationErrors_ = signal<Record<string, string>>({});
 
   ngOnInit(): void {
     this.buildForm();
@@ -118,7 +119,21 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
     });
   }
 
+  private validateForm_(): boolean {
+    const errors: Record<string, string> = {};
+    const val = this.equipmentForm_.getRawValue();
+    if (!val.name_hebrew?.trim()) errors['name_hebrew'] = 'field_name_required';
+    if (!val.category_?.trim()) errors['category_'] = 'field_category_required';
+    this.validationErrors_.set(errors);
+    return Object.keys(errors).length === 0;
+  }
+
   async onSubmit(): Promise<void> {
+    if (!this.validateForm_()) {
+      this.equipmentForm_.markAllAsTouched();
+      this.userMsg.onSetErrorMsg(this.translation.translate('form_has_errors'));
+      return;
+    }
     if (this.equipmentForm_.invalid) return;
     await this.saving.withSaving(async () => {
     try {

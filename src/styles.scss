@@ -52,6 +52,8 @@ $break-desktop: 1200px;
 
   /* ---- Semantic: warning ---- */
   --bg-warning: rgba(254, 243, 199, 0.7);
+  --bg-warning-strong: rgba(254, 243, 199, 0.9);
+  --bg-warning-soft: rgba(254, 243, 199, 0.5);
   --text-warning: #92400e;
   --border-warning: #f59e0b;
   --color-warning-hover: #b45309;
@@ -344,6 +346,21 @@ textarea.c-input {
       color: var(--color-text-muted-light);
     }
   }
+}
+
+/* ---- Engine: Field-level validation error text ---- */
+.c-field-error {
+  display: block;
+  color: var(--color-danger);
+  font-size: 0.75rem;
+  padding-block-start: 0.25rem;
+}
+
+/* ---- Engine: Invalid input modifier ---- */
+.c-input--invalid,
+[aria-invalid="true"] {
+  border-color: var(--color-danger) !important;
+  outline-color: var(--color-danger);
 }
 
 /* ---- Engine: Glass Select ---- */
@@ -1009,6 +1026,27 @@ textarea.c-input {
     padding-block: 1.25rem;
     margin-block-end: 0.5rem;
   }
+}
+
+@keyframes inline-edit-collapse {
+  from {
+    max-height: 60rem;
+    opacity: 1;
+    padding-block: 1.25rem;
+    margin-block-end: 0.5rem;
+  }
+
+  to {
+    max-height: 0;
+    opacity: 0;
+    padding-block: 0;
+    margin-block-end: 0;
+  }
+}
+
+.inline-edit-panel.closing {
+  animation: inline-edit-collapse 0.2s ease-in forwards;
+  pointer-events: none;
 }
 
 /* ---- Engine: Ghost Button (small) ---- */

@@ -16,12 +16,13 @@ description: Defines the mandatory class structure, section ordering, and CRDUL 
 - No `.c-*` classes defined in component `.scss` — use `src/styles.scss` engines only
 - Lucide icons must be registered in `app.config.ts` before use in templates
 - `.spec.ts` only during `commit-to-github` Phase 0 or explicit user request — never during iterative work
+- No `any` types — use explicit TypeScript types for all method parameters and return values
 
 ---
 
 ## Phase 1: Boilerplate Generation 
 
-**File Creation:** Standard four-file split: `.ts`, `.html`, `.scss`, `.spec.ts` (unless `inlineTemplate` requested).
+**File Creation:** Standard four-file split: `.ts`, `.html`, `.scss`, `.spec.ts` (unless `inlineTemplate` requested). When refactoring an existing component, skip file creation — reorder class sections in place.
 
 **Class Section Order (strict — enforce this sequence every time):**
 1. INJECTED services

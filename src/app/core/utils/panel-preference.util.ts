@@ -7,11 +7,11 @@ const STORAGE_PREFIX = 'list-panel:';
 export function getPanelOpen(context: string): boolean {
   try {
     const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_PREFIX + context) : null;
-    if (raw === null) return true;
+    if (raw === null) return false;
     const value = JSON.parse(raw);
     return value === true;
   } catch {
-    return true;
+    return false;
   }
 }
 

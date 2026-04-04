@@ -90,6 +90,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   protected readonly isSaving_ = this.saving.isSaving_;
   protected curProduct_ = signal<Product | null>(null);
   protected isBaseUnitMode_ = signal(false);
+  protected validationErrors_ = signal<Record<string, string>>({});
 
   //SIMPLE VALUES
   private formValue_!: Signal<any>
@@ -741,10 +742,26 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
     this.initialFormSnapshot_ = this.getFormSnapshotForComparison();
   }
+  private validateForm_(): boolean {
+    const errors: Record<string, string> = {};
+    const val = this.productForm_.getRawValue();
+    if (!val.productName?.trim()) errors['productName'] = 'field_name_required';
+    if (!val.base_unit_?.trim()) errors['base_unit_'] = 'field_unit_required';
+    if (val.buy_price_global_ == null || val.buy_price_global_ < 0) errors['buy_price_global_'] = 'field_price_required';
+    if (!val.categories_?.length) errors['categories_'] = 'field_category_required';
+    this.validationErrors_.set(errors);
+    return Object.keys(errors).length === 0;
+  }
+
   protected onSubmit(): void {
+    if (!this.validateForm_()) {
+      this.productForm_.markAllAsTouched();
+      this.userMsgService.onSetErrorMsg(this.translationService.translate('form_has_errors'));
+      return;
+    }
     if (!this.productForm_.valid) {
       this.productForm_.markAllAsTouched();
-      this.userMsgService.onSetErrorMsg('יש למלא את כל השדות הנדרשים (שם הפריט, יחידה, מחיר)');
+      this.userMsgService.onSetErrorMsg(this.translationService.translate('form_has_errors'));
       return;
     }
     const val = this.productForm_.getRawValue();
@@ -774,6 +791,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     this.kitchenStateService.saveProduct(productToSave).subscribe({
       next: () => {
         this.saving.setSaving(false);
+        this.validationErrors_.set({});
         this.isSubmitted = true;
         this.router.navigate(['/inventory/list']);
       },

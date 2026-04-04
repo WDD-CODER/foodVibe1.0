@@ -4,8 +4,7 @@ const { verifyToken } = require('../middleware/auth');
 
 const router = Router();
 
-// All routes require a valid JWT — reads are not public.
-router.use(verifyToken);
+// Write routes (POST/PUT/DELETE) require a valid JWT. Reads are public.
 
 // The auth entity type is managed exclusively by the auth router.
 // Block direct access via the generic data API.
@@ -78,7 +77,7 @@ router.get('/:type/:id', async (req, res) => {
 // POST /api/v1/data/:type
 // Inserts a new document stamped with the authenticated user's id.
 // ---------------------------------------------------------------------------
-router.post('/:type', async (req, res) => {
+router.post('/:type', verifyToken, async (req, res) => {
   try {
     const entity = req.body;
     if (!entity._id) {
@@ -111,7 +110,7 @@ router.post('/:type', async (req, res) => {
 // Updates one document. Preserves userId, _masterId; sets _userModified: true.
 // Strips reserved fields from req.body to prevent userId/master spoofing.
 // ---------------------------------------------------------------------------
-router.put('/:type/:id', async (req, res) => {
+router.put('/:type/:id', verifyToken, async (req, res) => {
   try {
     // Destructure reserved fields out of req.body — client must not override them.
     const { userId: _, _masterId: __, _userModified: ___, ...safeBody } = req.body;
@@ -136,7 +135,7 @@ router.put('/:type/:id', async (req, res) => {
 // Replaces the entire collection for the authenticated user — deleteMany + insertMany.
 // Body must be an array of entity objects. Each must have _id.
 // ---------------------------------------------------------------------------
-router.put('/:type', async (req, res) => {
+router.put('/:type', verifyToken, async (req, res) => {
   try {
     if (req.headers['x-confirm-replace'] !== 'true') {
       return res.status(400).json({ error: 'X-Confirm-Replace: true header is required for bulk replace' });
@@ -174,7 +173,7 @@ router.put('/:type', async (req, res) => {
 // DELETE /api/v1/data/:type/:id
 // Removes one document, scoped to the authenticated user.
 // ---------------------------------------------------------------------------
-router.delete('/:type/:id', async (req, res) => {
+router.delete('/:type/:id', verifyToken, async (req, res) => {
   try {
     const result = await col(req.params.type).deleteOne({
       _id: req.params.id,

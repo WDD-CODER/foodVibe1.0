@@ -62,7 +62,7 @@
 - [ ] Phase 2: Add main-session-only scope note to `agent.md` preflight
 - [ ] Phase 3: Remove duplicate §0.3 agent table from `copilot-instructions.md`
 - [ ] Phase 4: Tighten "Apply all project standards" → targeted section refs in 6 agent files
-- [ ] Phase 5: Add "Context Scope: gate-exempt" header to `ui-inspector.md`
+- [x] Phase 5: ~~Add "Context Scope: gate-exempt" header to `ui-inspector.md`~~ — OBSOLETE: file deleted (gstack `/qa` replaces UI Inspector)
 - [ ] Verification: run `/validate-agent-refs`
 
 ### Plan 192 — Pillar 3 Reactive Loop Hardening (A13–A17)

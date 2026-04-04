@@ -9,12 +9,21 @@
     display: block;
   }
 
+  // Suppress all filter-panel transitions until after the first browser paint.
+  // The class is added synchronously in the constructor and removed via rAF
+  // after afterNextRender — so the panel snaps to its saved state with no animation.
+  :host.panel-init .filter-panel,
+  :host.panel-init .filter-panel .panel-content {
+    transition: none !important;
+  }
+
   .list-container {
     display: grid;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto auto 1fr;
     grid-template-columns: auto 1fr;
     grid-template-areas:
       "header header"
+      "selbar selbar"
       "panel  table";
     container-type: inline-size;
 
@@ -24,6 +33,17 @@
 
     overflow: hidden;
     box-sizing: border-box;
+  }
+
+  .selection-bar-area {
+    grid-area: selbar;
+    display: flex;
+    justify-content: center;
+    padding-block-start: 0.5rem;
+
+    &:empty {
+      display: none;
+    }
   }
 
   .list-header {
@@ -47,9 +67,14 @@
   .header-start {
     display: flex;
     align-items: center;
-    flex-shrink: 0;
+    flex: 1;
 
     gap: 1rem;
+  }
+
+  :host ::ng-deep .page-title {
+    flex: 1;
+    text-align: center;
   }
 
   .header-search {
@@ -232,7 +257,9 @@
     transition:
       width 0.3s var(--ease-spring),
       min-width 0.3s var(--ease-spring),
-      opacity 0.25s var(--ease-smooth);
+      opacity 0.25s var(--ease-smooth),
+      border-inline-start-width 0.3s var(--ease-spring),
+      border-inline-start-color 0.25s var(--ease-smooth);
 
     &::-webkit-scrollbar {
       display: none;
@@ -243,6 +270,7 @@
       min-width: 0;
 
       border-inline-start-width: 0;
+      border-inline-start-color: transparent;
       overflow: hidden;
 
       .panel-content {
@@ -320,14 +348,16 @@
   @media (max-width: #{$panel-overlay-break}) {
     .list-container {
       display: grid;
-      grid-template-rows: auto 1fr;
+      grid-template-rows: auto auto 1fr;
       grid-template-columns: 1fr;
       grid-template-areas:
         "header"
+        "selbar"
         "table";
       position: relative;
 
       padding: 1rem;
+      overflow: visible;
     }
 
     .panel-backdrop {
@@ -423,7 +453,6 @@
       z-index: 1000;
 
       width: min(85vw, 340px);
-      max-height: calc(100dvh - 2rem);
 
       border-top-left-radius: var(--radius-xl);
       border-bottom-left-radius: var(--radius-xl);

@@ -6,6 +6,182 @@ Moved from todo.md to reduce token load.
 
 ## Done
 
+---
+
+### Plan 243 — Post-Migration System Validation (`plans/243-post-migration-validation-run.plan.md`)
+- [x] All tasks (branch, validate-agent-refs, ng build, lint checks, github-sync, fix stale counts, project state report)
+
+---
+
+### Plan 203-R — Recipe-book allergen + cell-expand refactor (`plans/203-R-recipe-book-allergen-cell-expand-refactor.plan.md`)
+- [x] Create `src/app/core/utils/recipe-allergens.util.ts`
+- [x] Create `src/app/core/utils/cell-expand-state.util.ts`
+- [x] Update `recipe-book-list.component.ts` — import utils, replace 4 signals with 2 CellExpandState instances
+- [x] Update `recipe-book-list.component.ts` — replace getRecipeAllergens body with thin wrapper
+- [x] Update `recipe-book-list.component.ts` — delete 6 expand methods; add close wrappers
+- [x] Update `recipe-book-list.component.html` — replace 6 method calls with allergenExpand.*/labelsExpand.*
+- [x] Verify: ng build passes
+
+---
+
+### Plan 066 — Quick-add product modal (`plans/1-100/066-quick-add-product-modal.plan.md`)
+- [x] Create QuickAddProductModalService (signal-based, Promise<Product|null>)
+- [x] Create QuickAddProductModalComponent (compact + expandable, keyboard, OnPush, a11y)
+- [x] Style modal SCSS (engine classes + cssLayer)
+- [x] Update ingredient-search: dropdown condition, add-item row, keyboard fix, auto-select
+- [x] Register modal in app.component; add dictionary keys
+
+---
+
+### Plan 069 — Unused and redundant code cleanup (`plans/1-100/069-unused-redundant-code-cleanup.plan.md`)
+- [x] Remove `@components/*` from tsconfig.json
+- [x] Delete recipe.module.ts, system-health.ts, ingredient.service.ts
+- [x] Update core/breadcrumbs.md and core/services/breadcrumbs.md
+- [x] Remove commented block in metadata-manager.page.component.ts
+- [x] Unit-creator spec: minimal placeholder or delete file
+- [x] Run build and tests to verify
+
+---
+
+### Plan 091 — Menu Intelligence Inputs and Layout (`plans/1-100/091-menu-intelligence-inputs-layout.plan.md`)
+- [x] Add SelectOnFocus to sell_price and dish-field inputs; import directive in component
+- [x] Add onSellPriceKeydown and onDishFieldKeydown with 0.25 step for portion fields
+- [x] Wrap dish name + meta toggle in .dish-name-meta; dish-name-cell as grid; .dish-remove out of absolute
+
+---
+
+### Plan 095 — Menu Intelligence Gap Report (`plans/1-100/095-menu-intelligence-gap-report.plan.md`)
+- [x] Add `{ capture: true }` to @HostListener in menu-intelligence.page.ts (implemented via document.addEventListener)
+- [x] Wire dish search ngModelChange to onDishSearchQueryChange; add [class.highlighted] and let ri to dish dropdown in HTML
+- [x] Replace dish name span with button + startEditDishName in menu-intelligence.page.html
+- [x] Add .dropdown-item.highlighted and .dish-name-clickable in menu-intelligence.page.scss
+- [x] Optional: section search ngModelChange to onSectionSearchQueryChange if NG5002 appears
+
+---
+
+### Plan 160 — Global user message queue (`plans/100-200/160-global-user-message-queue.plan.md`)
+- [x] Refactor UserMsgService to use explicit state (current message, timer, pending queue) instead of concatMap pipeline
+- [x] Success/warning: when current is success/warning, replace text and reset timer; do not enqueue
+- [x] Error: interrupt success/warning; when current is error, enqueue so each error shown in order
+- [x] Add user-msg.service.spec.ts with coalesce and error-priority tests
+
+---
+
+### Plan 233 — Gemini Direct API + Modal Status Feedback (`plans/233-gemini-direct-api-modal-status.plan.md`)
+- [x] `gemini.service.ts` — rewrite: fetch-based direct Gemini API call, apiKey_ signal, hasKey computed, setApiKey(), remove HttpClient/dead imports
+- [x] `ai-recipe-modal.component.ts` — add configuringKey_/keyInput_/status_ signals, onSaveKey/onClose methods, API key guard in onGenerate(), FormsModule in imports
+- [x] `ai-recipe-modal.component.html` — add key config panel + status bar (sending/done/error states)
+- [x] `ng build` — verify zero errors
+
+---
+
+### Plan 232 — Backend Collection Registry Standard (`plans/232-backend-collection-registry.plan.md`)
+- [x] `.claude/standards-backend.md` — create with 6 sections (22-row collection registry, corrected count)
+- [x] `.claude/copilot-instructions.md` — add standards table row for standards-backend.md
+- [x] `.claude/copilot-instructions.md` — add §0 Backend persistence trigger bullet
+- [x] `.cursor/rules/backend-persistence.mdc` — create with data-service globs
+- [x] `.claude/commands/plan-implementation.md` — add Backend Impact output block
+- [x] `.claude/commands/execute-it.md` — add Backend Impact check to Execution Rules
+
+---
+
+### Plan 231 — Mongo URI Env Split (`plans/231-mongo-uri-env-split.plan.md`)
+- [x] `server/db.js` — rewrite to read single MONGO_URI (remove NODE_ENV branch, MONGO_LOCAL_URI/MONGO_REMOTE_URI)
+- [x] `server/.env` — replace split URIs with MONGO_URI=localhost, add PORT=3000, ALLOWED_ORIGIN
+- [x] Secrets audit — confirmed server/.env was never committed to git history
+
+---
+
+### Plan 230 — AI Recipe Flow Completion (`plans/230-ai-recipe-flow-completion.plan.md`)
+- [x] `recipe-book-list.component.spec.ts` — add Sparkles + HeroFabService + AiRecipeModalService mocks
+- [x] `ai-recipe-modal.service.ts` — void open(), private isOpen_, public isOpen accessor
+- [x] `ai-recipe-modal.component.ts` — add ChangeDetectionStrategy.OnPush
+- [x] `ai-recipe-modal.component.html` — update isOpen_() → isOpen()
+- [x] `recipe-builder.page.ts` — move draft consume() inside else block
+- [x] `dictionary.json` — add ai_recipe_preview_ingredients + ai_recipe_preview_steps
+- [x] Run ng build — zero errors confirmed
+- [x] Run ng test — recipe-book-list 9/9 passing; 49 pre-existing failures unchanged
+
+---
+
+### Plan 228 — Backend Awareness in Agent Docs (`plans/228-backend-awareness-agents.plan.md`)
+- [x] `.claude/agents/software-architect.md` — add Backend Stack section
+- [x] `.claude/agents/product-manager.md` — add backend items to Quality Checklist
+- [x] `.claude/agents/qa-engineer.md` — add API Coverage to Test Strategy
+- [x] `server/breadcrumbs.md` — create
+
+---
+
+### Plan 227 — Render Deploy Config (`plans/227-render-deploy-config.plan.md`)
+- [x] `render.yaml` — create at repo root with web service config (rootDir: server, MONGO_REMOTE_URI, JWT_SECRET, ALLOWED_ORIGIN)
+- [x] `angular.json` — verify outputPath matches `dist/food-vibe1.0/browser` in server/index.js
+
+---
+
+### Plan 226 — AI Text Import Parser (`plans/226-ai-text-import-parser.plan.md`)
+- [x] `parsed-result.model.ts` — ParsedIngredient, ParsedStep, ParsedRecipe, ParsedDish, ParsedResult
+- [x] `gemini.service.ts` — add parseText() via proxy
+- [x] `recipe-text-import-modal.service.ts` — signal-based open/close + result
+- [x] `recipe-parser.service.ts` — wraps GeminiService; Observable<ParsedResult>; catchError
+- [x] `recipe-text-import-modal/` — standalone component, 3 states, confidence warning
+- [x] `recipe-header.component.ts+html` — importTextClick output + "ייבוא מטקסט" button
+- [x] `recipe-builder.page.ts` — inject, patch form, type mismatch toasts
+- [x] `recipe-builder.page.scss` — .just-filled animation
+- [x] `app.component.ts+html` — register modal at root
+- [x] `dictionary.json` — Hebrew translation keys
+- [x] `server/routes/ai.js` — POST /parse-text route
+
+---
+
+### Plan 225 — Gemini AI Proxy — Key Off Client (`plans/225-gemini-ai-proxy.plan.md`)
+- [x] `server/routes/ai.js` — create: POST /generate behind verifyToken, calls Gemini with process.env.GEMINI_API_KEY
+- [x] `server/index.js` — mount aiRouter at /api/v1/ai
+- [x] `.env` — add GEMINI_API_KEY= placeholder
+- [x] `gemini.service.ts` — remove apiKey_ signal + localStorage; inject HttpClient; proxy call to /api/v1/ai/generate
+- [x] `ai-recipe-modal.component.ts` — remove configuring_, keyInput_, onSaveKey()
+- [x] `ai-recipe-modal.component.html` — remove key-config panel blocks
+- [x] Run ng build — verify zero errors
+
+---
+
+### Plan 223 — Backend Auth Wire + cookie-parser Fix (`plans/223-backend-auth-wire.plan.md`)
+- [x] `server/` — npm install cookie-parser
+- [x] `server/index.js` — add cookieParser() middleware after express.json()
+- [x] `server/routes/auth.js` — fix login: replace direct safeCompare with PBKDF2 re-derivation
+- [x] `user.service.ts` — add HttpClient import + inject; add environment import + authBase
+- [x] `user.service.ts` — add storeToken() / clearToken() helpers using 'fv_token'
+- [x] `user.service.ts` — add callBackendLogin(), callBackendSignup(), callBackendRefresh(), callBackendLogout()
+- [x] `user.service.ts` — update login() with useBackendAuth branch + HTTP error mapping
+- [x] `user.service.ts` — update signup() with useBackendAuth branch (hash before send) + error mapping
+- [x] `user.service.ts` — update logout() — add clearToken() + fire-and-forget logout POST
+- [x] `auth.interceptor.ts` — add silent token refresh on 401 with URL guard to prevent infinite loop
+- [x] Run ng build — verify zero errors
+
+---
+
+### Plan 221 — Unify recipe delete button (`plans/221-unify-recipe-delete-button.plan.md`)
+- [x] `recipe-book-list.component.ts` — add `removingId_` signal; remove `hidingId_` and `permanentDeletingId_`
+- [x] `recipe-book-list.component.ts` — mark `onHideRecipe` and `onPermanentlyDeleteRecipe` private; update both to use `removingId_`
+- [x] `recipe-book-list.component.ts` — add `onRemoveRecipe(recipe)` unified public method with requireAuth gate + role-based confirm + routing
+- [x] `recipe-book-list.component.ts` — update `onBulkDeleteSelected` to call `hideRecipe` (non-admin) or `permanentlyDeleteRecipe` (admin) per recipe
+- [x] `recipe-book-list.component.html` — replace two-button block with single unified trash-2 button block guarded by `@if (isLoggedIn())`
+
+### Plan 220 — Add recipe via AI (`plans/220-add-recipe-via-ai.plan.md`)
+- [x] `src/app/core/services/ai-recipe-draft.service.ts` — create AiRecipeDraft interface + AiRecipeDraftService
+- [x] `src/app/core/services/gemini.service.ts` — create GeminiService with localStorage key, fetch-based generateRecipe
+- [x] `src/app/shared/ai-recipe-modal/ai-recipe-modal.service.ts` — create promise-based modal service
+- [x] `src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts + .html + .scss` — create modal component
+- [x] `src/app/appRoot/app.component.ts + .html` — wire AiRecipeModalComponent into root
+- [x] `recipe-book-list.component.ts` — add OnInit/OnDestroy + FAB action for AI recipe
+- [x] `recipe-builder.page.ts` — inject AiRecipeDraftService, add prefillFromAiDraft, call from ngOnInit
+- [x] `public/assets/data/dictionary.json` — add AI recipe translation keys to "general" section
+
+---
+
+### Tech Debt — Audit 2026-03-26 (completed)
+- [x] Extract `trim().toLowerCase().replace(/\s+/g, '_')` key-sanitization into `core/utils/sanitize-key.util.ts` (2 services: `translation-key-modal.service.ts:30`, `label-creation-modal.service.ts:33`)
+
+---
 
 ### Plan 216 — Dead Code Audit Cleanup (`plans/216-dead-code-audit-cleanup.plan.md`)
 - [x] `tsconfig.json` — remove `@components/*` alias
@@ -1314,3 +1490,168 @@ Update status after each sub-task. Link plan files here when applicable.
 - [ ] MEDIUM: One Master-section pointer line per Lite agent (delegation cross-references)
 - [ ] Adoption: Promote `.claude/toBe/` foundation + agents to canonical paths when 1â€”3 satisfied; run validate-agent-refs
 - [ ] Verification: breadcrumb-navigator + ui-inspector SKILLs hold canonical protocol detail before stripping Legacy agents
+
+---
+
+### Plan 240 — Validation Checklist Workflow Integration (`plans/240-validation-checklist-workflow-integration.plan.md`)
+- [x] Create `.claude/instructions/` directory (prerequisite — path didn't exist)
+- [x] Create `.claude/instructions/validation-checklist.md` — reusable checklist instruction with tree-format output
+- [x] Add `@.claude/instructions/validation-checklist.md` to top of `.claude/commands/execute-it.md`
+
+---
+
+### Plan 239 — Incomplete badge + ternary guard modal + AI-prefill fix (`plans/239-incomplete-badge-ternary-modal-guard-fix.plan.md`)
+- [x] `recipe-ingredients-table.component.ts` — Router inject + isProductIncomplete + navigateToEditProduct
+- [x] `recipe-ingredients-table.component.html` — incomplete-row class + badge button
+- [x] `recipe-ingredients-table.component.scss` — .incomplete-row, .incomplete-badge, pulse animation
+- [x] `dictionary.json` — product_incomplete_hint, save_and_leave, error_saving_recipe
+- [x] `confirm-modal.service.ts` — openTernary(), showSaveButton, saveButtonLabel, ConfirmModalResult
+- [x] `confirm-modal.component.html` — string choose() calls + conditional 3rd button
+- [x] `confirm-modal.component.spec.ts` — update mock + assertions
+- [x] `pending-changes.guard.ts` — saveAndWait interface + ternary vs binary flow
+- [x] `recipe-builder.page.ts` — saveAndWait() + hasRealChanges() failsafe for new recipes
+
+---
+
+### Plan 236/237/238 — AI Recipe: ingredients fix + prompt engineering + few-shot loop
+- [x] `gemini.service.ts` — Replace SYSTEM_PROMPT with domain-aware rules + English canonical units
+- [x] `recipe-builder.page.ts` — Unit fallback in `prefillFromAiDraft` (safeUnit via `allUnitKeys_()`)
+- [x] `recipe-ingredients-table.component.html` — Extend `[initialQuery]` to pre-fill AI-suggested names
+- [x] Create `src/app/core/utils/gemini-shots.util.ts` — few-shot localStorage util
+- [x] `gemini.service.ts` — Inject few-shot block into generateRecipe prompt
+- [x] `ai-recipe-modal.component.ts` — Call `addGeminiShot` on “Open in Builder”
+
+---
+
+### Plan 235 — Gemini model fix + usage tracker (`plans/235-gemini-model-fix-usage-tracker.plan.md`)
+- [x] `gemini.service.ts` — change model URL from `gemini-2.0-flash` to `gemini-2.5-flash-lite`
+- [x] `gemini.service.ts` — replace two-pass fence regex with single non-anchored `/\`\`\`json|\`\`\`/g`
+- [x] Create `src/app/core/utils/gemini-usage.util.ts` — localStorage usage tracker with limit guard
+- [x] `gemini.service.ts` — import util, add limit guard before fetch, call increment after success
+- [x] `ai-recipe-modal.component.ts` — add `computed` + `OnInit` imports; implement interface; add usage signal, computed, refreshUsage
+- [x] `ai-recipe-modal.component.html` — insert `.ai-usage-bar` block above generate button
+- [x] `ai-recipe-modal.component.scss` — append `.ai-usage-bar` styles
+
+---
+
+### Plan 234 — Filter panel default-closed + animation fix (`plans/234-filter-panel-default-closed-animation-fix.plan.md`)
+- [x] `panel-preference.util.ts` — change both `return true` fallbacks to `return false`
+- [x] `list-shell.component.scss` — add `overflow: visible` to `.list-container` in tablet media block
+- [x] `list-shell.component.scss` — add `border-inline-start-width 0.3s var(--ease-spring)` to desktop `.filter-panel` transition
+- [x] `ng build` — verify zero errors
+
+---
+
+### Plan 242 — Dev Guest Backend Token (`plans/242-dev-guest-backend-token.plan.md`)
+- [x] `server/models/user.model.js` — add `role` field; make `passwordHash` optional
+- [x] `server/routes/auth.js` — add `POST /guest` dev-only route with JWT + refresh cookie
+- [x] `src/app/core/services/user.service.ts` — add `callBackendGuestLogin()` + `loginAsGuestBackend()`
+- [x] `src/app/core/components/auth-modal/auth-modal.component.ts` — restore `isDev`; branch `loginAsGuest()` on `useBackendAuth`
+
+---
+
+### Plan 241 — Switch FoodVibe to MongoDB Backend Mode (`plans/241-backend-switch.plan.md`)
+- [x] `server/routes/generic.js` — remove blanket verifyToken; add per-route middleware on write routes; update comment
+- [x] `src/environments/environment.ts` — revert to useBackend: false, useBackendAuth: false
+- [x] Create `src/environments/environment.local.ts` — useBackend: true, useBackendAuth: true
+- [x] `angular.json` — add local build + serve configurations
+- [x] `package.json` — add dev:local script
+- [x] `user.service.ts` — fix login() backend path to hash password before sending
+
+---
+
+### Plan 229 — Point dev environment at local Express/MongoDB (`plans/229-dev-env-local-backend.plan.md`) — superseded by Plan 241
+- [x] Edit `src/environments/environment.ts`: set apiUrl/authApiUrl to localhost:3000, useBackend/useBackendAuth to true (reverted in Plan 241 — replaced by environment.local.ts approach)
+- [x] Run `ng build --configuration production` and confirm zero errors
+
+---
+
+### Plan 241 — gstack Integration & Agent Rewiring (`plans/241-gstack-integration-agent-rewiring.plan.md`)
+- [x] Phase 2: `CLAUDE.md` — append gstack section after Branch Rule
+- [x] Phase 3: Delete `.claude/agents/ui-inspector.md`
+- [x] Phase 4: `team-leader.md` — delete UI Inspector callout + rewrite Section 4 Visual QA
+- [x] Phase 5: `qa-engineer.md` — delete UI Inspector callout + rewrite Section 4 + append /investigate to Section 2
+- [x] Phase 6: `security-officer.md` — append /cso callout after Model Guidance line
+- [x] Phase 7A: `copilot-instructions.md` — delete UI Inspector trigger block (lines 50–54)
+- [x] Phase 7B: `copilot-instructions.md` — insert gstack Visual QA + /investigate + /cso triggers
+- [x] Phase 7C: `copilot-instructions.md` — rewrite UI Verification Gate to reference /qa
+- [x] Phase 7D: `copilot-instructions.md` — delete UI Inspector row from §0.5 Model Routing table
+- [x] Phase 8A: `agent.md` — delete UI Inspector row from Agent Task Force table
+- [x] Phase 8B: `agent.md` — append gstack line to Core Skills section
+- [x] Phase 8C: `agent.md` — rewrite Post-Execution Gate to add /qa step for layout changes
+- [x] Phase 9A: `validate-agent-refs.md` — delete ui-inspector.md from expected agents list
+- [x] Phase 9B: `validate-agent-refs.md` — remove ui-inspector from bash loop
+- [x] Phase 9C: `validate-agent-refs.md` — update expected agent count 7→6
+- [x] Phase 10A: `todo.md` — mark Plan 197 Phase 5 as OBSOLETE
+- [x] Phase 10B: `todo.md` — check Plan 198 section for ui-inspector reference (Plan 198 is Done, no open tasks)
+- [x] Phase 10C: `truly-open-tasks.md` — mark Plan 197 Phase 5 as OBSOLETE
+
+---
+
+### Plan 245 — Unified context-aware AI modal (`plans/245-unified-ai-modal.plan.md`)
+- [x] server/routes/ai.js — add POST /api/v1/ai/patch-recipe endpoint with smart partial-patch system prompt
+- [x] gemini.service.ts — add `patchRecipe(currentRecipe, instruction)` method calling new endpoint
+- [x] ai-recipe-modal.service.ts — extend to support `open('create')` and `open('edit', currentRecipe, onPatch)`
+- [x] ai-recipe-modal.component.ts + .html — add edit-mode UI (instruction textarea + patch preview card)
+- [x] recipe-builder.page.ts — replace `onImportTextClick` + `RecipeTextImportModalService` with `onAiEditClick` wired to AiRecipeModalService edit mode
+- [x] recipe-header.component.ts + .html — remove `importTextClick` output + `import-text-btn`
+- [x] app.component.ts + .html — remove RecipeTextImportModalComponent
+- [x] Delete recipe-text-import-modal component (3 files) + recipe-text-import-modal.service.ts
+- [x] ng build — verify zero errors
+
+---
+
+### Plan 246 — Create /evaluate-me command (`plans/246-evaluate-me-command.plan.md`)
+- [x] Create `.claude/retrospectives/` directory with `.gitkeep`
+- [x] Create `.claude/commands/evaluate-me.md` with full retrospective prompt
+- [x] Update `agent.md` commands table to include evaluate-me
+
+---
+
+### Plan 244 — Auto-solve command (`plans/244-auto-solve-command.plan.md`)
+- [x] Create `.claude/commands/auto-solve.md` with full command content (both Playwright prefixes in allowed-tools)
+- [x] Edit `.claude/settings.json` — remove "playwright" from disabledMcpjsonServers
+- [x] Edit `agent.md` — add auto-solve row to commands table
+- [x] Edit `.claude/copilot-instructions.md` — add /auto-solve trigger after Security review line
+
+---
+
+### Plan 157 — Fix sidebar alignment and close on breakpoint (`plans/157-fix-sidebar-alignment-close-breakpoint.plan.md`)
+- [x] List-shell: remove margin-block and max-height from .filter-panel in 768px block
+- [x] Inventory list: add afterNextRender + matchMedia to close panel when viewport <= 768px
+
+---
+
+### Plan 174 — Custom select chip and standalone state (`plans/174-custom-select-chip-and-standalone-state.plan.md`) [TRIAGED 2026-04-02]
+- [x] Cook-view ingredients index: add variant="chip" and typeToFilter to unit selects for consistency with recipe builder
+- [x] Verify in app: recipe builder and cook-view ingredients index unit dropdowns
+
+---
+
+### Tech Debt — Audit 2026-03-26
+- [x] Remove commented import `ProductDataService` at `product-form.component.ts:8` and commented statement at line 927
+
+---
+
+### Plan 219 — Recipe header photo-picker (`plans/219-recipe-header-photo-picker.plan.md`)
+- [x] recipe.model.ts — add `imageUrl_?: string` after `hiddenBy?`
+- [x] recipe-builder.page.ts — add `recipeImageUrl_` signal after `isApproved_`
+- [x] recipe-builder.page.ts — patch `patchFormFromRecipe` to set `recipeImageUrl_`
+- [x] recipe-builder.page.ts — replace `buildRecipeFromForm` body to spread `imageUrl_`
+- [x] recipe-builder.page.ts — add `recipeImageUrl_.set(null)` as first line of `resetToNewForm_`
+- [x] recipe-builder.page.ts — add `onImageChange` method to `//UPDATE` group
+- [x] recipe-builder.page.html — add `[imageUrl]`, `(imageChange)`, `[readonlyMode]` to `<app-recipe-header>`
+- [x] recipe-header.component.ts — add `readonlyMode` input, `imageChange` output, `onImageSelected` method
+- [x] recipe-header.component.html — replace `.image-square` div with label+input+overlay structure
+- [x] app.config.ts — import `Camera` and add to `LucideAngularModule.pick`
+- [x] recipe-header.component.scss — add cursor + `.img-upload-label` rules (+ fix: display:block + object-position:center)
+
+---
+
+### Plan 204-R — Inventory product-price util extraction (`plans/204-R-inventory-product-price-util.plan.md`)
+- [x] Create `src/app/core/utils/product-price.util.ts` — three pure exports: `getProductUnits`, `getPricePerUnit`, `calcBuyPriceGlobal`
+- [x] Delete dead `getProductUnits` method from component (no call sites)
+- [x] Replace `getPricePerUnit` body in component with 3-line wrapper (keeps 2-arg template signature)
+- [x] Replace `onPriceChange` conversion block with `calcBuyPriceGlobal(...)` call; add util import
+- [x] Leave `onUnitChange` conversion block unchanged (inverse math — cannot reuse)
+- [x] Verify `ng build` passes

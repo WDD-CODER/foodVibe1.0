@@ -29,13 +29,13 @@ import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.
 import { HeroFabService } from '@services/hero-fab.service';
 
 const DAY_LABELS = [
-  'general.day_sun',
-  'general.day_mon',
-  'general.day_tue',
-  'general.day_wed',
-  'general.day_thu',
-  'general.day_fri',
-  'general.day_sat',
+  'day_sun',
+  'day_mon',
+  'day_tue',
+  'day_wed',
+  'day_thu',
+  'day_fri',
+  'day_sat',
 ];
 type SupplierBulkField = 'delivery_days_' | 'lead_time_days_';
 
@@ -69,6 +69,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   protected searchQuery_ = signal('');
   protected deletingId_ = signal<string | null>(null);
   protected editingId_ = signal<string | null>(null);
+  protected closingId_ = signal<string | null>(null);
   protected isSavingEdit_ = signal(false);
   protected isPanelOpen_ = signal(true);
   protected carouselHeaderIndex_ = signal(0);
@@ -105,7 +106,6 @@ export class SupplierListComponent implements OnInit, OnDestroy {
     afterNextRender(() => {
       if (typeof window === 'undefined') return;
       const q = window.matchMedia('(max-width: 768px)');
-      if (q.matches) this.isPanelOpen_.set(false);
       q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); });
     });
   }
@@ -245,7 +245,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
       return;
     }
     if (this.editingId_() === item._id) {
-      this.editingId_.set(null);
+      this.closeWithAnimation();
       return;
     }
     void this.onEdit(item);
@@ -253,7 +253,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
 
   protected toggleRowEdit(item: Supplier): void {
     if (this.editingId_() === item._id) {
-      this.editingId_.set(null);
+      this.closeWithAnimation();
     } else {
       void this.onEdit(item);
     }
@@ -305,13 +305,25 @@ export class SupplierListComponent implements OnInit, OnDestroy {
     }
   }
 
+  private closeWithAnimation(): void {
+    const id = this.editingId_();
+    if (!id) return;
+    this.closingId_.set(id);
+    setTimeout(() => {
+      if (this.closingId_() === id) {
+        this.editingId_.set(null);
+        this.closingId_.set(null);
+      }
+    }, 200);
+  }
+
   protected async onInlineSave(): Promise<void> {
     const ok = await this.saveCurrentInlineEdit();
-    if (ok) this.editingId_.set(null);
+    if (ok) this.closeWithAnimation();
   }
 
   protected onInlineCancel(): void {
-    this.editingId_.set(null);
+    this.closeWithAnimation();
   }
 
   /** Close inline panel on click outside; confirm if form has unsaved changes. */
@@ -323,7 +335,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
       );
       if (!discard) return;
     }
-    this.editingId_.set(null);
+    this.closeWithAnimation();
   }
 
   async onDelete(item: Supplier): Promise<void> {

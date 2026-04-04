@@ -1,0 +1,58 @@
+{
+    "20260404142724": [
+        {
+            "status": "started",
+            "when": "2026-04-04 14:27:24.843807+03:00",
+            "limit": 1,
+            "files_requested": [
+                "PRICE_FULL_FILE"
+            ],
+            "store_id": null,
+            "files_names_to_scrape": null,
+            "when_date": null,
+            "filter_nul": false,
+            "filter_zero": false,
+            "suppress_exception": true
+        },
+        {
+            "status": "collected",
+            "when": "2026-04-04 14:27:25.860921+03:00",
+            "file_name_collected_from_site": [
+                "PriceFull7290876100000-001-008-20260404-001005.gz"
+            ],
+            "links_collected_from_site": ""
+        },
+        {
+            "status": "downloaded",
+            "when": "2026-04-04 14:27:26.465358+03:00",
+            "results": [
+                {
+                    "file_name": "PriceFull7290876100000-001-008-20260404-001005.gz",
+                    "downloaded": true,
+                    "extract_succefully": true,
+                    "restart_and_retry": false,
+                    "error": null
+                }
+            ]
+        },
+        {
+            "status": "estimated_size",
+            "when": "2026-04-04 14:27:26.471893+03:00",
+            "folder_size": {
+                "size": 4366126,
+                "unit": "MB",
+                "folder": "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\FreshMarketAndSuperDosh",
+                "folder_content": [
+                    "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\FreshMarketAndSuperDosh\\PriceFull7290876100000-001-008-20260404-001005.xml"
+                ]
+            },
+            "completed_successfully": true
+        }
+    ],
+    "verified_downloads": [
+        {
+            "file_name": "PriceFull7290876100000-001-008-20260404-001005.gz",
+            "when": "2026-04-04 14:27:26.468372+03:00"
+        }
+    ]
+}

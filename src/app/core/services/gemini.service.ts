@@ -1,65 +1,115 @@
-import { computed, inject, Injectable, signal } from '@angular/core'
+import { inject, Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
-import { Observable, map } from 'rxjs'
+import { Observable, map, firstValueFrom } from 'rxjs'
 import type { AiRecipeDraft } from './ai-recipe-draft.service'
+import { incrementGeminiUsage, isGeminiLimitReached } from '../utils/gemini-usage.util'
 import type { ParsedResult } from '@models/parsed-result.model'
 import { environment } from '../../../environments/environment'
 
-const SYSTEM_PROMPT = `אתה שף מקצועי ועוזר AI. המשתמש יתאר מתכון בעברית או בשפה אחרת.
-עליך להחזיר JSON בלבד (ללא הסברים, ללא markdown), בפורמט הבא:
-{
-  "name_hebrew": "שם המתכון בעברית",
-  "recipe_type": "dish" | "preparation",
-  "yield_amount": מספר,
-  "yield_unit": "יחידת תפוקה (גרם/מ\\"ל/מנה וכו')",
-  "ingredients": [
-    { "name": "שם המרכיב בעברית", "amount": מספר, "unit": "יחידה" }
-  ],
-  "steps": ["שלב 1", "שלב 2", ...]
+export interface AiRecipePatch {
+  name_hebrew?: string
+  yield_amount?: number
+  yield_unit?: string
+  ingredients?: { name: string; amount: number; unit: string }[]
+  steps?: string[]
+  equipment?: { name: string; quantity: number }[]
 }
-השתמש ב-"dish" כאשר המתכון הוא מנה מוכנה לאכילה, ו-"preparation" כאשר הוא בסיס/רוטב/תבלין.
-`
+
+const MAX_RETRIES = 5
+const RETRY_DELAY_MS = 800
+
+async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
+  let lastError: unknown
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      return await fn()
+    } catch (err) {
+      lastError = err
+      if (attempt < MAX_RETRIES) {
+        await new Promise(r => setTimeout(r, RETRY_DELAY_MS))
+      }
+    }
+  }
+  throw lastError
+}
 
 @Injectable({ providedIn: 'root' })
 export class GeminiService {
   private readonly http_ = inject(HttpClient)
   private readonly authBase_ = environment.authApiUrl
 
-  readonly apiKey_ = signal<string>(localStorage.getItem('FV_GEMINI_API_KEY') ?? '')
-  readonly hasKey = computed(() => this.apiKey_().length > 0)
-
-  setApiKey(key: string): void {
-    localStorage.setItem('FV_GEMINI_API_KEY', key)
-    this.apiKey_.set(key)
-  }
-
   async generateRecipe(prompt: string): Promise<AiRecipeDraft> {
-    const key = this.apiKey_()
-    if (!key) throw new Error('Gemini API key is not set')
+    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: SYSTEM_PROMPT + prompt }] }]
-      })
-    })
-
-    if (!response.ok) {
-      throw new Error(`Gemini request failed: ${response.status} ${response.statusText}`)
-    }
-
-    const data = await response.json() as { candidates?: { content?: { parts?: { text?: string }[] } }[] }
-    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
-    const cleaned = raw.replace(/```json?\n?/g, '').replace(/```$/g, '').trim()
-    return JSON.parse(cleaned) as AiRecipeDraft
+    const data = await withRetry(() =>
+      firstValueFrom(
+        this.http_.post<{ recipe: AiRecipeDraft }>(`${this.authBase_}/api/v1/ai/generate`, { prompt })
+      )
+    )
+    incrementGeminiUsage()
+    return data.recipe
   }
 
   parseText(rawText: string): Observable<ParsedResult> {
+    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
     return this.http_.post<{ result: ParsedResult }>(
       `${this.authBase_}/api/v1/ai/parse-text`,
       { rawText }
-    ).pipe(map(res => res.result))
+    ).pipe(
+      map(res => {
+        incrementGeminiUsage()
+        return res.result
+      })
+    )
+  }
+
+  async generateFromImage(file: File): Promise<AiRecipeDraft> {
+    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
+
+    const imageBase64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const result = reader.result as string
+        // Strip the data-url prefix (e.g. "data:image/jpeg;base64,")
+        resolve(result.split(',')[1])
+      }
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
+
+    const data = await withRetry(() =>
+      firstValueFrom(
+        this.http_.post<{ recipe: AiRecipeDraft }>(`${this.authBase_}/api/v1/ai/generate-from-image`, {
+          imageBase64,
+          mimeType: file.type,
+        })
+      )
+    )
+    incrementGeminiUsage()
+    return data.recipe
+  }
+
+  async generateFromUrl(url: string): Promise<AiRecipeDraft> {
+    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
+
+    const data = await withRetry(() =>
+      firstValueFrom(
+        this.http_.post<{ recipe: AiRecipeDraft }>(`${this.authBase_}/api/v1/ai/generate-from-url`, { url })
+      )
+    )
+    incrementGeminiUsage()
+    return data.recipe
+  }
+
+  async patchRecipe(currentRecipe: AiRecipeDraft, instruction: string): Promise<AiRecipePatch> {
+    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
+
+    const data = await withRetry(() =>
+      firstValueFrom(
+        this.http_.post<{ changes: AiRecipePatch }>(`${this.authBase_}/api/v1/ai/patch-recipe`, { currentRecipe, instruction })
+      )
+    )
+    incrementGeminiUsage()
+    return data.changes
   }
 }

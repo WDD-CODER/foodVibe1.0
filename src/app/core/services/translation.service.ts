@@ -55,11 +55,11 @@ export class TranslationService {
           return acc;
         }, {} as Record<string, string>);
 
-      this.masterDict.set(finalDict);
-      this.reverseMap.set(this.buildReverseMap(finalDict));
+      this.masterDict.set(sortedFinalDict);
+      this.reverseMap.set(this.buildReverseMap(sortedFinalDict));
 
       try {
-        localStorage.setItem('DICTIONARY_CACHE', JSON.stringify(finalDict))
+        localStorage.setItem('DICTIONARY_CACHE', JSON.stringify(sortedFinalDict))
       } catch (err) {
         this.logging.warn({ event: 'translation.cache.write_failed', message: 'Dictionary cache write failed (quota or access)', context: { err } })
       }

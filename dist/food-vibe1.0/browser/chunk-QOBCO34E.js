@@ -1,1 +1,0 @@
-import{J as t,da as i}from"./chunk-QUMV6NWP.js";var o=class e{isOpen_=i(!1);isOpen=this.isOpen_.asReadonly();open(){this.isOpen_.set(!0)}close(){this.isOpen_.set(!1)}static \u0275fac=function(s){return new(s||e)};static \u0275prov=t({token:e,factory:e.\u0275fac,providedIn:"root"})};export{o as a};

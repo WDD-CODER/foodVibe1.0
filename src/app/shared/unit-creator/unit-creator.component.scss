@@ -58,7 +58,7 @@
   padding: 0.75rem 1rem;
 
   background: var(--bg-error, rgba(254, 226, 226, 0.95));
-  color: var(--color-error, #b91c1c);
+  color: var(--color-danger-hover); /* --color-danger-hover equals #b91c1c */
 
   border-radius: var(--radius-md);
 

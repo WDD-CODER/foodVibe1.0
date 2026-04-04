@@ -24,11 +24,17 @@
     /* Keep on compositor layer so scale transition doesn't re-rasterize at end (no blur). */
     transform: translateZ(0);
     backface-visibility: hidden;
-    transition: transform 0.2s ease-out;
+    transition: transform 0.3s var(--ease-spring),
+                filter 0.2s ease;
 
-    &:hover:not(.stamped):not(.disabled) {
-      transform: translateZ(0) scale(1.05);
-      filter: brightness(1.08) 
+    &:hover:not(.disabled) {
+      transform: translateZ(0) scale(1.1);
+      filter: brightness(1.06);
+    }
+
+    &:active:not(.disabled) {
+      transform: translateZ(0) scale(0.92);
+      transition-duration: 0.1s;
     }
 
     &:disabled,
@@ -42,9 +48,9 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
     }
 
-    .approve-stamp__img{
-width: 5rem;
-height: 5rem;
+    .approve-stamp__img {
+      width: 3.5rem;
+      height: 3.5rem;
     }
   }
 
@@ -104,9 +110,27 @@ height: 5rem;
     .approve-stamp__text {
       font-size: 0.45rem;
     }
-    .approve-stamp__img{
-
+    .approve-stamp__img {
+      width: 3rem;
+      height: 3rem;
     }
   }
 
-  
+  // [mobile] Clear the fixed bottom nav (56px = 3.5rem) so the stamp is never hidden
+  // Both FAB and stamp use the same inset-block-end so they sit at the same vertical position.
+  @media (max-width: 620px) {
+    .approve-stamp {
+      inset-block-end: calc(3.5rem + env(safe-area-inset-bottom, 0px) + 0.75rem);
+      z-index: 210;
+    }
+
+    .approve-stamp__img {
+      width: 3.5rem;
+      height: 3.5rem;
+    }
+
+    .approve-stamp__seal {
+      width: 3.5rem;
+      height: 3.5rem;
+    }
+  }

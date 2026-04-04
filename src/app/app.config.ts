@@ -3,6 +3,7 @@ import { GlobalErrorHandler } from './core/services/global-error.handler'
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import {
+  ChefHat,
   AlertCircle,
   AlertTriangle,
   ArrowDown,
@@ -20,6 +21,7 @@ import {
   ChevronRight,
   ChevronUp,
   Circle,
+  Check,
   CircleCheck,
   CircleUserRound,
   CircleX,
@@ -32,7 +34,6 @@ import {
   Eye,
   EyeOff,
   Sparkles,
-  ScanText,
   FileDown,
   FilePlus,
   Filter,
@@ -56,6 +57,7 @@ import {
   Plus,
   PlusCircle,
   Printer,
+  RefreshCw,
   RotateCcw,
   Save,
   Scale,
@@ -74,7 +76,9 @@ import {
   Upload,
   Utensils,
   UtensilsCrossed,
-  X
+  X,
+  Type,
+  Link
 } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { provideHttpClient, withInterceptors } from '@angular/common/http'
@@ -130,6 +134,7 @@ export const appConfig: ApplicationConfig = {
         Truck,
         Package,
         CalendarClock,
+        RefreshCw,
         RotateCcw,
         History,
         BookOpen,
@@ -145,6 +150,7 @@ export const appConfig: ApplicationConfig = {
         UtensilsCrossed,
         ChevronUp,
         Circle,
+        Check,
         CircleCheck,
         CircleX,
         LayoutDashboard,
@@ -166,7 +172,9 @@ export const appConfig: ApplicationConfig = {
         Star,
         Lock,
         Sparkles,
-        ScanText
+        ChefHat,
+        Type,
+        Link
       })
     )
   ]

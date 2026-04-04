@@ -27,7 +27,7 @@ Run `git status`.
 
 Present options:
 
-- `A` — Merge PR + remove worktree
+- `A` — Merge PR → then remove worktree via /exit (see Phase 3)
 - `B` — Keep worktree open (no cleanup)
 - `X` — Cancel
 
@@ -35,7 +35,15 @@ Present options:
 
 ## Phase 3: Cleanup (only if A selected)
 
+> **CRITICAL:** Never run `git worktree remove`, `rm -rf`, or any programmatic directory deletion on the active worktree. The only safe removal path is `/exit → Remove worktree` in the Claude Code UI. Attempting removal from inside the worktree always fails with a fatal Git error.
+
+> **Why we can't delete the remote branch here:** The worktree is still checked out on this branch — `git push origin --delete` will be blocked. Instead, write a breadcrumb for the main session to pick up.
+
 1. Kill dev server by port: read `.worktree-port`, then `netstat -ano` + `taskkill /PID <pid> /F`
 2. `git -C <mainRepoPath> pull origin main`
-3. Output: `"Type /exit → select 'Remove worktree' to complete cleanup. Claude Code handles the directory removal safely after exiting."`
-4. Report: `"Ready to exit. Run /exit → Remove worktree to complete cleanup."`
+3. **Write cleanup breadcrumb** — append the worktree branch name to `<mainRepoPath>/.worktree-cleanup`:
+   ```
+   worktree-<name>
+   ```
+   One branch name per line. Create the file if it doesn't exist.
+4. Tell the user: "✓ Merged. To remove the worktree, type `/exit` in Claude Code, then choose **Remove worktree** from the menu. Do not close the terminal first."

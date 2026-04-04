@@ -323,6 +323,19 @@
     }
   }
 
+  .logistics-chip--unresolved {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+
+    .logistics-chip-label {
+      color: var(--color-danger);
+    }
+
+    .logistics-chip-qty {
+      color: var(--color-danger);
+    }
+  }
+
   .logistics-chip-label {
     width: fit-content;
     white-space: nowrap;
@@ -352,8 +365,7 @@
     display: flex;
     align-items: center;
 
-    flex: 0 1 53.33%;
-    max-width: 53.33%;
+    flex: 1 1 0;
     min-width: 0;
 
     padding-inline: var(--rb-gap-mid);
@@ -636,6 +648,6 @@
 }
 
 @keyframes just-filled-fade {
-  0%   { box-shadow: 0 0 0 2px var(--color-primary, #4CAF50); }
+  0%   { box-shadow: 0 0 0 2px var(--color-primary); }
   100% { box-shadow: none; }
 }

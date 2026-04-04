@@ -1,4 +1,4 @@
-import { Component, input, inject, output, signal, computed, ChangeDetectorRef } from '@angular/core';
+import { Component, input, inject, output, signal, computed, ChangeDetectorRef, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -50,19 +50,47 @@ export class RecipeHeaderComponent {
   // OUTPUTS
   openUnitCreator = output<string>();
   imageChange = output<string>();
-  importTextClick = output<void>();
 
   // YIELD MANAGER
   readonly yield = new RecipeYieldManager(
     this.form,
     this.unitRegistryService.allUnitKeys_,
     this.resetTrigger,
-    this.fb
+    this.fb,
+    {
+      totalWeightG: this.totalWeightG,
+      totalVolumeMl: this.totalVolumeMl,
+      getConversion: (key: string) => this.unitRegistryService.getConversion(key),
+    }
   )
+
+  constructor() {
+    effect(() => {
+      const computed = this.yield.computedYieldAmount_();
+      if (computed !== null && !this.yield.isManualOverride_()) {
+        this.yield.syncYieldFromMetrics();
+      }
+    });
+  }
+
+  // VALIDATION
+  validationErrors_ = signal<Record<string, string>>({});
+
+  validate(): boolean {
+    const errors: Record<string, string> = {};
+    const f = this.form();
+    const name = (f.get('name_hebrew')?.value ?? '').toString().trim();
+    if (!name) errors['name_hebrew'] = 'field_name_required';
+    const yieldAmount = this.yield.primaryAmount_();
+    if (!yieldAmount || yieldAmount <= 0) errors['yield_amount'] = 'field_amount_required';
+    const yieldUnit = this.yield.primaryUnitLabel_();
+    if (!yieldUnit?.trim()) errors['yield_unit'] = 'field_unit_required';
+    this.validationErrors_.set(errors);
+    return Object.keys(errors).length === 0;
+  }
 
   // SIGNALS & CONSTANTS
   readonly placeholderPath = 'assets/style/img/recipe_placeholder.png';
-  activeUnit = signal<string | null>(null);
 
   // LABELS
   protected labelMultiSelectOptions_ = computed(() => {

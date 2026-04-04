@@ -1,0 +1,60 @@
+{
+    "20260404142749": [
+        {
+            "status": "started",
+            "when": "2026-04-04 14:27:49.155239+03:00",
+            "limit": 1,
+            "files_requested": [
+                "PRICE_FULL_FILE"
+            ],
+            "store_id": null,
+            "files_names_to_scrape": null,
+            "when_date": null,
+            "filter_nul": false,
+            "filter_zero": false,
+            "suppress_exception": true
+        },
+        {
+            "status": "collected",
+            "when": "2026-04-04 14:27:51.498656+03:00",
+            "file_name_collected_from_site": [
+                "PriceFull7290058173198-043-202604041004"
+            ],
+            "links_collected_from_site": [
+                "http://zolvebegadol.binaprojects.com//Download.aspx?FileNm=PriceFull7290058173198-043-202604041004.gz"
+            ]
+        },
+        {
+            "status": "downloaded",
+            "when": "2026-04-04 14:27:55.464004+03:00",
+            "results": [
+                {
+                    "file_name": "PriceFull7290058173198-043-202604041004",
+                    "downloaded": true,
+                    "extract_succefully": true,
+                    "error": null,
+                    "restart_and_retry": false
+                }
+            ]
+        },
+        {
+            "status": "estimated_size",
+            "when": "2026-04-04 14:27:55.469238+03:00",
+            "folder_size": {
+                "size": 2721492,
+                "unit": "MB",
+                "folder": "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\ZolVeBegadol",
+                "folder_content": [
+                    "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\ZolVeBegadol\\PriceFull7290058173198-043-202604041004.aspx.xml"
+                ]
+            },
+            "completed_successfully": true
+        }
+    ],
+    "verified_downloads": [
+        {
+            "file_name": "PriceFull7290058173198-043-202604041004",
+            "when": "2026-04-04 14:27:55.465702+03:00"
+        }
+    ]
+}

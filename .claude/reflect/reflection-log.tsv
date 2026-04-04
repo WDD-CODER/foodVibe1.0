@@ -1,0 +1,14 @@
+date	skill	commit	skill_score	size_bytes	status	hypothesis	notes
+2026-04-03	angularComponentStructure	e4cd794	95.5	2917	baseline	initial	4/5 TCs fully passed; 1 anti-pattern hit: no rule against `any` type in TC-003
+2026-04-03	angularComponentStructure	e1d73bf	100.0	3012	keep	add-no-any-type-rule	Score 95.5→100.0; added explicit no-any rule to Component Rules block
+2026-04-03	cssLayer	e1d73bf	95.7	2800	baseline	initial	4/5 TCs fully passed; TC-004 B4 fails: no rule to replace duplicated styles with new .c-* class
+2026-04-03	cssLayer	02a5777	100.0	2892	keep	add-abstraction-replace-step	Score 95.7→100.0; Phase 3 now closes the loop: replace duplicated styles in component files after creating .c-* abstraction
+2026-04-03	cssLayer	02a5777	68.2	2892	baseline	hardened-tc003	TC-003 replaced with ambiguous-property variant; 3 behaviors fail (gap/z-index/animation unmapped), 4 anti-patterns triggered; score ceiling confirmed at 68.2 on harder suite
+2026-04-03	cssLayer	9c6d546	81.8	2913	keep	expand-layout-group	Added gap + z-index to Layout group; B1 passes, AP1+AP3 cleared; score 68.2→81.8
+2026-04-03	cssLayer	53e4cb0	90.9	2923	keep	expand-effects-add-animation	Added animation to Effects group; B5 passes, AP4 cleared; score 81.8→90.9; budget=2 reached
+2026-04-03	cssLayer	6750970	90.9	2923	baseline	re-baseline	new report format test; TC-003 B4+AP2 still failing on border-radius (not explicitly mapped in skill)
+2026-04-03	cssLayer	6750970	90.9	2923	baseline	initial	Loop start; TC-003 B4+AP2 failing — border-radius not mapped
+2026-04-03	cssLayer	ed62271	100.0	2937	keep	add-border-radius-to-structure	Score 90.9→100.0; border-radius added to Structure group; TC-003 B4+AP2 both resolved
+2026-04-03	cssLayer	ed62271	97.5	2940	baseline	add-tests-batch1	TC-001–TC-010; 39/40 behaviors; TC-009 B2 gap: no rule for breakpoint placement order
+2026-04-03	cssLayer	04cbdf8	100.0	3033	keep	add-breakpoint-placement-rule	score 97.5 → 100.0; mutation_score 100% (1/1 detected)
+2026-04-04	cssLayer	93dfd2f	100.0	3033	baseline	initial	All 10 TCs pass at 100.0 — improvement loop skipped. Session revealed real violations (margin-bottom, border-bottom, box-shadow in Group 4) not covered by existing TCs.

@@ -55,13 +55,13 @@
       }
 
       &.save {
-        background: #22b29a;
+        background: #22b29a; /* intentional: teal brand variant — slightly lighter than --color-primary */
         color: var(--color-text-on-primary);
         border-color: #22b29a;
         font-weight: 600;
 
         &:hover:not(:disabled) {
-          background: #1ea088;
+          background: #1ea088; /* intentional: hover shade for the above brand variant */
         }
       }
     }

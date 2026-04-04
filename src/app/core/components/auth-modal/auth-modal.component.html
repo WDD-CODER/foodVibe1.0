@@ -30,7 +30,9 @@
                    (input)="errorKey.set(null)"
                    name="name"
                    autocomplete="username"
-                   required />
+                   required
+                   [class.c-input--invalid]="errorKey() === 'name_required' || errorKey() === 'username_taken'"
+                   [attr.aria-invalid]="(errorKey() === 'name_required' || errorKey() === 'username_taken') ? true : null" />
             @if (errorKey() === 'user_not_found' || errorKey() === 'name_required' || errorKey() === 'username_taken') {
               <p class="auth-error">{{ errorKey()! | translatePipe }}</p>
             }
@@ -46,7 +48,9 @@
                      (input)="errorKey.set(null)"
                      name="email"
                      autocomplete="email"
-                     required />
+                     required
+                     [class.c-input--invalid]="errorKey() === 'email_required'"
+                     [attr.aria-invalid]="errorKey() === 'email_required' ? true : null" />
               @if (errorKey() === 'email_required') {
                 <p class="auth-error">{{ errorKey()! | translatePipe }}</p>
               }
@@ -63,7 +67,9 @@
                      (input)="errorKey.set(null)"
                      name="password"
                      [autocomplete]="isSignUp ? 'new-password' : 'current-password'"
-                     required />
+                     required
+                     [class.c-input--invalid]="errorKey() === 'password_required'"
+                     [attr.aria-invalid]="errorKey() === 'password_required' ? true : null" />
               <button type="button"
                       class="password-toggle"
                       (click)="showPassword_.set(!showPassword_())"
@@ -87,7 +93,9 @@
                        (input)="errorKey.set(null)"
                        name="confirmPassword"
                        autocomplete="new-password"
-                       required />
+                       required
+                       [class.c-input--invalid]="errorKey() === 'passwords_do_not_match'"
+                       [attr.aria-invalid]="errorKey() === 'passwords_do_not_match' ? true : null" />
                 <button type="button"
                         class="password-toggle"
                         (click)="showConfirmPassword_.set(!showConfirmPassword_())"
@@ -133,6 +141,11 @@
       </form>
 
       <div class="c-modal-actions">
+        @if (isDev) {
+          <button type="button" class="c-btn-ghost dev-guest-btn" (click)="loginAsGuest()">
+            Guest (Dev)
+          </button>
+        }
         <button type="button" class="c-btn-ghost" (click)="onClose()">
           {{ 'cancel' | translatePipe }}
         </button>

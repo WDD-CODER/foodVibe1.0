@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit, OnDestroy, DestroyRef, afterNextRender, Injector, runInInjectionContext } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy, DestroyRef, afterNextRender, Injector, runInInjectionContext, viewChild } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { filter, startWith, map, timer, switchMap, of, type Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -37,8 +37,8 @@ import { ExportToolbarOverlayComponent } from '../../shared/export-toolbar-overl
 import { ApproveStampComponent } from 'src/app/shared/approve-stamp/approve-stamp.component';
 import { ConfirmModalService } from '@services/confirm-modal.service';
 import { AiRecipeDraftService, type AiRecipeDraft } from '@services/ai-recipe-draft.service';
-import { RecipeTextImportModalService } from '@services/recipe-text-import-modal.service';
-import type { ParsedResult, ParsedRecipe, ParsedDish } from '@models/parsed-result.model';
+import { AiRecipeModalService } from '../../shared/ai-recipe-modal/ai-recipe-modal.service';
+import type { AiRecipePatch } from '@services/gemini.service';
 import { useSavingState } from 'src/app/core/utils/saving-state.util';
 import { CounterComponent } from 'src/app/shared/counter/counter.component';
 
@@ -85,7 +85,10 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private readonly confirmModal_ = inject(ConfirmModalService);
   private readonly heroFab_ = inject(HeroFabService);
   private readonly aiRecipeDraft_ = inject(AiRecipeDraftService);
-  private readonly textImportModal_ = inject(RecipeTextImportModalService);
+  private readonly aiModal_ = inject(AiRecipeModalService);
+
+  // CHILD REFS
+  private readonly recipeHeaderRef_ = viewChild(RecipeHeaderComponent);
 
   //SIGNALS
   private readonly saving = useSavingState();
@@ -392,6 +395,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     }
 
     const actions: HeroFabAction[] = [
+      { labelKey: 'ai_recipe_edit', icon: 'sparkles', run: () => this.onAiEditClick() },
       { labelKey: 'export', icon: 'printer', run: () => this.openExportFromHeroFab() }
     ];
     const id = this.recipeId_();
@@ -431,7 +435,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private prefillFromAiDraft(draft: AiRecipeDraft): void {
     const isDish = draft.recipe_type === 'dish'
 
-    this.recipeForm_.patchValue({ name_hebrew: draft.name_hebrew, recipe_type: draft.recipe_type }, { emitEvent: false })
+    // Emit recipe_type so recipeType_ signal updates before workflowArray is rebuilt
+    this.recipeForm_.patchValue({ recipe_type: draft.recipe_type })
+    this.recipeForm_.patchValue({ name_hebrew: draft.name_hebrew }, { emitEvent: false })
 
     this.yieldConversionsArray.clear()
     if (isDish) {
@@ -445,7 +451,18 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     for (const ing of draft.ingredients) {
       this.ingredientsArray.push(this.recipeFormService_.createIngredientGroup())
       const last = this.ingredientsArray.at(this.ingredientsArray.length - 1)
-      last.patchValue({ name_hebrew: ing.name, amount_net: ing.amount, unit: ing.unit })
+      const knownUnits = new Set(this.unitRegistry_.allUnitKeys_())
+      const safeUnit = knownUnits.has(ing.unit) ? ing.unit : 'unit'
+      const matched = this.findIngredientMatch_(ing.name)
+      last.patchValue({
+        name_hebrew: ing.name,
+        amount_net: ing.amount,
+        unit: safeUnit,
+        ...(matched && {
+          referenceId: matched.entity._id,
+          item_type: matched.type,
+        }),
+      })
     }
 
     this.workflowArray.clear()
@@ -466,72 +483,158 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         this.workflowArray.push(this.recipeFormService_.createStepGroup(1))
       }
     }
+
+    if (draft.equipment?.length) {
+      this.logisticsBaselineArray.clear()
+      for (const item of draft.equipment) {
+        const matched = this.findEquipmentMatch_(item.name)
+        this.logisticsBaselineArray.push(
+          this.recipeFormService_.createBaselineRow({
+            equipment_id_: matched?._id ?? '',
+            quantity_: item.quantity,
+            phase_: 'both',
+            is_critical_: true,
+            name_hebrew_: matched ? '' : item.name,
+          } as any)
+        )
+      }
+    }
   }
 
-  // ─── Text Import ─────────────────────────────────────────────────
+  // ─── AI Edit ─────────────────────────────────────────────────────
 
-  protected onImportTextClick(): void {
-    this.textImportModal_.open((result) => this.prefillFromParsedResult(result))
+  protected onAiEditClick(): void {
+    const snapshot = this.buildAiDraftSnapshot()
+    this.aiModal_.open('edit', snapshot, (patch) => this.applyAiPatch(patch))
   }
 
-  private prefillFromParsedResult(result: ParsedResult): void {
-    const currentType = this.recipeForm_.get('recipe_type')?.value as string
+  private buildAiDraftSnapshot(): AiRecipeDraft {
+    const formVal = this.recipeForm_.getRawValue()
+    const isDish = formVal.recipe_type === 'dish'
+    const primaryYield = this.yieldConversionsArray.at(0)?.getRawValue() ?? { amount: 0, unit: 'gram' }
 
-    if (result.type === 'recipe' && currentType === 'dish') {
-      this.userMsg_.onSetWarningMsg(this.translation_.translate('import_text_type_mismatch_dish_in_recipe'))
-      return
+    const ingredients = (this.ingredientsArray.controls as FormGroup[])
+      .map(g => g.getRawValue())
+      .filter(v => v.name_hebrew)
+      .map(v => ({ name: v.name_hebrew as string, amount: v.amount_net as number ?? 0, unit: v.unit as string ?? 'unit' }))
+
+    const steps = (this.workflowArray.controls as FormGroup[])
+      .map(g => g.getRawValue())
+      .map(v => (v.instruction as string | undefined) ?? (v.preparation_name as string | undefined) ?? '')
+      .filter(s => s.length > 0)
+
+    const equipment = (this.logisticsBaselineArray.controls as FormGroup[])
+      .map(g => g.getRawValue())
+      .filter(v => v.equipment_id_)
+      .map(v => {
+        const eq = this.equipmentData_.allEquipment_().find(e => e._id === v.equipment_id_)
+        return { name: eq?.name_hebrew ?? v.equipment_id_, quantity: v.quantity_ as number }
+      })
+
+    return {
+      name_hebrew: formVal.name_hebrew ?? '',
+      recipe_type: isDish ? 'dish' : 'preparation',
+      yield_amount: primaryYield.amount,
+      yield_unit: primaryYield.unit,
+      ingredients,
+      steps,
+      ...(equipment.length > 0 ? { equipment } : {}),
     }
-    if (result.type === 'dish' && currentType !== 'dish') {
-      this.userMsg_.onSetWarningMsg(this.translation_.translate('import_text_type_mismatch_recipe_in_dish'))
-      return
+  }
+
+  /** Case-insensitive, trimmed lookup for a product or recipe by Hebrew name. */
+  private findIngredientMatch_(name: string): { entity: { _id: string }; type: 'product' | 'recipe' } | null {
+    const norm = (s: string) => s.trim().toLowerCase()
+    const q = norm(name)
+    const product = this.state_.products_().find(p => norm(p.name_hebrew) === q)
+    if (product) return { entity: product, type: 'product' }
+    const recipe = this.state_.recipes_().find(r => norm(r.name_hebrew) === q)
+    if (recipe) return { entity: recipe, type: 'recipe' }
+    return null
+  }
+
+  /** Case-insensitive, trimmed lookup for equipment by Hebrew name. */
+  private findEquipmentMatch_(name: string): Equipment | null {
+    const norm = (s: string) => s.trim().toLowerCase()
+    const q = norm(name)
+    return this.equipmentData_.allEquipment_().find(e => norm(e.name_hebrew) === q) ?? null
+  }
+
+  private applyAiPatch(patch: AiRecipePatch): void {
+    const isDish = (this.recipeForm_.get('recipe_type')?.value as string) === 'dish'
+
+    if (patch.name_hebrew !== undefined) {
+      this.recipeForm_.patchValue({ name_hebrew: patch.name_hebrew }, { emitEvent: false })
     }
 
-    if (result.type === 'recipe') {
-      const data = result.data as ParsedRecipe
+    if (patch.yield_amount !== undefined || patch.yield_unit !== undefined) {
+      const primary = this.yieldConversionsArray.at(0)
+      if (primary) {
+        if (patch.yield_amount !== undefined) primary.patchValue({ amount: patch.yield_amount }, { emitEvent: false })
+        if (patch.yield_unit !== undefined) primary.patchValue({ unit: patch.yield_unit }, { emitEvent: false })
+      }
+    }
 
-      this.recipeForm_.patchValue(
-        {
-          name_hebrew: data.name_hebrew ?? '',
-          serving_portions: data.serving_portions ?? 1,
-          labels: data.labels ?? []
-        },
-        { emitEvent: false }
-      )
-
+    if (patch.ingredients !== undefined) {
       this.ingredientsArray.clear()
-      for (const ing of data.ingredients ?? []) {
+      for (const ing of patch.ingredients) {
         this.ingredientsArray.push(this.recipeFormService_.createIngredientGroup())
         const last = this.ingredientsArray.at(this.ingredientsArray.length - 1)
-        last.patchValue({ name_hebrew: ing.name_hebrew, amount_net: ing.amount_net, unit: ing.unit })
+        const knownUnits = new Set(this.unitRegistry_.allUnitKeys_())
+        const safeUnit = knownUnits.has(ing.unit) ? ing.unit : 'unit'
+        const matched = this.findIngredientMatch_(ing.name)
+        last.patchValue({
+          name_hebrew: ing.name,
+          amount_net: ing.amount,
+          unit: safeUnit,
+          ...(matched && {
+            referenceId: matched.entity._id,
+            item_type: matched.type,
+          }),
+        })
       }
       if (this.ingredientsArray.length === 0) this.addNewIngredientRow()
+      this.ingredientsFormVersion_.update(v => v + 1)
+    }
 
+    if (patch.steps !== undefined) {
       this.workflowArray.clear()
-      const steps = data.steps ?? []
-      if (steps.length > 0) {
-        steps.forEach((step, i) => {
-          const group = this.recipeFormService_.createStepGroup(step.order ?? i + 1)
-          group.patchValue({ instruction: step.instruction })
+      if (isDish) {
+        for (const step of patch.steps) {
+          this.workflowArray.push(this.recipeFormService_.createPrepItemRow({ preparation_name: step }))
+        }
+        if (this.workflowArray.length === 0) {
+          this.workflowArray.push(this.recipeFormService_.createPrepItemRow())
+        }
+      } else {
+        patch.steps.forEach((step, i) => {
+          const group = this.recipeFormService_.createStepGroup(i + 1)
+          group.patchValue({ instruction: step })
           this.workflowArray.push(group)
         })
-      } else {
-        this.workflowArray.push(this.recipeFormService_.createStepGroup(1))
+        if (this.workflowArray.length === 0) {
+          this.workflowArray.push(this.recipeFormService_.createStepGroup(1))
+        }
       }
-    } else {
-      const data = result.data as ParsedDish
+    }
 
-      this.recipeForm_.patchValue(
-        {
-          name_hebrew: data.name_hebrew ?? '',
-          serving_portions: data.serving_portions ?? 1,
-          labels: data.labels ?? []
-        },
-        { emitEvent: false }
-      )
+    if (patch.equipment !== undefined) {
+      this.logisticsBaselineArray.clear()
+      for (const item of patch.equipment) {
+        const matched = this.findEquipmentMatch_(item.name)
+        this.logisticsBaselineArray.push(
+          this.recipeFormService_.createBaselineRow({
+            equipment_id_: matched?._id ?? '',
+            quantity_: item.quantity,
+            phase_: 'both',
+            is_critical_: true,
+            name_hebrew_: matched ? '' : item.name,
+          } as any)
+        )
+      }
     }
 
     this.applyJustFilledHighlight_()
-    this.ingredientsFormVersion_.update(v => v + 1)
   }
 
   private applyJustFilledHighlight_(): void {
@@ -610,8 +713,51 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   /** For pendingChangesGuard: true when current form value differs from initial state when user entered the page. */
   hasRealChanges(): boolean {
     if (this.historyViewMode_() || this.recipeForm_.disabled) return false;
+
+    if (!this.recipeId_()) {
+      // New recipe: failsafe checks for any real content
+      if (this.ingredientsArray.controls.some(
+        g => !!(g as FormGroup).get('referenceId')?.value
+      )) return true
+      if ((this.recipeForm_.get('name_hebrew')?.value ?? '').trim()) return true
+      return false // blank new recipe — nothing to guard
+    }
+
     if (this.initialRecipeSnapshot_ === null) return this.recipeForm_.dirty === true;
     return this.getRecipeSnapshotForComparison() !== this.initialRecipeSnapshot_;
+  }
+
+  /** For pendingChangesGuard: save the recipe and resolve once done. */
+  saveAndWait(): Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
+      const headerValid = this.recipeHeaderRef_()?.validate() ?? true;
+      if (this.recipeForm_.invalid || !headerValid) {
+        this.recipeForm_.markAllAsTouched()
+        const msg = this.getRecipeValidationError_()
+        this.userMsg_.onSetErrorMsg(msg)
+        resolve(false)
+        return
+      }
+
+      this.saving.setSaving(true)
+      const recipe = this.buildRecipeFromForm()
+      recipe.autoLabels_ = this.recipeFormService_.computeAutoLabels(recipe)
+
+      this.state_.saveRecipe(recipe).subscribe({
+        next: () => {
+          this.saving.setSaving(false)
+          this.isSubmitted = true
+          resolve(true)
+        },
+        error: () => {
+          this.saving.setSaving(false)
+          this.userMsg_.onSetErrorMsg(
+            this.translation_.translate('error_saving_recipe')
+          )
+          resolve(false)
+        }
+      })
+    })
   }
 
   /** Normalized form value for comparison (numbers coerced, labels sorted). */
@@ -668,7 +814,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       yield_conversions: yieldNorm,
       ingredients: ingNorm,
       workflow_items: workflowNorm,
-      logistics_baseline: baselineNorm
+      logistics_baseline: baselineNorm,
+      imageUrl_: this.recipeImageUrl_() ?? null
     };
     return JSON.stringify(normalized);
   }
@@ -902,7 +1049,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   }
 
   saveRecipe(options?: { navigateOnSuccess?: boolean }): void {
-    if (this.recipeForm_.invalid) {
+    const headerValid = this.recipeHeaderRef_()?.validate() ?? true;
+    if (this.recipeForm_.invalid || !headerValid) {
       this.recipeForm_.markAllAsTouched();
       const msg = this.getRecipeValidationError_();
       this.userMsg_.onSetErrorMsg(msg);

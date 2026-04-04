@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, computed, DestroyRef, HostListener, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
@@ -215,6 +215,10 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
           this.closeAllExportOverlays();
         }
       });
+
+    // Use capture phase so we intercept keydown before inputs consume arrow/enter keys,
+    // but we guard explicitly inside the handler to skip when the event target is a text field.
+    document.addEventListener('keydown', this._boundOnDocumentKeydown, { capture: true });
   }
 
   /** Close export toolbar and all sub-modals so state is clean when user navigates away. */
@@ -229,6 +233,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    document.removeEventListener('keydown', this._boundOnDocumentKeydown, { capture: true });
     this.closeAllExportOverlays();
     this.heroFab.clearPageActions();
   }
@@ -452,11 +457,29 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     }, 0);
   }
 
-  @HostListener('document:keydown', ['$event'])
-  protected onDocumentKeydown(e: KeyboardEvent): void {
+  // Bound reference kept so removeEventListener can identify the exact listener.
+  private readonly _boundOnDocumentKeydown = (e: KeyboardEvent) => this.onDocumentKeydown(e);
+
+  private onDocumentKeydown(e: KeyboardEvent): void {
     const key = e.key;
     if (key !== 'ArrowDown' && key !== 'ArrowUp' && key !== 'Enter') return;
+
+    // Skip when focus is inside a plain text-entry element (typing in inputs/textareas).
+    const target = e.target as HTMLElement;
+    const tag = target.tagName;
+    const isTextInput =
+      (tag === 'INPUT' && !['button', 'checkbox', 'radio', 'submit', 'reset'].includes((target as HTMLInputElement).type)) ||
+      tag === 'TEXTAREA' ||
+      target.isContentEditable;
+
+    // Bail out when the user is typing in a text field that is NOT inside one of our
+    // managed dropdown search boxes — prevents the handler from hijacking general keyboard input.
     const el = e.target as Element;
+    const inManagedDropdown =
+      el.closest('.event-type-dropdown') ||
+      el.closest('.section-search-wrap') ||
+      el.closest('.dish-search-wrap');
+    if (isTextInput && !inManagedDropdown) return;
 
     if (el.closest('.event-type-dropdown') && this.eventTypeDropdownOpen_()) {
       e.preventDefault();

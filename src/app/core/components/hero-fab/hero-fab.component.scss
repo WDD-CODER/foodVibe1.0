@@ -19,6 +19,8 @@
   height: 3.5rem;
   border-radius: 50%;
   border: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
   background: var(--color-primary);
   color: var(--color-text-on-primary);
   box-shadow: var(--shadow-glow), 0 4px 16px rgba(0, 0, 0, 0.18);
@@ -116,5 +118,19 @@
   .fab-action {
     width: 2.5rem;
     height: 2.5rem;
+  }
+}
+
+// [mobile] Clear the fixed bottom nav (56px = 3.5rem) so the FAB is never hidden
+@media (max-width: 620px) {
+  .hero-fab-container:not(.above-bar) {
+    inset-block-end: calc(3.5rem + env(safe-area-inset-bottom, 0px) + 0.75rem);
+    z-index: 210;
+  }
+
+  // Reset the 768px size reduction — match approve-stamp at 3.5rem
+  .fab-main {
+    width: 3.5rem;
+    height: 3.5rem;
   }
 }

@@ -1,7 +1,7 @@
 # See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
 # Compiled output
-# /dist — committed for Render static deploy
+/dist
 /tmp
 /out-tsc
 /bazel-out
@@ -43,6 +43,8 @@ testem.log
 
 # Worktree port assignment
 .worktree-port
+# Worktree remote cleanup breadcrumb (processed by github-sync on next main session)
+.worktree-cleanup
 
 # Claude Code local config (never commit)
 .claude/settings.local.json
@@ -57,6 +59,13 @@ testem.log
 *.key
 migration-dump.json
 
+# Catalog seeder — runtime output (never commit)
+tools/catalog-seeder/output/pending-review.json
+tools/catalog-seeder/output/pending-manual.json
+# seed-products.json IS committed after admin review — intentionally not ignored
+tools/catalog-seeder/__pycache__/
+tools/catalog-seeder/*.pyc
+
 # Playwright MCP and UI Inspector artifacts (never commit)
 .playwright-mcp/
 .ui-inspector/
@@ -69,3 +78,4 @@ migration-dump.json
 # System files
 .DS_Store
 Thumbs.db
+.gstack/

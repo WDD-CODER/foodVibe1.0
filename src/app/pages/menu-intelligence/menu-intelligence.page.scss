@@ -46,7 +46,7 @@
   min-height: 320px;
   // padding: 36px 40px 44px;
   padding: 14px 20px 14px 20px;
-  border: 1px solid #1a1a1a;
+  border: 1px solid #1a1a1a; /* intentional: near-black inner border for paper frame, no token at this depth */
   border-radius: var(--radius-lg);
   background: transparent;
 
@@ -490,6 +490,32 @@
   text-align: center;
 }
 
+/* ---------- Dish Name Clickable ---------- */
+
+.dish-name-clickable {
+  display: inline;
+
+  padding: 0;
+
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+
+  cursor: pointer;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: var(--color-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
 /* ---------- Dish Rows ---------- */
 
 .dish-list {
@@ -542,6 +568,33 @@
 .add-section-btn {
   margin-top: 20px;
   font-size: 1rem;
+}
+
+@media (max-width: 620px) {
+  .meta-trigger,
+  .section-title-plain,
+  .add-dish-btn,
+  .add-section-btn {
+    min-block-size: 44px;
+  }
+
+  .counter-pill-btn {
+    min-inline-size: 44px;
+    min-block-size: 44px;
+  }
+
+  // Sub-fix 1: menu title wraps on narrow screens
+  .meta-input.menu-name-input {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  // Sub-fix 2: serving-style select — width fits content, not full row
+  .meta-row app-custom-select {
+    width: fit-content;
+    max-width: 12rem;
+  }
 }
 
 /* ---------- Financial Footer ---------- */
