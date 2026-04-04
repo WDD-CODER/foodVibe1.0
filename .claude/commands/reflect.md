@@ -54,6 +54,11 @@ THIS IS THE ONLY FILE YOU MAY EDIT:
 
 THIS FILE IS APPEND-ONLY — add one row per evaluation, never edit old rows:
 ├── .claude/reflect/reflection-log.tsv              # Experiment history (not committed)
+
+THESE FILES ARE WRITTEN each evaluation run (auto mode only):
+├── .claude/reflect/evidence/<skill>-<date>.evidence.md   # Per-behavior audit trail
+├── .claude/reflect/coverage/<skill>.coverage.md          # Rule → test coverage map
+├── .claude/reflect/test-quality-log.md                   # Weak/strong pattern log (PHASE 6 only, append-only)
 ```
 
 **Why this constraint?** If you could edit the test suite or evaluator during a loop,
@@ -290,6 +295,19 @@ TC-XXX: <name>
   Fully passed: YES/NO
 ```
 
+**F. Accumulate evidence in memory (written to file in Step 2.4b):**
+
+For each behavior, record:
+```
+[TC-XXX B<N>] STATUS: PASS | EVIDENCE: SKILL.md line NN: "<exact quote>" | REASONING: <causal chain>
+[TC-XXX B<N>] STATUS: FAIL | EVIDENCE: No rule in SKILL.md addresses this behavior
+```
+For each anti-pattern, record:
+```
+[TC-XXX AP<N>] STATUS: TRIGGERED | EVIDENCE: <rule that would prevent this is absent>
+[TC-XXX AP<N>] STATUS: CLEAR | EVIDENCE: SKILL.md line NN: "<rule that prevents it>"
+```
+
 ### Step 2.2: Calculate score
 
 ```
@@ -323,6 +341,38 @@ Append one tab-separated row:
 
 For the first evaluation of a session: `status = baseline`, `hypothesis = initial`
 For re-evaluations inside the loop: `status = re-eval`, `hypothesis = <what was just tried>`
+
+### Step 2.4b: Write evidence file (auto mode only — skip for baseline)
+
+Write all accumulated evidence (from Step 2.1F) to:
+`.claude/reflect/evidence/<skill_name>-<YYYY-MM-DD>.evidence.md`
+
+```markdown
+# Evidence Log: <skill_name> — <YYYY-MM-DD>
+Skill commit: <hash> | Score: <skill_score>
+
+## TC-XXX: <Name>
+### B<N> — <behavior text>
+- STATUS: PASS
+- EVIDENCE: SKILL.md line NN: "<exact quoted text>"
+- REASONING: <why this line produces the behavior>
+
+### B<N> — <behavior text>
+- STATUS: FAIL
+- EVIDENCE: No rule in SKILL.md addresses this behavior
+- IMPACT: -1 behavior point
+
+### AP<N> — <anti-pattern text>
+- STATUS: TRIGGERED (penalty)
+- EVIDENCE: <what rule is missing that would prevent this>
+- IMPACT: -1 anti-pattern penalty
+
+### AP<N> — <anti-pattern text>
+- STATUS: CLEAR
+- EVIDENCE: SKILL.md line NN: "<rule that prevents this>"
+```
+
+If the file already exists for today → overwrite it (this run is the latest).
 
 ### Step 2.5: Check the stop condition
 
@@ -476,6 +526,67 @@ The loop continues autonomously until a stop condition is met.
 
 ---
 
+## PHASE 6: Mutation Testing (runs after every KEEP decision)
+
+> **When it runs**: Only after a KEEP in Step 4.3. Discard decisions skip this phase.
+> **Purpose**: Verify that newly added rules are actually tested. If deleting a rule
+> doesn't drop the score, no test catches it — meaning the "improvement" was a placebo.
+> **This phase is OBSERVATIONAL only** — it does not affect KEEP/DISCARD decisions.
+
+### Step 6.1: Identify newly added rules
+
+Diff the just-committed skill against the previous commit:
+```bash
+git diff HEAD~1 HEAD -- .claude/skills/<skill_name>/SKILL.md
+```
+
+Extract each `+` line that represents a substantive rule (not blank lines, not headers,
+not reformatting). These are your mutation targets.
+
+If no substantive lines were added → skip PHASE 6, loop back to PHASE 2.
+
+### Step 6.2: For each added rule — mutate and re-score
+
+For each mutation target:
+
+1. **Remove the rule** from SKILL.md in memory only (do NOT commit this change)
+2. **Re-run PHASE 2 evaluation** on the mutated skill — full scoring pass
+3. **Compare scores:**
+   - `score_with_rule`: score from the last KEEP evaluation
+   - `score_without_rule`: score from this mutation evaluation
+   - `delta = score_with_rule - score_without_rule`
+4. **Restore the rule** (undo the in-memory removal)
+5. **Record:**
+   - `delta > 0` → rule is DETECTED by tests ✓
+   - `delta <= 0` → rule is NOT DETECTED — tests are too weak to catch this rule ✗
+
+### Step 6.3: Calculate mutation_score
+
+```
+mutation_score = (detected_rules / total_mutation_targets) * 100
+```
+
+### Step 6.4: Log weak rules to test-quality-log.md
+
+For every NOT DETECTED rule, append a row to `.claude/reflect/test-quality-log.md`
+under "Weak Patterns":
+
+```
+| <YYYY-MM-DD> | <skill> | <rule text truncated to 60 chars> | <pattern-type> | NOT DETECTED — <which TC dimension is missing> |
+```
+
+**Pattern type** (your judgment):
+- `broad-group-behavior` — test checks group assignment loosely, doesn't name the specific property
+- `missing-dimension` — no TC covers this dimension of the skill at all
+- `keyword-match` — test passed via surface wording, not presence of the specific rule
+
+### Step 6.5: Loop back to PHASE 2
+
+After mutation testing completes, loop back to PHASE 2.
+The mutation_score is reported in the final output (PHASE 5) — it does not block looping.
+
+---
+
 ## PHASE 5: Final Report (always runs last)
 
 This is the ONLY output the user sees. Do not output anything before this
@@ -492,10 +603,12 @@ This is the ONLY output the user sees. Do not output anything before this
 **Commit**: <hash>
 
 **Test Results**:
-| TC | Name | Behaviors | Anti-patterns | Passed? |
-|----|------|-----------|---------------|---------|
-| TC-001 | <name> | N/M | 0/M | ✓/✗ |
-...
+TC-001 ✓/✗ — N/M behaviors, 0/M anti-patterns
+  ✓ B1: <behavior> → SKILL.md line NN: "<exact quote>"
+  ✗ B2: <behavior> → No rule in SKILL.md covers this
+  ⚠ AP1: <anti-pattern> → <why triggered — what rule is absent>
+TC-002 ✓/✗ — N/M behaviors, 0/M anti-patterns
+  ...
 
 **Gaps found** (what would need to change to reach 100):
 - TC-XXX, behavior N: <what's missing in the skill>
@@ -504,6 +617,7 @@ This is the ONLY output the user sees. Do not output anything before this
 **To improve**: run `/reflect <skill_name>` or `/reflect <skill_name> <budget>`
 
 **Log entry added**: reflection-log.tsv
+**Evidence log**: `.claude/reflect/evidence/<skill_name>-<YYYY-MM-DD>.evidence.md`
 ```
 
 ### For auto mode (loop completed):
@@ -523,11 +637,18 @@ This is the ONLY output the user sees. Do not output anything before this
 | 2 | <slug> | 0.0 | DISCARD ✗ |
 ...
 
+**Mutation Score**: <X>% (<N>/<M> added rules detected by tests) — from PHASE 6
+**Undetected rules** (tests too weak to catch):
+- "<rule text>" — pattern: <type> — TC dimension missing: <what to add>
+(or: All added rules detected ✓)
+
 **Final test results**:
-| TC | Name | Behaviors | Anti-patterns | Passed? |
-|----|------|-----------|---------------|---------|
-| TC-001 | <name> | N/M | 0/M | ✓/✗ |
-...
+TC-001 ✓/✗ — N/M behaviors, 0/M anti-patterns
+  ✓ B1: <behavior> → SKILL.md line NN: "<exact quote>"
+  ✗ B2: <behavior> → No rule in SKILL.md covers this
+  ⚠ AP1: <anti-pattern> → <why triggered — what rule is absent>
+TC-002 ✓/✗ — N/M behaviors, 0/M anti-patterns
+  ...
 
 **What changed in the skill** (summary of all kept edits):
 - <brief description of each kept change>
@@ -538,7 +659,41 @@ This is the ONLY output the user sees. Do not output anything before this
 
 **Branch**: reflect/<skill_name>
 **Log entries added**: reflection-log.tsv
+**Evidence log**: `.claude/reflect/evidence/<skill_name>-<YYYY-MM-DD>.evidence.md`
+**Coverage map**: `.claude/reflect/coverage/<skill_name>.coverage.md`
 ```
+
+---
+
+### Step 5.1: Generate coverage map (auto mode only)
+
+After outputting the final report, generate or update:
+`.claude/reflect/coverage/<skill_name>.coverage.md`
+
+Build this from the evidence accumulated during PHASE 2 (Step 2.1F):
+
+```markdown
+# Coverage Map: <skill_name>
+Generated: <YYYY-MM-DD> | Score: <skill_score> | Commit: <hash>
+
+## SKILL.md Rules → Test Coverage
+| Line | Rule (truncated to 60 chars) | Covered by | Status |
+|------|------------------------------|------------|--------|
+| 35 | Layout — display, flex, grid, position, gap, z-index | TC-003 B1 | ✓ |
+| 36 | Dimensions — width, height, aspect-ratio | TC-003 B2 | ✓ |
+| 38 | Structure — margin, padding, border | (none) | ✗ UNTESTED |
+
+## Tests → SKILL.md Coverage
+| TC | Behavior | SKILL.md line | Status |
+|----|----------|---------------|--------|
+| TC-001 B1 | Scans src/styles.scss before writing | line 23 | ✓ |
+| TC-003 B4 | border-radius placed in Structure | (none) | ⚠ BROKEN TEST — no supporting rule |
+```
+
+**How to build it:**
+- For each SKILL.md rule line: check if any PASS evidence from Step 2.1F cites it → ✓ if yes, ✗ UNTESTED if no
+- For each TC behavior: check its evidence → ✓ if SKILL.md line found, ⚠ BROKEN TEST if FAIL (no line)
+- Overwrite the file on each run — this is always the latest state
 
 ---
 
@@ -583,6 +738,9 @@ Recovery: git checkout -- .claude/skills/<skill_name>/SKILL.md
 | Create/use `reflect/<skill>` branch | YES (Path 2 only) |
 | `git checkout -- <skill>` on discard | YES |
 | Pause to ask user during loop | NO — only stop on emergency |
+| Write .claude/reflect/evidence/ files | YES — one file per evaluation run (auto mode) |
+| Write .claude/reflect/coverage/ files | YES — updated in PHASE 5 (auto mode) |
+| Append to test-quality-log.md | YES — PHASE 6 only, weak-pattern entries |
 | Modify other project files | NO |
 
 ---
