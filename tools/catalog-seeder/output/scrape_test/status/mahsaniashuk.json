@@ -1,0 +1,60 @@
+{
+    "20260404142705": [
+        {
+            "status": "started",
+            "when": "2026-04-04 14:27:05.372756+03:00",
+            "limit": 1,
+            "files_requested": [
+                "PRICE_FULL_FILE"
+            ],
+            "store_id": null,
+            "files_names_to_scrape": null,
+            "when_date": null,
+            "filter_nul": false,
+            "filter_zero": false,
+            "suppress_exception": true
+        },
+        {
+            "status": "collected",
+            "when": "2026-04-04 14:27:10.806938+03:00",
+            "file_name_collected_from_site": [
+                "PriceFull7290661400001-238-202604040459-001"
+            ],
+            "links_collected_from_site": [
+                "https://laibcatalog.co.il/CompetitionRegulationsFiles\\latest\\7290661400001/PriceFull7290661400001-238-202604040459-001.xml.gz"
+            ]
+        },
+        {
+            "status": "downloaded",
+            "when": "2026-04-04 14:27:12.698906+03:00",
+            "results": [
+                {
+                    "file_name": "PriceFull7290661400001-238-202604040459-001",
+                    "downloaded": true,
+                    "extract_succefully": true,
+                    "error": null,
+                    "restart_and_retry": false
+                }
+            ]
+        },
+        {
+            "status": "estimated_size",
+            "when": "2026-04-04 14:27:12.701904+03:00",
+            "folder_size": {
+                "size": 2513813,
+                "unit": "MB",
+                "folder": "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\MahsaniAShuk",
+                "folder_content": [
+                    "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\MahsaniAShuk\\PriceFull7290661400001-238-202604040459-001.xml"
+                ]
+            },
+            "completed_successfully": true
+        }
+    ],
+    "verified_downloads": [
+        {
+            "file_name": "PriceFull7290661400001-238-202604040459-001",
+            "when": "2026-04-04 14:27:12.699902+03:00"
+        }
+    ]
+}

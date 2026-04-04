@@ -51,10 +51,16 @@ export class GeminiService {
   }
 
   parseText(rawText: string): Observable<ParsedResult> {
+    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
     return this.http_.post<{ result: ParsedResult }>(
       `${this.authBase_}/api/v1/ai/parse-text`,
       { rawText }
-    ).pipe(map(res => res.result))
+    ).pipe(
+      map(res => {
+        incrementGeminiUsage()
+        return res.result
+      })
+    )
   }
 
   async patchRecipe(currentRecipe: AiRecipeDraft, instruction: string): Promise<AiRecipePatch> {

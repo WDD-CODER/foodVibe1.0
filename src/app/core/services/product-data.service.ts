@@ -68,6 +68,9 @@ export class ProductDataService {
       expiry_days_default_: legacy.expiry_days_default_ ?? 0,
       addedAt_: legacy.addedAt_,
       updatedAt: legacy.updatedAt,
+      name_english: legacy.name_english,
+      seeded_: legacy.seeded_,
+      allergen_source_: legacy.allergen_source_,
     };
   }
 

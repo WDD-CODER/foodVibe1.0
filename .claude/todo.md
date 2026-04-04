@@ -2,81 +2,57 @@
 
 ---
 
+### Plan 249 — Catalog Seeder Data Quality + Supplier Model (`plans/249-seeder-data-quality.plan.md`)
+- [ ] Step 0: Clear bad seed from PRODUCT_LIST; delete output/pending-review.json and output/enriched.json
+- [ ] Step 1: Add `_safe_float` helper to `enrich.py`
+- [ ] Step 2: Expand `_PROMPT_TEMPLATE` in `enrich.py` to return 8 fields
+- [ ] Step 3: Update `_validate_response` in `enrich.py` to validate new fields
+- [ ] Step 4: Update `_attach_enrichment` in `enrich.py` with name override + `_recalc_pricing`
+- [ ] Step 5: Add `_recalc_pricing` and `_pack_to_base_conversion` to `enrich.py`
+- [ ] Step 6: Add `SUPPLIERS_COLLECTION` to `config.py`
+- [ ] Step 7: Add `_make_id` helper + imports to `db_write.py`
+- [ ] Step 8: Add `_upsert_suppliers` to `db_write.py`
+- [ ] Step 9: Update `write_approved` to call `_upsert_suppliers`
+- [ ] Step 10: Update `_prepare_doc` to link `supplierIds_`
+- [ ] Step 11: Update `_INTERNAL_KEYS` in `db_write.py`
+- [ ] Step 12: Update `db_write.py` imports for `SUPPLIERS_COLLECTION`
+- [ ] Step 13: Branch `feat/seeder-data-quality` and re-seed
+
+---
+
+### Plan 248 — Transloco Migration (`plans/248-transloco-migration.plan.md`)
+- [ ] Install `@jsverse/transloco` and configure `provideTransloco` in `src/app/app.config.ts` (standalone — do NOT run `ng add`)
+- [ ] Split `public/assets/data/dictionary.json` into 8 scoped files under `public/assets/i18n/he/`
+- [ ] Verify Transloco loader path — check network tab for `/assets/i18n/he/units.json` returning 200
+- [ ] Replace `| translatePipe` in all templates with `| transloco` (scope-prefixed); add `TranslocoModule`/`TranslocoDirective` to each component's `imports`
+- [ ] Replace `this.translation.translate(...)` calls in `.ts` files with `this.transloco.translate('scope.key')`
+- [ ] Create `src/app/core/services/vocabulary.service.ts` (~40 lines: `resolve()`, `addEntry()`, localStorage)
+- [ ] Update `src/app/core/services/key-resolution.service.ts` to inject `VocabularyService`
+- [ ] Update all remaining `TranslationService` injection sites to `VocabularyService`
+- [ ] Delete `translation-pipe.pipe.ts` and `translation.service.ts`
+- [ ] Verify `ng build` passes and `{{ 'cup' | transloco }}` renders `כוס` in the app
+
+---
+
 ### Plan 247 — Reflect: self-improving skills system (`plans/247-reflect-skill-improvement-loop.plan.md`)
-- [x] Create `.claude/reflect/test-suites/` directory
-- [x] Create `.claude/reflect/test-suite-template.md`
-- [x] Create `.claude/reflect/evaluator.md` (immutable scoring)
-- [x] Create `.claude/reflect/reflection-log.tsv` (header only)
-- [x] Create `.claude/reflect/test-suites/angularComponentStructure.tests.md`
-- [x] Create `.claude/commands/reflect.md` (orchestrator)
-- [x] Verify all files exist and paths are correct
+- [ ] Create `.claude/reflect/test-suites/` directory
+- [ ] Create `.claude/reflect/test-suite-template.md`
+- [ ] Create `.claude/reflect/evaluator.md` (immutable scoring)
+- [ ] Create `.claude/reflect/reflection-log.tsv` (header only)
+- [ ] Create `.claude/reflect/test-suites/angularComponentStructure.tests.md`
+- [ ] Create `.claude/commands/reflect.md` (orchestrator)
+- [ ] Verify all files exist and paths are correct
 
 ---
-
-### Plan 248 — Reflect: Karpathy gap-closure — two-agent split, executable score, concrete checks (`plans/248-reflect-karpathy-gaps.plan.md`)
-- [x] Update `.claude/reflect/test-suite-template.md` — add Concrete Checks + Agent-Evaluated Behaviors sections
-- [x] 🧑‍🍳 GATE A: Show migrated angularComponentStructure.tests.md draft (machine-check split) for approval
-- [x] Migrate `.claude/reflect/test-suites/angularComponentStructure.tests.md` to new format
-- [x] 🧑‍🍳 GATE B: Show 2–3 example TCs with grep checks + 70/30 vs 80/20 vs 60/40 ratio for approval
-- [x] Create `.claude/reflect/test-runner.sh` — executable scoring script
-- [x] Update `.claude/reflect/evaluator.md` — document dual-scoring (70% executable + 30% agent)
-- [x] Validate test-runner.sh — run twice, verify same score (70.0 both runs, 21/21 checks)
-- [x] 🧑‍🍳 GATE C: Show evaluator-agent-prompt.md draft + flow diagram for approval
-- [x] Create `.claude/reflect/evaluator-agent-prompt.md` — blind evaluator agent prompt
-- [x] Update `.claude/commands/reflect.md` — new Phase 2/4 two-agent flow + TSV schema migration
-
----
-
-### Plan 245 — Unified context-aware AI modal (`plans/245-unified-ai-modal.plan.md`)
-- [x] server/routes/ai.js — add POST /api/v1/ai/patch-recipe endpoint with smart partial-patch system prompt
-- [x] gemini.service.ts — add `patchRecipe(currentRecipe, instruction)` method calling new endpoint
-- [x] ai-recipe-modal.service.ts — extend to support `open('create')` and `open('edit', currentRecipe, onPatch)`
-- [x] ai-recipe-modal.component.ts + .html — add edit-mode UI (instruction textarea + patch preview card)
-- [x] recipe-builder.page.ts — replace `onImportTextClick` + `RecipeTextImportModalService` with `onAiEditClick` wired to AiRecipeModalService edit mode
-- [x] recipe-header.component.ts + .html — remove `importTextClick` output + `import-text-btn`
-- [x] app.component.ts + .html — remove RecipeTextImportModalComponent
-- [x] Delete recipe-text-import-modal component (3 files) + recipe-text-import-modal.service.ts
-- [x] ng build — verify zero errors
-
----
-
-### Plan 246 — Create /evaluate-me command (`plans/246-evaluate-me-command.plan.md`)
-- [x] Create `.claude/retrospectives/` directory with `.gitkeep`
-- [x] Create `.claude/commands/evaluate-me.md` with full retrospective prompt
-- [x] Update `agent.md` commands table to include evaluate-me
-
-### Plan 248 — Cook View Focus Mode Redesign (`plans/248-cook-view-focus-mode.plan.md`)
-- [x] A: Add new signals & methods to cook-view.page.ts (activeStepIndex_, stepDoneSet_, timer, cookingComplete_, markStepDone, etc.)
-- [x] B: Template rewrite — two-bar header, ingredient checklist pane, step card pane, completion screen
-- [x] C: SCSS rewrite + 9 new translation keys in dictionary.json
-- [x] D: Remove dead code (checkedSteps_, toggleStepCheck, onTimerHintTap)
 
 ## 🔴 Quick Fixes
-
-### Plan 244 — Auto-solve command (`plans/244-auto-solve-command.plan.md`)
-- [x] Create `.claude/commands/auto-solve.md` with full command content (both Playwright prefixes in allowed-tools)
-- [x] Edit `.claude/settings.json` — remove "playwright" from disabledMcpjsonServers
-- [x] Edit `agent.md` — add auto-solve row to commands table
-- [x] Edit `.claude/copilot-instructions.md` — add /auto-solve trigger after Security review line
-
-
-### Plan 157 — Fix sidebar alignment and close on breakpoint (`plans/157-fix-sidebar-alignment-close-breakpoint.plan.md`)
-- [x] List-shell: remove margin-block and max-height from .filter-panel in 768px block
-- [x] Inventory list: add afterNextRender + matchMedia to close panel when viewport <= 768px
-
-### Plan 174 — Custom select chip and standalone state (`plans/174-custom-select-chip-and-standalone-state.plan.md`) [TRIAGED 2026-04-02]
-- [x] Cook-view ingredients index: add variant=”chip” and typeToFilter to unit selects for consistency with recipe builder
-- [x] Verify in app: recipe builder and cook-view ingredients index unit dropdowns
 
 ### Plan 169 — List quick-edit UX overlay (`plans/169-list-quick-edit-ux-overlay.plan.md`)
 - [ ] Verify first-click open, carousel dropdown visible, row-blur confirm only
 
 ### Plan 134 — Translation and confirmation modals unified (`plans/134-translation-confirmation-modals-unified.plan.md`) [TRIAGED 2026-04-02]
 
-- [ ] Other entry points: align with resolve first → modal if needed → already in parameter (metadata-manager, preparation-*, menu-section-categories, add-equipment-modal, recipe-workflow, add-supplier-flow)
-
-### Tech Debt — Audit 2026-03-26 (unplanned items)
-- [x] Remove commented import `ProductDataService` at `product-form.component.ts:8` and commented statement at line 927
+- [x] Other entry points: align with resolve first → modal if needed → already in parameter (metadata-manager, preparation-*, menu-section-categories, add-equipment-modal, recipe-workflow, add-supplier-flow)
 
 ### Plan 074 â€” Tech debt remediation (`plans/074-tech-debt-remediation.plan.md`) [TRIAGED 2026-04-02]
 
@@ -89,28 +65,6 @@
 
 ## 🟡 Medium
 
-### Plan 219 — Recipe header photo-picker (`plans/219-recipe-header-photo-picker.plan.md`)
-- [x] recipe.model.ts — add `imageUrl_?: string` after `hiddenBy?`
-- [x] recipe-builder.page.ts — add `recipeImageUrl_` signal after `isApproved_`
-- [x] recipe-builder.page.ts — patch `patchFormFromRecipe` to set `recipeImageUrl_`
-- [x] recipe-builder.page.ts — replace `buildRecipeFromForm` body to spread `imageUrl_`
-- [x] recipe-builder.page.ts — add `recipeImageUrl_.set(null)` as first line of `resetToNewForm_`
-- [x] recipe-builder.page.ts — add `onImageChange` method to `//UPDATE` group
-- [x] recipe-builder.page.html — add `[imageUrl]`, `(imageChange)`, `[readonlyMode]` to `<app-recipe-header>`
-- [x] recipe-header.component.ts — add `readonlyMode` input, `imageChange` output, `onImageSelected` method
-- [x] recipe-header.component.html — replace `.image-square` div with label+input+overlay structure
-- [x] app.config.ts — import `Camera` and add to `LucideAngularModule.pick`
-- [x] recipe-header.component.scss — add cursor + `.img-upload-label` rules (+ fix: display:block + object-position:center)
-
-### Plan 204-R — Inventory product-price util extraction (`plans/204-R-inventory-product-price-util.plan.md`)
-- [x] Create `src/app/core/utils/product-price.util.ts` — three pure exports: `getProductUnits`, `getPricePerUnit`, `calcBuyPriceGlobal`
-- [x] Delete dead `getProductUnits` method from component (no call sites)
-- [x] Replace `getPricePerUnit` body in component with 3-line wrapper (keeps 2-arg template signature)
-- [x] Replace `onPriceChange` conversion block with `calcBuyPriceGlobal(...)` call; add util import
-- [x] Leave `onUnitChange` conversion block unchanged (inverse math — cannot reuse)
-- [x] Verify `ng build` passes
-
-
 ### Plan 182 + 163 — Visual & UX fix backlog (`plans/182-tofix-verification-undone.plan.md`, `plans/163-tofix-audit-prd.plan.md`)
 - [ ] Recipe builder: remove up/down arrows in section titles
 - [ ] Recipe builder: clicking a card header collapses/expands it (currently only the arrow does)
@@ -122,60 +76,9 @@
 - [ ] Menu library: keyboard navigation (arrow keys + Enter) on dropdown options
 - [ ] Lists: sidebar aligns correctly to the list container on smaller screens (768px)
 
-### Plan 160 — Global user message queue (`plans/160-global-user-message-queue.plan.md`)
-- [ ] Refactor UserMsgService to use explicit state (current message, timer, pending queue) instead of concatMap pipeline
-- [ ] Success/warning: when current is success/warning, replace text and reset timer; do not enqueue
-- [ ] Error: interrupt success/warning; when current is error, enqueue so each error shown in order
-- [ ] Add user-msg.service.spec.ts with coalesce and error-priority tests
-
-### Plan 124 — Unified styling audit and theme (`plans/124-unified-styling-audit-theme.plan.md`)
-
-- [ ] Phase 4: menu-library-list — use c-input-wrapper and c-btn-primary in HTML; recipe-builder main submit use c-btn-primary
-- [ ] Phase 5: Spot-check representative pages; search and replace remaining raw colors in src/**/*.scss
-
-### Plan 095 — Menu Intelligence Gap Report (`plans/095-menu-intelligence-gap-report.plan.md`)
-
-- [ ] Add `{ capture: true }` to @HostListener in menu-intelligence.page.ts
-- [ ] Wire dish search ngModelChange to onDishSearchQueryChange; add [class.highlighted] and let ri to dish dropdown in HTML
-- [ ] Replace dish name span with button + startEditDishName in menu-intelligence.page.html
-- [ ] Add .dropdown-item.highlighted and .dish-name-clickable in menu-intelligence.page.scss
-- [ ] Optional: section search ngModelChange to onSectionSearchQueryChange if NG5002 appears
-
-### Plan 091 — Menu Intelligence Inputs and Layout (`plans/091-menu-intelligence-inputs-layout.plan.md`)
-
-- [ ] Add SelectOnFocus to sell_price and dish-field inputs; import directive in component
-- [ ] Add onSellPriceKeydown and onDishFieldKeydown with 0.25 step for portion fields
-- [ ] Wrap dish name + meta toggle in .dish-name-meta; dish-name-cell as grid; .dish-remove out of absolute
-
-### Plan 069 â€” Unused and redundant code cleanup (`plans/069-unused-redundant-code-cleanup.plan.md`)
-
-- [ ] Remove `@components/*` from tsconfig.json
-- [ ] Delete recipe.module.ts, system-health.ts, ingredient.service.ts
-- [ ] Update core/breadcrumbs.md and core/services/breadcrumbs.md
-- [ ] Remove commented block in metadata-manager.page.component.ts (lines ~219â€”263)
-- [ ] Unit-creator spec: minimal placeholder or delete file
-- [ ] Run build and tests to verify
-
-### Plan 066 â€” Quick-add product modal (`plans/066-quick-add-product-modal.plan.md`)
-
-- [ ] Create QuickAddProductModalService (signal-based, Promise<Product|null>)
-- [ ] Create QuickAddProductModalComponent (compact + expandable, keyboard, OnPush, a11y)
-- [ ] Style modal SCSS (engine classes + cssLayer)
-- [ ] Update ingredient-search: dropdown condition, add-item row, keyboard fix, auto-select
-- [ ] Register modal in app.component; add dictionary keys
-
 ---
 
 ## 🟠 Large Refactors
-
-### Plan 203-R — Recipe-book allergen + cell-expand refactor (`plans/203-R-recipe-book-allergen-cell-expand-refactor.plan.md`)
-- [x] Create `src/app/core/utils/recipe-allergens.util.ts` — export `MAX_ALLERGEN_RECURSION` + pure `resolveRecipeAllergens` fn
-- [x] Create `src/app/core/utils/cell-expand-state.util.ts` — `CellExpandState` class with signals + helpers
-- [x] Update `recipe-book-list.component.ts` — import constants/util, replace 4 signals with 2 `CellExpandState` instances
-- [x] Update `recipe-book-list.component.ts` — replace `getRecipeAllergens` body with thin wrapper; update `getRecipeProductIds` to import `MAX_ALLERGEN_RECURSION`
-- [x] Update `recipe-book-list.component.ts` — delete 6 expand methods + 2 expand helper methods; add close wrappers + update `resetExpandedCells`
-- [x] Update `recipe-book-list.component.html` — replace 6 method calls in header/body with `allergenExpand.*` / `labelsExpand.*`
-- [x] Verify: `ng build` passes; component under ~600 LOC
 
 ### Plan 089 — Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
 
@@ -218,17 +121,6 @@
 ---
 
 ## 🔵 Infrastructure / Planning
-
-### Plan 243 — Post-Migration System Validation (`plans/243-post-migration-validation-run.plan.md`)
-- [x] Create branch `feat/validation-run` from `main`
-- [x] Run validate-agent-refs — verify 6 agents, 19 skills, 11 cursor rules, 4 cursor commands, broken links
-- [x] Run git status — report dirty files
-- [x] Run ng build — zero errors required
-- [x] Run npm run lint:icons — BROKEN: scripts/check-lucide-icons.mjs missing
-- [x] Run npm run lint:no-native-select — PASS (zero violations)
-- [x] Run github-sync skill — write notes/github-sync/2026-04-02.md
-- [x] Fix 3 stale counts in validate-agent-refs.md output template (skills: 14→19, cursor rules: 7→11, cursor commands: 3→4)
-- [x] Write project state summary report
 
 ### Plan 222 — Dev Machine Open Ports Security Hardening (`plans/222-dev-machine-open-ports-security.plan.md`)
 - [ ] Disable Dell SupportAssist service in `services.msc` — verify port 9012 closed
@@ -474,5 +366,6 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 | 192 | Pillar 3 Reactive Loop Hardening (A13–A17) | Done |
 | 196 | Commit flow speed audit | Planned |
 | 222 | Dev Machine Open Ports Security Hardening | Planned |
+| 248 | Transloco Migration | Planned |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*

@@ -43,6 +43,8 @@ testem.log
 
 # Worktree port assignment
 .worktree-port
+# Worktree remote cleanup breadcrumb (processed by github-sync on next main session)
+.worktree-cleanup
 
 # Claude Code local config (never commit)
 .claude/settings.local.json
@@ -56,6 +58,13 @@ testem.log
 *.pem
 *.key
 migration-dump.json
+
+# Catalog seeder — runtime output (never commit)
+tools/catalog-seeder/output/pending-review.json
+tools/catalog-seeder/output/pending-manual.json
+# seed-products.json IS committed after admin review — intentionally not ignored
+tools/catalog-seeder/__pycache__/
+tools/catalog-seeder/*.pyc
 
 # Playwright MCP and UI Inspector artifacts (never commit)
 .playwright-mcp/

@@ -1,0 +1,58 @@
+{
+    "20260404142625": [
+        {
+            "status": "started",
+            "when": "2026-04-04 14:26:25.392374+03:00",
+            "limit": 1,
+            "files_requested": [
+                "PRICE_FULL_FILE"
+            ],
+            "store_id": null,
+            "files_names_to_scrape": null,
+            "when_date": null,
+            "filter_nul": false,
+            "filter_zero": false,
+            "suppress_exception": true
+        },
+        {
+            "status": "collected",
+            "when": "2026-04-04 14:26:28.252339+03:00",
+            "file_name_collected_from_site": [
+                "PriceFull7290492000005-001-000-20260404-001017.gz"
+            ],
+            "links_collected_from_site": ""
+        },
+        {
+            "status": "downloaded",
+            "when": "2026-04-04 14:26:28.545464+03:00",
+            "results": [
+                {
+                    "file_name": "PriceFull7290492000005-001-000-20260404-001017.gz",
+                    "downloaded": true,
+                    "extract_succefully": true,
+                    "restart_and_retry": false,
+                    "error": null
+                }
+            ]
+        },
+        {
+            "status": "estimated_size",
+            "when": "2026-04-04 14:26:28.548460+03:00",
+            "folder_size": {
+                "size": 152,
+                "unit": "MB",
+                "folder": "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\DorAlon",
+                "folder_content": [
+                    "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\DorAlon\\PriceFull7290492000005-001-000-20260404-001017.xml"
+                ]
+            },
+            "completed_successfully": true
+        }
+    ],
+    "verified_downloads": [
+        {
+            "file_name": "PriceFull7290492000005-001-000-20260404-001017.gz",
+            "when": "2026-04-04 14:26:28.546461+03:00"
+        }
+    ]
+}
