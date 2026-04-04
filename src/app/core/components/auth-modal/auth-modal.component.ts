@@ -39,7 +39,7 @@ export class AuthModalComponent {
   protected showPassword_ = signal(false);
   protected showConfirmPassword_ = signal(false);
 
-  protected readonly isDev = !environment.production;
+  protected readonly isDev = environment.localDev;
 
   private imgBase64: string | null = null;
 

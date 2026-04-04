@@ -37,7 +37,7 @@ function makeId(length = 5) {
 // GET /api/v1/data/:type
 // Returns all documents belonging to the authenticated user.
 // ---------------------------------------------------------------------------
-router.get('/:type', async (req, res) => {
+router.get('/:type', verifyToken, async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit) || 500, 1000);
     const skip = parseInt(req.query.skip) || 0;
@@ -57,7 +57,7 @@ router.get('/:type', async (req, res) => {
 // GET /api/v1/data/:type/:id
 // Returns one document by _id, scoped to the authenticated user.
 // ---------------------------------------------------------------------------
-router.get('/:type/:id', async (req, res) => {
+router.get('/:type/:id', verifyToken, async (req, res) => {
   try {
     const doc = await col(req.params.type).findOne({
       _id: req.params.id,
@@ -149,11 +149,22 @@ router.put('/:type', verifyToken, async (req, res) => {
     await col(req.params.type).deleteMany({ userId: req.user.userId });
 
     if (entities.length > 0) {
+      // After deleting the user's docs, find which incoming _ids still exist in the
+      // collection (owned by other users). Those must get fresh ids to avoid E11000.
+      const incomingIds = entities.map(e => e._id).filter(Boolean);
+      const stillTaken = incomingIds.length > 0
+        ? new Set(
+            (await col(req.params.type)
+              .find({ _id: { $in: incomingIds } }, { projection: { _id: 1 } })
+              .toArray()).map(d => d._id)
+          )
+        : new Set();
+
       const docs = entities.map(e => {
         const { userId: _u, _masterId: _m, _userModified: _um, ...safeEntity } = e;
         return {
           ...safeEntity,
-          _id: safeEntity._id || makeId(),
+          _id: stillTaken.has(safeEntity._id) ? makeId() : (safeEntity._id || makeId()),
           userId: req.user.userId,
           _masterId: null,
           _userModified: false,
