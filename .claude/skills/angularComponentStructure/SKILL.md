@@ -22,7 +22,7 @@ description: Defines the mandatory class structure, section ordering, and CRDUL 
 
 ## Phase 1: Boilerplate Generation 
 
-**File Creation:** Standard four-file split: `.ts`, `.html`, `.scss`, `.spec.ts` (unless `inlineTemplate` requested).
+**File Creation:** Standard four-file split: `.ts`, `.html`, `.scss`, `.spec.ts` (unless `inlineTemplate` requested). When refactoring an existing component, skip file creation — reorder class sections in place.
 
 **Class Section Order (strict — enforce this sequence every time):**
 1. INJECTED services
