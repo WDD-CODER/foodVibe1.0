@@ -26,6 +26,7 @@ Create a self-contained SVG file with these attributes:
 
 Draw the cannabis leaf outline using a `<path>` element:
 - The leaf has 7 lobes (seven pointed leaflets) radiating from a central base
+- Each lobe has serrated (jagged) edges — small notches along both sides of every leaflet
 - Lobes should alternate in size (larger lobes at the sides, smaller at top)
 - The overall shape should fit within the upper 75% of the viewBox
 
