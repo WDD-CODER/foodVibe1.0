@@ -183,7 +183,7 @@
     transition: background 0.2s var(--ease-smooth), transform 0.15s var(--ease-smooth);
 
     &:hover {
-      background: rgba(254, 243, 199, 0.9);
+      background: var(--bg-warning-strong);
 
       transform: scale(1.02);
     }
@@ -208,7 +208,7 @@
 
     font-size: 0.75rem;
     font-weight: 500;
-    background: rgba(254, 243, 199, 0.5);
+    background: var(--bg-warning-soft);
     color: var(--text-warning);
 
     border-radius: var(--radius-xs);
@@ -230,7 +230,7 @@
     .product-grid-row app-cell-carousel {
       background: var(--bg-glass);
 
-      border-block-end: 1px solid rgba(241, 245, 249, 0.4);
+      border-block-end: 1px solid var(--border-row);
 
       transition: background 0.15s ease;
     }
