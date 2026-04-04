@@ -285,7 +285,20 @@ bash .claude/reflect/test-runner.sh \
   .claude/reflect/test-suites/<skill_name>.tests.md
 ```
 
-Parse the `skill_score:` line from the output. This is the raw machine score.
+**F. Accumulate evidence in memory (written to file in Step 2.4b):**
+
+For each behavior, record:
+```
+[TC-XXX B<N>] STATUS: PASS | EVIDENCE: SKILL.md line NN: "<exact quote>" | REASONING: <causal chain>
+[TC-XXX B<N>] STATUS: FAIL | EVIDENCE: No rule in SKILL.md addresses this behavior
+```
+For each anti-pattern, record:
+```
+[TC-XXX AP<N>] STATUS: TRIGGERED | EVIDENCE: <rule that would prevent this is absent>
+[TC-XXX AP<N>] STATUS: CLEAR | EVIDENCE: SKILL.md line NN: "<rule that prevents it>"
+```
+
+### Step 2.2: Calculate score
 
 **Three-tier weight adjustment:**
 - If the test suite has `**Behavior Checks**` sections: `exec_score = (raw_score / 70) * 40`
@@ -360,7 +373,39 @@ Append one tab-separated row:
 For the first evaluation of a session: `status = baseline`, `hypothesis = initial`
 For re-evaluations inside the loop: `status = re-eval`, `hypothesis = <what was just tried>`
 
-### Step 2.6: Write evidence file (auto mode only — skip for baseline)
+### Step 2.4b: Write evidence file (auto mode only — skip for baseline)
+
+Write all accumulated evidence (from Step 2.1F) to:
+`.claude/reflect/evidence/<skill_name>-<YYYY-MM-DD>.evidence.md`
+
+```markdown
+# Evidence Log: <skill_name> — <YYYY-MM-DD>
+Skill commit: <hash> | Score: <skill_score>
+
+## TC-XXX: <Name>
+### B<N> — <behavior text>
+- STATUS: PASS
+- EVIDENCE: SKILL.md line NN: "<exact quoted text>"
+- REASONING: <why this line produces the behavior>
+
+### B<N> — <behavior text>
+- STATUS: FAIL
+- EVIDENCE: No rule in SKILL.md addresses this behavior
+- IMPACT: -1 behavior point
+
+### AP<N> — <anti-pattern text>
+- STATUS: TRIGGERED (penalty)
+- EVIDENCE: <what rule is missing that would prevent this>
+- IMPACT: -1 anti-pattern penalty
+
+### AP<N> — <anti-pattern text>
+- STATUS: CLEAR
+- EVIDENCE: SKILL.md line NN: "<rule that prevents this>"
+```
+
+If the file already exists for today → overwrite it (this run is the latest).
+
+### Step 2.5: Check the stop condition
 
 Write the evaluator agent's raw output to:
 `.claude/reflect/evidence/<skill_name>-<YYYY-MM-DD>.evidence.md`
