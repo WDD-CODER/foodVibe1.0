@@ -12,10 +12,14 @@
     "test": "ng test",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
+    "build:render": "npx ng build --configuration=production",
     "dev:local": "ng serve -c local",
     "dev:remote": "ng serve -c remote"
   },
   "private": true,
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "@angular/cdk": "^19.2.19",
     "@angular/common": "^19.2.20",

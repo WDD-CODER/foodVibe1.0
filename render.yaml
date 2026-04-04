@@ -1,17 +1,16 @@
 services:
   - type: web
-    name: foodvibe-server
+    name: foodvibe
     runtime: node
-    buildCommand: npm run build && npm install --prefix server
+    plan: free
+    buildCommand: npm ci && npm install --prefix server && npm run build:render
     startCommand: node server/index.js
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 10000
-      - key: MONGO_URI
-        sync: false
       - key: JWT_SECRET
+        generateValue: true
+      - key: MONGO_URI
         sync: false
       # Set in Render dashboard — never commit the value
       - key: GEMINI_API_KEY
