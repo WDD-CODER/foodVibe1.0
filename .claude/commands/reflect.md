@@ -298,8 +298,6 @@ For each anti-pattern, record:
 [TC-XXX AP<N>] STATUS: CLEAR | EVIDENCE: SKILL.md line NN: "<rule that prevents it>"
 ```
 
-### Step 2.2: Calculate score
-
 **Three-tier weight adjustment:**
 - If the test suite has `**Behavior Checks**` sections: `exec_score = (raw_score / 70) * 40`
 - If the test suite has NO Behavior Checks: `exec_score = raw_score` (stays 0–70)
