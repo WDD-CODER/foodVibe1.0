@@ -10,6 +10,20 @@ description: Pulls recent GitHub activity and syncs the local branch at session 
 
 ---
 
+## Phase 0: Worktree Remote Cleanup `[Procedural — Haiku/Composer (Fast/Flash)]`
+
+**Check for breadcrumb:** If `.worktree-cleanup` exists in the repo root:
+1. Read each line (one branch name per line)
+2. For each branch name, run: `git push origin --delete <branch-name>`
+   - If it succeeds: log `✓ Deleted remote branch: <branch-name>`
+   - If it fails with "remote ref does not exist": log `✓ Already gone: <branch-name>` (safe to ignore)
+3. Delete the `.worktree-cleanup` file after processing all entries
+4. Run `git fetch --prune` to sync remote refs
+
+If `.worktree-cleanup` does not exist, skip this phase entirely.
+
+---
+
 ## Phase 1: Environment Audit `[Procedural — Haiku/Composer (Fast/Flash)]`
 
 **Status Check:** Run `git status` and `git fetch`.
