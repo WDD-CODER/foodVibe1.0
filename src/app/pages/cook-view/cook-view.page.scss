@@ -2,6 +2,7 @@
   display: block;
   min-height: 100vh;
   min-height: 100dvh;
+  background: #f0f7f5;
   --cv-bg: var(--bg-body);
   --cv-header-start: var(--color-primary-soft);
   --cv-header-end: var(--bg-success);
@@ -39,21 +40,19 @@ $cv-break-md: 56.25rem;
 
 .cook-view-container {
   display: block;
+  overflow: hidden;
 
-  max-width: 45rem;
+  max-width: 1100px;
   min-height: 100vh;
   min-height: 100dvh;
 
-  background: transparent;
+  background: #fff;
 
-  margin: 0 auto;
-  padding: 1.25rem;
-
-  @media (min-width: 56.25rem) {
-    max-width: 75rem;
-
-    padding: 1.5rem 2rem;
-  }
+  border: 1px solid rgba(29, 158, 117, 0.18);
+  border-radius: 24px;
+  box-shadow: 0 4px 32px rgba(29, 158, 117, 0.08);
+  margin-inline: auto;
+  margin-block: 1.5rem;
 }
 
 .cook-view-empty {
@@ -251,20 +250,26 @@ $cv-break-md: 56.25rem;
 
   gap: 0.5rem;
 
-  background: var(--cv-section-bg);
-
-  padding-block: 0.5rem;
-  padding-inline: 1.25rem;
+  background: linear-gradient(180deg, #f8fdfb 0%, #f0f7f5 100%);
 
   border-bottom: 1px solid var(--border-default);
+  padding-block: 0.5rem;
+  padding-inline: 1.25rem;
 }
 
 .quantity-control-wrap {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  overflow: hidden;
 
+  background: #fff;
+
+  border: 1.5px solid #c8e6db;
+  border-radius: 12px;
   gap: 0.875rem;
+  padding-block: 0.25rem;
+  padding-inline: 0.5rem;
 }
 
 .quantity-label {
@@ -304,7 +309,8 @@ $cv-break-md: 56.25rem;
 .cv-chip-btn {
   cursor: pointer;
 
-  border: 1px solid var(--cv-border-accent-strong);
+  border: 1.5px solid #c8e6db;
+  border-radius: 20px;
 
   transition: background 0.2s, color 0.2s;
 }
@@ -314,6 +320,7 @@ $cv-break-md: 56.25rem;
   color: var(--color-text-on-primary);
 
   border-color: var(--cv-accent);
+  box-shadow: 0 2px 8px rgba(29, 158, 117, 0.3);
 }
 
 .cv-recent-chips {
@@ -343,6 +350,13 @@ $cv-break-md: 56.25rem;
 .cv-ing-pane {
   order: 1;
   overflow-y: auto;
+
+  background: #fff;
+
+  border: 1px solid rgba(29, 158, 117, 0.12);
+  border-radius: 16px;
+
+  box-shadow: 0 2px 12px rgba(29, 158, 117, 0.06);
 }
 
 .cv-ing-pane-header {
@@ -355,13 +369,12 @@ $cv-break-md: 56.25rem;
 
   z-index: 1;
 
-  background: var(--bg-pure);
+  background: linear-gradient(135deg, #f0faf6 0%, #e8f7f1 100%);
 
+  border-bottom: 1px solid rgba(29, 158, 117, 0.1);
   gap: 0.5rem;
   padding-block: 0.625rem;
   padding-inline: 1rem;
-
-  border-bottom: 1px solid var(--border-default);
 }
 
 .cv-ing-pane-title {
@@ -370,9 +383,9 @@ $cv-break-md: 56.25rem;
 
   gap: 0.375rem;
 
+  color: #0F6E56;
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--cv-text-heading);
 
   lucide-icon {
     flex-shrink: 0;
@@ -400,21 +413,21 @@ $cv-break-md: 56.25rem;
 
 .cv-ing-progress-bar {
   width: 100%;
-  height: 3px;
+  height: 4px;
 
-  background: var(--border-default);
+  background: #c8e6db;
 
-  border-radius: 2px;
+  border-radius: 4px;
 }
 
 .cv-ing-progress-fill {
   height: 100%;
 
-  background: var(--cv-active-border);
+  background: linear-gradient(90deg, #1D9E75 0%, #5DCAA5 100%);
 
   border-radius: 2px;
 
-  transition: width 0.3s ease-out;
+  transition: width 0.4s ease-out;
 }
 
 .cv-ing-pane-header--complete .cv-ing-progress-fill {
@@ -434,9 +447,12 @@ $cv-break-md: 56.25rem;
   gap: 0.75rem;
   min-height: var(--cv-tap-min);
 
+  background: #fafffe;
   direction: rtl;
 
-  border-bottom: 1px solid var(--border-default);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  margin-bottom: 3px;
   padding-block: 0.625rem;
   padding-inline: 1rem;
 
@@ -444,7 +460,8 @@ $cv-break-md: 56.25rem;
   transition: background 0.15s;
 
   &:hover {
-    background: var(--cv-accent-soft);
+    background: #f0faf6;
+    border-color: rgba(29, 158, 117, 0.1);
   }
 }
 
@@ -493,9 +510,9 @@ $cv-break-md: 56.25rem;
 }
 
 .cv-ing-amt {
-  font-size: var(--cv-amt-size);
-  font-weight: 700;
-  color: var(--cv-accent);
+  color: #1D9E75;
+  font-size: 1.125rem;
+  font-weight: 800;
 
   min-width: 3rem;
   text-align: left;
@@ -514,9 +531,12 @@ $cv-break-md: 56.25rem;
   gap: 0.75rem;
   overflow-y: auto;
 
-  padding: 0.75rem;
+  background: #fff;
 
-  border-inline-end: 1px solid var(--border-default);
+  border: 1px solid rgba(29, 158, 117, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(29, 158, 117, 0.06);
+  padding: 0.75rem;
 }
 
 .cv-step-pane-header {
@@ -529,12 +549,11 @@ $cv-break-md: 56.25rem;
 
   z-index: 1;
 
-  background: var(--bg-pure);
+  background: linear-gradient(135deg, #f0faf6 0%, #e8f7f1 100%);
 
+  border-bottom: 1px solid rgba(29, 158, 117, 0.1);
   padding-block: 0.625rem;
   padding-inline: 0.5rem;
-
-  border-bottom: 1px solid var(--border-default);
 }
 
 .cv-step-pane-title {
@@ -543,9 +562,9 @@ $cv-break-md: 56.25rem;
 
   gap: 0.375rem;
 
+  color: #0F6E56;
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--cv-text-heading);
 
   lucide-icon {
     flex-shrink: 0;
@@ -566,10 +585,14 @@ $cv-break-md: 56.25rem;
 }
 
 .cv-step-card {
+  flex-shrink: 0;
   overflow: hidden;
 
-  border: 1px solid var(--border-default);
-  border-radius: var(--cv-radius-xl);
+  background: #fff;
+
+  border: 1.5px solid #e0f0ea;
+  border-radius: 14px;
+  margin-bottom: 8px;
 
   transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -577,7 +600,7 @@ $cv-break-md: 56.25rem;
 .cv-step-card--active {
   border: 2px solid var(--cv-active-border);
 
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cv-active-border) 15%, transparent);
+  box-shadow: 0 4px 20px rgba(29, 158, 117, 0.18);
 }
 
 .cv-step-card--done {
@@ -601,7 +624,7 @@ $cv-break-md: 56.25rem;
 }
 
 .cv-step-card--active .cv-step-card-head {
-  background: var(--cv-active-bg);
+  background: linear-gradient(135deg, #e8f7f1 0%, #d6f0e6 100%);
 }
 
 .cv-step-num {
@@ -610,16 +633,15 @@ $cv-break-md: 56.25rem;
   justify-content: center;
   flex-shrink: 0;
 
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
 
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
+  background: #e8f7f1;
+  color: #1D9E75;
+  font-size: 13px;
+  font-weight: 800;
 
-  background: var(--bg-glass);
-
-  border: 1px solid var(--border-default);
+  border: 2px solid #c8e6db;
   border-radius: 50%;
 }
 
@@ -628,6 +650,7 @@ $cv-break-md: 56.25rem;
   color: white;
 
   border-color: var(--cv-active-border);
+  box-shadow: 0 2px 8px rgba(29, 158, 117, 0.35);
 }
 
 .cv-step-num--done {
@@ -655,10 +678,15 @@ $cv-break-md: 56.25rem;
 }
 
 .cv-step-status-chip--active {
-  background: var(--cv-active-bg);
-  color: var(--cv-active-text);
+  background: #1D9E75;
+  color: #fff;
 
-  border-color: var(--cv-active-border);
+  border-color: #1D9E75;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  padding-block: 3px;
+  padding-inline: 10px;
 }
 
 .cv-step-status-chip--done {
@@ -669,9 +697,10 @@ $cv-break-md: 56.25rem;
 }
 
 .cv-step-status-chip--pending {
-  color: var(--color-text-muted);
+  background: #f0f7f5;
+  color: #8aa89f;
 
-  border-color: var(--border-default);
+  border-color: #e0f0ea;
 }
 
 .cv-step-card-body {
@@ -728,9 +757,10 @@ $cv-break-md: 56.25rem;
   background: var(--cv-step-done-btn-bg);
   color: var(--cv-step-done-btn-color);
   font-size: 0.9375rem;
-  font-weight: 600;
+  font-weight: 700;
 
   border: none;
+  letter-spacing: 0.01em;
   padding-block: 0.875rem;
 
   cursor: pointer;
@@ -1052,16 +1082,36 @@ $cv-break-md: 56.25rem;
 }
 
 @media (max-width: $cv-break-md) {
+  .cv-shell {
+    display: block;
+
+    height: auto;
+    overflow: visible;
+  }
+
   .cv-body {
+    display: grid;
     grid-template-columns: 1fr;
+
+    height: auto;
+    overflow: visible;
+
+    gap: 1rem;
+    padding-block-end: 1.5rem;
   }
 
   .cv-ing-pane {
-    max-height: 50vh;
+    max-height: none;
+    overflow-y: visible;
+
+    order: 2;
   }
 
   .cv-step-pane {
-    max-height: 50vh;
+    max-height: none;
+    overflow-y: visible;
+
+    order: 1;
   }
 
   .cv-chip-btn {

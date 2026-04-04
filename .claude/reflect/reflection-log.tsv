@@ -6,3 +6,5 @@ date	skill	commit	skill_score	size_bytes	status	hypothesis	notes
 2026-04-03	cssLayer	02a5777	68.2	2892	baseline	hardened-tc003	TC-003 replaced with ambiguous-property variant; 3 behaviors fail (gap/z-index/animation unmapped), 4 anti-patterns triggered; score ceiling confirmed at 68.2 on harder suite
 2026-04-03	cssLayer	9c6d546	81.8	2913	keep	expand-layout-group	Added gap + z-index to Layout group; B1 passes, AP1+AP3 cleared; score 68.2→81.8
 2026-04-03	cssLayer	53e4cb0	90.9	2923	keep	expand-effects-add-animation	Added animation to Effects group; B5 passes, AP4 cleared; score 81.8→90.9; budget=2 reached
+2026-04-04	angularComponentStructure	e1d73bf	95.5	3012	baseline	initial	TC-005 AP-2 triggered: no rule prevents rewrite-from-scratch during refactoring. Phase 1 File Creation is ambiguous.
+2026-04-04	angularComponentStructure	05e8a7f	100.0	3108	keep	add-refactor-preserve-rule	Score 95.5→100.0; Phase 1 File Creation now explicitly says: when refactoring, skip file creation and reorder sections in place.
