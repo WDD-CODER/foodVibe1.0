@@ -2,6 +2,38 @@
 
 ---
 
+### Plan 249 — Catalog Seeder Data Quality + Supplier Model (`plans/249-seeder-data-quality.plan.md`)
+- [ ] Step 0: Clear bad seed from PRODUCT_LIST; delete output/pending-review.json and output/enriched.json
+- [ ] Step 1: Add `_safe_float` helper to `enrich.py`
+- [ ] Step 2: Expand `_PROMPT_TEMPLATE` in `enrich.py` to return 8 fields
+- [ ] Step 3: Update `_validate_response` in `enrich.py` to validate new fields
+- [ ] Step 4: Update `_attach_enrichment` in `enrich.py` with name override + `_recalc_pricing`
+- [ ] Step 5: Add `_recalc_pricing` and `_pack_to_base_conversion` to `enrich.py`
+- [ ] Step 6: Add `SUPPLIERS_COLLECTION` to `config.py`
+- [ ] Step 7: Add `_make_id` helper + imports to `db_write.py`
+- [ ] Step 8: Add `_upsert_suppliers` to `db_write.py`
+- [ ] Step 9: Update `write_approved` to call `_upsert_suppliers`
+- [ ] Step 10: Update `_prepare_doc` to link `supplierIds_`
+- [ ] Step 11: Update `_INTERNAL_KEYS` in `db_write.py`
+- [ ] Step 12: Update `db_write.py` imports for `SUPPLIERS_COLLECTION`
+- [ ] Step 13: Branch `feat/seeder-data-quality` and re-seed
+
+---
+
+### Plan 248 — Transloco Migration (`plans/248-transloco-migration.plan.md`)
+- [ ] Install `@jsverse/transloco` and configure `provideTransloco` in `src/app/app.config.ts` (standalone — do NOT run `ng add`)
+- [ ] Split `public/assets/data/dictionary.json` into 8 scoped files under `public/assets/i18n/he/`
+- [ ] Verify Transloco loader path — check network tab for `/assets/i18n/he/units.json` returning 200
+- [ ] Replace `| translatePipe` in all templates with `| transloco` (scope-prefixed); add `TranslocoModule`/`TranslocoDirective` to each component's `imports`
+- [ ] Replace `this.translation.translate(...)` calls in `.ts` files with `this.transloco.translate('scope.key')`
+- [ ] Create `src/app/core/services/vocabulary.service.ts` (~40 lines: `resolve()`, `addEntry()`, localStorage)
+- [ ] Update `src/app/core/services/key-resolution.service.ts` to inject `VocabularyService`
+- [ ] Update all remaining `TranslationService` injection sites to `VocabularyService`
+- [ ] Delete `translation-pipe.pipe.ts` and `translation.service.ts`
+- [ ] Verify `ng build` passes and `{{ 'cup' | transloco }}` renders `כוס` in the app
+
+---
+
 ### Plan 247 — Reflect: self-improving skills system (`plans/247-reflect-skill-improvement-loop.plan.md`)
 - [ ] Create `.claude/reflect/test-suites/` directory
 - [ ] Create `.claude/reflect/test-suite-template.md`
@@ -334,5 +366,6 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 | 192 | Pillar 3 Reactive Loop Hardening (A13–A17) | Done |
 | 196 | Commit flow speed audit | Planned |
 | 222 | Dev Machine Open Ports Security Hardening | Planned |
+| 248 | Transloco Migration | Planned |
 
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
