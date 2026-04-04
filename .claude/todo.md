@@ -102,60 +102,9 @@
 - [ ] Menu library: keyboard navigation (arrow keys + Enter) on dropdown options
 - [ ] Lists: sidebar aligns correctly to the list container on smaller screens (768px)
 
-### Plan 160 — Global user message queue (`plans/160-global-user-message-queue.plan.md`)
-- [ ] Refactor UserMsgService to use explicit state (current message, timer, pending queue) instead of concatMap pipeline
-- [ ] Success/warning: when current is success/warning, replace text and reset timer; do not enqueue
-- [ ] Error: interrupt success/warning; when current is error, enqueue so each error shown in order
-- [ ] Add user-msg.service.spec.ts with coalesce and error-priority tests
-
-### Plan 124 — Unified styling audit and theme (`plans/124-unified-styling-audit-theme.plan.md`)
-
-- [ ] Phase 4: menu-library-list — use c-input-wrapper and c-btn-primary in HTML; recipe-builder main submit use c-btn-primary
-- [ ] Phase 5: Spot-check representative pages; search and replace remaining raw colors in src/**/*.scss
-
-### Plan 095 — Menu Intelligence Gap Report (`plans/095-menu-intelligence-gap-report.plan.md`)
-
-- [ ] Add `{ capture: true }` to @HostListener in menu-intelligence.page.ts
-- [ ] Wire dish search ngModelChange to onDishSearchQueryChange; add [class.highlighted] and let ri to dish dropdown in HTML
-- [ ] Replace dish name span with button + startEditDishName in menu-intelligence.page.html
-- [ ] Add .dropdown-item.highlighted and .dish-name-clickable in menu-intelligence.page.scss
-- [ ] Optional: section search ngModelChange to onSectionSearchQueryChange if NG5002 appears
-
-### Plan 091 — Menu Intelligence Inputs and Layout (`plans/091-menu-intelligence-inputs-layout.plan.md`)
-
-- [ ] Add SelectOnFocus to sell_price and dish-field inputs; import directive in component
-- [ ] Add onSellPriceKeydown and onDishFieldKeydown with 0.25 step for portion fields
-- [ ] Wrap dish name + meta toggle in .dish-name-meta; dish-name-cell as grid; .dish-remove out of absolute
-
-### Plan 069 â€” Unused and redundant code cleanup (`plans/069-unused-redundant-code-cleanup.plan.md`)
-
-- [ ] Remove `@components/*` from tsconfig.json
-- [ ] Delete recipe.module.ts, system-health.ts, ingredient.service.ts
-- [ ] Update core/breadcrumbs.md and core/services/breadcrumbs.md
-- [ ] Remove commented block in metadata-manager.page.component.ts (lines ~219â€”263)
-- [ ] Unit-creator spec: minimal placeholder or delete file
-- [ ] Run build and tests to verify
-
-### Plan 066 â€” Quick-add product modal (`plans/066-quick-add-product-modal.plan.md`)
-
-- [ ] Create QuickAddProductModalService (signal-based, Promise<Product|null>)
-- [ ] Create QuickAddProductModalComponent (compact + expandable, keyboard, OnPush, a11y)
-- [ ] Style modal SCSS (engine classes + cssLayer)
-- [ ] Update ingredient-search: dropdown condition, add-item row, keyboard fix, auto-select
-- [ ] Register modal in app.component; add dictionary keys
-
 ---
 
 ## 🟠 Large Refactors
-
-### Plan 203-R — Recipe-book allergen + cell-expand refactor (`plans/203-R-recipe-book-allergen-cell-expand-refactor.plan.md`)
-- [x] Create `src/app/core/utils/recipe-allergens.util.ts` — export `MAX_ALLERGEN_RECURSION` + pure `resolveRecipeAllergens` fn
-- [x] Create `src/app/core/utils/cell-expand-state.util.ts` — `CellExpandState` class with signals + helpers
-- [x] Update `recipe-book-list.component.ts` — import constants/util, replace 4 signals with 2 `CellExpandState` instances
-- [x] Update `recipe-book-list.component.ts` — replace `getRecipeAllergens` body with thin wrapper; update `getRecipeProductIds` to import `MAX_ALLERGEN_RECURSION`
-- [x] Update `recipe-book-list.component.ts` — delete 6 expand methods + 2 expand helper methods; add close wrappers + update `resetExpandedCells`
-- [x] Update `recipe-book-list.component.html` — replace 6 method calls in header/body with `allergenExpand.*` / `labelsExpand.*`
-- [x] Verify: `ng build` passes; component under ~600 LOC
 
 ### Plan 089 — Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
 
@@ -198,17 +147,6 @@
 ---
 
 ## 🔵 Infrastructure / Planning
-
-### Plan 243 — Post-Migration System Validation (`plans/243-post-migration-validation-run.plan.md`)
-- [x] Create branch `feat/validation-run` from `main`
-- [x] Run validate-agent-refs — verify 6 agents, 19 skills, 11 cursor rules, 4 cursor commands, broken links
-- [x] Run git status — report dirty files
-- [x] Run ng build — zero errors required
-- [x] Run npm run lint:icons — BROKEN: scripts/check-lucide-icons.mjs missing
-- [x] Run npm run lint:no-native-select — PASS (zero violations)
-- [x] Run github-sync skill — write notes/github-sync/2026-04-02.md
-- [x] Fix 3 stale counts in validate-agent-refs.md output template (skills: 14→19, cursor rules: 7→11, cursor commands: 3→4)
-- [x] Write project state summary report
 
 ### Plan 222 — Dev Machine Open Ports Security Hardening (`plans/222-dev-machine-open-ports-security.plan.md`)
 - [ ] Disable Dell SupportAssist service in `services.msc` — verify port 9012 closed

@@ -8,6 +8,65 @@ Moved from todo.md to reduce token load.
 
 ---
 
+### Plan 243 — Post-Migration System Validation (`plans/243-post-migration-validation-run.plan.md`)
+- [x] All tasks (branch, validate-agent-refs, ng build, lint checks, github-sync, fix stale counts, project state report)
+
+---
+
+### Plan 203-R — Recipe-book allergen + cell-expand refactor (`plans/203-R-recipe-book-allergen-cell-expand-refactor.plan.md`)
+- [x] Create `src/app/core/utils/recipe-allergens.util.ts`
+- [x] Create `src/app/core/utils/cell-expand-state.util.ts`
+- [x] Update `recipe-book-list.component.ts` — import utils, replace 4 signals with 2 CellExpandState instances
+- [x] Update `recipe-book-list.component.ts` — replace getRecipeAllergens body with thin wrapper
+- [x] Update `recipe-book-list.component.ts` — delete 6 expand methods; add close wrappers
+- [x] Update `recipe-book-list.component.html` — replace 6 method calls with allergenExpand.*/labelsExpand.*
+- [x] Verify: ng build passes
+
+---
+
+### Plan 066 — Quick-add product modal (`plans/1-100/066-quick-add-product-modal.plan.md`)
+- [x] Create QuickAddProductModalService (signal-based, Promise<Product|null>)
+- [x] Create QuickAddProductModalComponent (compact + expandable, keyboard, OnPush, a11y)
+- [x] Style modal SCSS (engine classes + cssLayer)
+- [x] Update ingredient-search: dropdown condition, add-item row, keyboard fix, auto-select
+- [x] Register modal in app.component; add dictionary keys
+
+---
+
+### Plan 069 — Unused and redundant code cleanup (`plans/1-100/069-unused-redundant-code-cleanup.plan.md`)
+- [x] Remove `@components/*` from tsconfig.json
+- [x] Delete recipe.module.ts, system-health.ts, ingredient.service.ts
+- [x] Update core/breadcrumbs.md and core/services/breadcrumbs.md
+- [x] Remove commented block in metadata-manager.page.component.ts
+- [x] Unit-creator spec: minimal placeholder or delete file
+- [x] Run build and tests to verify
+
+---
+
+### Plan 091 — Menu Intelligence Inputs and Layout (`plans/1-100/091-menu-intelligence-inputs-layout.plan.md`)
+- [x] Add SelectOnFocus to sell_price and dish-field inputs; import directive in component
+- [x] Add onSellPriceKeydown and onDishFieldKeydown with 0.25 step for portion fields
+- [x] Wrap dish name + meta toggle in .dish-name-meta; dish-name-cell as grid; .dish-remove out of absolute
+
+---
+
+### Plan 095 — Menu Intelligence Gap Report (`plans/1-100/095-menu-intelligence-gap-report.plan.md`)
+- [x] Add `{ capture: true }` to @HostListener in menu-intelligence.page.ts (implemented via document.addEventListener)
+- [x] Wire dish search ngModelChange to onDishSearchQueryChange; add [class.highlighted] and let ri to dish dropdown in HTML
+- [x] Replace dish name span with button + startEditDishName in menu-intelligence.page.html
+- [x] Add .dropdown-item.highlighted and .dish-name-clickable in menu-intelligence.page.scss
+- [x] Optional: section search ngModelChange to onSectionSearchQueryChange if NG5002 appears
+
+---
+
+### Plan 160 — Global user message queue (`plans/100-200/160-global-user-message-queue.plan.md`)
+- [x] Refactor UserMsgService to use explicit state (current message, timer, pending queue) instead of concatMap pipeline
+- [x] Success/warning: when current is success/warning, replace text and reset timer; do not enqueue
+- [x] Error: interrupt success/warning; when current is error, enqueue so each error shown in order
+- [x] Add user-msg.service.spec.ts with coalesce and error-priority tests
+
+---
+
 ### Plan 233 — Gemini Direct API + Modal Status Feedback (`plans/233-gemini-direct-api-modal-status.plan.md`)
 - [x] `gemini.service.ts` — rewrite: fetch-based direct Gemini API call, apiKey_ signal, hasKey computed, setApiKey(), remove HttpClient/dead imports
 - [x] `ai-recipe-modal.component.ts` — add configuringKey_/keyInput_/status_ signals, onSaveKey/onClose methods, API key guard in onGenerate(), FormsModule in imports
