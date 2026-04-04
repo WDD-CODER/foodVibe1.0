@@ -1,0 +1,60 @@
+{
+    "20260404142718": [
+        {
+            "status": "started",
+            "when": "2026-04-04 14:27:18.602644+03:00",
+            "limit": 1,
+            "files_requested": [
+                "PRICE_FULL_FILE"
+            ],
+            "store_id": null,
+            "files_names_to_scrape": null,
+            "when_date": null,
+            "filter_nul": false,
+            "filter_zero": false,
+            "suppress_exception": true
+        },
+        {
+            "status": "collected",
+            "when": "2026-04-04 14:27:20.816781+03:00",
+            "file_name_collected_from_site": [
+                "PriceFull7290058156016-264-202604041003"
+            ],
+            "links_collected_from_site": [
+                "http://supersapir.binaprojects.com//Download.aspx?FileNm=PriceFull7290058156016-264-202604041003.gz"
+            ]
+        },
+        {
+            "status": "downloaded",
+            "when": "2026-04-04 14:27:24.829236+03:00",
+            "results": [
+                {
+                    "file_name": "PriceFull7290058156016-264-202604041003",
+                    "downloaded": true,
+                    "extract_succefully": true,
+                    "error": null,
+                    "restart_and_retry": false
+                }
+            ]
+        },
+        {
+            "status": "estimated_size",
+            "when": "2026-04-04 14:27:24.834760+03:00",
+            "folder_size": {
+                "size": 3306580,
+                "unit": "MB",
+                "folder": "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\SuperSapir",
+                "folder_content": [
+                    "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\SuperSapir\\PriceFull7290058156016-264-202604041003.aspx.xml"
+                ]
+            },
+            "completed_successfully": true
+        }
+    ],
+    "verified_downloads": [
+        {
+            "file_name": "PriceFull7290058156016-264-202604041003",
+            "when": "2026-04-04 14:27:24.831235+03:00"
+        }
+    ]
+}

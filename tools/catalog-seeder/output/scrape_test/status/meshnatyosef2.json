@@ -1,0 +1,60 @@
+{
+    "20260404142659": [
+        {
+            "status": "started",
+            "when": "2026-04-04 14:26:59.080448+03:00",
+            "limit": 1,
+            "files_requested": [
+                "PRICE_FULL_FILE"
+            ],
+            "store_id": null,
+            "files_names_to_scrape": null,
+            "when_date": null,
+            "filter_nul": false,
+            "filter_zero": false,
+            "suppress_exception": true
+        },
+        {
+            "status": "collected",
+            "when": "2026-04-04 14:27:05.308230+03:00",
+            "file_name_collected_from_site": [
+                "PriceFull7290058289400-004-202604040500"
+            ],
+            "links_collected_from_site": [
+                "http://ktshivuk.binaprojects.com//Download.aspx?FileNm=PriceFull7290058289400-004-202604040500.gz"
+            ]
+        },
+        {
+            "status": "downloaded",
+            "when": "2026-04-04 14:27:08.372841+03:00",
+            "results": [
+                {
+                    "file_name": "PriceFull7290058289400-004-202604040500",
+                    "downloaded": true,
+                    "extract_succefully": true,
+                    "error": null,
+                    "restart_and_retry": false
+                }
+            ]
+        },
+        {
+            "status": "estimated_size",
+            "when": "2026-04-04 14:27:08.376948+03:00",
+            "folder_size": {
+                "size": 4172545,
+                "unit": "MB",
+                "folder": "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\MeshnatYosef2",
+                "folder_content": [
+                    "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\MeshnatYosef2\\PriceFull7290058289400-004-202604040500.aspx.xml"
+                ]
+            },
+            "completed_successfully": true
+        }
+    ],
+    "verified_downloads": [
+        {
+            "file_name": "PriceFull7290058289400-004-202604040500",
+            "when": "2026-04-04 14:27:08.374922+03:00"
+        }
+    ]
+}

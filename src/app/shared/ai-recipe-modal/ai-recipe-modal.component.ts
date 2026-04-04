@@ -9,7 +9,7 @@ import { GeminiService } from '@services/gemini.service'
 import type { AiRecipePatch } from '@services/gemini.service'
 import { AiRecipeDraftService, type AiRecipeDraft } from '@services/ai-recipe-draft.service'
 import { UserMsgService } from '@services/user-msg.service'
-import { getGeminiUsage, DAILY_LIMIT } from '../../core/utils/gemini-usage.util'
+import { getGeminiUsage, DAILY_LIMIT, fetchGeminiUsageFromServer } from '../../core/utils/gemini-usage.util'
 import { addGeminiShot } from '../../core/utils/gemini-shots.util'
 
 type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
@@ -67,7 +67,10 @@ export class AiRecipeModalComponent implements OnInit {
   }
 
   refreshUsage(): void {
-    this.geminiUsage_.set(getGeminiUsage())
+    this.geminiUsage_.set(getGeminiUsage())           // show local cache instantly
+    fetchGeminiUsageFromServer().then(usage => {       // then update with real server count
+      this.geminiUsage_.set(usage)
+    })
   }
 
   // ─── Create mode ─────────────────────────────────────────────────

@@ -1,0 +1,58 @@
+{
+    "20260404142715": [
+        {
+            "status": "started",
+            "when": "2026-04-04 14:27:15.961460+03:00",
+            "limit": 1,
+            "files_requested": [
+                "PRICE_FULL_FILE"
+            ],
+            "store_id": null,
+            "files_names_to_scrape": null,
+            "when_date": null,
+            "filter_nul": false,
+            "filter_zero": false,
+            "suppress_exception": true
+        },
+        {
+            "status": "collected",
+            "when": "2026-04-04 14:27:16.318902+03:00",
+            "file_name_collected_from_site": [
+                "PriceFull7290526500006-001-004-20260404-002006.gz"
+            ],
+            "links_collected_from_site": ""
+        },
+        {
+            "status": "downloaded",
+            "when": "2026-04-04 14:27:16.958212+03:00",
+            "results": [
+                {
+                    "file_name": "PriceFull7290526500006-001-004-20260404-002006.gz",
+                    "downloaded": true,
+                    "extract_succefully": true,
+                    "restart_and_retry": false,
+                    "error": null
+                }
+            ]
+        },
+        {
+            "status": "estimated_size",
+            "when": "2026-04-04 14:27:16.963747+03:00",
+            "folder_size": {
+                "size": 12299961,
+                "unit": "MB",
+                "folder": "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\SalachDabach",
+                "folder_content": [
+                    "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\SalachDabach\\PriceFull7290526500006-001-004-20260404-002006.xml"
+                ]
+            },
+            "completed_successfully": true
+        }
+    ],
+    "verified_downloads": [
+        {
+            "file_name": "PriceFull7290526500006-001-004-20260404-002006.gz",
+            "when": "2026-04-04 14:27:16.960224+03:00"
+        }
+    ]
+}

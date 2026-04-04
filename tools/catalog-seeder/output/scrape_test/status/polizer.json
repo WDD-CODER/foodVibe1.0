@@ -1,0 +1,58 @@
+{
+    "20260404142710": [
+        {
+            "status": "started",
+            "when": "2026-04-04 14:27:10.161728+03:00",
+            "limit": 1,
+            "files_requested": [
+                "PRICE_FULL_FILE"
+            ],
+            "store_id": null,
+            "files_names_to_scrape": null,
+            "when_date": null,
+            "filter_nul": false,
+            "filter_zero": false,
+            "suppress_exception": true
+        },
+        {
+            "status": "collected",
+            "when": "2026-04-04 14:27:10.570139+03:00",
+            "file_name_collected_from_site": [
+                "PriceFull7291059100008-001-001-20260404-001002.gz"
+            ],
+            "links_collected_from_site": ""
+        },
+        {
+            "status": "downloaded",
+            "when": "2026-04-04 14:27:11.072109+03:00",
+            "results": [
+                {
+                    "file_name": "PriceFull7291059100008-001-001-20260404-001002.gz",
+                    "downloaded": true,
+                    "extract_succefully": true,
+                    "restart_and_retry": false,
+                    "error": null
+                }
+            ]
+        },
+        {
+            "status": "estimated_size",
+            "when": "2026-04-04 14:27:11.075630+03:00",
+            "folder_size": {
+                "size": 9541903,
+                "unit": "MB",
+                "folder": "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\Polizer",
+                "folder_content": [
+                    "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\Polizer\\PriceFull7291059100008-001-001-20260404-001002.xml"
+                ]
+            },
+            "completed_successfully": true
+        }
+    ],
+    "verified_downloads": [
+        {
+            "file_name": "PriceFull7291059100008-001-001-20260404-001002.gz",
+            "when": "2026-04-04 14:27:11.073620+03:00"
+        }
+    ]
+}

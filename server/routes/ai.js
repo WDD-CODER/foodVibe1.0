@@ -1,10 +1,74 @@
 const { Router } = require('express');
+const mongoose = require('mongoose');
 const { verifyToken } = require('../middleware/auth');
 
 const router = Router();
 
 const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+
+// ---------------------------------------------------------------------------
+// Shared daily call counter — stored in MongoDB so all users + the Python
+// seeder share a single 1,000 calls/day limit.
+//
+// Collection: GEMINI_USAGE
+// Document:   { _id: "YYYY-MM-DD", count: N }
+// ---------------------------------------------------------------------------
+
+const DAILY_LIMIT = 1000;
+const USAGE_COLLECTION = 'GEMINI_USAGE';
+
+function todayKey() {
+  return new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+}
+
+function usageCol() {
+  return mongoose.connection.db.collection(USAGE_COLLECTION);
+}
+
+/**
+ * Returns today's call count without modifying it.
+ */
+async function getUsageCount() {
+  try {
+    const doc = await usageCol().findOne({ _id: todayKey() });
+    return doc ? doc.count : 0;
+  } catch {
+    return 0; // treat DB errors as non-blocking
+  }
+}
+
+/**
+ * Atomically increments today's counter by 1.
+ * Returns the new count after increment.
+ */
+async function incrementUsage() {
+  try {
+    const result = await usageCol().findOneAndUpdate(
+      { _id: todayKey() },
+      { $inc: { count: 1 } },
+      { upsert: true, returnDocument: 'after' }
+    );
+    return result?.count ?? 1;
+  } catch {
+    return null; // non-blocking — don't crash the AI call
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/v1/ai/usage
+// Public endpoint — returns today's call count, limit, and remaining quota.
+// Used by the Angular frontend to show a live usage indicator.
+// ---------------------------------------------------------------------------
+router.get('/usage', async (_req, res) => {
+  const count = await getUsageCount();
+  res.json({
+    date:      todayKey(),
+    count,
+    limit:     DAILY_LIMIT,
+    remaining: Math.max(0, DAILY_LIMIT - count),
+  });
+});
 
 const CANONICAL_UNITS = new Set([
   'gram', 'ml', 'kg', 'liter', 'unit', 'tablespoon', 'teaspoon', 'cup', 'pinch', 'portion',
@@ -93,6 +157,11 @@ router.post('/generate', verifyToken, async (req, res) => {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
   }
 
+  const currentCount = await getUsageCount();
+  if (currentCount >= DAILY_LIMIT) {
+    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
+  }
+
   const { prompt } = req.body;
   if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
     return res.status(400).json({ error: 'prompt is required' });
@@ -138,6 +207,7 @@ router.post('/generate', verifyToken, async (req, res) => {
       return res.status(502).json({ error: 'Gemini returned a malformed recipe', details: validationErrors });
     }
 
+    await incrementUsage();
     return res.json({ recipe });
   } catch (err) {
     console.error('[ai/generate]', err);
@@ -206,6 +276,11 @@ router.post('/parse-text', verifyToken, async (req, res) => {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
   }
 
+  const currentCount = await getUsageCount();
+  if (currentCount >= DAILY_LIMIT) {
+    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
+  }
+
   const { rawText } = req.body;
   if (!rawText || typeof rawText !== 'string' || !rawText.trim()) {
     return res.status(400).json({ error: 'rawText is required' });
@@ -244,6 +319,7 @@ router.post('/parse-text', verifyToken, async (req, res) => {
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
     }
 
+    await incrementUsage();
     return res.json({ result });
   } catch (err) {
     console.error('[ai/parse-text]', err);
@@ -313,6 +389,11 @@ router.post('/patch-recipe', verifyToken, async (req, res) => {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
   }
 
+  const currentCount = await getUsageCount();
+  if (currentCount >= DAILY_LIMIT) {
+    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
+  }
+
   const { currentRecipe, instruction } = req.body;
   if (!instruction || typeof instruction !== 'string' || !instruction.trim()) {
     return res.status(400).json({ error: 'instruction is required' });
@@ -360,6 +441,7 @@ router.post('/patch-recipe', verifyToken, async (req, res) => {
       return res.status(502).json({ error: 'Gemini response missing "changes" key' });
     }
 
+    await incrementUsage();
     return res.json({ changes: parsed.changes });
   } catch (err) {
     console.error('[ai/patch-recipe]', err);

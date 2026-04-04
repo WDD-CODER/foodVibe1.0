@@ -121,20 +121,30 @@ export class MetadataManagerComponent {
       return;
     }
 
-    // --- LAYER 2: ENGLISH KEY GUARD ---
-    const contextMap = { category: 'category' as const, allergen: 'allergen' as const, unit: 'unit' as const };
-    const result = await this.translationKeyModal.open(sanitizedHebrew, contextMap[type]);
-    if (!isTranslationKeyResult(result)) return;
+    // --- LAYER 2: ENGLISH KEY GUARD (resolve first; modal only when no key) ---
+    const resolveMap: Record<string, () => string | null> = {
+      category: () => this.translationService.resolveCategory(sanitizedHebrew),
+      allergen: () => this.translationService.resolveAllergen(sanitizedHebrew),
+      unit: () => this.translationService.resolveUnit(sanitizedHebrew),
+    };
+    let englishKey = resolveMap[type]?.() ?? null;
+    let resolvedHebrew = sanitizedHebrew;
 
-    const sanitizedKey = result.englishKey;
+    if (!englishKey) {
+      const contextMap = { category: 'category' as const, allergen: 'allergen' as const, unit: 'unit' as const };
+      const result = await this.translationKeyModal.open(sanitizedHebrew, contextMap[type]);
+      if (!isTranslationKeyResult(result)) return;
+      englishKey = result.englishKey;
+      resolvedHebrew = result.hebrewLabel;
+      this.translationService.updateDictionary(englishKey, resolvedHebrew);
+    }
 
     // --- LAYER 3: EXECUTION ---
     try {
-      this.translationService.updateDictionary(sanitizedKey, result.hebrewLabel);
       if (type === 'category') {
-        await this.metadataRegistry.registerCategory(result.hebrewLabel);
+        await this.metadataRegistry.registerCategory(resolvedHebrew);
       } else {
-        await this.registerInService(sanitizedKey, type);
+        await this.registerInService(englishKey, type);
       }
       inputElement.value = '';
       this.userMsgService.onSetSuccessMsg('הנתונים נשמרו בהצלחה');

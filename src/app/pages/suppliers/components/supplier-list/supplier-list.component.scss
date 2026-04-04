@@ -78,7 +78,7 @@
     .supplier-grid-row app-cell-carousel {
       background: var(--bg-glass);
 
-      border-block-end: 1px solid rgba(241, 245, 249, 0.4);
+      border-block-end: 1px solid var(--border-row);
 
       transition: background 0.15s ease;
     }

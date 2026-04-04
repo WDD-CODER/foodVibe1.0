@@ -11,5 +11,4 @@ date	skill	commit	skill_score	size_bytes	status	hypothesis	notes
 2026-04-03	cssLayer	ed62271	100.0	2937	keep	add-border-radius-to-structure	Score 90.9→100.0; border-radius added to Structure group; TC-003 B4+AP2 both resolved
 2026-04-03	cssLayer	ed62271	97.5	2940	baseline	add-tests-batch1	TC-001–TC-010; 39/40 behaviors; TC-009 B2 gap: no rule for breakpoint placement order
 2026-04-03	cssLayer	04cbdf8	100.0	3033	keep	add-breakpoint-placement-rule	score 97.5 → 100.0; mutation_score 100% (1/1 detected)
-2026-04-04	angularComponentStructure	e1d73bf	95.5	3012	baseline	initial	TC-005 AP-2 triggered: no rule prevents rewrite-from-scratch during refactoring. Phase 1 File Creation is ambiguous.
-2026-04-04	angularComponentStructure	05e8a7f	100.0	3108	keep	add-refactor-preserve-rule	Score 95.5→100.0; Phase 1 File Creation now explicitly says: when refactoring, skip file creation and reorder sections in place.
+2026-04-04	cssLayer	93dfd2f	100.0	3033	baseline	initial	All 10 TCs pass at 100.0 — improvement loop skipped. Session revealed real violations (margin-bottom, border-bottom, box-shadow in Group 4) not covered by existing TCs.
