@@ -1,0 +1,53 @@
+{
+    "20260404142752": [
+        {
+            "status": "started",
+            "when": "2026-04-04 14:27:52.254717+03:00",
+            "limit": 1,
+            "files_requested": [
+                "PRICE_FULL_FILE"
+            ],
+            "store_id": null,
+            "files_names_to_scrape": null,
+            "when_date": null,
+            "filter_nul": false,
+            "filter_zero": false,
+            "suppress_exception": true
+        },
+        {
+            "status": "collected",
+            "when": "2026-04-04 14:28:28.088397+03:00",
+            "file_name_collected_from_site": [
+                "PriceFull7290172900007-296-202604040706.gz"
+            ],
+            "links_collected_from_site": [
+                "http://prices.super-pharm.co.il//Download/PriceFull7290172900007-296-202604040706.gz?bucketName=sp_transparency_output_prod"
+            ]
+        },
+        {
+            "status": "downloaded",
+            "when": "2026-04-04 14:28:30.492210+03:00",
+            "results": [
+                {
+                    "file_name": "PriceFull7290172900007-296-202604040706.gz",
+                    "downloaded": false,
+                    "extract_succefully": false,
+                    "error": "File wasn't downloaded with wget,std_err is 'wget' is not recognized as an internal or external command,\noperable program or batch file.\n",
+                    "restart_and_retry": false
+                }
+            ]
+        },
+        {
+            "status": "estimated_size",
+            "when": "2026-04-04 14:28:30.498251+03:00",
+            "folder_size": {
+                "size": 0,
+                "unit": "MB",
+                "folder": "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\SuperPharm",
+                "folder_content": []
+            },
+            "completed_successfully": true
+        }
+    ],
+    "verified_downloads": []
+}

@@ -1,0 +1,60 @@
+{
+    "20260404142729": [
+        {
+            "status": "started",
+            "when": "2026-04-04 14:27:29.537270+03:00",
+            "limit": 1,
+            "files_requested": [
+                "PRICE_FULL_FILE"
+            ],
+            "store_id": null,
+            "files_names_to_scrape": null,
+            "when_date": null,
+            "filter_nul": false,
+            "filter_zero": false,
+            "suppress_exception": true
+        },
+        {
+            "status": "collected",
+            "when": "2026-04-04 14:27:34.413532+03:00",
+            "file_name_collected_from_site": [
+                "PriceFull7290696200003-091-202604040500-001"
+            ],
+            "links_collected_from_site": [
+                "https://laibcatalog.co.il/CompetitionRegulationsFiles\\latest\\7290696200003/PriceFull7290696200003-091-202604040500-001.xml.gz"
+            ]
+        },
+        {
+            "status": "downloaded",
+            "when": "2026-04-04 14:27:36.871527+03:00",
+            "results": [
+                {
+                    "file_name": "PriceFull7290696200003-091-202604040500-001",
+                    "downloaded": true,
+                    "extract_succefully": true,
+                    "error": null,
+                    "restart_and_retry": false
+                }
+            ]
+        },
+        {
+            "status": "estimated_size",
+            "when": "2026-04-04 14:27:36.881485+03:00",
+            "folder_size": {
+                "size": 3843468,
+                "unit": "MB",
+                "folder": "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\Victory",
+                "folder_content": [
+                    "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\Victory\\PriceFull7290696200003-091-202604040500-001.xml"
+                ]
+            },
+            "completed_successfully": true
+        }
+    ],
+    "verified_downloads": [
+        {
+            "file_name": "PriceFull7290696200003-091-202604040500-001",
+            "when": "2026-04-04 14:27:36.876963+03:00"
+        }
+    ]
+}

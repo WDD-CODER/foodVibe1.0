@@ -1,0 +1,58 @@
+{
+    "20260404142657": [
+        {
+            "status": "started",
+            "when": "2026-04-04 14:26:57.072307+03:00",
+            "limit": 1,
+            "files_requested": [
+                "PRICE_FULL_FILE"
+            ],
+            "store_id": null,
+            "files_names_to_scrape": null,
+            "when_date": null,
+            "filter_nul": false,
+            "filter_zero": false,
+            "suppress_exception": true
+        },
+        {
+            "status": "collected",
+            "when": "2026-04-04 14:26:57.933929+03:00",
+            "file_name_collected_from_site": [
+                "PriceFull7290785400000-001-014-20260404-001014.gz"
+            ],
+            "links_collected_from_site": ""
+        },
+        {
+            "status": "downloaded",
+            "when": "2026-04-04 14:26:59.072149+03:00",
+            "results": [
+                {
+                    "file_name": "PriceFull7290785400000-001-014-20260404-001014.gz",
+                    "downloaded": true,
+                    "extract_succefully": true,
+                    "restart_and_retry": false,
+                    "error": null
+                }
+            ]
+        },
+        {
+            "status": "estimated_size",
+            "when": "2026-04-04 14:26:59.076229+03:00",
+            "folder_size": {
+                "size": 15619836,
+                "unit": "MB",
+                "folder": "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\Keshet",
+                "folder_content": [
+                    "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\Keshet\\PriceFull7290785400000-001-014-20260404-001014.xml"
+                ]
+            },
+            "completed_successfully": true
+        }
+    ],
+    "verified_downloads": [
+        {
+            "file_name": "PriceFull7290785400000-001-014-20260404-001014.gz",
+            "when": "2026-04-04 14:26:59.073162+03:00"
+        }
+    ]
+}

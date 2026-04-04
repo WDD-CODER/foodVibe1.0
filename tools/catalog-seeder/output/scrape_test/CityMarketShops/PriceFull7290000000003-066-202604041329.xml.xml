@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <ChainId/>
+  <SubChainId/>
+  <StoreId/>
+  <BikoretNo/>
+  <Items>
+    <Item>
+      <PriceUpdateDate>2026-04-04 12:54:57</PriceUpdateDate>
+      <ItemCode>7290119374083</ItemCode>
+      <ItemType>0</ItemType>
+      <ItemNm>חלב</ItemNm>
+      <ManufacturerName>לא ידוע</ManufacturerName>
+      <ManufactureCountry>לא ידוע</ManufactureCountry>
+      <ManufacturerItemDescription>לא ידוע</ManufacturerItemDescription>
+      <UnitQty>יחידה</UnitQty>
+      <Quantity>1</Quantity>
+      <UnitOfMeasure>יחידה</UnitOfMeasure>
+      <bIsWeighted>0</bIsWeighted>
+      <QtyInPackage>1</QtyInPackage>
+      <ItemPrice/>
+      <UnitOfMeasurePrice/>
+      <AllowDiscount/>
+      <ItemStatus>1</ItemStatus>
+    </Item>
+  </Items>
+</root>

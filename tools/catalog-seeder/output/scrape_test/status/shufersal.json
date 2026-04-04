@@ -1,0 +1,60 @@
+{
+    "20260404142722": [
+        {
+            "status": "started",
+            "when": "2026-04-04 14:27:22.625954+03:00",
+            "limit": 1,
+            "files_requested": [
+                "PRICE_FULL_FILE"
+            ],
+            "store_id": null,
+            "files_names_to_scrape": null,
+            "when_date": null,
+            "filter_nul": false,
+            "filter_zero": false,
+            "suppress_exception": true
+        },
+        {
+            "status": "collected",
+            "when": "2026-04-04 14:27:43.853610+03:00",
+            "file_name_collected_from_site": [
+                "PriceFull7290027600007-087-202604040300.gz"
+            ],
+            "links_collected_from_site": [
+                "https://pricesprodpublic.blob.core.windows.net/pricefull/PriceFull7290027600007-087-202604040300.gz?sv=2014-02-14&sr=b&sig=vIELzSLN6qewSzZz0TR%2FgXmnrTqZfWRVKY%2B4XGWjRHg%3D&se=2026-04-04T11%3A57%3A29Z&sp=r"
+            ]
+        },
+        {
+            "status": "downloaded",
+            "when": "2026-04-04 14:27:45.895722+03:00",
+            "results": [
+                {
+                    "file_name": "PriceFull7290027600007-087-202604040300.gz",
+                    "downloaded": true,
+                    "extract_succefully": true,
+                    "error": null,
+                    "restart_and_retry": false
+                }
+            ]
+        },
+        {
+            "status": "estimated_size",
+            "when": "2026-04-04 14:27:45.901261+03:00",
+            "folder_size": {
+                "size": 4675206,
+                "unit": "MB",
+                "folder": "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\Shufersal",
+                "folder_content": [
+                    "C:/foodCo/foodVibe1.0/tools/catalog-seeder/output/scrape_test\\Shufersal\\PriceFull7290027600007-087-202604040300.xml"
+                ]
+            },
+            "completed_successfully": true
+        }
+    ],
+    "verified_downloads": [
+        {
+            "file_name": "PriceFull7290027600007-087-202604040300.gz",
+            "when": "2026-04-04 14:27:45.898245+03:00"
+        }
+    ]
+}

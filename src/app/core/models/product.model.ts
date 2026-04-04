@@ -20,4 +20,10 @@ export interface Product {
   /** Epoch ms when the product was first added (set on create, preserved on update) */
   addedAt_?: number;
   updatedAt?: string;
+  /** English translation of the product name — populated by catalog seeder */
+  name_english?: string;
+  /** True for products inserted by the catalog seeder pipeline */
+  seeded_?: boolean;
+  /** Provenance of allergen data: "off" = Open Food Facts, "llm" = AI-inferred */
+  allergen_source_?: 'off' | 'llm';
 }
