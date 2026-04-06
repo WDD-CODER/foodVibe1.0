@@ -1,6 +1,6 @@
 ---
 description: Autonomous plan executor — finds next incomplete plan, validates, executes, surfaces for approval
-allowed-tools: Read, Write, Edit, Bash, Agent, mcp__playwright__*, mcp__plugin_playwright_playwright__*
+allowed-tools: Read, Write, Edit, Bash, Agent, Skill, mcp__playwright__*, mcp__plugin_playwright_playwright__*
 ---
 
 # Command: auto-solve
@@ -78,7 +78,7 @@ Review what would be lost. Surface to user if significant changes detected.
 For each checkbox in the plan:
 
 1. **Code inspection first:** Read the target file, check if the described change already exists
-2. **Browser verification (if UI-related):** Use Playwright to verify visual state if applicable
+2. **Browser verification (if UI-related):** Use gstack `/browse` (`$B goto <url>` / `$B snapshot`) to verify visual state. Fall back to Playwright MCP only if the /browse daemon fails to start.
 3. Mark each checkbox as:
    - `DONE` — already implemented in code
    - `TODO` — needs to be done
@@ -130,7 +130,7 @@ ng lint 2>/dev/null || echo "No lint configured"
 If plan touched UI/layout:
 - Read `.worktree-port` (fallback 4200)
 - Run `/qa http://localhost:<port>/<affected-page>`
-- Capture screenshot if Playwright available
+- Capture screenshot via `$B screenshot /tmp/qa-shot.png` (gstack /browse); fall back to Playwright MCP `browser_take_screenshot` if /browse daemon unavailable
 
 ---
 
@@ -196,7 +196,7 @@ Commands:
 ## Error Handling
 
 - **Build fails:** Stop, show full error output, wait for user input — do not auto-fix
-- **Playwright unavailable:** Skip visual QA, note in report
+- **gstack /browse unavailable:** Fall back to Playwright MCP for screenshots; if both unavailable, skip visual QA and note in report
 - **Unexpected file state:** Stop that task, mark as "needs human", continue with others
 - **All tasks blocked:** Surface immediately, don't wait for validation phase
 
@@ -207,4 +207,5 @@ Commands:
 These are already in `.claude/settings.json`:
 - `Bash(*)` — for build, git, sound
 - `Write/Edit` for worktree paths
-- `mcp__playwright__*` and `mcp__plugin_playwright_playwright__*` — for visual QA
+- `Skill` — for invoking `/browse` (gstack; primary visual QA)
+- `mcp__playwright__*` and `mcp__plugin_playwright_playwright__*` — for visual QA (fallback when /browse unavailable)
