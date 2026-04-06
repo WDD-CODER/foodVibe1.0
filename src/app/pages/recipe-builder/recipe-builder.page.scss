@@ -298,7 +298,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 0.2rem;
 
     padding-inline: 0.5rem;
@@ -337,9 +337,11 @@
   }
 
   .logistics-chip-label {
+    flex-shrink: 0;
+
     width: fit-content;
+    min-width: fit-content;
     white-space: nowrap;
-    min-width: 0;
   }
 
   .logistics-chip-qty {

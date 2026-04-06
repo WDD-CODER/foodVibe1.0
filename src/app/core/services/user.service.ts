@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core'
+import { inject, Injector, Injectable, signal } from '@angular/core'
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { User } from '../models/user.model'
 import { catchError, from, map, Observable, of, switchMap, tap, throwError } from 'rxjs'
@@ -29,6 +29,7 @@ export class UserService {
   private storageService = inject(StorageService)
   private logging = inject(LoggingService)
   private http = inject(HttpClient)
+  private injector = inject(Injector)
 
   private authBase = environment.authApiUrl
 
@@ -41,6 +42,15 @@ export class UserService {
 
   get currentUser(): User | null {
     return this._user_()
+  }
+
+  /** Fire-and-forget rehydration after login. Lazy-resolved to avoid circular DI. */
+  private _reloadDataServices(): void {
+    // Deferred import to break the circular DI chain:
+    // UserService → StorageService → HttpStorageAdapter → UserService
+    import('./unit-registry.service').then(m => this.injector.get(m.UnitRegistryService).reloadFromStorage())
+    import('./product-data.service').then(m => this.injector.get(m.ProductDataService).reloadFromStorage())
+    import('./metadata-registry.service').then(m => this.injector.get(m.MetadataRegistryService).reloadFromStorage())
   }
 
   constructor() {
@@ -122,6 +132,7 @@ export class UserService {
       tap(({ token, user }) => {
         this.storeToken(token)
         this._saveUserLocal(user)
+        this._reloadDataServices()
       }),
       map(({ user }) => user)
     )
@@ -239,6 +250,7 @@ export class UserService {
           this._saveUserLocal(user)
           this._startRefreshTimer()
           this.logging.info({ event: 'auth.login', message: 'Login success', context: { userId: user._id } })
+          this._reloadDataServices()
         }),
         map(({ user }) => user),
         catchError((err: HttpErrorResponse) => {
@@ -269,6 +281,7 @@ export class UserService {
             const user = this._toUser(stored)
             this._saveUserLocal(user)
             this.logging.info({ event: 'auth.login', message: 'Login success', context: { userId: user._id } })
+            this._reloadDataServices()
             return of(user)
           })
         )

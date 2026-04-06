@@ -120,7 +120,7 @@
                         class="change-tag"
                         (click)="toggleChangePopover(item.id, change.field, $event)"
                       >
-                        {{ change.label | translatePipe }}
+                        {{ change.label | translatePipe }}@if (change.from || change.to) {: {{ change.from }} → {{ change.to }}}
                       </button>
                     }
                   </div>

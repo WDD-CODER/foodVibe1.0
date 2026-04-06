@@ -445,6 +445,13 @@
   // height (minus breathing room). The grid-row placement is ignored for
   // fixed elements — the viewport becomes the containing block.
   @media (max-width: #{$phone-break}) {
+    .list-container {
+      width: 100%;
+      padding-inline: 0.75rem;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
     .filter-panel {
       position: fixed;
       inset-block: 1rem;

@@ -81,9 +81,10 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     ...this.availableUnits_().map((u) => ({ value: u, label: u })),
     { value: 'NEW_UNIT', label: 'add_new_unit' },
   ]);
-  protected uomOptions_ = computed(() =>
-    this.availableUnits_().map((u) => ({ value: u, label: u }))
-  );
+  protected uomOptions_ = computed(() => [
+    ...this.availableUnits_().map((u) => ({ value: u, label: u })),
+    { value: 'NEW_UNIT', label: 'add_new_unit' },
+  ]);
   protected allergenOptions_ = computed(() => this.metadataRegistry.allAllergens_());
   protected isEditMode_ = signal<boolean>(false);
   private readonly saving = useSavingState();
@@ -442,6 +443,20 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     }
   }
 
+
+  protected onUomValueChange(value: string, index: number): void {
+    if (value === 'NEW_UNIT') {
+      this.unitRegistry.openUnitCreator();
+      (this.productForm_.get('purchase_options_') as FormArray)
+        ?.at(index)
+        ?.patchValue({ uom: '' });
+      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
+        (this.productForm_.get('purchase_options_') as FormArray)
+          ?.at(index)
+          ?.patchValue({ uom: newUnit });
+      });
+    }
+  }
 
   protected toggleAllergen(allergen: string): void {
     const ctrl = this.productForm_.get('allergens_');
