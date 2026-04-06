@@ -163,6 +163,7 @@ private readonly cdr = inject(ChangeDetectorRef)
       : (hasPurchaseOptions ? 1 : 0);
     group.patchValue({
       name_hebrew: item.name_hebrew,
+      nameSnapshot: item.name_hebrew,
       referenceId: item._id,
       item_type: item.item_type_,
       unit,
@@ -230,6 +231,19 @@ private readonly cdr = inject(ChangeDetectorRef)
     });
     group.updateValueAndValidity();
     this.ingredientsFormArray().updateValueAndValidity();
+  }
+
+  protected getDisplayName(group: FormGroup): string {
+    const refId = group.get('referenceId')?.value as string | null
+    const type = group.get('item_type')?.value as 'product' | 'recipe' | null
+    if (refId) {
+      const pool = type === 'recipe'
+        ? this.kitchenStateService.recipes_()
+        : this.kitchenStateService.products_()
+      const found = pool.find(x => x._id === refId)
+      if (found?.name_hebrew) return found.name_hebrew
+    }
+    return (group.get('name_hebrew')?.value || group.get('nameSnapshot')?.value || '') as string
   }
 
   getItemMetadata(group: FormGroup) {

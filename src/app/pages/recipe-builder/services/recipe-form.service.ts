@@ -60,6 +60,7 @@ export class RecipeFormService {
         referenceId: [item?._id ?? null],
         item_type: [item?.item_type_ ?? null],
         name_hebrew: [item?.name_hebrew ?? ''],
+        nameSnapshot: [item?.name_hebrew ?? ''],
         amount_net: [item ? 1 : null, [Validators.min(0)]],
         yield_percentage: [item?.yield_percentage ?? 1],
         unit: [item?.base_unit_ ?? 'gram'],
@@ -160,7 +161,7 @@ export class RecipeFormService {
     const raw = form.getRawValue() as Record<string, unknown>
     const isDish = raw['recipe_type'] === 'dish'
 
-    type IngRow = { referenceId?: string; item_type?: string; amount_net?: number; unit?: string; total_cost?: number }
+    type IngRow = { referenceId?: string; item_type?: string; amount_net?: number; unit?: string; total_cost?: number; nameSnapshot?: string }
     const rawIngredients = (raw['ingredients'] || []) as IngRow[]
     const ingredients: Ingredient[] = rawIngredients
       .filter(ing => !!ing?.referenceId)
@@ -170,7 +171,8 @@ export class RecipeFormService {
         type: (ing.item_type === 'recipe' ? 'recipe' : 'product') as 'product' | 'recipe',
         amount_: ing.amount_net ?? 0,
         unit_: ing.unit ?? '',
-        calculatedCost_: ing.total_cost ?? 0
+        calculatedCost_: ing.total_cost ?? 0,
+        nameSnapshot: ing.nameSnapshot ?? ''
       }))
 
     const steps: RecipeStep[] = []
@@ -313,6 +315,8 @@ export class RecipeFormService {
       lastGroup.patchValue({
         referenceId: ing.referenceId,
         item_type: ing.type,
+        name_hebrew: item?.name_hebrew ?? (ing as { name_hebrew_?: string }).name_hebrew_ ?? ing.nameSnapshot ?? '',
+        nameSnapshot: ing.nameSnapshot ?? item?.name_hebrew ?? '',
         amount_net: ing.amount_,
         unit: ing.unit_,
         total_cost: ing.calculatedCost_ ?? this.recipeCost.getCostForIngredient(ing)
