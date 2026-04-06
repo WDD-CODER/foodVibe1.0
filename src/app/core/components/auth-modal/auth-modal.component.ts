@@ -5,6 +5,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { AuthModalService } from '@services/auth-modal.service';
 import { UserService } from '@services/user.service';
 import { environment } from '../../../../environments/environment';
+import { validateUsername, validateEmail, validatePassword } from '../../utils/auth-validation.util';
 
 @Component({
   selector: 'app-auth-modal',
@@ -38,6 +39,10 @@ export class AuthModalComponent {
   protected isSubmitting = signal(false);
   protected showPassword_ = signal(false);
   protected showConfirmPassword_ = signal(false);
+  protected nameTouched_ = signal(false);
+  protected emailTouched_ = signal(false);
+  protected passwordTouched_ = signal(false);
+  protected confirmTouched_ = signal(false);
 
   protected readonly isDev = environment.localDev;
 
@@ -65,31 +70,52 @@ export class AuthModalComponent {
     reader.readAsDataURL(file);
   }
 
+  protected onNameBlur(): void {
+    this.nameTouched_.set(true);
+    const err = validateUsername(this.name);
+    if (err) this.errorKey.set(err);
+  }
+
+  protected onEmailBlur(): void {
+    this.emailTouched_.set(true);
+    const err = validateEmail(this.email);
+    if (err) this.errorKey.set(err);
+  }
+
+  protected onPasswordBlur(): void {
+    this.passwordTouched_.set(true);
+    if (!this.isSignUp) {
+      if (!this.password.trim()) this.errorKey.set('password_required');
+      return;
+    }
+    const err = validatePassword(this.password, this.name, this.email);
+    if (err) this.errorKey.set(err);
+  }
+
+  protected onConfirmBlur(): void {
+    this.confirmTouched_.set(true);
+    if (this.password !== this.confirmPassword) this.errorKey.set('passwords_do_not_match');
+  }
+
   protected onSubmit(): void {
     if (this.isSubmitting()) return;
 
-    const trimmedName = this.name.trim();
-    if (!trimmedName) {
-      this.errorKey.set('name_required');
-      return;
-    }
-
-    const trimmedPassword = this.password.trim();
-    if (!trimmedPassword) {
-      this.errorKey.set('password_required');
-      return;
-    }
+    const nameErr = validateUsername(this.name);
+    if (nameErr) { this.errorKey.set(nameErr); return; }
 
     if (this.isSignUp) {
-      const trimmedEmail = this.email.trim();
-      if (!trimmedEmail) {
-        this.errorKey.set('email_required');
-        return;
-      }
+      const emailErr = validateEmail(this.email);
+      if (emailErr) { this.errorKey.set(emailErr); return; }
+
+      const passwordErr = validatePassword(this.password, this.name, this.email);
+      if (passwordErr) { this.errorKey.set(passwordErr); return; }
+
       if (this.password !== this.confirmPassword) {
         this.errorKey.set('passwords_do_not_match');
         return;
       }
+    } else {
+      if (!this.password.trim()) { this.errorKey.set('password_required'); return; }
     }
 
     this.errorKey.set(null);
@@ -97,14 +123,14 @@ export class AuthModalComponent {
 
     if (this.isSignUp) {
       this.userService.signup(
-        { name: trimmedName, email: this.email.trim(), imgUrl: this.imgBase64 ?? undefined, role: this.isAdminSignup ? 'admin' : 'user' },
-        trimmedPassword
+        { name: this.name.trim(), email: this.email.trim(), imgUrl: this.imgBase64 ?? undefined, role: this.isAdminSignup ? 'admin' : 'user' },
+        this.password.trim()
       ).subscribe({
         next: () => this._onSuccess(),
         error: (err: Error) => this._onError(err)
       });
     } else {
-      this.userService.login({ name: trimmedName, password: trimmedPassword }).subscribe({
+      this.userService.login({ name: this.name.trim(), password: this.password.trim() }).subscribe({
         next: () => this._onSuccess(),
         error: (err: Error) => this._onError(err)
       });
@@ -139,6 +165,12 @@ export class AuthModalComponent {
     this.isSubmitting.set(false);
     if (err.message === 'USERNAME_TAKEN') {
       this.errorKey.set('username_taken');
+    } else if (err.message === 'EMAIL_TAKEN') {
+      this.errorKey.set('email_taken');
+    } else if (err.message === 'INVALID_USERNAME') {
+      this.errorKey.set('username_invalid_chars');
+    } else if (err.message === 'INVALID_EMAIL') {
+      this.errorKey.set('email_invalid');
     } else if (err.message === 'PASSWORD_REQUIRED') {
       this.errorKey.set('password_required');
     } else {
@@ -157,5 +189,9 @@ export class AuthModalComponent {
     this.imgBase64 = null;
     this.imgPreview.set(null);
     this.errorKey.set(null);
+    this.nameTouched_.set(false);
+    this.emailTouched_.set(false);
+    this.passwordTouched_.set(false);
+    this.confirmTouched_.set(false);
   }
 }

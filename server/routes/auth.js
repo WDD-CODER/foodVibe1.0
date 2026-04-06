@@ -95,6 +95,24 @@ router.post('/signup', signupLimiter, async (req, res) => {
       return res.status(400).json({ error: 'name, email, and password are required' });
     }
 
+    // Validate username format: trimmed, 3–20 chars, alphanumeric + _ and -
+    const trimmedName = name.trim();
+    const USERNAME_REGEX = /^[a-zA-Z0-9_-]+$/;
+    if (trimmedName.length < 3 || trimmedName.length > 20 || !USERNAME_REGEX.test(trimmedName)) {
+      return res.status(400).json({ error: 'INVALID_USERNAME' });
+    }
+
+    // Validate email format
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!EMAIL_REGEX.test(email.trim())) {
+      return res.status(400).json({ error: 'INVALID_EMAIL' });
+    }
+
+    // Note: password strength (min length, letter+digit, username/email check) is enforced
+    // client-side only. The password arrives pre-hashed (saltHex:hashHex) from the Angular
+    // client — plaintext strength cannot be validated here. The PBKDF2_FORMAT check below
+    // ensures the hash format is correct, preventing raw string bypass attempts.
+
     // Check username uniqueness
     const nameExists = await User.findOne({ name }).lean();
     if (nameExists) return res.status(409).json({ error: 'USERNAME_TAKEN' });
