@@ -159,7 +159,20 @@
 - [x] Task 18: auth-modal — add c-input--invalid + aria-invalid bindings
 - [x] Task 19: ng build — zero errors
 
+### Plan 250 — Auth Field Validation — Signup & Login (`plans/250-auth-field-validation.plan.md`)
+- [x] Task 1: Create `src/app/core/utils/auth-validation.util.ts` — pure validator functions
+- [x] Task 2: Add 4 per-field touched signals to `auth-modal.component.ts`
+- [x] Task 3: Replace onSubmit() validation block in `auth-modal.component.ts` with validator calls
+- [x] Task 4: Add (blur) handlers to `auth-modal.component.ts` for live per-field validation
+- [x] Task 5: Fix _onError() in `auth-modal.component.ts` — add EMAIL_TAKEN, INVALID_USERNAME, INVALID_EMAIL
+- [x] Task 6: Update `user.service.ts` signup() catchError — add INVALID_USERNAME, INVALID_EMAIL
+- [x] Task 7: Update `auth-modal.component.html` — extend bindings, @if blocks, (blur) events
+- [x] Task 8: Update `server/routes/auth.js` /signup — add username + email validation
+- [x] Task 9: Update `public/assets/data/dictionary.json` — add 9 Hebrew translation keys
+
 ---
+
+## 🔴 Quick Fixes
 
 ### Plan 251 — Recipe Builder Ingredient Name Display Fix (`plans/251-recipe-builder-ingredient-name-display.plan.md`)
 - [x] Task 1: `recipe-form.service.ts` — add `name_hebrew` to `lastGroup.patchValue(...)` in `patchFormFromRecipe`
