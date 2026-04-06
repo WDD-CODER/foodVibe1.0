@@ -1,5 +1,7 @@
 import { Injectable, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { StorageService } from './async-storage.service';
+import { LoggingService } from './logging.service';
 import { Recipe } from '../models/recipe.model';
 import { Product } from '../models/product.model';
 import { ActivityChange } from './activity-log.service';
@@ -24,15 +26,22 @@ const MAX_VERSIONS_PER_ENTITY = 20;
 @Injectable({ providedIn: 'root' })
 export class VersionHistoryService {
   private readonly storage = inject(StorageService);
+  private readonly logging = inject(LoggingService);
   private readonly recipeData = inject(RecipeDataService);
   private readonly dishData = inject(DishDataService);
   private readonly productData = inject(ProductDataService);
 
   async getVersions(entityType: VersionEntityType, entityId: string): Promise<VersionEntry[]> {
-    const all = await this.storage.query<VersionEntry>(VERSION_STORAGE_KEY, 0);
-    return all
-      .filter(e => e.entityType === entityType && e.entityId === entityId)
-      .sort((a, b) => b.versionAt - a.versionAt);
+    try {
+      const all = await this.storage.query<VersionEntry>(VERSION_STORAGE_KEY, 0);
+      return all
+        .filter(e => e.entityType === entityType && e.entityId === entityId)
+        .sort((a, b) => b.versionAt - a.versionAt);
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) throw err
+      this.logging.error({ event: 'crud.versionHistory.getVersions_error', message: 'Failed to get versions', context: { err } })
+      throw err
+    }
   }
 
   async getVersionEntry(
@@ -40,28 +49,40 @@ export class VersionHistoryService {
     entityId: string,
     versionAt: number
   ): Promise<VersionEntry | null> {
-    const all = await this.storage.query<VersionEntry>(VERSION_STORAGE_KEY, 0);
-    return all.find(
-      e => e.entityType === entityType && e.entityId === entityId && e.versionAt === versionAt
-    ) ?? null;
+    try {
+      const all = await this.storage.query<VersionEntry>(VERSION_STORAGE_KEY, 0);
+      return all.find(
+        e => e.entityType === entityType && e.entityId === entityId && e.versionAt === versionAt
+      ) ?? null;
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) throw err
+      this.logging.error({ event: 'crud.versionHistory.getVersionEntry_error', message: 'Failed to get version entry', context: { err } })
+      throw err
+    }
   }
 
   async addVersion(entry: Omit<VersionEntry, 'versionAt'>): Promise<void> {
-    const full: VersionEntry = { ...entry, versionAt: Date.now() };
-    const all = await this.storage.query<VersionEntry>(VERSION_STORAGE_KEY, 0);
-    all.push(full);
-    const byEntity = new Map<string, VersionEntry[]>();
-    for (const e of all) {
-      const key = `${e.entityType}:${e.entityId}`;
-      if (!byEntity.has(key)) byEntity.set(key, []);
-      byEntity.get(key)!.push(e);
+    try {
+      const full: VersionEntry = { ...entry, versionAt: Date.now() };
+      const all = await this.storage.query<VersionEntry>(VERSION_STORAGE_KEY, 0);
+      all.push(full);
+      const byEntity = new Map<string, VersionEntry[]>();
+      for (const e of all) {
+        const key = `${e.entityType}:${e.entityId}`;
+        if (!byEntity.has(key)) byEntity.set(key, []);
+        byEntity.get(key)!.push(e);
+      }
+      const trimmed: VersionEntry[] = [];
+      for (const arr of byEntity.values()) {
+        const sorted = arr.sort((a, b) => b.versionAt - a.versionAt);
+        trimmed.push(...sorted.slice(0, MAX_VERSIONS_PER_ENTITY));
+      }
+      await this.storage.replaceAll(VERSION_STORAGE_KEY, trimmed);
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) throw err
+      this.logging.error({ event: 'crud.versionHistory.addVersion_error', message: 'Failed to add version', context: { err } })
+      throw err
     }
-    const trimmed: VersionEntry[] = [];
-    for (const arr of byEntity.values()) {
-      const sorted = arr.sort((a, b) => b.versionAt - a.versionAt);
-      trimmed.push(...sorted.slice(0, MAX_VERSIONS_PER_ENTITY));
-    }
-    await this.storage.replaceAll(VERSION_STORAGE_KEY, trimmed);
   }
 
   async restoreVersion(
@@ -69,19 +90,25 @@ export class VersionHistoryService {
     entityId: string,
     versionAt: number
   ): Promise<void> {
-    const all = await this.storage.query<VersionEntry>(VERSION_STORAGE_KEY, 0);
-    const entry = all.find(
-      e => e.entityType === entityType && e.entityId === entityId && e.versionAt === versionAt
-    );
-    if (!entry) throw new Error('Version not found');
-    const snapshot = entry.snapshot;
+    try {
+      const all = await this.storage.query<VersionEntry>(VERSION_STORAGE_KEY, 0);
+      const entry = all.find(
+        e => e.entityType === entityType && e.entityId === entityId && e.versionAt === versionAt
+      );
+      if (!entry) throw new Error('Version not found');
+      const snapshot = entry.snapshot;
 
-    if (entityType === 'dish') {
-      await this.dishData.updateDish(snapshot as Recipe);
-    } else if (entityType === 'recipe') {
-      await this.recipeData.updateRecipe(snapshot as Recipe);
-    } else {
-      await this.productData.updateProduct(snapshot as Product);
+      if (entityType === 'dish') {
+        await this.dishData.updateDish(snapshot as Recipe);
+      } else if (entityType === 'recipe') {
+        await this.recipeData.updateRecipe(snapshot as Recipe);
+      } else {
+        await this.productData.updateProduct(snapshot as Product);
+      }
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) throw err
+      this.logging.error({ event: 'crud.versionHistory.restoreVersion_error', message: 'Failed to restore version', context: { err } })
+      throw err
     }
   }
 

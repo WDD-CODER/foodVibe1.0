@@ -79,3 +79,5 @@ tools/catalog-seeder/*.pyc
 .DS_Store
 Thumbs.db
 .gstack/
+
+backups/

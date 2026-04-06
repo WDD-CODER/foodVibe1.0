@@ -1,4 +1,5 @@
 import { Injectable, signal, computed, inject } from '@angular/core'
+import { HttpErrorResponse } from '@angular/common/http'
 import { StorageService } from './async-storage.service'
 import { UserMsgService } from './user-msg.service'
 import { LoggingService } from './logging.service'
@@ -58,7 +59,7 @@ export class UnitRegistryService {
   allUnitKeys_ = computed(() => Object.keys(this.globalUnits_()));
 
   constructor() {
-    this.initUnits();
+    this.initUnits().catch(() => {})
   }
 
   /**
@@ -98,8 +99,8 @@ export class UnitRegistryService {
         this.globalUnits_.set(units);
       }
     } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
       this.logging.error({ event: 'crud.units.hydrate_error', message: 'Failed to hydrate units', context: { err } })
-      this.userMsgService.onSetErrorMsg('שגיאה בטעינת יחידות המידה')
     }
   }
 
@@ -196,6 +197,7 @@ export class UnitRegistryService {
       this.userMsgService.onSetSuccessMsg(`היחידה ${key} נוספה בהצלחה`);
       return { success: true };
     } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return { success: false, error: 'unit_save_error' }
       this.userMsgService.onSetErrorMsg('שגיאה בשמירת היחידה במערכת');
       this.logging.error({ event: 'crud.units.save_error', message: 'Unit save error', context: { err } });
       return { success: false, error: 'unit_save_error' };
@@ -228,6 +230,7 @@ export class UnitRegistryService {
         this.userMsgService.onSetSuccessMsg(`היחידה ${unitKey} הוסרה`);
       }
     } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
       this.userMsgService.onSetErrorMsg('שגיאה במחיקת היחידה מהשרת')
       this.logging.error({ event: 'crud.units.delete_error', message: 'Unit delete error', context: { err } })
     }

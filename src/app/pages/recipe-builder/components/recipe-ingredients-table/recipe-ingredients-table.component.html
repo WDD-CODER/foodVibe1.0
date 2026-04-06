@@ -30,7 +30,11 @@
           (click)="editingNameAtRow_.set($index)"
           (keydown.enter)="editingNameAtRow_.set($index)"
           (keydown.space)="$event.preventDefault(); editingNameAtRow_.set($index)">
-          <span class="item-text">{{ group.get('name_hebrew')?.value }}</span>
+          @if (getDisplayName(group)) {
+            <span class="item-text">{{ getDisplayName(group) }}</span>
+          } @else {
+            <span class="item-text unlinked-ingredient" (click)="$event.stopPropagation(); editingNameAtRow_.set($index)">⚠ {{ 'unlinked_ingredient' | translatePipe }}</span>
+          }
           @if (isIncompleteRow(group)) {
             <button type="button" class="incomplete-badge"
               (click)="$event.stopPropagation(); group.get('referenceId')?.value ? navigateToEditProduct(group) : editingNameAtRow_.set($index)"

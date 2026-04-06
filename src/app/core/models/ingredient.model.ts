@@ -8,5 +8,6 @@ export interface Ingredient {
   unit_: string;
   note_?: string;
   calculatedCost_?: number;
+  nameSnapshot?: string;
 }
 

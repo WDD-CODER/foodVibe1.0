@@ -116,7 +116,8 @@
                 [options]="uomOptions_()"
                 [placeholder]="productForm_.get('base_unit_')?.value || 'compare_to_unit'"
                 [typeToFilter]="true"
-                />
+                [addNewValue]="'NEW_UNIT'"
+                (valueChange)="onUomValueChange($event, idx)" />
             </label>
           </div>
 

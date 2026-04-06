@@ -233,3 +233,26 @@
 
 **Anti-Patterns** (machine-verified):
 - GREP-NOT: "z-index.*opacity" — z-index and opacity must not be in the same property list
+
+<!-- source: session-derived 2026-04-06 | dimension: five-group-blank-line-separation -->
+### TC-011: Five-Group Blank-Line Separation Enforcement
+
+**Prompt**: |
+  Add styles to a sidebar component: give it a flex column layout, width of
+  280px, padding of 1rem, and a 1px solid border.
+
+**Concrete Checks** (machine-verified by `test-runner.sh`):
+- GREP: "blank line" — skill must explicitly mandate blank lines between the Five Groups
+
+**Agent-Evaluated Behaviors** (scored by evaluator agent — 30% weight):
+- [ ] The blank-line-between-groups rule is stated as mandatory — not a suggestion or style preference
+- [ ] The skill is specific enough that a developer would NOT write all five groups as a flat, uninterrupted block of properties
+
+**Anti-Patterns** (machine-verified):
+- GREP-NOT: "optional" — blank-line separation must not be described as optional
+
+**Behavior Checks** (behavioral execution — unkammable layer):
+- RUN_AGENT: "Add styles: overflow hidden, width 280px, padding-inline 1rem, border 1px solid, transition width 0.3s"
+  → OUTPUT-GREP-BEFORE: "overflow" BEFORE "width"
+  → OUTPUT-GREP-BEFORE: "width" BEFORE "padding"
+  → OUTPUT-GREP-BEFORE: "padding" BEFORE "transition"

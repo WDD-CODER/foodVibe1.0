@@ -42,6 +42,12 @@ async function seed() {
 
   const db = mongoose.connection.db;
 
+  // Safety check: record pre-seed counts and abort if any collection shrinks
+  const preCounts = {};
+  for (const entityType of Object.keys(dump)) {
+    preCounts[entityType] = await db.collection(entityType).countDocuments();
+  }
+
   for (const [entityType, items] of Object.entries(dump)) {
     const arr = Array.isArray(items) ? items : [items];
     const col = db.collection(entityType);
@@ -60,7 +66,14 @@ async function seed() {
         { upsert: true }
       );
     }
-    console.log(`[seed] Seeded ${arr.length} × ${entityType}`);
+
+    const postCount = await col.countDocuments();
+    if (postCount < preCounts[entityType]) {
+      console.error(`[seed] ABORT: ${entityType} shrank from ${preCounts[entityType]} → ${postCount}. No further collections will be seeded.`);
+      await mongoose.disconnect();
+      process.exit(1);
+    }
+    console.log(`[seed] Seeded ${arr.length} × ${entityType} (collection: ${preCounts[entityType]} → ${postCount})`);
   }
 
   await mongoose.disconnect();

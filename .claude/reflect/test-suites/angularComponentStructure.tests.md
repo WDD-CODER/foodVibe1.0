@@ -107,3 +107,27 @@
 
 **Anti-Patterns** (machine-verified):
 - GREP-NOT: "rewrite" — skill must not instruct a full rewrite when refactoring is asked
+
+<!-- source: session-derived 2026-04-06 | dimension: crdul-method-placement-in-existing-component -->
+### TC-006: Add Method to Existing Component — CRDUL Placement
+
+**Prompt**: |
+  Add an `onSaveForm()` method to the recipe-header component — it should
+  call the save service and emit a saved event
+
+**Concrete Checks** (machine-verified by `test-runner.sh`):
+- GREP: "CRDUL" — skill must name the CRDUL section where new methods land
+- GREP: "Create, Read, Delete, Update, List" — skill must name the Update group explicitly
+
+**Agent-Evaluated Behaviors** (scored by evaluator agent — 30% weight):
+- [ ] The skill is specific enough that an agent adding a save/update method would place it in the Update group — not appended arbitrarily at the bottom of the file
+- [ ] The class section ordering rule makes it clear that ALL new methods must land in their correct CRDUL bucket, not just methods in new components
+
+**Anti-Patterns** (machine-verified):
+- GREP-NOT: "bottom of the file" — skill must not suggest adding methods at the end of the class as a default
+
+**Behavior Checks** (behavioral execution — unkammable layer):
+- RUN_AGENT: "Add an `onSaveProduct()` method to an existing product-form component that persists the form to the data service"
+  → OUTPUT-GREP: "Update"
+  → OUTPUT-GREP-NOT: "constructor("
+  → OUTPUT-GREP-NOT: "@Output("
