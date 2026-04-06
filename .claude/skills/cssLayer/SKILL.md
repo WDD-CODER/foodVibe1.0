@@ -13,7 +13,7 @@ description: Enforces the project CSS architecture — engine placement, five-gr
 - Angular view encapsulation will scope `.c-*` defined in components, breaking cross-component reuse
 - If a `.c-*` is found in a component file → move to `src/styles.scss` before proceeding
 - No inline styles unless the value is dynamic/runtime
-- Logical properties only: `margin-inline`, `padding-block` — no physical directional values
+- Logical properties only: `padding-inline`, `padding-block`, `margin-inline` — no physical directional values
 - Responsive breakpoints must follow project token definitions
 
 ---
