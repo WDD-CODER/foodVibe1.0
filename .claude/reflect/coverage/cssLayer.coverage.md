@@ -1,5 +1,5 @@
 # Coverage Map: cssLayer
-Generated: 2026-04-03 | Score: 100.0 | Commit: 04cbdf8
+Generated: 2026-04-06 | Score: 100.0 | Commit: e2e5055
 
 ## SKILL.md Rules → Test Coverage
 
@@ -10,7 +10,7 @@ Generated: 2026-04-03 | Score: 100.0 | Commit: 04cbdf8
 | 13 | Angular view encapsulation scopes .c-* in components | TC-002 B4 | ✓ |
 | 14 | If .c-* found in component → move to src/styles.scss | TC-002 B2, TC-002 B3 | ✓ |
 | 15 | No inline styles unless value is dynamic/runtime | TC-001 AP4, TC-008 B1, TC-008 B2 | ✓ |
-| 16 | Logical properties only: margin-inline, padding-block | TC-001 B4, TC-006 B1, TC-006 B2 | ✓ |
+| 16 | Logical properties: padding-inline, padding-block, margin-inline | TC-001 B4, TC-006 B1, TC-006 B2 | ✓ |
 | 17 | Responsive breakpoints must follow project token defs | TC-009 B1 | ✓ |
 | 23 | Engine Search: Scan src/styles.scss before writing | TC-001 B1, TC-007 B1 | ✓ |
 | 25 | Component Scan: Check .scss files for .c-* defs | TC-002 B1 | ✓ |

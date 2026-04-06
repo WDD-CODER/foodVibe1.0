@@ -29,27 +29,25 @@ The answer does not change how you work — only what you output at the end.
 
 IF USER SAID YES — append this after your completion summary:
 
-  ✅ VALIDATION CHECKLIST
-  ├── 📍 UI Checks
-  │   ├── [ ] Navigate to [specific screen] and confirm [expected state]
-  │   ├── [ ] Perform [specific action] — expected: [result]
-  │   └── [ ] Confirm [element] appears / does not appear
-  │
-  ├── 🔧 Logic & Data Checks
-  │   ├── [ ] Trigger [specific flow] and verify [expected behavior]
-  │   └── [ ] Open DevTools / Network tab — confirm [request/response]
-  │
-  ├── 🗄️ Database Checks (if relevant)
-  │   └── [ ] Check MongoDB — confirm [document/field/value]
-  │
-  └── ⚠️  Edge Cases
-      ├── [ ] Try [edge case] — expected: [no crash / graceful handling]
-      └── [ ] Test with [empty / invalid / Hebrew input] if applicable
+✅ HOW TO VALIDATE
+- [action] → [expected result]
+- [action] → [expected result]
+...
 
-Rules for checklist items:
-- Concrete and specific to what was actually built — not generic
-- Ordered: UI first, then logic/data, then edge cases
-- Each item is actionable and testable by the user
+Rules for every bullet:
+- One action, one expected result — nothing more
+- Must be completable in under 30 seconds
+- Use plain language — no technical jargon, no file paths, no grep commands
+- For UI/behavior changes: describe exactly where to go and what to look for
+  Example: "Open recipe builder → add an ingredient → unit pill should be draggable"
+- For bug fixes: describe how to trigger the scenario that was broken
+  Example: "Submit the form with an empty name field → error message should appear in Hebrew"
+- For non-visible changes (config, refactor, backend): one sentence explaining
+  what changed and the simplest observable proof it works
+  Example: "Save a new recipe → it should appear in the list without a page refresh"
+- If a change truly has no user-visible effect: write one sentence explaining
+  what was changed and why no user action is needed to verify it
+- Never ask the user to open DevTools, run commands, or check files
 
 IF USER SAID NO:
 Standard completion summary only. No checklist.
@@ -59,7 +57,7 @@ Standard completion summary only. No checklist.
 ## Behavior Reference
 
   Execution task received        → Ask validation question FIRST, before any tool use
-  User says yes                  → Execute, then append ✅ VALIDATION CHECKLIST
+  User says yes                  → Execute, then append ✅ HOW TO VALIDATE
   User says no                   → Execute, standard summary only
   Planning / architecture task   → Skip question entirely
   Multi sub-task session         → Ask once at start, apply to whole session

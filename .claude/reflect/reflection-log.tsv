@@ -12,3 +12,7 @@ date	skill	commit	skill_score	size_bytes	status	hypothesis	notes
 2026-04-03	cssLayer	ed62271	97.5	2940	baseline	add-tests-batch1	TC-001–TC-010; 39/40 behaviors; TC-009 B2 gap: no rule for breakpoint placement order
 2026-04-03	cssLayer	04cbdf8	100.0	3033	keep	add-breakpoint-placement-rule	score 97.5 → 100.0; mutation_score 100% (1/1 detected)
 2026-04-04	cssLayer	93dfd2f	100.0	3033	baseline	initial	All 10 TCs pass at 100.0 — improvement loop skipped. Session revealed real violations (margin-bottom, border-bottom, box-shadow in Group 4) not covered by existing TCs.
+2026-04-06	cssLayer	22c7edf	67.5	38.5	0.0	27.0	3033	retrospective	padding-inline-missing
+2026-04-06	angularComponentStructure	22c7edf	100.0	40.0	0.0	30.0	3108	retrospective	machine-100-agent-estimated-30
+2026-04-06	cssLayer	22c7edf	97.4	38.6	30.0	28.8	3033	baseline	initial
+2026-04-06	cssLayer	e2e5055	100.0	40.0	30.0	30.0	3047	keep	add-padding-inline-to-logical-properties
