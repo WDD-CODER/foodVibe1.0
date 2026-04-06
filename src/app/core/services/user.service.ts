@@ -200,6 +200,8 @@ export class UserService {
         catchError((err: HttpErrorResponse) => {
           const body = err.error?.error
           if (body === 'EMAIL_TAKEN') return throwError(() => new Error('EMAIL_TAKEN'))
+          if (body === 'INVALID_USERNAME') return throwError(() => new Error('INVALID_USERNAME'))
+          if (body === 'INVALID_EMAIL') return throwError(() => new Error('INVALID_EMAIL'))
           return throwError(() => new Error('USERNAME_TAKEN'))
         })
       )

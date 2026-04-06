@@ -28,12 +28,13 @@
                    type="text"
                    [(ngModel)]="name"
                    (input)="errorKey.set(null)"
+                   (blur)="onNameBlur()"
                    name="name"
                    autocomplete="username"
                    required
-                   [class.c-input--invalid]="errorKey() === 'name_required' || errorKey() === 'username_taken'"
-                   [attr.aria-invalid]="(errorKey() === 'name_required' || errorKey() === 'username_taken') ? true : null" />
-            @if (errorKey() === 'user_not_found' || errorKey() === 'name_required' || errorKey() === 'username_taken') {
+                   [class.c-input--invalid]="errorKey() === 'name_required' || errorKey() === 'username_taken' || errorKey() === 'username_too_short' || errorKey() === 'username_too_long' || errorKey() === 'username_invalid_chars'"
+                   [attr.aria-invalid]="(errorKey() === 'name_required' || errorKey() === 'username_taken' || errorKey() === 'username_too_short' || errorKey() === 'username_too_long' || errorKey() === 'username_invalid_chars') ? true : null" />
+            @if (errorKey() === 'user_not_found' || errorKey() === 'name_required' || errorKey() === 'username_taken' || errorKey() === 'username_too_short' || errorKey() === 'username_too_long' || errorKey() === 'username_invalid_chars') {
               <p class="auth-error">{{ errorKey()! | translatePipe }}</p>
             }
           </div>
@@ -46,12 +47,13 @@
                      type="email"
                      [(ngModel)]="email"
                      (input)="errorKey.set(null)"
+                     (blur)="onEmailBlur()"
                      name="email"
                      autocomplete="email"
                      required
-                     [class.c-input--invalid]="errorKey() === 'email_required'"
-                     [attr.aria-invalid]="errorKey() === 'email_required' ? true : null" />
-              @if (errorKey() === 'email_required') {
+                     [class.c-input--invalid]="errorKey() === 'email_required' || errorKey() === 'email_invalid' || errorKey() === 'email_taken'"
+                     [attr.aria-invalid]="(errorKey() === 'email_required' || errorKey() === 'email_invalid' || errorKey() === 'email_taken') ? true : null" />
+              @if (errorKey() === 'email_required' || errorKey() === 'email_invalid' || errorKey() === 'email_taken') {
                 <p class="auth-error">{{ errorKey()! | translatePipe }}</p>
               }
             </div>
@@ -65,11 +67,12 @@
                      [type]="showPassword_() ? 'text' : 'password'"
                      [(ngModel)]="password"
                      (input)="errorKey.set(null)"
+                     (blur)="onPasswordBlur()"
                      name="password"
                      [autocomplete]="isSignUp ? 'new-password' : 'current-password'"
                      required
-                     [class.c-input--invalid]="errorKey() === 'password_required'"
-                     [attr.aria-invalid]="errorKey() === 'password_required' ? true : null" />
+                     [class.c-input--invalid]="errorKey() === 'password_required' || errorKey() === 'password_too_short' || errorKey() === 'password_needs_letter_and_number' || errorKey() === 'password_matches_username' || errorKey() === 'password_contains_email'"
+                     [attr.aria-invalid]="(errorKey() === 'password_required' || errorKey() === 'password_too_short' || errorKey() === 'password_needs_letter_and_number' || errorKey() === 'password_matches_username' || errorKey() === 'password_contains_email') ? true : null" />
               <button type="button"
                       class="password-toggle"
                       (click)="showPassword_.set(!showPassword_())"
@@ -77,7 +80,7 @@
                 <lucide-icon [name]="showPassword_() ? 'eye-off' : 'eye'" [size]="16"></lucide-icon>
               </button>
             </div>
-            @if (errorKey() === 'password_required') {
+            @if (errorKey() === 'password_required' || errorKey() === 'password_too_short' || errorKey() === 'password_needs_letter_and_number' || errorKey() === 'password_matches_username' || errorKey() === 'password_contains_email') {
               <p class="auth-error">{{ errorKey()! | translatePipe }}</p>
             }
           </div>
@@ -91,6 +94,7 @@
                        [type]="showConfirmPassword_() ? 'text' : 'password'"
                        [(ngModel)]="confirmPassword"
                        (input)="errorKey.set(null)"
+                       (blur)="onConfirmBlur()"
                        name="confirmPassword"
                        autocomplete="new-password"
                        required
