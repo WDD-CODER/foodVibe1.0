@@ -2,6 +2,55 @@
 
 ---
 
+### Plan 254 — Recipe Ref Repair + Name Snapshot (`plans/254-recipe-ref-repair-and-name-snapshot.plan.md`)
+
+- [x] Task 1: `git checkout -b fix/recipe-ref-repair` — create new branch
+- [x] Task 2: Write `scripts/backup-before-repair.mjs`
+- [x] Task 3: Run backup — confirm non-empty
+- [x] Task 4: Write `scripts/repair-recipe-references.mjs`
+- [x] Task 5: Run dry-run — confirm counts
+- [x] Task 6: Run `--write` — confirm 118 fixed
+- [x] Task 7: `ingredient.model.ts` — add `nameSnapshot?: string`
+- [x] Task 8: `recipe-form.service.ts` `createIngredientGroup` — add nameSnapshot control
+- [x] Task 9: `recipe-form.service.ts` `buildRecipeFromForm` — persist nameSnapshot
+- [x] Task 10: `recipe-form.service.ts` `patchFormFromRecipe` — patch nameSnapshot
+- [x] Task 11: `recipe-ingredients-table.component.ts` `onItemSelected` — write nameSnapshot
+- [x] Task 12: `recipe-ingredients-table.component.ts` `getDisplayName` — nameSnapshot fallback
+- [x] Task 13: `recipe-ingredients-table.component.html` — unlinked marker
+- [x] Task 14: Run `--write --backfill-snapshot`
+- [x] Task 15: `scripts/seed-from-dump.js` — add count safety check
+
+---
+
+### Plan 253 — Data Service Error Guards (`plans/253-data-service-error-guards.plan.md`)
+
+- [x] `menu-event-data.service.ts` — inject LoggingService; fix loadInitialData catch; wrap getMenuEventById, addMenuEvent, updateMenuEvent, deleteMenuEvent
+- [x] `version-history.service.ts` — inject LoggingService; wrap getVersions, getVersionEntry, addVersion, restoreVersion
+- [x] `menu-section-categories.service.ts` — inject LoggingService; fix constructor .catch(() => {}); fix load() and persist() catches
+- [x] `preparation-registry.service.ts` — fix constructor .catch(() => {}); add 401 guard to initRegistry + remove userMsg; add 401 guard to 5 CRUD methods
+- [x] `unit-registry.service.ts` — remove userMsg from initUnits catch; add 401 guard to registerUnit and deleteUnit
+- [x] `metadata-registry.service.ts` — add try/catch to reloadLabelsFromStorage; add 401 guard to 11 CRUD method catches
+- [x] `recipe-data.service.ts` — wrap 11 unprotected CRUD methods
+- [x] `dish-data.service.ts` — wrap 11 unprotected CRUD methods
+- [x] `product-data.service.ts` — wrap 9 unprotected CRUD methods
+- [x] `supplier-data.service.ts` — wrap getSupplierById, addSupplier, updateSupplier, removeSupplier
+- [x] `equipment-data.service.ts` — wrap getEquipmentById, addEquipment, updateEquipment, deleteEquipment, getTrashEquipment, restoreEquipment
+- [x] `venue-data.service.ts` — wrap getVenueById, addVenue, updateVenue, deleteVenue, getTrashVenues, restoreVenue
+- [x] `backup.service.ts` — add 401 guard to exportAllToFile and importFromFile backend-loop catches
+- [x] Run `npx ng build --configuration development` — confirm zero errors
+
+---
+
+### Plan 252 — auto-solve: prefer gstack /browse over Playwright MCP (`plans/252-auto-solve-browse-over-playwright.plan.md`)
+
+- [ ] `auto-solve.md` frontmatter — add `Skill` to allowed-tools list so `/browse` can be invoked
+- [ ] `auto-solve.md` Phase 2 line 81 — replace Playwright-first browser verification with gstack /browse ($B) as primary, Playwright MCP as fallback
+- [ ] `auto-solve.md` Phase 4 line 133 — replace "if Playwright available" screenshot with `$B screenshot` primary, Playwright MCP fallback
+- [ ] `auto-solve.md` Error Handling line 199 — update "Playwright unavailable" to reflect gstack /browse as primary tool
+- [ ] `auto-solve.md` Permissions Required line 210 — add Skill invocation note alongside Playwright MCP entry
+
+---
+
 ### Plan 234 — Per-User Collections + Render Deployment (`plans/234-per-user-collections-render-deploy.plan.md`)
 
 **Brief 1 — Schema & Migration**
@@ -110,10 +159,16 @@
 - [x] Task 18: auth-modal — add c-input--invalid + aria-invalid bindings
 - [x] Task 19: ng build — zero errors
 
-## 🔴 Quick Fixes
+---
 
-### Plan 169 — List quick-edit UX overlay (`plans/169-list-quick-edit-ux-overlay.plan.md`)
-- [ ] Verify first-click open, carousel dropdown visible, row-blur confirm only
+### Plan 251 — Recipe Builder Ingredient Name Display Fix (`plans/251-recipe-builder-ingredient-name-display.plan.md`)
+- [x] Task 1: `recipe-form.service.ts` — add `name_hebrew` to `lastGroup.patchValue(...)` in `patchFormFromRecipe`
+- [x] Task 2: `recipe-ingredients-table.component.ts` — add `protected getDisplayName(group: FormGroup): string` method in GETTERS section
+- [x] Task 3: `recipe-ingredients-table.component.html` — replace `{{ group.get('name_hebrew')?.value }}` with `{{ getDisplayName(group) }}`
+
+---
+
+## 🔴 Quick Fixes
 
 ### Plan 134 — Translation and confirmation modals unified (`plans/134-translation-confirmation-modals-unified.plan.md`) [TRIAGED 2026-04-02]
 
@@ -131,15 +186,15 @@
 ## 🟡 Medium
 
 ### Plan 182 + 163 — Visual & UX fix backlog (`plans/182-tofix-verification-undone.plan.md`, `plans/163-tofix-audit-prd.plan.md`)
-- [ ] Recipe builder: remove up/down arrows in section titles
-- [ ] Recipe builder: clicking a card header collapses/expands it (currently only the arrow does)
-- [ ] Logistics: chip labels get cut off — make chip width fit the full text
-- [ ] Activity: “what changed” tag should show the old and new value (e.g. “Unit: kg → g”), not just that something changed
-- [ ] Add new category modal: focus flows Hebrew first, then English (or pre-fills Hebrew and focuses English)
-- [ ] App-wide: audit every category/unit dropdown — add “add new” option where it's missing
-- [ ] Labels: you should be able to select existing labels in the delete-label screen and recipe builder
-- [ ] Menu library: keyboard navigation (arrow keys + Enter) on dropdown options
-- [ ] Lists: sidebar aligns correctly to the list container on smaller screens (768px)
+- [x] Recipe builder: remove up/down arrows in section titles — no such buttons exist (N/A)
+- [x] Recipe builder: clicking a card header collapses/expands it — already implemented on all 3 sections
+- [x] Logistics: chip labels get cut off — fixed flex-wrap + flex-shrink + fit-content
+- [x] Activity: “what changed” tag should show the old and new value (e.g. “Unit: kg → g”) — already done
+- [x] Add new category modal: focus flows Hebrew first — inline inputs, no focus gap found (N/A)
+- [x] App-wide: audit every category/unit dropdown — add “add new” option — added NEW_UNIT sentinel to product-form UOM select
+- [x] Labels: you should be able to select existing labels — already works via app-custom-multi-select
+- [x] Menu library: keyboard navigation — app-custom-select already has built-in keyboard nav
+- [x] Lists: sidebar aligns correctly to the list container on smaller screens (768px) — already fixed on branch
 
 ---
 
