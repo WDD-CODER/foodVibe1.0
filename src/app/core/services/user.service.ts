@@ -48,9 +48,17 @@ export class UserService {
   private _reloadDataServices(): void {
     // Deferred import to break the circular DI chain:
     // UserService → StorageService → HttpStorageAdapter → UserService
-    import('./unit-registry.service').then(m => this.injector.get(m.UnitRegistryService).reloadFromStorage())
-    import('./product-data.service').then(m => this.injector.get(m.ProductDataService).reloadFromStorage())
-    import('./metadata-registry.service').then(m => this.injector.get(m.MetadataRegistryService).reloadFromStorage())
+    void import('./unit-registry.service').then(m => this.injector.get(m.UnitRegistryService).reloadFromStorage())
+    void import('./product-data.service').then(m => this.injector.get(m.ProductDataService).reloadFromStorage())
+    void import('./metadata-registry.service').then(m => this.injector.get(m.MetadataRegistryService).reloadFromStorage())
+    void import('./recipe-data.service').then(m => this.injector.get(m.RecipeDataService).reloadFromStorage())
+    void import('./dish-data.service').then(m => this.injector.get(m.DishDataService).reloadFromStorage())
+    void import('./supplier-data.service').then(m => this.injector.get(m.SupplierDataService).reloadFromStorage())
+    void import('./equipment-data.service').then(m => this.injector.get(m.EquipmentDataService).reloadFromStorage())
+    void import('./venue-data.service').then(m => this.injector.get(m.VenueDataService).reloadFromStorage())
+    void import('./menu-event-data.service').then(m => this.injector.get(m.MenuEventDataService).reloadFromStorage())
+    void import('./menu-section-categories.service').then(m => this.injector.get(m.MenuSectionCategoriesService).reloadFromStorage())
+    void import('./preparation-registry.service').then(m => this.injector.get(m.PreparationRegistryService).reloadFromStorage())
   }
 
   constructor() {
