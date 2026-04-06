@@ -1,4 +1,5 @@
 import { Signal, signal, inject } from '@angular/core'
+import { HttpErrorResponse } from '@angular/common/http'
 import { StorageService } from './async-storage.service'
 import { LoggingService } from './logging.service'
 
@@ -20,7 +21,7 @@ export abstract class BaseEntityDataService<T> {
   readonly all_: Signal<T[]> = this.store_.asReadonly()
 
   constructor(private readonly storageKey: string) {
-    this.loadInitialData()
+    this.loadInitialData().catch(() => {})
   }
 
   /** Re-read from storage and refresh the signal (e.g. after demo data load). */
@@ -41,7 +42,12 @@ export abstract class BaseEntityDataService<T> {
   }
 
   private async loadInitialData(): Promise<void> {
-    const data = await this.storage.query<T>(this.storageKey)
-    this.store_.set(Array.isArray(data) ? data : [])
+    try {
+      const data = await this.storage.query<T>(this.storageKey)
+      this.store_.set(Array.isArray(data) ? data : [])
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
+      this.logging.error({ event: 'crud.entity.hydrate_error', message: `Failed to load ${this.storageKey}`, context: { err } })
+    }
   }
 }

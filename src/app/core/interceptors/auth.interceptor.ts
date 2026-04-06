@@ -49,7 +49,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         }
         if (req.url.includes(REFRESH_URL)) {
           logging.info({ event: 'auth.session_expired', message: 'Session expired or unauthorized (401)' })
-          signOut(userService, authModal, router)
+          if (userService.isLoggedIn()) {
+            signOut(userService, authModal, router)
+          }
           return throwError(() => err)
         }
 
@@ -85,7 +87,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             // Emit null so queued requests unblock and propagate their original 401 error
             refreshSubject$.next(null)
             logging.info({ event: 'auth.session_expired', message: 'Token refresh failed — signing out' })
-            signOut(userService, authModal, router)
+            if (userService.isLoggedIn()) {
+              signOut(userService, authModal, router)
+            }
             return throwError(() => refreshErr)
           })
         )

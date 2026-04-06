@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   BACKUP_ENTITY_TYPES,
   StorageService,
@@ -57,7 +58,8 @@ export class BackupService {
         try {
           const entities = await this.storage.query(key, 0);
           if (entities.length > 0) data[key] = entities;
-        } catch {
+        } catch (err) {
+          if (err instanceof HttpErrorResponse && err.status === 401) throw err
           // Key may not exist yet — skip
         }
       }
@@ -150,6 +152,7 @@ export class BackupService {
           const entities = Array.isArray(value) ? value : (value != null ? [value] : []);
           await this.storage.replaceAll(key, entities);
         } catch (err) {
+          if (err instanceof HttpErrorResponse && err.status === 401) throw err
           this.logging.warn({ event: 'backup.write_failed', message: 'Backup write failed', context: { key, err } });
         }
       }

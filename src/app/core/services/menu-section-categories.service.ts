@@ -1,5 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { StorageService } from './async-storage.service';
+import { LoggingService } from './logging.service';
 import { TranslationService } from './translation.service';
 import { KeyResolutionService } from './key-resolution.service';
 
@@ -18,6 +20,7 @@ interface MenuSectionCategoriesDoc {
 @Injectable({ providedIn: 'root' })
 export class MenuSectionCategoriesService {
   private readonly storage = inject(StorageService);
+  private readonly logging = inject(LoggingService);
   private readonly translationService = inject(TranslationService);
   private readonly keyResolution = inject(KeyResolutionService);
 
@@ -25,7 +28,7 @@ export class MenuSectionCategoriesService {
   readonly sectionCategories_ = this.categories_.asReadonly();
 
   constructor() {
-    this.load();
+    this.load().catch(() => {})
   }
 
   /** Re-read from storage (e.g. after backup restore). */
@@ -51,7 +54,9 @@ export class MenuSectionCategoriesService {
         await this.storage.post(STORAGE_KEY, payload);
       }
       this.categories_.set([...DEFAULT_SECTION_CATEGORIES]);
-    } catch {
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
+      this.logging.error({ event: 'crud.menuSectionCategories.hydrate_error', message: 'Failed to load menu section categories', context: { err } })
       this.categories_.set([...DEFAULT_SECTION_CATEGORIES]);
     }
   }
@@ -92,7 +97,9 @@ export class MenuSectionCategoriesService {
         await this.storage.post(STORAGE_KEY, payload);
       }
       this.categories_.set(items);
-    } catch {
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
+      this.logging.error({ event: 'crud.menuSectionCategories.persist_error', message: 'Failed to persist menu section categories', context: { err } })
       this.categories_.set(items);
     }
   }

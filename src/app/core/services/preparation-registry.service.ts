@@ -1,4 +1,5 @@
 import { Injectable, signal, computed, inject } from '@angular/core'
+import { HttpErrorResponse } from '@angular/common/http'
 import { StorageService } from './async-storage.service'
 import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
@@ -47,7 +48,7 @@ export class PreparationRegistryService {
   })
 
   constructor() {
-    this.initRegistry()
+    this.initRegistry().catch(() => {})
   }
 
   /** Reload categories and preparations from storage (e.g. after demo data load). */
@@ -66,8 +67,8 @@ export class PreparationRegistryService {
         this.preparations_.set(doc.preparations)
       }
     } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
       this.logging.error({ event: 'crud.preparations.load_error', message: 'Failed to load preparation registry', context: { err } });
-      this.userMsgService.onSetErrorMsg('שגיאה בטעינת רישום ההכנות')
     }
   }
 
@@ -101,6 +102,7 @@ export class PreparationRegistryService {
       this.categories_.set(updated)
       this.userMsgService.onSetSuccessMsg(`הקטגוריה "${label}" נוספה בהצלחה`)
     } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
       this.userMsgService.onSetErrorMsg('שגיאה בשמירת הקטגוריה')
       this.logging.error({ event: 'crud.preparations.category.save_error', message: 'Preparation category save error', context: { err } })
     }
@@ -206,6 +208,7 @@ export class PreparationRegistryService {
         this.userMsgService.onSetSuccessMsgWithUndo(`ההכנה "${name}" עודכנה בהצלחה`, undo)
       }
     } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
       this.userMsgService.onSetErrorMsg('שגיאה בעדכון ההכנה')
       this.logging.error({ event: 'crud.preparations.update_error', message: 'Preparation update error', context: { err } })
     }
@@ -226,6 +229,7 @@ export class PreparationRegistryService {
       }
       this.categories_.set(updated)
     } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
       this.userMsgService.onSetErrorMsg('שגיאה במחיקת הקטגוריה')
       this.logging.error({ event: 'crud.preparations.category.delete_error', message: 'Preparation category delete error', context: { err } })
     }
@@ -253,6 +257,7 @@ export class PreparationRegistryService {
       this.preparations_.set(updatedPreps)
       this.translationService.updateDictionary(sanitizedNew, newLabel.trim())
     } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
       this.userMsgService.onSetErrorMsg('שגיאה בעדכון הקטגוריה')
       this.logging.error({ event: 'crud.preparations.category.rename_error', message: 'Preparation category rename error', context: { err } })
     }
@@ -295,6 +300,7 @@ export class PreparationRegistryService {
       this.preparations_.set(updated)
       this.userMsgService.onSetSuccessMsg(`ההכנה "${sanitizedName}" נוספה בהצלחה`)
     } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
       this.userMsgService.onSetErrorMsg('שגיאה בשמירת ההכנה')
       this.logging.error({ event: 'crud.preparations.save_error', message: 'Preparation save error', context: { err } })
     }
