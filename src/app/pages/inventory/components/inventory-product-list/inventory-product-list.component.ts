@@ -512,32 +512,5 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     });
   }
 
-  // VALIDATION
-  protected getValidationStatus(product: Product): ProductValidationStatus {
-    return getProductValidationStatus(product);
-  }
-
-  protected getMissingFields(product: Product): string[] {
-    return getProductMissingFields(product);
-  }
-
-  protected getFieldIcon(field: string): string {
-    const icons: Record<string, string> = {
-      missing_name:     'type',
-      missing_unit:     'ruler',
-      missing_price:    'coins',
-      missing_category: 'tag',
-      missing_supplier: 'truck',
-    };
-    return icons[field] ?? 'alert-circle';
-  }
-
-  protected toggleShowInvalidOnly(): void {
-    this.showInvalidOnly_.update(v => !v);
-  }
-
-  protected toggleShowIncompleteOnly(): void {
-    this.showIncompleteOnly_.update(v => !v);
-  }
 
 }
