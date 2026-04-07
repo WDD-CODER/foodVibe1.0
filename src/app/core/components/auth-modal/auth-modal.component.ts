@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { AuthModalService } from '@services/auth-modal.service';
@@ -18,6 +19,7 @@ import { validateUsername, validateEmail, validatePassword } from '../../utils/a
 export class AuthModalComponent {
   protected readonly modalService = inject(AuthModalService);
   private readonly userService = inject(UserService);
+  private readonly router = inject(Router);
 
   protected nameInput = viewChild<ElementRef>('nameInput');
 
@@ -71,6 +73,7 @@ export class AuthModalComponent {
   }
 
   protected onNameBlur(): void {
+    if (!this.name.trim()) return;
     this.nameTouched_.set(true);
     const err = validateUsername(this.name);
     if (err) this.errorKey.set(err);
@@ -138,16 +141,16 @@ export class AuthModalComponent {
   }
 
   protected loginAsGuest(): void {
+    this.errorKey.set(null);
     if (environment.useBackendAuth) {
       this.userService.loginAsGuestBackend().subscribe({
-        next: () => { this._reset(); this.modalService.close(); },
+        next: () => this._onSuccess(),
         error: () => { this._reset(); this.modalService.close(); }
       });
       return;
     }
     this.userService._saveUserLocal({ _id: 'dev-guest', name: 'Guest Admin', email: 'guest@dev.local', role: 'admin' });
-    this._reset();
-    this.modalService.close();
+    this._onSuccess();
   }
 
   protected onClose(): void {
@@ -158,7 +161,10 @@ export class AuthModalComponent {
   private _onSuccess(): void {
     this.isSubmitting.set(false);
     this._reset();
+    const returnUrl = this.modalService.returnUrl();
+    this.modalService.clearReturnUrl();
     this.modalService.close();
+    if (returnUrl) this.router.navigateByUrl(returnUrl);
   }
 
   private _onError(err: Error): void {

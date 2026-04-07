@@ -2,6 +2,27 @@
 
 ---
 
+### Plan 255 — Dead Code Cleanup (`plans/255-dead-code-cleanup.plan.md`)
+
+- [ ] Task 1: Delete `.claude/skills/commit-to-github/` — confirmed deprecated, replaced by git-agent
+- [ ] Task 2: Delete `.claude/skills/end-session/` — confirmed deprecated, replaced by worktree-session-end
+- [ ] Task 3: Delete `.claude/agents/triage-agent.md` — zero references, never wired in
+- [ ] Task 4: Delete `scripts/backfill-name-snapshots.mjs` — untracked, no npm entry
+- [ ] Task 5: Delete `scripts/seed-from-dump.js` — one-time seed, explicitly documented as done
+- [ ] Task 6: Delete `scripts/stamp-master-userId.js` — one-time migration, explicitly "Run ONCE"
+- [ ] Task 7: Run `ng build` — confirm zero errors after deletions
+- [ ] Task 8: Investigate repair script trio (`backup-before-repair.mjs`, `diagnose-broken-refs.mjs`, `repair-recipe-references.mjs`) — confirm repair is complete, then delete all three
+- [ ] Task 9: Investigate migration pair (`migrate-to-master.mjs`, `link-users-to-master.mjs`) — confirm master-layer migration is done in prod, then delete both
+- [ ] Task 10: Investigate `scripts/trim-demo-data.mjs` — recurring or one-time? Add npm entry or delete
+- [ ] Task 11: Add `git-agent.md` row to `§0.3` agent roster in `copilot-instructions.md`
+- [ ] Task 12: Fix stale `commit-to-github Phase 0` reference in `.claude/agents/qa-engineer.md`
+- [ ] Task 13: Add `interface-design` trigger line to `copilot-instructions.md §0`
+- [ ] Task 14: Decide on `.claude/commands/reflect-add-tests.md` — add trigger or delete
+- [ ] Task 15: Decide on `.claude/commands/sweep-stale-todos.md` — verify pending update, then add trigger
+- [ ] Task 16: Decide on `getGeminiShots()` in `gemini-shots.util.ts` — build read-back feature or remove orphan export
+
+---
+
 ### Plan 254 — Recipe Ref Repair + Name Snapshot (`plans/254-recipe-ref-repair-and-name-snapshot.plan.md`)
 
 - [x] Task 1: `git checkout -b fix/recipe-ref-repair` — create new branch

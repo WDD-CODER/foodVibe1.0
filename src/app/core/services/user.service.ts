@@ -194,6 +194,7 @@ export class UserService {
           this.storeToken(token)
           this._saveUserLocal(user)
           this._startRefreshTimer()
+          this._reloadDataServices()
           this.logging.info({ event: 'auth.signup', message: 'Signup success', context: { userId: user._id } })
         }),
         map(({ user }) => user),

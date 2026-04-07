@@ -23,6 +23,7 @@ export class RecipeDataService {
 
   /** Re-read from storage and refresh the signal. Used by demo loader after replacing data. */
   async reloadFromStorage(): Promise<void> {
+    this.recipesStore_.set([]);
     await this.loadInitialData();
   }
 

@@ -37,7 +37,7 @@
           }
           @if (isIncompleteRow(group)) {
             <button type="button" class="incomplete-badge"
-              (click)="$event.stopPropagation(); group.get('referenceId')?.value ? navigateToEditProduct(group) : editingNameAtRow_.set($index)"
+              (click)="$event.stopPropagation(); getItemMetadata(group) ? navigateToEditProduct(group) : editingNameAtRow_.set($index)"
               [title]="'product_incomplete_hint' | translatePipe">
               <lucide-icon name="alert-triangle" [size]="14"></lucide-icon>
             </button>

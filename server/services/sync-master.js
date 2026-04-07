@@ -7,6 +7,11 @@
  *   2. Unchanged clone (_userModified: false) with stale data → overwrite with latest master
  *   3. User-modified clone (_userModified: true)              → skip (user's version wins)
  *   4. Deleted master item                                    → skip (no removal from user)
+ *
+ * Ingredient referenceId remapping (Rule 1 only):
+ *   When a new master recipe/dish is cloned to a user, its ingredient referenceIds
+ *   point to master product _ids. We remap them to the user's corresponding product _ids
+ *   using _masterId linkage so the ingredients resolve correctly.
  */
 
 'use strict';
@@ -21,6 +26,16 @@ function makeId(length = 5) {
   return id;
 }
 
+/** Remap ingredient referenceIds from master IDs to user-scoped IDs. */
+function remapIngredients(ingredients, idMap) {
+  if (!Array.isArray(ingredients)) return ingredients;
+  return ingredients.map(ing => {
+    if (!ing.referenceId) return ing;
+    const remapped = idMap.get(String(ing.referenceId));
+    return remapped ? { ...ing, referenceId: remapped } : ing;
+  });
+}
+
 /**
  * Syncs master data changes into the given user's namespace.
  *
@@ -31,6 +46,20 @@ async function syncMasterToUser(userId) {
   const db = mongoose.connection.db;
   let totalInserted = 0;
   let totalUpdated = 0;
+
+  // Build masterProductId → userProductId map for ingredient ref remapping.
+  // Loaded once before processing RECIPE_LIST / DISH_LIST.
+  let productIdMap = null;
+
+  async function getProductIdMap() {
+    if (productIdMap) return productIdMap;
+    const userProducts = await db.collection('PRODUCT_LIST')
+      .find({ userId, _masterId: { $ne: null } })
+      .project({ _id: 1, _masterId: 1 })
+      .toArray();
+    productIdMap = new Map(userProducts.map(p => [String(p._masterId), String(p._id)]));
+    return productIdMap;
+  }
 
   for (const entityType of CLONEABLE_TYPES) {
     const col = db.collection(entityType);
@@ -59,16 +88,31 @@ async function syncMasterToUser(userId) {
         // Rule 1: new master item — clone to user
         const newId = makeId();
         const { _id: _mid, userId: _u, _masterId: _m, _userModified: _um, ...rest } = master;
-        toInsert.push({
+        const clone = {
           ...rest,
           _id: newId,
           userId,
           _masterId: masterId,
           _userModified: false,
-        });
+        };
+
+        // Remap ingredient refs so they point to user's products, not master products
+        if (entityType === 'RECIPE_LIST' || entityType === 'DISH_LIST') {
+          const idMap = await getProductIdMap();
+          clone.ingredients_ = remapIngredients(clone.ingredients_, idMap);
+        }
+
+        toInsert.push(clone);
       } else if (!existing._userModified) {
         // Rule 2: unmodified clone — overwrite with latest master data
         const { _id: _mid, userId: _u, _masterId: _m, _userModified: _um, ...masterRest } = master;
+
+        // Remap ingredient refs so user's product IDs are preserved (same guard as Rule 1)
+        if (entityType === 'RECIPE_LIST' || entityType === 'DISH_LIST') {
+          const idMap = await getProductIdMap();
+          masterRest.ingredients_ = remapIngredients(masterRest.ingredients_, idMap);
+        }
+
         toUpdate.push({
           filter: { _id: existing._id },
           update: { $set: { ...masterRest, _userModified: false } },
