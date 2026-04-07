@@ -23,18 +23,19 @@
           [excludeNames]="editingNameAtRow_() === $index ? getExcludeNamesForRow($index) : existingIngredientNames"
           [initialQuery]="editingNameAtRow_() === $index ? (group.get('name_hebrew')?.value ?? '') : ''"
           (itemSelected)="onItemSelected($event, group)" (focusDone)="focusSearchDone.emit()"
-          (addNewRowRequested)="addIngredient.emit()" (cancelSearch)="editingNameAtRow_.set(null)"></app-ingredient-search>
+          (addNewRowRequested)="addIngredient.emit()" (cancelSearch)="onCancelSearch($index)"></app-ingredient-search>
         } @else {
-        <div class="selected-item-display" role="button" tabindex="0"
+        <div class="selected-item-display"
           [class.incomplete-row]="isBlockingRow(group)"
-          [class.warning-row]="isWarningRow(group)"
-          (click)="getProductForGroup(group) ? onQuickEditBadgeClick(group, $index, isBlockingRow(group) ? 'invalid' : 'incomplete') : editingNameAtRow_.set($index)"
-          (keydown.enter)="getProductForGroup(group) ? onQuickEditBadgeClick(group, $index, isBlockingRow(group) ? 'invalid' : 'incomplete') : editingNameAtRow_.set($index)"
-          (keydown.space)="$event.preventDefault(); getProductForGroup(group) ? onQuickEditBadgeClick(group, $index, isBlockingRow(group) ? 'invalid' : 'incomplete') : editingNameAtRow_.set($index)">
+          [class.warning-row]="isWarningRow(group)">
           @if (getDisplayName(group)) {
-            <span class="item-text">{{ getDisplayName(group) }}</span>
+            <span class="item-text" role="button" tabindex="0"
+              (click)="editingNameAtRow_.set($index)"
+              (keydown.enter)="editingNameAtRow_.set($index)">{{ getDisplayName(group) }}</span>
           } @else {
-            <span class="item-text unlinked-ingredient" (click)="$event.stopPropagation(); editingNameAtRow_.set($index)">⚠ {{ 'unlinked_ingredient' | translatePipe }}</span>
+            <span class="item-text unlinked-ingredient" role="button" tabindex="0"
+              (click)="editingNameAtRow_.set($index)"
+              (keydown.enter)="editingNameAtRow_.set($index)">⚠ {{ 'unlinked_ingredient' | translatePipe }}</span>
           }
           @if (isBlockingRow(group)) {
             <button type="button" class="incomplete-badge"
@@ -47,6 +48,11 @@
               (click)="$event.stopPropagation(); onQuickEditBadgeClick(group, $index, 'incomplete')"
               [title]="'product_warning_hint' | translatePipe">
               <lucide-icon name="alert-triangle" [size]="14"></lucide-icon>
+            </button>
+          } @else if (group.get('referenceId')?.value) {
+            <button type="button" class="edit-badge"
+              (click)="$event.stopPropagation(); onQuickEditBadgeClick(group, $index, 'incomplete')">
+              <lucide-icon name="pencil" [size]="14"></lucide-icon>
             </button>
           }
           <button type="button" class="clear-btn" (click)="$event.stopPropagation(); clearIngredient(group)">
@@ -81,7 +87,7 @@
           </button>
           <input type="number" SelectOnFocus formControlName="amount_net" (input)="updateLineCalculations($index)"
             (keydown)="onQuantityKeydown($event, $index)" focusByRow [rowIndex]="$index" kind="qty"
-            class="grid-input qty-input" placeholder="0" step="0.001" />
+            class="grid-input qty-input" placeholder="0" step="0.001" min="0" />
           <button type="button" class="qty-btn plus" tabindex="-1" (click)="incrementAmount(group, $index)">
             <lucide-icon name="plus" [size]="16"></lucide-icon>
           </button>
@@ -107,7 +113,7 @@
       </div>
 
       @if ((quickEditRowIndex_() === $index || quickEditRowClosingIndex_() === $index) && !isMobile_() && getProductForGroup(group)) {
-        <div class="quick-edit-accordion">
+        <div class="quick-edit-accordion" (clickOutside)="onAccordionClickOutside()">
           <app-quick-edit-product-panel
             [product]="getProductForGroup(group)!"
             [tier]="quickEditRowTier_() ?? 'incomplete'"

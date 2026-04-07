@@ -2,13 +2,16 @@
 
 ---
 
-### Plan 259 — Auto-Reflect Autonomous Loop (`plans/259-auto-reflect-autonomous-loop.plan.md`)
+### Plan 259 — DB-Backed Shared Few-Shot Pool (`plans/259-gemini-shots-db-pool.plan.md`)
 
-- [x] Task 1: Edit `.claude/commands/reflect.md` — insert AUTO MODE block after frontmatter; fix `git checkout main` → `git branch -D`
-- [x] Task 1b: Edit `.claude/copilot-instructions.md` — add correction-cycle behavioral rule to Skill Triggers
-- [x] Task 2: Create `.claude/reflect/auto-reflect.ps1` — failure-only mode, auto-reflection-log.tsv, powershell fallback
-- [x] Task 3: Edit root `.claude/settings.json` + worktree copy — add Stop hook
-- [x] Task 4: Verify — file existence, JSON validity, AUTO MODE in reflect.md, dry-run script
+- [ ] Task 1: `server/routes/ai.js` — add `GEMINI_SHOTS` helpers (`saveShot`, `getApprovedShots`, `computeSoftWarnings`), remove `buildFewShotBlock` from body path
+- [ ] Task 2: `server/routes/ai.js` — add `POST /api/v1/ai/shots` endpoint
+- [ ] Task 3: `server/routes/ai.js` — update `/generate`, `/generate-from-image`, `/generate-from-url` to fetch shots from DB server-side
+- [ ] Task 4: Create `src/app/core/services/gemini-shots.service.ts`
+- [ ] Task 5: `ai-recipe-modal.component.ts` — call shots service on approve/reject, show inline warnings
+- [ ] Task 6: `gemini.service.ts` — remove `getGeminiShots` import and `shots` from request bodies
+- [ ] Task 7: Deprecate `gemini-shots.util.ts` — remove `addGeminiShot` call from modal
+- [ ] Task 8: `ng build` + smoke test
 
 ---
 

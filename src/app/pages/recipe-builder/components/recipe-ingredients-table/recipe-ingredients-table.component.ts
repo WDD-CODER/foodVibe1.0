@@ -1,4 +1,4 @@
-import { Component, input, output, inject, signal, ViewChildren, QueryList, effect, ChangeDetectorRef } from '@angular/core';
+import { Component, input, output, inject, signal, ViewChildren, ViewChild, QueryList, effect, ChangeDetectorRef } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router'
 import { CommonModule } from '@angular/common';
@@ -23,6 +23,7 @@ import { quantityIncrement, quantityDecrement, QuantityStepOptions } from 'src/a
 import { map } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop';
+import { ClickOutSideDirective } from '@directives/click-out-side';
 
 @Component({
   selector: 'app-recipe-ingredients-table',
@@ -39,7 +40,8 @@ import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/d
     QuickEditProductPanelComponent,
     CdkDrag,
     CdkDropList,
-    CdkDragHandle
+    CdkDragHandle,
+    ClickOutSideDirective
   ],
   templateUrl: './recipe-ingredients-table.component.html',
   styleUrl: './recipe-ingredients-table.component.scss'
@@ -61,6 +63,7 @@ private readonly cdr = inject(ChangeDetectorRef)
   );
 
   @ViewChildren(FocusByRowDirective) private focusByRowRefs!: QueryList<FocusByRowDirective>;
+  @ViewChild(QuickEditProductPanelComponent) private quickEditPanelRef_?: QuickEditProductPanelComponent;
 
   constructor() {
     effect(() => {
@@ -136,10 +139,19 @@ private readonly cdr = inject(ChangeDetectorRef)
     }
   }
 
+  /** Called by clickOutside on the accordion div — defers to panel if it has unsaved changes. */
+  protected onAccordionClickOutside(): void {
+    if (this.quickEditPanelRef_) {
+      this.quickEditPanelRef_.requestClose();
+    } else {
+      this.closeQuickEditWithAnimation();
+    }
+  }
+
   /** Close the accordion with the collapse animation (200ms). */
   protected closeQuickEditWithAnimation(): void {
     const idx = this.quickEditRowIndex_();
-    if (idx === null) return;
+    if (idx === null || this.quickEditRowClosingIndex_() !== null) return;
     this.quickEditRowClosingIndex_.set(idx);
     setTimeout(() => {
       this.quickEditRowClosingIndex_.set(null);
@@ -153,6 +165,13 @@ private readonly cdr = inject(ChangeDetectorRef)
     this.closeQuickEditWithAnimation();
     // KitchenStateService.products_() is already updated by ProductDataService.updateProduct().
     // The existing effect() in the constructor fires and calls refreshAllLineCalculations().
+  }
+
+  /** Only cancel editing on the row that is actually being edited — prevents empty-row searches from wiping another row's edit mode. */
+  protected onCancelSearch(rowIndex: number): void {
+    if (this.editingNameAtRow_() === rowIndex) {
+      this.editingNameAtRow_.set(null);
+    }
   }
 
   /** Exclude names from search for a given row (other rows only), so user can re-select the same item when editing. */

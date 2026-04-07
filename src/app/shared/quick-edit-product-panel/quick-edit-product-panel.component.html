@@ -82,10 +82,25 @@
     <p class="qep__error" role="alert">{{ error_() }}</p>
   }
 
+  <!-- Unsaved-changes mini-confirm overlay -->
+  @if (showUnsavedConfirm_()) {
+    <div class="qep__unsaved-overlay">
+      <p class="qep__unsaved-msg">{{ 'unsaved_changes_confirm' | translatePipe }}</p>
+      <div class="qep__unsaved-actions">
+        <button type="button" class="c-btn-ghost" (click)="onDiscardAndClose()">
+          {{ 'leave_without_saving' | translatePipe }}
+        </button>
+        <button type="button" class="c-btn-primary" (click)="showUnsavedConfirm_.set(false); onSave()">
+          {{ 'save' | translatePipe }}
+        </button>
+      </div>
+    </div>
+  }
+
   <!-- Actions -->
   <div class="inline-edit-actions">
-    <button type="button" class="qep__link" (click)="onOpenFullEdit()">
-      {{ 'full_edit' | translatePipe }} →
+    <button type="button" class="c-btn-primary qep__link" (click)="onOpenFullEdit()">
+      {{ 'edit' | translatePipe }} →
     </button>
     <button type="button" class="c-btn-ghost" (click)="onCancel()">
       {{ 'cancel' | translatePipe }}

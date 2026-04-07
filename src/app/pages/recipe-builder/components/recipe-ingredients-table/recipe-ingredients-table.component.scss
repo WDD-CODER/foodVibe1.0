@@ -236,6 +236,7 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   .item-text {
     flex: 1;
     font-weight: 500;
+    cursor: pointer;
   }
 
   &.incomplete-row {
@@ -330,6 +331,51 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
 @keyframes warning-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.6; }
+}
+
+.clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0.25rem;
+
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+
+  cursor: pointer;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: var(--color-danger);
+  }
+}
+
+.edit-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  background: transparent;
+  color: var(--color-text-muted);
+
+  border: none;
+
+  cursor: pointer;
+  opacity: 0;
+  transition: color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    color: var(--color-primary);
+    transform: scale(1.15);
+  }
+}
+
+.selected-item-display:hover .edit-badge {
+  opacity: 1;
 }
 
 @container ingredients (max-width: 520px) {

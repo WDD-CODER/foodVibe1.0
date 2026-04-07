@@ -1,22 +1,15 @@
-const STORAGE_KEY = 'FV_GEMINI_SHOTS'
-const MAX_SHOTS = 3
+/**
+ * @deprecated Plan 259 — few-shot storage moved to MongoDB (GEMINI_SHOTS collection).
+ * Use GeminiShotsService for all shot operations.
+ * This file is a no-op stub kept for one release to prevent import errors.
+ */
 
-interface GeminiShot {
-  prompt: string
-  draft: object
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function getGeminiShots(): never[] {
+  return []
 }
 
-export function getGeminiShots(): GeminiShot[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) as GeminiShot[] : []
-  } catch {
-    return []
-  }
-}
-
-export function addGeminiShot(prompt: string, draft: object): void {
-  const shots = getGeminiShots()
-  shots.unshift({ prompt, draft })
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(shots.slice(0, MAX_SHOTS)))
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function addGeminiShot(_prompt: string, _draft: object): void {
+  // no-op — shots are now saved via GeminiShotsService → POST /api/v1/ai/shots
 }

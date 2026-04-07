@@ -11,7 +11,7 @@ import type { AiRecipePatch } from '@services/gemini.service'
 import { AiRecipeDraftService, type AiRecipeDraft } from '@services/ai-recipe-draft.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { getGeminiUsage, DAILY_LIMIT, fetchGeminiUsageFromServer } from '../../core/utils/gemini-usage.util'
-import { addGeminiShot } from '../../core/utils/gemini-shots.util'
+import { GeminiShotsService } from '@services/gemini-shots.service'
 
 type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
 type InputMode = 'text' | 'image' | 'url'
@@ -30,6 +30,7 @@ export class AiRecipeModalComponent implements OnInit {
   private readonly aiDraft = inject(AiRecipeDraftService)
   private readonly router = inject(Router)
   private readonly userMsg = inject(UserMsgService)
+  private readonly shots = inject(GeminiShotsService)
 
   // Create mode
   protected readonly inputMode_ = signal<InputMode>('text')
@@ -42,6 +43,10 @@ export class AiRecipeModalComponent implements OnInit {
   // Edit mode
   protected readonly instruction_ = signal('')
   protected readonly patch_ = signal<AiRecipePatch | null>(null)
+
+  // Shot quality warnings
+  protected readonly shotWarnings_ = signal<string[]>([])
+  protected readonly awaitingWarningConfirm_ = signal(false)
 
   // Shared
   protected readonly loading_ = signal(false)
@@ -99,7 +104,13 @@ export class AiRecipeModalComponent implements OnInit {
   }
 
   onGenerateAgain(): void {
+    const draft = this.draft_()
+    if (draft) {
+      this.shots.saveShot(this.prompt_(), draft, 'rejected', this.inputMode_()).subscribe()
+    }
     this.draft_.set(null)
+    this.shotWarnings_.set([])
+    this.awaitingWarningConfirm_.set(false)
     this.status_.set('idle')
     this.errorKey_.set('ai_recipe_error')
     this.imageFile_.set(null)
@@ -170,10 +181,27 @@ export class AiRecipeModalComponent implements OnInit {
   onOpenInBuilder(): void {
     const draft = this.draft_()
     if (!draft) return
-    addGeminiShot(this.prompt_(), draft)
+
+    // First click: check for soft quality warnings before committing to the pool
+    if (!this.awaitingWarningConfirm_()) {
+      const warnings = this.shots.computeWarnings(draft)
+      if (warnings.length > 0) {
+        this.shotWarnings_.set(warnings)
+        this.awaitingWarningConfirm_.set(true)
+        return
+      }
+    }
+
+    // No warnings, or user confirmed despite warnings — save as approved and open
+    this.shots.saveShot(this.prompt_(), draft, 'approved', this.inputMode_()).subscribe()
     this.aiDraft.set(draft)
     void this.router.navigate(['/recipe-builder'])
     this.modalService.close()
+  }
+
+  onDismissWarning(): void {
+    this.shotWarnings_.set([])
+    this.awaitingWarningConfirm_.set(false)
   }
 
   // ─── Edit mode ───────────────────────────────────────────────────
@@ -213,9 +241,15 @@ export class AiRecipeModalComponent implements OnInit {
   // ─── Shared ──────────────────────────────────────────────────────
 
   onClose(): void {
+    const draft = this.draft_()
+    if (draft) {
+      this.shots.saveShot(this.prompt_(), draft, 'rejected', this.inputMode_()).subscribe()
+    }
     this.modalService.close()
     this.draft_.set(null)
     this.patch_.set(null)
+    this.shotWarnings_.set([])
+    this.awaitingWarningConfirm_.set(false)
     this.prompt_.set('')
     this.instruction_.set('')
     this.imageFile_.set(null)
