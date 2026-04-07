@@ -55,6 +55,9 @@ description: Single source of truth for all project rules, standards, and skill/
 - **Global doc finalization** `[SHARED]`: User says "finalize docs" or "global audit" → read `.claude/skills/finalize-docs/SKILL.md`.
 - **Security review** `[CC]`: After any change touching `auth.guard.ts`, `auth.interceptor.ts`, `auth-crypto.ts`, `user.service.ts`, localStorage/sessionStorage, new routes, or `[innerHTML]`/`bypassSecurityTrust*` → invoke `security-officer` agent as the final step before committing.
 - **Autonomous plan execution** `[CC]`: User invokes `/auto-solve` or says "start auto-solve" → read `.claude/commands/auto-solve.md` and follow it.
+- **Interface design** `[SHARED]`: User asks to design, redesign, layout, or improve a UI page, dashboard, or component → invoke `/init` (new design) or `/audit` (check existing) or `/critique` (improve existing) or `/extract` (extract patterns) or `/status` (system state) as appropriate.
+- **Skill test suite** `[CC]`: User invokes `/reflect add-tests` → read `.claude/commands/reflect-add-tests.md` and follow it.
+- **Sweep stale todos** `[SHARED]`: At session end (after all tasks marked `[x]`) or on explicit request → read `.claude/commands/sweep-stale-todos.md` and follow it.
 
 ---
 
@@ -89,6 +92,7 @@ Agent persona files live in `.claude/agents/`. Load on demand — do not pre-loa
 | Breadcrumb Navigator | `breadcrumb-navigator.md` | New `pages/<x>/` or app subtree; structural changes; after update-docs |
 | QA Engineer | `qa-engineer.md` | Spec gaps; diagnosing failing tests; E2E creation |
 | Security Officer | `security-officer.md` | Post-feature review of auth/storage/route changes; pre-deploy; security consult |
+| Git Agent | `git-agent.md` | All git operations: commit, push, PR creation, merge, branch management |
 
 ---
 

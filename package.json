@@ -14,7 +14,10 @@
     "e2e:ui": "playwright test --ui",
     "build:render": "npx ng build --configuration=production",
     "dev:local": "ng serve -c local",
-    "dev:remote": "ng serve -c remote"
+    "dev:remote": "ng serve -c remote",
+    "repair:backup": "node scripts/backup-before-repair.mjs",
+    "repair:diagnose": "node scripts/diagnose-broken-refs.mjs",
+    "repair:refs": "node scripts/repair-recipe-references.mjs"
   },
   "private": true,
   "engines": {

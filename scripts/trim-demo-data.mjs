@@ -1,6 +1,11 @@
 /**
  * Trim demo data to 15 dishes + 3 preps and their dependencies.
  * Run from project root: node scripts/trim-demo-data.mjs
+ *
+ * STATUS (2026-04-07): Usage unclear — one-time vs recurring undecided.
+ * If demo data is now managed via a seeded dump, this can be deleted.
+ * If demo trimming is a recurring operation, add: "trim-demo": "node scripts/trim-demo-data.mjs"
+ * to package.json scripts so it is no longer invisible.
  */
 import fs from 'fs';
 import path from 'path';

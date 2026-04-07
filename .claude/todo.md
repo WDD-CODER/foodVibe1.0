@@ -23,6 +23,16 @@
 
 ---
 
+### Plan 256 — Gemini Few-Shot Injection (Backend Migration) (`plans/256-gemini-few-shot-backend.plan.md`)
+
+- [ ] Task 1: Extend backend generate endpoints to accept optional `shots` array in request body
+- [ ] Task 2: Build few-shot prompt block on the server using the shots array
+- [ ] Task 3: Update `GeminiService.generateRecipe()` to call `getGeminiShots()` and pass shots to backend
+- [ ] Task 4: Repeat for `generateFromImage()` and `generateFromUrl()` (all generate endpoints)
+- [ ] Task 5: Verify `ng build` passes and test end-to-end in dev
+
+---
+
 ### Plan 254 — Recipe Ref Repair + Name Snapshot (`plans/254-recipe-ref-repair-and-name-snapshot.plan.md`)
 
 - [x] Task 1: `git checkout -b fix/recipe-ref-repair` — create new branch
