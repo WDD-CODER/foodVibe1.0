@@ -1,6 +1,6 @@
 ---
-name: Daily Tech Debt Automation — Executive Brief
-type: executive-brief
+name: Daily Tech Debt Automation
+type: brief
 owner: Team Leader
 status: ready-for-execution
 created: 2026-04-07
@@ -62,52 +62,16 @@ Over time this creates a **self-healing codebase**: dead code never accumulates,
 
 ---
 
-## Implementation Requirements
+## Task Force
 
-### 1. Schedule Setup (one-time)
+### Sizing: Small (2 agents at gates only)
 
-Run from Claude Code desktop (local machine):
+| Agent | Role | When invoked |
+|-------|------|-------------|
+| **QA Engineer** | Verify auto-fixes don't break build; validate report accuracy | After Phase 2, only if logic changes were applied |
+| **Security Officer** | Review security flags; confirm nothing was auto-fixed that shouldn't be | After Phase 1, only if security flags > 0 |
 
-```
-/schedule
-```
-
-Configure:
-- **Cron**: `0 6 * * *` (daily at 06:00)
-- **Task**: Execute the Daily Techdebt Sweep skill (see operational brief below)
-- **Isolation**: Run on dedicated worktree
-- **Branch pattern**: `chore/daily-techdebt-YYYY-MM-DD`
-- **Cleanup**: Remove worktree after completion
-
-### 2. Worktree Strategy
-
-- Uses `/worktree-setup` to create `../foodVibe1.0-wt-daily-techdebt`
-- Branches from `main` every run (always audits latest merged code)
-- Worktree is destroyed after the run — no stale worktrees accumulate
-- Port allocation: not needed (no dev server required for static analysis)
-
-### 3. Report Retention
-
-Already built into `/techdebt` — rolling 7-report archive. The daily run naturally fills this: you always have the last week of audits for trend comparison.
-
-### 4. QA Verification
-
-When Phase 2 applies logic changes (signal migration, component splits):
-- QA Engineer is invoked automatically per the techdebt completion gate
-- `ng build` must pass before committing
-
----
-
-## Team Leader Delegation Plan
-
-### Task Sizing: Small (2 agents)
-
-| Agent | Role | Phase |
-|-------|------|-------|
-| **QA Engineer** | Verify auto-fixes don't break tests; run `ng build`; validate report accuracy | After Phase 2 |
-| **Security Officer** | Review any security flags found; confirm no false positives | After Phase 1 (only if security flags detected) |
-
-> Team Leader does NOT need to spin up a full team for this. The `/techdebt` skill handles Phases 1-4 autonomously. Agents are only invoked at gates.
+> `/techdebt` Phases 1–4 run autonomously. Agents are only invoked at verification gates — not for the scan itself.
 
 ### Coordination Flow
 
@@ -115,26 +79,121 @@ When Phase 2 applies logic changes (signal migration, component splits):
 /techdebt runs autonomously
     │
     ├─ Phase 1 complete → security flags found?
-    │   └─ YES → Security Officer reviews (Sonnet)
+    │   └─ YES → Security Officer reviews (see gate instructions below)
     │
     ├─ Phase 2 complete → logic changes applied?
-    │   └─ YES → QA Engineer verifies (Sonnet for analysis, Haiku for build check)
+    │   └─ YES → QA Engineer verifies (see gate instructions below)
     │
     ├─ Phase 3 → Report written
     │
     └─ Phase 4 → Docs synced → Commit → Push → Worktree cleanup
 ```
 
+Steps 3 and 4 (Security + QA gates) can run **in parallel** when both are triggered.
+
+---
+
+## Agent Gate Instructions
+
+### QA Engineer Gate
+
+**Trigger:** Phase 2 applied logic changes (signal migration, component splits, dead code removal touching logic).
+
+**Tasks:**
+1. **Build verification** — run `ng build` in the worktree. Build fails → report to Team Leader, do NOT attempt to fix.
+2. **Report accuracy** — read the techdebt report's Detailed Findings. Verify dead code items are truly unused (quick grep). Verify `@Input()` → `input()` migrations didn't break template bindings.
+3. **Regression spot-check** — if signal migrations were applied: check `.subscribe()` calls were also converted, `async` pipes replaced with signal reads. Run existing `.spec.ts` for affected components.
+4. **Sign-off:**
+```
+## QA Gate — Daily Techdebt Sweep
+- Build: PASS / FAIL
+- Report accuracy: VERIFIED / ISSUES FOUND
+- Regression check: CLEAR / FLAGGED [details]
+- Recommendation: APPROVE COMMIT / BLOCK — [reason]
+```
+
+**Do NOT:** fix issues (only report), write new specs, or modify files in the worktree.
+
+**Model guidance:** Haiku for build + grep checks. Sonnet for signal migration verification.
+
+---
+
+### Security Officer Gate
+
+**Trigger:** Phase 1 detected security flags (temp auth bypasses, hardcoded keys, exposed tokens, `bypassSecurityTrust*`).
+
+**Tasks:**
+1. **Verify each finding** — read the actual file and line from the report's Security Flags section. Classify: CRITICAL (blocks merge) / WARNING (note for developer) / FALSE POSITIVE (dismiss).
+2. **Confirm nothing was auto-fixed** — this is critical. Run `git diff` in the worktree and scan for changes to: `auth.guard.ts`, `auth.interceptor.ts`, `auth-crypto.ts`, `user.service.ts`, anything touching `localStorage`/`sessionStorage`, `bypassSecurityTrust*`, `[innerHTML]`. If security code WAS modified → **BLOCK immediately**.
+3. **Sign-off:**
+```
+## Security Gate — Daily Techdebt Sweep
+- Findings reviewed: [count]
+- CRITICAL: [count] — [list with file:line]
+- WARNING: [count] — [list with file:line]
+- FALSE POSITIVE: [count] — [dismissed items]
+- Auto-fix touched security code: YES (BLOCKED) / NO (CLEAR)
+- Recommendation: APPROVE COMMIT / BLOCK — [reason]
+```
+
+**Do NOT:** fix security issues (only flag them), run full `/cso` audit, or modify files.
+
+**Model guidance:** Sonnet for all phases (security requires high reasoning).
+
+---
+
+## Implementation Steps
+
+### Step 1 — Test Run (do this first)
+
+Run `/techdebt` manually in full-project mode. Verify the report at `.claude/techdebt-reports/techdebt-YYYY-MM-DD.md` is well-formed with Summary, Detailed Findings, and Trend sections.
+
+### Step 2 — Schedule Configuration
+
+From Claude Code desktop, run `/schedule` with:
+
+| Field | Value |
+|-------|-------|
+| **Name** | `daily-techdebt-sweep` |
+| **Cron** | `0 6 * * *` |
+| **Isolation** | Worktree |
+
+**Agent prompt for the scheduled task:**
+
+> Run a full-project /techdebt audit. Before starting:
+> 1. Create worktree: `git worktree add -b chore/daily-techdebt-$(date +%Y-%m-%d) ../foodVibe1.0-wt-daily-techdebt main`
+> 2. Run `npm install` in the worktree
+> 3. Execute /techdebt in full-project mode (scope: all of src/app/)
+> 4. If Phase 1 finds security flags → invoke Security Officer to review
+> 5. If Phase 2 applies logic changes → invoke QA Engineer to verify + run `ng build`
+> 6. Commit all changes to the chore/ branch with message: "chore: daily techdebt sweep YYYY-MM-DD"
+> 7. Push the branch to origin
+> 8. Remove the worktree: `git worktree remove ../foodVibe1.0-wt-daily-techdebt`
+> 9. Run `git worktree prune`
+
+### Step 3 — Verify First Automated Run
+
+Next morning:
+- [ ] `.claude/techdebt-reports/techdebt-YYYY-MM-DD.md` exists with today's date
+- [ ] `chore/daily-techdebt-YYYY-MM-DD` branch exists on origin (if fixes were needed)
+- [ ] `ng build` passes on that branch
+- [ ] No stale worktree left at `../foodVibe1.0-wt-daily-techdebt`
+- [ ] Report Trend section compares against previous reports
+
+### Step 4 — Wire Into Session Start
+
+Add to the `github-sync` daily check: "If a `chore/daily-techdebt-*` branch exists for today → notify the user: 'Daily techdebt sweep completed. Branch ready for review.'"
+
 ---
 
 ## Success Criteria
 
-1. Every weekday morning, a fresh `techdebt-YYYY-MM-DD.md` report exists
-2. Safe auto-fixes are on a branch ready to merge — zero manual effort for routine cleanup
-3. Security flags are never auto-fixed — always flagged for human review
-4. The Trend section shows debt decreasing or stable over 7-day windows
-5. `ng build` passes on every auto-fix branch (enforced by QA gate)
-6. No worktree debris left behind after runs
+- [ ] `/schedule` trigger is configured and confirmed active
+- [ ] First automated run produces a valid report
+- [ ] Auto-fixes compile cleanly (`ng build` passes)
+- [ ] Security flags are never auto-fixed — only reported
+- [ ] Worktree is created and destroyed cleanly each run
+- [ ] Report Trend section accurately compares last 7 days
 
 ---
 
@@ -143,35 +202,8 @@ When Phase 2 applies logic changes (signal migration, component splits):
 | Risk | Mitigation |
 |------|-----------|
 | Auto-fix introduces regression | QA Engineer gate + `ng build` must pass before commit |
-| Schedule fails silently | Check `.claude/techdebt-reports/` — if today's report is missing, the run failed. Add a note to session-start to verify. |
-| Worktree not cleaned up | `/worktree-setup` prunes stale refs at start; add `git worktree prune` to the scheduled task's cleanup step |
+| Schedule fails silently | Check `.claude/techdebt-reports/` — if today's report is missing, the run failed |
+| Worktree not cleaned up | Task includes explicit `git worktree remove` + `git worktree prune` |
 | Conflicts with active development | Runs on isolated worktree from `main` — never touches feature branches |
-| Over-aggressive auto-fix | Phase 2 only triggers when Phase 1 finds issues; security flags are never auto-fixed |
-
----
-
-## How to Execute This Brief
-
-**Step 1 — Test manually first:**
-```
-Run /techdebt in full-project mode on current branch.
-Review the report. Confirm the output quality is what you want daily.
-```
-
-**Step 2 — Set up the schedule:**
-```
-/schedule
-> Run /techdebt full-project mode daily at 06:00 on isolated worktree.
-> Branch: chore/daily-techdebt-YYYY-MM-DD from main.
-> Commit fixes, push branch, cleanup worktree.
-```
-
-**Step 3 — Verify first automated run:**
-```
-Next morning: check .claude/techdebt-reports/ for today's report.
-Check GitHub for the chore/daily-techdebt-YYYY-MM-DD branch.
-Review, merge if clean.
-```
-
-**Step 4 — Make it part of session-start:**
-Add to the daily github-sync check: "If today's techdebt branch exists, review and merge."
+| Over-aggressive auto-fix | Phase 2 only triggers when Phase 1 finds issues; security flags never auto-fixed |
+| `/schedule` unavailable | Fallback: run `/techdebt` manually as part of morning session-start routine |
