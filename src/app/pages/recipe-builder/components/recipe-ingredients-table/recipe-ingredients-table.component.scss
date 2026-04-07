@@ -61,6 +61,12 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   }
 }
 
+/* Accordion panel spans all 7 grid columns to fill the full row width */
+.quick-edit-accordion {
+  grid-column: 1 / -1;
+  padding-block: 0.375rem;
+}
+
 .ingredient-grid-row .col-actions .c-icon-btn {
   width: 1.5rem;
   height: 1.5rem;
@@ -236,6 +242,11 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
     border: 1px solid var(--color-danger);
     background: color-mix(in srgb, var(--color-danger) 6%, var(--bg-muted));
   }
+
+  &.warning-row {
+    border: 1px solid var(--border-warning);
+    background: var(--bg-warning-soft);
+  }
 }
 
 .incomplete-badge {
@@ -263,6 +274,33 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
 @keyframes incomplete-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
+}
+
+.warning-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  background: transparent;
+  color: var(--border-warning);
+
+  border: none;
+
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+  animation: warning-pulse 3s ease-in-out infinite;
+
+  &:hover {
+    color: var(--text-warning);
+    transform: scale(1.15);
+  }
+}
+
+@keyframes warning-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
 @container ingredients (max-width: 520px) {
