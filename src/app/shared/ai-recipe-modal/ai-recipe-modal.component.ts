@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { Router } from '@angular/router'
+import { HttpErrorResponse } from '@angular/common/http'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from '../loader/loader.component'
@@ -45,6 +46,7 @@ export class AiRecipeModalComponent implements OnInit {
   // Shared
   protected readonly loading_ = signal(false)
   protected readonly status_ = signal<GenerationStatus>('idle')
+  protected readonly errorKey_ = signal('ai_recipe_error')
   protected readonly geminiUsage_ = signal(getGeminiUsage())
   protected readonly usageColor_ = computed(() => {
     const pct = this.geminiUsage_().count / DAILY_LIMIT
@@ -99,6 +101,7 @@ export class AiRecipeModalComponent implements OnInit {
   onGenerateAgain(): void {
     this.draft_.set(null)
     this.status_.set('idle')
+    this.errorKey_.set('ai_recipe_error')
     this.imageFile_.set(null)
     this.imagePreviewUrl_.set(null)
     this.urlInput_.set('')
@@ -140,17 +143,28 @@ export class AiRecipeModalComponent implements OnInit {
     if (!url) return
     this.loading_.set(true)
     this.status_.set('sending')
+    this.errorKey_.set('ai_recipe_error')
     try {
       const draft = await this.gemini.generateFromUrl(url)
       this.draft_.set(draft)
       this.status_.set('done')
-    } catch {
+    } catch (err) {
+      const errorKey = this.resolveUrlErrorKey(err)
+      this.errorKey_.set(errorKey)
       this.status_.set('error')
-      this.userMsg.onSetErrorMsg('ai_recipe_error')
     } finally {
       this.loading_.set(false)
       this.refreshUsage()
     }
+  }
+
+  private resolveUrlErrorKey(err: unknown): string {
+    if (err instanceof HttpErrorResponse) {
+      const msg: string = err.error?.error ?? ''
+      if (/Failed to fetch URL: [45]\d\d/.test(msg)) return 'ai_recipe_url_blocked'
+      if (msg.includes('Could not fetch') || msg.includes('No usable text')) return 'ai_recipe_url_fetch_failed'
+    }
+    return 'ai_recipe_error'
   }
 
   onOpenInBuilder(): void {
@@ -210,5 +224,6 @@ export class AiRecipeModalComponent implements OnInit {
     this.inputMode_.set('text')
     this.loading_.set(false)
     this.status_.set('idle')
+    this.errorKey_.set('ai_recipe_error')
   }
 }

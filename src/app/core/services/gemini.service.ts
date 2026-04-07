@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core'
-import { HttpClient } from '@angular/common/http'
+import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { Observable, map, firstValueFrom } from 'rxjs'
 import type { AiRecipeDraft } from './ai-recipe-draft.service'
 import { incrementGeminiUsage, isGeminiLimitReached } from '../utils/gemini-usage.util'
@@ -25,6 +25,9 @@ async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
       return await fn()
     } catch (err) {
       lastError = err
+      // Don't retry on HTTP errors — the server gave a definitive answer (4xx/5xx).
+      // Only retry on network-level failures (no response at all).
+      if (err instanceof HttpErrorResponse) throw err
       if (attempt < MAX_RETRIES) {
         await new Promise(r => setTimeout(r, RETRY_DELAY_MS))
       }

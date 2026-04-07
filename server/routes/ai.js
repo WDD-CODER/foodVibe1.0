@@ -570,6 +570,11 @@ router.post('/generate-from-url', verifyToken, async (req, res) => {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
   }
 
+  const currentCount = await getUsageCount();
+  if (currentCount >= DAILY_LIMIT) {
+    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
+  }
+
   const { url } = req.body;
   if (!url || typeof url !== 'string' || !url.trim()) {
     return res.status(400).json({ error: 'url is required' });
@@ -581,8 +586,12 @@ router.post('/generate-from-url', verifyToken, async (req, res) => {
   let pageText;
   try {
     const pageRes = await fetch(url.trim(), {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; FoodVibeBot/1.0)' },
-      signal: AbortSignal.timeout(10000),
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+      },
+      signal: AbortSignal.timeout(15000),
     });
     if (!pageRes.ok) {
       return res.status(502).json({ error: `Failed to fetch URL: ${pageRes.status}` });
@@ -637,6 +646,7 @@ router.post('/generate-from-url', verifyToken, async (req, res) => {
       return res.status(502).json({ error: 'Gemini returned a malformed recipe', details: validationErrors });
     }
 
+    await incrementUsage();
     return res.json({ recipe });
   } catch (err) {
     console.error('[ai/generate-from-url]', err);
