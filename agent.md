@@ -51,5 +51,5 @@ All skill triggers defined in `copilot-instructions.md §0`.
 After completing any plan execution:
 1. Run `ng build` or full `getDiagnostics` — mandatory, no exceptions. Do not skip because changes look "mechanical" or "safe".
 2. If build fails → fix before reporting completion.
-3. If the completed plan involved layout-affecting changes → run `/qa http://localhost:<port>/<affected-page>` to verify visually. Port: read `.worktree-port`, fallback 4200. If dev server unreachable, flag to user.
+3. After any change → follow `validation-checklist.md`: show the validation checklist, then ask "Should I verify this myself, or will you check it?" Do not auto-run `/qa`.
 4. Do NOT run the full test suite here — run tests only on explicit user request.

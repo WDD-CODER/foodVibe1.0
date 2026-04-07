@@ -12,7 +12,7 @@ Skip entirely if you are a planning, architecture, QA, or orchestration agent.
 Immediately upon receiving the task — before reading any files, using any tools,
 or doing any analysis — ask the user ONE question:
 
-  "Do you want a validation checklist at the end of this task? (yes / no)"
+  "Should I verify this myself when done, or will you check it? (verify / I'll check)"
 
 Wait for the response before doing anything else.
 
@@ -21,13 +21,12 @@ Wait for the response before doing anything else.
 ## Step 2 — Execute Normally
 
 Proceed with full execution as you normally would.
-The answer does not change how you work — only what you output at the end.
 
 ---
 
-## Step 3 — End of Task Output
+## Step 3 — Always Show the Validation Checklist
 
-IF USER SAID YES — append this after your completion summary:
+After completing all file changes, always append:
 
 ✅ HOW TO VALIDATE
 - [action] → [expected result]
@@ -49,15 +48,41 @@ Rules for every bullet:
   what was changed and why no user action is needed to verify it
 - Never ask the user to open DevTools, run commands, or check files
 
-IF USER SAID NO:
-Standard completion summary only. No checklist.
+---
+
+## Step 4 — Act on the Answer
+
+### If user said "I'll check":
+Stop after the checklist. Wait for the user's next message.
+
+### If user said "verify":
+Work through every checklist item one by one:
+- For each item: perform the action (open page, trigger behavior, check output)
+- If the item passes → mark ✓
+- If the item fails → fix it, re-verify, then mark ✓
+- If an item cannot be agent-verified (e.g. requires real authenticated data, production
+  environment, or manual physical interaction) → skip it, mark ⚠ with a note
+
+When all items are resolved, report:
+
+```
+## Verified by agent
+- ✓ [checklist item] — [what was confirmed]
+- ✓ [checklist item] — [what was confirmed]
+- ⚠ [checklist item] — needs your check: [reason agent couldn't verify]
+
+Ready for your final pass.
+```
+
+Then stop and wait for the user.
 
 ---
 
 ## Behavior Reference
 
-  Execution task received        → Ask validation question FIRST, before any tool use
-  User says yes                  → Execute, then append ✅ HOW TO VALIDATE
-  User says no                   → Execute, standard summary only
-  Planning / architecture task   → Skip question entirely
-  Multi sub-task session         → Ask once at start, apply to whole session
+  Execution task received        → Ask "verify / I'll check?" before any tool use
+  After execution                → Always show ✅ HOW TO VALIDATE checklist
+  User said "I'll check"         → Show checklist, stop, wait
+  User said "verify"             → Show checklist, then work through each item, fix failures, report back
+  Item can't be agent-verified   → Mark ⚠, note reason, skip — don't fake it
+  Planning / architecture task   → Skip entirely

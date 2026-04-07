@@ -109,7 +109,7 @@ Agent persona files live in `.claude/agents/`. Load on demand — do not pre-loa
 
 **Documentation Gate**: After any structural change to `pages/` or `src/app/` top-level subtrees, run Breadcrumb Navigator to update `breadcrumbs.md` at affected seams.
 
-**UI Verification Gate:** After any layout-affecting change, agents run `/qa http://localhost:<port>/<relevant-page>` directly via gstack's browser daemon. If the dev server is unreachable, agents flag it to the user. No separate session required.
+**Verification Gate:** After any change, agents follow `validation-checklist.md` — show the validation checklist, then ask "Should I verify this myself, or will you check it?" Do not auto-run `/qa`. If the user chooses agent verification and the dev server is unreachable, flag it to the user.
 
 **Build Verification Gate**: After any agent-written code, run `mcp__ide__getDiagnostics` or `ng build` before marking tasks `[x]`. Trust the compiler, not the agent's self-report.
 
