@@ -10,7 +10,7 @@ created: 2026-04-07
 
 ## Vision
 
-Every morning at 06:00, before the developer sits down, a **scheduled Claude Code agent** runs a full-project `/techdebt` audit on an **isolated worktree**. By the time work begins, a clean report is waiting — either "all clear" or a ready-to-merge branch with fixes applied.
+Every morning at 06:00, a **scheduled Claude Code agent** runs a full-project `/techdebt` audit on a **fresh cloud clone** of the repo. By the time the developer sits down, a clean report is waiting — either "all clear" or a ready-to-merge branch with fixes applied.
 
 Over time this creates a **self-healing codebase**: dead code never accumulates, style violations never drift, TODOs never rot, and the trend chart in each report shows debt going down week over week.
 
@@ -21,10 +21,10 @@ Over time this creates a **self-healing codebase**: dead code never accumulates,
 ```
 06:00 — Scheduled trigger fires (Claude Code /schedule)
   │
-  ├─ 1. Creates isolated worktree: ../foodVibe1.0-wt-daily-techdebt
-  │     Branch: chore/daily-techdebt-YYYY-MM-DD (from main)
+  ├─ 1. Anthropic's cloud clones the repo from GitHub (automatic)
+  │     Creates branch: chore/daily-techdebt-YYYY-MM-DD (from main)
   │
-  ├─ 2. Runs /techdebt in full-project mode on the worktree
+  ├─ 2. Runs /techdebt in full-project mode
   │     Phase 1: Static analysis (dead code, TODOs, style violations)
   │     Phase 2: Logic & complexity pruning (only if Phase 1 finds issues)
   │     Phase 3: Report generation → .claude/techdebt-reports/techdebt-YYYY-MM-DD.md
@@ -35,12 +35,12 @@ Over time this creates a **self-healing codebase**: dead code never accumulates,
   │     → Pushes branch to origin
   │     → Report includes what was fixed vs. what needs human decision
   │
-  ├─ 4. If critical findings (security flags, >300-line components):
-  │     → Marks them in report as BLOCKING — does NOT auto-fix
-  │     → Flags for human review
-  │
-  └─ 5. Cleans up worktree after completion
+  └─ 4. If critical findings (security flags, >300-line components):
+        → Marks them in report as BLOCKING — does NOT auto-fix
+        → Flags for human review
 ```
+
+**No worktree needed** — the scheduled agent runs on Anthropic's cloud with a fresh clone. Your local machine and VS Code don't need to be open.
 
 **You arrive at your desk and see:**
 - A fresh techdebt report in `.claude/techdebt-reports/`
@@ -86,10 +86,10 @@ Over time this creates a **self-healing codebase**: dead code never accumulates,
     │
     ├─ Phase 3 → Report written
     │
-    └─ Phase 4 → Docs synced → Commit → Push → Worktree cleanup
+    └─ Phase 4 → Docs synced → Commit → Push
 ```
 
-Steps 3 and 4 (Security + QA gates) can run **in parallel** when both are triggered.
+Security + QA gates can run **in parallel** when both are triggered.
 
 ---
 
@@ -100,7 +100,7 @@ Steps 3 and 4 (Security + QA gates) can run **in parallel** when both are trigge
 **Trigger:** Phase 2 applied logic changes (signal migration, component splits, dead code removal touching logic).
 
 **Tasks:**
-1. **Build verification** — run `ng build` in the worktree. Build fails → report to Team Leader, do NOT attempt to fix.
+1. **Build verification** — run `ng build`. Build fails → report to Team Leader, do NOT attempt to fix.
 2. **Report accuracy** — read the techdebt report's Detailed Findings. Verify dead code items are truly unused (quick grep). Verify `@Input()` → `input()` migrations didn't break template bindings.
 3. **Regression spot-check** — if signal migrations were applied: check `.subscribe()` calls were also converted, `async` pipes replaced with signal reads. Run existing `.spec.ts` for affected components.
 4. **Sign-off:**
@@ -112,7 +112,7 @@ Steps 3 and 4 (Security + QA gates) can run **in parallel** when both are trigge
 - Recommendation: APPROVE COMMIT / BLOCK — [reason]
 ```
 
-**Do NOT:** fix issues (only report), write new specs, or modify files in the worktree.
+**Do NOT:** fix issues (only report), write new specs, or modify files.
 
 **Model guidance:** Haiku for build + grep checks. Sonnet for signal migration verification.
 
@@ -124,7 +124,7 @@ Steps 3 and 4 (Security + QA gates) can run **in parallel** when both are trigge
 
 **Tasks:**
 1. **Verify each finding** — read the actual file and line from the report's Security Flags section. Classify: CRITICAL (blocks merge) / WARNING (note for developer) / FALSE POSITIVE (dismiss).
-2. **Confirm nothing was auto-fixed** — this is critical. Run `git diff` in the worktree and scan for changes to: `auth.guard.ts`, `auth.interceptor.ts`, `auth-crypto.ts`, `user.service.ts`, anything touching `localStorage`/`sessionStorage`, `bypassSecurityTrust*`, `[innerHTML]`. If security code WAS modified → **BLOCK immediately**.
+2. **Confirm nothing was auto-fixed** — run `git diff` and scan for changes to: `auth.guard.ts`, `auth.interceptor.ts`, `auth-crypto.ts`, `user.service.ts`, anything touching `localStorage`/`sessionStorage`, `bypassSecurityTrust*`, `[innerHTML]`. If security code WAS modified → **BLOCK immediately**.
 3. **Sign-off:**
 ```
 ## Security Gate — Daily Techdebt Sweep
@@ -150,26 +150,21 @@ Run `/techdebt` manually in full-project mode. Verify the report at `.claude/tec
 
 ### Step 2 — Schedule Configuration
 
-From Claude Code desktop, run `/schedule` with:
+From Claude Code (local or web), run `/schedule` with:
 
 | Field | Value |
 |-------|-------|
 | **Name** | `daily-techdebt-sweep` |
-| **Cron** | `0 6 * * *` |
-| **Isolation** | Worktree |
+| **Cron** | `0 6 * * *` (daily at 06:00) |
 
 **Agent prompt for the scheduled task:**
 
-> Run a full-project /techdebt audit. Before starting:
-> 1. Create worktree: `git worktree add -b chore/daily-techdebt-$(date +%Y-%m-%d) ../foodVibe1.0-wt-daily-techdebt main`
-> 2. Run `npm install` in the worktree
-> 3. Execute /techdebt in full-project mode (scope: all of src/app/)
-> 4. If Phase 1 finds security flags → invoke Security Officer to review
-> 5. If Phase 2 applies logic changes → invoke QA Engineer to verify + run `ng build`
-> 6. Commit all changes to the chore/ branch with message: "chore: daily techdebt sweep YYYY-MM-DD"
-> 7. Push the branch to origin
-> 8. Remove the worktree: `git worktree remove ../foodVibe1.0-wt-daily-techdebt`
-> 9. Run `git worktree prune`
+> 1. Create branch `chore/daily-techdebt-YYYY-MM-DD` from main
+> 2. Run `/techdebt` in full-project mode (scope: all of `src/app/`)
+> 3. If Phase 1 finds security flags → invoke Security Officer to review
+> 4. If Phase 2 applies logic changes → invoke QA Engineer to verify + run `ng build`
+> 5. Commit all changes with message: "chore: daily techdebt sweep YYYY-MM-DD"
+> 6. Push the branch to origin
 
 ### Step 3 — Verify First Automated Run
 
@@ -177,7 +172,6 @@ Next morning:
 - [ ] `.claude/techdebt-reports/techdebt-YYYY-MM-DD.md` exists with today's date
 - [ ] `chore/daily-techdebt-YYYY-MM-DD` branch exists on origin (if fixes were needed)
 - [ ] `ng build` passes on that branch
-- [ ] No stale worktree left at `../foodVibe1.0-wt-daily-techdebt`
 - [ ] Report Trend section compares against previous reports
 
 ### Step 4 — Wire Into Session Start
@@ -192,7 +186,6 @@ Add to the `github-sync` daily check: "If a `chore/daily-techdebt-*` branch exis
 - [ ] First automated run produces a valid report
 - [ ] Auto-fixes compile cleanly (`ng build` passes)
 - [ ] Security flags are never auto-fixed — only reported
-- [ ] Worktree is created and destroyed cleanly each run
 - [ ] Report Trend section accurately compares last 7 days
 
 ---
@@ -203,7 +196,6 @@ Add to the `github-sync` daily check: "If a `chore/daily-techdebt-*` branch exis
 |------|-----------|
 | Auto-fix introduces regression | QA Engineer gate + `ng build` must pass before commit |
 | Schedule fails silently | Check `.claude/techdebt-reports/` — if today's report is missing, the run failed |
-| Worktree not cleaned up | Task includes explicit `git worktree remove` + `git worktree prune` |
-| Conflicts with active development | Runs on isolated worktree from `main` — never touches feature branches |
+| Conflicts with active development | Runs on fresh clone from `main` — never touches feature branches |
 | Over-aggressive auto-fix | Phase 2 only triggers when Phase 1 finds issues; security flags never auto-fixed |
 | `/schedule` unavailable | Fallback: run `/techdebt` manually as part of morning session-start routine |
