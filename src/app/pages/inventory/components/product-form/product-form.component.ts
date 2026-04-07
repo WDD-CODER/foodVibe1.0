@@ -299,7 +299,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       supplierIds_: [[]],
       min_stock_level_: [0, [Validators.min(0)]],
       expiry_days_default_: [0, [Validators.min(0)]],
-      yield_factor_: [1, [Validators.required]],
+      yield_factor_: [1, [Validators.required, Validators.min(0)]],
       waste_percent_: [0, [Validators.min(0), Validators.max(99)]],
       allergens_: [[]],
       purchase_options_: this.fb_.array([])
@@ -603,7 +603,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       conversion_rate_: [conv, [Validators.required, Validators.min(0.0001)]],
       uom: [uomValue, Validators.required],
       show_special_price_: [!!(opt?.price_override_ != null && Number(opt?.price_override_) !== 0)],
-      price_override_: [opt?.price_override_ || 0]
+      price_override_: [opt?.price_override_ || 0, [Validators.min(0)]]
     });
 
     // Initialize state for this row
