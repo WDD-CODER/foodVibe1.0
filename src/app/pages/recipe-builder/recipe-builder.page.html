@@ -247,6 +247,9 @@
 
     @if (!historyViewMode_()) {
       <footer class="action-footer">
+        @if (blockingIngredientsError_()) {
+          <p class="blocking-ingredients-error">{{ 'blocking_ingredients_error' | translatePipe }}</p>
+        }
         <button class="c-btn-primary main-submit-btn" [disabled]="isSaving_()" (click)="saveRecipe()">
           @if (isSaving_()) {
             <app-loader size="small" [inline]="true" />

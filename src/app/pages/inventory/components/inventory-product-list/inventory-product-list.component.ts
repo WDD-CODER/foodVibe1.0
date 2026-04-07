@@ -28,7 +28,7 @@ import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.comp
 import { useListState, StringParam, NullableStringParam, FilterRecordParam, BooleanParam } from 'src/app/core/utils/list-state.util';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 import { getPricePerUnit, calcBuyPriceGlobal } from 'src/app/core/utils/product-price.util'
-import { getProductValidationStatus, getProductMissingFields, VALIDATION_FIELD_ICONS, ProductValidationStatus } from 'src/app/core/utils/product-validation.util';
+import { getProductValidationStatus, getProductMissingFields, VALIDATION_FIELD_ICONS, ProductValidationStatus } from 'src/app/core/utils/product-validation.util'
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
 type ProductBulkField = 'categories_' | 'supplierIds_' | 'allergens_' | 'base_unit_';
@@ -510,6 +510,34 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       next: () => { this.savingPriceId_.set(null); },
       error: () => { this.savingPriceId_.set(null); }
     });
+  }
+
+  // VALIDATION
+  protected getValidationStatus(product: Product): ProductValidationStatus {
+    return getProductValidationStatus(product);
+  }
+
+  protected getMissingFields(product: Product): string[] {
+    return getProductMissingFields(product);
+  }
+
+  protected getFieldIcon(field: string): string {
+    const icons: Record<string, string> = {
+      missing_name:     'type',
+      missing_unit:     'ruler',
+      missing_price:    'coins',
+      missing_category: 'tag',
+      missing_supplier: 'truck',
+    };
+    return icons[field] ?? 'alert-circle';
+  }
+
+  protected toggleShowInvalidOnly(): void {
+    this.showInvalidOnly_.update(v => !v);
+  }
+
+  protected toggleShowIncompleteOnly(): void {
+    this.showIncompleteOnly_.update(v => !v);
   }
 
 }

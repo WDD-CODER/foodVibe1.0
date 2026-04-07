@@ -189,6 +189,8 @@
         "product_list": "רשימת מוצרים",
         "product_incomplete_hint": "המוצר חסר פרטים — לחץ לעריכה",
         "product_warning_hint": "המוצר חסר פרטים משלימים — לחץ לעריכה",
+        "product_invalid": "מוצר לא תקין",
+        "product_incomplete": "מוצר חסר פרטים",
         "missing_name": "שם",
         "missing_unit": "יחידה",
         "missing_price": "מחיר",

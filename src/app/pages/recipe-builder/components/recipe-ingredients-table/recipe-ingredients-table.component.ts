@@ -329,7 +329,7 @@ private readonly cdr = inject(ChangeDetectorRef)
     const type = group.get('item_type')?.value as 'product' | 'recipe' | null
     const pool = type === 'recipe' ? this.kitchenStateService.recipes_() : this.kitchenStateService.products_()
     const found = pool.find(x => x._id === refId)
-    // Unlinked: referenceId set but item not found in this user's pool
+    // Unlinked: referenceId not found in pool
     if (!found) return true
     // Product is in the invalid tier (missing name or base unit)
     if (type === 'product') {

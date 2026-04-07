@@ -114,6 +114,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   /** True when viewing an old version from history (read-only, no save). */
   protected historyViewMode_ = signal(false);
 
+  /** Set when save is blocked due to invalid ingredient rows — cleared once user resolves them. */
+  protected blockingIngredientsError_ = signal(false);
+
   /** Whether the current recipe is marked approved (stamp sets this; used in buildRecipeFromForm and for stamp UI). */
   protected isApproved_ = signal(false);
 
