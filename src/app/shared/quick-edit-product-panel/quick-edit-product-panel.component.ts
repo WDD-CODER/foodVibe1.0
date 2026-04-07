@@ -54,6 +54,20 @@ export class QuickEditProductPanelComponent {
   protected selectedSupplierIds_ = signal<string[]>([]);
   protected error_ = signal<string | null>(null);
   protected isSubmitting_ = signal(false);
+  protected showUnsavedConfirm_ = signal(false);
+
+  protected isDirty_ = computed(() => {
+    const p = this.product();
+    const suppliersSorted = [...this.selectedSupplierIds_()].sort().join(',');
+    const originalSuppliersSorted = [...(p.supplierIds_ ?? [])].sort().join(',');
+    return (
+      this.name_() !== (p.name_hebrew ?? '') ||
+      this.baseUnit_() !== (p.base_unit_ ?? '') ||
+      this.category_() !== (p.categories_?.[0] ?? '') ||
+      this.price_() !== (p.buy_price_global_ ?? 0) ||
+      suppliersSorted !== originalSuppliersSorted
+    );
+  });
 
   // VIEW REFS for focus management
   protected nameRef = viewChild<ElementRef<HTMLInputElement>>('nameInput');
@@ -139,12 +153,13 @@ export class QuickEditProductPanelComponent {
       name_hebrew: name,
       base_unit_: baseUnit,
       categories_: category ? [category] : [],
-      buy_price_global_: Number(this.price_()) || 0,
+      buy_price_global_: Math.max(0, Number(this.price_()) || 0),
       supplierIds_: this.selectedSupplierIds_(),
     };
 
     try {
       await this.productData.updateProduct(updated);
+      this.userMsg.onSetSuccessMsg('המוצר נשמר');
       this.isSubmitting_.set(false);
       this.saved.emit();
     } catch {
@@ -154,7 +169,26 @@ export class QuickEditProductPanelComponent {
   }
 
   protected onCancel(): void {
+    if (this.isDirty_()) {
+      this.showUnsavedConfirm_.set(true);
+    } else {
+      this.cancelled.emit();
+    }
+  }
+
+  protected onDiscardAndClose(): void {
+    this.showUnsavedConfirm_.set(false);
     this.cancelled.emit();
+  }
+
+  /** Called by the parent before closing (e.g. clickOutside on the accordion). */
+  requestClose(): void {
+    if (this.showUnsavedConfirm_()) return;
+    if (this.isDirty_()) {
+      this.showUnsavedConfirm_.set(true);
+    } else {
+      this.cancelled.emit();
+    }
   }
 
   protected onOpenFullEdit(): void {
