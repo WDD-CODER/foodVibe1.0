@@ -26,7 +26,8 @@
           (addNewRowRequested)="addIngredient.emit()" (cancelSearch)="editingNameAtRow_.set(null)"></app-ingredient-search>
         } @else {
         <div class="selected-item-display" role="button" tabindex="0"
-          [class.incomplete-row]="isIncompleteRow(group)"
+          [class.incomplete-row]="isBlockingRow(group)"
+          [class.warning-row]="isWarningRow(group)"
           (click)="editingNameAtRow_.set($index)"
           (keydown.enter)="editingNameAtRow_.set($index)"
           (keydown.space)="$event.preventDefault(); editingNameAtRow_.set($index)">
@@ -35,10 +36,16 @@
           } @else {
             <span class="item-text unlinked-ingredient" (click)="$event.stopPropagation(); editingNameAtRow_.set($index)">⚠ {{ 'unlinked_ingredient' | translatePipe }}</span>
           }
-          @if (isIncompleteRow(group)) {
+          @if (isBlockingRow(group)) {
             <button type="button" class="incomplete-badge"
               (click)="$event.stopPropagation(); getItemMetadata(group) ? navigateToEditProduct(group) : editingNameAtRow_.set($index)"
-              [title]="'product_incomplete_hint' | translatePipe">
+              [title]="'product_invalid' | translatePipe">
+              <lucide-icon name="alert-circle" [size]="14"></lucide-icon>
+            </button>
+          } @else if (isWarningRow(group)) {
+            <button type="button" class="warning-badge"
+              (click)="$event.stopPropagation(); navigateToEditProduct(group)"
+              [title]="'product_incomplete' | translatePipe">
               <lucide-icon name="alert-triangle" [size]="14"></lucide-icon>
             </button>
           }

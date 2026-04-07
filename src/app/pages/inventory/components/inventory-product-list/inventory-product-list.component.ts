@@ -28,6 +28,7 @@ import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.comp
 import { useListState, StringParam, NullableStringParam, FilterRecordParam, BooleanParam } from 'src/app/core/utils/list-state.util';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 import { getPricePerUnit, calcBuyPriceGlobal } from 'src/app/core/utils/product-price.util';
+import { getProductValidationStatus, getProductMissingFields, type ProductValidationStatus } from 'src/app/core/utils/product-validation.util';
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
 type ProductBulkField = 'categories_' | 'supplierIds_' | 'allergens_' | 'base_unit_';
@@ -81,6 +82,8 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected allergenPopoverProductId_ = signal<string | null>(null);
   protected allergenExpandAll_ = signal<boolean>(false);
   protected lowStockOnly_ = signal<boolean>(false);
+  protected showInvalidOnly_ = signal<boolean>(false);
+  protected showIncompleteOnly_ = signal<boolean>(false);
   protected deletingId_ = signal<string | null>(null);
   protected savingPriceId_ = signal<string | null>(null);
   protected carouselHeaderIndex_ = signal(0);
@@ -213,9 +216,18 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     const sortBy = this.sortBy_();
     const sortOrder = this.sortOrder_();
     const lowStockOnly = this.lowStockOnly_();
+    const showInvalidOnly = this.showInvalidOnly_();
+    const showIncompleteOnly = this.showIncompleteOnly_();
 
     if (lowStockOnly) {
       products = products.filter(p => (p.min_stock_level_ ?? 0) > 0);
+    }
+
+    if (showInvalidOnly || showIncompleteOnly) {
+      products = products.filter(p => {
+        const status = getProductValidationStatus(p);
+        return (showInvalidOnly && status === 'invalid') || (showIncompleteOnly && status === 'incomplete');
+      });
     }
 
     // 1. Apply filters
@@ -327,6 +339,8 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
   protected clearAllFilters(): void {
     this.lowStockOnly_.set(false);
+    this.showInvalidOnly_.set(false);
+    this.showIncompleteOnly_.set(false);
     this.activeFilters_.set({});
   }
 
@@ -335,7 +349,10 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   protected hasActiveFilters_ = computed(() =>
-    this.lowStockOnly_() || Object.values(this.activeFilters_()).some(arr => arr.length > 0)
+    this.lowStockOnly_() ||
+    this.showInvalidOnly_() ||
+    this.showIncompleteOnly_() ||
+    Object.values(this.activeFilters_()).some(arr => arr.length > 0)
   );
 
   protected toggleLowStockOnly(): void {
@@ -470,6 +487,34 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       next: () => { this.savingPriceId_.set(null); },
       error: () => { this.savingPriceId_.set(null); }
     });
+  }
+
+  // VALIDATION
+  protected getValidationStatus(product: Product): ProductValidationStatus {
+    return getProductValidationStatus(product);
+  }
+
+  protected getMissingFields(product: Product): string[] {
+    return getProductMissingFields(product);
+  }
+
+  protected getFieldIcon(field: string): string {
+    const icons: Record<string, string> = {
+      missing_name:     'type',
+      missing_unit:     'ruler',
+      missing_price:    'coins',
+      missing_category: 'tag',
+      missing_supplier: 'truck',
+    };
+    return icons[field] ?? 'alert-circle';
+  }
+
+  protected toggleShowInvalidOnly(): void {
+    this.showInvalidOnly_.update(v => !v);
+  }
+
+  protected toggleShowIncompleteOnly(): void {
+    this.showIncompleteOnly_.update(v => !v);
   }
 
 }

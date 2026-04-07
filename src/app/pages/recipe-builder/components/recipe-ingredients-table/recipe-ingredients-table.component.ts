@@ -15,6 +15,7 @@ import type { Product } from '@models/product.model';
 import type { Recipe } from '@models/recipe.model';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { quantityIncrement, quantityDecrement, QuantityStepOptions } from 'src/app/core/utils/quantity-step.util';
+import { getProductValidationStatus } from 'src/app/core/utils/product-validation.util';
 import { take } from 'rxjs/operators';
 import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop';
 
@@ -254,20 +255,42 @@ private readonly cdr = inject(ChangeDetectorRef)
       : this.kitchenStateService.recipes_().find(r => r._id === id);
   }
 
-  /** True when the row is unresolved (AI-added name with no match), unlinked (ref not found), or product has no price. */
-  isIncompleteRow(group: FormGroup): boolean {
-    // Unresolved: has a name but no referenceId (e.g. AI added an unknown ingredient)
+  /** True when the row cannot be saved — must be resolved before recipe can be saved. */
+  isBlockingRow(group: FormGroup): boolean {
+    // Unresolved: AI-added name with no referenceId
     if (group.get('name_hebrew')?.value && !group.get('referenceId')?.value) return true
     const refId = group.get('referenceId')?.value as string | null
     if (!refId) return false
     const type = group.get('item_type')?.value as 'product' | 'recipe' | null
     const pool = type === 'recipe' ? this.kitchenStateService.recipes_() : this.kitchenStateService.products_()
     const found = pool.find(x => x._id === refId)
-    // Unlinked: referenceId set but item not found in this user's pool
+    // Unlinked: referenceId not found in pool
     if (!found) return true
-    // Matched product with no price
-    if (type !== 'product') return false
-    return (found as Product).buy_price_global_ === 0
+    // Product is invalid tier (missing name or unit)
+    if (type === 'product') {
+      return getProductValidationStatus(found as Product) === 'invalid'
+    }
+    return false
+  }
+
+  /** True when the row is resolved but the product has incomplete data (warning tier only). */
+  isWarningRow(group: FormGroup): boolean {
+    if (this.isBlockingRow(group)) return false
+    const refId = group.get('referenceId')?.value as string | null
+    if (!refId || group.get('item_type')?.value !== 'product') return false
+    const product = this.kitchenStateService.products_().find(p => p._id === refId)
+    if (!product) return false
+    return getProductValidationStatus(product) === 'incomplete'
+  }
+
+  /** True when any ingredient row cannot be saved (used by recipe-builder save guard). */
+  hasBlockingRows(): boolean {
+    return this.ingredientGroups.some(g => this.isBlockingRow(g))
+  }
+
+  /** @deprecated Use isBlockingRow or isWarningRow instead. */
+  isIncompleteRow(group: FormGroup): boolean {
+    return this.isBlockingRow(group) || this.isWarningRow(group)
   }
 
   /** Navigate to the full product edit form so the user can complete the product. */
