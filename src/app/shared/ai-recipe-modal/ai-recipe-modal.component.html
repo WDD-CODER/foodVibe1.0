@@ -244,15 +244,33 @@
               <span class="ai-draft-value">{{ draft_()!.steps.length }}</span>
             </div>
           </div>
-          <div class="ai-modal-footer">
-            <button type="button" class="c-btn-ghost" (click)="onGenerateAgain()">
-              {{ 'ai_recipe_generate_again' | translatePipe }}
-            </button>
-            <button type="button" class="c-btn-primary" (click)="onOpenInBuilder()">
-              <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
-              {{ 'ai_recipe_open_builder' | translatePipe }}
-            </button>
-          </div>
+          @if (awaitingWarningConfirm_()) {
+            <div class="ai-shot-warnings">
+              @for (w of shotWarnings_(); track w) {
+                <div class="ai-shot-warning-item">
+                  <lucide-icon name="triangle-alert" [size]="14"></lucide-icon>
+                  <span>{{ w }}</span>
+                </div>
+              }
+              <div class="ai-modal-footer">
+                <button type="button" class="c-btn-ghost" (click)="onDismissWarning()">ביטול</button>
+                <button type="button" class="c-btn-primary" (click)="onOpenInBuilder()">
+                  <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
+                  פתח בכל זאת
+                </button>
+              </div>
+            </div>
+          } @else {
+            <div class="ai-modal-footer">
+              <button type="button" class="c-btn-ghost" (click)="onGenerateAgain()">
+                {{ 'ai_recipe_generate_again' | translatePipe }}
+              </button>
+              <button type="button" class="c-btn-primary" (click)="onOpenInBuilder()">
+                <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
+                {{ 'ai_recipe_open_builder' | translatePipe }}
+              </button>
+            </div>
+          }
         }
       }
 
