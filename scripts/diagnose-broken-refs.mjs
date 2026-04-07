@@ -1,7 +1,12 @@
 /**
  * Diagnose broken referenceId links in recipes and dishes.
- * Run: node scripts/diagnose-broken-refs.mjs
+ * Run: node scripts/diagnose-broken-refs.mjs  OR  npm run repair:diagnose
  * Requires MONGO_URI in environment (or .env file).
+ *
+ * STATUS (2026-04-07): Repair status unknown — kept for re-diagnosis if needed.
+ * Part of the broken-ref repair trio (backup → diagnose → repair).
+ * If the repair has been fully applied in production, delete this file along with
+ * backup-before-repair.mjs and repair-recipe-references.mjs.
  */
 import { createRequire } from 'module'
 import { resolve, dirname } from 'path'

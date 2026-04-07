@@ -1,4 +1,8 @@
 /**
+ * STATUS (2026-04-07): Migration status unknown — not confirmed complete in production.
+ * Prerequisite: migrate-to-master.mjs must be run first.
+ * If master-layer migration is verified complete, delete this file and migrate-to-master.mjs together.
+ *
  * Link existing user products to their corresponding master products.
  *
  * After migrate-to-master.mjs promotes orphaned products to userId: '__master__',

@@ -1,7 +1,12 @@
 /**
  * Backup PRODUCT_LIST, RECIPE_LIST, DISH_LIST to backups/<timestamp>/ before repair.
- * Run: node scripts/backup-before-repair.mjs
+ * Run: node scripts/backup-before-repair.mjs  OR  npm run repair:backup
  * Requires MONGO_REMOTE_URI or MONGO_URI in .env
+ *
+ * STATUS (2026-04-07): Repair status unknown — kept as a safety net.
+ * Part of the broken-ref repair trio (backup → diagnose → repair).
+ * If the repair has been fully applied in production, delete this file along with
+ * diagnose-broken-refs.mjs and repair-recipe-references.mjs.
  */
 import { createRequire } from 'module'
 import { resolve, dirname } from 'path'

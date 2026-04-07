@@ -1,4 +1,10 @@
 /**
+ * STATUS (2026-04-07): Repair status unknown — kept until confirmed complete in production.
+ * Part of the broken-ref repair trio (backup → diagnose → repair).
+ * Run: node scripts/repair-recipe-references.mjs  OR  npm run repair:refs
+ * If the repair has been fully applied in production, delete this file along with
+ * backup-before-repair.mjs and diagnose-broken-refs.mjs.
+ *
  * Repair broken demo_XXX referenceIds in RECIPE_LIST and DISH_LIST.
  *
  * Strategy (Path B — name match):

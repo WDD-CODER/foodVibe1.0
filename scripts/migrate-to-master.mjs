@@ -1,4 +1,8 @@
 /**
+ * STATUS (2026-04-07): Migration status unknown — not confirmed complete in production.
+ * Run BEFORE link-users-to-master.mjs. If master-layer migration is verified complete,
+ * delete this file and link-users-to-master.mjs together.
+ *
  * Promote orphaned documents (no userId) to userId: '__master__'.
  *
  * The scraper inserted products, recipes, and dishes without stamping a userId.
