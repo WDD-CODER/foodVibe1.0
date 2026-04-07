@@ -71,13 +71,41 @@
       </div>
     }
     @for (product of filteredProducts_(); track product._id) {
-      <div class="product-grid-row c-list-row" role="button" tabindex="0"
+      <div class="product-grid-row c-list-row"
+        [class.row--invalid]="getValidationStatus(product) === 'invalid'"
+        [class.row--incomplete]="getValidationStatus(product) === 'incomplete'"
+        role="button" tabindex="0"
         (click)="onRowClick(product, $event)"
         (keydown.enter)="onEditProduct(product._id)"
         (keydown.space)="$event.preventDefault(); onEditProduct(product._id)">
         <div class="col-name c-list-body-cell" role="cell">
           @if (isLowStock(product)) {
             <span class="low-stock-badge" [attr.title]="'low_stock' | translatePipe">{{ 'low_stock' | translatePipe }}</span>
+          }
+          @if (getValidationStatus(product) === 'invalid') {
+            <span class="validation-badge validation-badge--invalid">
+              <lucide-icon name="alert-circle" [size]="12"></lucide-icon>
+              <span class="validation-tooltip">
+                @for (field of getMissingFields(product); track field) {
+                  <span class="tooltip-chip">
+                    <lucide-icon [name]="getFieldIcon(field)" [size]="11"></lucide-icon>
+                    {{ field | translatePipe }}
+                  </span>
+                }
+              </span>
+            </span>
+          } @else if (getValidationStatus(product) === 'incomplete') {
+            <span class="validation-badge validation-badge--incomplete">
+              <lucide-icon name="alert-triangle" [size]="12"></lucide-icon>
+              <span class="validation-tooltip">
+                @for (field of getMissingFields(product); track field) {
+                  <span class="tooltip-chip">
+                    <lucide-icon [name]="getFieldIcon(field)" [size]="11"></lucide-icon>
+                    {{ field | translatePipe }}
+                  </span>
+                }
+              </span>
+            </span>
           }
           {{ product.name_hebrew }}
         </div>
@@ -148,6 +176,14 @@
       <label class="c-filter-option low-stock-toggle">
         <input type="checkbox" [checked]="lowStockOnly_()" (change)="toggleLowStockOnly()" />
         <span>{{ 'low_stock' | translatePipe }}</span>
+      </label>
+      <label class="c-filter-option">
+        <input type="checkbox" [checked]="showInvalidOnly_()" (change)="toggleShowInvalidOnly()" />
+        <span class="filter-status-label filter-status-label--invalid">{{ 'filter_invalid' | translatePipe }}</span>
+      </label>
+      <label class="c-filter-option">
+        <input type="checkbox" [checked]="showIncompleteOnly_()" (change)="toggleShowIncompleteOnly()" />
+        <span class="filter-status-label filter-status-label--incomplete">{{ 'filter_incomplete' | translatePipe }}</span>
       </label>
       @for (category of filterCategories_(); track category.name) {
         <div class="c-filter-category">

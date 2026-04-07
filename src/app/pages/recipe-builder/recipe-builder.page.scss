@@ -221,6 +221,19 @@
   border-radius: var(--radius-md);
 }
 
+/* ---- Blocking ingredients error ---- */
+.blocking-ingredients-error {
+  margin-block: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 30%, transparent);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
 /* ---- Primary submit button (layout only; .c-btn-primary provides appearance) ---- */
 .main-submit-btn {
   display: block;

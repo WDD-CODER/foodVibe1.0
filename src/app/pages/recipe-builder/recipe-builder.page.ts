@@ -89,6 +89,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   // CHILD REFS
   private readonly recipeHeaderRef_ = viewChild(RecipeHeaderComponent);
+  private readonly recipeIngredientsTableRef_ = viewChild(RecipeIngredientsTableComponent);
 
   //SIGNALS
   private readonly saving = useSavingState();
@@ -111,6 +112,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   /** True when viewing an old version from history (read-only, no save). */
   protected historyViewMode_ = signal(false);
+
+  /** Set when save is blocked due to invalid ingredient rows — cleared once user resolves them. */
+  protected blockingIngredientsError_ = signal(false);
 
   /** Whether the current recipe is marked approved (stamp sets this; used in buildRecipeFromForm and for stamp UI). */
   protected isApproved_ = signal(false);
@@ -1056,6 +1060,12 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       this.userMsg_.onSetErrorMsg(msg);
       return;
     }
+
+    if (this.recipeIngredientsTableRef_()?.hasBlockingRows()) {
+      this.blockingIngredientsError_.set(true);
+      return;
+    }
+    this.blockingIngredientsError_.set(false);
 
     const navigateOnSuccess = options?.navigateOnSuccess !== false;
     this.saving.setSaving(true);
