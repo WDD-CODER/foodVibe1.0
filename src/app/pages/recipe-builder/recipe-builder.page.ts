@@ -89,6 +89,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   // CHILD REFS
   private readonly recipeHeaderRef_ = viewChild(RecipeHeaderComponent);
+  private readonly ingredientsTableRef_ = viewChild(RecipeIngredientsTableComponent);
 
   //SIGNALS
   private readonly saving = useSavingState();
@@ -96,6 +97,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private recipeId_ = signal<string | null>(null);
   protected resetTrigger_ = signal(0);
   isSubmitted = false;
+  protected blockingIngredientsError_ = signal(false);
 
   /** Bumped when ingredients change so cost/weight computeds re-run (form is not a signal). */
   private ingredientsFormVersion_ = signal(0);
@@ -767,7 +769,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const normalizedLabels = [...labels].sort((a, b) => (a ?? '').localeCompare(b ?? ''));
     const yieldConv = (raw?.['yield_conversions'] ?? []) as { amount?: number | string; unit?: string }[];
     const yieldNorm = yieldConv.map((c) => ({
-      amount: Number(c?.amount ?? 0),
+      amount: Math.round(Number(c?.amount ?? 0) * 100) / 100,
       unit: (c?.unit ?? '').toString()
     }));
     const ingredients = (raw?.['ingredients'] ?? []) as { referenceId?: string; item_type?: string; amount_net?: number | string; unit?: string; total_cost?: number }[];
@@ -775,8 +777,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       referenceId: (ing?.referenceId ?? '').toString(),
       item_type: (ing?.item_type ?? '').toString(),
       amount_net: Number(ing?.amount_net ?? 0),
-      unit: (ing?.unit ?? '').toString(),
-      total_cost: Number(ing?.total_cost ?? 0)
+      unit: (ing?.unit ?? '').toString()
     }));
     const workflow = (raw?.['workflow_items'] ?? []) as Record<string, unknown>[];
     const workflowNorm = workflow.map((row) => {
@@ -808,8 +809,6 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       name_hebrew: (raw?.['name_hebrew'] ?? '').toString(),
       recipe_type: (raw?.['recipe_type'] ?? 'preparation').toString(),
       serving_portions: Number(raw?.['serving_portions'] ?? 1),
-      total_weight_g: Number(raw?.['total_weight_g'] ?? 0),
-      total_cost: Number(raw?.['total_cost'] ?? 0),
       labels: normalizedLabels,
       yield_conversions: yieldNorm,
       ingredients: ingNorm,
@@ -1056,6 +1055,13 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       this.userMsg_.onSetErrorMsg(msg);
       return;
     }
+
+    if (this.ingredientsTableRef_()?.hasBlockingRows()) {
+      this.blockingIngredientsError_.set(true);
+      this.userMsg_.onSetErrorMsg(this.translation_.translate('blocking_ingredients_error'));
+      return;
+    }
+    this.blockingIngredientsError_.set(false);
 
     const navigateOnSuccess = options?.navigateOnSuccess !== false;
     this.saving.setSaving(true);
