@@ -146,8 +146,83 @@ gram | ml | kg | liter | unit | tablespoon | teaspoon | cup | pinch | portion
 השדה "equipment" הוא אופציונלי — השמט אותו אם אין ציוד.`;
 
 // ---------------------------------------------------------------------------
+// GEMINI_SHOTS — shared few-shot pool stored in MongoDB.
+// Collection: GEMINI_SHOTS
+// Document: { prompt, draft, status, source, warnings, createdAt }
+// ---------------------------------------------------------------------------
+
+const SHOTS_COLLECTION = 'GEMINI_SHOTS';
+
+function shotsCol() {
+  return mongoose.connection.db.collection(SHOTS_COLLECTION);
+}
+
+/**
+ * Computes soft quality warnings for a recipe draft without blocking save.
+ */
+function computeSoftWarnings(draft) {
+  const warnings = [];
+  if (Array.isArray(draft.ingredients) && draft.ingredients.length < 3) {
+    warnings.push('מתכון עם מעט מרכיבים — ייתכן שהבינה הצליחה לחלץ חלקית בלבד');
+  }
+  if (typeof draft.yield_amount === 'number' && draft.yield_amount > 20) {
+    warnings.push('כמות מנות גבוהה במיוחד — בדוק שהתפוקה הגיונית');
+  }
+  if (Array.isArray(draft.steps) && draft.steps.length < 2) {
+    warnings.push('מספר שלבים נמוך — ייתכן שחסרות הוראות');
+  }
+  if (draft.recipe_type === 'dish' && draft.yield_unit === 'unit') {
+    warnings.push('יחידת תפוקה לא סבירה למנה');
+  }
+  return warnings;
+}
+
+/**
+ * Saves a shot to the GEMINI_SHOTS collection. Non-blocking — never throws.
+ * Returns the computed warnings array.
+ */
+async function saveShot(prompt, draft, status, source) {
+  try {
+    const warnings = computeSoftWarnings(draft);
+    await shotsCol().insertOne({ prompt, draft, status, source, warnings, createdAt: new Date() });
+    return warnings;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Returns up to `limit` most-recent approved shots for few-shot injection.
+ */
+async function getApprovedShots(limit = 2) {
+  try {
+    return await shotsCol()
+      .find({ status: 'approved' })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .toArray();
+  } catch {
+    return [];
+  }
+}
+
+// ---------------------------------------------------------------------------
+// buildFewShotBlock — formats an approved shots array into a Hebrew example
+// block prepended to the system prompt.
+// ---------------------------------------------------------------------------
+
+function buildFewShotBlock(shots) {
+  if (!Array.isArray(shots) || shots.length === 0) return '';
+  const examples = shots
+    .map(s => `קלט: "${s.prompt}"\nפלט: ${JSON.stringify(s.draft)}`)
+    .join('\n\n');
+  return `## דוגמאות מאושרות מהמשתמש\n${examples}\n\n`;
+}
+
+// ---------------------------------------------------------------------------
 // POST /generate
-// Accepts { prompt: string }, calls Gemini, returns { recipe: AiRecipeDraft }.
+// Accepts { prompt: string }, calls Gemini with DB-fetched few-shot examples,
+// returns { recipe: AiRecipeDraft }.
 // Requires a valid JWT — prevents unauthenticated use of the API quota.
 // ---------------------------------------------------------------------------
 
@@ -167,12 +242,14 @@ router.post('/generate', verifyToken, async (req, res) => {
     return res.status(400).json({ error: 'prompt is required' });
   }
 
+  const shots = await getApprovedShots(2);
+
   try {
     const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: SYSTEM_PROMPT + prompt.trim() }] }],
+        contents: [{ parts: [{ text: buildFewShotBlock(shots) + SYSTEM_PROMPT + prompt.trim() }] }],
       }),
     });
 
@@ -463,6 +540,11 @@ router.post('/generate-from-image', verifyToken, async (req, res) => {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
   }
 
+  const currentCount = await getUsageCount();
+  if (currentCount >= DAILY_LIMIT) {
+    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
+  }
+
   const { imageBase64, mimeType } = req.body;
   if (!imageBase64 || typeof imageBase64 !== 'string' || !imageBase64.trim()) {
     return res.status(400).json({ error: 'imageBase64 is required' });
@@ -471,6 +553,8 @@ router.post('/generate-from-image', verifyToken, async (req, res) => {
     return res.status(400).json({ error: 'mimeType must be a valid image MIME type' });
   }
 
+  const shots = await getApprovedShots(2);
+
   try {
     const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: 'POST',
@@ -478,7 +562,7 @@ router.post('/generate-from-image', verifyToken, async (req, res) => {
       body: JSON.stringify({
         contents: [{
           parts: [
-            { text: SYSTEM_PROMPT },
+            { text: buildFewShotBlock(shots) + SYSTEM_PROMPT },
             { inlineData: { mimeType, data: imageBase64 } },
           ],
         }],
@@ -515,6 +599,7 @@ router.post('/generate-from-image', verifyToken, async (req, res) => {
       return res.status(502).json({ error: 'Gemini returned a malformed recipe', details: validationErrors });
     }
 
+    await incrementUsage();
     return res.json({ recipe });
   } catch (err) {
     console.error('[ai/generate-from-image]', err);
@@ -607,12 +692,14 @@ router.post('/generate-from-url', verifyToken, async (req, res) => {
     return res.status(422).json({ error: 'No usable text found at the provided URL' });
   }
 
+  const shots = await getApprovedShots(2);
+
   try {
     const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: SYSTEM_PROMPT + '\n\nטקסט לניתוח:\n' + pageText }] }],
+        contents: [{ parts: [{ text: buildFewShotBlock(shots) + SYSTEM_PROMPT + '\n\nטקסט לניתוח:\n' + pageText }] }],
       }),
     });
 
@@ -652,6 +739,41 @@ router.post('/generate-from-url', verifyToken, async (req, res) => {
     console.error('[ai/generate-from-url]', err);
     return res.status(500).json({ error: 'Server error' });
   }
+});
+
+// ---------------------------------------------------------------------------
+// POST /shots
+// Accepts { prompt, draft, status: 'approved'|'rejected', source: 'text'|'image'|'url' }.
+// Saves the shot to GEMINI_SHOTS and returns soft quality warnings.
+// Requires a valid JWT.
+// ---------------------------------------------------------------------------
+
+router.post('/shots', verifyToken, async (req, res) => {
+  const { prompt, draft, status, source } = req.body;
+
+  if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
+    return res.status(400).json({ error: 'prompt is required' });
+  }
+  if (!draft || typeof draft !== 'object') {
+    return res.status(400).json({ error: 'draft is required' });
+  }
+  if (status !== 'approved' && status !== 'rejected') {
+    return res.status(400).json({ error: 'status must be "approved" or "rejected"' });
+  }
+  if (!['text', 'image', 'url'].includes(source)) {
+    return res.status(400).json({ error: 'source must be "text", "image", or "url"' });
+  }
+
+  // Hard structural validation — only block approved shots with broken structure
+  if (status === 'approved') {
+    const errors = validateRecipeDraft(draft);
+    if (errors.length > 0) {
+      return res.status(400).json({ saved: false, errors });
+    }
+  }
+
+  const warnings = await saveShot(prompt.trim(), draft, status, source);
+  return res.json({ saved: true, warnings });
 });
 
 module.exports = router;

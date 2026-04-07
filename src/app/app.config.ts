@@ -78,7 +78,8 @@ import {
   UtensilsCrossed,
   X,
   Type,
-  Link
+  Link,
+  Coins
 } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { provideHttpClient, withInterceptors } from '@angular/common/http'

@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, output, input, viewChild, effect, ElementRef } from '@angular/core';
+import { Component, inject, signal, computed, output, input, viewChild, effect, untracked, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
@@ -49,8 +49,11 @@ export class IngredientSearchComponent {
   protected highlightedIndex_ = signal(-1);
 
   private lastHandledFocusTrigger: number | null = null;
+  /** True for one microtask after the component is created — prevents the triggering click from immediately re-closing. */
+  private ignoreFirstClickOutside = true;
 
   constructor() {
+    setTimeout(() => { this.ignoreFirstClickOutside = false; }, 0);
     effect(() => {
       const trigger = this.focusTrigger();
       const row = this.rowIndex();
@@ -63,13 +66,20 @@ export class IngredientSearchComponent {
     });
     effect(() => {
       const q = this.initialQuery()?.trim() ?? '';
-      if (q && !this.searchQuery_()) {
+      if (q && !untracked(() => this.searchQuery_())) {
         this.searchQuery_.set(q);
         this.showResults_.set(true);
         setTimeout(() => this.focus(), 0);
       }
       if (q) this.highlightedIndex_.set(-1);
     });
+  }
+
+  protected onClickOutside(): void {
+    if (this.ignoreFirstClickOutside) return;
+    this.showResults_.set(false);
+    this.highlightedIndex_.set(-1);
+    this.cancelSearch.emit();
   }
 
   /** Focus the search input (e.g. after adding a new row). */
