@@ -58,6 +58,7 @@ description: Single source of truth for all project rules, standards, and skill/
 - **Interface design** `[SHARED]`: User asks to design, redesign, layout, or improve a UI page, dashboard, or component → invoke `/init` (new design) or `/audit` (check existing) or `/critique` (improve existing) or `/extract` (extract patterns) or `/status` (system state) as appropriate.
 - **Skill test suite** `[CC]`: User invokes `/reflect add-tests` → read `.claude/commands/reflect-add-tests.md` and follow it.
 - **Sweep stale todos** `[SHARED]`: At session end (after all tasks marked `[x]`) or on explicit request → read `.claude/commands/sweep-stale-todos.md` and follow it.
+- **Auto-reflect after correction cycle** `[CC]`: A correction cycle is complete when: (1) a skill was the active workflow, (2) one or more errors or failures occurred during execution, (3) you made file changes to address those errors, (4) the outcome is now successful. When a correction cycle completes → identify which skill was running and execute the AUTO MODE section of `.claude/commands/reflect.md` on it directly, inline. No user prompt needed. Do not spawn a subprocess — follow the AUTO MODE instructions yourself as the next step.
 
 ---
 

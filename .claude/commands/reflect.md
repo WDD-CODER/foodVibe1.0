@@ -5,6 +5,61 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 
 # /reflect
 
+## ⚡ AUTO MODE — Agent-Only (No Human Present)
+
+> **This section is for autonomous agent use only. It is never invoked by users.**
+> This section runs when the agent detects a completed correction cycle, or when the Stop hook fires.
+> Detect auto mode by checking: was this invoked via `claude --print`, or did the agent trigger it after a correction cycle? If yes → AUTO MODE.
+
+### AUTO MODE Rules
+- Skip all Phase 1 user prompts — read session context from `.claude/reflect/last-session-context.md` if it exists, otherwise infer from git log and recent file changes
+- Only apply improvements with `Risk: low` — skip medium and high risk changes entirely
+- Never ask for confirmation before applying a change
+- Apply one change per auto-reflect cycle (same as one experiment per autoresearch run)
+- Always log results to `.claude/reflect/auto-reflection-log.tsv` regardless of outcome
+- Exit cleanly after one cycle — do not loop
+
+### AUTO MODE Execution Steps
+
+**Step A — Read Context**
+```
+git log --oneline -5
+Get-Content .claude/reflect/last-session-context.md -ErrorAction SilentlyContinue
+```
+
+**Step B — Find One Low-Risk Improvement**
+Scan `.claude/skills/` and `.claude/agents/` for the most obvious low-risk improvement based on recent session context. One improvement only. Must have:
+- Clear target file
+- Specific change (not vague)
+- Risk: low
+- Measurable expected outcome
+
+**Step C — Apply and Evaluate**
+- `git checkout -b reflect/auto-$(Get-Date -Format 'yyyyMMdd-HHmm')`
+- Apply the change to the target file
+- Self-evaluate: does this clearly improve clarity, reduce token cost, or fix a known friction point?
+- If YES → `git commit -m "reflect(auto): <short description>"`
+- If NO → `git branch -D reflect/auto-<timestamp>` (delete branch directly — do not run `git checkout main` inside a worktree)
+
+**Step D — Log**
+Append one row to `.claude/reflect/auto-reflection-log.tsv`:
+```
+<timestamp>	auto	<target-file>	<change-summary>	<kept|discarded>	<reason>
+```
+Create the file with a header row if it doesn't exist:
+```
+timestamp	mode	target	change	result	reason
+```
+
+**Step E — Done**
+Print a one-line summary:
+```
+[auto-reflect] <kept|discarded> — <change-summary>
+```
+Exit. Do not continue to the manual reflect phases below.
+
+---
+
 Autonomous self-improvement system for Claude Code skills.
 Inspired by Karpathy's autoresearch pattern.
 

@@ -1,0 +1,2 @@
+﻿timestamp	mode	target	change	result	reason
+2026-04-07 17:18:23	auto	.claude/skills/elegant-fix/SKILL.md	generalize Completion Gate output template	kept	old template was Angular-only; nonsensical for non-Angular targets

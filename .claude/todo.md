@@ -2,6 +2,16 @@
 
 ---
 
+### Plan 259 — Auto-Reflect Autonomous Loop (`plans/259-auto-reflect-autonomous-loop.plan.md`)
+
+- [x] Task 1: Edit `.claude/commands/reflect.md` — insert AUTO MODE block after frontmatter; fix `git checkout main` → `git branch -D`
+- [x] Task 1b: Edit `.claude/copilot-instructions.md` — add correction-cycle behavioral rule to Skill Triggers
+- [x] Task 2: Create `.claude/reflect/auto-reflect.ps1` — failure-only mode, auto-reflection-log.tsv, powershell fallback
+- [x] Task 3: Edit root `.claude/settings.json` + worktree copy — add Stop hook
+- [x] Task 4: Verify — file existence, JSON validity, AUTO MODE in reflect.md, dry-run script
+
+---
+
 ### Plan 258 — Quick-Edit Product Panel (`plans/258-quick-edit-product-panel.plan.md`)
 
 - [ ] Create `src/app/core/services/quick-edit-product-modal.service.ts`
