@@ -205,7 +205,7 @@ export class QuickAddProductModalComponent {
     const product: Omit<Product, '_id'> = {
       name_hebrew: name,
       base_unit_: baseUnit,
-      buy_price_global_: Number(this.buyPrice_()) || 0,
+      buy_price_global_: Math.max(0, Number(this.buyPrice_()) || 0),
       purchase_options_: [],
       categories_: category ? [category] : [],
       supplierIds_: [],

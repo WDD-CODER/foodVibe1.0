@@ -16,6 +16,19 @@
 
 ---
 
+### Plan 259 — DB-Backed Shared Few-Shot Pool (`plans/259-gemini-shots-db-pool.plan.md`)
+
+- [ ] Task 1: `server/routes/ai.js` — add `GEMINI_SHOTS` helpers (`saveShot`, `getApprovedShots`, `computeSoftWarnings`), remove `buildFewShotBlock` from body path
+- [ ] Task 2: `server/routes/ai.js` — add `POST /api/v1/ai/shots` endpoint
+- [ ] Task 3: `server/routes/ai.js` — update `/generate`, `/generate-from-image`, `/generate-from-url` to fetch shots from DB server-side
+- [ ] Task 4: Create `src/app/core/services/gemini-shots.service.ts`
+- [ ] Task 5: `ai-recipe-modal.component.ts` — call shots service on approve/reject, show inline warnings
+- [ ] Task 6: `gemini.service.ts` — remove `getGeminiShots` import and `shots` from request bodies
+- [ ] Task 7: Deprecate `gemini-shots.util.ts` — remove `addGeminiShot` call from modal
+- [ ] Task 8: `ng build` + smoke test
+
+---
+
 ### Plan 258 — Quick-Edit Product Panel (`plans/258-quick-edit-product-panel.plan.md`)
 
 - [ ] Create `src/app/core/services/quick-edit-product-modal.service.ts`

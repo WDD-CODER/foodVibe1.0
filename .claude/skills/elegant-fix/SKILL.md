@@ -53,7 +53,7 @@ description: Refines a working but mediocre fix into a clean, idiomatic solution
 
 ## Completion Gate
 
-Output: `"Refactored [Component/Service] for elegance. Moved [X] functions to core/utils and converted [Y] variables to Signals."`
+Output: `"Refactored [target] for elegance. [Summary of what was extracted, simplified, or converted]."`
 
 If the refactor touches critical business logic → invoke QA Engineer for verification before committing.
 

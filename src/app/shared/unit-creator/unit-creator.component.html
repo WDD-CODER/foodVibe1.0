@@ -28,6 +28,7 @@
           <input id="unit-creator-amount"
                  SelectOnFocus
                  type="number"
+                 min="0.0001"
                  [ngModel]="newUnitValue_()"
                  (ngModelChange)="newUnitValue_.set($event)"
                  (keydown.enter)="$event.preventDefault(); focusBasisUnitSelect()"
