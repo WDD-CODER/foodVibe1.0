@@ -1,0 +1,105 @@
+<div class="inline-edit-panel" [class.closing]="closing()" dir="rtl">
+  <h3 class="inline-edit-title">{{ product().name_hebrew }}</h3>
+
+  <div class="inline-edit-section">
+    <div class="inline-edit-grid">
+
+      <!-- Name -->
+      <div class="inline-edit-field">
+        <label for="qep-name">{{ 'product_name' | translatePipe }}</label>
+        <input
+          id="qep-name"
+          #nameInput
+          type="text"
+          class="c-input"
+          [class.input--highlight]="tier() === 'invalid'"
+          [ngModel]="name_()"
+          (ngModelChange)="name_.set($event)"
+          (keydown.enter)="$event.preventDefault(); priceInput.focus()" />
+      </div>
+
+      <!-- Base unit -->
+      <div class="inline-edit-field">
+        <label for="qep-unit">{{ 'base_unit' | translatePipe }}</label>
+        <app-custom-select
+          triggerId="qep-unit"
+          [typeToFilter]="true"
+          [options]="baseUnitOptions_()"
+          [placeholder]="'choose_unit' | translatePipe"
+          [ngModel]="baseUnit_()"
+          (ngModelChange)="baseUnit_.set($event)"
+          name="base_unit_" />
+      </div>
+
+      <!-- Price -->
+      <div class="inline-edit-field">
+        <label for="qep-price">{{ 'buy_price' | translatePipe }}</label>
+        <input
+          id="qep-price"
+          #priceInput
+          type="number"
+          class="c-input"
+          [class.input--highlight]="tier() === 'incomplete'"
+          min="0"
+          step="0.01"
+          [ngModel]="price_()"
+          (ngModelChange)="price_.set($any($event))"
+          (keydown.enter)="$event.preventDefault(); onSave()"
+          name="buy_price_global_" />
+      </div>
+
+      <!-- Category -->
+      <div class="inline-edit-field">
+        <label for="qep-category">{{ 'category' | translatePipe }}</label>
+        <app-custom-select
+          triggerId="qep-category"
+          [typeToFilter]="true"
+          [options]="categoryOptions_()"
+          [placeholder]="'choose_category' | translatePipe"
+          [ngModel]="category_()"
+          (ngModelChange)="category_.set($event)"
+          name="category_" />
+      </div>
+
+    </div>
+
+    <!-- Suppliers -->
+    <div class="inline-edit-checkboxes">
+      @for (s of suppliers_(); track s._id) {
+        <label class="inline-edit-check">
+          <input type="checkbox" [checked]="isSupplierSelected(s._id)" (change)="onSupplierChange(s._id)" />
+          <span>{{ s.name_hebrew }}</span>
+        </label>
+      }
+      @empty {
+        <span class="qep__no-suppliers">{{ 'no_suppliers' | translatePipe }}</span>
+      }
+    </div>
+  </div>
+
+  <!-- Error -->
+  @if (error_()) {
+    <p class="qep__error" role="alert">{{ error_() }}</p>
+  }
+
+  <!-- Actions -->
+  <div class="inline-edit-actions">
+    <button type="button" class="qep__link" (click)="onOpenFullEdit()">
+      {{ 'full_edit' | translatePipe }} →
+    </button>
+    <button type="button" class="c-btn-ghost" (click)="onCancel()">
+      {{ 'cancel' | translatePipe }}
+    </button>
+    <button
+      type="button"
+      class="c-btn-primary"
+      [disabled]="isSubmitting_()"
+      (click)="onSave()">
+      @if (isSubmitting_()) {
+        {{ 'saving' | translatePipe }}
+      } @else {
+        {{ 'save' | translatePipe }}
+      }
+    </button>
+  </div>
+</div>

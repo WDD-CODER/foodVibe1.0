@@ -1,11 +1,16 @@
-import { Injectable, signal } from '@angular/core'
+import { inject, Injectable, signal } from '@angular/core'
 import type { AiRecipeDraft } from '@services/ai-recipe-draft.service'
 import type { AiRecipePatch } from '@services/gemini.service'
+import { UserService } from '@services/user.service'
+import { AuthModalService } from '@services/auth-modal.service'
 
 export type AiModalMode = 'create' | 'edit'
 
 @Injectable({ providedIn: 'root' })
 export class AiRecipeModalService {
+  private readonly userService = inject(UserService)
+  private readonly authModal = inject(AuthModalService)
+
   private readonly isOpen_ = signal(false)
   private readonly mode_ = signal<AiModalMode>('create')
   private currentRecipe_: AiRecipeDraft | null = null
@@ -15,6 +20,10 @@ export class AiRecipeModalService {
   readonly mode = this.mode_.asReadonly()
 
   open(mode: AiModalMode = 'create', currentRecipe?: AiRecipeDraft, onPatch?: (patch: AiRecipePatch) => void): void {
+    if (!this.userService.isLoggedIn()) {
+      this.authModal.open('sign-in')
+      return
+    }
     this.mode_.set(mode)
     this.currentRecipe_ = currentRecipe ?? null
     this.onPatch_ = onPatch ?? null

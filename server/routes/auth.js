@@ -269,13 +269,15 @@ router.post('/logout', (req, res) => {
 
 // ---------------------------------------------------------------------------
 // POST /guest
-// Dev-only endpoint — issues a JWT for the built-in guest account so the
+// Localhost-only endpoint — issues a JWT for the built-in guest account so the
 // frontend can make authenticated backend requests without signing up.
-// Blocked in production.
+// Blocked for any non-localhost origin regardless of NODE_ENV.
 // ---------------------------------------------------------------------------
 
 router.post('/guest', async (req, res) => {
-  if (process.env.NODE_ENV === 'production') {
+  const ip = req.ip || req.socket?.remoteAddress || '';
+  const isLocalhost = ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
+  if (!isLocalhost) {
     return res.status(404).json({ error: 'Not found' });
   }
 

@@ -1,0 +1,24 @@
+@if (isOpen_() && config()) {
+  <div
+    class="c-modal-overlay"
+    (click)="onCancelled()"
+    (keydown.escape)="onCancelled()">
+    <div
+      class="c-modal-card c-modal-card--md quick-edit-product-modal"
+      role="dialog"
+      aria-modal="true"
+      dir="rtl"
+      (click)="$event.stopPropagation()"
+      (keydown.escape)="onCancelled()">
+
+      <app-quick-edit-product-panel
+        [product]="config()!.product"
+        [tier]="config()!.tier"
+        (saved)="onSaved()"
+        (cancelled)="onCancelled()"
+        (openFullEdit)="onOpenFullEdit()">
+      </app-quick-edit-product-panel>
+
+    </div>
+  </div>
+}

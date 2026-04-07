@@ -769,6 +769,15 @@ textarea.c-input {
   transition: background 0.15s ease;
 }
 
+/* ── Validation row tints — must be outside @layer to beat .c-list-body-cell above ── */
+.row--invalid .c-list-body-cell {
+  background: color-mix(in srgb, var(--color-danger) 8%, white);
+}
+
+.row--incomplete .c-list-body-cell {
+  background: var(--bg-warning-soft);
+}
+
 .c-grid-cell {
   padding-inline: 0.75rem;
   padding-block: 0.625rem;

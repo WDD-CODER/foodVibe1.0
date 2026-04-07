@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { ActivatedRouteSnapshot, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { UserService } from '@services/user.service';
 import { AuthModalService, AuthMode } from '@services/auth-modal.service';
+import { authGuard } from '../../guards/auth.guard';
 
 @Component({
   selector: 'app-header',
@@ -16,6 +17,7 @@ import { AuthModalService, AuthMode } from '@services/auth-modal.service';
 export class HeaderComponent {
   private readonly userService = inject(UserService);
   private readonly authModal = inject(AuthModalService);
+  private readonly router = inject(Router);
 
   isMobileMenuOpen = signal(false);
 
@@ -39,8 +41,24 @@ export class HeaderComponent {
     this.authModal.open(mode);
   }
 
-  protected logout(): void {
-    this.userService.logout().subscribe();
+  protected async logout(): Promise<void> {
     this.closeMobileMenu();
+    if (this._isCurrentRouteProtected()) {
+      // Navigate to a public page first so Angular can run canDeactivate guards.
+      // If the user has unsaved changes, pendingChangesGuard shows the save/discard dialog.
+      // navigate() returns false if a guard cancelled the navigation — abort logout.
+      const navigated = await this.router.navigate(['/dashboard']);
+      if (navigated === false) return;
+    }
+    this.userService.logout().subscribe();
+  }
+
+  private _isCurrentRouteProtected(): boolean {
+    return this._snapshotHasAuthGuard(this.router.routerState.snapshot.root);
+  }
+
+  private _snapshotHasAuthGuard(snapshot: ActivatedRouteSnapshot): boolean {
+    if (snapshot.routeConfig?.canActivate?.includes(authGuard)) return true;
+    return snapshot.children.some(child => this._snapshotHasAuthGuard(child));
   }
 }
