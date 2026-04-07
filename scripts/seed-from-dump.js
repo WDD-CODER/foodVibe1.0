@@ -36,19 +36,34 @@ if (!dumpFile) {
 
 const dump = JSON.parse(fs.readFileSync(dumpFile, 'utf8'));
 
+// Optional --collections=PRODUCT_LIST,KITCHEN_UNITS filter
+const collectionsArg = process.argv.find(a => a.startsWith('--collections='))?.split('=')[1];
+const allowedCollections = collectionsArg ? new Set(collectionsArg.split(',').map(s => s.trim())) : null;
+if (allowedCollections) {
+  console.log(`[seed] Restricted to collections: ${[...allowedCollections].join(', ')}`);
+}
+
 async function seed() {
   await mongoose.connect(process.env.MONGO_URI);
   console.log('[seed] Connected to MongoDB.');
 
   const db = mongoose.connection.db;
 
+  const entriesToSeed = Object.entries(dump).filter(([entityType]) => {
+    if (allowedCollections && !allowedCollections.has(entityType)) {
+      console.log(`[seed] Skipping ${entityType} (not in --collections allowlist)`);
+      return false;
+    }
+    return true;
+  });
+
   // Safety check: record pre-seed counts and abort if any collection shrinks
   const preCounts = {};
-  for (const entityType of Object.keys(dump)) {
+  for (const [entityType] of entriesToSeed) {
     preCounts[entityType] = await db.collection(entityType).countDocuments();
   }
 
-  for (const [entityType, items] of Object.entries(dump)) {
+  for (const [entityType, items] of entriesToSeed) {
     const arr = Array.isArray(items) ? items : [items];
     const col = db.collection(entityType);
 

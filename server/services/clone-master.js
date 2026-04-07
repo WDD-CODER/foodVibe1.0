@@ -6,6 +6,12 @@
  *   Documents are stored flat in per-type native MongoDB collections.
  *   There is no Mongoose Entity model and no `data` wrapper — the doc IS the entity.
  *   `_masterId` records the source doc's _id so sync-master can track lineage.
+ *
+ * Ingredient referenceId remapping:
+ *   Recipes and dishes contain ingredients_[].referenceId pointing to product/recipe _ids.
+ *   After cloning PRODUCT_LIST, each master product gets a new user-scoped _id.
+ *   We build a masterProductId → userProductId map so cloned recipes reference
+ *   the user's copy of each product rather than the master copy.
  */
 
 'use strict';
@@ -20,6 +26,16 @@ function makeId(length = 5) {
   return id;
 }
 
+/** Remap ingredient referenceIds from master IDs to user-scoped IDs. */
+function remapIngredients(ingredients, idMap) {
+  if (!Array.isArray(ingredients)) return ingredients;
+  return ingredients.map(ing => {
+    if (!ing.referenceId) return ing;
+    const remapped = idMap.get(String(ing.referenceId));
+    return remapped ? { ...ing, referenceId: remapped } : ing;
+  });
+}
+
 /**
  * Clones all `userId: '__master__'` documents from every CLONEABLE_TYPES collection
  * into the given user's namespace.
@@ -31,6 +47,9 @@ async function cloneMasterDataToUser(userId) {
   const db = mongoose.connection.db;
   let totalCloned = 0;
 
+  // masterProductId → userProductId (populated when PRODUCT_LIST is cloned)
+  const productIdMap = new Map();
+
   for (const entityType of CLONEABLE_TYPES) {
     const col = db.collection(entityType);
     const masterDocs = await col.find({ userId: '__master__' }).toArray();
@@ -41,14 +60,28 @@ async function cloneMasterDataToUser(userId) {
       const newId = makeId();
       // Strip master-specific fields; assign new identity
       const { _id: masterId, userId: _u, _masterId: _m, _userModified: _um, ...rest } = doc;
-      return {
+      const clone = {
         ...rest,
         _id: newId,
         userId,
         _masterId: String(masterId),
         _userModified: false,
       };
+
+      // After we have the product id map, remap ingredient refs in recipes/dishes
+      if ((entityType === 'RECIPE_LIST' || entityType === 'DISH_LIST') && productIdMap.size > 0) {
+        clone.ingredients_ = remapIngredients(clone.ingredients_, productIdMap);
+      }
+
+      return clone;
     });
+
+    // Build masterProduct → userProduct map right after cloning products
+    if (entityType === 'PRODUCT_LIST') {
+      for (const clone of clones) {
+        productIdMap.set(clone._masterId, clone._id);
+      }
+    }
 
     await col.insertMany(clones, { ordered: false });
     totalCloned += clones.length;
