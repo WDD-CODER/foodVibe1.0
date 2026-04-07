@@ -1,8 +1,10 @@
 import { Component, input, output, inject, signal, ViewChildren, QueryList, effect, ChangeDetectorRef } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router'
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormArray, FormGroup, FormBuilder } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { RecipeCostService } from '@services/recipe-cost.service';
 import type { IngredientWeightRow } from '@services/recipe-cost.service';
@@ -11,11 +13,14 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive';
 import { FocusByRowDirective } from '@directives/focus-by-row.directive';
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
-import type { Product } from '@models/product.model';
+import { QuickEditProductPanelComponent } from 'src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component';
+import { QuickEditProductModalService } from '@services/quick-edit-product-modal.service';
+import type { Product } from '@models/product.model'
+import { getProductValidationStatus } from 'src/app/core/utils/product-validation.util';
 import type { Recipe } from '@models/recipe.model';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { quantityIncrement, quantityDecrement, QuantityStepOptions } from 'src/app/core/utils/quantity-step.util';
-import { getProductValidationStatus } from 'src/app/core/utils/product-validation.util';
+import { map } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop';
 
@@ -31,6 +36,7 @@ import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/d
     SelectOnFocusDirective,
     FocusByRowDirective,
     CustomSelectComponent,
+    QuickEditProductPanelComponent,
     CdkDrag,
     CdkDropList,
     CdkDragHandle
@@ -43,9 +49,16 @@ export class RecipeIngredientsTableComponent {
   private readonly kitchenStateService = inject(KitchenStateService);
   private readonly recipeCostService = inject(RecipeCostService);
   private readonly unitRegistry = inject(UnitRegistryService);
+  private readonly quickEditModalService = inject(QuickEditProductModalService);
+  private readonly bp = inject(BreakpointObserver);
   private fb = inject(FormBuilder);
 private readonly cdr = inject(ChangeDetectorRef)
   private readonly router_ = inject(Router)
+
+  protected readonly isMobile_ = toSignal(
+    this.bp.observe('(max-width: 767px)').pipe(map(r => r.matches)),
+    { initialValue: false }
+  );
 
   @ViewChildren(FocusByRowDirective) private focusByRowRefs!: QueryList<FocusByRowDirective>;
 
@@ -89,6 +102,58 @@ private readonly cdr = inject(ChangeDetectorRef)
 
   /** When set, this row index shows ingredient-search instead of selected-item-display (click name to change item). */
   protected editingNameAtRow_ = signal<number | null>(null);
+
+  /** Index of the row currently showing the inline quick-edit accordion (desktop only). */
+  protected quickEditRowIndex_ = signal<number | null>(null);
+
+  /** Index of the row currently animating closed (kept in DOM during 200ms collapse). */
+  protected quickEditRowClosingIndex_ = signal<number | null>(null);
+
+  /** Validation tier of the currently-open quick-edit row — drives field focus inside the panel. */
+  protected quickEditRowTier_ = signal<'invalid' | 'incomplete' | null>(null);
+
+  /** Resolve the product for a form group by referenceId. Returns null for unlinked rows. */
+  protected getProductForGroup(group: FormGroup): Product | null {
+    const refId = group.get('referenceId')?.value as string | null;
+    if (!refId) return null;
+    return this.kitchenStateService.products_().find(p => p._id === refId) ?? null;
+  }
+
+  /** Route the badge click: desktop → inline accordion; mobile → service-driven modal. */
+  protected onQuickEditBadgeClick(group: FormGroup, index: number, tier: 'invalid' | 'incomplete'): void {
+    const product = this.getProductForGroup(group);
+    if (!product) return;
+    if (this.isMobile_()) {
+      void this.quickEditModalService.open({ product, tier });
+    } else {
+      const alreadyOpen = this.quickEditRowIndex_() === index;
+      if (alreadyOpen) {
+        this.closeQuickEditWithAnimation();
+      } else {
+        this.quickEditRowIndex_.set(index);
+        this.quickEditRowTier_.set(tier);
+      }
+    }
+  }
+
+  /** Close the accordion with the collapse animation (200ms). */
+  protected closeQuickEditWithAnimation(): void {
+    const idx = this.quickEditRowIndex_();
+    if (idx === null) return;
+    this.quickEditRowClosingIndex_.set(idx);
+    setTimeout(() => {
+      this.quickEditRowClosingIndex_.set(null);
+      this.quickEditRowIndex_.set(null);
+      this.quickEditRowTier_.set(null);
+    }, 200);
+  }
+
+  /** Called when the accordion panel emits saved. Closes with animation. */
+  protected onQuickEditSaved(_index: number): void {
+    this.closeQuickEditWithAnimation();
+    // KitchenStateService.products_() is already updated by ProductDataService.updateProduct().
+    // The existing effect() in the constructor fires and calls refreshAllLineCalculations().
+  }
 
   /** Exclude names from search for a given row (other rows only), so user can re-select the same item when editing. */
   getExcludeNamesForRow(rowIndex: number): string[] {
@@ -255,7 +320,7 @@ private readonly cdr = inject(ChangeDetectorRef)
       : this.kitchenStateService.recipes_().find(r => r._id === id);
   }
 
-  /** True when the row cannot be saved — must be resolved before recipe can be saved. */
+  /** True when the row is blocking — must be resolved before the recipe can be saved. */
   isBlockingRow(group: FormGroup): boolean {
     // Unresolved: AI-added name with no referenceId
     if (group.get('name_hebrew')?.value && !group.get('referenceId')?.value) return true
@@ -266,31 +331,27 @@ private readonly cdr = inject(ChangeDetectorRef)
     const found = pool.find(x => x._id === refId)
     // Unlinked: referenceId not found in pool
     if (!found) return true
-    // Product is invalid tier (missing name or unit)
+    // Product is in the invalid tier (missing name or base unit)
     if (type === 'product') {
       return getProductValidationStatus(found as Product) === 'invalid'
     }
     return false
   }
 
-  /** True when the row is resolved but the product has incomplete data (warning tier only). */
+  /** True when the row is linked to a product that is in the incomplete (warning) tier. */
   isWarningRow(group: FormGroup): boolean {
     if (this.isBlockingRow(group)) return false
     const refId = group.get('referenceId')?.value as string | null
-    if (!refId || group.get('item_type')?.value !== 'product') return false
+    if (!refId) return false
+    if (group.get('item_type')?.value !== 'product') return false
     const product = this.kitchenStateService.products_().find(p => p._id === refId)
     if (!product) return false
     return getProductValidationStatus(product) === 'incomplete'
   }
 
-  /** True when any ingredient row cannot be saved (used by recipe-builder save guard). */
+  /** True when any ingredient row is blocking. Used by recipe-builder to gate save. */
   hasBlockingRows(): boolean {
     return this.ingredientGroups.some(g => this.isBlockingRow(g))
-  }
-
-  /** @deprecated Use isBlockingRow or isWarningRow instead. */
-  isIncompleteRow(group: FormGroup): boolean {
-    return this.isBlockingRow(group) || this.isWarningRow(group)
   }
 
   /** Navigate to the full product edit form so the user can complete the product. */

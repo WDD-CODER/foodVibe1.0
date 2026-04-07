@@ -27,8 +27,8 @@ import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-ba
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component';
 import { useListState, StringParam, NullableStringParam, FilterRecordParam, BooleanParam } from 'src/app/core/utils/list-state.util';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
-import { getPricePerUnit, calcBuyPriceGlobal } from 'src/app/core/utils/product-price.util';
-import { getProductValidationStatus, getProductMissingFields, type ProductValidationStatus } from 'src/app/core/utils/product-validation.util';
+import { getPricePerUnit, calcBuyPriceGlobal } from 'src/app/core/utils/product-price.util'
+import { getProductValidationStatus, getProductMissingFields, VALIDATION_FIELD_ICONS, ProductValidationStatus } from 'src/app/core/utils/product-validation.util'
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
 type ProductBulkField = 'categories_' | 'supplierIds_' | 'allergens_' | 'base_unit_';
@@ -225,9 +225,11 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
     if (showInvalidOnly || showIncompleteOnly) {
       products = products.filter(p => {
-        const status = getProductValidationStatus(p);
-        return (showInvalidOnly && status === 'invalid') || (showIncompleteOnly && status === 'incomplete');
-      });
+        const status = getProductValidationStatus(p)
+        if (showInvalidOnly && status === 'invalid') return true
+        if (showIncompleteOnly && status === 'incomplete') return true
+        return false
+      })
     }
 
     // 1. Apply filters
@@ -346,6 +348,27 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
   protected isLowStock(product: Product): boolean {
     return (product.min_stock_level_ ?? 0) > 0;
+  }
+
+  // VALIDATION STATUS
+  protected getValidationStatus(product: Product): ProductValidationStatus {
+    return getProductValidationStatus(product)
+  }
+
+  protected getMissingFields(product: Product): string[] {
+    return getProductMissingFields(product)
+  }
+
+  protected getFieldIcon(fieldKey: string): string {
+    return VALIDATION_FIELD_ICONS[fieldKey] ?? 'alert-circle'
+  }
+
+  protected toggleShowInvalidOnly(): void {
+    this.showInvalidOnly_.update(v => !v)
+  }
+
+  protected toggleShowIncompleteOnly(): void {
+    this.showIncompleteOnly_.update(v => !v)
   }
 
   protected hasActiveFilters_ = computed(() =>

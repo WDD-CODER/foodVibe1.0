@@ -28,9 +28,9 @@
         <div class="selected-item-display" role="button" tabindex="0"
           [class.incomplete-row]="isBlockingRow(group)"
           [class.warning-row]="isWarningRow(group)"
-          (click)="editingNameAtRow_.set($index)"
-          (keydown.enter)="editingNameAtRow_.set($index)"
-          (keydown.space)="$event.preventDefault(); editingNameAtRow_.set($index)">
+          (click)="getProductForGroup(group) ? onQuickEditBadgeClick(group, $index, isBlockingRow(group) ? 'invalid' : 'incomplete') : editingNameAtRow_.set($index)"
+          (keydown.enter)="getProductForGroup(group) ? onQuickEditBadgeClick(group, $index, isBlockingRow(group) ? 'invalid' : 'incomplete') : editingNameAtRow_.set($index)"
+          (keydown.space)="$event.preventDefault(); getProductForGroup(group) ? onQuickEditBadgeClick(group, $index, isBlockingRow(group) ? 'invalid' : 'incomplete') : editingNameAtRow_.set($index)">
           @if (getDisplayName(group)) {
             <span class="item-text">{{ getDisplayName(group) }}</span>
           } @else {
@@ -38,14 +38,14 @@
           }
           @if (isBlockingRow(group)) {
             <button type="button" class="incomplete-badge"
-              (click)="$event.stopPropagation(); getItemMetadata(group) ? navigateToEditProduct(group) : editingNameAtRow_.set($index)"
-              [title]="'product_invalid' | translatePipe">
+              (click)="$event.stopPropagation(); getProductForGroup(group) ? onQuickEditBadgeClick(group, $index, 'invalid') : editingNameAtRow_.set($index)"
+              [title]="'product_incomplete_hint' | translatePipe">
               <lucide-icon name="alert-circle" [size]="14"></lucide-icon>
             </button>
           } @else if (isWarningRow(group)) {
             <button type="button" class="warning-badge"
-              (click)="$event.stopPropagation(); navigateToEditProduct(group)"
-              [title]="'product_incomplete' | translatePipe">
+              (click)="$event.stopPropagation(); onQuickEditBadgeClick(group, $index, 'incomplete')"
+              [title]="'product_warning_hint' | translatePipe">
               <lucide-icon name="alert-triangle" [size]="14"></lucide-icon>
             </button>
           }
@@ -105,6 +105,19 @@
           <lucide-icon name="trash-2" [size]="18"></lucide-icon>
         </button>
       </div>
+
+      @if ((quickEditRowIndex_() === $index || quickEditRowClosingIndex_() === $index) && !isMobile_() && getProductForGroup(group)) {
+        <div class="quick-edit-accordion">
+          <app-quick-edit-product-panel
+            [product]="getProductForGroup(group)!"
+            [tier]="quickEditRowTier_() ?? 'incomplete'"
+            [closing]="quickEditRowClosingIndex_() === $index"
+            (saved)="onQuickEditSaved($index)"
+            (cancelled)="closeQuickEditWithAnimation()"
+            (openFullEdit)="navigateToEditProduct(group)">
+          </app-quick-edit-product-panel>
+        </div>
+      }
 
     </div>
     }

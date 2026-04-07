@@ -2,6 +2,37 @@
 
 ---
 
+### Plan 258 — Quick-Edit Product Panel (`plans/258-quick-edit-product-panel.plan.md`)
+
+- [ ] Create `src/app/core/services/quick-edit-product-modal.service.ts`
+- [ ] Create `src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.ts`
+- [ ] Create `src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.html`
+- [ ] Create `src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.scss`
+- [ ] Create `src/app/shared/quick-edit-product-modal/quick-edit-product-modal.component.ts`
+- [ ] Create `src/app/shared/quick-edit-product-modal/quick-edit-product-modal.component.html`
+- [ ] Create `src/app/shared/quick-edit-product-modal/quick-edit-product-modal.component.scss`
+- [ ] Edit `src/app/appRoot/app.component.ts` — register QuickEditProductModalComponent
+- [ ] Edit `src/app/appRoot/app.component.html` — add <app-quick-edit-product-modal/>
+- [ ] Edit `recipe-ingredients-table.component.ts` — signals, helpers, badge handlers
+- [ ] Edit `recipe-ingredients-table.component.html` — replace badge clicks, add accordion
+- [ ] Edit `recipe-ingredients-table.component.scss` — .quick-edit-accordion grid-column
+
+---
+
+### Plan 257 — Two-Tier Product Validation (`plans/257-product-validation-two-tier.plan.md`)
+
+- [x] Task 1: Create `src/app/core/utils/product-validation.util.ts` — `getProductValidationStatus()` + `getProductMissingFields()`
+- [x] Task 2: `inventory-product-list.component.ts` — wire validation util; add invalid/incomplete filter signals
+- [x] Task 3: `inventory-product-list.component.html` — status badge in col-name; Invalid/Incomplete filter chips in sidebar
+- [x] Task 4: `inventory-product-list.component.scss` — badge styles, row tint, tooltip chip styles
+- [x] Task 5: `recipe-ingredients-table.component.ts` — split `isIncompleteRow()` → `isBlockingRow()` + `isWarningRow()`; expose `hasBlockingRows()` output
+- [x] Task 6: `recipe-ingredients-table.component.html` — update row class bindings; add warning badge alongside existing blocking badge
+- [x] Task 7: `recipe-ingredients-table.component.scss` — add `.warning-row` + `.warning-badge` styles
+- [x] Task 8: `recipe-builder.page.ts` — add blocking-row save guard in `saveRecipe()`
+- [x] Task 9: Translation files — add new i18n keys for validation states and tooltip labels
+
+---
+
 ### Plan 255 — Dead Code Cleanup (`plans/255-dead-code-cleanup.plan.md`)
 
 - [ ] Task 1: Delete `.claude/skills/commit-to-github/` — confirmed deprecated, replaced by git-agent

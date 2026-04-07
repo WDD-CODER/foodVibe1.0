@@ -769,15 +769,22 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   }
 
   protected onSubmit(): void {
+    this.saveAndWait().then(saved => {
+      if (saved) this.router.navigate(['/inventory/list']);
+    });
+  }
+
+  /** For pendingChangesGuard: save and resolve true on success, false on failure. */
+  async saveAndWait(): Promise<boolean> {
     if (!this.validateForm_()) {
       this.productForm_.markAllAsTouched();
       this.userMsgService.onSetErrorMsg(this.translationService.translate('form_has_errors'));
-      return;
+      return false;
     }
     if (!this.productForm_.valid) {
       this.productForm_.markAllAsTouched();
       this.userMsgService.onSetErrorMsg(this.translationService.translate('form_has_errors'));
-      return;
+      return false;
     }
     const val = this.productForm_.getRawValue();
     const categories = (val.categories_ ?? []) as string[];
@@ -803,17 +810,19 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     };
 
     this.saving.setSaving(true);
-    this.kitchenStateService.saveProduct(productToSave).subscribe({
-      next: () => {
-        this.saving.setSaving(false);
-        this.validationErrors_.set({});
-        this.isSubmitted = true;
-        this.router.navigate(['/inventory/list']);
-      },
-      error: () => {
-        this.saving.setSaving(false);
-        this.isSubmitted = false;
-      }
+    return new Promise<boolean>(resolve => {
+      this.kitchenStateService.saveProduct(productToSave).subscribe({
+        next: () => {
+          this.saving.setSaving(false);
+          this.validationErrors_.set({});
+          this.isSubmitted = true;
+          resolve(true);
+        },
+        error: () => {
+          this.saving.setSaving(false);
+          resolve(false);
+        }
+      });
     });
   }
 

@@ -84,10 +84,10 @@
           }
           @if (getValidationStatus(product) === 'invalid') {
             <span class="validation-badge validation-badge--invalid">
-              <lucide-icon name="alert-circle" [size]="12"></lucide-icon>
+              <lucide-icon name="alert-circle" [size]="13"></lucide-icon>
               <span class="validation-tooltip">
                 @for (field of getMissingFields(product); track field) {
-                  <span class="tooltip-chip">
+                  <span class="tooltip-chip tooltip-chip--invalid">
                     <lucide-icon [name]="getFieldIcon(field)" [size]="11"></lucide-icon>
                     {{ field | translatePipe }}
                   </span>
@@ -96,10 +96,10 @@
             </span>
           } @else if (getValidationStatus(product) === 'incomplete') {
             <span class="validation-badge validation-badge--incomplete">
-              <lucide-icon name="alert-triangle" [size]="12"></lucide-icon>
+              <lucide-icon name="alert-triangle" [size]="13"></lucide-icon>
               <span class="validation-tooltip">
                 @for (field of getMissingFields(product); track field) {
-                  <span class="tooltip-chip">
+                  <span class="tooltip-chip tooltip-chip--incomplete">
                     <lucide-icon [name]="getFieldIcon(field)" [size]="11"></lucide-icon>
                     {{ field | translatePipe }}
                   </span>
@@ -177,13 +177,15 @@
         <input type="checkbox" [checked]="lowStockOnly_()" (change)="toggleLowStockOnly()" />
         <span>{{ 'low_stock' | translatePipe }}</span>
       </label>
-      <label class="c-filter-option">
+      <label class="c-filter-option validation-filter-option validation-filter-option--invalid">
         <input type="checkbox" [checked]="showInvalidOnly_()" (change)="toggleShowInvalidOnly()" />
-        <span class="filter-status-label filter-status-label--invalid">{{ 'filter_invalid' | translatePipe }}</span>
+        <lucide-icon name="alert-circle" [size]="13"></lucide-icon>
+        <span>{{ 'filter_invalid' | translatePipe }}</span>
       </label>
-      <label class="c-filter-option">
+      <label class="c-filter-option validation-filter-option validation-filter-option--incomplete">
         <input type="checkbox" [checked]="showIncompleteOnly_()" (change)="toggleShowIncompleteOnly()" />
-        <span class="filter-status-label filter-status-label--incomplete">{{ 'filter_incomplete' | translatePipe }}</span>
+        <lucide-icon name="alert-triangle" [size]="13"></lucide-icon>
+        <span>{{ 'filter_incomplete' | translatePipe }}</span>
       </label>
       @for (category of filterCategories_(); track category.name) {
         <div class="c-filter-category">

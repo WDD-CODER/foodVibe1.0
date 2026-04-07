@@ -32,7 +32,7 @@
                   <span>שולח בקשה לגמיני...</span>
                 } @else if (status_() === 'error') {
                   <lucide-icon name="circle-x" [size]="16"></lucide-icon>
-                  <span>{{ 'ai_recipe_error' | translatePipe }}</span>
+                  <span>{{ errorKey_() | translatePipe }}</span>
                 }
               </div>
             }
@@ -180,7 +180,7 @@
                   <span>תשובה התקבלה</span>
                 } @else if (status_() === 'error') {
                   <lucide-icon name="circle-x" [size]="16"></lucide-icon>
-                  <span>{{ 'ai_recipe_error' | translatePipe }}</span>
+                  <span>{{ errorKey_() | translatePipe }}</span>
                 }
               </div>
             }
