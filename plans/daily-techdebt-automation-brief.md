@@ -4,48 +4,73 @@ type: brief
 owner: Team Leader
 status: ready-for-execution
 created: 2026-04-07
+updated: 2026-04-07
+source: https://code.claude.com/docs/en/web-scheduled-tasks
 ---
 
 # Daily Automated Tech Debt Sweep
 
 ## Vision
 
-Every morning at 06:00, a **scheduled Claude Code agent** runs a full-project `/techdebt` audit on a **fresh cloud clone** of the repo. By the time the developer sits down, a clean report is waiting — either "all clear" or a ready-to-merge branch with fixes applied.
+Every morning at 06:00, a **cloud scheduled task** on Anthropic's infrastructure clones the repo from GitHub, runs a full-project `/techdebt` audit, and pushes results to a `claude/` branch. By the time the developer sits down, a session on claude.ai shows exactly what happened — and a branch is ready to merge.
 
 Over time this creates a **self-healing codebase**: dead code never accumulates, style violations never drift, TODOs never rot, and the trend chart in each report shows debt going down week over week.
+
+---
+
+## How Cloud Scheduled Tasks Work
+
+Based on [Anthropic's official documentation](https://code.claude.com/docs/en/web-scheduled-tasks):
+
+- **Runs on Anthropic's cloud** — your machine can be off, VS Code closed, no session needed
+- **Fresh clone every run** — clones the repo from GitHub, starts from the default branch (`main`)
+- **Branch restriction** — by default Claude can only push to `claude/` prefixed branches (e.g. `claude/daily-techdebt-2026-04-07`). Enable "Allow unrestricted branch pushes" if you want `chore/` prefixes instead
+- **Runs autonomously** — no permission prompts during the run
+- **Each run = a session** — visible at claude.ai alongside your other sessions. You can review what Claude did, see changes, and create a PR from there
+- **Minimum interval** — 1 hour (not per-minute)
+- **MCP connectors** — your connected services (Slack, Linear, etc.) are included by default
+- **Environment config** — set up `npm install` as a setup script so dependencies are ready before the scan runs
+
+### Three ways to create
+
+| Method | How |
+|--------|-----|
+| **Web** | Visit [claude.ai/code/scheduled](https://claude.ai/code/scheduled) → "New scheduled task" |
+| **Desktop app** | Schedule page → "New task" → "New remote task" |
+| **CLI** | Run `/schedule` in any Claude Code session |
 
 ---
 
 ## How It Works — End to End
 
 ```
-06:00 — Scheduled trigger fires (Claude Code /schedule)
+06:00 — Cloud scheduled task fires
   │
-  ├─ 1. Anthropic's cloud clones the repo from GitHub (automatic)
-  │     Creates branch: chore/daily-techdebt-YYYY-MM-DD (from main)
+  ├─ 1. Anthropic clones repo from GitHub (automatic)
+  │     Creates branch: claude/daily-techdebt-YYYY-MM-DD (from main)
   │
-  ├─ 2. Runs /techdebt in full-project mode
+  ├─ 2. Setup script runs: npm install (configured in environment)
+  │
+  ├─ 3. Runs /techdebt in full-project mode
   │     Phase 1: Static analysis (dead code, TODOs, style violations)
   │     Phase 2: Logic & complexity pruning (only if Phase 1 finds issues)
   │     Phase 3: Report generation → .claude/techdebt-reports/techdebt-YYYY-MM-DD.md
   │     Phase 4: Breadcrumb sync
   │
-  ├─ 3. If fixes were applied:
-  │     → Commits to chore/daily-techdebt-YYYY-MM-DD
+  ├─ 4. If fixes were applied:
+  │     → Commits to claude/daily-techdebt-YYYY-MM-DD
   │     → Pushes branch to origin
   │     → Report includes what was fixed vs. what needs human decision
   │
-  └─ 4. If critical findings (security flags, >300-line components):
+  └─ 5. If critical findings (security flags, >300-line components):
         → Marks them in report as BLOCKING — does NOT auto-fix
         → Flags for human review
 ```
 
-**No worktree needed** — the scheduled agent runs on Anthropic's cloud with a fresh clone. Your local machine and VS Code don't need to be open.
-
-**You arrive at your desk and see:**
-- A fresh techdebt report in `.claude/techdebt-reports/`
-- A branch with safe auto-fixes ready to merge (if any)
-- A clear list of anything that needs your judgment
+**You arrive at your desk and:**
+- Open [claude.ai](https://claude.ai) → see the completed session with full details
+- Check GitHub → `claude/daily-techdebt-YYYY-MM-DD` branch is ready for review
+- Review the techdebt report, merge if clean, move on
 
 ---
 
@@ -148,44 +173,76 @@ Security + QA gates can run **in parallel** when both are triggered.
 
 Run `/techdebt` manually in full-project mode. Verify the report at `.claude/techdebt-reports/techdebt-YYYY-MM-DD.md` is well-formed with Summary, Detailed Findings, and Trend sections.
 
-### Step 2 — Schedule Configuration
+### Step 2 — Create Cloud Environment
 
-From Claude Code (local or web), run `/schedule` with:
+At [claude.ai](https://claude.ai) → Settings → Environments, create an environment:
 
 | Field | Value |
 |-------|-------|
-| **Name** | `daily-techdebt-sweep` |
-| **Cron** | `0 6 * * *` (daily at 06:00) |
+| **Name** | `foodvibe-techdebt` |
+| **Setup script** | `npm install` |
+| **Network access** | Standard (needed for npm install) |
+| **Environment variables** | None required for static analysis |
 
-**Agent prompt for the scheduled task:**
+### Step 3 — Create the Scheduled Task
 
-> 1. Create branch `chore/daily-techdebt-YYYY-MM-DD` from main
-> 2. Run `/techdebt` in full-project mode (scope: all of `src/app/`)
-> 3. If Phase 1 finds security flags → invoke Security Officer to review
-> 4. If Phase 2 applies logic changes → invoke QA Engineer to verify + run `ng build`
-> 5. Commit all changes with message: "chore: daily techdebt sweep YYYY-MM-DD"
-> 6. Push the branch to origin
+Use any of the three methods:
 
-### Step 3 — Verify First Automated Run
+**Option A — Web (recommended):**
+1. Go to [claude.ai/code/scheduled](https://claude.ai/code/scheduled)
+2. Click "New scheduled task"
+3. Fill in:
 
-Next morning:
-- [ ] `.claude/techdebt-reports/techdebt-YYYY-MM-DD.md` exists with today's date
-- [ ] `chore/daily-techdebt-YYYY-MM-DD` branch exists on origin (if fixes were needed)
+| Field | Value |
+|-------|-------|
+| **Name** | `Daily Techdebt Sweep` |
+| **Repository** | `WDD-CODER/foodVibe1.0` |
+| **Environment** | `foodvibe-techdebt` |
+| **Schedule** | Daily at 06:00 |
+
+4. **Prompt:**
+
+> Run a full-project /techdebt audit on all of `src/app/`.
+> If Phase 1 finds security flags → invoke Security Officer to review.
+> If Phase 2 applies logic changes → invoke QA Engineer to verify + run `ng build`.
+> Commit all changes with message: "chore: daily techdebt sweep YYYY-MM-DD".
+> Push the branch to origin.
+
+5. Remove any MCP connectors that aren't needed
+6. Click "Create"
+
+**Option B — CLI:**
+```
+/schedule daily techdebt sweep at 6am
+```
+
+**Option C — Desktop app:**
+Schedule page → "New task" → "New remote task" → same config as Option A
+
+### Step 4 — Verify First Run
+
+Next morning, check:
+- [ ] New session visible at [claude.ai](https://claude.ai) showing the completed run
+- [ ] `claude/daily-techdebt-YYYY-MM-DD` branch exists on GitHub
+- [ ] `.claude/techdebt-reports/techdebt-YYYY-MM-DD.md` exists in that branch
 - [ ] `ng build` passes on that branch
 - [ ] Report Trend section compares against previous reports
 
-### Step 4 — Wire Into Session Start
+You can also click "Run now" on the task's detail page to test immediately.
 
-Add to the `github-sync` daily check: "If a `chore/daily-techdebt-*` branch exists for today → notify the user: 'Daily techdebt sweep completed. Branch ready for review.'"
+### Step 5 — Wire Into Session Start
+
+Add to the `github-sync` daily check: "If a `claude/daily-techdebt-*` branch exists for today → notify the user: 'Daily techdebt sweep completed. Branch ready for review.'"
 
 ---
 
 ## Success Criteria
 
-- [ ] `/schedule` trigger is configured and confirmed active
-- [ ] First automated run produces a valid report
+- [ ] Cloud scheduled task is created and visible at claude.ai/code/scheduled
+- [ ] First run produces a valid techdebt report
 - [ ] Auto-fixes compile cleanly (`ng build` passes)
 - [ ] Security flags are never auto-fixed — only reported
+- [ ] Branch uses `claude/` prefix (default cloud behavior)
 - [ ] Report Trend section accurately compares last 7 days
 
 ---
@@ -195,7 +252,17 @@ Add to the `github-sync` daily check: "If a `chore/daily-techdebt-*` branch exis
 | Risk | Mitigation |
 |------|-----------|
 | Auto-fix introduces regression | QA Engineer gate + `ng build` must pass before commit |
-| Schedule fails silently | Check `.claude/techdebt-reports/` — if today's report is missing, the run failed |
+| Schedule fails silently | Check claude.ai session list — each run creates a visible session. Also check `.claude/techdebt-reports/` for today's report |
+| Branch naming conflict | Cloud tasks auto-prefix with `claude/` — unique per day via date suffix |
 | Conflicts with active development | Runs on fresh clone from `main` — never touches feature branches |
 | Over-aggressive auto-fix | Phase 2 only triggers when Phase 1 finds issues; security flags never auto-fixed |
+| npm install fails in cloud | Configure setup script in the environment; test with "Run now" before relying on the schedule |
 | `/schedule` unavailable | Fallback: run `/techdebt` manually as part of morning session-start routine |
+
+---
+
+## References
+
+- [Cloud scheduled tasks documentation](https://code.claude.com/docs/en/web-scheduled-tasks)
+- [Session-scoped scheduling (/loop)](https://code.claude.com/docs/en/scheduled-tasks)
+- [Desktop scheduled tasks](https://code.claude.com/docs/en/desktop-scheduled-tasks)
