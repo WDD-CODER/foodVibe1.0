@@ -97,7 +97,6 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private recipeId_ = signal<string | null>(null);
   protected resetTrigger_ = signal(0);
   isSubmitted = false;
-  protected blockingIngredientsError_ = signal(false);
 
   /** Bumped when ingredients change so cost/weight computeds re-run (form is not a signal). */
   private ingredientsFormVersion_ = signal(0);
