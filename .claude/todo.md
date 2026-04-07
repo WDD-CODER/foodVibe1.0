@@ -2,6 +2,20 @@
 
 ---
 
+### Plan 260 — Tech Debt Execution: Apr 07 Audit (`plans/260-techdebt-apr07-execution.plan.md`)
+
+> **Tier 1 — Activate dormant plans (pass to agent as-is):**
+- [x] Execute Plan 214: `plans/214-R-sanitize-key-util-extraction.plan.md` — create `sanitize-key.util.ts`, replace 4 inline sites in 3 files
+- [x] Execute Plan 215: `plans/215-R-list-state-param-descriptor-any.plan.md` — widen `list-state.util.ts` types, remove 10 `as any` casts across 5 components
+
+> **Tier 2 — RecipeAiCoordinator extraction:**
+- [x] Task 1: Read `recipe-builder.page.ts` — AI surface identified (methods deeply form-coupled; component extraction impractical)
+- [x] Task 2: Create `src/app/pages/recipe-builder/services/recipe-ai-flow.service.ts` — service extraction (prefillFromDraft, buildDraftSnapshot, applyPatch, helpers)
+- [x] Task 3: `recipe-builder.page.ts` — remove extracted AI methods; wire `RecipeAiFlowService` via `providers` + `inject()`; `onAiEditClick` → 1-line shell
+- [x] Task 4: `ng build` — zero errors; `recipe-builder.page.ts` 1297 → 1094 LOC (−203)
+
+---
+
 ### Plan 258 — Quick-Edit Product Panel (`plans/258-quick-edit-product-panel.plan.md`)
 
 - [ ] Create `src/app/core/services/quick-edit-product-modal.service.ts`
