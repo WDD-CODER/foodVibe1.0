@@ -26,6 +26,13 @@ Proceed with full execution as you normally would.
 
 ## Step 3 — Always Show the Validation Checklist
 
+### Brief-sourced criteria (if applicable)
+If the conversation contains a `Session: .claude/sessions/` path, read that
+session's `brief.md` and prepend its `## Success Criteria` items as the first
+HOW TO VALIDATE bullets. Then add task-specific bullets below, separated by a
+blank line. If no session path in conversation, generate bullets from scratch
+as before.
+
 After completing all file changes, always append:
 
 ✅ HOW TO VALIDATE

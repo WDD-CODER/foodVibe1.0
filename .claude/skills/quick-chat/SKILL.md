@@ -8,13 +8,13 @@ description: Bypasses standard planning gates for a fast, credit-efficient singl
 **Trigger:** User invokes `/quick-chat` or explicitly requests skipping standard gates for a brief interaction.
 **Standard:** Quick-chat rules are self-contained in this skill — no standards files needed.
 
-> This skill disables `github-sync` and `session-handoff` auto-triggers for the **duration of this turn only**. Mandatory gate reads (CLAUDE.md, agent.md, copilot-instructions.md) remain active.
+> This skill disables `github-sync` and `end-of-session-agent` auto-triggers for the **duration of this turn only**. Mandatory gate reads (CLAUDE.md, agent.md, copilot-instructions.md) remain active.
 
 ---
 
 ## Phase 1: Context Isolation `[Procedural — Haiku/Composer (Fast/Flash)]`
 
-**Bypass Execution:** Disable automatic triggers for `github-sync` and `session-handoff` for this turn only.
+**Bypass Execution:** Disable automatic triggers for `github-sync` and `end-of-session-agent` for this turn only.
 
 **Scope Check:** Verify the request is a "Small" task (Section 0.4).
 

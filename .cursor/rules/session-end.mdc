@@ -11,19 +11,9 @@ Trigger when the user says any of the following (case-insensitive, partial match
 
 ### Workflow
 
-**Step 1 — Offer sweep**
-Before producing the handoff, ask:
-> "Before saving the handoff — run stale-todo sweep? (Recommended: removes noise from the handoff summary)"
-> a. Yes — run sweep first, then produce handoff.
-> b. No — skip sweep and go straight to handoff.
+Read `.claude/agents/end-of-session-agent.md` and follow its full phase pipeline.
 
-**Step 2a — If sweep approved**
-Run `.claude/commands/sweep-stale-todos.md`, wait for completion, then proceed to Step 3.
+The agent handles all session-closing workflows in one deterministic sequence:
+brief check → mid-session check → environment detection → state assessment → build gate → techdebt scan → git operations → todo archive → doc refresh → plan cleanup → session evaluation → write session-handoff.md → present to user → sync check.
 
-**Step 2b — If sweep skipped**
-Proceed directly to Step 3.
-
-**Step 3 — Produce handoff**
-Read `.claude/skills/session-handoff/SKILL.md` and produce the structured session summary.
-Write the result to `notes/session-handoffs/YYYY-MM-DD.md`.
-If a file for today already exists, append a timestamped section rather than overwriting.
+> **Note:** The agent subsumes the previous standalone sweep + handoff workflow. Do not run `session-handoff/SKILL.md` or `sweep-stale-todos.md` separately — the agent invokes them internally.

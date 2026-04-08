@@ -19,16 +19,16 @@ First message in conversation?
         Quick mode active (QUICK_MODE_ENABLED marker present)?
           └── Yes → skip both steps silently
           └── No  →
-                Step 1: Check notes/session-handoffs/ for files from the last 3 days
+                Step 1: Check .claude/sessions/ for session-handoff.md files from the last 3 days
                   └── Found  → summarize key context; append tip: "Tip: Say 'I'm done' or 'wrap up' when you're done for the day to save a session handoff."
-                  └── Not found → note the gap; append same tip
+                  └── Not found → check notes/session-handoffs/ (legacy fallback); if still not found, note the gap; append same tip
                 Step 2: Does notes/github-sync/YYYY-MM-DD.md exist for today?
                   └── Yes → skip (already synced this session)
                   └── No  → read .claude/skills/github-sync/SKILL.md and run sync
 ```
 
 ### Step 1 — Handoff check
-Read `notes/session-handoffs/`. Look for files dated within the last 3 days. If found, summarize key context (open work, blockers, next steps). Always end the summary with:
+Read `.claude/sessions/`. Look for `session-handoff.md` files dated within the last 3 days (by directory name date prefix). If found, summarize key context (open work, blockers, next steps). If not found, check `notes/session-handoffs/` as legacy fallback. Always end the summary with:
 > Tip: Say "I'm done" or "wrap up" when you're done for the day to save a session handoff.
 
 ### Step 2 — GitHub sync

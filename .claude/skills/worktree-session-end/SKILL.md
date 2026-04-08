@@ -5,9 +5,11 @@ description: Closes a worktree session — handles cleanup only. Commits, PRs, a
 
 # Skill: worktree-session-end
 
-**Trigger:** "wrap up", "done", "handoff", or "ship" inside a git worktree.
+> **Agent-managed:** This skill is now invoked by the `end-of-session-agent` (Phase 6) for worktree git operations. Do not invoke standalone — the agent handles orchestration and all surrounding phases.
 
-> **Hard Guard:** If `git rev-parse --git-dir` returns `.git` (main repo) → redirect to `session-handoff` immediately. This skill is worktree-only.
+**Trigger:** Invoked by `end-of-session-agent` Phase 6 when worktree detected (or standalone as legacy fallback).
+
+> **Hard Guard:** If `git rev-parse --git-dir` returns `.git` (main repo) → redirect to `end-of-session-agent` immediately. This skill is worktree-only.
 
 > **Worktree Boundary:** Never run `git checkout main` from inside a worktree. All PR/merge operations use `git -C <mainRepoPath>`.
 

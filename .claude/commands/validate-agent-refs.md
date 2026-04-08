@@ -11,6 +11,7 @@ Periodic health check that verifies all internal links in the agent guidance sys
 - `breadcrumb-navigator.md`
 - `qa-engineer.md`
 - `security-officer.md`
+- `end-of-session-agent.md`
 
 ### Skills (`.claude/skills/*/SKILL.md`)
 - `save-plan/SKILL.md`
@@ -34,6 +35,7 @@ Periodic health check that verifies all internal links in the agent guidance sys
 - `quick-chat/SKILL.md`
 
 > Note: `end-session/SKILL.md` is a deprecated redirect stub — not a functional skill. Intentionally kept as a pointer only.
+> Note: `session-handoff/SKILL.md` is now a redirect stub — routes to `end-of-session-agent.md`. Kept for backward compatibility.
 
 ### Cursor rules (`.cursor/rules/`)
 - `add-recipe-must-use-skill.mdc`
@@ -72,7 +74,7 @@ Periodic health check that verifies all internal links in the agent guidance sys
 
 ```bash
 # Verify all expected agent files exist
-for f in team-leader software-architect product-manager breadcrumb-navigator qa-engineer security-officer; do
+for f in team-leader software-architect product-manager breadcrumb-navigator qa-engineer security-officer end-of-session-agent; do
   [ -f ".claude/agents/$f.md" ] || echo "MISSING: .claude/agents/$f.md"
 done
 
@@ -93,7 +95,7 @@ Cross-check each path printed above against the filesystem. Any path that does n
 ## Agent Reference Validation — [Date]
 
 ### Inventory Check
-- Expected agents: 6 — found: [count]
+- Expected agents: 7 — found: [count]
 - Expected skills: 19 — found: [count]
 - Expected cursor rules: 11 — found: [count]
 - Expected cursor commands: 4 — found: [count]

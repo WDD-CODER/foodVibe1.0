@@ -129,4 +129,4 @@ PR #13 feat/scaling-chip — merged
 - Worktree provisioning — use `/worktree-setup`
 - Worktree cleanup / dev server kill — stays in `worktree-session-end`
 - Full CI pipeline — use `test-pr-review-merge`
-- Session handoff — use `session-handoff`
+- Session handoff — use `end-of-session-agent`

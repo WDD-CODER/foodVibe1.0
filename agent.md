@@ -24,7 +24,7 @@ See `copilot-instructions.md §0.5` for model routing (Efficiency Tiers).
 ## Core Skills (`.claude/skills/`)
 - **GitHub**: `git-agent` (`.claude/agents/git-agent.md`), `github-sync`, `worktree-setup`, `deploy-github-pages`
 - **Development**: `add-recipe`, `cssLayer`, `angularComponentStructure`, `elegant-fix`
-- **Lifecycle**: `save-plan`, `session-handoff`, `worktree-session-end`, `techdebt`, `update-docs`
+- **Lifecycle**: `save-plan`, `end-of-session-agent`, `session-handoff`, `worktree-session-end`, `techdebt`, `update-docs`
 - **gstack**: `/browse`, `/qa`, `/cso`, `/investigate`, `/careful`, `/freeze`, `/retro`, `/document-release`, `/ship`, `/land-and-deploy`
 
 All skill triggers defined in `copilot-instructions.md §0`.
@@ -43,7 +43,7 @@ All skill triggers defined in `copilot-instructions.md §0`.
 ## Preflight Checklist
 1. Read this file + `copilot-instructions.md` (mandatory gate).
 2. **GitHub sync (once-per-day):** Check `notes/github-sync/<today>.md` — if missing, run `github-sync` skill.
-3. Check session handoff: `notes/session-handoffs/` (last 3 days).
+3. Check session handoff: `.claude/sessions/` (most recent) or `notes/session-handoffs/` (legacy, last 3 days).
 4. Check `.claude/todo.md` for related pending work.
 5. **[Claude Code]** Verify current branch (`git branch --show-current`). Never commit to `main`.
 

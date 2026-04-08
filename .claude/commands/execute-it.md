@@ -13,9 +13,12 @@ Execute the implementation plan from this conversation, incorporating any findin
 
 Before executing, persist the plan so it's tracked in `plans/` and `todo.md`.
 
-1. **Scan the conversation** for two sources:
+1. **Scan the conversation** for three sources:
+   - **Session brief** — look for `Session: .claude/sessions/...` in plan-implementation output → read that `brief.md`
    - **Architectural brief** — the handoff from the planning brain (has `## Goal`, `## Steps`, `## Rules`, `## Done when`)
    - **Plan-implementation output** — verification results (✓/✗ items, deviations, gaps, corrections)
+
+   **Session brief fallback:** If no `Session:` path in conversation, scan `.claude/sessions/` for directories matching today's date. If exactly one → use it. If multiple → list and ask user. If none → proceed without brief (existing behavior).
 2. **Compose one concise plan** from both:
    - Frontmatter: `name` (from Goal), `overview` (one sentence), `todos: []`, `isProject: false`
    - Body: brief's Goal as heading, brief's Steps merged with every ✗ fix/amendment from plan-implementation as `# Atomic Sub-tasks` (each `[ ] description`), brief's Rules as constraints, brief's "Done when" as verification
@@ -57,9 +60,13 @@ Example: if the brief says "add reload calls for three services" and plan-implem
 When complete:
 ```
 ✓ Execution complete
+- Session: .claude/sessions/{session-id} (or "no session brief")
 - Plan saved: plans/NNN-slug.plan.md (or "skipped — no brief found")
 - Brief tasks: [N completed]
 - Plan-implementation fixes: [N incorporated]
 - Files modified: [list]
 - How to verify: [steps/checks]
+- Success criteria:
+  - [x] criterion (verified by build/test)
+  - [ ] criterion (not yet verified — needs manual check)
 ```
