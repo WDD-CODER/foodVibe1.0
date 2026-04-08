@@ -468,9 +468,19 @@ Full report: .claude/sessions/{session-id}/session-handoff.md
 
 ---
 
-### Phase 13: Sync Check (ALWAYS — FINAL STEP)
+### Phase 13: Final Commit + Sync Check (ALWAYS — FINAL STEP)
 
-If unpushed commits exist:
+**Session artifacts commit:** After Phase 12 confirmation, commit any files the agent generated during this run (session-handoff.md, brief.md, techdebt reports, todo-archive changes). These are written *after* the Phase 6 code commit and must not be left uncommitted.
+
+```bash
+git add .claude/sessions/{session-id}/ .claude/techdebt-reports/ .claude/todo-archive.md .claude/todo.md
+git commit -m "chore(session): add session-handoff report for {session-id}"
+git push  # to same branch as Phase 6, or main if no feature branch
+```
+
+This commit does NOT require user confirmation — it contains only agent-generated session artifacts, not code.
+
+If unpushed commits exist after this:
 ```
 Reminder: Run github-sync at the start of your next session.
 ```
