@@ -14,17 +14,38 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGIN || 'http://localhost:4200,http://localhost:4300').split(',').map(s => s.trim())
 
-// ---------------------------------------------------------------------------
-// Static files — served BEFORE CORS so Angular assets are never blocked
-// MUST also come before /api/ catch-all
-// ---------------------------------------------------------------------------
 const STATIC_DIR = path.join(__dirname, '..', 'dist', 'food-vibe1.0', 'browser')
-app.use(express.static(STATIC_DIR))
 
 // ---------------------------------------------------------------------------
-// Middleware
+// Security middleware — runs first so ALL responses (static assets + API) get
+// the correct security headers.
 // ---------------------------------------------------------------------------
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc:     ["'self'"],
+      scriptSrc:      ["'self'"],
+      // Angular 19 compiles (click)="..." to addEventListener — no inline handlers
+      // needed. Setting to false removes the directive so script-src governs it.
+      scriptSrcAttr:  false,
+      // Angular injects <style> tags for component encapsulation at runtime.
+      styleSrc:       ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc:        ["'self'", "https://fonts.gstatic.com"],
+      // blob: needed for Excel/image export (FileReader → Blob → URL.createObjectURL)
+      imgSrc:         ["'self'", "data:", "blob:"],
+      connectSrc:     ["'self'"],
+      objectSrc:      ["'none'"],
+      frameSrc:       ["'none'"],
+      upgradeInsecureRequests: [],
+    }
+  }
+}));
+
+// ---------------------------------------------------------------------------
+// Static files — served AFTER Helmet so assets also carry security headers.
+// MUST still come before /api/ catch-all.
+// ---------------------------------------------------------------------------
+app.use(express.static(STATIC_DIR))
 
 app.use(morgan('tiny'));
 
