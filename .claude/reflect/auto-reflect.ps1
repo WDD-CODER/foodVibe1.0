@@ -11,7 +11,7 @@ param(
     [string]$Mode = "failure-only"
     # "always" | "failure-only"
     # Default is "failure-only" because the agent handles correction cycles directly (inline AUTO MODE).
-    # The Stop hook is a safety net - only fires when git conflict markers are detected.
+    # The Stop hook is a safety net - only fires when issues are detected.
 )
 
 $ErrorActionPreference = "Stop"
@@ -29,7 +29,67 @@ if (-not (Test-Path $LogFile)) {
     "timestamp`tmode`ttarget`tchange`tresult`treason" | Out-File -FilePath $LogFile -Encoding utf8
 }
 
-# Decide whether to reflect
+# --- Step 1: Check for session-handoff.md ---
+# Look for the most recent unified session-handoff file
+$handoffFiles = Get-ChildItem -Path ".claude/sessions/*/session-handoff.md" -ErrorAction SilentlyContinue |
+    Sort-Object LastWriteTime -Descending |
+    Select-Object -First 1
+
+if ($handoffFiles) {
+    $handoffPath = $handoffFiles.FullName
+    $sessionDir = Split-Path (Split-Path $handoffPath)
+    $sessionId = Split-Path $sessionDir -Leaf
+    $handoffContent = Get-Content $handoffPath -Raw
+
+    # Parse for missed or partial criteria
+    $missedLines = @()
+    foreach ($line in (Get-Content $handoffPath)) {
+        if ($line -match [char]0x274C -or $line -match [char]0x26A0 -or $line -match "Missed" -or $line -match "Partial") {
+            # Check if this is in the evaluation table (contains | separator)
+            if ($line -match "\|") {
+                $missedLines += $line.Trim()
+            }
+        }
+    }
+
+    if ($missedLines.Count -gt 0) {
+        Write-Host "[auto-reflect] Session $sessionId has $($missedLines.Count) issue(s) - triggering targeted reflection"
+
+        # Build context
+        $missedSummary = $missedLines -join "`n"
+        $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+        $contextContent = @"
+# Session Reflection Context
+Generated: $timestamp
+Session: $sessionId
+
+## Issues Found in session-handoff.md
+$missedSummary
+
+## Trigger
+Auto-reflect triggered by session evaluation issues (missed or partial criteria)
+"@
+        $contextContent | Out-File -FilePath $ContextFile -Encoding utf8
+
+        # Invoke targeted reflection
+        $prompt = "Session $sessionId ended with issues: $missedSummary. Read .claude/commands/reflect.md and execute the AUTO MODE section. Find ONE low-risk workflow improvement that would help prevent this type of issue. Apply if safe, log result."
+        claude --print $prompt --max-turns 10
+
+        Write-Host "[auto-reflect] Targeted reflection cycle complete."
+        exit 0
+    }
+    else {
+        # All criteria passed
+        $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+        "$timestamp`tsession-handoff`t$sessionId`tnone`tskipped`tAll criteria passed" | Out-File -FilePath $LogFile -Append -Encoding utf8
+        Write-Host "[auto-reflect] Session $sessionId completed successfully. No reflection needed."
+        exit 0
+    }
+}
+
+# --- Step 2: Legacy fallback (no session-handoff found) ---
+# Original behavior: check for git conflict markers
+
 $shouldReflect = $false
 
 if ($Mode -eq "always") {
@@ -41,7 +101,7 @@ elseif ($Mode -eq "failure-only") {
     $hasFailureSignal = ($gitStatus -match "UU|AA|DD") -or ($LASTEXITCODE -ne 0)
     if ($hasFailureSignal) {
         $shouldReflect = $true
-        Write-Host '[auto-reflect] Failure signal detected - triggering reflection'
+        Write-Host '[auto-reflect] Failure signal detected (conflict markers) - triggering reflection'
     }
 }
 

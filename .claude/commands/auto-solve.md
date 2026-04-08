@@ -187,7 +187,7 @@ Commands:
   2. If collision detected (another worktree created same-numbered plan), rename current plan to next available number and update `todo.md` reference
   3. Commit with conventional message (read `.claude/agents/git-agent.md`)
   4. Loop back to Phase 0 for next plan
-- **"approve and stop"** → Commit, then run session-handoff skill
+- **"approve and stop"** → Commit, then invoke `end-of-session-agent`
 - **"show diff"** → Run `git diff`, then wait for next command
 - **"abort"** → Run `git checkout .` to discard, end session
 

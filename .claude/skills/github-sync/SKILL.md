@@ -46,7 +46,7 @@ If `.worktree-cleanup` does not exist, skip this phase entirely.
 
 ## Phase 3: Session Intelligence `[High Reasoning — Sonnet/Gemini 1.5 Pro]`
 
-**Daily Log Audit:** Read latest `notes/session-handoffs/` and `notes/github-sync/` files. Summarize the "State of the Project" for the current session.
+**Daily Log Audit:** Read latest `.claude/sessions/*/session-handoff.md` (preferred) or `notes/session-handoffs/` (legacy fallback) and `notes/github-sync/` files. Summarize the "State of the Project" for the current session.
 
 **GitHub Context:** Read open PRs via MCP (`mcp__github__list_pull_requests`) → fallback to `gh pr list`. Surface any pending reviews or CI failures.
 

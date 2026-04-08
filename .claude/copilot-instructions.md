@@ -27,6 +27,7 @@ description: Single source of truth for all project rules, standards, and skill/
 > Cursor receives these rules via `.cursor/rules/*.mdc`. Cursor cannot spawn subagents — `[CC]` triggers do not apply to Cursor.
 
 - **Plan & execute** `[SHARED]`: User presents architectural brief → invoke `/plan-implementation` command (read-only codebase scan, produce plan, wait for approval). On approval, invoke `/execute-it` command (full autonomous implementation).
+- **Session brief** `[SHARED]`: User invokes `/brief` or `/brief <description>` → read `.claude/commands/brief.md` and follow it. Creates or reconstructs a session brief that threads through validation and session-handoff as a scorecard.
 - **Save plan** `[SHARED]`: Message contains "save" + one of "it / that / this / plan" (case-insensitive) while a plan is in context → read `.claude/skills/save-plan/SKILL.md` and follow it.
 - **Git operations** `[SHARED]`: User mentions "commit", "push", "merge", "PR", "branch", git status, or any git workflow (but NOT "ship", "done", "wrap up", "end session", "handoff" — those route to session-end skills above) → read `.claude/agents/git-agent.md` and follow it. No git writes until user approves the visual plan.
 - **CSS/SCSS** `[SHARED]`: Before creating or editing any `.scss`/`.css` in `src/` → read `.claude/skills/cssLayer/SKILL.md` and apply it.
@@ -38,11 +39,9 @@ description: Single source of truth for all project rules, standards, and skill/
 - **After features** `[SHARED]`: Read `.claude/skills/update-docs/SKILL.md` to refresh breadcrumbs and docs.
 - **Breadcrumbs only** `[SHARED]`: Read `.claude/skills/breadcrumb-navigator/SKILL.md` and follow it.
 - **After a hacky fix** `[SHARED]`: Read `.claude/skills/elegant-fix/SKILL.md` to refine into a clean solution.
-- **Session end / wrap up** `[CC]`: User says "done", "end session", "wrap up", "finish up", "ship", "handoff" → run `git rev-parse --git-dir` first:
+- **Session end / wrap up** `[CC]`: User says "done", "end session", "wrap up", "finish up", "ship", "handoff" → read `.claude/agents/end-of-session-agent.md` and follow it. The agent handles environment detection (worktree vs main), build verification, techdebt, git operations, todo maintenance, docs, plan cleanup, session evaluation, and handoff report — all in one deterministic pipeline.
   - **Quick chat** `[SHARED]`: User invokes `/quick-chat` → skip handoff check and GitHub sync for this chat only.
-  - Returns `.git/worktrees/*` → read `.claude/skills/worktree-session-end/SKILL.md`.
-  - Returns `.git` → read `.claude/skills/session-handoff/SKILL.md`.
-  - Never ask the user which skill to use — detect and route automatically.
+  - Never ask the user which skill to use — the agent detects and routes automatically.
 - **Creating or refactoring Angular components** `[SHARED]`: Read `.claude/skills/angularComponentStructure/SKILL.md`.
 - **Lucide icons** `[SHARED]`: Before adding or editing `<lucide-icon name="...">` → read `.claude/standards-domain.md` Lucide section.
 - **Hebrew canonical values** `[SHARED]`: When adding or editing canonical value flows → read `.claude/standards-domain.md` Hebrew sections.
@@ -94,6 +93,7 @@ Agent persona files live in `.claude/agents/`. Load on demand — do not pre-loa
 | QA Engineer | `qa-engineer.md` | Spec gaps; diagnosing failing tests; E2E creation |
 | Security Officer | `security-officer.md` | Post-feature review of auth/storage/route changes; pre-deploy; security consult |
 | Git Agent | `git-agent.md` | All git operations: commit, push, PR creation, merge, branch management |
+| End-of-Session Agent | `end-of-session-agent.md` | Session wrap-up: "done", "wrap up", "ship", "handoff", "end session", "finish up" |
 
 ---
 

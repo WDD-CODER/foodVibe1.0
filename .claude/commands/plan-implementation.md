@@ -1,11 +1,49 @@
 ---
 description: Receive an architectural brief, verify against live code, flag gaps, and spot nearby issues — pause for approval before proceeding
-allowed-tools: Read, Grep, Glob
+allowed-tools: Read, Write, Grep, Glob
 ---
 
 # Skill: plan-implementation
 
 **PHASE 1 ONLY** — Do not write any code. Do not proceed to implementation.
+
+## Step 0: Brief Capture
+
+Before verification, persist the brief as the session's source of truth.
+
+1. **Detect brief format** in the user's message:
+   - **Structured** (contains `## Goal`, `## Steps`, or `## Success Criteria`) → parse and use as-is
+   - **Unstructured** (plain description/query) → auto-generate from template below
+
+2. **Generate session ID**: `YYYY-MM-DD-{2-4-word-slug}` where slug is derived from the goal (lowercase, hyphens, no special chars)
+
+3. **Collision check**: If `.claude/sessions/{session-id}/` already exists → append `-2`, `-3`, etc.
+
+4. **Write brief** to `.claude/sessions/{session-id}/brief.md` using this template:
+
+```markdown
+## Goal
+[one sentence extracted from user input]
+
+## Scope
+[files/modules the plan touches — or "TBD until verification" for unstructured input]
+
+## Out of Scope
+[anything explicitly excluded or implied as off-limits — or "None stated"]
+
+## Success Criteria
+- [ ] criterion 1
+- [ ] criterion 2
+
+## Session ID
+{session-id}
+```
+
+5. **Print the brief** to the user verbatim
+6. **Ask**: "Brief captured. Confirm or adjust before I proceed with verification."
+7. **Wait for user confirmation** before continuing to Step 1. If user adjusts → update brief.md, re-confirm.
+
+---
 
 ## Workflow
 
@@ -49,6 +87,8 @@ Only blockers and should-fix items get folded into the execution plan. Nice-to-h
 ## Output Format
 
 ```
+Session: .claude/sessions/{session-id}
+
 ✓/✗ Brief verified against live code
 
 ## Checked
