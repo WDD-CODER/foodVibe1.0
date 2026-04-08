@@ -2,6 +2,17 @@
 
 ---
 
+### Plan 261 — Claude-Mem Integration (`plans/261-claude-mem-integration.plan.md`)
+
+- [x] `.claude/settings.json` — merge claude-mem hooks (SessionStart, PostToolUse, Stop, SessionEnd) preserving existing Stop hook
+- [x] `.claude/mcp.json` — create with claude-mem MCP server entry
+- [x] `.claude/commands/plan-implementation.md` — add Phase 0 historical context recall (conditional on claude-mem)
+- [x] `.claude/agents/end-of-session-agent.md` — add Phase 1.5 memory enrichment to Phase 11 (session-handoff is redirect)
+- [x] `.claude/copilot-instructions.md` — add memory search trigger §0, token budget §0.2, priority hierarchy §0.1
+- [x] Provide user with Bun + claude-mem install commands + worker health check
+
+---
+
 ### Plan 260 — Tech Debt Execution: Apr 07 Audit (`plans/260-techdebt-apr07-execution.plan.md`)
 
 > **Tier 1 — Activate dormant plans (pass to agent as-is):**

@@ -325,6 +325,22 @@ Store: `archived_plans` list
 
 ---
 
+### Phase 10.5: Memory Enrichment (if claude-mem available)
+
+**SKIP IF:** claude-mem MCP tools are not active in this session.
+
+Before writing the session-handoff, enrich the report with semantic observations from claude-mem:
+
+1. `search(query="decisions architecture tradeoffs", dateStart="<session-start>", project="foodvibe", limit=5)`
+2. For any relevant IDs: `get_observations(ids=[...])`
+3. Append a **"Key Decisions This Session"** bullet list to the session-handoff template below (under `## What Was Done`)
+
+This enriches the handoff with *why* decisions were made, not just *what* changed — answering the #1 cross-session question.
+
+**If no relevant observations found:** Skip enrichment silently. Do not block session close on claude-mem availability.
+
+---
+
 ### Phase 11: Write session-handoff.md (ALWAYS — BEFORE PRESENTING TO USER)
 
 **File MUST be written before presenting anything to user.**
