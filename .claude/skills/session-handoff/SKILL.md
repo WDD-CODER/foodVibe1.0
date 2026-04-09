@@ -14,6 +14,8 @@ description: "[REDIRECT] Session handoff is now handled by the end-of-session ag
 
 Read `.claude/agents/end-of-session-agent.md` and follow it.
 
+**Memory enrichment (if MemPalace available):** Before closing, call `mempalace_diary_write(agent_name="claude", entry="<session summary>", topic="session-handoff")` to log key decisions to MemPalace. Skip silently if MCP unavailable.
+
 Do not run any phases from this file. The agent handles everything including:
 - Brief validation
 - Build gate

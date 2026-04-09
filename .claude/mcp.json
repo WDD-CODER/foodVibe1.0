@@ -1,18 +1,8 @@
 {
   "mcpServers": {
-    "claude-mem": {
-      "command": "claude-mem",
-      "args": ["mcp-server"],
-      "env": {
-        "CLAUDE_MEM_PROJECT": "foodvibe"
-      }
-    },
-    "qmd": {
-      "command": "qmd",
-      "args": ["mcp"],
-      "env": {
-        "QMD_DOCS_PATH": "C:/foodCo/foodVibe1.0"
-      }
+    "mempalace": {
+      "command": "python",
+      "args": ["-m", "mempalace.mcp_server"]
     }
   }
 }
