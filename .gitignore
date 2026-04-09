@@ -66,6 +66,12 @@ tools/catalog-seeder/output/pending-manual.json
 tools/catalog-seeder/__pycache__/
 tools/catalog-seeder/*.pyc
 
+# MemPalace runtime data (vector DB, knowledge graph, config — never commit)
+chroma.sqlite3
+entities.json
+mempalace.yaml
+mine-progress.ps1
+
 # Playwright MCP and UI Inspector artifacts (never commit)
 .playwright-mcp/
 .ui-inspector/
