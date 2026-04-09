@@ -503,7 +503,7 @@ Example: `"SESSION:2026-04-09|migrated.claude-mem→mempalace+wired.19.mcp.tools
 **Step 2 — Session artifacts commit:** After Phase 12 confirmation, commit any files the agent generated during this run (session-handoff.md, brief.md, techdebt reports, todo-archive changes). These are written *after* the Phase 6 code commit and must not be left uncommitted.
 
 ```bash
-git add .claude/sessions/{session-id}/ .claude/techdebt-reports/ .claude/todo-archive.md .claude/todo.md
+git add .claude/sessions/{session-id}/ .claude/techdebt-reports/ .claude/todo-archive.md .claude/todo.md .claude/reflect/open/
 git commit -m "chore(session): add session-handoff report for {session-id}"
 git push  # to same branch as Phase 6, or main if no feature branch
 ```

@@ -12,20 +12,61 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 > Detect auto mode by checking: was this invoked via `claude --print`, or did the agent trigger it after a correction cycle? If yes → AUTO MODE.
 
 ### AUTO MODE Rules
-- Skip all Phase 1 user prompts — read session context from `.claude/reflect/last-session-context.md` if it exists, otherwise infer from git log and recent file changes
+- Skip all Phase 1 user prompts — read session context from the newest `status: open` file in `.claude/reflect/open/`, falling back to `.claude/reflect/last-session-context.md` (legacy)
 - Only apply improvements with `Risk: low` — skip medium and high risk changes entirely
 - Never ask for confirmation before applying a change
 - Apply one change per auto-reflect cycle (same as one experiment per autoresearch run)
 - Always log results to `.claude/reflect/auto-reflection-log.tsv` regardless of outcome
+- Always update the `.reflect.md` file status and content when done
 - Exit cleanly after one cycle — do not loop
+
+### `.reflect.md` File Format
+
+Each auto-reflect run produces a file in `.claude/reflect/open/` with this structure:
+
+```markdown
+---
+status: open | resolved | interrupted
+session-id: <session-id>
+created: <YYYY-MM-DD HH:mm:ss>
+resolved: <YYYY-MM-DD HH:mm:ss> | null
+trigger: session-handoff | legacy-conflict
+---
+
+# Reflection: <session-id>
+
+## Issues Found
+<issues from session-handoff evaluation table, verbatim>
+
+## Analysis
+<what the auto-reflect agent found when scanning skills/agents>
+
+## Action Taken
+<one of: "Applied fix (kept)", "Attempted fix (discarded)", "No actionable improvement found">
+
+### Change Details
+- **Target file:** <path>
+- **Branch:** reflect/auto-<timestamp>
+- **Risk:** low
+- **Description:** <what was changed>
+
+### Diff
+\`\`\`diff
+<actual git diff output, or "N/A" if discarded/skipped>
+\`\`\`
+
+### Discard Reason
+<if discarded: why. Otherwise "N/A">
+```
 
 ### AUTO MODE Execution Steps
 
 **Step A — Read Context**
 ```
 git log --oneline -5
-Get-Content .claude/reflect/last-session-context.md -ErrorAction SilentlyContinue
 ```
+Read the newest `.claude/reflect/open/*.reflect.md` file with `status: open` in its frontmatter.
+Fallback: `.claude/reflect/last-session-context.md` (legacy — will be removed in a future cleanup).
 
 **Step B — Find One Low-Risk Improvement**
 Scan `.claude/skills/` and `.claude/agents/` for the most obvious low-risk improvement based on recent session context. One improvement only. Must have:
@@ -38,8 +79,15 @@ Scan `.claude/skills/` and `.claude/agents/` for the most obvious low-risk impro
 - `git checkout -b reflect/auto-$(Get-Date -Format 'yyyyMMdd-HHmm')`
 - Apply the change to the target file
 - Self-evaluate: does this clearly improve clarity, reduce token cost, or fix a known friction point?
-- If YES → `git commit -m "reflect(auto): <short description>"`
-- If NO → `git branch -D reflect/auto-<timestamp>` (delete branch directly — do not run `git checkout main` inside a worktree)
+- If YES (kept):
+  - `git commit -m "reflect(auto): <short description>"`
+  - Capture diff: `git diff HEAD~1 --no-color`
+  - Update the `.reflect.md` file: set `status: resolved`, set `resolved: <timestamp>`, fill `## Action Taken` with "Applied fix (kept)", fill `### Change Details` with target/branch/description, write the captured diff into `### Diff`
+- If NO (discarded):
+  - `git branch -D reflect/auto-<timestamp>` (delete branch directly — do not run `git checkout main` inside a worktree)
+  - Update the `.reflect.md` file: set `status: resolved`, set `resolved: <timestamp>`, fill `## Action Taken` with "Attempted fix (discarded)", fill `### Discard Reason` with explanation
+- If NO IMPROVEMENT FOUND:
+  - Update the `.reflect.md` file: set `status: resolved`, set `resolved: <timestamp>`, fill `## Action Taken` with "No actionable improvement found"
 
 **Step D — Log**
 Append one row to `.claude/reflect/auto-reflection-log.tsv`:
@@ -52,10 +100,12 @@ timestamp	mode	target	change	result	reason
 ```
 
 **Step E — Done**
-Print a one-line summary:
-```
-[auto-reflect] <kept|discarded> — <change-summary>
-```
+Print verbose output to stdout so the user can see exactly what happened:
+- Print the `## Action Taken` section
+- If kept: print the `### Diff` section (the actual code change)
+- If discarded: print the `### Discard Reason`
+- Print one-line summary: `[auto-reflect] <kept|discarded|no-improvement> — <change-summary>`
+
 Exit. Do not continue to the manual reflect phases below.
 
 ---
