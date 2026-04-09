@@ -58,6 +58,7 @@ description: Single source of truth for all project rules, standards, and skill/
 - **Skill test suite** `[CC]`: User invokes `/reflect add-tests` → read `.claude/commands/reflect-add-tests.md` and follow it.
 - **Sweep stale todos** `[SHARED]`: At session end (after all tasks marked `[x]`) or on explicit request → read `.claude/commands/sweep-stale-todos.md` and follow it.
 - **Auto-reflect after correction cycle** `[CC]`: A correction cycle is complete when: (1) a skill was the active workflow, (2) one or more errors or failures occurred during execution, (3) you made file changes to address those errors, (4) the outcome is now successful. When a correction cycle completes → identify which skill was running and execute the AUTO MODE section of `.claude/commands/reflect.md` on it directly, inline. No user prompt needed. Do not spawn a subprocess — follow the AUTO MODE instructions yourself as the next step.
+- **Memory search** `[CC]`: When answering "why did we...", "have we tried...", "what happened with...", or recalling past decisions → use MemPalace MCP tools before grepping session handoffs. Pattern: `mempalace_search(query="...", wing="wing_foodvibe")` → filter by relevance → `mempalace_kg_query(entity="...")` for architectural decisions. If MemPalace tools unavailable, skip silently and grep session handoffs instead.
 
 ---
 
@@ -67,8 +68,9 @@ description: Single source of truth for all project rules, standards, and skill/
 2. **This file** (`copilot-instructions.md`) — single source of truth
 3. **Active SKILL** being executed (context-specific rules for the current workflow)
 4. **Agent persona** file (role-specific guidance)
-5. **Breadcrumbs** (directory-local context)
-6. **Historical docs and reports** (tech-debt reports, session handoffs, etc.)
+5. **MemPalace observations** (when answering "why" or recalling decisions — if MCP tools available)
+6. **Breadcrumbs** (directory-local context)
+7. **Historical docs and reports** (tech-debt reports, session handoffs, etc.)
 
 ---
 
@@ -77,6 +79,8 @@ description: Single source of truth for all project rules, standards, and skill/
 Load skills and standards files on-demand at the point of need — do not pre-load at session start. Each skill is ~400–1,500 tokens. Each standards file is ~800–1,500 tokens. Load only what the current task requires.
 
 > **Skills are self-contained**: Each skill carries its own inline rules. When a skill is active, its inline rules are authoritative — do not load standards files to supplement them unless the skill explicitly instructs it.
+
+> **MemPalace context** adds ~170 tokens for wake-up (L0+L1). Per-session search cost is ~2,700 tokens for 1 search (5 results). `mempalace_kg_query` adds 50–300 tokens depending on entity connectivity. Diary writes are near-zero read cost. If MemPalace MCP is unavailable, skip silently — do not block on it.
 
 ---
 

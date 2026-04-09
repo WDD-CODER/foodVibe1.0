@@ -45,6 +45,23 @@ Before verification, persist the brief as the session's source of truth.
 
 ---
 
+## Phase 0 — Historical Context (if MemPalace available)
+
+Before decomposing the brief, check if MemPalace MCP tools are active in this session.
+
+**If MemPalace tools are available:**
+1. `mempalace_search(query="<2-3 keywords from brief goal>", wing="wing_foodvibe", limit=10)`
+2. Review results for:
+   - Past attempts at similar work (avoid repeating failed approaches)
+   - Architectural decisions that constrain this plan
+   - Known pitfalls or recurring build failures related to this area
+3. For key entities: `mempalace_kg_query(entity="<component or decision>")` to check temporal facts
+4. Include relevant findings in the brief's `## Context` section or in the Merged Execution Plan as constraint notes
+
+**If MemPalace tools are not available:** Skip this phase entirely — do not block on it.
+
+---
+
 ## Workflow
 
 1. **Read the architectural brief** carefully
