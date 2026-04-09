@@ -53,45 +53,41 @@
     flex-wrap: wrap;
 
     gap: 1rem;
-    padding-block-end: 1rem;
+    padding: 1em;
 
     border-block-end: 1px solid var(--border-default);
-  }
-
-  .header-spacer {
-    flex: 1;
-
-    min-width: 0;
   }
 
   .header-start {
     display: flex;
     align-items: center;
+    justify-content: center;
     flex: 1;
 
-    gap: 1rem;
+    min-width: 0;
+    overflow: hidden;
   }
 
   :host ::ng-deep .page-title {
-    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     text-align: center;
   }
 
   .header-search {
-    flex: 1 1 30%;
+    flex: 1;
 
-    width: 100%;
-    min-width: 30%;
-    max-width: 22.5rem;
+    min-width: 0;
   }
 
   .header-actions {
     display: flex;
     align-items: center;
-    flex-shrink: 0;
+    justify-content: flex-end;
+    flex: 1;
 
     gap: 1rem;
-    margin-inline-start: 0;
   }
 
   .open-panel-btn {
@@ -120,6 +116,7 @@
 
   @container (max-width: #{$header-break-grid}) {
     .list-header {
+      position: relative;
       display: grid;
       grid-template-columns: 1fr 1fr;
       grid-template-rows: auto auto;
@@ -128,44 +125,48 @@
         "search  actions";
 
       gap: 1rem;
+      padding-inline-end: 3.5rem;
+    }
+
+    .open-panel-btn {
+      position: absolute;
+      inset-inline-start: 0;
+      top: 0;
     }
 
     .header-start {
       grid-area: title;
-
-      min-width: 0;
+      justify-content: center;
     }
 
     .header-search {
       grid-area: search;
-      flex: none;
-
-      min-width: 0;
-      max-width: none;
     }
 
     .header-actions {
       grid-area: actions;
       justify-content: flex-end;
     }
-
-    .header-spacer {
-      display: none;
-    }
   }
 
   @container (max-width: #{$header-break-stack}) {
     .list-header {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr;
       grid-template-rows: auto auto auto;
       grid-template-areas:
-        "title"
-        "search"
-        "actions";
+        "title    title"
+        "search   search"
+        "actions  actions";
+
+      padding-inline-end: 3.5rem;
+    }
+
+    .header-start {
+      justify-content: center;
     }
 
     .header-actions {
-      justify-content: stretch;
+      justify-content: center;
     }
   }
 
@@ -342,9 +343,9 @@
   // CSS Grid absolute-in-area trick: when position:absolute is set on a
   // grid item that also has explicit grid-row/column placement, the CSS
   // spec uses that grid AREA as the containing block — not the whole
-  // grid container. Placing both the backdrop and panel at grid-row:2
-  // (the table row) means inset:0 fills exactly the table's bounds.
-  // The header (row 1) is excluded — the drawer never covers it.
+  // grid container. Both backdrop and panel are placed at grid-row:3
+  // (the table row) so inset:0 fills exactly the table's bounds.
+  // The header (row 1) and selbar (row 2) are excluded.
   @media (max-width: #{$panel-overlay-break}) {
     .list-container {
       display: grid;
@@ -362,8 +363,6 @@
 
     .panel-backdrop {
       display: block;
-      grid-row: 2;
-      grid-column: 1;
       position: absolute;
       inset: 0;
       z-index: 9;
@@ -376,7 +375,7 @@
     }
 
     .filter-panel {
-      grid-row: 2;
+      grid-row: 3;
       grid-column: 1;
       position: absolute;
       inset-block: 0;
@@ -391,11 +390,7 @@
       backdrop-filter: var(--blur-glass);
       -webkit-backdrop-filter: var(--blur-glass);
 
-      border-inline-start: none;
-      border-top-left-radius: var(--radius-lg);
-      border-bottom-left-radius: var(--radius-lg);
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
+      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
       box-shadow: var(--shadow-modal);
       overflow-y: auto;
 
@@ -454,7 +449,7 @@
 
     .filter-panel {
       position: fixed;
-      inset-block: 1rem;
+      inset-block: 0;
       right: 0;
       left: auto;
       z-index: 1000;
@@ -467,11 +462,13 @@
       border-bottom-right-radius: 0;
     }
 
-    // Backdrop covers the full viewport on phone
+    // Backdrop covers the full viewport on phone — no border-radius (full bleed)
     .panel-backdrop {
       position: fixed;
       inset: 0;
       z-index: 999;
+
+      border-radius: 0;
     }
 
     .table-area {

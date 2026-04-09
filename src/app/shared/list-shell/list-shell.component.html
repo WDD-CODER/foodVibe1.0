@@ -1,18 +1,16 @@
 <div class="list-container" [class.panel-open]="isPanelOpen()" [attr.dir]="dir()">
   <header class="list-header">
+    @if (!isPanelOpen()) {
+      <button type="button" class="open-panel-btn" (click)="panelToggle.emit()" aria-label="Toggle filters">
+        <lucide-icon name="menu" [size]="24"></lucide-icon>
+      </button>
+    }
     <div class="header-start">
-      @if (!isPanelOpen()) {
-        <button type="button" class="open-panel-btn" (click)="panelToggle.emit()" aria-label="Toggle filters">
-          <lucide-icon name="menu" [size]="24"></lucide-icon>
-        </button>
-      }
       <ng-content select="[shell-title]"></ng-content>
     </div>
-    <div class="header-spacer"></div>
     <div class="header-search">
       <ng-content select="[shell-search]"></ng-content>
     </div>
-    <div class="header-spacer"></div>
     <div class="header-actions">
       <ng-content select="[shell-actions]"></ng-content>
     </div>
@@ -29,14 +27,13 @@
     <div class="table-body">
       <ng-content select="[shell-table-body]"></ng-content>
     </div>
+    <div
+      class="panel-backdrop"
+      [class.visible]="isPanelOpen()"
+      (click)="panelToggle.emit()"
+      aria-hidden="true">
+    </div>
   </section>
-
-  <div
-    class="panel-backdrop"
-    [class.visible]="isPanelOpen()"
-    (click)="panelToggle.emit()"
-    aria-hidden="true">
-  </div>
 
   <aside class="filter-panel" [class.collapsed]="!isPanelOpen()">
     @if (isPanelOpen()) {

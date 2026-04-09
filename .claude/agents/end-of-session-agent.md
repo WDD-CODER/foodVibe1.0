@@ -185,6 +185,8 @@ Run techdebt skill scan on `src/app/`:
 
 Write: `.claude/techdebt-reports/techdebt-YYYY-MM-DD.md` (7-report retention — delete oldest if >7)
 
+**AUTHORITY: Write the techdebt report file autonomously — no user approval needed. This is a read/write operation on the agent's own session artifacts.**
+
 Store: `techdebt_summary` for inclusion in session-handoff.md
 
 Output brief summary:
@@ -325,19 +327,19 @@ Store: `archived_plans` list
 
 ---
 
-### Phase 10.5: Memory Enrichment (if claude-mem available)
+### Phase 10.5: Memory Enrichment (if MemPalace available)
 
-**SKIP IF:** claude-mem MCP tools are not active in this session.
+**SKIP IF:** MemPalace MCP tools are not active in this session.
 
-Before writing the session-handoff, enrich the report with semantic observations from claude-mem:
+Before writing the session-handoff, enrich the report with semantic observations from MemPalace:
 
-1. `search(query="decisions architecture tradeoffs", dateStart="<session-start>", project="foodvibe", limit=5)`
-2. For any relevant IDs: `get_observations(ids=[...])`
+1. `mempalace_search(query="decisions architecture tradeoffs", wing="wing_foodvibe", limit=5)`
+2. For key entities found: `mempalace_kg_query(entity="<component or decision>")`
 3. Append a **"Key Decisions This Session"** bullet list to the session-handoff template below (under `## What Was Done`)
 
-This enriches the handoff with *why* decisions were made, not just *what* changed — answering the #1 cross-session question.
+This enriches the handoff with *why* decisions were made, not just *what* changed.
 
-**If no relevant observations found:** Skip enrichment silently. Do not block session close on claude-mem availability.
+**If no relevant results found:** Skip enrichment silently. Do not block session close on MemPalace availability.
 
 ---
 
@@ -486,7 +488,19 @@ Full report: .claude/sessions/{session-id}/session-handoff.md
 
 ### Phase 13: Final Commit + Sync Check (ALWAYS — FINAL STEP)
 
-**Session artifacts commit:** After Phase 12 confirmation, commit any files the agent generated during this run (session-handoff.md, brief.md, techdebt reports, todo-archive changes). These are written *after* the Phase 6 code commit and must not be left uncommitted.
+**Step 1 — MemPalace diary write (MANDATORY):**
+
+Call `mempalace_diary_write` with a concise AAAK-format summary of the session:
+```
+agent_name: "claude"
+topic: "session-handoff"
+entry: "SESSION:{date}|{what-was-built}|{key-decisions}|{status}"
+```
+Example: `"SESSION:2026-04-09|migrated.claude-mem→mempalace+wired.19.mcp.tools|decided:CLI.diary.cmd+mandatory.hook|COMPLETE"`
+
+**SKIP IF:** MemPalace MCP tools are not active — skip silently, do not block.
+
+**Step 2 — Session artifacts commit:** After Phase 12 confirmation, commit any files the agent generated during this run (session-handoff.md, brief.md, techdebt reports, todo-archive changes). These are written *after* the Phase 6 code commit and must not be left uncommitted.
 
 ```bash
 git add .claude/sessions/{session-id}/ .claude/techdebt-reports/ .claude/todo-archive.md .claude/todo.md
