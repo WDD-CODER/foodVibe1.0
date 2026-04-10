@@ -71,13 +71,13 @@
     ]
   },
   "hooks": {
-    "Stop": [
+    "PostToolUse": [
       {
         "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -NoProfile -File .claude/reflect/auto-reflect.ps1"
+            "command": "powershell -NoProfile -File .claude/reflect/tool-failure-hook.ps1"
           }
         ]
       }
