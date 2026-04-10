@@ -395,6 +395,7 @@
         "next_column": "עמודה הבאה",
         "dashboard": "לוח בקרה",
         "back_to_dashboard": "חזרה ללוח הבקרה",
+        "back": "חזרה",
         "overview": "סקירה",
         "core_settings": "הגדרות ליבה",
         "inventory": "מלאי",
@@ -692,6 +693,13 @@
         "step_done_label": "הושלם ✓",
         "confirm_dish": "אשר מנה",
         "timer_start": "התחל טיימר",
-        "timer_cancel": "בטל"
+        "timer_cancel": "בטל",
+        "empty_recipe_book": "אין מתכונים עדיין",
+        "add_first_recipe": "הוסף מתכון ראשון",
+        "empty_inventory": "המלאי ריק",
+        "add_first_product": "הוסף מוצר ראשון",
+        "empty_suppliers": "אין ספקים עדיין",
+        "recipe_builder": "בונה מתכונים",
+        "quick_actions": "פעולות מהירות"
     }
 }

@@ -112,4 +112,21 @@ export class CellCarouselComponent implements AfterViewInit {
     this.currentIndex.set(idx < 0 ? list.length - 1 : idx);
     this.activeIndex.set(this.currentIndex());
   }
+
+  private touchStartX = 0;
+  private touchStartY = 0;
+  private readonly SWIPE_THRESHOLD = 30;
+
+  protected onTouchStart(event: TouchEvent): void {
+    this.touchStartX = event.touches[0].clientX;
+    this.touchStartY = event.touches[0].clientY;
+  }
+
+  protected onTouchEnd(event: TouchEvent): void {
+    const deltaX = event.changedTouches[0].clientX - this.touchStartX;
+    const deltaY = Math.abs(event.changedTouches[0].clientY - this.touchStartY);
+    if (Math.abs(deltaX) > deltaY && Math.abs(deltaX) > this.SWIPE_THRESHOLD) {
+      deltaX > 0 ? this.prev() : this.next();
+    }
+  }
 }

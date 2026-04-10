@@ -1,11 +1,14 @@
 <div class="list-container" [class.panel-open]="isPanelOpen()" [attr.dir]="dir()">
   <header class="list-header">
+    @if (!isPanelOpen()) {
+      <button type="button" class="open-panel-btn" (click)="panelToggle.emit()" aria-label="Toggle filters">
+        <lucide-icon name="menu" [size]="24"></lucide-icon>
+      </button>
+    }
+    <div class="header-back-btn">
+      <ng-content select="[shell-back-btn]"></ng-content>
+    </div>
     <div class="header-start">
-      @if (!isPanelOpen()) {
-        <button type="button" class="open-panel-btn" (click)="panelToggle.emit()" aria-label="Toggle filters">
-          <lucide-icon name="menu" [size]="24"></lucide-icon>
-        </button>
-      }
       <ng-content select="[shell-title]"></ng-content>
     </div>
     <div class="header-spacer"></div>
@@ -16,6 +19,7 @@
     <div class="header-actions">
       <ng-content select="[shell-actions]"></ng-content>
     </div>
+    <div class="header-ham-mirror" aria-hidden="true"></div>
   </header>
 
   <div class="selection-bar-area">
@@ -38,7 +42,9 @@
     aria-hidden="true">
   </div>
 
-  <aside class="filter-panel" [class.collapsed]="!isPanelOpen()">
+  <aside class="filter-panel" [class.collapsed]="!isPanelOpen()"
+         (touchstart)="onPanelTouchStart($event)"
+         (touchend)="onPanelTouchEnd($event)">
     @if (isPanelOpen()) {
       <button type="button" class="panel-toggle-icon" (click)="panelToggle.emit()" aria-label="Close filters">
         <lucide-icon name="circle-x" [size]="20"></lucide-icon>

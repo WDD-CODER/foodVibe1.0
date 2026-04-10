@@ -101,16 +101,14 @@ $cell-carousel-break: 768px;
     border-inline-start: 1px solid var(--border-default);
   }
 
-  /* Touch: keep arrows slightly visible when not hovering */
+  /* Touch: hide arrows — user swipes instead */
   @media (hover: none) {
-    .carousel-arrow {
-      opacity: 0.6;
+    .carousel-cell {
+      touch-action: pan-y;
     }
-  }
 
-  @media (max-width: 620px) {
     .carousel-arrow {
-      min-width: 44px;
+      display: none;
     }
   }
 }

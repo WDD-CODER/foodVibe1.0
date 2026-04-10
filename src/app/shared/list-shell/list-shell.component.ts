@@ -26,6 +26,24 @@ export class ListShellComponent {
 
   readonly panelToggle = output<void>();
 
+  private touchStartX = 0;
+  private touchStartY = 0;
+  private readonly SWIPE_THRESHOLD = 50;
+
+  protected onPanelTouchStart(event: TouchEvent): void {
+    this.touchStartX = event.touches[0].clientX;
+    this.touchStartY = event.touches[0].clientY;
+  }
+
+  protected onPanelTouchEnd(event: TouchEvent): void {
+    const deltaX = event.changedTouches[0].clientX - this.touchStartX;
+    const deltaY = Math.abs(event.changedTouches[0].clientY - this.touchStartY);
+    // Panel slides in from the right — swipe right to dismiss
+    if (deltaX > this.SWIPE_THRESHOLD && Math.abs(deltaX) > deltaY) {
+      this.panelToggle.emit();
+    }
+  }
+
   constructor() {
     const el = inject(ElementRef);
     const host = el.nativeElement as HTMLElement;

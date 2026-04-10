@@ -18,8 +18,10 @@
 
   .nav-link {
     display: inline-flex;
+    align-items: center;
     padding-inline: 1rem;
     padding-block: 0.5rem;
+    min-block-size: 44px;
     background: var(--bg-glass);
     color: var(--color-text-muted);
     text-decoration: none;
