@@ -24,7 +24,7 @@
           [class.active]="isExpanded_()"
           [class.grow-only]="useGrowAnimation_()"
           (click)="toggle()"
-          aria-label="Quick actions">
+          [attr.aria-label]="'quick_actions' | translatePipe">
     <lucide-icon name="flame" size="26"></lucide-icon>
   </button>
 </div>

@@ -1,4 +1,6 @@
-<div class="carousel-cell">
+<div class="carousel-cell"
+     (touchstart)="onTouchStart($event)"
+     (touchend)="onTouchEnd($event)">
   <span class="carousel-label" aria-hidden="true">{{ getCurrentLabel() }}</span>
   <ng-content></ng-content>
   <button type="button" class="carousel-arrow carousel-arrow-prev" (click)="prev(); $event.stopPropagation()" aria-label="Previous slide">

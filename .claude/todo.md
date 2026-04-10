@@ -2,6 +2,19 @@
 
 ---
 
+### Plan 262 — Mobile Layout Audit 375×812 (`plans/262-mobile-layout-audit.plan.md`)
+
+- [x] 1.1 Create ROUTE_INVENTORY.md from app.routes.ts — all paths, auth guards, children, page components
+- [x] 1.2 Read all page .component.html files — catalog interactive elements
+- [x] 1.3 Read shared/*.component.html files — catalog reusable interactive components
+- [x] 1.4 Write INTERACTIVE_CATALOG.md — page | element_selector | trigger_action | expected_behavior
+- [x] 2.1 /browse audit: launch localhost:4200 at 375×812, confirm RTL, screenshot all public pages
+- [x] 2.2 /browse audit: trigger all interactive elements per INTERACTIVE_CATALOG.md, screenshot each state
+- [x] 2.3 /browse audit: auth-required pages (login, then repeat crawl) — all auth pages captured; only /menu-library rows and /menu-intelligence/:id skipped (no DB data)
+- [x] 3.1 Create MOBILE_AUDIT_REPORT.md — critical/major/minor issues, clean pages, pass/fail checklist
+
+---
+
 ### Plan 261 — Claude-Mem Integration (`plans/261-claude-mem-integration.plan.md`)
 
 - [x] `.claude/settings.json` — merge claude-mem hooks (SessionStart, PostToolUse, Stop, SessionEnd) preserving existing Stop hook

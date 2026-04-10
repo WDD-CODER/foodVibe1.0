@@ -1,5 +1,5 @@
 <div class="dashboard-shell" dir="rtl">
-  <div class="dashboard-content">
+  <div class="dashboard-content" [class.dashboard-content--list]="activeTab() === 'venues'">
     @if (activeTab() === 'overview') {
       <app-dashboard-overview data-testid="dashboard-tab-overview" [activeTab]="activeTab()" (tabChange)="setTab($event)" />
     } @else if (activeTab() === 'metadata') {

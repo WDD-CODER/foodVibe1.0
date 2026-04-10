@@ -1,8 +1,14 @@
 <div class="trash-page" dir="rtl">
   <header class="trash-header">
+    <button type="button" class="header-btn header-btn--back"
+      data-testid="btn-back-to-dashboard-trash"
+      (click)="backToDashboard()">
+      <lucide-icon name="layout-dashboard" size="16"></lucide-icon>
+      {{ 'dashboard' | translatePipe }}
+    </button>
     <h1>{{ 'trash' | translatePipe }}</h1>
     <button type="button" class="btn-refresh" (click)="refresh()" [disabled]="loading()">
-      {{ loading() ? ('pending' | translatePipe) : ('general.refresh' | translatePipe) }}
+      {{ loading() ? ('pending' | translatePipe) : ('refresh' | translatePipe) }}
     </button>
   </header>
 
@@ -10,7 +16,7 @@
     <app-loader size="medium" label="loader_loading" />
   } @else if (loadError()) {
     <p class="trash-error">{{ loadError() }}</p>
-    <button type="button" class="btn-refresh" (click)="refresh()">{{ 'general.refresh_again' | translatePipe }}</button>
+    <button type="button" class="btn-refresh" (click)="refresh()">{{ 'refresh_again' | translatePipe }}</button>
   } @else {
     <div class="trash-sections">
       <!-- 1. Dishes -->
