@@ -5,12 +5,17 @@
         <lucide-icon name="menu" [size]="24"></lucide-icon>
       </button>
     }
+    <div class="header-back-btn">
+      <ng-content select="[shell-back-btn]"></ng-content>
+    </div>
     <div class="header-start">
       <ng-content select="[shell-title]"></ng-content>
     </div>
+    <div class="header-spacer"></div>
     <div class="header-search">
       <ng-content select="[shell-search]"></ng-content>
     </div>
+    <div class="header-spacer"></div>
     <div class="header-actions">
       <ng-content select="[shell-actions]"></ng-content>
     </div>
@@ -28,15 +33,18 @@
     <div class="table-body">
       <ng-content select="[shell-table-body]"></ng-content>
     </div>
-    <div
-      class="panel-backdrop"
-      [class.visible]="isPanelOpen()"
-      (click)="panelToggle.emit()"
-      aria-hidden="true">
-    </div>
   </section>
 
-  <aside class="filter-panel" [class.collapsed]="!isPanelOpen()">
+  <div
+    class="panel-backdrop"
+    [class.visible]="isPanelOpen()"
+    (click)="panelToggle.emit()"
+    aria-hidden="true">
+  </div>
+
+  <aside class="filter-panel" [class.collapsed]="!isPanelOpen()"
+         (touchstart)="onPanelTouchStart($event)"
+         (touchend)="onPanelTouchEnd($event)">
     @if (isPanelOpen()) {
       <button type="button" class="panel-toggle-icon" (click)="panelToggle.emit()" aria-label="Close filters">
         <lucide-icon name="circle-x" [size]="20"></lucide-icon>
