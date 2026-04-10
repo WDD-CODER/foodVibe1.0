@@ -139,14 +139,14 @@
 }
 
 .dev-guest-btn {
-  color: #d97706; /* intentional: amber-600 — softer warning shade, no token at this exact level */
-  border-color: #d97706;
+  color: var(--color-warning);
+  border-color: var(--color-warning);
   opacity: 0.85;
   font-size: 0.8rem;
 
   &:hover {
-    background: color-mix(in srgb, #d97706 10%, transparent);
-    color: #d97706; /* intentional: amber-600, see above */
+    background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+    color: var(--color-warning);
     opacity: 1;
   }
 }

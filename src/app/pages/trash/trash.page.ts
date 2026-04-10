@@ -48,7 +48,6 @@ export class TrashPage implements OnInit {
   }
 
   async refresh(): Promise<void> {
-    console.log('[TrashPage] refresh() clicked');
     this.loadError.set(null);
     await this.loadTrashInternal();
   }
