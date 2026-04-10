@@ -21,6 +21,16 @@ See `copilot-instructions.md §0.3` for the full agent roster and when to invoke
 See `copilot-instructions.md §0.4` for Task Force sizing and standard sequence.
 See `copilot-instructions.md §0.5` for model routing (Efficiency Tiers).
 
+## Playwright MCP (on-demand)
+
+Playwright is **disabled by default** to save CPU.
+To enable for a session: set `"playwright@claude-plugins-official": true` in `~/.claude/settings.json` and restart Claude Code. Disable again when done.
+
+Skills that use Playwright MCP:
+- `auto-solve.md`: uses `mcp__playwright__*` as fallback **only** if gstack `/browse` daemon is unavailable. Under normal conditions `/browse` handles all QA screenshots. If you run `/auto-solve` and `/browse` is down, re-enable Playwright first.
+
+---
+
 ## Core Skills (`.claude/skills/`)
 - **GitHub**: `git-agent` (`.claude/agents/git-agent.md`), `github-sync`, `worktree-setup`, `deploy-github-pages`
 - **Development**: `add-recipe`, `cssLayer`, `angularComponentStructure`, `elegant-fix`
