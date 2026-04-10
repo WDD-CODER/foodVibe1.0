@@ -49,6 +49,8 @@ All skill triggers defined in `copilot-instructions.md §0`.
 | `auto-solve.md` | Autonomous plan executor — finds, validates, executes, surfaces for approval |
 | `evaluate-me.md` | Session retrospective — evaluates agent performance, saves actionable report with file change suggestions |
 | `reflect.md` | Two paths: `/reflect` (session retrospective) or `/reflect <skill> [budget]` (autonomous improvement loop with optional iteration budget) |
+| `nightly-audit.md` | Autonomous nightly code audit — scans 6 violation categories, auto-fixes safe issues, flags the rest |
+| `audit-report.md` | Morning command — displays the latest nightly audit report summary |
 
 ## Preflight Checklist
 1. Read this file + `copilot-instructions.md` (mandatory gate).
