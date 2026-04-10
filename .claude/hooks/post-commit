@@ -1,0 +1,8 @@
+#!/bin/sh
+# MemPalace auto-mine: runs after commits that touch meaningful file types.
+# Routes through embed-runner.js (has singleton lock - safe for concurrent commits).
+
+CHANGED=$(git diff-tree --no-commit-id -r --name-only HEAD 2>/dev/null)
+if echo "$CHANGED" | grep -qE '\.(ts|html|scss|md|json|yaml|yml|js|plan\.md)$'; then
+  node "C:/Users/danwe/embed-runner.js" >> "C:/Users/danwe/embed-runner.log" 2>&1 &
+fi
