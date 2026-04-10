@@ -17,7 +17,11 @@ For **Medium and Large** tasks, use the native parallel execution infrastructure
 
 ### Phase 0 — Memory Check + Spin Up the Team
 
-**If MemPalace available:** Run `mempalace_search(query="<task keywords>", wing="foodvibe1.0", limit=5)` before assembling the team. Use findings to understand existing patterns and past attempts in the relevant area. Skip silently if MCP unavailable.
+**MemPalace Orient (MANDATORY before assembling team):**
+1. Run `mempalace_search(query="<task keywords>", wing="foodvibe1.0", limit=5)` to surface past decisions and existing patterns.
+2. If results found → pass relevant findings to spawned agents in their prompts (e.g., "MemPalace says X pattern exists at Y").
+3. If no results or MCP unavailable → proceed without blocking.
+4. When spawning agents, include explicit MemPalace search instructions: "Search MemPalace for [keywords] before reading files."
 
 1. Call `TeamCreate` with a descriptive `team_name`.
 2. Call `TaskCreate` for each sub-task identified in Phase 1 below.

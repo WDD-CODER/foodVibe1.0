@@ -103,7 +103,8 @@ This applies to ALL agents, skills, and commands when MemPalace MCP is available
 1. `mempalace_search(query="<2-3 words from task>", wing="foodvibe1.0", limit=5)` — orient
 2. `Grep` / `Read` — confirm, navigate, edit
 
-**Skip silently if MCP unavailable. Never block on MemPalace.**
+**If MCP unavailable:** Skip without blocking — but report in your completion message that MemPalace was not consulted, so the orchestrating agent has visibility.
+**When spawning subagents:** Always include explicit MemPalace search instructions in the agent prompt (e.g., "Search MemPalace for [keywords] before reading files").
 
 ---
 
@@ -172,6 +173,7 @@ Agent persona files live in `.claude/agents/`. Load on demand — do not pre-loa
 
 ## 2. The Gatekeeper Protocol
 
+* **Phase 0.5 (MemPalace Orient)**: Before planning, search MemPalace for related work: `mempalace_search(query="<2-3 feature keywords>", wing="foodvibe1.0", limit=5)`. If results found → check for past decisions, existing patterns, or known constraints that should inform the plan. Skip if MCP unavailable.
 * **Phase 1 (Decomposition)**: If task spans >2 sub-systems, decompose mentally. Identify all decisions that can't be inferred. Do NOT write the plan file yet.
 * **Phase 1.5 (Pre-Plan Q&A)**: If any questions exist → ask them ALL now using Q&A format. Stop and wait for answers. Do NOT write or save the plan until answered.
 * **Phase 2 (Plan + Hard Pause)**: Write `plans/XXX.plan.md` incorporating all answers. Every plan MUST include `# Atomic Sub-tasks`. Plans go in project `plans/` only (never `~/.cursor/plans/`). If the plan touches `.scss`/`.css`, add a step: run `cssLayer` skill before writing styles. Stop after writing. Output: *"Plan ready. Review it and say 'save the plan' to proceed."*
