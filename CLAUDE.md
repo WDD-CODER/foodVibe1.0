@@ -19,6 +19,14 @@ If a file cannot be read, respond **"No chef! I cannot read [filename]"** and st
 
 Subagents spawned via the Agent tool are running inside a task — they do **not** perform the session-start preflight ("Yes chef!" gate). The gate applies to main-session Claude only.
 
+## Subagent MemPalace Rule
+
+**When spawning ANY subagent** (Explore, Plan, or named agents), always include this instruction in the prompt:
+
+> Before reading files to understand this area, search MemPalace first: `mempalace_search(query="<relevant keywords>", wing="foodvibe1.0", limit=5)`. Use results to orient before file reads. Skip if MCP tools unavailable.
+
+This applies to all agent types. MemPalace has 6,000+ embedded drawers with project knowledge — CSS tokens, shared components, translation patterns, architecture decisions, past plans. Re-deriving this from raw files wastes tokens and time.
+
 ## Branch Rule
 
 - Never commit directly to `main` or `master`.

@@ -1,74 +1,316 @@
 ---
 name: nightly-audit
-description: Autonomous nightly code audit — 6 categories, detection patterns, auto-fix rules, git protocol, report generation
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+description: Autonomous nightly codebase audit — scans 6 violation categories, auto-fixes safe items, flags the rest, commits results on an audit branch, merges to main, and writes a report. Run via /nightly-audit or RemoteTrigger cron.
 ---
 
-# Nightly Code Audit — Skill Definition
+# Skill: nightly-audit
 
-Autonomous audit that scans the full codebase for 6 categories of violations, auto-fixes what's safe, flags the rest, commits to an audit branch, merges to main, and writes a report.
+**Trigger:** RemoteTrigger cron at 22:57 UTC (01:57 Israel time), or manual `/nightly-audit`.
 
-**DO NOT** modify the existing techdebt system (`.claude/skills/techdebt/SKILL.md`). They are separate.
-
----
-
-## Pre-flight
-
-1. Determine today's date: `YYYY-MM-DD`
-2. Set `AUDIT_BRANCH=audit/YYYY-MM-DD`
-3. Set `REPORT_PATH=.claude/reports/audit/YYYY-MM-DD-nightly-audit.md`
+**Separation:** This skill is independent of `techdebt`. Do NOT invoke the techdebt skill during a nightly audit run.
 
 ---
 
-## Git Safety Protocol
+## Phase 0 — Prerequisites
 
-Execute these 9 steps in order. If any step fails, abort and write a failure report.
+1. Verify you are on `main`: `git branch --show-current`
+   - If not on main: `git checkout main`
+2. Verify working tree is clean: `git status --porcelain`
+   - If dirty → **ABORT**. Write an abort report to `.claude/reports/audit/YYYY-MM-DD-nightly-audit.md` with the reason, then stop.
+3. Pull latest: `git pull origin main`
+4. Get today's date in `YYYY-MM-DD` format for all filenames and branch names.
 
-### Step 1 — Verify clean state
+---
+
+## Phase 1 — Create Audit Branch
+
 ```bash
-git status --porcelain
-```
-If output is non-empty → **ABORT**. Write failure report: "Working tree is dirty. Cannot run nightly audit."
-
-### Step 2 — Create audit branch
-```bash
-git checkout main
-git pull origin main
 git checkout -b audit/YYYY-MM-DD
 ```
-If branch already exists → append `-2`, `-3`, etc.
 
-### Step 3 — Run all 6 scan categories
-Execute each category (A–F) below. Collect all findings into a structured plan. **No file modifications yet.**
-
-### Step 4 — Commit the findings plan
-Write findings to `.claude/reports/audit/YYYY-MM-DD-findings.md`
+If branch already exists (re-run on same day), delete and recreate:
 ```bash
-git add .claude/reports/audit/YYYY-MM-DD-findings.md
+git branch -D audit/YYYY-MM-DD
+git checkout -b audit/YYYY-MM-DD
+```
+
+---
+
+## Phase 2 — Scan All 6 Categories
+
+Run all scans. Collect findings into a structured list. **Do not modify any files yet.**
+
+For each finding, record: `{ category, file, line, description, severity, action: "AUTO-FIX" | "FLAG" }`
+
+### Category A — Hardcoded Hebrew Strings
+
+**Scope:** `src/app/**/*.html`, `src/app/**/*.component.ts`
+**Exclude:** `**/dictionary.json`, `**/translation.service.ts`, `**/*.spec.ts`, `**/*.model.ts`
+
+**Detection:** Grep for Unicode Hebrew range `[\u0590-\u05FF]`
+
+**Response:** FLAG only (severity: Medium)
+- Cannot safely create translation keys unattended
+- Recommend: extract string, create key in dictionary.json, wire through TranslationService.translate() or translatePipe
+
+---
+
+### Category B — Shared Component Duplication
+
+**Scope:** All component directories under `src/app/pages/**/components/` and `src/app/core/components/`
+
+**Known shared components (32):**
+add-equipment-modal, add-item-modal, ai-recipe-modal, approve-stamp, carousel-header, cell-carousel, change-popover, chip-search-dropdown, confirm-modal, counter, custom-multi-select, custom-select, empty-state, export-preview, export-toolbar-overlay, floating-info-container, global-specific-modal, label-creation-modal, list-selection, list-shell, loader, quick-add-product-modal, quick-edit-product-modal, quick-edit-product-panel, restore-choice-modal, scaling-chip, scrollable-dropdown, selection-bar, supplier-modal, translation-key-modal, unit-creator, version-history-panel
+
+**Detection:** For each non-shared component directory, check if its name contains a substring that matches a shared component (e.g., a page-level "confirm-dialog" that duplicates "confirm-modal"). Also flag components whose template contains patterns like custom spinners, custom modals, or custom buttons when shared equivalents exist.
+
+**Response:** FLAG only (severity: Medium)
+- Recommend: replace with the matching shared component import
+
+---
+
+### Category C — Theme & Styling Violations
+
+**Scope:** `src/app/**/*.scss` (exclude `src/styles.scss`), `src/app/**/*.html`
+
+#### C1 — Hardcoded colors in SCSS
+
+**Detection:** Grep for `#[0-9a-fA-F]{3,8}`, `rgb(`, `rgba(`, `hsl(` in component `.scss` files.
+
+**Auto-fix token map (exact hex → CSS variable):**
+
+| Hex | Variable | Context |
+|---|---|---|
+| `#f0f4f8` | `var(--bg-body)` | any |
+| `#ffffff` | `var(--bg-pure)` | background/background-color property |
+| `#ffffff` | `var(--color-text-on-primary)` | color property |
+| `#0f172a` | `var(--color-text-main)` | any |
+| `#1e293b` | `var(--color-text-secondary)` | any |
+| `#64748b` | `var(--color-text-muted)` | any |
+| `#94a3b8` | `var(--color-text-muted-light)` | any |
+| `#14b8a6` | `var(--color-primary)` | any |
+| `#0d9488` | `var(--color-primary-hover)` | any |
+| `#a0833f` | `var(--color-accent-gold)` | any |
+| `#10b981` | `var(--color-success)` | any |
+| `#166534` | `var(--text-success)` | any |
+| `#92400e` | `var(--text-warning)` | any |
+| `#d97706` | `var(--color-warning)` | any |
+| `#b45309` | `var(--color-warning-hover)` | any |
+| `#f59e0b` | `var(--border-warning)` | any |
+| `#dc2626` | `var(--color-danger)` | any |
+| `#b91c1c` | `var(--color-danger-hover)` | any |
+
+**Rules:**
+- If hex matches a token exactly AND context is unambiguous → **AUTO-FIX**
+- If hex is `#ffffff` → check CSS property: `background`/`background-color` → `var(--bg-pure)`, `color` → `var(--color-text-on-primary)`. If property unclear → **FLAG**
+- If hex has no exact token match → **FLAG**
+- All `rgb(`, `rgba(`, `hsl(` → **FLAG** (too complex for automated matching)
+
+#### C2 — Inline styles in HTML
+
+**Detection:** Grep for `style="` in `.html` files.
+**Response:** FLAG only (severity: Low-Medium)
+- Exception: `[style.*]=` dynamic bindings are acceptable — skip those
+
+#### C3 — Font overrides in component SCSS
+
+**Detection:** Grep for `font-size:` and `font-family:` in component `.scss` files.
+**Response:** FLAG only (severity: Low)
+- These override the global Heebo typography system
+
+#### C4 — Engine class misuse
+
+**Detection:** Grep for `.c-` class selectors defined or extended in component `.scss` files.
+**Response:** FLAG only (severity: Medium)
+- `.c-*` engine classes belong exclusively in `src/styles.scss`
+
+---
+
+### Category D — Security Flags
+
+**Scope:** All `src/**/*.ts`, `src/**/*.html`, project root
+
+**All items are FLAG only. Never auto-fix security code. Severity: HIGH.**
+
+#### D1 — innerHTML bindings
+**Detection:** Grep for `[innerHTML]` in `.html` files.
+
+#### D2 — localStorage with sensitive data
+**Detection:** Grep for `localStorage\.(set|get)Item` where the key or value context matches `token|auth|jwt|session|password|secret|credential`.
+
+#### D3 — Console logging sensitive data
+**Detection:** Grep for `console\.(log|info|debug|warn)` in `.ts` files where the same line or next line references `request|req\.|user\.|token|password|auth|secret`.
+**Exclude:** `logging.service.ts`, `*.spec.ts`
+
+#### D4 — Hardcoded secrets
+**Detection:** Grep for patterns:
+- `sk-[a-zA-Z0-9]{20,}` (API keys)
+- `mongodb\+srv://` (connection strings with credentials)
+- `Bearer [a-zA-Z0-9]` (hardcoded bearer tokens)
+- `password\s*[:=]\s*['"][^'"]+['"]` (hardcoded passwords)
+- `secret\s*[:=]\s*['"][^'"]+['"]` (hardcoded secrets)
+**Exclude:** `.env` files (checked separately), `*.spec.ts`
+
+#### D5 — Non-HTTPS API calls
+**Detection:** Grep for `http://` in HTTP client calls (HttpClient, fetch). Exclude `localhost` and `127.0.0.1`.
+
+#### D6 — .env secrets exposure
+**Detection:** Check if `.env` exists in project root AND is NOT listed in `.gitignore`.
+Also check if `.env` contains patterns: `URI=`, `KEY=`, `SECRET=`, `PASSWORD=`.
+
+---
+
+### Category E — Dead Code & Hygiene
+
+**Scope:** `src/app/**/*.ts`
+**Exclude:** `*.spec.ts` for auto-fix actions
+
+#### E1 — Unused imports
+**Detection:** For each TypeScript file, parse `import { A, B, C } from '...'` lines. For each imported name, check if `\bName\b` appears in the file body (excluding the import line itself). If not → unused.
+**Response:** AUTO-FIX — rewrite the import line to remove unused names. If all names unused, remove the entire import line.
+
+#### E2 — Commented-out code blocks > 5 lines
+**Detection:** Find 5+ consecutive lines starting with `//` (excluding file headers and license blocks). Also find `/* ... */` blocks spanning 5+ lines that contain code-like patterns (function calls, variable declarations, etc.).
+**Response:** FLAG only (severity: Low) — developer may have left intentionally.
+
+#### E3 — Console.log in production paths
+**Detection:** Grep for `console\.log` in `.ts` files.
+**Exclude:** `logging.service.ts`, `*.spec.ts`, `*.spec.ts` files, lines inside `catch` blocks or error handlers.
+**Response:** AUTO-FIX — remove the `console.log` line.
+
+#### E4 — Empty catch blocks
+**Detection:** Grep for `catch\s*\([^)]*\)\s*\{\s*\}` (catch with empty body).
+**Response:** FLAG only (severity: Medium) — may need proper error handling.
+
+---
+
+### Category F — Angular Convention Drift
+
+**Scope:** `src/app/**/*.ts`
+**Exclude:** `*.spec.ts`
+
+#### F1 — Legacy decorators
+**Detection:** Grep for `@Input\(\)` and `@Output\(\)` in component/directive `.ts` files.
+**Response:** FLAG only (severity: Medium)
+- Recommend: migrate to `input()`, `output()`, `model()` signal-based API
+
+#### F2 — BehaviorSubject
+**Detection:** Grep for `BehaviorSubject` in `.ts` files.
+**Response:** FLAG only (severity: Medium)
+- Recommend: migrate to `signal()` with `WritableSignal`
+
+#### F3 — Manual subscriptions in components
+**Detection:** Grep for `.subscribe(` in `*.component.ts` files.
+**Response:** FLAG only (severity: Low-Medium)
+- Recommend: use `toSignal()`, `effect()`, or async pipe
+
+#### F4 — Oversized files
+**Detection:** Count lines in each `.ts` and `.component.ts` file. Flag if > 300 lines.
+**Response:** FLAG only (severity: Medium)
+- Report file name, line count, and suggest extraction/split strategy
+
+#### F5 — Trailing semicolons
+**Detection:** Grep for `;\s*$` (semicolons at end of lines) in `src/app/**/*.ts` files.
+
+**Auto-fix rules:**
+- Count semicolons per file
+- If file has **≤ 20 semicolons** → AUTO-FIX: remove trailing semicolons
+- If file has **> 20 semicolons** → FLAG only (too many for safe unattended bulk removal)
+- **Preserve:** semicolons inside `for(;;)` loops (mid-line, not matched by `;\s*$`)
+- **Preserve:** semicolons inside string literals
+- **Preserve:** semicolons in `src/main.ts`, `src/app/app.config.ts`, `src/app/app.routes.ts` (Angular bootstrap files where semicolons may be required by tooling)
+
+---
+
+## Phase 3 — Write Findings Plan
+
+Write all findings to `.claude/reports/audit/YYYY-MM-DD-plan.md`:
+
+```markdown
+# Audit Plan — YYYY-MM-DD
+
+## Findings Summary
+Total: N issues across X categories
+Auto-fix candidates: M
+Flag-only: F
+
+## Category A — Hebrew Strings
+[list each finding: file, line, text excerpt]
+
+## Category B — Shared Component Duplication
+[list each finding]
+
+## Category C — Styling Violations
+[list each finding, mark AUTO-FIX or FLAG]
+
+## Category D — Security Flags
+[list each finding]
+
+## Category E — Dead Code
+[list each finding, mark AUTO-FIX or FLAG]
+
+## Category F — Angular Convention Drift
+[list each finding, mark AUTO-FIX or FLAG]
+```
+
+Commit the plan:
+```bash
+git add .claude/reports/audit/YYYY-MM-DD-plan.md
 git commit -m "audit(plan): YYYY-MM-DD findings — N issues across X categories"
 ```
 
-### Step 5 — Execute auto-fixes
-Apply all AUTO-FIX actions (Categories C, E, F only — per rules below).
+---
 
-### Step 6 — Commit the fixes
+## Phase 4 — Execute Auto-Fixes
+
+Apply fixes ONLY for items marked AUTO-FIX in Phase 2. Categories that auto-fix:
+- **C1:** Replace exact hex matches with CSS variable tokens
+- **E1:** Remove unused imports
+- **E3:** Remove console.log lines (non-error paths)
+- **F5:** Remove trailing semicolons (files with ≤ 20 only)
+
+**Safety rules:**
+- Never modify a file you didn't scan
+- Never auto-fix anything in Category A, B, or D
+- If an auto-fix would break the line structure (e.g., removing an import that's the only one), clean up the empty import statement
+- After all fixes, verify no syntax errors were introduced by reading modified files
+
+Commit the fixes:
 ```bash
 git add -A
 git commit -m "audit(fix): YYYY-MM-DD — fixed N/M issues, M flagged for review"
 ```
-If no auto-fixes were applied, skip this step.
 
-### Step 7 — Merge to main
+If no auto-fixes were applied, skip this commit.
+
+---
+
+## Phase 5 — Merge to Main
+
 ```bash
 git checkout main
 git merge --ff-only audit/YYYY-MM-DD
 ```
-If `--ff-only` fails → try `git merge --no-ff audit/YYYY-MM-DD`. If actual conflicts → **ABORT**, write failure report, leave audit branch intact.
 
-### Step 8 — Write final report
-Copy `.claude/reports/audit/TEMPLATE.md` → `REPORT_PATH`. Fill in all values from the scan results.
+If fast-forward fails:
+```bash
+git merge --no-ff audit/YYYY-MM-DD -m "audit(merge): YYYY-MM-DD nightly audit"
+```
 
-### Step 9 — Commit the report
+If merge conflicts exist → **ABORT**. Leave audit branch intact. Write abort report.
+
+---
+
+## Phase 6 — Write Final Report
+
+1. Copy `.claude/reports/audit/TEMPLATE.md` to `.claude/reports/audit/YYYY-MM-DD-nightly-audit.md`
+2. Replace all placeholders with actual counts and data from Phase 2
+3. Populate the **Auto-fixed Items** table with every fix applied in Phase 4
+4. Populate the **Flagged for Manual Review** table with every FLAG item
+5. Fill in **Git Reference** with actual commit hashes
+6. Populate the **Trend** section by reading the last 7 reports in the folder, extracting their Summary tables, and comparing totals with direction arrows
+
+Commit the report:
 ```bash
 git add .claude/reports/audit/YYYY-MM-DD-nightly-audit.md
 git commit -m "audit(report): YYYY-MM-DD nightly report"
@@ -76,288 +318,52 @@ git commit -m "audit(report): YYYY-MM-DD nightly report"
 
 ---
 
-## The 6 Audit Categories
+## Phase 7 — Report Retention
+
+1. List all `*-nightly-audit.md` files in `.claude/reports/audit/`
+2. Parse dates from filenames
+3. Any report older than 30 days → `git mv` to `.claude/reports/audit/archive/`
+4. If any files moved, commit: `audit(archive): move reports older than 30 days`
 
 ---
 
-### Category A — Hardcoded Hebrew Strings
+## Phase 8 — Terminal Summary
 
-**Detection:**
-- Grep for regex `[\u0590-\u05FF]` in `src/**/*.html` and `src/**/*.component.ts`
-- **Exclude:** `**/dictionary.json`, `**/translation.service.ts`, `**/*.spec.ts`, `**/*.model.ts`
-
-**Response:** FLAG only. Never auto-fix — creating translation keys requires human judgment.
-
-**Severity:** Medium
-
-**Output format per finding:**
-```
-A | FLAG | src/app/.../file.html:42 | "שלום עולם" | Move to dictionary.json with translation key
-```
-
----
-
-### Category B — Shared Component Duplication
-
-**Detection:**
-Semantic comparison: for each component created or modified since the last audit, compare its template structure against the 32 known shared components in `src/app/shared/`:
+Output to terminal:
 
 ```
-add-equipment-modal, add-item-modal, ai-recipe-modal, approve-stamp,
-carousel-header, cell-carousel, change-popover, chip-search-dropdown,
-confirm-modal, counter, custom-multi-select, custom-select, empty-state,
-export-preview, export-toolbar-overlay, floating-info-container,
-global-specific-modal, label-creation-modal, list-selection, list-shell,
-loader, quick-add-product-modal, quick-edit-product-modal,
-quick-edit-product-panel, restore-choice-modal, scaling-chip,
-scrollable-dropdown, selection-bar, supplier-modal, translation-key-modal,
-unit-creator, version-history-panel
-```
-
-**Indicators of duplication:**
-- New component has modal/popover/dropdown pattern that matches an existing shared component
-- Template contains `<form>` + confirm/cancel buttons → check against `confirm-modal`, `global-specific-modal`
-- Template contains `<input>` + dropdown list → check against `chip-search-dropdown`, `custom-select`, `scrollable-dropdown`
-- Template contains carousel/slider pattern → check against `carousel-header`, `cell-carousel`
-
-**Response:** FLAG only. Requires human judgment on whether to refactor.
-
-**Severity:** Medium
-
-**Output format per finding:**
-```
-B | FLAG | src/app/.../new-component/ | Similar to shared/confirm-modal — consider reusing
+══════════════════════════════════════════════
+  NIGHTLY AUDIT COMPLETE — YYYY-MM-DD
+══════════════════════════════════════════════
+  Found:      N total issues
+  Auto-fixed: X
+  Flagged:    Y (need your review)
+  Security:   S flags    ← only if S > 0
+──────────────────────────────────────────────
+  Report: .claude/reports/audit/YYYY-MM-DD-nightly-audit.md
+  Branch: audit/YYYY-MM-DD
+  Run /audit-report to see full details.
+══════════════════════════════════════════════
 ```
 
 ---
 
-### Category C — Theme & Styling Violations
+## Abort Report Format
 
-**Detection (4 sub-checks):**
-
-**C1 — Hardcoded colors in component SCSS:**
-- Grep for `#[0-9a-fA-F]{3,8}` in `src/**/*.component.scss`
-- Grep for `rgb\(` / `rgba\(` / `hsl\(` / `hsla\(` in `src/**/*.component.scss`
-- **Exclude:** `src/styles.scss` (that's where tokens live)
-- **Exclude:** Comments (`//` and `/* */` lines)
-
-**C2 — Inline styles in templates:**
-- Grep for `style="` in `src/**/*.html`
-
-**C3 — Font overrides in component SCSS:**
-- Grep for `font-size\s*:` and `font-family\s*:` in `src/**/*.component.scss`
-
-**C4 — Engine class leaks:**
-- Grep for `\.c-` in `src/**/*.component.scss` (engine classes belong only in `src/styles.scss`)
-
-**Auto-fix rules (C1 only):**
-Apply ONLY when a hardcoded hex value has an exact 1-to-1 match in the token map below.
-
-**Token map (hex → CSS custom property):**
-
-| Hex (case-insensitive) | Token | Context rule |
-|---|---|---|
-| `#f0f4f8` | `var(--bg-body)` | Any property |
-| `#ffffff` | `var(--bg-pure)` | When property is `background`, `background-color`, or shorthand |
-| `#ffffff` | `var(--color-text-on-primary)` | When property is `color` |
-| `#0f172a` | `var(--color-text-main)` | Any property |
-| `#1e293b` | `var(--color-text-secondary)` | Any property |
-| `#64748b` | `var(--color-text-muted)` | Any property |
-| `#94a3b8` | `var(--color-text-muted-light)` | Any property |
-| `#14b8a6` | `var(--color-primary)` | Any property |
-| `#0d9488` | `var(--color-primary-hover)` | Any property |
-| `#a0833f` | `var(--color-accent-gold)` | Any property |
-| `#10b981` | `var(--color-success)` | Any property |
-| `#166534` | `var(--text-success)` | Any property |
-| `#92400e` | `var(--text-warning)` | Any property |
-| `#f59e0b` | `var(--border-warning)` | Any property |
-| `#d97706` | `var(--color-warning)` | Any property |
-| `#b45309` | `var(--color-warning-hover)` | Any property |
-| `#dc2626` | `var(--color-danger)` | Any property |
-| `#b91c1c` | `var(--color-danger-hover)` | Any property |
-
-**`#ffffff` disambiguation:**
-- Property contains `background` or `bg` → use `var(--bg-pure)`
-- Property is `color` → use `var(--color-text-on-primary)`
-- Ambiguous → FLAG, don't auto-fix
-
-**All other hardcoded colors** (no exact match) → FLAG only.
-**C2, C3, C4** → FLAG only, never auto-fix.
-
-**Severity:** Low-Medium
-
-**Output format:**
-```
-C | AUTO-FIX | src/app/.../file.scss:12 | #14b8a6 → var(--color-primary)
-C | FLAG     | src/app/.../file.scss:45 | #334155 — no matching token
-C | FLAG     | src/app/.../file.html:8  | inline style="..." detected
-```
-
----
-
-### Category D — Security Flags
-
-**Detection (6 sub-checks):**
-
-**D1 — innerHTML bindings:**
-- Grep for `\[innerHTML\]` in `src/**/*.html`
-
-**D2 — Sensitive localStorage usage:**
-- Grep for `localStorage\.(get|set|remove)Item\s*\(\s*['"]` in `src/**/*.ts`
-- Flag only when key name contains: `token`, `auth`, `jwt`, `session`, `password`, `secret`, `credential`
-
-**D3 — Sensitive console.log:**
-- Grep for `console\.log\(.*\b(request|user|token|auth|password|session)\b` in `src/**/*.ts`
-
-**D4 — Hardcoded secrets:**
-- Grep for patterns: `(api[_-]?key|secret|password|token)\s*[:=]\s*['"][^'"]{8,}` in `src/**/*.ts`
-- **Exclude:** type definitions, interfaces, enum declarations, comments
-
-**D5 — Non-HTTPS API URLs:**
-- Grep for `http://` in `src/**/*.ts` and `src/**/*.html`
-- **Exclude:** `http://localhost`, `http://127.0.0.1`, `http://0.0.0.0`
-
-**D6 — Secrets in .env:**
-- Check if `.env` exists and contains values for keys like `SECRET`, `KEY`, `TOKEN`, `PASSWORD`
-- Verify `.env` is in `.gitignore`
-
-**Response:** FLAG only, always. **Never auto-modify security-related code.**
-
-**Severity:** HIGH
-
-**Output format:**
-```
-D | FLAG | HIGH | src/app/.../file.html:15 | [innerHTML] binding — ensure input is sanitized
-D | FLAG | HIGH | src/app/.../file.ts:88  | localStorage stores 'authToken' — verify encryption
-```
-
----
-
-### Category E — Dead Code & Hygiene
-
-**Detection (4 sub-checks):**
-
-**E1 — Unused imports:**
-For each TypeScript file in `src/**/*.ts` (excluding `*.spec.ts`):
-1. Parse all `import { Name1, Name2 } from '...'` statements
-2. For each imported name, search the rest of the file for `\bName\b` (word boundary)
-3. If not found → unused import
-
-**E2 — Commented-out code blocks:**
-- Find blocks of 5+ consecutive lines that start with `//` or are within `/* ... */`
-- **Exclude:** JSDoc comments (`/** ... */`), license headers
-
-**E3 — Console.log in non-error paths:**
-- Grep for `console\.log\(` in `src/**/*.ts`
-- **Exclude:** lines inside `catch` blocks or error handler functions
-- **Exclude:** `*.spec.ts`, `*.test.ts`
-
-**E4 — Empty catch blocks:**
-- Grep for `catch\s*\([^)]*\)\s*\{\s*\}` (multiline) in `src/**/*.ts`
-
-**Auto-fix rules:**
-- **E1:** Remove the entire unused import name from the import statement. If all names in an import are unused, remove the entire import line.
-- **E3:** Remove the `console.log(...)` line entirely.
-
-**Safety:** If removing an import would leave a side-effect-only import (e.g., `import './polyfills'`), do NOT remove it.
-
-**E2, E4:** FLAG only.
-
-**Severity:** Low
-
-**Output format:**
-```
-E | AUTO-FIX | src/app/.../file.ts:3  | Removed unused import 'SomeService'
-E | FLAG     | src/app/.../file.ts:45 | 7-line commented-out block — review if intentional
-```
-
----
-
-### Category F — Angular Convention Drift
-
-**Detection (5 sub-checks):**
-
-**F1 — Legacy decorators:**
-- Grep for `@Input\(\)` and `@Output\(\)` in `src/**/*.ts` (excluding `*.spec.ts`)
-- These should be `input()`, `output()`, or `model()` signals
-
-**F2 — BehaviorSubject usage:**
-- Grep for `BehaviorSubject` in `src/**/*.ts` (excluding `*.spec.ts`)
-- Should be replaced with `signal()` or `computed()`
-
-**F3 — .subscribe() in components:**
-- Grep for `\.subscribe\(` in `src/**/*.component.ts`
-- Flag for reactive alternatives (`toSignal()`, `async` pipe, `effect()`)
-
-**F4 — Oversized files:**
-- For all `src/**/*.ts` files, count lines
-- Flag any file > 300 lines with its line count
-
-**F5 — Semicolons:**
-- Grep for `;\s*$` in `src/**/*.ts`
-- Count per file
-
-**Auto-fix rules (F5 only):**
-- Only auto-fix files with **20 or fewer** semicolons (safety limit for unattended runs)
-- Remove trailing semicolons: replace `;\s*$` with empty string
-- **Exclude:** `for(;;)` loop semicolons (mid-line, not matched by `;\s*$`)
-- **Exclude:** Lines where the semicolon is inside a string literal
-- **Exclude:** `*.spec.ts`, `*.d.ts`
-
-**F1–F4:** FLAG only, never auto-fix.
-
-**Severity:** Medium
-
-**Output format:**
-```
-F | FLAG     | src/app/.../file.ts:22 | @Input() — migrate to input() signal
-F | FLAG     | src/app/.../file.ts:10 | BehaviorSubject — migrate to signal()
-F | FLAG     | src/app/.../file.ts:55 | .subscribe() in component — consider toSignal()
-F | FLAG     | src/app/.../file.ts   | 412 lines — exceeds 300 line limit
-F | AUTO-FIX | src/app/.../file.ts:8 | Removed trailing semicolon (file has 15 total)
-```
-
----
-
-## Report Generation
-
-After all categories are scanned:
-
-1. Read `.claude/reports/audit/TEMPLATE.md`
-2. Copy to `REPORT_PATH`
-3. Fill in:
-   - Date in title
-   - Summary table counts per category
-   - Auto-fixed items list
-   - Flagged items list
-   - Git commit hashes
-4. **Trend section:** If previous reports exist in `.claude/reports/audit/`, read the last 7 and populate the trend table.
-
----
-
-## Report Retention
-
-After writing the new report:
-1. List all files in `.claude/reports/audit/` matching `*-nightly-audit.md`
-2. If any are older than 30 days → move to `.claude/reports/audit/archive/`
-3. Do NOT delete archived reports
-
----
-
-## Failure Report
-
-If any step in the Git Safety Protocol fails, write a minimal report:
+If the audit aborts at any phase, write this to `.claude/reports/audit/YYYY-MM-DD-nightly-audit.md`:
 
 ```markdown
-# Nightly Audit — YYYY-MM-DD — FAILED
+# Nightly Audit — YYYY-MM-DD — ABORTED
 
 ## Failure
-- Step: [which step failed]
-- Reason: [error message]
-- State: [branch left intact for debugging / rolled back to main]
+- **Phase:** [phase number and name]
+- **Reason:** [what went wrong]
+- **Branch:** audit/YYYY-MM-DD (preserved for debugging)
 
-## Action Required
-[What the developer needs to do to resolve]
+## Recovery
+1. Check the audit branch for partial work
+2. Resolve the issue (dirty tree, merge conflict, etc.)
+3. Re-run /nightly-audit
 ```
 
-Save to `REPORT_PATH` and commit to whatever branch is current.
+Commit abort report on main (if possible) or leave uncommitted with a terminal warning.

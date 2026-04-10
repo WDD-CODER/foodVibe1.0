@@ -57,7 +57,7 @@ description: Single source of truth for all project rules, standards, and skill/
 - **Interface design** `[SHARED]`: User asks to design, redesign, layout, or improve a UI page, dashboard, or component → invoke `/init` (new design) or `/audit` (check existing) or `/critique` (improve existing) or `/extract` (extract patterns) or `/status` (system state) as appropriate.
 - **Skill test suite** `[CC]`: User invokes `/reflect add-tests` → read `.claude/commands/reflect-add-tests.md` and follow it.
 - **Sweep stale todos** `[SHARED]`: At session end (after all tasks marked `[x]`) or on explicit request → read `.claude/commands/sweep-stale-todos.md` and follow it.
-- **Auto-reflect after correction cycle** `[CC]`: A correction cycle is complete when: (1) a skill was the active workflow, (2) one or more errors or failures occurred during execution, (3) you made file changes to address those errors, (4) the outcome is now successful. When a correction cycle completes → identify which skill was running and execute the AUTO MODE section of `.claude/commands/reflect.md` on it directly, inline. No user prompt needed. Do not spawn a subprocess — follow the AUTO MODE instructions yourself as the next step.
+- **Batch reflection** `[CC]`: User invokes `/reflect-list` → read `.claude/commands/reflect-list.md` and follow it. Processes the tool failure log and applies one low-risk fix per failure group.
 - **MemPalace search** `[CC]`: User invokes `/mp-search <query>` or `/recall <query>` → read `.claude/skills/mp-search/SKILL.md` and follow it.
 - **MemPalace wake-up** `[CC]`: User invokes `/mp-wake-up` → read `.claude/commands/mp-wake-up.md` and follow it.
 - **Memory search** `[CC]`: When answering "why did we...", "have we tried...", "what happened with...", or recalling past decisions → use MemPalace MCP tools before grepping session handoffs. Use `mempalace_search(query="...", wing="foodvibe1.0")` → filter by relevance → `mempalace_kg_query(entity="...")` for architectural decisions. **Use MemPalace when:** question is semantic/fuzzy, looking for past decisions/plans/constraints, need context across files. **Use Grep/Read when:** finding exact code/function names, structural navigation, editing files. If MemPalace tools unavailable, skip silently and grep session handoffs instead.
@@ -103,7 +103,8 @@ This applies to ALL agents, skills, and commands when MemPalace MCP is available
 1. `mempalace_search(query="<2-3 words from task>", wing="foodvibe1.0", limit=5)` — orient
 2. `Grep` / `Read` — confirm, navigate, edit
 
-**Skip silently if MCP unavailable. Never block on MemPalace.**
+**If MCP unavailable:** Skip without blocking — but report in your completion message that MemPalace was not consulted, so the orchestrating agent has visibility.
+**When spawning subagents:** Always include explicit MemPalace search instructions in the agent prompt (e.g., "Search MemPalace for [keywords] before reading files").
 
 ---
 
@@ -172,6 +173,7 @@ Agent persona files live in `.claude/agents/`. Load on demand — do not pre-loa
 
 ## 2. The Gatekeeper Protocol
 
+* **Phase 0.5 (MemPalace Orient)**: Before planning, search MemPalace for related work: `mempalace_search(query="<2-3 feature keywords>", wing="foodvibe1.0", limit=5)`. If results found → check for past decisions, existing patterns, or known constraints that should inform the plan. Skip if MCP unavailable.
 * **Phase 1 (Decomposition)**: If task spans >2 sub-systems, decompose mentally. Identify all decisions that can't be inferred. Do NOT write the plan file yet.
 * **Phase 1.5 (Pre-Plan Q&A)**: If any questions exist → ask them ALL now using Q&A format. Stop and wait for answers. Do NOT write or save the plan until answered.
 * **Phase 2 (Plan + Hard Pause)**: Write `plans/XXX.plan.md` incorporating all answers. Every plan MUST include `# Atomic Sub-tasks`. Plans go in project `plans/` only (never `~/.cursor/plans/`). If the plan touches `.scss`/`.css`, add a step: run `cssLayer` skill before writing styles. Stop after writing. Output: *"Plan ready. Review it and say 'save the plan' to proceed."*

@@ -1,52 +1,43 @@
 ---
-description: Autonomous nightly code audit — scans 6 violation categories, auto-fixes safe issues, flags the rest
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+description: Run the nightly codebase audit — scans 6 violation categories, auto-fixes safe items, commits results, writes report
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Agent
 ---
 
-# Command: nightly-audit
+# /nightly-audit
 
-Run the full nightly code audit pipeline. This command is designed to run autonomously (via RemoteTrigger cron) or manually.
+Run the full nightly audit pipeline. This command is designed to run autonomously (via RemoteTrigger cron) or manually.
 
-## Execution
+## Step 1 — Load Skill
 
-1. **Load skill:** Read `.claude/skills/nightly-audit/SKILL.md` and follow all instructions exactly.
+Read `.claude/skills/nightly-audit/SKILL.md` and follow it exactly.
 
-2. **Run pre-flight:** Determine today's date, set branch and report path variables.
+## Step 2 — Execute Pipeline
 
-3. **Execute Git Safety Protocol** (Steps 1–9 from the skill):
-   - Verify clean working tree on main
-   - Create `audit/YYYY-MM-DD` branch
-   - Run all 6 scan categories (A through F)
-   - Commit findings plan
-   - Execute auto-fixes (Categories C, E, F only — per skill rules)
-   - Commit fixes
-   - Merge to main (fast-forward preferred)
-   - Write final report from template
-   - Commit report
+Follow all 8 phases from the skill in order:
+1. Phase 0: Prerequisites (verify clean tree on main)
+2. Phase 1: Create audit branch
+3. Phase 2: Scan all 6 categories (no file changes)
+4. Phase 3: Write and commit findings plan
+5. Phase 4: Execute auto-fixes and commit
+6. Phase 5: Merge to main
+7. Phase 6: Write and commit final report
+8. Phase 7: Report retention cleanup
 
-4. **Terminal output** after completion:
-   ```
-   Nightly Audit — YYYY-MM-DD — COMPLETE
+## Step 3 — Terminal Summary
 
-   | Category | Found | Fixed | Flagged |
-   |----------|-------|-------|---------|
-   | A - Hebrew    | N | 0 | N |
-   | B - Shared    | N | 0 | N |
-   | C - Styling   | N | N | N |
-   | D - Security  | N | 0 | N |
-   | E - Dead code | N | N | N |
-   | F - Angular   | N | N | N |
+After the report is written, output the Phase 8 terminal summary from the skill.
 
-   Report: .claude/reports/audit/YYYY-MM-DD-nightly-audit.md
-   Run /audit-report to review details.
-   ```
+## Autonomous Mode
 
-5. **Run retention cleanup:** Archive reports older than 30 days.
+When invoked by RemoteTrigger (unattended):
+- Do not ask for confirmation at any step
+- Do not pause for user input
+- If any phase fails, write the abort report and stop
+- The report file is the source of truth — no other notification needed
 
-## Autonomous mode
+## Manual Mode
 
-When triggered by RemoteTrigger (cron), this command runs without user confirmation. All auto-fix rules have built-in safety limits — see the skill file for details.
-
-## Manual mode
-
-When run by a developer via `/nightly-audit`, the same pipeline executes. The developer can review the report immediately or wait until morning.
+When invoked by the developer:
+- Same pipeline, same behavior
+- The terminal summary serves as immediate feedback
+- Run `/audit-report` afterward to review the full report

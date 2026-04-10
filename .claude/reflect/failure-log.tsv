@@ -1,0 +1,53 @@
+﻿timestamp	tool_name	input_summary	error_snippet	processed
+2026-04-10 18:00:52	Write	C:\foodCo\foodVibe1.0\.claude\commands\reflect-list.md	| 1 | Bash | Build failed: NG0... | 4 | 2026-04-10 |	
+2026-04-10 18:01:05	Edit	C:\foodCo\foodVibe1.0\agent.md	1. Run `ng build` or full `getDiagnostics` ΓÇö mandatory, no exceptions. Do not skip because changes look "mechanical" o	
+2026-04-10 18:01:18	Edit	C:\foodCo\foodVibe1.0\.claude\copilot-instructions.md	- **Root-cause debugging** `[CC]`: For complex bugs where cause is unclear ΓåÆ invoke `/investigate`. It auto-freezes sc	
+2026-04-10 18:26:24	Bash	claude --version 2>/dev/null || echo "claude CLI not found in PATH"	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:27:41	Bash	claude trigger list 2>&1 || echo "---FALLBACK---" && claude schedule list 2>&1 |	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpec	
+2026-04-10 18:28:35	Bash	claude trigger list 2>&1 | head -20	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpec	
+2026-04-10 18:28:42	Bash	claude --help 2>&1 | head -40	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:28:48	Bash	claude --help 2>&1 | grep -i "trigger\|schedule\|cron"	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found; stderr=; interrupted=False; isImage=False; returnCodeInt	
+2026-04-10 18:34:36	Bash	git rev-parse --git-dir	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:34:36	Bash	git branch --show-current	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:34:37	Bash	git status --short	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:34:38	Bash	git diff --stat	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:34:41	Bash	git log origin/main..HEAD --oneline 2>/dev/null || echo "NO_REMOTE_TRACKING"	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpec	
+2026-04-10 18:34:42	Bash	git log --oneline -10	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:34:42	Bash	git rev-parse --show-toplevel	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:34:58	Bash	git diff --name-only origin/main..HEAD 2>/dev/null	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:35:02	Bash	ls -la C:/foodCo/foodVibe1.0/.claude/sessions/ 2>/dev/null || echo "NO_SESSIONS_	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:35:04	Bash	git diff --name-only --cached	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpec	
+2026-04-10 18:35:05	Bash	git diff --name-only	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:35:22	Bash	ls C:/foodCo/foodVibe1.0/.claude/worktrees/schdeule-chekup/ 2>/dev/null || echo 	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:35:27	Bash	ls -la .claude/skills/ | head -30	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:35:28	Bash	ls -la .claude/commands/	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:35:28	Bash	ls -laR .claude/reports/ 2>/dev/null || echo "No reports dir yet"	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:35:28	Bash	ls -la src/app/shared/components/ 2>/dev/null || echo "No shared components dir"	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:35:37	Bash	cd C:/foodCo/foodVibe1.0/.claude/worktrees/schdeule-chekup && git status --short	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:35:42	Bash	find src/app/shared -type d 2>/dev/null | head -20 || echo "No shared dir"	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:35:44	Bash	cd C:/foodCo/foodVibe1.0/.claude/worktrees/schdeule-chekup && git diff --stat 2>	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:35:55	Bash	ls C:/foodCo/foodVibe1.0/.claude/reflect/failure-log.tsv 2>/dev/null && cat C:/f	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:35:56	Bash	find src/app/shared -maxdepth 1 -type d | sort	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:36:10	Bash	find "C:\Users\danwe\.claude" -maxdepth 2 -name "*statusline*" -o -name "*status	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:36:10	Bash	find "C:\foodCo\foodVibe1.0\.claude" -maxdepth 2 -name "*statusline*" -o -name "	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:36:19	Bash	ls -la "/c/foodCo/foodVibe1.0/.claude/" 2>/dev/null	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:36:19	Bash	ls -la "/c/Users/danwe/.claude/" | grep -E "(statusline|settings|agent)" 2>/dev/	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:36:32	Bash	ls -la "/c/foodCo/foodVibe1.0/.claude/worktrees/" 2>/dev/null	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:36:32	Bash	mkdir -p C:/foodCo/foodVibe1.0/.claude/sessions/2026-04-10-reflect-infrastructur	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpec	
+2026-04-10 18:36:32	Bash	find "/c/foodCo/foodVibe1.0/.claude/" -name "*.md" -type f 2>/dev/null | head -2	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:36:33	Bash	find "/c/Users/danwe/.claude/projects/" -type d -name "*foodVibe*" 2>/dev/null	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:36:41	Bash	ls .env* 2>/dev/null; cat .env.example 2>/dev/null || cat .env 2>/dev/null | hea	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:36:48	Bash	ls -la "/c/Users/danwe/.claude/projects/C--foodCo-foodVibe1-0/memory/" 2>/dev/nu	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:36:49	Bash	ls "/c/foodCo/foodVibe1.0/.claude/skills/" 2>/dev/null | grep -i worktree	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:36:55	Bash	cd "/c/foodCo/foodVibe1.0" && git branch -a 2>/dev/null | head -10	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:37:01	Bash	cd C:/foodCo/foodVibe1.0/.claude/worktrees/schdeule-chekup && git diff .claude/s	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:37:19	Bash	git stash && git checkout main && git pull origin main 2>/dev/null; git checkout	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:40:46	Edit	C:\foodCo\foodVibe1.0\.claude\copilot-instructions.md	- **Root-cause debugging** `[CC]`: For complex bugs where cause is unclear ΓåÆ invoke `/investigate`. It auto-freezes sc	
+2026-04-10 18:40:56	Edit	C:\foodCo\foodVibe1.0\agent.md	1. Run `ng build` or full `getDiagnostics` ΓÇö mandatory, no exceptions. Do not skip because changes look "mechanical" o	
+2026-04-10 18:41:10	Edit	C:\Users\danwe\.claude\statusline-command.sh	except Exception:	
+2026-04-10 18:41:16	Edit	C:\Users\danwe\.claude\statusline-command.sh	except Exception:	
+2026-04-10 18:41:24	Bash	git status	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:41:37	Bash	git diff --stat && echo "---UNTRACKED---" && git ls-files --others --exclude-sta	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:41:38	Bash	git log --oneline -5	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 18:41:53	Bash	git add .claude/settings.json .claude/copilot-instructions.md agent.md .claude/c	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 19:03:39	Bash	git log --oneline -40 main	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	

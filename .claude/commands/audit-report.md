@@ -1,69 +1,40 @@
 ---
-description: Display the latest nightly audit report summary
+description: Display the latest nightly audit report — morning review command
 allowed-tools: Read, Glob, Bash
 ---
 
-# Command: audit-report
+# /audit-report
 
-Morning command to review the latest nightly audit results.
+Display the latest nightly audit report for morning review.
 
-## Execution
+## Usage
 
-1. **Find latest report:**
-   ```
-   Glob: .claude/reports/audit/*-nightly-audit.md
-   ```
-   Sort by filename (date-based), pick the most recent.
+```
+/audit-report              Show the latest report
+/audit-report YYYY-MM-DD   Show report for a specific date
+/audit-report --trend      Show trend summary from the last 7 audits
+/audit-report --list       List all available report dates
+```
 
-2. **If no report found:**
-   ```
-   No audit reports found. Run /nightly-audit to generate one.
-   ```
-   Stop.
+## Step 1 — Find Report
 
-3. **Read the report** and display the summary section to the terminal.
+**Default (no args):** Glob `.claude/reports/audit/*-nightly-audit.md`, sort by filename (date-based), pick the most recent.
 
-4. **Display format:**
-   ```
-   === Nightly Audit Report — YYYY-MM-DD ===
+**With date arg:** Read `.claude/reports/audit/YYYY-MM-DD-nightly-audit.md` directly. If not found, check `archive/`.
 
-   | Category              | Found | Fixed | Flagged |
-   |-----------------------|-------|-------|---------|
-   | A - Hebrew strings    |     N |     0 |       N |
-   | B - Shared components |     N |     0 |       N |
-   | C - Styling           |     N |     N |       N |
-   | D - Security          |     N |     0 |       N |
-   | E - Dead code         |     N |     N |       N |
-   | F - Angular drift     |     N |     N |       N |
-   | TOTAL                 |     N |     N |       N |
+**--list:** List all report filenames from both `audit/` and `audit/archive/`, sorted by date.
 
-   Auto-fixed: N items
-   Flagged for review: N items
+If no reports found: output `"No audit reports found. Run /nightly-audit first."`
 
-   Full report: .claude/reports/audit/YYYY-MM-DD-nightly-audit.md
-   ```
+## Step 2 — Display
 
-5. **If flagged items exist**, also display the top 5 highest-severity flagged items:
-   ```
-   Top flagged items:
-   1. [HIGH] src/app/.../file.ts:88 — localStorage stores 'authToken'
-   2. [HIGH] src/app/.../file.html:15 — [innerHTML] binding
-   3. [MED]  src/app/.../file.ts:22 — @Input() legacy decorator
-   ...
-   ```
+**Default and date mode:** Read the full report file and output its contents to terminal.
 
-6. **If the report is a FAILED report**, display the failure reason prominently:
-   ```
-   !!! AUDIT FAILED — YYYY-MM-DD !!!
-   Step: [N]
-   Reason: [error]
-   Action: [what to do]
-   ```
+**--trend mode:** Read the last 7 reports, extract only the Summary table from each, and display them side by side with direction arrows showing improvement/regression.
 
-7. **Trend display** (if trend data exists in the report):
-   ```
-   7-day trend:
-   04-03: 85 found, 12 fixed, 73 flagged
-   04-04: 80 found, 10 fixed, 70 flagged (delta: -5)
-   ...
-   ```
+## Step 3 — Suggest Next Actions
+
+After displaying, suggest:
+- If flagged items > 0: `"You have N items flagged for manual review. Check the 'Flagged for Manual Review' section above."`
+- If security flags > 0: `"⚠ N security flags found — review these first."`
+- `"To re-run the audit now: /nightly-audit"`
