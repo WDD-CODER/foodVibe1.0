@@ -49,6 +49,7 @@ All skill triggers defined in `copilot-instructions.md §0`.
 | `auto-solve.md` | Autonomous plan executor — finds, validates, executes, surfaces for approval |
 | `evaluate-me.md` | Session retrospective — evaluates agent performance, saves actionable report with file change suggestions |
 | `reflect.md` | Two paths: `/reflect` (session retrospective) or `/reflect <skill> [budget]` (autonomous improvement loop with optional iteration budget) |
+| `reflect-list.md` | Batch reflection — reviews tool failure log, applies fixes one by one |
 
 ## Preflight Checklist
 1. Read this file + `copilot-instructions.md` (mandatory gate).
@@ -56,29 +57,7 @@ All skill triggers defined in `copilot-instructions.md §0`.
 3. Check session handoff: `.claude/sessions/` (most recent) or `notes/session-handoffs/` (legacy, last 3 days).
 4. Check `.claude/todo.md` for related pending work.
 5. **[Claude Code]** Verify current branch (`git branch --show-current`). Never commit to `main`.
-6. **[Claude Code] Open reflection items:** Scan `.claude/reflect/open/*.reflect.md` for files containing `status: open`. If any found, output the reflection banner below before proceeding with the user's task. If none found, skip silently.
-
-### Reflection Banner (step 6 output)
-
-When open reflection items exist, output this banner (fill in dynamic values):
-
-```
-╔══════════════════════════════════════════════════════════╗
-║  OPEN REFLECTION ITEMS                                   ║
-║  Last auto-reflect run: <timestamp from newest file>     ║
-║  -> Found <N> issues · Applied <K> fix(es) · <M> open    ║
-╠══════════════════════════════════════════════════════════╣
-║  Stop mid-run:  ! echo. > .claude/reflect/.skip          ║
-╚══════════════════════════════════════════════════════════╝
-```
-
-Values:
-- **N** = total `.reflect.md` files in `.claude/reflect/open/` (all statuses)
-- **K** = files with `status: resolved` AND `## Action Taken` containing "Applied fix (kept)"
-- **M** = files with `status: open`
-- **timestamp** = `created:` value from the newest `.reflect.md` file
-
-After displaying the banner, continue with the user's task. Do NOT attempt to resolve the open items — the auto-reflect process handles that.
+6. **[Claude Code]** Check `.claude/reflect/failure-log.tsv` — if it has unprocessed rows, mention it briefly (e.g., "N unprocessed failures in reflect log — run `/reflect-list` when ready"). Do not attempt to fix them inline.
 
 ## Post-Execution Gate
 After completing any plan execution:
