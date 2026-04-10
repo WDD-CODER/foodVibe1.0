@@ -333,7 +333,7 @@ Store: `archived_plans` list
 
 Before writing the session-handoff, enrich the report with semantic observations from MemPalace:
 
-1. `mempalace_search(query="decisions architecture tradeoffs", wing="wing_foodvibe", limit=5)`
+1. `mempalace_search(query="decisions architecture tradeoffs", wing="foodvibe1.0", limit=5)`
 2. For key entities found: `mempalace_kg_query(entity="<component or decision>")`
 3. Append a **"Key Decisions This Session"** bullet list to the session-handoff template below (under `## What Was Done`)
 

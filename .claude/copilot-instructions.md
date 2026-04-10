@@ -58,7 +58,9 @@ description: Single source of truth for all project rules, standards, and skill/
 - **Skill test suite** `[CC]`: User invokes `/reflect add-tests` → read `.claude/commands/reflect-add-tests.md` and follow it.
 - **Sweep stale todos** `[SHARED]`: At session end (after all tasks marked `[x]`) or on explicit request → read `.claude/commands/sweep-stale-todos.md` and follow it.
 - **Auto-reflect after correction cycle** `[CC]`: A correction cycle is complete when: (1) a skill was the active workflow, (2) one or more errors or failures occurred during execution, (3) you made file changes to address those errors, (4) the outcome is now successful. When a correction cycle completes → identify which skill was running and execute the AUTO MODE section of `.claude/commands/reflect.md` on it directly, inline. No user prompt needed. Do not spawn a subprocess — follow the AUTO MODE instructions yourself as the next step.
-- **Memory search** `[CC]`: When answering "why did we...", "have we tried...", "what happened with...", or recalling past decisions → use MemPalace MCP tools before grepping session handoffs. Pattern: `mempalace_search(query="...", wing="wing_foodvibe")` → filter by relevance → `mempalace_kg_query(entity="...")` for architectural decisions. If MemPalace tools unavailable, skip silently and grep session handoffs instead.
+- **MemPalace search** `[CC]`: User invokes `/mp-search <query>` or `/recall <query>` → read `.claude/skills/mp-search/SKILL.md` and follow it.
+- **MemPalace wake-up** `[CC]`: User invokes `/mp-wake-up` → read `.claude/commands/mp-wake-up.md` and follow it.
+- **Memory search** `[CC]`: When answering "why did we...", "have we tried...", "what happened with...", or recalling past decisions → use MemPalace MCP tools before grepping session handoffs. Use `mempalace_search(query="...", wing="foodvibe1.0")` → filter by relevance → `mempalace_kg_query(entity="...")` for architectural decisions. **Use MemPalace when:** question is semantic/fuzzy, looking for past decisions/plans/constraints, need context across files. **Use Grep/Read when:** finding exact code/function names, structural navigation, editing files. If MemPalace tools unavailable, skip silently and grep session handoffs instead.
 
 ---
 
@@ -84,7 +86,28 @@ Load skills and standards files on-demand at the point of need — do not pre-lo
 
 ---
 
-## 0.3 Agent Personas (when to invoke)
+## 0.3 Context-First Protocol (All Agents)
+
+**Before reading files to understand an existing area of the codebase, run `mempalace_search` first.**
+This applies to ALL agents, skills, and commands when MemPalace MCP is available.
+
+| Situation | Use MemPalace | Then |
+|-----------|--------------|------|
+| Designing or planning | What patterns/decisions already exist? | Grep/Read to confirm |
+| Investigating a bug | What's the history of this area? | Grep/Read to locate exact code |
+| Writing tests | What's been tested? What has broken? | Read test files |
+| Security auditing | What past decisions constrain the surface? | Read auth/guard files |
+| Onboarding to an unfamiliar module | What is this thing and why? | Read breadcrumbs |
+
+**Pattern:**
+1. `mempalace_search(query="<2-3 words from task>", wing="foodvibe1.0", limit=5)` — orient
+2. `Grep` / `Read` — confirm, navigate, edit
+
+**Skip silently if MCP unavailable. Never block on MemPalace.**
+
+---
+
+## 0.4 Agent Personas (when to invoke)
 
 Agent persona files live in `.claude/agents/`. Load on demand — do not pre-load.
 
@@ -101,7 +124,7 @@ Agent persona files live in `.claude/agents/`. Load on demand — do not pre-loa
 
 ---
 
-## 0.4 Task Force & Documentation Standards
+## 0.5 Task Force & Documentation Standards
 
 **Task Sizing**
 | Size | Agent Count | Typical Use |
@@ -120,7 +143,7 @@ Agent persona files live in `.claude/agents/`. Load on demand — do not pre-loa
 
 ---
 
-## 0.5 Model Routing — Efficiency Tiers
+## 0.6 Model Routing — Efficiency Tiers
 
 | Agent | High Reasoning (Sonnet) | Procedural (Haiku/Flash) |
 |-------|------------------------|--------------------------|
