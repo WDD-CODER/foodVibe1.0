@@ -44,6 +44,22 @@ If `.worktree-cleanup` does not exist, skip this phase entirely.
 
 ---
 
+## Phase 2.5: Hook Guard (automatic, silent)
+
+After pull, ensure MemPalace git hooks are installed:
+
+```powershell
+if (!(Test-Path ".git/hooks/post-commit")) {
+    Copy-Item ".claude/hooks/post-commit" ".git/hooks/post-commit" -Force
+    Copy-Item ".claude/hooks/post-merge"  ".git/hooks/post-merge"  -Force
+    Write-Host "MemPalace hooks installed"
+}
+```
+
+If `.git/hooks/post-commit` already exists → skip silently. No output.
+
+---
+
 ## Phase 3: Session Intelligence `[High Reasoning — Sonnet/Gemini 1.5 Pro]`
 
 **Daily Log Audit:** Read latest `.claude/sessions/*/session-handoff.md` (preferred) or `notes/session-handoffs/` (legacy fallback) and `notes/github-sync/` files. Summarize the "State of the Project" for the current session.

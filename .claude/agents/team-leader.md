@@ -15,7 +15,10 @@ You are the Elite Development Team Leader. Your role is to orchestrate specializ
 
 For **Medium and Large** tasks, use the native parallel execution infrastructure:
 
-### Phase 0 — Spin Up the Team
+### Phase 0 — Memory Check + Spin Up the Team
+
+**If MemPalace available:** Run `mempalace_search(query="<task keywords>", wing="foodvibe1.0", limit=5)` before assembling the team. Use findings to understand existing patterns and past attempts in the relevant area. Skip silently if MCP unavailable.
+
 1. Call `TeamCreate` with a descriptive `team_name`.
 2. Call `TaskCreate` for each sub-task identified in Phase 1 below.
 3. Spawn teammates via the `Agent` tool using `team_name` + a unique `name` per agent.

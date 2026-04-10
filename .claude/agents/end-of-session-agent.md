@@ -185,6 +185,8 @@ Run techdebt skill scan on `src/app/`:
 
 Write: `.claude/techdebt-reports/techdebt-YYYY-MM-DD.md` (7-report retention — delete oldest if >7)
 
+**AUTHORITY: Write the techdebt report file autonomously — no user approval needed. This is a read/write operation on the agent's own session artifacts.**
+
 Store: `techdebt_summary` for inclusion in session-handoff.md
 
 Output brief summary:
@@ -331,7 +333,7 @@ Store: `archived_plans` list
 
 Before writing the session-handoff, enrich the report with semantic observations from MemPalace:
 
-1. `mempalace_search(query="decisions architecture tradeoffs", wing="wing_foodvibe", limit=5)`
+1. `mempalace_search(query="decisions architecture tradeoffs", wing="foodvibe1.0", limit=5)`
 2. For key entities found: `mempalace_kg_query(entity="<component or decision>")`
 3. Append a **"Key Decisions This Session"** bullet list to the session-handoff template below (under `## What Was Done`)
 
@@ -486,10 +488,22 @@ Full report: .claude/sessions/{session-id}/session-handoff.md
 
 ### Phase 13: Final Commit + Sync Check (ALWAYS — FINAL STEP)
 
-**Session artifacts commit:** After Phase 12 confirmation, commit any files the agent generated during this run (session-handoff.md, brief.md, techdebt reports, todo-archive changes). These are written *after* the Phase 6 code commit and must not be left uncommitted.
+**Step 1 — MemPalace diary write (MANDATORY):**
+
+Call `mempalace_diary_write` with a concise AAAK-format summary of the session:
+```
+agent_name: "claude"
+topic: "session-handoff"
+entry: "SESSION:{date}|{what-was-built}|{key-decisions}|{status}"
+```
+Example: `"SESSION:2026-04-09|migrated.claude-mem→mempalace+wired.19.mcp.tools|decided:CLI.diary.cmd+mandatory.hook|COMPLETE"`
+
+**SKIP IF:** MemPalace MCP tools are not active — skip silently, do not block.
+
+**Step 2 — Session artifacts commit:** After Phase 12 confirmation, commit any files the agent generated during this run (session-handoff.md, brief.md, techdebt reports, todo-archive changes). These are written *after* the Phase 6 code commit and must not be left uncommitted.
 
 ```bash
-git add .claude/sessions/{session-id}/ .claude/techdebt-reports/ .claude/todo-archive.md .claude/todo.md
+git add .claude/sessions/{session-id}/ .claude/techdebt-reports/ .claude/todo-archive.md .claude/todo.md .claude/reflect/open/
 git commit -m "chore(session): add session-handoff report for {session-id}"
 git push  # to same branch as Phase 6, or main if no feature branch
 ```

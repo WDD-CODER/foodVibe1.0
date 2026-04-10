@@ -4,15 +4,7 @@
   [gridTemplate]="'2fr 1fr minmax(48px, 0.8fr) 0.8fr 80px auto'"
   [mobileGridTemplate]="'2fr 1fr 80px auto'">
 
-  <ng-container shell-title>
-    @if (isUnderInventory) {
-      <a routerLink="/inventory/list" class="back-link">
-        <lucide-icon name="chevron-right" [size]="20"></lucide-icon>
-        {{ 'product_list' | translatePipe }}
-      </a>
-    }
-    <h2 class="page-title">{{ isUnderInventory ? ('logistics' | translatePipe) : ('equipment_list' | translatePipe) }}</h2>
-  </ng-container>
+  <h2 shell-title class="page-title">{{ isUnderInventory ? ('logistics' | translatePipe) : ('equipment_list' | translatePipe) }}</h2>
 
   <ng-container shell-search>
     <label class="visually-hidden" for="equipment-search">{{ 'search' | translatePipe }}</label>
@@ -185,6 +177,12 @@
   </ng-container>
 
   <ng-container shell-filters>
+    @if (isUnderInventory) {
+      <nav class="control-nav" aria-label="Inventory and logistics">
+        <a routerLink="/inventory/list" routerLinkActive="active" class="control-nav-link">{{ 'product_list' | translatePipe }}</a>
+        <a routerLink="/inventory/equipment" routerLinkActive="active" class="control-nav-link">{{ 'logistics' | translatePipe }}</a>
+      </nav>
+    }
     <div class="c-filter-section">
       <div class="c-filter-section-header">
         @if (hasActiveFilters_()) {

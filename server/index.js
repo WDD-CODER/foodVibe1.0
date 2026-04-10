@@ -25,9 +25,6 @@ app.use(helmet({
     directives: {
       defaultSrc:     ["'self'"],
       scriptSrc:      ["'self'"],
-      // Angular 19 compiles (click)="..." to addEventListener — no inline handlers
-      // needed. Setting to false removes the directive so script-src governs it.
-      scriptSrcAttr:  false,
       // Angular injects <style> tags for component encapsulation at runtime.
       styleSrc:       ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc:        ["'self'", "https://fonts.gstatic.com"],

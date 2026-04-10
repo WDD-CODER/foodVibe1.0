@@ -175,7 +175,8 @@ export const appConfig: ApplicationConfig = {
         Sparkles,
         ChefHat,
         Type,
-        Link
+        Link,
+        Coins
       })
     )
   ]
