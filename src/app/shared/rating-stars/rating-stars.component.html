@@ -1,0 +1,24 @@
+<div
+  class="rating-stars"
+  [class]="sizeClass_()"
+  [attr.aria-label]="'Rating: ' + value() + ' out of ' + max()"
+  role="img"
+  (mouseleave)="onLeave()"
+>
+  @for (star of stars_(); track star.index) {
+    <button
+      class="rating-stars__star"
+      type="button"
+      [class.rating-stars__star--full]="star.full"
+      [class.rating-stars__star--half]="star.half"
+      [class.rating-stars__star--empty]="star.empty"
+      [class.rating-stars__star--interactive]="!readonly()"
+      [disabled]="readonly()"
+      [attr.aria-label]="(star.index + 1) + ' star'"
+      (click)="onStarClick(star.index)"
+      (mouseenter)="onStarHover(star.index)"
+    >
+      <lucide-icon name="star" [size]="16"></lucide-icon>
+    </button>
+  }
+</div>

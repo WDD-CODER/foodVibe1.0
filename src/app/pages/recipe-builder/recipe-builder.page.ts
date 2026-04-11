@@ -39,6 +39,7 @@ import { ConfirmModalService } from '@services/confirm-modal.service';
 import { RecipeAiFlowService } from './services/recipe-ai-flow.service';
 import { useSavingState } from 'src/app/core/utils/saving-state.util';
 import { CounterComponent } from 'src/app/shared/counter/counter.component';
+import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component';
 
 @Component({
   selector: 'app-recipe-builder-page',
@@ -58,7 +59,8 @@ import { CounterComponent } from 'src/app/shared/counter/counter.component';
     ExportPreviewComponent,
     ExportToolbarOverlayComponent,
     ApproveStampComponent,
-    CounterComponent
+    CounterComponent,
+    RatingStarsComponent
   ],
   templateUrl: './recipe-builder.page.html',
   styleUrl: './recipe-builder.page.scss'
@@ -119,6 +121,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   /** User-uploaded recipe image as base64 data-URL; lives outside the form. */
   protected recipeImageUrl_ = signal<string | null>(null)
+
+  /** User-assigned rating (0 = unrated, 1–5 = rated); lives outside the form. */
+  protected recipeRating_ = signal<number>(0)
 
   /** Section cards collapsed by default (true = collapsed). */
   protected tableLogicCollapsed_ = signal(true);
@@ -274,6 +279,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   /** Resets the form to a blank state for creating a new recipe/dish. */
   private resetToNewForm_(): void {
     this.recipeImageUrl_.set(null)
+    this.recipeRating_.set(0)
     this.recipeId_.set(null);
     this.isApproved_.set(false);
     this.cachedPrepItems_ = [];
@@ -490,6 +496,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     this.isApproved_.set(recipe.is_approved_);
     this.recipeFormService_.patchFormFromRecipe(this.recipeForm_, recipe);
     this.recipeImageUrl_.set(recipe.imageUrl_ ?? null)
+    this.recipeRating_.set(recipe.rating_ ?? 0)
   }
 
 
@@ -1066,7 +1073,12 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private buildRecipeFromForm(): Recipe {
     const recipe = this.recipeFormService_.buildRecipeFromForm(this.recipeForm_, this.recipeId_(), this.isApproved_())
     const url = this.recipeImageUrl_()
-    return url ? { ...recipe, imageUrl_: url } : recipe
+    const rating = this.recipeRating_()
+    return {
+      ...recipe,
+      ...(url ? { imageUrl_: url } : {}),
+      ...(rating > 0 ? { rating_: rating } : {}),
+    }
   }
 
   //DELETE

@@ -45,6 +45,15 @@ description: Scans for duplicated code, dead code, style violations, and TODO de
 
 ---
 
+## Phase 0 — MemPalace Orient (MANDATORY before any file reads)
+
+1. Run `mempalace_search(query="tech debt dead code duplicates todos", limit=5)` to surface past audit findings and known debt areas.
+2. If results found → review for previously identified issues, known hotspots, or recurring patterns.
+3. If MCP unavailable → skip silently and continue to Phase 1.
+4. Report in completion message whether MemPalace was consulted.
+
+---
+
 ## Phase 1: Static Analysis `[Procedural — Haiku/Composer (Fast/Flash)]`
 
 **Duplicate Detection:** Scan for redundant utility functions or UI patterns that should move to `shared/` or `core/utils/`.

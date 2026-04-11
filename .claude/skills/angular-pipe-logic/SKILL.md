@@ -18,6 +18,15 @@ description: Scaffolds, implements, and tests Angular Pipes and Directives follo
 
 ---
 
+## Phase 0 — MemPalace Orient (MANDATORY before any file reads)
+
+1. Run `mempalace_search(query="pipe directive transform angular", limit=5)` to surface existing pipe/directive patterns and past decisions.
+2. If results found → review for existing implementations, constraints, or known patterns.
+3. If MCP unavailable → skip silently and continue to Phase 1.
+4. Report in completion message whether MemPalace was consulted.
+
+---
+
 ## Phase 1: Structural Scaffolding 
 
 **File Creation:** Generate standard `.ts` and `.spec.ts` files in the appropriate directory (`core/pipes/` or `shared/directives/`).

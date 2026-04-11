@@ -21,11 +21,29 @@ Subagents spawned via the Agent tool are running inside a task — they do **not
 
 ## Subagent MemPalace Rule
 
-**When spawning ANY subagent** (Explore, Plan, or named agents), always include this instruction in the prompt:
+**Before spawning ANY subagent** (Explore, Plan, or named agents):
+1. **YOU** (main Claude) call `mempalace_search(query="<relevant keywords>", limit=5)` first
+2. Include the top results as a `## MemPalace Context` section at the TOP of the subagent prompt
+3. Do NOT instruct the subagent to call `mempalace_search` — MCP tools are unreliable in subagent context ([GitHub #13898](https://github.com/anthropics/claude-code/issues/13898))
+4. If MCP unavailable in main session → note in the prompt: "MemPalace unavailable this session"
+5. If search returns no results → note: "MemPalace searched, no relevant results"
 
-> Before reading files to understand this area, search MemPalace first: `mempalace_search(query="<relevant keywords>", wing="foodvibe1.0", limit=5)`. Use results to orient before file reads. Skip if MCP tools unavailable.
+MemPalace has 6,000+ embedded drawers with project knowledge. Subagents receive this knowledge as injected context, not as tool calls they cannot reliably execute.
 
-This applies to all agent types. MemPalace has 6,000+ embedded drawers with project knowledge — CSS tokens, shared components, translation patterns, architecture decisions, past plans. Re-deriving this from raw files wastes tokens and time.
+## MemPalace Orient Rule (MANDATORY)
+
+**At the START of every task** — before reading files, before planning, before writing code — run:
+```
+mempalace_search(query="<2-3 keywords from the user's request>", limit=5)
+```
+This fires on ANY user request that involves code, files, components, or project knowledge. The only exceptions:
+- Pure conversation (questions about Claude Code itself, general chat)
+- A skill's Phase 0 already covers the same search → skip (no double-search)
+- MCP unavailable → skip silently
+
+**Why at task start, not at edit time:** If you wait until the edit step, read-only investigations and already-completed tasks skip it entirely. Searching first gives you context that shapes how you approach the task — even if you end up not writing code.
+
+This is the **universal safety net** — skills have their own Phase 0, but this rule covers everything that falls between the cracks.
 
 ## Branch Rule
 

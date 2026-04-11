@@ -4,7 +4,7 @@
       [class.custom-select-trigger--compact]="compact()"
       [class.custom-select-trigger--chip]="variant() === 'chip'"
       [class.open]="open()"
-      (click)="inputRef?.focus()">
+      (click)="openDropdown()">
       <input #inputRef
         type="text"
         [id]="triggerId()"

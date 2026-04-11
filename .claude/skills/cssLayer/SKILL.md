@@ -18,6 +18,15 @@ description: Enforces the project CSS architecture — engine placement, five-gr
 
 ---
 
+## Phase 0 — MemPalace Orient (MANDATORY before any file reads)
+
+1. Run `mempalace_search(query="css tokens styles engine layer", limit=5)` to surface existing CSS patterns and past decisions.
+2. If results found → review for existing implementations, constraints, or known patterns.
+3. If MCP unavailable → skip silently and continue to Phase 1.
+4. Report in completion message whether MemPalace was consulted.
+
+---
+
 ## Phase 1: Token & Engine Audit 
 
 **Engine Search:** Scan `src/styles.scss` for existing `.c-*` engine classes that can be composed before writing new styles.

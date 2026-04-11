@@ -5,6 +5,11 @@
     display: block;
   }
 
+  .col-rating {
+    display: flex;
+    align-items: center;
+  }
+
   /* Page title */
   .page-title {
     flex-shrink: 0;
@@ -37,6 +42,10 @@
 
   .recipe-grid-row:hover .c-icon-btn {
     opacity: 1;
+  }
+
+  .favorite-btn {
+    transition: color 0.15s ease, opacity 0.15s ease;
   }
 
   /* No results / empty state */
@@ -498,4 +507,14 @@ width: min-content;
       background: var(--bg-glass-hover);
     }
   }
+}
+
+/* Favorite button color — outside @layer to beat unlayered .c-icon-btn rule in styles.scss */
+.favorite-btn.is-favorited {
+  color: #e11d48;
+  opacity: 1;
+}
+
+.favorite-btn:hover:not(.is-favorited):not([disabled]) {
+  color: #e11d48;
 }

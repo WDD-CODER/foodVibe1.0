@@ -40,8 +40,8 @@ Replace the localStorage few-shot store with a shared MongoDB collection. Every 
 - [ ] Task 1: Add `GEMINI_SHOTS` collection helpers to `server/routes/ai.js` — `saveShot()`, `getApprovedShots(limit)`, `computeSoftWarnings()` — and remove `buildFewShotBlock` from request body path
 - [ ] Task 2: Add `POST /api/v1/ai/shots` endpoint — accepts `{ prompt, draft, status, source }`, runs hard + soft validation, saves to DB, returns `{ saved: true, warnings: [] }` or `{ saved: false, errors: [] }`
 - [ ] Task 3: Update `/generate`, `/generate-from-image`, `/generate-from-url` — remove `shots` from request body destructuring; call `getApprovedShots(2)` server-side instead
-- [ ] Task 4: Create `src/app/core/services/gemini-shots.service.ts` — `saveShot(prompt, draft, status, source)` calling `POST /api/v1/ai/shots`, returns `warnings[]`
-- [ ] Task 5: Update `ai-recipe-modal.component.ts` — on approval: call `saveShot(..., 'approved')`; on rejection/dismiss: call `saveShot(..., 'rejected')`; surface returned `warnings[]` as inline notice before builder opens
+- [x] Task 4: Create `src/app/core/services/gemini-shots.service.ts` — `saveShot(prompt, draft, status, source)` calling `POST /api/v1/ai/shots`, returns `warnings[]`
+- [x] Task 5: Update `ai-recipe-modal.component.ts` — on approval: call `saveShot(..., 'approved')`; on rejection/dismiss: call `saveShot(..., 'rejected')`; surface returned `warnings[]` as inline notice before builder opens
 - [ ] Task 6: Update `gemini.service.ts` — remove `getGeminiShots` import and `shots` from all request bodies
 - [ ] Task 7: Deprecate `gemini-shots.util.ts` — remove `addGeminiShot` call from modal, keep file as no-op stub for one release
 - [ ] Task 8: `ng build` + smoke test

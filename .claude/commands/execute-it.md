@@ -9,6 +9,15 @@ allowed-tools: Read, Write, Edit, Bash
 
 Execute the implementation plan from this conversation, incorporating any findings from plan-implementation verification.
 
+## Step -1 — MemPalace Orient (MANDATORY)
+
+Before executing, orient to existing project context:
+1. `mempalace_search(query="<2-3 keywords from the plan being executed>", limit=5)`
+2. Review results for existing patterns, past constraints, or known implementations.
+3. If MCP unavailable → skip silently.
+
+---
+
 ## Step 0: Compose & Save
 
 Before executing, persist the plan so it's tracked in `plans/` and `todo.md`.

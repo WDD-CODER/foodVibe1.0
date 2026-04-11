@@ -120,6 +120,14 @@
         [unconvertibleForWeight]="unconvertibleForWeight_()" [unconvertibleForVolume]="unconvertibleForVolume_()"
         [resetTrigger]="resetTrigger_()" [autoLabels]="liveAutoLabels_()" (openUnitCreator)="onOpenUnitCreator()"
         [imageUrl]="recipeImageUrl_()" (imageChange)="onImageChange($event)" [readonlyMode]="historyViewMode_()"></app-recipe-header>
+      <div class="builder-rating-row">
+        <app-rating-stars
+          [value]="recipeRating_()"
+          [readonly]="historyViewMode_()"
+          size="lg"
+          (ratingChange)="recipeRating_.set($event)"
+        />
+      </div>
     </section>
 
     <section class="builder-section">

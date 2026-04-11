@@ -1,0 +1,55 @@
+/* ─── Layout ─────────────────────────────────────────────── */
+:host {
+  display: inline-block;
+}
+
+.rating-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+/* ─── Size Variants ──────────────────────────────────────── */
+.rating-stars--sm lucide-icon { --lucide-size: 12px; }
+.rating-stars--md lucide-icon { --lucide-size: 16px; }
+.rating-stars--lg lucide-icon { --lucide-size: 22px; }
+
+/* ─── Star Button ────────────────────────────────────────── */
+.rating-stars__star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: default;
+  color: var(--color-border, #d1d5db);
+  transition: color 150ms ease, transform 100ms ease;
+
+  &--full {
+    color: var(--color-warning, #f59e0b);
+  }
+
+  &--half {
+    color: var(--color-warning, #f59e0b);
+    opacity: 0.5;
+  }
+
+  &--interactive {
+    cursor: pointer;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary, #2563eb);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+  }
+
+  &:disabled {
+    pointer-events: none;
+  }
+}

@@ -20,6 +20,15 @@ description: Defines the mandatory class structure, section ordering, and CRDUL 
 
 ---
 
+## Phase 0 — MemPalace Orient (MANDATORY before any file reads)
+
+1. Run `mempalace_search(query="component structure signals inputs", limit=5)` to surface existing component patterns and past decisions.
+2. If results found → review for existing implementations, constraints, or known patterns.
+3. If MCP unavailable → skip silently and continue to Phase 1.
+4. Report in completion message whether MemPalace was consulted.
+
+---
+
 ## Phase 1: Boilerplate Generation 
 
 **File Creation:** Standard four-file split: `.ts`, `.html`, `.scss`, `.spec.ts` (unless `inlineTemplate` requested). When refactoring an existing component, skip file creation — reorder class sections in place.

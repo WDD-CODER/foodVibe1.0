@@ -29,7 +29,7 @@
               <div class="ai-status-bar" [class.ai-status--sending]="status_() === 'sending'" [class.ai-status--done]="status_() === 'done'" [class.ai-status--error]="status_() === 'error'">
                 @if (status_() === 'sending') {
                   <app-loader size="small" [inline]="true" />
-                  <span>שולח בקשה לגמיני...</span>
+                  <span>{{ 'ai_recipe_sending_request' | translatePipe }}</span>
                 } @else if (status_() === 'error') {
                   <lucide-icon name="circle-x" [size]="16"></lucide-icon>
                   <span>{{ errorKey_() | translatePipe }}</span>
@@ -38,7 +38,7 @@
             }
 
             <div class="ai-usage-bar" [attr.data-status]="usageColor_()">
-              <span class="ai-usage-label">בקשות היום</span>
+              <span class="ai-usage-label">{{ 'ai_recipe_daily_requests' | translatePipe }}</span>
               <span class="ai-usage-count">{{ geminiUsage_().count }} / 1,000</span>
               <div class="ai-usage-track">
                 <div class="ai-usage-fill" [style.width.%]="(geminiUsage_().count / 1000) * 100"></div>
@@ -105,7 +105,7 @@
                 class="ai-tab-btn"
                 [class.ai-tab-btn--active]="inputMode_() === 'text'"
                 (click)="inputMode_.set('text')"
-                title="הזן טקסט"
+                [title]="'ai_recipe_input_text_mode' | translatePipe"
               >
                 <lucide-icon name="type" [size]="16"></lucide-icon>
               </button>
@@ -114,7 +114,7 @@
                 class="ai-tab-btn"
                 [class.ai-tab-btn--active]="inputMode_() === 'image'"
                 (click)="inputMode_.set('image')"
-                title="העלה תמונה"
+                [title]="'ai_recipe_input_image_mode' | translatePipe"
               >
                 <lucide-icon name="camera" [size]="16"></lucide-icon>
               </button>
@@ -123,7 +123,7 @@
                 class="ai-tab-btn"
                 [class.ai-tab-btn--active]="inputMode_() === 'url'"
                 (click)="inputMode_.set('url')"
-                title="הזן קישור"
+                [title]="'ai_recipe_input_url_mode' | translatePipe"
               >
                 <lucide-icon name="link" [size]="16"></lucide-icon>
               </button>
@@ -150,10 +150,10 @@
                   (change)="onImageSelected($event)"
                 />
                 @if (imagePreviewUrl_()) {
-                  <img class="ai-image-preview" [src]="imagePreviewUrl_()!" alt="תצוגה מקדימה" />
+                  <img class="ai-image-preview" [src]="imagePreviewUrl_()!" [alt]="'ai_recipe_image_preview_alt' | translatePipe" />
                 } @else {
                   <lucide-icon name="image" [size]="32"></lucide-icon>
-                  <span>לחץ להעלאת תמונה של מתכון</span>
+                  <span>{{ 'ai_recipe_upload_image_hint' | translatePipe }}</span>
                 }
               </label>
             }
@@ -174,10 +174,10 @@
               <div class="ai-status-bar" [class.ai-status--sending]="status_() === 'sending'" [class.ai-status--done]="status_() === 'done'" [class.ai-status--error]="status_() === 'error'">
                 @if (status_() === 'sending') {
                   <app-loader size="small" [inline]="true" />
-                  <span>שולח בקשה לגמיני...</span>
+                  <span>{{ 'ai_recipe_sending_request' | translatePipe }}</span>
                 } @else if (status_() === 'done') {
                   <lucide-icon name="circle-check" [size]="16"></lucide-icon>
-                  <span>תשובה התקבלה</span>
+                  <span>{{ 'ai_recipe_response_received' | translatePipe }}</span>
                 } @else if (status_() === 'error') {
                   <lucide-icon name="circle-x" [size]="16"></lucide-icon>
                   <span>{{ errorKey_() | translatePipe }}</span>
@@ -186,7 +186,7 @@
             }
 
             <div class="ai-usage-bar" [attr.data-status]="usageColor_()">
-              <span class="ai-usage-label">בקשות היום</span>
+              <span class="ai-usage-label">{{ 'ai_recipe_daily_requests' | translatePipe }}</span>
               <span class="ai-usage-count">{{ geminiUsage_().count }} / 1,000</span>
               <div class="ai-usage-track">
                 <div
@@ -253,10 +253,10 @@
                 </div>
               }
               <div class="ai-modal-footer">
-                <button type="button" class="c-btn-ghost" (click)="onDismissWarning()">ביטול</button>
+                <button type="button" class="c-btn-ghost" (click)="onDismissWarning()">{{ 'cancel' | translatePipe }}</button>
                 <button type="button" class="c-btn-primary" (click)="onOpenInBuilder()">
                   <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
-                  פתח בכל זאת
+                  {{ 'ai_recipe_open_anyway' | translatePipe }}
                 </button>
               </div>
             </div>

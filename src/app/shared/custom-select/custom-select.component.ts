@@ -174,7 +174,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
   }
 
   protected openDropdown(): void {
-    if (this._disabled()) return;
+    if (this._disabled() || this.open()) return;
     this.clearCloseTimeout();
     this.open.set(true);
     this.searchQuery_.set('');

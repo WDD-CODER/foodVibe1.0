@@ -36,14 +36,15 @@ import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.
 import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util';
 import { resolveRecipeAllergens, MAX_ALLERGEN_RECURSION } from 'src/app/core/utils/recipe-allergens.util';
 import { CellExpandState } from 'src/app/core/utils/cell-expand-state.util';
+import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component';
 
-export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens' | 'dateAdded' | 'dateUpdated';
+export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens' | 'dateAdded' | 'dateUpdated' | 'rating';
 type RecipeBulkField = 'labels_' | 'recipe_type_';
 
 @Component({
   selector: 'recipe-book-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, ClickOutSideDirective, VersionHistoryPanelComponent, LoaderComponent, ScrollableDropdownComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective, ListRowCheckboxComponent, SelectionBarComponent, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, ClickOutSideDirective, VersionHistoryPanelComponent, LoaderComponent, ScrollableDropdownComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective, ListRowCheckboxComponent, SelectionBarComponent, EmptyStateComponent, RatingStarsComponent],
   templateUrl: './recipe-book-list.component.html',
   styleUrl: './recipe-book-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -82,6 +83,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected isPanelOpen_ = signal<boolean>(true);
   protected dateFrom_ = signal<string | null>(null);
   protected dateTo_ = signal<string | null>(null);
+  protected showFavoritesOnly_ = signal<boolean>(false);
   /** When true: show items in range by creation OR by update. When false: by creation only. */
   protected dateIncludeByUpdated_ = signal<boolean>(false);
 
@@ -96,6 +98,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       { urlParam: 'dateFrom',        signal: this.dateFrom_,             serializer: NullableStringParam },
       { urlParam: 'dateTo',          signal: this.dateTo_,               serializer: NullableStringParam },
       { urlParam: 'dateByUpdated',   signal: this.dateIncludeByUpdated_, serializer: BooleanParam },
+      { urlParam: 'favorites',       signal: this.showFavoritesOnly_,   serializer: BooleanParam },
     ]);
 
     afterNextRender(() => {
@@ -338,6 +341,11 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       });
     }
 
+    if (this.showFavoritesOnly_()) {
+      const uid = this.currentUserId_();
+      recipes = uid ? recipes.filter(r => (r.favoritedBy_ ?? []).includes(uid)) : [];
+    }
+
     if (sortBy) {
       const isAsc = sortOrder === 'asc';
       recipes = [...recipes].sort((a, b) => {
@@ -355,6 +363,12 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   );
 
   protected isEmptyList_ = computed(() => this.kitchenState.visibleRecipes_().length === 0);
+
+  protected isFavoritedByCurrentUser_(recipe: Recipe): boolean {
+    const uid = this.currentUserId_();
+    if (!uid) return false;
+    return (recipe.favoritedBy_ ?? []).includes(uid);
+  }
 
   protected activeCostTooltipRecipe_ = computed(() => {
     const id = this.hoveredCostRecipeId_() ?? this.tappedCostRecipeId_();
@@ -466,9 +480,15 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
         return (a.addedAt_ ?? 0) - (b.addedAt_ ?? 0);
       case 'dateUpdated':
         return (a.updatedAt_ ?? 0) - (b.updatedAt_ ?? 0);
+      case 'rating':
+        return (a.rating_ ?? 0) - (b.rating_ ?? 0);
       default:
         return 0;
     }
+  }
+
+  protected onRatingChange(recipe: Recipe, value: number): void {
+    this.kitchenState.saveRecipe({ ...recipe, rating_: value }).subscribe();
   }
 
   protected onCarouselHeaderChange(index: number): void {
@@ -530,12 +550,14 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     this.dateFrom_.set(null);
     this.dateTo_.set(null);
     this.dateIncludeByUpdated_.set(false);
+    this.showFavoritesOnly_.set(false);
   }
 
   protected hasActiveFilters_ = computed(() =>
     Object.values(this.activeFilters_()).some(arr => arr.length > 0) ||
     this.dateFrom_() != null ||
-    this.dateTo_() != null
+    this.dateTo_() != null ||
+    this.showFavoritesOnly_()
   );
 
   protected selectedCountInCategory(category: { options: { checked_: boolean }[] }): number {
@@ -720,6 +742,19 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   protected onToggleApproval(recipe: Recipe): void {
     const updated = { ...recipe, is_approved_: !recipe.is_approved_ };
+    this.kitchenState.saveRecipe(updated).subscribe();
+  }
+
+  protected onToggleFavorite(recipe: Recipe): void {
+    const uid = this.currentUserId_();
+    if (!uid) return;
+    const current = recipe.favoritedBy_ ?? [];
+    const updated: Recipe = {
+      ...recipe,
+      favoritedBy_: current.includes(uid)
+        ? current.filter(id => id !== uid)
+        : [...current, uid],
+    };
     this.kitchenState.saveRecipe(updated).subscribe();
   }
 

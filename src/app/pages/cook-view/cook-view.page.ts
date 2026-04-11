@@ -1,6 +1,7 @@
 import { Component, DestroyRef, inject, signal, computed, OnInit, OnDestroy } from '@angular/core'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
+import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
 import { ActivatedRoute, NavigationStart, Router, RouterLink } from '@angular/router'
@@ -29,7 +30,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { FormatQuantityPipe } from 'src/app/core/pipes/format-quantity.pipe'
 import { quantityIncrement, quantityDecrement, QuantityStepOptions } from '../../core/utils/quantity-step.util'
-import { filter } from 'rxjs'
+import { filter, take } from 'rxjs'
 import { HeroFabService } from '@services/hero-fab.service'
 import { RecipeFormService } from '@pages/recipe-builder/services/recipe-form.service'
 
@@ -58,7 +59,8 @@ const MULTIPLIER_CHIPS = [
     FormatQuantityPipe,
     ExportPreviewComponent,
     ApproveStampComponent,
-    CounterComponent
+    CounterComponent,
+    RatingStarsComponent
   ],
   templateUrl: './cook-view.page.html',
   styleUrl: './cook-view.page.scss'
@@ -156,14 +158,17 @@ export class CookViewPage implements OnInit, OnDestroy {
     const recipe = this.recipe_()
     if (!recipe) return []
     const convs = recipe.yield_conversions_?.length ? recipe.yield_conversions_ : null
+    let opts: { value: string; label: string }[]
     if (convs?.length) {
       const seen = new Set<string>()
-      return convs
+      opts = convs
         .filter(c => c?.unit && !seen.has(c.unit) && (seen.add(c.unit), true))
         .map(c => ({ value: c.unit, label: c.unit }))
+    } else {
+      const u = recipe.yield_unit_ || 'unit'
+      opts = [{ value: u, label: u }]
     }
-    const u = recipe.yield_unit_ || 'unit'
-    return [{ value: u, label: u }]
+    return [...opts, { value: '__add_unit__', label: '+ יחידה חדשה' }]
   })
 
   protected convertedYieldAmount_ = computed(() => {
@@ -346,6 +351,13 @@ export class CookViewPage implements OnInit, OnDestroy {
 
   /** When user changes the yield unit, convert quantity to equivalent in the new unit (e.g. 1 kg → 4 when switching to "unit"). */
   protected onYieldUnitChange(newUnit: string): void {
+    if (newUnit === '__add_unit__') {
+      setTimeout(() => this.unitRegistry.openUnitCreator(), 0)
+      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe(unit => {
+        this.onYieldUnitChange(unit)
+      })
+      return
+    }
     const prevYield = this.convertedYieldAmount_()
     this.selectedUnit_.set(newUnit)
     if (prevYield > 0) {
@@ -549,6 +561,14 @@ export class CookViewPage implements OnInit, OnDestroy {
     })
   }
 
+  protected onRatingChange(value: number): void {
+    const recipe = this.recipe_()
+    if (!recipe) return
+    const updated = { ...recipe, rating_: value }
+    this.recipe_.set(updated)
+    this.kitchenState.saveRecipe(updated).subscribe()
+  }
+
   protected async onExportInfo(): Promise<void> {
     const recipe = this.recipe_()
     const qty = this.targetQuantity_()
@@ -675,6 +695,13 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   protected setIngredientUnit(index: number, unit: string): void {
+    if (unit === '__add_unit__') {
+      setTimeout(() => this.unitRegistry.openUnitCreator(), 0)
+      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe(newUnit => {
+        this.setIngredientUnit(index, newUnit)
+      })
+      return
+    }
     this.recipe_.update(r => {
       if (!r) return r
       return {
@@ -809,7 +836,8 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   protected getUnitOptionsForRow(row: ScaledIngredientRow): { value: string; label: string }[] {
-    return (row.availableUnits || []).map((u) => ({ value: u, label: u }))
+    const opts = (row.availableUnits || []).map((u) => ({ value: u, label: u }))
+    return [...opts, { value: '__add_unit__', label: '+ יחידה חדשה' }]
   }
 
   protected getDisplayAmount(rowIndex: number, row: ScaledIngredientRow): number {
