@@ -845,3 +845,11 @@ $B screenshot --clip 71,259,130,110	@{stdout=/c/Users/danwe/.bashrc: line 4: ng:
 2026-04-11 21:29:38	Bash	git commit -m "$(cat <<'EOF'
 feat(mempalace): harden integration ΓÇö Orient Rule	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
 2026-04-11 21:29:46	Bash	git status --short	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-11 21:31:50	Bash	git add .claude/reflect/failure-log.tsv .claude/standards-backend.md .claude/tod	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-11 21:32:01	Bash	git commit -m "$(cat <<'EOF'
+feat: cook-view polish, favorites, rating-stars, au	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-11 21:32:13	Bash	git push -u origin feat/nightly-audit-and-mempalace-integration	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-11 21:32:25	Bash	git fetch origin main && git merge-tree $(git merge-base HEAD origin/main) origi	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-11 21:32:37	Bash	git merge-tree $(git merge-base HEAD origin/main) origin/main HEAD 2>&1 | grep -	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-11 21:32:58	Bash	gh pr create --title "feat(mempalace): harden integration + app features" --body	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-11 21:33:35	Bash	git status --short	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
