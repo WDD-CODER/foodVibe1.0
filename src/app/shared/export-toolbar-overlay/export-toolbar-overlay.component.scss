@@ -1,18 +1,19 @@
-  /* Solid white toolbar, no blur; exact padding; save button teal per reference */
+  /* Glass toolbar — matches nav/modal glass theme */
   .export-toolbar-overlay {
     position: fixed;
     display: flex;
     inset-inline: 0;
     top: -10px;
     z-index: 250;
-    
+
     align-items: center;
     justify-content: center;
     min-height: 4.5rem;
-    
+
     padding-inline: 1.25rem;
     padding-block: 0.75rem;
 
+    background: var(--bg-glass-strong);
     backdrop-filter: blur(1px);
     border-block-end: 1px solid var(--border-default);
     .toolbar-export-grid {
@@ -37,7 +38,7 @@
       font-weight: 500;
       color: var(--color-text-main);
 
-      background: var(--bg-pure);
+      background: var(--bg-glass);
       border: 1px solid var(--border-default);
       border-radius: var(--radius-md);
 
@@ -55,13 +56,13 @@
       }
 
       &.save {
-        background: #22b29a; /* intentional: teal brand variant — slightly lighter than --color-primary */
+        background: var(--color-primary);
         color: var(--color-text-on-primary);
-        border-color: #22b29a;
+        border-color: var(--color-primary);
         font-weight: 600;
 
         &:hover:not(:disabled) {
-          background: #1ea088; /* intentional: hover shade for the above brand variant */
+          background: var(--color-primary-hover);
         }
       }
     }

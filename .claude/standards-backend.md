@@ -5,6 +5,21 @@ description: Backend collection registry, API contract, and persistence rules. L
 
 # Backend Persistence Standards
 
+## 0 — Tech Stack (verified 2026-04-11)
+
+| Layer | Technology | Version | Notes |
+|---|---|---|---|
+| **Runtime** | Node.js | v22.22.2 | ⚠️ v22+ has a DNS SRV bug on Windows — `index.js` sets `dns.setServers(['8.8.8.8','8.8.4.4'])` at the top as a workaround |
+| **Framework** | Express.js | 4.21.2 | |
+| **ODM** | Mongoose | 8.9.2 | |
+| **Database** | MongoDB Atlas | managed (M0 free tier) | SRV connection string: `mongodb+srv://` |
+| **Auth** | jsonwebtoken | 9.0.2 | |
+| **Security** | helmet | 8.1.0 | |
+| **Rate limiting** | express-rate-limit | 8.3.1 | |
+| **Config** | dotenv | 16.4.5 | |
+
+> When suggesting Node.js changes or debugging DNS/network issues, always check this version first.
+
 > Load this file when: adding a new entity type, adding new fields to an existing entity, changing CRUD logic in a data service, creating a new data service, or building any UI that reads/writes persisted data.
 
 > **Security**: Backend API security rules (JWT, rate-limiting, PBKDF2, etc.) live in `standards-security.md §9–17`. Do not duplicate them here.

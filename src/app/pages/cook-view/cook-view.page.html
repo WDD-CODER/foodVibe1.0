@@ -18,7 +18,15 @@
 
       <!-- Header bar: recipe name + actions + cost -->
       <div class="cv-header-bar">
-        <h1 class="cv-recipe-name">{{ recipe.name_hebrew }}</h1>
+        <div class="cv-name-rating">
+          <h1 class="cv-recipe-name">{{ recipe.name_hebrew }}</h1>
+          <app-rating-stars
+            [value]="recipe.rating_ ?? 0"
+            [readonly]="!isLoggedIn()"
+            size="md"
+            (ratingChange)="onRatingChange($event)"
+          />
+        </div>
         <div class="cv-header-actions">
           @if (editMode_()) {
             <div class="edit-actions">

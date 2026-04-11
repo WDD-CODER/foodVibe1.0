@@ -1,8 +1,8 @@
 <app-list-shell
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
-  [gridTemplate]="hideDateColumn_() ? '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) 80px auto' : '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) 0.8fr 80px auto'"
-  [mobileGridTemplate]="'2fr 1fr 0.8fr 80px auto'">
+  [gridTemplate]="hideDateColumn_() ? '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(80px, 0.7fr) minmax(72px, 0.85fr) 80px auto' : '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) minmax(80px, 0.7fr) 0.8fr 80px auto'"
+  [mobileGridTemplate]="'2fr 1fr 0.8fr 108px auto'">
 
   <h2 shell-title class="page-title">{{ 'recipe_book' | translatePipe }}</h2>
 
@@ -48,6 +48,9 @@
           {{ 'date_added' | translatePipe }}
         </div>
       }
+      <div class="col-rating c-grid-header-cell c-sortable-header" carouselHeaderColumn label="rating" (click)="setSort('rating')" (keydown.enter)="setSort('rating')" (keydown.space)="$event.preventDefault(); setSort('rating')" role="button" tabindex="0">
+        {{ 'rating' | translatePipe }}
+      </div>
     </app-carousel-header>
     <div class="col-cost c-grid-header-cell c-sortable-header" (click)="setSort('cost')" (keydown.enter)="setSort('cost')" (keydown.space)="$event.preventDefault(); setSort('cost')" role="button" tabindex="0">
       {{ 'cost' | translatePipe }}
@@ -118,11 +121,27 @@
               {{ formatAddedAt(recipe.addedAt_) }}
             </div>
           }
+          <div class="col-rating c-list-body-cell" cellCarouselSlide [label]="'rating' | translatePipe" (click)="$event.stopPropagation()">
+            <app-rating-stars
+              [value]="recipe.rating_ ?? 0"
+              [readonly]="!isLoggedIn()"
+              size="sm"
+              (ratingChange)="onRatingChange(recipe, $event)"
+            />
+          </div>
         </app-cell-carousel>
         <div class="col-cost c-list-body-cell cost-cell-wrap" (mouseenter)="showCostTooltip(recipe._id, $event)" (mouseleave)="hideCostTooltip()" (click)="toggleCostTooltipTap(recipe._id, $event)" [attr.aria-describedby]="(hoveredCostRecipeId_() === recipe._id || tappedCostRecipeId_() === recipe._id) ? 'cost-tooltip-' + recipe._id : null">
           ₪{{ getRecipeCost(recipe) | number:'1.2-2' }}
         </div>
         <div class="c-col-actions c-list-body-cell">
+          <button type="button"
+            class="c-icon-btn favorite-btn"
+            [class.is-favorited]="isFavoritedByCurrentUser_(recipe)"
+            (click)="onToggleFavorite(recipe); $event.stopPropagation()"
+            [attr.aria-label]="(isFavoritedByCurrentUser_(recipe) ? 'remove_from_favorites' : 'add_to_favorites') | translatePipe"
+            [disabled]="!isLoggedIn()">
+            <lucide-icon name="heart" [size]="18"></lucide-icon>
+          </button>
           <button type="button" class="c-icon-btn" (click)="onCookRecipe(recipe); $event.stopPropagation()"
             [attr.aria-label]="'cook' | translatePipe"
             [disabled]="!isLoggedIn()"
@@ -148,6 +167,16 @@
   </ng-container>
 
   <ng-container shell-filters>
+    @if (isLoggedIn()) {
+      <div class="c-filter-category favorites-filter-category">
+        <label class="c-filter-option">
+          <input type="checkbox"
+            [checked]="showFavoritesOnly_()"
+            (change)="showFavoritesOnly_.set(!showFavoritesOnly_())" />
+          <span>{{ 'show_favorites_only' | translatePipe }}</span>
+        </label>
+      </div>
+    }
     <div class="search-section">
       <div class="ingredient-search-block">
         <div class="ingredient-search-input-wrap">

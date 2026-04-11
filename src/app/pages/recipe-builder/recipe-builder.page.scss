@@ -68,6 +68,13 @@
     margin: 0 auto;
     gap: 1.5rem;
 
+    .builder-rating-row {
+      display: flex;
+      align-items: center;
+      padding-block: 0.5rem;
+      padding-inline: 0.75rem;
+    }
+
     .builder-section {
       position: relative;
 

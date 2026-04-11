@@ -11,7 +11,10 @@ export interface LogEvent {
 
 @Injectable({ providedIn: 'root' })
 export class LoggingService {
+  private _logServerDown = false
+
   private sendToLogServer(level: string, event: LogEvent): void {
+    if (this._logServerDown) return
     const url = (environment as { logServerUrl?: string }).logServerUrl
     if (!url || typeof fetch === 'undefined') return
     const payload = {
@@ -26,7 +29,9 @@ export class LoggingService {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
       keepalive: true
-    }).catch(() => { /* fire-and-forget; ignore if server not running */ })
+    })
+      .then(res => { if (res.status === 401 || res.status === 403) this._logServerDown = true })
+      .catch(() => { this._logServerDown = true })
   }
 
   info(message: string, context?: LogContext): void

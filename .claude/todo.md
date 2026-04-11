@@ -2,6 +2,18 @@
 
 ---
 
+### Plan 263 — Favorites Button on Recipe-Book List (`plans/263-favorites-recipe-book.plan.md`)
+
+- [x] 1 — `src/app/core/models/recipe.model.ts` — add `favoritedBy_?: string[]` field
+- [x] 2 — `src/app/app.config.ts` — register `Heart` Lucide icon
+- [x] 3 — `public/assets/data/dictionary.json` — add 4 translation keys (favorites, show_favorites_only, add_to_favorites, remove_from_favorites)
+- [x] 4 — `recipe-book-list.component.ts` — add showFavoritesOnly_ signal, isFavoritedByCurrentUser_ computed, onToggleFavorite method, filter logic, URL state param
+- [x] 5 — `recipe-book-list.component.html` — add heart button in actions column
+- [x] 6 — `recipe-book-list.component.html` — add "Favorites only" filter toggle in sidebar; update hasActiveFilters_ and clearAllFilters
+- [x] 7 — `recipe-book-list.component.scss` — add .favorite-btn styles
+
+---
+
 ### Plan 262 — Mobile Layout Audit 375×812 (`plans/262-mobile-layout-audit.plan.md`)
 
 - [x] 1.1 Create ROUTE_INVENTORY.md from app.routes.ts — all paths, auth guards, children, page components
@@ -305,7 +317,7 @@
 - [x] Refactor menu-intelligence.page.scss into partials (deferred)
 
 ### Plan 167 — Category/unit add-new audit (`plans/167-category-unit-add-new-audit.plan.md`) [TRIAGED 2026-04-02]
-- [ ] Optional: Cook-view “add new unit” so user can add from there
+- [x] Optional: Cook-view “add new unit” so user can add from there
 
 ---
 
