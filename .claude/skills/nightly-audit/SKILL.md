@@ -11,6 +11,14 @@ description: Autonomous nightly codebase audit — scans 6 violation categories,
 
 ---
 
+## MemPalace Orient (before audit begins)
+
+1. Run `mempalace_search(query="audit violations style code quality", limit=5)` to surface past audit findings and known violation hotspots.
+2. If results found → use them to prioritize scan areas and avoid re-flagging resolved issues.
+3. If MCP unavailable → skip silently and continue.
+
+---
+
 ## Phase 0 — Prerequisites
 
 1. Verify you are on `main`: `git branch --show-current`

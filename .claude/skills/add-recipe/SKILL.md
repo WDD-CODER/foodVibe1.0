@@ -18,6 +18,15 @@ description: Extracts, validates, and commits a new recipe or dish from an image
 
 ---
 
+## Phase 0 — MemPalace Orient (MANDATORY before any file reads)
+
+1. Run `mempalace_search(query="recipe ingredients steps metadata", limit=5)` to surface existing recipe patterns and past decisions.
+2. If results found → review for existing implementations, constraints, or known patterns.
+3. If MCP unavailable → skip silently and continue to Phase 1.
+4. Report in completion message whether MemPalace was consulted.
+
+---
+
 ## Phase 1: Data Extraction 
 
 **OCR / Parsing:** Extract ingredients, instructions, and metadata (yield, prep time) from the source.

@@ -55,6 +55,10 @@ All skill triggers defined in `copilot-instructions.md §0`.
 
 ## Preflight Checklist
 1. Read this file + `copilot-instructions.md` (mandatory gate).
+1.5. **MemPalace wake-up (once per session):**
+     - Run `mempalace_diary_read(agent_name="claude-main", last_n=3)` to see what past sessions worked on
+     - Run `mempalace_status()` to confirm palace is live
+     - If either fails → note "MemPalace unavailable" and continue (non-blocking)
 2. **GitHub sync (once-per-day):** Check `notes/github-sync/<today>.md` — if missing, run `github-sync` skill.
 3. Check session handoff: `.claude/sessions/` (most recent) or `notes/session-handoffs/` (legacy, last 3 days).
 4. Check `.claude/todo.md` for related pending work.

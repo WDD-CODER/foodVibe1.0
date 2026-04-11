@@ -18,6 +18,15 @@ description: Audits and hardens authentication guards, mutation entry points, an
 
 ---
 
+## Phase 0 — MemPalace Orient (MANDATORY before any file reads)
+
+1. Run `mempalace_search(query="auth guard interceptor route logging", limit=5)` to surface past security decisions and known constraints.
+2. If results found → review for existing implementations, constraints, or known patterns.
+3. If MCP unavailable → skip silently and continue to Phase 1.
+4. Report in completion message whether MemPalace was consulted.
+
+---
+
 ## Phase 1: Surface Audit 
 
 **Entry Point Scan:** Identify all new routes in `app.routes.ts` and new mutation handlers (buttons, FABs, modals) that require protection.

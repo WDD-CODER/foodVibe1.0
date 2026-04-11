@@ -333,9 +333,10 @@ Store: `archived_plans` list
 
 Before writing the session-handoff, enrich the report with semantic observations from MemPalace:
 
-1. `mempalace_search(query="decisions architecture tradeoffs", wing="foodvibe1.0", limit=5)`
+1. `mempalace_search(query="decisions architecture tradeoffs", limit=5)`
 2. For key entities found: `mempalace_kg_query(entity="<component or decision>")`
-3. Append a **"Key Decisions This Session"** bullet list to the session-handoff template below (under `## What Was Done`)
+3. `mempalace_diary_read(agent_name="claude-main", last_n=1)` — check last session's diary for continuity
+4. Append a **"Key Decisions This Session"** bullet list to the session-handoff template below (under `## What Was Done`)
 
 This enriches the handoff with *why* decisions were made, not just *what* changed.
 
@@ -499,6 +500,12 @@ entry: "SESSION:{date}|{what-was-built}|{key-decisions}|{status}"
 Example: `"SESSION:2026-04-09|migrated.claude-mem→mempalace+wired.19.mcp.tools|decided:CLI.diary.cmd+mandatory.hook|COMPLETE"`
 
 **SKIP IF:** MemPalace MCP tools are not active — skip silently, do not block.
+
+**Step 1.5 — Index session-handoff in MemPalace (if available):**
+
+Call `mempalace_add_drawer(wing="foodvibe1.0", room="logs", content="<first 500 chars of session-handoff summary>", source_file="<handoff filename>")` to make this session discoverable in future MemPalace searches.
+
+Skip silently if MCP unavailable.
 
 **Step 2 — Session artifacts commit:** After Phase 12 confirmation, commit any files the agent generated during this run (session-handoff.md, brief.md, techdebt reports, todo-archive changes). These are written *after* the Phase 6 code commit and must not be left uncommitted.
 

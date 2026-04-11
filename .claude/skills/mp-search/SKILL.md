@@ -26,7 +26,6 @@ Call:
 ```
 mempalace_search(
   query = <user query>,
-  wing  = "foodvibe1.0",
   limit = 8
 )
 ```
@@ -86,7 +85,7 @@ mempalace_traverse(start_room = "<room from results>", max_hops = 2)
 
 ## Inline Rules
 
-- Always use `wing="foodvibe1.0"` — this is the only wing in the palace
+- Do NOT pass `wing="foodvibe1.0"` — the wing filter has a ChromaDB index bug. All drawers are in one wing anyway, so results are identical without it
 - Never summarize drawer content — show it verbatim (that's the point)
 - Similarity scores below 0.05 are weak matches — flag them: "(weak match)"
 - Never block on MemPalace availability — fail gracefully with manual CLI alternative

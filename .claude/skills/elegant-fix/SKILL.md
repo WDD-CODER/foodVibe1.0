@@ -21,6 +21,15 @@ description: Refines a working but mediocre fix into a clean, idiomatic solution
 
 ---
 
+## Phase 0 — MemPalace Orient (MANDATORY before any file reads)
+
+1. Run `mempalace_search(query="refactor simplify clean code pattern", limit=5)` to surface existing patterns and past refactoring decisions.
+2. If results found → review for existing implementations, constraints, or known patterns.
+3. If MCP unavailable → skip silently and continue to Phase 1.
+4. Report in completion message whether MemPalace was consulted.
+
+---
+
 ## Phase 1: Complexity Audit 
 
 **Identify Smell:** Scan for nested subscriptions, large components (>300 lines), or one-off utility functions that belong in `core/utils/`.
