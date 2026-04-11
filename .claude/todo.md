@@ -302,7 +302,7 @@
 
 ### Plan 074 â€” Tech debt remediation (`plans/074-tech-debt-remediation.plan.md`) [TRIAGED 2026-04-02]
 
-- [ ] Refactor menu-intelligence.page.scss into partials (deferred)
+- [x] Refactor menu-intelligence.page.scss into partials (deferred)
 
 ### Plan 167 — Category/unit add-new audit (`plans/167-category-unit-add-new-audit.plan.md`) [TRIAGED 2026-04-02]
 - [ ] Optional: Cook-view “add new unit” so user can add from there

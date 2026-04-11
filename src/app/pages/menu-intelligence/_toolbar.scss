@@ -1,0 +1,97 @@
+/* ============================================================
+   Toolbar — Financial footer, action buttons, print styles
+   ============================================================ */
+
+/* ---------- Financial Footer ---------- */
+
+.financial-bar {
+  position: fixed;
+  bottom: 56px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  padding: 12px 20px;
+  background: var(--bg-pure);
+  border-top: 2px solid var(--border-warm);
+  box-shadow: 0 -2px 12px rgba(74, 60, 46, 0.08);
+  z-index: 100;
+}
+
+.fin-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.fin-label {
+  font-family: var(--font-serif);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.fin-value {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-ink);
+
+  &.over-target {
+    color: var(--color-danger);
+  }
+}
+
+@media (max-width: 768px) {
+  .financial-bar {
+    gap: 16px;
+    padding: 10px 12px;
+  }
+
+  .fin-label {
+    font-size: 0.7rem;
+  }
+
+  .fin-value {
+    font-size: 1rem;
+  }
+}
+
+/* ---------- Print Styles ---------- */
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  :host {
+    background: var(--bg-pure) !important;
+  }
+
+  .menu-editor-shell {
+    padding: 0;
+    max-width: none;
+  }
+
+  .paper-outer {
+    max-width: none;
+  }
+
+  .paper {
+    box-shadow: none;
+    padding: 10px;
+  }
+
+  .paper-inner {
+    border: 1px solid var(--color-text-main);
+    padding: 32px;
+  }
+
+  .dish-qty {
+    display: none;
+  }
+}

@@ -1,0 +1,34 @@
+/* ============================================================
+   Layout — Shell, grid containers
+   ============================================================ */
+
+:host {
+  --color-ink: var(--color-text-main);
+  --font-serif: 'Heebo', sans-serif;
+  --color-ornament: var(--color-primary);
+  --color-frame-ink: var(--color-text-main);
+  --border-warm: var(--border-default);
+
+  display: block;
+
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  background: var(--bg-body);
+}
+
+.menu-editor-shell {
+  padding: 1rem 1.25rem 6rem;
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.paper-outer {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  flex-shrink: 0;
+}
