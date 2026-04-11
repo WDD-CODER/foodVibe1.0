@@ -1,3 +1,4 @@
+require('node:dns').setServers(['8.8.8.8', '8.8.4.4']);
 require('dotenv').config();
 const path = require('path');
 const express = require('express');
@@ -34,6 +35,10 @@ app.use(helmet({
       objectSrc:      ["'none'"],
       frameSrc:       ["'none'"],
       upgradeInsecureRequests: [],
+      // Angular's CSS optimization: <link media="print" onload="this.media='all'">
+      // Helmet defaults scriptSrcAttr to 'none' which blocks this inline handler.
+      // 'unsafe-hashes' + the SHA-256 of the exact handler text allows only this one value.
+      scriptSrcAttr:  ["'unsafe-hashes'", "'sha256-MhtPZXr7+LpJUY5qtMutB+qWfQtMaPccfe7QXtCcEYc='"],
     }
   }
 }));
