@@ -51,3 +51,30 @@
 2026-04-10 18:41:38	Bash	git log --oneline -5	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
 2026-04-10 18:41:53	Bash	git add .claude/settings.json .claude/copilot-instructions.md agent.md .claude/c	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
 2026-04-10 19:03:39	Bash	git log --oneline -40 main	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:55:40	Bash	cd "C:/foodCo/foodVibe1.0/.claude/worktrees/meme" && gh pr merge 99 --squash --d	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:55:52	Bash	cd "C:/foodCo/foodVibe1.0/.claude/worktrees/meme" && gh pr view 99 --json state,	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:56:10	Bash	cd "C:/foodCo/foodVibe1.0" && git checkout --theirs .claude/commands/audit-repor	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:56:17	Bash	git -C "C:/foodCo/foodVibe1.0" diff --cached --stat	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:57:50	Bash	git -C "C:/foodCo/foodVibe1.0" diff --cached .claude/commands/audit-report.md	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:57:53	Bash	git -C "C:/foodCo/foodVibe1.0" diff --cached .claude/commands/nightly-audit.md	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:57:55	Bash	git -C "C:/foodCo/foodVibe1.0" diff --cached agent.md	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:58:25	Bash	git -C "C:/foodCo/foodVibe1.0" show HEAD:agent.md | sed -n '48,62p'	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:58:44	Bash	git -C "C:/foodCo/foodVibe1.0" show :agent.md | sed -n '48,85p'	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:58:51	Bash	git -C "C:/foodCo/foodVibe1.0" show :agent.md > /tmp/agent-staged.md && head -60	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:59:01	Edit	C:\foodCo\foodVibe1.0\agent.md	1. Run `ng build` or full `getDiagnostics` ΓÇö mandatory, no exceptions. Do not skip because changes look "mechanical" o	
+2026-04-10 23:59:10	Bash	git -C "C:/foodCo/foodVibe1.0" show HEAD:.claude/commands/audit-report.md 2>/dev	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:59:34	Bash	git -C "C:/foodCo/foodVibe1.0" checkout --ours .claude/commands/audit-report.md 	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:59:45	Bash	git -C "C:/foodCo/foodVibe1.0" show HEAD:.claude/commands/audit-report.md > "C:/	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpec	
+2026-04-10 23:59:52	Bash	git -C "C:/foodCo/foodVibe1.0" add .claude/commands/audit-report.md .claude/comm	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-11 00:04:06	Bash	git -C "C:/foodCo/foodVibe1.0" commit -m "$(cat <<'EOF'
+merge: integrate nightly	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-11 00:04:13	Bash	git -C "C:/foodCo/foodVibe1.0" branch --show-current	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-11 00:06:45	Bash	git -C "C:/foodCo/foodVibe1.0" log --oneline feat/nightly-audit-and-mempalace-in	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-11 00:06:48	Bash	git -C "C:/foodCo/foodVibe1.0" fetch origin main	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-11 00:06:57	Bash	git -C "C:/foodCo/foodVibe1.0" merge-tree $(git -C "C:/foodCo/foodVibe1.0" merge	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-11 00:07:05	Bash	git -C "C:/foodCo/foodVibe1.0" diff origin/main..feat/nightly-audit-and-mempalac	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-11 00:12:18	Bash	git -C "C:/foodCo/foodVibe1.0" push -u origin feat/nightly-audit-and-mempalace-i	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-11 00:12:39	Bash	gh pr view 98 --repo WDD-CODER/foodVibe1.0 --json state,mergeable,title --jq '"\	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-11 00:12:50	Bash	gh pr merge 98 --repo WDD-CODER/foodVibe1.0 --squash --delete-branch	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpec	
+2026-04-11 00:12:57	Bash	gh pr view 98 --repo WDD-CODER/foodVibe1.0 --json state,mergedAt --jq '"\(.state	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-11 00:13:14	Bash	echo "worktree-meme" >> "C:/foodCo/foodVibe1.0/.worktree-cleanup"	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpec	
