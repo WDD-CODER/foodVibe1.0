@@ -51,3 +51,32 @@
 2026-04-10 18:41:38	Bash	git log --oneline -5	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
 2026-04-10 18:41:53	Bash	git add .claude/settings.json .claude/copilot-instructions.md agent.md .claude/c	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
 2026-04-10 19:03:39	Bash	git log --oneline -40 main	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 19:41:52	Bash	git checkout -- .claude/reflect/failure-log.tsv && git status --porcelain	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpec	
+2026-04-10 19:41:59	Bash	git checkout -b audit/2026-04-10	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 19:42:30	Bash	wc -l src/app/pages/menu-intelligence/menu-intelligence.page.ts src/app/pages/re	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 19:43:26	Bash	git add .claude/reports/audit/2026-04-10-plan.md && git commit -m "$(cat <<'EOF'	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 19:43:57	Bash	git add src/app/core/components/auth-modal/auth-modal.component.scss src/app/pag	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 19:44:17	Bash	git checkout main && git merge --ff-only audit/2026-04-10	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 19:44:31	Bash	git log --oneline -3	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 19:45:17	Bash	git add .claude/reports/audit/2026-04-10-nightly-audit.md && git commit -m "$(ca	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 21:56:24	Bash	git checkout -b fix/mempalace-agent-integration	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 21:57:12	Edit	C:\foodCo\foodVibe1.0\.claude\agents\qa-engineer.md	- **Systematic Investigation**: For complex root-cause analysis, invoke `/investigate` ΓÇö it auto-freezes scope and enf	
+2026-04-10 21:57:48	Edit	C:\foodCo\foodVibe1.0\.claude\copilot-instructions.md	- **Root-cause debugging** `[CC]`: For complex bugs where cause is unclear ΓåÆ invoke `/investigate`. It auto-freezes sc	
+2026-04-10 21:58:05	Edit	C:\foodCo\foodVibe1.0\.claude\copilot-instructions.md	- **Root-cause debugging** `[CC]`: For complex bugs where cause is unclear ΓåÆ invoke `/investigate`. It auto-freezes sc	
+2026-04-10 21:58:11	Bash	git diff --stat	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 21:58:29	Bash	git add .claude/agents/breadcrumb-navigator.md .claude/agents/product-manager.md	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 21:58:38	Bash	git checkout main && git merge --no-ff fix/mempalace-agent-integration -m "Merge	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 22:28:38	Edit	C:\foodCo\foodVibe1.0\CLAUDE.md	- **Worktree boundary**: When working inside an isolated worktree, never attempt `git checkout main` from within it. All	
+2026-04-10 22:28:51	Bash	git add CLAUDE.md && git commit -m "$(cat <<'EOF'
+fix(workflow): add MemPalace r	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:30:07	Bash	git log --oneline origin/main..main	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:30:18	Bash	git checkout -b feat/nightly-audit-and-mempalace-integration && git push -u orig	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:30:43	Bash	gh pr create --base main --head feat/nightly-audit-and-mempalace-integration --t	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:32:16	Bash	git rev-parse --git-dir	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:40:03	Bash	git log --oneline -5	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:40:03	Bash	git branch --show-current	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:40:03	Bash	git status --short	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:40:09	Bash	git log --oneline main..HEAD 2>/dev/null | wc -l	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:40:10	Bash	ls .claude/sessions/ 2>/dev/null || echo "no sessions dir"	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:40:17	Bash	gh pr view 98 --json state,title,mergeable,headRefName 2>/dev/null	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-10 23:41:32	Bash	mkdir -p .claude/sessions/2026-04-10-nightly-audit	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpec	
