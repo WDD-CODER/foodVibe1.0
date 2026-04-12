@@ -123,6 +123,7 @@ PR #13 feat/scaling-chip — merged
 - If push/PR fails → report error, suggest fix. Don't retry blindly.
 - Check `gh pr list` before creating a PR — surface any existing PR for this branch
 - Batch operations: ONE visual plan, ONE approval, sequential execution — no mid-batch prompts
+- **Post-commit dirty worktree**: After committing, `.claude/reflect/failure-log.tsv` may be dirtied by pre-commit hooks logging new entries. Do NOT attempt to commit it again — leave it dirty. It will be included in the next session's commit naturally. Trying to re-commit triggers the hook again → infinite loop.
 
 ## What this agent does NOT do
 - Spec audit / lint / build — separate concern, run before invoking if needed
