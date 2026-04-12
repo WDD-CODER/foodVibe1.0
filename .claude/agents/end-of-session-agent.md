@@ -517,6 +517,8 @@ git push  # to same branch as Phase 6, or main if no feature branch
 
 This commit does NOT require user confirmation — it contains only agent-generated session artifacts, not code.
 
+**Do NOT add `.claude/reflect/failure-log.tsv`** — pre-commit hooks may have dirtied it. Leave it for the next session's commit to avoid an infinite hook → commit loop.
+
 If unpushed commits exist after this:
 ```
 Reminder: Run github-sync at the start of your next session.
