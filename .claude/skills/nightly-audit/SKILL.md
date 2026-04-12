@@ -318,9 +318,14 @@ If merge conflicts exist → **ABORT**. Leave audit branch intact. Write abort r
 5. Fill in **Git Reference** with actual commit hashes
 6. Populate the **Trend** section by reading the last 7 reports in the folder, extracting their Summary tables, and comparing totals with direction arrows
 
+7. **Merge nightly sections** — check for staging files matching `.claude/reports/audit/YYYY-MM-DD-*.md` (exclude the report itself and the plan file):
+   - For each staging file found → append its content to the report, then delete the staging file
+   - If `.claude/reports/audit/YYYY-MM-DD-reflect.md` was not found → append `## Reflect / Fixes\nNo reflect fixes tonight.`
+   - See `.claude/standards-scheduled-reporting.md` for the staging file convention used by all nightly agents
+
 Commit the report:
 ```bash
-git add .claude/reports/audit/YYYY-MM-DD-nightly-audit.md
+git add .claude/reports/audit/
 git commit -m "audit(report): YYYY-MM-DD nightly report"
 ```
 

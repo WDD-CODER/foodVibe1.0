@@ -33,3 +33,7 @@
 <!-- Compare totals with previous reports in this folder. Arrows: ↑ worse / ↓ better / → stable -->
 | Date | Total Found | Auto-fixed | Flagged | Direction |
 |---|---|---|---|---|
+
+## Reflect / Fixes
+<!-- Appended by evening maintenance agent. Each bullet: what was fixed and in which file. -->
+<!-- If no reflect activity tonight: "No reflect fixes tonight." -->
