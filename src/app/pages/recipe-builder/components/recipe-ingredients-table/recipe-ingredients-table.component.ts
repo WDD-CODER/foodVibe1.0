@@ -341,8 +341,6 @@ private readonly cdr = inject(ChangeDetectorRef)
 
   /** True when the row is blocking — must be resolved before the recipe can be saved. */
   isBlockingRow(group: FormGroup): boolean {
-    // Unresolved: AI-added name with no referenceId
-    if (group.get('name_hebrew')?.value && !group.get('referenceId')?.value) return true
     const refId = group.get('referenceId')?.value as string | null
     if (!refId) return false
     const type = group.get('item_type')?.value as 'product' | 'recipe' | null
@@ -355,6 +353,16 @@ private readonly cdr = inject(ChangeDetectorRef)
       return getProductValidationStatus(found as Product) === 'invalid'
     }
     return false
+  }
+
+  /** True when the row has a name but no referenceId (draft/unlinked ingredient). */
+  isUnlinkedRow(group: FormGroup): boolean {
+    return !!(group.get('name_hebrew')?.value?.trim()) && !group.get('referenceId')?.value
+  }
+
+  /** True when any ingredient row is unlinked (has name but no referenceId). */
+  hasUnlinkedRows(): boolean {
+    return this.ingredientGroups.some(g => this.isUnlinkedRow(g))
   }
 
   /** True when the row is linked to a product that is in the incomplete (warning) tier. */
@@ -438,7 +446,12 @@ private readonly cdr = inject(ChangeDetectorRef)
 
   getAvailableUnits(group: FormGroup): string[] {
     const item = this.getItemMetadata(group);
-    if (!item) return [];
+    if (!item) {
+      const current = group.get('unit')?.value as string | null
+      const defaults = new Set(['gram', 'kg', 'unit'])
+      if (current) defaults.add(current)
+      return Array.from(defaults)
+    }
 
     const units = new Set<string>();
     const meta = item as {

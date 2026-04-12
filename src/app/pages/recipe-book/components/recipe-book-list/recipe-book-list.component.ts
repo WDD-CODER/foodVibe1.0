@@ -437,6 +437,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     const set = new Set<string>();
     const recipes = this.kitchenState.recipes_();
     for (const ing of recipe.ingredients_) {
+      if (!ing.referenceId) continue;
       if (ing.type === 'product') {
         set.add(ing.referenceId);
       } else if (ing.type === 'recipe') {

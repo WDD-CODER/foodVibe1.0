@@ -29,25 +29,28 @@ export class RecipeFormService {
 
   // ─── Validators ───────────────────────────────────────────────────
 
-  /** Require amount > 0 when referenceId is set; empty rows are valid. */
+  /** Require amount > 0 when referenceId or name_hebrew is set; empty rows are valid. */
   ingredientRowValidator(control: AbstractControl): ValidationErrors | null {
     const refId = control.get('referenceId')?.value
+    const name = control.get('name_hebrew')?.value?.trim()
+    if (!refId && !name) return null
     const amount = control.get('amount_net')?.value
-    if (!refId) return null
     if (amount == null || amount === '') return { required: true }
     const numAmt = typeof amount === 'number' ? amount : Number(amount)
     if (isNaN(numAmt) || numAmt <= 0) return { min: true }
     return null
   }
 
-  /** Requires at least one ingredient with product/recipe selected and quantity > 0. */
+  /** Requires at least one ingredient with product/recipe selected or unlinked name, and quantity > 0. */
   recipeFormValidator(control: AbstractControl): ValidationErrors | null {
-    const ingredients = (control.get('ingredients')?.value || []) as { referenceId?: string; amount_net?: number | string }[]
+    const ingredients = (control.get('ingredients')?.value || []) as { referenceId?: string; amount_net?: number | string; name_hebrew?: string }[]
     const hasValid = ingredients.some(ing => {
-      if (!ing?.referenceId) return false
       const amt = ing.amount_net
       const num = typeof amt === 'number' ? amt : Number(amt)
-      return amt != null && amt !== '' && !isNaN(num) && num > 0
+      const hasAmount = amt != null && amt !== '' && !isNaN(num) && num > 0
+      if (ing?.referenceId && hasAmount) return true
+      if (!ing?.referenceId && ing?.name_hebrew?.trim() && hasAmount) return true
+      return false
     })
     return hasValid ? null : { atLeastOneIngredient: true }
   }
@@ -161,18 +164,22 @@ export class RecipeFormService {
     const raw = form.getRawValue() as Record<string, unknown>
     const isDish = raw['recipe_type'] === 'dish'
 
-    type IngRow = { referenceId?: string; item_type?: string; amount_net?: number; unit?: string; total_cost?: number; nameSnapshot?: string }
+    type IngRow = { referenceId?: string; item_type?: string; amount_net?: number; unit?: string; total_cost?: number; nameSnapshot?: string; name_hebrew?: string }
     const rawIngredients = (raw['ingredients'] || []) as IngRow[]
     const ingredients: Ingredient[] = rawIngredients
-      .filter(ing => !!ing?.referenceId)
+      .filter(ing => {
+        if (ing?.referenceId) return true
+        if (ing?.name_hebrew?.trim() && (ing.amount_net ?? 0) > 0) return true
+        return false
+      })
       .map(ing => ({
         _id: 'ing_' + Math.random().toString(36).slice(2, 9),
-        referenceId: ing.referenceId!,
-        type: (ing.item_type === 'recipe' ? 'recipe' : 'product') as 'product' | 'recipe',
+        ...(ing.referenceId ? { referenceId: ing.referenceId } : {}),
+        ...(ing.referenceId ? { type: (ing.item_type === 'recipe' ? 'recipe' : 'product') as 'product' | 'recipe' } : {}),
         amount_: ing.amount_net ?? 0,
         unit_: ing.unit ?? '',
-        calculatedCost_: ing.total_cost ?? 0,
-        nameSnapshot: ing.nameSnapshot ?? ''
+        calculatedCost_: ing.referenceId ? (ing.total_cost ?? 0) : 0,
+        nameSnapshot: ing.nameSnapshot || ing.name_hebrew || ''
       }))
 
     const steps: RecipeStep[] = []

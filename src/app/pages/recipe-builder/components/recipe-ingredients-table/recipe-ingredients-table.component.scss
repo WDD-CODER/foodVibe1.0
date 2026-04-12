@@ -255,6 +255,31 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
     border: 1px solid var(--color-warning);
     background: color-mix(in srgb, var(--color-warning) 6%, var(--bg-muted));
   }
+
+  &.unlinked-row {
+    border: 1px dashed var(--color-info, var(--color-primary));
+    background: color-mix(in srgb, var(--color-info, var(--color-primary)) 4%, var(--bg-muted));
+  }
+}
+
+.unlinked-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  background: transparent;
+  color: var(--color-info, var(--color-primary));
+
+  border: none;
+
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.15);
+  }
 }
 
 .incomplete-badge {

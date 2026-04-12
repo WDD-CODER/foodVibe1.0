@@ -10,9 +10,11 @@ export interface ScaledIngredientRow {
   /** Available units for this ingredient (product/recipe options). */
   availableUnits: string[];
   /** Original ingredient referenceId for tracking. */
-  referenceId: string;
+  referenceId?: string;
   /** Original ingredient type. */
-  type: 'product' | 'recipe';
+  type?: 'product' | 'recipe';
+  /** True when the ingredient has no linked product/recipe (draft ingredient). */
+  isUnlinked?: boolean;
 }
 
 export interface ScaledPrepRow {
@@ -45,11 +47,21 @@ export class ScalingService {
     const recipes = this.kitchenState_.recipes_();
 
     return ingredients.map(ing => {
+      if (!ing.referenceId) {
+        return {
+          name: ing.nameSnapshot || '(ללא שם)',
+          amount: (ing.amount_ ?? 0) * factor,
+          unit: ing.unit_ ?? '',
+          availableUnits: [ing.unit_ ?? ''],
+          isUnlinked: true
+        };
+      }
       const isProduct = ing.type === 'product';
       const item = isProduct
         ? products.find(p => p._id === ing.referenceId)
         : recipes.find(r => r._id === ing.referenceId);
-      const name = (item as { name_hebrew?: string } | undefined)?.name_hebrew ?? '(לא נמצא)';
+      const name = (item as { name_hebrew?: string } | undefined)?.name_hebrew
+        ?? ing.nameSnapshot ?? '(לא נמצא)';
       const units = this.getAvailableUnitsForIngredient(item, ing.unit_ ?? '');
       return {
         name,

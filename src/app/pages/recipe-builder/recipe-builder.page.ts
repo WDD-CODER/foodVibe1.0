@@ -872,6 +872,15 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     }
     this.blockingIngredientsError_.set(false);
 
+    // Unlinked ingredients confirmation gate
+    if (this.ingredientsTableRef_()?.hasUnlinkedRows()) {
+      const confirmed = await this.confirmModal_.open(
+        'save_with_unlinked_ingredients',
+        { saveLabel: 'save_anyway' }
+      );
+      if (!confirmed) return;
+    }
+
     // Neto confirmation gate
     const headerRef = this.recipeHeaderRef_();
     if (headerRef?.isYieldManualOverride() && !this.netoConfirmed_()) {

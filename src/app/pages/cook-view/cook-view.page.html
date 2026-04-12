@@ -175,7 +175,7 @@
                   <div class="col-amount">{{ 'quantity' | translatePipe }}</div>
                   <div class="col-unit">{{ 'unit' | translatePipe }}</div>
                 </div>
-                @for (row of scaledIngredients_(); track row.referenceId + row.unit + row.amount; let i = $index) {
+                @for (row of scaledIngredients_(); track (row.referenceId ?? 'u' + $index) + row.unit + row.amount; let i = $index) {
                   <div class="ingredients-table-row" [class.field-changed]="ingredientChanged(i)">
                     <div class="col-name">{{ row.name }}</div>
                     <div class="col-amount edit-amount">
@@ -208,7 +208,7 @@
               </div>
             } @else {
               <!-- View mode: Focus Mode ingredient checklist -->
-              @for (row of scaledIngredients_(); track row.referenceId + row.unit + row.amount; let i = $index) {
+              @for (row of scaledIngredients_(); track (row.referenceId ?? 'u' + $index) + row.unit + row.amount; let i = $index) {
                 <div
                   class="cv-ing-row"
                   [class.cv-ing-row--done]="checkedIngredients_().has(i)"
@@ -238,7 +238,7 @@
                     </div>
                   } @else {
                     <span class="cv-ing-check" [class.cv-ing-check--done]="checkedIngredients_().has(i)"></span>
-                    <span class="cv-ing-name">{{ row.name }}</span>
+                    <span class="cv-ing-name" [style.font-style]="row.isUnlinked ? 'italic' : null" [style.opacity]="row.isUnlinked ? '0.85' : null">{{ row.name }}</span>
                     <span class="cv-ing-amt">{{ getDisplayAmount(i, row) | formatQuantity }}</span>
                     <span class="cv-ing-unit">
                       @if (row.availableUnits.length > 1) {
@@ -265,7 +265,7 @@
           </div>
 
           <!-- Step pane -->
-          <div class="cv-step-pane">
+          <div class="cv-step-pane" #stepPane>
             <div class="cv-step-pane-header">
               <span class="cv-step-pane-title">
                 <lucide-icon name="timer" [size]="18"></lucide-icon>
@@ -295,9 +295,9 @@
                     <div class="cv-step-card"
                       [class.cv-step-card--active]="activeStepIndex_() === si && !stepDoneSet_().has(si)"
                       [class.cv-step-card--done]="stepDoneSet_().has(si)"
-                      [class.cv-step-card--peeked]="peekedStepIndex_() === si">
-                      <div class="cv-step-card-head"
-                        (click)="activeStepIndex_() !== si && !stepDoneSet_().has(si) ? toggleStepPeek(si) : null">
+                      [class.cv-step-card--next]="si === activeStepIndex_() + 1 && !stepDoneSet_().has(si)"
+                      [attr.data-step-index]="si">
+                      <div class="cv-step-card-head">
                         <span class="cv-step-num"
                           [class.cv-step-num--active]="activeStepIndex_() === si && !stepDoneSet_().has(si)"
                           [class.cv-step-num--done]="stepDoneSet_().has(si)">{{ si + 1 }}</span>
@@ -310,11 +310,9 @@
                           <span class="cv-step-status-chip cv-step-status-chip--pending">{{ 'step_pending' | translatePipe }}</span>
                         }
                       </div>
-                      @if (activeStepIndex_() === si || peekedStepIndex_() === si) {
-                        <div class="cv-step-card-body">
-                          <span>{{ row.amount | formatQuantity }} {{ row.unit | translatePipe }}</span>
-                        </div>
-                      }
+                      <div class="cv-step-card-body">
+                        <span>{{ row.amount | formatQuantity }} {{ row.unit | translatePipe }}</span>
+                      </div>
                       @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
                         <button type="button" class="cv-step-done-btn" (click)="markStepDone(si)">✓ {{ 'mark_step_done' | translatePipe }}</button>
                       }
@@ -330,9 +328,9 @@
                     <div class="cv-step-card"
                       [class.cv-step-card--active]="activeStepIndex_() === si && !stepDoneSet_().has(si)"
                       [class.cv-step-card--done]="stepDoneSet_().has(si)"
-                      [class.cv-step-card--peeked]="peekedStepIndex_() === si">
-                      <div class="cv-step-card-head"
-                        (click)="activeStepIndex_() !== si && !stepDoneSet_().has(si) ? toggleStepPeek(si) : null">
+                      [class.cv-step-card--next]="si === activeStepIndex_() + 1 && !stepDoneSet_().has(si)"
+                      [attr.data-step-index]="si">
+                      <div class="cv-step-card-head">
                         <span class="cv-step-num"
                           [class.cv-step-num--active]="activeStepIndex_() === si && !stepDoneSet_().has(si)"
                           [class.cv-step-num--done]="stepDoneSet_().has(si)">{{ step.order_ }}</span>
@@ -345,23 +343,21 @@
                           <span class="cv-step-status-chip cv-step-status-chip--pending">{{ 'step_pending' | translatePipe }}</span>
                         }
                       </div>
-                      @if (activeStepIndex_() === si || peekedStepIndex_() === si) {
-                        <div class="cv-step-card-body">
-                          <p>{{ step.instruction_ }}</p>
-                          @if (step.labor_time_minutes_ > 0) {
-                            @if (activeTimerStepIndex_() === si) {
-                              <button type="button" class="cv-timer-pill cv-timer-pill--active" (click)="cancelTimer()">
-                                ⏱ {{ timerDisplay_() }}
-                                <span class="cv-timer-cancel">{{ 'timer_cancel' | translatePipe }}</span>
-                              </button>
-                            } @else {
-                              <button type="button" class="cv-timer-pill" (click)="startTimer(si, step.labor_time_minutes_)">
-                                ⏱ {{ step.labor_time_minutes_ }} {{ 'min' | translatePipe }}
-                              </button>
-                            }
+                      <div class="cv-step-card-body">
+                        <p>{{ step.instruction_ }}</p>
+                        @if (step.labor_time_minutes_ > 0) {
+                          @if (activeTimerStepIndex_() === si) {
+                            <button type="button" class="cv-timer-pill cv-timer-pill--active" (click)="cancelTimer()">
+                              ⏱ {{ timerDisplay_() }}
+                              <span class="cv-timer-cancel">{{ 'timer_cancel' | translatePipe }}</span>
+                            </button>
+                          } @else {
+                            <button type="button" class="cv-timer-pill" (click)="startTimer(si, step.labor_time_minutes_)">
+                              ⏱ {{ step.labor_time_minutes_ }} {{ 'min' | translatePipe }}
+                            </button>
                           }
-                        </div>
-                      }
+                        }
+                      </div>
                       @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
                         <button type="button" class="cv-step-done-btn" (click)="markStepDone(si)">✓ {{ 'mark_step_done' | translatePipe }}</button>
                       }

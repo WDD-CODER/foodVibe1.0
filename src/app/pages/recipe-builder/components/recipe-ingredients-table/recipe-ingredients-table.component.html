@@ -27,7 +27,8 @@
         } @else {
         <div class="selected-item-display"
           [class.incomplete-row]="isBlockingRow(group)"
-          [class.warning-row]="isWarningRow(group)">
+          [class.warning-row]="isWarningRow(group)"
+          [class.unlinked-row]="isUnlinkedRow(group)">
           @if (getDisplayName(group)) {
             <span class="item-text" role="button" tabindex="0"
               (click)="editingNameAtRow_.set($index)"
@@ -48,6 +49,12 @@
               (click)="$event.stopPropagation(); onQuickEditBadgeClick(group, $index, 'incomplete')"
               [title]="'product_warning_hint' | translatePipe">
               <lucide-icon name="alert-triangle" [size]="14"></lucide-icon>
+            </button>
+          } @else if (isUnlinkedRow(group)) {
+            <button type="button" class="unlinked-badge"
+              (click)="$event.stopPropagation(); editingNameAtRow_.set($index)"
+              [title]="'unlinked_ingredient_hint' | translatePipe">
+              <lucide-icon name="link" [size]="14"></lucide-icon>
             </button>
           } @else if (group.get('referenceId')?.value) {
             <button type="button" class="edit-badge"
