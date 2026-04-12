@@ -131,43 +131,64 @@
 
             <!-- Text input -->
             @if (inputMode_() === 'text') {
-              <textarea
-                class="ai-prompt-textarea"
-                [placeholder]="'ai_recipe_prompt_placeholder' | translatePipe"
-                [value]="prompt_()"
-                (input)="prompt_.set($any($event.target).value)"
-                rows="4"
-              ></textarea>
+              <div class="ai-input-wrapper">
+                <textarea
+                  class="ai-prompt-textarea"
+                  [placeholder]="'ai_recipe_prompt_placeholder' | translatePipe"
+                  [value]="prompt_()"
+                  (input)="prompt_.set($any($event.target).value)"
+                  rows="4"
+                ></textarea>
+                @if (prompt_().trim()) {
+                  <button type="button" class="ai-clear-input-btn" (click)="onClearInput()">
+                    <lucide-icon name="x" [size]="14"></lucide-icon>
+                  </button>
+                }
+              </div>
             }
 
             <!-- Image input -->
             @if (inputMode_() === 'image') {
-              <label class="ai-image-upload">
-                <input
-                  type="file"
-                  accept="image/*"
-                  style="display:none"
-                  (change)="onImageSelected($event)"
-                />
-                @if (imagePreviewUrl_()) {
-                  <img class="ai-image-preview" [src]="imagePreviewUrl_()!" [alt]="'ai_recipe_image_preview_alt' | translatePipe" />
-                } @else {
-                  <lucide-icon name="image" [size]="32"></lucide-icon>
-                  <span>{{ 'ai_recipe_upload_image_hint' | translatePipe }}</span>
+              <div class="ai-input-wrapper">
+                <label class="ai-image-upload">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style="display:none"
+                    (change)="onImageSelected($event)"
+                  />
+                  @if (imagePreviewUrl_()) {
+                    <img class="ai-image-preview" [src]="imagePreviewUrl_()!" [alt]="'ai_recipe_image_preview_alt' | translatePipe" />
+                  } @else {
+                    <lucide-icon name="image" [size]="32"></lucide-icon>
+                    <span>{{ 'ai_recipe_upload_image_hint' | translatePipe }}</span>
+                  }
+                </label>
+                @if (imageFile_()) {
+                  <button type="button" class="ai-clear-input-btn" (click)="onClearInput()">
+                    <lucide-icon name="x" [size]="14"></lucide-icon>
+                  </button>
                 }
-              </label>
+              </div>
             }
 
             <!-- URL input -->
             @if (inputMode_() === 'url') {
-              <input
-                type="url"
-                class="ai-url-input"
-                placeholder="https://example.com/recipe"
-                dir="ltr"
-                [value]="urlInput_()"
-                (input)="urlInput_.set($any($event.target).value)"
-              />
+              <div class="ai-input-wrapper">
+                <input
+                  type="url"
+                  class="ai-url-input"
+                  placeholder="https://example.com/recipe"
+                  dir="ltr"
+                  [value]="urlInput_()"
+                  (input)="urlInput_.set($any($event.target).value)"
+                />
+                @if (urlInput_().trim()) {
+                  <button type="button" class="ai-clear-input-btn" (click)="onClearInput()">
+                    <lucide-icon name="x" [size]="14"></lucide-icon>
+                  </button>
+                }
+              </div>
             }
 
             @if (status_() !== 'idle') {
@@ -219,49 +240,46 @@
         } @else {
           <!-- Create preview card -->
           <div class="ai-draft-preview">
-            <div class="ai-draft-field">
-              <span class="ai-draft-label">{{ 'name' | translatePipe }}</span>
-              <span class="ai-draft-value">{{ draft_()!.name_hebrew }}</span>
-            </div>
-            <div class="ai-draft-field">
-              <span class="ai-draft-label">{{ 'type' | translatePipe }}</span>
-              <span class="ai-draft-value">{{ (draft_()!.recipe_type === 'dish' ? 'dish' : 'preparation') | translatePipe }}</span>
-            </div>
-            <div class="ai-draft-field">
-              <span class="ai-draft-label">{{ 'yield' | translatePipe }}</span>
-              <span class="ai-draft-value">{{ draft_()!.yield_amount }} {{ draft_()!.yield_unit }}</span>
-            </div>
-            <div class="ai-draft-field">
-              <span class="ai-draft-label">{{ 'ai_recipe_preview_ingredients' | translatePipe }}</span>
-              <ul class="ai-draft-ingredients">
-                @for (ing of draft_()!.ingredients; track ing.name) {
-                  <li>{{ ing.amount }} {{ ing.unit }} {{ ing.name }}</li>
-                }
-              </ul>
-            </div>
-            <div class="ai-draft-field">
-              <span class="ai-draft-label">{{ 'ai_recipe_preview_steps' | translatePipe }}</span>
-              <span class="ai-draft-value">{{ draft_()!.steps.length }}</span>
-            </div>
-          </div>
-          @if (awaitingWarningConfirm_()) {
-            <div class="ai-shot-warnings">
-              @for (w of shotWarnings_(); track w) {
-                <div class="ai-shot-warning-item">
-                  <lucide-icon name="triangle-alert" [size]="14"></lucide-icon>
-                  <span>{{ w }}</span>
+            <!-- Header: name + type + yield -->
+            <div class="ai-draft-header">
+              <div class="ai-draft-labeled-field">
+                <span class="ai-draft-field-title">{{ 'ai_recipe_name_title' | translatePipe }}</span>
+                <div class="ai-draft-field-value">
+                  <span class="ai-draft-name">{{ draft_()!.name_hebrew || ('ai_recipe_no_name' | translatePipe) }}</span>
+                  <span class="ai-draft-badge">{{ (draft_()!.recipe_type === 'dish' ? 'dish' : 'preparation') | translatePipe }}</span>
                 </div>
-              }
-              <div class="ai-modal-footer">
-                <button type="button" class="c-btn-ghost" (click)="onDismissWarning()">{{ 'cancel' | translatePipe }}</button>
-                <button type="button" class="c-btn-primary" (click)="onOpenInBuilder()">
-                  <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
-                  {{ 'ai_recipe_open_anyway' | translatePipe }}
-                </button>
+              </div>
+              <div class="ai-draft-labeled-field">
+                <span class="ai-draft-field-title">{{ 'yield' | translatePipe }}</span>
+                <span class="ai-draft-yield">{{ draft_()!.yield_amount }} {{ translateUnit(draft_()!.yield_unit) }}</span>
               </div>
             </div>
-          } @else {
-            <div class="ai-modal-footer">
+
+            <!-- Ingredients table -->
+            <div class="ai-draft-section">
+              <span class="ai-draft-section-title">{{ 'ai_recipe_preview_ingredients' | translatePipe }}</span>
+              <div class="ai-draft-ingredient-table">
+                @for (ing of draft_()!.ingredients; track ing.name) {
+                  <div class="ai-draft-ingredient-row">
+                    <span class="ai-draft-ing-name">{{ ing.name }}</span>
+                    <span class="ai-draft-ing-unit">{{ translateUnit(ing.unit) }}</span>
+                    <span class="ai-draft-ing-qty">{{ ing.amount }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Steps -->
+            <div class="ai-draft-section">
+              <span class="ai-draft-section-title">{{ 'ai_recipe_preview_steps' | translatePipe }} ({{ draft_()!.steps.length }})</span>
+              <ol class="ai-draft-steps">
+                @for (step of draft_()!.steps; track $index) {
+                  <li>{{ step }}</li>
+                }
+              </ol>
+            </div>
+          </div>
+          <div class="ai-modal-footer">
               <button type="button" class="c-btn-ghost" (click)="onGenerateAgain()">
                 {{ 'ai_recipe_generate_again' | translatePipe }}
               </button>
@@ -270,7 +288,6 @@
                 {{ 'ai_recipe_open_builder' | translatePipe }}
               </button>
             </div>
-          }
         }
       }
 

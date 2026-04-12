@@ -12,6 +12,7 @@ import { AiRecipeDraftService, type AiRecipeDraft } from '@services/ai-recipe-dr
 import { UserMsgService } from '@services/user-msg.service'
 import { getGeminiUsage, DAILY_LIMIT, fetchGeminiUsageFromServer } from '../../core/utils/gemini-usage.util'
 import { GeminiShotsService } from '@services/gemini-shots.service'
+import { TranslationService } from '@services/translation.service'
 
 type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
 type InputMode = 'text' | 'image' | 'url'
@@ -31,6 +32,7 @@ export class AiRecipeModalComponent implements OnInit {
   private readonly router = inject(Router)
   private readonly userMsg = inject(UserMsgService)
   private readonly shots = inject(GeminiShotsService)
+  private readonly translation = inject(TranslationService)
 
   // Create mode
   protected readonly inputMode_ = signal<InputMode>('text')
@@ -182,26 +184,38 @@ export class AiRecipeModalComponent implements OnInit {
     const draft = this.draft_()
     if (!draft) return
 
-    // First click: check for soft quality warnings before committing to the pool
-    if (!this.awaitingWarningConfirm_()) {
-      const warnings = this.shots.computeWarnings(draft)
-      if (warnings.length > 0) {
-        this.shotWarnings_.set(warnings)
-        this.awaitingWarningConfirm_.set(true)
-        return
-      }
-    }
-
-    // No warnings, or user confirmed despite warnings — save as approved and open
     this.shots.saveShot(this.prompt_(), draft, 'approved', this.inputMode_()).subscribe()
     this.aiDraft.set(draft)
     void this.router.navigate(['/recipe-builder'])
+    this.resetLocalState_()
     this.modalService.close()
   }
 
-  onDismissWarning(): void {
+  onClearDraft(): void {
+    const draft = this.draft_()
+    if (draft) {
+      this.shots.saveShot(this.prompt_(), draft, 'rejected', this.inputMode_()).subscribe()
+    }
+    this.draft_.set(null)
     this.shotWarnings_.set([])
     this.awaitingWarningConfirm_.set(false)
+    this.status_.set('idle')
+    this.prompt_.set('')
+    this.imageFile_.set(null)
+    this.imagePreviewUrl_.set(null)
+    this.urlInput_.set('')
+  }
+
+  onClearInput(): void {
+    this.prompt_.set('')
+    this.imageFile_.set(null)
+    this.imagePreviewUrl_.set(null)
+    this.urlInput_.set('')
+  }
+
+  /** Translate a unit key (e.g. 'gram' → 'גרם') for display. */
+  translateUnit(unit: string): string {
+    return this.translation.translate(unit)
   }
 
   // ─── Edit mode ───────────────────────────────────────────────────
@@ -246,6 +260,10 @@ export class AiRecipeModalComponent implements OnInit {
       this.shots.saveShot(this.prompt_(), draft, 'rejected', this.inputMode_()).subscribe()
     }
     this.modalService.close()
+    this.resetLocalState_()
+  }
+
+  private resetLocalState_(): void {
     this.draft_.set(null)
     this.patch_.set(null)
     this.shotWarnings_.set([])
