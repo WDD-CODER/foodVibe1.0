@@ -4,7 +4,20 @@ category: C — Theme & Styling Violations
 applies-to: "*.scss"
 auto-fix-paths: [A, B, C]
 flag-only-paths: [ambiguous]
+version: 2
+created: 2026-04-12
+last-tested: 2026-04-12T10:30:00Z
+last-tested-version: 2
+last-score: "6/6"
 ---
+<!--
+Version bump rule:
+- Bump `version` whenever DECIDE tree, FIX paths, DETECT pattern,
+  or SAFETY rules change.
+- Do NOT bump for typo fixes, formatting, or example additions.
+- When you bump, leave last-tested/last-tested-version/last-score
+  stale — the next /test-template run will refresh them.
+-->
 
 # Fix Template: Hardcoded Hex Color → CSS Token
 
@@ -25,25 +38,38 @@ Count how many files contain this exact hex value (case-insensitive).
 - 2+ files → must be a global token in styles.scss
 
 ## DECIDE
-```
-Does a token in styles.scss match this color AND its semantic meaning?
-├─ YES
-│   └─ PATH A — replace directly, no new token needed
-│
-├─ NO — hex used in 2+ files
-│   └─ PATH B — create global token in styles.scss, replace in all files
-│
-├─ NO — hex used in 1 file only
-│   ├─ Does the color have a clear semantic name? (danger, favorite, warning...)
-│   │   ├─ YES → PATH B (global token — color will likely spread)
-│   │   └─ NO  → PATH C (local --cv-* token in component :host block)
-│   │
-│   └─ Is the hex #fff or #000 with NO colored background in the same rule?
-│       └─ YES → FLAG — context too ambiguous, do not auto-fix
-│
-└─ Comment on same line says "intentional" or "no token"
-    └─ SKIP — do not touch
-```
+
+Follow these steps IN ORDER. Stop at the first match.
+
+**Step 1: Check exclusions.**
+- Does the line start with `--`? → SKIP (token definition). STOP.
+- Is the hex inside an SVG data URI? → SKIP. STOP.
+- Does a same-line comment say "intentional" or "no token"? → SKIP. STOP.
+
+**Step 2: Check for #fff / #000 ambiguity.**
+- Is the hex `#fff` or `#000`?
+  - YES: Is there a colored background in the SAME rule block?
+    (e.g. `background: var(--color-danger)`, `background: var(--color-primary)`, etc.)
+    - YES → continue to Step 3 (treat as a normal hex on a colored surface).
+    - NO → FLAG. STOP. Context too ambiguous.
+  - NO: continue to Step 3.
+
+**Step 3: Check existing tokens.**
+- Does a token in styles.scss match this EXACT hex value?
+  (Use the Context section to check — do not search the codebase.)
+  - YES → PATH A. Replace with the matching token. STOP.
+  - NO → continue to Step 4.
+
+**Step 4: Determine scope.**
+- How many files contain this hex? (Use the Context section.)
+  - 2+ files → PATH B. Create a global token in styles.scss. STOP.
+  - 1 file → continue to Step 5.
+
+**Step 5: Semantic name check.**
+- Does the color have a clear, reusable semantic name?
+  (danger, favorite, warning, success, star-rating, allergen, etc.)
+  - YES → PATH B. Create a global token. STOP.
+  - NO → PATH C. Create a local `--cv-*` token in the component `:host` block. STOP.
 
 ## FIX
 
@@ -110,6 +136,27 @@ Situation: `.some-label { color: #fff }` — no background context
 ```
 Decision: FLAG
 Action: none — too ambiguous to determine correct token
+```
+
+### Example 4 — PATH C (local token, page-specific palette)
+Situation: cook-view.page.scss uses many custom greens/teals unique to that page.
+No global token match. No clear single semantic name. Page has its own visual identity.
+```
+:host block BEFORE (naked hex values):
+  background: #f0f7f5;
+  border: 1px solid #c8e6db;
+
+:host block AFTER (local --cv-* tokens defined and used):
+  :host {
+    --cv-bg-page: #f0f7f5;
+    --cv-border-soft: #c8e6db;
+  }
+  background: var(--cv-bg-page);
+  border: 1px solid var(--cv-border-soft);
+
+Rule for naming: --cv-[semantic-role] not --cv-[hex-description]
+  ✅ --cv-bg-page   (role-based)
+  ❌ --cv-f0f7f5    (hex-based — meaningless)
 ```
 
 ## SAFETY
