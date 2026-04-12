@@ -66,6 +66,22 @@
       role="listbox"
       aria-multiselectable="true"
       [attr.aria-activedescendant]="triggerId() && highlightedIndex() >= 0 ? triggerId() + '-opt-' + highlightedIndex() : null">
+      @if (searchable()) {
+        <div class="custom-multi-select-search-wrap">
+          <input
+            #searchInputRef
+            type="text"
+            class="custom-multi-select-search-input"
+            [value]="searchQuery_()"
+            (input)="onSearchInput($any($event.target).value)"
+            (focus)="onSearchInputFocus_()"
+            (blur)="onSearchInputBlur_()"
+            (click)="$event.stopPropagation()"
+            (keydown)="$event.stopPropagation()"
+            autocomplete="off"
+            [placeholder]="'search' | translatePipe" />
+        </div>
+      }
       @for (opt of dropdownOptions_(); track opt.value; let i = $index) {
         <button
           type="button"
@@ -82,6 +98,13 @@
           } @else {
             {{ opt.label }}
           }
+        </button>
+      }
+      @if (showDynamicAddNew_()) {
+        <button type="button" class="custom-select-option custom-select-option--add-new custom-select-option--dynamic-add"
+          (click)="onDynamicAddNewClick()">
+          <lucide-icon name="plus-circle" [size]="14"></lucide-icon>
+          {{ searchQuery_().trim() }}
         </button>
       }
     </app-scrollable-dropdown>

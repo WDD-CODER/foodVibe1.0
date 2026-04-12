@@ -1,0 +1,37 @@
+/**
+ * FIX TEMPLATE BENCHMARK — color-token
+ *
+ * This file contains 3 seeded violations for testing agent decision quality.
+ * DO NOT fix this file manually. It is intentionally wrong.
+ * Expected outputs are defined in color-token.rubric.md
+ */
+
+/* ── CASE 1 ──────────────────────────────────────────────────────────────
+   Context: favorite/heart button, active state
+   Used in: this file only (1 file)
+   Expected: PATH C — create new global token --color-favorite, replace with var()
+*/
+.favorite-btn.is-favorited {
+  color: #e11d48;
+}
+
+/* ── CASE 2 ──────────────────────────────────────────────────────────────
+   Context: white text on a danger-colored hover background
+   Used in: this file only (1 file)
+   Expected: PATH A — use existing --color-text-on-primary, no new token
+*/
+.delete-btn {
+  &:hover {
+    background: var(--color-danger);
+    color: #fff;
+  }
+}
+
+/* ── CASE 3 ──────────────────────────────────────────────────────────────
+   Context: white text, no colored background — ambiguous
+   Used in: this file only (1 file)
+   Expected: FLAG — do not fix, context too ambiguous
+*/
+.some-label {
+  color: #fff;
+}

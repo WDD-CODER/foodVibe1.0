@@ -87,9 +87,10 @@
 }
 
 .center-controls {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto auto;
+  align-content: space-between;
   min-width: 0;
   gap: 1rem;
 
@@ -153,9 +154,9 @@
 }
 
 .scaling-dock-grid {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.75rem;
 
   margin-block-start: 1rem;
@@ -197,15 +198,13 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
-
-  padding-inline-end: 0.75rem;
+  flex: 1;
+  min-width: 0;
   overflow: visible;
+}
 
-  border-inline-end: 2px solid var(--bg-muted);
-
-  .add-unit-wrapper {
-    flex-shrink: 0;
-  }
+.add-unit-wrapper {
+  flex-shrink: 0;
 }
 
 .add-custom-chip {
@@ -424,7 +423,6 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0;
 }
 
 .labels-grid-row {
@@ -479,6 +477,33 @@
   }
 }
 
+// Desktop-only child placement — kept outside the base .center-controls block
+// so mobile's lower-specificity grid-area overrides are not beaten.
+@media (min-width: 40.626rem) {
+  .center-controls {
+    .top-row {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .header-rating {
+      grid-column: 2;
+      grid-row: 1;
+      align-self: center;
+    }
+
+    .scaling-dock-grid {
+      grid-column: 1 / 3;
+      grid-row: 2;
+    }
+
+    .labels-container {
+      grid-column: 1 / 3;
+      grid-row: 3;
+    }
+  }
+}
+
 @media (max-width: 620px) {
   .recipe-name-input {
     min-block-size: 44px;
@@ -501,15 +526,13 @@
   .header-dashboard-container {
     grid-template-columns: 50% 50%;
     grid-template-areas:
-      "title "
-      "primary-unit "
-      "secondary-units "
-      "image "
-      // " metrics "
-    ;
+      "title title"
+      "img metrics"
+      "rating rating"
+      "scaling scaling"
+      "labels labels";
     gap: 1.5rem;
     place-items: center;
-    // justify-items: center;
   }
 
   /* Assigning Grid Areas */
@@ -520,43 +543,60 @@
 
   .top-row {
     grid-area: title;
-    grid-column: 1/3;
-    width: 80%;
-    // flex-direction: column;
+    grid-column: 1 / 3;
+    // width: 80%;
+  }
+
+  .header-rating {
+    grid-area: rating;
+    align-self: center;
+    justify-self: center;
   }
 
   .scaling-dock-grid {
-    display: contents;
+    grid-area: scaling;
+    grid-column: 1 / 3;
+
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.75rem;
+    margin-block-start: 0;
   }
 
   .primary-chip-wrapper {
-    grid-area: primary-unit;
-    grid-column: 1/3;
+    grid-column: 1;
+    grid-row: 1;
+    justify-content: flex-start;
+  }
 
-    justify-content: center;
-    // margin: 200px;
+  .add-unit-wrapper {
+    grid-column: 2;
+    grid-row: 1;
   }
 
   .secondary-units-container {
-    grid-area: secondary-units;
-    grid-column: 1/3;
+    grid-column: 1 / 3;
+    grid-row: 2;
 
-    width: 90%;
-    padding-inline-end: 0;
+    flex: unset;
+    width: 100%;
     padding-block-end: 1rem;
 
-    border-inline-end: none;
     border-block-end: 2px solid var(--bg-muted);
   }
 
+  .labels-container {
+    grid-area: labels;
+    width: 100%;
+  }
+
   .image-square {
-    grid-area: image;
-    grid-column: 1;
+    grid-area: img;
   }
 
   .metrics-square {
-    grid-area: image;
-    grid-column: 2;
+    grid-area: metrics;
 
     // width: 100%;
     // flex-direction: row;
@@ -566,5 +606,8 @@
   .metrics-square .divider {
     width: 1px;
     height: 20px;
+  }
+  .labels-grid-row-wrap{
+    padding: 1rem;
   }
 }

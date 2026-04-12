@@ -10,6 +10,8 @@ export interface ConfirmModalOptions {
   title?: string
   /** Visual variant: danger (red) for permanent delete, warning (yellow/amber) for restore. */
   variant?: ConfirmModalVariant
+  /** Optional translation key for a bold header displayed above the message. */
+  headerKey?: string
 }
 
 export interface TernaryModalOptions extends ConfirmModalOptions {
@@ -25,6 +27,7 @@ export class ConfirmModalService {
   private readonly variant_ = signal<ConfirmModalVariant>('default')
   private readonly showSaveButton_ = signal(false)
   private readonly saveButtonLabel_ = signal('save')
+  private readonly headerKey_ = signal<string | null>(null)
 
   /** Internal resolver — accepts both boolean (legacy) and string (ternary). */
   private resolve_: ((value: ConfirmModalResult | boolean) => void) | null = null
@@ -35,6 +38,7 @@ export class ConfirmModalService {
   readonly variant = this.variant_.asReadonly()
   readonly showSaveButton = this.showSaveButton_.asReadonly()
   readonly saveButtonLabel = this.saveButtonLabel_.asReadonly()
+  readonly headerKey = this.headerKey_.asReadonly()
 
   /**
    * Binary confirm: returns true (confirm) or false (cancel).
@@ -46,6 +50,7 @@ export class ConfirmModalService {
     this.saveLabel_.set(label)
     this.variant_.set(options?.variant ?? 'default')
     this.showSaveButton_.set(false)
+    this.headerKey_.set(options?.headerKey ?? null)
     this.isOpen_.set(true)
     return new Promise(resolve => {
       this.resolve_ = (val) => resolve(typeof val === 'boolean' ? val : val === 'confirm')
@@ -93,6 +98,7 @@ export class ConfirmModalService {
     this.variant_.set('default')
     this.showSaveButton_.set(false)
     this.saveButtonLabel_.set('save')
+    this.headerKey_.set(null)
   }
 
   private resolveSaveLabel(options?: ConfirmModalOptions): string {

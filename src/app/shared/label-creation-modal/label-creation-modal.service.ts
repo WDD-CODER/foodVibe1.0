@@ -21,8 +21,8 @@ export class LabelCreationModalService {
   selectedColor_ = signal('#3B82F6');
   selectedTriggers_ = signal<string[]>([]);
 
-  open(): Promise<LabelCreationResult | null> {
-    this.hebrewLabel_.set('');
+  open(prefillHebrew?: string): Promise<LabelCreationResult | null> {
+    this.hebrewLabel_.set(prefillHebrew ?? '');
     this.englishKey_.set('');
     this.selectedColor_.set('#3B82F6');
     this.selectedTriggers_.set([]);

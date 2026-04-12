@@ -7,7 +7,9 @@ import {
   HostListener,
   ViewChild,
   ElementRef,
-  inject
+  inject,
+  afterNextRender,
+  Injector
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -15,6 +17,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { ClickOutSideDirective } from '../../core/directives/click-out-side';
 import { ScrollableDropdownComponent } from '../scrollable-dropdown/scrollable-dropdown.component';
 import { LucideAngularModule } from 'lucide-angular';
+import { TranslationService } from '../../core/services/translation.service';
 
 export interface CustomMultiSelectOption {
   value: string;
@@ -49,31 +52,65 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   variant = input<'default' | 'chip'>('default');
   readonlyChips = input<string[]>([]);
   addNewValue = input<string>('');
+  searchable = input<boolean>(false);
 
   valueChange = output<string[]>();
-  addNewChosen = output<void>();
+  addNewChosen = output<string>();
 
   private _value = signal<string[]>([]);
   private _onChange: (value: string[]) => void = () => {};
   private _onTouched: () => void = () => {};
   private _disabled = signal(false);
 
+  private _injector = inject(Injector);
+  private _translationService = inject(TranslationService);
+
   @ViewChild('triggerRef') protected triggerRef?: ElementRef<HTMLButtonElement>;
+  @ViewChild('searchInputRef') protected searchInputRef?: ElementRef<HTMLInputElement>;
 
   protected open = signal(false);
   protected highlightedIndex = signal(-1);
   private closeTimeout: ReturnType<typeof setTimeout> | null = null;
   private _focusFromMouse = false;
 
-  /** Options to show in dropdown: exclude already selected and readonly chips. */
+  protected searchQuery_ = signal('');
+
+  /** Returns the display text for an option — translated when translateLabels is true. */
+  private getDisplayText_(label: string): string {
+    return this.translateLabels()
+      ? (this._translationService.translate(label) || label)
+      : label;
+  }
+
+  /** Options to show in dropdown: exclude already selected and readonly chips, with optional search filter. */
   protected dropdownOptions_ = computed(() => {
     const opts = this.options();
     const value = this._value();
     const readonly = this.readonlyChips();
     const addNew = this.addNewValue();
-    return opts.filter(
-      (o) =>
-        o.value === addNew || (!value.includes(o.value) && !readonly.includes(o.value))
+    const query = this.searchQuery_().toLowerCase().trim();
+    const isSearchable = this.searchable();
+
+    return opts.filter((o) => {
+      // When searchable, never show the static addNew option (dynamic one replaces it)
+      if (isSearchable && addNew && o.value === addNew) return false;
+      // Exclude already selected and readonly
+      if (o.value !== addNew && (value.includes(o.value) || readonly.includes(o.value))) return false;
+      // Apply search filter against the translated display text
+      if (isSearchable && query) {
+        return this.getDisplayText_(o.label).toLowerCase().includes(query);
+      }
+      return true;
+    });
+  });
+
+  /** Show dynamic "create new" option when searchable and query doesn't exactly match any displayed option. */
+  protected showDynamicAddNew_ = computed(() => {
+    if (!this.searchable()) return false;
+    const query = this.searchQuery_().trim();
+    if (!query) return false;
+    return !this.dropdownOptions_().some(
+      (o) => this.getDisplayText_(o.label).toLowerCase() === query.toLowerCase()
     );
   });
 
@@ -133,12 +170,16 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
     if (next) {
       const opts = this.dropdownOptions_();
       this.highlightedIndex.set(opts.length > 0 ? 0 : -1);
+      if (this.searchable()) {
+        this.focusSearchInput_();
+      }
     }
   }
 
   protected close(): void {
     this.clearCloseTimeout();
     this.open.set(false);
+    this.searchQuery_.set('');
     this._onTouched();
   }
 
@@ -148,6 +189,15 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
     this.open.set(true);
     const opts = this.dropdownOptions_();
     this.highlightedIndex.set(opts.length > 0 ? 0 : -1);
+    if (this.searchable()) {
+      this.focusSearchInput_();
+    }
+  }
+
+  private focusSearchInput_(): void {
+    afterNextRender(() => {
+      this.searchInputRef?.nativeElement?.focus();
+    }, { injector: this._injector });
   }
 
   protected onTriggerBlur(): void {
@@ -163,6 +213,19 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
       clearTimeout(this.closeTimeout);
       this.closeTimeout = null;
     }
+  }
+
+  /** Called when the search input receives focus — cancels any pending close. */
+  protected onSearchInputFocus_(): void {
+    this.clearCloseTimeout();
+  }
+
+  /** Called when the search input loses focus — schedule close like the trigger does. */
+  protected onSearchInputBlur_(): void {
+    this.closeTimeout = setTimeout(() => {
+      this.closeTimeout = null;
+      this.close();
+    }, 120);
   }
 
   protected addOption(value: string): void {
@@ -183,12 +246,22 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
 
   protected onOptionClick(opt: CustomMultiSelectOption): void {
     if (opt.value === this.addNewValue()) {
-      this.addNewChosen.emit();
+      this.addNewChosen.emit(this.searchQuery_().trim());
       this.close();
       return;
     }
     this.addOption(opt.value);
     // Keep dropdown open for multi-select
+  }
+
+  protected onSearchInput(q: string): void {
+    this.searchQuery_.set(q);
+    this.highlightedIndex.set(0);
+  }
+
+  protected onDynamicAddNewClick(): void {
+    this.addNewChosen.emit(this.searchQuery_().trim());
+    this.close();
   }
 
   protected onTriggerMousedown(): void {
@@ -229,11 +302,13 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
       e.preventDefault();
       if (idx >= 0 && opts[idx]) {
         if (opts[idx].value === this.addNewValue()) {
-          this.addNewChosen.emit();
+          this.addNewChosen.emit(this.searchQuery_().trim());
           this.close();
         } else {
           this.addOption(opts[idx].value);
         }
+      } else if (idx < 0 && this.showDynamicAddNew_()) {
+        this.onDynamicAddNewClick();
       }
       return;
     }
