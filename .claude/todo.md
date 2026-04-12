@@ -381,10 +381,10 @@
 ## 🔵 Infrastructure / Planning
 
 ### Plan 222 — Dev Machine Open Ports Security Hardening (`plans/222-dev-machine-open-ports-security.plan.md`)
-- [ ] Disable Dell SupportAssist service in `services.msc` — verify port 9012 closed
-- [ ] Identify and resolve port 5700 (VMware/Hyper-V/Windows component)
-- [ ] Verify MongoDB auth enabled in `mongod.cfg` — confirm `--auth` flag present
-- [ ] Evaluate SMB usage — disable ports 445/139 if not file-sharing on LAN
+- [x] Disable Dell SupportAssist service in `services.msc` — verify port 9012 closed
+- [x] Identify and resolve port 5700 (VMware/Hyper-V/Windows component)
+- [x] Verify MongoDB auth enabled in `mongod.cfg` — confirm `--auth` flag present
+- [x] Evaluate SMB usage — disable ports 445/139 if not file-sharing on LAN
 
 ### Plan 200 — Lite skills refactor validation report (`plans/200-lite-skills-refactor-validation-report.plan.md`)
 - [ ] Pre-write verification: content check (`toBe/skills/commit-to-github.md`, `toBe/agents/breadcrumb-navigator.md`); Master §3–5 completeness in `toBe/copilot-instructions.md`; confirm no legacy `quick-chat` skill

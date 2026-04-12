@@ -761,3 +761,40 @@ feat(ai-recipe-modal): improve preview UX, add clea	@{stdout=/c/Users/danwe/.bas
 2026-04-12 12:14:39	Bash	git add src/app/pages/recipe-builder/components/recipe-header/recipe-header.comp	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpec	
 2026-04-12 12:14:50	Bash	git commit -m "$(cat <<'EOF'
 feat(recipe-builder): recipe header polish, confirm	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:20:36	Bash	sleep 5	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpec	
+2026-04-12 12:20:48	Bash	powershell -Command "netstat -ano | Select-String ':9012|:5700|:27017|:445|:139'	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:21:03	Bash	powershell -Command "mongosh --quiet --eval 'db.adminCommand({getCmdLineOpts: 1}	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:21:11	Bash	powershell -Command "mongosh --quiet --eval 'db.adminCommand({getCmdLineOpts: 1}	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpec	
+2026-04-12 12:21:19	Bash	powershell -Command "try { \$result = mongosh --quiet --eval 'JSON.stringify(db.	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:21:33	Bash	powershell -Command "Get-Command mongosh 2>&1; where.exe mongosh 2>&1; ls 'C:\Pr	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:21:41	Bash	powershell -Command "ls 'C:\Program Files\MongoDB\'" 2>/dev/null; ls /c/Program\	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:21:51	Bash	powershell -Command "ls 'C:\Program Files\MongoDB\Server\*\bin\mongosh.exe' 2>&1	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:21:59	Bash	powershell -Command "ls 'C:\Program Files\MongoDB\Server\8.0\bin\' 2>&1 | Select	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:22:35	Bash	powershell -Command "netsh http show urlacl 2>&1 | Select-String '5700' -Context	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpec	
+2026-04-12 12:22:44	Bash	powershell -Command "netsh http show urlacl | Select-String '5700' -Context 2,2;	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:22:53	Bash	powershell -Command "netsh http show urlacl" 2>/dev/null | grep -i "5700" || ech	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:23:03	Bash	powershell -Command "Get-Service | Where-Object {\$_.Status -eq 'Running'} | For	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:24:13	Bash	powershell -Command "[console]::beep(800,300); Start-Sleep -Milliseconds 100; [c	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpec	
+2026-04-12 12:43:53	Bash	_UPD=$(~/.claude/skills/gstack/bin/gstack-update-check 2>/dev/null || .claude/sk	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:44:05	Bash	~/.claude/skills/gstack/bin/gstack-config get auto_upgrade 2>/dev/null || echo "	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:44:16	Bash	if [ -d "$HOME/.claude/skills/gstack/.git" ]; then
+  INSTALL_TYPE="global-git"
+ 	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:45:32	Bash	cat /tmp/claude/C--foodCo-foodVibe1-0--claude-worktrees-auto-solve/fc99ccda-efe4	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:45:40	Bash	tail -20 /tmp/claude/C--foodCo-foodVibe1-0--claude-worktrees-auto-solve/fc99ccda	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:46:03	Bash	sleep 15 && tail -5 /tmp/claude/C--foodCo-foodVibe1-0--claude-worktrees-auto-sol	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:46:16	Bash	cat "$HOME/.claude/skills/gstack/VERSION"
+
+# Run migrations
+INSTALL_DIR="$HOME/.	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:46:49	Bash	_TEL_END=$(date +%s)
+_TEL_START=$(cat ~/.gstack/sessions/"$PPID" 2>/dev/null | g	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:49:46	Bash	cat C:/foodCo/foodVibe1.0/.claude/worktrees/auto-solve/.worktree-port 2>/dev/nul	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:50:15	Bash	tail -20 "C:/Users/danwe/AppData/Local/Temp/claude/C--foodCo-foodVibe1-0--claude	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:50:27	Bash	cd C:/foodCo/foodVibe1.0/.claude/worktrees/auto-solve && cat package.json | grep	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:51:02	Bash	sleep 20 && tail -15 "C:/Users/danwe/AppData/Local/Temp/claude/C--foodCo-foodVib	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:51:24	Bash	ls C:/foodCo/foodVibe1.0/.claude/worktrees/auto-solve/node_modules/.bin/ng 2>/de	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:52:02	Bash	sleep 25 && tail -10 "C:/Users/danwe/AppData/Local/Temp/claude/C--foodCo-foodVib	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:52:11	Bash	powershell -Command "netstat -ano | Select-String ':4201 '" 2>/dev/null	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 15:03:19	Edit	C:\Users\danwe\.claude\settings.json	  "skipDangerousModePermissionPrompt": true,	
+2026-04-12 15:20:42	Bash	cd C:/foodCo/foodVibe1.0/.claude/worktrees/auto-solve && git diff .claude/reflec	+  @{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found 	
