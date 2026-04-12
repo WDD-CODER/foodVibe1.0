@@ -68,4 +68,6 @@ export interface Recipe {
   imageUrl_?: string;
   /** User-assigned rating (1–5 stars). Optional; absent means unrated. */
   rating_?: number;
+  /** True once user has explicitly confirmed the manual yield amount as neto (not total ingredients weight). */
+  neto_confirmed_?: boolean;
 }

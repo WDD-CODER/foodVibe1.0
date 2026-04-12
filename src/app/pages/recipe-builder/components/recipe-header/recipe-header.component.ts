@@ -14,11 +14,12 @@ import { CustomMultiSelectComponent } from 'src/app/shared/custom-multi-select/c
 import { ScalingChipComponent } from 'src/app/shared/scaling-chip/scaling-chip.component';
 import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive';
 import { RecipeYieldManager } from 'src/app/core/utils/recipe-yield-manager.util';
+import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component';
 
 @Component({
   selector: 'app-recipe-header',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, ClickOutSideDirective, TranslatePipe, CustomMultiSelectComponent, ScalingChipComponent, ScrollIndicatorsDirective],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, ClickOutSideDirective, TranslatePipe, CustomMultiSelectComponent, ScalingChipComponent, ScrollIndicatorsDirective, RatingStarsComponent],
   templateUrl: './recipe-header.component.html',
   styleUrl: './recipe-header.component.scss'
 })
@@ -46,10 +47,13 @@ export class RecipeHeaderComponent {
   unconvertibleForVolume = input<string[]>([]);
   resetTrigger = input<number>(0);
   autoLabels = input<string[]>([]);
+  rating = input<number>(0);
+  netoConfirmed = input<boolean>(false);
 
   // OUTPUTS
   openUnitCreator = output<string>();
   imageChange = output<string>();
+  ratingChange = output<number>();
 
   // YIELD MANAGER
   readonly yield = new RecipeYieldManager(
@@ -67,7 +71,8 @@ export class RecipeHeaderComponent {
   constructor() {
     effect(() => {
       const computed = this.yield.computedYieldAmount_();
-      if (computed !== null && !this.yield.isManualOverride_()) {
+      // Do not auto-sync if the user already confirmed a neto override and saved it
+      if (computed !== null && !this.yield.isManualOverride_() && !this.netoConfirmed()) {
         this.yield.syncYieldFromMetrics();
       }
     });
@@ -87,6 +92,10 @@ export class RecipeHeaderComponent {
     if (!yieldUnit?.trim()) errors['yield_unit'] = 'field_unit_required';
     this.validationErrors_.set(errors);
     return Object.keys(errors).length === 0;
+  }
+
+  isYieldManualOverride(): boolean {
+    return this.yield.isManualOverride_() && this.yield.yieldDiffersFromComputed_();
   }
 
   // SIGNALS & CONSTANTS
@@ -208,8 +217,8 @@ export class RecipeHeaderComponent {
     this.form().get('labels')?.setValue([], { emitEvent: true });
   }
 
-  protected async openCreateLabel(): Promise<void> {
-    const result = await this.labelCreationModal.open();
+  protected async openCreateLabel(prefillName?: string): Promise<void> {
+    const result = await this.labelCreationModal.open(prefillName);
     if (!result?.key || !result?.hebrewLabel) return;
     try {
       this.translationService.updateDictionary(result.key, result.hebrewLabel);

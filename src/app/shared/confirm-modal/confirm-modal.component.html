@@ -5,6 +5,9 @@
       [class.c-modal-card--warning]="modalService.variant() === 'warning'"
       dir="rtl"
       (click)="$event.stopPropagation()">
+      @if (modalService.headerKey()) {
+        <h3 class="confirm-modal-header">{{ modalService.headerKey()! | translatePipe }}</h3>
+      }
       <p class="confirm-modal-message">{{ modalService.message() | translatePipe }}</p>
       <div class="c-modal-actions">
         <button type="button" class="c-btn-ghost" (click)="modalService.choose('cancel')">

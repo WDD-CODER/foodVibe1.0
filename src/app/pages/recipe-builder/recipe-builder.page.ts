@@ -39,7 +39,6 @@ import { ConfirmModalService } from '@services/confirm-modal.service';
 import { RecipeAiFlowService } from './services/recipe-ai-flow.service';
 import { useSavingState } from 'src/app/core/utils/saving-state.util';
 import { CounterComponent } from 'src/app/shared/counter/counter.component';
-import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component';
 
 @Component({
   selector: 'app-recipe-builder-page',
@@ -60,7 +59,6 @@ import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.c
     ExportToolbarOverlayComponent,
     ApproveStampComponent,
     CounterComponent,
-    RatingStarsComponent
   ],
   templateUrl: './recipe-builder.page.html',
   styleUrl: './recipe-builder.page.scss'
@@ -118,6 +116,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   /** Whether the current recipe is marked approved (stamp sets this; used in buildRecipeFromForm and for stamp UI). */
   protected isApproved_ = signal(false);
+
+  /** True once user has explicitly confirmed the manual yield amount as neto. */
+  protected netoConfirmed_ = signal(false);
 
   /** User-uploaded recipe image as base64 data-URL; lives outside the form. */
   protected recipeImageUrl_ = signal<string | null>(null)
@@ -282,6 +283,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     this.recipeRating_.set(0)
     this.recipeId_.set(null);
     this.isApproved_.set(false);
+    this.netoConfirmed_.set(false);
     this.cachedPrepItems_ = [];
     this.cachedSteps_ = [];
 
@@ -497,6 +499,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     this.recipeFormService_.patchFormFromRecipe(this.recipeForm_, recipe);
     this.recipeImageUrl_.set(recipe.imageUrl_ ?? null)
     this.recipeRating_.set(recipe.rating_ ?? 0)
+    this.netoConfirmed_.set(recipe.neto_confirmed_ ?? false);
   }
 
 
@@ -853,7 +856,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     this.focusIngredientSearchAtRow_.set(null);
   }
 
-  saveRecipe(options?: { navigateOnSuccess?: boolean }): void {
+  async saveRecipe(options?: { navigateOnSuccess?: boolean }): Promise<void> {
     const headerValid = this.recipeHeaderRef_()?.validate() ?? true;
     if (this.recipeForm_.invalid || !headerValid) {
       this.recipeForm_.markAllAsTouched();
@@ -868,6 +871,17 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       return;
     }
     this.blockingIngredientsError_.set(false);
+
+    // Neto confirmation gate
+    const headerRef = this.recipeHeaderRef_();
+    if (headerRef?.isYieldManualOverride() && !this.netoConfirmed_()) {
+      const confirmed = await this.confirmModal_.open(
+        'neto_confirm_message',
+        { saveLabel: 'confirm', headerKey: 'neto_confirm_header' }
+      );
+      if (!confirmed) return;
+      this.netoConfirmed_.set(true);
+    }
 
     const navigateOnSuccess = options?.navigateOnSuccess !== false;
     this.saving.setSaving(true);
@@ -1078,6 +1092,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       ...recipe,
       ...(url ? { imageUrl_: url } : {}),
       ...(rating > 0 ? { rating_: rating } : {}),
+      neto_confirmed_: this.netoConfirmed_(),
     }
   }
 

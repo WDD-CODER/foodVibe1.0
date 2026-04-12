@@ -511,10 +511,10 @@ width: min-content;
 
 /* Favorite button color — outside @layer to beat unlayered .c-icon-btn rule in styles.scss */
 .favorite-btn.is-favorited {
-  color: #e11d48;
+  color: var(--color-favorite);
   opacity: 1;
 }
 
 .favorite-btn:hover:not(.is-favorited):not([disabled]) {
-  color: #e11d48;
+  color: var(--color-favorite);
 }

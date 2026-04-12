@@ -41,6 +41,13 @@
             </div>
         </div>
 
+        <app-rating-stars
+            class="header-rating"
+            [value]="rating()"
+            [readonly]="readonlyMode()"
+            size="md"
+            (ratingChange)="ratingChange.emit($event)" />
+
         <div class="scaling-dock-grid">
             <div class="primary-chip-wrapper" [class.c-input--invalid]="validationErrors_()['yield_amount'] || validationErrors_()['yield_unit']">
                 <app-scaling-chip
@@ -53,7 +60,7 @@
                     (valueChange)="yield.onScalingChipAmountChange($event)"
                     (unitChange)="yield.setPrimaryUnit($event)"
                     (createUnit)="onCreateUnit()" />
-                @if (yield.yieldDiffersFromComputed_()) {
+                @if (yield.yieldDiffersFromComputed_() && !netoConfirmed()) {
                     <button type="button" class="yield-sync-badge"
                         (click)="yield.resetManualOverride(); $event.stopPropagation()"
                         [title]="'yield_sync_to_total' | translatePipe">
@@ -68,6 +75,13 @@
                 }
             </div>
 
+            <div class="add-unit-wrapper">
+                <button type="button" class="add-custom-chip" (click)="yield.addSecondaryChipWithDefault()">
+                    <lucide-icon name="plus" [size]="16"></lucide-icon>
+                </button>
+            </div>
+
+            @if (yield.secondaryConversions.length > 0) {
             <div class="secondary-units-container">
                 @for (group of yield.secondaryConversions; track $index; let chipIdx = $index) {
                 <app-scaling-chip
@@ -82,13 +96,8 @@
                     (createUnit)="onCreateUnit(chipIdx)"
                     (remove)="yield.removeSecondaryUnit(chipIdx)" />
                 }
-
-                <div class="add-unit-wrapper">
-                    <button type="button" class="add-custom-chip" (click)="yield.addSecondaryChipWithDefault()">
-                        <lucide-icon name="plus" [size]="16"></lucide-icon>
-                    </button>
-                </div>
             </div>
+            }
         </div>
 
         <div class="labels-container">
@@ -101,8 +110,9 @@
                         placeholder="labels"
                         addNewValue="__add_label__"
                         variant="chip"
+                        [searchable]="true"
                         [maxHeight]="200"
-                        (addNewChosen)="openCreateLabel()" />
+                        (addNewChosen)="openCreateLabel($event)" />
                     <div class="labels-actions">
                         <span class="labels-btn-label">{{ 'labels' | translatePipe }}</span>
                         @if (hasAnyLabelsInContainer_()) {
