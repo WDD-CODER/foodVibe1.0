@@ -3,7 +3,7 @@ services:
     name: foodvibe
     runtime: node
     plan: free
-    buildCommand: npm ci && npm install --prefix server && npm run build:render
+    buildCommand: npm ci --include=dev && npm install --prefix server && npm run build:render
     startCommand: node server/index.js
     envVars:
       - key: NODE_ENV

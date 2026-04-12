@@ -67,7 +67,17 @@
       "mcp__mempalace__mempalace_find_tunnels",
       "mcp__mempalace__mempalace_graph_stats",
       "mcp__mempalace__mempalace_diary_write",
-      "mcp__mempalace__mempalace_diary_read"
+      "mcp__mempalace__mempalace_diary_read",
+      "WebFetch",
+      "WebSearch",
+      "mcp__playwright__browser_drag",
+      "mcp__playwright__browser_file_upload",
+      "mcp__playwright__browser_handle_dialog",
+      "mcp__playwright__browser_network_requests",
+      "mcp__playwright__browser_select_option",
+      "mcp__ide__getOpenEditors",
+      "mcp__ide__getCurrentSelection",
+      "mcp__ide__executeCode"
     ]
   },
   "hooks": {
