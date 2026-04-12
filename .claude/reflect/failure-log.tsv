@@ -761,3 +761,5 @@ feat(ai-recipe-modal): improve preview UX, add clea	@{stdout=/c/Users/danwe/.bas
 2026-04-12 12:14:39	Bash	git add src/app/pages/recipe-builder/components/recipe-header/recipe-header.comp	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpec	
 2026-04-12 12:14:50	Bash	git commit -m "$(cat <<'EOF'
 feat(recipe-builder): recipe header polish, confirm	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
+2026-04-12 12:17:44	Bash	git checkout -- .claude/reflect/failure-log.tsv	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpec	
+2026-04-12 12:17:55	Bash	git diff .claude/reflect/failure-log.tsv | head -5	@{stdout=/c/Users/danwe/.bashrc: line 4: ng: command not found	
