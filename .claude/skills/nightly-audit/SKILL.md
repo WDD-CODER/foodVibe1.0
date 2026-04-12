@@ -285,9 +285,11 @@ Apply fixes ONLY for items marked AUTO-FIX in Phase 2. Categories that auto-fix:
 
 Commit the fixes:
 ```bash
-git add -A
+git add -A -- ':!.claude/reflect/failure-log.tsv'
 git commit -m "audit(fix): YYYY-MM-DD — fixed N/M issues, M flagged for review"
 ```
+
+> **Do NOT add `.claude/reflect/failure-log.tsv`** — the pre-commit hook appends to it on every commit. Including it triggers another commit → another hook append → infinite loop. Leave it dirty; the next session's commit will include it naturally.
 
 If no auto-fixes were applied, skip this commit.
 
