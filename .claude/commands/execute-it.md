@@ -42,7 +42,7 @@ Before executing, persist the plan so it's tracked in `plans/` and `todo.md`.
 1. **Build the merged execution list** — combine the original brief's steps WITH every ✗ fix, missing method, injection, or deviation flagged during plan-implementation. Treat verified items (✓) as confirmed context.
 2. **Execute atomically** — one logical unit per commit
 3. **Stop only on NEW surprises** — if you hit something not covered by the brief OR the plan-implementation findings, stop and report. Do not improvise.
-4. **Update progress** — mark completed tasks
+4. **Update progress** — mark completed tasks. After each task is marked `[x]`, check if ALL remaining items in that plan's `todo.md` section are now `[x]`. If yes → immediately archive: extract the full `### Plan NNN` block, append to `todo-archive.md` under `## Done`, remove from `todo.md`.
 
 ## The Rule: Brief + Verification = Full Plan
 

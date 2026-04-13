@@ -249,12 +249,11 @@ For each task verified as complete (code committed, file exists):
 **Step 2 — Archive (automatic):**
 Find archivable sections:
 - All tasks in section marked `[x]`
-- Verified in git (commits exist)
-- Section >7 days old
+- Section does NOT contain `(deferred)`, `(skipped)`, or `[~]`
 
 For each archivable section:
 - Move to `.claude/todo-archive.md`
-- Prepend with archive date header
+- Append under `## Done` with the section header and all checkboxes
 
 Output: `"Archived {n} completed sections to todo-archive.md"`
 
