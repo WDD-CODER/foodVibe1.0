@@ -1668,12 +1668,11 @@ Update status after each sub-task. Link plan files here when applicable.
 ---
 
 ### Plan 234 — Per-User Collections + Render Deployment (`plans/234-per-user-collections-render-deploy.plan.md`)
+> Partially re-opened after archive audit 2026-04-13 — 10 operational tasks moved back to `todo.md`. See `.qa-reports/plan-234-archive-audit.md`.
 - [x] Create `server/constants/cloneable-types.js` — exports CLONEABLE_TYPES array
 - [x] Fix `scripts/seed-from-dump.js` — replace broken Entity model with native MongoDB driver; add userId/__masterId/_userModified to $setOnInsert
 - [x] Create `scripts/stamp-master-userId.js` — --confirm-stamp flag; production guard; updateMany per CLONEABLE_TYPES collection
 - [x] `ng build` smoke check
-- [x] Run stamp migration against Atlas; verify in Compass
-- [x] PR + merge `feat/user-scoped-schema`
 - [x] `server/routes/generic.js` — GET /:type: add userId filter
 - [x] `server/routes/generic.js` — GET /:type/:id: add userId filter
 - [x] `server/routes/generic.js` — POST /:type: stamp userId/_masterId/_userModified
@@ -1685,20 +1684,12 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] `server/routes/auth.js` — wire cloneMasterDataToUser on signup
 - [x] `server/routes/auth.js` — wire syncMasterToUser on login (try/catch)
 - [x] `server/routes/auth.js` — wire syncMasterToUser on refresh (try/catch)
-- [x] Build verification + manual API test
-- [x] Security Officer review
-- [x] PR + merge `feat/user-scoped-backend`
 - [x] `user.service.ts` — add refreshToken() method
 - [x] `user.service.ts` — call refreshToken() on construction
 - [x] `user.service.ts` — 13-minute interval timer; start on login/refresh; clear on logout
 - [x] `ng build` verification
-- [x] Security Officer review
-- [x] PR + merge `feat/frontend-auth-wiring`
 - [x] `server/index.js` — add /api/ guard to SPA catch-all
 - [x] `package.json` (root) — add build:render script
-- [x] Build + serve verification
-- [x] PR + merge `feat/express-static-serving`
 - [x] Rewrite `render.yaml` — fix buildCommand, MONGO_URI key, JWT_SECRET generateValue, remove PORT
 - [x] `package.json` (root) — add engines field
-- [x] PR + merge `feat/render-deploy`
-- [x] Manual deploy + smoke test
+- [x] PR + merge `feat/render-deploy` *(PR #53, merged 2026-03-29 — confirmed)*

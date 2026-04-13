@@ -77,29 +77,35 @@ Review what would be lost. Surface to user if significant changes detected.
 
 For each checkbox in the plan:
 
-1. **Code inspection first:** Read the target file, check if the described change already exists
-2. **Browser verification (if UI-related):** Use gstack `/browse` (`$B goto <url>` / `$B snapshot`) to verify visual state. Fall back to Playwright MCP only if the /browse daemon fails to start.
-3. Mark each checkbox as:
-   - `DONE` — already implemented in code
-   - `TODO` — needs to be done
-   - `BLOCKED` — dependency missing or unexpected state
+**Step 1 — UI-DETECTION GATE:** Before pre-validating any checkboxes, scan the plan's target files. If any target file matches `**/*.component.html`, `**/*.component.ts`, `**/*.component.scss`, `**/*.page.html`, `**/*.page.ts`, `**/*.page.scss`, or `src/styles.scss` — the plan is **UI-TOUCHING**. For UI-TOUCHING plans, Phase 2 MUST invoke `/browse` against the affected route(s) at least once, capture a snapshot, and include the snapshot summary in the pre-validation output. Grep-only verification is forbidden for UI-TOUCHING plans.
 
-Output:
+**Step 1a — Route identification:** To identify the affected route, read the page component's usage in `app.routes.ts`. If the route cannot be identified, ask the user which route to probe before proceeding. Do not guess.
+
+**Step 1b — Browser budget cap:** Phase 2 browser invocation is capped at 5 `/browse` actions per plan (goto + snapshot + up to 3 additional inspection actions). If more than 5 are needed to verify the plan's assumptions, stop and surface the gap instead of continuing.
+
+**Step 2 — Code inspection:** Read the target file, check if the described change already exists.
+
+Mark each checkbox as:
+- `DONE` — already implemented in code
+- `TODO` — needs to be done
+- `BLOCKED` — dependency missing or unexpected state
+
+**MANDATORY OUTPUT FORMAT** — Pre-validation results MUST be rendered as a literal markdown table:
+
 ```
-## Pre-Validation Results
-- [x] Task 1 — DONE (already in code at line 45)
-- [ ] Task 2 — TODO
-- [ ] Task 3 — TODO
-- [ ] Task 4 — BLOCKED (missing dependency: X)
+| # | Task | Status | Evidence |
+|---|------|--------|----------|
+| 1 | [task text] | DONE | file.ts:45 — method exists |
+| 2 | [task text] | TODO | not found in target file |
+| 3 | [task text] | BLOCKED | missing dependency: X |
 ```
+
+`Status` must be one of `DONE` / `TODO` / `BLOCKED`. `Evidence` must be a one-line reference (file:line, browser snapshot reference, or skip reason). Inline prose summaries do NOT satisfy this requirement. A `DONE` with no Evidence entry is invalid and must be downgraded to `TODO`. If the table is not produced, Phase 2 did not run.
 
 **If ALL tasks are DONE (zero TODO or BLOCKED items):**
 → Mark all checkboxes `[x]` in `todo.md`
-→ **Archive immediately** — no Phase 3, 4, or 5 needed:
-   1. Extract the full `### Plan NNN — ...` block from `todo.md`
-   2. Append to `todo-archive.md` under `## Done`
-   3. Remove from `todo.md`, collapsing surrounding `---` separators (no double-`---`)
-→ Loop directly to Phase 0 for the next plan
+→ **Surface Phase 5** with all tasks shown as DONE in the report — explicit user "approve" is still required before archiving. Phase 3 is skipped (no code to execute). Phase 4 is skipped (no files modified). The Phase 5 report must include: `Phase 4 skipped — plan pre-validated-done, no changes made.`
+→ Do NOT archive until the user types "approve" or "approve and stop" in this session.
 
 ---
 
@@ -120,6 +126,12 @@ After each task: update checkbox in `.claude/todo.md` to `[x]`.
 ---
 
 ## Phase 4 — Self-Validate
+
+**BUILD SCOPE RULE** — `ng build` must run against the current plan's changes. A build result from a previous plan in the same session is NOT valid Phase 4 evidence, even if no files overlap. Each plan starts Phase 4 with a fresh build.
+
+**Skip exemption** — Phase 4 may be skipped ONLY if Phase 2 confirmed all tasks as DONE (pre-validated-done) AND no files were modified in Phase 3. In that case, replace Phase 4 with a single line in the Phase 5 report: `Phase 4 skipped — plan pre-validated-done, no changes made.` This exemption does NOT apply if any task was executed in Phase 3.
+
+**Logging requirement** — Silent skipping is forbidden. If Phase 4 is skipped, the reason must appear explicitly in the Phase 5 report. A Phase 5 report with no Phase 4 entry is invalid.
 
 Run validation checklist:
 ```bash
@@ -190,6 +202,16 @@ Commands:
 
 ## Phase 6 — Handle User Response
 
+### ARCHIVAL PRECONDITION (enforced before ANY archive action)
+
+Before any edit to `todo.md` that removes a section, or any append to `todo-archive.md`, ALL three rules below must be satisfied:
+
+1. **Approval required** — the user must have typed the literal string `"approve"` or `"approve and stop"` in the current session. Inference from file state, commit history, pre-validation results, or any other source does NOT satisfy this precondition. If the precondition is not met, stop and ask.
+2. **Pre-validated-done plans still need approval** — if Phase 2 pre-validation determined a plan is already fully done, Phase 5 must still be surfaced with all tasks marked DONE, and the user must still type "approve" before archiving. Pre-validated-done plans do not skip the approval gate.
+3. **Operational tasks require session evidence** — tasks that are migrations, deployments, reviews, or PR merges can NEVER be marked `[x]` based on filesystem inference or code presence. They require either (a) direct evidence from a command run in this session (e.g. `gh pr list` confirming a merge), or (b) explicit user confirmation ("yes, the migration ran") in this session. If neither exists, the task stays `[ ]` and is surfaced as BLOCKED in Phase 2.
+
+---
+
 - **"approve":**
   1. Before committing, verify plan file number is still unique (re-check `plans/` directory)
   2. If collision detected (another worktree created same-numbered plan), rename current plan to next available number and update `todo.md` reference
@@ -202,8 +224,6 @@ Commands:
 - **"approve and stop"** → Commit, archive the plan (same step 4 above), then invoke `end-of-session-agent`
 - **"show diff"** → Run `git diff`, then wait for next command
 - **"abort"** → Run `git checkout .` to discard, end session
-
-> **Archive rule:** The archive step fires whenever ALL checkboxes in the plan section are `[x]` and the user has approved. This includes plans that were pre-validated as entirely DONE in Phase 2 (no execute needed) — approval still triggers the archive.
 
 ---
 
