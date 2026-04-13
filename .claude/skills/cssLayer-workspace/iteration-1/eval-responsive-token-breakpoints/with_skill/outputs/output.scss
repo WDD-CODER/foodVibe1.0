@@ -1,0 +1,35 @@
+// menu-grid.component.scss
+// Responsive grid for the menu page — 1 col (mobile) → 2 col (tablet) → 3 col (desktop)
+// Uses project breakpoint tokens from src/styles.scss
+
+@use 'src/styles' as *;   // exposes $break-mobile, $break-tablet, $break-desktop
+
+.menu-grid {
+  // 1. Layout
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+
+  // 2. Dimensions
+  // (intrinsic — no fixed width/height needed)
+
+  // 3. Content
+  // (no typography at grid level)
+
+  // 4. Structure
+  padding-block: 1rem;
+  padding-inline: 1rem;
+
+  // 5. Effects
+  // (none at grid level)
+
+  @media (min-width: $break-tablet) {
+    // 1. Layout
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: $break-desktop) {
+    // 1. Layout
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

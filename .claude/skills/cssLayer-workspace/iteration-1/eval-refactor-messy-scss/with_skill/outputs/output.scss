@@ -1,0 +1,31 @@
+// dish-card.component.scss
+//
+// Phase 1 notes:
+//   - Compose `.c-glass-card` on the host element in the template.
+//     That engine class supplies: background (--bg-glass), border,
+//     border-radius (--radius-lg), box-shadow, backdrop-filter, and
+//     the hover-lift transition — so none of those need repeating here.
+//   - Raw color `#1a1a2e` → token `--color-text-main` (closest semantic match).
+//   - `background: white` removed — engine class owns the surface.
+//   - `border-radius: 8px` removed — engine class owns radius; if an
+//     override is ever needed, use `--radius-sm` or `--radius-md`.
+//   - Physical margin/padding directions → logical properties.
+//   - `transition: box-shadow` removed — engine class owns all transitions.
+//
+// Usage in template:
+//   <div class="c-glass-card dish-card">…</div>
+
+.dish-card {
+  // 1. Layout
+  display: flex;
+
+  // 2. Dimensions
+  width: 300px;
+
+  // 3. Content
+  color: var(--color-text-main);
+
+  // 4. Structure
+  margin-inline: 1rem;
+  padding-inline-end: 0.75rem;
+}

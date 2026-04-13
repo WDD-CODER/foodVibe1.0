@@ -1,0 +1,35 @@
+{
+  "skill_name": "cssLayer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I inherited this dish-card component's SCSS and it's a mess. Here are the current styles that need to be fixed:\n\n```scss\n// dish-card.component.scss\n.dish-card {\n  color: #1a1a2e;\n  margin-left: 16px;\n  display: flex;\n  border-radius: 8px;\n  padding-right: 12px;\n  transition: box-shadow 0.2s ease;\n  width: 300px;\n  background: white;\n  margin-right: 16px;\n}\n```\n\nClean this up and write it correctly following our CSS standards.",
+      "expected_output": "SCSS block using Five-Group Vertical Rhythm (Layout → Dimensions → Content → Structure → Effects), each group separated by blank lines. Physical properties replaced: margin-left+margin-right → margin-inline, padding-right → padding-inline. No physical directional properties remain.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Make the menu-grid component responsive. Add this to src/app/pages/menu/components/menu-grid/menu-grid.component.scss. On mobile it should be a 1-column layout, tablet 2 columns, and desktop 3 columns. The grid needs a 1.5rem gap and 1rem padding on all sides.",
+      "expected_output": "SCSS using project token variables ($break-mobile: 768px, $break-tablet: 900px, $break-desktop: 1200px from styles.scss), NOT hardcoded pixel values. Breakpoint blocks placed after the base selector. Padding uses padding-inline and padding-block.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Build the SCSS for a new supplier-card component at src/app/pages/suppliers/components/supplier-card/supplier-card.component.scss. It should display a supplier logo image at the top, the supplier name as a heading, contact info below, and have a hover state. The card should be 320px wide.",
+      "expected_output": "Agent scans src/styles.scss first, finds .c-glass-card engine class, composes using it rather than rewriting glass styles from scratch. Component SCSS only adds layout/content-specific overrides. No .c-* class defined inside the component file. Five-Group Rhythm on any new selectors.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Add styles to a new notification-banner component at src/app/shared/notification-banner/notification-banner.component.scss. The banner displays a warning message with an icon on the left and a dismiss button on the right. It should sit at the top of the content area and look consistent with the rest of the app.",
+      "expected_output": "Uses project semantic tokens for warning styling: --bg-warning, --text-warning, --border-warning (from styles.scss :root). Does NOT hardcode colors like #fff3cd or #ffc107. Follows Five-Group Rhythm. Uses logical properties. Looks visually native to the Liquid Glass design system.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Style the empty-state component for when a user has no recipes yet. It lives at src/app/pages/recipe-builder/components/empty-state/empty-state.component.scss. Show centered content: an icon area at the top, a heading, a short description line, and a call-to-action button area below.",
+      "expected_output": "Uses project tokens: --color-text-muted or --color-text-muted-light for descriptive text, var(--radius-*) for any rounded elements, consistent with glass design language. Does NOT hardcode colors like #666 or #999. Empty state feels like it belongs in the same app as the other pages.",
+      "files": []
+    }
+  ]
+}

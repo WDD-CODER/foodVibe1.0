@@ -14,7 +14,8 @@ description: Enforces the project CSS architecture — engine placement, five-gr
 - If a `.c-*` is found in a component file → move to `src/styles.scss` before proceeding
 - No inline styles unless the value is dynamic/runtime
 - Logical properties only: `padding-inline`, `padding-block`, `margin-inline` — no physical directional values
-- Responsive breakpoints must follow project token definitions
+- Responsive breakpoints must follow project token definitions (`$break-mobile`, `$break-tablet`, `$break-desktop` from `src/styles.scss` — never hardcode pixel values)
+- **No hardcoded values** — use `var(--*)` for ALL colors, shadows, radii, blur, and easing. Hardcoding `#ffffff`, `rgba(0,0,0,0.1)`, `8px` radius, or `blur(16px)` is a theme violation — the design system tokens exist for exactly these values
 
 ---
 
@@ -29,7 +30,9 @@ description: Enforces the project CSS architecture — engine placement, five-gr
 
 ## Phase 1: Token & Engine Audit 
 
-**Engine Search:** Scan `src/styles.scss` for existing `.c-*` engine classes that can be composed before writing new styles.
+**Theme Alignment:** Read the design system comment block at the top of `src/styles.scss` (the `/* Designated global tokens */` section). Identify which tokens apply to the component type you're about to style — surface tokens (`--bg-glass`, `--blur-glass`), semantic tokens (`--bg-warning`, `--text-warning`), radius tokens (`--radius-*`), shadow tokens (`--shadow-*`). Every value you write should map to one of these. If you can't find a token for a value, that's a signal the value might not belong in the design.
+
+**Engine Search:** Scan `src/styles.scss` for existing `.c-*` engine classes that can be composed before writing new styles. Composing an engine means adding it as an HTML class on the host element — not replicating its properties in the component SCSS.
 
 **Component Scan:** Check all component `.scss` files in scope for any `.c-*` definitions → move any found to `src/styles.scss`.
 
@@ -64,9 +67,10 @@ Use logical properties throughout (`margin-inline`, `padding-block`). Use native
 ## Completion Gate
 
 - No inline styles added (unless value is dynamic/runtime)
-- Responsive breakpoints follow project token definitions
+- Responsive breakpoints use `$break-*` SCSS variables — no hardcoded pixel values
 - No `.c-*` class defined in any component `.scss` file
 - Five-Group Vertical Rhythm applied to every new/edited selector
+- No hardcoded colors, shadows, radii, or blur values — every value uses `var(--*)` or a `$` SCSS variable from `src/styles.scss`
 
 ---
 

@@ -1,0 +1,36 @@
+{
+  "eval_id": 4,
+  "config": "with_skill",
+  "expectations": [
+    {
+      "text": "Output uses var(--bg-warning) or var(--bg-warning-strong) instead of hardcoded warning background",
+      "passed": true,
+      "evidence": "Line 33: background: var(--bg-warning)"
+    },
+    {
+      "text": "Output uses var(--text-warning) for warning text color",
+      "passed": true,
+      "evidence": "Line 20: color: var(--text-warning); line 56: color: var(--text-warning)"
+    },
+    {
+      "text": "Output uses var(--border-warning) for border color",
+      "passed": true,
+      "evidence": "Line 29: border: 1px solid var(--border-warning)"
+    },
+    {
+      "text": "Output does not contain hardcoded warning colors (#fff3cd, #ffc107, #856404, #f59e0b)",
+      "passed": true,
+      "evidence": "No hardcoded warning hex colors found. Note: line 37 has rgba(217, 119, 6, 0.1) for box-shadow — minor issue, could use shadow token."
+    },
+    {
+      "text": "Output uses logical padding (padding-block, padding-inline)",
+      "passed": true,
+      "evidence": "Line 27: padding-inline: 1rem; line 28: padding-block: 0.75rem"
+    },
+    {
+      "text": "Output applies Five-Group Vertical Rhythm with clear group separation",
+      "passed": true,
+      "evidence": "Every selector has explicit group labels: // 1. Layout, // 2. Dimensions, // 3. Content, // 4. Structure, // 5. Effects with blank line separation"
+    }
+  ]
+}

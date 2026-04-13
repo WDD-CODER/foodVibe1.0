@@ -1,0 +1,42 @@
+{
+  "eval_id": 2,
+  "eval_name": "responsive-token-breakpoints",
+  "prompt": "Make the menu-grid component responsive. Add this to src/app/pages/menu/components/menu-grid/menu-grid.component.scss. On mobile it should be a 1-column layout, tablet 2 columns, and desktop 3 columns. The grid needs a 1.5rem gap and 1rem padding on all sides.",
+  "assertions": [
+    {
+      "id": "no_hardcoded_600px",
+      "text": "Output does not contain hardcoded breakpoint 600px",
+      "type": "grep_not",
+      "pattern": "600px"
+    },
+    {
+      "id": "no_hardcoded_1024px",
+      "text": "Output does not contain hardcoded breakpoint 1024px",
+      "type": "grep_not",
+      "pattern": "1024px"
+    },
+    {
+      "id": "no_hardcoded_768px",
+      "text": "Output does not contain hardcoded breakpoint 768px",
+      "type": "grep_not",
+      "pattern": "768px"
+    },
+    {
+      "id": "uses_project_breakpoint_vars",
+      "text": "Output uses project SCSS breakpoint variables ($break-tablet, $break-desktop) or @use to import them",
+      "type": "grep",
+      "pattern": "\\$break-|@use"
+    },
+    {
+      "id": "logical_padding",
+      "text": "Output uses logical padding properties (padding-block, padding-inline) instead of shorthand padding:",
+      "type": "grep",
+      "pattern": "padding-block|padding-inline"
+    },
+    {
+      "id": "breakpoints_after_base",
+      "text": "Responsive @media blocks appear after the base .menu-grid selector, not before",
+      "type": "agent"
+    }
+  ]
+}

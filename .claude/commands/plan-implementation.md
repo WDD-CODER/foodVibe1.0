@@ -96,6 +96,53 @@ While you're already reading the files from the brief, apply **light assessment*
 
 Only blockers and should-fix items get folded into the execution plan. Nice-to-have items are noted but not executed.
 
+## No Placeholders Scan
+
+After verifying the brief against code, scan the Merged Execution Plan for placeholder language. These are **plan failures** — flag them and require concrete content:
+
+**Red flag patterns (flag if found in any task):**
+- "TBD", "TODO", "implement later", "fill in details"
+- "Add appropriate error handling" / "add validation" / "handle edge cases"
+- "Write tests for the above" (without specifying what tests)
+- "Similar to Task N" (each task must be self-contained)
+- Steps that describe what to do without showing which files or what changes
+- References to functions, methods, or types not defined in any task
+
+If placeholders found → replace with concrete content before presenting the plan. Every task must specify: which file(s), what changes, what the expected outcome is.
+
+## Forced Alternatives
+
+Before presenting the final Merged Execution Plan, present 2-3 distinct implementation approaches if the plan involves:
+- Creating new files or components (not just editing existing ones)
+- A design decision with multiple valid paths
+- Touching 3+ files in different modules
+
+**Format:**
+| Approach | Summary | Effort | Risk | Files | Reuses |
+|----------|---------|--------|------|-------|--------|
+| A: Minimal | [desc] | S/M/L | Low/Med/High | [list] | [existing patterns] |
+| B: Ideal | [desc] | S/M/L | Low/Med/High | [list] | [existing patterns] |
+
+Recommendation: [X] because [reason].
+
+**STOP** and wait for user to pick approach before generating the Merged Execution Plan.
+
+**Skip** this section if the plan is a straightforward edit to 1-2 files with an obvious single approach.
+
+## Adversarial Plan Review
+
+Before presenting the final output to the user, dispatch a fresh subagent to review the Merged Execution Plan on 3 dimensions:
+
+1. **Completeness** — Does every brief requirement have a corresponding task? Missing anything?
+2. **Consistency** — Do file paths, function names, and types match across tasks? Is Task 3's output used correctly in Task 5?
+3. **Feasibility** — Can each task actually be executed as written? Hidden dependencies?
+
+**If reviewer finds issues:** Fix them in the plan before presenting. Do not show the user an unreviewed plan.
+
+**If subagent unavailable or fails:** Present plan with note: "Adversarial review unavailable — presenting unreviewed plan."
+
+**Max 2 review iterations.** If issues persist after 2 rounds, note them as "## Open Concerns" in the output.
+
 ## Tools Available
 - `Read` — examine files
 - `Grep` — search content
@@ -124,6 +171,12 @@ Session: .claude/sessions/{session-id}
 - [ ] Task 3: [added — prerequisite discovered during verification]
 - [ ] Task 4: [added — neighborhood blocker]
 ...
+
+## Adversarial Review
+- Iterations: [N]
+- Issues found: [N]
+- Issues fixed: [N]
+- Open concerns: [list or "none"]
 
 ---
 **Ready for approval.** Say "execute-it" when ready to proceed.

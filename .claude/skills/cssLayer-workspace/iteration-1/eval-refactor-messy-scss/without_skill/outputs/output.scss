@@ -1,0 +1,11 @@
+// dish-card.component.scss
+.dish-card {
+  display: flex;
+  width: 300px;
+  margin: 0 16px;
+  padding-right: 12px;
+  background: white;
+  border-radius: 8px;
+  color: #1a1a2e;
+  transition: box-shadow 0.2s ease;
+}

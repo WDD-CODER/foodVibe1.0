@@ -1655,3 +1655,50 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Replace `onPriceChange` conversion block with `calcBuyPriceGlobal(...)` call; add util import
 - [x] Leave `onUnitChange` conversion block unchanged (inverse math — cannot reuse)
 - [x] Verify `ng build` passes
+
+---
+
+### Plan 252 — auto-solve: prefer gstack /browse over Playwright MCP (`plans/252-auto-solve-browse-over-playwright.plan.md`)
+- [x] `auto-solve.md` frontmatter — add `Skill` to allowed-tools list so `/browse` can be invoked
+- [x] `auto-solve.md` Phase 2 line 81 — replace Playwright-first browser verification with gstack /browse ($B) as primary, Playwright MCP as fallback
+- [x] `auto-solve.md` Phase 4 line 133 — replace "if Playwright available" screenshot with `$B screenshot` primary, Playwright MCP fallback
+- [x] `auto-solve.md` Error Handling line 199 — update "Playwright unavailable" to reflect gstack /browse as primary tool
+- [x] `auto-solve.md` Permissions Required line 210 — add Skill invocation note alongside Playwright MCP entry
+
+---
+
+### Plan 234 — Per-User Collections + Render Deployment (`plans/234-per-user-collections-render-deploy.plan.md`)
+- [x] Create `server/constants/cloneable-types.js` — exports CLONEABLE_TYPES array
+- [x] Fix `scripts/seed-from-dump.js` — replace broken Entity model with native MongoDB driver; add userId/__masterId/_userModified to $setOnInsert
+- [x] Create `scripts/stamp-master-userId.js` — --confirm-stamp flag; production guard; updateMany per CLONEABLE_TYPES collection
+- [x] `ng build` smoke check
+- [x] Run stamp migration against Atlas; verify in Compass
+- [x] PR + merge `feat/user-scoped-schema`
+- [x] `server/routes/generic.js` — GET /:type: add userId filter
+- [x] `server/routes/generic.js` — GET /:type/:id: add userId filter
+- [x] `server/routes/generic.js` — POST /:type: stamp userId/_masterId/_userModified
+- [x] `server/routes/generic.js` — PUT /:type/:id: spoof-safe merge update with userId scope
+- [x] `server/routes/generic.js` — PUT /:type (replaceAll): userId-scoped deleteMany + stamp on insert
+- [x] `server/routes/generic.js` — DELETE /:type/:id: add userId filter
+- [x] Create `server/services/clone-master.js` — flat-doc cloning per CLONEABLE_TYPES
+- [x] Create `server/services/sync-master.js` — 4-rule sync per CLONEABLE_TYPES
+- [x] `server/routes/auth.js` — wire cloneMasterDataToUser on signup
+- [x] `server/routes/auth.js` — wire syncMasterToUser on login (try/catch)
+- [x] `server/routes/auth.js` — wire syncMasterToUser on refresh (try/catch)
+- [x] Build verification + manual API test
+- [x] Security Officer review
+- [x] PR + merge `feat/user-scoped-backend`
+- [x] `user.service.ts` — add refreshToken() method
+- [x] `user.service.ts` — call refreshToken() on construction
+- [x] `user.service.ts` — 13-minute interval timer; start on login/refresh; clear on logout
+- [x] `ng build` verification
+- [x] Security Officer review
+- [x] PR + merge `feat/frontend-auth-wiring`
+- [x] `server/index.js` — add /api/ guard to SPA catch-all
+- [x] `package.json` (root) — add build:render script
+- [x] Build + serve verification
+- [x] PR + merge `feat/express-static-serving`
+- [x] Rewrite `render.yaml` — fix buildCommand, MONGO_URI key, JWT_SECRET generateValue, remove PORT
+- [x] `package.json` (root) — add engines field
+- [x] PR + merge `feat/render-deploy`
+- [x] Manual deploy + smoke test

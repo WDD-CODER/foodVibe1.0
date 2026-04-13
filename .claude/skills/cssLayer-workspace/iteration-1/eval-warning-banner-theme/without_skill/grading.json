@@ -1,0 +1,36 @@
+{
+  "eval_id": 4,
+  "config": "without_skill",
+  "expectations": [
+    {
+      "text": "Output uses var(--bg-warning) or var(--bg-warning-strong) instead of hardcoded warning background",
+      "passed": true,
+      "evidence": "Line 15: background: var(--bg-warning-strong) — agent scanned styles.scss and found the correct token"
+    },
+    {
+      "text": "Output uses var(--text-warning) for warning text color",
+      "passed": true,
+      "evidence": "Line 16: color: var(--text-warning); also used in message and dismiss selectors"
+    },
+    {
+      "text": "Output uses var(--border-warning) for border color",
+      "passed": true,
+      "evidence": "Line 18: border: 1px solid var(--border-warning)"
+    },
+    {
+      "text": "Output does not contain hardcoded warning colors (#fff3cd, #ffc107, #856404, #f59e0b)",
+      "passed": true,
+      "evidence": "No hardcoded warning hex colors — agent found and used all project warning tokens"
+    },
+    {
+      "text": "Output uses logical padding (padding-block, padding-inline)",
+      "passed": true,
+      "evidence": "Line 13: padding-block: 0.75rem; line 14: padding-inline: 1rem — also uses block-size/inline-size for dismiss button"
+    },
+    {
+      "text": "Output applies Five-Group Vertical Rhythm with clear group separation",
+      "passed": false,
+      "evidence": "Properties are mixed within selectors without Five-Group ordering. Example .notification-banner: display/align-items/gap, then width, then padding, then background/color, then border in one flat block — no group separation."
+    }
+  ]
+}

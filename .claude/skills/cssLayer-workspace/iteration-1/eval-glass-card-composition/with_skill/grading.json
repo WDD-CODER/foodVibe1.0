@@ -1,0 +1,36 @@
+{
+  "eval_id": 3,
+  "config": "with_skill",
+  "expectations": [
+    {
+      "text": "Output does not contain hardcoded background color (#ffffff, white, #f7f7f7)",
+      "passed": true,
+      "evidence": "No hardcoded backgrounds — all surface styling delegated to .c-glass-card engine class"
+    },
+    {
+      "text": "Output does not contain hardcoded border colors (#e0e0e0, etc.)",
+      "passed": true,
+      "evidence": "Uses var(--border-default) and var(--border-glass) throughout — no hex border colors"
+    },
+    {
+      "text": "Output does not contain hardcoded text colors (#1a1a1a, #555, #888, #333)",
+      "passed": true,
+      "evidence": "All colors use tokens: var(--color-text-main), var(--color-text-muted), var(--color-primary)"
+    },
+    {
+      "text": "Output uses at least 3 var(--) token references",
+      "passed": true,
+      "evidence": "Numerous var(--*) references: --border-default, --radius-md, --color-text-main, --color-text-muted, --color-primary, --color-primary-hover, --ease-smooth, --ease-spring"
+    },
+    {
+      "text": "Agent references .c-glass-card engine class (as a comment or template note) rather than rewriting glass styles from scratch",
+      "passed": true,
+      "evidence": "Header comment line 8: Usage in template: <div class='supplier-card c-glass-card'>. Phase 1 note confirms engine class discovered and composed."
+    },
+    {
+      "text": "Output uses logical properties (padding-inline, padding-block, margin-block, border-block)",
+      "passed": true,
+      "evidence": "padding-block: 1.75rem 1.5rem; padding-inline: 1.5rem; margin-block-end: 1rem; margin-block-start: 0.75rem; border-block-start: 1px solid var(--border-default)"
+    }
+  ]
+}

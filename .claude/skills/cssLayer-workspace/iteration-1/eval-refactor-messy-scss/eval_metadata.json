@@ -1,0 +1,41 @@
+{
+  "eval_id": 1,
+  "eval_name": "refactor-messy-scss",
+  "prompt": "I inherited this dish-card component's SCSS and it's a mess. Here are the current styles that need to be fixed:\n\n```scss\n.dish-card {\n  color: #1a1a2e;\n  margin-left: 16px;\n  display: flex;\n  border-radius: 8px;\n  padding-right: 12px;\n  transition: box-shadow 0.2s ease;\n  width: 300px;\n  background: white;\n  margin-right: 16px;\n}\n```\n\nClean this up and write it correctly following our CSS standards.",
+  "assertions": [
+    {
+      "id": "no_physical_padding",
+      "text": "Output does not contain padding-left or padding-right (replaced with logical properties)",
+      "type": "grep_not",
+      "pattern": "padding-right:|padding-left:"
+    },
+    {
+      "id": "no_physical_margin",
+      "text": "Output does not contain margin-left or margin-right (replaced with logical properties)",
+      "type": "grep_not",
+      "pattern": "margin-left:|margin-right:"
+    },
+    {
+      "id": "uses_logical_inline",
+      "text": "Output contains margin-inline or padding-inline (logical properties used)",
+      "type": "grep",
+      "pattern": "margin-inline|padding-inline"
+    },
+    {
+      "id": "no_hardcoded_colors",
+      "text": "Output does not contain hardcoded color #1a1a2e or raw 'background: white'",
+      "type": "grep_not",
+      "pattern": "#1a1a2e|background: white|background-color: white"
+    },
+    {
+      "id": "five_group_rhythm",
+      "text": "Output shows Five-Group Vertical Rhythm structure (group labels or clear blank-line separation between groups)",
+      "type": "agent"
+    },
+    {
+      "id": "engine_class_awareness",
+      "text": "With-skill agent recognizes that .c-glass-card engine owns background/border-radius/transition and avoids duplicating those",
+      "type": "agent"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+/*
+  dish-card — Refactored per cssLayer standards
+  Engine: .c-glass-card (applied as HTML class on host element)
+  The .c-glass-card engine provides: background, border, border-radius, box-shadow,
+  backdrop-filter, and hover-lift transition. No need to redeclare those here.
+*/
+
+.dish-card {
+  /* 1. Layout */
+  display: flex;
+
+  /* 2. Dimensions */
+  width: 18.75rem; /* 300px → rem */
+
+  /* 3. Content */
+  color: var(--color-text-main);
+
+  /* 4. Structure */
+  padding-inline-end: 0.75rem;
+  margin-inline: 1rem;
+
+  /* 5. Effects */
+  transition: box-shadow 0.2s var(--ease-smooth);
+}

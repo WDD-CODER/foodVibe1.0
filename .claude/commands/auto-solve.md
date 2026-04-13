@@ -93,6 +93,14 @@ Output:
 - [ ] Task 4 — BLOCKED (missing dependency: X)
 ```
 
+**If ALL tasks are DONE (zero TODO or BLOCKED items):**
+→ Mark all checkboxes `[x]` in `todo.md`
+→ **Archive immediately** — no Phase 3, 4, or 5 needed:
+   1. Extract the full `### Plan NNN — ...` block from `todo.md`
+   2. Append to `todo-archive.md` under `## Done`
+   3. Remove from `todo.md`, collapsing surrounding `---` separators (no double-`---`)
+→ Loop directly to Phase 0 for the next plan
+
 ---
 
 ## Phase 3 — Execute
@@ -186,10 +194,16 @@ Commands:
   1. Before committing, verify plan file number is still unique (re-check `plans/` directory)
   2. If collision detected (another worktree created same-numbered plan), rename current plan to next available number and update `todo.md` reference
   3. Commit with conventional message (read `.claude/agents/git-agent.md`)
-  4. Loop back to Phase 0 for next plan
-- **"approve and stop"** → Commit, then invoke `end-of-session-agent`
+  4. **Archive the completed plan** (run immediately after commit, or after pre-validate-all-DONE approval):
+     - Extract the full `### Plan NNN — ...` block from `.claude/todo.md` (header line + all checkbox lines)
+     - Append it to `.claude/todo-archive.md` under the `## Done` section (after the last `---` entry)
+     - Remove the block from `.claude/todo.md`, collapsing the surrounding `---` separators so no double-`---` is left behind
+  5. Loop back to Phase 0 for next plan
+- **"approve and stop"** → Commit, archive the plan (same step 4 above), then invoke `end-of-session-agent`
 - **"show diff"** → Run `git diff`, then wait for next command
 - **"abort"** → Run `git checkout .` to discard, end session
+
+> **Archive rule:** The archive step fires whenever ALL checkboxes in the plan section are `[x]` and the user has approved. This includes plans that were pre-validated as entirely DONE in Phase 2 (no execute needed) — approval still triggers the archive.
 
 ---
 

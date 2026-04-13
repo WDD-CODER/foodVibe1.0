@@ -1,0 +1,36 @@
+{
+  "eval_id": 5,
+  "config": "without_skill",
+  "expectations": [
+    {
+      "text": "Output uses var(--color-text-muted) or var(--color-text-muted-light) for description text",
+      "passed": true,
+      "evidence": "Line 61: color: var(--color-text-muted) — agent scanned styles.scss and found the correct token"
+    },
+    {
+      "text": "Output uses glass surface tokens (var(--bg-glass) or var(--blur-glass))",
+      "passed": true,
+      "evidence": "Line 20: background: var(--bg-glass-strong); line 25: backdrop-filter: var(--blur-glass)"
+    },
+    {
+      "text": "Output does not contain hardcoded muted colors (#666, #999, #aaa, color: #)",
+      "passed": true,
+      "evidence": "No hardcoded colors — agent found and used design system tokens correctly"
+    },
+    {
+      "text": "Output uses logical spacing (padding-block, padding-inline, margin-block)",
+      "passed": true,
+      "evidence": "margin-block-end: 1.5rem; margin-block: 0 0.5rem; margin-block: 0 2rem — partial logical usage. However uses padding: 3rem 2rem (physical shorthand) on .empty-state."
+    },
+    {
+      "text": "With-skill agent discovers existing .c-empty-state or .c-glass-card engine class and composes from it instead of reinventing",
+      "passed": false,
+      "evidence": "No reference to .c-empty-state engine class. Agent wrote all glass surface styling from scratch (background, border, box-shadow, backdrop-filter) rather than composing from the existing engine."
+    },
+    {
+      "text": "Output applies Five-Group Vertical Rhythm with clear group separation",
+      "passed": false,
+      "evidence": ".empty-state selector mixes layout, dimensions, content, structure, effects in one flat block without group separation. No Five-Group structure."
+    }
+  ]
+}

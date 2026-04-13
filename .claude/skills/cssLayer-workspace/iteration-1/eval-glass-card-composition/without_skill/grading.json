@@ -1,0 +1,36 @@
+{
+  "eval_id": 3,
+  "config": "without_skill",
+  "expectations": [
+    {
+      "text": "Output does not contain hardcoded background color (#ffffff, white, #f7f7f7)",
+      "passed": false,
+      "evidence": "Line 8: background-color: #ffffff. Line 26: background-color: #f7f7f7. Completely missed the glass design system."
+    },
+    {
+      "text": "Output does not contain hardcoded border colors (#e0e0e0, etc.)",
+      "passed": false,
+      "evidence": "Line 9: border: 1px solid #e0e0e0. Line 28: border-bottom: 1px solid #e0e0e0. Raw hex colors throughout."
+    },
+    {
+      "text": "Output does not contain hardcoded text colors (#1a1a1a, #555, #888, #333)",
+      "passed": false,
+      "evidence": "Line 46: color: #1a1a1a. Line 64: color: #555555. Line 76: color: #888888. Line 80: color: #333333."
+    },
+    {
+      "text": "Output uses at least 3 var(--) token references",
+      "passed": false,
+      "evidence": "Zero var(--*) token references in the entire output. Agent wrote completely custom CSS without consulting the design system."
+    },
+    {
+      "text": "Agent references .c-glass-card engine class (as a comment or template note) rather than rewriting glass styles from scratch",
+      "passed": false,
+      "evidence": "No reference to .c-glass-card. Agent invented its own card styling: background-color: #ffffff, border, box-shadow with hardcoded rgba values."
+    },
+    {
+      "text": "Output uses logical properties (padding-inline, padding-block, margin-block, border-block)",
+      "passed": false,
+      "evidence": "Uses: padding: 16px, padding: 20px, margin: 0 0 12px, font-size: 18px, gap: 8px — all physical/non-logical"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "eval_id": 5,
+  "eval_name": "empty-state-theme",
+  "prompt": "Style the empty-state component for when a user has no recipes yet. It lives at src/app/pages/recipe-builder/components/empty-state/empty-state.component.scss. Show centered content: an icon area at the top, a heading, a short description line, and a call-to-action button area below.",
+  "assertions": [
+    {
+      "id": "uses_text_muted_token",
+      "text": "Output uses var(--color-text-muted) or var(--color-text-muted-light) for description text",
+      "type": "grep",
+      "pattern": "var\\(--color-text-muted"
+    },
+    {
+      "id": "uses_glass_surface_tokens",
+      "text": "Output uses glass surface tokens (var(--bg-glass) or var(--blur-glass))",
+      "type": "grep",
+      "pattern": "var\\(--bg-glass|var\\(--blur-glass"
+    },
+    {
+      "id": "no_hardcoded_colors",
+      "text": "Output does not contain hardcoded muted colors (#666, #999, #aaa, color: #)",
+      "type": "grep_not",
+      "pattern": "color: #666|color: #999|color: #aaa"
+    },
+    {
+      "id": "logical_spacing",
+      "text": "Output uses logical spacing (padding-block, padding-inline, margin-block)",
+      "type": "grep",
+      "pattern": "padding-block|padding-inline|margin-block"
+    },
+    {
+      "id": "engine_class_discovery",
+      "text": "With-skill agent discovers existing .c-empty-state or .c-glass-card engine class and composes from it instead of reinventing",
+      "type": "agent"
+    },
+    {
+      "id": "five_group_rhythm",
+      "text": "Output applies Five-Group Vertical Rhythm with clear group separation",
+      "type": "agent"
+    }
+  ]
+}

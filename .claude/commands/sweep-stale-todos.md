@@ -29,18 +29,8 @@ gh pr list --state merged --search "<plan-keyword>" # merged PR
 ```
 If **neither** returns results → flag as "unverifiable" and exclude from the archive proposal. Add to **Sections Kept** with reason: "all [x] but no git verification found — manual review needed."
 
-### Step 3b — Age threshold
-Only propose archiving sections from plans older than **7 days**. Infer plan age from:
-```bash
-git log --oneline -- plans/<NNN>-*.plan.md | tail -1
-```
-If the plan file was committed fewer than 7 days ago → keep it. Add to **Sections Kept** with reason: "plan too recent (< 7 days)."
-
-### Step 4 — Propose archival
-List all sections that passed every gate. Ask: "Archive these sections to `todo-archive.md`?"
-
-### Step 5 — If approved
-Move each approved section (heading + items) from `todo.md` to `todo-archive.md` (create if needed), appended with today's date and plan number.
+### Step 4 — Archive immediately
+Move each qualifying section (heading + all items) from `todo.md` to `todo-archive.md`, appended under `## Done`. No confirmation gate — all-`[x]` sections that passed git verification are archived on the spot.
 
 ### Step 6 — Report
 

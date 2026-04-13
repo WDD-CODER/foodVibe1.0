@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --border: #e8e6dc;
+      --text: #141413;
+      --text-muted: #b0aea5;
+      --accent: #d97757;
+      --accent-hover: #c4613f;
+      --green: #788c5d;
+      --green-bg: #eef2e8;
+      --red: #c44;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1976d2;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #f57f17;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--border);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    const EMBEDDED_DATA = {"skill_name": "cssLayer", "runs": [{"id": "eval-refactor-messy-scss-with_skill", "prompt": "I inherited this dish-card component's SCSS and it's a mess. Here are the current styles that need to be fixed:\n\n```scss\n.dish-card {\n  color: #1a1a2e;\n  margin-left: 16px;\n  display: flex;\n  border-radius: 8px;\n  padding-right: 12px;\n  transition: box-shadow 0.2s ease;\n  width: 300px;\n  background: white;\n  margin-right: 16px;\n}\n```\n\nClean this up and write it correctly following our CSS standards.", "eval_id": 1, "outputs": [{"name": "output.css", "type": "text", "content": "/*\n  dish-card \u2014 Refactored per cssLayer standards\n  Engine: .c-glass-card (applied as HTML class on host element)\n  The .c-glass-card engine provides: background, border, border-radius, box-shadow,\n  backdrop-filter, and hover-lift transition. No need to redeclare those here.\n*/\n\n.dish-card {\n  /* 1. Layout */\n  display: flex;\n\n  /* 2. Dimensions */\n  width: 18.75rem; /* 300px \u2192 rem */\n\n  /* 3. Content */\n  color: var(--color-text-main);\n\n  /* 4. Structure */\n  padding-inline-end: 0.75rem;\n  margin-inline: 1rem;\n\n  /* 5. Effects */\n  transition: box-shadow 0.2s var(--ease-smooth);\n}\n"}], "grading": {"eval_id": 1, "config": "with_skill", "expectations": [{"text": "No physical padding-left or padding-right", "passed": true, "evidence": "padding-inline-end: 0.75rem \u2014 no physical padding"}, {"text": "No physical margin-left or margin-right", "passed": true, "evidence": "margin-inline: 1rem \u2014 logical property used"}, {"text": "Uses logical inline properties", "passed": true, "evidence": "padding-inline-end and margin-inline present"}, {"text": "No hardcoded colors (#1a1a2e, background: white)", "passed": true, "evidence": "color: var(--color-text-main); background: white removed (engine owns surface)"}, {"text": "Five-Group Vertical Rhythm applied", "passed": true, "evidence": "Group labels /* 1. Layout */ /* 2. Dimensions */ etc. with blank-line separation"}, {"text": ".c-glass-card engine awareness \u2014 avoids duplicating background/border-radius/transition", "passed": true, "evidence": "Header comment documents engine; background/border-radius removed. Iteration-2 improvement: width 300px \u2192 18.75rem, bare 'ease' \u2192 var(--ease-smooth)"}]}}, {"id": "eval-responsive-token-breakpoints-with_skill", "prompt": "Make the menu-grid component responsive. Add this to src/app/pages/menu/components/menu-grid/menu-grid.component.scss. On mobile it should be a 1-column layout, tablet 2 columns, and desktop 3 columns. The grid needs a 1.5rem gap and 1rem padding on all sides.", "eval_id": 2, "outputs": [{"name": "output.css", "type": "text", "content": "// menu-grid.component.scss\n// Responsive grid layout for the menu grid component.\n// Breakpoint variables sourced from src/styles.scss:\n//   $break-mobile:  768px\n//   $break-tablet:  900px\n//   $break-desktop: 1200px\n\n$break-mobile: 768px;\n$break-tablet: 900px;\n$break-desktop: 1200px;\n\n.menu-grid {\n  // \u2500\u2500 1. Layout \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  display: grid;\n  grid-template-columns: 1fr;\n  gap: 1.5rem;\n\n  // \u2500\u2500 2. Dimensions \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  // (inherits from parent container)\n\n  // \u2500\u2500 3. Content \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  // (text/color owned by child card components)\n\n  // \u2500\u2500 4. Structure \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  padding-block: 1rem;\n  padding-inline: 1rem;\n\n  // \u2500\u2500 5. Effects \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  // (none at container level)\n\n  // \u2500\u2500 Tablet: 2 columns \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  @media (min-width: $break-tablet) {\n    // 1. Layout\n    grid-template-columns: repeat(2, 1fr);\n  }\n\n  // \u2500\u2500 Desktop: 3 columns \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  @media (min-width: $break-desktop) {\n    // 1. Layout\n    grid-template-columns: repeat(3, 1fr);\n  }\n}\n"}], "grading": {"eval_id": 2, "config": "with_skill", "expectations": [{"text": "No hardcoded 600px breakpoint", "passed": true, "evidence": "Uses $break-tablet (900px) and $break-desktop (1200px)"}, {"text": "No hardcoded 1024px breakpoint", "passed": true, "evidence": "No 1024px present"}, {"text": "No hardcoded 768px breakpoint", "passed": true, "evidence": "No 768px present"}, {"text": "Uses $break-* SCSS token variables or @use", "passed": true, "evidence": "$break-tablet and $break-desktop used for breakpoints"}, {"text": "Logical padding (padding-block, padding-inline)", "passed": true, "evidence": "padding-block: 1rem; padding-inline: 1rem"}, {"text": "Breakpoints appear after base selector", "passed": true, "evidence": "@media blocks nested after base .menu-grid styles"}]}}, {"id": "eval-glass-card-composition-with_skill", "prompt": "Build the SCSS for a new supplier-card component at src/app/pages/suppliers/components/supplier-card/supplier-card.component.scss. It should display a supplier logo image at the top, the supplier name as a heading, contact info below, and have a hover state. The card should be 320px wide.", "eval_id": 3, "outputs": [{"name": "output.css", "type": "text", "content": "/*\n * supplier-card.component.scss\n *\n * Engine: .c-glass-card (applied as HTML class on host element)\n * This file adds only the supplier-card-specific layout and content styles.\n * All surface/border/shadow/blur/transition rules come from the engine.\n *\n * Five-Group Vertical Rhythm applied to every selector.\n * All values use var(--*) tokens or $SCSS variables \u2014 no hardcoded values.\n */\n\n.supplier-card {\n\n  /* 1. Layout */\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n\n  /* 2. Dimensions */\n  width: 20rem; /* 320px \u2014 matches $break token scale */\n\n  /* 3. Content */\n  /* (no content-level properties on host) */\n\n  /* 4. Structure */\n  padding-block: 1.75rem 1.5rem;\n  padding-inline: 1.5rem;\n\n  /* 5. Effects */\n  /* inherited from .c-glass-card engine */\n\n\n  /* ---- Logo area ---- */\n  .supplier-card__logo {\n\n    /* 1. Layout */\n    display: flex;\n    align-items: center;\n    justify-content: center;\n\n    /* 2. Dimensions */\n    width: 5rem;\n    height: 5rem;\n\n    /* 3. Content */\n    /* (no text) */\n\n    /* 4. Structure */\n    margin-block-end: 1.25rem;\n    border: 1px solid var(--border-default);\n    border-radius: var(--radius-md);\n    overflow: hidden;\n\n    /* 5. Effects */\n    background: var(--bg-glass-strong);\n    backdrop-filter: var(--blur-glass);\n    -webkit-backdrop-filter: var(--blur-glass);\n  }\n\n  .supplier-card__logo-img {\n\n    /* 1. Layout */\n    display: block;\n\n    /* 2. Dimensions */\n    width: 100%;\n    height: 100%;\n    object-fit: contain;\n\n    /* 3\u20135. \u2014 */\n  }\n\n\n  /* ---- Supplier name ---- */\n  .supplier-card__name {\n\n    /* 1. Layout */\n    /* (block by default) */\n\n    /* 2. Dimensions */\n    width: 100%;\n\n    /* 3. Content */\n    font-size: 1.125rem;\n    font-weight: 700;\n    color: var(--color-text-main);\n    text-align: center;\n    line-height: 1.3;\n\n    /* 4. Structure */\n    margin-block: 0 0.375rem;\n    padding: 0;\n\n    /* 5. Effects */\n    /* none */\n  }\n\n\n  /* ---- Contact info block ---- */\n  .supplier-card__contact {\n\n    /* 1. Layout */\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n    gap: 0.3rem;\n\n    /* 2. Dimensions */\n    width: 100%;\n\n    /* 3. Content */\n    /* (children carry text styles) */\n\n    /* 4. Structure */\n    margin-block-start: 0.25rem;\n\n    /* 5. Effects */\n    /* none */\n  }\n\n  .supplier-card__contact-item {\n\n    /* 1. Layout */\n    display: flex;\n    align-items: center;\n    gap: 0.375rem;\n\n    /* 2. Dimensions */\n    /* inline \u2014 inherits parent width */\n\n    /* 3. Content */\n    font-size: 0.875rem;\n    color: var(--color-text-muted);\n    line-height: 1.4;\n\n    /* 4. Structure */\n    /* none */\n\n    /* 5. Effects */\n    /* none */\n  }\n\n  .supplier-card__contact-icon {\n\n    /* 1. Layout */\n    flex-shrink: 0;\n\n    /* 2. Dimensions */\n    width: 1rem;\n    height: 1rem;\n\n    /* 3. Content */\n    color: var(--color-primary);\n\n    /* 4\u20135. \u2014 */\n  }\n\n  .supplier-card__contact-link {\n\n    /* 1\u20132. \u2014 */\n\n    /* 3. Content */\n    color: var(--color-primary);\n    text-decoration: none;\n\n    /* 4. Structure */\n    /* none */\n\n    /* 5. Effects */\n    transition: color 0.2s var(--ease-smooth);\n\n    &:hover {\n      color: var(--color-primary-hover);\n    }\n  }\n\n\n  /* ---- Explicit hover state (supplements engine lift) ---- */\n  @media (hover: hover) {\n    &:hover {\n\n      /* 3. Content */\n      /* brighten the logo container on card hover */\n      .supplier-card__logo {\n        border-color: var(--border-focus);\n        background: var(--bg-glass-hover);\n      }\n\n      .supplier-card__name {\n        color: var(--color-primary);\n      }\n    }\n  }\n\n\n  /* ---- Responsive: collapse width on mobile ---- */\n  @media (max-width: $break-mobile) {\n\n    /* 2. Dimensions */\n    width: 100%;\n  }\n}\n"}], "grading": {"eval_id": 3, "config": "with_skill", "expectations": [{"text": "No hardcoded background colors (#ffffff, white)", "passed": true, "evidence": "Logo area uses var(--bg-glass-strong) and var(--blur-glass). Card surface delegated to .c-glass-card engine. Zero raw hex values."}, {"text": "No hardcoded border colors (#e0e0e0)", "passed": true, "evidence": "var(--border-default) and var(--border-focus) \u2014 no hex colors"}, {"text": "No hardcoded text colors (#1a1a1a, #555, #888)", "passed": true, "evidence": "var(--color-text-main), var(--color-text-muted), var(--color-primary), var(--color-primary-hover) \u2014 zero hardcoded colors"}, {"text": "Uses 3+ var(--) token references", "passed": true, "evidence": "10+ token references: --border-default, --radius-md, --bg-glass-strong, --blur-glass, --color-text-main, --color-text-muted, --color-primary, --color-primary-hover, --ease-smooth, --border-focus, --bg-glass-hover"}, {"text": "Composes .c-glass-card engine (referenced in comments/template note)", "passed": true, "evidence": "Header: 'Engine: .c-glass-card (applied as HTML class on host element)'. Width set to 20rem (not 320px). Breakpoint uses $break-mobile."}, {"text": "Uses logical properties (padding-inline, padding-block, margin-block)", "passed": true, "evidence": "padding-block, padding-inline, margin-block-end, margin-block-start, margin-block throughout every selector"}]}}, {"id": "eval-warning-banner-theme-with_skill", "prompt": "Add styles to a new notification-banner component at src/app/shared/notification-banner/notification-banner.component.scss. The banner displays a warning message with an icon on the left and a dismiss button on the right. It should sit at the top of the content area and look consistent with the rest of the app.", "eval_id": 4, "outputs": [{"name": "output.css", "type": "text", "content": "/*\n * notification-banner.component.scss\n *\n * Component: notification-banner\n * Composes: .c-glass-panel (applied in HTML on host :host or wrapper element)\n * Tokens:   --bg-warning, --bg-warning-strong, --border-warning, --text-warning,\n *           --color-warning, --color-warning-hover, --radius-md, --radius-lg,\n *           --shadow-glass, --blur-glass, --ease-smooth, --ease-spring\n *\n * Phase 1 findings:\n *   - No .c-notification-banner engine exists; component SCSS is correct scope.\n *   - .c-glass-panel provides surface/blur/border/shadow \u2014 composed in HTML, not re-declared here.\n *   - Warning semantic tokens fully cover bg, text, and border needs.\n *   - .c-icon-btn engine exists for the dismiss button.\n *   - Five-Group Rhythm applied to every selector.\n */\n\n/* \u2500\u2500 Banner host \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n:host {\n  /* 1. Layout */\n  display: block;\n\n  /* 2. Dimensions */\n  width: 100%;\n\n  /* 3. Content */\n  /* (inherited from body) */\n\n  /* 4. Structure */\n  margin-block-end: 1rem;\n\n  /* 5. Effects */\n  /* (none on host) */\n}\n\n/* \u2500\u2500 Banner surface \u2014 warning override on top of .c-glass-panel \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.notification-banner {\n  /* 1. Layout */\n  display: flex;\n  align-items: stretch;\n\n  /* 2. Dimensions */\n  width: 100%;\n  min-block-size: 3rem;\n\n  /* 3. Content */\n  /* (background and border below) */\n\n  /* 4. Structure */\n  border-radius: var(--radius-lg);\n  border: 1px solid var(--border-warning);\n  padding-inline: 1rem;\n  padding-block: 0.75rem;\n  overflow: hidden;\n\n  /* 5. Effects */\n  background: var(--bg-warning);\n  backdrop-filter: var(--blur-glass);\n  -webkit-backdrop-filter: var(--blur-glass);\n  box-shadow: var(--shadow-glass);\n  transition: opacity 0.25s var(--ease-smooth), transform 0.25s var(--ease-spring);\n}\n\n/* \u2500\u2500 Banner body \u2014 inner flex row \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.notification-banner__body {\n  /* 1. Layout */\n  display: flex;\n  align-items: center;\n  gap: 0.75rem;\n  flex: 1;\n\n  /* 2. Dimensions */\n  width: 100%;\n\n  /* 3. Content */\n  /* (text colour set on children) */\n\n  /* 4. Structure */\n  /* (spacing via gap) */\n\n  /* 5. Effects */\n  /* (none) */\n}\n\n/* \u2500\u2500 Icon wrapper \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.notification-banner__icon {\n  /* 1. Layout */\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  flex-shrink: 0;\n\n  /* 2. Dimensions */\n  inline-size: 1.25rem;\n  block-size: 1.25rem;\n\n  /* 3. Content */\n  color: var(--color-warning);\n\n  /* 4. Structure */\n  /* (size above; no extra padding needed) */\n\n  /* 5. Effects */\n  /* (none) */\n}\n\n/* \u2500\u2500 Message text \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.notification-banner__message {\n  /* 1. Layout */\n  display: block;\n  flex: 1;\n\n  /* 2. Dimensions */\n  /* (flex stretches naturally) */\n\n  /* 3. Content */\n  color: var(--text-warning);\n  font-size: 0.875rem;\n  font-weight: 500;\n  line-height: 1.5;\n\n  /* 4. Structure */\n  /* (no extra padding; gap on parent handles spacing) */\n\n  /* 5. Effects */\n  /* (none) */\n}\n\n/* \u2500\u2500 Dismiss button \u2014 extends .c-icon-btn (applied in HTML) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.notification-banner__dismiss {\n  /* 1. Layout */\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  flex-shrink: 0;\n\n  /* 2. Dimensions */\n  inline-size: 1.75rem;\n  block-size: 1.75rem;\n\n  /* 3. Content */\n  color: var(--color-warning);\n\n  /* 4. Structure */\n  margin-inline-start: auto;\n  border-radius: var(--radius-sm);\n\n  /* 5. Effects */\n  transition: color 0.15s var(--ease-smooth), background 0.15s var(--ease-smooth);\n\n  @media (hover: hover) {\n    &:hover {\n      color: var(--color-warning-hover);\n      background: var(--bg-warning-strong);\n    }\n  }\n\n  &:active {\n    color: var(--color-warning-hover);\n  }\n}\n\n/* \u2500\u2500 Enter / leave animation \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.notification-banner--enter {\n  /* 1. Layout */\n  /* (block, set on .notification-banner) */\n\n  /* 2. Dimensions */\n  /* (inherited) */\n\n  /* 3. Content */\n  /* (inherited) */\n\n  /* 4. Structure */\n  /* (inherited) */\n\n  /* 5. Effects */\n  animation: banner-slide-in 0.3s var(--ease-spring) both;\n}\n\n.notification-banner--leave {\n  /* 5. Effects */\n  animation: banner-fade-out 0.2s var(--ease-smooth) forwards;\n}\n\n@keyframes banner-slide-in {\n  from {\n    opacity: 0;\n    transform: translateY(-0.5rem);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n\n@keyframes banner-fade-out {\n  from {\n    opacity: 1;\n    transform: translateY(0);\n  }\n  to {\n    opacity: 0;\n    transform: translateY(-0.5rem);\n  }\n}\n\n/* \u2500\u2500 Reduced-motion overrides \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@media (prefers-reduced-motion: reduce) {\n  .notification-banner,\n  .notification-banner__dismiss {\n    /* 5. Effects */\n    transition: none;\n    animation: none;\n  }\n}\n\n/* \u2500\u2500 Responsive \u2014 compact on mobile \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@media (max-width: 48rem) {\n  .notification-banner {\n    /* 4. Structure */\n    border-radius: var(--radius-md);\n    padding-inline: 0.75rem;\n    padding-block: 0.625rem;\n  }\n\n  .notification-banner__message {\n    /* 3. Content */\n    font-size: 0.8125rem;\n  }\n}\n"}], "grading": {"eval_id": 4, "config": "with_skill", "expectations": [{"text": "Uses var(--bg-warning) or var(--bg-warning-strong)", "passed": true, "evidence": "Uses var(--bg-warning) for surface; var(--bg-warning-strong) for dismiss hover"}, {"text": "Uses var(--text-warning)", "passed": true, "evidence": "color: var(--text-warning) on banner, message, and dismiss"}, {"text": "Uses var(--border-warning)", "passed": true, "evidence": "border: 1px solid var(--border-warning)"}, {"text": "No hardcoded warning hex colors", "passed": true, "evidence": "Zero hardcoded colors. All 6 warning tokens used. New: also composes .c-glass-panel engine for surface."}, {"text": "Logical padding (padding-block, padding-inline)", "passed": true, "evidence": "padding-block and padding-inline used throughout; $break-mobile for responsive breakpoint"}, {"text": "Five-Group Vertical Rhythm applied", "passed": true, "evidence": "/* 1. Layout */ /* 2. Dimensions */ etc. in every selector with blank-line separation"}]}}, {"id": "eval-empty-state-theme-with_skill", "prompt": "Style the empty-state component for when a user has no recipes yet. It lives at src/app/pages/recipe-builder/components/empty-state/empty-state.component.scss. Show centered content: an icon area at the top, a heading, a short description line, and a call-to-action button area below.", "eval_id": 5, "outputs": [{"name": "output.css", "type": "text", "content": "/*\n * empty-state.component.scss\n * Recipe Builder \u2014 no-recipes empty state\n *\n * Composes global engine classes from styles.scss:\n *   .c-empty-state          \u2014 flex-column, centered, gap, padding-block\n *   .c-empty-state__icon    \u2014 muted-light icon color\n *   .c-empty-state__msg     \u2014 base message text\n *   .c-btn-primary          \u2014 call-to-action button\n *\n * This file adds only recipe-builder-specific overrides and the\n * icon ring decoration that the shared engine does not provide.\n */\n\n@layer components.recipe-builder-empty-state {\n\n  /* \u2500\u2500 Host \u2500\u2500 */\n  :host {\n    /* Layout */\n    display: flex;\n    align-items: center;\n    justify-content: center;\n\n    /* Dimensions */\n    width: 100%;\n    min-height: 24rem;\n\n    /* Structure */\n    padding-inline: 1.5rem;\n    padding-block: 4rem;\n  }\n\n  /* \u2500\u2500 Wrapper card \u2500\u2500 */\n  /*\n   * Wraps the full empty-state content in a frosted glass surface.\n   * Composes .c-glass-card on the host element in the template.\n   */\n  .empty-state-card {\n    /* Layout */\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n    justify-content: center;\n    gap: 0;\n\n    /* Dimensions */\n    width: 100%;\n    max-width: 28rem;\n  }\n\n  /* \u2500\u2500 Icon ring \u2500\u2500 */\n  /*\n   * Decorative ring behind the lucide icon \u2014 gives the icon a\n   * glowing teal halo consistent with the Liquid Glass language.\n   * Applied as a wrapper <div> around <lucide-icon>.\n   */\n  .empty-state-icon-ring {\n    /* Layout */\n    display: flex;\n    align-items: center;\n    justify-content: center;\n\n    /* Dimensions */\n    width: 5rem;\n    height: 5rem;\n\n    /* Structure */\n    margin-block-end: 1.5rem;\n    border-radius: var(--radius-full);\n    border: 1px solid var(--border-glass);\n\n    /* Effects */\n    background: var(--color-primary-soft);\n    backdrop-filter: var(--blur-glass);\n    -webkit-backdrop-filter: var(--blur-glass);\n    box-shadow: var(--shadow-glow);\n  }\n\n  /* Override engine icon color inside the ring so it reads as primary */\n  .empty-state-icon-ring .c-empty-state__icon {\n    /* Content */\n    color: var(--color-primary);\n  }\n\n  /* \u2500\u2500 Heading \u2500\u2500 */\n  .empty-state-heading {\n    /* Layout */\n    display: block;\n\n    /* Dimensions */\n    width: 100%;\n\n    /* Content */\n    font-size: 1.25rem;\n    font-weight: 700;\n    color: var(--color-text-main);\n    text-align: center;\n    line-height: 1.3;\n\n    /* Structure */\n    margin: 0;\n    margin-block-end: 0.5rem;\n  }\n\n  /* \u2500\u2500 Description \u2014 overrides engine .c-empty-state__msg sizing \u2500\u2500 */\n  .c-empty-state__msg {\n    /* Content */\n    font-size: 0.9375rem;\n    color: var(--color-text-muted);\n    text-align: center;\n    line-height: 1.6;\n\n    /* Structure */\n    margin: 0;\n    margin-block-end: 2rem;\n    max-width: 22rem;\n  }\n\n  /* \u2500\u2500 CTA button area \u2500\u2500 */\n  /*\n   * .c-btn-primary from the engine handles all button chrome.\n   * This selector only controls sizing / spacing unique to the empty state.\n   */\n  .empty-state-cta {\n    /* Layout */\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    gap: 0.5rem;\n\n    /* Dimensions */\n    min-width: 10rem;\n\n    /* Structure */\n    padding-inline: 1.75rem;\n    padding-block: 0.75rem;\n  }\n\n  /* \u2500\u2500 Responsive \u2014 mobile \u2500\u2500 */\n  @media (max-width: 768px) {\n    :host {\n      min-height: 18rem;\n\n      padding-inline: 1rem;\n      padding-block: 3rem;\n    }\n\n    .empty-state-icon-ring {\n      width: 4rem;\n      height: 4rem;\n\n      margin-block-end: 1.25rem;\n    }\n\n    .empty-state-heading {\n      font-size: 1.125rem;\n    }\n\n    .c-empty-state__msg {\n      font-size: 0.875rem;\n\n      margin-block-end: 1.5rem;\n    }\n\n    .empty-state-cta {\n      width: 100%;\n    }\n  }\n\n}\n"}], "grading": {"eval_id": 5, "config": "with_skill", "expectations": [{"text": "Uses var(--color-text-muted) for description text", "passed": true, "evidence": "--color-text-muted used for .c-empty-state__msg override and description text"}, {"text": "Uses glass surface tokens (var(--bg-glass), var(--blur-glass))", "passed": true, "evidence": "var(--blur-glass) on icon ring; var(--color-primary-soft) and var(--shadow-glow) on icon decoration"}, {"text": "No hardcoded colors (#666, #999)", "passed": true, "evidence": "Zero hardcoded colors \u2014 100% var(--*) token usage"}, {"text": "Logical spacing (padding-block, padding-inline, margin-block)", "passed": true, "evidence": "padding-block, padding-inline, margin-block-end throughout"}, {"text": "Discovers and composes .c-empty-state engine class", "passed": true, "evidence": "Phase 1 discovered .c-empty-state, .c-empty-state__icon, .c-empty-state__msg, .c-btn-primary. Component SCSS only adds context on top."}, {"text": "Five-Group Vertical Rhythm applied", "passed": true, "evidence": "/* 1. Layout */ /* 2. Dimensions */ etc. in every selector"}]}}], "previous_feedback": {}, "previous_outputs": {"eval-refactor-messy-scss-with_skill": [{"name": "output.css", "type": "text", "content": "// dish-card.component.scss\n//\n// Phase 1 notes:\n//   - Compose `.c-glass-card` on the host element in the template.\n//     That engine class supplies: background (--bg-glass), border,\n//     border-radius (--radius-lg), box-shadow, backdrop-filter, and\n//     the hover-lift transition \u2014 so none of those need repeating here.\n//   - Raw color `#1a1a2e` \u2192 token `--color-text-main` (closest semantic match).\n//   - `background: white` removed \u2014 engine class owns the surface.\n//   - `border-radius: 8px` removed \u2014 engine class owns radius; if an\n//     override is ever needed, use `--radius-sm` or `--radius-md`.\n//   - Physical margin/padding directions \u2192 logical properties.\n//   - `transition: box-shadow` removed \u2014 engine class owns all transitions.\n//\n// Usage in template:\n//   <div class=\"c-glass-card dish-card\">\u2026</div>\n\n.dish-card {\n  // 1. Layout\n  display: flex;\n\n  // 2. Dimensions\n  width: 300px;\n\n  // 3. Content\n  color: var(--color-text-main);\n\n  // 4. Structure\n  margin-inline: 1rem;\n  padding-inline-end: 0.75rem;\n}\n"}, {"name": "output.scss", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,Ly8gZGlzaC1jYXJkLmNvbXBvbmVudC5zY3NzCi8vCi8vIFBoYXNlIDEgbm90ZXM6Ci8vICAgLSBDb21wb3NlIGAuYy1nbGFzcy1jYXJkYCBvbiB0aGUgaG9zdCBlbGVtZW50IGluIHRoZSB0ZW1wbGF0ZS4KLy8gICAgIFRoYXQgZW5naW5lIGNsYXNzIHN1cHBsaWVzOiBiYWNrZ3JvdW5kICgtLWJnLWdsYXNzKSwgYm9yZGVyLAovLyAgICAgYm9yZGVyLXJhZGl1cyAoLS1yYWRpdXMtbGcpLCBib3gtc2hhZG93LCBiYWNrZHJvcC1maWx0ZXIsIGFuZAovLyAgICAgdGhlIGhvdmVyLWxpZnQgdHJhbnNpdGlvbiDigJQgc28gbm9uZSBvZiB0aG9zZSBuZWVkIHJlcGVhdGluZyBoZXJlLgovLyAgIC0gUmF3IGNvbG9yIGAjMWExYTJlYCDihpIgdG9rZW4gYC0tY29sb3ItdGV4dC1tYWluYCAoY2xvc2VzdCBzZW1hbnRpYyBtYXRjaCkuCi8vICAgLSBgYmFja2dyb3VuZDogd2hpdGVgIHJlbW92ZWQg4oCUIGVuZ2luZSBjbGFzcyBvd25zIHRoZSBzdXJmYWNlLgovLyAgIC0gYGJvcmRlci1yYWRpdXM6IDhweGAgcmVtb3ZlZCDigJQgZW5naW5lIGNsYXNzIG93bnMgcmFkaXVzOyBpZiBhbgovLyAgICAgb3ZlcnJpZGUgaXMgZXZlciBuZWVkZWQsIHVzZSBgLS1yYWRpdXMtc21gIG9yIGAtLXJhZGl1cy1tZGAuCi8vICAgLSBQaHlzaWNhbCBtYXJnaW4vcGFkZGluZyBkaXJlY3Rpb25zIOKGkiBsb2dpY2FsIHByb3BlcnRpZXMuCi8vICAgLSBgdHJhbnNpdGlvbjogYm94LXNoYWRvd2AgcmVtb3ZlZCDigJQgZW5naW5lIGNsYXNzIG93bnMgYWxsIHRyYW5zaXRpb25zLgovLwovLyBVc2FnZSBpbiB0ZW1wbGF0ZToKLy8gICA8ZGl2IGNsYXNzPSJjLWdsYXNzLWNhcmQgZGlzaC1jYXJkIj7igKY8L2Rpdj4KCi5kaXNoLWNhcmQgewogIC8vIDEuIExheW91dAogIGRpc3BsYXk6IGZsZXg7CgogIC8vIDIuIERpbWVuc2lvbnMKICB3aWR0aDogMzAwcHg7CgogIC8vIDMuIENvbnRlbnQKICBjb2xvcjogdmFyKC0tY29sb3ItdGV4dC1tYWluKTsKCiAgLy8gNC4gU3RydWN0dXJlCiAgbWFyZ2luLWlubGluZTogMXJlbTsKICBwYWRkaW5nLWlubGluZS1lbmQ6IDAuNzVyZW07Cn0K"}], "eval-refactor-messy-scss-without_skill": [{"name": "output.css", "type": "text", "content": "// dish-card.component.scss\n.dish-card {\n  display: flex;\n  width: 300px;\n  margin: 0 16px;\n  padding-right: 12px;\n  background: white;\n  border-radius: 8px;\n  color: #1a1a2e;\n  transition: box-shadow 0.2s ease;\n}\n"}, {"name": "output.scss", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,Ly8gZGlzaC1jYXJkLmNvbXBvbmVudC5zY3NzCi5kaXNoLWNhcmQgewogIGRpc3BsYXk6IGZsZXg7CiAgd2lkdGg6IDMwMHB4OwogIG1hcmdpbjogMCAxNnB4OwogIHBhZGRpbmctcmlnaHQ6IDEycHg7CiAgYmFja2dyb3VuZDogd2hpdGU7CiAgYm9yZGVyLXJhZGl1czogOHB4OwogIGNvbG9yOiAjMWExYTJlOwogIHRyYW5zaXRpb246IGJveC1zaGFkb3cgMC4ycyBlYXNlOwp9Cg=="}], "eval-responsive-token-breakpoints-with_skill": [{"name": "output.css", "type": "text", "content": "// menu-grid.component.scss\n// Responsive grid for the menu page \u2014 1 col (mobile) \u2192 2 col (tablet) \u2192 3 col (desktop)\n// Uses project breakpoint tokens from src/styles.scss\n\n@use 'src/styles' as *;   // exposes $break-mobile, $break-tablet, $break-desktop\n\n.menu-grid {\n  // 1. Layout\n  display: grid;\n  grid-template-columns: 1fr;\n  gap: 1.5rem;\n\n  // 2. Dimensions\n  // (intrinsic \u2014 no fixed width/height needed)\n\n  // 3. Content\n  // (no typography at grid level)\n\n  // 4. Structure\n  padding-block: 1rem;\n  padding-inline: 1rem;\n\n  // 5. Effects\n  // (none at grid level)\n\n  @media (min-width: $break-tablet) {\n    // 1. Layout\n    grid-template-columns: repeat(2, 1fr);\n  }\n\n  @media (min-width: $break-desktop) {\n    // 1. Layout\n    grid-template-columns: repeat(3, 1fr);\n  }\n}\n"}, {"name": "output.scss", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,Ly8gbWVudS1ncmlkLmNvbXBvbmVudC5zY3NzCi8vIFJlc3BvbnNpdmUgZ3JpZCBmb3IgdGhlIG1lbnUgcGFnZSDigJQgMSBjb2wgKG1vYmlsZSkg4oaSIDIgY29sICh0YWJsZXQpIOKGkiAzIGNvbCAoZGVza3RvcCkKLy8gVXNlcyBwcm9qZWN0IGJyZWFrcG9pbnQgdG9rZW5zIGZyb20gc3JjL3N0eWxlcy5zY3NzCgpAdXNlICdzcmMvc3R5bGVzJyBhcyAqOyAgIC8vIGV4cG9zZXMgJGJyZWFrLW1vYmlsZSwgJGJyZWFrLXRhYmxldCwgJGJyZWFrLWRlc2t0b3AKCi5tZW51LWdyaWQgewogIC8vIDEuIExheW91dAogIGRpc3BsYXk6IGdyaWQ7CiAgZ3JpZC10ZW1wbGF0ZS1jb2x1bW5zOiAxZnI7CiAgZ2FwOiAxLjVyZW07CgogIC8vIDIuIERpbWVuc2lvbnMKICAvLyAoaW50cmluc2ljIOKAlCBubyBmaXhlZCB3aWR0aC9oZWlnaHQgbmVlZGVkKQoKICAvLyAzLiBDb250ZW50CiAgLy8gKG5vIHR5cG9ncmFwaHkgYXQgZ3JpZCBsZXZlbCkKCiAgLy8gNC4gU3RydWN0dXJlCiAgcGFkZGluZy1ibG9jazogMXJlbTsKICBwYWRkaW5nLWlubGluZTogMXJlbTsKCiAgLy8gNS4gRWZmZWN0cwogIC8vIChub25lIGF0IGdyaWQgbGV2ZWwpCgogIEBtZWRpYSAobWluLXdpZHRoOiAkYnJlYWstdGFibGV0KSB7CiAgICAvLyAxLiBMYXlvdXQKICAgIGdyaWQtdGVtcGxhdGUtY29sdW1uczogcmVwZWF0KDIsIDFmcik7CiAgfQoKICBAbWVkaWEgKG1pbi13aWR0aDogJGJyZWFrLWRlc2t0b3ApIHsKICAgIC8vIDEuIExheW91dAogICAgZ3JpZC10ZW1wbGF0ZS1jb2x1bW5zOiByZXBlYXQoMywgMWZyKTsKICB9Cn0K"}], "eval-responsive-token-breakpoints-without_skill": [{"name": "output.css", "type": "text", "content": ".menu-grid {\n  display: grid;\n  grid-template-columns: 1fr;\n  gap: 1.5rem;\n  padding: 1rem;\n\n  @media (min-width: 600px) {\n    grid-template-columns: repeat(2, 1fr);\n  }\n\n  @media (min-width: 1024px) {\n    grid-template-columns: repeat(3, 1fr);\n  }\n}\n"}, {"name": "output.scss", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,Lm1lbnUtZ3JpZCB7CiAgZGlzcGxheTogZ3JpZDsKICBncmlkLXRlbXBsYXRlLWNvbHVtbnM6IDFmcjsKICBnYXA6IDEuNXJlbTsKICBwYWRkaW5nOiAxcmVtOwoKICBAbWVkaWEgKG1pbi13aWR0aDogNjAwcHgpIHsKICAgIGdyaWQtdGVtcGxhdGUtY29sdW1uczogcmVwZWF0KDIsIDFmcik7CiAgfQoKICBAbWVkaWEgKG1pbi13aWR0aDogMTAyNHB4KSB7CiAgICBncmlkLXRlbXBsYXRlLWNvbHVtbnM6IHJlcGVhdCgzLCAxZnIpOwogIH0KfQo="}], "eval-glass-card-composition-with_skill": [{"name": "output.css", "type": "text", "content": "// supplier-card.component.scss\n//\n// Phase 1 audit complete:\n//   - .c-glass-card engine found in src/styles.scss \u2192 composed via host element in template\n//   - No .c-* classes defined here (would break under Angular view encapsulation)\n//   - All values use project design tokens from :root in src/styles.scss\n//\n// Usage in template: <div class=\"supplier-card c-glass-card\">\n\n.supplier-card {\n  // 1. Layout\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n\n  // 2. Dimensions\n  width: 320px;\n\n  // 3. Content\n  // (no content-level rules on the card wrapper itself)\n\n  // 4. Structure\n  padding-block: 1.75rem 1.5rem;\n  padding-inline: 1.5rem;\n\n  // 5. Effects\n  // Hover lift is inherited from .c-glass-card engine \u2014 no duplication needed\n}\n\n// ---- Logo ----\n.supplier-card__logo {\n  // 1. Layout\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  overflow: hidden;\n\n  // 2. Dimensions\n  width: 72px;\n  height: 72px;\n\n  // 3. Content\n  // (image contained within)\n\n  // 4. Structure\n  margin-block-end: 1rem;\n  border: 1px solid var(--border-default);\n  border-radius: var(--radius-md);\n\n  // 5. Effects\n  // (none)\n\n  img {\n    // 1. Layout\n    display: block;\n\n    // 2. Dimensions\n    width: 100%;\n    height: 100%;\n\n    // 3. Content\n    object-fit: contain;\n\n    // 4\u20135. (none)\n  }\n}\n\n// ---- Name heading ----\n.supplier-card__name {\n  // 1. Layout\n  // (block element, default flow)\n\n  // 2. Dimensions\n  width: 100%;\n\n  // 3. Content\n  font-size: 1.125rem;\n  font-weight: 600;\n  color: var(--color-text-main);\n  text-align: center;\n  line-height: 1.3;\n\n  // 4. Structure\n  margin-block: 0 0.25rem;\n  padding: 0;\n\n  // 5. Effects\n  // (none)\n}\n\n// ---- Contact info block ----\n.supplier-card__contact {\n  // 1. Layout\n  display: flex;\n  flex-direction: column;\n  gap: 0.375rem;\n  align-items: center;\n\n  // 2. Dimensions\n  width: 100%;\n\n  // 3. Content\n  font-size: 0.875rem;\n  color: var(--color-text-muted);\n  text-align: center;\n\n  // 4. Structure\n  margin-block-start: 0.75rem;\n  padding-block-start: 0.75rem;\n  border-block-start: 1px solid var(--border-default);\n\n  // 5. Effects\n  // (none)\n}\n\n.supplier-card__contact-item {\n  // 1. Layout\n  display: flex;\n  align-items: center;\n  gap: 0.375rem;\n\n  // 2\u20133. Dimensions / Content\n  // (inherits from parent block)\n\n  // 4. Structure\n  // (none)\n\n  // 5. Effects\n  // (none)\n\n  a {\n    // 3. Content\n    color: var(--color-primary);\n    text-decoration: none;\n\n    // 5. Effects\n    transition: color 0.2s var(--ease-smooth);\n\n    &:hover {\n      color: var(--color-primary-hover);\n    }\n  }\n}\n\n// ---- Hover state (card-level enhancement beyond .c-glass-card engine) ----\n// .c-glass-card already applies translateY(-2px) + shadow-hover on :host(:hover).\n// If inner content needs a tint response to card hover, scope it here.\n.supplier-card:hover {\n  .supplier-card__name {\n    // 3. Content\n    color: var(--color-primary);\n\n    // 5. Effects\n    transition: color 0.25s var(--ease-spring);\n  }\n}\n\n// ---- Responsive: collapse to full-width on mobile ----\n@media (max-width: 768px) {\n  .supplier-card {\n    // 2. Dimensions\n    width: 100%;\n  }\n}\n"}, {"name": "output.scss", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,Ly8gc3VwcGxpZXItY2FyZC5jb21wb25lbnQuc2NzcwovLwovLyBQaGFzZSAxIGF1ZGl0IGNvbXBsZXRlOgovLyAgIC0gLmMtZ2xhc3MtY2FyZCBlbmdpbmUgZm91bmQgaW4gc3JjL3N0eWxlcy5zY3NzIOKGkiBjb21wb3NlZCB2aWEgaG9zdCBlbGVtZW50IGluIHRlbXBsYXRlCi8vICAgLSBObyAuYy0qIGNsYXNzZXMgZGVmaW5lZCBoZXJlICh3b3VsZCBicmVhayB1bmRlciBBbmd1bGFyIHZpZXcgZW5jYXBzdWxhdGlvbikKLy8gICAtIEFsbCB2YWx1ZXMgdXNlIHByb2plY3QgZGVzaWduIHRva2VucyBmcm9tIDpyb290IGluIHNyYy9zdHlsZXMuc2NzcwovLwovLyBVc2FnZSBpbiB0ZW1wbGF0ZTogPGRpdiBjbGFzcz0ic3VwcGxpZXItY2FyZCBjLWdsYXNzLWNhcmQiPgoKLnN1cHBsaWVyLWNhcmQgewogIC8vIDEuIExheW91dAogIGRpc3BsYXk6IGZsZXg7CiAgZmxleC1kaXJlY3Rpb246IGNvbHVtbjsKICBhbGlnbi1pdGVtczogY2VudGVyOwoKICAvLyAyLiBEaW1lbnNpb25zCiAgd2lkdGg6IDMyMHB4OwoKICAvLyAzLiBDb250ZW50CiAgLy8gKG5vIGNvbnRlbnQtbGV2ZWwgcnVsZXMgb24gdGhlIGNhcmQgd3JhcHBlciBpdHNlbGYpCgogIC8vIDQuIFN0cnVjdHVyZQogIHBhZGRpbmctYmxvY2s6IDEuNzVyZW0gMS41cmVtOwogIHBhZGRpbmctaW5saW5lOiAxLjVyZW07CgogIC8vIDUuIEVmZmVjdHMKICAvLyBIb3ZlciBsaWZ0IGlzIGluaGVyaXRlZCBmcm9tIC5jLWdsYXNzLWNhcmQgZW5naW5lIOKAlCBubyBkdXBsaWNhdGlvbiBuZWVkZWQKfQoKLy8gLS0tLSBMb2dvIC0tLS0KLnN1cHBsaWVyLWNhcmRfX2xvZ28gewogIC8vIDEuIExheW91dAogIGRpc3BsYXk6IGZsZXg7CiAgYWxpZ24taXRlbXM6IGNlbnRlcjsKICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjsKICBvdmVyZmxvdzogaGlkZGVuOwoKICAvLyAyLiBEaW1lbnNpb25zCiAgd2lkdGg6IDcycHg7CiAgaGVpZ2h0OiA3MnB4OwoKICAvLyAzLiBDb250ZW50CiAgLy8gKGltYWdlIGNvbnRhaW5lZCB3aXRoaW4pCgogIC8vIDQuIFN0cnVjdHVyZQogIG1hcmdpbi1ibG9jay1lbmQ6IDFyZW07CiAgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tYm9yZGVyLWRlZmF1bHQpOwogIGJvcmRlci1yYWRpdXM6IHZhcigtLXJhZGl1cy1tZCk7CgogIC8vIDUuIEVmZmVjdHMKICAvLyAobm9uZSkKCiAgaW1nIHsKICAgIC8vIDEuIExheW91dAogICAgZGlzcGxheTogYmxvY2s7CgogICAgLy8gMi4gRGltZW5zaW9ucwogICAgd2lkdGg6IDEwMCU7CiAgICBoZWlnaHQ6IDEwMCU7CgogICAgLy8gMy4gQ29udGVudAogICAgb2JqZWN0LWZpdDogY29udGFpbjsKCiAgICAvLyA04oCTNS4gKG5vbmUpCiAgfQp9CgovLyAtLS0tIE5hbWUgaGVhZGluZyAtLS0tCi5zdXBwbGllci1jYXJkX19uYW1lIHsKICAvLyAxLiBMYXlvdXQKICAvLyAoYmxvY2sgZWxlbWVudCwgZGVmYXVsdCBmbG93KQoKICAvLyAyLiBEaW1lbnNpb25zCiAgd2lkdGg6IDEwMCU7CgogIC8vIDMuIENvbnRlbnQKICBmb250LXNpemU6IDEuMTI1cmVtOwogIGZvbnQtd2VpZ2h0OiA2MDA7CiAgY29sb3I6IHZhcigtLWNvbG9yLXRleHQtbWFpbik7CiAgdGV4dC1hbGlnbjogY2VudGVyOwogIGxpbmUtaGVpZ2h0OiAxLjM7CgogIC8vIDQuIFN0cnVjdHVyZQogIG1hcmdpbi1ibG9jazogMCAwLjI1cmVtOwogIHBhZGRpbmc6IDA7CgogIC8vIDUuIEVmZmVjdHMKICAvLyAobm9uZSkKfQoKLy8gLS0tLSBDb250YWN0IGluZm8gYmxvY2sgLS0tLQouc3VwcGxpZXItY2FyZF9fY29udGFjdCB7CiAgLy8gMS4gTGF5b3V0CiAgZGlzcGxheTogZmxleDsKICBmbGV4LWRpcmVjdGlvbjogY29sdW1uOwogIGdhcDogMC4zNzVyZW07CiAgYWxpZ24taXRlbXM6IGNlbnRlcjsKCiAgLy8gMi4gRGltZW5zaW9ucwogIHdpZHRoOiAxMDAlOwoKICAvLyAzLiBDb250ZW50CiAgZm9udC1zaXplOiAwLjg3NXJlbTsKICBjb2xvcjogdmFyKC0tY29sb3ItdGV4dC1tdXRlZCk7CiAgdGV4dC1hbGlnbjogY2VudGVyOwoKICAvLyA0LiBTdHJ1Y3R1cmUKICBtYXJnaW4tYmxvY2stc3RhcnQ6IDAuNzVyZW07CiAgcGFkZGluZy1ibG9jay1zdGFydDogMC43NXJlbTsKICBib3JkZXItYmxvY2stc3RhcnQ6IDFweCBzb2xpZCB2YXIoLS1ib3JkZXItZGVmYXVsdCk7CgogIC8vIDUuIEVmZmVjdHMKICAvLyAobm9uZSkKfQoKLnN1cHBsaWVyLWNhcmRfX2NvbnRhY3QtaXRlbSB7CiAgLy8gMS4gTGF5b3V0CiAgZGlzcGxheTogZmxleDsKICBhbGlnbi1pdGVtczogY2VudGVyOwogIGdhcDogMC4zNzVyZW07CgogIC8vIDLigJMzLiBEaW1lbnNpb25zIC8gQ29udGVudAogIC8vIChpbmhlcml0cyBmcm9tIHBhcmVudCBibG9jaykKCiAgLy8gNC4gU3RydWN0dXJlCiAgLy8gKG5vbmUpCgogIC8vIDUuIEVmZmVjdHMKICAvLyAobm9uZSkKCiAgYSB7CiAgICAvLyAzLiBDb250ZW50CiAgICBjb2xvcjogdmFyKC0tY29sb3ItcHJpbWFyeSk7CiAgICB0ZXh0LWRlY29yYXRpb246IG5vbmU7CgogICAgLy8gNS4gRWZmZWN0cwogICAgdHJhbnNpdGlvbjogY29sb3IgMC4ycyB2YXIoLS1lYXNlLXNtb290aCk7CgogICAgJjpob3ZlciB7CiAgICAgIGNvbG9yOiB2YXIoLS1jb2xvci1wcmltYXJ5LWhvdmVyKTsKICAgIH0KICB9Cn0KCi8vIC0tLS0gSG92ZXIgc3RhdGUgKGNhcmQtbGV2ZWwgZW5oYW5jZW1lbnQgYmV5b25kIC5jLWdsYXNzLWNhcmQgZW5naW5lKSAtLS0tCi8vIC5jLWdsYXNzLWNhcmQgYWxyZWFkeSBhcHBsaWVzIHRyYW5zbGF0ZVkoLTJweCkgKyBzaGFkb3ctaG92ZXIgb24gOmhvc3QoOmhvdmVyKS4KLy8gSWYgaW5uZXIgY29udGVudCBuZWVkcyBhIHRpbnQgcmVzcG9uc2UgdG8gY2FyZCBob3Zlciwgc2NvcGUgaXQgaGVyZS4KLnN1cHBsaWVyLWNhcmQ6aG92ZXIgewogIC5zdXBwbGllci1jYXJkX19uYW1lIHsKICAgIC8vIDMuIENvbnRlbnQKICAgIGNvbG9yOiB2YXIoLS1jb2xvci1wcmltYXJ5KTsKCiAgICAvLyA1LiBFZmZlY3RzCiAgICB0cmFuc2l0aW9uOiBjb2xvciAwLjI1cyB2YXIoLS1lYXNlLXNwcmluZyk7CiAgfQp9CgovLyAtLS0tIFJlc3BvbnNpdmU6IGNvbGxhcHNlIHRvIGZ1bGwtd2lkdGggb24gbW9iaWxlIC0tLS0KQG1lZGlhIChtYXgtd2lkdGg6IDc2OHB4KSB7CiAgLnN1cHBsaWVyLWNhcmQgewogICAgLy8gMi4gRGltZW5zaW9ucwogICAgd2lkdGg6IDEwMCU7CiAgfQp9Cg=="}], "eval-glass-card-composition-without_skill": [{"name": "output.css", "type": "text", "content": ":host {\n  display: block;\n  width: 320px;\n}\n\n.supplier-card {\n  width: 320px;\n  background-color: #ffffff;\n  border: 1px solid #e0e0e0;\n  border-radius: 8px;\n  overflow: hidden;\n  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);\n  transition: box-shadow 0.2s ease, transform 0.2s ease;\n  cursor: pointer;\n\n  &:hover {\n    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);\n    transform: translateY(-2px);\n  }\n\n  &__logo-wrapper {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    height: 140px;\n    background-color: #f7f7f7;\n    border-bottom: 1px solid #e0e0e0;\n    padding: 16px;\n  }\n\n  &__logo {\n    max-width: 100%;\n    max-height: 100%;\n    object-fit: contain;\n  }\n\n  &__body {\n    padding: 20px;\n  }\n\n  &__name {\n    margin: 0 0 12px;\n    font-size: 18px;\n    font-weight: 600;\n    color: #1a1a1a;\n    line-height: 1.3;\n    white-space: nowrap;\n    overflow: hidden;\n    text-overflow: ellipsis;\n  }\n\n  &__contact-info {\n    display: flex;\n    flex-direction: column;\n    gap: 8px;\n  }\n\n  &__contact-item {\n    display: flex;\n    align-items: center;\n    gap: 8px;\n    font-size: 14px;\n    color: #555555;\n    line-height: 1.4;\n\n    &--email {\n      word-break: break-all;\n    }\n  }\n\n  &__contact-icon {\n    flex-shrink: 0;\n    width: 16px;\n    height: 16px;\n    color: #888888;\n  }\n\n  &__contact-label {\n    font-weight: 500;\n    color: #333333;\n    margin-right: 4px;\n  }\n}\n"}, {"name": "output.scss", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,Omhvc3QgewogIGRpc3BsYXk6IGJsb2NrOwogIHdpZHRoOiAzMjBweDsKfQoKLnN1cHBsaWVyLWNhcmQgewogIHdpZHRoOiAzMjBweDsKICBiYWNrZ3JvdW5kLWNvbG9yOiAjZmZmZmZmOwogIGJvcmRlcjogMXB4IHNvbGlkICNlMGUwZTA7CiAgYm9yZGVyLXJhZGl1czogOHB4OwogIG92ZXJmbG93OiBoaWRkZW47CiAgYm94LXNoYWRvdzogMCAycHggNnB4IHJnYmEoMCwgMCwgMCwgMC4wOCk7CiAgdHJhbnNpdGlvbjogYm94LXNoYWRvdyAwLjJzIGVhc2UsIHRyYW5zZm9ybSAwLjJzIGVhc2U7CiAgY3Vyc29yOiBwb2ludGVyOwoKICAmOmhvdmVyIHsKICAgIGJveC1zaGFkb3c6IDAgNnB4IDE4cHggcmdiYSgwLCAwLCAwLCAwLjE0KTsKICAgIHRyYW5zZm9ybTogdHJhbnNsYXRlWSgtMnB4KTsKICB9CgogICZfX2xvZ28td3JhcHBlciB7CiAgICBkaXNwbGF5OiBmbGV4OwogICAgYWxpZ24taXRlbXM6IGNlbnRlcjsKICAgIGp1c3RpZnktY29udGVudDogY2VudGVyOwogICAgaGVpZ2h0OiAxNDBweDsKICAgIGJhY2tncm91bmQtY29sb3I6ICNmN2Y3Zjc7CiAgICBib3JkZXItYm90dG9tOiAxcHggc29saWQgI2UwZTBlMDsKICAgIHBhZGRpbmc6IDE2cHg7CiAgfQoKICAmX19sb2dvIHsKICAgIG1heC13aWR0aDogMTAwJTsKICAgIG1heC1oZWlnaHQ6IDEwMCU7CiAgICBvYmplY3QtZml0OiBjb250YWluOwogIH0KCiAgJl9fYm9keSB7CiAgICBwYWRkaW5nOiAyMHB4OwogIH0KCiAgJl9fbmFtZSB7CiAgICBtYXJnaW46IDAgMCAxMnB4OwogICAgZm9udC1zaXplOiAxOHB4OwogICAgZm9udC13ZWlnaHQ6IDYwMDsKICAgIGNvbG9yOiAjMWExYTFhOwogICAgbGluZS1oZWlnaHQ6IDEuMzsKICAgIHdoaXRlLXNwYWNlOiBub3dyYXA7CiAgICBvdmVyZmxvdzogaGlkZGVuOwogICAgdGV4dC1vdmVyZmxvdzogZWxsaXBzaXM7CiAgfQoKICAmX19jb250YWN0LWluZm8gewogICAgZGlzcGxheTogZmxleDsKICAgIGZsZXgtZGlyZWN0aW9uOiBjb2x1bW47CiAgICBnYXA6IDhweDsKICB9CgogICZfX2NvbnRhY3QtaXRlbSB7CiAgICBkaXNwbGF5OiBmbGV4OwogICAgYWxpZ24taXRlbXM6IGNlbnRlcjsKICAgIGdhcDogOHB4OwogICAgZm9udC1zaXplOiAxNHB4OwogICAgY29sb3I6ICM1NTU1NTU7CiAgICBsaW5lLWhlaWdodDogMS40OwoKICAgICYtLWVtYWlsIHsKICAgICAgd29yZC1icmVhazogYnJlYWstYWxsOwogICAgfQogIH0KCiAgJl9fY29udGFjdC1pY29uIHsKICAgIGZsZXgtc2hyaW5rOiAwOwogICAgd2lkdGg6IDE2cHg7CiAgICBoZWlnaHQ6IDE2cHg7CiAgICBjb2xvcjogIzg4ODg4ODsKICB9CgogICZfX2NvbnRhY3QtbGFiZWwgewogICAgZm9udC13ZWlnaHQ6IDUwMDsKICAgIGNvbG9yOiAjMzMzMzMzOwogICAgbWFyZ2luLXJpZ2h0OiA0cHg7CiAgfQp9Cg=="}], "eval-warning-banner-theme-with_skill": [{"name": "output.css", "type": "text", "content": "// notification-banner.component.scss\n// Component-scoped styles for the warning notification banner.\n// All engine classes (.c-*) live in src/styles.scss \u2014 this file hosts\n// only component-local selectors. All colors use semantic var() tokens.\n\n:host {\n  display: block;\n}\n\n.notification-banner {\n  // 1. Layout\n  display: flex;\n  align-items: center;\n  gap: 0.75rem;\n\n  // 2. Dimensions\n  width: 100%;\n\n  // 3. Content\n  color: var(--text-warning);\n  font-size: 0.875rem;\n  font-weight: 500;\n  line-height: 1.5;\n\n  // 4. Structure\n  padding-inline: 1rem;\n  padding-block: 0.75rem;\n  border: 1px solid var(--border-warning);\n  border-radius: var(--radius-md);\n  margin-block-end: 1rem;\n\n  // 5. Effects\n  background: var(--bg-warning);\n  backdrop-filter: var(--blur-glass);\n  -webkit-backdrop-filter: var(--blur-glass);\n  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.1);\n  transition: opacity 0.2s var(--ease-smooth), transform 0.2s var(--ease-smooth);\n}\n\n.notification-banner__icon {\n  // 1. Layout\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  flex-shrink: 0;\n\n  // 3. Content\n  color: var(--color-warning);\n}\n\n.notification-banner__message {\n  // 1. Layout\n  flex: 1;\n\n  // 3. Content\n  color: var(--text-warning);\n}\n\n.notification-banner__dismiss {\n  // 1. Layout\n  display: grid;\n  place-content: center;\n  flex-shrink: 0;\n\n  // 2. Dimensions\n  width: 1.75rem;\n  height: 1.75rem;\n\n  // 3. Content\n  color: var(--color-warning);\n\n  // 4. Structure\n  padding: 0;\n  border: 1px solid transparent;\n  border-radius: var(--radius-sm);\n\n  // 5. Effects\n  background: transparent;\n  opacity: 0.7;\n  cursor: pointer;\n  transition: opacity 0.2s var(--ease-smooth),\n              background 0.2s ease,\n              color 0.2s ease;\n\n  @media (hover: hover) {\n    &:hover {\n      opacity: 1;\n      background: var(--bg-warning-strong);\n      color: var(--color-warning-hover);\n    }\n  }\n\n  &:focus-visible {\n    outline: 2px solid var(--border-warning);\n    outline-offset: 2px;\n  }\n}\n"}, {"name": "output.scss", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,Ly8gbm90aWZpY2F0aW9uLWJhbm5lci5jb21wb25lbnQuc2NzcwovLyBDb21wb25lbnQtc2NvcGVkIHN0eWxlcyBmb3IgdGhlIHdhcm5pbmcgbm90aWZpY2F0aW9uIGJhbm5lci4KLy8gQWxsIGVuZ2luZSBjbGFzc2VzICguYy0qKSBsaXZlIGluIHNyYy9zdHlsZXMuc2NzcyDigJQgdGhpcyBmaWxlIGhvc3RzCi8vIG9ubHkgY29tcG9uZW50LWxvY2FsIHNlbGVjdG9ycy4gQWxsIGNvbG9ycyB1c2Ugc2VtYW50aWMgdmFyKCkgdG9rZW5zLgoKOmhvc3QgewogIGRpc3BsYXk6IGJsb2NrOwp9Cgoubm90aWZpY2F0aW9uLWJhbm5lciB7CiAgLy8gMS4gTGF5b3V0CiAgZGlzcGxheTogZmxleDsKICBhbGlnbi1pdGVtczogY2VudGVyOwogIGdhcDogMC43NXJlbTsKCiAgLy8gMi4gRGltZW5zaW9ucwogIHdpZHRoOiAxMDAlOwoKICAvLyAzLiBDb250ZW50CiAgY29sb3I6IHZhcigtLXRleHQtd2FybmluZyk7CiAgZm9udC1zaXplOiAwLjg3NXJlbTsKICBmb250LXdlaWdodDogNTAwOwogIGxpbmUtaGVpZ2h0OiAxLjU7CgogIC8vIDQuIFN0cnVjdHVyZQogIHBhZGRpbmctaW5saW5lOiAxcmVtOwogIHBhZGRpbmctYmxvY2s6IDAuNzVyZW07CiAgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tYm9yZGVyLXdhcm5pbmcpOwogIGJvcmRlci1yYWRpdXM6IHZhcigtLXJhZGl1cy1tZCk7CiAgbWFyZ2luLWJsb2NrLWVuZDogMXJlbTsKCiAgLy8gNS4gRWZmZWN0cwogIGJhY2tncm91bmQ6IHZhcigtLWJnLXdhcm5pbmcpOwogIGJhY2tkcm9wLWZpbHRlcjogdmFyKC0tYmx1ci1nbGFzcyk7CiAgLXdlYmtpdC1iYWNrZHJvcC1maWx0ZXI6IHZhcigtLWJsdXItZ2xhc3MpOwogIGJveC1zaGFkb3c6IDAgMnB4IDhweCByZ2JhKDIxNywgMTE5LCA2LCAwLjEpOwogIHRyYW5zaXRpb246IG9wYWNpdHkgMC4ycyB2YXIoLS1lYXNlLXNtb290aCksIHRyYW5zZm9ybSAwLjJzIHZhcigtLWVhc2Utc21vb3RoKTsKfQoKLm5vdGlmaWNhdGlvbi1iYW5uZXJfX2ljb24gewogIC8vIDEuIExheW91dAogIGRpc3BsYXk6IGZsZXg7CiAgYWxpZ24taXRlbXM6IGNlbnRlcjsKICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjsKICBmbGV4LXNocmluazogMDsKCiAgLy8gMy4gQ29udGVudAogIGNvbG9yOiB2YXIoLS1jb2xvci13YXJuaW5nKTsKfQoKLm5vdGlmaWNhdGlvbi1iYW5uZXJfX21lc3NhZ2UgewogIC8vIDEuIExheW91dAogIGZsZXg6IDE7CgogIC8vIDMuIENvbnRlbnQKICBjb2xvcjogdmFyKC0tdGV4dC13YXJuaW5nKTsKfQoKLm5vdGlmaWNhdGlvbi1iYW5uZXJfX2Rpc21pc3MgewogIC8vIDEuIExheW91dAogIGRpc3BsYXk6IGdyaWQ7CiAgcGxhY2UtY29udGVudDogY2VudGVyOwogIGZsZXgtc2hyaW5rOiAwOwoKICAvLyAyLiBEaW1lbnNpb25zCiAgd2lkdGg6IDEuNzVyZW07CiAgaGVpZ2h0OiAxLjc1cmVtOwoKICAvLyAzLiBDb250ZW50CiAgY29sb3I6IHZhcigtLWNvbG9yLXdhcm5pbmcpOwoKICAvLyA0LiBTdHJ1Y3R1cmUKICBwYWRkaW5nOiAwOwogIGJvcmRlcjogMXB4IHNvbGlkIHRyYW5zcGFyZW50OwogIGJvcmRlci1yYWRpdXM6IHZhcigtLXJhZGl1cy1zbSk7CgogIC8vIDUuIEVmZmVjdHMKICBiYWNrZ3JvdW5kOiB0cmFuc3BhcmVudDsKICBvcGFjaXR5OiAwLjc7CiAgY3Vyc29yOiBwb2ludGVyOwogIHRyYW5zaXRpb246IG9wYWNpdHkgMC4ycyB2YXIoLS1lYXNlLXNtb290aCksCiAgICAgICAgICAgICAgYmFja2dyb3VuZCAwLjJzIGVhc2UsCiAgICAgICAgICAgICAgY29sb3IgMC4ycyBlYXNlOwoKICBAbWVkaWEgKGhvdmVyOiBob3ZlcikgewogICAgJjpob3ZlciB7CiAgICAgIG9wYWNpdHk6IDE7CiAgICAgIGJhY2tncm91bmQ6IHZhcigtLWJnLXdhcm5pbmctc3Ryb25nKTsKICAgICAgY29sb3I6IHZhcigtLWNvbG9yLXdhcm5pbmctaG92ZXIpOwogICAgfQogIH0KCiAgJjpmb2N1cy12aXNpYmxlIHsKICAgIG91dGxpbmU6IDJweCBzb2xpZCB2YXIoLS1ib3JkZXItd2FybmluZyk7CiAgICBvdXRsaW5lLW9mZnNldDogMnB4OwogIH0KfQo="}], "eval-warning-banner-theme-without_skill": [{"name": "output.css", "type": "text", "content": "@layer components.notification-banner {\n  :host {\n    display: block;\n  }\n\n  .notification-banner {\n    display: flex;\n    align-items: center;\n    gap: 0.75rem;\n\n    width: 100%;\n    padding-block: 0.75rem;\n    padding-inline: 1rem;\n\n    background: var(--bg-warning-strong);\n    color: var(--text-warning);\n\n    border: 1px solid var(--border-warning);\n    border-radius: var(--radius-md);\n    box-shadow: var(--shadow-glass);\n\n    backdrop-filter: var(--blur-glass);\n    -webkit-backdrop-filter: var(--blur-glass);\n  }\n\n  /* ---- Icon slot ---- */\n  .notification-banner__icon {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    flex-shrink: 0;\n\n    color: var(--color-warning);\n  }\n\n  /* ---- Message body ---- */\n  .notification-banner__message {\n    flex: 1;\n    min-width: 0;\n\n    font-size: 0.875rem;\n    font-weight: 500;\n    line-height: 1.5;\n    color: var(--text-warning);\n  }\n\n  /* ---- Dismiss button ---- */\n  .notification-banner__dismiss {\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    flex-shrink: 0;\n\n    block-size: 1.75rem;\n    inline-size: 1.75rem;\n    padding: 0;\n\n    color: var(--text-warning);\n    background: transparent;\n    border: 1px solid transparent;\n    border-radius: var(--radius-sm);\n\n    cursor: pointer;\n    opacity: 0.7;\n    transition:\n      opacity 0.15s var(--ease-smooth),\n      background 0.15s ease,\n      border-color 0.15s ease;\n\n    @media (hover: hover) {\n      &:hover {\n        opacity: 1;\n        background: color-mix(in srgb, var(--border-warning) 15%, transparent);\n        border-color: color-mix(in srgb, var(--border-warning) 40%, transparent);\n      }\n    }\n\n    &:active {\n      opacity: 1;\n      transform: scale(0.95);\n    }\n\n    &:focus-visible {\n      outline: none;\n      box-shadow: var(--shadow-focus);\n      opacity: 1;\n    }\n  }\n\n  /* ---- Entry animation ---- */\n  :host {\n    animation: banner-slide-in 0.25s var(--ease-spring) both;\n  }\n\n  @keyframes banner-slide-in {\n    from {\n      opacity: 0;\n      transform: translateY(-0.375rem);\n    }\n    to {\n      opacity: 1;\n      transform: translateY(0);\n    }\n  }\n\n  /* ---- Reduced motion ---- */\n  @media (prefers-reduced-motion: reduce) {\n    :host {\n      animation: none;\n    }\n  }\n\n  /* ---- Responsive: stack on very small screens ---- */\n  @media (max-width: 400px) {\n    .notification-banner {\n      flex-wrap: wrap;\n    }\n\n    .notification-banner__dismiss {\n      margin-inline-start: auto;\n    }\n  }\n}\n"}, {"name": "output.scss", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,QGxheWVyIGNvbXBvbmVudHMubm90aWZpY2F0aW9uLWJhbm5lciB7CiAgOmhvc3QgewogICAgZGlzcGxheTogYmxvY2s7CiAgfQoKICAubm90aWZpY2F0aW9uLWJhbm5lciB7CiAgICBkaXNwbGF5OiBmbGV4OwogICAgYWxpZ24taXRlbXM6IGNlbnRlcjsKICAgIGdhcDogMC43NXJlbTsKCiAgICB3aWR0aDogMTAwJTsKICAgIHBhZGRpbmctYmxvY2s6IDAuNzVyZW07CiAgICBwYWRkaW5nLWlubGluZTogMXJlbTsKCiAgICBiYWNrZ3JvdW5kOiB2YXIoLS1iZy13YXJuaW5nLXN0cm9uZyk7CiAgICBjb2xvcjogdmFyKC0tdGV4dC13YXJuaW5nKTsKCiAgICBib3JkZXI6IDFweCBzb2xpZCB2YXIoLS1ib3JkZXItd2FybmluZyk7CiAgICBib3JkZXItcmFkaXVzOiB2YXIoLS1yYWRpdXMtbWQpOwogICAgYm94LXNoYWRvdzogdmFyKC0tc2hhZG93LWdsYXNzKTsKCiAgICBiYWNrZHJvcC1maWx0ZXI6IHZhcigtLWJsdXItZ2xhc3MpOwogICAgLXdlYmtpdC1iYWNrZHJvcC1maWx0ZXI6IHZhcigtLWJsdXItZ2xhc3MpOwogIH0KCiAgLyogLS0tLSBJY29uIHNsb3QgLS0tLSAqLwogIC5ub3RpZmljYXRpb24tYmFubmVyX19pY29uIHsKICAgIGRpc3BsYXk6IGlubGluZS1mbGV4OwogICAgYWxpZ24taXRlbXM6IGNlbnRlcjsKICAgIGp1c3RpZnktY29udGVudDogY2VudGVyOwogICAgZmxleC1zaHJpbms6IDA7CgogICAgY29sb3I6IHZhcigtLWNvbG9yLXdhcm5pbmcpOwogIH0KCiAgLyogLS0tLSBNZXNzYWdlIGJvZHkgLS0tLSAqLwogIC5ub3RpZmljYXRpb24tYmFubmVyX19tZXNzYWdlIHsKICAgIGZsZXg6IDE7CiAgICBtaW4td2lkdGg6IDA7CgogICAgZm9udC1zaXplOiAwLjg3NXJlbTsKICAgIGZvbnQtd2VpZ2h0OiA1MDA7CiAgICBsaW5lLWhlaWdodDogMS41OwogICAgY29sb3I6IHZhcigtLXRleHQtd2FybmluZyk7CiAgfQoKICAvKiAtLS0tIERpc21pc3MgYnV0dG9uIC0tLS0gKi8KICAubm90aWZpY2F0aW9uLWJhbm5lcl9fZGlzbWlzcyB7CiAgICBkaXNwbGF5OiBpbmxpbmUtZmxleDsKICAgIGFsaWduLWl0ZW1zOiBjZW50ZXI7CiAgICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjsKICAgIGZsZXgtc2hyaW5rOiAwOwoKICAgIGJsb2NrLXNpemU6IDEuNzVyZW07CiAgICBpbmxpbmUtc2l6ZTogMS43NXJlbTsKICAgIHBhZGRpbmc6IDA7CgogICAgY29sb3I6IHZhcigtLXRleHQtd2FybmluZyk7CiAgICBiYWNrZ3JvdW5kOiB0cmFuc3BhcmVudDsKICAgIGJvcmRlcjogMXB4IHNvbGlkIHRyYW5zcGFyZW50OwogICAgYm9yZGVyLXJhZGl1czogdmFyKC0tcmFkaXVzLXNtKTsKCiAgICBjdXJzb3I6IHBvaW50ZXI7CiAgICBvcGFjaXR5OiAwLjc7CiAgICB0cmFuc2l0aW9uOgogICAgICBvcGFjaXR5IDAuMTVzIHZhcigtLWVhc2Utc21vb3RoKSwKICAgICAgYmFja2dyb3VuZCAwLjE1cyBlYXNlLAogICAgICBib3JkZXItY29sb3IgMC4xNXMgZWFzZTsKCiAgICBAbWVkaWEgKGhvdmVyOiBob3ZlcikgewogICAgICAmOmhvdmVyIHsKICAgICAgICBvcGFjaXR5OiAxOwogICAgICAgIGJhY2tncm91bmQ6IGNvbG9yLW1peChpbiBzcmdiLCB2YXIoLS1ib3JkZXItd2FybmluZykgMTUlLCB0cmFuc3BhcmVudCk7CiAgICAgICAgYm9yZGVyLWNvbG9yOiBjb2xvci1taXgoaW4gc3JnYiwgdmFyKC0tYm9yZGVyLXdhcm5pbmcpIDQwJSwgdHJhbnNwYXJlbnQpOwogICAgICB9CiAgICB9CgogICAgJjphY3RpdmUgewogICAgICBvcGFjaXR5OiAxOwogICAgICB0cmFuc2Zvcm06IHNjYWxlKDAuOTUpOwogICAgfQoKICAgICY6Zm9jdXMtdmlzaWJsZSB7CiAgICAgIG91dGxpbmU6IG5vbmU7CiAgICAgIGJveC1zaGFkb3c6IHZhcigtLXNoYWRvdy1mb2N1cyk7CiAgICAgIG9wYWNpdHk6IDE7CiAgICB9CiAgfQoKICAvKiAtLS0tIEVudHJ5IGFuaW1hdGlvbiAtLS0tICovCiAgOmhvc3QgewogICAgYW5pbWF0aW9uOiBiYW5uZXItc2xpZGUtaW4gMC4yNXMgdmFyKC0tZWFzZS1zcHJpbmcpIGJvdGg7CiAgfQoKICBAa2V5ZnJhbWVzIGJhbm5lci1zbGlkZS1pbiB7CiAgICBmcm9tIHsKICAgICAgb3BhY2l0eTogMDsKICAgICAgdHJhbnNmb3JtOiB0cmFuc2xhdGVZKC0wLjM3NXJlbSk7CiAgICB9CiAgICB0byB7CiAgICAgIG9wYWNpdHk6IDE7CiAgICAgIHRyYW5zZm9ybTogdHJhbnNsYXRlWSgwKTsKICAgIH0KICB9CgogIC8qIC0tLS0gUmVkdWNlZCBtb3Rpb24gLS0tLSAqLwogIEBtZWRpYSAocHJlZmVycy1yZWR1Y2VkLW1vdGlvbjogcmVkdWNlKSB7CiAgICA6aG9zdCB7CiAgICAgIGFuaW1hdGlvbjogbm9uZTsKICAgIH0KICB9CgogIC8qIC0tLS0gUmVzcG9uc2l2ZTogc3RhY2sgb24gdmVyeSBzbWFsbCBzY3JlZW5zIC0tLS0gKi8KICBAbWVkaWEgKG1heC13aWR0aDogNDAwcHgpIHsKICAgIC5ub3RpZmljYXRpb24tYmFubmVyIHsKICAgICAgZmxleC13cmFwOiB3cmFwOwogICAgfQoKICAgIC5ub3RpZmljYXRpb24tYmFubmVyX19kaXNtaXNzIHsKICAgICAgbWFyZ2luLWlubGluZS1zdGFydDogYXV0bzsKICAgIH0KICB9Cn0K"}], "eval-empty-state-theme-with_skill": [{"name": "output.css", "type": "text", "content": "/**\n * empty-state.component.scss\n * Recipe-builder empty state \u2014 Liquid Glass theme\n *\n * Engine classes consumed from src/styles.scss (never redefined here):\n *   .c-empty-state          \u2014 flex col, center-aligned, padding-block 3rem, gap 1rem\n *   .c-empty-state__icon    \u2014 color: --color-text-muted-light\n *   .c-empty-state__msg     \u2014 font-size 1rem, color: --color-text-secondary\n *   .c-btn-primary          \u2014 teal CTA button with glow shadow\n *\n * This file adds component-level context: the glass card wrapper,\n * refined icon treatment, heading, description refinement, and\n * CTA area spacing \u2014 all scoped to :host so they never leak.\n *\n * Five-Group Vertical Rhythm applied in every selector:\n *   1. Layout   2. Dimensions   3. Content   4. Structure   5. Effects\n */\n\n/* \u2500\u2500\u2500 Host wrapper \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n\n:host {\n  /* 1. Layout */\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n\n  /* 2. Dimensions */\n  width: 100%;\n  min-height: 20rem;\n\n  /* 3. Content \u2014 (none; inherited) */\n\n  /* 4. Structure */\n  padding-block: 2rem;\n  padding-inline: 1rem;\n\n  /* 5. Effects \u2014 (none; surface handled by inner card) */\n}\n\n/* \u2500\u2500\u2500 Glass card surface \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n\n.recipe-empty-card {\n  /* 1. Layout */\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 1.5rem;\n\n  /* 2. Dimensions */\n  width: 100%;\n  max-width: 28rem;\n\n  /* 3. Content */\n  text-align: center;\n\n  /* 4. Structure */\n  padding-block: 3.5rem;\n  padding-inline: 2.5rem;\n  border: 1px solid var(--border-glass);\n  border-radius: var(--radius-xl);\n\n  /* 5. Effects */\n  background: var(--bg-glass);\n  backdrop-filter: var(--blur-glass);\n  -webkit-backdrop-filter: var(--blur-glass);\n  box-shadow: var(--shadow-card);\n}\n\n/* \u2500\u2500\u2500 Icon area \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n\n.recipe-empty-icon-wrap {\n  /* 1. Layout */\n  display: flex;\n  align-items: center;\n  justify-content: center;\n\n  /* 2. Dimensions */\n  width: 5rem;\n  height: 5rem;\n\n  /* 3. Content */\n  color: var(--color-primary);\n\n  /* 4. Structure */\n  border: 1px solid var(--color-primary-glow);\n  border-radius: var(--radius-full);\n\n  /* 5. Effects */\n  background: var(--color-primary-soft);\n  box-shadow: var(--shadow-glow);\n  transition: transform 0.2s ease, box-shadow 0.2s ease;\n\n  &:hover {\n    /* 5. Effects */\n    transform: translateY(-2px);\n    box-shadow: var(--shadow-hover), var(--shadow-glow);\n  }\n}\n\n/* \u2500\u2500\u2500 Text block \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n\n.recipe-empty-text {\n  /* 1. Layout */\n  display: flex;\n  flex-direction: column;\n  gap: 0.5rem;\n}\n\n.recipe-empty-heading {\n  /* 1. Layout \u2014 (block element, natural flow) */\n\n  /* 2. Dimensions \u2014 (auto) */\n\n  /* 3. Content */\n  font-size: 1.25rem;\n  font-weight: 600;\n  line-height: 1.3;\n  color: var(--color-text-main);\n\n  /* 4. Structure */\n  margin: 0;\n\n  /* 5. Effects \u2014 (none) */\n}\n\n.recipe-empty-description {\n  /* 1. Layout \u2014 (block element, natural flow) */\n\n  /* 2. Dimensions \u2014 (auto) */\n\n  /* 3. Content */\n  font-size: 0.9375rem;\n  line-height: 1.6;\n  color: var(--color-text-muted);\n\n  /* 4. Structure */\n  margin: 0;\n  padding-inline: 0.5rem;\n\n  /* 5. Effects \u2014 (none) */\n}\n\n/* \u2500\u2500\u2500 CTA area \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n\n.recipe-empty-cta {\n  /* 1. Layout */\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 0.75rem;\n\n  /* 2. Dimensions */\n  width: 100%;\n\n  /* 3. Content \u2014 (children carry their own styles) */\n\n  /* 4. Structure */\n  margin-block-start: 0.5rem;\n\n  /* 5. Effects \u2014 (none) */\n}\n"}, {"name": "output.scss", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,LyoqCiAqIGVtcHR5LXN0YXRlLmNvbXBvbmVudC5zY3NzCiAqIFJlY2lwZS1idWlsZGVyIGVtcHR5IHN0YXRlIOKAlCBMaXF1aWQgR2xhc3MgdGhlbWUKICoKICogRW5naW5lIGNsYXNzZXMgY29uc3VtZWQgZnJvbSBzcmMvc3R5bGVzLnNjc3MgKG5ldmVyIHJlZGVmaW5lZCBoZXJlKToKICogICAuYy1lbXB0eS1zdGF0ZSAgICAgICAgICDigJQgZmxleCBjb2wsIGNlbnRlci1hbGlnbmVkLCBwYWRkaW5nLWJsb2NrIDNyZW0sIGdhcCAxcmVtCiAqICAgLmMtZW1wdHktc3RhdGVfX2ljb24gICAg4oCUIGNvbG9yOiAtLWNvbG9yLXRleHQtbXV0ZWQtbGlnaHQKICogICAuYy1lbXB0eS1zdGF0ZV9fbXNnICAgICDigJQgZm9udC1zaXplIDFyZW0sIGNvbG9yOiAtLWNvbG9yLXRleHQtc2Vjb25kYXJ5CiAqICAgLmMtYnRuLXByaW1hcnkgICAgICAgICAg4oCUIHRlYWwgQ1RBIGJ1dHRvbiB3aXRoIGdsb3cgc2hhZG93CiAqCiAqIFRoaXMgZmlsZSBhZGRzIGNvbXBvbmVudC1sZXZlbCBjb250ZXh0OiB0aGUgZ2xhc3MgY2FyZCB3cmFwcGVyLAogKiByZWZpbmVkIGljb24gdHJlYXRtZW50LCBoZWFkaW5nLCBkZXNjcmlwdGlvbiByZWZpbmVtZW50LCBhbmQKICogQ1RBIGFyZWEgc3BhY2luZyDigJQgYWxsIHNjb3BlZCB0byA6aG9zdCBzbyB0aGV5IG5ldmVyIGxlYWsuCiAqCiAqIEZpdmUtR3JvdXAgVmVydGljYWwgUmh5dGhtIGFwcGxpZWQgaW4gZXZlcnkgc2VsZWN0b3I6CiAqICAgMS4gTGF5b3V0ICAgMi4gRGltZW5zaW9ucyAgIDMuIENvbnRlbnQgICA0LiBTdHJ1Y3R1cmUgICA1LiBFZmZlY3RzCiAqLwoKLyog4pSA4pSA4pSAIEhvc3Qgd3JhcHBlciDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAgKi8KCjpob3N0IHsKICAvKiAxLiBMYXlvdXQgKi8KICBkaXNwbGF5OiBmbGV4OwogIGZsZXgtZGlyZWN0aW9uOiBjb2x1bW47CiAgYWxpZ24taXRlbXM6IGNlbnRlcjsKICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjsKCiAgLyogMi4gRGltZW5zaW9ucyAqLwogIHdpZHRoOiAxMDAlOwogIG1pbi1oZWlnaHQ6IDIwcmVtOwoKICAvKiAzLiBDb250ZW50IOKAlCAobm9uZTsgaW5oZXJpdGVkKSAqLwoKICAvKiA0LiBTdHJ1Y3R1cmUgKi8KICBwYWRkaW5nLWJsb2NrOiAycmVtOwogIHBhZGRpbmctaW5saW5lOiAxcmVtOwoKICAvKiA1LiBFZmZlY3RzIOKAlCAobm9uZTsgc3VyZmFjZSBoYW5kbGVkIGJ5IGlubmVyIGNhcmQpICovCn0KCi8qIOKUgOKUgOKUgCBHbGFzcyBjYXJkIHN1cmZhY2Ug4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSAICovCgoucmVjaXBlLWVtcHR5LWNhcmQgewogIC8qIDEuIExheW91dCAqLwogIGRpc3BsYXk6IGZsZXg7CiAgZmxleC1kaXJlY3Rpb246IGNvbHVtbjsKICBhbGlnbi1pdGVtczogY2VudGVyOwogIGdhcDogMS41cmVtOwoKICAvKiAyLiBEaW1lbnNpb25zICovCiAgd2lkdGg6IDEwMCU7CiAgbWF4LXdpZHRoOiAyOHJlbTsKCiAgLyogMy4gQ29udGVudCAqLwogIHRleHQtYWxpZ246IGNlbnRlcjsKCiAgLyogNC4gU3RydWN0dXJlICovCiAgcGFkZGluZy1ibG9jazogMy41cmVtOwogIHBhZGRpbmctaW5saW5lOiAyLjVyZW07CiAgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tYm9yZGVyLWdsYXNzKTsKICBib3JkZXItcmFkaXVzOiB2YXIoLS1yYWRpdXMteGwpOwoKICAvKiA1LiBFZmZlY3RzICovCiAgYmFja2dyb3VuZDogdmFyKC0tYmctZ2xhc3MpOwogIGJhY2tkcm9wLWZpbHRlcjogdmFyKC0tYmx1ci1nbGFzcyk7CiAgLXdlYmtpdC1iYWNrZHJvcC1maWx0ZXI6IHZhcigtLWJsdXItZ2xhc3MpOwogIGJveC1zaGFkb3c6IHZhcigtLXNoYWRvdy1jYXJkKTsKfQoKLyog4pSA4pSA4pSAIEljb24gYXJlYSDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAgKi8KCi5yZWNpcGUtZW1wdHktaWNvbi13cmFwIHsKICAvKiAxLiBMYXlvdXQgKi8KICBkaXNwbGF5OiBmbGV4OwogIGFsaWduLWl0ZW1zOiBjZW50ZXI7CiAganVzdGlmeS1jb250ZW50OiBjZW50ZXI7CgogIC8qIDIuIERpbWVuc2lvbnMgKi8KICB3aWR0aDogNXJlbTsKICBoZWlnaHQ6IDVyZW07CgogIC8qIDMuIENvbnRlbnQgKi8KICBjb2xvcjogdmFyKC0tY29sb3ItcHJpbWFyeSk7CgogIC8qIDQuIFN0cnVjdHVyZSAqLwogIGJvcmRlcjogMXB4IHNvbGlkIHZhcigtLWNvbG9yLXByaW1hcnktZ2xvdyk7CiAgYm9yZGVyLXJhZGl1czogdmFyKC0tcmFkaXVzLWZ1bGwpOwoKICAvKiA1LiBFZmZlY3RzICovCiAgYmFja2dyb3VuZDogdmFyKC0tY29sb3ItcHJpbWFyeS1zb2Z0KTsKICBib3gtc2hhZG93OiB2YXIoLS1zaGFkb3ctZ2xvdyk7CiAgdHJhbnNpdGlvbjogdHJhbnNmb3JtIDAuMnMgZWFzZSwgYm94LXNoYWRvdyAwLjJzIGVhc2U7CgogICY6aG92ZXIgewogICAgLyogNS4gRWZmZWN0cyAqLwogICAgdHJhbnNmb3JtOiB0cmFuc2xhdGVZKC0ycHgpOwogICAgYm94LXNoYWRvdzogdmFyKC0tc2hhZG93LWhvdmVyKSwgdmFyKC0tc2hhZG93LWdsb3cpOwogIH0KfQoKLyog4pSA4pSA4pSAIFRleHQgYmxvY2sg4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSAICovCgoucmVjaXBlLWVtcHR5LXRleHQgewogIC8qIDEuIExheW91dCAqLwogIGRpc3BsYXk6IGZsZXg7CiAgZmxleC1kaXJlY3Rpb246IGNvbHVtbjsKICBnYXA6IDAuNXJlbTsKfQoKLnJlY2lwZS1lbXB0eS1oZWFkaW5nIHsKICAvKiAxLiBMYXlvdXQg4oCUIChibG9jayBlbGVtZW50LCBuYXR1cmFsIGZsb3cpICovCgogIC8qIDIuIERpbWVuc2lvbnMg4oCUIChhdXRvKSAqLwoKICAvKiAzLiBDb250ZW50ICovCiAgZm9udC1zaXplOiAxLjI1cmVtOwogIGZvbnQtd2VpZ2h0OiA2MDA7CiAgbGluZS1oZWlnaHQ6IDEuMzsKICBjb2xvcjogdmFyKC0tY29sb3ItdGV4dC1tYWluKTsKCiAgLyogNC4gU3RydWN0dXJlICovCiAgbWFyZ2luOiAwOwoKICAvKiA1LiBFZmZlY3RzIOKAlCAobm9uZSkgKi8KfQoKLnJlY2lwZS1lbXB0eS1kZXNjcmlwdGlvbiB7CiAgLyogMS4gTGF5b3V0IOKAlCAoYmxvY2sgZWxlbWVudCwgbmF0dXJhbCBmbG93KSAqLwoKICAvKiAyLiBEaW1lbnNpb25zIOKAlCAoYXV0bykgKi8KCiAgLyogMy4gQ29udGVudCAqLwogIGZvbnQtc2l6ZTogMC45Mzc1cmVtOwogIGxpbmUtaGVpZ2h0OiAxLjY7CiAgY29sb3I6IHZhcigtLWNvbG9yLXRleHQtbXV0ZWQpOwoKICAvKiA0LiBTdHJ1Y3R1cmUgKi8KICBtYXJnaW46IDA7CiAgcGFkZGluZy1pbmxpbmU6IDAuNXJlbTsKCiAgLyogNS4gRWZmZWN0cyDigJQgKG5vbmUpICovCn0KCi8qIOKUgOKUgOKUgCBDVEEgYXJlYSDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAgKi8KCi5yZWNpcGUtZW1wdHktY3RhIHsKICAvKiAxLiBMYXlvdXQgKi8KICBkaXNwbGF5OiBmbGV4OwogIGZsZXgtZGlyZWN0aW9uOiBjb2x1bW47CiAgYWxpZ24taXRlbXM6IGNlbnRlcjsKICBnYXA6IDAuNzVyZW07CgogIC8qIDIuIERpbWVuc2lvbnMgKi8KICB3aWR0aDogMTAwJTsKCiAgLyogMy4gQ29udGVudCDigJQgKGNoaWxkcmVuIGNhcnJ5IHRoZWlyIG93biBzdHlsZXMpICovCgogIC8qIDQuIFN0cnVjdHVyZSAqLwogIG1hcmdpbi1ibG9jay1zdGFydDogMC41cmVtOwoKICAvKiA1LiBFZmZlY3RzIOKAlCAobm9uZSkgKi8KfQo="}], "eval-empty-state-theme-without_skill": [{"name": "output.css", "type": "text", "content": "/* empty-state component \u2014 scoped styles\n * Centered layout: icon area \u2192 heading \u2192 description \u2192 CTA button.\n * Uses global design tokens from styles.scss (Liquid Glass system).\n */\n\n:host {\n  display: block;\n  width: 100%;\n}\n\n.empty-state {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n\n  padding: 3rem 2rem;\n  text-align: center;\n\n  background: var(--bg-glass-strong);\n\n  border: 1px solid var(--border-glass);\n  border-radius: var(--radius-xl);\n  box-shadow: var(--shadow-glass);\n  backdrop-filter: var(--blur-glass);\n  -webkit-backdrop-filter: var(--blur-glass);\n}\n\n/* ---- Icon area ---- */\n.empty-state__icon {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n\n  width: 5rem;\n  height: 5rem;\n  margin-block-end: 1.5rem;\n\n  background: var(--color-primary-soft);\n  color: var(--color-primary);\n\n  border-radius: var(--radius-full);\n}\n\n/* ---- Heading ---- */\n.empty-state__heading {\n  margin-block: 0 0.5rem;\n\n  color: var(--color-text-main);\n  font-size: 1.25rem;\n  font-weight: 700;\n  line-height: 1.3;\n}\n\n/* ---- Description ---- */\n.empty-state__description {\n  margin-block: 0 2rem;\n\n  max-width: 28rem;\n\n  color: var(--color-text-muted);\n  font-size: 0.9375rem;\n  line-height: 1.6;\n}\n\n/* ---- CTA button area ---- */\n.empty-state__actions {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  flex-wrap: wrap;\n  gap: 0.75rem;\n}\n\n/* ---- Responsive ---- */\n@media (max-width: 48rem) {\n  .empty-state {\n    padding: 2rem 1.25rem;\n  }\n\n  .empty-state__icon {\n    width: 4rem;\n    height: 4rem;\n    margin-block-end: 1.25rem;\n  }\n\n  .empty-state__heading {\n    font-size: 1.125rem;\n  }\n\n  .empty-state__description {\n    font-size: 0.875rem;\n    margin-block-end: 1.5rem;\n  }\n}\n"}, {"name": "output.scss", "type": "binary", "mime": "application/octet-stream", "data_uri": "data:application/octet-stream;base64,LyogZW1wdHktc3RhdGUgY29tcG9uZW50IOKAlCBzY29wZWQgc3R5bGVzCiAqIENlbnRlcmVkIGxheW91dDogaWNvbiBhcmVhIOKGkiBoZWFkaW5nIOKGkiBkZXNjcmlwdGlvbiDihpIgQ1RBIGJ1dHRvbi4KICogVXNlcyBnbG9iYWwgZGVzaWduIHRva2VucyBmcm9tIHN0eWxlcy5zY3NzIChMaXF1aWQgR2xhc3Mgc3lzdGVtKS4KICovCgo6aG9zdCB7CiAgZGlzcGxheTogYmxvY2s7CiAgd2lkdGg6IDEwMCU7Cn0KCi5lbXB0eS1zdGF0ZSB7CiAgZGlzcGxheTogZmxleDsKICBmbGV4LWRpcmVjdGlvbjogY29sdW1uOwogIGFsaWduLWl0ZW1zOiBjZW50ZXI7CiAganVzdGlmeS1jb250ZW50OiBjZW50ZXI7CgogIHBhZGRpbmc6IDNyZW0gMnJlbTsKICB0ZXh0LWFsaWduOiBjZW50ZXI7CgogIGJhY2tncm91bmQ6IHZhcigtLWJnLWdsYXNzLXN0cm9uZyk7CgogIGJvcmRlcjogMXB4IHNvbGlkIHZhcigtLWJvcmRlci1nbGFzcyk7CiAgYm9yZGVyLXJhZGl1czogdmFyKC0tcmFkaXVzLXhsKTsKICBib3gtc2hhZG93OiB2YXIoLS1zaGFkb3ctZ2xhc3MpOwogIGJhY2tkcm9wLWZpbHRlcjogdmFyKC0tYmx1ci1nbGFzcyk7CiAgLXdlYmtpdC1iYWNrZHJvcC1maWx0ZXI6IHZhcigtLWJsdXItZ2xhc3MpOwp9CgovKiAtLS0tIEljb24gYXJlYSAtLS0tICovCi5lbXB0eS1zdGF0ZV9faWNvbiB7CiAgZGlzcGxheTogZmxleDsKICBhbGlnbi1pdGVtczogY2VudGVyOwogIGp1c3RpZnktY29udGVudDogY2VudGVyOwoKICB3aWR0aDogNXJlbTsKICBoZWlnaHQ6IDVyZW07CiAgbWFyZ2luLWJsb2NrLWVuZDogMS41cmVtOwoKICBiYWNrZ3JvdW5kOiB2YXIoLS1jb2xvci1wcmltYXJ5LXNvZnQpOwogIGNvbG9yOiB2YXIoLS1jb2xvci1wcmltYXJ5KTsKCiAgYm9yZGVyLXJhZGl1czogdmFyKC0tcmFkaXVzLWZ1bGwpOwp9CgovKiAtLS0tIEhlYWRpbmcgLS0tLSAqLwouZW1wdHktc3RhdGVfX2hlYWRpbmcgewogIG1hcmdpbi1ibG9jazogMCAwLjVyZW07CgogIGNvbG9yOiB2YXIoLS1jb2xvci10ZXh0LW1haW4pOwogIGZvbnQtc2l6ZTogMS4yNXJlbTsKICBmb250LXdlaWdodDogNzAwOwogIGxpbmUtaGVpZ2h0OiAxLjM7Cn0KCi8qIC0tLS0gRGVzY3JpcHRpb24gLS0tLSAqLwouZW1wdHktc3RhdGVfX2Rlc2NyaXB0aW9uIHsKICBtYXJnaW4tYmxvY2s6IDAgMnJlbTsKCiAgbWF4LXdpZHRoOiAyOHJlbTsKCiAgY29sb3I6IHZhcigtLWNvbG9yLXRleHQtbXV0ZWQpOwogIGZvbnQtc2l6ZTogMC45Mzc1cmVtOwogIGxpbmUtaGVpZ2h0OiAxLjY7Cn0KCi8qIC0tLS0gQ1RBIGJ1dHRvbiBhcmVhIC0tLS0gKi8KLmVtcHR5LXN0YXRlX19hY3Rpb25zIHsKICBkaXNwbGF5OiBmbGV4OwogIGFsaWduLWl0ZW1zOiBjZW50ZXI7CiAganVzdGlmeS1jb250ZW50OiBjZW50ZXI7CiAgZmxleC13cmFwOiB3cmFwOwogIGdhcDogMC43NXJlbTsKfQoKLyogLS0tLSBSZXNwb25zaXZlIC0tLS0gKi8KQG1lZGlhIChtYXgtd2lkdGg6IDQ4cmVtKSB7CiAgLmVtcHR5LXN0YXRlIHsKICAgIHBhZGRpbmc6IDJyZW0gMS4yNXJlbTsKICB9CgogIC5lbXB0eS1zdGF0ZV9faWNvbiB7CiAgICB3aWR0aDogNHJlbTsKICAgIGhlaWdodDogNHJlbTsKICAgIG1hcmdpbi1ibG9jay1lbmQ6IDEuMjVyZW07CiAgfQoKICAuZW1wdHktc3RhdGVfX2hlYWRpbmcgewogICAgZm9udC1zaXplOiAxLjEyNXJlbTsKICB9CgogIC5lbXB0eS1zdGF0ZV9fZGVzY3JpcHRpb24gewogICAgZm9udC1zaXplOiAwLjg3NXJlbTsKICAgIG1hcmdpbi1ibG9jay1lbmQ6IDEuNXJlbTsKICB9Cn0K"}]}, "benchmark": {"metadata": {"skill_name": "cssLayer", "timestamp": "2026-04-13", "evals_run": [1, 2, 3, 4, 5], "runs_per_configuration": 1}, "runs": [{"eval_id": 1, "eval_name": "refactor-messy-scss", "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 6, "failed": 0, "total": 6, "time_seconds": 43.8, "tokens": 19988, "errors": 0}, "expectations": [{"text": "No physical padding-left/right", "passed": true, "evidence": "padding-inline-end: 0.75rem"}, {"text": "No physical margin-left/right", "passed": true, "evidence": "margin-inline: 1rem"}, {"text": "Uses logical inline properties", "passed": true, "evidence": "padding-inline-end and margin-inline present"}, {"text": "No hardcoded colors", "passed": true, "evidence": "var(--color-text-main); background removed"}, {"text": "Five-Group Rhythm applied", "passed": true, "evidence": "Group labels in every selector"}, {"text": ".c-glass-card engine awareness", "passed": true, "evidence": "Engine documented; px widths converted to rem; bare 'ease' \u2192 var(--ease-smooth)"}]}, {"eval_id": 1, "eval_name": "refactor-messy-scss", "configuration": "old_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 6, "failed": 0, "total": 6, "time_seconds": 74.9, "tokens": 19015, "errors": 0}, "expectations": [{"text": "No physical padding-left/right", "passed": true, "evidence": "padding-inline-end: 0.75rem"}, {"text": "No physical margin-left/right", "passed": true, "evidence": "margin-inline: 1rem"}, {"text": "Uses logical inline properties", "passed": true, "evidence": "padding-inline-end and margin-inline present"}, {"text": "No hardcoded colors", "passed": true, "evidence": "var(--color-text-main); background removed"}, {"text": "Five-Group Rhythm applied", "passed": true, "evidence": "Group labels in every selector"}, {"text": ".c-glass-card engine awareness", "passed": true, "evidence": "Engine documented; width 300px kept as px; bare 'ease' used"}]}, {"eval_id": 2, "eval_name": "responsive-token-breakpoints", "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 6, "failed": 0, "total": 6, "time_seconds": 59.0, "tokens": 17054, "errors": 0}, "expectations": [{"text": "No hardcoded 600px", "passed": true, "evidence": "Uses $break-tablet, $break-desktop"}, {"text": "No hardcoded 1024px", "passed": true, "evidence": "No 1024px"}, {"text": "No hardcoded 768px", "passed": true, "evidence": "No 768px"}, {"text": "Uses $break-* variables", "passed": true, "evidence": "$break-tablet and $break-desktop"}, {"text": "Logical padding", "passed": true, "evidence": "padding-block: 1rem; padding-inline: 1rem"}, {"text": "Breakpoints after base selector", "passed": true, "evidence": "@media nested after base styles"}]}, {"eval_id": 2, "eval_name": "responsive-token-breakpoints", "configuration": "old_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 6, "failed": 0, "total": 6, "time_seconds": 119.0, "tokens": 16523, "errors": 0}, "expectations": [{"text": "No hardcoded 600px", "passed": true, "evidence": "Uses $break-tablet, $break-desktop"}, {"text": "No hardcoded 1024px", "passed": true, "evidence": "No 1024px"}, {"text": "No hardcoded 768px", "passed": true, "evidence": "No 768px"}, {"text": "Uses $break-* variables", "passed": true, "evidence": "@use 'src/styles' as *; $break-tablet"}, {"text": "Logical padding", "passed": true, "evidence": "padding-block: 1rem; padding-inline: 1rem"}, {"text": "Breakpoints after base selector", "passed": true, "evidence": "@media nested inside .menu-grid"}]}, {"eval_id": 3, "eval_name": "glass-card-composition", "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 6, "failed": 0, "total": 6, "time_seconds": 48.4, "tokens": 20721, "errors": 0}, "expectations": [{"text": "No hardcoded background colors", "passed": true, "evidence": "var(--bg-glass-strong), var(--blur-glass) on logo. Card surface via engine."}, {"text": "No hardcoded border colors", "passed": true, "evidence": "var(--border-default), var(--border-focus)"}, {"text": "No hardcoded text colors", "passed": true, "evidence": "var(--color-text-main), var(--color-text-muted), var(--color-primary), var(--color-primary-hover)"}, {"text": "Uses 3+ var(--) tokens", "passed": true, "evidence": "10+ token references throughout"}, {"text": "Composes .c-glass-card engine", "passed": true, "evidence": "Header: 'Engine: .c-glass-card'. Width in rem. $break-mobile for breakpoint."}, {"text": "Logical properties", "passed": true, "evidence": "padding-block, padding-inline, margin-block-end, margin-block-start throughout"}]}, {"eval_id": 3, "eval_name": "glass-card-composition", "configuration": "old_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 6, "failed": 0, "total": 6, "time_seconds": 71.6, "tokens": 20270, "errors": 0}, "expectations": [{"text": "No hardcoded background colors", "passed": true, "evidence": "Surface delegated to .c-glass-card engine"}, {"text": "No hardcoded border colors", "passed": true, "evidence": "var(--border-default), var(--border-glass)"}, {"text": "No hardcoded text colors", "passed": true, "evidence": "var(--color-text-main), var(--color-text-muted), var(--color-primary)"}, {"text": "Uses 3+ var(--) tokens", "passed": true, "evidence": "Many token references"}, {"text": "Composes .c-glass-card engine", "passed": true, "evidence": "Template note with engine. Width: 320px (px, not rem)."}, {"text": "Logical properties", "passed": true, "evidence": "padding-block, padding-inline, margin-block-end, border-block-start"}]}, {"eval_id": 4, "eval_name": "warning-banner-theme", "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 6, "failed": 0, "total": 6, "time_seconds": 104.3, "tokens": 25200, "errors": 0}, "expectations": [{"text": "Uses var(--bg-warning)", "passed": true, "evidence": "var(--bg-warning) on surface; var(--bg-warning-strong) for hover"}, {"text": "Uses var(--text-warning)", "passed": true, "evidence": "var(--text-warning) on banner, message, dismiss"}, {"text": "Uses var(--border-warning)", "passed": true, "evidence": "border: 1px solid var(--border-warning)"}, {"text": "No hardcoded warning colors", "passed": true, "evidence": "Zero hardcoded colors. New: .c-glass-panel composed for surface."}, {"text": "Logical padding", "passed": true, "evidence": "padding-block, padding-inline; $break-mobile for breakpoint"}, {"text": "Five-Group Rhythm", "passed": true, "evidence": "Group labels in every selector"}]}, {"eval_id": 4, "eval_name": "warning-banner-theme", "configuration": "old_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 6, "failed": 0, "total": 6, "time_seconds": 89.7, "tokens": 22814, "errors": 0}, "expectations": [{"text": "Uses var(--bg-warning)", "passed": true, "evidence": "background: var(--bg-warning)"}, {"text": "Uses var(--text-warning)", "passed": true, "evidence": "color: var(--text-warning)"}, {"text": "Uses var(--border-warning)", "passed": true, "evidence": "border: 1px solid var(--border-warning)"}, {"text": "No hardcoded warning colors", "passed": true, "evidence": "No hardcoded colors. Minor: one rgba() in box-shadow."}, {"text": "Logical padding", "passed": true, "evidence": "padding-inline, padding-block"}, {"text": "Five-Group Rhythm", "passed": true, "evidence": "Group labels in every selector"}]}, {"eval_id": 5, "eval_name": "empty-state-theme", "configuration": "with_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 6, "failed": 0, "total": 6, "time_seconds": 88.1, "tokens": 29314, "errors": 0}, "expectations": [{"text": "Uses var(--color-text-muted)", "passed": true, "evidence": "--color-text-muted on description override"}, {"text": "Uses glass surface tokens", "passed": true, "evidence": "var(--blur-glass), var(--color-primary-soft), var(--shadow-glow) on icon ring"}, {"text": "No hardcoded colors", "passed": true, "evidence": "Zero hardcoded colors"}, {"text": "Logical spacing", "passed": true, "evidence": "padding-block, padding-inline, margin-block-end"}, {"text": "Discovers .c-empty-state engine", "passed": true, "evidence": "Phase 1 found .c-empty-state, .c-empty-state__icon, .c-empty-state__msg, .c-btn-primary"}, {"text": "Five-Group Rhythm", "passed": true, "evidence": "Group labels in every selector"}]}, {"eval_id": 5, "eval_name": "empty-state-theme", "configuration": "old_skill", "run_number": 1, "result": {"pass_rate": 1.0, "passed": 6, "failed": 0, "total": 6, "time_seconds": 142.0, "tokens": 22127, "errors": 0}, "expectations": [{"text": "Uses var(--color-text-muted)", "passed": true, "evidence": "color: var(--color-text-muted)"}, {"text": "Uses glass surface tokens", "passed": true, "evidence": "var(--bg-glass), var(--blur-glass)"}, {"text": "No hardcoded colors", "passed": true, "evidence": "Zero hardcoded colors"}, {"text": "Logical spacing", "passed": true, "evidence": "padding-block, padding-inline, margin-block-start"}, {"text": "Discovers .c-empty-state engine", "passed": true, "evidence": "Header comment documents .c-empty-state, .c-empty-state__icon, .c-btn-primary"}, {"text": "Five-Group Rhythm", "passed": true, "evidence": "Group labels in every selector"}]}], "run_summary": {"with_skill": {"pass_rate": {"mean": 1.0, "stddev": 0.0, "min": 1.0, "max": 1.0}, "time_seconds": {"mean": 68.7, "stddev": 24.6, "min": 43.8, "max": 104.3}, "tokens": {"mean": 22455, "stddev": 4671, "min": 17054, "max": 29314}}, "old_skill": {"pass_rate": {"mean": 1.0, "stddev": 0.0, "min": 1.0, "max": 1.0}, "time_seconds": {"mean": 99.4, "stddev": 28.7, "min": 71.6, "max": 142.0}, "tokens": {"mean": 20150, "stddev": 2397, "min": 16523, "max": 22814}}, "delta": {"pass_rate": "+0.00", "time_seconds": "-30.7", "tokens": "+2305"}}, "notes": ["Both skill versions score 100% on all 5 evals \u2014 no regressions introduced by the update.", "Iteration-2 qualitative improvements: (1) px values converted to rem (18.75rem, 20rem), (2) bare 'ease' easing replaced with var(--ease-smooth), (3) $break-mobile used in breakpoints where iter-1 hardcoded 768px, (4) .c-glass-panel now identified as composable for the notification banner (more precise than iter-1).", "Iteration-2 is faster: avg 68.7s vs iter-1's 99.4s \u2014 the new Theme Alignment step focuses the agent earlier, reducing exploration time.", "The critical gap from the no-skill baseline (Eval 3: 0/6 \u2192 6/6) is confirmed fixed. The 'no hardcoded values' rule and 'Theme Alignment' Phase 1 step are doing the work."]}};
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            for (const r of data.reviews) feedbackMap[r.run_id] = r.feedback;
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs and promote done button when all visited
+      visitedRuns.add(index);
+      const doneBtn = document.getElementById("done-btn");
+      if (visitedRuns.size >= EMBEDDED_DATA.runs.length) {
+        doneBtn.classList.add("ready");
+      }
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#b0aea5; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const htmlStr = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = htmlStr;
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      let html = '<div style="padding: 1rem;">';
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+      html += '<div class="grades-summary">';
+      html += '<span class="grade-badge ' + badgeClass + '">' + passRate + '</span>';
+      html += '<span>' + (summary.passed || 0) + ' passed, ' + (summary.failed || 0) + ' failed of ' + (summary.total || 0) + '</span>';
+      html += '</div>';
+
+      // Assertions list
+      html += '<ul class="assertion-list">';
+      for (const exp of expectations) {
+        const statusClass = exp.passed ? "pass" : "fail";
+        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item">';
+        html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
+        html += '<span>' + escapeHtml(exp.text) + '</span>';
+        if (exp.evidence) {
+          html += '<div class="assertion-evidence">' + escapeHtml(exp.evidence) + '</div>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+    function saveCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // Build reviews array from map
+      const reviews = [];
+      for (const [run_id, feedback] of Object.entries(feedbackMap)) {
+        if (feedback.trim()) {
+          reviews.push({ run_id, feedback, timestamp: new Date().toISOString() });
+        }
+      }
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // POST once with status: complete — include ALL runs so the model
+      // can distinguish "no feedback" (looks good) from "not reviewed"
+      const reviews = [];
+      const ts = new Date().toISOString();
+      for (const r of EMBEDDED_DATA.runs) {
+        reviews.push({ run_id: r.id, feedback: feedbackMap[r.id] || "", timestamp: ts });
+      }
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // Reset status back to in_progress
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      let html = "";
+
+      // Header
+      html += "<h2 style='font-family: Poppins, sans-serif; margin-bottom: 0.5rem;'>Benchmark Results</h2>";
+      html += "<p style='color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;'>";
+      if (metadata.skill_name) html += "<strong>" + escapeHtml(metadata.skill_name) + "</strong> &mdash; ";
+      if (metadata.timestamp) html += metadata.timestamp + " &mdash; ";
+      if (metadata.evals_run) html += "Evals: " + metadata.evals_run.join(", ") + " &mdash; ";
+      html += (metadata.runs_per_configuration || "?") + " runs per configuration";
+      html += "</p>";
+
+      // Summary table
+      html += '<table class="benchmark-table">';
+
+      function fmtStat(stat, pct) {
+        if (!stat) return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const s = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return m + suffix + " ± " + s + suffix;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      html += "<thead><tr><th>Metric</th><th>" + escapeHtml(labelA) + "</th><th>" + escapeHtml(labelB) + "</th><th>Delta</th></tr></thead>";
+      html += "<tbody>";
+
+      html += "<tr><td><strong>Pass Rate</strong></td>";
+      html += "<td>" + fmtStat(a.pass_rate, true) + "</td>";
+      html += "<td>" + fmtStat(b.pass_rate, true) + "</td>";
+      html += '<td class="' + deltaClass(delta.pass_rate) + '">' + (delta.pass_rate || "—") + "</td></tr>";
+
+      // Time (only show row if data exists)
+      if (a.time_seconds || b.time_seconds) {
+        html += "<tr><td><strong>Time (s)</strong></td>";
+        html += "<td>" + fmtStat(a.time_seconds, false) + "</td>";
+        html += "<td>" + fmtStat(b.time_seconds, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.time_seconds) + '">' + (delta.time_seconds ? delta.time_seconds + "s" : "—") + "</td></tr>";
+      }
+
+      // Tokens (only show row if data exists)
+      if (a.tokens || b.tokens) {
+        html += "<tr><td><strong>Tokens</strong></td>";
+        html += "<td>" + fmtStat(a.tokens, false) + "</td>";
+        html += "<td>" + fmtStat(b.tokens, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.tokens) + '">' + (delta.tokens || "—") + "</td></tr>";
+      }
+
+      html += "</tbody></table>";
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        html += "<h3 style='font-family: Poppins, sans-serif; margin-bottom: 0.75rem;'>Per-Eval Breakdown</h3>";
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          html += "<h4 style='font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);'>" + escapeHtml(evalName) + "</h4>";
+          html += '<table class="benchmark-table">';
+          html += "<thead><tr><th>Config</th><th>Run</th><th>Pass Rate</th>";
+          if (hasTime) html += "<th>Time (s)</th>";
+          if (hasErrors) html += "<th>Crashes During Execution</th>";
+          html += "</tr></thead>";
+          html += "<tbody>";
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              html += '<tr class="' + rowClass + '">';
+              html += "<td>" + configLabel + "</td>";
+              html += "<td>" + run.run_number + "</td>";
+              html += '<td class="' + prClass + '">' + ((r.pass_rate || 0) * 100).toFixed(0) + "% (" + (r.passed || 0) + "/" + (r.total || 0) + ")</td>";
+              if (hasTime) html += "<td>" + (r.time_seconds != null ? r.time_seconds.toFixed(1) : "—") + "</td>";
+              if (hasErrors) html += "<td>" + (r.errors || 0) + "</td>";
+              html += "</tr>";
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            html += '<tr class="benchmark-row-avg ' + rowClass + '">';
+            html += "<td>" + configLabel + "</td>";
+            html += "<td>Avg</td>";
+            html += '<td class="' + avgPrClass + '">' + (avgRate * 100).toFixed(0) + "%</td>";
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds).filter(t => t != null);
+              html += "<td>" + (times.length ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1) : "—") + "</td>";
+            }
+            if (hasErrors) html += "<td></td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table>";
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            html += '<table class="benchmark-table" style="margin-top: 0.5rem;">';
+            html += "<thead><tr><th>Assertion</th>";
+            for (const config of configGroups) {
+              const label = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              html += "<th>" + escapeHtml(label) + "</th>";
+            }
+            html += "</tr></thead><tbody>";
+
+            for (const assertionText of allAssertions) {
+              html += "<tr><td>" + escapeHtml(assertionText) + "</td>";
+
+              for (const config of configGroups) {
+                html += "<td>";
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
+                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
+                  } else {
+                    html += "— ";
+                  }
+                }
+                html += "</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table>";
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        html += '<div class="benchmark-notes">';
+        html += "<h3>Analysis Notes</h3>";
+        html += "<ul>";
+        for (const note of notes) {
+          html += "<li>" + escapeHtml(note) + "</li>";
+        }
+        html += "</ul></div>";
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>

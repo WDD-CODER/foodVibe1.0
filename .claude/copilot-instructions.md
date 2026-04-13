@@ -27,6 +27,7 @@ description: Single source of truth for all project rules, standards, and skill/
 > Cursor receives these rules via `.cursor/rules/*.mdc`. Cursor cannot spawn subagents — `[CC]` triggers do not apply to Cursor.
 
 - **Plan & execute** `[SHARED]`: User presents architectural brief → invoke `/plan-implementation` command (read-only codebase scan, produce plan, wait for approval). On approval, invoke `/execute-it` command (full autonomous implementation).
+- **New feature scoping** `[SHARED]`: User invokes `/new-feature` or `/new-feature <description>` → read `.claude/commands/new-feature.md` and follow it. Produces a scoped brief that feeds into `/plan-implementation`. Does NOT write code.
 - **Session brief** `[SHARED]`: User invokes `/brief` or `/brief <description>` → read `.claude/commands/brief.md` and follow it. Creates or reconstructs a session brief that threads through validation and session-handoff as a scorecard.
 - **Save plan** `[SHARED]`: Message contains "save" + one of "it / that / this / plan" (case-insensitive) while a plan is in context → read `.claude/skills/save-plan/SKILL.md` and follow it.
 - **Git operations** `[SHARED]`: User mentions "commit", "push", "merge", "PR", "branch", git status, or any git workflow (but NOT "ship", "done", "wrap up", "end session", "handoff" — those route to session-end skills above) → read `.claude/agents/git-agent.md` and follow it. No git writes until user approves the visual plan.

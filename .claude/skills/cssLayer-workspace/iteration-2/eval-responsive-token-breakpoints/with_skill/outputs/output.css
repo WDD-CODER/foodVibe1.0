@@ -1,0 +1,42 @@
+// menu-grid.component.scss
+// Responsive grid layout for the menu grid component.
+// Breakpoint variables sourced from src/styles.scss:
+//   $break-mobile:  768px
+//   $break-tablet:  900px
+//   $break-desktop: 1200px
+
+$break-mobile: 768px;
+$break-tablet: 900px;
+$break-desktop: 1200px;
+
+.menu-grid {
+  // ── 1. Layout ─────────────────────────────────────────────────────────────
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+
+  // ── 2. Dimensions ─────────────────────────────────────────────────────────
+  // (inherits from parent container)
+
+  // ── 3. Content ────────────────────────────────────────────────────────────
+  // (text/color owned by child card components)
+
+  // ── 4. Structure ──────────────────────────────────────────────────────────
+  padding-block: 1rem;
+  padding-inline: 1rem;
+
+  // ── 5. Effects ────────────────────────────────────────────────────────────
+  // (none at container level)
+
+  // ── Tablet: 2 columns ─────────────────────────────────────────────────────
+  @media (min-width: $break-tablet) {
+    // 1. Layout
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  // ── Desktop: 3 columns ────────────────────────────────────────────────────
+  @media (min-width: $break-desktop) {
+    // 1. Layout
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

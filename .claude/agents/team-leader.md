@@ -57,6 +57,26 @@ Skip `TeamCreate` — invoke agents directly via the `Agent` tool (sequential is
 - Confirm build compiles and branch is not `main`.
 - Ensure agents read `breadcrumbs.md` before modifying any directory.
 
+### 3.5 Two-Stage Review Gate (for multi-task execution)
+
+When orchestrating implementation across multiple tasks:
+
+**After each task completion:**
+1. **Stage 1 — Spec Compliance Review:** Dispatch a fresh subagent to verify the completed task matches the plan's specification. Does the code do what the task said it should? Nothing missing, nothing extra.
+   - If issues found → implementer fixes, re-review
+   - If PASS → proceed to Stage 2
+
+2. **Stage 2 — Code Quality Review:** Dispatch a fresh subagent to review code quality. Clean code? Good patterns? No magic numbers? Consistent with codebase style?
+   - If critical issues → implementer fixes, re-review
+   - If minor issues or PASS → mark task complete, proceed to next
+
+**Skip two-stage review for:**
+- Documentation-only changes
+- Configuration changes
+- Single-line fixes where the change is obviously correct
+
+**Source:** Adapted from Superpowers `subagent-driven-development` skill's review pattern.
+
 ### 4. Visual QA (via gstack)
 - After layout-affecting changes, run `/qa http://localhost:<port>/<relevant-page>` to verify visually.
 - Port resolution: read `.worktree-port` in active worktree; fallback to 4200.

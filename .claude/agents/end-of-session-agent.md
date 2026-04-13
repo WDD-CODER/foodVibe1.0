@@ -249,12 +249,11 @@ For each task verified as complete (code committed, file exists):
 **Step 2 — Archive (automatic):**
 Find archivable sections:
 - All tasks in section marked `[x]`
-- Verified in git (commits exist)
-- Section >7 days old
+- Section does NOT contain `(deferred)`, `(skipped)`, or `[~]`
 
 For each archivable section:
 - Move to `.claude/todo-archive.md`
-- Prepend with archive date header
+- Append under `## Done` with the section header and all checkboxes
 
 Output: `"Archived {n} completed sections to todo-archive.md"`
 
@@ -306,6 +305,21 @@ Store: `archived_plans` list
    - todo.md (was task marked `[x]`?)
    - build status (does it compile?)
    - file existence (was deliverable created?)
+
+   **Verification-Before-Completion enforcement:**
+   - For EACH criterion that involves code changes:
+     - Do NOT trust prior build results. Run `ng build` NOW (fresh).
+     - Do NOT trust "tests passed earlier." Run relevant tests NOW.
+     - Only mark as "Done" if you have FRESH evidence from commands you just ran.
+     - If build/test fails → status is "Missed" regardless of what the conversation says
+   - For criteria that don't involve code (docs, plans, config):
+     - Verify file exists and contains expected content
+     - Mark "Done" with file path as evidence
+
+   **Red flags (mark as "Missed" immediately):**
+   - Criterion claims code works but `ng build` fails
+   - Criterion claims tests pass but no test command was run in this phase
+   - Criterion says "should work" without evidence
 
 4. Grade each:
    - **Done** — criterion fully met, evidence clear

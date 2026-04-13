@@ -1,0 +1,42 @@
+{
+  "eval_id": 3,
+  "eval_name": "glass-card-composition",
+  "prompt": "Build the SCSS for a new supplier-card component at src/app/pages/suppliers/components/supplier-card/supplier-card.component.scss. It should display a supplier logo image at the top, the supplier name as a heading, contact info below, and have a hover state. The card should be 320px wide.",
+  "assertions": [
+    {
+      "id": "no_hardcoded_background",
+      "text": "Output does not contain hardcoded background color (#ffffff, white, #f7f7f7)",
+      "type": "grep_not",
+      "pattern": "background-color: #|background: #|background: white|background-color: white|#f7f7f7"
+    },
+    {
+      "id": "no_hardcoded_border_colors",
+      "text": "Output does not contain hardcoded border colors (#e0e0e0, etc.)",
+      "type": "grep_not",
+      "pattern": "solid #e0e0e0|solid #ddd|solid #ccc"
+    },
+    {
+      "id": "no_hardcoded_text_colors",
+      "text": "Output does not contain hardcoded text colors (#1a1a1a, #555, #888, #333)",
+      "type": "grep_not",
+      "pattern": "color: #1a1|color: #555|color: #888|color: #333"
+    },
+    {
+      "id": "uses_var_tokens",
+      "text": "Output uses at least 3 var(--) token references",
+      "type": "agent"
+    },
+    {
+      "id": "composes_glass_engine",
+      "text": "Agent references .c-glass-card engine class (as a comment or template note) rather than rewriting glass styles from scratch",
+      "type": "grep",
+      "pattern": "c-glass-card"
+    },
+    {
+      "id": "logical_properties",
+      "text": "Output uses logical properties (padding-inline, padding-block, margin-block, border-block)",
+      "type": "grep",
+      "pattern": "padding-inline|padding-block|margin-block|border-block"
+    }
+  ]
+}

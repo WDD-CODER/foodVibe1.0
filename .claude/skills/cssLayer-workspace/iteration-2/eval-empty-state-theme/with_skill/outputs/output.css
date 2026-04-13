@@ -1,0 +1,170 @@
+/*
+ * empty-state.component.scss
+ * Recipe Builder — no-recipes empty state
+ *
+ * Composes global engine classes from styles.scss:
+ *   .c-empty-state          — flex-column, centered, gap, padding-block
+ *   .c-empty-state__icon    — muted-light icon color
+ *   .c-empty-state__msg     — base message text
+ *   .c-btn-primary          — call-to-action button
+ *
+ * This file adds only recipe-builder-specific overrides and the
+ * icon ring decoration that the shared engine does not provide.
+ */
+
+@layer components.recipe-builder-empty-state {
+
+  /* ── Host ── */
+  :host {
+    /* Layout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Dimensions */
+    width: 100%;
+    min-height: 24rem;
+
+    /* Structure */
+    padding-inline: 1.5rem;
+    padding-block: 4rem;
+  }
+
+  /* ── Wrapper card ── */
+  /*
+   * Wraps the full empty-state content in a frosted glass surface.
+   * Composes .c-glass-card on the host element in the template.
+   */
+  .empty-state-card {
+    /* Layout */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+
+    /* Dimensions */
+    width: 100%;
+    max-width: 28rem;
+  }
+
+  /* ── Icon ring ── */
+  /*
+   * Decorative ring behind the lucide icon — gives the icon a
+   * glowing teal halo consistent with the Liquid Glass language.
+   * Applied as a wrapper <div> around <lucide-icon>.
+   */
+  .empty-state-icon-ring {
+    /* Layout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Dimensions */
+    width: 5rem;
+    height: 5rem;
+
+    /* Structure */
+    margin-block-end: 1.5rem;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-glass);
+
+    /* Effects */
+    background: var(--color-primary-soft);
+    backdrop-filter: var(--blur-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Override engine icon color inside the ring so it reads as primary */
+  .empty-state-icon-ring .c-empty-state__icon {
+    /* Content */
+    color: var(--color-primary);
+  }
+
+  /* ── Heading ── */
+  .empty-state-heading {
+    /* Layout */
+    display: block;
+
+    /* Dimensions */
+    width: 100%;
+
+    /* Content */
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    text-align: center;
+    line-height: 1.3;
+
+    /* Structure */
+    margin: 0;
+    margin-block-end: 0.5rem;
+  }
+
+  /* ── Description — overrides engine .c-empty-state__msg sizing ── */
+  .c-empty-state__msg {
+    /* Content */
+    font-size: 0.9375rem;
+    color: var(--color-text-muted);
+    text-align: center;
+    line-height: 1.6;
+
+    /* Structure */
+    margin: 0;
+    margin-block-end: 2rem;
+    max-width: 22rem;
+  }
+
+  /* ── CTA button area ── */
+  /*
+   * .c-btn-primary from the engine handles all button chrome.
+   * This selector only controls sizing / spacing unique to the empty state.
+   */
+  .empty-state-cta {
+    /* Layout */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+
+    /* Dimensions */
+    min-width: 10rem;
+
+    /* Structure */
+    padding-inline: 1.75rem;
+    padding-block: 0.75rem;
+  }
+
+  /* ── Responsive — mobile ── */
+  @media (max-width: 768px) {
+    :host {
+      min-height: 18rem;
+
+      padding-inline: 1rem;
+      padding-block: 3rem;
+    }
+
+    .empty-state-icon-ring {
+      width: 4rem;
+      height: 4rem;
+
+      margin-block-end: 1.25rem;
+    }
+
+    .empty-state-heading {
+      font-size: 1.125rem;
+    }
+
+    .c-empty-state__msg {
+      font-size: 0.875rem;
+
+      margin-block-end: 1.5rem;
+    }
+
+    .empty-state-cta {
+      width: 100%;
+    }
+  }
+
+}

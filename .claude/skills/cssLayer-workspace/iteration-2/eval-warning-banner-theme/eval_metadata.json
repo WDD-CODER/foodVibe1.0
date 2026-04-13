@@ -1,0 +1,42 @@
+{
+  "eval_id": 4,
+  "eval_name": "warning-banner-theme",
+  "prompt": "Add styles to a new notification-banner component at src/app/shared/notification-banner/notification-banner.component.scss. The banner displays a warning message with an icon on the left and a dismiss button on the right. It should sit at the top of the content area and look consistent with the rest of the app.",
+  "assertions": [
+    {
+      "id": "uses_warning_bg_token",
+      "text": "Output uses var(--bg-warning) or var(--bg-warning-strong) instead of hardcoded warning background",
+      "type": "grep",
+      "pattern": "var\\(--bg-warning"
+    },
+    {
+      "id": "uses_warning_text_token",
+      "text": "Output uses var(--text-warning) for warning text color",
+      "type": "grep",
+      "pattern": "var\\(--text-warning"
+    },
+    {
+      "id": "uses_warning_border_token",
+      "text": "Output uses var(--border-warning) for border color",
+      "type": "grep",
+      "pattern": "var\\(--border-warning"
+    },
+    {
+      "id": "no_hardcoded_warning_colors",
+      "text": "Output does not contain hardcoded warning colors (#fff3cd, #ffc107, #856404, #f59e0b)",
+      "type": "grep_not",
+      "pattern": "#fff3cd|#ffc107|#856404|#f59e0b"
+    },
+    {
+      "id": "logical_padding",
+      "text": "Output uses logical padding (padding-block, padding-inline)",
+      "type": "grep",
+      "pattern": "padding-block|padding-inline"
+    },
+    {
+      "id": "five_group_rhythm",
+      "text": "Output applies Five-Group Vertical Rhythm with clear group separation",
+      "type": "agent"
+    }
+  ]
+}
