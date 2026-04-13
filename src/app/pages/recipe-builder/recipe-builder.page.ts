@@ -231,7 +231,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private destroyRef = inject(DestroyRef);
 
   private cachedPrepItems_: { preparation_name?: string; category_name?: string; main_category_name?: string; quantity?: number; unit?: string }[] = [];
-  private cachedSteps_: { order?: number; instruction?: string; labor_time?: number }[] = [];
+  private cachedSteps_: { order?: number; instruction?: string; labor_time?: number; cooking_time?: number }[] = [];
 
   constructor() {
     this.ingredientsArray.valueChanges
@@ -255,7 +255,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       const rows = this.workflowArray.controls.map(c => c.getRawValue() as { preparation_name?: string; category_name?: string; main_category_name?: string; quantity?: number; unit?: string });
       this.cachedPrepItems_ = rows;
     } else {
-      const rows = this.workflowArray.controls.map(c => c.getRawValue() as { order?: number; instruction?: string; labor_time?: number });
+      const rows = this.workflowArray.controls.map(c => c.getRawValue() as { order?: number; instruction?: string; labor_time?: number; cooking_time?: number });
       this.cachedSteps_ = rows;
     }
 
@@ -325,6 +325,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
+    // Reset guard flag so canDeactivate works correctly if the component is reused
+    // (Angular may reuse the same instance when navigating between recipe-builder/:id routes).
+    this.isSubmitted = false;
     const lsIngredients = localStorage.getItem('rb_col_ingredients');
     if (lsIngredients !== null) this.tableLogicCollapsed_.set(JSON.parse(lsIngredients));
     const lsWorkflow = localStorage.getItem('rb_col_workflow');
@@ -523,6 +526,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   /** For pendingChangesGuard: true when current form value differs from initial state when user entered the page. */
   hasRealChanges(): boolean {
+    // DEBUG — remove after diagnosis
+    console.log('[recipe hasRealChanges] historyView:', this.historyViewMode_(), 'disabled:', this.recipeForm_.disabled, 'recipeId:', this.recipeId_(), 'snapshotNull:', this.initialRecipeSnapshot_ === null, 'dirty:', this.recipeForm_.dirty)
     if (this.historyViewMode_() || this.recipeForm_.disabled) return false;
 
     if (!this.recipeId_()) {
@@ -535,13 +540,21 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     }
 
     if (this.initialRecipeSnapshot_ === null) return this.recipeForm_.dirty === true;
-    return this.getRecipeSnapshotForComparison() !== this.initialRecipeSnapshot_;
+    const current = this.getRecipeSnapshotForComparison()
+    // DEBUG
+    console.log('[recipe hasRealChanges] snapshots equal:', current === this.initialRecipeSnapshot_)
+    return current !== this.initialRecipeSnapshot_;
   }
 
   /** For pendingChangesGuard: save the recipe and resolve once done. */
   saveAndWait(): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
       const headerValid = this.recipeHeaderRef_()?.validate() ?? true;
+      if (this.recipeForm_.pending) {
+        this.userMsg_.onSetErrorMsg(this.translation_.translate('validating_please_wait') ?? 'אנא המתן לסיום האימות');
+        resolve(false);
+        return;
+      }
       if (this.recipeForm_.invalid || !headerValid) {
         this.recipeForm_.markAllAsTouched()
         const msg = this.getRecipeValidationError_()
@@ -590,11 +603,12 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     }));
     const workflow = (raw?.['workflow_items'] ?? []) as Record<string, unknown>[];
     const workflowNorm = workflow.map((row) => {
-      if (row?.['order'] != null || row?.['instruction'] != null || row?.['labor_time'] != null) {
+      if (row?.['order'] != null || row?.['instruction'] != null || row?.['labor_time'] != null || row?.['cooking_time'] != null) {
         return {
           order: Number(row?.['order'] ?? 0),
           instruction: (row?.['instruction'] ?? '').toString(),
-          labor_time: Number(row?.['labor_time'] ?? 0)
+          labor_time: Number(row?.['labor_time'] ?? 0),
+          cooking_time: Number(row?.['cooking_time'] ?? 0)
         };
       }
       return {
@@ -858,6 +872,11 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   async saveRecipe(options?: { navigateOnSuccess?: boolean }): Promise<void> {
     const headerValid = this.recipeHeaderRef_()?.validate() ?? true;
+    if (this.recipeForm_.pending) {
+      // Async validators (duplicate-name check) still running — block save to avoid racing
+      this.userMsg_.onSetErrorMsg(this.translation_.translate('validating_please_wait') ?? 'אנא המתן לסיום האימות');
+      return;
+    }
     if (this.recipeForm_.invalid || !headerValid) {
       this.recipeForm_.markAllAsTouched();
       const msg = this.getRecipeValidationError_();
@@ -898,13 +917,18 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     recipe.autoLabels_ = this.recipeFormService_.computeAutoLabels(recipe);
 
     this.state_.saveRecipe(recipe).subscribe({
-      next: () => {
+      next: (saved) => {
         this.saving.setSaving(false);
         if (navigateOnSuccess) {
           this.isSubmitted = true;
           this.resetToNewForm_();
           this.router_.navigate(['/recipe-book']);
         } else {
+          // If a type-change caused a new _id to be assigned, update recipeId_ so the
+          // duplicate-name validator does not flag the same recipe as a conflict.
+          if (saved._id && saved._id !== this.recipeId_()) {
+            this.recipeId_.set(saved._id);
+          }
           this.userMsg_.onSetSuccessMsg(
             this.translation_.translate(this.isApproved_() ? 'approval_success' : 'unapproval_success')
           );

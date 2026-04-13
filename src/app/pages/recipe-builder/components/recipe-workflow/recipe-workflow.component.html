@@ -33,13 +33,25 @@
                 (keydown.enter)="onInstructionEnter($event)"></textarea>
             </div>
 
-            <!-- Left: timer + delete -->
+            <!-- Left: timer + cook time + delete -->
             <div class="col-step-actions">
+              <!-- clock icon = labor time (admin analytics) -->
               <button type="button"
                 class="timer-toggle-btn"
                 [class.timer-active]="isTimerOpen(i)"
+                [class.timer-has-value]="!isTimerOpen(i) && (group.get('labor_time')?.value ?? 0) > 0"
                 (click)="toggleTimer(i)"
                 [attr.aria-label]="'labor_time_minutes' | translatePipe"
+                tabindex="-1">
+                <lucide-icon name="clock" class="wf-icon"></lucide-icon>
+              </button>
+              <!-- timer icon = cooking time (countdown) -->
+              <button type="button"
+                class="timer-toggle-btn"
+                [class.timer-active]="isCookTimeOpen(i)"
+                [class.timer-has-value]="!isCookTimeOpen(i) && (group.get('cooking_time')?.value ?? 0) > 0"
+                (click)="toggleCookTime(i)"
+                [attr.aria-label]="'cooking_time_minutes' | translatePipe"
                 tabindex="-1">
                 <lucide-icon name="timer" class="wf-icon"></lucide-icon>
               </button>
@@ -48,7 +60,7 @@
               </button>
             </div>
 
-            <!-- Timer counter row — spans full width, shows below when active -->
+            <!-- Labor time row -->
             @if (isTimerOpen(i)) {
               <div class="timer-row">
                 <span class="timer-row-label">{{ 'labor_time_minutes' | translatePipe }}</span>
@@ -65,29 +77,75 @@
                   @if (editingLaborTimeIndex_() === i) {
                     <input
                       #laborTimeInput
-                      type="number"
-                      formControlName="labor_time"
+                      type="text"
                       class="timer-field"
-                      min="0"
+                      [value]="laborTimeEditStr_()"
+                      (input)="laborTimeEditStr_.set($any($event.target).value)"
+                      placeholder="0:00"
                       SelectOnFocus
                       (blur)="exitLaborTimeEdit(group)"
                       (keydown.enter)="exitLaborTimeEdit(group); $event.preventDefault()"
-                      (keydown.arrowDown)="onLaborTimeKeydown($event, group)"
-                      (keydown.arrowUp)="onLaborTimeKeydown($event, group)"
                     />
                   } @else {
                     <span
                       class="timer-value"
-                      (click)="enterLaborTimeEdit(i)"
-                      (focus)="enterLaborTimeEdit(i)"
+                      (click)="enterLaborTimeEdit(i, group.get('labor_time')?.value ?? 0)"
+                      (focus)="enterLaborTimeEdit(i, group.get('labor_time')?.value ?? 0)"
                       tabindex="0"
                       role="button"
-                    >{{ group.get('labor_time')?.value ?? 0 }}</span>
+                    >{{ formatMinutesToClock(group.get('labor_time')?.value ?? 0) }}</span>
                   }
                   <button
                     type="button"
                     class="counter-btn plus"
                     (click)="incrementLaborTime(group)"
+                    tabindex="-1"
+                  >
+                    <lucide-icon name="plus" class="wf-icon"></lucide-icon>
+                  </button>
+                </div>
+              </div>
+            }
+
+            <!-- Cook time row -->
+            @if (isCookTimeOpen(i)) {
+              <div class="timer-row cook-time-row">
+                <span class="timer-row-label">{{ 'cooking_time_minutes' | translatePipe }}</span>
+                <div class="timer-counter">
+                  <button
+                    type="button"
+                    class="counter-btn minus"
+                    [disabled]="(group.get('cooking_time')?.value ?? 0) <= 0"
+                    (click)="decrementCookTime(group)"
+                    tabindex="-1"
+                  >
+                    <lucide-icon name="minus" class="wf-icon"></lucide-icon>
+                  </button>
+                  @if (editingCookTimeIndex_() === i) {
+                    <input
+                      #cookTimeInput
+                      type="text"
+                      class="timer-field timer-field--wide"
+                      [value]="cookTimeEditStr_()"
+                      (input)="cookTimeEditStr_.set($any($event.target).value)"
+                      placeholder="00:00:00"
+                      SelectOnFocus
+                      (blur)="exitCookTimeEdit(group)"
+                      (keydown.enter)="exitCookTimeEdit(group); $event.preventDefault()"
+                    />
+                  } @else {
+                    <span
+                      class="timer-value"
+                      (click)="enterCookTimeEdit(i, group.get('cooking_time')?.value ?? 0)"
+                      (focus)="enterCookTimeEdit(i, group.get('cooking_time')?.value ?? 0)"
+                      tabindex="0"
+                      role="button"
+                    >{{ formatSecsToHms(group.get('cooking_time')?.value ?? 0) }}</span>
+                  }
+                  <button
+                    type="button"
+                    class="counter-btn plus"
+                    (click)="incrementCookTime(group)"
                     tabindex="-1"
                   >
                     <lucide-icon name="plus" class="wf-icon"></lucide-icon>

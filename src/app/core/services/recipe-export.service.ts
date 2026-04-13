@@ -61,16 +61,17 @@ export class RecipeExportService {
     const ws = wb.addWorksheet('Cooking steps', { views: [{ rightToLeft: true }] })
     ws.addRow([heHeader('exported_at'), exportDateStr(), '', recipe.name_hebrew ?? '', `${heHeader('yield')}: ${quantity} ${heUnit(recipe.yield_unit_ ?? 'unit')}`])
     styleHeaderRow(ws, 1)
-    ws.addRow([heHeader('order'), heHeader('instruction'), heHeader('time_min')])
+    ws.addRow([heHeader('order'), heHeader('instruction'), heHeader('labor_time_min'), heHeader('cooking_time_sec')])
     styleHeaderRow(ws, 2)
     let rowNum = 3
     steps.forEach(s => {
-      ws.addRow([s.order_, s.instruction_ ?? '', roundExportNumber(s.labor_time_minutes_ ?? 0)])
+      ws.addRow([s.order_, s.instruction_ ?? '', roundExportNumber(s.labor_time_minutes_ ?? 0), roundExportNumber(s.cooking_time_secs_ ?? 0)])
       styleDataRow(ws, rowNum++)
     })
     ws.getColumn(1).width = 8
     ws.getColumn(2).width = 50
     ws.getColumn(3).width = 12
+    ws.getColumn(4).width = 12
     const fileName = buildExportFileName('cooking-steps', recipe.name_hebrew ?? 'recipe')
     await downloadWorkbook(wb, fileName)
   }

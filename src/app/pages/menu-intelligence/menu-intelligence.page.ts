@@ -524,8 +524,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     }
   }
 
-  /** For pendingChangesGuard */
-  hasUnsavedEdits(): boolean {
+  /** For pendingChangesGuard — method name must match PendingChangesComponent interface */
+  hasRealChanges(): boolean {
     return JSON.stringify(this.form_.getRawValue()) !== this.savedSnapshot_;
   }
 

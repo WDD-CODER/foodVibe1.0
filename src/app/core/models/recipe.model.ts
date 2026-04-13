@@ -5,6 +5,8 @@ export interface RecipeStep {
   order_: number;
   instruction_: string;
   labor_time_minutes_: number;
+  /** Cook timer duration in seconds (session countdown). Separate from labor_time_minutes_ which is admin/analytics. */
+  cooking_time_secs_?: number;
   video_url_?: string;
 }
 
