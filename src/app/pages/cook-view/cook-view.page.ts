@@ -140,6 +140,15 @@ export class CookViewPage implements OnInit, OnDestroy {
   /** Interval handle for the countdown timer — not a signal, just for cleanup. */
   private timerIntervalId_: ReturnType<typeof setInterval> | null = null
 
+  // ---- COOK TIMER INPUT SIGNALS ----
+  protected timerInputExpandedIndex_ = signal<number | null>(null)
+  protected timerCustomInput_ = signal<string>('')
+
+  // ---- STOPWATCH SIGNALS ----
+  protected stopwatchStepIndex_ = signal<number | null>(null)
+  protected stopwatchSecondsElapsed_ = signal<number>(0)
+  private stopwatchIntervalId_: ReturnType<typeof setInterval> | null = null
+
   /** Multiplier chip definitions exposed to template. */
   protected readonly multiplierChips = MULTIPLIER_CHIPS
 
@@ -262,12 +271,26 @@ export class CookViewPage implements OnInit, OnDestroy {
     return this.stepDoneSet_().size >= steps.length
   })
 
-  /** Formatted timer display (m:ss). */
+  /** Formatted timer display (m:ss under 1h, h:mm:ss at 1h+). */
   protected timerDisplay_ = computed(() => {
     const s = this.timerSecondsLeft_()
-    const m = Math.floor(s / 60)
+    const h = Math.floor(s / 3600)
+    const m = Math.floor((s % 3600) / 60)
     const sec = s % 60
-    return `${m}:${sec.toString().padStart(2, '0')}`
+    return h > 0
+      ? `${h}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`
+      : `${m}:${sec.toString().padStart(2, '0')}`
+  })
+
+  /** Formatted stopwatch display (count-up, same format as timerDisplay_). */
+  protected stopwatchDisplay_ = computed(() => {
+    const s = this.stopwatchSecondsElapsed_()
+    const h = Math.floor(s / 3600)
+    const m = Math.floor((s % 3600) / 60)
+    const sec = s % 60
+    return h > 0
+      ? `${h}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`
+      : `${m}:${sec.toString().padStart(2, '0')}`
   })
 
   protected get workflowFormArray(): FormArray {
@@ -321,6 +344,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     this.cancelTimer()
     this.closeAllExportOverlays()
     this.heroFab.clearPageActions()
+    if (this.stopwatchIntervalId_ !== null) clearInterval(this.stopwatchIntervalId_)
   }
 
   protected setQuantity(value: number): void {
@@ -529,7 +553,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected onApproveStamp(): void {
     const recipe = this.recipe_()
     if (!recipe) return
-    if (this.hasUnsavedEdits()) {
+    if (this.hasRealChanges()) {
       this.applyWorkflowFormToRecipe()
       this.confirmModal.open('approve_stamp_unsaved_confirm', { saveLabel: 'save_changes' }).then(confirmed => {
         if (!confirmed) return
@@ -662,8 +686,8 @@ export class CookViewPage implements OnInit, OnDestroy {
     this.exportBarExpanded_.update((v: boolean) => !v)
   }
 
-  /** For route guard: true when in edit mode with unsaved changes. */
-  hasUnsavedEdits(): boolean {
+  /** For route guard (PendingChangesComponent interface): true when in edit mode with unsaved changes. */
+  hasRealChanges(): boolean {
     const edit = this.editMode_()
     const orig = this.originalRecipe_()
     const current = this.recipe_()
@@ -790,6 +814,15 @@ export class CookViewPage implements OnInit, OnDestroy {
     }
   }
 
+  protected unmarkStepDone(index: number): void {
+    this.stepDoneSet_.update(s => {
+      const next = new Set(s)
+      next.delete(index)
+      return next
+    })
+    this.activeStepIndex_.set(index)
+  }
+
   /** Toggle peek (expanded preview) on a pending step. Cannot peek the active step. */
   protected toggleStepPeek(index: number): void {
     if (index === this.activeStepIndex_()) return
@@ -797,12 +830,12 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   /** Start a countdown timer on a step card. */
-  protected startTimer(stepIndex: number, minutes: number): void {
+  protected startTimer(stepIndex: number, totalSeconds: number): void {
     if (this.timerIntervalId_ !== null) {
       clearInterval(this.timerIntervalId_)
     }
     this.activeTimerStepIndex_.set(stepIndex)
-    this.timerSecondsLeft_.set(minutes * 60)
+    this.timerSecondsLeft_.set(totalSeconds)
     this.timerIntervalId_ = setInterval(() => {
       this.timerSecondsLeft_.update(s => s - 1)
       if (this.timerSecondsLeft_() <= 0) {
@@ -819,6 +852,60 @@ export class CookViewPage implements OnInit, OnDestroy {
     }
     this.activeTimerStepIndex_.set(null)
     this.timerSecondsLeft_.set(0)
+  }
+  /** Expand the h:mm input for a step, pre-filling with the step's preset cooking time. */
+  protected expandTimerInput(stepIndex: number, presetMinutes: number): void {
+    const h = Math.floor(presetMinutes / 60)
+    const m = presetMinutes % 60
+    this.timerCustomInput_.set(h > 0 ? `${h}:${m.toString().padStart(2, '0')}` : `${presetMinutes}`)
+    this.timerInputExpandedIndex_.set(stepIndex)
+  }
+
+  /** Parse the h:mm input and start the countdown timer. */
+  protected confirmTimerInput(stepIndex: number): void {
+    const raw = this.timerCustomInput_().trim()
+    let totalMinutes = 0
+    if (raw.includes(':')) {
+      const parts = raw.split(':')
+      const h = parseInt(parts[0], 10) || 0
+      const m = parseInt(parts[1], 10) || 0
+      totalMinutes = h * 60 + m
+    } else {
+      totalMinutes = parseInt(raw, 10) || 0
+    }
+    if (totalMinutes > 0) {
+      this.startTimer(stepIndex, totalMinutes)
+    }
+    this.timerInputExpandedIndex_.set(null)
+    this.timerCustomInput_.set('')
+  }
+
+  /** Dismiss the h:mm input without starting a timer. */
+  protected cancelTimerInput(): void {
+    this.timerInputExpandedIndex_.set(null)
+    this.timerCustomInput_.set('')
+  }
+
+  /** Start a count-up stopwatch on a step card. */
+  protected startStopwatch(stepIndex: number): void {
+    if (this.stopwatchIntervalId_ !== null) {
+      clearInterval(this.stopwatchIntervalId_)
+    }
+    this.stopwatchStepIndex_.set(stepIndex)
+    this.stopwatchSecondsElapsed_.set(0)
+    this.stopwatchIntervalId_ = setInterval(() => {
+      this.stopwatchSecondsElapsed_.update(s => s + 1)
+    }, 1000)
+  }
+
+  /** Stop and reset the active stopwatch. */
+  protected stopStopwatch(): void {
+    if (this.stopwatchIntervalId_ !== null) {
+      clearInterval(this.stopwatchIntervalId_)
+      this.stopwatchIntervalId_ = null
+    }
+    this.stopwatchStepIndex_.set(null)
+    this.stopwatchSecondsElapsed_.set(0)
   }
 
   protected onEdit(): void {
@@ -903,7 +990,7 @@ export class CookViewPage implements OnInit, OnDestroy {
         steps.forEach((step, i) => {
           const group = this.recipeFormService.createStepGroup(step.order_ ?? i + 1)
           group.get('instruction')?.addValidators(Validators.required)
-          group.patchValue({ instruction: step.instruction_ ?? '', labor_time: step.labor_time_minutes_ ?? 0 })
+          group.patchValue({ instruction: step.instruction_ ?? '', labor_time: step.labor_time_minutes_ ?? 0, cooking_time: step.cooking_time_secs_ ?? 0 })
           arr.push(group)
         })
       } else {
@@ -952,10 +1039,11 @@ export class CookViewPage implements OnInit, OnDestroy {
     } else {
       const steps: RecipeStep[] = (raw || [])
         .filter((s: { instruction?: string }) => !!s?.instruction?.trim())
-        .map((step: { order?: number; instruction?: string; labor_time?: number }, i: number) => ({
+        .map((step: { order?: number; instruction?: string; labor_time?: number; cooking_time?: number }, i: number) => ({
           order_: step?.order ?? i + 1,
           instruction_: step?.instruction ?? '',
-          labor_time_minutes_: step?.labor_time ?? 0
+          labor_time_minutes_: step?.labor_time ?? 0,
+          cooking_time_secs_: step?.cooking_time ?? 0
         }))
       this.recipe_.update(r => ({ ...r, steps_: steps.length ? steps : [] } as Recipe))
     }

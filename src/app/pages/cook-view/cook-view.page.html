@@ -137,18 +137,7 @@
         }
       </div>
 
-      <!-- Completion screen OR two-column body -->
-      @if (cookingComplete_() && !editMode_()) {
-        <div class="cv-completion-screen">
-          <lucide-icon name="circle-check" [size]="56"></lucide-icon>
-          <h2>{{ recipe.name_hebrew }}</h2>
-          <h3>{{ 'cooking_complete' | translatePipe }}</h3>
-          <div class="cv-completion-actions">
-            <button type="button" class="c-btn-primary" (click)="onApproveStamp()">{{ 'confirm_dish' | translatePipe }}</button>
-            <a routerLink="/recipe-book" class="c-btn-ghost">{{ 'back_to_list' | translatePipe }}</a>
-          </div>
-        </div>
-      } @else {
+      <!-- Two-column body -->
         <div class="cv-body">
           <!-- Ingredient pane -->
           <div class="cv-ing-pane">
@@ -167,6 +156,7 @@
               </div>
             </div>
 
+            <div class="cv-ing-body">
             @if (editMode_()) {
               <!-- Edit mode: original ingredient table -->
               <div class="ingredients-table">
@@ -262,6 +252,7 @@
                 </div>
               }
             }
+            </div>
           </div>
 
           <!-- Step pane -->
@@ -274,6 +265,7 @@
               <span class="cv-step-counter">{{ stepDoneSet_().size }}/{{ isDish_() ? scaledPrep_().length : recipe.steps_.length }}</span>
             </div>
 
+            <div class="cv-step-body">
             @if (editMode_()) {
               <!-- Edit mode: original workflow editor -->
               <app-recipe-workflow
@@ -335,28 +327,49 @@
                           [class.cv-step-num--active]="activeStepIndex_() === si && !stepDoneSet_().has(si)"
                           [class.cv-step-num--done]="stepDoneSet_().has(si)">{{ step.order_ }}</span>
                         <span class="cv-step-label">{{ 'step' | translatePipe }} {{ step.order_ }}</span>
+                        <!-- Timer & stopwatch tools — before status chip -->
+                        <div class="cv-step-tools" (click)="$event.stopPropagation()">
+                          @if ((step.cooking_time_secs_ ?? 0) > 0) {
+                            @if (activeTimerStepIndex_() === si) {
+                              <!-- Running: countdown pill + cancel -->
+                              <button type="button" class="cv-timer-pill cv-timer-pill--active" (click)="cancelTimer()">
+                                <lucide-icon name="timer" [size]="13"></lucide-icon>
+                                {{ timerDisplay_() }}
+                                <span class="cv-timer-cancel">✕</span>
+                              </button>
+                            } @else {
+                              <!-- Idle: tap to start immediately with preset seconds -->
+                              <button type="button" class="cv-timer-icon"
+                                (click)="startTimer(si, step.cooking_time_secs_ ?? 0)">
+                                <lucide-icon name="timer" [size]="17"></lucide-icon>
+                              </button>
+                            }
+                          }
+                          <!-- Stopwatch -->
+                          @if (stopwatchStepIndex_() === si) {
+                            <button type="button" class="cv-stopwatch-icon cv-stopwatch-icon--active" (click)="stopStopwatch()">
+                              <lucide-icon name="watch" [size]="17"></lucide-icon>
+                              {{ stopwatchDisplay_() }}
+                            </button>
+                          } @else {
+                            <button type="button" class="cv-stopwatch-icon"
+                              (click)="startStopwatch(si)">
+                              <lucide-icon name="watch" [size]="17"></lucide-icon>
+                            </button>
+                          }
+                        </div>
+                        <!-- Status chip — after tools -->
                         @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
                           <span class="cv-step-status-chip cv-step-status-chip--active">{{ 'step_active' | translatePipe }}</span>
                         } @else if (stepDoneSet_().has(si)) {
-                          <span class="cv-step-status-chip cv-step-status-chip--done">{{ 'step_done_label' | translatePipe }}</span>
+                          <span class="cv-step-status-chip cv-step-status-chip--done cv-step-status-chip--clickable"
+                            (click)="unmarkStepDone(si)">{{ 'step_done_label' | translatePipe }} ↩</span>
                         } @else {
                           <span class="cv-step-status-chip cv-step-status-chip--pending">{{ 'step_pending' | translatePipe }}</span>
                         }
                       </div>
                       <div class="cv-step-card-body">
                         <p>{{ step.instruction_ }}</p>
-                        @if (step.labor_time_minutes_ > 0) {
-                          @if (activeTimerStepIndex_() === si) {
-                            <button type="button" class="cv-timer-pill cv-timer-pill--active" (click)="cancelTimer()">
-                              ⏱ {{ timerDisplay_() }}
-                              <span class="cv-timer-cancel">{{ 'timer_cancel' | translatePipe }}</span>
-                            </button>
-                          } @else {
-                            <button type="button" class="cv-timer-pill" (click)="startTimer(si, step.labor_time_minutes_)">
-                              ⏱ {{ step.labor_time_minutes_ }} {{ 'min' | translatePipe }}
-                            </button>
-                          }
-                        }
                       </div>
                       @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
                         <button type="button" class="cv-step-done-btn" (click)="markStepDone(si)">✓ {{ 'mark_step_done' | translatePipe }}</button>
@@ -368,9 +381,9 @@
                 }
               }
             }
+            </div>
           </div>
         </div>
-      }
     </div>
     <app-approve-stamp
       [approved]="recipe.is_approved_"

@@ -76,6 +76,26 @@ export class RecipeWorkflowComponent {
     });
   }
 
+
+  /** Tracks which prep-step rows have the cook-time counter open. */
+  cookTimeOpenRows_ = signal<Set<number>>(new Set());
+
+  isCookTimeOpen(index: number): boolean {
+    return this.cookTimeOpenRows_().has(index);
+  }
+
+  toggleCookTime(index: number): void {
+    this.cookTimeOpenRows_.update(set => {
+      const next = new Set(set);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
+  }
+
   toggleAddCategoryPicker() {
     this.showAddCategoryPicker_.update(v => !v);
   }
@@ -87,8 +107,12 @@ export class RecipeWorkflowComponent {
 
   @ViewChildren('instructionField') instructionFields!: QueryList<ElementRef<HTMLTextAreaElement>>
   @ViewChildren('laborTimeInput') laborTimeInputs!: QueryList<ElementRef<HTMLInputElement>>
+  @ViewChildren('cookTimeInput') cookTimeInputs!: QueryList<ElementRef<HTMLInputElement>>
 
   editingLaborTimeIndex_ = signal<number | null>(null)
+  editingCookTimeIndex_ = signal<number | null>(null)
+  laborTimeEditStr_ = signal<string>('')
+  cookTimeEditStr_ = signal<string>('')
   /** When set, show preparation-search for this row with current name as initialQuery (click display to edit). */
   editingPreparationNameAtRow_ = signal<number | null>(null)
 
@@ -175,7 +199,55 @@ export class RecipeWorkflowComponent {
     ctrl?.setValue(quantityDecrement(current, 0, { integerOnly: true }))
   }
 
-  enterLaborTimeEdit(index: number): void {
+  formatMinutesToClock(m: number): string {
+    const h = Math.floor(m / 60)
+    const min = m % 60
+    return `${h}:${min.toString().padStart(2, '0')}`
+  }
+
+  parseClockToMinutes(str: string): number {
+    const s = str.trim()
+    if (!s) return 0
+    const parts = s.split(':')
+    if (parts.length >= 2) {
+      const h = parseInt(parts[0], 10) || 0
+      const m = parseInt(parts[1], 10) || 0
+      return h * 60 + m
+    }
+    const n = parseInt(s, 10)
+    return isNaN(n) || n < 0 ? 0 : n
+  }
+
+  /** Format total seconds to hh:mm:ss display string. */
+  formatSecsToHms(totalSecs: number): string {
+    const h = Math.floor(totalSecs / 3600)
+    const m = Math.floor((totalSecs % 3600) / 60)
+    const s = totalSecs % 60
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+  }
+
+  /** Parse hh:mm:ss or mm:ss or raw-seconds string to total seconds. */
+  parseHmsToSecs(str: string): number {
+    const raw = str.trim()
+    if (!raw) return 0
+    const parts = raw.split(':')
+    if (parts.length === 3) {
+      const h = parseInt(parts[0], 10) || 0
+      const m = parseInt(parts[1], 10) || 0
+      const s = parseInt(parts[2], 10) || 0
+      return h * 3600 + m * 60 + s
+    }
+    if (parts.length === 2) {
+      const m = parseInt(parts[0], 10) || 0
+      const s = parseInt(parts[1], 10) || 0
+      return m * 60 + s
+    }
+    const n = parseInt(raw, 10)
+    return isNaN(n) || n < 0 ? 0 : n
+  }
+
+  enterLaborTimeEdit(index: number, currentMinutes: number): void {
+    this.laborTimeEditStr_.set(this.formatMinutesToClock(currentMinutes))
     this.editingLaborTimeIndex_.set(index)
     setTimeout(() => this.laborTimeInputs?.get(0)?.nativeElement?.focus(), 0)
   }
@@ -189,12 +261,42 @@ export class RecipeWorkflowComponent {
   }
 
   exitLaborTimeEdit(group: FormGroup): void {
-    const ctrl = group.get('labor_time')
-    const raw = ctrl?.value
-    const parsed = typeof raw === 'number' ? raw : parseInt(String(raw ?? ''), 10)
-    const sanitized = !isNaN(parsed) && parsed >= 0 ? parsed : 0
-    ctrl?.setValue(sanitized)
+    const minutes = this.parseClockToMinutes(this.laborTimeEditStr_())
+    group.get('labor_time')?.setValue(minutes)
+    this.laborTimeEditStr_.set('')
     this.editingLaborTimeIndex_.set(null)
+  }
+
+
+  incrementCookTime(group: FormGroup): void {
+    const ctrl = group.get('cooking_time')
+    ctrl?.setValue((ctrl?.value ?? 0) + 30)
+  }
+
+  decrementCookTime(group: FormGroup): void {
+    const ctrl = group.get('cooking_time')
+    ctrl?.setValue(Math.max(0, (ctrl?.value ?? 0) - 30))
+  }
+
+  enterCookTimeEdit(index: number, currentSecs: number): void {
+    this.cookTimeEditStr_.set(this.formatSecsToHms(currentSecs))
+    this.editingCookTimeIndex_.set(index)
+    setTimeout(() => this.cookTimeInputs?.get(0)?.nativeElement?.focus(), 0)
+  }
+
+  onCookTimeKeydown(event: Event, group: FormGroup): void {
+    const e = event as KeyboardEvent
+    const val = (group.get('cooking_time')?.value ?? 0) as number
+    if (e.key === 'ArrowDown' && val <= 0) {
+      e.preventDefault()
+    }
+  }
+
+  exitCookTimeEdit(group: FormGroup): void {
+    const secs = this.parseHmsToSecs(this.cookTimeEditStr_())
+    group.get('cooking_time')?.setValue(secs)
+    this.cookTimeEditStr_.set('')
+    this.editingCookTimeIndex_.set(null)
   }
 
   onPreparationSelected(entry: PreparationEntry, group: FormGroup): void {

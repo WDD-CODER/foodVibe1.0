@@ -77,7 +77,8 @@ export class RecipeFormService {
     return this.fb.group({
       order: [order],
       instruction: [''],
-      labor_time: [0]
+      labor_time: [0],
+      cooking_time: [0]
     })
   }
 
@@ -216,7 +217,7 @@ export class RecipeFormService {
         items: items.map(it => ({ item_name: it.item_name, unit: it.unit }))
       }))
     } else {
-      type StepRow = { order?: number; instruction?: string; labor_time?: number }
+      type StepRow = { order?: number; instruction?: string; labor_time?: number; cooking_time?: number }
       const stepRows = (raw['workflow_items'] || []) as StepRow[]
       stepRows
         .filter(s => !!s?.instruction?.trim())
@@ -224,7 +225,8 @@ export class RecipeFormService {
           steps.push({
             order_: step?.order ?? i + 1,
             instruction_: step?.instruction ?? '',
-            labor_time_minutes_: step?.labor_time ?? 0
+            labor_time_minutes_: step?.labor_time ?? 0,
+            cooking_time_secs_: step?.cooking_time ?? 0
           })
         })
     }
@@ -344,7 +346,8 @@ export class RecipeFormService {
         const group = this.createStepGroup(step.order_ ?? i + 1)
         group.patchValue({
           instruction: step.instruction_,
-          labor_time: step.labor_time_minutes_ ?? 0
+          labor_time: step.labor_time_minutes_ ?? 0,
+          cooking_time: step.cooking_time_secs_ ?? 0
         })
         workflowArr.push(group)
       })

@@ -330,6 +330,12 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
     background: var(--color-primary-soft);
     border-color: var(--color-primary);
   }
+
+  &.timer-has-value {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+    opacity: 0.6;
+  }
 }
 
 .col-timer {
@@ -346,10 +352,12 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
   .timer-field,
   .timer-value {
     display: inline-block;
-
     min-width: 3rem;
-
     text-align: center;
+  }
+
+  .timer-field--wide {
+    min-width: 5.5rem;
   }
 
   .counter-btn {
