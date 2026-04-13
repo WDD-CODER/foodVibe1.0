@@ -17,6 +17,7 @@ import { QuickEditProductPanelComponent } from 'src/app/shared/quick-edit-produc
 import { QuickEditProductModalService } from '@services/quick-edit-product-modal.service';
 import type { Product } from '@models/product.model'
 import { getProductValidationStatus } from 'src/app/core/utils/product-validation.util';
+import { getEffectivePrice } from '@utils/product-source.util';
 import type { Recipe } from '@models/recipe.model';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { quantityIncrement, quantityDecrement, QuantityStepOptions } from 'src/app/core/utils/quantity-step.util';
@@ -405,21 +406,21 @@ private readonly cdr = inject(ChangeDetectorRef)
       const amountInYieldUnit = this.recipeCostService.amountInRecipeYieldUnit(netAmount, selectedUnit, recipe);
       lineCost = amountInYieldUnit * costPerUnit;
     } else {
-      const prod = item as { base_unit_?: string; purchase_options_?: { unit_symbol_: string; conversion_rate_?: number; price_override_?: number }[]; buy_price_global_?: number; yield_factor_?: number; calculated_cost_per_unit?: number };
+      const prod = item as Product & { calculated_cost_per_unit?: number };
       const unitOption = prod.purchase_options_?.find(o => o.unit_symbol_ === selectedUnit);
+      const effectivePrice = getEffectivePrice(prod);
 
       if (unitOption) {
         if (unitOption.price_override_ != null && unitOption.price_override_ > 0) {
           lineCost = netAmount * unitOption.price_override_;
         } else {
           const normalizedAmount = netAmount * (unitOption.conversion_rate_ || 1);
-          const price = prod.buy_price_global_ || 0;
           const yieldFactor = prod.yield_factor_ || 1;
-          lineCost = (normalizedAmount / yieldFactor) * price;
+          lineCost = (normalizedAmount / yieldFactor) * effectivePrice;
         }
       } else {
         // Selected unit not in purchase_options_ (e.g. base unit or custom like כפית): convert to product base unit.
-        const price = prod.buy_price_global_ || prod.calculated_cost_per_unit || 0;
+        const price = effectivePrice || prod.calculated_cost_per_unit || 0;
         const yieldFactor = prod.yield_factor_ || 1;
         const baseUnit = prod.base_unit_ || 'gram';
         const amountG = this.recipeCostService.convertToBaseUnits(netAmount, selectedUnit);

@@ -13,14 +13,14 @@ describe('RecipeCostService', () => {
   const recipesSignal = signal<Recipe[]>([]);
 
   function createProduct(overrides: Partial<Product> & { _id: string }): Product {
+    const price = overrides.buy_price_global_ ?? 0;
     return {
       _id: overrides._id,
       name_hebrew: overrides.name_hebrew ?? 'Product',
       base_unit_: overrides.base_unit_ ?? 'gram',
-      buy_price_global_: overrides.buy_price_global_ ?? 0,
+      sources_: overrides.sources_ ?? (price > 0 ? [{ supplierId: '', price, addedAt: Date.now() }] : []),
       purchase_options_: overrides.purchase_options_ ?? [],
       categories_: overrides.categories_ ?? [],
-      supplierIds_: overrides.supplierIds_ ?? [],
       yield_factor_: overrides.yield_factor_ ?? 1,
       allergens_: overrides.allergens_ ?? [],
       min_stock_level_: overrides.min_stock_level_ ?? 0,
@@ -109,7 +109,7 @@ describe('RecipeCostService', () => {
         ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 100, unit_: 'gram' }],
       });
       // (100 / 0.8) * (100/1000) if buy_price_global_ is per kg? Recipe cost service: normalizedAmount = ing.amount_ / (unitOption.conversion_rate_ || 1) when unitOption exists; else normalizedAmount = ing.amount_. Then return (normalizedAmount / yieldFactor) * price. So price is buy_price_global_ - need to see what that is per. In the code it's just price = product.buy_price_global_. So (100/0.8)*100 = 12500. That seems like price is per unit (gram). So 100g at 100 per gram with 0.8 yield = 100/0.8 * 100 = 12500. So buy_price_global_ might be per base_unit_ (per gram). Let me use smaller numbers: buy_price_global_: 1 (per gram), 100g, yield 0.8 → (100/0.8)*1 = 125.
-      product.buy_price_global_ = 1;
+      product.sources_ = [{ supplierId: '', price: 1, addedAt: Date.now() }];
       expect(service.computeRecipeCost(recipe)).toBeCloseTo(125, 0);
     });
   });

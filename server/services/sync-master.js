@@ -113,6 +113,16 @@ async function syncMasterToUser(userId) {
           masterRest.ingredients_ = remapIngredients(masterRest.ingredients_, idMap);
         }
 
+        // For products: merge sources_ arrays (deduplicate by supplierId)
+        if (entityType === 'PRODUCT_LIST' && Array.isArray(masterRest.sources_)) {
+          const existingSources = existing.sources_ || [];
+          const existingSupplierIds = new Set(existingSources.map(s => s.supplierId).filter(Boolean));
+          const newSources = (masterRest.sources_ || []).filter(
+            s => !s.supplierId || !existingSupplierIds.has(s.supplierId)
+          );
+          masterRest.sources_ = [...existingSources, ...newSources];
+        }
+
         toUpdate.push({
           filter: { _id: existing._id },
           update: { $set: { ...masterRest, _userModified: false } },

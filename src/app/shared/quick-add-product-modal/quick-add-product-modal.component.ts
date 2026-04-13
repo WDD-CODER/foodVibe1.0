@@ -202,13 +202,13 @@ export class QuickAddProductModalComponent {
     this.isSubmitting_.set(true);
 
     const category = this.category_().trim();
+    const price = Math.max(0, Number(this.buyPrice_()) || 0);
     const product: Omit<Product, '_id'> = {
       name_hebrew: name,
       base_unit_: baseUnit,
-      buy_price_global_: Math.max(0, Number(this.buyPrice_()) || 0),
+      sources_: price > 0 ? [{ supplierId: '', price, addedAt: Date.now() }] : [],
       purchase_options_: [],
       categories_: category ? [category] : [],
-      supplierIds_: [],
       yield_factor_: Number(this.yieldFactor_()) || 1,
       allergens_: Array.from(this.selectedAllergens_()),
       min_stock_level_: Number(this.minStock_()) || 0,

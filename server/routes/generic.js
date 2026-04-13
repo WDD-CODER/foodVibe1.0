@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const mongoose = require('mongoose');
-const { verifyToken } = require('../middleware/auth');
+const { verifyToken, optionalToken } = require('../middleware/auth');
 
 const router = Router();
 
@@ -35,14 +35,16 @@ function makeId(length = 5) {
 
 // ---------------------------------------------------------------------------
 // GET /api/v1/data/:type
-// Returns all documents belonging to the authenticated user.
+// Authenticated → returns the user's own documents.
+// Anonymous (no token) → returns __master__ documents (shared/public data).
 // ---------------------------------------------------------------------------
-router.get('/:type', verifyToken, async (req, res) => {
+router.get('/:type', optionalToken, async (req, res) => {
   try {
+    const userId = req.user ? req.user.userId : '__master__';
     const limit = Math.min(parseInt(req.query.limit) || 500, 1000);
     const skip = parseInt(req.query.skip) || 0;
     const docs = await col(req.params.type)
-      .find({ userId: req.user.userId })
+      .find({ userId })
       .skip(skip)
       .limit(limit)
       .toArray();
@@ -55,13 +57,15 @@ router.get('/:type', verifyToken, async (req, res) => {
 
 // ---------------------------------------------------------------------------
 // GET /api/v1/data/:type/:id
-// Returns one document by _id, scoped to the authenticated user.
+// Authenticated → returns one document by _id scoped to the user.
+// Anonymous → returns one document by _id from __master__.
 // ---------------------------------------------------------------------------
-router.get('/:type/:id', verifyToken, async (req, res) => {
+router.get('/:type/:id', optionalToken, async (req, res) => {
   try {
+    const userId = req.user ? req.user.userId : '__master__';
     const doc = await col(req.params.type).findOne({
       _id: req.params.id,
-      userId: req.user.userId,
+      userId,
     });
     if (!doc) {
       return res.status(404).json({ error: `Cannot get, Item ${req.params.id} of type: ${req.params.type} does not exist` });
@@ -76,6 +80,13 @@ router.get('/:type/:id', verifyToken, async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/v1/data/:type
 // Inserts a new document stamped with the authenticated user's id.
+//
+// For PRODUCT_LIST: performs name-based collision detection against __master__.
+// If a master product with the same name exists, merges the new source data
+// into the existing product (silent merge) instead of creating a duplicate.
+//
+// For all types: also inserts a copy under userId: '__master__' so additions
+// propagate to all users on next sync/login.
 // ---------------------------------------------------------------------------
 router.post('/:type', verifyToken, async (req, res) => {
   try {
@@ -84,9 +95,58 @@ router.post('/:type', verifyToken, async (req, res) => {
       return res.status(400).json({ error: '_id is required in the request body' });
     }
 
-    // Strip any userId the client may have sent — always use the verified JWT value.
+    const entityType = req.params.type;
     const { userId: _u, _masterId: _m, _userModified: _um, ...safeEntity } = entity;
 
+    // --- PRODUCT_LIST: name-based collision detection (silent merge) ---
+    if (entityType === 'PRODUCT_LIST' && safeEntity.name_hebrew) {
+      const normalized = (safeEntity.name_hebrew || '').trim().replace(/\s+/g, ' ').toLowerCase();
+      const existingMaster = await col(entityType).findOne({
+        userId: '__master__',
+        name_hebrew_normalized: normalized,
+      });
+
+      if (existingMaster) {
+        // Merge: push new source data into the existing master product
+        const newSource = {
+          supplierId: (safeEntity.sources_ && safeEntity.sources_[0]?.supplierId) || '',
+          price: (safeEntity.sources_ && safeEntity.sources_[0]?.price) || safeEntity.buy_price_global_ || 0,
+          addedBy: req.user.userId,
+          addedAt: Date.now(),
+        };
+
+        // Only push if this supplier isn't already in sources_
+        const alreadyHasSupplier = (existingMaster.sources_ || []).some(
+          s => s.supplierId && s.supplierId === newSource.supplierId
+        );
+        if (!alreadyHasSupplier && (newSource.supplierId || newSource.price > 0)) {
+          await col(entityType).updateOne(
+            { _id: existingMaster._id, userId: '__master__' },
+            { $push: { sources_: newSource } }
+          );
+        }
+
+        // Upsert in user's namespace with the SAME _id as master (stable referenceId)
+        const userDoc = {
+          ...existingMaster,
+          userId: req.user.userId,
+          _masterId: String(existingMaster._id),
+          _userModified: false,
+        };
+        delete userDoc._id;
+        await col(entityType).updateOne(
+          { _id: existingMaster._id, userId: req.user.userId },
+          { $setOnInsert: { _id: existingMaster._id, ...userDoc } },
+          { upsert: true }
+        );
+
+        // Return the master product with its original _id (merged, not duplicated)
+        const merged = await col(entityType).findOne({ _id: existingMaster._id, userId: req.user.userId });
+        return res.status(200).json({ ...merged, _merged: true });
+      }
+    }
+
+    // --- Standard insert (no collision) ---
     const doc = {
       ...safeEntity,
       userId: req.user.userId,
@@ -94,7 +154,39 @@ router.post('/:type', verifyToken, async (req, res) => {
       _userModified: false,
     };
 
-    await col(req.params.type).insertOne(doc);
+    // Compute normalized name for future collision detection
+    if (entityType === 'PRODUCT_LIST' && doc.name_hebrew) {
+      doc.name_hebrew_normalized = (doc.name_hebrew || '').trim().replace(/\s+/g, ' ').toLowerCase();
+    }
+
+    await col(entityType).insertOne(doc);
+
+    // Also insert a copy under __master__ for shared visibility
+    const masterCopy = { ...doc };
+    delete masterCopy.userId;
+    delete masterCopy._masterId;
+    delete masterCopy._userModified;
+    const masterId = makeId();
+    try {
+      await col(entityType).insertOne({
+        ...masterCopy,
+        _id: masterId,
+        userId: '__master__',
+        _masterId: null,
+        _userModified: false,
+      });
+      // Update user's doc with _masterId pointing to the master copy
+      await col(entityType).updateOne(
+        { _id: doc._id, userId: req.user.userId },
+        { $set: { _masterId: masterId } }
+      );
+    } catch (masterErr) {
+      // Non-critical: if master copy fails (e.g. race condition), user's doc still exists
+      if (masterErr.code !== 11000) {
+        console.error('[data/post] master copy failed:', masterErr.message);
+      }
+    }
+
     res.status(201).json(doc);
   } catch (err) {
     if (err.code === 11000) {

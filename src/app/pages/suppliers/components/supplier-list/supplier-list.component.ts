@@ -27,6 +27,7 @@ import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.comp
 import { useListState, StringParam, BooleanParam, NumberSetParam } from 'src/app/core/utils/list-state.util';
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 import { HeroFabService } from '@services/hero-fab.service';
+import { getSupplierIds } from '@utils/product-source.util';
 
 const DAY_LABELS = [
   'day_sun',
@@ -224,7 +225,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
 
   protected linkedProductCount_(supplierId: string): number {
     return this.kitchenState.products_().filter(p =>
-      (p.supplierIds_ ?? []).includes(supplierId)
+      getSupplierIds(p).includes(supplierId)
     ).length;
   }
 

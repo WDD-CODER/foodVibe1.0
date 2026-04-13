@@ -7,6 +7,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const { connectDb } = require('./db');
+const { seedMasterData } = require('./services/seed-master');
 const authRouter = require('./routes/auth');
 const genericRouter = require('./routes/generic');
 const aiRouter = require('./routes/ai');
@@ -108,6 +109,7 @@ app.use((err, req, res, _next) => {
 // Start
 // ---------------------------------------------------------------------------
 connectDb()
+  .then(() => seedMasterData())
   .then(() => {
     app.listen(PORT, () => {
       console.log(`foodVibe server listening on port ${PORT}`);

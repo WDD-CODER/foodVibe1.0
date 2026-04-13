@@ -2,7 +2,7 @@ import { Injectable, signal, inject, computed } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
 import { StorageService } from './async-storage.service'
 import { LoggingService } from './logging.service'
-import { Product } from '../models/product.model'
+import { Product, ProductSource } from '../models/product.model'
 
 const ENTITY = 'PRODUCT_LIST'
 const TRASH_KEY = 'TRASH_PRODUCTS'
@@ -59,15 +59,24 @@ export class ProductDataService {
         categories_ = [...categories_, 'dairy'];
       }
     }
-    const supplierIds_ = (legacy.supplierIds_ ?? (legacy.supplierId_ ? [legacy.supplierId_] : [])) as string[];
+
+    // Migration: build sources_ from legacy flat fields if not present
+    const legacySupplierIds = (legacy.supplierIds_ ?? (legacy.supplierId_ ? [legacy.supplierId_] : [])) as string[];
+    let sources_ = (legacy.sources_ ?? []) as ProductSource[];
+    if (sources_.length === 0) {
+      const price = legacy.buy_price_global_ ?? 0;
+      sources_ = legacySupplierIds.length > 0
+        ? legacySupplierIds.map(sid => ({ supplierId: sid, price, addedAt: legacy.addedAt_ }))
+        : price > 0 ? [{ supplierId: '', price, addedAt: legacy.addedAt_ }] : [];
+    }
+
     return {
       _id: legacy._id ?? '',
       name_hebrew: legacy.name_hebrew ?? '',
       base_unit_: legacy.base_unit_ ?? 'gram',
-      buy_price_global_: legacy.buy_price_global_ ?? 0,
+      sources_,
       purchase_options_: (legacy.purchase_options_ ?? []) as Product['purchase_options_'],
       categories_,
-      supplierIds_,
       yield_factor_: legacy.yield_factor_ ?? 1,
       allergens_: (legacy.allergens_ ?? []) as string[],
       min_stock_level_: legacy.min_stock_level_ ?? 0,
@@ -99,9 +108,20 @@ export class ProductDataService {
         addedAt_: newProduct.addedAt_ ?? now,
         updatedAt: new Date().toISOString(),
       } as Product
-      const saved = await this.storage.post<Product>(ENTITY, toCreate)
-      this.ProductsStore_.update(products => [...products, saved])
-      this.logging.info({ event: 'crud.product.create', message: 'Product created', context: { entityType: ENTITY, id: saved._id } })
+      const saved = await this.storage.post<Product & { _merged?: boolean }>(ENTITY, toCreate)
+      const wasMerged = !!(saved as { _merged?: boolean })._merged
+      if (wasMerged) {
+        // Silent merge: update existing product in store instead of appending
+        const normalized = this.normalizeProduct(saved as unknown as Record<string, unknown>)
+        this.ProductsStore_.update(products => {
+          const idx = products.findIndex(p => p._id === normalized._id)
+          return idx >= 0 ? products.map((p, i) => i === idx ? normalized : p) : [...products, normalized]
+        })
+        this.logging.info({ event: 'crud.product.merged', message: 'Product merged with existing', context: { entityType: ENTITY, id: saved._id } })
+      } else {
+        this.ProductsStore_.update(products => [...products, saved])
+        this.logging.info({ event: 'crud.product.create', message: 'Product created', context: { entityType: ENTITY, id: saved._id } })
+      }
       return saved
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err

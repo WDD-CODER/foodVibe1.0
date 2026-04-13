@@ -17,6 +17,9 @@
       "@pages/*": [
         "src/app/pages/*"
       ],
+      "@utils/*": [
+        "src/app/core/utils/*"
+      ],
     },
     "outDir": "./dist/out-tsc",
     "strict": true,

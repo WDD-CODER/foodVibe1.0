@@ -4,6 +4,7 @@ import { UnitRegistryService } from './unit-registry.service';
 import { Recipe } from '../models/recipe.model';
 import { Product } from '../models/product.model';
 import { Ingredient } from '../models/ingredient.model';
+import { getEffectivePrice } from '../utils/product-source.util';
 import { MAX_RECURSION_DEPTH, UNIT_ALIASES, MASS_UNITS, VOLUME_OR_WEIGHT_KEYS } from '../utils/recipe-cost.constants';
 
 export type IngredientWeightRow = {
@@ -259,7 +260,7 @@ export class RecipeCostService {
       const product = this.kitchenState_.products_().find(p => p._id === ing.referenceId) as Product | undefined;
       if (!product) return 0;
       const yieldFactor = product.yield_factor_ || 1;
-      const price = product.buy_price_global_ ?? 0;
+      const price = getEffectivePrice(product);
       const unitOption = product.purchase_options_?.find(o => o.unit_symbol_ === ing.unit_);
       let normalizedAmount: number;
       if (unitOption) {
