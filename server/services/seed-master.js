@@ -17,6 +17,13 @@ const { CLONEABLE_TYPES } = require('../constants/cloneable-types');
 
 const ASSETS_DIR = path.resolve(__dirname, '..', '..', 'public', 'assets', 'data');
 
+function makeId(length = 8) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let id = '';
+  for (let i = 0; i < length; i++) id += chars[Math.floor(Math.random() * chars.length)];
+  return id;
+}
+
 /**
  * Maps demo JSON filenames to their entity-type collection names.
  * Only types that have a demo JSON file are seeded.
@@ -74,24 +81,46 @@ async function seedMasterData() {
   console.log('[seed-master] Assets dir exists:', fs.existsSync(ASSETS_DIR));
   let totalSeeded = 0;
 
+  // Pass 1: build an originalId → newMasterId map for PRODUCT_LIST so that
+  // RECIPE_LIST / DISH_LIST ingredient referenceIds can be remapped in Pass 2.
+  const productIdMap = new Map(); // originalId → newMasterId
+
   for (const entityType of CLONEABLE_TYPES) {
     const filename = DEMO_FILE_MAP[entityType];
-    if (!filename) continue; // No demo file for this entity type
+    if (!filename) continue;
 
     const entities = readDemoFile(filename);
     if (entities.length === 0) continue;
 
     const docs = entities.map(entity => {
+      // Always generate a fresh _id to avoid collisions with any existing user data.
+      const newId = makeId();
+      if (entityType === 'PRODUCT_LIST') {
+        productIdMap.set(String(entity._id), newId);
+      }
+
       const doc = {
         ...entity,
+        _id: newId,
         userId: '__master__',
         _masterId: null,
         _userModified: false,
       };
-      // Add normalized name for product collision detection
+
+      // Remap ingredient referenceIds so they point to the new master product IDs
+      if ((entityType === 'RECIPE_LIST' || entityType === 'DISH_LIST') && Array.isArray(doc.ingredients_)) {
+        doc.ingredients_ = doc.ingredients_.map(ing => {
+          if (!ing.referenceId) return ing;
+          const remapped = productIdMap.get(String(ing.referenceId));
+          return remapped ? { ...ing, referenceId: remapped } : ing;
+        });
+      }
+
+      // Normalized name for product collision detection
       if (entityType === 'PRODUCT_LIST' && doc.name_hebrew) {
         doc.name_hebrew_normalized = (doc.name_hebrew || '').trim().replace(/\s+/g, ' ').toLowerCase();
       }
+
       return doc;
     });
 
@@ -100,7 +129,6 @@ async function seedMasterData() {
       totalSeeded += docs.length;
       console.log(`[seed-master]   ${entityType}: ${docs.length} docs seeded`);
     } catch (err) {
-      // E11000 duplicate key errors are expected on partial re-runs — log and continue
       if (err.code === 11000) {
         const inserted = err.result?.insertedCount ?? 0;
         totalSeeded += inserted;
