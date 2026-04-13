@@ -42,8 +42,13 @@ function readDemoFile(filename) {
   try {
     const raw = fs.readFileSync(filePath, 'utf8');
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
+    if (!Array.isArray(parsed)) {
+      console.warn(`[seed-master]   ${filename}: not an array — skipping`);
+      return [];
+    }
+    return parsed;
+  } catch (err) {
+    console.warn(`[seed-master]   ${filename}: could not read (${err.message}) — skipping`);
     return [];
   }
 }
@@ -65,6 +70,8 @@ async function seedMasterData() {
   }
 
   console.log('[seed-master] No master data found — seeding from demo JSON files...');
+  console.log('[seed-master] Assets dir:', ASSETS_DIR);
+  console.log('[seed-master] Assets dir exists:', fs.existsSync(ASSETS_DIR));
   let totalSeeded = 0;
 
   for (const entityType of CLONEABLE_TYPES) {
