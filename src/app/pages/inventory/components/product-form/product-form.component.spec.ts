@@ -54,8 +54,8 @@ describe('ProductFormComponent', () => {
 
     const mockUtil = jasmine.createSpyObj('UtilService', ['getEmptyProduct']);
     mockUtil.getEmptyProduct.and.returnValue({
-      _id: '', name_hebrew: '', base_unit_: 'gram', categories_: [], supplierIds_: [],
-      buy_price_global_: 0, purchase_options_: [], yield_factor_: 1, allergens_: [],
+      _id: '', name_hebrew: '', base_unit_: 'gram', categories_: [], sources_: [],
+      purchase_options_: [], yield_factor_: 1, allergens_: [],
       min_stock_level_: 0, expiry_days_default_: 0
     } as Product);
 

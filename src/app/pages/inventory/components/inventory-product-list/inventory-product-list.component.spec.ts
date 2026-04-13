@@ -25,19 +25,17 @@ describe('InventoryProductListComponent', () => {
         _id: '1',
         name_hebrew: 'Tomato',
         categories_: ['Vegetables'],
-        supplierIds_: ['Supplier A'],
+        sources_: [{ supplierId: 'Supplier A', price: 5, addedAt: Date.now() }],
         allergens_: ['Gluten'],
         base_unit_: 'gram',
-        buy_price_global_: 5
       } as Product,
       {
         _id: '2',
         name_hebrew: 'Milk',
         categories_: ['Dairy'],
-        supplierIds_: ['Supplier B'],
+        sources_: [{ supplierId: 'Supplier B', price: 12, addedAt: Date.now() }],
         allergens_: ['milk products'],
         base_unit_: 'liter',
-        buy_price_global_: 12
       } as Product
     ]);
 

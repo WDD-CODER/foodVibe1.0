@@ -104,6 +104,7 @@
     <app-preparation-category-manager />
     <app-section-category-manager />
 
+    @if (!isProduction_) {
     <section class="manager-card">
       <div class="card-title">
         <lucide-icon name="package" class="icon-warning"></lucide-icon>
@@ -116,6 +117,7 @@
         </button>
       </div>
     </section>
+    }
 
     <section class="manager-card">
       <div class="card-title">

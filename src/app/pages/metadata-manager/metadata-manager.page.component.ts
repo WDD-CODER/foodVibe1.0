@@ -23,6 +23,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component';
 import { ALL_DISH_FIELDS, DEFAULT_DISH_FIELDS, type DishFieldKey, type MenuTypeDefinition } from '@models/menu-event.model';
 import { PreparationCategoryManagerComponent } from './components/preparation-category-manager/preparation-category-manager.component';
 import { SectionCategoryManagerComponent } from './components/section-category-manager/section-category-manager.component';
+import { environment } from '../../../environments/environment';
 
 type MetadataType = 'category' | 'allergen' | 'unit' | 'label';
 @Component({
@@ -49,6 +50,7 @@ export class MetadataManagerComponent {
   protected readonly isLoggedIn = inject(UserService).isLoggedIn;
   private readonly authModal = inject(AuthModalService);
   private readonly logging = inject(LoggingService);
+  protected readonly isProduction_ = environment.production;
 
   /** Returns false if not signed in (shows message and opens sign-in modal). */
   private requireSignIn(): boolean {

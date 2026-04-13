@@ -1,4 +1,5 @@
 import { Product } from '@models/product.model'
+import { getEffectivePrice, getSupplierIds } from './product-source.util'
 
 export type ProductValidationStatus = 'invalid' | 'incomplete' | 'valid'
 
@@ -20,9 +21,9 @@ export const VALIDATION_FIELD_ICONS: Record<string, string> = {
 export function getProductValidationStatus(product: Product): ProductValidationStatus {
   if (!product.name_hebrew?.trim() || !product.base_unit_?.trim()) return 'invalid'
   if (
-    !product.buy_price_global_ ||
+    !getEffectivePrice(product) ||
     !product.categories_?.length ||
-    !product.supplierIds_?.length
+    !getSupplierIds(product).length
   ) return 'incomplete'
   return 'valid'
 }
@@ -35,8 +36,8 @@ export function getProductMissingFields(product: Product): string[] {
   const missing: string[] = []
   if (!product.name_hebrew?.trim()) missing.push('missing_name')
   if (!product.base_unit_?.trim()) missing.push('missing_unit')
-  if (!product.buy_price_global_) missing.push('missing_price')
+  if (!getEffectivePrice(product)) missing.push('missing_price')
   if (!product.categories_?.length) missing.push('missing_category')
-  if (!product.supplierIds_?.length) missing.push('missing_supplier')
+  if (!getSupplierIds(product).length) missing.push('missing_supplier')
   return missing
 }

@@ -20,7 +20,8 @@ import { UnitRegistryService } from '@services/unit-registry.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { UserMsgService } from '@services/user-msg.service';
-import { Product } from '@models/product.model';
+import { Product, ProductSource } from '@models/product.model';
+import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util';
 
 @Component({
   selector: 'app-quick-edit-product-panel',
@@ -59,12 +60,12 @@ export class QuickEditProductPanelComponent {
   protected isDirty_ = computed(() => {
     const p = this.product();
     const suppliersSorted = [...this.selectedSupplierIds_()].sort().join(',');
-    const originalSuppliersSorted = [...(p.supplierIds_ ?? [])].sort().join(',');
+    const originalSuppliersSorted = [...getSupplierIds(p)].sort().join(',');
     return (
       this.name_() !== (p.name_hebrew ?? '') ||
       this.baseUnit_() !== (p.base_unit_ ?? '') ||
       this.category_() !== (p.categories_?.[0] ?? '') ||
-      this.price_() !== (p.buy_price_global_ ?? 0) ||
+      this.price_() !== getEffectivePrice(p) ||
       suppliersSorted !== originalSuppliersSorted
     );
   });
@@ -97,8 +98,8 @@ export class QuickEditProductPanelComponent {
       this.name_.set(p.name_hebrew ?? '');
       this.baseUnit_.set(p.base_unit_ ?? '');
       this.category_.set(p.categories_?.[0] ?? '');
-      this.price_.set(p.buy_price_global_ ?? 0);
-      this.selectedSupplierIds_.set([...(p.supplierIds_ ?? [])]);
+      this.price_.set(getEffectivePrice(p));
+      this.selectedSupplierIds_.set([...getSupplierIds(p)]);
       this.error_.set(null);
       this.isSubmitting_.set(false);
     });
@@ -148,13 +149,25 @@ export class QuickEditProductPanelComponent {
     this.error_.set(null);
 
     const category = this.category_().trim();
+    const price = Math.max(0, Number(this.price_()) || 0);
+    const supplierIds = this.selectedSupplierIds_();
+    const existingSources = this.product().sources_ ?? [];
+    let sources_: ProductSource[];
+    if (supplierIds.length > 0) {
+      sources_ = supplierIds.map(sid => {
+        const existing = existingSources.find(s => s.supplierId === sid);
+        return { supplierId: sid, price, addedBy: existing?.addedBy, addedAt: existing?.addedAt ?? Date.now() };
+      });
+    } else {
+      sources_ = price > 0 ? [{ supplierId: '', price, addedAt: Date.now() }] : [];
+    }
+
     const updated: Product = {
       ...this.product(),
       name_hebrew: name,
       base_unit_: baseUnit,
       categories_: category ? [category] : [],
-      buy_price_global_: Math.max(0, Number(this.price_()) || 0),
-      supplierIds_: this.selectedSupplierIds_(),
+      sources_,
     };
 
     try {

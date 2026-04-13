@@ -8,7 +8,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ConversionService } from '@services/conversion.service';
 import { UserMsgService } from '@services/user-msg.service';
 import { KitchenStateService } from '@services/kitchen-state.service';
-import { Product, PurchaseOption_ } from '@models/product.model';
+import { Product, PurchaseOption_, ProductSource } from '@models/product.model';
+import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util';
 import { ClickOutSideDirective } from "@directives/click-out-side";
 import { UtilService } from '@services/util.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
@@ -730,9 +731,9 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     this.productForm_.patchValue({
       productName: data.name_hebrew,
       base_unit_: data.base_unit_,
-      buy_price_global_: data.buy_price_global_,
+      buy_price_global_: getEffectivePrice(data),
       categories_: withDairy,
-      supplierIds_: data.supplierIds_ ?? [],
+      supplierIds_: getSupplierIds(data),
       min_stock_level_: data.min_stock_level_ ?? 0,
       expiry_days_default_: data.expiry_days_default_ ?? 0,
       yield_factor_: data.yield_factor_,
@@ -744,7 +745,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     if ((data.expiry_days_default_ ?? 0) > 0) this.expandedExpiryDays_.set(true);
     if (Math.abs((data.yield_factor_ ?? 1) - 1) > 0.001) this.expandedWasteYield_.set(true);
     if ((data.allergens_?.length ?? 0) > 0) this.expandedAllergens_.set(true);
-    if ((data.supplierIds_?.length ?? 0) > 0) this.expandedSupplier_.set(true);
+    if (getSupplierIds(data).length > 0) this.expandedSupplier_.set(true);
 
     this.purchaseOptions_.clear();
 
@@ -795,13 +796,26 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       return rest as PurchaseOption_;
     });
 
+    // Build sources_ from form's flat buy_price_global_ + supplierIds_
+    const formPrice = val.buy_price_global_ ?? 0;
+    const formSupplierIds = (val.supplierIds_ ?? []) as string[];
+    const existingSources = this.curProduct_()?.sources_ ?? [];
+    let sources_: ProductSource[];
+    if (formSupplierIds.length > 0) {
+      sources_ = formSupplierIds.map(sid => {
+        const existing = existingSources.find(s => s.supplierId === sid);
+        return { supplierId: sid, price: formPrice, addedBy: existing?.addedBy, addedAt: existing?.addedAt ?? Date.now() };
+      });
+    } else {
+      sources_ = formPrice > 0 ? [{ supplierId: '', price: formPrice, addedAt: Date.now() }] : [];
+    }
+
     const productToSave: Product = {
       ...this.curProduct_()!,
       name_hebrew: val.productName,
       base_unit_: val.base_unit_,
-      buy_price_global_: val.buy_price_global_,
+      sources_,
       categories_: categories,
-      supplierIds_: val.supplierIds_ ?? [],
       min_stock_level_: val.min_stock_level_ ?? 0,
       expiry_days_default_: val.expiry_days_default_ ?? 0,
       yield_factor_: val.yield_factor_,

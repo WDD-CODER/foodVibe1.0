@@ -806,3 +806,37 @@ files = [
 2026-04-12 16:24:21	Edit	C:\foodCo\foodVibe1.0\.claude\commands\test-template.md	Γöé Failed: fff-in-shadow (expected FLAG, got A)            Γöé	
 2026-04-12 16:24:29	Edit	C:\foodCo\foodVibe1.0\.claude\commands\test-template.md	Γöé Failed: fff-in-shadow (expected FLAG, got A)            Γöé	
 2026-04-12 16:38:02	Edit	C:\foodCo\foodVibe1.0\.claude\fix-templates\manual-subscription.md	  .subscribe({ next: () => {}, error: () => {} });	
+2026-04-13 09:21:10	Bash	head -50 /c/foodCo/foodVibe1.0/src/app/core/services/async-storage.service.ts	export const STORAGE_ERROR_MESSAGE = 'Storage failed: quota or access denied';	
+2026-04-13 11:46:24	Edit	C:\foodCo\foodVibe1.0\server\index.js	    return res.status(404).json({ error: 'Not found' })	
+2026-04-13 11:46:30	Edit	C:\foodCo\foodVibe1.0\server\index.js	    return res.status(404).json({ error: 'Not found' })	
+2026-04-13 11:46:48	Edit	C:\foodCo\foodVibe1.0\server\middleware\auth.js	    return res.status(401).json({ error: 'Invalid or expired token' });	
+2026-04-13 11:46:53	Edit	C:\foodCo\foodVibe1.0\server\routes\generic.js	    return res.status(403).json({ error: 'Access to this entity type is not permitted' });	
+2026-04-13 11:47:02	Edit	C:\foodCo\foodVibe1.0\server\routes\generic.js	    res.status(500).json({ error: 'Server error' });	
+2026-04-13 11:47:11	Edit	C:\foodCo\foodVibe1.0\server\routes\generic.js	      return res.status(404).json({ error: `Cannot get, Item ${req.params.id} of type: ${req.params.type} does not exist	
+2026-04-13 11:48:18	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\product-data.service.ts	      this.logging.error({ event: 'crud.products.hydrate_error', message: 'Failed to load products', context: { err } })	
+2026-04-13 11:48:34	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\product-data.service.ts	      this.logging.error({ event: 'crud.products.hydrate_error', message: 'Failed to load products', context: { err } })	
+2026-04-13 11:50:00	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\product-form\product-fo	      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context: { 	
+2026-04-13 11:50:12	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\product-form\product-fo	      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context: { 	
+2026-04-13 11:50:23	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\product-form\product-fo	      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context: { 	
+2026-04-13 11:51:35	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\components\recipe-ingredients	                error: () => setUnitAndUpdate()	
+2026-04-13 11:51:50	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\components\recipe-ingredients	                error: () => setUnitAndUpdate()	
+2026-04-13 11:52:31	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\	        error: () => { this.deletingId_.set(null); }	
+2026-04-13 11:52:38	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\	        error: () => { this.deletingId_.set(null); }	
+2026-04-13 11:52:44	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\	        error: () => { this.deletingId_.set(null); }	
+2026-04-13 11:52:50	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\	        error: () => { this.deletingId_.set(null); }	
+2026-04-13 11:52:58	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\	        error: () => { this.deletingId_.set(null); }	
+2026-04-13 11:53:05	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\	        error: () => { this.deletingId_.set(null); }	
+2026-04-13 11:53:10	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\	        error: () => { this.deletingId_.set(null); }	
+2026-04-13 11:53:25	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\	        error: () => { this.deletingId_.set(null); }	
+2026-04-13 11:53:45	Edit	C:\foodCo\foodVibe1.0\src\app\pages\suppliers\components\supplier-list\supplier-	      this.logging.error({ event: 'supplier.save_error', message: 'Supplier save failed', context: { err } });	
+2026-04-13 11:53:52	Edit	C:\foodCo\foodVibe1.0\src\app\pages\suppliers\components\supplier-list\supplier-	      this.logging.error({ event: 'supplier.save_error', message: 'Supplier save failed', context: { err } });	
+2026-04-13 11:54:18	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\kitchen-state.service.ts	        return throwError(() => new Error('permanentDelete failed'));	
+2026-04-13 11:54:25	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\kitchen-state.service.ts	        return throwError(() => new Error('permanentDelete failed'));	
+2026-04-13 11:54:32	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\kitchen-state.service.ts	        return throwError(() => new Error('permanentDelete failed'));	
+2026-04-13 11:55:24	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\	        error: () => { this.deletingId_.set(null); }	
+2026-04-13 11:56:16	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\kitchen-state.service.spec.ts	        error: (err) => {	
+2026-04-13 11:58:35	Bash	npx ng build 2>&1 | head -80	Application bundle generation failed. [17.257 seconds]	
+2026-04-13 12:00:05	Edit	C:\foodCo\foodVibe1.0\server\routes\generic.js	      return res.status(400).json({ error: '_id is required in the request body' });	
+2026-04-13 12:00:28	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\product-data.service.ts	      this.logging.error({ event: 'crud.products.hydrate_error', message: 'Failed to load products', context: { err } })	
+2026-04-13 12:11:17	Edit	C:\foodCo\foodVibe1.0\src\app\pages\metadata-manager\metadata-manager.page.compo	    this.logging.error({ event: 'crud.metadata.delete_error', message: `Failed to delete ${type}`, context: { err } });	
+2026-04-13 12:11:22	Edit	C:\foodCo\foodVibe1.0\src\app\pages\metadata-manager\metadata-manager.page.compo	    this.logging.error({ event: 'crud.metadata.delete_error', message: `Failed to delete ${type}`, context: { err } });	

@@ -29,6 +29,7 @@ import { useListState, StringParam, NullableStringParam, FilterRecordParam, Bool
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
 import { getPricePerUnit, calcBuyPriceGlobal } from 'src/app/core/utils/product-price.util'
 import { getProductValidationStatus, getProductMissingFields, VALIDATION_FIELD_ICONS, ProductValidationStatus } from 'src/app/core/utils/product-validation.util'
+import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date';
 type ProductBulkField = 'categories_' | 'supplierIds_' | 'allergens_' | 'base_unit_';
@@ -159,7 +160,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
         if (!categories['Category']) categories['Category'] = new Set();
         categories['Category'].add(cat);
       });
-      const supplierIds = product.supplierIds_ ?? [];
+      const supplierIds = getSupplierIds(product);
       supplierIds.forEach(id => {
         if (!categories['Supplier']) categories['Supplier'] = new Set();
         categories['Supplier'].add(id);
@@ -240,7 +241,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
           let productValues: string[] = [];
           if (category === 'Allergens') productValues = product.allergens_ || [];
           else if (category === 'Category') productValues = product.categories_ ?? [];
-          else if (category === 'Supplier') productValues = product.supplierIds_ ?? [];
+          else if (category === 'Supplier') productValues = getSupplierIds(product);
           return selectedValues.some(v => productValues.includes(v));
         });
       });
@@ -284,7 +285,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
         return hebrewCompare(aVal, bVal);
       }
       case 'supplier':
-        return hebrewCompare(this.getSupplierNames(a.supplierIds_ ?? []), this.getSupplierNames(b.supplierIds_ ?? []));
+        return hebrewCompare(this.getSupplierNames(getSupplierIds(a)), this.getSupplierNames(getSupplierIds(b)));
       case 'date':
         return new Date(a.updatedAt || 0).getTime() - new Date(b.updatedAt || 0).getTime();
       default:
@@ -435,6 +436,10 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     return (ids ?? []).map(id => this.getSupplierName(id)).filter(Boolean).join(', ');
   }
 
+  protected getProductSupplierNames(product: Product): string {
+    return this.getSupplierNames(getSupplierIds(product));
+  }
+
   protected getCategoryDisplay(ids: string[] | undefined): string {
     return ((ids ?? []).map(id => this.translationService.translate(id)).filter(Boolean).join(', ')) || '';
   }
@@ -447,7 +452,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   // INLINE UPDATE
   protected onUnitChange(product: Product, newUnit: string): void {
     const oldBase = product.base_unit_ || 'unit';
-    const oldPrice = product.buy_price_global_ ?? 0;
+    const oldPrice = getEffectivePrice(product);
     let newPrice = oldPrice;
     if (newUnit !== oldBase) {
       const opt = (product.purchase_options_ || []).find(o => o.unit_symbol_ === newUnit);
@@ -459,7 +464,8 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
         if (baseConv && unitConv) newPrice = oldPrice * (unitConv / baseConv);
       }
     }
-    const updated: Product = { ...product, base_unit_: newUnit, buy_price_global_: newPrice };
+    const newSources = (product.sources_ ?? []).map(s => ({ ...s, price: newPrice }));
+    const updated: Product = { ...product, base_unit_: newUnit, sources_: newSources.length ? newSources : [{ supplierId: '', price: newPrice, addedAt: Date.now() }] };
     this.kitchenStateService.saveProduct(updated).subscribe({ next: () => {}, error: () => {} });
   }
 
@@ -491,7 +497,12 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       const product = products.find(p => p._id === id)
       if (!product) continue
       let updated: Product
-      if (field === 'supplierIds_' || field === 'categories_' || field === 'allergens_') {
+      if (field === 'supplierIds_') {
+        const currentIds = getSupplierIds(product)
+        if (currentIds.includes(event.value)) continue
+        const newSource = { supplierId: event.value, price: getEffectivePrice(product), addedAt: Date.now() }
+        updated = { ...product, sources_: [...(product.sources_ ?? []), newSource] }
+      } else if (field === 'categories_' || field === 'allergens_') {
         const current = (product[field] ?? []) as string[]
         if (current.includes(event.value)) continue
         updated = { ...product, [field]: [...current, event.value] }
@@ -505,7 +516,8 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected onPriceChange(product: Product, displayUnit: string, value: string | number): void {
     const pricePerUnit = typeof value === 'string' ? parseFloat(value) || 0 : (value as number)
     const buyPriceGlobal = calcBuyPriceGlobal(product, displayUnit, pricePerUnit, this.unitRegistry)
-    const updated: Product = { ...product, buy_price_global_: buyPriceGlobal };
+    const newSources = (product.sources_ ?? []).map(s => ({ ...s, price: buyPriceGlobal }));
+    const updated: Product = { ...product, sources_: newSources.length ? newSources : [{ supplierId: '', price: buyPriceGlobal, addedAt: Date.now() }] };
     this.savingPriceId_.set(product._id ?? '');
     this.kitchenStateService.saveProduct(updated).subscribe({
       next: () => { this.savingPriceId_.set(null); },

@@ -12,6 +12,7 @@ import { DishDataService } from './dish-data.service';
 import { SupplierDataService } from './supplier-data.service';
 import { ActivityLogService, ActivityChange } from './activity-log.service';
 import { VersionHistoryService } from './version-history.service';
+import { getEffectivePrice, getSupplierIds } from '../utils/product-source.util';
 
 @Injectable({
   providedIn: 'root'
@@ -126,12 +127,14 @@ export class KitchenStateService {
         to: next.name_hebrew,
       });
     }
-    if (prev.buy_price_global_ !== next.buy_price_global_) {
+    const prevPrice = getEffectivePrice(prev);
+    const nextPrice = getEffectivePrice(next);
+    if (prevPrice !== nextPrice) {
       changes.push({
         field: 'price',
         label: 'activity_field_price',
-        from: `${prev.buy_price_global_} ₪`,
-        to: `${next.buy_price_global_} ₪`,
+        from: `${prevPrice} ₪`,
+        to: `${nextPrice} ₪`,
       });
     }
     if (prev.base_unit_ !== next.base_unit_) {
@@ -142,8 +145,8 @@ export class KitchenStateService {
         to: next.base_unit_,
       });
     }
-    const prevSupp = (prev.supplierIds_ ?? []).slice().sort().join(',');
-    const nextSupp = (next.supplierIds_ ?? []).slice().sort().join(',');
+    const prevSupp = getSupplierIds(prev).slice().sort().join(',');
+    const nextSupp = getSupplierIds(next).slice().sort().join(',');
     if (prevSupp !== nextSupp) {
       changes.push({
         field: 'supplier',

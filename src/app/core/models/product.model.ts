@@ -5,14 +5,21 @@ export interface PurchaseOption_ {
   uom?:string
 }
 
+/** One supplier's offering of this product — price per base_unit. */
+export interface ProductSource {
+  supplierId: string;
+  price: number;
+  addedBy?: string;
+  addedAt?: number;
+}
+
 export interface Product {
   _id: string;
   name_hebrew: string;
   base_unit_: string;
-  buy_price_global_: number;
+  sources_: ProductSource[];
   purchase_options_: PurchaseOption_[];
   categories_: string[];
-  supplierIds_: string[];
   yield_factor_: number;
   allergens_: string[];
   min_stock_level_: number;
@@ -26,4 +33,9 @@ export interface Product {
   seeded_?: boolean;
   /** Provenance of allergen data: "off" = Open Food Facts, "llm" = AI-inferred */
   allergen_source_?: 'off' | 'llm';
+
+  /** @deprecated Migration shim — use sources_ */
+  buy_price_global_?: number;
+  /** @deprecated Migration shim — use sources_ */
+  supplierIds_?: string[];
 }
