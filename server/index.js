@@ -13,6 +13,7 @@ const genericRouter = require('./routes/generic');
 const aiRouter = require('./routes/ai');
 
 const app = express();
+app.set('trust proxy', 1); // Required for Render/reverse-proxy: enables correct IP from X-Forwarded-For
 const PORT = process.env.PORT || 3000;
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGIN || 'http://localhost:4200,http://localhost:4300').split(',').map(s => s.trim())
 
