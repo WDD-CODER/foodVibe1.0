@@ -1,0 +1,97 @@
+// notification-banner.component.scss
+// Component-scoped styles for the warning notification banner.
+// All engine classes (.c-*) live in src/styles.scss — this file hosts
+// only component-local selectors. All colors use semantic var() tokens.
+
+:host {
+  display: block;
+}
+
+.notification-banner {
+  // 1. Layout
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  // 2. Dimensions
+  width: 100%;
+
+  // 3. Content
+  color: var(--text-warning);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+
+  // 4. Structure
+  padding-inline: 1rem;
+  padding-block: 0.75rem;
+  border: 1px solid var(--border-warning);
+  border-radius: var(--radius-md);
+  margin-block-end: 1rem;
+
+  // 5. Effects
+  background: var(--bg-warning);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.1);
+  transition: opacity 0.2s var(--ease-smooth), transform 0.2s var(--ease-smooth);
+}
+
+.notification-banner__icon {
+  // 1. Layout
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  // 3. Content
+  color: var(--color-warning);
+}
+
+.notification-banner__message {
+  // 1. Layout
+  flex: 1;
+
+  // 3. Content
+  color: var(--text-warning);
+}
+
+.notification-banner__dismiss {
+  // 1. Layout
+  display: grid;
+  place-content: center;
+  flex-shrink: 0;
+
+  // 2. Dimensions
+  width: 1.75rem;
+  height: 1.75rem;
+
+  // 3. Content
+  color: var(--color-warning);
+
+  // 4. Structure
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+
+  // 5. Effects
+  background: transparent;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity 0.2s var(--ease-smooth),
+              background 0.2s ease,
+              color 0.2s ease;
+
+  @media (hover: hover) {
+    &:hover {
+      opacity: 1;
+      background: var(--bg-warning-strong);
+      color: var(--color-warning-hover);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--border-warning);
+    outline-offset: 2px;
+  }
+}

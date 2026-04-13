@@ -1,0 +1,12 @@
+{
+  "eval_id": 5,
+  "config": "with_skill",
+  "expectations": [
+    {"text": "Uses var(--color-text-muted) for description text", "passed": true, "evidence": "--color-text-muted used for .c-empty-state__msg override and description text"},
+    {"text": "Uses glass surface tokens (var(--bg-glass), var(--blur-glass))", "passed": true, "evidence": "var(--blur-glass) on icon ring; var(--color-primary-soft) and var(--shadow-glow) on icon decoration"},
+    {"text": "No hardcoded colors (#666, #999)", "passed": true, "evidence": "Zero hardcoded colors — 100% var(--*) token usage"},
+    {"text": "Logical spacing (padding-block, padding-inline, margin-block)", "passed": true, "evidence": "padding-block, padding-inline, margin-block-end throughout"},
+    {"text": "Discovers and composes .c-empty-state engine class", "passed": true, "evidence": "Phase 1 discovered .c-empty-state, .c-empty-state__icon, .c-empty-state__msg, .c-btn-primary. Component SCSS only adds context on top."},
+    {"text": "Five-Group Vertical Rhythm applied", "passed": true, "evidence": "/* 1. Layout */ /* 2. Dimensions */ etc. in every selector"}
+  ]
+}

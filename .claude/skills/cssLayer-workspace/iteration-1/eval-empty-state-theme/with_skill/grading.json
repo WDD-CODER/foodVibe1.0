@@ -1,0 +1,36 @@
+{
+  "eval_id": 5,
+  "config": "with_skill",
+  "expectations": [
+    {
+      "text": "Output uses var(--color-text-muted) or var(--color-text-muted-light) for description text",
+      "passed": true,
+      "evidence": "Line 135: color: var(--color-text-muted) on .recipe-empty-description. Also references --color-text-muted-light in engine class comment."
+    },
+    {
+      "text": "Output uses glass surface tokens (var(--bg-glass) or var(--blur-glass))",
+      "passed": true,
+      "evidence": "Line 64: background: var(--bg-glass); line 65: backdrop-filter: var(--blur-glass)"
+    },
+    {
+      "text": "Output does not contain hardcoded muted colors (#666, #999, #aaa, color: #)",
+      "passed": true,
+      "evidence": "Zero hardcoded colors in the entire file — 100% var(--*) token usage"
+    },
+    {
+      "text": "Output uses logical spacing (padding-block, padding-inline, margin-block)",
+      "passed": true,
+      "evidence": "padding-block: 2rem; padding-inline: 1rem; padding-block: 3.5rem 2.5rem; padding-inline: 2.5rem; margin-block-start: 0.5rem"
+    },
+    {
+      "text": "With-skill agent discovers existing .c-empty-state or .c-glass-card engine class and composes from it instead of reinventing",
+      "passed": true,
+      "evidence": "Header comment documents discovered engine: .c-empty-state, .c-empty-state__icon, .c-empty-state__msg, .c-btn-primary — agent composed from these and only added component-level context on top"
+    },
+    {
+      "text": "Output applies Five-Group Vertical Rhythm with clear group separation",
+      "passed": true,
+      "evidence": "Every selector has /* 1. Layout */ /* 2. Dimensions */ etc. group comments with blank line separation throughout"
+    }
+  ]
+}

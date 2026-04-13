@@ -1,0 +1,12 @@
+{
+  "eval_id": 2,
+  "config": "with_skill",
+  "expectations": [
+    {"text": "No hardcoded 600px breakpoint", "passed": true, "evidence": "Uses $break-tablet (900px) and $break-desktop (1200px)"},
+    {"text": "No hardcoded 1024px breakpoint", "passed": true, "evidence": "No 1024px present"},
+    {"text": "No hardcoded 768px breakpoint", "passed": true, "evidence": "No 768px present"},
+    {"text": "Uses $break-* SCSS token variables or @use", "passed": true, "evidence": "$break-tablet and $break-desktop used for breakpoints"},
+    {"text": "Logical padding (padding-block, padding-inline)", "passed": true, "evidence": "padding-block: 1rem; padding-inline: 1rem"},
+    {"text": "Breakpoints appear after base selector", "passed": true, "evidence": "@media blocks nested after base .menu-grid styles"}
+  ]
+}

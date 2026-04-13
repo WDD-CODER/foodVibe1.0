@@ -1,0 +1,264 @@
+{
+  "metadata": {
+    "skill_name": "cssLayer",
+    "timestamp": "2026-04-13",
+    "evals_run": [1, 2, 3, 4, 5],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "refactor-messy-scss",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 74.9,
+        "tokens": 19015,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "No physical padding-left/right", "passed": true, "evidence": "Uses padding-inline-end: 0.75rem"},
+        {"text": "No physical margin-left/right", "passed": true, "evidence": "Uses margin-inline: 1rem"},
+        {"text": "Uses logical inline properties", "passed": true, "evidence": "margin-inline and padding-inline-end present"},
+        {"text": "No hardcoded colors (#1a1a2e, background: white)", "passed": true, "evidence": "Uses var(--color-text-main); engine owns surface"},
+        {"text": "Five-Group Vertical Rhythm applied", "passed": true, "evidence": "Explicit group labels: // 1. Layout, // 2. Dimensions, etc."},
+        {"text": ".c-glass-card engine awareness — avoids duplicating background/border-radius/transition", "passed": true, "evidence": "Header comment explains engine composition; all duplicated props removed"}
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "refactor-messy-scss",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.167,
+        "passed": 1,
+        "failed": 5,
+        "total": 6,
+        "time_seconds": 111.4,
+        "tokens": 14673,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "No physical padding-left/right", "passed": false, "evidence": "padding-right: 12px kept unchanged"},
+        {"text": "No physical margin-left/right", "passed": true, "evidence": "Used shorthand margin: 0 16px (passes literal grep but still physical)"},
+        {"text": "Uses logical inline properties", "passed": false, "evidence": "No logical properties used — margin: 0 16px, padding-right: 12px"},
+        {"text": "No hardcoded colors (#1a1a2e, background: white)", "passed": false, "evidence": "color: #1a1a2e and background: white kept unchanged"},
+        {"text": "Five-Group Vertical Rhythm applied", "passed": false, "evidence": "Flat sorted property list, no group structure"},
+        {"text": ".c-glass-card engine awareness — avoids duplicating background/border-radius/transition", "passed": false, "evidence": "No awareness of engine classes; background/border-radius/transition all kept"}
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "responsive-token-breakpoints",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 119.0,
+        "tokens": 16523,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "No hardcoded 600px breakpoint", "passed": true, "evidence": "Uses $break-tablet (900px) and $break-desktop (1200px)"},
+        {"text": "No hardcoded 1024px breakpoint", "passed": true, "evidence": "No 1024px present"},
+        {"text": "No hardcoded 768px breakpoint", "passed": true, "evidence": "No 768px present"},
+        {"text": "Uses $break-* SCSS token variables or @use", "passed": true, "evidence": "@use 'src/styles' as *; $break-tablet; $break-desktop"},
+        {"text": "Logical padding (padding-block, padding-inline)", "passed": true, "evidence": "padding-block: 1rem; padding-inline: 1rem"},
+        {"text": "Breakpoints appear after base selector", "passed": true, "evidence": "@media blocks nested inside .menu-grid base selector"}
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "responsive-token-breakpoints",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.333,
+        "passed": 2,
+        "failed": 4,
+        "total": 6,
+        "time_seconds": 128.7,
+        "tokens": 20593,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "No hardcoded 600px breakpoint", "passed": false, "evidence": "@media (min-width: 600px) — invented, not a project token"},
+        {"text": "No hardcoded 1024px breakpoint", "passed": false, "evidence": "@media (min-width: 1024px) — invented, not a project token"},
+        {"text": "No hardcoded 768px breakpoint", "passed": true, "evidence": "Used 600px/1024px instead (different wrong values)"},
+        {"text": "Uses $break-* SCSS token variables or @use", "passed": false, "evidence": "No @use or $break- variables"},
+        {"text": "Logical padding (padding-block, padding-inline)", "passed": false, "evidence": "padding: 1rem physical shorthand"},
+        {"text": "Breakpoints appear after base selector", "passed": true, "evidence": "@media blocks nested inside base selector correctly"}
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "glass-card-composition",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 71.6,
+        "tokens": 20270,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "No hardcoded background colors (#ffffff, white)", "passed": true, "evidence": "Surface delegated entirely to .c-glass-card engine"},
+        {"text": "No hardcoded border colors (#e0e0e0)", "passed": true, "evidence": "Uses var(--border-default), var(--border-glass)"},
+        {"text": "No hardcoded text colors (#1a1a1a, #555, #888)", "passed": true, "evidence": "All use var(--color-text-main), var(--color-text-muted), var(--color-primary)"},
+        {"text": "Uses 3+ var(--) token references", "passed": true, "evidence": "Many tokens: --border-default, --radius-md, --color-text-main, --color-primary, --ease-spring"},
+        {"text": "Composes .c-glass-card engine (referenced in comments/template note)", "passed": true, "evidence": "Usage note: <div class='supplier-card c-glass-card'>; Phase 1 audit documented"},
+        {"text": "Uses logical properties (padding-inline, border-block, etc.)", "passed": true, "evidence": "padding-block, padding-inline, margin-block-end, border-block-start throughout"}
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "glass-card-composition",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.0,
+        "passed": 0,
+        "failed": 6,
+        "total": 6,
+        "time_seconds": 111.0,
+        "tokens": 15313,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "No hardcoded background colors (#ffffff, white)", "passed": false, "evidence": "background-color: #ffffff and background-color: #f7f7f7 — glass system ignored"},
+        {"text": "No hardcoded border colors (#e0e0e0)", "passed": false, "evidence": "border: 1px solid #e0e0e0 twice"},
+        {"text": "No hardcoded text colors (#1a1a1a, #555, #888)", "passed": false, "evidence": "color: #1a1a1a, #555555, #888888, #333333 — all hardcoded"},
+        {"text": "Uses 3+ var(--) token references", "passed": false, "evidence": "Zero var(--*) references. Entire file uses raw hex values."},
+        {"text": "Composes .c-glass-card engine (referenced in comments/template note)", "passed": false, "evidence": "No reference to .c-glass-card. Invented custom card styles from scratch."},
+        {"text": "Uses logical properties (padding-inline, border-block, etc.)", "passed": false, "evidence": "padding: 20px, margin: 0 0 12px, gap: 8px, font-size: 18px — all physical/px"}
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "warning-banner-theme",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 89.7,
+        "tokens": 22814,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "Uses var(--bg-warning) or var(--bg-warning-strong)", "passed": true, "evidence": "background: var(--bg-warning)"},
+        {"text": "Uses var(--text-warning)", "passed": true, "evidence": "color: var(--text-warning) in banner and message"},
+        {"text": "Uses var(--border-warning)", "passed": true, "evidence": "border: 1px solid var(--border-warning)"},
+        {"text": "No hardcoded warning hex colors", "passed": true, "evidence": "No #fff3cd, #ffc107, etc. Note: one rgba(217,119,6,0.1) in box-shadow — minor issue"},
+        {"text": "Logical padding (padding-block, padding-inline)", "passed": true, "evidence": "padding-inline: 1rem; padding-block: 0.75rem"},
+        {"text": "Five-Group Vertical Rhythm applied", "passed": true, "evidence": "Group labels // 1. Layout, // 2. Dimensions, etc. in every selector"}
+      ]
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "warning-banner-theme",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.833,
+        "passed": 5,
+        "failed": 1,
+        "total": 6,
+        "time_seconds": 75.9,
+        "tokens": 25699,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "Uses var(--bg-warning) or var(--bg-warning-strong)", "passed": true, "evidence": "background: var(--bg-warning-strong) — agent scanned codebase and found token"},
+        {"text": "Uses var(--text-warning)", "passed": true, "evidence": "color: var(--text-warning) — found in styles.scss"},
+        {"text": "Uses var(--border-warning)", "passed": true, "evidence": "border: 1px solid var(--border-warning)"},
+        {"text": "No hardcoded warning hex colors", "passed": true, "evidence": "No hardcoded colors — agent found all project warning tokens"},
+        {"text": "Logical padding (padding-block, padding-inline)", "passed": true, "evidence": "padding-block: 0.75rem; padding-inline: 1rem; block-size/inline-size on dismiss"},
+        {"text": "Five-Group Vertical Rhythm applied", "passed": false, "evidence": "Properties mixed in flat blocks — no group separation. display/gap/width/padding/background/border all in one block."}
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "empty-state-theme",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 142.0,
+        "tokens": 22127,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "Uses var(--color-text-muted) for description text", "passed": true, "evidence": "color: var(--color-text-muted) on .recipe-empty-description"},
+        {"text": "Uses glass surface tokens (var(--bg-glass), var(--blur-glass))", "passed": true, "evidence": "background: var(--bg-glass); backdrop-filter: var(--blur-glass)"},
+        {"text": "No hardcoded muted colors (#666, #999)", "passed": true, "evidence": "Zero hardcoded colors — 100% var(--*) token usage"},
+        {"text": "Logical spacing (padding-block, padding-inline, margin-block)", "passed": true, "evidence": "padding-block, padding-inline, margin-block-start throughout"},
+        {"text": "Discovers and composes .c-empty-state engine class", "passed": true, "evidence": "Header comment documents discovered engines: .c-empty-state, .c-empty-state__icon, .c-btn-primary"},
+        {"text": "Five-Group Vertical Rhythm applied", "passed": true, "evidence": "/* 1. Layout */ /* 2. Dimensions */ etc. in every selector with blank line separation"}
+      ]
+    },
+    {
+      "eval_id": 5,
+      "eval_name": "empty-state-theme",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.667,
+        "passed": 4,
+        "failed": 2,
+        "total": 6,
+        "time_seconds": 106.4,
+        "tokens": 31603,
+        "errors": 0
+      },
+      "expectations": [
+        {"text": "Uses var(--color-text-muted) for description text", "passed": true, "evidence": "color: var(--color-text-muted) — agent scanned styles.scss"},
+        {"text": "Uses glass surface tokens (var(--bg-glass), var(--blur-glass))", "passed": true, "evidence": "var(--bg-glass-strong) and var(--blur-glass) used"},
+        {"text": "No hardcoded muted colors (#666, #999)", "passed": true, "evidence": "No hardcoded colors — found and used design tokens"},
+        {"text": "Logical spacing (padding-block, padding-inline, margin-block)", "passed": true, "evidence": "margin-block-end, margin-block used. Note: padding: 3rem 2rem (physical shorthand) also present."},
+        {"text": "Discovers and composes .c-empty-state engine class", "passed": false, "evidence": "No reference to .c-empty-state engine. Wrote all glass surface styling from scratch."},
+        {"text": "Five-Group Vertical Rhythm applied", "passed": false, "evidence": ".empty-state flat block mixes layout/structure/effects without group separation"}
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {"mean": 1.0, "stddev": 0.0, "min": 1.0, "max": 1.0},
+      "time_seconds": {"mean": 99.4, "stddev": 28.7, "min": 71.6, "max": 142.0},
+      "tokens": {"mean": 20150, "stddev": 2397, "min": 16523, "max": 22814}
+    },
+    "without_skill": {
+      "pass_rate": {"mean": 0.4, "stddev": 0.31, "min": 0.0, "max": 0.833},
+      "time_seconds": {"mean": 106.7, "stddev": 19.1, "min": 75.9, "max": 128.7},
+      "tokens": {"mean": 21576, "stddev": 6500, "min": 14673, "max": 31603}
+    },
+    "delta": {
+      "pass_rate": "+0.60",
+      "time_seconds": "-7.3",
+      "tokens": "-1426"
+    }
+  },
+  "notes": [
+    "Eval 3 (glass-card-composition) is the critical gap: without_skill scored 0/6. Agents write completely non-themed CSS (#ffffff, #e0e0e0, #555555) when not guided to scan for engine classes.",
+    "Evals 4-5 show surprising baseline competence: agents proactively scan styles.scss when the prompt says 'look consistent with the app'. The skill's primary differentiation there is Five-Group Rhythm and engine class discovery.",
+    "Eval 2 confirms breakpoint tokens matter: baseline invented 600px/1024px — completely wrong project values ($break-tablet:900px, $break-desktop:1200px).",
+    "Skill adds no token overhead: with_skill avg 20,150 tokens vs without_skill avg 21,576. Phase 1 scanning is efficient.",
+    "Key skill gap: Phase 1 only mentions scanning for engine CLASSES. No rule says 'use var(--*) for ALL values — no hardcoded colors, shadows, radii.' Eval 3 baseline failure is directly caused by this missing instruction."
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "eval_id": 4,
+  "config": "with_skill",
+  "expectations": [
+    {"text": "Uses var(--bg-warning) or var(--bg-warning-strong)", "passed": true, "evidence": "Uses var(--bg-warning) for surface; var(--bg-warning-strong) for dismiss hover"},
+    {"text": "Uses var(--text-warning)", "passed": true, "evidence": "color: var(--text-warning) on banner, message, and dismiss"},
+    {"text": "Uses var(--border-warning)", "passed": true, "evidence": "border: 1px solid var(--border-warning)"},
+    {"text": "No hardcoded warning hex colors", "passed": true, "evidence": "Zero hardcoded colors. All 6 warning tokens used. New: also composes .c-glass-panel engine for surface."},
+    {"text": "Logical padding (padding-block, padding-inline)", "passed": true, "evidence": "padding-block and padding-inline used throughout; $break-mobile for responsive breakpoint"},
+    {"text": "Five-Group Vertical Rhythm applied", "passed": true, "evidence": "/* 1. Layout */ /* 2. Dimensions */ etc. in every selector with blank-line separation"}
+  ]
+}

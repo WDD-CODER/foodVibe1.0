@@ -1,0 +1,12 @@
+{
+  "eval_id": 1,
+  "config": "with_skill",
+  "expectations": [
+    {"text": "No physical padding-left or padding-right", "passed": true, "evidence": "padding-inline-end: 0.75rem — no physical padding"},
+    {"text": "No physical margin-left or margin-right", "passed": true, "evidence": "margin-inline: 1rem — logical property used"},
+    {"text": "Uses logical inline properties", "passed": true, "evidence": "padding-inline-end and margin-inline present"},
+    {"text": "No hardcoded colors (#1a1a2e, background: white)", "passed": true, "evidence": "color: var(--color-text-main); background: white removed (engine owns surface)"},
+    {"text": "Five-Group Vertical Rhythm applied", "passed": true, "evidence": "Group labels /* 1. Layout */ /* 2. Dimensions */ etc. with blank-line separation"},
+    {"text": ".c-glass-card engine awareness — avoids duplicating background/border-radius/transition", "passed": true, "evidence": "Header comment documents engine; background/border-radius removed. Iteration-2 improvement: width 300px → 18.75rem, bare 'ease' → var(--ease-smooth)"}
+  ]
+}

@@ -1,0 +1,231 @@
+/*
+ * notification-banner.component.scss
+ *
+ * Component: notification-banner
+ * Composes: .c-glass-panel (applied in HTML on host :host or wrapper element)
+ * Tokens:   --bg-warning, --bg-warning-strong, --border-warning, --text-warning,
+ *           --color-warning, --color-warning-hover, --radius-md, --radius-lg,
+ *           --shadow-glass, --blur-glass, --ease-smooth, --ease-spring
+ *
+ * Phase 1 findings:
+ *   - No .c-notification-banner engine exists; component SCSS is correct scope.
+ *   - .c-glass-panel provides surface/blur/border/shadow — composed in HTML, not re-declared here.
+ *   - Warning semantic tokens fully cover bg, text, and border needs.
+ *   - .c-icon-btn engine exists for the dismiss button.
+ *   - Five-Group Rhythm applied to every selector.
+ */
+
+/* ── Banner host ──────────────────────────────────────────────────────────── */
+:host {
+  /* 1. Layout */
+  display: block;
+
+  /* 2. Dimensions */
+  width: 100%;
+
+  /* 3. Content */
+  /* (inherited from body) */
+
+  /* 4. Structure */
+  margin-block-end: 1rem;
+
+  /* 5. Effects */
+  /* (none on host) */
+}
+
+/* ── Banner surface — warning override on top of .c-glass-panel ──────────── */
+.notification-banner {
+  /* 1. Layout */
+  display: flex;
+  align-items: stretch;
+
+  /* 2. Dimensions */
+  width: 100%;
+  min-block-size: 3rem;
+
+  /* 3. Content */
+  /* (background and border below) */
+
+  /* 4. Structure */
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-warning);
+  padding-inline: 1rem;
+  padding-block: 0.75rem;
+  overflow: hidden;
+
+  /* 5. Effects */
+  background: var(--bg-warning);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  box-shadow: var(--shadow-glass);
+  transition: opacity 0.25s var(--ease-smooth), transform 0.25s var(--ease-spring);
+}
+
+/* ── Banner body — inner flex row ────────────────────────────────────────── */
+.notification-banner__body {
+  /* 1. Layout */
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+
+  /* 2. Dimensions */
+  width: 100%;
+
+  /* 3. Content */
+  /* (text colour set on children) */
+
+  /* 4. Structure */
+  /* (spacing via gap) */
+
+  /* 5. Effects */
+  /* (none) */
+}
+
+/* ── Icon wrapper ─────────────────────────────────────────────────────────── */
+.notification-banner__icon {
+  /* 1. Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  /* 2. Dimensions */
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+
+  /* 3. Content */
+  color: var(--color-warning);
+
+  /* 4. Structure */
+  /* (size above; no extra padding needed) */
+
+  /* 5. Effects */
+  /* (none) */
+}
+
+/* ── Message text ─────────────────────────────────────────────────────────── */
+.notification-banner__message {
+  /* 1. Layout */
+  display: block;
+  flex: 1;
+
+  /* 2. Dimensions */
+  /* (flex stretches naturally) */
+
+  /* 3. Content */
+  color: var(--text-warning);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+
+  /* 4. Structure */
+  /* (no extra padding; gap on parent handles spacing) */
+
+  /* 5. Effects */
+  /* (none) */
+}
+
+/* ── Dismiss button — extends .c-icon-btn (applied in HTML) ──────────────── */
+.notification-banner__dismiss {
+  /* 1. Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  /* 2. Dimensions */
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+
+  /* 3. Content */
+  color: var(--color-warning);
+
+  /* 4. Structure */
+  margin-inline-start: auto;
+  border-radius: var(--radius-sm);
+
+  /* 5. Effects */
+  transition: color 0.15s var(--ease-smooth), background 0.15s var(--ease-smooth);
+
+  @media (hover: hover) {
+    &:hover {
+      color: var(--color-warning-hover);
+      background: var(--bg-warning-strong);
+    }
+  }
+
+  &:active {
+    color: var(--color-warning-hover);
+  }
+}
+
+/* ── Enter / leave animation ─────────────────────────────────────────────── */
+.notification-banner--enter {
+  /* 1. Layout */
+  /* (block, set on .notification-banner) */
+
+  /* 2. Dimensions */
+  /* (inherited) */
+
+  /* 3. Content */
+  /* (inherited) */
+
+  /* 4. Structure */
+  /* (inherited) */
+
+  /* 5. Effects */
+  animation: banner-slide-in 0.3s var(--ease-spring) both;
+}
+
+.notification-banner--leave {
+  /* 5. Effects */
+  animation: banner-fade-out 0.2s var(--ease-smooth) forwards;
+}
+
+@keyframes banner-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes banner-fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+}
+
+/* ── Reduced-motion overrides ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .notification-banner,
+  .notification-banner__dismiss {
+    /* 5. Effects */
+    transition: none;
+    animation: none;
+  }
+}
+
+/* ── Responsive — compact on mobile ──────────────────────────────────────── */
+@media (max-width: 48rem) {
+  .notification-banner {
+    /* 4. Structure */
+    border-radius: var(--radius-md);
+    padding-inline: 0.75rem;
+    padding-block: 0.625rem;
+  }
+
+  .notification-banner__message {
+    /* 3. Content */
+    font-size: 0.8125rem;
+  }
+}

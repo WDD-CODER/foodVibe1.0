@@ -1,0 +1,36 @@
+{
+  "eval_id": 1,
+  "config": "with_skill",
+  "expectations": [
+    {
+      "text": "Output does not contain padding-left or padding-right (replaced with logical properties)",
+      "passed": true,
+      "evidence": "Output uses padding-inline-end: 0.75rem — no padding-left or padding-right present"
+    },
+    {
+      "text": "Output does not contain margin-left or margin-right (replaced with logical properties)",
+      "passed": true,
+      "evidence": "Output uses margin-inline: 1rem — no margin-left or margin-right present"
+    },
+    {
+      "text": "Output contains margin-inline or padding-inline (logical properties used)",
+      "passed": true,
+      "evidence": "Line 29: margin-inline: 1rem; line 30: padding-inline-end: 0.75rem"
+    },
+    {
+      "text": "Output does not contain hardcoded color #1a1a2e or raw 'background: white'",
+      "passed": true,
+      "evidence": "Color replaced with var(--color-text-main); background: white removed (engine class owns surface)"
+    },
+    {
+      "text": "Output shows Five-Group Vertical Rhythm structure (group labels or clear blank-line separation between groups)",
+      "passed": true,
+      "evidence": "Explicit group labels: // 1. Layout, // 2. Dimensions, // 3. Content, // 4. Structure"
+    },
+    {
+      "text": "With-skill agent recognizes that .c-glass-card engine owns background/border-radius/transition and avoids duplicating those",
+      "passed": true,
+      "evidence": "Header comment explicitly states: compose .c-glass-card on the host. background, border-radius, transition all removed from component with explanation."
+    }
+  ]
+}

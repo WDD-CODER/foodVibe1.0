@@ -1,0 +1,36 @@
+{
+  "eval_id": 2,
+  "config": "without_skill",
+  "expectations": [
+    {
+      "text": "Output does not contain hardcoded breakpoint 600px",
+      "passed": false,
+      "evidence": "Line 7: @media (min-width: 600px) — invented breakpoint not from the project token system"
+    },
+    {
+      "text": "Output does not contain hardcoded breakpoint 1024px",
+      "passed": false,
+      "evidence": "Line 11: @media (min-width: 1024px) — invented breakpoint not from the project token system"
+    },
+    {
+      "text": "Output does not contain hardcoded breakpoint 768px",
+      "passed": true,
+      "evidence": "No 768px — agent used 600px/1024px instead (different wrong values)"
+    },
+    {
+      "text": "Output uses project SCSS breakpoint variables ($break-tablet, $break-desktop) or @use to import them",
+      "passed": false,
+      "evidence": "No @use or $break- variables — hardcoded 600px and 1024px instead"
+    },
+    {
+      "text": "Output uses logical padding properties (padding-block, padding-inline) instead of shorthand padding:",
+      "passed": false,
+      "evidence": "Line 5: padding: 1rem — physical shorthand, not logical properties"
+    },
+    {
+      "text": "Responsive @media blocks appear after the base .menu-grid selector, not before",
+      "passed": true,
+      "evidence": "Base selector lines 1-14, @media blocks lines 7-13 are nested inside — correct order"
+    }
+  ]
+}

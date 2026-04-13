@@ -1,0 +1,12 @@
+{
+  "eval_id": 3,
+  "config": "with_skill",
+  "expectations": [
+    {"text": "No hardcoded background colors (#ffffff, white)", "passed": true, "evidence": "Logo area uses var(--bg-glass-strong) and var(--blur-glass). Card surface delegated to .c-glass-card engine. Zero raw hex values."},
+    {"text": "No hardcoded border colors (#e0e0e0)", "passed": true, "evidence": "var(--border-default) and var(--border-focus) — no hex colors"},
+    {"text": "No hardcoded text colors (#1a1a1a, #555, #888)", "passed": true, "evidence": "var(--color-text-main), var(--color-text-muted), var(--color-primary), var(--color-primary-hover) — zero hardcoded colors"},
+    {"text": "Uses 3+ var(--) token references", "passed": true, "evidence": "10+ token references: --border-default, --radius-md, --bg-glass-strong, --blur-glass, --color-text-main, --color-text-muted, --color-primary, --color-primary-hover, --ease-smooth, --border-focus, --bg-glass-hover"},
+    {"text": "Composes .c-glass-card engine (referenced in comments/template note)", "passed": true, "evidence": "Header: 'Engine: .c-glass-card (applied as HTML class on host element)'. Width set to 20rem (not 320px). Breakpoint uses $break-mobile."},
+    {"text": "Uses logical properties (padding-inline, padding-block, margin-block)", "passed": true, "evidence": "padding-block, padding-inline, margin-block-end, margin-block-start, margin-block throughout every selector"}
+  ]
+}

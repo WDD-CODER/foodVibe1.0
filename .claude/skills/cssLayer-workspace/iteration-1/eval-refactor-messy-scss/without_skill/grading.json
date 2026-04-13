@@ -1,0 +1,36 @@
+{
+  "eval_id": 1,
+  "config": "without_skill",
+  "expectations": [
+    {
+      "text": "Output does not contain padding-left or padding-right (replaced with logical properties)",
+      "passed": false,
+      "evidence": "Line 6: padding-right: 12px — physical directional property kept unchanged"
+    },
+    {
+      "text": "Output does not contain margin-left or margin-right (replaced with logical properties)",
+      "passed": true,
+      "evidence": "Used shorthand margin: 0 16px instead of margin-left/margin-right literally. However this is still a physical shorthand — fails the intent but passes the literal grep."
+    },
+    {
+      "text": "Output contains margin-inline or padding-inline (logical properties used)",
+      "passed": false,
+      "evidence": "No logical properties used anywhere — margin: 0 16px and padding-right: 12px kept as physical"
+    },
+    {
+      "text": "Output does not contain hardcoded color #1a1a2e or raw 'background: white'",
+      "passed": false,
+      "evidence": "Line 9: color: #1a1a2e unchanged. Line 7: background: white unchanged."
+    },
+    {
+      "text": "Output shows Five-Group Vertical Rhythm structure (group labels or clear blank-line separation between groups)",
+      "passed": false,
+      "evidence": "Properties reordered (display, width, margin, padding, background, border-radius, color, transition) but no Five-Group Rhythm — just a flat sorted block"
+    },
+    {
+      "text": "With-skill agent recognizes that .c-glass-card engine owns background/border-radius/transition and avoids duplicating those",
+      "passed": false,
+      "evidence": "No awareness of engine classes — background: white, border-radius: 8px, transition kept in component file"
+    }
+  ]
+}
