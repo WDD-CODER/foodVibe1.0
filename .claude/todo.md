@@ -2,19 +2,6 @@
 
 ---
 
-### Plan 265 — auto-solve Enforcement Fixes (`plans/265-auto-solve-enforcement-fixes.plan.md`)
-
-- [x] Task 1: `auto-solve.md` Phase 2 — Remove silent-archive shortcut; replace with route-to-Phase-5
-- [x] Task 2: `auto-solve.md` Phase 6 — Add ARCHIVAL PRECONDITION block (3 rules); remove redundant Archive rule footnote
-- [x] Task 3: `auto-solve.md` Phase 4 — Add BUILD SCOPE RULE + skip exemption + logging requirement
-- [x] Task 4: `auto-solve.md` Phase 2 — UI-DETECTION GATE + route rule + budget cap + mandatory evidence table
-- [x] Task 5: Surface yes/no questions to user re Plan 234 operational tasks
-- [x] Task 6: Write `.qa-reports/plan-234-archive-audit.md` with 3 sections
-- [x] Task 7: Move unverified Plan 234 operational tasks back to `todo.md`; update archive
-- [x] Task 8: Run `npx ng build` — verify 0 errors
-
----
-
 ### Plan 234 — Per-User Collections + Render Deployment — operational tasks re-opened (`plans/234-per-user-collections-render-deploy.plan.md`)
 > Partially re-opened after archive audit 2026-04-13 — see `.qa-reports/plan-234-archive-audit.md`
 
