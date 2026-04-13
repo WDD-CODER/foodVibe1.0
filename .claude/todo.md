@@ -2,6 +2,27 @@
 
 ---
 
+### Plan 264 — Workflow Superpowers Integration (`plans/264-workflow-superpowers-integration.plan.md`)
+
+- [x] A1: Create `.claude/commands/new-feature.md` — full command (Phases 0-5)
+- [x] A2: Edit `plan-implementation.md` — add No Placeholders Scan
+- [x] A3: Edit `plan-implementation.md` — add Forced Alternatives
+- [x] A4: Edit `plan-implementation.md` — add Adversarial Subagent Review
+- [x] A5: Edit `plan-implementation.md` — update Output Format
+- [x] A6: Edit `execute-it.md` — add Verification-Before-Completion Gate
+- [x] A7: Edit `execute-it.md` — add Systematic-Debugging Protocol
+- [x] A8: Edit `execute-it.md` — add Smart Visual QA Flow
+- [x] A9: Edit `execute-it.md` — add validation override to Execution Rules
+- [x] A10: Edit `team-leader.md` — add Two-Stage Review Gate
+- [x] A11: Edit `qa-engineer.md` — add Systematic-Debugging + RED-GREEN Mandate
+- [x] A12: Edit `end-of-session-agent.md` — add Verification-Before-Completion to Phase 10
+- [x] A13: Edit `software-architect.md` — add No Placeholders Gate + Forced Alternatives
+- [x] A14: Edit `copilot-instructions.md` — add `/new-feature` skill trigger
+- [x] A15: Edit `agent.md` — add `/new-feature` to commands table
+- [x] A16: Run `ng build` — verify no regressions
+
+---
+
 ### Plan 263 — Favorites Button on Recipe-Book List (`plans/263-favorites-recipe-book.plan.md`)
 
 - [x] 1 — `src/app/core/models/recipe.model.ts` — add `favoritedBy_?: string[]` field
@@ -67,18 +88,18 @@
 
 ### Plan 258 — Quick-Edit Product Panel (`plans/258-quick-edit-product-panel.plan.md`)
 
-- [ ] Create `src/app/core/services/quick-edit-product-modal.service.ts`
-- [ ] Create `src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.ts`
-- [ ] Create `src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.html`
-- [ ] Create `src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.scss`
-- [ ] Create `src/app/shared/quick-edit-product-modal/quick-edit-product-modal.component.ts`
-- [ ] Create `src/app/shared/quick-edit-product-modal/quick-edit-product-modal.component.html`
-- [ ] Create `src/app/shared/quick-edit-product-modal/quick-edit-product-modal.component.scss`
-- [ ] Edit `src/app/appRoot/app.component.ts` — register QuickEditProductModalComponent
-- [ ] Edit `src/app/appRoot/app.component.html` — add <app-quick-edit-product-modal/>
-- [ ] Edit `recipe-ingredients-table.component.ts` — signals, helpers, badge handlers
-- [ ] Edit `recipe-ingredients-table.component.html` — replace badge clicks, add accordion
-- [ ] Edit `recipe-ingredients-table.component.scss` — .quick-edit-accordion grid-column
+- [x] Create `src/app/core/services/quick-edit-product-modal.service.ts`
+- [x] Create `src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.ts`
+- [x] Create `src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.html`
+- [x] Create `src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.scss`
+- [x] Create `src/app/shared/quick-edit-product-modal/quick-edit-product-modal.component.ts`
+- [x] Create `src/app/shared/quick-edit-product-modal/quick-edit-product-modal.component.html`
+- [x] Create `src/app/shared/quick-edit-product-modal/quick-edit-product-modal.component.scss`
+- [x] Edit `src/app/appRoot/app.component.ts` — register QuickEditProductModalComponent
+- [x] Edit `src/app/appRoot/app.component.html` — add <app-quick-edit-product-modal/>
+- [x] Edit `recipe-ingredients-table.component.ts` — signals, helpers, badge handlers
+- [x] Edit `recipe-ingredients-table.component.html` — replace badge clicks, add accordion
+- [x] Edit `recipe-ingredients-table.component.scss` — .quick-edit-accordion grid-column
 
 ---
 
@@ -98,18 +119,18 @@
 
 ### Plan 255 — Dead Code Cleanup (`plans/255-dead-code-cleanup.plan.md`)
 
-- [ ] Task 1: Delete `.claude/skills/commit-to-github/` — confirmed deprecated, replaced by git-agent
-- [ ] Task 2: Delete `.claude/skills/end-session/` — confirmed deprecated, replaced by worktree-session-end
-- [ ] Task 3: Delete `.claude/agents/triage-agent.md` — zero references, never wired in
-- [ ] Task 4: Delete `scripts/backfill-name-snapshots.mjs` — untracked, no npm entry
-- [ ] Task 5: Delete `scripts/seed-from-dump.js` — one-time seed, explicitly documented as done
-- [ ] Task 6: Delete `scripts/stamp-master-userId.js` — one-time migration, explicitly "Run ONCE"
-- [ ] Task 7: Run `ng build` — confirm zero errors after deletions
+- [x] Task 1: Delete `.claude/skills/commit-to-github/` — confirmed deprecated, replaced by git-agent
+- [x] Task 2: Delete `.claude/skills/end-session/` — confirmed deprecated, replaced by worktree-session-end
+- [x] Task 3: Delete `.claude/agents/triage-agent.md` — zero references, never wired in
+- [x] Task 4: Delete `scripts/backfill-name-snapshots.mjs` — untracked, no npm entry
+- [x] Task 5: Delete `scripts/seed-from-dump.js` — one-time seed, explicitly documented as done
+- [x] Task 6: Delete `scripts/stamp-master-userId.js` — one-time migration, explicitly "Run ONCE"
+- [x] Task 7: Run `ng build` — confirm zero errors after deletions
 - [ ] Task 8: Investigate repair script trio (`backup-before-repair.mjs`, `diagnose-broken-refs.mjs`, `repair-recipe-references.mjs`) — confirm repair is complete, then delete all three
 - [ ] Task 9: Investigate migration pair (`migrate-to-master.mjs`, `link-users-to-master.mjs`) — confirm master-layer migration is done in prod, then delete both
 - [ ] Task 10: Investigate `scripts/trim-demo-data.mjs` — recurring or one-time? Add npm entry or delete
-- [ ] Task 11: Add `git-agent.md` row to `§0.3` agent roster in `copilot-instructions.md`
-- [ ] Task 12: Fix stale `commit-to-github Phase 0` reference in `.claude/agents/qa-engineer.md`
+- [x] Task 11: Add `git-agent.md` row to `§0.3` agent roster in `copilot-instructions.md`
+- [x] Task 12: Fix stale `commit-to-github Phase 0` reference in `.claude/agents/qa-engineer.md`
 - [ ] Task 13: Add `interface-design` trigger line to `copilot-instructions.md §0`
 - [ ] Task 14: Decide on `.claude/commands/reflect-add-tests.md` — add trigger or delete
 - [ ] Task 15: Decide on `.claude/commands/sweep-stale-todos.md` — verify pending update, then add trigger
@@ -163,64 +184,6 @@
 - [x] `venue-data.service.ts` — wrap getVenueById, addVenue, updateVenue, deleteVenue, getTrashVenues, restoreVenue
 - [x] `backup.service.ts` — add 401 guard to exportAllToFile and importFromFile backend-loop catches
 - [x] Run `npx ng build --configuration development` — confirm zero errors
-
----
-
-### Plan 252 — auto-solve: prefer gstack /browse over Playwright MCP (`plans/252-auto-solve-browse-over-playwright.plan.md`)
-
-- [ ] `auto-solve.md` frontmatter — add `Skill` to allowed-tools list so `/browse` can be invoked
-- [ ] `auto-solve.md` Phase 2 line 81 — replace Playwright-first browser verification with gstack /browse ($B) as primary, Playwright MCP as fallback
-- [ ] `auto-solve.md` Phase 4 line 133 — replace "if Playwright available" screenshot with `$B screenshot` primary, Playwright MCP fallback
-- [ ] `auto-solve.md` Error Handling line 199 — update "Playwright unavailable" to reflect gstack /browse as primary tool
-- [ ] `auto-solve.md` Permissions Required line 210 — add Skill invocation note alongside Playwright MCP entry
-
----
-
-### Plan 234 — Per-User Collections + Render Deployment (`plans/234-per-user-collections-render-deploy.plan.md`)
-
-**Brief 1 — Schema & Migration**
-- [ ] Create `server/constants/cloneable-types.js` — exports CLONEABLE_TYPES array
-- [ ] Fix `scripts/seed-from-dump.js` — replace broken Entity model with native MongoDB driver; add userId/__masterId/_userModified to $setOnInsert
-- [ ] Create `scripts/stamp-master-userId.js` — --confirm-stamp flag; production guard; updateMany per CLONEABLE_TYPES collection
-- [ ] `ng build` smoke check
-- [ ] Run stamp migration against Atlas; verify in Compass
-- [ ] PR + merge `feat/user-scoped-schema`
-
-**Brief 2 — Backend User Scoping**
-- [ ] `server/routes/generic.js` — GET /:type: add userId filter
-- [ ] `server/routes/generic.js` — GET /:type/:id: add userId filter
-- [ ] `server/routes/generic.js` — POST /:type: stamp userId/_masterId/_userModified
-- [ ] `server/routes/generic.js` — PUT /:type/:id: spoof-safe merge update with userId scope
-- [ ] `server/routes/generic.js` — PUT /:type (replaceAll): userId-scoped deleteMany + stamp on insert
-- [ ] `server/routes/generic.js` — DELETE /:type/:id: add userId filter
-- [ ] Create `server/services/clone-master.js` — flat-doc cloning per CLONEABLE_TYPES
-- [ ] Create `server/services/sync-master.js` — 4-rule sync per CLONEABLE_TYPES
-- [ ] `server/routes/auth.js` — wire cloneMasterDataToUser on signup
-- [ ] `server/routes/auth.js` — wire syncMasterToUser on login (try/catch)
-- [ ] `server/routes/auth.js` — wire syncMasterToUser on refresh (try/catch)
-- [ ] Build verification + manual API test
-- [ ] Security Officer review
-- [ ] PR + merge `feat/user-scoped-backend`
-
-**Brief 3 — Frontend Auth Wiring (refresh only)**
-- [ ] `user.service.ts` — add refreshToken() method
-- [ ] `user.service.ts` — call refreshToken() on construction
-- [ ] `user.service.ts` — 13-minute interval timer; start on login/refresh; clear on logout
-- [ ] `ng build` verification
-- [ ] Security Officer review
-- [ ] PR + merge `feat/frontend-auth-wiring`
-
-**Brief 4 — Express Static Serving**
-- [ ] `server/index.js` — add /api/ guard to SPA catch-all
-- [ ] `package.json` (root) — add build:render script
-- [ ] Build + serve verification
-- [ ] PR + merge `feat/express-static-serving`
-
-**Brief 5 — Deploy to Render**
-- [ ] Rewrite `render.yaml` — fix buildCommand, MONGO_URI key, JWT_SECRET generateValue, remove PORT
-- [ ] `package.json` (root) — add engines field
-- [ ] PR + merge `feat/render-deploy`
-- [ ] Manual deploy + smoke test
 
 ---
 
@@ -342,13 +305,13 @@
 
 - [ ] A: Auto-name menu with formatted date when name is empty on save, with duplicate handling (1), (2)
 - [ ] Timestamps: Add updated_at_ to MenuEvent model; set created_at_ on create and updated_at_ on every save
-- [ ] B: Set event_date_ default to today's date for new menus
-- [ ] C: Redesign guest counter as unified pill-shaped container with paper-blend styling
-- [ ] D1: Tie food cost calculation to serving_portions * guest_count, update service and component
-- [ ] D2: Show sell_price inline next to dish name for all menu types
-- [ ] E1: Make toolbar collapsible with fixed overlay when opened
-- [ ] E2: Create floating FAB on right side with pop-up buttons for toolbar and back navigation
-- [ ] Dictionary: Add new Hebrew dictionary keys for new labels
+- [x] B: Set event_date_ default to today's date for new menus
+- [x] C: Redesign guest counter as unified pill-shaped container with paper-blend styling
+- [x] D1: Tie food cost calculation to serving_portions * guest_count, update service and component
+- [x] D2: Show sell_price inline next to dish name for all menu types
+- [x] E1: Make toolbar collapsible with fixed overlay when opened
+- [x] E2: Create floating FAB on right side with pop-up buttons for toolbar and back navigation
+- [x] Dictionary: Add new Hebrew dictionary keys for new labels
 
 ### Plan 081 â€” toFix Detailed Plans (`plans/081-tofix-detailed-plans.plan.md`)
 

@@ -42,6 +42,7 @@ All skill triggers defined in `copilot-instructions.md §0`.
 ## Commands (`.claude/commands/`)
 | Command | Purpose |
 |---------|---------|
+| `new-feature.md` | Structured feature scoping — forcing questions, landscape search, premise challenge, forced alternatives → produces sharp brief for plan-implementation |
 | `plan-implementation.md` | Architectural brief → codebase scan → implementation plan (read-only phase) |
 | `execute-it.md` | Execute the implementation plan from this conversation (full write phase) |
 | `test-pr-review-merge.md` | Full CI: test, PR, review, merge to main |
