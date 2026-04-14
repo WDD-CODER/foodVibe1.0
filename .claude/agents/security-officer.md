@@ -68,3 +68,9 @@ Fail — [specific vulnerability] detected at [location]. Fix required before me
 ```
 
 **Efficiency Notes**: Use High Reasoning for Phases 1–2 (threat modeling, logic audit). Use Procedural for Phases 3–4 (pattern grep, injection scan). Invoke LAST in the agent chain after all other development agents have completed.
+
+
+## Context hygiene
+Consult `.claude/skills/context-management/SKILL.md` for checkpoint triggers.
+If any trigger fires, run `/checkpoint` before continuing.
+Do not silently push through context pressure — losing state is worse than an extra checkpoint.

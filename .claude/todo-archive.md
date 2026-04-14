@@ -8,6 +8,27 @@ Moved from todo.md to reduce token load.
 
 ---
 
+## Plan 266 — Cook Timer / Labor Time Separation (archived 2026-04-13)
+
+- [x] Task 1: `src/app/core/models/recipe.model.ts` — add `cooking_time_minutes_?: number` to RecipeStep
+- [x] Task 2: `src/app/pages/recipe-builder/services/recipe-form.service.ts` — add `cooking_time: [0]` to createStepGroup()
+- [x] Task 3: `src/app/pages/recipe-builder/services/recipe-form.service.ts` — patch `cooking_time` in patchFormFromRecipe()
+- [x] Task 4: `src/app/pages/recipe-builder/services/recipe-form.service.ts` — StepRow type + buildRecipeFromForm cooking_time mapping
+- [x] Task 5: `src/app/pages/recipe-builder/components/recipe-workflow/recipe-workflow.component.ts` — cookTimeOpenRows_, methods
+- [x] Task 6: `src/app/pages/recipe-builder/components/recipe-workflow/recipe-workflow.component.html` — cook time icon + collapsible input
+- [x] Task 7: `src/app/pages/cook-view/cook-view.page.ts` — timer input + stopwatch signals/methods
+- [x] Task 8: `src/app/pages/cook-view/cook-view.page.ts` — timerDisplay_ h:mm:ss + ngOnDestroy
+- [x] Task 9: `src/app/pages/cook-view/cook-view.page.ts` — applyWorkflowFormToRecipe cooking_time_minutes_
+- [x] Task 10: `src/app/pages/cook-view/cook-view.page.ts` — setupWorkflowForm_ patch cooking_time
+- [x] Task 11: `src/app/pages/cook-view/cook-view.page.html` — redesign timer area
+- [x] Task 12: `src/app/pages/cook-view/cook-view.page.scss` — timer icon + stopwatch styles
+- [x] Task 13: `public/assets/data/dictionary.json` — new i18n keys
+- [x] Task 14: `src/app/core/services/recipe-export.service.ts` — cooking_time column
+- [x] Task 15: `src/app/pages/recipe-builder/recipe-builder.page.ts` — cachedSteps_ + workflowNorm
+- [x] Task 16: Tests — timerDisplay_ h:mm:ss + cooking_time control
+
+---
+
 ### Plan 243 — Post-Migration System Validation (`plans/243-post-migration-validation-run.plan.md`)
 - [x] All tasks (branch, validate-agent-refs, ng build, lint checks, github-sync, fix stale counts, project state report)
 
