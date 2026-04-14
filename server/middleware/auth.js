@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
 
+const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET;
+
 /**
  * JWT verification middleware.
  * Reads Bearer token from the Authorization header, verifies it against JWT_SECRET,
@@ -18,7 +20,7 @@ function verifyToken(req, res, next) {
   }
 
   try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = jwt.verify(token, ACCESS_SECRET);
     next();
   } catch {
     return res.status(401).json({ error: 'Invalid or expired token' });
@@ -45,11 +47,18 @@ function optionalToken(req, res, next) {
   }
 
   try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = jwt.verify(token, ACCESS_SECRET);
     next();
   } catch {
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
 }
 
-module.exports = { verifyToken, optionalToken };
+function requireAdmin(req, res, next) {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+  next();
+}
+
+module.exports = { verifyToken, optionalToken, requireAdmin };

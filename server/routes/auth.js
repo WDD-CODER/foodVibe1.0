@@ -9,6 +9,8 @@ const { syncMasterToUser } = require('../services/sync-master');
 const router = Router();
 const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '30d';
+const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET;
+const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
 
 // ---------------------------------------------------------------------------
 // Rate limiters
@@ -133,8 +135,8 @@ router.post('/signup', signupLimiter, async (req, res) => {
 
     await cloneMasterDataToUser(_id);
 
-    const token = jwt.sign({ userId: _id, name }, process.env.JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
-    const refreshToken = jwt.sign({ userId: _id }, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+    const token = jwt.sign({ userId: _id, name, role: 'user' }, ACCESS_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+    const refreshToken = jwt.sign({ userId: _id }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 
     res.cookie('fv_refresh', refreshToken, {
       httpOnly: true,
@@ -187,11 +189,11 @@ router.post('/login', loginLimiter, async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: user._id, name: user.name },
-      process.env.JWT_SECRET,
+      { userId: user._id, name: user.name, role: user.role || 'user' },
+      ACCESS_SECRET,
       { expiresIn: ACCESS_TOKEN_EXPIRY }
     );
-    const refreshToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+    const refreshToken = jwt.sign({ userId: user._id }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 
     res.cookie('fv_refresh', refreshToken, {
       httpOnly: true,
@@ -222,7 +224,7 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
 
     let payload;
     try {
-      payload = jwt.verify(refreshToken, process.env.JWT_SECRET);
+      payload = jwt.verify(refreshToken, REFRESH_SECRET);
     } catch {
       return res.status(401).json({ error: 'INVALID_REFRESH_TOKEN' });
     }
@@ -231,12 +233,12 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
     if (!user) return res.status(401).json({ error: 'USER_NOT_FOUND' });
 
     const token = jwt.sign(
-      { userId: user._id, name: user.name },
-      process.env.JWT_SECRET,
+      { userId: user._id, name: user.name, role: user.role || 'user' },
+      ACCESS_SECRET,
       { expiresIn: ACCESS_TOKEN_EXPIRY }
     );
 
-    const newRefreshToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+    const newRefreshToken = jwt.sign({ userId: user._id }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
     res.cookie('fv_refresh', newRefreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -289,11 +291,11 @@ router.post('/guest', async (req, res) => {
     );
 
     const token = jwt.sign(
-      { userId: 'dev-guest', name: 'Guest Admin' },
-      process.env.JWT_SECRET,
+      { userId: 'dev-guest', name: 'Guest Admin', role: 'admin' },
+      ACCESS_SECRET,
       { expiresIn: ACCESS_TOKEN_EXPIRY }
     );
-    const refreshToken = jwt.sign({ userId: 'dev-guest' }, process.env.JWT_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+    const refreshToken = jwt.sign({ userId: 'dev-guest' }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 
     res.cookie('fv_refresh', refreshToken, {
       httpOnly: true,
