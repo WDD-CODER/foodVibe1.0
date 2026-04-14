@@ -42,6 +42,7 @@ export class RecipeDataService {
       return this.storage.get<Recipe>(ENTITY, _id);
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
+      if (err instanceof HttpErrorResponse && err.status === 404) throw err
       this.logging.error({ event: 'crud.recipe.get_error', message: 'Failed to get recipe', context: { err } })
       throw err
     }

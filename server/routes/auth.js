@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const User = require('../models/user.model');
 const { cloneMasterDataToUser } = require('../services/clone-master');
-const { syncMasterToUser } = require('../services/sync-master');
+const { syncMasterToUser, cleanupNameCollisionClones } = require('../services/sync-master');
 
 const router = Router();
 const ACCESS_TOKEN_EXPIRY = '15m';
@@ -202,7 +202,10 @@ router.post('/login', loginLimiter, async (req, res) => {
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
-    try { await syncMasterToUser(user._id); } catch (syncErr) { console.error('[auth/login] sync error:', syncErr.message); }
+    try {
+      await cleanupNameCollisionClones(user._id);
+      await syncMasterToUser(user._id);
+    } catch (syncErr) { console.error('[auth/login] sync error:', syncErr.message); }
 
     const publicUser = { _id: user._id, name: user.name, email: user.email, imgUrl: user.imgUrl };
     return res.json({ token, user: publicUser });
@@ -246,7 +249,10 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
-    try { await syncMasterToUser(user._id); } catch (syncErr) { console.error('[auth/refresh] sync error:', syncErr.message); }
+    try {
+      await cleanupNameCollisionClones(user._id);
+      await syncMasterToUser(user._id);
+    } catch (syncErr) { console.error('[auth/refresh] sync error:', syncErr.message); }
 
     return res.json({ token });
   } catch (err) {
@@ -303,6 +309,11 @@ router.post('/guest', async (req, res) => {
       sameSite: 'strict',
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
+
+    try {
+      await cleanupNameCollisionClones('dev-guest');
+      await syncMasterToUser('dev-guest');
+    } catch (syncErr) { console.error('[auth/guest] sync error:', syncErr.message); }
 
     return res.json({
       token,

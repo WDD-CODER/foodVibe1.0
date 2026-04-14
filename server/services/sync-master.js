@@ -64,9 +64,10 @@ async function syncMasterToUser(userId) {
   for (const entityType of CLONEABLE_TYPES) {
     const col = db.collection(entityType);
 
-    const [masterDocs, userDocs] = await Promise.all([
+    const [masterDocs, userDocs, allUserDocs] = await Promise.all([
       col.find({ userId: '__master__' }).toArray(),
       col.find({ userId, _masterId: { $ne: null } }).toArray(),
+      col.find({ userId }, { projection: { _id: 1, name_hebrew: 1 } }).toArray(),
     ]);
 
     if (masterDocs.length === 0) continue;
@@ -75,6 +76,17 @@ async function syncMasterToUser(userId) {
     const userByMasterId = new Map();
     for (const ud of userDocs) {
       userByMasterId.set(String(ud._masterId), ud);
+    }
+
+    // Build name index for all user docs (to detect name collisions on Rule 1).
+    // Prevents cloning a master item when the user already owns a same-name item.
+    const NAMED_TYPES = new Set(['RECIPE_LIST', 'DISH_LIST']);
+    const userNameSet = new Set();
+    if (NAMED_TYPES.has(entityType)) {
+      for (const ud of allUserDocs) {
+        const n = ud.name_hebrew?.trim();
+        if (n) userNameSet.add(n);
+      }
     }
 
     const toInsert = [];
@@ -86,6 +98,14 @@ async function syncMasterToUser(userId) {
 
       if (!existing) {
         // Rule 1: new master item — clone to user
+        // Skip if the user already has any item with the same name (name-collision guard).
+        if (NAMED_TYPES.has(entityType)) {
+          const masterName = master.name_hebrew?.trim();
+          if (masterName && userNameSet.has(masterName)) {
+            console.log(`[sync-master]   ${entityType}: skipping clone — name collision "${masterName}"`);
+            continue;
+          }
+        }
         const newId = makeId();
         const { _id: _mid, userId: _u, _masterId: _m, _userModified: _um, ...rest } = master;
         const clone = {
@@ -146,4 +166,54 @@ async function syncMasterToUser(userId) {
   return { inserted: totalInserted, updated: totalUpdated };
 }
 
-module.exports = { syncMasterToUser };
+/**
+ * One-time cleanup: removes auto-cloned records (_masterId != null) when the user
+ * already owns a same-name record with _masterId == null (user-created / old-seed record).
+ * User-created records always take precedence over auto-cloned master copies.
+ *
+ * Safe to run multiple times (idempotent).
+ *
+ * @param {string} userId
+ * @returns {Promise<number>} number of orphan clones removed
+ */
+async function cleanupNameCollisionClones(userId) {
+  const db = mongoose.connection.db;
+  const NAMED_TYPES = ['RECIPE_LIST', 'DISH_LIST'];
+  let totalRemoved = 0;
+
+  for (const entityType of NAMED_TYPES) {
+    const col = db.collection(entityType);
+    const allUserDocs = await col.find({ userId }).toArray();
+
+    // Build map: name → list of docs
+    const byName = new Map();
+    for (const doc of allUserDocs) {
+      const n = doc.name_hebrew?.trim();
+      if (!n) continue;
+      if (!byName.has(n)) byName.set(n, []);
+      byName.get(n).push(doc);
+    }
+
+    const idsToDelete = [];
+    for (const [, docs] of byName) {
+      if (docs.length < 2) continue;
+      // If there is at least one user-created doc (_masterId null), delete the clones
+      const hasUserCreated = docs.some(d => !d._masterId);
+      if (!hasUserCreated) continue;
+      const clones = docs.filter(d => d._masterId);
+      for (const clone of clones) {
+        idsToDelete.push(clone._id);
+      }
+    }
+
+    if (idsToDelete.length > 0) {
+      const result = await col.deleteMany({ _id: { $in: idsToDelete } });
+      totalRemoved += result.deletedCount;
+      console.log(`[sync-master] cleanup ${entityType}: removed ${result.deletedCount} orphan clones for user ${userId}`);
+    }
+  }
+
+  return totalRemoved;
+}
+
+module.exports = { syncMasterToUser, cleanupNameCollisionClones };

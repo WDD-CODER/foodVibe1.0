@@ -1,4 +1,4 @@
-# Session State — 2026-04-14
+# Session State — 2026-04-13
 
 > Single source of continuity. Read this at session start, update it at session end.
 
@@ -7,40 +7,70 @@
 ## Current Status
 
 **Branch:** `main`
-**Latest commit:** `ab73c3d`
-**Test baseline:** passing (Plan 266 build verified)
-**Build status:** passing
+**Latest commit:** `250552b` (Merge PR #109 — context-management session-handoff)
+**Build status:** passing (last verified this session)
 **Open PRs:** none
 
 ---
 
 ## Session Summary
 
-- Shipped Plan 266: cook timer / labor time separation — cook-view now shows a per-step countdown timer (h:mm:ss), recipe-builder has a separate cook time field, labor time hidden from cooking mode. Merged PR #108.
-- Built Plan 267 context-management system: installed claude-code-session-kit hooks (context-monitor, pre-compact-reminder, session-startup, handoff-check) into `scripts/` and merged into `.claude/settings.json`; created `docs/session-state.md`; added `## Context hygiene` to all 6 agent personas; created `.claude/skills/context-management/SKILL.md`.
-- Removed redundant custom `/checkpoint` and `/resume` commands — gstack already handles checkpoint/resume with auto-detection (`/resume` with no args loads most recent).
-- Plan 267 changes are uncommitted — ready to commit and PR.
+Fixed the `pendingChangesGuard` (canDeactivate) bug on the recipe-builder:
+
+1. **`recipe-form.service.ts`** — Added `{ emitEvent: false }` to `form.patchValue()` in `patchFormFromRecipe` to prevent `recipe_type.valueChanges` from firing during form initialization, which was triggering stale `name_hebrew.updateValueAndValidity()` calls in component-reuse scenarios.
+
+2. **`recipe-builder.page.ts`** — Rewrote `saveAndWait()` as async:
+   - Neto yield confirmation gate added (matches `saveRecipe()` parity)
+   - Stale `duplicateName` error: re-triggers fresh validation before saving
+   - Waits for PENDING async validators to settle via `statusChanges.pipe(filter, take(1))`
+   - Removed debug `console.log` statements from `hasRealChanges()`
+
+3. **`recipe-header.component.ts`** — Added `yieldManuallyChanged` output + wrapper methods `onPrimaryAmountChange` / `onPrimaryUnitChange` so parent can reset `netoConfirmed` signal when yield changes.
+
+4. **Server-side name collision fix** (root cause of "name already taken" on Save & Leave):
+   - `sync-master.js`: Added `cleanupNameCollisionClones()` function — detects and removes duplicate user clones where `name_hebrew` collides with an existing user recipe
+   - `sync-master.js`: Added `userNameSet` guard in `syncMasterToUser()` — skips cloning master items whose name already exists in user namespace (Rule 1)
+   - `auth.js`: Calls `cleanupNameCollisionClones(userId)` before `syncMasterToUser()` on login, refresh, and guest login
+   - `generic.js`: Added `_masterId` fallback lookup — if a doc isn't found by `_id` in user namespace, tries `{ _masterId: requestedId, userId }` to handle post-login returnUrl race
+
+5. **`recipe-data.service.ts` + `dish-data.service.ts`**: Rethrow `404` errors (alongside existing `401` rethrow) so callers can handle "not found" explicitly.
+
+---
+
+## Uncommitted Changes
+
+All 10 modified files are uncommitted. Ready to stage and commit:
+- `src/app/pages/recipe-builder/recipe-builder.page.ts`
+- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts`
+- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html`
+- `src/app/pages/recipe-builder/recipe-builder.page.html`
+- `src/app/core/services/recipe-data.service.ts`
+- `src/app/core/services/dish-data.service.ts`
+- `server/routes/auth.js`
+- `server/routes/generic.js`
+- `server/services/sync-master.js`
+- `.claude/reflect/failure-log.tsv` (skip — pre-commit hook artifact)
 
 ---
 
 ## Next Steps
 
-1. Commit and PR Plan 267 changes (context-management system, session-kit hooks, agent persona edits, CLAUDE.md session section, docs/session-state.md)
-2. Verify `session-startup.sh` fires correctly on next session start and loads this file into context
-3. Address Plan 234 re-opened operational tasks (stamp migration, manual deploy/smoke test) — see `todo.md`
+1. Commit and PR the pending-changes guard fix + server name-collision fix (suggest branch `fix/pending-changes-guard-save-and-leave`)
+2. Run `cleanupNameCollisionClones` against production data to clear existing bad clones (requires manual Atlas/Compass access or a one-time migration script)
+3. Manual smoke test: open recipe-builder → make a change → navigate away → confirm "Save & Leave" succeeds without "name already taken"
+4. Address Plan 234 operational tasks (stamp migration, manual deploy/smoke test) — see `todo.md`
 
 ---
 
 ## Blocked
 
 - Plan 234 operational tasks require manual Atlas/Compass access and production deploy — cannot be agent-executed
+- Name collision cleanup in production requires manual run or deploy of migration script
 
 ---
 
 ## References
 
-- `plans/267-context-management-session-handoff.plan.md` — context-management system plan
-- `plans/session-kit-eval.md` — full session-kit compatibility report
-- `plans/session-handoff-setup.md` — user-facing guide to the handoff system
-- `.claude/skills/context-management/SKILL.md` — checkpoint trigger rules for agents
-- `scripts/` — 4 session-kit hook scripts (context-monitor, pre-compact-reminder, session-startup, handoff-check)
+- `server/services/sync-master.js` — `cleanupNameCollisionClones()` + `userNameSet` guard
+- `src/app/pages/recipe-builder/recipe-builder.page.ts` — `saveAndWait()` async rewrite
+- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts` — `yieldManuallyChanged` output

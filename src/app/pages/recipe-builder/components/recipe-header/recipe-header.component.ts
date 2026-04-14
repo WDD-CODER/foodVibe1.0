@@ -54,6 +54,19 @@ export class RecipeHeaderComponent {
   openUnitCreator = output<string>();
   imageChange = output<string>();
   ratingChange = output<number>();
+  /** Fires whenever the user actively changes the primary yield amount or unit. */
+  yieldManuallyChanged = output<void>();
+
+  // YIELD WRAPPERS — emit yieldManuallyChanged so the parent can reset netoConfirmed
+  onPrimaryAmountChange(val: number): void {
+    this.yield.onScalingChipAmountChange(val);
+    this.yieldManuallyChanged.emit();
+  }
+
+  onPrimaryUnitChange(unit: string): void {
+    this.yield.setPrimaryUnit(unit);
+    this.yieldManuallyChanged.emit();
+  }
 
   // YIELD MANAGER
   readonly yield = new RecipeYieldManager(

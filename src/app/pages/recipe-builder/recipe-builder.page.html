@@ -121,7 +121,7 @@
         [resetTrigger]="resetTrigger_()" [autoLabels]="liveAutoLabels_()" (openUnitCreator)="onOpenUnitCreator()"
         [imageUrl]="recipeImageUrl_()" (imageChange)="onImageChange($event)" [readonlyMode]="historyViewMode_()"
         [rating]="recipeRating_()" (ratingChange)="recipeRating_.set($event)"
-        [netoConfirmed]="netoConfirmed_()"></app-recipe-header>
+        [netoConfirmed]="netoConfirmed_()" (yieldManuallyChanged)="netoConfirmed_.set(false)"></app-recipe-header>
     </section>
 
     <section class="builder-section">

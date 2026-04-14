@@ -57,10 +57,10 @@
                     [unitOptions]="yield.primaryUnitOptions_()"
                     [minAmount]="yield.currentRecipeTypeDisplay_() === 'dish' ? 1 : 0"
                     [stepOptions]="{ unit: yield.primaryUnitLabel_() }"
-                    (valueChange)="yield.onScalingChipAmountChange($event)"
-                    (unitChange)="yield.setPrimaryUnit($event)"
+                    (valueChange)="onPrimaryAmountChange($event)"
+                    (unitChange)="onPrimaryUnitChange($event)"
                     (createUnit)="onCreateUnit()" />
-                @if (yield.yieldDiffersFromComputed_() && !netoConfirmed()) {
+                @if (yield.yieldDiffersFromComputed_()) {
                     <button type="button" class="yield-sync-badge"
                         (click)="yield.resetManualOverride(); $event.stopPropagation()"
                         [title]="'yield_sync_to_total' | translatePipe">

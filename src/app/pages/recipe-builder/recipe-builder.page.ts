@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed, OnInit, OnDestroy, DestroyRef, afterNextRender, Injector, runInInjectionContext, viewChild } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { filter, startWith, map, timer, switchMap, of, take, type Observable, type Subscription } from 'rxjs';
+import { filter, firstValueFrom, startWith, map, timer, switchMap, of, take, type Observable, type Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
@@ -554,51 +554,58 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   }
 
   /** For pendingChangesGuard: save the recipe and resolve once done. */
-  saveAndWait(): Promise<boolean> {
+  async saveAndWait(): Promise<boolean> {
+    const headerValid = this.recipeHeaderRef_()?.validate() ?? true;
+
+    // Neto confirmation gate — same as saveRecipe(): if the user has manually
+    // overridden the yield amount and hasn't confirmed it, ask before saving.
+    const headerRef = this.recipeHeaderRef_();
+    if (headerRef?.isYieldManualOverride() && !this.netoConfirmed_()) {
+      const confirmed = await this.confirmModal_.open(
+        'neto_confirm_message',
+        { saveLabel: 'confirm', headerKey: 'neto_confirm_header' }
+      );
+      if (!confirmed) return false;
+      this.netoConfirmed_.set(true);
+    }
+
+    // Safety net: if a stale duplicateName error survived to this point, re-validate.
+    const nameCtrl = this.recipeForm_.get('name_hebrew');
+    if (nameCtrl?.errors?.['duplicateName'] && !this.recipeForm_.pending) {
+      nameCtrl.updateValueAndValidity();
+    }
+
+    // Wait for async validators to settle before checking validity.
+    if (this.recipeForm_.pending) {
+      await firstValueFrom(
+        this.recipeForm_.statusChanges.pipe(filter(s => s !== 'PENDING'), take(1))
+      );
+    }
+
+    if (this.recipeForm_.invalid || !headerValid) {
+      this.recipeForm_.markAllAsTouched();
+      const msg = this.getRecipeValidationError_();
+      this.userMsg_.onSetErrorMsg(msg);
+      return false;
+    }
+
+    this.saving.setSaving(true);
+    const recipe = this.buildRecipeFromForm();
+    recipe.autoLabels_ = this.recipeFormService_.computeAutoLabels(recipe);
+
     return new Promise<boolean>((resolve) => {
-      const headerValid = this.recipeHeaderRef_()?.validate() ?? true;
-
-      const doSave = () => {
-        if (this.recipeForm_.invalid || !headerValid) {
-          this.recipeForm_.markAllAsTouched();
-          const msg = this.getRecipeValidationError_();
-          this.userMsg_.onSetErrorMsg(msg);
+      this.state_.saveRecipe(recipe).subscribe({
+        next: () => {
+          this.saving.setSaving(false);
+          this.isSubmitted = true;
+          resolve(true);
+        },
+        error: () => {
+          this.saving.setSaving(false);
+          this.userMsg_.onSetErrorMsg(this.translation_.translate('error_saving_recipe'));
           resolve(false);
-          return;
         }
-        this.saving.setSaving(true);
-        const recipe = this.buildRecipeFromForm();
-        recipe.autoLabels_ = this.recipeFormService_.computeAutoLabels(recipe);
-        this.state_.saveRecipe(recipe).subscribe({
-          next: () => {
-            this.saving.setSaving(false);
-            this.isSubmitted = true;
-            resolve(true);
-          },
-          error: () => {
-            this.saving.setSaving(false);
-            this.userMsg_.onSetErrorMsg(this.translation_.translate('error_saving_recipe'));
-            resolve(false);
-          }
-        });
-      };
-
-      // Safety net: if a stale duplicateName error somehow survived to this point,
-      // kick off a fresh validation. Must NOT use emitEvent:false — the statusChanges
-      // subscription below depends on the event being emitted.
-      const nameCtrl = this.recipeForm_.get('name_hebrew');
-      if (nameCtrl?.errors?.['duplicateName'] && !this.recipeForm_.pending) {
-        nameCtrl.updateValueAndValidity();
-      }
-
-      // If async validators are running, wait for them to settle then save.
-      if (this.recipeForm_.pending) {
-        this.recipeForm_.statusChanges
-          .pipe(filter(s => s !== 'PENDING'), take(1))
-          .subscribe(() => doSave());
-      } else {
-        doSave();
-      }
+      });
     });
   }
 

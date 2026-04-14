@@ -63,10 +63,16 @@ router.get('/:type', optionalToken, async (req, res) => {
 router.get('/:type/:id', optionalToken, async (req, res) => {
   try {
     const userId = req.user ? req.user.userId : '__master__';
-    const doc = await col(req.params.type).findOne({
+    let doc = await col(req.params.type).findOne({
       _id: req.params.id,
       userId,
     });
+    // If not found in user namespace, check if the request ID is a master _id and the
+    // user has a cloned copy (linked via _masterId). This handles the post-login race
+    // where the returnUrl carries a master ID but the user's copy has a different _id.
+    if (!doc && userId !== '__master__') {
+      doc = await col(req.params.type).findOne({ _masterId: req.params.id, userId });
+    }
     if (!doc) {
       return res.status(404).json({ error: `Cannot get, Item ${req.params.id} of type: ${req.params.type} does not exist` });
     }
