@@ -203,13 +203,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     { initialValue: 1 }
   );
 
-  protected recipeType_ = toSignal(
-    this.recipeForm_.get('recipe_type')!.valueChanges.pipe(
-      startWith(this.recipeForm_.get('recipe_type')?.value ?? 'preparation'),
-      map((v: string | null) => (v === 'dish' ? 'dish' : 'preparation'))
-    ),
-    { initialValue: 'preparation' as const }
-  );
+  /** Writable signal so patchFormFromRecipe can update it even when emitEvent:false suppresses valueChanges. */
+  protected recipeType_ = signal<'dish' | 'preparation'>('preparation');
 
   /** Auto-labels from current form ingredients (for header preview). */
   protected liveAutoLabels_ = computed(() => {
@@ -245,7 +240,10 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
     this.recipeForm_.get('recipe_type')?.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(type => this.onRecipeTypeChange(type));
+      .subscribe(type => {
+        this.recipeType_.set(type === 'dish' ? 'dish' : 'preparation');
+        this.onRecipeTypeChange(type);
+      });
   }
 
   private onRecipeTypeChange(type: string | null): void {
@@ -512,6 +510,10 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     this.recipeImageUrl_.set(recipe.imageUrl_ ?? null)
     this.recipeRating_.set(recipe.rating_ ?? 0)
     this.netoConfirmed_.set(recipe.neto_confirmed_ ?? false);
+    // patchFormFromRecipe uses emitEvent:false, so recipe_type.valueChanges never fires.
+    // Manually sync recipeType_ so the template renders the correct workflow format.
+    const isDish = this.recipeForm_.get('recipe_type')?.value === 'dish';
+    this.recipeType_.set(isDish ? 'dish' : 'preparation');
   }
 
 
