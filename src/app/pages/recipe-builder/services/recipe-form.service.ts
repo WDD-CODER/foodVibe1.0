@@ -287,7 +287,7 @@ export class RecipeFormService {
       total_weight_g: 0,
       total_cost: 0,
       labels: normalizedLabels
-    })
+    }, { emitEvent: false })
 
     const yieldArr = form.get('yield_conversions') as FormArray
     const conversions = recipe.yield_conversions_?.length

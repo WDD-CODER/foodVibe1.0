@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed, OnInit, OnDestroy, DestroyRef, afterNextRender, Injector, runInInjectionContext, viewChild } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { filter, startWith, map, timer, switchMap, of, type Observable } from 'rxjs';
+import { filter, startWith, map, timer, switchMap, of, take, type Observable, type Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
@@ -101,6 +101,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   /** Snapshot of form value when user entered the page (for hasRealChanges). */
   private initialRecipeSnapshot_: string | null = null;
+  /** Tracks the recipe_type → name re-validation subscription so it doesn't stack on component reuse. */
+  private recipeTypeRevalidationSub_?: Subscription;
 
   /** When set, the ingredients table will focus the search input at this row index; cleared after focus. */
   protected focusIngredientSearchAtRow_ = signal<number | null>(null);
@@ -201,13 +203,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     { initialValue: 1 }
   );
 
-  protected recipeType_ = toSignal(
-    this.recipeForm_.get('recipe_type')!.valueChanges.pipe(
-      startWith(this.recipeForm_.get('recipe_type')?.value ?? 'preparation'),
-      map((v: string | null) => (v === 'dish' ? 'dish' : 'preparation'))
-    ),
-    { initialValue: 'preparation' as const }
-  );
+  /** Writable signal so patchFormFromRecipe can update it even when emitEvent:false suppresses valueChanges. */
+  protected recipeType_ = signal<'dish' | 'preparation'>('preparation');
 
   /** Auto-labels from current form ingredients (for header preview). */
   protected liveAutoLabels_ = computed(() => {
@@ -243,7 +240,10 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
     this.recipeForm_.get('recipe_type')?.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(type => this.onRecipeTypeChange(type));
+      .subscribe(type => {
+        this.recipeType_.set(type === 'dish' ? 'dish' : 'preparation');
+        this.onRecipeTypeChange(type);
+      });
   }
 
   private onRecipeTypeChange(type: string | null): void {
@@ -370,6 +370,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         this.recipeId_.set(recipe._id);
         this.patchFormFromRecipe(recipe);
       } else {
+        this.recipeId_.set(null);
         const gotDraft = this.aiFlow_.applyPendingDraft()
         if (!gotDraft) {
           const type = this.route_.snapshot.queryParams['type'] as string | undefined;
@@ -402,11 +403,16 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       }
     }
     this.recipeForm_.get('name_hebrew')?.setAsyncValidators([(ctrl) => this.duplicateNameValidator_(ctrl)]);
-    this.recipeForm_.get('recipe_type')?.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.recipeForm_.get('name_hebrew')?.updateValueAndValidity({ emitEvent: false }));
+    // Prevent stacking on component reuse (Angular reuses the same instance across
+    // recipe-builder/:id navigations — destroyRef never fires).
+    this.recipeTypeRevalidationSub_?.unsubscribe();
+    this.recipeTypeRevalidationSub_ = this.recipeForm_.get('recipe_type')?.valueChanges
+      .subscribe(() => this.recipeForm_.get('name_hebrew')?.updateValueAndValidity());
     this.updateTotalWeightG();
     this.recipeForm_.markAsPristine();
+    // Clear any stale async-validation errors left over from a previous recipe on
+    // this reused component instance, and run a fresh check with the correct ID.
+    this.recipeForm_.get('name_hebrew')?.updateValueAndValidity();
     if (!this.historyViewMode_() && !this.recipeForm_.disabled) {
       this.initialRecipeSnapshot_ = this.getRecipeSnapshotForComparison();
     }
@@ -447,6 +453,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.closeAllExportOverlays();
     this.heroFab_.clearPageActions();
+    this.recipeTypeRevalidationSub_?.unsubscribe();
   }
 
   // ─── AI Edit ─────────────────────────────────────────────────────
@@ -503,6 +510,10 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     this.recipeImageUrl_.set(recipe.imageUrl_ ?? null)
     this.recipeRating_.set(recipe.rating_ ?? 0)
     this.netoConfirmed_.set(recipe.neto_confirmed_ ?? false);
+    // patchFormFromRecipe uses emitEvent:false, so recipe_type.valueChanges never fires.
+    // Manually sync recipeType_ so the template renders the correct workflow format.
+    const isDish = this.recipeForm_.get('recipe_type')?.value === 'dish';
+    this.recipeType_.set(isDish ? 'dish' : 'preparation');
   }
 
 
@@ -526,8 +537,6 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   /** For pendingChangesGuard: true when current form value differs from initial state when user entered the page. */
   hasRealChanges(): boolean {
-    // DEBUG — remove after diagnosis
-    console.log('[recipe hasRealChanges] historyView:', this.historyViewMode_(), 'disabled:', this.recipeForm_.disabled, 'recipeId:', this.recipeId_(), 'snapshotNull:', this.initialRecipeSnapshot_ === null, 'dirty:', this.recipeForm_.dirty)
     if (this.historyViewMode_() || this.recipeForm_.disabled) return false;
 
     if (!this.recipeId_()) {
@@ -541,8 +550,6 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
     if (this.initialRecipeSnapshot_ === null) return this.recipeForm_.dirty === true;
     const current = this.getRecipeSnapshotForComparison()
-    // DEBUG
-    console.log('[recipe hasRealChanges] snapshots equal:', current === this.initialRecipeSnapshot_)
     return current !== this.initialRecipeSnapshot_;
   }
 
@@ -550,38 +557,49 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   saveAndWait(): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
       const headerValid = this.recipeHeaderRef_()?.validate() ?? true;
-      if (this.recipeForm_.pending) {
-        this.userMsg_.onSetErrorMsg(this.translation_.translate('validating_please_wait') ?? 'אנא המתן לסיום האימות');
-        resolve(false);
-        return;
-      }
-      if (this.recipeForm_.invalid || !headerValid) {
-        this.recipeForm_.markAllAsTouched()
-        const msg = this.getRecipeValidationError_()
-        this.userMsg_.onSetErrorMsg(msg)
-        resolve(false)
-        return
-      }
 
-      this.saving.setSaving(true)
-      const recipe = this.buildRecipeFromForm()
-      recipe.autoLabels_ = this.recipeFormService_.computeAutoLabels(recipe)
-
-      this.state_.saveRecipe(recipe).subscribe({
-        next: () => {
-          this.saving.setSaving(false)
-          this.isSubmitted = true
-          resolve(true)
-        },
-        error: () => {
-          this.saving.setSaving(false)
-          this.userMsg_.onSetErrorMsg(
-            this.translation_.translate('error_saving_recipe')
-          )
-          resolve(false)
+      const doSave = () => {
+        if (this.recipeForm_.invalid || !headerValid) {
+          this.recipeForm_.markAllAsTouched();
+          const msg = this.getRecipeValidationError_();
+          this.userMsg_.onSetErrorMsg(msg);
+          resolve(false);
+          return;
         }
-      })
-    })
+        this.saving.setSaving(true);
+        const recipe = this.buildRecipeFromForm();
+        recipe.autoLabels_ = this.recipeFormService_.computeAutoLabels(recipe);
+        this.state_.saveRecipe(recipe).subscribe({
+          next: () => {
+            this.saving.setSaving(false);
+            this.isSubmitted = true;
+            resolve(true);
+          },
+          error: () => {
+            this.saving.setSaving(false);
+            this.userMsg_.onSetErrorMsg(this.translation_.translate('error_saving_recipe'));
+            resolve(false);
+          }
+        });
+      };
+
+      // Safety net: if a stale duplicateName error somehow survived to this point,
+      // kick off a fresh validation. Must NOT use emitEvent:false — the statusChanges
+      // subscription below depends on the event being emitted.
+      const nameCtrl = this.recipeForm_.get('name_hebrew');
+      if (nameCtrl?.errors?.['duplicateName'] && !this.recipeForm_.pending) {
+        nameCtrl.updateValueAndValidity();
+      }
+
+      // If async validators are running, wait for them to settle then save.
+      if (this.recipeForm_.pending) {
+        this.recipeForm_.statusChanges
+          .pipe(filter(s => s !== 'PENDING'), take(1))
+          .subscribe(() => doSave());
+      } else {
+        doSave();
+      }
+    });
   }
 
   /** Normalized form value for comparison (numbers coerced, labels sorted). */
@@ -929,6 +947,10 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
           if (saved._id && saved._id !== this.recipeId_()) {
             this.recipeId_.set(saved._id);
           }
+          // Refresh the entry-time snapshot so the pending-changes guard does not
+          // fire when the user navigates away after a successful in-place save.
+          this.initialRecipeSnapshot_ = this.getRecipeSnapshotForComparison();
+          this.recipeForm_.markAsPristine();
           this.userMsg_.onSetSuccessMsg(
             this.translation_.translate(this.isApproved_() ? 'approval_success' : 'unapproval_success')
           );

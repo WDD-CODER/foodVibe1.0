@@ -91,3 +91,6 @@ backups/
 # MemPalace
 chroma.sqlite3
 mine-progress.ps1
+
+# One-time migration scripts
+apply-*.js
