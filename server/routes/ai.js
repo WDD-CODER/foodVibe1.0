@@ -1,6 +1,33 @@
 const { Router } = require('express');
 const mongoose = require('mongoose');
-const { verifyToken } = require('../middleware/auth');
+const { verifyToken, requireAdmin } = require('../middleware/auth');
+const dns = require('node:dns').promises;
+
+const PRIVATE_IP_RANGES = [
+  /^127\./,
+  /^::1$/,
+  /^10\./,
+  /^172\.(1[6-9]|2\d|3[01])\./,
+  /^192\.168\./,
+  /^169\.254\./,
+  /^fe80:/i,
+  /^fc/i,
+  /^fd/i,
+];
+
+async function isSafeUrl(rawUrl) {
+  let parsed;
+  try { parsed = new URL(rawUrl); } catch { return false; }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+  const hostname = parsed.hostname;
+  if (PRIVATE_IP_RANGES.some(re => re.test(hostname))) return false;
+  let addresses;
+  try {
+    const results = await dns.lookup(hostname, { all: true });
+    addresses = results.map(r => r.address);
+  } catch { return false; }
+  return !addresses.some(addr => PRIVATE_IP_RANGES.some(re => re.test(addr)));
+}
 
 const router = Router();
 
@@ -211,10 +238,18 @@ async function getApprovedShots(limit = 2) {
 // block prepended to the system prompt.
 // ---------------------------------------------------------------------------
 
+function escapeForPrompt(str) {
+  return String(str)
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r');
+}
+
 function buildFewShotBlock(shots) {
   if (!Array.isArray(shots) || shots.length === 0) return '';
   const examples = shots
-    .map(s => `קלט: "${s.prompt}"\nפלט: ${JSON.stringify(s.draft)}`)
+    .map(s => `קלט: "${escapeForPrompt(s.prompt)}"\nפלט: ${JSON.stringify(s.draft)}`)
     .join('\n\n');
   return `## דוגמאות מאושרות מהמשתמש\n${examples}\n\n`;
 }
@@ -667,6 +702,10 @@ router.post('/generate-from-url', verifyToken, async (req, res) => {
   if (!/^https?:\/\//i.test(url.trim())) {
     return res.status(400).json({ error: 'url must start with http:// or https://' });
   }
+  const safe = await isSafeUrl(url.trim());
+  if (!safe) {
+    return res.status(400).json({ error: 'url resolves to a disallowed address' });
+  }
 
   let pageText;
   try {
@@ -748,7 +787,7 @@ router.post('/generate-from-url', verifyToken, async (req, res) => {
 // Requires a valid JWT.
 // ---------------------------------------------------------------------------
 
-router.post('/shots', verifyToken, async (req, res) => {
+router.post('/shots', verifyToken, requireAdmin, async (req, res) => {
   const { prompt, draft, status, source } = req.body;
 
   if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {

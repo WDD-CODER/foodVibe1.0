@@ -8,7 +8,7 @@ const router = Router();
 
 // The auth entity type is managed exclusively by the auth router.
 // Block direct access via the generic data API.
-const BLOCKED_ENTITY_TYPES = new Set(['signed-users-db', 'users']);
+const BLOCKED_ENTITY_TYPES = new Set(['signed-users-db', 'users', 'GEMINI_SHOTS', 'GEMINI_USAGE']);
 router.use('/:type', (req, res, next) => {
   if (BLOCKED_ENTITY_TYPES.has(req.params.type)) {
     return res.status(403).json({ error: 'Access to this entity type is not permitted' });
