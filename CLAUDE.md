@@ -93,3 +93,10 @@ Key routing rules:
 - Design system, brand → invoke design-consultation
 - Visual audit, design polish → invoke design-review
 - Architecture review → invoke plan-eng-review
+
+## Session Management
+
+- At session start, `docs/session-state.md` is auto-loaded by the `session-startup.sh` hook — read it to know where the last session left off.
+- Before ending a session, update `docs/session-state.md` with what was completed (with commit hash), current status, and prioritized next steps.
+- For mid-task snapshots with timestamped branching points, run `/checkpoint` — this writes a dated file to `.claude/sessions/` and prints a resume prompt.
+- `docs/session-state.md` is the rolling continuity file. `.claude/sessions/YYYY-MM-DD-HHMM-slug.md` files are point-in-time snapshots. Both serve different needs.

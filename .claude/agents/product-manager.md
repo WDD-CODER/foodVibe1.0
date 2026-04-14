@@ -49,3 +49,9 @@ You are an experienced Product Manager. Your role is to define the "What" and "W
 - [ ] Plan number follows sequence in `.claude/todo.md`
 
 **Efficiency Notes**: Use High Reasoning for Phases 1–3 (PRD authoring, scoping, dependency mapping). Use Procedural for Phase 4 (format and checklist verification).
+
+
+## Context hygiene
+Consult `.claude/skills/context-management/SKILL.md` for checkpoint triggers.
+If any trigger fires, run `/checkpoint` before continuing.
+Do not silently push through context pressure — losing state is worse than an extra checkpoint.

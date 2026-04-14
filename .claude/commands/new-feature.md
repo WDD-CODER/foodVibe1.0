@@ -86,8 +86,11 @@ At ANY question, user can say "skip", "just do it", "go ahead", or similar:
 
 **If searching:**
 1. `WebSearch` for "[feature keywords] angular library" and "[feature keywords] existing solution 2026"
-2. Read top 2-3 results
-3. Synthesize: "Found [library/pattern] that does [X]% of this. Could save [estimate] of development."
+2. Fetch **2-3 URLs** to build a spectrum of options — aim for variety (different libraries, different approaches)
+3. **One attempt per URL** — if a fetch returns 429, is blocked, or is rejected → skip it, move to the next candidate. Never retry the same URL or burn an attempt on an alternative for the same result
+4. **Hard cap: 3 fetch attempts total**, counting failures. Stop after the third attempt regardless of how many succeeded
+5. Synthesize what you have — even 1-2 successful fetches is enough for a useful spectrum
+6. If all fetches failed → note "Landscape search inconclusive" and proceed to Phase 3 silently
 
 **HARD STOP if significant finding:**
 ```
@@ -188,6 +191,8 @@ Recommendation: [X] because [one-line reason]
 ## Behavioral Rules
 
 - Total flow should take **2-5 minutes** for a typical feature, not 20 minutes
+- **Landscape search budget: max 3 fetch attempts** — aim for 2-3 options (a spectrum), stop hard at 3 attempts whether they succeeded or failed
+- **One attempt per URL:** 429, rate-limit, or rejected = skip that URL and move on — never retry the same URL or burn a second attempt chasing the same result
 - 3 hard stops total: (1) landscape search finds significant existing solution, (2) premise challenge agree/disagree, (3) choose approach + confirm brief
 - Forcing questions are natural conversation turns, not hard stops
 - If user provides a complete, specific brief upfront → skip Phases 1-4, go straight to Phase 5

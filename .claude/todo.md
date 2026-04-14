@@ -2,6 +2,22 @@
 
 ---
 
+### Plan 267 — Context Management + Session Handoff (`plans/267-context-management-session-handoff.plan.md`)
+
+- [x] Task 1: `scripts/` — copy 4 session-kit hooks (context-monitor.sh, pre-compact-reminder.sh, session-startup.sh, handoff-check.sh) + chmod +x
+- [x] Task 2: `docs/session-state.md` — create from session-kit template
+- [x] Task 3: `.claude/settings.json` — merge 4 hook entries (preserve existing PostToolUse)
+- [x] Task 4: `CLAUDE.md` — append `## Session Management` section
+- [x] Task 5: `.claude/skills/context-management/SKILL.md` — create detection heuristics skill
+- [x] Task 6: `.claude/commands/checkpoint.md` — create timestamped snapshot command
+- [x] Task 7: `.claude/commands/resume.md` — create confirmation-gated resume command
+- [x] Task 8: `.claude/agents/` — append `## Context hygiene` to 6 persona files
+- [x] Task 9: `.claude/sessions/README.md` — create naming/lifecycle explainer
+- [x] Task 10: `plans/session-handoff-setup.md` — write user-facing how-to doc
+- [x] Task 11: Verify `/rewind` works in current Claude Code install
+
+---
+
 ### Plan 265 — auto-solve Enforcement Fixes (`plans/265-auto-solve-enforcement-fixes.plan.md`)
 
 - [x] Task 1: `auto-solve.md` Phase 2 — Remove silent-archive shortcut; replace with route-to-Phase-5
