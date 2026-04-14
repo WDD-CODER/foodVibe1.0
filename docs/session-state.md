@@ -1,4 +1,4 @@
-# Session State — 2026-04-13
+# Session State — 2026-04-14
 
 > Single source of continuity. Read this at session start, update it at session end.
 
@@ -7,57 +7,42 @@
 ## Current Status
 
 **Branch:** `main`
-**Latest commit:** `250552b` (Merge PR #109 — context-management session-handoff)
-**Build status:** passing (last verified this session)
-**Open PRs:** none
+**Latest commit:** `7972591` (fix/recipe-builder: resolve canDeactivate save-and-leave + server name collision root cause)
+**Build status:** passing (verified 2026-04-14, warnings only)
+**Open PRs:** none — commit is unpushed
 
 ---
 
-## Session Summary
+## Session Summary (2026-04-14)
 
-Fixed the `pendingChangesGuard` (canDeactivate) bug on the recipe-builder:
+Fixed two bugs in the neto (net yield) confirmation flow of the recipe-builder:
 
-1. **`recipe-form.service.ts`** — Added `{ emitEvent: false }` to `form.patchValue()` in `patchFormFromRecipe` to prevent `recipe_type.valueChanges` from firing during form initialization, which was triggering stale `name_hebrew.updateValueAndValidity()` calls in component-reuse scenarios.
+### Bug 1: Neto confirmation modal not showing on re-edit
+- **Root cause:** `netoConfirmed_` signal was loaded from `recipe.neto_confirmed_` (which could be `true` from a previous save). When `true`, the gate `!this.netoConfirmed_()` blocked the modal from appearing even after a new manual yield override.
+- **Fix:** `recipe-header.component.ts` — wrapper methods `onPrimaryAmountChange()` / `onPrimaryUnitChange()` now emit `yieldManuallyChanged` output. Parent (`recipe-builder.page.html`) resets `netoConfirmed_.set(false)` via `(yieldManuallyChanged)` binding.
 
-2. **`recipe-builder.page.ts`** — Rewrote `saveAndWait()` as async:
-   - Neto yield confirmation gate added (matches `saveRecipe()` parity)
-   - Stale `duplicateName` error: re-triggers fresh validation before saving
-   - Waits for PENDING async validators to settle via `statusChanges.pipe(filter, take(1))`
-   - Removed debug `console.log` statements from `hasRealChanges()`
+### Bug 2: Sync-badge reset button hidden when `neto_confirmed_` was true on load
+- **Root cause:** Same `!netoConfirmed()` gate in the `@if` condition in `recipe-header.component.html`.
+- **Fix:** Removed `&& !netoConfirmed()` from the condition — button now always shows when yield differs from computed.
 
-3. **`recipe-header.component.ts`** — Added `yieldManuallyChanged` output + wrapper methods `onPrimaryAmountChange` / `onPrimaryUnitChange` so parent can reset `netoConfirmed` signal when yield changes.
-
-4. **Server-side name collision fix** (root cause of "name already taken" on Save & Leave):
-   - `sync-master.js`: Added `cleanupNameCollisionClones()` function — detects and removes duplicate user clones where `name_hebrew` collides with an existing user recipe
-   - `sync-master.js`: Added `userNameSet` guard in `syncMasterToUser()` — skips cloning master items whose name already exists in user namespace (Rule 1)
-   - `auth.js`: Calls `cleanupNameCollisionClones(userId)` before `syncMasterToUser()` on login, refresh, and guest login
-   - `generic.js`: Added `_masterId` fallback lookup — if a doc isn't found by `_id` in user namespace, tries `{ _masterId: requestedId, userId }` to handle post-login returnUrl race
-
-5. **`recipe-data.service.ts` + `dish-data.service.ts`**: Rethrow `404` errors (alongside existing `401` rethrow) so callers can handle "not found" explicitly.
+All changes shipped in commit `7972591` (alongside canDeactivate + server name collision fixes).
 
 ---
 
 ## Uncommitted Changes
 
-All 10 modified files are uncommitted. Ready to stage and commit:
-- `src/app/pages/recipe-builder/recipe-builder.page.ts`
-- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts`
-- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html`
-- `src/app/pages/recipe-builder/recipe-builder.page.html`
-- `src/app/core/services/recipe-data.service.ts`
-- `src/app/core/services/dish-data.service.ts`
-- `server/routes/auth.js`
-- `server/routes/generic.js`
-- `server/services/sync-master.js`
-- `.claude/reflect/failure-log.tsv` (skip — pre-commit hook artifact)
+- `.claude/reflect/failure-log.tsv` — pre-commit hook artifact, skip
 
 ---
 
 ## Next Steps
 
-1. Commit and PR the pending-changes guard fix + server name-collision fix (suggest branch `fix/pending-changes-guard-save-and-leave`)
-2. Run `cleanupNameCollisionClones` against production data to clear existing bad clones (requires manual Atlas/Compass access or a one-time migration script)
-3. Manual smoke test: open recipe-builder → make a change → navigate away → confirm "Save & Leave" succeeds without "name already taken"
+1. **Push `7972591` to remote and open PR** — all 10-file fix is committed but unpushed
+2. **Run `cleanupNameCollisionClones` against production** to clear existing bad clones (requires manual Atlas/Compass access or one-time migration script)
+3. **Manual smoke tests:**
+   - Open recipe-builder → change yield manually → save → reopen → change yield again → confirm neto modal appears
+   - Navigate from a preparation recipe to a dish recipe → confirm no `workflow_items -> N -> instruction` crash
+   - Open recipe-builder → make a change → navigate away → confirm "Save & Leave" succeeds without "name already taken"
 4. Address Plan 234 operational tasks (stamp migration, manual deploy/smoke test) — see `todo.md`
 
 ---
@@ -71,6 +56,8 @@ All 10 modified files are uncommitted. Ready to stage and commit:
 
 ## References
 
+- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts` — `yieldManuallyChanged` output + wrappers
+- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html` — sync-badge condition fix
+- `src/app/pages/recipe-builder/recipe-builder.page.html` — `(yieldManuallyChanged)` binding
 - `server/services/sync-master.js` — `cleanupNameCollisionClones()` + `userNameSet` guard
 - `src/app/pages/recipe-builder/recipe-builder.page.ts` — `saveAndWait()` async rewrite
-- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts` — `yieldManuallyChanged` output
