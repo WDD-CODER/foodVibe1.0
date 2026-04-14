@@ -122,6 +122,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   /** True once user has explicitly confirmed the manual yield amount as neto. */
   protected netoConfirmed_ = signal(false);
 
+  /** Last-saved serving_portions for existing dish recipes. Null for new dishes (hides the reset button). */
+  protected savedPortions_ = signal<number | null>(null);
+
   /** User-uploaded recipe image as base64 data-URL; lives outside the form. */
   protected recipeImageUrl_ = signal<string | null>(null)
 
@@ -284,6 +287,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     this.recipeId_.set(null);
     this.isApproved_.set(false);
     this.netoConfirmed_.set(false);
+    this.savedPortions_.set(null);
     this.cachedPrepItems_ = [];
     this.cachedSteps_ = [];
 
@@ -510,9 +514,11 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     this.recipeImageUrl_.set(recipe.imageUrl_ ?? null)
     this.recipeRating_.set(recipe.rating_ ?? 0)
     this.netoConfirmed_.set(recipe.neto_confirmed_ ?? false);
+    // Capture saved portions for the dish reset button (only for existing dishes).
+    const isDish = this.recipeForm_.get('recipe_type')?.value === 'dish';
+    this.savedPortions_.set(isDish ? (recipe.yield_amount_ ?? null) : null);
     // patchFormFromRecipe uses emitEvent:false, so recipe_type.valueChanges never fires.
     // Manually sync recipeType_ so the template renders the correct workflow format.
-    const isDish = this.recipeForm_.get('recipe_type')?.value === 'dish';
     this.recipeType_.set(isDish ? 'dish' : 'preparation');
   }
 
@@ -557,13 +563,16 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   async saveAndWait(): Promise<boolean> {
     const headerValid = this.recipeHeaderRef_()?.validate() ?? true;
 
-    // Neto confirmation gate — same as saveRecipe(): if the user has manually
-    // overridden the yield amount and hasn't confirmed it, ask before saving.
+    // Neto/portions confirmation gate.
     const headerRef = this.recipeHeaderRef_();
     if (headerRef?.isYieldManualOverride() && !this.netoConfirmed_()) {
+      const isDish = this.recipeForm_.get('recipe_type')?.value === 'dish';
       const confirmed = await this.confirmModal_.open(
-        'neto_confirm_message',
-        { saveLabel: 'confirm', headerKey: 'neto_confirm_header' }
+        isDish ? 'dish_portions_confirm_message' : 'neto_confirm_message',
+        {
+          saveLabel: 'confirm',
+          headerKey: isDish ? 'dish_portions_confirm_header' : 'neto_confirm_header',
+        }
       );
       if (!confirmed) return false;
       this.netoConfirmed_.set(true);
@@ -925,12 +934,16 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       if (!confirmed) return;
     }
 
-    // Neto confirmation gate
+    // Neto/portions confirmation gate
     const headerRef = this.recipeHeaderRef_();
     if (headerRef?.isYieldManualOverride() && !this.netoConfirmed_()) {
+      const isDish = this.recipeForm_.get('recipe_type')?.value === 'dish';
       const confirmed = await this.confirmModal_.open(
-        'neto_confirm_message',
-        { saveLabel: 'confirm', headerKey: 'neto_confirm_header' }
+        isDish ? 'dish_portions_confirm_message' : 'neto_confirm_message',
+        {
+          saveLabel: 'confirm',
+          headerKey: isDish ? 'dish_portions_confirm_header' : 'neto_confirm_header',
+        }
       );
       if (!confirmed) return;
       this.netoConfirmed_.set(true);
@@ -958,6 +971,10 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
           // fire when the user navigates away after a successful in-place save.
           this.initialRecipeSnapshot_ = this.getRecipeSnapshotForComparison();
           this.recipeForm_.markAsPristine();
+          // Update savedPortions_ so the reset button reflects the newly saved value.
+          if (saved.recipe_type_ === 'dish') {
+            this.savedPortions_.set(saved.yield_amount_ ?? null);
+          }
           this.userMsg_.onSetSuccessMsg(
             this.translation_.translate(this.isApproved_() ? 'approval_success' : 'unapproval_success')
           );

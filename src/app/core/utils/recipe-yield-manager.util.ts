@@ -137,6 +137,12 @@ export class RecipeYieldManager {
     this.syncYieldFromMetrics()
   }
 
+  /** Dish-mode: reset serving_portions to the last saved value. */
+  resetToSavedPortions(savedPortions: number): void {
+    this.applyPrimaryUpdate(savedPortions)
+    this.isManualOverride_.set(false)
+  }
+
   // --- Getters ---
 
   get secondaryConversions(): FormGroup[] {

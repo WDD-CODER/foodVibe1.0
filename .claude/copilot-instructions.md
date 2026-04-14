@@ -40,7 +40,7 @@ description: Single source of truth for all project rules, standards, and skill/
 - **After features** `[SHARED]`: Read `.claude/skills/update-docs/SKILL.md` to refresh breadcrumbs and docs.
 - **Breadcrumbs only** `[SHARED]`: Read `.claude/skills/breadcrumb-navigator/SKILL.md` and follow it.
 - **After a hacky fix** `[SHARED]`: Read `.claude/skills/elegant-fix/SKILL.md` to refine into a clean solution.
-- **Session end / wrap up** `[CC]`: User says "done", "end session", "wrap up", "finish up", "ship", "handoff" → read `.claude/agents/end-of-session-agent.md` and follow it. The agent handles environment detection (worktree vs main), build verification, techdebt, git operations, todo maintenance, docs, plan cleanup, session evaluation, and handoff report — all in one deterministic pipeline.
+- **Session end / wrap up** `[CC]`: User says "done", "end session", "wrap up", "finish up", "ship", "handoff" → invoke using the **Agent tool** (`subagent_type: end-of-session-agent`), NOT the Skill tool. The agent handles environment detection (worktree vs main), build verification, techdebt, git operations, todo maintenance, docs, plan cleanup, session evaluation, and handoff report — all in one deterministic pipeline.
   - **Quick chat** `[SHARED]`: User invokes `/quick-chat` → skip handoff check and GitHub sync for this chat only.
   - Never ask the user which skill to use — the agent detects and routes automatically.
 - **Creating or refactoring Angular components** `[SHARED]`: Read `.claude/skills/angularComponentStructure/SKILL.md`.

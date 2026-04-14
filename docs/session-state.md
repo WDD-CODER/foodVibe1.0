@@ -1,63 +1,104 @@
 # Session State — 2026-04-14
 
-> Single source of continuity. Read this at session start, update it at session end.
+> Single source of truth for all project rules, standards, and skill/agent routing.
 
 ---
 
 ## Current Status
 
 **Branch:** `main`
-**Latest commit:** `7972591` (fix/recipe-builder: resolve canDeactivate save-and-leave + server name collision root cause)
-**Build status:** passing (verified 2026-04-14, warnings only)
-**Open PRs:** none — commit is unpushed
+**Latest commit:** `de03a1d` (chore: session-handoff for security-audit-sprint)
+**Build status:** passing (verified 2026-04-14 end-of-session run, warnings only — budget overage, cook-view SCSS, exceljs CommonJS — all pre-existing)
+**Open PRs:** none — commits `7972591`, `b6ce1fc`, `de03a1d` unpushed; new session changes also uncommitted
 
 ---
 
-## Session Summary (2026-04-14)
+## Session Summary (2026-04-14) — Neto Confirm + Dish Reset + Type-Change Modal
 
-Fixed two bugs in the neto (net yield) confirmation flow of the recipe-builder:
+Four fixes/features shipped in the recipe-builder neto/dish confirmation flow:
 
-### Bug 1: Neto confirmation modal not showing on re-edit
-- **Root cause:** `netoConfirmed_` signal was loaded from `recipe.neto_confirmed_` (which could be `true` from a previous save). When `true`, the gate `!this.netoConfirmed_()` blocked the modal from appearing even after a new manual yield override.
-- **Fix:** `recipe-header.component.ts` — wrapper methods `onPrimaryAmountChange()` / `onPrimaryUnitChange()` now emit `yieldManuallyChanged` output. Parent (`recipe-builder.page.html`) resets `netoConfirmed_.set(false)` via `(yieldManuallyChanged)` binding.
+### Fix 1: Neto confirmation modal not showing on re-edit
+- **Root cause:** `netoConfirmed_` was loaded as `true` from the saved recipe, blocking the modal gate.
+- **Fix:** `RecipeHeaderComponent` emits `yieldManuallyChanged` output. Parent resets `netoConfirmed_.set(false)` on yield change.
 
-### Bug 2: Sync-badge reset button hidden when `neto_confirmed_` was true on load
-- **Root cause:** Same `!netoConfirmed()` gate in the `@if` condition in `recipe-header.component.html`.
-- **Fix:** Removed `&& !netoConfirmed()` from the condition — button now always shows when yield differs from computed.
+### Fix 2: Sync-badge reset button hidden
+- **Root cause:** Same `!netoConfirmed()` guard in the `@if` condition.
+- **Fix:** Removed `!netoConfirmed()` — button always shows when yield differs from computed.
 
-All changes shipped in commit `7972591` (alongside canDeactivate + server name collision fixes).
+### Feature 3: Dish-type neto confirmation + reset button
+- `isYieldManualOverride()` returns `isManualOverride_()` for dish type (no ingredient-total comparison).
+- Dish-specific modal text: `dish_portions_confirm_header` / `dish_portions_confirm_message`.
+- New `savedPortions` input on `RecipeHeaderComponent`; dish reset button shows when editing existing dish with changed portions.
+- `savedPortions_` signal in page: set from `recipe.yield_amount_` in `patchFormFromRecipe`, cleared on new recipe.
+- New `resetToSavedPortions()` method in `RecipeYieldManager`.
+- Template: recipe sync badge gated on `!== 'dish'`; dish reset badge gated on `=== 'dish' && isManualOverride_() && savedPortions() !== null`.
+
+### Feature 4: Type-change confirmation modal
+- When user clicks the recipe/dish toggle while the form is dirty, a warning modal fires.
+- Fresh (non-dirty) forms toggle immediately with no prompt.
+- `ConfirmModalService` injected into `RecipeHeaderComponent`; `toggleTypeWrapper()` made async.
+
+### Plus (same uncommitted batch)
+- `server/routes/generic.js` — master-copy fallback for users whose sync skipped due to name collision
+- `docs/session-state.md` — updated for this session
+- `.claude/copilot-instructions.md` — routing rule updated for end-of-session-agent
 
 ---
 
-## Uncommitted Changes
+## Prior Session Summary (2026-04-14) — Guest 404 Fix
 
-- `.claude/reflect/failure-log.tsv` — pre-commit hook artifact, skip
+Fixed spurious 404 console errors when a guest user clicks a recipe after login.
+
+### Fixes
+1. `server/routes/generic.js` — `_masterId` fallback in `GET /:type/:id`
+2. `recipe-data.service.ts` — silenced 404 logging
+3. `dish-data.service.ts` — silenced 404 logging
+
+All committed in `7972591`.
+
+---
+
+## Uncommitted Changes (This Session)
+
+- `public/assets/data/dictionary.json` — 4 new translation keys
+- `src/app/core/utils/recipe-yield-manager.util.ts` — `resetToSavedPortions()`
+- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts` — dish portions input, reset wrapper, `isYieldManualOverride()` fix, `ConfirmModalService`, async toggle
+- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html` — sync/dish badge split
+- `src/app/pages/recipe-builder/recipe-builder.page.ts` — `savedPortions_` signal, dish confirmation messages
+- `src/app/pages/recipe-builder/recipe-builder.page.html` — `[savedPortions]` binding
+- `server/routes/generic.js` — master-copy fallback (additional fix)
+- `docs/session-state.md` — this update
+- `.claude/copilot-instructions.md` — routing rule tweak
 
 ---
 
 ## Next Steps
 
-1. **Push `7972591` to remote and open PR** — all 10-file fix is committed but unpushed
-2. **Run `cleanupNameCollisionClones` against production** to clear existing bad clones (requires manual Atlas/Compass access or one-time migration script)
-3. **Manual smoke tests:**
-   - Open recipe-builder → change yield manually → save → reopen → change yield again → confirm neto modal appears
-   - Navigate from a preparation recipe to a dish recipe → confirm no `workflow_items -> N -> instruction` crash
-   - Open recipe-builder → make a change → navigate away → confirm "Save & Leave" succeeds without "name already taken"
-4. Address Plan 234 operational tasks (stamp migration, manual deploy/smoke test) — see `todo.md`
+1. **Commit and push** all uncommitted changes above
+2. **Manual smoke tests:**
+   - Open recipe-builder → change yield → save → reopen → change yield again → confirm neto modal appears
+   - Confirm sync-badge always visible when yield differs from computed
+   - Open existing dish → change portions → verify dish-specific modal fires on save
+   - Open existing dish → change portions → verify reset button appears and restores saved value
+   - Toggle recipe/dish type while form is dirty → confirm warning modal appears; toggle while clean → confirm immediate
+   - Navigate from preparation to dish → confirm no `workflow_items -> N -> instruction` crash
+3. **Push `main` to remote** — multiple unpushed commits: `7972591`, `b6ce1fc`, `de03a1d` + new commit
+4. **Run `cleanupNameCollisionClones`** against production — requires Atlas/Compass
+5. Address Plan 234 operational tasks — see `todo.md`
 
 ---
 
 ## Blocked
 
-- Plan 234 operational tasks require manual Atlas/Compass access and production deploy — cannot be agent-executed
+- Plan 234 operational tasks require manual Atlas/Compass access and production deploy
 - Name collision cleanup in production requires manual run or deploy of migration script
 
 ---
 
 ## References
 
-- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts` — `yieldManuallyChanged` output + wrappers
-- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html` — sync-badge condition fix
-- `src/app/pages/recipe-builder/recipe-builder.page.html` — `(yieldManuallyChanged)` binding
-- `server/services/sync-master.js` — `cleanupNameCollisionClones()` + `userNameSet` guard
-- `src/app/pages/recipe-builder/recipe-builder.page.ts` — `saveAndWait()` async rewrite
+- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts` — `yieldManuallyChanged`, `savedPortions`, `isYieldManualOverride()`, `toggleTypeWrapper()` async
+- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html` — recipe/dish badge split
+- `src/app/pages/recipe-builder/recipe-builder.page.ts` — `savedPortions_` signal, dish confirmation messages
+- `src/app/core/utils/recipe-yield-manager.util.ts` — `resetToSavedPortions()`
+- `server/routes/generic.js` — master-copy fallback

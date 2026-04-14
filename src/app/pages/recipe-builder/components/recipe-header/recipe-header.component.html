@@ -60,10 +60,17 @@
                     (valueChange)="onPrimaryAmountChange($event)"
                     (unitChange)="onPrimaryUnitChange($event)"
                     (createUnit)="onCreateUnit()" />
-                @if (yield.yieldDiffersFromComputed_()) {
+                @if (yield.currentRecipeTypeDisplay_() !== 'dish' && yield.yieldDiffersFromComputed_()) {
                     <button type="button" class="yield-sync-badge"
                         (click)="yield.resetManualOverride(); $event.stopPropagation()"
                         [title]="'yield_sync_to_total' | translatePipe">
+                        <lucide-icon name="refresh-cw" [size]="12"></lucide-icon>
+                    </button>
+                }
+                @if (yield.currentRecipeTypeDisplay_() === 'dish' && yield.isManualOverride_() && savedPortions() !== null) {
+                    <button type="button" class="yield-sync-badge"
+                        (click)="onResetDishToSaved(); $event.stopPropagation()"
+                        [title]="'dish_reset_to_saved' | translatePipe">
                         <lucide-icon name="refresh-cw" [size]="12"></lucide-icon>
                     </button>
                 }

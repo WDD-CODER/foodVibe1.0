@@ -73,6 +73,12 @@ router.get('/:type/:id', optionalToken, async (req, res) => {
     if (!doc && userId !== '__master__') {
       doc = await col(req.params.type).findOne({ _masterId: req.params.id, userId });
     }
+    // Final fallback: serve the master copy if the user has no personal copy at all
+    // (e.g. sync skipped due to name collision). Master data is already public to
+    // unauthenticated requests so this grants no new privileges.
+    if (!doc && userId !== '__master__') {
+      doc = await col(req.params.type).findOne({ _id: req.params.id, userId: '__master__' });
+    }
     if (!doc) {
       return res.status(404).json({ error: `Cannot get, Item ${req.params.id} of type: ${req.params.type} does not exist` });
     }

@@ -8,6 +8,7 @@ import { KitchenStateService } from '@services/kitchen-state.service';
 import { UnitRegistryService } from '@services/unit-registry.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
 import { TranslationService } from '@services/translation.service';
+import { ConfirmModalService } from '@services/confirm-modal.service';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service';
 import { CustomMultiSelectComponent } from 'src/app/shared/custom-multi-select/custom-multi-select.component';
@@ -32,6 +33,7 @@ export class RecipeHeaderComponent {
   private translationService = inject(TranslationService);
   private labelCreationModal = inject(LabelCreationModalService);
   private cdr = inject(ChangeDetectorRef);
+  private confirmModal = inject(ConfirmModalService);
 
   // INPUTS
   form = input.required<FormGroup>();
@@ -49,6 +51,8 @@ export class RecipeHeaderComponent {
   autoLabels = input<string[]>([]);
   rating = input<number>(0);
   netoConfirmed = input<boolean>(false);
+  /** Last-saved serving_portions for existing dishes. Null for new dishes (no reset button shown). */
+  savedPortions = input<number | null>(null);
 
   // OUTPUTS
   openUnitCreator = output<string>();
@@ -66,6 +70,14 @@ export class RecipeHeaderComponent {
   onPrimaryUnitChange(unit: string): void {
     this.yield.setPrimaryUnit(unit);
     this.yieldManuallyChanged.emit();
+  }
+
+  onResetDishToSaved(): void {
+    const saved = this.savedPortions();
+    if (saved !== null) {
+      this.yield.resetToSavedPortions(saved);
+      this.yieldManuallyChanged.emit();
+    }
   }
 
   // YIELD MANAGER
@@ -108,6 +120,9 @@ export class RecipeHeaderComponent {
   }
 
   isYieldManualOverride(): boolean {
+    if (this.yield.currentRecipeTypeDisplay_() === 'dish') {
+      return this.yield.isManualOverride_();
+    }
     return this.yield.isManualOverride_() && this.yield.yieldDiffersFromComputed_();
   }
 
@@ -141,7 +156,14 @@ export class RecipeHeaderComponent {
 
   // WRAPPERS — CDR / output handling
 
-  protected toggleTypeWrapper(): void {
+  protected async toggleTypeWrapper(): Promise<void> {
+    if (this.form().dirty) {
+      const confirmed = await this.confirmModal.open(
+        'type_change_confirm_message',
+        { saveLabel: 'confirm', headerKey: 'type_change_confirm_header', variant: 'warning' }
+      );
+      if (!confirmed) return;
+    }
     this.yield.toggleType()
     this.cdr.markForCheck()
   }
