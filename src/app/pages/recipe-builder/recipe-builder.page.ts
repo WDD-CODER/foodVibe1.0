@@ -491,12 +491,11 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     void this.router_.navigate(id ? ['/cook', id] : ['/cook']);
   }
 
-  /** Async validator: duplicate recipe/dish name (excludes current id when editing).
-   * Searches both RECIPE_LIST and DISH_LIST combined so that a type-change
-   * (preparation → dish or vice versa) does not produce a false positive.
-   * The current record's _id lives in one collection; excluding it only from
-   * the type-specific list would miss it when the form type differs from the
-   * stored type mid-conversion. */
+  /** Async validator: duplicate name across all recipe types (excludes current id when editing).
+   * Dishes and preparations share a global name namespace — same name in either
+   * collection is a conflict. Excludes the record being edited (by _id) from both
+   * collections so type-change saves (preparation → dish) are not falsely blocked
+   * mid-edit: the preparation being converted is the same logical item. */
   private duplicateNameValidator_(control: AbstractControl): Observable<ValidationErrors | null> {
     return timer(300).pipe(
       switchMap(() => {
