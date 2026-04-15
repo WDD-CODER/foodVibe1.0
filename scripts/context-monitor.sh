@@ -6,6 +6,10 @@
 # The 70% hard gate forces a session handoff — no exceptions.
 # Developed across dozens of real sessions — hard stops have saved work multiple times.
 #
+# After /compact the transcript file stays the same size on disk (it's append-only),
+# so the hook uses delta-since-last-compact instead of total file size.
+# pre-compact-reminder.sh writes a baseline; this script reads it.
+#
 # Hook type: PostToolUse (matcher: ".*")
 # Timeout: 5s
 
@@ -29,8 +33,22 @@ if [ -z "$TRANSCRIPT" ] || [ ! -f "$TRANSCRIPT" ]; then
   exit 0
 fi
 
-# Get file size in bytes
-SIZE=$(wc -c < "$TRANSCRIPT" 2>/dev/null || echo 0)
+# Save transcript path so pre-compact-reminder.sh can find it.
+# PreCompact hooks are not guaranteed to receive transcript_path in their input,
+# so we persist it here where we know PostToolUse always provides it.
+echo "$TRANSCRIPT" > /tmp/claude-transcript-path
+
+# Get effective size — delta since last compact, or total if no compact yet.
+# After /compact the .jsonl file doesn't shrink (it's append-only), so raw size
+# would fire false alerts immediately after compaction. Subtracting the baseline
+# recorded at compact time gives the actual new context growth since last compact.
+TOTAL=$(wc -c < "$TRANSCRIPT" 2>/dev/null || echo 0)
+BASELINE=$(cat /tmp/claude-compact-baseline 2>/dev/null || echo 0)
+if [ "$BASELINE" -gt 0 ] && [ "$TOTAL" -gt "$BASELINE" ]; then
+  SIZE=$((TOTAL - BASELINE))
+else
+  SIZE=$TOTAL
+fi
 
 # Thresholds (rough estimates based on observed context usage):
 #   400KB ≈ 40% of context window
