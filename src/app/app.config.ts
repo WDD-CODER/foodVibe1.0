@@ -81,7 +81,10 @@ import {
   Type,
   Link,
   Coins,
-  Clock
+  Clock,
+  Watch,
+  Play,
+  Pause
 } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { provideHttpClient, withInterceptors } from '@angular/common/http'
@@ -180,7 +183,10 @@ export const appConfig: ApplicationConfig = {
         Type,
         Link,
         Coins,
-        Clock
+        Clock,
+        Watch,
+        Play,
+        Pause
       })
     )
   ]
