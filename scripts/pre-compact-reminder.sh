@@ -8,12 +8,7 @@
 
 cat <<'EOF'
 {
-  "hookSpecificOutput": {
-    "hookEventName": "PreCompact",
-    "decision": {
-      "additionalContext": "Context is about to be compressed. Before proceeding, confirm:\n1. Have important decisions and progress been written to session-state.md?\n2. Are there any unpushed commits that need to be recorded?\n3. Are next steps documented?\n\nAfter compression, early conversation details will be lost. session-state.md is the memory bridge across compressions."
-    }
-  }
+  "systemMessage": "Context is about to be compressed. Before proceeding, confirm:\n1. Have important decisions and progress been written to session-state.md?\n2. Are there any unpushed commits that need to be recorded?\n3. Are next steps documented?\n\nAfter compression, early conversation details will be lost. session-state.md is the memory bridge across compressions."
 }
 EOF
 

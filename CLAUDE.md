@@ -96,7 +96,8 @@ Key routing rules:
 
 ## Session Management
 
-- At session start, `docs/session-state.md` is auto-loaded by the `session-startup.sh` hook — read it to know where the last session left off.
-- Before ending a session, update `docs/session-state.md` with what was completed (with commit hash), current status, and prioritized next steps.
+- At session start, the most recently modified session-state file for this branch is auto-loaded by `session-startup.sh`. The startup message tells you which file was loaded and where to save.
+- **Save target**: The startup hook injects a `SESSION SAVE TARGET:` line with your session's unique file path (`docs/session-state-<branch>-<pid>.md`). Before ending a session, write session-state to that path — not `docs/session-state.md` directly. If the startup message is unavailable, read `.claude/.session-state-path` for the path, or fall back to `docs/session-state.md`.
+- This design lets two sessions on the same branch coexist without overwriting each other. Files older than 7 days are cleaned up automatically on next startup.
 - For mid-task snapshots with timestamped branching points, run `/checkpoint` — this writes a dated file to `.claude/sessions/` and prints a resume prompt.
-- `docs/session-state.md` is the rolling continuity file. `.claude/sessions/YYYY-MM-DD-HHMM-slug.md` files are point-in-time snapshots. Both serve different needs.
+- `docs/session-state-<branch>-<pid>.md` files are the rolling continuity files per session. `.claude/sessions/YYYY-MM-DD-HHMM-slug.md` files are point-in-time snapshots. Both serve different needs.

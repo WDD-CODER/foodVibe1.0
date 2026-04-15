@@ -46,9 +46,7 @@ if [ "$SIZE" -gt "$STOP_THRESHOLD" ]; then
 {
   "hookSpecificOutput": {
     "hookEventName": "PostToolUse",
-    "decision": {
-      "additionalContext": "HARD STOP — Context exceeds 70%. You MUST do the following immediately. Do NOT continue any other work:\n1. Update session-state.md with current progress, decisions made, and next steps\n2. Stop all generation/development work\n3. Tell the user: 'Context is full. I recommend starting a new session. session-state.md has been updated.'\n\nThis is a hard gate. Continuing past this point risks losing work to context truncation."
-    }
+    "additionalContext": "HARD STOP — Context exceeds 70%. You MUST do the following immediately. Do NOT continue any other work:\n1. Update session-state.md with current progress, decisions made, and next steps\n2. Stop all generation/development work\n3. Tell the user: 'Context is full. I recommend starting a new session. session-state.md has been updated.'\n\nThis is a hard gate. Continuing past this point risks losing work to context truncation."
   }
 }
 EOF
@@ -57,9 +55,7 @@ elif [ "$SIZE" -gt "$ALERT_THRESHOLD" ]; then
 {
   "hookSpecificOutput": {
     "hookEventName": "PostToolUse",
-    "decision": {
-      "additionalContext": "Context is past 60%. Update session-state.md now to preserve progress. Finish your current task, then hand off. Do not start new tasks."
-    }
+    "additionalContext": "Context is past 60%. Update session-state.md now to preserve progress. Finish your current task, then hand off. Do not start new tasks."
   }
 }
 EOF
@@ -68,9 +64,7 @@ elif [ "$SIZE" -gt "$WARN_THRESHOLD" ]; then
 {
   "hookSpecificOutput": {
     "hookEventName": "PostToolUse",
-    "decision": {
-      "additionalContext": "Context is past 40%. Start thinking about wrap-up timing. Finish your current task and consider whether to hand off soon."
-    }
+    "additionalContext": "Context is past 40%. Start thinking about wrap-up timing. Finish your current task and consider whether to hand off soon."
   }
 }
 EOF
