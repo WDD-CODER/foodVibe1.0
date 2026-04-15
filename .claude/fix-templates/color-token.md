@@ -4,10 +4,10 @@ category: C — Theme & Styling Violations
 applies-to: "*.scss"
 auto-fix-paths: [A, B, C]
 flag-only-paths: [ambiguous]
-version: 2
+version: 3
 created: 2026-04-12
-last-tested: 2026-04-12T10:30:00Z
-last-tested-version: 2
+last-tested: 2026-04-14T09:15:00Z
+last-tested-version: 3
 last-score: "6/6"
 ---
 <!--
@@ -57,19 +57,19 @@ Follow these steps IN ORDER. Stop at the first match.
 **Step 3: Check existing tokens.**
 - Does a token in styles.scss match this EXACT hex value?
   (Use the Context section to check — do not search the codebase.)
-  - YES → PATH A. Replace with the matching token. STOP.
+  - YES → A. Replace with the matching token. STOP.
   - NO → continue to Step 4.
 
 **Step 4: Determine scope.**
 - How many files contain this hex? (Use the Context section.)
-  - 2+ files → PATH B. Create a global token in styles.scss. STOP.
+  - 2+ files → B. Create a global token in styles.scss. STOP.
   - 1 file → continue to Step 5.
 
 **Step 5: Semantic name check.**
 - Does the color have a clear, reusable semantic name?
   (danger, favorite, warning, success, star-rating, allergen, etc.)
-  - YES → PATH B. Create a global token. STOP.
-  - NO → PATH C. Create a local `--cv-*` token in the component `:host` block. STOP.
+  - YES → B. Create a global token. STOP.
+  - NO → C. Create a local `--cv-*` token in the component `:host` block. STOP.
 
 ## FIX
 
