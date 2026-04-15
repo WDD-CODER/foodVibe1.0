@@ -101,6 +101,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   /** Snapshot of form value when user entered the page (for hasRealChanges). */
   private initialRecipeSnapshot_: string | null = null;
+  /** Original recipe_type when the record was loaded — used to detect type-change saves. */
+  private initialRecipeType_: 'dish' | 'preparation' | null = null;
   /** Tracks the recipe_type → name re-validation subscription so it doesn't stack on component reuse. */
   private recipeTypeRevalidationSub_?: Subscription;
 
@@ -526,6 +528,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     // patchFormFromRecipe uses emitEvent:false, so recipe_type.valueChanges never fires.
     // Manually sync recipeType_ so the template renders the correct workflow format.
     this.recipeType_.set(isDish ? 'dish' : 'preparation');
+    // Record the original type so save gates can detect type-change and prompt the user.
+    this.initialRecipeType_ = isDish ? 'dish' : 'preparation';
   }
 
 
@@ -582,6 +586,23 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       );
       if (!confirmed) return false;
       this.netoConfirmed_.set(true);
+    }
+
+    // Type-change confirmation gate — same check as in saveRecipe().
+    if (this.recipeId_() && this.initialRecipeType_) {
+      const formType = this.recipeForm_.get('recipe_type')?.value === 'dish' ? 'dish' : 'preparation';
+      if (formType !== this.initialRecipeType_) {
+        const toDish = formType === 'dish';
+        const confirmed = await this.confirmModal_.open(
+          toDish ? 'type_change_to_dish_message' : 'type_change_to_preparation_message',
+          {
+            saveLabel: 'confirm',
+            headerKey: toDish ? 'type_change_to_dish_header' : 'type_change_to_preparation_header',
+            variant: 'warning',
+          }
+        );
+        if (!confirmed) return false;
+      }
     }
 
     // Safety net: if a stale duplicateName error survived to this point, re-validate.
@@ -955,6 +976,24 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       this.netoConfirmed_.set(true);
     }
 
+    // Type-change confirmation gate — only fires when editing an existing record
+    // and the user has switched recipe_type from what was originally loaded.
+    if (this.recipeId_() && this.initialRecipeType_) {
+      const formType = this.recipeForm_.get('recipe_type')?.value === 'dish' ? 'dish' : 'preparation';
+      if (formType !== this.initialRecipeType_) {
+        const toDish = formType === 'dish';
+        const confirmed = await this.confirmModal_.open(
+          toDish ? 'type_change_to_dish_message' : 'type_change_to_preparation_message',
+          {
+            saveLabel: 'confirm',
+            headerKey: toDish ? 'type_change_to_dish_header' : 'type_change_to_preparation_header',
+            variant: 'warning',
+          }
+        );
+        if (!confirmed) return;
+      }
+    }
+
     const navigateOnSuccess = options?.navigateOnSuccess !== false;
     this.saving.setSaving(true);
     const recipe = this.buildRecipeFromForm();
@@ -976,6 +1015,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
           // Refresh the entry-time snapshot so the pending-changes guard does not
           // fire when the user navigates away after a successful in-place save.
           this.initialRecipeSnapshot_ = this.getRecipeSnapshotForComparison();
+          this.initialRecipeType_ = saved.recipe_type_ === 'dish' ? 'dish' : 'preparation';
           this.recipeForm_.markAsPristine();
           // Update savedPortions_ so the reset button reflects the newly saved value.
           if (saved.recipe_type_ === 'dish') {
