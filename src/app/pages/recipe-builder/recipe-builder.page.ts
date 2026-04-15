@@ -491,16 +491,23 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     void this.router_.navigate(id ? ['/cook', id] : ['/cook']);
   }
 
-  /** Async validator: duplicate recipe/dish name by type (excludes current id when editing). */
+  /** Async validator: duplicate recipe/dish name (excludes current id when editing).
+   * Searches both RECIPE_LIST and DISH_LIST combined so that a type-change
+   * (preparation → dish or vice versa) does not produce a false positive.
+   * The current record's _id lives in one collection; excluding it only from
+   * the type-specific list would miss it when the form type differs from the
+   * stored type mid-conversion. */
   private duplicateNameValidator_(control: AbstractControl): Observable<ValidationErrors | null> {
     return timer(300).pipe(
       switchMap(() => {
         const name = (control.value ?? '').toString().trim();
         if (!name) return of(null);
-        const type = this.recipeForm_.get('recipe_type')?.value === 'dish' ? 'dish' : 'preparation';
         const currentId = this.recipeId_();
-        const list = type === 'dish' ? this.dishDataService_.allDishes_() : this.recipeDataService_.allRecipes_();
-        const isDup = list.some(
+        const combined = [
+          ...this.recipeDataService_.allRecipes_(),
+          ...this.dishDataService_.allDishes_(),
+        ];
+        const isDup = combined.some(
           (r) => (r.name_hebrew?.trim() ?? '') === name && r._id !== currentId
         );
         return of(isDup ? { duplicateName: true } : null);

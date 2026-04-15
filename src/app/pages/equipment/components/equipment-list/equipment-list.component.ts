@@ -27,6 +27,7 @@ import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.
 import { HeroFabService } from '@services/hero-fab.service';
 import { AddItemModalService } from '@services/add-item-modal.service';
 import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service';
+import { EquipmentCategoryRegistryService } from '@services/equipment-category-registry.service';
 
 const ADD_NEW_CATEGORY_VALUE = '__add_new__';
 
@@ -54,6 +55,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly addItemModal = inject(AddItemModalService);
   private readonly translationKeyModal = inject(TranslationKeyModalService);
+  private readonly equipmentCategoryRegistry = inject(EquipmentCategoryRegistryService);
 
   /** True when this list is shown under /inventory/equipment (logistics from inventory). */
   protected get isUnderInventory(): boolean {
@@ -182,7 +184,10 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   protected customCategories_ = signal<string[]>([]);
   protected categoryOptions = computed(() => {
     const fixed = this.categories.map((c) => ({ value: c, label: c }));
-    const custom = this.customCategories_().map((c) => ({ value: c, label: c }));
+    const persisted = this.equipmentCategoryRegistry.customCategories_();
+    const hydrated = this.customCategories_();
+    const merged = Array.from(new Set([...persisted, ...hydrated]));
+    const custom = merged.filter(c => !this.categories.includes(c as EquipmentCategory)).map((c) => ({ value: c, label: c }));
     return [...fixed, ...custom, { value: ADD_NEW_CATEGORY_VALUE, label: 'add_new_category' }];
   });
 
@@ -255,6 +260,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
       if (!this.customCategories_().includes(keyToUse)) {
         this.customCategories_.update((list) => [...list, keyToUse]);
       }
+      void this.equipmentCategoryRegistry.addCategory(keyToUse);
       if (context === 'inline') {
         this.lastCategory_.set(keyToUse);
         this.editForm_.patchValue({ category_: keyToUse });
