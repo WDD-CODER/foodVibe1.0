@@ -3,6 +3,7 @@ import { ResolveFn, Router } from '@angular/router';
 import { RecipeDataService } from '../services/recipe-data.service';
 import { DishDataService } from '../services/dish-data.service';
 import { UserMsgService } from '../services/user-msg.service';
+import { UserService } from '../services/user.service';
 import { Recipe } from '../models/recipe.model';
 
 export const recipeResolver: ResolveFn<Promise<Recipe | null>> = async (route) => {
@@ -10,6 +11,7 @@ export const recipeResolver: ResolveFn<Promise<Recipe | null>> = async (route) =
   const dishDataService = inject(DishDataService);
   const router = inject(Router);
   const userMsgService = inject(UserMsgService);
+  const userService = inject(UserService);
 
   const id = route.paramMap.get('id');
   if (!id) return null;
@@ -23,7 +25,10 @@ export const recipeResolver: ResolveFn<Promise<Recipe | null>> = async (route) =
       return dish;
     } catch {
       userMsgService.onSetErrorMsg('המתכון לא נמצא');
-      router.navigate(['/recipe-builder']);
+      // Logged-in users land on recipe-builder (create new). Guests land on
+      // recipe-book (public) — avoids triggering authGuard on recipe-builder
+      // which would create a misleading "not logged in" warning cascade.
+      router.navigate([userService.isLoggedIn() ? '/recipe-builder' : '/recipe-book']);
       return null;
     }
   }

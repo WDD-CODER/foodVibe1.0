@@ -52,6 +52,8 @@ This is the **universal safety net** — skills have their own Phase 0, but this
 - Need an isolated worktree for parallel multi-agent work? Use `/worktree-setup` on demand — **not automatic**.
 - **Worktree boundary**: When working inside an isolated worktree, never attempt `git checkout main` from within it. All PR creation and merges must be executed using `git -C <mainRepoPath>` from the root repository path to avoid `fatal: main is already used` errors.
 
+> **Branch Guard hook**: A `PreToolUse` hook (`scripts/branch-guard.sh`) fires automatically before every Edit/Write/MultiEdit call. If Claude is on `main`, it creates `feat/session-YYYYMMDD` and switches to it before writing any file. When the hook output contains `BRANCH_GUARD:`, Claude **must immediately announce to the user** which branch was created — e.g. *"Moved to branch `feat/session-20260415` before making any changes."* This message must appear in Claude's next response, not buried or skipped.
+
 ## gstack — Browser QA & Extended Tooling
 
 gstack is installed at `~/.claude/skills/gstack/`. It provides browser automation, visual QA, safety guardrails, and lifecycle tools that complement our existing workflow.
@@ -93,6 +95,11 @@ Key routing rules:
 - Design system, brand → invoke design-consultation
 - Visual audit, design polish → invoke design-review
 - Architecture review → invoke plan-eng-review
+- Open a URL, navigate a page, test UI behavior in the browser → invoke browse
+- Verify a fix works on localhost, check a running app → invoke browse
+- Any web browsing whatsoever → invoke browse
+
+> **HARD RULE — browser tools**: NEVER call `mcp__claude-in-chrome__*` or any raw Playwright MCP tools directly. ALL browser interaction in this project goes through `/browse` (gstack). This applies to main-session Claude AND all subagents.
 
 ## Session Management
 

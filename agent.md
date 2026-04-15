@@ -63,7 +63,7 @@ All skill triggers defined in `copilot-instructions.md §0`.
 2. **GitHub sync (once-per-day):** Check `notes/github-sync/<today>.md` — if missing, run `github-sync` skill.
 3. Check session handoff: `.claude/sessions/` (most recent) or `notes/session-handoffs/` (legacy, last 3 days).
 4. Check `.claude/todo.md` for related pending work.
-5. **[Claude Code]** Verify current branch (`git branch --show-current`). Never commit to `main`.
+5. **[Claude Code]** Check current branch (`git branch --show-current`). If on `main`/`master`: the `branch-guard` hook auto-creates a `feat/session-YYYYMMDD` branch on the first Edit/Write — you do not need to do it manually. If you notice you are on `main` before any edit starts, warn the user proactively. Never commit to `main`.
 6. **[Claude Code] Open reflection items:** Scan `.claude/reflect/open/*.reflect.md` for files containing `status: open`. If any found, output the reflection banner below before proceeding with the user's task. If none found, skip silently.
 
 ### Reflection Banner (step 6 output)
