@@ -13,6 +13,7 @@ import { UserMsgService } from '@services/user-msg.service';
 import { AddItemModalService } from '@services/add-item-modal.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
 import { MenuSectionCategoriesService } from '@services/menu-section-categories.service';
+import { MenuEventTypeService } from '@services/menu-event-type.service';
 import { MenuEvent, MenuSection, ServingType, DEFAULT_DISH_FIELDS, ALL_DISH_FIELDS, type DishFieldKey } from '@models/menu-event.model';
 import { Recipe } from '@models/recipe.model';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
@@ -64,6 +65,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private readonly addItemModal = inject(AddItemModalService);
   private readonly metadataRegistry = inject(MetadataRegistryService);
   private readonly menuSectionCategories = inject(MenuSectionCategoriesService);
+  private readonly menuEventTypeService = inject(MenuEventTypeService);
   private readonly recipeCostService = inject(RecipeCostService);
   private readonly exportService = inject(ExportService);
   private readonly heroFab = inject(HeroFabService);
@@ -373,9 +375,10 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     this.router.navigate(['/menu-library']);
   }
 
-  /** Event types: from existing menus + allow add new via AddItemModal */
+  /** Event types: from persisted registry + existing menus */
   protected readonly eventTypeOptions_ = computed(() => {
     const set = new Set<string>();
+    this.menuEventTypeService.allEventTypes_().forEach(t => set.add(t));
     this.menuEventData.allMenuEvents_().forEach(ev => { if (ev.event_type_) set.add(ev.event_type_); });
     return Array.from(set);
   });
@@ -517,6 +520,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       saveLabel: 'save',
     });
     if (result?.trim()) {
+      await this.menuEventTypeService.addEventType(result.trim());
       this.form_.patchValue({ event_type_: result.trim() });
       this.closeEventTypeDropdown();
       this.stopEditField();
