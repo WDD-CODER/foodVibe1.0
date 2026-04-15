@@ -61,6 +61,27 @@ async function syncMasterToUser(userId) {
     return productIdMap;
   }
 
+  // RECIPE_LIST and DISH_LIST share a global name namespace — a name that exists
+  // in either collection counts as "taken" for collision purposes.
+  // Build this cross-collection name set once, before the per-collection loop.
+  const NAMED_TYPES = new Set(['RECIPE_LIST', 'DISH_LIST']);
+  let crossCollectionNameSet = null;
+  async function getCrossCollectionNameSet() {
+    if (crossCollectionNameSet) return crossCollectionNameSet;
+    const [recipeDocs, dishDocs] = await Promise.all([
+      db.collection('RECIPE_LIST').find({ userId }, { projection: { name_hebrew: 1 } }).toArray(),
+      db.collection('DISH_LIST').find({ userId }, { projection: { name_hebrew: 1 } }).toArray(),
+    ]);
+    crossCollectionNameSet = new Set([
+      ...recipeDocs.map(d => d.name_hebrew?.trim()).filter(Boolean),
+      ...dishDocs.map(d => d.name_hebrew?.trim()).filter(Boolean),
+    ]);
+    return crossCollectionNameSet;
+  }
+  // Accumulates names queued for insertion during this sync run so that a name
+  // added from RECIPE_LIST also blocks cloning it again from DISH_LIST (and vice versa).
+  const pendingNames = new Set();
+
   for (const entityType of CLONEABLE_TYPES) {
     const col = db.collection(entityType);
 
@@ -78,17 +99,6 @@ async function syncMasterToUser(userId) {
       userByMasterId.set(String(ud._masterId), ud);
     }
 
-    // Build name index for all user docs (to detect name collisions on Rule 1).
-    // Prevents cloning a master item when the user already owns a same-name item.
-    const NAMED_TYPES = new Set(['RECIPE_LIST', 'DISH_LIST']);
-    const userNameSet = new Set();
-    if (NAMED_TYPES.has(entityType)) {
-      for (const ud of allUserDocs) {
-        const n = ud.name_hebrew?.trim();
-        if (n) userNameSet.add(n);
-      }
-    }
-
     const toInsert = [];
     const toUpdate = [];
 
@@ -98,12 +108,17 @@ async function syncMasterToUser(userId) {
 
       if (!existing) {
         // Rule 1: new master item — clone to user
-        // Skip if the user already has any item with the same name (name-collision guard).
+        // Skip if the user already has any item with the same name in EITHER
+        // RECIPE_LIST or DISH_LIST — these two collections share a name namespace,
+        // so a name present in the sibling collection is also a collision.
         if (NAMED_TYPES.has(entityType)) {
           const masterName = master.name_hebrew?.trim();
-          if (masterName && userNameSet.has(masterName)) {
-            console.log(`[sync-master]   ${entityType}: skipping clone — name collision "${masterName}"`);
-            continue;
+          if (masterName) {
+            const crossNames = await getCrossCollectionNameSet();
+            if (crossNames.has(masterName) || pendingNames.has(masterName)) {
+              console.log(`[sync-master]   ${entityType}: skipping clone — cross-collection name collision "${masterName}"`);
+              continue;
+            }
           }
         }
         const newId = makeId();
@@ -115,6 +130,10 @@ async function syncMasterToUser(userId) {
           _masterId: masterId,
           _userModified: false,
         };
+        // Track this name so sibling-collection items with the same name are skipped.
+        if (NAMED_TYPES.has(entityType) && clone.name_hebrew?.trim()) {
+          pendingNames.add(clone.name_hebrew.trim());
+        }
 
         // Remap ingredient refs so they point to user's products, not master products
         if (entityType === 'RECIPE_LIST' || entityType === 'DISH_LIST') {
@@ -211,6 +230,55 @@ async function cleanupNameCollisionClones(userId) {
       totalRemoved += result.deletedCount;
       console.log(`[sync-master] cleanup ${entityType}: removed ${result.deletedCount} orphan clones for user ${userId}`);
     }
+  }
+
+  // Cross-collection cleanup: RECIPE_LIST and DISH_LIST share a name namespace.
+  // If the user has the same name in both collections, remove the lower-priority
+  // copy — prefer user-created over master-cloned; prefer DISH_LIST over RECIPE_LIST
+  // when both are clones (DISH_LIST is typically more recent after a type-change).
+  const [recipeDocs, dishDocs] = await Promise.all([
+    db.collection('RECIPE_LIST').find({ userId }).toArray(),
+    db.collection('DISH_LIST').find({ userId }).toArray(),
+  ]);
+  const dishByName = new Map(dishDocs.map(d => [d.name_hebrew?.trim(), d]).filter(([n]) => n));
+  const recipeByName = new Map(recipeDocs.map(r => [r.name_hebrew?.trim(), r]).filter(([n]) => n));
+
+  const recipeIdsToRemove = [];
+  const dishIdsToRemove = [];
+
+  for (const [name, recipe] of recipeByName) {
+    const dish = dishByName.get(name);
+    if (!dish) continue; // no cross-collection conflict
+
+    const recipeIsClone = !!recipe._masterId;
+    const dishIsClone   = !!dish._masterId;
+
+    if (recipeIsClone && !dishIsClone) {
+      // Recipe is a clone, dish is user-created → remove recipe clone
+      recipeIdsToRemove.push(recipe._id);
+    } else if (!recipeIsClone && dishIsClone) {
+      // Dish is a clone, recipe is user-created → remove dish clone
+      dishIdsToRemove.push(dish._id);
+    } else if (recipeIsClone && dishIsClone) {
+      // Both are clones (e.g. re-cloned after a type-change) → prefer DISH_LIST
+      recipeIdsToRemove.push(recipe._id);
+    }
+    // Both user-created: leave them and log — user named two things the same intentionally.
+    // The duplicate-name validator will catch this on next edit.
+    else {
+      console.log(`[sync-master] cross-collection cleanup: user ${userId} has two user-created items named "${name}" — skipping`);
+    }
+  }
+
+  if (recipeIdsToRemove.length > 0) {
+    const result = await db.collection('RECIPE_LIST').deleteMany({ _id: { $in: recipeIdsToRemove } });
+    totalRemoved += result.deletedCount;
+    console.log(`[sync-master] cross-collection cleanup: removed ${result.deletedCount} RECIPE_LIST orphan(s) for user ${userId}`);
+  }
+  if (dishIdsToRemove.length > 0) {
+    const result = await db.collection('DISH_LIST').deleteMany({ _id: { $in: dishIdsToRemove } });
+    totalRemoved += result.deletedCount;
+    console.log(`[sync-master] cross-collection cleanup: removed ${result.deletedCount} DISH_LIST orphan(s) for user ${userId}`);
   }
 
   return totalRemoved;
