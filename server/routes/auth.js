@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const User = require('../models/user.model');
 const { cloneMasterDataToUser } = require('../services/clone-master');
-const { syncMasterToUser, cleanupNameCollisionClones } = require('../services/sync-master');
+const { syncMasterToUser } = require('../services/sync-master');
 
 const router = Router();
 const ACCESS_TOKEN_EXPIRY = '15m';
@@ -203,7 +203,6 @@ router.post('/login', loginLimiter, async (req, res) => {
     });
 
     try {
-      await cleanupNameCollisionClones(user._id);
       await syncMasterToUser(user._id);
     } catch (syncErr) { console.error('[auth/login] sync error:', syncErr.message); }
 
@@ -250,7 +249,6 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
     });
 
     try {
-      await cleanupNameCollisionClones(user._id);
       await syncMasterToUser(user._id);
     } catch (syncErr) { console.error('[auth/refresh] sync error:', syncErr.message); }
 
@@ -311,7 +309,6 @@ router.post('/guest', async (req, res) => {
     });
 
     try {
-      await cleanupNameCollisionClones('dev-guest');
       await syncMasterToUser('dev-guest');
     } catch (syncErr) { console.error('[auth/guest] sync error:', syncErr.message); }
 
