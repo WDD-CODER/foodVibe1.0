@@ -869,3 +869,15 @@ files = [
 git diff src/app/pages/cook-view/co	 - **Worktree boundary**: When working inside an isolated worktree, never attempt `git checkout main` from within it. Al	
 2026-04-15 18:14:42	Bash	git diff main...HEAD 2>/dev/null | head -200	+  console.error('ERROR: No MongoDB URI found in .env (MONGO_LOCAL_URI or MONGO_URI)')	
 2026-04-15 18:15:27	mcp__mempalace__mempalace_search	@{query=master pool dual-write sync cleanup tombstone deletion; limit=8}	      "text": "erge --merge --delete-branch`: ~31.6s\n- Remote delete fallback `git push origin --delete ...`: ~4.0s\n\n	
+2026-04-15 18:16:31	Bash	mongosh "mongodb://admin:foodvibe1@localhost:27017/foodvibe?authSource=admin" --	@{stdout=/usr/bin/bash: line 1: mongosh: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=	
+2026-04-15 18:16:37	Bash	winpty mongosh.exe "mongodb://admin:foodvibe1@localhost:27017/foodvibe?authSourc	@{stdout=winpty: error: cannot start 'mongosh.exe': Not found in PATH; stderr=; interrupted=False; isImage=False; noOutp	
+2026-04-15 18:17:44	Bash	tail -50 "/c/Program Files/MongoDB/Server/8.0/log/mongod.log" 2>/dev/null | grep	@{stdout={"t":{"$date":"2026-04-15T18:14:35.931+03:00"},"s":"W",  "c":"NETWORK",  "id":4615610, "ctx":"conn582","msg":"F	
+2026-04-15 18:23:46	Write	C:\foodCo\foodVibe1.0\plans\269-master-pool-cleanup.plan.md	      return res.status(400).json({ error: '_id is required in the request body' });	
+2026-04-15 18:28:31	Edit	C:\foodCo\foodVibe1.0\server\routes\generic.js	      return res.status(400).json({ error: '_id is required in the request body' });	
+2026-04-15 18:28:42	Edit	C:\foodCo\foodVibe1.0\server\routes\generic.js	      return res.status(404).json({ error: `Cannot get, Item ${req.params.id} of type: ${req.params.type} does not exist	
+2026-04-15 18:28:47	Edit	C:\foodCo\foodVibe1.0\server\routes\generic.js	    return res.status(403).json({ error: 'Access to this entity type is not permitted' });	
+2026-04-15 18:28:57	Edit	C:\foodCo\foodVibe1.0\server\routes\generic.js	      return res.status(404).json({ error: `Cannot remove, item ${req.params.id} of type: ${req.params.type} does not ex	
+2026-04-15 18:29:32	Edit	C:\foodCo\foodVibe1.0\server\routes\auth.js	  message: { error: 'Too many login attempts, please try again later' },	
+2026-04-15 18:29:40	Edit	C:\foodCo\foodVibe1.0\server\routes\auth.js	    } catch (syncErr) { console.error('[auth/login] sync error:', syncErr.message); }; newString=    try {	
+2026-04-15 18:29:44	Edit	C:\foodCo\foodVibe1.0\server\routes\auth.js	    } catch (syncErr) { console.error('[auth/refresh] sync error:', syncErr.message); }; newString=    try {	
+2026-04-15 18:29:48	Edit	C:\foodCo\foodVibe1.0\server\routes\auth.js	    } catch (syncErr) { console.error('[auth/guest] sync error:', syncErr.message); }; newString=    try {	
