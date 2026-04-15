@@ -840,3 +840,32 @@ files = [
 2026-04-13 12:00:28	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\product-data.service.ts	      this.logging.error({ event: 'crud.products.hydrate_error', message: 'Failed to load products', context: { err } })	
 2026-04-13 12:11:17	Edit	C:\foodCo\foodVibe1.0\src\app\pages\metadata-manager\metadata-manager.page.compo	    this.logging.error({ event: 'crud.metadata.delete_error', message: `Failed to delete ${type}`, context: { err } });	
 2026-04-13 12:11:22	Edit	C:\foodCo\foodVibe1.0\src\app\pages\metadata-manager\metadata-manager.page.compo	    this.logging.error({ event: 'crud.metadata.delete_error', message: `Failed to delete ${type}`, context: { err } });	
+2026-04-15 12:44:19	Write	C:\foodCo\foodVibe1.0\src\app\core\services\equipment-category-registry.service.	      this.logging.error({ event: 'crud.equipmentCategories.load_error', message: 'Failed to load equipment custom categ	
+2026-04-15 12:44:28	Write	C:\foodCo\foodVibe1.0\src\app\core\services\menu-event-type.service.ts	      this.logging.error({ event: 'crud.menuEventTypes.load_error', message: 'Failed to load menu event types', context:	
+2026-04-15 12:44:39	Edit	C:\foodCo\foodVibe1.0\src\app\pages\equipment\components\equipment-list\equipmen	          : (this.translation.translate('save_failed') ?? '╫⌐╫Æ╫Ö╫É╫ö ╫æ╫⌐╫₧╫Ö╫¿╫ö');	
+2026-04-15 12:44:48	Edit	C:\foodCo\foodVibe1.0\src\app\pages\equipment\components\equipment-list\equipmen	          : (this.translation.translate('save_failed') ?? '╫⌐╫Æ╫Ö╫É╫ö ╫æ╫⌐╫₧╫Ö╫¿╫ö');	
+2026-04-15 12:45:10	Edit	C:\foodCo\foodVibe1.0\src\app\pages\equipment\components\equipment-list\equipmen	          : (this.translation.translate('save_failed') ?? '╫⌐╫Æ╫Ö╫É╫ö ╫æ╫⌐╫₧╫Ö╫¿╫ö');	
+2026-04-15 12:45:18	Edit	C:\foodCo\foodVibe1.0\src\app\pages\equipment\components\equipment-list\equipmen	          : (this.translation.translate('save_failed') ?? '╫⌐╫Æ╫Ö╫É╫ö ╫æ╫⌐╫₧╫Ö╫¿╫ö');	
+2026-04-15 15:50:03	Bash	grep -rn "╫⌐╫¥ ╫ö╫₧╫á╫ö\|dish.*name.*use\|name.*already\|already.*use\|nameAlrea	src/app/core/services/translation.service.ts:174:      return { valid: false, error: `The ID "${sanitized}" is already u	
+2026-04-15 16:00:35	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-15 16:18:57	Edit	C:\foodCo\foodVibe1.0\CLAUDE.md	This fires on ANY user request that involves code, files, components, or project knowledge. The only exceptions:	
+2026-04-15 16:26:57	Edit	C:\foodCo\foodVibe1.0\src\app\pages\cook-view\cook-view.page.ts	        error: () => { this.saving.setSaving(false) }	
+2026-04-15 16:27:12	Edit	C:\foodCo\foodVibe1.0\src\app\pages\cook-view\cook-view.page.ts	        error: () => { this.saving.setSaving(false) }	
+2026-04-15 16:41:46	Write	C:\foodCo\foodVibe1.0\.claude\sessions\2026-04-15-duplicate-name-validator-fix\s	- The root cause of the original bug: `currentId` is in the source collection; when type changes, the validator searched	
+2026-04-15 16:47:15	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-15 16:57:42	Edit	C:\foodCo\foodVibe1.0\CLAUDE.md	- **Worktree boundary**: When working inside an isolated worktree, never attempt `git checkout main` from within it. All	
+2026-04-15 16:57:48	Edit	C:\foodCo\foodVibe1.0\agent.md	1. Run `ng build` or full `getDiagnostics` ΓÇö mandatory, no exceptions. Do not skip because changes look "mechanical" o	
+2026-04-15 17:04:16	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-15 17:04:59	Write	C:\foodCo\foodVibe1.0\scripts\fix-duplicate-names.mjs	  console.error('ERROR: No MongoDB URI found in .env (MONGO_LOCAL_URI or MONGO_URI)')	
+2026-04-15 17:15:56	Edit	C:\foodCo\foodVibe1.0\public\assets\data\dictionary.json	        "ai_recipe_url_fetch_failed": "╫£╫É ╫á╫Ö╫¬╫ƒ ╫£╫Æ╫⌐╫¬ ╫£╫¢╫¬╫ò╫æ╫¬. ╫æ╫ô╫ò╫º ╫⌐╫ö╫º╫Ö╫⌐╫ò╫¿ ╫¬╫º╫Ö╫ƒ ╫ò╫á╫í╫ö ╫⌐	
+2026-04-15 17:16:06	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-15 17:16:19	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-15 17:16:30	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-15 17:16:42	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-15 17:16:59	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-15 17:28:39	mcp__mempalace__mempalace_search	@{query=data architecture storage modes mongoose models ownership; limit=5}	      "text": "const { Schema, model } = require('mongoose');\n\nconst userSchema = new Schema(\n  {\n    _id: { type: S	
+2026-04-15 17:39:29	Write	C:\foodCo\foodVibe1.0\plans\268-data-architecture-map.plan.md	Fields: `_id` (String, custom), `name` (String, unique), `email` (String, unique), `imgUrl`, `role` (enum admin/user), `	
+2026-04-15 18:13:47	Bash	# Check what changed in other modified files
+git diff src/app/pages/cook-view/co	 - **Worktree boundary**: When working inside an isolated worktree, never attempt `git checkout main` from within it. Al	
+2026-04-15 18:14:42	Bash	git diff main...HEAD 2>/dev/null | head -200	+  console.error('ERROR: No MongoDB URI found in .env (MONGO_LOCAL_URI or MONGO_URI)')	
+2026-04-15 18:15:27	mcp__mempalace__mempalace_search	@{query=master pool dual-write sync cleanup tombstone deletion; limit=8}	      "text": "erge --merge --delete-branch`: ~31.6s\n- Remote delete fallback `git push origin --delete ...`: ~4.0s\n\n	
