@@ -47,10 +47,24 @@ This is the **universal safety net** — skills have their own Phase 0, but this
 
 ## Branch Rule
 
-- Never commit directly to `main` or `master`.
-- Writing code on `main`? Run `git checkout -b feat/<name>` or `fix/<name>` first.
-- Need an isolated worktree for parallel multi-agent work? Use `/worktree-setup` on demand — **not automatic**.
-- **Worktree boundary**: When working inside an isolated worktree, never attempt `git checkout main` from within it. All PR creation and merges must be executed using `git -C <mainRepoPath>` from the root repository path to avoid `fatal: main is already used` errors.
+**Check your branch BEFORE doing any work — not just before committing.**
+
+At task start, run `git branch --show-current`. Then:
+
+- **On `main` or `master`?** Stop. Create and switch to a new branch first, then begin:
+  - `git checkout -b feat/<task-slug>` — new feature
+  - `git checkout -b fix/<task-slug>` — bug fix
+  - `git checkout -b chore/<task-slug>` — maintenance/tooling
+  - Derive `<task-slug>` from the task description (3–5 words, kebab-case)
+  - **Before creating the branch, check if another agent already owns it:**
+    ```bash
+    ls -t docs/session-state-<branch-slug>-*.md 2>/dev/null | head -1
+    ```
+    If a file exists and was modified in the last 4 hours → that branch is occupied. Append `-2` to your slug (then `-3` etc.) until you find a clear one.
+- **Already on a feature/fix/chore branch?** Check for co-occupants the same way. If another agent's session-state file is present and recent on this branch → move to a new branch unless explicitly told to collaborate.
+- **Explicitly told to share a branch or collaborate?** Honor the instruction and note it.
+- **Parallel multi-agent work needing isolation?** Use `/worktree-setup` on demand — not automatic.
+- **Worktree boundary**: When inside an isolated worktree, never attempt `git checkout main`. All PR creation and merges must use `git -C <mainRepoPath>` from the root repo path to avoid `fatal: main is already used` errors.
 
 ## gstack — Browser QA & Extended Tooling
 
