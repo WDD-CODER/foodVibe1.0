@@ -44,7 +44,7 @@ router.get('/:type', optionalToken, async (req, res) => {
     const limit = Math.min(parseInt(req.query.limit) || 500, 1000);
     const skip = parseInt(req.query.skip) || 0;
     const docs = await col(req.params.type)
-      .find({ userId })
+      .find({ userId, _userDeleted: { $ne: true } })
       .skip(skip)
       .limit(limit)
       .toArray();
@@ -63,22 +63,11 @@ router.get('/:type', optionalToken, async (req, res) => {
 router.get('/:type/:id', optionalToken, async (req, res) => {
   try {
     const userId = req.user ? req.user.userId : '__master__';
-    let doc = await col(req.params.type).findOne({
+    const doc = await col(req.params.type).findOne({
       _id: req.params.id,
       userId,
+      _userDeleted: { $ne: true },
     });
-    // If not found in user namespace, check if the request ID is a master _id and the
-    // user has a cloned copy (linked via _masterId). This handles the post-login race
-    // where the returnUrl carries a master ID but the user's copy has a different _id.
-    if (!doc && userId !== '__master__') {
-      doc = await col(req.params.type).findOne({ _masterId: req.params.id, userId });
-    }
-    // Final fallback: serve the master copy if the user has no personal copy at all
-    // (e.g. sync skipped due to name collision). Master data is already public to
-    // unauthenticated requests so this grants no new privileges.
-    if (!doc && userId !== '__master__') {
-      doc = await col(req.params.type).findOne({ _id: req.params.id, userId: '__master__' });
-    }
     if (!doc) {
       return res.status(404).json({ error: `Cannot get, Item ${req.params.id} of type: ${req.params.type} does not exist` });
     }
@@ -110,95 +99,14 @@ router.post('/:type', verifyToken, async (req, res) => {
     const entityType = req.params.type;
     const { userId: _u, _masterId: _m, _userModified: _um, ...safeEntity } = entity;
 
-    // --- PRODUCT_LIST: name-based collision detection (silent merge) ---
-    if (entityType === 'PRODUCT_LIST' && safeEntity.name_hebrew) {
-      const normalized = (safeEntity.name_hebrew || '').trim().replace(/\s+/g, ' ').toLowerCase();
-      const existingMaster = await col(entityType).findOne({
-        userId: '__master__',
-        name_hebrew_normalized: normalized,
-      });
-
-      if (existingMaster) {
-        // Merge: push new source data into the existing master product
-        const newSource = {
-          supplierId: (safeEntity.sources_ && safeEntity.sources_[0]?.supplierId) || '',
-          price: (safeEntity.sources_ && safeEntity.sources_[0]?.price) || safeEntity.buy_price_global_ || 0,
-          addedBy: req.user.userId,
-          addedAt: Date.now(),
-        };
-
-        // Only push if this supplier isn't already in sources_
-        const alreadyHasSupplier = (existingMaster.sources_ || []).some(
-          s => s.supplierId && s.supplierId === newSource.supplierId
-        );
-        if (!alreadyHasSupplier && (newSource.supplierId || newSource.price > 0)) {
-          await col(entityType).updateOne(
-            { _id: existingMaster._id, userId: '__master__' },
-            { $push: { sources_: newSource } }
-          );
-        }
-
-        // Upsert in user's namespace with the SAME _id as master (stable referenceId)
-        const userDoc = {
-          ...existingMaster,
-          userId: req.user.userId,
-          _masterId: String(existingMaster._id),
-          _userModified: false,
-        };
-        delete userDoc._id;
-        await col(entityType).updateOne(
-          { _id: existingMaster._id, userId: req.user.userId },
-          { $setOnInsert: { _id: existingMaster._id, ...userDoc } },
-          { upsert: true }
-        );
-
-        // Return the master product with its original _id (merged, not duplicated)
-        const merged = await col(entityType).findOne({ _id: existingMaster._id, userId: req.user.userId });
-        return res.status(200).json({ ...merged, _merged: true });
-      }
-    }
-
-    // --- Standard insert (no collision) ---
     const doc = {
       ...safeEntity,
       userId: req.user.userId,
-      _masterId: null,
+      _masterId: safeEntity._id,
       _userModified: false,
     };
 
-    // Compute normalized name for future collision detection
-    if (entityType === 'PRODUCT_LIST' && doc.name_hebrew) {
-      doc.name_hebrew_normalized = (doc.name_hebrew || '').trim().replace(/\s+/g, ' ').toLowerCase();
-    }
-
     await col(entityType).insertOne(doc);
-
-    // Also insert a copy under __master__ for shared visibility
-    const masterCopy = { ...doc };
-    delete masterCopy.userId;
-    delete masterCopy._masterId;
-    delete masterCopy._userModified;
-    const masterId = makeId();
-    try {
-      await col(entityType).insertOne({
-        ...masterCopy,
-        _id: masterId,
-        userId: '__master__',
-        _masterId: null,
-        _userModified: false,
-      });
-      // Update user's doc with _masterId pointing to the master copy
-      await col(entityType).updateOne(
-        { _id: doc._id, userId: req.user.userId },
-        { $set: { _masterId: masterId } }
-      );
-    } catch (masterErr) {
-      // Non-critical: if master copy fails (e.g. race condition), user's doc still exists
-      if (masterErr.code !== 11000) {
-        console.error('[data/post] master copy failed:', masterErr.message);
-      }
-    }
-
     res.status(201).json(doc);
   } catch (err) {
     if (err.code === 11000) {
@@ -290,13 +198,28 @@ router.put('/:type', verifyToken, async (req, res) => {
 // ---------------------------------------------------------------------------
 router.delete('/:type/:id', verifyToken, async (req, res) => {
   try {
-    const result = await col(req.params.type).deleteOne({
+    const existing = await col(req.params.type).findOne({
       _id: req.params.id,
       userId: req.user.userId,
     });
-    if (result.deletedCount === 0) {
+    if (!existing) {
       return res.status(404).json({ error: `Cannot remove, item ${req.params.id} of type: ${req.params.type} does not exist` });
     }
+
+    const isMasterClone = existing._masterId && existing._masterId !== existing._id;
+
+    if (isMasterClone) {
+      // Tombstone: preserve lineage so sync doesn't re-clone this item on next login.
+      // _userModified: true ensures syncMasterToUser Rule 3 treats this as user-wins.
+      await col(req.params.type).replaceOne(
+        { _id: req.params.id, userId: req.user.userId },
+        { _id: req.params.id, userId: req.user.userId, _masterId: existing._masterId, _userDeleted: true, _userModified: true }
+      );
+    } else {
+      // Hard delete: user-originated item or legacy (no _masterId / self-referential)
+      await col(req.params.type).deleteOne({ _id: req.params.id, userId: req.user.userId });
+    }
+
     res.json({ ok: true });
   } catch (err) {
     console.error('[data/delete]', err);
