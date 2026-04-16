@@ -1,4 +1,4 @@
-# Session State — 2026-04-15 (end of day)
+# Session State — 2026-04-16 (end of day)
 
 > Single source of truth for all project rules, standards, and skill/agent routing.
 
@@ -6,89 +6,92 @@
 
 ## Current Status
 
-**Branch:** `main` (all work merged)
-**Latest main commits:**
-- `8d6c68f` — chore(session): end-of-day snapshot — plans, sessions, todo, state
-- `40c3432` — fix(http-adapter): appendExisting swallows 409 — item already in target is success (merged via PR #117)
-- `dd763de` — fix(server): stop POST from writing master copies + tombstone deletes (merged via PR #117)
-- `5961d64` — Merge pull request #116 from WDD-CODER/fix/duplicate-name-validator-combined-search
-**Build status:** not verified (server-only changes; frontend adapter fix is minimal)
-**Open PRs:** none — all work on main
+**Branch:** `fix/master-pool-cleanup`
+**Latest commit on branch:**
+- `a08b2cd` — fix(console): suppress 404 log noise + replace all native confirm() with ConfirmModalService
+**Build status:** PASS (0 errors, 3 pre-existing budget warnings)
+**Open PRs:** PR #118 — ready for manual smoke test + merge
 
 ---
 
-## Session Summary (2026-04-15) — Full Day
+## Session Summary (2026-04-16)
 
-### Investigation 1 — Guest cook-view 3 console errors (PR #116, `5961d64`)
-- Root cause: `recipeResolver` redirected to `/recipe-builder` on not-found regardless of auth state. Guests hit auth guard → misleading auth modal cascade.
-- Fix: `src/app/core/resolvers/recipe.resolver.ts` — auth-aware redirect: guests → `/recipe-book`, logged-in → `/recipe-builder`
+### Fix 1 — Auth interceptor 404 noise
+- Root cause: `auth.interceptor.ts:98` logged ALL 4xx responses. Recipe resolver uses a two-step lookup (RECIPE_LIST → DISH_LIST fallback), generating expected 404s on every navigation to a dish recipe.
+- Fix: Added `&& err.status !== 404` to the error-logging condition. Other 4xx/5xx still logged.
+- File: `src/app/core/interceptors/auth.interceptor.ts`
 
-### Investigation 2 — Kitchen preparations explosion (32→47 items) + "name already taken" blocker (PR #116, `5961d64`)
-- Root cause: `syncMasterToUser` cross-collection blindspot — RECIPE_LIST and DISH_LIST share a name namespace but sync checked per-collection only, causing double-clone of same-name master items.
-- Fix: `server/services/sync-master.js` — cross-collection name set + `pendingNames` accumulator + `cleanupNameCollisionClones` cross-collection pass (later superseded in PR #117)
+### Fix 2 — Replace 13 native confirm() with ConfirmModalService
+Replaced all native `confirm()` calls across 5 list components:
+- `recipe-book-list.component.ts` — 4 calls (added import+inject, methods async)
+- `venue-list.component.ts` — 2 calls (added inject, unwrapped async IIFE)
+- `equipment-list.component.ts` — 2 calls (already had inject)
+- `inventory-product-list.component.ts` — 2 calls (already had inject)
+- `supplier-list.component.ts` — 3 calls (already had inject; in-use warning uses `variant:'warning'`)
+- `recipe-book-list.component.spec.ts` — 2 tests updated from `spyOn(window,'confirm')` to `spyOn(confirmModal,'open')`
 
-### Plan 268 — Data Architecture Map (reference, no code changes)
-- Complete audit of storage modes, Mongoose models, server routes, signup seeding, and frontend services.
-- Saved as `plans/268-data-architecture-map.plan.md`.
+### Explanation — log-server.js
+- `scripts/log-server.js` is a separate process on port 9765 that receives frontend log POSTs
+- Start with: `node scripts/log-server.js`
+- App server is `server.js` (Express API on port 3000)
 
-### Plan 269 — Master Pool Cleanup + Deletion Tombstones (PR #117, `dd763de`)
-- `server/routes/generic.js` POST: removed master-copy dual-write + collision branch; `_masterId` now self-referential.
-- `server/routes/generic.js` GET list + GET by-id: added `_userDeleted: { $ne: true }` tombstone filter; GET by-id collapsed from 3-layer fallback to single `findOne`.
-- `server/routes/generic.js` DELETE: master-cloned items → tombstone; user-originated items → hard delete.
-- `server/services/sync-master.js`: `cleanupNameCollisionClones` removed entirely (root cause fixed, cleanup no longer needed).
-- `server/routes/auth.js`: `cleanupNameCollisionClones` import + all 3 call sites removed.
-
-### Fix — type-change 409 crash in TRASH_RECIPES (PR #117, `40c3432`)
-- `src/app/core/services/http-storage.adapter.ts`: `appendExisting` treats 409 as success (idempotent semantics).
-
-### Also shipped in PR #116
-- `feat(recipe-builder)`: type-change confirmation modal with direction-specific messages
-- `feat(cook-view)`: stopwatch pause/resume for steps
-- `chore(infra)`: `scripts/branch-guard.sh` — auto-creates `feat/session-YYYYMMDD` on main edits
+### Confirmed non-issues
+- MetaMask console errors — browser extension noise
+- Remote-control console errors — browser extension noise
 
 ---
 
-## Prior Session Summary (2026-04-14) — Neto Confirm + Dish Reset + Type-Change Modal
+## Prior Session Summary (2026-04-15) — Master Pool Cleanup + Tombstones
 
-Four fixes/features shipped in the recipe-builder neto/dish confirmation flow:
-1. `RecipeHeaderComponent` emits `yieldManuallyChanged`; parent resets `netoConfirmed_` on yield change.
-2. Sync-badge reset button always shows when yield differs from computed.
-3. Dish-type neto confirmation + reset button added.
-4. Type-change confirmation modal when form is dirty.
-- Commit: `a26e48d`
+### Plan 269 — Master Pool Cleanup + Deletion Tombstones (PR #117)
+- `server/routes/generic.js` POST: removed master-copy dual-write + collision branch; `_masterId` now self-referential
+- `server/routes/generic.js` GET list + GET by-id: `_userDeleted: { $ne: true }` tombstone filter; GET by-id collapsed from 3-layer fallback to single `findOne`
+- `server/routes/generic.js` DELETE: master-cloned items → tombstone; user-originated items → hard delete
+- `server/services/sync-master.js`: `cleanupNameCollisionClones` removed
+- `server/routes/auth.js`: `cleanupNameCollisionClones` import + all 3 call sites removed
+
+### Fix — type-change 409 crash (PR #117)
+- `src/app/core/services/http-storage.adapter.ts`: `appendExisting` treats 409 as success
 
 ---
 
 ## Next Steps (Priority Order)
 
-1. **Manual smoke tests (MongoDB required):**
+1. **Manual smoke test PR #118** before merging:
+   - Delete a recipe → confirm modal appears with danger styling (red)
+   - Delete a venue → confirm modal appears with danger styling
+   - Delete equipment → confirm modal appears with danger styling
+   - Delete a product → confirm modal appears with danger styling
+   - Delete a supplier that is in use → confirm modal with warning styling (yellow)
+   - Navigate to non-existent recipe → no log server 404 call fired
+   - Other 4xx errors (401, 403) → log server still receives them
+
+2. **Manual smoke tests for PR #117** (MongoDB required, still pending):
    - Sign in → create product → Compass: single doc in userId, nothing in `__master__`
    - Delete master-seeded item → Compass: `_userDeleted: true`, client-invisible
    - Log out and back in → tombstoned item must NOT re-appear
    - Delete user-owned item (not master clone) → Compass: hard deleted
-   - Type-change a dish/prep with prior TRASH_RECIPES entry → confirm no 409
-2. **TRASH_RECIPES cleanup (optional):** one-time Atlas script to remove stale duplicate `_id` entries from failed prior type-changes
-3. **Existing __master__ pollution (optional):** existing pollution stays until users delete it manually, or write a one-off cleanup script
-4. **Plan 234 operational tasks** — blocked on Atlas/Compass access + production deploy
+
+3. **Plan 255 — Dead Code Cleanup (remaining open tasks):**
+   - Task 8: Investigate repair script trio (`backup-before-repair.mjs`, `diagnose-broken-refs.mjs`, `repair-recipe-references.mjs`)
+   - Task 9: Investigate migration pair (`migrate-to-master.mjs`, `link-users-to-master.mjs`)
+   - Task 10: Investigate `scripts/trim-demo-data.mjs`
+
+4. **Plan 259 — DB-Backed Shared Few-Shot Pool** — all tasks open
 
 ---
 
 ## Blocked
 
 - Plan 234 operational tasks require manual Atlas/Compass access and production deploy
-- Smoke tests for Plan 269 require running server against a real MongoDB instance
+- PR #117 smoke tests require running server against a real MongoDB instance
 
 ---
 
 ## References
 
-- PR #116: https://github.com/WDD-CODER/foodVibe1.0/pull/116 (merged `5961d64`)
-- PR #117: https://github.com/WDD-CODER/foodVibe1.0/pull/117 (merged `dd763de` + `40c3432`)
-- `server/routes/generic.js` — POST, GET `/:type`, GET `/:type/:id`, DELETE — all updated
-- `server/services/sync-master.js` — `cleanupNameCollisionClones` removed
-- `server/routes/auth.js` — `cleanupNameCollisionClones` removed from import + 3 call sites
-- `src/app/core/services/http-storage.adapter.ts` — `appendExisting` 409 handling
-- `src/app/core/resolvers/recipe.resolver.ts` — auth-aware not-found redirect
-- `plans/268-data-architecture-map.plan.md` — reference architecture map
-- `plans/269-master-pool-cleanup.plan.md` — plan with implementation notes
-- `.claude/sessions/2026-04-15-master-pool-cleanup/session-handoff.md` — full end-of-day evaluation
+- PR #118: https://github.com/WDD-CODER/foodVibe1.0/pull/118 — confirm modal migration + 404 fix
+- PR #117: https://github.com/WDD-CODER/foodVibe1.0/pull/117 (merged — master pool cleanup)
+- PR #116: https://github.com/WDD-CODER/foodVibe1.0/pull/116 (merged)
+- Session handoff: `.claude/sessions/2026-04-16-confirm-modal-migration/session-handoff.md`
+- Techdebt report: `.claude/techdebt-reports/techdebt-2026-04-16.md`
