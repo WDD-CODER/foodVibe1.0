@@ -95,7 +95,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         )
       }
 
-      if (err.status && err.status >= 400 && !req.url.startsWith(environment.logServerUrl)) {
+      if (err.status && err.status >= 400 && err.status !== 404 && !req.url.startsWith(environment.logServerUrl)) {
         logging.error({
           event: 'http.error',
           message: `HTTP ${err.status}`,

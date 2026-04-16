@@ -408,7 +408,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
 
   async onDelete(item: Equipment): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return;
-    if (!confirm('האם למחוק את פריט הציוד "' + (item.name_hebrew ?? '') + '"?')) return;
+    if (!await this.confirmModal.open('האם למחוק את פריט הציוד "' + (item.name_hebrew ?? '') + '"?', { variant: 'danger' })) return;
     this.deletingId_.set(item._id);
     try {
       await this.equipmentData.deleteEquipment(item._id);
@@ -438,7 +438,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
     if (!this.requireAuthService.requireAuth()) return;
-    if (!confirm(`למחוק ${ids.length} פריטי ציוד?`)) return;
+    if (!await this.confirmModal.open(`למחוק ${ids.length} פריטי ציוד?`, { variant: 'danger' })) return;
     for (const id of ids) {
       this.deletingId_.set(id);
       try {

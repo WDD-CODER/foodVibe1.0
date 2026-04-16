@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { catchError, firstValueFrom, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 /** Mirrors EntityId from async-storage.service.ts — kept local to avoid circular import. */
@@ -124,7 +124,11 @@ export class HttpStorageAdapter {
    */
   async appendExisting<T extends EntityId>(entityType: string, entity: T): Promise<void> {
     await firstValueFrom(
-      this.http.post<unknown>(`${this.base}/api/v1/data/${entityType}`, entity, { headers: this.headers(), withCredentials: true })
+      this.http.post<unknown>(`${this.base}/api/v1/data/${entityType}`, entity, { headers: this.headers(), withCredentials: true }).pipe(
+        // 409 = item already exists in the target collection (e.g. already in trash from a
+        // prior attempt). The goal of appendExisting is "make sure it's there" — treat as success.
+        catchError((err: HttpErrorResponse) => err.status === 409 ? of(null) : new Promise((_, reject) => reject(err)))
+      )
     );
   }
 

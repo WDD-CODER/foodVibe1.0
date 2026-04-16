@@ -15,6 +15,7 @@ import { MetadataRegistryService } from '@services/metadata-registry.service';
 import { UserService } from '@services/user.service';
 import { UserMsgService } from '@services/user-msg.service';
 import { RequireAuthService } from 'src/app/core/utils/require-auth.util';
+import { ConfirmModalService } from '@services/confirm-modal.service';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { ClickOutSideDirective } from '@directives/click-out-side';
 import { Recipe } from '@models/recipe.model';
@@ -58,6 +59,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   private readonly userService = inject(UserService);
   protected readonly isLoggedIn = this.userService.isLoggedIn;
   private readonly requireAuthService = inject(RequireAuthService);
+  private readonly confirmModal = inject(ConfirmModalService);
   private readonly userMsg = inject(UserMsgService);
   private readonly heroFab = inject(HeroFabService);
   private readonly aiRecipeModal = inject(AiRecipeModalService);
@@ -653,15 +655,14 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     this.onEditRecipe(recipe);
   }
 
-  protected onDeleteRecipe(recipe: Recipe): void {
+  protected async onDeleteRecipe(recipe: Recipe): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return;
-    if (confirm('האם אתה בטוח שברצונך למחוק?')) {
-      this.deletingId_.set(recipe._id);
-      this.kitchenState.deleteRecipe(recipe).subscribe({
-        next: () => { this.deletingId_.set(null); },
-        error: () => { this.deletingId_.set(null); }
-      });
-    }
+    if (!await this.confirmModal.open('האם אתה בטוח שברצונך למחוק?', { variant: 'danger' })) return;
+    this.deletingId_.set(recipe._id);
+    this.kitchenState.deleteRecipe(recipe).subscribe({
+      next: () => { this.deletingId_.set(null); },
+      error: () => { this.deletingId_.set(null); }
+    });
   }
 
   private onHideRecipe(recipe: Recipe): void {
@@ -672,22 +673,21 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     });
   }
 
-  private onPermanentlyDeleteRecipe(recipe: Recipe): void {
-    if (confirm('מחיקה קבועה — לא ניתן לשחזר. להמשיך?')) {
-      this.removingId_.set(recipe._id);
-      this.kitchenState.permanentlyDeleteRecipe(recipe).subscribe({
-        next: () => { this.removingId_.set(null); },
-        error: () => { this.removingId_.set(null); }
-      });
-    }
+  private async onPermanentlyDeleteRecipe(recipe: Recipe): Promise<void> {
+    if (!await this.confirmModal.open('מחיקה קבועה — לא ניתן לשחזר. להמשיך?', { variant: 'danger' })) return;
+    this.removingId_.set(recipe._id);
+    this.kitchenState.permanentlyDeleteRecipe(recipe).subscribe({
+      next: () => { this.removingId_.set(null); },
+      error: () => { this.removingId_.set(null); }
+    });
   }
 
-  protected onRemoveRecipe(recipe: Recipe): void {
+  protected async onRemoveRecipe(recipe: Recipe): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return;
     if (this.isAdmin_()) {
-      this.onPermanentlyDeleteRecipe(recipe);
+      await this.onPermanentlyDeleteRecipe(recipe);
     } else {
-      if (confirm('האם אתה בטוח שברצונך למחוק?')) {
+      if (await this.confirmModal.open('האם אתה בטוח שברצונך למחוק?', { variant: 'danger' })) {
         this.onHideRecipe(recipe);
       }
     }
@@ -711,10 +711,10 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected onBulkDeleteSelected(ids: string[]): void {
+  protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
     if (!this.requireAuthService.requireAuth()) return;
-    if (!confirm(`למחוק ${ids.length} מתכונים?`)) return;
+    if (!await this.confirmModal.open(`למחוק ${ids.length} מתכונים?`, { variant: 'danger' })) return;
     const recipes = this.kitchenState.recipes_().filter((r) => ids.includes(r._id ?? ''));
     if (this.isAdmin_()) {
       recipes.forEach((recipe) => {

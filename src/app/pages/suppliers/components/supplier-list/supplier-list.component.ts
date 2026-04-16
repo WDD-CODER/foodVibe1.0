@@ -343,9 +343,8 @@ export class SupplierListComponent implements OnInit, OnDestroy {
     if (!this.requireAuthService.requireAuth()) return;
     const count = this.linkedProductCount_(item._id);
     if (count > 0) {
-      const msg = this.translation.translate('supplier_in_use_cannot_delete');
-      if (!confirm(msg)) return;
-    } else if (!confirm('למחוק את הספק "' + (item.name_hebrew ?? '') + '"?')) return;
+      if (!await this.confirmModal.open('supplier_in_use_cannot_delete', { variant: 'warning' })) return;
+    } else if (!await this.confirmModal.open('למחוק את הספק "' + (item.name_hebrew ?? '') + '"?', { variant: 'danger' })) return;
     this.deletingId_.set(item._id);
     try {
       await this.supplierData.removeSupplier(item._id);
@@ -359,7 +358,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
     if (!this.requireAuthService.requireAuth()) return;
-    if (!confirm(`למחוק ${ids.length} ספקים?`)) return;
+    if (!await this.confirmModal.open(`למחוק ${ids.length} ספקים?`, { variant: 'danger' })) return;
     for (const id of ids) {
       this.deletingId_.set(id);
       try {

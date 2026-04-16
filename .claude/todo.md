@@ -2,6 +2,18 @@
 
 ---
 
+### Plan 269 — Master Pool Cleanup + Deletion Tombstones (`plans/269-master-pool-cleanup.plan.md`)
+
+- [x] Task 1: `server/routes/generic.js` — replace POST handler body: remove dual-write + collision block, set `_masterId: safeEntity._id`
+- [x] Task 2: `server/routes/generic.js` — replace GET `/:type/:id` 3-layer fallback with single `findOne({ _id, userId, _userDeleted: { $ne: true } })`
+- [x] Task 3: `server/routes/generic.js` — add `_userDeleted: { $ne: true }` to GET `/:type` list query
+- [x] Task 4: `server/routes/generic.js` — replace DELETE handler inner logic with tombstone/hard-delete branching
+- [x] Task 5: `server/services/sync-master.js` — delete `cleanupNameCollisionClones` function; update `module.exports`
+- [x] Task 6: `server/routes/auth.js` — remove `cleanupNameCollisionClones` from import + 3 call sites
+- [x] Task 7: Verify `grep -r cleanupNameCollisionClones server/` returns nothing; confirm no syntax errors
+
+---
+
 ### Plan 267 — Context Management + Session Handoff (`plans/267-context-management-session-handoff.plan.md`)
 
 - [x] Task 1: `scripts/` — copy 4 session-kit hooks (context-monitor.sh, pre-compact-reminder.sh, session-startup.sh, handoff-check.sh) + chmod +x

@@ -1,4 +1,4 @@
-# Session State — 2026-04-14
+# Session State — 2026-04-16 (end of day)
 
 > Single source of truth for all project rules, standards, and skill/agent routing.
 
@@ -6,99 +6,92 @@
 
 ## Current Status
 
-**Branch:** `main`
-**Latest commit:** `de03a1d` (chore: session-handoff for security-audit-sprint)
-**Build status:** passing (verified 2026-04-14 end-of-session run, warnings only — budget overage, cook-view SCSS, exceljs CommonJS — all pre-existing)
-**Open PRs:** none — commits `7972591`, `b6ce1fc`, `de03a1d` unpushed; new session changes also uncommitted
+**Branch:** `fix/master-pool-cleanup`
+**Latest commit on branch:**
+- `a08b2cd` — fix(console): suppress 404 log noise + replace all native confirm() with ConfirmModalService
+**Build status:** PASS (0 errors, 3 pre-existing budget warnings)
+**Open PRs:** PR #118 — ready for manual smoke test + merge
 
 ---
 
-## Session Summary (2026-04-14) — Neto Confirm + Dish Reset + Type-Change Modal
+## Session Summary (2026-04-16)
 
-Four fixes/features shipped in the recipe-builder neto/dish confirmation flow:
+### Fix 1 — Auth interceptor 404 noise
+- Root cause: `auth.interceptor.ts:98` logged ALL 4xx responses. Recipe resolver uses a two-step lookup (RECIPE_LIST → DISH_LIST fallback), generating expected 404s on every navigation to a dish recipe.
+- Fix: Added `&& err.status !== 404` to the error-logging condition. Other 4xx/5xx still logged.
+- File: `src/app/core/interceptors/auth.interceptor.ts`
 
-### Fix 1: Neto confirmation modal not showing on re-edit
-- **Root cause:** `netoConfirmed_` was loaded as `true` from the saved recipe, blocking the modal gate.
-- **Fix:** `RecipeHeaderComponent` emits `yieldManuallyChanged` output. Parent resets `netoConfirmed_.set(false)` on yield change.
+### Fix 2 — Replace 13 native confirm() with ConfirmModalService
+Replaced all native `confirm()` calls across 5 list components:
+- `recipe-book-list.component.ts` — 4 calls (added import+inject, methods async)
+- `venue-list.component.ts` — 2 calls (added inject, unwrapped async IIFE)
+- `equipment-list.component.ts` — 2 calls (already had inject)
+- `inventory-product-list.component.ts` — 2 calls (already had inject)
+- `supplier-list.component.ts` — 3 calls (already had inject; in-use warning uses `variant:'warning'`)
+- `recipe-book-list.component.spec.ts` — 2 tests updated from `spyOn(window,'confirm')` to `spyOn(confirmModal,'open')`
 
-### Fix 2: Sync-badge reset button hidden
-- **Root cause:** Same `!netoConfirmed()` guard in the `@if` condition.
-- **Fix:** Removed `!netoConfirmed()` — button always shows when yield differs from computed.
+### Explanation — log-server.js
+- `scripts/log-server.js` is a separate process on port 9765 that receives frontend log POSTs
+- Start with: `node scripts/log-server.js`
+- App server is `server.js` (Express API on port 3000)
 
-### Feature 3: Dish-type neto confirmation + reset button
-- `isYieldManualOverride()` returns `isManualOverride_()` for dish type (no ingredient-total comparison).
-- Dish-specific modal text: `dish_portions_confirm_header` / `dish_portions_confirm_message`.
-- New `savedPortions` input on `RecipeHeaderComponent`; dish reset button shows when editing existing dish with changed portions.
-- `savedPortions_` signal in page: set from `recipe.yield_amount_` in `patchFormFromRecipe`, cleared on new recipe.
-- New `resetToSavedPortions()` method in `RecipeYieldManager`.
-- Template: recipe sync badge gated on `!== 'dish'`; dish reset badge gated on `=== 'dish' && isManualOverride_() && savedPortions() !== null`.
-
-### Feature 4: Type-change confirmation modal
-- When user clicks the recipe/dish toggle while the form is dirty, a warning modal fires.
-- Fresh (non-dirty) forms toggle immediately with no prompt.
-- `ConfirmModalService` injected into `RecipeHeaderComponent`; `toggleTypeWrapper()` made async.
-
-### Plus (same uncommitted batch)
-- `server/routes/generic.js` — master-copy fallback for users whose sync skipped due to name collision
-- `docs/session-state.md` — updated for this session
-- `.claude/copilot-instructions.md` — routing rule updated for end-of-session-agent
+### Confirmed non-issues
+- MetaMask console errors — browser extension noise
+- Remote-control console errors — browser extension noise
 
 ---
 
-## Prior Session Summary (2026-04-14) — Guest 404 Fix
+## Prior Session Summary (2026-04-15) — Master Pool Cleanup + Tombstones
 
-Fixed spurious 404 console errors when a guest user clicks a recipe after login.
+### Plan 269 — Master Pool Cleanup + Deletion Tombstones (PR #117)
+- `server/routes/generic.js` POST: removed master-copy dual-write + collision branch; `_masterId` now self-referential
+- `server/routes/generic.js` GET list + GET by-id: `_userDeleted: { $ne: true }` tombstone filter; GET by-id collapsed from 3-layer fallback to single `findOne`
+- `server/routes/generic.js` DELETE: master-cloned items → tombstone; user-originated items → hard delete
+- `server/services/sync-master.js`: `cleanupNameCollisionClones` removed
+- `server/routes/auth.js`: `cleanupNameCollisionClones` import + all 3 call sites removed
 
-### Fixes
-1. `server/routes/generic.js` — `_masterId` fallback in `GET /:type/:id`
-2. `recipe-data.service.ts` — silenced 404 logging
-3. `dish-data.service.ts` — silenced 404 logging
-
-All committed in `7972591`.
-
----
-
-## Uncommitted Changes (This Session)
-
-- `public/assets/data/dictionary.json` — 4 new translation keys
-- `src/app/core/utils/recipe-yield-manager.util.ts` — `resetToSavedPortions()`
-- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts` — dish portions input, reset wrapper, `isYieldManualOverride()` fix, `ConfirmModalService`, async toggle
-- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html` — sync/dish badge split
-- `src/app/pages/recipe-builder/recipe-builder.page.ts` — `savedPortions_` signal, dish confirmation messages
-- `src/app/pages/recipe-builder/recipe-builder.page.html` — `[savedPortions]` binding
-- `server/routes/generic.js` — master-copy fallback (additional fix)
-- `docs/session-state.md` — this update
-- `.claude/copilot-instructions.md` — routing rule tweak
+### Fix — type-change 409 crash (PR #117)
+- `src/app/core/services/http-storage.adapter.ts`: `appendExisting` treats 409 as success
 
 ---
 
-## Next Steps
+## Next Steps (Priority Order)
 
-1. **Commit and push** all uncommitted changes above
-2. **Manual smoke tests:**
-   - Open recipe-builder → change yield → save → reopen → change yield again → confirm neto modal appears
-   - Confirm sync-badge always visible when yield differs from computed
-   - Open existing dish → change portions → verify dish-specific modal fires on save
-   - Open existing dish → change portions → verify reset button appears and restores saved value
-   - Toggle recipe/dish type while form is dirty → confirm warning modal appears; toggle while clean → confirm immediate
-   - Navigate from preparation to dish → confirm no `workflow_items -> N -> instruction` crash
-3. **Push `main` to remote** — multiple unpushed commits: `7972591`, `b6ce1fc`, `de03a1d` + new commit
-4. **Run `cleanupNameCollisionClones`** against production — requires Atlas/Compass
-5. Address Plan 234 operational tasks — see `todo.md`
+1. **Manual smoke test PR #118** before merging:
+   - Delete a recipe → confirm modal appears with danger styling (red)
+   - Delete a venue → confirm modal appears with danger styling
+   - Delete equipment → confirm modal appears with danger styling
+   - Delete a product → confirm modal appears with danger styling
+   - Delete a supplier that is in use → confirm modal with warning styling (yellow)
+   - Navigate to non-existent recipe → no log server 404 call fired
+   - Other 4xx errors (401, 403) → log server still receives them
+
+2. **Manual smoke tests for PR #117** (MongoDB required, still pending):
+   - Sign in → create product → Compass: single doc in userId, nothing in `__master__`
+   - Delete master-seeded item → Compass: `_userDeleted: true`, client-invisible
+   - Log out and back in → tombstoned item must NOT re-appear
+   - Delete user-owned item (not master clone) → Compass: hard deleted
+
+3. **Plan 255 — Dead Code Cleanup (remaining open tasks):**
+   - Task 8: Investigate repair script trio (`backup-before-repair.mjs`, `diagnose-broken-refs.mjs`, `repair-recipe-references.mjs`)
+   - Task 9: Investigate migration pair (`migrate-to-master.mjs`, `link-users-to-master.mjs`)
+   - Task 10: Investigate `scripts/trim-demo-data.mjs`
+
+4. **Plan 259 — DB-Backed Shared Few-Shot Pool** — all tasks open
 
 ---
 
 ## Blocked
 
 - Plan 234 operational tasks require manual Atlas/Compass access and production deploy
-- Name collision cleanup in production requires manual run or deploy of migration script
+- PR #117 smoke tests require running server against a real MongoDB instance
 
 ---
 
 ## References
 
-- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts` — `yieldManuallyChanged`, `savedPortions`, `isYieldManualOverride()`, `toggleTypeWrapper()` async
-- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html` — recipe/dish badge split
-- `src/app/pages/recipe-builder/recipe-builder.page.ts` — `savedPortions_` signal, dish confirmation messages
-- `src/app/core/utils/recipe-yield-manager.util.ts` — `resetToSavedPortions()`
-- `server/routes/generic.js` — master-copy fallback
+- PR #118: https://github.com/WDD-CODER/foodVibe1.0/pull/118 — confirm modal migration + 404 fix
+- PR #117: https://github.com/WDD-CODER/foodVibe1.0/pull/117 (merged — master pool cleanup)
+- PR #116: https://github.com/WDD-CODER/foodVibe1.0/pull/116 (merged)
+- Session handoff: `.claude/sessions/2026-04-16-confirm-modal-migration/session-handoff.md`
+- Techdebt report: `.claude/techdebt-reports/techdebt-2026-04-16.md`
