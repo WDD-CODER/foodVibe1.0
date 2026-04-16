@@ -1,4 +1,4 @@
-# Session State — 2026-04-16 (end of day, session 2)
+# Session State — 2026-04-16 (end of day, session 3 — audit session)
 
 > Single source of truth for all project rules, standards, and skill/agent routing.
 
@@ -6,10 +6,11 @@
 
 ## Current Status
 
-**Branch:** `fix/session-20260416`
-**Latest commit on branch:**
-- `cfb4d3c` — fix(auth+recipe-book): role in login response + restore trash delete flow
-**Build status:** PASS (last verified on earlier commit today; not re-run after cfb4d3c)
+**Branch:** `fix/remove-trailing-semicolons`
+**Latest commits on branch:**
+- `73b57c7` — style(F5): remove 9,496 trailing semicolons — no-semis convention
+- `f115b57` — fix(cook-view): tokenize 3 residual hex values + upgrade color-token template to v4
+**Build status:** PASS (ng build + tsc --noEmit verified after semicolon sweep)
 **Open PRs:**
 - PR #119 — fix(auth+recipe-book): role + trash flow — ready for smoke test + merge
 - PR #118 — merged (auto guest login + confirm modal migration)
@@ -52,9 +53,27 @@
 
 ---
 
+## Session Summary (2026-04-16, session 3 — audit session)
+
+### Audit items worked (from 2026-04-10 nightly audit)
+- **F3 subscription leak** — hero-fab Router.events had no cleanup (was already committed in prior session)
+- **C color tokens** — cook-view.page.scss: added `--cv-muted: #888`, fixed 2× #fff → `--color-text-on-primary`, fixed cv-muted fallback → `var(--cv-muted)`
+- **color-token template** — v3 → v4: redesigned Step 5 into Step 5a (page-palette check) + Step 5b (global semantic name); scores 6/6
+- **F5 trailing semicolons** — 9,496 removed across 181 files using ASI-safe script; 31 preserved where next meaningful line starts with `(`, `[`, or `` ` ``
+- **Oversized files (6)** — skipped, needs dedicated architectural session
+
+### New files
+- `scripts/remove-trailing-semicolons.mjs` — reusable semicolon cleanup script
+- `.prettierrc.json` — anchors `semi: false` convention
+- `.claude/reports/audit-sessions/2026-04-16-audit-session.md` — session log
+
+---
+
 ## Next Steps (Priority Order)
 
-1. **Merge PR #119** after smoke test:
+1. **Create PR** for `fix/remove-trailing-semicolons` (2 commits: cook-view fix + semicolon sweep)
+
+2. **Merge PR #119** after smoke test:
    - Delete a recipe → confirm it moves to trash (not hard deleted)
    - Log out and back in → tombstoned item must NOT re-appear (Test 3)
    - Type-change TRASH_RECIPES → no 409 response (Test 5)

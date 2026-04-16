@@ -881,3 +881,10 @@ git diff src/app/pages/cook-view/co	 - **Worktree boundary**: When working insid
 2026-04-15 18:29:40	Edit	C:\foodCo\foodVibe1.0\server\routes\auth.js	    } catch (syncErr) { console.error('[auth/login] sync error:', syncErr.message); }; newString=    try {	
 2026-04-15 18:29:44	Edit	C:\foodCo\foodVibe1.0\server\routes\auth.js	    } catch (syncErr) { console.error('[auth/refresh] sync error:', syncErr.message); }; newString=    try {	
 2026-04-15 18:29:48	Edit	C:\foodCo\foodVibe1.0\server\routes\auth.js	    } catch (syncErr) { console.error('[auth/guest] sync error:', syncErr.message); }; newString=    try {	
+2026-04-16 18:01:20	Bash	cd C:/foodCo/foodVibe1.0 && git stash && npx ng test --watch=false --browsers=Ch	Chrome Headless 147.0.0.0 (Windows 10): Executed 310 of 310[31m (63 FAILED)[39m[31m DISCONNECTED[39m (33.92 secs / 3	
+2026-04-16 18:04:09	Write	C:\foodCo\foodVibe1.0\.claude\reports\audit-sessions\2026-04-16-audit-session.md	Γöé Failed:    n/a ΓÇö first try worked                      Γöé	
+2026-04-16 18:05:25	mcp__mempalace__mempalace_search	@{query=auth state change user login logout list update; limit=5}	      "text": "event: 'auth.signup', message: 'Signup success', context: { userId: user._id } })\n      })\n    )\n  }\n	
+2026-04-16 18:10:42	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\user.service.ts	        error: () => {	
+2026-04-16 18:10:56	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\user.service.ts	        error: () => {	
+2026-04-16 18:11:05	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\user.service.ts	        error: () => {	
+2026-04-16 18:23:15	Bash	cd C:/foodCo/foodVibe1.0 && git diff .claude/reflect/failure-log.tsv	 2026-04-15 18:29:40 Edit C:\foodCo\foodVibe1.0\server\routes\auth.js     } catch (syncErr) { console.error('[auth/login	
