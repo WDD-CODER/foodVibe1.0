@@ -1,4 +1,4 @@
-# Session State — 2026-04-16 (end of day — updated after disk cleanup session)
+# Session State — 2026-04-16 (end of day — updated after ai-inventory-save-validation session)
 
 > Single source of truth for all project rules, standards, and skill/agent routing.
 
@@ -6,60 +6,70 @@
 
 ## Current Status
 
-**Branch:** `feat/unlinked-ingredient-inline-edit`
+**Branch:** `fix/ai-inventory-save-validation` (changes in working tree — not yet committed)
 **Latest commit on branch:** `a52bdcb` — Merge pull request #118 from WDD-CODER/fix/master-pool-cleanup
-**Build status:** PASS (verified earlier today — 0 errors, 0 warnings on this feature)
-**Open PRs:** None (PR #118 merged)
-**Dirty working tree:** YES — 105 lines of uncommitted changes across 9 files (see below)
+**Build status:** PASS (user confirmed 0 errors, 0 warnings)
+**Open PRs:** None
+**Dirty working tree:** YES — 13 files modified (see below)
 
 ---
 
 ## IMPORTANT: Uncommitted Feature Work
 
-Code changes for the unlinked-ingredient-inline-edit feature exist in the working tree but were NEVER committed. These must be addressed at the start of the next session:
+Two features were implemented this session and exist only in the working tree. Commit at the start of the next session:
 
+### Batch 1 — Unlinked badge click opens inline edit panel
 ```
-recipe-ingredients-table.component.html   (+3)
-recipe-ingredients-table.component.ts     (+23)
-recipe-builder.page.ts                    (+3)
-quick-add-product-modal.component.html    (+11)
-quick-add-product-modal.component.scss    (+11)
-quick-add-product-modal.component.ts      (+9)
-quick-edit-product-panel.component.html   (+11)
-quick-edit-product-panel.component.scss   (+12)
-quick-edit-product-panel.component.ts     (+9)
+recipe-ingredients-table.component.html   (badge click handler swapped)
+recipe-ingredients-table.component.ts     (+23 — onUnlinkedBadgeClick)
+```
+
+### Batch 2 — AI-inventory save validation + UX hardening (fix/ai-inventory-save-validation)
+```
+quick-add-product-modal.component.html    (+11 — red borders + error text)
+quick-add-product-modal.component.scss    (+11 — .field-error-msg, .input--error)
+quick-add-product-modal.component.ts      (+9  — nameError_/unitError_ signals)
+quick-edit-product-panel.component.html   (+11 — red borders + error text)
+quick-edit-product-panel.component.scss   (+12 — same error styles)
+quick-edit-product-panel.component.ts     (+9  — nameError_/unitError_ signals)
+recipe-builder.page.ts                    (+3  — scroll to first .incomplete-row on blocked save)
+recipe-ingredients-table.component.scss   (+7  — gap + .badge-label for incomplete badge)
+public/assets/data/dictionary.json        (+1  — "fix": "תקן")
 ```
 
 **Next session start sequence:**
 1. `ng build` — verify 0 errors
-2. Manual smoke test: click unlinked icon → inline edit opens; click name → dropdown opens
-3. Commit on `feat/unlinked-ingredient-inline-edit` and create PR
+2. Manual smoke test: unlinked icon → inline edit; save without name → red border shown; blocked save → page scrolls to .incomplete-row
+3. Commit both batches on `fix/ai-inventory-save-validation` → create PR
 
 ---
 
-## Session Summary (2026-04-16 — Disk Cleanup)
+## Session Summary (2026-04-16 — AI Inventory Save Validation)
+
+### Fix — Inline validation for Quick-Add and Quick-Edit panels
+- `quick-add-product-modal` and `quick-edit-product-panel`: Added `nameError_` / `unitError_` signals; validation fires on save attempt; red `input--error` border + `.field-error-msg` text shown under offending fields
+- `recipe-ingredients-table.component.scss`: Added `gap` + `.badge-label` to `incomplete-badge` — displays "תקן" text label alongside the badge icon
+- `recipe-builder.page.ts`: On blocked save (incomplete rows present), page scrolls to the first `.incomplete-row` automatically
+- `dictionary.json`: Added `"fix": "תקן"` translation key
+
+### Unlinked badge feature (carried from previous session — now also in working tree)
+- `recipe-ingredients-table.component.ts/html`: Clicking unlinked badge calls `onUnlinkedBadgeClick` → opens Quick-Edit panel at `'incomplete'` tier
+
+---
+
+## Prior Session Summary (2026-04-16 evening) — Disk Cleanup
 
 ### Maintenance session — no code changes
-- Cleared disk space: freed ~16+ GB total
-  - uv Python cache: 2.2 GB
-  - pip cache: 0.75 GB
-  - Bun install cache: ~0.75 GB
-  - Chrome cache: ~0.38 GB
-  - Slack cache: ~0.9 GB
-  - Discord cache: ~1.28 GB
-  - Claude Desktop uninstalled (claudevm.bundle: 12.32 GB)
+- Cleared disk space: freed ~16+ GB total (uv, pip, Bun, Chrome, Slack, Discord, Claude Desktop)
 - Confirmed: `dev:local` is correct for active development (Render free tier sleeps)
 
 ---
 
-## Prior Session Summary (2026-04-16 morning) — Unlinked Ingredient Inline Edit (IN PROGRESS)
+## Prior Session Summary (2026-04-16 morning) — Unlinked Ingredient Inline Edit
 
 ### Feature — Unlinked badge click → inline edit panel
-- `recipe-ingredients-table.component.ts`: Added `onUnlinkedBadgeClick(group, index)` method; injects `ProductDataService`; creates stub product from `name_hebrew`, patches form row with `referenceId` + `item_type: 'product'`, calls `onQuickEditBadgeClick` at tier `'incomplete'`
-- `recipe-ingredients-table.component.html`: Changed unlinked badge click from `editingNameAtRow_.set($index)` to `onUnlinkedBadgeClick(group, $index)`
-- `quick-add-product-modal`: Added `nameError_` and `unitError_` signals for inline validation on save attempt
-- `quick-edit-product-panel`: Additional panel improvements (scss + html)
-- STATUS: Code written, build verified earlier, but NOT committed — must commit at next session start
+- `recipe-ingredients-table.component.ts`: Added `onUnlinkedBadgeClick` — creates stub product, patches form row, calls `onQuickEditBadgeClick` at tier `'incomplete'`
+- Build verified; NOT committed — changes carried into the current session's working tree
 
 ---
 
@@ -102,10 +112,10 @@ Replaced all native `confirm()` calls across 5 list components:
 
 ## Next Steps (Priority Order)
 
-1. **FIRST: Commit unlinked-ingredient-inline-edit** (dirty working tree — pre-existing code):
+1. **FIRST: Commit fix/ai-inventory-save-validation** (dirty working tree — 13 files):
    - `ng build` — verify 0 errors
-   - Smoke test: click unlinked icon → inline edit opens; click name → dropdown opens as before
-   - Commit on `feat/unlinked-ingredient-inline-edit` → create PR
+   - Smoke test: unlinked icon → inline edit; save without name → red border; blocked save → scroll to .incomplete-row
+   - Commit all 13 modified files on `fix/ai-inventory-save-validation` → create PR
    - Note: stub product uses `base_unit_: 'gram'` hardcoded — flag for follow-up if unit mismatch needed
 
 2. **Manual smoke tests for PR #117** (MongoDB required, still pending):
@@ -135,6 +145,6 @@ Replaced all native `confirm()` calls across 5 list components:
 - PR #118: https://github.com/WDD-CODER/foodVibe1.0/pull/118 — confirm modal migration + 404 fix (MERGED)
 - PR #117: https://github.com/WDD-CODER/foodVibe1.0/pull/117 (merged — master pool cleanup)
 - PR #116: https://github.com/WDD-CODER/foodVibe1.0/pull/116 (merged)
-- Session handoff (disk cleanup): `.claude/sessions/2026-04-16-unlinked-ingredient-inline-edit/session-handoff.md`
+- Session handoff (ai-inventory-save-validation): `.claude/sessions/2026-04-16-unlinked-ingredient-inline-edit/session-handoff.md` (updated this session)
 - Session handoff (confirm modal): `.claude/sessions/2026-04-16-confirm-modal-migration/session-handoff.md`
 - Techdebt report: `.claude/techdebt-reports/techdebt-2026-04-16.md`
