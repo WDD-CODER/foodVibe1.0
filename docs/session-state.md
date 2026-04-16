@@ -1,4 +1,4 @@
-# Session State — 2026-04-16 (end of day)
+# Session State — 2026-04-16 (end of day, session 2)
 
 > Single source of truth for all project rules, standards, and skill/agent routing.
 
@@ -6,71 +6,63 @@
 
 ## Current Status
 
-**Branch:** `fix/master-pool-cleanup`
+**Branch:** `fix/session-20260416`
 **Latest commit on branch:**
-- `a08b2cd` — fix(console): suppress 404 log noise + replace all native confirm() with ConfirmModalService
-**Build status:** PASS (0 errors, 3 pre-existing budget warnings)
-**Open PRs:** PR #118 — ready for manual smoke test + merge
+- `cfb4d3c` — fix(auth+recipe-book): role in login response + restore trash delete flow
+**Build status:** PASS (last verified on earlier commit today; not re-run after cfb4d3c)
+**Open PRs:**
+- PR #119 — fix(auth+recipe-book): role + trash flow — ready for smoke test + merge
+- PR #118 — merged (auto guest login + confirm modal migration)
 
 ---
 
-## Session Summary (2026-04-16)
+## Session Summary (2026-04-16, session 2)
+
+### Fix 1 — Auth role missing from login response
+- Root cause: `server/routes/auth.js` `publicUser` object omitted `role` field in both login and signup responses, causing `isAdmin_()` signal to always return false.
+- Fix: Added `role: user.role` to `publicUser` in both login and signup handlers.
+- File: `server/routes/auth.js`
+
+### Fix 2 — Trash delete flow bypassed for admins in recipe-book-list
+- Root cause: Plan 221 introduced an admin shortcut that called `permanentlyDeleteRecipe` (hard delete) for admins and `hideRecipe` for non-admins — bypassing the trash system entirely for admins.
+- Fix: `onRemoveRecipe` and `onBulkDeleteSelected` now call `kitchenState.deleteRecipe()` (move to trash) for all users, restoring Plan 018 trash behavior.
+- File: `src/app/features/recipe-book-list/recipe-book-list.component.ts`
+
+### Fix 3 — Auto guest login (PR #118, now merged)
+- Added `autoLoginGuest: true` to `environment.local.ts`, `false` to all others
+- Added second `APP_INITIALIZER` in `app.config.ts` calling `loginAsGuestBackend()` on startup
+- Fixed timing bug: `switchMap` to call `loginAsGuestBackend()` if user still null after refresh
+- Removed admin checkbox from signup form (was ignored by backend)
+
+### Plan 269 smoke tests — partial
+- Test 2 (delete master-seeded item → tombstone): discovered delete flow was broken (fixed above); partially validated
+- Test 4 (delete user-owned item → hard delete): confirmed working via backend logs
+- Tests 3 and 5: pending (require running MongoDB instance)
+
+---
+
+## Prior Session Summary (2026-04-16, session 1) — Confirm Modal Migration
 
 ### Fix 1 — Auth interceptor 404 noise
-- Root cause: `auth.interceptor.ts:98` logged ALL 4xx responses. Recipe resolver uses a two-step lookup (RECIPE_LIST → DISH_LIST fallback), generating expected 404s on every navigation to a dish recipe.
-- Fix: Added `&& err.status !== 404` to the error-logging condition. Other 4xx/5xx still logged.
-- File: `src/app/core/interceptors/auth.interceptor.ts`
+- `src/app/core/interceptors/auth.interceptor.ts`: added `&& err.status !== 404` to error-logging condition
 
 ### Fix 2 — Replace 13 native confirm() with ConfirmModalService
-Replaced all native `confirm()` calls across 5 list components:
-- `recipe-book-list.component.ts` — 4 calls (added import+inject, methods async)
-- `venue-list.component.ts` — 2 calls (added inject, unwrapped async IIFE)
-- `equipment-list.component.ts` — 2 calls (already had inject)
-- `inventory-product-list.component.ts` — 2 calls (already had inject)
-- `supplier-list.component.ts` — 3 calls (already had inject; in-use warning uses `variant:'warning'`)
-- `recipe-book-list.component.spec.ts` — 2 tests updated from `spyOn(window,'confirm')` to `spyOn(confirmModal,'open')`
-
-### Explanation — log-server.js
-- `scripts/log-server.js` is a separate process on port 9765 that receives frontend log POSTs
-- Start with: `node scripts/log-server.js`
-- App server is `server.js` (Express API on port 3000)
-
-### Confirmed non-issues
-- MetaMask console errors — browser extension noise
-- Remote-control console errors — browser extension noise
-
----
-
-## Prior Session Summary (2026-04-15) — Master Pool Cleanup + Tombstones
-
-### Plan 269 — Master Pool Cleanup + Deletion Tombstones (PR #117)
-- `server/routes/generic.js` POST: removed master-copy dual-write + collision branch; `_masterId` now self-referential
-- `server/routes/generic.js` GET list + GET by-id: `_userDeleted: { $ne: true }` tombstone filter; GET by-id collapsed from 3-layer fallback to single `findOne`
-- `server/routes/generic.js` DELETE: master-cloned items → tombstone; user-originated items → hard delete
-- `server/services/sync-master.js`: `cleanupNameCollisionClones` removed
-- `server/routes/auth.js`: `cleanupNameCollisionClones` import + all 3 call sites removed
-
-### Fix — type-change 409 crash (PR #117)
-- `src/app/core/services/http-storage.adapter.ts`: `appendExisting` treats 409 as success
+- `recipe-book-list.component.ts`, `venue-list.component.ts`, `equipment-list.component.ts`, `inventory-product-list.component.ts`, `supplier-list.component.ts`
+- `recipe-book-list.component.spec.ts`: 2 tests updated
 
 ---
 
 ## Next Steps (Priority Order)
 
-1. **Manual smoke test PR #118** before merging:
-   - Delete a recipe → confirm modal appears with danger styling (red)
-   - Delete a venue → confirm modal appears with danger styling
-   - Delete equipment → confirm modal appears with danger styling
-   - Delete a product → confirm modal appears with danger styling
-   - Delete a supplier that is in use → confirm modal with warning styling (yellow)
-   - Navigate to non-existent recipe → no log server 404 call fired
-   - Other 4xx errors (401, 403) → log server still receives them
+1. **Merge PR #119** after smoke test:
+   - Delete a recipe → confirm it moves to trash (not hard deleted)
+   - Log out and back in → tombstoned item must NOT re-appear (Test 3)
+   - Type-change TRASH_RECIPES → no 409 response (Test 5)
 
-2. **Manual smoke tests for PR #117** (MongoDB required, still pending):
-   - Sign in → create product → Compass: single doc in userId, nothing in `__master__`
-   - Delete master-seeded item → Compass: `_userDeleted: true`, client-invisible
-   - Log out and back in → tombstoned item must NOT re-appear
-   - Delete user-owned item (not master clone) → Compass: hard deleted
+2. **Complete Plan 269 smoke tests** (requires MongoDB):
+   - Test 1 full pass: create product → single doc in Compass, nothing in `__master__`
+   - Test 3: log out/back in → tombstoned item stays gone
+   - Test 5: type-change TRASH_RECIPES action → no 409
 
 3. **Plan 255 — Dead Code Cleanup (remaining open tasks):**
    - Task 8: Investigate repair script trio (`backup-before-repair.mjs`, `diagnose-broken-refs.mjs`, `repair-recipe-references.mjs`)
@@ -84,14 +76,15 @@ Replaced all native `confirm()` calls across 5 list components:
 ## Blocked
 
 - Plan 234 operational tasks require manual Atlas/Compass access and production deploy
-- PR #117 smoke tests require running server against a real MongoDB instance
+- Plan 269 Tests 3 + 5 require running server against a real MongoDB instance
 
 ---
 
 ## References
 
-- PR #118: https://github.com/WDD-CODER/foodVibe1.0/pull/118 — confirm modal migration + 404 fix
-- PR #117: https://github.com/WDD-CODER/foodVibe1.0/pull/117 (merged — master pool cleanup)
-- PR #116: https://github.com/WDD-CODER/foodVibe1.0/pull/116 (merged)
-- Session handoff: `.claude/sessions/2026-04-16-confirm-modal-migration/session-handoff.md`
-- Techdebt report: `.claude/techdebt-reports/techdebt-2026-04-16.md`
+- PR #119: https://github.com/WDD-CODER/foodVibe1.0/pull/119 — auth role + trash flow fix (open)
+- PR #118: https://github.com/WDD-CODER/foodVibe1.0/pull/118 — merged (auto guest login + confirm modal)
+- PR #117: https://github.com/WDD-CODER/foodVibe1.0/pull/117 — merged (master pool cleanup)
+- PR #116: https://github.com/WDD-CODER/foodVibe1.0/pull/116 — merged
+- Session handoff (session 2): `.claude/sessions/2026-04-16-auth-role-trash-flow/session-handoff.md`
+- Session handoff (session 1): `.claude/sessions/2026-04-16-confirm-modal-migration/session-handoff.md`
