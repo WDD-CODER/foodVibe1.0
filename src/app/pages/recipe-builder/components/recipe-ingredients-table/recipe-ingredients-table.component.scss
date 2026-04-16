@@ -286,6 +286,7 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.2rem;
 
   padding: 0;
 
@@ -301,6 +302,12 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   &:hover {
     color: var(--color-danger-hover);
     transform: scale(1.15);
+  }
+
+  .badge-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1;
   }
 }
 

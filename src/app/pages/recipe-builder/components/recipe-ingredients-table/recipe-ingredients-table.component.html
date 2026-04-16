@@ -43,6 +43,7 @@
               (click)="$event.stopPropagation(); getProductForGroup(group) ? onQuickEditBadgeClick(group, $index, 'invalid') : editingNameAtRow_.set($index)"
               [title]="'product_incomplete_hint' | translatePipe">
               <lucide-icon name="alert-circle" [size]="14"></lucide-icon>
+              <span class="badge-label">{{ 'fix' | translatePipe }}</span>
             </button>
           } @else if (isWarningRow(group)) {
             <button type="button" class="warning-badge"
@@ -52,7 +53,7 @@
             </button>
           } @else if (isUnlinkedRow(group)) {
             <button type="button" class="unlinked-badge"
-              (click)="$event.stopPropagation(); editingNameAtRow_.set($index)"
+              (click)="$event.stopPropagation(); onUnlinkedBadgeClick(group, $index)"
               [title]="'unlinked_ingredient_hint' | translatePipe">
               <lucide-icon name="link" [size]="14"></lucide-icon>
             </button>

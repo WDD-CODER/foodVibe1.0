@@ -948,6 +948,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     if (this.ingredientsTableRef_()?.hasBlockingRows()) {
       this.blockingIngredientsError_.set(true);
       this.userMsg_.onSetErrorMsg(this.translation_.translate('blocking_ingredients_error'));
+      setTimeout(() => {
+        document.querySelector('.incomplete-row')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
       return;
     }
     this.blockingIngredientsError_.set(false);

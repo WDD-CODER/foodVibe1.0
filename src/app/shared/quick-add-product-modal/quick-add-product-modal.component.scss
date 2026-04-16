@@ -146,6 +146,17 @@
   }
 }
 
+.field-error-msg {
+  font-size: 0.75rem;
+  color: var(--color-danger, #e53e3e);
+  margin-top: 2px;
+  display: block;
+}
+
+input.input--error {
+  border-color: var(--color-danger, #e53e3e) !important;
+}
+
 @keyframes quick-add-expand {
   from {
     opacity: 0;

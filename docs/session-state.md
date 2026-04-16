@@ -1,4 +1,4 @@
-# Session State — 2026-04-16 (end of day)
+# Session State — 2026-04-16 (end of day — updated after disk cleanup session)
 
 > Single source of truth for all project rules, standards, and skill/agent routing.
 
@@ -6,15 +6,64 @@
 
 ## Current Status
 
-**Branch:** `fix/master-pool-cleanup`
-**Latest commit on branch:**
-- `a08b2cd` — fix(console): suppress 404 log noise + replace all native confirm() with ConfirmModalService
-**Build status:** PASS (0 errors, 3 pre-existing budget warnings)
-**Open PRs:** PR #118 — ready for manual smoke test + merge
+**Branch:** `feat/unlinked-ingredient-inline-edit`
+**Latest commit on branch:** `a52bdcb` — Merge pull request #118 from WDD-CODER/fix/master-pool-cleanup
+**Build status:** PASS (verified earlier today — 0 errors, 0 warnings on this feature)
+**Open PRs:** None (PR #118 merged)
+**Dirty working tree:** YES — 105 lines of uncommitted changes across 9 files (see below)
 
 ---
 
-## Session Summary (2026-04-16)
+## IMPORTANT: Uncommitted Feature Work
+
+Code changes for the unlinked-ingredient-inline-edit feature exist in the working tree but were NEVER committed. These must be addressed at the start of the next session:
+
+```
+recipe-ingredients-table.component.html   (+3)
+recipe-ingredients-table.component.ts     (+23)
+recipe-builder.page.ts                    (+3)
+quick-add-product-modal.component.html    (+11)
+quick-add-product-modal.component.scss    (+11)
+quick-add-product-modal.component.ts      (+9)
+quick-edit-product-panel.component.html   (+11)
+quick-edit-product-panel.component.scss   (+12)
+quick-edit-product-panel.component.ts     (+9)
+```
+
+**Next session start sequence:**
+1. `ng build` — verify 0 errors
+2. Manual smoke test: click unlinked icon → inline edit opens; click name → dropdown opens
+3. Commit on `feat/unlinked-ingredient-inline-edit` and create PR
+
+---
+
+## Session Summary (2026-04-16 — Disk Cleanup)
+
+### Maintenance session — no code changes
+- Cleared disk space: freed ~16+ GB total
+  - uv Python cache: 2.2 GB
+  - pip cache: 0.75 GB
+  - Bun install cache: ~0.75 GB
+  - Chrome cache: ~0.38 GB
+  - Slack cache: ~0.9 GB
+  - Discord cache: ~1.28 GB
+  - Claude Desktop uninstalled (claudevm.bundle: 12.32 GB)
+- Confirmed: `dev:local` is correct for active development (Render free tier sleeps)
+
+---
+
+## Prior Session Summary (2026-04-16 morning) — Unlinked Ingredient Inline Edit (IN PROGRESS)
+
+### Feature — Unlinked badge click → inline edit panel
+- `recipe-ingredients-table.component.ts`: Added `onUnlinkedBadgeClick(group, index)` method; injects `ProductDataService`; creates stub product from `name_hebrew`, patches form row with `referenceId` + `item_type: 'product'`, calls `onQuickEditBadgeClick` at tier `'incomplete'`
+- `recipe-ingredients-table.component.html`: Changed unlinked badge click from `editingNameAtRow_.set($index)` to `onUnlinkedBadgeClick(group, $index)`
+- `quick-add-product-modal`: Added `nameError_` and `unitError_` signals for inline validation on save attempt
+- `quick-edit-product-panel`: Additional panel improvements (scss + html)
+- STATUS: Code written, build verified earlier, but NOT committed — must commit at next session start
+
+---
+
+## Prior Session Summary (2026-04-16 earlier) — Confirm Modal Migration (PR #118, MERGED)
 
 ### Fix 1 — Auth interceptor 404 noise
 - Root cause: `auth.interceptor.ts:98` logged ALL 4xx responses. Recipe resolver uses a two-step lookup (RECIPE_LIST → DISH_LIST fallback), generating expected 404s on every navigation to a dish recipe.
@@ -35,10 +84,6 @@ Replaced all native `confirm()` calls across 5 list components:
 - Start with: `node scripts/log-server.js`
 - App server is `server.js` (Express API on port 3000)
 
-### Confirmed non-issues
-- MetaMask console errors — browser extension noise
-- Remote-control console errors — browser extension noise
-
 ---
 
 ## Prior Session Summary (2026-04-15) — Master Pool Cleanup + Tombstones
@@ -57,14 +102,11 @@ Replaced all native `confirm()` calls across 5 list components:
 
 ## Next Steps (Priority Order)
 
-1. **Manual smoke test PR #118** before merging:
-   - Delete a recipe → confirm modal appears with danger styling (red)
-   - Delete a venue → confirm modal appears with danger styling
-   - Delete equipment → confirm modal appears with danger styling
-   - Delete a product → confirm modal appears with danger styling
-   - Delete a supplier that is in use → confirm modal with warning styling (yellow)
-   - Navigate to non-existent recipe → no log server 404 call fired
-   - Other 4xx errors (401, 403) → log server still receives them
+1. **FIRST: Commit unlinked-ingredient-inline-edit** (dirty working tree — pre-existing code):
+   - `ng build` — verify 0 errors
+   - Smoke test: click unlinked icon → inline edit opens; click name → dropdown opens as before
+   - Commit on `feat/unlinked-ingredient-inline-edit` → create PR
+   - Note: stub product uses `base_unit_: 'gram'` hardcoded — flag for follow-up if unit mismatch needed
 
 2. **Manual smoke tests for PR #117** (MongoDB required, still pending):
    - Sign in → create product → Compass: single doc in userId, nothing in `__master__`
@@ -90,8 +132,9 @@ Replaced all native `confirm()` calls across 5 list components:
 
 ## References
 
-- PR #118: https://github.com/WDD-CODER/foodVibe1.0/pull/118 — confirm modal migration + 404 fix
+- PR #118: https://github.com/WDD-CODER/foodVibe1.0/pull/118 — confirm modal migration + 404 fix (MERGED)
 - PR #117: https://github.com/WDD-CODER/foodVibe1.0/pull/117 (merged — master pool cleanup)
 - PR #116: https://github.com/WDD-CODER/foodVibe1.0/pull/116 (merged)
-- Session handoff: `.claude/sessions/2026-04-16-confirm-modal-migration/session-handoff.md`
+- Session handoff (disk cleanup): `.claude/sessions/2026-04-16-unlinked-ingredient-inline-edit/session-handoff.md`
+- Session handoff (confirm modal): `.claude/sessions/2026-04-16-confirm-modal-migration/session-handoff.md`
 - Techdebt report: `.claude/techdebt-reports/techdebt-2026-04-16.md`
