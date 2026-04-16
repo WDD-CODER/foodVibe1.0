@@ -1,6 +1,6 @@
-import { Component, output, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ClickOutSideDirective } from '@directives/click-out-side';
+import { Component, output, ViewEncapsulation } from '@angular/core'
+import { CommonModule } from '@angular/common'
+import { ClickOutSideDirective } from '@directives/click-out-side'
 
 @Component({
   selector: 'app-export-toolbar-overlay',
@@ -12,5 +12,5 @@ import { ClickOutSideDirective } from '@directives/click-out-side';
 })
 export class ExportToolbarOverlayComponent {
   /** Emitted when user clicks outside the overlay (e.g. to close). */
-  closeRequest = output<void>();
+  closeRequest = output<void>()
 }

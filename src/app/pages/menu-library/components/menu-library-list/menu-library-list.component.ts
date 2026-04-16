@@ -1,22 +1,22 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { LucideAngularModule } from 'lucide-angular';
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
-import { MenuEventDataService } from '@services/menu-event-data.service';
-import { MenuIntelligenceService } from '@services/menu-intelligence.service';
-import { MenuEvent, ServingType } from '@models/menu-event.model';
-import { ConfirmModalService } from '@services/confirm-modal.service';
-import { UserService } from '@services/user.service';
-import { UserMsgService } from '@services/user-msg.service';
-import { TranslationService } from '@services/translation.service';
-import { RequireAuthService } from 'src/app/core/utils/require-auth.util';
-import { LoaderComponent } from 'src/app/shared/loader/loader.component';
-import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
-import { useListState, StringParam } from 'src/app/core/utils/list-state.util';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core'
+import { CommonModule } from '@angular/common'
+import { FormsModule } from '@angular/forms'
+import { Router } from '@angular/router'
+import { LucideAngularModule } from 'lucide-angular'
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { MenuEventDataService } from '@services/menu-event-data.service'
+import { MenuIntelligenceService } from '@services/menu-intelligence.service'
+import { MenuEvent, ServingType } from '@models/menu-event.model'
+import { ConfirmModalService } from '@services/confirm-modal.service'
+import { UserService } from '@services/user.service'
+import { UserMsgService } from '@services/user-msg.service'
+import { TranslationService } from '@services/translation.service'
+import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
+import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
+import { useListState, StringParam } from 'src/app/core/utils/list-state.util'
 
-export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count';
+export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count'
 
 @Component({
   selector: 'app-menu-library-list',
@@ -27,23 +27,23 @@ export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MenuLibraryListComponent {
-  private readonly router = inject(Router);
-  private readonly menuEventData = inject(MenuEventDataService);
-  private readonly menuIntelligence = inject(MenuIntelligenceService);
-  private readonly confirmModal = inject(ConfirmModalService);
-  protected readonly isLoggedIn = inject(UserService).isLoggedIn;
-  private readonly userMsg = inject(UserMsgService);
-  private readonly requireAuthService = inject(RequireAuthService);
-  private readonly translation = inject(TranslationService);
+  private readonly router = inject(Router)
+  private readonly menuEventData = inject(MenuEventDataService)
+  private readonly menuIntelligence = inject(MenuIntelligenceService)
+  private readonly confirmModal = inject(ConfirmModalService)
+  protected readonly isLoggedIn = inject(UserService).isLoggedIn
+  private readonly userMsg = inject(UserMsgService)
+  private readonly requireAuthService = inject(RequireAuthService)
+  private readonly translation = inject(TranslationService)
 
-  protected readonly searchQuery_ = signal('');
-  protected readonly eventTypeFilter_ = signal('all');
-  protected readonly servingStyleFilter_ = signal('all');
-  protected readonly dateFrom_ = signal('');
-  protected readonly sortBy_ = signal<SortField>('date');
-  protected readonly sortOrder_ = signal<'asc' | 'desc'>('desc');
-  protected readonly cloningId_ = signal<string | null>(null);
-  protected readonly deletingId_ = signal<string | null>(null);
+  protected readonly searchQuery_ = signal('')
+  protected readonly eventTypeFilter_ = signal('all')
+  protected readonly servingStyleFilter_ = signal('all')
+  protected readonly dateFrom_ = signal('')
+  protected readonly sortBy_ = signal<SortField>('date')
+  protected readonly sortOrder_ = signal<'asc' | 'desc'>('desc')
+  protected readonly cloningId_ = signal<string | null>(null)
+  protected readonly deletingId_ = signal<string | null>(null)
 
   constructor() {
     useListState('menu-library', [
@@ -53,193 +53,193 @@ export class MenuLibraryListComponent {
       { urlParam: 'eventType', signal: this.eventTypeFilter_,    serializer: StringParam },
       { urlParam: 'style',     signal: this.servingStyleFilter_, serializer: StringParam },
       { urlParam: 'dateFrom',  signal: this.dateFrom_,           serializer: StringParam },
-    ]);
+    ])
   }
 
-  protected readonly events_ = this.menuEventData.allMenuEvents_;
+  protected readonly events_ = this.menuEventData.allMenuEvents_
 
   protected readonly servingStyleOptions_: { value: string; label: string }[] = [
     { value: 'all', label: 'all' },
     { value: 'buffet_family', label: 'buffet_family' },
     { value: 'plated_course', label: 'plated_course' },
     { value: 'cocktail_passed', label: 'cocktail_passed' },
-  ];
+  ]
 
   protected readonly eventTypeOptions_ = computed(() => {
-    const set = new Set<string>();
+    const set = new Set<string>()
     this.events_().forEach(ev => {
-      if (ev.event_type_) set.add(ev.event_type_);
-    });
-    return ['all', ...Array.from(set)];
-  });
+      if (ev.event_type_) set.add(ev.event_type_)
+    })
+    return ['all', ...Array.from(set)]
+  })
 
   protected readonly eventTypeSelectOptions_ = computed(() =>
     this.eventTypeOptions_().map((t) => ({ value: t, label: t }))
-  );
+  )
 
   protected readonly sortBySelectOptions_: { value: SortField; label: string }[] = [
     { value: 'date', label: 'sort_by_date' },
     { value: 'name', label: 'sort_by_name' },
     { value: 'food_cost', label: 'menu_food_cost' },
     { value: 'guest_count', label: 'menu_guest_count' },
-  ];
+  ]
 
   protected readonly filteredEvents_ = computed(() => {
-    const query = this.searchQuery_().trim().toLowerCase();
-    const type = this.eventTypeFilter_();
-    const style = this.servingStyleFilter_();
-    const from = this.dateFrom_();
-    const sortBy = this.sortBy_();
-    const sortOrder = this.sortOrder_();
+    const query = this.searchQuery_().trim().toLowerCase()
+    const type = this.eventTypeFilter_()
+    const style = this.servingStyleFilter_()
+    const from = this.dateFrom_()
+    const sortBy = this.sortBy_()
+    const sortOrder = this.sortOrder_()
 
     let events = this.events_().filter(event => {
-      if (type !== 'all' && event.event_type_ !== type) return false;
-      if (style !== 'all' && event.serving_type_ !== style) return false;
-      if (from && (!event.event_date_ || event.event_date_ < from)) return false;
+      if (type !== 'all' && event.event_type_ !== type) return false
+      if (style !== 'all' && event.serving_type_ !== style) return false
+      if (from && (!event.event_date_ || event.event_date_ < from)) return false
       if (query) {
         const haystack = [
           event.name_,
           event.event_type_,
           event.event_date_ || '',
           ...(event.cuisine_tags_ || []),
-        ].join(' ').toLowerCase();
-        if (!haystack.includes(query)) return false;
+        ].join(' ').toLowerCase()
+        if (!haystack.includes(query)) return false
       }
-      return true;
-    });
+      return true
+    })
 
     events = [...events].sort((a, b) => {
-      const cmp = this.compareEvents(a, b, sortBy);
-      return sortOrder === 'asc' ? cmp : -cmp;
-    });
+      const cmp = this.compareEvents(a, b, sortBy)
+      return sortOrder === 'asc' ? cmp : -cmp
+    })
 
-    return events;
-  });
+    return events
+  })
 
   private getFoodCostPctForSort(event: MenuEvent): number {
-    const hydrated = this.menuIntelligence.hydrateDerivedPortions(event);
-    return this.menuIntelligence.computeFoodCostPctFromActualRevenue(hydrated);
+    const hydrated = this.menuIntelligence.hydrateDerivedPortions(event)
+    return this.menuIntelligence.computeFoodCostPctFromActualRevenue(hydrated)
   }
 
   private compareEvents(a: MenuEvent, b: MenuEvent, field: SortField): number {
     switch (field) {
       case 'name':
-        return (a.name_ || '').localeCompare(b.name_ || '', 'he');
+        return (a.name_ || '').localeCompare(b.name_ || '', 'he')
       case 'date':
-        return (a.event_date_ || '').localeCompare(b.event_date_ || '');
+        return (a.event_date_ || '').localeCompare(b.event_date_ || '')
       case 'food_cost':
-        return this.getFoodCostPctForSort(a) - this.getFoodCostPctForSort(b);
+        return this.getFoodCostPctForSort(a) - this.getFoodCostPctForSort(b)
       case 'guest_count':
-        return (a.guest_count_ ?? 0) - (b.guest_count_ ?? 0);
+        return (a.guest_count_ ?? 0) - (b.guest_count_ ?? 0)
       default:
-        return 0;
+        return 0
     }
   }
 
   protected setSort(field: SortField): void {
     if (this.sortBy_() === field) {
-      this.sortOrder_.update(o => o === 'asc' ? 'desc' : 'asc');
+      this.sortOrder_.update(o => o === 'asc' ? 'desc' : 'asc')
     } else {
-      this.sortBy_.set(field);
-      this.sortOrder_.set('asc');
+      this.sortBy_.set(field)
+      this.sortOrder_.set('asc')
     }
   }
 
   protected onCreateNew(): void {
-    this.router.navigate(['/menu-intelligence']);
+    this.router.navigate(['/menu-intelligence'])
   }
 
   protected onOpen(event: MenuEvent): void {
-    this.router.navigate(['/menu-intelligence', event._id]);
+    this.router.navigate(['/menu-intelligence', event._id])
   }
 
   protected async onClone(event: MenuEvent): Promise<void> {
-    this.cloningId_.set(event._id);
+    this.cloningId_.set(event._id)
     try {
-      const cloned = await this.menuEventData.cloneMenuEventAsNew(event._id);
-      this.router.navigate(['/menu-intelligence', cloned._id]);
+      const cloned = await this.menuEventData.cloneMenuEventAsNew(event._id)
+      this.router.navigate(['/menu-intelligence', cloned._id])
     } finally {
-      this.cloningId_.set(null);
+      this.cloningId_.set(null)
     }
   }
 
   protected async onDelete(event: MenuEvent): Promise<void> {
-    if (!this.requireAuthService.requireAuth()) return;
+    if (!this.requireAuthService.requireAuth()) return
     const ok = await this.confirmModal.open('menu_confirm_delete', {
       saveLabel: 'delete',
       variant: 'danger',
-    });
-    if (!ok) return;
-    this.deletingId_.set(event._id);
+    })
+    if (!ok) return
+    this.deletingId_.set(event._id)
     try {
-      await this.menuEventData.deleteMenuEvent(event._id);
+      await this.menuEventData.deleteMenuEvent(event._id)
     } finally {
-      this.deletingId_.set(null);
+      this.deletingId_.set(null)
     }
   }
 
   /** Food cost % from actual revenue (same logic as menu-intelligence page). Computed live so card matches detail view. */
   protected getFoodCostPctDisplay(event: MenuEvent): string {
-    const hydrated = this.menuIntelligence.hydrateDerivedPortions(event);
-    const pct = this.menuIntelligence.computeFoodCostPctFromActualRevenue(hydrated);
-    return `${pct.toFixed(1)}%`;
+    const hydrated = this.menuIntelligence.hydrateDerivedPortions(event)
+    const pct = this.menuIntelligence.computeFoodCostPctFromActualRevenue(hydrated)
+    return `${pct.toFixed(1)}%`
   }
 
   /** Total sale price (revenue): sum of sell_price × derived_portions for all items. */
   protected getTotalSalePriceDisplay(event: MenuEvent): string {
-    const total = this.computeEventRevenue(event);
-    if (total <= 0) return '—';
-    return `₪${total.toLocaleString('he-IL', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+    const total = this.computeEventRevenue(event)
+    if (total <= 0) return '—'
+    return `₪${total.toLocaleString('he-IL', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
   }
 
   private computeEventRevenue(event: MenuEvent): number {
-    let sum = 0;
+    let sum = 0
     const guestCount = event.guest_count_ ?? 0;
     (event.sections_ || []).forEach(section => {
       (section.items_ || []).forEach(item => {
-        const price = item.sell_price_ ?? 0;
-        const portions = item.derived_portions_ ?? guestCount * (item.serving_portions_ ?? 1);
-        sum += price * portions;
-      });
-    });
-    return sum;
+        const price = item.sell_price_ ?? 0
+        const portions = item.derived_portions_ ?? guestCount * (item.serving_portions_ ?? 1)
+        sum += price * portions
+      })
+    })
+    return sum
   }
 
   protected getGuestCountDisplay(event: MenuEvent): string {
-    return String(event.guest_count_ || 0);
+    return String(event.guest_count_ || 0)
   }
 
   protected getSectionCount(event: MenuEvent): number {
-    return event.sections_?.length || 0;
+    return event.sections_?.length || 0
   }
 
   protected getDishCount(event: MenuEvent): number {
-    return (event.sections_ || []).reduce((sum, s) => sum + (s.items_?.length || 0), 0);
+    return (event.sections_ || []).reduce((sum, s) => sum + (s.items_?.length || 0), 0)
   }
 
   /** Translation key for current sort order (א–ת, ת–א, ישן לחדש, etc.). */
   protected getSortOrderLabel(): string {
-    const order = this.sortOrder_();
+    const order = this.sortOrder_()
     switch (this.sortBy_()) {
       case 'name':
-        return order === 'asc' ? 'sort_name_az' : 'sort_name_za';
+        return order === 'asc' ? 'sort_name_az' : 'sort_name_za'
       case 'date':
-        return order === 'asc' ? 'sort_date_old_new' : 'sort_date_new_old';
+        return order === 'asc' ? 'sort_date_old_new' : 'sort_date_new_old'
       case 'food_cost':
       case 'guest_count':
-        return order === 'asc' ? 'sort_number_low_high' : 'sort_number_high_low';
+        return order === 'asc' ? 'sort_number_low_high' : 'sort_number_high_low'
       default:
-        return order === 'asc' ? 'sort_number_low_high' : 'sort_number_high_low';
+        return order === 'asc' ? 'sort_number_low_high' : 'sort_number_high_low'
     }
   }
 
   protected toggleSortOrder(): void {
-    this.sortOrder_.update(o => o === 'asc' ? 'desc' : 'asc');
+    this.sortOrder_.update(o => o === 'asc' ? 'desc' : 'asc')
   }
 
   protected onDateWrapClick(input: HTMLInputElement | undefined): void {
     if (input?.showPicker) {
-      input.showPicker();
+      input.showPicker()
     }
   }
 }

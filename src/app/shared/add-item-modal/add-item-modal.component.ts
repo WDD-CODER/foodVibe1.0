@@ -1,9 +1,9 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ClickOutSideDirective } from '@directives/click-out-side';
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
-import { AddItemModalService } from '@services/add-item-modal.service';
+import { Component, inject, signal } from '@angular/core'
+import { CommonModule } from '@angular/common'
+import { FormsModule } from '@angular/forms'
+import { ClickOutSideDirective } from '@directives/click-out-side'
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { AddItemModalService } from '@services/add-item-modal.service'
 
 @Component({
   selector: 'add-item-modal',
@@ -13,24 +13,24 @@ import { AddItemModalService } from '@services/add-item-modal.service';
   styleUrl: './add-item-modal.component.scss'
 })
 export class AddItemModalComponent {
-  protected modalService = inject(AddItemModalService);
+  protected modalService = inject(AddItemModalService)
 
-  protected isOpen_ = this.modalService.isOpen_;
-  protected config = this.modalService.config;
-  protected value_ = signal('');
+  protected isOpen_ = this.modalService.isOpen_
+  protected config = this.modalService.config
+  protected value_ = signal('')
 
   protected save(): void {
-    const val = this.value_();
-    this.value_.set('');
-    this.modalService.save(val);
+    const val = this.value_()
+    this.value_.set('')
+    this.modalService.save(val)
   }
 
   protected cancel(): void {
-    this.value_.set('');
-    this.modalService.cancel();
+    this.value_.set('')
+    this.modalService.cancel()
   }
 
   protected resetAndClose(): void {
-    this.cancel();
+    this.cancel()
   }
 }

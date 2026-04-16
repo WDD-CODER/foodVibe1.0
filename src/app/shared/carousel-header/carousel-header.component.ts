@@ -9,16 +9,16 @@ import {
   signal,
   AfterViewInit,
   effect,
-} from '@angular/core';
-import { LucideAngularModule } from 'lucide-angular';
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
+} from '@angular/core'
+import { LucideAngularModule } from 'lucide-angular'
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 
 @Directive({
   selector: '[carouselHeaderColumn]',
   standalone: true,
 })
 export class CarouselHeaderColumnDirective {
-  readonly label = input<string>('');
+  readonly label = input<string>('')
 }
 
 @Component({
@@ -30,40 +30,40 @@ export class CarouselHeaderColumnDirective {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CarouselHeaderComponent implements AfterViewInit {
-  @ContentChildren(CarouselHeaderColumnDirective) columns!: QueryList<CarouselHeaderColumnDirective>;
+  @ContentChildren(CarouselHeaderColumnDirective) columns!: QueryList<CarouselHeaderColumnDirective>
 
-  readonly activeIndex = input(0);
-  readonly activeIndexChange = output<number>();
+  readonly activeIndex = input(0)
+  readonly activeIndexChange = output<number>()
 
-  protected readonly currentIndex = signal(0);
+  protected readonly currentIndex = signal(0)
 
   constructor() {
     effect(() => {
-      this.currentIndex.set(this.activeIndex());
-    });
+      this.currentIndex.set(this.activeIndex())
+    })
   }
 
   ngAfterViewInit(): void {
-    this.currentIndex.set(this.activeIndex());
+    this.currentIndex.set(this.activeIndex())
   }
 
   protected getCurrentLabel(): string {
-    const list = this.columns?.toArray() ?? [];
-    return list[this.currentIndex()]?.label() ?? '';
+    const list = this.columns?.toArray() ?? []
+    return list[this.currentIndex()]?.label() ?? ''
   }
 
   protected prev(): void {
-    const count = this.columns?.length ?? 0;
-    if (count === 0) return;
-    const idx = this.currentIndex() - 1;
-    this.currentIndex.set(idx < 0 ? count - 1 : idx);
-    this.activeIndexChange.emit(this.currentIndex());
+    const count = this.columns?.length ?? 0
+    if (count === 0) return
+    const idx = this.currentIndex() - 1
+    this.currentIndex.set(idx < 0 ? count - 1 : idx)
+    this.activeIndexChange.emit(this.currentIndex())
   }
 
   protected next(): void {
-    const count = this.columns?.length ?? 0;
-    if (count === 0) return;
-    this.currentIndex.set((this.currentIndex() + 1) % count);
-    this.activeIndexChange.emit(this.currentIndex());
+    const count = this.columns?.length ?? 0
+    if (count === 0) return
+    this.currentIndex.set((this.currentIndex() + 1) % count)
+    this.activeIndexChange.emit(this.currentIndex())
   }
 }

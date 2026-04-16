@@ -1,36 +1,36 @@
-import { ChangeDetectionStrategy, Component, computed, inject, output, signal, afterNextRender, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { LucideAngularModule } from 'lucide-angular';
-import { VenueDataService } from '@services/venue-data.service';
-import { UserService } from '@services/user.service';
-import { UserMsgService } from '@services/user-msg.service';
-import { TranslationService } from '@services/translation.service';
-import { RequireAuthService } from 'src/app/core/utils/require-auth.util';
-import { LoggingService } from '@services/logging.service';
-import { ConfirmModalService } from '@services/confirm-modal.service';
-import { VenueProfile, EnvironmentType } from '@models/venue.model';
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
-import { LoaderComponent } from 'src/app/shared/loader/loader.component';
-import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
-import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
-import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
-import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state';
-import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component';
-import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component';
-import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model';
-import { useListState, StringParam, StringSetParam } from 'src/app/core/utils/list-state.util';
-import { HeroFabService } from '@services/hero-fab.service';
-import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
+import { ChangeDetectionStrategy, Component, computed, inject, output, signal, afterNextRender, OnInit, OnDestroy } from '@angular/core'
+import { CommonModule } from '@angular/common'
+import { FormsModule } from '@angular/forms'
+import { Router } from '@angular/router'
+import { LucideAngularModule } from 'lucide-angular'
+import { VenueDataService } from '@services/venue-data.service'
+import { UserService } from '@services/user.service'
+import { UserMsgService } from '@services/user-msg.service'
+import { TranslationService } from '@services/translation.service'
+import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
+import { LoggingService } from '@services/logging.service'
+import { ConfirmModalService } from '@services/confirm-modal.service'
+import { VenueProfile, EnvironmentType } from '@models/venue.model'
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
+import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
+import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component'
+import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component'
+import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
+import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
+import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component'
+import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model'
+import { useListState, StringParam, StringSetParam } from 'src/app/core/utils/list-state.util'
+import { HeroFabService } from '@services/hero-fab.service'
+import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util'
 
 const ENV_TYPES: EnvironmentType[] = [
   'professional_kitchen',
   'outdoor_field',
   'client_home',
   'popup_venue',
-];
-type VenueBulkField = 'environment_type_';
+]
+type VenueBulkField = 'environment_type_'
 
 @Component({
   selector: 'app-venue-list',
@@ -55,28 +55,28 @@ type VenueBulkField = 'environment_type_';
   inputs: ['embeddedInDashboard'],
 })
 export class VenueListComponent implements OnInit, OnDestroy {
-  private readonly venueData = inject(VenueDataService);
-  private readonly router = inject(Router);
-  private readonly heroFab = inject(HeroFabService);
-  protected readonly isLoggedIn = inject(UserService).isLoggedIn;
-  private readonly requireAuthService = inject(RequireAuthService);
-  private readonly userMsg = inject(UserMsgService);
-  private readonly translation = inject(TranslationService);
-  private readonly logging = inject(LoggingService);
-  private readonly confirmModal = inject(ConfirmModalService);
+  private readonly venueData = inject(VenueDataService)
+  private readonly router = inject(Router)
+  private readonly heroFab = inject(HeroFabService)
+  protected readonly isLoggedIn = inject(UserService).isLoggedIn
+  private readonly requireAuthService = inject(RequireAuthService)
+  private readonly userMsg = inject(UserMsgService)
+  private readonly translation = inject(TranslationService)
+  private readonly logging = inject(LoggingService)
+  private readonly confirmModal = inject(ConfirmModalService)
 
   /** When true, add button emits addVenueClick instead of navigating (e.g. dashboard tab switch). */
-  embeddedInDashboard = false;
-  readonly addVenueClick = output<void>();
+  embeddedInDashboard = false
+  readonly addVenueClick = output<void>()
 
-  protected searchQuery_ = signal('');
-  protected deletingId_ = signal<string | null>(null);
-  protected isPanelOpen_ = signal(true);
-  protected carouselHeaderIndex_ = signal(0);
-  protected selectedEnvTypes_ = signal<Set<EnvironmentType>>(new Set());
-  protected selection = new ListSelectionState();
+  protected searchQuery_ = signal('')
+  protected deletingId_ = signal<string | null>(null)
+  protected isPanelOpen_ = signal(true)
+  protected carouselHeaderIndex_ = signal(0)
+  protected selectedEnvTypes_ = signal<Set<EnvironmentType>>(new Set())
+  protected selection = new ListSelectionState()
 
-  protected envTypes = ENV_TYPES;
+  protected envTypes = ENV_TYPES
 
   protected editableFields_ = computed<BulkEditableField[]>(() => [
     {
@@ -88,108 +88,108 @@ export class VenueListComponent implements OnInit, OnDestroy {
   ])
 
   constructor() {
-    this.isPanelOpen_.set(getPanelOpen('venues'));
+    this.isPanelOpen_.set(getPanelOpen('venues'))
     if (!this.embeddedInDashboard) {
       useListState('venues', [
         { urlParam: 'q',        signal: this.searchQuery_,      serializer: StringParam },
         { urlParam: 'envTypes',  signal: this.selectedEnvTypes_, serializer: StringSetParam },
-      ]);
+      ])
     }
 
     afterNextRender(() => {
-      const q = window.matchMedia('(max-width: 768px)');
-      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); });
-    });
+      const q = window.matchMedia('(max-width: 768px)')
+      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); })
+    })
   }
 
   ngOnInit(): void {
     this.heroFab.setPageActions(
       [{ labelKey: 'add_venue', icon: 'plus', run: () => this.onAddPlace() }],
       'replace'
-    );
+    )
   }
 
   ngOnDestroy(): void {
-    this.heroFab.clearPageActions();
+    this.heroFab.clearPageActions()
   }
 
   protected togglePanel(): void {
-    this.isPanelOpen_.update((v) => !v);
-    setPanelOpen('venues', this.isPanelOpen_());
+    this.isPanelOpen_.update((v) => !v)
+    setPanelOpen('venues', this.isPanelOpen_())
   }
 
   protected onCarouselHeaderChange(index: number): void {
-    this.carouselHeaderIndex_.set(index);
+    this.carouselHeaderIndex_.set(index)
   }
 
   protected toggleEnvType(env: EnvironmentType): void {
     this.selectedEnvTypes_.update((set) => {
-      const next = new Set(set);
-      if (next.has(env)) next.delete(env);
-      else next.add(env);
-      return next;
-    });
+      const next = new Set(set)
+      if (next.has(env)) next.delete(env)
+      else next.add(env)
+      return next
+    })
   }
 
-  protected hasActiveFilters_ = computed(() => this.selectedEnvTypes_().size > 0);
+  protected hasActiveFilters_ = computed(() => this.selectedEnvTypes_().size > 0)
 
   protected clearAllFilters(): void {
-    this.selectedEnvTypes_.set(new Set());
+    this.selectedEnvTypes_.set(new Set())
   }
 
   /** Visible venue IDs for header select-all. */
   protected filteredVenueIds_ = computed(() =>
     this.filteredVenues_().map(v => v._id ?? '').filter(Boolean)
-  );
+  )
 
   protected filteredVenues_ = computed(() => {
-    let list = this.venueData.allVenues_();
-    const search = this.searchQuery_().trim().toLowerCase();
-    const selectedEnv = this.selectedEnvTypes_();
+    let list = this.venueData.allVenues_()
+    const search = this.searchQuery_().trim().toLowerCase()
+    const selectedEnv = this.selectedEnvTypes_()
     if (search) {
       list = list.filter(
         (v) =>
           (v.name_hebrew ?? '').toLowerCase().includes(search) ||
           (v.environment_type_ ?? '').toLowerCase().includes(search)
-      );
+      )
     }
     if (selectedEnv.size > 0) {
-      list = list.filter((v) => selectedEnv.has(v.environment_type_));
+      list = list.filter((v) => selectedEnv.has(v.environment_type_))
     }
     return [...list].sort((a, b) =>
       (a.name_hebrew ?? '').localeCompare(b.name_hebrew ?? '', 'he')
-    );
-  });
+    )
+  })
 
   protected envTypeLabel(env: EnvironmentType): string {
-    return env;
+    return env
   }
 
   backToDashboard(): void {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/dashboard'])
   }
 
   protected onAddPlace(): void {
-    if (!this.requireAuthService.requireAuth()) return;
+    if (!this.requireAuthService.requireAuth()) return
     if (this.embeddedInDashboard) {
-      this.addVenueClick.emit();
+      this.addVenueClick.emit()
     } else {
-      void this.router.navigate(['/venues/add']);
+      void this.router.navigate(['/venues/add'])
     }
   }
 
   onEdit(id: string): void {
-    this.router.navigate(['/venues/edit', id]);
+    this.router.navigate(['/venues/edit', id])
   }
 
   protected onRowClick(item: VenueProfile, event: MouseEvent): void {
-    const el = event.target as HTMLElement;
-    if (el.closest('button') || el.closest('a') || el.closest('app-list-row-checkbox')) return;
+    const el = event.target as HTMLElement
+    if (el.closest('button') || el.closest('a') || el.closest('app-list-row-checkbox')) return
     if (this.selection.selectionMode()) {
-      this.selection.toggle(item._id ?? '');
-      return;
+      this.selection.toggle(item._id ?? '')
+      return
     }
-    this.router.navigate(['/venues/edit', item._id]);
+    this.router.navigate(['/venues/edit', item._id])
   }
 
   protected onBulkEdit(event: { field: string; value: string; ids: string[] }): void {
@@ -205,32 +205,32 @@ export class VenueListComponent implements OnInit, OnDestroy {
   }
 
   protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
-    if (ids.length === 0) return;
-    if (!this.requireAuthService.requireAuth()) return;
-    if (!await this.confirmModal.open(`למחוק ${ids.length} מיקומים?`, { variant: 'danger' })) return;
+    if (ids.length === 0) return
+    if (!this.requireAuthService.requireAuth()) return
+    if (!await this.confirmModal.open(`למחוק ${ids.length} מיקומים?`, { variant: 'danger' })) return
     for (const id of ids) {
-      this.deletingId_.set(id);
+      this.deletingId_.set(id)
       try {
-        await this.venueData.deleteVenue(id);
+        await this.venueData.deleteVenue(id)
       } catch (e) {
-        this.logging.error({ event: 'venue.list_error', message: 'Venue list error', context: { err: e } });
+        this.logging.error({ event: 'venue.list_error', message: 'Venue list error', context: { err: e } })
       } finally {
-        this.deletingId_.set(null);
+        this.deletingId_.set(null)
       }
     }
-    this.selection.clear();
+    this.selection.clear()
   }
 
   async onDelete(item: VenueProfile): Promise<void> {
-    if (!this.requireAuthService.requireAuth()) return;
-    if (!await this.confirmModal.open('למחוק את המיקום "' + (item.name_hebrew ?? '') + '"?', { variant: 'danger' })) return;
-    this.deletingId_.set(item._id);
+    if (!this.requireAuthService.requireAuth()) return
+    if (!await this.confirmModal.open('למחוק את המיקום "' + (item.name_hebrew ?? '') + '"?', { variant: 'danger' })) return
+    this.deletingId_.set(item._id)
     try {
-      await this.venueData.deleteVenue(item._id);
+      await this.venueData.deleteVenue(item._id)
     } catch (e) {
-      this.logging.error({ event: 'venue.list_error', message: 'Venue list error', context: { err: e } });
+      this.logging.error({ event: 'venue.list_error', message: 'Venue list error', context: { err: e } })
     } finally {
-      this.deletingId_.set(null);
+      this.deletingId_.set(null)
     }
   }
 }

@@ -1,69 +1,69 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
-import { from, throwError, of, Observable } from 'rxjs';
-import { tap, catchError, switchMap, map } from 'rxjs/operators';
-import { Product } from '../models/product.model';
-import { Recipe } from '../models/recipe.model';
-import { Supplier } from '@models/supplier.model';
-import { UserMsgService } from './user-msg.service';
-import { UserService } from './user.service';
-import { ProductDataService } from './product-data.service';
-import { RecipeDataService } from './recipe-data.service';
-import { DishDataService } from './dish-data.service';
-import { SupplierDataService } from './supplier-data.service';
-import { ActivityLogService, ActivityChange } from './activity-log.service';
-import { VersionHistoryService } from './version-history.service';
-import { getEffectivePrice, getSupplierIds } from '../utils/product-source.util';
+import { Injectable, signal, computed, inject } from '@angular/core'
+import { from, throwError, of, Observable } from 'rxjs'
+import { tap, catchError, switchMap, map } from 'rxjs/operators'
+import { Product } from '../models/product.model'
+import { Recipe } from '../models/recipe.model'
+import { Supplier } from '@models/supplier.model'
+import { UserMsgService } from './user-msg.service'
+import { UserService } from './user.service'
+import { ProductDataService } from './product-data.service'
+import { RecipeDataService } from './recipe-data.service'
+import { DishDataService } from './dish-data.service'
+import { SupplierDataService } from './supplier-data.service'
+import { ActivityLogService, ActivityChange } from './activity-log.service'
+import { VersionHistoryService } from './version-history.service'
+import { getEffectivePrice, getSupplierIds } from '../utils/product-source.util'
 
 @Injectable({
   providedIn: 'root'
 })
 export class KitchenStateService {
-  private productDataService = inject(ProductDataService);
-  private recipeDataService = inject(RecipeDataService);
-  private dishDataService = inject(DishDataService);
-  private supplierDataService = inject(SupplierDataService);
-  private userMsgService = inject(UserMsgService);
-  private userService = inject(UserService);
-  private activityLogService = inject(ActivityLogService);
-  private versionHistoryService = inject(VersionHistoryService);
+  private productDataService = inject(ProductDataService)
+  private recipeDataService = inject(RecipeDataService)
+  private dishDataService = inject(DishDataService)
+  private supplierDataService = inject(SupplierDataService)
+  private userMsgService = inject(UserMsgService)
+  private userService = inject(UserService)
+  private activityLogService = inject(ActivityLogService)
+  private versionHistoryService = inject(VersionHistoryService)
 
   // CORE SIGNALS
-  products_ = computed(() => this.productDataService.allProducts_());
+  products_ = computed(() => this.productDataService.allProducts_())
   /** Combined recipes (preparations) + dishes for ingredient search and lookup. */
   recipes_ = computed(() => [
     ...this.recipeDataService.allRecipes_(),
     ...this.dishDataService.allDishes_()
-  ]);
+  ])
   /** Recipes visible to the current user — hides entries where the user's id is in hiddenBy[]. */
   visibleRecipes_ = computed(() => {
-    const userId = this.userService.user_()?._id;
-    return this.recipes_().filter(r => !userId || !(r.hiddenBy ?? []).includes(userId));
-  });
-  suppliers_ = computed(() => this.supplierDataService.allSuppliers_());
-  selectedProductId_ = signal<string | null>(null);
-  isDrawerOpen_ = signal<boolean>(false);
+    const userId = this.userService.user_()?._id
+    return this.recipes_().filter(r => !userId || !(r.hiddenBy ?? []).includes(userId))
+  })
+  suppliers_ = computed(() => this.supplierDataService.allSuppliers_())
+  selectedProductId_ = signal<string | null>(null)
+  isDrawerOpen_ = signal<boolean>(false)
 
   // COMPUTED SIGNALS
   lowStockProducts_ = computed(() =>
     this.products_().filter(p => p.min_stock_level_ > 0)
-  );
+  )
 
   saveProduct(product: Product): Observable<void> {
-    const isUpdate = !!(product._id && product._id.trim() !== '');
+    const isUpdate = !!(product._id && product._id.trim() !== '')
 
     const isDuplicate = this.products_().some(p =>
       p.name_hebrew.trim() === product.name_hebrew.trim() &&
       p._id !== product._id
-    );
+    )
 
     if (isDuplicate) {
-      this.userMsgService.onSetErrorMsg('כבר קיים חומר גלם בשם זה - לא ניתן לשמור');
-      return throwError(() => new Error('Duplicate product name'));
+      this.userMsgService.onSetErrorMsg('כבר קיים חומר גלם בשם זה - לא ניתן לשמור')
+      return throwError(() => new Error('Duplicate product name'))
     }
 
     if (isUpdate) {
-      const previous = this.products_().find(p => p._id === product._id) ?? null;
-      const changes = previous ? this.buildProductChanges(previous, product) : [];
+      const previous = this.products_().find(p => p._id === product._id) ?? null
+      const changes = previous ? this.buildProductChanges(previous, product) : []
 
       return from(
         previous
@@ -78,46 +78,46 @@ export class KitchenStateService {
       ).pipe(
         switchMap(() => from(this.productDataService.updateProduct(product))),
         tap(() => {
-          this.userMsgService.onSetSuccessMsg('המוצר עודכן בהצלחה');
+          this.userMsgService.onSetSuccessMsg('המוצר עודכן בהצלחה')
           this.activityLogService.recordActivity({
             action: 'updated',
             entityType: 'product',
             entityId: product._id,
             entityName: product.name_hebrew,
             changes,
-          });
+          })
         }),
         map(() => undefined as void),
         catchError(err => {
-          this.userMsgService.onSetErrorMsg('שגיאה בעדכון המוצר');
-          return throwError(() => err);
+          this.userMsgService.onSetErrorMsg('שגיאה בעדכון המוצר')
+          return throwError(() => err)
         })
-      );
+      )
     } else {
       // Create path – use saved product to get the new _id
       return from(this.productDataService.addProduct(product as Omit<Product, '_id'>)).pipe(
         tap((saved) => {
-          this.userMsgService.onSetSuccessMsg('חומר גלם נוסף בהצלחה');
+          this.userMsgService.onSetSuccessMsg('חומר גלם נוסף בהצלחה')
           this.activityLogService.recordActivity({
             action: 'created',
             entityType: 'product',
             entityId: saved._id,
             entityName: saved.name_hebrew,
             changes: [],
-          });
+          })
         }),
         map(() => undefined as void),
         catchError(err => {
-          this.userMsgService.onSetErrorMsg('שגיאה בהוספת המוצר');
-          return throwError(() => err);
+          this.userMsgService.onSetErrorMsg('שגיאה בהוספת המוצר')
+          return throwError(() => err)
         })
-      );
+      )
     }
   }
 
   /** Build structured change list between two products for activity log. */
   private buildProductChanges(prev: Product, next: Product): ActivityChange[] {
-    const changes: ActivityChange[] = [];
+    const changes: ActivityChange[] = []
 
     if (prev.name_hebrew !== next.name_hebrew) {
       changes.push({
@@ -125,17 +125,17 @@ export class KitchenStateService {
         label: 'activity_field_name',
         from: prev.name_hebrew,
         to: next.name_hebrew,
-      });
+      })
     }
-    const prevPrice = getEffectivePrice(prev);
-    const nextPrice = getEffectivePrice(next);
+    const prevPrice = getEffectivePrice(prev)
+    const nextPrice = getEffectivePrice(next)
     if (prevPrice !== nextPrice) {
       changes.push({
         field: 'price',
         label: 'activity_field_price',
         from: `${prevPrice} ₪`,
         to: `${nextPrice} ₪`,
-      });
+      })
     }
     if (prev.base_unit_ !== next.base_unit_) {
       changes.push({
@@ -143,37 +143,37 @@ export class KitchenStateService {
         label: 'activity_field_unit',
         from: prev.base_unit_,
         to: next.base_unit_,
-      });
+      })
     }
-    const prevSupp = getSupplierIds(prev).slice().sort().join(',');
-    const nextSupp = getSupplierIds(next).slice().sort().join(',');
+    const prevSupp = getSupplierIds(prev).slice().sort().join(',')
+    const nextSupp = getSupplierIds(next).slice().sort().join(',')
     if (prevSupp !== nextSupp) {
       changes.push({
         field: 'supplier',
         label: 'activity_field_supplier',
         from: prevSupp || undefined,
         to: nextSupp || undefined,
-      });
+      })
     }
-    const prevCat = (prev.categories_ ?? []).slice().sort().join(',');
-    const nextCat = (next.categories_ ?? []).slice().sort().join(',');
+    const prevCat = (prev.categories_ ?? []).slice().sort().join(',')
+    const nextCat = (next.categories_ ?? []).slice().sort().join(',')
     if (prevCat !== nextCat) {
       changes.push({
         field: 'category',
         label: 'activity_field_category',
         from: prevCat || undefined,
         to: nextCat || undefined,
-      });
+      })
     }
-    const prevAll = (prev.allergens_ ?? []).slice().sort().join(',');
-    const nextAll = (next.allergens_ ?? []).slice().sort().join(',');
+    const prevAll = (prev.allergens_ ?? []).slice().sort().join(',')
+    const nextAll = (next.allergens_ ?? []).slice().sort().join(',')
     if (prevAll !== nextAll) {
       changes.push({
         field: 'allergens',
         label: 'activity_field_allergens',
         from: prevAll || undefined,
         to: nextAll || undefined,
-      });
+      })
     }
     if ((prev.min_stock_level_ ?? 0) !== (next.min_stock_level_ ?? 0)) {
       changes.push({
@@ -181,7 +181,7 @@ export class KitchenStateService {
         label: 'activity_field_min_stock',
         from: String(prev.min_stock_level_ ?? 0),
         to: String(next.min_stock_level_ ?? 0),
-      });
+      })
     }
     if ((prev.expiry_days_default_ ?? 0) !== (next.expiry_days_default_ ?? 0)) {
       changes.push({
@@ -189,7 +189,7 @@ export class KitchenStateService {
         label: 'activity_field_expiry_days',
         from: String(prev.expiry_days_default_ ?? 0),
         to: String(next.expiry_days_default_ ?? 0),
-      });
+      })
     }
     if (Math.abs((prev.yield_factor_ ?? 1) - (next.yield_factor_ ?? 1)) > 0.001) {
       changes.push({
@@ -197,139 +197,139 @@ export class KitchenStateService {
         label: 'activity_field_yield_factor',
         from: String(prev.yield_factor_ ?? 1),
         to: String(next.yield_factor_ ?? 1),
-      });
+      })
     }
     if ((prev.purchase_options_?.length ?? 0) !== (next.purchase_options_?.length ?? 0)) {
-      const prevUnits = (prev.purchase_options_ ?? []).map(o => o.unit_symbol_).join(', ');
-      const nextUnits = (next.purchase_options_ ?? []).map(o => o.unit_symbol_).join(', ');
+      const prevUnits = (prev.purchase_options_ ?? []).map(o => o.unit_symbol_).join(', ')
+      const nextUnits = (next.purchase_options_ ?? []).map(o => o.unit_symbol_).join(', ')
       changes.push({
         field: 'purchase_options',
         label: 'activity_field_purchase_options',
         from: prevUnits || undefined,
         to: nextUnits || undefined,
-      });
+      })
     } else if ((prev.purchase_options_?.length ?? 0) > 0) {
-      const prevOpts = JSON.stringify(prev.purchase_options_ ?? []);
-      const nextOpts = JSON.stringify(next.purchase_options_ ?? []);
+      const prevOpts = JSON.stringify(prev.purchase_options_ ?? [])
+      const nextOpts = JSON.stringify(next.purchase_options_ ?? [])
       if (prevOpts !== nextOpts) {
-        const prevUnits = (prev.purchase_options_ ?? []).map(o => o.unit_symbol_).join(', ');
-        const nextUnits = (next.purchase_options_ ?? []).map(o => o.unit_symbol_).join(', ');
+        const prevUnits = (prev.purchase_options_ ?? []).map(o => o.unit_symbol_).join(', ')
+        const nextUnits = (next.purchase_options_ ?? []).map(o => o.unit_symbol_).join(', ')
         changes.push({
           field: 'purchase_options',
           label: 'activity_field_purchase_options',
           from: prevUnits || undefined,
           to: nextUnits || undefined,
-        });
+        })
       }
     }
-    return changes;
+    return changes
   }
 
   deleteProduct(_id: string): Observable<void> {
-    const existing = this.products_().find(p => p._id === _id);
-    const entityName = existing?.name_hebrew ?? _id;
+    const existing = this.products_().find(p => p._id === _id)
+    const entityName = existing?.name_hebrew ?? _id
 
     return of(null).pipe(
       switchMap(() => {
-        const exists = this.products_().some(p => p._id === _id);
-        if (!exists) return throwError(() => new Error('NOT_FOUND'));
+        const exists = this.products_().some(p => p._id === _id)
+        if (!exists) return throwError(() => new Error('NOT_FOUND'))
 
-        return from(this.productDataService.deleteProduct(_id));
+        return from(this.productDataService.deleteProduct(_id))
       }),
       tap(() => {
-        this.userMsgService.onSetSuccessMsg('חומר הגלם נמחק בהצלחה');
+        this.userMsgService.onSetSuccessMsg('חומר הגלם נמחק בהצלחה')
         this.activityLogService.recordActivity({
           action: 'deleted',
           entityType: 'product',
           entityId: _id,
           entityName,
-        });
+        })
       }),
       catchError(err => {
-        const msg = err.message === 'NOT_FOUND' ? 'הפריט לא נמצא' : 'שגיאה בעת המחיקה';
-        this.userMsgService.onSetErrorMsg(msg);
-        return throwError(() => err);
+        const msg = err.message === 'NOT_FOUND' ? 'הפריט לא נמצא' : 'שגיאה בעת המחיקה'
+        this.userMsgService.onSetErrorMsg(msg)
+        return throwError(() => err)
       })
-    );
+    )
   }
 
   // RECIPE / DISH CRUD
   deleteRecipe(recipe: Recipe): Observable<void> {
-    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length);
+    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length)
     const operation$ = isDish
       ? from(this.dishDataService.deleteDish(recipe._id))
-      : from(this.recipeDataService.deleteRecipe(recipe._id));
+      : from(this.recipeDataService.deleteRecipe(recipe._id))
 
     return operation$.pipe(
       tap(() => {
-        const msg = isDish ? 'המנה נמחקה בהצלחה' : 'המתכון נמחק בהצלחה';
-        this.userMsgService.onSetSuccessMsg(msg);
+        const msg = isDish ? 'המנה נמחקה בהצלחה' : 'המתכון נמחק בהצלחה'
+        this.userMsgService.onSetSuccessMsg(msg)
         this.activityLogService.recordActivity({
           action: 'deleted',
           entityType: isDish ? 'dish' : 'recipe',
           entityId: recipe._id,
           entityName: recipe.name_hebrew,
-        });
+        })
       }),
       catchError(() => {
-        const errorMsg = isDish ? 'שגיאה במחיקת המנה' : 'שגיאה במחיקת המתכון';
-        this.userMsgService.onSetErrorMsg(errorMsg);
-        return throwError(() => new Error(errorMsg));
+        const errorMsg = isDish ? 'שגיאה במחיקת המנה' : 'שגיאה במחיקת המתכון'
+        this.userMsgService.onSetErrorMsg(errorMsg)
+        return throwError(() => new Error(errorMsg))
       })
-    );
+    )
   }
 
   hideRecipe(recipe: Recipe): Observable<Recipe> {
-    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length);
+    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length)
     const operation$ = isDish
       ? from(this.dishDataService.hideDish(recipe._id))
-      : from(this.recipeDataService.hideRecipe(recipe._id));
+      : from(this.recipeDataService.hideRecipe(recipe._id))
     return operation$.pipe(
       catchError((err: unknown) => {
         const msg = err instanceof Error && err.message === 'NOT_AUTHENTICATED'
           ? 'יש להתחבר כדי להסתיר מתכון'
-          : 'שגיאה בהסתרת המתכון';
-        this.userMsgService.onSetErrorMsg(msg);
-        return throwError(() => err);
+          : 'שגיאה בהסתרת המתכון'
+        this.userMsgService.onSetErrorMsg(msg)
+        return throwError(() => err)
       })
-    );
+    )
   }
 
   permanentlyDeleteRecipe(recipe: Recipe): Observable<void> {
-    const user = this.userService.user_();
-    if (!user) return throwError(() => new Error('NOT_AUTHENTICATED'));
-    if (user.role !== 'admin') return throwError(() => new Error('NOT_AUTHORIZED'));
-    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length);
+    const user = this.userService.user_()
+    if (!user) return throwError(() => new Error('NOT_AUTHENTICATED'))
+    if (user.role !== 'admin') return throwError(() => new Error('NOT_AUTHORIZED'))
+    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length)
     const operation$ = isDish
       ? from(this.dishDataService.permanentlyDeleteDish(recipe._id))
-      : from(this.recipeDataService.permanentlyDeleteRecipe(recipe._id));
+      : from(this.recipeDataService.permanentlyDeleteRecipe(recipe._id))
     return operation$.pipe(
       tap(() => {
-        this.userMsgService.onSetSuccessMsg(isDish ? 'המנה נמחקה לצמיתות' : 'המתכון נמחק לצמיתות');
+        this.userMsgService.onSetSuccessMsg(isDish ? 'המנה נמחקה לצמיתות' : 'המתכון נמחק לצמיתות')
         this.activityLogService.recordActivity({
           action: 'deleted',
           entityType: isDish ? 'dish' : 'recipe',
           entityId: recipe._id,
           entityName: recipe.name_hebrew,
-        });
+        })
       }),
       catchError(() => {
-        this.userMsgService.onSetErrorMsg('שגיאה במחיקה הקבועה');
-        return throwError(() => new Error('permanentDelete failed'));
+        this.userMsgService.onSetErrorMsg('שגיאה במחיקה הקבועה')
+        return throwError(() => new Error('permanentDelete failed'))
       })
-    );
+    )
   }
 
   saveRecipe(recipe: Recipe): Observable<Recipe> {
-    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length);
-    const isUpdate = !!(recipe._id && recipe._id.trim() !== '');
-    const previous = isUpdate ? this.recipes_().find(r => r._id === recipe._id) : null;
+    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length)
+    const isUpdate = !!(recipe._id && recipe._id.trim() !== '')
+    const previous = isUpdate ? this.recipes_().find(r => r._id === recipe._id) : null
     const previousIsDish = previous
       ? (previous.recipe_type_ === 'dish' || !!(previous.prep_items_?.length || previous.prep_categories_?.length))
-      : false;
-    const typeChanged = isUpdate && !!previous && previousIsDish !== isDish;
-    const entityType = isDish ? 'dish' as const : 'recipe' as const;
-    const previousEntityType = previousIsDish ? 'dish' as const : 'recipe' as const;
+      : false
+    const typeChanged = isUpdate && !!previous && previousIsDish !== isDish
+    const entityType = isDish ? 'dish' as const : 'recipe' as const
+    const previousEntityType = previousIsDish ? 'dish' as const : 'recipe' as const
 
     const recordVersion$ =
       isUpdate && previous
@@ -342,16 +342,16 @@ export class KitchenStateService {
               changes: this.buildRecipeChanges(previous, recipe),
             })
           )
-        : from(Promise.resolve());
+        : from(Promise.resolve())
 
     const operation$ = typeChanged
       ? recordVersion$.pipe(
           switchMap(() => this.deleteRecipe(previous)),
           switchMap(() => {
-            const { _id: _omit, ...payload } = recipe as Recipe & { _id?: string };
+            const { _id: _omit, ...payload } = recipe as Recipe & { _id?: string }
             return isDish
               ? from(this.dishDataService.addDish(payload as Omit<Recipe, '_id'>))
-              : from(this.recipeDataService.addRecipe(payload as Omit<Recipe, '_id'>));
+              : from(this.recipeDataService.addRecipe(payload as Omit<Recipe, '_id'>))
           })
         )
       : recordVersion$.pipe(
@@ -364,11 +364,11 @@ export class KitchenStateService {
                   ? from(this.recipeDataService.updateRecipe(recipe))
                   : from(this.recipeDataService.addRecipe(recipe as Omit<Recipe, '_id'>)))
           )
-        );
+        )
 
     const fallbackErrorMsg = isDish
       ? (isUpdate ? 'שגיאה בעדכון המנה' : 'שגיאה בשמירת המנה')
-      : (isUpdate ? 'שגיאה בעדכון המתכון' : 'שגיאה בשמירת המתכון');
+      : (isUpdate ? 'שגיאה בעדכון המתכון' : 'שגיאה בשמירת המתכון')
 
     return operation$.pipe(
       tap((saved) => {
@@ -376,31 +376,31 @@ export class KitchenStateService {
           ? 'המתכון/המנה שונה לסוג החדש ונשמר בהצלחה'
           : isDish
             ? (isUpdate ? 'המנה עודכנה בהצלחה' : 'המנה נשמרה בהצלחה')
-            : (isUpdate ? 'המתכון עודכן בהצלחה' : 'המתכון נשמר בהצלחה');
-        this.userMsgService.onSetSuccessMsg(msg);
-        const changes = isUpdate && previous ? this.buildRecipeChanges(previous, saved) : [];
+            : (isUpdate ? 'המתכון עודכן בהצלחה' : 'המתכון נשמר בהצלחה')
+        this.userMsgService.onSetSuccessMsg(msg)
+        const changes = isUpdate && previous ? this.buildRecipeChanges(previous, saved) : []
         this.activityLogService.recordActivity({
           action: typeChanged ? 'created' : (isUpdate ? 'updated' : 'created'),
           entityType: isDish ? 'dish' : 'recipe',
           entityId: saved._id,
           entityName: saved.name_hebrew,
           changes,
-        });
+        })
       }),
       catchError((err: unknown) => {
         const msg =
           (err && typeof err === 'object' && (err as { error?: { message?: string } }).error?.message) ||
           (err instanceof Error ? err.message : null) ||
-          fallbackErrorMsg;
-        this.userMsgService.onSetErrorMsg(String(msg));
-        return throwError(() => (err instanceof Error ? err : new Error(String(msg))));
+          fallbackErrorMsg
+        this.userMsgService.onSetErrorMsg(String(msg))
+        return throwError(() => (err instanceof Error ? err : new Error(String(msg))))
       })
-    );
+    )
   }
 
   /** Build structured change list between two recipes/dishes for activity log. */
   private buildRecipeChanges(prev: Recipe, next: Recipe): ActivityChange[] {
-    const changes: ActivityChange[] = [];
+    const changes: ActivityChange[] = []
 
     if (prev.name_hebrew !== next.name_hebrew) {
       changes.push({
@@ -408,7 +408,7 @@ export class KitchenStateService {
         label: 'activity_field_name',
         from: prev.name_hebrew,
         to: next.name_hebrew,
-      });
+      })
     }
     if ((prev.ingredients_?.length ?? 0) !== (next.ingredients_?.length ?? 0)) {
       changes.push({
@@ -416,7 +416,7 @@ export class KitchenStateService {
         label: 'activity_field_ingredients_count',
         from: String(prev.ingredients_?.length ?? 0),
         to: String(next.ingredients_?.length ?? 0),
-      });
+      })
     }
     if ((prev.steps_?.length ?? 0) !== (next.steps_?.length ?? 0)) {
       changes.push({
@@ -424,7 +424,7 @@ export class KitchenStateService {
         label: 'activity_field_steps_count',
         from: String(prev.steps_?.length ?? 0),
         to: String(next.steps_?.length ?? 0),
-      });
+      })
     }
     if ((prev.yield_amount_ ?? 0) !== (next.yield_amount_ ?? 0) || (prev.yield_unit_ ?? '') !== (next.yield_unit_ ?? '')) {
       changes.push({
@@ -432,7 +432,7 @@ export class KitchenStateService {
         label: 'activity_field_yield',
         from: `${prev.yield_amount_ ?? 0} ${prev.yield_unit_ ?? ''}`.trim(),
         to: `${next.yield_amount_ ?? 0} ${next.yield_unit_ ?? ''}`.trim(),
-      });
+      })
     }
     if ((prev.prep_items_?.length ?? 0) !== (next.prep_items_?.length ?? 0)) {
       changes.push({
@@ -440,13 +440,13 @@ export class KitchenStateService {
         label: 'activity_field_prep_items',
         from: String(prev.prep_items_?.length ?? 0),
         to: String(next.prep_items_?.length ?? 0),
-      });
+      })
     }
-    return changes;
+    return changes
   }
 
   // SUPPLIER CRUD
   async addSupplier(supplier: Omit<Supplier, '_id'>): Promise<Supplier> {
-    return this.supplierDataService.addSupplier(supplier);
+    return this.supplierDataService.addSupplier(supplier)
   }
 }

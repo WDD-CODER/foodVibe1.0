@@ -1,6 +1,6 @@
 <app-header/>
 <div class="app-content">
-  @if (isRouteLoading()) {
+  @if (isRouteLoading() || isDataReloading_()) {
     <app-loader size="large" label="loader_please_wait" [overlay]="true" />
   }
   <router-outlet></router-outlet>

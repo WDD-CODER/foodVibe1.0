@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RecipeBookListComponent } from './components/recipe-book-list/recipe-book-list.component';
+import { ChangeDetectionStrategy, Component } from '@angular/core'
+import { RecipeBookListComponent } from './components/recipe-book-list/recipe-book-list.component'
 
 @Component({
   selector: 'app-recipe-book-page',

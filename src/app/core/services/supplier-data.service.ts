@@ -18,7 +18,7 @@ export class SupplierDataService extends BaseEntityDataService<Supplier> {
 
   async getSupplierById(_id: string): Promise<Supplier> {
     try {
-      return this.storage.get<Supplier>(ENTITY, _id);
+      return this.storage.get<Supplier>(ENTITY, _id)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({ event: 'crud.supplier.get_error', message: 'Failed to get supplier', context: { err } })
