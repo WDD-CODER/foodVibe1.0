@@ -40,6 +40,7 @@
   --cv-border-muted: #e0f0ea;
   --cv-bg-active-gradient: #d6f0e6;
   --cv-text-muted-green: #8aa89f;
+  --cv-muted: #888;
 }
 
 .cook-view-container {
@@ -724,7 +725,7 @@
 
 .cv-timer-pill--active {
   background: var(--cv-active-border);
-  color: #fff;
+  color: var(--color-text-on-primary);
   font-weight: 600;
 }
 
@@ -781,7 +782,7 @@
 
 .cv-stopwatch-icon--paused {
   opacity: 0.65;
-  color: var(--cv-muted, #888);
+  color: var(--cv-muted);
 }
 
 .cv-stopwatch-close {
@@ -835,7 +836,7 @@
 
 .cv-timer-confirm {
   background: var(--cv-active-border);
-  color: #fff;
+  color: var(--color-text-on-primary);
 }
 
 .cv-timer-dismiss {
