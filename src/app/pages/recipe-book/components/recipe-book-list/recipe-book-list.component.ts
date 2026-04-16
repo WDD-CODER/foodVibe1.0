@@ -684,13 +684,12 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   protected async onRemoveRecipe(recipe: Recipe): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return;
-    if (this.isAdmin_()) {
-      await this.onPermanentlyDeleteRecipe(recipe);
-    } else {
-      if (await this.confirmModal.open('האם אתה בטוח שברצונך למחוק?', { variant: 'danger' })) {
-        this.onHideRecipe(recipe);
-      }
-    }
+    if (!await this.confirmModal.open('האם אתה בטוח שברצונך למחוק?', { variant: 'danger' })) return;
+    this.removingId_.set(recipe._id);
+    this.kitchenState.deleteRecipe(recipe).subscribe({
+      next: () => { this.removingId_.set(null); },
+      error: () => { this.removingId_.set(null); }
+    });
   }
 
   protected onBulkEdit(event: { field: string; value: string; ids: string[] }): void {
@@ -716,15 +715,9 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     if (!this.requireAuthService.requireAuth()) return;
     if (!await this.confirmModal.open(`למחוק ${ids.length} מתכונים?`, { variant: 'danger' })) return;
     const recipes = this.kitchenState.recipes_().filter((r) => ids.includes(r._id ?? ''));
-    if (this.isAdmin_()) {
-      recipes.forEach((recipe) => {
-        this.kitchenState.permanentlyDeleteRecipe(recipe).subscribe({ next: () => {}, error: () => {} });
-      });
-    } else {
-      recipes.forEach((recipe) => {
-        this.kitchenState.hideRecipe(recipe).subscribe({ next: () => {}, error: () => {} });
-      });
-    }
+    recipes.forEach((recipe) => {
+      this.kitchenState.deleteRecipe(recipe).subscribe({ next: () => {}, error: () => {} });
+    });
     this.selection.clear();
   }
 
