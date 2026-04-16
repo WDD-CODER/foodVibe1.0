@@ -9,6 +9,7 @@ import { UserMsgService } from '@services/user-msg.service';
 import { TranslationService } from '@services/translation.service';
 import { RequireAuthService } from 'src/app/core/utils/require-auth.util';
 import { LoggingService } from '@services/logging.service';
+import { ConfirmModalService } from '@services/confirm-modal.service';
 import { VenueProfile, EnvironmentType } from '@models/venue.model';
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
 import { LoaderComponent } from 'src/app/shared/loader/loader.component';
@@ -62,6 +63,7 @@ export class VenueListComponent implements OnInit, OnDestroy {
   private readonly userMsg = inject(UserMsgService);
   private readonly translation = inject(TranslationService);
   private readonly logging = inject(LoggingService);
+  private readonly confirmModal = inject(ConfirmModalService);
 
   /** When true, add button emits addVenueClick instead of navigating (e.g. dashboard tab switch). */
   embeddedInDashboard = false;
@@ -202,28 +204,26 @@ export class VenueListComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected onBulkDeleteSelected(ids: string[]): void {
+  protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
     if (!this.requireAuthService.requireAuth()) return;
-    if (!confirm(`למחוק ${ids.length} מיקומים?`)) return;
-    (async () => {
-      for (const id of ids) {
-        this.deletingId_.set(id);
-        try {
-          await this.venueData.deleteVenue(id);
-        } catch (e) {
-          this.logging.error({ event: 'venue.list_error', message: 'Venue list error', context: { err: e } });
-        } finally {
-          this.deletingId_.set(null);
-        }
+    if (!await this.confirmModal.open(`למחוק ${ids.length} מיקומים?`, { variant: 'danger' })) return;
+    for (const id of ids) {
+      this.deletingId_.set(id);
+      try {
+        await this.venueData.deleteVenue(id);
+      } catch (e) {
+        this.logging.error({ event: 'venue.list_error', message: 'Venue list error', context: { err: e } });
+      } finally {
+        this.deletingId_.set(null);
       }
-      this.selection.clear();
-    })();
+    }
+    this.selection.clear();
   }
 
   async onDelete(item: VenueProfile): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return;
-    if (!confirm('למחוק את המיקום "' + (item.name_hebrew ?? '') + '"?')) return;
+    if (!await this.confirmModal.open('למחוק את המיקום "' + (item.name_hebrew ?? '') + '"?', { variant: 'danger' })) return;
     this.deletingId_.set(item._id);
     try {
       await this.venueData.deleteVenue(item._id);

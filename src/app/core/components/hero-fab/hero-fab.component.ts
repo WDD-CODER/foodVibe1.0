@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { LucideAngularModule } from 'lucide-angular';
@@ -17,6 +18,7 @@ import { HeroFabService } from '@services/hero-fab.service';
 })
 export class HeroFabComponent {
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
   private heroFab_ = inject(HeroFabService);
   protected readonly isLoggedIn = inject(UserService).isLoggedIn;
 
@@ -42,7 +44,10 @@ export class HeroFabComponent {
     };
     setRoute();
     this.router.events
-      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .pipe(
+        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe(setRoute);
   }
 

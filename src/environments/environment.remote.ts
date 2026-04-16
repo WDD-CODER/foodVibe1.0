@@ -5,5 +5,6 @@ export const environment = {
   authApiUrl: 'https://foodvibe-api.onrender.com',
   useBackendAuth: true,
   useBackend: true,
+  autoLoginGuest: false,
   logServerUrl: ''
 }

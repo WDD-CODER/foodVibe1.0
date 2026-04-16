@@ -407,19 +407,18 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   // DELETE
-  protected onDeleteProduct(_id: string): void {
-    if (confirm('האם אתה בטוח שברצונך למחוק חומר גלם זה?')) {
-      this.deletingId_.set(_id);
-      this.kitchenStateService.deleteProduct(_id).subscribe({
-        next: () => { this.deletingId_.set(null); },
-        error: () => { this.deletingId_.set(null); }
-      });
-    }
+  protected async onDeleteProduct(_id: string): Promise<void> {
+    if (!await this.confirmModal.open('האם אתה בטוח שברצונך למחוק חומר גלם זה?', { variant: 'danger' })) return;
+    this.deletingId_.set(_id);
+    this.kitchenStateService.deleteProduct(_id).subscribe({
+      next: () => { this.deletingId_.set(null); },
+      error: () => { this.deletingId_.set(null); }
+    });
   }
 
-  protected onBulkDeleteSelected(ids: string[]): void {
+  protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
-    if (!confirm(`למחוק ${ids.length} מוצרים?`)) return;
+    if (!await this.confirmModal.open(`למחוק ${ids.length} מוצרים?`, { variant: 'danger' })) return;
     ids.forEach(id => {
       this.kitchenStateService.deleteProduct(id).subscribe({ next: () => {}, error: () => {} });
     });

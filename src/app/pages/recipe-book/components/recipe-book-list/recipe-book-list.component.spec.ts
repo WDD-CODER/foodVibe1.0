@@ -14,6 +14,7 @@ import { AuthModalService } from '@services/auth-modal.service';
 import { HeroFabService } from '@services/hero-fab.service';
 import { AiRecipeModalService } from 'src/app/shared/ai-recipe-modal/ai-recipe-modal.service';
 import { MetadataRegistryService } from '@services/metadata-registry.service';
+import { ConfirmModalService } from '@services/confirm-modal.service';
 
 describe('RecipeBookListComponent', () => {
   let component: RecipeBookListComponent;
@@ -128,24 +129,26 @@ describe('RecipeBookListComponent', () => {
     expect(filtered.length).toBe(0);
   });
 
-  it('should call deleteRecipe when delete is confirmed', () => {
-    spyOn(window, 'confirm').and.returnValue(true);
+  it('should call deleteRecipe when delete is confirmed', async () => {
+    const confirmModal = TestBed.inject(ConfirmModalService);
+    spyOn(confirmModal, 'open').and.returnValue(Promise.resolve(true));
     const stateService = TestBed.inject(KitchenStateService);
     (stateService.deleteRecipe as jasmine.Spy).and.returnValue({ subscribe: () => {} });
 
     const recipe = mockRecipesSignal()[0];
-    (component as any).onDeleteRecipe(recipe);
+    await (component as any).onDeleteRecipe(recipe);
 
-    expect(window.confirm).toHaveBeenCalledWith('האם אתה בטוח שברצונך למחוק?');
+    expect(confirmModal.open).toHaveBeenCalled();
     expect(stateService.deleteRecipe).toHaveBeenCalledWith(recipe);
   });
 
-  it('should not call deleteRecipe when delete is cancelled', () => {
-    spyOn(window, 'confirm').and.returnValue(false);
+  it('should not call deleteRecipe when delete is cancelled', async () => {
+    const confirmModal = TestBed.inject(ConfirmModalService);
+    spyOn(confirmModal, 'open').and.returnValue(Promise.resolve(false));
     const stateService = TestBed.inject(KitchenStateService);
 
     const recipe = mockRecipesSignal()[0];
-    (component as any).onDeleteRecipe(recipe);
+    await (component as any).onDeleteRecipe(recipe);
 
     expect(stateService.deleteRecipe).not.toHaveBeenCalled();
   });
