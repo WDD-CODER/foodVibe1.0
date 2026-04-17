@@ -47,10 +47,24 @@ This is the **universal safety net** — skills have their own Phase 0, but this
 
 ## Branch Rule
 
-- Never commit directly to `main` or `master`.
-- Writing code on `main`? Run `git checkout -b feat/<name>` or `fix/<name>` first.
-- Need an isolated worktree for parallel multi-agent work? Use `/worktree-setup` on demand — **not automatic**.
-- **Worktree boundary**: When working inside an isolated worktree, never attempt `git checkout main` from within it. All PR creation and merges must be executed using `git -C <mainRepoPath>` from the root repository path to avoid `fatal: main is already used` errors.
+**Check your branch BEFORE doing any work — not just before committing.**
+
+At task start, run `git branch --show-current`. Then:
+
+- **On `main` or `master`?** Stop. Create and switch to a new branch first, then begin:
+  - `git checkout -b feat/<task-slug>` — new feature
+  - `git checkout -b fix/<task-slug>` — bug fix
+  - `git checkout -b chore/<task-slug>` — maintenance/tooling
+  - Derive `<task-slug>` from the task description (3–5 words, kebab-case)
+  - **Before creating the branch, check if another agent already owns it:**
+    ```bash
+    ls -t docs/session-state-<branch-slug>-*.md 2>/dev/null | head -1
+    ```
+    If a file exists and was modified in the last 4 hours → that branch is occupied. Append `-2` to your slug (then `-3` etc.) until you find a clear one.
+- **Already on a feature/fix/chore branch?** Check for co-occupants the same way. If another agent's session-state file is present and recent on this branch → move to a new branch unless explicitly told to collaborate.
+- **Explicitly told to share a branch or collaborate?** Honor the instruction and note it.
+- **Parallel multi-agent work needing isolation?** Use `/worktree-setup` on demand — not automatic.
+- **Worktree boundary**: When inside an isolated worktree, never attempt `git checkout main`. All PR creation and merges must use `git -C <mainRepoPath>` from the root repo path to avoid `fatal: main is already used` errors.
 
 > **Branch Guard hook**: A `PreToolUse` hook (`scripts/branch-guard.sh`) fires automatically before every Edit/Write/MultiEdit call. If Claude is on `main`, it creates `feat/session-YYYYMMDD` and switches to it before writing any file. When the hook output contains `BRANCH_GUARD:`, Claude **must immediately announce to the user** which branch was created — e.g. *"Moved to branch `feat/session-20260415` before making any changes."* This message must appear in Claude's next response, not buried or skipped.
 
@@ -103,7 +117,8 @@ Key routing rules:
 
 ## Session Management
 
-- At session start, `docs/session-state.md` is auto-loaded by the `session-startup.sh` hook — read it to know where the last session left off.
-- Before ending a session, update `docs/session-state.md` with what was completed (with commit hash), current status, and prioritized next steps.
+- At session start, the most recently modified session-state file for this branch is auto-loaded by `session-startup.sh`. The startup message tells you which file was loaded and where to save.
+- **Save target**: The startup hook injects a `SESSION SAVE TARGET:` line with your session's unique file path (`docs/session-state-<branch>-<pid>.md`). Before ending a session, write session-state to that path — not `docs/session-state.md` directly. If the startup message is unavailable, read `.claude/.session-state-path` for the path, or fall back to `docs/session-state.md`.
+- This design lets two sessions on the same branch coexist without overwriting each other. Files older than 7 days are cleaned up automatically on next startup.
 - For mid-task snapshots with timestamped branching points, run `/checkpoint` — this writes a dated file to `.claude/sessions/` and prints a resume prompt.
-- `docs/session-state.md` is the rolling continuity file. `.claude/sessions/YYYY-MM-DD-HHMM-slug.md` files are point-in-time snapshots. Both serve different needs.
+- `docs/session-state-<branch>-<pid>.md` files are the rolling continuity files per session. `.claude/sessions/YYYY-MM-DD-HHMM-slug.md` files are point-in-time snapshots. Both serve different needs.

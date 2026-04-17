@@ -14,6 +14,8 @@
 
 if [ -n "$SESSION_STATE_PATH" ]; then
   SESSION_STATE="$SESSION_STATE_PATH"
+elif [ -f ".claude/.session-state-path" ]; then
+  SESSION_STATE=$(cat ".claude/.session-state-path")
 else
   BRANCH=$(git branch --show-current 2>/dev/null | sed 's/[^a-zA-Z0-9]/-/g')
   BRANCH_FILE="docs/session-state-${BRANCH}.md"
