@@ -1,0 +1,1 @@
+import{a as n}from"./chunk-G37YX7GL.js";import{db as i,ha as t}from"./chunk-EI5FYLXS.js";var a=class e{translationService=t(n);transform(r){return this.translationService.translate(r)}static \u0275fac=function(s){return new(s||e)};static \u0275pipe=i({name:"translatePipe",type:e,pure:!1})};export{a};

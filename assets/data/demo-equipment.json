@@ -1,0 +1,588 @@
+[
+  {
+    "_id": "eq_001",
+    "name_hebrew": "כיריים/תנור",
+    "category_": "heat_source",
+    "owned_quantity_": 2,
+    "scaling_rule_": {
+      "per_guests_": 25,
+      "min_quantity_": 1,
+      "max_quantity_": 8
+    },
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_004",
+    "name_hebrew": "מחבת",
+    "category_": "container",
+    "owned_quantity_": 6,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_005",
+    "name_hebrew": "סיר",
+    "category_": "container",
+    "owned_quantity_": 4,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_008",
+    "name_hebrew": "גז (מכל)",
+    "category_": "consumable",
+    "owned_quantity_": 0,
+    "scaling_rule_": {
+      "per_guests_": 50,
+      "min_quantity_": 1,
+      "max_quantity_": 20
+    },
+    "is_consumable_": true,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_011",
+    "name_hebrew": "ארון חימום",
+    "category_": "heat_source",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_012",
+    "name_hebrew": "כלים לתוספות",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_013",
+    "name_hebrew": "מכונת נקניקיות",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_014",
+    "name_hebrew": "מלקחיים להגשה",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_015",
+    "name_hebrew": "מקרר",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_016",
+    "name_hebrew": "סלסלת קש ללחמניות",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_017",
+    "name_hebrew": "חיבור ישראלי לחשמל",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_018",
+    "name_hebrew": "תלת פאזי (תלוי במכונה)",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_019",
+    "name_hebrew": "חותמת הלחמה + ברנר ספייר",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_020",
+    "name_hebrew": "ציפסר",
+    "category_": "heat_source",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_021",
+    "name_hebrew": "שפין דיש לציפס",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_022",
+    "name_hebrew": "פלאנצה פרונטלית",
+    "category_": "heat_source",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_023",
+    "name_hebrew": "גסטרונומים לארון חימום עם רשת",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_024",
+    "name_hebrew": "פלטה לפלאנצה",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_025",
+    "name_hebrew": "כלי לריבת בצל",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_026",
+    "name_hebrew": "בקטים לחיצים למיונז וקטשוף",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_027",
+    "name_hebrew": "סקוויזר לפונדו צ'דר",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_028",
+    "name_hebrew": "בן מארי לפונדו גבינה",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_029",
+    "name_hebrew": "שפינג דיש לבשר מפורק",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_030",
+    "name_hebrew": "מקרר/קלקרים שחורים בפרונט",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_031",
+    "name_hebrew": "סכין לחם משוננת לפריסת לחמניות",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_032",
+    "name_hebrew": "כפפות חמות לעמדה",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_033",
+    "name_hebrew": "מברשת ברזל לניקוי החותמת",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_034",
+    "name_hebrew": "בולים לערבוב ציפס בעמדה",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_035",
+    "name_hebrew": "כלי לטבילת הבורגר ברוטב",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_036",
+    "name_hebrew": "קרש עבודה לשולחן אחורי",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_037",
+    "name_hebrew": "שפין דיש לאורז",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_038",
+    "name_hebrew": "שפין דיש לשיפודי עוף",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_039",
+    "name_hebrew": "שפין דיש לרוטב",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_040",
+    "name_hebrew": "כפות הגשה בעמדה",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_041",
+    "name_hebrew": "מצקת לרוטב",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_042",
+    "name_hebrew": "קראפ עם שפה גבוהה (ריבוע 12x12 / קראפ 12)",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_043",
+    "name_hebrew": "גסטרונום",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_044",
+    "name_hebrew": "שפין דיש לקציצות ברוטב",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_045",
+    "name_hebrew": "קלקרים שחורים",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_046",
+    "name_hebrew": "מכונת גלידה אמריקאית 2 טעמים",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_047",
+    "name_hebrew": "מקרר וטרינה לאוניגירי",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_048",
+    "name_hebrew": "משטחי מלמין להנחת אוניגירי במקרר",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_049",
+    "name_hebrew": "קישוטים לסושי",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_050",
+    "name_hebrew": "כיור או פח ניקוז נוזלים",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_051",
+    "name_hebrew": "בוצ'ר עץ רחב",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_052",
+    "name_hebrew": "שייקר מלח",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_053",
+    "name_hebrew": "קערת הגשה רחבה לסלט",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_054",
+    "name_hebrew": "מלקחיים",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_055",
+    "name_hebrew": "קערת ערבוב לעבודה",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_056",
+    "name_hebrew": "כלי סגור למשרה",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_057",
+    "name_hebrew": "מגימיקס",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_058",
+    "name_hebrew": "קערות קטנות לטופינג",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_059",
+    "name_hebrew": "כף עץ לערבוב",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_060",
+    "name_hebrew": "קערה קטנה לקורנפלור",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_061",
+    "name_hebrew": "סקוייזרים לרוטב",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_062",
+    "name_hebrew": "ברנר עדין",
+    "category_": "heat_source",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_063",
+    "name_hebrew": "מגשים 60×40 לניהול הקומות במקרר",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_064",
+    "name_hebrew": "וטרינה לקינוחים",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_065",
+    "name_hebrew": "מטמפררת שוקולד חלב 4 שלבים",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_066",
+    "name_hebrew": "מטמפררת שוקולד לבן 4 שלבים",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_067",
+    "name_hebrew": "מקפיא פרזנטציה 600 מ\"ל",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_068",
+    "name_hebrew": "עמדת שבור את זה בעצמך",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_069",
+    "name_hebrew": "פטשים לעמדה",
+    "category_": "tool",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "_id": "eq_070",
+    "name_hebrew": "כלים עם רוטב למזיגה לקוקוטים",
+    "category_": "container",
+    "owned_quantity_": 0,
+    "is_consumable_": false,
+    "created_at_": "2025-01-01T00:00:00.000Z",
+    "updated_at_": "2025-01-01T00:00:00.000Z"
+  }
+]
