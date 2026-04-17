@@ -51,6 +51,12 @@
   <div class="editor-section">
     <p class="editor-section-title">{{ 'ai_recipe_preview_ingredients' | translatePipe }}</p>
     <div class="editor-ing-table">
+      <div class="editor-ing-header">
+        <span>{{ 'ingredient_name' | translatePipe }}</span>
+        <span>{{ 'quantity' | translatePipe }}</span>
+        <span>{{ 'unit' | translatePipe }}</span>
+        <span></span>
+      </div>
       @for (ing of ingredients_(); track ing.id; let i = $index) {
         <div class="editor-ing-row" [class.editor-ing-row--new]="ing.isNew">
           <div class="editor-ing-name-cell">
