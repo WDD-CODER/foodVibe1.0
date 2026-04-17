@@ -14,12 +14,12 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { UnitRegistryService } from '@services/unit-registry.service'
-import { TranslationService } from '@services/translation.service'
 import { FormsModule } from '@angular/forms'
 import { AiRecipeDraft } from '@services/ai-recipe-draft.service'
 import { take } from 'rxjs/operators'
 
 export interface DraftIngredient {
+  id: number
   name: string
   amount: number
   unit: string
@@ -27,6 +27,7 @@ export interface DraftIngredient {
 }
 
 export interface DraftWorkflowItem {
+  id: number
   text: string
   qty: number
   unit: string
@@ -42,7 +43,8 @@ export interface DraftWorkflowItem {
 })
 export class AiDraftEditorComponent {
   private readonly unitRegistry = inject(UnitRegistryService)
-  private readonly translation = inject(TranslationService)
+  private nextId_ = 0
+  private newId(): number { return ++this.nextId_ }
 
   // ── Inputs / Outputs ──────────────────────────────────────────────
   draft = input.required<AiRecipeDraft>()
@@ -73,8 +75,8 @@ export class AiDraftEditorComponent {
       this.type_.set(d.recipe_type)
       this.yieldAmount_.set(d.yield_amount)
       this.yieldUnit_.set(d.yield_unit ?? 'gram')
-      this.ingredients_.set(d.ingredients.map(i => ({ ...i, isNew: false })))
-      this.workflowItems_.set(d.steps.map(s => ({ text: s, qty: 1, unit: 'unit' })))
+      this.ingredients_.set(d.ingredients.map(i => ({ ...i, isNew: false, id: this.newId() })))
+      this.workflowItems_.set(d.steps.map(s => ({ text: s, qty: 1, unit: 'unit', id: this.newId() })))
     }, { allowSignalWrites: true })
   }
 
@@ -101,7 +103,7 @@ export class AiDraftEditorComponent {
   protected addIngredient(): void {
     this.ingredients_.update(list => [
       ...list,
-      { name: '', amount: 0, unit: 'gram', isNew: true },
+      { id: this.newId(), name: '', amount: 0, unit: 'gram', isNew: true },
     ])
   }
 
@@ -140,7 +142,7 @@ export class AiDraftEditorComponent {
   protected addWorkflowItem(): void {
     this.workflowItems_.update(list => [
       ...list,
-      { text: '', qty: 1, unit: 'unit' },
+      { id: this.newId(), text: '', qty: 1, unit: 'unit' },
     ])
   }
 
@@ -173,11 +175,6 @@ export class AiDraftEditorComponent {
         list.map((item, i) => i === index ? { ...item, unit: val } : item)
       )
     }
-  }
-
-  // ── Translate unit key for display ────────────────────────────────
-  protected translateUnit(unit: string): string {
-    return this.translation.translate(unit)
   }
 
   // ── Approval / generate again ─────────────────────────────────────

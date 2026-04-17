@@ -51,7 +51,7 @@
   <div class="editor-section">
     <p class="editor-section-title">{{ 'ai_recipe_preview_ingredients' | translatePipe }}</p>
     <div class="editor-ing-table">
-      @for (ing of ingredients_(); track $index; let i = $index) {
+      @for (ing of ingredients_(); track ing.id; let i = $index) {
         <div class="editor-ing-row" [class.editor-ing-row--new]="ing.isNew">
           <div class="editor-ing-name-cell">
             @if (ing.isNew) {
@@ -98,7 +98,7 @@
     <div class="editor-section">
       <p class="editor-section-title">{{ 'ai_recipe_preview_steps' | translatePipe }}</p>
       <div class="editor-steps-list">
-        @for (item of workflowItems_(); track $index; let i = $index) {
+        @for (item of workflowItems_(); track item.id; let i = $index) {
           <div class="editor-step-row">
             <span class="editor-step-num">{{ i + 1 }}</span>
             <textarea
@@ -132,7 +132,7 @@
           <span>{{ 'unit' | translatePipe }}</span>
           <span></span>
         </div>
-        @for (item of workflowItems_(); track $index; let i = $index) {
+        @for (item of workflowItems_(); track item.id; let i = $index) {
           <div class="editor-prep-row">
             <input
               class="c-input"
