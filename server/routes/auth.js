@@ -145,7 +145,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
-    const publicUser = { _id, name, email, imgUrl: imgUrl || '' };
+    const publicUser = { _id, name, email, imgUrl: imgUrl || '', role: 'user' };
     return res.status(201).json({ token, user: publicUser });
   } catch (err) {
     console.error('[auth/signup]', err);
@@ -206,7 +206,7 @@ router.post('/login', loginLimiter, async (req, res) => {
       await syncMasterToUser(user._id);
     } catch (syncErr) { console.error('[auth/login] sync error:', syncErr.message); }
 
-    const publicUser = { _id: user._id, name: user.name, email: user.email, imgUrl: user.imgUrl };
+    const publicUser = { _id: user._id, name: user.name, email: user.email, imgUrl: user.imgUrl, role: user.role || 'user' };
     return res.json({ token, user: publicUser });
   } catch (err) {
     console.error('[auth/login]', err);
