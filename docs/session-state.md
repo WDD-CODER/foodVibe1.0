@@ -1,4 +1,4 @@
-# Session State — 2026-04-16 (end of day — updated after ai-inventory-save-validation session)
+# Session State — 2026-04-17 (end of day — updated after recipe-type-switch + context-monitor session)
 
 > Single source of truth for all project rules, standards, and skill/agent routing.
 
@@ -6,8 +6,11 @@
 
 ## Current Status
 
-**Branch:** `fix/ai-inventory-save-validation` (changes in working tree — not yet committed)
-**Latest commit on branch:** `a52bdcb` — Merge pull request #118 from WDD-CODER/fix/master-pool-cleanup
+**Branch:** `feat/session-20260417` (changes in working tree — NOT committed)
+**Latest merged commit:** `aa96b54` — Merge pull request #120 from WDD-CODER/feat/session-20260416-2011
+**Build status:** UNVERIFIED — ng build not run this session
+**Open PRs:** None
+**Dirty working tree:** YES — 2 feature files + failure-log.tsv
 **Build status:** PASS (user confirmed 0 errors, 0 warnings)
 **Open PRs:** None
 **Dirty working tree:** YES — 13 files modified (see below)
@@ -16,31 +19,33 @@
 
 ## IMPORTANT: Uncommitted Feature Work
 
-Two features were implemented this session and exist only in the working tree. Commit at the start of the next session:
-
-### Batch 1 — Unlinked badge click opens inline edit panel
+### Batch — recipe type switch content migration + context-monitor fix (feat/session-20260417)
 ```
-recipe-ingredients-table.component.html   (badge click handler swapped)
-recipe-ingredients-table.component.ts     (+23 — onUnlinkedBadgeClick)
-```
-
-### Batch 2 — AI-inventory save validation + UX hardening (fix/ai-inventory-save-validation)
-```
-quick-add-product-modal.component.html    (+11 — red borders + error text)
-quick-add-product-modal.component.scss    (+11 — .field-error-msg, .input--error)
-quick-add-product-modal.component.ts      (+9  — nameError_/unitError_ signals)
-quick-edit-product-panel.component.html   (+11 — red borders + error text)
-quick-edit-product-panel.component.scss   (+12 — same error styles)
-quick-edit-product-panel.component.ts     (+9  — nameError_/unitError_ signals)
-recipe-builder.page.ts                    (+3  — scroll to first .incomplete-row on blocked save)
-recipe-ingredients-table.component.scss   (+7  — gap + .badge-label for incomplete badge)
-public/assets/data/dictionary.json        (+1  — "fix": "תקן")
+src/app/pages/recipe-builder/recipe-builder.page.ts  (+49/-17 — bidirectional type-switch content migration + bug fix)
+scripts/context-monitor.sh                            (+14/-22 — systemMessage field + raised thresholds)
 ```
 
 **Next session start sequence:**
-1. `ng build` — verify 0 errors
-2. Manual smoke test: unlinked icon → inline edit; save without name → red border shown; blocked save → page scrolls to .incomplete-row
-3. Commit both batches on `fix/ai-inventory-save-validation` → create PR
+1. `ng build` — verify 0 errors (build not run this session)
+2. Smoke test recipe type switch: 4 scenarios (see session-handoff for checklist)
+3. Commit both files on `feat/session-20260417` → create PR
+4. NOTE: `failure-log.tsv` is also dirty — commit separately after PR to avoid hook loop
+
+### NOTE: Previous session's fix/ai-inventory-save-validation work
+The prior session (2026-04-16) documented 13 uncommitted files on `fix/ai-inventory-save-validation`. Verify with `git status` — those changes may now be committed (check PR #120). If still present in working tree, commit those first.
+
+---
+
+## Session Summary (2026-04-17 — Recipe Type Switch + Context Monitor Fix)
+
+### Feature — Bidirectional content migration on recipe type switch
+- `recipe-builder.page.ts` `onRecipeTypeChange()`: dish → steps now seeds step instructions from prep item names on first switch; back-switch restores full prep items (qty/unit/category)
+- `recipe-builder.page.ts` `onRecipeTypeChange()`: steps → dish now seeds prep item names from step instructions on first switch; back-switch restores full steps (instruction/labor_time/cooking_time)
+- Pre-existing bug fixed: cached steps previously only restored `order` — now restores all fields via `patchValue`
+
+### Fix — context-monitor.sh PostToolUse output format
+- Root cause: PostToolUse hooks must output `systemMessage` field; `hookSpecificOutput.decision.additionalContext` is only valid for PreToolUse/SessionStart
+- Fixed all three alert tiers; raised thresholds from 400/600/700 KB to 550/750/900 KB
 
 ---
 
@@ -112,13 +117,15 @@ Replaced all native `confirm()` calls across 5 list components:
 
 ## Next Steps (Priority Order)
 
-1. **FIRST: Commit fix/ai-inventory-save-validation** (dirty working tree — 13 files):
-   - `ng build` — verify 0 errors
-   - Smoke test: unlinked icon → inline edit; save without name → red border; blocked save → scroll to .incomplete-row
-   - Commit all 13 modified files on `fix/ai-inventory-save-validation` → create PR
-   - Note: stub product uses `base_unit_: 'gram'` hardcoded — flag for follow-up if unit mismatch needed
+1. **FIRST: Commit feat/session-20260417** (dirty working tree — 2 files):
+   - `ng build` — verify 0 errors (build NOT run this session)
+   - Smoke test: 4 recipe type switch scenarios (dish→steps→dish, steps→dish→steps)
+   - Commit `scripts/context-monitor.sh` + `src/app/pages/recipe-builder/recipe-builder.page.ts` → create PR
+   - Commit `failure-log.tsv` separately after PR (avoid hook loop)
 
-2. **Manual smoke tests for PR #117** (MongoDB required, still pending):
+2. **Check if fix/ai-inventory-save-validation is still dirty** — run `git status`; if 13 files still uncommitted, commit those next
+
+3. **Manual smoke tests for PR #117** (MongoDB required, still pending):
    - Sign in → create product → Compass: single doc in userId, nothing in `__master__`
    - Delete master-seeded item → Compass: `_userDeleted: true`, client-invisible
    - Log out and back in → tombstoned item must NOT re-appear
