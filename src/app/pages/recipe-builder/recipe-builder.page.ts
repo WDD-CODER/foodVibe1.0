@@ -254,28 +254,57 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private onRecipeTypeChange(type: string | null): void {
     if (type == null) return;
     const isDish = type === 'dish';
-    const wasDish = !isDish;
 
-    if (wasDish) {
-      const rows = this.workflowArray.controls.map(c => c.getRawValue() as { preparation_name?: string; category_name?: string; main_category_name?: string; quantity?: number; unit?: string });
-      this.cachedPrepItems_ = rows;
+    // Always save current form data to its own type's cache before switching
+    if (!isDish) {
+      // Was dish, now switching to steps — save dish data
+      this.cachedPrepItems_ = this.workflowArray.controls.map(
+        c => c.getRawValue() as { preparation_name?: string; category_name?: string; main_category_name?: string; quantity?: number; unit?: string }
+      );
     } else {
-      const rows = this.workflowArray.controls.map(c => c.getRawValue() as { order?: number; instruction?: string; labor_time?: number; cooking_time?: number });
-      this.cachedSteps_ = rows;
+      // Was steps, now switching to dish — save steps data
+      this.cachedSteps_ = this.workflowArray.controls.map(
+        c => c.getRawValue() as { order?: number; instruction?: string; labor_time?: number; cooking_time?: number }
+      );
     }
 
     this.workflowArray.clear();
+
     if (isDish) {
       if (this.cachedPrepItems_.length > 0) {
-        this.cachedPrepItems_.forEach(row => this.workflowArray.push(this.recipeFormService_.createPrepItemRow(row)));
+        // Restore original prep items (with full quantity/unit/category)
+        this.cachedPrepItems_.forEach(row =>
+          this.workflowArray.push(this.recipeFormService_.createPrepItemRow(row))
+        );
+      } else if (this.cachedSteps_.length > 0) {
+        // First-time switch: convert step instructions → prep item names
+        this.cachedSteps_.forEach(step =>
+          this.workflowArray.push(
+            this.recipeFormService_.createPrepItemRow({ preparation_name: step.instruction ?? '' })
+          )
+        );
       } else {
         this.workflowArray.push(this.recipeFormService_.createPrepItemRow());
       }
     } else {
       if (this.cachedSteps_.length > 0) {
-        this.cachedSteps_.forEach((step, i) =>
-      this.workflowArray.push(this.recipeFormService_.createStepGroup(step.order ?? i + 1))
-        );
+        // Restore cached steps with full content (fixes bug: previously only order was restored)
+        this.cachedSteps_.forEach((step, i) => {
+          const group = this.recipeFormService_.createStepGroup(step.order ?? i + 1);
+          group.patchValue({
+            instruction: step.instruction ?? '',
+            labor_time: step.labor_time ?? 0,
+            cooking_time: step.cooking_time ?? 0
+          });
+          this.workflowArray.push(group);
+        });
+      } else if (this.cachedPrepItems_.length > 0) {
+        // First-time switch: convert prep item names → step instructions
+        this.cachedPrepItems_.forEach((item, i) => {
+          const group = this.recipeFormService_.createStepGroup(i + 1);
+          group.patchValue({ instruction: item.preparation_name ?? '' });
+          this.workflowArray.push(group);
+        });
       } else {
         this.workflowArray.push(this.recipeFormService_.createStepGroup(1));
       }
@@ -763,7 +792,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   });
 
   protected getEquipmentNameById(id: string): string {
-    const eq = this.equipmentData_.allEquipment_().find(e => e._id === id);
+    const eq = this.equipmentData_.allEquipment_().find(
+      e => e._id === id || (e as any)._masterId === id
+    );
     return eq?.name_hebrew ?? id;
   }
 
