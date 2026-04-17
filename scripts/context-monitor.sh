@@ -32,46 +32,30 @@ fi
 # Get file size in bytes
 SIZE=$(wc -c < "$TRANSCRIPT" 2>/dev/null || echo 0)
 
-# Thresholds (rough estimates based on observed context usage):
-#   400KB ≈ 40% of context window
-#   600KB ≈ 60% of context window
-#   700KB ≈ 70% of context window
-# These are conservative estimates. Adjust based on your model's context size.
-WARN_THRESHOLD=400000
-ALERT_THRESHOLD=600000
-STOP_THRESHOLD=700000
+# Thresholds based on transcript file size (proxy for context usage).
+# Claude Sonnet 4.6 has a 200K token context (~800KB at 4 bytes/token).
+# JSONL overhead makes byte count a rough proxy — these are generous to avoid
+# interrupting work too often.
+WARN_THRESHOLD=550000
+ALERT_THRESHOLD=750000
+STOP_THRESHOLD=900000
 
 if [ "$SIZE" -gt "$STOP_THRESHOLD" ]; then
   cat <<'EOF'
 {
-  "hookSpecificOutput": {
-    "hookEventName": "PostToolUse",
-    "decision": {
-      "additionalContext": "HARD STOP — Context exceeds 70%. You MUST do the following immediately. Do NOT continue any other work:\n1. Update session-state.md with current progress, decisions made, and next steps\n2. Stop all generation/development work\n3. Tell the user: 'Context is full. I recommend starting a new session. session-state.md has been updated.'\n\nThis is a hard gate. Continuing past this point risks losing work to context truncation."
-    }
-  }
+  "systemMessage": "HARD STOP — Context exceeds 70%. You MUST do the following immediately. Do NOT continue any other work:\n1. Update session-state.md with current progress, decisions made, and next steps\n2. Stop all generation/development work\n3. Tell the user: 'Context is full. I recommend starting a new session. session-state.md has been updated.'\n\nThis is a hard gate. Continuing past this point risks losing work to context truncation."
 }
 EOF
 elif [ "$SIZE" -gt "$ALERT_THRESHOLD" ]; then
   cat <<'EOF'
 {
-  "hookSpecificOutput": {
-    "hookEventName": "PostToolUse",
-    "decision": {
-      "additionalContext": "Context is past 60%. Update session-state.md now to preserve progress. Finish your current task, then hand off. Do not start new tasks."
-    }
-  }
+  "systemMessage": "Context is past 60%. Update session-state.md now to preserve progress. Finish your current task, then hand off. Do not start new tasks."
 }
 EOF
 elif [ "$SIZE" -gt "$WARN_THRESHOLD" ]; then
   cat <<'EOF'
 {
-  "hookSpecificOutput": {
-    "hookEventName": "PostToolUse",
-    "decision": {
-      "additionalContext": "Context is past 40%. Start thinking about wrap-up timing. Finish your current task and consider whether to hand off soon."
-    }
-  }
+  "systemMessage": "Context is past 40%. Start thinking about wrap-up timing. Finish your current task and consider whether to hand off soon."
 }
 EOF
 fi
