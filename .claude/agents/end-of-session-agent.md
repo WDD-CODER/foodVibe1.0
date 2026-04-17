@@ -450,9 +450,9 @@ Write file to disk. Continue to Phase 12.
 
 ---
 
-### Phase 12: Present to User (ALWAYS — USER CONFIRMATION REQUIRED)
+### Phase 12: Present to User (ALWAYS — AUTO-CLOSE)
 
-Print a clean terminal summary (NOT the raw file):
+Print a clean terminal summary (NOT the raw file) and **proceed directly to Phase 13 without asking for confirmation**:
 
 ```
 ===============================================
@@ -494,10 +494,7 @@ Full report: .claude/sessions/{session-id}/session-handoff.md
 ===============================================
 ```
 
-**USER CONFIRM:** `"Does this look accurate? (Y to close / N to flag issues)"`
-
-- **Y:** Session officially closed → Continue to Phase 13
-- **N:** Ask `"What needs to be corrected?"` → Update session-handoff.md → Re-present → Loop until confirmed
+**NO CONFIRMATION GATE** — proceed directly to Phase 13. If user wants to flag issues they will say so explicitly.
 
 ---
 
