@@ -207,24 +207,30 @@ Techdebt scan: {N} warnings, {N} critical issues.
 
 **IF MAIN REPO:**
 
-Gather payload for git-agent:
-```
-files_to_stage: [from git status]
-branch: {branch_name}
-suggested_message: {derived from completed tasks}
-create_pr: {true if on feature branch}
-source: "end-of-session-agent"
-```
+Group the dirty files into logical commits (by feature area, config, session artifacts, etc.).
 
-Invoke git-agent with payload. Git-agent handles:
-- Visual staged files summary
-- Commit message generation (Conventional Commits)
-- User confirmation gate
-- Commit execution
-- Push to remote
-- PR creation (if applicable)
+Present the commit proposal using the **EXACT same visual tree format as git-agent** — always wrap in a `text` code block so it renders as fixed-width in every context:
 
-Receive from git-agent:
+~~~text
+Branch: {branch_name}
+
+└── 📦 type(scope): subject line
+    ├── 📄 path/to/file1
+    ├── 📄 path/to/file2
+    └── 📄 path/to/file3
+
+└── 📦 type(scope): subject line for second commit
+    ├── 📄 path/to/file4
+    └── 📄 path/to/file5
+~~~
+
+End the proposal with a bold single line: **Approve? (Y/N)** — **no git writes until Y**.
+
+On approval, execute via git-agent:
+- `git add` → `git commit` → `git push` (separate Bash calls, never chained)
+- PR creation if on a feature branch (`gh pr create --base main`)
+
+Receive result:
 ```
 commit_sha: string | null
 pr_url: string | null
@@ -233,7 +239,7 @@ skipped: bool
 
 Store result for inclusion in session-handoff.md.
 
-**Non-negotiable:** Per `memory/feedback_no_auto_commit.md` — NEVER auto-commit. Always show visual summary. Always wait for explicit user approval.
+**Non-negotiable:** Per `memory/feedback_no_auto_commit.md` — NEVER auto-commit. Always show the visual tree. Always wait for explicit user approval.
 
 ---
 
