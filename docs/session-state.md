@@ -1,4 +1,4 @@
-# Session State — 2026-04-17 (end of day — updated after recipe-type-switch + context-monitor session)
+# Session State — 2026-04-17 (end of day — updated after logistics equipment-ID fix session)
 
 > Single source of truth for all project rules, standards, and skill/agent routing.
 
@@ -6,33 +6,52 @@
 
 ## Current Status
 
-**Branch:** `feat/session-20260417` (changes in working tree — NOT committed)
-**Latest merged commit:** `aa96b54` — Merge pull request #120 from WDD-CODER/feat/session-20260416-2011
-**Build status:** UNVERIFIED — ng build not run this session
+**Branch:** `feat/session-20260417` (1 commit ahead of origin — needs push + PR)
+**Latest local commit:** `06120ed` — fix(ai-draft-editor): smoke test fixes
+**Equipment ID fix commit:** `046c184` — fix(sync): remap logistics equipment IDs on master→user sync
+**Build status:** PASS (user confirmed 0 errors before logistics fix commit)
 **Open PRs:** None
-**Dirty working tree:** YES — 2 feature files + failure-log.tsv
-**Build status:** PASS (user confirmed 0 errors, 0 warnings)
-**Open PRs:** None
-**Dirty working tree:** YES — 13 files modified (see below)
+**Dirty working tree:** YES — 5 ai-recipe-modal/ai-draft-editor files + failure-log.tsv (unstaged)
 
 ---
 
-## IMPORTANT: Uncommitted Feature Work
+## IMPORTANT: Uncommitted Work in Working Tree
 
-### Batch — recipe type switch content migration + context-monitor fix (feat/session-20260417)
+### Unstaged files — ai-draft-editor smoke test fixes (from recipe-type-switch session)
+These are uncommitted edits sitting in the working tree — NOT yet staged:
 ```
-src/app/pages/recipe-builder/recipe-builder.page.ts  (+49/-17 — bidirectional type-switch content migration + bug fix)
-scripts/context-monitor.sh                            (+14/-22 — systemMessage field + raised thresholds)
+src/app/shared/ai-recipe-modal/ai-draft-editor/ai-draft-editor.component.html
+src/app/shared/ai-recipe-modal/ai-draft-editor/ai-draft-editor.component.scss
+src/app/shared/ai-recipe-modal/ai-recipe-modal.component.html
+src/app/shared/ai-recipe-modal/ai-recipe-modal.component.scss
+src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts
 ```
 
 **Next session start sequence:**
-1. `ng build` — verify 0 errors (build not run this session)
-2. Smoke test recipe type switch: 4 scenarios (see session-handoff for checklist)
-3. Commit both files on `feat/session-20260417` → create PR
-4. NOTE: `failure-log.tsv` is also dirty — commit separately after PR to avoid hook loop
+1. `git diff` — review the 5 ai-draft-editor files in working tree
+2. Stage + commit the ai-draft-editor files
+3. Push `feat/session-20260417` → create PR
+4. NOTE: `failure-log.tsv` is dirty — commit separately after PR to avoid hook loop
+5. Smoke test: open "משרה לפרגית בולגוגית" as signed-in user → verify Hebrew equipment names in logistics
 
-### NOTE: Previous session's fix/ai-inventory-save-validation work
-The prior session (2026-04-16) documented 13 uncommitted files on `fix/ai-inventory-save-validation`. Verify with `git status` — those changes may now be committed (check PR #120). If still present in working tree, commit those first.
+---
+
+## Session Summary (2026-04-17 evening — Logistics Equipment ID Fix)
+
+### Root Cause Investigation + Data Migration
+- Root cause: DATA CORRUPTION in MongoDB — not a code bug
+  - EQUIPMENT_LIST master seeded via POST → generated IDs (jdYuQRY5, etc.)
+  - DISH_LIST/RECIPE_LIST master seeded from demo JSON → kept eq_xxx IDs
+  - 206 documents affected (160 dishes + 46 recipes across all users)
+- mongosh migration: built eq_xxx → master_id mapping via guest user as name bridge; fixed all 206 documents
+- Verified: "משרה לפרגית בולגוגית" resolves equipment names correctly post-fix
+
+### Code Fixes (committed: 046c184)
+- `server/services/sync-master.js`: `remapLogistics()` + `getEquipmentIdMap()` — remaps eq_xxx IDs when syncing master recipes/dishes to users (prevents recurrence)
+- `src/app/pages/recipe-builder/services/recipe-ai-flow.service.ts:154`: `_masterId` fallback in AI snapshot builder
+
+### Also Discussed (no code changes)
+- 404 errors on recipe navigation are EXPECTED (two-step RECIPE_LIST → DISH_LIST resolver fallback)
 
 ---
 
@@ -117,13 +136,12 @@ Replaced all native `confirm()` calls across 5 list components:
 
 ## Next Steps (Priority Order)
 
-1. **FIRST: Commit feat/session-20260417** (dirty working tree — 2 files):
-   - `ng build` — verify 0 errors (build NOT run this session)
-   - Smoke test: 4 recipe type switch scenarios (dish→steps→dish, steps→dish→steps)
-   - Commit `scripts/context-monitor.sh` + `src/app/pages/recipe-builder/recipe-builder.page.ts` → create PR
+1. **FIRST: Commit + push feat/session-20260417**:
+   - Stage the 5 ai-draft-editor files and commit
+   - Push branch → create PR
    - Commit `failure-log.tsv` separately after PR (avoid hook loop)
 
-2. **Check if fix/ai-inventory-save-validation is still dirty** — run `git status`; if 13 files still uncommitted, commit those next
+2. **Smoke test: logistics fix** — sign in → open "משרה לפרגית בולגוגית" → verify Hebrew equipment names in logistics tab
 
 3. **Manual smoke tests for PR #117** (MongoDB required, still pending):
    - Sign in → create product → Compass: single doc in userId, nothing in `__master__`
@@ -152,6 +170,7 @@ Replaced all native `confirm()` calls across 5 list components:
 - PR #118: https://github.com/WDD-CODER/foodVibe1.0/pull/118 — confirm modal migration + 404 fix (MERGED)
 - PR #117: https://github.com/WDD-CODER/foodVibe1.0/pull/117 (merged — master pool cleanup)
 - PR #116: https://github.com/WDD-CODER/foodVibe1.0/pull/116 (merged)
-- Session handoff (ai-inventory-save-validation): `.claude/sessions/2026-04-16-unlinked-ingredient-inline-edit/session-handoff.md` (updated this session)
+- Session handoff (logistics equipment-ID fix): `.claude/sessions/2026-04-17-logistics-equipment-id-fix/session-handoff.md`
+- Session handoff (ai-inventory-save-validation): `.claude/sessions/2026-04-16-unlinked-ingredient-inline-edit/session-handoff.md`
 - Session handoff (confirm modal): `.claude/sessions/2026-04-16-confirm-modal-migration/session-handoff.md`
 - Techdebt report: `.claude/techdebt-reports/techdebt-2026-04-16.md`
