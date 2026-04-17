@@ -377,6 +377,7 @@
         "ai_recipe_clear_draft": "נקה",
         "ai_recipe_no_name": "ללא שם",
         "ai_recipe_name_title": "שם המתכון",
+        "ai_recipe_dish_preps_unlinked_hint": "שמות ההכנות יוצגו כלא מקושרות בבונה עד שתקשר אותן להכנות קיימות",
         "retry": "נסה שוב",
         "no_recipes_match": "אין מתכונים או מנות התואמים את הסינון",
         "no_ingredients_found": "לא נמצאו מוצרים",
