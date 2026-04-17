@@ -196,6 +196,11 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
     border-color: var(--border-focus);
     box-shadow: var(--shadow-focus);
   }
+
+  &.has-error {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-danger) 15%, transparent);
+  }
 }
 
 .grid-select {
