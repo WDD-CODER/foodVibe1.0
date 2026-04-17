@@ -891,3 +891,42 @@ git diff src/app/pages/cook-view/co	 - **Worktree boundary**: When working insid
 2026-04-16 18:29:29	Edit	C:\foodCo\foodVibe1.0\.claude\skills\nightly-audit\SKILL.md	- Exception: `[style.*]=` dynamic bindings are acceptable ΓÇö skip those	
 2026-04-16 18:32:26	Bash	git -C C:/foodCo/foodVibe1.0 show main:src/app/pages/recipe-book/components/reci	721:        this.kitchenState.permanentlyDeleteRecipe(recipe).subscribe({ next: () => {}, error: () => {} });; stderr=; 	
 2026-04-16 18:34:43	Bash	git -C C:/foodCo/foodVibe1.0 show HEAD:src/app/pages/recipe-book/components/reci	      error: () => { this.removingId_.set(null); }	
+2026-04-16 19:21:25	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\components\recipe-ingredients	                error: () => setUnitAndUpdate()	
+2026-04-16 19:21:37	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\components\recipe-ingredients	                error: () => setUnitAndUpdate()	
+2026-04-16 19:21:51	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\components\recipe-ingredients	                error: () => setUnitAndUpdate()	
+2026-04-16 19:22:43	Bash	git diff HEAD	 2026-04-15 18:29:40 Edit C:\foodCo\foodVibe1.0\server\routes\auth.js     } catch (syncErr) { console.error('[auth/login	
+2026-04-16 19:33:12	Bash	cat "C:\Users\danwe\AppData\Local\Temp\claude\C--foodCo-foodVibe1-0\95bb9646-cd7	    + CategoryInfo          : InvalidArgument: (:) [Measure-Object], PSArgumentException	
+2026-04-16 19:38:00	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\components\recipe-ingredients	                error: () => setUnitAndUpdate()	
+2026-04-16 19:39:42	Bash	powershell -Command "Remove-Item 'C:\Users\danwe\AppData\Local\Temp\*' -Recurse 	@{stdout=<bash output unavailable: output file C:\Users\danwe\AppData\Local\Temp\claude\C--foodCo-foodVibe1-0\95bb9646-c	
+2026-04-16 20:12:43	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-16 20:13:12	Edit	C:\foodCo\foodVibe1.0\public\assets\data\dictionary.json	        "ai_recipe_url_fetch_failed": "╫£╫É ╫á╫Ö╫¬╫ƒ ╫£╫Æ╫⌐╫¬ ╫£╫¢╫¬╫ò╫æ╫¬. ╫æ╫ô╫ò╫º ╫⌐╫ö╫º╫Ö╫⌐╫ò╫¿ ╫¬╫º╫Ö╫ƒ ╫ò╫á╫í╫ö ╫⌐	
+2026-04-17 15:27:23	Edit	C:\foodCo\foodVibe1.0\src\app\shared\custom-multi-select\custom-multi-select.com	import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';	
+2026-04-17 15:27:38	Edit	C:\foodCo\foodVibe1.0\src\app\shared\custom-multi-select\custom-multi-select.com	    // Background and color set dynamically for option-based chip color (single exception)	
+2026-04-17 15:42:40	Edit	C:\foodCo\foodVibe1.0\src\app\shared\custom-multi-select\custom-multi-select.com	    // Background and color set dynamically for option-based chip color (single exception)	
+2026-04-17 15:42:46	Edit	C:\foodCo\foodVibe1.0\src\app\shared\custom-multi-select\custom-multi-select.com	    // Background and color set dynamically for option-based chip color (single exception)	
+2026-04-17 15:47:55	Edit	C:\foodCo\foodVibe1.0\src\app\shared\custom-multi-select\custom-multi-select.com	import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';	
+2026-04-17 15:48:09	Edit	C:\foodCo\foodVibe1.0\src\app\shared\custom-multi-select\custom-multi-select.com	    // Background and color set dynamically for option-based chip color (single exception)	
+2026-04-17 15:48:14	Edit	C:\foodCo\foodVibe1.0\src\app\shared\custom-multi-select\custom-multi-select.com	    // Background and color set dynamically for option-based chip color (single exception)	
+2026-04-17 15:54:40	Bash	git diff HEAD -- .claude/reflect/failure-log.tsv | head -30	 2026-04-16 18:29:29 Edit C:\foodCo\foodVibe1.0\.claude\skills\nightly-audit\SKILL.md - Exception: `[style.*]=` dynamic 	
+2026-04-17 15:59:57	mcp__mempalace__mempalace_search	@{query=MongoDB indexes userId sync performance; limit=5}	      "text": "tring, unique), `imgUrl`, `role` (enum admin/user), `passwordHash`, `failedAttempts`, `lockedUntil`.\n\n*	
+2026-04-17 16:01:38	Edit	C:\foodCo\foodVibe1.0\server\routes\auth.js	    } catch (syncErr) { console.error('[auth/refresh] sync error:', syncErr.message); }	
+2026-04-17 16:05:43	Bash	B=~/.claude/skills/gstack/browse/dist/browse
+sleep 3 && $B reload
+$B js "documen	page.evaluate: TypeError: Cannot read properties of null (reading 'scrollIntoView')	
+2026-04-17 16:22:43	Edit	C:\foodCo\foodVibe1.0\src\app\shared\custom-multi-select\custom-multi-select.com	import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';	
+2026-04-17 16:23:03	Edit	C:\foodCo\foodVibe1.0\src\app\shared\custom-multi-select\custom-multi-select.com	    // Background and color set dynamically for option-based chip color (single exception)	
+2026-04-17 16:23:56	Bash	B=~/.claude/skills/gstack/browse/dist/browse
+$B js "document.querySelector('.cus	[2026-04-17T13:02:49.182Z] [error] Failed to load resource: the server responded with a status of 401 (Unauthorized)	
+2026-04-17 16:24:13	Bash	B=~/.claude/skills/gstack/browse/dist/browse
+$B js "document.querySelector('app-	[2026-04-17T13:02:49.182Z] [error] Failed to load resource: the server responded with a status of 401 (Unauthorized)	
+2026-04-17 16:31:35	Bash	B=~/.claude/skills/gstack/browse/dist/browse
+$B url
+$B js "document.title"
+$B co	[2026-04-17T13:02:49.182Z] [error] Failed to load resource: the server responded with a status of 401 (Unauthorized)	
+2026-04-17 16:33:17	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-17 16:34:37	Edit	C:\foodCo\foodVibe1.0\public\assets\data\dictionary.json	        "ai_recipe_url_fetch_failed": "╫£╫É ╫á╫Ö╫¬╫ƒ ╫£╫Æ╫⌐╫¬ ╫£╫¢╫¬╫ò╫æ╫¬. ╫æ╫ô╫ò╫º ╫⌐╫ö╫º╫Ö╫⌐╫ò╫¿ ╫¬╫º╫Ö╫ƒ ╫ò╫á╫í╫ö ╫⌐	
+2026-04-17 17:07:23	Bash	B=~/.claude/skills/gstack/browse/dist/browse
+$B goto http://localhost:4200
+sleep	--- BEGIN UNTRUSTED EXTERNAL CONTENT (source: chrome-error://chromewebdata/) ---	
+2026-04-17 17:07:52	Bash	npx ng build --configuration=development 2>&1 | tail -40	Application bundle generation failed. [19.109 seconds]	
+2026-04-17 17:13:44	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\translation.service.ts	        this.logging.warn({ event: 'translation.cache.write_failed', message: 'Dictionary cache write failed (quota or a	

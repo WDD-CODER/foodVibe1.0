@@ -1,8 +1,22 @@
-<div
+<fieldset
   class="custom-multi-select-wrap"
   [class.open]="open()"
   [class.custom-multi-select-wrap--chip]="variant() === 'chip'"
+  [class.custom-multi-select-wrap--titled]="triggerTitle()"
   (clickOutside)="close()">
+  @if (triggerTitle()) {
+    <legend class="custom-multi-select-legend">
+      <span>{{ triggerTitle() | translatePipe }}</span>
+      @if (clearable()) {
+        <button
+          type="button"
+          class="custom-multi-select-legend-clear"
+          (click)="cleared.emit(); $event.stopPropagation()">
+          {{ 'clear_all' | translatePipe }}
+        </button>
+      }
+    </legend>
+  }
   <button
     #triggerRef
     type="button"
@@ -109,4 +123,4 @@
       }
     </app-scrollable-dropdown>
   }
-</div>
+</fieldset>

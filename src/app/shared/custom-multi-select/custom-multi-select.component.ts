@@ -53,9 +53,12 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   readonlyChips = input<string[]>([]);
   addNewValue = input<string>('');
   searchable = input<boolean>(false);
+  triggerTitle = input<string>('');
+  clearable = input<boolean>(false);
 
   valueChange = output<string[]>();
   addNewChosen = output<string>();
+  cleared = output<void>();
 
   private _value = signal<string[]>([]);
   private _onChange: (value: string[]) => void = () => {};
