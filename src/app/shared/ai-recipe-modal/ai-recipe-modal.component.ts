@@ -181,17 +181,6 @@ export class AiRecipeModalComponent implements OnInit {
     return 'ai_recipe_error'
   }
 
-  onOpenInBuilder(): void {
-    const draft = this.draft_()
-    if (!draft) return
-
-    this.shots.saveShot(this.prompt_(), draft, 'approved', this.inputMode_()).subscribe()
-    this.aiDraft.set(draft)
-    void this.router.navigate(['/recipe-builder'])
-    this.resetLocalState_()
-    this.modalService.close()
-  }
-
   onDraftApproved(draft: AiRecipeDraft): void {
     this.shots.saveShot(this.prompt_(), draft, 'approved', this.inputMode_()).subscribe()
     this.aiDraft.set(draft)
