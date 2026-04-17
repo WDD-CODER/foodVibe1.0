@@ -15,15 +15,24 @@
         <!-- ── Edit mode ── -->
         @if (!patch_()) {
           <div class="ai-prompt-panel">
-            <textarea
-              class="ai-prompt-textarea"
-              dir="auto"
-              [placeholder]="'ai_recipe_edit_placeholder' | translatePipe"
-              [value]="instruction_()"
-              (input)="instruction_.set($any($event.target).value)"
-              rows="4"
-              [disabled]="status_() === 'sending'"
-            ></textarea>
+            <div class="ai-textarea-scroll-wrap">
+              <div class="ai-scroll-zone ai-scroll-zone--top">
+                <div class="ai-scroll-indicator"><lucide-icon name="chevron-up" [size]="12" /></div>
+              </div>
+              <textarea
+                scrollIndicators
+                class="ai-prompt-textarea"
+                dir="auto"
+                [placeholder]="'ai_recipe_edit_placeholder' | translatePipe"
+                [value]="instruction_()"
+                (input)="instruction_.set($any($event.target).value)"
+                rows="4"
+                [disabled]="status_() === 'sending'"
+              ></textarea>
+              <div class="ai-scroll-zone ai-scroll-zone--bottom">
+                <div class="ai-scroll-indicator"><lucide-icon name="chevron-down" [size]="12" /></div>
+              </div>
+            </div>
 
             @if (status_() !== 'idle') {
               <div class="ai-status-bar" [class.ai-status--sending]="status_() === 'sending'" [class.ai-status--done]="status_() === 'done'" [class.ai-status--error]="status_() === 'error'">
@@ -132,13 +141,22 @@
             <!-- Text input -->
             @if (inputMode_() === 'text') {
               <div class="ai-input-wrapper">
-                <textarea
-                  class="ai-prompt-textarea"
-                  [placeholder]="'ai_recipe_prompt_placeholder' | translatePipe"
-                  [value]="prompt_()"
-                  (input)="prompt_.set($any($event.target).value)"
-                  rows="4"
-                ></textarea>
+                <div class="ai-textarea-scroll-wrap">
+                  <div class="ai-scroll-zone ai-scroll-zone--top">
+                    <div class="ai-scroll-indicator"><lucide-icon name="chevron-up" [size]="12" /></div>
+                  </div>
+                  <textarea
+                    scrollIndicators
+                    class="ai-prompt-textarea"
+                    [placeholder]="'ai_recipe_prompt_placeholder' | translatePipe"
+                    [value]="prompt_()"
+                    (input)="prompt_.set($any($event.target).value)"
+                    rows="4"
+                  ></textarea>
+                  <div class="ai-scroll-zone ai-scroll-zone--bottom">
+                    <div class="ai-scroll-indicator"><lucide-icon name="chevron-down" [size]="12" /></div>
+                  </div>
+                </div>
                 @if (prompt_().trim()) {
                   <button type="button" class="ai-clear-input-btn" (click)="onClearInput()">
                     <lucide-icon name="x" [size]="14"></lucide-icon>

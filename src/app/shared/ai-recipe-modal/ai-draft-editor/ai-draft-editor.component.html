@@ -33,7 +33,7 @@
       <span class="editor-locked-unit">{{ 'dish' | translatePipe }}</span>
     } @else {
       <app-custom-select
-        class="editor-unit-select"
+        class="editor-unit-select editor-yield-unit"
         [options]="unitOptions_()"
         [ngModel]="yieldUnit_()"
         (ngModelChange)="onYieldUnitChange($event)"
@@ -50,15 +50,20 @@
   <!-- ── Ingredients ── -->
   <div class="editor-section">
     <p class="editor-section-title">{{ 'ai_recipe_preview_ingredients' | translatePipe }}</p>
-    <div class="editor-ing-table">
+    <div class="editor-ing-table" cdkDropList (cdkDropListDropped)="onDropIngredient($event)">
       <div class="editor-ing-header">
+        <span></span>
         <span>{{ 'ingredient_name' | translatePipe }}</span>
         <span>{{ 'quantity' | translatePipe }}</span>
         <span>{{ 'unit' | translatePipe }}</span>
         <span></span>
       </div>
       @for (ing of ingredients_(); track ing.id; let i = $index) {
-        <div class="editor-ing-row" [class.editor-ing-row--new]="ing.isNew">
+        <div class="editor-ing-row" [class.editor-ing-row--new]="ing.isNew" cdkDrag>
+          <div class="cdk-custom-placeholder" *cdkDragPlaceholder></div>
+          <div class="editor-drag-handle" cdkDragHandle>
+            <lucide-icon name="grip-vertical" [size]="14" class="drag-handle-icon" />
+          </div>
           <div class="editor-ing-name-cell">
             @if (ing.isNew) {
               <span class="editor-new-badge">{{ 'new' | translatePipe }}</span>
@@ -103,9 +108,13 @@
   @if (!isDish_()) {
     <div class="editor-section">
       <p class="editor-section-title">{{ 'ai_recipe_preview_steps' | translatePipe }}</p>
-      <div class="editor-steps-list">
+      <div class="editor-steps-list" cdkDropList (cdkDropListDropped)="onDropWorkflow($event)">
         @for (item of workflowItems_(); track item.id; let i = $index) {
-          <div class="editor-step-row">
+          <div class="editor-step-row" cdkDrag>
+            <div class="cdk-custom-placeholder" *cdkDragPlaceholder></div>
+            <div class="editor-drag-handle" cdkDragHandle>
+              <lucide-icon name="grip-vertical" [size]="14" class="drag-handle-icon" />
+            </div>
             <span class="editor-step-num">{{ i + 1 }}</span>
             <textarea
               class="c-input editor-step-textarea"
@@ -131,15 +140,20 @@
   @if (isDish_()) {
     <div class="editor-section">
       <p class="editor-section-title">{{ 'preparation' | translatePipe }}</p>
-      <div class="editor-prep-table">
+      <div class="editor-prep-table" cdkDropList (cdkDropListDropped)="onDropWorkflow($event)">
         <div class="editor-prep-header">
+          <span></span>
           <span>{{ 'preparation' | translatePipe }}</span>
           <span>{{ 'quantity' | translatePipe }}</span>
           <span>{{ 'unit' | translatePipe }}</span>
           <span></span>
         </div>
         @for (item of workflowItems_(); track item.id; let i = $index) {
-          <div class="editor-prep-row">
+          <div class="editor-prep-row" cdkDrag>
+            <div class="cdk-custom-placeholder" *cdkDragPlaceholder></div>
+            <div class="editor-drag-handle" cdkDragHandle>
+              <lucide-icon name="grip-vertical" [size]="14" class="drag-handle-icon" />
+            </div>
             <input
               class="c-input"
               [value]="item.text"

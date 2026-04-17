@@ -17,6 +17,7 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { FormsModule } from '@angular/forms'
 import { AiRecipeDraft } from '@services/ai-recipe-draft.service'
 import { take } from 'rxjs/operators'
+import { CdkDragDrop, moveItemInArray, CdkDrag, CdkDropList, CdkDragHandle, CdkDragPlaceholder } from '@angular/cdk/drag-drop'
 
 export interface DraftIngredient {
   id: number
@@ -36,7 +37,7 @@ export interface DraftWorkflowItem {
 @Component({
   selector: 'app-ai-draft-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, CustomSelectComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, CustomSelectComponent, CdkDrag, CdkDropList, CdkDragHandle, CdkDragPlaceholder],
   templateUrl: './ai-draft-editor.component.html',
   styleUrl: './ai-draft-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -111,6 +112,15 @@ export class AiDraftEditorComponent {
     this.ingredients_.update(list => list.filter((_, i) => i !== index))
   }
 
+  protected onDropIngredient(event: CdkDragDrop<DraftIngredient[]>): void {
+    if (event.previousIndex === event.currentIndex) return
+    this.ingredients_.update(list => {
+      const copy = [...list]
+      moveItemInArray(copy, event.previousIndex, event.currentIndex)
+      return copy
+    })
+  }
+
   protected updateIngredientName(index: number, value: string): void {
     this.ingredients_.update(list =>
       list.map((item, i) => i === index ? { ...item, name: value } : item)
@@ -148,6 +158,15 @@ export class AiDraftEditorComponent {
 
   protected removeWorkflowItem(index: number): void {
     this.workflowItems_.update(list => list.filter((_, i) => i !== index))
+  }
+
+  protected onDropWorkflow(event: CdkDragDrop<DraftWorkflowItem[]>): void {
+    if (event.previousIndex === event.currentIndex) return
+    this.workflowItems_.update(list => {
+      const copy = [...list]
+      moveItemInArray(copy, event.previousIndex, event.currentIndex)
+      return copy
+    })
   }
 
   protected updateWorkflowText(index: number, value: string): void {
