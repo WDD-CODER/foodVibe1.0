@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Draft Editor v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: 'Heebo', sans-serif;
+    background: #f0f4f8; min-height: 100vh;
+    padding: 2rem 1rem; position: relative;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 600px 400px at 15% 20%, rgba(20,184,166,0.12), transparent),
+      radial-gradient(ellipse 500px 500px at 80% 70%, rgba(251,191,36,0.08), transparent);
+    pointer-events: none;
+  }
+  .page { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; }
+  .page-title { font-size: 0.95rem; font-weight: 700; color: #0f172a; text-align: center; margin: 0 0 0.25rem; }
+  .page-sub { font-size: 0.78rem; color: #64748b; text-align: center; margin: 0 0 1.5rem; }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  @media (max-width: 640px) { .split { grid-template-columns: 1fr; } }
+
+  /* ── Modal card ── */
+  .modal-card {
+    background: rgba(255,255,255,0.72);
+    border: 1px solid rgba(255,255,255,0.45);
+    border-radius: 1.25rem;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.05);
+    backdrop-filter: blur(24px);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.875rem 1.125rem 0.75rem;
+    border-bottom: 1px solid rgba(226,232,240,0.6);
+  }
+  .modal-title { font-size: 1rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 0.4rem; }
+  .close-btn { width: 1.75rem; height: 1.75rem; display: flex; align-items: center; justify-content: center; border: none; background: none; color: #94a3b8; border-radius: 0.5rem; cursor: pointer; font-size: 1rem; }
+  .close-btn:hover { background: rgba(241,245,249,0.8); color: #0f172a; }
+
+  /* ── Editor body — NO scrollbar ── */
+  .editor-body {
+    padding: 0.875rem 1.125rem;
+    display: flex; flex-direction: column; gap: 0.875rem;
+    scrollbar-width: none;          /* Firefox */
+    -ms-overflow-style: none;       /* IE/Edge */
+    overflow-y: auto;
+  }
+  .editor-body::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+  /* ── Glass inputs / selects ── */
+  .c-input {
+    padding: 0.45rem 0.7rem;
+    background: rgba(255,255,255,0.55); color: #0f172a;
+    font-size: 0.875rem; font-family: 'Heebo', sans-serif;
+    border: 1px solid rgba(226,232,240,0.6); border-radius: 0.75rem;
+    backdrop-filter: blur(16px); outline: none; direction: rtl;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .c-input:focus { border-color: rgba(20,184,166,0.5); box-shadow: 0 0 0 3px rgba(20,184,166,0.2); }
+  .c-select {
+    padding: 0.45rem 0.7rem;
+    background: rgba(255,255,255,0.55); color: #0f172a;
+    font-size: 0.875rem; font-family: 'Heebo', sans-serif;
+    border: 1px solid rgba(226,232,240,0.6); border-radius: 0.75rem;
+    backdrop-filter: blur(16px); outline: none; cursor: pointer; direction: rtl;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .c-select:focus { border-color: rgba(20,184,166,0.5); box-shadow: 0 0 0 3px rgba(20,184,166,0.2); }
+
+  .locked-unit {
+    padding: 0.45rem 0.7rem; font-size: 0.875rem; font-family: 'Heebo', sans-serif;
+    background: rgba(241,245,249,0.6); color: #94a3b8;
+    border: 1px solid rgba(226,232,240,0.4); border-radius: 0.75rem;
+    pointer-events: none; font-style: italic; white-space: nowrap;
+  }
+
+  /* ── Row layouts ── */
+  .header-row { display: flex; align-items: center; gap: 0.5rem; }
+  .yield-row { display: flex; align-items: center; gap: 0.5rem; }
+  .field-label { font-size: 0.72rem; font-weight: 600; color: #64748b; white-space: nowrap; }
+
+  /* ── Type toggle ── */
+  .type-btn-dish {
+    padding: 0.35rem 0.8rem; border: 1px solid rgba(14,165,233,0.4); border-radius: 0.75rem;
+    background: rgba(14,165,233,0.1); color: #0284c7; font-weight: 700;
+    font-size: 0.8rem; font-family: 'Heebo', sans-serif; cursor: pointer; white-space: nowrap;
+  }
+  .type-btn-prep {
+    padding: 0.35rem 0.8rem; border: 1px solid rgba(20,184,166,0.4); border-radius: 0.75rem;
+    background: rgba(20,184,166,0.1); color: #0d9488; font-weight: 700;
+    font-size: 0.8rem; font-family: 'Heebo', sans-serif; cursor: pointer; white-space: nowrap;
+  }
+
+  /* ── Section title ── */
+  .section-title {
+    font-size: 0.72rem; font-weight: 700; color: #64748b;
+    text-transform: uppercase; letter-spacing: .5px; margin: 0 0 0.4rem;
+  }
+
+  /* ── Ingredient table ── */
+  .ing-table {
+    display: flex; flex-direction: column;
+    border: 1px solid rgba(226,232,240,0.6); border-radius: 0.75rem;
+    overflow: hidden; background: rgba(255,255,255,0.3);
+  }
+  .ing-row {
+    display: grid; grid-template-columns: 1fr 54px 70px 26px;
+    align-items: center; gap: 0.35rem;
+    padding: 0.35rem 0.5rem;
+    border-bottom: 1px solid rgba(241,245,249,0.5);
+    transition: background 0.15s;
+  }
+  .ing-row:last-child { border-bottom: none; }
+  .ing-row:hover { background: rgba(20,184,166,0.05); }
+  .ing-row .c-input, .ing-row .c-select { border-radius: 0.5rem; padding: 0.28rem 0.45rem; font-size: 0.8rem; }
+  .ing-row--new { background: rgba(254,243,199,0.35) !important; }
+  .ing-row--new .c-input, .ing-row--new .c-select { border-color: rgba(245,158,11,0.3); }
+  .new-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 0.1rem 0.4rem; background: rgba(254,243,199,0.9);
+    border: 1px solid #f59e0b; border-radius: 999px;
+    font-size: 0.6rem; font-weight: 700; color: #92400e; white-space: nowrap;
+  }
+
+  .del-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 1.5rem; height: 1.5rem; border: 1px solid rgba(226,232,240,0.6);
+    border-radius: 50%; background: none; color: #94a3b8;
+    font-size: 0.85rem; cursor: pointer; flex-shrink: 0;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .del-btn:hover { background: #dc2626; border-color: #dc2626; color: #fff; }
+
+  .add-row {
+    display: flex; align-items: center; gap: 0.35rem;
+    color: #14b8a6; font-size: 0.8rem; font-weight: 600;
+    cursor: pointer; padding: 0.35rem 0.5rem;
+    border-radius: 0.5rem; width: fit-content; transition: background 0.15s;
+  }
+  .add-row:hover { background: rgba(20,184,166,0.08); }
+
+  /* ── PREPARATION steps ── */
+  .steps-list { display: flex; flex-direction: column; gap: 0.35rem; }
+  .step-row { display: flex; align-items: flex-start; gap: 0.45rem; }
+  .step-num { font-size: 0.72rem; font-weight: 700; color: #14b8a6; min-width: 1.1rem; padding-top: 0.45rem; text-align: center; }
+  .step-input {
+    flex: 1; padding: 0.4rem 0.6rem;
+    background: rgba(255,255,255,0.55); color: #0f172a;
+    font-size: 0.8rem; font-family: 'Heebo', sans-serif;
+    border: 1px solid rgba(226,232,240,0.6); border-radius: 0.625rem;
+    backdrop-filter: blur(16px); outline: none; resize: none; line-height: 1.5; direction: rtl;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .step-input:focus { border-color: rgba(20,184,166,0.5); box-shadow: 0 0 0 3px rgba(20,184,166,0.2); }
+
+  /* ── DISH prep-reference rows ── */
+  .prep-table {
+    display: flex; flex-direction: column;
+    border: 1px solid rgba(226,232,240,0.6); border-radius: 0.75rem;
+    overflow: hidden; background: rgba(255,255,255,0.3);
+  }
+  .prep-header {
+    display: grid; grid-template-columns: 1fr 52px 70px 26px;
+    gap: 0.35rem; padding: 0.3rem 0.5rem;
+    background: rgba(14,165,233,0.06); border-bottom: 1px solid rgba(226,232,240,0.5);
+    font-size: 0.65rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: .4px;
+  }
+  .prep-row {
+    display: grid; grid-template-columns: 1fr 52px 70px 26px;
+    align-items: center; gap: 0.35rem; padding: 0.35rem 0.5rem;
+    border-bottom: 1px solid rgba(241,245,249,0.5); transition: background 0.15s;
+  }
+  .prep-row:last-child { border-bottom: none; }
+  .prep-row:hover { background: rgba(14,165,233,0.04); }
+  .prep-row .c-input, .prep-row .c-select { border-radius: 0.5rem; padding: 0.28rem 0.45rem; font-size: 0.8rem; }
+  .unlinked-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 0.1rem 0.4rem; background: rgba(254,243,199,0.9);
+    border: 1px solid #f59e0b; border-radius: 999px;
+    font-size: 0.6rem; font-weight: 700; color: #92400e; white-space: nowrap;
+  }
+  .prep-hint {
+    margin-top: 0.35rem; padding: 0.5rem 0.65rem;
+    background: rgba(14,165,233,0.06); border: 1px solid rgba(14,165,233,0.2);
+    border-radius: 0.625rem; font-size: 0.72rem; color: #0369a1; line-height: 1.5;
+  }
+
+  /* ── Modal footer ── */
+  .modal-footer {
+    display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+    padding: 0.75rem 1.125rem 0.875rem;
+    border-top: 1px solid rgba(226,232,240,0.6);
+  }
+  .c-btn-ghost {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.55rem 1rem; background: rgba(255,255,255,0.55);
+    color: #1e293b; font-weight: 500; font-size: 0.8125rem; font-family: 'Heebo', sans-serif;
+    border: 1px solid rgba(226,232,240,0.6); border-radius: 0.75rem;
+    backdrop-filter: blur(16px); cursor: pointer;
+  }
+  .c-btn-primary {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.55rem 1rem; background: #14b8a6; color: #fff;
+    font-weight: 600; font-size: 0.8125rem; font-family: 'Heebo', sans-serif;
+    border: none; border-radius: 0.75rem; box-shadow: 0 0 20px rgba(20,184,166,0.15); cursor: pointer;
+  }
+
+  .divider { height: 1px; background: rgba(226,232,240,0.5); }
+
+  /* Column label under card */
+  .col-label {
+    text-align: center; font-size: 0.72rem; font-weight: 700;
+    margin-top: 0.75rem; letter-spacing: .3px;
+  }
+  .col-label.dish { color: #0284c7; }
+  .col-label.prep { color: #0d9488; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <p class="page-title">AiDraftEditorComponent — type-aware layout</p>
+  <p class="page-sub">Same editor, different fields depending on whether recipe_type is מנה or הכנה</p>
+
+  <div class="split">
+
+    <!-- ══ DISH ══ -->
+    <div>
+      <div class="modal-card">
+        <div class="modal-header">
+          <span class="modal-title">✨ הוספת מתכון עם AI</span>
+          <button class="close-btn">✕</button>
+        </div>
+
+        <div class="editor-body">
+
+          <!-- Name + Type -->
+          <div class="header-row">
+            <input class="c-input" value="שניצל עוף" style="flex:1;font-weight:600;font-size:0.95rem" />
+            <button class="type-btn-dish">מנה</button>
+          </div>
+
+          <!-- Yield — portions, locked unit -->
+          <div class="yield-row">
+            <span class="field-label">מנות:</span>
+            <input class="c-input" value="4" type="number" min="1" style="width:58px;text-align:center" />
+            <span class="locked-unit">מנות</span>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Ingredients -->
+          <div>
+            <p class="section-title">מרכיבים</p>
+            <div class="ing-table">
+              <div class="ing-row">
+                <input class="c-input" value="חזה עוף" />
+                <input class="c-input" value="500" type="number" />
+                <select class="c-select"><option>גרם</option><option>+ חדש</option></select>
+                <button class="del-btn">×</button>
+              </div>
+              <div class="ing-row">
+                <input class="c-input" value="פירורי לחם" />
+                <input class="c-input" value="150" type="number" />
+                <select class="c-select"><option>גרם</option><option>+ חדש</option></select>
+                <button class="del-btn">×</button>
+              </div>
+              <div class="ing-row ing-row--new">
+                <input class="c-input" value="מלח שחור" />
+                <input class="c-input" value="1" type="number" />
+                <select class="c-select"><option>כפית</option><option>+ חדש</option></select>
+                <span class="new-badge">חדש</span>
+              </div>
+            </div>
+            <div class="add-row">＋ הוסף מרכיב</div>
+          </div>
+
+          <!-- Dish workflow = preparation REFERENCES -->
+          <div>
+            <p class="section-title">הכנות (שלבי הרכבה)</p>
+            <div class="prep-table">
+              <div class="prep-header">
+                <div>שם הכנה</div><div>כמות</div><div>יחידה</div><div></div>
+              </div>
+              <div class="prep-row">
+                <input class="c-input" value="ציפוי פירורי לחם" />
+                <input class="c-input" value="1" type="number" />
+                <select class="c-select"><option>מנה</option><option>+ חדש</option></select>
+                <button class="del-btn">×</button>
+              </div>
+              <div class="prep-row">
+                <input class="c-input" value="רוטב דיפ" />
+                <input class="c-input" value="1" type="number" />
+                <select class="c-select"><option>מנה</option><option>+ חדש</option></select>
+                <button class="del-btn">×</button>
+              </div>
+            </div>
+            <div class="add-row">＋ הוסף הכנה</div>
+            <div class="prep-hint">
+              ⚠️ שמות ההכנות יוצגו כ<strong>לא מקושר</strong> בבונה עד שתקשר אותם להכנות קיימות
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button class="c-btn-ghost">↺ צור מחדש</button>
+          <button class="c-btn-primary">← פתח בבונה</button>
+        </div>
+      </div>
+      <p class="col-label dish">מנה — Dish<br><small style="font-weight:400;font-size:0.7rem">yield = portions · workflow = prep references</small></p>
+    </div>
+
+    <!-- ══ PREPARATION ══ -->
+    <div>
+      <div class="modal-card">
+        <div class="modal-header">
+          <span class="modal-title">✨ הוספת מתכון עם AI</span>
+          <button class="close-btn">✕</button>
+        </div>
+
+        <div class="editor-body">
+
+          <!-- Name + Type -->
+          <div class="header-row">
+            <input class="c-input" value="ציפוי שניצל" style="flex:1;font-weight:600;font-size:0.95rem" />
+            <button class="type-btn-prep">הכנה</button>
+          </div>
+
+          <!-- Yield — amount + unit dropdown -->
+          <div class="yield-row">
+            <span class="field-label">תפוקה:</span>
+            <input class="c-input" value="800" type="number" min="0" style="width:58px;text-align:center" />
+            <select class="c-select" style="min-width:78px">
+              <option>גרם</option><option>ק״ג</option><option>מ״ל</option><option>ליטר</option>
+              <option>─────</option><option>+ חדש</option>
+            </select>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Ingredients -->
+          <div>
+            <p class="section-title">מרכיבים</p>
+            <div class="ing-table">
+              <div class="ing-row">
+                <input class="c-input" value="פירורי לחם" />
+                <input class="c-input" value="500" type="number" />
+                <select class="c-select"><option>גרם</option><option>+ חדש</option></select>
+                <button class="del-btn">×</button>
+              </div>
+              <div class="ing-row">
+                <input class="c-input" value="ביצים" />
+                <input class="c-input" value="3" type="number" />
+                <select class="c-select"><option>יח׳</option><option>+ חדש</option></select>
+                <button class="del-btn">×</button>
+              </div>
+              <div class="ing-row ing-row--new">
+                <input class="c-input" value="קמח תפוח אדמה" />
+                <input class="c-input" value="100" type="number" />
+                <select class="c-select"><option>גרם</option><option>+ חדש</option></select>
+                <span class="new-badge">חדש</span>
+              </div>
+            </div>
+            <div class="add-row">＋ הוסף מרכיב</div>
+          </div>
+
+          <!-- Preparation workflow = instruction steps -->
+          <div>
+            <p class="section-title">שלבי הכנה</p>
+            <div class="steps-list">
+              <div class="step-row">
+                <span class="step-num">1</span>
+                <textarea class="step-input" rows="2">ערבבו פירורי לחם עם תבלינים בקערה רחבה.</textarea>
+                <button class="del-btn" style="margin-top:0.35rem">×</button>
+              </div>
+              <div class="step-row">
+                <span class="step-num">2</span>
+                <textarea class="step-input" rows="2">טרפו ביצים בנפרד עם מלח ופלפל.</textarea>
+                <button class="del-btn" style="margin-top:0.35rem">×</button>
+              </div>
+              <div class="step-row">
+                <span class="step-num">3</span>
+                <textarea class="step-input" rows="2">טבלו כל נתח בביצה ואז בפירורים עד לציפוי אחיד.</textarea>
+                <button class="del-btn" style="margin-top:0.35rem">×</button>
+              </div>
+              <div class="add-row">＋ הוסף שלב</div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button class="c-btn-ghost">↺ צור מחדש</button>
+          <button class="c-btn-primary">← פתח בבונה</button>
+        </div>
+      </div>
+      <p class="col-label prep">הכנה — Preparation<br><small style="font-weight:400;font-size:0.7rem">yield = amount+unit · workflow = instruction steps</small></p>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

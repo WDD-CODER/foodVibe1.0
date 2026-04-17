@@ -930,3 +930,39 @@ $B goto http://localhost:4200
 sleep	--- BEGIN UNTRUSTED EXTERNAL CONTENT (source: chrome-error://chromewebdata/) ---	
 2026-04-17 17:07:52	Bash	npx ng build --configuration=development 2>&1 | tail -40	Application bundle generation failed. [19.109 seconds]	
 2026-04-17 17:13:44	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\translation.service.ts	        this.logging.warn({ event: 'translation.cache.write_failed', message: 'Dictionary cache write failed (quota or a	
+2026-04-17 17:54:12	Bash	git stash 2>&1 && gh pr checkout 114 2>&1 && git fetch origin main 2>&1 && git m	Automatic merge failed; fix conflicts and then commit the result.; stderr=; interrupted=False; isImage=False; noOutputEx	
+2026-04-17 18:02:04	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-17 18:52:02	Write	C:\foodCo\foodVibe1.0\docs\superpowers\plans\2026-04-17-ai-draft-editor.md	> **Note:** If Task 1 Step 2 failed because `unitAdded$` is not found, do this task instead of assuming the name.	
+2026-04-17 18:53:07	Edit	C:\foodCo\foodVibe1.0\docs\superpowers\plans\2026-04-17-ai-draft-editor.md	> **Note:** If Task 1 Step 2 failed because `unitAdded$` is not found, do this task instead of assuming the name.	
+2026-04-17 18:53:17	Edit	C:\foodCo\foodVibe1.0\docs\superpowers\plans\2026-04-17-ai-draft-editor.md	> **Note:** If Task 1 Step 2 failed because `unitAdded$` is not found, do this task instead of assuming the name.	
+2026-04-17 18:53:27	Edit	C:\foodCo\foodVibe1.0\docs\superpowers\plans\2026-04-17-ai-draft-editor.md	> **Note:** If Task 1 Step 2 failed because `unitAdded$` is not found, do this task instead of assuming the name.	
+2026-04-17 18:53:52	Edit	C:\foodCo\foodVibe1.0\docs\superpowers\plans\2026-04-17-ai-draft-editor.md	> **Note:** If Task 1 Step 2 failed because `unitAdded$` is not found, do this task instead of assuming the name.	
+2026-04-17 18:54:03	Edit	C:\foodCo\foodVibe1.0\docs\superpowers\plans\2026-04-17-ai-draft-editor.md	> **Note:** If Task 1 Step 2 failed because `unitAdded$` is not found, do this task instead of assuming the name.	
+2026-04-17 18:54:20	Edit	C:\foodCo\foodVibe1.0\docs\superpowers\plans\2026-04-17-ai-draft-editor.md	> **Note:** If Task 1 Step 2 failed because `unitAdded$` is not found, do this task instead of assuming the name.	
+2026-04-17 18:56:30	Edit	C:\foodCo\foodVibe1.0\scripts\context-monitor.sh	# The 70% hard gate forces a session handoff ΓÇö no exceptions.	
+2026-04-17 19:01:18	Edit	C:\foodCo\foodVibe1.0\scripts\context-monitor.sh	# The 70% hard gate forces a session handoff ΓÇö no exceptions.	
+2026-04-17 19:08:35	Edit	C:\foodCo\foodVibe1.0\public\assets\data\dictionary.json	        "ai_recipe_url_fetch_failed": "╫£╫É ╫á╫Ö╫¬╫ƒ ╫£╫Æ╫⌐╫¬ ╫£╫¢╫¬╫ò╫æ╫¬. ╫æ╫ô╫ò╫º ╫⌐╫ö╫º╫Ö╫⌐╫ò╫¿ ╫¬╫º╫Ö╫ƒ ╫ò╫á╫í╫ö ╫⌐	
+2026-04-17 19:10:24	Edit	C:\foodCo\foodVibe1.0\src\app\shared\ai-recipe-modal\ai-recipe-modal.component.t	      if (/Failed to fetch URL: [45]\d\d/.test(msg)) return 'ai_recipe_url_blocked'	
+2026-04-17 19:10:30	Edit	C:\foodCo\foodVibe1.0\src\app\shared\ai-recipe-modal\ai-recipe-modal.component.t	      if (/Failed to fetch URL: [45]\d\d/.test(msg)) return 'ai_recipe_url_blocked'	
+2026-04-17 19:10:39	Edit	C:\foodCo\foodVibe1.0\src\app\shared\ai-recipe-modal\ai-recipe-modal.component.t	      if (/Failed to fetch URL: [45]\d\d/.test(msg)) return 'ai_recipe_url_blocked'	
+2026-04-17 19:12:39	Edit	C:\foodCo\foodVibe1.0\src\app\shared\ai-recipe-modal\ai-recipe-modal.component.t	      if (/Failed to fetch URL: [45]\d\d/.test(msg)) return 'ai_recipe_url_blocked'	
+2026-04-17 19:24:15	Bash	cd C:/foodCo/foodVibe1.0 && ng build 2>&1 | tail -20	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-17 19:36:48	Bash	cd C:/foodCo/foodVibe1.0 && node -e "const d=JSON.parse(require('fs').readFileSy	  blocking_ingredients_error: '╫Ö╫⌐ ╫¿╫¢╫Ö╫æ╫Ö╫¥ ╫£╫É ╫¬╫º╫Ö╫á╫Ö╫¥ ΓÇö ╫Ö╫⌐ ╫£╫¬╫º╫ƒ ╫É╫ò ╫£╫ö╫í╫Ö╫¿ ╫£╫ñ╫á╫Ö ╫ö╫⌐╫₧╫Ö╫¿	
+2026-04-17 20:03:30	Bash	grep -n "INVALID_USERNAME\|username\|name.*req\|req.*name" C:/foodCo/foodVibe1.0	97:      return res.status(400).json({ error: 'name, email, and password are required' });	
+2026-04-17 20:03:56	Bash	grep -n "INVALID_PASSWORD\|password.*valid\|validatePassword\|min.*length\|stren	130:      return res.status(400).json({ error: 'INVALID_PASSWORD_FORMAT' });; stderr=; interrupted=False; isImage=False;	
+2026-04-17 20:27:08	Edit	C:\foodCo\foodVibe1.0\src\app\shared\ai-recipe-modal\ai-recipe-modal.component.t	      if (/Failed to fetch URL: [45]\d\d/.test(msg)) return 'ai_recipe_url_blocked'	
+2026-04-17 20:27:20	Edit	C:\foodCo\foodVibe1.0\src\app\shared\ai-recipe-modal\ai-recipe-modal.component.t	      if (/Failed to fetch URL: [45]\d\d/.test(msg)) return 'ai_recipe_url_blocked'	
+2026-04-17 20:46:46	Edit	C:\foodCo\foodVibe1.0\CLAUDE.md	This fires on ANY user request that involves code, files, components, or project knowledge. The only exceptions:	
+2026-04-17 20:52:13	Edit	C:\foodCo\foodVibe1.0\.claude\copilot-instructions.md	- **Root-cause debugging** `[CC]`: For complex bugs where cause is unclear ΓåÆ invoke `/investigate`. It auto-freezes sc	
+2026-04-17 20:52:14	Bash	# Quick benchmark: mine just the src directory (dry run) to see how fast it is
+t	ERROR: No mempalace.yaml found in C:/foodCo/foodVibe1.0/src	
+2026-04-17 20:52:27	Bash	# Real benchmark: mine the project (full run, not dry-run) and time it
+time pyth	UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-54: character maps to <undefined>	
+2026-04-17 20:52:34	Bash	# Force UTF-8 encoding and retry
+PYTHONIOENCODING=utf-8 time python -m mempalace	@{stdout=/usr/bin/bash: line 3: time: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=Fal	
+2026-04-17 20:55:32	Bash	# Search all scripts and hooks for mempalace or qmd references
+grep -ri "mempala	C:/foodCo/foodVibe1.0/.claude/reflect/failure-log-archive-2026-04.tsv:2026-04-11 00:06:45 Bash git -C "C:/foodCo/foodVib	
+2026-04-17 20:57:25	Bash	git -C /c/foodCo/foodVibe1.0 diff HEAD -- CLAUDE.md 2>/dev/null | head -80	+3. **Explore agent** ΓÇö broad codebase exploration. **Last resort only.** Spawn ONLY if both MemPalace and Grep/Glob f	
+2026-04-17 20:57:44	Bash	ng build 2>&1 | tail -30	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-17 21:02:37	Edit	C:\foodCo\foodVibe1.0\.claude\agents\end-of-session-agent.md	Build failed. Cannot close session with broken code.	
+2026-04-17 21:04:56	Bash	cd C:/foodCo/foodVibe1.0 && git diff .claude/reflect/failure-log.tsv | head -50	 sleep --- BEGIN UNTRUSTED EXTERNAL CONTENT (source: chrome-error://chromewebdata/) --- 	
