@@ -248,9 +248,9 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
-    try {
-      await syncMasterToUser(user._id);
-    } catch (syncErr) { console.error('[auth/refresh] sync error:', syncErr.message); }
+    // Fire-and-forget — do not block the token response on sync.
+    // Login awaits sync; refresh runs every 15 min and blocking here adds 3-8s latency.
+    syncMasterToUser(user._id).catch(syncErr => console.error('[auth/refresh] sync error:', syncErr.message));
 
     return res.json({ token });
   } catch (err) {

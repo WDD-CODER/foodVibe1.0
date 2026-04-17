@@ -5,7 +5,7 @@
     <div class="inline-edit-grid">
 
       <!-- Name -->
-      <div class="inline-edit-field">
+      <div class="inline-edit-field" [class.field--error]="nameError_()">
         <label for="qep-name">{{ 'product_name' | translatePipe }}</label>
         <input
           id="qep-name"
@@ -13,13 +13,17 @@
           type="text"
           class="c-input"
           [class.input--highlight]="tier() === 'invalid'"
+          [class.input--error]="nameError_()"
           [ngModel]="name_()"
           (ngModelChange)="name_.set($event)"
           (keydown.enter)="$event.preventDefault(); priceInput.focus()" />
+        @if (nameError_()) {
+          <span class="field-error-msg">{{ nameError_() | translatePipe }}</span>
+        }
       </div>
 
       <!-- Base unit -->
-      <div class="inline-edit-field">
+      <div class="inline-edit-field" [class.field--error]="unitError_()">
         <label for="qep-unit">{{ 'base_unit' | translatePipe }}</label>
         <app-custom-select
           triggerId="qep-unit"
@@ -29,6 +33,9 @@
           [ngModel]="baseUnit_()"
           (ngModelChange)="baseUnit_.set($event)"
           name="base_unit_" />
+        @if (unitError_()) {
+          <span class="field-error-msg">{{ unitError_() | translatePipe }}</span>
+        }
       </div>
 
       <!-- Price -->

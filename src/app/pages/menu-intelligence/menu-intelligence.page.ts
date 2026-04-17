@@ -107,6 +107,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   /** Track saved snapshot for dirty detection */
   private savedSnapshot_ = ''
+  /** For pendingChangesGuard: prevents re-triggering after a successful save */
+  isSubmitted = false
 
   protected readonly form_ = this.fb.group({
     name_: [''],
@@ -533,6 +535,31 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     return JSON.stringify(this.form_.getRawValue()) !== this.savedSnapshot_
   }
 
+  /** For pendingChangesGuard — enables ternary modal with "Save & Leave" option */
+  async saveAndWait(): Promise<boolean> {
+    if (!this.form_.value.name_?.trim()) {
+      this.form_.patchValue({ name_: this.generateDateName() })
+    }
+
+    try {
+      const event = this.menuIntelligence.hydrateDerivedPortions(this.buildEventFromForm())
+      const now = Date.now()
+      const id = this.editingId_()
+      if (id) {
+        await this.menuEventData.updateMenuEvent({ ...event, _id: id, updated_at_: now })
+      } else {
+        const created = await this.menuEventData.addMenuEvent({ ...event, created_at_: now, updated_at_: now })
+        this.editingId_.set(created._id)
+      }
+      this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue())
+      this.isSubmitted = true
+      return true
+    } catch {
+      this.userMsg.onSetErrorMsg('error_saving_menu')
+      return false
+    }
+  }
+
   protected get sectionsArray(): FormArray<FormGroup> {
     return this.form_.get('sections_') as FormArray<FormGroup>
   }
@@ -662,7 +689,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
         } else {
           const nextSearch = document.getElementById('dish-search-' + s + '-' + (i + 1))
           const nextSell = document.getElementById('dish-sell-' + s + '-' + (i + 1))
-          const addDish = document.getElementById('add-dish-' + s);
+          const addDish = document.getElementById('add-dish-' + s)
           (nextSearch ?? nextSell ?? addDish)?.focus()
         }
       }, 0)
@@ -859,14 +886,14 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       setTimeout(() => {
         if (ke.shiftKey) {
           const prev = document.getElementById('dish-search-' + s + '-' + (i - 1))
-          const sectionTitle = document.getElementById('section-title-' + s);
+          const sectionTitle = document.getElementById('section-title-' + s)
           (prev ?? sectionTitle)?.focus()
         } else {
           if (hasRecipe) {
             document.getElementById('dish-sell-' + s + '-' + i)?.focus()
           } else {
             const next = document.getElementById('dish-search-' + s + '-' + (i + 1))
-            const addDish = document.getElementById('add-dish-' + s);
+            const addDish = document.getElementById('add-dish-' + s)
             (next ?? addDish)?.focus()
           }
         }
@@ -951,7 +978,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
           document.getElementById('section-title-' + sectionIdx)?.focus()
         } else {
           const firstDish = document.getElementById('dish-search-' + sectionIdx + '-0')
-          const addDish = document.getElementById('add-dish-' + sectionIdx);
+          const addDish = document.getElementById('add-dish-' + sectionIdx)
           (firstDish ?? addDish)?.focus()
         }
       }, 0)
@@ -1149,7 +1176,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const hydrated = this.menuIntelligence.hydrateDerivedPortions({
       _id: '',
       name_: raw.name_ || 'Untitled Event',
-      event_type_: raw.event_type_ || 'General Event',
+      event_type_: raw.event_type_ || '',
       event_date_: raw.event_date_ || '',
       serving_type_: servingType,
       guest_count_: guestCount,

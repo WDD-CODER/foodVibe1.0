@@ -29,7 +29,7 @@ export class TranslationService {
   //LIST
   public async loadGlobalDictionary(): Promise<void> {
     try {
-      const jsonPath = '/assets/data/dictionary.json'
+      const jsonPath = 'assets/data/dictionary.json'
       const baseData = await firstValueFrom(this.http.get<{ units?: Record<string, string>; categories?: Record<string, string>; section_categories?: Record<string, string>; allergens?: Record<string, string>; actions?: Record<string, string>; preparation_categories?: Record<string, string>; export_headers?: Record<string, string>; general?: Record<string, string> }>(jsonPath))
 
       const baseFlattened = {

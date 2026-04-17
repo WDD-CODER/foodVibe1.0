@@ -15,6 +15,7 @@ import { FocusByRowDirective } from '@directives/focus-by-row.directive'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { QuickEditProductPanelComponent } from 'src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component'
 import { QuickEditProductModalService } from '@services/quick-edit-product-modal.service'
+import { ProductDataService } from '@services/product-data.service'
 import type { Product } from '@models/product.model'
 import { getProductValidationStatus } from 'src/app/core/utils/product-validation.util'
 import { getEffectivePrice } from '@utils/product-source.util'
@@ -53,6 +54,7 @@ export class RecipeIngredientsTableComponent {
   private readonly recipeCostService = inject(RecipeCostService)
   private readonly unitRegistry = inject(UnitRegistryService)
   private readonly quickEditModalService = inject(QuickEditProductModalService)
+  private readonly productDataService = inject(ProductDataService)
   private readonly bp = inject(BreakpointObserver)
   private fb = inject(FormBuilder)
 private readonly cdr = inject(ChangeDetectorRef)
@@ -138,6 +140,27 @@ private readonly cdr = inject(ChangeDetectorRef)
         this.quickEditRowTier_.set(tier)
       }
     }
+  }
+
+  /** Create a stub product from the unlinked ingredient name, link it, then open Quick-Edit panel. */
+  protected onUnlinkedBadgeClick(group: FormGroup, index: number): void {
+    const name = ((group.get('name_hebrew')?.value as string) ?? '').trim()
+    if (!name) return
+    const stub: Omit<Product, '_id'> = {
+      name_hebrew: name,
+      base_unit_: 'gram',
+      sources_: [],
+      purchase_options_: [],
+      categories_: [],
+      yield_factor_: 1,
+      allergens_: [],
+      min_stock_level_: 0,
+      expiry_days_default_: 0,
+    }
+    void this.productDataService.addProduct(stub).then(saved => {
+      group.patchValue({ referenceId: saved._id, item_type: 'product', nameSnapshot: saved.name_hebrew })
+      this.onQuickEditBadgeClick(group, index, 'incomplete')
+    })
   }
 
   /** Called by clickOutside on the accordion div — defers to panel if it has unsaved changes. */

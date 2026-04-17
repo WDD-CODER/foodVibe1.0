@@ -56,6 +56,8 @@ export class QuickEditProductPanelComponent {
   protected error_ = signal<string | null>(null)
   protected isSubmitting_ = signal(false)
   protected showUnsavedConfirm_ = signal(false)
+  protected nameError_ = signal('')
+  protected unitError_ = signal('')
 
   protected isDirty_ = computed(() => {
     const p = this.product()
@@ -102,6 +104,8 @@ export class QuickEditProductPanelComponent {
       this.selectedSupplierIds_.set([...getSupplierIds(p)])
       this.error_.set(null)
       this.isSubmitting_.set(false)
+      this.nameError_.set('')
+      this.unitError_.set('')
     })
 
     // Auto-focus the relevant field based on tier
@@ -134,14 +138,19 @@ export class QuickEditProductPanelComponent {
   protected async onSave(): Promise<void> {
     if (this.isSubmitting_()) return
 
+    this.nameError_.set('')
+    this.unitError_.set('')
+
     const name = this.name_().trim()
     const baseUnit = this.baseUnit_().trim()
 
     if (!name) {
+      this.nameError_.set('field_name_required')
       this.nameRef()?.nativeElement?.focus()
       return
     }
     if (!baseUnit) {
+      this.unitError_.set('field_unit_required')
       return
     }
 

@@ -222,7 +222,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const products = this.state_.products_().filter(p => productIds.includes(p._id))
     const triggerSet = new Set<string>()
     products.forEach(p => {
-      (p.categories_ ?? []).forEach(c => triggerSet.add(c));
+      (p.categories_ ?? []).forEach(c => triggerSet.add(c))
       (p.allergens_ ?? []).forEach(a => triggerSet.add(a))
     })
     return this.metadataRegistry_.allLabels_()
@@ -420,7 +420,16 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     // this reused component instance, and run a fresh check with the correct ID.
     this.recipeForm_.get('name_hebrew')?.updateValueAndValidity()
     if (!this.historyViewMode_() && !this.recipeForm_.disabled) {
-      this.initialRecipeSnapshot_ = this.getRecipeSnapshotForComparison()
+      // Defer snapshot capture to after the first render so that child component effects
+      // (e.g. RecipeHeaderComponent auto-syncs yield from ingredient metrics) have already
+      // run. Capturing the snapshot before effects fire causes false-positive dirty guards
+      // whenever the computed yield differs from the stored yield_amount_.
+      runInInjectionContext(this.injector_, () => {
+        afterNextRender(() => {
+          this.initialRecipeSnapshot_ = this.getRecipeSnapshotForComparison()
+          this.recipeForm_.markAsPristine()
+        })
+      })
     }
 
     const actions: HeroFabAction[] = [
@@ -948,6 +957,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     if (this.ingredientsTableRef_()?.hasBlockingRows()) {
       this.blockingIngredientsError_.set(true)
       this.userMsg_.onSetErrorMsg(this.translation_.translate('blocking_ingredients_error'))
+      setTimeout(() => {
+        document.querySelector('.incomplete-row')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 100)
       return
     }
     this.blockingIngredientsError_.set(false)

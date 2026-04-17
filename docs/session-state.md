@@ -1,4 +1,4 @@
-# Session State — 2026-04-16 (end of day, session 3 — audit session)
+# Session State — 2026-04-16 (end of day — updated after ai-inventory-save-validation session)
 
 > Single source of truth for all project rules, standards, and skill/agent routing.
 
@@ -6,82 +6,123 @@
 
 ## Current Status
 
-**Branch:** `fix/remove-trailing-semicolons`
-**Latest commits on branch:**
-- `73b57c7` — style(F5): remove 9,496 trailing semicolons — no-semis convention
-- `f115b57` — fix(cook-view): tokenize 3 residual hex values + upgrade color-token template to v4
-**Build status:** PASS (ng build + tsc --noEmit verified after semicolon sweep)
-**Open PRs:**
-- PR #119 — fix(auth+recipe-book): role + trash flow — ready for smoke test + merge
-- PR #118 — merged (auto guest login + confirm modal migration)
+**Branch:** `fix/ai-inventory-save-validation` (changes in working tree — not yet committed)
+**Latest commit on branch:** `a52bdcb` — Merge pull request #118 from WDD-CODER/fix/master-pool-cleanup
+**Build status:** PASS (user confirmed 0 errors, 0 warnings)
+**Open PRs:** None
+**Dirty working tree:** YES — 13 files modified (see below)
 
 ---
 
-## Session Summary (2026-04-16, session 2)
+## IMPORTANT: Uncommitted Feature Work
 
-### Fix 1 — Auth role missing from login response
-- Root cause: `server/routes/auth.js` `publicUser` object omitted `role` field in both login and signup responses, causing `isAdmin_()` signal to always return false.
-- Fix: Added `role: user.role` to `publicUser` in both login and signup handlers.
-- File: `server/routes/auth.js`
+Two features were implemented this session and exist only in the working tree. Commit at the start of the next session:
 
-### Fix 2 — Trash delete flow bypassed for admins in recipe-book-list
-- Root cause: Plan 221 introduced an admin shortcut that called `permanentlyDeleteRecipe` (hard delete) for admins and `hideRecipe` for non-admins — bypassing the trash system entirely for admins.
-- Fix: `onRemoveRecipe` and `onBulkDeleteSelected` now call `kitchenState.deleteRecipe()` (move to trash) for all users, restoring Plan 018 trash behavior.
-- File: `src/app/features/recipe-book-list/recipe-book-list.component.ts`
+### Batch 1 — Unlinked badge click opens inline edit panel
+```
+recipe-ingredients-table.component.html   (badge click handler swapped)
+recipe-ingredients-table.component.ts     (+23 — onUnlinkedBadgeClick)
+```
 
-### Fix 3 — Auto guest login (PR #118, now merged)
-- Added `autoLoginGuest: true` to `environment.local.ts`, `false` to all others
-- Added second `APP_INITIALIZER` in `app.config.ts` calling `loginAsGuestBackend()` on startup
-- Fixed timing bug: `switchMap` to call `loginAsGuestBackend()` if user still null after refresh
-- Removed admin checkbox from signup form (was ignored by backend)
+### Batch 2 — AI-inventory save validation + UX hardening (fix/ai-inventory-save-validation)
+```
+quick-add-product-modal.component.html    (+11 — red borders + error text)
+quick-add-product-modal.component.scss    (+11 — .field-error-msg, .input--error)
+quick-add-product-modal.component.ts      (+9  — nameError_/unitError_ signals)
+quick-edit-product-panel.component.html   (+11 — red borders + error text)
+quick-edit-product-panel.component.scss   (+12 — same error styles)
+quick-edit-product-panel.component.ts     (+9  — nameError_/unitError_ signals)
+recipe-builder.page.ts                    (+3  — scroll to first .incomplete-row on blocked save)
+recipe-ingredients-table.component.scss   (+7  — gap + .badge-label for incomplete badge)
+public/assets/data/dictionary.json        (+1  — "fix": "תקן")
+```
 
-### Plan 269 smoke tests — partial
-- Test 2 (delete master-seeded item → tombstone): discovered delete flow was broken (fixed above); partially validated
-- Test 4 (delete user-owned item → hard delete): confirmed working via backend logs
-- Tests 3 and 5: pending (require running MongoDB instance)
+**Next session start sequence:**
+1. `ng build` — verify 0 errors
+2. Manual smoke test: unlinked icon → inline edit; save without name → red border shown; blocked save → page scrolls to .incomplete-row
+3. Commit both batches on `fix/ai-inventory-save-validation` → create PR
 
 ---
 
-## Prior Session Summary (2026-04-16, session 1) — Confirm Modal Migration
+## Session Summary (2026-04-16 — AI Inventory Save Validation)
+
+### Fix — Inline validation for Quick-Add and Quick-Edit panels
+- `quick-add-product-modal` and `quick-edit-product-panel`: Added `nameError_` / `unitError_` signals; validation fires on save attempt; red `input--error` border + `.field-error-msg` text shown under offending fields
+- `recipe-ingredients-table.component.scss`: Added `gap` + `.badge-label` to `incomplete-badge` — displays "תקן" text label alongside the badge icon
+- `recipe-builder.page.ts`: On blocked save (incomplete rows present), page scrolls to the first `.incomplete-row` automatically
+- `dictionary.json`: Added `"fix": "תקן"` translation key
+
+### Unlinked badge feature (carried from previous session — now also in working tree)
+- `recipe-ingredients-table.component.ts/html`: Clicking unlinked badge calls `onUnlinkedBadgeClick` → opens Quick-Edit panel at `'incomplete'` tier
+
+---
+
+## Prior Session Summary (2026-04-16 evening) — Disk Cleanup
+
+### Maintenance session — no code changes
+- Cleared disk space: freed ~16+ GB total (uv, pip, Bun, Chrome, Slack, Discord, Claude Desktop)
+- Confirmed: `dev:local` is correct for active development (Render free tier sleeps)
+
+---
+
+## Prior Session Summary (2026-04-16 morning) — Unlinked Ingredient Inline Edit
+
+### Feature — Unlinked badge click → inline edit panel
+- `recipe-ingredients-table.component.ts`: Added `onUnlinkedBadgeClick` — creates stub product, patches form row, calls `onQuickEditBadgeClick` at tier `'incomplete'`
+- Build verified; NOT committed — changes carried into the current session's working tree
+
+---
+
+## Prior Session Summary (2026-04-16 earlier) — Confirm Modal Migration (PR #118, MERGED)
 
 ### Fix 1 — Auth interceptor 404 noise
-- `src/app/core/interceptors/auth.interceptor.ts`: added `&& err.status !== 404` to error-logging condition
+- Root cause: `auth.interceptor.ts:98` logged ALL 4xx responses. Recipe resolver uses a two-step lookup (RECIPE_LIST → DISH_LIST fallback), generating expected 404s on every navigation to a dish recipe.
+- Fix: Added `&& err.status !== 404` to the error-logging condition. Other 4xx/5xx still logged.
+- File: `src/app/core/interceptors/auth.interceptor.ts`
 
 ### Fix 2 — Replace 13 native confirm() with ConfirmModalService
-- `recipe-book-list.component.ts`, `venue-list.component.ts`, `equipment-list.component.ts`, `inventory-product-list.component.ts`, `supplier-list.component.ts`
-- `recipe-book-list.component.spec.ts`: 2 tests updated
+Replaced all native `confirm()` calls across 5 list components:
+- `recipe-book-list.component.ts` — 4 calls (added import+inject, methods async)
+- `venue-list.component.ts` — 2 calls (added inject, unwrapped async IIFE)
+- `equipment-list.component.ts` — 2 calls (already had inject)
+- `inventory-product-list.component.ts` — 2 calls (already had inject)
+- `supplier-list.component.ts` — 3 calls (already had inject; in-use warning uses `variant:'warning'`)
+- `recipe-book-list.component.spec.ts` — 2 tests updated from `spyOn(window,'confirm')` to `spyOn(confirmModal,'open')`
+
+### Explanation — log-server.js
+- `scripts/log-server.js` is a separate process on port 9765 that receives frontend log POSTs
+- Start with: `node scripts/log-server.js`
+- App server is `server.js` (Express API on port 3000)
 
 ---
 
-## Session Summary (2026-04-16, session 3 — audit session)
+## Prior Session Summary (2026-04-15) — Master Pool Cleanup + Tombstones
 
-### Audit items worked (from 2026-04-10 nightly audit)
-- **F3 subscription leak** — hero-fab Router.events had no cleanup (was already committed in prior session)
-- **C color tokens** — cook-view.page.scss: added `--cv-muted: #888`, fixed 2× #fff → `--color-text-on-primary`, fixed cv-muted fallback → `var(--cv-muted)`
-- **color-token template** — v3 → v4: redesigned Step 5 into Step 5a (page-palette check) + Step 5b (global semantic name); scores 6/6
-- **F5 trailing semicolons** — 9,496 removed across 181 files using ASI-safe script; 31 preserved where next meaningful line starts with `(`, `[`, or `` ` ``
-- **Oversized files (6)** — skipped, needs dedicated architectural session
+### Plan 269 — Master Pool Cleanup + Deletion Tombstones (PR #117)
+- `server/routes/generic.js` POST: removed master-copy dual-write + collision branch; `_masterId` now self-referential
+- `server/routes/generic.js` GET list + GET by-id: `_userDeleted: { $ne: true }` tombstone filter; GET by-id collapsed from 3-layer fallback to single `findOne`
+- `server/routes/generic.js` DELETE: master-cloned items → tombstone; user-originated items → hard delete
+- `server/services/sync-master.js`: `cleanupNameCollisionClones` removed
+- `server/routes/auth.js`: `cleanupNameCollisionClones` import + all 3 call sites removed
 
-### New files
-- `scripts/remove-trailing-semicolons.mjs` — reusable semicolon cleanup script
-- `.prettierrc.json` — anchors `semi: false` convention
-- `.claude/reports/audit-sessions/2026-04-16-audit-session.md` — session log
+### Fix — type-change 409 crash (PR #117)
+- `src/app/core/services/http-storage.adapter.ts`: `appendExisting` treats 409 as success
 
 ---
 
 ## Next Steps (Priority Order)
 
-1. **Create PR** for `fix/remove-trailing-semicolons` (2 commits: cook-view fix + semicolon sweep)
+1. **FIRST: Commit fix/ai-inventory-save-validation** (dirty working tree — 13 files):
+   - `ng build` — verify 0 errors
+   - Smoke test: unlinked icon → inline edit; save without name → red border; blocked save → scroll to .incomplete-row
+   - Commit all 13 modified files on `fix/ai-inventory-save-validation` → create PR
+   - Note: stub product uses `base_unit_: 'gram'` hardcoded — flag for follow-up if unit mismatch needed
 
-2. **Merge PR #119** after smoke test:
-   - Delete a recipe → confirm it moves to trash (not hard deleted)
-   - Log out and back in → tombstoned item must NOT re-appear (Test 3)
-   - Type-change TRASH_RECIPES → no 409 response (Test 5)
-
-2. **Complete Plan 269 smoke tests** (requires MongoDB):
-   - Test 1 full pass: create product → single doc in Compass, nothing in `__master__`
-   - Test 3: log out/back in → tombstoned item stays gone
-   - Test 5: type-change TRASH_RECIPES action → no 409
+2. **Manual smoke tests for PR #117** (MongoDB required, still pending):
+   - Sign in → create product → Compass: single doc in userId, nothing in `__master__`
+   - Delete master-seeded item → Compass: `_userDeleted: true`, client-invisible
+   - Log out and back in → tombstoned item must NOT re-appear
+   - Delete user-owned item (not master clone) → Compass: hard deleted
 
 3. **Plan 255 — Dead Code Cleanup (remaining open tasks):**
    - Task 8: Investigate repair script trio (`backup-before-repair.mjs`, `diagnose-broken-refs.mjs`, `repair-recipe-references.mjs`)
@@ -95,15 +136,15 @@
 ## Blocked
 
 - Plan 234 operational tasks require manual Atlas/Compass access and production deploy
-- Plan 269 Tests 3 + 5 require running server against a real MongoDB instance
+- PR #117 smoke tests require running server against a real MongoDB instance
 
 ---
 
 ## References
 
-- PR #119: https://github.com/WDD-CODER/foodVibe1.0/pull/119 — auth role + trash flow fix (open)
-- PR #118: https://github.com/WDD-CODER/foodVibe1.0/pull/118 — merged (auto guest login + confirm modal)
-- PR #117: https://github.com/WDD-CODER/foodVibe1.0/pull/117 — merged (master pool cleanup)
-- PR #116: https://github.com/WDD-CODER/foodVibe1.0/pull/116 — merged
-- Session handoff (session 2): `.claude/sessions/2026-04-16-auth-role-trash-flow/session-handoff.md`
-- Session handoff (session 1): `.claude/sessions/2026-04-16-confirm-modal-migration/session-handoff.md`
+- PR #118: https://github.com/WDD-CODER/foodVibe1.0/pull/118 — confirm modal migration + 404 fix (MERGED)
+- PR #117: https://github.com/WDD-CODER/foodVibe1.0/pull/117 (merged — master pool cleanup)
+- PR #116: https://github.com/WDD-CODER/foodVibe1.0/pull/116 (merged)
+- Session handoff (ai-inventory-save-validation): `.claude/sessions/2026-04-16-unlinked-ingredient-inline-edit/session-handoff.md` (updated this session)
+- Session handoff (confirm modal): `.claude/sessions/2026-04-16-confirm-modal-migration/session-handoff.md`
+- Techdebt report: `.claude/techdebt-reports/techdebt-2026-04-16.md`
