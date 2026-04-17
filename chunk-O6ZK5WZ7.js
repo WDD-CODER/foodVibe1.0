@@ -1,0 +1,1 @@
+import{a}from"./chunk-GTOYCPJN.js";import"./chunk-5MDIPZDV.js";import"./chunk-PSGVX6HB.js";import"./chunk-FTPTYD2K.js";import"./chunk-GQVWCZUD.js";import"./chunk-EI5FYLXS.js";export{a as DishDataService};

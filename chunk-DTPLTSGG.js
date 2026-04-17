@@ -1,1 +1,0 @@
-import{a}from"./chunk-4XBBDKK6.js";import"./chunk-ZJ6TEQ3D.js";import"./chunk-PSGVX6HB.js";import"./chunk-FTPTYD2K.js";import"./chunk-GQVWCZUD.js";import"./chunk-EI5FYLXS.js";export{a as RecipeDataService};
