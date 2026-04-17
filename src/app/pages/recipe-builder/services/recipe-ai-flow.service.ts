@@ -151,7 +151,9 @@ export class RecipeAiFlowService {
       .map(g => g.getRawValue())
       .filter(v => v.equipment_id_)
       .map(v => {
-        const eq = this.equipmentData_.allEquipment_().find(e => e._id === v.equipment_id_)
+        const eq = this.equipmentData_.allEquipment_().find(
+          e => e._id === v.equipment_id_ || (e as any)._masterId === v.equipment_id_
+        )
         return { name: eq?.name_hebrew ?? v.equipment_id_, quantity: v.quantity_ as number }
       })
 
