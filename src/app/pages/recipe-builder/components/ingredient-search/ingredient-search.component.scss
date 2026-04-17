@@ -6,7 +6,7 @@
   /* TODO: remove ::ng-deep when scrollable-dropdown exposes a slot or engine class */
   app-scrollable-dropdown {
     ::ng-deep .c-dropdown {
-      z-index: 100;
+      z-index: 250;
     }
   }
 }

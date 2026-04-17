@@ -2,6 +2,26 @@
 
 ---
 
+### Plan 272 — Seeder Curation Pipeline (`plans/272-seeder-curation-pipeline.plan.md`)
+
+- [ ] Task 1: `tools/catalog-seeder/config.py` — Add CATALOG_REVIEW_FILE, KITCHEN_CATEGORIES, expand NON_FOOD_KEYWORDS
+- [ ] Task 2: `tools/catalog-seeder/fetch.py` — Extract 7 nutrition fields from OFF bulk CSV
+- [ ] Task 3: `tools/catalog-seeder/normalize.py` — Remove _is_non_food(); add nutrition_per_100g + review fields
+- [ ] Task 4: `tools/catalog-seeder/filter.py` (new) — apply_food_filter() with category-pass + pantry food-signal
+- [ ] Task 5: `tools/catalog-seeder/main.py` — Restructure flow: --from-review arg, write catalog-review.json
+
+---
+
+### Plan 271 — Seeder Master Alignment (`plans/271-seeder-master-alignment.plan.md`)
+
+- [ ] Step 1: `tools/catalog-seeder/db_write.py` — Add `userId: '__master__'`, `_masterId: None`, `_userModified: False` to `_prepare_doc()`
+- [ ] Step 2: `tools/catalog-seeder/db_write.py` — Add `_normalize_name()` helper; stamp `name_hebrew_normalized` on each product doc
+- [ ] Step 3: `tools/catalog-seeder/db_write.py` — Build and write `sources_` array `[{supplierId, price, addedAt}]` alongside legacy fields
+- [ ] Step 4: `tools/catalog-seeder/db_write.py` — Add `userId: '__master__'`, `_masterId: None`, `_userModified: False` to `_upsert_suppliers()`
+- [ ] Step 5: `tools/catalog-seeder/diff.py` — Add `userId: '__master__'` filter to MongoDB query in `diff_against_db()`
+
+---
+
 ### Plan 269 — Master Pool Cleanup + Deletion Tombstones (`plans/269-master-pool-cleanup.plan.md`)
 
 - [x] Task 1: `server/routes/generic.js` — replace POST handler body: remove dual-write + collision block, set `_masterId: safeEntity._id`
