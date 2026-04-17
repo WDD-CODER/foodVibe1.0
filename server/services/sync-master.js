@@ -176,8 +176,11 @@ async function syncMasterToUser(userId) {
       totalInserted += toInsert.length;
     }
 
-    for (const op of toUpdate) {
-      await col.updateOne(op.filter, op.update);
+    if (toUpdate.length > 0) {
+      await col.bulkWrite(
+        toUpdate.map(op => ({ updateOne: op })),
+        { ordered: false }
+      );
     }
     totalUpdated += toUpdate.length;
   }
