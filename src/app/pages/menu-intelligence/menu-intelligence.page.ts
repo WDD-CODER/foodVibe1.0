@@ -107,6 +107,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   /** Track saved snapshot for dirty detection */
   private savedSnapshot_ = '';
+  /** For pendingChangesGuard: prevents re-triggering after a successful save */
+  isSubmitted = false;
 
   protected readonly form_ = this.fb.group({
     name_: [''],
@@ -531,6 +533,31 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   /** For pendingChangesGuard — method name must match PendingChangesComponent interface */
   hasRealChanges(): boolean {
     return JSON.stringify(this.form_.getRawValue()) !== this.savedSnapshot_;
+  }
+
+  /** For pendingChangesGuard — enables ternary modal with "Save & Leave" option */
+  async saveAndWait(): Promise<boolean> {
+    if (!this.form_.value.name_?.trim()) {
+      this.form_.patchValue({ name_: this.generateDateName() });
+    }
+
+    try {
+      const event = this.menuIntelligence.hydrateDerivedPortions(this.buildEventFromForm());
+      const now = Date.now();
+      const id = this.editingId_();
+      if (id) {
+        await this.menuEventData.updateMenuEvent({ ...event, _id: id, updated_at_: now });
+      } else {
+        const created = await this.menuEventData.addMenuEvent({ ...event, created_at_: now, updated_at_: now });
+        this.editingId_.set(created._id);
+      }
+      this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue());
+      this.isSubmitted = true;
+      return true;
+    } catch {
+      this.userMsg.onSetErrorMsg('error_saving_menu');
+      return false;
+    }
   }
 
   protected get sectionsArray(): FormArray<FormGroup> {
@@ -1149,7 +1176,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const hydrated = this.menuIntelligence.hydrateDerivedPortions({
       _id: '',
       name_: raw.name_ || 'Untitled Event',
-      event_type_: raw.event_type_ || 'General Event',
+      event_type_: raw.event_type_ || '',
       event_date_: raw.event_date_ || '',
       serving_type_: servingType,
       guest_count_: guestCount,

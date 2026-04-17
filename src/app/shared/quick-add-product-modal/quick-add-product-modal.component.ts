@@ -51,6 +51,8 @@ export class QuickAddProductModalComponent {
   protected minStock_ = signal(0);
   protected expiryDays_ = signal(0);
   protected isSubmitting_ = signal(false);
+  protected nameError_ = signal('');
+  protected unitError_ = signal('');
 
   protected baseUnitRef = viewChild<ElementRef<HTMLElement>>('baseUnitSelect');
   protected buyPriceRef = viewChild<ElementRef<HTMLInputElement>>('buyPriceEl');
@@ -92,6 +94,8 @@ export class QuickAddProductModalComponent {
         this.minStock_.set(0);
         this.expiryDays_.set(0);
         this.isSubmitting_.set(false);
+        this.nameError_.set('');
+        this.unitError_.set('');
       }
     });
 
@@ -189,12 +193,17 @@ export class QuickAddProductModalComponent {
   protected onSave(): void {
     if (this.isSubmitting_()) return;
 
+    this.nameError_.set('');
+    this.unitError_.set('');
+
     const name = this.name_().trim();
     const baseUnit = this.baseUnit_().trim();
     if (!name) {
+      this.nameError_.set('field_name_required');
       return;
     }
     if (!baseUnit) {
+      this.unitError_.set('field_unit_required');
       this.baseUnitRef()?.nativeElement?.focus();
       return;
     }

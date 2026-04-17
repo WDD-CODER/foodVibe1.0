@@ -413,69 +413,6 @@
   }
 }
 
-.labels-container {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.labels-grid-row-wrap {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-
-.labels-grid-row {
-  display: flex;
-  align-items: stretch;
-  gap: 0.5rem;
-  min-height: 2.25rem;
-
-  app-custom-multi-select {
-    flex: 1;
-    min-width: 0;
-  }
-}
-
-.labels-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  flex-shrink: 0;
-}
-
-.labels-btn-label {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--color-primary);
-}
-
-.labels-btn-clear {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  padding-inline: 0.625rem;
-  padding-block: 0.35rem;
-
-  background: var(--bg-glass);
-  color: var(--color-text-secondary);
-  font-size: 0.75rem;
-  font-weight: 600;
-
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-full);
-  white-space: nowrap;
-
-  cursor: pointer;
-  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
-
-  &:hover {
-    color: var(--color-danger);
-    background: var(--bg-danger-subtle);
-    border-color: var(--color-danger);
-  }
-}
 
 // Desktop-only child placement — kept outside the base .center-controls block
 // so mobile's lower-specificity grid-area overrides are not beaten.
@@ -606,8 +543,5 @@
   .metrics-square .divider {
     width: 1px;
     height: 20px;
-  }
-  .labels-grid-row-wrap{
-    padding: 1rem;
   }
 }

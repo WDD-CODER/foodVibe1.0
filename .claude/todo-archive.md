@@ -6,6 +6,16 @@ Moved from todo.md to reduce token load.
 
 ## Done
 
+### Plan 270 — Atlas Performance Fixes (`plans/270-atlas-performance-fixes.plan.md`)
+
+- [x] Task 1: `server/db.js` — add `{ userId: 1 }` index to all 14 CLONEABLE_TYPES collections + `name`/`email` on users
+- [x] Task 2: `server/routes/auth.js` — remove `await` from `syncMasterToUser` in `/refresh` endpoint
+- [x] Task 3: `server/services/sync-master.js` — replace sequential `updateOne` loop with `col.bulkWrite()`
+
+---
+
+## Done
+
 ---
 
 ## Plan 266 — Cook Timer / Labor Time Separation (archived 2026-04-13)

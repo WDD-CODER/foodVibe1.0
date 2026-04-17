@@ -43,6 +43,7 @@
               (click)="$event.stopPropagation(); getProductForGroup(group) ? onQuickEditBadgeClick(group, $index, 'invalid') : editingNameAtRow_.set($index)"
               [title]="'product_incomplete_hint' | translatePipe">
               <lucide-icon name="alert-circle" [size]="14"></lucide-icon>
+              <span class="badge-label">{{ 'fix' | translatePipe }}</span>
             </button>
           } @else if (isWarningRow(group)) {
             <button type="button" class="warning-badge"
@@ -52,7 +53,7 @@
             </button>
           } @else if (isUnlinkedRow(group)) {
             <button type="button" class="unlinked-badge"
-              (click)="$event.stopPropagation(); editingNameAtRow_.set($index)"
+              (click)="$event.stopPropagation(); onUnlinkedBadgeClick(group, $index)"
               [title]="'unlinked_ingredient_hint' | translatePipe">
               <lucide-icon name="link" [size]="14"></lucide-icon>
             </button>
@@ -94,7 +95,8 @@
           </button>
           <input type="number" SelectOnFocus formControlName="amount_net" (input)="updateLineCalculations($index)"
             (keydown)="onQuantityKeydown($event, $index)" focusByRow [rowIndex]="$index" kind="qty"
-            class="grid-input qty-input" placeholder="0" step="0.001" min="0" />
+            class="grid-input qty-input" placeholder="0" step="0.001" min="0"
+            [class.has-error]="group.invalid && group.touched" />
           <button type="button" class="qty-btn plus" tabindex="-1" (click)="incrementAmount(group, $index)">
             <lucide-icon name="plus" [size]="16"></lucide-icon>
           </button>

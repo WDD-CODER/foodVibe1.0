@@ -159,7 +159,10 @@
             <button type="button" id="menu-focus-event_type_" class="meta-trigger"
               (click)="openEventTypeDropdown()"
               (keydown)="onMetaKeydown('event_type_', $event)">
-              {{ form_.value.event_type_ || ('menu_event_type' | translatePipe) }}
+              {{ ((form_.value.event_type_ ?? '') | translatePipe) || ('menu_event_type' | translatePipe) }}
+              @if (form_.value.event_type_ && form_.value.event_date_) {
+                <span class="meta-trigger-date">· {{ form_.value.event_date_ }}</span>
+              }
             </button>
           }
         </div>

@@ -6,13 +6,13 @@
 
 .financial-bar {
   position: fixed;
-  bottom: 56px;
+  bottom: 0;
   left: 0;
   right: 0;
   display: flex;
   justify-content: center;
   gap: 40px;
-  padding: 12px 20px;
+  padding: 5px;
   background: var(--bg-pure);
   border-top: 2px solid var(--border-warm);
   box-shadow: 0 -2px 12px rgba(74, 60, 46, 0.08);
