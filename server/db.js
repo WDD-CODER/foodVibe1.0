@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const { CLONEABLE_TYPES } = require('./constants/cloneable-types')
 
 async function connectDb() {
   const isLocal = process.env.NODE_ENV === 'development'
@@ -10,6 +11,17 @@ async function connectDb() {
 
   await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 })
   console.log(`MongoDB connected → ${uri.startsWith('mongodb+srv') ? 'Atlas' : 'local'}`)
+
+  // Ensure userId index on every entity collection.
+  // createIndex is idempotent — safe to call on every startup.
+  // background: true is a no-op on MongoDB 4.2+ but harmless for older drivers.
+  const db = mongoose.connection.db
+  await Promise.all(
+    CLONEABLE_TYPES.map(type =>
+      db.collection(type).createIndex({ userId: 1 }, { background: true })
+    )
+  )
+  console.log(`userId indexes ensured for ${CLONEABLE_TYPES.length} collections`)
 }
 
 module.exports = { connectDb }

@@ -68,7 +68,7 @@ export class PreparationRegistryService {
       }
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.logging.error({ event: 'crud.preparations.load_error', message: 'Failed to load preparation registry', context: { err } });
+      this.logging.error({ event: 'crud.preparations.load_error', message: 'Failed to load preparation registry', context: { err } })
     }
   }
 
@@ -268,8 +268,8 @@ export class PreparationRegistryService {
     const sanitizedCategory = (category ?? '').trim()
     if (!sanitizedName) return
 
-    const key = await this.keyResolution.ensureKeyForContext(sanitizedCategory, 'preparation_category');
-    if (sanitizedCategory && !key) return;
+    const key = await this.keyResolution.ensureKeyForContext(sanitizedCategory, 'preparation_category')
+    if (sanitizedCategory && !key) return
     const cats = this.categories_()
     const categoryExists = key != null && cats.includes(key)
     if (!categoryExists && key) {

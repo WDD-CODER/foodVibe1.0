@@ -1,7 +1,7 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { UserMsgService } from '@services/user-msg.service';
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
+import { Component, inject } from '@angular/core'
+import { CommonModule } from '@angular/common'
+import { UserMsgService } from '@services/user-msg.service'
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 
 @Component({
   selector: 'user-msg',

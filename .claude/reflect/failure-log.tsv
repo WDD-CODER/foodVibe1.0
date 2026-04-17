@@ -840,3 +840,93 @@ files = [
 2026-04-13 12:00:28	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\product-data.service.ts	      this.logging.error({ event: 'crud.products.hydrate_error', message: 'Failed to load products', context: { err } })	
 2026-04-13 12:11:17	Edit	C:\foodCo\foodVibe1.0\src\app\pages\metadata-manager\metadata-manager.page.compo	    this.logging.error({ event: 'crud.metadata.delete_error', message: `Failed to delete ${type}`, context: { err } });	
 2026-04-13 12:11:22	Edit	C:\foodCo\foodVibe1.0\src\app\pages\metadata-manager\metadata-manager.page.compo	    this.logging.error({ event: 'crud.metadata.delete_error', message: `Failed to delete ${type}`, context: { err } });	
+2026-04-15 12:44:19	Write	C:\foodCo\foodVibe1.0\src\app\core\services\equipment-category-registry.service.	      this.logging.error({ event: 'crud.equipmentCategories.load_error', message: 'Failed to load equipment custom categ	
+2026-04-15 12:44:28	Write	C:\foodCo\foodVibe1.0\src\app\core\services\menu-event-type.service.ts	      this.logging.error({ event: 'crud.menuEventTypes.load_error', message: 'Failed to load menu event types', context:	
+2026-04-15 12:44:39	Edit	C:\foodCo\foodVibe1.0\src\app\pages\equipment\components\equipment-list\equipmen	          : (this.translation.translate('save_failed') ?? '╫⌐╫Æ╫Ö╫É╫ö ╫æ╫⌐╫₧╫Ö╫¿╫ö');	
+2026-04-15 12:44:48	Edit	C:\foodCo\foodVibe1.0\src\app\pages\equipment\components\equipment-list\equipmen	          : (this.translation.translate('save_failed') ?? '╫⌐╫Æ╫Ö╫É╫ö ╫æ╫⌐╫₧╫Ö╫¿╫ö');	
+2026-04-15 12:45:10	Edit	C:\foodCo\foodVibe1.0\src\app\pages\equipment\components\equipment-list\equipmen	          : (this.translation.translate('save_failed') ?? '╫⌐╫Æ╫Ö╫É╫ö ╫æ╫⌐╫₧╫Ö╫¿╫ö');	
+2026-04-15 12:45:18	Edit	C:\foodCo\foodVibe1.0\src\app\pages\equipment\components\equipment-list\equipmen	          : (this.translation.translate('save_failed') ?? '╫⌐╫Æ╫Ö╫É╫ö ╫æ╫⌐╫₧╫Ö╫¿╫ö');	
+2026-04-15 15:50:03	Bash	grep -rn "╫⌐╫¥ ╫ö╫₧╫á╫ö\|dish.*name.*use\|name.*already\|already.*use\|nameAlrea	src/app/core/services/translation.service.ts:174:      return { valid: false, error: `The ID "${sanitized}" is already u	
+2026-04-15 16:00:35	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-15 16:18:57	Edit	C:\foodCo\foodVibe1.0\CLAUDE.md	This fires on ANY user request that involves code, files, components, or project knowledge. The only exceptions:	
+2026-04-15 16:26:57	Edit	C:\foodCo\foodVibe1.0\src\app\pages\cook-view\cook-view.page.ts	        error: () => { this.saving.setSaving(false) }	
+2026-04-15 16:27:12	Edit	C:\foodCo\foodVibe1.0\src\app\pages\cook-view\cook-view.page.ts	        error: () => { this.saving.setSaving(false) }	
+2026-04-15 16:41:46	Write	C:\foodCo\foodVibe1.0\.claude\sessions\2026-04-15-duplicate-name-validator-fix\s	- The root cause of the original bug: `currentId` is in the source collection; when type changes, the validator searched	
+2026-04-15 16:47:15	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-15 16:57:42	Edit	C:\foodCo\foodVibe1.0\CLAUDE.md	- **Worktree boundary**: When working inside an isolated worktree, never attempt `git checkout main` from within it. All	
+2026-04-15 16:57:48	Edit	C:\foodCo\foodVibe1.0\agent.md	1. Run `ng build` or full `getDiagnostics` ΓÇö mandatory, no exceptions. Do not skip because changes look "mechanical" o	
+2026-04-15 17:04:16	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-15 17:04:59	Write	C:\foodCo\foodVibe1.0\scripts\fix-duplicate-names.mjs	  console.error('ERROR: No MongoDB URI found in .env (MONGO_LOCAL_URI or MONGO_URI)')	
+2026-04-15 17:15:56	Edit	C:\foodCo\foodVibe1.0\public\assets\data\dictionary.json	        "ai_recipe_url_fetch_failed": "╫£╫É ╫á╫Ö╫¬╫ƒ ╫£╫Æ╫⌐╫¬ ╫£╫¢╫¬╫ò╫æ╫¬. ╫æ╫ô╫ò╫º ╫⌐╫ö╫º╫Ö╫⌐╫ò╫¿ ╫¬╫º╫Ö╫ƒ ╫ò╫á╫í╫ö ╫⌐	
+2026-04-15 17:16:06	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-15 17:16:19	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-15 17:16:30	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-15 17:16:42	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-15 17:16:59	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-15 17:28:39	mcp__mempalace__mempalace_search	@{query=data architecture storage modes mongoose models ownership; limit=5}	      "text": "const { Schema, model } = require('mongoose');\n\nconst userSchema = new Schema(\n  {\n    _id: { type: S	
+2026-04-15 17:39:29	Write	C:\foodCo\foodVibe1.0\plans\268-data-architecture-map.plan.md	Fields: `_id` (String, custom), `name` (String, unique), `email` (String, unique), `imgUrl`, `role` (enum admin/user), `	
+2026-04-15 18:13:47	Bash	# Check what changed in other modified files
+git diff src/app/pages/cook-view/co	 - **Worktree boundary**: When working inside an isolated worktree, never attempt `git checkout main` from within it. Al	
+2026-04-15 18:14:42	Bash	git diff main...HEAD 2>/dev/null | head -200	+  console.error('ERROR: No MongoDB URI found in .env (MONGO_LOCAL_URI or MONGO_URI)')	
+2026-04-15 18:15:27	mcp__mempalace__mempalace_search	@{query=master pool dual-write sync cleanup tombstone deletion; limit=8}	      "text": "erge --merge --delete-branch`: ~31.6s\n- Remote delete fallback `git push origin --delete ...`: ~4.0s\n\n	
+2026-04-15 18:16:31	Bash	mongosh "mongodb://admin:foodvibe1@localhost:27017/foodvibe?authSource=admin" --	@{stdout=/usr/bin/bash: line 1: mongosh: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=	
+2026-04-15 18:16:37	Bash	winpty mongosh.exe "mongodb://admin:foodvibe1@localhost:27017/foodvibe?authSourc	@{stdout=winpty: error: cannot start 'mongosh.exe': Not found in PATH; stderr=; interrupted=False; isImage=False; noOutp	
+2026-04-15 18:17:44	Bash	tail -50 "/c/Program Files/MongoDB/Server/8.0/log/mongod.log" 2>/dev/null | grep	@{stdout={"t":{"$date":"2026-04-15T18:14:35.931+03:00"},"s":"W",  "c":"NETWORK",  "id":4615610, "ctx":"conn582","msg":"F	
+2026-04-15 18:23:46	Write	C:\foodCo\foodVibe1.0\plans\269-master-pool-cleanup.plan.md	      return res.status(400).json({ error: '_id is required in the request body' });	
+2026-04-15 18:28:31	Edit	C:\foodCo\foodVibe1.0\server\routes\generic.js	      return res.status(400).json({ error: '_id is required in the request body' });	
+2026-04-15 18:28:42	Edit	C:\foodCo\foodVibe1.0\server\routes\generic.js	      return res.status(404).json({ error: `Cannot get, Item ${req.params.id} of type: ${req.params.type} does not exist	
+2026-04-15 18:28:47	Edit	C:\foodCo\foodVibe1.0\server\routes\generic.js	    return res.status(403).json({ error: 'Access to this entity type is not permitted' });	
+2026-04-15 18:28:57	Edit	C:\foodCo\foodVibe1.0\server\routes\generic.js	      return res.status(404).json({ error: `Cannot remove, item ${req.params.id} of type: ${req.params.type} does not ex	
+2026-04-15 18:29:32	Edit	C:\foodCo\foodVibe1.0\server\routes\auth.js	  message: { error: 'Too many login attempts, please try again later' },	
+2026-04-15 18:29:40	Edit	C:\foodCo\foodVibe1.0\server\routes\auth.js	    } catch (syncErr) { console.error('[auth/login] sync error:', syncErr.message); }; newString=    try {	
+2026-04-15 18:29:44	Edit	C:\foodCo\foodVibe1.0\server\routes\auth.js	    } catch (syncErr) { console.error('[auth/refresh] sync error:', syncErr.message); }; newString=    try {	
+2026-04-15 18:29:48	Edit	C:\foodCo\foodVibe1.0\server\routes\auth.js	    } catch (syncErr) { console.error('[auth/guest] sync error:', syncErr.message); }; newString=    try {	
+2026-04-16 18:01:20	Bash	cd C:/foodCo/foodVibe1.0 && git stash && npx ng test --watch=false --browsers=Ch	Chrome Headless 147.0.0.0 (Windows 10): Executed 310 of 310[31m (63 FAILED)[39m[31m DISCONNECTED[39m (33.92 secs / 3	
+2026-04-16 18:04:09	Write	C:\foodCo\foodVibe1.0\.claude\reports\audit-sessions\2026-04-16-audit-session.md	Γöé Failed:    n/a ΓÇö first try worked                      Γöé	
+2026-04-16 18:05:25	mcp__mempalace__mempalace_search	@{query=auth state change user login logout list update; limit=5}	      "text": "event: 'auth.signup', message: 'Signup success', context: { userId: user._id } })\n      })\n    )\n  }\n	
+2026-04-16 18:10:42	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\user.service.ts	        error: () => {	
+2026-04-16 18:10:56	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\user.service.ts	        error: () => {	
+2026-04-16 18:11:05	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\user.service.ts	        error: () => {	
+2026-04-16 18:23:15	Bash	cd C:/foodCo/foodVibe1.0 && git diff .claude/reflect/failure-log.tsv	 2026-04-15 18:29:40 Edit C:\foodCo\foodVibe1.0\server\routes\auth.js     } catch (syncErr) { console.error('[auth/login	
+2026-04-16 18:29:29	Edit	C:\foodCo\foodVibe1.0\.claude\skills\nightly-audit\SKILL.md	- Exception: `[style.*]=` dynamic bindings are acceptable ΓÇö skip those	
+2026-04-16 18:32:26	Bash	git -C C:/foodCo/foodVibe1.0 show main:src/app/pages/recipe-book/components/reci	721:        this.kitchenState.permanentlyDeleteRecipe(recipe).subscribe({ next: () => {}, error: () => {} });; stderr=; 	
+2026-04-16 18:34:43	Bash	git -C C:/foodCo/foodVibe1.0 show HEAD:src/app/pages/recipe-book/components/reci	      error: () => { this.removingId_.set(null); }	
+2026-04-16 19:21:25	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\components\recipe-ingredients	                error: () => setUnitAndUpdate()	
+2026-04-16 19:21:37	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\components\recipe-ingredients	                error: () => setUnitAndUpdate()	
+2026-04-16 19:21:51	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\components\recipe-ingredients	                error: () => setUnitAndUpdate()	
+2026-04-16 19:22:43	Bash	git diff HEAD	 2026-04-15 18:29:40 Edit C:\foodCo\foodVibe1.0\server\routes\auth.js     } catch (syncErr) { console.error('[auth/login	
+2026-04-16 19:33:12	Bash	cat "C:\Users\danwe\AppData\Local\Temp\claude\C--foodCo-foodVibe1-0\95bb9646-cd7	    + CategoryInfo          : InvalidArgument: (:) [Measure-Object], PSArgumentException	
+2026-04-16 19:38:00	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\components\recipe-ingredients	                error: () => setUnitAndUpdate()	
+2026-04-16 19:39:42	Bash	powershell -Command "Remove-Item 'C:\Users\danwe\AppData\Local\Temp\*' -Recurse 	@{stdout=<bash output unavailable: output file C:\Users\danwe\AppData\Local\Temp\claude\C--foodCo-foodVibe1-0\95bb9646-c	
+2026-04-16 20:12:43	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-16 20:13:12	Edit	C:\foodCo\foodVibe1.0\public\assets\data\dictionary.json	        "ai_recipe_url_fetch_failed": "╫£╫É ╫á╫Ö╫¬╫ƒ ╫£╫Æ╫⌐╫¬ ╫£╫¢╫¬╫ò╫æ╫¬. ╫æ╫ô╫ò╫º ╫⌐╫ö╫º╫Ö╫⌐╫ò╫¿ ╫¬╫º╫Ö╫ƒ ╫ò╫á╫í╫ö ╫⌐	
+2026-04-17 15:27:23	Edit	C:\foodCo\foodVibe1.0\src\app\shared\custom-multi-select\custom-multi-select.com	import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';	
+2026-04-17 15:27:38	Edit	C:\foodCo\foodVibe1.0\src\app\shared\custom-multi-select\custom-multi-select.com	    // Background and color set dynamically for option-based chip color (single exception)	
+2026-04-17 15:42:40	Edit	C:\foodCo\foodVibe1.0\src\app\shared\custom-multi-select\custom-multi-select.com	    // Background and color set dynamically for option-based chip color (single exception)	
+2026-04-17 15:42:46	Edit	C:\foodCo\foodVibe1.0\src\app\shared\custom-multi-select\custom-multi-select.com	    // Background and color set dynamically for option-based chip color (single exception)	
+2026-04-17 15:47:55	Edit	C:\foodCo\foodVibe1.0\src\app\shared\custom-multi-select\custom-multi-select.com	import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';	
+2026-04-17 15:48:09	Edit	C:\foodCo\foodVibe1.0\src\app\shared\custom-multi-select\custom-multi-select.com	    // Background and color set dynamically for option-based chip color (single exception)	
+2026-04-17 15:48:14	Edit	C:\foodCo\foodVibe1.0\src\app\shared\custom-multi-select\custom-multi-select.com	    // Background and color set dynamically for option-based chip color (single exception)	
+2026-04-17 15:54:40	Bash	git diff HEAD -- .claude/reflect/failure-log.tsv | head -30	 2026-04-16 18:29:29 Edit C:\foodCo\foodVibe1.0\.claude\skills\nightly-audit\SKILL.md - Exception: `[style.*]=` dynamic 	
+2026-04-17 15:59:57	mcp__mempalace__mempalace_search	@{query=MongoDB indexes userId sync performance; limit=5}	      "text": "tring, unique), `imgUrl`, `role` (enum admin/user), `passwordHash`, `failedAttempts`, `lockedUntil`.\n\n*	
+2026-04-17 16:01:38	Edit	C:\foodCo\foodVibe1.0\server\routes\auth.js	    } catch (syncErr) { console.error('[auth/refresh] sync error:', syncErr.message); }	
+2026-04-17 16:05:43	Bash	B=~/.claude/skills/gstack/browse/dist/browse
+sleep 3 && $B reload
+$B js "documen	page.evaluate: TypeError: Cannot read properties of null (reading 'scrollIntoView')	
+2026-04-17 16:22:43	Edit	C:\foodCo\foodVibe1.0\src\app\shared\custom-multi-select\custom-multi-select.com	import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';	
+2026-04-17 16:23:03	Edit	C:\foodCo\foodVibe1.0\src\app\shared\custom-multi-select\custom-multi-select.com	    // Background and color set dynamically for option-based chip color (single exception)	
+2026-04-17 16:23:56	Bash	B=~/.claude/skills/gstack/browse/dist/browse
+$B js "document.querySelector('.cus	[2026-04-17T13:02:49.182Z] [error] Failed to load resource: the server responded with a status of 401 (Unauthorized)	
+2026-04-17 16:24:13	Bash	B=~/.claude/skills/gstack/browse/dist/browse
+$B js "document.querySelector('app-	[2026-04-17T13:02:49.182Z] [error] Failed to load resource: the server responded with a status of 401 (Unauthorized)	
+2026-04-17 16:31:35	Bash	B=~/.claude/skills/gstack/browse/dist/browse
+$B url
+$B js "document.title"
+$B co	[2026-04-17T13:02:49.182Z] [error] Failed to load resource: the server responded with a status of 401 (Unauthorized)	
+2026-04-17 16:33:17	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
+2026-04-17 16:34:37	Edit	C:\foodCo\foodVibe1.0\public\assets\data\dictionary.json	        "ai_recipe_url_fetch_failed": "╫£╫É ╫á╫Ö╫¬╫ƒ ╫£╫Æ╫⌐╫¬ ╫£╫¢╫¬╫ò╫æ╫¬. ╫æ╫ô╫ò╫º ╫⌐╫ö╫º╫Ö╫⌐╫ò╫¿ ╫¬╫º╫Ö╫ƒ ╫ò╫á╫í╫ö ╫⌐	
+2026-04-17 17:07:23	Bash	B=~/.claude/skills/gstack/browse/dist/browse
+$B goto http://localhost:4200
+sleep	--- BEGIN UNTRUSTED EXTERNAL CONTENT (source: chrome-error://chromewebdata/) ---	
+2026-04-17 17:07:52	Bash	npx ng build --configuration=development 2>&1 | tail -40	Application bundle generation failed. [19.109 seconds]	
+2026-04-17 17:13:44	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\translation.service.ts	        this.logging.warn({ event: 'translation.cache.write_failed', message: 'Dictionary cache write failed (quota or a	

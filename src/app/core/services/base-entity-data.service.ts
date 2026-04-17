@@ -15,7 +15,7 @@ export abstract class BaseEntityDataService<T> {
   protected readonly storage = inject(StorageService)
   protected readonly logging = inject(LoggingService)
 
-  private readonly store_ = signal<T[]>([]);
+  private readonly store_ = signal<T[]>([])
 
   /** Read-only view of the entity list. Subclasses may alias this under a domain name. */
   readonly all_: Signal<T[]> = this.store_.asReadonly()

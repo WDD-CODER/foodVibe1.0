@@ -36,6 +36,9 @@ export class UserService {
   private _user_ = signal<User | null>(this._loadUserFromSession())
   public user_ = this._user_.asReadonly()
 
+  private _isDataReloading_ = signal(false)
+  public isDataReloading_ = this._isDataReloading_.asReadonly()
+
   private _refreshTimer: ReturnType<typeof setInterval> | null = null
 
   public isLoggedIn = () => this._user_() !== null
@@ -44,21 +47,28 @@ export class UserService {
     return this._user_()
   }
 
-  /** Fire-and-forget rehydration after login. Lazy-resolved to avoid circular DI. */
-  private _reloadDataServices(): void {
+  /** Rehydrates all data services after auth state changes (login or logout). Lazy-resolved to avoid circular DI. */
+  private async _reloadDataServices(): Promise<void> {
     // Deferred import to break the circular DI chain:
     // UserService → StorageService → HttpStorageAdapter → UserService
-    void import('./unit-registry.service').then(m => this.injector.get(m.UnitRegistryService).reloadFromStorage())
-    void import('./product-data.service').then(m => this.injector.get(m.ProductDataService).reloadFromStorage())
-    void import('./metadata-registry.service').then(m => this.injector.get(m.MetadataRegistryService).reloadFromStorage())
-    void import('./recipe-data.service').then(m => this.injector.get(m.RecipeDataService).reloadFromStorage())
-    void import('./dish-data.service').then(m => this.injector.get(m.DishDataService).reloadFromStorage())
-    void import('./supplier-data.service').then(m => this.injector.get(m.SupplierDataService).reloadFromStorage())
-    void import('./equipment-data.service').then(m => this.injector.get(m.EquipmentDataService).reloadFromStorage())
-    void import('./venue-data.service').then(m => this.injector.get(m.VenueDataService).reloadFromStorage())
-    void import('./menu-event-data.service').then(m => this.injector.get(m.MenuEventDataService).reloadFromStorage())
-    void import('./menu-section-categories.service').then(m => this.injector.get(m.MenuSectionCategoriesService).reloadFromStorage())
-    void import('./preparation-registry.service').then(m => this.injector.get(m.PreparationRegistryService).reloadFromStorage())
+    this._isDataReloading_.set(true)
+    try {
+      await Promise.all([
+        import('./unit-registry.service').then(m => this.injector.get(m.UnitRegistryService).reloadFromStorage()),
+        import('./product-data.service').then(m => this.injector.get(m.ProductDataService).reloadFromStorage()),
+        import('./metadata-registry.service').then(m => this.injector.get(m.MetadataRegistryService).reloadFromStorage()),
+        import('./recipe-data.service').then(m => this.injector.get(m.RecipeDataService).reloadFromStorage()),
+        import('./dish-data.service').then(m => this.injector.get(m.DishDataService).reloadFromStorage()),
+        import('./supplier-data.service').then(m => this.injector.get(m.SupplierDataService).reloadFromStorage()),
+        import('./equipment-data.service').then(m => this.injector.get(m.EquipmentDataService).reloadFromStorage()),
+        import('./venue-data.service').then(m => this.injector.get(m.VenueDataService).reloadFromStorage()),
+        import('./menu-event-data.service').then(m => this.injector.get(m.MenuEventDataService).reloadFromStorage()),
+        import('./menu-section-categories.service').then(m => this.injector.get(m.MenuSectionCategoriesService).reloadFromStorage()),
+        import('./preparation-registry.service').then(m => this.injector.get(m.PreparationRegistryService).reloadFromStorage()),
+      ])
+    } finally {
+      this._isDataReloading_.set(false)
+    }
   }
 
   constructor() {
@@ -243,6 +253,7 @@ export class UserService {
         this._stopRefreshTimer()
         this._saveUserLocal(null)
         this.clearToken()
+        this._reloadDataServices()
         if (environment.useBackendAuth) {
           this.callBackendLogout().subscribe({ error: () => {} })
         }
@@ -305,8 +316,8 @@ export class UserService {
   }
 
   _saveUserLocal(user: User | null): void {
-    this._user_.set(user && { ...user });
-    this._saveUserToSession(user);
+    this._user_.set(user && { ...user })
+    this._saveUserToSession(user)
   }
 
   _clearSessionStorage() {
@@ -320,16 +331,16 @@ export class UserService {
 
   private _loadUserFromSession(): User | null {
     try {
-      const raw = sessionStorage.getItem(SESSION_USER_KEY);
-      return raw ? JSON.parse(raw) : null;
+      const raw = sessionStorage.getItem(SESSION_USER_KEY)
+      return raw ? JSON.parse(raw) : null
     } catch { return null; }
   }
 
   private _saveUserToSession(user: User | null): void {
     if (user) {
-      sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(user));
+      sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(user))
     } else {
-      sessionStorage.removeItem(SESSION_USER_KEY);
+      sessionStorage.removeItem(SESSION_USER_KEY)
     }
   }
 }

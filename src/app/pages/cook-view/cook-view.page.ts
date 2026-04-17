@@ -147,6 +147,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   // ---- STOPWATCH SIGNALS ----
   protected stopwatchStepIndex_ = signal<number | null>(null)
   protected stopwatchSecondsElapsed_ = signal<number>(0)
+  protected stopwatchPaused_ = signal<boolean>(false)
   private stopwatchIntervalId_: ReturnType<typeof setInterval> | null = null
 
   /** Multiplier chip definitions exposed to template. */
@@ -893,12 +894,39 @@ export class CookViewPage implements OnInit, OnDestroy {
     }
     this.stopwatchStepIndex_.set(stepIndex)
     this.stopwatchSecondsElapsed_.set(0)
+    this.stopwatchPaused_.set(false)
     this.stopwatchIntervalId_ = setInterval(() => {
       this.stopwatchSecondsElapsed_.update(s => s + 1)
     }, 1000)
   }
 
-  /** Stop and reset the active stopwatch. */
+  /** Pause the running stopwatch. */
+  protected pauseStopwatch(): void {
+    if (this.stopwatchIntervalId_ !== null) {
+      clearInterval(this.stopwatchIntervalId_)
+      this.stopwatchIntervalId_ = null
+    }
+    this.stopwatchPaused_.set(true)
+  }
+
+  /** Resume a paused stopwatch from where it left off. */
+  protected resumeStopwatch(): void {
+    this.stopwatchPaused_.set(false)
+    this.stopwatchIntervalId_ = setInterval(() => {
+      this.stopwatchSecondsElapsed_.update(s => s + 1)
+    }, 1000)
+  }
+
+  /** Toggle pause/resume on the active stopwatch. */
+  protected toggleStopwatch(): void {
+    if (this.stopwatchPaused_()) {
+      this.resumeStopwatch()
+    } else {
+      this.pauseStopwatch()
+    }
+  }
+
+  /** Close and reset the active stopwatch. */
   protected stopStopwatch(): void {
     if (this.stopwatchIntervalId_ !== null) {
       clearInterval(this.stopwatchIntervalId_)
@@ -906,6 +934,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     }
     this.stopwatchStepIndex_.set(null)
     this.stopwatchSecondsElapsed_.set(0)
+    this.stopwatchPaused_.set(false)
   }
 
   protected onEdit(): void {

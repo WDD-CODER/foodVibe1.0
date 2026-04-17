@@ -107,31 +107,20 @@
             }
         </div>
 
-        <div class="labels-container">
-            <div class="labels-grid-row-wrap">
-                <div class="labels-grid-row">
-                    <app-custom-multi-select
-                        [formControl]="labelsControl"
-                        [options]="labelMultiSelectOptions_()"
-                        [readonlyChips]="autoLabels()"
-                        placeholder="labels"
-                        addNewValue="__add_label__"
-                        variant="chip"
-                        [searchable]="true"
-                        [maxHeight]="200"
-                        (addNewChosen)="openCreateLabel($event)" />
-                    <div class="labels-actions">
-                        <span class="labels-btn-label">{{ 'labels' | translatePipe }}</span>
-                        @if (hasAnyLabelsInContainer_()) {
-                            <button type="button" class="labels-btn-clear" tabindex="-1"
-                                (click)="clearAllManualLabels(); $event.stopPropagation()">
-                                {{ 'clear_all' | translatePipe }}
-                            </button>
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
+        <app-custom-multi-select
+            class="labels-container"
+            [formControl]="labelsControl"
+            [options]="labelMultiSelectOptions_()"
+            [readonlyChips]="autoLabels()"
+            placeholder="labels"
+            addNewValue="__add_label__"
+            variant="chip"
+            [searchable]="true"
+            [maxHeight]="200"
+            triggerTitle="labels"
+            [clearable]="hasAnyLabelsInContainer_()"
+            (cleared)="clearAllManualLabels()"
+            (addNewChosen)="openCreateLabel($event)" />
     </div>
 
     <div class="metrics-square">

@@ -1,4 +1,4 @@
-# Session State — 2026-04-14
+# Session State — 2026-04-16 (end of day — updated after ai-inventory-save-validation session)
 
 > Single source of truth for all project rules, standards, and skill/agent routing.
 
@@ -6,99 +6,145 @@
 
 ## Current Status
 
-**Branch:** `main`
-**Latest commit:** `de03a1d` (chore: session-handoff for security-audit-sprint)
-**Build status:** passing (verified 2026-04-14 end-of-session run, warnings only — budget overage, cook-view SCSS, exceljs CommonJS — all pre-existing)
-**Open PRs:** none — commits `7972591`, `b6ce1fc`, `de03a1d` unpushed; new session changes also uncommitted
+**Branch:** `fix/ai-inventory-save-validation` (changes in working tree — not yet committed)
+**Latest commit on branch:** `a52bdcb` — Merge pull request #118 from WDD-CODER/fix/master-pool-cleanup
+**Build status:** PASS (user confirmed 0 errors, 0 warnings)
+**Open PRs:** None
+**Dirty working tree:** YES — 13 files modified (see below)
 
 ---
 
-## Session Summary (2026-04-14) — Neto Confirm + Dish Reset + Type-Change Modal
+## IMPORTANT: Uncommitted Feature Work
 
-Four fixes/features shipped in the recipe-builder neto/dish confirmation flow:
+Two features were implemented this session and exist only in the working tree. Commit at the start of the next session:
 
-### Fix 1: Neto confirmation modal not showing on re-edit
-- **Root cause:** `netoConfirmed_` was loaded as `true` from the saved recipe, blocking the modal gate.
-- **Fix:** `RecipeHeaderComponent` emits `yieldManuallyChanged` output. Parent resets `netoConfirmed_.set(false)` on yield change.
+### Batch 1 — Unlinked badge click opens inline edit panel
+```
+recipe-ingredients-table.component.html   (badge click handler swapped)
+recipe-ingredients-table.component.ts     (+23 — onUnlinkedBadgeClick)
+```
 
-### Fix 2: Sync-badge reset button hidden
-- **Root cause:** Same `!netoConfirmed()` guard in the `@if` condition.
-- **Fix:** Removed `!netoConfirmed()` — button always shows when yield differs from computed.
+### Batch 2 — AI-inventory save validation + UX hardening (fix/ai-inventory-save-validation)
+```
+quick-add-product-modal.component.html    (+11 — red borders + error text)
+quick-add-product-modal.component.scss    (+11 — .field-error-msg, .input--error)
+quick-add-product-modal.component.ts      (+9  — nameError_/unitError_ signals)
+quick-edit-product-panel.component.html   (+11 — red borders + error text)
+quick-edit-product-panel.component.scss   (+12 — same error styles)
+quick-edit-product-panel.component.ts     (+9  — nameError_/unitError_ signals)
+recipe-builder.page.ts                    (+3  — scroll to first .incomplete-row on blocked save)
+recipe-ingredients-table.component.scss   (+7  — gap + .badge-label for incomplete badge)
+public/assets/data/dictionary.json        (+1  — "fix": "תקן")
+```
 
-### Feature 3: Dish-type neto confirmation + reset button
-- `isYieldManualOverride()` returns `isManualOverride_()` for dish type (no ingredient-total comparison).
-- Dish-specific modal text: `dish_portions_confirm_header` / `dish_portions_confirm_message`.
-- New `savedPortions` input on `RecipeHeaderComponent`; dish reset button shows when editing existing dish with changed portions.
-- `savedPortions_` signal in page: set from `recipe.yield_amount_` in `patchFormFromRecipe`, cleared on new recipe.
-- New `resetToSavedPortions()` method in `RecipeYieldManager`.
-- Template: recipe sync badge gated on `!== 'dish'`; dish reset badge gated on `=== 'dish' && isManualOverride_() && savedPortions() !== null`.
-
-### Feature 4: Type-change confirmation modal
-- When user clicks the recipe/dish toggle while the form is dirty, a warning modal fires.
-- Fresh (non-dirty) forms toggle immediately with no prompt.
-- `ConfirmModalService` injected into `RecipeHeaderComponent`; `toggleTypeWrapper()` made async.
-
-### Plus (same uncommitted batch)
-- `server/routes/generic.js` — master-copy fallback for users whose sync skipped due to name collision
-- `docs/session-state.md` — updated for this session
-- `.claude/copilot-instructions.md` — routing rule updated for end-of-session-agent
+**Next session start sequence:**
+1. `ng build` — verify 0 errors
+2. Manual smoke test: unlinked icon → inline edit; save without name → red border shown; blocked save → page scrolls to .incomplete-row
+3. Commit both batches on `fix/ai-inventory-save-validation` → create PR
 
 ---
 
-## Prior Session Summary (2026-04-14) — Guest 404 Fix
+## Session Summary (2026-04-16 — AI Inventory Save Validation)
 
-Fixed spurious 404 console errors when a guest user clicks a recipe after login.
+### Fix — Inline validation for Quick-Add and Quick-Edit panels
+- `quick-add-product-modal` and `quick-edit-product-panel`: Added `nameError_` / `unitError_` signals; validation fires on save attempt; red `input--error` border + `.field-error-msg` text shown under offending fields
+- `recipe-ingredients-table.component.scss`: Added `gap` + `.badge-label` to `incomplete-badge` — displays "תקן" text label alongside the badge icon
+- `recipe-builder.page.ts`: On blocked save (incomplete rows present), page scrolls to the first `.incomplete-row` automatically
+- `dictionary.json`: Added `"fix": "תקן"` translation key
 
-### Fixes
-1. `server/routes/generic.js` — `_masterId` fallback in `GET /:type/:id`
-2. `recipe-data.service.ts` — silenced 404 logging
-3. `dish-data.service.ts` — silenced 404 logging
-
-All committed in `7972591`.
-
----
-
-## Uncommitted Changes (This Session)
-
-- `public/assets/data/dictionary.json` — 4 new translation keys
-- `src/app/core/utils/recipe-yield-manager.util.ts` — `resetToSavedPortions()`
-- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts` — dish portions input, reset wrapper, `isYieldManualOverride()` fix, `ConfirmModalService`, async toggle
-- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html` — sync/dish badge split
-- `src/app/pages/recipe-builder/recipe-builder.page.ts` — `savedPortions_` signal, dish confirmation messages
-- `src/app/pages/recipe-builder/recipe-builder.page.html` — `[savedPortions]` binding
-- `server/routes/generic.js` — master-copy fallback (additional fix)
-- `docs/session-state.md` — this update
-- `.claude/copilot-instructions.md` — routing rule tweak
+### Unlinked badge feature (carried from previous session — now also in working tree)
+- `recipe-ingredients-table.component.ts/html`: Clicking unlinked badge calls `onUnlinkedBadgeClick` → opens Quick-Edit panel at `'incomplete'` tier
 
 ---
 
-## Next Steps
+## Prior Session Summary (2026-04-16 evening) — Disk Cleanup
 
-1. **Commit and push** all uncommitted changes above
-2. **Manual smoke tests:**
-   - Open recipe-builder → change yield → save → reopen → change yield again → confirm neto modal appears
-   - Confirm sync-badge always visible when yield differs from computed
-   - Open existing dish → change portions → verify dish-specific modal fires on save
-   - Open existing dish → change portions → verify reset button appears and restores saved value
-   - Toggle recipe/dish type while form is dirty → confirm warning modal appears; toggle while clean → confirm immediate
-   - Navigate from preparation to dish → confirm no `workflow_items -> N -> instruction` crash
-3. **Push `main` to remote** — multiple unpushed commits: `7972591`, `b6ce1fc`, `de03a1d` + new commit
-4. **Run `cleanupNameCollisionClones`** against production — requires Atlas/Compass
-5. Address Plan 234 operational tasks — see `todo.md`
+### Maintenance session — no code changes
+- Cleared disk space: freed ~16+ GB total (uv, pip, Bun, Chrome, Slack, Discord, Claude Desktop)
+- Confirmed: `dev:local` is correct for active development (Render free tier sleeps)
+
+---
+
+## Prior Session Summary (2026-04-16 morning) — Unlinked Ingredient Inline Edit
+
+### Feature — Unlinked badge click → inline edit panel
+- `recipe-ingredients-table.component.ts`: Added `onUnlinkedBadgeClick` — creates stub product, patches form row, calls `onQuickEditBadgeClick` at tier `'incomplete'`
+- Build verified; NOT committed — changes carried into the current session's working tree
+
+---
+
+## Prior Session Summary (2026-04-16 earlier) — Confirm Modal Migration (PR #118, MERGED)
+
+### Fix 1 — Auth interceptor 404 noise
+- Root cause: `auth.interceptor.ts:98` logged ALL 4xx responses. Recipe resolver uses a two-step lookup (RECIPE_LIST → DISH_LIST fallback), generating expected 404s on every navigation to a dish recipe.
+- Fix: Added `&& err.status !== 404` to the error-logging condition. Other 4xx/5xx still logged.
+- File: `src/app/core/interceptors/auth.interceptor.ts`
+
+### Fix 2 — Replace 13 native confirm() with ConfirmModalService
+Replaced all native `confirm()` calls across 5 list components:
+- `recipe-book-list.component.ts` — 4 calls (added import+inject, methods async)
+- `venue-list.component.ts` — 2 calls (added inject, unwrapped async IIFE)
+- `equipment-list.component.ts` — 2 calls (already had inject)
+- `inventory-product-list.component.ts` — 2 calls (already had inject)
+- `supplier-list.component.ts` — 3 calls (already had inject; in-use warning uses `variant:'warning'`)
+- `recipe-book-list.component.spec.ts` — 2 tests updated from `spyOn(window,'confirm')` to `spyOn(confirmModal,'open')`
+
+### Explanation — log-server.js
+- `scripts/log-server.js` is a separate process on port 9765 that receives frontend log POSTs
+- Start with: `node scripts/log-server.js`
+- App server is `server.js` (Express API on port 3000)
+
+---
+
+## Prior Session Summary (2026-04-15) — Master Pool Cleanup + Tombstones
+
+### Plan 269 — Master Pool Cleanup + Deletion Tombstones (PR #117)
+- `server/routes/generic.js` POST: removed master-copy dual-write + collision branch; `_masterId` now self-referential
+- `server/routes/generic.js` GET list + GET by-id: `_userDeleted: { $ne: true }` tombstone filter; GET by-id collapsed from 3-layer fallback to single `findOne`
+- `server/routes/generic.js` DELETE: master-cloned items → tombstone; user-originated items → hard delete
+- `server/services/sync-master.js`: `cleanupNameCollisionClones` removed
+- `server/routes/auth.js`: `cleanupNameCollisionClones` import + all 3 call sites removed
+
+### Fix — type-change 409 crash (PR #117)
+- `src/app/core/services/http-storage.adapter.ts`: `appendExisting` treats 409 as success
+
+---
+
+## Next Steps (Priority Order)
+
+1. **FIRST: Commit fix/ai-inventory-save-validation** (dirty working tree — 13 files):
+   - `ng build` — verify 0 errors
+   - Smoke test: unlinked icon → inline edit; save without name → red border; blocked save → scroll to .incomplete-row
+   - Commit all 13 modified files on `fix/ai-inventory-save-validation` → create PR
+   - Note: stub product uses `base_unit_: 'gram'` hardcoded — flag for follow-up if unit mismatch needed
+
+2. **Manual smoke tests for PR #117** (MongoDB required, still pending):
+   - Sign in → create product → Compass: single doc in userId, nothing in `__master__`
+   - Delete master-seeded item → Compass: `_userDeleted: true`, client-invisible
+   - Log out and back in → tombstoned item must NOT re-appear
+   - Delete user-owned item (not master clone) → Compass: hard deleted
+
+3. **Plan 255 — Dead Code Cleanup (remaining open tasks):**
+   - Task 8: Investigate repair script trio (`backup-before-repair.mjs`, `diagnose-broken-refs.mjs`, `repair-recipe-references.mjs`)
+   - Task 9: Investigate migration pair (`migrate-to-master.mjs`, `link-users-to-master.mjs`)
+   - Task 10: Investigate `scripts/trim-demo-data.mjs`
+
+4. **Plan 259 — DB-Backed Shared Few-Shot Pool** — all tasks open
 
 ---
 
 ## Blocked
 
 - Plan 234 operational tasks require manual Atlas/Compass access and production deploy
-- Name collision cleanup in production requires manual run or deploy of migration script
+- PR #117 smoke tests require running server against a real MongoDB instance
 
 ---
 
 ## References
 
-- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts` — `yieldManuallyChanged`, `savedPortions`, `isYieldManualOverride()`, `toggleTypeWrapper()` async
-- `src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html` — recipe/dish badge split
-- `src/app/pages/recipe-builder/recipe-builder.page.ts` — `savedPortions_` signal, dish confirmation messages
-- `src/app/core/utils/recipe-yield-manager.util.ts` — `resetToSavedPortions()`
-- `server/routes/generic.js` — master-copy fallback
+- PR #118: https://github.com/WDD-CODER/foodVibe1.0/pull/118 — confirm modal migration + 404 fix (MERGED)
+- PR #117: https://github.com/WDD-CODER/foodVibe1.0/pull/117 (merged — master pool cleanup)
+- PR #116: https://github.com/WDD-CODER/foodVibe1.0/pull/116 (merged)
+- Session handoff (ai-inventory-save-validation): `.claude/sessions/2026-04-16-unlinked-ingredient-inline-edit/session-handoff.md` (updated this session)
+- Session handoff (confirm modal): `.claude/sessions/2026-04-16-confirm-modal-migration/session-handoff.md`
+- Techdebt report: `.claude/techdebt-reports/techdebt-2026-04-16.md`

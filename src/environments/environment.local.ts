@@ -5,5 +5,6 @@ export const environment = {
   authApiUrl: 'http://localhost:3000',
   useBackendAuth: true,
   useBackend: true,
+  autoLoginGuest: true,
   logServerUrl: 'http://localhost:9765'
 }

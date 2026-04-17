@@ -16,17 +16,21 @@
       <form (ngSubmit)="onSave()" class="c-modal-body quick-add-product-modal__form">
         <section class="quick-add-product-modal__section quick-add-product-modal__section--required" aria-label="Required fields">
           <div class="quick-add-product-modal__grid quick-add-product-modal__grid--dense">
-            <div class="quick-add-product-modal__field">
+            <div class="quick-add-product-modal__field" [class.field--error]="nameError_()">
               <label for="quick-add-name">{{ 'product_name' | translatePipe }}</label>
               <input
                 id="quick-add-name"
                 type="text"
+                [class.input--error]="nameError_()"
                 [ngModel]="name_()"
                 (ngModelChange)="name_.set($event)"
                 name="name_hebrew"
                 (keydown.enter)="$event.preventDefault(); onSave()" />
+              @if (nameError_()) {
+                <span class="field-error-msg">{{ nameError_() | translatePipe }}</span>
+              }
             </div>
-            <div class="quick-add-product-modal__field">
+            <div class="quick-add-product-modal__field" [class.field--error]="unitError_()">
               <label for="quick-add-base-unit">{{ 'base_unit' | translatePipe }}</label>
               <app-custom-select
                 #baseUnitSelect
@@ -39,6 +43,9 @@
                 [ngModel]="baseUnit_()"
                 (ngModelChange)="onBaseUnitChange($event)"
                 name="base_unit_" />
+              @if (unitError_()) {
+                <span class="field-error-msg">{{ unitError_() | translatePipe }}</span>
+              }
             </div>
             <div class="quick-add-product-modal__field">
               <label for="quick-add-price">{{ 'buy_price' | translatePipe }}</label>

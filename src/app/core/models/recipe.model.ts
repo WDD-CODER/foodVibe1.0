@@ -1,75 +1,75 @@
-import { Ingredient } from './ingredient.model';
-import type { DishLogistics } from './logistics.model';
+import { Ingredient } from './ingredient.model'
+import type { DishLogistics } from './logistics.model'
 
 export interface RecipeStep {
-  order_: number;
-  instruction_: string;
-  labor_time_minutes_: number;
+  order_: number
+  instruction_: string
+  labor_time_minutes_: number
   /** Cook timer duration in seconds (session countdown). Separate from labor_time_minutes_ which is admin/analytics. */
-  cooking_time_secs_?: number;
-  video_url_?: string;
+  cooking_time_secs_?: number
+  video_url_?: string
 }
 
 export interface MiseItem {
-  item_name: string;
-  unit: string;
-  quantity?: number;
-  category_name?: string;
+  item_name: string
+  unit: string
+  quantity?: number
+  category_name?: string
 }
 
 /** Flat prep item for dish workflow (prep list) */
 export interface FlatPrepItem {
-  preparation_name: string;
-  category_name: string;
+  preparation_name: string
+  category_name: string
   /** When set, global (registry) category; when absent, treat as equal to category_name (backward compatible). */
-  main_category_name?: string;
-  quantity: number;
-  unit: string;
+  main_category_name?: string
+  quantity: number
+  unit: string
 }
 
 export interface PrepCategory {
-  category_name: string;
-  items: MiseItem[];
+  category_name: string
+  items: MiseItem[]
 }
 
 export interface Recipe {
-  _id: string;
-  name_hebrew: string;
-  ingredients_: Ingredient[];
-  steps_: RecipeStep[];
-  yield_amount_: number;
-  yield_unit_: string;
+  _id: string
+  name_hebrew: string
+  ingredients_: Ingredient[]
+  steps_: RecipeStep[]
+  yield_amount_: number
+  yield_unit_: string
   /** Equivalent yields per unit for the same batch (e.g. [{ amount: 1, unit: 'kg' }, { amount: 4, unit: 'unit' }]). Used in cook-view for recipe-specific unit options and conversion. */
-  yield_conversions_?: { amount: number; unit: string }[];
-  default_station_: string;
-  is_approved_: boolean;
+  yield_conversions_?: { amount: number; unit: string }[]
+  default_station_: string
+  is_approved_: boolean
   /** 'dish' | 'preparation' - determines storage (DISH_LIST vs RECIPE_LIST) */
-  recipe_type_?: 'dish' | 'preparation';
-  version_history_?: string[];
+  recipe_type_?: 'dish' | 'preparation'
+  version_history_?: string[]
   /** For recipe_type === 'dish': flat prep list */
-  prep_items_?: FlatPrepItem[];
+  prep_items_?: FlatPrepItem[]
   /** For recipe_type === 'dish': grouped by category */
-  prep_categories_?: PrepCategory[];
+  prep_categories_?: PrepCategory[]
   /** Baseline equipment + service-style overrides (contextual logistics) */
-  logistics_?: DishLogistics;
+  logistics_?: DishLogistics
   /** User-chosen labels (keys from label registry) */
-  labels_?: string[];
+  labels_?: string[]
   /** Auto-applied labels from ingredient categories/allergens (computed on save) */
-  autoLabels_?: string[];
+  autoLabels_?: string[]
   /** Epoch ms when the recipe/dish was first added (set on create, preserved on update) */
-  addedAt_?: number;
+  addedAt_?: number
   /** Epoch ms when the recipe/dish was last updated (set on create and on every update) */
-  updatedAt_?: number;
+  updatedAt_?: number
   /** _id of the user who created this recipe/dish */
-  createdBy?: string;
+  createdBy?: string
   /** List of user _ids who have hidden this recipe from their view (soft-delete per user) */
-  hiddenBy?: string[];
+  hiddenBy?: string[]
   /** List of user _ids who have favorited this recipe/dish */
-  favoritedBy_?: string[];
+  favoritedBy_?: string[]
   /** Base64 data-URL of the recipe photo, set by user upload in recipe-builder. */
-  imageUrl_?: string;
+  imageUrl_?: string
   /** User-assigned rating (1–5 stars). Optional; absent means unrated. */
-  rating_?: number;
+  rating_?: number
   /** True once user has explicitly confirmed the manual yield amount as neto (not total ingredients weight). */
-  neto_confirmed_?: boolean;
+  neto_confirmed_?: boolean
 }

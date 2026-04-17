@@ -1,10 +1,10 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { Injectable, inject } from '@angular/core'
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http'
+import { catchError, firstValueFrom, of } from 'rxjs'
+import { environment } from '../../../environments/environment'
 
 /** Mirrors EntityId from async-storage.service.ts — kept local to avoid circular import. */
-type EntityId = { _id: string };
+type EntityId = { _id: string }
 
 /**
  * sessionStorage key where the JWT is stored after login.
@@ -19,7 +19,7 @@ type EntityId = { _id: string };
  * localStorage was rejected because it survives tab close and browser
  * restart, violating the credential-storage prohibition in the standard.
  */
-const TOKEN_KEY = 'fv_token';
+const TOKEN_KEY = 'fv_token'
 
 /**
  * HTTP adapter that mirrors the full StorageService interface.
@@ -39,18 +39,18 @@ const TOKEN_KEY = 'fv_token';
  */
 @Injectable({ providedIn: 'root' })
 export class HttpStorageAdapter {
-  private http = inject(HttpClient);
-  private base = environment.apiUrl;
+  private http = inject(HttpClient)
+  private base = environment.apiUrl
 
   // ---------------------------------------------------------------------------
   // Token helper
   // ---------------------------------------------------------------------------
 
   private headers(): HttpHeaders {
-    const token = sessionStorage.getItem(TOKEN_KEY);
+    const token = sessionStorage.getItem(TOKEN_KEY)
     return token
       ? new HttpHeaders({ Authorization: `Bearer ${token}` })
-      : new HttpHeaders();
+      : new HttpHeaders()
   }
 
   // ---------------------------------------------------------------------------
@@ -65,14 +65,14 @@ export class HttpStorageAdapter {
   async query<T>(entityType: string, _delay = 100): Promise<T[]> {
     return firstValueFrom(
       this.http.get<T[]>(`${this.base}/api/v1/data/${entityType}`, { headers: this.headers(), withCredentials: true })
-    );
+    )
   }
 
   /** Returns one entity by id. Throws if not found (404 → HttpErrorResponse). */
   async get<T extends EntityId>(entityType: string, entityId: string): Promise<T> {
     return firstValueFrom(
       this.http.get<T>(`${this.base}/api/v1/data/${entityType}/${entityId}`, { headers: this.headers(), withCredentials: true })
-    );
+    )
   }
 
   /**
@@ -80,10 +80,10 @@ export class HttpStorageAdapter {
    * matching the behaviour of StorageService.post().
    */
   async post<T>(entityType: string, newEntity: T): Promise<T & EntityId> {
-    const entityWithId = { ...(newEntity as object), _id: this.makeId() } as T & EntityId;
+    const entityWithId = { ...(newEntity as object), _id: this.makeId() } as T & EntityId
     return firstValueFrom(
       this.http.post<T & EntityId>(`${this.base}/api/v1/data/${entityType}`, entityWithId, { headers: this.headers(), withCredentials: true })
-    );
+    )
   }
 
   /** Updates one entity. Uses updatedEntity._id as the path parameter. */
@@ -94,14 +94,14 @@ export class HttpStorageAdapter {
         updatedEntity,
         { headers: this.headers(), withCredentials: true }
       )
-    );
+    )
   }
 
   /** Removes one entity by id. */
   async remove(entityType: string, entityId: string): Promise<void> {
     await firstValueFrom(
       this.http.delete<void>(`${this.base}/api/v1/data/${entityType}/${entityId}`, { headers: this.headers(), withCredentials: true })
-    );
+    )
   }
 
   /**
@@ -110,12 +110,12 @@ export class HttpStorageAdapter {
    * generated here are format-compatible for migration purposes.
    */
   makeId(length = 5): string {
-    let txt = '';
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let txt = ''
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
     for (let i = 0; i < length; i++) {
-      txt += possible.charAt(Math.floor(Math.random() * possible.length));
+      txt += possible.charAt(Math.floor(Math.random() * possible.length))
     }
-    return txt;
+    return txt
   }
 
   /**
@@ -124,8 +124,12 @@ export class HttpStorageAdapter {
    */
   async appendExisting<T extends EntityId>(entityType: string, entity: T): Promise<void> {
     await firstValueFrom(
-      this.http.post<unknown>(`${this.base}/api/v1/data/${entityType}`, entity, { headers: this.headers(), withCredentials: true })
-    );
+      this.http.post<unknown>(`${this.base}/api/v1/data/${entityType}`, entity, { headers: this.headers(), withCredentials: true }).pipe(
+        // 409 = item already exists in the target collection (e.g. already in trash from a
+        // prior attempt). The goal of appendExisting is "make sure it's there" — treat as success.
+        catchError((err: HttpErrorResponse) => err.status === 409 ? of(null) : new Promise((_, reject) => reject(err)))
+      )
+    )
   }
 
   /**
@@ -139,6 +143,6 @@ export class HttpStorageAdapter {
         entities,
         { headers: this.headers().set('X-Confirm-Replace', 'true'), withCredentials: true }
       )
-    );
+    )
   }
 }

@@ -14,8 +14,8 @@ export class RecipeDataService {
   private logging = inject(LoggingService)
   private userService = inject(UserService)
 
-  private recipesStore_ = signal<Recipe[]>([]);
-  readonly allRecipes_ = this.recipesStore_.asReadonly();
+  private recipesStore_ = signal<Recipe[]>([])
+  readonly allRecipes_ = this.recipesStore_.asReadonly()
 
   constructor() {
     this.loadInitialData().catch(() => {})
@@ -23,14 +23,14 @@ export class RecipeDataService {
 
   /** Re-read from storage and refresh the signal. Used by demo loader after replacing data. */
   async reloadFromStorage(): Promise<void> {
-    this.recipesStore_.set([]);
-    await this.loadInitialData();
+    this.recipesStore_.set([])
+    await this.loadInitialData()
   }
 
   private async loadInitialData(): Promise<void> {
     try {
-      const data = await this.storage.query<Recipe>(ENTITY);
-      this.recipesStore_.set(data);
+      const data = await this.storage.query<Recipe>(ENTITY)
+      this.recipesStore_.set(data)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
       this.logging.error({ event: 'crud.recipes.hydrate_error', message: 'Failed to load recipes', context: { err } })
@@ -39,7 +39,7 @@ export class RecipeDataService {
 
   async getRecipeById(_id: string): Promise<Recipe> {
     try {
-      return this.storage.get<Recipe>(ENTITY, _id);
+      return this.storage.get<Recipe>(ENTITY, _id)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       if (err instanceof HttpErrorResponse && err.status === 404) throw err
@@ -133,7 +133,7 @@ export class RecipeDataService {
 
   async getTrashRecipes(): Promise<(Recipe & { deletedAt: number })[]> {
     try {
-      return this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY, 0);
+      return this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY, 0)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({ event: 'crud.recipe.getTrash_error', message: 'Failed to get trash recipes', context: { err } })
@@ -143,15 +143,15 @@ export class RecipeDataService {
 
   async restoreRecipe(_id: string): Promise<Recipe> {
     try {
-      const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY, 0);
-      const item = trash.find(r => r._id === _id);
-      if (!item) throw new Error(`Recipe ${_id} not found in trash`);
-      const { deletedAt: _, ...recipe } = item;
-      const rest = trash.filter(r => r._id !== _id);
-      await this.storage.replaceAll(TRASH_KEY, rest);
-      await this.storage.appendExisting(ENTITY, recipe);
-      this.recipesStore_.update(recipes => [...recipes, recipe]);
-      return recipe;
+      const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY, 0)
+      const item = trash.find(r => r._id === _id)
+      if (!item) throw new Error(`Recipe ${_id} not found in trash`)
+      const { deletedAt: _, ...recipe } = item
+      const rest = trash.filter(r => r._id !== _id)
+      await this.storage.replaceAll(TRASH_KEY, rest)
+      await this.storage.appendExisting(ENTITY, recipe)
+      this.recipesStore_.update(recipes => [...recipes, recipe])
+      return recipe
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({ event: 'crud.recipe.restore_error', message: 'Failed to restore recipe', context: { err } })
@@ -161,10 +161,10 @@ export class RecipeDataService {
 
   async disposeRecipe(_id: string): Promise<void> {
     try {
-      const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY, 0);
-      const rest = trash.filter(r => r._id !== _id);
-      if (rest.length === trash.length) throw new Error(`Recipe ${_id} not found in trash`);
-      await this.storage.replaceAll(TRASH_KEY, rest);
+      const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY, 0)
+      const rest = trash.filter(r => r._id !== _id)
+      if (rest.length === trash.length) throw new Error(`Recipe ${_id} not found in trash`)
+      await this.storage.replaceAll(TRASH_KEY, rest)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({ event: 'crud.recipe.dispose_error', message: 'Failed to dispose recipe', context: { err } })
@@ -174,16 +174,16 @@ export class RecipeDataService {
 
   async restoreAllRecipes(): Promise<Recipe[]> {
     try {
-      const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY, 0);
-      const restored: Recipe[] = [];
+      const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY, 0)
+      const restored: Recipe[] = []
       for (const item of trash) {
-        const { deletedAt: _, ...recipe } = item;
-        await this.storage.appendExisting(ENTITY, recipe);
-        restored.push(recipe);
+        const { deletedAt: _, ...recipe } = item
+        await this.storage.appendExisting(ENTITY, recipe)
+        restored.push(recipe)
       }
-      await this.storage.replaceAll(TRASH_KEY, []);
-      this.recipesStore_.update(recipes => [...recipes, ...restored]);
-      return restored;
+      await this.storage.replaceAll(TRASH_KEY, [])
+      this.recipesStore_.update(recipes => [...recipes, ...restored])
+      return restored
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({ event: 'crud.recipe.restoreAll_error', message: 'Failed to restore all recipes', context: { err } })
@@ -193,7 +193,7 @@ export class RecipeDataService {
 
   async disposeAllRecipes(): Promise<void> {
     try {
-      await this.storage.replaceAll(TRASH_KEY, []);
+      await this.storage.replaceAll(TRASH_KEY, [])
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({ event: 'crud.recipe.disposeAll_error', message: 'Failed to dispose all recipes', context: { err } })

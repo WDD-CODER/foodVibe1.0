@@ -1,4 +1,4 @@
-import { Directive, ElementRef, input } from '@angular/core';
+import { Directive, ElementRef, input } from '@angular/core'
 
 /**
  * Place on quantity input or unit select in ingredient row.
@@ -9,12 +9,12 @@ import { Directive, ElementRef, input } from '@angular/core';
   standalone: true
 })
 export class FocusByRowDirective {
-  readonly rowIndex = input.required<number>();
-  readonly kind = input<'qty' | 'unit'>('qty');
+  readonly rowIndex = input.required<number>()
+  readonly kind = input<'qty' | 'unit'>('qty')
 
   constructor(private el: ElementRef<HTMLInputElement | HTMLSelectElement>) {}
 
   focus(): void {
-    this.el.nativeElement.focus();
+    this.el.nativeElement.focus()
   }
 }

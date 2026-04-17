@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { Product } from '@models/product.model';
+import { Injectable } from '@angular/core'
+import { Product } from '@models/product.model'
 
 @Injectable({
   providedIn: 'root',
@@ -7,15 +7,15 @@ import { Product } from '@models/product.model';
 export class UtilService {
 
   makeId(length: number = 6): string {
-    let result = '';
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = ''
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 
     for (let i = 0; i < length; i++) {
-      const randomIndex = Math.floor(Math.random() * characters.length);
-      result += characters.charAt(randomIndex);
+      const randomIndex = Math.floor(Math.random() * characters.length)
+      result += characters.charAt(randomIndex)
     }
 
-    return result;
+    return result
   }
 
   getEmptyProduct(): Product {
@@ -31,6 +31,6 @@ export class UtilService {
       min_stock_level_: 0,
       expiry_days_default_: 0,
       updatedAt: new Date().toISOString()
-    };
+    }
   }
 }

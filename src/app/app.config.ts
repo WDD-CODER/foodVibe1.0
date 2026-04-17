@@ -81,12 +81,18 @@ import {
   Type,
   Link,
   Coins,
-  Clock
+  Clock,
+  Watch,
+  Play,
+  Pause
 } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { provideHttpClient, withInterceptors } from '@angular/common/http'
 import { authInterceptor } from './core/interceptors/auth.interceptor'
 import { TranslationService } from '@services/translation.service';
+import { UserService } from '@services/user.service'
+import { environment } from '../environments/environment'
+import { catchError, of, switchMap } from 'rxjs'
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -99,6 +105,19 @@ export const appConfig: ApplicationConfig = {
       provide: APP_INITIALIZER,
       useFactory: (transService: TranslationService) => () => transService.loadGlobalDictionary(),
       deps: [TranslationService],
+      multi: true
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (userService: UserService) => () => {
+        if (!environment.autoLoginGuest) return of(null)
+        const guestLogin = () => userService.loginAsGuestBackend().pipe(catchError(() => of(null)))
+        return userService.refreshToken().pipe(
+          switchMap(() => userService.isLoggedIn() ? of(null) : guestLogin()),
+          catchError(() => guestLogin())
+        )
+      },
+      deps: [UserService],
       multi: true
     },
     importProvidersFrom(
@@ -180,7 +199,10 @@ export const appConfig: ApplicationConfig = {
         Type,
         Link,
         Coins,
-        Clock
+        Clock,
+        Watch,
+        Play,
+        Pause
       })
     )
   ]

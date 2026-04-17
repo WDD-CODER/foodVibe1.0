@@ -1,14 +1,14 @@
-import { Injectable, inject } from '@angular/core';
-import { ACTIVITY_STORAGE_KEY } from './activity-log.service';
-import { environment } from '../../../environments/environment';
-import { HttpStorageAdapter } from './http-storage.adapter';
+import { Injectable, inject } from '@angular/core'
+import { ACTIVITY_STORAGE_KEY } from './activity-log.service'
+import { environment } from '../../../environments/environment'
+import { HttpStorageAdapter } from './http-storage.adapter'
 
 export type EntityId = {
-  _id: string;
-};
+  _id: string
+}
 
 /** Thrown when localStorage.setItem fails (quota exceeded, private mode, disabled). */
-export const STORAGE_ERROR_MESSAGE = 'Storage failed: quota or access denied';
+export const STORAGE_ERROR_MESSAGE = 'Storage failed: quota or access denied'
 
 /** Entity types that are mirrored to backup_<key> after every successful save. */
 export const BACKUP_ENTITY_TYPES = new Set<string>([
@@ -17,7 +17,7 @@ export const BACKUP_ENTITY_TYPES = new Set<string>([
   'TRASH_RECIPES', 'TRASH_DISHES', 'TRASH_PRODUCTS', 'TRASH_EQUIPMENT', 'TRASH_VENUES', 'TRASH_MENU_EVENTS',
   'VERSION_HISTORY', ACTIVITY_STORAGE_KEY, 'KITCHEN_UNITS', 'KITCHEN_PREPARATIONS',
   'KITCHEN_CATEGORIES', 'KITCHEN_ALLERGENS', 'KITCHEN_LABELS', 'MENU_TYPES', 'MENU_SECTION_CATEGORIES'
-]);
+])
 
 @Injectable({
   providedIn: 'root'
@@ -25,99 +25,99 @@ export const BACKUP_ENTITY_TYPES = new Set<string>([
 export class StorageService {
   /** Injected unconditionally so Angular's DI graph is stable.
    *  Only used at runtime when environment.useBackend is true. */
-  private httpAdapter = inject(HttpStorageAdapter);
+  private httpAdapter = inject(HttpStorageAdapter)
 
   async query<T>(entityType: string, delay = 100): Promise<T[]> {
-    if (environment.useBackend) return this.httpAdapter.query<T>(entityType, delay);
-    let entities: T[] = [];
+    if (environment.useBackend) return this.httpAdapter.query<T>(entityType, delay)
+    let entities: T[] = []
     try {
-      const raw = localStorage.getItem(entityType) || 'null';
-      const parsed = JSON.parse(raw);
-      entities = Array.isArray(parsed) ? parsed : parsed ? [parsed] : [];
+      const raw = localStorage.getItem(entityType) || 'null'
+      const parsed = JSON.parse(raw)
+      entities = Array.isArray(parsed) ? parsed : parsed ? [parsed] : []
     } catch {
-      entities = [];
+      entities = []
     }
     if (delay) {
-      return new Promise((resolve) => setTimeout(resolve, delay, entities));
+      return new Promise((resolve) => setTimeout(resolve, delay, entities))
     }
-    return entities;
+    return entities
   }
 
   async get<T extends EntityId>(entityType: string, entityId: string): Promise<T> {
-    if (environment.useBackend) return this.httpAdapter.get<T>(entityType, entityId);
-    const entities = await this.query<T>(entityType);
-    const entity = entities.find(entity => entity._id === entityId);
-    if (!entity) throw new Error(`Cannot get, Item ${entityId} of type: ${entityType} does not exist`);
-    return entity;
+    if (environment.useBackend) return this.httpAdapter.get<T>(entityType, entityId)
+    const entities = await this.query<T>(entityType)
+    const entity = entities.find(entity => entity._id === entityId)
+    if (!entity) throw new Error(`Cannot get, Item ${entityId} of type: ${entityType} does not exist`)
+    return entity
   }
 
   async post<T>(entityType: string, newEntity: T): Promise<T & EntityId> {
-    if (environment.useBackend) return this.httpAdapter.post<T>(entityType, newEntity);
-    const entityToSave = { ...newEntity, _id: this.makeId() };
-    const entities = await this.query<T & EntityId>(entityType, 0);
-    entities.push(entityToSave);
-    this._save(entityType, entities);
-    return entityToSave;
+    if (environment.useBackend) return this.httpAdapter.post<T>(entityType, newEntity)
+    const entityToSave = { ...newEntity, _id: this.makeId() }
+    const entities = await this.query<T & EntityId>(entityType, 0)
+    entities.push(entityToSave)
+    this._save(entityType, entities)
+    return entityToSave
   }
 
   async put<T extends EntityId>(entityType: string, updatedEntity: T): Promise<T> {
-    if (environment.useBackend) return this.httpAdapter.put<T>(entityType, updatedEntity);
-    const entities = await this.query<T>(entityType, 0);
-    const idx = entities.findIndex(entity => entity._id === updatedEntity._id);
-    if (idx === -1) throw new Error(`Cannot update, product ${updatedEntity._id} does not exist`);
+    if (environment.useBackend) return this.httpAdapter.put<T>(entityType, updatedEntity)
+    const entities = await this.query<T>(entityType, 0)
+    const idx = entities.findIndex(entity => entity._id === updatedEntity._id)
+    if (idx === -1) throw new Error(`Cannot update, product ${updatedEntity._id} does not exist`)
 
-    entities[idx] = updatedEntity;
-    this._save(entityType, entities);
-    return updatedEntity;
+    entities[idx] = updatedEntity
+    this._save(entityType, entities)
+    return updatedEntity
   }
 
   async remove(entityType: string, entityId: string): Promise<void> {
-    if (environment.useBackend) return this.httpAdapter.remove(entityType, entityId);
-    const entities = await this.query<EntityId>(entityType, 0);
-    const idx = entities.findIndex(entity => entity._id === entityId);
+    if (environment.useBackend) return this.httpAdapter.remove(entityType, entityId)
+    const entities = await this.query<EntityId>(entityType, 0)
+    const idx = entities.findIndex(entity => entity._id === entityId)
     if (idx !== -1) {
-      entities.splice(idx, 1);
-      this._save(entityType, entities);
+      entities.splice(idx, 1)
+      this._save(entityType, entities)
     } else {
-      throw new Error(`Cannot remove, product ${entityId} of type: ${entityType} does not exist`);
+      throw new Error(`Cannot remove, product ${entityId} of type: ${entityType} does not exist`)
     }
   }
 
   public makeId(length = 5): string {
-    let txt = '';
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let txt = ''
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
     for (let i = 0; i < length; i++) {
-      txt += possible.charAt(Math.floor(Math.random() * possible.length));
+      txt += possible.charAt(Math.floor(Math.random() * possible.length))
     }
-    return txt;
+    return txt
   }
 
   /** Append an entity (e.g. with existing _id) to a list and save. Use delay 0 to avoid artificial delay. */
   async appendExisting<T extends EntityId>(entityType: string, entity: T): Promise<void> {
-    if (environment.useBackend) return this.httpAdapter.appendExisting<T>(entityType, entity);
-    const list = await this.query<T>(entityType, 0);
-    list.push(entity);
-    this._save(entityType, list);
+    if (environment.useBackend) return this.httpAdapter.appendExisting<T>(entityType, entity)
+    const list = await this.query<T>(entityType, 0)
+    list.push(entity)
+    this._save(entityType, list)
   }
 
   /** Replace the entire list for an entity type (e.g. trash list after remove). */
   async replaceAll<T>(entityType: string, entities: T[]): Promise<void> {
-    if (environment.useBackend) return this.httpAdapter.replaceAll<T>(entityType, entities);
-    this._save(entityType, entities);
+    if (environment.useBackend) return this.httpAdapter.replaceAll<T>(entityType, entities)
+    this._save(entityType, entities)
   }
 
   private _save<T>(entityType: string, entities: T[]): void {
     try {
-      localStorage.setItem(entityType, JSON.stringify(entities));
+      localStorage.setItem(entityType, JSON.stringify(entities))
       if (BACKUP_ENTITY_TYPES.has(entityType)) {
         try {
-          localStorage.setItem(`backup_${entityType}`, JSON.stringify(entities));
+          localStorage.setItem(`backup_${entityType}`, JSON.stringify(entities))
         } catch {
           // Backup write failed; main save succeeded — log only, do not fail
         }
       }
     } catch {
-      throw new Error(STORAGE_ERROR_MESSAGE);
+      throw new Error(STORAGE_ERROR_MESSAGE)
     }
   }
 }

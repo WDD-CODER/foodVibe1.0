@@ -5,6 +5,18 @@
   border-color: var(--border-warning) !important;
 }
 
+/* Validation error state */
+.input--error {
+  border-color: var(--color-danger, #e53e3e) !important;
+}
+
+.field-error-msg {
+  font-size: 0.75rem;
+  color: var(--color-danger, #e53e3e);
+  margin-top: 2px;
+  display: block;
+}
+
 /* Error alert */
 .qep__error {
   margin: 0;

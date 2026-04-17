@@ -8,25 +8,25 @@ import {
   AfterViewInit,
   ViewChild,
   ElementRef,
-} from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { LucideAngularModule } from 'lucide-angular';
-import { EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME } from '@services/equipment-data.service';
+} from '@angular/core'
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
+import { CommonModule } from '@angular/common'
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms'
+import { ActivatedRoute, Router } from '@angular/router'
+import { LucideAngularModule } from 'lucide-angular'
+import { EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME } from '@services/equipment-data.service'
 import {
   Equipment,
   EquipmentCategory,
   ScalingRule,
-} from '@models/equipment.model';
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
-import { LoaderComponent } from 'src/app/shared/loader/loader.component';
-import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
-import { UserMsgService } from '@services/user-msg.service';
-import { TranslationService } from '@services/translation.service';
-import { LoggingService } from '@services/logging.service';
-import { useSavingState } from 'src/app/core/utils/saving-state.util';
+} from '@models/equipment.model'
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
+import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
+import { UserMsgService } from '@services/user-msg.service'
+import { TranslationService } from '@services/translation.service'
+import { LoggingService } from '@services/logging.service'
+import { useSavingState } from 'src/app/core/utils/saving-state.util'
 
 const CATEGORIES: EquipmentCategory[] = [
   'heat_source',
@@ -35,7 +35,7 @@ const CATEGORIES: EquipmentCategory[] = [
   'packaging',
   'infrastructure',
   'consumable',
-];
+]
 
 @Component({
   selector: 'app-equipment-form',
@@ -46,40 +46,40 @@ const CATEGORIES: EquipmentCategory[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EquipmentFormComponent implements OnInit, AfterViewInit {
-  @ViewChild('nameInput') private nameInputRef?: ElementRef<HTMLInputElement>;
+  @ViewChild('nameInput') private nameInputRef?: ElementRef<HTMLInputElement>
 
-  private readonly fb = inject(FormBuilder);
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly equipmentData = inject(EquipmentDataService);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly userMsg = inject(UserMsgService);
-  private readonly translation = inject(TranslationService);
-  private readonly logging = inject(LoggingService);
+  private readonly fb = inject(FormBuilder)
+  private readonly route = inject(ActivatedRoute)
+  private readonly router = inject(Router)
+  private readonly equipmentData = inject(EquipmentDataService)
+  private readonly destroyRef = inject(DestroyRef)
+  private readonly userMsg = inject(UserMsgService)
+  private readonly translation = inject(TranslationService)
+  private readonly logging = inject(LoggingService)
 
-  protected equipmentForm_!: FormGroup;
-  protected isEditMode_ = signal(false);
-  private readonly saving = useSavingState();
-  protected readonly isSaving_ = this.saving.isSaving_;
-  protected categories = CATEGORIES;
-  protected categoryOptions = CATEGORIES.map((c) => ({ value: c, label: c }));
-  protected validationErrors_ = signal<Record<string, string>>({});
+  protected equipmentForm_!: FormGroup
+  protected isEditMode_ = signal(false)
+  private readonly saving = useSavingState()
+  protected readonly isSaving_ = this.saving.isSaving_
+  protected categories = CATEGORIES
+  protected categoryOptions = CATEGORIES.map((c) => ({ value: c, label: c }))
+  protected validationErrors_ = signal<Record<string, string>>({})
 
   ngOnInit(): void {
-    this.buildForm();
+    this.buildForm()
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((data) => {
-      const equipment = data['equipment'] as Equipment | null | undefined;
+      const equipment = data['equipment'] as Equipment | null | undefined
       if (equipment) {
-        this.isEditMode_.set(true);
-        this.hydrateForm(equipment);
+        this.isEditMode_.set(true)
+        this.hydrateForm(equipment)
       } else {
-        this.patchScalingDefaults();
+        this.patchScalingDefaults()
       }
-    });
+    })
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => this.nameInputRef?.nativeElement?.focus(), 0);
+    setTimeout(() => this.nameInputRef?.nativeElement?.focus(), 0)
   }
 
   private buildForm(): void {
@@ -93,7 +93,7 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
       per_guests_: [25, [Validators.min(1)]],
       min_quantity_: [1, [Validators.min(0)]],
       max_quantity_: [null as number | null],
-    });
+    })
   }
 
   private hydrateForm(e: Equipment): void {
@@ -107,7 +107,7 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
       per_guests_: e.scaling_rule_?.per_guests_ ?? 25,
       min_quantity_: e.scaling_rule_?.min_quantity_ ?? 1,
       max_quantity_: e.scaling_rule_?.max_quantity_ ?? null,
-    });
+    })
   }
 
   private patchScalingDefaults(): void {
@@ -116,39 +116,39 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
       per_guests_: 25,
       min_quantity_: 1,
       max_quantity_: null,
-    });
+    })
   }
 
   private validateForm_(): boolean {
-    const errors: Record<string, string> = {};
-    const val = this.equipmentForm_.getRawValue();
-    if (!val.name_hebrew?.trim()) errors['name_hebrew'] = 'field_name_required';
-    if (!val.category_?.trim()) errors['category_'] = 'field_category_required';
-    this.validationErrors_.set(errors);
-    return Object.keys(errors).length === 0;
+    const errors: Record<string, string> = {}
+    const val = this.equipmentForm_.getRawValue()
+    if (!val.name_hebrew?.trim()) errors['name_hebrew'] = 'field_name_required'
+    if (!val.category_?.trim()) errors['category_'] = 'field_category_required'
+    this.validationErrors_.set(errors)
+    return Object.keys(errors).length === 0
   }
 
   async onSubmit(): Promise<void> {
     if (!this.validateForm_()) {
-      this.equipmentForm_.markAllAsTouched();
-      this.userMsg.onSetErrorMsg(this.translation.translate('form_has_errors'));
-      return;
+      this.equipmentForm_.markAllAsTouched()
+      this.userMsg.onSetErrorMsg(this.translation.translate('form_has_errors'))
+      return
     }
-    if (this.equipmentForm_.invalid) return;
+    if (this.equipmentForm_.invalid) return
     await this.saving.withSaving(async () => {
     try {
-      const v = this.equipmentForm_.getRawValue();
-      const now = new Date().toISOString();
+      const v = this.equipmentForm_.getRawValue()
+      const now = new Date().toISOString()
       const scalingRule: ScalingRule | undefined = v.scaling_enabled_
         ? {
             per_guests_: Number(v.per_guests_),
             min_quantity_: Number(v.min_quantity_),
             max_quantity_: v.max_quantity_ != null && v.max_quantity_ !== '' ? Number(v.max_quantity_) : undefined,
           }
-        : undefined;
+        : undefined
 
       if (this.isEditMode_()) {
-        const equipment = this.route.snapshot.data['equipment'] as Equipment;
+        const equipment = this.route.snapshot.data['equipment'] as Equipment
         const updated: Equipment = {
           ...equipment,
           name_hebrew: v.name_hebrew,
@@ -158,8 +158,8 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
           notes_: v.notes_ ?? undefined,
           scaling_rule_: scalingRule,
           updated_at_: now,
-        };
-        await this.equipmentData.updateEquipment(updated);
+        }
+        await this.equipmentData.updateEquipment(updated)
       } else {
         await this.equipmentData.addEquipment({
           name_hebrew: v.name_hebrew,
@@ -170,22 +170,22 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
           notes_: v.notes_ || undefined,
           created_at_: now,
           updated_at_: now,
-        });
+        })
       }
-      const listPath = this.router.url.startsWith('/inventory/equipment') ? ['/inventory/equipment'] : ['/equipment/list'];
-      this.router.navigate(listPath);
+      const listPath = this.router.url.startsWith('/inventory/equipment') ? ['/inventory/equipment'] : ['/equipment/list']
+      this.router.navigate(listPath)
     } catch (err) {
-      this.logging.error({ event: 'equipment.save_error', message: 'Equipment save error', context: { err } });
+      this.logging.error({ event: 'equipment.save_error', message: 'Equipment save error', context: { err } })
       const msg = err instanceof Error && err.message === ERR_DUPLICATE_EQUIPMENT_NAME
         ? (this.translation.translate('duplicate_equipment_name') ?? 'כלי עם שם זה כבר קיים')
-        : (this.translation.translate('save_failed') ?? 'שגיאה בשמירה');
-      this.userMsg.onSetErrorMsg(msg);
+        : (this.translation.translate('save_failed') ?? 'שגיאה בשמירה')
+      this.userMsg.onSetErrorMsg(msg)
     }
-    });
+    })
   }
 
   onCancel(): void {
-    const listPath = this.router.url.startsWith('/inventory/equipment') ? ['/inventory/equipment'] : ['/equipment/list'];
-    this.router.navigate(listPath);
+    const listPath = this.router.url.startsWith('/inventory/equipment') ? ['/inventory/equipment'] : ['/equipment/list']
+    this.router.navigate(listPath)
   }
 }
