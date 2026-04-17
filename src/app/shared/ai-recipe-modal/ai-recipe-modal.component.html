@@ -238,56 +238,12 @@
           </div>
 
         } @else {
-          <!-- Create preview card -->
-          <div class="ai-draft-preview">
-            <!-- Header: name + type + yield -->
-            <div class="ai-draft-header">
-              <div class="ai-draft-labeled-field">
-                <span class="ai-draft-field-title">{{ 'ai_recipe_name_title' | translatePipe }}</span>
-                <div class="ai-draft-field-value">
-                  <span class="ai-draft-name">{{ draft_()!.name_hebrew || ('ai_recipe_no_name' | translatePipe) }}</span>
-                  <span class="ai-draft-badge">{{ (draft_()!.recipe_type === 'dish' ? 'dish' : 'preparation') | translatePipe }}</span>
-                </div>
-              </div>
-              <div class="ai-draft-labeled-field">
-                <span class="ai-draft-field-title">{{ 'yield' | translatePipe }}</span>
-                <span class="ai-draft-yield">{{ draft_()!.yield_amount }} {{ translateUnit(draft_()!.yield_unit) }}</span>
-              </div>
-            </div>
-
-            <!-- Ingredients table -->
-            <div class="ai-draft-section">
-              <span class="ai-draft-section-title">{{ 'ai_recipe_preview_ingredients' | translatePipe }}</span>
-              <div class="ai-draft-ingredient-table">
-                @for (ing of draft_()!.ingredients; track ing.name) {
-                  <div class="ai-draft-ingredient-row">
-                    <span class="ai-draft-ing-name">{{ ing.name }}</span>
-                    <span class="ai-draft-ing-unit">{{ translateUnit(ing.unit) }}</span>
-                    <span class="ai-draft-ing-qty">{{ ing.amount }}</span>
-                  </div>
-                }
-              </div>
-            </div>
-
-            <!-- Steps -->
-            <div class="ai-draft-section">
-              <span class="ai-draft-section-title">{{ 'ai_recipe_preview_steps' | translatePipe }} ({{ draft_()!.steps.length }})</span>
-              <ol class="ai-draft-steps">
-                @for (step of draft_()!.steps; track $index) {
-                  <li>{{ step }}</li>
-                }
-              </ol>
-            </div>
-          </div>
-          <div class="ai-modal-footer">
-              <button type="button" class="c-btn-ghost" (click)="onGenerateAgain()">
-                {{ 'ai_recipe_generate_again' | translatePipe }}
-              </button>
-              <button type="button" class="c-btn-primary" (click)="onOpenInBuilder()">
-                <lucide-icon name="arrow-left" [size]="16"></lucide-icon>
-                {{ 'ai_recipe_open_builder' | translatePipe }}
-              </button>
-            </div>
+          <!-- Create preview — interactive editor -->
+          <app-ai-draft-editor
+            [draft]="draft_()!"
+            (approved)="onDraftApproved($event)"
+            (generateAgain)="onGenerateAgain()"
+          />
         }
       }
 
