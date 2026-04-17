@@ -1,4 +1,4 @@
-# Session State — 2026-04-17 (end of day — updated after logistics equipment-ID fix session)
+# Session State -- 2026-04-17 (end of day -- context-monitor.sh rewrite committed)
 
 > Single source of truth for all project rules, standards, and skill/agent routing.
 
@@ -6,12 +6,20 @@
 
 ## Current Status
 
-**Branch:** `feat/session-20260417` (1 commit ahead of origin — needs push + PR)
-**Latest local commit:** `06120ed` — fix(ai-draft-editor): smoke test fixes
-**Equipment ID fix commit:** `046c184` — fix(sync): remap logistics equipment IDs on master→user sync
-**Build status:** PASS (user confirmed 0 errors before logistics fix commit)
-**Open PRs:** None
-**Dirty working tree:** YES — 5 ai-recipe-modal/ai-draft-editor files + failure-log.tsv (unstaged)
+**Branch:** feat/session-20260417 (pushed, 17 commits ahead of origin/main)
+**Latest commit:** 654749c -- fix(context-monitor): compaction-aware word-count measurement
+**Build status:** PASS (0 errors, 3 pre-existing warnings)
+**Open PRs:** https://github.com/WDD-CODER/foodVibe1.0/pull/122
+**Dirty working tree:** YES -- .claude/reflect/failure-log.tsv only (hook-generated, intentionally not committed)
+
+---
+
+## context-monitor.sh -- Rewrite Summary (654749c)
+- Measures word count AFTER last compaction boundary (not raw file bytes)
+- Eliminates JSONL overhead inflation (~38x for base64/JSON keys) that caused false alerts
+- Dynamic thresholds: 40%/60%/70% of model capacity (200K tokens) minus system prompt overhead (~12K words)
+- Model detection wired from transcript -- future-proof for new models
+- All three alert tiers output systemMessage field (PostToolUse requirement)
 
 ---
 
