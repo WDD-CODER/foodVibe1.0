@@ -4,9 +4,9 @@ import { quantityIncrement, quantityDecrement } from './quantity-step.util'
 import { MASS_UNITS, VOLUME_UNITS } from './recipe-cost.constants'
 
 export interface YieldAutoSyncConfig {
-  totalWeightG: Signal<number>;
-  totalVolumeMl: Signal<number>;
-  getConversion: (unitKey: string) => number;
+  totalWeightG: Signal<number>
+  totalVolumeMl: Signal<number>
+  getConversion: (unitKey: string) => number
 }
 
 export class RecipeYieldManager {

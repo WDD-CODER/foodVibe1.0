@@ -8,24 +8,24 @@ import {
   OnInit,
   output,
   signal,
-} from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { LucideAngularModule } from 'lucide-angular';
-import { duplicateEntityNameValidator } from 'src/app/core/validators/item.validators';
-import { SupplierDataService } from '@services/supplier-data.service';
-import { LoggingService } from '@services/logging.service';
-import { UserMsgService } from '@services/user-msg.service';
-import { TranslationService } from '@services/translation.service';
-import { RequireAuthService } from 'src/app/core/utils/require-auth.util';
-import { Supplier } from '@models/supplier.model';
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
-import { LoaderComponent } from 'src/app/shared/loader/loader.component';
-import { useSavingState } from 'src/app/core/utils/saving-state.util';
+} from '@angular/core'
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
+import { CommonModule } from '@angular/common'
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms'
+import { ActivatedRoute, Router } from '@angular/router'
+import { LucideAngularModule } from 'lucide-angular'
+import { duplicateEntityNameValidator } from 'src/app/core/validators/item.validators'
+import { SupplierDataService } from '@services/supplier-data.service'
+import { LoggingService } from '@services/logging.service'
+import { UserMsgService } from '@services/user-msg.service'
+import { TranslationService } from '@services/translation.service'
+import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
+import { Supplier } from '@models/supplier.model'
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
+import { useSavingState } from 'src/app/core/utils/saving-state.util'
 
-const DAY_KEYS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fri', 'day_sat'];
+const DAY_KEYS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fri', 'day_sat']
 
 @Component({
   selector: 'app-supplier-form',
@@ -36,75 +36,75 @@ const DAY_KEYS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fr
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SupplierFormComponent implements OnInit {
-  embeddedInDashboard = input<boolean>(false);
+  embeddedInDashboard = input<boolean>(false)
   /** When set (e.g. from SupplierModalService), form is hydrated in modal mode without route resolver. */
-  supplierToEdit = input<Supplier | null>(null);
-  saved = output<void>();
-  cancel = output<void>();
+  supplierToEdit = input<Supplier | null>(null)
+  saved = output<void>()
+  cancel = output<void>()
 
-  private readonly fb = inject(FormBuilder);
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly supplierData = inject(SupplierDataService);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly logging = inject(LoggingService);
-  private readonly userMsg = inject(UserMsgService);
-  private readonly translation = inject(TranslationService);
-  private readonly requireAuth = inject(RequireAuthService);
+  private readonly fb = inject(FormBuilder)
+  private readonly route = inject(ActivatedRoute)
+  private readonly router = inject(Router)
+  private readonly supplierData = inject(SupplierDataService)
+  private readonly destroyRef = inject(DestroyRef)
+  private readonly logging = inject(LoggingService)
+  private readonly userMsg = inject(UserMsgService)
+  private readonly translation = inject(TranslationService)
+  private readonly requireAuth = inject(RequireAuthService)
 
-  protected supplierForm_!: FormGroup;
-  protected isEditMode_ = signal(false);
-  private readonly saving = useSavingState();
-  protected readonly isSaving_ = this.saving.isSaving_;
-  protected dayKeys = DAY_KEYS;
-  protected validationErrors_ = signal<Record<string, string>>({});
+  protected supplierForm_!: FormGroup
+  protected isEditMode_ = signal(false)
+  private readonly saving = useSavingState()
+  protected readonly isSaving_ = this.saving.isSaving_
+  protected dayKeys = DAY_KEYS
+  protected validationErrors_ = signal<Record<string, string>>({})
 
   protected get deliveryDaysArray(): FormArray {
-    return this.supplierForm_?.get('delivery_days_') as FormArray;
+    return this.supplierForm_?.get('delivery_days_') as FormArray
   }
 
   constructor() {
     effect(() => {
-      const supplier = this.supplierToEdit();
-      if (!this.supplierForm_) return;
+      const supplier = this.supplierToEdit()
+      if (!this.supplierForm_) return
       if (supplier) {
-        this.isEditMode_.set(true);
-        this.hydrateForm(supplier);
+        this.isEditMode_.set(true)
+        this.hydrateForm(supplier)
       } else if (supplier === null) {
-        this.isEditMode_.set(false);
+        this.isEditMode_.set(false)
         this.supplierForm_.patchValue({
           name_hebrew: '',
           contact_person_: '',
           min_order_mov_: 0,
           lead_time_days_: 0,
-        });
-        const daysArray = this.supplierForm_.get('delivery_days_') as FormArray;
+        })
+        const daysArray = this.supplierForm_.get('delivery_days_') as FormArray
         if (daysArray?.controls?.length === 7) {
           for (let i = 0; i < 7; i++) {
-            daysArray.at(i).setValue(false);
+            daysArray.at(i).setValue(false)
           }
         }
       }
-    });
+    })
   }
 
   ngOnInit(): void {
-    this.buildForm();
+    this.buildForm()
     if (!this.embeddedInDashboard()) {
       this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((data) => {
-        const supplier = data['supplier'] as Supplier | null | undefined;
+        const supplier = data['supplier'] as Supplier | null | undefined
         if (supplier) {
-          this.isEditMode_.set(true);
-          this.hydrateForm(supplier);
+          this.isEditMode_.set(true)
+          this.hydrateForm(supplier)
         }
-      });
+      })
     }
   }
 
   private buildForm(): void {
     const daysArray = this.fb.array(
       Array.from({ length: 7 }, () => this.fb.control(false))
-    );
+    )
     this.supplierForm_ = this.fb.group({
       name_hebrew: ['', [
         Validators.required,
@@ -121,87 +121,87 @@ export class SupplierFormComponent implements OnInit {
       delivery_days_: daysArray,
       min_order_mov_: [0, [Validators.required, Validators.min(0)]],
       lead_time_days_: [0, [Validators.required, Validators.min(0)]],
-    });
+    })
   }
 
   private hydrateForm(s: Supplier): void {
-    const days = s.delivery_days_ ?? [];
-    const dayControls = this.deliveryDaysArray;
+    const days = s.delivery_days_ ?? []
+    const dayControls = this.deliveryDaysArray
     for (let i = 0; i < 7; i++) {
-      dayControls.at(i).setValue(days.includes(i));
+      dayControls.at(i).setValue(days.includes(i))
     }
     this.supplierForm_.patchValue({
       name_hebrew: s.name_hebrew ?? '',
       contact_person_: s.contact_person_ ?? '',
       min_order_mov_: s.min_order_mov_ ?? 0,
       lead_time_days_: s.lead_time_days_ ?? 0,
-    });
+    })
   }
 
   private validateForm_(): boolean {
-    const errors: Record<string, string> = {};
-    const val = this.supplierForm_.getRawValue();
-    if (!val.name_hebrew?.trim()) errors['name_hebrew'] = 'field_name_required';
-    this.validationErrors_.set(errors);
-    return Object.keys(errors).length === 0;
+    const errors: Record<string, string> = {}
+    const val = this.supplierForm_.getRawValue()
+    if (!val.name_hebrew?.trim()) errors['name_hebrew'] = 'field_name_required'
+    this.validationErrors_.set(errors)
+    return Object.keys(errors).length === 0
   }
 
   protected onSubmit(): void {
-    if (!this.requireAuth.requireAuth()) return;
+    if (!this.requireAuth.requireAuth()) return
     if (!this.validateForm_()) {
-      this.supplierForm_.markAllAsTouched();
-      this.userMsg.onSetErrorMsg(this.translation.translate('form_has_errors'));
-      return;
+      this.supplierForm_.markAllAsTouched()
+      this.userMsg.onSetErrorMsg(this.translation.translate('form_has_errors'))
+      return
     }
-    if (this.supplierForm_.invalid || this.isSaving_()) return;
-    const raw = this.supplierForm_.getRawValue();
-    const delivery_days_: number[] = [];
+    if (this.supplierForm_.invalid || this.isSaving_()) return
+    const raw = this.supplierForm_.getRawValue()
+    const delivery_days_: number[] = []
     this.deliveryDaysArray.controls.forEach((c, i) => {
-      if (c.value) delivery_days_.push(i);
-    });
+      if (c.value) delivery_days_.push(i)
+    })
     const payload = {
       name_hebrew: raw.name_hebrew,
       contact_person_: raw.contact_person_ || undefined,
       delivery_days_,
       min_order_mov_: Number(raw.min_order_mov_) || 0,
       lead_time_days_: Number(raw.lead_time_days_) || 0,
-    };
-    this.saving.setSaving(true);
+    }
+    this.saving.setSaving(true)
     if (this.isEditMode_()) {
-      const supplier = this.embeddedInDashboard() ? (this.supplierToEdit() ?? undefined) : (this.route.snapshot.data['supplier'] as Supplier);
+      const supplier = this.embeddedInDashboard() ? (this.supplierToEdit() ?? undefined) : (this.route.snapshot.data['supplier'] as Supplier)
       if (!supplier) {
-        this.saving.setSaving(false);
-        return;
+        this.saving.setSaving(false)
+        return
       }
       this.supplierData
         .updateSupplier({ ...supplier, ...payload })
         .then(() => {
-          if (this.embeddedInDashboard()) this.saved.emit();
-          else this.router.navigate(['/suppliers/list']);
+          if (this.embeddedInDashboard()) this.saved.emit()
+          else this.router.navigate(['/suppliers/list'])
         })
         .catch((e) => {
-          this.logging.error({ event: 'supplier.save_error', message: 'Supplier save failed', context: { err: e } });
+          this.logging.error({ event: 'supplier.save_error', message: 'Supplier save failed', context: { err: e } })
         })
-        .finally(() => this.saving.setSaving(false));
+        .finally(() => this.saving.setSaving(false))
     } else {
       this.supplierData
         .addSupplier(payload)
         .then(() => {
-          if (this.embeddedInDashboard()) this.saved.emit();
-          else this.router.navigate(['/suppliers/list']);
+          if (this.embeddedInDashboard()) this.saved.emit()
+          else this.router.navigate(['/suppliers/list'])
         })
         .catch((e) => {
-          this.logging.error({ event: 'supplier.save_error', message: 'Supplier save failed', context: { err: e } });
+          this.logging.error({ event: 'supplier.save_error', message: 'Supplier save failed', context: { err: e } })
         })
-        .finally(() => this.saving.setSaving(false));
+        .finally(() => this.saving.setSaving(false))
     }
   }
 
   protected onCancel(): void {
     if (this.embeddedInDashboard()) {
-      this.cancel.emit();
+      this.cancel.emit()
     } else {
-      this.router.navigate(['/suppliers/list']);
+      this.router.navigate(['/suppliers/list'])
     }
   }
 }

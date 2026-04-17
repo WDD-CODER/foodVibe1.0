@@ -1,7 +1,7 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ConfirmModalService } from '@services/confirm-modal.service';
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
+import { Component, inject } from '@angular/core'
+import { CommonModule } from '@angular/common'
+import { ConfirmModalService } from '@services/confirm-modal.service'
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 
 @Component({
   selector: 'app-confirm-modal',
@@ -11,5 +11,5 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
   styleUrl: './confirm-modal.component.scss'
 })
 export class ConfirmModalComponent {
-  protected readonly modalService = inject(ConfirmModalService);
+  protected readonly modalService = inject(ConfirmModalService)
 }

@@ -8,34 +8,34 @@ import {
   OnInit,
   output,
   signal,
-} from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { LucideAngularModule } from 'lucide-angular';
-import { duplicateEntityNameValidator } from 'src/app/core/validators/item.validators';
-import { useSavingState } from 'src/app/core/utils/saving-state.util';
-import { VenueDataService } from '@services/venue-data.service';
-import { EquipmentDataService } from '@services/equipment-data.service';
-import { RequireAuthService } from 'src/app/core/utils/require-auth.util';
+} from '@angular/core'
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
+import { CommonModule } from '@angular/common'
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms'
+import { ActivatedRoute, Router } from '@angular/router'
+import { LucideAngularModule } from 'lucide-angular'
+import { duplicateEntityNameValidator } from 'src/app/core/validators/item.validators'
+import { useSavingState } from 'src/app/core/utils/saving-state.util'
+import { VenueDataService } from '@services/venue-data.service'
+import { EquipmentDataService } from '@services/equipment-data.service'
+import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
 import {
   VenueProfile,
   VenueInfraItem,
   EnvironmentType,
-} from '@models/venue.model';
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
-import { LoaderComponent } from 'src/app/shared/loader/loader.component';
-import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component';
-import { UserMsgService } from '@services/user-msg.service';
-import { TranslationService } from '@services/translation.service';
+} from '@models/venue.model'
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
+import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
+import { UserMsgService } from '@services/user-msg.service'
+import { TranslationService } from '@services/translation.service'
 
 const ENV_TYPES: EnvironmentType[] = [
   'professional_kitchen',
   'outdoor_field',
   'client_home',
   'popup_venue',
-];
+]
 
 @Component({
   selector: 'app-venue-form',
@@ -46,49 +46,49 @@ const ENV_TYPES: EnvironmentType[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VenueFormComponent implements OnInit {
-  embeddedInDashboard = input<boolean>(false);
-  saved = output<void>();
-  cancel = output<void>();
+  embeddedInDashboard = input<boolean>(false)
+  saved = output<void>()
+  cancel = output<void>()
 
-  private readonly fb = inject(FormBuilder);
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly venueData = inject(VenueDataService);
-  private readonly equipmentData = inject(EquipmentDataService);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly requireAuth = inject(RequireAuthService);
-  private readonly userMsg = inject(UserMsgService);
-  private readonly translation = inject(TranslationService);
+  private readonly fb = inject(FormBuilder)
+  private readonly route = inject(ActivatedRoute)
+  private readonly router = inject(Router)
+  private readonly venueData = inject(VenueDataService)
+  private readonly equipmentData = inject(EquipmentDataService)
+  private readonly destroyRef = inject(DestroyRef)
+  private readonly requireAuth = inject(RequireAuthService)
+  private readonly userMsg = inject(UserMsgService)
+  private readonly translation = inject(TranslationService)
 
-  protected venueForm_!: FormGroup;
-  protected isEditMode_ = signal(false);
-  private readonly saving = useSavingState();
-  protected readonly isSaving_ = this.saving.isSaving_;
-  protected envTypes = ENV_TYPES;
-  protected validationErrors_ = signal<Record<string, string>>({});
+  protected venueForm_!: FormGroup
+  protected isEditMode_ = signal(false)
+  private readonly saving = useSavingState()
+  protected readonly isSaving_ = this.saving.isSaving_
+  protected envTypes = ENV_TYPES
+  protected validationErrors_ = signal<Record<string, string>>({})
 
   protected get infraArray(): FormArray {
-    return this.venueForm_?.get('available_infrastructure_') as FormArray;
+    return this.venueForm_?.get('available_infrastructure_') as FormArray
   }
 
   protected get allEquipment_() {
-    return this.equipmentData.allEquipment_();
+    return this.equipmentData.allEquipment_()
   }
 
-  protected envOptions: { value: string; label: string }[] = ENV_TYPES.map((env) => ({ value: env, label: env }));
+  protected envOptions: { value: string; label: string }[] = ENV_TYPES.map((env) => ({ value: env, label: env }))
   protected equipmentOptions_ = computed(() =>
     this.equipmentData.allEquipment_().map((eq) => ({ value: eq._id, label: eq.name_hebrew }))
-  );
+  )
 
   ngOnInit(): void {
-    this.buildForm();
+    this.buildForm()
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((data) => {
-      const venue = data['venue'] as VenueProfile | null | undefined;
+      const venue = data['venue'] as VenueProfile | null | undefined
       if (venue) {
-        this.isEditMode_.set(true);
-        this.hydrateForm(venue);
+        this.isEditMode_.set(true)
+        this.hydrateForm(venue)
       }
-    });
+    })
   }
 
   private buildForm(): void {
@@ -103,7 +103,7 @@ export class VenueFormComponent implements OnInit {
       environment_type_: ['outdoor_field', [Validators.required]],
       notes_: [''],
       available_infrastructure_: this.fb.array([]),
-    });
+    })
   }
 
   private hydrateForm(v: VenueProfile): void {
@@ -111,8 +111,8 @@ export class VenueFormComponent implements OnInit {
       name_hebrew: v.name_hebrew ?? '',
       environment_type_: v.environment_type_ ?? 'outdoor_field',
       notes_: v.notes_ ?? '',
-    });
-    const arr = this.infraArray;
+    })
+    const arr = this.infraArray
     arr.clear();
     (v.available_infrastructure_ ?? []).forEach((item) => {
       arr.push(
@@ -120,8 +120,8 @@ export class VenueFormComponent implements OnInit {
           equipment_id_: [item.equipment_id_, Validators.required],
           available_quantity_: [item.available_quantity_, [Validators.required, Validators.min(0)]],
         })
-      );
-    });
+      )
+    })
   }
 
   protected addInfraRow(): void {
@@ -130,49 +130,49 @@ export class VenueFormComponent implements OnInit {
         equipment_id_: ['', Validators.required],
         available_quantity_: [1, [Validators.required, Validators.min(0)]],
       })
-    );
+    )
   }
 
   protected removeInfraRow(index: number): void {
-    this.infraArray.removeAt(index);
+    this.infraArray.removeAt(index)
   }
 
   private validateForm_(): boolean {
-    const errors: Record<string, string> = {};
-    const val = this.venueForm_.getRawValue();
-    if (!val.name_hebrew?.trim()) errors['name_hebrew'] = 'field_name_required';
-    this.validationErrors_.set(errors);
-    return Object.keys(errors).length === 0;
+    const errors: Record<string, string> = {}
+    const val = this.venueForm_.getRawValue()
+    if (!val.name_hebrew?.trim()) errors['name_hebrew'] = 'field_name_required'
+    this.validationErrors_.set(errors)
+    return Object.keys(errors).length === 0
   }
 
   async onSubmit(): Promise<void> {
-    if (!this.requireAuth.requireAuth()) return;
+    if (!this.requireAuth.requireAuth()) return
     if (!this.validateForm_()) {
-      this.venueForm_.markAllAsTouched();
-      this.userMsg.onSetErrorMsg(this.translation.translate('form_has_errors'));
-      return;
+      this.venueForm_.markAllAsTouched()
+      this.userMsg.onSetErrorMsg(this.translation.translate('form_has_errors'))
+      return
     }
-    if (this.venueForm_.invalid) return;
+    if (this.venueForm_.invalid) return
     await this.saving.withSaving(async () => {
-      const v = this.venueForm_.getRawValue();
+      const v = this.venueForm_.getRawValue()
       const infra: VenueInfraItem[] = (v.available_infrastructure_ ?? [])
         .filter((row: { equipment_id_: string }) => row.equipment_id_)
         .map((row: { equipment_id_: string; available_quantity_: number }) => ({
           equipment_id_: row.equipment_id_,
           available_quantity_: Number(row.available_quantity_),
-        }));
+        }))
 
-      const now = new Date().toISOString();
+      const now = new Date().toISOString()
 
       if (this.isEditMode_()) {
-        const venue = this.route.snapshot.data['venue'] as VenueProfile;
+        const venue = this.route.snapshot.data['venue'] as VenueProfile
         await this.venueData.updateVenue({
           ...venue,
           name_hebrew: v.name_hebrew,
           environment_type_: v.environment_type_,
           notes_: v.notes_ || undefined,
           available_infrastructure_: infra,
-        });
+        })
       } else {
         await this.venueData.addVenue({
           name_hebrew: v.name_hebrew,
@@ -180,25 +180,25 @@ export class VenueFormComponent implements OnInit {
           notes_: v.notes_ || undefined,
           available_infrastructure_: infra,
           created_at_: now,
-        });
+        })
       }
       if (this.embeddedInDashboard()) {
-        this.saved.emit();
+        this.saved.emit()
       } else {
-        this.router.navigate(['/venues/list']);
+        this.router.navigate(['/venues/list'])
       }
-    });
+    })
   }
 
   onCancel(): void {
     if (this.embeddedInDashboard()) {
-      this.cancel.emit();
+      this.cancel.emit()
     } else {
-      this.router.navigate(['/venues/list']);
+      this.router.navigate(['/venues/list'])
     }
   }
 
   protected equipmentName(id: string): string {
-    return this.allEquipment_.find((e) => e._id === id)?.name_hebrew ?? id;
+    return this.allEquipment_.find((e) => e._id === id)?.name_hebrew ?? id
   }
 }

@@ -1,4 +1,4 @@
-const STORAGE_PREFIX = 'list-panel:';
+const STORAGE_PREFIX = 'list-panel:'
 
 /**
  * Reads the saved "panel open" state for a given context (e.g. 'inventory', 'venues').
@@ -6,12 +6,12 @@ const STORAGE_PREFIX = 'list-panel:';
  */
 export function getPanelOpen(context: string): boolean {
   try {
-    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_PREFIX + context) : null;
-    if (raw === null) return false;
-    const value = JSON.parse(raw);
-    return value === true;
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_PREFIX + context) : null
+    if (raw === null) return false
+    const value = JSON.parse(raw)
+    return value === true
   } catch {
-    return false;
+    return false
   }
 }
 
@@ -21,7 +21,7 @@ export function getPanelOpen(context: string): boolean {
 export function setPanelOpen(context: string, open: boolean): void {
   try {
     if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(STORAGE_PREFIX + context, JSON.stringify(open));
+      localStorage.setItem(STORAGE_PREFIX + context, JSON.stringify(open))
     }
   } catch {
     /* ignore */

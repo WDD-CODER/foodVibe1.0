@@ -22,7 +22,7 @@ export class EquipmentDataService extends BaseEntityDataService<Equipment> {
 
   async getEquipmentById(_id: string): Promise<Equipment> {
     try {
-      return this.storage.get<Equipment>(ENTITY, _id);
+      return this.storage.get<Equipment>(ENTITY, _id)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({ event: 'crud.equipment.get_error', message: 'Failed to get equipment', context: { err } })
@@ -91,7 +91,7 @@ export class EquipmentDataService extends BaseEntityDataService<Equipment> {
 
   async getTrashEquipment(): Promise<(Equipment & { deletedAt: number })[]> {
     try {
-      return this.storage.query<Equipment & { deletedAt: number }>(TRASH_KEY, 0);
+      return this.storage.query<Equipment & { deletedAt: number }>(TRASH_KEY, 0)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({ event: 'crud.equipment.getTrash_error', message: 'Failed to get trash equipment', context: { err } })
@@ -101,15 +101,15 @@ export class EquipmentDataService extends BaseEntityDataService<Equipment> {
 
   async restoreEquipment(_id: string): Promise<Equipment> {
     try {
-      const trash = await this.storage.query<Equipment & { deletedAt: number }>(TRASH_KEY, 0);
-      const found = trash.find(e => e._id === _id);
-      if (!found) throw new Error(`Equipment ${_id} not found in trash`);
-      const { deletedAt: _, ...item } = found;
-      const rest = trash.filter(e => e._id !== _id);
-      await this.storage.replaceAll(TRASH_KEY, rest);
-      await this.storage.appendExisting(ENTITY, item);
-      this.updateItems(list => [...list, item]);
-      return item;
+      const trash = await this.storage.query<Equipment & { deletedAt: number }>(TRASH_KEY, 0)
+      const found = trash.find(e => e._id === _id)
+      if (!found) throw new Error(`Equipment ${_id} not found in trash`)
+      const { deletedAt: _, ...item } = found
+      const rest = trash.filter(e => e._id !== _id)
+      await this.storage.replaceAll(TRASH_KEY, rest)
+      await this.storage.appendExisting(ENTITY, item)
+      this.updateItems(list => [...list, item])
+      return item
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({ event: 'crud.equipment.restore_error', message: 'Failed to restore equipment', context: { err } })

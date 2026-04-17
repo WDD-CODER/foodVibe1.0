@@ -1,6 +1,6 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { SelectOnFocusDirective } from './select-on-focus.directive';
+import { Component, ElementRef, ViewChild } from '@angular/core'
+import { ComponentFixture, TestBed } from '@angular/core/testing'
+import { SelectOnFocusDirective } from './select-on-focus.directive'
 
 // 1. Create a Test Host Component to house the directive
 @Component({
@@ -9,37 +9,37 @@ import { SelectOnFocusDirective } from './select-on-focus.directive';
   template: `<input SelectOnFocus #inputField>`
 })
 class TestHostComponent {
-  @ViewChild('inputField') inputElement!: ElementRef<HTMLInputElement>;
+  @ViewChild('inputField') inputElement!: ElementRef<HTMLInputElement>
 }
 
 describe('SelectOnFocusDirective', () => {
-  let fixture: ComponentFixture<TestHostComponent>;
-  let hostComponent: TestHostComponent;
+  let fixture: ComponentFixture<TestHostComponent>
+  let hostComponent: TestHostComponent
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TestHostComponent, SelectOnFocusDirective]
-    }).compileComponents();
+    }).compileComponents()
 
-    fixture = TestBed.createComponent(TestHostComponent);
-    hostComponent = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+    fixture = TestBed.createComponent(TestHostComponent)
+    hostComponent = fixture.componentInstance
+    fixture.detectChanges()
+  })
 
   it('should create the host component', () => {
-    expect(hostComponent).toBeTruthy();
-  });
+    expect(hostComponent).toBeTruthy()
+  })
 
   it('should select the text when the input is focused', () => {
-    const inputEl = hostComponent.inputElement.nativeElement;
+    const inputEl = hostComponent.inputElement.nativeElement
     
     // Create a spy on the native select method
-    const selectSpy = spyOn(inputEl, 'select');
+    const selectSpy = spyOn(inputEl, 'select')
 
     // Trigger the focus event
-    inputEl.dispatchEvent(new Event('focus'));
+    inputEl.dispatchEvent(new Event('focus'))
     
     // Assert the spy was called
-    expect(selectSpy).toHaveBeenCalled();
-  });
-});
+    expect(selectSpy).toHaveBeenCalled()
+  })
+})

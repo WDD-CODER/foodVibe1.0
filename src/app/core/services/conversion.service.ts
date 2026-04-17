@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core'
 
 @Injectable({ providedIn: 'root' })
 export class ConversionService {
@@ -8,10 +8,10 @@ export class ConversionService {
    * Formula: Gross Price / (Total Quantity * Yield Factor)
    */
   calculateNetCost(grossPrice: number, convFactor: number, wastePercent: number): number {
-    if (!grossPrice || convFactor <= 0) return 0;
-    const yieldFactor = 1 - (wastePercent / 100);
-    const netQuantity = convFactor * yieldFactor;
-    return netQuantity > 0 ? grossPrice / netQuantity : 0;
+    if (!grossPrice || convFactor <= 0) return 0
+    const yieldFactor = 1 - (wastePercent / 100)
+    const netQuantity = convFactor * yieldFactor
+    return netQuantity > 0 ? grossPrice / netQuantity : 0
   }
 
 
@@ -20,21 +20,21 @@ export class ConversionService {
    * Translates waste percentage to quantity based on total scaling amount
    */
   getWasteQuantity(percent: number, total: number): number {
-    return (percent / 100) * total;
+    return (percent / 100) * total
   }
 
   /**
    * Translates waste quantity to percentage based on total scaling amount
    */
   getWastePercent(quantity: number, total: number): number {
-    return total > 0 ? (quantity / total) * 100 : 0;
+    return total > 0 ? (quantity / total) * 100 : 0
   }
 
   /**
    * Calculates scaling chain logic (e.g., 1 Case = 6 Buckets)
    */
   getChainConversion(amount: number, factor: number): number {
-    return amount * factor;
+    return amount * factor
   }
 
   /** * Logic to sync Waste % and Yield Factor 
@@ -42,31 +42,31 @@ export class ConversionService {
   handleWasteChange(wastePercent: number | string | null): { yieldFactor: number } {
     // Guard against non-numeric or empty values while typing 
     if (wastePercent === null || wastePercent === '') {
-    return { yieldFactor: 1 };
+    return { yieldFactor: 1 }
   }
-    const val = parseFloat(String(wastePercent));
-    if (isNaN(val)) return { yieldFactor: 1 };
+    const val = parseFloat(String(wastePercent))
+    if (isNaN(val)) return { yieldFactor: 1 }
 
-    const yieldFactor = Math.max(0, (100 - val) / 100);
+    const yieldFactor = Math.max(0, (100 - val) / 100)
     return { yieldFactor: parseFloat(yieldFactor.toFixed(4)) }; // Avoid floating point junk 
   }
 
   handleYieldChange(yieldFactor: number | string): { wastePercent: number } {
-    const val = parseFloat(String(yieldFactor));
-    if (isNaN(val)) return { wastePercent: 0 };
+    const val = parseFloat(String(yieldFactor))
+    if (isNaN(val)) return { wastePercent: 0 }
 
-    const wastePercent = Math.max(0, 100 - (val * 100));
-    return { wastePercent: Math.round(wastePercent) };
+    const wastePercent = Math.max(0, 100 - (val * 100))
+    return { wastePercent: Math.round(wastePercent) }
   }
 
   /**
    * Calculates suggested price for a purchase unit based on global price and conversion rate
    */
   getSuggestedPurchasePrice(globalPrice: number, conversionRate: number): number {
-    if (!globalPrice) return 0;
+    if (!globalPrice) return 0
     // By default, the suggested price for a purchase option represents
     // the price for the quantity that equals 1 base unit (e.g. 1000 g = 1 kg).
     // So the conventional suggested price is just the base unit price.
-    return globalPrice;
+    return globalPrice
   }
 }

@@ -221,12 +221,12 @@ Also check if `.env` contains patterns: `URI=`, `KEY=`, `SECRET=`, `PASSWORD=`.
 **Detection:** Grep for `;\s*$` (semicolons at end of lines) in `src/app/**/*.ts` files.
 
 **Auto-fix rules:**
-- Count semicolons per file
-- If file has **≤ 20 semicolons** → AUTO-FIX: remove trailing semicolons
-- If file has **> 20 semicolons** → FLAG only (too many for safe unattended bulk removal)
-- **Preserve:** semicolons inside `for(;;)` loops (mid-line, not matched by `;\s*$`)
-- **Preserve:** semicolons inside string literals
-- **Preserve:** semicolons in `src/main.ts`, `src/app/app.config.ts`, `src/app/app.routes.ts` (Angular bootstrap files where semicolons may be required by tooling)
+- Run `node scripts/remove-trailing-semicolons.mjs` — this script is ASI-safe (preserves
+  semicolons where the next meaningful line starts with `(`, `[`, or `` ` ``, skipping
+  blank lines and comments in the lookahead).
+- No per-file count threshold — script handles all files safely regardless of size.
+- **Preserves by default:** `src/main.ts`, `src/app/app.config.ts`, `src/app/app.routes.ts`
+- After running: verify with `npx tsc --noEmit` before reporting results.
 
 ---
 

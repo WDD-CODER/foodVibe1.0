@@ -1,33 +1,33 @@
-import { ChangeDetectionStrategy, Component, computed, inject, output, signal, afterNextRender, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { LucideAngularModule } from 'lucide-angular';
-import { SupplierDataService } from '@services/supplier-data.service';
-import { KitchenStateService } from '@services/kitchen-state.service';
-import { SupplierModalService } from '@services/supplier-modal.service';
-import { TranslationService } from '@services/translation.service';
-import { Supplier } from '@models/supplier.model';
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
-import { LoaderComponent } from 'src/app/shared/loader/loader.component';
-import { UserService } from '@services/user.service';
-import { UserMsgService } from '@services/user-msg.service';
-import { RequireAuthService } from 'src/app/core/utils/require-auth.util';
-import { LoggingService } from '@services/logging.service';
-import { ConfirmModalService } from '@services/confirm-modal.service';
-import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
-import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
-import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
-import { ClickOutSideDirective } from '@directives/click-out-side';
-import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state';
-import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component';
-import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component';
-import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model';
-import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component';
-import { useListState, StringParam, BooleanParam, NumberSetParam } from 'src/app/core/utils/list-state.util';
-import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
-import { HeroFabService } from '@services/hero-fab.service';
-import { getSupplierIds } from '@utils/product-source.util';
+import { ChangeDetectionStrategy, Component, computed, inject, output, signal, afterNextRender, OnInit, OnDestroy } from '@angular/core'
+import { CommonModule } from '@angular/common'
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms'
+import { Router } from '@angular/router'
+import { LucideAngularModule } from 'lucide-angular'
+import { SupplierDataService } from '@services/supplier-data.service'
+import { KitchenStateService } from '@services/kitchen-state.service'
+import { SupplierModalService } from '@services/supplier-modal.service'
+import { TranslationService } from '@services/translation.service'
+import { Supplier } from '@models/supplier.model'
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
+import { UserService } from '@services/user.service'
+import { UserMsgService } from '@services/user-msg.service'
+import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
+import { LoggingService } from '@services/logging.service'
+import { ConfirmModalService } from '@services/confirm-modal.service'
+import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component'
+import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
+import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component'
+import { ClickOutSideDirective } from '@directives/click-out-side'
+import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
+import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
+import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component'
+import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model'
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import { useListState, StringParam, BooleanParam, NumberSetParam } from 'src/app/core/utils/list-state.util'
+import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util'
+import { HeroFabService } from '@services/hero-fab.service'
+import { getSupplierIds } from '@utils/product-source.util'
 
 const DAY_LABELS = [
   'day_sun',
@@ -37,8 +37,8 @@ const DAY_LABELS = [
   'day_thu',
   'day_fri',
   'day_sat',
-];
-type SupplierBulkField = 'delivery_days_' | 'lead_time_days_';
+]
+type SupplierBulkField = 'delivery_days_' | 'lead_time_days_'
 
 @Component({
   selector: 'app-supplier-list',
@@ -50,33 +50,33 @@ type SupplierBulkField = 'delivery_days_' | 'lead_time_days_';
   inputs: ['embeddedInDashboard'],
 })
 export class SupplierListComponent implements OnInit, OnDestroy {
-  protected readonly isLoggedIn = inject(UserService).isLoggedIn;
-  private readonly supplierData = inject(SupplierDataService);
-  private readonly kitchenState = inject(KitchenStateService);
-  private readonly supplierModal = inject(SupplierModalService);
-  private readonly heroFab = inject(HeroFabService);
-  private readonly translation = inject(TranslationService);
-  private readonly router = inject(Router);
-  private readonly userMsg = inject(UserMsgService);
-  private readonly requireAuthService = inject(RequireAuthService);
-  private readonly logging = inject(LoggingService);
-  private readonly confirmModal = inject(ConfirmModalService);
-  private readonly fb = inject(FormBuilder);
+  protected readonly isLoggedIn = inject(UserService).isLoggedIn
+  private readonly supplierData = inject(SupplierDataService)
+  private readonly kitchenState = inject(KitchenStateService)
+  private readonly supplierModal = inject(SupplierModalService)
+  private readonly heroFab = inject(HeroFabService)
+  private readonly translation = inject(TranslationService)
+  private readonly router = inject(Router)
+  private readonly userMsg = inject(UserMsgService)
+  private readonly requireAuthService = inject(RequireAuthService)
+  private readonly logging = inject(LoggingService)
+  private readonly confirmModal = inject(ConfirmModalService)
+  private readonly fb = inject(FormBuilder)
 
   /** When true, add button emits addSupplierClick instead of opening modal and navigating. */
-  embeddedInDashboard = false;
-  readonly addSupplierClick = output<void>();
+  embeddedInDashboard = false
+  readonly addSupplierClick = output<void>()
 
-  protected searchQuery_ = signal('');
-  protected deletingId_ = signal<string | null>(null);
-  protected editingId_ = signal<string | null>(null);
-  protected closingId_ = signal<string | null>(null);
-  protected isSavingEdit_ = signal(false);
-  protected isPanelOpen_ = signal(true);
-  protected carouselHeaderIndex_ = signal(0);
-  protected selection = new ListSelectionState();
-  protected dayLabels = DAY_LABELS;
-  protected editForm_!: FormGroup;
+  protected searchQuery_ = signal('')
+  protected deletingId_ = signal<string | null>(null)
+  protected editingId_ = signal<string | null>(null)
+  protected closingId_ = signal<string | null>(null)
+  protected isSavingEdit_ = signal(false)
+  protected isPanelOpen_ = signal(true)
+  protected carouselHeaderIndex_ = signal(0)
+  protected selection = new ListSelectionState()
+  protected dayLabels = DAY_LABELS
+  protected editForm_!: FormGroup
 
   protected editableFields_: BulkEditableField[] = [
     {
@@ -94,21 +94,21 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   ]
 
   constructor() {
-    this.isPanelOpen_.set(getPanelOpen('suppliers'));
-    this.buildEditForm();
+    this.isPanelOpen_.set(getPanelOpen('suppliers'))
+    this.buildEditForm()
     if (!this.embeddedInDashboard) {
       useListState('suppliers', [
         { urlParam: 'q',          signal: this.searchQuery_,   serializer: StringParam },
         { urlParam: 'days',       signal: this.selectedDays_,  serializer: NumberSetParam },
         { urlParam: 'linkedOnly', signal: this.hasLinkedOnly_, serializer: BooleanParam },
-      ]);
+      ])
     }
 
     afterNextRender(() => {
-      if (typeof window === 'undefined') return;
-      const q = window.matchMedia('(max-width: 768px)');
-      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); });
-    });
+      if (typeof window === 'undefined') return
+      const q = window.matchMedia('(max-width: 768px)')
+      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); })
+    })
   }
 
   ngOnInit(): void {
@@ -118,213 +118,213 @@ export class SupplierListComponent implements OnInit, OnDestroy {
           labelKey: 'add_supplier',
           icon: 'plus',
           run: () => {
-            if (this.requireAuthService.requireAuth()) this.supplierModal.openAdd();
+            if (this.requireAuthService.requireAuth()) this.supplierModal.openAdd()
           }
         }],
         'replace'
-      );
+      )
     }
   }
 
   ngOnDestroy(): void {
-    this.heroFab.clearPageActions();
+    this.heroFab.clearPageActions()
   }
 
   /** Delivery days to filter (0=Sun .. 6=Sat). Empty set = show all. */
-  protected selectedDays_ = signal<Set<number>>(new Set());
-  protected hasLinkedOnly_ = signal(false);
+  protected selectedDays_ = signal<Set<number>>(new Set())
+  protected hasLinkedOnly_ = signal(false)
 
-  protected isEmptyList_ = computed(() => this.supplierData.allSuppliers_().length === 0);
+  protected isEmptyList_ = computed(() => this.supplierData.allSuppliers_().length === 0)
 
   protected hasActiveFilters_ = computed(() => {
-    const days = this.selectedDays_();
-    const linked = this.hasLinkedOnly_();
-    return (days.size > 0) || linked;
-  });
+    const days = this.selectedDays_()
+    const linked = this.hasLinkedOnly_()
+    return (days.size > 0) || linked
+  })
 
   protected filteredSuppliers_ = computed(() => {
-    let list = this.supplierData.allSuppliers_();
-    const search = this.searchQuery_().trim().toLowerCase();
-    const days = this.selectedDays_();
-    const linkedOnly = this.hasLinkedOnly_();
+    let list = this.supplierData.allSuppliers_()
+    const search = this.searchQuery_().trim().toLowerCase()
+    const days = this.selectedDays_()
+    const linkedOnly = this.hasLinkedOnly_()
 
     if (search) {
       list = list.filter(
         s =>
           (s.name_hebrew ?? '').toLowerCase().includes(search) ||
           (s.contact_person_ ?? '').toLowerCase().includes(search)
-      );
+      )
     }
     if (days.size > 0) {
-      list = list.filter(s => (s.delivery_days_ ?? []).some(d => days.has(d)));
+      list = list.filter(s => (s.delivery_days_ ?? []).some(d => days.has(d)))
     }
     if (linkedOnly) {
-      list = list.filter(s => this.linkedProductCount_(s._id) > 0);
+      list = list.filter(s => this.linkedProductCount_(s._id) > 0)
     }
     return [...list].sort((a, b) =>
       (a.name_hebrew ?? '').localeCompare(b.name_hebrew ?? '', 'he')
-    );
-  });
+    )
+  })
 
   /** Visible supplier IDs for header select-all. */
   protected filteredSupplierIds_ = computed(() =>
     this.filteredSuppliers_().map(s => s._id ?? '').filter(Boolean)
-  );
+  )
 
   protected togglePanel(): void {
-    this.isPanelOpen_.update(v => !v);
-    setPanelOpen('suppliers', this.isPanelOpen_());
+    this.isPanelOpen_.update(v => !v)
+    setPanelOpen('suppliers', this.isPanelOpen_())
   }
 
   protected onCarouselHeaderChange(index: number): void {
-    this.carouselHeaderIndex_.set(index);
+    this.carouselHeaderIndex_.set(index)
   }
 
   protected toggleDay(day: number): void {
     this.selectedDays_.update(set => {
-      const next = new Set(set);
-      if (next.has(day)) next.delete(day);
-      else next.add(day);
-      return next;
-    });
+      const next = new Set(set)
+      if (next.has(day)) next.delete(day)
+      else next.add(day)
+      return next
+    })
   }
 
   protected clearAllFilters(): void {
-    this.selectedDays_.set(new Set());
-    this.hasLinkedOnly_.set(false);
+    this.selectedDays_.set(new Set())
+    this.hasLinkedOnly_.set(false)
   }
 
   private buildEditForm(): void {
-    const daysArray = this.fb.array(Array.from({ length: 7 }, () => this.fb.control(false)));
+    const daysArray = this.fb.array(Array.from({ length: 7 }, () => this.fb.control(false)))
     this.editForm_ = this.fb.group({
       name_hebrew: ['', [Validators.required]],
       contact_person_: [''],
       delivery_days_: daysArray,
       min_order_mov_: [0, [Validators.required, Validators.min(0)]],
       lead_time_days_: [0, [Validators.required, Validators.min(0)]],
-    });
+    })
   }
 
   protected get deliveryDaysArray(): FormArray {
-    return this.editForm_?.get('delivery_days_') as FormArray;
+    return this.editForm_?.get('delivery_days_') as FormArray
   }
 
   private hydrateEditForm(s: Supplier): void {
-    const days = s.delivery_days_ ?? [];
-    const dayControls = this.deliveryDaysArray;
+    const days = s.delivery_days_ ?? []
+    const dayControls = this.deliveryDaysArray
     for (let i = 0; i < 7; i++) {
-      dayControls.at(i).setValue(days.includes(i));
+      dayControls.at(i).setValue(days.includes(i))
     }
     this.editForm_.patchValue({
       name_hebrew: s.name_hebrew ?? '',
       contact_person_: s.contact_person_ ?? '',
       min_order_mov_: s.min_order_mov_ ?? 0,
       lead_time_days_: s.lead_time_days_ ?? 0,
-    });
+    })
   }
 
   protected linkedProductCount_(supplierId: string): number {
     return this.kitchenState.products_().filter(p =>
       getSupplierIds(p).includes(supplierId)
-    ).length;
+    ).length
   }
 
   protected onAdd(): void {
-    if (!this.requireAuthService.requireAuth()) return;
+    if (!this.requireAuthService.requireAuth()) return
     if (this.embeddedInDashboard) {
-      this.addSupplierClick.emit();
-      return;
+      this.addSupplierClick.emit()
+      return
     }
-    this.supplierModal.openAdd();
+    this.supplierModal.openAdd()
   }
 
   protected onRowClick(item: Supplier, event: MouseEvent): void {
-    const el = event.target as HTMLElement;
-    if (el.closest('button') || el.closest('a') || el.closest('.inline-edit-panel') || el.closest('app-list-row-checkbox')) return;
+    const el = event.target as HTMLElement
+    if (el.closest('button') || el.closest('a') || el.closest('.inline-edit-panel') || el.closest('app-list-row-checkbox')) return
     if (this.selection.selectionMode()) {
-      this.selection.toggle(item._id ?? '');
-      return;
+      this.selection.toggle(item._id ?? '')
+      return
     }
     if (this.editingId_() === item._id) {
-      this.closeWithAnimation();
-      return;
+      this.closeWithAnimation()
+      return
     }
-    void this.onEdit(item);
+    void this.onEdit(item)
   }
 
   protected toggleRowEdit(item: Supplier): void {
     if (this.editingId_() === item._id) {
-      this.closeWithAnimation();
+      this.closeWithAnimation()
     } else {
-      void this.onEdit(item);
+      void this.onEdit(item)
     }
   }
 
   async onEdit(item: Supplier): Promise<void> {
-    if (!this.requireAuthService.requireAuth()) return;
-    const currentId = this.editingId_();
+    if (!this.requireAuthService.requireAuth()) return
+    const currentId = this.editingId_()
     if (currentId !== null && currentId !== item._id && this.editForm_.dirty) {
       const saveFirst = await this.confirmModal.open(
         this.translation.translate('unsaved_changes_confirm') ?? 'יש שינויים שלא נשמרו. שמור לפני מעבר?',
         { variant: 'warning', saveLabel: 'save' }
-      );
+      )
       if (saveFirst) {
-        await this.saveCurrentInlineEdit();
+        await this.saveCurrentInlineEdit()
       }
     }
-    this.editingId_.set(item._id);
-    this.hydrateEditForm(item);
+    this.editingId_.set(item._id)
+    this.hydrateEditForm(item)
   }
 
   private async saveCurrentInlineEdit(): Promise<boolean> {
-    const id = this.editingId_();
-    if (!id || this.editForm_.invalid) return false;
-    const supplier = this.supplierData.allSuppliers_().find((s) => s._id === id);
-    if (!supplier) return false;
-    this.isSavingEdit_.set(true);
+    const id = this.editingId_()
+    if (!id || this.editForm_.invalid) return false
+    const supplier = this.supplierData.allSuppliers_().find((s) => s._id === id)
+    if (!supplier) return false
+    this.isSavingEdit_.set(true)
     try {
-      const raw = this.editForm_.getRawValue();
-      const delivery_days_: number[] = [];
+      const raw = this.editForm_.getRawValue()
+      const delivery_days_: number[] = []
       this.deliveryDaysArray.controls.forEach((c, i) => {
-        if (c.value) delivery_days_.push(i);
-      });
+        if (c.value) delivery_days_.push(i)
+      })
       const payload: Partial<Supplier> = {
         name_hebrew: raw.name_hebrew,
         contact_person_: raw.contact_person_ || undefined,
         delivery_days_,
         min_order_mov_: Number(raw.min_order_mov_) || 0,
         lead_time_days_: Number(raw.lead_time_days_) || 0,
-      };
-      await this.supplierData.updateSupplier({ ...supplier, ...payload });
-      return true;
+      }
+      await this.supplierData.updateSupplier({ ...supplier, ...payload })
+      return true
     } catch (err) {
-      this.logging.error({ event: 'supplier.save_error', message: 'Supplier save failed', context: { err } });
-      this.userMsg.onSetErrorMsg(this.translation.translate('save_failed') ?? 'שגיאה בשמירה');
-      return false;
+      this.logging.error({ event: 'supplier.save_error', message: 'Supplier save failed', context: { err } })
+      this.userMsg.onSetErrorMsg(this.translation.translate('save_failed') ?? 'שגיאה בשמירה')
+      return false
     } finally {
-      this.isSavingEdit_.set(false);
+      this.isSavingEdit_.set(false)
     }
   }
 
   private closeWithAnimation(): void {
-    const id = this.editingId_();
-    if (!id) return;
-    this.closingId_.set(id);
+    const id = this.editingId_()
+    if (!id) return
+    this.closingId_.set(id)
     setTimeout(() => {
       if (this.closingId_() === id) {
-        this.editingId_.set(null);
-        this.closingId_.set(null);
+        this.editingId_.set(null)
+        this.closingId_.set(null)
       }
-    }, 200);
+    }, 200)
   }
 
   protected async onInlineSave(): Promise<void> {
-    const ok = await this.saveCurrentInlineEdit();
-    if (ok) this.closeWithAnimation();
+    const ok = await this.saveCurrentInlineEdit()
+    if (ok) this.closeWithAnimation()
   }
 
   protected onInlineCancel(): void {
-    this.closeWithAnimation();
+    this.closeWithAnimation()
   }
 
   /** Close inline panel on click outside; confirm if form has unsaved changes. */
@@ -333,43 +333,43 @@ export class SupplierListComponent implements OnInit, OnDestroy {
       const discard = await this.confirmModal.open(
         this.translation.translate('unsaved_changes_confirm') ?? 'יש שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?',
         { variant: 'warning', saveLabel: 'leave_without_saving' }
-      );
-      if (!discard) return;
+      )
+      if (!discard) return
     }
-    this.closeWithAnimation();
+    this.closeWithAnimation()
   }
 
   async onDelete(item: Supplier): Promise<void> {
-    if (!this.requireAuthService.requireAuth()) return;
-    const count = this.linkedProductCount_(item._id);
+    if (!this.requireAuthService.requireAuth()) return
+    const count = this.linkedProductCount_(item._id)
     if (count > 0) {
-      if (!await this.confirmModal.open('supplier_in_use_cannot_delete', { variant: 'warning' })) return;
-    } else if (!await this.confirmModal.open('למחוק את הספק "' + (item.name_hebrew ?? '') + '"?', { variant: 'danger' })) return;
-    this.deletingId_.set(item._id);
+      if (!await this.confirmModal.open('supplier_in_use_cannot_delete', { variant: 'warning' })) return
+    } else if (!await this.confirmModal.open('למחוק את הספק "' + (item.name_hebrew ?? '') + '"?', { variant: 'danger' })) return
+    this.deletingId_.set(item._id)
     try {
-      await this.supplierData.removeSupplier(item._id);
+      await this.supplierData.removeSupplier(item._id)
     } catch (e) {
-      this.logging.error({ event: 'supplier.list_error', message: 'Supplier list error', context: { err: e } });
+      this.logging.error({ event: 'supplier.list_error', message: 'Supplier list error', context: { err: e } })
     } finally {
-      this.deletingId_.set(null);
+      this.deletingId_.set(null)
     }
   }
 
   protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
-    if (ids.length === 0) return;
-    if (!this.requireAuthService.requireAuth()) return;
-    if (!await this.confirmModal.open(`למחוק ${ids.length} ספקים?`, { variant: 'danger' })) return;
+    if (ids.length === 0) return
+    if (!this.requireAuthService.requireAuth()) return
+    if (!await this.confirmModal.open(`למחוק ${ids.length} ספקים?`, { variant: 'danger' })) return
     for (const id of ids) {
-      this.deletingId_.set(id);
+      this.deletingId_.set(id)
       try {
-        await this.supplierData.removeSupplier(id);
+        await this.supplierData.removeSupplier(id)
       } catch (e) {
-        this.logging.error({ event: 'supplier.list_error', message: 'Supplier list error', context: { err: e } });
+        this.logging.error({ event: 'supplier.list_error', message: 'Supplier list error', context: { err: e } })
       } finally {
-        this.deletingId_.set(null);
+        this.deletingId_.set(null)
       }
     }
-    this.selection.clear();
+    this.selection.clear()
   }
 
   protected async onBulkEdit(event: { field: string; value: string; ids: string[] }): Promise<void> {
@@ -392,11 +392,11 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   }
 
   backToDashboard(): void {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/dashboard'])
   }
 
   protected deliveryDaysDisplay(days: number[] | undefined): string {
-    if (!days?.length) return '—';
-    return days.map(d => this.translation.translate(DAY_LABELS[d]) || String(d)).join(', ');
+    if (!days?.length) return '—'
+    return days.map(d => this.translation.translate(DAY_LABELS[d]) || String(d)).join(', ')
   }
 }
