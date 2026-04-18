@@ -215,8 +215,10 @@
                     <li role="option" class="logistics-tool-option logistics-tool-add-new"
                       [class.highlighted]="logisticsHighlightedIndex_() === logisticsSearchOptions_().length"
                       (click)="openAddNewToolModal()">
-                      <lucide-icon name="plus-circle" [size]="16"></lucide-icon>
-                      <span>{{ 'add_new_tool' | translatePipe }}</span>
+                      <span class="c-add-new-icon">
+                        <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
+                      </span>
+                      {{ 'add' | translatePipe }}
                     </li>
                   </ul>
                 </app-scrollable-dropdown>

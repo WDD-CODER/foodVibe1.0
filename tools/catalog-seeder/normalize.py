@@ -10,7 +10,7 @@ import string
 from collections import defaultdict
 from typing import Any
 
-from config import ALLOWED_ALLERGENS, CATEGORY_GROUPS, CATEGORY_UNIT_MAP, MAX_PRODUCTS, NON_FOOD_KEYWORDS
+from config import ALLOWED_ALLERGENS, CATEGORY_GROUPS, CATEGORY_UNIT_MAP, MAX_PRODUCTS
 
 logger = logging.getLogger(__name__)
 
@@ -157,13 +157,7 @@ def normalize_products(
         product["_chain_count"] = 1
         normalized.append(product)
 
-    # Drop non-food products
-    before = len(normalized)
-    normalized = [p for p in normalized if not _is_non_food(p["name_hebrew"])]
-    logger.info(
-        f"[normalize] {len(normalized)} unique products after dedup "
-        f"({before - len(normalized)} non-food dropped)"
-    )
+    logger.info(f"[normalize] {len(normalized)} unique products after dedup")
 
     # Keep only the most popular products (highest cross-chain count)
     normalized.sort(key=lambda p: p["_chain_count"], reverse=True)
@@ -175,11 +169,6 @@ def normalize_products(
         normalized = normalized[:MAX_PRODUCTS]
 
     return normalized
-
-
-def _is_non_food(name: str) -> bool:
-    """Return True if the product name matches any non-food keyword."""
-    return any(kw in name for kw in NON_FOOD_KEYWORDS)
 
 
 def _normalize_one(
@@ -233,4 +222,12 @@ def _normalize_one(
         # LLM enrichment fields (populated in enrich.py)
         "_category_group":     category_group,  # internal routing key, stripped before DB write
         "_enrichment_failed":  False,
+        # Nutrition from Open Food Facts (None if barcode not in OFF)
+        "nutrition_per_100g":  off_data.get("nutrition_per_100g"),
+        # Review fields — human edits these in catalog-review.json
+        "suggested_category":  category_group,
+        "kitchen_category":    "",
+        "approved":            False,
+        "drop":                False,
+        "notes":               "",
     }

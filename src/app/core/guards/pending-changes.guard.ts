@@ -1,8 +1,6 @@
 import { CanDeactivateFn } from '@angular/router'
 import { inject } from '@angular/core'
-import { UserMsgService } from '@services/user-msg.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
-import { TranslationService } from '@services/translation.service'
 import { AbstractControl } from '@angular/forms'
 
 export interface PendingChangesComponent {
@@ -26,9 +24,7 @@ export interface PendingChangesComponent {
  *   Cancel (stay) | Leave without saving.
  */
 export const pendingChangesGuard: CanDeactivateFn<PendingChangesComponent> = async (component) => {
-  const userMsgService = inject(UserMsgService)
   const confirmModal = inject(ConfirmModalService)
-  const translationService = inject(TranslationService)
 
   const form = component?.readProductForm_ ?? component?.recipeForm_
   if (component?.isSubmitted) return true
@@ -58,7 +54,6 @@ export const pendingChangesGuard: CanDeactivateFn<PendingChangesComponent> = asy
     }
 
     // result === 'confirm' → leave without saving
-    userMsgService.onSetErrorMsg(translationService.translate('unsaved_changes_confirm'))
     return true
   }
 
@@ -70,6 +65,5 @@ export const pendingChangesGuard: CanDeactivateFn<PendingChangesComponent> = asy
 
   if (!isConfirmed) return false
 
-  userMsgService.onSetErrorMsg(translationService.translate('unsaved_changes_confirm'))
   return true
 }

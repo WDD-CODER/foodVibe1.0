@@ -1,0 +1,2421 @@
+{
+  "category": "proteins",
+  "total": 69,
+  "items": [
+    {
+      "_id": "0zzC1",
+      "barcode": "7290104724718",
+      "name_hebrew": "שוקולד פרה חלב במילו",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.15,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.15
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 17
+    },
+    {
+      "_id": "rbnV1",
+      "barcode": "7290008750677",
+      "name_hebrew": "שוקולד פרה ממולא תות",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.29,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.29
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 16
+    },
+    {
+      "_id": "haGPT",
+      "barcode": "7290107951104",
+      "name_hebrew": "בפלות שוקולד 200 גרם",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 7.12,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 7.12
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "O7Znb",
+      "barcode": "7290107950206",
+      "name_hebrew": "מעדן שטראוס דיאט שוק",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 3.63,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 3.63
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "S8obR",
+      "barcode": "7290000178103",
+      "name_hebrew": "שוקולד חלב עלית רביע",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 29.1,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 29.1
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "W8H0X",
+      "barcode": "72993637",
+      "name_hebrew": "דני מהדרין שוקו בודד",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 2.97,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 2.97
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "pH15y",
+      "barcode": "7290000061245",
+      "name_hebrew": "עוגיות שוקוציפס ממול",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 13.45,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 13.45
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "eyoAp",
+      "barcode": "7290000077017",
+      "name_hebrew": "קרמוגית במילוי שוקול",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 13.14,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 13.14
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "kWMDI",
+      "barcode": "7290006983763",
+      "name_hebrew": "עוגת הבית שוקולד אסם",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 14.58,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 14.58
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "T9Zqj",
+      "barcode": "7290008775816",
+      "name_hebrew": "ערגליות שוקו אסם 300",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 12.01,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 12.01
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "LwDZ2",
+      "barcode": "7290119380558",
+      "name_hebrew": "מילקי שכבות בטעם שוק",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 3.87,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 3.87
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "AcyNS",
+      "barcode": "7290000174099",
+      "name_hebrew": "בפלות שוקולד 500 גרם",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 17.43,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 17.43
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "fmY42",
+      "barcode": "7290000174723",
+      "name_hebrew": "שוקולית אבקת שוקו על",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 16.57,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 16.57
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "7vWNU",
+      "barcode": "7290004131074",
+      "name_hebrew": "חלב בקרטון 3% שומן ת",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 7.27,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 7.27
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "N2KYE",
+      "barcode": "72940761",
+      "name_hebrew": "מילקי שוקו",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 3.15,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 3.15
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "3IQTt",
+      "barcode": "7290003029181",
+      "name_hebrew": "שוקו 2% בבקבוק יטבתה",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 12.81,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 12.81
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "ePLRH",
+      "barcode": "7290003029433",
+      "name_hebrew": "שוקו יטבתה 250מל",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 5.65,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 5.65
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "pVY3j",
+      "barcode": "7290003029792",
+      "name_hebrew": "שוקו 2% יטבתה 225x8",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 22.49,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 22.49
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "EI2Vu",
+      "barcode": "80177609",
+      "name_hebrew": "קינדר אצבעות שוקולד",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.1,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.1
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "WC8zr",
+      "barcode": "8000500071083",
+      "name_hebrew": "קינדר אצבעות שוקולד",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 16.85,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 16.85
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "JzA4o",
+      "barcode": "8000500026731",
+      "name_hebrew": "קינדר ביצי שוקולד 3*",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 17.49,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 17.49
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "1pMLs",
+      "barcode": "7290112966803",
+      "name_hebrew": "פודינג שוקולד אסם 88",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 5.79,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 5.79
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "NevNJ",
+      "barcode": "7290105363572",
+      "name_hebrew": "שוקולד פרה ביסקוויט",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.45,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.45
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "boTks",
+      "barcode": "7290112351128",
+      "name_hebrew": "פרה שוקולד סוכריות ק",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.18,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.18
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "SbFvb",
+      "barcode": "7290112351104",
+      "name_hebrew": "שוקולד פרה פיצפוצי א",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.18,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.18
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "sr47K",
+      "barcode": "7290110557102",
+      "name_hebrew": "מעדן חלב עם שוקולד 1",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 5.97,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 5.97
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "JdidK",
+      "barcode": "7290004063115",
+      "name_hebrew": "מלח למליחות בשר וביש",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 2.01,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 2.01
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "SaGZF",
+      "barcode": "7290000042435",
+      "name_hebrew": "חלב מפוסטר 1% בקרטון",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.84,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.84
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "AanpG",
+      "barcode": "7290000042855",
+      "name_hebrew": "שוקו יטבתה שקית 250",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 2.96,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 2.96
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "1hiaR",
+      "barcode": "7290006983787",
+      "name_hebrew": "עוגת הבית שוקוציפס א",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 14.34,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 14.34
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "6oT2G",
+      "barcode": "46214731552",
+      "name_hebrew": "מרבה עוגיות 37% שוקו",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 11.69,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 11.69
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "XxD2s",
+      "barcode": "7290003903955",
+      "name_hebrew": "שוקולד פרה במילוי קר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.06,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.06
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "bkdIB",
+      "barcode": "7290010116980",
+      "name_hebrew": "שוקולית עלית 850גר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 20.97,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 20.97
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "IAmk6",
+      "barcode": "7290115678376",
+      "name_hebrew": "מעדן הגולן שוקולד 12",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 3.26,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 3.26
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "FLjJc",
+      "barcode": "7290000170053",
+      "name_hebrew": "שוקולד פרה חלב 100גר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.13,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.13
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "rTS71",
+      "barcode": "7290102397747",
+      "name_hebrew": "מוצרלה פרוס מחלב בקר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 23.47,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 23.47
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "iJ4ID",
+      "barcode": "7290115678383",
+      "name_hebrew": "מעדן הגולן שוקולד מר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 3.26,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 3.26
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "s044l",
+      "barcode": "7290119385836",
+      "name_hebrew": "אפיפית שוקו 200 ג'",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 10.87,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 10.87
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "Nigfq",
+      "barcode": "7290119385768",
+      "name_hebrew": "פרו קראנצ' פצפוץ שוק",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 7.25,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 7.25
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "7BRJw",
+      "barcode": "7290011081690",
+      "name_hebrew": "קרמיסימו פרווה שוקו",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 25.83,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 25.83
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "Z37SR",
+      "barcode": "3387390525960",
+      "name_hebrew": "דגני קראנץ' נסטלה 50",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 23.53,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 23.53
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "fish",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "Ev3u2",
+      "barcode": "7290106526822",
+      "name_hebrew": "פריכיות עם תחתית שוק",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 10.54,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 10.54
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "PurLz",
+      "barcode": "7290106656727",
+      "name_hebrew": "עוגיות חיוכים שוקו ב",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 20.49,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 20.49
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "Qqef3",
+      "barcode": "7290105965516",
+      "name_hebrew": "שוקולד ספלנדיד חלב 3",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 15.19,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 15.19
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "9m18V",
+      "barcode": "5900951140303",
+      "name_hebrew": "אם אן אם שוקולד 45גר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.38,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.38
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "gs3s4",
+      "barcode": "7290111566752",
+      "name_hebrew": "טבעול שניצל תירס 99",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 35.84,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 35.84
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "WrIEC",
+      "barcode": "7290102398560",
+      "name_hebrew": "שוקו טרה מועשר 1 ליט",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 13.76,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 13.76
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "He47S",
+      "barcode": "7290112490216",
+      "name_hebrew": "נמס בכוס קנור עוף קר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 7.96,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 7.96
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "ZEdXC",
+      "barcode": "7622202268298",
+      "name_hebrew": "מילקה שוקולד חלב 90",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.64,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.64
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "1dQpq",
+      "barcode": "7290110579463",
+      "name_hebrew": "שוקולד פרה מריר עם ש",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 8.99,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 8.99
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "l9yxI",
+      "barcode": "7290119382576",
+      "name_hebrew": "שוקולד לבן עוגיות 10",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 8.99,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 8.99
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "0mouQ",
+      "barcode": "7290019204381",
+      "name_hebrew": "אצבעות שניצל עוף טוב",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 38.26,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 38.26
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "re2GS",
+      "barcode": "7290019205807",
+      "name_hebrew": "שניצלונים עוף טוב 60",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 21.13,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 21.13
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "eNxYf",
+      "barcode": "7622202262593",
+      "name_hebrew": "שוקולד מילקה חלב עם",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.6,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.6
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "EUsAj",
+      "barcode": "7622202269738",
+      "name_hebrew": "שוקולד מילקה חלב עם",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.6,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.6
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "fQbQM",
+      "barcode": "7290019205708",
+      "name_hebrew": "שניצל מיני דינוזאור",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 38.52,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 38.52
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "dMh09",
+      "barcode": "7290000318127",
+      "name_hebrew": "נקניקיות ביס יחיעם 3",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 14.55,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 14.55
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "TdaIT",
+      "barcode": "7290000319131",
+      "name_hebrew": "נקניקיות עוף יחיעם 4",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 14.85,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 14.85
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "YXlB2",
+      "barcode": "7290011499327",
+      "name_hebrew": "בולגרית בקר מעודנת 2",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 28.58,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 28.58
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "rd7j6",
+      "barcode": "7613035635845",
+      "name_hebrew": "פיטנס גרנולה שוקולד",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 16.15,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 16.15
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "HVfiz",
+      "barcode": "7290119377077",
+      "name_hebrew": "שוקולד פרה בטעם רבע",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 11.55,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 11.55
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "lQ1gi",
+      "barcode": "7290000074153",
+      "name_hebrew": "פתי בר שוקו אסם 500ג",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 13.79,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 13.79
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "53Ipa",
+      "barcode": "7290000300900",
+      "name_hebrew": "שניצל תירס טבעול 750",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 32.44,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 32.44
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "KWF8K",
+      "barcode": "7290000178134",
+      "name_hebrew": "שוקולד מריר פרה רביע",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 28.9,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 28.9
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "t3N82",
+      "barcode": "7290100685341",
+      "name_hebrew": "אסם מרק זך טעם עוף ר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 18.52,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 18.52
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "xRWbu",
+      "barcode": "4000417025005",
+      "name_hebrew": "שוקולד ריטר ספורט מר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 13.15,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 13.15
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "ZIXml",
+      "barcode": "7290014762800",
+      "name_hebrew": "מעדן סויה בטעם שוקול",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 4.72,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 4.72
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "g7dw5",
+      "barcode": "7290005197758",
+      "name_hebrew": "עוגיות חיוכים שוקו 1",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.18,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.18
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "nPVth",
+      "barcode": "7290107646826",
+      "name_hebrew": "שוגי שוקו מאגדת חטיפ",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 16.82,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 16.82
+        }
+      ],
+      "categories_": [
+        "proteins"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "proteins",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "proteins",
+      "kitchen_category": "meat",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    }
+  ]
+}

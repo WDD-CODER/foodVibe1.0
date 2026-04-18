@@ -30,8 +30,10 @@
   @if (showResults_() && showAddOption_()) {
     <div class="add-option">
       <button type="button" (click)="addPreparationDirectly()" class="add-prep-btn">
-        <lucide-icon name="plus" size="16"></lucide-icon>
-        {{ 'add_preparation' | translatePipe }}: {{ searchQuery_() }}
+        <span class="c-add-new-icon">
+          <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
+        </span>
+        {{ 'add' | translatePipe }}
       </button>
     </div>
   }

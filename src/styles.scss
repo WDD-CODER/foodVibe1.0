@@ -1539,3 +1539,21 @@ textarea.c-input {
     color: var(--color-primary-hover);
   }
 }
+
+/* ---- Engine: Add-new icon box ---- */
+.c-add-new-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--color-primary);
+  border-radius: 6px;
+  flex-shrink: 0;
+
+  img {
+    width: 14px;
+    height: 14px;
+    object-fit: contain;
+  }
+}

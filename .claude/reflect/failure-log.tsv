@@ -966,3 +966,43 @@ grep -ri "mempala	C:/foodCo/foodVibe1.0/.claude/reflect/failure-log-archive-2026
 2026-04-17 20:57:44	Bash	ng build 2>&1 | tail -30	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
 2026-04-17 21:02:37	Edit	C:\foodCo\foodVibe1.0\.claude\agents\end-of-session-agent.md	Build failed. Cannot close session with broken code.	
 2026-04-17 21:04:56	Bash	cd C:/foodCo/foodVibe1.0 && git diff .claude/reflect/failure-log.tsv | head -50	 sleep --- BEGIN UNTRUSTED EXTERNAL CONTENT (source: chrome-error://chromewebdata/) --- 	
+2026-04-17 21:11:09	Edit	C:\foodCo\foodVibe1.0\scripts\context-monitor.sh	# The 70% hard gate forces a session handoff ΓÇö no exceptions.	
+2026-04-17 21:11:46	Bash	PREV="/c/Users/danwe/.claude/projects/C--foodCo-foodVibe1-0/fb0a5bf7-7e4e-4ad2-b	422:{"parentUuid":"197f5e12-c101-499c-b27f-57c16ac2e5e7","isSidechain":false,"promptId":"af9f5ea0-0f8e-4a18-b33d-d9b4751	
+2026-04-17 21:37:35	Bash	git -C /c/foodCo/foodVibe1.0 diff HEAD -- .claude/reflect/failure-log.tsv script	 2026-04-17 20:57:44 Bash ng build 2>&1 | tail -30 @{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; inter	
+2026-04-17 21:37:50	Bash	git -C /c/foodCo/foodVibe1.0 diff HEAD -- scripts/context-monitor.sh | head -100	-# The 70% hard gate forces a session handoff ΓÇö no exceptions.	
+2026-04-17 21:48:29	Bash	B=~/.claude/skills/gstack/browse/dist/browse
+$B console --errors	[2026-04-17T18:39:27.939Z] [error] Failed to load resource: the server responded with a status of 401 (Unauthorized)	
+2026-04-17 21:53:17	mcp__mempalace__mempalace_search	@{query=product data model storage service MongoDB; limit=5}	      "text": "tring, unique), `imgUrl`, `role` (enum admin/user), `passwordHash`, `failedAttempts`, `lockedUntil`.\n\n*	
+2026-04-17 21:56:52	mcp__mempalace__mempalace_search	@{query=recipe discard changes exit navigation; limit=5}	      "text": "t) when there are unsaved changes, with a short generic message (browsers often ignore custom text).\n\n#	
+2026-04-17 21:58:28	Edit	C:\foodCo\foodVibe1.0\src\app\core\guards\pending-changes.guard.ts	      if (!saved) return false // save failed ΓÇö stay on page	
+2026-04-17 21:58:46	Edit	C:\foodCo\foodVibe1.0\src\app\core\guards\pending-changes.guard.ts	      if (!saved) return false // save failed ΓÇö stay on page	
+2026-04-17 21:58:52	Edit	C:\foodCo\foodVibe1.0\src\app\core\guards\pending-changes.guard.ts	      if (!saved) return false // save failed ΓÇö stay on page	
+2026-04-17 22:08:34	Bash	B=~/.claude/skills/gstack/browse/dist/browse
+$B viewport 375x812
+# Check console	[2026-04-17T18:39:27.939Z] [error] Failed to load resource: the server responded with a status of 401 (Unauthorized)	
+2026-04-17 22:09:21	Write	C:\foodCo\foodVibe1.0\.gstack\qa-reports\qa-report-localhost-4200-2026-04-17.md	- No JavaScript runtime errors or unhandled exceptions	
+2026-04-17 22:36:55	Write	C:\Users\danwe\.claude\plans\lovely-churning-pascal.md	    except (TypeError, ValueError):	
+2026-04-17 22:38:56	Write	C:\foodCo\foodVibe1.0\plans\272-seeder-curation-pipeline.plan.md	    except (TypeError, ValueError):	
+2026-04-17 22:43:34	Write	C:\foodCo\foodVibe1.0\plans\272-seeder-curation-pipeline.plan.md	    except (TypeError, ValueError):	
+2026-04-17 22:45:21	Edit	C:\foodCo\foodVibe1.0\tools\catalog-seeder\db_write.py	    "barcode", "_category_group", "_enrichment_failed",	
+2026-04-17 22:45:26	Edit	C:\foodCo\foodVibe1.0\tools\catalog-seeder\db_write.py	    "barcode", "_category_group", "_enrichment_failed",	
+2026-04-17 22:45:36	Edit	C:\foodCo\foodVibe1.0\tools\catalog-seeder\db_write.py	    "barcode", "_category_group", "_enrichment_failed",	
+2026-04-17 22:45:42	Edit	C:\foodCo\foodVibe1.0\tools\catalog-seeder\db_write.py	    "barcode", "_category_group", "_enrichment_failed",	
+2026-04-17 22:45:47	Edit	C:\foodCo\foodVibe1.0\tools\catalog-seeder\diff.py	    except Exception as exc:	
+2026-04-17 22:46:35	Edit	C:\foodCo\foodVibe1.0\tools\catalog-seeder\fetch.py	    except (TypeError, ValueError):	
+2026-04-17 22:46:45	Edit	C:\foodCo\foodVibe1.0\tools\catalog-seeder\fetch.py	    except ImportError:	
+2026-04-17 22:46:52	Edit	C:\foodCo\foodVibe1.0\tools\catalog-seeder\normalize.py	        "_enrichment_failed":  False,	
+2026-04-17 22:46:59	Edit	C:\foodCo\foodVibe1.0\tools\catalog-seeder\normalize.py	        "_enrichment_failed":  False,	
+2026-04-17 22:47:05	Edit	C:\foodCo\foodVibe1.0\tools\catalog-seeder\normalize.py	        "_enrichment_failed":  False,	
+2026-04-17 22:47:12	Edit	C:\foodCo\foodVibe1.0\tools\catalog-seeder\normalize.py	        "_enrichment_failed":  False,	
+2026-04-17 22:47:50	Edit	C:\foodCo\foodVibe1.0\tools\catalog-seeder\main.py	        logger.error(f"Configuration error: {exc}")	
+2026-04-17 22:47:59	Edit	C:\foodCo\foodVibe1.0\tools\catalog-seeder\main.py	        logger.error(f"Configuration error: {exc}")	
+2026-04-17 22:48:20	Edit	C:\foodCo\foodVibe1.0\tools\catalog-seeder\main.py	        logger.error(f"Configuration error: {exc}")	
+2026-04-17 22:48:27	Edit	C:\foodCo\foodVibe1.0\tools\catalog-seeder\main.py	        logger.error(f"Configuration error: {exc}")	
+2026-04-17 22:51:33	Bash	git -C /c/foodCo/foodVibe1.0 diff HEAD -- tools/catalog-seeder/diff.py tools/cat	+    except (TypeError, ValueError):	
+2026-04-17 22:53:51	Bash	git -C /c/foodCo/foodVibe1.0 diff HEAD -- tools/catalog-seeder/normalize.py	         "_enrichment_failed":  False,	
+2026-04-17 22:55:39	mcp__mempalace__mempalace_search	@{query=custom-select add new option dropdown; limit=8}	      "text": "er border (separator) between the regular options and the \u201cadd new\u201d row so it is clearly distin	
+2026-04-17 23:24:04	Bash	cd "C:/foodCo/foodVibe1.0" && npx ng build --configuration=development 2>&1 | ta	Application bundle generation failed. [28.781 seconds]	
+2026-04-17 23:34:02	Bash	cd "C:/foodCo/foodVibe1.0" && npx ng serve --configuration=development 2>&1 &
+sl	[?25h[1m[31mAn unhandled exception occurred: Port 4200 is already in use. Use '--port' to specify a different port.	
+2026-04-17 23:34:16	Bash	cat "C:/Users/danwe/AppData/Local/Temp/ng-C4KMMP/angular-errors.log" 2>/dev/null	@{stdout=[error] Error: Port 4200 is already in use. Use '--port' to specify a different port.	

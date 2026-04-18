@@ -128,6 +128,13 @@ def _parse_xml_file(filepath: str, chain_name: str) -> list[dict[str, Any]]:
 # Open Food Facts Israel — bulk download
 # ---------------------------------------------------------------------------
 
+def _safe_float(val: str | None) -> float | None:
+    try:
+        return float(val) if val else None
+    except (TypeError, ValueError):
+        return None
+
+
 def fetch_off_bulk() -> dict[str, dict[str, Any]]:
     """
     Download the Open Food Facts Israel compressed CSV once.
@@ -163,6 +170,16 @@ def fetch_off_bulk() -> dict[str, dict[str, Any]]:
                     if a.strip()
                 ]
 
+                nutrition = {
+                    "energy_kcal": _safe_float(row.get("energy_100g")),
+                    "protein_g":   _safe_float(row.get("proteins_100g")),
+                    "carbs_g":     _safe_float(row.get("carbohydrates_100g")),
+                    "sugars_g":    _safe_float(row.get("sugars_100g")),
+                    "fat_g":       _safe_float(row.get("fat_100g")),
+                    "fiber_g":     _safe_float(row.get("fiber_100g")),
+                    "sodium_g":    _safe_float(row.get("sodium_100g")),
+                }
+
                 data[barcode] = {
                     "allergens_tags":  allergens,
                     "product_name_en": (row.get("product_name_en") or row.get("product_name") or "").strip(),
@@ -171,6 +188,9 @@ def fetch_off_bulk() -> dict[str, dict[str, Any]]:
                         for c in (row.get("categories_tags") or "").split(",")
                         if c.strip()
                     ],
+                    "nutrition_per_100g": (
+                        nutrition if any(v is not None for v in nutrition.values()) else None
+                    ),
                 }
 
         logger.info(f"[fetch] OFF bulk loaded: {len(data)} barcodes")

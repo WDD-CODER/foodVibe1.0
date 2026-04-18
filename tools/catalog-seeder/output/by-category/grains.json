@@ -1,0 +1,1581 @@
+{
+  "category": "grains",
+  "total": 45,
+  "items": [
+    {
+      "_id": "4VHkP",
+      "barcode": "7290000208428",
+      "name_hebrew": "חומוס יכין 550 גרם",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 10.38,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 10.38
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "AupiT",
+      "barcode": "7290000060200",
+      "name_hebrew": "פתיתים אפויים קוסקוס",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 7.37,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 7.37
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "4f1H8",
+      "barcode": "7290000060781",
+      "name_hebrew": "פסטה מסולסלים אסם 50",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.52,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.52
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "eodfy",
+      "barcode": "7290000060828",
+      "name_hebrew": "פסטה קרניים בינוניות",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.52,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.52
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "pwvil",
+      "barcode": "7290000060880",
+      "name_hebrew": "פסטה ספגטי אסם 500גר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.52,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.52
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "cuNpV",
+      "barcode": "7290008645935",
+      "name_hebrew": "חומוס לניגוב אחלה 75",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 12.83,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 12.83
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "V2kVx",
+      "barcode": "7290000211442",
+      "name_hebrew": "אורז בסגנון פרסי קלא",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 12.27,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 12.27
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "ZDHnL",
+      "barcode": "7290000211985",
+      "name_hebrew": "אורז עגול סוגת 1קג",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 13.11,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 13.11
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "EMaQo",
+      "barcode": "7290003643004",
+      "name_hebrew": "אורז בסמטי סוגת 1קג",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 15.51,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 15.51
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "Hr3II",
+      "barcode": "7290000060217",
+      "name_hebrew": "פסטה מקרוני 7 אסם 50",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.52,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.52
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "zogZC",
+      "barcode": "8901537024014",
+      "name_hebrew": "אורז בסמטי דאווט 1קג",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 14.88,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 14.88
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "E2Yht",
+      "barcode": "7290100700396",
+      "name_hebrew": "אורז יסמין קלאסי סוג",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 13.2,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 13.2
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "8rm72",
+      "barcode": "7290106576537",
+      "name_hebrew": "חומוס מסעדות צבר 700",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 12.79,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 12.79
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "RDfI1",
+      "barcode": "7290115202434",
+      "name_hebrew": "צבר חומוס עם זעתר 37",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 13.99,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 13.99
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "0vJup",
+      "barcode": "7290000208855",
+      "name_hebrew": "רוטב פסטה יכין 240 ג",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.94,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.94
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "mt7Oc",
+      "barcode": "7290000060248",
+      "name_hebrew": "פסטה תלתלים אסם 500",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.42,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.42
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "9kSVG",
+      "barcode": "7290000060842",
+      "name_hebrew": "פסטה צדפים גדולים אס",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.42,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.42
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "IDi9e",
+      "barcode": "7290000060903",
+      "name_hebrew": "פתיתים אפויים אורז א",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 7.26,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 7.26
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "aXTUg",
+      "barcode": "7290000063140",
+      "name_hebrew": "שקדי מרק רכיבים טבעי",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 11.78,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 11.78
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "cwWHc",
+      "barcode": "7290006653819",
+      "name_hebrew": "קוסקוס דק אסם 350 גר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 8.84,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 8.84
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "mnA01",
+      "barcode": "7290006983176",
+      "name_hebrew": "לחמית שיפון אסם 250ג",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 10.32,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 10.32
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "QoFN0",
+      "barcode": "7290003643714",
+      "name_hebrew": "חומוס סוגת 500גר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.28,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.28
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "CI28P",
+      "barcode": "7290003643769",
+      "name_hebrew": "עדשים אדומים סוגת 50",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.45,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.45
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "a7w1g",
+      "barcode": "8076802085936",
+      "name_hebrew": "ברילה פסטה ריגאטי מס",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 8.49,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 8.49
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "YsRex",
+      "barcode": "7290110327514",
+      "name_hebrew": "משקה שיבולת שועל בטע",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 13.64,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 13.64
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "BQIQi",
+      "barcode": "7290104061448",
+      "name_hebrew": "חומוס חריף אחלה קלאס",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 12.04,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 12.04
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "lcSx6",
+      "barcode": "7290110325619",
+      "name_hebrew": "משקה שיבולת שועל 1 ל",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 13.34,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 13.34
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "8QRnw",
+      "barcode": "7290105695024",
+      "name_hebrew": "פתיתים אפויים אורז ע",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 7.5,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 7.5
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "QmIXj",
+      "barcode": "7290106573628",
+      "name_hebrew": "חומוס עם טחינה צבר 4",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 13.42,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 13.42
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "pdlpw",
+      "barcode": "7290107871990",
+      "name_hebrew": "פסטה צינורות אסם 500",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.42,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.42
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "r1BBc",
+      "barcode": "8434165466333",
+      "name_hebrew": "קואטרה מיני קרקרים ע",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 11.8,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 11.8
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "Wa6J4",
+      "barcode": "7290109351025",
+      "name_hebrew": "חומוסטחינה צבר 400גר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 16.37,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 16.37
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "lBejh",
+      "barcode": "7290119384259",
+      "name_hebrew": "קפסולות נאפולי 13 למ",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 18.53,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 18.53
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "JKWi1",
+      "barcode": "7290110564360",
+      "name_hebrew": "חומוס אבי עשיר ב40%",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 14.85,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 14.85
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "JPxfg",
+      "barcode": "7290105964564",
+      "name_hebrew": "חומוס אחלה 400 גרם",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 10.1,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 10.1
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "VK7Ki",
+      "barcode": "7290112357113",
+      "name_hebrew": "גרגרי חומוס 380ג שטר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 7.88,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 7.88
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "jHfBr",
+      "barcode": "7290017105895",
+      "name_hebrew": "גרגירי חומוס בבישול",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 10.9,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 10.9
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "HilpS",
+      "barcode": "7290111568275",
+      "name_hebrew": "נודלס איטריות אורז ר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 11.14,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 11.14
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "Tnc5L",
+      "barcode": "7290000060859",
+      "name_hebrew": "אסם פסטה צדפים קטנים",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.57,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.57
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "t1d81",
+      "barcode": "7290000065540",
+      "name_hebrew": "מנה חמה אסם פסטה מוק",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 7.41,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 7.41
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "F06Do",
+      "barcode": "7290000068343",
+      "name_hebrew": "פריכונים מאורז מלא א",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.1,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.1
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "MxKzG",
+      "barcode": "7290000073415",
+      "name_hebrew": "מנה חמה אסם פסטה ברו",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 7.27,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 7.27
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "5fWze",
+      "barcode": "7290110578558",
+      "name_hebrew": "פולי אספרסו עוצמה 10",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 42.82,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 42.82
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "IRILk",
+      "barcode": "8076809512268",
+      "name_hebrew": "ברילה פסטה גירנדולה",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 8.53,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 8.53
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "qVmuQ",
+      "barcode": "8076809513692",
+      "name_hebrew": "רוטב נפולטנה 400 גרם",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 16.29,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 16.29
+        }
+      ],
+      "categories_": [
+        "grains"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "grains",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "grains",
+      "kitchen_category": "dry",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    }
+  ]
+}

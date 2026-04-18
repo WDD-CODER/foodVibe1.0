@@ -107,7 +107,12 @@
           role="option"
           [attr.aria-selected]="value.includes(opt.value)"
           (click)="onOptionClick(opt)">
-          @if (translateLabels()) {
+          @if (opt.value === addNewValue()) {
+            <span class="c-add-new-icon">
+              <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
+            </span>
+            {{ 'add' | translatePipe }}
+          } @else if (translateLabels()) {
             {{ opt.label | translatePipe }}
           } @else {
             {{ opt.label }}
@@ -117,8 +122,10 @@
       @if (showDynamicAddNew_()) {
         <button type="button" class="custom-select-option custom-select-option--add-new custom-select-option--dynamic-add"
           (click)="onDynamicAddNewClick()">
-          <lucide-icon name="plus-circle" [size]="14"></lucide-icon>
-          {{ searchQuery_().trim() }}
+          <span class="c-add-new-icon">
+            <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
+          </span>
+          {{ 'add' | translatePipe }}
         </button>
       }
     </app-scrollable-dropdown>

@@ -7,13 +7,14 @@ Uses pymongo with the same MONGO_URI as the Node.js backend.
 
 import logging
 import random
+import re
 import string
 import time
 from typing import Any
 
 import pymongo
 
-from config import COLLECTION, MONGO_URI, SUPPLIERS_COLLECTION
+from config import COLLECTION, MONGO_ATLAS_URI, MONGO_LOCAL_URI, SUPPLIERS_COLLECTION
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,10 @@ _INTERNAL_KEYS = {
     "barcode", "_category_group", "_enrichment_failed",
     "_chain_count", "_brand", "_pack_size", "_pack_unit",
 }
+
+
+def _normalize_name(name: str) -> str:
+    return re.sub(r'\s+', ' ', name.strip()).lower()
 
 
 def _make_id(length: int = 5) -> str:
@@ -55,38 +60,43 @@ def write_approved(approved: list[dict[str, Any]], dry_run: bool = False) -> int
             logger.info(f"  ... and {len(docs) - 5} more")
         return len(docs)
 
-    inserted = 0
-    skipped = 0
+    total_inserted = 0
 
-    try:
-        client = pymongo.MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
-        db = client.get_default_database()
+    targets = []
+    if MONGO_ATLAS_URI:
+        targets.append(("Atlas", MONGO_ATLAS_URI))
+    if MONGO_LOCAL_URI:
+        targets.append(("Local", MONGO_LOCAL_URI))
 
-        # Upsert suppliers first so we have IDs to link
-        brand_names = list({p.get("_brand") for p in approved if p.get("_brand")})
-        supplier_map = _upsert_suppliers(brand_names, db)
+    for label, uri in targets:
+        inserted = 0
+        skipped = 0
+        try:
+            client = pymongo.MongoClient(uri, serverSelectionTimeoutMS=5000)
+            db = client.get_default_database()
 
-        col = db[COLLECTION]
-        for product in approved:
-            doc = _prepare_doc(product, now_ms, supplier_map)
-            try:
-                col.insert_one(doc)
-                inserted += 1
-            except pymongo.errors.DuplicateKeyError:
-                logger.debug(f"[db_write] Skipped duplicate _id: {doc['_id']}")
-                skipped += 1
-            except Exception as exc:
-                logger.error(f"[db_write] Failed to insert {doc.get('_id')}: {exc}")
+            brand_names = list({p.get("_brand") for p in approved if p.get("_brand")})
+            supplier_map = _upsert_suppliers(brand_names, db)
 
-        client.close()
-        logger.info(
-            f"[db_write] Inserted: {inserted}, skipped (duplicate): {skipped}"
-        )
-    except Exception as exc:
-        logger.error(f"[db_write] MongoDB connection failed: {exc}")
-        raise
+            col = db[COLLECTION]
+            for product in approved:
+                doc = _prepare_doc(product, now_ms, supplier_map)
+                try:
+                    col.insert_one(doc)
+                    inserted += 1
+                except pymongo.errors.DuplicateKeyError:
+                    logger.debug(f"[db_write] [{label}] Skipped duplicate _id: {doc['_id']}")
+                    skipped += 1
+                except Exception as exc:
+                    logger.error(f"[db_write] [{label}] Failed to insert {doc.get('_id')}: {exc}")
 
-    return inserted
+            client.close()
+            logger.info(f"[db_write] [{label}] Inserted: {inserted}, skipped (duplicate): {skipped}")
+            total_inserted = max(total_inserted, inserted)
+        except Exception as exc:
+            logger.error(f"[db_write] [{label}] MongoDB connection failed: {exc}")
+
+    return total_inserted
 
 
 def _upsert_suppliers(brand_names: list[str], db: Any) -> dict[str, str]:
@@ -111,6 +121,9 @@ def _upsert_suppliers(brand_names: list[str], db: Any) -> dict[str, str]:
                 "min_order_mov_":  0,
                 "lead_time_days_": 1,
                 "seeded_":         True,
+                "userId":          "__master__",
+                "_masterId":       None,
+                "_userModified":   False,
             })
             result[brand] = supplier_id
             logger.info(f"[db_write] Created supplier: {brand} ({supplier_id})")
@@ -122,6 +135,12 @@ def _prepare_doc(product: dict[str, Any], now_ms: int, supplier_map: dict[str, s
     doc = {k: v for k, v in product.items() if k not in _INTERNAL_KEYS}
     doc["addedAt_"] = now_ms
     doc["seeded_"] = True
+    # Ownership — master/user clone architecture
+    doc["userId"] = "__master__"
+    doc["_masterId"] = None
+    doc["_userModified"] = False
+    # Normalized Hebrew name for dedup / search
+    doc["name_hebrew_normalized"] = _normalize_name(doc.get("name_hebrew", ""))
     # Ensure null-enriched fields get safe defaults if admin skipped them
     if doc.get("yield_factor_") is None:
         doc["yield_factor_"] = 1.0
@@ -129,6 +148,16 @@ def _prepare_doc(product: dict[str, Any], now_ms: int, supplier_map: dict[str, s
         doc["expiry_days_default_"] = 0
     # Link brand supplier
     brand = product.get("_brand")
-    if brand and brand in supplier_map:
-        doc["supplierIds_"] = [supplier_map[brand]]
+    supplier_id = supplier_map.get(brand) if brand else None
+    if supplier_id:
+        doc["supplierIds_"] = [supplier_id]  # backward compat
+        doc["sources_"] = [
+            {
+                "supplierId": supplier_id,
+                "price":      doc.get("buy_price_global_"),
+                "addedAt":    now_ms,
+            }
+        ]
+    else:
+        doc["sources_"] = []
     return doc
