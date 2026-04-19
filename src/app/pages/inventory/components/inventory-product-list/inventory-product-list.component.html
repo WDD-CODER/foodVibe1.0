@@ -21,12 +21,15 @@
     </div>
   </ng-container>
 
-  <ng-container shell-actions>
+  <ng-container shell-selection-bar>
     <app-selection-bar
       [selectionState]="selection"
       [editableFields]="editableFields_()"
       (bulkDelete)="onBulkDeleteSelected($event)"
       (bulkEdit)="onBulkEdit($event)" />
+  </ng-container>
+
+  <ng-container shell-actions>
     <button type="button" class="c-btn-primary" (click)="onAddProduct()"
       [disabled]="!isLoggedIn()"
       [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">

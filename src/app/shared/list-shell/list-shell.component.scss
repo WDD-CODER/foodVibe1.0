@@ -39,11 +39,17 @@
     grid-area: selbar;
     display: flex;
     justify-content: center;
-    padding-block-start: 0.5rem;
+
+    overflow: hidden;
 
     &:empty {
       display: none;
     }
+  }
+
+  :host ::ng-deep .selection-bar-area .selection-bar {
+    margin-block-start: 0.5rem;
+    margin-block-end: 0.5rem;
   }
 
   .list-header {

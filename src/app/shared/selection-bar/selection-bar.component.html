@@ -1,5 +1,5 @@
 @if (selectionState().selectionMode()) {
-  <div class="selection-bar">
+  <div class="selection-bar" [@slideInOut]>
     <header class="selection-bar__header">
       <span class="selection-bar__count">{{ selectionState().selectedIds().size }}</span>
       <span class="selection-bar__count-label">{{ 'items_selected' | translatePipe }}</span>
