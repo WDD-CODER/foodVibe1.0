@@ -295,6 +295,7 @@
     flex-direction: column;
 
     min-height: 2.5rem;
+    min-width: 0;
     padding: var(--rb-gap-tight);
 
     background: var(--bg-muted);
@@ -375,11 +376,14 @@
     flex-direction: column;
 
     gap: 0.25rem;
+    max-width: 100%;
+    overflow: hidden;
   }
 
   .logistics-add-inner {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: var(--rb-gap-tight);
   }
 

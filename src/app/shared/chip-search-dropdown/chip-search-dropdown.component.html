@@ -43,7 +43,10 @@
              tabindex="-1"
              role="option"
              (click)="emitAddNew(); $event.stopPropagation()">
-          + {{ addNewLabel() }}@if (searchQuery_().trim()) { "{{ searchQuery_() }}" }
+          <span class="c-add-new-icon">
+            <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
+          </span>
+          {{ 'add' | translatePipe }}
         </div>
       }
       @if (noOptionsLabel() && filteredOptions_().length === 0 && !searchQuery_().trim()) {

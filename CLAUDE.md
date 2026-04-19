@@ -19,31 +19,33 @@ If a file cannot be read, respond **"No chef! I cannot read [filename]"** and st
 
 Subagents spawned via the Agent tool are running inside a task — they do **not** perform the session-start preflight ("Yes chef!" gate). The gate applies to main-session Claude only.
 
-## Subagent MemPalace Rule
+## Codebase Search Priority (MANDATORY)
 
-**Before spawning ANY subagent** (Explore, Plan, or named agents):
-1. **YOU** (main Claude) call `mempalace_search(query="<relevant keywords>", limit=5)` first
-2. Include the top results as a `## MemPalace Context` section at the TOP of the subagent prompt
+**Every search starts with MemPalace.** MemPalace has 6,000+ embedded drawers with project knowledge — semantic search over architecture, patterns, past decisions, and file relationships. It is faster and more context-rich than file-level tools.
+
+**Decision tree — follow in order, stop when you have what you need:**
+
+1. **`mempalace_search(query="<2-3 keywords>", limit=5)`** — semantic domain knowledge. Run this FIRST for any task involving code, files, components, or project knowledge.
+2. **Grep / Glob** — targeted file content search. Use when you need exact symbols, file paths, or string matches that MemPalace doesn't cover (max 2-3 attempts).
+3. **Explore agent** — broad codebase exploration. **Last resort only.** Spawn ONLY if both MemPalace and Grep/Glob failed to find what you need.
+
+**Exceptions** (skip step 1 only if):
+- Pure conversation (questions about Claude Code itself, general chat)
+- A skill's Phase 0 already covers the same search (no double-search)
+- MCP unavailable this session → skip silently
+
+**Why MemPalace first:** It returns semantic matches across the entire project — file relationships, architectural decisions, domain patterns — that Grep cannot find by string matching. Searching first gives you context that shapes how you approach the task, even if you end up not writing code.
+
+## Subagent MemPalace Rule (HARD GATE)
+
+**NEVER spawn any agent** (Explore, Plan, or named agents) without:
+1. **YOU** (main Claude) run `mempalace_search(query="<relevant keywords>", limit=5)` first
+2. Include the top results as a `## MemPalace Context` section at the **TOP** of the subagent prompt
 3. Do NOT instruct the subagent to call `mempalace_search` — MCP tools are unreliable in subagent context ([GitHub #13898](https://github.com/anthropics/claude-code/issues/13898))
 4. If MCP unavailable in main session → note in the prompt: "MemPalace unavailable this session"
 5. If search returns no results → note: "MemPalace searched, no relevant results"
 
-MemPalace has 6,000+ embedded drawers with project knowledge. Subagents receive this knowledge as injected context, not as tool calls they cannot reliably execute.
-
-## MemPalace Orient Rule (MANDATORY)
-
-**At the START of every task** — before reading files, before planning, before writing code — run:
-```
-mempalace_search(query="<2-3 keywords from the user's request>", limit=5)
-```
-This fires on ANY user request that involves code, files, components, or project knowledge. The only exceptions:
-- Pure conversation (questions about Claude Code itself, general chat)
-- A skill's Phase 0 already covers the same search → skip (no double-search)
-- MCP unavailable → skip silently
-
-**Why at task start, not at edit time:** If you wait until the edit step, read-only investigations and already-completed tasks skip it entirely. Searching first gives you context that shapes how you approach the task — even if you end up not writing code.
-
-This is the **universal safety net** — skills have their own Phase 0, but this rule covers everything that falls between the cracks.
+**No exceptions.** An agent spawned without MemPalace context is a waste — it will re-derive knowledge that already exists in the palace.
 
 ## Branch Rule
 

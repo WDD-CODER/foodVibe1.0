@@ -1,0 +1,166 @@
+<h2>Component Architecture</h2>
+<p class="subtitle">How the pieces connect — data flow and responsibilities</p>
+
+<style>
+  .arch {
+    font-family: sans-serif;
+    max-width: 560px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .box {
+    border-radius: 10px;
+    padding: 14px 18px;
+    position: relative;
+  }
+  .box-title {
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .box-sub {
+    font-size: 11px;
+    line-height: 1.6;
+    color: #555;
+  }
+  .box-sub span {
+    display: inline-block;
+    background: rgba(0,0,0,.06);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: monospace;
+    font-size: 10px;
+  }
+  .gemini-box { background: #f0fdf4; border: 1.5px solid #86efac; }
+  .modal-box  { background: #eff6ff; border: 1.5px solid #93c5fd; }
+  .editor-box { background: #f5f3ff; border: 1.5px solid #c4b5fd; }
+  .draft-box  { background: #fff7ed; border: 1.5px solid #fcd34d; }
+  .builder-box{ background: #fef2f2; border: 1.5px solid #fca5a5; }
+
+  .arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 4px 0;
+    font-size: 11px;
+    color: #888;
+  }
+  .arrow-line {
+    flex: 1;
+    height: 1px;
+    background: #ddd;
+    max-width: 80px;
+  }
+  .arrow-label {
+    background: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 99px;
+    padding: 2px 10px;
+    font-size: 10px;
+    white-space: nowrap;
+  }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 6px 0; }
+  .responsibility { font-size: 11px; color: #666; }
+  .responsibility li { margin-bottom: 3px; }
+  .divider { border: none; border-top: 2px dashed #e5e7eb; margin: 12px 0; }
+  .badge-new { background: #7c3aed; color: #fff; font-size: 9px; font-weight: 700; border-radius: 4px; padding: 1px 5px; vertical-align: middle; margin-right: 4px; }
+  .badge-exists { background: #2563eb; color: #fff; font-size: 9px; font-weight: 700; border-radius: 4px; padding: 1px 5px; vertical-align: middle; margin-right: 4px; }
+</style>
+
+<div class="arch">
+
+  <!-- Gemini -->
+  <div class="box gemini-box">
+    <div class="box-title">🤖 Gemini / AI generation</div>
+    <div class="box-sub">
+      <span>GeminiService</span> · <span>server/routes/ai.js</span><br>
+      Unchanged — still called by AiRecipeModalComponent. Returns <span>AiRecipeDraft</span>.
+    </div>
+  </div>
+
+  <div class="arrow">
+    <div class="arrow-line"></div>
+    <div class="arrow-label">AiRecipeDraft (generated)</div>
+    <div class="arrow-line"></div>
+  </div>
+
+  <!-- Modal -->
+  <div class="box modal-box">
+    <div class="box-title"><span class="badge-exists">EXISTS</span> AiRecipeModalComponent</div>
+    <div class="box-sub">
+      Owns: prompt input, generation status, error handling, usage bar, "Generate Again" logic, shot saving.<br>
+      <strong>Change:</strong> when <span>draft_()</span> is non-null, renders <span>AiDraftEditorComponent</span> instead of the old read-only preview block.
+    </div>
+  </div>
+
+  <div class="arrow">
+    <div class="arrow-line"></div>
+    <div class="arrow-label">@Input draft / @Output approved · generateAgain</div>
+    <div class="arrow-line"></div>
+  </div>
+
+  <!-- Editor -->
+  <div class="box editor-box">
+    <div class="box-title"><span class="badge-new">NEW</span> AiDraftEditorComponent</div>
+    <div class="two-col">
+      <div>
+        <div class="responsibility"><strong>Owns (signals):</strong>
+          <ul>
+            <li>working copy of draft</li>
+            <li>ingredients array (add / edit / remove)</li>
+            <li>steps array (add / edit / remove)</li>
+            <li>name, type, yield amount, yield unit</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="responsibility"><strong>Does NOT own:</strong>
+          <ul>
+            <li>generation / Gemini calls</li>
+            <li>navigation</li>
+            <li>shot saving</li>
+            <li>usage bar</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="box-sub" style="margin-top:6px">
+      On <strong>"Open in Builder"</strong> → emits <span>approved</span> with edited draft.<br>
+      On <strong>"Generate Again"</strong> → emits <span>generateAgain</span> (no draft attached).<br>
+      New ingredients added here get <strong>no inventory lookup</strong> — they're plain text.
+    </div>
+  </div>
+
+  <div class="arrow">
+    <div class="arrow-line"></div>
+    <div class="arrow-label">approved AiRecipeDraft (edited)</div>
+    <div class="arrow-line"></div>
+  </div>
+
+  <!-- Draft service -->
+  <div class="box draft-box">
+    <div class="box-title"><span class="badge-exists">EXISTS</span> AiRecipeDraftService</div>
+    <div class="box-sub">
+      <span>aiDraft.set(editedDraft)</span> — stores the edited draft for the builder to consume. Unchanged interface.
+    </div>
+  </div>
+
+  <div class="arrow">
+    <div class="arrow-line"></div>
+    <div class="arrow-label">router.navigate(['/recipe-builder'])</div>
+    <div class="arrow-line"></div>
+  </div>
+
+  <!-- Recipe builder -->
+  <div class="box builder-box">
+    <div class="box-title"><span class="badge-exists">EXISTS</span> RecipeBuilderPage</div>
+    <div class="box-sub">
+      Reads draft via <span>aiDraft.consume()</span>. Pre-fills form as today.<br>
+      Ingredient lookup runs here — names not found in inventory show as <strong>unlinked</strong>.
+    </div>
+  </div>
+
+</div>

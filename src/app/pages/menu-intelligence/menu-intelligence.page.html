@@ -151,7 +151,10 @@
                   <button type="button" class="dropdown-item" [class.highlighted]="eventTypeHighlightedIndex_() === i" (click)="selectEventType(t)">{{ t }}</button>
                 }
                 <button type="button" class="dropdown-item add-new" [class.highlighted]="eventTypeHighlightedIndex_() === getFilteredEventTypes().length" (click)="addNewEventType()">
-                  + {{ 'add_new_category' | translatePipe }}
+                  <span class="c-add-new-icon">
+                    <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
+                  </span>
+                  {{ 'add' | translatePipe }}
                 </button>
               </app-scrollable-dropdown>
             </div>
@@ -236,11 +239,17 @@
                   }
                   @if (getSectionSearchQuery(sectionIndex).trim()) {
                     <button type="button" class="dropdown-item add-new" [class.highlighted]="getSectionCategoryHighlightedIndex(sectionIndex) === getFilteredSectionCategories(sectionIndex).length" (click)="addNewSectionCategory(sectionIndex)">
-                      + {{ getSectionSearchQuery(sectionIndex) }}
+                      <span class="c-add-new-icon">
+                        <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
+                      </span>
+                      {{ 'add' | translatePipe }}
                     </button>
                   }
                   <button type="button" class="dropdown-item add-new" [class.highlighted]="getSectionCategoryHighlightedIndex(sectionIndex) === getSectionCategoryOptionCount(sectionIndex) - 1" (click)="openAddCategoryModal(sectionIndex)">
-                    + {{ 'add_new_category' | translatePipe }}
+                    <span class="c-add-new-icon">
+                      <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
+                    </span>
+                    {{ 'add' | translatePipe }}
                   </button>
                 </app-scrollable-dropdown>
               </div>

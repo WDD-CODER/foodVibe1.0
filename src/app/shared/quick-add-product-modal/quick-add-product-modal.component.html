@@ -20,12 +20,13 @@
               <label for="quick-add-name">{{ 'product_name' | translatePipe }}</label>
               <input
                 id="quick-add-name"
+                #nameEl
                 type="text"
                 [class.input--error]="nameError_()"
                 [ngModel]="name_()"
                 (ngModelChange)="name_.set($event)"
                 name="name_hebrew"
-                (keydown.enter)="$event.preventDefault(); onSave()" />
+                (keydown.enter)="advanceFocus(baseUnitRef()?.nativeElement); $event.preventDefault()" />
               @if (nameError_()) {
                 <span class="field-error-msg">{{ nameError_() | translatePipe }}</span>
               }

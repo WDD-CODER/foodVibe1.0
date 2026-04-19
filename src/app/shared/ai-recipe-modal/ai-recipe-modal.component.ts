@@ -13,6 +13,8 @@ import { UserMsgService } from '@services/user-msg.service'
 import { getGeminiUsage, DAILY_LIMIT, fetchGeminiUsageFromServer } from '../../core/utils/gemini-usage.util'
 import { GeminiShotsService } from '@services/gemini-shots.service'
 import { TranslationService } from '@services/translation.service'
+import { AiDraftEditorComponent } from './ai-draft-editor/ai-draft-editor.component'
+import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive'
 
 type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
 type InputMode = 'text' | 'image' | 'url'
@@ -20,7 +22,7 @@ type InputMode = 'text' | 'image' | 'url'
 @Component({
   selector: 'app-ai-recipe-modal',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, TranslatePipe, LoaderComponent],
+  imports: [CommonModule, LucideAngularModule, TranslatePipe, LoaderComponent, AiDraftEditorComponent, ScrollIndicatorsDirective],
   templateUrl: './ai-recipe-modal.component.html',
   styleUrl: './ai-recipe-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -180,10 +182,7 @@ export class AiRecipeModalComponent implements OnInit {
     return 'ai_recipe_error'
   }
 
-  onOpenInBuilder(): void {
-    const draft = this.draft_()
-    if (!draft) return
-
+  onDraftApproved(draft: AiRecipeDraft): void {
     this.shots.saveShot(this.prompt_(), draft, 'approved', this.inputMode_()).subscribe()
     this.aiDraft.set(draft)
     void this.router.navigate(['/recipe-builder'])

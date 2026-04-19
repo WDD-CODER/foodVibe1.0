@@ -1,0 +1,132 @@
+<h2>How should editing feel in the preview?</h2>
+<p class="subtitle">Pick the interaction style that feels most natural</p>
+
+<style>
+  .mockup-body { font-family: sans-serif; direction: rtl; font-size: 13px; }
+  .preview-row { display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-bottom: 1px solid #eee; }
+  .preview-field { background: #f5f5f5; border-radius: 4px; padding: 3px 7px; font-size: 12px; }
+  .editing-field { background: #fff; border: 1.5px solid #6366f1; border-radius: 4px; padding: 3px 7px; font-size: 12px; outline: none; width: 70px; }
+  .edit-icon { color: #aaa; font-size: 10px; cursor: pointer; }
+  .badge { background: #e0e7ff; color: #4338ca; border-radius: 99px; padding: 2px 10px; font-size: 11px; font-weight: 600; cursor: pointer; }
+  .badge-editing { background: #4338ca; color: #fff; border-radius: 99px; padding: 2px 10px; font-size: 11px; font-weight: 600; }
+  .label-sm { color: #888; font-size: 11px; min-width: 40px; }
+  .add-row { color: #6366f1; font-size: 12px; cursor: pointer; padding: 6px 4px; }
+  .step-item { padding: 5px 4px; border-bottom: 1px solid #eee; font-size: 12px; cursor: pointer; color: #555; }
+  .step-item:hover { background: #fafafa; }
+  .step-editing { background: #fff; border: 1.5px solid #6366f1; border-radius: 4px; padding: 4px 7px; font-size: 12px; width: 100%; }
+  .always-input { background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 3px 7px; font-size: 12px; width: 65px; }
+  .always-input:focus { border-color: #6366f1; outline: none; }
+  .section-label { font-weight: 600; font-size: 11px; color: #555; margin: 8px 0 4px; text-transform: uppercase; letter-spacing: .5px; }
+  .name-field { font-weight: 600; font-size: 14px; cursor: pointer; }
+  .name-editing { font-weight: 600; font-size: 14px; border: 1.5px solid #6366f1; border-radius: 4px; padding: 2px 6px; outline: none; width: 160px; }
+</style>
+
+<div class="cards">
+
+  <!-- Option A: Click-to-edit inline -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px;">
+      <div class="mockup-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span class="name-editing">שניצל עוף</span>
+          <span class="badge-editing">מנה</span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;font-size:12px;">
+          <span class="label-sm">תפוקה:</span>
+          <input class="editing-field" value="4" style="width:45px" onclick="event.stopPropagation()" />
+          <input class="editing-field" value="מנות" style="width:55px" onclick="event.stopPropagation()" />
+        </div>
+        <div class="section-label">מרכיבים</div>
+        <div class="preview-row">
+          <span style="flex:1">חזה עוף</span>
+          <input class="editing-field" value="500" style="width:45px" onclick="event.stopPropagation()" />
+          <input class="editing-field" value="גרם" style="width:50px" onclick="event.stopPropagation()" />
+        </div>
+        <div class="preview-row">
+          <span class="preview-field" style="flex:1">פירורי לחם</span>
+          <span class="preview-field">150</span>
+          <span class="preview-field">גרם</span>
+          <span class="edit-icon">✏️</span>
+        </div>
+        <div class="add-row">+ הוסף מרכיב</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Click any field to edit it</h3>
+      <p>Fields look like read-only labels by default. Clicking one turns it into an input. A pencil icon hints that the row is editable. Active row stays in edit mode until you click elsewhere.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Always-edit form -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px;">
+      <div class="mockup-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;">
+          <input class="always-input" value="שניצל עוף" style="flex:1;font-weight:600;font-size:13px;" onclick="event.stopPropagation()" />
+          <select class="always-input" onclick="event.stopPropagation()" style="width:70px">
+            <option>מנה</option>
+            <option>הכנה</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;font-size:12px;">
+          <span class="label-sm">תפוקה:</span>
+          <input class="always-input" value="4" style="width:40px" onclick="event.stopPropagation()" />
+          <input class="always-input" value="מנות" style="width:55px" onclick="event.stopPropagation()" />
+        </div>
+        <div class="section-label">מרכיבים</div>
+        <div class="preview-row">
+          <input class="always-input" value="חזה עוף" style="flex:1" onclick="event.stopPropagation()" />
+          <input class="always-input" value="500" style="width:40px" onclick="event.stopPropagation()" />
+          <input class="always-input" value="גרם" style="width:50px" onclick="event.stopPropagation()" />
+          <span style="color:#e55;cursor:pointer;font-size:14px" onclick="event.stopPropagation()">×</span>
+        </div>
+        <div class="preview-row">
+          <input class="always-input" value="פירורי לחם" style="flex:1" onclick="event.stopPropagation()" />
+          <input class="always-input" value="150" style="width:40px" onclick="event.stopPropagation()" />
+          <input class="always-input" value="גרם" style="width:50px" onclick="event.stopPropagation()" />
+          <span style="color:#e55;cursor:pointer;font-size:14px" onclick="event.stopPropagation()">×</span>
+        </div>
+        <div class="add-row">+ הוסף מרכיב</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Always-edit form</h3>
+      <p>The preview shows up as a mini-form from the start — all fields are inputs, no click required. Feels more like a lightweight builder, less like a read-only preview. Simpler to implement.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Section-level edit toggle -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px;">
+      <div class="mockup-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span class="name-field">שניצל עוף</span>
+          <span class="badge">מנה ✏️</span>
+        </div>
+        <div style="font-size:12px;margin-bottom:8px;color:#555;">תפוקה: 4 מנות &nbsp;<span style="color:#6366f1;cursor:pointer">✏️</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div class="section-label">מרכיבים</div>
+          <span style="color:#6366f1;font-size:11px;cursor:pointer">עריכה</span>
+        </div>
+        <div class="preview-row" style="background:#f0f0ff;border-radius:4px;">
+          <input class="editing-field" value="חזה עוף" style="flex:1" onclick="event.stopPropagation()" />
+          <input class="editing-field" value="500" style="width:40px" onclick="event.stopPropagation()" />
+          <input class="editing-field" value="גרם" style="width:50px" onclick="event.stopPropagation()" />
+          <span style="color:#e55;cursor:pointer" onclick="event.stopPropagation()">×</span>
+        </div>
+        <div class="preview-row" style="background:#f0f0ff;border-radius:4px;">
+          <input class="editing-field" value="פירורי לחם" style="flex:1" onclick="event.stopPropagation()" />
+          <input class="editing-field" value="150" style="width:40px" onclick="event.stopPropagation()" />
+          <input class="editing-field" value="גרם" style="width:50px" onclick="event.stopPropagation()" />
+          <span style="color:#e55;cursor:pointer" onclick="event.stopPropagation()">×</span>
+        </div>
+        <div class="add-row">+ הוסף מרכיב</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Section-level edit toggle</h3>
+      <p>Each section (header info, ingredients, steps) has its own "Edit" button. Clicking it flips that section into edit mode. Other sections stay read-only until toggled. More structured, less accidental edits.</p>
+    </div>
+  </div>
+
+</div>

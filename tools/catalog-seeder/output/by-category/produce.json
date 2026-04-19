@@ -1,0 +1,2561 @@
+{
+  "category": "produce",
+  "total": 73,
+  "items": [
+    {
+      "_id": "eJbwU",
+      "barcode": "7290112490230",
+      "name_hebrew": "נמס בכוס קנור אפונה",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 8.13,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 8.13
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 16
+    },
+    {
+      "_id": "jKRVz",
+      "barcode": "7290110114787",
+      "name_hebrew": "נביעות+ תפוח 1.5ליטר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.64,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.64
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "lTalI",
+      "barcode": "7290107937542",
+      "name_hebrew": "אקטיביה משקה תות 1.2",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.27,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.27
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "azwvZ",
+      "barcode": "7290000272696",
+      "name_hebrew": "מיץ לימון טבעי משומר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 11.28,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 11.28
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "rIX2r",
+      "barcode": "7290008775823",
+      "name_hebrew": "ערגליות תות אסם 300ג",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 12.01,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 12.01
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "x5zVI",
+      "barcode": "7290001247143",
+      "name_hebrew": "ספרינג תפוח קרטונית",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.77,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.77
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "VDvc7",
+      "barcode": "7290006374738",
+      "name_hebrew": "קונפיטורת תות יד מרד",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 16.02,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 16.02
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "HVcze",
+      "barcode": "7290110114794",
+      "name_hebrew": "נביעות+ אפרסק 1.5ליט",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.64,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.64
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "ZR7pg",
+      "barcode": "7290112339867",
+      "name_hebrew": "גמדים סקוויז תות 100",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 5.96,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 5.96
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "rkRfq",
+      "barcode": "87108538",
+      "name_hebrew": "מנטוס תות בגליל בודד",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 4.52,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 4.52
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "6dB7A",
+      "barcode": "7290102390427",
+      "name_hebrew": "מולר פרופ תות 3% 150",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.22,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.22
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "sIqEA",
+      "barcode": "7290102390465",
+      "name_hebrew": "מולר פרופ אפרסק פסיפ",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.22,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.22
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "hhXzn",
+      "barcode": "8690777204071",
+      "name_hebrew": "פלפל חריף ויליפוד 64",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 14.36,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 14.36
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "yRA7A",
+      "barcode": "7290104726262",
+      "name_hebrew": "דני תות לשתיה מארז ר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 11.93,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 11.93
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "4lh8K",
+      "barcode": "7290115208009",
+      "name_hebrew": "ויטמינצ'יק ענבים 1 ל",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 14.9,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 14.9
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "zLplS",
+      "barcode": "7290112349606",
+      "name_hebrew": "דניאלה בטעם תות בננה",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 4.18,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 4.18
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "gg5i0",
+      "barcode": "7290110115005",
+      "name_hebrew": "פריגת ענבים 1.5 ליטר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 8.82,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 8.82
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "3IimH",
+      "barcode": "7290106668577",
+      "name_hebrew": "מיץ לימון טבעי 250 מ",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.52,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.52
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "zTAoh",
+      "barcode": "7290110115036",
+      "name_hebrew": "פריגת  מנגו 1.5",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 8.82,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 8.82
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "pWIMy",
+      "barcode": "7290113192560",
+      "name_hebrew": "פלפל שיפקה א2 230 גר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 8.48,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 8.48
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "vLwIh",
+      "barcode": "7290113192508",
+      "name_hebrew": "מלפפון במלח קטנים 13",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 12.78,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 12.78
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "cac74",
+      "barcode": "7290113192515",
+      "name_hebrew": "מלפפון 18/25במלח קטנ",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 13.83,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 13.83
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "LLoEj",
+      "barcode": "7290113192522",
+      "name_hebrew": "מלפפון 18/25בחומץ קט",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 13.89,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 13.89
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "3XpNU",
+      "barcode": "7290113192539",
+      "name_hebrew": "מלפפון 7/9 במלח בית",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 8.75,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 8.75
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "Fjnow",
+      "barcode": "7290113192546",
+      "name_hebrew": "מלפפון 7/9 בחומץ בית",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 8.75,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 8.75
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "MvS2g",
+      "barcode": "7290110115050",
+      "name_hebrew": "פריגת תות-בננה 1.5",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 8.82,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 8.82
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "vHxuK",
+      "barcode": "7290115201727",
+      "name_hebrew": "ביסלי בטעם בצל אסם 2",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 8.79,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 8.79
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "yDMt8",
+      "barcode": "7290119380916",
+      "name_hebrew": "אקטימל תות משפחתי 16",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 36.69,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 36.69
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "IAwN3",
+      "barcode": "7290000207162",
+      "name_hebrew": "רוטב עגבניות 22BX יכ",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 3.02,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 3.02
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "oVSQl",
+      "barcode": "7290000208336",
+      "name_hebrew": "רוטב עגבניות 22BX יכ",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 5.16,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 5.16
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "eJjv0",
+      "barcode": "7290110117856",
+      "name_hebrew": "נורדיק מוגז אפרסק זי",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.53,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.53
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "FiBdJ",
+      "barcode": "7290000081663",
+      "name_hebrew": "בייגלה טבעות שומשום",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 12.49,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 12.49
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "paoqW",
+      "barcode": "7290110117825",
+      "name_hebrew": "נורדיק מוגז מנגו נענ",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.6,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.6
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "qGPxe",
+      "barcode": "7290001247099",
+      "name_hebrew": "ספרינג מנגו קרטונית",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.7,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.7
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "mGnY5",
+      "barcode": "7290000104201",
+      "name_hebrew": "אפונה עדינה סנפרוסט",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 19.9,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 19.9
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "spfRV",
+      "barcode": "7290112336644",
+      "name_hebrew": "סוכריות ללס לימון 80",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.51,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.51
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "AJmo8",
+      "barcode": "7290110114800",
+      "name_hebrew": "נביעות+ ענבים 1.5ליט",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.63,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.63
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "BymV9",
+      "barcode": "7290002019794",
+      "name_hebrew": "רוטב עגבניות מרוכז מ",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 2.68,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 2.68
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "mn87f",
+      "barcode": "7290002019787",
+      "name_hebrew": "רוטב עגבניות 22% פרי",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 4.81,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 4.81
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "gmYEd",
+      "barcode": "7290000110851",
+      "name_hebrew": "כיפלי בצל תלמה 70גר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.79,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.79
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "0jbuW",
+      "barcode": "8690777221405",
+      "name_hebrew": "פלפל אדום קלוי על הא",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 14.61,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 14.61
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "oL58n",
+      "barcode": "7290102393169",
+      "name_hebrew": "מולר סימפלי פרוט תות",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.18,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.18
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "9XOZB",
+      "barcode": "7290105368331",
+      "name_hebrew": "מילקי תות",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 3.14,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 3.14
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "Wlop9",
+      "barcode": "7290114311359",
+      "name_hebrew": "מולר פרופ קציפת מנגו",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.15,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.15
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "OGT9f",
+      "barcode": "7290113192577",
+      "name_hebrew": "כרוב כבוש א2 430 גרם",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.88,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.88
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "ky3Lq",
+      "barcode": "7290113192478",
+      "name_hebrew": "מלפפון 10/12במלח בינ",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 10.43,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 10.43
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "X5OFj",
+      "barcode": "7290107951111",
+      "name_hebrew": "בפלות לימון 200 גרם",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.85,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.85
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "BijpO",
+      "barcode": "7290019056577",
+      "name_hebrew": "ספרינג מנגו 1.5ליטר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 8.02,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 8.02
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "2Ccdj",
+      "barcode": "7290019056362",
+      "name_hebrew": "תפוזינה ענבים 1.5ליט",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 7.79,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 7.79
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "UL75Y",
+      "barcode": "7290019056393",
+      "name_hebrew": "תפוזינה תות בננה 1.5",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 7.8,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 7.8
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "p9rWL",
+      "barcode": "7290019056409",
+      "name_hebrew": "תפוזינה מנגו עסיסי 1",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 7.8,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 7.8
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "MT6oK",
+      "barcode": "7290018471920",
+      "name_hebrew": "שוופס מוגז ענבים 1.5",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 8.27,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 8.27
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "ckSpG",
+      "barcode": "7290018471913",
+      "name_hebrew": "שוופס מוגז תפוחים 1.",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 8.26,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 8.26
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "C6fQP",
+      "barcode": "7290019056171",
+      "name_hebrew": "שוופס סודה לימון מאר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 13.51,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 13.51
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "dt17L",
+      "barcode": "7290110115623",
+      "name_hebrew": "פיוז טי זירו אפרסק 1",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.04,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.04
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "UhJIQ",
+      "barcode": "7290110329792",
+      "name_hebrew": "סויה ביו אפרסק 150 ג",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 5.27,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 5.27
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "tttV8",
+      "barcode": "7290000040042",
+      "name_hebrew": "יופלה תות שובב 3% 15",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 5.86,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 5.86
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "xmcM2",
+      "barcode": "7290000040080",
+      "name_hebrew": "יופלה אפרסק מאוהב 3%",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 5.86,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 5.86
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "D2sMs",
+      "barcode": "5010677551281",
+      "name_hebrew": "בריזר לימון בקבוק כש",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 14.92,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 14.92
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "FSJbr",
+      "barcode": "7290122783506",
+      "name_hebrew": "חומוס ישראלי עם פלפל",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 13.67,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 13.67
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "VpAeE",
+      "barcode": "7290000208114",
+      "name_hebrew": "אפונת גינה וגזר יכין",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 10.72,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 10.72
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "szAmR",
+      "barcode": "7290019233268",
+      "name_hebrew": "ממרח עגבניות מיובשות",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 17.52,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 17.52
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "UGuD1",
+      "barcode": "7290000061061",
+      "name_hebrew": "אסם קרקר בצל 250 גרם",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 11.21,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 11.21
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "qmIaO",
+      "barcode": "7290000066295",
+      "name_hebrew": "במבה תות מחומרים טבע",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 3.46,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 3.46
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "QaxIO",
+      "barcode": "7290000068190",
+      "name_hebrew": "ג'לי תות אסם 85 גר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.93,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.93
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "4qHgi",
+      "barcode": "7290000074252",
+      "name_hebrew": "קרקר שומשום אסם 250ג",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 10.27,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 10.27
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "lpc9D",
+      "barcode": "7290000334684",
+      "name_hebrew": "תפוגן טבעות בצל 700",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 21.55,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 21.55
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "xY2ex",
+      "barcode": "7290002253006",
+      "name_hebrew": "שום כתוש דורות 200גר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 18.07,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 18.07
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "ltkRd",
+      "barcode": "7290000287492",
+      "name_hebrew": "סנובון נוזלי לימון 7",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 10.56,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 10.56
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "5cDVz",
+      "barcode": "7290001247068",
+      "name_hebrew": "ספרינג תות בננה קרטו",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.53,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.53
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "6QHgm",
+      "barcode": "7290001247082",
+      "name_hebrew": "ספרינג עגבניות קרטונ",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.64,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.64
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "8kxag",
+      "barcode": "7290003804320",
+      "name_hebrew": "תיבולית קנור שום פטר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 11.28,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 11.28
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "F9tr9",
+      "barcode": "8076809513739",
+      "name_hebrew": "רוטב עגבניות עם בזיל",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 16.45,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 16.45
+        }
+      ],
+      "categories_": [
+        "produce"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "produce",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "produce",
+      "kitchen_category": "vegetables",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    }
+  ]
+}

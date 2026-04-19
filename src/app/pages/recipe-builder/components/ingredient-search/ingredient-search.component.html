@@ -42,8 +42,10 @@
           class="result-item"
           (click)="addNewProduct()"
           (keydown)="onAddItemKeydown($event)">
-          <span>{{ 'add_as_new_product' | translatePipe }} "{{ searchQuery_() }}"</span>
-          <lucide-icon name="plus-circle" [size]="16"></lucide-icon>
+          <span class="c-add-new-icon">
+            <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
+          </span>
+          {{ 'add' | translatePipe }}
         </li>
       </ul>
     </app-scrollable-dropdown>

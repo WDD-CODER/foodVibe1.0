@@ -15,12 +15,13 @@ import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { ScrollableDropdownComponent } from '../scrollable-dropdown/scrollable-dropdown.component'
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 
 @Component({
   selector: 'app-chip-search-dropdown',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, LucideAngularModule, ClickOutSideDirective, ScrollableDropdownComponent],
+  imports: [CommonModule, LucideAngularModule, ClickOutSideDirective, ScrollableDropdownComponent, TranslatePipe],
   templateUrl: './chip-search-dropdown.component.html',
   styleUrl: './chip-search-dropdown.component.scss'
 })

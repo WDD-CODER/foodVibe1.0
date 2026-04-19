@@ -2,18 +2,19 @@
 main.py — Catalog Seeder Pipeline Orchestrator
 
 Usage:
-  python main.py              # Full run (fetch → normalize → diff → enrich → review → write)
-  python main.py --dry-run      # Fetch/normalize/diff only — no Gemini calls, no DB write
-  python main.py --skip-fetch   # Re-use existing output/pending-review.json (re-enrich + review)
-  python main.py --approve-all  # Skip interactive review — approve everything automatically
+  python main.py              # FETCH → FILTER → NORMALIZE → write catalog-review.json (STOP)
+  python main.py --dry-run      # Same as above but only log stats — do not write file
+  python main.py --from-review  # Load catalog-review.json (approved:true) → ENRICH → DIFF → WRITE
+  python main.py --approve-all  # With --from-review: skip interactive review, approve all
 
-Steps:
+Steps (default path):
   1. FETCH      — pull from il-supermarket-scraper + Open Food Facts bulk
   2. NORMALIZE  — map to Product model skeleton
-  3. DIFF       — filter out products already in PRODUCT_LIST or pending-review.json
-  4. ENRICH     — batched LLM enrichment (yield, expiry, allergens, English name)
-  5. REVIEW     — CLI admin approval table
-  6. WRITE      — insert approved products into MongoDB (skipped in --dry-run)
+  2.5 FILTER    — food-signal filter; drop non-kitchen items
+  → write catalog-review.json and stop
+
+Steps (--from-review path):
+  load catalog-review.json → filter approved:true → ENRICH → DIFF → WRITE
 """
 
 import argparse
@@ -35,17 +36,25 @@ def main() -> int:
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Run the full pipeline but skip writing to MongoDB",
+        help="Log pipeline stats without writing any file or DB",
+    )
+    parser.add_argument(
+        "--from-review",
+        action="store_true",
+        help=(
+            "Skip fetch/filter/normalize — load catalog-review.json, "
+            "take approved:true items, and proceed to enrich + diff + write."
+        ),
     )
     parser.add_argument(
         "--skip-fetch",
         action="store_true",
-        help="Skip fetch/normalize/diff — re-use existing output/pending-review.json",
+        help="Deprecated — use --from-review instead.",
     )
     parser.add_argument(
         "--approve-all",
         action="store_true",
-        help="Skip interactive review — approve all enriched products automatically",
+        help="With --from-review: skip interactive review, approve all enriched products",
     )
     parser.add_argument(
         "--skip-enrich",
@@ -54,9 +63,13 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    if args.skip_fetch and not args.from_review:
+        logger.warning("[main] --skip-fetch is deprecated — treating as --from-review")
+        args.from_review = True
+
     # Lazy imports — config validates env vars on import
     try:
-        from config import OUTPUT_DIR, PENDING_REVIEW_FILE, SEED_OUTPUT_FILE
+        from config import CATALOG_REVIEW_FILE, OUTPUT_DIR, PENDING_REVIEW_FILE, SEED_OUTPUT_FILE
     except RuntimeError as exc:
         logger.error(f"Configuration error: {exc}")
         return 1
@@ -64,23 +77,12 @@ def main() -> int:
     Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
 
     # ------------------------------------------------------------------
-    # Steps 1–3: Fetch → Normalize → Diff
+    # DEFAULT PATH: Fetch → Normalize → Filter → write catalog-review.json
     # ------------------------------------------------------------------
-    if args.skip_fetch:
-        if not Path(PENDING_REVIEW_FILE).exists():
-            logger.error(
-                f"--skip-fetch specified but {PENDING_REVIEW_FILE} does not exist. "
-                "Run without --skip-fetch first."
-            )
-            return 1
-        logger.info(f"[main] --skip-fetch: loading from {PENDING_REVIEW_FILE}")
-        with open(PENDING_REVIEW_FILE, "r", encoding="utf-8") as f:
-            pending = json.load(f)
-        logger.info(f"[main] Loaded {len(pending)} pending products from file")
-    else:
+    if not args.from_review:
         from fetch import fetch_off_bulk, fetch_supermarket_products
         from normalize import normalize_products
-        from diff import diff_against_db
+        from filter import apply_food_filter
 
         logger.info("[main] Step 1: Fetching supermarket products...")
         try:
@@ -89,23 +91,78 @@ def main() -> int:
             logger.error(str(exc))
             return 1
 
-        logger.info("[main] Step 1: Fetching Open Food Facts bulk data...")
+        logger.info("[main] Step 1b: Fetching Open Food Facts bulk data...")
         off_lookup = fetch_off_bulk()
 
         logger.info("[main] Step 2: Normalizing...")
         normalized = normalize_products(raw_products, off_lookup)
 
-        logger.info("[main] Step 3: Diffing against existing catalog...")
-        pending = diff_against_db(normalized)
+        logger.info("[main] Step 2.5: Applying food filter...")
+        filtered = apply_food_filter(normalized)
 
-        if not pending:
-            logger.info("[main] No new products found. Nothing to do.")
+        if args.dry_run:
+            logger.info(
+                f"[main] DRY RUN: {len(filtered)} products would be written to "
+                f"{CATALOG_REVIEW_FILE}. Re-run without --dry-run to save."
+            )
             return 0
 
-        # Save pending list for --skip-fetch on re-runs
-        with open(PENDING_REVIEW_FILE, "w", encoding="utf-8") as f:
-            json.dump(pending, f, ensure_ascii=False, indent=2)
-        logger.info(f"[main] {len(pending)} new products saved to {PENDING_REVIEW_FILE}")
+        import datetime
+        review_doc = {
+            "generated_at": datetime.datetime.utcnow().isoformat(),
+            "total": len(filtered),
+            "items": filtered,
+        }
+        with open(CATALOG_REVIEW_FILE, "w", encoding="utf-8") as f:
+            json.dump(review_doc, f, ensure_ascii=False, indent=2)
+        logger.info(
+            f"[main] {len(filtered)} products written to {CATALOG_REVIEW_FILE}. "
+            "Review and set approved:true, then re-run with --from-review."
+        )
+        return 0
+
+    # ------------------------------------------------------------------
+    # --from-review PATH: load approved items → Enrich → Diff → Write
+    # ------------------------------------------------------------------
+    if not Path(CATALOG_REVIEW_FILE).exists():
+        logger.error(
+            f"catalog-review.json not found at {CATALOG_REVIEW_FILE}. "
+            "Run without --from-review first."
+        )
+        return 1
+
+    with open(CATALOG_REVIEW_FILE, "r", encoding="utf-8") as f:
+        review_doc = json.load(f)
+
+    all_items = review_doc.get("items", review_doc) if isinstance(review_doc, dict) else review_doc
+    approved_items = [p for p in all_items if p.get("approved") and not p.get("drop")]
+
+    if not approved_items:
+        logger.info("[main] No approved items found in catalog-review.json. Nothing to do.")
+        return 0
+
+    logger.info(f"[main] {len(approved_items)} approved items loaded from catalog-review.json")
+
+    # Strip review-only fields; map kitchen_category → categories_ if set
+    _REVIEW_FIELDS = {"approved", "drop", "kitchen_category", "suggested_category", "notes"}
+    pending = []
+    for p in approved_items:
+        kc = p.get("kitchen_category", "").strip()
+        item = {k: v for k, v in p.items() if k not in _REVIEW_FIELDS}
+        if kc:
+            item["categories_"] = [kc]
+        pending.append(item)
+
+    # ------------------------------------------------------------------
+    # Step 3: Diff against existing catalog
+    # ------------------------------------------------------------------
+    from diff import diff_against_db
+    logger.info("[main] Step 3: Diffing against existing catalog...")
+    pending = diff_against_db(pending)
+
+    if not pending:
+        logger.info("[main] No new products found (all already in DB). Nothing to do.")
+        return 0
 
     # ------------------------------------------------------------------
     # Step 4: Enrich  (skipped in --dry-run)

@@ -435,20 +435,24 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
     .col-prep-name {
       grid-column: 1;
       grid-row: 1;
+      min-width: 0;
     }
     .col-prep-category {
       grid-column: 2;
       grid-row: 1;
+      min-width: 0;
     }
 
     // Row 2: unit select (left 50%) | quantity (right 50%)
     .col-prep-unit {
       grid-column: 1;
       grid-row: 2;
+      min-width: 0;
     }
     .col-prep-qty {
       grid-column: 2;
       grid-row: 2;
+      min-width: 0;
     }
 
     .col-prep-actions {

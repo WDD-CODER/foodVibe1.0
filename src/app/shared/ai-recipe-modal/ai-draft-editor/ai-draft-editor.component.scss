@@ -1,0 +1,419 @@
+.ai-draft-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 72vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// ── Layout helpers ─────────────────────────────────────────────────
+
+.editor-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.editor-row--yield {
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+}
+
+.editor-field-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.editor-name-input {
+  flex: 1;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.editor-num-input {
+  width: 62px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.editor-unit-select {
+  min-width: 72px;
+}
+
+// Yield row unit select — fit-content, don't stretch
+.editor-yield-unit {
+  flex: 0 0 auto;
+  min-width: 72px;
+  max-width: 120px;
+}
+
+.editor-locked-unit {
+  padding: 0.45rem 0.75rem;
+  background: var(--bg-muted);
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  font-style: italic;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  pointer-events: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.editor-divider {
+  height: 1px;
+  background: var(--border-default);
+  flex-shrink: 0;
+}
+
+// ── Type toggle ────────────────────────────────────────────────────
+
+.type-toggle-btn {
+  padding: 0.375rem 0.875rem;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-glass);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  backdrop-filter: var(--blur-glass);
+
+  &--dish {
+    background: rgba(14, 165, 233, 0.1);
+    border-color: rgba(14, 165, 233, 0.4);
+    color: #0284c7;
+  }
+
+  &:not(.type-toggle-btn--dish) {
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary-glow);
+    color: var(--color-primary);
+  }
+}
+
+// ── Section ────────────────────────────────────────────────────────
+
+.editor-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.editor-section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+// ── Ingredient table — CSS grid with subgrid for aligned columns ───
+
+.editor-ing-table {
+  display: grid;
+  grid-template-columns: 18px minmax(72px, auto) 63px 1fr 28px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  // overflow visible so dropdowns escape — max-height on the whole editor
+  overflow: visible;
+}
+
+.editor-ing-header {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  gap: 0.35rem;
+  padding: 0.3rem 0.5rem;
+  background: var(--color-primary-soft);
+  border-bottom: 1px solid var(--border-default);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.editor-ing-row {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--border-row);
+  transition: background 0.15s;
+
+  &:last-child {
+    border-bottom: none;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+  }
+
+  &:hover {
+    background: var(--color-primary-soft);
+  }
+
+  &--new {
+    background: var(--bg-warning-soft) !important;
+
+    .c-input {
+      border-color: var(--border-warning);
+    }
+  }
+
+  .c-input, app-custom-select {
+    font-size: 0.8125rem;
+  }
+}
+
+.editor-ing-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+
+  .c-input {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.editor-new-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.45rem;
+  background: var(--bg-warning-strong);
+  border: 1px solid var(--border-warning);
+  border-radius: var(--radius-full);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-warning);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+// ── Delete button ──────────────────────────────────────────────────
+
+.editor-del-btn {
+  width: 1.6rem;
+  height: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-default);
+  border-radius: 50%;
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+
+  &:hover {
+    background: var(--color-danger);
+    border-color: var(--color-danger);
+    color: var(--color-text-on-primary);
+  }
+}
+
+// ── Add row button — matches recipe-builder style ──────────────────
+
+.editor-add-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-default);
+  color: var(--color-primary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: var(--color-primary-soft);
+  }
+}
+
+// ── Steps (preparation workflow) ───────────────────────────────────
+
+.editor-steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.editor-step-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+}
+
+.editor-step-num {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  min-width: 1.1rem;
+  padding-top: 0.5rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.editor-step-textarea {
+  flex: 1;
+  resize: none;
+  line-height: 1.5;
+  font-size: 0.8125rem;
+  min-height: 2.5rem;
+  field-sizing: content;
+}
+
+// ── Prep references (dish workflow) ───────────────────────────────
+
+.editor-prep-table {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  overflow: visible;
+  background: var(--bg-subtle);
+}
+
+.editor-prep-header {
+  display: grid;
+  grid-template-columns: 18px 1fr 62px minmax(72px, auto) 28px;
+  gap: 0.35rem;
+  padding: 0.3rem 0.5rem;
+  background: rgba(14, 165, 233, 0.06);
+  border-bottom: 1px solid var(--border-default);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.editor-prep-row {
+  display: grid;
+  grid-template-columns: 18px 1fr 62px minmax(72px, auto) 28px;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--border-row);
+  transition: background 0.15s;
+
+  &:last-child {
+    border-bottom: none;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+  }
+
+  &:hover {
+    background: rgba(14, 165, 233, 0.04);
+  }
+
+  .c-input, app-custom-select {
+    font-size: 0.8125rem;
+  }
+}
+
+.editor-prep-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 0.5rem 0.625rem;
+  background: rgba(14, 165, 233, 0.06);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  color: #0369a1;
+  line-height: 1.5;
+
+  lucide-icon {
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+}
+
+// ── Drag handle ────────────────────────────────────────────────────
+
+.editor-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+
+  &:active { cursor: grabbing; }
+}
+
+.drag-handle-icon {
+  opacity: 0.4;
+  transition: opacity 0.15s;
+
+  .editor-ing-row:hover &,
+  .editor-prep-row:hover &,
+  .editor-step-row:hover & {
+    opacity: 0.8;
+  }
+}
+
+// ── CDK drag styles ────────────────────────────────────────────────
+
+.cdk-drag-preview {
+  box-shadow: var(--shadow-card);
+  background: var(--bg-glass-strong, var(--color-surface));
+  border: 1px solid var(--border-accent, var(--color-primary-glow));
+  border-radius: var(--radius-md);
+  opacity: 0.95;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.5rem;
+  box-sizing: border-box;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.editor-ing-table.cdk-drop-list-dragging .editor-ing-row:not(.cdk-drag-placeholder),
+.editor-steps-list.cdk-drop-list-dragging .editor-step-row:not(.cdk-drag-placeholder),
+.editor-prep-table.cdk-drop-list-dragging .editor-prep-row:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+// ── Footer ─────────────────────────────────────────────────────────
+
+.editor-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+  flex-shrink: 0;
+}
