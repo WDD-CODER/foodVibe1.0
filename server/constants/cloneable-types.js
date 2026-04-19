@@ -8,10 +8,10 @@
  *  - Keep in sync with standards-backend.md §1 (collection registry).
  */
 const CLONEABLE_TYPES = [
+  'KITCHEN_SUPPLIERS',   // must precede PRODUCT_LIST so supplierIdMap is ready
   'PRODUCT_LIST',
   'RECIPE_LIST',
   'DISH_LIST',
-  'KITCHEN_SUPPLIERS',
   'EQUIPMENT_LIST',
   'VENUE_PROFILES',
   'KITCHEN_PREPARATIONS',

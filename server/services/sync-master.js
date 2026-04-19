@@ -88,6 +88,20 @@ async function syncMasterToUser(userId) {
     return equipmentIdMap;
   }
 
+  // Build masterSupplierId → userSupplierId map for product supplier remapping.
+  // Loaded lazily — only when processing PRODUCT_LIST.
+  let supplierIdMap = null;
+
+  async function getSupplierIdMap() {
+    if (supplierIdMap) return supplierIdMap;
+    const userSuppliers = await db.collection('KITCHEN_SUPPLIERS')
+      .find({ userId, _masterId: { $ne: null } })
+      .project({ _id: 1, _masterId: 1 })
+      .toArray();
+    supplierIdMap = new Map(userSuppliers.map(s => [String(s._masterId), String(s._id)]));
+    return supplierIdMap;
+  }
+
   // RECIPE_LIST and DISH_LIST share a global name namespace — a name that exists
   // in either collection counts as "taken" for collision purposes.
   // Build this cross-collection name set once, before the per-collection loop.
@@ -170,6 +184,19 @@ async function syncMasterToUser(userId) {
           clone.logistics_ = remapLogistics(clone.logistics_, eqMap);
         }
 
+        // Remap supplier IDs so cloned products reference user-scoped supplier IDs.
+        if (entityType === 'PRODUCT_LIST') {
+          const supMap = await getSupplierIdMap();
+          if (Array.isArray(clone.supplierIds_)) {
+            clone.supplierIds_ = clone.supplierIds_.map(id => supMap.get(id) ?? id);
+          }
+          if (Array.isArray(clone.sources_)) {
+            clone.sources_ = clone.sources_.map(s =>
+              s.supplierId ? { ...s, supplierId: supMap.get(s.supplierId) ?? s.supplierId } : s
+            );
+          }
+        }
+
         toInsert.push(clone);
       } else if (!existing._userModified) {
         // Rule 2: unmodified clone — overwrite with latest master data
@@ -183,8 +210,18 @@ async function syncMasterToUser(userId) {
           masterRest.logistics_ = remapLogistics(masterRest.logistics_, eqMap);
         }
 
-        // For products: merge sources_ arrays (deduplicate by supplierId)
-        if (entityType === 'PRODUCT_LIST' && Array.isArray(masterRest.sources_)) {
+        // For products: remap master supplier IDs to user-scoped IDs, then merge sources_.
+        if (entityType === 'PRODUCT_LIST') {
+          const supMap = await getSupplierIdMap();
+          if (Array.isArray(masterRest.supplierIds_)) {
+            masterRest.supplierIds_ = masterRest.supplierIds_.map(id => supMap.get(id) ?? id);
+          }
+          if (Array.isArray(masterRest.sources_)) {
+            masterRest.sources_ = masterRest.sources_.map(s =>
+              s.supplierId ? { ...s, supplierId: supMap.get(s.supplierId) ?? s.supplierId } : s
+            );
+          }
+          // Merge sources_ — deduplicate by (now remapped) supplierId
           const existingSources = existing.sources_ || [];
           const existingSupplierIds = new Set(existingSources.map(s => s.supplierId).filter(Boolean));
           const newSources = (masterRest.sources_ || []).filter(

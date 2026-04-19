@@ -49,6 +49,8 @@ async function cloneMasterDataToUser(userId) {
 
   // masterProductId → userProductId (populated when PRODUCT_LIST is cloned)
   const productIdMap = new Map();
+  // masterSupplierId → userSupplierId (populated when KITCHEN_SUPPLIERS is cloned)
+  const supplierIdMap = new Map();
 
   for (const entityType of CLONEABLE_TYPES) {
     const col = db.collection(entityType);
@@ -69,6 +71,17 @@ async function cloneMasterDataToUser(userId) {
       };
 
       // After we have the product id map, remap ingredient refs in recipes/dishes
+      if (entityType === 'PRODUCT_LIST' && supplierIdMap.size > 0) {
+        if (Array.isArray(clone.supplierIds_)) {
+          clone.supplierIds_ = clone.supplierIds_.map(id => supplierIdMap.get(id) ?? id);
+        }
+        if (Array.isArray(clone.sources_)) {
+          clone.sources_ = clone.sources_.map(s =>
+            s.supplierId ? { ...s, supplierId: supplierIdMap.get(s.supplierId) ?? s.supplierId } : s
+          );
+        }
+      }
+
       if ((entityType === 'RECIPE_LIST' || entityType === 'DISH_LIST') && productIdMap.size > 0) {
         clone.ingredients_ = remapIngredients(clone.ingredients_, productIdMap);
       }
@@ -80,6 +93,13 @@ async function cloneMasterDataToUser(userId) {
     if (entityType === 'PRODUCT_LIST') {
       for (const clone of clones) {
         productIdMap.set(clone._masterId, clone._id);
+      }
+    }
+
+    // Build masterSupplier → userSupplier map right after cloning suppliers
+    if (entityType === 'KITCHEN_SUPPLIERS') {
+      for (const clone of clones) {
+        supplierIdMap.set(clone._masterId, clone._id);
       }
     }
 
