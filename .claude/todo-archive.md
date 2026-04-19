@@ -6,6 +6,40 @@ Moved from todo.md to reduce token load.
 
 ## Done
 
+### Plan 272 — Seeder Curation Pipeline (`plans/272-seeder-curation-pipeline.plan.md`)
+
+- [x] Task 1: `tools/catalog-seeder/config.py` — Add CATALOG_REVIEW_FILE, KITCHEN_CATEGORIES, expand NON_FOOD_KEYWORDS
+- [x] Task 2: `tools/catalog-seeder/fetch.py` — Extract 7 nutrition fields from OFF bulk CSV; add User-Agent header; local 7-day cache for global OFF CSV
+- [x] Task 3: `tools/catalog-seeder/normalize.py` — Removed _is_non_food(); added nutrition_per_100g + review fields (suggested_category, kitchen_category, approved, drop, notes)
+- [x] Task 4: `tools/catalog-seeder/filter.py` (new) — strict positive ingredient-keyword filter (drop + ingredient-match)
+- [x] Task 5: `tools/catalog-seeder/main.py` — --from-review arg, catalog-review.json write flow, --skip-fetch deprecated alias
+
+---
+
+### Plan 271 — Seeder Master Alignment (`plans/271-seeder-master-alignment.plan.md`)
+
+- [x] Step 1: `tools/catalog-seeder/db_write.py` — Added `userId: '__master__'`, `_masterId: None`, `_userModified: False` to `_prepare_doc()`
+- [x] Step 2: `tools/catalog-seeder/db_write.py` — Added `_normalize_name()` helper; stamps `name_hebrew_normalized` on each product doc
+- [x] Step 3: `tools/catalog-seeder/db_write.py` — Builds and writes `sources_` array `[{supplierId, price, addedAt}]` alongside legacy fields
+- [x] Step 4: `tools/catalog-seeder/db_write.py` — Added `userId: '__master__'`, `_masterId: None`, `_userModified: False` to `_upsert_suppliers()`
+- [x] Step 5: `tools/catalog-seeder/diff.py` — `userId: '__master__'` filter on MongoDB query in `diff_against_db()`
+- Verified: dry-run smoke test passed — 144,500 raw → 57,656 deduped → 800 capped → 185 filtered
+
+---
+
+### Plan 275 — Design Bundle 3: Hebrew Font, RTL Nav, Dashboard Tab Pills, KPI Polish (`plans/275-design-bundle-3-hebrew-rtl.plan.md`)
+
+- [x] Task 1: `src/styles.scss` — add Heebo to Google Fonts URL; update --font-sans to 'Heebo', 'Rubik', system-ui
+- [x] Task 2: `header.component.html` — swap DOM order in all 4 nav pills (text before icon)
+- [x] Task 3: `header.component.scss` — remove letter-spacing: -0.005em from .nav-pill
+- [x] Task 4: `dashboard-overview.component.html` — replace .header-btn with .c-tab-pill on all 4 sub-nav buttons
+- [x] Task 5: `dashboard-overview.component.scss` — remove .header-btn block; fix .kpi-label font; fix .link-btn color; add .kpi-card::before shine
+- [x] Task 6: `ng build` — 0 errors
+
+---
+
+## Done
+
 ### Plan 270 — Atlas Performance Fixes (`plans/270-atlas-performance-fixes.plan.md`)
 
 - [x] Task 1: `server/db.js` — add `{ userId: 1 }` index to all 14 CLONEABLE_TYPES collections + `name`/`email` on users

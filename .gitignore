@@ -62,6 +62,7 @@ migration-dump.json
 # Catalog seeder — runtime output (never commit)
 tools/catalog-seeder/output/pending-review.json
 tools/catalog-seeder/output/pending-manual.json
+tools/catalog-seeder/output/off-bulk-cache.csv.gz
 # seed-products.json IS committed after admin review — intentionally not ignored
 tools/catalog-seeder/__pycache__/
 tools/catalog-seeder/*.pyc

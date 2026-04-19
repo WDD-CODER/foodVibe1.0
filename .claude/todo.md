@@ -2,25 +2,30 @@
 
 ---
 
-### Plan 272 — Seeder Curation Pipeline (`plans/272-seeder-curation-pipeline.plan.md`)
 
-- [ ] Task 1: `tools/catalog-seeder/config.py` — Add CATALOG_REVIEW_FILE, KITCHEN_CATEGORIES, expand NON_FOOD_KEYWORDS
-- [ ] Task 2: `tools/catalog-seeder/fetch.py` — Extract 7 nutrition fields from OFF bulk CSV
-- [ ] Task 3: `tools/catalog-seeder/normalize.py` — Remove _is_non_food(); add nutrition_per_100g + review fields
-- [ ] Task 4: `tools/catalog-seeder/filter.py` (new) — apply_food_filter() with category-pass + pantry food-signal
-- [ ] Task 5: `tools/catalog-seeder/main.py` — Restructure flow: --from-review arg, write catalog-review.json
+### Plan 274 — UI Bundle 2: Nav Pill Container, KPI Icon/Footer, Activity Avatar (`plans/274-ui-bundle-2-nav-kpi-activity.plan.md`)
+
+- [x] Task 1: `src/styles.scss` — add .c-tab-pill, .c-table-card, .c-table engine classes
+- [x] Task 2: `header.component.html` — nav-pills div, nav-pill anchors, user-chip wrapper
+- [x] Task 3: `header.component.scss` — height 3.875rem, nav-pills glass container, user-chip, mobile hide
+- [x] Task 4: `dashboard-overview.component.html` — kpi-top/kpi-icon/kpi-foot restructure
+- [x] Task 5: `dashboard-overview.component.html` — act-avatar + act-middle in activity items
+- [x] Task 6: `dashboard-overview.component.scss` — kpi/activity SCSS
+- [x] Task 7: `ng build` — 0 errors
+
+---
+
+### Plan 273 — Design System Modernization (`plans/273-design-system-modernization.plan.md`)
+
+- [x] Task 1: `src/styles.scss` — replace Heebo @import, add new tokens, update font-family
+- [x] Task 2: `src/styles.scss` — update body::before gradient
+- [x] Task 3: `src/styles.scss` — update .c-btn-primary, add .c-btn-dark, .c-btn-sm/.c-btn-lg, update .c-chip, add .c-status, .c-eyebrow
+- [x] Task 4: `dashboard-overview.component.scss` — KPI card glow + value/label redesign
+- [x] Task 5: `dashboard-overview.component.scss` — activity-item/tags Space Grotesk update
+- [x] Task 6: `ng build` — verify 0 errors
 
 ---
 
-### Plan 271 — Seeder Master Alignment (`plans/271-seeder-master-alignment.plan.md`)
-
-- [ ] Step 1: `tools/catalog-seeder/db_write.py` — Add `userId: '__master__'`, `_masterId: None`, `_userModified: False` to `_prepare_doc()`
-- [ ] Step 2: `tools/catalog-seeder/db_write.py` — Add `_normalize_name()` helper; stamp `name_hebrew_normalized` on each product doc
-- [ ] Step 3: `tools/catalog-seeder/db_write.py` — Build and write `sources_` array `[{supplierId, price, addedAt}]` alongside legacy fields
-- [ ] Step 4: `tools/catalog-seeder/db_write.py` — Add `userId: '__master__'`, `_masterId: None`, `_userModified: False` to `_upsert_suppliers()`
-- [ ] Step 5: `tools/catalog-seeder/diff.py` — Add `userId: '__master__'` filter to MongoDB query in `diff_against_db()`
-
----
 
 ### Plan 269 — Master Pool Cleanup + Deletion Tombstones (`plans/269-master-pool-cleanup.plan.md`)
 
