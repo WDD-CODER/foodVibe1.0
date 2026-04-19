@@ -6,7 +6,7 @@
   display: flex;
   align-items: center;
 
-  height: 3rem;
+  height: 3.875rem;
   padding-inline: 1.5rem;
   padding-block: 0;
 
@@ -28,59 +28,25 @@
   border-block-end: 1px solid var(--border-glass);
   box-shadow: var(--shadow-nav);
 
+  // Mirror spacer: gives pills a symmetrical counterpart so they stay
+  // truly centered regardless of chip width.
+  &::after {
+    content: '';
+    flex: 1;
+    min-width: 0;
+  }
+
   .mobile-menu-btn,
   .mobile-close-btn {
     display: none;
   }
 
+  // Mobile drawer list — hidden on desktop
   ul {
-    display: flex;
-    place-content: center;
-    flex: 1;
-    gap: 0.25rem;
+    display: none;
     list-style: none;
     margin: 0;
     padding: 0;
-
-    li a {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.375rem;
-
-      padding-inline: 0.875rem;
-      padding-block: 0.625rem;
-
-      color: var(--color-text-muted);
-      font-size: 0.875rem;
-      font-weight: 500;
-      text-decoration: none;
-      white-space: nowrap;
-
-      border-radius: var(--radius-md);
-
-      cursor: pointer;
-      transition: color 0.2s ease, background 0.2s ease;
-
-      lucide-icon {
-        opacity: 0.7;
-        transition: opacity 0.2s ease;
-      }
-
-      &:hover {
-        color: var(--color-text-main);
-        background: var(--bg-glass);
-
-        lucide-icon { opacity: 1; }
-      }
-
-      &.active {
-        color: var(--color-primary);
-        background: var(--color-primary-soft);
-        font-weight: 600;
-
-        lucide-icon { opacity: 1; }
-      }
-    }
   }
 
   .mobile-auth-section {
@@ -88,17 +54,118 @@
   }
 }
 
+// ─── NAV PILLS — centered floating glass pill group ────────────────────────
+// In-flow (not absolute) so flex guarantees it never overlaps the chip.
+// ::after on .header-nav acts as a mirror spacer so pills stay geometrically
+// centered in the full header width.
+.nav-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+
+  padding: 0.25rem;
+
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: var(--radius-full);
+  backdrop-filter: var(--blur-glass);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.nav-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+
+  padding-inline: 0.875rem;
+  padding-block: 0.5rem;
+
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+
+  border: none;
+  border-radius: var(--radius-full);
+
+  cursor: pointer;
+  transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+
+  lucide-icon {
+    opacity: 0.7;
+    transition: opacity 0.18s ease;
+  }
+
+  &:hover {
+    color: var(--color-text-main);
+    background: rgba(255, 255, 255, 0.5);
+
+    lucide-icon { opacity: 1; }
+  }
+
+  &.active {
+    background: linear-gradient(180deg, var(--color-primary-light), var(--color-primary));
+    color: var(--color-text-on-primary);
+    box-shadow: 0 4px 12px -4px var(--color-primary-glow), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+
+    lucide-icon { opacity: 1; }
+  }
+}
+
+// ─── AUTH SECTION ──────────────────────────────────────────────────────────
 .auth-section {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 
-  margin-inline-start: auto;
+  // flex: 1 mirrors the ::after spacer — chip stays in its column,
+  // pills stay centered, no margin tricks needed.
+  flex: 1;
+}
+
+.user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+
+  padding-block: 0.25rem;
+  padding-inline: 0.25rem 0.625rem;
+
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+  cursor: default;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: var(--bg-pure);
+  }
+}
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.user-role {
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: var(--color-text-muted-light);
+  text-align: start;
+  line-height: 1;
+  text-transform: capitalize;
 }
 
 .avatar-img {
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2rem;
+  height: 2rem;
 
   border: 2px solid var(--border-default);
   border-radius: var(--radius-full);
@@ -115,15 +182,41 @@
   display: grid;
   place-content: center;
 
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2rem;
+  height: 2rem;
 
   background: var(--color-primary-soft);
   color: var(--color-primary);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 700;
 
   border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.avatar-wrapper {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.role-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+
+  display: grid;
+  place-content: center;
+
+  width: 1rem;
+  height: 1rem;
+
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+  border: 1.5px solid var(--bg-pure);
+  border-radius: var(--radius-full);
+
+  lucide-icon { display: block; }
 }
 
 .avatar-guest {
@@ -153,8 +246,7 @@
   display: inline-flex;
   align-items: center;
 
-  padding-inline: 0.5rem;
-  padding-block: 0.375rem;
+  padding: 0;
 
   background: transparent;
   color: var(--color-text-muted);
@@ -165,11 +257,10 @@
   border-radius: var(--radius-sm);
 
   cursor: pointer;
-  transition: color 0.2s ease, transform 0.2s var(--ease-spring);
+  transition: color 0.2s ease;
 
   &:hover {
     color: var(--color-danger);
-    transform: rotate(-4deg);
   }
 }
 
@@ -197,14 +288,12 @@
   }
 }
 
-// Bottom nav — hidden by default (shown only on mobile ≤ 767px)
+// Bottom nav — hidden by default (shown only on mobile ≤ 620px)
 .bottom-nav {
   display: none;
 }
 
-// ─── MOBILE NAV BACKDROP (click-outside to close) ─────────────────────
-// Positioned outside <nav> so backdrop-filter on ::before does not
-// affect its fixed positioning.
+// ─── MOBILE NAV BACKDROP ──────────────────────────────────────────────────
 .mobile-nav-backdrop {
   display: none;
   position: fixed;
@@ -215,22 +304,17 @@
 }
 
 
-// ─── TABLET (768px – 1023px) — inline nav with enhanced touch targets ──
+// ─── TABLET (768px – 1023px) — inline nav pills with tighter padding ───────
 @media (min-width: 768px) and (max-width: 1023px) {
   .header-nav {
     padding-inline: 1rem;
+  }
 
-    ul {
-      gap: 0.125rem;
-
-      li a {
-        // Ensure 44px min touch target
-        padding-inline: 0.625rem;
-        padding-block: 0.75rem;
-        font-size: 0.8125rem;
-        gap: 0.3rem;
-      }
-    }
+  .nav-pill {
+    padding-inline: 0.625rem;
+    padding-block: 0.4375rem;
+    font-size: 0.75rem;
+    gap: 0.25rem;
   }
 
   // Tablet never shows hamburger or bottom nav
@@ -239,14 +323,14 @@
 }
 
 
-// ─── MOBILE (≤ 767px) — minimal top header + bottom tab bar ────────────
+// ─── MOBILE (≤ 620px) — minimal top header + bottom tab bar ────────────────
 @media (max-width: 620px) {
   .header-nav {
     padding-inline: 1rem;
 
-    // Nav list: hidden on mobile (bottom nav replaces it)
-    ul {
-      display: none !important;
+    // Nav pills: hidden on mobile (bottom nav replaces it)
+    .nav-pills {
+      display: none;
     }
 
     // No hamburger on mobile
@@ -254,10 +338,6 @@
       display: none;
     }
 
-    .auth-section {
-      margin-inline-start: 0;
-      margin-inline-end: auto; // RTL: pushes auth section to physical right
-    }
   }
 
   // Backdrop not needed on mobile (no dropdown)
@@ -283,7 +363,7 @@
 
     height: 3.5rem;
     padding-inline: 0.25rem;
-    padding-block-end: env(safe-area-inset-bottom, 0); // iPhone home bar
+    padding-block-end: env(safe-area-inset-bottom, 0);
 
     background: var(--bg-glass-strong);
     backdrop-filter: var(--blur-glass);
@@ -300,7 +380,7 @@
       gap: 0.1875rem;
 
       flex: 1;
-      min-block-size: 44px; // WCAG touch target
+      min-block-size: 44px;
       padding-block: 0.375rem;
 
       color: var(--color-text-muted);
