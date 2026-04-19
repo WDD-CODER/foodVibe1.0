@@ -54,6 +54,7 @@ export class QuickAddProductModalComponent {
   protected nameError_ = signal('');
   protected unitError_ = signal('');
 
+  protected nameRef = viewChild<ElementRef<HTMLInputElement>>('nameEl');
   protected baseUnitRef = viewChild<ElementRef<HTMLElement>>('baseUnitSelect');
   protected buyPriceRef = viewChild<ElementRef<HTMLInputElement>>('buyPriceEl');
   protected categoryRef = viewChild<ElementRef<HTMLElement>>('categorySelect');
@@ -101,7 +102,7 @@ export class QuickAddProductModalComponent {
 
     effect(() => {
       if (this.modalService.isOpen_() && this.modalService.config()) {
-        setTimeout(() => this.baseUnitRef()?.nativeElement?.focus(), 0);
+        setTimeout(() => this.nameRef()?.nativeElement?.focus(), 0);
       }
     });
 
