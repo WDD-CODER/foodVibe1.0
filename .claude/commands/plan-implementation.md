@@ -11,15 +11,24 @@ allowed-tools: Read, Write, Grep, Glob
 
 Before verification, persist the brief as the session's source of truth.
 
-1. **Detect brief format** in the user's message:
-   - **Structured** (contains `## Goal`, `## Steps`, or `## Success Criteria`) → parse and use as-is
+1. **Detect brief format** in the user's message — three tiers:
+
+   - **Comprehensive** (contains ordered numbered steps AND explicit rules/constraints AND "Done when" / success criteria AND schema/field definitions) → This is already a complete specification. **STOP. Ask the user:**
+     > "Your input looks like a complete specification — it has ordered steps, explicit rules, and done-criteria. Should I:
+     > **(A)** Use it directly as the brief (no compression — preserve every detail), or
+     > **(B)** Condense it into the standard brief template?
+     > (A is recommended when the input is more detailed than the template can hold.)"
+     Wait for the user's answer before proceeding. If **(A)**: write the input verbatim to `brief.md`, skip compression, proceed to Step 1. If **(B)**: proceed normally with the template below.
+
+   - **Structured** (contains `## Goal`, `## Steps`, or `## Success Criteria` but lacks the full set above) → parse and use as-is with the template below
+
    - **Unstructured** (plain description/query) → auto-generate from template below
 
 2. **Generate session ID**: `YYYY-MM-DD-{2-4-word-slug}` where slug is derived from the goal (lowercase, hyphens, no special chars)
 
 3. **Collision check**: If `.claude/sessions/{session-id}/` already exists → append `-2`, `-3`, etc.
 
-4. **Write brief** to `.claude/sessions/{session-id}/brief.md` using this template:
+4. **Write brief** to `.claude/sessions/{session-id}/brief.md` using this template (skip if Comprehensive + user chose A):
 
 ```markdown
 ## Goal

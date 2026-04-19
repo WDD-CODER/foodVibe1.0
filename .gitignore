@@ -95,3 +95,4 @@ mine-progress.ps1
 
 # One-time migration scripts
 apply-*.js
+.superpowers/

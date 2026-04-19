@@ -6,6 +6,130 @@ Moved from todo.md to reduce token load.
 
 ## Done
 
+### Plan 260 — Tech Debt Execution: Apr 07 Audit (`plans/260-techdebt-apr07-execution.plan.md`)
+
+> **Tier 1 — Activate dormant plans (pass to agent as-is):**
+- [x] Execute Plan 214: `plans/214-R-sanitize-key-util-extraction.plan.md` — create `sanitize-key.util.ts`, replace 4 inline sites in 3 files
+- [x] Execute Plan 215: `plans/215-R-list-state-param-descriptor-any.plan.md` — widen `list-state.util.ts` types, remove 10 `as any` casts across 5 components
+
+> **Tier 2 — RecipeAiCoordinator extraction:**
+- [x] Task 1: Read `recipe-builder.page.ts` — AI surface identified (methods deeply form-coupled; component extraction impractical)
+- [x] Task 2: Create `src/app/pages/recipe-builder/services/recipe-ai-flow.service.ts` — service extraction (prefillFromDraft, buildDraftSnapshot, applyPatch, helpers)
+- [x] Task 3: `recipe-builder.page.ts` — remove extracted AI methods; wire `RecipeAiFlowService` via `providers` + `inject()`; `onAiEditClick` → 1-line shell
+- [x] Task 4: `ng build` — zero errors; `recipe-builder.page.ts` 1297 → 1094 LOC (−203)
+
+---
+
+### Plan 261 — Claude-Mem Integration (`plans/261-claude-mem-integration.plan.md`)
+
+- [x] `.claude/settings.json` — merge claude-mem hooks (SessionStart, PostToolUse, Stop, SessionEnd) preserving existing Stop hook
+- [x] `.claude/mcp.json` — create with claude-mem MCP server entry
+- [x] `.claude/commands/plan-implementation.md` — add Phase 0 historical context recall (conditional on claude-mem)
+- [x] `.claude/agents/end-of-session-agent.md` — add Phase 1.5 memory enrichment to Phase 11 (session-handoff is redirect)
+- [x] `.claude/copilot-instructions.md` — add memory search trigger §0, token budget §0.2, priority hierarchy §0.1
+- [x] Provide user with Bun + claude-mem install commands + worker health check
+
+> **NOTE:** This plan originally used `claude-mem`. The project has since migrated to **MemPalace** (MCP server `mcp__mempalace__*`). All memory/knowledge-graph tooling now goes through MemPalace. `claude-mem` is no longer active.
+
+---
+
+### Plan 263 — Favorites Button on Recipe-Book List (`plans/263-favorites-recipe-book.plan.md`)
+
+- [x] 1 — `src/app/core/models/recipe.model.ts` — add `favoritedBy_?: string[]` field
+- [x] 2 — `src/app/app.config.ts` — register `Heart` Lucide icon
+- [x] 3 — `public/assets/data/dictionary.json` — add 4 translation keys (favorites, show_favorites_only, add_to_favorites, remove_from_favorites)
+- [x] 4 — `recipe-book-list.component.ts` — add showFavoritesOnly_ signal, isFavoritedByCurrentUser_ computed, onToggleFavorite method, filter logic, URL state param
+- [x] 5 — `recipe-book-list.component.html` — add heart button in actions column
+- [x] 6 — `recipe-book-list.component.html` — add "Favorites only" filter toggle in sidebar; update hasActiveFilters_ and clearAllFilters
+- [x] 7 — `recipe-book-list.component.scss` — add .favorite-btn styles
+
+---
+
+### Plan 264 — Workflow Superpowers Integration (`plans/264-workflow-superpowers-integration.plan.md`)
+
+- [x] A1: Create `.claude/commands/new-feature.md` — full command (Phases 0-5)
+- [x] A2: Edit `plan-implementation.md` — add No Placeholders Scan
+- [x] A3: Edit `plan-implementation.md` — add Forced Alternatives
+- [x] A4: Edit `plan-implementation.md` — add Adversarial Subagent Review
+- [x] A5: Edit `plan-implementation.md` — update Output Format
+- [x] A6: Edit `execute-it.md` — add Verification-Before-Completion Gate
+- [x] A7: Edit `execute-it.md` — add Systematic-Debugging Protocol
+- [x] A8: Edit `execute-it.md` — add Smart Visual QA Flow
+- [x] A9: Edit `execute-it.md` — add validation override to Execution Rules
+- [x] A10: Edit `team-leader.md` — add Two-Stage Review Gate
+- [x] A11: Edit `qa-engineer.md` — add Systematic-Debugging + RED-GREEN Mandate
+- [x] A12: Edit `end-of-session-agent.md` — add Verification-Before-Completion to Phase 10
+- [x] A13: Edit `software-architect.md` — add No Placeholders Gate + Forced Alternatives
+- [x] A14: Edit `copilot-instructions.md` — add `/new-feature` skill trigger
+- [x] A15: Edit `agent.md` — add `/new-feature` to commands table
+- [x] A16: Run `ng build` — verify no regressions
+
+---
+
+### Plan 265 — auto-solve Enforcement Fixes (`plans/265-auto-solve-enforcement-fixes.plan.md`)
+
+- [x] Task 1: `auto-solve.md` Phase 2 — Remove silent-archive shortcut; replace with route-to-Phase-5
+- [x] Task 2: `auto-solve.md` Phase 6 — Add ARCHIVAL PRECONDITION block (3 rules); remove redundant Archive rule footnote
+- [x] Task 3: `auto-solve.md` Phase 4 — Add BUILD SCOPE RULE + skip exemption + logging requirement
+- [x] Task 4: `auto-solve.md` Phase 2 — UI-DETECTION GATE + route rule + budget cap + mandatory evidence table
+- [x] Task 5: Surface yes/no questions to user re Plan 234 operational tasks
+- [x] Task 6: Write `.qa-reports/plan-234-archive-audit.md` with 3 sections
+- [x] Task 7: Move unverified Plan 234 operational tasks back to `todo.md`; update archive
+- [x] Task 8: Run `npx ng build` — verify 0 errors
+
+---
+
+### Plan 267 — Context Management + Session Handoff (`plans/267-context-management-session-handoff.plan.md`)
+
+- [x] Task 1: `scripts/` — copy 4 session-kit hooks (context-monitor.sh, pre-compact-reminder.sh, session-startup.sh, handoff-check.sh) + chmod +x
+- [x] Task 2: `docs/session-state.md` — create from session-kit template
+- [x] Task 3: `.claude/settings.json` — merge 4 hook entries (preserve existing PostToolUse)
+- [x] Task 4: `CLAUDE.md` — append `## Session Management` section
+- [x] Task 5: `.claude/skills/context-management/SKILL.md` — create detection heuristics skill
+- [x] Task 6: `.claude/commands/checkpoint.md` — create timestamped snapshot command
+- [x] Task 7: `.claude/commands/resume.md` — create confirmation-gated resume command
+- [x] Task 8: `.claude/agents/` — append `## Context hygiene` to 6 persona files
+- [x] Task 9: `.claude/sessions/README.md` — create naming/lifecycle explainer
+- [x] Task 10: `plans/session-handoff-setup.md` — write user-facing how-to doc
+- [x] Task 11: Verify `/rewind` works in current Claude Code install
+
+---
+
+### Plan 269 — Master Pool Cleanup + Deletion Tombstones (`plans/269-master-pool-cleanup.plan.md`)
+
+- [x] Task 1: `server/routes/generic.js` — replace POST handler body: remove dual-write + collision block, set `_masterId: safeEntity._id`
+- [x] Task 2: `server/routes/generic.js` — replace GET `/:type/:id` 3-layer fallback with single `findOne({ _id, userId, _userDeleted: { $ne: true } })`
+- [x] Task 3: `server/routes/generic.js` — add `_userDeleted: { $ne: true }` to GET `/:type` list query
+- [x] Task 4: `server/routes/generic.js` — replace DELETE handler inner logic with tombstone/hard-delete branching
+- [x] Task 5: `server/services/sync-master.js` — delete `cleanupNameCollisionClones` function; update `module.exports`
+- [x] Task 6: `server/routes/auth.js` — remove `cleanupNameCollisionClones` from import + 3 call sites
+- [x] Task 7: Verify `grep -r cleanupNameCollisionClones server/` returns nothing; confirm no syntax errors
+
+---
+
+### Plan 273 — Design System Modernization (`plans/273-design-system-modernization.plan.md`)
+
+- [x] Task 1: `src/styles.scss` — replace Heebo @import, add new tokens, update font-family
+- [x] Task 2: `src/styles.scss` — update body::before gradient
+- [x] Task 3: `src/styles.scss` — update .c-btn-primary, add .c-btn-dark, .c-btn-sm/.c-btn-lg, update .c-chip, add .c-status, .c-eyebrow
+- [x] Task 4: `dashboard-overview.component.scss` — KPI card glow + value/label redesign
+- [x] Task 5: `dashboard-overview.component.scss` — activity-item/tags Space Grotesk update
+- [x] Task 6: `ng build` — verify 0 errors
+
+---
+
+### Plan 274 — UI Bundle 2: Nav Pill Container, KPI Icon/Footer, Activity Avatar (`plans/274-ui-bundle-2-nav-kpi-activity.plan.md`)
+
+- [x] Task 1: `src/styles.scss` — add .c-tab-pill, .c-table-card, .c-table engine classes
+- [x] Task 2: `header.component.html` — nav-pills div, nav-pill anchors, user-chip wrapper
+- [x] Task 3: `header.component.scss` — height 3.875rem, nav-pills glass container, user-chip, mobile hide
+- [x] Task 4: `dashboard-overview.component.html` — kpi-top/kpi-icon/kpi-foot restructure
+- [x] Task 5: `dashboard-overview.component.html` — act-avatar + act-middle in activity items
+- [x] Task 6: `dashboard-overview.component.scss` — kpi/activity SCSS
+- [x] Task 7: `ng build` — 0 errors
+
+---
+
 ### Plan 272 — Seeder Curation Pipeline (`plans/272-seeder-curation-pipeline.plan.md`)
 
 - [x] Task 1: `tools/catalog-seeder/config.py` — Add CATALOG_REVIEW_FILE, KITCHEN_CATEGORIES, expand NON_FOOD_KEYWORDS
