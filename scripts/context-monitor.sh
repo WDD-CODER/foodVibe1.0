@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # context-monitor.sh — PostToolUse hook
-# Periodically checks context usage and injects warnings.
+# Periodically checks transcript size and injects context warnings.
 # Three-tier alert system: 40% (warn) → 60% (alert) → 70% (hard stop).
 #
-# Measures word count of content AFTER the last compaction event in the
-# transcript JSONL, since compacted messages are no longer in the active
-# context window. Uses word count (~1.3 tokens/word) instead of byte count
-# to avoid JSONL overhead inflation (JSON keys, escaping, base64 = ~38x).
+# The 70% hard gate forces a session handoff — no exceptions.
+# Developed across dozens of real sessions — hard stops have saved work multiple times.
+#
+# After /compact the transcript file stays the same size on disk (it's append-only),
+# so the hook uses delta-since-last-compact instead of total file size.
+# pre-compact-reminder.sh writes a baseline; this script reads it.
 #
 # Hook type: PostToolUse (matcher: ".*")
 # Timeout: 5s
@@ -31,67 +33,57 @@ if [ -z "$TRANSCRIPT" ] || [ ! -f "$TRANSCRIPT" ]; then
   exit 0
 fi
 
-# Find the last compaction boundary line number. Content after this line is
-# the active context window. If no compaction has happened, use the whole file.
-# Claude Code writes {"subtype":"compact_boundary"} entries when it compresses
-# older messages out of the active window.
-LAST_COMPACT_LINE=$(grep -n '"subtype":"compact_boundary"' "$TRANSCRIPT" 2>/dev/null | tail -1 | cut -d: -f1)
+# Save transcript path so pre-compact-reminder.sh can find it.
+# PreCompact hooks are not guaranteed to receive transcript_path in their input,
+# so we persist it here where we know PostToolUse always provides it.
+echo "$TRANSCRIPT" > /tmp/claude-transcript-path
 
-if [ -n "$LAST_COMPACT_LINE" ]; then
-  # Count words only from content after last compaction
-  WORDS=$(tail -n +"$LAST_COMPACT_LINE" "$TRANSCRIPT" 2>/dev/null | wc -w | tr -d ' ')
+# Get effective size — delta since last compact, or total if no compact yet.
+# After /compact the .jsonl file doesn't shrink (it's append-only), so raw size
+# would fire false alerts immediately after compaction. Subtracting the baseline
+# recorded at compact time gives the actual new context growth since last compact.
+TOTAL=$(wc -c < "$TRANSCRIPT" 2>/dev/null || echo 0)
+BASELINE=$(cat /tmp/claude-compact-baseline 2>/dev/null || echo 0)
+if [ "$BASELINE" -gt 0 ] && [ "$TOTAL" -gt "$BASELINE" ]; then
+  SIZE=$((TOTAL - BASELINE))
 else
-  # No compaction yet — count the whole file
-  WORDS=$(wc -w < "$TRANSCRIPT" 2>/dev/null | tr -d ' ')
+  SIZE=$TOTAL
 fi
 
-WORDS=${WORDS:-0}
+# Thresholds (rough estimates based on observed context usage):
+#   400KB ≈ 40% of context window
+#   600KB ≈ 60% of context window
+#   700KB ≈ 70% of context window
+# These are conservative estimates. Adjust based on your model's context size.
+WARN_THRESHOLD=400000
+ALERT_THRESHOLD=600000
+STOP_THRESHOLD=700000
 
-# Detect model from the most recent assistant message in the active window.
-# Each model family has a different context window size.
-if [ -n "$LAST_COMPACT_LINE" ]; then
-  MODEL=$(tail -n +"$LAST_COMPACT_LINE" "$TRANSCRIPT" 2>/dev/null | grep -o '"model":"[^"]*"' | tail -1 | sed 's/"model":"//;s/"//')
-else
-  MODEL=$(grep -o '"model":"[^"]*"' "$TRANSCRIPT" 2>/dev/null | tail -1 | sed 's/"model":"//;s/"//')
-fi
-
-# Context window sizes (tokens) by model family.
-# Update this table when new models ship.
-#   claude-opus-4-6:   200K
-#   claude-sonnet-4-6: 200K
-#   claude-haiku-4-5:  200K
-#   (fallback):        200K
-case "$MODEL" in
-  claude-opus-4-6*)   CTX_TOKENS=200000 ;;
-  claude-sonnet-4-6*) CTX_TOKENS=200000 ;;
-  claude-haiku-4-5*)  CTX_TOKENS=200000 ;;
-  *)                  CTX_TOKENS=200000 ;;
-esac
-
-# Convert token capacity to word thresholds.
-# ~1.3 tokens/word → word capacity = CTX_TOKENS / 1.3
-# Subtract system prompt overhead (~15K tokens ≈ 12K words).
-WORD_CAPACITY=$(( CTX_TOKENS * 10 / 13 - 12000 ))
-WARN_THRESHOLD=$(( WORD_CAPACITY * 40 / 100 ))
-ALERT_THRESHOLD=$(( WORD_CAPACITY * 60 / 100 ))
-STOP_THRESHOLD=$(( WORD_CAPACITY * 70 / 100 ))
-
-if [ "$WORDS" -gt "$STOP_THRESHOLD" ]; then
+if [ "$SIZE" -gt "$STOP_THRESHOLD" ]; then
   cat <<'EOF'
 {
-  "systemMessage": "HARD STOP — Context exceeds 70%. You MUST do the following immediately. Do NOT continue any other work:\n1. Update session-state.md with current progress, decisions made, and next steps\n2. Stop all generation/development work\n3. Tell the user: 'Context is full. I recommend starting a new session. session-state.md has been updated.'\n\nThis is a hard gate. Continuing past this point risks losing work to context truncation."
+  "hookSpecificOutput": {
+    "hookEventName": "PostToolUse",
+    "additionalContext": "HARD STOP — Context exceeds 70%. You MUST do the following immediately. Do NOT continue any other work:\n1. Update session-state.md with current progress, decisions made, and next steps\n2. Stop all generation/development work\n3. Tell the user: 'Context is full. I recommend starting a new session. session-state.md has been updated.'\n\nThis is a hard gate. Continuing past this point risks losing work to context truncation."
+  }
 }
 EOF
-elif [ "$WORDS" -gt "$ALERT_THRESHOLD" ]; then
+elif [ "$SIZE" -gt "$ALERT_THRESHOLD" ]; then
   cat <<'EOF'
 {
-  "systemMessage": "Context is past 60%. Update session-state.md now to preserve progress. Finish your current task, then hand off. Do not start new tasks."
+  "hookSpecificOutput": {
+    "hookEventName": "PostToolUse",
+    "additionalContext": "Context is past 60%. Update session-state.md now to preserve progress. Finish your current task, then hand off. Do not start new tasks."
+  }
 }
 EOF
-elif [ "$WORDS" -gt "$WARN_THRESHOLD" ]; then
+elif [ "$SIZE" -gt "$WARN_THRESHOLD" ]; then
   cat <<'EOF'
 {
-  "systemMessage": "Context is past 40%. Start thinking about wrap-up timing. Finish your current task and consider whether to hand off soon."
+  "hookSpecificOutput": {
+    "hookEventName": "PostToolUse",
+    "additionalContext": "Context is past 40%. Start thinking about wrap-up timing. Finish your current task and consider whether to hand off soon."
+  }
 }
 EOF
 fi

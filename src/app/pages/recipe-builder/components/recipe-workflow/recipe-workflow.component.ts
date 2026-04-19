@@ -55,54 +55,54 @@ export class RecipeWorkflowComponent {
   removeItem = output<number>()
   focusRowDone = output<void>()
 
-  showAddCategoryPicker_ = signal(false);
+  showAddCategoryPicker_ = signal(false)
 
   /** Tracks which prep-step rows have the timer counter open. */
-  timerOpenRows_ = signal<Set<number>>(new Set());
+  timerOpenRows_ = signal<Set<number>>(new Set())
 
   isTimerOpen(index: number): boolean {
-    return this.timerOpenRows_().has(index);
+    return this.timerOpenRows_().has(index)
   }
 
   toggleTimer(index: number): void {
     this.timerOpenRows_.update(set => {
-      const next = new Set(set);
+      const next = new Set(set)
       if (next.has(index)) {
-        next.delete(index);
+        next.delete(index)
       } else {
-        next.add(index);
+        next.add(index)
       }
-      return next;
-    });
+      return next
+    })
   }
 
 
   /** Tracks which prep-step rows have the cook-time counter open. */
-  cookTimeOpenRows_ = signal<Set<number>>(new Set());
+  cookTimeOpenRows_ = signal<Set<number>>(new Set())
 
   isCookTimeOpen(index: number): boolean {
-    return this.cookTimeOpenRows_().has(index);
+    return this.cookTimeOpenRows_().has(index)
   }
 
   toggleCookTime(index: number): void {
     this.cookTimeOpenRows_.update(set => {
-      const next = new Set(set);
+      const next = new Set(set)
       if (next.has(index)) {
-        next.delete(index);
+        next.delete(index)
       } else {
-        next.add(index);
+        next.add(index)
       }
-      return next;
-    });
+      return next
+    })
   }
 
   toggleAddCategoryPicker() {
-    this.showAddCategoryPicker_.update(v => !v);
+    this.showAddCategoryPicker_.update(v => !v)
   }
 
   onAddWithCategory(category: string) {
-    this.showAddCategoryPicker_.set(false);
-    this.addItem.emit(category);
+    this.showAddCategoryPicker_.set(false)
+    this.addItem.emit(category)
   }
 
   @ViewChildren('instructionField') instructionFields!: QueryList<ElementRef<HTMLTextAreaElement>>
@@ -132,20 +132,20 @@ export class RecipeWorkflowComponent {
   }
 
   protected workflowGroups_ = computed(() => {
-    this.resetTrigger();
-    return this.workflowFormArray().controls as FormGroup[];
+    this.resetTrigger()
+    return this.workflowFormArray().controls as FormGroup[]
   })
 
   onDropStep(event: CdkDragDrop<FormGroup[]>): void {
-    if (event.previousIndex === event.currentIndex) return;
-    const formArray = this.workflowFormArray();
-    const item = formArray.at(event.previousIndex);
-    formArray.removeAt(event.previousIndex);
-    formArray.insert(event.currentIndex, item);
+    if (event.previousIndex === event.currentIndex) return
+    const formArray = this.workflowFormArray()
+    const item = formArray.at(event.previousIndex)
+    formArray.removeAt(event.previousIndex)
+    formArray.insert(event.currentIndex, item)
     if (this.type() === 'preparation') {
       formArray.controls.forEach((group, i) => {
-        group.get('order')?.setValue(i + 1);
-      });
+        group.get('order')?.setValue(i + 1)
+      })
     }
   }
 
@@ -163,19 +163,19 @@ export class RecipeWorkflowComponent {
   }
 
   protected unitOptionsForWorkflow(): { value: string; label: string }[] {
-    const opts = this.getAllUnitKeys().map((u) => ({ value: u, label: u }));
-    return [...opts, { value: '__add_unit__', label: '+ יחידה חדשה' }];
+    const opts = this.getAllUnitKeys().map((u) => ({ value: u, label: u }))
+    return [...opts, { value: '__add_unit__', label: '+ יחידה חדשה' }]
   }
 
   onUnitChange(group: FormGroup, val: string): void {
     if (val === '__add_unit__') {
-      group.get('unit')?.setValue('');
-      this.unitRegistry_.openUnitCreator();
+      group.get('unit')?.setValue('')
+      this.unitRegistry_.openUnitCreator()
       this.unitRegistry_.unitAdded$.pipe(take(1)).subscribe(newUnit => {
-        group.get('unit')?.setValue(newUnit);
-      });
+        group.get('unit')?.setValue(newUnit)
+      })
     } else {
-      group.get('unit')?.setValue(val);
+      group.get('unit')?.setValue(val)
     }
   }
 

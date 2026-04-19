@@ -1,24 +1,24 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RecipeBookListComponent } from './recipe-book-list.component';
-import { KitchenStateService } from '@services/kitchen-state.service';
-import { RecipeCostService } from '@services/recipe-cost.service';
-import { Router, ActivatedRoute } from '@angular/router';
-import { signal } from '@angular/core';
-import { of } from 'rxjs';
-import { LucideAngularModule, Search, Trash2, Pencil, Plus, Menu, X, ShieldAlert, ArrowUpDown, ArrowUp, ArrowDown, ChevronRight, ChevronLeft, ChevronDown, BookOpen, Tag, CircleX, CookingPot, CookingPotIcon, Sparkles } from 'lucide-angular';
-import { Recipe } from '@models/recipe.model';
-import { TranslationService } from '@services/translation.service';
-import { UserService } from '@services/user.service';
-import { UserMsgService } from '@services/user-msg.service';
-import { AuthModalService } from '@services/auth-modal.service';
-import { HeroFabService } from '@services/hero-fab.service';
-import { AiRecipeModalService } from 'src/app/shared/ai-recipe-modal/ai-recipe-modal.service';
-import { MetadataRegistryService } from '@services/metadata-registry.service';
-import { ConfirmModalService } from '@services/confirm-modal.service';
+import { ComponentFixture, TestBed } from '@angular/core/testing'
+import { RecipeBookListComponent } from './recipe-book-list.component'
+import { KitchenStateService } from '@services/kitchen-state.service'
+import { RecipeCostService } from '@services/recipe-cost.service'
+import { Router, ActivatedRoute } from '@angular/router'
+import { signal } from '@angular/core'
+import { of } from 'rxjs'
+import { LucideAngularModule, Search, Trash2, Pencil, Plus, Menu, X, ShieldAlert, ArrowUpDown, ArrowUp, ArrowDown, ChevronRight, ChevronLeft, ChevronDown, BookOpen, Tag, CircleX, CookingPot, CookingPotIcon, Sparkles } from 'lucide-angular'
+import { Recipe } from '@models/recipe.model'
+import { TranslationService } from '@services/translation.service'
+import { UserService } from '@services/user.service'
+import { UserMsgService } from '@services/user-msg.service'
+import { AuthModalService } from '@services/auth-modal.service'
+import { HeroFabService } from '@services/hero-fab.service'
+import { AiRecipeModalService } from 'src/app/shared/ai-recipe-modal/ai-recipe-modal.service'
+import { MetadataRegistryService } from '@services/metadata-registry.service'
+import { ConfirmModalService } from '@services/confirm-modal.service'
 
 describe('RecipeBookListComponent', () => {
-  let component: RecipeBookListComponent;
-  let fixture: ComponentFixture<RecipeBookListComponent>;
+  let component: RecipeBookListComponent
+  let fixture: ComponentFixture<RecipeBookListComponent>
 
   const mockRecipesSignal = signal<Recipe[]>([
     {
@@ -32,18 +32,18 @@ describe('RecipeBookListComponent', () => {
       default_station_: '',
       is_approved_: true
     } as Recipe
-  ]);
+  ])
 
-  const mockProductsSignal = signal([{ _id: 'p1', allergens_: ['gluten'] }]);
+  const mockProductsSignal = signal([{ _id: 'p1', allergens_: ['gluten'] }])
 
   beforeEach(async () => {
-    sessionStorage.removeItem('list-state:recipe-book');
+    sessionStorage.removeItem('list-state:recipe-book')
     const mockKitchenState = {
       recipes_: mockRecipesSignal,
       visibleRecipes_: mockRecipesSignal,
       products_: mockProductsSignal,
       deleteRecipe: jasmine.createSpy('deleteRecipe').and.returnValue({ subscribe: () => {} })
-    };
+    }
 
     await TestBed.configureTestingModule({
       imports: [
@@ -63,93 +63,93 @@ describe('RecipeBookListComponent', () => {
         { provide: AiRecipeModalService, useValue: { open: jasmine.createSpy('open'), isOpen: signal(false) } },
         { provide: MetadataRegistryService, useValue: { allLabels_: signal([]), getLabelColor: () => '#78716C' } }
       ]
-    }).compileComponents();
+    }).compileComponents()
 
-    fixture = TestBed.createComponent(RecipeBookListComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+    fixture = TestBed.createComponent(RecipeBookListComponent)
+    component = fixture.componentInstance
+    fixture.detectChanges()
+  })
 
   it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+    expect(component).toBeTruthy()
+  })
 
   it('should compute filtered recipes from kitchen state', () => {
-    const filtered = (component as any).filteredRecipes_();
-    expect(filtered.length).toBe(1);
-    expect(filtered[0].name_hebrew).toBe('סלט ירקות');
-  });
+    const filtered = (component as any).filteredRecipes_()
+    expect(filtered.length).toBe(1)
+    expect(filtered[0].name_hebrew).toBe('סלט ירקות')
+  })
 
   it('should aggregate allergens from product ingredients', () => {
-    const recipe = mockRecipesSignal()[0];
-    const allergens = (component as any).getRecipeAllergens(recipe);
-    expect(allergens).toContain('gluten');
-  });
+    const recipe = mockRecipesSignal()[0]
+    const allergens = (component as any).getRecipeAllergens(recipe)
+    expect(allergens).toContain('gluten')
+  })
 
   it('should change sort order when sort column is clicked', () => {
-    (component as any).setSort('name');
-    expect((component as any).sortBy_()).toBe('name');
+    (component as any).setSort('name')
+    expect((component as any).sortBy_()).toBe('name')
     expect((component as any).sortOrder_()).toBe('asc');
 
-    (component as any).setSort('name');
+    (component as any).setSort('name')
     expect((component as any).sortOrder_()).toBe('desc');
 
-    (component as any).setSort('cost');
-    expect((component as any).sortBy_()).toBe('cost');
+    (component as any).setSort('cost')
+    expect((component as any).sortBy_()).toBe('cost')
     expect((component as any).sortOrder_()).toBe('asc');
 
-    (component as any).setSort('dateAdded');
-    expect((component as any).sortBy_()).toBe('dateAdded');
-    expect((component as any).sortOrder_()).toBe('asc');
-  });
+    (component as any).setSort('dateAdded')
+    expect((component as any).sortBy_()).toBe('dateAdded')
+    expect((component as any).sortOrder_()).toBe('asc')
+  })
 
   it('should format addedAt date or return placeholder when missing', () => {
-    expect((component as any).formatAddedAt(undefined)).toBe('—');
-    expect((component as any).formatAddedAt(1700000000000)).toMatch(/\d/);
-  });
+    expect((component as any).formatAddedAt(undefined)).toBe('—')
+    expect((component as any).formatAddedAt(1700000000000)).toMatch(/\d/)
+  })
 
   it('should format updatedAt date or return placeholder when missing', () => {
-    expect((component as any).formatUpdatedAt(undefined)).toBe('—');
-    expect((component as any).formatUpdatedAt(1700000000000)).toMatch(/\d/);
-  });
+    expect((component as any).formatUpdatedAt(undefined)).toBe('—')
+    expect((component as any).formatUpdatedAt(1700000000000)).toMatch(/\d/)
+  })
 
   it('should filter list when search input is set', () => {
-    let filtered = (component as any).filteredRecipes_();
-    expect(filtered.length).toBe(1);
+    let filtered = (component as any).filteredRecipes_()
+    expect(filtered.length).toBe(1)
     expect(filtered[0].name_hebrew).toBe('סלט ירקות');
 
-    (component as any).searchQuery_.set('סלט');
-    fixture.detectChanges();
-    filtered = (component as any).filteredRecipes_();
+    (component as any).searchQuery_.set('סלט')
+    fixture.detectChanges()
+    filtered = (component as any).filteredRecipes_()
     expect(filtered.length).toBe(1);
 
-    (component as any).searchQuery_.set('לא קיים');
-    fixture.detectChanges();
-    filtered = (component as any).filteredRecipes_();
-    expect(filtered.length).toBe(0);
-  });
+    (component as any).searchQuery_.set('לא קיים')
+    fixture.detectChanges()
+    filtered = (component as any).filteredRecipes_()
+    expect(filtered.length).toBe(0)
+  })
 
   it('should call deleteRecipe when delete is confirmed', async () => {
-    const confirmModal = TestBed.inject(ConfirmModalService);
-    spyOn(confirmModal, 'open').and.returnValue(Promise.resolve(true));
+    const confirmModal = TestBed.inject(ConfirmModalService)
+    spyOn(confirmModal, 'open').and.returnValue(Promise.resolve(true))
     const stateService = TestBed.inject(KitchenStateService);
-    (stateService.deleteRecipe as jasmine.Spy).and.returnValue({ subscribe: () => {} });
+    (stateService.deleteRecipe as jasmine.Spy).and.returnValue({ subscribe: () => {} })
 
-    const recipe = mockRecipesSignal()[0];
-    await (component as any).onDeleteRecipe(recipe);
+    const recipe = mockRecipesSignal()[0]
+    await (component as any).onDeleteRecipe(recipe)
 
-    expect(confirmModal.open).toHaveBeenCalled();
-    expect(stateService.deleteRecipe).toHaveBeenCalledWith(recipe);
-  });
+    expect(confirmModal.open).toHaveBeenCalled()
+    expect(stateService.deleteRecipe).toHaveBeenCalledWith(recipe)
+  })
 
   it('should not call deleteRecipe when delete is cancelled', async () => {
-    const confirmModal = TestBed.inject(ConfirmModalService);
-    spyOn(confirmModal, 'open').and.returnValue(Promise.resolve(false));
-    const stateService = TestBed.inject(KitchenStateService);
+    const confirmModal = TestBed.inject(ConfirmModalService)
+    spyOn(confirmModal, 'open').and.returnValue(Promise.resolve(false))
+    const stateService = TestBed.inject(KitchenStateService)
 
-    const recipe = mockRecipesSignal()[0];
-    await (component as any).onDeleteRecipe(recipe);
+    const recipe = mockRecipesSignal()[0]
+    await (component as any).onDeleteRecipe(recipe)
 
-    expect(stateService.deleteRecipe).not.toHaveBeenCalled();
-  });
-});
+    expect(stateService.deleteRecipe).not.toHaveBeenCalled()
+  })
+})

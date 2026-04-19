@@ -1,6 +1,6 @@
-import { Component, input } from '@angular/core';
-import { ScrollIndicatorsDirective } from '../../core/directives/scroll-indicators.directive';
-import { LucideAngularModule } from 'lucide-angular';
+import { Component, input } from '@angular/core'
+import { ScrollIndicatorsDirective } from '../../core/directives/scroll-indicators.directive'
+import { LucideAngularModule } from 'lucide-angular'
 
 @Component({
   selector: 'app-scrollable-dropdown',
@@ -11,5 +11,5 @@ import { LucideAngularModule } from 'lucide-angular';
 })
 export class ScrollableDropdownComponent {
   /** Max height in px for the scrollable list. Default 240. */
-  maxHeight = input<number>(240);
+  maxHeight = input<number>(240)
 }

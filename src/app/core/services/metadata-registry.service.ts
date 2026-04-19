@@ -32,16 +32,16 @@ export class MetadataRegistryService {
   private readonly keyResolution = inject(KeyResolutionService)
 
   //PRIVATE SIGNALS
-  private categories_ = signal<string[]>([]);
-  private allergens_ = signal<string[]>([]);
-  private labels_ = signal<LabelDefinition[]>([]);
-  private menuTypes_ = signal<MenuTypeDefinition[]>([]);
+  private categories_ = signal<string[]>([])
+  private allergens_ = signal<string[]>([])
+  private labels_ = signal<LabelDefinition[]>([])
+  private menuTypes_ = signal<MenuTypeDefinition[]>([])
 
   //PUBLIC SIGNALS
-  public allCategories_ = this.categories_.asReadonly();
-  public allAllergens_ = this.allergens_.asReadonly();
-  public allLabels_ = this.labels_.asReadonly();
-  public allMenuTypes_ = this.menuTypes_.asReadonly();
+  public allCategories_ = this.categories_.asReadonly()
+  public allAllergens_ = this.allergens_.asReadonly()
+  public allLabels_ = this.labels_.asReadonly()
+  public allMenuTypes_ = this.menuTypes_.asReadonly()
 
 
   constructor() {
@@ -50,7 +50,7 @@ export class MetadataRegistryService {
 
   /** Reload all metadata signals from storage after a backup import/restore. */
   async reloadFromStorage(): Promise<void> {
-    await this.initMetadata();
+    await this.initMetadata()
   }
 
   private async persistRegistry<T>(storageKey: string, items: T[]): Promise<void> {
@@ -65,47 +65,47 @@ export class MetadataRegistryService {
 
   private async initMetadata() {
     try {
-      const DEFAULT_CATEGORIES = ['vegetables', 'dairy', 'meat', 'dry', 'fish', 'spices'];
-      const DEFAULT_ALLERGENS = ['gluten', 'eggs', 'peanuts', 'nuts', 'soy', 'milk_solids', 'sesame', 'fish', 'shellfish', 'seafood'];
+      const DEFAULT_CATEGORIES = ['vegetables', 'dairy', 'meat', 'dry', 'fish', 'spices']
+      const DEFAULT_ALLERGENS = ['gluten', 'eggs', 'peanuts', 'nuts', 'soy', 'milk_solids', 'sesame', 'fish', 'shellfish', 'seafood']
 
       // 1. Fetch Categories
-      const catRegistry = await this.storageService.query<RegistryDoc<string>>('KITCHEN_CATEGORIES');
-      const existingCats = catRegistry[0]?.items || [];
+      const catRegistry = await this.storageService.query<RegistryDoc<string>>('KITCHEN_CATEGORIES')
+      const existingCats = catRegistry[0]?.items || []
 
       if (existingCats.length === 0) {
         await this.persistRegistry('KITCHEN_CATEGORIES', DEFAULT_CATEGORIES)
-        this.categories_.set(DEFAULT_CATEGORIES);
+        this.categories_.set(DEFAULT_CATEGORIES)
       } else {
-        this.categories_.set(existingCats);
+        this.categories_.set(existingCats)
       }
 
       // 2. Fetch Allergens (Same Logic)
-      const allergenRegistry = await this.storageService.query<RegistryDoc<string>>('KITCHEN_ALLERGENS');
-      const existingAllergens = allergenRegistry[0]?.items || [];
+      const allergenRegistry = await this.storageService.query<RegistryDoc<string>>('KITCHEN_ALLERGENS')
+      const existingAllergens = allergenRegistry[0]?.items || []
 
       if (existingAllergens.length === 0) {
         await this.persistRegistry('KITCHEN_ALLERGENS', DEFAULT_ALLERGENS)
-        this.allergens_.set(DEFAULT_ALLERGENS);
+        this.allergens_.set(DEFAULT_ALLERGENS)
       } else {
-        this.allergens_.set(existingAllergens);
+        this.allergens_.set(existingAllergens)
       }
 
       // 3. Fetch Labels (recipe labels with color + optional auto-triggers)
-      await this.reloadLabelsFromStorage();
+      await this.reloadLabelsFromStorage()
 
       // 4. Fetch Menu Types (serving-style config with dish-row fields)
       const defaultMenuTypes: MenuTypeDefinition[] = [
         { key: 'buffet_family', fields: [...DEFAULT_DISH_FIELDS] },
         { key: 'plated_course', fields: [...DEFAULT_DISH_FIELDS] },
         { key: 'cocktail_passed', fields: ['food_cost_pct', 'serving_portions_pct'] },
-      ];
-      const menuTypeRegistry = await this.storageService.query<RegistryDoc<MenuTypeDefinition>>('MENU_TYPES');
-      const existingMenuTypes = menuTypeRegistry[0]?.items ?? [];
+      ]
+      const menuTypeRegistry = await this.storageService.query<RegistryDoc<MenuTypeDefinition>>('MENU_TYPES')
+      const existingMenuTypes = menuTypeRegistry[0]?.items ?? []
       if (Array.isArray(existingMenuTypes) && existingMenuTypes.length > 0) {
-        this.menuTypes_.set(existingMenuTypes);
+        this.menuTypes_.set(existingMenuTypes)
       } else {
         await this.persistRegistry('MENU_TYPES', defaultMenuTypes)
-        this.menuTypes_.set(defaultMenuTypes);
+        this.menuTypes_.set(defaultMenuTypes)
       }
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
@@ -114,18 +114,18 @@ export class MetadataRegistryService {
   }
 
   getMenuTypeFields(key: string): DishFieldKey[] {
-    const def = this.menuTypes_().find(t => t.key === key);
-    return def?.fields ?? [...DEFAULT_DISH_FIELDS];
+    const def = this.menuTypes_().find(t => t.key === key)
+    return def?.fields ?? [...DEFAULT_DISH_FIELDS]
   }
 
   async registerMenuType(def: MenuTypeDefinition): Promise<void> {
-    const key = def.key.trim();
-    if (!key || this.menuTypes_().some(t => t.key === key)) return;
-    const updated = [...this.menuTypes_(), { key, fields: def.fields ?? [...DEFAULT_DISH_FIELDS] }];
+    const key = def.key.trim()
+    if (!key || this.menuTypes_().some(t => t.key === key)) return
+    const updated = [...this.menuTypes_(), { key, fields: def.fields ?? [...DEFAULT_DISH_FIELDS] }]
     try {
       await this.persistRegistry('MENU_TYPES', updated)
-      this.menuTypes_.set(updated);
-      this.userMsgService.onSetSuccessMsg(`סוג תפריט "${key}" נוסף בהצלחה`);
+      this.menuTypes_.set(updated)
+      this.userMsgService.onSetSuccessMsg(`סוג תפריט "${key}" נוסף בהצלחה`)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
       this.userMsgService.onSetErrorMsg('שגיאה בשמירת סוג התפריט')
@@ -134,15 +134,15 @@ export class MetadataRegistryService {
   }
 
   async updateMenuType(key: string, fields: DishFieldKey[]): Promise<void> {
-    const current = this.menuTypes_();
-    const idx = current.findIndex(t => t.key === key);
-    if (idx === -1) return;
-    const updated = current.slice();
-    updated[idx] = { ...updated[idx], fields };
+    const current = this.menuTypes_()
+    const idx = current.findIndex(t => t.key === key)
+    if (idx === -1) return
+    const updated = current.slice()
+    updated[idx] = { ...updated[idx], fields }
     try {
       await this.persistRegistry('MENU_TYPES', updated)
-      this.menuTypes_.set(updated);
-      this.userMsgService.onSetSuccessMsg(`סוג תפריט "${key}" עודכן`);
+      this.menuTypes_.set(updated)
+      this.userMsgService.onSetSuccessMsg(`סוג תפריט "${key}" עודכן`)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
       this.userMsgService.onSetErrorMsg('שגיאה בעדכון סוג התפריט')
@@ -151,11 +151,11 @@ export class MetadataRegistryService {
   }
 
   async deleteMenuType(key: string): Promise<void> {
-    const updated = this.menuTypes_().filter(t => t.key !== key);
+    const updated = this.menuTypes_().filter(t => t.key !== key)
     try {
       await this.persistRegistry('MENU_TYPES', updated)
-      this.menuTypes_.set(updated);
-      this.userMsgService.onSetSuccessMsg(`סוג תפריט "${key}" נמחק`);
+      this.menuTypes_.set(updated)
+      this.userMsgService.onSetSuccessMsg(`סוג תפריט "${key}" נמחק`)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
       this.userMsgService.onSetErrorMsg('שגיאה במחיקת סוג התפריט')
@@ -164,40 +164,40 @@ export class MetadataRegistryService {
   }
 
   async renameMenuType(oldKey: string, newKey: string): Promise<void> {
-    const trimmed = newKey.trim();
-    if (!trimmed || trimmed === oldKey) return;
+    const trimmed = newKey.trim()
+    if (!trimmed || trimmed === oldKey) return
     if (this.menuTypes_().some(t => t.key === trimmed)) {
-      this.userMsgService.onSetErrorMsg(`סוג תפריט "${trimmed}" כבר קיים`);
-      return;
+      this.userMsgService.onSetErrorMsg(`סוג תפריט "${trimmed}" כבר קיים`)
+      return
     }
-    const current = this.menuTypes_();
-    const idx = current.findIndex(t => t.key === oldKey);
-    if (idx === -1) return;
-    const def = current[idx];
-    const updated = current.slice();
-    updated[idx] = { key: trimmed, fields: def.fields };
+    const current = this.menuTypes_()
+    const idx = current.findIndex(t => t.key === oldKey)
+    if (idx === -1) return
+    const def = current[idx]
+    const updated = current.slice()
+    updated[idx] = { key: trimmed, fields: def.fields }
     try {
       await this.persistRegistry('MENU_TYPES', updated)
-      this.menuTypes_.set(updated);
-      this.userMsgService.onSetSuccessMsg(`סוג תפריט שונה ל-"${trimmed}"`);
+      this.menuTypes_.set(updated)
+      this.userMsgService.onSetSuccessMsg(`סוג תפריט שונה ל-"${trimmed}"`)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.userMsgService.onSetErrorMsg('שגיאה בשינוי שם סוג התפריט');
-      this.logging.error({ event: 'crud.metadata.menuType.rename_error', message: 'MenuType rename error', context: { err } });
+      this.userMsgService.onSetErrorMsg('שגיאה בשינוי שם סוג התפריט')
+      this.logging.error({ event: 'crud.metadata.menuType.rename_error', message: 'MenuType rename error', context: { err } })
     }
   }
 
   getLabelColor(key: string): string {
-    const def = this.labels_().find(l => l.key === key);
-    return def?.color ?? '#78716C';
+    const def = this.labels_().find(l => l.key === key)
+    return def?.color ?? '#78716C'
   }
 
   /** Reload labels from storage (e.g. after demo data load). */
   async reloadLabelsFromStorage(): Promise<void> {
     try {
-      const labelRegistry = await this.storageService.query<RegistryDoc<LabelDefinition>>('KITCHEN_LABELS');
-      const items = labelRegistry[0]?.items ?? [];
-      this.labels_.set(Array.isArray(items) ? items : []);
+      const labelRegistry = await this.storageService.query<RegistryDoc<LabelDefinition>>('KITCHEN_LABELS')
+      const items = labelRegistry[0]?.items ?? []
+      this.labels_.set(Array.isArray(items) ? items : [])
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
       this.logging.error({ event: 'crud.metadata.labels.hydrate_error', message: 'Failed to load labels', context: { err } })
@@ -205,13 +205,13 @@ export class MetadataRegistryService {
   }
 
   async registerLabel(key: string, color: string, autoTriggers?: string[]): Promise<void> {
-    const sanitized = key.trim();
-    if (!sanitized || this.labels_().some(l => l.key === sanitized)) return;
-    const updated = [...this.labels_(), { key: sanitized, color: color || '#78716C', autoTriggers: autoTriggers ?? [] }];
+    const sanitized = key.trim()
+    if (!sanitized || this.labels_().some(l => l.key === sanitized)) return
+    const updated = [...this.labels_(), { key: sanitized, color: color || '#78716C', autoTriggers: autoTriggers ?? [] }]
     try {
       await this.persistRegistry('KITCHEN_LABELS', updated)
-      this.labels_.set(updated);
-      this.userMsgService.onSetSuccessMsg(`תווית "${sanitized}" נוספה בהצלחה`);
+      this.labels_.set(updated)
+      this.userMsgService.onSetSuccessMsg(`תווית "${sanitized}" נוספה בהצלחה`)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
       this.userMsgService.onSetErrorMsg('שגיאה בשמירת התווית')
@@ -220,11 +220,11 @@ export class MetadataRegistryService {
   }
 
   async deleteLabel(key: string): Promise<void> {
-    const updated = this.labels_().filter(l => l.key !== key);
+    const updated = this.labels_().filter(l => l.key !== key)
     try {
       await this.persistRegistry('KITCHEN_LABELS', updated)
-      this.labels_.set(updated);
-      this.userMsgService.onSetSuccessMsg(`תווית ${key} נמחקה בהצלחה`);
+      this.labels_.set(updated)
+      this.userMsgService.onSetSuccessMsg(`תווית ${key} נמחקה בהצלחה`)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
       this.userMsgService.onSetErrorMsg('שגיאה במחיקת התווית')
@@ -233,14 +233,14 @@ export class MetadataRegistryService {
   }
 
   async updateLabel(key: string, changes: Partial<LabelDefinition>): Promise<void> {
-    const current = this.labels_();
-    const idx = current.findIndex(l => l.key === key);
-    if (idx === -1) return;
-    const updated = current.slice();
-    updated[idx] = { ...updated[idx], ...changes };
+    const current = this.labels_()
+    const idx = current.findIndex(l => l.key === key)
+    if (idx === -1) return
+    const updated = current.slice()
+    updated[idx] = { ...updated[idx], ...changes }
     try {
       await this.persistRegistry('KITCHEN_LABELS', updated)
-      this.labels_.set(updated);
+      this.labels_.set(updated)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
       this.userMsgService.onSetErrorMsg('שגיאה בעדכון התווית')
@@ -250,59 +250,59 @@ export class MetadataRegistryService {
 
   async purgeGlobalUnit(unitSymbol: string): Promise<void> {
     const affectedProducts = this.productDataService.allProducts_()
-      .filter(p => p.base_unit_ === unitSymbol);
+      .filter(p => p.base_unit_ === unitSymbol)
 
     // LOGIC CHANGE: Standardized fallback to English 'gram' [cite: 407, 413]
     for (const p of affectedProducts) {
-      await this.productDataService.updateProduct({ ...p, base_unit_: 'gram' });
+      await this.productDataService.updateProduct({ ...p, base_unit_: 'gram' })
     }
   }
 
   async registerAllergen(name: string): Promise<void> {
-    const keyToUse = await this.keyResolution.ensureKeyForContext(name, 'allergen');
-    if (!keyToUse) return;
-    if (this.allergens_().includes(keyToUse)) return;
+    const keyToUse = await this.keyResolution.ensureKeyForContext(name, 'allergen')
+    if (!keyToUse) return
+    if (this.allergens_().includes(keyToUse)) return
 
-    const updated: string[] = [...this.allergens_(), keyToUse];
+    const updated: string[] = [...this.allergens_(), keyToUse]
 
     try {
       await this.persistRegistry('KITCHEN_ALLERGENS', updated)
-      this.allergens_.set(updated);
-      this.userMsgService.onSetSuccessMsg(`אלרגן "${keyToUse}" נוסף בהצלחה`);
+      this.allergens_.set(updated)
+      this.userMsgService.onSetSuccessMsg(`אלרגן "${keyToUse}" נוסף בהצלחה`)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.userMsgService.onSetErrorMsg('שגיאה בשמירת האלרגן');
-      this.logging.error({ event: 'crud.metadata.allergen.save_error', message: 'Allergen save error', context: { err } });
+      this.userMsgService.onSetErrorMsg('שגיאה בשמירת האלרגן')
+      this.logging.error({ event: 'crud.metadata.allergen.save_error', message: 'Allergen save error', context: { err } })
     }
   }
 
   async registerCategory(name: string): Promise<string | null> {
-    const keyToUse = await this.keyResolution.ensureKeyForContext(name, 'category');
-    if (!keyToUse) return null;
-    if (this.categories_().includes(keyToUse)) return keyToUse;
+    const keyToUse = await this.keyResolution.ensureKeyForContext(name, 'category')
+    if (!keyToUse) return null
+    if (this.categories_().includes(keyToUse)) return keyToUse
 
-    const updatedCategories: string[] = [...this.categories_(), keyToUse];
+    const updatedCategories: string[] = [...this.categories_(), keyToUse]
 
     try {
       await this.persistRegistry('KITCHEN_CATEGORIES', updatedCategories)
-      this.categories_.set(updatedCategories);
-      this.userMsgService.onSetSuccessMsg(`הקטגוריה "${keyToUse}" נוספה בהצלחה`);
-      return keyToUse;
+      this.categories_.set(updatedCategories)
+      this.userMsgService.onSetSuccessMsg(`הקטגוריה "${keyToUse}" נוספה בהצלחה`)
+      return keyToUse
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return null
       this.userMsgService.onSetErrorMsg('שגיאה בשמירת הקטגוריה')
       this.logging.error({ event: 'crud.metadata.category.save_error', message: 'Category save error', context: { err } })
-      return null;
+      return null
     }
   }
 
   async deleteCategory(name: string): Promise<void> {
-    const updated = this.categories_().filter(c => c !== name);
+    const updated = this.categories_().filter(c => c !== name)
 
     try {
       await this.persistRegistry('KITCHEN_CATEGORIES', updated)
-      this.categories_.set(updated);
-      this.userMsgService.onSetSuccessMsg(`הקטגוריה ${name} נמחקה בהצלחה`);
+      this.categories_.set(updated)
+      this.userMsgService.onSetSuccessMsg(`הקטגוריה ${name} נמחקה בהצלחה`)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
       this.userMsgService.onSetErrorMsg('שגיאה במחיקת הקטגוריה מהשרת')
@@ -311,16 +311,16 @@ export class MetadataRegistryService {
   }
 
   async deleteAllergen(name: string): Promise<void> {
-    const updated = this.allergens_().filter(a => a !== name);
+    const updated = this.allergens_().filter(a => a !== name)
 
     try {
       await this.persistRegistry('KITCHEN_ALLERGENS', updated)
-      this.allergens_.set(updated);
-      this.userMsgService.onSetSuccessMsg(`האלרגן ${name} נמחק`);
+      this.allergens_.set(updated)
+      this.userMsgService.onSetSuccessMsg(`האלרגן ${name} נמחק`)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.userMsgService.onSetErrorMsg('שגיאה במחיקת האלרגן מהשרת');
-      this.logging.error({ event: 'crud.metadata.allergen.delete_error', message: 'Allergen delete error', context: { err } });
+      this.userMsgService.onSetErrorMsg('שגיאה במחיקת האלרגן מהשרת')
+      this.logging.error({ event: 'crud.metadata.allergen.delete_error', message: 'Allergen delete error', context: { err } })
     }
   }
 }

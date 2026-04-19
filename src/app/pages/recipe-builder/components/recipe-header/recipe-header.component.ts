@@ -1,21 +1,21 @@
-import { Component, input, inject, output, signal, computed, ChangeDetectorRef, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms';
-import { LucideAngularModule } from 'lucide-angular';
-import { ClickOutSideDirective } from '@directives/click-out-side';
-import { take } from 'rxjs/operators';
-import { KitchenStateService } from '@services/kitchen-state.service';
-import { UnitRegistryService } from '@services/unit-registry.service';
-import { MetadataRegistryService } from '@services/metadata-registry.service';
-import { TranslationService } from '@services/translation.service';
-import { ConfirmModalService } from '@services/confirm-modal.service';
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
-import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service';
-import { CustomMultiSelectComponent } from 'src/app/shared/custom-multi-select/custom-multi-select.component';
-import { ScalingChipComponent } from 'src/app/shared/scaling-chip/scaling-chip.component';
-import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive';
-import { RecipeYieldManager } from 'src/app/core/utils/recipe-yield-manager.util';
-import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component';
+import { Component, input, inject, output, signal, computed, ChangeDetectorRef, effect } from '@angular/core'
+import { CommonModule } from '@angular/common'
+import { FormBuilder, FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms'
+import { LucideAngularModule } from 'lucide-angular'
+import { ClickOutSideDirective } from '@directives/click-out-side'
+import { take } from 'rxjs/operators'
+import { KitchenStateService } from '@services/kitchen-state.service'
+import { UnitRegistryService } from '@services/unit-registry.service'
+import { MetadataRegistryService } from '@services/metadata-registry.service'
+import { TranslationService } from '@services/translation.service'
+import { ConfirmModalService } from '@services/confirm-modal.service'
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service'
+import { CustomMultiSelectComponent } from 'src/app/shared/custom-multi-select/custom-multi-select.component'
+import { ScalingChipComponent } from 'src/app/shared/scaling-chip/scaling-chip.component'
+import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive'
+import { RecipeYieldManager } from 'src/app/core/utils/recipe-yield-manager.util'
+import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
 
 @Component({
   selector: 'app-recipe-header',
@@ -26,57 +26,57 @@ import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.c
 })
 export class RecipeHeaderComponent {
   // INJECTED
-  private fb = inject(FormBuilder);
-  private unitRegistryService = inject(UnitRegistryService);
-  private kitchenStateService = inject(KitchenStateService);
-  private metadataRegistry = inject(MetadataRegistryService);
-  private translationService = inject(TranslationService);
-  private labelCreationModal = inject(LabelCreationModalService);
-  private cdr = inject(ChangeDetectorRef);
-  private confirmModal = inject(ConfirmModalService);
+  private fb = inject(FormBuilder)
+  private unitRegistryService = inject(UnitRegistryService)
+  private kitchenStateService = inject(KitchenStateService)
+  private metadataRegistry = inject(MetadataRegistryService)
+  private translationService = inject(TranslationService)
+  private labelCreationModal = inject(LabelCreationModalService)
+  private cdr = inject(ChangeDetectorRef)
+  private confirmModal = inject(ConfirmModalService)
 
   // INPUTS
-  form = input.required<FormGroup>();
-  recipeType = input<'dish' | 'preparation'>();
-  imageUrl = input<string | null>(null);
-  readonlyMode = input<boolean>(false);
-  currentCost = input<number>(0);
-  totalWeightG = input<number>(0);
-  totalBrutoWeightG = input<number>(0);
-  totalVolumeL = input<number>(0);
-  totalVolumeMl = input<number>(0);
-  unconvertibleForWeight = input<string[]>([]);
-  unconvertibleForVolume = input<string[]>([]);
-  resetTrigger = input<number>(0);
-  autoLabels = input<string[]>([]);
-  rating = input<number>(0);
-  netoConfirmed = input<boolean>(false);
+  form = input.required<FormGroup>()
+  recipeType = input<'dish' | 'preparation'>()
+  imageUrl = input<string | null>(null)
+  readonlyMode = input<boolean>(false)
+  currentCost = input<number>(0)
+  totalWeightG = input<number>(0)
+  totalBrutoWeightG = input<number>(0)
+  totalVolumeL = input<number>(0)
+  totalVolumeMl = input<number>(0)
+  unconvertibleForWeight = input<string[]>([])
+  unconvertibleForVolume = input<string[]>([])
+  resetTrigger = input<number>(0)
+  autoLabels = input<string[]>([])
+  rating = input<number>(0)
+  netoConfirmed = input<boolean>(false)
   /** Last-saved serving_portions for existing dishes. Null for new dishes (no reset button shown). */
-  savedPortions = input<number | null>(null);
+  savedPortions = input<number | null>(null)
 
   // OUTPUTS
-  openUnitCreator = output<string>();
-  imageChange = output<string>();
-  ratingChange = output<number>();
+  openUnitCreator = output<string>()
+  imageChange = output<string>()
+  ratingChange = output<number>()
   /** Fires whenever the user actively changes the primary yield amount or unit. */
-  yieldManuallyChanged = output<void>();
+  yieldManuallyChanged = output<void>()
 
   // YIELD WRAPPERS — emit yieldManuallyChanged so the parent can reset netoConfirmed
   onPrimaryAmountChange(val: number): void {
-    this.yield.onScalingChipAmountChange(val);
-    this.yieldManuallyChanged.emit();
+    this.yield.onScalingChipAmountChange(val)
+    this.yieldManuallyChanged.emit()
   }
 
   onPrimaryUnitChange(unit: string): void {
-    this.yield.setPrimaryUnit(unit);
-    this.yieldManuallyChanged.emit();
+    this.yield.setPrimaryUnit(unit)
+    this.yieldManuallyChanged.emit()
   }
 
   onResetDishToSaved(): void {
-    const saved = this.savedPortions();
+    const saved = this.savedPortions()
     if (saved !== null) {
-      this.yield.resetToSavedPortions(saved);
-      this.yieldManuallyChanged.emit();
+      this.yield.resetToSavedPortions(saved)
+      this.yieldManuallyChanged.emit()
     }
   }
 
@@ -95,39 +95,39 @@ export class RecipeHeaderComponent {
 
   constructor() {
     effect(() => {
-      const computed = this.yield.computedYieldAmount_();
+      const computed = this.yield.computedYieldAmount_()
       // Do not auto-sync if the user already confirmed a neto override and saved it
       if (computed !== null && !this.yield.isManualOverride_() && !this.netoConfirmed()) {
-        this.yield.syncYieldFromMetrics();
+        this.yield.syncYieldFromMetrics()
       }
-    });
+    })
   }
 
   // VALIDATION
-  validationErrors_ = signal<Record<string, string>>({});
+  validationErrors_ = signal<Record<string, string>>({})
 
   validate(): boolean {
-    const errors: Record<string, string> = {};
-    const f = this.form();
-    const name = (f.get('name_hebrew')?.value ?? '').toString().trim();
-    if (!name) errors['name_hebrew'] = 'field_name_required';
-    const yieldAmount = this.yield.primaryAmount_();
-    if (!yieldAmount || yieldAmount <= 0) errors['yield_amount'] = 'field_amount_required';
-    const yieldUnit = this.yield.primaryUnitLabel_();
-    if (!yieldUnit?.trim()) errors['yield_unit'] = 'field_unit_required';
-    this.validationErrors_.set(errors);
-    return Object.keys(errors).length === 0;
+    const errors: Record<string, string> = {}
+    const f = this.form()
+    const name = (f.get('name_hebrew')?.value ?? '').toString().trim()
+    if (!name) errors['name_hebrew'] = 'field_name_required'
+    const yieldAmount = this.yield.primaryAmount_()
+    if (!yieldAmount || yieldAmount <= 0) errors['yield_amount'] = 'field_amount_required'
+    const yieldUnit = this.yield.primaryUnitLabel_()
+    if (!yieldUnit?.trim()) errors['yield_unit'] = 'field_unit_required'
+    this.validationErrors_.set(errors)
+    return Object.keys(errors).length === 0
   }
 
   isYieldManualOverride(): boolean {
     if (this.yield.currentRecipeTypeDisplay_() === 'dish') {
-      return this.yield.isManualOverride_();
+      return this.yield.isManualOverride_()
     }
-    return this.yield.isManualOverride_() && this.yield.yieldDiffersFromComputed_();
+    return this.yield.isManualOverride_() && this.yield.yieldDiffersFromComputed_()
   }
 
   // SIGNALS & CONSTANTS
-  readonly placeholderPath = 'assets/style/img/recipe_placeholder.png';
+  readonly placeholderPath = 'assets/style/img/recipe_placeholder.png'
 
   // LABELS
   protected labelMultiSelectOptions_ = computed(() => {
@@ -135,24 +135,24 @@ export class RecipeHeaderComponent {
       value: l.key,
       label: l.key,
       color: l.color
-    }));
-    return [...all, { value: '__add_label__', label: 'create_new_label' }];
-  });
+    }))
+    return [...all, { value: '__add_label__', label: 'create_new_label' }]
+  })
 
   protected get labelsControl(): FormControl<string[]> {
-    return this.form().get('labels') as FormControl<string[]>;
+    return this.form().get('labels') as FormControl<string[]>
   }
 
   protected hasManualLabels_ = computed(() => {
-    const arr = (this.form().get('labels')?.value ?? []) as string[];
-    return arr.length > 0;
-  });
+    const arr = (this.form().get('labels')?.value ?? []) as string[]
+    return arr.length > 0
+  })
 
   protected hasAnyLabelsInContainer_ = computed(() => {
-    const manual = (this.form().get('labels')?.value ?? []) as string[];
-    const auto = this.autoLabels();
-    return manual.length > 0 || auto.length > 0;
-  });
+    const manual = (this.form().get('labels')?.value ?? []) as string[]
+    const auto = this.autoLabels()
+    return manual.length > 0 || auto.length > 0
+  })
 
   // WRAPPERS — CDR / output handling
 
@@ -161,8 +161,8 @@ export class RecipeHeaderComponent {
       const confirmed = await this.confirmModal.open(
         'type_change_confirm_message',
         { saveLabel: 'confirm', headerKey: 'type_change_confirm_header', variant: 'warning' }
-      );
-      if (!confirmed) return;
+      )
+      if (!confirmed) return
     }
     this.yield.toggleType()
     this.cdr.markForCheck()
@@ -184,83 +184,83 @@ export class RecipeHeaderComponent {
 
   // CREATE UNIT
   protected onCreateUnit(secondaryChipIndex?: number): void {
-    this.unitRegistryService.openUnitCreator();
+    this.unitRegistryService.openUnitCreator()
     this.unitRegistryService.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
       if (secondaryChipIndex === undefined) {
-        this.yield.setPrimaryUnit(newUnit);
+        this.yield.setPrimaryUnit(newUnit)
       } else {
-        this.changeSecondaryUnitWrapper(secondaryChipIndex, newUnit);
+        this.changeSecondaryUnitWrapper(secondaryChipIndex, newUnit)
       }
-    });
+    })
   }
 
   // METRICS
-  metricsDisplayMode_ = signal<'weight' | 'volume'>('weight');
-  metricsNoticeOpen_ = signal(false);
+  metricsDisplayMode_ = signal<'weight' | 'volume'>('weight')
+  metricsNoticeOpen_ = signal(false)
 
   toggleMetricsDisplayMode(): void {
-    this.metricsDisplayMode_.update(m => m === 'weight' ? 'volume' : 'weight');
-    this.metricsNoticeOpen_.set(false);
+    this.metricsDisplayMode_.update(m => m === 'weight' ? 'volume' : 'weight')
+    this.metricsNoticeOpen_.set(false)
   }
 
   toggleMetricsNotice(): void {
-    this.metricsNoticeOpen_.update(v => !v);
+    this.metricsNoticeOpen_.update(v => !v)
   }
 
   closeMetricsNotice(): void {
-    this.metricsNoticeOpen_.set(false);
+    this.metricsNoticeOpen_.set(false)
   }
 
-  private metricsNoticeCloseTimeout_: ReturnType<typeof setTimeout> | null = null;
+  private metricsNoticeCloseTimeout_: ReturnType<typeof setTimeout> | null = null
 
   onMetricsNoticeZoneEnter(): void {
     if (this.metricsNoticeCloseTimeout_ != null) {
-      clearTimeout(this.metricsNoticeCloseTimeout_);
-      this.metricsNoticeCloseTimeout_ = null;
+      clearTimeout(this.metricsNoticeCloseTimeout_)
+      this.metricsNoticeCloseTimeout_ = null
     }
     if (this.unconvertibleNamesFiltered_().length > 0) {
-      this.metricsNoticeOpen_.set(true);
+      this.metricsNoticeOpen_.set(true)
     }
   }
 
   onMetricsNoticeZoneLeave(): void {
     if (this.metricsNoticeCloseTimeout_ != null) {
-      clearTimeout(this.metricsNoticeCloseTimeout_);
+      clearTimeout(this.metricsNoticeCloseTimeout_)
     }
     this.metricsNoticeCloseTimeout_ = setTimeout(() => {
-      this.metricsNoticeCloseTimeout_ = null;
-      this.metricsNoticeOpen_.set(false);
-    }, 150);
+      this.metricsNoticeCloseTimeout_ = null
+      this.metricsNoticeOpen_.set(false)
+    }, 150)
   }
 
   protected unconvertibleNamesForCurrentMode_ = computed(() => {
     return this.metricsDisplayMode_() === 'weight'
       ? this.unconvertibleForWeight()
-      : this.unconvertibleForVolume();
-  });
+      : this.unconvertibleForVolume()
+  })
 
   protected unconvertibleNamesFiltered_ = computed(() =>
     this.unconvertibleNamesForCurrentMode_().filter((n) => (n != null && String(n).trim().length > 0))
-  );
+  )
 
   protected showMetricsNoticeIcon_ = computed(() =>
     this.metricsDisplayMode_() === 'volume' && this.unconvertibleNamesFiltered_().length > 0
-  );
+  )
 
   // LABELS ACTIONS
   protected clearAllManualLabels(): void {
-    this.form().get('labels')?.setValue([], { emitEvent: true });
+    this.form().get('labels')?.setValue([], { emitEvent: true })
   }
 
   protected async openCreateLabel(prefillName?: string): Promise<void> {
-    const result = await this.labelCreationModal.open(prefillName);
-    if (!result?.key || !result?.hebrewLabel) return;
+    const result = await this.labelCreationModal.open(prefillName)
+    if (!result?.key || !result?.hebrewLabel) return
     try {
-      this.translationService.updateDictionary(result.key, result.hebrewLabel);
-      await this.metadataRegistry.registerLabel(result.key, result.color, result.autoTriggers);
-      const current = (this.form().get('labels')?.value ?? []) as string[];
+      this.translationService.updateDictionary(result.key, result.hebrewLabel)
+      await this.metadataRegistry.registerLabel(result.key, result.color, result.autoTriggers)
+      const current = (this.form().get('labels')?.value ?? []) as string[]
       if (!current.includes(result.key)) {
-        this.form().get('labels')?.setValue([...current, result.key], { emitEvent: true });
+        this.form().get('labels')?.setValue([...current, result.key], { emitEvent: true })
       }
     } catch {
       // Error already shown by registry

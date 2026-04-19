@@ -1,37 +1,37 @@
-import { Injectable, signal } from '@angular/core';
-import { Subject, firstValueFrom } from 'rxjs';
-import { Product } from '../models/product.model';
+import { Injectable, signal } from '@angular/core'
+import { Subject, firstValueFrom } from 'rxjs'
+import { Product } from '../models/product.model'
 
 interface QuickAddProductConfig {
-  prefillName: string;
+  prefillName: string
 }
 
 @Injectable({ providedIn: 'root' })
 export class QuickAddProductModalService {
-  private readonly resultSubject = new Subject<Product | null>();
-  private readonly config_ = signal<QuickAddProductConfig | null>(null);
+  private readonly resultSubject = new Subject<Product | null>()
+  private readonly config_ = signal<QuickAddProductConfig | null>(null)
 
-  readonly isOpen_ = signal(false);
-  readonly config = this.config_.asReadonly();
+  readonly isOpen_ = signal(false)
+  readonly config = this.config_.asReadonly()
 
   open(config: QuickAddProductConfig): Promise<Product | null> {
-    this.config_.set(config);
-    this.isOpen_.set(true);
-    return firstValueFrom(this.resultSubject);
+    this.config_.set(config)
+    this.isOpen_.set(true)
+    return firstValueFrom(this.resultSubject)
   }
 
   save(product: Product): void {
-    this.resultSubject.next(product);
-    this.close();
+    this.resultSubject.next(product)
+    this.close()
   }
 
   cancel(): void {
-    this.resultSubject.next(null);
-    this.close();
+    this.resultSubject.next(null)
+    this.close()
   }
 
   private close(): void {
-    this.isOpen_.set(false);
-    this.config_.set(null);
+    this.isOpen_.set(false)
+    this.config_.set(null)
   }
 }

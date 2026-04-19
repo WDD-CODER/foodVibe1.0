@@ -1,46 +1,46 @@
-import { Component, inject, ChangeDetectionStrategy, signal, computed, effect, afterNextRender, OnInit, OnDestroy } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs';
-import { LucideAngularModule } from 'lucide-angular';
+import { Component, inject, ChangeDetectionStrategy, signal, computed, effect, afterNextRender, OnInit, OnDestroy } from '@angular/core'
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
+import { CommonModule } from '@angular/common'
+import { FormsModule } from '@angular/forms'
+import { Router, NavigationEnd } from '@angular/router'
+import { filter } from 'rxjs'
+import { LucideAngularModule } from 'lucide-angular'
 
-import { KitchenStateService } from '@services/kitchen-state.service';
-import { HeroFabService } from '@services/hero-fab.service';
-import { AiRecipeModalService } from 'src/app/shared/ai-recipe-modal/ai-recipe-modal.service';
-import { RecipeCostService } from '@services/recipe-cost.service';
-import { TranslationService } from '@services/translation.service';
-import { MetadataRegistryService } from '@services/metadata-registry.service';
-import { UserService } from '@services/user.service';
-import { UserMsgService } from '@services/user-msg.service';
-import { RequireAuthService } from 'src/app/core/utils/require-auth.util';
-import { ConfirmModalService } from '@services/confirm-modal.service';
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe';
-import { ClickOutSideDirective } from '@directives/click-out-side';
-import { Recipe } from '@models/recipe.model';
-import { Product } from '@models/product.model';
-import { VersionEntityType } from '@services/version-history.service';
-import { VersionHistoryPanelComponent } from 'src/app/shared/version-history-panel/version-history-panel.component';
-import { LoaderComponent } from 'src/app/shared/loader/loader.component';
-import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component';
-import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component';
-import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component';
-import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component';
-import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state';
-import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component';
-import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component';
-import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model';
-import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component';
-import { useListState, StringParam, NullableStringParam, FilterRecordParam, StringArrayParam, BooleanParam } from 'src/app/core/utils/list-state.util';
-import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util';
-import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util';
-import { resolveRecipeAllergens, MAX_ALLERGEN_RECURSION } from 'src/app/core/utils/recipe-allergens.util';
-import { CellExpandState } from 'src/app/core/utils/cell-expand-state.util';
-import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component';
+import { KitchenStateService } from '@services/kitchen-state.service'
+import { HeroFabService } from '@services/hero-fab.service'
+import { AiRecipeModalService } from 'src/app/shared/ai-recipe-modal/ai-recipe-modal.service'
+import { RecipeCostService } from '@services/recipe-cost.service'
+import { TranslationService } from '@services/translation.service'
+import { MetadataRegistryService } from '@services/metadata-registry.service'
+import { UserService } from '@services/user.service'
+import { UserMsgService } from '@services/user-msg.service'
+import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
+import { ConfirmModalService } from '@services/confirm-modal.service'
+import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { ClickOutSideDirective } from '@directives/click-out-side'
+import { Recipe } from '@models/recipe.model'
+import { Product } from '@models/product.model'
+import { VersionEntityType } from '@services/version-history.service'
+import { VersionHistoryPanelComponent } from 'src/app/shared/version-history-panel/version-history-panel.component'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
+import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
+import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component'
+import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
+import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component'
+import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
+import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
+import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component'
+import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model'
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import { useListState, StringParam, NullableStringParam, FilterRecordParam, StringArrayParam, BooleanParam } from 'src/app/core/utils/list-state.util'
+import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util'
+import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util'
+import { resolveRecipeAllergens, MAX_ALLERGEN_RECURSION } from 'src/app/core/utils/recipe-allergens.util'
+import { CellExpandState } from 'src/app/core/utils/cell-expand-state.util'
+import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
 
-export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens' | 'dateAdded' | 'dateUpdated' | 'rating';
-type RecipeBulkField = 'labels_' | 'recipe_type_';
+export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens' | 'dateAdded' | 'dateUpdated' | 'rating'
+type RecipeBulkField = 'labels_' | 'recipe_type_'
 
 @Component({
   selector: 'recipe-book-list',
@@ -51,18 +51,18 @@ type RecipeBulkField = 'labels_' | 'recipe_type_';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RecipeBookListComponent implements OnInit, OnDestroy {
-  private readonly kitchenState = inject(KitchenStateService);
-  private readonly router = inject(Router);
-  private readonly recipeCostService = inject(RecipeCostService);
-  private readonly translationService = inject(TranslationService);
-  private readonly metadataRegistry = inject(MetadataRegistryService);
-  private readonly userService = inject(UserService);
-  protected readonly isLoggedIn = this.userService.isLoggedIn;
-  private readonly requireAuthService = inject(RequireAuthService);
-  private readonly confirmModal = inject(ConfirmModalService);
-  private readonly userMsg = inject(UserMsgService);
-  private readonly heroFab = inject(HeroFabService);
-  private readonly aiRecipeModal = inject(AiRecipeModalService);
+  private readonly kitchenState = inject(KitchenStateService)
+  private readonly router = inject(Router)
+  private readonly recipeCostService = inject(RecipeCostService)
+  private readonly translationService = inject(TranslationService)
+  private readonly metadataRegistry = inject(MetadataRegistryService)
+  private readonly userService = inject(UserService)
+  protected readonly isLoggedIn = this.userService.isLoggedIn
+  private readonly requireAuthService = inject(RequireAuthService)
+  private readonly confirmModal = inject(ConfirmModalService)
+  private readonly userMsg = inject(UserMsgService)
+  private readonly heroFab = inject(HeroFabService)
+  private readonly aiRecipeModal = inject(AiRecipeModalService)
 
   ngOnInit(): void {
     this.heroFab.setPageActions(
@@ -75,22 +75,22 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     this.heroFab.clearPageActions()
   }
 
-  protected readonly currentUserId_ = computed(() => this.userService.user_()?._id ?? null);
-  protected readonly isAdmin_ = computed(() => this.userService.user_()?.role === 'admin');
+  protected readonly currentUserId_ = computed(() => this.userService.user_()?._id ?? null)
+  protected readonly isAdmin_ = computed(() => this.userService.user_()?.role === 'admin')
 
-  protected activeFilters_ = signal<Record<string, string[]>>({});
-  protected searchQuery_ = signal<string>('');
-  protected sortBy_ = signal<SortField | null>(null);
-  protected sortOrder_ = signal<'asc' | 'desc'>('asc');
-  protected isPanelOpen_ = signal<boolean>(true);
-  protected dateFrom_ = signal<string | null>(null);
-  protected dateTo_ = signal<string | null>(null);
-  protected showFavoritesOnly_ = signal<boolean>(false);
+  protected activeFilters_ = signal<Record<string, string[]>>({})
+  protected searchQuery_ = signal<string>('')
+  protected sortBy_ = signal<SortField | null>(null)
+  protected sortOrder_ = signal<'asc' | 'desc'>('asc')
+  protected isPanelOpen_ = signal<boolean>(true)
+  protected dateFrom_ = signal<string | null>(null)
+  protected dateTo_ = signal<string | null>(null)
+  protected showFavoritesOnly_ = signal<boolean>(false)
   /** When true: show items in range by creation OR by update. When false: by creation only. */
-  protected dateIncludeByUpdated_ = signal<boolean>(false);
+  protected dateIncludeByUpdated_ = signal<boolean>(false)
 
   constructor() {
-    this.isPanelOpen_.set(getPanelOpen('recipe-book'));
+    this.isPanelOpen_.set(getPanelOpen('recipe-book'))
     useListState('recipe-book', [
       { urlParam: 'q',               signal: this.searchQuery_,          serializer: StringParam },
       { urlParam: 'sort',            signal: this.sortBy_,               serializer: NullableStringParam },
@@ -101,37 +101,37 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       { urlParam: 'dateTo',          signal: this.dateTo_,               serializer: NullableStringParam },
       { urlParam: 'dateByUpdated',   signal: this.dateIncludeByUpdated_, serializer: BooleanParam },
       { urlParam: 'favorites',       signal: this.showFavoritesOnly_,   serializer: BooleanParam },
-    ]);
+    ])
 
     afterNextRender(() => {
-      if (typeof window === 'undefined') return;
-      const q = window.matchMedia('(max-width: 768px)');
-      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); });
-    });
+      if (typeof window === 'undefined') return
+      const q = window.matchMedia('(max-width: 768px)')
+      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); })
+    })
 
     // Expand any filter category that has selected values (e.g. when opened via URL like ?filters=Approved:false).
     effect(() => {
-      const filters = this.activeFilters_();
-      const withValues = Object.keys(filters).filter((name) => (filters[name]?.length ?? 0) > 0);
-      const hasDateRange = this.dateFrom_() != null || this.dateTo_() != null;
-      if (withValues.length === 0 && !hasDateRange) return;
+      const filters = this.activeFilters_()
+      const withValues = Object.keys(filters).filter((name) => (filters[name]?.length ?? 0) > 0)
+      const hasDateRange = this.dateFrom_() != null || this.dateTo_() != null
+      if (withValues.length === 0 && !hasDateRange) return
       this.expandedFilterCategories_.update((set) => {
-        const next = new Set(set);
-        withValues.forEach((name) => next.add(name));
-        if (hasDateRange) next.add('Date');
-        return next;
-      });
-    });
+        const next = new Set(set)
+        withValues.forEach((name) => next.add(name))
+        if (hasDateRange) next.add('Date')
+        return next
+      })
+    })
 
     // Reset expanded allergen/labels cells when user lands on recipe-book list (e.g. navigates back).
-    const events = this.router.events;
+    const events = this.router.events
     if (events) {
       events.pipe(
         filter((e): e is NavigationEnd => e instanceof NavigationEnd),
         takeUntilDestroyed(),
       ).subscribe(() => {
-        if (this.router.url.includes('recipe-book')) this.resetExpandedCells();
-      });
+        if (this.router.url.includes('recipe-book')) this.resetExpandedCells()
+      })
     }
   }
 
@@ -140,17 +140,17 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     this.labelsExpand.reset()
   }
 
-  protected expandedFilterCategories_ = signal<Set<string>>(new Set());
+  protected expandedFilterCategories_ = signal<Set<string>>(new Set())
   protected readonly allergenExpand = new CellExpandState()
   protected readonly labelsExpand = new CellExpandState()
-  protected hoveredCostRecipeId_ = signal<string | null>(null);
-  protected tappedCostRecipeId_ = signal<string | null>(null);
-  protected costTooltipAnchor_ = signal<DOMRect | null>(null);
-  protected hoveredDateRecipeId_ = signal<string | null>(null);
+  protected hoveredCostRecipeId_ = signal<string | null>(null)
+  protected tappedCostRecipeId_ = signal<string | null>(null)
+  protected costTooltipAnchor_ = signal<DOMRect | null>(null)
+  protected hoveredDateRecipeId_ = signal<string | null>(null)
   /** Set to false to show the "date added" column again. */
-  protected hideDateColumn_ = signal(true);
-  protected dateTooltipAnchor_ = signal<DOMRect | null>(null);
-  protected selection = new ListSelectionState();
+  protected hideDateColumn_ = signal(true)
+  protected dateTooltipAnchor_ = signal<DOMRect | null>(null)
+  protected selection = new ListSelectionState()
 
   protected editableFields_ = computed<BulkEditableField[]>(() => [
     {
@@ -169,13 +169,13 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       multi: false,
     },
   ])
-  protected ingredientSearchQuery_ = signal<string>('');
-  protected selectedProductIds_ = signal<string[]>([]);
-  protected historyFor_ = signal<{ entityType: VersionEntityType; entityId: string; entityName: string } | null>(null);
-  protected deletingId_ = signal<string | null>(null);
-  protected removingId_ = signal<string | null>(null);
-  protected duplicatingId_ = signal<string | null>(null);
-  protected carouselHeaderIndex_ = signal(0);
+  protected ingredientSearchQuery_ = signal<string>('')
+  protected selectedProductIds_ = signal<string[]>([])
+  protected historyFor_ = signal<{ entityType: VersionEntityType; entityId: string; entityName: string } | null>(null)
+  protected deletingId_ = signal<string | null>(null)
+  protected removingId_ = signal<string | null>(null)
+  protected duplicatingId_ = signal<string | null>(null)
+  protected carouselHeaderIndex_ = signal(0)
 
   protected categoryDisplayKey(internalName: string): string {
     const map: Record<string, string> = {
@@ -184,87 +184,87 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       'Allergens': 'allergens',
       'Approved': 'approved',
       'Station': 'station'
-    };
-    return map[internalName] ?? internalName.toLowerCase();
+    }
+    return map[internalName] ?? internalName.toLowerCase()
   }
 
   protected getAllRecipeLabels(recipe: Recipe): string[] {
-    return [...new Set([...(recipe.labels_ ?? []), ...(recipe.autoLabels_ ?? [])])];
+    return [...new Set([...(recipe.labels_ ?? []), ...(recipe.autoLabels_ ?? [])])]
   }
 
   /** Resolves label color by registry key, or by display text (e.g. Hebrew) when recipe stores translated value. */
   protected getLabelColor(keyOrDisplay: string): string {
-    const byKey = this.metadataRegistry.getLabelColor(keyOrDisplay);
-    if (byKey !== '#78716C') return byKey;
+    const byKey = this.metadataRegistry.getLabelColor(keyOrDisplay)
+    if (byKey !== '#78716C') return byKey
     const byDisplay = this.metadataRegistry.allLabels_().find(
       (def) => this.translationService.translate(def.key) === keyOrDisplay
-    );
-    return byDisplay?.color ?? byKey;
+    )
+    return byDisplay?.color ?? byKey
   }
 
   protected toggleFilterCategory(name: string): void {
     this.expandedFilterCategories_.update(set => {
-      const next = new Set(set);
-      if (next.has(name)) next.delete(name);
-      else next.add(name);
-      return next;
-    });
+      const next = new Set(set)
+      if (next.has(name)) next.delete(name)
+      else next.add(name)
+      return next
+    })
   }
 
   protected isCategoryExpanded(name: string): boolean {
-    return this.expandedFilterCategories_().has(name);
+    return this.expandedFilterCategories_().has(name)
   }
 
   protected togglePanel(): void {
-    this.isPanelOpen_.update(v => !v);
-    setPanelOpen('recipe-book', this.isPanelOpen_());
+    this.isPanelOpen_.update(v => !v)
+    setPanelOpen('recipe-book', this.isPanelOpen_())
   }
 
   protected filterCategories_ = computed(() => {
-    const recipes = this.kitchenState.visibleRecipes_();
-    const filters = this.activeFilters_();
-    const categories: Record<string, Set<string>> = {};
+    const recipes = this.kitchenState.visibleRecipes_()
+    const filters = this.activeFilters_()
+    const categories: Record<string, Set<string>> = {}
 
     recipes.forEach(recipe => {
-      const isDish = this.isRecipeDish(recipe);
-      const typeVal = isDish ? 'dish' : 'preparation';
-      if (!categories['Type']) categories['Type'] = new Set();
-      categories['Type'].add(typeVal);
+      const isDish = this.isRecipeDish(recipe)
+      const typeVal = isDish ? 'dish' : 'preparation'
+      if (!categories['Type']) categories['Type'] = new Set()
+      categories['Type'].add(typeVal)
 
-      const allergens = this.getRecipeAllergens(recipe);
+      const allergens = this.getRecipeAllergens(recipe)
       allergens.forEach(a => {
-        if (!categories['Allergens']) categories['Allergens'] = new Set();
-        categories['Allergens'].add(a);
-      });
+        if (!categories['Allergens']) categories['Allergens'] = new Set()
+        categories['Allergens'].add(a)
+      })
 
-      const recipeLabels = this.getAllRecipeLabels(recipe);
+      const recipeLabels = this.getAllRecipeLabels(recipe)
       if (recipeLabels.length > 0) {
         recipeLabels.forEach(l => {
-          if (!categories['Labels']) categories['Labels'] = new Set();
-          categories['Labels'].add(l);
-        });
+          if (!categories['Labels']) categories['Labels'] = new Set()
+          categories['Labels'].add(l)
+        })
       } else {
-        if (!categories['Labels']) categories['Labels'] = new Set();
-        categories['Labels'].add('no_label');
+        if (!categories['Labels']) categories['Labels'] = new Set()
+        categories['Labels'].add('no_label')
       }
 
-      if (!categories['Approved']) categories['Approved'] = new Set();
-      categories['Approved'].add(recipe.is_approved_ ? 'true' : 'false');
+      if (!categories['Approved']) categories['Approved'] = new Set()
+      categories['Approved'].add(recipe.is_approved_ ? 'true' : 'false')
 
-      const station = (recipe.default_station_ || '').trim() || '_none';
-      if (!categories['Station']) categories['Station'] = new Set();
-      categories['Station'].add(station);
-    });
+      const station = (recipe.default_station_ || '').trim() || '_none'
+      if (!categories['Station']) categories['Station'] = new Set()
+      categories['Station'].add(station)
+    })
 
     // Always show both Approved options (כן/לא) so the sidebar can show selected state when filtering by URL.
-    if (!categories['Approved']) categories['Approved'] = new Set();
-    categories['Approved'].add('true').add('false');
+    if (!categories['Approved']) categories['Approved'] = new Set()
+    categories['Approved'].add('true').add('false')
 
     const optionLabel = (name: string, value: string): string => {
-      if (name === 'Approved') return value === 'true' ? 'approved_yes' : 'approved_no';
-      if (name === 'Station' && value === '_none') return 'no_station';
-      return value;
-    };
+      if (name === 'Approved') return value === 'true' ? 'approved_yes' : 'approved_no'
+      if (name === 'Station' && value === '_none') return 'no_station'
+      return value
+    }
 
     return Object.keys(categories).map(name => ({
       name,
@@ -274,116 +274,116 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
         value: option,
         checked_: (filters[name] || []).includes(option)
       }))
-    }));
-  });
+    }))
+  })
 
   protected filteredProductsForIngredientSearch_ = computed(() => {
-    const raw = this.ingredientSearchQuery_().trim();
-    if (!raw) return [];
-    const selected = new Set(this.selectedProductIds_());
-    const candidates = this.kitchenState.products_().filter((p) => !selected.has(p._id));
-    return filterOptionsByStartsWith(candidates, raw, (p) => (p.name_hebrew ?? '').trim());
-  });
+    const raw = this.ingredientSearchQuery_().trim()
+    if (!raw) return []
+    const selected = new Set(this.selectedProductIds_())
+    const candidates = this.kitchenState.products_().filter((p) => !selected.has(p._id))
+    return filterOptionsByStartsWith(candidates, raw, (p) => (p.name_hebrew ?? '').trim())
+  })
 
   protected filteredRecipes_ = computed(() => {
-    let recipes = this.kitchenState.visibleRecipes_();
-    const filters = this.activeFilters_();
-    const search = this.searchQuery_().trim().toLowerCase();
-    const sortBy = this.sortBy_();
-    const sortOrder = this.sortOrder_();
-    const selectedIds = this.selectedProductIds_();
+    let recipes = this.kitchenState.visibleRecipes_()
+    const filters = this.activeFilters_()
+    const search = this.searchQuery_().trim().toLowerCase()
+    const sortBy = this.sortBy_()
+    const sortOrder = this.sortOrder_()
+    const selectedIds = this.selectedProductIds_()
 
     if (Object.keys(filters).length > 0) {
       recipes = recipes.filter(recipe => {
         return Object.entries(filters).every(([category, selectedValues]) => {
-          let recipeValues: string[] = [];
+          let recipeValues: string[] = []
           if (category === 'Type') {
-            recipeValues = [this.isRecipeDish(recipe) ? 'dish' : 'preparation'];
+            recipeValues = [this.isRecipeDish(recipe) ? 'dish' : 'preparation']
           } else if (category === 'Allergens') {
-            recipeValues = this.getRecipeAllergens(recipe);
+            recipeValues = this.getRecipeAllergens(recipe)
             // "Do not include allergens": show only recipes that have NONE of the selected allergens
-            return selectedValues.every(v => !recipeValues.includes(v));
+            return selectedValues.every(v => !recipeValues.includes(v))
           } else if (category === 'Labels') {
-            const labels = this.getAllRecipeLabels(recipe);
-            recipeValues = labels.length > 0 ? labels : ['no_label'];
+            const labels = this.getAllRecipeLabels(recipe)
+            recipeValues = labels.length > 0 ? labels : ['no_label']
           } else if (category === 'Approved') {
-            recipeValues = [recipe.is_approved_ ? 'true' : 'false'];
+            recipeValues = [recipe.is_approved_ ? 'true' : 'false']
           } else if (category === 'Station') {
-            const st = (recipe.default_station_ || '').trim() || '_none';
-            recipeValues = [st];
+            const st = (recipe.default_station_ || '').trim() || '_none'
+            recipeValues = [st]
           }
-          return selectedValues.some(v => recipeValues.includes(v));
-        });
-      });
+          return selectedValues.some(v => recipeValues.includes(v))
+        })
+      })
     }
 
     if (selectedIds.length > 0) {
-      recipes = recipes.filter(r => this.recipeContainsAllProducts(r, selectedIds));
+      recipes = recipes.filter(r => this.recipeContainsAllProducts(r, selectedIds))
     }
 
     if (search) {
-      recipes = recipes.filter(r => (r.name_hebrew ?? '').toLowerCase().includes(search));
+      recipes = recipes.filter(r => (r.name_hebrew ?? '').toLowerCase().includes(search))
     }
 
-    const dateFrom = this.dateFrom_();
-    const dateTo = this.dateTo_();
-    const includeByUpdated = this.dateIncludeByUpdated_();
+    const dateFrom = this.dateFrom_()
+    const dateTo = this.dateTo_()
+    const includeByUpdated = this.dateIncludeByUpdated_()
     if (dateFrom != null || dateTo != null) {
-      const fromMs = dateFrom != null ? this.parseDateToStartOfDay(dateFrom) : null;
-      const toMs = dateTo != null ? this.parseDateToEndOfDay(dateTo) : null;
+      const fromMs = dateFrom != null ? this.parseDateToStartOfDay(dateFrom) : null
+      const toMs = dateTo != null ? this.parseDateToEndOfDay(dateTo) : null
       recipes = recipes.filter(recipe => {
         const inRange = (ts: number) => {
-          if (fromMs != null && ts < fromMs) return false;
-          if (toMs != null && ts > toMs) return false;
-          return true;
-        };
-        const createdInRange = inRange(recipe.addedAt_ ?? 0);
-        const updatedInRange = includeByUpdated && inRange(recipe.updatedAt_ ?? 0);
-        return createdInRange || updatedInRange;
-      });
+          if (fromMs != null && ts < fromMs) return false
+          if (toMs != null && ts > toMs) return false
+          return true
+        }
+        const createdInRange = inRange(recipe.addedAt_ ?? 0)
+        const updatedInRange = includeByUpdated && inRange(recipe.updatedAt_ ?? 0)
+        return createdInRange || updatedInRange
+      })
     }
 
     if (this.showFavoritesOnly_()) {
-      const uid = this.currentUserId_();
-      recipes = uid ? recipes.filter(r => (r.favoritedBy_ ?? []).includes(uid)) : [];
+      const uid = this.currentUserId_()
+      recipes = uid ? recipes.filter(r => (r.favoritedBy_ ?? []).includes(uid)) : []
     }
 
     if (sortBy) {
-      const isAsc = sortOrder === 'asc';
+      const isAsc = sortOrder === 'asc'
       recipes = [...recipes].sort((a, b) => {
-        const cmp = this.compareRecipes(a, b, sortBy);
-        return isAsc ? cmp : -cmp;
-      });
+        const cmp = this.compareRecipes(a, b, sortBy)
+        return isAsc ? cmp : -cmp
+      })
     }
 
-    return recipes;
-  });
+    return recipes
+  })
 
   /** Visible recipe IDs for header select-all. */
   protected filteredRecipeIds_ = computed(() =>
     this.filteredRecipes_().map(r => r._id ?? '').filter(Boolean)
-  );
+  )
 
-  protected isEmptyList_ = computed(() => this.kitchenState.visibleRecipes_().length === 0);
+  protected isEmptyList_ = computed(() => this.kitchenState.visibleRecipes_().length === 0)
 
   protected isFavoritedByCurrentUser_(recipe: Recipe): boolean {
-    const uid = this.currentUserId_();
-    if (!uid) return false;
-    return (recipe.favoritedBy_ ?? []).includes(uid);
+    const uid = this.currentUserId_()
+    if (!uid) return false
+    return (recipe.favoritedBy_ ?? []).includes(uid)
   }
 
   protected activeCostTooltipRecipe_ = computed(() => {
-    const id = this.hoveredCostRecipeId_() ?? this.tappedCostRecipeId_();
-    return id ? this.filteredRecipes_().find(r => r._id === id) ?? null : null;
-  });
+    const id = this.hoveredCostRecipeId_() ?? this.tappedCostRecipeId_()
+    return id ? this.filteredRecipes_().find(r => r._id === id) ?? null : null
+  })
 
   protected activeDateTooltipRecipe_ = computed(() => {
-    const id = this.hoveredDateRecipeId_();
-    return id ? this.filteredRecipes_().find(r => r._id === id) ?? null : null;
-  });
+    const id = this.hoveredDateRecipeId_()
+    return id ? this.filteredRecipes_().find(r => r._id === id) ?? null : null
+  })
 
   protected isRecipeDish(recipe: Recipe): boolean {
-    return recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length);
+    return recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length)
   }
 
   protected getRecipeAllergens(recipe: Recipe): string[] {
@@ -392,132 +392,132 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   /** Parse YYYY-MM-DD to start of day (00:00:00.000) in local timezone. */
   private parseDateToStartOfDay(dateStr: string): number | null {
-    const parts = dateStr.split('-').map(Number);
-    if (parts.length !== 3 || parts.some(isNaN)) return null;
-    const [y, m, d] = parts;
-    return new Date(y, m - 1, d).getTime();
+    const parts = dateStr.split('-').map(Number)
+    if (parts.length !== 3 || parts.some(isNaN)) return null
+    const [y, m, d] = parts
+    return new Date(y, m - 1, d).getTime()
   }
 
   /** Parse YYYY-MM-DD to end of day (23:59:59.999) in local timezone. */
   private parseDateToEndOfDay(dateStr: string): number | null {
-    const parts = dateStr.split('-').map(Number);
-    if (parts.length !== 3 || parts.some(isNaN)) return null;
-    const [y, m, d] = parts;
-    return new Date(y, m - 1, d, 23, 59, 59, 999).getTime();
+    const parts = dateStr.split('-').map(Number)
+    if (parts.length !== 3 || parts.some(isNaN)) return null
+    const [y, m, d] = parts
+    return new Date(y, m - 1, d, 23, 59, 59, 999).getTime()
   }
 
   protected formatAddedAt(addedAt: number | undefined): string {
-    if (addedAt == null) return '—';
-    return new Date(addedAt).toLocaleDateString('he-IL', { dateStyle: 'short' });
+    if (addedAt == null) return '—'
+    return new Date(addedAt).toLocaleDateString('he-IL', { dateStyle: 'short' })
   }
 
   protected formatUpdatedAt(updatedAt: number | undefined): string {
-    if (updatedAt == null) return '—';
-    return new Date(updatedAt).toLocaleDateString('he-IL', { dateStyle: 'short' });
+    if (updatedAt == null) return '—'
+    return new Date(updatedAt).toLocaleDateString('he-IL', { dateStyle: 'short' })
   }
 
   /** Date and time for hover tooltip (last updated). */
   protected formatUpdatedAtWithTime(updatedAt: number | undefined): string {
-    if (updatedAt == null) return '—';
-    return new Date(updatedAt).toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' });
+    if (updatedAt == null) return '—'
+    return new Date(updatedAt).toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' })
   }
 
   protected getRecipeYieldDescription(recipe: Recipe): string {
-    const amount = recipe.yield_amount_ ?? 1;
-    const unit = recipe.yield_unit_ ? this.translationService.translate(recipe.yield_unit_) : '';
-    return `${amount} ${unit}`.trim() || String(amount);
+    const amount = recipe.yield_amount_ ?? 1
+    const unit = recipe.yield_unit_ ? this.translationService.translate(recipe.yield_unit_) : ''
+    return `${amount} ${unit}`.trim() || String(amount)
   }
 
   protected recipeContainsAllProducts(recipe: Recipe, productIds: string[]): boolean {
-    if (productIds.length === 0) return true;
-    const ids = this.getRecipeProductIds(recipe);
-    return productIds.every(id => ids.has(id));
+    if (productIds.length === 0) return true
+    const ids = this.getRecipeProductIds(recipe)
+    return productIds.every(id => ids.has(id))
   }
 
   private getRecipeProductIds(recipe: Recipe, depth = 0): Set<string> {
-    if (depth >= MAX_ALLERGEN_RECURSION || !recipe?.ingredients_?.length) return new Set();
-    const set = new Set<string>();
-    const recipes = this.kitchenState.recipes_();
+    if (depth >= MAX_ALLERGEN_RECURSION || !recipe?.ingredients_?.length) return new Set()
+    const set = new Set<string>()
+    const recipes = this.kitchenState.recipes_()
     for (const ing of recipe.ingredients_) {
-      if (!ing.referenceId) continue;
+      if (!ing.referenceId) continue
       if (ing.type === 'product') {
-        set.add(ing.referenceId);
+        set.add(ing.referenceId)
       } else if (ing.type === 'recipe') {
-        const sub = recipes.find(r => r._id === ing.referenceId);
-        if (sub) this.getRecipeProductIds(sub, depth + 1).forEach(id => set.add(id));
+        const sub = recipes.find(r => r._id === ing.referenceId)
+        if (sub) this.getRecipeProductIds(sub, depth + 1).forEach(id => set.add(id))
       }
     }
-    return set;
+    return set
   }
 
   private compareRecipes(a: Recipe, b: Recipe, field: SortField): number {
-    const hebrewCompare = (x: string, y: string) => (x || '').localeCompare(y || '', 'he');
+    const hebrewCompare = (x: string, y: string) => (x || '').localeCompare(y || '', 'he')
     switch (field) {
       case 'name':
-        return hebrewCompare(a.name_hebrew || '', b.name_hebrew || '');
+        return hebrewCompare(a.name_hebrew || '', b.name_hebrew || '')
       case 'type': {
-        const aType = this.isRecipeDish(a) ? 'dish' : 'preparation';
-        const bType = this.isRecipeDish(b) ? 'dish' : 'preparation';
+        const aType = this.isRecipeDish(a) ? 'dish' : 'preparation'
+        const bType = this.isRecipeDish(b) ? 'dish' : 'preparation'
         return hebrewCompare(
           this.translationService.translate(aType),
           this.translationService.translate(bType)
-        );
+        )
       }
       case 'cost':
-        return this.recipeCostService.computeRecipeCost(a) - this.recipeCostService.computeRecipeCost(b);
+        return this.recipeCostService.computeRecipeCost(a) - this.recipeCostService.computeRecipeCost(b)
       case 'labels': {
-        const aLabels = this.getAllRecipeLabels(a);
-        const bLabels = this.getAllRecipeLabels(b);
-        const aStr = aLabels.length > 0 ? aLabels.map(l => this.translationService.translate(l)).join(', ') : '';
-        const bStr = bLabels.length > 0 ? bLabels.map(l => this.translationService.translate(l)).join(', ') : '';
-        return hebrewCompare(aStr, bStr);
+        const aLabels = this.getAllRecipeLabels(a)
+        const bLabels = this.getAllRecipeLabels(b)
+        const aStr = aLabels.length > 0 ? aLabels.map(l => this.translationService.translate(l)).join(', ') : ''
+        const bStr = bLabels.length > 0 ? bLabels.map(l => this.translationService.translate(l)).join(', ') : ''
+        return hebrewCompare(aStr, bStr)
       }
       case 'allergens': {
-        const aAll = this.getRecipeAllergens(a);
-        const bAll = this.getRecipeAllergens(b);
-        const aVal = this.translationService.translate((aAll[0] ?? '') as string);
-        const bVal = this.translationService.translate((bAll[0] ?? '') as string);
-        return hebrewCompare(aVal, bVal);
+        const aAll = this.getRecipeAllergens(a)
+        const bAll = this.getRecipeAllergens(b)
+        const aVal = this.translationService.translate((aAll[0] ?? '') as string)
+        const bVal = this.translationService.translate((bAll[0] ?? '') as string)
+        return hebrewCompare(aVal, bVal)
       }
       case 'dateAdded':
-        return (a.addedAt_ ?? 0) - (b.addedAt_ ?? 0);
+        return (a.addedAt_ ?? 0) - (b.addedAt_ ?? 0)
       case 'dateUpdated':
-        return (a.updatedAt_ ?? 0) - (b.updatedAt_ ?? 0);
+        return (a.updatedAt_ ?? 0) - (b.updatedAt_ ?? 0)
       case 'rating':
-        return (a.rating_ ?? 0) - (b.rating_ ?? 0);
+        return (a.rating_ ?? 0) - (b.rating_ ?? 0)
       default:
-        return 0;
+        return 0
     }
   }
 
   protected onRatingChange(recipe: Recipe, value: number): void {
-    this.kitchenState.saveRecipe({ ...recipe, rating_: value }).subscribe();
+    this.kitchenState.saveRecipe({ ...recipe, rating_: value }).subscribe()
   }
 
   protected onCarouselHeaderChange(index: number): void {
-    this.carouselHeaderIndex_.set(index);
+    this.carouselHeaderIndex_.set(index)
   }
 
   protected setSort(field: SortField): void {
-    const current = this.sortBy_();
+    const current = this.sortBy_()
     if (current === field) {
-      this.sortOrder_.update(o => o === 'asc' ? 'desc' : 'asc');
+      this.sortOrder_.update(o => o === 'asc' ? 'desc' : 'asc')
     } else {
-      this.sortBy_.set(field);
-      this.sortOrder_.set('asc');
+      this.sortBy_.set(field)
+      this.sortOrder_.set('asc')
     }
   }
 
   /** Set sort to date (newest first). */
   protected setSortDateNewestFirst(): void {
-    this.sortBy_.set('dateAdded');
-    this.sortOrder_.set('desc');
+    this.sortBy_.set('dateAdded')
+    this.sortOrder_.set('desc')
   }
 
   /** Set sort to date (oldest first). */
   protected setSortDateOldestFirst(): void {
-    this.sortBy_.set('dateAdded');
-    this.sortOrder_.set('asc');
+    this.sortBy_.set('dateAdded')
+    this.sortOrder_.set('asc')
   }
 
   /** Close allergen chips view on outside click — guard header column clicks. */
@@ -536,24 +536,24 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   protected toggleFilter(categoryName: string, optionValue: string): void {
     this.activeFilters_.update(prev => {
-      const current = { ...prev };
-      const values = current[categoryName] || [];
+      const current = { ...prev }
+      const values = current[categoryName] || []
       if (values.includes(optionValue)) {
-        current[categoryName] = values.filter(v => v !== optionValue);
-        if (current[categoryName].length === 0) delete current[categoryName];
+        current[categoryName] = values.filter(v => v !== optionValue)
+        if (current[categoryName].length === 0) delete current[categoryName]
       } else {
-        current[categoryName] = [...values, optionValue];
+        current[categoryName] = [...values, optionValue]
       }
-      return current;
-    });
+      return current
+    })
   }
 
   protected clearAllFilters(): void {
-    this.activeFilters_.set({});
-    this.dateFrom_.set(null);
-    this.dateTo_.set(null);
-    this.dateIncludeByUpdated_.set(false);
-    this.showFavoritesOnly_.set(false);
+    this.activeFilters_.set({})
+    this.dateFrom_.set(null)
+    this.dateTo_.set(null)
+    this.dateIncludeByUpdated_.set(false)
+    this.showFavoritesOnly_.set(false)
   }
 
   protected hasActiveFilters_ = computed(() =>
@@ -561,136 +561,135 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     this.dateFrom_() != null ||
     this.dateTo_() != null ||
     this.showFavoritesOnly_()
-  );
+  )
 
   protected selectedCountInCategory(category: { options: { checked_: boolean }[] }): number {
-    return category.options.filter(o => o.checked_).length;
+    return category.options.filter(o => o.checked_).length
   }
 
   protected showCostTooltip(recipeId: string, event?: Event): void {
-    const el = event?.currentTarget as HTMLElement | undefined;
-    if (el) this.costTooltipAnchor_.set(el.getBoundingClientRect());
-    this.hoveredCostRecipeId_.set(recipeId);
+    const el = event?.currentTarget as HTMLElement | undefined
+    if (el) this.costTooltipAnchor_.set(el.getBoundingClientRect())
+    this.hoveredCostRecipeId_.set(recipeId)
   }
 
   protected hideCostTooltip(): void {
-    this.hoveredCostRecipeId_.set(null);
-    if (!this.tappedCostRecipeId_()) this.costTooltipAnchor_.set(null);
+    this.hoveredCostRecipeId_.set(null)
+    if (!this.tappedCostRecipeId_()) this.costTooltipAnchor_.set(null)
   }
 
   protected toggleCostTooltipTap(recipeId: string, event?: Event): void {
-    const wasOpen = this.tappedCostRecipeId_() === recipeId;
-    this.tappedCostRecipeId_.update(id => (id === recipeId ? null : recipeId));
+    const wasOpen = this.tappedCostRecipeId_() === recipeId
+    this.tappedCostRecipeId_.update(id => (id === recipeId ? null : recipeId))
     if (!wasOpen && recipeId) {
-      const el = event?.currentTarget as HTMLElement | undefined;
-      if (el) this.costTooltipAnchor_.set(el.getBoundingClientRect());
+      const el = event?.currentTarget as HTMLElement | undefined
+      if (el) this.costTooltipAnchor_.set(el.getBoundingClientRect())
     } else if (!this.tappedCostRecipeId_() && !this.hoveredCostRecipeId_()) {
-      this.costTooltipAnchor_.set(null);
+      this.costTooltipAnchor_.set(null)
     }
   }
 
   protected closeCostTooltipTap(): void {
-    this.tappedCostRecipeId_.set(null);
-    if (!this.hoveredCostRecipeId_()) this.costTooltipAnchor_.set(null);
+    this.tappedCostRecipeId_.set(null)
+    if (!this.hoveredCostRecipeId_()) this.costTooltipAnchor_.set(null)
   }
 
   protected showDateTooltip(recipeId: string, event?: Event): void {
-    const el = event?.currentTarget as HTMLElement | undefined;
-    if (el) this.dateTooltipAnchor_.set(el.getBoundingClientRect());
-    this.hoveredDateRecipeId_.set(recipeId);
+    const el = event?.currentTarget as HTMLElement | undefined
+    if (el) this.dateTooltipAnchor_.set(el.getBoundingClientRect())
+    this.hoveredDateRecipeId_.set(recipeId)
   }
 
   protected hideDateTooltip(): void {
-    this.hoveredDateRecipeId_.set(null);
-    this.dateTooltipAnchor_.set(null);
+    this.hoveredDateRecipeId_.set(null)
+    this.dateTooltipAnchor_.set(null)
   }
 
   protected addIngredientProduct(product: Product): void {
-    if (this.selectedProductIds_().includes(product._id)) return;
-    this.selectedProductIds_.update(ids => [...ids, product._id]);
-    this.ingredientSearchQuery_.set('');
+    if (this.selectedProductIds_().includes(product._id)) return
+    this.selectedProductIds_.update(ids => [...ids, product._id])
+    this.ingredientSearchQuery_.set('')
   }
 
   protected removeIngredientProduct(productId: string): void {
-    this.selectedProductIds_.update(ids => ids.filter(id => id !== productId));
+    this.selectedProductIds_.update(ids => ids.filter(id => id !== productId))
   }
 
   protected clearIngredientProducts(): void {
-    this.selectedProductIds_.set([]);
+    this.selectedProductIds_.set([])
   }
 
   protected getSelectedProducts(): Product[] {
-    const ids = this.selectedProductIds_();
-    return this.kitchenState.products_().filter(p => ids.includes(p._id));
+    const ids = this.selectedProductIds_()
+    return this.kitchenState.products_().filter(p => ids.includes(p._id))
   }
 
   protected onAddRecipe(): void {
-    this.router.navigate(['/recipe-builder']);
+    this.router.navigate(['/recipe-builder'])
   }
 
   protected onEditRecipe(recipe: Recipe): void {
-    this.router.navigate(['/recipe-builder', recipe._id]);
+    this.router.navigate(['/recipe-builder', recipe._id])
   }
 
   protected openHistory(recipe: Recipe): void {
-    const entityType: VersionEntityType = this.isRecipeDish(recipe) ? 'dish' : 'recipe';
-    this.historyFor_.set({ entityType, entityId: recipe._id, entityName: recipe.name_hebrew });
+    const entityType: VersionEntityType = this.isRecipeDish(recipe) ? 'dish' : 'recipe'
+    this.historyFor_.set({ entityType, entityId: recipe._id, entityName: recipe.name_hebrew })
   }
 
   protected closeHistory(): void {
-    this.historyFor_.set(null);
+    this.historyFor_.set(null)
   }
 
   protected onCookRecipe(recipe: Recipe): void {
-    this.router.navigate(['/cook', recipe._id]);
+    this.router.navigate(['/cook', recipe._id])
   }
 
   protected onRowClick(recipe: Recipe, event: MouseEvent): void {
-    const el = event.target as HTMLElement;
-    if (el.closest('button') || el.closest('a') || el.closest('.cost-cell-wrap') || el.closest('.allergen-btn-wrapper') || el.closest('.labels-btn-wrapper') || el.closest('app-list-row-checkbox')) return;
+    const el = event.target as HTMLElement
+    if (el.closest('button') || el.closest('a') || el.closest('.cost-cell-wrap') || el.closest('.allergen-btn-wrapper') || el.closest('.labels-btn-wrapper') || el.closest('app-list-row-checkbox')) return
     if (this.selection.selectionMode()) {
-      this.selection.toggle(recipe._id ?? '');
-      return;
+      this.selection.toggle(recipe._id ?? '')
+      return
     }
-    this.onEditRecipe(recipe);
+    this.onEditRecipe(recipe)
   }
 
   protected async onDeleteRecipe(recipe: Recipe): Promise<void> {
-    if (!this.requireAuthService.requireAuth()) return;
-    if (!await this.confirmModal.open('האם אתה בטוח שברצונך למחוק?', { variant: 'danger' })) return;
-    this.deletingId_.set(recipe._id);
+    if (!this.requireAuthService.requireAuth()) return
+    if (!await this.confirmModal.open('האם אתה בטוח שברצונך למחוק?', { variant: 'danger' })) return
+    this.deletingId_.set(recipe._id)
     this.kitchenState.deleteRecipe(recipe).subscribe({
       next: () => { this.deletingId_.set(null); },
       error: () => { this.deletingId_.set(null); }
-    });
+    })
   }
 
   private onHideRecipe(recipe: Recipe): void {
-    this.removingId_.set(recipe._id);
+    this.removingId_.set(recipe._id)
     this.kitchenState.hideRecipe(recipe).subscribe({
       next: () => { this.removingId_.set(null); },
       error: () => { this.removingId_.set(null); }
-    });
+    })
   }
 
   private async onPermanentlyDeleteRecipe(recipe: Recipe): Promise<void> {
-    if (!await this.confirmModal.open('מחיקה קבועה — לא ניתן לשחזר. להמשיך?', { variant: 'danger' })) return;
-    this.removingId_.set(recipe._id);
+    if (!await this.confirmModal.open('מחיקה קבועה — לא ניתן לשחזר. להמשיך?', { variant: 'danger' })) return
+    this.removingId_.set(recipe._id)
     this.kitchenState.permanentlyDeleteRecipe(recipe).subscribe({
       next: () => { this.removingId_.set(null); },
       error: () => { this.removingId_.set(null); }
-    });
+    })
   }
 
   protected async onRemoveRecipe(recipe: Recipe): Promise<void> {
-    if (!this.requireAuthService.requireAuth()) return;
-    if (this.isAdmin_()) {
-      await this.onPermanentlyDeleteRecipe(recipe);
-    } else {
-      if (await this.confirmModal.open('האם אתה בטוח שברצונך למחוק?', { variant: 'danger' })) {
-        this.onHideRecipe(recipe);
-      }
-    }
+    if (!this.requireAuthService.requireAuth()) return
+    if (!await this.confirmModal.open('האם אתה בטוח שברצונך למחוק?', { variant: 'danger' })) return
+    this.removingId_.set(recipe._id)
+    this.kitchenState.deleteRecipe(recipe).subscribe({
+      next: () => { this.removingId_.set(null); },
+      error: () => { this.removingId_.set(null); }
+    })
   }
 
   protected onBulkEdit(event: { field: string; value: string; ids: string[] }): void {
@@ -712,54 +711,48 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
-    if (ids.length === 0) return;
-    if (!this.requireAuthService.requireAuth()) return;
-    if (!await this.confirmModal.open(`למחוק ${ids.length} מתכונים?`, { variant: 'danger' })) return;
-    const recipes = this.kitchenState.recipes_().filter((r) => ids.includes(r._id ?? ''));
-    if (this.isAdmin_()) {
-      recipes.forEach((recipe) => {
-        this.kitchenState.permanentlyDeleteRecipe(recipe).subscribe({ next: () => {}, error: () => {} });
-      });
-    } else {
-      recipes.forEach((recipe) => {
-        this.kitchenState.hideRecipe(recipe).subscribe({ next: () => {}, error: () => {} });
-      });
-    }
-    this.selection.clear();
+    if (ids.length === 0) return
+    if (!this.requireAuthService.requireAuth()) return
+    if (!await this.confirmModal.open(`למחוק ${ids.length} מתכונים?`, { variant: 'danger' })) return
+    const recipes = this.kitchenState.recipes_().filter((r) => ids.includes(r._id ?? ''))
+    recipes.forEach((recipe) => {
+      this.kitchenState.deleteRecipe(recipe).subscribe({ next: () => {}, error: () => {} })
+    })
+    this.selection.clear()
   }
 
   protected onDuplicateRecipe(recipe: Recipe): void {
-    const copyOf = this.translationService.translate('copy_of');
-    const clone = JSON.parse(JSON.stringify(recipe)) as Recipe;
-    delete (clone as { _id?: string })._id;
-    clone.name_hebrew = `${copyOf} ${recipe.name_hebrew}`.trim();
-    clone.is_approved_ = false;
-    this.duplicatingId_.set(recipe._id);
+    const copyOf = this.translationService.translate('copy_of')
+    const clone = JSON.parse(JSON.stringify(recipe)) as Recipe
+    delete (clone as { _id?: string })._id
+    clone.name_hebrew = `${copyOf} ${recipe.name_hebrew}`.trim()
+    clone.is_approved_ = false
+    this.duplicatingId_.set(recipe._id)
     this.kitchenState.saveRecipe(clone).subscribe({
       next: () => { this.duplicatingId_.set(null); },
       error: () => { this.duplicatingId_.set(null); }
-    });
+    })
   }
 
   protected onToggleApproval(recipe: Recipe): void {
-    const updated = { ...recipe, is_approved_: !recipe.is_approved_ };
-    this.kitchenState.saveRecipe(updated).subscribe();
+    const updated = { ...recipe, is_approved_: !recipe.is_approved_ }
+    this.kitchenState.saveRecipe(updated).subscribe()
   }
 
   protected onToggleFavorite(recipe: Recipe): void {
-    const uid = this.currentUserId_();
-    if (!uid) return;
-    const current = recipe.favoritedBy_ ?? [];
+    const uid = this.currentUserId_()
+    if (!uid) return
+    const current = recipe.favoritedBy_ ?? []
     const updated: Recipe = {
       ...recipe,
       favoritedBy_: current.includes(uid)
         ? current.filter(id => id !== uid)
         : [...current, uid],
-    };
-    this.kitchenState.saveRecipe(updated).subscribe();
+    }
+    this.kitchenState.saveRecipe(updated).subscribe()
   }
 
   protected getRecipeCost(recipe: Recipe): number {
-    return this.recipeCostService.computeRecipeCost(recipe);
+    return this.recipeCostService.computeRecipeCost(recipe)
   }
 }

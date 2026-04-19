@@ -1,22 +1,22 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { LucideAngularModule, Trash2, Search, GripVertical } from 'lucide-angular';
-import { RecipeIngredientsTableComponent } from './recipe-ingredients-table.component';
+import { ComponentFixture, TestBed } from '@angular/core/testing'
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms'
+import { provideHttpClient } from '@angular/common/http'
+import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { LucideAngularModule, Trash2, Search, GripVertical } from 'lucide-angular'
+import { RecipeIngredientsTableComponent } from './recipe-ingredients-table.component'
 
 describe('RecipeIngredientsTableComponent', () => {
-  let component: RecipeIngredientsTableComponent;
-  let fixture: ComponentFixture<RecipeIngredientsTableComponent>;
-  let fb: FormBuilder;
+  let component: RecipeIngredientsTableComponent
+  let fixture: ComponentFixture<RecipeIngredientsTableComponent>
+  let fb: FormBuilder
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RecipeIngredientsTableComponent, ReactiveFormsModule, LucideAngularModule.pick({ Trash2, Search, GripVertical })],
       providers: [FormBuilder, provideHttpClient(), provideHttpClientTesting()]
-    }).compileComponents();
+    }).compileComponents()
 
-    fb = TestBed.inject(FormBuilder);
+    fb = TestBed.inject(FormBuilder)
     const ingredientsFormArray = fb.array([
       fb.group({
         amount_net: [0],
@@ -26,15 +26,15 @@ describe('RecipeIngredientsTableComponent', () => {
         unit: ['gram'],
         price_override_: [null]
       })
-    ]);
+    ])
 
-    fixture = TestBed.createComponent(RecipeIngredientsTableComponent);
-    component = fixture.componentInstance;
-    fixture.componentRef.setInput('ingredientsFormArray', ingredientsFormArray);
-    fixture.detectChanges();
-  });
+    fixture = TestBed.createComponent(RecipeIngredientsTableComponent)
+    component = fixture.componentInstance
+    fixture.componentRef.setInput('ingredientsFormArray', ingredientsFormArray)
+    fixture.detectChanges()
+  })
 
   it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-});
+    expect(component).toBeTruthy()
+  })
+})

@@ -1,4 +1,4 @@
-import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core'
 
 @Component({
   selector: 'app-list-row-checkbox',
@@ -8,14 +8,14 @@ import { Component, input, output, ChangeDetectionStrategy } from '@angular/core
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListRowCheckboxComponent {
-  readonly checked = input<boolean>(false);
-  readonly disabled = input<boolean>(false);
-  readonly toggle = output<void>();
+  readonly checked = input<boolean>(false)
+  readonly disabled = input<boolean>(false)
+  readonly toggle = output<void>()
 
   onCheckboxClick(event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
-    if (this.disabled()) return;
-    this.toggle.emit();
+    event.preventDefault()
+    event.stopPropagation()
+    if (this.disabled()) return
+    this.toggle.emit()
   }
 }

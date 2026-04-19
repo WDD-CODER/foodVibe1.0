@@ -7,7 +7,7 @@ import { UserService } from '@services/user.service'
 /**
  * Shared auth guard: if the user is not signed in, shows warning, opens sign-in modal, and returns false.
  * Use in list/form components before add/edit/delete actions.
- * Example: if (!this.requireAuthService.requireAuth()) return;
+ * Example: if (!this.requireAuthService.requireAuth()) return
  */
 @Injectable({ providedIn: 'root' })
 export class RequireAuthService {
