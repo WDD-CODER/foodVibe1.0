@@ -6,6 +6,65 @@ Moved from todo.md to reduce token load.
 
 ## Done
 
+### Plan 250 — Auth Field Validation — Signup & Login (`plans/250-auth-field-validation.plan.md`)
+
+- [x] Task 1: Create `src/app/core/utils/auth-validation.util.ts` — pure validator functions
+- [x] Task 2: Add 4 per-field touched signals to `auth-modal.component.ts`
+- [x] Task 3: Replace onSubmit() validation block in `auth-modal.component.ts` with validator calls
+- [x] Task 4: Add (blur) handlers to `auth-modal.component.ts` for live per-field validation
+- [x] Task 5: Fix _onError() in `auth-modal.component.ts` — add EMAIL_TAKEN, INVALID_USERNAME, INVALID_EMAIL
+- [x] Task 6: Update `user.service.ts` signup() catchError — add INVALID_USERNAME, INVALID_EMAIL
+- [x] Task 7: Update `auth-modal.component.html` — extend bindings, @if blocks, (blur) events
+- [x] Task 8: Update `server/routes/auth.js` /signup — add username + email validation
+- [x] Task 9: Update `public/assets/data/dictionary.json` — add 9 Hebrew translation keys
+
+---
+
+### Plan 247 — Form field-level inline validation (`plans/247-form-field-validation.plan.md`)
+
+- [x] Task 1: `src/styles.scss` — add `.c-field-error` and `.c-input--invalid` engine classes
+- [x] Task 2: `dictionary.json` — add field validation Hebrew keys
+- [x] Task 3–8: product-form — validationErrors_ signal, validateForm_(), onSubmit wire, HTML error bindings
+- [x] Task 9–11: recipe-header + recipe-builder — validate() method, viewChild, HTML error bindings
+- [x] Task 12–17: equipment-form, supplier-form, venue-form — validation signal + method + HTML
+- [x] Task 18: auth-modal — add c-input--invalid + aria-invalid bindings
+- [x] Task 19: ng build — zero errors
+
+---
+
+### Plan 253 — Data Service Error Guards (`plans/253-data-service-error-guards.plan.md`)
+
+- [x] `menu-event-data.service.ts` — inject LoggingService; fix loadInitialData catch; wrap getMenuEventById, addMenuEvent, updateMenuEvent, deleteMenuEvent
+- [x] `version-history.service.ts` — inject LoggingService; wrap getVersions, getVersionEntry, addVersion, restoreVersion
+- [x] `menu-section-categories.service.ts` — inject LoggingService; fix constructor .catch(() => {}); fix load() and persist() catches
+- [x] `preparation-registry.service.ts` — fix constructor .catch(() => {}); add 401 guard to initRegistry + remove userMsg; add 401 guard to 5 CRUD methods
+- [x] `unit-registry.service.ts` — remove userMsg from initUnits catch; add 401 guard to registerUnit and deleteUnit
+- [x] `metadata-registry.service.ts` — add try/catch to reloadLabelsFromStorage; add 401 guard to 11 CRUD method catches
+- [x] `recipe-data.service.ts` — wrap 11 unprotected CRUD methods
+- [x] `dish-data.service.ts` — wrap 11 unprotected CRUD methods
+- [x] `product-data.service.ts` — wrap 9 unprotected CRUD methods
+- [x] `supplier-data.service.ts` — wrap getSupplierById, addSupplier, updateSupplier, removeSupplier
+- [x] `equipment-data.service.ts` — wrap getEquipmentById, addEquipment, updateEquipment, deleteEquipment, getTrashEquipment, restoreEquipment
+- [x] `venue-data.service.ts` — wrap getVenueById, addVenue, updateVenue, deleteVenue, getTrashVenues, restoreVenue
+- [x] `backup.service.ts` — add 401 guard to exportAllToFile and importFromFile backend-loop catches
+- [x] Run `npx ng build --configuration development` — confirm zero errors
+
+---
+
+### Plan 257 — Two-Tier Product Validation (`plans/257-product-validation-two-tier.plan.md`)
+
+- [x] Task 1: Create `src/app/core/utils/product-validation.util.ts` — `getProductValidationStatus()` + `getProductMissingFields()`
+- [x] Task 2: `inventory-product-list.component.ts` — wire validation util; add invalid/incomplete filter signals
+- [x] Task 3: `inventory-product-list.component.html` — status badge in col-name; Invalid/Incomplete filter chips in sidebar
+- [x] Task 4: `inventory-product-list.component.scss` — badge styles, row tint, tooltip chip styles
+- [x] Task 5: `recipe-ingredients-table.component.ts` — split `isIncompleteRow()` → `isBlockingRow()` + `isWarningRow()`; expose `hasBlockingRows()` output
+- [x] Task 6: `recipe-ingredients-table.component.html` — update row class bindings; add warning badge alongside existing blocking badge
+- [x] Task 7: `recipe-ingredients-table.component.scss` — add `.warning-row` + `.warning-badge` styles
+- [x] Task 8: `recipe-builder.page.ts` — add blocking-row save guard in `saveRecipe()`
+- [x] Task 9: Translation files — add new i18n keys for validation states and tooltip labels
+
+---
+
 ### Plan 260 — Tech Debt Execution: Apr 07 Audit (`plans/260-techdebt-apr07-execution.plan.md`)
 
 > **Tier 1 — Activate dormant plans (pass to agent as-is):**

@@ -63,20 +63,6 @@
 
 ---
 
-### Plan 257 — Two-Tier Product Validation (`plans/257-product-validation-two-tier.plan.md`)
-
-- [x] Task 1: Create `src/app/core/utils/product-validation.util.ts` — `getProductValidationStatus()` + `getProductMissingFields()`
-- [x] Task 2: `inventory-product-list.component.ts` — wire validation util; add invalid/incomplete filter signals
-- [x] Task 3: `inventory-product-list.component.html` — status badge in col-name; Invalid/Incomplete filter chips in sidebar
-- [x] Task 4: `inventory-product-list.component.scss` — badge styles, row tint, tooltip chip styles
-- [x] Task 5: `recipe-ingredients-table.component.ts` — split `isIncompleteRow()` → `isBlockingRow()` + `isWarningRow()`; expose `hasBlockingRows()` output
-- [x] Task 6: `recipe-ingredients-table.component.html` — update row class bindings; add warning badge alongside existing blocking badge
-- [x] Task 7: `recipe-ingredients-table.component.scss` — add `.warning-row` + `.warning-badge` styles
-- [x] Task 8: `recipe-builder.page.ts` — add blocking-row save guard in `saveRecipe()`
-- [x] Task 9: Translation files — add new i18n keys for validation states and tooltip labels
-
----
-
 ### Plan 255 — Dead Code Cleanup (`plans/255-dead-code-cleanup.plan.md`)
 
 - [x] Task 1: Delete `.claude/skills/commit-to-github/` — confirmed deprecated, replaced by git-agent
@@ -128,25 +114,6 @@
 
 ---
 
-### Plan 253 — Data Service Error Guards (`plans/253-data-service-error-guards.plan.md`)
-
-- [x] `menu-event-data.service.ts` — inject LoggingService; fix loadInitialData catch; wrap getMenuEventById, addMenuEvent, updateMenuEvent, deleteMenuEvent
-- [x] `version-history.service.ts` — inject LoggingService; wrap getVersions, getVersionEntry, addVersion, restoreVersion
-- [x] `menu-section-categories.service.ts` — inject LoggingService; fix constructor .catch(() => {}); fix load() and persist() catches
-- [x] `preparation-registry.service.ts` — fix constructor .catch(() => {}); add 401 guard to initRegistry + remove userMsg; add 401 guard to 5 CRUD methods
-- [x] `unit-registry.service.ts` — remove userMsg from initUnits catch; add 401 guard to registerUnit and deleteUnit
-- [x] `metadata-registry.service.ts` — add try/catch to reloadLabelsFromStorage; add 401 guard to 11 CRUD method catches
-- [x] `recipe-data.service.ts` — wrap 11 unprotected CRUD methods
-- [x] `dish-data.service.ts` — wrap 11 unprotected CRUD methods
-- [x] `product-data.service.ts` — wrap 9 unprotected CRUD methods
-- [x] `supplier-data.service.ts` — wrap getSupplierById, addSupplier, updateSupplier, removeSupplier
-- [x] `equipment-data.service.ts` — wrap getEquipmentById, addEquipment, updateEquipment, deleteEquipment, getTrashEquipment, restoreEquipment
-- [x] `venue-data.service.ts` — wrap getVenueById, addVenue, updateVenue, deleteVenue, getTrashVenues, restoreVenue
-- [x] `backup.service.ts` — add 401 guard to exportAllToFile and importFromFile backend-loop catches
-- [x] Run `npx ng build --configuration development` — confirm zero errors
-
----
-
 ### Plan 249 — Catalog Seeder Data Quality + Supplier Model (`plans/249-seeder-data-quality.plan.md`)
 - [ ] Step 0: Clear bad seed from PRODUCT_LIST; delete output/pending-review.json and output/enriched.json
 - [ ] Step 1: Add `_safe_float` helper to `enrich.py`
@@ -165,10 +132,13 @@
 
 ---
 
-### Plan 233 — Gemini Direct API + Modal Status Feedback (`plans/233-gemini-direct-api-modal-status.plan.md`)
-- [x] `gemini.service.ts` — rewrite: fetch-based direct Gemini API call, apiKey_ signal, hasKey computed, setApiKey(), remove HttpClient/dead imports
-- [x] `ai-recipe-modal.component.ts` — add configuringKey_/keyInput_/status_ signals, onSaveKey/onClose methods, API key guard in onGenerate(), FormsModule in imports
-- [x] `ai-recipe-modal.component.html` — add key config panel + status bar (sending/done/error states)
+### Plan 233 — Gemini Direct API + Modal Status Feedback (`plans/233-gemini-direct-api-modal-status.plan.md`) ✅❌ INTENTIONALLY PARTIAL
+> **Architecture pivot 2026-04-19:** Direct fetch + localStorage API key approach was dropped in favour of backend proxy (`/api/v1/ai/*`). Key lives server-side. Only the modal status feedback tasks were implemented.
+
+- [ ] ~~`gemini.service.ts` — fetch-based direct API, apiKey_ signal, hasKey, setApiKey()~~ **DROPPED — backend proxy kept; API key is server-side**
+- [ ] ~~`ai-recipe-modal.component.ts` — configuringKey_/keyInput_ signals, onSaveKey, API key guard~~ **DROPPED — no client-side key management**
+- [ ] ~~`ai-recipe-modal.component.html` — key config panel~~ **DROPPED**
+- [x] `ai-recipe-modal.component.ts` — status_ signal (idle/sending/done/error), onClose, status bar in HTML — **DONE**
 - [x] `ng build` — verify zero errors
 
 ---
@@ -198,27 +168,6 @@
 
 ---
 
-### Plan 247 — Form field-level inline validation (`plans/247-form-field-validation.plan.md`)
-- [x] Task 1: `src/styles.scss` — add `.c-field-error` and `.c-input--invalid` engine classes
-- [x] Task 2: `dictionary.json` — add field validation Hebrew keys
-- [x] Task 3–8: product-form — validationErrors_ signal, validateForm_(), onSubmit wire, HTML error bindings
-- [x] Task 9–11: recipe-header + recipe-builder — validate() method, viewChild, HTML error bindings
-- [x] Task 12–17: equipment-form, supplier-form, venue-form — validation signal + method + HTML
-- [x] Task 18: auth-modal — add c-input--invalid + aria-invalid bindings
-- [x] Task 19: ng build — zero errors
-
-### Plan 250 — Auth Field Validation — Signup & Login (`plans/250-auth-field-validation.plan.md`)
-- [x] Task 1: Create `src/app/core/utils/auth-validation.util.ts` — pure validator functions
-- [x] Task 2: Add 4 per-field touched signals to `auth-modal.component.ts`
-- [x] Task 3: Replace onSubmit() validation block in `auth-modal.component.ts` with validator calls
-- [x] Task 4: Add (blur) handlers to `auth-modal.component.ts` for live per-field validation
-- [x] Task 5: Fix _onError() in `auth-modal.component.ts` — add EMAIL_TAKEN, INVALID_USERNAME, INVALID_EMAIL
-- [x] Task 6: Update `user.service.ts` signup() catchError — add INVALID_USERNAME, INVALID_EMAIL
-- [x] Task 7: Update `auth-modal.component.html` — extend bindings, @if blocks, (blur) events
-- [x] Task 8: Update `server/routes/auth.js` /signup — add username + email validation
-- [x] Task 9: Update `public/assets/data/dictionary.json` — add 9 Hebrew translation keys
-
----
 
 ## 🔴 Quick Fixes
 
