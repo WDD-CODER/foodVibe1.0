@@ -1,6 +1,6 @@
 ---
 name: nightly-audit
-description: Autonomous nightly codebase audit — scans 6 violation categories, auto-fixes safe items, flags the rest, commits results on an audit branch, merges to main, and writes a report. Run via /nightly-audit or RemoteTrigger cron.
+description: Autonomous nightly codebase audit — scans 6 violation categories, auto-fixes safe items, flags the rest, commits results on an audit branch, and pushes the branch ready for morning review. Never merges to main. Run via /nightly-audit or RemoteTrigger cron.
 ---
 
 # Skill: nightly-audit
@@ -295,23 +295,7 @@ If no auto-fixes were applied, skip this commit.
 
 ---
 
-## Phase 5 — Merge to Main
-
-```bash
-git checkout main
-git merge --ff-only audit/YYYY-MM-DD
-```
-
-If fast-forward fails:
-```bash
-git merge --no-ff audit/YYYY-MM-DD -m "audit(merge): YYYY-MM-DD nightly audit"
-```
-
-If merge conflicts exist → **ABORT**. Leave audit branch intact. Write abort report.
-
----
-
-## Phase 6 — Write Final Report
+## Phase 5 — Write Final Report
 
 1. Copy `.claude/reports/audit/TEMPLATE.md` to `.claude/reports/audit/YYYY-MM-DD-nightly-audit.md`
 2. Replace all placeholders with actual counts and data from Phase 2
@@ -320,29 +304,27 @@ If merge conflicts exist → **ABORT**. Leave audit branch intact. Write abort r
 5. Fill in **Git Reference** with actual commit hashes
 6. Populate the **Trend** section by reading the last 7 reports in the folder, extracting their Summary tables, and comparing totals with direction arrows
 
-7. **Merge nightly sections** — check for staging files matching `.claude/reports/audit/YYYY-MM-DD-*.md` (exclude the report itself and the plan file):
-   - For each staging file found → append its content to the report, then delete the staging file
-   - If `.claude/reports/audit/YYYY-MM-DD-reflect.md` was not found → append `## Reflect / Fixes\nNo reflect fixes tonight.`
-   - See `.claude/standards-scheduled-reporting.md` for the staging file convention used by all nightly agents
-
-Commit the report:
+Commit the report and push the branch:
 ```bash
 git add .claude/reports/audit/
 git commit -m "audit(report): YYYY-MM-DD nightly report"
+git push -u origin audit/YYYY-MM-DD
 ```
+
+**Never merge to main.** The branch stays open for the user to review via `/audit-report` in the morning.
 
 ---
 
-## Phase 7 — Report Retention
+## Phase 6 — Report Retention
 
 1. List all `*-nightly-audit.md` files in `.claude/reports/audit/`
 2. Parse dates from filenames
 3. Any report older than 30 days → `git mv` to `.claude/reports/audit/archive/`
-4. If any files moved, commit: `audit(archive): move reports older than 30 days`
+4. If any files moved, commit: `audit(archive): move reports older than 30 days` and push
 
 ---
 
-## Phase 8 — Terminal Summary
+## Phase 7 — Terminal Summary
 
 Output to terminal:
 
@@ -355,9 +337,8 @@ Output to terminal:
   Flagged:    Y (need your review)
   Security:   S flags    ← only if S > 0
 ──────────────────────────────────────────────
-  Report: .claude/reports/audit/YYYY-MM-DD-nightly-audit.md
-  Branch: audit/YYYY-MM-DD
-  Run /audit-report to see full details.
+  Branch: audit/YYYY-MM-DD  ← pushed, ready to merge
+  Run /audit-report in the morning to review and merge.
 ══════════════════════════════════════════════
 ```
 
