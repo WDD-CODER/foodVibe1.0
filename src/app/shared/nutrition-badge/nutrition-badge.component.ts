@@ -46,11 +46,19 @@ export class NutritionBadgeComponent {
   @Input() nutrition: NutritionPer100g | null | undefined
   showTooltip = false
   tooltipFlipped_ = signal(false)
+  tooltipStyle_ = signal<Record<string, string>>({})
 
   onMouseEnter(): void {
     this.showTooltip = true
     const rect = (this.elRef_.nativeElement as HTMLElement).getBoundingClientRect()
-    this.tooltipFlipped_.set(rect.top < 150)
+    const flipped = rect.top < 260
+    this.tooltipFlipped_.set(flipped)
+    const centerX = rect.left + rect.width / 2
+    if (flipped) {
+      this.tooltipStyle_.set({ top: `${rect.bottom + 8}px`, left: `${centerX}px` })
+    } else {
+      this.tooltipStyle_.set({ bottom: `${window.innerHeight - rect.top + 8}px`, left: `${centerX}px` })
+    }
   }
 
   get dominantColor(): string | null {

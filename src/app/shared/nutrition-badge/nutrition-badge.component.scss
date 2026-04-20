@@ -19,12 +19,12 @@
 // ─── Tooltip ─────────────────────────────────────────────────────────────────
 
 .nb-tooltip {
-  position: absolute;
-  bottom: calc(100% + 8px);
+  position: fixed;
+   bottom: calc(100% + 10px);
   left: 50%;
   transform: translateX(-50%);
   width: 164px;
-  z-index: 1100;
+  z-index: 9999;
 
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(0, 0, 0, 0.08);
