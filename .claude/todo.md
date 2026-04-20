@@ -77,7 +77,6 @@
 - [ ] Task 10: Investigate `scripts/trim-demo-data.mjs` — recurring or one-time? Add npm entry or delete
 - [x] Task 11: Add `git-agent.md` row to `§0.3` agent roster in `copilot-instructions.md`
 - [x] Task 12: Fix stale `commit-to-github Phase 0` reference in `.claude/agents/qa-engineer.md`
-- [ ] Task 13: Add `interface-design` trigger line to `copilot-instructions.md §0`
 - [ ] Task 14: Decide on `.claude/commands/reflect-add-tests.md` — add trigger or delete
 - [ ] Task 15: Decide on `.claude/commands/sweep-stale-todos.md` — verify pending update, then add trigger
 - [ ] Task 16: Decide on `getGeminiShots()` in `gemini-shots.util.ts` — build read-back feature or remove orphan export
