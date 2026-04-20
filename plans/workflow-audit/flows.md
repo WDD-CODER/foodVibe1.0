@@ -32,7 +32,7 @@ Side branches confirmed in relationships.md:
 |------|------|------|------|
 | 1 | commands/new-feature.md | --(invokes)--> | commands/brief.md |
 | 2 | commands/brief.md | --(writes)--> | sessions/ |
-| 3 | commands/new-feature.md | --(references)--> | commands/plan-implementation.md |
+| 3 | commands/new-feature.md | --(invokes)--> | commands/plan-implementation.md |
 | 4 | commands/plan-implementation.md | --(reads)--> | instructions/validation-checklist.md |
 | 5 | commands/plan-implementation.md | --(invokes)--> | commands/brief.md |
 | 6 | commands/plan-implementation.md | --(writes)--> | sessions/ |
@@ -147,3 +147,28 @@ Note: The trigger conditions for steps 3–6 (git commit / git merge events) are
 | 4 | reflect/failure-log.tsv | --(references)--> | commands/reflect-list.md |
 
 Downstream: commands/reflect-list.md --(reads)--> reflect/failure-log.tsv [closes the loop for batch fix processing]
+
+---
+
+## Flow 7 — On-demand Agents
+
+**Summary:** Four specialist agents are invoked on-demand from copilot-instructions.md trigger rules. None are part of a fixed automated flow — each fires when the user's task matches a specific condition.
+
+| Step | Node | Edge | Node |
+|------|------|------|------|
+| 1 | copilot-instructions.md | --(references)--> | agents/product-manager.md |
+| 2 | copilot-instructions.md | --(references)--> | agents/software-architect.md |
+| 3 | copilot-instructions.md | --(references)--> | agents/team-leader.md |
+| 4 | copilot-instructions.md | --(references)--> | agents/breadcrumb-navigator.md |
+| 5 | agents/product-manager.md | --(writes)--> | plans/ |
+| 6 | agents/software-architect.md | --(writes)--> | plans/ |
+| 7 | agents/team-leader.md | --(invokes)--> | [multiple specialist agents] |
+| 8 | agents/breadcrumb-navigator.md | --(writes)--> | src/**/breadcrumbs.md |
+
+**Trigger conditions (from copilot-instructions.md):**
+- product-manager: User scopes a new feature or asks for a PRD
+- software-architect: HLD authoring or system design review
+- team-leader: Multi-agent orchestration, parallel stream coordination
+- breadcrumb-navigator: After features ship or directory structure changes
+
+**Note:** These agents had 8–13 commits each at Stage 2 analysis, confirming active use, but were absent from Flows 1–6. Adding Flow 7 closes the G-1 gap and prevents future pruning passes from incorrectly rating them as used-rarely.
