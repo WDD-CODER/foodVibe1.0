@@ -51,7 +51,7 @@ description: Single source of truth for all project rules, standards, and skill/
 - **Security audit (formal)** `[CC]`: For pre-deploy or comprehensive security reviews → invoke `/cso` (OWASP Top 10 + STRIDE). For targeted file-specific audits during development → invoke `security-officer` agent as before.
 - **Angular Pipes & Directives** `[SHARED]`: Before creating or refactoring any Angular Pipe or Directive → read `.claude/skills/angular-pipe-logic/SKILL.md`.
 - **Crypto / token management** `[SHARED]`: Before creating or modifying `auth-crypto.ts` → read `.claude/skills/auth-crypto/SKILL.md`. Security Officer invocation is mandatory at completion.
-- **Global doc finalization** `[SHARED]`: User says "finalize docs" or "global audit" → read `.claude/skills/finalize-docs/SKILL.md`.
+- **Global doc finalization** `[SHARED]`: User says "finalize docs" or "global audit" → invoke `breadcrumb-navigator` skill then `update-docs` skill in sequence.
 - **Security review** `[CC]`: After any change touching `auth.guard.ts`, `auth.interceptor.ts`, `auth-crypto.ts`, `user.service.ts`, localStorage/sessionStorage, new routes, or `[innerHTML]`/`bypassSecurityTrust*` → invoke `security-officer` agent as the final step before committing.
 - **Autonomous plan execution** `[CC]`: User invokes `/auto-solve` or says "start auto-solve" → read `.claude/commands/auto-solve.md` and follow it.
 - **Skill test suite** `[CC]`: User invokes `/reflect add-tests` → read `.claude/commands/reflect-add-tests.md` and follow it.
