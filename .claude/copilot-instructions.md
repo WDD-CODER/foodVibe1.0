@@ -41,7 +41,6 @@ description: Single source of truth for all project rules, standards, and skill/
 - **Breadcrumbs only** `[SHARED]`: Read `.claude/skills/breadcrumb-navigator/SKILL.md` and follow it.
 - **After a hacky fix** `[SHARED]`: Read `.claude/skills/elegant-fix/SKILL.md` to refine into a clean solution.
 - **Session end / wrap up** `[CC]`: User types `/end-session`, OR says "done", "end session", "wrap up", "finish up", "ship", "handoff" → invoke the **`end-session` skill** using the Skill tool. The skill delegates to the `end-of-session-agent` which handles everything: brief validation, build gate, techdebt scan, git operations, todo archive, doc refresh, plan cleanup, session evaluation, and handoff report.
-  - **Quick chat** `[SHARED]`: User invokes `/quick-chat` → skip handoff check and GitHub sync for this chat only.
   - Never ask the user which skill to use — the agent detects and routes automatically.
 - **Creating or refactoring Angular components** `[SHARED]`: Read `.claude/skills/angularComponentStructure/SKILL.md`.
 - **Lucide icons** `[SHARED]`: Before adding or editing `<lucide-icon name="...">` → read `.claude/standards-domain.md` Lucide section.
@@ -52,15 +51,13 @@ description: Single source of truth for all project rules, standards, and skill/
 - **Security audit (formal)** `[CC]`: For pre-deploy or comprehensive security reviews → invoke `/cso` (OWASP Top 10 + STRIDE). For targeted file-specific audits during development → invoke `security-officer` agent as before.
 - **Angular Pipes & Directives** `[SHARED]`: Before creating or refactoring any Angular Pipe or Directive → read `.claude/skills/angular-pipe-logic/SKILL.md`.
 - **Crypto / token management** `[SHARED]`: Before creating or modifying `auth-crypto.ts` → read `.claude/skills/auth-crypto/SKILL.md`. Security Officer invocation is mandatory at completion.
-- **Global doc finalization** `[SHARED]`: User says "finalize docs" or "global audit" → read `.claude/skills/finalize-docs/SKILL.md`.
+- **Global doc finalization** `[SHARED]`: User says "finalize docs" or "global audit" → invoke `breadcrumb-navigator` skill then `update-docs` skill in sequence.
 - **Security review** `[CC]`: After any change touching `auth.guard.ts`, `auth.interceptor.ts`, `auth-crypto.ts`, `user.service.ts`, localStorage/sessionStorage, new routes, or `[innerHTML]`/`bypassSecurityTrust*` → invoke `security-officer` agent as the final step before committing.
 - **Autonomous plan execution** `[CC]`: User invokes `/auto-solve` or says "start auto-solve" → read `.claude/commands/auto-solve.md` and follow it.
-- **Interface design** `[SHARED]`: User asks to design, redesign, layout, or improve a UI page, dashboard, or component → invoke `/init` (new design) or `/audit` (check existing) or `/critique` (improve existing) or `/extract` (extract patterns) or `/status` (system state) as appropriate.
 - **Skill test suite** `[CC]`: User invokes `/reflect add-tests` → read `.claude/commands/reflect-add-tests.md` and follow it.
 - **Sweep stale todos** `[SHARED]`: At session end (after all tasks marked `[x]`) or on explicit request → read `.claude/commands/sweep-stale-todos.md` and follow it.
 - **Batch reflection** `[CC]`: User invokes `/reflect-list` → read `.claude/commands/reflect-list.md` and follow it. Processes the tool failure log and applies one low-risk fix per failure group.
 - **MemPalace search** `[CC]`: User invokes `/mp-search <query>` or `/recall <query>` → read `.claude/skills/mp-search/SKILL.md` and follow it.
-- **MemPalace wake-up** `[CC]`: User invokes `/mp-wake-up` → read `.claude/commands/mp-wake-up.md` and follow it.
 - **Memory search** `[CC]`: When answering "why did we...", "have we tried...", "what happened with...", or recalling past decisions → use MemPalace MCP tools before grepping session handoffs. Use `mempalace_search(query="...", limit=5)` → filter by relevance → `mempalace_kg_query(entity="...")` for architectural decisions. **Use MemPalace when:** question is semantic/fuzzy, looking for past decisions/plans/constraints, need context across files. **Use Grep/Read when:** finding exact code/function names, structural navigation, editing files. If MemPalace tools unavailable, skip silently and grep session handoffs instead.
 
 ---

@@ -1,0 +1,210 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+}
+
+.nb-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.nb-leaf {
+  display: block;
+  flex-shrink: 0;
+}
+
+// ─── Tooltip ─────────────────────────────────────────────────────────────────
+
+.nb-tooltip {
+  position: fixed;
+   bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 164px;
+  z-index: 9999;
+
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 1rem;
+  padding: 10px 11px 8px;
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.13), 0 2px 6px rgba(15, 23, 42, 0.07);
+  backdrop-filter: blur(16px);
+
+  // Pointer arrow
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.08);
+  }
+  &::before {
+    content: '';
+    position: absolute;
+    top: calc(100% - 1px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: rgba(255, 255, 255, 0.95);
+    z-index: 1;
+  }
+}
+
+.nb-tooltip--flipped {
+  inset-block-start: calc(100% + 8px);
+  inset-block-end: auto;
+  bottom: auto;
+  top: calc(100% + 8px);
+  &::after {
+    inset-block-start: auto;
+    inset-block-end: 100%;
+    top: auto;
+    bottom: 100%;
+    border-top-color: transparent;
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+  }
+  &::before {
+    inset-block-start: auto;
+    inset-block-end: calc(100% - 1px);
+    top: auto;
+    bottom: calc(100% - 1px);
+    border-top-color: transparent;
+    border-bottom-color: rgba(255, 255, 255, 0.95);
+  }
+}
+
+.nb-header {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #14b8a6;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: center;
+  margin-bottom: 7px;
+}
+
+// ─── Macro bar ────────────────────────────────────────────────────────────────
+
+.nb-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.06);
+  margin-bottom: 6px;
+}
+
+.nb-bar-seg {
+  height: 100%;
+  transition: width 0.2s ease;
+}
+
+// ─── Legend ──────────────────────────────────────────────────────────────────
+
+.nb-legend {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 7px;
+}
+
+.nb-legend-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.nb-legend-pct {
+  font-size: 0.58rem;
+  color: #64748b;
+  font-weight: 600;
+  line-height: 1;
+}
+
+// ─── Divider ─────────────────────────────────────────────────────────────────
+
+.nb-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.07);
+  margin: 5px 0;
+}
+
+// ─── Nutrient rows ───────────────────────────────────────────────────────────
+
+.nb-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 0;
+  font-size: 0.7rem;
+
+  &--sub {
+    padding-right: 8px;
+
+    .nb-row-label {
+      font-size: 0.66rem;
+      color: #94a3b8;
+    }
+
+    .nb-row-val {
+      font-size: 0.66rem;
+    }
+  }
+}
+
+.nb-row-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.nb-row-label {
+  flex: 1;
+  color: #334155;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nb-row-val {
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.nb-row-unit {
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+// ─── Fat SVG icon ─────────────────────────────────────────────────────────────
+
+.nb-fat-icon {
+  width: 10px;
+  height: 10px;
+
+  &--row {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+// ─── Footer note ─────────────────────────────────────────────────────────────
+
+.nb-note {
+  font-size: 0.58rem;
+  color: #94a3b8;
+  text-align: center;
+  margin-top: 5px;
+  line-height: 1.3;
+}

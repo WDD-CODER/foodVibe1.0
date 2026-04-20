@@ -1,3 +1,13 @@
+export interface NutritionPer100g {
+  energy_kcal?: number
+  protein_g?: number
+  carbs_g?: number
+  sugars_g?: number
+  fat_g?: number
+  fiber_g?: number
+  sodium_g?: number
+}
+
 export interface PurchaseOption_ {
   unit_symbol_: string
   conversion_rate_: number
@@ -38,4 +48,6 @@ export interface Product {
   buy_price_global_?: number
   /** @deprecated Migration shim — use sources_ */
   supplierIds_?: string[]
+  /** Nutritional data per 100g — populated by catalog seeder (Open Food Facts) */
+  nutrition_per_100g?: NutritionPer100g
 }
