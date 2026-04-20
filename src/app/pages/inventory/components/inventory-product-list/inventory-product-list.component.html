@@ -110,6 +110,9 @@
               </span>
             </span>
           }
+          @if (product.nutrition_per_100g) {
+            <app-nutrition-badge [nutrition]="product.nutrition_per_100g"></app-nutrition-badge>
+          }
           {{ product.name_hebrew }}
         </div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
