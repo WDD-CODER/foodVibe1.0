@@ -277,10 +277,7 @@ Edge vocabulary: `invokes` · `delegates-to` · `gates` · `reads` · `writes` �
 - reflect/failure-log.tsv --(references)--> reflect/tool-failure-hook.ps1   [mx: reflect/failure-log.tsv — Cross-refs]
 - reflect/failure-log.tsv --(references)--> commands/reflect-list.md   [mx: reflect/failure-log.tsv — Cross-refs]
 - reflect/failure-log-archive-2026-04.tsv --(references)--> reflect/failure-log.tsv   [mx: reflect/failure-log-archive — Cross-refs]
-- reflect/last-session-context.md --(external)--> [EXT] docs/session-state.md   [mx: reflect/last-session-context.md — Cross-refs]
 - reflect/reflect-runner-prompt.md --(references)--> commands/reflect.md   [mx: reflect/reflect-runner-prompt.md — Cross-refs]
-- reflect/reflected-sessions.stamp --(references)--> reflect/auto-reflect.ps1   [mx: reflect/reflected-sessions.stamp — Cross-refs]
-- reflect/reflected-sessions.stamp --(references)--> commands/reflect.md   [mx: reflect/reflected-sessions.stamp — Cross-refs]
 - reflect/reflection-log.tsv --(references)--> commands/reflect.md   [mx: reflect/reflection-log.tsv — Cross-refs]
 - reflect/reflection-log.tsv --(references)--> reflect/evaluator.md   [mx: reflect/reflection-log.tsv — Cross-refs]
 - reflect/test-quality-log.md --(references)--> commands/reflect.md   [mx: reflect/test-quality-log.md — Cross-refs]
@@ -391,10 +388,9 @@ These edges are strongly suggested by Inputs/triggers or Outputs fields but do N
 
 1. hooks/post-commit --(triggered-by)--> git commit event — stated in Inputs/triggers ("Fires automatically after every git commit") but git commit event is not in any Cross-references field.
 2. hooks/post-merge --(triggered-by)--> git merge event — same reason.
-3. reflect/auto-reflect.ps1 --(triggered-by)--> settings.json Stop hook — stated as "Registered as the Stop hook in settings.json (scripts/handoff-check.sh wraps it)" in Inputs/triggers; neither settings.json nor handoff-check.sh appears in auto-reflect.ps1's Cross-refs.
-4. commands/reflect.md --(writes)--> reflect/reflected-sessions.stamp — stated in stamp's Inputs/triggers "Written by reflect pipeline after each run"; not in reflect.md's Cross-refs.
-5. commands/reflect.md --(writes)--> reflect/evidence/ — stated in evidence/'s Inputs/triggers "Written by reflect skill during evaluation runs"; not in reflect.md's Cross-refs.
-6. skills/nightly-audit/SKILL.md --(writes)--> reports/audit/archive/ — implied by "Oldest deleted when >7 exist" behavior; archive/ Cross-refs only point to nightly-audit/SKILL.md (inbound), not the other direction in nightly-audit's own Cross-refs list.
+3. reflect/auto-reflect.ps1 invocation path UNKNOWN — Brief A verification confirmed scripts/handoff-check.sh does NOT invoke auto-reflect.ps1. handoff-check.sh is a standalone session-state validator. auto-reflect.ps1 is not registered in settings.json. The automatic-reflection pipeline has been dark since the Stop hook was switched to handoff-check.sh. Stale references remain in auto-reflect.ps1 line 8 and agents/end-of-session-agent.md ~line 555. See plans/workflow-audit/verification-findings.md (D-18 CORRECTED) and assessment.md D-19.
+4. commands/reflect.md --(writes)--> reflect/evidence/ — stated in evidence/'s Inputs/triggers "Written by reflect skill during evaluation runs"; not in reflect.md's Cross-refs.
+5. skills/nightly-audit/SKILL.md --(writes)--> reports/audit/archive/ — implied by "Oldest deleted when >7 exist" behavior; archive/ Cross-refs only point to nightly-audit/SKILL.md (inbound), not the other direction in nightly-audit's own Cross-refs list.
 7. gstack --(references)--> CLAUDE.md, security-officer.md, qa-engineer.md — these edges originate from gstack's Cross-references field, but gstack is an external node. Edges from external to internal are recorded here rather than the main list because the brief stops traversal at the .claude/ boundary.
 8. commands/reflect.md --(reads)--> skills/ (for baseline capture) — reflect reads existing SKILL.md files as baseline before mutation; implied by the reflect pipeline description but skills/ appears in Cross-refs only as a write target ("Updated SKILL.md files"), not explicitly as a read target.
 
@@ -450,7 +446,6 @@ These nodes are sources only — no other node's Cross-references field names th
 - commands/validate-agent-refs.md
 - reflect/auto-reflection-log.tsv
 - reflect/test-suite-template.md
-- reflect/last-session-context.md
 - scheduled_tasks.lock
 - .session-state-path
 - worktrees/
