@@ -297,17 +297,25 @@ If no auto-fixes were applied, skip this commit.
 
 ## Phase 5 — Merge to Main
 
-```bash
-git checkout main
-git merge --ff-only audit/YYYY-MM-DD
+**Always delegate to the git agent — never run raw `git merge` directly.** The git agent handles conflicts intelligently so no work is ever lost.
+
+Spawn the agent with this exact prompt (substitute the real date):
+
+```
+Merge branch `audit/YYYY-MM-DD` into `main-fadnX` (or `main` — whichever is the active base branch).
+
+Rules:
+- Prefer fast-forward (`--ff-only`). If that fails, use `--no-ff`.
+- If there are merge conflicts, resolve them by KEEPING BOTH SIDES — never discard any content.
+  - For code files (.ts, .scss): keep the incoming audit fix AND the existing code change. Rewrite the conflicted section so both intents are satisfied.
+  - For report/plan files (.md): always keep the audit's version (it is additive, not destructive).
+- After resolving, verify with `npx tsc --noEmit` that TypeScript still compiles.
+- Commit the merge with message: `audit(merge): YYYY-MM-DD nightly audit`
+- Do NOT push — the audit skill handles the push in Phase 6.
+- Report back: fast-forward / no-ff / conflicts-resolved, and list any files that needed manual conflict resolution.
 ```
 
-If fast-forward fails:
-```bash
-git merge --no-ff audit/YYYY-MM-DD -m "audit(merge): YYYY-MM-DD nightly audit"
-```
-
-If merge conflicts exist → **ABORT**. Leave audit branch intact. Write abort report.
+**After the agent returns:** continue to Phase 6 regardless of whether it was fast-forward, no-ff, or conflict-resolved. The git agent guarantees no work is lost — there is no abort path in Phase 5.
 
 ---
 
