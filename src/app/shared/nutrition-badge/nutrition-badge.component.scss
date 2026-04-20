@@ -20,8 +20,6 @@
 
 .nb-tooltip {
   position: fixed;
-   bottom: calc(100% + 10px);
-  left: 50%;
   transform: translateX(-50%);
   width: 164px;
   z-index: 9999;
@@ -55,22 +53,14 @@
   }
 }
 
-.nb-tooltip--flipped {
-  inset-block-start: calc(100% + 8px);
-  inset-block-end: auto;
-  bottom: auto;
-  top: calc(100% + 8px);
+.nb-tooltip--below {
   &::after {
-    inset-block-start: auto;
-    inset-block-end: 100%;
     top: auto;
     bottom: 100%;
     border-top-color: transparent;
     border-bottom-color: rgba(0, 0, 0, 0.08);
   }
   &::before {
-    inset-block-start: auto;
-    inset-block-end: calc(100% - 1px);
     top: auto;
     bottom: calc(100% - 1px);
     border-top-color: transparent;
