@@ -86,6 +86,7 @@ export class ProductDataService {
       name_english: legacy.name_english,
       seeded_: legacy.seeded_,
       allergen_source_: legacy.allergen_source_,
+      nutrition_per_100g: legacy.nutrition_per_100g,
     }
   }
 
