@@ -4,7 +4,7 @@
 2026-04-20-nutrition-badge-workflow-audit
 
 ## Status
-INCOMPLETE
+INCOMPLETE (updated — tooltip-flip commit added 2026-04-20 session close)
 
 ## Summary
 Goal: Nutrition Badge feature build + Workflow Audit cleanup (Briefs A–H)
@@ -55,29 +55,28 @@ docs/superpowers/specs/2026-04-19-nutrition-badge-design.md
 | NutritionPer100g interface + normalizeProduct() wiring | Done | product.model.ts + product-data.service.ts in commits b969e35/unpushed; build passes |
 | NutritionBadgeComponent created (standalone, OnPush, icons, tooltip) | Done | src/app/shared/nutrition-badge/ — 3 files confirmed in remote diff |
 | Badge wired into inventory and recipe host templates | Partial | imports[] wired in both .ts files; Angular compiler WARNING: component not used in template — <app-nutrition-badge> missing from .html files |
-| Tooltip flip logic (shows below when within 220px of top) | Missed | Not in component source; session state explicitly marked as "pending" |
+| Tooltip flip logic (shows below when within 220px of top) | Done | tooltipStyle_ signal + fixed-position coordinate calc added in onMouseEnter(); committed at session close |
 | ng build passes with zero errors | Done | Build completed 2026-04-20; 5 warnings, 0 errors |
 | Brief A complete — verification findings documented | Done | plans/workflow-audit/verification-findings.md committed in 5ae39d2 |
 | Brief B complete — D-1, D-2, D-3, D-9, D-11 committed | Partial | D-1/D-2/D-3 partially in 2d66312; D-9/D-11 renames not executed; reflect.md line 69 not cleaned |
 
 ## Validation Checklist
 - [x] Build passes (zero errors, 5 warnings — ng build 2026-04-20)
-- [x] Changes committed: 2d66312, 535e431, b085a9d, b969e35, 5ae39d2
-- [x] Pushed to origin/feat/session-20260417
+- [x] Changes committed: 2d66312, 535e431, b085a9d, b969e35, 5ae39d2, 18a78f8, 01481de, 6a7900c, c2d7bbf, 777b74a + tooltip-fix commit (session close)
+- [ ] Push pending — 6+ commits ahead of origin, push after commit approval
 - [ ] PR not created (feature incomplete — NutritionBadge template wiring missing)
 - [x] Techdebt scan: 1 TODO, 2 style violations (1 new: @Input on NutritionBadge), 6 pre-existing refactor candidates, 0 critical
 - [ ] Manual verification needed:
   - Add `<app-nutrition-badge [nutrition]="product.nutrition_per_100g">` to inventory-product-list.component.html
   - Add `<app-nutrition-badge [nutrition]="ingredient.nutrition_per_100g">` to recipe-ingredients-table.component.html
-  - Add tooltip flip logic (ElementRef injection + onMouseEnter + .nb-tooltip--below CSS)
   - Fix remaining semicolon in menu-intelligence.page.ts line 896: `const addDish = document.getElementById('add-dish-' + s);`
   - Complete Brief B: reflect.md line 69, git rm last-session-context.md, D-9 renames, D-11 rename
 
 ---
 
 ## Session Actions
-- Commits: 2d66312, 535e431, b085a9d, b969e35, 5ae39d2
-- PR: N/A (feature incomplete)
+- Commits: 2d66312, 535e431, b085a9d, b969e35, 5ae39d2, 18a78f8, 01481de, 6a7900c, c2d7bbf, 777b74a + tooltip-fix (session close)
+- PR: N/A (feature incomplete — template wiring still missing)
 - Tasks archived: none
 - Plans marked done: none
 
@@ -95,13 +94,13 @@ docs/superpowers/specs/2026-04-19-nutrition-badge-design.md
 
 **Next task:**
 1. Fix menu-intelligence.page.ts line 896 semicolon (BLOCKING — see docs/session-state.md)
-2. Add `<app-nutrition-badge>` to both host component templates
-3. Add tooltip flip logic to NutritionBadgeComponent
-4. Complete Brief B remaining steps (reflect.md line 69 + git rm + D-9 + D-11)
+2. Add `<app-nutrition-badge [nutrition]="product.nutrition_per_100g">` to inventory-product-list.component.html
+3. Add `<app-nutrition-badge [nutrition]="ingredient.nutrition_per_100g">` to recipe-ingredients-table.component.html
+4. Complete Brief B remaining steps (reflect.md line 69 + git rm last-session-context.md + D-9 renames + D-11 rename)
 5. Create PR for feat/session-20260417
 
 **Suggested focus:**
-NutritionBadge template wiring is fast (2 HTML edits) and unblocks the visible feature. Do that first, then tooltip flip, then Brief B cleanup, then PR.
+NutritionBadge template wiring is fast (2 HTML edits) and unblocks the visible feature. Tooltip flip logic is now done — coordinate calculation committed at session close. Do template wiring first, then Brief B cleanup, then PR.
 
 ---
 Generated: 2026-04-20
