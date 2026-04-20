@@ -1,13 +1,13 @@
 @if (dominantColor) {
   <span class="nb-wrap"
-    (mouseenter)="showTooltip = true"
+    (mouseenter)="onMouseEnter()"
     (mouseleave)="showTooltip = false"
     (click)="onBadgeClick($event)">
 
     <lucide-icon name="leaf" [size]="14" class="nb-leaf" [style.color]="dominantColor"></lucide-icon>
 
     @if (showTooltip) {
-      <div class="nb-tooltip" dir="rtl">
+      <div class="nb-tooltip" dir="rtl" [class.nb-tooltip--flipped]="tooltipFlipped_()">
 
         <div class="nb-header">100 גר׳</div>
 

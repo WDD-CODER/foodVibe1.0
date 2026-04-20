@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core'
+import { Component, Input, ChangeDetectionStrategy, signal, ElementRef, inject } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { NutritionPer100g } from '@models/product.model'
@@ -41,8 +41,17 @@ const MACRO_COLORS: Record<string, string> = {
   styleUrl: './nutrition-badge.component.scss',
 })
 export class NutritionBadgeComponent {
+  private readonly elRef_ = inject(ElementRef)
+
   @Input() nutrition: NutritionPer100g | null | undefined
   showTooltip = false
+  tooltipFlipped_ = signal(false)
+
+  onMouseEnter(): void {
+    this.showTooltip = true
+    const rect = (this.elRef_.nativeElement as HTMLElement).getBoundingClientRect()
+    this.tooltipFlipped_.set(rect.top < 150)
+  }
 
   get dominantColor(): string | null {
     const n = this.nutrition

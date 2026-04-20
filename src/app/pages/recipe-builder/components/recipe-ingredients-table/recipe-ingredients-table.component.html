@@ -63,6 +63,9 @@
               <lucide-icon name="pencil" [size]="14"></lucide-icon>
             </button>
           }
+          @if (group.get('item_type')?.value === 'product' && getProductForGroup(group)?.nutrition_per_100g) {
+            <app-nutrition-badge [nutrition]="getProductForGroup(group)!.nutrition_per_100g"></app-nutrition-badge>
+          }
           <button type="button" class="clear-btn" (click)="$event.stopPropagation(); clearIngredient(group)">
             <lucide-icon name="x" [size]="14"></lucide-icon>
           </button>
