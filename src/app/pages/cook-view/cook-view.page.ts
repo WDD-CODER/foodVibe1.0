@@ -9,7 +9,7 @@ import { ReactiveFormsModule, FormBuilder, FormArray, FormGroup, Validators } fr
 import { LucideAngularModule } from 'lucide-angular'
 
 import { Recipe, RecipeStep, FlatPrepItem, PrepCategory } from '@models/recipe.model'
-import { ScalingService, ScaledIngredientRow, ScaledPrepRow } from '@services/scaling.service'
+import { ScalingService, ScaledIngredientRow } from '@services/scaling.service'
 import { CookViewStateService } from '@services/cook-view-state.service'
 import { RecipeCostService } from '@services/recipe-cost.service'
 import { KitchenStateService } from '@services/kitchen-state.service'

@@ -14,7 +14,7 @@ import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.direct
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util'
 import { take } from 'rxjs/operators'
-import { CdkDragDrop, moveItemInArray, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop'
+import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 
 @Component({

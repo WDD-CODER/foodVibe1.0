@@ -1,7 +1,5 @@
-import { Injectable, Signal, inject } from '@angular/core'
+import { Injectable, Signal } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
-import { StorageService } from './async-storage.service'
-import { LoggingService } from './logging.service'
 import { Equipment } from '../models/equipment.model'
 import { BaseEntityDataService } from './base-entity-data.service'
 

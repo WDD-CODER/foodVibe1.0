@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core'
 import { KitchenStateService } from './kitchen-state.service'
 import { Recipe } from '../models/recipe.model'
-import { FlatPrepItem, PrepCategory } from '../models/recipe.model'
+import { PrepCategory } from '../models/recipe.model'
 
 export interface ScaledIngredientRow {
   name: string
