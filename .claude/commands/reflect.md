@@ -12,7 +12,7 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 > Detect auto mode by checking: was this invoked via `claude --print`, or did the agent trigger it after a correction cycle? If yes → AUTO MODE.
 
 ### AUTO MODE Rules
-- Skip all Phase 1 user prompts — read session context from the newest `status: open` file in `.claude/reflect/open/`, falling back to `.claude/reflect/last-session-context.md` (legacy)
+- Skip all Phase 1 user prompts — read session context from the newest `status: open` file in `.claude/reflect/open/`
 - Only apply improvements with `Risk: low` — skip medium and high risk changes entirely
 - Never ask for confirmation before applying a change
 - Apply one change per auto-reflect cycle (same as one experiment per autoresearch run)
@@ -66,7 +66,6 @@ trigger: session-handoff | legacy-conflict
 git log --oneline -5
 ```
 Read the newest `.claude/reflect/open/*.reflect.md` file with `status: open` in its frontmatter.
-Fallback: `.claude/reflect/last-session-context.md` (legacy — will be removed in a future cleanup).
 
 **Step B — Find One Low-Risk Improvement**
 Scan `.claude/skills/` and `.claude/agents/` for the most obvious low-risk improvement based on recent session context. One improvement only. Must have:
