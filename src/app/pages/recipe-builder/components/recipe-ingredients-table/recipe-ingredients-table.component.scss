@@ -475,8 +475,8 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
 
   .ingredient-grid-row {
     display: grid;
-    // name | unit | quantity | cost — compact single row
-    grid-template-columns: 1fr 5rem 4rem 3.5rem;
+    // name | unit | quantity | cost | actions — compact single row with visible delete
+    grid-template-columns: 1fr 5rem 4rem 3.5rem 2.5rem;
     grid-template-rows: auto;
     gap: 0.375rem;
     padding-inline: 0.5rem;
@@ -486,7 +486,7 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
     border-block-end: 1px solid var(--border-default);
     border-radius: 0;
     background: transparent;
-    min-height: 2.75rem;
+    min-block-size: 2.75rem;
 
     .col-drag {
       display: none;
@@ -495,32 +495,49 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
     .col-name {
       grid-column: 1;
       grid-row: 1;
-      min-width: 0;
+      min-inline-size: 0;
+
+      .grid-input {
+        inline-size: 100%;
+        min-inline-size: 0;
+      }
     }
 
     .col-unit {
       grid-column: 2;
       grid-row: 1;
-      min-width: 0;
+      min-inline-size: 0;
     }
 
     .col-quantity {
       grid-column: 3;
       grid-row: 1;
-      min-width: 0;
-      min-height: auto;
+      min-inline-size: 0;
+      min-block-size: auto;
     }
 
     .col-cost {
       grid-column: 4;
       grid-row: 1;
-      min-height: auto;
+      min-block-size: auto;
       font-size: 0.8rem;
     }
 
-    .col-percent,
-    .col-actions {
+    .col-percent {
       display: none;
+    }
+
+    .col-actions {
+      grid-column: 5;
+      grid-row: 1;
+      min-block-size: auto;
+      justify-content: center;
+
+      .c-icon-btn {
+        opacity: 1;
+        width: 2.75rem;
+        height: 2.75rem;
+      }
     }
 
     // Hide +/- counter buttons on mobile — user types directly

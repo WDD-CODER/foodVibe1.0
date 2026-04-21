@@ -1,25 +1,4 @@
-# Session State — 2026-04-21 (mobile audit — READY TO EXECUTE)
-
----
-
-## EXECUTION STATUS (Brief 3)
-
-**Brief 1 DONE** — TRIAGE.md written  
-**Brief 2 DONE** — Plans 276–283 written to `plans/`, sub-tasks in `.claude/todo.md`, TRIAGE.md updated  
-**Brief 3 PENDING** — Execute plans in order: 276 → 277 → 278 → 279 → 280 → 281 → 282 → 283
-
-### Amendment to Plan 282
-The duplicate-name validator fix (DEF-IE-02) is **already fixed** in `server/services/sync-master.js` — see "INTERRUPT TASK" below. **Skip** the sub-task "Inventory component TS — locate duplicate-name validator; add exclusion for current product ID" when executing Plan 282. Only execute: category dropdown close-on-select, Escape dismiss, dropdown panel max-height.
-
-### Recommended execution order
-1. **276** — rtl-fab: 2-line change in `hero-fab.component.scss` (`left` → `inset-inline-end`)
-2. **283** — touch-target-size: `min-block-size: 2.75rem` in `trash.page.scss` + `recipe-book-list`
-3. **280** — rtl-layout: recipe-book-list filter/search icons, suppliers title, venues button, trash margin
-4. **279** — sticky-header: `padding-block-start: 3.875rem` for dashboard + recipe-book-list
-5. **281** — input-overflow: recipe-builder name/vessel inputs + ingredient search
-6. **277** — ingredient-grid: restore `.col-actions` in mobile grid
-7. **278** — bottom-nav-occlusion: financial-bar z-index + page padding-block-end
-8. **282** — dropdown: category close-on-select + Escape dismiss + panel max-height (skip dup-name fix)
+# Session State — 2026-04-21 (mobile audit triage + plan-writing mid-Brief 2)
 
 ---
 

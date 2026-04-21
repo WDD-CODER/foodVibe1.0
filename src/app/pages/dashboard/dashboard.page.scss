@@ -22,3 +22,11 @@
 
   gap: 1.5rem;
 }
+
+/* Plan 279 — sticky header safe zone; Plan 278 — bottom nav occlusion */
+@media (max-width: 620px) {
+  .dashboard-content {
+    padding-block-start: 3.875rem;
+    padding-block-end: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+  }
+}

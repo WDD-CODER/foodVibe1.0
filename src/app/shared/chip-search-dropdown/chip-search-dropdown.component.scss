@@ -35,6 +35,14 @@
     min-height: auto;
   }
 
+  /* Plan 282 — category dropdown max-height on mobile */
+  @media (max-width: 620px) {
+    app-scrollable-dropdown {
+      max-block-size: 40vh;
+      overflow-y: auto;
+    }
+  }
+
   app-scrollable-dropdown {
     ::ng-deep .dropdown-item {
       padding: 0.6rem 1rem;

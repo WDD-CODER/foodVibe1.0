@@ -4,6 +4,11 @@
   display: block;
 
   padding: 1.25rem;
+
+  /* Plan 278 — bottom nav occlusion */
+  @media (max-width: 620px) {
+    padding-block-end: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 .venues-nav {

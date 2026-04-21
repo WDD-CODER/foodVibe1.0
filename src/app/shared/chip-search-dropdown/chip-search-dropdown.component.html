@@ -31,7 +31,7 @@
              [class.dropdown-item--highlight]="highlightIndex_() === i"
              tabindex="-1"
              role="option"
-             (click)="add.emit(opt); $event.stopPropagation()">
+             (click)="add.emit(opt); closeDropdown(); $event.stopPropagation()">
           {{ displayFn()(opt) }}
         </div>
       }
