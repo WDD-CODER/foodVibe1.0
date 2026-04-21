@@ -308,13 +308,13 @@ export class RecipeFormService {
     recipe.ingredients_.forEach(ing => {
       let item = this.state.products_().find(p => p._id === ing.referenceId)
         ?? this.state.recipes_().find(r => r._id === ing.referenceId)
-      // Auto-repair: if referenceId is missing but nameSnapshot is set, try to find
-      // the product by name and restore the link. This silently fixes recipes that
-      // were accidentally saved as unlinked drafts (e.g. via clearIngredient() while
-      // the ingredient had a name but no referenceId).
       let resolvedRefId = ing.referenceId
       let resolvedType = ing.type
-      if (!resolvedRefId && ing.nameSnapshot) {
+      // Auto-repair by nameSnapshot: covers two cases —
+      //   A) referenceId was null (saved as unlinked draft via clearIngredient)
+      //   B) referenceId is set but product was deleted/replaced (orphaned reference)
+      // In both cases, if nameSnapshot matches a current product/recipe name, restore the link.
+      if (!item && ing.nameSnapshot) {
         const byName = this.state.products_().find(p => p.name_hebrew === ing.nameSnapshot)
           ?? this.state.recipes_().find(r => r.name_hebrew === ing.nameSnapshot)
         if (byName) {
@@ -322,6 +322,12 @@ export class RecipeFormService {
           resolvedRefId = byName._id
           resolvedType = 'base_unit_' in byName ? 'product' : 'recipe'
         }
+      }
+      // If item still not resolved (orphaned referenceId + no nameSnapshot) — clear
+      // resolvedRefId so isUnlinkedRow() fires and the badge prompts the user to re-link.
+      if (!item && resolvedRefId) {
+        resolvedRefId = undefined
+        resolvedType = undefined
       }
       const itemForGroup = item
         ? {
