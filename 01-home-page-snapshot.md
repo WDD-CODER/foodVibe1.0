@@ -1,0 +1,84 @@
+- generic [ref=e2]:
+  - navigation [ref=e4]:
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - generic [ref=e8]: G
+        - generic "admin" [ref=e9]:
+          - img [ref=e11]
+      - button "התנתקות" [ref=e14] [cursor=pointer]: Guest Admin
+    - generic [ref=e15]:
+      - link "לוח בקרה" [ref=e16] [cursor=pointer]:
+        - /url: /dashboard
+        - text: לוח בקרה
+        - img [ref=e18]
+      - link "מלאי" [ref=e23] [cursor=pointer]:
+        - /url: /inventory
+        - text: מלאי
+        - img [ref=e25]
+      - link "ספר מתכונים" [ref=e29] [cursor=pointer]:
+        - /url: /recipe-book
+        - text: ספר מתכונים
+        - img [ref=e31]
+      - link "תפריטי אירוע" [ref=e33] [cursor=pointer]:
+        - /url: /menu-library
+        - text: תפריטי אירוע
+        - img [ref=e35]
+  - generic [ref=e42]:
+    - banner [ref=e43]:
+      - heading "לוח בקרה" [level=1] [ref=e44]
+      - group "Dashboard actions" [ref=e45]:
+        - navigation "Dashboard sections" [ref=e46]:
+          - button "הגדרות ליבה" [ref=e47] [cursor=pointer]
+          - button "מיקומי אירוע" [ref=e48] [cursor=pointer]:
+            - text: מיקומי אירוע
+            - img [ref=e50]
+          - button "אשפה" [ref=e53] [cursor=pointer]:
+            - text: אשפה
+            - img [ref=e55]
+          - button "ספקים" [ref=e58] [cursor=pointer]:
+            - generic [ref=e59]: ספקים
+            - img [ref=e61]
+    - main [ref=e66]:
+      - generic [ref=e67]:
+        - article [ref=e68] [cursor=pointer]:
+          - generic [ref=e69]:
+            - img [ref=e72]
+            - heading "סה\"כ מוצרים" [level=2] [ref=e76]
+          - paragraph [ref=e77]: "252"
+          - generic [ref=e78]:
+            - button "צפייה במלאי" [ref=e79]
+            - button "הוסף מוצר" [ref=e80]
+        - article [ref=e81] [cursor=pointer]:
+          - generic [ref=e82]:
+            - img [ref=e85]
+            - heading "סה\"כ מתכונים/מנות" [level=2] [ref=e87]
+          - paragraph [ref=e88]: "24"
+          - generic [ref=e89]:
+            - button "צפייה בספר מתכונים" [ref=e90]
+            - img [ref=e91]
+        - article [ref=e93] [cursor=pointer]:
+          - generic [ref=e94]:
+            - img [ref=e97]
+            - heading "מלאי נמוך" [level=2] [ref=e99]
+          - paragraph [ref=e100]: "0"
+          - generic [ref=e101]:
+            - button "צפייה במלאי" [ref=e102]
+            - img [ref=e103]
+        - article [ref=e105] [cursor=pointer]:
+          - generic [ref=e106]:
+            - img [ref=e109]
+            - heading "מתכונים/מנות לא מאושרים" [level=2] [ref=e112]
+          - paragraph [ref=e113]: "24"
+          - generic [ref=e114]:
+            - button "צפייה בספר מתכונים" [ref=e115]
+            - img [ref=e116]
+      - generic [ref=e118]:
+        - heading "פעילות אחרונה" [level=2] [ref=e120]
+        - paragraph [ref=e121]: עדיין אין פעילות להצגה
+  - generic [ref=e122]:
+    - generic:
+      - button "בונה מתכונים":
+        - generic:
+          - img
+    - button "פעולות מהירות" [ref=e123] [cursor=pointer]:
+      - img [ref=e125]

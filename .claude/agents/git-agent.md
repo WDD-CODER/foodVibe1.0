@@ -72,6 +72,7 @@ If splitting into multiple branches, repeat a block per branch, separated by a b
 6. Execute: `git add` → `git commit` → `git push` (separate Bash calls, never chained)
 7. If user wants PR: `gh pr create --base main --head <branch> --title "..." --body "..."`
 8. If user wants merge: `gh pr merge <n> --merge --delete-branch`
+   **If that fails** (exit code non-zero, error mentions local checkout or dirty files): fall back to `gh pr merge <n> --merge --auto` — this merges server-side without a local checkout. Do NOT stash or commit the dirty file (e.g. `.claude/reflect/failure-log.tsv` is intentionally left untracked).
 9. Report result. Done.
 10. **Todo Update + Auto-Archive:**
     - In `.claude/todo.md`, set any sub-tasks completed by this commit to `[x]`.
@@ -105,7 +106,7 @@ After merge: all branches deleted, main synced.
 
 4. End with: **Approve all? (Y/N)** — ONE gate for the entire batch
 5. Execute sequentially, NO mid-batch prompts:
-   - Per branch: `git push` → `gh pr create` → `gh pr merge --merge` → `git push origin --delete <branch>`
+   - Per branch: `git push` → `gh pr create` → `gh pr merge --merge --delete-branch` (fall back to `gh pr merge --merge --auto` if local dirty files block checkout) → verify merged
    - After all: `git checkout main` → `git pull origin main`
 6. ONE summary at end, wrapped in a `text` block:
 

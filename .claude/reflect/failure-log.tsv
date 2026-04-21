@@ -33,3 +33,29 @@
 2026-04-21 17:00:26	Edit	C:\foodCo\foodVibe1.0\.claude\commands\evaluate-me.md	**Verdict**: [SUCCESS | PARTIAL | FAILED]	
 2026-04-21 17:00:32	Edit	C:\foodCo\foodVibe1.0\CLAUDE.md	@{filePath=C:\foodCo\foodVibe1.0\CLAUDE.md; oldString=- **Build gate**: `ng build` must pass before any commit. No excep	
 2026-04-21 17:02:54	Bash	cd C:/foodCo/foodVibe1.0 && ng build 2>&1 | tail -20	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-21 17:35:01	Bash	grep -r "feat/session\|session-\|YYYYMMDD" "C:\foodCo\foodVibe1.0\.claude" --inc	C:\foodCo\foodVibe1.0\.claude/commands/reflect.md:237:3. Note any **session-specific gaps**: things the agent actually d	
+2026-04-21 17:38:29	Bash	git show 8faeaa3 --stat
+echo "---"
+git show 8faeaa3 --no-stat -p | head -80	fatal: unrecognized argument: --no-stat; stderr=; interrupted=False; isImage=False; noOutputExpected=False}	
+2026-04-21 17:43:49	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-book\components\recipe-book-list\reci	      error: () => { this.deletingId_.set(null); }	
+2026-04-21 17:44:08	Bash	ng build 2>&1 | tail -20	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-21 17:58:07	Bash	cat scripts/repair-recipe-references.mjs	  console.error('ERROR: MONGO_REMOTE_URI not set in .env')	
+2026-04-21 17:58:14	Edit	C:\foodCo\foodVibe1.0\scripts\context-monitor.sh	# The 70% hard gate forces a session handoff ΓÇö no exceptions.	
+2026-04-21 18:01:46	Write	C:\foodCo\foodVibe1.0\.claude\retrospectives\2026-04-21-18-00-refactor-planner.m	- **Ship workflow: `gh pr merge --merge --delete-branch` failed locally** due to dirty `failure-log.tsv`. Had to fall ba	
+2026-04-21 18:04:00	Edit	C:\foodCo\foodVibe1.0\.claude\agents\end-of-session-agent.md	| **Build gate is hard** | Build failure blocks ALL commit/push operations ΓÇö no exceptions |	
+2026-04-21 18:15:24	Bash	bash .claude/reflect/test-runner.sh .claude/skills/cssLayer/SKILL.md .claude/ref	checks_failed:  0	
+2026-04-21 18:15:34	Bash	bash .claude/reflect/test-runner.sh .claude/skills/angularComponentStructure/SKI	checks_failed:  0	
+2026-04-21 18:17:00	Bash	find ~/.claude -name "failure-log*" 2>/dev/null
+find ~/.claude -name "*failure*"	/c/Users/danwe/.claude/plugins/marketplaces/thedotmack/docs/reports/issue-602-posttooluse-worker-service-failed.md	
+2026-04-21 18:17:05	Bash	# The gitStatus shows .claude/reflect/failure-log.tsv as modified ΓÇö must be re	2026-04-20 14:23:28 Bash cat /c/foodCo/foodVibe1.0/agent.md | head -100 1. Run `ng build` or full `getDiagnostics` ╬ô├ç├	
+2026-04-21 18:17:11	Bash	cat .claude/reflect/tool-failure-hook.ps1 2>/dev/null | head -60	    "Error:", "error:", "FAILED", "failed",	
+2026-04-21 18:17:21	Bash	# Find all references to failure-log across the project's .claude dir
+grep -r "f	.claude/retrospectives/2026-04-21-18-00-refactor-planner.md:36:- **Ship workflow: `gh pr merge --merge --delete-branch` 	
+2026-04-21 18:17:29	Bash	cat .claude/commands/reflect-list.md	| 1 | Bash | Build failed: NG0... | 4 | 2026-04-10 |	
+2026-04-21 18:18:11	Bash	# Check what patterns dominate the current unprocessed failure log (skip header)	      1 fatal: unrecognized argument: --no-stat; stderr=; interrupted=False; isImage=False; noOutputExpected=False}	
+2026-04-21 18:20:50	Bash	cd C:/foodCo/foodVibe1.0 && ng build 2>&1 | tail -30	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-21 18:21:26	Bash	cd C:/foodCo/foodVibe1.0 && npx ng build 2>&1 | tail -30	@{stdout=Application bundle generation failed. [20.212 seconds]	
+2026-04-21 18:34:30	mcp__playwright__browser_evaluate	@{function=async () => {
+  // Get the stored token
+  const token = sessionStorag	await page.evaluate('async () => {\n  // Get the stored token\n  const token = sessionStorage.getItem(\'fv_token\');\n  	
+2026-04-21 19:23:21	Bash	ng build 2>&1 | tail -20	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	

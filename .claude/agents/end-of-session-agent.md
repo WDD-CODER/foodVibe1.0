@@ -89,6 +89,12 @@ git push -u origin {new_name}
 ```
 Otherwise just: `git push -u origin {new_name}`
 
+**PR merge fallback (dirty working tree):** If the user asks to merge to main and `gh pr merge --merge --delete-branch` fails because a dirty file (e.g. `.claude/reflect/failure-log.tsv`) blocks local checkout, fall back to:
+```bash
+gh pr merge {pr_number} --merge --auto
+```
+This merges server-side without a local checkout. Do not attempt to commit or stash the dirty file — it is intentionally left untracked.
+
 ---
 
 ## Phase 3: Write session-state.md

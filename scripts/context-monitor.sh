@@ -38,6 +38,28 @@ fi
 # so we persist it here where we know PostToolUse always provides it.
 echo "$TRANSCRIPT" > /tmp/claude-transcript-path
 
+# Detect a fresh conversation — either a new transcript file or an explicit
+# reset flag written by session-startup.sh (handles /clear with same file path).
+# In both cases, reset the compact baseline to the current file size so that
+# SIZE (delta) starts at 0 for the new conversation.
+LAST_TRANSCRIPT=$(cat /tmp/claude-last-transcript-path 2>/dev/null)
+SESSION_RESET=0
+if [ "$TRANSCRIPT" != "$LAST_TRANSCRIPT" ]; then
+  SESSION_RESET=1
+fi
+if [ -f /tmp/claude-context-reset ]; then
+  rm -f /tmp/claude-context-reset
+  SESSION_RESET=1
+fi
+echo "$TRANSCRIPT" > /tmp/claude-last-transcript-path
+
+if [ "$SESSION_RESET" -eq 1 ]; then
+  BASELINE_NOW=$(wc -c < "$TRANSCRIPT" 2>/dev/null || echo 0)
+  echo "$BASELINE_NOW" > /tmp/claude-compact-baseline
+  echo 1 > "$COUNTER_FILE"
+  COUNT=1
+fi
+
 # Get effective size — delta since last compact, or total if no compact yet.
 # After /compact the .jsonl file doesn't shrink (it's append-only), so raw size
 # would fire false alerts immediately after compaction. Subtracting the baseline

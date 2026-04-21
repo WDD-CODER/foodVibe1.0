@@ -6,61 +6,69 @@ feat/session-20260421
 ## Date
 2026-04-21
 
-## Session Summary
-- Shipped all 8 mobile audit fix plans (276–283): RTL FAB, ingredient grid, bottom-nav safe zone, sticky header, RTL layout, input overflow, dropdown z-index, touch targets — all merged via PR #132
-- Fixed product-edit false "name taken" bug in sync-master.js (name-collision guard on clone + dedup on existing products)
-- Refactored recipe.resolver.ts to route by ID prefix (dish_/prep_) avoiding wasted 404 round-trips
-- Applied retrospective improvements: execute-it skill update, context-management skill, end-session skill fix, evaluate-me command update, failure-log entries, multi-agent retrospective written
+## Committed Fixes (clean)
+- `11b512a` — Bug 1: guest navigation routes to cook-view (recipe-book-list)
+- `7b2870e` — Bug 2 partial: auto-repair `patchFormFromRecipe` when referenceId null + nameSnapshot set
 
-## Current Bug Investigation (INCOMPLETE — context limit hit)
+## Active Bug — "משרה לפרגית בולגוגית" (prep LZDsy)
 
-### Bug 1: FIXED — recipe-book-list guest navigation
-- **Root cause**: `onRowClick` always called `onEditRecipe` → `/recipe-builder/:id` (authGuard). Cook button had `[disabled]="!isLoggedIn()"`. Guests had zero path to view a recipe.
-- **Fix applied (not yet committed)**:
-  - `recipe-book-list.component.ts`: `onRowClick` now routes guests to `onCookRecipe()` → `/cook/:id` (open route)
-  - `recipe-book-list.component.html`: removed `[disabled]="!isLoggedIn()"` from cook button
-- **Build**: passes
+### Real Root Cause (confirmed via browser + localStorage inspection)
+- Recipe `LZDsy` has 11 ingredients with **non-null referenceIds** (BCI12, ME4Pi, etc.)
+- **nameSnapshot is null on all** — recipe was saved before nameSnapshot was in the model
+- The referenced product IDs (BCI12 etc.) **do not exist** in PRODUCT_LIST (localStorage wiped at some point)
+- Result: orphaned referenceIds + no nameSnapshot fallback
 
-### Bug 2: NEEDS USER CLARIFICATION — "רכיב לא מקושר" in recipe-builder
-- **Screenshot**: "Guest Admin" in recipe-builder; 4 ingredients all show "רכיב לא מקושר"; ₪0.00 costs; recipe stamped "NOT APPROVED"
-- **Full trace complete**: `dish-data.service.ts` passes raw DB data as-is (no ingredient mapping). `Ingredient` model: `referenceId?` is optional. `patchFormFromRecipe` always does `patchValue({ referenceId: ing.referenceId })` — so if the saved recipe has `ing.referenceId === undefined`, the badge shows.
-- **Conclusion**: `97c0b44` (Apr 12) was the change — it intentionally allowed saving unlinked draft ingredients. These ARE expected to show "לא מקושר". The badge exists so users can click to link them via Quick-Edit (`b9d6e87`).
-- **This is by-design**, NOT a regression in the code. The recipe itself was saved with unlinked ingredients (likely via AI recipe modal). "NOT APPROVED" stamp and sub-10g amounts confirm it's an AI draft.
-- **If user believes specific recipes that WERE linked are now showing unlinked**: likely the recipe was resaved after `97c0b44` while still having name-only draft rows, which overwrote the previous linked state.
-- **Action needed**: Ask user — is this a new AI-created recipe, or an old recipe that used to show costs?
+### Symptom breakdown
+| View | What shows | Why |
+|------|-----------|-----|
+| Cook-view | `(לא נמצא)` | scaling.service finds referenceId, item=undefined, nameSnapshot=null → fallback |
+| Recipe-builder | blank name, NO badge | patchFormFromRecipe sets referenceId="BCI12" (truthy) → isUnlinkedRow=false |
 
-## Next Steps
-1. Commit Bug 1 fix (uncommitted — recipe-book-list guest navigation)
-2. Ask user: is the affected recipe new (AI) or old (previously had costs/linked)?  
-   - If old recipe lost links: look for a re-save event stripping referenceIds  
-   - If new AI recipe: this is intentional — direct user to click badge to link products
+### My `patchFormFromRecipe` auto-repair DOES NOT help here
+- It only fires on `!resolvedRefId` — but referenceId is "BCI12" (truthy) → skipped
+- Needs to ALSO handle: referenceId set but product not in state
 
-## Files Modified
- .claude/agents/invocation-log.tsv                  |   2 +
- .claude/commands/evaluate-me.md                    |   3 +-
- .claude/commands/execute-it.md                     |  16 +++
- .claude/reflect/failure-log.tsv                    |  13 +++
- .claude/retrospectives/2026-04-21-15-00-multi-agent.md | 112 ++++++++++++++
- .claude/retrospectives/2026-04-21-17-00-multi-agent.md | 115 ++++++++++++++
- .claude/skills/context-management/SKILL.md         |  14 +++
- .claude/skills/end-session/SKILL.md                |   2 +-
- CLAUDE.md                                          |   1 +
- docs/session-state-feat-session-20260421-1.md      | (this file)
- src/app/core/resolvers/recipe.resolver.ts          |  46 +++++-
- src/app/pages/suppliers/.../supplier-list.component.scss |   5 +
- src/app/pages/venues/.../venue-form.component.scss  |   5 +
- src/app/shared/list-shell/list-shell.component.scss |   8 +-
- 15 files changed, 344 insertions(+), 19 deletions(-)
+### Architecture verdict (audited)
+- `useBackend=false` (localStorage) in dev is **intentional, not legacy**
+- `useBackend=true` (MongoDB via HTTP) in prod
+- Clean adapter pattern — no migration needed
+- The data corruption is localStorage-specific: products wiped (demo reload?) while recipe retained old IDs
 
-## Commit
-8faeaa3 — fix(resolver): route recipe resolver by ID prefix, commit session artifacts
+## Plan (approved approach — see jazzy-weaving-lagoon.md)
+Two-file fix:
 
-## PR
-N/A — branch already merged via PR #132; current commit pushed to feat/session-20260421 (post-merge cleanup)
+### Fix A: `src/app/pages/recipe-builder/services/recipe-form.service.ts`
+Extend auto-repair in `patchFormFromRecipe` to handle orphaned referenceIds:
+```typescript
+let item = state.products_().find(p => p._id === ing.referenceId)
+  ?? state.recipes_().find(r => r._id === ing.referenceId)
+let resolvedRefId = ing.referenceId
+let resolvedType = ing.type
 
-## Next Steps
-- [ ] Re-run `/mobile-flow-audit` verification passes for plans 276–283 (re-audit clusters 1,2,4,5,6,7,8,10)
-- [ ] Update TRIAGE.md deferred clusters section after re-audit confirms fixes
-- [ ] Plan 259 — DB-Backed Shared Few-Shot Pool (next unstarted feature plan)
-- [ ] Techdebt tasks 8,9,10 — investigate repair/migration/trim-demo scripts before deleting
-- [ ] Did you run `/reflect` today? If yes, log the run in `.claude/reflect/test-drive/log.md`.
+// Try name-based repair: covers both null-refId AND orphaned-refId cases
+if (!item && ing.nameSnapshot) {
+  const byName = state.products_().find(p => p.name_hebrew === ing.nameSnapshot)
+    ?? state.recipes_().find(r => r.name_hebrew === ing.nameSnapshot)
+  if (byName) { item = byName; resolvedRefId = byName._id; resolvedType = ... }
+}
+// If still no item → clear resolvedRefId so badge shows (user must re-link)
+if (!item && resolvedRefId) { resolvedRefId = undefined; resolvedType = undefined }
+```
+
+### Fix B: `src/app/core/services/scaling.service.ts`
+In `getScaledIngredients`, when referenceId set but item not found → add `isUnlinked: true`:
+```typescript
+// Change '(לא נמצא)' fallback → '' and add isUnlinked when !item
+const name = item?.name_hebrew ?? ing.nameSnapshot ?? ''
+return { name, ..., ...(item ? {} : { isUnlinked: true }) }
+```
+
+## Next Steps (new session)
+1. Apply Fix A to `recipe-form.service.ts` (replace current auto-repair block ~lines 309-334)
+2. Apply Fix B to `scaling.service.ts` (lines ~63-74)
+3. `ng build` — must pass
+4. Browser test: cook-view shows faded/italic unlinked rows; recipe-builder shows "לא מקושר" badge
+5. Commit both
+
+## Plan file
+`C:\Users\danwe\.claude\plans\jazzy-weaving-lagoon.md`
