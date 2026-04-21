@@ -511,3 +511,11 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] C1: Add cook_mode_* translation keys to dictionary.json
 - [x] C2: Wire "Start Cook Mode" button in cook-view.page
 - [x] D1: ng build verification
+
+
+---
+
+## Workflow Evolution
+
+- [ ] **2026-04-28**: Reflect test-drive verdict due — read `.claude/reflect/test-drive/log.md`, apply decision from `decision-criteria.md` (KEEP / REBUILD / PARK)
+- [ ] **2026-04-28**: Remove reflect test-drive reminder from `.claude/skills/end-session/SKILL.md` (expires today)
