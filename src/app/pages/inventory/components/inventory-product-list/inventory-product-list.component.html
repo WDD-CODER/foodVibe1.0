@@ -111,6 +111,9 @@
             </span>
           }
           {{ product.name_hebrew }}
+          @if (product.nutrition_per_100g) {
+            <app-nutrition-badge [nutrition]="product.nutrition_per_100g"></app-nutrition-badge>
+          }
         </div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
           <div class="col-category c-list-body-cell" cellCarouselSlide [label]="'category' | translatePipe">{{ getCategoryDisplay(product.categories_) || '—' }}</div>

@@ -86,7 +86,12 @@ import {
   Watch,
   Play,
   Pause,
-  Crown
+  Crown,
+  Leaf,
+  Dumbbell,
+  Wheat,
+  Candy,
+  Waves
 } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { provideHttpClient, withInterceptors } from '@angular/common/http'
@@ -206,7 +211,12 @@ export const appConfig: ApplicationConfig = {
         Watch,
         Play,
         Pause,
-        Crown
+        Crown,
+        Leaf,
+        Dumbbell,
+        Wheat,
+        Candy,
+        Waves
       })
     )
   ]

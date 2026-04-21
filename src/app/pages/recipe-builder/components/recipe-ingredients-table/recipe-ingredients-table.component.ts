@@ -26,6 +26,7 @@ import { map } from 'rxjs'
 import { take } from 'rxjs/operators'
 import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop'
 import { ClickOutSideDirective } from '@directives/click-out-side'
+import { NutritionBadgeComponent } from 'src/app/shared/nutrition-badge/nutrition-badge.component'
 
 @Component({
   selector: 'app-recipe-ingredients-table',
@@ -43,7 +44,8 @@ import { ClickOutSideDirective } from '@directives/click-out-side'
     CdkDrag,
     CdkDropList,
     CdkDragHandle,
-    ClickOutSideDirective
+    ClickOutSideDirective,
+    NutritionBadgeComponent,
   ],
   templateUrl: './recipe-ingredients-table.component.html',
   styleUrl: './recipe-ingredients-table.component.scss'

@@ -3,6 +3,9 @@ description: Structured feature scoping — forcing questions, landscape search,
 allowed-tools: Read, Grep, Glob, WebSearch, WebFetch
 ---
 
+> **DEPRECATION NOTICE** (added 2026-04-21, remove after 2026-04-28): Use `/feat` for new feature work. This file remains functional as an alias during the transition week.
+
+
 # Skill: new-feature
 
 Structured scoping flow that produces a sharp, evidence-based brief. Does NOT write code — outputs a `brief.md` file that feeds into `/plan-implementation`.

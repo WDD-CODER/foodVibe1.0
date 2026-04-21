@@ -41,7 +41,6 @@ description: Single source of truth for all project rules, standards, and skill/
 - **Breadcrumbs only** `[SHARED]`: Read `.claude/skills/breadcrumb-navigator/SKILL.md` and follow it.
 - **After a hacky fix** `[SHARED]`: Read `.claude/skills/elegant-fix/SKILL.md` to refine into a clean solution.
 - **Session end / wrap up** `[CC]`: User types `/end-session`, OR says "done", "end session", "wrap up", "finish up", "ship", "handoff" → invoke the **`end-session` skill** using the Skill tool. The skill delegates to the `end-of-session-agent` which handles everything: brief validation, build gate, techdebt scan, git operations, todo archive, doc refresh, plan cleanup, session evaluation, and handoff report.
-  - **Quick chat** `[SHARED]`: User invokes `/quick-chat` → skip handoff check and GitHub sync for this chat only.
   - Never ask the user which skill to use — the agent detects and routes automatically.
 - **Creating or refactoring Angular components** `[SHARED]`: Read `.claude/skills/angularComponentStructure/SKILL.md`.
 - **Lucide icons** `[SHARED]`: Before adding or editing `<lucide-icon name="...">` → read `.claude/standards-domain.md` Lucide section.
@@ -52,15 +51,13 @@ description: Single source of truth for all project rules, standards, and skill/
 - **Security audit (formal)** `[CC]`: For pre-deploy or comprehensive security reviews → invoke `/cso` (OWASP Top 10 + STRIDE). For targeted file-specific audits during development → invoke `security-officer` agent as before.
 - **Angular Pipes & Directives** `[SHARED]`: Before creating or refactoring any Angular Pipe or Directive → read `.claude/skills/angular-pipe-logic/SKILL.md`.
 - **Crypto / token management** `[SHARED]`: Before creating or modifying `auth-crypto.ts` → read `.claude/skills/auth-crypto/SKILL.md`. Security Officer invocation is mandatory at completion.
-- **Global doc finalization** `[SHARED]`: User says "finalize docs" or "global audit" → read `.claude/skills/finalize-docs/SKILL.md`.
+- **Global doc finalization** `[SHARED]`: User says "finalize docs" or "global audit" → invoke `breadcrumb-navigator` skill then `update-docs` skill in sequence.
 - **Security review** `[CC]`: After any change touching `auth.guard.ts`, `auth.interceptor.ts`, `auth-crypto.ts`, `user.service.ts`, localStorage/sessionStorage, new routes, or `[innerHTML]`/`bypassSecurityTrust*` → invoke `security-officer` agent as the final step before committing.
 - **Autonomous plan execution** `[CC]`: User invokes `/auto-solve` or says "start auto-solve" → read `.claude/commands/auto-solve.md` and follow it.
-- **Interface design** `[SHARED]`: User asks to design, redesign, layout, or improve a UI page, dashboard, or component → invoke `/init` (new design) or `/audit` (check existing) or `/critique` (improve existing) or `/extract` (extract patterns) or `/status` (system state) as appropriate.
 - **Skill test suite** `[CC]`: User invokes `/reflect add-tests` → read `.claude/commands/reflect-add-tests.md` and follow it.
 - **Sweep stale todos** `[SHARED]`: At session end (after all tasks marked `[x]`) or on explicit request → read `.claude/commands/sweep-stale-todos.md` and follow it.
 - **Batch reflection** `[CC]`: User invokes `/reflect-list` → read `.claude/commands/reflect-list.md` and follow it. Processes the tool failure log and applies one low-risk fix per failure group.
 - **MemPalace search** `[CC]`: User invokes `/mp-search <query>` or `/recall <query>` → read `.claude/skills/mp-search/SKILL.md` and follow it.
-- **MemPalace wake-up** `[CC]`: User invokes `/mp-wake-up` → read `.claude/commands/mp-wake-up.md` and follow it.
 - **Memory search** `[CC]`: When answering "why did we...", "have we tried...", "what happened with...", or recalling past decisions → use MemPalace MCP tools before grepping session handoffs. Use `mempalace_search(query="...", limit=5)` → filter by relevance → `mempalace_kg_query(entity="...")` for architectural decisions. **Use MemPalace when:** question is semantic/fuzzy, looking for past decisions/plans/constraints, need context across files. **Use Grep/Read when:** finding exact code/function names, structural navigation, editing files. If MemPalace tools unavailable, skip silently and grep session handoffs instead.
 
 ---
@@ -135,7 +132,7 @@ Agent persona files live in `.claude/agents/`. Load on demand — do not pre-loa
 | Team Leader | `team-leader.md` | Task spans >2 subsystems; agents conflict; progress report needed |
 | Software Architect | `software-architect.md` | PRD exists and needs HLD; architecture trade-offs to evaluate |
 | Product Manager | `product-manager.md` | Planning a new feature; writing a plan file; scoping work |
-| Breadcrumb Navigator | `breadcrumb-navigator.md` | New `pages/<x>/` or app subtree; structural changes; after update-docs |
+| Breadcrumb Navigator | `skills/breadcrumb-navigator/SKILL.md` (agent file removed — skill is sufficient) | New `pages/<x>/` or app subtree; structural changes; after update-docs |
 | QA Engineer | `qa-engineer.md` | Spec gaps; diagnosing failing tests; E2E creation |
 | Mobile Flow Auditor | `mobile-flow-auditor.md` | Mobile layout regression hunt; pre-release UX sanity check; after any shared UI or layout change |
 | Security Officer | `security-officer.md` | Post-feature review of auth/storage/route changes; pre-deploy; security consult |
@@ -199,3 +196,100 @@ Agent persona files live in `.claude/agents/`. Load on demand — do not pre-loa
 * **Phase 3 (Ledger Sync)**: On "save the plan", first action: append sub-tasks to `.claude/todo.md`. Then read `.claude/skills/save-plan/SKILL.md` and follow it.
 * **Phase 4 (Atomic Execution)**: Full autonomous file operations post-approval. Commit each sub-task with Conventional Commits. Update `.claude/todo.md` to `[x]` after each commit.
 * **Phase 5 (QA Loop)**: After all `[x]`, output a **How to verify** section: bullet list of where to go in the app and what to expect.
+---
+
+## Session Preflight (moved from agent.md)
+
+> Run these steps at the start of every session, after reading CLAUDE.md and copilot-instructions.md.
+
+1. **MemPalace wake-up (once per session)**:
+   - Run `mempalace_diary_read(agent_name="claude-main", last_n=3)` — see what past sessions worked on.
+   - Run `mempalace_status()` — confirm palace is live.
+   - If either fails → note "MemPalace unavailable" and continue (non-blocking).
+
+2. **GitHub sync (once per calendar day)**: Check `notes/github-sync/<today>.md`. If missing → run `github-sync` skill.
+
+3. **Session handoff**: Check `.claude/sessions/` (most recent) or `notes/session-handoffs/` (legacy, last 3 days).
+
+4. **Todo**: Check `.claude/todo.md` for related pending work.
+
+5. **Branch check**: Run `git branch --show-current`. If on `main`/`master` → warn user proactively. The `branch-guard` hook auto-creates `feat/session-YYYYMMDD` on the first Edit/Write.
+
+6. **Open reflection items**: Scan `.claude/reflect/open/*.reflect.md` for `status: open`. If any found → output the Reflection Banner below before proceeding. If none → skip silently.
+
+### Reflection Banner
+
+```
+╔══════════════════════════════════════════════════════════╗
+║  OPEN REFLECTION ITEMS                                   ║
+║  Last auto-reflect run: <timestamp from newest file>     ║
+║  -> Found <N> issues · Applied <K> fix(es) · <M> open    ║
+╠══════════════════════════════════════════════════════════╣
+║  Stop mid-run:  ! echo. > .claude/reflect/.skip          ║
+╚══════════════════════════════════════════════════════════╝
+```
+
+- N = total `.reflect.md` files in `.claude/reflect/open/`
+- K = files with `status: resolved` AND `## Action Taken` containing "Applied fix (kept)"
+- M = files with `status: open`
+- timestamp = `created:` from the newest `.reflect.md` file
+
+---
+
+## Post-Execution Gate (moved from agent.md)
+
+After completing any plan execution:
+1. Run `ng build` or full `getDiagnostics` — mandatory, no exceptions.
+2. If build fails → fix before reporting completion.
+3. After any change → follow `validation-checklist.md`: show checklist, ask "Should I verify this myself, or will you check it?" Do not auto-run `/qa`.
+4. Do NOT run the full test suite here — run tests only on explicit user request.
+
+---
+
+## Commands Reference (moved from agent.md)
+
+Commands live in `.claude/commands/`. Use the path router in `CLAUDE.md` to select the right one.
+
+| Command | Purpose |
+|---------|---------|
+| `/feat` | New feature — loads Angular+domain standards, invokes plan→execute flow |
+| `/plan` | PRD/HLD planning — invokes product-manager, software-architect |
+| `/fix` | Bug fix — asks area (css/auth/data/ui/api), loads matching standards |
+| `/refactor` | Refactor — loads Angular+cssLayer+techdebt standards |
+| `/security` | Security audit/fix — loads security standards, invokes security-officer |
+| `new-feature.md` | Structured feature scoping (legacy — use /feat) |
+| `plan-implementation.md` | Architectural brief → implementation plan (read-only phase) |
+| `execute-it.md` | Execute the implementation plan (full write phase) |
+| `test-pr-review-merge.md` | Full CI: test, PR, review, merge |
+| `validate-agent-refs.md` | Health check: verify all agent file cross-references |
+| `auto-solve.md` | Autonomous plan executor |
+| `reflect.md` | Autonomous skill improvement loop |
+| `reflect-list.md` | Batch reflection — reviews tool failure log |
+| `nightly-audit.md` | Nightly code audit (6 violation categories) |
+| `audit-report.md` | Display latest nightly audit report |
+| `cleanup.md` | Prune old sessions and merged worktrees (dry-run + confirm) |
+
+---
+
+## Agent Roster (§0.3) — moved from agent.md
+
+Active agents in `.claude/agents/`:
+
+| Agent | When to invoke |
+|-------|---------------|
+| `team-leader` | Multi-task orchestration, parallel agent coordination |
+| `git-agent` | All git operations: commit, push, PR, merge, batch |
+| `end-of-session-agent` | Session end — 4-phase fast path via `/ship` (< 2 min). Invoked by `/ship` and `/end-session` alias. |
+| `qa-engineer` | QA, test runs, bug verification |
+| `security-officer` | Security audits, auth review |
+| `product-manager` | PRD/HLD, feature scoping |
+| `software-architect` | Technical design, architecture decisions |
+
+---
+
+## Playwright MCP (moved from agent.md)
+
+Playwright is **disabled by default** to save CPU. To enable for a session:
+set `"playwright@claude-plugins-official": true` in `~/.claude/settings.json` and restart.
+
+`auto-solve.md` uses `mcp__playwright__*` as fallback **only** if gstack `/browse` daemon is unavailable.

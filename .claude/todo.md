@@ -77,7 +77,6 @@
 - [ ] Task 10: Investigate `scripts/trim-demo-data.mjs` — recurring or one-time? Add npm entry or delete
 - [x] Task 11: Add `git-agent.md` row to `§0.3` agent roster in `copilot-instructions.md`
 - [x] Task 12: Fix stale `commit-to-github Phase 0` reference in `.claude/agents/qa-engineer.md`
-- [ ] Task 13: Add `interface-design` trigger line to `copilot-instructions.md §0`
 - [ ] Task 14: Decide on `.claude/commands/reflect-add-tests.md` — add trigger or delete
 - [ ] Task 15: Decide on `.claude/commands/sweep-stale-todos.md` — verify pending update, then add trigger
 - [ ] Task 16: Decide on `getGeminiShots()` in `gemini-shots.util.ts` — build read-back feature or remove orphan export
@@ -512,3 +511,13 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] C1: Add cook_mode_* translation keys to dictionary.json
 - [x] C2: Wire "Start Cook Mode" button in cook-view.page
 - [x] D1: ng build verification
+
+
+---
+
+## Workflow Evolution
+
+- [ ] **2026-04-28**: Reflect test-drive verdict due — read `.claude/reflect/test-drive/log.md`, apply decision from `decision-criteria.md` (KEEP / REBUILD / PARK)
+- [ ] **2026-04-28**: Remove reflect test-drive reminder from `.claude/skills/end-session/SKILL.md` (expires today)
+- [ ] **2026-05-04**: Agent roster 2-week review — check `invocation-log.tsv` for actual usage patterns; decide if any further agents can be removed
+- [ ] **2026-05-04**: Reflect system verdict (if not applied on 2026-04-28): apply decision from `.claude/reflect/test-drive/decision-criteria.md` (PARK is default if < 3 runs logged)

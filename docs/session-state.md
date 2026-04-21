@@ -1,4 +1,60 @@
-# Session State -- 2026-04-17 (end of day -- context-monitor.sh rewrite committed)
+# Session State — 2026-04-19 (nutrition badge — mid-build-fix)
+
+## RESUME HERE (next session)
+
+**Build is FAILING** — one remaining fix needed:
+
+**`menu-intelligence.page.ts` line 896** — add semicolon:
+```typescript
+const addDish = document.getElementById('add-dish-' + s);  // ← semicolon!
+(next ?? addDish)?.focus()
+```
+
+After that fix, `ng build` should be clean (0 errors).
+
+**Then:** add tooltip flip logic to `NutritionBadgeComponent` — when badge is within 220px of viewport top, show tooltip below instead of above. See §Tooltip Flip below.
+
+**Then:** commit all 10 modified files.
+
+---
+
+## Modified Files (10 total — do NOT commit until build is clean)
+
+| File | Change |
+|---|---|
+| `src/app/core/models/product.model.ts` | `NutritionPer100g` interface + `nutrition_per_100g?` on Product |
+| `src/app/core/services/product-data.service.ts` | `nutrition_per_100g: legacy.nutrition_per_100g` in normalizeProduct() |
+| `src/app/app.config.ts` | `Leaf, Dumbbell, Wheat, Candy, Waves` in import + `.pick()` |
+| `src/app/shared/nutrition-badge/nutrition-badge.component.ts` | NEW — standalone OnPush badge |
+| `src/app/shared/nutrition-badge/nutrition-badge.component.html` | NEW — leaf icon + tooltip |
+| `src/app/shared/nutrition-badge/nutrition-badge.component.scss` | NEW — glass tooltip styles |
+| `inventory-product-list.component.ts` | `NutritionBadgeComponent` in imports[] |
+| `inventory-product-list.component.html` | `<app-nutrition-badge>` in .col-name cell |
+| `recipe-ingredients-table.component.ts` | `NutritionBadgeComponent` in imports[] |
+| `recipe-ingredients-table.component.html` | `<app-nutrition-badge>` after item-text span |
+| `menu-intelligence.page.ts` | 2/3 semicolons fixed (lines 692, 981) — line 896 still needs fix |
+
+**LINTER REVERT WARNING:** Linter auto-reverts `product.model.ts`, `product-data.service.ts`, `app.config.ts`, and both host component `.ts` files. If leaf icons disappear, re-check these 5 files.
+
+---
+
+## Tooltip Flip Logic (pending)
+
+Inject `ElementRef` into `NutritionBadgeComponent`, add:
+```typescript
+tooltipBelow = false
+
+onMouseEnter(): void {
+  this.tooltipBelow = this.el.nativeElement.getBoundingClientRect().top < 220
+  this.showTooltip = true
+}
+```
+Template: bind `[class.nb-tooltip--below]="tooltipBelow"` and `(mouseenter)="onMouseEnter()"`.
+SCSS: `.nb-tooltip--below { bottom: auto; top: calc(100% + 8px); }`
+
+---
+
+# Session State — 2026-04-17 (archived)
 
 > Single source of truth for all project rules, standards, and skill/agent routing.
 

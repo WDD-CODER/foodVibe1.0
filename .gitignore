@@ -59,10 +59,19 @@ testem.log
 *.key
 migration-dump.json
 
+# Claude Code runtime state inside tools
+tools/**/.claude/
+
 # Catalog seeder — runtime output (never commit)
 tools/catalog-seeder/output/pending-review.json
 tools/catalog-seeder/output/pending-manual.json
 tools/catalog-seeder/output/off-bulk-cache.csv.gz
+tools/catalog-seeder/output/review-list.txt
+tools/catalog-seeder/output/review-table.txt
+tools/catalog-seeder/output/to-enrich.json
+tools/catalog-seeder/output/*.csv.gz
+tools/catalog-seeder/output/*.json.gz
+tools/catalog-seeder/output/enriched.json
 # seed-products.json IS committed after admin review — intentionally not ignored
 tools/catalog-seeder/__pycache__/
 tools/catalog-seeder/*.pyc
