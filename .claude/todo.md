@@ -525,82 +525,82 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 ---
 
 ### Plan 276 — Mobile audit fix: rtl-fab (`plans/276-mobile-audit-rtl-fab.plan.md`)
-- [ ] `hero-fab.component.scss` line 4 — `left: 0.75rem` → `inset-inline-end: 0.75rem`
-- [ ] `hero-fab.component.scss` line 110 — `left: 0.5rem` → `inset-inline-end: 0.5rem`
-- [ ] Run `ng build` — 0 errors
+- [x] `hero-fab.component.scss` line 4 — `left: 0.75rem` → `inset-inline-end: 0.75rem`
+- [x] `hero-fab.component.scss` line 110 — `left: 0.5rem` → `inset-inline-end: 0.5rem`
+- [x] Run `ng build` — 0 errors
 - [ ] Re-run `/mobile-flow-audit --only dashboard --only recipe-builder-new-prep --only signup`
 - [ ] Update TRIAGE.md — Cluster 1 ✓ resolved
 
 ---
 
 ### Plan 277 — Mobile audit fix: ingredient-grid-mobile (`plans/277-mobile-audit-ingredient-grid-mobile.plan.md`)
-- [ ] `recipe-ingredients-table.component.scss` — add 5th column `2.75rem` to mobile grid template
-- [ ] Remove `display: none` from `.col-actions` in `@media (max-width: 640px)` block; assign `grid-column: 5`; set `.c-icon-btn { opacity: 1; min-width/height: 2.75rem }`
-- [ ] Run `ng build` — 0 errors
+- [x] `recipe-ingredients-table.component.scss` — add 5th column `2.75rem` to mobile grid template
+- [x] Remove `display: none` from `.col-actions` in `@media (max-width: 640px)` block; assign `grid-column: 5`; set `.c-icon-btn { opacity: 1; min-width/height: 2.75rem }`
+- [x] Run `ng build` — 0 errors
 - [ ] Re-run `/mobile-flow-audit --only recipe-builder-new-prep --only recipe-builder-new-dish`
 - [ ] Update TRIAGE.md — Cluster 2 C2/C4/DC1/DC2 ✓ resolved
 
 ---
 
 ### Plan 278 — Mobile audit fix: bottom-nav-occlusion (`plans/278-mobile-audit-bottom-nav-occlusion.plan.md`)
-- [ ] `_toolbar.scss` `.financial-bar` — `z-index: 201`; `@media ≤620px { bottom: 3.5rem }`
-- [ ] Menu-intelligence page SCSS — add `padding-block-end: calc(3.5rem + env(safe-area-inset-bottom,0))`
-- [ ] Venues-add SCSS — same `padding-block-end`
-- [ ] Inventory-add/edit SCSS — same `padding-block-end`
-- [ ] Equipment-add SCSS — same `padding-block-end`
-- [ ] Run `ng build` — 0 errors
+- [x] `_toolbar.scss` `.financial-bar` — `z-index: 201`; `@media ≤620px { bottom: 3.5rem }`
+- [x] Menu-intelligence page SCSS — add `padding-block-end: calc(3.5rem + env(safe-area-inset-bottom,0))`
+- [x] Venues-add SCSS — same `padding-block-end`
+- [x] Inventory-add/edit SCSS — same `padding-block-end`
+- [x] Equipment-add SCSS — same `padding-block-end`
+- [x] Run `ng build` — 0 errors
 - [ ] Re-run `/mobile-flow-audit --only menu-intelligence-event --only venues-add --only inventory-add-product --only inventory-edit-product --only equipment-add`
 - [ ] Update TRIAGE.md — Cluster 4 ✓ resolved
 
 ---
 
 ### Plan 279 — Mobile audit fix: sticky-header-safe-zone (`plans/279-mobile-audit-sticky-header-safe-zone.plan.md`)
-- [ ] `dashboard.page.scss` `.dashboard-content` — add `@media (max-width: 620px) { padding-block-start: 3.875rem; }`
-- [ ] `recipe-book-list.component.scss` — add same `padding-block-start: 3.875rem` at ≤620px
-- [ ] Run `ng build` — 0 errors
+- [x] `dashboard.page.scss` `.dashboard-content` — add `@media (max-width: 620px) { padding-block-start: 3.875rem; }`
+- [x] `recipe-book-list.component.scss` — add same `padding-block-start: 3.875rem` at ≤620px
+- [x] Run `ng build` — 0 errors
 - [ ] Re-run `/mobile-flow-audit --only dashboard --only recipe-book-list`
 - [ ] Update TRIAGE.md — Cluster 5 ✓ resolved
 
 ---
 
 ### Plan 280 — Mobile audit fix: rtl-layout (`plans/280-mobile-audit-rtl-layout.plan.md`)
-- [ ] `recipe-book-list.component.scss` — fix filter close button `left:` → `inset-inline-end:` and search icon position
-- [ ] Suppliers SCSS — add `padding-inline-end: 0.75rem` to page title at mobile
-- [ ] Venues SCSS — fix "הוסף שורה" button icon order for RTL
-- [ ] `trash.page.scss` line 164 — `margin-right: auto` → `margin-inline-end: auto`
-- [ ] Run `ng build` — 0 errors
+- [x] `recipe-book-list.component.scss` — fix filter close button `left:` → `inset-inline-end:` and search icon position
+- [x] Suppliers SCSS — add `padding-inline-end: 0.75rem` to page title at mobile
+- [x] Venues SCSS — fix "הוסף שורה" button icon order for RTL
+- [x] `trash.page.scss` line 164 — `margin-right: auto` → `margin-inline-end: auto`
+- [x] Run `ng build` — 0 errors
 - [ ] Re-run `/mobile-flow-audit --only recipe-book-list --only suppliers-add --only venues-add --only trash-restore`
 - [ ] Update TRIAGE.md — Cluster 6 ✓ resolved
 
 ---
 
 ### Plan 281 — Mobile audit fix: input-overflow (`plans/281-mobile-audit-input-overflow.plan.md`)
-- [ ] `recipe-builder.page.scss` — recipe name input: `text-overflow: ellipsis`, `overflow: hidden`
-- [ ] `recipe-builder.page.scss` — yield vessel search: `width: 100%`, `min-width: 0`
-- [ ] `recipe-ingredients-table.component.scss` mobile block — ensure `.col-name .grid-input` has `width: 100%`, `min-width: 0`
-- [ ] Prep-item search input — fix `padding-inline-end` for search icon
-- [ ] Run `ng build` — 0 errors
+- [x] `recipe-builder.page.scss` — recipe name input: `text-overflow: ellipsis`, `overflow: hidden`
+- [x] `recipe-builder.page.scss` — yield vessel search: `width: 100%`, `min-width: 0`
+- [x] `recipe-ingredients-table.component.scss` mobile block — ensure `.col-name .grid-input` has `width: 100%`, `min-width: 0`
+- [x] Prep-item search input — fix `padding-inline-end` for search icon
+- [x] Run `ng build` — 0 errors
 - [ ] Re-run `/mobile-flow-audit --only recipe-builder-new-prep --only recipe-builder-new-dish --only recipe-builder-edit`
 - [ ] Update TRIAGE.md — Cluster 7 ✓ resolved
 
 ---
 
 ### Plan 282 — Mobile audit fix: dropdown-z-index (`plans/282-mobile-audit-dropdown-z-index.plan.md`)
-- [ ] Inventory edit TS — fix `onCategorySelect` to close dropdown after selection
-- [ ] Inventory edit template — verify `[multiple]="false"` on category ng-select
-- [ ] Inventory edit TS — fix duplicate-name validator to exclude current product ID
-- [ ] `styles.scss` — add global Escape dismiss for ng-select dropdowns if missing
-- [ ] Inventory SCSS — add `max-height: 40vh; overflow-y: auto` for category dropdown panel at ≤620px
-- [ ] Run `ng build` — 0 errors
+- [x] Inventory edit TS — fix `onCategorySelect` to close dropdown after selection
+- [x] Inventory edit template — verify `[multiple]="false"` on category ng-select
+- [x] Inventory edit TS — fix duplicate-name validator to exclude current product ID
+- [x] `styles.scss` — add global Escape dismiss for ng-select dropdowns if missing
+- [x] Inventory SCSS — add `max-height: 40vh; overflow-y: auto` for category dropdown panel at ≤620px
+- [x] Run `ng build` — 0 errors
 - [ ] Re-run `/mobile-flow-audit --only inventory-edit-product --only inventory-add-product --only recipe-builder-new-dish`
 - [ ] Update TRIAGE.md — Cluster 8 + DEF-IE-02 ✓ resolved
 
 ---
 
 ### Plan 283 — Mobile audit fix: touch-target-size (`plans/283-mobile-audit-touch-target-size.plan.md`)
-- [ ] `trash.page.scss` `.btn-item` — add `min-block-size: 2.75rem`
-- [ ] `trash.page.scss` `.btn-action` — add `min-block-size: 2.75rem`
-- [ ] `recipe-book-list.component.scss` — row action buttons: add `min-inline-size: 2.75rem; min-block-size: 2.75rem`
-- [ ] Run `ng build` — 0 errors
+- [x] `trash.page.scss` `.btn-item` — add `min-block-size: 2.75rem`
+- [x] `trash.page.scss` `.btn-action` — add `min-block-size: 2.75rem`
+- [x] `recipe-book-list.component.scss` — row action buttons: add `min-inline-size: 2.75rem; min-block-size: 2.75rem`
+- [x] Run `ng build` — 0 errors
 - [ ] Re-run `/mobile-flow-audit --only trash-restore --only recipe-book-list`
 - [ ] Update TRIAGE.md — Cluster 10 ✓ resolved
