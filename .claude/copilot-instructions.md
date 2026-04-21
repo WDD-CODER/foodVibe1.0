@@ -195,3 +195,100 @@ Agent persona files live in `.claude/agents/`. Load on demand — do not pre-loa
 * **Phase 3 (Ledger Sync)**: On "save the plan", first action: append sub-tasks to `.claude/todo.md`. Then read `.claude/skills/save-plan/SKILL.md` and follow it.
 * **Phase 4 (Atomic Execution)**: Full autonomous file operations post-approval. Commit each sub-task with Conventional Commits. Update `.claude/todo.md` to `[x]` after each commit.
 * **Phase 5 (QA Loop)**: After all `[x]`, output a **How to verify** section: bullet list of where to go in the app and what to expect.
+---
+
+## Session Preflight (moved from agent.md)
+
+> Run these steps at the start of every session, after reading CLAUDE.md and copilot-instructions.md.
+
+1. **MemPalace wake-up (once per session)**:
+   - Run `mempalace_diary_read(agent_name="claude-main", last_n=3)` — see what past sessions worked on.
+   - Run `mempalace_status()` — confirm palace is live.
+   - If either fails → note "MemPalace unavailable" and continue (non-blocking).
+
+2. **GitHub sync (once per calendar day)**: Check `notes/github-sync/<today>.md`. If missing → run `github-sync` skill.
+
+3. **Session handoff**: Check `.claude/sessions/` (most recent) or `notes/session-handoffs/` (legacy, last 3 days).
+
+4. **Todo**: Check `.claude/todo.md` for related pending work.
+
+5. **Branch check**: Run `git branch --show-current`. If on `main`/`master` → warn user proactively. The `branch-guard` hook auto-creates `feat/session-YYYYMMDD` on the first Edit/Write.
+
+6. **Open reflection items**: Scan `.claude/reflect/open/*.reflect.md` for `status: open`. If any found → output the Reflection Banner below before proceeding. If none → skip silently.
+
+### Reflection Banner
+
+```
+╔══════════════════════════════════════════════════════════╗
+║  OPEN REFLECTION ITEMS                                   ║
+║  Last auto-reflect run: <timestamp from newest file>     ║
+║  -> Found <N> issues · Applied <K> fix(es) · <M> open    ║
+╠══════════════════════════════════════════════════════════╣
+║  Stop mid-run:  ! echo. > .claude/reflect/.skip          ║
+╚══════════════════════════════════════════════════════════╝
+```
+
+- N = total `.reflect.md` files in `.claude/reflect/open/`
+- K = files with `status: resolved` AND `## Action Taken` containing "Applied fix (kept)"
+- M = files with `status: open`
+- timestamp = `created:` from the newest `.reflect.md` file
+
+---
+
+## Post-Execution Gate (moved from agent.md)
+
+After completing any plan execution:
+1. Run `ng build` or full `getDiagnostics` — mandatory, no exceptions.
+2. If build fails → fix before reporting completion.
+3. After any change → follow `validation-checklist.md`: show checklist, ask "Should I verify this myself, or will you check it?" Do not auto-run `/qa`.
+4. Do NOT run the full test suite here — run tests only on explicit user request.
+
+---
+
+## Commands Reference (moved from agent.md)
+
+Commands live in `.claude/commands/`. Use the path router in `CLAUDE.md` to select the right one.
+
+| Command | Purpose |
+|---------|---------|
+| `/feat` | New feature — loads Angular+domain standards, invokes plan→execute flow |
+| `/plan` | PRD/HLD planning — invokes product-manager, software-architect |
+| `/fix` | Bug fix — asks area (css/auth/data/ui/api), loads matching standards |
+| `/refactor` | Refactor — loads Angular+cssLayer+techdebt standards |
+| `/security` | Security audit/fix — loads security standards, invokes security-officer |
+| `new-feature.md` | Structured feature scoping (legacy — use /feat) |
+| `plan-implementation.md` | Architectural brief → implementation plan (read-only phase) |
+| `execute-it.md` | Execute the implementation plan (full write phase) |
+| `test-pr-review-merge.md` | Full CI: test, PR, review, merge |
+| `validate-agent-refs.md` | Health check: verify all agent file cross-references |
+| `auto-solve.md` | Autonomous plan executor |
+| `reflect.md` | Autonomous skill improvement loop |
+| `reflect-list.md` | Batch reflection — reviews tool failure log |
+| `nightly-audit.md` | Nightly code audit (6 violation categories) |
+| `audit-report.md` | Display latest nightly audit report |
+| `cleanup.md` | Prune old sessions and merged worktrees (dry-run + confirm) |
+
+---
+
+## Agent Roster (§0.3) — moved from agent.md
+
+Active agents in `.claude/agents/`:
+
+| Agent | When to invoke |
+|-------|---------------|
+| `team-leader` | Multi-task orchestration, parallel agent coordination |
+| `git-agent` | All git operations: commit, push, PR, merge, batch |
+| `end-of-session-agent` | Session end (full 14-phase) — use `/ship` for the 4-phase fast path |
+| `qa-engineer` | QA, test runs, bug verification |
+| `security-officer` | Security audits, auth review |
+| `product-manager` | PRD/HLD, feature scoping |
+| `software-architect` | Technical design, architecture decisions |
+
+---
+
+## Playwright MCP (moved from agent.md)
+
+Playwright is **disabled by default** to save CPU. To enable for a session:
+set `"playwright@claude-plugins-official": true` in `~/.claude/settings.json` and restart.
+
+`auto-solve.md` uses `mcp__playwright__*` as fallback **only** if gstack `/browse` daemon is unavailable.

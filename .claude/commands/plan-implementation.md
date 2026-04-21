@@ -3,6 +3,9 @@ description: Receive an architectural brief, verify against live code, flag gaps
 allowed-tools: Read, Write, Grep, Glob
 ---
 
+> **DEPRECATION NOTICE** (added 2026-04-21, remove after 2026-04-28): Use `/feat` then `/plan` for planning+implementation flow. This file remains functional as an alias during the transition week.
+
+
 # Skill: plan-implementation
 
 **PHASE 1 ONLY** — Do not write any code. Do not proceed to implementation.
