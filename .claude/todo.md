@@ -519,3 +519,5 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 - [ ] **2026-04-28**: Reflect test-drive verdict due — read `.claude/reflect/test-drive/log.md`, apply decision from `decision-criteria.md` (KEEP / REBUILD / PARK)
 - [ ] **2026-04-28**: Remove reflect test-drive reminder from `.claude/skills/end-session/SKILL.md` (expires today)
+- [ ] **2026-05-04**: Agent roster 2-week review — check `invocation-log.tsv` for actual usage patterns; decide if any further agents can be removed
+- [ ] **2026-05-04**: Reflect system verdict (if not applied on 2026-04-28): apply decision from `.claude/reflect/test-drive/decision-criteria.md` (PARK is default if < 3 runs logged)
