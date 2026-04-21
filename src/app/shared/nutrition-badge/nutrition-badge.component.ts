@@ -45,16 +45,64 @@ export class NutritionBadgeComponent {
 
   @Input() nutrition: NutritionPer100g | null | undefined
   showTooltip = false
+  isBelow_ = signal(false)
   tooltipStyle_ = signal<Record<string, string>>({})
 
   onMouseEnter(): void {
     this.showTooltip = true
-    const rect = (this.elRef_.nativeElement as HTMLElement).getBoundingClientRect()
-    const centerX = rect.left + rect.width / 2
-    this.tooltipStyle_.set({
-      bottom: `${window.innerHeight - rect.top + 8}px`,
-      left: `${centerX}px`,
-    })
+    const host = this.elRef_.nativeElement as HTMLElement
+    const rect = host.getBoundingClientRect()
+    const cbRect = this.findFixedContainingBlock_(host)
+
+    // All coordinates are in containing-block space.
+    // When no intercepting ancestor exists cbRect covers the full viewport,
+    // so the formulas degrade to the plain-viewport case.
+    const TOOLTIP_W = 164
+    const TOOLTIP_EST_HEIGHT = 240
+    const halfW = TOOLTIP_W / 2
+
+    const centerX_cb = rect.left + rect.width / 2 - cbRect.left
+    const clampedX  = Math.max(halfW, Math.min(cbRect.width - halfW, centerX_cb))
+
+    // Flip to below when the badge is too close to the containing block's top edge
+    const below = (rect.top - cbRect.top) < TOOLTIP_EST_HEIGHT + 8
+    this.isBelow_.set(below)
+
+    if (!below) {
+      this.tooltipStyle_.set({
+        bottom: `${cbRect.bottom - rect.top + 8}px`,
+        top:    'auto',
+        left:   `${clampedX}px`,
+      })
+    } else {
+      this.tooltipStyle_.set({
+        top:    `${rect.bottom - cbRect.top + 8}px`,
+        bottom: 'auto',
+        left:   `${clampedX}px`,
+      })
+    }
+  }
+
+  /** Walk up the DOM and return the bounding rect of the first ancestor that
+   *  acts as a containing block for position:fixed (container-type, transform,
+   *  filter, perspective, or will-change). Falls back to the full viewport. */
+  private findFixedContainingBlock_(start: HTMLElement): DOMRect {
+    let el = start.parentElement
+    while (el && el !== document.documentElement) {
+      const cs = getComputedStyle(el)
+      if (
+        (cs.containerType && cs.containerType !== 'normal') ||
+        (cs.transform     && cs.transform     !== 'none')   ||
+        (cs.filter        && cs.filter        !== 'none')   ||
+        (cs.perspective   && cs.perspective   !== 'none')   ||
+        cs.willChange.split(',').some(p =>
+          ['transform', 'filter', 'perspective'].includes(p.trim()))
+      ) {
+        return el.getBoundingClientRect()
+      }
+      el = el.parentElement
+    }
+    return new DOMRect(0, 0, window.innerWidth, window.innerHeight)
   }
 
   get dominantColor(): string | null {

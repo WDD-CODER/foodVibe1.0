@@ -4,103 +4,95 @@
 2026-04-20-nutrition-badge-workflow-audit
 
 ## Status
-INCOMPLETE (updated — tooltip-flip commit added 2026-04-20 session close)
+INCOMPLETE
 
 ## Summary
 Goal: Nutrition Badge feature build + Workflow Audit cleanup (Briefs A–H)
-Branch: feat/session-20260417
+Branch: feat/session-20260420-1554
 Date: 2026-04-20
 
 ---
 
-## What Was Done
-- Added `NutritionPer100g` interface to `product.model.ts`
-- Added `nutrition_per_100g` field wiring in `product-data.service.ts` normalizeProduct()
-- Created `NutritionBadgeComponent` (standalone, OnPush) with macro-ratio bar, glass tooltip, lucide icons
-- Registered lucide icons (Leaf, Dumbbell, Wheat, Candy, Waves) in `app.config.ts`
-- Added `NutritionBadgeComponent` to imports[] of `inventory-product-list` and `recipe-ingredients-table`
-- Fixed 2 of 3 semicolon errors in `menu-intelligence.page.ts` (lines 692, 981)
-- Committed workflow-audit zero-risk cleanup (D-1, D-2, D-3 partially) — chore commit 2d66312
-- Committed interface-design cluster removal (D-4 full remove) — 535e431
-- Committed orphan single-use commands removal (D-5 full remove) — b085a9d
-- Brief A verification findings documented in `plans/workflow-audit/verification-findings.md`
-- All 6 workflow audit plan files added to `plans/workflow-audit/`
+## What Was Done (This Session)
+- Diagnosed root cause of tooltip misplacement: `container-type: inline-size` on `.list-container` and `.ingredients-container` intercepts `position: fixed` per CSS Containment spec, making those elements the containing block instead of the viewport
+- Added `findFixedContainingBlock_()` private method to `NutritionBadgeComponent` — walks DOM ancestors checking `containerType`, `transform`, `filter`, `perspective`, `willChange`; falls back to full viewport DOMRect when no interceptor found
+- Rewrote `onMouseEnter()` coordinate calculation to use containing-block-relative space for both above/below cases plus horizontal clamping
+- Added `isBelow_` signal; bound `[class.nb-tooltip--below]` in template
+- Renamed CSS class `--flipped` → `--below`; removed stale static `bottom`/`left` defaults from `.nb-tooltip`
+- Added `plans/workflow-audit/snapshot-2026-04-20.md` (workflow audit state snapshot, staged)
+- Build: clean (0 errors, 3 pre-existing warnings)
 
 ## Files Modified
 ```
-src/app/app.config.ts                                      | 14 +
-src/app/core/models/product.model.ts                       | 12 +
-src/app/core/services/product-data.service.ts              |  1 +
-inventory-product-list.component.ts                        |  2 +
-menu-intelligence.page.ts                                  |  8 +-
-recipe-ingredients-table.component.ts                      |  4 +
-src/app/shared/nutrition-badge/ (3 new files)
-plans/workflow-audit/ (6 new files, 3634 lines)
-docs/superpowers/specs/2026-04-19-nutrition-badge-design.md
-.claude/skills/finalize-docs/SKILL.md (removed)
+src/app/shared/nutrition-badge/nutrition-badge.component.ts   | 60 +-
+src/app/shared/nutrition-badge/nutrition-badge.component.html |  2 +-
+src/app/shared/nutrition-badge/nutrition-badge.component.scss | 12 +-
+plans/workflow-audit/snapshot-2026-04-20.md                   | 832 + (new)
+.claude/.session-state-path                                   |   2 +-
+.claude/reflect/failure-log.tsv                               |   1 +
 ```
 
 ## What Was Skipped or Blocked
-- Tooltip flip logic (onMouseEnter + ElementRef injection) — explicitly listed as pending in session state; not implemented
-- `<app-nutrition-badge>` template wiring in inventory-product-list.component.html and recipe-ingredients-table.component.html — Angular compiler confirms the component is imported but not used in templates
-- Brief B remaining steps: reflect.md line 69 edit, git rm last-session-context.md, D-9 renames (audit-session files), D-11 rename (end-of-session-analysis.md)
+- Template wiring: `<app-nutrition-badge>` still missing from `inventory-product-list.component.html` and `recipe-ingredients-table.component.html` — carried forward from prior session
+- Brief B remaining: reflect.md line 69, git rm last-session-context.md, D-9 renames, D-11 rename
 - Briefs C–G not started
-- Brief H blocked (JSON bug not confirmed as precondition)
+- Brief H blocked (JSON bug precondition unconfirmed)
 
 ---
 
 ## Evaluation Against Success Criteria
+
 | Criterion | Status | Evidence/Reason |
 |-----------|--------|-----------------|
-| NutritionPer100g interface + normalizeProduct() wiring | Done | product.model.ts + product-data.service.ts in commits b969e35/unpushed; build passes |
-| NutritionBadgeComponent created (standalone, OnPush, icons, tooltip) | Done | src/app/shared/nutrition-badge/ — 3 files confirmed in remote diff |
-| Badge wired into inventory and recipe host templates | Partial | imports[] wired in both .ts files; Angular compiler WARNING: component not used in template — <app-nutrition-badge> missing from .html files |
-| Tooltip flip logic (shows below when within 220px of top) | Done | tooltipStyle_ signal + fixed-position coordinate calc added in onMouseEnter(); committed at session close |
-| ng build passes with zero errors | Done | Build completed 2026-04-20; 5 warnings, 0 errors |
-| Brief A complete — verification findings documented | Done | plans/workflow-audit/verification-findings.md committed in 5ae39d2 |
-| Brief B complete — D-1, D-2, D-3, D-9, D-11 committed | Partial | D-1/D-2/D-3 partially in 2d66312; D-9/D-11 renames not executed; reflect.md line 69 not cleaned |
+| NutritionPer100g interface + normalizeProduct() wiring | Done | Committed in prior session (b969e35); product.model.ts + product-data.service.ts confirmed |
+| NutritionBadgeComponent created (standalone, OnPush, icons, tooltip) | Done | src/app/shared/nutrition-badge/ — 3 files exist; build passes |
+| Badge wired into inventory and recipe host templates | Partial | imports[] wired in .ts files; `<app-nutrition-badge>` tag missing from .html files — feature invisible |
+| Tooltip flip logic (correct positioning with containing-block awareness) | Done | findFixedContainingBlock_() implemented; isBelow_ signal + coordinate calc updated; build passes |
+| ng build passes with zero errors | Done | npx ng build — 0 errors, 3 pre-existing warnings |
+| Brief A complete — verification findings documented | Done | plans/workflow-audit/verification-findings.md committed in prior session (5ae39d2) |
+| Brief B complete — D-1, D-2, D-3, D-9, D-11 committed | Partial | D-1/D-2/D-3 committed (2d66312); D-9/D-11 renames not executed |
 
 ## Validation Checklist
-- [x] Build passes (zero errors, 5 warnings — ng build 2026-04-20)
-- [x] Changes committed: 2d66312, 535e431, b085a9d, b969e35, 5ae39d2, 18a78f8, 01481de, 6a7900c, c2d7bbf, 777b74a + tooltip-fix commit (session close)
-- [ ] Push pending — 6+ commits ahead of origin, push after commit approval
-- [ ] PR not created (feature incomplete — NutritionBadge template wiring missing)
-- [x] Techdebt scan: 1 TODO, 2 style violations (1 new: @Input on NutritionBadge), 6 pre-existing refactor candidates, 0 critical
+- [x] Build passes (0 errors — npx ng build 2026-04-20)
+- [ ] Changes uncommitted — awaiting user approval on commit proposal below
+- [ ] Push pending after commit
+- [ ] PR not created (template wiring still missing — feature not visually wired)
+- [x] Techdebt scan: 3 pre-existing warnings (bundle size, cook-view.scss, exceljs CommonJS), 0 new critical issues
 - [ ] Manual verification needed:
-  - Add `<app-nutrition-badge [nutrition]="product.nutrition_per_100g">` to inventory-product-list.component.html
-  - Add `<app-nutrition-badge [nutrition]="ingredient.nutrition_per_100g">` to recipe-ingredients-table.component.html
-  - Fix remaining semicolon in menu-intelligence.page.ts line 896: `const addDish = document.getElementById('add-dish-' + s);`
+  - Add `<app-nutrition-badge [nutrition]="product.nutrition_per_100g">` to `inventory-product-list.component.html`
+  - Add `<app-nutrition-badge [nutrition]="ingredient.nutrition_per_100g">` to `recipe-ingredients-table.component.html`
+  - Verify tooltip renders correctly above and below in both list-container and ingredients-container contexts
   - Complete Brief B: reflect.md line 69, git rm last-session-context.md, D-9 renames, D-11 rename
 
 ---
 
 ## Session Actions
-- Commits: 2d66312, 535e431, b085a9d, b969e35, 5ae39d2, 18a78f8, 01481de, 6a7900c, c2d7bbf, 777b74a + tooltip-fix (session close)
-- PR: N/A (feature incomplete — template wiring still missing)
+- Commit: pending user approval
+- PR: N/A (feature incomplete)
 - Tasks archived: none
 - Plans marked done: none
 
 ## Agent Notes
-- The `src/` files appearing as `M` in git status had zero actual diff — this was a line-ending/timestamp artifact. The nutrition badge code was already committed in the unpushed commits prior to this session end run.
-- Angular compiler warnings for NutritionBadgeComponent being "not used in template" are a red flag — the `.ts` imports exist but `.html` template wiring is missing. The feature will not display until the HTML tags are added.
-- Brief B's zero-risk cleanup commit (2d66312) was titled correctly but only covered D-3 (reflect.md line 15) and D-2 (3 gitkeep files); D-9 and D-11 file moves were not executed.
-- Brief H remains blocked — precondition (JSON bug) not confirmed.
+- The CSS Containment spec root cause is the key insight: any ancestor with `container-type` (not `normal`) acts as the fixed-position containing block. This affects ANY `position: fixed` element inside a CSS container — not just tooltips. Other future fixed overlays in these views will need the same treatment.
+- `findFixedContainingBlock_()` is defensive: it also checks `transform`, `filter`, `perspective`, `willChange` per spec. This handles cases where container-type is removed but other interception remains.
+- Formula degrades cleanly when no interceptor found — `DOMRect(0, 0, innerWidth, innerHeight)` makes the math identical to plain viewport coordinates.
+- `snapshot-2026-04-20.md` is a workflow audit state snapshot (832 lines) — large file, intentional.
 
 ---
 
 ## Next Session
 **Open PRs:**
-- None (feat/session-20260417 not yet PR'd)
+- None (feat/session-20260420-1554 not yet PR'd)
 
 **Next task:**
-1. Fix menu-intelligence.page.ts line 896 semicolon (BLOCKING — see docs/session-state.md)
-2. Add `<app-nutrition-badge [nutrition]="product.nutrition_per_100g">` to inventory-product-list.component.html
-3. Add `<app-nutrition-badge [nutrition]="ingredient.nutrition_per_100g">` to recipe-ingredients-table.component.html
-4. Complete Brief B remaining steps (reflect.md line 69 + git rm last-session-context.md + D-9 renames + D-11 rename)
-5. Create PR for feat/session-20260417
+1. Add `<app-nutrition-badge [nutrition]="product.nutrition_per_100g">` to `inventory-product-list.component.html`
+2. Add `<app-nutrition-badge [nutrition]="ingredient.nutrition_per_100g">` to `recipe-ingredients-table.component.html`
+3. Visual QA: verify tooltip positions correctly in both scroll contexts
+4. Complete Brief B remaining steps
+5. Create PR for the nutrition-badge fix
 
 **Suggested focus:**
-NutritionBadge template wiring is fast (2 HTML edits) and unblocks the visible feature. Tooltip flip logic is now done — coordinate calculation committed at session close. Do template wiring first, then Brief B cleanup, then PR.
+Template wiring is 2 HTML lines and unblocks the visible feature. Do that first, QA second, then PR.
 
 ---
 Generated: 2026-04-20

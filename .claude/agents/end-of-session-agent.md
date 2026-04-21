@@ -550,11 +550,11 @@ Next task: {exact task name from todo.md}
 
 ---
 
-### Phase 14: Post-Stop Hook (AUTOMATIC — EXTERNAL)
+### Phase 14: Nightly Reflection (AUTOMATIC — SCHEDULED)
 
-**This phase is NOT executed by this agent.** It fires externally via `.claude/settings.json` → `hooks.Stop` → `.claude/reflect/auto-reflect.ps1` after the Claude Code session ends.
+**This phase is NOT executed by this agent.** The `reflect-agent` runs nightly at 23:03 Israel time via the Cloud Routine scheduler. It processes `.claude/reflect/open/` entries, applies skill fixes, and archives resolved items.
 
-The auto-reflect script can optionally read `.claude/sessions/*/session-handoff.md` for targeted reflection when session issues were flagged.
+Manual reflection: invoke `/reflect` directly if same-session issues need immediate attention.
 
 ---
 
