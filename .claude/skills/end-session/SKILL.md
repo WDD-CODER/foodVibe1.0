@@ -18,3 +18,12 @@ Agent(
 ```
 
 Do not run any phases inline. The agent handles everything — brief validation, build gate, techdebt scan, git operations, todo archive, doc refresh, plan cleanup, session evaluation, handoff report, and final commit.
+
+---
+
+> **REFLECT TEST-DRIVE REMINDER** (expires 2026-04-28 — remove after verdict)
+>
+> Before closing this session, consider running `/reflect` against any skill you invoked today.
+> Log the run in `.claude/reflect/test-drive/log.md` using the rubric in `.claude/reflect/test-drive/rubric.md`.
+> The user (Dan) fills out entries personally — Claude prompts but does not self-score.
+> Decision date: **2026-04-28**. See `.claude/reflect/test-drive/decision-criteria.md` for verdict thresholds.
