@@ -124,6 +124,19 @@ router.post('/:type', verifyToken, async (req, res) => {
 // ---------------------------------------------------------------------------
 router.put('/:type/:id', verifyToken, async (req, res) => {
   try {
+    // A2: nameSnapshot enforcement — every linked ingredient must carry a nameSnapshot
+    // so the recipe remains readable if the product is later deleted or the DB is reset.
+    if (req.params.type === 'RECIPE_LIST' || req.params.type === 'DISH_LIST') {
+      const ings = req.body.ingredients_ ?? [];
+      const orphan = ings.find(ing => ing.referenceId && !ing.nameSnapshot);
+      if (orphan) {
+        return res.status(400).json({
+          error: 'Each linked ingredient must have a nameSnapshot',
+          referenceId: orphan.referenceId,
+        });
+      }
+    }
+
     // Destructure reserved fields out of req.body — client must not override them.
     const { userId: _, _masterId: __, _userModified: ___, ...safeBody } = req.body;
 
@@ -198,6 +211,28 @@ router.put('/:type', verifyToken, async (req, res) => {
 // ---------------------------------------------------------------------------
 router.delete('/:type/:id', verifyToken, async (req, res) => {
   try {
+    // A1: referential integrity — block product delete if any recipe/dish uses it.
+    // Prevents orphaned ingredient referenceIds in RECIPE_LIST and DISH_LIST.
+    if (req.params.type === 'PRODUCT_LIST') {
+      const recipeRef = await col('RECIPE_LIST').findOne({
+        userId: req.user.userId,
+        'ingredients_.referenceId': req.params.id,
+        _userDeleted: { $ne: true },
+      });
+      const dishRef = !recipeRef && await col('DISH_LIST').findOne({
+        userId: req.user.userId,
+        'ingredients_.referenceId': req.params.id,
+        _userDeleted: { $ne: true },
+      });
+      if (recipeRef || dishRef) {
+        const ref = recipeRef || dishRef;
+        return res.status(409).json({
+          error: 'Product is used in one or more recipes',
+          referencedBy: ref.name_hebrew || ref._id,
+        });
+      }
+    }
+
     const existing = await col(req.params.type).findOne({
       _id: req.params.id,
       userId: req.user.userId,
