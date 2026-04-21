@@ -24,19 +24,38 @@ export const recipeResolver: ResolveFn<Promise<Recipe | null>> = async (route) =
   const inMemoryDish = dishDataService.allDishes_().find(d => d._id === id)
   if (inMemoryDish) return inMemoryDish
 
-  // In-memory miss (page refresh / direct URL) — fall back to HTTP.
+  // In-memory miss (page refresh / direct URL) — use ID prefix to route to the
+  // correct collection directly, avoiding a wasted 404 on the wrong collection.
+  // Master dishes use "dish_" prefix (DISH_LIST); master recipes use "prep_" prefix
+  // (RECIPE_LIST); user-created items have MongoDB ObjectId format — try both.
+  const isDish = id.startsWith('dish_')
+  const isRecipe = id.startsWith('prep_')
+
+  const notFound = () => {
+    userMsgService.onSetErrorMsg('המתכון לא נמצא')
+    // Logged-in users land on recipe-builder (create new). Guests land on
+    // recipe-book (public) — avoids triggering authGuard on recipe-builder
+    // which would create a misleading "not logged in" warning cascade.
+    router.navigate([userService.isLoggedIn() ? '/recipe-builder' : '/recipe-book'])
+    return null
+  }
+
+  if (isDish) {
+    try { return await dishDataService.getDishById(id) } catch { return notFound() }
+  }
+
+  if (isRecipe) {
+    try { return await recipeDataService.getRecipeById(id) } catch { return notFound() }
+  }
+
+  // Unknown prefix (user-created ObjectId) — try recipe first, then dish.
   try {
     return await recipeDataService.getRecipeById(id)
   } catch {
     try {
       return await dishDataService.getDishById(id)
     } catch {
-      userMsgService.onSetErrorMsg('המתכון לא נמצא')
-      // Logged-in users land on recipe-builder (create new). Guests land on
-      // recipe-book (public) — avoids triggering authGuard on recipe-builder
-      // which would create a misleading "not logged in" warning cascade.
-      router.navigate([userService.isLoggedIn() ? '/recipe-builder' : '/recipe-book'])
-      return null
+      return notFound()
     }
   }
 }
