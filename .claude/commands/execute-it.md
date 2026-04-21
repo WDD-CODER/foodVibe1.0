@@ -68,6 +68,22 @@ Example: if the brief says "add reload calls for three services" and plan-implem
 - **Backend Impact check** — if the plan includes a `## Backend Impact` section with new collections, verify the new `entityType` key is added to `BACKUP_ENTITY_TYPES` in `async-storage.service.ts` before marking the task done
 - **Validation override** — the Smart Visual QA Flow section below overrides the validation-checklist's "ask before anything" timing. Code verification is always automatic. User choice applies only to visual QA.
 
+## Post-Delegation Diff Gate
+
+**When a Team Leader or multi-agent execution completes, run this gate before declaring success:**
+
+1. Run `git diff --stat HEAD` — count the files actually modified
+2. Compare against the number of tasks/files the agent reported touching
+3. If the diff is empty or the file count is significantly lower than reported:
+   - Do NOT declare execution complete
+   - Investigate each plan's target file to check if the change is pre-existing (already committed in a prior session) or genuinely missing
+   - Report the discrepancy to the user before proceeding to commit
+4. If a file shows the correct state but no git diff → mark it as "pre-existing / no write needed" in the summary, not "applied"
+
+**Why this matters:** Subagents that read a file and find the target state already correct will report "done" without writing anything. This is valid, but must be labeled clearly — otherwise the summary misleads and the end-of-session commit appears incomplete.
+
+---
+
 ## Verification-Before-Completion Gate
 
 **Iron law: No completion claims without fresh verification evidence.**

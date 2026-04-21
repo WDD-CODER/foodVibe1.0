@@ -16,7 +16,7 @@ description: Session closer — alias for /ship. Runs build gate, commit/push, s
 Agent(
   subagent_type: "end-of-session-agent",
   description: "Run 4-phase ship pipeline",
-  prompt: "Run the 4-phase /ship pipeline. Repo root: C:\\foodCo\\foodVibe1.0. Build gate → commit → session-state → todo sync."
+  prompt: "Run the 4-phase /ship pipeline. Repo root: C:\\foodCo\\foodVibe1.0. Build gate → commit → session-state → todo sync. IMPORTANT: In Phase 2 (commit proposal), first check .claude/agents/invocation-log.tsv for any Team Leader or multi-agent entries from this session. If found, compare the number of files in `git status` against what was delegated. If git status shows significantly fewer files than the Team Leader reported modifying, warn the user before proposing the commit: 'Note: Team Leader ran this session but only N files are staged — verify all expected plan files are included.'"
 )
 ```
 

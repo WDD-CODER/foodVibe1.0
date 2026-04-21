@@ -16,13 +16,20 @@ export const recipeResolver: ResolveFn<Promise<Recipe | null>> = async (route) =
   const id = route.paramMap.get('id')
   if (!id) return null
 
+  // Check in-memory stores first — avoids unnecessary 404 network calls when
+  // navigating within the app (stores already populated by service constructors).
+  const inMemoryRecipe = recipeDataService.allRecipes_().find(r => r._id === id)
+  if (inMemoryRecipe) return inMemoryRecipe
+
+  const inMemoryDish = dishDataService.allDishes_().find(d => d._id === id)
+  if (inMemoryDish) return inMemoryDish
+
+  // In-memory miss (page refresh / direct URL) — fall back to HTTP.
   try {
-    const recipe = await recipeDataService.getRecipeById(id)
-    return recipe
+    return await recipeDataService.getRecipeById(id)
   } catch {
     try {
-      const dish = await dishDataService.getDishById(id)
-      return dish
+      return await dishDataService.getDishById(id)
     } catch {
       userMsgService.onSetErrorMsg('המתכון לא נמצא')
       // Logged-in users land on recipe-builder (create new). Guests land on
