@@ -132,7 +132,7 @@ Agent persona files live in `.claude/agents/`. Load on demand — do not pre-loa
 | Team Leader | `team-leader.md` | Task spans >2 subsystems; agents conflict; progress report needed |
 | Software Architect | `software-architect.md` | PRD exists and needs HLD; architecture trade-offs to evaluate |
 | Product Manager | `product-manager.md` | Planning a new feature; writing a plan file; scoping work |
-| Breadcrumb Navigator | `breadcrumb-navigator.md` | New `pages/<x>/` or app subtree; structural changes; after update-docs |
+| Breadcrumb Navigator | `skills/breadcrumb-navigator/SKILL.md` (agent file removed — skill is sufficient) | New `pages/<x>/` or app subtree; structural changes; after update-docs |
 | QA Engineer | `qa-engineer.md` | Spec gaps; diagnosing failing tests; E2E creation |
 | Security Officer | `security-officer.md` | Post-feature review of auth/storage/route changes; pre-deploy; security consult |
 | Git Agent | `git-agent.md` | All git operations: commit, push, PR creation, merge, branch management |
@@ -278,7 +278,7 @@ Active agents in `.claude/agents/`:
 |-------|---------------|
 | `team-leader` | Multi-task orchestration, parallel agent coordination |
 | `git-agent` | All git operations: commit, push, PR, merge, batch |
-| `end-of-session-agent` | Session end (full 14-phase) — use `/ship` for the 4-phase fast path |
+| `end-of-session-agent` | Session end — 4-phase fast path via `/ship` (< 2 min). Invoked by `/ship` and `/end-session` alias. |
 | `qa-engineer` | QA, test runs, bug verification |
 | `security-officer` | Security audits, auth review |
 | `product-manager` | PRD/HLD, feature scoping |

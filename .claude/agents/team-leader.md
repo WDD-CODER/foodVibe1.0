@@ -94,3 +94,30 @@ Include: Task Analysis, Recommended Task Force, Coordination Plan, Success Crite
 Consult `.claude/skills/context-management/SKILL.md` for checkpoint triggers.
 If any trigger fires, run `/checkpoint` before continuing.
 Do not silently push through context pressure — losing state is worse than an extra checkpoint.
+
+---
+
+## Invocation Logging
+
+**On every agent delegation**, append a row to `.claude/agents/invocation-log.tsv`:
+
+```
+{YYYY-MM-DD HH:MM:SS}  {agent_name}  {task_slug}  {team_name_or_solo}  {outcome}
+```
+
+Fields (tab-separated):
+
+| Field | Description | Example values |
+|-------|-------------|---------------|
+| timestamp | ISO date-time | `2026-04-21 10:30:00` |
+| agent_name | Exact agent file name without `.md` | `qa-engineer`, `security-officer`, `git-agent` |
+| task_slug | 3-5 word kebab-case task description | `fix-nutrition-badge-tooltip` |
+| team | Team name if parallel, `solo` if direct Agent call | `team-cleanup`, `solo` |
+| outcome | Delegation result | `delegated`, `completed`, `blocked` |
+
+**Log file**: `.claude/agents/invocation-log.tsv`
+**Header row**: `timestamp\tagent_name\ttask_slug\tteam\toutcome`
+
+**Log rotation**: When file exceeds 500 rows, rename to `invocation-log-{YYYY-MM}.tsv` and start fresh with a new header.
+
+**Commit**: Include in the session artifacts commit (not the code commit). Do not leave uncommitted.
