@@ -145,11 +145,7 @@ async function syncMasterToUser(userId) {
     // clones that would collide with a user-created product.
     // Also clean up any stale clones that already conflict (created before this
     // guard existed) — these cause the "name is taken" false-positive on edit.
-    // Hoisted here (before the per-master loop) so Rule 1 reuses it without
-    // rebuilding the Set on every iteration.
-    let allProductNames = null;
     if (entityType === 'PRODUCT_LIST') {
-      allProductNames = new Set(allUserDocs.map(d => d.name_hebrew?.trim()).filter(Boolean));
       const cloneIds = new Set(userDocs.map(d => String(d._id)));
       const userCreatedNames = new Set(
         allUserDocs
@@ -193,6 +189,7 @@ async function syncMasterToUser(userId) {
         // Skip if the user already has a product with the same name (any origin).
         if (entityType === 'PRODUCT_LIST') {
           const masterName = master.name_hebrew?.trim();
+          const allProductNames = new Set(allUserDocs.map(d => d.name_hebrew?.trim()).filter(Boolean));
           if (masterName && allProductNames.has(masterName)) {
             console.log(`[sync-master]   PRODUCT_LIST: skipping clone — name collision "${masterName}"`);
             continue;
