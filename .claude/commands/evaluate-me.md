@@ -68,8 +68,9 @@ Target files for suggestions:
 - `.claude/agent.md` — agent personas, gates, workflows
 - `.claude/CLAUDE.md` — base rules, conventions
 - `.claude/skills/*.md` — skill definitions
-- `.claude/commands/*.md` — command prompts
+- `.claude/commands/*.md` — command prompts (note: some workflows like `execute-it` live here, not in `skills/`)
 - `copilot-instructions.md` — IDE-level guidance
+- `~/.claude/plugins/cache/.../superpowers/` — superpowers skills (edits here are fragile — overwritten on plugin version bump; prefer local project overrides when available; always note cache edits in `CLAUDE.md`)
 
 ## Step 5: Save Report
 

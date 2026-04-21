@@ -146,9 +146,7 @@
             <lucide-icon name="heart" [size]="18"></lucide-icon>
           </button>
           <button type="button" class="c-icon-btn" (click)="onCookRecipe(recipe); $event.stopPropagation()"
-            [attr.aria-label]="'cook' | translatePipe"
-            [disabled]="!isLoggedIn()"
-            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+            [attr.aria-label]="'cook' | translatePipe">
             <lucide-icon name="cooking-pot" [size]="18"></lucide-icon>
           </button>
           @if (isLoggedIn()) {

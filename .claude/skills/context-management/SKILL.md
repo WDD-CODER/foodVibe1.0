@@ -52,6 +52,20 @@ Context loss is worse than an extra checkpoint. When in doubt, save.
 
 ---
 
+## Session-State Document Size Constraints
+
+Session-state docs loaded as context summaries consume significant tokens at session start. Keep them lean:
+
+- **Hard cap: 80 lines** total per session-state document
+- Detailed plan specs belong in `plans/*.plan.md` — the state doc holds a **pointer only** (`Plan 276 — see plans/276-mobile-audit-rtl-fab.plan.md`)
+- **Code facts block**: max 10 lines (key measurements only; pointer to plan files for the rest)
+- Execution status: 5 lines max — current step + next action only
+- If a session-state doc exceeds 80 lines, split it: move plan detail into the plan files, keep state doc as index
+
+**Why this matters:** A 190-line session-state doc loaded at session start can exhaust 70% of context before any code is read — forcing an immediate new session and losing the work just started.
+
+---
+
 ## Rolling session file vs. snapshots
 
 | `docs/session-state.md` | `.claude/sessions/YYYY-MM-DD-HHMM-slug.md` |

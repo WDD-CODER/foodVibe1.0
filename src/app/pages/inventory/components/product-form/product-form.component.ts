@@ -154,6 +154,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   protected toggleSupplier(): void { this.expandedSupplier_.update(v => !v); }
 
   protected onSupplierBlur(clickTarget?: HTMLElement): void {
+    if (!this.productForm_) return
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
     if (this.selectedSupplierIds_().length === 0) {
       this.expandedSupplier_.set(false)
@@ -161,6 +162,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   }
 
   protected onMinStockBlur(clickTarget?: HTMLElement): void {
+    if (!this.productForm_) return
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
     const val = this.productForm_.get('min_stock_level_')?.value
     if (val == null || val === 0 || val === '') {
@@ -169,6 +171,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   }
 
   protected onExpiryDaysBlur(clickTarget?: HTMLElement): void {
+    if (!this.productForm_) return
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
     const val = this.productForm_.get('expiry_days_default_')?.value
     if (val == null || val === 0 || val === '') {
@@ -177,6 +180,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   }
 
   protected onAllergensBlur(clickTarget?: HTMLElement): void {
+    if (!this.productForm_) return
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
     const allergens = (this.productForm_.get('allergens_')?.value || []) as string[]
     if (allergens.length === 0) {
@@ -185,6 +189,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   }
 
   protected onWasteYieldBlur(clickTarget?: HTMLElement): void {
+    if (!this.productForm_) return
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
     const waste = this.productForm_.get('waste_percent_')?.value
     const yieldVal = this.productForm_.get('yield_factor_')?.value
