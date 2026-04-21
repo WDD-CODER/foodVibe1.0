@@ -10,3 +10,13 @@
 2026-04-21 07:38:04	Edit	C:\Users\danwe\.claude\settings.json	  "skipDangerousModePermissionPrompt": true	
 2026-04-21 07:45:17	Bash	git -C C:/foodCo/foodVibe1.0 diff HEAD -- .claude/copilot-instructions.md CLAUDE	+1. Run `ng build` or full `getDiagnostics` ΓÇö mandatory, no exceptions.	
 2026-04-21 07:45:31	Bash	git -C C:/foodCo/foodVibe1.0 diff HEAD -- CLAUDE.md | head -60	+- **Build gate**: `ng build` must pass before any commit. No exceptions.	
+2026-04-21 11:32:18	Bash	powershell -NoProfile -Command "Get-Process | Where-Object {$_.MainWindowTitle -	    + CategoryInfo          : ObjectNotFound: (extglob.MainWindowTitle:String) [], CommandNotFoundException	
+2026-04-21 11:39:37	Bash	powershell -NoProfile -Command "Get-WmiObject Win32_PerfFormattedData_PerfDisk_L	    + CategoryInfo          : ObjectNotFound: (extglob.Name:String) [], CommandNotFoundException	
+2026-04-21 15:41:23	Bash	grep -rn "syncMasterToUser\|sync-master" C:/foodCo/foodVibe1.0/server/ 2>/dev/nu	C:/foodCo/foodVibe1.0/server/routes/auth.js:253:    syncMasterToUser(user._id).catch(syncErr => console.error('[auth/ref	
+2026-04-21 15:43:23	Bash	cd C:/foodCo/foodVibe1.0 && ng build 2>&1 | tail -15	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-21 15:49:14	Bash	cd C:/foodCo/foodVibe1.0 && npx ng test --watch=false --browsers=ChromeHeadless 	Chrome Headless 147.0.0.0 (Windows 10): Executed 303 of 310[31m (97 FAILED)[39m (0 secs / 2.509 secs)	
+2026-04-21 15:49:58	Bash	cd C:/foodCo/foodVibe1.0 && npx ng test --watch=false --browsers=ChromeHeadless 	@{stdout=[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) PreparationRegistryService should register a category and p	
+2026-04-21 15:56:21	Bash	cd /c/foodCo/foodVibe1.0
+# The main diff against main is tiny (1 line SKILL.md).	@{stdout=/usr/bin/bash: line 9: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-21 16:04:35	Bash	cat "C:/foodCo/foodVibe1.0/src/app/pages/inventory/components/product-form/produ	360:      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context	
+2026-04-21 16:04:40	Bash	grep -n 'ng-select\|category\|closeOnSelect\|ngSelect' "C:/foodCo/foodVibe1.0/sr	360:      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context	

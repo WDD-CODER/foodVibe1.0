@@ -507,6 +507,22 @@ width: min-content;
       background: var(--bg-glass-hover);
     }
   }
+
+  /* Plan 283 — touch target: row action buttons (favorite, cook, delete) */
+  @media (max-width: 620px) {
+    .recipe-grid-row .c-icon-btn,
+    .favorite-btn {
+      min-inline-size: 2.75rem;
+      min-block-size: 2.75rem;
+    }
+  }
+
+  /* Plan 279 — sticky header safe zone */
+  @media (max-width: 620px) {
+    :host {
+      padding-block-start: 3.875rem;
+    }
+  }
 }
 
 /* Favorite button color — outside @layer to beat unlayered .c-icon-btn rule in styles.scss */

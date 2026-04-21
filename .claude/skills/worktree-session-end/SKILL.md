@@ -48,4 +48,4 @@ Present options:
    worktree-<name>
    ```
    One branch name per line. Create the file if it doesn't exist.
-4. Tell the user: "✓ Merged. To remove the worktree, type `/exit` in Claude Code, then choose **Remove worktree** from the menu. Do not close the terminal first."
+4. Tell the user: "✓ Merged. To remove the worktree: type `/exit` in Claude Code, then choose **Remove worktree** from the menu. Do not close the terminal first — and do NOT run `git worktree remove` from inside this session, it will always fail because you can't delete the directory you're currently running in."

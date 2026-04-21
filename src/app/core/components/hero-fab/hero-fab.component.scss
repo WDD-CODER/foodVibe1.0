@@ -1,7 +1,7 @@
 .hero-fab-container {
   position: fixed;
   inset-block-end: 0.75rem;
-  left: 0.75rem; // intentionally physical — FAB is always bottom-left chrome regardless of dir
+  inset-inline-end: 0.75rem;
   z-index: 90;
   display: flex;
   flex-direction: column;
@@ -107,7 +107,7 @@
 @media (max-width: 768px) {
   .hero-fab-container {
     inset-block-end: 0.5rem;
-    left: 0.5rem; // intentionally physical — see base rule above
+    inset-inline-end: 0.5rem;
   }
 
   .fab-main {

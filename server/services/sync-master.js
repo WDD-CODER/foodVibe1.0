@@ -140,6 +140,30 @@ async function syncMasterToUser(userId) {
       userByMasterId.set(String(ud._masterId), ud);
     }
 
+    // PRODUCT_LIST: names are globally unique within the collection.
+    // Build a set of all existing user product names so Rule 1 skips master
+    // clones that would collide with a user-created product.
+    // Also clean up any stale clones that already conflict (created before this
+    // guard existed) — these cause the "name is taken" false-positive on edit.
+    if (entityType === 'PRODUCT_LIST') {
+      const cloneIds = new Set(userDocs.map(d => String(d._id)));
+      const userCreatedNames = new Set(
+        allUserDocs
+          .filter(d => !cloneIds.has(String(d._id)))
+          .map(d => d.name_hebrew?.trim())
+          .filter(Boolean)
+      );
+      const staleClones = userDocs.filter(ud => userCreatedNames.has(ud.name_hebrew?.trim()));
+      if (staleClones.length > 0) {
+        await col.deleteMany({ _id: { $in: staleClones.map(d => d._id) } });
+        console.log(`[sync-master]   PRODUCT_LIST: removed ${staleClones.length} stale duplicate clone(s): ${staleClones.map(d => d.name_hebrew).join(', ')}`);
+        // Remove stale clones from userByMasterId so Rule 2 doesn't try to update them
+        for (const sc of staleClones) {
+          userByMasterId.delete(String(sc._masterId));
+        }
+      }
+    }
+
     const toInsert = [];
     const toUpdate = [];
 
@@ -160,6 +184,15 @@ async function syncMasterToUser(userId) {
               console.log(`[sync-master]   ${entityType}: skipping clone — cross-collection name collision "${masterName}"`);
               continue;
             }
+          }
+        }
+        // Skip if the user already has a product with the same name (any origin).
+        if (entityType === 'PRODUCT_LIST') {
+          const masterName = master.name_hebrew?.trim();
+          const allProductNames = new Set(allUserDocs.map(d => d.name_hebrew?.trim()).filter(Boolean));
+          if (masterName && allProductNames.has(masterName)) {
+            console.log(`[sync-master]   PRODUCT_LIST: skipping clone — name collision "${masterName}"`);
+            continue;
           }
         }
         const newId = makeId();
