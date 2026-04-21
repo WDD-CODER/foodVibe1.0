@@ -18,3 +18,5 @@
 2026-04-21 15:49:58	Bash	cd C:/foodCo/foodVibe1.0 && npx ng test --watch=false --browsers=ChromeHeadless 	@{stdout=[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) PreparationRegistryService should register a category and p	
 2026-04-21 15:56:21	Bash	cd /c/foodCo/foodVibe1.0
 # The main diff against main is tiny (1 line SKILL.md).	@{stdout=/usr/bin/bash: line 9: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-21 16:04:35	Bash	cat "C:/foodCo/foodVibe1.0/src/app/pages/inventory/components/product-form/produ	360:      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context	
+2026-04-21 16:04:40	Bash	grep -n 'ng-select\|category\|closeOnSelect\|ngSelect' "C:/foodCo/foodVibe1.0/sr	360:      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context	
