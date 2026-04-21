@@ -689,8 +689,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
         } else {
           const nextSearch = document.getElementById('dish-search-' + s + '-' + (i + 1))
           const nextSell = document.getElementById('dish-sell-' + s + '-' + (i + 1))
-          const addDish = document.getElementById('add-dish-' + s);
-          (nextSearch ?? nextSell ?? addDish)?.focus()
+          const addDish = document.getElementById('add-dish-' + s)
+          ;(nextSearch ?? nextSell ?? addDish)?.focus()
         }
       }, 0)
       return
@@ -886,15 +886,15 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       setTimeout(() => {
         if (ke.shiftKey) {
           const prev = document.getElementById('dish-search-' + s + '-' + (i - 1))
-          const sectionTitle = document.getElementById('section-title-' + s);
-          (prev ?? sectionTitle)?.focus()
+          const sectionTitle = document.getElementById('section-title-' + s)
+          ;(prev ?? sectionTitle)?.focus()
         } else {
           if (hasRecipe) {
             document.getElementById('dish-sell-' + s + '-' + i)?.focus()
           } else {
             const next = document.getElementById('dish-search-' + s + '-' + (i + 1))
-            const addDish = document.getElementById('add-dish-' + s);
-            (next ?? addDish)?.focus()
+            const addDish = document.getElementById('add-dish-' + s)
+            ;(next ?? addDish)?.focus()
           }
         }
       }, 0)
@@ -978,8 +978,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
           document.getElementById('section-title-' + sectionIdx)?.focus()
         } else {
           const firstDish = document.getElementById('dish-search-' + sectionIdx + '-0')
-          const addDish = document.getElementById('add-dish-' + sectionIdx);
-          (firstDish ?? addDish)?.focus()
+          const addDish = document.getElementById('add-dish-' + sectionIdx)
+          ;(firstDish ?? addDish)?.focus()
         }
       }, 0)
     }
