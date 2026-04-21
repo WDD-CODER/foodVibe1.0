@@ -59,3 +59,9 @@ grep -r "f	.claude/retrospectives/2026-04-21-18-00-refactor-planner.md:36:- **Sh
   // Get the stored token
   const token = sessionStorag	await page.evaluate('async () => {\n  // Get the stored token\n  const token = sessionStorage.getItem(\'fv_token\');\n  	
 2026-04-21 19:23:21	Bash	ng build 2>&1 | tail -20	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-21 19:29:22	mcp__mempalace__mempalace_search	@{query=MongoDB backend data management storage workflow; limit=5}	      "text": "tring, unique), `imgUrl`, `role` (enum admin/user), `passwordHash`, `failedAttempts`, `lockedUntil`.\n\n*	
+2026-04-21 19:41:50	Write	C:\Users\danwe\.claude\plans\jazzy-weaving-lagoon.md	      error: 'Product is used in one or more recipes',	
+2026-04-21 19:42:06	Write	C:\foodCo\foodVibe1.0\docs\session-state-feat-session-20260421-1.md	      error: 'Product is used in one or more recipes',	
+2026-04-21 19:42:28	Bash	ls .claude/fix-templates/ 2>/dev/null && echo "---" && cat .claude/fix-templates	{"timestamp":"2026-04-12T10:30:00Z","template":"color-token","version":2,"score":"6/6","passed":["ambiguous-flag","fff-i	
+2026-04-21 19:43:02	Edit	C:\foodCo\foodVibe1.0\server\routes\generic.js	          error: 'Product is used in one or more recipes',	
+2026-04-21 19:43:11	Edit	C:\foodCo\foodVibe1.0\server\routes\generic.js	          error: 'Each linked ingredient must have a nameSnapshot',	

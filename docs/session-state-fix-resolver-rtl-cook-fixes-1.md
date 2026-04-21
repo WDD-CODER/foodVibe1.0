@@ -1,30 +1,90 @@
-# Session State
+# Session State — 2026-04-21 (fix/resolver-rtl-cook-fixes)
 
 ## Branch
-fix/resolver-rtl-cook-fixes (renamed from feat/session-20260421 at /ship — first use of new semantic naming)
+`fix/resolver-rtl-cook-fixes`
 
 ## Date
 2026-04-21
 
 ## Session Summary
-- Refactored session branch naming: `feat/session-YYYYMMDD` placeholders now renamed to semantic names (`feat/…`, `fix/…`, `refactor/…`, `chore/…`) before any push. Implemented via Ultraplan (PR #134) — added Phase 2a to end-of-session-agent.md, step 2b to git-agent.md, updated CLAUDE.md hard rules.
-- Shipped session branch as PR #135 (`fix/resolver-rtl-cook-fixes`) — recipe resolver ID-prefix routing, mobile RTL layout (Plan 280), cook button UX for non-logged-in users.
-- Retrospective: two cssLayer / angularComponentStructure test suite gaps identified (raw 620px breakpoint, resolver trigger boundary).
+- Fixed orphaned ingredient `referenceId` handling: `recipe-form.service.ts` now auto-repairs unlinked ingredients on form load
+- Fixed data integrity at the server layer: `server/routes/generic.js` blocks orphan-creating DELETE operations (referential integrity guard)
+- Fixed recipe resolver routing: resolver now correctly routes by ID prefix
+- Session-state, agent docs, reflect logs, and scripts updated via chore commit
+- Active bug identified but NOT yet fixed: nutrition badge tooltip renders below the leaf icon instead of above — root cause documented below
 
-## Files Modified
- .claude/agents/end-of-session-agent.md | +fallback note for dirty-tree PR merge
- .claude/agents/git-agent.md            | +step 2b semantic branch rename
- .claude/retrospectives/2026-04-21-18-00-refactor-planner.md | new
- CLAUDE.md                              | branch guard rule updated
+## Active Bug — Nutrition Badge Tooltip (RESUME HERE)
 
-## Commit
-33c77c3 (chore: session state) → merged to main via PR #135
+**File:** `src/app/shared/nutrition-badge/nutrition-badge.component.ts`
+
+**Symptom:** Tooltip covers the leaf icon instead of appearing above it.
+
+**Root cause:** `findFixedContainingBlock_()` computes wrong coordinate space when `.table-body` has a CSS transform/container-type intercepting `position: fixed`. The flip check fires incorrectly and tooltip renders below.
+
+**Fix to apply next session — replace `onMouseEnter()` with pure viewport coords and remove `findFixedContainingBlock_()`:**
+
+```typescript
+onMouseEnter(): void {
+  this.showTooltip = true
+  const host = this.elRef_.nativeElement as HTMLElement
+  const rect = host.getBoundingClientRect()
+
+  const TOOLTIP_W = 164
+  const TOOLTIP_EST_HEIGHT = 220
+  const halfW = TOOLTIP_W / 2
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+
+  const centerX = rect.left + rect.width / 2
+  const clampedX = Math.max(halfW, Math.min(vw - halfW, centerX))
+
+  // Flip below when badge is too close to viewport top
+  const below = rect.top < TOOLTIP_EST_HEIGHT + 8
+  this.isBelow_.set(below)
+
+  if (!below) {
+    this.tooltipStyle_.set({
+      bottom: `${vh - rect.top + 8}px`,
+      top:    'auto',
+      left:   `${clampedX}px`,
+    })
+  } else {
+    this.tooltipStyle_.set({
+      top:    `${rect.bottom + 8}px`,
+      bottom: 'auto',
+      left:   `${clampedX}px`,
+    })
+  }
+}
+```
+
+After applying: run `ng build`, browse inventory page, hover a leaf badge, screenshot.
+
+## Files Modified (this session's commits)
+```
+01-home-page-snapshot.md                           |  84 ++++
+docs/session-state-feat-session-20260421-1.md      | 108 +++++
+docs/session-state-fix-resolver-rtl-cook-fixes-1.md|  30 ++
+scripts/context-monitor.sh                         |  22 ++
+scripts/session-startup.sh                         |   6 ++
+server/routes/generic.js                           |  35 ++
+server/services/seed-master.js                     |   9 ++
+src/app/core/services/scaling.service.ts           |   8 +-
+recipe-builder/services/recipe-form.service.ts     |  32 +++-
+15 files changed, 385 insertions(+), 59 deletions(-)
+```
+
+## Commits (unpushed)
+- `a07edc2` fix(server): referential integrity — block orphan-creating operations
+- `75b6da6` fix(data-integrity): handle orphaned ingredient referenceIds gracefully
+- `cd09878` chore(session): update session artifacts, agent docs, reflect logs, and scripts
+- `7b2870e` fix(recipe-builder): auto-repair unlinked ingredients on form load
 
 ## PR
-https://github.com/WDD-CODER/foodVibe1.0/pull/135 — MERGED
+N/A — commits not yet pushed
 
 ## Next Steps
-- [ ] Fix ship skill: `gh pr merge --delete-branch` fails when `failure-log.tsv` is dirty — add `--auto` fallback in `~/.claude/skills/ship/SKILL.md` Step 8 / merge section. The Grep for `gh pr merge` in that file returned no matches — the merge-to-main logic may live in git-agent.md instead. Next session: locate the exact section and add: "If merge fails due to dirty local files, fall back to `gh pr merge {n} --merge --auto`"
-- [ ] `/reflect cssLayer 1` — add TC-009 behavior check for raw pixel breakpoint enforcement
-- [ ] `/reflect angularComponentStructure 1` — extend TC-004 trigger boundary to exclude resolver files
-- [ ] Remove `.claude/reflect/failure-log.tsv` (user plans to do this — eliminates the dirty-tree PR merge issue)
+- [ ] Apply nutrition badge tooltip fix (pure viewport coords, remove `findFixedContainingBlock_()`)
+- [ ] `ng build` verification after tooltip fix
+- [ ] Browse inventory page — hover leaf badge — screenshot to confirm tooltip above icon
+- [ ] Push 4 unpushed commits + open PR for `fix/resolver-rtl-cook-fixes`
