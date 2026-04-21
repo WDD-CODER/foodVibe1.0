@@ -1,23 +1,26 @@
 ---
 name: end-session
-description: Runs the complete end-of-session pipeline — brief validation, build gate, techdebt scan, git operations, todo archive, session evaluation, and handoff report.
+description: Session closer — alias for /ship. Runs build gate, commit/push, session-state, todo sync. Target < 2 min.
 ---
 
 # Skill: /end-session
 
-**Trigger:** User types `/end-session`.
+> **Alias for `/ship`** — both invoke the same 4-phase `end-of-session-agent`.
+> Deprecation deadline: **2026-04-28**. Use `/ship` for new sessions.
+
+**Trigger:** User types `/end-session` or natural language: "wrap up", "done", "finish up", "handoff".
 
 **Action:** Invoke the end-of-session agent via the Agent tool:
 
 ```
 Agent(
   subagent_type: "end-of-session-agent",
-  description: "Run full end-of-session pipeline",
-  prompt: "Run the complete end-of-session pipeline for the current session. Repo root: C:\\foodCo\\foodVibe1.0"
+  description: "Run 4-phase ship pipeline",
+  prompt: "Run the 4-phase /ship pipeline. Repo root: C:\\foodCo\\foodVibe1.0. Build gate → commit → session-state → todo sync."
 )
 ```
 
-Do not run any phases inline. The agent handles everything — brief validation, build gate, techdebt scan, git operations, todo archive, doc refresh, plan cleanup, session evaluation, handoff report, and final commit.
+Do not run any phases inline. The agent handles everything.
 
 ---
 
