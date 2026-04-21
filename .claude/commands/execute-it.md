@@ -5,6 +5,9 @@ description: Execute the implementation plan from this conversation
 allowed-tools: Read, Write, Edit, Bash
 ---
 
+> **DEPRECATION NOTICE** (added 2026-04-21, remove after 2026-04-28): Use `/feat` which invokes execute-it automatically. This file remains functional as an alias during the transition week.
+
+
 # Skill: execute-it
 
 Execute the implementation plan from this conversation, incorporating any findings from plan-implementation verification.
