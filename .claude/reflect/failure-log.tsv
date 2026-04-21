@@ -1,1 +1,12 @@
 ﻿timestamp	tool_name	input_summary	error_snippet	processed
+2026-04-20 14:23:28	Bash	cat /c/foodCo/foodVibe1.0/agent.md | head -100	1. Run `ng build` or full `getDiagnostics` ΓÇö mandatory, no exceptions. Do not skip because changes look "mechanical" o	
+2026-04-20 16:12:42	Bash	ng build 2>&1 | tail -20	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-20 16:29:34	Edit	C:\foodCo\foodVibe1.0\.claude\agents\end-of-session-agent.md	Build failed. Cannot close session with broken code.	
+2026-04-20 16:55:54	mcp__mempalace__mempalace_search	@{query=signup new user seed items; limit=5}	      "text": "/**\n * Dev-only script: promotes dev-guest documents to __master__ in local MongoDB.\n *\n * Run once af	
+2026-04-20 17:15:04	Write	C:\foodCo\foodVibe1.0\scripts\push-master-to-atlas.js	  console.error('[push-master] ERROR: --confirm flag required.');	
+2026-04-20 17:20:20	Bash	cat "C:\Users\danwe\AppData\Local\Temp\claude\C--foodCo-foodVibe1-0\f55b791d-a32	@{stdout=Failed: Server selection timed out after 30000 ms; stderr=; interrupted=False; isImage=False; noOutputExpected=	
+2026-04-21 06:50:19	Edit	C:\foodCo\foodVibe1.0\scripts\push-master-to-atlas.js	  console.error('[push-master] ERROR: --confirm flag required.');	
+2026-04-21 07:37:57	Edit	C:\Users\danwe\.claude\settings.json	  "skipDangerousModePermissionPrompt": true	
+2026-04-21 07:38:04	Edit	C:\Users\danwe\.claude\settings.json	  "skipDangerousModePermissionPrompt": true	
+2026-04-21 07:45:17	Bash	git -C C:/foodCo/foodVibe1.0 diff HEAD -- .claude/copilot-instructions.md CLAUDE	+1. Run `ng build` or full `getDiagnostics` ΓÇö mandatory, no exceptions.	
+2026-04-21 07:45:31	Bash	git -C C:/foodCo/foodVibe1.0 diff HEAD -- CLAUDE.md | head -60	+- **Build gate**: `ng build` must pass before any commit. No exceptions.	
