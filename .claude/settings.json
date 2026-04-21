@@ -3,6 +3,7 @@
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "permissions": {
+    "defaultMode": "bypassPermissions",
     "allow": [
       "Bash(*)",
       "Write(C:/foodCo/foodVibe1.0/**)",
@@ -87,7 +88,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash scripts/branch-guard.sh",
+            "command": "bash C:/foodCo/foodVibe1.0/scripts/branch-guard.sh",
             "timeout": 10
           }
         ]
@@ -99,7 +100,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash scripts/session-startup.sh",
+            "command": "bash C:/foodCo/foodVibe1.0/scripts/session-startup.sh",
             "timeout": 10
           }
         ]
@@ -111,7 +112,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -NoProfile -File .claude/reflect/tool-failure-hook.ps1"
+            "command": "powershell -NoProfile -File C:/foodCo/foodVibe1.0/.claude/reflect/tool-failure-hook.ps1"
           }
         ]
       },
@@ -120,7 +121,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash scripts/context-monitor.sh",
+            "command": "bash C:/foodCo/foodVibe1.0/scripts/context-monitor.sh",
             "timeout": 5
           }
         ]
@@ -132,7 +133,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash scripts/pre-compact-reminder.sh",
+            "command": "bash C:/foodCo/foodVibe1.0/scripts/pre-compact-reminder.sh",
             "timeout": 5
           }
         ]
@@ -143,7 +144,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash scripts/handoff-check.sh",
+            "command": "bash C:/foodCo/foodVibe1.0/scripts/handoff-check.sh",
             "timeout": 10
           }
         ]

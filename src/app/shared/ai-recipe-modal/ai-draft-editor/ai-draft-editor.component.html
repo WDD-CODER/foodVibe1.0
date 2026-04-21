@@ -1,0 +1,209 @@
+<!-- src/app/shared/ai-recipe-modal/ai-draft-editor/ai-draft-editor.component.html -->
+<div class="ai-draft-editor" dir="rtl">
+
+  <!-- ── Name + Type ── -->
+  <div class="editor-row editor-row--header">
+    <input
+      class="c-input editor-name-input"
+      [value]="name_()"
+      (input)="name_.set($any($event.target).value)"
+      [placeholder]="(isDish_() ? 'dish_name_placeholder' : 'recipe_name_placeholder') | translatePipe"
+    />
+    <button
+      type="button"
+      class="type-toggle-btn"
+      [class.type-toggle-btn--dish]="isDish_()"
+      (click)="toggleType()"
+    >
+      {{ (isDish_() ? 'dish' : 'preparation') | translatePipe }}
+    </button>
+  </div>
+
+  <!-- ── Yield ── -->
+  <div class="editor-row editor-row--yield">
+    <span class="editor-field-label">{{ (isDish_() ? 'serving_portions' : 'yield') | translatePipe }}:</span>
+    <input
+      class="c-input editor-num-input"
+      type="number"
+      [min]="isDish_() ? 1 : 0"
+      [value]="yieldAmount_()"
+      (input)="yieldAmount_.set(+$any($event.target).value)"
+    />
+    @if (isDish_()) {
+      <span class="editor-locked-unit">{{ 'dish' | translatePipe }}</span>
+    } @else {
+      <app-custom-select
+        class="editor-unit-select editor-yield-unit"
+        [options]="unitOptions_()"
+        [ngModel]="yieldUnit_()"
+        (ngModelChange)="onYieldUnitChange($event)"
+        name="yield_unit"
+        [typeToFilter]="true"
+        addNewValue="__add_unit__"
+        [compact]="true"
+      />
+    }
+  </div>
+
+  <div class="editor-divider"></div>
+
+  <!-- ── Ingredients ── -->
+  <div class="editor-section">
+    <p class="editor-section-title">{{ 'ai_recipe_preview_ingredients' | translatePipe }}</p>
+    <div class="editor-ing-table" cdkDropList (cdkDropListDropped)="onDropIngredient($event)">
+      <div class="editor-ing-header">
+        <span></span>
+        <span>{{ 'ingredient_name' | translatePipe }}</span>
+        <span>{{ 'quantity' | translatePipe }}</span>
+        <span>{{ 'unit' | translatePipe }}</span>
+        <span></span>
+      </div>
+      @for (ing of ingredients_(); track ing.id; let i = $index) {
+        <div class="editor-ing-row" [class.editor-ing-row--new]="ing.isNew" cdkDrag>
+          <div class="cdk-custom-placeholder" *cdkDragPlaceholder></div>
+          <div class="editor-drag-handle" cdkDragHandle>
+            <lucide-icon name="grip-vertical" [size]="14" class="drag-handle-icon" />
+          </div>
+          <div class="editor-ing-name-cell">
+            @if (ing.isNew) {
+              <span class="editor-new-badge">{{ 'new' | translatePipe }}</span>
+            }
+            <input
+              class="c-input"
+              [value]="ing.name"
+              (input)="updateIngredientName(i, $any($event.target).value)"
+              [placeholder]="'ingredient_name' | translatePipe"
+            />
+          </div>
+          <input
+            class="c-input editor-num-input"
+            type="number"
+            min="0"
+            [value]="ing.amount"
+            (input)="updateIngredientAmount(i, +$any($event.target).value)"
+          />
+          <app-custom-select
+            class="editor-unit-select"
+            [options]="unitOptions_()"
+            [ngModel]="ing.unit"
+            (ngModelChange)="onIngredientUnitChange(i, $event)"
+            [name]="'ing_unit_' + i"
+            [typeToFilter]="true"
+            addNewValue="__add_unit__"
+            [compact]="true"
+          />
+          <button type="button" class="editor-del-btn c-icon-btn" (click)="removeIngredient(i)">
+            <lucide-icon name="x" [size]="14" />
+          </button>
+        </div>
+      }
+    </div>
+    <button type="button" class="editor-add-row" (click)="addIngredient()">
+      <lucide-icon name="plus" [size]="13" />
+      {{ 'add_ingredient' | translatePipe }}
+    </button>
+  </div>
+
+  <!-- ── Workflow: Preparation steps ── -->
+  @if (!isDish_()) {
+    <div class="editor-section">
+      <p class="editor-section-title">{{ 'ai_recipe_preview_steps' | translatePipe }}</p>
+      <div class="editor-steps-list" cdkDropList (cdkDropListDropped)="onDropWorkflow($event)">
+        @for (item of workflowItems_(); track item.id; let i = $index) {
+          <div class="editor-step-row" cdkDrag>
+            <div class="cdk-custom-placeholder" *cdkDragPlaceholder></div>
+            <div class="editor-drag-handle" cdkDragHandle>
+              <lucide-icon name="grip-vertical" [size]="14" class="drag-handle-icon" />
+            </div>
+            <span class="editor-step-num">{{ i + 1 }}</span>
+            <textarea
+              class="c-input editor-step-textarea"
+              [value]="item.text"
+              (input)="updateWorkflowText(i, $any($event.target).value)"
+              rows="2"
+              [placeholder]="'instruction_placeholder' | translatePipe"
+            ></textarea>
+            <button type="button" class="editor-del-btn c-icon-btn" (click)="removeWorkflowItem(i)">
+              <lucide-icon name="x" [size]="14" />
+            </button>
+          </div>
+        }
+      </div>
+      <button type="button" class="editor-add-row" (click)="addWorkflowItem()">
+        <lucide-icon name="plus" [size]="13" />
+        {{ 'add_prep_stage' | translatePipe }}
+      </button>
+    </div>
+  }
+
+  <!-- ── Workflow: Dish prep references ── -->
+  @if (isDish_()) {
+    <div class="editor-section">
+      <p class="editor-section-title">{{ 'preparation' | translatePipe }}</p>
+      <div class="editor-prep-table" cdkDropList (cdkDropListDropped)="onDropWorkflow($event)">
+        <div class="editor-prep-header">
+          <span></span>
+          <span>{{ 'preparation' | translatePipe }}</span>
+          <span>{{ 'quantity' | translatePipe }}</span>
+          <span>{{ 'unit' | translatePipe }}</span>
+          <span></span>
+        </div>
+        @for (item of workflowItems_(); track item.id; let i = $index) {
+          <div class="editor-prep-row" cdkDrag>
+            <div class="cdk-custom-placeholder" *cdkDragPlaceholder></div>
+            <div class="editor-drag-handle" cdkDragHandle>
+              <lucide-icon name="grip-vertical" [size]="14" class="drag-handle-icon" />
+            </div>
+            <input
+              class="c-input"
+              [value]="item.text"
+              (input)="updateWorkflowText(i, $any($event.target).value)"
+              [placeholder]="'preparation' | translatePipe"
+            />
+            <input
+              class="c-input editor-num-input"
+              type="number"
+              min="0"
+              [value]="item.qty"
+              (input)="updateWorkflowQty(i, +$any($event.target).value)"
+            />
+            <app-custom-select
+              class="editor-unit-select"
+              [options]="unitOptions_()"
+              [ngModel]="item.unit"
+              (ngModelChange)="onWorkflowUnitChange(i, $event)"
+              [name]="'wf_unit_' + i"
+              [typeToFilter]="true"
+              addNewValue="__add_unit__"
+              [compact]="true"
+            />
+            <button type="button" class="editor-del-btn c-icon-btn" (click)="removeWorkflowItem(i)">
+              <lucide-icon name="x" [size]="14" />
+            </button>
+          </div>
+        }
+      </div>
+      <button type="button" class="editor-add-row" (click)="addWorkflowItem()">
+        <lucide-icon name="plus" [size]="13" />
+        {{ 'add_preparation' | translatePipe }}
+      </button>
+      <div class="editor-prep-hint">
+        <lucide-icon name="info" [size]="13" />
+        {{ 'ai_recipe_dish_preps_unlinked_hint' | translatePipe }}
+      </div>
+    </div>
+  }
+
+  <!-- ── Footer ── -->
+  <div class="editor-footer">
+    <button type="button" class="c-btn-ghost" (click)="onGenerateAgain()">
+      <lucide-icon name="rotate-ccw" [size]="14" />
+      {{ 'ai_recipe_generate_again' | translatePipe }}
+    </button>
+    <button type="button" class="c-btn-primary" (click)="onApprove()">
+      <lucide-icon name="arrow-left" [size]="14" />
+      {{ 'ai_recipe_open_builder' | translatePipe }}
+    </button>
+  </div>
+
+</div>

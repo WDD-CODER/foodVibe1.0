@@ -2,123 +2,58 @@
 
 ## MANDATORY GATE
 
-Read the two files below at the start of each session, then confirm **"Yes chef!"**
-If a file cannot be read, respond **"No chef! I cannot read [filename]"** and stop.
+Read the two files below at session start, then confirm **"Yes chef!"**
 
 1. [`agent.md`](agent.md) — preflight checklist, agent index, operational workflow
 2. [`.claude/copilot-instructions.md`](.claude/copilot-instructions.md) — all project rules, skill triggers, Angular/CSS/Git standards
 
-> **Claude Code:** Read both files once at session start (first message only). They remain in context for the rest of the conversation — do not re-read on subsequent messages.
-> **Cursor:** Read them at the start of each new task context.
+> **Claude Code:** Read both files once (first message only) — do not re-read on subsequent messages.
+> **Subagents** spawned via Agent tool are exempt from this gate.
+> **Skills are self-contained** — do NOT re-read `copilot-instructions.md` inside a skill.
 
-> **Command in first message**: If the first message also contains a command or task (e.g. `/commit-github`), confirm **"Yes chef!"** and immediately execute it — do not stop after the confirmation.
+---
 
-> **Skills are self-contained**: Individual skills carry their own inline rules. Do NOT re-read `copilot-instructions.md` when executing a skill unless the skill explicitly instructs it.
+## Hard Rules (always enforced)
 
-## Subagent Gate Exemption
+- **Branch guard**: Never write on `main`. Branch-guard hook auto-creates `feat/session-YYYYMMDD` as a placeholder. Before any push, `/ship` and git-agent rename it to a semantic name (`feat/…`, `fix/…`, `refactor/…`, `chore/…`). Announce `BRANCH_GUARD:` output immediately.
+- **MemPalace first**: Every search starts with `mempalace_search()`. See priority tree in `.claude/copilot-instructions.md §Codebase Search`.
+- **Subagent MemPalace gate**: YOU run `mempalace_search()` before spawning any agent. Pass results as `## MemPalace Context` in the prompt. Never instruct subagents to call it themselves.
+- **Browser tools**: NEVER call `mcp__claude-in-chrome__*` or raw Playwright MCP directly. ALL browser interaction goes through `/browse` (gstack).
+- **No semicolons in `.ts` files.** Single quotes in TS, double quotes in HTML.
+- **Build gate**: `ng build` must pass before any commit. No exceptions.
+- **Plugin cache edits**: Any edit to `~/.claude/plugins/cache/.../superpowers/` is overwritten on plugin version bump. Active tracked edit: `superpowers/*/skills/subagent-driven-development/implementer-prompt.md` — "Files changed" report section requires `git diff --name-only` label per file (`(new change)` vs `(pre-existing — no write needed)`). Re-apply after any superpowers plugin update.
 
-Subagents spawned via the Agent tool are running inside a task — they do **not** perform the session-start preflight ("Yes chef!" gate). The gate applies to main-session Claude only.
+---
 
-## Subagent MemPalace Rule
+## Path Router
 
-**Before spawning ANY subagent** (Explore, Plan, or named agents):
-1. **YOU** (main Claude) call `mempalace_search(query="<relevant keywords>", limit=5)` first
-2. Include the top results as a `## MemPalace Context` section at the TOP of the subagent prompt
-3. Do NOT instruct the subagent to call `mempalace_search` — MCP tools are unreliable in subagent context ([GitHub #13898](https://github.com/anthropics/claude-code/issues/13898))
-4. If MCP unavailable in main session → note in the prompt: "MemPalace unavailable this session"
-5. If search returns no results → note: "MemPalace searched, no relevant results"
+Choose the path that matches your task. Each path loads the right context automatically.
 
-MemPalace has 6,000+ embedded drawers with project knowledge. Subagents receive this knowledge as injected context, not as tool calls they cannot reliably execute.
+| Task type | Command | Loads | Invokes |
+|-----------|---------|-------|---------|
+| New feature | `/feat` | standards-angular, standards-domain | plan-implementation, execute-it, team-leader |
+| Planning / PRD | `/plan` | prd-template, hld-template | product-manager, software-architect |
+| Bug fix | `/fix` | matching standards section (css/auth/data/ui/api) | investigate, elegant-fix |
+| Refactor | `/refactor` | standards-angular, cssLayer, techdebt | team-leader |
+| Security | `/security` | standards-security, auth-and-logging, auth-crypto | security-officer |
 
-## MemPalace Orient Rule (MANDATORY)
+> Commands live in `.claude/commands/`. All existing commands continue to work as aliases.
 
-**At the START of every task** — before reading files, before planning, before writing code — run:
-```
-mempalace_search(query="<2-3 keywords from the user's request>", limit=5)
-```
-This fires on ANY user request that involves code, files, components, or project knowledge. The only exceptions:
-- Pure conversation (questions about Claude Code itself, general chat)
-- A skill's Phase 0 already covers the same search → skip (no double-search)
-- MCP unavailable → skip silently
-
-**Why at task start, not at edit time:** If you wait until the edit step, read-only investigations and already-completed tasks skip it entirely. Searching first gives you context that shapes how you approach the task — even if you end up not writing code.
-
-This is the **universal safety net** — skills have their own Phase 0, but this rule covers everything that falls between the cracks.
-
-## Branch Rule
-
-**Check your branch BEFORE doing any work — not just before committing.**
-
-At task start, run `git branch --show-current`. Then:
-
-- **On `main` or `master`?** Stop. Create and switch to a new branch first, then begin:
-  - `git checkout -b feat/<task-slug>` — new feature
-  - `git checkout -b fix/<task-slug>` — bug fix
-  - `git checkout -b chore/<task-slug>` — maintenance/tooling
-  - Derive `<task-slug>` from the task description (3–5 words, kebab-case)
-  - **Before creating the branch, check if another agent already owns it:**
-    ```bash
-    ls -t docs/session-state-<branch-slug>-*.md 2>/dev/null | head -1
-    ```
-    If a file exists and was modified in the last 4 hours → that branch is occupied. Append `-2` to your slug (then `-3` etc.) until you find a clear one.
-- **Already on a feature/fix/chore branch?** Check for co-occupants the same way. If another agent's session-state file is present and recent on this branch → move to a new branch unless explicitly told to collaborate.
-- **Explicitly told to share a branch or collaborate?** Honor the instruction and note it.
-- **Parallel multi-agent work needing isolation?** Use `/worktree-setup` on demand — not automatic.
-- **Worktree boundary**: When inside an isolated worktree, never attempt `git checkout main`. All PR creation and merges must use `git -C <mainRepoPath>` from the root repo path to avoid `fatal: main is already used` errors.
-
-> **Branch Guard hook**: A `PreToolUse` hook (`scripts/branch-guard.sh`) fires automatically before every Edit/Write/MultiEdit call. If Claude is on `main`, it creates `feat/session-YYYYMMDD` and switches to it before writing any file. When the hook output contains `BRANCH_GUARD:`, Claude **must immediately announce to the user** which branch was created — e.g. *"Moved to branch `feat/session-20260415` before making any changes."* This message must appear in Claude's next response, not buried or skipped.
-
-## gstack — Browser QA & Extended Tooling
-
-gstack is installed at `~/.claude/skills/gstack/`. It provides browser automation, visual QA, safety guardrails, and lifecycle tools that complement our existing workflow.
-
-**Use /browse from gstack for all web browsing. Never use mcp__claude-in-chrome__* tools.**
-
-### gstack skills available in this project:
-- **Browser QA**: `/browse`, `/qa`, `/qa-only`, `/connect-chrome`, `/setup-browser-cookies`, `/canary`, `/benchmark`
-- **Review & Security**: `/review`, `/cso`, `/investigate`
-- **Shipping & Deploy**: `/ship`, `/land-and-deploy`, `/setup-deploy`, `/document-release`
-- **Safety**: `/careful`, `/freeze`, `/guard`, `/unfreeze`
-- **Lifecycle**: `/retro`, `/gstack-upgrade`
-- **Design**: `/design-review`, `/design-shotgun`, `/design-consultation`
-
-### What gstack does NOT replace (our own workflow remains primary):
-- Planning: briefs come from the Claude.ai planning brain → `/plan-implementation` → `/execute-it`
-- Git: `git-agent` handles all commit/push/PR/batch operations
-- Domain skills: `cssLayer`, `angularComponentStructure`, `add-recipe`, `elegant-fix`
-- Agent orchestration: Team Leader, Software Architect, Product Manager, Breadcrumb Navigator
-- Standards: `standards-angular.md`, `standards-security.md`, `standards-domain.md`, `standards-git.md`
-
-### gstack skills NOT used (redundant with our workflow):
-- `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`, `/plan-design-review`, `/autoplan` — our planning brain + brief workflow is superior
-- `/codex` — requires OpenAI Codex CLI, not in our stack
-## Skill routing
-
-When the user's request matches an available skill, ALWAYS invoke it using the Skill
-tool as your FIRST action. Do NOT answer directly, do NOT use other tools first.
-The skill has specialized workflows that produce better results than ad-hoc answers.
-
-Key routing rules:
-- Product ideas, "is this worth building", brainstorming → invoke office-hours
-- Bugs, errors, "why is this broken", 500 errors → invoke investigate
-- Ship, deploy, push, create PR → invoke ship
-- QA, test the site, find bugs → invoke qa
-- Code review, check my diff → invoke review
-- Update docs after shipping → invoke document-release
-- Weekly retro → invoke retro
-- Design system, brand → invoke design-consultation
-- Visual audit, design polish → invoke design-review
-- Architecture review → invoke plan-eng-review
-- Open a URL, navigate a page, test UI behavior in the browser → invoke browse
-- Verify a fix works on localhost, check a running app → invoke browse
-- Any web browsing whatsoever → invoke browse
-
-> **HARD RULE — browser tools**: NEVER call `mcp__claude-in-chrome__*` or any raw Playwright MCP tools directly. ALL browser interaction in this project goes through `/browse` (gstack). This applies to main-session Claude AND all subagents.
+---
 
 ## Session Management
 
-- At session start, the most recently modified session-state file for this branch is auto-loaded by `session-startup.sh`. The startup message tells you which file was loaded and where to save.
-- **Save target**: The startup hook injects a `SESSION SAVE TARGET:` line with your session's unique file path (`docs/session-state-<branch>-<pid>.md`). Before ending a session, write session-state to that path — not `docs/session-state.md` directly. If the startup message is unavailable, read `.claude/.session-state-path` for the path, or fall back to `docs/session-state.md`.
-- This design lets two sessions on the same branch coexist without overwriting each other. Files older than 7 days are cleaned up automatically on next startup.
-- For mid-task snapshots with timestamped branching points, run `/checkpoint` — this writes a dated file to `.claude/sessions/` and prints a resume prompt.
-- `docs/session-state-<branch>-<pid>.md` files are the rolling continuity files per session. `.claude/sessions/YYYY-MM-DD-HHMM-slug.md` files are point-in-time snapshots. Both serve different needs.
+- Session-state file path is injected by `session-startup.sh` → `SESSION SAVE TARGET:` line.
+- Read `.claude/.session-state-path` if startup message unavailable.
+- Mid-task snapshot: run `/checkpoint`.
+- Session end: run `/ship` (4-phase, < 2 min) or `/end-session` (full pipeline, alias).
+
+---
+
+## Standards & Agents (pointers)
+
+- Full rules: `.claude/copilot-instructions.md`
+- Agent roster: `copilot-instructions.md §0.3`
+- Task force sizing: `copilot-instructions.md §0.4`
+- Model routing: `copilot-instructions.md §0.5`
+- gstack skills: `copilot-instructions.md §gstack`

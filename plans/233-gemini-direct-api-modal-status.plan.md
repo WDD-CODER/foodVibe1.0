@@ -8,11 +8,15 @@ isProject: false
 # Goal
 Replace the backend-proxied GeminiService with a direct fetch-based client, add API key management (localStorage FV_GEMINI_API_KEY), and give the user visible status feedback (sending → done/error) in the AI recipe modal.
 
+# Architecture Note (2026-04-19)
+Direct fetch + localStorage API key approach was **dropped**. Architecture pivoted to backend proxy — Gemini API key lives server-side in the Node.js backend. Only the modal status feedback portion was implemented.
+
 # Atomic Sub-tasks
-- [ ] `gemini.service.ts` — rewrite: fetch-based direct Gemini API call, apiKey_ signal, hasKey computed, setApiKey(), remove HttpClient/dead imports
-- [ ] `ai-recipe-modal.component.ts` — add configuringKey_/keyInput_/status_ signals, onSaveKey/onClose methods, API key guard in onGenerate(), FormsModule in imports
-- [ ] `ai-recipe-modal.component.html` — add key config panel (shown when no key) + status bar (sending/done/error states)
-- [ ] `ng build` — verify zero errors
+- [DROPPED] `gemini.service.ts` — fetch-based direct API, apiKey_ signal, hasKey, setApiKey() — backend proxy kept instead
+- [DROPPED] `ai-recipe-modal.component.ts` — configuringKey_/keyInput_ signals, onSaveKey, API key guard — no client-side key management
+- [DROPPED] `ai-recipe-modal.component.html` — key config panel
+- [x] `ai-recipe-modal.component.ts` — status_ signal (idle/sending/done/error), onClose, status bar wired
+- [x] `ng build` — zero errors
 
 # Rules
 - Do NOT use HttpClient for GeminiService — use fetch only

@@ -39,10 +39,42 @@ If no reports found in any mode: `"No audit reports found. Run /nightly-audit fi
 
 ## Interactive Morning Loop (default mode)
 
+### Phase 0 — Discover Pending Branches
+
+1. Get today's date `YYYY-MM-DD` and yesterday's date `YYYY-MM-DD` (both, since jobs may run just after midnight).
+2. Run:
+   ```bash
+   git fetch origin
+   git branch -a
+   ```
+3. Find the most recent `audit/YYYY-MM-DD` or `audit/YYYY-MM-DD-1` branch → store as `AUDIT_BRANCH`.
+4. Find the most recent `reflect/YYYY-MM-DD` or `reflect/YYYY-MM-DD-1` branch → store as `REFLECT_BRANCH`.
+
+---
+
 ### Phase 1 — Display report
 
-1. Glob `.claude/reports/audit/*-nightly-audit.md`, pick most recent by filename
-2. Read and display the full report to terminal
+1. Read the audit report:
+   - If `AUDIT_BRANCH` is set → `git show $AUDIT_BRANCH:.claude/reports/audit/YYYY-MM-DD-nightly-audit.md`
+   - Otherwise → glob `.claude/reports/audit/*-nightly-audit.md` on current branch, pick most recent
+
+2. Read the reflect report (if available):
+   - If `REFLECT_BRANCH` is set → `git show $REFLECT_BRANCH:.claude/reports/audit/YYYY-MM-DD-reflect.md`
+   - Otherwise → check `.claude/reports/audit/YYYY-MM-DD-reflect.md` on current branch
+
+3. Display the full audit report, then append the reflect section directly below it.
+
+4. End the display with a **Pending Branches** box:
+   ```
+   ┌─ PENDING BRANCHES ─────────────────────────────────────────────┐
+   │ These branches were created by last night's scheduled jobs.    │
+   │ Review above, then merge what you want to keep:                │
+   │                                                                │
+   │  audit/YYYY-MM-DD    →  git merge audit/YYYY-MM-DD            │
+   │  reflect/YYYY-MM-DD  →  git merge reflect/YYYY-MM-DD          │
+   └────────────────────────────────────────────────────────────────┘
+   ```
+   Show only lines for branches that actually exist. If neither exists, omit the box.
 
 ### Phase 2 — Trust mode
 

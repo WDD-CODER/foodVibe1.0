@@ -26,6 +26,10 @@ if not MONGO_URI:
         "in tools/catalog-seeder/.env or server/.env"
     )
 
+# Both URIs — used when writing to local + Atlas simultaneously
+MONGO_ATLAS_URI: str = os.getenv("MONGO_URI", "")
+MONGO_LOCAL_URI: str = os.getenv("MONGO_LOCAL_URI", "")
+
 COLLECTION = "PRODUCT_LIST"
 SUPPLIERS_COLLECTION = "KITCHEN_SUPPLIERS"
 
@@ -53,6 +57,7 @@ OUTPUT_DIR = _HERE / "output"
 PENDING_REVIEW_FILE = OUTPUT_DIR / "pending-review.json"
 PENDING_MANUAL_FILE = OUTPUT_DIR / "pending-manual.json"
 SEED_OUTPUT_FILE = OUTPUT_DIR / "seed-products.json"
+CATALOG_REVIEW_FILE = OUTPUT_DIR / "catalog-review.json"
 
 # ---------------------------------------------------------------------------
 # Allergens — allowed values only
@@ -108,6 +113,13 @@ NON_FOOD_KEYWORDS: tuple[str, ...] = (
     "חיתול", "טיטול",
     # Pet food
     "מזון לכלב", "מזון לחתול",
+    # Household / kitchen supplies (not food ingredients)
+    "שקיות זיפר", "שקיות ניילון", "ניילון נצמד", "נייר כסף", "נייר אלומיניום",
+    "נרות", "שקיות אשפה", "כפפות", "קיסמים",
+    # Tobacco
+    "סיגריות", "סיגר", "טבק", "נרגילה",
+    # Medicines / supplements
+    "ויטמין", "תרופ", "כדורים", "תוסף תזונה", "פרוביוטיקה",
 )
 
 # ---------------------------------------------------------------------------
@@ -120,3 +132,8 @@ CATEGORY_GROUPS: dict[str, list[str]] = {
     "pantry":    ["pantry", "pantry_liquid", "pantry_solid", "oils", "spices", "sauces", "condiments"],
     "frozen":    ["frozen"],
 }
+
+# App's canonical product categories (must match metadata-registry.service.ts DEFAULT_CATEGORIES)
+KITCHEN_CATEGORIES: tuple[str, ...] = (
+    "vegetables", "dairy", "meat", "dry", "fish", "spices",
+)

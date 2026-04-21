@@ -1,4 +1,5 @@
 import { APP_INITIALIZER, ApplicationConfig, ErrorHandler, importProvidersFrom, provideZoneChangeDetection } from '@angular/core'
+import { provideAnimations } from '@angular/platform-browser/animations'
 import { GlobalErrorHandler } from './core/services/global-error.handler'
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
@@ -84,7 +85,13 @@ import {
   Clock,
   Watch,
   Play,
-  Pause
+  Pause,
+  Crown,
+  Leaf,
+  Dumbbell,
+  Wheat,
+  Candy,
+  Waves
 } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { provideHttpClient, withInterceptors } from '@angular/common/http'
@@ -97,6 +104,7 @@ import { catchError, of, switchMap } from 'rxjs'
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
+    provideAnimations(),
     provideRouter(routes),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     KitchenStateService,
@@ -202,7 +210,13 @@ export const appConfig: ApplicationConfig = {
         Clock,
         Watch,
         Play,
-        Pause
+        Pause,
+        Crown,
+        Leaf,
+        Dumbbell,
+        Wheat,
+        Candy,
+        Waves
       })
     )
   ]

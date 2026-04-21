@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Type Switch</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: 'Heebo', sans-serif;
+    background: #f0f4f8; min-height: 100vh;
+    padding: 2rem 1rem;
+    position: relative;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 600px 400px at 15% 20%, rgba(20,184,166,0.12), transparent),
+      radial-gradient(ellipse 500px 500px at 80% 70%, rgba(251,191,36,0.08), transparent);
+    pointer-events: none;
+  }
+  .page { position: relative; z-index: 1; max-width: 780px; margin: 0 auto; }
+  h2 { font-size: 1rem; font-weight: 700; color: #0f172a; margin: 0 0 0.375rem; text-align: center; }
+  .subtitle { font-size: 0.8rem; color: #64748b; text-align: center; margin: 0 0 1.5rem; }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  @media (max-width: 580px) { .split { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: rgba(255,255,255,0.72);
+    border: 1px solid rgba(255,255,255,0.45);
+    border-radius: 1.25rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    backdrop-filter: blur(20px);
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(226,232,240,0.6);
+    font-size: 0.8rem; font-weight: 700; color: #64748b;
+    text-transform: uppercase; letter-spacing: .5px;
+  }
+  .panel-body { padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .c-input {
+    padding: 0.5rem 0.75rem;
+    background: rgba(255,255,255,0.55);
+    color: #0f172a; font-size: 0.875rem;
+    font-family: 'Heebo', sans-serif;
+    border: 1px solid rgba(226,232,240,0.6);
+    border-radius: 0.75rem;
+    backdrop-filter: blur(16px);
+    outline: none; direction: rtl;
+  }
+  .c-select {
+    padding: 0.5rem 0.75rem;
+    background: rgba(255,255,255,0.55);
+    color: #0f172a; font-size: 0.875rem;
+    font-family: 'Heebo', sans-serif;
+    border: 1px solid rgba(226,232,240,0.6);
+    border-radius: 0.75rem;
+    backdrop-filter: blur(16px);
+    outline: none; cursor: pointer; direction: rtl;
+  }
+
+  .row { display: flex; align-items: center; gap: 0.5rem; }
+  .field-label { font-size: 0.75rem; font-weight: 600; color: #64748b; white-space: nowrap; }
+  .num { width: 62px; text-align: center; }
+  .locked-unit {
+    padding: 0.5rem 0.75rem;
+    background: rgba(241,245,249,0.7);
+    color: #94a3b8;
+    font-size: 0.875rem;
+    border: 1px solid rgba(226,232,240,0.4);
+    border-radius: 0.75rem;
+    font-style: italic;
+    pointer-events: none;
+  }
+
+  /* Type toggle buttons */
+  .type-btn {
+    padding: 0.375rem 0.875rem;
+    border: 1px solid rgba(226,232,240,0.6);
+    border-radius: 0.75rem;
+    background: rgba(255,255,255,0.55);
+    font-size: 0.8125rem; font-family: 'Heebo', sans-serif;
+    color: #64748b; cursor: pointer;
+  }
+  .type-btn.active-dish { background: rgba(14,165,233,0.12); border-color: rgba(14,165,233,0.4); color: #0284c7; font-weight: 700; }
+  .type-btn.active-prep { background: rgba(20,184,166,0.12); border-color: rgba(20,184,166,0.4); color: #0d9488; font-weight: 700; }
+
+  /* Annotation callout */
+  .callout {
+    margin-top: 0.5rem;
+    padding: 0.625rem 0.875rem;
+    border-radius: 0.75rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+  .callout-dish { background: rgba(14,165,233,0.08); border: 1px solid rgba(14,165,233,0.25); color: #0369a1; }
+  .callout-prep { background: rgba(20,184,166,0.08); border: 1px solid rgba(20,184,166,0.25); color: #0f766e; }
+  .callout strong { display: block; margin-bottom: 0.2rem; font-weight: 700; }
+
+  .divider { height: 1px; background: rgba(226,232,240,0.5); margin: 0.25rem 0; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h2>Type switch — how the yield row changes</h2>
+  <p class="subtitle">Switching between מנה (dish) and הכנה (preparation) affects the yield field</p>
+
+  <div class="split">
+
+    <!-- DISH -->
+    <div class="panel">
+      <div class="panel-header">מנה — Dish</div>
+      <div class="panel-body">
+
+        <div class="row">
+          <input class="c-input" value="שניצל עוף קלאסי" style="flex:1;font-weight:600" />
+          <button class="type-btn active-dish">מנה</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="row">
+          <span class="field-label">מנות:</span>
+          <input class="c-input num" value="4" type="number" min="1" />
+          <span class="locked-unit">מנות</span>
+        </div>
+
+        <div class="callout callout-dish">
+          <strong>Unit locked to "מנות"</strong>
+          For a dish, yield = number of portions. The unit is always "מנות" — no dropdown needed. Maps to <code>serving_portions</code> in the builder.
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PREPARATION -->
+    <div class="panel">
+      <div class="panel-header">הכנה — Preparation</div>
+      <div class="panel-body">
+
+        <div class="row">
+          <input class="c-input" value="שניצל עוף קלאסי" style="flex:1;font-weight:600" />
+          <button class="type-btn active-prep">הכנה</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="row">
+          <span class="field-label">תפוקה:</span>
+          <input class="c-input num" value="500" type="number" min="0" />
+          <select class="c-select" style="min-width:80px">
+            <option>גרם</option>
+            <option>ק״ג</option>
+            <option>מ״ל</option>
+            <option>ליטר</option>
+            <option>כוס</option>
+            <option>─────</option>
+            <option>+ חדש</option>
+          </select>
+        </div>
+
+        <div class="callout callout-prep">
+          <strong>Unit is a free dropdown</strong>
+          For a preparation, yield = weight/volume amount. Any unit from the app's registry can be chosen, plus "add new". Maps to <code>yield_conversions[0]</code> in the builder.
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div style="margin-top:1.25rem; padding:0.875rem 1rem; background:rgba(255,255,255,0.6); border:1px solid rgba(226,232,240,0.6); border-radius:1rem; backdrop-filter:blur(16px); font-size:0.82rem; color:#475569; line-height:1.6;">
+    <strong style="color:#0f172a">Note:</strong> There is no "minimum yield" field in the current data model — the builder doesn't have one either. The min=0 vs min=1 validation is just about whether 0 is a valid amount (preparations can have 0, dishes need at least 1 portion). If a "minimum batch size" field is a separate future requirement, that would need a data model change.
+  </div>
+</div>
+</body>
+</html>

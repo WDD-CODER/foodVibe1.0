@@ -1,3 +1,4 @@
+import { animate, style, transition, trigger } from '@angular/animations'
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
@@ -12,6 +13,19 @@ import { BulkEditableField } from './bulk-editable-field.model'
   templateUrl: './selection-bar.component.html',
   styleUrl: './selection-bar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger('slideInOut', [
+      transition(':enter', [
+        style({ height: '0', opacity: 0, overflow: 'hidden' }),
+        animate('300ms cubic-bezier(0.22, 1, 0.36, 1)',
+          style({ height: '*', opacity: 1, overflow: 'hidden' }))
+      ]),
+      transition(':leave', [
+        style({ overflow: 'hidden' }),
+        animate('200ms ease-in', style({ height: '0', opacity: 0 }))
+      ])
+    ])
+  ],
 })
 export class SelectionBarComponent {
   selectionState = input.required<ListSelectionState>()

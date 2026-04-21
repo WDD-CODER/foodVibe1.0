@@ -67,7 +67,7 @@ def _load_existing_from_db() -> tuple[set[str], set[str]]:
         client = pymongo.MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
         db = client.get_default_database()
         col = db[COLLECTION]
-        for doc in col.find({}, {"barcode": 1, "name_hebrew": 1, "_id": 0}):
+        for doc in col.find({"userId": "__master__"}, {"barcode": 1, "name_hebrew": 1, "_id": 0}):
             if doc.get("barcode"):
                 barcodes.add(str(doc["barcode"]).strip())
             if doc.get("name_hebrew"):

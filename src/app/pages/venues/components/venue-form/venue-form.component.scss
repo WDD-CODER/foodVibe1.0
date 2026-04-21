@@ -53,6 +53,11 @@
           font-weight: 600;
         }
 
+        /* Plan 280 — RTL icon order: plus icon renders after text in LTR DOM,
+           row-reverse places it visually before text in RTL layout */
+        .c-btn-ghost {
+          flex-direction: row-reverse;
+        }
       }
 
       .infra-row {

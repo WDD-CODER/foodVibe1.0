@@ -652,7 +652,11 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       this.selection.toggle(recipe._id ?? '')
       return
     }
-    this.onEditRecipe(recipe)
+    if (this.isLoggedIn()) {
+      this.onEditRecipe(recipe)
+    } else {
+      this.onCookRecipe(recipe)
+    }
   }
 
   protected async onDeleteRecipe(recipe: Recipe): Promise<void> {

@@ -15,16 +15,18 @@ import os
 import tempfile
 import time
 import xml.etree.ElementTree as ET
+from pathlib import Path
 from typing import Any
 
 import requests
 
-from config import FOOD_CHAINS
+from config import FOOD_CHAINS, OUTPUT_DIR
 
 logger = logging.getLogger(__name__)
 
-# Open Food Facts Israel compressed CSV
-_OFF_BULK_URL = "https://il.openfoodfacts.org/data/il.openfoodfacts.org.products.csv.gz"
+# Open Food Facts global compressed CSV (Israel-specific export no longer available)
+_OFF_BULK_URL = "https://static.openfoodfacts.org/data/en.openfoodfacts.org.products.csv.gz"
+_OFF_CACHE_TTL_DAYS = 7
 
 # Retry config
 _MAX_CHAIN_RETRIES = 3
@@ -128,28 +130,52 @@ def _parse_xml_file(filepath: str, chain_name: str) -> list[dict[str, Any]]:
 # Open Food Facts Israel — bulk download
 # ---------------------------------------------------------------------------
 
+def _safe_float(val: str | None) -> float | None:
+    try:
+        return float(val) if val else None
+    except (TypeError, ValueError):
+        return None
+
+
+_OFF_CACHE_PATH = Path(OUTPUT_DIR) / "off-bulk-cache.csv.gz"
+
+
 def fetch_off_bulk() -> dict[str, dict[str, Any]]:
     """
-    Download the Open Food Facts Israel compressed CSV once.
-    Returns a dict keyed by barcode (string):
-      {
-        "allergens_tags": [...],
-        "product_name_en": "...",
-        "categories_tags": [...]
-      }
+    Load Open Food Facts global bulk CSV, cached locally for _OFF_CACHE_TTL_DAYS days.
 
-    Uses exponential backoff on 429. Skips on persistent failure (non-blocking).
+    Downloads ~1.2 GB on first run; subsequent runs within the TTL read from disk.
+    Returns a dict keyed by barcode: { allergens_tags, product_name_en, nutrition_per_100g }
+
+    Non-blocking — returns empty dict on any failure.
     """
-    logger.info("[fetch] Downloading Open Food Facts Israel bulk data...")
     data: dict[str, dict[str, Any]] = {}
 
-    try:
+    gz_path = _OFF_CACHE_PATH
+    gz_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Use cache if fresh enough
+    if gz_path.exists():
+        age_days = (time.time() - gz_path.stat().st_mtime) / 86400
+        if age_days < _OFF_CACHE_TTL_DAYS:
+            logger.info(f"[fetch] OFF cache hit ({age_days:.1f}d old) — loading from {gz_path}")
+        else:
+            logger.info(f"[fetch] OFF cache stale ({age_days:.1f}d old) — re-downloading...")
+            gz_path.unlink()
+
+    if not gz_path.exists():
+        logger.info(f"[fetch] Downloading OFF global bulk CSV (~1.2 GB) → {gz_path} ...")
         response = _get_with_backoff(_OFF_BULK_URL)
         if response is None:
-            logger.warning("[fetch] OFF bulk download failed — allergen/English name data will be LLM-only")
+            logger.warning("[fetch] OFF bulk download failed — allergen/nutrition data will be LLM-only")
             return data
+        with open(gz_path, "wb") as f:
+            for chunk in response.iter_content(chunk_size=1024 * 1024):
+                f.write(chunk)
+        logger.info(f"[fetch] OFF bulk saved to cache ({gz_path.stat().st_size / 1e6:.0f} MB)")
 
-        with gzip.open(io.BytesIO(response.content), "rt", encoding="utf-8", errors="replace") as f:
+    try:
+        with gzip.open(gz_path, "rt", encoding="utf-8", errors="replace") as f:
             reader = csv.DictReader(f, delimiter="\t")
             for row in reader:
                 barcode = (row.get("code") or "").strip()
@@ -163,6 +189,16 @@ def fetch_off_bulk() -> dict[str, dict[str, Any]]:
                     if a.strip()
                 ]
 
+                nutrition = {
+                    "energy_kcal": _safe_float(row.get("energy_100g")),
+                    "protein_g":   _safe_float(row.get("proteins_100g")),
+                    "carbs_g":     _safe_float(row.get("carbohydrates_100g")),
+                    "sugars_g":    _safe_float(row.get("sugars_100g")),
+                    "fat_g":       _safe_float(row.get("fat_100g")),
+                    "fiber_g":     _safe_float(row.get("fiber_100g")),
+                    "sodium_g":    _safe_float(row.get("sodium_100g")),
+                }
+
                 data[barcode] = {
                     "allergens_tags":  allergens,
                     "product_name_en": (row.get("product_name_en") or row.get("product_name") or "").strip(),
@@ -171,6 +207,9 @@ def fetch_off_bulk() -> dict[str, dict[str, Any]]:
                         for c in (row.get("categories_tags") or "").split(",")
                         if c.strip()
                     ],
+                    "nutrition_per_100g": (
+                        nutrition if any(v is not None for v in nutrition.values()) else None
+                    ),
                 }
 
         logger.info(f"[fetch] OFF bulk loaded: {len(data)} barcodes")
@@ -180,12 +219,17 @@ def fetch_off_bulk() -> dict[str, dict[str, Any]]:
     return data
 
 
+_HEADERS = {
+    "User-Agent": "foodVibe-catalog-seeder/1.0 (https://github.com/WDD-CODER/foodVibe1.0; contact via GitHub)"
+}
+
+
 def _get_with_backoff(url: str, max_attempts: int = 4) -> requests.Response | None:
     """GET with exponential backoff on 429 / transient errors."""
     delay = 2.0
     for attempt in range(1, max_attempts + 1):
         try:
-            resp = requests.get(url, timeout=120, stream=True)
+            resp = requests.get(url, timeout=120, stream=True, headers=_HEADERS)
             if resp.status_code == 200:
                 return resp
             if resp.status_code == 429:

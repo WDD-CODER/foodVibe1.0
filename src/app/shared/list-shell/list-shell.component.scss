@@ -39,11 +39,17 @@
     grid-area: selbar;
     display: flex;
     justify-content: center;
-    padding-block-start: 0.5rem;
+
+    overflow: hidden;
 
     &:empty {
       display: none;
     }
+  }
+
+  :host ::ng-deep .selection-bar-area .selection-bar {
+    margin-block-start: 0.5rem;
+    margin-block-end: 0.5rem;
   }
 
   .list-header {
@@ -414,8 +420,8 @@
       grid-column: 1;
       position: absolute;
       inset-block: 0;
-      right: 0;
-      left: auto;
+      inset-inline-start: 0;
+      inset-inline-end: auto;
       z-index: 10;
 
       width: 300px;
@@ -500,8 +506,8 @@
     .filter-panel {
       position: fixed;
       inset-block: 1rem;
-      right: 0;
-      left: auto;
+      inset-inline-start: 0;
+      inset-inline-end: auto;
       z-index: 1000;
 
       width: min(85vw, 340px);

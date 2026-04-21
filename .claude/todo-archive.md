@@ -6,6 +6,223 @@ Moved from todo.md to reduce token load.
 
 ## Done
 
+### Plan 250 — Auth Field Validation — Signup & Login (`plans/250-auth-field-validation.plan.md`)
+
+- [x] Task 1: Create `src/app/core/utils/auth-validation.util.ts` — pure validator functions
+- [x] Task 2: Add 4 per-field touched signals to `auth-modal.component.ts`
+- [x] Task 3: Replace onSubmit() validation block in `auth-modal.component.ts` with validator calls
+- [x] Task 4: Add (blur) handlers to `auth-modal.component.ts` for live per-field validation
+- [x] Task 5: Fix _onError() in `auth-modal.component.ts` — add EMAIL_TAKEN, INVALID_USERNAME, INVALID_EMAIL
+- [x] Task 6: Update `user.service.ts` signup() catchError — add INVALID_USERNAME, INVALID_EMAIL
+- [x] Task 7: Update `auth-modal.component.html` — extend bindings, @if blocks, (blur) events
+- [x] Task 8: Update `server/routes/auth.js` /signup — add username + email validation
+- [x] Task 9: Update `public/assets/data/dictionary.json` — add 9 Hebrew translation keys
+
+---
+
+### Plan 247 — Form field-level inline validation (`plans/247-form-field-validation.plan.md`)
+
+- [x] Task 1: `src/styles.scss` — add `.c-field-error` and `.c-input--invalid` engine classes
+- [x] Task 2: `dictionary.json` — add field validation Hebrew keys
+- [x] Task 3–8: product-form — validationErrors_ signal, validateForm_(), onSubmit wire, HTML error bindings
+- [x] Task 9–11: recipe-header + recipe-builder — validate() method, viewChild, HTML error bindings
+- [x] Task 12–17: equipment-form, supplier-form, venue-form — validation signal + method + HTML
+- [x] Task 18: auth-modal — add c-input--invalid + aria-invalid bindings
+- [x] Task 19: ng build — zero errors
+
+---
+
+### Plan 253 — Data Service Error Guards (`plans/253-data-service-error-guards.plan.md`)
+
+- [x] `menu-event-data.service.ts` — inject LoggingService; fix loadInitialData catch; wrap getMenuEventById, addMenuEvent, updateMenuEvent, deleteMenuEvent
+- [x] `version-history.service.ts` — inject LoggingService; wrap getVersions, getVersionEntry, addVersion, restoreVersion
+- [x] `menu-section-categories.service.ts` — inject LoggingService; fix constructor .catch(() => {}); fix load() and persist() catches
+- [x] `preparation-registry.service.ts` — fix constructor .catch(() => {}); add 401 guard to initRegistry + remove userMsg; add 401 guard to 5 CRUD methods
+- [x] `unit-registry.service.ts` — remove userMsg from initUnits catch; add 401 guard to registerUnit and deleteUnit
+- [x] `metadata-registry.service.ts` — add try/catch to reloadLabelsFromStorage; add 401 guard to 11 CRUD method catches
+- [x] `recipe-data.service.ts` — wrap 11 unprotected CRUD methods
+- [x] `dish-data.service.ts` — wrap 11 unprotected CRUD methods
+- [x] `product-data.service.ts` — wrap 9 unprotected CRUD methods
+- [x] `supplier-data.service.ts` — wrap getSupplierById, addSupplier, updateSupplier, removeSupplier
+- [x] `equipment-data.service.ts` — wrap getEquipmentById, addEquipment, updateEquipment, deleteEquipment, getTrashEquipment, restoreEquipment
+- [x] `venue-data.service.ts` — wrap getVenueById, addVenue, updateVenue, deleteVenue, getTrashVenues, restoreVenue
+- [x] `backup.service.ts` — add 401 guard to exportAllToFile and importFromFile backend-loop catches
+- [x] Run `npx ng build --configuration development` — confirm zero errors
+
+---
+
+### Plan 257 — Two-Tier Product Validation (`plans/257-product-validation-two-tier.plan.md`)
+
+- [x] Task 1: Create `src/app/core/utils/product-validation.util.ts` — `getProductValidationStatus()` + `getProductMissingFields()`
+- [x] Task 2: `inventory-product-list.component.ts` — wire validation util; add invalid/incomplete filter signals
+- [x] Task 3: `inventory-product-list.component.html` — status badge in col-name; Invalid/Incomplete filter chips in sidebar
+- [x] Task 4: `inventory-product-list.component.scss` — badge styles, row tint, tooltip chip styles
+- [x] Task 5: `recipe-ingredients-table.component.ts` — split `isIncompleteRow()` → `isBlockingRow()` + `isWarningRow()`; expose `hasBlockingRows()` output
+- [x] Task 6: `recipe-ingredients-table.component.html` — update row class bindings; add warning badge alongside existing blocking badge
+- [x] Task 7: `recipe-ingredients-table.component.scss` — add `.warning-row` + `.warning-badge` styles
+- [x] Task 8: `recipe-builder.page.ts` — add blocking-row save guard in `saveRecipe()`
+- [x] Task 9: Translation files — add new i18n keys for validation states and tooltip labels
+
+---
+
+### Plan 260 — Tech Debt Execution: Apr 07 Audit (`plans/260-techdebt-apr07-execution.plan.md`)
+
+> **Tier 1 — Activate dormant plans (pass to agent as-is):**
+- [x] Execute Plan 214: `plans/214-R-sanitize-key-util-extraction.plan.md` — create `sanitize-key.util.ts`, replace 4 inline sites in 3 files
+- [x] Execute Plan 215: `plans/215-R-list-state-param-descriptor-any.plan.md` — widen `list-state.util.ts` types, remove 10 `as any` casts across 5 components
+
+> **Tier 2 — RecipeAiCoordinator extraction:**
+- [x] Task 1: Read `recipe-builder.page.ts` — AI surface identified (methods deeply form-coupled; component extraction impractical)
+- [x] Task 2: Create `src/app/pages/recipe-builder/services/recipe-ai-flow.service.ts` — service extraction (prefillFromDraft, buildDraftSnapshot, applyPatch, helpers)
+- [x] Task 3: `recipe-builder.page.ts` — remove extracted AI methods; wire `RecipeAiFlowService` via `providers` + `inject()`; `onAiEditClick` → 1-line shell
+- [x] Task 4: `ng build` — zero errors; `recipe-builder.page.ts` 1297 → 1094 LOC (−203)
+
+---
+
+### Plan 261 — Claude-Mem Integration (`plans/261-claude-mem-integration.plan.md`)
+
+- [x] `.claude/settings.json` — merge claude-mem hooks (SessionStart, PostToolUse, Stop, SessionEnd) preserving existing Stop hook
+- [x] `.claude/mcp.json` — create with claude-mem MCP server entry
+- [x] `.claude/commands/plan-implementation.md` — add Phase 0 historical context recall (conditional on claude-mem)
+- [x] `.claude/agents/end-of-session-agent.md` — add Phase 1.5 memory enrichment to Phase 11 (session-handoff is redirect)
+- [x] `.claude/copilot-instructions.md` — add memory search trigger §0, token budget §0.2, priority hierarchy §0.1
+- [x] Provide user with Bun + claude-mem install commands + worker health check
+
+> **NOTE:** This plan originally used `claude-mem`. The project has since migrated to **MemPalace** (MCP server `mcp__mempalace__*`). All memory/knowledge-graph tooling now goes through MemPalace. `claude-mem` is no longer active.
+
+---
+
+### Plan 263 — Favorites Button on Recipe-Book List (`plans/263-favorites-recipe-book.plan.md`)
+
+- [x] 1 — `src/app/core/models/recipe.model.ts` — add `favoritedBy_?: string[]` field
+- [x] 2 — `src/app/app.config.ts` — register `Heart` Lucide icon
+- [x] 3 — `public/assets/data/dictionary.json` — add 4 translation keys (favorites, show_favorites_only, add_to_favorites, remove_from_favorites)
+- [x] 4 — `recipe-book-list.component.ts` — add showFavoritesOnly_ signal, isFavoritedByCurrentUser_ computed, onToggleFavorite method, filter logic, URL state param
+- [x] 5 — `recipe-book-list.component.html` — add heart button in actions column
+- [x] 6 — `recipe-book-list.component.html` — add "Favorites only" filter toggle in sidebar; update hasActiveFilters_ and clearAllFilters
+- [x] 7 — `recipe-book-list.component.scss` — add .favorite-btn styles
+
+---
+
+### Plan 264 — Workflow Superpowers Integration (`plans/264-workflow-superpowers-integration.plan.md`)
+
+- [x] A1: Create `.claude/commands/new-feature.md` — full command (Phases 0-5)
+- [x] A2: Edit `plan-implementation.md` — add No Placeholders Scan
+- [x] A3: Edit `plan-implementation.md` — add Forced Alternatives
+- [x] A4: Edit `plan-implementation.md` — add Adversarial Subagent Review
+- [x] A5: Edit `plan-implementation.md` — update Output Format
+- [x] A6: Edit `execute-it.md` — add Verification-Before-Completion Gate
+- [x] A7: Edit `execute-it.md` — add Systematic-Debugging Protocol
+- [x] A8: Edit `execute-it.md` — add Smart Visual QA Flow
+- [x] A9: Edit `execute-it.md` — add validation override to Execution Rules
+- [x] A10: Edit `team-leader.md` — add Two-Stage Review Gate
+- [x] A11: Edit `qa-engineer.md` — add Systematic-Debugging + RED-GREEN Mandate
+- [x] A12: Edit `end-of-session-agent.md` — add Verification-Before-Completion to Phase 10
+- [x] A13: Edit `software-architect.md` — add No Placeholders Gate + Forced Alternatives
+- [x] A14: Edit `copilot-instructions.md` — add `/new-feature` skill trigger
+- [x] A15: Edit `agent.md` — add `/new-feature` to commands table
+- [x] A16: Run `ng build` — verify no regressions
+
+---
+
+### Plan 265 — auto-solve Enforcement Fixes (`plans/265-auto-solve-enforcement-fixes.plan.md`)
+
+- [x] Task 1: `auto-solve.md` Phase 2 — Remove silent-archive shortcut; replace with route-to-Phase-5
+- [x] Task 2: `auto-solve.md` Phase 6 — Add ARCHIVAL PRECONDITION block (3 rules); remove redundant Archive rule footnote
+- [x] Task 3: `auto-solve.md` Phase 4 — Add BUILD SCOPE RULE + skip exemption + logging requirement
+- [x] Task 4: `auto-solve.md` Phase 2 — UI-DETECTION GATE + route rule + budget cap + mandatory evidence table
+- [x] Task 5: Surface yes/no questions to user re Plan 234 operational tasks
+- [x] Task 6: Write `.qa-reports/plan-234-archive-audit.md` with 3 sections
+- [x] Task 7: Move unverified Plan 234 operational tasks back to `todo.md`; update archive
+- [x] Task 8: Run `npx ng build` — verify 0 errors
+
+---
+
+### Plan 267 — Context Management + Session Handoff (`plans/267-context-management-session-handoff.plan.md`)
+
+- [x] Task 1: `scripts/` — copy 4 session-kit hooks (context-monitor.sh, pre-compact-reminder.sh, session-startup.sh, handoff-check.sh) + chmod +x
+- [x] Task 2: `docs/session-state.md` — create from session-kit template
+- [x] Task 3: `.claude/settings.json` — merge 4 hook entries (preserve existing PostToolUse)
+- [x] Task 4: `CLAUDE.md` — append `## Session Management` section
+- [x] Task 5: `.claude/skills/context-management/SKILL.md` — create detection heuristics skill
+- [x] Task 6: `.claude/commands/checkpoint.md` — create timestamped snapshot command
+- [x] Task 7: `.claude/commands/resume.md` — create confirmation-gated resume command
+- [x] Task 8: `.claude/agents/` — append `## Context hygiene` to 6 persona files
+- [x] Task 9: `.claude/sessions/README.md` — create naming/lifecycle explainer
+- [x] Task 10: `plans/session-handoff-setup.md` — write user-facing how-to doc
+- [x] Task 11: Verify `/rewind` works in current Claude Code install
+
+---
+
+### Plan 269 — Master Pool Cleanup + Deletion Tombstones (`plans/269-master-pool-cleanup.plan.md`)
+
+- [x] Task 1: `server/routes/generic.js` — replace POST handler body: remove dual-write + collision block, set `_masterId: safeEntity._id`
+- [x] Task 2: `server/routes/generic.js` — replace GET `/:type/:id` 3-layer fallback with single `findOne({ _id, userId, _userDeleted: { $ne: true } })`
+- [x] Task 3: `server/routes/generic.js` — add `_userDeleted: { $ne: true }` to GET `/:type` list query
+- [x] Task 4: `server/routes/generic.js` — replace DELETE handler inner logic with tombstone/hard-delete branching
+- [x] Task 5: `server/services/sync-master.js` — delete `cleanupNameCollisionClones` function; update `module.exports`
+- [x] Task 6: `server/routes/auth.js` — remove `cleanupNameCollisionClones` from import + 3 call sites
+- [x] Task 7: Verify `grep -r cleanupNameCollisionClones server/` returns nothing; confirm no syntax errors
+
+---
+
+### Plan 273 — Design System Modernization (`plans/273-design-system-modernization.plan.md`)
+
+- [x] Task 1: `src/styles.scss` — replace Heebo @import, add new tokens, update font-family
+- [x] Task 2: `src/styles.scss` — update body::before gradient
+- [x] Task 3: `src/styles.scss` — update .c-btn-primary, add .c-btn-dark, .c-btn-sm/.c-btn-lg, update .c-chip, add .c-status, .c-eyebrow
+- [x] Task 4: `dashboard-overview.component.scss` — KPI card glow + value/label redesign
+- [x] Task 5: `dashboard-overview.component.scss` — activity-item/tags Space Grotesk update
+- [x] Task 6: `ng build` — verify 0 errors
+
+---
+
+### Plan 274 — UI Bundle 2: Nav Pill Container, KPI Icon/Footer, Activity Avatar (`plans/274-ui-bundle-2-nav-kpi-activity.plan.md`)
+
+- [x] Task 1: `src/styles.scss` — add .c-tab-pill, .c-table-card, .c-table engine classes
+- [x] Task 2: `header.component.html` — nav-pills div, nav-pill anchors, user-chip wrapper
+- [x] Task 3: `header.component.scss` — height 3.875rem, nav-pills glass container, user-chip, mobile hide
+- [x] Task 4: `dashboard-overview.component.html` — kpi-top/kpi-icon/kpi-foot restructure
+- [x] Task 5: `dashboard-overview.component.html` — act-avatar + act-middle in activity items
+- [x] Task 6: `dashboard-overview.component.scss` — kpi/activity SCSS
+- [x] Task 7: `ng build` — 0 errors
+
+---
+
+### Plan 272 — Seeder Curation Pipeline (`plans/272-seeder-curation-pipeline.plan.md`)
+
+- [x] Task 1: `tools/catalog-seeder/config.py` — Add CATALOG_REVIEW_FILE, KITCHEN_CATEGORIES, expand NON_FOOD_KEYWORDS
+- [x] Task 2: `tools/catalog-seeder/fetch.py` — Extract 7 nutrition fields from OFF bulk CSV; add User-Agent header; local 7-day cache for global OFF CSV
+- [x] Task 3: `tools/catalog-seeder/normalize.py` — Removed _is_non_food(); added nutrition_per_100g + review fields (suggested_category, kitchen_category, approved, drop, notes)
+- [x] Task 4: `tools/catalog-seeder/filter.py` (new) — strict positive ingredient-keyword filter (drop + ingredient-match)
+- [x] Task 5: `tools/catalog-seeder/main.py` — --from-review arg, catalog-review.json write flow, --skip-fetch deprecated alias
+
+---
+
+### Plan 271 — Seeder Master Alignment (`plans/271-seeder-master-alignment.plan.md`)
+
+- [x] Step 1: `tools/catalog-seeder/db_write.py` — Added `userId: '__master__'`, `_masterId: None`, `_userModified: False` to `_prepare_doc()`
+- [x] Step 2: `tools/catalog-seeder/db_write.py` — Added `_normalize_name()` helper; stamps `name_hebrew_normalized` on each product doc
+- [x] Step 3: `tools/catalog-seeder/db_write.py` — Builds and writes `sources_` array `[{supplierId, price, addedAt}]` alongside legacy fields
+- [x] Step 4: `tools/catalog-seeder/db_write.py` — Added `userId: '__master__'`, `_masterId: None`, `_userModified: False` to `_upsert_suppliers()`
+- [x] Step 5: `tools/catalog-seeder/diff.py` — `userId: '__master__'` filter on MongoDB query in `diff_against_db()`
+- Verified: dry-run smoke test passed — 144,500 raw → 57,656 deduped → 800 capped → 185 filtered
+
+---
+
+### Plan 275 — Design Bundle 3: Hebrew Font, RTL Nav, Dashboard Tab Pills, KPI Polish (`plans/275-design-bundle-3-hebrew-rtl.plan.md`)
+
+- [x] Task 1: `src/styles.scss` — add Heebo to Google Fonts URL; update --font-sans to 'Heebo', 'Rubik', system-ui
+- [x] Task 2: `header.component.html` — swap DOM order in all 4 nav pills (text before icon)
+- [x] Task 3: `header.component.scss` — remove letter-spacing: -0.005em from .nav-pill
+- [x] Task 4: `dashboard-overview.component.html` — replace .header-btn with .c-tab-pill on all 4 sub-nav buttons
+- [x] Task 5: `dashboard-overview.component.scss` — remove .header-btn block; fix .kpi-label font; fix .link-btn color; add .kpi-card::before shine
+- [x] Task 6: `ng build` — 0 errors
+
+---
+
+## Done
+
 ### Plan 270 — Atlas Performance Fixes (`plans/270-atlas-performance-fixes.plan.md`)
 
 - [x] Task 1: `server/db.js` — add `{ userId: 1 }` index to all 14 CLONEABLE_TYPES collections + `name`/`email` on users

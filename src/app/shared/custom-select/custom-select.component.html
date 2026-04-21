@@ -82,12 +82,10 @@
             role="option"
             [attr.aria-selected]="value === addNewOption_()!.value"
             (click)="onOptionClick(addNewOption_()!)">
-            <lucide-icon name="plus" [size]="12"></lucide-icon>
-            @if (translateLabels()) {
-              {{ addNewOption_()!.label | translatePipe }}
-            } @else {
-              {{ addNewOption_()!.label }}
-            }
+            <span class="c-add-new-icon">
+              <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
+            </span>
+            {{ 'add' | translatePipe }}
           </button>
         </div>
       }

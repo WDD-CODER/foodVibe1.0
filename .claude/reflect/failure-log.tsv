@@ -1,1 +1,35 @@
 ﻿timestamp	tool_name	input_summary	error_snippet	processed
+2026-04-20 14:23:28	Bash	cat /c/foodCo/foodVibe1.0/agent.md | head -100	1. Run `ng build` or full `getDiagnostics` ΓÇö mandatory, no exceptions. Do not skip because changes look "mechanical" o	
+2026-04-20 16:12:42	Bash	ng build 2>&1 | tail -20	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-20 16:29:34	Edit	C:\foodCo\foodVibe1.0\.claude\agents\end-of-session-agent.md	Build failed. Cannot close session with broken code.	
+2026-04-20 16:55:54	mcp__mempalace__mempalace_search	@{query=signup new user seed items; limit=5}	      "text": "/**\n * Dev-only script: promotes dev-guest documents to __master__ in local MongoDB.\n *\n * Run once af	
+2026-04-20 17:15:04	Write	C:\foodCo\foodVibe1.0\scripts\push-master-to-atlas.js	  console.error('[push-master] ERROR: --confirm flag required.');	
+2026-04-20 17:20:20	Bash	cat "C:\Users\danwe\AppData\Local\Temp\claude\C--foodCo-foodVibe1-0\f55b791d-a32	@{stdout=Failed: Server selection timed out after 30000 ms; stderr=; interrupted=False; isImage=False; noOutputExpected=	
+2026-04-21 06:50:19	Edit	C:\foodCo\foodVibe1.0\scripts\push-master-to-atlas.js	  console.error('[push-master] ERROR: --confirm flag required.');	
+2026-04-21 07:37:57	Edit	C:\Users\danwe\.claude\settings.json	  "skipDangerousModePermissionPrompt": true	
+2026-04-21 07:38:04	Edit	C:\Users\danwe\.claude\settings.json	  "skipDangerousModePermissionPrompt": true	
+2026-04-21 07:45:17	Bash	git -C C:/foodCo/foodVibe1.0 diff HEAD -- .claude/copilot-instructions.md CLAUDE	+1. Run `ng build` or full `getDiagnostics` ΓÇö mandatory, no exceptions.	
+2026-04-21 07:45:31	Bash	git -C C:/foodCo/foodVibe1.0 diff HEAD -- CLAUDE.md | head -60	+- **Build gate**: `ng build` must pass before any commit. No exceptions.	
+2026-04-21 11:32:18	Bash	powershell -NoProfile -Command "Get-Process | Where-Object {$_.MainWindowTitle -	    + CategoryInfo          : ObjectNotFound: (extglob.MainWindowTitle:String) [], CommandNotFoundException	
+2026-04-21 11:39:37	Bash	powershell -NoProfile -Command "Get-WmiObject Win32_PerfFormattedData_PerfDisk_L	    + CategoryInfo          : ObjectNotFound: (extglob.Name:String) [], CommandNotFoundException	
+2026-04-21 15:41:23	Bash	grep -rn "syncMasterToUser\|sync-master" C:/foodCo/foodVibe1.0/server/ 2>/dev/nu	C:/foodCo/foodVibe1.0/server/routes/auth.js:253:    syncMasterToUser(user._id).catch(syncErr => console.error('[auth/ref	
+2026-04-21 15:43:23	Bash	cd C:/foodCo/foodVibe1.0 && ng build 2>&1 | tail -15	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-21 15:49:14	Bash	cd C:/foodCo/foodVibe1.0 && npx ng test --watch=false --browsers=ChromeHeadless 	Chrome Headless 147.0.0.0 (Windows 10): Executed 303 of 310[31m (97 FAILED)[39m (0 secs / 2.509 secs)	
+2026-04-21 15:49:58	Bash	cd C:/foodCo/foodVibe1.0 && npx ng test --watch=false --browsers=ChromeHeadless 	@{stdout=[1A[2K[31mChrome Headless 147.0.0.0 (Windows 10) PreparationRegistryService should register a category and p	
+2026-04-21 15:56:21	Bash	cd /c/foodCo/foodVibe1.0
+# The main diff against main is tiny (1 line SKILL.md).	@{stdout=/usr/bin/bash: line 9: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-21 16:04:35	Bash	cat "C:/foodCo/foodVibe1.0/src/app/pages/inventory/components/product-form/produ	360:      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context	
+2026-04-21 16:04:40	Bash	grep -n 'ng-select\|category\|closeOnSelect\|ngSelect' "C:/foodCo/foodVibe1.0/sr	360:      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context	
+2026-04-21 16:18:30	Bash	ng build 2>&1 | tail -20	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-21 16:18:33	Bash	git -C /c/foodCo/foodVibe1.0 diff HEAD -- .claude/.session-state-path .claude/re	 # The main diff against main is tiny (1 line SKILL.md). @{stdout=/usr/bin/bash: line 9: ng: command not found; stderr=;	
+2026-04-21 16:26:41	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\product-form\product-fo	      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context: { 	
+2026-04-21 16:26:56	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\product-form\product-fo	      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context: { 	
+2026-04-21 16:27:03	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\product-form\product-fo	      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context: { 	
+2026-04-21 16:27:12	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\product-form\product-fo	      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context: { 	
+2026-04-21 16:27:23	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\product-form\product-fo	      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context: { 	
+2026-04-21 16:27:42	Bash	cd "C:/foodCo/foodVibe1.0" && ng build 2>&1 | tail -20	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-21 16:33:55	Edit	C:\foodCo\foodVibe1.0\.claude\commands\execute-it.md	- "Just this once" ΓåÆ No exceptions	
+2026-04-21 16:53:30	Bash	git diff HEAD -- .claude/.session-state-path .claude/reflect/failure-log.tsv --s	 2026-04-21 16:04:40 Bash grep -n 'ng-select\|category\|closeOnSelect\|ngSelect' "C:/foodCo/foodVibe1.0/sr 360:      thi	
+2026-04-21 17:00:26	Edit	C:\foodCo\foodVibe1.0\.claude\commands\evaluate-me.md	**Verdict**: [SUCCESS | PARTIAL | FAILED]	
+2026-04-21 17:00:32	Edit	C:\foodCo\foodVibe1.0\CLAUDE.md	@{filePath=C:\foodCo\foodVibe1.0\CLAUDE.md; oldString=- **Build gate**: `ng build` must pass before any commit. No excep	
+2026-04-21 17:02:54	Bash	cd C:/foodCo/foodVibe1.0 && ng build 2>&1 | tail -20	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	

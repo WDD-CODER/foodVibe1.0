@@ -1,0 +1,4626 @@
+{
+  "category": "dairy",
+  "total": 132,
+  "items": [
+    {
+      "_id": "FalH1",
+      "barcode": "7290005200786",
+      "name_hebrew": "תפוצ'יפס בטעם שמנת ב",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 4.67,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 4.67
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 16
+    },
+    {
+      "_id": "jtJ4A",
+      "barcode": "7290110566975",
+      "name_hebrew": "דנונה פרו 20 גרם חלב",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 6.45,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 6.45
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "pxSrr",
+      "barcode": "7290114314053",
+      "name_hebrew": "מולר סימפלי יוגורט מ",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.16,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.16
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "qYV4b",
+      "barcode": "7290119376643",
+      "name_hebrew": "יוגורט מולטי אפרסק ד",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.05,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.05
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "46HaS",
+      "barcode": "7290110558284",
+      "name_hebrew": "דנונה ביו מולטי 200",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 4.91,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 4.91
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "1ckaE",
+      "barcode": "7290000041858",
+      "name_hebrew": "שמנת חמוצה מעושר 15%",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 3.07,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 3.07
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "mOeTE",
+      "barcode": "7290000048185",
+      "name_hebrew": "גבינה לבנה 5% תנובה",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 5.81,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 5.81
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "hLzHk",
+      "barcode": "7290106520912",
+      "name_hebrew": "שמנת לבישול 9% יטבתה",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 8.74,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 8.74
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "GMer1",
+      "barcode": "7290119382231",
+      "name_hebrew": "סו מאץ' ש.חלב וש.בלו",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 15.63,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 15.63
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "iL4hO",
+      "barcode": "5711953106583",
+      "name_hebrew": "גבינת שמנת טבעי ארלה",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 16.62,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 16.62
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "Y8mGp",
+      "barcode": "7290004125400",
+      "name_hebrew": "אשל 4.5% מהדרין תנוב",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 1.96,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 1.96
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "72pZr",
+      "barcode": "7290004125455",
+      "name_hebrew": "שמנת חמוצה 15% מהדרי",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 2.81,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 2.81
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "Nh3Ts",
+      "barcode": "7290004125509",
+      "name_hebrew": "שמנת חצי מנה 15% תנו",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 2.27,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 2.27
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "1ALgY",
+      "barcode": "7290004125721",
+      "name_hebrew": "שמנת לבישול 15% 250מ",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 10.09,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 10.09
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "wZgms",
+      "barcode": "7290004127329",
+      "name_hebrew": "גבינת קוטג 5% תנובה",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.15,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.15
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "J7WAV",
+      "barcode": "7290004127336",
+      "name_hebrew": "גבינת קוטג 9% תנובה",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.16,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.16
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "tP3Bi",
+      "barcode": "7290004127800",
+      "name_hebrew": "גבינה לבנה 5% תנובה",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 11.62,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 11.62
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "J5EpK",
+      "barcode": "7290000408316",
+      "name_hebrew": "דנונה טבעי 3% 200גר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 4.39,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 4.39
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "MU512",
+      "barcode": "7290000408354",
+      "name_hebrew": "דנונה בר פיצפוצים 17",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 5.27,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 5.27
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "QJMtK",
+      "barcode": "7290002824183",
+      "name_hebrew": "גבינה לבנה 5% סקי 50",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 11.62,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 11.62
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "aNcxi",
+      "barcode": "7290002824640",
+      "name_hebrew": "גבינה 5% סקי 250 גרם",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 5.81,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 5.81
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "DC5XK",
+      "barcode": "7290003029372",
+      "name_hebrew": "משקה חלב בטעם בננה י",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 12.8,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 12.8
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "mNaeL",
+      "barcode": "7290003029815",
+      "name_hebrew": "חלב מועשר 3% בכד יטב",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 18.14,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 18.14
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "riFUM",
+      "barcode": "7290003029907",
+      "name_hebrew": "משקה חלב בטעם אייס ק",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 12.8,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 12.8
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "aMzeg",
+      "barcode": "7290003989539",
+      "name_hebrew": "רביולי גבינה שטראוס",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 20.53,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 20.53
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "gE3zX",
+      "barcode": "7290004584351",
+      "name_hebrew": "סימפוניה במרקם שמנת",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 11.49,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 11.49
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "flWjd",
+      "barcode": "7290004584528",
+      "name_hebrew": "דנונה ביו 1.5% 200גר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 4.39,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 4.39
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "bbnzX",
+      "barcode": "7290005838002",
+      "name_hebrew": "דניאלה מעדן בטעם וני",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 4.18,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 4.18
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "KyWKl",
+      "barcode": "7290008693134",
+      "name_hebrew": "דניאלה מעדן בטעם תות",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 4.18,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 4.18
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "PKdfg",
+      "barcode": "7290010471669",
+      "name_hebrew": "דנונה בר תות קורנפלק",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 5.27,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 5.27
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "hScbC",
+      "barcode": "7290011194246",
+      "name_hebrew": "גבינת קוטג׳ 5% שטראו",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.93,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.93
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "dNwpc",
+      "barcode": "7290114314060",
+      "name_hebrew": "מולר סימפלי יוגורט א",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.11,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.11
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "FtNPm",
+      "barcode": "7290000474502",
+      "name_hebrew": "גבינה לבנה 5% טרה 25",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 5.81,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 5.81
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "nS4Zv",
+      "barcode": "7290001485026",
+      "name_hebrew": "גבינת קרם שמנת עם זי",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 13.12,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 13.12
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "GAcTh",
+      "barcode": "8000500121436",
+      "name_hebrew": "קינדר בואנו לבן שליש",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 14.59,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 14.59
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "DUkC9",
+      "barcode": "7290105362377",
+      "name_hebrew": "כיף כף חלב מגדים 45",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 5.02,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 5.02
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "j1C2a",
+      "barcode": "7290102394821",
+      "name_hebrew": "גבינה צהובה נעם 28%",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 20.33,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 20.33
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "Nxgy1",
+      "barcode": "7290105362339",
+      "name_hebrew": "שמנת לבישול 15% יטבת",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 8.71,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 8.71
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "i8ATX",
+      "barcode": "7290105965738",
+      "name_hebrew": "דנונה לשתיה תות בננה",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 5.97,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 5.97
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "chDay",
+      "barcode": "7290106664562",
+      "name_hebrew": "רוטב שמנת עם פטריות",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 11.49,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 11.49
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "yKSuh",
+      "barcode": "7290102396665",
+      "name_hebrew": "גבינה צהובה נעם 15%",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 20.57,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 20.57
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "KVzSl",
+      "barcode": "7290107932080",
+      "name_hebrew": "חלב 3% מועשר בבקבוק",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 9.2,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 9.2
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "jZE2z",
+      "barcode": "7290107938396",
+      "name_hebrew": "אקטימל יוגורט פרוביו",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 21.08,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 21.08
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "utXw4",
+      "barcode": "7290112494283",
+      "name_hebrew": "קליק מעורב חום לבן ת",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 8.13,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 8.13
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "7P7SI",
+      "barcode": "7290110565527",
+      "name_hebrew": "דנונה פרו 20 גרם חלב",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 6.45,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 6.45
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "NkjzC",
+      "barcode": "7290110557133",
+      "name_hebrew": "מעדן הגולן וניל 125",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 3.3,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 3.3
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "b1sFz",
+      "barcode": "7290107936309",
+      "name_hebrew": "דנונה יווני לבן 130ג",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 3.79,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 3.79
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "ht0A8",
+      "barcode": "7290110563462",
+      "name_hebrew": "חלב 2% בבקבוק נטול ל",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 10.09,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 10.09
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "gR7KK",
+      "barcode": "7290112330352",
+      "name_hebrew": "דנונה פרו 20 גרם וני",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.45,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.45
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "3o1a9",
+      "barcode": "7290112330390",
+      "name_hebrew": "דנונה פרו 20 גרם פיר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.45,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.45
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "gkwf0",
+      "barcode": "7290106722415",
+      "name_hebrew": "ממולדה לבן במילוי תו",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.18,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.18
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 15
+    },
+    {
+      "_id": "VT4cc",
+      "barcode": "7290110578053",
+      "name_hebrew": "יוגורט דנונה קראנצ פ",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 5.31,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 5.31
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "2OMOb",
+      "barcode": "7290116930695",
+      "name_hebrew": "חלב נטול לקטוז 2% שו",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 9.2,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 9.2
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "sqOUE",
+      "barcode": "7290114313094",
+      "name_hebrew": "מולר פרופ יוגורט מוק",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 5.75,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 5.75
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "Zp6Eg",
+      "barcode": "7290119384242",
+      "name_hebrew": "יוגורט חלבון פרו קרם",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 6.38,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 6.38
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "Zn9sM",
+      "barcode": "7290114311328",
+      "name_hebrew": "חלב נטול לקטוז מועשר",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 9.56,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 9.56
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "pH1Sp",
+      "barcode": "7290002107965",
+      "name_hebrew": "גבינה טבורוג לאפייה",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 29.86,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 29.86
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "RB6Et",
+      "barcode": "7290000041445",
+      "name_hebrew": "קוטג' 5% בדצ 250גר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.14,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.14
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "j8blY",
+      "barcode": "7290000047546",
+      "name_hebrew": "גבינה לבנה ללא תוספת",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 28.85,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 28.85
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "ZNpsQ",
+      "barcode": "7290000048192",
+      "name_hebrew": "גבינה לבנה 9% תנובה",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.12,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.12
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "37DJ7",
+      "barcode": "7290017065137",
+      "name_hebrew": "ריקוטה למריחה 5% טבע",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 12.98,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 12.98
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "0GZX4",
+      "barcode": "7290119373048",
+      "name_hebrew": "טבלת פסק זמן ש.חלב ב",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 11.24,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 11.24
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "c10cJ",
+      "barcode": "7290011499365",
+      "name_hebrew": "גבינת חלומי מחלבות ג",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 26.89,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 26.89
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "MhC9L",
+      "barcode": "7290110571382",
+      "name_hebrew": "מעדן חלב בטעם וניל 1",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 5.98,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 5.98
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "eCuPe",
+      "barcode": "7290119380831",
+      "name_hebrew": "דנונה יוגורט חלבון פ",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 6.36,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 6.36
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "NYDOk",
+      "barcode": "7290114313018",
+      "name_hebrew": "משקה חלב נטול לקטוז",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 12.39,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 12.39
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "01iuc",
+      "barcode": "7290012645112",
+      "name_hebrew": "יוגורט עיזים בדלי חל",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 22.34,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 22.34
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "E4RcI",
+      "barcode": "7290004120566",
+      "name_hebrew": "בולגרית 24% פיראוס 2",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 27.71,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 27.71
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "AKPue",
+      "barcode": "7290004120634",
+      "name_hebrew": "פיראוס בולגרית 5% 25",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 27.56,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 27.56
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "jfeGW",
+      "barcode": "7290004125776",
+      "name_hebrew": "גבינה צהובה עמק 28%",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 34.96,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 34.96
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "hT0sb",
+      "barcode": "7290004127817",
+      "name_hebrew": "גבינה לבנה 9% תנובה",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 12.09,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 12.09
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "xdtcZ",
+      "barcode": "7290004127862",
+      "name_hebrew": "גבינה לבנה 5% תנובה",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 17.42,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 17.42
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "5FrMx",
+      "barcode": "7290004129101",
+      "name_hebrew": "גבינת נפוליאון בטעם",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 16.28,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 16.28
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "4L52w",
+      "barcode": "7290004129118",
+      "name_hebrew": "גבינת נפוליאון בטעם",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 16.39,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 16.39
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "e8t4x",
+      "barcode": "7290004129156",
+      "name_hebrew": "גבינת נפוליאון שום ש",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 16.39,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 16.39
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "HlKzD",
+      "barcode": "7290119383733",
+      "name_hebrew": "פרה קראנצ' ס'מורס 10",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.17,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.17
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "D0RcF",
+      "barcode": "7290003029389",
+      "name_hebrew": "משקה חלב בננה יטבתה",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 5.59,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 5.59
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "LoIsa",
+      "barcode": "7290005838972",
+      "name_hebrew": "סקי גבינת לבנה 5% 12",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 3.86,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 3.86
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "Vi8CY",
+      "barcode": "7290006664693",
+      "name_hebrew": "דנונה אפרסק 3% 150גר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 4.46,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 4.46
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "GDyUm",
+      "barcode": "7290006664990",
+      "name_hebrew": "דנונה ביו מארז שמיני",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 20.31,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 20.31
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "LjYHM",
+      "barcode": "7290003643387",
+      "name_hebrew": "סוכר לבן בצנצנת סוגת",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 12.94,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 12.94
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "XexbV",
+      "barcode": "7290000474540",
+      "name_hebrew": "גבינת 3% טוב טעם 250",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 14.17,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 14.17
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "se9Oe",
+      "barcode": "7290001485019",
+      "name_hebrew": "גבינת קרם שמנת טעם ט",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 12.92,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 12.92
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "GfEFz",
+      "barcode": "7290010945481",
+      "name_hebrew": "גבינה לבנה 5% טרה 50",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 11.41,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 11.41
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "cyXkq",
+      "barcode": "7290119370177",
+      "name_hebrew": "דנונה פרו 20גר חלבון",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 6.38,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 6.38
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "8JoWn",
+      "barcode": "7290004119133",
+      "name_hebrew": "יוגורט 7% תנובה 1.5",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 21.06,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 21.06
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "5laeU",
+      "barcode": "7290019635031",
+      "name_hebrew": "בוראטה מוצרלה 28% במ",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 21.75,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 21.75
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "ds33N",
+      "barcode": "7290106728127",
+      "name_hebrew": "חלב טבעי 3.6% יטבתה",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 9.31,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 9.31
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "zhLe7",
+      "barcode": "7290102391844",
+      "name_hebrew": "מולר פרופ לבן+קציפת",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.15,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.15
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "AQo6J",
+      "barcode": "7290102392094",
+      "name_hebrew": "חלב עיזים צוריאל 1ל",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 19.48,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 19.48
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "onALV",
+      "barcode": "7290014762831",
+      "name_hebrew": "גבינת נפוליאון 25% ע",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 16.39,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 16.39
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "KJdHe",
+      "barcode": "7290019635741",
+      "name_hebrew": "החלב החדש מושלם לקפה",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 13.06,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 13.06
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "vDIyA",
+      "barcode": "7290105368904",
+      "name_hebrew": "שמנת מתוקה להקצפה 32",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 8.82,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 8.82
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "SlcyJ",
+      "barcode": "7290014759084",
+      "name_hebrew": "גבינת נפוליאון 16% 2",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 16.39,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 16.39
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "Z54pO",
+      "barcode": "72991008",
+      "name_hebrew": "פסק זמן חלב מגדים 45",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 5.94,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 5.94
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "tuRqt",
+      "barcode": "7290107932134",
+      "name_hebrew": "חלב מועשר 1% בבקבוק",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 9.14,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 9.14
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "mJjG9",
+      "barcode": "7290102397334",
+      "name_hebrew": "בולגרית קלאסית 5% מש",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 26.61,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 26.61
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "CB7aJ",
+      "barcode": "7290112495105",
+      "name_hebrew": "נשנושים שמנת בצל 260",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 14.73,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 14.73
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "Z2fzi",
+      "barcode": "8719200998032",
+      "name_hebrew": "מזולה בטעם חמאה 250ג",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 10.83,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 10.83
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "rhp9t",
+      "barcode": "7290119380800",
+      "name_hebrew": "דנונה פרו 20 שכבות מ",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 7.56,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 7.56
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "qmDCQ",
+      "barcode": "7290114310239",
+      "name_hebrew": "חלב נטול לקטוז מועשר",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 14.61,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 14.61
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "1mOQT",
+      "barcode": "7290116932033",
+      "name_hebrew": "חמאה תנובה מהדרין  2",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 10.19,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 10.19
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "zEDAj",
+      "barcode": "7290102397891",
+      "name_hebrew": "גבינה מותכת צוריאל 1",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 9.11,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 9.11
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "KTGd1",
+      "barcode": "7290102398065",
+      "name_hebrew": "חלב קרטון 2 ליטר 3%",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 14.53,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 14.53
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "WLKZT",
+      "barcode": "7290107954976",
+      "name_hebrew": "משקה חלב יטבתה פרו 3",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 7.8,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 7.8
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "pqlhF",
+      "barcode": "7290011499419",
+      "name_hebrew": "קרם שמנת ניו יורק טב",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 15.84,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 15.84
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "Nlxxl",
+      "barcode": "7290112336712",
+      "name_hebrew": "דנונה פרו 21 גרם 0%",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.44,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.44
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "VXaCI",
+      "barcode": "7290112343260",
+      "name_hebrew": "רוטב שמנת קלאסי 9% י",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 11.34,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 11.34
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "MWf0E",
+      "barcode": "7290114314503",
+      "name_hebrew": "מולר פרופ יוגורט עם",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.16,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.16
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "6mrDE",
+      "barcode": "7290017065588",
+      "name_hebrew": "גד יוגורט יווני 10%",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 19.91,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 19.91
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "0SAR2",
+      "barcode": "7290110328788",
+      "name_hebrew": "יוגורט גו סמיך אפרסק",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.78,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.78
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "cimNC",
+      "barcode": "7290110328764",
+      "name_hebrew": "יוגורט גו סמיך תות 0",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.78,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.78
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "S6RAW",
+      "barcode": "7290114313865",
+      "name_hebrew": "חלב נוטל לקטוז 1 ליט",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 14.41,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 14.41
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "K3Hs3",
+      "barcode": "7290114313568",
+      "name_hebrew": "משקה חלב נטול לקטוז",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 7.24,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 7.24
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 14
+    },
+    {
+      "_id": "OeMjW",
+      "barcode": "7290112005656",
+      "name_hebrew": "וניש גל לבן לכביסה ל",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 29.66,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 29.66
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "mXbAw",
+      "barcode": "7290000554402",
+      "name_hebrew": "מלבי 160גר מחלבות גד",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 7.3,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 7.3
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "lHtsh",
+      "barcode": "7290000554600",
+      "name_hebrew": "מוצרלה 22% מגורדת 30",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 29.96,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 29.96
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "jFQnJ",
+      "barcode": "7290000554822",
+      "name_hebrew": "ריקוטה טבעי 5% 250גר",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 18.25,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 18.25
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "Jw4yx",
+      "barcode": "7290000554839",
+      "name_hebrew": "גבינה מסקרפונה 40% 2",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 26.79,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 26.79
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "AxNBm",
+      "barcode": "7290005992735",
+      "name_hebrew": "גבינת לאבנה גד 5% שו",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 15.75,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 15.75
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "3CcIH",
+      "barcode": "7290006492432",
+      "name_hebrew": "בייבי מוצרלה מחלבות",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 17.76,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 17.76
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "ETjDK",
+      "barcode": "7290006492852",
+      "name_hebrew": "גבינת עיזים 5 % למרי",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 21.44,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 21.44
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "WSrlu",
+      "barcode": "7290011499129",
+      "name_hebrew": "בולגרית מעודנת קוביו",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 26.96,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 26.96
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "IrtgQ",
+      "barcode": "7290110558703",
+      "name_hebrew": "מעדן חלב מועשר בחלבו",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 5.85,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 5.85
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "mNVEP",
+      "barcode": "7290004137021",
+      "name_hebrew": "שמנת לבישול 10% 250מ",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 10.16,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 10.16
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "SMofO",
+      "barcode": "7290110329952",
+      "name_hebrew": "יוגורט גו קרמי 0.4%",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 6.76,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 6.76
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "jWSMp",
+      "barcode": "7290119373017",
+      "name_hebrew": "טבלת פסק זמן ש.חלב ב",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 11.07,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 11.07
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "QQhGc",
+      "barcode": "7290000042503",
+      "name_hebrew": "חלב עמיד קרטון תנובה",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 9.37,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 9.37
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "G8N9m",
+      "barcode": "7290000043814",
+      "name_hebrew": "השף הלבן שמנת עמידה",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 7.55,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 7.55
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "3EOW6",
+      "barcode": "7290019635598",
+      "name_hebrew": "גבינת לאבנה 5% שומן",
+      "name_english": null,
+      "base_unit_": "kg",
+      "buy_price_global_": 17.75,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "kg",
+          "conversion_rate_": 1,
+          "price_override_": 17.75
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "2D5Nw",
+      "barcode": "7290004737900",
+      "name_hebrew": "חלב מרוכז ממותק 397",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 11.28,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 11.28
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    },
+    {
+      "_id": "yfBij",
+      "barcode": "7290119382842",
+      "name_hebrew": "סו מאץ' ש.חלב במילוי",
+      "name_english": null,
+      "base_unit_": "liter",
+      "buy_price_global_": 15.52,
+      "purchase_options_": [
+        {
+          "unit_symbol_": "liter",
+          "conversion_rate_": 1,
+          "price_override_": 15.52
+        }
+      ],
+      "categories_": [
+        "dairy"
+      ],
+      "supplierIds_": [],
+      "yield_factor_": null,
+      "allergens_": [],
+      "allergen_source_": "llm",
+      "min_stock_level_": 0,
+      "expiry_days_default_": null,
+      "addedAt_": null,
+      "seeded_": true,
+      "_category_group": "dairy",
+      "_enrichment_failed": false,
+      "nutrition_per_100g": null,
+      "suggested_category": "dairy",
+      "kitchen_category": "dairy",
+      "approved": true,
+      "drop": false,
+      "notes": "",
+      "_chain_count": 13
+    }
+  ]
+}

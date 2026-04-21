@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Rubik:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 /* Global breakpoints (use in @media, not in :root) */
 $break-mobile: 768px;
@@ -12,7 +12,11 @@ $break-desktop: 1200px;
  * New styles: use var(--*) and rem/em; prefer engines over one-off classes. See .claude/skills/cssLayer/SKILL.md
  */
 :root {
-  font-family: 'Heebo', sans-serif;
+  font-family: 'Heebo', 'Rubik', system-ui, sans-serif;
+
+  /* ---- Font families ---- */
+  --font-sans: 'Heebo', 'Rubik', system-ui, sans-serif;
+  --font-mono: 'Space Grotesk', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
   /* ---- Surfaces ---- */
   --bg-body: #f0f4f8;
@@ -23,6 +27,7 @@ $break-desktop: 1200px;
   --bg-subtle: rgba(255, 255, 255, 0.35);
   --bg-muted: rgba(241, 245, 249, 0.6);
   --bg-frosted-nav: rgba(255, 255, 255, 0.6);
+  --bg-glass-dense: rgba(255, 255, 255, 0.85);
 
   /* ---- Borders ---- */
   --border-glass: rgba(255, 255, 255, 0.45);
@@ -30,6 +35,7 @@ $break-desktop: 1200px;
   --border-strong: rgba(203, 213, 225, 0.7);
   --border-focus: rgba(20, 184, 166, 0.5);
   --border-row: rgba(241, 245, 249, 0.4);
+  --border-glass-strong: rgba(255, 255, 255, 0.95);
 
   /* ---- Text ---- */
   --color-text-main: #0f172a;
@@ -40,10 +46,13 @@ $break-desktop: 1200px;
 
   /* ---- Primary (teal) ---- */
   --color-primary: #14b8a6;
+  --color-primary-light: #2dd4bf;
   --color-primary-hover: #0d9488;
   --color-primary-soft: rgba(20, 184, 166, 0.12);
   --color-primary-glow: rgba(20, 184, 166, 0.25);
+  --color-primary-glow-strong: rgba(20, 184, 166, 0.28);
   --color-accent-gold: #a0833f;
+  --color-warning-glow: rgba(245, 158, 11, 0.30);
 
   /* ---- Semantic: success ---- */
   --color-success: #10b981;
@@ -89,6 +98,7 @@ $break-desktop: 1200px;
   --shadow-hover: 0 8px 40px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.05);
   --shadow-nav: 0 1px 8px rgba(0, 0, 0, 0.04);
   --shadow-nav-footer: 0 -1px 8px rgba(0, 0, 0, 0.03);
+  --shadow-soft: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 2px 6px rgba(15, 23, 42, 0.05), 0 16px 40px -22px rgba(15, 23, 42, 0.20);
 
   /* ---- Glass blur ---- */
   --blur-glass: blur(16px);
@@ -136,7 +146,7 @@ body {
   padding: 0;
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
-  font-family: 'Heebo', sans-serif;
+  font-family: var(--font-sans);
   background: var(--bg-body);
   color: var(--color-text-main);
   min-height: 100vh;
@@ -150,9 +160,10 @@ body::before {
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(ellipse 600px 400px at 15% 20%, rgba(20, 184, 166, 0.12), transparent),
-    radial-gradient(ellipse 500px 500px at 80% 70%, rgba(251, 191, 36, 0.08), transparent),
+    radial-gradient(ellipse 900px 700px at 8% -5%, rgba(20, 184, 166, 0.22), transparent 55%),
+    radial-gradient(ellipse 700px 600px at 100% 105%, rgba(245, 158, 11, 0.14), transparent 55%),
     radial-gradient(ellipse 400px 300px at 50% 50%, rgba(14, 165, 233, 0.06), transparent);
+  background-attachment: fixed;
   pointer-events: none;
 }
 
@@ -228,22 +239,29 @@ lucide-icon {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding-inline: 1.25rem;
+
+  padding-inline: 1.125rem;
   padding-block: 0.625rem;
-  background: var(--color-primary);
+
   color: var(--color-text-on-primary);
+  font-family: var(--font-sans);
   font-weight: 600;
   font-size: 0.875rem;
-  border: none;
+  white-space: nowrap;
+
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
+  border: 1px solid transparent;
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-glow);
   cursor: pointer;
-  transition: transform 0.15s var(--ease-spring), background 0.2s ease, box-shadow 0.2s ease;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(15, 118, 110, 0.3),
+    0 2px 4px var(--color-primary-soft),
+    0 8px 20px -8px var(--color-primary-glow);
+  transition: transform 0.18s var(--ease-spring), box-shadow 0.18s ease;
 
   @media (hover: hover) {
     &:hover {
-      background: var(--color-primary-hover);
-      box-shadow: 0 0 24px rgba(20, 184, 166, 0.3);
       transform: translateY(-1px);
     }
   }
@@ -256,7 +274,41 @@ lucide-icon {
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
-    box-shadow: none;
+  }
+}
+
+/* ---- Engine: Dark Button ---- */
+.c-btn-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  padding-inline: 1.125rem;
+  padding-block: 0.625rem;
+
+  color: var(--color-text-on-primary);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.875rem;
+  white-space: nowrap;
+
+  background: var(--color-text-main);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  box-shadow: 0 4px 12px -4px rgba(15, 23, 42, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.10);
+  transition: transform 0.18s var(--ease-spring), background 0.18s ease;
+
+  @media (hover: hover) {
+    &:hover {
+      background: var(--color-text-secondary);
+      transform: translateY(-1px);
+    }
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.97);
   }
 }
 
@@ -266,28 +318,47 @@ lucide-icon {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding-inline: 1.25rem;
+
+  padding-inline: 1.125rem;
   padding-block: 0.625rem;
-  background: var(--bg-glass);
-  color: var(--color-text-secondary);
-  font-weight: 500;
+
+  color: var(--color-text-main);
+  font-family: var(--font-sans);
+  font-weight: 600;
   font-size: 0.875rem;
+  white-space: nowrap;
+
+  background: var(--bg-glass-dense);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   backdrop-filter: var(--blur-glass);
   cursor: pointer;
-  transition: transform 0.15s var(--ease-spring), background 0.2s ease, border-color 0.2s ease;
+  box-shadow: inset 0 1px 0 var(--border-glass-strong), var(--shadow-glass);
+  transition: transform 0.18s var(--ease-spring), background 0.18s ease;
 
   @media (hover: hover) {
     &:hover {
-      background: var(--bg-glass-hover);
-      border-color: var(--border-strong);
+      background: var(--bg-pure);
+      transform: translateY(-1px);
     }
   }
 
   &:active:not(:disabled) {
     transform: scale(0.97);
   }
+}
+
+/* ---- Engine: Button size modifiers ---- */
+.c-btn-sm {
+  padding-inline: 0.875rem;
+  padding-block: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.c-btn-lg {
+  padding-inline: 1.375rem;
+  padding-block: 0.8125rem;
+  font-size: 0.9375rem;
 }
 
 /* ---- Engine: Glass Input ---- */
@@ -730,15 +801,166 @@ textarea.c-input {
 .c-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding-inline: 0.625rem;
-  padding-block: 0.2rem;
-  background: var(--color-primary-soft);
-  color: var(--color-primary-hover);
-  font-size: 0.8125rem;
+  gap: 0.3125rem;
+
+  padding-inline: 0.6875rem;
+  padding-block: 0.3125rem;
+
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.71875rem;
   font-weight: 500;
+  line-height: 1;
+
+  background: rgba(15, 23, 42, 0.05);
+  border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: var(--radius-full);
-  line-height: 1.4;
+
+  &.teal {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-hover);
+    border-color: rgba(20, 184, 166, 0.2);
+  }
+
+  &.amber {
+    background: var(--bg-warning-soft);
+    color: var(--text-warning);
+    border-color: rgba(245, 158, 11, 0.25);
+  }
+
+  &.red {
+    background: var(--bg-danger-subtle);
+    color: var(--color-danger);
+    border-color: rgba(220, 38, 38, 0.2);
+  }
+}
+
+/* ---- Engine: Status Pill ---- */
+.c-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+
+  padding-inline: 0.5625rem;
+  padding-block: 0.25rem;
+
+  color: currentColor;
+  font-family: var(--font-mono);
+  font-size: 0.65625rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1;
+
+  border-radius: var(--radius-full);
+
+  &::before {
+    content: '';
+    flex-shrink: 0;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  &.created, &.ok, &.approved {
+    background: rgba(16, 185, 129, 0.14);
+    color: #047857;
+  }
+
+  &.updated, &.pending, &.warn {
+    background: var(--bg-warning);
+    color: var(--text-warning);
+  }
+
+  &.deleted, &.rejected {
+    background: var(--bg-danger-subtle);
+    color: var(--color-danger);
+  }
+
+  &.draft {
+    background: rgba(15, 23, 42, 0.08);
+    color: var(--color-text-muted);
+  }
+}
+
+/* ---- Engine: Eyebrow Label ---- */
+.c-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  color: var(--color-primary-hover);
+  font-family: var(--font-mono);
+  font-size: 0.65625rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  line-height: 1;
+
+  &::before {
+    content: '';
+    flex-shrink: 0;
+    width: 20px;
+    height: 1.5px;
+    background: var(--color-primary);
+    border-radius: 2px;
+  }
+}
+
+/* ---- Engine: Tab Filter Pill ---- */
+.c-tab-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+
+  padding-inline: 0.875rem;
+  padding-block: 0.4375rem;
+
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  backdrop-filter: var(--blur-glass);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+  cursor: pointer;
+  transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+
+  lucide-icon {
+    opacity: 0.7;
+    transition: opacity 0.18s ease;
+  }
+
+  &:hover {
+    color: var(--color-text-main);
+    background: var(--bg-pure);
+
+    lucide-icon { opacity: 1; }
+  }
+
+  &.active {
+    background: linear-gradient(180deg, var(--color-primary-light), var(--color-primary));
+    color: var(--color-text-on-primary);
+    border-color: transparent;
+    box-shadow: 0 4px 12px -4px var(--color-primary-glow), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+
+    lucide-icon { opacity: 1; }
+  }
+
+  &.trash {
+    color: var(--color-danger);
+    border-color: color-mix(in srgb, var(--color-danger) 30%, transparent);
+
+    &:hover {
+      color: var(--color-danger-hover);
+      border-color: color-mix(in srgb, var(--color-danger) 50%, transparent);
+    }
+  }
 }
 
 /* ---- Engine: Glass Data Grid ---- */
@@ -900,6 +1122,69 @@ textarea.c-input {
   box-shadow: var(--shadow-glass);
   backdrop-filter: var(--blur-glass);
   -webkit-backdrop-filter: var(--blur-glass);
+}
+
+/* ---- Engine: Glass Table Card (upgrade of c-table-wrap with xl radius) ---- */
+.c-table-card {
+  overflow: hidden;
+
+  background: rgba(255, 255, 255, 0.85);
+
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+}
+
+/* ---- Engine: Modern Data Table ---- */
+.c-table {
+  width: 100%;
+
+  border-collapse: separate;
+  border-spacing: 0;
+
+  th {
+    padding-inline: 1.125rem;
+    padding-block: 0.875rem;
+
+    background: rgba(255, 255, 255, 0.4);
+    color: var(--color-text-muted-light);
+    font-family: var(--font-mono);
+    font-size: 0.65625rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-align: start;
+
+    border-block-end: 1px solid var(--border-default);
+    position: sticky;
+    top: 3.875rem;
+  }
+
+  td {
+    padding-inline: 1.125rem;
+    padding-block: 0.875rem;
+
+    font-size: 0.84375rem;
+    color: var(--color-text-main);
+    vertical-align: middle;
+
+    border-block-end: 1px solid var(--border-default);
+  }
+
+  tbody tr {
+    cursor: pointer;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    &:last-child td {
+      border-block-end: none;
+    }
+  }
 }
 
 /* ---- Engine: Data Table (th/td base) ---- */
@@ -1537,5 +1822,23 @@ textarea.c-input {
   &.category {
     background: var(--color-primary-soft);
     color: var(--color-primary-hover);
+  }
+}
+
+/* ---- Engine: Add-new icon box ---- */
+.c-add-new-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--color-primary);
+  border-radius: 6px;
+  flex-shrink: 0;
+
+  img {
+    width: 14px;
+    height: 14px;
+    object-fit: contain;
   }
 }

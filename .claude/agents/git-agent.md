@@ -36,6 +36,24 @@ From user prompt + git state, determine action:
 ## Commit Flow (most common path)
 1. State assessment (already done)
 2. If on main → `git checkout -b feat/<name>` or `fix/<name>` first
+2b. If on a `feat/session-*` branch (date-based placeholder) → apply Naming Rule before presenting the tree:
+   - Run `git log main..HEAD --oneline` and `git diff --stat main..HEAD`
+   - **Type prefix**: `feat/` new features · `fix/` bug fixes · `refactor/` refactors · `chore/` docs/config/maintenance. Dominant type wins; ties → `feat > fix > refactor > chore`.
+   - **Slug**: 2–4 kebab-case words for the *main thing done*. No dates, no "session", no filler ("update", "changes").
+     - Good: `feat/product-sync-name-guard`, `fix/product-edit-duplicate`, `refactor/semantic-branch-names`
+     - Bad: `feat/session-updates`, `fix/various-fixes`, `feat/work-2026`
+   - Prepend `Rename: {old} → {new}` to the commit tree and use `{new}` as the displayed branch name. Do NOT ask separately — the rename proposal is part of the single commit approval.
+   - End with: **Approve? (Y / type a different branch name)**
+   - On approval, rename happens between commit and push:
+     ```bash
+     git branch -m {old_name} {new_name}
+     # if old was already pushed to remote:
+     git push origin --delete {old_name}
+     git push -u origin {new_name}
+     git branch --set-upstream-to=origin/{new_name} {new_name}
+     # otherwise just:
+     git push -u origin {new_name}
+     ```
 3. Group changes into logical commits (auto-propose, user can adjust)
 4. Present visual tree using this EXACT format — always wrap in a markdown code block tagged `text` so it renders as a fixed-width block in every context:
 

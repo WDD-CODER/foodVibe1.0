@@ -1,4 +1,60 @@
-# Session State — 2026-04-16 (end of day — updated after ai-inventory-save-validation session)
+# Session State — 2026-04-19 (nutrition badge — mid-build-fix)
+
+## RESUME HERE (next session)
+
+**Build is FAILING** — one remaining fix needed:
+
+**`menu-intelligence.page.ts` line 896** — add semicolon:
+```typescript
+const addDish = document.getElementById('add-dish-' + s);  // ← semicolon!
+(next ?? addDish)?.focus()
+```
+
+After that fix, `ng build` should be clean (0 errors).
+
+**Then:** add tooltip flip logic to `NutritionBadgeComponent` — when badge is within 220px of viewport top, show tooltip below instead of above. See §Tooltip Flip below.
+
+**Then:** commit all 10 modified files.
+
+---
+
+## Modified Files (10 total — do NOT commit until build is clean)
+
+| File | Change |
+|---|---|
+| `src/app/core/models/product.model.ts` | `NutritionPer100g` interface + `nutrition_per_100g?` on Product |
+| `src/app/core/services/product-data.service.ts` | `nutrition_per_100g: legacy.nutrition_per_100g` in normalizeProduct() |
+| `src/app/app.config.ts` | `Leaf, Dumbbell, Wheat, Candy, Waves` in import + `.pick()` |
+| `src/app/shared/nutrition-badge/nutrition-badge.component.ts` | NEW — standalone OnPush badge |
+| `src/app/shared/nutrition-badge/nutrition-badge.component.html` | NEW — leaf icon + tooltip |
+| `src/app/shared/nutrition-badge/nutrition-badge.component.scss` | NEW — glass tooltip styles |
+| `inventory-product-list.component.ts` | `NutritionBadgeComponent` in imports[] |
+| `inventory-product-list.component.html` | `<app-nutrition-badge>` in .col-name cell |
+| `recipe-ingredients-table.component.ts` | `NutritionBadgeComponent` in imports[] |
+| `recipe-ingredients-table.component.html` | `<app-nutrition-badge>` after item-text span |
+| `menu-intelligence.page.ts` | 2/3 semicolons fixed (lines 692, 981) — line 896 still needs fix |
+
+**LINTER REVERT WARNING:** Linter auto-reverts `product.model.ts`, `product-data.service.ts`, `app.config.ts`, and both host component `.ts` files. If leaf icons disappear, re-check these 5 files.
+
+---
+
+## Tooltip Flip Logic (pending)
+
+Inject `ElementRef` into `NutritionBadgeComponent`, add:
+```typescript
+tooltipBelow = false
+
+onMouseEnter(): void {
+  this.tooltipBelow = this.el.nativeElement.getBoundingClientRect().top < 220
+  this.showTooltip = true
+}
+```
+Template: bind `[class.nb-tooltip--below]="tooltipBelow"` and `(mouseenter)="onMouseEnter()"`.
+SCSS: `.nb-tooltip--below { bottom: auto; top: calc(100% + 8px); }`
+
+---
+
+# Session State — 2026-04-17 (archived)
 
 > Single source of truth for all project rules, standards, and skill/agent routing.
 
@@ -6,41 +62,73 @@
 
 ## Current Status
 
-**Branch:** `fix/ai-inventory-save-validation` (changes in working tree — not yet committed)
-**Latest commit on branch:** `a52bdcb` — Merge pull request #118 from WDD-CODER/fix/master-pool-cleanup
-**Build status:** PASS (user confirmed 0 errors, 0 warnings)
-**Open PRs:** None
-**Dirty working tree:** YES — 13 files modified (see below)
+**Branch:** feat/session-20260417 (pushed, 17 commits ahead of origin/main)
+**Latest commit:** 654749c -- fix(context-monitor): compaction-aware word-count measurement
+**Build status:** PASS (0 errors, 3 pre-existing warnings)
+**Open PRs:** https://github.com/WDD-CODER/foodVibe1.0/pull/122
+**Dirty working tree:** YES -- .claude/reflect/failure-log.tsv only (hook-generated, intentionally not committed)
 
 ---
 
-## IMPORTANT: Uncommitted Feature Work
+## context-monitor.sh -- Rewrite Summary (654749c)
+- Measures word count AFTER last compaction boundary (not raw file bytes)
+- Eliminates JSONL overhead inflation (~38x for base64/JSON keys) that caused false alerts
+- Dynamic thresholds: 40%/60%/70% of model capacity (200K tokens) minus system prompt overhead (~12K words)
+- Model detection wired from transcript -- future-proof for new models
+- All three alert tiers output systemMessage field (PostToolUse requirement)
 
-Two features were implemented this session and exist only in the working tree. Commit at the start of the next session:
+---
 
-### Batch 1 — Unlinked badge click opens inline edit panel
-```
-recipe-ingredients-table.component.html   (badge click handler swapped)
-recipe-ingredients-table.component.ts     (+23 — onUnlinkedBadgeClick)
-```
+## IMPORTANT: Uncommitted Work in Working Tree
 
-### Batch 2 — AI-inventory save validation + UX hardening (fix/ai-inventory-save-validation)
+### Unstaged files — ai-draft-editor smoke test fixes (from recipe-type-switch session)
+These are uncommitted edits sitting in the working tree — NOT yet staged:
 ```
-quick-add-product-modal.component.html    (+11 — red borders + error text)
-quick-add-product-modal.component.scss    (+11 — .field-error-msg, .input--error)
-quick-add-product-modal.component.ts      (+9  — nameError_/unitError_ signals)
-quick-edit-product-panel.component.html   (+11 — red borders + error text)
-quick-edit-product-panel.component.scss   (+12 — same error styles)
-quick-edit-product-panel.component.ts     (+9  — nameError_/unitError_ signals)
-recipe-builder.page.ts                    (+3  — scroll to first .incomplete-row on blocked save)
-recipe-ingredients-table.component.scss   (+7  — gap + .badge-label for incomplete badge)
-public/assets/data/dictionary.json        (+1  — "fix": "תקן")
+src/app/shared/ai-recipe-modal/ai-draft-editor/ai-draft-editor.component.html
+src/app/shared/ai-recipe-modal/ai-draft-editor/ai-draft-editor.component.scss
+src/app/shared/ai-recipe-modal/ai-recipe-modal.component.html
+src/app/shared/ai-recipe-modal/ai-recipe-modal.component.scss
+src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts
 ```
 
 **Next session start sequence:**
-1. `ng build` — verify 0 errors
-2. Manual smoke test: unlinked icon → inline edit; save without name → red border shown; blocked save → page scrolls to .incomplete-row
-3. Commit both batches on `fix/ai-inventory-save-validation` → create PR
+1. `git diff` — review the 5 ai-draft-editor files in working tree
+2. Stage + commit the ai-draft-editor files
+3. Push `feat/session-20260417` → create PR
+4. NOTE: `failure-log.tsv` is dirty — commit separately after PR to avoid hook loop
+5. Smoke test: open "משרה לפרגית בולגוגית" as signed-in user → verify Hebrew equipment names in logistics
+
+---
+
+## Session Summary (2026-04-17 evening — Logistics Equipment ID Fix)
+
+### Root Cause Investigation + Data Migration
+- Root cause: DATA CORRUPTION in MongoDB — not a code bug
+  - EQUIPMENT_LIST master seeded via POST → generated IDs (jdYuQRY5, etc.)
+  - DISH_LIST/RECIPE_LIST master seeded from demo JSON → kept eq_xxx IDs
+  - 206 documents affected (160 dishes + 46 recipes across all users)
+- mongosh migration: built eq_xxx → master_id mapping via guest user as name bridge; fixed all 206 documents
+- Verified: "משרה לפרגית בולגוגית" resolves equipment names correctly post-fix
+
+### Code Fixes (committed: 046c184)
+- `server/services/sync-master.js`: `remapLogistics()` + `getEquipmentIdMap()` — remaps eq_xxx IDs when syncing master recipes/dishes to users (prevents recurrence)
+- `src/app/pages/recipe-builder/services/recipe-ai-flow.service.ts:154`: `_masterId` fallback in AI snapshot builder
+
+### Also Discussed (no code changes)
+- 404 errors on recipe navigation are EXPECTED (two-step RECIPE_LIST → DISH_LIST resolver fallback)
+
+---
+
+## Session Summary (2026-04-17 — Recipe Type Switch + Context Monitor Fix)
+
+### Feature — Bidirectional content migration on recipe type switch
+- `recipe-builder.page.ts` `onRecipeTypeChange()`: dish → steps now seeds step instructions from prep item names on first switch; back-switch restores full prep items (qty/unit/category)
+- `recipe-builder.page.ts` `onRecipeTypeChange()`: steps → dish now seeds prep item names from step instructions on first switch; back-switch restores full steps (instruction/labor_time/cooking_time)
+- Pre-existing bug fixed: cached steps previously only restored `order` — now restores all fields via `patchValue`
+
+### Fix — context-monitor.sh PostToolUse output format
+- Root cause: PostToolUse hooks must output `systemMessage` field; `hookSpecificOutput.decision.additionalContext` is only valid for PreToolUse/SessionStart
+- Fixed all three alert tiers; raised thresholds from 400/600/700 KB to 550/750/900 KB
 
 ---
 
@@ -112,13 +200,14 @@ Replaced all native `confirm()` calls across 5 list components:
 
 ## Next Steps (Priority Order)
 
-1. **FIRST: Commit fix/ai-inventory-save-validation** (dirty working tree — 13 files):
-   - `ng build` — verify 0 errors
-   - Smoke test: unlinked icon → inline edit; save without name → red border; blocked save → scroll to .incomplete-row
-   - Commit all 13 modified files on `fix/ai-inventory-save-validation` → create PR
-   - Note: stub product uses `base_unit_: 'gram'` hardcoded — flag for follow-up if unit mismatch needed
+1. **FIRST: Commit + push feat/session-20260417**:
+   - Stage the 5 ai-draft-editor files and commit
+   - Push branch → create PR
+   - Commit `failure-log.tsv` separately after PR (avoid hook loop)
 
-2. **Manual smoke tests for PR #117** (MongoDB required, still pending):
+2. **Smoke test: logistics fix** — sign in → open "משרה לפרגית בולגוגית" → verify Hebrew equipment names in logistics tab
+
+3. **Manual smoke tests for PR #117** (MongoDB required, still pending):
    - Sign in → create product → Compass: single doc in userId, nothing in `__master__`
    - Delete master-seeded item → Compass: `_userDeleted: true`, client-invisible
    - Log out and back in → tombstoned item must NOT re-appear
@@ -145,6 +234,7 @@ Replaced all native `confirm()` calls across 5 list components:
 - PR #118: https://github.com/WDD-CODER/foodVibe1.0/pull/118 — confirm modal migration + 404 fix (MERGED)
 - PR #117: https://github.com/WDD-CODER/foodVibe1.0/pull/117 (merged — master pool cleanup)
 - PR #116: https://github.com/WDD-CODER/foodVibe1.0/pull/116 (merged)
-- Session handoff (ai-inventory-save-validation): `.claude/sessions/2026-04-16-unlinked-ingredient-inline-edit/session-handoff.md` (updated this session)
+- Session handoff (logistics equipment-ID fix): `.claude/sessions/2026-04-17-logistics-equipment-id-fix/session-handoff.md`
+- Session handoff (ai-inventory-save-validation): `.claude/sessions/2026-04-16-unlinked-ingredient-inline-edit/session-handoff.md`
 - Session handoff (confirm modal): `.claude/sessions/2026-04-16-confirm-modal-migration/session-handoff.md`
 - Techdebt report: `.claude/techdebt-reports/techdebt-2026-04-16.md`

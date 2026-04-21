@@ -30,6 +30,7 @@ import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.
 import { getPricePerUnit, calcBuyPriceGlobal } from 'src/app/core/utils/product-price.util'
 import { getProductValidationStatus, getProductMissingFields, VALIDATION_FIELD_ICONS, ProductValidationStatus } from 'src/app/core/utils/product-validation.util'
 import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
+import { NutritionBadgeComponent } from 'src/app/shared/nutrition-badge/nutrition-badge.component'
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date'
 type ProductBulkField = 'categories_' | 'supplierIds_' | 'allergens_' | 'base_unit_'
@@ -54,6 +55,7 @@ type ProductBulkField = 'categories_' | 'supplierIds_' | 'allergens_' | 'base_un
     ListRowCheckboxComponent,
     SelectionBarComponent,
     EmptyStateComponent,
+    NutritionBadgeComponent,
   ],
   templateUrl: './inventory-product-list.component.html',
   styleUrl: './inventory-product-list.component.scss',

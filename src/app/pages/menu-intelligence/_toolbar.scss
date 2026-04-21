@@ -16,7 +16,12 @@
   background: var(--bg-pure);
   border-top: 2px solid var(--border-warm);
   box-shadow: 0 -2px 12px rgba(74, 60, 46, 0.08);
-  z-index: 100;
+  z-index: 201;
+
+  @media (max-width: 620px) {
+    bottom: 3.5rem;
+    padding-block-end: env(safe-area-inset-bottom, 0);
+  }
 }
 
 .fin-metric {

@@ -21,12 +21,15 @@
     </div>
   </ng-container>
 
-  <ng-container shell-actions>
+  <ng-container shell-selection-bar>
     <app-selection-bar
       [selectionState]="selection"
       [editableFields]="editableFields_()"
       (bulkDelete)="onBulkDeleteSelected($event)"
       (bulkEdit)="onBulkEdit($event)" />
+  </ng-container>
+
+  <ng-container shell-actions>
     <button type="button" class="c-btn-primary" (click)="onAddProduct()"
       [disabled]="!isLoggedIn()"
       [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
@@ -108,6 +111,9 @@
             </span>
           }
           {{ product.name_hebrew }}
+          @if (product.nutrition_per_100g) {
+            <app-nutrition-badge [nutrition]="product.nutrition_per_100g"></app-nutrition-badge>
+          }
         </div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
           <div class="col-category c-list-body-cell" cellCarouselSlide [label]="'category' | translatePipe">{{ getCategoryDisplay(product.categories_) || '—' }}</div>
