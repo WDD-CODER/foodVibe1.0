@@ -306,24 +306,40 @@ export class RecipeFormService {
     const ingredientsArr = form.get('ingredients') as FormArray
     ingredientsArr.clear()
     recipe.ingredients_.forEach(ing => {
-      const item = this.state.products_().find(p => p._id === ing.referenceId)
+      let item = this.state.products_().find(p => p._id === ing.referenceId)
         ?? this.state.recipes_().find(r => r._id === ing.referenceId)
+      // Auto-repair: if referenceId is missing but nameSnapshot is set, try to find
+      // the product by name and restore the link. This silently fixes recipes that
+      // were accidentally saved as unlinked drafts (e.g. via clearIngredient() while
+      // the ingredient had a name but no referenceId).
+      let resolvedRefId = ing.referenceId
+      let resolvedType = ing.type
+      if (!resolvedRefId && ing.nameSnapshot) {
+        const byName = this.state.products_().find(p => p.name_hebrew === ing.nameSnapshot)
+          ?? this.state.recipes_().find(r => r.name_hebrew === ing.nameSnapshot)
+        if (byName) {
+          item = byName
+          resolvedRefId = byName._id
+          resolvedType = 'base_unit_' in byName ? 'product' : 'recipe'
+        }
+      }
       const itemForGroup = item
         ? {
-            _id: ing.referenceId,
+            _id: resolvedRefId,
             name_hebrew: item.name_hebrew,
-            item_type_: ing.type,
+            item_type_: resolvedType,
             base_unit_: (item as { base_unit_?: string }).base_unit_ ?? ing.unit_,
             yield_percentage: 1
           }
         : null
+
       ingredientsArr.push(
         this.createIngredientGroup(itemForGroup as { _id: string; name_hebrew: string; item_type_: string; base_unit_: string; yield_percentage?: number } | null)
       )
       const lastGroup = ingredientsArr.at(ingredientsArr.length - 1)
       lastGroup.patchValue({
-        referenceId: ing.referenceId,
-        item_type: ing.type,
+        referenceId: resolvedRefId,
+        item_type: resolvedType,
         name_hebrew: item?.name_hebrew ?? (ing as { name_hebrew_?: string }).name_hebrew_ ?? ing.nameSnapshot ?? '',
         nameSnapshot: ing.nameSnapshot ?? item?.name_hebrew ?? '',
         amount_net: ing.amount_,
