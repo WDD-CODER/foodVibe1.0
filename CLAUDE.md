@@ -15,7 +15,7 @@ Read the two files below at session start, then confirm **"Yes chef!"**
 
 ## Hard Rules (always enforced)
 
-- **Branch guard**: Never write on `main`. Branch-guard hook auto-creates `feat/session-YYYYMMDD` if needed. Announce `BRANCH_GUARD:` output immediately.
+- **Branch guard**: Never write on `main`. Branch-guard hook auto-creates `feat/session-YYYYMMDD` as a placeholder. Before any push, `/ship` and git-agent rename it to a semantic name (`feat/…`, `fix/…`, `refactor/…`, `chore/…`). Announce `BRANCH_GUARD:` output immediately.
 - **MemPalace first**: Every search starts with `mempalace_search()`. See priority tree in `.claude/copilot-instructions.md §Codebase Search`.
 - **Subagent MemPalace gate**: YOU run `mempalace_search()` before spawning any agent. Pass results as `## MemPalace Context` in the prompt. Never instruct subagents to call it themselves.
 - **Browser tools**: NEVER call `mcp__claude-in-chrome__*` or raw Playwright MCP directly. ALL browser interaction goes through `/browse` (gstack).

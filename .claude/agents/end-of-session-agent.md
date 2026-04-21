@@ -54,19 +54,40 @@ git rev-parse --git-dir
 
 **IF WORKTREE:** Delegate to `worktree-session-end` skill. Return here after completion.
 
-**IF MAIN REPO:** Present commit proposal via git-agent using the visual tree format:
+**IF MAIN REPO:**
+
+**If on a `feat/session-*` branch (date-based placeholder):**
+1. Run `git log main..HEAD --oneline` and `git diff --stat main..HEAD`
+2. Derive a semantic slug using the Naming Rule:
+   - **Type prefix**: `feat/` new features · `fix/` bug fixes · `refactor/` refactors · `chore/` docs/config/maintenance. Dominant type wins; ties → `feat > fix > refactor > chore`.
+   - **Slug**: 2–4 kebab-case words for the *main thing done*. No dates, no "session", no filler ("update", "changes").
+     - Good: `feat/product-sync-name-guard`, `fix/product-edit-duplicate`, `refactor/semantic-branch-names`
+     - Bad: `feat/session-updates`, `fix/various-fixes`, `feat/work-2026`
+3. Prepend `Rename: {old} → {new}` to the commit tree and use `{new}` as the displayed branch name.
+
+Present commit proposal using the visual tree format:
 
 ~~~text
-Branch: {branch_name}
+Rename: feat/session-20260421 → feat/semantic-branch-names
+Branch: feat/semantic-branch-names
 
 └── 📦 type(scope): subject line
     ├── 📄 path/to/file1
     └── 📄 path/to/file2
 ~~~
 
-**Wait for explicit "Y" approval before any git write.**
+(If branch is already semantic — not `feat/session-*` — omit the `Rename:` line and show only `Branch: {branch_name}`.)
 
-On approval: `git add` → `git commit` → `git push` → `gh pr create` (if on feature branch).
+**Wait for explicit "Y" (or a typed alternative name) before any git write.**
+
+On approval: `git add` → `git commit` → (if renamed: `git branch -m {old} {new}`) → `git push` → `gh pr create` (if on feature branch).
+
+If the old branch was already pushed to remote before the rename:
+```bash
+git push origin --delete {old_name}
+git push -u origin {new_name}
+```
+Otherwise just: `git push -u origin {new_name}`
 
 ---
 
@@ -128,13 +149,15 @@ Write (overwrite) with this schema — required sections must be present:
 After all phases complete, print:
 
 ```
-SESSION WRAP — {branch_name}
+SESSION WRAP — {final_branch_name}
 Build: {PASS / SKIPPED}
 Commit: {sha or "none"}
 PR: {url or "N/A"}
 Todo: {n} tasks marked complete
 Session state: {path}
 ```
+
+(`{final_branch_name}` is the semantic name if the branch was renamed from `feat/session-*`, otherwise the original branch name.)
 
 ---
 
