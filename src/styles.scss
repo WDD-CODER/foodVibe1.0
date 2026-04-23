@@ -58,6 +58,7 @@ $break-desktop: 1200px;
   --color-success: #10b981;
   --bg-success: rgba(220, 252, 231, 0.7);
   --text-success: #166534;
+  --color-success-emphasis: #047857;
 
   /* ---- Semantic: warning ---- */
   --bg-warning: rgba(254, 243, 199, 0.7);
@@ -865,7 +866,7 @@ textarea.c-input {
 
   &.created, &.ok, &.approved {
     background: rgba(16, 185, 129, 0.14);
-    color: #047857;
+    color: var(--color-success-emphasis);
   }
 
   &.updated, &.pending, &.warn {

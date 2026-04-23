@@ -156,12 +156,6 @@ export class MetadataManagerComponent {
     }
   }
 
-  // addAllergen(name: string): void {
-  //   if (name.trim()) {
-  //     this.metadataRegistry.registerAllergen(name.trim())
-  //   }
-  // }
-
   //DELETE
   async onRemoveMetadata(item: string, type: MetadataType) {
   if (!this.requireSignIn()) return

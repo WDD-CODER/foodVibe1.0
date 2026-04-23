@@ -6,7 +6,7 @@ auto-fix-paths: [A, B, C]
 flag-only-paths: [ambiguous]
 version: 4
 created: 2026-04-12
-last-tested: 2026-04-16T07:30:00Z
+last-tested: 2026-04-23T10:00:00Z
 last-tested-version: 4
 last-score: "6/6"
 ---

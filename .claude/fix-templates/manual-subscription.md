@@ -6,7 +6,7 @@ auto-fix-paths: []
 flag-only-paths: [real-violation]
 version: 1
 created: 2026-04-12
-last-tested: 2026-04-15T09:30:00Z
+last-tested: 2026-04-23T10:30:00Z
 last-tested-version: 1
 last-score: "5/5"
 ---

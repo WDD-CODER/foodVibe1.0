@@ -1,3 +1,8 @@
+:host {
+  --cv-avatar-gradient-start: #ccfbf1;
+  --cv-avatar-gradient-end: #5eead4;
+}
+
 .dashboard-overview {
   padding: 0;
   display: flex;
@@ -384,7 +389,7 @@
   width: 1.875rem;
   height: 1.875rem;
 
-  background: linear-gradient(180deg, #ccfbf1, #5eead4);
+  background: linear-gradient(180deg, var(--cv-avatar-gradient-start), var(--cv-avatar-gradient-end));
   color: var(--color-primary-hover);
 
   border-radius: 0.625rem;
@@ -447,7 +452,7 @@
 
   &[data-action="created"] {
     background: rgba(16, 185, 129, 0.14);
-    color: #047857;
+    color: var(--color-success-emphasis);
   }
 
   &[data-action="updated"] {
@@ -500,7 +505,7 @@
 
   &[data-entity="dish"] {
     background: rgba(16, 185, 129, 0.12);
-    color: #047857;
+    color: var(--color-success-emphasis);
   }
 }
 
