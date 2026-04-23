@@ -150,6 +150,9 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected stopwatchPaused_ = signal<boolean>(false)
   private stopwatchIntervalId_: ReturnType<typeof setInterval> | null = null
 
+  /** Step index whose countdown just finished (null = none). Cleared by dismissTimerDone(). */
+  protected timerFinishedStepIndex_ = signal<number | null>(null)
+
   /** Multiplier chip definitions exposed to template. */
   protected readonly multiplierChips = MULTIPLIER_CHIPS
 
@@ -267,9 +270,10 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected cookingComplete_ = computed(() => {
     const recipe = this.recipe_()
     if (!recipe) return false
-    const steps = recipe.steps_ ?? []
-    if (steps.length === 0) return false
-    return this.stepDoneSet_().size >= steps.length
+    if (this.isDish_()) {
+      return this.stepDoneSet_().size >= this.scaledPrep_().length && this.scaledPrep_().length > 0
+    }
+    return this.stepDoneSet_().size >= (recipe.steps_?.length ?? 0) && (recipe.steps_?.length ?? 0) > 0
   })
 
   /** Formatted timer display (m:ss under 1h, h:mm:ss at 1h+). */
@@ -835,12 +839,17 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (this.timerIntervalId_ !== null) {
       clearInterval(this.timerIntervalId_)
     }
+    this.timerFinishedStepIndex_.set(null)
     this.activeTimerStepIndex_.set(stepIndex)
     this.timerSecondsLeft_.set(totalSeconds)
     this.timerIntervalId_ = setInterval(() => {
       this.timerSecondsLeft_.update(s => s - 1)
       if (this.timerSecondsLeft_() <= 0) {
-        this.cancelTimer()
+        clearInterval(this.timerIntervalId_!)
+        this.timerIntervalId_ = null
+        this.timerFinishedStepIndex_.set(this.activeTimerStepIndex_())
+        this.activeTimerStepIndex_.set(null)
+        this.timerSecondsLeft_.set(0)
       }
     }, 1000)
   }
@@ -852,7 +861,13 @@ export class CookViewPage implements OnInit, OnDestroy {
       this.timerIntervalId_ = null
     }
     this.activeTimerStepIndex_.set(null)
+    this.timerFinishedStepIndex_.set(null)
     this.timerSecondsLeft_.set(0)
+  }
+
+  /** Dismiss the timer-done alert for a finished step. */
+  protected dismissTimerDone(): void {
+    this.timerFinishedStepIndex_.set(null)
   }
   /** Expand the h:mm input for a step, pre-filling with the step's preset cooking time. */
   protected expandTimerInput(stepIndex: number, presetMinutes: number): void {
