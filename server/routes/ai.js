@@ -286,11 +286,14 @@ router.post('/generate', verifyToken, async (req, res) => {
       body: JSON.stringify({
         contents: [{ parts: [{ text: buildFewShotBlock(shots) + SYSTEM_PROMPT + prompt.trim() }] }],
       }),
+      signal: AbortSignal.timeout(30000),
     });
 
     if (!geminiRes.ok) {
-      console.error('[ai/generate] Gemini API error:', geminiRes.status);
-      return res.status(502).json({ error: `Gemini API error: ${geminiRes.status}` });
+      const errBody = await geminiRes.json().catch(() => ({}));
+      const geminiMsg = errBody?.error?.message ?? '';
+      console.error('[ai/generate] Gemini API error:', geminiRes.status, geminiMsg);
+      return res.status(502).json({ error: `Gemini API error: ${geminiRes.status}`, geminiMessage: geminiMsg });
     }
 
     const data = await geminiRes.json();
@@ -322,6 +325,10 @@ router.post('/generate', verifyToken, async (req, res) => {
     await incrementUsage();
     return res.json({ recipe });
   } catch (err) {
+    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
+      console.error('[ai/generate] timeout');
+      return res.status(504).json({ error: 'Gemini request timed out' });
+    }
     console.error('[ai/generate]', err);
     return res.status(500).json({ error: 'Server error' });
   }
@@ -405,6 +412,7 @@ router.post('/parse-text', verifyToken, async (req, res) => {
       body: JSON.stringify({
         contents: [{ parts: [{ text: TEXT_IMPORT_SYSTEM_PROMPT + '\n\nText to analyze:\n' + rawText.trim() }] }],
       }),
+      signal: AbortSignal.timeout(30000),
     });
 
     if (!geminiRes.ok) {
@@ -434,6 +442,10 @@ router.post('/parse-text', verifyToken, async (req, res) => {
     await incrementUsage();
     return res.json({ result });
   } catch (err) {
+    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
+      console.error('[ai/parse-text] timeout');
+      return res.status(504).json({ error: 'Gemini request timed out' });
+    }
     console.error('[ai/parse-text]', err);
     return res.status(500).json({ error: 'Server error' });
   }
@@ -523,6 +535,7 @@ router.post('/patch-recipe', verifyToken, async (req, res) => {
       body: JSON.stringify({
         contents: [{ parts: [{ text: PATCH_SYSTEM_PROMPT + '\n\n' + userContent }] }],
       }),
+      signal: AbortSignal.timeout(30000),
     });
 
     if (!geminiRes.ok) {
@@ -556,6 +569,10 @@ router.post('/patch-recipe', verifyToken, async (req, res) => {
     await incrementUsage();
     return res.json({ changes: parsed.changes });
   } catch (err) {
+    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
+      console.error('[ai/patch-recipe] timeout');
+      return res.status(504).json({ error: 'Gemini request timed out' });
+    }
     console.error('[ai/patch-recipe]', err);
     return res.status(500).json({ error: 'Server error' });
   }
@@ -602,6 +619,7 @@ router.post('/generate-from-image', verifyToken, async (req, res) => {
           ],
         }],
       }),
+      signal: AbortSignal.timeout(30000),
     });
 
     if (!geminiRes.ok) {
@@ -637,6 +655,10 @@ router.post('/generate-from-image', verifyToken, async (req, res) => {
     await incrementUsage();
     return res.json({ recipe });
   } catch (err) {
+    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
+      console.error('[ai/generate-from-image] timeout');
+      return res.status(504).json({ error: 'Gemini request timed out' });
+    }
     console.error('[ai/generate-from-image]', err);
     return res.status(500).json({ error: 'Server error' });
   }
@@ -718,7 +740,13 @@ router.post('/generate-from-url', verifyToken, async (req, res) => {
       signal: AbortSignal.timeout(15000),
     });
     if (!pageRes.ok) {
-      return res.status(502).json({ error: `Failed to fetch URL: ${pageRes.status}` });
+      const urlStatus = pageRes.status;
+      let urlError;
+      if (urlStatus === 404) urlError = 'URL not found (404)';
+      else if (urlStatus === 403 || urlStatus === 401) urlError = `URL access denied (${urlStatus}) — bot protection`;
+      else if (urlStatus >= 500) urlError = `URL server error (${urlStatus})`;
+      else urlError = `Failed to fetch URL: ${urlStatus}`;
+      return res.status(502).json({ error: urlError, urlStatus });
     }
     const html = await pageRes.text();
     pageText = extractTextFromHtml(html);
@@ -740,6 +768,7 @@ router.post('/generate-from-url', verifyToken, async (req, res) => {
       body: JSON.stringify({
         contents: [{ parts: [{ text: buildFewShotBlock(shots) + SYSTEM_PROMPT + '\n\nטקסט לניתוח:\n' + pageText }] }],
       }),
+      signal: AbortSignal.timeout(30000),
     });
 
     if (!geminiRes.ok) {
@@ -775,6 +804,10 @@ router.post('/generate-from-url', verifyToken, async (req, res) => {
     await incrementUsage();
     return res.json({ recipe });
   } catch (err) {
+    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
+      console.error('[ai/generate-from-url] timeout');
+      return res.status(504).json({ error: 'Gemini request timed out' });
+    }
     console.error('[ai/generate-from-url]', err);
     return res.status(500).json({ error: 'Server error' });
   }

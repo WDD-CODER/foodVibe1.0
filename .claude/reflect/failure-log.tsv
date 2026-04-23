@@ -65,3 +65,34 @@ grep -r "f	.claude/retrospectives/2026-04-21-18-00-refactor-planner.md:36:- **Sh
 2026-04-21 19:42:28	Bash	ls .claude/fix-templates/ 2>/dev/null && echo "---" && cat .claude/fix-templates	{"timestamp":"2026-04-12T10:30:00Z","template":"color-token","version":2,"score":"6/6","passed":["ambiguous-flag","fff-i	
 2026-04-21 19:43:02	Edit	C:\foodCo\foodVibe1.0\server\routes\generic.js	          error: 'Product is used in one or more recipes',	
 2026-04-21 19:43:11	Edit	C:\foodCo\foodVibe1.0\server\routes\generic.js	          error: 'Each linked ingredient must have a nameSnapshot',	
+2026-04-23 14:54:18	mcp__mempalace__mempalace_search	@{query=signup authentication cold start slow performance; limit=5}	      "text": "apply to `POST /login`\n- [ ] D5: Add `signupLimiter` (5 req / 1 hour / IP); apply to `POST /signup`\n- [	
+2026-04-23 14:55:44	Bash	cat src/app/core/services/user.service.ts | grep -A 20 "refreshToken\|loginAsGue	        error: () => {	
+2026-04-23 14:55:47	Bash	cat angular.json | python3 -c "import sys,json; d=json.load(sys.stdin); build=d[	@{stdout=Python parse failed	
+2026-04-23 14:59:31	Bash	python3 -c "
+import json, sys
+sys.stdout.reconfigure(encoding='utf-8')
+with open	ai_recipe_url_fetch_failed -> ╫£╫É ╫á╫Ö╫¬╫ƒ ╫£╫Æ╫⌐╫¬ ╫£╫¢╫¬╫ò╫æ╫¬. ╫æ╫ô╫ò╫º ╫⌐╫ö╫º╫Ö╫⌐╫ò╫¿ ╫¬╫º╫Ö╫ƒ ╫ò╫á╫í╫ö ╫⌐╫ò╫æ.	
+2026-04-23 15:00:42	Bash	python3 -c "
+import json, sys
+sys.stdout.reconfigure(encoding='utf-8')
+with open	ai_recipe_url_fetch_failed -> ╫£╫É ╫á╫Ö╫¬╫ƒ ╫£╫Æ╫⌐╫¬ ╫£╫¢╫¬╫ò╫æ╫¬. ╫æ╫ô╫ò╫º ╫⌐╫ö╫º╫Ö╫⌐╫ò╫¿ ╫¬╫º╫Ö╫ƒ ╫ò╫á╫í╫ö ╫⌐╫ò╫æ.; st	
+2026-04-23 15:01:05	Edit	C:\foodCo\foodVibe1.0\public\assets\data\dictionary.json	    "ai_recipe_url_fetch_failed": "╫£╫É ╫á╫Ö╫¬╫ƒ ╫£╫Æ╫⌐╫¬ ╫£╫¢╫¬╫ò╫æ╫¬. ╫æ╫ô╫ò╫º ╫⌐╫ö╫º╫Ö╫⌐╫ò╫¿ ╫¬╫º╫Ö╫ƒ ╫ò╫á╫í╫ö ╫⌐╫ò╫æ	
+2026-04-23 15:01:15	Edit	C:\foodCo\foodVibe1.0\server\routes\ai.js	      console.error('[ai/generate] Gemini API error:', geminiRes.status);	
+2026-04-23 15:01:21	Edit	C:\foodCo\foodVibe1.0\server\routes\ai.js	    return res.status(500).json({ error: 'Server error' });	
+2026-04-23 15:01:41	Edit	C:\foodCo\foodVibe1.0\server\routes\ai.js	      console.error('[ai/parse-text] Gemini API error:', geminiRes.status);	
+2026-04-23 15:01:48	Edit	C:\foodCo\foodVibe1.0\server\routes\ai.js	    return res.status(500).json({ error: 'Server error' });	
+2026-04-23 15:01:55	Edit	C:\foodCo\foodVibe1.0\server\routes\ai.js	      console.error('[ai/patch-recipe] Gemini API error:', geminiRes.status);	
+2026-04-23 15:02:17	Edit	C:\foodCo\foodVibe1.0\server\routes\ai.js	    return res.status(500).json({ error: 'Server error' });	
+2026-04-23 15:02:31	Edit	C:\foodCo\foodVibe1.0\server\routes\ai.js	      console.error('[ai/generate-from-image] Gemini API error:', geminiRes.status);	
+2026-04-23 15:02:40	Edit	C:\foodCo\foodVibe1.0\server\routes\ai.js	    return res.status(500).json({ error: 'Server error' });	
+2026-04-23 15:02:56	Edit	C:\foodCo\foodVibe1.0\server\routes\ai.js	      return res.status(502).json({ error: `Failed to fetch URL: ${pageRes.status}` });	
+2026-04-23 15:03:05	Edit	C:\foodCo\foodVibe1.0\server\routes\ai.js	      console.error('[ai/generate-from-url] Gemini API error:', geminiRes.status);	
+2026-04-23 15:03:18	Edit	C:\foodCo\foodVibe1.0\server\routes\ai.js	      return res.status(504).json({ error: 'Gemini request timed out' });	
+2026-04-23 15:03:28	Edit	C:\foodCo\foodVibe1.0\src\app\shared\ai-recipe-modal\ai-recipe-modal.component.t	      if (/Failed to fetch URL: [45]\d\d/.test(msg)) return 'ai_recipe_url_blocked'	
+2026-04-23 15:03:35	Edit	C:\foodCo\foodVibe1.0\src\app\shared\ai-recipe-modal\ai-recipe-modal.component.t	      if (/Failed to fetch URL: [45]\d\d/.test(msg)) return 'ai_recipe_url_blocked'	
+2026-04-23 15:03:51	Edit	C:\foodCo\foodVibe1.0\src\app\shared\ai-recipe-modal\ai-recipe-modal.component.t	      if (/Failed to fetch URL: [45]\d\d/.test(msg)) return 'ai_recipe_url_blocked'	
+2026-04-23 15:03:53	Bash	ng build 2>&1 | tail -20	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-23 15:04:05	Edit	C:\foodCo\foodVibe1.0\src\app\shared\ai-recipe-modal\ai-recipe-modal.component.t	      if (msg.includes('Could not fetch') || msg.includes('resolves to a disallowed')) return 'ai_recipe_url_fetch_faile	
+2026-04-23 15:04:22	Edit	C:\foodCo\foodVibe1.0\src\app\shared\ai-recipe-modal\ai-recipe-modal.component.t	      if (msg.includes('Could not fetch') || msg.includes('resolves to a disallowed')) return 'ai_recipe_url_fetch_faile	
+2026-04-23 15:04:29	Edit	C:\foodCo\foodVibe1.0\src\app\shared\ai-recipe-modal\ai-recipe-modal.component.t	      if (msg.includes('Could not fetch') || msg.includes('resolves to a disallowed')) return 'ai_recipe_url_fetch_faile	
+2026-04-23 15:36:14	Bash	ng build 2>&1 | tail -20	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
