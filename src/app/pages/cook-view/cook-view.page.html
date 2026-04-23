@@ -175,7 +175,7 @@
               </div>
             </div>
 
-            <div class="cv-ing-body">
+            <div class="cv-ing-body" scrollIndicators>
             @if (editMode_()) {
               <!-- Edit mode: original ingredient table -->
               <div class="ingredients-table">
@@ -272,6 +272,12 @@
               }
             }
             </div>
+            <div class="cv-pane-scroll-indicator cv-pane-scroll-indicator--top" aria-hidden="true">
+              <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
+            </div>
+            <div class="cv-pane-scroll-indicator cv-pane-scroll-indicator--bottom" aria-hidden="true">
+              <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
+            </div>
           </div>
 
           <div class="cv-pane-divider" [style.order]="1"></div>
@@ -286,7 +292,7 @@
               <span class="cv-step-counter">{{ stepDoneSet_().size }}/{{ isDish_() ? scaledPrep_().length : recipe.steps_.length }}</span>
             </div>
 
-            <div class="cv-step-body">
+            <div class="cv-step-body" scrollIndicators>
             @if (editMode_()) {
               <!-- Edit mode: original workflow editor -->
               <app-recipe-workflow
@@ -460,6 +466,12 @@
               </div>
             }
             }
+            </div>
+            <div class="cv-pane-scroll-indicator cv-pane-scroll-indicator--top" aria-hidden="true">
+              <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
+            </div>
+            <div class="cv-pane-scroll-indicator cv-pane-scroll-indicator--bottom" aria-hidden="true">
+              <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
             </div>
           </div>
         </div>

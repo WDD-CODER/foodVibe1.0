@@ -33,6 +33,7 @@ import { quantityIncrement, quantityDecrement, QuantityStepOptions } from '../..
 import { filter, take } from 'rxjs'
 import { HeroFabService } from '@services/hero-fab.service'
 import { RecipeFormService } from '@pages/recipe-builder/services/recipe-form.service'
+import { ScrollIndicatorsDirective } from 'src/app/core/directives/scroll-indicators.directive'
 
 /** Multiplier chip definitions — factor is the multiplier applied to `convertedYieldAmount_()`. */
 const MULTIPLIER_CHIPS = [
@@ -60,7 +61,8 @@ const MULTIPLIER_CHIPS = [
     ExportPreviewComponent,
     ApproveStampComponent,
     CounterComponent,
-    RatingStarsComponent
+    RatingStarsComponent,
+    ScrollIndicatorsDirective
   ],
   templateUrl: './cook-view.page.html',
   styleUrl: './cook-view.page.scss'

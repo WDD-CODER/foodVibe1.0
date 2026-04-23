@@ -447,6 +447,7 @@
 }
 
 .cv-ing-pane {
+  position: relative;
   display: flex;
   flex-direction: column;
   order: 1;
@@ -549,18 +550,18 @@
   background: var(--cv-bg-row);
   direction: rtl;
 
-  border: 1px solid transparent;
+  border: 1px solid rgba(29, 158, 117, 0.14);
   border-radius: 12px;
   margin-bottom: 3px;
   padding-block: 0.625rem;
   padding-inline: 1rem;
 
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
 
   &:hover {
     background: var(--cv-bg-soft);
-    border-color: rgba(29, 158, 117, 0.1);
+    border-color: rgba(29, 158, 117, 0.28);
   }
 }
 
@@ -623,12 +624,54 @@
 }
 
 .cv-step-pane {
+  position: relative;
   display: flex;
   flex-direction: column;
   order: 2;
 
   min-height: 0;
   overflow: hidden;
+}
+
+/* Scroll indicator chevrons — shared by both panes */
+.cv-pane-scroll-indicator--top,
+.cv-pane-scroll-indicator--bottom {
+  position: absolute;
+  inset-inline: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 1.5rem;
+  padding-block: 0.25rem;
+
+  color: var(--color-text-muted);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s var(--ease-smooth);
+}
+
+.cv-pane-scroll-indicator--top {
+  top: 0;
+  background: linear-gradient(to bottom, var(--bg-glass-strong) 0%, transparent 100%);
+}
+
+.cv-pane-scroll-indicator--bottom {
+  bottom: 0;
+  background: linear-gradient(to top, var(--bg-glass-strong) 0%, transparent 100%);
+}
+
+/* Show top chevron when list can scroll up */
+.cv-ing-pane:has(.cv-ing-body.can-scroll-up) .cv-pane-scroll-indicator--top,
+.cv-step-pane:has(.cv-step-body.can-scroll-up) .cv-pane-scroll-indicator--top {
+  opacity: 0.7;
+}
+
+/* Show bottom chevron when list can scroll down */
+.cv-ing-pane:has(.cv-ing-body.can-scroll-down) .cv-pane-scroll-indicator--bottom,
+.cv-step-pane:has(.cv-step-body.can-scroll-down) .cv-pane-scroll-indicator--bottom {
+  opacity: 0.7;
 }
 
 .cv-step-pane-header {
