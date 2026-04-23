@@ -359,16 +359,18 @@
                         <div class="cv-step-card-head">
                           <span class="cv-step-num cv-step-num--active">{{ si + 1 }}</span>
                           <span class="cv-step-active-label">פעיל עכשיו</span>
-                          <!-- Timer button -->
-                          @if (activeTimerStepIndex_() === si) {
-                            <button type="button" class="cv-step-tool-btn" (click)="cancelTimer()">
-                              ⏱ {{ timerDisplay_() }} ⏸
-                            </button>
-                          } @else {
-                            <button type="button" class="cv-step-tool-btn"
-                              (click)="startTimer(si, step.cooking_time_secs_ ?? 180)">
-                              ⏱ {{ 'timer_start' | translatePipe }}
-                            </button>
+                          <!-- Timer button — only shown when step has a configured cooking time -->
+                          @if ((step.cooking_time_secs_ ?? 0) > 0) {
+                            @if (activeTimerStepIndex_() === si) {
+                              <button type="button" class="cv-step-tool-btn" (click)="cancelTimer()">
+                                ⏱ {{ timerDisplay_() }} ⏸
+                              </button>
+                            } @else {
+                              <button type="button" class="cv-step-tool-btn"
+                                (click)="startTimer(si, step.cooking_time_secs_!)">
+                                ⏱ {{ 'timer_start' | translatePipe }}
+                              </button>
+                            }
                           }
                           <!-- Stopwatch button -->
                           @if (stopwatchStepIndex_() === si) {
@@ -421,10 +423,11 @@
                         </div>
                       </div>
                     } @else {
-                      <!-- PENDING step -->
-                      <div class="cv-step-card"
+                      <!-- PENDING step — tap anywhere to jump to this step -->
+                      <div class="cv-step-card cv-step-card--pending"
                         [class.cv-step-card--timer-alert]="timerFinishedStepIndex_() === si"
-                        [attr.data-step-index]="si">
+                        [attr.data-step-index]="si"
+                        (click)="setActiveStep(si)">
                         <div class="cv-step-card-head">
                           <span class="cv-step-num">{{ si + 1 }}</span>
                           <!-- Finished timer alert -->

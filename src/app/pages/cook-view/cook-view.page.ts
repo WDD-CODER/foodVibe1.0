@@ -845,6 +845,12 @@ export class CookViewPage implements OnInit, OnDestroy {
     this.phoneFirstPane_.set(pane)
   }
 
+  /** Jump to any pending step and make it the active one. */
+  protected setActiveStep(index: number): void {
+    this.activeStepIndex_.set(index)
+    this.scrollToActiveStep(index)
+  }
+
   /** Toggle peek (expanded preview) on a pending step. Cannot peek the active step. */
   protected toggleStepPeek(index: number): void {
     if (index === this.activeStepIndex_()) return

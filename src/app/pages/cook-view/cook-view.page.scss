@@ -682,6 +682,15 @@
   opacity: var(--cv-inactive-opacity);
 }
 
+/* Pending steps are tappable — cursor indicates this */
+.cv-step-card--pending {
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
 .cv-step-card--timer-alert {
   // !important overrides the 2px active-border shorthand (active and done/pending states are mutually exclusive in the template)
   border-color: var(--cv-timer-alert-border) !important;
