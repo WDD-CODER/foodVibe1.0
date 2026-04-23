@@ -305,31 +305,45 @@
                 <!-- Dish mode: prep items as cards -->
                 @if (scaledPrep_().length > 0) {
                   @for (row of scaledPrep_(); track row.name + row.unit + row.amount; let si = $index) {
-                    <div class="cv-step-card"
-                      [class.cv-step-card--active]="activeStepIndex_() === si && !stepDoneSet_().has(si)"
-                      [class.cv-step-card--done]="stepDoneSet_().has(si)"
-                      [class.cv-step-card--next]="si === activeStepIndex_() + 1 && !stepDoneSet_().has(si)"
-                      [attr.data-step-index]="si">
-                      <div class="cv-step-card-head">
-                        <span class="cv-step-num"
-                          [class.cv-step-num--active]="activeStepIndex_() === si && !stepDoneSet_().has(si)"
-                          [class.cv-step-num--done]="stepDoneSet_().has(si)">{{ si + 1 }}</span>
-                        <span class="cv-step-label">{{ row.name }}</span>
-                        @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
-                          <span class="cv-step-status-chip cv-step-status-chip--active">{{ 'step_active' | translatePipe }}</span>
-                        } @else if (stepDoneSet_().has(si)) {
-                          <span class="cv-step-status-chip cv-step-status-chip--done">{{ 'step_done_label' | translatePipe }}</span>
-                        } @else {
-                          <span class="cv-step-status-chip cv-step-status-chip--pending">{{ 'step_pending' | translatePipe }}</span>
-                        }
+                    @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
+                      <!-- ACTIVE prep item -->
+                      <div class="cv-step-card cv-step-card--active" [attr.data-step-index]="si">
+                        <div class="cv-step-card-head">
+                          <span class="cv-step-num cv-step-num--active">{{ si + 1 }}</span>
+                          <span class="cv-step-active-label">פעיל עכשיו</span>
+                        </div>
+                        <div class="cv-step-card-body">
+                          <p>{{ row.amount | formatQuantity }} {{ row.unit | translatePipe }} {{ row.name }}</p>
+                        </div>
+                        <button type="button" class="cv-step-done-btn" (click)="markStepDone(si)">
+                          ✓ &nbsp; {{ 'mark_step_done' | translatePipe }}
+                        </button>
                       </div>
-                      <div class="cv-step-card-body">
-                        <span>{{ row.amount | formatQuantity }} {{ row.unit | translatePipe }}</span>
+                    } @else if (stepDoneSet_().has(si)) {
+                      <!-- DONE prep item -->
+                      <div class="cv-step-card cv-step-card--done" [attr.data-step-index]="si">
+                        <div class="cv-step-card-head">
+                          <span class="cv-step-num cv-step-num--done">✓</span>
+                          <span class="cv-step-done-label">{{ 'step_done_label' | translatePipe }}</span>
+                          <span class="cv-step-status-chip cv-step-status-chip--done cv-step-status-chip--clickable"
+                            style="margin-inline-start: auto"
+                            (click)="unmarkStepDone(si)">↩</span>
+                        </div>
+                        <div class="cv-step-card-body">
+                          <p>{{ row.amount | formatQuantity }} {{ row.unit | translatePipe }} {{ row.name }}</p>
+                        </div>
                       </div>
-                      @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
-                        <button type="button" class="cv-step-done-btn" (click)="markStepDone(si)">✓ {{ 'mark_step_done' | translatePipe }}</button>
-                      }
-                    </div>
+                    } @else {
+                      <!-- PENDING prep item -->
+                      <div class="cv-step-card" [attr.data-step-index]="si">
+                        <div class="cv-step-card-head">
+                          <span class="cv-step-num">{{ si + 1 }}</span>
+                        </div>
+                        <div class="cv-step-card-body">
+                          <p>{{ row.amount | formatQuantity }} {{ row.unit | translatePipe }} {{ row.name }}</p>
+                        </div>
+                      </div>
+                    }
                   }
                 } @else {
                   <p class="empty-state-text">{{ 'no_preparations_defined' | translatePipe }}</p>
@@ -437,6 +451,11 @@
                   <p class="empty-state-text">{{ 'no_steps_defined' | translatePipe }}</p>
                 }
               }
+            @if (cookingComplete_()) {
+              <div class="cv-complete-banner">
+                🎉 {{ 'cooking_complete' | translatePipe }}
+              </div>
+            }
             }
             </div>
           </div>
