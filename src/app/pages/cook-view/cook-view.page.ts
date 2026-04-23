@@ -153,6 +153,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected stopwatchSecondsElapsed_ = signal<number>(0)
   protected stopwatchPaused_ = signal<boolean>(false)
   private stopwatchIntervalId_: ReturnType<typeof setInterval> | null = null
+  private scrollTimeoutId: ReturnType<typeof setTimeout> | null = null
 
   /** Step index whose countdown just finished (null = none). Cleared by dismissTimerDone(). */
   protected timerFinishedStepIndex_ = signal<number | null>(null)
@@ -354,6 +355,10 @@ export class CookViewPage implements OnInit, OnDestroy {
     this.closeAllExportOverlays()
     this.heroFab.clearPageActions()
     if (this.stopwatchIntervalId_ !== null) clearInterval(this.stopwatchIntervalId_)
+    if (this.scrollTimeoutId !== null) {
+      clearTimeout(this.scrollTimeoutId)
+      this.scrollTimeoutId = null
+    }
   }
 
   protected setQuantity(value: number): void {
@@ -1106,7 +1111,11 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   private scrollToActiveStep(index: number): void {
-    setTimeout(() => {
+    if (this.scrollTimeoutId !== null) {
+      clearTimeout(this.scrollTimeoutId)
+    }
+    this.scrollTimeoutId = setTimeout(() => {
+      this.scrollTimeoutId = null
       const card = this.el.nativeElement.querySelector(`[data-step-index="${index}"]`) as HTMLElement | null
       card?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }, 50)
