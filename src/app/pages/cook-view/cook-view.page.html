@@ -317,70 +317,100 @@
                 <!-- Recipe mode: steps as cards -->
                 @if (recipe.steps_ && recipe.steps_.length) {
                   @for (step of recipe.steps_; track step.order_; let si = $index) {
-                    <div class="cv-step-card"
-                      [class.cv-step-card--active]="activeStepIndex_() === si && !stepDoneSet_().has(si)"
-                      [class.cv-step-card--done]="stepDoneSet_().has(si)"
-                      [class.cv-step-card--next]="si === activeStepIndex_() + 1 && !stepDoneSet_().has(si)"
-                      [attr.data-step-index]="si">
-                      <div class="cv-step-card-head">
-                        <span class="cv-step-num"
-                          [class.cv-step-num--active]="activeStepIndex_() === si && !stepDoneSet_().has(si)"
-                          [class.cv-step-num--done]="stepDoneSet_().has(si)">{{ step.order_ }}</span>
-                        <span class="cv-step-label">{{ 'step' | translatePipe }} {{ step.order_ }}</span>
-                        <!-- Timer & stopwatch tools — before status chip -->
-                        <div class="cv-step-tools" (click)="$event.stopPropagation()">
-                          @if ((step.cooking_time_secs_ ?? 0) > 0) {
-                            @if (activeTimerStepIndex_() === si) {
-                              <!-- Running: countdown pill + cancel -->
-                              <button type="button" class="cv-timer-pill cv-timer-pill--active" (click)="cancelTimer()">
-                                <lucide-icon name="timer" [size]="13"></lucide-icon>
-                                {{ timerDisplay_() }}
-                                <span class="cv-timer-cancel">✕</span>
-                              </button>
-                            } @else {
-                              <!-- Idle: tap to start immediately with preset seconds -->
-                              <button type="button" class="cv-timer-icon"
-                                (click)="startTimer(si, step.cooking_time_secs_ ?? 0)">
-                                <lucide-icon name="timer" [size]="17"></lucide-icon>
-                              </button>
-                            }
-                          }
-                          <!-- Stopwatch -->
-                          @if (stopwatchStepIndex_() === si) {
-                            <button type="button" class="cv-stopwatch-icon cv-stopwatch-icon--active"
-                              [class.cv-stopwatch-icon--paused]="stopwatchPaused_()"
-                              (click)="toggleStopwatch()">
-                              <lucide-icon name="watch" [size]="17"></lucide-icon>
-                              {{ stopwatchDisplay_() }}
-                              <lucide-icon [name]="stopwatchPaused_() ? 'play' : 'pause'" [size]="13"></lucide-icon>
-                            </button>
-                            <button type="button" class="cv-stopwatch-close" (click)="stopStopwatch()" title="Close stopwatch">
-                              <lucide-icon name="x" [size]="13"></lucide-icon>
+                    @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
+                      <!-- ACTIVE step -->
+                      <div class="cv-step-card cv-step-card--active" [attr.data-step-index]="si">
+                        <!-- Green header bar -->
+                        <div class="cv-step-card-head">
+                          <span class="cv-step-num cv-step-num--active">{{ si + 1 }}</span>
+                          <span class="cv-step-active-label">פעיל עכשיו</span>
+                          <!-- Timer button -->
+                          @if (activeTimerStepIndex_() === si) {
+                            <button type="button" class="cv-step-tool-btn" (click)="cancelTimer()">
+                              ⏱ {{ timerDisplay_() }} ⏸
                             </button>
                           } @else {
-                            <button type="button" class="cv-stopwatch-icon"
+                            <button type="button" class="cv-step-tool-btn"
+                              (click)="startTimer(si, step.cooking_time_secs_ ?? 180)">
+                              ⏱ {{ 'timer' | translatePipe }}
+                            </button>
+                          }
+                          <!-- Stopwatch button -->
+                          @if (stopwatchStepIndex_() === si) {
+                            <button type="button" class="cv-step-tool-btn"
+                              (click)="toggleStopwatch()">
+                              ⌚ {{ stopwatchDisplay_() }} {{ stopwatchPaused_() ? '▶' : '⏸' }}
+                            </button>
+                          } @else {
+                            <button type="button" class="cv-step-tool-btn"
                               (click)="startStopwatch(si)">
-                              <lucide-icon name="watch" [size]="17"></lucide-icon>
+                              ⌚ {{ 'stopwatch' | translatePipe }}
                             </button>
                           }
                         </div>
-                        <!-- Status chip — after tools -->
-                        @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
-                          <span class="cv-step-status-chip cv-step-status-chip--active">{{ 'step_active' | translatePipe }}</span>
-                        } @else if (stepDoneSet_().has(si)) {
+                        <div class="cv-step-card-body">
+                          <p>{{ step.instruction_ }}</p>
+                        </div>
+                        <button type="button" class="cv-step-done-btn" (click)="markStepDone(si)">
+                          ✓ &nbsp; {{ 'mark_step_done' | translatePipe }}
+                        </button>
+                      </div>
+                    } @else if (stepDoneSet_().has(si)) {
+                      <!-- DONE step -->
+                      <div class="cv-step-card cv-step-card--done"
+                        [class.cv-step-card--timer-alert]="timerFinishedStepIndex_() === si"
+                        [attr.data-step-index]="si">
+                        <div class="cv-step-card-head">
+                          <span class="cv-step-num cv-step-num--done">✓</span>
+                          <span class="cv-step-done-label">{{ 'step_done_label' | translatePipe }}</span>
+                          <!-- Finished timer alert on done step -->
+                          @if (timerFinishedStepIndex_() === si) {
+                            <span class="cv-step-timer-pill cv-step-timer-pill--alert"
+                              (click)="dismissTimerDone()">
+                              ⏱ {{ 'timer_done' | translatePipe }} ✕
+                            </span>
+                          }
+                          <!-- Running stopwatch on done step -->
+                          @if (stopwatchStepIndex_() === si) {
+                            <span class="cv-step-timer-pill" (click)="toggleStopwatch()">
+                              ⌚ {{ stopwatchDisplay_() }} {{ stopwatchPaused_() ? '▶' : '⏸' }}
+                            </span>
+                          }
+                          <!-- Undo done -->
                           <span class="cv-step-status-chip cv-step-status-chip--done cv-step-status-chip--clickable"
-                            (click)="unmarkStepDone(si)">{{ 'step_done_label' | translatePipe }} ↩</span>
-                        } @else {
-                          <span class="cv-step-status-chip cv-step-status-chip--pending">{{ 'step_pending' | translatePipe }}</span>
-                        }
+                            style="margin-inline-start: auto"
+                            (click)="unmarkStepDone(si)">↩</span>
+                        </div>
+                        <div class="cv-step-card-body">
+                          <p>{{ step.instruction_ }}</p>
+                        </div>
                       </div>
-                      <div class="cv-step-card-body">
-                        <p>{{ step.instruction_ }}</p>
+                    } @else {
+                      <!-- PENDING step -->
+                      <div class="cv-step-card"
+                        [class.cv-step-card--timer-alert]="timerFinishedStepIndex_() === si"
+                        [attr.data-step-index]="si">
+                        <div class="cv-step-card-head">
+                          <span class="cv-step-num">{{ si + 1 }}</span>
+                          <!-- Finished timer alert -->
+                          @if (timerFinishedStepIndex_() === si) {
+                            <span class="cv-step-timer-pill cv-step-timer-pill--alert"
+                              (click)="dismissTimerDone()">
+                              ⏱ {{ 'timer_done' | translatePipe }} ✕
+                            </span>
+                          }
+                          <!-- Running stopwatch on pending step -->
+                          @if (stopwatchStepIndex_() === si) {
+                            <span class="cv-step-timer-pill" (click)="toggleStopwatch()">
+                              ⌚ {{ stopwatchDisplay_() }} {{ stopwatchPaused_() ? '▶' : '⏸' }}
+                            </span>
+                          }
+                        </div>
+                        <div class="cv-step-card-body">
+                          <p>{{ step.instruction_ }}</p>
+                        </div>
                       </div>
-                      @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
-                        <button type="button" class="cv-step-done-btn" (click)="markStepDone(si)">✓ {{ 'mark_step_done' | translatePipe }}</button>
-                      }
-                    </div>
+                    }
                   }
                 } @else {
                   <p class="empty-state-text">{{ 'no_steps_defined' | translatePipe }}</p>

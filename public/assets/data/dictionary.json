@@ -742,6 +742,8 @@
     "confirm_dish": "אשר מנה",
     "timer_start": "התחל טיימר",
     "timer_cancel": "בטל",
+    "timer_done": "הטיימר הסתיים!",
+    "stopwatch": "שעון",
     "empty_recipe_book": "אין מתכונים עדיין",
     "add_first_recipe": "הוסף מתכון ראשון",
     "empty_inventory": "המלאי ריק",
