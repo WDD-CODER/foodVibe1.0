@@ -170,7 +170,7 @@
   justify-content: space-between;
   flex-wrap: wrap;
 
-  background: linear-gradient(135deg, #1d9e75, #0f6e56);
+  background: linear-gradient(135deg, var(--cv-active-border), var(--cv-active-text));
 
   border-radius: 24px 24px 0 0;
   gap: 0.5rem;
@@ -291,7 +291,7 @@
   display: none;
   align-items: center;
 
-  background: white;
+  background: var(--bg-pure);
 
   border-bottom: 2px solid var(--cv-border-soft);
   gap: 0;
@@ -565,7 +565,7 @@
 }
 
 .cv-ing-row--done {
-  opacity: var(--cv-done-opacity);
+  opacity: var(--cv-inactive-opacity);
 
   .cv-ing-name {
     text-decoration: line-through;
@@ -683,6 +683,7 @@
 }
 
 .cv-step-card--timer-alert {
+  // !important overrides the 2px active-border shorthand (active and done/pending states are mutually exclusive in the template)
   border-color: var(--cv-timer-alert-border) !important;
   border-width: 1.5px !important;
   opacity: var(--cv-inactive-opacity);
@@ -962,6 +963,7 @@
   cursor: pointer;
   margin-top: 10px;
   padding: 10px;
+  min-height: var(--cv-tap-min);
 
   letter-spacing: 0.02em;
 
@@ -1339,7 +1341,7 @@
 
     background: linear-gradient(90deg, transparent, var(--cv-border-soft), transparent);
     height: 2px;
-    order: 1;
+    order: 1.5;
 
     margin: 0.5rem 1rem;
   }
