@@ -121,7 +121,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash C:/foodCo/foodVibe1.0/scripts/context-monitor.sh",
+            "command": "python C:/foodCo/foodVibe1.0/scripts/context-monitor.py",
             "timeout": 5
           }
         ]
