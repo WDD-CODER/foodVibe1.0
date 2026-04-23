@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, signal, computed, OnInit, OnDestroy } from '@angular/core'
+import { Component, DestroyRef, ElementRef, inject, signal, computed, OnInit, OnDestroy } from '@angular/core'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
@@ -84,6 +84,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   private readonly translation = inject(TranslationService)
   private readonly heroFab = inject(HeroFabService)
   private readonly recipeFormService = inject(RecipeFormService)
+  private readonly el = inject(ElementRef)
 
   // ---- SIGNALS & CONSTANTS ----
   protected recipe_ = signal<Recipe | null>(null)
@@ -116,6 +117,9 @@ export class CookViewPage implements OnInit, OnDestroy {
   private exportPreviewType_: 'recipe-info' | 'shopping-list' | 'cooking-steps' | 'dish-checklist' | null = null
   /** Floating export bar expanded. */
   protected exportBarExpanded_ = signal<boolean>(false)
+
+  /** Phone layout: which pane appears on top. Default: ingredients first. */
+  protected phoneFirstPane_ = signal<'ingredients' | 'steps'>('ingredients')
 
   /**
    * Active multiplier chip factor (null = no chip selected, 1 = 1x selected by default).
@@ -803,20 +807,24 @@ export class CookViewPage implements OnInit, OnDestroy {
       return next
     })
     const recipe = this.recipe_()
-    const steps = recipe?.steps_ ?? []
+    const steps = this.isDish_() ? this.scaledPrep_() : (recipe?.steps_ ?? [])
     const doneSet = this.stepDoneSet_()
     for (let i = index + 1; i < steps.length; i++) {
       if (!doneSet.has(i)) {
         this.activeStepIndex_.set(i)
+        this.scrollToActiveStep(i)
         return
       }
     }
     for (let i = 0; i < index; i++) {
       if (!doneSet.has(i)) {
         this.activeStepIndex_.set(i)
+        this.scrollToActiveStep(i)
         return
       }
     }
+    // All steps done — scroll back to first
+    this.scrollToActiveStep(0)
   }
 
   protected unmarkStepDone(index: number): void {
@@ -826,6 +834,10 @@ export class CookViewPage implements OnInit, OnDestroy {
       return next
     })
     this.activeStepIndex_.set(index)
+  }
+
+  protected swapToPane(pane: 'ingredients' | 'steps'): void {
+    this.phoneFirstPane_.set(pane)
   }
 
   /** Toggle peek (expanded preview) on a pending step. Cannot peek the active step. */
@@ -1091,5 +1103,12 @@ export class CookViewPage implements OnInit, OnDestroy {
         }))
       this.recipe_.update(r => ({ ...r, steps_: steps.length ? steps : [] } as Recipe))
     }
+  }
+
+  private scrollToActiveStep(index: number): void {
+    setTimeout(() => {
+      const card = this.el.nativeElement.querySelector(`[data-step-index="${index}"]`) as HTMLElement | null
+      card?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 50)
   }
 }
