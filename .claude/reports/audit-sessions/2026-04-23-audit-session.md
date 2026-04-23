@@ -137,4 +137,6 @@ ng build: PASS (0 errors, 3 pre-existing warnings)
 Ended: session complete
 
 ## Commits
-<!-- Filled after commit -->
+- 0b232a5 — chore(audit): 2026-04-19 audit session — tokenize colors, clean C4/E2/C2, template tooling
+- 7bc408d — fix(nightly-audit): pre-filter safe patterns for C1 and F3
+- Archive: 2026-04-19-nightly-audit.md moved to archive/ (RESOLVED)
