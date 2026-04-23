@@ -27,7 +27,6 @@ import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import type { ExportPayload } from 'src/app/core/utils/export.util'
 import { ExportPreviewComponent } from 'src/app/shared/export-preview/export-preview.component'
-import { ExportToolbarOverlayComponent } from 'src/app/shared/export-toolbar-overlay/export-toolbar-overlay.component'
 import { HeroFabService } from '@services/hero-fab.service'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { MenuDishRowComponent } from './components/menu-dish-row/menu-dish-row.component'
@@ -49,7 +48,7 @@ type MenuSectionFormRaw = { _id?: string; name_?: string; items_?: MenuItemForm[
 @Component({
   selector: 'app-menu-intelligence-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, ClickOutSideDirective, ScrollableDropdownComponent, CustomSelectComponent, ExportPreviewComponent, ExportToolbarOverlayComponent, MenuDishRowComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, ClickOutSideDirective, ScrollableDropdownComponent, CustomSelectComponent, ExportPreviewComponent, MenuDishRowComponent],
   templateUrl: './menu-intelligence.page.html',
   styleUrl: './menu-intelligence.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

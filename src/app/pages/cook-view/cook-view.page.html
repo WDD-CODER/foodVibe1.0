@@ -20,12 +20,20 @@
       <div class="cv-header-bar">
         <div class="cv-name-rating">
           <h1 class="cv-recipe-name">{{ recipe.name_hebrew }}</h1>
-          <app-rating-stars
-            [value]="recipe.rating_ ?? 0"
-            [readonly]="!isLoggedIn()"
-            size="md"
-            (ratingChange)="onRatingChange($event)"
-          />
+          <div class="cv-header-meta">
+            <app-rating-stars
+              [value]="recipe.rating_ ?? 0"
+              [readonly]="!isLoggedIn()"
+              size="sm"
+              (ratingChange)="onRatingChange($event)"
+            />
+            @if (scaledCost_() > 0) {
+              <span class="cv-cost">₪{{ scaledCost_() | number:'1.0-0' }}</span>
+            }
+            @if (recipe.is_approved_) {
+              <span class="cv-approved-badge">✓ מאושר</span>
+            }
+          </div>
         </div>
         <div class="cv-header-actions">
           @if (editMode_()) {
@@ -90,9 +98,6 @@
               </button>
             </div>
           }
-          @if (scaledCost_() > 0) {
-            <span class="cv-cost">{{ 'cost' | translatePipe }}: ₪{{ scaledCost_() | number:'1.2-2' }}</span>
-          }
         </div>
       </div>
 
@@ -137,10 +142,24 @@
         }
       </div>
 
+      <!-- Phone-only pane swap buttons -->
+      <div class="cv-phone-swap-bar">
+        <button type="button" class="cv-phone-swap-btn"
+          [class.active]="phoneFirstPane_() === 'ingredients'"
+          (click)="swapToPane('ingredients')">
+          🧪 {{ 'ingredients_index' | translatePipe }}
+        </button>
+        <button type="button" class="cv-phone-swap-btn"
+          [class.active]="phoneFirstPane_() === 'steps'"
+          (click)="swapToPane('steps')">
+          ⏱ {{ isDish_() ? ('prep_list_mise_en_place' | translatePipe) : ('prep_workflow' | translatePipe) }}
+        </button>
+      </div>
+
       <!-- Two-column body -->
         <div class="cv-body">
           <!-- Ingredient pane -->
-          <div class="cv-ing-pane">
+          <div class="cv-ing-pane" [style.order]="phoneFirstPane_() === 'ingredients' ? 0 : 2">
             <div class="cv-ing-pane-header" [class.cv-ing-pane-header--complete]="allIngredientsChecked_()">
               <span class="cv-ing-pane-title">
                 <lucide-icon name="flask-conical" [size]="18"></lucide-icon>
@@ -156,7 +175,7 @@
               </div>
             </div>
 
-            <div class="cv-ing-body">
+            <div class="cv-ing-body" scrollIndicators>
             @if (editMode_()) {
               <!-- Edit mode: original ingredient table -->
               <div class="ingredients-table">
@@ -253,10 +272,18 @@
               }
             }
             </div>
+            <div class="cv-pane-scroll-indicator cv-pane-scroll-indicator--top" aria-hidden="true">
+              <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
+            </div>
+            <div class="cv-pane-scroll-indicator cv-pane-scroll-indicator--bottom" aria-hidden="true">
+              <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
+            </div>
           </div>
 
+          <div class="cv-pane-divider" [style.order]="1"></div>
+
           <!-- Step pane -->
-          <div class="cv-step-pane" #stepPane>
+          <div class="cv-step-pane" #stepPane [style.order]="phoneFirstPane_() === 'steps' ? 0 : 2">
             <div class="cv-step-pane-header">
               <span class="cv-step-pane-title">
                 <lucide-icon name="timer" [size]="18"></lucide-icon>
@@ -265,7 +292,7 @@
               <span class="cv-step-counter">{{ stepDoneSet_().size }}/{{ isDish_() ? scaledPrep_().length : recipe.steps_.length }}</span>
             </div>
 
-            <div class="cv-step-body">
+            <div class="cv-step-body" scrollIndicators>
             @if (editMode_()) {
               <!-- Edit mode: original workflow editor -->
               <app-recipe-workflow
@@ -284,31 +311,45 @@
                 <!-- Dish mode: prep items as cards -->
                 @if (scaledPrep_().length > 0) {
                   @for (row of scaledPrep_(); track row.name + row.unit + row.amount; let si = $index) {
-                    <div class="cv-step-card"
-                      [class.cv-step-card--active]="activeStepIndex_() === si && !stepDoneSet_().has(si)"
-                      [class.cv-step-card--done]="stepDoneSet_().has(si)"
-                      [class.cv-step-card--next]="si === activeStepIndex_() + 1 && !stepDoneSet_().has(si)"
-                      [attr.data-step-index]="si">
-                      <div class="cv-step-card-head">
-                        <span class="cv-step-num"
-                          [class.cv-step-num--active]="activeStepIndex_() === si && !stepDoneSet_().has(si)"
-                          [class.cv-step-num--done]="stepDoneSet_().has(si)">{{ si + 1 }}</span>
-                        <span class="cv-step-label">{{ row.name }}</span>
-                        @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
-                          <span class="cv-step-status-chip cv-step-status-chip--active">{{ 'step_active' | translatePipe }}</span>
-                        } @else if (stepDoneSet_().has(si)) {
-                          <span class="cv-step-status-chip cv-step-status-chip--done">{{ 'step_done_label' | translatePipe }}</span>
-                        } @else {
-                          <span class="cv-step-status-chip cv-step-status-chip--pending">{{ 'step_pending' | translatePipe }}</span>
-                        }
+                    @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
+                      <!-- ACTIVE prep item -->
+                      <div class="cv-step-card cv-step-card--active" [attr.data-step-index]="si">
+                        <div class="cv-step-card-head">
+                          <span class="cv-step-num cv-step-num--active">{{ si + 1 }}</span>
+                          <span class="cv-step-active-label">פעיל עכשיו</span>
+                        </div>
+                        <div class="cv-step-card-body">
+                          <p>{{ row.amount | formatQuantity }} {{ row.unit | translatePipe }} {{ row.name }}</p>
+                        </div>
+                        <button type="button" class="cv-step-done-btn" (click)="markStepDone(si)">
+                          ✓ &nbsp; {{ 'mark_step_done' | translatePipe }}
+                        </button>
                       </div>
-                      <div class="cv-step-card-body">
-                        <span>{{ row.amount | formatQuantity }} {{ row.unit | translatePipe }}</span>
+                    } @else if (stepDoneSet_().has(si)) {
+                      <!-- DONE prep item -->
+                      <div class="cv-step-card cv-step-card--done" [attr.data-step-index]="si">
+                        <div class="cv-step-card-head">
+                          <span class="cv-step-num cv-step-num--done">✓</span>
+                          <span class="cv-step-done-label">{{ 'step_done_label' | translatePipe }}</span>
+                          <span class="cv-step-status-chip cv-step-status-chip--done cv-step-status-chip--clickable"
+                            style="margin-inline-start: auto"
+                            (click)="unmarkStepDone(si)">↩</span>
+                        </div>
+                        <div class="cv-step-card-body">
+                          <p>{{ row.amount | formatQuantity }} {{ row.unit | translatePipe }} {{ row.name }}</p>
+                        </div>
                       </div>
-                      @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
-                        <button type="button" class="cv-step-done-btn" (click)="markStepDone(si)">✓ {{ 'mark_step_done' | translatePipe }}</button>
-                      }
-                    </div>
+                    } @else {
+                      <!-- PENDING prep item -->
+                      <div class="cv-step-card" [attr.data-step-index]="si">
+                        <div class="cv-step-card-head">
+                          <span class="cv-step-num">{{ si + 1 }}</span>
+                        </div>
+                        <div class="cv-step-card-body">
+                          <p>{{ row.amount | formatQuantity }} {{ row.unit | translatePipe }} {{ row.name }}</p>
+                        </div>
+                      </div>
+                    }
                   }
                 } @else {
                   <p class="empty-state-text">{{ 'no_preparations_defined' | translatePipe }}</p>
@@ -317,76 +358,120 @@
                 <!-- Recipe mode: steps as cards -->
                 @if (recipe.steps_ && recipe.steps_.length) {
                   @for (step of recipe.steps_; track step.order_; let si = $index) {
-                    <div class="cv-step-card"
-                      [class.cv-step-card--active]="activeStepIndex_() === si && !stepDoneSet_().has(si)"
-                      [class.cv-step-card--done]="stepDoneSet_().has(si)"
-                      [class.cv-step-card--next]="si === activeStepIndex_() + 1 && !stepDoneSet_().has(si)"
-                      [attr.data-step-index]="si">
-                      <div class="cv-step-card-head">
-                        <span class="cv-step-num"
-                          [class.cv-step-num--active]="activeStepIndex_() === si && !stepDoneSet_().has(si)"
-                          [class.cv-step-num--done]="stepDoneSet_().has(si)">{{ step.order_ }}</span>
-                        <span class="cv-step-label">{{ 'step' | translatePipe }} {{ step.order_ }}</span>
-                        <!-- Timer & stopwatch tools — before status chip -->
-                        <div class="cv-step-tools" (click)="$event.stopPropagation()">
+                    @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
+                      <!-- ACTIVE step -->
+                      <div class="cv-step-card cv-step-card--active" [attr.data-step-index]="si">
+                        <!-- Green header bar -->
+                        <div class="cv-step-card-head">
+                          <span class="cv-step-num cv-step-num--active">{{ si + 1 }}</span>
+                          <span class="cv-step-active-label">פעיל עכשיו</span>
+                          <!-- Timer button — only shown when step has a configured cooking time -->
                           @if ((step.cooking_time_secs_ ?? 0) > 0) {
                             @if (activeTimerStepIndex_() === si) {
-                              <!-- Running: countdown pill + cancel -->
-                              <button type="button" class="cv-timer-pill cv-timer-pill--active" (click)="cancelTimer()">
-                                <lucide-icon name="timer" [size]="13"></lucide-icon>
-                                {{ timerDisplay_() }}
-                                <span class="cv-timer-cancel">✕</span>
+                              <button type="button" class="cv-step-tool-btn" (click)="cancelTimer()">
+                                ⏱ {{ timerDisplay_() }} ⏸
                               </button>
                             } @else {
-                              <!-- Idle: tap to start immediately with preset seconds -->
-                              <button type="button" class="cv-timer-icon"
-                                (click)="startTimer(si, step.cooking_time_secs_ ?? 0)">
-                                <lucide-icon name="timer" [size]="17"></lucide-icon>
+                              <button type="button" class="cv-step-tool-btn"
+                                (click)="startTimer(si, step.cooking_time_secs_!)">
+                                ⏱ {{ 'timer_start' | translatePipe }}
                               </button>
                             }
                           }
-                          <!-- Stopwatch -->
+                          <!-- Stopwatch button -->
                           @if (stopwatchStepIndex_() === si) {
-                            <button type="button" class="cv-stopwatch-icon cv-stopwatch-icon--active"
-                              [class.cv-stopwatch-icon--paused]="stopwatchPaused_()"
+                            <button type="button" class="cv-step-tool-btn"
                               (click)="toggleStopwatch()">
-                              <lucide-icon name="watch" [size]="17"></lucide-icon>
-                              {{ stopwatchDisplay_() }}
-                              <lucide-icon [name]="stopwatchPaused_() ? 'play' : 'pause'" [size]="13"></lucide-icon>
-                            </button>
-                            <button type="button" class="cv-stopwatch-close" (click)="stopStopwatch()" title="Close stopwatch">
-                              <lucide-icon name="x" [size]="13"></lucide-icon>
+                              ⌚ {{ stopwatchDisplay_() }} {{ stopwatchPaused_() ? '▶' : '⏸' }}
                             </button>
                           } @else {
-                            <button type="button" class="cv-stopwatch-icon"
+                            <button type="button" class="cv-step-tool-btn"
                               (click)="startStopwatch(si)">
-                              <lucide-icon name="watch" [size]="17"></lucide-icon>
+                              ⌚ {{ 'stopwatch' | translatePipe }}
                             </button>
                           }
                         </div>
-                        <!-- Status chip — after tools -->
-                        @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
-                          <span class="cv-step-status-chip cv-step-status-chip--active">{{ 'step_active' | translatePipe }}</span>
-                        } @else if (stepDoneSet_().has(si)) {
+                        <div class="cv-step-card-body">
+                          <p>{{ step.instruction_ }}</p>
+                        </div>
+                        <button type="button" class="cv-step-done-btn" (click)="markStepDone(si)">
+                          ✓ &nbsp; {{ 'mark_step_done' | translatePipe }}
+                        </button>
+                      </div>
+                    } @else if (stepDoneSet_().has(si)) {
+                      <!-- DONE step -->
+                      <div class="cv-step-card cv-step-card--done"
+                        [class.cv-step-card--timer-alert]="timerFinishedStepIndex_() === si"
+                        [attr.data-step-index]="si">
+                        <div class="cv-step-card-head">
+                          <span class="cv-step-num cv-step-num--done">✓</span>
+                          <span class="cv-step-done-label">{{ 'step_done_label' | translatePipe }}</span>
+                          <!-- Finished timer alert on done step -->
+                          @if (timerFinishedStepIndex_() === si) {
+                            <span class="cv-step-timer-pill cv-step-timer-pill--alert"
+                              (click)="dismissTimerDone()">
+                              ⏱ {{ 'timer_done' | translatePipe }} ✕
+                            </span>
+                          }
+                          <!-- Running stopwatch on done step -->
+                          @if (stopwatchStepIndex_() === si) {
+                            <span class="cv-step-timer-pill" (click)="toggleStopwatch()">
+                              ⌚ {{ stopwatchDisplay_() }} {{ stopwatchPaused_() ? '▶' : '⏸' }}
+                            </span>
+                          }
+                          <!-- Undo done -->
                           <span class="cv-step-status-chip cv-step-status-chip--done cv-step-status-chip--clickable"
-                            (click)="unmarkStepDone(si)">{{ 'step_done_label' | translatePipe }} ↩</span>
-                        } @else {
-                          <span class="cv-step-status-chip cv-step-status-chip--pending">{{ 'step_pending' | translatePipe }}</span>
-                        }
+                            style="margin-inline-start: auto"
+                            (click)="unmarkStepDone(si)">↩</span>
+                        </div>
+                        <div class="cv-step-card-body">
+                          <p>{{ step.instruction_ }}</p>
+                        </div>
                       </div>
-                      <div class="cv-step-card-body">
-                        <p>{{ step.instruction_ }}</p>
+                    } @else {
+                      <!-- PENDING step — tap anywhere to jump to this step -->
+                      <div class="cv-step-card cv-step-card--pending"
+                        [class.cv-step-card--timer-alert]="timerFinishedStepIndex_() === si"
+                        [attr.data-step-index]="si"
+                        (click)="setActiveStep(si)">
+                        <div class="cv-step-card-head">
+                          <span class="cv-step-num">{{ si + 1 }}</span>
+                          <!-- Finished timer alert -->
+                          @if (timerFinishedStepIndex_() === si) {
+                            <span class="cv-step-timer-pill cv-step-timer-pill--alert"
+                              (click)="dismissTimerDone()">
+                              ⏱ {{ 'timer_done' | translatePipe }} ✕
+                            </span>
+                          }
+                          <!-- Running stopwatch on pending step -->
+                          @if (stopwatchStepIndex_() === si) {
+                            <span class="cv-step-timer-pill" (click)="toggleStopwatch()">
+                              ⌚ {{ stopwatchDisplay_() }} {{ stopwatchPaused_() ? '▶' : '⏸' }}
+                            </span>
+                          }
+                        </div>
+                        <div class="cv-step-card-body">
+                          <p>{{ step.instruction_ }}</p>
+                        </div>
                       </div>
-                      @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
-                        <button type="button" class="cv-step-done-btn" (click)="markStepDone(si)">✓ {{ 'mark_step_done' | translatePipe }}</button>
-                      }
-                    </div>
+                    }
                   }
                 } @else {
                   <p class="empty-state-text">{{ 'no_steps_defined' | translatePipe }}</p>
                 }
               }
+            @if (cookingComplete_()) {
+              <div class="cv-complete-banner">
+                🎉 {{ 'cooking_complete' | translatePipe }}
+              </div>
             }
+            }
+            </div>
+            <div class="cv-pane-scroll-indicator cv-pane-scroll-indicator--top" aria-hidden="true">
+              <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
+            </div>
+            <div class="cv-pane-scroll-indicator cv-pane-scroll-indicator--bottom" aria-hidden="true">
+              <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
             </div>
           </div>
         </div>

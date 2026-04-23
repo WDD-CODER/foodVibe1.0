@@ -1,111 +1,106 @@
 <div class="menu-editor-shell" dir="rtl">
-  <!-- Toolbar overlay (fixed at top, toggled) - shared component with transparent blur -->
-  @if (toolbarOpen_()) {
-    <app-export-toolbar-overlay (closeRequest)="closeToolbar()">
-        <div class="view-export-wrap">
-          <button type="button" class="toolbar-glass-btn" (click)="openViewExportModal('menu-info'); $event.stopPropagation()" [attr.aria-label]="'export_menu_info' | translatePipe" [attr.aria-expanded]="viewExportModal_() === 'menu-info'">
-            <lucide-icon name="table-2" [size]="14"></lucide-icon>
-            {{ 'toolbar_menu' | translatePipe }}
+  <!-- Pill toolbar row — always visible above paper -->
+  <div class="pill-row no-print">
+
+    <!-- Shopping list pill -->
+    <div class="pill-wrap" (clickOutside)="closeViewExportModal()">
+      <button type="button" class="pill"
+        (click)="openViewExportModal('shopping-list'); $event.stopPropagation()"
+        [attr.aria-label]="'export_menu_shopping_list' | translatePipe"
+        [attr.aria-expanded]="viewExportModal_() === 'shopping-list'">
+        🛒 {{ 'toolbar_shopping' | translatePipe }}
+      </button>
+      @if (viewExportModal_() === 'shopping-list') {
+        <div class="view-export-modal" (click)="$event.stopPropagation()" (clickOutside)="closeViewExportModal()">
+          <button type="button" class="view-export-option" (click)="onViewMenuShoppingList(); closeViewExportModal()">
+            <lucide-icon name="eye" [size]="14"></lucide-icon>
+            {{ 'view' | translatePipe }}
           </button>
-          @if (viewExportModal_() === 'menu-info') {
-            <div class="view-export-modal" (click)="$event.stopPropagation()" (clickOutside)="closeViewExportModal()">
-              <button type="button" class="view-export-option" (click)="onViewMenuInfo(); closeViewExportModal()">
-                <lucide-icon name="eye" [size]="14"></lucide-icon>
-                {{ 'view' | translatePipe }}
-              </button>
-              <button type="button" class="view-export-option" (click)="onExportMenuInfo(); closeViewExportModal()">
-                <lucide-icon name="download" [size]="14"></lucide-icon>
-                {{ 'export' | translatePipe }}
-              </button>
-            </div>
-          }
-        </div>
-        <div class="view-export-wrap">
-          <button type="button" class="toolbar-glass-btn" (click)="openViewExportModal('shopping-list'); $event.stopPropagation()" [attr.aria-label]="'export_menu_shopping_list' | translatePipe" [attr.aria-expanded]="viewExportModal_() === 'shopping-list'">
-            <lucide-icon name="shopping-cart" [size]="14"></lucide-icon>
-            {{ 'toolbar_shopping' | translatePipe }}
+          <button type="button" class="view-export-option" (click)="onExportMenuShoppingList(); closeViewExportModal()">
+            <lucide-icon name="download" [size]="14"></lucide-icon>
+            {{ 'export' | translatePipe }}
           </button>
-          @if (viewExportModal_() === 'shopping-list') {
-            <div class="view-export-modal" (click)="$event.stopPropagation()" (clickOutside)="closeViewExportModal()">
-              <button type="button" class="view-export-option" (click)="onViewMenuShoppingList(); closeViewExportModal()">
-                <lucide-icon name="eye" [size]="14"></lucide-icon>
-                {{ 'view' | translatePipe }}
-              </button>
-              <button type="button" class="view-export-option" (click)="onExportMenuShoppingList(); closeViewExportModal()">
-                <lucide-icon name="download" [size]="14"></lucide-icon>
-                {{ 'export' | translatePipe }}
-              </button>
-            </div>
-          }
         </div>
-        <div class="checklist-export-wrap">
-          <button type="button" class="toolbar-glass-btn" (click)="toggleExportChecklistDropdown(); $event.stopPropagation()" [attr.aria-label]="'export_checklist' | translatePipe" [attr.aria-expanded]="exportChecklistDropdownOpen_()">
-            <lucide-icon name="clipboard-list" [size]="14"></lucide-icon>
-            {{ 'toolbar_checklist' | translatePipe }}
-            <lucide-icon name="chevron-down" [size]="12"></lucide-icon>
+      }
+    </div>
+
+    <!-- Checklist pill -->
+    <div class="pill-wrap" (clickOutside)="closeExportChecklistDropdown()">
+      <button type="button" class="pill"
+        (click)="toggleExportChecklistDropdown(); $event.stopPropagation()"
+        [attr.aria-label]="'export_checklist' | translatePipe"
+        [attr.aria-expanded]="exportChecklistDropdownOpen_()">
+        📋 {{ 'toolbar_checklist' | translatePipe }}
+      </button>
+      @if (exportChecklistDropdownOpen_()) {
+        <div class="checklist-export-dropdown" (click)="$event.stopPropagation()" (clickOutside)="closeExportChecklistDropdown()">
+          <div class="checklist-export-option-row">
+            <span class="checklist-export-option-label">{{ 'export_checklist_by_dish' | translatePipe }}</span>
+            <button type="button" class="toolbar-glass-btn icon" (click)="onViewChecklist('by_dish'); $event.stopPropagation()" [attr.aria-label]="'view' | translatePipe">
+              <lucide-icon name="eye" [size]="12"></lucide-icon>
+            </button>
+            <button type="button" class="toolbar-glass-btn icon" (click)="onExportChecklist('by_dish'); $event.stopPropagation()" [attr.aria-label]="'export' | translatePipe">
+              <lucide-icon name="download" [size]="12"></lucide-icon>
+            </button>
+          </div>
+          <div class="checklist-export-option-row">
+            <span class="checklist-export-option-label">{{ 'export_checklist_by_category' | translatePipe }}</span>
+            <button type="button" class="toolbar-glass-btn icon" (click)="onViewChecklist('by_category'); $event.stopPropagation()" [attr.aria-label]="'view' | translatePipe">
+              <lucide-icon name="eye" [size]="12"></lucide-icon>
+            </button>
+            <button type="button" class="toolbar-glass-btn icon" (click)="onExportChecklist('by_category'); $event.stopPropagation()" [attr.aria-label]="'export' | translatePipe">
+              <lucide-icon name="download" [size]="12"></lucide-icon>
+            </button>
+          </div>
+          <div class="checklist-export-option-row">
+            <span class="checklist-export-option-label">{{ 'export_checklist_by_station' | translatePipe }}</span>
+            <button type="button" class="toolbar-glass-btn icon" (click)="onViewChecklist('by_station'); $event.stopPropagation()" [attr.aria-label]="'view' | translatePipe">
+              <lucide-icon name="eye" [size]="12"></lucide-icon>
+            </button>
+            <button type="button" class="toolbar-glass-btn icon" (click)="onExportChecklist('by_station'); $event.stopPropagation()" [attr.aria-label]="'export' | translatePipe">
+              <lucide-icon name="download" [size]="12"></lucide-icon>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Print pill -->
+    <button type="button" class="pill" (click)="printMenu()" [attr.aria-label]="'menu_export_customer' | translatePipe">
+      🖨 הדפסה
+    </button>
+
+    <!-- All pill -->
+    <div class="pill-wrap" (clickOutside)="closeViewExportModal()">
+      <button type="button" class="pill"
+        (click)="openViewExportModal('all'); $event.stopPropagation()"
+        [attr.aria-label]="'export_all_together' | translatePipe"
+        [attr.aria-expanded]="viewExportModal_() === 'all'">
+        📦 {{ 'toolbar_all' | translatePipe }}
+      </button>
+      @if (viewExportModal_() === 'all') {
+        <div class="view-export-modal" (click)="$event.stopPropagation()" (clickOutside)="closeViewExportModal()">
+          <button type="button" class="view-export-option" (click)="onViewAll(); closeViewExportModal()">
+            <lucide-icon name="eye" [size]="14"></lucide-icon>
+            {{ 'view' | translatePipe }}
           </button>
-          @if (exportChecklistDropdownOpen_()) {
-            <div class="checklist-export-dropdown" (click)="$event.stopPropagation()" (clickOutside)="closeExportChecklistDropdown()">
-              <div class="checklist-export-option-row">
-                <span class="checklist-export-option-label">{{ 'export_checklist_by_dish' | translatePipe }}</span>
-                <button type="button" class="toolbar-glass-btn icon" (click)="onViewChecklist('by_dish'); $event.stopPropagation()" [attr.aria-label]="'view' | translatePipe">
-                  <lucide-icon name="eye" [size]="12"></lucide-icon>
-                </button>
-                <button type="button" class="toolbar-glass-btn icon" (click)="onExportChecklist('by_dish'); $event.stopPropagation()" [attr.aria-label]="'export' | translatePipe">
-                  <lucide-icon name="download" [size]="12"></lucide-icon>
-                </button>
-              </div>
-              <div class="checklist-export-option-row">
-                <span class="checklist-export-option-label">{{ 'export_checklist_by_category' | translatePipe }}</span>
-                <button type="button" class="toolbar-glass-btn icon" (click)="onViewChecklist('by_category'); $event.stopPropagation()" [attr.aria-label]="'view' | translatePipe">
-                  <lucide-icon name="eye" [size]="12"></lucide-icon>
-                </button>
-                <button type="button" class="toolbar-glass-btn icon" (click)="onExportChecklist('by_category'); $event.stopPropagation()" [attr.aria-label]="'export' | translatePipe">
-                  <lucide-icon name="download" [size]="12"></lucide-icon>
-                </button>
-              </div>
-              <div class="checklist-export-option-row">
-                <span class="checklist-export-option-label">{{ 'export_checklist_by_station' | translatePipe }}</span>
-                <button type="button" class="toolbar-glass-btn icon" (click)="onViewChecklist('by_station'); $event.stopPropagation()" [attr.aria-label]="'view' | translatePipe">
-                  <lucide-icon name="eye" [size]="12"></lucide-icon>
-                </button>
-                <button type="button" class="toolbar-glass-btn icon" (click)="onExportChecklist('by_station'); $event.stopPropagation()" [attr.aria-label]="'export' | translatePipe">
-                  <lucide-icon name="download" [size]="12"></lucide-icon>
-                </button>
-              </div>
-            </div>
-          }
-        </div>
-        <div class="view-export-wrap">
-          <button type="button" class="toolbar-glass-btn" (click)="openViewExportModal('all'); $event.stopPropagation()" [attr.aria-label]="'export_all_together' | translatePipe" [attr.aria-expanded]="viewExportModal_() === 'all'">
-            <lucide-icon name="package" [size]="14"></lucide-icon>
-            {{ 'toolbar_all' | translatePipe }}
+          <button type="button" class="view-export-option" (click)="onExportAllTogether(); closeViewExportModal()">
+            <lucide-icon name="download" [size]="14"></lucide-icon>
+            {{ 'export' | translatePipe }}
           </button>
-          @if (viewExportModal_() === 'all') {
-            <div class="view-export-modal" (click)="$event.stopPropagation()" (clickOutside)="closeViewExportModal()">
-              <button type="button" class="view-export-option" (click)="onViewAll(); closeViewExportModal()">
-                <lucide-icon name="eye" [size]="14"></lucide-icon>
-                {{ 'view' | translatePipe }}
-              </button>
-              <button type="button" class="view-export-option" (click)="onExportAllTogether(); closeViewExportModal()">
-                <lucide-icon name="download" [size]="14"></lucide-icon>
-                {{ 'export' | translatePipe }}
-              </button>
-            </div>
-          }
         </div>
-        <button type="button" class="toolbar-glass-btn" (click)="printMenu()" [attr.aria-label]="'menu_export_customer' | translatePipe">
-          <lucide-icon name="printer" [size]="14"></lucide-icon>
-        </button>
-        <button type="button" class="toolbar-glass-btn save" (click)="save()" [disabled]="isSaving_()">
-          @if (isSaving_()) {
-            <app-loader size="small" [inline]="true" />
-          }
-          <lucide-icon name="save" [size]="14"></lucide-icon>
-          {{ isSaving_() ? ('saving' | translatePipe) : ('menu_save' | translatePipe) }}
-        </button>
-    </app-export-toolbar-overlay>
-  }
+      }
+    </div>
+
+    <!-- Save pill -->
+    <button type="button" class="pill pill--save" (click)="save()" [disabled]="isSaving_()">
+      @if (isSaving_()) {
+        <app-loader size="small" [inline]="true" />
+      }
+      {{ isSaving_() ? ('saving' | translatePipe) : ('menu_save' | translatePipe) }}
+    </button>
+
+  </div>
 
   <!-- Paper in the middle of the screen -->
   <div class="paper-outer">
@@ -113,109 +108,103 @@
       <div class="paper-inner">
     <div class="paper-ornament top"></div>
     
-    <div class="meta-row">
-      <input
-        id="menu-focus-name_"
-        type="text"
-        class="meta-input menu-name-input"
-        formControlName="name_"
-        [attr.aria-label]="'menu_name_placeholder' | translatePipe"
-        [placeholder]="'menu_name_placeholder' | translatePipe"
-        (keydown)="onMetaKeydown('name_', $event)"
-      />
-    </div>
-
-    <!-- Metadata column: title stays, value to the left (RTL: value on right) -->
-    <div class="meta-column">
-      <!-- Menu Name: h1-style input, no label -->
-
-      <!-- Event Type: label + value/trigger; click opens dropdown with search + add new -->
-      <div class="meta-row">
-        <span class="meta-label">{{ 'menu_event_type' | translatePipe }}</span>
-        <div class="meta-value-wrap" (clickOutside)="closeEventTypeDropdown()">
-          @if (eventTypeDropdownOpen_()) {
-            <div class="event-type-dropdown">
-              <input
-                id="menu-focus-event_type_search"
-                type="text"
-                class="meta-input event-type-search"
-                autocomplete="off"
-                [ngModel]="eventTypeSearch_()"
-                [ngModelOptions]="{ standalone: true }"
-                (ngModelChange)="eventTypeSearch_.set($event); eventTypeHighlightedIndex_.set(0)"
-                [placeholder]="'search' | translatePipe"
-                (keydown)="onEventTypeSearchKeydown($event)"
-              />
-              <app-scrollable-dropdown [maxHeight]="200">
-                @for (t of getFilteredEventTypes(); track t; let i = $index) {
-                  <button type="button" class="dropdown-item" [class.highlighted]="eventTypeHighlightedIndex_() === i" (click)="selectEventType(t)">{{ t }}</button>
-                }
-                <button type="button" class="dropdown-item add-new" [class.highlighted]="eventTypeHighlightedIndex_() === getFilteredEventTypes().length" (click)="addNewEventType()">
-                  <span class="c-add-new-icon">
-                    <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
-                  </span>
-                  {{ 'add' | translatePipe }}
-                </button>
-              </app-scrollable-dropdown>
-            </div>
-          } @else {
-            <button type="button" id="menu-focus-event_type_" class="meta-trigger"
-              (click)="openEventTypeDropdown()"
-              (keydown)="onMetaKeydown('event_type_', $event)">
-              {{ ((form_.value.event_type_ ?? '') | translatePipe) || ('menu_event_type' | translatePipe) }}
-              @if (form_.value.event_type_ && form_.value.event_date_) {
-                <span class="meta-trigger-date">· {{ form_.value.event_date_ }}</span>
+    <!-- Tag line: event type · serving type -->
+    <div class="event-tag-line">
+      <div class="event-type-chip-wrap" (clickOutside)="closeEventTypeDropdown()">
+        @if (eventTypeDropdownOpen_()) {
+          <div class="event-type-dropdown">
+            <input
+              id="menu-focus-event_type_search"
+              type="text"
+              class="event-type-search"
+              autocomplete="off"
+              [ngModel]="eventTypeSearch_()"
+              [ngModelOptions]="{ standalone: true }"
+              (ngModelChange)="eventTypeSearch_.set($event); eventTypeHighlightedIndex_.set(0)"
+              [placeholder]="'search' | translatePipe"
+              (keydown)="onEventTypeSearchKeydown($event)"
+            />
+            <app-scrollable-dropdown [maxHeight]="200">
+              @for (t of getFilteredEventTypes(); track t; let i = $index) {
+                <button type="button" class="dropdown-item" [class.highlighted]="eventTypeHighlightedIndex_() === i" (click)="selectEventType(t)">{{ t }}</button>
               }
-            </button>
-          }
-        </div>
-      </div>
-
-      <!-- Serving Type (menu type from registry) -->
-      <div class="meta-row" (keydown)="onMetaKeydown('serving_type_', $event)">
-        <span class="meta-label">{{ 'menu_serving_style' | translatePipe }}</span>
-        <app-custom-select
-          triggerId="menu-focus-serving_type_"
-          formControlName="serving_type_"
-          [options]="servingTypeOptions_()"
-          [placeholder]="'menu_serving_style'"
-          [typeToFilter]="true" />
-      </div>
-
-      <!-- Guest Count -->
-      <div class="meta-row guest-row">
-        <span class="meta-label">{{ 'menu_guests' | translatePipe }}</span>
-        <div class="counter-pill">
-          <button type="button" class="counter-pill-btn" tabindex="-1" (click)="decrementGuests()" [disabled]="getGuestCount() <= 0" [attr.aria-label]="'decrease' | translatePipe">
-            <lucide-icon name="minus" [size]="14"></lucide-icon>
+              <button type="button" class="dropdown-item add-new" [class.highlighted]="eventTypeHighlightedIndex_() === getFilteredEventTypes().length" (click)="addNewEventType()">
+                <span class="c-add-new-icon">
+                  <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
+                </span>
+                {{ 'add' | translatePipe }}
+              </button>
+            </app-scrollable-dropdown>
+          </div>
+        } @else {
+          <button type="button" class="event-chip" id="menu-focus-event_type_"
+            [attr.aria-expanded]="eventTypeDropdownOpen_()"
+            (click)="openEventTypeDropdown()"
+            (keydown)="onMetaKeydown('event_type_', $event)">
+            {{ ((form_.value.event_type_ ?? '') | translatePipe) || ('menu_event_type' | translatePipe) }}
           </button>
-          <input id="menu-focus-guest_count_" type="number" class="counter-pill-input" formControlName="guest_count_" min="0"
-            (keydown)="onMetaKeydown('guest_count_', $event)" />
-          <button type="button" class="counter-pill-btn" tabindex="-1" (click)="incrementGuests()" [attr.aria-label]="'increase' | translatePipe">
-            <lucide-icon name="plus" [size]="14"></lucide-icon>
-          </button>
-        </div>
+        }
       </div>
-
-      <!-- Event Date -->
-      <div class="meta-row date-row">
-        <span class="meta-label">{{ 'menu_set_date' | translatePipe }}</span>
-        <div class="meta-date-wrap" (click)="openDatePicker()" role="button" tabindex="0" (keydown.enter)="openDatePicker()" (keydown.space)="$event.preventDefault(); openDatePicker()" [attr.aria-label]="'menu_set_date' | translatePipe">
-          <span class="meta-date-display">{{ getEventDateDisplay() || ('menu_no_date' | translatePipe) }}</span>
-          <input id="menu-focus-event_date_" type="date" class="meta-date-input" formControlName="event_date_"
-            (keydown)="onDateKeydown($event)" />
-        </div>
-      </div>
+      <span class="event-chip-sep">·</span>
+      <app-custom-select
+        triggerId="menu-focus-serving_type_"
+        formControlName="serving_type_"
+        [options]="servingTypeOptions_()"
+        [placeholder]="'menu_serving_style'"
+        [typeToFilter]="true"
+        class="event-chip-select"
+        (keydown)="onMetaKeydown('serving_type_', $event)" />
     </div>
 
-    <div class="info-menu-divider"></div>
+    <!-- Menu title -->
+    <input
+      id="menu-focus-name_"
+      type="text"
+      class="menu-title-input"
+      formControlName="name_"
+      [attr.aria-label]="'menu_name_placeholder' | translatePipe"
+      placeholder="שם האירוע..."
+      (keydown)="onMetaKeydown('name_', $event)"
+    />
+
+    <!-- Meta line: guests · date -->
+    <div class="event-meta-line">
+      <span class="event-meta-chip event-meta-chip--guests">
+        <input
+          id="menu-focus-guest_count_"
+          type="number"
+          class="guest-chip-input"
+          formControlName="guest_count_"
+          min="0"
+          [attr.aria-label]="'menu_guests' | translatePipe"
+          (keydown)="onMetaKeydown('guest_count_', $event)"
+        />
+        {{ 'menu_guests' | translatePipe }}
+      </span>
+      <span class="event-chip-sep">·</span>
+      <span class="event-meta-chip meta-date-chip"
+        (click)="openDatePicker()"
+        role="button"
+        tabindex="0"
+        (keydown.enter)="openDatePicker()"
+        (keydown.space)="$event.preventDefault(); openDatePicker()"
+        [attr.aria-label]="'menu_set_date' | translatePipe"
+        (keydown)="onDateKeydown($event)">
+        <span class="meta-date-display">{{ getEventDateDisplay() || ('menu_no_date' | translatePipe) }}</span>
+        <input id="menu-focus-event_date_" type="date" class="meta-date-input" formControlName="event_date_"
+          (keydown)="onDateKeydown($event)" />
+      </span>
+    </div>
+
+    <!-- Ornamental rule -->
+    <div class="info-menu-divider">✦</div>
 
     <!-- Sections: category looks like plain text; dropdown only on click -->
     <div class="sections-area" formArrayName="sections_">
       @for (section of sectionsArray.controls; track section.get('_id')?.value; let sectionIndex = $index) {
         <div class="menu-section" [formGroupName]="sectionIndex">
           @if (sectionIndex > 0) {
-            <div class="section-divider"></div>
+            <div class="section-divider">✦</div>
           }
 
           <div class="section-header">
@@ -311,14 +300,15 @@
     </div>
   </div>
 
-  <footer class="financial-bar no-print">
+  <!-- Financial footnote — fixed bar, always visible while scrolling -->
+  <div class="financial-footnote no-print">
     <div class="fin-metric">
       <span class="fin-label">{{ 'menu_total_cost' | translatePipe }}</span>
       <span class="fin-value">₪{{ eventCost_() | number:'1.2-2' }}</span>
     </div>
     <div class="fin-metric">
       <span class="fin-label">{{ 'menu_food_cost' | translatePipe }} %</span>
-      <span class="fin-value">
+      <span class="fin-value" [class.fin-value--warning]="totalRevenue_() > 0 && foodCostPct_() > 33">
         @if (totalRevenue_() > 0) {
           {{ foodCostPct_() | number:'1.1-1' }}%
         } @else {
@@ -334,7 +324,7 @@
       <span class="fin-label">{{ 'menu_cost_per_guest' | translatePipe }}</span>
       <span class="fin-value">₪{{ costPerGuest_() | number:'1.2-2' }}</span>
     </div>
-  </footer>
+  </div>
 
   @if (exportPreviewPayload_(); as payload) {
     <app-export-preview [payload]="payload"

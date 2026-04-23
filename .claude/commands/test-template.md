@@ -88,6 +88,9 @@ The path field must be exactly one of the values defined in the template's
 DECIDE tree (e.g. "A", "B", "C", "FLAG" for color templates, or "SAFE",
 "REAL VIOLATION" for subscription templates). Use the template's own
 vocabulary — do not invent path names.
+The path field must be a SINGLE SHORT VALUE only — the exact letter or word
+from the DECIDE tree (e.g. "A", "B", "C", "FLAG"). Do NOT put step traces,
+explanations, or reasoning in the path field. One word or letter only.
 ```
 
 Where `<TEMPLATE_CONTENT>`, `<CONTEXT_CONTENT>`, and `<CASE_FILE_CONTENT>` are replaced with the actual content. The `## Context` section is only included when a `.context.md` file exists for the case. Nothing else is added to the prompt — no slug name, no fixture set name, no expected path, no case filename.

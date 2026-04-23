@@ -288,6 +288,13 @@ Ended: HH:MM
 3. Propose a single commit message for all session changes
 4. **Wait for explicit user approval** before committing
 5. After commit, append the commit SHA to the session log's `## Commits` section
+6. **Archive the report** — move the active report so it is never shown again.
+   Run each sub-step as a **separate tool call** — never chain into one Bash call:
+   - **Pre-flight:** Print `"Archiving: <path> — exists? <yes/no>"` before touching anything
+   - **Write archive copy:** Prepend `## Status: RESOLVED — YYYY-MM-DD\nSession complete.\n\n` and write to `.claude/reports/audit/archive/YYYY-MM-DD-nightly-audit.md` (create `archive/` if absent)
+   - **Verify write:** Confirm archive file exists before proceeding — stop and report if not
+   - **Delete original:** Remove `.claude/reports/audit/YYYY-MM-DD-nightly-audit.md` as its own Bash call
+   - **Verify delete:** Confirm original is gone — if still present, report to user and stop
 
 ---
 
@@ -331,3 +338,12 @@ Eleven fields, always in this order, even if some are "n/a".
 - **Triage menu is dynamic** — generated from the report, not hardcoded categories
 - **Template health check before every fix** — failing templates trigger the override gate, not silent application
 - **findings.md is surfaced every session** — open items don't get forgotten
+
+### Resilience rules for destructive operations
+
+These rules exist because a swallowed Bash tool result can silently block an entire execution chain. Short atomic steps make failures immediately visible.
+
+- **One action per Bash call** — never chain delete + verify + write into one command. Each is its own call. A failure on step 1 doesn't silently skip steps 2–4.
+- **Pre-flight before destructive ops** — before any delete or overwrite, print the file's current on-disk state (`exists / missing`). If the agent can read the state, the user can see exactly where it stopped.
+- **Verify after every destructive step** — after `rm` or overwrite, confirm the result in a separate call before proceeding. If verification fails, stop and report — do not continue to the next step.
+- **Prefer `python3 -c "os.remove(...)"` over `rm`** — the `rm` command is not available in the bash environment on this project; Python's `os.remove()` is the reliable cross-platform delete.

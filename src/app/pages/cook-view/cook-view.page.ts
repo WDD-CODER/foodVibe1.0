@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, signal, computed, OnInit, OnDestroy } from '@angular/core'
+import { Component, DestroyRef, ElementRef, inject, signal, computed, OnInit, OnDestroy } from '@angular/core'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
@@ -33,6 +33,7 @@ import { quantityIncrement, quantityDecrement, QuantityStepOptions } from '../..
 import { filter, take } from 'rxjs'
 import { HeroFabService } from '@services/hero-fab.service'
 import { RecipeFormService } from '@pages/recipe-builder/services/recipe-form.service'
+import { ScrollIndicatorsDirective } from 'src/app/core/directives/scroll-indicators.directive'
 
 /** Multiplier chip definitions — factor is the multiplier applied to `convertedYieldAmount_()`. */
 const MULTIPLIER_CHIPS = [
@@ -60,7 +61,8 @@ const MULTIPLIER_CHIPS = [
     ExportPreviewComponent,
     ApproveStampComponent,
     CounterComponent,
-    RatingStarsComponent
+    RatingStarsComponent,
+    ScrollIndicatorsDirective
   ],
   templateUrl: './cook-view.page.html',
   styleUrl: './cook-view.page.scss'
@@ -84,6 +86,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   private readonly translation = inject(TranslationService)
   private readonly heroFab = inject(HeroFabService)
   private readonly recipeFormService = inject(RecipeFormService)
+  private readonly el = inject(ElementRef)
 
   // ---- SIGNALS & CONSTANTS ----
   protected recipe_ = signal<Recipe | null>(null)
@@ -117,6 +120,9 @@ export class CookViewPage implements OnInit, OnDestroy {
   /** Floating export bar expanded. */
   protected exportBarExpanded_ = signal<boolean>(false)
 
+  /** Phone layout: which pane appears on top. Default: ingredients first. */
+  protected phoneFirstPane_ = signal<'ingredients' | 'steps'>('ingredients')
+
   /**
    * Active multiplier chip factor (null = no chip selected, 1 = 1x selected by default).
    * Set to null when user manually adjusts quantity via stepper.
@@ -149,6 +155,10 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected stopwatchSecondsElapsed_ = signal<number>(0)
   protected stopwatchPaused_ = signal<boolean>(false)
   private stopwatchIntervalId_: ReturnType<typeof setInterval> | null = null
+  private scrollTimeoutId: ReturnType<typeof setTimeout> | null = null
+
+  /** Step index whose countdown just finished (null = none). Cleared by dismissTimerDone(). */
+  protected timerFinishedStepIndex_ = signal<number | null>(null)
 
   /** Multiplier chip definitions exposed to template. */
   protected readonly multiplierChips = MULTIPLIER_CHIPS
@@ -267,9 +277,10 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected cookingComplete_ = computed(() => {
     const recipe = this.recipe_()
     if (!recipe) return false
-    const steps = recipe.steps_ ?? []
-    if (steps.length === 0) return false
-    return this.stepDoneSet_().size >= steps.length
+    if (this.isDish_()) {
+      return this.stepDoneSet_().size >= this.scaledPrep_().length && this.scaledPrep_().length > 0
+    }
+    return this.stepDoneSet_().size >= (recipe.steps_?.length ?? 0) && (recipe.steps_?.length ?? 0) > 0
   })
 
   /** Formatted timer display (m:ss under 1h, h:mm:ss at 1h+). */
@@ -346,6 +357,10 @@ export class CookViewPage implements OnInit, OnDestroy {
     this.closeAllExportOverlays()
     this.heroFab.clearPageActions()
     if (this.stopwatchIntervalId_ !== null) clearInterval(this.stopwatchIntervalId_)
+    if (this.scrollTimeoutId !== null) {
+      clearTimeout(this.scrollTimeoutId)
+      this.scrollTimeoutId = null
+    }
   }
 
   protected setQuantity(value: number): void {
@@ -799,20 +814,24 @@ export class CookViewPage implements OnInit, OnDestroy {
       return next
     })
     const recipe = this.recipe_()
-    const steps = recipe?.steps_ ?? []
+    const steps = this.isDish_() ? this.scaledPrep_() : (recipe?.steps_ ?? [])
     const doneSet = this.stepDoneSet_()
     for (let i = index + 1; i < steps.length; i++) {
       if (!doneSet.has(i)) {
         this.activeStepIndex_.set(i)
+        this.scrollToActiveStep(i)
         return
       }
     }
     for (let i = 0; i < index; i++) {
       if (!doneSet.has(i)) {
         this.activeStepIndex_.set(i)
+        this.scrollToActiveStep(i)
         return
       }
     }
+    // All steps done — scroll back to first
+    this.scrollToActiveStep(0)
   }
 
   protected unmarkStepDone(index: number): void {
@@ -822,6 +841,16 @@ export class CookViewPage implements OnInit, OnDestroy {
       return next
     })
     this.activeStepIndex_.set(index)
+  }
+
+  protected swapToPane(pane: 'ingredients' | 'steps'): void {
+    this.phoneFirstPane_.set(pane)
+  }
+
+  /** Jump to any pending step and make it the active one. */
+  protected setActiveStep(index: number): void {
+    this.activeStepIndex_.set(index)
+    this.scrollToActiveStep(index)
   }
 
   /** Toggle peek (expanded preview) on a pending step. Cannot peek the active step. */
@@ -835,12 +864,17 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (this.timerIntervalId_ !== null) {
       clearInterval(this.timerIntervalId_)
     }
+    this.timerFinishedStepIndex_.set(null)
     this.activeTimerStepIndex_.set(stepIndex)
     this.timerSecondsLeft_.set(totalSeconds)
     this.timerIntervalId_ = setInterval(() => {
       this.timerSecondsLeft_.update(s => s - 1)
       if (this.timerSecondsLeft_() <= 0) {
-        this.cancelTimer()
+        clearInterval(this.timerIntervalId_!)
+        this.timerIntervalId_ = null
+        this.timerFinishedStepIndex_.set(this.activeTimerStepIndex_())
+        this.activeTimerStepIndex_.set(null)
+        this.timerSecondsLeft_.set(0)
       }
     }, 1000)
   }
@@ -852,7 +886,13 @@ export class CookViewPage implements OnInit, OnDestroy {
       this.timerIntervalId_ = null
     }
     this.activeTimerStepIndex_.set(null)
+    this.timerFinishedStepIndex_.set(null)
     this.timerSecondsLeft_.set(0)
+  }
+
+  /** Dismiss the timer-done alert for a finished step. */
+  protected dismissTimerDone(): void {
+    this.timerFinishedStepIndex_.set(null)
   }
   /** Expand the h:mm input for a step, pre-filling with the step's preset cooking time. */
   protected expandTimerInput(stepIndex: number, presetMinutes: number): void {
@@ -1076,5 +1116,16 @@ export class CookViewPage implements OnInit, OnDestroy {
         }))
       this.recipe_.update(r => ({ ...r, steps_: steps.length ? steps : [] } as Recipe))
     }
+  }
+
+  private scrollToActiveStep(index: number): void {
+    if (this.scrollTimeoutId !== null) {
+      clearTimeout(this.scrollTimeoutId)
+    }
+    this.scrollTimeoutId = setTimeout(() => {
+      this.scrollTimeoutId = null
+      const card = this.el.nativeElement.querySelector(`[data-step-index="${index}"]`) as HTMLElement | null
+      card?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 50)
   }
 }

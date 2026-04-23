@@ -71,7 +71,7 @@
           min-width: 0;
         }
 
-        input.c-input {
+        input {
           width: 5rem;
           flex-shrink: 0;
         }
@@ -87,8 +87,8 @@
       font-weight: 500;
     }
 
-    input.c-input,
-    textarea.c-input {
+    input,
+    textarea {
       width: 100%;
     }
 

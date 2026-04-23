@@ -85,6 +85,11 @@ add-equipment-modal, add-item-modal, ai-recipe-modal, approve-stamp, carousel-he
 
 **Detection:** Grep for `#[0-9a-fA-F]{3,8}`, `rgb(`, `rgba(`, `hsl(` in component `.scss` files.
 
+**Pre-filter before flagging any hex match:**
+- **Skip token definition lines:** If the matched line starts with optional whitespace followed by `--` (i.e., matches `^\s*--[a-zA-Z]`), the hex is part of a CSS custom property definition — skip it. These are intentional token values, not violations.
+- **Skip annotated lines:** If the line contains an inline comment with `intentional` or `no token` → skip.
+- Apply these checks before consulting the auto-fix token map.
+
 **Auto-fix token map (exact hex → CSS variable):**
 
 | Hex | Variable | Context |
@@ -209,6 +214,15 @@ Also check if `.env` contains patterns: `URI=`, `KEY=`, `SECRET=`, `PASSWORD=`.
 
 #### F3 — Manual subscriptions in components
 **Detection:** Grep for `.subscribe(` in `*.component.ts` files.
+
+**Pre-filter before flagging any `.subscribe(` match:**
+Read the 6 lines preceding the `.subscribe(` call (the pipe chain context). Apply these checks in order — if ANY matches, discard the finding (SAFE):
+1. **takeUntilDestroyed / takeUntil:** If `takeUntilDestroyed` or `takeUntil(` appears in the preceding 6 lines → SAFE (subscription is properly cleaned up).
+2. **One-shot observable:** If `take(1)` or `first(` appears in the preceding 6 lines → SAFE (completes automatically).
+3. **HTTP fire-and-forget:** If the line containing `.subscribe(` or any of the preceding 6 lines contains a service method call matching `.save(`, `.delete(`, `.load(`, `.get(`, `.post(`, `.put(`, `.patch(`, `.hide(`, or `.permanently` → SAFE (HttpClient completes automatically).
+
+Only flag if NONE of the above patterns are found → REAL VIOLATION.
+
 **Response:** FLAG only (severity: Low-Medium)
 - Recommend: use `toSignal()`, `effect()`, or async pipe
 

@@ -18,9 +18,6 @@
           <button type="button" class="auth-username-btn" (click)="logout()" [attr.aria-label]="'log_out' | translatePipe">
             {{ user_()!.name }}
           </button>
-          @if (user_()?.role && user_()?.role !== 'admin') {
-            <span class="user-role">{{ user_()?.role ?? '' }}</span>
-          }
         </div>
       </div>
     } @else {

@@ -78,7 +78,7 @@
 
 .type-toggle-btn {
   padding: 0.375rem 0.875rem;
-  border: 1px solid var(--border-default);
+  outline: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   background: var(--bg-glass);
   font-size: 0.8125rem;
@@ -97,8 +97,9 @@
   }
 
   &:not(.type-toggle-btn--dish) {
+    margin-inline-end: 5px;
     background: var(--color-primary-soft);
-    border-color: var(--color-primary-glow);
+    outline-color: var(--color-primary-glow);
     color: var(--color-primary);
   }
 }
@@ -176,7 +177,8 @@
     }
   }
 
-  .c-input, app-custom-select {
+  .c-input,
+  app-custom-select {
     font-size: 0.8125rem;
   }
 }
@@ -263,6 +265,7 @@
 }
 
 .editor-step-row {
+  place-items: center;
   display: flex;
   align-items: flex-start;
   gap: 0.45rem;
@@ -331,7 +334,8 @@
     background: rgba(14, 165, 233, 0.04);
   }
 
-  .c-input, app-custom-select {
+  .c-input,
+  app-custom-select {
     font-size: 0.8125rem;
   }
 }
@@ -364,7 +368,9 @@
   color: var(--color-text-muted);
   flex-shrink: 0;
 
-  &:active { cursor: grabbing; }
+  &:active {
+    cursor: grabbing;
+  }
 }
 
 .drag-handle-icon {
