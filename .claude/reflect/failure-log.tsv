@@ -155,3 +155,8 @@ with open	ai_recipe_url_fetch_failed -> ╫£╫É ╫á╫Ö╫¬╫ƒ ╫£╫
 2026-04-23 18:49:31	Bash	cd C:/foodCo/foodVibe1.0 && npx ng build 2>&1 | grep -vE "(WARNING|CommonJS|AMD|	Application bundle generation failed. [24.598 seconds]	
 2026-04-23 18:50:43	Bash	cd C:/foodCo/foodVibe1.0 && npx ng build 2>&1 | grep -E "^(X |Application bundle	@{stdout=Application bundle generation failed. [24.490 seconds]; stderr=; interrupted=False; isImage=False; noOutputExpe	
 2026-04-23 18:55:18	Bash	cd C:/foodCo/foodVibe1.0 && ng build 2>&1 | tail -15	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-23 19:43:37	Bash	cd C:/foodCo/foodVibe1.0 && npx ng build 2>&1 | grep -B2 -A15 "ExportToolbarOver	@{stdout=Application bundle generation failed. [44.926 seconds]	
+2026-04-23 19:43:43	Bash	git stash && npx ng build --configuration=production 2>&1 | grep -E "ERROR|faile	Application bundle generation failed. [38.809 seconds]	
+2026-04-23 19:45:53	Bash	cd C:/foodCo/foodVibe1.0 && npx ng build 2>&1 | grep -E "failed|succeeded|bundle	@{stdout=Application bundle generation failed. [35.174 seconds]; stderr=; interrupted=False; isImage=False; noOutputExpe	
+2026-04-23 19:46:35	Bash	git stash drop stash@{0} 2>/dev/null; git stash drop stash@{0} 2>/dev/null; npx 	Application bundle generation failed. [36.607 seconds]; stderr=; interrupted=False; isImage=False; noOutputExpected=Fals	
+2026-04-23 19:46:44	Bash	cd C:/foodCo/foodVibe1.0 && npx ng build 2>&1 | grep -v "WARNING\|CommonJS\|budg	Application bundle generation failed. [32.876 seconds]	

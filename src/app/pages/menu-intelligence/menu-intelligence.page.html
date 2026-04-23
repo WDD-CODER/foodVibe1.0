@@ -295,34 +295,34 @@
       + {{ 'menu_add_section' | translatePipe }}
     </button>
 
-    <!-- Financial footnote -->
-    <div class="financial-footnote no-print">
-      <div class="fin-metric">
-        <span class="fin-label">{{ 'menu_total_cost' | translatePipe }}</span>
-        <span class="fin-value">₪{{ eventCost_() | number:'1.2-2' }}</span>
-      </div>
-      <div class="fin-metric">
-        <span class="fin-label">{{ 'menu_food_cost' | translatePipe }} %</span>
-        <span class="fin-value" [class.fin-value--warning]="totalRevenue_() > 0 && foodCostPct_() > 33">
-          @if (totalRevenue_() > 0) {
-            {{ foodCostPct_() | number:'1.1-1' }}%
-          } @else {
-            —
-          }
-        </span>
-      </div>
-      <div class="fin-metric">
-        <span class="fin-label">{{ 'menu_total_revenue' | translatePipe }}</span>
-        <span class="fin-value">₪{{ totalRevenue_() | number:'1.2-2' }}</span>
-      </div>
-      <div class="fin-metric">
-        <span class="fin-label">{{ 'menu_cost_per_guest' | translatePipe }}</span>
-        <span class="fin-value">₪{{ costPerGuest_() | number:'1.2-2' }}</span>
-      </div>
-    </div>
-
     <div class="paper-ornament bottom"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- Financial footnote — fixed bar, always visible while scrolling -->
+  <div class="financial-footnote no-print">
+    <div class="fin-metric">
+      <span class="fin-label">{{ 'menu_total_cost' | translatePipe }}</span>
+      <span class="fin-value">₪{{ eventCost_() | number:'1.2-2' }}</span>
+    </div>
+    <div class="fin-metric">
+      <span class="fin-label">{{ 'menu_food_cost' | translatePipe }} %</span>
+      <span class="fin-value" [class.fin-value--warning]="totalRevenue_() > 0 && foodCostPct_() > 33">
+        @if (totalRevenue_() > 0) {
+          {{ foodCostPct_() | number:'1.1-1' }}%
+        } @else {
+          —
+        }
+      </span>
+    </div>
+    <div class="fin-metric">
+      <span class="fin-label">{{ 'menu_total_revenue' | translatePipe }}</span>
+      <span class="fin-value">₪{{ totalRevenue_() | number:'1.2-2' }}</span>
+    </div>
+    <div class="fin-metric">
+      <span class="fin-label">{{ 'menu_cost_per_guest' | translatePipe }}</span>
+      <span class="fin-value">₪{{ costPerGuest_() | number:'1.2-2' }}</span>
     </div>
   </div>
 
