@@ -75,36 +75,39 @@ fi
 # Thresholds (rough estimates based on observed context usage):
 #   400KB ≈ 40% of context window
 #   600KB ≈ 60% of context window
-#   700KB ≈ 70% of context window
+#   730KB ≈ 73% of context window
 # These are conservative estimates. Adjust based on your model's context size.
 WARN_THRESHOLD=400000
 ALERT_THRESHOLD=600000
-STOP_THRESHOLD=700000
+STOP_THRESHOLD=730000
 
 if [ "$SIZE" -gt "$STOP_THRESHOLD" ]; then
+  # 70% — hard stop: agent must surface this to the user immediately.
   cat <<'EOF'
 {
   "hookSpecificOutput": {
     "hookEventName": "PostToolUse",
-    "additionalContext": "HARD STOP — Context exceeds 70%. You MUST do the following immediately. Do NOT continue any other work:\n1. Update session-state.md with current progress, decisions made, and next steps\n2. Stop all generation/development work\n3. Tell the user: 'Context is full. I recommend starting a new session. session-state.md has been updated.'\n\nThis is a hard gate. Continuing past this point risks losing work to context truncation."
+    "additionalContext": "HARD STOP — Context exceeds 73%. You MUST do the following immediately. Do NOT continue any other work:\n1. Update session-state.md with current progress, decisions made, and next steps.\n2. Stop all generation/development work.\n3. Tell the user: 'Context window is at 73%+. I have updated session-state.md. Please start a new session to continue safely.'\n\nThis is a hard gate. Continuing past this point risks losing work to context truncation."
   }
 }
 EOF
 elif [ "$SIZE" -gt "$ALERT_THRESHOLD" ]; then
+  # 60% — informational only: do NOT stop or interrupt current work.
   cat <<'EOF'
 {
   "hookSpecificOutput": {
     "hookEventName": "PostToolUse",
-    "additionalContext": "Context is past 60%. Update session-state.md now to preserve progress. Finish your current task, then hand off. Do not start new tasks."
+    "additionalContext": "[Context ~60% — informational, no action required] Context has passed 60%. Continue your current task without interruption — do not stop, do not update session-state, do not surface this to the user unless you judge the remaining workload is too large to complete. After the current task reaches a natural stopping point, avoid starting large new tasks. If the user requests a major new feature, suggest opening a fresh session."
   }
 }
 EOF
 elif [ "$SIZE" -gt "$WARN_THRESHOLD" ]; then
+  # 40% — informational only: do NOT stop or interrupt current work.
   cat <<'EOF'
 {
   "hookSpecificOutput": {
     "hookEventName": "PostToolUse",
-    "additionalContext": "Context is past 40%. Start thinking about wrap-up timing. Finish your current task and consider whether to hand off soon."
+    "additionalContext": "[Context ~40% — informational, no action required] Context is approaching 40%. Continue your current task without interruption. Use this as a planning signal only: if you are about to take on a large multi-step task, scope it to fit within the remaining context window. No session-state update needed yet."
   }
 }
 EOF

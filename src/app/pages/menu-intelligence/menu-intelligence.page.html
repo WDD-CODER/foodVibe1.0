@@ -138,6 +138,7 @@
           </div>
         } @else {
           <button type="button" class="event-chip" id="menu-focus-event_type_"
+            [attr.aria-expanded]="eventTypeDropdownOpen_()"
             (click)="openEventTypeDropdown()"
             (keydown)="onMetaKeydown('event_type_', $event)">
             {{ ((form_.value.event_type_ ?? '') | translatePipe) || ('menu_event_type' | translatePipe) }}
@@ -175,6 +176,7 @@
           class="guest-chip-input"
           formControlName="guest_count_"
           min="0"
+          [attr.aria-label]="'menu_guests' | translatePipe"
           (keydown)="onMetaKeydown('guest_count_', $event)"
         />
         {{ 'menu_guests' | translatePipe }}
