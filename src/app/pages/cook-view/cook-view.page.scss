@@ -680,6 +680,15 @@
   padding-inline: 0.5rem;
 }
 
+.cv-ing-body,
+.cv-step-body {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 .cv-ing-body {
   flex: 1;
 
