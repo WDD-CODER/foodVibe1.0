@@ -24,9 +24,14 @@
   --cv-active-border: #1D9E75;
   --cv-active-bg: #E1F5EE;
   --cv-active-text: #0F6E56;
-  --cv-done-opacity: 0.7;
+  --cv-inactive-opacity: 0.62;
+  --cv-done-circle-bg: #d4ede6;
+  --cv-done-circle-color: #1d9e75;
   --cv-timer-bg: #FAEEDA;
   --cv-timer-color: #633806;
+  --cv-timer-alert-bg: #fee2e2;
+  --cv-timer-alert-color: #b91c1c;
+  --cv-timer-alert-border: #fca5a5;
   --cv-step-done-btn-bg: #1D9E75;
   --cv-step-done-btn-color: #E1F5EE;
   --cv-tap-min: 44px;
@@ -163,25 +168,41 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
 
-  padding-block: 0.75rem;
-  padding-inline: 1.25rem;
+  background: linear-gradient(135deg, #1d9e75, #0f6e56);
 
-  border-bottom: 1px solid var(--border-default);
+  border-radius: 24px 24px 0 0;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+}
+
+.cv-recipe-name {
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 800;
+
+  margin: 0;
 }
 
 .cv-name-rating {
   display: flex;
   flex-direction: column;
+
   gap: 0.25rem;
 }
 
-.cv-recipe-name {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--cv-text-heading);
+.cv-header-meta {
+  display: flex;
+  align-items: center;
 
-  margin: 0;
+  gap: 0.5rem;
+}
+
+.cv-approved-badge {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.7rem;
+  font-weight: 600;
 }
 
 .cv-header-actions {
@@ -192,8 +213,9 @@
 }
 
 .cv-cost {
+  color: rgba(255, 255, 255, 0.85);
   font-size: 0.8rem;
-  color: var(--color-text-muted);
+  font-weight: 600;
 }
 
 .edit-btn {
@@ -257,13 +279,72 @@
   align-items: center;
   flex-wrap: wrap;
 
+  background: linear-gradient(180deg, rgba(29,158,117,0.08) 0%, var(--cv-bg-page) 100%);
+
+  border-bottom: 1px solid var(--cv-border-soft);
   gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+}
 
-  background: linear-gradient(180deg, var(--cv-gradient-start) 0%, var(--cv-bg-page) 100%);
+/* Phone-only pane swap buttons */
+.cv-phone-swap-bar {
+  display: none;
+  align-items: center;
 
-  border-bottom: 1px solid var(--border-default);
-  padding-block: 0.5rem;
-  padding-inline: 1.25rem;
+  background: white;
+
+  border-bottom: 2px solid var(--cv-border-soft);
+  gap: 0;
+}
+
+.cv-phone-swap-btn {
+  flex: 1;
+  text-align: center;
+
+  background: transparent;
+  color: #888;
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  border: none;
+  cursor: pointer;
+  padding: 10px 0 8px;
+
+  transition: color 0.15s;
+
+  &.active {
+    color: var(--cv-active-border);
+
+    border-bottom: 2px solid var(--cv-active-border);
+    margin-bottom: -2px;
+  }
+}
+
+.cv-phone-swap-hint {
+  display: none;
+
+  color: #8aaa99;
+  font-size: 0.72rem;
+  text-align: center;
+
+  padding: 4px 0 2px;
+}
+
+.cv-pane-divider {
+  display: none;
+}
+
+.cv-complete-banner {
+  background: var(--cv-active-bg);
+  color: var(--cv-active-text);
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+
+  border: 2px solid var(--cv-active-border);
+  border-radius: 12px;
+  margin: 0.75rem;
+  padding: 1rem;
 }
 
 .quantity-control-wrap {
@@ -577,46 +658,49 @@
 
 
 .cv-step-card {
-  flex-shrink: 0;
-  overflow: hidden;
-
   background: var(--bg-pure);
 
-  border: 1.5px solid var(--cv-border-muted);
-  border-radius: 14px;
-  margin-bottom: 8px;
+  border: 1px solid var(--cv-border-muted);
+  border-radius: 10px;
 
-  transition: border-color 0.2s, box-shadow 0.2s;
+  overflow: hidden;
+  opacity: var(--cv-inactive-opacity);
+  transition: opacity 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
 .cv-step-card--active {
-  border: 2px solid var(--cv-active-border);
+  background: var(--cv-active-bg);
 
-  box-shadow: 0 4px 20px rgba(29, 158, 117, 0.18);
+  border: 2px solid var(--cv-active-border);
+  border-radius: 12px;
+
+  box-shadow: 0 4px 16px rgba(29, 158, 117, 0.18);
+  opacity: 1;
 }
 
 .cv-step-card--done {
-  opacity: var(--cv-done-opacity);
+  opacity: var(--cv-inactive-opacity);
+}
+
+.cv-step-card--timer-alert {
+  border-color: var(--cv-timer-alert-border) !important;
+  border-width: 1.5px !important;
+  opacity: var(--cv-inactive-opacity);
 }
 
 .cv-step-card-head {
   display: flex;
   align-items: center;
 
-  gap: 0.625rem;
-  min-height: var(--cv-tap-min);
-
-  direction: rtl;
-
-  background: var(--cv-section-bg);
-
-  padding: 0.75rem 1rem;
-
-  cursor: pointer;
+  gap: 6px;
+  padding: 10px 12px 6px;
 }
 
 .cv-step-card--active .cv-step-card-head {
-  background: linear-gradient(135deg, var(--cv-bg-soft) 0%, var(--cv-bg-active-gradient) 100%);
+  background: var(--cv-active-border);
+
+  gap: 8px;
+  padding: 7px 12px;
 }
 
 .cv-step-num {
@@ -625,30 +709,42 @@
   justify-content: center;
   flex-shrink: 0;
 
-  width: 30px;
-  height: 30px;
-
-  background: var(--cv-bg-soft);
-  color: var(--cv-active-border);
-  font-size: 13px;
+  background: #e8f7f1;
+  color: var(--cv-active-text);
+  font-size: 0.6rem;
   font-weight: 800;
 
-  border: 2px solid var(--cv-border-soft);
   border-radius: 50%;
+  width: 18px;
+  height: 18px;
 }
 
 .cv-step-num--active {
-  background: var(--cv-active-border);
+  background: rgba(255, 255, 255, 0.25);
   color: white;
 
-  border-color: var(--cv-active-border);
-  box-shadow: 0 2px 8px rgba(29, 158, 117, 0.35);
+  width: 22px;
+  height: 22px;
+  font-size: 0.7rem;
 }
 
 .cv-step-num--done {
-  color: var(--cv-active-border);
+  background: var(--cv-done-circle-bg);
+  color: var(--cv-done-circle-color);
+}
 
-  border-color: var(--cv-active-border);
+.cv-step-active-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.cv-step-done-label {
+  color: #7aaa94;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
 }
 
 .cv-step-label {
@@ -696,16 +792,24 @@
 }
 
 .cv-step-card-body {
-  direction: rtl;
-  font-size: 0.9375rem;
-  line-height: 1.65;
-  color: var(--color-text-main);
-
-  padding: 0.75rem 1rem;
+  padding: 10px 12px 0;
 
   p {
     margin: 0;
+    color: #0a4a38;
+    font-size: 0.88rem;
+    line-height: 1.65;
   }
+}
+
+.cv-step-card:not(.cv-step-card--active) .cv-step-card-body p {
+  color: #4a6a5a;
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.cv-step-card--done .cv-step-card-body p {
+  text-decoration: line-through;
 }
 
 .cv-timer-pill {
@@ -847,28 +951,75 @@
 
 .cv-step-done-btn {
   display: block;
-
   width: 100%;
-  min-height: 48px;
 
-  background: var(--cv-step-done-btn-bg);
-  color: var(--cv-step-done-btn-color);
-  font-size: 0.9375rem;
+  background: var(--cv-active-border);
+  color: white;
+  font-size: 0.88rem;
   font-weight: 700;
 
   border: none;
-  letter-spacing: 0.01em;
-  padding-block: 0.875rem;
-
   cursor: pointer;
-  transition: background 0.15s;
+  margin-top: 10px;
+  padding: 10px;
+
+  letter-spacing: 0.02em;
 
   &:hover {
-    background: var(--cv-active-text);
+    background: #0f6e56;
+  }
+}
+
+/* Pill shown on non-active step cards when timer/stopwatch is running or done */
+.cv-step-timer-pill {
+  display: inline-flex;
+  align-items: center;
+
+  background: #e8f7f1;
+  color: var(--cv-active-text);
+  font-size: 0.62rem;
+  font-weight: 600;
+
+  border: 1px solid #c8e6db;
+  border-radius: 6px;
+  gap: 3px;
+  margin-inline-start: auto;
+  padding: 2px 7px;
+
+  cursor: default;
+}
+
+.cv-step-timer-pill--alert {
+  background: var(--cv-timer-alert-bg);
+  color: var(--cv-timer-alert-color);
+
+  border-color: var(--cv-timer-alert-border);
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+/* Active step: timer/stopwatch tool buttons in the green header */
+.cv-step-tool-btn {
+  display: inline-flex;
+  align-items: center;
+
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 0.65rem;
+
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 6px;
+  cursor: pointer;
+  gap: 3px;
+  padding: 3px 8px;
+
+  &:first-of-type {
+    margin-inline-start: auto;
   }
 
-  &:active {
-    transform: scale(0.99);
+  & + & {
+    margin-inline-start: 4px;
   }
 }
 
@@ -1140,23 +1291,40 @@
     overflow: visible;
   }
 
+  .cv-phone-swap-bar {
+    display: flex;
+  }
+
+  .cv-phone-swap-hint {
+    display: block;
+  }
+
   .cv-body {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
 
+    overflow-y: auto;
     height: auto;
-    overflow: visible;
-
-    gap: 1rem;
-    padding-block-end: 1.5rem;
   }
 
   .cv-ing-pane {
+    order: 1;
+    min-height: 0;
     overflow: visible;
+
+    &.cv-pane--second {
+      order: 2;
+    }
   }
 
   .cv-step-pane {
+    order: 2;
+    min-height: 0;
     overflow: visible;
+
+    &.cv-pane--first {
+      order: 1;
+    }
   }
 
   .cv-ing-body,
@@ -1164,6 +1332,16 @@
     flex: none;
 
     overflow-y: visible;
+  }
+
+  .cv-pane-divider {
+    display: block;
+
+    background: linear-gradient(90deg, transparent, var(--cv-border-soft), transparent);
+    height: 2px;
+    order: 1;
+
+    margin: 0.5rem 1rem;
   }
 
   .cv-chip-btn {
