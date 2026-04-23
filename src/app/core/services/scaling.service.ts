@@ -60,8 +60,11 @@ export class ScalingService {
       const item = isProduct
         ? products.find(p => p._id === ing.referenceId)
         : recipes.find(r => r._id === ing.referenceId)
+      // When referenceId is set but the product/recipe no longer exists in state
+      // (orphaned reference — e.g. product deleted or DB reset), fall back to
+      // nameSnapshot and mark as unlinked so the UI can style it appropriately.
       const name = (item as { name_hebrew?: string } | undefined)?.name_hebrew
-        ?? ing.nameSnapshot ?? '(לא נמצא)'
+        ?? ing.nameSnapshot ?? ''
       const units = this.getAvailableUnitsForIngredient(item, ing.unit_ ?? '')
       return {
         name,
@@ -69,7 +72,8 @@ export class ScalingService {
         unit: ing.unit_ ?? '',
         availableUnits: units,
         referenceId: ing.referenceId,
-        type: ing.type
+        type: ing.type,
+        ...(item ? {} : { isUnlinked: true })
       }
     })
   }

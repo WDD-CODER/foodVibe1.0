@@ -9,7 +9,6 @@ import { AiRecipeModalService } from './ai-recipe-modal.service'
 import { GeminiService } from '@services/gemini.service'
 import type { AiRecipePatch } from '@services/gemini.service'
 import { AiRecipeDraftService, type AiRecipeDraft } from '@services/ai-recipe-draft.service'
-import { UserMsgService } from '@services/user-msg.service'
 import { getGeminiUsage, DAILY_LIMIT, fetchGeminiUsageFromServer } from '../../core/utils/gemini-usage.util'
 import { GeminiShotsService } from '@services/gemini-shots.service'
 import { TranslationService } from '@services/translation.service'
@@ -32,7 +31,6 @@ export class AiRecipeModalComponent implements OnInit {
   protected readonly gemini = inject(GeminiService)
   private readonly aiDraft = inject(AiRecipeDraftService)
   private readonly router = inject(Router)
-  private readonly userMsg = inject(UserMsgService)
   private readonly shots = inject(GeminiShotsService)
   private readonly translation = inject(TranslationService)
 
@@ -98,9 +96,9 @@ export class AiRecipeModalComponent implements OnInit {
       const draft = await this.gemini.generateRecipe(this.prompt_())
       this.draft_.set(draft)
       this.status_.set('done')
-    } catch {
+    } catch (err) {
+      this.errorKey_.set(this.resolveErrorKey_(err))
       this.status_.set('error')
-      this.userMsg.onSetErrorMsg('ai_recipe_error')
     } finally {
       this.loading_.set(false)
       this.refreshUsage()
@@ -144,9 +142,9 @@ export class AiRecipeModalComponent implements OnInit {
       const draft = await this.gemini.generateFromImage(file)
       this.draft_.set(draft)
       this.status_.set('done')
-    } catch {
+    } catch (err) {
+      this.errorKey_.set(this.resolveErrorKey_(err))
       this.status_.set('error')
-      this.userMsg.onSetErrorMsg('ai_recipe_error')
     } finally {
       this.loading_.set(false)
       this.refreshUsage()
@@ -164,8 +162,7 @@ export class AiRecipeModalComponent implements OnInit {
       this.draft_.set(draft)
       this.status_.set('done')
     } catch (err) {
-      const errorKey = this.resolveUrlErrorKey(err)
-      this.errorKey_.set(errorKey)
+      this.errorKey_.set(this.resolveErrorKey_(err))
       this.status_.set('error')
     } finally {
       this.loading_.set(false)
@@ -173,11 +170,29 @@ export class AiRecipeModalComponent implements OnInit {
     }
   }
 
-  private resolveUrlErrorKey(err: unknown): string {
+  private resolveErrorKey_(err: unknown): string {
+    // Local limit check — throws plain Error with Hebrew message
+    if (err instanceof Error && !(err instanceof HttpErrorResponse) && err.message.includes('מגבלת')) {
+      return 'ai_recipe_daily_limit'
+    }
     if (err instanceof HttpErrorResponse) {
       const msg: string = err.error?.error ?? ''
-      if (/Failed to fetch URL: [45]\d\d/.test(msg)) return 'ai_recipe_url_blocked'
-      if (msg.includes('Could not fetch') || msg.includes('No usable text')) return 'ai_recipe_url_fetch_failed'
+      const status = err.status
+
+      if (status === 429 || msg.includes('daily_limit_reached')) return 'ai_recipe_daily_limit'
+      if (status === 504 || msg.includes('timed out')) return 'ai_recipe_timeout'
+      if (status === 503 && msg.includes('not configured')) return 'ai_recipe_not_configured'
+      if (status === 0) return 'ai_recipe_network_error'
+
+      // URL-fetch specific
+      if (msg.includes('not found (404)')) return 'ai_recipe_url_not_found'
+      if (msg.includes('access denied') || msg.includes('bot protection')) return 'ai_recipe_url_blocked'
+      if (msg.includes('server error')) return 'ai_recipe_url_server_error'
+      if (msg.includes('Could not fetch') || msg.includes('resolves to a disallowed')) return 'ai_recipe_url_fetch_failed'
+      if (msg.includes('No usable text')) return 'ai_recipe_url_no_content'
+
+      // Gemini response issues
+      if (msg.includes('Gemini returned') || msg.includes('Gemini API error')) return 'ai_recipe_invalid_response'
     }
     return 'ai_recipe_error'
   }
@@ -228,9 +243,9 @@ export class AiRecipeModalComponent implements OnInit {
       const patch = await this.gemini.patchRecipe(currentRecipe, this.instruction_())
       this.patch_.set(patch)
       this.status_.set('done')
-    } catch {
+    } catch (err) {
+      this.errorKey_.set(this.resolveErrorKey_(err))
       this.status_.set('error')
-      this.userMsg.onSetErrorMsg('ai_recipe_error')
     } finally {
       this.loading_.set(false)
       this.refreshUsage()

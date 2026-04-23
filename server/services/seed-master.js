@@ -69,6 +69,15 @@ function readDemoFile(filename) {
 async function seedMasterData() {
   const db = mongoose.connection.db;
 
+  // Ordering guard: PRODUCT_LIST must appear before RECIPE_LIST/DISH_LIST so the
+  // productIdMap is fully built before ingredient referenceIds are remapped.
+  const _pidx = CLONEABLE_TYPES.indexOf('PRODUCT_LIST');
+  const _ridx = CLONEABLE_TYPES.indexOf('RECIPE_LIST');
+  const _didx = CLONEABLE_TYPES.indexOf('DISH_LIST');
+  if (_pidx === -1 || _ridx === -1 || _pidx > _ridx || (_didx !== -1 && _pidx > _didx)) {
+    throw new Error('[seed-master] CLONEABLE_TYPES ordering violation: PRODUCT_LIST must precede RECIPE_LIST and DISH_LIST');
+  }
+
   // Idempotency check: if master products already exist, skip
   const existing = await db.collection('PRODUCT_LIST').findOne({ userId: '__master__' });
   if (existing) {
