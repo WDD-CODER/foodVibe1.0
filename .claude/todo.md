@@ -62,17 +62,6 @@
 
 ---
 
-### Plan 284 — Context Monitor Token Rewrite (`plans/284-context-monitor-token-rewrite.plan.md`)
-
-- [x] Task 1: Create `.claude/config/model-context-windows.json` — model → context-window map
-- [x] Task 2: Create `scripts/context-monitor.py` — token-based, session-scoped, 3-tier warnings, override support
-- [x] Task 3: Create `.claude/commands/context-override.md` — slash command to suppress warnings 30 min
-- [x] Task 4: Simplify `scripts/pre-compact-reminder.sh` — remove baseline block, add SESSION SAVE TARGET reference + Post-Compact Resume instruction
-- [x] Task 5: Update `scripts/session-startup.sh` — add post-compact resume reminder line
-- [x] Task 6: Update `.claude/settings.json` — swap .sh → .py in PostToolUse hook
-
----
-
 ### Plan 081 — toFix Detailed Plans (`plans/081-tofix-detailed-plans.plan.md`)
 > Sections 3–8 verified done 2026-04-24. Sections 1 and 9 still have open items.
 
