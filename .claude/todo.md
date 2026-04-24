@@ -38,7 +38,7 @@
 - [x] Task 12: Fix stale `commit-to-github Phase 0` reference in `.claude/agents/qa-engineer.md`
 - [x] Task 14: Decide on `.claude/commands/reflect-add-tests.md` — add trigger or delete
 - [x] Task 15: Decide on `.claude/commands/sweep-stale-todos.md` — verify pending update, then add trigger
-- [ ] Task 16: Decide on `getGeminiShots()` in `gemini-shots.util.ts` — build read-back feature or remove orphan export
+- [x] Task 16: Decide on `getGeminiShots()` in `gemini-shots.util.ts` — build read-back feature or remove orphan export
 
 ---
 
