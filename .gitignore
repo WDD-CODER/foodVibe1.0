@@ -108,3 +108,6 @@ apply-*.js
 
 # Mobile audit credentials (local only)
 .claude/reports/mobile-audit/.credentials.json
+
+# Render audit credentials (local only)
+.claude/reports/render-audit/.credentials.json

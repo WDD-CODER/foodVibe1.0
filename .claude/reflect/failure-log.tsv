@@ -160,3 +160,18 @@ with open	ai_recipe_url_fetch_failed -> ╫£╫É ╫á╫Ö╫¬╫ƒ ╫£╫
 2026-04-23 19:45:53	Bash	cd C:/foodCo/foodVibe1.0 && npx ng build 2>&1 | grep -E "failed|succeeded|bundle	@{stdout=Application bundle generation failed. [35.174 seconds]; stderr=; interrupted=False; isImage=False; noOutputExpe	
 2026-04-23 19:46:35	Bash	git stash drop stash@{0} 2>/dev/null; git stash drop stash@{0} 2>/dev/null; npx 	Application bundle generation failed. [36.607 seconds]; stderr=; interrupted=False; isImage=False; noOutputExpected=Fals	
 2026-04-23 19:46:44	Bash	cd C:/foodCo/foodVibe1.0 && npx ng build 2>&1 | grep -v "WARNING\|CommonJS\|budg	Application bundle generation failed. [32.876 seconds]	
+2026-04-24 09:42:23	Write	C:\foodCo\foodVibe1.0\.claude\agents\render-flow-auditor.md	   - **F6 ΓÇö Console error capture:** after every state change, run `$B console` ΓÇö flag any client-side exception or 	
+2026-04-24 09:43:24	Write	C:\foodCo\foodVibe1.0\.claude\commands\render-flow-audit.md	6. After every state change: run $B console ΓÇö flag exceptions and unhandled rejections	
+2026-04-24 09:43:44	Edit	C:\foodCo\foodVibe1.0\.claude\copilot-instructions.md	- **Root-cause debugging** `[CC]`: For complex bugs where cause is unclear ΓåÆ invoke `/investigate`. It auto-freezes sc	
+2026-04-24 09:57:55	Bash	B=~/.claude/skills/gstack/browse/dist/browse; $B storage 2>&1 | head -50	    "DICTIONARY_CACHE": "{\"Amuse-Bouche\":\"╫É╫₧╫ò╫û-╫æ╫ò╫⌐\",\"Appetizers\":\"╫₧╫á╫ò╫¬ ╫ñ╫¬╫Ö╫ù╫ö\",\"Approved\":\"╫₧╫	
+2026-04-24 10:00:07	Bash	B=~/.claude/skills/gstack/browse/dist/browse; $B console 2>&1	[2026-04-24T06:58:40.160Z] [error] Failed to load resource: the server responded with a status of 404 ()	
+2026-04-24 10:00:44	Bash	B=~/.claude/skills/gstack/browse/dist/browse; $B console 2>&1 | tail -10	[2026-04-24T06:58:40.160Z] [error] Failed to load resource: the server responded with a status of 404 ()	
+2026-04-24 10:00:54	Bash	B=~/.claude/skills/gstack/browse/dist/browse; $B console 2>&1 && $B network 2>&1	[2026-04-24T06:58:40.160Z] [error] Failed to load resource: the server responded with a status of 404 ()	
+2026-04-24 10:01:44	Bash	B=~/.claude/skills/gstack/browse/dist/browse; $B console 2>&1	[2026-04-24T06:58:40.160Z] [error] Failed to load resource: the server responded with a status of 404 ()	
+2026-04-24 10:07:55	Edit	C:\Users\danwe\.claude\settings.json	  "skipDangerousModePermissionPrompt": true	
+2026-04-24 10:08:33	Bash	B=~/.claude/skills/gstack/browse/dist/browse; $B console 2>&1	[2026-04-24T06:58:40.160Z] [error] Failed to load resource: the server responded with a status of 404 ()	
+2026-04-24 10:08:49	Bash	B=~/.claude/skills/gstack/browse/dist/browse; $B storage 2>&1	    "DICTIONARY_CACHE": "{\"Amuse-Bouche\":\"╫É╫₧╫ò╫û-╫æ╫ò╫⌐\",\"Appetizers\":\"╫₧╫á╫ò╫¬ ╫ñ╫¬╫Ö╫ù╫ö\",\"Approved\":\"╫₧╫	
+2026-04-24 10:09:28	Bash	B=~/.claude/skills/gstack/browse/dist/browse; $B console 2>&1	[2026-04-24T06:58:40.160Z] [error] Failed to load resource: the server responded with a status of 404 ()	
+2026-04-24 10:10:26	Bash	B=~/.claude/skills/gstack/browse/dist/browse; $B console 2>&1 | grep -E "error|E	@{stdout=[2026-04-24T06:58:40.160Z] [error] Failed to load resource: the server responded with a status of 404 (); stder	
+2026-04-24 10:10:41	Edit	C:\Users\danwe\.claude\settings.json	  "skipDangerousModePermissionPrompt": true	
+2026-04-24 10:12:00	Bash	git diff HEAD -- .claude/reflect/failure-log.tsv | head -20	@@ -160,3 +160,17 @@ with open ai_recipe_url_fetch_failed -> Γò½┬úΓò½├ë Γò½├íΓò½├ûΓò½┬¼Γò½╞Æ Γò½┬úΓò½	
