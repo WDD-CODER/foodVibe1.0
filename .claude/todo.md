@@ -609,9 +609,9 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 
 ### Plan 284 — Context Monitor Token Rewrite (`plans/284-context-monitor-token-rewrite.plan.md`)
 
-- [ ] Task 1: Create `.claude/config/model-context-windows.json` — model → context-window map
-- [ ] Task 2: Create `scripts/context-monitor.py` — token-based, session-scoped, 3-tier warnings, override support
-- [ ] Task 3: Create `.claude/commands/context-override.md` — slash command to suppress warnings 30 min
+- [x] Task 1: Create `.claude/config/model-context-windows.json` — model → context-window map
+- [x] Task 2: Create `scripts/context-monitor.py` — token-based, session-scoped, 3-tier warnings, override support
+- [x] Task 3: Create `.claude/commands/context-override.md` — slash command to suppress warnings 30 min
 - [ ] Task 4: Simplify `scripts/pre-compact-reminder.sh` — remove baseline block, add SESSION SAVE TARGET reference + Post-Compact Resume instruction
 - [ ] Task 5: Update `scripts/session-startup.sh` — add post-compact resume reminder line
-- [ ] Task 6: Update `.claude/settings.json` — swap .sh → .py in PostToolUse hook
+- [x] Task 6: Update `.claude/settings.json` — swap .sh → .py in PostToolUse hook
