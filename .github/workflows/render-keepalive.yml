@@ -1,0 +1,19 @@
+name: Render Keep-Alive
+
+on:
+  schedule:
+    # Every 14 minutes — keeps Render free-tier from sleeping (sleeps after 15 min idle)
+    - cron: '*/14 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render service
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" https://foodvibe.onrender.com)
+          echo "Response: $code"
+          if [ "$code" != "200" ]; then
+            echo "Warning: Render returned $code (may be waking up)"
+          fi

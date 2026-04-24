@@ -52,7 +52,7 @@ The flow catalog is the source of truth. Load it below and respect `--only` / `-
 | 4 | `recipe-book-list` | `/recipe-book` | No | Open filters panel, search, click row actions (favorite, cook, edit, duplicate, delete) | F4, F5, F6 |
 | 5 | `recipe-builder-new-prep` | `/recipe-builder` | Yes | Name, 15 ingredients (mixed reference + free text), 10 workflow steps with labor+cook times, 3 labels, yield conversions, save | F1, F5, F6 |
 | 6 | `recipe-builder-new-dish` | `/recipe-builder` | Yes | Name, 8 prep items across 3 categories, serving portions, labels, save | F1, F5, F6 |
-| 7 | `recipe-builder-edit` | `/recipe-builder/edit/:id` | Yes | Open existing prep recipe, add 5 more ingredients, reorder steps, change yield unit, save. **F2 is MANDATORY — must reproduce or confirm fixed the duplicate-name-on-edit bug reported 2026-04-23.** | F1, F2, F5, F6 |
+| 7 | `recipe-builder-edit` | `/recipe-builder/:id` | Yes | Open existing prep recipe, add 5 more ingredients, reorder steps, change yield unit, save. **F2 is MANDATORY — must reproduce or confirm fixed the duplicate-name-on-edit bug reported 2026-04-23.** | F1, F2, F5, F6 |
 | 8 | `cook-view` | `/cook/:id` | No | Open existing recipe, change quantity, switch yield unit, verify scaling UI | F5, F6 |
 | 9 | `inventory-add-product` | `/inventory/add` | Yes | Name, base unit, category (add-new flow), allergens (multi-select), 2 purchase options, supplier, save | F1, F5, F6 |
 | 10 | `inventory-edit-product` | `/inventory/edit/:id` | Yes | Open existing, add 3rd purchase option, change category | F1, F2, F5, F6 |

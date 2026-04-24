@@ -170,5 +170,6 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/trash/trash.page').then(m => m.TrashPage),
     canActivate: [authGuard],
   },
+  { path: 'recipe-builder/edit/:id', redirectTo: 'recipe-builder/:id', pathMatch: 'full' },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 ];

@@ -9,7 +9,7 @@ async function connectDb() {
   if (!isLocal && !uri) throw new Error('MONGO_URI is not set in .env')
   if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET is not set in .env')
 
-  await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 })
+  await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000, minPoolSize: 1, maxPoolSize: 10 })
   console.log(`MongoDB connected → ${uri.startsWith('mongodb+srv') ? 'Atlas' : 'local'}`)
 
   // Ensure userId index on every entity collection.

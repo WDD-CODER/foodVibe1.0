@@ -150,6 +150,7 @@
         </button>
         <button type="button" class="c-btn-primary" [disabled]="isSubmitting()" (click)="onSubmit()">
           @if (isSubmitting()) {
+            <lucide-icon name="loader-circle" [size]="16" class="spin-icon" />
             {{ 'saving' | translatePipe }}
           } @else if (isSignUp) {
             {{ 'sign_up' | translatePipe }}
