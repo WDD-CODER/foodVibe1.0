@@ -75,6 +75,9 @@ You are the Senior QA Engineer. You own the verification layer, ensuring every f
 - Coverage gaps identified: [list]
 ```
 
+## Todo hygiene
+After marking a task `[x]` in `.claude/todo.md`: count remaining `[ ]` under the parent `### Plan NNN` heading. If zero remain, read `.claude/skills/todo-archive/SKILL.md` and follow it in section-mode with your agent name as `archived_by`. Relay the skill's archive/kept outcome in your completion message. If the skill returns `ARCHIVE-PENDING`, do NOT omit it — surface the reason verbatim. Source: `copilot-instructions.md §0.5 Task Completion Contract`.
+
 ## Context hygiene
 Consult `.claude/skills/context-management/SKILL.md` for checkpoint triggers.
 If any trigger fires, run `/checkpoint` before continuing.

@@ -137,8 +137,8 @@ Write (overwrite) with this schema — required sections must be present:
 
 1. Find tasks completed this session (matched against committed files or explicit user statements).
 2. Mark as `[x]` in `.claude/todo.md` for any that were completed.
-3. If a whole section is now all `[x]`, move it to `.claude/todo-archive.md` under `## Done`.
-4. Output: `"Updated todo.md: {n} tasks marked complete."`
+3. Read `.claude/skills/todo-archive/SKILL.md` and follow it in **scan-mode**, passing `caller=end-of-session-agent`. The skill handles git verification, operational-task guards, and writes the archive metadata.
+4. Output: `"Updated todo.md: {n} tasks marked complete. Archive report:"` followed by the skill's report block verbatim.
 
 ---
 
@@ -159,7 +159,7 @@ SESSION WRAP — {final_branch_name}
 Build: {PASS / SKIPPED}
 Commit: {sha or "none"}
 PR: {url or "N/A"}
-Todo: {n} tasks marked complete
+Todo: {n} tasks marked complete · Archived: {n} sections · Pending: {m} sections
 Session state: {path}
 ```
 

@@ -42,6 +42,8 @@ The command will:
 2. Fill in Goal, Completed, Current step, Next steps, Key decisions, Files touched, Open questions
 3. Print a ready-to-paste resume prompt
 
+The checkpoint file includes a `## Pending Archive` section — surfaces any all-`[x]` plan sections that didn't clear git verification this session, so `/resume` can retry them.
+
 ---
 
 ## Rule of thumb

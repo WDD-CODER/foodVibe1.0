@@ -157,7 +157,17 @@ Agent persona files live in `.claude/agents/`. Load on demand — do not pre-loa
 
 **Verification Gate:** After any change, agents follow `validation-checklist.md` — show the validation checklist, then ask "Should I verify this myself, or will you check it?" Do not auto-run `/qa`. If the user chooses agent verification and the dev server is unreachable, flag it to the user.
 
-**Build Verification Gate**: After any agent-written code, run `mcp__ide__getDiagnostics` or `ng build` before marking tasks `[x]`. Trust the compiler, not the agent's self-report.
+**Task Completion Contract**
+
+Three rules apply every time an agent marks a task `[x]`:
+
+**Rule 1 — Build before `[x]`:** After any agent-written code, run `mcp__ide__getDiagnostics` or `ng build` before marking tasks `[x]`. Trust the compiler, not the agent's self-report.
+
+**Rule 2 — Section sweep after `[x]`:** After writing a `[x]`, count remaining `[ ]` under the parent `### Plan NNN` heading in `.claude/todo.md`. If count > 0 → done. If count == 0 → read `.claude/skills/todo-archive/SKILL.md` and follow it in section-mode, passing the plan heading and your own agent name as `archived_by`. Relay the skill's report in your completion message.
+
+**Rule 3 — Never silently skip:** If the archive skill returns `kept` with `ARCHIVE-PENDING`, surface that exact pending reason in your completion message. Do not mark the task done in your own report until you've relayed the archive outcome.
+
+> Cursor agents and ambient edits: same contract applies. Cursor cannot invoke skills programmatically — instead, after marking `[x]`, read `todo-archive/SKILL.md` and follow it inline.
 
 ---
 

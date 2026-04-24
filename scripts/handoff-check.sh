@@ -62,6 +62,16 @@ if ! grep -q "## Next Steps" "$SESSION_STATE" 2>/dev/null; then
   ERRORS="${ERRORS}Warning: session-state.md is missing a '## Next Steps' section\n"
 fi
 
+if grep -q "<!-- ARCHIVE-PENDING:" "$SESSION_STATE" 2>/dev/null || \
+   grep -q "^## Pending Archive" "$SESSION_STATE" 2>/dev/null; then
+  # If Pending Archive section exists, make sure it's populated (not just a header)
+  if awk '/^## Pending Archive/,/^## /' "$SESSION_STATE" | grep -qE "None\.|- Plan"; then
+    : # OK — section has content
+  else
+    ERRORS="${ERRORS}Warning: ## Pending Archive section is empty — populate with either 'None.' or a list of pending plans\n"
+  fi
+fi
+
 if [ -n "$ERRORS" ]; then
   echo -e "Handoff check found issues:\n${ERRORS}Please fix these before ending the session."
 fi
