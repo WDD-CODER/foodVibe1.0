@@ -107,7 +107,9 @@ Credentials: <CREDS or "signup-mode">
 
 ## Your Task
 1. Set viewport 1366x768 via $B viewport 1366x768
-2. If flow is signup/login: perform auth actions, save creds on success (email: renderaudit+<YYYYMMDD>@foodvibe.test)
+2. If flow is signup: fill username=renderaudit<YYYYMMDD>, email=renderaudit+<YYYYMMDD>@foodvibe.test, password=<password>
+   Save credentials as: {"username":"renderaudit<YYYYMMDD>","email":"renderaudit+<YYYYMMDD>@foodvibe.test","password":"<password>"}
+   If flow is login: use credentials.username in the USERNAME field (NOT the email field). The login form has a username input (max 20 chars).
 3. Navigate to https://foodvibe.onrender.com<route>
 4. Execute the interactions with assigned F-probes
 5. After every save/delete: run $B network — flag 4xx/5xx (exclude expected recipe→dish resolver 404s)

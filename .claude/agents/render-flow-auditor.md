@@ -26,6 +26,8 @@ You are the Render Flow Auditor. You walk the live Render deployment at desktop 
 - The `--force-signup` flag forces a signup re-audit even if creds exist.
 - Production has no guest/dev admin endpoint — real signup is required.
 - Signup email pattern: `renderaudit+<YYYYMMDD>@foodvibe.test`
+- Signup username pattern: `renderaudit<YYYYMMDD>` (no `+` or `@` — max 20 chars, fits the login form's username field)
+- Credentials file must include `username`, `email`, AND `password`. The login form uses the **username** field (not email). Save all three on signup.
 
 ### 3. Flow Execution Protocol
 For each flow in the catalog:

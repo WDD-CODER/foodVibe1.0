@@ -198,3 +198,16 @@ $B console --cle	page.evaluate: TypeError: Cannot read properties of undefined (
 2026-04-24 11:31:42	Edit	C:\foodCo\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts	        error: () => {	
 2026-04-24 11:32:25	Write	C:\foodCo\foodVibe1.0\.claude\reports\render-audit\audit-report-20260424.md	### [MAJOR] NG04002 ΓÇö Route `/recipe-builder/edit/:id` does not exist	
 2026-04-24 20:04:02	Edit	C:\foodCo\foodVibe1.0\.claude\todo-archive.md	- [x] Error: interrupt success/warning; when current is error, enqueue so each error shown in order	
+2026-04-24 20:08:33	Write	C:\foodCo\foodVibe1.0\.claude\retrospectives\2026-04-24-17-05-render-flow-audito	**4. NG04002 re-classification**	
+2026-04-24 20:11:45	Edit	C:\foodCo\foodVibe1.0\.claude\agents\render-flow-auditor.md	   - **F6 ΓÇö Console error capture:** after every state change, run `$B console` ΓÇö flag any client-side exception or 	
+2026-04-24 20:11:48	Edit	C:\foodCo\foodVibe1.0\.claude\commands\render-flow-audit.md	6. After every state change: run $B console ΓÇö flag exceptions and unhandled rejections	
+2026-04-24 20:11:53	Edit	C:\foodCo\foodVibe1.0\CLAUDE.md	@{filePath=C:\foodCo\foodVibe1.0\CLAUDE.md; oldString=- **Build gate**: `ng build` must pass before any commit. No excep	
+2026-04-24 20:15:03	Edit	C:\foodCo\foodVibe1.0\src\app\shared\ai-recipe-modal\ai-recipe-modal.component.t	      if (msg.includes('Could not fetch') || msg.includes('resolves to a disallowed')) return 'ai_recipe_url_fetch_faile	
+2026-04-24 20:15:16	Edit	C:\foodCo\foodVibe1.0\src\app\shared\ai-recipe-modal\ai-recipe-modal.component.t	      if (msg.includes('Could not fetch') || msg.includes('resolves to a disallowed')) return 'ai_recipe_url_fetch_faile	
+2026-04-24 20:15:25	Edit	C:\foodCo\foodVibe1.0\src\app\shared\ai-recipe-modal\ai-recipe-modal.component.t	      if (msg.includes('Could not fetch') || msg.includes('resolves to a disallowed')) return 'ai_recipe_url_fetch_faile	
+2026-04-24 20:16:01	Edit	C:\foodCo\foodVibe1.0\public\assets\data\dictionary.json	    "ai_recipe_url_fetch_failed": "╫£╫É ╫á╫Ö╫¬╫ƒ ╫£╫Æ╫⌐╫¬ ╫£╫¢╫¬╫ò╫æ╫¬. ╫æ╫ô╫ò╫º ╫⌐╫ö╫º╫Ö╫⌐╫ò╫¿ ╫¬╫º╫Ö╫ƒ ╫ò╫á╫í╫ö ╫⌐╫ò╫æ	
+2026-04-24 20:16:18	Bash	ng build 2>&1 | tail -20	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-24 20:18:00	Bash	cat ~/.claude/skills/gstack/gstack-upgrade/SKILL.md 2>/dev/null | head -80	**If `AUTO_UPGRADE=true` or `AUTO_UPGRADE=1`:** Skip AskUserQuestion. Log "Auto-upgrading gstack v{old} ΓåÆ v{new}..." a	
+2026-04-24 20:19:09	Bash	cd C:/foodCo/foodVibe1.0 && ng build 2>&1 | tail -20	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-24 20:20:39	Edit	C:\foodCo\foodVibe1.0\.claude\todo-archive.md	- [x] Error: interrupt success/warning; when current is error, enqueue so each error shown in order	
+2026-04-24 20:20:59	Bash	cd C:/foodCo/foodVibe1.0 && git diff HEAD -- .claude/agents/render-flow-auditor.	-- **Build gate**: `ng build` must pass before any commit. No exceptions.	

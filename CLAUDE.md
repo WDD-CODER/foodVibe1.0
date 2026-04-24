@@ -20,7 +20,7 @@ Read the two files below at session start, then confirm **"Yes chef!"**
 - **Subagent MemPalace gate**: YOU run `mempalace_search()` before spawning any agent. Pass results as `## MemPalace Context` in the prompt. Never instruct subagents to call it themselves.
 - **Browser tools**: NEVER call `mcp__claude-in-chrome__*` or raw Playwright MCP directly. ALL browser interaction goes through `/browse` (gstack).
 - **No semicolons in `.ts` files.** Single quotes in TS, double quotes in HTML.
-- **Build gate**: `ng build` must pass before any commit. No exceptions.
+- **Build gate**: `ng build` must pass before any commit. No exceptions. Run it yourself after any TS/template/SCSS change — do not rely solely on the end-of-session agent's Phase 1 gate.
 - **Plugin cache edits**: Any edit to `~/.claude/plugins/cache/.../superpowers/` is overwritten on plugin version bump. Active tracked edit: `superpowers/*/skills/subagent-driven-development/implementer-prompt.md` — "Files changed" report section requires `git diff --name-only` label per file (`(new change)` vs `(pre-existing — no write needed)`). Re-apply after any superpowers plugin update.
 
 ---
