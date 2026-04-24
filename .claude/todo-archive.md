@@ -2057,3 +2057,12 @@ Update status after each sub-task. Link plan files here when applicable.
 ### Plan 167 — Category/unit add-new audit (`plans/167-category-unit-add-new-audit.plan.md`) [TRIAGED 2026-04-02]
 
 - [x] Optional: Cook-view "add new unit" so user can add from there
+
+---
+
+### Plan 072 — Robust login, app-wide logging, security (`plans/072-robust-login-app-logging-security.plan.md`) [VERIFIED 2026-04-24]
+
+- [x] Wire logging: auth (login/logout/signup/guard/401), HTTP interceptor, global ErrorHandler, critical CRUD in data services
+- [x] Auth hardening: password in UI, credentials types, local hash-only storage, auth abstraction, guard/modal wiring
+- [x] Backend-ready: environment files, API contract, HTTP provider, interceptor, token lifecycle
+- [x] Add "Security & go-live" checklist to docs (HTTPS, headers, rate limiting, no secrets in repo, error exposure)
