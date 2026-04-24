@@ -2013,3 +2013,47 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Labels: you should be able to select existing labels — already works via app-custom-multi-select
 - [x] Menu library: keyboard navigation — app-custom-select already has built-in keyboard nav
 - [x] Lists: sidebar aligns correctly to the list container on smaller screens (768px) — already fixed on branch
+
+---
+
+### Plan 089 — Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
+
+- [x] A: Auto-name menu with formatted date when name is empty on save, with duplicate handling (1), (2)
+- [x] Timestamps: Add updated_at_ to MenuEvent model; set created_at_ on create and updated_at_ on every save
+- [x] B: Set event_date_ default to today's date for new menus
+- [x] C: Redesign guest counter as unified pill-shaped container with paper-blend styling
+- [x] D1: Tie food cost calculation to serving_portions * guest_count, update service and component
+- [x] D2: Show sell_price inline next to dish name for all menu types
+- [x] E1: Make toolbar collapsible with fixed overlay when opened
+- [x] E2: Create floating FAB on right side with pop-up buttons for toolbar and back navigation
+- [x] Dictionary: Add new Hebrew dictionary keys for new labels
+
+---
+
+### Plan 247 — Reflect: self-improving skills system (`plans/247-reflect-skill-improvement-loop.plan.md`)
+
+- [x] Create `.claude/reflect/test-suites/` directory
+- [x] Create `.claude/reflect/test-suite-template.md`
+- [x] Create `.claude/reflect/evaluator.md` (immutable scoring)
+- [x] Create `.claude/reflect/reflection-log.tsv` (header only)
+- [x] Create `.claude/reflect/test-suites/angularComponentStructure.tests.md`
+- [x] Create `.claude/commands/reflect.md` (orchestrator)
+- [x] Verify all files exist and paths are correct
+
+---
+
+### Plan 134 — Translation and confirmation modals unified (`plans/134-translation-confirmation-modals-unified.plan.md`) [TRIAGED 2026-04-02]
+
+- [x] Other entry points: align with resolve first → modal if needed → already in parameter (metadata-manager, preparation-*, menu-section-categories, add-equipment-modal, recipe-workflow, add-supplier-flow)
+
+---
+
+### Plan 074 — Tech debt remediation (`plans/074-tech-debt-remediation.plan.md`) [TRIAGED 2026-04-02]
+
+- [x] Refactor menu-intelligence.page.scss into partials (deferred)
+
+---
+
+### Plan 167 — Category/unit add-new audit (`plans/167-category-unit-add-new-audit.plan.md`) [TRIAGED 2026-04-02]
+
+- [x] Optional: Cook-view "add new unit" so user can add from there

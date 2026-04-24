@@ -22,14 +22,14 @@
 
 ### Plan 259 — DB-Backed Shared Few-Shot Pool (`plans/259-gemini-shots-db-pool.plan.md`)
 
-- [ ] Task 1: `server/routes/ai.js` — add `GEMINI_SHOTS` helpers (`saveShot`, `getApprovedShots`, `computeSoftWarnings`), remove `buildFewShotBlock` from body path
-- [ ] Task 2: `server/routes/ai.js` — add `POST /api/v1/ai/shots` endpoint
-- [ ] Task 3: `server/routes/ai.js` — update `/generate`, `/generate-from-image`, `/generate-from-url` to fetch shots from DB server-side
-- [ ] Task 4: Create `src/app/core/services/gemini-shots.service.ts`
+- [x] Task 1: `server/routes/ai.js` — add `GEMINI_SHOTS` helpers (`saveShot`, `getApprovedShots`, `computeSoftWarnings`), remove `buildFewShotBlock` from body path
+- [x] Task 2: `server/routes/ai.js` — add `POST /api/v1/ai/shots` endpoint
+- [x] Task 3: `server/routes/ai.js` — update `/generate`, `/generate-from-image`, `/generate-from-url` to fetch shots from DB server-side
+- [x] Task 4: Create `src/app/core/services/gemini-shots.service.ts`
 - [ ] Task 5: `ai-recipe-modal.component.ts` — call shots service on approve/reject, show inline warnings
-- [ ] Task 6: `gemini.service.ts` — remove `getGeminiShots` import and `shots` from request bodies
-- [ ] Task 7: Deprecate `gemini-shots.util.ts` — remove `addGeminiShot` call from modal
-- [ ] Task 8: `ng build` + smoke test
+- [x] Task 6: `gemini.service.ts` — remove `getGeminiShots` import and `shots` from request bodies
+- [x] Task 7: Deprecate `gemini-shots.util.ts` — remove `addGeminiShot` call from modal
+- [x] Task 8: `ng build` + smoke test
 
 ---
 
@@ -47,8 +47,8 @@
 - [ ] Task 10: Investigate `scripts/trim-demo-data.mjs` — recurring or one-time? Add npm entry or delete
 - [x] Task 11: Add `git-agent.md` row to `§0.3` agent roster in `copilot-instructions.md`
 - [x] Task 12: Fix stale `commit-to-github Phase 0` reference in `.claude/agents/qa-engineer.md`
-- [ ] Task 14: Decide on `.claude/commands/reflect-add-tests.md` — add trigger or delete
-- [ ] Task 15: Decide on `.claude/commands/sweep-stale-todos.md` — verify pending update, then add trigger
+- [x] Task 14: Decide on `.claude/commands/reflect-add-tests.md` — add trigger or delete
+- [x] Task 15: Decide on `.claude/commands/sweep-stale-todos.md` — verify pending update, then add trigger
 - [ ] Task 16: Decide on `getGeminiShots()` in `gemini-shots.util.ts` — build read-back feature or remove orphan export
 
 ---
@@ -81,17 +81,6 @@
 
 ---
 
-### Plan 233 — Gemini Direct API + Modal Status Feedback (`plans/233-gemini-direct-api-modal-status.plan.md`) ✅❌ INTENTIONALLY PARTIAL
-> **Architecture pivot 2026-04-19:** Direct fetch + localStorage API key approach was dropped in favour of backend proxy (`/api/v1/ai/*`). Key lives server-side. Only the modal status feedback tasks were implemented.
-
-- [ ] ~~`gemini.service.ts` — fetch-based direct API, apiKey_ signal, hasKey, setApiKey()~~ **DROPPED — backend proxy kept; API key is server-side**
-- [ ] ~~`ai-recipe-modal.component.ts` — configuringKey_/keyInput_ signals, onSaveKey, API key guard~~ **DROPPED — no client-side key management**
-- [ ] ~~`ai-recipe-modal.component.html` — key config panel~~ **DROPPED**
-- [x] `ai-recipe-modal.component.ts` — status_ signal (idle/sending/done/error), onClose, status bar in HTML — **DONE**
-- [x] `ng build` — verify zero errors
-
----
-
 ### Plan 248 — Transloco Migration (`plans/248-transloco-migration.plan.md`)
 - [ ] Install `@jsverse/transloco` and configure `provideTransloco` in `src/app/app.config.ts` (standalone — do NOT run `ng add`)
 - [ ] Split `public/assets/data/dictionary.json` into 8 scoped files under `public/assets/i18n/he/`
@@ -106,51 +95,13 @@
 
 ---
 
-### Plan 247 — Reflect: self-improving skills system (`plans/247-reflect-skill-improvement-loop.plan.md`)
-- [ ] Create `.claude/reflect/test-suites/` directory
-- [ ] Create `.claude/reflect/test-suite-template.md`
-- [ ] Create `.claude/reflect/evaluator.md` (immutable scoring)
-- [ ] Create `.claude/reflect/reflection-log.tsv` (header only)
-- [ ] Create `.claude/reflect/test-suites/angularComponentStructure.tests.md`
-- [ ] Create `.claude/commands/reflect.md` (orchestrator)
-- [ ] Verify all files exist and paths are correct
-
----
-
-
-## 🔴 Quick Fixes
-
-### Plan 134 — Translation and confirmation modals unified (`plans/134-translation-confirmation-modals-unified.plan.md`) [TRIAGED 2026-04-02]
-
-- [x] Other entry points: align with resolve first → modal if needed → already in parameter (metadata-manager, preparation-*, menu-section-categories, add-equipment-modal, recipe-workflow, add-supplier-flow)
-
-### Plan 074 â€” Tech debt remediation (`plans/074-tech-debt-remediation.plan.md`) [TRIAGED 2026-04-02]
-
-- [x] Refactor menu-intelligence.page.scss into partials (deferred)
-
-### Plan 167 — Category/unit add-new audit (`plans/167-category-unit-add-new-audit.plan.md`) [TRIAGED 2026-04-02]
-- [x] Optional: Cook-view “add new unit” so user can add from there
-
----
 
 ## 🟠 Large Refactors
-
-### Plan 089 — Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
-
-- [ ] A: Auto-name menu with formatted date when name is empty on save, with duplicate handling (1), (2)
-- [ ] Timestamps: Add updated_at_ to MenuEvent model; set created_at_ on create and updated_at_ on every save
-- [x] B: Set event_date_ default to today's date for new menus
-- [x] C: Redesign guest counter as unified pill-shaped container with paper-blend styling
-- [x] D1: Tie food cost calculation to serving_portions * guest_count, update service and component
-- [x] D2: Show sell_price inline next to dish name for all menu types
-- [x] E1: Make toolbar collapsible with fixed overlay when opened
-- [x] E2: Create floating FAB on right side with pop-up buttons for toolbar and back navigation
-- [x] Dictionary: Add new Hebrew dictionary keys for new labels
 
 ### Plan 081 â€” toFix Detailed Plans (`plans/081-tofix-detailed-plans.plan.md`)
 
 - [ ] Section 1 â€” Sign-in / Sign-up: auto-focus, dev user dropdown, Enter-to-submit, field-level errors
-- [ ] Section 2 â€” Quick-add default base unit: set signal to 'gram'
+- [x] Section 2 â€” Quick-add default base unit: set signal to 'gram'
 - [ ] Section 3 â€” Recipe view: number formatting pipe, unit-before-scale, ingredient alignment
 - [ ] Section 4 â€” Recipe builder: persist container state, remove arrows, custom qty buttons, clickable headers, CDK drag-drop
 - [ ] Section 5 â€” Maison Plus (dish prep list): row style, qty buttons, category-first add flow, auto-focus
