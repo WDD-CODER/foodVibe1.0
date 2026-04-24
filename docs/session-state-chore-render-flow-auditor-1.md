@@ -11,29 +11,30 @@ chore/render-flow-auditor
 - Fixed three render-identified bugs: edit route redirect, auth-modal spinner, Gemini DB pool keepalive workflow
 - Added token-based context monitor Python hook + `/context-override` command
 - Archived Plans 072, 089, 247, 134, 074, 167 after verification; reorganised todo.md with Operational / In Progress / Large Refactors / Infrastructure / Roadmap / Deferred sections
+- **Plan 259 Task 5 DONE:** AI recipe modal now surfaces quality warnings before navigating to recipe builder (`onDraftApproved` captures `saveShot` response; `.ai-shot-warnings` panel with Back/Continue buttons; `pendingApprovedDraft_` signal)
+- **Plan 255 Task 16 DONE:** Deleted orphaned `gemini-shots.util.ts` (zero imports, DB approach live)
+- **Plan 284 Tasks 4+5 DONE:** Simplified `pre-compact-reminder.sh` (removed baseline block, added SAVE_TARGET + Post-Compact Resume); added Post-Compact Resume note to `session-startup.sh`
 
-## Files Modified
-32 files changed, 3573 insertions(+), 856 deletions(-)
-- .claude/agents/render-flow-auditor.md (new)
-- .claude/commands/render-flow-audit.md (new)
-- .claude/agents/end-of-session-agent.md
-- .claude/agents/team-leader.md / qa-engineer.md / security-officer.md / software-architect.md / product-manager.md
-- .claude/skills/context-management/SKILL.md (new)
-- .claude/commands/sweep-stale-todos.md (new)
-- .claude/copilot-instructions.md
-- scripts/handoff-check.sh (new)
-- src/app/app.routes.ts
-- src/app/components/auth-modal/auth-modal.component.html/.scss
-- src/app/pages/recipe-builder/recipe-builder.page.ts
-- .claude/todo.md (reorganised with section headers)
+## Open Plan Items (user decision needed)
+- **Plan 255 Tasks 8/9/10 — BLOCKED:** User unsure if prod migrations ran. Needs answers before deletions:
+  - Task 8: Was broken-ref repair applied in prod? YES → delete 3 scripts
+  - Task 9: Is master-layer migration complete in prod? YES → delete 2 scripts
+  - Task 10: Is trim-demo-data.mjs recurring or one-time done?
 
-## Commit
-8021ede
+## Commits This Session (not yet in main)
+- `53059cf` feat(ai-recipe-modal): surface quality warnings before navigating to recipe builder
+- `07b3a5c` chore(dead-code): delete orphaned gemini-shots.util.ts stub
+- `b95155a` chore(hooks): simplify pre-compact hook; add post-compact resume reminders
+- `c12314f` chore(todo): archive Plan 284; remove from active todo
+
+## Interrupted Mid-Ship
+`/ship` was invoked at end of session but hit context limit (73.5%). Stopped at Step 1 (pre-flight). No PR exists yet for this session's commits. **Next session: run `/ship` to create the PR.**
 
 ## PR
-https://github.com/WDD-CODER/foodVibe1.0/pull/140
+https://github.com/WDD-CODER/foodVibe1.0/pull/140 (previous session — may already be merged)
 
 ## Next Steps
-- [ ] Run stamp migration against Atlas; verify in Compass (Plan 234 — operational)
-- [ ] Complete Plan 259 Tasks 5–7 (DB-Backed Few-Shot Pool remaining steps)
-- [ ] Merge PR #140 once CI passes
+- [ ] New session: run `/ship` to push and create PR for this session's commits
+- [ ] Answer Plan 255 Tasks 8/9/10 blocked questions (prod migration state)
+- [ ] Continue auto-solve: Plan 081 Sections 1 and 9 (sign-in dropdown, label selector)
+- [ ] Plan 276 — Cook Mode Overlay (large refactor, needs planning first)
