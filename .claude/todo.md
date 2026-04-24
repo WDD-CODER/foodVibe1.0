@@ -20,19 +20,6 @@
 
 ---
 
-### Plan 262 — Mobile Layout Audit 375×812 (`plans/262-mobile-layout-audit.plan.md`)
-
-- [x] 1.1 Create ROUTE_INVENTORY.md from app.routes.ts — all paths, auth guards, children, page components
-- [x] 1.2 Read all page .component.html files — catalog interactive elements
-- [x] 1.3 Read shared/*.component.html files — catalog reusable interactive components
-- [x] 1.4 Write INTERACTIVE_CATALOG.md — page | element_selector | trigger_action | expected_behavior
-- [x] 2.1 /browse audit: launch localhost:4200 at 375×812, confirm RTL, screenshot all public pages
-- [x] 2.2 /browse audit: trigger all interactive elements per INTERACTIVE_CATALOG.md, screenshot each state
-- [x] 2.3 /browse audit: auth-required pages (login, then repeat crawl) — all auth pages captured; only /menu-library rows and /menu-intelligence/:id skipped (no DB data)
-- [x] 3.1 Create MOBILE_AUDIT_REPORT.md — critical/major/minor issues, clean pages, pass/fail checklist
-
----
-
 ### Plan 259 — DB-Backed Shared Few-Shot Pool (`plans/259-gemini-shots-db-pool.plan.md`)
 
 - [ ] Task 1: `server/routes/ai.js` — add `GEMINI_SHOTS` helpers (`saveShot`, `getApprovedShots`, `computeSoftWarnings`), remove `buildFewShotBlock` from body path
@@ -43,23 +30,6 @@
 - [ ] Task 6: `gemini.service.ts` — remove `getGeminiShots` import and `shots` from request bodies
 - [ ] Task 7: Deprecate `gemini-shots.util.ts` — remove `addGeminiShot` call from modal
 - [ ] Task 8: `ng build` + smoke test
-
----
-
-### Plan 258 — Quick-Edit Product Panel (`plans/258-quick-edit-product-panel.plan.md`)
-
-- [x] Create `src/app/core/services/quick-edit-product-modal.service.ts`
-- [x] Create `src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.ts`
-- [x] Create `src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.html`
-- [x] Create `src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.scss`
-- [x] Create `src/app/shared/quick-edit-product-modal/quick-edit-product-modal.component.ts`
-- [x] Create `src/app/shared/quick-edit-product-modal/quick-edit-product-modal.component.html`
-- [x] Create `src/app/shared/quick-edit-product-modal/quick-edit-product-modal.component.scss`
-- [x] Edit `src/app/appRoot/app.component.ts` — register QuickEditProductModalComponent
-- [x] Edit `src/app/appRoot/app.component.html` — add <app-quick-edit-product-modal/>
-- [x] Edit `recipe-ingredients-table.component.ts` — signals, helpers, badge handlers
-- [x] Edit `recipe-ingredients-table.component.html` — replace badge clicks, add accordion
-- [x] Edit `recipe-ingredients-table.component.scss` — .quick-edit-accordion grid-column
 
 ---
 
@@ -90,26 +60,6 @@
 - [ ] Task 3: Update `GeminiService.generateRecipe()` to call `getGeminiShots()` and pass shots to backend
 - [ ] Task 4: Repeat for `generateFromImage()` and `generateFromUrl()` (all generate endpoints)
 - [ ] Task 5: Verify `ng build` passes and test end-to-end in dev
-
----
-
-### Plan 254 — Recipe Ref Repair + Name Snapshot (`plans/254-recipe-ref-repair-and-name-snapshot.plan.md`)
-
-- [x] Task 1: `git checkout -b fix/recipe-ref-repair` — create new branch
-- [x] Task 2: Write `scripts/backup-before-repair.mjs`
-- [x] Task 3: Run backup — confirm non-empty
-- [x] Task 4: Write `scripts/repair-recipe-references.mjs`
-- [x] Task 5: Run dry-run — confirm counts
-- [x] Task 6: Run `--write` — confirm 118 fixed
-- [x] Task 7: `ingredient.model.ts` — add `nameSnapshot?: string`
-- [x] Task 8: `recipe-form.service.ts` `createIngredientGroup` — add nameSnapshot control
-- [x] Task 9: `recipe-form.service.ts` `buildRecipeFromForm` — persist nameSnapshot
-- [x] Task 10: `recipe-form.service.ts` `patchFormFromRecipe` — patch nameSnapshot
-- [x] Task 11: `recipe-ingredients-table.component.ts` `onItemSelected` — write nameSnapshot
-- [x] Task 12: `recipe-ingredients-table.component.ts` `getDisplayName` — nameSnapshot fallback
-- [x] Task 13: `recipe-ingredients-table.component.html` — unlinked marker
-- [x] Task 14: Run `--write --backfill-snapshot`
-- [x] Task 15: `scripts/seed-from-dump.js` — add count safety check
 
 ---
 
@@ -170,15 +120,6 @@
 
 ## 🔴 Quick Fixes
 
-### Plan 251 — Recipe Builder Ingredient Name Display Fix (`plans/251-recipe-builder-ingredient-name-display.plan.md`)
-- [x] Task 1: `recipe-form.service.ts` — add `name_hebrew` to `lastGroup.patchValue(...)` in `patchFormFromRecipe`
-- [x] Task 2: `recipe-ingredients-table.component.ts` — add `protected getDisplayName(group: FormGroup): string` method in GETTERS section
-- [x] Task 3: `recipe-ingredients-table.component.html` — replace `{{ group.get('name_hebrew')?.value }}` with `{{ getDisplayName(group) }}`
-
----
-
-## 🔴 Quick Fixes
-
 ### Plan 134 — Translation and confirmation modals unified (`plans/134-translation-confirmation-modals-unified.plan.md`) [TRIAGED 2026-04-02]
 
 - [x] Other entry points: align with resolve first → modal if needed → already in parameter (metadata-manager, preparation-*, menu-section-categories, add-equipment-modal, recipe-workflow, add-supplier-flow)
@@ -189,21 +130,6 @@
 
 ### Plan 167 — Category/unit add-new audit (`plans/167-category-unit-add-new-audit.plan.md`) [TRIAGED 2026-04-02]
 - [x] Optional: Cook-view “add new unit” so user can add from there
-
----
-
-## 🟡 Medium
-
-### Plan 182 + 163 — Visual & UX fix backlog (`plans/182-tofix-verification-undone.plan.md`, `plans/163-tofix-audit-prd.plan.md`)
-- [x] Recipe builder: remove up/down arrows in section titles — no such buttons exist (N/A)
-- [x] Recipe builder: clicking a card header collapses/expands it — already implemented on all 3 sections
-- [x] Logistics: chip labels get cut off — fixed flex-wrap + flex-shrink + fit-content
-- [x] Activity: “what changed” tag should show the old and new value (e.g. “Unit: kg → g”) — already done
-- [x] Add new category modal: focus flows Hebrew first — inline inputs, no focus gap found (N/A)
-- [x] App-wide: audit every category/unit dropdown — add “add new” option — added NEW_UNIT sentinel to product-form UOM select
-- [x] Labels: you should be able to select existing labels — already works via app-custom-multi-select
-- [x] Menu library: keyboard navigation — app-custom-select already has built-in keyboard nav
-- [x] Lists: sidebar aligns correctly to the list container on smaller screens (768px) — already fixed on branch
 
 ---
 
@@ -500,17 +426,17 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 *Excluded from audit: `plans/recipe-builder-page.md` (recipe book plan).*
 
 ### Plan 276 — Design System Token Gaps + Cook Mode Overlay
-- [x] A1: Add 7 missing token categories to src/styles.scss :root
-- [x] B1: Create cook-mode.component.ts (signals, inputs, timer logic)
-- [x] B2: Create cook-mode.component.html (3-variant template)
-- [x] B3: Create cook-mode.component.scss (RTL, tokens, variant styles)
-- [x] B4: Timer logic (start/pause/reset/step-change)
-- [x] B5: Ingredient check-off toggle
-- [x] B6: Swipe gesture handler (touch, RTL-aware)
-- [x] B7: Wake lock (feature-detect)
-- [x] C1: Add cook_mode_* translation keys to dictionary.json
-- [x] C2: Wire "Start Cook Mode" button in cook-view.page
-- [x] D1: ng build verification
+- [ ] A1: Add 7 missing token categories to src/styles.scss :root
+- [ ] B1: Create cook-mode.component.ts (signals, inputs, timer logic)
+- [ ] B2: Create cook-mode.component.html (3-variant template)
+- [ ] B3: Create cook-mode.component.scss (RTL, tokens, variant styles)
+- [ ] B4: Timer logic (start/pause/reset/step-change)
+- [ ] B5: Ingredient check-off toggle
+- [ ] B6: Swipe gesture handler (touch, RTL-aware)
+- [ ] B7: Wake lock (feature-detect)
+- [ ] C1: Add cook_mode_* translation keys to dictionary.json
+- [ ] C2: Wire "Start Cook Mode" button in cook-view.page
+- [ ] D1: ng build verification
 
 
 ---
