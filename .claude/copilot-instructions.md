@@ -135,6 +135,7 @@ Agent persona files live in `.claude/agents/`. Load on demand — do not pre-loa
 | Breadcrumb Navigator | `skills/breadcrumb-navigator/SKILL.md` (agent file removed — skill is sufficient) | New `pages/<x>/` or app subtree; structural changes; after update-docs |
 | QA Engineer | `qa-engineer.md` | Spec gaps; diagnosing failing tests; E2E creation |
 | Mobile Flow Auditor | `mobile-flow-auditor.md` | Mobile layout regression hunt; pre-release UX sanity check; after any shared UI or layout change |
+| Render Flow Auditor | `render-flow-auditor.md` | Post-deploy production smoke; reproducing a reported prod-only bug; pre-release functional sanity |
 | Security Officer | `security-officer.md` | Post-feature review of auth/storage/route changes; pre-deploy; security consult |
 | Git Agent | `git-agent.md` | All git operations: commit, push, PR creation, merge, branch management |
 | End-of-Session Agent | `end-of-session-agent.md` | Session wrap-up: "done", "wrap up", "ship", "handoff", "end session", "finish up" |
