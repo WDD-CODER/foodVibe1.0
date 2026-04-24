@@ -57,7 +57,7 @@ if [ -f "$SESSION_STATE" ]; then
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
     "decision": {
-      "additionalContext": "Previous session state loaded from: $SESSION_STATE\\n$CONTENT\\n\\n---\\nSESSION SAVE TARGET: $SAVE_PATH\\nWhen ending this session, write session-state to the path above (not docs/session-state.md directly). This prevents parallel sessions on the same branch from overwriting each other."
+      "additionalContext": "Previous session state loaded from: $SESSION_STATE\\n$CONTENT\\n\\n---\\nSESSION SAVE TARGET: $SAVE_PATH\\nWhen ending this session, write session-state to the path above (not docs/session-state.md directly). This prevents parallel sessions on the same branch from overwriting each other.\\n\\nPost-Compact Resume: If this session started after \/compact, early conversation history has been compressed — the state file above is your memory bridge."
     }
   }
 }
@@ -69,7 +69,7 @@ else
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
     "decision": {
-      "additionalContext": "No previous session state found for branch: ${BRANCH}.\\n\\n---\\nSESSION SAVE TARGET: $SAVE_PATH\\nWhen ending this session, write session-state to the path above."
+      "additionalContext": "No previous session state found for branch: ${BRANCH}.\\n\\n---\\nSESSION SAVE TARGET: $SAVE_PATH\\nWhen ending this session, write session-state to the path above.\\n\\nPost-Compact Resume: If this session started after \/compact, early conversation history has been compressed — create a session-state file at the path above to serve as your memory bridge."
     }
   }
 }
