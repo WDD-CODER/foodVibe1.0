@@ -28,7 +28,7 @@
 - [x] Task 2: `server/routes/ai.js` — add `POST /api/v1/ai/shots` endpoint
 - [x] Task 3: `server/routes/ai.js` — update `/generate`, `/generate-from-image`, `/generate-from-url` to fetch shots from DB server-side
 - [x] Task 4: Create `src/app/core/services/gemini-shots.service.ts`
-- [ ] Task 5: `ai-recipe-modal.component.ts` — call shots service on approve/reject, show inline warnings
+- [x] Task 5: `ai-recipe-modal.component.ts` — call shots service on approve/reject, show inline warnings
 - [x] Task 6: `gemini.service.ts` — remove `getGeminiShots` import and `shots` from request bodies
 - [x] Task 7: Deprecate `gemini-shots.util.ts` — remove `addGeminiShot` call from modal
 - [x] Task 8: `ng build` + smoke test

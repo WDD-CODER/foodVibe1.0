@@ -256,12 +256,32 @@
           </div>
 
         } @else {
-          <!-- Create preview — interactive editor -->
-          <app-ai-draft-editor
-            [draft]="draft_()!"
-            (approved)="onDraftApproved($event)"
-            (generateAgain)="onGenerateAgain()"
-          />
+          <!-- Create preview — interactive editor or warning confirmation -->
+          @if (awaitingWarningConfirm_()) {
+            <div class="ai-shot-warnings">
+              <p class="ai-patch-preview-label">{{ 'ai_recipe_quality_warnings' | translatePipe }}</p>
+              @for (w of shotWarnings_(); track w) {
+                <div class="ai-shot-warning-item">
+                  <lucide-icon name="alert-triangle" [size]="14"></lucide-icon>
+                  <span>{{ w }}</span>
+                </div>
+              }
+            </div>
+            <div class="ai-modal-footer">
+              <button type="button" class="c-btn-ghost" (click)="onBackFromWarnings()">
+                {{ 'back' | translatePipe }}
+              </button>
+              <button type="button" class="c-btn-primary" (click)="onConfirmWarnings()">
+                {{ 'ai_recipe_continue_anyway' | translatePipe }}
+              </button>
+            </div>
+          } @else {
+            <app-ai-draft-editor
+              [draft]="draft_()!"
+              (approved)="onDraftApproved($event)"
+              (generateAgain)="onGenerateAgain()"
+            />
+          }
         }
       }
 

@@ -381,6 +381,8 @@
     "ai_recipe_image_preview_alt": "תצוגה מקדימה",
     "ai_recipe_upload_image_hint": "לחץ להעלאת תמונה של מתכון",
     "ai_recipe_response_received": "תשובה התקבלה",
+    "ai_recipe_quality_warnings": "הערות איכות לפני שמירה",
+    "ai_recipe_continue_anyway": "המשך בכל זאת",
     "ai_recipe_open_anyway": "פתח בכל זאת",
     "ai_recipe_clear_draft": "נקה",
     "ai_recipe_no_name": "ללא שם",
