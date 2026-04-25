@@ -111,3 +111,9 @@ apply-*.js
 
 # Render audit credentials (local only)
 .claude/reports/render-audit/.credentials.json
+
+# Session manifests — per-session runtime state, never commit
+.claude/sessions/
+
+# GCM diagnostic log — dumps all env vars including secrets
+gcm-diagnose.log
