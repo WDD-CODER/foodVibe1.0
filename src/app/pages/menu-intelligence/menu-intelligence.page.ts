@@ -214,7 +214,10 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   ngOnInit(): void {
     this.menuAiFlow_.init({ menuForm: this.form_ })
     this.heroFab.setPageActions(
-      [{ labelKey: 'menu_toolbar_open', icon: 'printer', run: () => this.openToolbar() }],
+      [
+        { labelKey: 'ai_menu_open', icon: 'sparkles', run: () => this.openAiMenuModal() },
+        { labelKey: 'menu_toolbar_open', icon: 'printer', run: () => this.openToolbar() },
+      ],
       'replace'
     )
     this.router.events
@@ -1160,22 +1163,19 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   protected openAiMenuModal(): void {
     const hasContent = this.sectionsArray.length > 0
-    if (!hasContent) {
+    if (hasContent) {
+      this.aiMenuModal_.open(
+        'edit',
+        this.buildAiMenuSnapshot_(),
+        undefined,
+        (patch) => this.menuAiFlow_.applyPatch(patch),
+      )
+    } else {
       this.aiMenuModal_.open(
         'create',
         undefined,
         (matched: MatchedMenu, resolutions) => this.menuAiFlow_.applyMatchedMenu(matched, resolutions),
       )
-    } else {
-      void this.confirmModal_.open('ai_menu_replace_confirm').then((confirmed) => {
-        if (!confirmed) return
-        this.aiMenuModal_.open(
-          'edit',
-          this.buildAiMenuSnapshot_(),
-          undefined,
-          (patch) => this.menuAiFlow_.applyPatch(patch),
-        )
-      })
     }
   }
 

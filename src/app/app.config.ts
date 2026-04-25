@@ -91,7 +91,9 @@ import {
   Dumbbell,
   Wheat,
   Candy,
-  Waves
+  Waves,
+  CheckCircle,
+  HelpCircle
 } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { provideHttpClient, withInterceptors } from '@angular/common/http'
@@ -216,7 +218,9 @@ export const appConfig: ApplicationConfig = {
         Dumbbell,
         Wheat,
         Candy,
-        Waves
+        Waves,
+        CheckCircle,
+        HelpCircle
       })
     )
   ]
