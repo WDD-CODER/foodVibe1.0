@@ -2,6 +2,33 @@
 
 ---
 
+### Plan 285 — AI Menu Phase 1 (`plans/285-ai-menu-phase1.plan.md`)
+
+- [x] 1.1.1 `server/routes/ai.js` — add MENU_GENERATE_SYSTEM_PROMPT
+- [x] 1.1.2 `server/routes/ai.js` — add validateMenuDraft() helper
+- [x] 1.1.3 `server/routes/ai.js` — add POST /generate-menu endpoint
+- [x] 1.1.4 `server/routes/ai.js` — add MENU_PATCH_SYSTEM_PROMPT
+- [x] 1.1.5 `server/routes/ai.js` — add POST /patch-menu endpoint
+- [x] 1.2.1 `src/app/core/models/ai-menu-draft.model.ts` — create
+- [x] 1.2.2 `src/app/core/utils/recipe-match.util.ts` — create
+- [x] 1.2.3 `src/app/core/services/gemini.service.ts` — add generateMenu() + patchMenu()
+- [x] 1.2.4 `src/app/pages/menu-intelligence/services/menu-ai-flow.service.ts` — create
+- [x] 1.3.1 `src/app/shared/ai-menu-modal/ai-menu-modal.service.ts` — create
+- [x] 1.3.2 `src/app/shared/ai-menu-modal/ai-menu-modal.component.ts` — create
+- [x] 1.3.3 `src/app/shared/ai-menu-modal/ai-menu-modal.component.html` — create
+- [x] 1.3.4 `src/app/shared/ai-menu-modal/ai-menu-modal.component.scss` — create
+- [x] 1.3.5 `src/app/appRoot/app.component.html` — add `<app-ai-menu-modal/>`
+- [x] 1.3.6 `src/app/appRoot/app.component.ts` — import AiMenuModalComponent
+- [x] 1.3.7 `public/assets/data/dictionary.json` — add 19 ai_menu_* keys
+- [x] 1.4.1 `menu-intelligence.page.ts` — providers + inject + ngOnInit init()
+- [x] 1.4.2 `menu-intelligence.page.ts` — openAiMenuModal() + buildAiMenuSnapshot_()
+- [x] 1.4.3 `menu-intelligence.page.html` — add AI button
+- [x] 1.4.4 `menu-library-list.component.ts + .html` — onCreateWithAi() + button
+- [x] 1.4.5 `public/assets/data/dictionary.json` — add 4 integration keys
+- [x] BG — ng build 0 errors
+
+---
+
 
 
 ### Plan 234 — Per-User Collections + Render Deployment — operational tasks re-opened (`plans/234-per-user-collections-render-deploy.plan.md`)

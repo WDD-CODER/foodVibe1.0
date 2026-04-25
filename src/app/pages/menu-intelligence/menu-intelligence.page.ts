@@ -30,6 +30,10 @@ import { ExportPreviewComponent } from 'src/app/shared/export-preview/export-pre
 import { HeroFabService } from '@services/hero-fab.service'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { MenuDishRowComponent } from './components/menu-dish-row/menu-dish-row.component'
+import { ConfirmModalService } from '@services/confirm-modal.service'
+import { AiMenuModalService } from '../../shared/ai-menu-modal/ai-menu-modal.service'
+import { MenuAiFlowService } from './services/menu-ai-flow.service'
+import type { AiMenuDraft, MatchedMenu } from '@models/ai-menu-draft.model'
 
 type MenuItemForm = {
   recipe_id_: string
@@ -52,6 +56,7 @@ type MenuSectionFormRaw = { _id?: string; name_?: string; items_?: MenuItemForm[
   templateUrl: './menu-intelligence.page.html',
   styleUrl: './menu-intelligence.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [MenuAiFlowService],
 })
 export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder)
@@ -69,6 +74,9 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private readonly exportService = inject(ExportService)
   private readonly heroFab = inject(HeroFabService)
   private readonly destroyRef = inject(DestroyRef)
+  private readonly confirmModal_ = inject(ConfirmModalService)
+  private readonly aiMenuModal_ = inject(AiMenuModalService)
+  private readonly menuAiFlow_ = inject(MenuAiFlowService)
 
   /** Bumped when form value changes so footer computeds re-run (form is not a signal). */
   private readonly formValueVersion_ = signal(0)
@@ -204,6 +212,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.menuAiFlow_.init({ menuForm: this.form_ })
     this.heroFab.setPageActions(
       [{ labelKey: 'menu_toolbar_open', icon: 'printer', run: () => this.openToolbar() }],
       'replace'
@@ -1147,6 +1156,47 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     })
 
     this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue())
+  }
+
+  protected openAiMenuModal(): void {
+    const hasContent = this.sectionsArray.length > 0
+    if (!hasContent) {
+      this.aiMenuModal_.open(
+        'create',
+        undefined,
+        (matched: MatchedMenu, resolutions) => this.menuAiFlow_.applyMatchedMenu(matched, resolutions),
+      )
+    } else {
+      void this.confirmModal_.open('ai_menu_replace_confirm').then((confirmed) => {
+        if (!confirmed) return
+        this.aiMenuModal_.open(
+          'edit',
+          this.buildAiMenuSnapshot_(),
+          undefined,
+          (patch) => this.menuAiFlow_.applyPatch(patch),
+        )
+      })
+    }
+  }
+
+  private buildAiMenuSnapshot_(): AiMenuDraft {
+    const raw = this.form_.getRawValue()
+    return {
+      name_: raw.name_ ?? '',
+      event_type_: raw.event_type_ ?? '',
+      event_date_: raw.event_date_ ?? null,
+      serving_type_: raw.serving_type_ ?? 'plated_course',
+      guest_count_: Number(raw.guest_count_ ?? 0),
+      sections_: (raw.sections_ ?? []).map((sec: { name_?: string; items_?: { recipe_id_?: string; predicted_take_rate_?: number; serving_portions?: number; sell_price?: number }[] }) => ({
+        category: sec.name_ ?? '',
+        items: (sec.items_ ?? []).map((item) => ({
+          name_hebrew: '',
+          predicted_take_rate_: item.predicted_take_rate_ ?? 0.4,
+          serving_portions: item.serving_portions ?? 1,
+          sell_price: item.sell_price ?? 0,
+        })),
+      })),
+    }
   }
 
   private buildEventFromForm(): Omit<MenuEvent, '_id'> {

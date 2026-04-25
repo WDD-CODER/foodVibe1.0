@@ -92,6 +92,12 @@
       }
     </div>
 
+    <!-- AI pill -->
+    <button type="button" class="pill pill--ai no-print" (click)="openAiMenuModal()">
+      <lucide-icon name="sparkles" [size]="14"></lucide-icon>
+      {{ 'ai_menu_open' | translatePipe }}
+    </button>
+
     <!-- Save pill -->
     <button type="button" class="pill pill--save" (click)="save()" [disabled]="isSaving_()">
       @if (isSaving_()) {

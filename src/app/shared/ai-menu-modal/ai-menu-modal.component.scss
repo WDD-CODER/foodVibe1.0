@@ -1,0 +1,264 @@
+.ai-menu-modal-card {
+  inline-size: min(640px, 94vw);
+  max-block-size: 88vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ai-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block-end: 0.5rem;
+  border-block-end: 1px solid var(--border-light, rgba(0 0 0 / 0.08));
+}
+
+.ai-menu-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+// ── Usage bar ─────────────────────────────────────────────────────────────────
+
+.ai-menu-usage-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+
+  &[data-status='danger'] .ai-menu-usage-fill { background: var(--c-danger, #e53e3e); }
+  &[data-status='warning'] .ai-menu-usage-fill { background: var(--c-warning, #dd6b20); }
+  &[data-status='ok'] .ai-menu-usage-fill { background: var(--c-accent, #3182ce); }
+}
+
+.ai-menu-usage-track {
+  flex: 1;
+  block-size: 4px;
+  border-radius: 2px;
+  background: var(--border-light, rgba(0 0 0 / 0.1));
+  overflow: hidden;
+}
+
+.ai-menu-usage-fill {
+  block-size: 100%;
+  transition: width 0.3s ease;
+}
+
+// ── Prompt / instruction panel ────────────────────────────────────────────────
+
+.ai-menu-prompt-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ai-menu-textarea {
+  inline-size: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border-light, rgba(0 0 0 / 0.15));
+  border-radius: 8px;
+  font-size: 0.9rem;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+
+  &:focus {
+    outline: none;
+    border-color: var(--c-accent, #3182ce);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+// ── Status bar ────────────────────────────────────────────────────────────────
+
+.ai-menu-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  background: var(--bg-subtle, rgba(0 0 0 / 0.04));
+
+  &.ai-menu-status--sending {
+    color: var(--c-accent, #3182ce);
+  }
+
+  &.ai-menu-status--error {
+    color: var(--c-danger, #e53e3e);
+    background: rgba(229 62 62 / 0.06);
+  }
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+
+.ai-menu-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding-block-start: 0.25rem;
+}
+
+// ── Preview panel ─────────────────────────────────────────────────────────────
+
+.ai-menu-preview-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ai-menu-preview-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.ai-menu-meta-name {
+  font-weight: 600;
+}
+
+.ai-menu-meta-guests {
+  color: var(--text-secondary, rgba(0 0 0 / 0.55));
+  font-size: 0.8rem;
+}
+
+.ai-menu-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ai-menu-section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  color: var(--text-secondary, rgba(0 0 0 / 0.6));
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ai-menu-dish-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.ai-menu-dish-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: 6px;
+  background: var(--bg-subtle, rgba(0 0 0 / 0.03));
+
+  &[data-status='ambiguous'],
+  &[data-status='unmatched'] {
+    flex-direction: column;
+  }
+}
+
+.ai-menu-dish-icon {
+  flex-shrink: 0;
+  margin-block-start: 2px;
+
+  &--matched { color: var(--c-success, #38a169); }
+  &--ambiguous { color: var(--c-warning, #dd6b20); }
+  &--unmatched { color: var(--c-danger, #e53e3e); }
+}
+
+.ai-menu-dish-name {
+  flex: 1;
+  font-size: 0.875rem;
+
+  &--placeholder {
+    color: var(--text-secondary, rgba(0 0 0 / 0.55));
+    font-style: italic;
+  }
+}
+
+.ai-menu-unmatched-note {
+  font-size: 0.75rem;
+  color: var(--text-secondary, rgba(0 0 0 / 0.5));
+}
+
+.ai-menu-change-btn {
+  opacity: 0.5;
+  transition: opacity 0.15s;
+
+  &:hover { opacity: 1; }
+}
+
+// ── Candidate picker ──────────────────────────────────────────────────────────
+
+.ai-menu-candidates {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-inline-start: 1.5rem;
+  inline-size: 100%;
+}
+
+.ai-menu-candidates-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary, rgba(0 0 0 / 0.5));
+  margin: 0 0 0.25rem;
+}
+
+.ai-menu-candidate-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.825rem;
+  cursor: pointer;
+}
+
+.ai-menu-candidate-score {
+  font-size: 0.7rem;
+  color: var(--text-secondary, rgba(0 0 0 / 0.45));
+  margin-inline-start: auto;
+}
+
+.ai-menu-skip-btn {
+  align-self: flex-start;
+  font-size: 0.75rem;
+  padding-block: 0.2rem;
+  padding-inline: 0.5rem;
+}
+
+// ── Patch panel ───────────────────────────────────────────────────────────────
+
+.ai-menu-patch-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ai-menu-patch-title {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.ai-menu-patch-list {
+  list-style: disc;
+  padding-inline-start: 1.25rem;
+  margin: 0;
+  font-size: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ai-menu-patch-item {
+  color: var(--text-secondary, rgba(0 0 0 / 0.7));
+}
