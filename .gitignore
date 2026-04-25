@@ -111,3 +111,4 @@ apply-*.js
 
 # Render audit credentials (local only)
 .claude/reports/render-audit/.credentials.json
+gcm-diagnose.log

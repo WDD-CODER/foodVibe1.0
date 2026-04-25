@@ -71,7 +71,7 @@
 .nb-header {
   font-size: 0.62rem;
   font-weight: 700;
-  color: #14b8a6;
+  color: var(--color-primary);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   text-align: center;
@@ -111,7 +111,7 @@
 
 .nb-legend-pct {
   font-size: 0.58rem;
-  color: #64748b;
+  color: var(--color-text-muted);
   font-weight: 600;
   line-height: 1;
 }
@@ -138,7 +138,7 @@
 
     .nb-row-label {
       font-size: 0.66rem;
-      color: #94a3b8;
+      color: var(--color-text-muted-light);
     }
 
     .nb-row-val {
@@ -164,7 +164,7 @@
 
 .nb-row-val {
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-text-main);
   white-space: nowrap;
   display: flex;
   align-items: baseline;
@@ -174,7 +174,7 @@
 .nb-row-unit {
   font-size: 0.6rem;
   font-weight: 500;
-  color: #64748b;
+  color: var(--color-text-muted);
 }
 
 // ─── Fat SVG icon ─────────────────────────────────────────────────────────────
@@ -193,7 +193,7 @@
 
 .nb-note {
   font-size: 0.58rem;
-  color: #94a3b8;
+  color: var(--color-text-muted-light);
   text-align: center;
   margin-top: 5px;
   line-height: 1.3;
