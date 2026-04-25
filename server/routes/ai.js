@@ -579,6 +579,241 @@ router.post('/patch-recipe', verifyToken, async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// POST /generate-menu
+// Accepts { rawText: string }.
+// Gemini reads the natural-language description and returns a structured menu draft.
+// Response: { menu: AiMenuDraft }
+// Requires a valid JWT.
+// ---------------------------------------------------------------------------
+
+const MENU_GENERATE_SYSTEM_PROMPT = `You are an expert catering menu planner. You will receive a natural-language description (possibly in Hebrew or English) of a catering event and you must produce a complete structured menu draft.
+
+## Output format
+
+Return ONLY valid JSON — no markdown, no explanation, no code blocks. Raw JSON only.
+
+{
+  "name_": "<event name in Hebrew>",
+  "event_type_": "<type of event in Hebrew, e.g. חתונה, בר מצווה, ימי הולדת>",
+  "event_date_": "<ISO 8601 date string, e.g. 2025-12-31, or null if not specified>",
+  "serving_type_": "<one of: plated_course | buffet | finger_food | family_style>",
+  "guest_count_": <integer number of guests>,
+  "sections_": [
+    {
+      "category": "<section name in Hebrew, e.g. ראשונות, עיקריות, קינוחים>",
+      "items": [
+        {
+          "name_hebrew": "<dish name in Hebrew>",
+          "predicted_take_rate_": <number between 0 and 1 representing expected take rate, or null>,
+          "serving_portions": <integer number of portions needed, or null>,
+          "sell_price": <number in ILS per portion, or null>
+        }
+      ]
+    }
+  ]
+}
+
+## Rules
+
+- serving_type_ MUST be exactly one of these four English keys: plated_course | buffet | finger_food | family_style — never Hebrew
+- Infer serving_type_ from context: מנות אישיות → plated_course, בופה → buffet, פינגר פוד / אצבעות → finger_food, מנות משפחתיות → family_style
+- sections_ must be a non-empty array with at least one section
+- Each section must have at least one item
+- All dish names in Hebrew
+- predicted_take_rate_ is a fraction 0–1 (e.g. 0.8 means 80% of guests will take this dish)
+- guest_count_ must be a positive integer
+- If event_date_ is not specified, return null`;
+
+function validateMenuDraft(menu) {
+  const errors = [];
+  if (!menu || typeof menu !== 'object') { errors.push('menu must be an object'); return errors; }
+  if (typeof menu.name_ !== 'string' || !menu.name_.trim()) errors.push('name_ must be a non-empty string');
+  const validServingTypes = ['plated_course', 'buffet', 'finger_food', 'family_style'];
+  if (!validServingTypes.includes(menu.serving_type_)) errors.push(`serving_type_ must be one of: ${validServingTypes.join(', ')}`);
+  if (typeof menu.guest_count_ !== 'number' || menu.guest_count_ <= 0) errors.push('guest_count_ must be a positive number');
+  if (!Array.isArray(menu.sections_) || menu.sections_.length === 0) errors.push('sections_ must be a non-empty array');
+  return errors;
+}
+
+router.post('/generate-menu', verifyToken, async (req, res) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ error: 'AI generation is not configured on this server' });
+  }
+
+  const currentCount = await getUsageCount();
+  if (currentCount >= DAILY_LIMIT) {
+    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
+  }
+
+  const { rawText } = req.body;
+  if (!rawText || typeof rawText !== 'string' || !rawText.trim()) {
+    return res.status(400).json({ error: 'rawText is required' });
+  }
+
+  try {
+    const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: MENU_GENERATE_SYSTEM_PROMPT }] },
+        contents: [{ role: 'user', parts: [{ text: rawText }] }],
+        generationConfig: { temperature: 0.7, maxOutputTokens: 4096 },
+      }),
+      signal: AbortSignal.timeout(45000),
+    });
+
+    if (!geminiRes.ok) {
+      const errBody = await geminiRes.text();
+      console.error('[ai/generate-menu] Gemini API error:', errBody);
+      return res.status(502).json({ error: 'Gemini API error' });
+    }
+
+    const geminiData = await geminiRes.json();
+    let raw = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      console.error('[ai/generate-menu] JSON parse failed:', raw);
+      return res.status(502).json({ error: 'Gemini returned invalid JSON' });
+    }
+
+    const validationErrors = validateMenuDraft(parsed);
+    if (validationErrors.length > 0) {
+      console.error('[ai/generate-menu] validation failed:', validationErrors);
+      return res.status(502).json({ error: 'Gemini returned invalid menu draft', details: validationErrors });
+    }
+
+    await incrementUsage();
+    return res.json({ menu: parsed });
+  } catch (err) {
+    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
+      console.error('[ai/generate-menu] timeout');
+      return res.status(504).json({ error: 'Gemini request timed out' });
+    }
+    console.error('[ai/generate-menu]', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /patch-menu
+// Accepts { currentMenu: AiMenuDraft, instruction: string }.
+// Gemini reads the current menu + user instruction and returns ONLY the
+// fields that should change as a sparse patch object.
+// Response: { changes: { name_?, event_type_?, event_date_?, serving_type_?, guest_count_?, sections_? } }
+// Requires a valid JWT.
+// ---------------------------------------------------------------------------
+
+const MENU_PATCH_SYSTEM_PROMPT = `You are an intelligent catering menu editor. You will receive:
+1. The CURRENT MENU as a JSON object
+2. The USER'S INSTRUCTION — a natural-language request (possibly in Hebrew or English)
+
+Your job is to produce a SPARSE PATCH — a JSON object containing ONLY the fields the user asked to change.
+Do NOT include fields that were not mentioned or implied by the instruction.
+
+## Rules
+
+### Field keys you may include in the patch:
+- "name_" — string: new event name
+- "event_type_" — string: new event type in Hebrew
+- "event_date_" — string: ISO 8601 date or null
+- "serving_type_" — string: MUST be one of plated_course | buffet | finger_food | family_style (English keys only)
+- "guest_count_" — number: new guest count
+- "sections_" — array: FULL replacement array of all sections (only include if user explicitly changes dish lineup or sections)
+
+### Decision rules:
+- Only include keys that the user clearly wants to change
+- If user says "change guest count to 150" → include ONLY "guest_count_"
+- If user says "add a dessert section with chocolate cake" → include ONLY "sections_" with the full updated sections array
+- If ambiguous, prefer minimal changes
+
+### sections_ format (when included — full replacement):
+[
+  { "category": "<Hebrew section name>", "items": [{ "name_hebrew": "<Hebrew>", "predicted_take_rate_": <0-1 or null>, "serving_portions": <number or null>, "sell_price": <number or null> }] }
+]
+
+Return ONLY valid JSON. No markdown, no explanation, no code blocks. Raw JSON only.
+
+Format:
+{
+  "changes": {
+    ... only the fields being changed ...
+  }
+}`;
+
+router.post('/patch-menu', verifyToken, async (req, res) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ error: 'AI generation is not configured on this server' });
+  }
+
+  const { currentMenu, instruction } = req.body;
+  if (!currentMenu || typeof currentMenu !== 'object') {
+    return res.status(400).json({ error: 'currentMenu is required' });
+  }
+  if (!instruction || typeof instruction !== 'string' || !instruction.trim()) {
+    return res.status(400).json({ error: 'instruction is required' });
+  }
+
+  const currentCount = await getUsageCount();
+  if (currentCount >= DAILY_LIMIT) {
+    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
+  }
+
+  try {
+    const userMessage = `CURRENT MENU:\n${JSON.stringify(currentMenu, null, 2)}\n\nUSER INSTRUCTION:\n${instruction}`;
+
+    const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: MENU_PATCH_SYSTEM_PROMPT }] },
+        contents: [{ role: 'user', parts: [{ text: userMessage }] }],
+        generationConfig: { temperature: 0.3, maxOutputTokens: 4096 },
+      }),
+      signal: AbortSignal.timeout(45000),
+    });
+
+    if (!geminiRes.ok) {
+      const errBody = await geminiRes.text();
+      console.error('[ai/patch-menu] Gemini API error:', errBody);
+      return res.status(502).json({ error: 'Gemini API error' });
+    }
+
+    const geminiData = await geminiRes.json();
+    let raw = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      console.error('[ai/patch-menu] JSON parse failed:', raw);
+      return res.status(502).json({ error: 'Gemini returned invalid JSON' });
+    }
+
+    if (!parsed.changes || typeof parsed.changes !== 'object') {
+      console.error('[ai/patch-menu] missing changes key:', parsed);
+      return res.status(502).json({ error: 'Gemini returned invalid patch format' });
+    }
+
+    await incrementUsage();
+    return res.json({ changes: parsed.changes });
+  } catch (err) {
+    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
+      console.error('[ai/patch-menu] timeout');
+      return res.status(504).json({ error: 'Gemini request timed out' });
+    }
+    console.error('[ai/patch-menu]', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
 // POST /generate-from-image
 // Accepts { imageBase64: string, mimeType: string }.
 // Sends the image to Gemini via inline_data alongside the SYSTEM_PROMPT and
