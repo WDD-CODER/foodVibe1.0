@@ -129,6 +129,12 @@ export class GeminiService {
     return data.menu
   }
 
+  async saveMenuShot(prompt: string, menu: AiMenuDraft): Promise<void> {
+    await firstValueFrom(
+      this.http_.post(`${this.authBase_}/api/v1/ai/save-menu-shot`, { prompt, menu })
+    )
+  }
+
   async patchMenu(currentMenu: AiMenuDraft, instruction: string): Promise<AiMenuPatch> {
     if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
 

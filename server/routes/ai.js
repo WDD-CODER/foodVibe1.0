@@ -579,6 +579,38 @@ router.post('/patch-recipe', verifyToken, async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// GEMINI_MENU_SHOTS — approved menu generation examples for few-shot injection.
+// Collection: GEMINI_MENU_SHOTS
+// Document: { prompt, menu, createdAt }
+// ---------------------------------------------------------------------------
+
+const MENU_SHOTS_COLLECTION = 'GEMINI_MENU_SHOTS';
+
+function menuShotsCol() {
+  return mongoose.connection.db.collection(MENU_SHOTS_COLLECTION);
+}
+
+async function getApprovedMenuShots(limit = 2) {
+  try {
+    return await menuShotsCol()
+      .find({})
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .toArray();
+  } catch {
+    return [];
+  }
+}
+
+function buildMenuFewShotBlock(shots) {
+  if (!Array.isArray(shots) || shots.length === 0) return '';
+  const examples = shots
+    .map(s => `קלט: "${escapeForPrompt(s.prompt)}"\nפלט: ${JSON.stringify(s.menu)}`)
+    .join('\n\n');
+  return `## דוגמאות מאושרות מהמשתמש\n${examples}\n\n`;
+}
+
+// ---------------------------------------------------------------------------
 // POST /generate-menu
 // Accepts { rawText: string }.
 // Gemini reads the natural-language description and returns a structured menu draft.
@@ -586,7 +618,11 @@ router.post('/patch-recipe', verifyToken, async (req, res) => {
 // Requires a valid JWT.
 // ---------------------------------------------------------------------------
 
-const MENU_GENERATE_SYSTEM_PROMPT = `You are an expert catering menu planner. You will receive a natural-language description (possibly in Hebrew or English) of a catering event and you must produce a complete structured menu draft.
+const MENU_GENERATE_SYSTEM_PROMPT = `You are a catering menu assistant. You will receive a natural-language description (possibly in Hebrew or English) of a catering event and you must extract ONLY what the user explicitly mentioned into a structured menu draft.
+
+## Critical rule — NO invention
+
+ONLY include dishes the user explicitly named. Do NOT add, suggest, or invent any dish that was not mentioned. If the user said "כבד קצוץ לראשונות", include only כבד קצוץ in ראשונות — do not add salads, bread, or anything else. If the user named exactly one dish per course, the section has exactly one item.
 
 ## Output format
 
@@ -603,7 +639,7 @@ Return ONLY valid JSON — no markdown, no explanation, no code blocks. Raw JSON
       "category": "<section name in Hebrew, e.g. ראשונות, עיקריות, קינוחים>",
       "items": [
         {
-          "name_hebrew": "<dish name in Hebrew>",
+          "name_hebrew": "<dish name exactly as the user mentioned it, in Hebrew>",
           "predicted_take_rate_": <number between 0 and 1 representing expected take rate, or null>,
           "serving_portions": <integer number of portions needed, or null>,
           "sell_price": <number in ILS per portion, or null>
@@ -618,7 +654,7 @@ Return ONLY valid JSON — no markdown, no explanation, no code blocks. Raw JSON
 - serving_type_ MUST be exactly one of these four English keys: plated_course | buffet | finger_food | family_style — never Hebrew
 - Infer serving_type_ from context: מנות אישיות → plated_course, בופה → buffet, פינגר פוד / אצבעות → finger_food, מנות משפחתיות → family_style
 - sections_ must be a non-empty array with at least one section
-- Each section must have at least one item
+- Each section must have only the items the user mentioned — never more
 - All dish names in Hebrew
 - predicted_take_rate_ is a fraction 0–1 (e.g. 0.8 means 80% of guests will take this dish)
 - guest_count_ must be a positive integer
@@ -651,13 +687,16 @@ router.post('/generate-menu', verifyToken, async (req, res) => {
     return res.status(400).json({ error: 'rawText is required' });
   }
 
+  const menuShots = await getApprovedMenuShots(2);
+
   try {
-    const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+    const userContent = buildMenuFewShotBlock(menuShots) + rawText;
+    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         system_instruction: { parts: [{ text: MENU_GENERATE_SYSTEM_PROMPT }] },
-        contents: [{ role: 'user', parts: [{ text: rawText }] }],
+        contents: [{ role: 'user', parts: [{ text: userContent }] }],
         generationConfig: { temperature: 0.7, maxOutputTokens: 4096 },
       }),
       signal: AbortSignal.timeout(45000),
@@ -767,7 +806,7 @@ router.post('/patch-menu', verifyToken, async (req, res) => {
   try {
     const userMessage = `CURRENT MENU:\n${JSON.stringify(currentMenu, null, 2)}\n\nUSER INSTRUCTION:\n${instruction}`;
 
-    const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1081,6 +1120,46 @@ router.post('/shots', verifyToken, requireAdmin, async (req, res) => {
 
   const warnings = await saveShot(prompt.trim(), draft, status, source);
   return res.json({ saved: true, warnings });
+});
+
+// ---------------------------------------------------------------------------
+// POST /save-menu-shot
+// Called automatically when the user clicks Apply in the AI menu modal.
+// Saves the (prompt → menu) pair to GEMINI_MENU_SHOTS for future few-shot injection.
+// Capped at 50 most recent shots — older ones are pruned on save.
+// Requires a valid JWT.
+// ---------------------------------------------------------------------------
+
+router.post('/save-menu-shot', verifyToken, async (req, res) => {
+  const { prompt, menu } = req.body;
+  if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
+    return res.status(400).json({ error: 'prompt is required' });
+  }
+  if (!menu || typeof menu !== 'object') {
+    return res.status(400).json({ error: 'menu is required' });
+  }
+  const validationErrors = validateMenuDraft(menu);
+  if (validationErrors.length > 0) {
+    return res.status(400).json({ error: 'invalid menu draft', details: validationErrors });
+  }
+  try {
+    await menuShotsCol().insertOne({ prompt: prompt.trim(), menu, createdAt: new Date() });
+    // Prune to most recent 50 shots
+    const count = await menuShotsCol().countDocuments();
+    if (count > 50) {
+      const oldest = await menuShotsCol()
+        .find({})
+        .sort({ createdAt: 1 })
+        .limit(count - 50)
+        .toArray();
+      const ids = oldest.map(d => d._id);
+      if (ids.length > 0) await menuShotsCol().deleteMany({ _id: { $in: ids } });
+    }
+    return res.json({ saved: true });
+  } catch (err) {
+    console.error('[ai/save-menu-shot]', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
 });
 
 module.exports = router;

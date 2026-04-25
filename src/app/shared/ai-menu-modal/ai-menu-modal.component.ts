@@ -32,6 +32,7 @@ export class AiMenuModalComponent implements OnInit {
 
   // Create mode
   protected readonly prompt_ = signal('')
+  protected readonly draft_ = signal<AiMenuDraft | null>(null)
   protected readonly matched_ = signal<MatchedMenu | null>(null)
   protected readonly userResolutions_ = signal<Map<string, string | 'skip'>>(new Map())
 
@@ -52,9 +53,32 @@ export class AiMenuModalComponent implements OnInit {
     return 'ok'
   })
 
-  protected readonly patchKeys_ = computed(() => {
-    const p = this.patch_()
-    return p ? Object.keys(p) : []
+  private static readonly SERVING_TYPE_LABELS: Record<string, string> = {
+    plated_course: 'מנות אישיות',
+    buffet: 'בופה',
+    finger_food: 'פינגר פוד',
+    family_style: 'מנות משפחתיות',
+  }
+
+  protected readonly diffEntries_ = computed(() => {
+    const patch = this.patch_()
+    const current = this.modalService.getEditContext()
+    if (!patch || !current) return []
+    const entries: { label: string; from: string; to: string }[] = []
+    if ('name_' in patch) entries.push({ label: 'שם', from: current.name_ || '—', to: String(patch['name_'] ?? '—') })
+    if ('event_type_' in patch) entries.push({ label: 'סוג אירוע', from: current.event_type_ || '—', to: String(patch['event_type_'] ?? '—') })
+    if ('guest_count_' in patch) entries.push({ label: 'אורחים', from: String(current.guest_count_), to: String(patch['guest_count_'] ?? '—') })
+    if ('serving_type_' in patch) {
+      const fmt = (k: unknown) => AiMenuModalComponent.SERVING_TYPE_LABELS[String(k)] ?? String(k)
+      entries.push({ label: 'סגנון הגשה', from: fmt(current.serving_type_), to: fmt(patch['serving_type_']) })
+    }
+    if ('event_date_' in patch) entries.push({ label: 'תאריך', from: current.event_date_ ?? '—', to: String(patch['event_date_'] ?? '—') })
+    if ('sections_' in patch) {
+      const newSections = patch['sections_'] as { category: string; items: unknown[] }[] | undefined
+      const count = Array.isArray(newSections) ? newSections.length : 0
+      entries.push({ label: 'סעיפים', from: String(current.sections_.length), to: String(count) })
+    }
+    return entries
   })
 
   ngOnInit(): void {
@@ -76,6 +100,7 @@ export class AiMenuModalComponent implements OnInit {
     this.errorKey_.set('ai_menu_error')
     try {
       const draft = await this.gemini_.generateMenu(text)
+      this.draft_.set(draft)
       const matched = this.buildMatchedMenu_(draft)
       this.matched_.set(matched)
       this.status_.set('done')
@@ -130,8 +155,12 @@ export class AiMenuModalComponent implements OnInit {
 
   onApply(): void {
     const matched = this.matched_()
+    const draft = this.draft_()
     if (!matched) return
     this.modalService.deliverResult(matched, this.userResolutions_())
+    if (draft) {
+      this.gemini_.saveMenuShot(this.prompt_(), draft).catch(() => { /* non-blocking */ })
+    }
     this.resetLocalState_()
   }
 
@@ -193,6 +222,7 @@ export class AiMenuModalComponent implements OnInit {
 
   private resetLocalState_(): void {
     this.prompt_.set('')
+    this.draft_.set(null)
     this.matched_.set(null)
     this.userResolutions_.set(new Map())
     this.instruction_.set('')

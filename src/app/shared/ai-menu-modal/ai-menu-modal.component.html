@@ -57,12 +57,20 @@
             </div>
           </div>
         } @else {
-          <!-- Patch summary -->
+          <!-- Patch summary — before/after diff -->
           <div class="ai-menu-patch-panel">
             <p class="ai-menu-patch-title">{{ 'ai_menu_title_edit' | translatePipe }}</p>
             <ul class="ai-menu-patch-list">
-              @for (key of patchKeys_(); track key) {
-                <li class="ai-menu-patch-item">{{ key }}</li>
+              @for (entry of diffEntries_(); track entry.label) {
+                <li class="ai-menu-patch-item">
+                  <span class="ai-menu-patch-label">{{ entry.label }}</span>
+                  <span class="ai-menu-patch-from">{{ entry.from }}</span>
+                  <span class="ai-menu-patch-arrow">→</span>
+                  <span class="ai-menu-patch-to">{{ entry.to }}</span>
+                </li>
+              }
+              @if (diffEntries_().length === 0) {
+                <li class="ai-menu-patch-item ai-menu-patch-item--empty">אין שינויים זוהו</li>
               }
             </ul>
             <div class="ai-menu-footer">
@@ -123,9 +131,9 @@
                     @for (dish of section.items; track dish.name_hebrew; let di = $index) {
                       <li class="ai-menu-dish-row" [attr.data-status]="dish.status">
                         @if (dish.status === 'matched') {
-                          <!-- Matched: show recipe name with check icon -->
+                          <!-- Matched: show the database recipe name, not the AI input -->
                           <lucide-icon name="check-circle" [size]="16" class="ai-menu-dish-icon ai-menu-dish-icon--matched"></lucide-icon>
-                          <span class="ai-menu-dish-name">{{ dish.name_hebrew }}</span>
+                          <span class="ai-menu-dish-name">{{ dish.candidates[0] ? dish.candidates[0].name : dish.name_hebrew }}</span>
                           <button type="button" class="c-icon-btn ai-menu-change-btn" (click)="onResolve(si + ':' + dish.name_hebrew, '')">
                             <lucide-icon name="pencil" [size]="14"></lucide-icon>
                           </button>
