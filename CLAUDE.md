@@ -83,3 +83,22 @@ Choose the path that matches your task. Each path loads the right context automa
 - Task force sizing: `copilot-instructions.md §0.4`
 - Model routing: `copilot-instructions.md §0.5`
 - gstack skills: `copilot-instructions.md §gstack`
+
+---
+
+## Skill routing
+
+When the user's request matches an available skill, invoke it via the Skill tool as your FIRST action. Do NOT answer directly or use other tools first.
+
+| Trigger | Skill |
+|---------|-------|
+| Product ideas, brainstorming, "is this worth building" | `office-hours` |
+| Bugs, errors, "why is this broken" | `investigate` |
+| Ship, deploy, push, create PR, end session | `ship` |
+| QA, test the site, find bugs | `qa` |
+| Code review, check my diff | `review` |
+| Update docs after shipping | `document-release` |
+| Architecture review | `plan-eng-review` |
+| Save progress, checkpoint, resume | `checkpoint` |
+| Visual audit, design polish | `design-review` |
+| Code quality, health check | `health` |

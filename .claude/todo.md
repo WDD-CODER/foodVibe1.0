@@ -2,6 +2,22 @@
 
 ---
 
+### Plan 288 — User Management Card (`plans/288-user-management-card.plan.md`)
+
+- [x] Task 1: `server/constants/all-user-entity-types.js` — create with ALL_USER_ENTITY_TYPES (22 strings)
+- [x] Task 2: `server/routes/admin.js` — create with GET /users and DELETE /users/:userId
+- [x] Task 3: `server/index.js` — mount adminRouter at /api/v1/admin
+- [x] Task 4: `src/app/core/models/admin-user.model.ts` — create AdminUser interface
+- [x] Task 5: `src/app/core/services/user-admin.service.ts` — create with getUsers() and deleteUser()
+- [x] Task 6: `src/app/pages/metadata-manager/components/user-management/user-management.component.ts` — create
+- [x] Task 7: `src/app/pages/metadata-manager/components/user-management/user-management.component.html` — create
+- [x] Task 8: `metadata-manager.page.component.html` — insert <app-user-management />
+- [x] Task 9: `metadata-manager.page.component.ts` — add UserManagementComponent to imports
+- [x] Task 10: ng build gate — zero errors
+- [ ] Task 11: `.claude/commands/plan-implementation.md` — fix comprehensive-brief gate
+
+---
+
 ### Plan 285 — AI Menu Phase 1 (`plans/285-ai-menu-phase1.plan.md`)
 
 - [x] 1.1.1 `server/routes/ai.js` — add MENU_GENERATE_SYSTEM_PROMPT
