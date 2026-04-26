@@ -1,0 +1,34 @@
+@if (isAdmin()) {
+  <section class="manager-card">
+    <div class="card-title">
+      <lucide-icon name="users" class="icon-primary"></lucide-icon>
+      <h2>{{ 'user_management' | translatePipe }}</h2>
+    </div>
+
+    @if (isLoading_()) {
+      <div class="empty-state">טוען...</div>
+    } @else if (users_().length === 0) {
+      <div class="empty-state">אין משתמשים רשומים</div>
+    } @else {
+      <div class="list-container">
+        <div class="list-stack">
+          @for (user of users_(); track user._id) {
+            <div class="list-item group">
+              <div>
+                <span>{{ user.name }}</span>
+                <span class="user-email">{{ user.email }}</span>
+              </div>
+              <button
+                class="c-icon-btn danger"
+                (click)="onDeleteUser(user)"
+                [disabled]="user._id === currentUserId()"
+                [attr.title]="user._id === currentUserId() ? 'לא ניתן למחוק את עצמך' : ('remove' | translatePipe)">
+                <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </section>
+}

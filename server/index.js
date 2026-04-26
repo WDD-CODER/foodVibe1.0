@@ -10,7 +10,8 @@ const { connectDb } = require('./db');
 const { seedMasterData } = require('./services/seed-master');
 const authRouter = require('./routes/auth');
 const genericRouter = require('./routes/generic');
-const aiRouter = require('./routes/ai');
+const aiRouter = require('./routes/ai')
+const adminRouter = require('./routes/admin');
 
 const app = express();
 app.set('trust proxy', 1); // Required for Render/reverse-proxy: enables correct IP from X-Forwarded-For
@@ -80,7 +81,8 @@ app.use(cookieParser());
 // ---------------------------------------------------------------------------
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/data', genericRouter);
-app.use('/api/v1/ai', aiRouter);
+app.use('/api/v1/ai', aiRouter)
+app.use('/api/v1/admin', adminRouter);
 
 app.get('/api/v1/health', (_req, res) => res.json({ ok: true, ts: Date.now() }));
 

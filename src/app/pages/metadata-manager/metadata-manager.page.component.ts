@@ -23,13 +23,14 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { ALL_DISH_FIELDS, DEFAULT_DISH_FIELDS, type DishFieldKey, type MenuTypeDefinition } from '@models/menu-event.model'
 import { PreparationCategoryManagerComponent } from './components/preparation-category-manager/preparation-category-manager.component'
 import { SectionCategoryManagerComponent } from './components/section-category-manager/section-category-manager.component'
+import { UserManagementComponent } from './components/user-management/user-management.component'
 import { environment } from '../../../environments/environment'
 
 type MetadataType = 'category' | 'allergen' | 'unit' | 'label'
 @Component({
   selector: 'app-metadata-manager',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, PreparationCategoryManagerComponent, SectionCategoryManagerComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, PreparationCategoryManagerComponent, SectionCategoryManagerComponent, UserManagementComponent],
   templateUrl: './metadata-manager.page.component.html',
   styleUrl: './metadata-manager.page.component.scss'
 })
