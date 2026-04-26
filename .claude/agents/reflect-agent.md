@@ -1,12 +1,15 @@
 ---
 name: reflect-agent (scheduled evening)
-description: Scheduled evening maintenance — processes tool failure log, applies skill fixes, archives entries, pushes a reflect branch. Runs autonomously at 23:03 Israel time. Never pushes to main.
+description: Manual-only maintenance — invoke explicitly via /reflect or /reflect-list. Cron disabled 2026-04-26.
 ---
 
-# Reflect Agent — Scheduled Evening Maintenance
+# Reflect Agent — Manual-Only Maintenance
 
-**Trigger:** RemoteTrigger cron at 20:03 UTC (23:03 Israel time), or manual.
-**This agent is fully autonomous. It must never pause for user confirmation.**
+> **MANUAL-ONLY as of 2026-04-26. Cron schedule disabled.**
+> **Reason:** token-budget management on Pro plan.
+
+**Trigger:** Manual via `/reflect` or `/reflect-list`. Cron disabled 2026-04-26.
+**This agent is fully autonomous **when manually invoked**. It must never pause for user confirmation.**
 
 ---
 

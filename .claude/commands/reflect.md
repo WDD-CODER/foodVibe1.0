@@ -3,6 +3,8 @@ description: Autonomous self-improvement loop for Claude Code skills
 allowed-tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
+<!-- Output Discipline EXEMPT — retrospectives require narrative -->
+
 # /reflect
 
 ## ⚡ AUTO MODE — Agent-Only (No Human Present)

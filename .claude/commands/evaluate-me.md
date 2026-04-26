@@ -1,3 +1,5 @@
+<!-- Output Discipline EXEMPT — retrospectives require narrative -->
+
 # Agent Session Retrospective
 
 Before compacting, analyze this entire session and generate a retrospective report.

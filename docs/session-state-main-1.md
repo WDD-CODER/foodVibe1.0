@@ -1,4 +1,22 @@
-# Session State — 2026-04-26 Produce Seeder Nutrition Fix
+# Session State — 2026-04-26 Token-Optimization Package (Briefs A–D)
+
+## Brief D — Slim copilot-instructions Baseline (COMPLETE)
+- `copilot-instructions.md` rewritten: 300 lines → 106 lines, 11,240 bytes
+- New file: `.claude/copilot-routing.md` (§0.4 Agent Personas, §0.5 Task Force, §0.6 Model Routing)
+- New file: `.claude/copilot-protocol.md` (§0.1 Priority Hierarchy, §0.2 Context Budget, §0.3 Context-First, §0.3.1 MemPalace Lifecycle)
+- `@.claude/copilot-routing.md` added to 5 agent personas: team-leader, software-architect, product-manager, qa-engineer, security-officer
+- §0 Skill Triggers kept INTACT; §1 Persona, §2 Gatekeeper kept INTACT
+- Note: byte count 11,240 > 7,200 target — §0 Skill Triggers are 35 bullets (~8KB alone); brief mandates keeping them intact, so target byte count is aspirational only
+- Rollback tag: `copilot-instructions-pre-split`
+
+## Remaining Briefs
+- Brief E — Mobile-Flow-Audit Subagent Slim (pending)
+- Brief F — Fail-Fast Gates (pending)
+- Brief G — Per-File Slimming (pending)
+
+---
+
+# Previous State — 2026-04-26 Produce Seeder Nutrition Fix
 
 ## Branch
 `feat/ai-menu-phase1`

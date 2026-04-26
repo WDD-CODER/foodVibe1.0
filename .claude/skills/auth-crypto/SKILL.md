@@ -49,10 +49,3 @@ description: Implements and audits hashing, encryption, and token management in 
 **Mandatory Security Officer Trigger:** Invoke Security Officer agent for a logic-flow audit before committing. This is non-negotiable — do not skip even if changes seem minor.
 
 Output: `"Crypto logic updated. Algorithms verified, spec coverage confirmed. Invoking Security Officer for final audit..."`
-
----
-
-## Cursor Tip
-> For standard hashing updates or spec maintenance, use Composer 2.0 (Fast/Flash) — it follows the existing patterns in `auth-crypto.ts`.
-> Reserve Gemini 1.5 Pro for Phase 2 only when implementing new encryption schemes or key derivation logic.
-> Credit-saver: ~67% of this skill (Phases 1 + 3) is Flash-eligible.

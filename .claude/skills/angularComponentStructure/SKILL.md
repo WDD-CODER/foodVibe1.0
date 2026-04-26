@@ -20,15 +20,6 @@ description: Defines the mandatory class structure, section ordering, and CRDUL 
 
 ---
 
-## Phase 0 — MemPalace Orient (MANDATORY before any file reads)
-
-1. Run `mempalace_search(query="component structure signals inputs", limit=5)` to surface existing component patterns and past decisions.
-2. If results found → review for existing implementations, constraints, or known patterns.
-3. If MCP unavailable → skip silently and continue to Phase 1.
-4. Report in completion message whether MemPalace was consulted.
-
----
-
 ## Phase 1: Boilerplate Generation 
 
 **File Creation:** Standard four-file split: `.ts`, `.html`, `.scss`, `.spec.ts` (unless `inlineTemplate` requested). When refactoring an existing component, skip file creation — reorder class sections in place.
@@ -78,10 +69,3 @@ description: Defines the mandatory class structure, section ordering, and CRDUL 
 Output: `"Component [Name] created with [X] signals and [Y] inputs. Lucide registry verified."`
 
 Update `.claude/todo.md` and proceed to the next atomic task.
-
----
-
-## Cursor Tip
-> Use Composer 2.0 (Fast/Flash) for Phase 1 and Phase 3 — boilerplate and markup are fully pattern-driven.
-> Reserve Gemini 1.5 Pro for Phase 2 (Signal architecture) and Phase 4 (test strategy) only.
-> Credit-saver: ~50% of component work (Phases 1 + 3) is Flash-eligible.

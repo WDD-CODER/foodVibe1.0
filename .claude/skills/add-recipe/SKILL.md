@@ -18,15 +18,6 @@ description: Extracts, validates, and commits a new recipe or dish from an image
 
 ---
 
-## Phase 0 — MemPalace Orient (MANDATORY before any file reads)
-
-1. Run `mempalace_search(query="recipe ingredients steps metadata", limit=5)` to surface existing recipe patterns and past decisions.
-2. If results found → review for existing implementations, constraints, or known patterns.
-3. If MCP unavailable → skip silently and continue to Phase 1.
-4. Report in completion message whether MemPalace was consulted.
-
----
-
 ## Phase 1: Data Extraction 
 
 **OCR / Parsing:** Extract ingredients, instructions, and metadata (yield, prep time) from the source.
@@ -75,10 +66,3 @@ description: Extracts, validates, and commits a new recipe or dish from an image
 ## Completion Gate
 
 Output: `"Recipe [Name] added to the ledger. All units resolved to canonical keys."`
-
----
-
-## Cursor Tip
-> Use Gemini 1.5 Pro for Phase 1 (OCR/extraction) and Phase 2 (ledger alignment) — these require domain reasoning.
-> Switch to Composer 2.0 (Fast/Flash) once the user confirms in Phase 3 — file writes are purely procedural.
-> Credit-saver: ~50% of this skill (Phases 3–4) is Flash-eligible after user confirmation.

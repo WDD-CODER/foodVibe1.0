@@ -19,15 +19,6 @@ description: Enforces the project CSS architecture — engine placement, five-gr
 
 ---
 
-## Phase 0 — MemPalace Orient (MANDATORY before any file reads)
-
-1. Run `mempalace_search(query="css tokens styles engine layer", limit=5)` to surface existing CSS patterns and past decisions.
-2. If results found → review for existing implementations, constraints, or known patterns.
-3. If MCP unavailable → skip silently and continue to Phase 1.
-4. Report in completion message whether MemPalace was consulted.
-
----
-
 ## Phase 1: Token & Engine Audit 
 
 **Theme Alignment:** Read the design system comment block at the top of `src/styles.scss` (the `/* Designated global tokens */` section). Identify which tokens apply to the component type you're about to style — surface tokens (`--bg-glass`, `--blur-glass`), semantic tokens (`--bg-warning`, `--text-warning`), radius tokens (`--radius-*`), shadow tokens (`--shadow-*`). Every value you write should map to one of these. If you can't find a token for a value, that's a signal the value might not belong in the design.
@@ -71,10 +62,3 @@ Use logical properties throughout (`margin-inline`, `padding-block`). Use native
 - No `.c-*` class defined in any component `.scss` file
 - Five-Group Vertical Rhythm applied to every new/edited selector
 - No hardcoded colors, shadows, radii, or blur values — every value uses `var(--*)` or a `$` SCSS variable from `src/styles.scss`
-
----
-
-## Cursor Tip
-> CSS is highly pattern-driven. Use Composer 2.0 (Fast/Flash) for **all** styling work (Phases 1 & 2) — ~90% of this skill is procedural.
-> Reserve Gemini 1.5 Pro for Phase 3 **only** when designing a new global `.c-*` engine class.
-> Credit-saver: Highest Flash-eligible ratio in the registry (~90%).

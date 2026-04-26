@@ -23,18 +23,16 @@ Periodic health check that verifies all internal links in the agent guidance sys
 - `elegant-fix/SKILL.md`
 - `angularComponentStructure/SKILL.md`
 - `auth-and-logging/SKILL.md`
-- `session-handoff/SKILL.md`
 - `breadcrumb-navigator/SKILL.md`
 - `deploy-github-pages/SKILL.md`
 - `worktree-session-end/SKILL.md`
 - `worktree-setup/SKILL.md`
 - `auth-crypto/SKILL.md`
 - `angular-pipe-logic/SKILL.md`
+- `brief-detection/SKILL.md`
 - `finalize-docs/SKILL.md`
 - `quick-chat/SKILL.md`
-
-> Note: `end-session/SKILL.md` is a deprecated redirect stub — not a functional skill. Intentionally kept as a pointer only.
-> Note: `session-handoff/SKILL.md` is now a redirect stub — routes to `end-of-session-agent.md`. Kept for backward compatibility.
+- `execute-debugging/SKILL.md`
 
 ### Cursor rules (`.cursor/rules/`)
 - `add-recipe-must-use-skill.mdc`
@@ -78,7 +76,7 @@ for f in team-leader software-architect product-manager qa-engineer security-off
 done
 
 # Verify all expected skill files exist
-for s in save-plan commit-to-github cssLayer add-recipe github-sync techdebt update-docs elegant-fix angularComponentStructure auth-and-logging session-handoff breadcrumb-navigator deploy-github-pages worktree-session-end worktree-setup auth-crypto angular-pipe-logic finalize-docs quick-chat; do
+for s in save-plan commit-to-github cssLayer add-recipe github-sync techdebt update-docs elegant-fix angularComponentStructure auth-and-logging brief-detection breadcrumb-navigator deploy-github-pages worktree-session-end worktree-setup auth-crypto angular-pipe-logic finalize-docs quick-chat execute-debugging; do
   [ -f ".claude/skills/$s/SKILL.md" ] || echo "MISSING: .claude/skills/$s/SKILL.md"
 done
 
@@ -95,7 +93,7 @@ Cross-check each path printed above against the filesystem. Any path that does n
 
 ### Inventory Check
 - Expected agents: 6 — found: [count]
-- Expected skills: 19 — found: [count]
+- Expected skills: 20 — found: [count] (session-handoff removed, brief-detection added, execute-debugging added)
 - Expected cursor rules: 11 — found: [count]
 - Expected cursor commands: 4 — found: [count]
 

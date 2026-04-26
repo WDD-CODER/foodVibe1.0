@@ -11,7 +11,6 @@ Quick reference for everything in this folder.
 | Command | What it does |
 |---------|-------------|
 | `/feat` | Full new-feature path — loads standards, invokes plan-implementation + execute-it |
-| `/new-feature` | Structured feature scoping — forcing questions, premise challenge, produces a brief |
 | `/plan` | Planning / PRD path — loads templates, invokes product-manager + software-architect |
 | `/plan-implementation` | Receive a brief, verify against live code, flag gaps — pauses for approval |
 | `/execute-it` | Execute the implementation plan from this conversation |
@@ -54,9 +53,9 @@ Quick reference for everything in this folder.
 
 | Command | What it does |
 |---------|-------------|
-| `/reflect` | Autonomous self-improvement loop — processes failure log, applies skill fixes |
-| `/reflect-list` | Review and fix issues from the tool failure log |
-| `/nightly-audit` | Run the nightly codebase audit — scans 6 quality dimensions |
+| `/reflect` (manual-only) | Autonomous self-improvement loop — processes failure log, applies skill fixes |
+| `/reflect-list` (manual-only) | Review and fix issues from the tool failure log |
+| `/nightly-audit` (manual-only) | Run the nightly codebase audit — scans 6 quality dimensions |
 | `/audit-report` | Display the latest nightly audit report |
 | `/mobile-flow-audit` | Walk 16 mobile flows at 375×812 RTL, stress-test layout |
 
@@ -66,6 +65,7 @@ Quick reference for everything in this folder.
 
 | Command | What it does |
 |---------|-------------|
+| `/brief-detect` | Manually invoke brief-detection gate |
 | `/cleanup` | Session & worktree pruning — removes stale branches and worktrees |
 | `/sweep-stale-todos` | Find and close todos that are no longer relevant |
 | `/docs-refresh` | On-demand documentation refresh — updates breadcrumbs and project docs |

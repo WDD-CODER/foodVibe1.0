@@ -3,6 +3,8 @@ description: Receive an architectural brief, verify against live code, flag gaps
 allowed-tools: Read, Write, Grep, Glob
 ---
 
+<!-- Output Discipline EXEMPT — plan briefs require narrative -->
+
 > **DEPRECATION NOTICE** (added 2026-04-21, remove after 2026-04-28): Use `/feat` then `/plan` for planning+implementation flow. This file remains functional as an alias during the transition week.
 
 
@@ -191,7 +193,11 @@ Session: .claude/sessions/{session-id}
 - Open concerns: [list or "none"]
 
 ---
-**Ready for approval.** Say "execute-it" when ready to proceed.
+If "Open concerns" in Adversarial Review is empty:
+  **Ready for approval.** Say "execute-it" when ready to proceed.
+If "Open concerns" is non-empty:
+  **Plan has {N} open concerns above. Resolve each, or say "override" to proceed despite them.**
+  Default: do NOT proceed without resolution.
 ```
 
 The "Merged Execution Plan" is what execute-it will use. It combines the original brief steps with all ✗ fixes, prerequisite gaps, and neighborhood blockers into one ordered task list.

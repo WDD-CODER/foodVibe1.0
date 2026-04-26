@@ -82,6 +82,24 @@ Branch: feat/semantic-branch-names
 
 On approval: `git add` → `git commit` → (if renamed: `git branch -m {old} {new}`) → `git push` → `gh pr create` (if on feature branch).
 
+**Push conflict guard:** If `git push` is rejected (non-fast-forward), stop immediately and run:
+```bash
+git fetch origin
+git log --oneline HEAD..origin/{branch} --  # commits on remote not on local
+git diff --stat HEAD...origin/{branch}       # files that diverged
+```
+Present to user:
+```
+PUSH REJECTED — remote has {N} diverging commit(s).
+Diverging files: {list}
+
+Choose how to proceed:
+a. Rebase my commits on top of remote (git pull --rebase) — safer, linear history
+b. Merge remote into local (git pull --merge) — preserves branch topology
+c. Abort — I'll resolve this manually
+```
+Wait for user choice. On **a**: `git pull --rebase origin {branch}` → if conflicts: list conflicting files, stop, instruct user to resolve then re-run `/ship`. On **b**: `git pull origin {branch}` → same conflict stop. On **c**: exit agent, print files that need attention.
+
 If the old branch was already pushed to remote before the rename:
 ```bash
 git push origin --delete {old_name}

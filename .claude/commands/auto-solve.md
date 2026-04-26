@@ -212,6 +212,14 @@ Before any edit to `todo.md` that removes a section, or any append to `todo-arch
 
 ---
 
+### Plan-to-plan dirty-state gate
+After marking a plan complete, run `git status --short`. If output is non-empty:
+- Abort the auto-solve loop
+- Output: "Previous plan left dirty state — manual review required."
+- Do NOT proceed to next plan.
+
+---
+
 - **"approve":**
   1. Before committing, verify plan file number is still unique (re-check `plans/` directory)
   2. If collision detected (another worktree created same-numbered plan), rename current plan to next available number and update `todo.md` reference

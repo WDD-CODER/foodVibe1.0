@@ -76,9 +76,3 @@ Output: `"GitHub sync complete. Remote changes merged. Local branch is up to dat
 
 Save sync log to `notes/github-sync/<today-date>.md`.
 
----
-
-## Cursor Tip
-> Git syncing is a utility task. Always use Composer 2.0 (Fast/Flash) for Phases 1 & 2.
-> Reserve Gemini 1.5 Pro for Phase 3 only — the morning state-of-project analysis.
-> Credit-saver: ~67% of this skill (Phases 1 + 2) is Flash-eligible.

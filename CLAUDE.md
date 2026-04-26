@@ -25,12 +25,38 @@ Read the two files below at session start, then confirm **"Yes chef!"**
 
 ---
 
+## Output Discipline (Claude Code only)
+
+These rules apply to Claude Code execution only. Planning/discussion in claude.ai sessions is exempt — reasoning narrative has high value there.
+
+**Suppress:**
+- Preambles. No "I'll now do X". Start with the action.
+- Postambles. No "I've successfully updated...". The diff is the receipt.
+- Apology language. Mistakes get corrected, not eulogized.
+- Sycophancy. No "Great question" / "You're absolutely right".
+- Prose explaining code that is the answer.
+
+**Preserve (diagnostic narrative REQUIRED when):**
+- A tool call failed
+- A verification gate failed (build, test, lint, diagnostics)
+- A fix is being attempted (state hypothesis per systematic-debugging)
+- The user asked "why" or "what happened"
+- Producing retrospective or evaluation (`/evaluate-me`, `/reflect`)
+- Writing a plan (`/plan-implementation`, `/feat` planning phase)
+
+Status reports stay structured: `[x]`/`[ ]` checkboxes, file paths, line counts, exit codes. Tables and bullets, not prose paragraphs.
+
+Session-start "Yes chef!" prefix remains required — it's a 3-token marker, not a preamble.
+
+---
+
 ## Path Router
 
 Choose the path that matches your task. Each path loads the right context automatically.
 
 | Task type | Command | Loads | Invokes |
 |-----------|---------|-------|---------|
+| Pasted brief detected | (auto) | brief-detection skill | gates execution |
 | New feature | `/feat` | standards-angular, standards-domain | plan-implementation, execute-it, team-leader |
 | Planning / PRD | `/plan` | prd-template, hld-template | product-manager, software-architect |
 | Bug fix | `/fix` | matching standards section (css/auth/data/ui/api) | investigate, elegant-fix |

@@ -30,12 +30,8 @@ For each flow in the catalog:
 2. Take baseline screenshot: `shots/01-baseline.png`.
 3. Execute the flow's scripted actions (fill, click, select, open).
 4. Apply the **6-probe stress set** to every input field encountered:
-   - **P1 — 40-char Hebrew:** "בדיקה ארוכה של שדה טקסט בעברית עם הרבה תווים"
-   - **P2 — 80-char Hebrew:** "בדיקה מאוד מאוד ארוכה של שדה טקסט בעברית עם המון תווים ועוד המון תווים נוספים"
-   - **P3 — Emoji + LTR digits in RTL:** "מתכון 🍝 123 pasta"
-   - **P4 — Two dropdowns open:** open dropdown A, without closing it open dropdown B; screenshot collision
-   - **P5 — Keyboard-open state:** focus an input mid-form; screenshot with virtual keyboard region simulated (viewport stays 375×812, focus the input and screenshot)
-   - **P6 — 20+ row list:** where the flow has a dynamic list (ingredients, steps, prep items, infra items), add 20+ rows and screenshot the scroll state
+
+   **Probes:** Read `.claude/agents/mobile-probes.json` for probe strings and actions. Apply per the flow's probe assignment.
 5. Screenshot every interactive state: `shots/02-filled.png`, `shots/03-dropdown-open.png`, etc.
 6. Record each defect with: severity (critical/major/minor), screenshot reference, element selector (from `$B snapshot -i`), concrete description of what breaks.
 

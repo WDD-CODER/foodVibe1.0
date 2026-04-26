@@ -49,9 +49,3 @@ Output: `"Documentation refreshed. Breadcrumbs updated at [List of Seams]."`
 
 Trigger the Breadcrumb Navigator (Section 0.3) if the user asks for a structural overview after the update.
 
----
-
-## Cursor Tip
-> This skill is a "Credit Saver." Always run breadcrumb updates using Composer 2.0 (Fast/Flash) — it is a pattern-matching task that requires no Intelligence tokens.
-> Only escalate to Gemini 1.5 Pro for Phase 3 during a major architectural reorganization.
-> Credit-saver: ~95% of routine runs are fully Flash-eligible.

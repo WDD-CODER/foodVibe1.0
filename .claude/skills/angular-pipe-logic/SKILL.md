@@ -20,7 +20,7 @@ description: Scaffolds, implements, and tests Angular Pipes and Directives follo
 
 ## Phase 0 — MemPalace Orient (MANDATORY before any file reads)
 
-1. Run `mempalace_search(query="pipe directive transform angular", limit=5)` to surface existing pipe/directive patterns and past decisions.
+1. Run `mempalace_search(query="pipe directive transform angular", limit=3)` to surface existing pipe/directive patterns and past decisions.
 2. If results found → review for existing implementations, constraints, or known patterns.
 3. If MCP unavailable → skip silently and continue to Phase 1.
 4. Report in completion message whether MemPalace was consulted.
@@ -63,10 +63,3 @@ description: Scaffolds, implements, and tests Angular Pipes and Directives follo
 Output: `"Angular [Pipe/Directive] [Name] created. Logic verified as pure and registered for use."`
 
 Run targeted specs to confirm transformation logic before finishing.
-
----
-
-## Cursor Tip
-> Pipes and Directives are small, focused units. Use Composer 2.0 (Fast/Flash) for Phase 1 and Phase 3.
-> Reserve Gemini 1.5 Pro for Phase 2 **only** when transformation logic involves complex mathematics or domain-specific data mapping.
-> Credit-saver: ~67% of this skill (Phases 1 + 3) is Flash-eligible.

@@ -21,12 +21,8 @@ description: Refines a working but mediocre fix into a clean, idiomatic solution
 
 ---
 
-## Phase 0 — MemPalace Orient (MANDATORY before any file reads)
-
-1. Run `mempalace_search(query="refactor simplify clean code pattern", limit=5)` to surface existing patterns and past refactoring decisions.
-2. If results found → review for existing implementations, constraints, or known patterns.
-3. If MCP unavailable → skip silently and continue to Phase 1.
-4. Report in completion message whether MemPalace was consulted.
+## Phase 0 — MemPalace Orient (CONDITIONAL)
+Run `mempalace_search(query="<keywords>", limit=3)` ONLY if task involves an unfamiliar code area or known-recurring debt category. Skip for routine cleanup or pattern application. Default: skip. If MCP unavailable: skip silently.
 
 ---
 
@@ -65,10 +61,3 @@ description: Refines a working but mediocre fix into a clean, idiomatic solution
 Output: `"Refactored [target] for elegance. [Summary of what was extracted, simplified, or converted]."`
 
 If the refactor touches critical business logic → invoke QA Engineer for verification before committing.
-
----
-
-## Cursor Tip
-> For simple code cleaning and naming fixes, use Composer 2.0 (Fast/Flash) — all naming and dead code removal is pattern-driven.
-> Reserve Gemini 1.5 Pro for Phase 2 only when restructuring logic or applying architectural patterns.
-> Credit-saver: ~67% of this skill (Phases 1 + 3) is Flash-eligible.

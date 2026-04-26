@@ -18,12 +18,8 @@ description: Audits and hardens authentication guards, mutation entry points, an
 
 ---
 
-## Phase 0 — MemPalace Orient (MANDATORY before any file reads)
-
-1. Run `mempalace_search(query="auth guard interceptor route logging", limit=5)` to surface past security decisions and known constraints.
-2. If results found → review for existing implementations, constraints, or known patterns.
-3. If MCP unavailable → skip silently and continue to Phase 1.
-4. Report in completion message whether MemPalace was consulted.
+## Phase 0 — MemPalace Orient (CONDITIONAL)
+Run `mempalace_search(query="<keywords>", limit=3)` ONLY if task involves an unfamiliar code area or known-recurring debt category. Skip for routine cleanup or pattern application. Default: skip. If MCP unavailable: skip silently.
 
 ---
 
@@ -62,10 +58,3 @@ description: Audits and hardens authentication guards, mutation entry points, an
 **Security Officer Trigger:** If this task touches the security surface (auth files, `localStorage`/`sessionStorage`, `[innerHTML]`, new routes) → invoke Security Officer agent for final audit before committing. No exceptions.
 
 Output: `"Auth/Logging hardened. [X] mutation handlers protected, PII audit passed."`
-
----
-
-## Cursor Tip
-> Use Composer 2.0 (Fast/Flash) for Phase 1 and Phase 3 — scanning and PII checks are pattern-matching tasks.
-> Reserve Gemini 1.5 Pro for Phase 2 only when implementing guard logic or crypto architecture.
-> Credit-saver: ~67% of this skill (Phases 1 + 3) is Flash-eligible.

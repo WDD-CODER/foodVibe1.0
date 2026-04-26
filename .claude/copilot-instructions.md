@@ -3,6 +3,16 @@ name: copilot-instructions
 description: Single source of truth for all project rules, standards, and skill/agent triggers
 ---
 
+<!-- ESSENTIAL EAGER RULES (must remain in this file):
+- Yes chef! prefix
+- Q&A Format
+- Branch guard
+- Build gate
+- No semicolons in TS
+- MemPalace search-before-grep
+- Skill triggers §0
+-->
+
 # Unified Technical Standards
 
 > **Single source of truth**: All project rules live here or in the standards files below. When the user gives a new rule, add it to the appropriate file. The `.cursor/rules/*.mdc` files are Cursor-specific pointers that reinforce triggers; canonical rules stay here so the setup works in any IDE/agent.
@@ -27,7 +37,8 @@ description: Single source of truth for all project rules, standards, and skill/
 > Cursor receives these rules via `.cursor/rules/*.mdc`. Cursor cannot spawn subagents — `[CC]` triggers do not apply to Cursor.
 
 - **Plan & execute** `[SHARED]`: User presents architectural brief → invoke `/plan-implementation` command (read-only codebase scan, produce plan, wait for approval). On approval, invoke `/execute-it` command (full autonomous implementation).
-- **New feature scoping** `[SHARED]`: User invokes `/new-feature` or `/new-feature <description>` → read `.claude/commands/new-feature.md` and follow it. Produces a scoped brief that feeds into `/plan-implementation`. Does NOT write code.
+- **Brief detection** `[CC]`: User's first message contains 3+ structural markers (## Goal, ## Steps, ## Done when, ## Rules, ## Files, etc.) → read `.claude/skills/brief-detection/SKILL.md` and follow it. Source-agnostic.
+- **New feature scoping** `[SHARED]`: User invokes `/new-feature` or `/new-feature <description>` → invoke `/feat` which runs plan-implementation + execute-it. Does NOT write code without plan approval.
 - **Session brief** `[SHARED]`: User invokes `/brief` or `/brief <description>` → read `.claude/commands/brief.md` and follow it. Creates or reconstructs a session brief that threads through validation and session-handoff as a scorecard.
 - **Save plan** `[SHARED]`: Message contains "save" + one of "it / that / this / plan" (case-insensitive) while a plan is in context → read `.claude/skills/save-plan/SKILL.md` and follow it.
 - **Git operations** `[SHARED]`: User mentions "commit", "push", "merge", "PR", "branch", git status, or any git workflow (but NOT "ship", "done", "wrap up", "end session", "handoff" — those route to session-end skills above) → read `.claude/agents/git-agent.md` and follow it. No git writes until user approves the visual plan.
@@ -58,119 +69,14 @@ description: Single source of truth for all project rules, standards, and skill/
 - **Sweep stale todos** `[SHARED]`: At session end (after all tasks marked `[x]`) or on explicit request → read `.claude/commands/sweep-stale-todos.md` and follow it.
 - **Batch reflection** `[CC]`: User invokes `/reflect-list` → read `.claude/commands/reflect-list.md` and follow it. Processes the tool failure log and applies one low-risk fix per failure group.
 - **MemPalace search** `[CC]`: User invokes `/mp-search <query>` or `/recall <query>` → read `.claude/skills/mp-search/SKILL.md` and follow it.
-- **Memory search** `[CC]`: When answering "why did we...", "have we tried...", "what happened with...", or recalling past decisions → use MemPalace MCP tools before grepping session handoffs. Use `mempalace_search(query="...", limit=5)` → filter by relevance → `mempalace_kg_query(entity="...")` for architectural decisions. **Use MemPalace when:** question is semantic/fuzzy, looking for past decisions/plans/constraints, need context across files. **Use Grep/Read when:** finding exact code/function names, structural navigation, editing files. If MemPalace tools unavailable, skip silently and grep session handoffs instead.
+- **Memory search** `[CC]`: When answering "why did we...", "have we tried...", "what happened with...", or recalling past decisions → use MemPalace MCP tools before grepping session handoffs. Use `mempalace_search(query="...", limit=3)` → filter by relevance → `mempalace_kg_query(entity="...")` for architectural decisions. **Use MemPalace when:** question is semantic/fuzzy, looking for past decisions/plans/constraints, need context across files. **Use Grep/Read when:** finding exact code/function names, structural navigation, editing files. If MemPalace tools unavailable, skip silently and grep session handoffs instead.
 
 ---
 
-## 0.1 Priority Hierarchy (when guidance conflicts)
+## 0.1–0.6 See also: copilot-protocol.md and copilot-routing.md
 
-1. **User's explicit instruction** in the current conversation
-2. **This file** (`copilot-instructions.md`) — single source of truth
-3. **Active SKILL** being executed (context-specific rules for the current workflow)
-4. **Agent persona** file (role-specific guidance)
-5. **MemPalace observations** (when answering "why" or recalling decisions — if MCP tools available)
-6. **Breadcrumbs** (directory-local context)
-7. **Historical docs and reports** (tech-debt reports, session handoffs, etc.)
-
----
-
-## 0.2 Context Budget
-
-Load skills and standards files on-demand at the point of need — do not pre-load at session start. Each skill is ~400–1,500 tokens. Each standards file is ~800–1,500 tokens. Load only what the current task requires.
-
-> **Skills are self-contained**: Each skill carries its own inline rules. When a skill is active, its inline rules are authoritative — do not load standards files to supplement them unless the skill explicitly instructs it.
-
-> **MemPalace context** adds ~170 tokens for wake-up (L0+L1). Per-session search cost is ~2,700 tokens for 1 search (5 results). `mempalace_kg_query` adds 50–300 tokens depending on entity connectivity. Diary writes are near-zero read cost. If MemPalace MCP is unavailable, skip silently — do not block on it.
-
----
-
-## 0.3 Context-First Protocol (All Agents)
-
-**Main Claude runs `mempalace_search` before reading files to understand an existing area.**
-Subagents receive MemPalace results injected into their prompts — they do NOT call MemPalace themselves (MCP tools are unreliable in subagent context per [GitHub #13898](https://github.com/anthropics/claude-code/issues/13898)).
-
-| Situation | Use MemPalace | Then |
-|-----------|--------------|------|
-| Designing or planning | What patterns/decisions already exist? | Grep/Read to confirm |
-| Investigating a bug | What's the history of this area? | Grep/Read to locate exact code |
-| Writing tests | What's been tested? What has broken? | Read test files |
-| Security auditing | What past decisions constrain the surface? | Read auth/guard files |
-| Onboarding to an unfamiliar module | What is this thing and why? | Read breadcrumbs |
-
-**Pattern (main session):**
-1. `mempalace_search(query="<2-3 words from task>", limit=5)` — orient
-2. `Grep` / `Read` — confirm, navigate, edit
-
-**Pattern (spawning subagents):**
-1. Main Claude runs `mempalace_search(query="<task keywords>", limit=5)`
-2. Paste top 3 results into Agent prompt under `## MemPalace Context`
-3. Spawn subagent — it receives knowledge, doesn't need MCP
-
-**For unfamiliar modules:** Also call `mempalace_traverse(start_room="<module-name>", max_hops=2)` to discover cross-cutting connections across the codebase.
-
-**If MCP unavailable:** Skip without blocking — but report in your completion message that MemPalace was not consulted, so the orchestrating agent has visibility.
-**When spawning subagents:** NEVER include "search MemPalace first" in the prompt. Include `## MemPalace Context` with real results (or "no results found").
-
----
-
-## 0.3.1 MemPalace Fact Lifecycle
-
-When a plan is **superseded** or an architectural decision is **reversed**:
-1. `mempalace_kg_invalidate(subject="<entity>", predicate="decided", object="<old decision>", ended="<today>")` — mark old fact as expired
-2. `mempalace_kg_add(subject="<entity>", predicate="decided", object="<new decision>", valid_from="<today>")` — record new fact
-
-This maintains temporal accuracy — the KG knows what was true when, not just what's true now. Skip if MCP unavailable.
-
----
-
-## 0.4 Agent Personas (when to invoke)
-
-Agent persona files live in `.claude/agents/`. Load on demand — do not pre-load.
-
-| Agent | File | Invoke when |
-|-------|------|-------------|
-| Team Leader | `team-leader.md` | Task spans >2 subsystems; agents conflict; progress report needed |
-| Software Architect | `software-architect.md` | PRD exists and needs HLD; architecture trade-offs to evaluate |
-| Product Manager | `product-manager.md` | Planning a new feature; writing a plan file; scoping work |
-| Breadcrumb Navigator | `skills/breadcrumb-navigator/SKILL.md` (agent file removed — skill is sufficient) | New `pages/<x>/` or app subtree; structural changes; after update-docs |
-| QA Engineer | `qa-engineer.md` | Spec gaps; diagnosing failing tests; E2E creation |
-| Mobile Flow Auditor | `mobile-flow-auditor.md` | Mobile layout regression hunt; pre-release UX sanity check; after any shared UI or layout change |
-| Render Flow Auditor | `render-flow-auditor.md` | Post-deploy production smoke; reproducing a reported prod-only bug; pre-release functional sanity |
-| Security Officer | `security-officer.md` | Post-feature review of auth/storage/route changes; pre-deploy; security consult |
-| Git Agent | `git-agent.md` | All git operations: commit, push, PR creation, merge, branch management |
-| End-of-Session Agent | `end-of-session-agent.md` | Session wrap-up: "done", "wrap up", "ship", "handoff", "end session", "finish up" |
-
----
-
-## 0.5 Task Force & Documentation Standards
-
-**Task Sizing**
-| Size | Agent Count | Typical Use |
-|------|-------------|-------------|
-| Small | 1–2 agents | Bug fix, single component, docs update |
-| Medium | 3–4 agents | New page + service, cross-cutting refactor |
-| Large | 5 agents | New subsystem, major architecture change |
-
-**Standard Sequence**: Product Manager → Software Architect → Implementation → QA Engineer → (Security Officer if security surface touched)
-
-**Documentation Gate**: After any structural change to `pages/` or `src/app/` top-level subtrees, run Breadcrumb Navigator to update `breadcrumbs.md` at affected seams.
-
-**Verification Gate:** After any change, agents follow `validation-checklist.md` — show the validation checklist, then ask "Should I verify this myself, or will you check it?" Do not auto-run `/qa`. If the user chooses agent verification and the dev server is unreachable, flag it to the user.
-
-**Build Verification Gate**: After any agent-written code, run `mcp__ide__getDiagnostics` or `ng build` before marking tasks `[x]`. Trust the compiler, not the agent's self-report.
-
----
-
-## 0.6 Model Routing — Efficiency Tiers
-
-| Agent | High Reasoning (Sonnet) | Procedural (Haiku/Flash) |
-|-------|------------------------|--------------------------|
-| Team Leader | Task Force Assembly, Conflict Resolution | Quality Oversight, Visual QA Trigger |
-| Product Manager | PRD Authoring, Scoping, Dependency Mapping | Milestone Sync (format check) |
-| Software Architect | HLD Creation, Entity Modeling, Trade-off Analysis | Pattern Enforcement (grep/checklist) |
-| Security Officer | Threat Modeling, Logic-Flow Audit | Vulnerability Grepping, Injection Awareness |
-| QA Engineer | Test Strategy, Diagnostic Reasoning | Spec Authoring, Visual QA Verification |
-| Breadcrumb Navigator | — (all procedural) | All phases (pure scan/read/write) |
+Full protocol details (priority hierarchy, context budget, context-first protocol, MemPalace lifecycle) → `.claude/copilot-protocol.md`
+Agent personas, task-force sizing, model routing → `.claude/copilot-routing.md`
 
 ---
 
@@ -180,6 +86,7 @@ Agent persona files live in `.claude/agents/`. Load on demand — do not pre-loa
 * **Tone**: Precise American-style directness. No conversational fillers.
 * **Prefix**: Start ALL responses with **"Yes chef!"** or **"No chef!"**.
 * **Decision Logic**: Only ask when a decision can't be inferred. When presenting choices, use **only** the Q&A format below (never embed options in prose).
+* **Execution output discipline**: When operating as Claude Code on execution tasks, apply `CLAUDE.md` Output Discipline rules. The "Yes chef!" prefix remains required.
 
 ## 1.1 Q&A Format
 
@@ -190,107 +97,10 @@ Agent persona files live in `.claude/agents/`. Load on demand — do not pre-loa
 
 ## 2. The Gatekeeper Protocol
 
-* **Phase 0.5 (MemPalace Orient)**: Before planning, search MemPalace for related work: `mempalace_search(query="<2-3 feature keywords>", limit=5)`. If results found → check for past decisions, existing patterns, or known constraints that should inform the plan. Skip if MCP unavailable.
+* **Phase 0.5 (MemPalace Orient)**: Before planning, search MemPalace for related work: `mempalace_search(query="<2-3 feature keywords>", limit=3)`. If results found → check for past decisions, existing patterns, or known constraints that should inform the plan. Skip if MCP unavailable.
 * **Phase 1 (Decomposition)**: If task spans >2 sub-systems, decompose mentally. Identify all decisions that can't be inferred. Do NOT write the plan file yet.
 * **Phase 1.5 (Pre-Plan Q&A)**: If any questions exist → ask them ALL now using Q&A format. Stop and wait for answers. Do NOT write or save the plan until answered.
 * **Phase 2 (Plan + Hard Pause)**: Write `plans/XXX.plan.md` incorporating all answers. Every plan MUST include `# Atomic Sub-tasks`. Plans go in project `plans/` only (never `~/.cursor/plans/`). If the plan touches `.scss`/`.css`, add a step: run `cssLayer` skill before writing styles. Stop after writing. Output: *"Plan ready. Review it and say 'save the plan' to proceed."*
 * **Phase 3 (Ledger Sync)**: On "save the plan", first action: append sub-tasks to `.claude/todo.md`. Then read `.claude/skills/save-plan/SKILL.md` and follow it.
 * **Phase 4 (Atomic Execution)**: Full autonomous file operations post-approval. Commit each sub-task with Conventional Commits. Update `.claude/todo.md` to `[x]` after each commit.
 * **Phase 5 (QA Loop)**: After all `[x]`, output a **How to verify** section: bullet list of where to go in the app and what to expect.
----
-
-## Session Preflight (moved from agent.md)
-
-> Run these steps at the start of every session, after reading CLAUDE.md and copilot-instructions.md.
-
-1. **MemPalace wake-up (once per session)**:
-   - Run `mempalace_diary_read(agent_name="claude-main", last_n=3)` — see what past sessions worked on.
-   - Run `mempalace_status()` — confirm palace is live.
-   - If either fails → note "MemPalace unavailable" and continue (non-blocking).
-
-2. **GitHub sync (once per calendar day)**: Check `notes/github-sync/<today>.md`. If missing → run `github-sync` skill.
-
-3. **Session handoff**: Check `.claude/sessions/` (most recent) or `notes/session-handoffs/` (legacy, last 3 days).
-
-4. **Todo**: Check `.claude/todo.md` for related pending work.
-
-5. **Branch check**: Run `git branch --show-current`. If on `main`/`master` → warn user proactively. The `branch-guard` hook auto-creates `feat/session-YYYYMMDD` on the first Edit/Write.
-
-6. **Open reflection items**: Scan `.claude/reflect/open/*.reflect.md` for `status: open`. If any found → output the Reflection Banner below before proceeding. If none → skip silently.
-
-### Reflection Banner
-
-```
-╔══════════════════════════════════════════════════════════╗
-║  OPEN REFLECTION ITEMS                                   ║
-║  Last auto-reflect run: <timestamp from newest file>     ║
-║  -> Found <N> issues · Applied <K> fix(es) · <M> open    ║
-╠══════════════════════════════════════════════════════════╣
-║  Stop mid-run:  ! echo. > .claude/reflect/.skip          ║
-╚══════════════════════════════════════════════════════════╝
-```
-
-- N = total `.reflect.md` files in `.claude/reflect/open/`
-- K = files with `status: resolved` AND `## Action Taken` containing "Applied fix (kept)"
-- M = files with `status: open`
-- timestamp = `created:` from the newest `.reflect.md` file
-
----
-
-## Post-Execution Gate (moved from agent.md)
-
-After completing any plan execution:
-1. Run `ng build` or full `getDiagnostics` — mandatory, no exceptions.
-2. If build fails → fix before reporting completion.
-3. After any change → follow `validation-checklist.md`: show checklist, ask "Should I verify this myself, or will you check it?" Do not auto-run `/qa`.
-4. Do NOT run the full test suite here — run tests only on explicit user request.
-
----
-
-## Commands Reference (moved from agent.md)
-
-Commands live in `.claude/commands/`. Use the path router in `CLAUDE.md` to select the right one.
-
-| Command | Purpose |
-|---------|---------|
-| `/feat` | New feature — loads Angular+domain standards, invokes plan→execute flow |
-| `/plan` | PRD/HLD planning — invokes product-manager, software-architect |
-| `/fix` | Bug fix — asks area (css/auth/data/ui/api), loads matching standards |
-| `/refactor` | Refactor — loads Angular+cssLayer+techdebt standards |
-| `/security` | Security audit/fix — loads security standards, invokes security-officer |
-| `new-feature.md` | Structured feature scoping (legacy — use /feat) |
-| `plan-implementation.md` | Architectural brief → implementation plan (read-only phase) |
-| `execute-it.md` | Execute the implementation plan (full write phase) |
-| `test-pr-review-merge.md` | Full CI: test, PR, review, merge |
-| `validate-agent-refs.md` | Health check: verify all agent file cross-references |
-| `auto-solve.md` | Autonomous plan executor |
-| `reflect.md` | Autonomous skill improvement loop |
-| `reflect-list.md` | Batch reflection — reviews tool failure log |
-| `nightly-audit.md` | Nightly code audit (6 violation categories) |
-| `audit-report.md` | Display latest nightly audit report |
-| `cleanup.md` | Prune old sessions and merged worktrees (dry-run + confirm) |
-
----
-
-## Agent Roster (§0.3) — moved from agent.md
-
-Active agents in `.claude/agents/`:
-
-| Agent | When to invoke |
-|-------|---------------|
-| `team-leader` | Multi-task orchestration, parallel agent coordination |
-| `git-agent` | All git operations: commit, push, PR, merge, batch |
-| `end-of-session-agent` | Session end — 4-phase fast path via `/ship` (< 2 min). Invoked by `/ship` and `/end-session` alias. |
-| `qa-engineer` | QA, test runs, bug verification |
-| `security-officer` | Security audits, auth review |
-| `product-manager` | PRD/HLD, feature scoping |
-| `software-architect` | Technical design, architecture decisions |
-
----
-
-## Playwright MCP (moved from agent.md)
-
-Playwright is **disabled by default** to save CPU. To enable for a session:
-set `"playwright@claude-plugins-official": true` in `~/.claude/settings.json` and restart.
-
-`auto-solve.md` uses `mcp__playwright__*` as fallback **only** if gstack `/browse` daemon is unavailable.

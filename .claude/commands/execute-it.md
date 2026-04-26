@@ -12,10 +12,18 @@ allowed-tools: Read, Write, Edit, Bash
 
 Execute the implementation plan from this conversation, incorporating any findings from plan-implementation verification.
 
+## Step -2 — Open Concerns gate
+
+If invoked while plan-implementation reported open concerns:
+- Verify user said `override` in this turn
+- If not → abort and re-display the open concerns
+
+---
+
 ## Step -1 — MemPalace Orient (MANDATORY)
 
 Before executing, orient to existing project context:
-1. `mempalace_search(query="<2-3 keywords from the plan being executed>", limit=5)`
+1. `mempalace_search(query="<2-3 keywords from the plan being executed>", limit=3)`
 2. Review results for existing patterns, past constraints, or known implementations.
 3. If MCP unavailable → skip silently.
 
@@ -84,61 +92,13 @@ Example: if the brief says "add reload calls for three services" and plan-implem
 
 ---
 
-## Verification-Before-Completion Gate
-
-**Iron law: No completion claims without fresh verification evidence.**
-
-After completing each task in the execution list, BEFORE marking it done:
-
-1. **IDENTIFY** — What command proves this task is done? (`ng build`, test command, diagnostic check)
-2. **RUN** — Execute the command. Fresh, complete, not cached.
-3. **READ** — Full output. Check exit code. Count failures.
-4. **VERIFY** — Does output confirm the task is done?
-   - YES → Mark task done, state claim WITH evidence: "Build passes (0 errors, 0 warnings)"
-   - NO → Fix the issue (using systematic-debugging if needed), re-run, re-verify
-
-**Red flags (STOP if you catch yourself thinking these):**
-- "Should work now" → RUN the verification
-- "I'm confident" → Confidence is not evidence
-- "Linter passed so build passes" → Linter is not compiler. Run the build.
-- "Just this once" → No exceptions
-
-**Minimum verification per task:**
-- Any `.ts` change → `ng build` must pass (or `getDiagnostics` if available)
-- Any `.html` template change → `ng build` must pass
-- Any `.scss` change → `ng build` must pass
-- Logic change → relevant test must pass (if test exists)
-
-## Systematic-Debugging Protocol
-
-When verification fails or a bug is encountered during execution, follow this protocol BEFORE attempting any fix:
-
-### Phase 1: Root Cause Investigation (MANDATORY before any fix attempt)
-1. **Read error messages carefully** — full stack traces, line numbers, error codes
-2. **Check what changed** — `git diff` against last known-good state
-3. **Trace data flow** — where does the bad value originate? Trace backward through call stack
-
-### Phase 2: Hypothesis
-1. State clearly: "I think [X] is the root cause because [Y]"
-2. Make the SMALLEST possible change to test the hypothesis
-3. ONE variable at a time — don't fix multiple things at once
-
-### Phase 3: Verify Fix
-1. Run the same verification that failed
-2. If PASS → continue execution
-3. If FAIL → form NEW hypothesis, don't pile fixes
-
-### Phase 4: Escalation (3-fix rule)
-If 3 fix attempts have failed:
-- **STOP** — do not attempt fix #4
-- Report to user: what was tried, what failed, what the root cause might be
-- Ask for guidance before continuing
-
-**Never:** guess-and-check, add multiple fixes at once, skip error messages, say "it should work now" without running verification.
+**On verification failure or bug encountered:** read `.claude/skills/execute-debugging/SKILL.md` and apply the Verification-Before-Completion Gate + Systematic-Debugging Protocol.
 
 ## Smart Visual QA Flow
 
 The validation-checklist instruction (`@.claude/instructions/validation-checklist.md`) asks "verify / I'll check?" at task start. This section OVERRIDES that timing for tasks that include UI changes:
+
+Run `/preflight` before launching browser.
 
 **New flow for UI-touching tasks:**
 1. Execute the task normally

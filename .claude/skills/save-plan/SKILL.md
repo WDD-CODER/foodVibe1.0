@@ -70,10 +70,3 @@ Skip silently if MCP unavailable.
 ## Completion Gate
 
 Output: `"Plan saved. Ledger updated. Ready to execute Task 1: [Task Name]."`
-
----
-
-## Cursor Tip
-> Moving sub-tasks to the todo list is a pure data-transfer task. Always use Composer 2.0 (Fast/Flash) to transition from planning to coding instantly.
-> Reserve Gemini 1.5 Pro for Phase 2 only when validating PRD alignment on a complex plan.
-> Credit-saver: ~67% of this skill (Phases 1 + 3) is Flash-eligible.

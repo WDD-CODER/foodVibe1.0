@@ -1,0 +1,8 @@
+{
+  "P1": { "name": "40-char Hebrew", "value": "בדיקה ארוכה של שדה טקסט בעברית עם הרבה תווים" },
+  "P2": { "name": "80-char Hebrew", "value": "בדיקה מאוד מאוד ארוכה של שדה טקסט בעברית עם המון תווים ועוד המון תווים נוספים" },
+  "P3": { "name": "Emoji+LTR in RTL", "value": "מתכון 🍝 123 pasta" },
+  "P4": { "name": "Two dropdowns open", "action": "open A then B without closing A; screenshot collision" },
+  "P5": { "name": "Keyboard-open state", "action": "focus input mid-form; screenshot with keyboard region simulated" },
+  "P6": { "name": "20+ row list", "action": "add 20+ rows where dynamic list exists; screenshot scroll state" }
+}

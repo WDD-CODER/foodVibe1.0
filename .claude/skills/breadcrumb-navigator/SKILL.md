@@ -52,10 +52,3 @@ description: Creates and maintains breadcrumbs.md navigation files at major dire
 Output: `"Navigation map updated for [Directory]. Breadcrumbs active at [Major Seams]."`
 
 If a new directory was created → remind the user to run `update-docs` for a global refresh.
-
----
-
-## Cursor Tip
-> Updating breadcrumbs is a pure data-transfer task. Always use Composer 2.0 (Fast/Flash) — it is extremely fast at scanning directories and writing the markdown maps.
-> Reserve Gemini 1.5 Pro for Phase 3 only when providing high-level architectural navigation advice.
-> Credit-saver: ~95% of this skill is procedural (Phases 1 + 2).

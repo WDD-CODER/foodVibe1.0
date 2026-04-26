@@ -73,7 +73,23 @@ If splitting into multiple branches, repeat a block per branch, separated by a b
 7. If user wants PR: `gh pr create --base main --head <branch> --title "..." --body "..."`
 8. If user wants merge: `gh pr merge <n> --merge --delete-branch`
    **If that fails** (exit code non-zero, error mentions local checkout or dirty files): fall back to `gh pr merge <n> --merge --auto` — this merges server-side without a local checkout. Do NOT stash or commit the dirty file (e.g. `.claude/reflect/failure-log.tsv` is intentionally left untracked).
-9. Report result. Done.
+9. **Push conflict guard:** If `git push` is rejected (non-fast-forward), stop and run:
+   ```bash
+   git fetch origin
+   git log --oneline HEAD..origin/{branch}   # remote-only commits
+   git diff --stat HEAD...origin/{branch}    # diverging files
+   ```
+   Present to user:
+   ```
+   PUSH REJECTED — remote has {N} diverging commit(s).
+   Diverging files: {list}
+
+   a. Rebase my commits on top of remote (git pull --rebase) — linear history
+   b. Merge remote into local (git pull --merge) — preserves topology
+   c. Abort — I'll resolve manually
+   ```
+   Wait for choice. On **a**: `git pull --rebase origin {branch}` → if conflicts arise, list conflicting files, stop, instruct user to resolve then re-run. On **b**: `git pull origin {branch}` → same conflict stop. On **c**: exit, print files needing attention.
+10. Report result. Done.
 10. **Todo Update + Auto-Archive:**
     - In `.claude/todo.md`, set any sub-tasks completed by this commit to `[x]`.
     - Then scan every plan section (heading + items) for sections where **all** items are `[x]`:
@@ -134,7 +150,7 @@ PR #13 feat/scaling-chip — merged
 - Worktree: never `git checkout main` from inside — use `git -C <mainRepoPath>` for PR/merge
 - Conventional Commits: `feat` | `fix` | `docs` | `style` | `refactor` | `test` | `chore`
 - `gh` CLI for all GitHub operations — no MCP writes
-- If push/PR fails → report error, suggest fix. Don't retry blindly.
+- If push/PR fails → apply conflict guard (step 9). Don't retry blindly.
 - Check `gh pr list` before creating a PR — surface any existing PR for this branch
 - Batch operations: ONE visual plan, ONE approval, sequential execution — no mid-batch prompts
 - **Post-commit dirty worktree**: After committing, `.claude/reflect/failure-log.tsv` may be dirtied by pre-commit hooks logging new entries. Do NOT attempt to commit it again — leave it dirty. It will be included in the next session's commit naturally. Trying to re-commit triggers the hook again → infinite loop.

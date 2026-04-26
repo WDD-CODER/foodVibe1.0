@@ -35,7 +35,3 @@ Agent(
 | MemPalace diary write | `mempalace_diary_write()` manually |
 | Plan archive | Rename `.plan.md` → `.done.plan.md` |
 
-## Aliases (work identically, deprecated — remove 2026-04-28)
-
-- `/end-session` → `.claude/skills/end-session/SKILL.md`
-- `/session-handoff` → `.claude/skills/session-handoff/SKILL.md`

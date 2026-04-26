@@ -5,7 +5,10 @@ allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Agent
 
 # /nightly-audit
 
-Run the full nightly audit pipeline. This command is designed to run autonomously (via RemoteTrigger cron) or manually.
+> **MANUAL-ONLY as of 2026-04-26. Cron schedule disabled.**
+> **Reason:** token-budget management on Pro plan.
+
+Run the full nightly audit pipeline.
 
 ## Step 1 — Load Skill
 

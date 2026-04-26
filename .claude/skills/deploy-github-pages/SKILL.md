@@ -52,9 +52,3 @@ Output: `"Deployment successful. App is live at: [URL]"`
 
 Update the session handoff with the deployment timestamp and version if applicable.
 
----
-
-## Cursor Tip
-> Deployment is CLI-heavy. Use Composer 2.0 (Fast/Flash) for Phases 1, 2, and 3 (~95% of the work).
-> Reserve Gemini 1.5 Pro for Phase 4 **only** if the build fails due to dependency or base-href pathing issues.
-> Credit-saver: ~75% of this skill is Flash-eligible.

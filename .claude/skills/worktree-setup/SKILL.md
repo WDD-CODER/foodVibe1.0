@@ -66,10 +66,3 @@ git worktree add -b feat/<name> <path> main
 Output: `"Worktree created at [path] on port [port]. Branch feat/[name] is active and linked."`
 
 Update the main repo's `.claude/todo.md` to reflect the task is now active in the worktree.
-
----
-
-## Cursor Tip
-> Setting up a worktree is pure automation. Always use Composer 2.0 (Fast/Flash) for Phases 1 & 2.
-> Reserve Gemini 1.5 Pro for Phase 3 only — ensuring the worktree has the correct logic context and todo state.
-> Credit-saver: ~67% of this skill (Phases 1 + 2) is Flash-eligible.

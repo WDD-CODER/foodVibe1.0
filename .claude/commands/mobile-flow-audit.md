@@ -16,6 +16,8 @@ Invoke the Mobile Flow Auditor persona to run the full mobile-flow audit.
 
 ## Step 1 — Preflight
 
+Run `/preflight` first. Abort if any check fails.
+
 1. Check dev server: `curl -s -o /dev/null -w "%{http_code}" http://localhost:4200` must return `200`. If not → abort with `"Dev server not running. Start with npm run dev:local."`
 2. Check gstack binary: `ls ~/.claude/skills/gstack/browse/dist/browse`. If missing → abort with `"gstack not installed."`
 3. Set viewport: `B=~/.claude/skills/gstack/browse/dist/browse; $B viewport 375x812`
@@ -62,6 +64,13 @@ P1 = 40-char Hebrew | P2 = 80-char Hebrew | P3 = Emoji+LTR in RTL | P4 = Two dro
 
 ## Step 4 — Execute flows
 
+### Dependency gate
+Track `LOGIN_OK=true|false`. Initialize from credentials check.
+After login flow runs, set `LOGIN_OK` based on result.
+For each subsequent flow with `Requires Auth = Yes` in catalog:
+- If `LOGIN_OK=false`: skip the flow, write stub `report.md` noting "blocked-by-prerequisite: login flow failed"
+- If `LOGIN_OK=true`: proceed normally
+
 For each flow in the filtered catalog:
 
 ### 4a — Prepare
@@ -80,36 +89,23 @@ Severity counts: Critical <TBD> · Major <TBD> · Minor <TBD>
 
 ### 4b — Spawn auditor subagent
 
-Spawn a fresh Agent (general-purpose) with this prompt:
-
+Spawn fresh Agent (general-purpose) with prompt:
 ```
-You are the Mobile Flow Auditor (.claude/agents/mobile-flow-auditor.md).
+You are the Mobile Flow Auditor.
+Read .claude/agents/mobile-flow-auditor.md for full protocol.
+Assigned flow:
 
-## Assigned Flow
-Slug: <slug>
-Route: <route>
-Key interactions: <interactions>
-Probes to apply: <probe list>
-Credentials: <CREDS or "signup-mode">
+  Slug: <slug>
+  Route: <route>
+  Interactions: <interactions>
+  Probes to apply: <probe IDs>
+  Credentials: <CREDS or "signup-mode">
+  Output report: .claude/reports/mobile-audit/<slug>/report.md
+  Output screenshots: .claude/reports/mobile-audit/<slug>/shots/
 
-## Your Task
-1. Set viewport 375x812 via $B viewport 375x812
-2. If flow is signup/login: perform auth actions, save creds on success
-3. Navigate to the route
-4. Execute the interactions with stress probes
-5. Screenshot every state into .claude/reports/mobile-audit/<slug>/shots/NN-<state>.png (NN = zero-padded order)
-6. Write .claude/reports/mobile-audit/<slug>/report.md (overwrite) with:
-   - Metadata header (run date, viewport, counts)
-   - Defect entries: ### [severity] <element> — <summary>
-     - Screenshot: ./shots/NN-<state>.png
-     - Selector: <from $B snapshot -i>
-     - Description: what breaks, in one sentence
-     - Steps to reproduce: numbered list
-
-Return a JSON summary: {"slug":"...","critical":N,"major":N,"minor":N,"screenshots":N}
-
-Use $B=~/.claude/skills/gstack/browse/dist/browse for all browser operations.
-Never modify src/, server/, or any app code.
+Use $B=~/.claude/skills/gstack/browse/dist/browse for browser ops.
+Never modify src/, server/, or app code.
+Return JSON summary on completion.
 ```
 
 ### 4c — Collect result

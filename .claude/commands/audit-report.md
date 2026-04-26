@@ -49,6 +49,13 @@ If no reports found in any mode: `"No audit reports found. Run /nightly-audit fi
    ```
 3. Find the most recent `audit/YYYY-MM-DD` or `audit/YYYY-MM-DD-1` branch → store as `AUDIT_BRANCH`.
 4. Find the most recent `reflect/YYYY-MM-DD` or `reflect/YYYY-MM-DD-1` branch → store as `REFLECT_BRANCH`.
+5. If neither branch exists and no local report file found:
+   ```
+   No nightly audit ran (manual-only mode as of 2026-04-26).
+   Run /nightly-audit to generate a report on demand.
+   Use /audit-report YYYY-MM-DD to view a historical report.
+   ```
+   Exit.
 
 ---
 

@@ -45,12 +45,8 @@ description: Scans for duplicated code, dead code, style violations, and TODO de
 
 ---
 
-## Phase 0 — MemPalace Orient (MANDATORY before any file reads)
-
-1. Run `mempalace_search(query="tech debt dead code duplicates todos", limit=5)` to surface past audit findings and known debt areas.
-2. If results found → review for previously identified issues, known hotspots, or recurring patterns.
-3. If MCP unavailable → skip silently and continue to Phase 1.
-4. Report in completion message whether MemPalace was consulted.
+## Phase 0 — MemPalace Orient (CONDITIONAL)
+Run `mempalace_search(query="<keywords>", limit=3)` ONLY if task involves an unfamiliar code area or known-recurring debt category. Skip for routine cleanup or pattern application. Default: skip. If MCP unavailable: skip silently.
 
 ---
 
@@ -144,10 +140,3 @@ description: Scans for duplicated code, dead code, style violations, and TODO de
 Output: `"Tech debt audit complete. [X] unused imports removed, [Y] TODOs logged, [Z] components flagged for refactor. Report saved to .claude/techdebt-reports/techdebt-YYYY-MM-DD.md ([N]/7 reports in archive)."`
 
 If critical logic was changed → invoke QA Engineer for verification before committing.
-
----
-
-## Cursor Tip
-> Tech debt cleanup is pattern-matching and deletion. Use Composer 2.0 (Fast/Flash) for ~90% of this work (Phases 1 + 3a).
-> Reserve Gemini 1.5 Pro for Phase 2 only when determining how to decouple complex logic or optimize Signal architecture.
-> Credit-saver: ~67% of this skill is Flash-eligible.
