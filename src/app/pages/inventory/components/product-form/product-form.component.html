@@ -9,6 +9,9 @@
       <h2 class="form-header__title">{{ 'add_product_inventory_title' | translatePipe }}</h2>
       <p class="subtitle">{{ 'add_product_subtitle' | translatePipe }}</p>
       }
+      <button type="button" class="c-icon-btn" (click)="openAiProductModal()" [title]="'ai_product_open' | translatePipe">
+        <lucide-icon name="sparkles" [size]="18"></lucide-icon>
+      </button>
     </header>
 
     <div class="form-section form-section--mandatory">

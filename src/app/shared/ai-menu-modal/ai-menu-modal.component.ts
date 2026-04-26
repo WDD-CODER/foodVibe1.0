@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, HostListener, inject, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { HttpErrorResponse } from '@angular/common/http'
 import { LucideAngularModule } from 'lucide-angular'
@@ -200,6 +200,11 @@ export class AiMenuModalComponent implements OnInit {
   }
 
   // ─── Shared ──────────────────────────────────────────────────────
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    if (this.modalService.isOpen()) this.onClose()
+  }
 
   onClose(): void {
     this.modalService.close()

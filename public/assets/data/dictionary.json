@@ -778,6 +778,22 @@
     "ai_menu_open": "AI תפריט",
     "ai_menu_create_new": "צור עם AI",
     "ai_menu_replace_confirm_title": "החלפת תפריט קיים",
-    "ai_menu_replace_confirm": "יש תפריט קיים. האם לעדכן אותו בעזרת AI?"
+    "ai_menu_replace_confirm": "יש תפריט קיים. האם לעדכן אותו בעזרת AI?",
+    "ai_product_title_create": "צור מוצר עם AI",
+    "ai_product_title_edit": "ערוך מוצר עם AI",
+    "ai_product_prompt_placeholder": "תאר את המוצר — שם, סוג, קטגוריה...",
+    "ai_product_instruction_placeholder": "תאר את השינוי שברצונך לבצע במוצר...",
+    "ai_product_generate": "צור מוצר",
+    "ai_product_generate_again": "נסה שוב",
+    "ai_product_apply": "החל",
+    "ai_product_error": "שגיאה ביצירת המוצר. נסה שוב.",
+    "ai_product_daily_limit_reached": "הגעת למגבלת הבקשות היומית (1,000)",
+    "ai_product_base_unit_label": "יחידת בסיס",
+    "ai_product_categories_label": "קטגוריות",
+    "ai_product_allergens_label": "אלרגנים",
+    "ai_product_yield_label": "תפוקה",
+    "ai_product_purchase_options_label": "אופציות רכישה",
+    "ai_product_open": "AI מוצר",
+    "ai_product_create_new": "צור עם AI"
   }
 }

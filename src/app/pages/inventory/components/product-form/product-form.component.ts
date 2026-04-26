@@ -28,6 +28,9 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { ChipSearchDropdownComponent } from 'src/app/shared/chip-search-dropdown/chip-search-dropdown.component'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
+import { AiProductModalService } from 'src/app/shared/ai-product-modal/ai-product-modal.service'
+import { ProductAiFlowService } from 'src/app/pages/inventory/services/product-ai-flow.service'
+import type { AiProductDraft } from '@models/ai-product-draft.model'
 
 @Component({
   selector: 'product-form',
@@ -43,6 +46,7 @@ import { useSavingState } from 'src/app/core/utils/saving-state.util'
     CustomSelectComponent,
     ChipSearchDropdownComponent
   ],
+  providers: [ProductAiFlowService],
   templateUrl: './product-form.component.html',
   styleUrl: './product-form.component.scss'
 })
@@ -67,6 +71,8 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   private readonly confirmModal = inject(ConfirmModalService)
   private readonly destroyRef = inject(DestroyRef)
   private readonly logging = inject(LoggingService)
+  private readonly aiProductModal_ = inject(AiProductModalService)
+  private readonly productAiFlow_ = inject(ProductAiFlowService)
 
   unitRegistry = inject(UnitRegistryService)
 
@@ -199,6 +205,20 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     }
   }
 
+  protected openAiProductModal(): void {
+    const snapshot: AiProductDraft = {
+      name_hebrew: this.productForm_.get('productName')?.value ?? '',
+      base_unit_: this.productForm_.get('base_unit_')?.value ?? '',
+      categories_: this.productForm_.get('categories_')?.value ?? [],
+      allergens_: this.productForm_.get('allergens_')?.value ?? [],
+      yield_factor_: this.productForm_.get('yield_factor_')?.value ?? 1,
+      min_stock_level_: this.productForm_.get('min_stock_level_')?.value ?? 0,
+      expiry_days_default_: this.productForm_.get('expiry_days_default_')?.value ?? 0,
+    }
+    this.aiProductModal_.open('edit', snapshot, undefined,
+      async (patch) => this.productAiFlow_.applyPatch(patch))
+  }
+
   ngAfterViewInit(): void {
     setTimeout(() => this.productNameInputRef?.nativeElement?.focus(), 0)
   }
@@ -240,6 +260,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.unitRegistry.refreshFromStorage()
     this.initForm()
+    this.productAiFlow_.init(this.productForm_)
 
     runInInjectionContext(this.injector, () => {
       this.formValue_ = toSignal(this.productForm_.valueChanges, {

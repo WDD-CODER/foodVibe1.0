@@ -18,17 +18,33 @@
           <div class="quick-add-product-modal__grid quick-add-product-modal__grid--dense">
             <div class="quick-add-product-modal__field" [class.field--error]="nameError_()">
               <label for="quick-add-name">{{ 'product_name' | translatePipe }}</label>
-              <input
-                id="quick-add-name"
-                #nameEl
-                type="text"
-                [class.input--error]="nameError_()"
-                [ngModel]="name_()"
-                (ngModelChange)="name_.set($event)"
-                name="name_hebrew"
-                (keydown.enter)="advanceFocus(baseUnitRef()?.nativeElement); $event.preventDefault()" />
+              <div class="quick-add-name-row">
+                <input
+                  id="quick-add-name"
+                  #nameEl
+                  type="text"
+                  [class.input--error]="nameError_()"
+                  [ngModel]="name_()"
+                  (ngModelChange)="name_.set($event)"
+                  name="name_hebrew"
+                  (keydown.enter)="advanceFocus(baseUnitRef()?.nativeElement); $event.preventDefault()" />
+                <button
+                  type="button"
+                  class="c-icon-btn"
+                  (click)="onAiFill()"
+                  [disabled]="!name_().trim() || aiLoading_()">
+                  @if (aiLoading_()) {
+                    <app-loader size="small" [inline]="true" />
+                  } @else {
+                    <lucide-icon name="sparkles" [size]="16"></lucide-icon>
+                  }
+                </button>
+              </div>
               @if (nameError_()) {
                 <span class="field-error-msg">{{ nameError_() | translatePipe }}</span>
+              }
+              @if (aiError_()) {
+                <span class="field-error-msg">{{ 'ai_product_error' | translatePipe }}</span>
               }
             </div>
             <div class="quick-add-product-modal__field" [class.field--error]="unitError_()">

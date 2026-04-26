@@ -642,3 +642,4 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [ ] Task 4: Simplify `scripts/pre-compact-reminder.sh` — remove baseline block, add SESSION SAVE TARGET reference + Post-Compact Resume instruction
 - [ ] Task 5: Update `scripts/session-startup.sh` — add post-compact resume reminder line
 - [x] Task 6: Update `.claude/settings.json` — swap .sh → .py in PostToolUse hook
+
