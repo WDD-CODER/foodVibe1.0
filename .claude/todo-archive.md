@@ -6,6 +6,36 @@ Moved from todo.md to reduce token load.
 
 ## Done
 
+### Plan 287 — AI Phase 2 — Products (`plans/287-ai-phase2-products.plan.md`) ✅ 2026-04-26
+
+#### Sub-brief 2.1 — Backend
+- [x] Task 1: `server/routes/ai.js` — Add `PRODUCT_GENERATE_SYSTEM_PROMPT`
+- [x] Task 2: `server/routes/ai.js` — Add `validateProductDraft()` helper
+- [x] Task 3: `server/routes/ai.js` — Add `POST /generate-product` endpoint
+- [x] Task 4: `server/routes/ai.js` — Add `PRODUCT_PATCH_SYSTEM_PROMPT`
+- [x] Task 5: `server/routes/ai.js` — Add `POST /patch-product` endpoint
+
+#### Sub-brief 2.2 — Client layer
+- [x] Task 6: Create `src/app/core/models/ai-product-draft.model.ts`
+- [x] Task 7: `gemini.service.ts` — Add `generateProduct()` + `patchProduct()`
+- [x] Task 8: Create `src/app/pages/inventory/services/product-ai-flow.service.ts`
+
+#### Sub-brief 2.3 — Modal
+- [x] Task 9: Create `ai-product-modal.service.ts`
+- [x] Task 10: Create `ai-product-modal.component.ts`
+- [x] Task 11: Create `ai-product-modal.component.html`
+- [x] Task 12: Create `ai-product-modal.component.scss`
+- [x] Task 13: Mount `<app-ai-product-modal/>` in `app.component`
+- [x] Task 14: `dictionary.json` — add 14 `ai_product_*` keys
+
+#### Sub-brief 2.4 — Integration
+- [x] Task 15: `inventory-product-list.component.ts` — HeroFab sparkles action
+- [x] Task 16: `product-form.component.ts/.html` — providers, inject, button
+- [x] Task 17: `quick-add-product-modal.component.ts/.html` — AI icon + fill
+- [x] Task 18: `dictionary.json` — add `ai_product_open`, `ai_product_create_new`
+
+---
+
 ### Plan 250 — Auth Field Validation — Signup & Login (`plans/250-auth-field-validation.plan.md`)
 
 - [x] Task 1: Create `src/app/core/utils/auth-validation.util.ts` — pure validator functions

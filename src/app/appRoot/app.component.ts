@@ -20,10 +20,11 @@ import { AuthModalComponent } from '../core/components/auth-modal/auth-modal.com
 import { SupplierModalComponent } from '../shared/supplier-modal/supplier-modal.component'
 import { AiRecipeModalComponent } from '../shared/ai-recipe-modal/ai-recipe-modal.component'
 import { AiMenuModalComponent } from '../shared/ai-menu-modal/ai-menu-modal.component'
+import { AiProductModalComponent } from '../shared/ai-product-modal/ai-product-modal.component'
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, HeaderComponent, UserMsg, UnitCreatorModal, TranslationKeyModalComponent, LabelCreationModalComponent, AddItemModalComponent, QuickAddProductModalComponent, QuickEditProductModalComponent, AddEquipmentModalComponent, GlobalSpecificModalComponent, ConfirmModalComponent, RestoreChoiceModalComponent, LoaderComponent, HeroFabComponent, AuthModalComponent, SupplierModalComponent, AiRecipeModalComponent, AiMenuModalComponent],
+  imports: [RouterOutlet, HeaderComponent, UserMsg, UnitCreatorModal, TranslationKeyModalComponent, LabelCreationModalComponent, AddItemModalComponent, QuickAddProductModalComponent, QuickEditProductModalComponent, AddEquipmentModalComponent, GlobalSpecificModalComponent, ConfirmModalComponent, RestoreChoiceModalComponent, LoaderComponent, HeroFabComponent, AuthModalComponent, SupplierModalComponent, AiRecipeModalComponent, AiMenuModalComponent, AiProductModalComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

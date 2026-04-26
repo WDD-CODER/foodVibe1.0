@@ -31,6 +31,8 @@ import { getPricePerUnit, calcBuyPriceGlobal } from 'src/app/core/utils/product-
 import { getProductValidationStatus, getProductMissingFields, VALIDATION_FIELD_ICONS, ProductValidationStatus } from 'src/app/core/utils/product-validation.util'
 import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
 import { NutritionBadgeComponent } from 'src/app/shared/nutrition-badge/nutrition-badge.component'
+import { ProductDataService } from '@services/product-data.service'
+import { AiProductModalService } from 'src/app/shared/ai-product-modal/ai-product-modal.service'
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date'
 type ProductBulkField = 'categories_' | 'supplierIds_' | 'allergens_' | 'base_unit_'
@@ -73,6 +75,8 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected readonly unitRegistry = inject(UnitRegistryService)
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   private readonly metadataRegistry = inject(MetadataRegistryService)
+  private readonly productData_ = inject(ProductDataService)
+  private readonly aiProductModal_ = inject(AiProductModalService)
 
   private lastPriceEdit_ = { productId: '', unit: '', value: 0 }
 
@@ -138,9 +142,31 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.heroFab.setPageActions(
-      [{ labelKey: 'add_product', icon: 'plus', run: () => this.router.navigate(['/inventory/add']) }],
+      [
+        { labelKey: 'add_product', icon: 'plus', run: () => this.router.navigate(['/inventory/add']) },
+        { labelKey: 'ai_product_create_new', icon: 'sparkles', run: () => this.openAiCreateModal() },
+      ],
       'replace'
     )
+  }
+
+  private openAiCreateModal(): void {
+    this.aiProductModal_.open('create', undefined, async (draft) => {
+      const payload = {
+        name_hebrew: draft.name_hebrew,
+        base_unit_: draft.base_unit_,
+        categories_: draft.categories_,
+        allergens_: draft.allergens_,
+        yield_factor_: draft.yield_factor_,
+        min_stock_level_: draft.min_stock_level_,
+        expiry_days_default_: draft.expiry_days_default_,
+        // purchase_options_ deliberately omitted: AI unit symbols don't map to UnitRegistry keys
+        purchase_options_: [],
+        sources_: [],
+      }
+      const created = await this.productData_.addProduct(payload)
+      void this.router.navigate(['/inventory/edit', created._id])
+    })
   }
 
   ngOnDestroy(): void {

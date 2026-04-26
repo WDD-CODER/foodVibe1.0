@@ -853,6 +853,227 @@ router.post('/patch-menu', verifyToken, async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// POST /generate-product
+// Accepts { rawText: string }.
+// Gemini reads the raw text and returns a structured AiProductDraft JSON.
+// Response: { product: AiProductDraft }
+// Requires a valid JWT.
+// ---------------------------------------------------------------------------
+
+const PRODUCT_GENERATE_SYSTEM_PROMPT = `You are an intelligent product catalog assistant for a catering kitchen. Given a text description of a food product or ingredient, you return a fully structured product record as JSON.
+
+## Required output format (JSON only — no markdown, no explanation):
+{
+  "name_hebrew": "<product name in Hebrew>",
+  "base_unit_": "<one of: gram | ml | kg | liter | unit | tablespoon | teaspoon | cup | pinch | portion>",
+  "categories_": ["<Hebrew category name>"],
+  "allergens_": ["<Hebrew allergen name — from: גלוטן, חלב, ביצים, אגוזים, סויה, שומשום, דגים, סרטנים, בוטנים, סלרי, חרדל, לופין, מולוסקים>"],
+  "yield_factor_": <number between 0 and 1>,
+  "min_stock_level_": <integer, 0 if unknown>,
+  "expiry_days_default_": <integer, 0 if unknown>
+}
+
+## Rules
+- base_unit_ MUST be one of the 10 canonical English keys listed above — NEVER use Hebrew for base_unit_.
+- categories_ should be inferred from the product type (e.g. "חלב" → ["מוצרי חלב"], "עוף שלם" → ["עופות"]).
+- allergens_ must list ONLY allergens the product actually contains, inferred from the name and category.
+- yield_factor_ is between 0 and 1. Use 1.0 for packaged goods and liquids (no waste). Use 0.75–0.90 for fresh vegetables and fruits.
+- Return ONLY valid JSON. No markdown. No code blocks. No explanation.`;
+
+function validateProductDraft(product) {
+  const errors = [];
+  if (!product.name_hebrew || typeof product.name_hebrew !== 'string' || !product.name_hebrew.trim()) {
+    errors.push('name_hebrew is required');
+  }
+  if (!product.base_unit_ || !CANONICAL_UNITS.has(product.base_unit_)) {
+    errors.push('base_unit_ must be one of the canonical units');
+  }
+  if (!Array.isArray(product.categories_)) {
+    errors.push('categories_ must be an array');
+  }
+  if (!Array.isArray(product.allergens_)) {
+    errors.push('allergens_ must be an array');
+  }
+  if (typeof product.yield_factor_ !== 'number' || product.yield_factor_ < 0 || product.yield_factor_ > 1) {
+    errors.push('yield_factor_ must be a number between 0 and 1');
+  }
+  return errors;
+}
+
+router.post('/generate-product', verifyToken, async (req, res) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ error: 'AI generation is not configured on this server' });
+  }
+
+  const { rawText } = req.body;
+  if (!rawText || typeof rawText !== 'string' || !rawText.trim()) {
+    return res.status(400).json({ error: 'rawText is required' });
+  }
+
+  const currentCount = await getUsageCount();
+  if (currentCount >= DAILY_LIMIT) {
+    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
+  }
+
+  try {
+    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: PRODUCT_GENERATE_SYSTEM_PROMPT }] },
+        contents: [{ role: 'user', parts: [{ text: rawText }] }],
+        generationConfig: { temperature: 0.5, maxOutputTokens: 1024 },
+      }),
+      signal: AbortSignal.timeout(30000),
+    });
+
+    if (!geminiRes.ok) {
+      const errBody = await geminiRes.text();
+      console.error('[ai/generate-product] Gemini API error:', errBody);
+      return res.status(502).json({ error: 'Gemini API error' });
+    }
+
+    const geminiData = await geminiRes.json();
+    let raw = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      console.error('[ai/generate-product] JSON parse failed:', raw);
+      return res.status(502).json({ error: 'Gemini returned invalid JSON' });
+    }
+
+    const validationErrors = validateProductDraft(parsed);
+    if (validationErrors.length > 0) {
+      console.error('[ai/generate-product] validation failed:', validationErrors, parsed);
+      return res.status(502).json({ error: 'Gemini returned invalid product structure', details: validationErrors });
+    }
+
+    await incrementUsage();
+    return res.json({ product: parsed });
+  } catch (err) {
+    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
+      console.error('[ai/generate-product] timeout');
+      return res.status(504).json({ error: 'Gemini request timed out' });
+    }
+    console.error('[ai/generate-product]', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /patch-product
+// Accepts { currentProduct: AiProductDraft, instruction: string }.
+// Gemini reads the current product + user instruction and returns ONLY the
+// fields that should change as a sparse patch object.
+// Response: { changes: { ...only changed fields... } }
+// Requires a valid JWT.
+// ---------------------------------------------------------------------------
+
+const PRODUCT_PATCH_SYSTEM_PROMPT = `You are an intelligent product record editor for a catering kitchen. You will receive:
+1. The CURRENT PRODUCT as a JSON object
+2. The USER'S INSTRUCTION — a natural-language request (possibly in Hebrew or English)
+
+Your job is to produce a SPARSE PATCH — a JSON object containing ONLY the fields the user asked to change.
+Do NOT include fields that were not mentioned or implied by the instruction.
+
+## Field keys you may include in the patch:
+- "name_hebrew" — string: new product name in Hebrew
+- "base_unit_" — string: MUST be one of gram | ml | kg | liter | unit | tablespoon | teaspoon | cup | pinch | portion
+- "categories_" — string[]: full replacement array of Hebrew category names
+- "allergens_" — string[]: full replacement array of Hebrew allergen names
+- "yield_factor_" — number 0–1: new yield factor
+- "min_stock_level_" — integer: new minimum stock level
+- "expiry_days_default_" — integer: new default expiry days
+- "min_stock_level_" — integer: new minimum stock level
+- "expiry_days_default_" — integer: new default expiry days
+
+## Decision rules:
+- Only include keys the user clearly wants to change
+- If user says "change the yield to 0.85" → include ONLY "yield_factor_"
+- If ambiguous, prefer minimal changes
+
+Return ONLY valid JSON. No markdown, no explanation, no code blocks. Raw JSON only.
+
+Format:
+{
+  "changes": {
+    ... only the fields being changed ...
+  }
+}`;
+
+router.post('/patch-product', verifyToken, async (req, res) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ error: 'AI generation is not configured on this server' });
+  }
+
+  const { currentProduct, instruction } = req.body;
+  if (!currentProduct || typeof currentProduct !== 'object') {
+    return res.status(400).json({ error: 'currentProduct is required' });
+  }
+  if (!instruction || typeof instruction !== 'string' || !instruction.trim()) {
+    return res.status(400).json({ error: 'instruction is required' });
+  }
+
+  const currentCount = await getUsageCount();
+  if (currentCount >= DAILY_LIMIT) {
+    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
+  }
+
+  try {
+    const userMessage = `CURRENT PRODUCT:\n${JSON.stringify(currentProduct, null, 2)}\n\nUSER INSTRUCTION:\n${instruction}`;
+
+    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: PRODUCT_PATCH_SYSTEM_PROMPT }] },
+        contents: [{ role: 'user', parts: [{ text: userMessage }] }],
+        generationConfig: { temperature: 0.3, maxOutputTokens: 1024 },
+      }),
+      signal: AbortSignal.timeout(45000),
+    });
+
+    if (!geminiRes.ok) {
+      const errBody = await geminiRes.text();
+      console.error('[ai/patch-product] Gemini API error:', errBody);
+      return res.status(502).json({ error: 'Gemini API error' });
+    }
+
+    const geminiData = await geminiRes.json();
+    let raw = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      console.error('[ai/patch-product] JSON parse failed:', raw);
+      return res.status(502).json({ error: 'Gemini returned invalid JSON' });
+    }
+
+    if (!parsed.changes || typeof parsed.changes !== 'object') {
+      console.error('[ai/patch-product] missing changes key:', parsed);
+      return res.status(502).json({ error: 'Gemini returned invalid patch format' });
+    }
+
+    await incrementUsage();
+    return res.json({ changes: parsed.changes });
+  } catch (err) {
+    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
+      console.error('[ai/patch-product] timeout');
+      return res.status(504).json({ error: 'Gemini request timed out' });
+    }
+    console.error('[ai/patch-product]', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
 // POST /generate-from-image
 // Accepts { imageBase64: string, mimeType: string }.
 // Sends the image to Gemini via inline_data alongside the SYSTEM_PROMPT and

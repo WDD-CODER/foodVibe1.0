@@ -6,6 +6,7 @@ import { incrementGeminiUsage, isGeminiLimitReached } from '../utils/gemini-usag
 import type { ParsedResult } from '@models/parsed-result.model'
 import { environment } from '../../../environments/environment'
 import type { AiMenuDraft, AiMenuPatch } from '@models/ai-menu-draft.model'
+import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.model'
 
 export interface AiRecipePatch {
   name_hebrew?: string
@@ -141,6 +142,30 @@ export class GeminiService {
     const data = await withRetry(() =>
       firstValueFrom(
         this.http_.post<{ changes: AiMenuPatch }>(`${this.authBase_}/api/v1/ai/patch-menu`, { currentMenu, instruction })
+      )
+    )
+    incrementGeminiUsage()
+    return data.changes
+  }
+
+  async generateProduct(rawText: string): Promise<AiProductDraft> {
+    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
+
+    const data = await withRetry(() =>
+      firstValueFrom(
+        this.http_.post<{ product: AiProductDraft }>(`${this.authBase_}/api/v1/ai/generate-product`, { rawText })
+      )
+    )
+    incrementGeminiUsage()
+    return data.product
+  }
+
+  async patchProduct(currentProduct: AiProductDraft, instruction: string): Promise<AiProductPatch> {
+    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
+
+    const data = await withRetry(() =>
+      firstValueFrom(
+        this.http_.post<{ changes: AiProductPatch }>(`${this.authBase_}/api/v1/ai/patch-product`, { currentProduct, instruction })
       )
     )
     incrementGeminiUsage()

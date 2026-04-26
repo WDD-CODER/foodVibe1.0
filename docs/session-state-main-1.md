@@ -1,70 +1,107 @@
-# Session State — 2026-04-25 AI-Everywhere Menus
+# Session State — 2026-04-26 Produce Seeder Nutrition Fix
 
 ## Branch
-`feat/session-20260425`
+`feat/ai-menu-phase1`
+
+## Seeder Work (this session)
+
+### Root Cause Found & Fixed
+- `fetch.py` crashed at row ~1.5M of OFF bulk CSV due to default `csv.field_size_limit` (131KB)
+- Israeli barcodes (729...) only appear in rows 3M–4.4M — crash = 0 nutrition
+- **Fix:** `csv.field_size_limit(10 * 1024 * 1024)` added to `fetch.py:178`
+
+### Pipeline Re-run
+- `catalog-review.json` regenerated: 191 products, 51/191 (26.7%) now have nutrition
+- 8 mislabels/duplicates fixed in `catalog-review.json`
+- Ready: user sets `approved: true` → `python main.py --from-review`
+
+### New Script
+- `tools/catalog-seeder/patch_nutrition.py` — backfills nutrition via OFF for barcode-bearing products
+- 83 demo products have NO barcodes → can't use OFF → need Gemini
+
+### Gemini nutrition — DONE
+- User ran prompt manually in Gemini UI, got JSON back for 81 products (demo_162 and demo_185 returned all nulls — skipped)
+- `patch_nutrition_manual.py` written with all 81 nutrition entries embedded
+- Dry run: Local=81 found, Atlas=0 found (Atlas has catalog products, not demo products)
+
+### Atlas situation — CLARIFIED
+- Atlas has 165 `__master__` products (catalog products from previous seeder runs, names like "פסטה קרניים בינוניות")
+- 48 have nutrition, 117 don't
+- Barcodes were STRIPPED from DB docs by `db_write.py` `_INTERNAL_KEYS` — so `patch_nutrition.py` (barcode-based) found nothing
+- Fix: rewrote `patch_nutrition.py` to match by `name_hebrew` using `catalog-review.json` as the nutrition source
+
+### READY TO RUN — needs dry run first
+```bash
+cd tools/catalog-seeder
+python patch_nutrition.py          # dry run — check counts
+python patch_nutrition.py --write  # apply to Atlas + Local
+python patch_nutrition_manual.py   # dry run for demo products (Local only)
+python patch_nutrition_manual.py --write
+```
+
+---
+
+# Previous State — 2026-04-26 AI-Everywhere Phase 2 Planning
+
+## Branch
+`main` (no code written yet this session — planning only)
 
 ## Session
-`.claude/sessions/2026-04-25-ai-everywhere-menus/`
+`.claude/sessions/2026-04-25-ai-phase2-products/`
 
-## What shipped this session
+## What happened this session
 
-### Bug fixes
-- **502 on /generate-menu + /patch-menu** — both hardcoded `gemini-2.0-flash` (deprecated). Fixed to use `GEMINI_URL` constant (`gemini-2.5-flash-lite`). `server/routes/ai.js` lines 655, 770.
-- **Icon errors** — `CheckCircle` + `HelpCircle` missing from `LucideAngularModule.pick()`. Added to `src/app/app.config.ts`.
-- **AI over-generation** — prompt said "complete structured menu draft" → Gemini invented dishes. Prompt now says "only include dishes the user explicitly named, never add or invent".
-- **Match display** — matched dishes showed AI input name. Now shows `dish.candidates[0].name` (the actual DB recipe name).
+### Phase 1 (Menus) — Status audit
+- Verified all 4 Phase 1 sub-briefs are complete against live code
+- Sub-brief 1.1 (backend): ✅ `/generate-menu` + `/patch-menu` + `/save-menu-shot` all live
+- Sub-brief 1.2 (client layer): ✅ `ai-menu-draft.model.ts`, `recipe-match.util.ts`, `MenuAiFlowService` all exist
+- Sub-brief 1.3 (modal): ✅ `AiMenuModalComponent` + service fully implemented
+- Sub-brief 1.4 (integration): ✅ Both entry points wired (menu-intelligence via HeroFab, menu-library via HeroFab)
+- One gap fixed: added `@HostListener('document:keydown.escape')` to `ai-menu-modal.component.ts`
+- Create-while-dirty confirm: accepted auto-switch behavior as better UX (no code needed)
+- `ng build` passes clean ✅
 
-### Features implemented (Phase 1 menu AI)
-- **Shots loop** (`GEMINI_MENU_SHOTS` collection):
-  - Backend: `getApprovedMenuShots()`, `buildMenuFewShotBlock()`, injection into `/generate-menu`, `/save-menu-shot` POST endpoint (auto-prune to 50). `server/routes/ai.js`.
-  - Frontend: `GeminiService.saveMenuShot()`, auto-fired on Apply in `ai-menu-modal.component.ts`. `draft_` signal added to store raw AI output for the shot.
-- **In-paper AI button**: removed toolbar pill, added `.paper-ai-btn` inside the paper between meta line and ornamental divider. `menu-intelligence.page.html` + `_paper-ui.scss`.
-- **Edit mode entry point fix**: removed confirm dialog gate for edit mode. If form has content → directly opens edit mode (patch). If empty → create mode. `menu-intelligence.page.ts:openAiMenuModal()`.
-- **Edit mode diff preview**: replaced key-name list with before→after diff (`diffEntries_()` computed). Shows label, from (strikethrough), arrow, to (green). Handles name_, event_type_, guest_count_, serving_type_, event_date_, sections_. `ai-menu-modal.component.ts + .html + .scss`.
+### Phase 2 (Products) — Planned, NOT yet executed
+- Full 4-sub-brief plan written and saved as **Plan 287** (`plans/287-ai-phase2-products.plan.md`)
+- Session brief: `.claude/sessions/2026-04-25-ai-phase2-products/brief.md`
+- Adversarial review run — 3 real issues fixed, plan is clean
+- todo.md updated with all 18 tasks
+- **NO code has been written for Phase 2 yet**
 
-## What's NOT done yet (Sub-brief 1.4 remnants)
-- Menu list page ("add with AI" button on library/list page) — not yet wired
-- `ng build` passes cleanly (one NG8107 warning fixed)
+## Next session: Execute Plan 287
 
-## Sub-briefs status
-| Sub-brief | Status |
-|-----------|--------|
-| 1.1 Backend endpoints | ✅ Done (was already done, fixed 502 model bug) |
-| 1.2 Client models + services + match util | ✅ Done (was already done) |
-| 1.3 AI menu modal | ✅ Done (was already done, enhanced this session) |
-| 1.4 Integration + entry points | 🟡 Partial — menu-intelligence page done, menu LIST page entry point pending |
+Start with Task 1 — say `execute-it` to begin.
 
-## Next session priorities
-1. Add "create with AI" button to menu list/library page (Sub-brief 1.4 completion)
-2. Run full QA pass on the menu AI flow end-to-end
-3. Begin Phase 2 (Products) planning
+Task sequence:
+1. Tasks 1–5: `server/routes/ai.js` — backend endpoints
+2. Tasks 6–8: client models + GeminiService + flow service
+3. Tasks 9–14: AiProductModal + dictionary
+4. Tasks 15–18: integration (inventory list, product form, quick-add modal)
 
-## Ship Status (in progress — context limit hit)
-- Build gate: PASSED (ng build clean)
-- Base merge: up to date
-- All files staged and ready to commit
-- Next: commit → push → create PR
+## Key context for executor
 
-### Files to commit
-- server/routes/ai.js
-- src/app/app.config.ts
-- src/app/core/services/gemini.service.ts
-- src/app/pages/menu-intelligence/menu-intelligence.page.html
-- src/app/pages/menu-intelligence/menu-intelligence.page.ts
-- src/app/shared/ai-menu-modal/ai-menu-modal.component.html
-- src/app/shared/ai-menu-modal/ai-menu-modal.component.scss
-- src/app/shared/ai-menu-modal/ai-menu-modal.component.ts
-- .claude/sessions/2026-04-25-ai-everywhere-menus/ (new)
-- docs/session-state-main-1.md (new)
+**Product model fields** (`src/app/core/models/product.model.ts`):
+`name_hebrew`, `base_unit_`, `sources_[]`, `purchase_options_[]`, `categories_[]`, `yield_factor_`, `allergens_[]`, `min_stock_level_`, `expiry_days_default_`
 
-### Suggested commit message
-feat(ai-menu): Phase 1 — AI-powered menu creation and editing
+**productForm_ controls** (in `product-form.component.ts` line 294+):
+`name_hebrew`, `base_unit_` (required), `categories_` (FormControl holding string[]), `allergens_` (FormControl holding string[]), `yield_factor_`, `min_stock_level_`, `expiry_days_default_`
 
-- Fix 502: menu endpoints used deprecated gemini-2.0-flash, now use GEMINI_URL (gemini-2.5-flash-lite)
-- Fix icons: CheckCircle + HelpCircle added to app.config.ts LucideAngularModule.pick()
-- Fix over-generation: prompt now forbids inventing dishes not mentioned by user
-- Fix match display: show DB recipe name (candidates[0].name) not AI input name
-- Add shots loop: GEMINI_MENU_SHOTS collection, auto-save on Apply, inject into generate-menu
-- Add edit mode: AI button in hero FAB (sparkles icon, matches recipe-builder pattern)
-- Add diff preview: before→after field diff in edit mode (name, guests, serving type, date, sections)
-- Remove confirm gate: edit mode opens directly without confirm dialog
+**MetadataRegistryService**:
+- `registerCategory(name): Promise<string|null>` — returns key or null
+- `registerAllergen(name): Promise<void>` — returns void, push string directly after
+
+**HeroFab** already wired in `inventory-product-list.component.ts` line 140 — just add to existing array.
+
+**QuickAddProductModal** uses signals (not FormGroup) — AI fill sets signals directly, do NOT break `advanceFocus()` keyboard chain.
+
+**`addProduct(Omit<Product,'_id'>): Promise<Product>`** — must include `sources_: []` and `purchase_options_: draft.purchase_options_ ?? []` in payload.
+
+**`product-form.component.ts`** has NO `providers` array currently — create it.
+
+**GeminiService import pattern**: `import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.model'`
+
+## Phase 1 Escape key fix (this session)
+- File changed: `src/app/shared/ai-menu-modal/ai-menu-modal.component.ts`
+- Added `HostListener` import + `@HostListener('document:keydown.escape') onEscapeKey()`
+- Build passes ✅
+- **Uncommitted** — needs commit before or alongside Phase 2 commit
