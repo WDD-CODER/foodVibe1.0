@@ -175,3 +175,37 @@ with open	ai_recipe_url_fetch_failed -> ╫£╫É ╫á╫Ö╫¬╫ƒ ╫£╫
 2026-04-24 10:10:26	Bash	B=~/.claude/skills/gstack/browse/dist/browse; $B console 2>&1 | grep -E "error|E	@{stdout=[2026-04-24T06:58:40.160Z] [error] Failed to load resource: the server responded with a status of 404 (); stder	
 2026-04-24 10:10:41	Edit	C:\Users\danwe\.claude\settings.json	  "skipDangerousModePermissionPrompt": true	
 2026-04-24 10:12:00	Bash	git diff HEAD -- .claude/reflect/failure-log.tsv | head -20	@@ -160,3 +160,17 @@ with open ai_recipe_url_fetch_failed -> Γò½┬úΓò½├ë Γò½├íΓò½├ûΓò½┬¼Γò½╞Æ Γò½┬úΓò½	
+2026-04-25 09:16:04	Edit	C:\foodCo\foodVibe1.0\server\routes\ai.js	    return res.status(503).json({ error: 'AI generation is not configured on this server' });	
+2026-04-25 09:16:12	Edit	C:\foodCo\foodVibe1.0\server\routes\ai.js	    return res.status(503).json({ error: 'AI generation is not configured on this server' });	
+2026-04-25 09:16:20	Bash	grep -n "gemini-2.0-flash\|GEMINI_URL\|generate-menu\|patch-menu" /c/foodCo/food	668:      console.error('[ai/generate-menu] Gemini API error:', errBody);	
+2026-04-25 09:19:42	Edit	C:\foodCo\foodVibe1.0\server\routes\ai.js	    return res.status(503).json({ error: 'AI generation is not configured on this server' });	
+2026-04-25 09:29:36	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\gemini.service.ts	  let lastError: unknown	
+2026-04-25 09:29:50	Edit	C:\foodCo\foodVibe1.0\server\routes\ai.js	    return res.status(503).json({ error: 'AI generation is not configured on this server' });	
+2026-04-25 09:30:01	Edit	C:\foodCo\foodVibe1.0\server\routes\ai.js	    return res.status(503).json({ error: 'AI generation is not configured on this server' });	
+2026-04-25 09:30:14	Edit	C:\foodCo\foodVibe1.0\server\routes\ai.js	    return res.status(400).json({ error: 'prompt is required' });	
+2026-04-25 09:31:53	Bash	git diff HEAD -- server/routes/ai.js | head -80	     return res.status(400).json({ error: 'rawText is required' });	
+2026-04-25 16:41:30	Write	C:\foodCo\foodVibe1.0\plans\286-session-manifest.plan.md	    except Exception:	
+2026-04-25 17:02:00	Write	C:\foodCo\foodVibe1.0\scripts\session-manifest-hook.py	    except Exception:	
+2026-04-25 17:02:31	Write	C:\foodCo\foodVibe1.0\scripts\session-manifest-ship.py	    except Exception:	
+2026-04-25 19:19:35	Edit	C:\foodCo\foodVibe1.0\tools\catalog-seeder\fetch.py	    except ImportError:	
+2026-04-25 19:38:38	Write	C:\foodCo\foodVibe1.0\tools\catalog-seeder\patch_nutrition.py	    except (TypeError, ValueError):	
+2026-04-26 09:02:46	Edit	C:\foodCo\foodVibe1.0\server\routes\ai.js	    return res.status(503).json({ error: 'AI generation is not configured on this server' });	
+2026-04-26 09:03:03	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\gemini.service.ts	  let lastError: unknown	
+2026-04-26 09:03:15	Edit	C:\foodCo\foodVibe1.0\src\app\core\services\gemini.service.ts	  let lastError: unknown	
+2026-04-26 09:06:08	Edit	C:\foodCo\foodVibe1.0\public\assets\data\dictionary.json	    "ai_recipe_url_fetch_failed": "╫£╫É ╫á╫Ö╫¬╫ƒ ╫£╫Æ╫⌐╫¬ ╫£╫¢╫¬╫ò╫æ╫¬. ╫æ╫ô╫ò╫º ╫⌐╫ö╫º╫Ö╫⌐╫ò╫¿ ╫¬╫º╫Ö╫ƒ ╫ò╫á╫í╫ö ╫⌐╫ò╫æ	
+2026-04-26 09:06:32	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\	      error: () => { this.deletingId_.set(null); }	
+2026-04-26 09:06:42	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\	      error: () => { this.deletingId_.set(null); }	
+2026-04-26 09:06:57	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\	      error: () => { this.deletingId_.set(null); }	
+2026-04-26 09:07:50	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\product-form\product-fo	      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context: { 	
+2026-04-26 09:08:04	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\product-form\product-fo	      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context: { 	
+2026-04-26 09:08:17	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\product-form\product-fo	      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context: { 	
+2026-04-26 09:08:31	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\product-form\product-fo	      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context: { 	
+2026-04-26 09:08:48	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\product-form\product-fo	      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context: { 	
+2026-04-26 09:13:00	Edit	C:\foodCo\foodVibe1.0\.claude\todo-archive.md	- [x] Error: interrupt success/warning; when current is error, enqueue so each error shown in order	
+2026-04-26 14:10:08	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\	      error: () => { this.deletingId_.set(null); }	
+2026-04-26 14:25:57	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\	      error: () => { this.deletingId_.set(null); }	
+2026-04-26 14:26:20	Edit	C:\foodCo\foodVibe1.0\server\routes\ai.js	    return res.status(503).json({ error: 'AI generation is not configured on this server' });	
+2026-04-26 14:26:40	Edit	C:\foodCo\foodVibe1.0\server\routes\ai.js	    return res.status(503).json({ error: 'AI generation is not configured on this server' });	
+2026-04-26 14:38:14	Bash	ng build 2>&1 | tail -20	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-26 14:39:13	Bash	npx ng build 2>&1 | tail -25	Application bundle generation failed. [33.396 seconds]	
+2026-04-26 14:39:30	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\product-form\product-fo	      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context: { 	

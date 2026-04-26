@@ -175,6 +175,7 @@ def fetch_off_bulk() -> dict[str, dict[str, Any]]:
         logger.info(f"[fetch] OFF bulk saved to cache ({gz_path.stat().st_size / 1e6:.0f} MB)")
 
     try:
+        csv.field_size_limit(10 * 1024 * 1024)  # OFF has rows with fields > default 131 KB limit
         with gzip.open(gz_path, "rt", encoding="utf-8", errors="replace") as f:
             reader = csv.DictReader(f, delimiter="\t")
             for row in reader:
