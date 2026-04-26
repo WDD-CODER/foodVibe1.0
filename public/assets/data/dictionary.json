@@ -199,6 +199,8 @@
     "missing_supplier": "ספק",
     "filter_invalid": "לא תקינים",
     "filter_incomplete": "חסרי פרטים",
+    "filter_has_nutrition": "עם ערכים תזונתיים",
+    "filter_missing_nutrition": "חסרי ערכים תזונתיים",
     "blocking_ingredients_error": "יש רכיבים לא תקינים — יש לתקן או להסיר לפני השמירה",
     "unlinked_ingredient": "רכיב לא מקושר",
     "unlinked_ingredient_hint": "הרכיב לא מקושר למוצר — לחץ לחיפוש וקישור",

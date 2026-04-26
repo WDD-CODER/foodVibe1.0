@@ -193,6 +193,16 @@
         <lucide-icon name="alert-triangle" [size]="13"></lucide-icon>
         <span>{{ 'filter_incomplete' | translatePipe }}</span>
       </label>
+      <label class="c-filter-option nutrition-filter-option nutrition-filter-option--has">
+        <input type="checkbox" [checked]="nutritionFilter_() === 'has'" (change)="toggleNutritionFilter('has')" />
+        <lucide-icon name="leaf" [size]="13"></lucide-icon>
+        <span>{{ 'filter_has_nutrition' | translatePipe }}</span>
+      </label>
+      <label class="c-filter-option nutrition-filter-option nutrition-filter-option--missing">
+        <input type="checkbox" [checked]="nutritionFilter_() === 'missing'" (change)="toggleNutritionFilter('missing')" />
+        <lucide-icon name="circle-slash" [size]="13"></lucide-icon>
+        <span>{{ 'filter_missing_nutrition' | translatePipe }}</span>
+      </label>
       @for (category of filterCategories_(); track category.name) {
         <div class="c-filter-category">
           <button type="button" class="c-filter-category-header" [class.expanded]="isCategoryExpanded(category.name)" (click)="toggleFilterCategory(category.name)">

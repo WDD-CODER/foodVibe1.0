@@ -91,6 +91,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected lowStockOnly_ = signal<boolean>(false)
   protected showInvalidOnly_ = signal<boolean>(false)
   protected showIncompleteOnly_ = signal<boolean>(false)
+  protected nutritionFilter_ = signal<'all' | 'has' | 'missing'>('all')
   protected deletingId_ = signal<string | null>(null)
   protected savingPriceId_ = signal<string | null>(null)
   protected carouselHeaderIndex_ = signal(0)
@@ -129,7 +130,8 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       { urlParam: 'sort',     signal: this.sortBy_,         serializer: NullableStringParam },
       { urlParam: 'order',    signal: this.sortOrder_,      serializer: StringParam },
       { urlParam: 'filters',  signal: this.activeFilters_,  serializer: FilterRecordParam },
-      { urlParam: 'lowStock', signal: this.lowStockOnly_,   serializer: BooleanParam },
+      { urlParam: 'lowStock',    signal: this.lowStockOnly_,     serializer: BooleanParam },
+      { urlParam: 'nutrition',   signal: this.nutritionFilter_,  serializer: StringParam },
     ])
 
     afterNextRender(() => {
@@ -248,6 +250,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     const lowStockOnly = this.lowStockOnly_()
     const showInvalidOnly = this.showInvalidOnly_()
     const showIncompleteOnly = this.showIncompleteOnly_()
+    const nutritionFilter = this.nutritionFilter_()
 
     if (lowStockOnly) {
       products = products.filter(p => (p.min_stock_level_ ?? 0) > 0)
@@ -260,6 +263,12 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
         if (showIncompleteOnly && status === 'incomplete') return true
         return false
       })
+    }
+
+    if (nutritionFilter === 'has') {
+      products = products.filter(p => !!p.nutrition_per_100g)
+    } else if (nutritionFilter === 'missing') {
+      products = products.filter(p => !p.nutrition_per_100g)
     }
 
     // 1. Apply filters
@@ -373,7 +382,12 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     this.lowStockOnly_.set(false)
     this.showInvalidOnly_.set(false)
     this.showIncompleteOnly_.set(false)
+    this.nutritionFilter_.set('all')
     this.activeFilters_.set({})
+  }
+
+  protected toggleNutritionFilter(value: 'has' | 'missing'): void {
+    this.nutritionFilter_.update(current => current === value ? 'all' : value)
   }
 
   protected isLowStock(product: Product): boolean {
@@ -405,6 +419,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     this.lowStockOnly_() ||
     this.showInvalidOnly_() ||
     this.showIncompleteOnly_() ||
+    this.nutritionFilter_() !== 'all' ||
     Object.values(this.activeFilters_()).some(arr => arr.length > 0)
   )
 
