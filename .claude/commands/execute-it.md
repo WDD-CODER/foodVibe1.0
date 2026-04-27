@@ -74,6 +74,7 @@ Example: if the brief says "add reload calls for three services" and plan-implem
 - **Verify** — after each file change, run diagnostics or build checks if applicable
 - **Stop on NEW conflict** — if the code differs from what BOTH the brief and plan-implementation expected, stop and report
 - **Backend Impact check** — if the plan includes a `## Backend Impact` section with new collections, verify the new `entityType` key is added to `BACKUP_ENTITY_TYPES` in `async-storage.service.ts` before marking the task done
+- **Lucide icon gate** — after any task that touches an `.html` template: grep for every `<lucide-icon name="...">` added in that task, confirm each icon's PascalCase equivalent is imported AND listed in `LucideAngularModule.pick({})` in `src/app/app.config.ts`. Missing registration is a blocker — fix before marking the task complete.
 - **Validation override** — the Smart Visual QA Flow section below overrides the validation-checklist's "ask before anything" timing. Code verification is always automatic. User choice applies only to visual QA.
 
 ## Post-Delegation Diff Gate

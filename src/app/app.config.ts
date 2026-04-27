@@ -94,7 +94,8 @@ import {
   Candy,
   Waves,
   CheckCircle,
-  HelpCircle
+  HelpCircle,
+  Users
 } from 'lucide-angular';
 import { KitchenStateService } from '@services/kitchen-state.service';
 import { provideHttpClient, withInterceptors } from '@angular/common/http'
@@ -222,7 +223,8 @@ export const appConfig: ApplicationConfig = {
         Candy,
         Waves,
         CheckCircle,
-        HelpCircle
+        HelpCircle,
+        Users
       })
     )
   ]

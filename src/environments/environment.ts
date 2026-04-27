@@ -6,5 +6,5 @@ export const environment = {
   useBackendAuth: false,
   useBackend: false,
   autoLoginGuest: false,
-  logServerUrl: 'http://localhost:9765'
+  logServerUrl: ''
 }

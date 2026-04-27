@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core'
+import { Component, inject, signal, computed, effect, ChangeDetectionStrategy } from '@angular/core'
 import { UserAdminService } from '@services/user-admin.service'
 import { UserService } from '@services/user.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
@@ -12,9 +12,10 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
   standalone: true,
   imports: [LucideAngularModule, TranslatePipe],
   templateUrl: './user-management.component.html',
+  styleUrl: './user-management.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UserManagementComponent implements OnInit {
+export class UserManagementComponent {
   private userAdmin = inject(UserAdminService)
   private confirmModal = inject(ConfirmModalService)
   private userMsg = inject(UserMsgService)
@@ -25,8 +26,10 @@ export class UserManagementComponent implements OnInit {
   protected isAdmin = computed(() => this.userService.user_()?.role === 'admin')
   protected currentUserId = computed(() => this.userService.user_()?._id ?? '')
 
-  ngOnInit(): void {
-    if (this.isAdmin()) this.loadUsers()
+  constructor() {
+    effect(() => {
+      if (this.isAdmin()) this.loadUsers()
+    })
   }
 
   private loadUsers(): void {

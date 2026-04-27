@@ -209,3 +209,60 @@ with open	ai_recipe_url_fetch_failed -> ╫£╫É ╫á╫Ö╫¬╫ƒ ╫£╫
 2026-04-26 14:38:14	Bash	ng build 2>&1 | tail -20	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
 2026-04-26 14:39:13	Bash	npx ng build 2>&1 | tail -25	Application bundle generation failed. [33.396 seconds]	
 2026-04-26 14:39:30	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\product-form\product-fo	      this.logging.error({ event: 'inventory.product.add_category_error', message: 'Failed to add category', context: { 	
+2026-04-26 14:53:14	Edit	C:\foodCo\foodVibe1.0\.claude\copilot-instructions.md	- **Root-cause debugging** `[CC]`: For complex bugs where cause is unclear ΓåÆ invoke `/investigate`. It auto-freezes sc	
+2026-04-26 14:53:44	Edit	C:\foodCo\foodVibe1.0\CLAUDE.md	- **Build gate**: `ng build` must pass before any commit. No exceptions.	
+2026-04-26 14:55:03	Edit	C:\foodCo\foodVibe1.0\.claude\commands\audit-report.md	Γöé Failed:    <why, or "n/a ΓÇö first try worked">          Γöé	
+2026-04-26 14:56:27	Edit	C:\foodCo\foodVibe1.0\.claude\copilot-instructions.md	- **Root-cause debugging** `[CC]`: For complex bugs where cause is unclear ΓåÆ invoke `/investigate`. It auto-freezes sc	
+2026-04-26 14:58:13	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\	      error: () => { this.deletingId_.set(null); }	
+2026-04-26 14:58:25	Edit	C:\foodCo\foodVibe1.0\CLAUDE.md	- A tool call failed	
+2026-04-26 14:58:27	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\	      error: () => { this.deletingId_.set(null); }	
+2026-04-26 14:58:37	Edit	C:\foodCo\foodVibe1.0\.claude\copilot-instructions.md	- **Root-cause debugging** `[CC]`: For complex bugs where cause is unclear ΓåÆ invoke `/investigate`. It auto-freezes sc	
+2026-04-26 14:58:52	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\	      error: () => { this.deletingId_.set(null); }	
+2026-04-26 14:59:07	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\	      error: () => { this.deletingId_.set(null); }	
+2026-04-26 14:59:09	Edit	C:\foodCo\foodVibe1.0\.claude\commands\plan-implementation.md	   - Past attempts at similar work (avoid repeating failed approaches)	
+2026-04-26 14:59:21	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\	      error: () => { this.deletingId_.set(null); }	
+2026-04-26 14:59:36	Edit	C:\foodCo\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\	      error: () => { this.deletingId_.set(null); }	
+2026-04-26 14:59:38	Edit	C:\foodCo\foodVibe1.0\.claude\commands\evaluate-me.md	**Verdict**: [SUCCESS | PARTIAL | FAILED]	
+2026-04-26 14:59:47	Edit	C:\foodCo\foodVibe1.0\.claude\commands\reflect.md	3. Note any **session-specific gaps**: things the agent actually did (or failed to do)	
+2026-04-26 15:00:46	Edit	C:\foodCo\foodVibe1.0\public\assets\data\dictionary.json	    "ai_recipe_url_fetch_failed": "╫£╫É ╫á╫Ö╫¬╫ƒ ╫£╫Æ╫⌐╫¬ ╫£╫¢╫¬╫ò╫æ╫¬. ╫æ╫ô╫ò╫º ╫⌐╫ö╫º╫Ö╫⌐╫ò╫¿ ╫¬╫º╫Ö╫ƒ ╫ò╫á╫í╫ö ╫⌐╫ò╫æ	
+2026-04-26 15:01:00	Bash	ng build 2>&1 | tail -20	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-26 15:01:56	Edit	C:\foodCo\foodVibe1.0\.claude\skills\auth-and-logging\SKILL.md	- Every new protected route ΓåÆ `canActivate: [authGuard]` ΓÇö no exceptions	
+2026-04-26 15:02:36	Edit	C:\foodCo\foodVibe1.0\.claude\agents\qa-engineer.md	- **Systematic Investigation**: For complex root-cause analysis, invoke `/investigate` ΓÇö it auto-freezes scope and enf	
+2026-04-26 15:03:20	Edit	C:\foodCo\foodVibe1.0\.claude\skills\nightly-audit\SKILL.md	- Exception: `[style.*]=` dynamic bindings are acceptable ΓÇö skip those	
+2026-04-26 15:03:23	Edit	C:\foodCo\foodVibe1.0\.claude\commands\execute-it.md	- "Just this once" ΓåÆ No exceptions	
+2026-04-26 15:03:33	Edit	C:\foodCo\foodVibe1.0\.claude\copilot-instructions.md	- **Root-cause debugging** `[CC]`: For complex bugs where cause is unclear ΓåÆ invoke `/investigate`. It auto-freezes sc	
+2026-04-26 15:03:44	Edit	C:\foodCo\foodVibe1.0\.claude\copilot-instructions.md	- **Root-cause debugging** `[CC]`: For complex bugs where cause is unclear ΓåÆ invoke `/investigate`. It auto-freezes sc	
+2026-04-26 15:03:52	Edit	C:\foodCo\foodVibe1.0\.claude\copilot-instructions.md	- **Root-cause debugging** `[CC]`: For complex bugs where cause is unclear ΓåÆ invoke `/investigate`. It auto-freezes sc	
+2026-04-26 15:04:10	Edit	C:\foodCo\foodVibe1.0\.claude\copilot-instructions.md	- **Root-cause debugging** `[CC]`: For complex bugs where cause is unclear ΓåÆ invoke `/investigate`. It auto-freezes sc	
+2026-04-26 15:08:45	Write	C:\foodCo\foodVibe1.0\.claude\copilot-instructions.md	- **Root-cause debugging** `[CC]`: For complex bugs where cause is unclear ΓåÆ invoke `/investigate`. It auto-freezes sc	
+2026-04-26 15:09:58	Write	C:\foodCo\foodVibe1.0\.claude\copilot-instructions.md	- **Root-cause debugging** `[CC]`: For complex bugs where cause is unclear ΓåÆ invoke `/investigate`. It auto-freezes sc	
+2026-04-26 15:10:43	Edit	C:\foodCo\foodVibe1.0\.claude\agents\qa-engineer.md	- **Systematic Investigation**: For complex root-cause analysis, invoke `/investigate` ΓÇö it auto-freezes scope and enf	
+2026-04-26 15:14:20	Edit	C:\foodCo\foodVibe1.0\.claude\commands\auto-solve.md	  echo "BUILD FAILED ΓÇö errors detected:"	
+2026-04-26 15:15:02	Write	C:\foodCo\foodVibe1.0\.claude\skills\execute-debugging\SKILL.md	- "Just this once" ΓåÆ No exceptions	
+2026-04-26 15:15:12	Edit	C:\foodCo\foodVibe1.0\.claude\commands\mobile-flow-audit.md	- If `LOGIN_OK=false`: skip the flow, write stub `report.md` noting "blocked-by-prerequisite: login flow failed"	
+2026-04-26 15:15:22	Edit	C:\foodCo\foodVibe1.0\.claude\commands\plan-implementation.md	   - Past attempts at similar work (avoid repeating failed approaches)	
+2026-04-26 15:15:25	Edit	C:\foodCo\foodVibe1.0\.claude\commands\execute-it.md	- "Just this once" ΓåÆ No exceptions	
+2026-04-26 15:15:42	Edit	C:\foodCo\foodVibe1.0\.claude\agents\qa-engineer.md	- **Systematic Investigation**: For complex root-cause analysis, invoke `/investigate` ΓÇö it auto-freezes scope and enf	
+2026-04-26 15:16:14	Edit	C:\foodCo\foodVibe1.0\.claude\skills\auth-crypto\SKILL.md	- **Security Officer sign-off mandatory before any commit ΓÇö no exceptions**	
+2026-04-26 15:16:16	Edit	C:\foodCo\foodVibe1.0\.claude\skills\auth-and-logging\SKILL.md	- Every new protected route ΓåÆ `canActivate: [authGuard]` ΓÇö no exceptions	
+2026-04-26 15:16:35	Edit	C:\foodCo\foodVibe1.0\.claude\agents\qa-engineer.md	- **Systematic Investigation**: For complex root-cause analysis, invoke `/investigate` ΓÇö it auto-freezes scope and enf	
+2026-04-26 15:20:22	Bash	cat /c/foodCo/foodVibe1.0/tools/catalog-seeder/patch_nutrition.py | head -60	    except (TypeError, ValueError):	
+2026-04-26 17:19:46	Bash	cd /c/foodCo/foodVibe1.0 && grep -rn "syncMasterToUser\|sync-master\|cloneMaster	server/routes/auth.js:253:    syncMasterToUser(user._id).catch(syncErr => console.error('[auth/refresh] sync error:', sy	
+2026-04-26 18:21:57	Edit	C:\foodCo\foodVibe1.0\.claude\agents\end-of-session-agent.md	| **Build gate is hard** | Build failure blocks ALL commit/push operations ΓÇö no exceptions |	
+2026-04-26 19:32:15	Bash	ng build 2>&1 | tail -20	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-26 20:00:38	Write	C:\foodCo\foodVibe1.0\server\routes\admin.js	    res.status(500).json({ error: 'Server error' })	
+2026-04-26 20:00:51	Edit	C:\foodCo\foodVibe1.0\server\index.js	    return res.status(404).json({ error: 'Not found' })	
+2026-04-26 20:01:02	Edit	C:\foodCo\foodVibe1.0\server\index.js	    return res.status(404).json({ error: 'Not found' })	
+2026-04-26 20:01:53	Write	C:\foodCo\foodVibe1.0\src\app\pages\metadata-manager\components\user-management\	      error: () => { this.isLoading_.set(false) },	
+2026-04-26 20:02:07	Write	C:\foodCo\foodVibe1.0\.claude\retrospectives\2026-04-26-18-00-multi-agent.md	Session executed 9 REV3 token-optimization briefs against the Claude agent system (earlier context, pre-compaction), the	
+2026-04-26 20:02:35	Edit	C:\foodCo\foodVibe1.0\src\app\pages\metadata-manager\metadata-manager.page.compo	    this.logging.error({ event: 'crud.metadata.delete_error', message: `Failed to delete ${type}`, context: { err } })	
+2026-04-26 20:02:46	Edit	C:\foodCo\foodVibe1.0\src\app\pages\metadata-manager\metadata-manager.page.compo	    this.logging.error({ event: 'crud.metadata.delete_error', message: `Failed to delete ${type}`, context: { err } })	
+2026-04-26 20:02:58	Bash	cd C:/foodCo/foodVibe1.0 && ng build 2>&1 | tail -20	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-26 20:04:02	Edit	C:\foodCo\foodVibe1.0\CLAUDE.md	- **Build gate**: `ng build` must pass before any commit. No exceptions.	
+2026-04-26 20:11:45	Edit	C:\foodCo\foodVibe1.0\CLAUDE.md	- **Build gate**: `ng build` must pass before any commit. No exceptions.	
+2026-04-26 20:13:03	Bash	ng build 2>&1 | tail -20	@{stdout=/usr/bin/bash: line 1: ng: command not found; stderr=; interrupted=False; isImage=False; noOutputExpected=False	
+2026-04-26 20:16:34	Edit	C:\foodCo\foodVibe1.0\src\app\pages\metadata-manager\components\user-management\	      error: () => { this.isLoading_.set(false) },	
+2026-04-26 20:18:10	Edit	C:\foodCo\foodVibe1.0\public\assets\data\dictionary.json	@{filePath=C:\foodCo\foodVibe1.0\public\assets\data\dictionary.json; oldString=    "metadata_save_failed": "╫⌐╫Æ╫Ö╫É╫ö ╫	
+2026-04-27 08:30:43	Edit	C:\foodCo\foodVibe1.0\src\app\pages\metadata-manager\components\user-management\	      error: () => { this.isLoading_.set(false) },	
+2026-04-27 08:30:59	Edit	C:\foodCo\foodVibe1.0\src\app\pages\metadata-manager\components\user-management\	      error: () => { this.isLoading_.set(false) },	
+2026-04-27 09:08:16	Edit	C:\foodCo\foodVibe1.0\.claude\standards-domain.md	* Missing registration causes runtime error: *"The '...' icon has not been provided by any available icon providers."*; 	

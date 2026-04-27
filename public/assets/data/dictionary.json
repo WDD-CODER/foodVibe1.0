@@ -705,6 +705,8 @@
     "metadata_updated_success": "עודכן בהצלחה",
     "metadata_no_section_categories": "אין מקטעי תפריט. הוסף מקטע.",
     "metadata_save_failed": "שגיאה בשמירה",
+    "user_management": "ניהול משתמשים",
+    "user_management_desc": "ניהול משתמשים רשומים ומחיקת נתוניהם",
     "metadata_yes": "כן",
     "metadata_no": "לא",
     "edit_product_title": "עריכת מוצר",

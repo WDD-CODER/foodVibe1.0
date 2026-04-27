@@ -38,3 +38,4 @@ description: Domain standards — translation, Hebrew canonical values, and Luci
 * When adding a new icon: (1) import from `lucide-angular` (PascalCase, e.g. `CircleUserRound`), (2) add it to `LucideAngularModule.pick({ ... })`.
 * Template uses kebab-case (`circle-user-round`); TypeScript uses PascalCase (`CircleUserRound`).
 * Missing registration causes runtime error: *"The '...' icon has not been provided by any available icon providers."*
+* **Execution gate**: After any task that adds a `<lucide-icon>` to a template, grep the template for every icon name added, then verify each one is present in both the `import { ... } from 'lucide-angular'` block AND the `LucideAngularModule.pick({ ... })` call in `app.config.ts`. This check must pass before the task is marked `[x]`.
