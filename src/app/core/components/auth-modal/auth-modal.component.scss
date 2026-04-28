@@ -172,6 +172,20 @@
   }
 }
 
+.auth-warn {
+  margin: 0;
+  margin-top: 4px;
+  padding-inline: 0.5rem;
+  padding-block: 0.5rem;
+
+  background: var(--bg-warning-subtle, color-mix(in srgb, var(--color-warning, #f59e0b) 12%, transparent));
+  color: var(--color-warning, #b45309);
+  font-size: 0.85rem;
+  font-weight: 500;
+
+  border-radius: var(--radius-sm);
+}
+
 .auth-error {
   margin: 0;
   margin-top: 4px;
