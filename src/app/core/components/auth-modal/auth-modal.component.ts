@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, ElementRef, inject, signal, viewChild } from '@angular/core'
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, effect, ElementRef, inject, signal, viewChild } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
@@ -23,6 +23,7 @@ export class AuthModalComponent {
   private readonly userService = inject(UserService)
   private readonly router = inject(Router)
   private readonly cloudinary = inject(CloudinaryService)
+  private readonly cdr = inject(ChangeDetectorRef)
 
   protected nameInput = viewChild<ElementRef>('nameInput')
 
@@ -68,15 +69,18 @@ export class AuthModalComponent {
     if (!file) return
     this.errorKey.set(null)
     this.uploadingImage_.set(true)
+    this.cdr.markForCheck()
     this.cloudinary.upload(file).pipe(take(1)).subscribe({
       next: url => {
         this.imgCloudinaryUrl = url
         this.imgPreview.set(url)
         this.uploadingImage_.set(false)
+        this.cdr.markForCheck()
       },
       error: () => {
         this.uploadingImage_.set(false)
         this.errorKey.set('image_upload_failed')
+        this.cdr.markForCheck()
       },
     })
   }
