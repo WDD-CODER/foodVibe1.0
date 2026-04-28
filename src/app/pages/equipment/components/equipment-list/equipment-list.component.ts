@@ -28,6 +28,7 @@ import { HeroFabService } from '@services/hero-fab.service'
 import { AddItemModalService } from '@services/add-item-modal.service'
 import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service'
 import { EquipmentCategoryRegistryService } from '@services/equipment-category-registry.service'
+import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 
 const ADD_NEW_CATEGORY_VALUE = '__add_new__'
 
@@ -37,7 +38,7 @@ type EquipmentBulkField = 'category_' | 'is_consumable_'
 @Component({
   selector: 'app-equipment-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, RouterLinkActive, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective, CustomSelectComponent, ListRowCheckboxComponent, SelectionBarComponent, ClickOutSideDirective],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, RouterLinkActive, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective, CustomSelectComponent, ListRowCheckboxComponent, SelectionBarComponent, ClickOutSideDirective, RowActionsMenuComponent],
   templateUrl: './equipment-list.component.html',
   styleUrl: './equipment-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

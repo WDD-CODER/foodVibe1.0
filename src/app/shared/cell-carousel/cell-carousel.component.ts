@@ -13,7 +13,6 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { LucideAngularModule } from 'lucide-angular'
 
 export const CAROUSEL_ACTIVE_CLASS = 'carousel-slide-active'
 
@@ -29,7 +28,7 @@ export class CellCarouselSlideDirective {
 @Component({
   selector: 'app-cell-carousel',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule],
   templateUrl: './cell-carousel.component.html',
   styleUrl: './cell-carousel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

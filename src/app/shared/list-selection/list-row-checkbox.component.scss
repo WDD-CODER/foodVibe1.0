@@ -24,10 +24,14 @@
     }
   }
 
-  @media (max-width: 620px) {
+  @media (max-width: 768px) {
     .list-row-checkbox {
-      min-width: 44px;
-      min-height: 44px;
+      padding: 0.25rem;
+
+      input[type='checkbox'] {
+        width: 0.875rem;
+        height: 0.875rem;
+      }
     }
   }
 }

@@ -23,6 +23,7 @@ import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-fi
 import { useListState, StringParam, StringSetParam } from 'src/app/core/utils/list-state.util'
 import { HeroFabService } from '@services/hero-fab.service'
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util'
+import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 
 const ENV_TYPES: EnvironmentType[] = [
   'professional_kitchen',
@@ -48,6 +49,7 @@ type VenueBulkField = 'environment_type_'
     CellCarouselSlideDirective,
     ListRowCheckboxComponent,
     SelectionBarComponent,
+    RowActionsMenuComponent,
   ],
   templateUrl: './venue-list.component.html',
   styleUrl: './venue-list.component.scss',

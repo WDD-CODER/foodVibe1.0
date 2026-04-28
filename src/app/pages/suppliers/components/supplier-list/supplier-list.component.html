@@ -2,7 +2,7 @@
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
   [gridTemplate]="'2fr 1fr minmax(48px, 0.8fr) 0.8fr 0.8fr 0.8fr 80px auto'"
-  [mobileGridTemplate]="'2fr 1fr 80px auto'">
+  [mobileGridTemplate]="'2fr 1fr 40px 28px'">
 
   <h2 shell-title class="page-title">{{ 'supplier_list' | translatePipe }}</h2>
 
@@ -84,7 +84,7 @@
         </app-cell-carousel>
         <div class="col-lead c-list-body-cell" role="cell">{{ item.lead_time_days_ }}</div>
         <div class="col-linked c-list-body-cell" role="cell">{{ linkedProductCount_(item._id) }}</div>
-        <div class="c-col-actions c-list-body-cell" role="cell">
+        <app-row-actions-menu class="c-col-actions c-list-body-cell" role="cell">
           <button type="button" class="c-icon-btn" (click)="onEdit(item); $event.stopPropagation()"
             [attr.aria-label]="'edit' | translatePipe"
             [disabled]="!isLoggedIn()"
@@ -101,7 +101,7 @@
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>
             </button>
           }
-        </div>
+        </app-row-actions-menu>
         <div class="col-select c-list-body-cell" role="cell">
           <app-list-row-checkbox [checked]="selection.isSelected(item._id)" (toggle)="selection.toggle(item._id)" />
         </div>
