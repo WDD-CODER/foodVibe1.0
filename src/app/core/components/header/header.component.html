@@ -111,7 +111,11 @@
 <!-- Mobile floating avatar FAB — mobile only (≤ 620px), shown via CSS -->
 <div class="mobile-avatar-fab">
   @if (isLoggedIn()) {
-    <button type="button" class="mobile-fab-btn" (click)="logout()" [attr.aria-label]="'log_out' | translatePipe">
+    <button type="button"
+            class="mobile-fab-btn"
+            (click)="toggleMobileAvatar()"
+            [attr.aria-expanded]="mobileAvatarOpen()"
+            [attr.aria-label]="'log_out' | translatePipe">
       <div class="avatar-wrapper">
         @if (user_()?.imgUrl) {
           <img [src]="user_()!.imgUrl" alt="" class="avatar-img" />
@@ -125,6 +129,11 @@
         }
       </div>
     </button>
+    @if (mobileAvatarOpen()) {
+      <button type="button" class="mobile-fab-name" (click)="logout()">
+        {{ user_()!.name }}
+      </button>
+    }
   } @else {
     <button type="button" class="mobile-fab-btn mobile-fab-btn--guest" (click)="openAuth('sign-in')" [attr.aria-label]="'sign_in' | translatePipe">
       <lucide-icon name="circle-user-round" [size]="24"></lucide-icon>
