@@ -28,6 +28,7 @@ import { useListState, StringParam, BooleanParam, NumberSetParam } from 'src/app
 import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util'
 import { HeroFabService } from '@services/hero-fab.service'
 import { getSupplierIds } from '@utils/product-source.util'
+import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 
 const DAY_LABELS = [
   'day_sun',
@@ -43,7 +44,7 @@ type SupplierBulkField = 'delivery_days_' | 'lead_time_days_'
 @Component({
   selector: 'app-supplier-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective, ClickOutSideDirective, ListRowCheckboxComponent, SelectionBarComponent, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective, ClickOutSideDirective, ListRowCheckboxComponent, SelectionBarComponent, EmptyStateComponent, RowActionsMenuComponent],
   templateUrl: './supplier-list.component.html',
   styleUrl: './supplier-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -47,50 +47,31 @@
       top: 0;
       bottom: 0;
 
-      width: 1.5rem;
+      width: 1rem;
       padding: 0;
 
-      background: var(--bg-glass);
-      color: var(--color-text-muted);
+      background: transparent;
+      color: var(--color-text-muted-light);
 
       border: none;
 
       cursor: pointer;
-      opacity: 0;
-      transition: opacity 0.2s var(--ease-smooth), background 0.2s ease;
+      opacity: 0.55;
+      transition: opacity 0.2s var(--ease-smooth), background 0.2s ease, color 0.2s ease;
 
       &:hover {
+        opacity: 1;
         background: var(--bg-glass-hover);
         color: var(--color-text-main);
       }
     }
 
-    :host:hover .carousel-header-arrow {
-      opacity: 1;
-    }
-
     .carousel-header-arrow.prev {
       inset-inline-start: 0;
-
-      border-inline-end: 1px solid var(--border-default);
     }
 
     .carousel-header-arrow.next {
       inset-inline-end: 0;
-
-      border-inline-start: 1px solid var(--border-default);
-    }
-
-    @media (hover: none) {
-      .carousel-header-arrow {
-        opacity: 0.6;
-      }
-    }
-
-    @media (max-width: 620px) {
-      .carousel-header-arrow {
-        min-width: 44px;
-      }
     }
   }
 }

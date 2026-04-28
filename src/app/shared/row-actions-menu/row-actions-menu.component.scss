@@ -1,0 +1,89 @@
+// Desktop: host acts as normal flex actions cell; projected buttons flow in directly
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.ram-trigger {
+  display: none;
+}
+
+.ram-backdrop {
+  display: none;
+}
+
+// Projected action buttons flow as flex children of :host on desktop
+.ram-popover {
+  display: contents;
+}
+
+// ── Mobile ─────────────────────────────────────────────────────────────────
+@media (max-width: 768px) {
+  :host {
+    padding-inline-end: 0; // override .c-col-actions padding on narrow column
+  }
+
+  .ram-trigger {
+    display: grid;
+    place-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    background: transparent;
+    color: var(--color-text-muted);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+
+    &:hover,
+    &[aria-expanded='true'] {
+      border-color: var(--border-default);
+      background: var(--bg-glass-hover);
+      color: var(--color-text-main);
+    }
+  }
+
+  .ram-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1099;
+    display: none;
+
+    &.visible {
+      display: block;
+    }
+  }
+
+  .ram-popover {
+    display: none;
+    position: fixed;
+    z-index: 1100;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    padding-inline: 0.5rem;
+    transform: translateX(-50%);
+
+    background: var(--bg-glass-strong);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-modal);
+    backdrop-filter: var(--blur-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+
+    &.is-open {
+      display: flex;
+    }
+
+    // Ensure projected icon buttons are always visible inside the popover
+    ::ng-deep .c-icon-btn {
+      opacity: 1;
+      width: 2.25rem;
+      height: 2.25rem;
+    }
+  }
+}
