@@ -116,20 +116,25 @@
             <div class="c-input-stack">
               <label>{{ 'profile_image' | translatePipe }}</label>
               <div class="image-upload-area">
-                @if (imgPreview()) {
+                @if (uploadingImage_()) {
+                  <div class="image-placeholder image-placeholder--loading">
+                    <lucide-icon name="refresh-cw" [size]="24"></lucide-icon>
+                  </div>
+                } @else if (imgPreview()) {
                   <img [src]="imgPreview()" alt="" class="image-preview" />
                 } @else {
                   <div class="image-placeholder">
                     <lucide-icon name="image" [size]="24"></lucide-icon>
                   </div>
                 }
-                <label class="image-upload-btn" for="auth-img">
+                <label class="image-upload-btn" for="auth-img" [class.disabled]="uploadingImage_()">
                   {{ 'choose_image' | translatePipe }}
                 </label>
                 <input id="auth-img"
                        type="file"
                        accept="image/*"
                        (change)="onFileSelected($event)"
+                       [disabled]="uploadingImage_()"
                        class="visually-hidden" />
               </div>
             </div>
@@ -148,7 +153,7 @@
         <button type="button" class="c-btn-ghost" (click)="onClose()">
           {{ 'cancel' | translatePipe }}
         </button>
-        <button type="button" class="c-btn-primary" [disabled]="isSubmitting()" (click)="onSubmit()">
+        <button type="button" class="c-btn-primary" [disabled]="isSubmitting() || uploadingImage_()" (click)="onSubmit()">
           @if (isSubmitting()) {
             {{ 'saving' | translatePipe }}
           } @else if (isSignUp) {
