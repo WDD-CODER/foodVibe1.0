@@ -66,6 +66,7 @@ export class AuthModalComponent {
     const input = event.target as HTMLInputElement
     const file = input.files?.[0]
     if (!file) return
+    this.errorKey.set(null)
     this.uploadingImage_.set(true)
     this.cloudinary.upload(file).pipe(take(1)).subscribe({
       next: url => {
@@ -73,7 +74,10 @@ export class AuthModalComponent {
         this.imgPreview.set(url)
         this.uploadingImage_.set(false)
       },
-      error: () => this.uploadingImage_.set(false),
+      error: () => {
+        this.uploadingImage_.set(false)
+        this.errorKey.set('image_upload_failed')
+      },
     })
   }
 
@@ -106,7 +110,7 @@ export class AuthModalComponent {
   }
 
   protected onSubmit(): void {
-    if (this.isSubmitting()) return
+    if (this.isSubmitting() || this.uploadingImage_()) return
 
     const nameErr = validateUsername(this.name)
     if (nameErr) { this.errorKey.set(nameErr); return; }
