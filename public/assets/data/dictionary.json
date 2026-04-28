@@ -649,6 +649,7 @@
     "signup_success": "נרשמת בהצלחה",
     "choose_image": "בחר תמונה",
     "profile_image": "תמונת פרופיל",
+    "image_upload_failed": "שגיאה בהעלאת התמונה, נסה שוב",
     "email": "אימייל",
     "email_required": "נא להזין כתובת אימייל",
     "password": "סיסמה",

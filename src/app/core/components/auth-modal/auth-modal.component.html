@@ -137,6 +137,9 @@
                        [disabled]="uploadingImage_()"
                        class="visually-hidden" />
               </div>
+              @if (errorKey() === 'image_upload_failed') {
+                <p class="auth-error">{{ errorKey()! | translatePipe }}</p>
+              }
             </div>
 
           }
