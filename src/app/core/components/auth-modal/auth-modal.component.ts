@@ -5,8 +5,10 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { AuthModalService } from '@services/auth-modal.service'
 import { UserService } from '@services/user.service'
+import { CloudinaryService } from '@services/cloudinary.service'
 import { environment } from '../../../../environments/environment'
 import { validateUsername, validateEmail, validatePassword } from '../../utils/auth-validation.util'
+import { take } from 'rxjs/operators'
 
 @Component({
   selector: 'app-auth-modal',
@@ -20,6 +22,7 @@ export class AuthModalComponent {
   protected readonly modalService = inject(AuthModalService)
   private readonly userService = inject(UserService)
   private readonly router = inject(Router)
+  private readonly cloudinary = inject(CloudinaryService)
 
   protected nameInput = viewChild<ElementRef>('nameInput')
 
@@ -36,6 +39,7 @@ export class AuthModalComponent {
   protected password = ''
   protected confirmPassword = ''
   protected imgPreview = signal<string | null>(null)
+  protected uploadingImage_ = signal(false)
   protected errorKey = signal<string | null>(null)
   protected isSubmitting = signal(false)
   protected showPassword_ = signal(false)
@@ -47,7 +51,7 @@ export class AuthModalComponent {
 
   protected readonly isDev = environment.localDev
 
-  private imgBase64: string | null = null
+  private imgCloudinaryUrl: string | null = null
 
   protected get isSignUp(): boolean {
     return this.modalService.mode() === 'sign-up'
@@ -62,13 +66,15 @@ export class AuthModalComponent {
     const input = event.target as HTMLInputElement
     const file = input.files?.[0]
     if (!file) return
-    const reader = new FileReader()
-    reader.onload = () => {
-      const result = reader.result as string
-      this.imgBase64 = result
-      this.imgPreview.set(result)
-    }
-    reader.readAsDataURL(file)
+    this.uploadingImage_.set(true)
+    this.cloudinary.upload(file).pipe(take(1)).subscribe({
+      next: url => {
+        this.imgCloudinaryUrl = url
+        this.imgPreview.set(url)
+        this.uploadingImage_.set(false)
+      },
+      error: () => this.uploadingImage_.set(false),
+    })
   }
 
   protected onNameBlur(): void {
@@ -125,7 +131,7 @@ export class AuthModalComponent {
 
     if (this.isSignUp) {
       this.userService.signup(
-        { name: this.name.trim(), email: this.email.trim(), imgUrl: this.imgBase64 ?? undefined, role: 'user' },
+        { name: this.name.trim(), email: this.email.trim(), imgUrl: this.imgCloudinaryUrl ?? undefined, role: 'user' },
         this.password.trim()
       ).subscribe({
         next: () => this._onSuccess(),
@@ -190,7 +196,7 @@ export class AuthModalComponent {
     this.confirmPassword = ''
     this.showPassword_.set(false)
     this.showConfirmPassword_.set(false)
-    this.imgBase64 = null
+    this.imgCloudinaryUrl = null
     this.imgPreview.set(null)
     this.errorKey.set(null)
     this.nameTouched_.set(false)

@@ -5,6 +5,7 @@ import { LucideAngularModule } from 'lucide-angular'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { take } from 'rxjs/operators'
 import { KitchenStateService } from '@services/kitchen-state.service'
+import { CloudinaryService } from '@services/cloudinary.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { TranslationService } from '@services/translation.service'
@@ -34,6 +35,7 @@ export class RecipeHeaderComponent {
   private labelCreationModal = inject(LabelCreationModalService)
   private cdr = inject(ChangeDetectorRef)
   private confirmModal = inject(ConfirmModalService)
+  private cloudinary = inject(CloudinaryService)
 
   // INPUTS
   form = input.required<FormGroup>()
@@ -127,7 +129,9 @@ export class RecipeHeaderComponent {
   }
 
   // SIGNALS & CONSTANTS
+  // TODO: replace with Cloudinary URL once uploaded — https://res.cloudinary.com/dsxi4o2gb/image/upload/f_auto,q_auto/<public_id>
   readonly placeholderPath = 'assets/style/img/recipe_placeholder.png'
+  readonly uploadingImage_ = signal(false)
 
   // LABELS
   protected labelMultiSelectOptions_ = computed(() => {
@@ -272,10 +276,13 @@ export class RecipeHeaderComponent {
     if (this.readonlyMode()) return
     const file = (event.target as HTMLInputElement).files?.[0]
     if (!file) return
-    const reader = new FileReader()
-    reader.onload = () => {
-      this.imageChange.emit(reader.result as string)
-    }
-    reader.readAsDataURL(file)
+    this.uploadingImage_.set(true)
+    this.cloudinary.upload(file).pipe(take(1)).subscribe({
+      next: url => {
+        this.imageChange.emit(url)
+        this.uploadingImage_.set(false)
+      },
+      error: () => this.uploadingImage_.set(false),
+    })
   }
 }

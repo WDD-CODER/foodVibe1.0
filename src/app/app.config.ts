@@ -1,7 +1,7 @@
 import { APP_INITIALIZER, ApplicationConfig, ErrorHandler, importProvidersFrom, provideZoneChangeDetection } from '@angular/core'
 import { provideAnimations } from '@angular/platform-browser/animations'
 import { GlobalErrorHandler } from './core/services/global-error.handler'
-import { provideRouter } from '@angular/router';
+import { provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
 import { routes } from './app.routes';
 import {
   ChefHat,
@@ -107,7 +107,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideAnimations(),
-    provideRouter(routes),
+    provideRouter(routes, withPreloading(PreloadAllModules)),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     KitchenStateService,
     provideHttpClient(withInterceptors([authInterceptor])),
