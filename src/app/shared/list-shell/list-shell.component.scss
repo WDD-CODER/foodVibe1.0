@@ -382,9 +382,10 @@
   // CSS Grid absolute-in-area trick: when position:absolute is set on a
   // grid item that also has explicit grid-row/column placement, the CSS
   // spec uses that grid AREA as the containing block — not the whole
-  // grid container. Placing both the backdrop and panel at grid-row:2
-  // (the table row) means inset:0 fills exactly the table's bounds.
-  // The header (row 1) is excluded — the drawer never covers it.
+  // grid container. Placing both the backdrop and panel at grid-row:2/-1
+  // spans from below the header (row 2 = selbar start) to the grid bottom,
+  // so inset:0 fills the full selbar+table area. The header (row 1) is
+  // excluded — the drawer never covers it.
   @media (max-width: #{$panel-overlay-break}) {
     .list-container {
       display: grid;
@@ -402,7 +403,7 @@
 
     .panel-backdrop {
       display: block;
-      grid-row: 2;
+      grid-row: 2 / -1;
       grid-column: 1;
       position: absolute;
       inset: 0;
@@ -416,7 +417,7 @@
     }
 
     .filter-panel {
-      grid-row: 2;
+      grid-row: 2 / -1;
       grid-column: 1;
       position: absolute;
       inset-block: 0;
