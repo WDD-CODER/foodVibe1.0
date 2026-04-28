@@ -479,14 +479,10 @@
     }
   }
 
-  // ─── TOUCH DEVICES — swipe-to-close replaces the close button ────────
+  // ─── TOUCH DEVICES — swipe-to-close supplements the close button ─────
   @media (hover: none) {
     .filter-panel {
       touch-action: pan-y;
-    }
-
-    .panel-toggle-icon {
-      display: none;
     }
   }
 
