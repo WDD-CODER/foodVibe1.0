@@ -1,0 +1,26 @@
+{
+  "name": "notion-agent",
+  "version": "0.1.0",
+  "description": "Personal Notion Assistant — autonomous Claude Code project for natural-language Notion workspace management.",
+  "private": true,
+  "type": "commonjs",
+  "main": "src/notion-client.js",
+  "scripts": {
+    "search": "node src/notion-client.js searchWorkspace",
+    "list-dbs": "node src/notion-client.js listDatabases",
+    "schema": "node src/notion-client.js getDatabaseSchema",
+    "query": "node src/notion-client.js queryDatabase",
+    "create": "node src/notion-client.js createPage",
+    "update": "node src/notion-client.js updatePage",
+    "append": "node src/notion-client.js appendBlocks",
+    "get": "node src/notion-client.js getPage",
+    "archive": "node src/notion-client.js archivePage"
+  },
+  "dependencies": {
+    "@notionhq/client": "^2.2.15",
+    "dotenv": "^16.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
