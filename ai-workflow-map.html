@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FoodVibe AI Workflow Map</title>
+<style>
+:root {
+  --bg: #07070f;
+  --surface: #0d0d1a;
+  --card: #111120;
+  --card-h: #161628;
+  --border: #1c1c35;
+  --border-b: #28284a;
+
+  --text: #e2e4f0;
+  --muted: #7880a0;
+  --dim: #40466a;
+
+  --keep: #22c55e; --keep-bg: #031a0c; --keep-br: #14532d;
+  --rewrite: #f59e0b; --rewrite-bg: #180e02; --rewrite-br: #78350f;
+  --proj: #f97316; --proj-bg: #160900; --proj-br: #7c2d12;
+  --broken: #ef4444; --broken-bg: #170303; --broken-br: #7f1d1d;
+  --fixed: #06b6d4; --fixed-bg: #021b20; --fixed-br: #164e63;
+  --unused: #6b7280; --unused-bg: #0e0e12; --unused-br: #374151;
+
+  --cc: #a78bfa; --cc-bg: #100830; --cc-br: #3730a3;
+  --cur: #38bdf8; --cur-bg: #051624; --cur-br: #075985;
+  --shared: #34d399; --shared-bg: #032418; --shared-br: #065f46;
+
+  --hook-color: #c084fc;
+  --hook-bg: #140a28;
+  --skill-color: #4ade80;
+  --skill-bg: #0a2010;
+  --cmd-color: #38bdf8;
+  --cmd-bg: #051624;
+  --agent-color: #fb923c;
+  --agent-bg: #1a0a02;
+
+  --r: 10px; --r-sm: 6px; --r-lg: 16px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.5;padding:32px 24px 100px;max-width:1500px;margin:0 auto}
+
+/* TYPOGRAPHY */
+h1{font-size:2rem;font-weight:800;letter-spacing:-0.5px}
+h2{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)}
+.mono{font-family:'SF Mono','Fira Code','Cascadia Code',monospace}
+
+/* LAYOUT */
+.section{margin-bottom:52px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.gauto{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.gauto-sm{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.gauto-xs{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;transition:border-color .15s}
+.card:hover{border-color:var(--border-b)}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:100px;font-size:.68rem;font-weight:700;white-space:nowrap;letter-spacing:.3px}
+.bk{background:var(--keep-bg);color:var(--keep);border:1px solid var(--keep-br)}
+.br{background:var(--rewrite-bg);color:var(--rewrite);border:1px solid var(--rewrite-br)}
+.bp{background:var(--proj-bg);color:var(--proj);border:1px solid var(--proj-br)}
+.bb{background:var(--broken-bg);color:var(--broken);border:1px solid var(--broken-br)}
+.bf{background:var(--fixed-bg);color:var(--fixed);border:1px solid var(--fixed-br)}
+.bu{background:var(--unused-bg);color:var(--unused);border:1px solid var(--unused-br)}
+.bcc{background:var(--cc-bg);color:var(--cc);border:1px solid var(--cc-br)}
+.bcur{background:var(--cur-bg);color:var(--cur);border:1px solid var(--cur-br)}
+.bsh{background:var(--shared-bg);color:var(--shared);border:1px solid var(--shared-br)}
+
+/* SECTION HEADER */
+.sec-head{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.sec-icon{font-size:1.1rem}
+.sec-count{font-size:.72rem;color:var(--dim);margin-left:auto}
+
+/* PAGE HEADER */
+.page-header{margin-bottom:52px;padding-bottom:28px;border-bottom:1px solid var(--border)}
+.title-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:10px}
+.subtitle{color:var(--muted);font-size:.88rem;max-width:720px;line-height:1.6}
+.stats-row{display:flex;gap:32px;margin-top:24px;flex-wrap:wrap}
+.stat{display:flex;flex-direction:column;gap:1px}
+.stat-n{font-size:2rem;font-weight:800;line-height:1}
+.stat-l{font-size:.68rem;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.stat-n.c-keep{color:var(--keep)}
+.stat-n.c-rewrite{color:var(--rewrite)}
+.stat-n.c-proj{color:var(--proj)}
+.stat-n.c-broken{color:var(--broken)}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:44px}
+.leg-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--dim);margin-right:6px}
+
+/* FILTER BAR */
+.filter-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.filter-btn{padding:5px 14px;border-radius:100px;font-size:.75rem;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;transition:all .15s}
+.filter-btn:hover{border-color:var(--border-b);color:var(--text)}
+.filter-btn.active-all,.filter-btn:first-child{background:var(--card-h);color:var(--text);border-color:var(--border-b)}
+.filter-btn[data-filter="keep"].active-f{background:var(--keep-bg);color:var(--keep);border-color:var(--keep-br)}
+.filter-btn[data-filter="rewrite"].active-f{background:var(--rewrite-bg);color:var(--rewrite);border-color:var(--rewrite-br)}
+.filter-btn[data-filter="project"].active-f{background:var(--proj-bg);color:var(--proj);border-color:var(--proj-br)}
+.filter-btn[data-filter="broken"].active-f{background:var(--broken-bg);color:var(--broken);border-color:var(--broken-br)}
+.filter-btn[data-filter="unused"].active-f{background:var(--unused-bg);color:var(--unused);border-color:var(--unused-br)}
+.item-hidden{opacity:.12!important;pointer-events:none}
+
+/* PIPELINE */
+.pipeline{display:flex;overflow-x:auto;padding-bottom:4px;gap:0}
+.stage{flex:1;min-width:170px;background:var(--card);border:1px solid var(--border);padding:16px 14px;position:relative}
+.stage:first-child{border-radius:var(--r) 0 0 var(--r)}
+.stage:last-child{border-radius:0 var(--r) var(--r) 0}
+.stage:not(:last-child){border-right:none}
+.stage:not(:last-child)::after{content:'';position:absolute;right:-13px;top:50%;transform:translateY(-50%);width:0;height:0;border-top:15px solid transparent;border-bottom:15px solid transparent;border-left:13px solid var(--border-b);z-index:2}
+.stage:not(:last-child)::before{content:'';position:absolute;right:-11px;top:50%;transform:translateY(-50%);width:0;height:0;border-top:13px solid transparent;border-bottom:13px solid transparent;border-left:11px solid var(--card);z-index:3}
+.stage-name{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:10px}
+.stage-items{display:flex;flex-direction:column;gap:5px}
+.pi{font-size:.73rem;padding:3px 9px;border-radius:var(--r-sm);font-family:'SF Mono','Fira Code',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pi-h{background:var(--hook-bg);color:var(--hook-color);border:1px solid #2d1060}
+.pi-s{background:var(--skill-bg);color:var(--skill-color);border:1px solid #14532d}
+.pi-c{background:var(--cmd-bg);color:var(--cmd-color);border:1px solid #075985}
+.pi-a{background:var(--agent-bg);color:var(--agent-color);border:1px solid #7c2d12}
+
+/* HOOKS TABLE */
+.htable{width:100%;border-collapse:collapse}
+.htable th{text-align:left;padding:8px 14px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border);background:var(--surface)}
+.htable td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle;font-size:.82rem}
+.htable tr:last-child td{border-bottom:none}
+.htable tr:hover td{background:var(--card-h)}
+.ev{display:inline-block;padding:2px 10px;border-radius:4px;font-size:.7rem;font-weight:600;font-family:'SF Mono','Fira Code',monospace}
+.ev-pre{background:#180900;color:#fb923c;border:1px solid #7c2d12}
+.ev-post{background:#031a0c;color:#4ade80;border:1px solid #14532d}
+.ev-start{background:#051624;color:#38bdf8;border:1px solid #075985}
+.ev-stop{background:#100828;color:#c084fc;border:1px solid #4c1d95}
+.ev-compact{background:#180e02;color:#fbbf24;border:1px solid #78350f}
+
+/* MCP CARDS */
+.mcp-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:8px}
+.mcp-name{font-family:'SF Mono','Fira Code',monospace;font-size:.95rem;font-weight:700}
+.mcp-desc{font-size:.78rem;color:var(--muted)}
+.mcp-badges{display:flex;flex-wrap:wrap;gap:4px}
+
+/* IDE PANELS */
+.ide-panel{border-radius:var(--r-lg);padding:20px;display:flex;flex-direction:column;gap:10px}
+.ide-cc{background:var(--cc-bg);border:1px solid var(--cc-br)}
+.ide-cur{background:var(--cur-bg);border:1px solid var(--cur-br)}
+.ide-title{font-size:1rem;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.ide-dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.ide-feat{display:flex;align-items:center;gap:8px;font-size:.8rem;padding:6px 10px;border-radius:var(--r-sm);background:rgba(0,0,0,.25)}
+.ide-icon{font-size:.88rem;width:18px;text-align:center}
+
+/* SKILL CARDS */
+.sk-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;display:flex;flex-direction:column;gap:4px;transition:border-color .15s}
+.sk-card:hover{border-color:var(--border-b)}
+.sk-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px}
+.sk-name{font-family:'SF Mono','Fira Code',monospace;font-size:.8rem;font-weight:600;color:var(--text)}
+.sk-desc{font-size:.75rem;color:var(--muted)}
+.sk-trig{font-size:.68rem;color:var(--dim);font-style:italic;line-height:1.3}
+
+/* AGENT CARDS */
+.ag-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:6px;transition:border-color .15s}
+.ag-card:hover{border-color:var(--border-b)}
+.ag-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px}
+.ag-name{font-family:'SF Mono','Fira Code',monospace;font-size:.85rem;font-weight:700;color:var(--text)}
+.ag-desc{font-size:.78rem;color:var(--muted);line-height:1.4}
+.ag-role{font-size:.68rem;color:var(--dim)}
+
+/* COMMAND GROUPS */
+.cmd-grp{margin-bottom:22px}
+.cmd-grp-title{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);margin-bottom:8px;padding:0 2px}
+.cmd-list{display:flex;flex-wrap:wrap;gap:6px}
+.cmd{padding:4px 10px;border-radius:var(--r-sm);font-family:'SF Mono','Fira Code',monospace;font-size:.78rem;background:var(--card);border:1px solid var(--border);color:var(--text);cursor:default;transition:background .15s,border-color .15s;position:relative}
+.cmd:hover{background:var(--card-h);border-color:var(--border-b)}
+.cmd[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#1a1a30;border:1px solid var(--border-b);color:var(--text);padding:5px 10px;border-radius:6px;font-size:.7rem;white-space:nowrap;z-index:100;pointer-events:none;font-family:-apple-system,system-ui,sans-serif;font-weight:400}
+
+/* STANDARDS CARDS */
+.std-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px}
+.std-name{font-family:'SF Mono','Fira Code',monospace;font-size:.78rem;font-weight:600;color:var(--text);margin-bottom:4px}
+.std-when{font-size:.72rem;color:var(--muted)}
+
+/* CURSOR RULE CARDS */
+.cr-card{background:var(--cur-bg);border:1px solid var(--cur-br);border-radius:var(--r-sm);padding:10px 12px}
+.cr-file{font-family:'SF Mono','Fira Code',monospace;font-size:.73rem;color:var(--cur);margin-bottom:3px}
+.cr-desc{font-size:.73rem;color:var(--muted)}
+.cr-badge{font-size:.65rem;color:var(--dim);font-style:italic}
+
+/* SCRIPTS TABLE */
+.st-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.st-row{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--border);gap:12px;transition:background .12s}
+.st-row:last-child{border-bottom:none}
+.st-row:hover{background:var(--card-h)}
+.st-left{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.st-name{font-family:'SF Mono','Fira Code',monospace;font-size:.8rem;color:var(--text);font-weight:500}
+.st-purpose{font-size:.72rem;color:var(--muted)}
+.st-right{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+
+/* MEMPALACE ROOMS */
+.mp-rooms{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.mp-room{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px;text-align:center}
+.mp-rname{font-family:'SF Mono','Fira Code',monospace;font-size:.75rem;color:var(--text);margin-bottom:3px;font-weight:600}
+.mp-rpath{font-size:.65rem;color:var(--dim)}
+
+/* ALERTS */
+.alert{padding:12px 16px;border-radius:var(--r);margin-bottom:16px;font-size:.8rem;display:flex;gap:10px;align-items:flex-start;line-height:1.5}
+.al-fix{background:var(--fixed-bg);border:1px solid var(--fixed-br);color:#67e8f9}
+.al-warn{background:var(--broken-bg);border:1px solid var(--broken-br);color:#fca5a5}
+.al-info{background:var(--rewrite-bg);border:1px solid var(--rewrite-br);color:#fde68a}
+.alert-icon{font-size:1rem;flex-shrink:0;margin-top:1px}
+
+/* VERDICT TABLE */
+.vt{width:100%;border-collapse:collapse}
+.vt th{text-align:left;padding:9px 14px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border);background:var(--surface)}
+.vt td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:.8rem;vertical-align:top}
+.vt tr:last-child td{border-bottom:none}
+.vt tr:hover td{background:var(--card-h)}
+.vt-name{font-family:'SF Mono','Fira Code',monospace;font-weight:600;color:var(--text)}
+.vt-note{font-size:.72rem;color:var(--muted);margin-top:3px}
+
+/* SECTION BOX */
+.section-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px;margin-bottom:12px}
+
+/* REFLECT GRID */
+.rfl-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.rfl-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.rfl-title{font-size:.8rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.rfl-item{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:.78rem}
+.rfl-item:last-child{border-bottom:none}
+.rfl-filename{font-family:'SF Mono','Fira Code',monospace;font-size:.75rem;color:var(--muted)}
+
+/* DIVIDER */
+.div{height:1px;background:var(--border);margin:44px 0}
+
+/* STICKY NAV */
+.nav{position:sticky;top:0;z-index:50;background:rgba(7,7,15,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:10px 0;margin-bottom:48px;display:flex;gap:6px;flex-wrap:wrap}
+.nav a{padding:4px 12px;border-radius:var(--r-sm);font-size:.76rem;color:var(--muted);text-decoration:none;transition:all .15s}
+.nav a:hover{color:var(--text);background:var(--card)}
+
+@media(max-width:900px){.g2,.g3,.g4{grid-template-columns:1fr}.pipeline{flex-direction:column}.stage{border-radius:var(--r-sm)!important}.stage::after,.stage::before{display:none}.rfl-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="#overview">Overview</a>
+  <a href="#lifecycle">Lifecycle</a>
+  <a href="#hooks">Hooks</a>
+  <a href="#mcp">MCP Servers</a>
+  <a href="#skills">Skills</a>
+  <a href="#agents">Agents</a>
+  <a href="#commands">Commands</a>
+  <a href="#standards">Standards</a>
+  <a href="#cursor">Cursor</a>
+  <a href="#scripts">Scripts</a>
+  <a href="#mempalace">MemPalace</a>
+  <a href="#reflect">Reflect</a>
+  <a href="#verdict">Template Verdict</a>
+</nav>
+
+<!-- HEADER -->
+<header class="page-header" id="top">
+  <div class="title-row">
+    <h1>FoodVibe AI Workflow Map</h1>
+    <span class="badge bf">Last audit: May 2026</span>
+  </div>
+  <p class="subtitle">Complete map of every AI workflow component — Claude Code, Cursor, MCP servers, skills, agents, hooks, and scripts. Each item is rated for template portability so you know exactly what to keep, rewrite, or drop when starting a new project.</p>
+  <div class="stats-row">
+    <div class="stat"><span class="stat-n c-keep">33</span><span class="stat-l">Keep (universal)</span></div>
+    <div class="stat"><span class="stat-n c-rewrite">14</span><span class="stat-l">Rewrite (structure only)</span></div>
+    <div class="stat"><span class="stat-n c-proj">18</span><span class="stat-l">Project-specific</span></div>
+    <div class="stat"><span class="stat-n c-broken">3</span><span class="stat-l">Broken / needs fix</span></div>
+  </div>
+</header>
+
+<!-- LEGEND -->
+<div class="legend">
+  <span class="leg-label">Status key →</span>
+  <span class="badge bk">✓ KEEP — copy as-is to any project</span>
+  <span class="badge br">↻ REWRITE — keep structure, swap content</span>
+  <span class="badge bp">⊕ PROJECT — foodVibe-specific, don't copy</span>
+  <span class="badge bb">✗ BROKEN — currently not working</span>
+  <span class="badge bf">★ FIXED — repaired this session</span>
+  <span class="badge bu">· UNUSED — configured but never triggered</span>
+  <span class="badge bcc">CC — Claude Code only</span>
+  <span class="badge bcur">CUR — Cursor only</span>
+  <span class="badge bsh">SHARED — both IDEs</span>
+</div>
+
+<!-- ════════════════════════════════════ 1. OVERVIEW ════════════════════════════════════ -->
+<section class="section" id="overview">
+  <div class="sec-head">
+    <span class="sec-icon">🗺</span>
+    <h2>AI IDE Overview</h2>
+  </div>
+
+  <div class="alert al-fix">
+    <span class="alert-icon">✅</span>
+    <div><strong>Fixed this session:</strong> All hook paths were hardcoded to <code>C:/foodCo/foodVibe1.0/</code> — a Windows-only absolute path that broke every hook on Linux/Mac. Converted to relative <code>./scripts/</code> paths. Also removed the PowerShell <code>tool-failure-hook.ps1</code> PostToolUse hook (Windows binary). Takes effect next session restart.</div>
+  </div>
+  <div class="alert al-warn">
+    <span class="alert-icon">⚠️</span>
+    <div><strong>Still broken:</strong> <code>.mcp.json</code> defines the GitHub MCP server using <code>cmd /c npx …</code> — a Windows-only shell. This server is also explicitly disabled in <code>settings.json</code>. The Cursor <code>mcp.json</code> has the correct cross-platform form (<code>npx</code> directly).</div>
+  </div>
+  <div class="alert al-info">
+    <span class="alert-icon">💡</span>
+    <div><strong>Architecture principle:</strong> <code>.claude/copilot-instructions.md</code> is the single source of truth for all rules. Cursor's <code>.cursor/rules/*.mdc</code> files are thin pointers that reinforce the same rules for Cursor's rule engine — not a separate ruleset.</div>
+  </div>
+
+  <div class="g2">
+    <div class="ide-panel ide-cc">
+      <div class="ide-title"><span class="ide-dot" style="background:var(--cc)"></span> Claude Code (CC)</div>
+      <div class="ide-feat"><span class="ide-icon">🎮</span> Full skill + agent system (Skill tool)</div>
+      <div class="ide-feat"><span class="ide-icon">🪝</span> 5-event hook system (PreToolUse → Stop)</div>
+      <div class="ide-feat"><span class="ide-icon">🧠</span> MemPalace MCP — semantic project memory</div>
+      <div class="ide-feat"><span class="ide-icon">🤖</span> Multi-agent teams (EXPERIMENTAL flag enabled)</div>
+      <div class="ide-feat"><span class="ide-icon">📜</span> CLAUDE.md session gate + path router</div>
+      <div class="ide-feat"><span class="ide-icon">⚡</span> bypassPermissions mode (explicit allowlist)</div>
+      <div class="ide-feat"><span class="ide-icon">🌿</span> Branch guard: auto-blocks writes to main</div>
+      <div class="ide-feat"><span class="ide-icon">📦</span> Worktree support for parallel/isolated work</div>
+    </div>
+    <div class="ide-panel ide-cur">
+      <div class="ide-title"><span class="ide-dot" style="background:var(--cur)"></span> Cursor</div>
+      <div class="ide-feat"><span class="ide-icon">📐</span> 13 .mdc rule files (mirror copilot-instructions)</div>
+      <div class="ide-feat"><span class="ide-icon">🎭</span> Playwright MCP — browser automation</div>
+      <div class="ide-feat"><span class="ide-icon">🐙</span> GitHub MCP — PR/issue access</div>
+      <div class="ide-feat"><span class="ide-icon">📂</span> 5 command files in .cursor/commands/</div>
+      <div class="ide-feat"><span class="ide-icon">🚫</span> No hook system (rules only)</div>
+      <div class="ide-feat"><span class="ide-icon">🚫</span> Cannot spawn subagents (CC-only)</div>
+      <div class="ide-feat"><span class="ide-icon">✅</span> Same standards files as Claude Code</div>
+      <div class="ide-feat"><span class="ide-icon">✅</span> Same skills triggered via rules (shared skills)</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════ 2. LIFECYCLE ════════════════════════════════════ -->
+<section class="section" id="lifecycle">
+  <div class="sec-head">
+    <span class="sec-icon">🔄</span>
+    <h2>Session Lifecycle Pipeline</h2>
+    <span class="sec-count">what fires at each stage</span>
+  </div>
+
+  <div class="pipeline">
+    <div class="stage">
+      <div class="stage-name">1 · Session Start</div>
+      <div class="stage-items">
+        <span class="pi pi-h">session-startup.sh</span>
+        <span class="pi pi-s">github-sync (1×/day)</span>
+        <span class="pi pi-s">mp-search (context)</span>
+        <span class="pi pi-c">/brief (optional)</span>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="stage-name">2 · Plan</div>
+      <div class="stage-items">
+        <span class="pi pi-c">/new-feature</span>
+        <span class="pi pi-c">/plan-implementation</span>
+        <span class="pi pi-s">save-plan</span>
+        <span class="pi pi-a">software-architect</span>
+        <span class="pi pi-a">product-manager</span>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="stage-name">3 · Develop</div>
+      <div class="stage-items">
+        <span class="pi pi-h">branch-guard.sh ←Edit</span>
+        <span class="pi pi-h">context-monitor.py ←*</span>
+        <span class="pi pi-h">session-manifest ←Edit</span>
+        <span class="pi pi-s">cssLayer (SCSS)</span>
+        <span class="pi pi-s">angularComp (component)</span>
+        <span class="pi pi-c">/execute-it</span>
+        <span class="pi pi-c">/auto-solve</span>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="stage-name">4 · Review</div>
+      <div class="stage-items">
+        <span class="pi pi-s">elegant-fix</span>
+        <span class="pi pi-s">techdebt</span>
+        <span class="pi pi-a">security-officer</span>
+        <span class="pi pi-a">qa-engineer</span>
+        <span class="pi pi-c">/mobile-flow-audit</span>
+        <span class="pi pi-c">/render-flow-audit</span>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="stage-name">5 · Ship</div>
+      <div class="stage-items">
+        <span class="pi pi-c">/ship or /end-session</span>
+        <span class="pi pi-a">end-of-session-agent</span>
+        <span class="pi pi-a">git-agent</span>
+        <span class="pi pi-s">update-docs</span>
+        <span class="pi pi-h">handoff-check.sh ←Stop</span>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="stage-name">6 · Nightly</div>
+      <div class="stage-items">
+        <span class="pi pi-a">reflect-agent</span>
+        <span class="pi pi-s">nightly-audit</span>
+        <span class="pi pi-c">/audit-report</span>
+        <span class="pi pi-c">/reflect-list</span>
+        <span class="pi pi-c">/sweep-stale-todos</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
+    <span style="display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--muted)"><span class="pi pi-h" style="display:inline-block">hook</span> Automated (fires on event)</span>
+    <span style="display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--muted)"><span class="pi pi-s" style="display:inline-block">skill</span> Context-triggered by AI rule</span>
+    <span style="display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--muted)"><span class="pi pi-c" style="display:inline-block">cmd</span> Manually invoked</span>
+    <span style="display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--muted)"><span class="pi pi-a" style="display:inline-block">agent</span> Spawned by skill/command</span>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════ 3. HOOKS ════════════════════════════════════ -->
+<section class="section" id="hooks">
+  <div class="sec-head">
+    <span class="sec-icon">🪝</span>
+    <h2>Hook System — Claude Code</h2>
+    <span class="sec-count">5 event types · all paths fixed ✓</span>
+  </div>
+  <div class="section-box">
+    <table class="htable">
+      <thead><tr><th>Event</th><th>Matcher</th><th>Script</th><th>What it does</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><span class="ev ev-start">SessionStart</span></td><td><span class="mono" style="font-size:.75rem;color:var(--muted)">startup</span></td><td><span class="mono" style="font-size:.78rem">session-startup.sh</span></td><td style="font-size:.78rem;color:var(--muted)">Writes SESSION SAVE TARGET path to .claude/.session-state-path</td><td><span class="badge bk">KEEP</span><span class="badge bf" style="margin-left:4px">FIXED</span></td></tr>
+        <tr><td><span class="ev ev-pre">PreToolUse</span></td><td><span class="mono" style="font-size:.75rem;color:var(--muted)">Edit|Write|MultiEdit</span></td><td><span class="mono" style="font-size:.78rem">branch-guard.sh</span></td><td style="font-size:.78rem;color:var(--muted)">Blocks any write to main. Auto-creates feat/session-YYYYMMDD branch if on main</td><td><span class="badge bk">KEEP</span><span class="badge bf" style="margin-left:4px">FIXED</span></td></tr>
+        <tr><td><span class="ev ev-post">PostToolUse</span></td><td><span class="mono" style="font-size:.75rem;color:var(--muted)">.*</span></td><td><span class="mono" style="font-size:.78rem">context-monitor.py</span></td><td style="font-size:.78rem;color:var(--muted)">Tracks token usage after every tool call. Warns when approaching context limit</td><td><span class="badge bk">KEEP</span><span class="badge bf" style="margin-left:4px">FIXED</span></td></tr>
+        <tr><td><span class="ev ev-post">PostToolUse</span></td><td><span class="mono" style="font-size:.75rem;color:var(--muted)">Edit|Write</span></td><td><span class="mono" style="font-size:.78rem">session-manifest-hook.py</span></td><td style="font-size:.78rem;color:var(--muted)">Logs every file edited during the session. Used by ship to produce the "files changed" report</td><td><span class="badge bk">KEEP</span><span class="badge bf" style="margin-left:4px">FIXED</span></td></tr>
+        <tr><td><span class="ev ev-compact">PreCompact</span></td><td><span class="mono" style="font-size:.75rem;color:var(--muted)">(any)</span></td><td><span class="mono" style="font-size:.78rem">pre-compact-reminder.sh</span></td><td style="font-size:.78rem;color:var(--muted)">Fires before context is compressed. Reminds AI to save current task state</td><td><span class="badge bk">KEEP</span><span class="badge bf" style="margin-left:4px">FIXED</span></td></tr>
+        <tr><td><span class="ev ev-stop">Stop</span></td><td><span class="mono" style="font-size:.75rem;color:var(--muted)">(any)</span></td><td><span class="mono" style="font-size:.78rem">handoff-check.sh</span></td><td style="font-size:.78rem;color:var(--muted)">Checks for uncommitted changes when Claude stops. Prompts to run /ship if found</td><td><span class="badge bk">KEEP</span><span class="badge bf" style="margin-left:4px">FIXED</span></td></tr>
+        <tr style="opacity:.5"><td><span class="ev" style="background:#170303;color:#f87171;border:1px solid #7f1d1d">PostToolUse</span></td><td><span class="mono" style="font-size:.75rem;color:var(--muted)">(any)</span></td><td><span class="mono" style="font-size:.78rem">tool-failure-hook.ps1</span></td><td style="font-size:.78rem;color:var(--muted)">PowerShell-only — logged tool failures to reflect/failure-log.tsv</td><td><span class="badge bb">REMOVED</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="font-size:.75rem;color:var(--dim);margin-top:8px">💡 For the portable template: replace PowerShell hook with a bash equivalent that appends to failure-log.tsv</div>
+</section>
+
+<!-- ════════════════════════════════════ 4. MCP ════════════════════════════════════ -->
+<section class="section" id="mcp">
+  <div class="sec-head">
+    <span class="sec-icon">🔌</span>
+    <h2>MCP Servers</h2>
+    <span class="sec-count">4 configured · 2 actively used</span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px">
+    <div class="mcp-card" style="border-color:#065f46;background:#032418">
+      <div class="mcp-name" style="color:#34d399">🧠 mempalace</div>
+      <div class="mcp-desc">Semantic project memory. Stores decisions, code patterns, session history in a vector knowledge graph. Main AI memory system for this project.</div>
+      <div class="mcp-badges">
+        <span class="badge bk">ACTIVE</span>
+        <span class="badge bcc">CC</span>
+        <span class="badge br">REWRITE yaml for new project</span>
+      </div>
+      <div style="font-size:.7rem;color:var(--dim);margin-top:4px">Defined in: .mcp.json + .claude/mcp.json (redundant — one is enough)</div>
+    </div>
+    <div class="mcp-card" style="border-color:#7f1d1d;background:#170303">
+      <div class="mcp-name" style="color:#f87171">🐙 github (CC)</div>
+      <div class="mcp-desc">GitHub API — PRs, issues, branches, comments. Uses <code>cmd /c npx …</code> (Windows-only shell). Also explicitly DISABLED in settings.json.</div>
+      <div class="mcp-badges">
+        <span class="badge bb">BROKEN (Windows shell)</span>
+        <span class="badge bb">DISABLED in settings</span>
+        <span class="badge bcc">CC</span>
+      </div>
+      <div style="font-size:.7rem;color:var(--dim);margin-top:4px">Fix: change cmd in .mcp.json to <code>npx -y @modelcontextprotocol/server-github</code></div>
+    </div>
+    <div class="mcp-card" style="border-color:#075985;background:#051624">
+      <div class="mcp-name" style="color:#38bdf8">🎭 playwright (Cursor)</div>
+      <div class="mcp-desc">Browser automation — navigate, click, screenshot, fill forms. Used for visual QA flows in Cursor sessions.</div>
+      <div class="mcp-badges">
+        <span class="badge bk">ACTIVE</span>
+        <span class="badge bcur">Cursor only</span>
+        <span class="badge bk">Cross-platform</span>
+      </div>
+      <div style="font-size:.7rem;color:var(--dim);margin-top:4px">Defined in: .cursor/mcp.json · Consider pinning version</div>
+    </div>
+    <div class="mcp-card" style="border-color:#075985;background:#051624">
+      <div class="mcp-name" style="color:#38bdf8">🐙 github (Cursor)</div>
+      <div class="mcp-desc">GitHub API in Cursor. Cross-platform (uses npx directly). Works correctly on all OSes.</div>
+      <div class="mcp-badges">
+        <span class="badge bk">ACTIVE</span>
+        <span class="badge bcur">Cursor only</span>
+        <span class="badge bk">Cross-platform</span>
+      </div>
+      <div style="font-size:.7rem;color:var(--dim);margin-top:4px">Defined in: .cursor/mcp.json</div>
+    </div>
+  </div>
+  <div style="margin-top:14px;font-size:.75rem;color:var(--dim)">Note: <code>enableAllProjectMcpServers: false</code> in settings.json — only explicitly listed servers connect. <code>disabledMcpjsonServers: ["github","context7"]</code> explicitly blocks them in Claude Code.</div>
+</section>
+
+<!-- ════════════════════════════════════ 5. SKILLS ════════════════════════════════════ -->
+<section class="section" id="skills">
+  <div class="sec-head">
+    <span class="sec-icon">🔧</span>
+    <h2>Skills — .claude/skills/</h2>
+    <span class="sec-count">21 items</span>
+  </div>
+
+  <div class="filter-bar" id="skills-filter">
+    <button class="filter-btn active-all" onclick="filterItems('skills-grid','all',this)">All</button>
+    <button class="filter-btn" data-filter="keep" onclick="filterItems('skills-grid','keep',this)">✓ Keep</button>
+    <button class="filter-btn" data-filter="rewrite" onclick="filterItems('skills-grid','rewrite',this)">↻ Rewrite</button>
+    <button class="filter-btn" data-filter="project" onclick="filterItems('skills-grid','project',this)">⊕ Project</button>
+    <button class="filter-btn" data-filter="unused" onclick="filterItems('skills-grid','unused',this)">· Unused</button>
+  </div>
+
+  <div class="gauto" id="skills-grid">
+    <!-- KEEP -->
+    <div class="sk-card" data-status="keep"><div class="sk-top"><span class="sk-name">cssLayer</span><span class="badge bk">KEEP</span></div><div class="sk-desc">CSS architecture enforcement — engine placement, 5-group rhythm, token tiers</div><div class="sk-trig">Trigger: before creating/editing any .scss or .css in src/</div></div>
+    <div class="sk-card" data-status="keep"><div class="sk-top"><span class="sk-name">techdebt</span><span class="badge bk">KEEP</span></div><div class="sk-desc">Scans for duplicate code, dead code, style violations, TODO debt. Maintains rolling 7-day archive</div><div class="sk-trig">Trigger: end of session / before PR</div></div>
+    <div class="sk-card" data-status="keep"><div class="sk-top"><span class="sk-name">elegant-fix</span><span class="badge bk">KEEP</span></div><div class="sk-desc">Refines a working but hacky fix into a clean, idiomatic solution after implementation</div><div class="sk-trig">Trigger: after a messy quick-fix is confirmed working</div></div>
+    <div class="sk-card" data-status="keep"><div class="sk-top"><span class="sk-name">save-plan</span><span class="badge bk">KEEP</span></div><div class="sk-desc">Determines next plan number, syncs atomic sub-tasks to ledger, writes plan file to plans/</div><div class="sk-trig">Trigger: message contains "save" + "it/that/this/plan"</div></div>
+    <div class="sk-card" data-status="keep"><div class="sk-top"><span class="sk-name">breadcrumb-navigator</span><span class="badge bk">KEEP</span></div><div class="sk-desc">Creates and maintains breadcrumbs.md nav files at major directory seams</div><div class="sk-trig">Trigger: after features complete, /breadcrumbs request</div></div>
+    <div class="sk-card" data-status="keep"><div class="sk-top"><span class="sk-name">context-management</span><span class="badge bk">KEEP</span></div><div class="sk-desc">Mid-task state preservation — detects when to checkpoint before context exhaustion</div><div class="sk-trig">Trigger: context approaching limit mid-task</div></div>
+    <div class="sk-card" data-status="keep"><div class="sk-top"><span class="sk-name">end-session</span><span class="badge bk">KEEP</span></div><div class="sk-desc">Session closer alias — delegates to end-of-session-agent for full 4-phase close</div><div class="sk-trig">Trigger: /ship, /end-session, "done", "wrap up"</div></div>
+    <div class="sk-card" data-status="keep"><div class="sk-top"><span class="sk-name">github-sync</span><span class="badge bk">KEEP</span></div><div class="sk-desc">Pulls recent GitHub activity at session start. Checks notes/github-sync/&lt;today&gt;.md to avoid repeating</div><div class="sk-trig">Trigger: session start — once per calendar day only</div></div>
+    <div class="sk-card" data-status="keep"><div class="sk-top"><span class="sk-name">nightly-audit</span><span class="badge bk">KEEP</span></div><div class="sk-desc">Autonomous nightly scan — 6 violation categories, auto-fixes safe items, flags rest, commits on audit branch</div><div class="sk-trig">Trigger: /nightly-audit or RemoteTrigger cron. Never merges to main</div></div>
+    <div class="sk-card" data-status="keep"><div class="sk-top"><span class="sk-name">update-docs</span><span class="badge bk">KEEP</span></div><div class="sk-desc">Refreshes breadcrumb navigation maps and project docs after feature completion</div><div class="sk-trig">Trigger: after features complete</div></div>
+    <div class="sk-card" data-status="keep"><div class="sk-top"><span class="sk-name">mp-search</span><span class="badge bk">KEEP</span></div><div class="sk-desc">Semantic search alias across all MemPalace drawers (5,992 embedded project entries)</div><div class="sk-trig">Trigger: /mp-search &lt;query&gt; or /recall &lt;query&gt;</div></div>
+    <div class="sk-card" data-status="keep"><div class="sk-top"><span class="sk-name">worktree-setup</span><span class="badge bk">KEEP</span></div><div class="sk-desc">Provisions an isolated git worktree for parallel/multi-agent work on demand</div><div class="sk-trig">Trigger: parallel work needed — NOT automatic</div></div>
+    <div class="sk-card" data-status="keep"><div class="sk-top"><span class="sk-name">worktree-session-end</span><span class="badge bk">KEEP</span></div><div class="sk-desc">Closes a worktree session — cleanup only. Delegates commits/PRs to git-agent</div><div class="sk-trig">Trigger: end of a worktree session</div></div>
+    <!-- UNUSED -->
+    <div class="sk-card" data-status="unused"><div class="sk-top"><span class="sk-name">session-handoff</span><span class="badge bu">UNUSED</span></div><div class="sk-desc">Legacy redirect — now points to end-of-session-agent. No longer invoked directly</div><div class="sk-trig">Superseded by end-session skill. Consider removing</div></div>
+    <!-- PROJECT-SPECIFIC -->
+    <div class="sk-card" data-status="project"><div class="sk-top"><span class="sk-name">add-recipe</span><span class="badge bp">PROJECT</span></div><div class="sk-desc">Extracts, validates, commits new recipe or dish from image/URL/text into project ledger</div><div class="sk-trig">Trigger: user adds recipe. Step 3 confirmation required before any write</div></div>
+    <div class="sk-card" data-status="project"><div class="sk-top"><span class="sk-name">auth-and-logging</span><span class="badge bp">PROJECT</span></div><div class="sk-desc">Audits/hardens auth guards, mutation entry points, logging — has foodVibe-specific auth patterns</div><div class="sk-trig">Trigger: touching auth, persistence, HTTP, or critical operations</div></div>
+    <div class="sk-card" data-status="project"><div class="sk-top"><span class="sk-name">auth-crypto</span><span class="badge bp">PROJECT</span></div><div class="sk-desc">Implements/audits hashing, encryption, token mgmt in auth-crypto.ts. Security Officer sign-off mandatory</div><div class="sk-trig">Trigger: before creating or modifying auth-crypto.ts</div></div>
+    <div class="sk-card" data-status="project"><div class="sk-top"><span class="sk-name">angular-pipe-logic</span><span class="badge bp">PROJECT</span></div><div class="sk-desc">Scaffolds, implements, tests Angular Pipes and Directives per project reactivity standards</div><div class="sk-trig">Trigger: before creating/refactoring any Angular Pipe or Directive</div></div>
+    <div class="sk-card" data-status="project"><div class="sk-top"><span class="sk-name">angularComponentStructure</span><span class="badge bp">PROJECT</span></div><div class="sk-desc">Enforces mandatory class structure, section ordering, CRDUL method grouping for every component</div><div class="sk-trig">Trigger: creating or refactoring Angular components</div></div>
+    <div class="sk-card" data-status="project"><div class="sk-top"><span class="sk-name">deploy-github-pages</span><span class="badge bp">PROJECT</span></div><div class="sk-desc">Configures and deploys the foodVibe Angular SPA to GitHub Pages. Explicit request only</div><div class="sk-trig">Trigger: "deploy", "publish app", "GitHub Pages" — explicit only</div></div>
+    <div class="sk-card" data-status="project"><div class="sk-top"><span class="sk-name">cssLayer-workspace/</span><span class="badge bp">EVAL DATA</span></div><div class="sk-desc">Not a skill — iteration eval data for cssLayer (benchmark JSONs, grading outputs, timing). Dev artifact</div><div class="sk-trig">2 iterations × 5 scenarios. Can be cleaned up from template</div></div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════ 6. AGENTS ════════════════════════════════════ -->
+<section class="section" id="agents">
+  <div class="sec-head">
+    <span class="sec-icon">🤖</span>
+    <h2>Agents — .claude/agents/</h2>
+    <span class="sec-count">10 agents · all universal</span>
+  </div>
+  <div class="gauto">
+    <div class="ag-card"><div class="ag-top"><span class="ag-name">end-of-session-agent</span><span class="badge bk">KEEP</span></div><div class="ag-desc">4-phase session closer: brief validation → build gate → techdebt → git ops → todo archive → handoff report</div><div class="ag-role">Invoked by /ship, /end-session</div></div>
+    <div class="ag-card"><div class="ag-top"><span class="ag-name">git-agent</span><span class="badge bk">KEEP</span></div><div class="ag-desc">Proactive git assistant. Evaluates repo state, interprets user intent, executes git workflows with single-approval safety</div><div class="ag-role">Invoked on any git-related action</div></div>
+    <div class="ag-card"><div class="ag-top"><span class="ag-name">team-leader</span><span class="badge bk">KEEP</span></div><div class="ag-desc">Multi-agent orchestration, parallel stream coordination, conflict resolution across subagents</div><div class="ag-role">Invoked by /feat, /refactor, complex tasks</div></div>
+    <div class="ag-card"><div class="ag-top"><span class="ag-name">security-officer</span><span class="badge bk">KEEP</span></div><div class="ag-desc">Advanced threat modeling, logic-flow audit, vulnerability verification. OWASP Top 10 + STRIDE</div><div class="ag-role">Invoked after auth/security surface changes</div></div>
+    <div class="ag-card"><div class="ag-top"><span class="ag-name">software-architect</span><span class="badge bk">KEEP</span></div><div class="ag-desc">Technical design, HLD authoring, Signal-based data flow mapping for the project</div><div class="ag-role">Invoked by /plan, /plan-implementation</div></div>
+    <div class="ag-card"><div class="ag-top"><span class="ag-name">product-manager</span><span class="badge bk">KEEP</span></div><div class="ag-desc">Feature scoping, requirement definition, PRD authoring</div><div class="ag-role">Invoked by /new-feature, /plan</div></div>
+    <div class="ag-card"><div class="ag-top"><span class="ag-name">qa-engineer</span><span class="badge bk">KEEP</span></div><div class="ag-desc">Test strategy, regression verification, diagnostic reasoning</div><div class="ag-role">Invoked after features/fixes, for regression checks</div></div>
+    <div class="ag-card"><div class="ag-top"><span class="ag-name">mobile-flow-auditor</span><span class="badge bk">KEEP</span></div><div class="ag-desc">Reports mobile-viewport layout breakage across 16 predefined user flows. Report-only, never fixes</div><div class="ag-role">Invoked by /mobile-flow-audit</div></div>
+    <div class="ag-card"><div class="ag-top"><span class="ag-name">render-flow-auditor</span><span class="badge bk">KEEP</span></div><div class="ag-desc">Walks live Render deployment at desktop viewport. Reports functional bugs, API errors, false validations</div><div class="ag-role">Invoked by /render-flow-audit</div></div>
+    <div class="ag-card"><div class="ag-top"><span class="ag-name">reflect-agent</span><span class="badge bk">KEEP</span></div><div class="ag-desc">Scheduled nightly maintenance — processes tool failure log, applies skill fixes, archives, pushes reflect branch</div><div class="ag-role">Runs autonomously at 23:03. Never pushes to main</div></div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════ 7. COMMANDS ════════════════════════════════════ -->
+<section class="section" id="commands">
+  <div class="sec-head">
+    <span class="sec-icon">⌨️</span>
+    <h2>Slash Commands — .claude/commands/</h2>
+    <span class="sec-count">26 commands · all CC only</span>
+  </div>
+  <div class="g2">
+    <div>
+      <div class="cmd-grp"><div class="cmd-grp-title">Session Management</div><div class="cmd-list">
+        <span class="cmd" data-tip="Full 4-phase session closer">/ship</span>
+        <span class="cmd" data-tip="Alias for /ship">/end-session</span>
+        <span class="cmd" data-tip="Create or reconstruct session brief (scorecard)">/brief</span>
+        <span class="cmd" data-tip="Session and worktree pruning">/cleanup</span>
+        <span class="cmd" data-tip="Disable context warnings for 30 min">/context-override</span>
+      </div></div>
+      <div class="cmd-grp"><div class="cmd-grp-title">Feature Development Pipeline</div><div class="cmd-list">
+        <span class="cmd" data-tip="New feature path (loads angular+domain standards)">/feat</span>
+        <span class="cmd" data-tip="Bug fix path">/fix</span>
+        <span class="cmd" data-tip="Planning path (loads prd+hld templates)">/plan</span>
+        <span class="cmd" data-tip="Refactor path (loads angular+cssLayer+techdebt)">/refactor</span>
+        <span class="cmd" data-tip="Security path (loads security+auth standards)">/security</span>
+        <span class="cmd" data-tip="Scoped feature brief — feeds into /plan-implementation">/new-feature</span>
+        <span class="cmd" data-tip="Codebase scan + plan (read-only). Waits for approval">/plan-implementation</span>
+        <span class="cmd" data-tip="Autonomous implementation after /plan-implementation approval">/execute-it</span>
+        <span class="cmd" data-tip="Fully autonomous plan execution">/auto-solve</span>
+      </div></div>
+      <div class="cmd-grp"><div class="cmd-grp-title">Documentation</div><div class="cmd-list">
+        <span class="cmd" data-tip="Refresh breadcrumbs and docs after features">/docs-refresh</span>
+      </div></div>
+    </div>
+    <div>
+      <div class="cmd-grp"><div class="cmd-grp-title">QA &amp; Audits</div><div class="cmd-list">
+        <span class="cmd" data-tip="Run nightly codebase audit">/nightly-audit</span>
+        <span class="cmd" data-tip="Display latest nightly audit report">/audit-report</span>
+        <span class="cmd" data-tip="Mobile viewport layout audit (16 flows)">/mobile-flow-audit</span>
+        <span class="cmd" data-tip="Render deployment functional audit">/render-flow-audit</span>
+        <span class="cmd" data-tip="Full Test → PR → Review → Merge pipeline">/test-pr-review-merge</span>
+      </div></div>
+      <div class="cmd-grp"><div class="cmd-grp-title">Self-Improvement (Reflect)</div><div class="cmd-list">
+        <span class="cmd" data-tip="Autonomous self-improvement loop for skills">/reflect</span>
+        <span class="cmd" data-tip="Batch reflection from tool failure log">/reflect-list</span>
+        <span class="cmd" data-tip="Add skill behavior test cases">/reflect-add-tests</span>
+        <span class="cmd" data-tip="Score a fix template against fixture corpus">/test-template</span>
+        <span class="cmd" data-tip="Generate adversarial test cases for a fix template">/adversarial-template</span>
+      </div></div>
+      <div class="cmd-grp"><div class="cmd-grp-title">Utilities</div><div class="cmd-list">
+        <span class="cmd" data-tip="Clean stale/resolved todos from todo.md">/sweep-stale-todos</span>
+        <span class="cmd" data-tip="Validate all agent file references are intact">/validate-agent-refs</span>
+        <span class="cmd" data-tip="Self-evaluation against session brief">/evaluate-me</span>
+        <span class="cmd" data-tip="Command index — lists all available commands">/_index</span>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════ 8. STANDARDS ════════════════════════════════════ -->
+<section class="section" id="standards">
+  <div class="sec-head">
+    <span class="sec-icon">📏</span>
+    <h2>Standards Files — .claude/standards-*.md</h2>
+    <span class="sec-count">6 files · loaded on-demand only</span>
+  </div>
+  <div style="margin-bottom:12px;font-size:.78rem;color:var(--muted)">These are never pre-loaded at session start. Each file loads only when the relevant context triggers it. Each is ~800–1,500 tokens.</div>
+  <div class="gauto-sm">
+    <div class="std-card"><div class="std-name">standards-angular.md</div><div class="std-when"><span class="badge br" style="margin-bottom:4px;display:inline-block">REWRITE for your framework</span><br>Load when: creating/refactoring components, pipes, directives, SCSS, folder structure</div></div>
+    <div class="std-card"><div class="std-name">standards-domain.md</div><div class="std-when"><span class="badge bp" style="margin-bottom:4px;display:inline-block">FOODVIBE-SPECIFIC</span><br>Load when: Hebrew i18n, Lucide icons, food domain logic. Contains canonical values</div></div>
+    <div class="std-card"><div class="std-name">standards-backend.md</div><div class="std-when"><span class="badge br" style="margin-bottom:4px;display:inline-block">REWRITE for your stack</span><br>Load when: adding/modifying persisted entities, new data services, CRUD, backend API</div></div>
+    <div class="std-card"><div class="std-name">standards-security.md</div><div class="std-when"><span class="badge br" style="margin-bottom:4px;display:inline-block">REWRITE threat model</span><br>Load when: touching auth, routes, storage, crypto, security surface, pre-deploy</div></div>
+    <div class="std-card"><div class="std-name">standards-git.md</div><div class="std-when"><span class="badge br" style="margin-bottom:4px;display:inline-block">REWRITE branch conventions</span><br>Load when: committing, pushing, PRs, deploying, GitHub MCP operations</div></div>
+    <div class="std-card"><div class="std-name">standards-scheduled-reporting.md</div><div class="std-when"><span class="badge bk" style="margin-bottom:4px;display:inline-block">KEEP</span><br>Load when: configuring nightly audit, scheduled tasks, reporting cadence</div></div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════ 9. CURSOR ════════════════════════════════════ -->
+<section class="section" id="cursor">
+  <div class="sec-head">
+    <span class="sec-icon">🖱</span>
+    <h2>Cursor Integration — .cursor/</h2>
+    <span class="sec-count">13 rules · 5 commands</span>
+  </div>
+  <div style="margin-bottom:14px;font-size:.78rem;color:var(--muted)">The <code>.cursor/rules/*.mdc</code> files mirror <code>copilot-instructions.md</code> for Cursor's rule engine. Canonical rules stay in <code>copilot-instructions.md</code>. Cursor cannot spawn subagents — all [CC]-only skills are unavailable in Cursor.</div>
+
+  <h3 style="margin-bottom:12px">Rules</h3>
+  <div class="rules-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;margin-bottom:24px">
+    <div class="cr-card"><div class="cr-file">mandatory-gate.mdc</div><div class="cr-desc">Reads CLAUDE.md + copilot-instructions.md at session start. Confirms "Yes chef!"</div><div class="cr-badge">→ KEEP (rewrite for new project)</div></div>
+    <div class="cr-card"><div class="cr-file">session-start.mdc</div><div class="cr-desc">Checks github-sync note for today — triggers skill if missing</div><div class="cr-badge">→ KEEP</div></div>
+    <div class="cr-card"><div class="cr-file">session-end.mdc</div><div class="cr-desc">Routes /ship, /end-session, "done" to end-session skill</div><div class="cr-badge">→ KEEP</div></div>
+    <div class="cr-card"><div class="cr-file">git-commit-must-use-skill.mdc</div><div class="cr-desc">Enforces git-agent for all commit/push/PR operations</div><div class="cr-badge">→ KEEP</div></div>
+    <div class="cr-card"><div class="cr-file">save-plan-must-use-skill.mdc</div><div class="cr-desc">Enforces save-plan skill for "save plan/it/that/this"</div><div class="cr-badge">→ KEEP</div></div>
+    <div class="cr-card"><div class="cr-file">scss-styling-must-use-cssLayer.mdc</div><div class="cr-desc">Enforces cssLayer skill before any SCSS/CSS edit in src/</div><div class="cr-badge">→ KEEP (rename for your stack)</div></div>
+    <div class="cr-card"><div class="cr-file">security.mdc</div><div class="cr-desc">Triggers security-officer after auth/guard/crypto changes</div><div class="cr-badge">→ KEEP</div></div>
+    <div class="cr-card"><div class="cr-file">core-angular.mdc</div><div class="cr-desc">Angular-specific rules: no semicolons, single quotes TS, double quotes HTML</div><div class="cr-badge">→ REWRITE for your framework</div></div>
+    <div class="cr-card"><div class="cr-file">angular-component-structure.mdc</div><div class="cr-desc">Triggers angularComponentStructure skill on component create/refactor</div><div class="cr-badge">→ REWRITE for your framework</div></div>
+    <div class="cr-card"><div class="cr-file">backend-persistence.mdc</div><div class="cr-desc">Loads standards-backend.md for any persistent data changes</div><div class="cr-badge">→ REWRITE for your backend</div></div>
+    <div class="cr-card"><div class="cr-file">add-recipe-must-use-skill.mdc</div><div class="cr-desc">Triggers add-recipe skill when user adds food/recipe</div><div class="cr-badge" style="color:var(--proj)">→ FOODVIBE-SPECIFIC — replace</div></div>
+    <div class="cr-card"><div class="cr-file">lucide-icons-must-register-in-app-config.mdc</div><div class="cr-desc">Validates Lucide icon registration in app.config.ts</div><div class="cr-badge" style="color:var(--proj)">→ FOODVIBE-SPECIFIC — replace with your icon system</div></div>
+    <div class="cr-card"><div class="cr-file">no-c-engine-in-component-scss.mdc</div><div class="cr-desc">Blocks CSS engine placement violations in component SCSS</div><div class="cr-badge">→ KEEP (or adapt for your CSS rules)</div></div>
+    <div class="cr-card"><div class="cr-file">translation.mdc</div><div class="cr-desc">Hebrew canonical values, i18n keys, RTL layout rules</div><div class="cr-badge" style="color:var(--proj)">→ FOODVIBE-SPECIFIC — replace with your i18n setup</div></div>
+  </div>
+
+  <h3 style="margin-bottom:12px">Cursor Commands (.cursor/commands/)</h3>
+  <div class="gauto-xs">
+    <div class="cr-card"><div class="cr-file">add-recipe.md</div><div class="cr-desc">Add recipe from image/URL/text</div></div>
+    <div class="cr-card"><div class="cr-file">commit-github.md</div><div class="cr-desc">Commit and push via git-agent</div></div>
+    <div class="cr-card"><div class="cr-file">deploy-github-pages.md</div><div class="cr-desc">Deploy to GitHub Pages</div></div>
+    <div class="cr-card"><div class="cr-file">git.md</div><div class="cr-desc">Git workflow entry point</div></div>
+    <div class="cr-card"><div class="cr-file">quick-chat.md</div><div class="cr-desc">Quick conversational mode</div></div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════ 10. SCRIPTS ════════════════════════════════════ -->
+<section class="section" id="scripts">
+  <div class="sec-head">
+    <span class="sec-icon">📜</span>
+    <h2>Scripts — scripts/</h2>
+    <span class="sec-count">24 files · 8 workflow · 16 project-specific</span>
+  </div>
+
+  <h3 style="margin-bottom:10px;color:var(--keep)">Workflow Scripts — keep in template</h3>
+  <div class="st-wrap" style="margin-bottom:20px">
+    <div class="st-row"><div class="st-left"><span class="st-name">branch-guard.sh</span><span class="st-purpose">Blocks writes to main. Auto-creates feat/session-YYYYMMDD branch. Fires on every Edit/Write</span></div><div class="st-right"><span class="badge bk">KEEP</span><span class="badge bf">FIXED</span></div></div>
+    <div class="st-row"><div class="st-left"><span class="st-name">session-startup.sh</span><span class="st-purpose">Writes SESSION SAVE TARGET to .claude/.session-state-path at session start</span></div><div class="st-right"><span class="badge bk">KEEP</span><span class="badge bf">FIXED</span></div></div>
+    <div class="st-row"><div class="st-left"><span class="st-name">handoff-check.sh</span><span class="st-purpose">Checks for uncommitted changes on Stop. Reminds to /ship if found</span></div><div class="st-right"><span class="badge bk">KEEP</span><span class="badge bf">FIXED</span></div></div>
+    <div class="st-row"><div class="st-left"><span class="st-name">pre-compact-reminder.sh</span><span class="st-purpose">Fires before context compaction. Prints reminder to save task state</span></div><div class="st-right"><span class="badge bk">KEEP</span><span class="badge bf">FIXED</span></div></div>
+    <div class="st-row"><div class="st-left"><span class="st-name">context-monitor.py</span><span class="st-purpose">Tracks context window usage after every tool call. Warns when approaching limit</span></div><div class="st-right"><span class="badge bk">KEEP</span><span class="badge bf">FIXED</span></div></div>
+    <div class="st-row"><div class="st-left"><span class="st-name">session-manifest-hook.py</span><span class="st-purpose">Logs every edited file per session. PostToolUse on Edit/Write</span></div><div class="st-right"><span class="badge bk">KEEP</span><span class="badge bf">FIXED</span></div></div>
+    <div class="st-row"><div class="st-left"><span class="st-name">session-manifest-ship.py</span><span class="st-purpose">Produces file-change report at ship time using session-manifest data</span></div><div class="st-right"><span class="badge bk">KEEP</span></div></div>
+    <div class="st-row"><div class="st-left"><span class="st-name">pre-commit-no-semi.mjs</span><span class="st-purpose">Git hook: blocks TypeScript files that contain semicolons. Enforces no-semicolons rule</span></div><div class="st-right"><span class="badge br">REWRITE for your style</span></div></div>
+  </div>
+
+  <h3 style="margin-bottom:10px;color:var(--proj)">Project-Specific Scripts — do not copy to template</h3>
+  <div class="st-wrap" style="margin-bottom:20px">
+    <div class="st-row"><div class="st-left"><span class="st-name">backup-before-repair.mjs</span><span class="st-purpose">Backs up data before repair operations. One-time migration utility</span></div><div class="st-right"><span class="badge bp">PROJECT</span></div></div>
+    <div class="st-row"><div class="st-left"><span class="st-name">diagnose-broken-refs.mjs</span><span class="st-purpose">Diagnoses broken ingredient/recipe references in Firestore</span></div><div class="st-right"><span class="badge bp">PROJECT</span></div></div>
+    <div class="st-row"><div class="st-left"><span class="st-name">fix-duplicate-names.mjs</span><span class="st-purpose">Fixes duplicate ingredient names in master pool</span></div><div class="st-right"><span class="badge bp">PROJECT</span></div></div>
+    <div class="st-row"><div class="st-left"><span class="st-name">link-users-to-master.mjs</span><span class="st-purpose">Links user ingredient records to master pool entries</span></div><div class="st-right"><span class="badge bp">PROJECT</span></div></div>
+    <div class="st-row"><div class="st-left"><span class="st-name">migrate-to-master.mjs</span><span class="st-purpose">DB migration: moves ingredients to master pool architecture</span></div><div class="st-right"><span class="badge bp">PROJECT</span></div></div>
+    <div class="st-row"><div class="st-left"><span class="st-name">promote-guest-to-master.js</span><span class="st-purpose">Promotes guest user data to full master pool record</span></div><div class="st-right"><span class="badge bp">PROJECT</span></div></div>
+    <div class="st-row"><div class="st-left"><span class="st-name">push-master-to-atlas.js</span><span class="st-purpose">Pushes master pool data to MongoDB Atlas</span></div><div class="st-right"><span class="badge bp">PROJECT</span></div></div>
+    <div class="st-row"><div class="st-left"><span class="st-name">repair-recipe-references.mjs</span><span class="st-purpose">Repairs broken ingredient references inside recipe documents</span></div><div class="st-right"><span class="badge bp">PROJECT</span></div></div>
+    <div class="st-row"><div class="st-left"><span class="st-name">trim-demo-data.mjs</span><span class="st-purpose">Trims demo/seed data from database</span></div><div class="st-right"><span class="badge bp">PROJECT</span></div></div>
+    <div class="st-row"><div class="st-left"><span class="st-name">check-lucide-icons.mjs</span><span class="st-purpose">Validates Lucide icon registration in app.config.ts — Angular/Lucide specific</span></div><div class="st-right"><span class="badge bp">PROJECT</span></div></div>
+    <div class="st-row"><div class="st-left"><span class="st-name">check-no-native-select.mjs</span><span class="st-purpose">Lints HTML for native &lt;select&gt; elements (project uses custom component)</span></div><div class="st-right"><span class="badge bp">PROJECT</span></div></div>
+    <div class="st-row"><div class="st-left"><span class="st-name">log-server.js</span><span class="st-purpose">Development log server for structured logging</span></div><div class="st-right"><span class="badge bp">PROJECT</span></div></div>
+    <div class="st-row"><div class="st-left"><span class="st-name">prune-merged-worktrees.sh</span><span class="st-purpose">Cleans up merged git worktrees. Useful but foodVibe-specific naming</span></div><div class="st-right"><span class="badge bk">KEEP (generic)</span></div></div>
+    <div class="st-row"><div class="st-left"><span class="st-name">prune-old-sessions.sh</span><span class="st-purpose">Cleans old .claude/sessions/ entries</span></div><div class="st-right"><span class="badge bk">KEEP (generic)</span></div></div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════ 11. MEMPALACE ════════════════════════════════════ -->
+<section class="section" id="mempalace">
+  <div class="sec-head">
+    <span class="sec-icon">🧠</span>
+    <h2>MemPalace — Semantic Project Memory</h2>
+    <span class="sec-count">mempalace.yaml · 13 rooms</span>
+  </div>
+  <div style="margin-bottom:14px;font-size:.78rem;color:var(--muted)">MemPalace is a vector knowledge graph MCP server. It maps project directories to "rooms" inside a "wing". Every architectural decision, past session, code pattern, and lesson learned is stored as a searchable drawer. The AI searches it before reading files for any design/debug question.</div>
+  <div class="g2" style="margin-bottom:20px">
+    <div class="card">
+      <div style="font-size:.8rem;font-weight:700;margin-bottom:10px;color:var(--muted)">How it integrates with AI workflow</div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:.78rem">
+        <div style="padding:6px 10px;background:var(--surface);border-radius:var(--r-sm);border:1px solid var(--border)">1. Main Claude always calls <code>mempalace_search()</code> before reading files for any design/debug/planning question</div>
+        <div style="padding:6px 10px;background:var(--surface);border-radius:var(--r-sm);border:1px solid var(--border)">2. Subagents receive MemPalace results injected in their prompts — they cannot call it themselves</div>
+        <div style="padding:6px 10px;background:var(--surface);border-radius:var(--r-sm);border:1px solid var(--border)">3. Session decisions, bugs, and patterns are written via <code>mempalace_diary_write()</code></div>
+        <div style="padding:6px 10px;background:var(--surface);border-radius:var(--r-sm);border:1px solid var(--border)">4. Knowledge graph queries via <code>mempalace_kg_query(entity=…)</code> for architectural decisions</div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:.8rem;font-weight:700;margin-bottom:10px;color:var(--muted)">When to use MemPalace vs Grep</div>
+      <div style="display:flex;flex-direction:column;gap:5px;font-size:.78rem">
+        <div style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--cc);font-weight:700;min-width:80px">MemPalace</span><span style="color:var(--muted)">Semantic/fuzzy questions, past decisions, "why did we…", "have we tried…", architectural context</span></div>
+        <div style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--shared);font-weight:700;min-width:80px">Grep/Read</span><span style="color:var(--muted)">Exact code/function names, structural navigation, editing files, finding specific patterns</span></div>
+        <div style="display:flex;gap:8px;align-items:flex-start;padding:5px 0"><span style="color:var(--muted);font-weight:700;min-width:80px">Skip MP</span><span style="color:var(--muted)">If MCP unavailable — skip silently, grep session handoffs instead</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-bottom:12px">Wing: foodvibe1.0 — 13 Rooms</h3>
+  <div class="mp-rooms">
+    <div class="mp-room"><div class="mp-rname">src</div><div class="mp-rpath">from src/</div></div>
+    <div class="mp-room"><div class="mp-rname">backend</div><div class="mp-rpath">from server/</div></div>
+    <div class="mp-room"><div class="mp-rname">scripts</div><div class="mp-rpath">from scripts/</div></div>
+    <div class="mp-room"><div class="mp-rname">plans</div><div class="mp-rpath">from plans/</div></div>
+    <div class="mp-room"><div class="mp-rname">documentation</div><div class="mp-rpath">from docs/</div></div>
+    <div class="mp-room"><div class="mp-rname">reports</div><div class="mp-rpath">from reports/</div></div>
+    <div class="mp-room"><div class="mp-rname">e2e</div><div class="mp-rpath">from e2e/</div></div>
+    <div class="mp-room"><div class="mp-rname">logs</div><div class="mp-rpath">from logs/</div></div>
+    <div class="mp-room"><div class="mp-rname">public</div><div class="mp-rpath">from public/</div></div>
+    <div class="mp-room"><div class="mp-rname">research</div><div class="mp-rpath">from references/</div></div>
+    <div class="mp-room"><div class="mp-rname">design</div><div class="mp-rpath">from assets/</div></div>
+    <div class="mp-room"><div class="mp-rname">backups</div><div class="mp-rpath">from backups/</div></div>
+    <div class="mp-room"><div class="mp-rname">general</div><div class="mp-rpath">doesn't fit other rooms</div></div>
+  </div>
+  <div style="font-size:.75rem;color:var(--dim);margin-top:10px">For a new project: keep the wing/room structure, rewrite room names and directory paths to match your project layout.</div>
+</section>
+
+<!-- ════════════════════════════════════ 12. REFLECT ════════════════════════════════════ -->
+<section class="section" id="reflect">
+  <div class="sec-head">
+    <span class="sec-icon">🔁</span>
+    <h2>Reflect System — AI Self-Improvement Loop</h2>
+    <span class="sec-count">.claude/reflect/</span>
+  </div>
+  <div style="margin-bottom:14px;font-size:.78rem;color:var(--muted)">The reflect system makes the AI improve its own skills over time. It logs tool failures, runs skill tests, evaluates behavior, and applies low-risk fixes autonomously via the nightly reflect-agent. Think of it as a CI/CD pipeline for AI behavior.</div>
+  <div class="rfl-grid">
+    <div class="rfl-card">
+      <div class="rfl-title"><span>📝</span> Logs &amp; Data</div>
+      <div class="rfl-item"><span>failure-log.tsv</span><span class="badge bk">KEEP (clear data)</span></div>
+      <div class="rfl-item"><span>reflection-log.tsv</span><span class="badge bk">KEEP (clear data)</span></div>
+      <div class="rfl-item"><span>auto-reflection-log.tsv</span><span class="badge bk">KEEP (clear data)</span></div>
+      <div class="rfl-item"><span>failure-log-archive-*.tsv</span><span class="badge bu">HISTORICAL — don't copy</span></div>
+      <div class="rfl-item"><span>test-quality-log.md</span><span class="badge bk">KEEP (clear data)</span></div>
+    </div>
+    <div class="rfl-card">
+      <div class="rfl-title"><span>🧪</span> Test Infrastructure</div>
+      <div class="rfl-item"><span>test-suites/cssLayer.tests.md</span><span class="badge bp">PROJECT-SPECIFIC</span></div>
+      <div class="rfl-item"><span>test-suites/angularComponent.tests.md</span><span class="badge bp">PROJECT-SPECIFIC</span></div>
+      <div class="rfl-item"><span>coverage/cssLayer.coverage.md</span><span class="badge bp">PROJECT-SPECIFIC</span></div>
+      <div class="rfl-item"><span>evidence/ (4 files)</span><span class="badge bu">HISTORICAL — don't copy</span></div>
+      <div class="rfl-item"><span>test-runner.sh</span><span class="badge bk">KEEP</span></div>
+    </div>
+    <div class="rfl-card">
+      <div class="rfl-title"><span>🤖</span> Agent Prompts</div>
+      <div class="rfl-item"><span>reflect-runner-prompt.md</span><span class="badge bk">KEEP</span></div>
+      <div class="rfl-item"><span>behavior-runner-prompt.md</span><span class="badge bk">KEEP</span></div>
+      <div class="rfl-item"><span>evaluator-agent-prompt.md</span><span class="badge bk">KEEP</span></div>
+      <div class="rfl-item"><span>evaluator.md</span><span class="badge bk">KEEP</span></div>
+    </div>
+    <div class="rfl-card">
+      <div class="rfl-title"><span>🎯</span> Test Drive</div>
+      <div class="rfl-item"><span>test-drive/decision-criteria.md</span><span class="badge bk">KEEP</span></div>
+      <div class="rfl-item"><span>test-drive/rubric.md</span><span class="badge bk">KEEP</span></div>
+      <div class="rfl-item"><span>test-drive/log.md</span><span class="badge bu">HISTORICAL — clear</span></div>
+      <div class="rfl-item"><span>test-suite-template.md</span><span class="badge bk">KEEP (template)</span></div>
+    </div>
+  </div>
+  <div style="margin-top:12px;font-size:.75rem;color:var(--dim)">For a new project: keep all the infrastructure (agent prompts, test-runner, templates). Replace test-suites and coverage files with ones for your skills. Clear all historical data files.</div>
+</section>
+
+<!-- ════════════════════════════════════ 13. VERDICT ════════════════════════════════════ -->
+<section class="section" id="verdict">
+  <div class="sec-head">
+    <span class="sec-icon">📋</span>
+    <h2>Template Portability Verdict</h2>
+    <span class="sec-count">what to do when starting a new project</span>
+  </div>
+  <div style="margin-bottom:14px;font-size:.78rem;color:var(--muted)">This table summarizes every component category and what action to take when copying this workflow to a new project.</div>
+  <div class="section-box">
+    <table class="vt">
+      <thead><tr><th>Component</th><th>Verdict</th><th>What to do</th></tr></thead>
+      <tbody>
+        <tr><td><div class="vt-name">CLAUDE.md</div><div class="vt-note">Session gate, hard rules, path router</div></td><td><span class="badge br">REWRITE</span></td><td style="font-size:.78rem;color:var(--muted)">Keep the structure (gate, path router, hard rules). Rewrite the tech stack row in the path router table and remove foodVibe-specific rules (no-semicolons, Lucide, Hebrew)</td></tr>
+        <tr><td><div class="vt-name">copilot-instructions.md</div><div class="vt-note">Single source of truth for all rules</div></td><td><span class="badge br">REWRITE</span></td><td style="font-size:.78rem;color:var(--muted)">Keep section structure and generic triggers. Replace skill triggers that reference Angular, Lucide, Hebrew, recipe domain with your framework/domain equivalents</td></tr>
+        <tr><td><div class="vt-name">settings.json</div><div class="vt-note">Claude Code config, hooks, permissions</div></td><td><span class="badge br">REWRITE</span></td><td style="font-size:.78rem;color:var(--muted)">Keep the hook structure and bypassPermissions setup. Remove Windows-path Write/Edit allow entries. Add your project's specific paths. Paths now relative — works anywhere</td></tr>
+        <tr><td><div class="vt-name">All 8 workflow hooks (6 scripts)</div><div class="vt-note">branch-guard, session-startup, etc.</div></td><td><span class="badge bk">KEEP AS-IS</span></td><td style="font-size:.78rem;color:var(--muted)">Copy scripts/ workflow files verbatim. They're generic. Only pre-commit-no-semi.mjs needs adjustment if your style rules differ</td></tr>
+        <tr><td><div class="vt-name">13 universal skills</div><div class="vt-note">cssLayer, techdebt, save-plan, etc.</div></td><td><span class="badge bk">KEEP AS-IS</span></td><td style="font-size:.78rem;color:var(--muted)">Copy verbatim. These are framework-agnostic workflow tools. Replace skill trigger references in copilot-instructions.md to match your file types if not using SCSS</td></tr>
+        <tr><td><div class="vt-name">7 project-specific skills</div><div class="vt-note">add-recipe, auth-*, angular-*, deploy-*</div></td><td><span class="badge bp">REPLACE</span></td><td style="font-size:.78rem;color:var(--muted)">Don't copy these. Create new domain-specific and framework-specific skills for your new project from scratch using the same SKILL.md structure</td></tr>
+        <tr><td><div class="vt-name">All 10 agents</div><div class="vt-note">git-agent, security-officer, etc.</div></td><td><span class="badge bk">KEEP AS-IS</span></td><td style="font-size:.78rem;color:var(--muted)">Copy all agent .md files verbatim. They're generic. The invocation-log.tsv should be cleared</td></tr>
+        <tr><td><div class="vt-name">All 26 commands</div><div class="vt-note">/ship, /feat, /plan, etc.</div></td><td><span class="badge bk">KEEP AS-IS</span></td><td style="font-size:.78rem;color:var(--muted)">Copy all command .md files. They're generic workflow commands with no foodVibe-specific content</td></tr>
+        <tr><td><div class="vt-name">5 standards files</div><div class="vt-note">angular, domain, backend, security, git</div></td><td><span class="badge br">REWRITE</span></td><td style="font-size:.78rem;color:var(--muted)">Keep the file structure and section headers. Rewrite content for your framework (React/Vue/etc), your domain, your backend, your security threat model</td></tr>
+        <tr><td><div class="vt-name">Cursor rules (13 .mdc)</div><div class="vt-note">.cursor/rules/</div></td><td><span class="badge br">REWRITE SOME</span></td><td style="font-size:.78rem;color:var(--muted)">Keep: mandatory-gate, session-start/end, git-commit, save-plan, scss-must-cssLayer, security, no-c-engine. Replace: add-recipe, lucide, angular-specific, translation rules</td></tr>
+        <tr><td><div class="vt-name">MCP: mempalace</div><div class="vt-note">.mcp.json + .claude/mcp.json</div></td><td><span class="badge br">REWRITE yaml</span></td><td style="font-size:.78rem;color:var(--muted)">Keep the MCP server entries. Rewrite mempalace.yaml with wing name and rooms matching your new project's directory structure. Clear all existing drawer data</td></tr>
+        <tr><td><div class="vt-name">MCP: github (CC)</div><div class="vt-note">.mcp.json</div></td><td><span class="badge bb">FIX FIRST</span></td><td style="font-size:.78rem;color:var(--muted)">Change <code>cmd /c npx</code> → <code>npx</code> in .mcp.json to make it cross-platform. Also remove the duplicate from disabledMcpjsonServers if you want it enabled</td></tr>
+        <tr><td><div class="vt-name">Reflect system</div><div class="vt-note">.claude/reflect/</div></td><td><span class="badge bk">KEEP INFRA</span></td><td style="font-size:.78rem;color:var(--muted)">Copy all agent prompts, test-runner.sh, template files. Clear all .tsv data files, delete evidence/ and failure-log-archive. Create new test-suites for your skills</td></tr>
+        <tr><td><div class="vt-name">Historical data (.claude/sessions/, handoffs/, etc.)</div><div class="vt-note">Session logs, tech debt reports, audits</div></td><td><span class="badge bp">SKIP</span></td><td style="font-size:.78rem;color:var(--muted)">Don't copy any of these — they're project-specific history. Create empty directories with .gitkeep if your skills expect them to exist</td></tr>
+        <tr><td><div class="vt-name">Data migration scripts (16 scripts)</div><div class="vt-note">migrate-to-master, fix-duplicate-names, etc.</div></td><td><span class="badge bp">SKIP</span></td><td style="font-size:.78rem;color:var(--muted)">100% foodVibe Firestore/Atlas specific. Create new data utility scripts for your own data model</td></tr>
+        <tr><td><div class="vt-name">Fix templates</div><div class="vt-note">.claude/fix-templates/</div></td><td><span class="badge bp">SKIP</span></td><td style="font-size:.78rem;color:var(--muted)">color-token and manual-subscription templates are foodVibe + Angular specific. Create new fix templates for your common bug patterns using the same structure</td></tr>
+        <tr><td><div class="vt-name">References (hld, prd, templates)</div><div class="vt-note">.claude/references/</div></td><td><span class="badge bk">KEEP AS-IS</span></td><td style="font-size:.78rem;color:var(--muted)">These are generic document templates (HLD, PRD, team-leader output). Useful in any project</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top:24px;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg)">
+    <div style="font-weight:700;margin-bottom:12px;font-size:.9rem">New project starter checklist</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:.78rem">
+      <div style="padding:5px 0;border-bottom:1px solid var(--border)">☐ Copy all 8 workflow scripts</div>
+      <div style="padding:5px 0;border-bottom:1px solid var(--border)">☐ Copy all 13 universal skills</div>
+      <div style="padding:5px 0;border-bottom:1px solid var(--border)">☐ Copy all 10 agents</div>
+      <div style="padding:5px 0;border-bottom:1px solid var(--border)">☐ Copy all 26 commands</div>
+      <div style="padding:5px 0;border-bottom:1px solid var(--border)">☐ Copy reflect infra (prompts, runner)</div>
+      <div style="padding:5px 0;border-bottom:1px solid var(--border)">☐ Copy reference templates (hld, prd)</div>
+      <div style="padding:5px 0;border-bottom:1px solid var(--border)">☐ Rewrite CLAUDE.md for your stack</div>
+      <div style="padding:5px 0;border-bottom:1px solid var(--border)">☐ Rewrite copilot-instructions.md triggers</div>
+      <div style="padding:5px 0;border-bottom:1px solid var(--border)">☐ Rewrite 5 standards files for your stack</div>
+      <div style="padding:5px 0;border-bottom:1px solid var(--border)">☐ Rewrite mempalace.yaml rooms</div>
+      <div style="padding:5px 0;border-bottom:1px solid var(--border)">☐ Rewrite 6 Cursor rules (replace foodVibe ones)</div>
+      <div style="padding:5px 0;border-bottom:1px solid var(--border)">☐ Fix GitHub MCP in .mcp.json (remove cmd /c)</div>
+      <div style="padding:5px 0;border-bottom:1px solid var(--border)">☐ Create domain-specific skills for your app</div>
+      <div style="padding:5px 0;border-bottom:1px solid var(--border)">☐ Clear all .tsv reflect logs</div>
+      <div style="padding:5px 0">☐ Remove all sessions/, handoffs/, history</div>
+      <div style="padding:5px 0">☐ Create empty dirs for expected paths</div>
+    </div>
+  </div>
+</section>
+
+<script>
+function filterItems(gridId, status, btn) {
+  const grid = document.getElementById(gridId)
+  if (!grid) return
+  const items = grid.querySelectorAll('[data-status]')
+  const btns = btn.parentElement.querySelectorAll('.filter-btn')
+  btns.forEach(b => b.classList.remove('active-all','active-f'))
+  if (status === 'all') {
+    btn.classList.add('active-all')
+    items.forEach(el => el.classList.remove('item-hidden'))
+  } else {
+    btn.classList.add('active-f')
+    items.forEach(el => {
+      if (el.dataset.status === status) {
+        el.classList.remove('item-hidden')
+      } else {
+        el.classList.add('item-hidden')
+      }
+    })
+  }
+}
+</script>
+</body>
+</html>
