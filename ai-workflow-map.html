@@ -521,6 +521,47 @@ body {
 
 /* ── DIVIDER ── */
 .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+/* ── ENRICHMENT STYLES ── */
+.example-box {
+  background: rgba(255,255,255,0.03);
+  border-left: 3px solid var(--type-color, var(--cmd-c));
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  font-style: italic;
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  margin-bottom: 14px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.verdict-why {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.55;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.03);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+}
+.validated-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid;
+  margin-bottom: 14px;
+}
+.validated-current { background: var(--keep-bg); border-color: var(--keep-br); color: var(--keep); }
+.validated-review { background: var(--rewrite-bg); border-color: var(--rewrite-br); color: var(--rewrite); }
+.validated-redundant { background: var(--proj-bg); border-color: var(--proj-br); color: var(--proj); }
+.validated-superseded { background: var(--broken-bg); border-color: var(--broken-br); color: var(--broken); }
+.validated-broken { background: var(--broken-bg); border-color: var(--broken-br); color: var(--broken); }
+.validated-note-text { font-size: 13px; color: var(--text); line-height: 1.55; margin-bottom: 14px; }
+.validated-footer { font-size: 10px; color: var(--dim); font-style: italic; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
 </style>
 </head>
 <body>
@@ -607,11 +648,13 @@ body {
     <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
     <button class="tab-btn" onclick="switchTab('connections')">Connections</button>
     <button class="tab-btn" onclick="switchTab('template')">Template</button>
+    <button class="tab-btn" onclick="switchTab('validated')">Validated</button>
   </div>
   <div class="panel-body">
     <div id="tab-overview" class="tab-content active"></div>
     <div id="tab-connections" class="tab-content"></div>
     <div id="tab-template" class="tab-content"></div>
+    <div id="tab-validated" class="tab-content"></div>
   </div>
 </div>
 
@@ -642,7 +685,10 @@ const DB = {
     location: '.claude/hooks/session-startup.sh',
     calls: [], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Drop in as-is. Change the session-state directory path if your project layout differs.'
+    templateNote: 'Drop in as-is. Change the session-state directory path if your project layout differs.',
+    verdictWhy: 'Keep — generic session initialization that works for any project. Path is now relative (./scripts/) so it\'s fully cross-platform.',
+    example: 'Session starts → hook fires → writes \'/home/user/foodVibe1.0/.claude/sessions/2026-05-23-my-feature/session.md\' to .session-state-path → /checkpoint and /ship know exactly where to save progress for this session.',
+    validated: { status: 'current', note: 'Standard session initialization pattern. No native equivalent in Claude Code. The PreToolUse/SessionStart hook system is well-documented and stable.' }
   },
   'hook-branch-guard': {
     id: 'hook-branch-guard', type: 'hook',
@@ -654,7 +700,10 @@ const DB = {
     location: '.claude/hooks/branch-guard.sh',
     calls: [], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Essential for any repo that enforces branch protection. Update the branch name pattern if your convention differs.'
+    templateNote: 'Essential for any repo that enforces branch protection. Update the branch name pattern if your convention differs.',
+    verdictWhy: 'Keep — protects main branch from accidental AI writes. Essential safety mechanism with no native Claude Code equivalent. Recently fixed from Windows-only absolute path.',
+    example: 'You\'re on main and Claude tries to edit RecipeService.ts → hook intercepts → blocks the edit → auto-creates branch \'feat/session-20260523\' → edit proceeds safely → main is never touched.',
+    validated: { status: 'current', note: 'No native branch protection in Claude Code hooks. This custom script is the correct approach — Claude Code has no built-in write-guard for main.' }
   },
   'hook-context-monitor': {
     id: 'hook-context-monitor', type: 'hook',
@@ -666,7 +715,10 @@ const DB = {
     location: '.claude/hooks/context-monitor.py',
     calls: [], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Universally useful. Adjust threshold percentages at the top of the script to match your preferred warning points.'
+    templateNote: 'Universally useful. Adjust threshold percentages at the top of the script to match your preferred warning points.',
+    verdictWhy: 'Keep — fills a real gap since Claude Code exposes no native token usage to hooks. Fires after every tool call, giving you live context health.',
+    example: 'You\'re 70% through a large refactor — hook fires after a Read call → prints "Context at 71% — checkpoint soon" → you run /checkpoint before hitting the 90% limit.',
+    validated: { status: 'current', note: 'Claude Code exposes no native token counter to hook scripts. This PostToolUse script fills that gap. No OSS equivalent exists that specifically targets Claude Code context monitoring.' }
   },
   'hook-session-manifest': {
     id: 'hook-session-manifest', type: 'hook',
@@ -678,7 +730,10 @@ const DB = {
     location: '.claude/hooks/session-manifest-hook.py',
     calls: [], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Pair with end-of-session-agent to get automatic file-change summaries in session briefs.'
+    templateNote: 'Pair with end-of-session-agent to get automatic file-change summaries in session briefs.',
+    verdictWhy: 'Keep — tracks every file edited per session. No native equivalent. Powers the "files changed" section of the handoff report at /ship time.',
+    example: 'You edit RecipeService.ts, add ai-product-modal.component.ts, and modify app.component.html → manifest records all 3 with timestamps → /ship uses the manifest to generate "Files changed: 3" in the handoff doc.',
+    validated: { status: 'current', note: 'Claude Code has no native session file tracking. This PostToolUse hook fills the gap. Husky + lint-staged (5M weekly downloads) tracks files at commit time, not real-time during a session.' }
   },
   'hook-pre-compact': {
     id: 'hook-pre-compact', type: 'hook',
@@ -690,7 +745,10 @@ const DB = {
     location: '.claude/hooks/pre-compact-reminder.sh',
     calls: [], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Useful for long sessions. Works as-is with any session-state approach that uses a checkpoint skill.'
+    templateNote: 'Useful for long sessions. Works as-is with any session-state approach that uses a checkpoint skill.',
+    verdictWhy: 'Keep — the only way to inject a reminder before context is compressed. Without this, you could lose track of in-progress work during a long session.',
+    example: 'Mid-session, Claude auto-summarises 40 turns of context → hook fires just before compression → emits "CHECKPOINT NOW — save in-progress state" → you run /checkpoint → work state is preserved across the boundary.',
+    validated: { status: 'current', note: 'PreCompact is a Claude Code-specific hook event with no OSS equivalent. The pattern is sound and the hook is stable as of 2026.' }
   },
   'hook-handoff-check': {
     id: 'hook-handoff-check', type: 'hook',
@@ -702,7 +760,10 @@ const DB = {
     location: '.claude/hooks/handoff-check.sh',
     calls: ['cmd-ship'], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Keep as-is. Prevents losing work when sessions end unexpectedly.'
+    templateNote: 'Keep as-is. Prevents losing work when sessions end unexpectedly.',
+    verdictWhy: 'Keep — Stop is the right hook event for this. Without it, Claude finishes and exits silently even if uncommitted changes exist.',
+    example: 'Session ends after implementing AI modal feature → hook fires → git status shows 4 modified files → warning emitted → you run /ship → all changes committed before the context disappears.',
+    validated: { status: 'current', note: 'Stop hook event is Claude Code-specific. Husky pre-push hook serves a similar intent at git level. Both are complementary — this hook catches the session end, Husky catches the push.' }
   },
 
   /* COMMANDS */
@@ -716,7 +777,10 @@ const DB = {
     location: '.claude/commands/ship.md',
     calls: ['skill-end-session'], calledBy: ['hook-handoff-check'],
     templateVerdict: 'keep',
-    templateNote: 'Keep the 4-phase structure. Swap ng build for your own build gate command.'
+    templateNote: 'Keep the 4-phase structure. Swap ng build for your own build gate command.',
+    verdictWhy: 'Keep — the 4-phase close (brief → build → commit → archive) prevents the most common session anti-pattern: losing uncommitted work when context expires.',
+    example: 'Feature done → you type /ship → brief is validated → ng build passes → git-agent commits and pushes → todos archived → handoff doc written → session closes cleanly.',
+    validated: { status: 'current', note: 'Session-end workflows are increasingly standard in AI coding. No direct OSS equivalent, but the phase-gate pattern (validate → build → commit) is used in CrewAI and LangGraph task completion flows.' }
   },
   'cmd-brief': {
     id: 'cmd-brief', type: 'cmd',
@@ -728,7 +792,10 @@ const DB = {
     location: '.claude/commands/brief.md',
     calls: [], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Adapt the brief template sections to your project\'s conventions.'
+    templateNote: 'Adapt the brief template sections to your project\'s conventions.',
+    verdictWhy: 'Keep — creates a shared context document that survives session boundaries. Without it, you lose the thread when a session expires mid-task.',
+    example: 'You start a new session on an in-progress feature → /brief → Claude reads the session-state file and git log → produces a 1-page summary → you\'re back up to speed in 30 seconds.',
+    validated: { status: 'current', note: 'Session state management is a known challenge with AI coding assistants. LangGraph uses similar checkpointing for multi-turn agent state. This command implements a well-established pattern.' }
   },
   'cmd-cleanup': {
     id: 'cmd-cleanup', type: 'cmd',
@@ -740,7 +807,10 @@ const DB = {
     location: '.claude/commands/cleanup.md',
     calls: ['skill-worktree-end'], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Essential companion to worktree-setup. Keep if you use parallel worktrees; skip otherwise.'
+    templateNote: 'Essential companion to worktree-setup. Keep if you use parallel worktrees; skip otherwise.',
+    verdictWhy: 'Keep — worktree management prevents the problem of abandoned parallel branches accumulating and creating merge confusion.',
+    example: 'You had 3 parallel worktrees for testing different approaches → /cleanup → all 3 worktrees removed → branches merged or discarded → .worktrees/ directory emptied.',
+    validated: { status: 'current', note: 'git worktree is a standard git feature (since 2.5). Claude Code added native isolation:worktree support in v2.1.49 (Feb 2026) for Agent definitions. This command wraps the manual teardown workflow.' }
   },
   'cmd-feat': {
     id: 'cmd-feat', type: 'cmd',
@@ -752,7 +822,10 @@ const DB = {
     location: '.claude/commands/feat.md',
     calls: ['cmd-plan-impl', 'cmd-execute-it', 'std-angular', 'std-domain'], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Replace std-angular and std-domain with your own standards files for non-Angular projects.'
+    templateNote: 'Replace std-angular and std-domain with your own standards files for non-Angular projects.',
+    verdictWhy: 'Keep — the plan-then-execute gate prevents the most common AI mistake: diving straight into implementation without verifying the approach.',
+    example: 'You type "/feat add dark mode toggle" → standards files loaded → plan generated → you approve → team-leader coordinates CSS + component + settings implementation.',
+    validated: { status: 'current', note: 'Plan-gate-then-execute is the dominant pattern in production AI coding workflows. CrewAI (26k★) and LangGraph (>10k★) both implement similar plan-approve-execute sequences. This implementation is Claude Code-specific but the pattern is universal.' }
   },
   'cmd-fix': {
     id: 'cmd-fix', type: 'cmd',
@@ -764,7 +837,10 @@ const DB = {
     location: '.claude/commands/fix.md',
     calls: ['skill-elegant-fix'], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Works for any codebase. Elegant-fix skill may need tailoring to your language idioms.'
+    templateNote: 'Works for any codebase. Elegant-fix skill may need tailoring to your language idioms.',
+    verdictWhy: 'Keep — structured investigation before fix prevents surface-level patches that miss root causes. The elegant-fix phase ensures the solution is clean, not just correct.',
+    example: 'Product form validation failing → /fix → investigate phase locates the reactive form binding error → elegant-fix rewrites the validator cleanly → no more workaround comments in the code.',
+    validated: { status: 'current', note: 'Root-cause-first debugging is standard practice. The investigate-then-fix flow is implemented similarly in Sweep (GitHub Issues AI) and Devin workflows. No direct OSS equivalent.' }
   },
   'cmd-plan': {
     id: 'cmd-plan', type: 'cmd',
@@ -776,7 +852,10 @@ const DB = {
     location: '.claude/commands/plan.md',
     calls: ['agent-software-architect', 'agent-product-manager'], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Adapt HLD and PRD templates in the commands file to your project\'s documentation standards.'
+    templateNote: 'Adapt HLD and PRD templates in the commands file to your project\'s documentation standards.',
+    verdictWhy: 'Keep — separating design from implementation prevents the common AI mistake of over-engineering based on a misunderstood requirement.',
+    example: 'You need a new inventory bulk-edit feature → /plan → software-architect writes HLD with 8 sub-tasks → product-manager adds acceptance criteria → you review and approve before any code is written.',
+    validated: { status: 'current', note: 'Design-before-code is fundamental. CrewAI (26k★), LangGraph, and Microsoft AutoGen all have planning phases. This implementation leverages Claude Code native agents.' }
   },
   'cmd-refactor': {
     id: 'cmd-refactor', type: 'cmd',
@@ -788,7 +867,10 @@ const DB = {
     location: '.claude/commands/refactor.md',
     calls: ['agent-team-leader', 'skill-cssLayer', 'skill-techdebt'], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Replace cssLayer with your own CSS/style enforcement skill if not using SCSS layers.'
+    templateNote: 'Replace cssLayer with your own CSS/style enforcement skill if not using SCSS layers.',
+    verdictWhy: 'Keep — unguided refactors produce regressions. The techdebt scan + CSS enforcement + approval gate ensures refactors improve quality, not just change structure.',
+    example: 'The inventory page CSS has grown unwieldy → /refactor → techdebt identifies 3 duplicate rule sets → cssLayer enforces the 5-layer architecture → team-leader orchestrates the cleanup.',
+    validated: { status: 'current', note: 'Refactor-with-validation is the safe approach. Semgrep (20k★) and SonarQube Community can provide pre-refactor debt analysis as OSS alternatives for the scanning phase.' }
   },
   'cmd-security': {
     id: 'cmd-security', type: 'cmd',
@@ -1565,8 +1647,8 @@ function panelBack() {
 
 function switchTab(tab) {
   activeTab = tab
+  const tabs = ['overview','connections','template','validated']
   document.querySelectorAll('.tab-btn').forEach((b, i) => {
-    const tabs = ['overview','connections','template']
     b.classList.toggle('active', tabs[i] === tab)
   })
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'))
@@ -1592,6 +1674,8 @@ function renderPanel(comp) {
   activeTab = 'overview'
 
   // Overview tab
+  const typeColorMap = { hook:'var(--hook-c)', skill:'var(--skill-c)', cmd:'var(--cmd-c)', agent:'var(--agent-c)', mcp:'var(--mcp-c)', std:'var(--std-c)' }
+  const typeColor = typeColorMap[comp.type] || 'var(--cmd-c)'
   document.getElementById('tab-overview').innerHTML = `
     <div class="field-label">Description</div>
     <div class="field-value">${comp.long}</div>
@@ -1599,6 +1683,7 @@ function renderPanel(comp) {
     <div class="field-value">${comp.trigger}</div>
     <div class="field-label">File Location</div>
     <div class="field-value mono">${comp.location}</div>
+    ${comp.example ? `<div class="field-label">Example</div><div class="example-box" style="border-left-color:${typeColor}">${comp.example}</div>` : ''}
   `
 
   // Connections tab
@@ -1627,9 +1712,25 @@ function renderPanel(comp) {
   const tv = comp.templateVerdict || 'keep'
   const tvLabels = { keep: '✓ Keep for new projects', rewrite: '↻ Rewrite for new projects', project: '⊕ Project-specific — replace', skip: '· Skip for new projects' }
   document.getElementById('tab-template').innerHTML = `
+    ${comp.verdictWhy ? `<div class="field-label">Why this verdict</div><div class="verdict-why">${comp.verdictWhy}</div>` : ''}
     <div class="tmpl-verdict ${tv}">${tvLabels[tv] || tv}</div>
     <div class="field-label">What to do for a new project</div>
     <div class="field-value">${comp.templateNote}</div>
+  `
+
+  // Validated tab
+  const vLabels = {
+    current: '✓ Up to date',
+    review: '⚡ Worth reviewing',
+    redundant: '⊕ Redundant',
+    superseded: '↑ Superseded',
+    broken: '✗ Broken'
+  }
+  const v = comp.validated || { status: 'current', note: '' }
+  document.getElementById('tab-validated').innerHTML = `
+    <span class="validated-badge validated-${v.status}">${vLabels[v.status] || v.status}</span>
+    <div class="validated-note-text">${v.note}</div>
+    <div class="validated-footer">Based on Claude Code docs + OSS community research, May 2026</div>
   `
 }
 

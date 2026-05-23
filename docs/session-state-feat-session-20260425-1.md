@@ -1,44 +1,177 @@
-# Session State — 2026-05-23 AI Workflow Map + Audit
-> Previous session content preserved below the divider.
+# Session State — 2026-05-23 AI Workflow Map enrichment (verdictWhy + example + validated)
 
 ## Branch
 `claude/document-ai-workflow-ySGoG`
 
-## What happened this session
+## Task
+Enriching `/home/user/foodVibe1.0/ai-workflow-map.html` with 3 new fields per DB component:
+- `verdictWhy` — why this verdict was assigned
+- `example` — concrete real-world usage scenario
+- `validated` — `{ status, note }` based on 2026 Claude Code research
 
-### 1. Fixed broken hooks ✅ (committed `34f4e4e`)
-- All hook paths in `.claude/settings.json` hardcoded to `C:/foodCo/foodVibe1.0/` — fixed to relative `./scripts/`
-- Removed PowerShell `tool-failure-hook.ps1` (Windows-only binary)
+Also updating panel rendering:
+1. Overview tab: show `example` in styled box below description
+2. Template tab: show `verdictWhy` prominently before templateNote
+3. New 4th "Validated" tab with status badge + note
 
-### 2. Created `ai-workflow-map.html` — static infographic ✅ (committed `f21e824`)
+## Progress
 
-### 3. Rebuilt as interactive SPA ✅ (committed `5a80b29`)
-- 1,806 lines. 66 components in DB. Clickable detail panel, 3 tabs, global search, skills filter.
+### DB fields added so far (Edit operations applied):
+- [x] `hook-session-startup` — all 3 fields added
+- [x] `hook-branch-guard` — all 3 fields added
+- [ ] `hook-context-monitor` — NOT YET
+- [ ] `hook-session-manifest` — NOT YET
+- [ ] `hook-pre-compact` — NOT YET
+- [ ] `hook-handoff-check` — NOT YET
+- [ ] All commands (21 items) — NOT YET
+- [ ] All skills universal (13 items) — NOT YET
+- [ ] All skills project (6 items) — NOT YET
+- [ ] All agents (10 items) — NOT YET
+- [ ] All MCP (4 items) — NOT YET
+- [ ] All standards (6 items) — NOT YET
 
-### 4. In-flight: HTML enrichment (agent `ae463491df3685ec1` running)
-Adding to each component: `verdictWhy`, `example`, `validated` fields + new 4th "Validated" tab.
+### Panel rendering — NOT YET updated
 
-### 5. OSS research completed (NOT YET in HTML — needs second pass after agent finishes)
-Key findings to add to `validated.note` fields:
-- **Mem0** (47k★) — best OSS memory alternative to MemPalace (vector+graph+KV). Add to `mcp-mempalace`, `skill-mp-search`
-- **Zep** — temporal knowledge graph memory, better for entity/time reasoning. Same components.
-- **Husky + lint-staged** (5M weekly downloads) — industry standard for git hooks. Add to `hook-branch-guard`, `hook-session-manifest`, pre-commit scripts
-- **Lefthook** — faster all-in-one Husky alternative
-- **Semgrep** — fast OSS SAST (10s CI scans). Add to `agent-security-officer`, `skill-auth-logging`
-- **SonarQube Community** — code quality + tech debt tracking. Add to `skill-techdebt`, `cmd-nightly-audit`
-- **Commitlint + semantic-release** — automates commit conventions + versioning. Add to `agent-git`, `std-git`
-- **CrewAI** (active dev, lowest learning curve) — OSS multi-agent alternative. Add to `agent-team-leader`
-- **LangGraph** — best for stateful/complex multi-agent flows. Same component.
-- **Microsoft Agent Framework v1.0** (April 2026, AutoGen merger) — production-grade alternative. Same.
-- **Native CC `--worktree` flag** (Feb 2026) — confirmed: `skill-worktree-setup` and `skill-worktree-end` are partially redundant
+## Exact data to use
+All data is in the user's original request message. Key patterns:
 
-## Next steps
-1. Wait for agent to finish → commit + push HTML (has verdictWhy + example + validated)
-2. Second agent pass: enrich `validated.note` with the OSS alternatives listed above
-3. Commit + push final version
+### verdictWhy pattern per hook:
+- hook-context-monitor: "Keep — fills a real gap since Claude Code exposes no native token usage to hooks. Fires after every tool call, giving you live context health."
+- hook-session-manifest: "Keep — tracks every file edited per session. No native equivalent. Powers the 'files changed' section of the handoff report at /ship time."
+- hook-pre-compact: "Keep — the only way to inject a reminder before context is compressed. Without this, you could lose track of in-progress work during a long session."
+- hook-handoff-check: "Keep — Stop is the right hook event for this. Without it, Claude finishes and exits silently even if uncommitted changes exist."
+
+### validated.status values:
+- All hooks: 'current'
+- All commands: 'current'
+- skill-mp-search: 'review'
+- skill-worktree-setup: 'review'
+- skill-worktree-end: 'review'
+- All other skills: 'current'
+- All agents: 'current'
+- mcp-mempalace: 'review'
+- mcp-github-cc: 'broken'
+- mcp-playwright: 'current'
+- mcp-github-cursor: 'current'
+- All standards: 'current'
+
+## Panel rendering changes needed
+
+### 1. Add CSS for example box (in <style>):
+```css
+.example-box {
+  background: rgba(255,255,255,0.03);
+  border-left: 3px solid var(--type-color, var(--cmd-c));
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  font-style: italic;
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  margin-bottom: 14px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.verdict-why {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.55;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.03);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+}
+.validated-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid;
+  margin-bottom: 14px;
+}
+.validated-current { background: var(--keep-bg); border-color: var(--keep-br); color: var(--keep); }
+.validated-review { background: var(--rewrite-bg); border-color: var(--rewrite-br); color: var(--rewrite); }
+.validated-redundant { background: var(--proj-bg); border-color: var(--proj-br); color: var(--proj); }
+.validated-superseded { background: var(--broken-bg); border-color: var(--broken-br); color: var(--broken); }
+.validated-broken { background: var(--broken-bg); border-color: var(--broken-br); color: var(--broken); }
+.validated-note-text { font-size: 13px; color: var(--text); line-height: 1.55; margin-bottom: 14px; }
+.validated-footer { font-size: 10px; color: var(--dim); font-style: italic; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
+```
+
+### 2. Add 4th tab button in panel HTML:
+Change:
+```html
+<button class="tab-btn" onclick="switchTab('template')">Template</button>
+```
+To:
+```html
+<button class="tab-btn" onclick="switchTab('template')">Template</button>
+<button class="tab-btn" onclick="switchTab('validated')">Validated</button>
+```
+
+### 3. Add 4th tab content div:
+After `<div id="tab-template" class="tab-content"></div>` add:
+`<div id="tab-validated" class="tab-content"></div>`
+
+### 4. Update switchTab() to handle 4 tabs:
+```js
+function switchTab(tab) {
+  activeTab = tab
+  const tabs = ['overview','connections','template','validated']
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', tabs[i] === tab)
+  })
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'))
+  document.getElementById('tab-' + tab).classList.add('active')
+}
+```
+
+### 5. Update renderPanel() — Overview tab — add example box after location:
+```js
+const typeColorMap = { hook:'var(--hook-c)', skill:'var(--skill-c)', cmd:'var(--cmd-c)', agent:'var(--agent-c)', mcp:'var(--mcp-c)', std:'var(--std-c)' }
+const typeColor = typeColorMap[comp.type] || 'var(--cmd-c)'
+// in the overview innerHTML, after the location field:
+${comp.example ? `<div class="field-label">Example</div><div class="example-box" style="border-left-color:${typeColor}">${comp.example}</div>` : ''}
+```
+
+### 6. Update renderPanel() — Template tab — add verdictWhy before templateNote:
+```js
+document.getElementById('tab-template').innerHTML = `
+  ${comp.verdictWhy ? `<div class="field-label">Why this verdict</div><div class="verdict-why">${comp.verdictWhy}</div>` : ''}
+  <div class="tmpl-verdict ${tv}">${tvLabels[tv] || tv}</div>
+  <div class="field-label">What to do for a new project</div>
+  <div class="field-value">${comp.templateNote}</div>
+`
+```
+
+### 7. Add validated tab rendering in renderPanel():
+```js
+const vLabels = {
+  current: '✓ Up to date',
+  review: '⚡ Worth reviewing',
+  redundant: '⊕ Redundant',
+  superseded: '↑ Superseded',
+  broken: '✗ Broken'
+}
+const v = comp.validated || { status: 'current', note: '' }
+document.getElementById('tab-validated').innerHTML = `
+  <span class="validated-badge validated-${v.status}">${vLabels[v.status] || v.status}</span>
+  <div class="validated-note-text">${v.note}</div>
+  <div class="validated-footer">Based on Claude Code docs as of May 2026</div>
+`
+```
+
+## Next session instructions
+1. Continue adding fields to remaining DB entries (hook-context-monitor onward)
+2. Apply all panel rendering changes listed above
+3. The file is at /home/user/foodVibe1.0/ai-workflow-map.html
+4. All exact data (verdictWhy, example, validated) is in the original user message in the conversation
 
 ---
-# Previous session state (2026-04-26):
+# Previous session state preserved below
+---
 # Session State — 2026-04-26 AI Phase 2 Products (execution + fixes)
 
 ## Branch
@@ -67,91 +200,3 @@ All 18 tasks completed and archived to `todo-archive.md`.
 - `inventory-product-list.component.ts` — sparkles HeroFab + openAiCreateModal()
 - `product-form.component.ts/.html` — providers, inject, openAiProductModal(), button
 - `quick-add-product-modal.component.ts/.html` — onAiFill(), AI icon button
-
----
-
-### Post-execution bug fixes (PARTIALLY COMPLETE — session ended mid-fix)
-
-**Bug 1: Routing — FIXED ✅**
-- `router.navigate(['/inventory', created._id])` → `router.navigate(['/inventory/edit', created._id])`
-- File: `inventory-product-list.component.ts`
-
-**Bug 2: Preview panel redesign — FIXED ✅**
-- Replaced static read-only preview with editable form panel
-- Editable: name, base_unit_ (select), yield_factor_, min_stock/expiry (pair), categories (chips+add), allergens (chips+add)
-- Methods added to component: setDraftField(), addCategory(), removeCategory(), addAllergen(), removeAllergen(), removePurchaseOption()
-
-**Bug 3: purchase_options_ blank unit rows — IN PROGRESS (session ended mid-fix)**
-
-Root cause: AI generated Hebrew unit symbols ('ק״ג', 'שקית') but UnitRegistry stores English canonical keys ('kg', 'gram'). CustomSelectComponent finds no match → blank row appears on product form after creation.
-
-Fixes applied so far:
-1. ✅ `inventory-product-list.component.ts` — `purchase_options_: []` (drop AI units from create payload)
-2. ✅ `server/routes/ai.js` — removed `purchase_options_` from PRODUCT_GENERATE_SYSTEM_PROMPT (AI no longer generates them)
-3. ✅ `ai-product-draft.model.ts` — removed `purchase_options_` field from AiProductDraft interface
-4. ✅ `server/routes/ai.js` PRODUCT_PATCH_SYSTEM_PROMPT — removed `purchase_options_` from allowed patch keys (duplicate line was replaced — but need to verify the edit landed correctly)
-
-**Still needed to complete Bug 3 fix:**
-- [ ] Remove `purchase_options_` references from `ai-product-modal.component.ts`:
-  - `removePurchaseOption()` method — can be deleted
-  - `diffEntries_()` computed — no purchase_options_ key to handle (already absent)
-- [ ] Remove purchase_options_ section from `ai-product-modal.component.html` draft editor (the `@if (draft_()!.purchase_options_.length)` block)
-- [ ] Remove `purchase_options_` from `ProductAiFlowService.applyDraft()` and `applyPatch()` current snapshot build — already absent in service so this may be fine
-- [ ] Verify `ng build` passes with the model change (AiProductDraft no longer has purchase_options_)
-- [ ] Check if `openAiCreateModal` payload TypeScript complains (removed purchase_options_ from Omit<Product,'_id'> payload — it's already `purchase_options_: []` so that's fine)
-
-**Bug 4: buy_price_global_ not filled by AI**
-- This is BY DESIGN — AI does not generate prices (brief says "AI does not set supplier prices")
-- No fix needed; user expectation mismatch
-- Optionally: add a note in the modal footer "מחיר יש להגדיר ידנית"
-
----
-
-## Next session: complete the purchase_options_ cleanup
-
-1. Read `ai-product-modal.component.ts` — delete `removePurchaseOption()` method
-2. Read `ai-product-modal.component.html` — remove the purchase_options_ display block in draft editor  
-3. Read `server/routes/ai.js` around PRODUCT_PATCH_SYSTEM_PROMPT to verify the edit that was partially applied landed correctly
-4. Run `ng build` — must pass 0 errors
-5. Commit all changes
-
-## Key technical facts
-
-**AiProductDraft (updated):**
-```typescript
-export interface AiProductDraft {
-  name_hebrew: string
-  base_unit_: string          // English canonical: gram|ml|kg|liter|unit|...
-  categories_: string[]       // Hebrew names
-  allergens_: string[]        // Hebrew names
-  yield_factor_: number       // 0-1
-  min_stock_level_: number
-  expiry_days_default_: number
-  // purchase_options_ REMOVED — unit symbols incompatible with UnitRegistry
-}
-```
-
-**SYSTEM_UNITS** (always in UnitRegistry, never need registration):
-`kg, liter, gram, ml, unit, dish, tablespoon, teaspoon, cup, pinch, portion`
-
-**ProductAiFlowService form control names:**
-- `productName` = name_hebrew (not `name_hebrew` — form uses `productName`)
-- `base_unit_`, `categories_`, `allergens_`, `yield_factor_`, `min_stock_level_`, `expiry_days_default_`
-
-**Inventory edit route:** `/inventory/edit/:id` (NOT `/inventory/:id`)
-
-**Uncommitted files (all need one commit):**
-- server/routes/ai.js
-- src/app/core/models/ai-product-draft.model.ts
-- src/app/core/services/gemini.service.ts
-- src/app/pages/inventory/services/product-ai-flow.service.ts (NEW)
-- src/app/shared/ai-product-modal/* (4 NEW files)
-- src/app/appRoot/app.component.ts/.html
-- public/assets/data/dictionary.json
-- src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts
-- src/app/pages/inventory/components/product-form/product-form.component.ts/.html
-- src/app/shared/quick-add-product-modal/quick-add-product-modal.component.ts/.html
-- src/app/shared/ai-menu-modal/ai-menu-modal.component.ts (escape key fix from prev session)
-
-## Next session start
-Say `continue` to finish the purchase_options_ cleanup, run build, and commit.
