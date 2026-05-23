@@ -1,3 +1,44 @@
+# Session State — 2026-05-23 AI Workflow Map + Audit
+> Previous session content preserved below the divider.
+
+## Branch
+`claude/document-ai-workflow-ySGoG`
+
+## What happened this session
+
+### 1. Fixed broken hooks ✅ (committed `34f4e4e`)
+- All hook paths in `.claude/settings.json` hardcoded to `C:/foodCo/foodVibe1.0/` — fixed to relative `./scripts/`
+- Removed PowerShell `tool-failure-hook.ps1` (Windows-only binary)
+
+### 2. Created `ai-workflow-map.html` — static infographic ✅ (committed `f21e824`)
+
+### 3. Rebuilt as interactive SPA ✅ (committed `5a80b29`)
+- 1,806 lines. 66 components in DB. Clickable detail panel, 3 tabs, global search, skills filter.
+
+### 4. In-flight: HTML enrichment (agent `ae463491df3685ec1` running)
+Adding to each component: `verdictWhy`, `example`, `validated` fields + new 4th "Validated" tab.
+
+### 5. OSS research completed (NOT YET in HTML — needs second pass after agent finishes)
+Key findings to add to `validated.note` fields:
+- **Mem0** (47k★) — best OSS memory alternative to MemPalace (vector+graph+KV). Add to `mcp-mempalace`, `skill-mp-search`
+- **Zep** — temporal knowledge graph memory, better for entity/time reasoning. Same components.
+- **Husky + lint-staged** (5M weekly downloads) — industry standard for git hooks. Add to `hook-branch-guard`, `hook-session-manifest`, pre-commit scripts
+- **Lefthook** — faster all-in-one Husky alternative
+- **Semgrep** — fast OSS SAST (10s CI scans). Add to `agent-security-officer`, `skill-auth-logging`
+- **SonarQube Community** — code quality + tech debt tracking. Add to `skill-techdebt`, `cmd-nightly-audit`
+- **Commitlint + semantic-release** — automates commit conventions + versioning. Add to `agent-git`, `std-git`
+- **CrewAI** (active dev, lowest learning curve) — OSS multi-agent alternative. Add to `agent-team-leader`
+- **LangGraph** — best for stateful/complex multi-agent flows. Same component.
+- **Microsoft Agent Framework v1.0** (April 2026, AutoGen merger) — production-grade alternative. Same.
+- **Native CC `--worktree` flag** (Feb 2026) — confirmed: `skill-worktree-setup` and `skill-worktree-end` are partially redundant
+
+## Next steps
+1. Wait for agent to finish → commit + push HTML (has verdictWhy + example + validated)
+2. Second agent pass: enrich `validated.note` with the OSS alternatives listed above
+3. Commit + push final version
+
+---
+# Previous session state (2026-04-26):
 # Session State — 2026-04-26 AI Phase 2 Products (execution + fixes)
 
 ## Branch
