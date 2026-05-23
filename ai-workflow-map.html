@@ -894,7 +894,10 @@ const DB = {
     location: '.claude/commands/new-feature.md',
     calls: ['cmd-plan-impl'], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Works as-is. Modify the scoping questions in the command file to match your domain.'
+    templateNote: 'Works as-is. Modify the scoping questions in the command file to match your domain.',
+    verdictWhy: 'Keep — scoping questions prevent ambiguous features from being built incorrectly. The brief-first approach catches misunderstandings early.',
+    example: 'You have a vague idea: "add analytics" → /new-feature → guided scoping: what events? which views? → brief produced → passed to /plan-implementation → well-scoped feature built.',
+    validated: { status: 'current', note: 'Feature scoping before implementation is standard product engineering practice. No direct OSS equivalent for the conversational scoping flow.' }
   },
   'cmd-plan-impl': {
     id: 'cmd-plan-impl', type: 'cmd',
@@ -906,7 +909,10 @@ const DB = {
     location: '.claude/commands/plan-implementation.md',
     calls: ['agent-software-architect'], calledBy: ['cmd-feat', 'cmd-new-feature', 'cmd-auto-solve'],
     templateVerdict: 'keep',
-    templateNote: 'The approval gate is the key value. Keep the two-phase structure in any project.'
+    templateNote: 'The approval gate is the key value. Keep the two-phase structure in any project.',
+    verdictWhy: 'Keep — the read-only first phase + explicit approval gate is the critical safety mechanism that prevents runaway autonomous implementation.',
+    example: 'Plan for 6 files approved → /plan-implementation → read-only scan produces numbered task list → you say "proceed" → only then does any code get written.',
+    validated: { status: 'current', note: 'Plan-gate approval is the standard pattern for safe autonomous coding. Used in Devin, Sweep, and GitHub Copilot Workspace. Claude Code\'s native implementation.' }
   },
   'cmd-execute-it': {
     id: 'cmd-execute-it', type: 'cmd',
@@ -918,7 +924,10 @@ const DB = {
     location: '.claude/commands/execute-it.md',
     calls: ['agent-team-leader'], calledBy: ['cmd-feat', 'cmd-auto-solve'],
     templateVerdict: 'keep',
-    templateNote: 'Requires team-leader agent. Adjust the build gate command (ng build) for your stack.'
+    templateNote: 'Requires team-leader agent. Adjust the build gate command (ng build) for your stack.',
+    verdictWhy: 'Keep — autonomous execution after plan approval is the productivity multiplier. Without it, each sub-task needs individual instruction.',
+    example: '8-task plan approved → /execute-it → team-leader assigns 4 tasks to sub-agents in parallel → build gate validates after each stream → all 8 tasks complete without manual intervention.',
+    validated: { status: 'current', note: 'Autonomous multi-task execution is the core value of AI coding agents. CrewAI (26k★) and LangGraph implement similar orchestration. Claude Code Agent Teams (EXPERIMENTAL) underpins this.' }
   },
   'cmd-auto-solve': {
     id: 'cmd-auto-solve', type: 'cmd',
@@ -930,7 +939,10 @@ const DB = {
     location: '.claude/commands/auto-solve.md',
     calls: ['cmd-plan-impl', 'cmd-execute-it'], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Use sparingly on new projects until you trust the planning quality. The approval gate in /plan-implementation is bypassed.'
+    templateNote: 'Use sparingly on new projects until you trust the planning quality. The approval gate in /plan-implementation is bypassed.',
+    verdictWhy: 'Keep — for well-scoped trusted tasks, removing the approval gate saves significant time. The plan is still generated and stored for audit.',
+    example: 'Need to add a "copy to clipboard" button to 5 components — well-understood task → /auto-solve → plan generated → execution begins immediately → done in 3 minutes.',
+    validated: { status: 'current', note: 'Auto-mode (no approval gate) is appropriate for low-risk well-scoped tasks. Standard in all autonomous coding agents. Use with judgment.' }
   },
   'cmd-nightly-audit': {
     id: 'cmd-nightly-audit', type: 'cmd',
@@ -942,7 +954,10 @@ const DB = {
     location: '.claude/commands/nightly-audit.md',
     calls: ['skill-nightly-audit'], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Configure the 6 audit categories and auto-fix rules in the nightly-audit skill file.'
+    templateNote: 'Configure the 6 audit categories and auto-fix rules in the nightly-audit skill file.',
+    verdictWhy: 'Keep — autonomous nightly audits catch debt before it compounds. The 6-category taxonomy prevents the most common code quality regressions.',
+    example: 'Overnight audit runs → finds 3 unused imports, 1 stale TODO, 2 CSS violations → auto-fixes safe items → commits to audit/2026-05-23 branch → you review findings in the morning.',
+    validated: { status: 'current', note: 'Nightly code quality scans are well-established. Semgrep (20k★) with CI/CD scheduling, ESLint scheduled, SonarQube Community are proven OSS alternatives running in CI. This runs in Claude Code sessions.' }
   },
   'cmd-audit-report': {
     id: 'cmd-audit-report', type: 'cmd',
@@ -954,7 +969,10 @@ const DB = {
     location: '.claude/commands/audit-report.md',
     calls: [], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Works as-is. Adjust the report directory path if your audit output location differs.'
+    templateNote: 'Works as-is. Adjust the report directory path if your audit output location differs.',
+    verdictWhy: 'Keep — reviewing audit findings without switching branches is a small but real quality-of-life improvement.',
+    example: 'Morning after a nightly audit → /audit-report → findings rendered in the current session → 2 critical issues flagged → you address them before starting the day\'s feature work.',
+    validated: { status: 'current', note: 'Report surfacing in the current context is a convenience feature. Equivalent to reading a markdown file, but the context-aware rendering is Claude Code-specific.' }
   },
   'cmd-mobile-audit': {
     id: 'cmd-mobile-audit', type: 'cmd',
@@ -966,7 +984,10 @@ const DB = {
     location: '.claude/commands/mobile-flow-audit.md',
     calls: ['agent-mobile-auditor'], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Update the 16 flow definitions in the agent file to match your application\'s routes and user journeys.'
+    templateNote: 'Update the 16 flow definitions in the agent file to match your application\'s routes and user journeys.',
+    verdictWhy: 'Keep — mobile regressions are easy to introduce and hard to catch manually. The 16-flow structured audit catches them consistently.',
+    example: 'After a layout refactor → /mobile-flow-audit → agent walks 16 flows at 375px → finds 3 touch target violations and 1 overflow in the recipe card → issues documented.',
+    validated: { status: 'current', note: 'Mobile viewport testing is essential. Playwright (73k★) is the leading OSS browser automation tool. The 16-flow structure is project-specific; the tooling is standard.' }
   },
   'cmd-render-audit': {
     id: 'cmd-render-audit', type: 'cmd',
@@ -978,7 +999,10 @@ const DB = {
     location: '.claude/commands/render-flow-audit.md',
     calls: ['agent-render-auditor'], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Set the deployment URL in the agent file. Works for any hosted web app, not just Render.com deployments.'
+    templateNote: 'Set the deployment URL in the agent file. Works for any hosted web app, not just Render.com deployments.',
+    verdictWhy: 'Keep — production bugs differ from local bugs. Live-deployment audits catch issues that local testing misses entirely.',
+    example: 'After deploying to Render → /render-flow-audit → agent walks the live URL → finds API returning 404 due to missing env var → caught before users hit it.',
+    validated: { status: 'current', note: 'Production smoke testing is essential. Playwright powers this. Similar to Vercel deployment protection checks and Checkly synthetic monitoring.' }
   },
   'cmd-reflect': {
     id: 'cmd-reflect', type: 'cmd',
@@ -990,7 +1014,10 @@ const DB = {
     location: '.claude/commands/reflect.md',
     calls: ['agent-reflect'], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Requires a tool-failure logging hook. The reflect-agent file contains the failure pattern taxonomy.'
+    templateNote: 'Requires a tool-failure logging hook. The reflect-agent file contains the failure pattern taxonomy.',
+    verdictWhy: 'Keep — tool failure patterns repeat across sessions. The reflect loop is the only mechanism for the AI workflow to improve over time.',
+    example: 'Claude Code failed to find the correct file path 3 times last week → /reflect → reflect-agent identifies the pattern → patches skill instructions → failures drop.',
+    validated: { status: 'current', note: 'Self-improvement loops for AI agents are an active research area. LangSmith (LangChain) provides failure logging and analysis for production AI systems. No direct OSS equivalent with this level of Claude Code integration.' }
   },
   'cmd-reflect-list': {
     id: 'cmd-reflect-list', type: 'cmd',
@@ -1002,7 +1029,10 @@ const DB = {
     location: '.claude/commands/reflect-list.md',
     calls: ['agent-reflect'], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Use in conjunction with /reflect for targeted skill improvement workflows.'
+    templateNote: 'Use in conjunction with /reflect for targeted skill improvement workflows.',
+    verdictWhy: 'Keep — batch reflection over a specific set of failures is more efficient than processing the full log every time.',
+    example: 'After a complex session with 8 tool failures → /reflect-list [ids] → reflect-agent processes just those 8 → targeted skill patches applied.',
+    validated: { status: 'current', note: 'Same rationale as /reflect. This variant adds targeted selection. Unique to this workflow system.' }
   },
   'cmd-sweep-todos': {
     id: 'cmd-sweep-todos', type: 'cmd',
@@ -1014,7 +1044,10 @@ const DB = {
     location: '.claude/commands/sweep-stale-todos.md',
     calls: [], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Adjust the staleness threshold and todo.md path in the command file.'
+    templateNote: 'Adjust the staleness threshold and todo.md path in the command file.',
+    verdictWhy: 'Keep — stale TODOs are invisible debt. Regular sweeps keep the backlog honest.',
+    example: 'After 3 weeks of dev → /sweep-stale-todos → removes 7 done items and 3 cancelled → todo.md shrinks from 24 to 14 active items → backlog is accurate again.',
+    validated: { status: 'current', note: 'TODO management is universal. Conventional Commits + GitHub Issues handle TODOs at other levels. This command handles the AI-session-specific markdown context.' }
   },
   'cmd-docs-refresh': {
     id: 'cmd-docs-refresh', type: 'cmd',
@@ -1026,7 +1059,10 @@ const DB = {
     location: '.claude/commands/docs-refresh.md',
     calls: ['skill-update-docs', 'skill-breadcrumb-nav'], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Update the list of auto-generated doc targets in the command file for your project\'s structure.'
+    templateNote: 'Update the list of auto-generated doc targets in the command file for your project\'s structure.',
+    verdictWhy: 'Keep — breadcrumb files are essential for agent efficiency. Without them, agents waste tokens on full tree scans every session.',
+    example: 'After adding 3 new feature modules → /docs-refresh → breadcrumb-navigator updates all breadcrumbs.md files → next agent finds new files instantly.',
+    validated: { status: 'current', note: 'Documentation auto-generation is standard: JSDoc, TypeDoc (7k★), Storybook (82k★). Breadcrumb files are a Claude Code-specific agent navigation pattern with no direct equivalent.' }
   },
   'cmd-recall': {
     id: 'cmd-recall', type: 'cmd',
@@ -1038,7 +1074,10 @@ const DB = {
     location: '.claude/commands/mp-search.md',
     calls: ['skill-mp-search'], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Requires the MemPalace MCP server to be configured and running.'
+    templateNote: 'Requires the MemPalace MCP server to be configured and running.',
+    verdictWhy: 'Keep — semantic search is the only practical way to surface relevant past decisions. Keyword search misses conceptually related content.',
+    example: 'Designing a new caching layer → /mp-search "caching strategy decisions" → MemPalace returns 3 relevant past decisions including the rationale for the current LocalStorage approach.',
+    validated: { status: 'current', note: 'Semantic memory for AI agents is a growing space. Mem0 (47k★ on GitHub) is the leading OSS alternative with RAG and memory management APIs. Zep (4k★) adds temporal knowledge graphs. MemPalace is a self-hosted equivalent.' }
   },
 
   /* SKILLS (UNIVERSAL) */
@@ -1052,7 +1091,10 @@ const DB = {
     location: '.claude/skills/cssLayer.md',
     calls: ['std-angular'], calledBy: ['cmd-refactor'],
     templateVerdict: 'rewrite',
-    templateNote: 'Rewrite the 5-group layer names and token tier definitions for your project\'s CSS architecture.'
+    templateNote: 'Rewrite the 5-group layer names and token tier definitions for your project\'s CSS architecture.',
+    verdictWhy: 'Rewrite — the 5-layer CSS architecture is FoodVibe-specific. The enforcement mechanism is universally valuable but layer names and token tiers must match your project.',
+    example: 'New component added → skill triggers → validates the .scss file uses @layer components → checks tokens are at the right tier → prevents style from bleeding into the utilities layer.',
+    validated: { status: 'current', note: 'CSS architecture enforcement is essential for maintainable codebases. Stylelint (15k★) with custom rules is the leading OSS alternative for CI-level CSS enforcement. This skill provides the AI-session-aware version.' }
   },
   'skill-techdebt': {
     id: 'skill-techdebt', type: 'skill',
@@ -1064,7 +1106,10 @@ const DB = {
     location: '.claude/skills/techdebt.md',
     calls: [], calledBy: ['cmd-refactor', 'agent-end-of-session'],
     templateVerdict: 'keep',
-    templateNote: 'Adjust the 6 violation categories and severity thresholds for your project\'s standards.'
+    templateNote: 'Adjust the 6 violation categories and severity thresholds for your project\'s standards.',
+    verdictWhy: 'Keep — the 6-category debt taxonomy covers the most common accumulation patterns. End-of-session scans catch debt while context is fresh.',
+    example: 'Session ends → techdebt skill runs → finds 2 stale TODOs, 1 dead function, 3 style violations → ranked debt register written → team-leader prioritises the critical item.',
+    validated: { status: 'current', note: 'Technical debt management is well-supported in OSS. SonarQube Community (8k★) provides full debt tracking. ESLint + custom rules handles style violations. Knip detects unused exports. These are CI tools; this skill runs in session context.' }
   },
   'skill-elegant-fix': {
     id: 'skill-elegant-fix', type: 'skill',
@@ -1076,7 +1121,10 @@ const DB = {
     location: '.claude/skills/elegant-fix.md',
     calls: [], calledBy: ['cmd-fix'],
     templateVerdict: 'keep',
-    templateNote: 'Works for any language/framework. The "idiomatic" definition comes from the loaded standards files.'
+    templateNote: 'Works for any language/framework. The "idiomatic" definition comes from the loaded standards files.',
+    verdictWhy: 'Keep — working-but-hacky fixes are the root cause of most debt accumulation. The dedicated "make it clean" phase prevents fast fixes from becoming permanent technical debt.',
+    example: 'Bug fixed with a bandaid → elegant-fix phase → query builder restructured properly → no more workaround comment in the code.',
+    validated: { status: 'current', note: 'Code quality enforcement after fixes is universal best practice. SonarQube\'s technical debt remediation suggestions are the closest OSS parallel. No direct OSS equivalent for the post-fix refine step.' }
   },
   'skill-save-plan': {
     id: 'skill-save-plan', type: 'skill',
@@ -1088,7 +1136,10 @@ const DB = {
     location: '.claude/skills/save-plan.md',
     calls: [], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Change the ledger format and numbering scheme in the skill file if your plan directory structure differs.'
+    templateNote: 'Change the ledger format and numbering scheme in the skill file if your plan directory structure differs.',
+    verdictWhy: 'Keep — plan numbering and ledger sync prevent plan duplication across sessions. Without it, plans get overwritten or numbered inconsistently.',
+    example: 'You design a plan for the AI product modal → say "save the plan" → skill reads ledger, assigns plan-287 → writes plans/plan-287.md with full metadata → synced to ledger.',
+    validated: { status: 'current', note: 'Plan management in AI workflows is emerging. LangGraph checkpointing and CrewAI task delegation provide similar state persistence. This is a lightweight file-based implementation suited to Claude Code\'s architecture.' }
   },
   'skill-breadcrumb-nav': {
     id: 'skill-breadcrumb-nav', type: 'skill',
@@ -1100,7 +1151,10 @@ const DB = {
     location: '.claude/skills/breadcrumb-navigator.md',
     calls: [], calledBy: ['cmd-docs-refresh', 'skill-update-docs'],
     templateVerdict: 'keep',
-    templateNote: 'Configure the directory depth and which paths to exclude in the skill file.'
+    templateNote: 'Configure the directory depth and which paths to exclude in the skill file.',
+    verdictWhy: 'Keep — breadcrumb files cut agent file-discovery time dramatically. Without them, agents scan the full tree on every session start, wasting tokens.',
+    example: 'New features directory created → skill runs → breadcrumbs.md generated with auth/, inventory/, shared/ descriptions → next agent finds files in 1 lookup.',
+    validated: { status: 'current', note: 'Directory navigation aids are common (VS Code breadcrumbs, auto-generated READMEs). For AI agents specifically this pattern is a known effective technique. No direct OSS equivalent for the AI-agent-optimised format.' }
   },
   'skill-context-mgmt': {
     id: 'skill-context-mgmt', type: 'skill',
@@ -1112,7 +1166,10 @@ const DB = {
     location: '.claude/skills/context-management.md',
     calls: [], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Pair with context-monitor hook and session-state infrastructure.'
+    templateNote: 'Pair with context-monitor hook and session-state infrastructure.',
+    verdictWhy: 'Keep — context exhaustion mid-task is one of the top failure modes for AI coding agents. Proactive checkpointing prevents total loss of in-progress work.',
+    example: 'Large feature implementation reaches 87% context → skill triggers → checkpoint written with completed steps, remaining steps, and key decisions → next session resumes precisely.',
+    validated: { status: 'current', note: 'Context window management is a known challenge. LangGraph (10k★) has native state persistence for long-running tasks. Claude Code does not yet offer native mid-task checkpointing, making this skill essential.' }
   },
   'skill-end-session': {
     id: 'skill-end-session', type: 'skill',
@@ -1124,7 +1181,10 @@ const DB = {
     location: '.claude/skills/end-session.md',
     calls: ['agent-end-of-session'], calledBy: ['cmd-ship'],
     templateVerdict: 'keep',
-    templateNote: 'Keep as-is. Adjust the brief validation logic if your brief format differs.'
+    templateNote: 'Keep as-is. Adjust the brief validation logic if your brief format differs.',
+    verdictWhy: 'Keep — the coordination layer between /ship and the end-of-session-agent ensures the 4-phase close runs correctly even when the session brief is missing.',
+    example: '/ship triggered → skill checks for brief → brief missing → skill creates brief from git log → end-of-session-agent spawned → 4-phase close runs correctly.',
+    validated: { status: 'current', note: 'Session lifecycle management is Claude Code-specific. The skill-as-coordination-layer pattern between command and agent is good architecture for any multi-agent workflow.' }
   },
   'skill-github-sync': {
     id: 'skill-github-sync', type: 'skill',
@@ -1136,7 +1196,10 @@ const DB = {
     location: '.claude/skills/github-sync.md',
     calls: ['mcp-github-cursor'], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Update the GitHub repo reference and the fields fetched to match your project\'s activity types.'
+    templateNote: 'Update the GitHub repo reference and the fields fetched to match your project\'s activity types.',
+    verdictWhy: 'Keep — once-per-day GitHub activity pull prevents redundant API calls and ensures the agent has current project context without user intervention.',
+    example: 'Session starts → skill checks notes/github-sync/2026-05-23.md → file missing → GitHub MCP called → 3 open PRs and 2 recent issues fetched → session continues with current project state.',
+    validated: { status: 'current', note: 'GitHub context at session start is valuable. GitHub CLI (gh) with cron could serve the same purpose. The once-per-day deduplication is the key value here.' }
   },
   'skill-nightly-audit': {
     id: 'skill-nightly-audit', type: 'skill',
@@ -1148,7 +1211,10 @@ const DB = {
     location: '.claude/skills/nightly-audit.md',
     calls: ['agent-reflect'], calledBy: ['cmd-nightly-audit'],
     templateVerdict: 'keep',
-    templateNote: 'Configure the 6 audit categories and the safe auto-fix list for your project\'s standards.'
+    templateNote: 'Configure the 6 audit categories and the safe auto-fix list for your project\'s standards.',
+    verdictWhy: 'Keep — the 6-category autonomous audit runs while you sleep. The safe-auto-fix list prevents regressions while unsafe findings are flagged for human review.',
+    example: 'Cron fires at 23:03 → skill scans 6 categories → auto-fixes 4 import order issues → commits to audit/2026-05-23 → reflect-agent processes 1 new tool failure pattern.',
+    validated: { status: 'review', note: 'Nightly automated audits are well-established. Semgrep (20k★) with CI scheduled jobs, ESLint --fix with GitHub Actions, and SonarQube Community are proven OSS alternatives running in CI. Consider supplementing this skill with CI-based tooling for broader coverage.' }
   },
   'skill-update-docs': {
     id: 'skill-update-docs', type: 'skill',
@@ -1160,7 +1226,10 @@ const DB = {
     location: '.claude/skills/update-docs.md',
     calls: ['skill-breadcrumb-nav'], calledBy: ['cmd-docs-refresh', 'agent-end-of-session'],
     templateVerdict: 'keep',
-    templateNote: 'Add your project\'s specific auto-generated doc targets to the skill file.'
+    templateNote: 'Add your project\'s specific auto-generated doc targets to the skill file.',
+    verdictWhy: 'Keep — documentation drift is one of the most common problems in growing codebases. Auto-regenerating docs at session end keeps them accurate with zero manual effort.',
+    example: '3 new components added → /ship → end-of-session-agent calls update-docs → breadcrumbs.md files regenerated → component catalog updated → docs reflect reality.',
+    validated: { status: 'current', note: 'Documentation auto-generation is well-supported: JSDoc, TypeDoc (7k★), Storybook (82k★) for components. These are build-time tools; this skill handles the AI-session context and breadcrumb-specific format.' }
   },
   'skill-mp-search': {
     id: 'skill-mp-search', type: 'skill',
@@ -1172,7 +1241,10 @@ const DB = {
     location: '.claude/skills/mp-search.md',
     calls: ['mcp-mempalace'], calledBy: ['cmd-recall'],
     templateVerdict: 'keep',
-    templateNote: 'Requires MemPalace MCP. Define your drawer taxonomy in the MemPalace config.'
+    templateNote: 'Requires MemPalace MCP. Define your drawer taxonomy in the MemPalace config.',
+    verdictWhy: 'Keep — semantic search is the only practical way to surface relevant past decisions from a growing knowledge base. Keyword search misses conceptually related content.',
+    example: 'Designing a new caching strategy → /mp-search "caching approach" → returns 3 past decisions including the rationale for choosing LocalStorage over IndexedDB.',
+    validated: { status: 'review', note: 'Mem0 (47k★ on GitHub) is a production-ready OSS alternative with RAG and memory management APIs. Zep (4k★) adds temporal knowledge graphs for agent memory. Both widely used in production AI systems. Consider whether Mem0 better meets your needs than self-hosted MemPalace.' }
   },
   'skill-worktree-setup': {
     id: 'skill-worktree-setup', type: 'skill',
@@ -1184,7 +1256,10 @@ const DB = {
     location: '.claude/skills/worktree-setup.md',
     calls: [], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Update the dependency install command (npm ci, yarn install, etc.) for your project stack.'
+    templateNote: 'Update the dependency install command (npm ci, yarn install, etc.) for your project stack.',
+    verdictWhy: 'Keep — git worktrees enable true parallel work streams. Without this skill, parallel agent work requires complex branch choreography.',
+    example: 'New feature needs parallel tracks: API design and UI implementation → /worktree-setup → two isolated worktrees created → agents work in parallel → no interference.',
+    validated: { status: 'review', note: 'Claude Code added native isolation:worktree support (v2.1.49, Feb 2026) for Agent definitions via the Agent tool\'s isolation parameter. This may make some manual worktree-setup usage redundant for in-session agent isolation. Consider migrating to the native isolation:worktree option.' }
   },
   'skill-worktree-end': {
     id: 'skill-worktree-end', type: 'skill',
@@ -1196,7 +1271,10 @@ const DB = {
     location: '.claude/skills/worktree-session-end.md',
     calls: ['agent-git'], calledBy: ['cmd-cleanup'],
     templateVerdict: 'keep',
-    templateNote: 'Works for any git worktree setup. No project-specific changes needed.'
+    templateNote: 'Works for any git worktree setup. No project-specific changes needed.',
+    verdictWhy: 'Keep — safe teardown prevents orphaned worktrees and dangling git references. The git-agent delegation ensures commits are handled correctly before removal.',
+    example: 'Parallel worktree completed → /cleanup → skill calls git-agent to commit, runs git worktree remove → .worktrees/feat-caching removed → no orphaned references left.',
+    validated: { status: 'review', note: 'With native isolation:worktree in Claude Code v2.1.49, the worktree is automatically cleaned up when the agent makes no changes. Review whether this skill is still needed or if the native cleanup covers your cases.' }
   },
 
   /* SKILLS (PROJECT-SPECIFIC) */
@@ -1210,7 +1288,10 @@ const DB = {
     location: '.claude/skills/add-recipe.md',
     calls: [], calledBy: [],
     templateVerdict: 'project',
-    templateNote: 'FoodVibe-specific. For a new project, replace with a domain-appropriate data-ingestion skill following the same 3-step confirmation pattern.'
+    templateNote: 'FoodVibe-specific. For a new project, replace with a domain-appropriate data-ingestion skill following the same 3-step confirmation pattern.',
+    verdictWhy: 'Project-specific — the 3-step extract/validate/commit pattern with explicit confirmation is well-designed, but the food domain fields are entirely FoodVibe-specific.',
+    example: 'User pastes a Jamie Oliver recipe URL → skill extracts title, 12 ingredients, 6 steps → validates against canonical food domain values → asks "Confirm write?" → user confirms → recipe saved.',
+    validated: { status: 'current', note: 'Data ingestion with validation and confirmation gates is universal best practice. The 3-step pattern (extract → validate → confirm) can be adapted for any domain.' }
   },
   'skill-auth-logging': {
     id: 'skill-auth-logging', type: 'skill',
@@ -1222,7 +1303,10 @@ const DB = {
     location: '.claude/skills/auth-and-logging.md',
     calls: ['agent-security-officer'], calledBy: ['cmd-security'],
     templateVerdict: 'project',
-    templateNote: 'Rewrite for your auth framework. The route-guard patterns are Angular-specific; adapt for your router.'
+    templateNote: 'Rewrite for your auth framework. The route-guard patterns are Angular-specific; adapt for your router.',
+    verdictWhy: 'Project-specific — the auth surface it audits (Angular guards, HTTP interceptors) is FoodVibe-specific. The OWASP-aligned, PII-aware audit methodology is universally applicable.',
+    example: 'New admin route added → skill triggers → checks for missing CanActivate guard → finds unlogged mutation in ProductService.delete() → security-officer called → findings reported.',
+    validated: { status: 'current', note: 'Auth auditing is essential. Semgrep (20k★) with taint analysis rules and OWASP ZAP for dynamic scanning are the leading OSS tools. This skill is the AI-session-integrated version.' }
   },
   'skill-auth-crypto': {
     id: 'skill-auth-crypto', type: 'skill',
@@ -1234,7 +1318,10 @@ const DB = {
     location: '.claude/skills/auth-crypto.md',
     calls: ['agent-security-officer'], calledBy: ['cmd-security'],
     templateVerdict: 'project',
-    templateNote: 'Rewrite for your project\'s crypto surface. The key constraint (single crypto service file) is a universally good pattern to keep.'
+    templateNote: 'Rewrite for your project\'s crypto surface. The key constraint (single crypto service file) is a universally good pattern to keep.',
+    verdictWhy: 'Project-specific — governs auth-crypto.ts, a FoodVibe-specific file. The constraint (single crypto service, bcrypt + AES-256-GCM) is sound security architecture applicable to any project.',
+    example: 'New feature requires password storage → skill triggers → enforces bcrypt min 12 rounds → finds proposed MD5 usage → blocks it → security-officer documents the finding.',
+    validated: { status: 'current', note: 'Cryptographic guardrails are essential. OWASP Cryptographic Storage Cheat Sheet is the reference standard. Semgrep has crypto misuse rules (e.g. crypto-weak-hash). This skill provides the AI-session-integrated enforcement.' }
   },
   'skill-angular-pipe': {
     id: 'skill-angular-pipe', type: 'skill',
@@ -1246,7 +1333,10 @@ const DB = {
     location: '.claude/skills/angular-pipe-logic.md',
     calls: ['std-angular'], calledBy: [],
     templateVerdict: 'project',
-    templateNote: 'FoodVibe / Angular-specific. Rewrite for your framework\'s equivalent of pipes and directives.'
+    templateNote: 'FoodVibe / Angular-specific. Rewrite for your framework\'s equivalent of pipes and directives.',
+    verdictWhy: 'Project-specific — enforces FoodVibe\'s Angular reactivity standards for Pipes and Directives. The pure-pipes and Signal-inputs pattern is Angular-specific.',
+    example: 'New currency-format pipe needed → skill triggers → generates pure pipe skeleton with Signal input → validates no impure pipe without justification → test stubs created automatically.',
+    validated: { status: 'current', note: 'Framework-specific code generation is a standard AI coding pattern. Angular CLI (ng generate pipe) provides scaffolding. This skill adds project-specific reactivity standards enforcement on top.' }
   },
   'skill-angular-comp': {
     id: 'skill-angular-comp', type: 'skill',
@@ -1258,7 +1348,10 @@ const DB = {
     location: '.claude/skills/angularComponentStructure.md',
     calls: ['std-angular'], calledBy: ['cmd-feat', 'cmd-refactor'],
     templateVerdict: 'project',
-    templateNote: 'FoodVibe / Angular-specific. Adapt the CRDUL grouping for your framework\'s component model.'
+    templateNote: 'FoodVibe / Angular-specific. Adapt the CRDUL grouping for your framework\'s component model.',
+    verdictWhy: 'Project-specific — enforces the CRDUL component structure (Constructor → Reactive state → Data loading → UI → Lifecycle). Angular + Signal-specific.',
+    example: 'New ProductCardComponent needed → skill triggers → generates CRDUL skeleton → OnPush set → Signal-based inputs generated → Lucide icons registered.',
+    validated: { status: 'current', note: 'Component scaffolding is well-supported: Angular CLI, Nx generators, Hygen. This skill adds project-specific CRDUL structure enforcement. CRDUL is a team convention, not an Angular standard.' }
   },
   'skill-deploy-gh': {
     id: 'skill-deploy-gh', type: 'skill',
@@ -1270,7 +1363,10 @@ const DB = {
     location: '.claude/skills/deploy-github-pages.md',
     calls: [], calledBy: [],
     templateVerdict: 'project',
-    templateNote: 'FoodVibe / Angular / GitHub Pages-specific. Replace entirely for different hosting targets or frameworks.'
+    templateNote: 'FoodVibe / Angular / GitHub Pages-specific. Replace entirely for different hosting targets or frameworks.',
+    verdictWhy: 'Project-specific — handles the FoodVibe GitHub Pages deployment flow including Angular base-href configuration and the gh-pages branch strategy.',
+    example: 'MVP ready → /deploy → skill sets base-href to /foodVibe1.0/ → ng build --configuration production → dist/ pushed to gh-pages branch → deployment URL verified.',
+    validated: { status: 'current', note: 'GitHub Pages deployment for SPAs is well-documented. JamesIves/github-pages-deploy-action (4k★) is the standard automated approach via GitHub Actions. This skill handles the manual Claude Code session workflow.' }
   },
 
   /* AGENTS */
@@ -1284,7 +1380,10 @@ const DB = {
     location: '.claude/agents/end-of-session-agent.md',
     calls: ['agent-git', 'skill-techdebt', 'skill-update-docs'], calledBy: ['skill-end-session'],
     templateVerdict: 'keep',
-    templateNote: 'Replace ng build with your build command. The 4-phase structure is universally applicable.'
+    templateNote: 'Replace ng build with your build command. The 4-phase structure is universally applicable.',
+    verdictWhy: 'Keep — the 4-phase structure (brief → build → techdebt → git) prevents the most common session-close anti-patterns: missing brief, failed build, lost todos, unreviewed debt.',
+    example: '/ship called → agent runs: (1) brief validated ✓, (2) ng build passes ✓, (3) techdebt: 1 medium issue noted, (4) git-agent commits 4 files and pushes → handoff doc written → session closed cleanly.',
+    validated: { status: 'current', note: 'Structured session closing is a Claude Code-specific pattern. LangGraph (10k★) has analogous phase-gate task completion. Replace ng build with your stack\'s build command.' }
   },
   'agent-git': {
     id: 'agent-git', type: 'agent',
@@ -1296,7 +1395,10 @@ const DB = {
     location: '.claude/agents/git-agent.md',
     calls: ['std-git'], calledBy: ['skill-worktree-end', 'agent-end-of-session'],
     templateVerdict: 'keep',
-    templateNote: 'Update std-git with your project\'s branch naming and commit message conventions.'
+    templateNote: 'Update std-git with your project\'s branch naming and commit message conventions.',
+    verdictWhy: 'Keep — intelligent git operations (diff-quality commit messages, conflict handling, PR creation) are significantly better than raw git commands. Single-approval safety prevents accidents.',
+    example: 'Session done → agent evaluates diff → writes commit message "feat(inventory): add AI product modal with patch/draft flow" → stages 6 files → creates signed commit → pushes.',
+    validated: { status: 'current', note: 'AI-assisted git operations are emerging as standard. GitHub Copilot now suggests commit messages natively. Commitlint (6k★) and semantic-release (10k★) provide OSS conventional commits and automated versioning as complementary tools.' }
   },
   'agent-team-leader': {
     id: 'agent-team-leader', type: 'agent',
@@ -1308,7 +1410,10 @@ const DB = {
     location: '.claude/agents/team-leader.md',
     calls: ['agent-software-architect', 'agent-qa', 'agent-security-officer'], calledBy: ['cmd-execute-it', 'cmd-refactor'],
     templateVerdict: 'keep',
-    templateNote: 'Works as-is. Adjust the parallelism limit and sub-agent roster in the agent file.'
+    templateNote: 'Works as-is. Adjust the parallelism limit and sub-agent roster in the agent file.',
+    verdictWhy: 'Keep — multi-agent orchestration with conflict resolution and build gates is essential for complex features. Single-agent approaches hit context limits on multi-file features.',
+    example: '8-task feature plan → team-leader splits into architect, 2×implementer (parallel), QA → resolves CSS naming conflict between streams → build gate validates → done.',
+    validated: { status: 'current', note: 'Multi-agent orchestration is the dominant pattern for complex AI coding. CrewAI (26k★) and LangGraph (10k★) are leading OSS frameworks. Microsoft Agent Framework v1.0 (stable) is a production-ready alternative. Claude Code Agent Teams (EXPERIMENTAL) underpins this.' }
   },
   'agent-security-officer': {
     id: 'agent-security-officer', type: 'agent',
@@ -1320,7 +1425,10 @@ const DB = {
     location: '.claude/agents/security-officer.md',
     calls: ['std-security'], calledBy: ['skill-auth-logging', 'skill-auth-crypto', 'cmd-security', 'agent-team-leader'],
     templateVerdict: 'keep',
-    templateNote: 'Keep the OWASP + STRIDE structure. Update std-security with your project\'s specific threat surface.'
+    templateNote: 'Keep the OWASP + STRIDE structure. Update std-security with your project\'s specific threat surface.',
+    verdictWhy: 'Keep — security analysis requires depth and focus that generalist agents lack. The dedicated OWASP + STRIDE methodology produces thorough, structured findings.',
+    example: 'New auth flow added → agent performs STRIDE analysis on the token refresh path → finds missing rate limiting on /auth/refresh → severity: HIGH → specific fix documented.',
+    validated: { status: 'current', note: 'Dedicated security analysis is best practice. Semgrep (20k★) with security rulesets, OWASP Dependency-Check (5k★), and Snyk are leading OSS tools for automated scanning. This agent provides AI-session-integrated structured analysis.' }
   },
   'agent-software-architect': {
     id: 'agent-software-architect', type: 'agent',
@@ -1332,7 +1440,10 @@ const DB = {
     location: '.claude/agents/software-architect.md',
     calls: ['std-backend'], calledBy: ['cmd-plan', 'cmd-plan-impl', 'agent-team-leader'],
     templateVerdict: 'keep',
-    templateNote: 'Remove the Angular/Signal-specific data flow section and replace with your framework\'s patterns.'
+    templateNote: 'Remove the Angular/Signal-specific data flow section and replace with your framework\'s patterns.',
+    verdictWhy: 'Keep — architecture decisions made without structured design lead to rework. The HLD output forces explicit trade-off documentation before coding begins.',
+    example: 'New AI product feature needed → agent scans codebase → maps Signal data flow from GeminiService → produces HLD with 3 approach options → trade-offs documented → you select approach 2.',
+    validated: { status: 'current', note: 'AI-assisted architecture is emerging. GitHub Copilot, Cursor, and Cline provide design suggestions. This agent formalises the HLD pattern with explicit trade-off documentation — a practice that distinguishes professional AI coding.' }
   },
   'agent-product-manager': {
     id: 'agent-product-manager', type: 'agent',
@@ -1344,7 +1455,10 @@ const DB = {
     location: '.claude/agents/product-manager.md',
     calls: [], calledBy: ['cmd-plan'],
     templateVerdict: 'keep',
-    templateNote: 'Update the PRD template in the agent file to match your product documentation standards.'
+    templateNote: 'Update the PRD template in the agent file to match your product documentation standards.',
+    verdictWhy: 'Keep — undefined requirements are the most expensive problem in software. The PRD output ensures what\'s built is what was needed.',
+    example: 'Vague request: "add analytics" → agent conducts structured scoping → produces PRD: 5 user stories, 3 out-of-scope items, success metric → feature is well-defined before any code.',
+    validated: { status: 'current', note: 'AI product management is emerging. GitHub Copilot Workspace and Linear AI provide requirement generation. This agent implements a full PRD methodology within the Claude Code workflow.' }
   },
   'agent-qa': {
     id: 'agent-qa', type: 'agent',
@@ -1356,7 +1470,10 @@ const DB = {
     location: '.claude/agents/qa-engineer.md',
     calls: [], calledBy: ['agent-team-leader'],
     templateVerdict: 'keep',
-    templateNote: 'Replace Jasmine/Karma with your project\'s test framework. The diagnostic reasoning approach is universal.'
+    templateNote: 'Replace Jasmine/Karma with your project\'s test framework. The diagnostic reasoning approach is universal.',
+    verdictWhy: 'Keep — QA as a dedicated phase prevents shipping untested code because "it works in the happy path". Structured regression checks prevent regressions.',
+    example: 'AI product modal implemented → QA agent called by team-leader → writes Jasmine specs for modal state transitions → finds 1 broken spec in ProductFormComponent → fix applied before merge.',
+    validated: { status: 'current', note: 'AI-assisted testing is a hot area: Copilot test generation, CodiumAI. This agent adds workflow integration and regression-specific reasoning beyond simple test generation.' }
   },
   'agent-mobile-auditor': {
     id: 'agent-mobile-auditor', type: 'agent',
@@ -1368,7 +1485,10 @@ const DB = {
     location: '.claude/agents/mobile-flow-auditor.md',
     calls: [], calledBy: ['cmd-mobile-audit'],
     templateVerdict: 'keep',
-    templateNote: 'Rewrite the 16 flow definitions and viewport dimensions for your application\'s routes and target devices.'
+    templateNote: 'Rewrite the 16 flow definitions and viewport dimensions for your application\'s routes and target devices.',
+    verdictWhy: 'Keep — mobile regressions are invisible in desktop-first development. The 16-flow structured audit catches them before users do.',
+    example: 'Recipe card layout updated → mobile-flow-auditor runs → detects ingredient list overflow at 375px → reports touch target below 44px on "add to cart" → both fixed before PR merge.',
+    validated: { status: 'current', note: 'Mobile testing is well-tooled: Playwright (73k★) multi-device emulation, Lighthouse mobile audits, BrowserStack. This agent wraps Playwright with a structured 16-flow methodology specific to this application.' }
   },
   'agent-render-auditor': {
     id: 'agent-render-auditor', type: 'agent',
@@ -1380,7 +1500,10 @@ const DB = {
     location: '.claude/agents/render-flow-auditor.md',
     calls: [], calledBy: ['cmd-render-audit'],
     templateVerdict: 'keep',
-    templateNote: 'Set your deployment URL in the agent file. Works for any web app hosted anywhere — not Render-specific.'
+    templateNote: 'Set your deployment URL in the agent file. Works for any web app hosted anywhere — not Render-specific.',
+    verdictWhy: 'Keep — staging does not equal production. Environment-specific bugs only appear when testing the live deployment.',
+    example: 'Deploy to Render → agent walks live URL → /api/products returns 500 → console shows missing RENDER_DATABASE_URL env var → caught 10 minutes after deploy, not from a user complaint.',
+    validated: { status: 'current', note: 'Production smoke testing is standard practice. Checkly (synthetic monitoring), Playwright E2E, and Vercel deployment protection checks are the leading approaches. This agent provides a structured flow-based smoke test.' }
   },
   'agent-reflect': {
     id: 'agent-reflect', type: 'agent',
@@ -1392,7 +1515,10 @@ const DB = {
     location: '.claude/agents/reflect-agent.md',
     calls: [], calledBy: ['skill-nightly-audit', 'cmd-reflect', 'cmd-reflect-list'],
     templateVerdict: 'keep',
-    templateNote: 'Requires tool-failure logging infrastructure. Adapt the failure pattern taxonomy for your toolset.'
+    templateNote: 'Requires tool-failure logging infrastructure. Adapt the failure pattern taxonomy for your toolset.',
+    verdictWhy: 'Keep — tool failure patterns that aren\'t addressed will repeat indefinitely. The self-improvement loop is the only mechanism for the AI workflow to improve over time.',
+    example: 'Reflect agent runs → reads 12 tool failures from the week → identifies pattern: "Edit fails when file path contains spaces" → patches 3 skills to quote file paths → failures drop to 0.',
+    validated: { status: 'current', note: 'Self-improving AI agents are an active research area. LangSmith (LangChain) provides failure logging and analysis for production AI systems. This agent implements a lightweight version focused on skill improvement.' }
   },
 
   /* MCP SERVERS */
@@ -1406,7 +1532,10 @@ const DB = {
     location: '.mcp/mempalace-config.json',
     calls: [], calledBy: ['skill-mp-search'],
     templateVerdict: 'rewrite',
-    templateNote: 'Rewrite the drawer taxonomy and embedding model config for your project\'s knowledge domains. The MCP protocol bindings stay the same.'
+    templateNote: 'Rewrite the drawer taxonomy and embedding model config for your project\'s knowledge domains. The MCP protocol bindings stay the same.',
+    verdictWhy: 'Rewrite — the wing/room/drawer taxonomy is FoodVibe-specific. The vector knowledge graph infrastructure and MCP protocol bindings are universally reusable.',
+    example: 'Start session on database design → mempalace_search("database schema decisions") → returns 3 relevant past decisions including the rationale for the current localStorage approach.',
+    validated: { status: 'review', note: 'Vector knowledge stores for AI agents are mature. Mem0 (47k★ on GitHub) is the leading OSS alternative with hosted and self-hosted options. Zep (4k★) adds temporal knowledge graphs. Both widely used in production. Consider whether Mem0 better meets your needs than self-hosted MemPalace.' }
   },
   'mcp-github-cc': {
     id: 'mcp-github-cc', type: 'mcp',
@@ -1418,7 +1547,10 @@ const DB = {
     location: '.claude/settings.json (disabled)',
     calls: [], calledBy: [],
     templateVerdict: 'rewrite',
-    templateNote: 'Fix the shell invocation in the MCP config to use /bin/sh -c instead of cmd /c on Linux/macOS systems.'
+    templateNote: 'Fix the shell invocation in the MCP config to use /bin/sh -c instead of cmd /c on Linux/macOS systems.',
+    verdictWhy: 'Broken — the Windows cmd /c shell invocation in the MCP config fails on Linux/macOS. GitHub API access in Claude Code sessions is currently unavailable.',
+    example: 'Agent tries to list open PRs via MCP → fails silently → GitHub API unavailable in Claude Code → workaround: use Cursor sessions for GitHub API calls until fixed.',
+    validated: { status: 'broken', note: 'Fix: update .mcp.json to use "command": "npx", "args": ["-y", "@modelcontextprotocol/server-github"] and remove "github" from disabledMcpjsonServers in settings.json. The package itself is fine — only the launcher config is broken.' }
   },
   'mcp-playwright': {
     id: 'mcp-playwright', type: 'mcp',
@@ -1430,7 +1562,10 @@ const DB = {
     location: '.cursor/mcp.json',
     calls: [], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Works as-is in any Cursor project. No project-specific configuration needed.'
+    templateNote: 'Works as-is in any Cursor project. No project-specific configuration needed.',
+    verdictWhy: 'Keep — browser automation is essential for visual QA. Playwright is the gold standard for cross-browser testing and the MCP integration is stable.',
+    example: 'Mobile audit triggered in Cursor → playwright MCP navigates to /inventory → takes screenshot at 375px → identifies 2px horizontal overflow on the mobile recipe grid → bug documented.',
+    validated: { status: 'current', note: 'Playwright (73k★ on GitHub) is the leading OSS browser automation framework and the industry standard for E2E testing. The MCP integration is maintained by the Playwright team. Well-chosen, production-proven tool.' }
   },
   'mcp-github-cursor': {
     id: 'mcp-github-cursor', type: 'mcp',
@@ -1442,7 +1577,10 @@ const DB = {
     location: '.cursor/mcp.json',
     calls: [], calledBy: ['skill-github-sync'],
     templateVerdict: 'keep',
-    templateNote: 'Update the GitHub token and default repo in the MCP config for your project.'
+    templateNote: 'Update the GitHub token and default repo in the MCP config for your project.',
+    verdictWhy: 'Keep — the cross-platform Node.js invocation (no shell wrapper) is the correct approach. Use this config as the template when fixing mcp-github-cc.',
+    example: 'Session start → github-sync skill calls github MCP → fetches 2 open PRs and 3 recent issues → writes notes/github-sync/2026-05-23.md → agent has current project context.',
+    validated: { status: 'current', note: '@modelcontextprotocol/server-github is an official Anthropic MCP server. Cross-platform Node.js invocation via npx is the correct documented approach. GitHub API v4 (GraphQL) and v3 (REST) both supported.' }
   },
 
   /* STANDARDS FILES */
@@ -1456,7 +1594,10 @@ const DB = {
     location: '.claude/standards/standards-angular.md',
     calls: [], calledBy: ['skill-cssLayer', 'skill-angular-comp', 'skill-angular-pipe'],
     templateVerdict: 'rewrite',
-    templateNote: 'Rewrite entirely for non-Angular projects. The 5-layer CSS architecture and token tier patterns are worth keeping in any project.'
+    templateNote: 'Rewrite entirely for non-Angular projects. The 5-layer CSS architecture and token tier patterns are worth keeping in any project.',
+    verdictWhy: 'Rewrite — Angular + Signal-specific rules. The 5-layer CSS architecture and token tier patterns are worth keeping; the CRDUL structure, OnPush, and Signal rules are Angular-only.',
+    example: 'New component created → standards loaded → CRDUL structure enforced → OnPush set → Signal input() used → no semicolons in TS → @layer components declared in SCSS.',
+    validated: { status: 'current', note: 'Framework-specific coding standards are essential for AI-assisted development. For non-Angular projects replace with equivalent standards: React hooks patterns, Vue Composition API, etc. The enforcement mechanism (loaded into context) is universally applicable.' }
   },
   'std-domain': {
     id: 'std-domain', type: 'std',
@@ -1468,7 +1609,10 @@ const DB = {
     location: '.claude/standards/standards-domain.md',
     calls: [], calledBy: ['cmd-feat'],
     templateVerdict: 'project',
-    templateNote: 'FoodVibe-specific. Replace with a domain standards file for your project\'s subject matter and i18n requirements.'
+    templateNote: 'FoodVibe-specific. Replace with a domain standards file for your project\'s subject matter and i18n requirements.',
+    verdictWhy: 'Project-specific — Hebrew i18n, Lucide icon registry, and food domain canonical values are entirely FoodVibe-specific. No part of this file applies to other projects.',
+    example: 'Adding a new dietary tag → standards loaded → validates against canonical list (vegan, vegetarian, gluten-free, kosher…) → Hebrew translation key required → Lucide icon must be pre-registered.',
+    validated: { status: 'current', note: 'Domain-specific standards are essential for AI-assisted development in any domain. Create an equivalent file for your project with your domain entities, canonical values, and i18n requirements.' }
   },
   'std-backend': {
     id: 'std-backend', type: 'std',
@@ -1480,7 +1624,10 @@ const DB = {
     location: '.claude/standards/standards-backend.md',
     calls: [], calledBy: ['agent-software-architect'],
     templateVerdict: 'rewrite',
-    templateNote: 'Rewrite the CRUD patterns and persistence rules for your stack (REST, GraphQL, Supabase, Firebase, etc.).'
+    templateNote: 'Rewrite the CRUD patterns and persistence rules for your stack (REST, GraphQL, Supabase, Firebase, etc.).',
+    verdictWhy: 'Rewrite — the CRUD method names and Observable/Signal boundary rules are FoodVibe/Angular-specific. The single-responsibility data service principle is universal.',
+    example: 'New ProductVariantService needed → standards loaded → getAll/getById/create/update/remove naming enforced → direct localStorage access blocked → Observable at API boundary, Signal at component.',
+    validated: { status: 'current', note: 'Backend/data service standards are universal but framework-specific. Rewrite for your stack: REST vs GraphQL, Repository Pattern vs Active Record, Prisma vs Mongoose vs raw SQL.' }
   },
   'std-security': {
     id: 'std-security', type: 'std',
@@ -1492,7 +1639,10 @@ const DB = {
     location: '.claude/standards/standards-security.md',
     calls: [], calledBy: ['agent-security-officer'],
     templateVerdict: 'rewrite',
-    templateNote: 'Rewrite the auth and storage rules for your framework and deployment environment.'
+    templateNote: 'Rewrite the auth and storage rules for your framework and deployment environment.',
+    verdictWhy: 'Rewrite — Angular-specific guard patterns and JWT storage rules. The core security principles (no tokens in localStorage, CORS config, input sanitisation) are universal.',
+    example: 'New admin feature → standards loaded → CanActivate guard required → JWT not in localStorage (cookie only) → CORS headers verified → input sanitised before API call.',
+    validated: { status: 'current', note: 'Security standards are universal. OWASP Application Security Verification Standard (ASVS) level 2 is the framework to use. Rewrite this file using ASVS as the baseline for your project.' }
   },
   'std-git': {
     id: 'std-git', type: 'std',
@@ -1504,7 +1654,10 @@ const DB = {
     location: '.claude/standards/standards-git.md',
     calls: [], calledBy: ['agent-git'],
     templateVerdict: 'rewrite',
-    templateNote: 'Update branch naming, commit format, and PR conventions for your team\'s git workflow.'
+    templateNote: 'Update branch naming, commit format, and PR conventions for your team\'s git workflow.',
+    verdictWhy: 'Rewrite — branch naming and PR conventions are team-specific. The imperative-mood commit message format and squash-before-merge policy are widely adopted best practices worth keeping.',
+    example: 'Feature complete → git-agent reads standards → branch named feat/ai-product-modal → commit message: "feat(inventory): add AI product modal with draft/patch flow" → PR created.',
+    validated: { status: 'current', note: 'Git conventions are widely standardised. Conventional Commits (conventionalcommits.org) is the de facto standard. Commitlint (6k★) and semantic-release (10k★) provide enforcement tooling. Align your std-git to Conventional Commits format for broad tooling compatibility.' }
   },
   'std-reporting': {
     id: 'std-reporting', type: 'std',
@@ -1516,7 +1669,10 @@ const DB = {
     location: '.claude/standards/standards-scheduled-reporting.md',
     calls: [], calledBy: [],
     templateVerdict: 'keep',
-    templateNote: 'Adapt the cron schedules and report format for your CI/CD and monitoring conventions.'
+    templateNote: 'Adapt the cron schedules and report format for your CI/CD and monitoring conventions.',
+    verdictWhy: 'Keep — the nightly audit configuration and severity taxonomy are project-neutral. The cron schedule format and auto-fix eligibility criteria translate directly to any project.',
+    example: 'Nightly audit config loaded → cron: "3 23 * * *" → severity taxonomy applied: 3 critical, 1 high, 5 low → auto-fix eligible: formatting + import order only → unsafe items flagged.',
+    validated: { status: 'current', note: 'Reporting standards are project-neutral. The severity taxonomy (critical/high/medium/low/info) is aligned with CVSS and industry standards. Good patterns for any automated audit system.' }
   }
 }
 

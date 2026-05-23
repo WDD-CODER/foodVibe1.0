@@ -17,20 +17,24 @@ Also updating panel rendering:
 ## Progress
 
 ### DB fields added so far (Edit operations applied):
-- [x] `hook-session-startup` — all 3 fields added
-- [x] `hook-branch-guard` — all 3 fields added
-- [ ] `hook-context-monitor` — NOT YET
-- [ ] `hook-session-manifest` — NOT YET
-- [ ] `hook-pre-compact` — NOT YET
-- [ ] `hook-handoff-check` — NOT YET
-- [ ] All commands (21 items) — NOT YET
-- [ ] All skills universal (13 items) — NOT YET
-- [ ] All skills project (6 items) — NOT YET
-- [ ] All agents (10 items) — NOT YET
+- [x] All 6 hooks — done
+- [x] All 21 commands — done
+- [x] All 13 universal skills — done
+- [x] All 6 project skills — done
+- [x] agent-end-of-session — done
+- [ ] agent-git — IN PROGRESS (next)
+- [ ] agent-team-leader — NOT YET
+- [ ] agent-security-officer — NOT YET
+- [ ] agent-software-architect — NOT YET
+- [ ] agent-product-manager — NOT YET
+- [ ] agent-qa — NOT YET
+- [ ] agent-mobile-auditor — NOT YET
+- [ ] agent-render-auditor — NOT YET
+- [ ] agent-reflect — NOT YET
 - [ ] All MCP (4 items) — NOT YET
 - [ ] All standards (6 items) — NOT YET
 
-### Panel rendering — NOT YET updated
+### Panel rendering — DONE (CSS, 4th tab, switchTab, renderPanel all updated)
 
 ## Exact data to use
 All data is in the user's original request message. Key patterns:
