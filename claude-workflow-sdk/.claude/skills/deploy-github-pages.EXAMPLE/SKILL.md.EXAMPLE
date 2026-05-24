@@ -1,0 +1,55 @@
+---
+name: deploy-github-pages
+description: Configures and deploys a [FRAMEWORK] SPA to GitHub Pages. Run only on explicit user request.
+---
+
+> **EXAMPLE SKILL** — Copy to `.claude/skills/deploy-github-pages/` and replace `[PROJECT_NAME]`, `[BUILD_OUTPUT]`, `[BASE_HREF]`, and `[BUILD_COMMAND]` with your project's values. Remove this notice block when done.
+
+# Skill: deploy-github-pages
+
+**Trigger:** User says "deploy", "publish app", "set up GitHub Pages", or "deploy to GitHub Pages".
+**Standard:** Read `.claude/standards-git.md` before any deployment step.
+
+> **Not automatic.** Run only on explicit user request — this skill modifies CI/CD configuration.
+
+---
+
+## Phase 1: Pre-Flight Check
+
+**Branch Verification:** Ensure the active branch is `main` or a stable `feat/` branch.
+
+**Build Audit:** Verify the project contains the build script for GitHub Pages (e.g. `build:gh-pages` in `package.json`).
+
+**Environment Check:** Ensure the repository has a configured `gh-pages` branch or is set to deploy via GitHub Actions.
+
+---
+
+## Phase 2: Build & Optimization
+
+**Clean Build:** Run `[BUILD_COMMAND]` with `--base-href [BASE_HREF]` to ensure assets resolve correctly on GitHub's sub-paths.
+
+**Asset Check:** Verify `[BUILD_OUTPUT]` contains the correct `index.html` and bundled assets before proceeding.
+
+---
+
+## Phase 3: Deployment Execution
+
+**Push to Branch:** Execute `npx gh-pages -d [BUILD_OUTPUT]` to publish to the `gh-pages` branch.
+
+**Remote Sync:** Ensure the deployment commit is pushed to `origin`.
+
+---
+
+## Phase 4: URL Verification
+
+**Link Generation:** Construct the final URL (`https://[github-user].github.io/[PROJECT_NAME]/`).
+
+**Smoke Test:** Visually confirm icons and styles loaded correctly at the live URL.
+
+---
+
+## Completion Gate
+
+Output: `"Deployment successful. App is live at: https://[github-user].github.io/[PROJECT_NAME]/"`
+
+Update the session handoff with the deployment timestamp and version if applicable.

@@ -6,5 +6,7 @@ export const environment = {
   useBackendAuth: false,
   useBackend: false,
   autoLoginGuest: false,
-  logServerUrl: ''
+  logServerUrl: '',
+  cloudinaryCloudName: 'dsxi4o2gb',
+  cloudinaryUploadPreset: 'foodvibe',
 }

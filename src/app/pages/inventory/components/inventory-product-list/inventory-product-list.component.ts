@@ -33,6 +33,7 @@ import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
 import { NutritionBadgeComponent } from 'src/app/shared/nutrition-badge/nutrition-badge.component'
 import { ProductDataService } from '@services/product-data.service'
 import { AiProductModalService } from 'src/app/shared/ai-product-modal/ai-product-modal.service'
+import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date'
 type ProductBulkField = 'categories_' | 'supplierIds_' | 'allergens_' | 'base_unit_'
@@ -58,6 +59,7 @@ type ProductBulkField = 'categories_' | 'supplierIds_' | 'allergens_' | 'base_un
     SelectionBarComponent,
     EmptyStateComponent,
     NutritionBadgeComponent,
+    RowActionsMenuComponent,
   ],
   templateUrl: './inventory-product-list.component.html',
   styleUrl: './inventory-product-list.component.scss',

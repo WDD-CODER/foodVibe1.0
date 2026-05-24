@@ -1,0 +1,51 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git:*)",
+      "Bash(gh:*)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(rm:*)",
+      "Bash(claude:*)",
+      "Bash(ls:*)",
+      "Bash(sleep:*)",
+      "Bash(curl:*)",
+      "Bash(echo:*)",
+      "Bash(bash:*)",
+      "Bash(find:*)",
+      "Bash(head:*)",
+      "Bash(sed:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(mkdir:*)",
+      "Bash(gh pr:*)",
+      "Write([TEMP_DIR]/*)",
+      "Skill(update-config)",
+      "Skill(plan-implementation)",
+      "Skill(execute-it)",
+      "Skill(investigate)",
+      "Skill(browse)",
+      "Skill(qa)",
+      "Skill(ship)",
+      "Skill(checkpoint)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "WebSearch",
+      "mcp__ide__getDiagnostics"
+    ],
+    "deny": [
+      "mcp__ide__executeCode",
+      "NotebookEdit"
+    ]
+  },
+  "enableAllProjectMcpServers": false,
+  "enabledMcpjsonServers": [],
+  "disabledMcpjsonServers": [
+    "playwright",
+    "github",
+    "context7"
+  ]
+}

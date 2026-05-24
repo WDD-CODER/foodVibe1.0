@@ -2,7 +2,7 @@
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="onPanelToggled()"
   [gridTemplate]="'2fr 1fr 1fr 1fr minmax(48px, 0.8fr) 0.8fr 80px auto'"
-  [mobileGridTemplate]="'2fr 1fr 0.8fr 0.8fr 80px auto'"
+  [mobileGridTemplate]="'2fr 1fr 0.8fr 0.8fr 40px 28px'"
   [dir]="'rtl'">
 
   <h2 shell-title class="page-title">{{ 'product_list' | translatePipe }}</h2>
@@ -143,7 +143,7 @@
           <span class="price-value">{{ getPricePerUnit(product, product.base_unit_) | number:'1.2-2' }}</span>
           <span class="price-suffix">₪</span>
         </div>
-        <div class="c-col-actions c-list-body-cell" role="cell">
+        <app-row-actions-menu class="c-col-actions c-list-body-cell" role="cell">
           <button type="button" class="c-icon-btn" (click)="onEditProduct(product._id); $event.stopPropagation()"
             [attr.aria-label]="'edit' | translatePipe"
             [disabled]="!isLoggedIn()"
@@ -160,7 +160,7 @@
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>
             </button>
           }
-        </div>
+        </app-row-actions-menu>
         <div class="col-select c-list-body-cell" role="cell">
           <app-list-row-checkbox [checked]="selection.isSelected(product._id)" (toggle)="selection.toggle(product._id)" />
         </div>

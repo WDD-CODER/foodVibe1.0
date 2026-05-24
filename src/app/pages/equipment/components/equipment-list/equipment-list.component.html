@@ -2,7 +2,7 @@
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
   [gridTemplate]="'2fr 1fr minmax(48px, 0.8fr) 0.8fr 80px auto'"
-  [mobileGridTemplate]="'2fr 1fr 80px auto'">
+  [mobileGridTemplate]="'2fr 1fr 40px 28px'">
 
   <h2 shell-title class="page-title">{{ isUnderInventory ? ('logistics' | translatePipe) : ('equipment_list' | translatePipe) }}</h2>
 
@@ -75,7 +75,7 @@
           <div class="col-owned c-list-body-cell" cellCarouselSlide [label]="'owned_quantity' | translatePipe">{{ item.owned_quantity_ }}</div>
           <div class="col-consumable c-list-body-cell" cellCarouselSlide [label]="'is_consumable' | translatePipe">{{ item.is_consumable_ ? ('approved_yes' | translatePipe) : ('approved_no' | translatePipe) }}</div>
         </app-cell-carousel>
-        <div class="c-col-actions c-list-body-cell" role="cell">
+        <app-row-actions-menu class="c-col-actions c-list-body-cell" role="cell">
           <button type="button" class="c-icon-btn" (click)="onEdit(item); $event.stopPropagation()"
             [attr.aria-label]="'edit' | translatePipe"
             [disabled]="!isLoggedIn()"
@@ -92,7 +92,7 @@
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>
             </button>
           }
-        </div>
+        </app-row-actions-menu>
         <div class="col-select c-list-body-cell" role="cell">
           <app-list-row-checkbox [checked]="selection.isSelected(item._id)" (toggle)="selection.toggle(item._id)" />
         </div>
