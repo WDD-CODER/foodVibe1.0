@@ -15,10 +15,25 @@ A portable multi-agent Claude Code workflow system. Drop this folder into any pr
 
 ## Quick start
 
-1. Copy `claude-workflow-sdk/` into your project root
-2. Open Claude Code in your project
-3. Run `/init-repo`
-4. Follow the 5-phase setup wizard
+**Step 1 — Copy the SDK contents into your project root** (copy what's INSIDE the folder, not the folder itself):
+
+macOS / Linux:
+```bash
+cp -r claude-workflow-sdk/. /path/to/your-project/
+```
+
+Windows (PowerShell):
+```powershell
+Copy-Item -Path .\claude-workflow-sdk\* -Destination C:\path\to\your-project\ -Recurse -Force
+```
+
+> After copying, your project root should contain `CLAUDE.md`, `agent.md`, `.mcp.json`, and a `.claude/` directory. The `claude-workflow-sdk/` folder can be kept as a reference or deleted.
+
+**Step 2 — Open Claude Code in your project**
+
+**Step 3 — Run `/init-repo`**
+
+**Step 4 — Follow the 7-phase setup wizard**
 
 The wizard will:
 - Detect your framework, build commands, and project structure

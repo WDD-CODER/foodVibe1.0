@@ -11,6 +11,48 @@ One-time setup wizard that installs the Claude Workflow SDK into the current pro
 
 ---
 
+## Phase 0 — Bootstrap Check
+
+Before anything else, verify the SDK files are present at the project root (not buried in a subfolder).
+
+Check that these exist:
+```bash
+test -d .claude/commands && echo "commands/ present" || echo "MISSING"
+test -d .claude/agents   && echo "agents/ present"   || echo "MISSING"
+test -d .claude/skills   && echo "skills/ present"   || echo "MISSING"
+```
+
+**If all three are present** → SDK is installed. Proceed to Phase 1.
+
+**If any are missing**, check whether a `claude-workflow-sdk/` subfolder exists:
+```bash
+test -d claude-workflow-sdk && echo "found subfolder"
+```
+
+If `claude-workflow-sdk/` exists:
+```
+SDK files were not installed correctly. The folder was copied but its CONTENTS were not
+extracted to the project root.
+
+To fix this, run (macOS/Linux):
+  cp -r claude-workflow-sdk/. .
+
+Or on Windows (PowerShell):
+  Copy-Item -Path .\claude-workflow-sdk\* -Destination . -Recurse -Force
+
+Then run /init-repo again.
+```
+**Stop. Do not proceed until the user re-runs the copy command and re-runs `/init-repo`.**
+
+If neither condition is true (no `.claude/` AND no `claude-workflow-sdk/` subfolder):
+```
+Cannot find the SDK files. Make sure you copied the contents of claude-workflow-sdk/
+into this project before running /init-repo. See README.md for instructions.
+```
+**Stop.**
+
+---
+
 ## Phase 1 — Detect Existing Installation
 
 Check whether any workflow files are already present:
