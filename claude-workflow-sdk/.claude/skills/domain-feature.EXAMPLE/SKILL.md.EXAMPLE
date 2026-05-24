@@ -1,0 +1,63 @@
+---
+name: domain-feature
+description: Extracts, validates, and commits a new [DOMAIN_ENTITY] from user input (image, URL, or raw text) into the project ledger with canonical field resolution.
+---
+
+> **EXAMPLE SKILL** — Copy this folder, rename it to match your domain entity (e.g. `add-product`, `add-record`, `add-order`), update the frontmatter `name`, and replace all `[DOMAIN_*]` placeholders with your project's terminology. Remove this notice block when done.
+
+# Skill: domain-feature
+**Model Guidance:** Use Sonnet for Phases 1 and 2. Use Haiku/Flash for Phases 3 and 4.
+
+**Trigger:** User adds a new [DOMAIN_ENTITY] from an image, URL, or raw text.
+
+**Domain Rules (inline — no guide read required):**
+- Field trust hierarchy: existing record value > extracted value > default
+- All required fields must resolve before writing — never write with unresolved placeholders
+- **Hard stop before any file write — wait for explicit user confirmation**
+
+---
+
+## Phase 1: Data Extraction
+
+**Parsing:** Extract [DOMAIN_ENTITY] fields from the source (image/URL/text).
+
+**Normalization:** Convert raw input into a structured draft with all required fields.
+
+**Field Mapping:** Map each field to its canonical form. Flag any that cannot be resolved — do not proceed with unresolved required fields.
+
+---
+
+## Phase 2: Record Alignment
+
+**Duplicate Check:** Cross-reference against existing records to detect potential duplicates.
+
+**Field Validation:** Verify all required fields are present and correctly typed.
+
+**Constraint Check:** Flag records that violate project-specific business rules with suggested corrections.
+
+---
+
+## Phase 3: Interactive Confirmation
+
+**User Review:** Present the full structured draft in the chat — all fields, flags, warnings.
+
+> ## CRITICAL — Hard Pause
+> **STOP immediately. Do NOT write any files.**
+> **Wait for the user to say "Yes" or provide explicit corrections.**
+> **Writing before confirmation is a critical error.**
+
+---
+
+## Phase 4: Atomic Implementation
+
+**File Creation:** Write the [DOMAIN_ENTITY] data/model file to the appropriate directory.
+
+**Registry Update:** Add the new record to all global indices and navigation lists.
+
+**Field Verification:** Confirm all required fields resolved before writing.
+
+---
+
+## Completion Gate
+
+Output: `"[DOMAIN_ENTITY] [Name] added. All required fields resolved."`

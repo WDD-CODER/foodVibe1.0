@@ -1,0 +1,62 @@
+---
+name: auth-and-logging
+description: Audits and hardens authentication guards, mutation entry points, and logging calls in compliance with project Security standards.
+---
+
+> **EXAMPLE SKILL** — This skill is partially framework-specific. Copy to `.claude/skills/auth-and-logging/` and replace `[ROUTES_FILE]`, `[AUTH_GUARD]`, `[LOGGING_SERVICE]`, `[USER_MSG_SERVICE]` with your project's actual names. Remove this notice block when done.
+
+# Skill: auth-and-logging
+**Model Guidance:** Use Haiku/Flash for Phases 1 and 3. Use Sonnet for Phase 2 only.
+**Trigger:** Touching auth guards, interceptors, user services, HTTP CRUD, or any flow requiring protected access.
+
+**Security Rules (inline — no guide read required):**
+- Every new protected route → `[AUTH_GUARD]` — no exceptions
+- Every mutation handler (add, edit, delete buttons/modals) → auth check at entry point
+- Credentials → `sessionStorage` only — never `localStorage`
+- Sensitive data handling → use project crypto module and invoke `auth-crypto` skill
+- No PII in logs — only user ID permitted in audit trails
+- User-facing security warnings → `[USER_MSG_SERVICE]` only
+- Security Officer sign-off required before commit if this task touches the security surface
+
+---
+
+## Phase 0 — MemPalace Orient (CONDITIONAL)
+Run `mempalace_search(query="auth guard logging security", limit=3)` only if task involves an unfamiliar code area or known-recurring debt. Skip for routine cleanup. If MCP unavailable: skip silently.
+
+---
+
+## Phase 1: Surface Audit
+
+**Entry Point Scan:** Identify all new routes in `[ROUTES_FILE]` and new mutation handlers that require protection.
+
+**Storage Check:** Verify all code touching `localStorage` or `sessionStorage` — credentials must use `sessionStorage` only.
+
+**Logging Scan:** List all new `[LOGGING_SERVICE]` calls and flag any that may include PII.
+
+---
+
+## Phase 2: Security Implementation
+
+**Guard Application:** Apply `[AUTH_GUARD]` to every new protected route in `[ROUTES_FILE]`.
+
+**Mutation Hardening:** Implement auth check at the entry point of all non-route mutation handlers — add, edit, delete buttons and modals.
+
+**Crypto / Logic:** If handling sensitive data → delegate to project crypto module and invoke the `auth-crypto` skill.
+
+---
+
+## Phase 3: Logging & Privacy Audit
+
+**PII Scrub:** Scan all new `[LOGGING_SERVICE]` calls — ensure NO PII (emails, names, passwords, tokens) is logged.
+
+**Identity Check:** Only user ID is permitted in audit trails — flag anything else.
+
+**Feedback Logic:** Verify all user-facing security warnings route through `[USER_MSG_SERVICE]`.
+
+---
+
+## Completion Gate
+
+**Security Officer Trigger:** If this task touches the security surface (auth files, `localStorage`/`sessionStorage`, unsafe HTML binding, new routes) → invoke Security Officer agent for final audit before committing. No exceptions.
+
+Output: `"Auth/Logging hardened. [X] mutation handlers protected, PII audit passed."`
