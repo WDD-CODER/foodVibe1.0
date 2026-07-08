@@ -1,22 +1,33 @@
 #!/bin/bash
-# Branch Guard — PreToolUse hook
-# Fires automatically before Edit / Write / MultiEdit tool calls.
-# If Claude is on main or master, creates a feat/session-YYYYMMDD branch
-# and prints a message Claude must relay to the user.
+# Branch Guard - PreToolUse hook
+# stdout MUST be valid JSON for Cursor PreToolUse.
 
-REPO="/c/foodCo/foodVibe1.0"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Do not read stdin - Cursor may leave the pipe open; reading would hang.
+
 CURRENT=$(git -C "$REPO" branch --show-current 2>/dev/null)
+MSG=""
 
 if [[ "$CURRENT" == "main" || "$CURRENT" == "master" ]]; then
   BRANCH="feat/session-$(date +%Y%m%d)"
-
-  # If today's branch already exists, add HH:MM to keep it unique
   if git -C "$REPO" show-ref --verify --quiet "refs/heads/$BRANCH" 2>/dev/null; then
     BRANCH="feat/session-$(date +%Y%m%d-%H%M)"
   fi
-
   git -C "$REPO" checkout -b "$BRANCH" 2>/dev/null
-  echo "BRANCH_GUARD: Auto-switched from 'main' to new branch '$BRANCH' before writing code. YOU MUST tell the user this right now — say exactly: 'Moved to branch \`$BRANCH\` before making any changes.'"
+  MSG="BRANCH_GUARD: Auto-switched from main to new branch $BRANCH before writing code. Tell the user: Moved to branch `$BRANCH` before making any changes."
+  echo "$MSG" >&2
+fi
+
+if [[ -n "$MSG" ]]; then
+  ESCAPED=$(printf '%s' "$MSG" | python -c 'import json,sys; print(json.dumps(sys.stdin.read()))' 2>/dev/null)
+  if [[ -z "$ESCAPED" ]]; then
+    ESCAPED="\"$MSG\""
+  fi
+  printf '{"permission":"allow","agent_message":%s}\n' "$ESCAPED"
+else
+  printf '{"permission":"allow"}\n'
 fi
 
 exit 0
