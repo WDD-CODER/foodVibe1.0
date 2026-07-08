@@ -207,7 +207,7 @@
 
 - [x] Other entry points: align with resolve first → modal if needed → already in parameter (metadata-manager, preparation-*, menu-section-categories, add-equipment-modal, recipe-workflow, add-supplier-flow)
 
-### Plan 074 â€” Tech debt remediation (`plans/074-tech-debt-remediation.plan.md`) [TRIAGED 2026-04-02]
+### Plan 074 — Tech debt remediation (`plans/074-tech-debt-remediation.plan.md`) [TRIAGED 2026-04-02]
 
 - [x] Refactor menu-intelligence.page.scss into partials (deferred)
 
@@ -245,17 +245,17 @@
 - [x] E2: Create floating FAB on right side with pop-up buttons for toolbar and back navigation
 - [x] Dictionary: Add new Hebrew dictionary keys for new labels
 
-### Plan 081 â€” toFix Detailed Plans (`plans/081-tofix-detailed-plans.plan.md`)
+### Plan 081 — toFix Detailed Plans (`plans/081-tofix-detailed-plans.plan.md`)
 
-- [ ] Section 1 â€” Sign-in / Sign-up: auto-focus, dev user dropdown, Enter-to-submit, field-level errors
-- [ ] Section 2 â€” Quick-add default base unit: set signal to 'gram'
-- [ ] Section 3 â€” Recipe view: number formatting pipe, unit-before-scale, ingredient alignment
-- [ ] Section 4 â€” Recipe builder: persist container state, remove arrows, custom qty buttons, clickable headers, CDK drag-drop
-- [ ] Section 5 â€” Maison Plus (dish prep list): row style, qty buttons, category-first add flow, auto-focus
-- [ ] Section 6 â€” App-wide category/unit dropdowns: add 'add new' sentinel option to every dropdown
-- [ ] Section 7 â€” Logistics: chip fit-content width, keyboard navigation with highlighted index
-- [ ] Section 8 â€” Add-equipment modal: single-step category creation quick-save flow
-- [ ] Section 9 â€” Labels: selectable existing labels in delete UI and recipe builder
+- [ ] Section 1 — Sign-in / Sign-up: auto-focus, dev user dropdown, Enter-to-submit, field-level errors
+- [ ] Section 2 — Quick-add default base unit: set signal to 'gram'
+- [ ] Section 3 — Recipe view: number formatting pipe, unit-before-scale, ingredient alignment
+- [ ] Section 4 — Recipe builder: persist container state, remove arrows, custom qty buttons, clickable headers, CDK drag-drop
+- [ ] Section 5 — Maison Plus (dish prep list): row style, qty buttons, category-first add flow, auto-focus
+- [ ] Section 6 — App-wide category/unit dropdowns: add 'add new' sentinel option to every dropdown
+- [ ] Section 7 — Logistics: chip fit-content width, keyboard navigation with highlighted index
+- [ ] Section 8 — Add-equipment modal: single-step category creation quick-save flow
+- [ ] Section 9 — Labels: selectable existing labels in delete UI and recipe builder
 
 ### Plan 133 — List quick-edit inline (`plans/unused-133-list-quick-edit-inline.plan.md`)
 
@@ -264,7 +264,7 @@
 - [ ] Keyboard and a11y: focus model, focus trap in inline control, Esc/Enter, return focus, screen reader labels (partial: aria-label on buttons)
 - [ ] Venue list / Recipe-book list: optional quick-edit columns as needed
 
-### Plan 072 â€” Robust login, app-wide logging, security (`plans/072-robust-login-app-logging-security.plan.md`)
+### Plan 072 — Robust login, app-wide logging, security (`plans/072-robust-login-app-logging-security.plan.md`)
 
 - [ ] Wire logging: auth (login/logout/signup/guard/401), HTTP interceptor, global ErrorHandler, critical CRUD in data services
 - [ ] Auth hardening: password in UI, credentials types, local hash-only storage, auth abstraction, guard/modal wiring
@@ -310,35 +310,35 @@
 - [ ] Decide confirmation pattern (open edit screen with draft vs inline draft in chat vs both)
 - [ ] Write designated implementation plan once clarifications are set
 
-### Phase 1 â€” Stabilize & Complete (`plans/010-product-roadmap.plan.md`)
+### Phase 1 — Stabilize & Complete (`plans/010-product-roadmap.plan.md`)
 
 - [ ] When adding new features: add/update `.spec.ts` and mark related sub-tasks here; run the full test suite only at commit time (Phase 0) or when the user explicitly asks — not after every iteration.
 
-### Phase 2 â€” Product Enhancement
+### Phase 2 — Product Enhancement
 
 - [ ] **Plan 011 (KPI expansion, optional)**: Further dashboard enhancements per roadmap if desired.
-- [ ] **Plan 013 â€” Recipe Quick Actions**: Duplicate recipe, approval toggle in recipe book list, batch select/actions.
-- [ ] **Plan 014 â€” Low Stock Alerts**: Visual indicators in inventory list, filter toggle, dashboard card.
+- [ ] **Plan 013 — Recipe Quick Actions**: Duplicate recipe, approval toggle in recipe book list, batch select/actions.
+- [ ] **Plan 014 — Low Stock Alerts**: Visual indicators in inventory list, filter toggle, dashboard card.
 
-### Phase 3 â€” Polish & Production Readiness
+### Phase 3 — Polish & Production Readiness
 
-- [ ] **Plan 015 â€” Empty States & Onboarding**: Empty-state UX for all list views, first-use guidance, Hebrew copy.
-- [ ] **Plan 016 â€” Print-Friendly Recipe View**: Print stylesheet, hide navigation in print, RTL-aware layout, print button.
-- [ ] **Plan 018 â€” Backend API Preparation**: Formalize `IStorageAdapter`, document REST API contract, audit adapter compliance.
+- [ ] **Plan 015 — Empty States & Onboarding**: Empty-state UX for all list views, first-use guidance, Hebrew copy.
+- [ ] **Plan 016 — Print-Friendly Recipe View**: Print stylesheet, hide navigation in print, RTL-aware layout, print button.
+- [ ] **Plan 018 — Backend API Preparation**: Formalize `IStorageAdapter`, document REST API contract, audit adapter compliance.
 - [ ] **Deployment Pipeline**: Validate and activate GitHub Actions workflow for GitHub Pages.
 
-### Plan 060 â€” Data persistence and backup (`plans/060-data-persistence-and-backup.plan.md`)
+### Plan 060 — Data persistence and backup (`plans/060-data-persistence-and-backup.plan.md`)
 
 - [ ] Optional: debounced auto-download per category for physical JSON on every change.
 
-### Plan 059 â€” Unify design engine (`plans/059-unify-design-engine.plan.md`)
+### Plan 059 — Unify design engine (`plans/059-unify-design-engine.plan.md`)
 
 Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 
-- [ ] Phase 9: Deferred â€” grid header/cell too coupled to display:contents layout
-- [ ] Phase 10: Deferred â€” breakpoint/transition standardization for follow-up
+- [ ] Phase 9: Deferred — grid header/cell too coupled to display:contents layout
+- [ ] Phase 10: Deferred — breakpoint/transition standardization for follow-up
 
-### Plan 047 â€” Recipe Builder Polish (`plans/047-recipe-builder-polish.plan.md`)
+### Plan 047 — Recipe Builder Polish (`plans/047-recipe-builder-polish.plan.md`)
 
 - [x] B3: Volume conversion fix (unverifiable without spec; needs acceptance criteria)
 
@@ -368,7 +368,7 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 | 009 | Cohesive Add Item Modal | Done |
 | 010 | Product Roadmap: V1 Completion & Beyond | Active |
 | 011 | Unify Dashboard & Command Center | Done |
-| â€” | Recipe Builder: scaling, bruto, weight/volume toggle, unconvertible notice | Done |
+| — | Recipe Builder: scaling, bruto, weight/volume toggle, unconvertible notice | Done |
 | 012 | Kitchen Demo Data (original) | Done |
 | 012-1 | Kitchen Demo Data and Recipes | Done |
 | 012-2 | Kitchen Demo Data Full Values | Done |

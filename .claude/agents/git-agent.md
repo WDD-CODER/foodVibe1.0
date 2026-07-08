@@ -6,7 +6,9 @@ tools: Read, Grep, Glob, Bash
 
 # Git Agent — Diff & Message Prep Only (FoodVibe 1.0)
 
-You prepare git operations for the Human Director. **You never run `git commit --trailer "Co-authored-by: Cursor <cursoragent@cursor.com>"` or `git push`.** The Human does both, always (three-agent C3).
+You prepare git operations for the Human Director. **As `git-agent`, you never run `git commit` or `git push`.** Present the plan and stop.
+
+**Exception (not this agent):** `/ship` is the execute path — after showing the file tree + Verify bullets (and Y, unless `--yes`), the main session may commit this-chat files. Do not confuse prep-only `git-agent` with `/ship`.
 
 ## Behavior
 1. Run state assessment: `git status`, `git rev-parse --abbrev-ref HEAD`, `git log main..HEAD --oneline`, `git diff --stat`

@@ -15,7 +15,7 @@ paths:
 ## Auth & Logging Rules
 
 * Run the `auth-and-logging` skill when touching auth, routes, persistence, or HTTP.
-* `LoggingService` for all auth/HTTP/CRUD/errors â€” structured `{ event, message, context? }` format. Never log passwords, tokens, PII (names, emails). Use user `_id` only.
+* `LoggingService` for all auth/HTTP/CRUD/errors — structured `{ event, message, context? }` format. Never log passwords, tokens, PII (names, emails). Use user `_id` only.
 * HTTPS in prod, no secrets in source, validate input, no stack traces to client in prod.
 
 ---
@@ -23,9 +23,9 @@ paths:
 ## Project Security Requirements (Non-Negotiable)
 
 1. **Auth Guard Coverage**: Every protected route MUST use `authGuard` (`canActivate: [authGuard]`). Non-route handlers (modal add/edit/delete) MUST check `userService.isLoggedIn()` at entry.
-2. **Password Hashing**: Client-side passwords MUST be hashed via `auth-crypto.ts` using PBKDF2 (100k iterations, SHA-256, random 16-byte salt). Raw SHA-256 without salt is legacy read-only â€” never use for new user creation.
+2. **Password Hashing**: Client-side passwords MUST be hashed via `auth-crypto.ts` using PBKDF2 (100k iterations, SHA-256, random 16-byte salt). Raw SHA-256 without salt is legacy read-only — never use for new user creation.
 3. **Session Storage**: Logged-in user session MUST be stored in `sessionStorage` only (key: `loggedInUser`). No password, hash, or token ever written to `localStorage`.
-4. **Logging â€” No PII, No Secrets**: Log entries MUST NOT contain passwords, hashes, tokens, full names, or email addresses. Use user `_id` for audit identity only.
+4. **Logging — No PII, No Secrets**: Log entries MUST NOT contain passwords, hashes, tokens, full names, or email addresses. Use user `_id` for audit identity only.
 5. **No Secrets in Source**: No API keys, tokens, or production credentials in any Angular source file. `environment.ts` uses empty string placeholders only.
 6. **Angular XSS**: `[innerHTML]` bindings are forbidden unless explicitly sanitized via `DomSanitizer.bypassSecurityTrustHtml()` with documented justification. Never use `bypassSecurityTrust*` for URL, resource URL, or script contexts.
 7. **Production Readiness** (`useBackendAuth: true`): Enforce HTTPS, require CSP / `X-Frame-Options` / `X-Content-Type-Options` headers, rate-limit login/signup endpoints, prefer httpOnly cookies over sessionStorage for access tokens.
@@ -53,7 +53,7 @@ paths:
 - [ ] `localStorage` contains no passwords, hashes, or tokens
 - [ ] `sessionStorage` session key cleared on logout
 - [ ] PBKDF2 used for all new password hashing (not raw SHA-256)
-- [ ] No PII (names, emails) in localStorage keys or log entries â€” user `_id` only
+- [ ] No PII (names, emails) in localStorage keys or log entries — user `_id` only
 - [ ] Backup keys in localStorage store only data entities, never credentials
 
 **Prompt Injection**
@@ -71,8 +71,8 @@ paths:
 **Code Quality Security**
 - [ ] No deprecated or vulnerable dependencies
 - [ ] Error handling does not expose stack traces to user (generic messages in production)
-- [ ] `LoggingService` used for all error/event logging â€” no bare `console.log` with sensitive data
-- [ ] Crypto implementations use `auth-crypto.ts` â€” no custom crypto
+- [ ] `LoggingService` used for all error/event logging — no bare `console.log` with sensitive data
+- [ ] Crypto implementations use `auth-crypto.ts` — no custom crypto
 
 ---
 
@@ -89,17 +89,17 @@ All agents read file contents, localStorage data, recipe names, product descript
 
 ---
 
-## Backend Security Rules (Plan 217 â€” added 2026-03-27)
+## Backend Security Rules (Plan 217 — added 2026-03-27)
 
 These rules apply to the Express server (`server/`) and are non-negotiable for production:
 
-9. **Authenticated Reads**: ALL API routes including GET must require a valid JWT. Unauthenticated reads are not permitted â€” `router.use(verifyToken)` must come before all route handlers in `generic.js`.
-10. **JWT Expiry**: Access tokens must expire in â‰¤ 15 minutes. Refresh tokens (30d) must be stored as httpOnly cookies â€” never in localStorage or sessionStorage.
+9. **Authenticated Reads**: ALL API routes including GET must require a valid JWT. Unauthenticated reads are not permitted — `router.use(verifyToken)` must come before all route handlers in `generic.js`.
+10. **JWT Expiry**: Access tokens must expire in ≤ 15 minutes. Refresh tokens (30d) must be stored as httpOnly cookies — never in localStorage or sessionStorage.
 11. **Rate Limiting**: `/api/v1/auth/login` must be rate-limited to 10 req/15min/IP. `/api/v1/auth/signup` must be rate-limited to 5 req/1h/IP. Use `express-rate-limit`.
 12. **Account Lockout**: After 5 consecutive failed login attempts, the account must be locked for 15 minutes (`lockedUntil` field in user document). Reset on successful login.
 13. **replaceAll Guard**: `PUT /api/v1/data/:type` (no id) requires `X-Confirm-Replace: true` header. Missing header returns 400. Angular `HttpStorageAdapter.replaceAll()` must set this header.
-14. **Server Logging**: All requests must be logged (method, URL, status, duration) via `morgan`. Never log request/response bodies. Use `console.error` for errors with event context only â€” no stack traces to client in production.
+14. **Server Logging**: All requests must be logged (method, URL, status, duration) via `morgan`. Never log request/response bodies. Use `console.error` for errors with event context only — no stack traces to client in production.
 15. **Body Size Cap**: `express.json({ limit: '2mb' })` must be set. No unbounded request bodies.
-16. **No Stack Traces in Production**: Global error handler must check `NODE_ENV === 'production'` and return `{ error: 'Internal server error' }` only â€” never the stack.
+16. **No Stack Traces in Production**: Global error handler must check `NODE_ENV === 'production'` and return `{ error: 'Internal server error' }` only — never the stack.
 17. **PBKDF2 Pass-through**: Angular hashes passwords client-side (PBKDF2, saltHex:hashHex). Backend stores the incoming hash as-is at signup. Backend compares the incoming hash directly at login (`timingSafeEqual`). Backend must NEVER re-hash an already-hashed value.
 

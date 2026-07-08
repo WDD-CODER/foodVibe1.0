@@ -1,16 +1,16 @@
 ﻿---
 name: github-sync
-description: Pulls recent GitHub activity and syncs the local branch at session start or after time away â€” runs once per calendar day.
+description: Pulls recent GitHub activity and syncs the local branch at session start or after time away — runs once per calendar day.
 ---
 
 # Skill: github-sync
 
-**Trigger:** Session start or after time away. **Once-per-day gate:** Check `notes/github-sync/<today-date>.md` first â€” if it exists, skip and print `âœ“ GitHub sync already ran today`. Only run if missing.
-**Standard:** Session start rules are in session context from startup â€” no file reload needed.
+**Trigger:** Session start or after time away. **Once-per-day gate:** Check `notes/github-sync/<today-date>.md` first — if it exists, skip and print `âœ“ GitHub sync already ran today`. Only run if missing.
+**Standard:** Session start rules are in session context from startup — no file reload needed.
 
 ---
 
-## Phase 0: Worktree Remote Cleanup `[Procedural â€” Haiku/Composer (Fast/Flash)]`
+## Phase 0: Worktree Remote Cleanup `[Procedural — Haiku/Composer (Fast/Flash)]`
 
 **Check for breadcrumb:** If `.worktree-cleanup` exists in the repo root:
 1. Read each line (one branch name per line)
@@ -24,7 +24,7 @@ If `.worktree-cleanup` does not exist, skip this phase entirely.
 
 ---
 
-## Phase 1: Environment Audit `[Procedural â€” Haiku/Composer (Fast/Flash)]`
+## Phase 1: Environment Audit `[Procedural — Haiku/Composer (Fast/Flash)]`
 
 **Status Check:** Run `git status` and `git fetch`.
 
@@ -34,11 +34,11 @@ If `.worktree-cleanup` does not exist, skip this phase entirely.
 
 ---
 
-## Phase 2: Synchronization `[Procedural â€” Haiku/Composer (Fast/Flash)]`
+## Phase 2: Synchronization `[Procedural — Haiku/Composer (Fast/Flash)]`
 
 **Pull / Rebase:** Execute `git pull --rebase` for clean history.
 
-**Stash Management:** If uncommitted changes exist: `git stash` â†’ sync â†’ `git stash pop`.
+**Stash Management:** If uncommitted changes exist: `git stash` → sync → `git stash pop`.
 
 **Branch Cleanup:** Identify merged local branches safe to delete.
 
@@ -52,19 +52,19 @@ If `.worktree-cleanup` does not exist, skip this phase entirely.
 if (!(Test-Path ".git/hooks/post-commit")) {
     Copy-Item ".claude/hooks/post-commit" ".git/hooks/post-commit" -Force
     Copy-Item ".claude/hooks/post-merge"  ".git/hooks/post-merge"  -Force
-    Write-Host "Auto Memory hooks installed"
+    Write-Host "Git hooks installed"
 }
 ```
 
-If `.git/hooks/post-commit` already exists â†’ skip silently. No output.
+If `.git/hooks/post-commit` already exists → skip silently. No output.
 
 ---
 
-## Phase 3: Session Intelligence `[High Reasoning â€” Sonnet/Gemini 1.5 Pro]`
+## Phase 3: Session Intelligence `[High Reasoning — Sonnet/Gemini 1.5 Pro]`
 
 **Daily Log Audit:** Read latest `.claude/sessions/*/session-handoff.md` (preferred) or `notes/session-handoffs/` (legacy fallback) and `notes/github-sync/` files. Summarize the "State of the Project" for the current session.
 
-**GitHub Context:** Read open PRs via MCP (`mcp__github__list_pull_requests`) â†’ fallback to `gh pr list`. Surface any pending reviews or CI failures.
+**GitHub Context:** Read open PRs via MCP (`mcp__github__list_pull_requests`) → fallback to `gh pr list`. Surface any pending reviews or CI failures.
 
 **Todo Alignment:** Verify `.claude/todo.md` matches the current branch state.
 

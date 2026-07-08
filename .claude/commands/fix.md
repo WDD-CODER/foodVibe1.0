@@ -18,12 +18,12 @@ Use this path for fixing bugs, errors, and broken behavior.
 
 | Area | Standards loaded |
 |------|-----------------|
-| `css` | `.claude/standards-angular.md §CSS` + `cssLayer` skill |
-| `auth` | `.claude/standards-security.md` + `auth-and-logging` + `auth-crypto` |
-| `data` | `.claude/standards-domain.md` + `standards-backend.md` |
-| `ui` | `.claude/standards-angular.md §Components` + `standards-domain.md` |
-| `api` | `standards-backend.md` + `standards-security.md §API` |
-| `other` | `.claude/copilot-instructions.md` (full read) |
+| `css` | `.claude/rules/angular.md` (CSS section) + `cssLayer` skill |
+| `auth` | `.claude/rules/security.md` + `auth-and-logging` + `auth-crypto` |
+| `data` | `.claude/rules/domain.md` + `.claude/rules/backend.md` |
+| `ui` | `.claude/rules/angular.md` (Components) + `.claude/rules/domain.md` |
+| `api` | `.claude/rules/backend.md` + `.claude/rules/security.md` |
+| `other` | `.claude/rules/` (path-scoped) + `CLAUDE.md` |
 
 ## Invokes
 
@@ -33,13 +33,14 @@ Use this path for fixing bugs, errors, and broken behavior.
 ## Typical flow
 
 1. User describes the bug (area + symptom).
-2. `investigate` traces the root cause (reads MemPalace, checks failure log, reads source).
+2. `investigate` traces the root cause (checks recent changes, failure history, source).
 3. Fix is implemented atomically — one targeted change.
 4. `elegant-fix` reviews the fix for code quality, edge cases, and consistency.
-5. `ng build` passes. PR created.
+5. `ng build` / `ng lint` pass. Human commits via `git-agent` prep.
 
 ## Hard rules
 
 - NEVER fix a symptom without identifying the root cause first.
 - `ng build` must pass before committing.
 - No semicolons in any `.ts` file touched during the fix.
+- 3-strike rule: at most 3 autonomous fix attempts in scoped files; then STOP and report.
