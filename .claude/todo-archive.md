@@ -1971,3 +1971,21 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Rewrite `render.yaml` — fix buildCommand, MONGO_URI key, JWT_SECRET generateValue, remove PORT
 - [x] `package.json` (root) — add engines field
 - [x] PR + merge `feat/render-deploy` *(PR #53, merged 2026-03-29 — confirmed)*
+
+## Plan 288 — User Management Card (archived 2026-07-08)
+
+### Plan 288 — User Management Card (`plans/288-user-management-card.plan.md`)
+
+- [x] Task 1: `server/constants/all-user-entity-types.js` — create with ALL_USER_ENTITY_TYPES (22 strings)
+- [x] Task 2: `server/routes/admin.js` — create with GET /users and DELETE /users/:userId
+- [x] Task 3: `server/index.js` — mount adminRouter at /api/v1/admin
+- [x] Task 4: `src/app/core/models/admin-user.model.ts` — create AdminUser interface
+- [x] Task 5: `src/app/core/services/user-admin.service.ts` — create with getUsers() and deleteUser()
+- [x] Task 6: `src/app/pages/metadata-manager/components/user-management/user-management.component.ts` — create
+- [x] Task 7: `src/app/pages/metadata-manager/components/user-management/user-management.component.html` — create
+- [x] Task 8: `metadata-manager.page.component.html` — insert <app-user-management />
+- [x] Task 9: `metadata-manager.page.component.ts` — add UserManagementComponent to imports
+- [x] Task 10: ng build gate — zero errors
+- [x] Task 11: .claude/commands/plan-implementation.md — OBSOLETE: command retired in three-agent cutover (native Plan Mode). Closed by smoke-test Milestone 1 2026-07-08.
+
+---

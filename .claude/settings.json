@@ -89,24 +89,24 @@
     ],
     "PostToolUse": [
       {
+        "matcher": ".*",
         "hooks": [
           {
             "type": "command",
             "command": "python scripts/context-monitor.py",
             "timeout": 5
           }
-        ],
-        "matcher": ".*"
+        ]
       },
       {
+        "matcher": "Edit|Write",
         "hooks": [
           {
             "type": "command",
             "command": "python3 scripts/session-manifest-hook.py",
             "timeout": 5
           }
-        ],
-        "matcher": "Edit|Write"
+        ]
       }
     ],
     "PreCompact": [
