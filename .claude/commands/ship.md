@@ -111,40 +111,33 @@ the **same** commit as the shipped files.
 
 1. Append (or create) `/sessions/[YYYY-MM-DD].md` with:
    - Branch, date, short summary, files to be committed, Verify bullets
-   - `Commit: pending` (placeholder)
+   - `Commit: included in this /ship commit` — **do not** put a real SHA in the file
+     (a commit cannot contain its own final hash; printing the SHA is for the
+     chat Output summary only)
    - `Push: yes | no` (intent from Human request)
 2. Also update `.claude/.session-state-path` / `docs/session-state.md` if that path is
    the active capsule — same rule: write **before** commit, not after push.
 3. Todo: mark `[x]` only for items the Human confirmed done this session — do not invent.
    If todo files change, add them to the stage list now.
 
-### 3.1 Stage + commit
+### 3.1 Stage + commit (single commit — no post-commit wrap edits)
 
 1. `git add` **only** the listed paths **plus** the session wrap file(s) from 3.0
    (never `git add -A` unless Human overrode scope).
 2. `git commit` with the proposed Conventional Commit message.
    Include trailer when using Cursor: `Co-authored-by: Cursor <cursoragent@cursor.com>`.
+3. **Do not** edit the session wrap again after this commit. No amend-for-SHA.
+   Report the real SHA only in the Output summary (`git rev-parse --short HEAD`).
 
-### 3.2 Fill real SHA (amend BEFORE any push)
-
-1. Read `git rev-parse --short HEAD`.
-2. Replace `Commit: pending` in the session wrap with `Commit: {sha} — {subject}`.
-3. `git add` that session file only.
-4. `git commit --amend --no-edit` — **allowed only when all of these are true:**
-   - This `/ship` just created HEAD (same agent turn)
-   - HEAD has **not** been pushed yet
-   - No other commits landed in between
-5. **Never** amend after a successful push. **Never** force-push to rewrite remote.
-
-### 3.3 Push (only if Human asked)
+### 3.2 Push (only if Human asked)
 
 1. `git push -u origin HEAD` only if Human said “push” / “ship and push”.
 2. After successful commit (and push if any): delete
    `.claude/sessions/<current-branch>/manifest.txt` if it exists.
 3. Confirm `git status --short` is clean for this-chat paths. If the session wrap is
-   still dirty, you violated 3.0–3.2 — fix before ending (do **not** ask the Human for
+   still dirty, you violated 3.0–3.1 — fix before ending (do **not** ask the Human for
    another push for wrap-only dirt you created).
-4. Never commit to `main`. Never force-push.
+4. Never commit to `main`. Never force-push. Never amend after push.
 
 If on `feat/session-*`, propose a semantic rename in the confirmation block; rename
 between commit and push only after Human OK (or as part of `--yes` if they already
@@ -161,7 +154,7 @@ Scope: this-chat ({n} files) | override ({note})
 Commit: {sha or none}
 Push: yes | no
 Verify bullets: {n} shown
-Session state: {path}  (included in Commit — tree clean)
+Session state: {path}  (staged in same commit — tree clean after push)
 ```
 
 ---
