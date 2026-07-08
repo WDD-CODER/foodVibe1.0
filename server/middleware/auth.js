@@ -1,10 +1,10 @@
 const jwt = require('jsonwebtoken');
 
-const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET;
+const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
 
 /**
  * JWT verification middleware.
- * Reads Bearer token from the Authorization header, verifies it against JWT_SECRET,
+ * Reads Bearer token from the Authorization header, verifies it against JWT_ACCESS_SECRET,
  * and attaches the decoded payload to req.user.
  *
  * @param {import('express').Request} req
