@@ -1,8 +1,2 @@
----
-description: Save-plan skill — fires when message contains "save" + it/that/this/plan with a plan in context
-alwaysApply: true
----
+﻿# Retired — three-agent cutover in progress. See PRD-three-agent-cutover.md. Replaced by .cursorrules in Phase 3.
 
-Trigger (case-insensitive) when the message contains "save" AND one of: `it`, `that`, `this`, `plan` — and a plan has been confirmed in this conversation.
-
-When triggered, read [.claude/skills/save-plan/SKILL.md](.claude/skills/save-plan/SKILL.md) and write only to the project `plans/` folder with correct numbering.

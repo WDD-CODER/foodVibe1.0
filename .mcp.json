@@ -1,4 +1,4 @@
-{
+﻿{
   "mcpServers": {
     "github": {
       "command": "cmd",
@@ -6,10 +6,6 @@
       "env": {
         "GITHUB_TOKEN": "${GITHUB_TOKEN}"
       }
-    },
-    "mempalace": {
-      "command": "python",
-      "args": ["-m", "mempalace.mcp_server"]
     }
   }
 }

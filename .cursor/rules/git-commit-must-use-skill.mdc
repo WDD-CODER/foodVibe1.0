@@ -1,8 +1,2 @@
----
-description: Git operations must use the git-agent (visual plan + approval)
-alwaysApply: true
----
+﻿# Retired — three-agent cutover in progress. See PRD-three-agent-cutover.md. Replaced by .cursorrules in Phase 3.
 
-When the user asks to commit, push, create a PR, merge, or perform any git operation,
-read `.claude/agents/git-agent.md` and follow it. No git writes until the user approves
-the visual plan.

@@ -1,19 +1,2 @@
----
-description: Session end — produce structured summary when user signals end of session
-globs: []
----
+﻿# Retired — three-agent cutover in progress. See PRD-three-agent-cutover.md. Replaced by .cursorrules in Phase 3.
 
-Trigger when the user says any of the following (case-insensitive, partial match acceptable):
-
-> "wrap up", "done for today", "session end", "handoff",
-> "I'm done", "that's it for today", "goodbye", "EOD",
-> "end of day", "logging off", "I'll stop here"
-
-### Workflow
-
-Read `.claude/agents/end-of-session-agent.md` and follow its full phase pipeline.
-
-The agent handles all session-closing workflows in one deterministic sequence:
-brief check → mid-session check → environment detection → state assessment → build gate → techdebt scan → git operations → todo archive → doc refresh → plan cleanup → session evaluation → write session-handoff.md → present to user → sync check.
-
-> **Note:** The agent subsumes the previous standalone sweep + handoff workflow. Do not run `session-handoff/SKILL.md` or `sweep-stale-todos.md` separately — the agent invokes them internally.

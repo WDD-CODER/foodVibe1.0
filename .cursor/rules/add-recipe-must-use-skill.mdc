@@ -1,6 +1,2 @@
----
-description: Add recipe/dish requests must use the add-recipe skill; Step 3 confirmation before any write
-alwaysApply: true
----
+﻿# Retired — three-agent cutover in progress. See PRD-three-agent-cutover.md. Replaced by .cursorrules in Phase 3.
 
-When the user adds a recipe or dish from image or text, read [.claude/skills/add-recipe/SKILL.md](.claude/skills/add-recipe/SKILL.md) and present the visual tree for confirmation before writing.
