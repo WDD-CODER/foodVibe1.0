@@ -1,15 +1,15 @@
----
-name: standards-backend
-description: Backend collection registry, API contract, and persistence rules. Load when any feature adds, modifies, or removes persisted data.
+﻿---
+paths:
+  - "server/**"
 ---
 
 # Backend Persistence Standards
 
-## 0 — Tech Stack (verified 2026-04-11)
+## 0 â€” Tech Stack (verified 2026-04-11)
 
 | Layer | Technology | Version | Notes |
 |---|---|---|---|
-| **Runtime** | Node.js | v22.22.2 | ⚠️ v22+ has a DNS SRV bug on Windows — `index.js` sets `dns.setServers(['8.8.8.8','8.8.4.4'])` at the top as a workaround |
+| **Runtime** | Node.js | v22.22.2 | âš ï¸ v22+ has a DNS SRV bug on Windows â€” `index.js` sets `dns.setServers(['8.8.8.8','8.8.4.4'])` at the top as a workaround |
 | **Framework** | Express.js | 4.21.2 | |
 | **ODM** | Mongoose | 8.9.2 | |
 | **Database** | MongoDB Atlas | managed (M0 free tier) | SRV connection string: `mongodb+srv://` |
@@ -22,11 +22,11 @@ description: Backend collection registry, API contract, and persistence rules. L
 
 > Load this file when: adding a new entity type, adding new fields to an existing entity, changing CRUD logic in a data service, creating a new data service, or building any UI that reads/writes persisted data.
 
-> **Security**: Backend API security rules (JWT, rate-limiting, PBKDF2, etc.) live in `standards-security.md §9–17`. Do not duplicate them here.
+> **Security**: Backend API security rules (JWT, rate-limiting, PBKDF2, etc.) live in `standards-security.md Â§9â€“17`. Do not duplicate them here.
 
 ---
 
-## 1 — Collection Registry
+## 1 â€” Collection Registry
 
 > **Canonical reference.** `BACKUP_ENTITY_TYPES` in `src/app/core/services/async-storage.service.ts` is the code-level source of truth. This table must stay in sync with it.
 
@@ -59,7 +59,7 @@ description: Backend collection registry, API contract, and persistence rules. L
 
 ---
 
-## 2 — When This Applies
+## 2 â€” When This Applies
 
 Load this standard when a plan or feature involves any of:
 
@@ -71,7 +71,7 @@ Load this standard when a plan or feature involves any of:
 
 ---
 
-## 3 — New Collection Checklist
+## 3 â€” New Collection Checklist
 
 When a feature needs a new persisted entity type:
 
@@ -80,48 +80,49 @@ When a feature needs a new persisted entity type:
 3. Choose an `entityType` key: `SCREAMING_SNAKE_CASE`, domain-prefixed (`KITCHEN_*`, `MENU_*`, `TRASH_*`)
 4. Add the key to `BACKUP_ENTITY_TYPES` in `async-storage.service.ts`
 5. Add a `reloadFromStorage()` method and wire it into `BackupService.reloadAllDataServices()`
-6. **No server changes needed** — generic routes use native `collection(type)` access (no Mongoose model for entity types; `server/routes/generic.js` calls `mongoose.connection.db.collection(type)` directly)
+6. **No server changes needed** â€” generic routes use native `collection(type)` access (no Mongoose model for entity types; `server/routes/generic.js` calls `mongoose.connection.db.collection(type)` directly)
 7. If the new entity needs a dedicated endpoint beyond generic CRUD, add it to `server/routes/` and document it in this file
 
 ---
 
-## 4 — Existing Feature Persistence Check
+## 4 â€” Existing Feature Persistence Check
 
 When modifying an existing feature:
 
 - Identify which `entityType` the feature reads/writes (use the registry table above)
 - Confirm the data service already handles the CRUD path
-- **Adding new fields**: no backend migration needed (schema-less `Mixed` storage) — update the TypeScript model only
+- **Adding new fields**: no backend migration needed (schema-less `Mixed` storage) â€” update the TypeScript model only
 - **Changing persisted data shape**: consider backward compatibility for existing documents in both localStorage and MongoDB
 
 ---
 
-## 5 — Backend API Contract
+## 5 â€” Backend API Contract
 
-All routes require `Authorization: Bearer <token>` (see `standards-security.md §9` — authenticated reads, no public endpoints).
+All routes require `Authorization: Bearer <token>` (see `standards-security.md Â§9` â€” authenticated reads, no public endpoints).
 
 | Method | Path | Description |
 |---|---|---|
-| `GET` | `/api/v1/data/:type` | List all — mirrors `StorageService.query()` |
-| `GET` | `/api/v1/data/:type/:id` | Get one — mirrors `StorageService.get()` |
+| `GET` | `/api/v1/data/:type` | List all â€” mirrors `StorageService.query()` |
+| `GET` | `/api/v1/data/:type/:id` | Get one â€” mirrors `StorageService.get()` |
 | `POST` | `/api/v1/data/:type` | Create (body must include `_id`) |
-| `PUT` | `/api/v1/data/:type/:id` | Replace one — mirrors `StorageService.put()` |
+| `PUT` | `/api/v1/data/:type/:id` | Replace one â€” mirrors `StorageService.put()` |
 | `PUT` | `/api/v1/data/:type` | Replace all (requires `X-Confirm-Replace: true` header) |
 | `DELETE` | `/api/v1/data/:type/:id` | Remove one |
 
-> `BLOCKED_ENTITY_TYPES`: `signed-users-db` and `users` return `403` from the generic router — managed exclusively by the auth router.
+> `BLOCKED_ENTITY_TYPES`: `signed-users-db` and `users` return `403` from the generic router â€” managed exclusively by the auth router.
 
 ---
 
-## 6 — Plan Annotation Rule
+## 6 â€” Plan Annotation Rule
 
 Every implementation plan that touches persisted data **MUST** include a `## Backend Impact` section:
 
 ```markdown
 ## Backend Impact
 - Collections affected: [list entityType keys]
-- New collections: [yes/no — if yes, list with justification]
-- Server changes needed: [yes/no — if yes, describe]
+- New collections: [yes/no â€” if yes, list with justification]
+- Server changes needed: [yes/no â€” if yes, describe]
 ```
 
-If the answer to all three is "no impact", write `## Backend Impact — None` explicitly. This makes the decision visible rather than assumed.
+If the answer to all three is "no impact", write `## Backend Impact â€” None` explicitly. This makes the decision visible rather than assumed.
+

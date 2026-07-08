@@ -3,7 +3,7 @@
                 "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS":  "1"
             },
     "permissions":  {
-                        "defaultMode":  "bypassPermissions",
+                        "defaultMode":  "plan",
                         "allow":  [
                                       "Bash(*)",
                                       "Write(C:/foodCo/foodVibe1.0/**)",
@@ -137,5 +137,8 @@
     "disabledMcpjsonServers":  [
                                    "github",
                                    "context7"
-                               ]
+                               ],
+    "enabledPlugins":  {
+                           "security-guidance@claude-plugins-official":  true
+                       }
 }

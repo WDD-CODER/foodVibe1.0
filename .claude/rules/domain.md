@@ -1,6 +1,7 @@
----
-name: standards-domain
-description: Domain standards — translation, Hebrew canonical values, and Lucide icon registration. Load on demand — do not pre-load at session start.
+﻿---
+paths:
+  - "src/app/**/*.html"
+  - "public/assets/data/dictionary.json"
 ---
 
 # Domain Standards
@@ -12,23 +13,23 @@ description: Domain standards — translation, Hebrew canonical values, and Luci
 ## Translation (Hebrew UI)
 
 * All user-facing text via `translatePipe` and `dictionary.json` (`public/assets/data/dictionary.json`). Keys: lowercase, underscores. Sections: `units`, `categories`, `allergens`, `general`.
-* When adding a key, add Hebrew translation to the right section — never hardcode Hebrew in templates.
+* When adding a key, add Hebrew translation to the right section â€” never hardcode Hebrew in templates.
 
 ---
 
 ## Hebrew-Primary Canonical Values (avoid duplicates)
 
-* When the app accepts user input stored as a **canonical identifier** (unit symbol, category, allergen, section category, preparation category), resolve Hebrew input to the existing canonical key from the dictionary so the same concept is not stored twice (e.g. "יחידה" → "unit").
+* When the app accepts user input stored as a **canonical identifier** (unit symbol, category, allergen, section category, preparation category), resolve Hebrew input to the existing canonical key from the dictionary so the same concept is not stored twice (e.g. "×™×—×™×“×”" â†’ "unit").
 * Use `TranslationService`: `resolveUnit`, `resolveCategory`, `resolveAllergen`, `resolveSectionCategory`, `resolvePreparationCategory`. Each returns the canonical key if the trimmed input equals a known Hebrew value; otherwise returns `null`.
 * **If there is no matching key**: Prompt the user for the **English** value (canonical key), then call `translationService.promptForEnglishKeyAndAdd(hebrewLabel)` or `updateDictionary(englishKey, hebrewLabel)` so the dictionary grows and future input resolves correctly.
-* **Units only**: When adding a measurement unit to a product (e.g. purchase option), after resolving or creating the unit, check whether **this product** already has that unit symbol; if yes, do not add a duplicate — use existing or show "already on this product".
+* **Units only**: When adding a measurement unit to a product (e.g. purchase option), after resolving or creating the unit, check whether **this product** already has that unit symbol; if yes, do not add a duplicate â€” use existing or show "already on this product".
 * New add-item / add-unit / add-category flows must use this resolution flow before persisting.
 
 ---
 
-## Translation Modal (Hebrew → English key)
+## Translation Modal (Hebrew â†’ English key)
 
-* For flows that need a prompt for the English canonical key, use the existing **translation-key modal** in `src/app/shared/` — not a new dialog. Match its implementation for editable Hebrew, initial focus, and when "Continue without saving" appears.
+* For flows that need a prompt for the English canonical key, use the existing **translation-key modal** in `src/app/shared/` â€” not a new dialog. Match its implementation for editable Hebrew, initial focus, and when "Continue without saving" appears.
 
 ---
 
@@ -39,3 +40,4 @@ description: Domain standards — translation, Hebrew canonical values, and Luci
 * Template uses kebab-case (`circle-user-round`); TypeScript uses PascalCase (`CircleUserRound`).
 * Missing registration causes runtime error: *"The '...' icon has not been provided by any available icon providers."*
 * **Execution gate**: After any task that adds a `<lucide-icon>` to a template, grep the template for every icon name added, then verify each one is present in both the `import { ... } from 'lucide-angular'` block AND the `LucideAngularModule.pick({ ... })` call in `app.config.ts`. This check must pass before the task is marked `[x]`.
+

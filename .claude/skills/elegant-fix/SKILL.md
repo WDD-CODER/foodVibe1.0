@@ -1,4 +1,4 @@
----
+﻿---
 name: elegant-fix
 description: Refines a working but mediocre fix into a clean, idiomatic solution after the initial implementation is confirmed to work.
 ---
@@ -8,21 +8,21 @@ description: Refines a working but mediocre fix into a clean, idiomatic solution
 
 **Trigger:** After any fix that feels hacky, before submitting a PR with "I know this isn't ideal" comments, or when duplicate logic or too many special cases are noticed.
 
-**Code Quality Rules (inline — no guide read required):**
+**Code Quality Rules (inline â€” no guide read required):**
 - Naming: PascalCase classes, kebab-case selectors, `is`/`has` boolean flags
-- No nested subscriptions — use `computed()` and `effect()` correctly
-- No `@Input`/`@Output` decorators — use `input()`, `output()`, `model()` signals
-- No `BehaviorSubject` — use `signal()` instead
+- No nested subscriptions â€” use `computed()` and `effect()` correctly
+- No `@Input`/`@Output` decorators â€” use `input()`, `output()`, `model()` signals
+- No `BehaviorSubject` â€” use `signal()` instead
 - No `any` types, no semicolons in TypeScript
-- Components >300 lines → candidate for split/refactor
-- Reusable logic → `src/app/core/services/util.service.ts`
+- Components >300 lines â†’ candidate for split/refactor
+- Reusable logic â†’ `src/app/core/services/util.service.ts`
 - Adapter/Facade pattern for logic too coupled to external APIs or storage
-- CSS touched during refactor → run `cssLayer` skill
+- CSS touched during refactor â†’ run `cssLayer` skill
 
 ---
 
-## Phase 0 — MemPalace Orient (CONDITIONAL)
-Run `mempalace_search(query="<keywords>", limit=3)` ONLY if task involves an unfamiliar code area or known-recurring debt category. Skip for routine cleanup or pattern application. Default: skip. If MCP unavailable: skip silently.
+## Phase 0 â€” Auto Memory Orient (CONDITIONAL)
+Run `Auto Memory_search(query="<keywords>", limit=3)` ONLY if task involves an unfamiliar code area or known-recurring debt category. Skip for routine cleanup or pattern application. Default: skip. If MCP unavailable: skip silently.
 
 ---
 
@@ -30,7 +30,7 @@ Run `mempalace_search(query="<keywords>", limit=3)` ONLY if task involves an unf
 
 **Identify Smell:** Scan for nested subscriptions, large components (>300 lines), or one-off utility functions that belong in `core/utils/`.
 
-**State Check:** Identify any Signal-leaking or untracked state — any reactive value not managed via `signal()` or `computed()`.
+**State Check:** Identify any Signal-leaking or untracked state â€” any reactive value not managed via `signal()` or `computed()`.
 
 **Duplication Scan:** Flag any copied logic blocks that should be extracted as pure functions.
 
@@ -52,7 +52,7 @@ Run `mempalace_search(query="<keywords>", limit=3)` ONLY if task involves an unf
 
 **Naming:** Verify PascalCase classes, kebab-case selectors, `is`/`has` boolean flags throughout.
 
-**CSS Alignment:** If any local styles were touched during refactor → invoke `cssLayer` skill.
+**CSS Alignment:** If any local styles were touched during refactor â†’ invoke `cssLayer` skill.
 
 ---
 
@@ -60,4 +60,5 @@ Run `mempalace_search(query="<keywords>", limit=3)` ONLY if task involves an unf
 
 Output: `"Refactored [target] for elegance. [Summary of what was extracted, simplified, or converted]."`
 
-If the refactor touches critical business logic → invoke QA Engineer for verification before committing.
+If the refactor touches critical business logic â†’ invoke QA Engineer for verification before committing.
+
