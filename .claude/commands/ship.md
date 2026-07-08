@@ -52,6 +52,9 @@ ng build
 
 Flag secrets / `.env` — never stage them.
 
+**Always include** the session wrap path in the stage list (even if not yet dirty):
+`/sessions/[YYYY-MM-DD].md` (create/append in Phase 3.0 before `git add`).
+
 ### 2.2 Present confirmation block (always, including `--yes`)
 
 Use this exact shape (markdown `text` fence):
@@ -67,6 +70,7 @@ Proposed commit:
 Files to stage:
   ├── file1
   ├── file2
+  ├── sessions/YYYY-MM-DD.md   (session wrap — same commit)
   └── file3
 
 Verify (you — quick pass):
@@ -97,31 +101,54 @@ Rules:
 
 ---
 
-## Phase 3 — Agent commits (authorized by /ship)
+## Phase 3 — Session wrap + commit + optional push (one shot)
 
-1. `git add` **only** the listed paths (one call or per-file; never `git add -A` unless
-   Human overrode scope).
+**Goal:** after `/ship` finishes (especially with push), the working tree must **not**
+have a leftover dirty `sessions/*.md` that forces a second push. Session wrap lives in
+the **same** commit as the shipped files.
+
+### 3.0 Write session wrap BEFORE staging
+
+1. Append (or create) `/sessions/[YYYY-MM-DD].md` with:
+   - Branch, date, short summary, files to be committed, Verify bullets
+   - `Commit: pending` (placeholder)
+   - `Push: yes | no` (intent from Human request)
+2. Also update `.claude/.session-state-path` / `docs/session-state.md` if that path is
+   the active capsule — same rule: write **before** commit, not after push.
+3. Todo: mark `[x]` only for items the Human confirmed done this session — do not invent.
+   If todo files change, add them to the stage list now.
+
+### 3.1 Stage + commit
+
+1. `git add` **only** the listed paths **plus** the session wrap file(s) from 3.0
+   (never `git add -A` unless Human overrode scope).
 2. `git commit` with the proposed Conventional Commit message.
    Include trailer when using Cursor: `Co-authored-by: Cursor <cursoragent@cursor.com>`.
-3. Optional `git push -u origin HEAD` only if Human asked to push.
-4. After successful commit (and push if any): delete
+
+### 3.2 Fill real SHA (amend BEFORE any push)
+
+1. Read `git rev-parse --short HEAD`.
+2. Replace `Commit: pending` in the session wrap with `Commit: {sha} — {subject}`.
+3. `git add` that session file only.
+4. `git commit --amend --no-edit` — **allowed only when all of these are true:**
+   - This `/ship` just created HEAD (same agent turn)
+   - HEAD has **not** been pushed yet
+   - No other commits landed in between
+5. **Never** amend after a successful push. **Never** force-push to rewrite remote.
+
+### 3.3 Push (only if Human asked)
+
+1. `git push -u origin HEAD` only if Human said “push” / “ship and push”.
+2. After successful commit (and push if any): delete
    `.claude/sessions/<current-branch>/manifest.txt` if it exists.
-5. Never commit to `main`. Never force-push.
+3. Confirm `git status --short` is clean for this-chat paths. If the session wrap is
+   still dirty, you violated 3.0–3.2 — fix before ending (do **not** ask the Human for
+   another push for wrap-only dirt you created).
+4. Never commit to `main`. Never force-push.
 
 If on `feat/session-*`, propose a semantic rename in the confirmation block; rename
 between commit and push only after Human OK (or as part of `--yes` if they already
 approved the new name in the prompt).
-
----
-
-## Phase 4 — Session state + todo
-
-1. Write/update session artifact:
-   - Prefer `/sessions/[YYYY-MM-DD].md` (Contractor milestone handoff), and/or
-   - Path in `.claude/.session-state-path` / `docs/session-state.md` if present.
-2. Include: branch, date, short summary, files committed, commit sha, Verify bullets
-   (so the next session knows what the Human was asked to check).
-3. Todo: mark `[x]` only for items the Human confirmed done this session — do not invent.
 
 ---
 
@@ -134,7 +161,7 @@ Scope: this-chat ({n} files) | override ({note})
 Commit: {sha or none}
 Push: yes | no
 Verify bullets: {n} shown
-Session state: {path}
+Session state: {path}  (included in Commit — tree clean)
 ```
 
 ---
@@ -149,3 +176,4 @@ Session state: {path}
 | Agent Memory save | `memory_save` / `memory_lesson_save` |
 | Plan archive | Rename `.plan.md` → `.done.plan.md` or mark Plan Contract `[x]` |
 | Message-only prep (no commit) | `git-agent` |
+| Post-push session-file edits | Forbidden — causes leftover dirty tree |
