@@ -65,5 +65,5 @@ agent evaluates against.
 
 Output: `Session: .claude/sessions/{session-id}`
 
-This line is picked up by `execute-it`, `validation-checklist`, and `end-of-session-agent`
-downstream — it threads the brief through the entire session lifecycle.
+This line threads the brief through the session lifecycle — picked up by `/ship`
+and `/evaluate-me` (the retired `execute-it` / `end-of-session-agent` path is gone).

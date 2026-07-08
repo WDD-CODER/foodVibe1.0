@@ -70,8 +70,8 @@ Target files for suggestions:
 - `.claude/agent.md` — agent personas, gates, workflows
 - `.claude/CLAUDE.md` — base rules, conventions
 - `.claude/skills/*.md` — skill definitions
-- `.claude/commands/*.md` — command prompts (note: some workflows like `execute-it` live here, not in `skills/`)
-- `copilot-instructions.md` — IDE-level guidance
+- `.claude/commands/*.md` — command prompts
+- `CLAUDE.md` / `.cursorrules` — IDE-level guidance
 - `~/.claude/plugins/cache/.../superpowers/` — superpowers skills (edits here are fragile — overwritten on plugin version bump; prefer local project overrides when available; always note cache edits in `CLAUDE.md`)
 
 ## Step 5: Save Report
@@ -80,7 +80,7 @@ Save the full retrospective to:
 `.claude/retrospectives/[TIMESTAMP]-[AGENT-NAME].md`
 
 Use format: `YYYY-MM-DD-HH-MM-agent-name.md`
-Example: `2026-04-02-14-30-software-architect.md`
+Example: `2026-07-08-14-30-reviewer.md`
 
 If multiple agents were used, use primary agent or `multi-agent`.
 
