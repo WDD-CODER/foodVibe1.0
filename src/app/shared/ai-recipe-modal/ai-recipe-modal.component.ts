@@ -49,6 +49,7 @@ export class AiRecipeModalComponent implements OnInit {
   // Shot quality warnings
   protected readonly shotWarnings_ = signal<string[]>([])
   protected readonly awaitingWarningConfirm_ = signal(false)
+  private readonly pendingApprovedDraft_ = signal<AiRecipeDraft | null>(null)
 
   // Shared
   protected readonly loading_ = signal(false)
@@ -198,7 +199,30 @@ export class AiRecipeModalComponent implements OnInit {
   }
 
   onDraftApproved(draft: AiRecipeDraft): void {
-    this.shots.saveShot(this.prompt_(), draft, 'approved', this.inputMode_()).subscribe()
+    this.pendingApprovedDraft_.set(draft)
+    this.shots.saveShot(this.prompt_(), draft, 'approved', this.inputMode_()).subscribe(result => {
+      if (result.warnings?.length) {
+        this.shotWarnings_.set(result.warnings)
+        this.awaitingWarningConfirm_.set(true)
+      } else {
+        this.navigateToBuilder_(draft)
+      }
+    })
+  }
+
+  onConfirmWarnings(): void {
+    const draft = this.pendingApprovedDraft_()
+    if (!draft) return
+    this.navigateToBuilder_(draft)
+  }
+
+  onBackFromWarnings(): void {
+    this.awaitingWarningConfirm_.set(false)
+    this.shotWarnings_.set([])
+    this.pendingApprovedDraft_.set(null)
+  }
+
+  private navigateToBuilder_(draft: AiRecipeDraft): void {
     this.aiDraft.set(draft)
     void this.router.navigate(['/recipe-builder'])
     this.resetLocalState_()
@@ -282,6 +306,7 @@ export class AiRecipeModalComponent implements OnInit {
     this.patch_.set(null)
     this.shotWarnings_.set([])
     this.awaitingWarningConfirm_.set(false)
+    this.pendingApprovedDraft_.set(null)
     this.prompt_.set('')
     this.instruction_.set('')
     this.imageFile_.set(null)
