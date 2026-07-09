@@ -18,7 +18,9 @@ Show all registered slash commands with short descriptions and file locations.
    - `[SHARED]` — usable by Cursor (Contractor) and Claude Code (Reviewer)
    - `[CC]` — primarily Claude Code Reviewer path
 5. Print a markdown table. Do **not** invent commands that are not on disk.
-6. Do **not** list retired commands from the `_index.md` Retired section unless the `.md` file still exists on disk (then mark `LEGACY`).
+6. **Count check (mandatory):** if the number of `.md` files (excluding `_index.md`) ≠
+   table rows, rebuild the table from disk before printing.
+7. Do **not** list retired commands from the `_index.md` Retired section unless the `.md` file still exists on disk (then mark `LEGACY`).
 
 ## Current registry (refresh from disk if stale)
 

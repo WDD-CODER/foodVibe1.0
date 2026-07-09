@@ -42,6 +42,7 @@ Detailed, path-scoped rules load automatically from .claude/rules/ when you touc
 matching files. Don't pre-load them - that's the point of path-scoping.
 
 ## Skill & command discovery
+Replaces retired `copilot-instructions.md` §0 skill-trigger list.
 - **List available skills** `[SHARED]`: User invokes `/skills` -> read
   `.claude/commands/skills.md` and follow it.
 - **List available commands** `[SHARED]`: User invokes `/commands` -> read

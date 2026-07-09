@@ -16,7 +16,9 @@ Show all registered skills with trigger patterns and file locations.
    - `[SHARED]` — usable by Cursor (Contractor) and Claude Code (Reviewer)
    - `[CC]` — Claude Code slash/command path only (or historically CC-gated)
 5. Print a markdown table. Do **not** invent skills that are not on disk.
-6. Optionally append a one-line note if a skill folder exists without `SKILL.md`.
+6. **Count check (mandatory):** if the number of dirs with `SKILL.md` ≠ table rows,
+   rebuild the table from disk before printing (do not print a stale registry).
+7. Optionally append a one-line note if a skill folder exists without `SKILL.md`.
 
 ## Current registry (refresh from disk if stale)
 
