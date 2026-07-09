@@ -66,4 +66,4 @@ agent evaluates against.
 Output: `Session: .claude/sessions/{session-id}`
 
 This line threads the brief through the session lifecycle — picked up by `/ship`
-and `/evaluate-me` (the retired `execute-it` / `end-of-session-agent` path is gone).
+and `/evaluate-me` (legacy end-of-session automation is gone).

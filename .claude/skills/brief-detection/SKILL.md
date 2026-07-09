@@ -34,7 +34,7 @@ Detected structured brief: {one-line goal extracted}.
 
 How should I handle this?
 a. Refine first — discuss before any execution (default)
-b. Execute as-is — /plan-implementation then /execute-it
+b. Execute as-is — /feat (or /plan → Contractor one milestone → /review-it)
 c. Discussion only — no execution
 ```
 
@@ -44,8 +44,8 @@ c. Discussion only — no execution
 
 | Choice | Action |
 |---|---|
-| `a` | Discussion mode — do NOT auto-trigger `/plan-implementation` |
-| `b` | Invoke `/plan-implementation` with the brief, then `/execute-it` on approval |
+| `a` | Discussion mode — do NOT auto-trigger `/plan` or Contractor execution |
+| `b` | Invoke `/feat` (or `/plan` with the brief). After Human approves the Plan Contract: Contractor executes **one milestone**, writes `/sessions/[date].md`, stops; then `/review-it`. Do **not** invoke retired `/plan-implementation` or `/execute-it`. |
 | `c` | Acknowledge, treat as documentation — no execution |
 
 **Default:** Anything other than a/b/c (e.g., "yes", "go", blank) → option `a` (Refine first).

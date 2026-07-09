@@ -48,7 +48,8 @@ Rules of thumb:
 
 ## What retired
 
-Team Leader as execution dispatcher, MemPalace, custom plan-implementation/execute-it,
+Team Leader as execution dispatcher, MemPalace, retired `/plan-implementation` and
+`/execute-it` (use `/feat` → `/plan` → Contractor → `/review-it` instead),
 nightly-audit/reflect cron automation, end-of-session 14-phase agent. See PRD Appendix.
 
 ## Old vs new plans
