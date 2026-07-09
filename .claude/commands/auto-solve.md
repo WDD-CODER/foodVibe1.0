@@ -229,7 +229,7 @@ After marking a plan complete, run `git status --short`. If output is non-empty:
      - Append it to `.claude/todo-archive.md` under the `## Done` section (after the last `---` entry)
      - Remove the block from `.claude/todo.md`, collapsing the surrounding `---` separators so no double-`---` is left behind
   5. Loop back to Phase 0 for next plan
-- **"approve and stop"** → Commit, archive the plan (same step 4 above), then invoke `end-of-session-agent`
+- **"approve and stop"** → Commit (Human via `git-agent` prep), archive the plan (same step 4 above), then `/ship`
 - **"show diff"** → Run `git diff`, then wait for next command
 - **"abort"** → Run `git checkout .` to discard, end session
 

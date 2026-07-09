@@ -3,13 +3,13 @@
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "permissions": {
-    "defaultMode": "bypassPermissions",
+    "defaultMode": "plan",
     "allow": [
       "Bash(*)",
-      "Write(C:/foodCo/foodVibe1.0/**)",
+      "Write(C:/coding projects/Cursor/foodVibe1.0/**)",
       "Write(C:/Users/danwe/.claude/**)",
       "Write(C:/Users/danwe/AppData/Local/Temp/*)",
-      "Edit(C:/foodCo/foodVibe1.0/**)",
+      "Edit(C:/coding projects/Cursor/foodVibe1.0/**)",
       "Edit(C:/Users/danwe/.claude/**)",
       "mcp__ide__getDiagnostics",
       "mcp__playwright__browser_navigate",
@@ -50,25 +50,6 @@
       "mcp__plugin_playwright_playwright__browser_install",
       "mcp__plugin_playwright_playwright__browser_network_requests",
       "mcp__plugin_playwright_playwright__browser_select_option",
-      "mcp__mempalace__mempalace_status",
-      "mcp__mempalace__mempalace_list_wings",
-      "mcp__mempalace__mempalace_list_rooms",
-      "mcp__mempalace__mempalace_get_taxonomy",
-      "mcp__mempalace__mempalace_search",
-      "mcp__mempalace__mempalace_check_duplicate",
-      "mcp__mempalace__mempalace_get_aaak_spec",
-      "mcp__mempalace__mempalace_add_drawer",
-      "mcp__mempalace__mempalace_delete_drawer",
-      "mcp__mempalace__mempalace_kg_query",
-      "mcp__mempalace__mempalace_kg_add",
-      "mcp__mempalace__mempalace_kg_invalidate",
-      "mcp__mempalace__mempalace_kg_timeline",
-      "mcp__mempalace__mempalace_kg_stats",
-      "mcp__mempalace__mempalace_traverse",
-      "mcp__mempalace__mempalace_find_tunnels",
-      "mcp__mempalace__mempalace_graph_stats",
-      "mcp__mempalace__mempalace_diary_write",
-      "mcp__mempalace__mempalace_diary_read",
       "WebFetch",
       "WebSearch",
       "mcp__playwright__browser_drag",
@@ -88,7 +69,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash C:/foodCo/foodVibe1.0/scripts/branch-guard.sh",
+            "command": "\"C:/Program Files/Git/bin/bash.exe\" scripts/branch-guard.sh",
             "timeout": 10
           }
         ]
@@ -100,7 +81,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash C:/foodCo/foodVibe1.0/scripts/session-startup.sh",
+            "command": "\"C:/Program Files/Git/bin/bash.exe\" scripts/session-startup.sh",
             "timeout": 10
           }
         ]
@@ -108,20 +89,11 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "powershell -NoProfile -File C:/foodCo/foodVibe1.0/.claude/reflect/tool-failure-hook.ps1"
-          }
-        ]
-      },
-      {
         "matcher": ".*",
         "hooks": [
           {
             "type": "command",
-            "command": "python C:/foodCo/foodVibe1.0/scripts/context-monitor.py",
+            "command": "python scripts/context-monitor.py",
             "timeout": 5
           }
         ]
@@ -131,7 +103,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 C:/foodCo/foodVibe1.0/scripts/session-manifest-hook.py",
+            "command": "python3 scripts/session-manifest-hook.py",
             "timeout": 5
           }
         ]
@@ -143,7 +115,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash C:/foodCo/foodVibe1.0/scripts/pre-compact-reminder.sh",
+            "command": "\"C:/Program Files/Git/bin/bash.exe\" scripts/pre-compact-reminder.sh",
             "timeout": 5
           }
         ]
@@ -154,7 +126,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash C:/foodCo/foodVibe1.0/scripts/handoff-check.sh",
+            "command": "\"C:/Program Files/Git/bin/bash.exe\" scripts/handoff-check.sh",
             "timeout": 10
           }
         ]
@@ -165,5 +137,8 @@
   "disabledMcpjsonServers": [
     "github",
     "context7"
-  ]
+  ],
+  "enabledPlugins": {
+    "security-guidance@claude-plugins-official": true
+  }
 }

@@ -1,11 +1,11 @@
----
+﻿---
 name: github-sync
 description: Pulls recent GitHub activity and syncs the local branch at session start or after time away — runs once per calendar day.
 ---
 
 # Skill: github-sync
 
-**Trigger:** Session start or after time away. **Once-per-day gate:** Check `notes/github-sync/<today-date>.md` first — if it exists, skip and print `✓ GitHub sync already ran today`. Only run if missing.
+**Trigger:** Session start or after time away. **Once-per-day gate:** Check `notes/github-sync/<today-date>.md` first — if it exists, skip and print `âœ“ GitHub sync already ran today`. Only run if missing.
 **Standard:** Session start rules are in session context from startup — no file reload needed.
 
 ---
@@ -15,8 +15,8 @@ description: Pulls recent GitHub activity and syncs the local branch at session 
 **Check for breadcrumb:** If `.worktree-cleanup` exists in the repo root:
 1. Read each line (one branch name per line)
 2. For each branch name, run: `git push origin --delete <branch-name>`
-   - If it succeeds: log `✓ Deleted remote branch: <branch-name>`
-   - If it fails with "remote ref does not exist": log `✓ Already gone: <branch-name>` (safe to ignore)
+   - If it succeeds: log `âœ“ Deleted remote branch: <branch-name>`
+   - If it fails with "remote ref does not exist": log `âœ“ Already gone: <branch-name>` (safe to ignore)
 3. Delete the `.worktree-cleanup` file after processing all entries
 4. Run `git fetch --prune` to sync remote refs
 
@@ -46,13 +46,13 @@ If `.worktree-cleanup` does not exist, skip this phase entirely.
 
 ## Phase 2.5: Hook Guard (automatic, silent)
 
-After pull, ensure MemPalace git hooks are installed:
+
 
 ```powershell
 if (!(Test-Path ".git/hooks/post-commit")) {
     Copy-Item ".claude/hooks/post-commit" ".git/hooks/post-commit" -Force
     Copy-Item ".claude/hooks/post-merge"  ".git/hooks/post-merge"  -Force
-    Write-Host "MemPalace hooks installed"
+    Write-Host "Git hooks installed"
 }
 ```
 
@@ -75,4 +75,5 @@ If `.git/hooks/post-commit` already exists → skip silently. No output.
 Output: `"GitHub sync complete. Remote changes merged. Local branch is up to date."`
 
 Save sync log to `notes/github-sync/<today-date>.md`.
+
 

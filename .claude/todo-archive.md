@@ -1151,7 +1151,7 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Add updatedAt_ to Recipe model; recipe-data and dish-data: set on add and update
 - [x] Recipe-book-list: add formatUpdatedAt and "Updated at" column (date only); add date_updated to dictionary
 
-### Plan 086 â€” AI Tooling Optimization (`plans/086-ai-tooling-optimization.plan.md`)
+### Plan 086 — AI Tooling Optimization (`plans/086-ai-tooling-optimization.plan.md`)
 
 - [x] F1: Merge entry points (delete HOW-WE-WORK, reduce agent.md, slim agent.md)
 - [x] F3: Refactor copilot-instructions (portable triggers, dedup, fix Section 0)
@@ -1169,7 +1169,7 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Shorten Phase 1 commands; compress example and End State/Related
 - [x] Slim command and rule files; session-scope remains in command only
 
-### Plan 082 â€” Recipe/Dish date added (`plans/082-recipe-dish-date-added.plan.md`) â€” merged to main
+### Plan 082 — Recipe/Dish date added (`plans/082-recipe-dish-date-added.plan.md`) — merged to main
 
 - [x] Add `addedAt_?: number` to Recipe model
 - [x] RecipeDataService: set `addedAt_: Date.now()` in addRecipe; merge existing addedAt_ in updateRecipe
@@ -1180,26 +1180,26 @@ Update status after each sub-task. Link plan files here when applicable.
 
 ---
 
-### Plan 080 â€” Entity storage audit designated (`plans/080-entity-storage-audit-designated.plan.md`)
+### Plan 080 — Entity storage audit designated (`plans/080-entity-storage-audit-designated.plan.md`)
 
 - [x] Add MENU_SECTION_CATEGORIES storage; load/save in menu-intelligence; add to BACKUP_ENTITY_TYPES
 - [x] Add activity log key to BACKUP_ENTITY_TYPES; use constant in ActivityLogService
 
-### Plan 079 â€” Unify logistics search, remove From library (`plans/079-unify-logistics-search-remove-from-library.plan.md`)
+### Plan 079 — Unify logistics search, remove From library (`plans/079-unify-logistics-search-remove-from-library.plan.md`)
 
 - [x] Remove "From library" button and library-only dropdown (recipe-builder.page.html)
 - [x] Use all equipment (not only tools) for search; single dropdown with library + equipment matches (recipe-builder.page.ts)
-- [x] Single select handler: library option â†’ add baseline entry; equipment option â†’ add baseline row (recipe-builder.page.ts)
+- [x] Single select handler: library option → add baseline entry; equipment option → add baseline row (recipe-builder.page.ts)
 - [x] Keep "Save as template" on chips and "Add new tool" in dropdown
 
-### Plan 078 â€” Logistics designated storage (`plans/078-logistics-designated-storage.plan.md`)
+### Plan 078 — Logistics designated storage (`plans/078-logistics-designated-storage.plan.md`)
 
 - [x] Add `LogisticsBaselineItem` type and storage wiring (logistics.model.ts, async-storage.service.ts)
 - [x] Create LogisticsBaselineDataService (query, getById, add, update, remove, allItems_ signal)
 - [x] Recipe builder: inject service; "Add from library" (dropdown + copy into form); "Save as template" per baseline row
 - [x] Add translation keys (from_library, save_as_template) and verify build
 
-### Plan 077 â€” Excel export feature (`plans/077-excel-export-feature.plan.md`)
+### Plan 077 — Excel export feature (`plans/077-excel-export-feature.plan.md`)
 
 - [x] Install xlsx (SheetJS CE) via npm
 - [x] Create ExportService with all four export methods
@@ -1210,23 +1210,23 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Add two export buttons to menu-intelligence.page.html toolbar
 - [x] Add translation keys for all four export actions
 
-### Plan 076 â€” Unified add-recipe skill and create-if-missing (`plans/076-unified-add-recipe-skill-create-if-missing.plan.md`)
+### Plan 076 — Unified add-recipe skill and create-if-missing (`plans/076-unified-add-recipe-skill-create-if-missing.plan.md`)
 
 - [x] Unify image + text triggers and add "Text input" section in SKILL.md
 - [x] Add gap-filling (ask for missing info) and single workflow in SKILL.md
 - [x] Add "Create-if-missing before writing" (products, then equipment) in SKILL.md
 - [x] Update SCHEMA.md with equipment schema and product-creation rules
 - [x] Update HOW-WE-WORK.md "Add recipe from image" to image or text + create-if-missing
-- [x] Add-recipe workflow: rename skill to add-recipe, add command + rule; full Step 5 (visual structure, summary, tables, confirm/deny); no write without confirmation; duplicate-name check; recipe-builder cost on load; dish_012 units fix, dish_013, equipment â€” `feat/add-recipe-workflow` merged to main
-- [x] Add-recipe full data persistence: demo-kitchen-preparations.json, DemoLoaderService + PreparationRegistryService.reloadFromStorage, SKILL.md Steps 2/5b/6/8 and SCHEMA.md for preparations â€” `feat/add-recipe-full-data-persistence` merged to main
-- [x] Add-recipe Step 5 visual tree format (SKILL.md) + dish_017 ××•× ×™×’×™×¨×™ ×ž×•×’×© ×¢× ×§×™×ž×¦×™ ×•×¡×•×™×” (demo data, eq_045â€“050, demo_188, pickling/patisserie) â€” `feat/add-recipe-onigiri-and-visual` merged to main
+- [x] Add-recipe workflow: rename skill to add-recipe, add command + rule; full Step 5 (visual structure, summary, tables, confirm/deny); no write without confirmation; duplicate-name check; recipe-builder cost on load; dish_012 units fix, dish_013, equipment — `feat/add-recipe-workflow` merged to main
+- [x] Add-recipe full data persistence: demo-kitchen-preparations.json, DemoLoaderService + PreparationRegistryService.reloadFromStorage, SKILL.md Steps 2/5b/6/8 and SCHEMA.md for preparations — `feat/add-recipe-full-data-persistence` merged to main
+- [x] Add-recipe Step 5 visual tree format (SKILL.md) + dish_017 ××•× ×™×’×™×¨×™ ×ž×•×’×© ×¢× ×§×™×ž×¦×™ ×•×¡×•×™×” (demo data, eq_045–050, demo_188, pickling/patisserie) — `feat/add-recipe-onigiri-and-visual` merged to main
 
-### Plan 075 â€” Cleanup demo products (`plans/075-cleanup-demo-products.plan.md`) â€” feat/cleanup-demo-products (not merged to main)
+### Plan 075 — Cleanup demo products (`plans/075-cleanup-demo-products.plan.md`) — feat/cleanup-demo-products (not merged to main)
 
 - [x] Cleanup demo JSON (products, recipes, venues) and add plan; align app (list-shell, recipe-book, inventory, venue-list, equipment-list) and assistant todo.
-- [x] demo-products.json refactor (yield 1, min_stock/expiry 0, 2026 IL prices, allergens) â€” feat/demo-products-cleanup merged to main.
+- [x] demo-products.json refactor (yield 1, min_stock/expiry 0, 2026 IL prices, allergens) — feat/demo-products-cleanup merged to main.
 
-### Plan 074 â€” Tech debt remediation (`plans/074-tech-debt-remediation.plan.md`)
+### Plan 074 — Tech debt remediation (`plans/074-tech-debt-remediation.plan.md`)
 
 - [x] Migrate @Input/@Output to signals in recipe-ingredients-table and recipe-workflow
 - [x] Migrate @Input/@Output to signals in supplier-form and venue-form
@@ -1235,19 +1235,19 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Extract RecipeFormService from recipe-builder.page.ts
 - [x] Extract hardcoded Hebrew strings to dictionary (ingredient-search)
 
-### Plan 073 â€” Log file in project (`plans/073-log-file-in-project.plan.md`)
+### Plan 073 — Log file in project (`plans/073-log-file-in-project.plan.md`)
 
 - [x] Add Node log server script (scripts/log-server.js): POST /log, append to logs/app.log, CORS, GET /health
 - [x] Add logServerUrl to environment.ts (dev) and environment.prod.ts (empty); extend LoggingService to POST when set
 - [x] Add logs/ to .gitignore
 - [x] Add "Development logging" to docs and npm run log-server script
 
-### Plan 072 â€” Robust login, app-wide logging, security (`plans/072-robust-login-app-logging-security.plan.md`)
+### Plan 072 — Robust login, app-wide logging, security (`plans/072-robust-login-app-logging-security.plan.md`)
 
 - [x] Create `.claude/skills/auth-and-logging/SKILL.md`; update HOW-WE-WORK.md and copilot-instructions.md
 - [x] Implement LoggingService; replace ad-hoc console.log in user.service and translation.service
 
-### Plan 071 â€” Unified list design system (`plans/071-unified-list-design-system.plan.md`) â€” merged to main (feat/unified-list-design-system)
+### Plan 071 — Unified list design system (`plans/071-unified-list-design-system.plan.md`) — merged to main (feat/unified-list-design-system)
 
 - [x] Create `app-list-shell` shared component (TS, HTML, SCSS) with content projection slots and panel behavior
 - [x] Create `app-carousel-header` shared component for unified carousel column header navigation
@@ -1257,26 +1257,26 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Migrate inventory-product-list: convert table to grid, remove inline editing, add carousel, use list-shell
 - [x] Migrate venue-list: convert table to grid, add carousel for Environment + Infrastructure, use list-shell
 
-### Plan 070 â€” Recipe carousel header label sync (`plans/070-recipe-carousel-header-label-sync.plan.md`)
+### Plan 070 — Recipe carousel header label sync (`plans/070-recipe-carousel-header-label-sync.plan.md`)
 
 - [x] CellCarouselComponent: add activeIndexChange output; emit new index in next() and prev()
 - [x] RecipeBookListComponent: add carouselHeaderIndex_ signal and getCarouselHeaderLabel_()
 - [x] Recipe-book-list HTML: dynamic header label; header arrows for whole column, cell-only arrows; matching bg
 
-### Plan 064 â€” Inventory list grid layout refactor (`plans/064-inventory-list-grid-layout-refactor.plan.md`)
+### Plan 064 — Inventory list grid layout refactor (`plans/064-inventory-list-grid-layout-refactor.plan.md`)
 
 - [x] Refactor inventory HTML: replace table/thead/tbody with grid+divs (recipe-book pattern)
 - [x] Refactor inventory SCSS: grid template, table-area, table-header, table-body, product-grid-row
 - [x] Build and verify
 
-### Plan 063 â€” Recipe book carousel media query, behavior, design (`plans/063-recipe-book-carousel-media-query-behavior-design.plan.md`)
+### Plan 063 — Recipe book carousel media query, behavior, design (`plans/063-recipe-book-carousel-media-query-behavior-design.plan.md`)
 
 - [x] Desktop: show 3 header columns, hide arrows, no sliding; mobile: carousel header with sliding strip and arrows
 - [x] Remove (indexChange) binding from app-cell-carousel; keep [activeIndex]
 - [x] Add small label above header carousel (getCarouselHeaderLabel_ or computed) for mobile
 - [x] Mobile SCSS: style small label like cell; header arrows opacity 0, on hover opacity 1; match cell arrow size/position
 
-### Plan 062 â€” Auth single source and sign-in/up (`plans/062-auth-single-source-sign-in-up.plan.md`)
+### Plan 062 — Auth single source and sign-in/up (`plans/062-auth-single-source-sign-in-up.plan.md`)
 
 - [x] Extend User model with imgUrl? field
 - [x] Refactor UserService: StorageService as single source, unique-name rejection, persistent session via localStorage, auto-login on load
@@ -1290,14 +1290,14 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Wire auth modal into app root, register Lucide icons, APP_INITIALIZER for auto-login, authGuard on routes
 - [x] Fix auth build errors: add UserService.isLoggedIn, inline session storage (replace removed UtilService methods), wire HeaderComponent auth (isLoggedIn, user_, userInitial, openAuth, logout), User.imgUrl (`fix/auth-isloggedin-storage-header` merged to main)
 
-### Plan 062-1 â€” Fix FAB and cook-view guest access (`plans/062-1-fix-fab-cookview-guest.plan.md`)
+### Plan 062-1 — Fix FAB and cook-view guest access (`plans/062-1-fix-fab-cookview-guest.plan.md`)
 
 - [x] FAB always visible, gate only the recipe-builder action
 - [x] Remove authGuard from cook/:id route
 - [x] Gate edit actions inside cook-view for guests
 - [x] Show add/edit buttons disabled with tooltip when not signed in (feat/suppliers-nav-and-auth-buttons merged to main)
 
-### Plan 061 â€” Header carousel shift controls (`plans/061-header-carousel-shift-controls.plan.md`)
+### Plan 061 — Header carousel shift controls (`plans/061-header-carousel-shift-controls.plan.md`)
 
 - [x] Add carouselHeaderIndex_ and carouselHeaderPrev/Next in recipe-book-list.component.ts
 - [x] Add activeIndex input and indexChange output to CellCarouselComponent; sync and emit
@@ -1305,14 +1305,14 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Bind [activeIndex] and (indexChange) on each app-cell-carousel in template
 - [x] SCSS: carousel header as one grid cell, overflow hidden, inner strip and transform
 
-### Plan 060 â€” Data persistence and backup (`plans/060-data-persistence-and-backup.plan.md`)
+### Plan 060 — Data persistence and backup (`plans/060-data-persistence-and-backup.plan.md`)
 
 - [x] StorageService: wrap `_save()` in try/catch; re-throw with clear message. Harden UtilService and TranslationService direct localStorage writes.
 - [x] Demo loader: add confirmation step (modal or confirm) before `loadDemoData()` with copy that demo replaces recipes, dishes, products, suppliers, equipment, venues.
 - [x] Backup mirror: define backup entity list; in StorageService after successful save, write to `backup_<entityType>` for listed types.
-- [x] Export / Restore: implement `exportAllToFiles()` (download JSON per category) and â€œRestore from backupâ€ / â€œImport from file(s)â€ with validation and reload.
+- [x] Export / Restore: implement `exportAllToFiles()` (download JSON per category) and “Restore from backup” / “Import from file(s)” with validation and reload.
 
-### Plan 059 â€” Unify design engine (`plans/059-unify-design-engine.plan.md`)
+### Plan 059 — Unify design engine (`plans/059-unify-design-engine.plan.md`)
 
 - [x] Phase 1: Add missing engine classes to styles.scss (.visually-hidden, .placeholder-dash, .c-table-wrap, .c-data-table, .c-sortable-header, .c-col-actions, .c-empty-state, .c-btn-ghost--sm, .c-chip variants, .c-grid-input/.c-grid-select)
 - [x] Phase 2: Migrate .action-btn to .c-icon-btn in recipe-book-list, inventory-product-list, menu-library-list
@@ -1323,36 +1323,36 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Phase 7: Migrate sortable-header, col-actions, clear-filters-btn to engine classes in recipe-book + inventory
 - [x] Phase 8: Fixed .chipe typo, migrated ingredient chips to .c-chip--success
 
-### Plan 058 â€” Sidebar collapse and floating (`plans/058-sidebar-collapse-floating.plan.md`)
+### Plan 058 — Sidebar collapse and floating (`plans/058-sidebar-collapse-floating.plan.md`)
 
 - [x] Inventory: full collapse to width 0 (SCSS + HTML toggle wrap)
 - [x] Switch border-radius to right side in both SCSS files
 - [x] Add floating overlay behavior at 768px breakpoint in both SCSS files
 - [x] Change close icon to chevron-left in both HTML files
 
-### Plan 057 â€” Plans folder full audit (`plans/057-plans-folder-full-audit.plan.md`)
+### Plan 057 — Plans folder full audit (`plans/057-plans-folder-full-audit.plan.md`)
 
 - [x] Execute Plan 055 Group E (Five-Group rhythm: confirm-modal, translation-key-modal, restore-choice-modal, label-creation-modal, global-specific-modal, unit-creator, version-history-panel, custom-select, loader)
 - [x] Execute Plan 047 S1: Unify ingredient row style with workflow
 - [x] Execute Plan 047 S4: Workflow prep rows match ingredient rows
 - [x] Execute Plan 047 L3: Responsive tablet/mobile for recipe builder
 
-### Plan 056 â€” Table carousel columns (`plans/056-table-carousel-columns.plan.md`)
+### Plan 056 — Table carousel columns (`plans/056-table-carousel-columns.plan.md`)
 
 - [x] Create shared CellCarouselComponent and CellCarouselSlideDirective in src/app/shared/cell-carousel/
 - [x] Wrap Type/Labels/Allergens columns in recipe-book-list with carousel; adjust header and grid template at 768px
 - [x] Wrap Category/Allergens/Supplier columns in inventory-product-list with carousel; adjust header and grid template at 768px
 - [x] Check lints on all modified files and fix any issues
 
-### Plan 055 â€” SCSS cssLayer audit fix (`plans/055-scss-csslayer-audit-fix.plan.md`)
+### Plan 055 — SCSS cssLayer audit fix (`plans/055-scss-csslayer-audit-fix.plan.md`)
 
 - [x] Group A: product-form, recipe-header, preparation-search, menu-intelligence, recipe-ingredients-table, ingredient-search (tokens, logical, rhythm)
 - [x] Group B: cook-view (media query, !important, missing --cv-* tokens); other B files left for follow-up
-- [x] Group C: equipment/venues border-block-end; menu-library --bg-warm â†’ --bg-body
+- [x] Group C: equipment/venues border-block-end; menu-library --bg-warm → --bg-body
 - [x] Group E: shared modals, unit-creator, version-history-panel, custom-select, loader (Five-Group rhythm, logical props)
 - [x] Run ng build to verify
 
-### Plan 054 â€” Unify modal styles (`plans/054-unify-modal-styles.plan.md`)
+### Plan 054 — Unify modal styles (`plans/054-unify-modal-styles.plan.md`)
 
 - [x] Expand engine classes in styles.scss: .c-modal-card modifiers (--md, --fluid), .c-modal-actions, .c-modal-body, .c-input-stack, .c-btn-primary--danger/--warning, modal responsive rules
 - [x] Update add-item-modal and add-equipment-modal HTML/SCSS
@@ -1360,20 +1360,20 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Update translation-key-modal, label-creation-modal, unit-creator HTML/SCSS
 - [x] Run ng build and verify all 8 modals render correctly
 
-### Plan 052 â€” Plan 047 audit report (`plans/052-plan-047-audit-report.plan.md`)
+### Plan 052 — Plan 047 audit report (`plans/052-plan-047-audit-report.plan.md`)
 
 - [x] Update Plan 047 todo items in todo.md per audit findings (split L4, mark items per report)
 - [x] Optional: implement quick wins (L1 column reorder, S2 timer fixed width, L4 sort by relevance)
 - [x] Clarify B3 (volume conversion fix) and B4 (header unit dropdown polish) with spec or acceptance criteria
 
-### Plan 051 â€” Recipe builder UX fixes (`plans/051-recipe-builder-ux-fixes.plan.md`)
+### Plan 051 — Recipe builder UX fixes (`plans/051-recipe-builder-ux-fixes.plan.md`)
 
 - [x] Remove border of unit select; same height for value containers; center header cells (except col-name)
 - [x] Reduce logistics search width by 20%
 - [x] Move "add new tool" to bottom of dropdown
 - [x] Collapsible section cards: state, markup, styling (table-logic, workflow-logic, logistics-logic)
 
-### Plan 050 â€” Recipe list labels, panel, header, menu UX (`plans/050-recipe-list-labels-panel-header-menu-ux.plan.md`)
+### Plan 050 — Recipe list labels, panel, header, menu UX (`plans/050-recipe-list-labels-panel-header-menu-ux.plan.md`)
 
 - [x] 1. Labels column: compact/expand like allergens; header toggle expand-all; clickOutside close
 - [x] 2. Row height: col-labels/col-allergens grow to fit expanded content (recipe-book + inventory)
@@ -1383,7 +1383,7 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] 6. Guest number: remove default spinner (SCSS)
 - [x] 7. Guest number: +/- buttons, disable minus at 0
 
-### Plan 049 â€” Menu Intelligence Layout and UX Fixes (`plans/049-menu-intelligence-layout-ux-fixes.plan.md`)
+### Plan 049 — Menu Intelligence Layout and UX Fixes (`plans/049-menu-intelligence-layout-ux-fixes.plan.md`)
 
 - [x] Meta-column to opposite side (margin-inline swap)
 - [x] Remove focus border from all inputs/selects on page
@@ -1392,7 +1392,7 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Hide number input spinners on dish-field inputs
 - [x] Food cost (food_cost_money) read-only: no edit mode, span only
 
-### Plan 048 â€” Menu Intelligence UX Polish (`plans/048-menu-intelligence-ux-polish.plan.md`)
+### Plan 048 — Menu Intelligence UX Polish (`plans/048-menu-intelligence-ux-polish.plan.md`)
 
 - [x] Auto-focus dish search input when a recipe is selected (addItem + selectRecipe)
 - [x] Replace X icons with trash-2; remove hover background; keep delete on left
@@ -1403,7 +1403,7 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Replace chevron toggle with info icon (collapsed) / chevron-up (expanded); add spacing
 - [x] Center dish-data fields horizontally with justify-content: center
 
-### Plan 047 â€” Recipe Builder Polish (`plans/047-recipe-builder-polish.plan.md`)
+### Plan 047 — Recipe Builder Polish (`plans/047-recipe-builder-polish.plan.md`)
 
 - [x] L4: Reduce logistics search width by 20% (done in Plan 051)
 - [x] L4: Sort logistics dropdown by relevance (closest match first)
@@ -1418,7 +1418,7 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] B2: Duplicate recipe/dish name validation
 - [x] B4: Unit selectors in recipe-header (overflow visible + z-index 100)
 
-### Plan 046 â€” Cook-view scale by ingredient (`plans/046-cook-view-scale-by-ingredient.plan.md`)
+### Plan 046 — Cook-view scale by ingredient (`plans/046-cook-view-scale-by-ingredient.plan.md`)
 
 - [x] cook-view.page.ts: Add scale-by state signals and methods (startSetByIngredient, applyScaleByIngredient, resetToFullRecipe); hide main quantity in special view
 - [x] cook-view.page.html: Per-row hover/tap highlight, "Set recipe by this item", inline amount + Convert; special scaled view banner + "Back to full recipe"
@@ -1426,12 +1426,12 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] dictionary.json: set_recipe_by_this_item, convert, scale_recipe_confirm, scaled_to, back_to_full_recipe
 - [x] Reuse ConfirmModalService for scale confirmation
 
-### Plan 046-1 â€” Cook-view scale-by UX fixes (`plans/046-1-cook-view-scale-by-ux-fixes.plan.md`)
+### Plan 046-1 — Cook-view scale-by UX fixes (`plans/046-1-cook-view-scale-by-ux-fixes.plan.md`)
 
 - [x] HTML: Move "Set recipe by this item" into col-name (left of name); empty col-scale-action for normal rows
 - [x] SCSS: Button visible only on row hover; full-row border/box-shadow on hover; yellow box-shadow for setting state; scaled-view shell + banner (edit-mode-like, different colors); spacing between containers
 
-### Plan 045 â€” Logistics tools and menu type edit (`plans/045-logistics-tools-and-menu-type-edit.plan.md`)
+### Plan 045 — Logistics tools and menu type edit (`plans/045-logistics-tools-and-menu-type-edit.plan.md`)
 
 - [x] Show logistics section for both recipe and dish (recipe-builder.page.html)
 - [x] Tool search + "Add new tool" opening add-equipment modal in recipe builder
@@ -1439,13 +1439,13 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Metadata manager: menu type row grid 1fr auto 30px 30px; inline name edit; removable field chips; confirm on rename
 - [x] MetadataRegistryService.renameMenuType; MenuEventDataService.updateServingTypeForAll; confirm modal + translation key
 
-### Plan 044 â€” Custom dropdown for all selects (`plans/044-custom-dropdown-for-all-selects.plan.md`)
+### Plan 044 — Custom dropdown for all selects (`plans/044-custom-dropdown-for-all-selects.plan.md`)
 
 - [x] Create CustomSelectComponent (CVA, scrollable dropdown, host focus forwarding)
 - [x] Replace native selects app-wide: unit-creator, add-equipment-modal, equipment-form, equipment-list, recipe-workflow, recipe-ingredients-table, inventory-product-list, cook-view, menu-library-list, venue-form, recipe-builder
 - [x] Save plan 044 to plans/
 
-### Plan 043 â€” Reusable dropdown with scroll arrows (`plans/043-reusable-dropdown-scroll-arrows.plan.md`)
+### Plan 043 — Reusable dropdown with scroll arrows (`plans/043-reusable-dropdown-scroll-arrows.plan.md`)
 
 - [x] Add .c-dropdown engine in src/styles.scss (wrapper, list with hidden scrollbar, scroll-top/scroll-bottom arrows)
 - [x] Create scrollIndicators directive (core/directives)
@@ -1457,13 +1457,13 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Migrate recipe-book-list (ingredient-dropdown)
 - [x] Add agent guidance (HOW-WE-WORK and/or copilot-instructions)
 
-### Plan 042 â€” Menu Intelligence Metadata Redesign (`plans/042-menu-intelligence-metadata-redesign.plan.md`)
+### Plan 042 — Menu Intelligence Metadata Redesign (`plans/042-menu-intelligence-metadata-redesign.plan.md`)
 
 - [x] 1. menu-intelligence.page.ts: expandedMetaKeys_, isDishMetaExpanded, toggleDishMeta; editingDishField_, startEditDishField, commitEditDishField, isEditingDishField, getInputWidth
 - [x] 2. menu-intelligence.page.html: dish row block; name cell + toggle button; conditional .dish-data; click-to-edit fields (display/edit branches)
 - [x] 3. menu-intelligence.page.scss: single-column list; .dish-row block; toggle + click-to-edit styles; carousel at narrow (cssLayer)
 
-### Plan 041 â€” Menu Intelligence UX Fixes (`plans/041-menu-intelligence-ux-fixes.plan.md`)
+### Plan 041 — Menu Intelligence UX Fixes (`plans/041-menu-intelligence-ux-fixes.plan.md`)
 
 - [x] a: Add dictionary entries for default section categories
 - [x] b: Close category dropdown on click outside (ClickOutSideDirective)
@@ -1471,7 +1471,7 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] d: Remove dish-qty (derived portions) from dish row
 - [x] e: Section grid layout (30% data column, centered names, responsive + mobile)
 
-### Plan 040 â€” Menu Intelligence Layout and Design (`plans/040-menu-intelligence-layout-design.plan.md`)
+### Plan 040 — Menu Intelligence Layout and Design (`plans/040-menu-intelligence-layout-design.plan.md`)
 
 - [x] d: Replace var(--bg-paper-light) with var(--bg-pure) in menu-intelligence.page.scss
 - [x] a+b+c: Menu name as h1, meta right-aligned and denser, paper border-radius
@@ -1479,22 +1479,22 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] g1: MenuTypeDefinition model + MenuItemSelection extend
 - [x] g2: MetadataRegistryService MENU_TYPES storage
 - [x] g3: Metadata manager "Menu Types" card with field checkboxes
-- [x] g4â€“g6: Dynamic serving-type dropdown + dish-row field container in menu-intelligence
+- [x] g4–g6: Dynamic serving-type dropdown + dish-row field container in menu-intelligence
 
-### Plan 039 â€” List UX Panel and Scroll (`plans/039-list-ux-panel-scroll.plan.md`)
+### Plan 039 — List UX Panel and Scroll (`plans/039-list-ux-panel-scroll.plan.md`)
 
 - [x] Move filter panel to visual right (grid swap in both list SCSS)
 - [x] Replace panel toggle with hover-reveal arrow icon; hide scrollbars; remove Cook/History buttons from recipe book
 - [x] Move open-panel (hamburger) into list header when panel closed (recipe-book + inventory); merge to main (feat/list-ux-panel-and-header)
 
-### Plan 038 â€” Inverted-L List Layout (`plans/038-inverted-l-list-layout.plan.md`)
+### Plan 038 — Inverted-L List Layout (`plans/038-inverted-l-list-layout.plan.md`)
 
 - [x] Restructure recipe-book-list and inventory-product-list to inverted-L (header / table-area / filter-panel)
 - [x] Rewrite both SCSS: grid, fixed header, scrollable table body, retractable panel (cssLayer)
 - [x] Replace sidebar signals with isPanelOpen_ / togglePanel(); remove swipe and media-query logic
 - [x] Build and linter verified
 
-### Plan 037 â€” Recipe Labels Refactor (`plans/037-recipe-labels-refactor.plan.md`)
+### Plan 037 — Recipe Labels Refactor (`plans/037-recipe-labels-refactor.plan.md`)
 
 - [x] Create LabelDefinition interface + labels_/autoLabels_ on Recipe model
 - [x] Extend MetadataRegistryService: allLabels_ signal, registerLabel, deleteLabel, getLabelColor (KITCHEN_LABELS)
@@ -1506,13 +1506,13 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Add translation keys (labels, choose_label, create_new_label, no_label, label_name, label_color, auto_trigger_sources, save_label, add_new_label)
 - [x] Register label-creation-modal in app root
 
-### Plan 036 â€” Dashboard Control Panel Fixed Tabs (`plans/036-dashboard-control-panel-fixed-tabs.plan.md`)
+### Plan 036 — Dashboard Control Panel Fixed Tabs (`plans/036-dashboard-control-panel-fixed-tabs.plan.md`)
 
 - [x] Extend DashboardTab to five tabs; query param; five tab buttons; sticky header
 - [x] Render five views (overview, metadata, venues, add-venue, trash); VenueForm embedded mode
 - [x] Suppliers tab in dashboard (suppliers + add-supplier); unified list layout and table (venue, equipment, supplier): fixed layout, col-actions-inner flex, empty states (feat/dashboard-suppliers-unified-lists)
 
-### Plan 035 â€” Header and Navigation Refactor (`plans/035-header-navigation-refactor.plan.md`)
+### Plan 035 — Header and Navigation Refactor (`plans/035-header-navigation-refactor.plan.md`)
 
 - [x] A. Hide mobile-close-btn in desktop mode via SCSS rule
 - [x] B+E. Remove 5 nav items from header HTML, increase gap for padding
@@ -1521,7 +1521,7 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] F+H. Location/Trash buttons in dashboard tab bar
 - [x] G. Create HeroFab (expand on main-button hover only); remove footer
 
-### Plan 034 â€” Recipe Builder UI Fixes (`plans/034-recipe-builder-ui-fixes.plan.md`)
+### Plan 034 — Recipe Builder UI Fixes (`plans/034-recipe-builder-ui-fixes.plan.md`)
 
 - [x] a. Type toggle: pass recipeType from parent, add input in header, use in template
 - [x] b. Header unit dropdowns: overflow visible + z-index for primary/secondary
@@ -1531,7 +1531,7 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] f. Workflow section: space-evenly + define prep-flat-grid styles
 - [x] g. Add step button: width 100%, align with grid in recipe-workflow
 
-### Plan 032 â€” Custom Cooking Loader (`plans/032-custom-cooking-loader.plan.md`)
+### Plan 032 — Custom Cooking Loader (`plans/032-custom-cooking-loader.plan.md`)
 
 - [x] Create loader component (simmering pot + steam, sizes large/medium/small, overlay, inline).
 - [x] Add dictionary keys (loader_loading, loader_saving, loader_please_wait, loader_cooking_up).
@@ -1540,7 +1540,7 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Delete/clone loaders: recipe-book, inventory, equipment, venue, menu-library; inventory price-save loader.
 - [x] Demo data import large overlay on metadata manager.
 
-### Plan 017 â€” Recipe Book List UX Overhaul (`plans/017-recipe-book-list-ux-overhaul.plan.md`)
+### Plan 017 — Recipe Book List UX Overhaul (`plans/017-recipe-book-list-ux-overhaul.plan.md`)
 
 - [x] Sidebar open by default (desktop), closed on mobile; sticky right; mobile off-canvas with close button.
 - [x] Remove approved/station table columns; keep Approved & Station as sidebar filters.
@@ -1552,7 +1552,7 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Ingredient search: product dropdown, chips (click to remove), clear, recipeContainsAllProducts filter.
 - [x] Dictionary keys: Approved, Station, approved_yes, approved_no, no_station, search_by_ingredients, clear.
 
-### Plan 012-2 â€” Kitchen demo data full values (`plans/012-2-kitchen-demo-data-full-values.plan.md`)
+### Plan 012-2 — Kitchen demo data full values (`plans/012-2-kitchen-demo-data-full-values.plan.md`)
 
 - [x] demo-suppliers.json: 10 suppliers (add 2)
 - [x] demo-products.json: subset with purchase_options_ and variety
@@ -1561,24 +1561,24 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] demo-equipment.json: verify categories and scaling mix
 - [x] demo-venues.json: 10 venues (add 7)
 
-### Phase 2 â€” Product Enhancement
+### Phase 2 — Product Enhancement
 
-- [x] **Plan 012 â€” Supplier Management Page**: Dedicated CRUD page at `/suppliers` with list, edit, delete, linked products view.
+- [x] **Plan 012 — Supplier Management Page**: Dedicated CRUD page at `/suppliers` with list, edit, delete, linked products view.
 
 ---
 
-### Plan 011 â€” Dashboard & Command Center Unification (done)
+### Plan 011 — Dashboard & Command Center Unification (done)
 
-- [x] Dashboard default route, Overview + Core settings tabs; `/command-center` â†’ `/dashboard?tab=metadata`; single Dashboard nav link; unit tests + recipe-builder spec fix (queryParams).
+- [x] Dashboard default route, Overview + Core settings tabs; `/command-center` → `/dashboard?tab=metadata`; single Dashboard nav link; unit tests + recipe-builder spec fix (queryParams).
 
-### Phase 1 â€” Stabilize & Complete (`plans/010-product-roadmap.plan.md`)
+### Phase 1 — Stabilize & Complete (`plans/010-product-roadmap.plan.md`)
 
 - [x] Add `recipe-book-list.spec.ts` and run tests (Plan 008 closure).
 - [x] Set up Playwright E2E tests: config + 3 critical flow tests (product CRUD, recipe creation with cost, recipe edit persistence).
 - [x] Optionally expand minimal specs (e.g. recipe-builder page and subcomponents) with behavior tests when touching those areas.
 - [x] Sync documentation: update `project-plan.md` checkboxes, update breadcrumbs.
 
-### Plan 009 â€” Cohesive Add Item Modal (`plans/009-cohesive-add-item-modal.plan.md`)
+### Plan 009 — Cohesive Add Item Modal (`plans/009-cohesive-add-item-modal.plan.md`)
 
 - [x] Create AddItemModalService and AddItemModal component (refactor from add-supplier-modal).
 - [x] Create AddSupplierFlowService for add-supplier orchestration.
@@ -1588,7 +1588,7 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Update App Root and delete deprecated add-supplier-modal service.
 - [x] Add add_supplier_translation_key and ensure dictionary keys.
 
-### Plan 008 â€” Recipe Book Page (`plans/008-recipe-book-page.plan.md`)
+### Plan 008 — Recipe Book Page (`plans/008-recipe-book-page.plan.md`)
 
 - [x] Route `/recipe-book` + page shell + header link (replace `/dishes`).
 - [x] Recipe-book-list component: grid with sortable columns (name, type, cost, approved, station, main-category, allergens, actions).
@@ -1598,7 +1598,7 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Main-category column placeholder (no_category).
 - [x] Add recipe-book-list.spec.ts and run tests.
 
-### Plan 007 â€” Product Form Enhancement (`plans/007-product-form-enhancement.plan.md`)
+### Plan 007 — Product Form Enhancement (`plans/007-product-form-enhancement.plan.md`)
 
 - [x] Add SupplierDataService and persist suppliers to KITCHEN_SUPPLIERS.
 - [x] Create TranslationKeyModal component and service (replace prompt).
@@ -1608,7 +1608,7 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Style new fields and modal per application design system.
 - [x] Update inventory list to resolve supplierId_ to supplier name for display.
 
-### Plan 006 â€” Recipe Workflow Refactor (`plans/006-recipe-workflow-refactor.plan.md`)
+### Plan 006 — Recipe Workflow Refactor (`plans/006-recipe-workflow-refactor.plan.md`)
 
 - [x] (a) Preparation category: always a select (main grid + add-form); choose category placeholder; add-option; per-recipe override.
 - [x] (b) Quantity input: remove browser default spinners.
@@ -1618,7 +1618,7 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] (f) Apply translatePipe to all user-facing strings.
 - [x] (g) New category: prompt for English value, add to dictionary.
 
-### Plan 006-1 â€” Preparation Global vs Specific (`plans/006-1-preparation-global-vs-specific.plan.md`)
+### Plan 006-1 — Preparation Global vs Specific (`plans/006-1-preparation-global-vs-specific.plan.md`)
 
 - [x] Add dictionary keys (change_global, add_as_specific, category_change_prompt).
 - [x] Add getPreparationByName and updatePreparationCategory to PreparationRegistryService.
@@ -1627,26 +1627,26 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Extend onCategoryChange with modal logic.
 - [x] Register modal in app root.
 
-### Plan 006-2 â€” Preparation Category Change Modal (`plans/006-2-preparation-category-change-modal.plan.md`)
+### Plan 006-2 — Preparation Category Change Modal (`plans/006-2-preparation-category-change-modal.plan.md`)
 
 - [x] Category change modal (Change global / Add as specific).
 - [x] Undo/revert for change main.
 
-### Plan 005 â€” Inventory Page Enhancement (`plans/005-inventory-page-enhancement.plan.md`)
+### Plan 005 — Inventory Page Enhancement (`plans/005-inventory-page-enhancement.plan.md`)
 
 - [x] Action sidebar: search by name, filters (category, allergens, supplier), collapsible from right.
 - [x] Product list: sharp table grid with edit/delete per row.
 - [x] Styling: slate palette, allergen pills, sharp borders.
 - [x] Hover animation on products for edit and delete icons.
 
-### Plan 005-1 â€” Inventory List Refactor (`plans/005-1-inventory-list-refactor.plan.md`)
+### Plan 005-1 — Inventory List Refactor (`plans/005-1-inventory-list-refactor.plan.md`)
 
 - [x] Column-header sort (replace sidebar sort).
 - [x] Hamburger fade when sidebar open.
 - [x] Remove Add product button.
 - [x] Center-align grid row text.
 
-### Plan 004 â€” Recipe Workflow Enhancement (`plans/004-recipe-workflow-enhancement.plan.md`)
+### Plan 004 — Recipe Workflow Enhancement (`plans/004-recipe-workflow-enhancement.plan.md`)
 
 - [x] Create PreparationRegistryService + spec.
 - [x] Create PreparationSearchComponent (ts, html, scss, spec).
@@ -1656,14 +1656,14 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Add dictionary entries and verify icons.
 - [x] Migration: load old mise_categories_ into flat form; save as prep_items_ and prep_categories_.
 
-### Plan 003 â€” Recipe Ingredients Table Enhancement (`plans/003-recipe-ingredients-table-enhancement.plan.md`)
+### Plan 003 — Recipe Ingredients Table Enhancement (`plans/003-recipe-ingredients-table-enhancement.plan.md`)
 
 - [x] Add plus/minus quantity controls (incrementAmount, decrementAmount).
 - [x] Add percentage column (getPercentageDisplay, getRowWeightG in RecipeCostService).
 - [x] Update grid layout for quantity+controls and percentage.
 - [x] Minor fixes: remove duplicate import, unused totalMass_.
 
-### Plan 002 â€” Recipe Header Scaling (`plans/002-recipe-header-scaling.plan.md`)
+### Plan 002 — Recipe Header Scaling (`plans/002-recipe-header-scaling.plan.md`)
 
 - [x] Register `dish` as a real unit in UnitRegistryService.
 - [x] Primary unit label for dishes shows `dish` via translatePipe.
@@ -1671,12 +1671,12 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Unit filtering: bidirectional exclusivity (availablePrimaryUnits_, availableSecondaryUnits_).
 - [x] Header specs: dish unit, secondary chip UX, unit filtering.
 
-### Recipe Builder (recipe-builder-page.md â€” excluded from plan audit per request)
+### Recipe Builder (recipe-builder-page.md — excluded from plan audit per request)
 
-- [x] Recipe-builder plan executed: `plans/recipe-builder-page.md` â€” A1â€“A5, C1â€“C2 (currentCost, mise-en-place fix, persistence, RecipeDataService, edit flow, pendingChangesGuard, reactive portions).
-- [x] fix(recipe-builder): confirm when leaving with unsaved edits â€” markAsDirty in ingredients/workflow/logistics + hasUnsavedEdits(); fix/recipe-unsaved-changes-confirm merged to main.
-- [x] Recipe header labels: dense grid + Label dropdown, colored chips, clear all; Lucide icons (log-out, shopping-cart, grip-vertical, archive, download, upload) â€” `feat/recipe-builder-labels-and-icons` merged to main.
-- [x] Recipe header label chips: fit width to text (flex + max-content) â€” `fix/recipe-header-label-chips-fit-text` merged to main.
+- [x] Recipe-builder plan executed: `plans/recipe-builder-page.md` — A1–A5, C1–C2 (currentCost, mise-en-place fix, persistence, RecipeDataService, edit flow, pendingChangesGuard, reactive portions).
+- [x] fix(recipe-builder): confirm when leaving with unsaved edits — markAsDirty in ingredients/workflow/logistics + hasUnsavedEdits(); fix/recipe-unsaved-changes-confirm merged to main.
+- [x] Recipe header labels: dense grid + Label dropdown, colored chips, clear all; Lucide icons (log-out, shopping-cart, grip-vertical, archive, download, upload) — `feat/recipe-builder-labels-and-icons` merged to main.
+- [x] Recipe header label chips: fit width to text (flex + max-content) — `fix/recipe-header-label-chips-fit-text` merged to main.
 - [x] feat/recipe-cook-quantity-and-ux merged to main: format-quantity pipe, unit registry, recipe-builder/workflow/ingredients/cook-view/metadata-manager/modals and styles, deps and demo data (3 commits).
 - [x] feat/quantity-controls-unified merged to main: shared quantity-step util (value-based step 1 / 0.001), cook-view, recipe-ingredients-table, recipe-workflow, menu-intelligence guest count, recipe-builder logistics +/-.
 - [x] feat/recipe-builder-ingredients-ux merged to main: no duplicate ingredients in ingredient search dropdown; add preparation adds empty row without category picker.
@@ -1697,13 +1697,13 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Shared: `unit-creator.component`.
 - [x] App root: `app.component.spec.ts`.
 
-### Recipe Builder â€” Ingredients keyboard-first UX (ad-hoc)
+### Recipe Builder — Ingredients keyboard-first UX (ad-hoc)
 
 - [x] Open recipe-builder with one empty row and auto-focus its search (afterNextRender).
-- [x] Add-row button: focus moves to new rowâ€™s search so user can type immediately.
+- [x] Add-row button: focus moves to new row’s search so user can type immediately.
 - [x] Ingredient search: arrow keys + Enter in dropdown; Enter with no selection adds new row.
 - [x] After selecting item: focus moves to quantity (no new row); Tab goes to unit select (not +/-).
-- [x] Enter in quantity or unit: add new row and focus new rowâ€™s search (keyboard-only flow).
+- [x] Enter in quantity or unit: add new row and focus new row’s search (keyboard-only flow).
 - [x] FocusByRowDirective + wiring for focus-by-row (qty/unit).
 
 ### feat/suppliers-nav-and-auth-buttons (merged to main)
@@ -1726,9 +1726,9 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] feat(list-shell): sidebar styling and shared c-filter-* utilities (list-shell, styles.scss, supplier/equipment/inventory/venue list SCSS)
 - [x] fix(recipe-book): ingredient search - no duplicate add, no redundant heading, no-match message (recipe-book-list html/scss/ts, dictionary no_ingredients_found)
 
-### Recipe Builder â€” Scaling, Bruto, Weight/Volume Toggle (`docs/recipe_metrics_scaling_plan.md`)
+### Recipe Builder — Scaling, Bruto, Weight/Volume Toggle (`docs/recipe_metrics_scaling_plan.md`)
 
-- [x] RecipeCostService: fix product weight formula (`net / conversion_rate_`), registry fallback for volumeâ†’grams, VOLUME_OR_WEIGHT_KEYS.
+- [x] RecipeCostService: fix product weight formula (`net / conversion_rate_`), registry fallback for volume→grams, VOLUME_OR_WEIGHT_KEYS.
 - [x] RecipeCostService: computeTotalBrutoWeightG, getUnconvertibleNamesForWeight, computeTotalVolumeL (with unconvertible names); IngredientWeightRow.name_hebrew.
 - [x] recipe-builder.page: totalBrutoWeightG_, totalVolumeL_/totalVolumeMl_, unconvertibleForWeight_/unconvertibleForVolume_; pass to header; ingredientsFormVersion_ so totalCost_/totalWeightG_ recompute when ingredients change.
 - [x] recipe-header: inputs (totalBrutoWeightG, totalVolumeL, totalVolumeMl, unconvertible lists); metricsDisplayMode_ (weight | volume); toggle on metric-group click; bruto or volume display; red notice icon + floating list (names only), hover/click, ClickOutSideDirective.
@@ -1737,20 +1737,20 @@ Update status after each sub-task. Link plan files here when applicable.
 
 ### feat/demo-products-from-list (merged to main)
 
-- [x] feat(data): update demo-products from user produce list â€” prices for 21 existing products, 65 new products (demo_121â€“demo_185).
+- [x] feat(data): update demo-products from user produce list — prices for 21 existing products, 65 new products (demo_121–demo_185).
 
 ### Optimize add-recipe skill and data (feat/optimize-add-recipe-skill merged to main)
 
 - [x] Merge SCHEMA.md into SKILL.md, consolidate 8 steps into 5, add lazy file reads
 - [x] Remove dead service_overrides_ from all 18 dishes in demo-dishes.json
-- [x] Slim command (7â†’3 lines) and rule (15â†’6 lines)
-- [x] Save plan 085 â€” optimize-commit-github-skill
+- [x] Slim command (7→3 lines) and rule (15→6 lines)
+- [x] Save plan 085 — optimize-commit-github-skill
 
 ---
 
-## 2026-03-29 â€” Audit cleanup: archived with open tasks deferred
+## 2026-03-29 — Audit cleanup: archived with open tasks deferred
 
-### Plan 190 â€” Master De-Spaghettification Map â€” deferred tasks (`plans/190-master-de-spaghettification-map.plan.md`)
+### Plan 190 — Master De-Spaghettification Map — deferred tasks (`plans/190-master-de-spaghettification-map.plan.md`)
 
 - [ ] Phase A1: Replace hardcoded Hebrew strings with `translatePipe` keys and dictionary entries (SW-4)
 - [ ] Phase A2: Replace orphan button classes with design-system `c-*` tokens in product/metadata flows (HI-1)
@@ -1760,13 +1760,13 @@ Update status after each sub-task. Link plan files here when applicable.
 - [ ] Phase C2: Consolidate scroll-indicator scaffold into shared scroll-zone infrastructure (HI-6)
 - [ ] Phase C3: Decompose god files into page services/sub-components (`menu-intelligence`, `recipe-builder`, `product-form`) (SW-5)
 
-### Plan 198 â€” Lite agent refactor adoption â€” deferred tasks (`plans/198-lite-agent-refactor-adoption.plan.md`)
+### Plan 198 — Lite agent refactor adoption — deferred tasks (`plans/198-lite-agent-refactor-adoption.plan.md`)
 
 - [ ] CRITICAL: Verify Legacy security-officer requirements + 30-item checklist fully migrated to copilot-instructions §5 before retiring Legacy agent
 - [ ] HIGH: Fix `.claude/toBe/agents/breadcrumb-navigator.md` content (Navigator vs Architect mismatch)
-- [ ] MEDIUM: Lite QA agent â€” prominent spec-authoring callout (no `.spec.ts` during iterative plan execution)
+- [ ] MEDIUM: Lite QA agent — prominent spec-authoring callout (no `.spec.ts` during iterative plan execution)
 - [ ] MEDIUM: One Master-section pointer line per Lite agent (delegation cross-references)
-- [ ] Adoption: Promote `.claude/toBe/` foundation + agents to canonical paths when 1â€”3 satisfied; run validate-agent-refs
+- [ ] Adoption: Promote `.claude/toBe/` foundation + agents to canonical paths when 1—3 satisfied; run validate-agent-refs
 - [ ] Verification: breadcrumb-navigator + ui-inspector SKILLs hold canonical protocol detail before stripping Legacy agents
 
 ---
@@ -1971,3 +1971,21 @@ Update status after each sub-task. Link plan files here when applicable.
 - [x] Rewrite `render.yaml` — fix buildCommand, MONGO_URI key, JWT_SECRET generateValue, remove PORT
 - [x] `package.json` (root) — add engines field
 - [x] PR + merge `feat/render-deploy` *(PR #53, merged 2026-03-29 — confirmed)*
+
+## Plan 288 — User Management Card (archived 2026-07-08)
+
+### Plan 288 — User Management Card (`plans/288-user-management-card.plan.md`)
+
+- [x] Task 1: `server/constants/all-user-entity-types.js` — create with ALL_USER_ENTITY_TYPES (22 strings)
+- [x] Task 2: `server/routes/admin.js` — create with GET /users and DELETE /users/:userId
+- [x] Task 3: `server/index.js` — mount adminRouter at /api/v1/admin
+- [x] Task 4: `src/app/core/models/admin-user.model.ts` — create AdminUser interface
+- [x] Task 5: `src/app/core/services/user-admin.service.ts` — create with getUsers() and deleteUser()
+- [x] Task 6: `src/app/pages/metadata-manager/components/user-management/user-management.component.ts` — create
+- [x] Task 7: `src/app/pages/metadata-manager/components/user-management/user-management.component.html` — create
+- [x] Task 8: `metadata-manager.page.component.html` — insert <app-user-management />
+- [x] Task 9: `metadata-manager.page.component.ts` — add UserManagementComponent to imports
+- [x] Task 10: ng build gate — zero errors
+- [x] Task 11: .claude/commands/plan-implementation.md — OBSOLETE: command retired in three-agent cutover (native Plan Mode). Closed by smoke-test Milestone 1 2026-07-08.
+
+---

@@ -1,4 +1,4 @@
----
+﻿---
 name: angular-pipe-logic
 description: Scaffolds, implements, and tests Angular Pipes and Directives following the project's reactivity and purity standards.
 ---
@@ -18,12 +18,12 @@ description: Scaffolds, implements, and tests Angular Pipes and Directives follo
 
 ---
 
-## Phase 0 — MemPalace Orient (MANDATORY before any file reads)
+## Phase 0 — Agent Memory Orient (MANDATORY before any file reads)
 
-1. Run `mempalace_search(query="pipe directive transform angular", limit=3)` to surface existing pipe/directive patterns and past decisions.
+1. Run `memory_smart_search(query="pipe directive transform angular", limit=3)` to surface existing pipe/directive patterns and past decisions.
 2. If results found → review for existing implementations, constraints, or known patterns.
 3. If MCP unavailable → skip silently and continue to Phase 1.
-4. Report in completion message whether MemPalace was consulted.
+4. Report in completion message whether Agent Memory was consulted.
 
 ---
 
@@ -63,3 +63,4 @@ description: Scaffolds, implements, and tests Angular Pipes and Directives follo
 Output: `"Angular [Pipe/Directive] [Name] created. Logic verified as pure and registered for use."`
 
 Run targeted specs to confirm transformation logic before finishing.
+

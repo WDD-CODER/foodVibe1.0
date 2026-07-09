@@ -1,4 +1,4 @@
----
+﻿---
 name: techdebt
 description: Scans for duplicated code, dead code, style violations, and TODO debt — run before PRs, after features, or at session end. Maintains a rolling archive of the last 7 audit reports.
 ---
@@ -45,8 +45,8 @@ description: Scans for duplicated code, dead code, style violations, and TODO de
 
 ---
 
-## Phase 0 — MemPalace Orient (CONDITIONAL)
-Run `mempalace_search(query="<keywords>", limit=3)` ONLY if task involves an unfamiliar code area or known-recurring debt category. Skip for routine cleanup or pattern application. Default: skip. If MCP unavailable: skip silently.
+## Phase 0 — Agent Memory Orient (CONDITIONAL)
+Run `memory_smart_search(query="<keywords>", limit=3)` ONLY if task involves an unfamiliar code area or known-recurring debt category. Skip for routine cleanup or pattern application. Default: skip. If MCP unavailable: skip silently.
 
 ---
 
@@ -120,7 +120,7 @@ Run `mempalace_search(query="<keywords>", limit=3)` ONLY if task involves an unf
 
 ## Trend (last 7 audits)
 <!-- Compare today's totals vs previous reports in the folder.
-     Show direction arrows: ↑ worse / ↓ better / → stable -->
+     Show direction arrows: â†‘ worse / â†“ better / → stable -->
 ```
 
 > The **Trend** section is populated by reading the Summary block from the other reports in the archive folder and comparing counts. This gives a quick at-a-glance view of whether tech debt is growing or shrinking over the rolling window.
@@ -140,3 +140,4 @@ Run `mempalace_search(query="<keywords>", limit=3)` ONLY if task involves an unf
 Output: `"Tech debt audit complete. [X] unused imports removed, [Y] TODOs logged, [Z] components flagged for refactor. Report saved to .claude/techdebt-reports/techdebt-YYYY-MM-DD.md ([N]/7 reports in archive)."`
 
 If critical logic was changed → invoke QA Engineer for verification before committing.
+

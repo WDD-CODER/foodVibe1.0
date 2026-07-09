@@ -2,8 +2,10 @@
 
 Regenerates breadcrumbs, updates key exports, and prunes stale entries.
 
-Moved from `end-of-session-agent` Phase 8 to an on-demand command.
-Run after structural changes (new components, services, or modules).
+On-demand command (not part of `/ship`). Run after structural changes
+(new components, services, or modules).
+
+Repo root = **workspace cwd** (never hardcode a machine path).
 
 ## When to use
 
@@ -14,18 +16,20 @@ Run after structural changes (new components, services, or modules).
 
 ## Execution
 
-```
-Agent(
-  subagent_type: "general",
-  description: "Refresh breadcrumbs and project docs",
-  prompt: "Run the update-docs skill. Repo root: C:\\foodCo\\foodVibe1.0. Refresh breadcrumbs.md at major seams, prune stale entries, update key exports."
-)
-```
-
-Or invoke the `update-docs` skill directly:
+Invoke the `update-docs` skill from the repo root (cwd):
 
 1. Read `.claude/skills/update-docs/SKILL.md`
 2. Follow the skill's steps to refresh breadcrumbs and documentation
+
+Or spawn a general agent with a **path-free** prompt:
+
+```
+Agent(
+  subagent_type: "generalPurpose",
+  description: "Refresh breadcrumbs and project docs",
+  prompt: "Run the update-docs skill from the workspace repo root (cwd). Refresh breadcrumbs.md at major seams, prune stale entries, update key exports. Do not use any hardcoded absolute machine path."
+)
+```
 
 ## What it does
 

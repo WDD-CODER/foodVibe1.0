@@ -1,4 +1,4 @@
----
+﻿---
 name: brief-detection
 description: Detects structured briefs in user messages and gates execution. Source-agnostic.
 ---
@@ -57,6 +57,7 @@ c. Discussion only — no execution
 ## What this skill does NOT do
 
 - Does not write or modify code
-- Does not invoke MemPalace
+- Does not invoke Agent Memory
 - Does not invoke other agents
 - Does not pre-load standards files
+

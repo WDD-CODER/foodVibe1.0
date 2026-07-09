@@ -1,32 +1,33 @@
 # /plan — Planning Path
 
 Use this path for product planning, PRDs, HLDs, and technical design decisions.
+In the three-agent workflow, planning is the **Architect** role (Claude.ai by default;
+Claude Code / Cursor may plan when the Human Director explicitly overrides).
 
 ## Loads
 
-- `prd-template.md` (if available in `.claude/`) — product requirements document template
-- `hld-template.md` (if available in `.claude/`) — high-level design template
+- `.claude/references/prd-template.md` — product requirements / Plan Contract template
+- `.claude/references/hld-template.md` — high-level design template (when present)
+- `/_shared/tech-stack.md` + `/_shared/current-state.md` — stack + capsule
+- `.claude/rules/` — path-scoped standards (loaded when the plan touches matching areas)
 
 ## Invokes
 
-- `product-manager` — feature scoping, user stories, success metrics, forced alternatives
-- `software-architect` — technical design, component breakdown, risk analysis
+- Architect (Human-directed) — writes / updates a Plan Contract in
+  `/plans/[feature]_v[N].md`
+- Does **not** invoke the retired `product-manager` or `software-architect` agents
 
 ## Typical flow
 
 1. User describes the problem or feature area.
-2. `product-manager` runs structured scoping: forcing questions, landscape search, premise challenge.
-3. Output: a sharp brief suitable for `plan-implementation`.
-4. `software-architect` adds technical design layer if the feature spans multiple subsystems.
-5. User approves brief → proceed to `/feat` for implementation.
+2. Architect runs structured scoping (forcing questions, landscape, premise challenge).
+3. Output: a Plan Contract under `/plans/[feature]_v[N].md` with numbered milestones
+   and a Verify command per milestone.
+4. User approves the plan → Contractor executes one milestone at a time → `/review-it`.
 
 ## Notes
 
-- Planning is read-only. No code changes happen in this path.
-- Output of `/plan` is always a brief or design doc, never code.
-- Use `/feat` to execute a plan after this path completes.
-
-## Deprecation note
-
-`new-feature.md` contains structured scoping logic that overlaps with this path.
-`new-feature.md` remains functional as an alias. **Deadline to review: 2026-04-28.**
+- Planning is read-only against the app. No product-code changes happen in this path.
+- Output of `/plan` is always a Plan Contract (or design doc), never application code.
+- Use Cursor (Contractor) or an explicit execute override to implement after approval.
+- Legacy `plans/NNN-name.plan.md` files coexist; new work uses `[feature]_v[N].md`.

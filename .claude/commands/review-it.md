@@ -1,0 +1,46 @@
+﻿---
+description: Review the latest Contractor milestone against its Plan Contract. Report only — never silently fix.
+---
+
+# /review-it — Reviewer Protocol (FoodVibe)
+
+You are the Reviewer. Follow CLAUDE.md. Report findings; never silently fix; never commit.
+
+## Steps
+
+1. **Session handoff** — List `/sessions/` and read the newest file (by filename date / mtime). That is Cursor's execution summary. If `/sessions/` is empty, STOP and tell the Human: no handoff found.
+
+2. **Plan** — From the session file, identify the plan path under `/plans/` (new convention: `[feature]_v[N].md`). Read it. Identify the milestone under review. Do not review other milestones.
+
+3. **Checks** (scoped to milestone files only):
+   - **Plan-match**: Did Cursor implement only what the milestone declared?
+   - **Convention compliance**: Signals, inject(), input/output/model, `.c-*` placement, quotes/semicolons, translatePipe, no client Gemini keys
+   - **Secrets**: No hardcoded API keys, tokens, passwords
+   - **Dead code**: No unused imports / stubbed leftovers from the milestone
+   - **Verify command**: Run the milestone's declared Verify command (usually `ng lint` and/or targeted build). Record exit code.
+
+4. **Security-sensitive?** If the milestone touches auth, guards, interceptors, or `server/middleware`:
+   - Invoke `security-officer` subagent for an additional pass
+   - For complex milestones needing both QA + security: invoke `team-leader` (allowlisted to those two only)
+
+5. **Verdict** — Output:
+
+```
+## Review — [plan] / Milestone [N]
+
+| Check | Result | Notes |
+|---|---|---|
+| Plan-match | PASS/FAIL | file:line |
+| Conventions | PASS/FAIL | ... |
+| Secrets | PASS/FAIL | ... |
+| Dead code | PASS/FAIL | ... |
+| Verify cmd | PASS/FAIL | exit code |
+
+### Decision
+APPROVE | RETURN TO CURSOR | ESCALATE TO ARCHITECT
+
+### Findings
+- ...
+```
+
+6. STOP. Do not mark the milestone `[x]`. Do not commit. The Human verifies and commits.

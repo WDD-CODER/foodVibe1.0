@@ -1,4 +1,4 @@
----
+﻿---
 name: save-plan
 description: Determines the next plan number, syncs atomic sub-tasks to the ledger, and writes the plan file to plans/ when the user confirms a plan.
 ---
@@ -57,16 +57,7 @@ description: Determines the next plan number, syncs atomic sub-tasks to the ledg
 
 ---
 
-## Post-Save: Record Decision in Knowledge Graph (if MemPalace available)
-
-Call `mempalace_kg_add(subject="<plan-slug>", predicate="decided", object="<key architectural decision in 1 sentence>", valid_from="<today YYYY-MM-DD>")` to record the plan's core decision in the temporal knowledge graph.
-
-Example: `mempalace_kg_add(subject="cook-view-redesign", predicate="decided", object="two-column layout with step progression and ingredient checklist", valid_from="2026-04-11")`
-
-Skip silently if MCP unavailable.
-
----
-
 ## Completion Gate
 
 Output: `"Plan saved. Ledger updated. Ready to execute Task 1: [Task Name]."`
+

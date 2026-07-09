@@ -1,4 +1,4 @@
----
+﻿---
 name: auth-and-logging
 description: Audits and hardens authentication guards, mutation entry points, and logging calls in compliance with project Security & QA standards.
 ---
@@ -18,8 +18,8 @@ description: Audits and hardens authentication guards, mutation entry points, an
 
 ---
 
-## Phase 0 — MemPalace Orient (CONDITIONAL)
-Run `mempalace_search(query="<keywords>", limit=3)` ONLY if task involves an unfamiliar code area or known-recurring debt category. Skip for routine cleanup or pattern application. Default: skip. If MCP unavailable: skip silently.
+## Phase 0 — Agent Memory Orient (CONDITIONAL)
+Run `memory_smart_search(query="<keywords>", limit=3)` ONLY if task involves an unfamiliar code area or known-recurring debt category. Skip for routine cleanup or pattern application. Default: skip. If MCP unavailable: skip silently.
 
 ---
 
@@ -58,3 +58,4 @@ Run `mempalace_search(query="<keywords>", limit=3)` ONLY if task involves an unf
 **Security Officer Trigger:** If this task touches the security surface (auth files, `localStorage`/`sessionStorage`, `[innerHTML]`, new routes) → invoke Security Officer agent for final audit before committing. No exceptions.
 
 Output: `"Auth/Logging hardened. [X] mutation handlers protected, PII audit passed."`
+

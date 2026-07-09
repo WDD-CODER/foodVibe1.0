@@ -34,10 +34,10 @@
 - Dependencies: [existing services/components affected]
 - New files needed: [list]
 - Model changes: [any interface/type updates]
-- Hebrew canonical values: [if the feature accepts user-entered units, categories, allergens, or section/preparation categories → flag Sections 7.1–7.2 of copilot-instructions.md; the canonical resolution flow and translation modal UX are required]
+- Hebrew canonical values: [if the feature accepts user-entered units, categories, allergens, or section/preparation categories → flag the Hebrew canonical values guidance in `.claude/rules/domain.md`; the canonical resolution flow and translation modal UX are required]
 
 ## Out of Scope
 [Explicitly list what is NOT included]
 
 ## Critical Questions
-[Q&A format per copilot-instructions Section 1.1 — multiple choice, never open-ended]
+[Q&A format per the `brief-detection` skill — multiple choice, never open-ended]

@@ -1,4 +1,4 @@
----
+﻿---
 name: elegant-fix
 description: Refines a working but mediocre fix into a clean, idiomatic solution after the initial implementation is confirmed to work.
 ---
@@ -21,8 +21,8 @@ description: Refines a working but mediocre fix into a clean, idiomatic solution
 
 ---
 
-## Phase 0 — MemPalace Orient (CONDITIONAL)
-Run `mempalace_search(query="<keywords>", limit=3)` ONLY if task involves an unfamiliar code area or known-recurring debt category. Skip for routine cleanup or pattern application. Default: skip. If MCP unavailable: skip silently.
+## Phase 0 — Agent Memory Orient (CONDITIONAL)
+Run `memory_smart_search(query="<keywords>", limit=3)` ONLY if task involves an unfamiliar code area or known-recurring debt category. Skip for routine cleanup or pattern application. Default: skip. If MCP unavailable: skip silently.
 
 ---
 
@@ -61,3 +61,4 @@ Run `mempalace_search(query="<keywords>", limit=3)` ONLY if task involves an unf
 Output: `"Refactored [target] for elegance. [Summary of what was extracted, simplified, or converted]."`
 
 If the refactor touches critical business logic → invoke QA Engineer for verification before committing.
+

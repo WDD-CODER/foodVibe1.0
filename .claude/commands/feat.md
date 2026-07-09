@@ -4,34 +4,28 @@ Use this path for building new features. Loads Angular + domain standards automa
 
 ## Loads
 
-- `.claude/standards-angular.md` — Signals, Components, CSS (Layers), Angular conventions
-- `.claude/standards-domain.md` — FoodVibe domain model, data flow, naming conventions
+- `.claude/rules/angular.md` — Signals, Components, CSS (Layers), Angular conventions
+- `.claude/rules/domain.md` — FoodVibe domain model, data flow, naming conventions
+- `/_shared/tech-stack.md` — stack overrides
 
 ## Invokes
 
-- `plan-implementation` — read-only phase: codebase scan → implementation plan
-- `execute-it` — full write phase: atomic sub-tasks, commit each, update todo.md
-- `team-leader` — for medium/large tasks requiring parallel agents
+- `/plan` — read-only phase: codebase scan → Plan Contract (Architect authors, saved to `plans/`)
+- `/review-it` — review phase: Reviewer checks plan-match, conventions, and the Verify gate
+- `team-leader` — review-time coordinator only (`qa-engineer` + `security-officer` on complex / security-sensitive milestones)
 
 ## Typical flow
 
 1. User describes feature goal.
-2. Invoke `plan-implementation` (reads standards, searches MemPalace, produces plan).
-3. User reviews plan and says "save the plan".
-4. `save-plan` skill assigns plan number, appends to todo.md.
-5. User says "execute it" or "go".
-6. `execute-it` runs atomic sub-tasks in sequence.
-7. For tasks spanning 3+ sub-systems, `team-leader` assembles a task force.
-8. After all `[x]`: `/ship` for fast session end or `/end-session` for full pipeline.
+2. Invoke `/plan` (produces a Plan Contract in `/plans/[feature]_v[N].md`).
+3. User reviews and approves the plan.
+4. Contractor executes **one milestone at a time**, writes `/sessions/[date].md`, stops.
+5. After a milestone: `/review-it` for the Reviewer pass.
+6. On APPROVE: Human runs Verify, commits, marks the milestone `[x]`.
+7. `/ship` for session wrap prep (Human still commits / pushes).
 
-## Hard rules (inherited from CLAUDE.md)
+## Hard rules (inherited from CLAUDE.md / .cursorrules)
 
 - No semicolons in `.ts` files. Single quotes in TS, double quotes in HTML.
-- `ng build` must pass before any commit.
-- MemPalace search before spawning any agent.
-- Branch guard enforced — never commit to `main`.
-
-## Deprecation note
-
-`new-feature.md` and `plan-implementation.md` + `execute-it.md` remain fully functional as aliases.
-Prefer `/feat` for new work. **Deadline to remove old aliases: 2026-04-28.**
+- `ng build` / `ng lint` must pass before declaring a milestone ready.
+- Branch guard enforced — never write on `main`.

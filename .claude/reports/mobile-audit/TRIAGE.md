@@ -1,5 +1,11 @@
 # Mobile Audit Triage — 2026-04-21
 
+## Phase 6 status stamp — 2026-07-09
+
+Report-only refresh from plan/git/code evidence (see [`2026-07-status.md`](./2026-07-status.md)).
+**No live re-audit this pass** — `localhost:4200` and API/Mongo unreachable; cook-view stub **not** regenerated.
+Plans **276–283**: implementation largely present in tree (`a9c56f7`, Plan 280 also `d381686`); **verify** tasks (flow re-audit + mark clusters resolved) remain **open** in `.claude/todo.md`. Do **not** treat clusters below as verified-fixed until those re-audits run.
+
 ## Summary
 - **Total defects:** 95 (per INDEX.md) — 88 catalogued below, 7 in cook-view (malformed report)
 - **Critical:** 11 · **Major:** 43 · **Minor:** 41
