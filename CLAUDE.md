@@ -41,6 +41,13 @@ Gemini AI (server-proxied only). Hebrew RTL. Deployed on Render.
 Detailed, path-scoped rules load automatically from .claude/rules/ when you touch
 matching files. Don't pre-load them - that's the point of path-scoping.
 
+## Skill & command discovery
+Replaces retired `copilot-instructions.md` §0 skill-trigger list.
+- **List available skills** `[SHARED]`: User invokes `/skills` -> read
+  `.claude/commands/skills.md` and follow it.
+- **List available commands** `[SHARED]`: User invokes `/commands` -> read
+  `.claude/commands/commands.md` and follow it.
+
 ## Review protocol (/review-it)
 Default on `/review-it`: report-only, no silent fixes, do not mark milestones done.
 1. Read the newest file in /sessions/ for Cursor's latest execution summary.

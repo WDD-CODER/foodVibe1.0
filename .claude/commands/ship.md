@@ -83,6 +83,26 @@ Approve? (Y / edit list / abort)
 
 On `--yes`, replace the last line with: `Mode: --yes — committing now.`
 
+### 2.2.1 Unrelated commits on branch (history hygiene)
+
+Before presenting the confirmation block, run:
+
+```bash
+git log --oneline origin/main..HEAD
+```
+
+(If `origin/main` is missing, use `main` or the branch’s merge-base with the intended base.)
+
+**If** any commit in that list is **outside** this chat’s stage list / goal (different scope,
+e.g. auth commit on a docs-only discovery branch):
+
+1. Add a warning line under `Branch:` in the confirmation block, e.g.
+   `Warning: unrelated commits on branch — <sha> <subject> (…); rebase/cherry-pick before merge?`
+2. Add one Verify bullet: `Unrelated commits on branch (list SHAs) — rebase/cherry-pick before merge?`
+3. Do **not** silently rewrite history. Surface it; Human decides rebase vs split PR.
+
+Skip this check when every commit ahead of the base clearly belongs to the same PR scope.
+
 ### 2.3 Verify bullets (mandatory)
 
 Give the Human a **ready-made evaluation checklist** so they do not invent what to check.
