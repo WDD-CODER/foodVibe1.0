@@ -7,22 +7,28 @@ allowed-tools: Read, Glob, Bash
 
 Show all registered slash commands with short descriptions and file locations.
 
-## Execution
+## Execution (fast path — default)
+
+1. **Do not** read every command file. **Do not** call MCP / memory tools.
+2. Print the **Current registry** table below as-is.
+3. Optional freshness (one cheap check only):
+   - `Glob` `.claude/commands/*.md` (exclude `_index.md`) — **filenames only**.
+   - Compare the filename set to the `File` column in the table.
+   - If sets match → done (print table; no further reads).
+   - If sets differ → run **Refresh path** once, then print the rebuilt table.
+4. `/commands --refresh` (or user says "refresh") → skip straight to **Refresh path**.
+5. Do **not** invent commands that are not on disk.
+6. Do **not** list retired commands from `_index.md` Retired unless the `.md` still exists (then mark `LEGACY`).
+
+### Refresh path (only on mismatch or `--refresh`)
 
 1. Enumerate `.claude/commands/*.md` (exclude `_index.md`).
-2. For each file, read frontmatter `description:` if present; else use the first `#` heading (strip the `/name —` prefix when present).
-3. Category tags (from `_index.md` sections):
-   - `FLOW` — multi-step pipeline
-   - `UTIL` — single-purpose utility / discovery
-4. Scope tags (post three-agent cutover):
-   - `[SHARED]` — usable by Cursor (Contractor) and Claude Code (Reviewer)
-   - `[CC]` — primarily Claude Code Reviewer path
-5. Print a markdown table. Do **not** invent commands that are not on disk.
-6. **Count check (mandatory):** if the number of `.md` files (excluding `_index.md`) ≠
-   table rows, rebuild the table from disk before printing.
-7. Do **not** list retired commands from the `_index.md` Retired section unless the `.md` file still exists on disk (then mark `LEGACY`).
+2. For each file, read frontmatter `description:` if present; else first `#` heading (strip `/name —` prefix).
+3. Category: `FLOW` = multi-step pipeline; `UTIL` = single-purpose / discovery (see `_index.md` sections).
+4. Scope: `[SHARED]` = Cursor + Claude Code; `[CC]` = primarily Reviewer path.
+5. Rebuild and print the table. Prefer also updating this file's embedded registry in the same change when adding/removing a command.
 
-## Current registry (refresh from disk if stale)
+## Current registry
 
 | Command | What it does | File | Category | Scope |
 | --- | --- | --- | --- | --- |
@@ -53,4 +59,5 @@ Show all registered slash commands with short descriptions and file locations.
 
 - Quick reference twin: `.claude/commands/_index.md` (human-oriented index).
 - Skills are separate — use `/skills` for `.claude/skills/*/SKILL.md`.
+- When adding/removing a command file, update this table (and `_index.md`) in the same change.
 - Retired (do not invoke; files removed in cutover): `/plan-implementation`, `/execute-it`, `/validate-agent-refs`, `/nightly-audit`, `/audit-report`, `/reflect`, `/reflect-list`, `/reflect-add-tests`.

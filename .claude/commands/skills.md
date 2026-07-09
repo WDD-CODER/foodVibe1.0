@@ -7,20 +7,30 @@ allowed-tools: Read, Glob, Bash
 
 Show all registered skills with trigger patterns and file locations.
 
-## Execution
+## Execution (fast path — default)
 
-1. Enumerate directories under `.claude/skills/` that contain a `SKILL.md`.
-2. Skip dirs without `SKILL.md` (e.g. eval/workspace artifacts).
-3. For each skill, read the frontmatter `description` and the first `**Trigger:**` / `## Trigger` / `## When to checkpoint` line.
-4. Scope tags (post three-agent cutover — `copilot-instructions.md` §0 retired):
-   - `[SHARED]` — usable by Cursor (Contractor) and Claude Code (Reviewer)
-   - `[CC]` — Claude Code slash/command path only (or historically CC-gated)
-5. Print a markdown table. Do **not** invent skills that are not on disk.
-6. **Count check (mandatory):** if the number of dirs with `SKILL.md` ≠ table rows,
-   rebuild the table from disk before printing (do not print a stale registry).
-7. Optionally append a one-line note if a skill folder exists without `SKILL.md`.
+1. **Do not** read every `SKILL.md`. **Do not** call MCP / memory tools.
+2. Print the **Current registry** table below as-is.
+3. Optional freshness (one cheap check only):
+   - `Glob` `.claude/skills/*/SKILL.md` under the repo `.claude/skills/` only (ignore `claude-workflow-sdk/` and other trees).
+   - Compare the skill-dir name set to the `File` column paths (e.g. `add-recipe` from `.claude/skills/add-recipe/SKILL.md`).
+   - **Exclude retired dirs** even if present on disk: `mp-search`, `nightly-audit`, `worktree-session-end`, `execute-debugging`.
+   - If active sets match → done (print table; no further reads).
+   - If sets differ → run **Refresh path** once, then print the rebuilt table.
+4. `/skills --refresh` (or user says "refresh") → skip straight to **Refresh path**.
+5. Do **not** invent skills that are not on disk.
+6. Do **not** list retired skills in the printed table.
 
-## Current registry (refresh from disk if stale)
+### Refresh path (only on mismatch or `--refresh`)
+
+1. Enumerate `.claude/skills/*/SKILL.md` (repo skills only; skip dirs without `SKILL.md`).
+2. Skip retired: `mp-search`, `nightly-audit`, `worktree-session-end`, `execute-debugging`.
+3. For each remaining skill, read frontmatter `description` and the first `**Trigger:**` / `## Trigger` / `## When to checkpoint` line.
+4. Scope: `[SHARED]` = Cursor + Claude Code; `[CC]` = Claude Code slash/command path only (or historically CC-gated).
+5. Rebuild and print the table. Prefer also updating this file's embedded registry in the same change when adding/removing a skill.
+6. Optionally append a one-line note if a non-retired skill folder exists without `SKILL.md`.
+
+## Current registry
 
 | Trigger | File | Scope |
 | --- | --- | --- |
@@ -46,4 +56,5 @@ Show all registered skills with trigger patterns and file locations.
 
 - `copilot-instructions.md` §0 was retired in the three-agent cutover. This command is the discoverability surface.
 - Slash commands live in `.claude/commands/` — use `/commands` or see `_index.md`. Skills are separate from commands.
-- Do not list retired skills (e.g. `mp-search`, `nightly-audit`, `worktree-session-end`, `execute-debugging`) even if mentioned in archives.
+- When adding/removing a skill, update this table in the same change.
+- Do not list retired skills (`mp-search`, `nightly-audit`, `worktree-session-end`, `execute-debugging`) even if mentioned in archives.
