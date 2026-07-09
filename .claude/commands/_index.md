@@ -61,6 +61,8 @@ See `README_WORKFLOW.md` and `CLAUDE.md`.
 | `/docs-refresh` | On-demand documentation refresh — updates breadcrumbs and project docs |
 | `/auto-solve` | Autonomous plan executor (legacy; prefer milestone-by-milestone Contractor) |
 | `/context-override` | Override session context defaults |
+| `/skills` | List all registered skills, triggers, and scope |
+| `/commands` | List all registered slash commands, categories, and paths |
 
 ---
 
