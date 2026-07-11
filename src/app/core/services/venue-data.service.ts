@@ -14,7 +14,7 @@ export class VenueDataService extends BaseEntityDataService<VenueProfile> {
   readonly allVenues_: Signal<VenueProfile[]> = this.all_
 
   constructor() {
-    super(ENTITY)
+    super(ENTITY, false)
   }
 
   async getVenueById(_id: string): Promise<VenueProfile> {

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
-import { StorageService } from './async-storage.service'
+import { StorageService, EntityId } from './async-storage.service'
 import { LoggingService } from './logging.service'
 import { Recipe } from '../models/recipe.model'
 import { Product } from '../models/product.model'
@@ -8,6 +8,7 @@ import { ActivityChange } from './activity-log.service'
 import { RecipeDataService } from './recipe-data.service'
 import { DishDataService } from './dish-data.service'
 import { ProductDataService } from './product-data.service'
+import { environment } from '../../../environments/environment'
 
 export type VersionEntityType = 'recipe' | 'dish' | 'product'
 
@@ -64,6 +65,29 @@ export class VersionHistoryService {
   async addVersion(entry: Omit<VersionEntry, 'versionAt'>): Promise<void> {
     try {
       const full: VersionEntry = { ...entry, versionAt: Date.now() }
+
+      // Backend: post one doc + trim only this entity's overflow (no full-collection rewrite).
+      if (environment.useBackend) {
+        await this.storage.post(VERSION_STORAGE_KEY, full)
+        const entityVersions = await this.storage.queryFiltered<VersionEntry & EntityId>(
+          VERSION_STORAGE_KEY,
+          entry.entityType,
+          entry.entityId
+        )
+        if (entityVersions.length > MAX_VERSIONS_PER_ENTITY) {
+          const overflowIds = entityVersions
+            .slice()
+            .sort((a, b) => a.versionAt - b.versionAt)
+            .slice(0, entityVersions.length - MAX_VERSIONS_PER_ENTITY)
+            .map(e => e._id)
+          if (overflowIds.length > 0) {
+            await this.storage.deleteBulk(VERSION_STORAGE_KEY, overflowIds)
+          }
+        }
+        return
+      }
+
+      // localStorage: full-array trim remains fine at small scale.
       const all = await this.storage.query<VersionEntry>(VERSION_STORAGE_KEY, 0)
       all.push(full)
       const byEntity = new Map<string, VersionEntry[]>()

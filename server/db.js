@@ -23,6 +23,13 @@ async function connectDb() {
     )
   )
   console.log(`userId indexes ensured for ${CLONEABLE_TYPES.length} collections`)
+
+  // VERSION_HISTORY is not cloneable but needs a compound index for per-entity queries.
+  await db.collection('VERSION_HISTORY').createIndex(
+    { userId: 1, entityType: 1, entityId: 1 },
+    { background: true }
+  )
+  console.log('VERSION_HISTORY compound index ensured (userId, entityType, entityId)')
 }
 
 module.exports = { connectDb }

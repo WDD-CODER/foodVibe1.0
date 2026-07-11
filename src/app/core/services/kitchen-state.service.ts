@@ -12,6 +12,7 @@ import { DishDataService } from './dish-data.service'
 import { SupplierDataService } from './supplier-data.service'
 import { ActivityLogService, ActivityChange } from './activity-log.service'
 import { VersionHistoryService } from './version-history.service'
+import { LoggingService } from './logging.service'
 import { getEffectivePrice, getSupplierIds } from '../utils/product-source.util'
 
 @Injectable({
@@ -26,6 +27,7 @@ export class KitchenStateService {
   private userService = inject(UserService)
   private activityLogService = inject(ActivityLogService)
   private versionHistoryService = inject(VersionHistoryService)
+  private logging = inject(LoggingService)
 
   // CORE SIGNALS
   products_ = computed(() => this.productDataService.allProducts_())
@@ -65,18 +67,7 @@ export class KitchenStateService {
       const previous = this.products_().find(p => p._id === product._id) ?? null
       const changes = previous ? this.buildProductChanges(previous, product) : []
 
-      return from(
-        previous
-          ? this.versionHistoryService.addVersion({
-              entityType: 'product',
-              entityId: previous._id,
-              entityName: previous.name_hebrew,
-              snapshot: previous,
-              changes,
-            })
-          : Promise.resolve()
-      ).pipe(
-        switchMap(() => from(this.productDataService.updateProduct(product))),
+      return from(this.productDataService.updateProduct(product)).pipe(
         tap(() => {
           this.userMsgService.onSetSuccessMsg('המוצר עודכן בהצלחה')
           this.activityLogService.recordActivity({
@@ -86,6 +77,23 @@ export class KitchenStateService {
             entityName: product.name_hebrew,
             changes,
           })
+          if (previous) {
+            void this.versionHistoryService
+              .addVersion({
+                entityType: 'product',
+                entityId: previous._id,
+                entityName: previous.name_hebrew,
+                snapshot: previous,
+                changes,
+              })
+              .catch(err => {
+                this.logging.error({
+                  event: 'crud.versionHistory.addVersion_fireAndForget_error',
+                  message: 'Version history write failed after product save',
+                  context: { err },
+                })
+              })
+          }
         }),
         map(() => undefined as void),
         catchError(err => {
@@ -331,22 +339,8 @@ export class KitchenStateService {
     const entityType = isDish ? 'dish' as const : 'recipe' as const
     const previousEntityType = previousIsDish ? 'dish' as const : 'recipe' as const
 
-    const recordVersion$ =
-      isUpdate && previous
-        ? from(
-            this.versionHistoryService.addVersion({
-              entityType: typeChanged ? previousEntityType : entityType,
-              entityId: previous._id,
-              entityName: previous.name_hebrew,
-              snapshot: previous,
-              changes: this.buildRecipeChanges(previous, recipe),
-            })
-          )
-        : from(Promise.resolve())
-
     const operation$ = typeChanged
-      ? recordVersion$.pipe(
-          switchMap(() => this.deleteRecipe(previous)),
+      ? this.deleteRecipe(previous!).pipe(
           switchMap(() => {
             const { _id: _omit, ...payload } = recipe as Recipe & { _id?: string }
             return isDish
@@ -354,17 +348,13 @@ export class KitchenStateService {
               : from(this.recipeDataService.addRecipe(payload as Omit<Recipe, '_id'>))
           })
         )
-      : recordVersion$.pipe(
-          switchMap(() =>
-            isDish
-              ? (isUpdate
-                  ? from(this.dishDataService.updateDish(recipe))
-                  : from(this.dishDataService.addDish(recipe as Omit<Recipe, '_id'>)))
-              : (isUpdate
-                  ? from(this.recipeDataService.updateRecipe(recipe))
-                  : from(this.recipeDataService.addRecipe(recipe as Omit<Recipe, '_id'>)))
-          )
-        )
+      : (isDish
+          ? (isUpdate
+              ? from(this.dishDataService.updateDish(recipe))
+              : from(this.dishDataService.addDish(recipe as Omit<Recipe, '_id'>)))
+          : (isUpdate
+              ? from(this.recipeDataService.updateRecipe(recipe))
+              : from(this.recipeDataService.addRecipe(recipe as Omit<Recipe, '_id'>))))
 
     const fallbackErrorMsg = isDish
       ? (isUpdate ? 'שגיאה בעדכון המנה' : 'שגיאה בשמירת המנה')
@@ -386,6 +376,23 @@ export class KitchenStateService {
           entityName: saved.name_hebrew,
           changes,
         })
+        if (isUpdate && previous) {
+          void this.versionHistoryService
+            .addVersion({
+              entityType: typeChanged ? previousEntityType : entityType,
+              entityId: previous._id,
+              entityName: previous.name_hebrew,
+              snapshot: previous,
+              changes: this.buildRecipeChanges(previous, recipe),
+            })
+            .catch(err => {
+              this.logging.error({
+                event: 'crud.versionHistory.addVersion_fireAndForget_error',
+                message: 'Version history write failed after recipe/dish save',
+                context: { err },
+              })
+            })
+        }
       }),
       catchError((err: unknown) => {
         const msg =

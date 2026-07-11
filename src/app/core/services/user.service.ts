@@ -61,9 +61,19 @@ export class UserService {
         import('./dish-data.service').then(m => this.injector.get(m.DishDataService).reloadFromStorage()),
         import('./supplier-data.service').then(m => this.injector.get(m.SupplierDataService).reloadFromStorage()),
         import('./equipment-data.service').then(m => this.injector.get(m.EquipmentDataService).reloadFromStorage()),
-        import('./venue-data.service').then(m => this.injector.get(m.VenueDataService).reloadFromStorage()),
-        import('./menu-event-data.service').then(m => this.injector.get(m.MenuEventDataService).reloadFromStorage()),
-        import('./menu-section-categories.service').then(m => this.injector.get(m.MenuSectionCategoriesService).reloadFromStorage()),
+        // Deferred services: only rehydrate if already loaded this session (avoid bootstrap GETs).
+        import('./venue-data.service').then(m => {
+          const s = this.injector.get(m.VenueDataService)
+          return s.hasLoaded() ? s.reloadFromStorage() : Promise.resolve()
+        }),
+        import('./menu-event-data.service').then(m => {
+          const s = this.injector.get(m.MenuEventDataService)
+          return s.hasLoaded() ? s.reloadFromStorage() : Promise.resolve()
+        }),
+        import('./menu-section-categories.service').then(m => {
+          const s = this.injector.get(m.MenuSectionCategoriesService)
+          return s.hasLoaded() ? s.reloadFromStorage() : Promise.resolve()
+        }),
         import('./preparation-registry.service').then(m => this.injector.get(m.PreparationRegistryService).reloadFromStorage()),
       ])
     } finally {

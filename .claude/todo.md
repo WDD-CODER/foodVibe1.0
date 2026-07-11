@@ -2,6 +2,24 @@
 
 ---
 
+### Plan 289 — App Load Optimization (`plans/289-app-load-optimization.plan.md`)
+> Phase 2 after Save Latency Fix (M1–3 already executed in session 2026-07-09). Contractor executed M4–6 2026-07-09 — Human/Reviewer marks `[x]`.
+
+- [ ] 4.1 Record baseline: `ng build --configuration production` — note initial/main bundle size *(done in session: 920.70 kB)*
+- [ ] 4.2 `app.component.html` + `.ts` — `@defer` the 3 AI modals (`ai-recipe`, `ai-menu`, `ai-product`) on their open signals; verify open + rebuild size
+- [ ] 4.3 Defer remaining root modals (pass 2) — leave `app-confirm-modal` / `app-auth-modal` eager if first-open latency is noticeable
+- [ ] 4.4 Manual verify: all deferred modals open; confirm/auth still snappy; no pendingChangesGuard regression
+- [ ] 4.5 Record after numbers from production build output (main vs deferred chunks) *(after: 670.83 kB, −249.87 kB)*
+- [ ] 5.1 Audit: grep `allEquipment_` / venues / menu-events / preparations / section-categories usages — exclude any read from dashboard *(Equipment + Preparations kept eager)*
+- [ ] 5.2 For each safe service: remove constructor `loadInitialData()`; add `ensureLoaded()` with `loaded_` guard
+- [ ] 5.3 Wire `ensureLoaded()` into route resolvers (equipment, venues, menu-intelligence, metadata-manager as applicable)
+- [ ] 5.4 Keep Recipe/Dish/Product/Supplier/Unit/Metadata registries eager — do not touch
+- [ ] 5.5 Manual: `/dashboard` Network tab has no EQUIPMENT/VENUE/MENU_EVENT/PREPARATIONS/SECTION_CATEGORIES GETs until navigation
+- [ ] 6.1 `server/routes/generic.js` PUT `/:type` — parallelize `deleteMany` + stillTaken `_id` lookup via `Promise.all`
+- [ ] 6.2 Manual: trash empty-all + backup-import still correct; contract (`X-Confirm-Replace`) unchanged
+
+---
+
 ### Plan 285 — AI Menu Phase 1 (`plans/285-ai-menu-phase1.plan.md`)
 
 - [x] 1.1.1 `server/routes/ai.js` — add MENU_GENERATE_SYSTEM_PROMPT

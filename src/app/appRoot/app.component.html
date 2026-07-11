@@ -6,19 +6,48 @@
   <router-outlet></router-outlet>
 </div>
 <user-msg/>
-<unit-creator-modal/>
-<translation-key-modal/>
-<app-label-creation-modal/>
-<add-item-modal/>
-<app-quick-add-product-modal/>
-<app-quick-edit-product-modal/>
-<add-equipment-modal/>
-<app-global-specific-modal/>
+
+@defer (when unitRegistry.isCreatorOpen_()) {
+  <unit-creator-modal/>
+}
+@defer (when translationKeyModal.isOpen_()) {
+  <translation-key-modal/>
+}
+@defer (when labelCreationModal.isOpen_()) {
+  <app-label-creation-modal/>
+}
+@defer (when addItemModal.isOpen_()) {
+  <add-item-modal/>
+}
+@defer (when quickAddProductModal.isOpen_()) {
+  <app-quick-add-product-modal/>
+}
+@defer (when quickEditProductModal.isOpen_()) {
+  <app-quick-edit-product-modal/>
+}
+@defer (when addEquipmentModal.isOpen_()) {
+  <add-equipment-modal/>
+}
+@defer (when globalSpecificModal.isOpen()) {
+  <app-global-specific-modal/>
+}
+
+<!-- Eager: confirm + auth used early in typical sessions -->
 <app-confirm-modal/>
-<app-supplier-modal/>
-<app-ai-recipe-modal/>
-<app-ai-menu-modal/>
-<app-ai-product-modal/>
-<app-restore-choice-modal/>
+@defer (when supplierModal.isOpen()) {
+  <app-supplier-modal/>
+}
+@defer (when aiRecipeModal.isOpen()) {
+  <app-ai-recipe-modal/>
+}
+@defer (when aiMenuModal.isOpen()) {
+  <app-ai-menu-modal/>
+}
+@defer (when aiProductModal.isOpen()) {
+  <app-ai-product-modal/>
+}
+@defer (when restoreChoiceModal.isOpen()) {
+  <app-restore-choice-modal/>
+}
 <app-hero-fab/>
 <app-auth-modal/>

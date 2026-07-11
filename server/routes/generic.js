@@ -37,14 +37,22 @@ function makeId(length = 5) {
 // GET /api/v1/data/:type
 // Authenticated → returns the user's own documents.
 // Anonymous (no token) → returns __master__ documents (shared/public data).
+// Optional ?filterEntityType=&filterEntityId= narrow the find (e.g. VERSION_HISTORY).
 // ---------------------------------------------------------------------------
 router.get('/:type', optionalToken, async (req, res) => {
   try {
     const userId = req.user ? req.user.userId : '__master__';
     const limit = Math.min(parseInt(req.query.limit) || 500, 1000);
     const skip = parseInt(req.query.skip) || 0;
+    const filter = { userId, _userDeleted: { $ne: true } };
+    if (req.query.filterEntityType) {
+      filter.entityType = String(req.query.filterEntityType);
+    }
+    if (req.query.filterEntityId) {
+      filter.entityId = String(req.query.filterEntityId);
+    }
     const docs = await col(req.params.type)
-      .find({ userId, _userDeleted: { $ne: true } })
+      .find(filter)
       .skip(skip)
       .limit(limit)
       .toArray();
@@ -170,20 +178,26 @@ router.put('/:type', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'Body must be an array of entity objects' });
     }
 
-    // Only delete the authenticated user's documents — never touch master or other users.
-    await col(req.params.type).deleteMany({ userId: req.user.userId });
+    const incomingIds = entities.length > 0
+      ? entities.map(e => e._id).filter(Boolean)
+      : [];
+
+    // Delete this user's docs and check other-user id conflicts in parallel.
+    // Conflict query excludes this userId so it does not race with deleteMany.
+    const [, conflictDocs] = await Promise.all([
+      col(req.params.type).deleteMany({ userId: req.user.userId }),
+      incomingIds.length > 0
+        ? col(req.params.type)
+            .find(
+              { _id: { $in: incomingIds }, userId: { $ne: req.user.userId } },
+              { projection: { _id: 1 } }
+            )
+            .toArray()
+        : Promise.resolve([]),
+    ]);
 
     if (entities.length > 0) {
-      // After deleting the user's docs, find which incoming _ids still exist in the
-      // collection (owned by other users). Those must get fresh ids to avoid E11000.
-      const incomingIds = entities.map(e => e._id).filter(Boolean);
-      const stillTaken = incomingIds.length > 0
-        ? new Set(
-            (await col(req.params.type)
-              .find({ _id: { $in: incomingIds } }, { projection: { _id: 1 } })
-              .toArray()).map(d => d._id)
-          )
-        : new Set();
+      const stillTaken = new Set(conflictDocs.map(d => d._id));
 
       const docs = entities.map(e => {
         const { userId: _u, _masterId: _m, _userModified: _um, ...safeEntity } = e;
@@ -201,6 +215,33 @@ router.put('/:type', verifyToken, async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error('[data/replaceAll]', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// DELETE /api/v1/data/:type/bulk
+// Removes many documents by _id, scoped to the authenticated user.
+// Body: { ids: string[] }. Must be registered before /:type/:id so "bulk" is not an id.
+// ---------------------------------------------------------------------------
+router.delete('/:type/bulk', verifyToken, async (req, res) => {
+  try {
+    const ids = req.body && req.body.ids;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'Body must include a non-empty ids array' });
+    }
+    if (!ids.every(id => typeof id === 'string' && id.length > 0)) {
+      return res.status(400).json({ error: 'Each id must be a non-empty string' });
+    }
+
+    const result = await col(req.params.type).deleteMany({
+      _id: { $in: ids },
+      userId: req.user.userId,
+    });
+
+    res.json({ ok: true, deletedCount: result.deletedCount });
+  } catch (err) {
+    console.error('[data/deleteBulk]', err);
     res.status(500).json({ error: 'Server error' });
   }
 });

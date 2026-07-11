@@ -105,6 +105,7 @@ export class VenueListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    void this.venueData.ensureLoaded()
     this.heroFab.setPageActions(
       [{ labelKey: 'add_venue', icon: 'plus', run: () => this.onAddPlace() }],
       'replace'

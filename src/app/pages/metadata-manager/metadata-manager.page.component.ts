@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core'
+import { Component, inject, OnInit, signal, computed } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { UnitRegistryService, SYSTEM_UNITS } from '@services/unit-registry.service'
@@ -34,7 +34,7 @@ type MetadataType = 'category' | 'allergen' | 'unit' | 'label'
   templateUrl: './metadata-manager.page.component.html',
   styleUrl: './metadata-manager.page.component.scss'
 })
-export class MetadataManagerComponent {
+export class MetadataManagerComponent implements OnInit {
   private unitRegistry = inject(UnitRegistryService)
   private metadataRegistry = inject(MetadataRegistryService)
   private productData = inject(ProductDataService)
@@ -52,6 +52,10 @@ export class MetadataManagerComponent {
   private readonly authModal = inject(AuthModalService)
   private readonly logging = inject(LoggingService)
   protected readonly isProduction_ = environment.production
+
+  ngOnInit(): void {
+    void this.menuEventData.ensureLoaded()
+  }
 
   /** Returns false if not signed in (shows message and opens sign-in modal). */
   private requireSignIn(): boolean {

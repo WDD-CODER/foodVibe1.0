@@ -12,7 +12,7 @@ export const venueResolver: ResolveFn<VenueProfile | null> = (route) => {
 
   if (!id) return null
 
-  return venueDataService.getVenueById(id).then(
+  return venueDataService.ensureLoaded().then(() => venueDataService.getVenueById(id)).then(
     (venue) => venue,
     () => {
       userMsgService.onSetErrorMsg('מיקום האירוע לא נמצא')

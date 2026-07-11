@@ -36,6 +36,8 @@ const TOKEN_KEY = 'fv_token'
  *   remove       → DELETE /api/v1/data/:entityType/:id
  *   appendExisting → POST /api/v1/data/:entityType        (body already has _id)
  *   replaceAll   → PUT    /api/v1/data/:entityType        (body is full array, no :id segment)
+ *   queryFiltered → GET   /api/v1/data/:entityType?filterEntityType=&filterEntityId=
+ *   deleteBulk   → DELETE /api/v1/data/:entityType/bulk   (body: { ids })
  */
 @Injectable({ providedIn: 'root' })
 export class HttpStorageAdapter {
@@ -65,6 +67,40 @@ export class HttpStorageAdapter {
   async query<T>(entityType: string, _delay = 100): Promise<T[]> {
     return firstValueFrom(
       this.http.get<T[]>(`${this.base}/api/v1/data/${entityType}`, { headers: this.headers(), withCredentials: true })
+    )
+  }
+
+  /**
+   * Returns entities of a given type filtered by document entityType/entityId fields
+   * (e.g. VERSION_HISTORY scoped to one recipe/dish/product).
+   */
+  async queryFiltered<T>(
+    entityType: string,
+    filterEntityType: string,
+    filterEntityId: string
+  ): Promise<T[]> {
+    const params = new URLSearchParams({
+      filterEntityType,
+      filterEntityId,
+    })
+    return firstValueFrom(
+      this.http.get<T[]>(
+        `${this.base}/api/v1/data/${entityType}?${params.toString()}`,
+        { headers: this.headers(), withCredentials: true }
+      )
+    )
+  }
+
+  /**
+   * Deletes many entities by _id in one request (user-scoped on the server).
+   */
+  async deleteBulk(entityType: string, ids: string[]): Promise<void> {
+    await firstValueFrom(
+      this.http.delete<unknown>(`${this.base}/api/v1/data/${entityType}/bulk`, {
+        headers: this.headers(),
+        withCredentials: true,
+        body: { ids },
+      })
     )
   }
 

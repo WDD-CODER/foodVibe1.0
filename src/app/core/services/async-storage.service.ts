@@ -106,6 +106,34 @@ export class StorageService {
     this._save(entityType, entities)
   }
 
+  /**
+   * Backend: GET with filterEntityType/filterEntityId query params.
+   * localStorage: filters the in-memory array (small-scale path).
+   */
+  async queryFiltered<T extends { entityType?: string; entityId?: string }>(
+    entityType: string,
+    filterEntityType: string,
+    filterEntityId: string
+  ): Promise<T[]> {
+    if (environment.useBackend) {
+      return this.httpAdapter.queryFiltered<T>(entityType, filterEntityType, filterEntityId)
+    }
+    const all = await this.query<T>(entityType, 0)
+    return all.filter(e => e.entityType === filterEntityType && e.entityId === filterEntityId)
+  }
+
+  /**
+   * Backend: DELETE /:type/bulk with { ids }.
+   * localStorage: remove matching ids from the array and save.
+   */
+  async deleteBulk(entityType: string, ids: string[]): Promise<void> {
+    if (environment.useBackend) return this.httpAdapter.deleteBulk(entityType, ids)
+    if (ids.length === 0) return
+    const idSet = new Set(ids)
+    const list = await this.query<EntityId>(entityType, 0)
+    this._save(entityType, list.filter(e => !idSet.has(e._id)))
+  }
+
   private _save<T>(entityType: string, entities: T[]): void {
     try {
       localStorage.setItem(entityType, JSON.stringify(entities))
