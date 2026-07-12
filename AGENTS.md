@@ -41,6 +41,9 @@ Single source of truth for hard rules, conventions, and skill triggers. Claude C
 | List available commands | `.claude/commands/commands.md` |
 | Finishing a feature | `/ship` (runs review automatically; `--skip-review "reason"` for trivial changes; commits are PR'd only when feature-complete; milestone commits push without a PR) |
 | PR checks failing | Run `docs/agent/pr-check-fix-loop.md` (via `/fix-pr-checks` in either tool). Bounded: 2 rounds max, security-scan findings always surface to the user. |
+| Session start on unfamiliar work | Read `docs/brain/index.md`, then only the relevant sub-file |
+| Architectural choice | Check `docs/brain/decisions/` first; supersede, never edit in place |
+| Surprising behavior / a trap cost time | `docs/brain/gotchas.md` first |
 
 ## Standards index
 

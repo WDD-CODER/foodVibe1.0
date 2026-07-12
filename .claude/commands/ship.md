@@ -78,8 +78,17 @@ Files to stage:
   ├── file1
   └── file2
 
+Also proposing a brain entry:   # only when this session produced a durable decision/pattern/gotcha
+  docs/brain/{gotchas.md | patterns/*.md | decisions/NNNN-*.md} — "one-line summary"
+
 Approve? (Y / edit list / abort)
 ~~~
+
+### Brain-entry capture (no new gate)
+
+If this session produced something durable — a decision worth an ADR, a proven pattern, or a gotcha that cost time — draft the entry and add it as an extra line item in the same tree above, under "Also proposing a brain entry." If nothing durable happened, omit that block entirely; do not print it for trivial sessions.
+
+This rides the existing `Approve? (Y / edit list / abort)` answer — there is no separate Y/N for the brain entry. Saying "edit list" also covers dropping the brain entry (treat it like any other stageable item the user can remove). On approval, write the entry to its `docs/brain/` file (append for `gotchas.md`/`patterns/`, new numbered file for `decisions/`) and stage it alongside the rest.
 
 ### Semantic branch rename ((semantic rename rules))
 
@@ -105,8 +114,8 @@ Decide whether this ship is a **feature-complete** commit (push + propose PR) or
 **Otherwise — brief used this session** (brief file referenced in conversation or `.claude/todo.md`):
 
 1. Compare the session diff against that brief’s **Done when** list.
-2. **All criteria met** → feature-complete → proceed to propose PR (`gh pr create` on a feature branch, existing flow).
-3. **Not all criteria met** → milestone/checkpoint → commit + push to the branch only; **do not** propose a PR. In the ship summary state explicitly: `Milestone commit — brief not yet complete, no PR proposed`.
+2. **All criteria met** → feature-complete → run `node scripts/brain-review-check.mjs --scope=full` (advisory only — findings never block the PR, just get reported), then proceed to propose PR (`gh pr create` on a feature branch, existing flow).
+3. **Not all criteria met** → milestone/checkpoint → commit + push to the branch only; **do not** propose a PR; **do not** run the `--scope=full` brain check (checkpoint commits only get the CI `--scope=dead-refs` pass). In the ship summary state explicitly: `Milestone commit — brief not yet complete, no PR proposed`.
 
 **Otherwise — no brief this session** (ad-hoc work, no Done-when to check):
 
@@ -209,6 +218,7 @@ PR path: PR proposed — brief Done-when met
        | Checkpoint commit — no brief, user confirmed
        | Checkpoint commit — user override
 PR: {url or N/A}
+Brain review: {--scope=full summary, e.g. "no issues found" | "2 advisory findings — see above"} | N/A (checkpoint, not run)
 Todo: {n marked} | no matching open items — skipped
 Session state: {path} (append | full rewrite)
 ```
