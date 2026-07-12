@@ -143,13 +143,13 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected readonly FOCUS_ORDER = ['name_', 'event_type_', 'serving_type_', 'guest_count_', 'event_date_'] as const
 
   protected readonly eventCost_ = computed(() => {
-    this.formValueVersion_(); // depend on form changes
+    this.formValueVersion_() // depend on form changes
     const event = this.buildEventFromForm()
     return this.menuIntelligence.computeEventIngredientCost(event)
   })
 
   protected readonly foodCostPct_ = computed(() => {
-    this.formValueVersion_(); // depend on form changes
+    this.formValueVersion_() // depend on form changes
     const revenue = this.totalRevenue_()
     const cost = this.eventCost_()
     if (revenue <= 0) return 0
@@ -157,7 +157,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   })
 
   protected readonly totalRevenue_ = computed(() => {
-    this.formValueVersion_(); // depend on form changes
+    this.formValueVersion_() // depend on form changes
     const guestCount = Number(this.form_.get('guest_count_')?.value ?? 0)
     let total = 0
     const sections = this.sectionsArray
@@ -174,7 +174,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   })
 
   protected readonly costPerGuest_ = computed(() => {
-    this.formValueVersion_(); // depend on form changes
+    this.formValueVersion_() // depend on form changes
     const guestCount = this.getGuestCount()
     if (guestCount <= 0) return 0
     return this.eventCost_() / guestCount
@@ -392,7 +392,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected readonly eventTypeOptions_ = computed(() => {
     const set = new Set<string>()
     this.menuEventTypeService.allEventTypes_().forEach(t => set.add(t))
-    this.menuEventData.allMenuEvents_().forEach(ev => { if (ev.event_type_) set.add(ev.event_type_); })
+    this.menuEventData.allMenuEvents_().forEach(ev => { if (ev.event_type_) set.add(ev.event_type_) })
     return Array.from(set)
   })
 
@@ -420,7 +420,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected onEventTypeSearchKeydown(e: KeyboardEvent): void {
     const list = this.getFilteredEventTypes()
     const addNewIndex = list.length
-    const maxIndex = addNewIndex; // last option is "add new"
+    const maxIndex = addNewIndex // last option is "add new"
     let idx = this.eventTypeHighlightedIndex_()
 
     if (e.key === 'ArrowDown') {
@@ -933,7 +933,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected getSectionCategoryOptionCount(sectionIndex: number): number {
     const cats = this.getFilteredSectionCategories(sectionIndex)
     const hasQuery = this.getSectionSearchQuery(sectionIndex).trim().length > 0
-    return cats.length + (hasQuery ? 2 : 1); // cats + [add with query?] + add new modal
+    return cats.length + (hasQuery ? 2 : 1) // cats + [add with query?] + add new modal
   }
 
   protected onSectionSearchKeydown(sectionIndex: number, e: KeyboardEvent): void {

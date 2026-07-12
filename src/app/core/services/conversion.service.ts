@@ -48,7 +48,7 @@ export class ConversionService {
     if (isNaN(val)) return { yieldFactor: 1 }
 
     const yieldFactor = Math.max(0, (100 - val) / 100)
-    return { yieldFactor: parseFloat(yieldFactor.toFixed(4)) }; // Avoid floating point junk 
+    return { yieldFactor: parseFloat(yieldFactor.toFixed(4)) } // Avoid floating point junk 
   }
 
   handleYieldChange(yieldFactor: number | string): { wastePercent: number } {

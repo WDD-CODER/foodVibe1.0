@@ -28,7 +28,7 @@ describe('ProductFormComponent', () => {
   const mockAllergens = signal(['gluten', 'peanuts'])
   const mockUnits = signal(['kg', 'liter'])
   const mockUnitKeys = signal(['ק"ג', 'גרם'])
-  const mockIsCreatorOpen = signal(false); // Add this signal mock
+  const mockIsCreatorOpen = signal(false) // Add this signal mock
   beforeEach(async () => {
     mockRouter = jasmine.createSpyObj('Router', ['navigate'])
     mockConversionService = jasmine.createSpyObj('ConversionService',
@@ -113,7 +113,7 @@ describe('ProductFormComponent', () => {
         yield_factor_: 0.8
       })
 
-      tick(); // Let valueChanges stream through toSignal
+      tick() // Let valueChanges stream through toSignal
       fixture.detectChanges()
 
       // Formula in code: price / yieldFactor => 100 / 0.8 = 125

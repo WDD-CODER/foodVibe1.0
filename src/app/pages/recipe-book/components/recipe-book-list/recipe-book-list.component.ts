@@ -108,7 +108,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       if (typeof window === 'undefined') return
       const q = window.matchMedia('(max-width: 768px)')
       if (q.matches) this.isPanelOpen_.set(false)
-      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); })
+      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false) })
     })
 
     // Expand any filter category that has selected values (e.g. when opened via URL like ?filters=Approved:false).
@@ -666,16 +666,16 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     if (!await this.confirmModal.open('האם אתה בטוח שברצונך למחוק?', { variant: 'danger' })) return
     this.deletingId_.set(recipe._id)
     this.kitchenState.deleteRecipe(recipe).subscribe({
-      next: () => { this.deletingId_.set(null); },
-      error: () => { this.deletingId_.set(null); }
+      next: () => { this.deletingId_.set(null) },
+      error: () => { this.deletingId_.set(null) }
     })
   }
 
   private onHideRecipe(recipe: Recipe): void {
     this.removingId_.set(recipe._id)
     this.kitchenState.hideRecipe(recipe).subscribe({
-      next: () => { this.removingId_.set(null); },
-      error: () => { this.removingId_.set(null); }
+      next: () => { this.removingId_.set(null) },
+      error: () => { this.removingId_.set(null) }
     })
   }
 
@@ -683,8 +683,8 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     if (!await this.confirmModal.open('מחיקה קבועה — לא ניתן לשחזר. להמשיך?', { variant: 'danger' })) return
     this.removingId_.set(recipe._id)
     this.kitchenState.permanentlyDeleteRecipe(recipe).subscribe({
-      next: () => { this.removingId_.set(null); },
-      error: () => { this.removingId_.set(null); }
+      next: () => { this.removingId_.set(null) },
+      error: () => { this.removingId_.set(null) }
     })
   }
 
@@ -693,8 +693,8 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     if (!await this.confirmModal.open('האם אתה בטוח שברצונך למחוק?', { variant: 'danger' })) return
     this.removingId_.set(recipe._id)
     this.kitchenState.deleteRecipe(recipe).subscribe({
-      next: () => { this.removingId_.set(null); },
-      error: () => { this.removingId_.set(null); }
+      next: () => { this.removingId_.set(null) },
+      error: () => { this.removingId_.set(null) }
     })
   }
 
@@ -735,8 +735,8 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     clone.is_approved_ = false
     this.duplicatingId_.set(recipe._id)
     this.kitchenState.saveRecipe(clone).subscribe({
-      next: () => { this.duplicatingId_.set(null); },
-      error: () => { this.duplicatingId_.set(null); }
+      next: () => { this.duplicatingId_.set(null) },
+      error: () => { this.duplicatingId_.set(null) }
     })
   }
 

@@ -70,7 +70,7 @@ describe('ProductDataService', () => {
       storageSpy.remove.and.returnValue(Promise.resolve())
 
       service.deleteProduct('1')
-      tick(); // Resolve the storage.remove promise
+      tick() // Resolve the storage.remove promise
 
       expect(service.allProducts_().length).toBe(1)
       expect(service.allProducts_().find(p => p._id === '1')).toBeUndefined()

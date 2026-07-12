@@ -92,7 +92,7 @@ describe('RecipeCostService', () => {
         _id: 'r1',
         ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 500, unit_: 'gram' }],
       })
-      expect(service.computeRecipeCost(recipe)).toBe(5000); // 500g * 10 per gram
+      expect(service.computeRecipeCost(recipe)).toBe(5000) // 500g * 10 per gram
     })
 
     it('should use yield_factor_ for product cost', () => {
@@ -123,9 +123,9 @@ describe('RecipeCostService', () => {
         yield_amount_: 4,
         ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 400, unit_: 'gram' }],
       })
-      const total = service.computeRecipeCost(recipe); // 400*2 = 800
+      const total = service.computeRecipeCost(recipe) // 400*2 = 800
       expect(total).toBe(800)
-      expect(service.getRecipeCostPerUnit(recipe)).toBe(200); // 800/4
+      expect(service.getRecipeCostPerUnit(recipe)).toBe(200) // 800/4
     })
   })
 
@@ -135,7 +135,7 @@ describe('RecipeCostService', () => {
         { amount_net: 100, unit: 'gram', referenceId: '', item_type: undefined as string | undefined },
         { amount_net: 1, unit: 'kg', referenceId: '', item_type: undefined as string | undefined },
       ]
-      expect(service.computeTotalWeightG(rows)).toBe(1100); // 100 + 1000
+      expect(service.computeTotalWeightG(rows)).toBe(1100) // 100 + 1000
     })
 
     it('should convert purchase unit to base (conversion_rate_ = base per 1 purchase unit)', () => {
@@ -291,7 +291,7 @@ describe('RecipeCostService', () => {
         unit_: 'unit',
       })
       expect(costFor1Unit).toBe(costFor446Gram)
-      expect(costFor446Gram).toBeCloseTo(4.46, 2); // 446 * 0.01
+      expect(costFor446Gram).toBeCloseTo(4.46, 2) // 446 * 0.01
     })
 
     it('should give same row weight for 1 unit as 446 gram when recipe has yield_conversions_', () => {

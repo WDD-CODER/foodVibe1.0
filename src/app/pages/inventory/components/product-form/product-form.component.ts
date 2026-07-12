@@ -10,7 +10,7 @@ import { UserMsgService } from '@services/user-msg.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { Product, PurchaseOption_, ProductSource } from '@models/product.model'
 import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
-import { ClickOutSideDirective } from "@directives/click-out-side"
+import { ClickOutSideDirective } from '@directives/click-out-side'
 import { UtilService } from '@services/util.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
@@ -153,11 +153,11 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   protected expandedAllergens_ = signal(false)
   protected expandedSupplier_ = signal(false)
 
-  protected toggleMinStock(): void { this.expandedMinStock_.update(v => !v); }
-  protected toggleExpiryDays(): void { this.expandedExpiryDays_.update(v => !v); }
-  protected toggleWasteYield(): void { this.expandedWasteYield_.update(v => !v); }
-  protected toggleAllergens(): void { this.expandedAllergens_.update(v => !v); }
-  protected toggleSupplier(): void { this.expandedSupplier_.update(v => !v); }
+  protected toggleMinStock(): void { this.expandedMinStock_.update(v => !v) }
+  protected toggleExpiryDays(): void { this.expandedExpiryDays_.update(v => !v) }
+  protected toggleWasteYield(): void { this.expandedWasteYield_.update(v => !v) }
+  protected toggleAllergens(): void { this.expandedAllergens_.update(v => !v) }
+  protected toggleSupplier(): void { this.expandedSupplier_.update(v => !v) }
 
   protected onSupplierBlur(clickTarget?: HTMLElement): void {
     if (!this.productForm_) return
@@ -346,7 +346,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       // Only update if the value is actually different to avoid loops
       if (yieldCtrl?.value !== yieldFactor) {
         yieldCtrl?.setValue(yieldFactor, { emitEvent: false })
-        this.productForm_.get('buy_price_global_')?.updateValueAndValidity(); // Force price recalc
+        this.productForm_.get('buy_price_global_')?.updateValueAndValidity() // Force price recalc
       }
     })
 

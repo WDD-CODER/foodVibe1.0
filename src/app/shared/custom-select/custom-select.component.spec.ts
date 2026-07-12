@@ -41,7 +41,7 @@ describe('CustomSelectComponent', () => {
 
   it('should emit valueChange when option is selected', () => {
     let emitted: string | undefined
-    component.valueChange.subscribe((v: string) => { emitted = v; })
+    component.valueChange.subscribe((v: string) => { emitted = v })
     component.writeValue('')
     fixture.detectChanges();
     (component as unknown as { select: (v: string) => void }).select('a')

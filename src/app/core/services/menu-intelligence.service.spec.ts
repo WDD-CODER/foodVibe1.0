@@ -43,12 +43,12 @@ describe('MenuIntelligenceService', () => {
     })
 
     it('should return round(guestCount * piecesPerPerson * takeRate) for cocktail_passed', () => {
-      expect(service.derivePortions('cocktail_passed', 100, 0.4, 3, 1)).toBe(120); // 100*3*0.4
+      expect(service.derivePortions('cocktail_passed', 100, 0.4, 3, 1)).toBe(120) // 100*3*0.4
       expect(service.derivePortions('cocktail_passed', 50, 1, 2, 1)).toBe(100)
     })
 
     it('should clamp take rate to [0,1] for cocktail_passed', () => {
-      expect(service.derivePortions('cocktail_passed', 10, 1.5, 1, 1)).toBe(10); // clamped to 1
+      expect(service.derivePortions('cocktail_passed', 10, 1.5, 1, 1)).toBe(10) // clamped to 1
       expect(service.derivePortions('cocktail_passed', 10, -0.1, 1, 1)).toBe(0)
     })
 
@@ -88,7 +88,7 @@ describe('MenuIntelligenceService', () => {
         performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' },
       }
       const out = service.hydrateDerivedPortions(event)
-      expect(out.sections_[0].items_[0].derived_portions_).toBe(8); // 4 * 2
+      expect(out.sections_[0].items_[0].derived_portions_).toBe(8) // 4 * 2
     })
 
     it('should apply cocktail_passed formula when serving_type_ is cocktail_passed', () => {
@@ -114,7 +114,7 @@ describe('MenuIntelligenceService', () => {
         performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'cocktail_passed' },
       }
       const out = service.hydrateDerivedPortions(event)
-      expect(out.sections_[0].items_[0].derived_portions_).toBe(120); // round(100*3*0.4)
+      expect(out.sections_[0].items_[0].derived_portions_).toBe(120) // round(100*3*0.4)
     })
   })
 
@@ -220,7 +220,7 @@ describe('MenuIntelligenceService', () => {
         performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' },
       }
       const pct = service.computeFoodCostPct(event)
-      expect(pct).toBe(3); // 30 / (10*100) * 100 = 3%
+      expect(pct).toBe(3) // 30 / (10*100) * 100 = 3%
     })
 
     it('should return 0 when revenue per guest is 0 or guest_count is 0', () => {

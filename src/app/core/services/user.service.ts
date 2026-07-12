@@ -343,7 +343,7 @@ export class UserService {
     try {
       const raw = sessionStorage.getItem(SESSION_USER_KEY)
       return raw ? JSON.parse(raw) : null
-    } catch { return null; }
+    } catch { return null }
   }
 
   private _saveUserToSession(user: User | null): void {

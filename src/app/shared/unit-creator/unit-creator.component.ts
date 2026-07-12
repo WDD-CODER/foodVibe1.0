@@ -45,7 +45,7 @@ export class UnitCreatorModal {
   // Technical Keys for logic
   newUnitName_ = signal('')
   newUnitValue_ = signal(1)
-  basisUnit_ = signal<string>(''); // 🛠️ REFACTORED: Use technical key 'gram'
+  basisUnit_ = signal<string>('') // 🛠️ REFACTORED: Use technical key 'gram'
 
   protected basisOptions_ = this.unitRegistryService.allUnitKeys_
   protected basisUnitOptions_ = computed(() =>
@@ -90,7 +90,7 @@ export class UnitCreatorModal {
     this.errorMessage_.set(null)
     this.newUnitName_.set('')
     this.newUnitValue_.set(1)
-    this.basisUnit_.set(''); // 🛠️ REFACTORED: Use technical key 'gram'
+    this.basisUnit_.set('') // 🛠️ REFACTORED: Use technical key 'gram'
   }
 
   resetAndClose() {

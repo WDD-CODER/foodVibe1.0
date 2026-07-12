@@ -4,7 +4,7 @@ import { provideRouter } from '@angular/router'
 import { provideHttpClient } from '@angular/common/http'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { HeaderComponent } from '../core/components/header/header.component'
-import { UserMsg } from "src/app/core/components/user-msg/user-msg.component"
+import { UserMsg } from 'src/app/core/components/user-msg/user-msg.component'
 import { UserMsgService } from '@services/user-msg.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { ConversionService } from '@services/conversion.service'
@@ -63,7 +63,7 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy()
   })
 
-  it(`should have the 'foodVibe1.0' title`, () => {
+  it('should have the \'foodVibe1.0\' title', () => {
     const fixture = TestBed.createComponent(AppComponent)
     const app = fixture.componentInstance
     expect(app.title).toEqual('foodVibe1.0')

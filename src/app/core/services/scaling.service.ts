@@ -85,10 +85,10 @@ export class ScalingService {
     const meta = item as { base_unit_?: string; purchase_options_?: { unit_symbol_?: string }[]; unit_options_?: { unit_symbol_?: string }[]; yield_unit_?: string }
     if (meta.base_unit_) units.add(meta.base_unit_)
     if (meta.purchase_options_?.length) {
-      meta.purchase_options_.forEach(o => { if (o.unit_symbol_) units.add(o.unit_symbol_); })
+      meta.purchase_options_.forEach(o => { if (o.unit_symbol_) units.add(o.unit_symbol_) })
     }
     if (meta.unit_options_?.length) {
-      meta.unit_options_.forEach(o => { if (o.unit_symbol_) units.add(o.unit_symbol_); })
+      meta.unit_options_.forEach(o => { if (o.unit_symbol_) units.add(o.unit_symbol_) })
     }
     if (meta.yield_unit_) units.add(meta.yield_unit_)
     return Array.from(units)

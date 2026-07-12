@@ -490,14 +490,14 @@ private readonly cdr = inject(ChangeDetectorRef)
 
     if (meta.base_unit_) units.add(meta.base_unit_)
     if (meta.purchase_options_?.length) {
-      meta.purchase_options_.forEach(o => { if (o.unit_symbol_) units.add(o.unit_symbol_); })
+      meta.purchase_options_.forEach(o => { if (o.unit_symbol_) units.add(o.unit_symbol_) })
     }
     if (meta.unit_options_?.length) {
-      meta.unit_options_.forEach(o => { if (o.unit_symbol_) units.add(o.unit_symbol_); })
+      meta.unit_options_.forEach(o => { if (o.unit_symbol_) units.add(o.unit_symbol_) })
     }
     if (meta.yield_unit_) units.add(meta.yield_unit_)
     if (meta.yield_conversions_?.length) {
-      meta.yield_conversions_.forEach(c => { if (c?.unit) units.add(c.unit); })
+      meta.yield_conversions_.forEach(c => { if (c?.unit) units.add(c.unit) })
     }
 
     return Array.from(units)
@@ -565,7 +565,7 @@ private readonly cdr = inject(ChangeDetectorRef)
     const net = group.get('amount_net')?.value || 0
 
     if (group.get('item_type')?.value !== 'product') {
-      return net; // For preps, Net is effectively Gross
+      return net // For preps, Net is effectively Gross
     }
 
     const item = this.getItemMetadata(group)

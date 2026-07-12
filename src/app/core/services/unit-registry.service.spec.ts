@@ -39,7 +39,7 @@ describe('UnitRegistryService', () => {
     })
 
     service = TestBed.inject(UnitRegistryService)
-    tick(); // let initUnits() complete
+    tick() // let initUnits() complete
   }))
 
   it('should be created and have initial units', () => {

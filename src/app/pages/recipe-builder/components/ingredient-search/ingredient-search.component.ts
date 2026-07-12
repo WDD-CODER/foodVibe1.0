@@ -53,7 +53,7 @@ export class IngredientSearchComponent {
   private ignoreFirstClickOutside = true
 
   constructor() {
-    setTimeout(() => { this.ignoreFirstClickOutside = false; }, 0)
+    setTimeout(() => { this.ignoreFirstClickOutside = false }, 0)
     effect(() => {
       const trigger = this.focusTrigger()
       const row = this.rowIndex()

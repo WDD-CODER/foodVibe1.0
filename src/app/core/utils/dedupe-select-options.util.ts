@@ -1,4 +1,4 @@
-import { filterOptionsByStartsWith } from "./filter-starts-with.util"
+import { filterOptionsByStartsWith } from './filter-starts-with.util'
 
 /**
  * Filters and deduplicates a list of select options.

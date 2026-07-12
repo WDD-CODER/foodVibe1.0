@@ -56,7 +56,7 @@ describe('MetadataRegistryService', () => {
 
     service = TestBed.inject(MetadataRegistryService)
     productDataSpy = TestBed.inject(ProductDataService) as jasmine.SpyObj<ProductDataService>
-    tick(); // let initMetadata() complete
+    tick() // let initMetadata() complete
   }))
 
   it('should be created', () => {
@@ -92,7 +92,7 @@ describe('MetadataRegistryService', () => {
 
       // LOGIC CHANGE: Trigger purge with English key
       service.purgeGlobalUnit('kg')
-      tick(); // Resolve the async loop [cite: 412, 431]
+      tick() // Resolve the async loop [cite: 412, 431]
 
       // Only the 2 products with 'kg' should have been updated
       expect(productDataSpy.updateProduct).toHaveBeenCalledTimes(2)

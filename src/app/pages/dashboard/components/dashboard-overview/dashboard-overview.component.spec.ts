@@ -230,8 +230,8 @@ describe('DashboardOverviewComponent', () => {
     ])
     fixture.detectChanges()
     const changeTag = fixture.debugElement.query(By.css('.change-tag'))
-    changeTag.nativeElement.click(); // open
-    changeTag.nativeElement.click(); // close
+    changeTag.nativeElement.click() // open
+    changeTag.nativeElement.click() // close
     expect((component as unknown as { openChange_: () => unknown }).openChange_()).toBeNull()
   })
 

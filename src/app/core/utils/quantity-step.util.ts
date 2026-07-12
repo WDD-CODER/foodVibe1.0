@@ -42,8 +42,8 @@ function getSingleClickUnitStep(value: number): number {
   const r = roundToPrecision(value, NORMALIZE_PRECISION)
   const isWhole = Math.abs(r - Math.round(r)) < EPS
   if (isWhole) return 0.1
-  if (Math.abs(r * 10 - Math.round(r * 10)) < EPS) return 0.1; // 1dp
-  return 0.01; // 2dp or finer → cap at 0.01
+  if (Math.abs(r * 10 - Math.round(r * 10)) < EPS) return 0.1 // 1dp
+  return 0.01 // 2dp or finer → cap at 0.01
 }
 
 /** Range-based hold step going UP. */
