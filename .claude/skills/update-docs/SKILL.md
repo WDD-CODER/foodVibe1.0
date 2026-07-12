@@ -1,4 +1,4 @@
----
+﻿---
 name: update-docs
 description: Refreshes breadcrumb navigation maps and project documentation after feature completion in foodVibe 1.0.
 ---
@@ -6,11 +6,11 @@ description: Refreshes breadcrumb navigation maps and project documentation afte
 # Skill: update-docs
 
 **Trigger:** After completing a significant development task, adding new features/components/services, or before a PR.
-**Standard:** Breadcrumb placement and Major Seam definitions are in '.claude/standards-angular.md'.
+**Standard:** Breadcrumb placement and Major Seam definitions are in 'docs/agent/standards-angular.md'.
 
 ---
 
-## Phase 1: Structural Scan `[Procedural — Haiku/Composer (Fast/Flash)]`
+## Phase 1: Structural Scan `[Procedural â€” Haiku/Composer (Fast/Flash)]`
 
 **Detect Changes:** Identify new directories, moved files, or deleted subtrees since the last session.
 
@@ -23,7 +23,7 @@ description: Refreshes breadcrumb navigation maps and project documentation afte
 
 ---
 
-## Phase 2: Map Maintenance `[Procedural — Haiku/Composer (Fast/Flash)]`
+## Phase 2: Map Maintenance `[Procedural â€” Haiku/Composer (Fast/Flash)]`
 
 **Sync Content:** Update the internal directory maps within each breadcrumb file.
 

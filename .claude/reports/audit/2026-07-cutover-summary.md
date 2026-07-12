@@ -8,7 +8,7 @@
 - Custom plan-implementation / execute-it / validate-agent-refs commands
 - nightly-audit + reflect-agent + `.claude/reflect/` + fix-templates
 - MemPalace MCP registration, mp-search skill, settings allows
-- software-architect, product-manager, end-of-session-agent, worktree-session-end
+- software-architect, product-manager, /ship, worktree-session-end
 - `.claude/copilot-instructions.md` §0 routing (stubbed then superseded)
 - `.cursor/rules/*.mdc` (replaced by `.cursorrules`)
 - `standards-*.md` (converted or folded)

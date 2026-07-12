@@ -15,7 +15,7 @@ description: Determines the next plan number, syncs atomic sub-tasks to the ledg
 - Write to `plans/<NNN>-<slug>.plan.md` in project root only — never `~/.cursor/plans/`
 - Todo update happens FIRST — before writing the plan file
 - Every sub-task formatted as `[ ] Brief description of target file(s)`
-- Medium/Large plan touching auth/storage → notify Security Officer before execution
+- Medium/Large plan touching auth/storage → note security surface — rely on pre-commit security grep + CI before execution
 - Not on a worktree + plan involves code changes → suggest `feat/` branch checkout
 
 ---
@@ -43,7 +43,7 @@ description: Determines the next plan number, syncs atomic sub-tasks to the ledg
 
 **PRD Alignment:** Verify atomic sub-tasks satisfy 100% of the plan's requirements — no requirement left without a corresponding task.
 
-**Risk Audit:** If the plan is Medium or Large and touches auth/storage → notify Security Officer now, before execution begins.
+**Risk Audit:** If the plan is Medium or Large and touches auth/storage → note security surface — rely on pre-commit security grep + CI now, before execution begins.
 
 ---
 

@@ -60,5 +60,5 @@ Run `memory_smart_search(query="<keywords>", limit=3)` ONLY if task involves an 
 
 Output: `"Refactored [target] for elegance. [Summary of what was extracted, simplified, or converted]."`
 
-If the refactor touches critical business logic → invoke QA Engineer for verification before committing.
+If the refactor touches critical business logic → invoke CI / ng test for verification before committing.
 

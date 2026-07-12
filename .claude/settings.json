@@ -89,16 +89,6 @@
     ],
     "PostToolUse": [
       {
-        "matcher": ".*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python scripts/context-monitor.py",
-            "timeout": 5
-          }
-        ]
-      },
-      {
         "matcher": "Edit|Write",
         "hooks": [
           {
@@ -115,7 +105,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"C:/Program Files/Git/bin/bash.exe\" scripts/pre-compact-reminder.sh",
+            "command": "\"C:/Program Files/Git/bin/bash.exe\" scripts/pre-compact-todo-append.sh",
             "timeout": 5
           }
         ]

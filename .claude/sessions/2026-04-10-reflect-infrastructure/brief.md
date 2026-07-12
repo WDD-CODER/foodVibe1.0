@@ -1,4 +1,4 @@
-# Session Brief
+﻿# Session Brief
 
 ## Session ID
 2026-04-10-reflect-infrastructure
@@ -7,7 +7,7 @@
 Replace the heavyweight auto-reflect Stop hook with a lightweight PostToolUse failure logger and batch processing command. Clean up stale worktrees.
 
 ## Success Criteria
-1. Remove auto-reflect Stop hooks from schdeule-chekup worktree (settings.json, copilot-instructions.md, agent.md, end-of-session-agent.md, auto-reflect.ps1)
+1. Remove auto-reflect Stop hooks from schdeule-chekup worktree (settings.json, copilot-instructions.md, agent.md, /ship (formerly /ship), auto-reflect.ps1)
 2. Prune stale worktree synthetic-wondering-breeze
 3. Create PostToolUse failure logger (tool-failure-hook.ps1) that logs tool failures to failure-log.tsv
 4. Add PostToolUse hook to .claude/settings.json
@@ -25,4 +25,4 @@ reflect/cssLayer
 2026-04-10
 
 ## Notes
-Discussion-driven session — no formal brief was created upfront. Brief reconstructed at session end.
+Discussion-driven session â€” no formal brief was created upfront. Brief reconstructed at session end.

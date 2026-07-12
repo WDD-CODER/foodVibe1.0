@@ -45,7 +45,7 @@ MemPalace is still registered in project `.mcp.json` → Phase 1 must remove it.
 ## 4. Live inventory (repo root `.claude/` only — not SDK/toolkit copies)
 
 ### Agents (10)
-`end-of-session-agent.md`, `git-agent.md`, `mobile-flow-auditor.md`, `product-manager.md`, `qa-engineer.md`, `reflect-agent.md`, `render-flow-auditor.md`, `security-officer.md`, `software-architect.md`, `team-leader.md`
+`/ship (formerly /ship)`, `git-agent.md`, `mobile-flow-auditor.md`, `product-manager.md`, `qa-engineer.md`, `reflect-agent.md`, `render-flow-auditor.md`, `security-officer.md`, `software-architect.md`, `team-leader.md`
 
 ### Skills (22 dirs)
 `add-recipe`, `angular-pipe-logic`, `angularComponentStructure`, `auth-and-logging`, `auth-crypto`, `breadcrumb-navigator`, `brief-detection`, `context-management`, `cssLayer`, `cssLayer-workspace`, `deploy-github-pages`, `elegant-fix`, `execute-debugging`, `github-sync`, `mp-search`, `nightly-audit`, `preflight`, `save-plan`, `techdebt`, `update-docs`, `worktree-session-end`, `worktree-setup`
@@ -101,7 +101,7 @@ Historical plans/docs/archives do **not** block deletion of dead components.
 | `mp-wake-up.md` | **Absent** | N/A |
 | `agents/team-leader.md` | Yes — convert in Phase 3, do not delete | **CONVERT** |
 | `agents/software-architect.md`, `product-manager.md` | Yes — routing | **Retire after Phase 1** |
-| `agents/end-of-session-agent.md`, `skills/worktree-session-end/` | Yes — session-end rule, ship | **Retire after Phase 1** |
+| `agents//ship (formerly /ship)`, `skills/worktree-session-end/` | Yes — session-end rule, ship | **Retire after Phase 1** |
 | `skills/session-handoff/`, `end-session/`, `quick-chat/` | **Absent** from live root | N/A — already gone |
 | `reports/audit/` (old nightly artifacts) | Self-contained + this verification file lives here | **Keep directory**; do not wipe verification report. Old nightly files may be archived later |
 | `fix-templates/` | Referenced by nightly-audit skill | **Retire with nightly-audit** |

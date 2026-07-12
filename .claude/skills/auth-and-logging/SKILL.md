@@ -14,7 +14,7 @@ description: Audits and hardens authentication guards, mutation entry points, an
 - Sensitive data handling → use `auth-crypto.ts` and invoke `auth-crypto` skill
 - No PII in logs — only `user._id` permitted in audit trails
 - User-facing security warnings → `UserMsgService` only (e.g. `'sign_in_to_use'`)
-- Security Officer sign-off required before commit if this task touches the security surface
+- pre-commit security grep + CI sign-off required before commit if this task touches the security surface
 
 ---
 
@@ -55,7 +55,7 @@ Run `memory_smart_search(query="<keywords>", limit=3)` ONLY if task involves an 
 
 ## Completion Gate
 
-**Security Officer Trigger:** If this task touches the security surface (auth files, `localStorage`/`sessionStorage`, `[innerHTML]`, new routes) → invoke Security Officer agent for final audit before committing. No exceptions.
+**pre-commit security grep + CI Trigger:** If this task touches the security surface (auth files, `localStorage`/`sessionStorage`, `[innerHTML]`, new routes) → invoke pre-commit security grep + CI agent for final audit before committing. No exceptions.
 
 Output: `"Auth/Logging hardened. [X] mutation handlers protected, PII audit passed."`
 

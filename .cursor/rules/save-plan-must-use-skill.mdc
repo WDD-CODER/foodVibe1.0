@@ -1,0 +1,5 @@
+﻿---
+description: Save plan skill
+alwaysApply: false
+---
+Follow `.claude/skills/save-plan/SKILL.md` when the user asks to save a plan.

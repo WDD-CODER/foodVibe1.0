@@ -1,6 +1,6 @@
----
+﻿---
 name: auth-crypto
-description: Implements and audits hashing, encryption, and token management in auth-crypto.ts with mandatory Security Officer sign-off.
+description: Implements and audits hashing, encryption, and token management in auth-crypto.ts with mandatory pre-commit security grep + CI gate.
 ---
 
 # Skill: auth-crypto
@@ -8,13 +8,13 @@ description: Implements and audits hashing, encryption, and token management in 
 
 **Trigger:** Implementing or refactoring hashing, encryption, or token management in `src/app/core/auth-crypto.ts`.
 
-**Crypto Rules (inline — no guide read required):**
-- Minimum algorithms: PBKDF2 for hashing, AES-256 for encryption — nothing weaker
-- Never hardcode salts or IVs — generate securely at runtime, never log them
-- Generic error messages only for crypto failures — no timing/padding side-channel leakage
-- No PII, keys, salts, or raw inputs in any log statement — including test logs
+**Crypto Rules (inline â€” no guide read required):**
+- Minimum algorithms: PBKDF2 for hashing, AES-256 for encryption â€” nothing weaker
+- Never hardcode salts or IVs â€” generate securely at runtime, never log them
+- Generic error messages only for crypto failures â€” no timing/padding side-channel leakage
+- No PII, keys, salts, or raw inputs in any log statement â€” including test logs
 - External crypto libraries must be approved, correctly typed, and in `package.json`
-- **Security Officer sign-off mandatory before any commit — no exceptions**
+- **pre-commit security grep + CI sign-off mandatory before any commit â€” no exceptions**
 
 ---
 
@@ -30,9 +30,9 @@ description: Implements and audits hashing, encryption, and token management in 
 
 **Logic Hardening:** Implement or refactor core crypto functions (`hashPassword`, `encryptData`, `verifyToken`).
 
-**Salt / IV Management:** Generate salts and IVs securely at runtime. Never hardcode, never log — zero-trust policy applies.
+**Salt / IV Management:** Generate salts and IVs securely at runtime. Never hardcode, never log â€” zero-trust policy applies.
 
-**Error Masking:** Implement generic error messages for all crypto failures — no information that could enable timing or padding attacks.
+**Error Masking:** Implement generic error messages for all crypto failures â€” no information that could enable timing or padding attacks.
 
 ---
 
@@ -40,12 +40,12 @@ description: Implements and audits hashing, encryption, and token management in 
 
 **Unit Testing:** Write or update `.spec.ts` to test hashing consistency and encryption/decryption cycles.
 
-**PII Leakage Check:** Scan all test logs and assertions — ensure no sensitive keys, salts, or raw inputs are accidentally logged.
+**PII Leakage Check:** Scan all test logs and assertions â€” ensure no sensitive keys, salts, or raw inputs are accidentally logged.
 
 ---
 
 ## Completion Gate
 
-**Mandatory Security Officer Trigger:** Invoke Security Officer agent for a logic-flow audit before committing. This is non-negotiable — do not skip even if changes seem minor.
+**Mandatory pre-commit security grep + CI Trigger:** Invoke pre-commit security grep + CI agent for a logic-flow audit before committing. This is non-negotiable â€” do not skip even if changes seem minor.
 
-Output: `"Crypto logic updated. Algorithms verified, spec coverage confirmed. Invoking Security Officer for final audit..."`
+Output: `"Crypto logic updated. Algorithms verified, spec coverage confirmed. Invoking pre-commit security grep + CI for final audit..."`

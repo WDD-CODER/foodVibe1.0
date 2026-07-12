@@ -1,0 +1,5 @@
+﻿---
+globs: "{src/app/**/*.html,public/assets/data/dictionary.json}"
+alwaysApply: false
+---
+Follow `docs/agent/standards-domain.md` and `docs/agent/conventions.md`.

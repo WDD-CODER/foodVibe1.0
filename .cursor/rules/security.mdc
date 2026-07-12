@@ -1,0 +1,5 @@
+﻿---
+globs: "{server/middleware/**,server/routes/auth.js,src/app/core/guards/**,src/app/core/interceptors/**}"
+alwaysApply: false
+---
+Follow `docs/agent/standards-security.md`.

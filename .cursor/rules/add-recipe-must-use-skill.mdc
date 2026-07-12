@@ -1,0 +1,5 @@
+﻿---
+description: Add recipe skill
+alwaysApply: false
+---
+Follow `.claude/skills/add-recipe/SKILL.md` when adding a recipe or dish from image or text.

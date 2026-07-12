@@ -1,8 +1,8 @@
-## Goal
-Create the unified end-of-session agent and migrate all session-closing workflows to use it as a single deterministic pipeline.
+﻿## Goal
+Create the unified /ship and migrate all session-closing workflows to use it as a single deterministic pipeline.
 
 ## Scope
-- `.claude/agents/end-of-session-agent.md` (new — core agent file)
+- `.claude/agents//ship (formerly /ship)` (new â€” core agent file)
 - `.claude/copilot-instructions.md` (trigger routing, agent table)
 - `.claude/skills/session-handoff/SKILL.md` (redirect stub)
 - `.claude/skills/worktree-session-end/SKILL.md` (agent-managed note)
@@ -22,7 +22,7 @@ Create the unified end-of-session agent and migrate all session-closing workflow
 - Application code
 
 ## Success Criteria
-- [x] Agent file exists at `.claude/agents/end-of-session-agent.md`
+- [x] Agent file exists at `.claude/agents//ship (formerly /ship)`
 - [x] Agent encodes all 14 phases from the specification brief
 - [x] All user confirmation gates are defined (mid-session, commit, plan archive, report)
 - [x] Existing trigger phrases route to the agent (copilot-instructions.md updated)
@@ -32,4 +32,4 @@ Create the unified end-of-session agent and migrate all session-closing workflow
 - [x] Memory updated to reflect new agent
 
 ## Session ID
-2026-04-08-end-of-session-agent
+2026-04-08-/ship

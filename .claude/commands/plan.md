@@ -1,4 +1,4 @@
-# /plan — Planning Path
+﻿# /plan â€” Planning Path
 
 Use this path for product planning, PRDs, HLDs, and technical design decisions.
 In the three-agent workflow, planning is the **Architect** role (Claude.ai by default;
@@ -6,16 +6,16 @@ Claude Code / Cursor may plan when the Human Director explicitly overrides).
 
 ## Loads
 
-- `.claude/references/prd-template.md` — product requirements / Plan Contract template
-- `.claude/references/hld-template.md` — high-level design template (when present)
-- `/_shared/tech-stack.md` + `/_shared/current-state.md` — stack + capsule
-- `.claude/rules/` — path-scoped standards (loaded when the plan touches matching areas)
+- `.claude/references/prd-template.md` â€” product requirements / Plan Contract template
+- `.claude/references/hld-template.md` â€” high-level design template (when present)
+- `/_shared/tech-stack.md` + `/_shared/current-state.md` â€” stack + capsule
+- `docs/agent/` â€” path-scoped standards (loaded when the plan touches matching areas)
 
 ## Invokes
 
-- Architect (Human-directed) — writes / updates a Plan Contract in
+- Architect (Human-directed) â€” writes / updates a Plan Contract in
   `/plans/[feature]_v[N].md`
-- Does **not** invoke the retired `product-manager` or `software-architect` agents
+- Does **not** invoke the retired `(retired)` or `(retired)` agents
 
 ## Typical flow
 
@@ -23,7 +23,7 @@ Claude Code / Cursor may plan when the Human Director explicitly overrides).
 2. Architect runs structured scoping (forcing questions, landscape, premise challenge).
 3. Output: a Plan Contract under `/plans/[feature]_v[N].md` with numbered milestones
    and a Verify command per milestone.
-4. User approves the plan → Contractor executes one milestone at a time → `/review-it`.
+4. User approves the plan â†’ Contractor executes one milestone at a time â†’ `/review-it`.
 
 ## Notes
 

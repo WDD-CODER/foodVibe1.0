@@ -1,21 +1,21 @@
----
+﻿---
 name: worktree-setup
-description: On-demand provisioning of a git worktree for isolated multi-agent or parallel work. NOT automatic — invoke only when explicitly needed.
+description: On-demand provisioning of a git worktree for isolated multi-agent or parallel work. NOT automatic â€” invoke only when explicitly needed.
 ---
 
 # Skill: worktree-setup
 **Model Guidance:** Use Haiku/Flash for Phases 1 and 2. Use Sonnet for Phase 3 only.
 
-**Trigger:** User says "setup worktree", "new worktree", or Team Leader orchestrates parallel task execution.
+**Trigger:** User says "setup worktree", "new worktree", or (retired coordinator) orchestrates parallel task execution.
 
-> **Not automatic.** Only invoke on explicit user request or Team Leader orchestration.
+> **Not automatic.** Only invoke on explicit user request or (retired coordinator) orchestration.
 
-**Worktree Rules (inline — no guide read required):**
+**Worktree Rules (inline â€” no guide read required):**
 - Target directory must be outside the main repo: `../<project>-wt-<feature>`
-- Branch naming: `feat/<name>` — always branch from `main`
+- Branch naming: `feat/<name>` â€” always branch from `main`
 - Port allocation: start at 4201, retry up to 5 candidates, hard stop if all occupied
 - Always write `.worktree-root` (points to main repo) and `.worktree-port` (assigned port)
-- Copy `.env` silently — skip without error if missing
+- Copy `.env` silently â€” skip without error if missing
 - Never run `git checkout main` from inside a worktree
 
 ---
@@ -32,7 +32,7 @@ description: On-demand provisioning of a git worktree for isolated multi-agent o
 ```bash
 netstat -ano -p tcp | findstr ":<PORT>"
 ```
-Retry up to 5 candidates. Hard stop if all 5 are occupied — report to user.
+Retry up to 5 candidates. Hard stop if all 5 are occupied â€” report to user.
 
 ---
 
@@ -47,7 +47,7 @@ git worktree add -b feat/<name> <path> main
 
 **Metadata Write:** Create `.worktree-root` pointing to the main repository path. Write `.worktree-port` with the assigned port number.
 
-**Env Copy:** Copy `.env` to the new worktree root — silent skip if `.env` is missing.
+**Env Copy:** Copy `.env` to the new worktree root â€” silent skip if `.env` is missing.
 
 ---
 

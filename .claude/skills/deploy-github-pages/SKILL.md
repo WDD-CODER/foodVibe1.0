@@ -1,4 +1,4 @@
----
+﻿---
 name: deploy-github-pages
 description: Configures and deploys the foodVibe 1.0 Angular SPA to GitHub Pages. Run only on explicit user request.
 ---
@@ -6,13 +6,13 @@ description: Configures and deploys the foodVibe 1.0 Angular SPA to GitHub Pages
 # Skill: deploy-github-pages
 
 **Trigger:** User says "deploy", "publish app", "set up GitHub Pages", or "deploy to GitHub Pages".
-**Standard:** Read '.claude/standards-git.md' before any deployment step.
+**Standard:** Read 'docs/agent/standards-git.md' before any deployment step.
 
-> **Not automatic.** Run only on explicit user request — this skill modifies CI/CD configuration.
+> **Not automatic.** Run only on explicit user request â€” this skill modifies CI/CD configuration.
 
 ---
 
-## Phase 1: Pre-Flight Check `[Procedural — Haiku/Composer (Fast/Flash)]`
+## Phase 1: Pre-Flight Check `[Procedural â€” Haiku/Composer (Fast/Flash)]`
 
 **Branch Verification:** Ensure the active branch is `main` or a stable `feat/` branch.
 
@@ -22,7 +22,7 @@ description: Configures and deploys the foodVibe 1.0 Angular SPA to GitHub Pages
 
 ---
 
-## Phase 2: Build & Optimization `[Procedural — Haiku/Composer (Fast/Flash)]`
+## Phase 2: Build & Optimization `[Procedural â€” Haiku/Composer (Fast/Flash)]`
 
 **Clean Build:** Run `npm run build` with the `--base-href` flag set for the repository name (e.g., `--base-href "/foodVibe1.0/"`) to ensure assets resolve correctly on GitHub's sub-paths.
 
@@ -30,7 +30,7 @@ description: Configures and deploys the foodVibe 1.0 Angular SPA to GitHub Pages
 
 ---
 
-## Phase 3: Deployment Execution `[Procedural — Haiku/Composer (Fast/Flash)]`
+## Phase 3: Deployment Execution `[Procedural â€” Haiku/Composer (Fast/Flash)]`
 
 **Push to Branch:** Execute `npx gh-pages -d dist/food-vibe-1.0` (adjust to the specific project `dist` folder).
 
@@ -38,7 +38,7 @@ description: Configures and deploys the foodVibe 1.0 Angular SPA to GitHub Pages
 
 ---
 
-## Phase 4: URL Verification `[High Reasoning — Sonnet/Gemini 1.5 Pro]`
+## Phase 4: URL Verification `[High Reasoning â€” Sonnet/Gemini 1.5 Pro]`
 
 **Link Generation:** Construct the final URL (`https://[user].github.io/[repo]/`).
 
