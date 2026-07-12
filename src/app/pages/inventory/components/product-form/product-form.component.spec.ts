@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing'
-import { ReactiveFormsModule, FormArray } from '@angular/forms'
+import { ReactiveFormsModule } from '@angular/forms'
 import { ProductFormComponent } from './product-form.component'
 import { ConversionService } from '@services/conversion.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
@@ -10,7 +10,22 @@ import { UserMsgService } from '@services/user-msg.service'
 import { ActivatedRoute, Router } from '@angular/router'
 import { of, Subject } from 'rxjs'
 import { signal } from '@angular/core'
-import { LucideAngularModule, ShieldAlert, X, FlaskConical, Plus, Trash2, ArrowRight, Save, ChevronDown, ChevronUp, Tags, Truck, Package, CalendarClock } from 'lucide-angular'
+import {
+  LucideAngularModule,
+  ShieldAlert,
+  X,
+  FlaskConical,
+  Plus,
+  Trash2,
+  ArrowRight,
+  Save,
+  ChevronDown,
+  ChevronUp,
+  Tags,
+  Truck,
+  Package,
+  CalendarClock
+} from 'lucide-angular'
 import { Product } from '@models/product.model'
 import { TranslationService } from '@services/translation.service'
 import { TranslationKeyModalService } from '@services/translation-key-modal.service'
@@ -26,18 +41,20 @@ describe('ProductFormComponent', () => {
   // Signal Mocks for SoT
   const mockCategories = signal(['meat', 'dairy'])
   const mockAllergens = signal(['gluten', 'peanuts'])
-  const mockUnits = signal(['kg', 'liter'])
   const mockUnitKeys = signal(['ק"ג', 'גרם'])
   const mockIsCreatorOpen = signal(false) // Add this signal mock
   beforeEach(async () => {
     mockRouter = jasmine.createSpyObj('Router', ['navigate'])
-    mockConversionService = jasmine.createSpyObj('ConversionService',
-      ['handleWasteChange', 'handleYieldChange', 'getSuggestedPurchasePrice']
-    )
+    mockConversionService = jasmine.createSpyObj('ConversionService', [
+      'handleWasteChange',
+      'handleYieldChange',
+      'getSuggestedPurchasePrice'
+    ])
     mockConversionService.handleWasteChange.and.returnValue({ yieldFactor: 1 })
     mockConversionService.handleYieldChange.and.returnValue({ wastePercent: 0 })
     mockConversionService.getSuggestedPurchasePrice.and.returnValue(0)
-    mockUnitRegistry = jasmine.createSpyObj('UnitRegistryService',
+    mockUnitRegistry = jasmine.createSpyObj(
+      'UnitRegistryService',
       ['getConversion', 'openUnitCreator', 'refreshFromStorage'],
       {
         allUnitKeys_: mockUnitKeys,
@@ -54,16 +71,37 @@ describe('ProductFormComponent', () => {
 
     const mockUtil = jasmine.createSpyObj('UtilService', ['getEmptyProduct'])
     mockUtil.getEmptyProduct.and.returnValue({
-      _id: '', name_hebrew: '', base_unit_: 'gram', categories_: [], sources_: [],
-      purchase_options_: [], yield_factor_: 1, allergens_: [],
-      min_stock_level_: 0, expiry_days_default_: 0
+      _id: '',
+      name_hebrew: '',
+      base_unit_: 'gram',
+      categories_: [],
+      sources_: [],
+      purchase_options_: [],
+      yield_factor_: 1,
+      allergens_: [],
+      min_stock_level_: 0,
+      expiry_days_default_: 0
     } as Product)
 
     await TestBed.configureTestingModule({
       imports: [
         ProductFormComponent,
         ReactiveFormsModule,
-        LucideAngularModule.pick({ ShieldAlert, X, FlaskConical, Plus, Trash2, ArrowRight, Save, ChevronDown, ChevronUp, Tags, Truck, Package, CalendarClock })
+        LucideAngularModule.pick({
+          ShieldAlert,
+          X,
+          FlaskConical,
+          Plus,
+          Trash2,
+          ArrowRight,
+          Save,
+          ChevronDown,
+          ChevronUp,
+          Tags,
+          Truck,
+          Package,
+          CalendarClock
+        })
       ],
       providers: [
         { provide: Router, useValue: mockRouter },
@@ -121,17 +159,17 @@ describe('ProductFormComponent', () => {
     }))
   })
 
- describe('Dynamic Purchase Options', () => {
+  describe('Dynamic Purchase Options', () => {
     it('should add a new purchase option and sync suggested price on unit change', () => {
       // 1. Setup the global price
       component['productForm_'].patchValue({ buy_price_global_: 10 })
-      
+
       // 2. Configure the EXISTING spies instead of re-creating the object
       mockUnitRegistry.getConversion.and.returnValue(1000)
-      mockConversionService.getSuggestedPurchasePrice.and.returnValue(10000);
+      mockConversionService.getSuggestedPurchasePrice.and.returnValue(10000)
 
       // 3. Act
-      (component as any).addPurchaseOption()
+      ;(component as any).addPurchaseOption()
       const options = component.purchaseOptions_
       const firstRow = options.at(0)
 
@@ -146,10 +184,10 @@ describe('ProductFormComponent', () => {
 
   describe('Allergen Management', () => {
     it('should toggle allergens in the form control', () => {
-      const ctrl = component['productForm_'].get('allergens_');
-      (component as any).toggleAllergen('gluten')
-      expect(ctrl?.value).toContain('gluten');
-      (component as any).toggleAllergen('gluten')
+      const ctrl = component['productForm_'].get('allergens_')
+      ;(component as any).toggleAllergen('gluten')
+      expect(ctrl?.value).toContain('gluten')
+      ;(component as any).toggleAllergen('gluten')
       expect(ctrl?.value).not.toContain('gluten')
     })
   })

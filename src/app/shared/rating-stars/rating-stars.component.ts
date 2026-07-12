@@ -1,11 +1,4 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  input,
-  output,
-  signal,
-  computed,
-} from '@angular/core'
+import { Component, ChangeDetectionStrategy, input, output, signal, computed } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 
@@ -24,7 +17,7 @@ export interface StarState {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, LucideAngularModule],
   templateUrl: './rating-stars.component.html',
-  styleUrl: './rating-stars.component.scss',
+  styleUrl: './rating-stars.component.scss'
 })
 export class RatingStarsComponent {
   // INPUTS
@@ -43,18 +36,15 @@ export class RatingStarsComponent {
   // COMPUTED SIGNALS
   protected stars_ = computed<StarState[]>(() => {
     const total = this.max()
-    const active = this.hoveredIndex_() >= 0
-      ? this.hoveredIndex_() + 1
-      : this.value()
+    const active = this.hoveredIndex_() >= 0 ? this.hoveredIndex_() + 1 : this.value()
 
     return Array.from({ length: total }, (_, i) => {
-      const threshold = i + 1
       const diff = active - i
       return {
         index: i,
         full: diff >= 1,
         half: diff > 0 && diff < 1,
-        empty: diff <= 0,
+        empty: diff <= 0
       }
     })
   })

@@ -21,7 +21,7 @@ type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
   imports: [CommonModule, LucideAngularModule, TranslatePipe, LoaderComponent],
   templateUrl: './ai-menu-modal.component.html',
   styleUrl: './ai-menu-modal.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AiMenuModalComponent implements OnInit {
   protected readonly modalService = inject(AiMenuModalService)
@@ -57,7 +57,7 @@ export class AiMenuModalComponent implements OnInit {
     plated_course: 'מנות אישיות',
     buffet: 'בופה',
     finger_food: 'פינגר פוד',
-    family_style: 'מנות משפחתיות',
+    family_style: 'מנות משפחתיות'
   }
 
   protected readonly diffEntries_ = computed(() => {
@@ -66,13 +66,16 @@ export class AiMenuModalComponent implements OnInit {
     if (!patch || !current) return []
     const entries: { label: string; from: string; to: string }[] = []
     if ('name_' in patch) entries.push({ label: 'שם', from: current.name_ || '—', to: String(patch['name_'] ?? '—') })
-    if ('event_type_' in patch) entries.push({ label: 'סוג אירוע', from: current.event_type_ || '—', to: String(patch['event_type_'] ?? '—') })
-    if ('guest_count_' in patch) entries.push({ label: 'אורחים', from: String(current.guest_count_), to: String(patch['guest_count_'] ?? '—') })
+    if ('event_type_' in patch)
+      entries.push({ label: 'סוג אירוע', from: current.event_type_ || '—', to: String(patch['event_type_'] ?? '—') })
+    if ('guest_count_' in patch)
+      entries.push({ label: 'אורחים', from: String(current.guest_count_), to: String(patch['guest_count_'] ?? '—') })
     if ('serving_type_' in patch) {
       const fmt = (k: unknown) => AiMenuModalComponent.SERVING_TYPE_LABELS[String(k)] ?? String(k)
       entries.push({ label: 'סגנון הגשה', from: fmt(current.serving_type_), to: fmt(patch['serving_type_']) })
     }
-    if ('event_date_' in patch) entries.push({ label: 'תאריך', from: current.event_date_ ?? '—', to: String(patch['event_date_'] ?? '—') })
+    if ('event_date_' in patch)
+      entries.push({ label: 'תאריך', from: current.event_date_ ?? '—', to: String(patch['event_date_'] ?? '—') })
     if ('sections_' in patch) {
       const newSections = patch['sections_'] as { category: string; items: unknown[] }[] | undefined
       const count = Array.isArray(newSections) ? newSections.length : 0
@@ -115,7 +118,7 @@ export class AiMenuModalComponent implements OnInit {
 
   private buildMatchedMenu_(draft: AiMenuDraft): MatchedMenu {
     const recipes = this.kitchenState_.recipes_()
-    const sections: MatchedSection[] = draft.sections_.map((section, si) => {
+    const sections: MatchedSection[] = draft.sections_.map((section, _si) => {
       const items: MatchedDish[] = section.items.map((dish) => {
         const { bestMatch, candidates, status } = matchRecipeName(dish.name_hebrew, recipes)
         return {
@@ -125,7 +128,7 @@ export class AiMenuModalComponent implements OnInit {
           candidates,
           predictedTakeRate: dish.predicted_take_rate_,
           servingPortions: dish.serving_portions,
-          sellPrice: dish.sell_price,
+          sellPrice: dish.sell_price
         }
       })
       return { category: section.category, items }
@@ -136,7 +139,7 @@ export class AiMenuModalComponent implements OnInit {
       event_date_: draft.event_date_,
       serving_type_: draft.serving_type_,
       guest_count_: draft.guest_count_,
-      sections,
+      sections
     }
   }
 
@@ -159,7 +162,9 @@ export class AiMenuModalComponent implements OnInit {
     if (!matched) return
     this.modalService.deliverResult(matched, this.userResolutions_())
     if (draft) {
-      this.gemini_.saveMenuShot(this.prompt_(), draft).catch(() => { /* non-blocking */ })
+      this.gemini_.saveMenuShot(this.prompt_(), draft).catch(() => {
+        /* non-blocking */
+      })
     }
     this.resetLocalState_()
   }

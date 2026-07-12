@@ -1,13 +1,12 @@
 import { Component } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { CounterComponent } from './counter.component'
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { TranslationService } from '@services/translation.service'
 
 @Component({
   standalone: true,
   imports: [CounterComponent],
-  template: '<app-counter [value]="value" [min]="min" [max]="max" (valueChange)="captured = $event" />',
+  template: '<app-counter [value]="value" [min]="min" [max]="max" (valueChange)="captured = $event" />'
 })
 class HostComponent {
   value = 5
@@ -23,9 +22,7 @@ describe('CounterComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent],
-      providers: [
-        { provide: TranslationService, useValue: { translate: (k: string) => k || '' } }
-      ]
+      providers: [{ provide: TranslationService, useValue: { translate: (k: string) => k || '' } }]
     }).compileComponents()
 
     fixture = TestBed.createComponent(HostComponent)

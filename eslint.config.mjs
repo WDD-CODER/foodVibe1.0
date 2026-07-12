@@ -41,5 +41,14 @@ export default tseslint.config(
     rules: {
       quotes: ['error', 'double', { avoidEscape: true }]
     }
+  },
+  {
+    // Test files only: `any` is downgraded to a warning here because specs
+    // routinely use it for mocks, spies, and partial stubs. This relaxation
+    // applies to *.spec.ts exclusively — production source keeps `error`.
+    files: ['src/app/**/*.spec.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'warn'
+    }
   }
 )

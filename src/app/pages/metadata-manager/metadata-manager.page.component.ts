@@ -20,7 +20,7 @@ import { AuthModalService } from '@services/auth-modal.service'
 import { LoggingService } from '@services/logging.service'
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
-import { ALL_DISH_FIELDS, DEFAULT_DISH_FIELDS, type DishFieldKey, type MenuTypeDefinition } from '@models/menu-event.model'
+import { ALL_DISH_FIELDS, DEFAULT_DISH_FIELDS, type DishFieldKey } from '@models/menu-event.model'
 import { PreparationCategoryManagerComponent } from './components/preparation-category-manager/preparation-category-manager.component'
 import { SectionCategoryManagerComponent } from './components/section-category-manager/section-category-manager.component'
 import { UserManagementComponent } from './components/user-management/user-management.component'
@@ -30,7 +30,16 @@ type MetadataType = 'category' | 'allergen' | 'unit' | 'label'
 @Component({
   selector: 'app-metadata-manager',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, PreparationCategoryManagerComponent, SectionCategoryManagerComponent, UserManagementComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    LucideAngularModule,
+    TranslatePipe,
+    LoaderComponent,
+    PreparationCategoryManagerComponent,
+    SectionCategoryManagerComponent,
+    UserManagementComponent
+  ],
   templateUrl: './metadata-manager.page.component.html',
   styleUrl: './metadata-manager.page.component.scss'
 })
@@ -70,7 +79,7 @@ export class MetadataManagerComponent implements OnInit {
   allAllergens_ = this.metadataRegistry.allAllergens_
   allCategories_ = this.metadataRegistry.allCategories_
   allLabels_ = this.metadataRegistry.allLabels_
-  allLabelKeys_ = computed(() => this.allLabels_().map(l => l.key))
+  allLabelKeys_ = computed(() => this.allLabels_().map((l) => l.key))
   allMenuTypes_ = this.metadataRegistry.allMenuTypes_
   protected isImporting_ = signal(false)
   protected editingMenuTypeKey_ = signal<string | null>(null)
@@ -83,7 +92,6 @@ export class MetadataManagerComponent implements OnInit {
     return this.metadataRegistry.getLabelColor(key)
   }
 
-
   isSystemUnit(unitKey: string): boolean {
     return unitKey in SYSTEM_UNITS
   }
@@ -94,8 +102,6 @@ export class MetadataManagerComponent implements OnInit {
   //   if (!name.trim()) return
   //   this.unitRegistry.registerUnit(name.trim(), 1)
   // }
-
-
 
   async onAddLabel(): Promise<void> {
     const result = await this.labelCreationModal.open()
@@ -121,7 +127,7 @@ export class MetadataManagerComponent implements OnInit {
 
     // --- LAYER 1: REGISTRY GUARD ---
     const currentIds = this.getRegistryByType(type)
-    const existingLabels = currentIds.map(id => this.translationService.translate(id))
+    const existingLabels = currentIds.map((id) => this.translationService.translate(id))
 
     if (existingLabels.includes(sanitizedHebrew)) {
       this.userMsgService.onSetErrorMsg(`הערך "${sanitizedHebrew}" כבר קיים ברשימה הזו.`)
@@ -132,7 +138,7 @@ export class MetadataManagerComponent implements OnInit {
     const resolveMap: Record<string, () => string | null> = {
       category: () => this.translationService.resolveCategory(sanitizedHebrew),
       allergen: () => this.translationService.resolveAllergen(sanitizedHebrew),
-      unit: () => this.translationService.resolveUnit(sanitizedHebrew),
+      unit: () => this.translationService.resolveUnit(sanitizedHebrew)
     }
     let englishKey = resolveMap[type]?.() ?? null
     let resolvedHebrew = sanitizedHebrew
@@ -156,77 +162,78 @@ export class MetadataManagerComponent implements OnInit {
       inputElement.value = ''
       this.userMsgService.onSetSuccessMsg('הנתונים נשמרו בהצלחה')
     } catch (err) {
-      this.logging.error({ event: 'metadata.sync_error', message: 'Metadata sync error (add metadata)', context: { err } })
+      this.logging.error({
+        event: 'metadata.sync_error',
+        message: 'Metadata sync error (add metadata)',
+        context: { err }
+      })
       this.userMsgService.onSetErrorMsg('שגיאה בסנכרון הנתונים')
     }
   }
 
   //DELETE
   async onRemoveMetadata(item: string, type: MetadataType) {
-  if (!this.requireSignIn()) return
-  const allProducts = this.productData.allProducts_()
-  let isUsed = false
+    if (!this.requireSignIn()) return
+    const allProducts = this.productData.allProducts_()
+    let isUsed = false
 
-  // 1. DYNAMIC USAGE CHECK
-  switch (type) {
-    case 'unit':
-      isUsed = allProducts.some(p =>
-        p.base_unit_ === item ||
-        p.purchase_options_?.some(opt => opt.unit_symbol_ === item)
-      )
-      break
-    case 'allergen':
-      isUsed = allProducts.some(p => p.allergens_?.includes(item))
-      break
-    case 'category':
-      isUsed = allProducts.some(p => (p.categories_ ?? []).includes(item))
-      break
-    case 'label': {
-      const recipes = this.kitchenState.recipes_()
-      isUsed = recipes.some(r =>
-        (r.labels_ ?? []).includes(item) || (r.autoLabels_ ?? []).includes(item)
-      )
-      break
-    }
-  }
-
-  // 2. BLOCK DELETION IF IN USE
-  if (isUsed) {
-    const typeNames: Record<MetadataType, string> = {
-      unit: 'היחידה',
-      allergen: 'האלרגן',
-      category: 'הקטגוריה',
-      label: 'התווית',
-    }
-    const where = type === 'label' ? 'במתכונים' : 'במלאי'
-    this.userMsgService.onSetErrorMsg(
-      `לא ניתן למחוק את ${typeNames[type]} "${this.translationService.translate(item)}" - היא נמצאת בשימוש ${where}`
-    )
-    return
-  }
-
-  // 3. EXECUTION
-  try {
+    // 1. DYNAMIC USAGE CHECK
     switch (type) {
       case 'unit':
-        await this.unitRegistry.deleteUnit(item)
+        isUsed = allProducts.some(
+          (p) => p.base_unit_ === item || p.purchase_options_?.some((opt) => opt.unit_symbol_ === item)
+        )
         break
       case 'allergen':
-        await this.metadataRegistry.deleteAllergen(item)
+        isUsed = allProducts.some((p) => p.allergens_?.includes(item))
         break
       case 'category':
-        await this.metadataRegistry.deleteCategory(item)
+        isUsed = allProducts.some((p) => (p.categories_ ?? []).includes(item))
         break
-      case 'label':
-        await this.metadataRegistry.deleteLabel(item)
+      case 'label': {
+        const recipes = this.kitchenState.recipes_()
+        isUsed = recipes.some((r) => (r.labels_ ?? []).includes(item) || (r.autoLabels_ ?? []).includes(item))
         break
+      }
     }
-    this.userMsgService.onSetSuccessMsg('המחיקה בוצעה בהצלחה')
-  } catch (err) {
-    this.logging.error({ event: 'crud.metadata.delete_error', message: `Failed to delete ${type}`, context: { err } })
-    this.userMsgService.onSetErrorMsg('שגיאה בביצוע המחיקה מול השרת')
+
+    // 2. BLOCK DELETION IF IN USE
+    if (isUsed) {
+      const typeNames: Record<MetadataType, string> = {
+        unit: 'היחידה',
+        allergen: 'האלרגן',
+        category: 'הקטגוריה',
+        label: 'התווית'
+      }
+      const where = type === 'label' ? 'במתכונים' : 'במלאי'
+      this.userMsgService.onSetErrorMsg(
+        `לא ניתן למחוק את ${typeNames[type]} "${this.translationService.translate(item)}" - היא נמצאת בשימוש ${where}`
+      )
+      return
+    }
+
+    // 3. EXECUTION
+    try {
+      switch (type) {
+        case 'unit':
+          await this.unitRegistry.deleteUnit(item)
+          break
+        case 'allergen':
+          await this.metadataRegistry.deleteAllergen(item)
+          break
+        case 'category':
+          await this.metadataRegistry.deleteCategory(item)
+          break
+        case 'label':
+          await this.metadataRegistry.deleteLabel(item)
+          break
+      }
+      this.userMsgService.onSetSuccessMsg('המחיקה בוצעה בהצלחה')
+    } catch (err) {
+      this.logging.error({ event: 'crud.metadata.delete_error', message: `Failed to delete ${type}`, context: { err } })
+      this.userMsgService.onSetErrorMsg('שגיאה בביצוע המחיקה מול השרת')
+    }
   }
-}
 
   //HELPERS
   private async registerInService(key: string, type: MetadataType): Promise<void> {
@@ -282,7 +289,10 @@ export class MetadataManagerComponent implements OnInit {
   async onRestoreFromBackup(): Promise<void> {
     if (!this.requireSignIn()) return
     const message = this.translationService.translate('backup_restore_confirm')
-    const confirmed = await this.confirmModal.open(message, { variant: 'warning', saveLabel: 'backup_restore_from_backup' })
+    const confirmed = await this.confirmModal.open(message, {
+      variant: 'warning',
+      saveLabel: 'backup_restore_from_backup'
+    })
     if (!confirmed) return
     this.isImporting_.set(true)
     try {
@@ -319,11 +329,11 @@ export class MetadataManagerComponent implements OnInit {
       title: 'add_new_category',
       label: 'menu_serving_style',
       placeholder: 'menu_serving_style',
-      saveLabel: 'save',
+      saveLabel: 'save'
     })
     if (result?.trim()) {
       const key = result.trim()
-      if (this.allMenuTypes_().some(t => t.key === key)) {
+      if (this.allMenuTypes_().some((t) => t.key === key)) {
         this.userMsgService.onSetErrorMsg(`סוג תפריט "${key}" כבר קיים`)
         return
       }
@@ -338,9 +348,9 @@ export class MetadataManagerComponent implements OnInit {
   }
 
   toggleMenuTypeField(fieldKey: DishFieldKey): void {
-    this.editingMenuTypeFields_.update(fields => {
+    this.editingMenuTypeFields_.update((fields) => {
       const has = fields.includes(fieldKey)
-      if (has) return fields.filter(f => f !== fieldKey)
+      if (has) return fields.filter((f) => f !== fieldKey)
       return [...fields, fieldKey]
     })
   }
@@ -350,7 +360,7 @@ export class MetadataManagerComponent implements OnInit {
   }
 
   getDishFieldLabelKey(fieldKey: DishFieldKey): string {
-    return ALL_DISH_FIELDS.find(f => f.key === fieldKey)?.labelKey ?? fieldKey
+    return ALL_DISH_FIELDS.find((f) => f.key === fieldKey)?.labelKey ?? fieldKey
   }
 
   async onSaveMenuTypeFields(): Promise<void> {
@@ -369,7 +379,7 @@ export class MetadataManagerComponent implements OnInit {
 
   async onRemoveMenuType(key: string): Promise<void> {
     if (!this.requireSignIn()) return
-    const isUsed = this.menuEventData.allMenuEvents_().some(e => e.serving_type_ === key)
+    const isUsed = this.menuEventData.allMenuEvents_().some((e) => e.serving_type_ === key)
     if (isUsed) {
       this.userMsgService.onSetErrorMsg(`לא ניתן למחוק: סוג התפריט "${key}" בשימוש בתפריטים שמורים`)
       return
@@ -391,8 +401,7 @@ export class MetadataManagerComponent implements OnInit {
   async removeFieldFromMenuType(key: string, fieldKey: DishFieldKey): Promise<void> {
     if (!this.requireSignIn()) return
     const current = this.metadataRegistry.getMenuTypeFields(key)
-    const updated = current.filter(f => f !== fieldKey)
+    const updated = current.filter((f) => f !== fieldKey)
     await this.metadataRegistry.updateMenuType(key, updated)
   }
-
 }

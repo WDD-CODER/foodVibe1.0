@@ -19,14 +19,14 @@ export const StringParam: ParamSerializer<string> = {
   toUrl: (v) => v || null,
   fromUrl: (r) => r ?? '',
   toSession: (v) => v,
-  fromSession: (r) => (typeof r === 'string' ? r : ''),
+  fromSession: (r) => (typeof r === 'string' ? r : '')
 }
 
 export const NullableStringParam: ParamSerializer<string | null> = {
   toUrl: (v) => v ?? null,
   fromUrl: (r) => r ?? null,
   toSession: (v) => v,
-  fromSession: (r) => (typeof r === 'string' ? r : null),
+  fromSession: (r) => (typeof r === 'string' ? r : null)
 }
 
 /** 'created' | 'updated'; URL only when 'updated'. */
@@ -34,14 +34,14 @@ export const DateFieldParam: ParamSerializer<'created' | 'updated'> = {
   toUrl: (v) => (v === 'updated' ? 'updated' : null),
   fromUrl: (r) => (r === 'updated' ? 'updated' : 'created'),
   toSession: (v) => v,
-  fromSession: (r) => (r === 'updated' ? 'updated' : 'created'),
+  fromSession: (r) => (r === 'updated' ? 'updated' : 'created')
 }
 
 export const BooleanParam: ParamSerializer<boolean> = {
   toUrl: (v) => (v ? '1' : null),
   fromUrl: (r) => r === '1',
   toSession: (v) => v,
-  fromSession: (r) => r === true,
+  fromSession: (r) => r === true
 }
 
 export const NullableBooleanParam: ParamSerializer<boolean | null> = {
@@ -56,21 +56,21 @@ export const NullableBooleanParam: ParamSerializer<boolean | null> = {
     if (r === true) return true
     if (r === false) return false
     return null
-  },
+  }
 }
 
 export const StringArrayParam: ParamSerializer<string[]> = {
   toUrl: (v) => (v.length ? v.join(',') : null),
   fromUrl: (r) => (r ? r.split(',').filter(Boolean) : []),
   toSession: (v) => v,
-  fromSession: (r) => (Array.isArray(r) ? r : []),
+  fromSession: (r) => (Array.isArray(r) ? r : [])
 }
 
 export const StringSetParam: ParamSerializer<Set<string>> = {
   toUrl: (v) => (v.size ? Array.from(v).join(',') : null),
   fromUrl: (r) => new Set(r ? r.split(',').filter(Boolean) : []),
   toSession: (v) => Array.from(v),
-  fromSession: (r) => new Set(Array.isArray(r) ? r : []),
+  fromSession: (r) => new Set(Array.isArray(r) ? r : [])
 }
 
 export const NumberSetParam: ParamSerializer<Set<number>> = {
@@ -85,7 +85,7 @@ export const NumberSetParam: ParamSerializer<Set<number>> = {
         : []
     ),
   toSession: (v) => Array.from(v),
-  fromSession: (r) => new Set(Array.isArray(r) ? r.map(Number) : []),
+  fromSession: (r) => new Set(Array.isArray(r) ? r.map(Number) : [])
 }
 
 /**
@@ -105,16 +105,16 @@ export const FilterRecordParam: ParamSerializer<Record<string, string[]>> = {
       const idx = part.indexOf(':')
       if (idx < 1) continue
       const key = part.slice(0, idx)
-      const vals = part.slice(idx + 1).split(',').filter(Boolean)
+      const vals = part
+        .slice(idx + 1)
+        .split(',')
+        .filter(Boolean)
       if (vals.length) result[key] = vals
     }
     return result
   },
   toSession: (v) => v,
-  fromSession: (r) =>
-    r && typeof r === 'object' && !Array.isArray(r)
-      ? (r as Record<string, string[]>)
-      : {},
+  fromSession: (r) => (r && typeof r === 'object' && !Array.isArray(r) ? (r as Record<string, string[]>) : {})
 }
 
 const SESSION_PREFIX = 'list-state:'
@@ -128,10 +128,7 @@ function readSession(routeKey: string): Record<string, unknown> | null {
   }
 }
 
-function writeSession(
-  routeKey: string,
-  descriptors: ParamDescriptor<any>[]
-): void {
+function writeSession(routeKey: string, descriptors: ParamDescriptor<unknown>[]): void {
   try {
     const obj: Record<string, unknown> = {}
     for (const d of descriptors) {
@@ -151,10 +148,7 @@ function writeSession(
  *
  * Priority: URL query params > sessionStorage > signal defaults.
  */
-export function useListState(
-  routeKey: string,
-  descriptors: ParamDescriptor<any>[]
-): void {
+export function useListState(routeKey: string, descriptors: ParamDescriptor<unknown>[]): void {
   const router = inject(Router)
   const route = inject(ActivatedRoute)
 
@@ -211,7 +205,7 @@ export function useListState(
         relativeTo: route,
         queryParams,
         queryParamsHandling: 'merge',
-        replaceUrl: true,
+        replaceUrl: true
       })
     })
   })

@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick, flush } from '@angular/core/testing'
+import { TestBed, fakeAsync, tick } from '@angular/core/testing'
 import { ProductDataService } from './product-data.service'
 import { StorageService } from './async-storage.service'
 import { Product } from '../models/product.model'
@@ -10,8 +10,30 @@ describe('ProductDataService', () => {
   const ENTITY = 'PRODUCT_LIST'
 
   const mockProducts: Product[] = [
-    { _id: '1', name_hebrew: 'Tomato', categories_: ['Veg'], sources_: [], allergens_: ['dairy'], base_unit_: 'gram', purchase_options_: [], yield_factor_: 1, min_stock_level_: 0, expiry_days_default_: 0 } as Product,
-    { _id: '2', name_hebrew: 'Cucumber', categories_: ['Veg'], sources_: [], allergens_: ['dairy'], base_unit_: 'gram', purchase_options_: [], yield_factor_: 1, min_stock_level_: 0, expiry_days_default_: 0 } as Product
+    {
+      _id: '1',
+      name_hebrew: 'Tomato',
+      categories_: ['Veg'],
+      sources_: [],
+      allergens_: ['dairy'],
+      base_unit_: 'gram',
+      purchase_options_: [],
+      yield_factor_: 1,
+      min_stock_level_: 0,
+      expiry_days_default_: 0
+    } as Product,
+    {
+      _id: '2',
+      name_hebrew: 'Cucumber',
+      categories_: ['Veg'],
+      sources_: [],
+      allergens_: ['dairy'],
+      base_unit_: 'gram',
+      purchase_options_: [],
+      yield_factor_: 1,
+      min_stock_level_: 0,
+      expiry_days_default_: 0
+    } as Product
   ]
 
   beforeEach(fakeAsync(() => {
@@ -23,14 +45,11 @@ describe('ProductDataService', () => {
     storageSpy.get.and.returnValue(Promise.resolve(mockProducts[0]))
 
     TestBed.configureTestingModule({
-      providers: [
-        ProductDataService,
-        { provide: StorageService, useValue: storageSpy }
-      ]
+      providers: [ProductDataService, { provide: StorageService, useValue: storageSpy }]
     })
 
     service = TestBed.inject(ProductDataService)
-    
+
     // Resolve the constructor's loadInitialData() before ANY test runs
     tick()
   }))
@@ -55,14 +74,19 @@ describe('ProductDataService', () => {
 
   describe('CRUD Operations', () => {
     it('should update an existing product in the signal', fakeAsync(() => {
-      const updatedProduct = { ...mockProducts[0], name_hebrew: 'Rotten Tomato', categories_: ['Veg'], supplierIds_: [] } as Product
+      const updatedProduct = {
+        ...mockProducts[0],
+        name_hebrew: 'Rotten Tomato',
+        categories_: ['Veg'],
+        supplierIds_: []
+      } as Product
       storageSpy.get.and.returnValue(Promise.resolve(mockProducts[0]))
       storageSpy.put.and.returnValue(Promise.resolve(updatedProduct))
 
       service.updateProduct(updatedProduct)
       tick()
 
-      const result = service.allProducts_().find(p => p._id === '1')
+      const result = service.allProducts_().find((p) => p._id === '1')
       expect(result?.name_hebrew).toBe('Rotten Tomato')
     }))
 
@@ -73,7 +97,7 @@ describe('ProductDataService', () => {
       tick() // Resolve the storage.remove promise
 
       expect(service.allProducts_().length).toBe(1)
-      expect(service.allProducts_().find(p => p._id === '1')).toBeUndefined()
+      expect(service.allProducts_().find((p) => p._id === '1')).toBeUndefined()
     }))
   })
 })

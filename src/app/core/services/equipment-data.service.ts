@@ -1,7 +1,5 @@
-import { Injectable, Signal, inject } from '@angular/core'
+import { Injectable, Signal } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
-import { StorageService } from './async-storage.service'
-import { LoggingService } from './logging.service'
 import { Equipment } from '../models/equipment.model'
 import { BaseEntityDataService } from './base-entity-data.service'
 
@@ -33,18 +31,22 @@ export class EquipmentDataService extends BaseEntityDataService<Equipment> {
   async addEquipment(newItem: Omit<Equipment, '_id'>): Promise<Equipment> {
     try {
       const name = (newItem.name_hebrew ?? '').trim()
-      if (name && this.currentItems().some(e => (e.name_hebrew ?? '').trim() === name)) {
+      if (name && this.currentItems().some((e) => (e.name_hebrew ?? '').trim() === name)) {
         throw new Error(ERR_DUPLICATE_EQUIPMENT_NAME)
       }
       const now = new Date().toISOString()
       const withTimestamps = {
         ...newItem,
         created_at_: newItem.created_at_ ?? now,
-        updated_at_: now,
+        updated_at_: now
       }
       const saved = await this.storage.post<Equipment>(ENTITY, withTimestamps as Equipment)
-      this.updateItems(list => [...list, saved])
-      this.logging.info({ event: 'crud.equipment.create', message: 'Equipment created', context: { entityType: ENTITY, id: saved._id } })
+      this.updateItems((list) => [...list, saved])
+      this.logging.info({
+        event: 'crud.equipment.create',
+        message: 'Equipment created',
+        context: { entityType: ENTITY, id: saved._id }
+      })
       return saved
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
@@ -56,20 +58,28 @@ export class EquipmentDataService extends BaseEntityDataService<Equipment> {
   async updateEquipment(item: Equipment): Promise<Equipment> {
     try {
       const name = (item.name_hebrew ?? '').trim()
-      if (name && this.currentItems().some(e => e._id !== item._id && (e.name_hebrew ?? '').trim() === name)) {
+      if (name && this.currentItems().some((e) => e._id !== item._id && (e.name_hebrew ?? '').trim() === name)) {
         throw new Error(ERR_DUPLICATE_EQUIPMENT_NAME)
       }
       const updated = {
         ...item,
-        updated_at_: new Date().toISOString(),
+        updated_at_: new Date().toISOString()
       }
       const result = await this.storage.put<Equipment>(ENTITY, updated)
-      this.updateItems(list => list.map(e => (e._id === result._id ? result : e)))
-      this.logging.info({ event: 'crud.equipment.update', message: 'Equipment updated', context: { entityType: ENTITY, id: result._id } })
+      this.updateItems((list) => list.map((e) => (e._id === result._id ? result : e)))
+      this.logging.info({
+        event: 'crud.equipment.update',
+        message: 'Equipment updated',
+        context: { entityType: ENTITY, id: result._id }
+      })
       return result
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.equipment.update_error', message: 'Failed to update equipment', context: { err } })
+      this.logging.error({
+        event: 'crud.equipment.update_error',
+        message: 'Failed to update equipment',
+        context: { err }
+      })
       throw err
     }
   }
@@ -80,11 +90,19 @@ export class EquipmentDataService extends BaseEntityDataService<Equipment> {
       const withDeleted = { ...item, deletedAt: Date.now() } as Equipment & { deletedAt: number }
       await this.storage.appendExisting(TRASH_KEY, withDeleted)
       await this.storage.remove(ENTITY, _id)
-      this.updateItems(list => list.filter(e => e._id !== _id))
-      this.logging.info({ event: 'crud.equipment.delete', message: 'Equipment deleted', context: { entityType: ENTITY, id: _id } })
+      this.updateItems((list) => list.filter((e) => e._id !== _id))
+      this.logging.info({
+        event: 'crud.equipment.delete',
+        message: 'Equipment deleted',
+        context: { entityType: ENTITY, id: _id }
+      })
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.equipment.delete_error', message: 'Failed to delete equipment', context: { err } })
+      this.logging.error({
+        event: 'crud.equipment.delete_error',
+        message: 'Failed to delete equipment',
+        context: { err }
+      })
       throw err
     }
   }
@@ -94,7 +112,11 @@ export class EquipmentDataService extends BaseEntityDataService<Equipment> {
       return this.storage.query<Equipment & { deletedAt: number }>(TRASH_KEY, 0)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.equipment.getTrash_error', message: 'Failed to get trash equipment', context: { err } })
+      this.logging.error({
+        event: 'crud.equipment.getTrash_error',
+        message: 'Failed to get trash equipment',
+        context: { err }
+      })
       throw err
     }
   }
@@ -102,17 +124,21 @@ export class EquipmentDataService extends BaseEntityDataService<Equipment> {
   async restoreEquipment(_id: string): Promise<Equipment> {
     try {
       const trash = await this.storage.query<Equipment & { deletedAt: number }>(TRASH_KEY, 0)
-      const found = trash.find(e => e._id === _id)
+      const found = trash.find((e) => e._id === _id)
       if (!found) throw new Error(`Equipment ${_id} not found in trash`)
       const { deletedAt: _, ...item } = found
-      const rest = trash.filter(e => e._id !== _id)
+      const rest = trash.filter((e) => e._id !== _id)
       await this.storage.replaceAll(TRASH_KEY, rest)
       await this.storage.appendExisting(ENTITY, item)
-      this.updateItems(list => [...list, item])
+      this.updateItems((list) => [...list, item])
       return item
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.equipment.restore_error', message: 'Failed to restore equipment', context: { err } })
+      this.logging.error({
+        event: 'crud.equipment.restore_error',
+        message: 'Failed to restore equipment',
+        context: { err }
+      })
       throw err
     }
   }

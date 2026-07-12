@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core'
 import { KitchenStateService } from './kitchen-state.service'
 import { Recipe } from '../models/recipe.model'
-import { FlatPrepItem, PrepCategory } from '../models/recipe.model'
+import { PrepCategory } from '../models/recipe.model'
 
 export interface ScaledIngredientRow {
   name: string
@@ -46,7 +46,7 @@ export class ScalingService {
     const products = this.kitchenState_.products_()
     const recipes = this.kitchenState_.recipes_()
 
-    return ingredients.map(ing => {
+    return ingredients.map((ing) => {
       if (!ing.referenceId) {
         return {
           name: ing.nameSnapshot || '(ללא שם)',
@@ -58,13 +58,12 @@ export class ScalingService {
       }
       const isProduct = ing.type === 'product'
       const item = isProduct
-        ? products.find(p => p._id === ing.referenceId)
-        : recipes.find(r => r._id === ing.referenceId)
+        ? products.find((p) => p._id === ing.referenceId)
+        : recipes.find((r) => r._id === ing.referenceId)
       // When referenceId is set but the product/recipe no longer exists in state
       // (orphaned reference — e.g. product deleted or DB reset), fall back to
       // nameSnapshot and mark as unlinked so the UI can style it appropriately.
-      const name = (item as { name_hebrew?: string } | undefined)?.name_hebrew
-        ?? ing.nameSnapshot ?? ''
+      const name = (item as { name_hebrew?: string } | undefined)?.name_hebrew ?? ing.nameSnapshot ?? ''
       const units = this.getAvailableUnitsForIngredient(item, ing.unit_ ?? '')
       return {
         name,
@@ -82,13 +81,22 @@ export class ScalingService {
     const units = new Set<string>()
     if (currentUnit) units.add(currentUnit)
     if (!item) return Array.from(units)
-    const meta = item as { base_unit_?: string; purchase_options_?: { unit_symbol_?: string }[]; unit_options_?: { unit_symbol_?: string }[]; yield_unit_?: string }
+    const meta = item as {
+      base_unit_?: string
+      purchase_options_?: { unit_symbol_?: string }[]
+      unit_options_?: { unit_symbol_?: string }[]
+      yield_unit_?: string
+    }
     if (meta.base_unit_) units.add(meta.base_unit_)
     if (meta.purchase_options_?.length) {
-      meta.purchase_options_.forEach(o => { if (o.unit_symbol_) units.add(o.unit_symbol_) })
+      meta.purchase_options_.forEach((o) => {
+        if (o.unit_symbol_) units.add(o.unit_symbol_)
+      })
     }
     if (meta.unit_options_?.length) {
-      meta.unit_options_.forEach(o => { if (o.unit_symbol_) units.add(o.unit_symbol_) })
+      meta.unit_options_.forEach((o) => {
+        if (o.unit_symbol_) units.add(o.unit_symbol_)
+      })
     }
     if (meta.yield_unit_) units.add(meta.yield_unit_)
     return Array.from(units)
@@ -101,7 +109,7 @@ export class ScalingService {
     const rows: ScaledPrepRow[] = []
 
     if (recipe.prep_items_?.length) {
-      recipe.prep_items_.forEach(p => {
+      recipe.prep_items_.forEach((p) => {
         rows.push({
           name: p.preparation_name,
           amount: (p.quantity ?? 0) * factor,
@@ -113,7 +121,7 @@ export class ScalingService {
 
     if (recipe.prep_categories_?.length) {
       recipe.prep_categories_.forEach((cat: PrepCategory) => {
-        (cat.items ?? []).forEach(it => {
+        ;(cat.items ?? []).forEach((it) => {
           rows.push({
             name: it.item_name,
             amount: (it.quantity ?? 0) * factor,

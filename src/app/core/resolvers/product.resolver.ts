@@ -4,7 +4,7 @@ import { KitchenStateService } from '../services/kitchen-state.service'
 import { UserMsgService } from '../services/user-msg.service'
 import { Product } from '../models/product.model'
 
-export const productResolver: ResolveFn<Product | null> = (route, state) => {
+export const productResolver: ResolveFn<Product | null> = (route, _state) => {
   const kitchenState = inject(KitchenStateService)
   const router = inject(Router)
   const userMsgService = inject(UserMsgService)
@@ -15,7 +15,7 @@ export const productResolver: ResolveFn<Product | null> = (route, state) => {
   if (!id) return null
 
   // Logic: Find the item in our Single Source of Truth
-  const product = kitchenState.products_().find(p => p._id === id)
+  const product = kitchenState.products_().find((p) => p._id === id)
 
   // Error Handling: If an ID was provided but no product exists, redirect safely
   if (!product) {

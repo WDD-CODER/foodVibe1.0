@@ -1,4 +1,15 @@
-import { Component, input, output, inject, signal, ViewChildren, ViewChild, QueryList, effect, ChangeDetectorRef } from '@angular/core'
+import {
+  Component,
+  input,
+  output,
+  inject,
+  signal,
+  ViewChildren,
+  ViewChild,
+  QueryList,
+  effect,
+  ChangeDetectorRef
+} from '@angular/core'
 import { toSignal } from '@angular/core/rxjs-interop'
 import { Router } from '@angular/router'
 import { CommonModule } from '@angular/common'
@@ -19,7 +30,6 @@ import { ProductDataService } from '@services/product-data.service'
 import type { Product } from '@models/product.model'
 import { getProductValidationStatus } from 'src/app/core/utils/product-validation.util'
 import { getEffectivePrice } from '@utils/product-source.util'
-import type { Recipe } from '@models/recipe.model'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { quantityIncrement, quantityDecrement, QuantityStepOptions } from 'src/app/core/utils/quantity-step.util'
 import { map } from 'rxjs'
@@ -45,7 +55,7 @@ import { NutritionBadgeComponent } from 'src/app/shared/nutrition-badge/nutritio
     CdkDropList,
     CdkDragHandle,
     ClickOutSideDirective,
-    NutritionBadgeComponent,
+    NutritionBadgeComponent
   ],
   templateUrl: './recipe-ingredients-table.component.html',
   styleUrl: './recipe-ingredients-table.component.scss'
@@ -59,13 +69,12 @@ export class RecipeIngredientsTableComponent {
   private readonly productDataService = inject(ProductDataService)
   private readonly bp = inject(BreakpointObserver)
   private fb = inject(FormBuilder)
-private readonly cdr = inject(ChangeDetectorRef)
+  private readonly cdr = inject(ChangeDetectorRef)
   private readonly router_ = inject(Router)
 
-  protected readonly isMobile_ = toSignal(
-    this.bp.observe('(max-width: 767px)').pipe(map(r => r.matches)),
-    { initialValue: false }
-  )
+  protected readonly isMobile_ = toSignal(this.bp.observe('(max-width: 767px)').pipe(map((r) => r.matches)), {
+    initialValue: false
+  })
 
   @ViewChildren(FocusByRowDirective) private focusByRowRefs!: QueryList<FocusByRowDirective>
   @ViewChild(QuickEditProductPanelComponent) private quickEditPanelRef_?: QuickEditProductPanelComponent
@@ -103,8 +112,8 @@ private readonly cdr = inject(ChangeDetectorRef)
   /** Names of ingredients already selected in the recipe (for excluding from search dropdown). */
   get existingIngredientNames(): string[] {
     return this.ingredientGroups
-      .filter(g => g.get('referenceId')?.value)
-      .map(g => (g.get('name_hebrew')?.value ?? '').toString().trim())
+      .filter((g) => g.get('referenceId')?.value)
+      .map((g) => (g.get('name_hebrew')?.value ?? '').toString().trim())
       .filter(Boolean)
   }
 
@@ -124,7 +133,7 @@ private readonly cdr = inject(ChangeDetectorRef)
   protected getProductForGroup(group: FormGroup): Product | null {
     const refId = group.get('referenceId')?.value as string | null
     if (!refId) return null
-    return this.kitchenStateService.products_().find(p => p._id === refId) ?? null
+    return this.kitchenStateService.products_().find((p) => p._id === refId) ?? null
   }
 
   /** Route the badge click: desktop → inline accordion; mobile → service-driven modal. */
@@ -157,9 +166,9 @@ private readonly cdr = inject(ChangeDetectorRef)
       yield_factor_: 1,
       allergens_: [],
       min_stock_level_: 0,
-      expiry_days_default_: 0,
+      expiry_days_default_: 0
     }
-    void this.productDataService.addProduct(stub).then(saved => {
+    void this.productDataService.addProduct(stub).then((saved) => {
       group.patchValue({ referenceId: saved._id, item_type: 'product', nameSnapshot: saved.name_hebrew })
       this.onQuickEditBadgeClick(group, index, 'incomplete')
     })
@@ -204,11 +213,9 @@ private readonly cdr = inject(ChangeDetectorRef)
   getExcludeNamesForRow(rowIndex: number): string[] {
     return this.ingredientGroups
       .filter((g, i) => i !== rowIndex && g.get('referenceId')?.value)
-      .map(g => (g.get('name_hebrew')?.value ?? '').toString().trim())
+      .map((g) => (g.get('name_hebrew')?.value ?? '').toString().trim())
       .filter(Boolean)
   }
-
-
 
   /** True when the row's unit is a product purchase unit (use step 1 for +/-). */
   private isPurchaseUnitRow(group: FormGroup): boolean {
@@ -216,14 +223,14 @@ private readonly cdr = inject(ChangeDetectorRef)
     if (!item || (item as { item_type_?: string }).item_type_ !== 'product') return false
     const prod = item as Product
     const unit = group.get('unit')?.value
-    return prod.purchase_options_?.some(o => o.unit_symbol_ === unit) ?? false
+    return prod.purchase_options_?.some((o) => o.unit_symbol_ === unit) ?? false
   }
 
   incrementAmount(group: FormGroup, index: number): void {
     const ctrl = group.get('amount_net')
     const current = ctrl?.value ?? 0
     const unit = group.get('unit')?.value as string | undefined
-    const stepOpts: QuantityStepOptions = this.isPurchaseUnitRow(group) ? { integerOnly: true } : (unit ? { unit } : {})
+    const stepOpts: QuantityStepOptions = this.isPurchaseUnitRow(group) ? { integerOnly: true } : unit ? { unit } : {}
     ctrl?.setValue(quantityIncrement(current, 0, stepOpts))
     this.updateLineCalculations(index)
   }
@@ -232,13 +239,13 @@ private readonly cdr = inject(ChangeDetectorRef)
     const ctrl = group.get('amount_net')
     const current = ctrl?.value ?? 0
     const unit = group.get('unit')?.value as string | undefined
-    const stepOpts: QuantityStepOptions = this.isPurchaseUnitRow(group) ? { integerOnly: true } : (unit ? { unit } : {})
+    const stepOpts: QuantityStepOptions = this.isPurchaseUnitRow(group) ? { integerOnly: true } : unit ? { unit } : {}
     ctrl?.setValue(quantityDecrement(current, 0, stepOpts))
     this.updateLineCalculations(index)
   }
 
   getTotalWeightG(): number {
-    const rows = this.ingredientGroups.map(g => ({
+    const rows = this.ingredientGroups.map((g) => ({
       amount_net: g.get('amount_net')?.value,
       unit: g.get('unit')?.value,
       referenceId: g.get('referenceId')?.value,
@@ -268,17 +275,23 @@ private readonly cdr = inject(ChangeDetectorRef)
     const hasPurchaseOptions = product?.purchase_options_?.length
     const unit = hasPurchaseOptions
       ? (product!.purchase_options_![0].unit_symbol_ ?? product!.base_unit_ ?? '')
-      : ('base_unit_' in item ? (item.base_unit_ ?? '') : ('yield_unit_' in item ? (item.yield_unit_ ?? '') : ''))
+      : 'base_unit_' in item
+        ? (item.base_unit_ ?? '')
+        : 'yield_unit_' in item
+          ? (item.yield_unit_ ?? '')
+          : ''
     const amount_net = isEditingName
       ? (group.get('amount_net')?.value ?? (hasPurchaseOptions ? 1 : 0))
-      : (hasPurchaseOptions ? 1 : 0)
+      : hasPurchaseOptions
+        ? 1
+        : 0
     group.patchValue({
       name_hebrew: item.name_hebrew,
       nameSnapshot: item.name_hebrew,
       referenceId: item._id,
       item_type: item.item_type_,
       unit,
-      amount_net,
+      amount_net
     })
 
     if (index !== -1) {
@@ -311,10 +324,9 @@ private readonly cdr = inject(ChangeDetectorRef)
       e.preventDefault()
       const current = ctrl.value ?? 0
       const unit = group.get('unit')?.value as string | undefined
-      const stepOpts: QuantityStepOptions = this.isPurchaseUnitRow(group) ? { integerOnly: true } : (unit ? { unit } : {})
-      const next = e.key === 'ArrowUp'
-        ? quantityIncrement(current, 0, stepOpts)
-        : quantityDecrement(current, 0, stepOpts)
+      const stepOpts: QuantityStepOptions = this.isPurchaseUnitRow(group) ? { integerOnly: true } : unit ? { unit } : {}
+      const next =
+        e.key === 'ArrowUp' ? quantityIncrement(current, 0, stepOpts) : quantityDecrement(current, 0, stepOpts)
       ctrl.setValue(next)
       this.updateLineCalculations(rowIndex)
       return
@@ -325,7 +337,7 @@ private readonly cdr = inject(ChangeDetectorRef)
     }
   }
 
-  onUnitKeydown(e: KeyboardEvent, rowIndex: number): void {
+  onUnitKeydown(e: KeyboardEvent, _rowIndex: number): void {
     if (e.key === 'Enter') {
       e.preventDefault()
       this.addIngredient.emit()
@@ -338,7 +350,7 @@ private readonly cdr = inject(ChangeDetectorRef)
       name_hebrew: '',
       item_type: null,
       amount_net: null,
-      unit: 'gram',
+      unit: 'gram'
     })
     group.updateValueAndValidity()
     this.ingredientsFormArray().updateValueAndValidity()
@@ -348,10 +360,8 @@ private readonly cdr = inject(ChangeDetectorRef)
     const refId = group.get('referenceId')?.value as string | null
     const type = group.get('item_type')?.value as 'product' | 'recipe' | null
     if (refId) {
-      const pool = type === 'recipe'
-        ? this.kitchenStateService.recipes_()
-        : this.kitchenStateService.products_()
-      const found = pool.find(x => x._id === refId)
+      const pool = type === 'recipe' ? this.kitchenStateService.recipes_() : this.kitchenStateService.products_()
+      const found = pool.find((x) => x._id === refId)
       if (found?.name_hebrew) return found.name_hebrew
     }
     return (group.get('name_hebrew')?.value || group.get('nameSnapshot')?.value || '') as string
@@ -361,8 +371,8 @@ private readonly cdr = inject(ChangeDetectorRef)
     const id = group.get('referenceId')?.value
     const type = group.get('item_type')?.value
     return type === 'product'
-      ? this.kitchenStateService.products_().find(p => p._id === id)
-      : this.kitchenStateService.recipes_().find(r => r._id === id)
+      ? this.kitchenStateService.products_().find((p) => p._id === id)
+      : this.kitchenStateService.recipes_().find((r) => r._id === id)
   }
 
   /** True when the row is blocking — must be resolved before the recipe can be saved. */
@@ -371,7 +381,7 @@ private readonly cdr = inject(ChangeDetectorRef)
     if (!refId) return false
     const type = group.get('item_type')?.value as 'product' | 'recipe' | null
     const pool = type === 'recipe' ? this.kitchenStateService.recipes_() : this.kitchenStateService.products_()
-    const found = pool.find(x => x._id === refId)
+    const found = pool.find((x) => x._id === refId)
     // Unlinked: referenceId not found in pool
     if (!found) return true
     // Product is in the invalid tier (missing name or base unit)
@@ -383,12 +393,12 @@ private readonly cdr = inject(ChangeDetectorRef)
 
   /** True when the row has a name but no referenceId (draft/unlinked ingredient). */
   isUnlinkedRow(group: FormGroup): boolean {
-    return !!(group.get('name_hebrew')?.value?.trim()) && !group.get('referenceId')?.value
+    return !!group.get('name_hebrew')?.value?.trim() && !group.get('referenceId')?.value
   }
 
   /** True when any ingredient row is unlinked (has name but no referenceId). */
   hasUnlinkedRows(): boolean {
-    return this.ingredientGroups.some(g => this.isUnlinkedRow(g))
+    return this.ingredientGroups.some((g) => this.isUnlinkedRow(g))
   }
 
   /** True when the row is linked to a product that is in the incomplete (warning) tier. */
@@ -397,14 +407,14 @@ private readonly cdr = inject(ChangeDetectorRef)
     const refId = group.get('referenceId')?.value as string | null
     if (!refId) return false
     if (group.get('item_type')?.value !== 'product') return false
-    const product = this.kitchenStateService.products_().find(p => p._id === refId)
+    const product = this.kitchenStateService.products_().find((p) => p._id === refId)
     if (!product) return false
     return getProductValidationStatus(product) === 'incomplete'
   }
 
   /** True when any ingredient row is blocking. Used by recipe-builder to gate save. */
   hasBlockingRows(): boolean {
-    return this.ingredientGroups.some(g => this.isBlockingRow(g))
+    return this.ingredientGroups.some((g) => this.isBlockingRow(g))
   }
 
   /** Navigate to the full product edit form so the user can complete the product. */
@@ -432,7 +442,7 @@ private readonly cdr = inject(ChangeDetectorRef)
       lineCost = amountInYieldUnit * costPerUnit
     } else {
       const prod = item as Product & { calculated_cost_per_unit?: number }
-      const unitOption = prod.purchase_options_?.find(o => o.unit_symbol_ === selectedUnit)
+      const unitOption = prod.purchase_options_?.find((o) => o.unit_symbol_ === selectedUnit)
       const effectivePrice = getEffectivePrice(prod)
 
       if (unitOption) {
@@ -490,14 +500,20 @@ private readonly cdr = inject(ChangeDetectorRef)
 
     if (meta.base_unit_) units.add(meta.base_unit_)
     if (meta.purchase_options_?.length) {
-      meta.purchase_options_.forEach(o => { if (o.unit_symbol_) units.add(o.unit_symbol_) })
+      meta.purchase_options_.forEach((o) => {
+        if (o.unit_symbol_) units.add(o.unit_symbol_)
+      })
     }
     if (meta.unit_options_?.length) {
-      meta.unit_options_.forEach(o => { if (o.unit_symbol_) units.add(o.unit_symbol_) })
+      meta.unit_options_.forEach((o) => {
+        if (o.unit_symbol_) units.add(o.unit_symbol_)
+      })
     }
     if (meta.yield_unit_) units.add(meta.yield_unit_)
     if (meta.yield_conversions_?.length) {
-      meta.yield_conversions_.forEach(c => { if (c?.unit) units.add(c.unit) })
+      meta.yield_conversions_.forEach((c) => {
+        if (c?.unit) units.add(c.unit)
+      })
     }
 
     return Array.from(units)
@@ -517,10 +533,11 @@ private readonly cdr = inject(ChangeDetectorRef)
   onUnitChange(group: FormGroup, index: number, val: string): void {
     if (val === '__add_unit__') {
       group.get('unit')?.setValue('')
-      const product = group.get('item_type')?.value === 'product' ? (this.getItemMetadata(group) as Product | undefined) : undefined
+      const product =
+        group.get('item_type')?.value === 'product' ? (this.getItemMetadata(group) as Product | undefined) : undefined
       const existingSymbols = product?.purchase_options_?.map((o) => o.unit_symbol_) ?? []
       setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols: existingSymbols }), 0)
-      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe(newUnit => {
+      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
         const setUnitAndUpdate = (): void => {
           group.get('unit')?.setValue(newUnit)
           this.updateLineCalculations(index)
@@ -528,7 +545,7 @@ private readonly cdr = inject(ChangeDetectorRef)
         if (group.get('item_type')?.value === 'product') {
           const prod = this.getItemMetadata(group) as Product | undefined
           if (prod && prod._id) {
-            const existing = prod.purchase_options_?.some(o => o.unit_symbol_ === newUnit)
+            const existing = prod.purchase_options_?.some((o) => o.unit_symbol_ === newUnit)
             if (!existing) {
               const baseFactor = this.unitRegistry.getConversion(prod.base_unit_) || 1
               const unitFactor = this.unitRegistry.getConversion(newUnit) || 1
@@ -572,5 +589,4 @@ private readonly cdr = inject(ChangeDetectorRef)
     const yieldValue = (item as Product)?.yield_factor_ ?? 1
     return net / yieldValue
   }
-
 }

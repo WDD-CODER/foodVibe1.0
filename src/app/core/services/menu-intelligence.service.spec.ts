@@ -3,7 +3,7 @@ import { signal } from '@angular/core'
 import { MenuIntelligenceService } from './menu-intelligence.service'
 import { KitchenStateService } from './kitchen-state.service'
 import { RecipeCostService } from './recipe-cost.service'
-import { MenuEvent, MenuItemSelection, MenuSection } from '@models/menu-event.model'
+import { MenuEvent } from '@models/menu-event.model'
 import { Recipe } from '@models/recipe.model'
 
 describe('MenuIntelligenceService', () => {
@@ -13,15 +13,15 @@ describe('MenuIntelligenceService', () => {
   beforeEach(() => {
     recipesSignal.set([])
     const kitchenSpy = jasmine.createSpyObj('KitchenStateService', [], {
-      recipes_: recipesSignal,
+      recipes_: recipesSignal
     })
     const costSpy = jasmine.createSpyObj('RecipeCostService', ['computeRecipeCost'])
     TestBed.configureTestingModule({
       providers: [
         MenuIntelligenceService,
         { provide: KitchenStateService, useValue: kitchenSpy },
-        { provide: RecipeCostService, useValue: costSpy },
-      ],
+        { provide: RecipeCostService, useValue: costSpy }
+      ]
     })
     service = TestBed.inject(MenuIntelligenceService)
   })
@@ -80,12 +80,18 @@ describe('MenuIntelligenceService', () => {
             name_: 'Main',
             sort_order_: 1,
             items_: [
-              { recipe_id_: 'r1', recipe_type_: 'dish', predicted_take_rate_: 0, derived_portions_: 0, serving_portions_: 2 },
-            ],
-          },
+              {
+                recipe_id_: 'r1',
+                recipe_type_: 'dish',
+                predicted_take_rate_: 0,
+                derived_portions_: 0,
+                serving_portions_: 2
+              }
+            ]
+          }
         ],
         financial_targets_: { target_food_cost_pct_: 0, target_revenue_per_guest_: 0 },
-        performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' },
+        performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' }
       }
       const out = service.hydrateDerivedPortions(event)
       expect(out.sections_[0].items_[0].derived_portions_).toBe(8) // 4 * 2
@@ -106,12 +112,18 @@ describe('MenuIntelligenceService', () => {
             name_: 'Passed',
             sort_order_: 1,
             items_: [
-              { recipe_id_: 'r1', recipe_type_: 'dish', predicted_take_rate_: 0.4, derived_portions_: 0, serving_portions_: 1 },
-            ],
-          },
+              {
+                recipe_id_: 'r1',
+                recipe_type_: 'dish',
+                predicted_take_rate_: 0.4,
+                derived_portions_: 0,
+                serving_portions_: 1
+              }
+            ]
+          }
         ],
         financial_targets_: { target_food_cost_pct_: 0, target_revenue_per_guest_: 0 },
-        performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'cocktail_passed' },
+        performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'cocktail_passed' }
       }
       const out = service.hydrateDerivedPortions(event)
       expect(out.sections_[0].items_[0].derived_portions_).toBe(120) // round(100*3*0.4)
@@ -128,7 +140,7 @@ describe('MenuIntelligenceService', () => {
         yield_amount_: 2,
         yield_unit_: 'unit',
         default_station_: '',
-        is_approved_: false,
+        is_approved_: false
       }
       recipesSignal.set([recipe])
       const costService = TestBed.inject(RecipeCostService) as jasmine.SpyObj<RecipeCostService>
@@ -147,13 +159,25 @@ describe('MenuIntelligenceService', () => {
             name_: 'Main',
             sort_order_: 1,
             items_: [
-              { recipe_id_: 'r1', recipe_type_: 'dish', predicted_take_rate_: 0, derived_portions_: 4, serving_portions_: 1 },
-              { recipe_id_: 'r1', recipe_type_: 'dish', predicted_take_rate_: 0, derived_portions_: 2, serving_portions_: 0.5 },
-            ],
-          },
+              {
+                recipe_id_: 'r1',
+                recipe_type_: 'dish',
+                predicted_take_rate_: 0,
+                derived_portions_: 4,
+                serving_portions_: 1
+              },
+              {
+                recipe_id_: 'r1',
+                recipe_type_: 'dish',
+                predicted_take_rate_: 0,
+                derived_portions_: 2,
+                serving_portions_: 0.5
+              }
+            ]
+          }
         ],
         financial_targets_: { target_food_cost_pct_: 0, target_revenue_per_guest_: 0 },
-        performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' },
+        performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' }
       }
       const total = service.computeEventIngredientCost(event)
       expect(total).toBe(25)
@@ -177,12 +201,18 @@ describe('MenuIntelligenceService', () => {
             name_: 'Main',
             sort_order_: 1,
             items_: [
-              { recipe_id_: 'missing', recipe_type_: 'dish', predicted_take_rate_: 0, derived_portions_: 2, serving_portions_: 1 },
-            ],
-          },
+              {
+                recipe_id_: 'missing',
+                recipe_type_: 'dish',
+                predicted_take_rate_: 0,
+                derived_portions_: 2,
+                serving_portions_: 1
+              }
+            ]
+          }
         ],
         financial_targets_: { target_food_cost_pct_: 0, target_revenue_per_guest_: 0 },
-        performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' },
+        performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' }
       }
       const total = service.computeEventIngredientCost(event)
       expect(total).toBe(0)
@@ -200,7 +230,7 @@ describe('MenuIntelligenceService', () => {
         yield_amount_: 1,
         yield_unit_: 'unit',
         default_station_: '',
-        is_approved_: false,
+        is_approved_: false
       }
       recipesSignal.set([recipe])
       const costService = TestBed.inject(RecipeCostService) as jasmine.SpyObj<RecipeCostService>
@@ -214,10 +244,23 @@ describe('MenuIntelligenceService', () => {
         serving_type_: 'plated_course',
         guest_count_: 10,
         sections_: [
-          { _id: 's1', name_: 'Main', sort_order_: 1, items_: [{ recipe_id_: 'r1', recipe_type_: 'dish', predicted_take_rate_: 0, derived_portions_: 10, serving_portions_: 1 }] },
+          {
+            _id: 's1',
+            name_: 'Main',
+            sort_order_: 1,
+            items_: [
+              {
+                recipe_id_: 'r1',
+                recipe_type_: 'dish',
+                predicted_take_rate_: 0,
+                derived_portions_: 10,
+                serving_portions_: 1
+              }
+            ]
+          }
         ],
         financial_targets_: { target_food_cost_pct_: 30, target_revenue_per_guest_: 100 },
-        performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' },
+        performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' }
       }
       const pct = service.computeFoodCostPct(event)
       expect(pct).toBe(3) // 30 / (10*100) * 100 = 3%
@@ -233,14 +276,14 @@ describe('MenuIntelligenceService', () => {
         guest_count_: 10,
         sections_: [],
         financial_targets_: { target_food_cost_pct_: 0, target_revenue_per_guest_: 0 },
-        performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' },
+        performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' }
       }
       expect(service.computeFoodCostPct(eventNoRevenue)).toBe(0)
 
       const eventNoGuests: MenuEvent = {
         ...eventNoRevenue,
         guest_count_: 0,
-        financial_targets_: { target_food_cost_pct_: 0, target_revenue_per_guest_: 50 },
+        financial_targets_: { target_food_cost_pct_: 0, target_revenue_per_guest_: 50 }
       }
       expect(service.computeFoodCostPct(eventNoGuests)).toBe(0)
     })
