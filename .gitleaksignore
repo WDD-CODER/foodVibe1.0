@@ -1,0 +1,3 @@
+# False positive: prose "API shape, RTL/translation" in agent review command docs
+# Fingerprint from gitleaks generic-api-key on PR #150 commit range
+15973291f1ab5030f7e681275d58de5b0b057605:.claude/commands/review.md:generic-api-key:27

@@ -24,7 +24,7 @@ Standalone review command. Used by `/ship` Phase 2 and invokable alone.
 ## What to check (judgment only)
 
 - Contextual security CI cannot pattern-match (e.g. whether a specific `innerHTML` use is safe given what populates it; auth / persisted-data handling in context).
-- Convention judgment calls (structure, API shape, RTL/translation intent) that are not pure lint.
+- Convention judgment calls (structure, interface shape, right-to-left and translation intent) that are not pure lint.
 - Spec / brief mismatch when a Done-when brief is present.
 
 ## What to skip (CI already covers)
