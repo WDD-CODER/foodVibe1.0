@@ -43,6 +43,7 @@ Show all registered slash commands with short descriptions and file locations.
 | `/evaluate-me` | Agent session retrospective â€” grades the session | `.claude/commands/evaluate-me.md` | FLOW | SHARED |
 | `/feat` | New-feature path â€” rules, `/plan`, Contractor + `/review-it` | `.claude/commands/feat.md` | FLOW | SHARED |
 | `/fix` | Bug fix path â€” matching rules + elegant-fix | `.claude/commands/fix.md` | FLOW | SHARED |
+| `/fix-pr-checks` | Bounded PR CI/security fix loop (2 rounds max) | `.claude/commands/fix-pr-checks.md` | FLOW | SHARED |
 | `/mobile-flow-audit` | Walk mobile flows at 375Ã—812 RTL; report layout breakage | `.claude/commands/mobile-flow-audit.md` | FLOW | SHARED |
 | `/plan` | Planning / Plan Contract path | `.claude/commands/plan.md` | FLOW | SHARED |
 | `/refactor` | Refactor path â€” angular/domain rules, cssLayer, techdebt | `.claude/commands/refactor.md` | FLOW | SHARED |

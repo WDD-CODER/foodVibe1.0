@@ -24,6 +24,7 @@ See `README_WORKFLOW.md` and `CLAUDE.md`.
 | Command | What it does |
 |---------|-------------|
 | `/fix` | Bug fix path â€” loads matching `docs/agent/`, investigate + elegant-fix |
+| `/fix-pr-checks` | Bounded PR check fix loop â€” `docs/agent/pr-check-fix-loop.md` (2 rounds max) |
 | `/refactor` | Refactor path â€” loads angular/domain rules, cssLayer, techdebt |
 | `/security` | Security path â€” loads `docs/agent/standards-security.md`, relies on pre-commit security grep + CI |
 

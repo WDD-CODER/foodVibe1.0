@@ -116,6 +116,10 @@ Decide whether this ship is a **feature-complete** commit (push + propose PR) or
 
 **Hard rule:** Never open a PR without either (a) the brief’s Done-when fully met, or (b) explicit user instruction (override or ad-hoc answer).
 
+### After opening a PR (feature-complete path only)
+
+After opening the PR, run `gh pr checks --watch` once. If any check fails, offer the user: run the fix loop now (`docs/agent/pr-check-fix-loop.md`) or leave it. Do not auto-run without asking.
+
 ### Push conflict guard
 
 If push is rejected (non-fast-forward):
