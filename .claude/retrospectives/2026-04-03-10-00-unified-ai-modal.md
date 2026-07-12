@@ -1,19 +1,19 @@
-# Retrospective: Unified Context-Aware AI Modal (Plan 245)
+﻿# Retrospective: Unified Context-Aware AI Modal (Plan 245)
 **Date**: 2026-04-03
-**Agent(s)**: Software Architect (plan), Execute-It (implementation), Git Agent (commit/merge)
+**Agent(s)**: retired architect role (plan), Execute-It (implementation), Git Agent (commit/merge)
 **Verdict**: SUCCESS (with two mid-session bug corrections)
 
 ---
 
 ## Summary
 
-The session replaced the separate `import-text-btn` (scan-text → Gemini parse flow) with a unified, context-aware AI button: inside the recipe builder it opens in "edit" mode (sparse patch), outside it opens in "create" mode (unchanged). The implementation was completed, both bugs were identified and fixed during the session, build passed, PR #66 was merged to main.
+The session replaced the separate `import-text-btn` (scan-text â†’ Gemini parse flow) with a unified, context-aware AI button: inside the recipe builder it opens in "edit" mode (sparse patch), outside it opens in "create" mode (unchanged). The implementation was completed, both bugs were identified and fixed during the session, build passed, PR #66 was merged to main.
 
 ---
 
 ## Session Stats
 - Files modified: 26 changed (596 insertions, 495 deletions)
-- Files deleted: 5 (recipe-text-import-modal ×3, recipe-parser.service, recipe-text-import-modal.service)
+- Files deleted: 5 (recipe-text-import-modal Ã—3, recipe-parser.service, recipe-text-import-modal.service)
 - Tool calls: ~60+
 - Build failures: 0 (build passed on first run after each change set)
 - Rollbacks needed: 0
@@ -23,12 +23,12 @@ The session replaced the separate `import-text-btn` (scan-text → Gemini parse 
 
 ## What Went Well
 
-- **Architecture clarity**: The sparse-patch pattern (only changed fields returned from Gemini) was correctly identified upfront — prevented form overwrite bugs before they happened.
+- **Architecture clarity**: The sparse-patch pattern (only changed fields returned from Gemini) was correctly identified upfront â€” prevented form overwrite bugs before they happened.
 - **Context-aware service design**: Extending `AiRecipeModalService` with a `mode` signal and `onPatch` callback was clean and avoided component coupling.
 - **Dead code removal was thorough**: All three import-modal files, the parser service, the `ScanText` lucide icon, the `RecipeTextImportModalComponent` in `app.component`, and all dead dictionary keys were removed in one pass.
-- **Retry logic was correctly placed**: `withRetry<T>()` wraps only the HTTP calls, not the entire service methods — correct placement.
-- **Build gate was run after every change set** — no surprise failures at the end.
-- **Git agent plan was shown to user before executing** — memory rule followed.
+- **Retry logic was correctly placed**: `withRetry<T>()` wraps only the HTTP calls, not the entire service methods â€” correct placement.
+- **Build gate was run after every change set** â€” no surprise failures at the end.
+- **Git agent plan was shown to user before executing** â€” memory rule followed.
 - **`findIngredientMatch_` normalization** (`trim().toLowerCase()`) was identified proactively before it caused a bug.
 
 ---
@@ -39,18 +39,18 @@ The session replaced the separate `import-text-btn` (scan-text → Gemini parse 
 
 **Issue**: The `recipe-ingredients-table.component.html` had `@if (group.get('referenceId')?.value)` gates around `col-unit` and `col-quantity`. This was a pre-existing issue, but the plan did not flag it as a risk.
 **Impact**: User saw "n/a" / "---" for AI-populated ingredients. Required a second fix pass.
-**Root cause**: Plan verification (`plan-implementation`) did not scan the ingredient table template for conditional rendering gates. The template was never read during planning — only the component `.ts` was analyzed.
+**Root cause**: Plan verification (`plan-implementation`) did not scan the ingredient table template for conditional rendering gates. The template was never read during planning â€” only the component `.ts` was analyzed.
 
 ### 2. "Unresolved ingredient" UX not scoped in original brief
 
-**Issue**: After fixing the template gate, AI-added ingredients with no kitchen match were still showing the search box (because `!referenceId` → show search). The user had to describe the desired behavior (red triangle, like incomplete products) before this was addressed.
+**Issue**: After fixing the template gate, AI-added ingredients with no kitchen match were still showing the search box (because `!referenceId` â†’ show search). The user had to describe the desired behavior (red triangle, like incomplete products) before this was addressed.
 **Impact**: One additional iteration after initial fix was deployed.
 **Root cause**: The original brief described "add ingredients from AI" but didn't define the UX for the case where a name has no matching product. The agent didn't proactively scope this edge case in the plan.
 
-### 3. `isProductIncomplete` → `isIncompleteRow` rename in same session
+### 3. `isProductIncomplete` â†’ `isIncompleteRow` rename in same session
 
 **Issue**: The method was renamed mid-session to cover the new "unresolved" case. This is technically correct but could have been the right name from the start if the edge case was anticipated in planning.
-**Impact**: Minor — no breakage, but required a template re-read.
+**Impact**: Minor â€” no breakage, but required a template re-read.
 
 ---
 
@@ -58,7 +58,7 @@ The session replaced the separate `import-text-btn` (scan-text → Gemini parse 
 
 | Issue | Root Cause | Impact |
 |-------|------------|--------|
-| Template gate not caught | `plan-implementation` never read the ingredient table `.html` file — only `.ts` | Two-pass fix, user frustration |
+| Template gate not caught | `plan-implementation` never read the ingredient table `.html` file â€” only `.ts` | Two-pass fix, user frustration |
 | Unresolved ingredient UX undefined | Brief didn't scope "name with no match" edge case | Extra iteration after first deploy |
 | Method rename mid-session | Incomplete domain modeling during planning | Minor, no breakage |
 
@@ -79,7 +79,7 @@ The session replaced the separate `import-text-btn` (scan-text → Gemini parse 
 
 ### 2. `.claude/copilot-instructions.md` or `standards-angular.md`
 
-**Problem**: No documented standard for "unresolved AI ingredient" UX — the pattern of showing a name-only row with a red triangle is a domain pattern that should be documented so future AI features handle it consistently.
+**Problem**: No documented standard for "unresolved AI ingredient" UX â€” the pattern of showing a name-only row with a red triangle is a domain pattern that should be documented so future AI features handle it consistently.
 
 **Suggested addition**:
 ```markdown
@@ -87,25 +87,25 @@ The session replaced the separate `import-text-btn` (scan-text → Gemini parse 
 When an AI feature adds an ingredient row by name only (no referenceId match found):
 - Set `name_hebrew` on the FormGroup; leave `referenceId` null
 - Use `isIncompleteRow()` (not `isProductIncomplete()`) to detect and show the warning badge
-- Show the ingredient in the display row (not the search input) — user clicks triangle to resolve
+- Show the ingredient in the display row (not the search input) â€” user clicks triangle to resolve
 - This follows the same visual pattern as products with buy_price_global_ === 0
 ```
 
 ### 3. `.claude/agents/git-agent.md` (minor)
 
-**Problem**: Git agent correctly showed plan before executing, but the output format listed `dist/` files — these are compiled output files that arguably shouldn't be committed to source control. The agent committed them because they were previously tracked.
+**Problem**: Git agent correctly showed plan before executing, but the output format listed `dist/` files â€” these are compiled output files that arguably shouldn't be committed to source control. The agent committed them because they were previously tracked.
 
 **Suggested note**:
 ```
 When dist/ files are tracked and modified, flag them to user in the plan summary
-with a note: "dist/ files are tracked — confirm these should be included or add to .gitignore"
+with a note: "dist/ files are tracked â€” confirm these should be included or add to .gitignore"
 ```
 
 ---
 
 ## Action Items
 
-- [ ] Add template `.html` scan requirement to `plan-implementation.md` — always read both `.ts` and `.html` for any component under analysis
+- [ ] Add template `.html` scan requirement to `plan-implementation.md` â€” always read both `.ts` and `.html` for any component under analysis
 - [ ] Document "unresolved AI ingredient" pattern in `standards-domain.md` or `copilot-instructions.md`
 - [ ] Consider adding `dist/` to `.gitignore` and removing it from tracking (separate task)
 - [ ] Add "unresolved ingredient" handling note to `add-recipe.md` skill if it handles AI-prefill paths

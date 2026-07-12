@@ -4,7 +4,6 @@ import { provideRouter, RouterLink } from '@angular/router'
 import { By } from '@angular/platform-browser'
 
 describe('InventoryPage', () => {
-  let component: InventoryPage
   let fixture: ComponentFixture<InventoryPage>
 
   beforeEach(async () => {
@@ -14,7 +13,6 @@ describe('InventoryPage', () => {
     }).compileComponents()
 
     fixture = TestBed.createComponent(InventoryPage)
-    component = fixture.componentInstance
     fixture.detectChanges()
   })
 

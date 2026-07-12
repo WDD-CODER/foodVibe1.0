@@ -6,7 +6,7 @@ import { SelectOnFocusDirective } from './select-on-focus.directive'
 @Component({
   standalone: true,
   imports: [SelectOnFocusDirective],
-  template: `<input SelectOnFocus #inputField>`
+  template: '<input SelectOnFocus #inputField>'
 })
 class TestHostComponent {
   @ViewChild('inputField') inputElement!: ElementRef<HTMLInputElement>

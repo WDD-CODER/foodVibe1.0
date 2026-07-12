@@ -64,7 +64,7 @@ describe('ExportService', () => {
       await service.exportShoppingList(recipe, 4)
 
       expect(scalingSpy.getScaleFactor).toHaveBeenCalledWith(recipe, 4)
-      expect(scalingSpy.getScaledIngredients).toHaveBeenCalledWith(recipe, 2); // 4/2
+      expect(scalingSpy.getScaledIngredients).toHaveBeenCalledWith(recipe, 2) // 4/2
     })
 
     it('should use kitchen state products and recipes for category resolution', () => {
@@ -151,8 +151,8 @@ describe('ExportService', () => {
       }
       await service.exportMenuShoppingList(menu, [recipe], [product])
 
-      expect(scalingSpy.getScaledIngredients).toHaveBeenCalledWith(recipe, 2); // 20/10
-      expect(scalingSpy.getScaledIngredients).toHaveBeenCalledWith(recipe, 0.5); // 5/10
+      expect(scalingSpy.getScaledIngredients).toHaveBeenCalledWith(recipe, 2) // 20/10
+      expect(scalingSpy.getScaledIngredients).toHaveBeenCalledWith(recipe, 0.5) // 5/10
       expect(scalingSpy.getScaledIngredients).toHaveBeenCalledTimes(2)
     })
 

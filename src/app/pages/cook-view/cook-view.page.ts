@@ -9,7 +9,7 @@ import { ReactiveFormsModule, FormBuilder, FormArray, FormGroup, Validators } fr
 import { LucideAngularModule } from 'lucide-angular'
 
 import { Recipe, RecipeStep, FlatPrepItem, PrepCategory } from '@models/recipe.model'
-import { ScalingService, ScaledIngredientRow, ScaledPrepRow } from '@services/scaling.service'
+import { ScalingService, ScaledIngredientRow } from '@services/scaling.service'
 import { CookViewStateService } from '@services/cook-view-state.service'
 import { RecipeCostService } from '@services/recipe-cost.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
@@ -38,10 +38,10 @@ import { ScrollIndicatorsDirective } from 'src/app/core/directives/scroll-indica
 /** Multiplier chip definitions — factor is the multiplier applied to `convertedYieldAmount_()`. */
 const MULTIPLIER_CHIPS = [
   { factor: 0.5, key: 'multiplier_half' },
-  { factor: 1,   key: 'multiplier_1x' },
-  { factor: 2,   key: 'multiplier_2x' },
-  { factor: 3,   key: 'multiplier_3x' },
-  { factor: 4,   key: 'multiplier_4x' },
+  { factor: 1, key: 'multiplier_1x' },
+  { factor: 2, key: 'multiplier_2x' },
+  { factor: 3, key: 'multiplier_3x' },
+  { factor: 4, key: 'multiplier_4x' }
 ] as const
 
 @Component({
@@ -182,8 +182,8 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (convs?.length) {
       const seen = new Set<string>()
       opts = convs
-        .filter(c => c?.unit && !seen.has(c.unit) && (seen.add(c.unit), true))
-        .map(c => ({ value: c.unit, label: c.unit }))
+        .filter((c) => c?.unit && !seen.has(c.unit) && (seen.add(c.unit), true))
+        .map((c) => ({ value: c.unit, label: c.unit }))
     } else {
       const u = recipe.yield_unit_ || 'unit'
       opts = [{ value: u, label: u }]
@@ -200,7 +200,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (baseUnit === selUnit) return baseAmount
     const convs = recipe.yield_conversions_
     if (convs?.length) {
-      const entry = convs.find(c => c?.unit === selUnit)
+      const entry = convs.find((c) => c?.unit === selUnit)
       if (entry != null) return entry.amount
     }
     const baseConv = this.unitRegistry.getConversion(baseUnit)
@@ -236,7 +236,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (!recipe?.ingredients_?.length) return 0
     const scaledRecipe: Recipe = {
       ...recipe,
-      ingredients_: recipe.ingredients_.map(ing => ({
+      ingredients_: recipe.ingredients_.map((ing) => ({
         ...ing,
         amount_: (ing.amount_ ?? 0) * factor
       }))
@@ -263,8 +263,8 @@ export class CookViewPage implements OnInit, OnDestroy {
 
   // ---- FOCUS MODE COMPUTED SIGNALS ----
   /** True when all ingredients have been checked off. */
-  protected allIngredientsChecked_ = computed(() =>
-    this.checkedIngredients_().size >= (this.recipe_()?.ingredients_?.length ?? 0)
+  protected allIngredientsChecked_ = computed(
+    () => this.checkedIngredients_().size >= (this.recipe_()?.ingredients_?.length ?? 0)
   )
 
   /** Progress object for ingredient check-off (done/total). */
@@ -393,7 +393,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected onYieldUnitChange(newUnit: string): void {
     if (newUnit === '__add_unit__') {
       setTimeout(() => this.unitRegistry.openUnitCreator(), 0)
-      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe(unit => {
+      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((unit) => {
         this.onYieldUnitChange(unit)
       })
       return
@@ -416,7 +416,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected incrementQuantity(): void {
     const min = this.isDish_() ? 1 : 0.01
     const options = this.cookViewStepOpts_()
-    this.targetQuantity_.update(q => quantityIncrement(q, min, options))
+    this.targetQuantity_.update((q) => quantityIncrement(q, min, options))
     this.scaleByIngredientIndex_.set(null)
     this.scaleByIngredientAmount_.set(null)
     this.activeMultiplier_.set(null)
@@ -425,7 +425,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected decrementQuantity(): void {
     const min = this.isDish_() ? 1 : 0.01
     const options = this.cookViewStepOpts_()
-    this.targetQuantity_.update(q => quantityDecrement(q, min, options))
+    this.targetQuantity_.update((q) => quantityDecrement(q, min, options))
     this.scaleByIngredientIndex_.set(null)
     this.scaleByIngredientAmount_.set(null)
     this.activeMultiplier_.set(null)
@@ -441,10 +441,13 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected onEditAmountKeydown(e: KeyboardEvent, index: number, currentAmount: number, rowUnit?: string): void {
     if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return
     e.preventDefault()
-    const opts: QuantityStepOptions | undefined = this.isDish_() ? { integerOnly: true } : (rowUnit ? { unit: rowUnit } : undefined)
-    const next = e.key === 'ArrowUp'
-      ? quantityIncrement(currentAmount, 0, opts)
-      : quantityDecrement(currentAmount, 0, opts)
+    const opts: QuantityStepOptions | undefined = this.isDish_()
+      ? { integerOnly: true }
+      : rowUnit
+        ? { unit: rowUnit }
+        : undefined
+    const next =
+      e.key === 'ArrowUp' ? quantityIncrement(currentAmount, 0, opts) : quantityDecrement(currentAmount, 0, opts)
     this.setIngredientAmount(index, next)
   }
 
@@ -453,9 +456,8 @@ export class CookViewPage implements OnInit, OnDestroy {
     e.preventDefault()
     const current = this.settingByIngredientAmount_()
     const options = this.isDish_() ? { integerOnly: true } : undefined
-    const next = e.key === 'ArrowUp'
-      ? quantityIncrement(current, 0.01, options)
-      : quantityDecrement(current, 0.01, options)
+    const next =
+      e.key === 'ArrowUp' ? quantityIncrement(current, 0.01, options) : quantityDecrement(current, 0.01, options)
     this.settingByIngredientAmount_.set(next)
   }
 
@@ -487,7 +489,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (!recipe?.ingredients_?.[index]) return
     const baseAmount = recipe.ingredients_[index].amount_ ?? 0
     if (baseAmount <= 0) return
-    this.confirmModal.open('scale_recipe_confirm', { saveLabel: 'convert' }).then(confirmed => {
+    this.confirmModal.open('scale_recipe_confirm', { saveLabel: 'convert' }).then((confirmed) => {
       if (!confirmed) return
       this.applyScaleByIngredient(index, amount)
       this.settingByIngredientIndex_.set(null)
@@ -540,7 +542,7 @@ export class CookViewPage implements OnInit, OnDestroy {
 
   protected saveEdits(): void {
     this.applyWorkflowFormToRecipe()
-    this.confirmModal.open('save_changes', { saveLabel: 'save_changes' }).then(confirmed => {
+    this.confirmModal.open('save_changes', { saveLabel: 'save_changes' }).then((confirmed) => {
       if (!confirmed) return
       const recipe = this.recipe_()
       if (!recipe) return
@@ -551,7 +553,9 @@ export class CookViewPage implements OnInit, OnDestroy {
           this.editMode_.set(false)
           this.saving.setSaving(false)
         },
-        error: () => { this.saving.setSaving(false) }
+        error: () => {
+          this.saving.setSaving(false)
+        }
       })
     })
   }
@@ -571,7 +575,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (!recipe) return
     if (this.hasRealChanges()) {
       this.applyWorkflowFormToRecipe()
-      this.confirmModal.open('approve_stamp_unsaved_confirm', { saveLabel: 'save_changes' }).then(confirmed => {
+      this.confirmModal.open('approve_stamp_unsaved_confirm', { saveLabel: 'save_changes' }).then((confirmed) => {
         if (!confirmed) return
         this.saveRecipeWithToggledApproval()
       })
@@ -712,10 +716,12 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   protected getEditAmountStep(currentAmount: number, delta: number, rowUnit?: string): number {
-    const options: QuantityStepOptions | undefined = this.isDish_() ? { integerOnly: true } : (rowUnit ? { unit: rowUnit } : undefined)
-    return delta > 0
-      ? quantityIncrement(currentAmount, 0, options)
-      : quantityDecrement(currentAmount, 0, options)
+    const options: QuantityStepOptions | undefined = this.isDish_()
+      ? { integerOnly: true }
+      : rowUnit
+        ? { unit: rowUnit }
+        : undefined
+    return delta > 0 ? quantityIncrement(currentAmount, 0, options) : quantityDecrement(currentAmount, 0, options)
   }
 
   protected setIngredientAmount(index: number, scaledAmount: number): void {
@@ -723,13 +729,11 @@ export class CookViewPage implements OnInit, OnDestroy {
     const factor = this.scaleFactor_()
     if (!recipe?.ingredients_?.length || factor <= 0) return
     const base = Math.max(0, scaledAmount) / factor
-    this.recipe_.update(r => {
+    this.recipe_.update((r) => {
       if (!r) return r
       return {
         ...r,
-        ingredients_: r.ingredients_.map((ing, i) =>
-          i === index ? { ...ing, amount_: base } : ing
-        )
+        ingredients_: r.ingredients_.map((ing, i) => (i === index ? { ...ing, amount_: base } : ing))
       }
     })
   }
@@ -737,43 +741,42 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected setIngredientUnit(index: number, unit: string): void {
     if (unit === '__add_unit__') {
       setTimeout(() => this.unitRegistry.openUnitCreator(), 0)
-      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe(newUnit => {
+      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
         this.setIngredientUnit(index, newUnit)
       })
       return
     }
-    this.recipe_.update(r => {
+    this.recipe_.update((r) => {
       if (!r) return r
       return {
         ...r,
-        ingredients_: r.ingredients_.map((ing, i) =>
-          i === index ? { ...ing, unit_: unit } : ing
-        )
+        ingredients_: r.ingredients_.map((ing, i) => (i === index ? { ...ing, unit_: unit } : ing))
       }
     })
   }
 
-  protected replaceIngredient(index: number, item: { _id: string; item_type_?: string; name_hebrew?: string; base_unit_?: string; yield_unit_?: string }): void {
+  protected replaceIngredient(
+    index: number,
+    item: { _id: string; item_type_?: string; name_hebrew?: string; base_unit_?: string; yield_unit_?: string }
+  ): void {
     const recipe = this.recipe_()
     if (!recipe?.ingredients_?.[index]) return
-    const type = item.item_type_ === 'recipe' ? 'recipe' as const : 'product' as const
+    const type = item.item_type_ === 'recipe' ? ('recipe' as const) : ('product' as const)
     const unit = item.base_unit_ ?? (item as { yield_unit_?: string }).yield_unit_ ?? 'unit'
     const current = recipe.ingredients_[index]
-    this.recipe_.update(r => {
+    this.recipe_.update((r) => {
       if (!r) return r
       return {
         ...r,
         ingredients_: r.ingredients_.map((ing, i) =>
-          i === index
-            ? { ...current, referenceId: item._id, type, unit_: unit }
-            : ing
+          i === index ? { ...current, referenceId: item._id, type, unit_: unit } : ing
         )
       }
     })
   }
 
   protected removeIngredient(index: number): void {
-    this.recipe_.update(r => {
+    this.recipe_.update((r) => {
       if (!r) return r
       return {
         ...r,
@@ -793,7 +796,7 @@ export class CookViewPage implements OnInit, OnDestroy {
 
   /** Toggle check-off state for ingredient row at index (view mode only, session-only). */
   protected toggleIngredientCheck(index: number): void {
-    this.checkedIngredients_.update(s => {
+    this.checkedIngredients_.update((s) => {
       const next = new Set(s)
       if (next.has(index)) {
         next.delete(index)
@@ -808,7 +811,7 @@ export class CookViewPage implements OnInit, OnDestroy {
 
   /** Mark a step as done and advance activeStepIndex_ to the next undone step. */
   protected markStepDone(index: number): void {
-    this.stepDoneSet_.update(s => {
+    this.stepDoneSet_.update((s) => {
       const next = new Set(s)
       next.add(index)
       return next
@@ -835,7 +838,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   protected unmarkStepDone(index: number): void {
-    this.stepDoneSet_.update(s => {
+    this.stepDoneSet_.update((s) => {
       const next = new Set(s)
       next.delete(index)
       return next
@@ -868,7 +871,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     this.activeTimerStepIndex_.set(stepIndex)
     this.timerSecondsLeft_.set(totalSeconds)
     this.timerIntervalId_ = setInterval(() => {
-      this.timerSecondsLeft_.update(s => s - 1)
+      this.timerSecondsLeft_.update((s) => s - 1)
       if (this.timerSecondsLeft_() <= 0) {
         clearInterval(this.timerIntervalId_!)
         this.timerIntervalId_ = null
@@ -936,7 +939,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     this.stopwatchSecondsElapsed_.set(0)
     this.stopwatchPaused_.set(false)
     this.stopwatchIntervalId_ = setInterval(() => {
-      this.stopwatchSecondsElapsed_.update(s => s + 1)
+      this.stopwatchSecondsElapsed_.update((s) => s + 1)
     }, 1000)
   }
 
@@ -953,7 +956,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected resumeStopwatch(): void {
     this.stopwatchPaused_.set(false)
     this.stopwatchIntervalId_ = setInterval(() => {
-      this.stopwatchSecondsElapsed_.update(s => s + 1)
+      this.stopwatchSecondsElapsed_.update((s) => s + 1)
     }, 1000)
   }
 
@@ -983,7 +986,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   protected setUnitOverride(rowIndex: number, unit: string): void {
-    this.unitOverrides_.update(m => ({ ...m, [rowIndex]: unit }))
+    this.unitOverrides_.update((m) => ({ ...m, [rowIndex]: unit }))
   }
 
   protected getDisplayUnit(rowIndex: number, row: ScaledIngredientRow): string {
@@ -1035,7 +1038,7 @@ export class CookViewPage implements OnInit, OnDestroy {
       return catA.localeCompare(catB)
     })
     arr.clear()
-    sorted.forEach(c => arr.push(c))
+    sorted.forEach((c) => arr.push(c))
   }
 
   protected onWorkflowFocusRowDone(): void {
@@ -1049,7 +1052,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (isDish) {
       const prepRows = this.recipeFormService.getPrepRowsFromRecipe(recipe)
       if (prepRows.length > 0) {
-        prepRows.forEach(row => arr.push(this.recipeFormService.createPrepItemRow(row)))
+        prepRows.forEach((row) => arr.push(this.recipeFormService.createPrepItemRow(row)))
       } else {
         arr.push(this.recipeFormService.createPrepItemRow())
       }
@@ -1059,7 +1062,11 @@ export class CookViewPage implements OnInit, OnDestroy {
         steps.forEach((step, i) => {
           const group = this.recipeFormService.createStepGroup(step.order_ ?? i + 1)
           group.get('instruction')?.addValidators(Validators.required)
-          group.patchValue({ instruction: step.instruction_ ?? '', labor_time: step.labor_time_minutes_ ?? 0, cooking_time: step.cooking_time_secs_ ?? 0 })
+          group.patchValue({
+            instruction: step.instruction_ ?? '',
+            labor_time: step.labor_time_minutes_ ?? 0,
+            cooking_time: step.cooking_time_secs_ ?? 0
+          })
           arr.push(group)
         })
       } else {
@@ -1077,44 +1084,57 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (isDish) {
       const prepItems: FlatPrepItem[] = (raw || [])
         .filter((r: { preparation_name?: string }) => !!r?.preparation_name?.trim())
-        .map((r: { preparation_name?: string; category_name?: string; main_category_name?: string; quantity?: number | string; unit?: string }) => {
-          const qty = typeof r.quantity === 'number' ? r.quantity : (Number(r.quantity) || 1)
-          const item: FlatPrepItem = {
-            preparation_name: r.preparation_name ?? '',
-            category_name: r.category_name ?? '',
-            quantity: qty,
-            unit: r.unit ?? 'unit'
+        .map(
+          (r: {
+            preparation_name?: string
+            category_name?: string
+            main_category_name?: string
+            quantity?: number | string
+            unit?: string
+          }) => {
+            const qty = typeof r.quantity === 'number' ? r.quantity : Number(r.quantity) || 1
+            const item: FlatPrepItem = {
+              preparation_name: r.preparation_name ?? '',
+              category_name: r.category_name ?? '',
+              quantity: qty,
+              unit: r.unit ?? 'unit'
+            }
+            if (r.main_category_name !== undefined && r.main_category_name !== '') {
+              item.main_category_name = r.main_category_name
+            }
+            return item
           }
-          if (r.main_category_name !== undefined && r.main_category_name !== '') {
-            item.main_category_name = r.main_category_name
-          }
-          return item
-        })
+        )
       const byCategory = new Map<string, { item_name: string; unit: string; quantity?: number }[]>()
-      prepItems.forEach(p => {
+      prepItems.forEach((p) => {
         const list = byCategory.get(p.category_name) ?? []
         list.push({ item_name: p.preparation_name, unit: p.unit, quantity: p.quantity })
         byCategory.set(p.category_name, list)
       })
       const prepCategories: PrepCategory[] = Array.from(byCategory.entries()).map(([category_name, items]) => ({
         category_name,
-        items: items.map(it => ({ item_name: it.item_name, unit: it.unit }))
+        items: items.map((it) => ({ item_name: it.item_name, unit: it.unit }))
       }))
-      this.recipe_.update(r => ({
-        ...r,
-        prep_items_: prepItems,
-        prep_categories_: prepCategories
-      } as Recipe))
+      this.recipe_.update(
+        (r) =>
+          ({
+            ...r,
+            prep_items_: prepItems,
+            prep_categories_: prepCategories
+          }) as Recipe
+      )
     } else {
       const steps: RecipeStep[] = (raw || [])
         .filter((s: { instruction?: string }) => !!s?.instruction?.trim())
-        .map((step: { order?: number; instruction?: string; labor_time?: number; cooking_time?: number }, i: number) => ({
-          order_: step?.order ?? i + 1,
-          instruction_: step?.instruction ?? '',
-          labor_time_minutes_: step?.labor_time ?? 0,
-          cooking_time_secs_: step?.cooking_time ?? 0
-        }))
-      this.recipe_.update(r => ({ ...r, steps_: steps.length ? steps : [] } as Recipe))
+        .map(
+          (step: { order?: number; instruction?: string; labor_time?: number; cooking_time?: number }, i: number) => ({
+            order_: step?.order ?? i + 1,
+            instruction_: step?.instruction ?? '',
+            labor_time_minutes_: step?.labor_time ?? 0,
+            cooking_time_secs_: step?.cooking_time ?? 0
+          })
+        )
+      this.recipe_.update((r) => ({ ...r, steps_: steps.length ? steps : [] }) as Recipe)
     }
   }
 

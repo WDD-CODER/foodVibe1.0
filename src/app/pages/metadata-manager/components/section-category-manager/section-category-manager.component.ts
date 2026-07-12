@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core'
+import { Component, inject, OnInit, signal } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { MenuSectionCategoriesService } from '@services/menu-section-categories.service'
@@ -16,7 +16,7 @@ import { AuthModalService } from '@services/auth-modal.service'
   templateUrl: './section-category-manager.component.html',
   styleUrl: './section-category-manager.component.scss'
 })
-export class SectionCategoryManagerComponent {
+export class SectionCategoryManagerComponent implements OnInit {
   private readonly sectionCategories = inject(MenuSectionCategoriesService)
   private readonly menuEventData = inject(MenuEventDataService)
   private readonly confirmModal = inject(ConfirmModalService)
@@ -27,6 +27,11 @@ export class SectionCategoryManagerComponent {
 
   protected readonly categories_ = this.sectionCategories.sectionCategories_
   protected readonly editingName_ = signal<string | null>(null)
+
+  ngOnInit(): void {
+    void this.sectionCategories.ensureLoaded()
+    void this.menuEventData.ensureLoaded()
+  }
 
   private requireSignIn(): boolean {
     if (this.isLoggedIn()) return true

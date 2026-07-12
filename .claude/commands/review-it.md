@@ -20,8 +20,7 @@ You are the Reviewer. Follow CLAUDE.md. Report findings; never silently fix; nev
    - **Verify command**: Run the milestone's declared Verify command (usually `ng lint` and/or targeted build). Record exit code.
 
 4. **Security-sensitive?** If the milestone touches auth, guards, interceptors, or `server/middleware`:
-   - Invoke `security-officer` subagent for an additional pass
-   - For complex milestones needing both QA + security: invoke `team-leader` (allowlisted to those two only)
+   - Rely on pre-commit security grep + CI security workflow; judgment-only review remains in this command
 
 5. **Verdict** — Output:
 

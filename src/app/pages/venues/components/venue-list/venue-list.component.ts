@@ -100,11 +100,12 @@ export class VenueListComponent implements OnInit, OnDestroy {
 
     afterNextRender(() => {
       const q = window.matchMedia('(max-width: 768px)')
-      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); })
+      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false) })
     })
   }
 
   ngOnInit(): void {
+    void this.venueData.ensureLoaded()
     this.heroFab.setPageActions(
       [{ labelKey: 'add_venue', icon: 'plus', run: () => this.onAddPlace() }],
       'replace'

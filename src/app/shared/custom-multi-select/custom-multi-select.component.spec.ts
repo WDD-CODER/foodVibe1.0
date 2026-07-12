@@ -44,7 +44,7 @@ describe('CustomMultiSelectComponent', () => {
 
   it('should emit valueChange when option is added', () => {
     let emitted: string[] | undefined
-    component.valueChange.subscribe((v: string[]) => { emitted = v; })
+    component.valueChange.subscribe((v: string[]) => { emitted = v })
     component.writeValue([])
     fixture.detectChanges();
     (component as unknown as { addOption: (v: string) => void }).addOption('a')

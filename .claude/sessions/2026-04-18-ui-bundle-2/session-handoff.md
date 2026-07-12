@@ -1,10 +1,10 @@
-# Session Handoff
+﻿# Session Handoff
 
 ## Session ID
 2026-04-18-ui-bundle-2
 
 ## Status
-COMPLETE (1 criterion deferred: .kpi-delta — no trend data service)
+COMPLETE (1 criterion deferred: .kpi-delta â€” no trend data service)
 
 ## Note
 This session (Plan 274) was executed back-to-back with sessions 2026-04-18-design-modernization (Plan 273) and 2026-04-18-hebrew-font-rtl (Plan 275). All three sessions' code was committed to branch feat/session-20260417 in the same push sequence.
@@ -22,4 +22,4 @@ Full evaluation report is in:
 
 ---
 Generated: 2026-04-19
-Agent: end-of-session-agent
+Agent: /ship

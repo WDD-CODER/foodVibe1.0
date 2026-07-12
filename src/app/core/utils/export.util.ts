@@ -21,7 +21,7 @@ export const EXPORT_HEADER_HE: Record<string, string> = {
   amount: 'כמות',
   unit: "יח' מידה",
   unit_price: 'מחיר ליחידה',
-  line_total: "סה״כ שורה",
+  line_total: 'סה״כ שורה',
   prep_item: 'פריט הכנה',
   quantity: 'כמות',
   dish: 'מנה',

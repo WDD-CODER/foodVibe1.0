@@ -39,18 +39,16 @@ export class UnitCreatorModal {
   }
 
   netUnitCost = input<number>(0)
-  unitSaved = output<{ symbol: string, rate: number }>()
+  unitSaved = output<{ symbol: string; rate: number }>()
   closed = output<void>()
 
   // Technical Keys for logic
   newUnitName_ = signal('')
   newUnitValue_ = signal(1)
-  basisUnit_ = signal<string>(''); // 🛠️ REFACTORED: Use technical key 'gram'
+  basisUnit_ = signal<string>('') // 🛠️ REFACTORED: Use technical key 'gram'
 
   protected basisOptions_ = this.unitRegistryService.allUnitKeys_
-  protected basisUnitOptions_ = computed(() =>
-    this.basisOptions_().map((k) => ({ value: k, label: k }))
-  )
+  protected basisUnitOptions_ = computed(() => this.basisOptions_().map((k) => ({ value: k, label: k })))
 
   private readonly saving = useSavingState()
   protected readonly isSaving_ = this.saving.isSaving_
@@ -75,7 +73,7 @@ export class UnitCreatorModal {
         }
         this.unitRegistryService.closeUnitCreator()
         this.resetFields()
-      } catch (err) {
+      } catch {
         this.errorMessage_.set('unit_save_error')
       }
     })
@@ -90,7 +88,7 @@ export class UnitCreatorModal {
     this.errorMessage_.set(null)
     this.newUnitName_.set('')
     this.newUnitValue_.set(1)
-    this.basisUnit_.set(''); // 🛠️ REFACTORED: Use technical key 'gram'
+    this.basisUnit_.set('') // 🛠️ REFACTORED: Use technical key 'gram'
   }
 
   resetAndClose() {

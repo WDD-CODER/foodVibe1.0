@@ -15,12 +15,33 @@ export class MenuEventDataService {
   private readonly eventsStore_ = signal<MenuEvent[]>([])
   readonly allMenuEvents_ = this.eventsStore_.asReadonly()
 
+  private loaded_ = false
+  private loadPromise_: Promise<void> | null = null
+
   constructor() {
-    this.loadInitialData().catch(() => {})
+    // Deferred: load on ensureLoaded() via menu-library / menu-intelligence / metadata routes.
+  }
+
+  hasLoaded(): boolean {
+    return this.loaded_
+  }
+
+  async ensureLoaded(): Promise<void> {
+    if (this.loaded_) return
+    if (this.loadPromise_) return this.loadPromise_
+    this.loadPromise_ = this.loadInitialData()
+      .catch(() => {})
+      .finally(() => {
+        this.loaded_ = true
+        this.loadPromise_ = null
+      })
+    return this.loadPromise_
   }
 
   async reloadFromStorage(): Promise<void> {
-    await this.loadInitialData()
+    this.loaded_ = false
+    this.loadPromise_ = null
+    await this.ensureLoaded()
   }
 
   private async loadInitialData(): Promise<void> {

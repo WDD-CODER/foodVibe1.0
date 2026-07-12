@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core'
+import { Injectable, Injector, inject } from '@angular/core'
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http'
 import { catchError, firstValueFrom, of } from 'rxjs'
 import { environment } from '../../../environments/environment'
@@ -28,6 +28,9 @@ const TOKEN_KEY = 'fv_token'
  * Drop-in replacement: StorageService injects this when environment.useBackend is true.
  * No data-service files need to change — only StorageService's delegation logic.
  *
+ * HttpClient is resolved lazily so constructing StorageService in unit tests
+ * (environment.useBackend === false) does not require an HttpClient provider.
+ *
  * Endpoints:
  *   query        → GET    /api/v1/data/:entityType
  *   get          → GET    /api/v1/data/:entityType/:id
@@ -36,11 +39,17 @@ const TOKEN_KEY = 'fv_token'
  *   remove       → DELETE /api/v1/data/:entityType/:id
  *   appendExisting → POST /api/v1/data/:entityType        (body already has _id)
  *   replaceAll   → PUT    /api/v1/data/:entityType        (body is full array, no :id segment)
+ *   queryFiltered → GET   /api/v1/data/:entityType?filterEntityType=&filterEntityId=
+ *   deleteBulk   → DELETE /api/v1/data/:entityType/bulk   (body: { ids })
  */
 @Injectable({ providedIn: 'root' })
 export class HttpStorageAdapter {
-  private http = inject(HttpClient)
+  private readonly injector_ = inject(Injector)
   private base = environment.apiUrl
+
+  private get http(): HttpClient {
+    return this.injector_.get(HttpClient)
+  }
 
   // ---------------------------------------------------------------------------
   // Token helper
@@ -48,9 +57,7 @@ export class HttpStorageAdapter {
 
   private headers(): HttpHeaders {
     const token = sessionStorage.getItem(TOKEN_KEY)
-    return token
-      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
-      : new HttpHeaders()
+    return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders()
   }
 
   // ---------------------------------------------------------------------------
@@ -68,10 +75,43 @@ export class HttpStorageAdapter {
     )
   }
 
+  /**
+   * Returns entities of a given type filtered by document entityType/entityId fields
+   * (e.g. VERSION_HISTORY scoped to one recipe/dish/product).
+   */
+  async queryFiltered<T>(entityType: string, filterEntityType: string, filterEntityId: string): Promise<T[]> {
+    const params = new URLSearchParams({
+      filterEntityType,
+      filterEntityId
+    })
+    return firstValueFrom(
+      this.http.get<T[]>(`${this.base}/api/v1/data/${entityType}?${params.toString()}`, {
+        headers: this.headers(),
+        withCredentials: true
+      })
+    )
+  }
+
+  /**
+   * Deletes many entities by _id in one request (user-scoped on the server).
+   */
+  async deleteBulk(entityType: string, ids: string[]): Promise<void> {
+    await firstValueFrom(
+      this.http.delete<unknown>(`${this.base}/api/v1/data/${entityType}/bulk`, {
+        headers: this.headers(),
+        withCredentials: true,
+        body: { ids }
+      })
+    )
+  }
+
   /** Returns one entity by id. Throws if not found (404 → HttpErrorResponse). */
   async get<T extends EntityId>(entityType: string, entityId: string): Promise<T> {
     return firstValueFrom(
-      this.http.get<T>(`${this.base}/api/v1/data/${entityType}/${entityId}`, { headers: this.headers(), withCredentials: true })
+      this.http.get<T>(`${this.base}/api/v1/data/${entityType}/${entityId}`, {
+        headers: this.headers(),
+        withCredentials: true
+      })
     )
   }
 
@@ -82,25 +122,30 @@ export class HttpStorageAdapter {
   async post<T>(entityType: string, newEntity: T): Promise<T & EntityId> {
     const entityWithId = { ...(newEntity as object), _id: this.makeId() } as T & EntityId
     return firstValueFrom(
-      this.http.post<T & EntityId>(`${this.base}/api/v1/data/${entityType}`, entityWithId, { headers: this.headers(), withCredentials: true })
+      this.http.post<T & EntityId>(`${this.base}/api/v1/data/${entityType}`, entityWithId, {
+        headers: this.headers(),
+        withCredentials: true
+      })
     )
   }
 
   /** Updates one entity. Uses updatedEntity._id as the path parameter. */
   async put<T extends EntityId>(entityType: string, updatedEntity: T): Promise<T> {
     return firstValueFrom(
-      this.http.put<T>(
-        `${this.base}/api/v1/data/${entityType}/${updatedEntity._id}`,
-        updatedEntity,
-        { headers: this.headers(), withCredentials: true }
-      )
+      this.http.put<T>(`${this.base}/api/v1/data/${entityType}/${updatedEntity._id}`, updatedEntity, {
+        headers: this.headers(),
+        withCredentials: true
+      })
     )
   }
 
   /** Removes one entity by id. */
   async remove(entityType: string, entityId: string): Promise<void> {
     await firstValueFrom(
-      this.http.delete<void>(`${this.base}/api/v1/data/${entityType}/${entityId}`, { headers: this.headers(), withCredentials: true })
+      this.http.delete<void>(`${this.base}/api/v1/data/${entityType}/${entityId}`, {
+        headers: this.headers(),
+        withCredentials: true
+      })
     )
   }
 
@@ -124,11 +169,18 @@ export class HttpStorageAdapter {
    */
   async appendExisting<T extends EntityId>(entityType: string, entity: T): Promise<void> {
     await firstValueFrom(
-      this.http.post<unknown>(`${this.base}/api/v1/data/${entityType}`, entity, { headers: this.headers(), withCredentials: true }).pipe(
-        // 409 = item already exists in the target collection (e.g. already in trash from a
-        // prior attempt). The goal of appendExisting is "make sure it's there" — treat as success.
-        catchError((err: HttpErrorResponse) => err.status === 409 ? of(null) : new Promise((_, reject) => reject(err)))
-      )
+      this.http
+        .post<unknown>(`${this.base}/api/v1/data/${entityType}`, entity, {
+          headers: this.headers(),
+          withCredentials: true
+        })
+        .pipe(
+          // 409 = item already exists in the target collection (e.g. already in trash from a
+          // prior attempt). The goal of appendExisting is "make sure it's there" — treat as success.
+          catchError((err: HttpErrorResponse) =>
+            err.status === 409 ? of(null) : new Promise((_, reject) => reject(err))
+          )
+        )
     )
   }
 
@@ -138,11 +190,10 @@ export class HttpStorageAdapter {
    */
   async replaceAll<T>(entityType: string, entities: T[]): Promise<void> {
     await firstValueFrom(
-      this.http.put<unknown>(
-        `${this.base}/api/v1/data/${entityType}`,
-        entities,
-        { headers: this.headers().set('X-Confirm-Replace', 'true'), withCredentials: true }
-      )
+      this.http.put<unknown>(`${this.base}/api/v1/data/${entityType}`, entities, {
+        headers: this.headers().set('X-Confirm-Replace', 'true'),
+        withCredentials: true
+      })
     )
   }
 }

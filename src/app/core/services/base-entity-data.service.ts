@@ -10,23 +10,54 @@ import { LoggingService } from './logging.service'
  *  - support reload from storage
  *
  * Subclasses provide the storage key and may alias `all_` under an entity-specific name.
+ * Pass `autoLoad: false` to defer the initial network fetch until `ensureLoaded()`
+ * (e.g. route resolver / first page visit).
  */
 export abstract class BaseEntityDataService<T> {
   protected readonly storage = inject(StorageService)
   protected readonly logging = inject(LoggingService)
 
   private readonly store_ = signal<T[]>([])
+  private loaded_ = false
+  private loadPromise_: Promise<void> | null = null
 
   /** Read-only view of the entity list. Subclasses may alias this under a domain name. */
   readonly all_: Signal<T[]> = this.store_.asReadonly()
 
-  constructor(private readonly storageKey: string) {
-    this.loadInitialData().catch(() => {})
+  constructor(
+    private readonly storageKey: string,
+    autoLoad = true
+  ) {
+    if (autoLoad) {
+      void this.ensureLoaded()
+    }
+  }
+
+  /** True after at least one successful (or attempted) hydrate. */
+  hasLoaded(): boolean {
+    return this.loaded_
+  }
+
+  /**
+   * Loads from storage once. Safe to call repeatedly — concurrent callers share one promise.
+   */
+  async ensureLoaded(): Promise<void> {
+    if (this.loaded_) return
+    if (this.loadPromise_) return this.loadPromise_
+    this.loadPromise_ = this.loadInitialData()
+      .catch(() => {})
+      .finally(() => {
+        this.loaded_ = true
+        this.loadPromise_ = null
+      })
+    return this.loadPromise_
   }
 
   /** Re-read from storage and refresh the signal (e.g. after demo data load). */
   async reloadFromStorage(): Promise<void> {
-    await this.loadInitialData()
+    this.loaded_ = false
+    this.loadPromise_ = null
+    await this.ensureLoaded()
   }
 
   protected setItems(items: T[]): void {

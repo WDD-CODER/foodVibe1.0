@@ -28,8 +28,11 @@ export class UserService {
   private userMsgService = inject(UserMsgService)
   private storageService = inject(StorageService)
   private logging = inject(LoggingService)
-  private http = inject(HttpClient)
   private injector = inject(Injector)
+
+  private get http(): HttpClient {
+    return this.injector.get(HttpClient)
+  }
 
   private authBase = environment.authApiUrl
 
@@ -54,17 +57,31 @@ export class UserService {
     this._isDataReloading_.set(true)
     try {
       await Promise.all([
-        import('./unit-registry.service').then(m => this.injector.get(m.UnitRegistryService).reloadFromStorage()),
-        import('./product-data.service').then(m => this.injector.get(m.ProductDataService).reloadFromStorage()),
-        import('./metadata-registry.service').then(m => this.injector.get(m.MetadataRegistryService).reloadFromStorage()),
-        import('./recipe-data.service').then(m => this.injector.get(m.RecipeDataService).reloadFromStorage()),
-        import('./dish-data.service').then(m => this.injector.get(m.DishDataService).reloadFromStorage()),
-        import('./supplier-data.service').then(m => this.injector.get(m.SupplierDataService).reloadFromStorage()),
-        import('./equipment-data.service').then(m => this.injector.get(m.EquipmentDataService).reloadFromStorage()),
-        import('./venue-data.service').then(m => this.injector.get(m.VenueDataService).reloadFromStorage()),
-        import('./menu-event-data.service').then(m => this.injector.get(m.MenuEventDataService).reloadFromStorage()),
-        import('./menu-section-categories.service').then(m => this.injector.get(m.MenuSectionCategoriesService).reloadFromStorage()),
-        import('./preparation-registry.service').then(m => this.injector.get(m.PreparationRegistryService).reloadFromStorage()),
+        import('./unit-registry.service').then((m) => this.injector.get(m.UnitRegistryService).reloadFromStorage()),
+        import('./product-data.service').then((m) => this.injector.get(m.ProductDataService).reloadFromStorage()),
+        import('./metadata-registry.service').then((m) =>
+          this.injector.get(m.MetadataRegistryService).reloadFromStorage()
+        ),
+        import('./recipe-data.service').then((m) => this.injector.get(m.RecipeDataService).reloadFromStorage()),
+        import('./dish-data.service').then((m) => this.injector.get(m.DishDataService).reloadFromStorage()),
+        import('./supplier-data.service').then((m) => this.injector.get(m.SupplierDataService).reloadFromStorage()),
+        import('./equipment-data.service').then((m) => this.injector.get(m.EquipmentDataService).reloadFromStorage()),
+        // Deferred services: only rehydrate if already loaded this session (avoid bootstrap GETs).
+        import('./venue-data.service').then((m) => {
+          const s = this.injector.get(m.VenueDataService)
+          return s.hasLoaded() ? s.reloadFromStorage() : Promise.resolve()
+        }),
+        import('./menu-event-data.service').then((m) => {
+          const s = this.injector.get(m.MenuEventDataService)
+          return s.hasLoaded() ? s.reloadFromStorage() : Promise.resolve()
+        }),
+        import('./menu-section-categories.service').then((m) => {
+          const s = this.injector.get(m.MenuSectionCategoriesService)
+          return s.hasLoaded() ? s.reloadFromStorage() : Promise.resolve()
+        }),
+        import('./preparation-registry.service').then((m) =>
+          this.injector.get(m.PreparationRegistryService).reloadFromStorage()
+        )
       ])
     } finally {
       this._isDataReloading_.set(false)
@@ -81,7 +98,7 @@ export class UserService {
           // Refresh failed (cookie expired or absent) — clear any stale session state.
           this._saveUserLocal(null)
           this.clearToken()
-        },
+        }
       })
     }
   }
@@ -108,33 +125,24 @@ export class UserService {
 
   /** Public — auth interceptor calls this on 401 to silently refresh the access token. */
   callBackendRefresh(): Observable<{ token: string }> {
-    return this.http.post<{ token: string }>(
-      `${this.authBase}/api/v1/auth/refresh`,
-      {},
-      { withCredentials: true }
-    )
+    return this.http.post<{ token: string }>(`${this.authBase}/api/v1/auth/refresh`, {}, { withCredentials: true })
   }
 
   private callBackendLogin(name: string, password: string): Observable<{ token: string; user: User }> {
-    return this.http.post<{ token: string; user: User }>(
-      `${this.authBase}/api/v1/auth/login`,
-      { name, password }
-    )
+    return this.http.post<{ token: string; user: User }>(`${this.authBase}/api/v1/auth/login`, { name, password })
   }
 
   private callBackendSignup(newUser: User, hashedPassword: string): Observable<{ token: string; user: User }> {
-    return this.http.post<{ token: string; user: User }>(
-      `${this.authBase}/api/v1/auth/signup`,
-      { name: newUser.name, email: newUser.email, imgUrl: newUser.imgUrl, password: hashedPassword }
-    )
+    return this.http.post<{ token: string; user: User }>(`${this.authBase}/api/v1/auth/signup`, {
+      name: newUser.name,
+      email: newUser.email,
+      imgUrl: newUser.imgUrl,
+      password: hashedPassword
+    })
   }
 
   private callBackendLogout(): Observable<void> {
-    return this.http.post<void>(
-      `${this.authBase}/api/v1/auth/logout`,
-      {},
-      { withCredentials: true }
-    )
+    return this.http.post<void>(`${this.authBase}/api/v1/auth/logout`, {}, { withCredentials: true })
   }
 
   private callBackendGuestLogin(): Observable<{ token: string; user: User }> {
@@ -199,7 +207,7 @@ export class UserService {
   public signup(newUser: User, password: string) {
     if (environment.useBackendAuth) {
       return from(hashPassword(password)).pipe(
-        switchMap(hashedPassword => this.callBackendSignup(newUser, hashedPassword)),
+        switchMap((hashedPassword) => this.callBackendSignup(newUser, hashedPassword)),
         tap(({ token, user }) => {
           this.storeToken(token)
           this._saveUserLocal(user)
@@ -219,12 +227,12 @@ export class UserService {
     }
 
     return from(this.storageService.query<StoredUser>(SIGNED_USERS)).pipe(
-      map(users => users.find(u => u.name === newUser.name)),
-      switchMap(existing =>
+      map((users) => users.find((u) => u.name === newUser.name)),
+      switchMap((existing) =>
         existing
           ? throwError(() => new Error('USERNAME_TAKEN'))
           : from(hashPassword(password)).pipe(
-              switchMap(passwordHash =>
+              switchMap((passwordHash) =>
                 from(
                   this.storageService.post(SIGNED_USERS, {
                     name: newUser.name,
@@ -237,7 +245,7 @@ export class UserService {
               )
             )
       ),
-      tap(stored => {
+      tap((stored) => {
         const user = this._toUser(stored)
         this.userMsgService.onSetSuccessMsg('Signup Successfully ')
         this._saveUserLocal(user)
@@ -284,18 +292,22 @@ export class UserService {
     }
 
     return from(this.storageService.query<StoredUser>(SIGNED_USERS)).pipe(
-      map(users => users.find(u => u.name === name)),
-      switchMap(stored => {
+      map((users) => users.find((u) => u.name === name)),
+      switchMap((stored) => {
         if (!stored) {
           this.logging.warn({ event: 'auth.login.failure', message: 'Login failed: user not found', context: {} })
           return throwError(() => new Error('USER_NOT_FOUND'))
         }
         if (!stored.passwordHash) {
-          this.logging.warn({ event: 'auth.login.failure', message: 'Login failed: no password hash on record', context: {} })
+          this.logging.warn({
+            event: 'auth.login.failure',
+            message: 'Login failed: no password hash on record',
+            context: {}
+          })
           return throwError(() => new Error('USER_NOT_FOUND'))
         }
         return from(verifyPassword(password, stored.passwordHash)).pipe(
-          switchMap(ok => {
+          switchMap((ok) => {
             if (!ok) {
               this.logging.warn({ event: 'auth.login.failure', message: 'Login failed: invalid password', context: {} })
               return throwError(() => new Error('USER_NOT_FOUND'))
@@ -333,7 +345,9 @@ export class UserService {
     try {
       const raw = sessionStorage.getItem(SESSION_USER_KEY)
       return raw ? JSON.parse(raw) : null
-    } catch { return null; }
+    } catch {
+      return null
+    }
   }
 
   private _saveUserToSession(user: User | null): void {

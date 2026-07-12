@@ -6,7 +6,7 @@ import { TranslationService } from './translation.service'
 import { KeyResolutionService } from './key-resolution.service'
 import { LoggingService } from './logging.service'
 import { DishDataService } from './dish-data.service'
-import type { Recipe, FlatPrepItem, PrepCategory } from '../models/recipe.model'
+import type { FlatPrepItem, PrepCategory } from '../models/recipe.model'
 
 const STORAGE_KEY = 'KITCHEN_PREPARATIONS'
 
@@ -68,7 +68,11 @@ export class PreparationRegistryService {
       }
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.logging.error({ event: 'crud.preparations.load_error', message: 'Failed to load preparation registry', context: { err } })
+      this.logging.error({
+        event: 'crud.preparations.load_error',
+        message: 'Failed to load preparation registry',
+        context: { err }
+      })
     }
   }
 
@@ -104,7 +108,11 @@ export class PreparationRegistryService {
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
       this.userMsgService.onSetErrorMsg('שגיאה בשמירת הקטגוריה')
-      this.logging.error({ event: 'crud.preparations.category.save_error', message: 'Preparation category save error', context: { err } })
+      this.logging.error({
+        event: 'crud.preparations.category.save_error',
+        message: 'Preparation category save error',
+        context: { err }
+      })
     }
   }
 
@@ -123,10 +131,9 @@ export class PreparationRegistryService {
       const items = dish.prep_items_
       if (!items?.length) continue
       let changed = false
-      const updatedItems: FlatPrepItem[] = items.map(p => {
+      const updatedItems: FlatPrepItem[] = items.map((p) => {
         const match =
-          p.preparation_name.trim().toLowerCase() === nameLower &&
-          (p.category_name?.trim() ?? '') === oldCategory
+          p.preparation_name.trim().toLowerCase() === nameLower && (p.category_name?.trim() ?? '') === oldCategory
         if (!match) return p
         changed = true
         return {
@@ -137,7 +144,7 @@ export class PreparationRegistryService {
       })
       if (!changed) continue
       const byCategory = new Map<string, { item_name: string; unit: string; quantity?: number }[]>()
-      updatedItems.forEach(p => {
+      updatedItems.forEach((p) => {
         const list = byCategory.get(p.category_name) ?? []
         list.push({
           item_name: p.preparation_name,
@@ -146,12 +153,10 @@ export class PreparationRegistryService {
         })
         byCategory.set(p.category_name, list)
       })
-      const prepCategories: PrepCategory[] = Array.from(byCategory.entries()).map(
-        ([category_name, items]) => ({
-          category_name,
-          items: items.map(it => ({ item_name: it.item_name, unit: it.unit }))
-        })
-      )
+      const prepCategories: PrepCategory[] = Array.from(byCategory.entries()).map(([category_name, items]) => ({
+        category_name,
+        items: items.map((it) => ({ item_name: it.item_name, unit: it.unit }))
+      }))
       await this.dishDataService.updateDish({
         ...dish,
         prep_items_: updatedItems,
@@ -163,7 +168,7 @@ export class PreparationRegistryService {
   /** Returns the first matching preparation by name (case-insensitive). */
   getPreparationByName(name: string): PreparationEntry | undefined {
     const q = name.trim().toLowerCase()
-    return this.preparations_().find(p => p.name.toLowerCase() === q)
+    return this.preparations_().find((p) => p.name.toLowerCase() === q)
   }
 
   /** Updates a preparation's category in the registry. */
@@ -175,14 +180,12 @@ export class PreparationRegistryService {
   ): Promise<void> {
     const preps = this.preparations_()
     const idx = preps.findIndex(
-      p => p.name.toLowerCase() === name.trim().toLowerCase() && p.category === oldCategory.trim()
+      (p) => p.name.toLowerCase() === name.trim().toLowerCase() && p.category === oldCategory.trim()
     )
     if (idx < 0) return
 
     const sanitizedNew = newCategory.trim().toLowerCase().replace(/\s+/g, '_')
-    const updated = preps.map((p, i) =>
-      i === idx ? { ...p, category: sanitizedNew } : p
-    )
+    const updated = preps.map((p, i) => (i === idx ? { ...p, category: sanitizedNew } : p))
 
     try {
       const registries = await this.storageService.query<PreparationRegistryDoc>(STORAGE_KEY)
@@ -202,26 +205,30 @@ export class PreparationRegistryService {
         await this.propagateCategoryToDishes(name.trim(), oldCategory.trim(), sanitizedNew)
         const onRevert = options?.onRevert
         const undo = () =>
-          this.updatePreparationCategory(name, sanitizedNew, oldCategory, { silent: true }).then(
-            () => onRevert?.()
-          )
+          this.updatePreparationCategory(name, sanitizedNew, oldCategory, { silent: true }).then(() => onRevert?.())
         this.userMsgService.onSetSuccessMsgWithUndo(`ההכנה "${name}" עודכנה בהצלחה`, undo)
       }
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
       this.userMsgService.onSetErrorMsg('שגיאה בעדכון ההכנה')
-      this.logging.error({ event: 'crud.preparations.update_error', message: 'Preparation update error', context: { err } })
+      this.logging.error({
+        event: 'crud.preparations.update_error',
+        message: 'Preparation update error',
+        context: { err }
+      })
     }
   }
 
   async deleteCategory(key: string): Promise<void> {
     const trimmed = key.trim().toLowerCase()
-    const updated = this.categories_().filter(c => c !== trimmed)
+    const updated = this.categories_().filter((c) => c !== trimmed)
     if (updated.length === this.categories_().length) return
     try {
       const registries = await this.storageService.query<PreparationRegistryDoc>(STORAGE_KEY)
       const doc = registries[0]
-      const payload: PreparationRegistryDoc = doc ? { ...doc, categories: updated } : { categories: updated, preparations: [] }
+      const payload: PreparationRegistryDoc = doc
+        ? { ...doc, categories: updated }
+        : { categories: updated, preparations: [] }
       if (doc?._id) {
         await this.storageService.put(STORAGE_KEY, { ...payload, _id: doc._id })
       } else {
@@ -231,17 +238,19 @@ export class PreparationRegistryService {
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
       this.userMsgService.onSetErrorMsg('שגיאה במחיקת הקטגוריה')
-      this.logging.error({ event: 'crud.preparations.category.delete_error', message: 'Preparation category delete error', context: { err } })
+      this.logging.error({
+        event: 'crud.preparations.category.delete_error',
+        message: 'Preparation category delete error',
+        context: { err }
+      })
     }
   }
 
   async renameCategory(oldKey: string, newKey: string, newLabel: string): Promise<void> {
     const sanitizedNew = newKey.trim().toLowerCase().replace(/\s+/g, '_')
     if (!sanitizedNew || sanitizedNew === oldKey) return
-    const updatedCats = this.categories_().map(c => c === oldKey ? sanitizedNew : c)
-    const updatedPreps = this.preparations_().map(p =>
-      p.category === oldKey ? { ...p, category: sanitizedNew } : p
-    )
+    const updatedCats = this.categories_().map((c) => (c === oldKey ? sanitizedNew : c))
+    const updatedPreps = this.preparations_().map((p) => (p.category === oldKey ? { ...p, category: sanitizedNew } : p))
     try {
       const registries = await this.storageService.query<PreparationRegistryDoc>(STORAGE_KEY)
       const doc = registries[0]
@@ -259,7 +268,11 @@ export class PreparationRegistryService {
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
       this.userMsgService.onSetErrorMsg('שגיאה בעדכון הקטגוריה')
-      this.logging.error({ event: 'crud.preparations.category.rename_error', message: 'Preparation category rename error', context: { err } })
+      this.logging.error({
+        event: 'crud.preparations.category.rename_error',
+        message: 'Preparation category rename error',
+        context: { err }
+      })
     }
   }
 
@@ -277,9 +290,7 @@ export class PreparationRegistryService {
     }
 
     const preps = this.preparations_()
-    const exists = preps.some(
-      p => p.name.toLowerCase() === sanitizedName.toLowerCase() && p.category === key
-    )
+    const exists = preps.some((p) => p.name.toLowerCase() === sanitizedName.toLowerCase() && p.category === key)
     if (exists) return
 
     const entry: PreparationEntry = { name: sanitizedName, category: key ?? '' }

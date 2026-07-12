@@ -1,4 +1,14 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core'
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal
+} from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms'
@@ -14,13 +24,19 @@ import { AddItemModalService } from '@services/add-item-modal.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { MenuSectionCategoriesService } from '@services/menu-section-categories.service'
 import { MenuEventTypeService } from '@services/menu-event-type.service'
-import { MenuEvent, MenuSection, ServingType, DEFAULT_DISH_FIELDS, ALL_DISH_FIELDS, type DishFieldKey } from '@models/menu-event.model'
+import {
+  MenuEvent,
+  MenuSection,
+  ServingType,
+  DEFAULT_DISH_FIELDS,
+  ALL_DISH_FIELDS,
+  type DishFieldKey
+} from '@models/menu-event.model'
 import { Recipe } from '@models/recipe.model'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { RecipeCostService } from '@services/recipe-cost.service'
 import { ExportService } from '@services/export.service'
 import { ClickOutSideDirective } from '@directives/click-out-side'
-import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util'
 import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util'
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
@@ -52,11 +68,23 @@ type MenuSectionFormRaw = { _id?: string; name_?: string; items_?: MenuItemForm[
 @Component({
   selector: 'app-menu-intelligence-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, ClickOutSideDirective, ScrollableDropdownComponent, CustomSelectComponent, ExportPreviewComponent, MenuDishRowComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    LucideAngularModule,
+    TranslatePipe,
+    LoaderComponent,
+    ClickOutSideDirective,
+    ScrollableDropdownComponent,
+    CustomSelectComponent,
+    ExportPreviewComponent,
+    MenuDishRowComponent
+  ],
   templateUrl: './menu-intelligence.page.html',
   styleUrl: './menu-intelligence.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [MenuAiFlowService],
+  providers: [MenuAiFlowService]
 })
 export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder)
@@ -103,7 +131,11 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   /** Currently active dish search (for keyboard nav); null when none focused/has query. */
   protected readonly activeDishSearch_ = signal<{ sectionIndex: number; itemIndex: number } | null>(null)
   /** Dish row being edited (for restoring recipe_id_ on cancel). */
-  protected readonly editingDishAt_ = signal<{ sectionIndex: number; itemIndex: number; previousRecipeId: string } | null>(null)
+  protected readonly editingDishAt_ = signal<{
+    sectionIndex: number
+    itemIndex: number
+    previousRecipeId: string
+  } | null>(null)
 
   /** Highlighted index for keyboard nav in dropdowns (-1 = none). */
   protected readonly eventTypeHighlightedIndex_ = signal(0)
@@ -123,7 +155,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     event_date_: [new Date().toISOString().slice(0, 10)],
     serving_type_: ['plated_course' as ServingType, Validators.required],
     guest_count_: [50, [Validators.required, Validators.min(0)]],
-    sections_: this.fb.array<FormGroup>([]),
+    sections_: this.fb.array<FormGroup>([])
   })
 
   /** Inline-edit state for metadata fields */
@@ -143,13 +175,13 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected readonly FOCUS_ORDER = ['name_', 'event_type_', 'serving_type_', 'guest_count_', 'event_date_'] as const
 
   protected readonly eventCost_ = computed(() => {
-    this.formValueVersion_(); // depend on form changes
+    this.formValueVersion_() // depend on form changes
     const event = this.buildEventFromForm()
     return this.menuIntelligence.computeEventIngredientCost(event)
   })
 
   protected readonly foodCostPct_ = computed(() => {
-    this.formValueVersion_(); // depend on form changes
+    this.formValueVersion_() // depend on form changes
     const revenue = this.totalRevenue_()
     const cost = this.eventCost_()
     if (revenue <= 0) return 0
@@ -157,7 +189,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   })
 
   protected readonly totalRevenue_ = computed(() => {
-    this.formValueVersion_(); // depend on form changes
+    this.formValueVersion_() // depend on form changes
     const guestCount = Number(this.form_.get('guest_count_')?.value ?? 0)
     let total = 0
     const sections = this.sectionsArray
@@ -174,18 +206,16 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   })
 
   protected readonly costPerGuest_ = computed(() => {
-    this.formValueVersion_(); // depend on form changes
+    this.formValueVersion_() // depend on form changes
     const guestCount = this.getGuestCount()
     if (guestCount <= 0) return 0
     return this.eventCost_() / guestCount
   })
 
-  protected readonly menuTypeOptions_ = computed(() =>
-    this.metadataRegistry.allMenuTypes_().map(t => t.key)
-  )
+  protected readonly menuTypeOptions_ = computed(() => this.metadataRegistry.allMenuTypes_().map((t) => t.key))
 
   protected readonly servingTypeOptions_ = computed(() =>
-    this.menuTypeOptions_().map(key => ({ value: key, label: key }))
+    this.menuTypeOptions_().map((key) => ({ value: key, label: key }))
   )
 
   protected readonly activeMenuTypeFields_ = computed((): DishFieldKey[] => {
@@ -193,13 +223,13 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     if (!key) return [...DEFAULT_DISH_FIELDS]
     const fields = this.metadataRegistry.getMenuTypeFields(key)
     const all = fields.length > 0 ? fields : [...DEFAULT_DISH_FIELDS]
-    return all.filter(f => f !== 'sell_price')
+    return all.filter((f) => f !== 'sell_price')
   })
 
   constructor() {
     this.form_.valueChanges
       .pipe(startWith(null), takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.formValueVersion_.update(v => v + 1))
+      .subscribe(() => this.formValueVersion_.update((v) => v + 1))
 
     const id = this.route.snapshot.paramMap.get('id')
     if (id) {
@@ -216,7 +246,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     this.heroFab.setPageActions(
       [
         { labelKey: 'ai_menu_open', icon: 'sparkles', run: () => this.openAiMenuModal() },
-        { labelKey: 'menu_toolbar_open', icon: 'printer', run: () => this.openToolbar() },
+        { labelKey: 'menu_toolbar_open', icon: 'printer', run: () => this.openToolbar() }
       ],
       'replace'
     )
@@ -261,9 +291,9 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected focusField(field: string): void {
     const el = document.getElementById(`menu-focus-${field}`)
     if (el && typeof (el as HTMLInputElement).focus === 'function') {
-      (el as HTMLInputElement).focus()
+      ;(el as HTMLInputElement).focus()
       if (field === 'event_date_' && typeof (el as HTMLInputElement).showPicker === 'function') {
-        (el as HTMLInputElement).showPicker()
+        ;(el as HTMLInputElement).showPicker()
       }
     } else if (el) el.focus()
   }
@@ -391,8 +421,10 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   /** Event types: from persisted registry + existing menus */
   protected readonly eventTypeOptions_ = computed(() => {
     const set = new Set<string>()
-    this.menuEventTypeService.allEventTypes_().forEach(t => set.add(t))
-    this.menuEventData.allMenuEvents_().forEach(ev => { if (ev.event_type_) set.add(ev.event_type_); })
+    this.menuEventTypeService.allEventTypes_().forEach((t) => set.add(t))
+    this.menuEventData.allMenuEvents_().forEach((ev) => {
+      if (ev.event_type_) set.add(ev.event_type_)
+    })
     return Array.from(set)
   })
 
@@ -420,7 +452,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected onEventTypeSearchKeydown(e: KeyboardEvent): void {
     const list = this.getFilteredEventTypes()
     const addNewIndex = list.length
-    const maxIndex = addNewIndex; // last option is "add new"
+    const maxIndex = addNewIndex // last option is "add new"
     let idx = this.eventTypeHighlightedIndex_()
 
     if (e.key === 'ArrowDown') {
@@ -484,7 +516,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const target = e.target as HTMLElement
     const tag = target.tagName
     const isTextInput =
-      (tag === 'INPUT' && !['button', 'checkbox', 'radio', 'submit', 'reset'].includes((target as HTMLInputElement).type)) ||
+      (tag === 'INPUT' &&
+        !['button', 'checkbox', 'radio', 'submit', 'reset'].includes((target as HTMLInputElement).type)) ||
       tag === 'TEXTAREA' ||
       target.isContentEditable
 
@@ -492,9 +525,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     // managed dropdown search boxes — prevents the handler from hijacking general keyboard input.
     const el = e.target as Element
     const inManagedDropdown =
-      el.closest('.event-type-dropdown') ||
-      el.closest('.section-search-wrap') ||
-      el.closest('.dish-search-wrap')
+      el.closest('.event-type-dropdown') || el.closest('.section-search-wrap') || el.closest('.dish-search-wrap')
     if (isTextInput && !inManagedDropdown) return
 
     if (el.closest('.event-type-dropdown') && this.eventTypeDropdownOpen_()) {
@@ -530,7 +561,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       title: 'add_new_category',
       label: 'menu_event_type',
       placeholder: 'menu_event_type',
-      saveLabel: 'save',
+      saveLabel: 'save'
     })
     if (result?.trim()) {
       await this.menuEventTypeService.addEventType(result.trim())
@@ -581,7 +612,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
         _id: [crypto.randomUUID()],
         name_: [''],
         sort_order_: [this.sectionsArray.length + 1],
-        items_: this.fb.array<FormGroup>([]),
+        items_: this.fb.array<FormGroup>([])
       })
     )
   }
@@ -605,7 +636,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
         food_cost_money: [0],
         food_cost_pct: [0],
         serving_portions: [1],
-        serving_portions_pct: [0],
+        serving_portions_pct: [0]
       })
     )
     const newItemIndex = items.length - 1
@@ -629,7 +660,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const item = this.getItemsArray(sectionIndex).at(itemIndex)
     const recipeId = item?.get('recipe_id_')?.value as string | undefined
     if (!recipeId) return 0
-    const recipe = this.recipes_().find(r => r._id === recipeId)
+    const recipe = this.recipes_().find((r) => r._id === recipeId)
     if (!recipe) return 0
     const derivedPortions = this.menuIntelligence.derivePortions(
       this.form_.value.serving_type_ as ServingType,
@@ -642,10 +673,10 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const multiplier = derivedPortions / baseYield
     const scaledCost = this.recipeCostService.computeRecipeCost({
       ...recipe,
-      ingredients_: recipe.ingredients_.map(ing => ({
+      ingredients_: recipe.ingredients_.map((ing) => ({
         ...ing,
-        amount_: (ing.amount_ || 0) * multiplier,
-      })),
+        amount_: (ing.amount_ || 0) * multiplier
+      }))
     })
     return Math.round(scaledCost * 100) / 100
   }
@@ -664,7 +695,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   protected toggleDishMeta(sectionIndex: number, itemIndex: number): void {
     const key = this.getDishMetaKey(sectionIndex, itemIndex)
-    this.expandedMetaKeys_.update(set => {
+    this.expandedMetaKeys_.update((set) => {
       const next = new Set(set)
       if (next.has(key)) next.delete(key)
       else next.add(key)
@@ -693,7 +724,6 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       e.preventDefault()
       const s = sectionIndex
       const i = itemIndex
-      const items = this.getItemsArray(s)
       setTimeout(() => {
         if (e.shiftKey) {
           document.getElementById('dish-name-' + s + '-' + i)?.focus()
@@ -711,9 +741,10 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const item = this.getItemsArray(sectionIndex).at(itemIndex)
     const ctrl = item.get('sell_price')
     const v = Number(ctrl?.value ?? 0)
-    const next = e.key === 'ArrowUp'
-      ? quantityIncrement(v, 0, { integerOnly: true })
-      : quantityDecrement(v, 0, { integerOnly: true })
+    const next =
+      e.key === 'ArrowUp'
+        ? quantityIncrement(v, 0, { integerOnly: true })
+        : quantityDecrement(v, 0, { integerOnly: true })
     ctrl?.setValue(next)
   }
 
@@ -726,9 +757,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const v = Number(ctrl.value ?? 0)
     const isPortionField = fieldKey === 'serving_portions' || fieldKey === 'serving_portions_pct'
     const options = isPortionField ? { explicitStep: 0.25 } : { explicitStep: 0.01 }
-    const next = e.key === 'ArrowUp'
-      ? quantityIncrement(v, 0, options)
-      : quantityDecrement(v, 0, options)
+    const next = e.key === 'ArrowUp' ? quantityIncrement(v, 0, options) : quantityDecrement(v, 0, options)
     ctrl.setValue(next)
   }
 
@@ -739,16 +768,16 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected setDishSearchQuery(sectionIndex: number, itemIndex: number, value: string): void {
-    this.dishSearchQueries_.update(q => ({
+    this.dishSearchQueries_.update((q) => ({
       ...q,
-      [this.getDishSearchKey(sectionIndex, itemIndex)]: value,
+      [this.getDishSearchKey(sectionIndex, itemIndex)]: value
     }))
   }
 
   protected onDishSearchQueryChange(sectionIndex: number, itemIndex: number, value: string): void {
     this.setDishSearchQuery(sectionIndex, itemIndex, value)
     const key = this.getDishSearchHighlightKey(sectionIndex, itemIndex)
-    this.dishSearchHighlightedIndex_.update(m => ({ ...m, [key]: 0 }))
+    this.dishSearchHighlightedIndex_.update((m) => ({ ...m, [key]: 0 }))
     if (value.trim().length > 0) {
       this.activeDishSearch_.set({ sectionIndex, itemIndex })
     } else {
@@ -775,16 +804,16 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const multiplier = derivedPortions / baseYield
     const autoCost = this.recipeCostService.computeRecipeCost({
       ...recipe,
-      ingredients_: recipe.ingredients_.map(ing => ({
+      ingredients_: recipe.ingredients_.map((ing) => ({
         ...ing,
-        amount_: (ing.amount_ || 0) * multiplier,
-      })),
+        amount_: (ing.amount_ || 0) * multiplier
+      }))
     })
     group.patchValue({
       recipe_id_: recipe._id,
       recipe_type_: this.isRecipeDish(recipe) ? 'dish' : 'preparation',
       food_cost_money: Math.round(autoCost * 100) / 100,
-      serving_portions: 1,
+      serving_portions: 1
     })
     this.setDishSearchQuery(sectionIndex, itemIndex, '')
     this.activeDishSearch_.set(null)
@@ -801,14 +830,14 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const group = this.getItemsArray(sectionIndex).at(itemIndex)
     const recipeId = group.get('recipe_id_')?.value as string | undefined
     if (!recipeId) return
-    const currentName = this.recipes_().find(r => r._id === recipeId)?.name_hebrew || ''
+    const currentName = this.recipes_().find((r) => r._id === recipeId)?.name_hebrew || ''
     this.editingDishAt_.set({ sectionIndex, itemIndex, previousRecipeId: recipeId })
     group.patchValue({ recipe_id_: '' })
     this.setDishSearchQuery(sectionIndex, itemIndex, currentName)
     this.activeDishSearch_.set({ sectionIndex, itemIndex })
-    this.dishSearchHighlightedIndex_.update(m => ({
+    this.dishSearchHighlightedIndex_.update((m) => ({
       ...m,
-      [this.getDishSearchHighlightKey(sectionIndex, itemIndex)]: 0,
+      [this.getDishSearchHighlightKey(sectionIndex, itemIndex)]: 0
     }))
     this.focusDishSearchInput(sectionIndex, itemIndex)
   }
@@ -860,7 +889,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       ke.preventDefault()
       ke.stopPropagation()
       idx = recipes.length ? Math.min(idx + 1, maxIndex) : 0
-      this.dishSearchHighlightedIndex_.update(m => ({ ...m, [key]: idx }))
+      this.dishSearchHighlightedIndex_.update((m) => ({ ...m, [key]: idx }))
       this.scrollDropdownHighlightIntoView('.dish-search-wrap')
       return
     }
@@ -868,7 +897,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       ke.preventDefault()
       ke.stopPropagation()
       idx = Math.max(0, idx - 1)
-      this.dishSearchHighlightedIndex_.update(m => ({ ...m, [key]: idx }))
+      this.dishSearchHighlightedIndex_.update((m) => ({ ...m, [key]: idx }))
       this.scrollDropdownHighlightIntoView('.dish-search-wrap')
       return
     }
@@ -914,8 +943,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   protected openSectionSearch(index: number): void {
     this.sectionSearchOpen_.set(index)
-    this.sectionSearchQueries_.update(q => ({ ...q, [index]: '' }))
-    this.sectionCategoryHighlightedIndex_.update(m => ({ ...m, [index]: 0 }))
+    this.sectionSearchQueries_.update((q) => ({ ...q, [index]: '' }))
+    this.sectionCategoryHighlightedIndex_.update((m) => ({ ...m, [index]: 0 }))
     setTimeout(() => {
       const input = document.querySelector('.section-search-wrap .section-search-input') as HTMLInputElement
       input?.focus()
@@ -933,7 +962,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected getSectionCategoryOptionCount(sectionIndex: number): number {
     const cats = this.getFilteredSectionCategories(sectionIndex)
     const hasQuery = this.getSectionSearchQuery(sectionIndex).trim().length > 0
-    return cats.length + (hasQuery ? 2 : 1); // cats + [add with query?] + add new modal
+    return cats.length + (hasQuery ? 2 : 1) // cats + [add with query?] + add new modal
   }
 
   protected onSectionSearchKeydown(sectionIndex: number, e: KeyboardEvent): void {
@@ -946,7 +975,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       e.preventDefault()
       e.stopPropagation()
       idx = Math.min(idx + 1, maxIndex)
-      this.sectionCategoryHighlightedIndex_.update(m => ({ ...m, [sectionIndex]: idx }))
+      this.sectionCategoryHighlightedIndex_.update((m) => ({ ...m, [sectionIndex]: idx }))
       this.scrollDropdownHighlightIntoView('.section-search-wrap')
       return
     }
@@ -954,7 +983,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       e.preventDefault()
       e.stopPropagation()
       idx = Math.max(0, idx - 1)
-      this.sectionCategoryHighlightedIndex_.update(m => ({ ...m, [sectionIndex]: idx }))
+      this.sectionCategoryHighlightedIndex_.update((m) => ({ ...m, [sectionIndex]: idx }))
       this.scrollDropdownHighlightIntoView('.section-search-wrap')
       return
     }
@@ -967,7 +996,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       } else if (hasQuery && idx === cats.length) {
         void this.addNewSectionCategory(sectionIndex)
         this.closeSectionSearch()
-      } else if (idx === (cats.length + (hasQuery ? 1 : 0))) {
+      } else if (idx === cats.length + (hasQuery ? 1 : 0)) {
         void this.openAddCategoryModal(sectionIndex)
         this.closeSectionSearch()
       }
@@ -1001,12 +1030,12 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected setSectionSearchQuery(index: number, value: string): void {
-    this.sectionSearchQueries_.update(q => ({ ...q, [index]: value }))
+    this.sectionSearchQueries_.update((q) => ({ ...q, [index]: value }))
   }
 
   protected onSectionSearchQueryChange(sectionIndex: number, value: string): void {
     this.setSectionSearchQuery(sectionIndex, value)
-    this.sectionCategoryHighlightedIndex_.update(m => ({ ...m, [sectionIndex]: 0 }))
+    this.sectionCategoryHighlightedIndex_.update((m) => ({ ...m, [sectionIndex]: 0 }))
   }
 
   protected getFilteredSectionCategories(index: number): string[] {
@@ -1032,7 +1061,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       title: 'add_new_category',
       label: 'menu_search_category',
       placeholder: 'menu_search_category',
-      saveLabel: 'save',
+      saveLabel: 'save'
     })
     if (result?.trim()) {
       const name = result.trim()
@@ -1053,7 +1082,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const map: Record<string, string> = {
       buffet_family: 'Buffet / Family Style',
       plated_course: 'Plated / Course Based',
-      cocktail_passed: 'Cocktail / Passed',
+      cocktail_passed: 'Cocktail / Passed'
     }
     return map[this.form_.value.serving_type_ || 'plated_course'] || ''
   }
@@ -1088,9 +1117,10 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private generateDateName(): string {
     const today = new Date()
     const base = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`
-    const existing = this.menuEventData.allMenuEvents_()
-      .map(e => e.name_)
-      .filter(n => n === base || n.startsWith(`${base} (`))
+    const existing = this.menuEventData
+      .allMenuEvents_()
+      .map((e) => e.name_)
+      .filter((n) => n === base || n.startsWith(`${base} (`))
     if (!existing.includes(base)) return base
     let i = 1
     while (existing.includes(`${base} (${i})`)) i++
@@ -1115,7 +1145,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected toggleExport(): void {
-    this.showExport_.update(v => !v)
+    this.showExport_.update((v) => !v)
   }
 
   protected printMenu(): void {
@@ -1129,29 +1159,32 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       event_type_: event.event_type_,
       event_date_: event.event_date_ || '',
       serving_type_: event.serving_type_,
-      guest_count_: event.guest_count_,
+      guest_count_: event.guest_count_
     })
 
     this.sectionsArray.clear()
-    event.sections_.forEach(section => {
+    event.sections_.forEach((section) => {
       const sectionGroup = this.fb.group({
         _id: [section._id],
         name_: [section.name_, Validators.required],
         sort_order_: [section.sort_order_],
-        items_: this.fb.array<FormGroup>([]),
+        items_: this.fb.array<FormGroup>([])
       })
       const items = sectionGroup.get('items_') as FormArray<FormGroup>
-      section.items_.forEach(item => {
+      section.items_.forEach((item) => {
         items.push(
           this.fb.group({
             recipe_id_: [item.recipe_id_, Validators.required],
             recipe_type_: [item.recipe_type_],
-            predicted_take_rate_: [item.predicted_take_rate_, [Validators.required, Validators.min(0), Validators.max(1)]],
+            predicted_take_rate_: [
+              item.predicted_take_rate_,
+              [Validators.required, Validators.min(0), Validators.max(1)]
+            ],
             sell_price: [item.sell_price_ ?? 0],
             food_cost_money: [item.food_cost_override_ ?? 0],
             food_cost_pct: [0],
             serving_portions: [item.serving_portions_ ?? 0],
-            serving_portions_pct: [0],
+            serving_portions_pct: [0]
           })
         )
       })
@@ -1164,17 +1197,12 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected openAiMenuModal(): void {
     const hasContent = this.sectionsArray.length > 0
     if (hasContent) {
-      this.aiMenuModal_.open(
-        'edit',
-        this.buildAiMenuSnapshot_(),
-        undefined,
-        (patch) => this.menuAiFlow_.applyPatch(patch),
+      this.aiMenuModal_.open('edit', this.buildAiMenuSnapshot_(), undefined, (patch) =>
+        this.menuAiFlow_.applyPatch(patch)
       )
     } else {
-      this.aiMenuModal_.open(
-        'create',
-        undefined,
-        (matched: MatchedMenu, resolutions) => this.menuAiFlow_.applyMatchedMenu(matched, resolutions),
+      this.aiMenuModal_.open('create', undefined, (matched: MatchedMenu, resolutions) =>
+        this.menuAiFlow_.applyMatchedMenu(matched, resolutions)
       )
     }
   }
@@ -1187,15 +1215,25 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       event_date_: raw.event_date_ ?? null,
       serving_type_: raw.serving_type_ ?? 'plated_course',
       guest_count_: Number(raw.guest_count_ ?? 0),
-      sections_: (raw.sections_ ?? []).map((sec: { name_?: string; items_?: { recipe_id_?: string; predicted_take_rate_?: number; serving_portions?: number; sell_price?: number }[] }) => ({
-        category: sec.name_ ?? '',
-        items: (sec.items_ ?? []).map((item) => ({
-          name_hebrew: '',
-          predicted_take_rate_: item.predicted_take_rate_ ?? 0.4,
-          serving_portions: item.serving_portions ?? 1,
-          sell_price: item.sell_price ?? 0,
-        })),
-      })),
+      sections_: (raw.sections_ ?? []).map(
+        (sec: {
+          name_?: string
+          items_?: {
+            recipe_id_?: string
+            predicted_take_rate_?: number
+            serving_portions?: number
+            sell_price?: number
+          }[]
+        }) => ({
+          category: sec.name_ ?? '',
+          items: (sec.items_ ?? []).map((item) => ({
+            name_hebrew: '',
+            predicted_take_rate_: item.predicted_take_rate_ ?? 0.4,
+            serving_portions: item.serving_portions ?? 1,
+            sell_price: item.sell_price ?? 0
+          }))
+        })
+      )
     }
   }
 
@@ -1217,9 +1255,9 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
           derived_portions_: sp * guestCount,
           sell_price_: item.sell_price ?? undefined,
           food_cost_override_: this.getAutoFoodCost(sectionIndex, itemIndex) || undefined,
-          serving_portions_: sp,
+          serving_portions_: sp
         }
-      }),
+      })
     }))
 
     const hydrated = this.menuIntelligence.hydrateDerivedPortions({
@@ -1232,20 +1270,20 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       sections_: sections,
       financial_targets_: {
         target_food_cost_pct_: 30,
-        target_revenue_per_guest_: 0,
+        target_revenue_per_guest_: 0
       },
       performance_tags_: {
         food_cost_pct_: 0,
-        primary_serving_style_: servingType,
-      },
+        primary_serving_style_: servingType
+      }
     })
 
     return {
       ...hydrated,
       performance_tags_: {
         food_cost_pct_: this.menuIntelligence.computeFoodCostPctFromActualRevenue(hydrated),
-        primary_serving_style_: servingType,
-      },
+        primary_serving_style_: servingType
+      }
     }
   }
 
@@ -1275,7 +1313,9 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   protected onViewMenuShoppingList(): void {
     const menu = this.getCurrentMenuForExport()
-    this.exportPreviewPayload_.set(this.exportService.getMenuShoppingListPreviewPayload(menu, this.recipes_(), this.products_()))
+    this.exportPreviewPayload_.set(
+      this.exportService.getMenuShoppingListPreviewPayload(menu, this.recipes_(), this.products_())
+    )
     this.exportPreviewType_ = 'menu-shopping-list'
   }
 
@@ -1290,9 +1330,11 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     if (!type) return
     const menu = this.getCurrentMenuForExport()
     if (type === 'menu-info') this.exportService.exportMenuInfo(menu, this.recipes_())
-    else if (type === 'menu-shopping-list') this.exportService.exportMenuShoppingList(menu, this.recipes_(), this.products_())
+    else if (type === 'menu-shopping-list')
+      this.exportService.exportMenuShoppingList(menu, this.recipes_(), this.products_())
     else if (type === 'menu-checklist' && mode) this.exportService.exportChecklist(menu, this.recipes_(), mode)
-    else if (type === 'menu-all') this.exportService.exportAllTogetherMenu(menu, this.recipes_(), this.products_(), 'by_category')
+    else if (type === 'menu-all')
+      this.exportService.exportAllTogetherMenu(menu, this.recipes_(), this.products_(), 'by_category')
     this.exportPreviewPayload_.set(null)
     this.exportPreviewType_ = null
     this.exportChecklistMode_ = null
@@ -1322,7 +1364,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected readonly viewExportModal_ = signal<'menu-info' | 'shopping-list' | 'all' | null>(null)
 
   protected toggleExportChecklistDropdown(): void {
-    this.exportChecklistDropdownOpen_.update(v => !v)
+    this.exportChecklistDropdownOpen_.update((v) => !v)
     this.viewExportModal_.set(null)
   }
 
@@ -1331,7 +1373,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected openViewExportModal(type: 'menu-info' | 'shopping-list' | 'all'): void {
-    this.viewExportModal_.update(current => (current === type ? null : type))
+    this.viewExportModal_.update((current) => (current === type ? null : type))
     this.exportChecklistDropdownOpen_.set(false)
   }
 

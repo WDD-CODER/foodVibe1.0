@@ -23,7 +23,7 @@ import {
   heUnit,
   roundExportNumber,
   type ExportPayload,
-  type ExportSection,
+  type ExportSection
 } from '../utils/export.util'
 import {
   downloadWorkbook,
@@ -33,10 +33,9 @@ import {
   styleExcelBlankRow,
   styleExcelColumnHeader,
   styleExcelDataRowBorders,
-  styleExcelSeparator,
   styleExcelSubtitle,
   styleExcelTitle,
-  styleHeaderRow,
+  styleHeaderRow
 } from './excel-workbook.util'
 
 @Injectable({ providedIn: 'root' })
@@ -62,14 +61,14 @@ export class MenuExportService {
       [heHeader('event_type'), menu.event_type_ ?? ''],
       [heHeader('date'), menu.event_date_ ?? ''],
       [heHeader('guest_count'), menu.guest_count_ ?? 0],
-      [heHeader('pieces_per_person'), menu.pieces_per_person_ ?? ''],
+      [heHeader('pieces_per_person'), menu.pieces_per_person_ ?? '']
     ]
-    coverData.forEach(row => coverWs.addRow(row))
+    coverData.forEach((row) => coverWs.addRow(row))
     coverWs.getColumn(1).width = 18
     coverWs.getColumn(2).width = 24
 
     const sections = (menu.sections_ ?? []).slice().sort((a, b) => (a.sort_order_ ?? 0) - (b.sort_order_ ?? 0))
-    const recipeMap = new Map(_recipes.map(r => [r._id, r]))
+    const recipeMap = new Map(_recipes.map((r) => [r._id, r]))
 
     sections.forEach((section: MenuSection) => {
       const sheetName = (section.name_ ?? `Section_${section._id}`).slice(0, 31)
@@ -84,9 +83,7 @@ export class MenuExportService {
           name,
           roundExportNumber(item.derived_portions_ ?? 0),
           roundExportNumber(item.predicted_take_rate_ ?? 0),
-          item.sell_price_ !== undefined && item.sell_price_ !== null
-            ? roundExportNumber(Number(item.sell_price_))
-            : '',
+          item.sell_price_ !== undefined && item.sell_price_ !== null ? roundExportNumber(Number(item.sell_price_)) : ''
         ])
         styleDataRow(ws, rowNum++)
       })
@@ -105,12 +102,12 @@ export class MenuExportService {
    * Filename: shopping-list_{menuName}.xlsx (no date for menu).
    */
   async exportMenuShoppingList(menu: MenuEvent, recipes: Recipe[], products: Product[]): Promise<void> {
-    const recipeMap = new Map(recipes.map(r => [r._id, r]))
+    const recipeMap = new Map(recipes.map((r) => [r._id, r]))
     const categoryToAggregate = new Map<string, { name: string; amount: number; unit: string; cost: number }[]>()
 
     const addRow = (category: string, name: string, amount: number, unit: string, lineCost: number): void => {
       const arr = categoryToAggregate.get(category) ?? []
-      const existing = arr.find(x => x.name === name && x.unit === unit)
+      const existing = arr.find((x) => x.name === name && x.unit === unit)
       if (existing) {
         existing.amount += amount
         existing.cost += lineCost
@@ -130,15 +127,15 @@ export class MenuExportService {
         const scaled = this.scaling_.getScaledIngredients(recipe, factor)
         const scaledRecipe: Recipe = {
           ...recipe,
-          ingredients_: (recipe.ingredients_ ?? []).map(ing => ({
+          ingredients_: (recipe.ingredients_ ?? []).map((ing) => ({
             ...ing,
-            amount_: (ing.amount_ ?? 0) * factor,
-          })),
+            amount_: (ing.amount_ ?? 0) * factor
+          }))
         }
         scaled.forEach((row, i) => {
           const category =
             row.type === 'product'
-              ? (products.find(p => p._id === row.referenceId)?.categories_?.[0] ?? 'כללי')
+              ? (products.find((p) => p._id === row.referenceId)?.categories_?.[0] ?? 'כללי')
               : 'הכנות'
           const ing = scaledRecipe.ingredients_[i]
           const lineCost = ing ? this.recipeCost_.getCostForIngredient(ing) : 0
@@ -154,7 +151,7 @@ export class MenuExportService {
     let rowNum = 2
     const sortedCategories = Array.from(categoryToAggregate.keys()).sort()
     for (const cat of sortedCategories) {
-      ;(categoryToAggregate.get(cat) ?? []).forEach(it => {
+      ;(categoryToAggregate.get(cat) ?? []).forEach((it) => {
         const unitPrice = it.amount > 0 ? it.cost / it.amount : 0
         const row = ws.getRow(rowNum)
         row.getCell(1).value = cat
@@ -187,7 +184,7 @@ export class MenuExportService {
     recipes: Recipe[],
     mode: 'by_dish' | 'by_category' | 'by_station'
   ): Promise<void> {
-    const recipeMap = new Map(recipes.map(r => [r._id, r]))
+    const recipeMap = new Map(recipes.map((r) => [r._id, r]))
     const wb = new Workbook()
 
     if (mode === 'by_dish') {
@@ -216,8 +213,13 @@ export class MenuExportService {
           styleExcelSubtitle(ws, rowNum++, numCols)
           ws.addRow([heHeader('prep_item'), heHeader('category'), heHeader('quantity'), heHeader('unit')])
           styleExcelColumnHeader(ws, rowNum++, numCols)
-          sortedPrep.forEach(pr => {
-            ws.addRow([pr.name, heCategoryLabel(this.translation_, pr.category_name), roundExportNumber(pr.amount), heUnit(pr.unit)])
+          sortedPrep.forEach((pr) => {
+            ws.addRow([
+              pr.name,
+              heCategoryLabel(this.translation_, pr.category_name),
+              roundExportNumber(pr.amount),
+              heUnit(pr.unit)
+            ])
             styleExcelDataRowBorders(ws, rowNum++, numCols)
           })
           ws.addRow([])
@@ -230,14 +232,17 @@ export class MenuExportService {
       ws.getColumn(4).width = 10
     } else {
       const isByStation = mode === 'by_station'
-      const categoryToAggregate = new Map<string, { name: string; amount: number; unit: string; categoryName?: string }[]>()
+      const categoryToAggregate = new Map<
+        string,
+        { name: string; amount: number; unit: string; categoryName?: string }[]
+      >()
 
       const addPrep = (key: string, name: string, amount: number, unit: string, categoryName?: string): void => {
         const arr = categoryToAggregate.get(key) ?? []
         const existing =
           isByStation && categoryName !== undefined
-            ? arr.find(x => x.name === name && x.unit === unit && (x.categoryName ?? '') === categoryName)
-            : arr.find(x => x.name === name && x.unit === unit)
+            ? arr.find((x) => x.name === name && x.unit === unit && (x.categoryName ?? '') === categoryName)
+            : arr.find((x) => x.name === name && x.unit === unit)
         if (existing) existing.amount += amount
         else
           arr.push(
@@ -254,7 +259,7 @@ export class MenuExportService {
           const yieldAmount = recipe.yield_amount_ || 1
           const factor = yieldAmount > 0 ? portions / yieldAmount : 0
           const prepRows = this.scaling_.getScaledPrepItems(recipe, factor)
-          prepRows.forEach(pr => {
+          prepRows.forEach((pr) => {
             const key = isByStation ? (recipe.default_station_ ?? 'כללי') : (pr.category_name ?? 'כללי')
             addPrep(key, pr.name, pr.amount, pr.unit, isByStation ? (pr.category_name ?? '') : undefined)
           })
@@ -286,9 +291,14 @@ export class MenuExportService {
           if (isByStation) return (a.categoryName ?? '').localeCompare(b.categoryName ?? '', 'he')
           return (a.name ?? '').localeCompare(b.name ?? '', 'he')
         })
-        items.forEach(it => {
+        items.forEach((it) => {
           const dataRow = isByStation
-            ? [heCategoryLabel(this.translation_, it.categoryName), it.name, roundExportNumber(it.amount), heUnit(it.unit)]
+            ? [
+                heCategoryLabel(this.translation_, it.categoryName),
+                it.name,
+                roundExportNumber(it.amount),
+                heUnit(it.unit)
+              ]
             : [it.name, roundExportNumber(it.amount), heUnit(it.unit)]
           wsAcc.addRow(dataRow)
           styleExcelDataRowBorders(wsAcc, rowNumAcc, numCols)
@@ -303,7 +313,10 @@ export class MenuExportService {
     }
 
     const modeVariant = mode === 'by_dish' ? 'by-dish' : mode === 'by_station' ? 'by-station' : 'by-category'
-    const fileName = buildExportFileName('check-list', menu.name_ ?? 'menu', { includeDate: false, variant: modeVariant })
+    const fileName = buildExportFileName('check-list', menu.name_ ?? 'menu', {
+      includeDate: false,
+      variant: modeVariant
+    })
     await downloadWorkbook(wb, fileName)
   }
 
@@ -318,7 +331,7 @@ export class MenuExportService {
     checklistMode: 'by_dish' | 'by_category' | 'by_station' = 'by_category'
   ): Promise<void> {
     const wb = new Workbook()
-    const recipeMap = new Map(recipes.map(r => [r._id, r]))
+    const recipeMap = new Map(recipes.map((r) => [r._id, r]))
 
     const coverWs = wb.addWorksheet('Menu info', { views: [{ rightToLeft: true }] })
     coverWs.addRow([heHeader('exported_at'), exportDateStr()])
@@ -345,9 +358,7 @@ export class MenuExportService {
           name,
           roundExportNumber(item.derived_portions_ ?? 0),
           roundExportNumber(item.predicted_take_rate_ ?? 0),
-          item.sell_price_ !== undefined && item.sell_price_ !== null
-            ? roundExportNumber(Number(item.sell_price_))
-            : '',
+          item.sell_price_ !== undefined && item.sell_price_ !== null ? roundExportNumber(Number(item.sell_price_)) : ''
         ])
         styleDataRow(ws, rowNum++)
       })
@@ -370,17 +381,17 @@ export class MenuExportService {
 
   /** Build payload for menu info preview (cover + sections). */
   getMenuInfoPreviewPayload(menu: MenuEvent, recipes: Recipe[]): ExportPayload {
-    const recipeMap = new Map(recipes.map(r => [r._id, r]))
+    const recipeMap = new Map(recipes.map((r) => [r._id, r]))
     const coverRows: (string | number)[][] = [
       [heHeader('menu_name'), menu.name_ ?? ''],
       [heHeader('event_type'), menu.event_type_ ?? ''],
       [heHeader('date'), menu.event_date_ ?? ''],
       [heHeader('guest_count'), menu.guest_count_ ?? 0],
-      [heHeader('pieces_per_person'), menu.pieces_per_person_ ?? ''],
+      [heHeader('pieces_per_person'), menu.pieces_per_person_ ?? '']
     ]
     const sections = (menu.sections_ ?? []).slice().sort((a, b) => (a.sort_order_ ?? 0) - (b.sort_order_ ?? 0))
     const exportSections: ExportSection[] = [
-      { title: heHeader('menu_info'), headerRow: [heHeader('field'), heHeader('value')], rows: coverRows },
+      { title: heHeader('menu_info'), headerRow: [heHeader('field'), heHeader('value')], rows: coverRows }
     ]
     sections.forEach((section: MenuSection) => {
       const sectionRows: (string | number)[][] = (section.items_ ?? []).map((item: MenuItemSelection) => {
@@ -390,33 +401,31 @@ export class MenuExportService {
           name,
           roundExportNumber(item.derived_portions_ ?? 0),
           roundExportNumber(item.predicted_take_rate_ ?? 0),
-          item.sell_price_ !== undefined && item.sell_price_ !== null
-            ? roundExportNumber(Number(item.sell_price_))
-            : '',
+          item.sell_price_ !== undefined && item.sell_price_ !== null ? roundExportNumber(Number(item.sell_price_)) : ''
         ]
       })
       exportSections.push({
         title: section.name_ ?? 'Section',
         headerRow: [heHeader('dish_name'), heHeader('portions'), heHeader('take_rate'), heHeader('sell_price')],
-        rows: sectionRows,
+        rows: sectionRows
       })
     })
     return {
       title: menu.name_ ?? 'Menu',
       subtitle: [menu.event_type_, menu.event_date_].filter(Boolean).join(' · ') || undefined,
       exportedAt: new Date().toISOString(),
-      sections: exportSections,
+      sections: exportSections
     }
   }
 
   /** Build payload for menu shopping list preview (same aggregation as export). */
   getMenuShoppingListPreviewPayload(menu: MenuEvent, recipes: Recipe[], products: Product[]): ExportPayload {
-    const recipeMap = new Map(recipes.map(r => [r._id, r]))
+    const recipeMap = new Map(recipes.map((r) => [r._id, r]))
     const categoryToAggregate = new Map<string, { name: string; amount: number; unit: string; cost: number }[]>()
 
     const addRow = (category: string, name: string, amount: number, unit: string, lineCost: number): void => {
       const arr = categoryToAggregate.get(category) ?? []
-      const existing = arr.find(x => x.name === name && x.unit === unit)
+      const existing = arr.find((x) => x.name === name && x.unit === unit)
       if (existing) {
         existing.amount += amount
         existing.cost += lineCost
@@ -436,15 +445,15 @@ export class MenuExportService {
         const scaled = this.scaling_.getScaledIngredients(recipe, factor)
         const scaledRecipe: Recipe = {
           ...recipe,
-          ingredients_: (recipe.ingredients_ ?? []).map(ing => ({
+          ingredients_: (recipe.ingredients_ ?? []).map((ing) => ({
             ...ing,
-            amount_: (ing.amount_ ?? 0) * factor,
-          })),
+            amount_: (ing.amount_ ?? 0) * factor
+          }))
         }
         scaled.forEach((row, i) => {
           const category =
             row.type === 'product'
-              ? (products.find(p => p._id === row.referenceId)?.categories_?.[0] ?? 'כללי')
+              ? (products.find((p) => p._id === row.referenceId)?.categories_?.[0] ?? 'כללי')
               : 'הכנות'
           const ing = scaledRecipe.ingredients_[i]
           const lineCost = ing ? this.recipeCost_.getCostForIngredient(ing) : 0
@@ -456,17 +465,24 @@ export class MenuExportService {
     const rows: (string | number)[][] = []
     const sortedCategories = Array.from(categoryToAggregate.keys()).sort()
     for (const cat of sortedCategories) {
-      ;(categoryToAggregate.get(cat) ?? []).forEach(it => {
+      ;(categoryToAggregate.get(cat) ?? []).forEach((it) => {
         const unitPrice = it.amount > 0 ? it.cost / it.amount : 0
         const lineTotal = roundExportNumber(it.cost)
-        rows.push([cat, it.name, roundExportNumber(it.amount), heUnit(it.unit), roundExportNumber(unitPrice), lineTotal])
+        rows.push([
+          cat,
+          it.name,
+          roundExportNumber(it.amount),
+          heUnit(it.unit),
+          roundExportNumber(unitPrice),
+          lineTotal
+        ])
       })
     }
 
     return {
       title: `${menu.name_ ?? 'Menu'} — Shopping list`,
       exportedAt: new Date().toISOString(),
-      sections: [{ headerRow: ['Category', 'Ingredient', 'Amount', 'Unit', 'Unit price', 'Line total'], rows }],
+      sections: [{ headerRow: ['Category', 'Ingredient', 'Amount', 'Unit', 'Unit price', 'Line total'], rows }]
     }
   }
 
@@ -476,7 +492,7 @@ export class MenuExportService {
     recipes: Recipe[],
     mode: 'by_dish' | 'by_category' | 'by_station'
   ): ExportPayload {
-    const recipeMap = new Map(recipes.map(r => [r._id, r]))
+    const recipeMap = new Map(recipes.map((r) => [r._id, r]))
     const modeLabel = mode === 'by_dish' ? 'by_dish' : mode === 'by_station' ? 'by_station' : 'by_category'
 
     if (mode === 'by_dish') {
@@ -496,16 +512,16 @@ export class MenuExportService {
             const catB = b.category_name ?? ''
             return catA.localeCompare(catB) || a.name.localeCompare(b.name)
           })
-          const rows: (string | number)[][] = sortedPrep.map(pr => [
+          const rows: (string | number)[][] = sortedPrep.map((pr) => [
             pr.name,
             heCategoryLabel(this.translation_, pr.category_name),
             roundExportNumber(pr.amount),
-            heUnit(pr.unit),
+            heUnit(pr.unit)
           ])
           sections.push({
             title: `${heHeader('dish')}: ${recipe.name_hebrew ?? item.recipe_id_} (${heHeader('portions')}: ${portions})`,
             headerRow: [heHeader('prep_item'), heHeader('category'), heHeader('quantity'), heHeader('unit')],
-            rows,
+            rows
           })
         }
       }
@@ -513,19 +529,22 @@ export class MenuExportService {
         title: `${menu.name_ ?? 'Menu'} — ${heHeader('checklist')}`,
         subtitle: modeLabel,
         exportedAt: new Date().toISOString(),
-        sections,
+        sections
       }
     }
 
     const isByStation = mode === 'by_station'
-    const categoryToAggregate = new Map<string, { name: string; amount: number; unit: string; categoryName?: string }[]>()
+    const categoryToAggregate = new Map<
+      string,
+      { name: string; amount: number; unit: string; categoryName?: string }[]
+    >()
 
     const addPrep = (key: string, name: string, amount: number, unit: string, categoryName?: string): void => {
       const arr = categoryToAggregate.get(key) ?? []
       const existing =
         isByStation && categoryName !== undefined
-          ? arr.find(x => x.name === name && x.unit === unit && (x.categoryName ?? '') === categoryName)
-          : arr.find(x => x.name === name && x.unit === unit)
+          ? arr.find((x) => x.name === name && x.unit === unit && (x.categoryName ?? '') === categoryName)
+          : arr.find((x) => x.name === name && x.unit === unit)
       if (existing) existing.amount += amount
       else
         arr.push(
@@ -542,7 +561,7 @@ export class MenuExportService {
         const yieldAmount = recipe.yield_amount_ || 1
         const factor = yieldAmount > 0 ? portions / yieldAmount : 0
         const prepRows = this.scaling_.getScaledPrepItems(recipe, factor)
-        prepRows.forEach(pr => {
+        prepRows.forEach((pr) => {
           const key = isByStation ? (recipe.default_station_ ?? 'כללי') : (pr.category_name ?? 'כללי')
           addPrep(key, pr.name, pr.amount, pr.unit, isByStation ? (pr.category_name ?? '') : undefined)
         })
@@ -557,8 +576,14 @@ export class MenuExportService {
         if (isByStation) return (a.categoryName ?? '').localeCompare(b.categoryName ?? '', 'he')
         return (a.name ?? '').localeCompare(b.name ?? '', 'he')
       })
-      items.forEach(it => {
-        if (isByStation) accRows.push([heCategoryLabel(this.translation_, it.categoryName), it.name, roundExportNumber(it.amount), heUnit(it.unit)])
+      items.forEach((it) => {
+        if (isByStation)
+          accRows.push([
+            heCategoryLabel(this.translation_, it.categoryName),
+            it.name,
+            roundExportNumber(it.amount),
+            heUnit(it.unit)
+          ])
         else accRows.push([it.name, roundExportNumber(it.amount), heUnit(it.unit)])
       })
     }
@@ -570,13 +595,13 @@ export class MenuExportService {
       title: `${menu.name_ ?? 'Menu'} — ${heHeader('checklist')}`,
       subtitle: modeLabel,
       exportedAt: new Date().toISOString(),
-      sections: [{ title: heHeader('accumulated'), headerRow: headerAcc, rows: accRows }],
+      sections: [{ title: heHeader('accumulated'), headerRow: headerAcc, rows: accRows }]
     }
   }
 
   /** Build payload for menu "All" view: cover + sections with food cost data. */
   getMenuAllViewPreviewPayload(menu: MenuEvent, recipes: Recipe[]): ExportPayload {
-    const recipeMap = new Map(recipes.map(r => [r._id, r]))
+    const recipeMap = new Map(recipes.map((r) => [r._id, r]))
     const guestCount = Number(menu.guest_count_ ?? 0)
     const piecesPerPerson = Number((menu as { pieces_per_person_?: number }).pieces_per_person_ ?? 1)
     const servingType = (menu.serving_type_ ?? 'plated_course') as ServingType
@@ -586,10 +611,10 @@ export class MenuExportService {
       [heHeader('event_type'), menu.event_type_ ?? ''],
       [heHeader('date'), menu.event_date_ ?? ''],
       [heHeader('guest_count'), menu.guest_count_ ?? 0],
-      [heHeader('pieces_per_person'), menu.pieces_per_person_ ?? ''],
+      [heHeader('pieces_per_person'), menu.pieces_per_person_ ?? '']
     ]
     const exportSections: ExportSection[] = [
-      { title: heHeader('menu_info'), headerRow: [heHeader('field'), heHeader('value')], rows: coverRows },
+      { title: heHeader('menu_info'), headerRow: [heHeader('field'), heHeader('value')], rows: coverRows }
     ]
 
     const sections = (menu.sections_ ?? []).slice().sort((a, b) => (a.sort_order_ ?? 0) - (b.sort_order_ ?? 0))
@@ -610,10 +635,10 @@ export class MenuExportService {
           const multiplier = derivedPortions / baseYield
           totalCost = this.recipeCost_.computeRecipeCost({
             ...recipe,
-            ingredients_: recipe.ingredients_.map(ing => ({
+            ingredients_: recipe.ingredients_.map((ing) => ({
               ...ing,
-              amount_: (ing.amount_ || 0) * multiplier,
-            })),
+              amount_: (ing.amount_ || 0) * multiplier
+            }))
           })
         }
         const costPerPortion = derivedPortions >= 1 ? totalCost / derivedPortions : totalCost
@@ -622,9 +647,7 @@ export class MenuExportService {
           roundExportNumber(derivedPortions),
           roundExportNumber(totalCost),
           roundExportNumber(costPerPortion),
-          item.sell_price_ !== undefined && item.sell_price_ !== null
-            ? roundExportNumber(Number(item.sell_price_))
-            : '',
+          item.sell_price_ !== undefined && item.sell_price_ !== null ? roundExportNumber(Number(item.sell_price_)) : ''
         ]
       })
       exportSections.push({
@@ -634,16 +657,16 @@ export class MenuExportService {
           heHeader('portions'),
           heHeader('food_cost_money'),
           heHeader('dish_food_cost_per_portion'),
-          heHeader('sell_price'),
+          heHeader('sell_price')
         ],
-        rows: sectionRows,
+        rows: sectionRows
       })
     }
     return {
       title: `${menu.name_ ?? 'Menu'} — ${heHeader('info')}`,
       subtitle: [menu.event_type_, menu.event_date_].filter(Boolean).join(' · ') || undefined,
       exportedAt: new Date().toISOString(),
-      sections: exportSections,
+      sections: exportSections
     }
   }
 
@@ -675,8 +698,13 @@ export class MenuExportService {
           styleExcelSubtitle(ws, rowNum++, numCols)
           ws.addRow([heHeader('prep_item'), heHeader('category'), heHeader('quantity'), heHeader('unit')])
           styleExcelColumnHeader(ws, rowNum++, numCols)
-          prepRows.forEach(pr => {
-            ws.addRow([pr.name, heCategoryLabel(this.translation_, pr.category_name), roundExportNumber(pr.amount), heUnit(pr.unit)])
+          prepRows.forEach((pr) => {
+            ws.addRow([
+              pr.name,
+              heCategoryLabel(this.translation_, pr.category_name),
+              roundExportNumber(pr.amount),
+              heUnit(pr.unit)
+            ])
             styleExcelDataRowBorders(ws, rowNum++, numCols)
           })
           ws.addRow([])
@@ -689,14 +717,24 @@ export class MenuExportService {
       ws.getColumn(4).width = 10
     } else {
       const isByStation = mode === 'by_station'
-      const categoryToAggregate = new Map<string, { name: string; amount: number; unit: string; categoryName?: string }[]>()
+      const categoryToAggregate = new Map<
+        string,
+        { name: string; amount: number; unit: string; categoryName?: string }[]
+      >()
       const byDishRows: { groupKey: string; name: string; amount: number; unit: string; dishName: string }[] = []
-      const addPrep = (key: string, name: string, amount: number, unit: string, dishName: string, categoryName?: string): void => {
+      const addPrep = (
+        key: string,
+        name: string,
+        amount: number,
+        unit: string,
+        dishName: string,
+        categoryName?: string
+      ): void => {
         const arr = categoryToAggregate.get(key) ?? []
         const existing =
           isByStation && categoryName !== undefined
-            ? arr.find(x => x.name === name && x.unit === unit && (x.categoryName ?? '') === categoryName)
-            : arr.find(x => x.name === name && x.unit === unit)
+            ? arr.find((x) => x.name === name && x.unit === unit && (x.categoryName ?? '') === categoryName)
+            : arr.find((x) => x.name === name && x.unit === unit)
         if (existing) existing.amount += amount
         else
           arr.push(
@@ -713,7 +751,7 @@ export class MenuExportService {
           const factor = (recipe.yield_amount_ || 1) > 0 ? portions / (recipe.yield_amount_ || 1) : 0
           const prepRows = this.scaling_.getScaledPrepItems(recipe, factor)
           const dishName = recipe.name_hebrew ?? item.recipe_id_
-          prepRows.forEach(pr => {
+          prepRows.forEach((pr) => {
             const key = isByStation ? (recipe.default_station_ ?? 'כללי') : (pr.category_name ?? 'כללי')
             addPrep(key, pr.name, pr.amount, pr.unit, dishName, isByStation ? (pr.category_name ?? '') : undefined)
           })
@@ -743,9 +781,14 @@ export class MenuExportService {
           if (isByStation) return (a.categoryName ?? '').localeCompare(b.categoryName ?? '', 'he')
           return (a.name ?? '').localeCompare(b.name ?? '', 'he')
         })
-        items.forEach(it => {
+        items.forEach((it) => {
           const dataRow = isByStation
-            ? [heCategoryLabel(this.translation_, it.categoryName), it.name, roundExportNumber(it.amount), heUnit(it.unit)]
+            ? [
+                heCategoryLabel(this.translation_, it.categoryName),
+                it.name,
+                roundExportNumber(it.amount),
+                heUnit(it.unit)
+              ]
             : [it.name, roundExportNumber(it.amount), heUnit(it.unit)]
           wsAcc.addRow(dataRow)
           styleExcelDataRowBorders(wsAcc, r, numColsAcc)
@@ -763,10 +806,12 @@ export class MenuExportService {
       styleHeaderRow(wsByDish, 1)
       let r2 = 2
       for (const cat of sortedGroups) {
-        byDishRows.filter(x => x.groupKey === cat).forEach(rr => {
-          wsByDish.addRow([cat, rr.name, roundExportNumber(rr.amount), heUnit(rr.unit), rr.dishName])
-          styleDataRow(wsByDish, r2++)
-        })
+        byDishRows
+          .filter((x) => x.groupKey === cat)
+          .forEach((rr) => {
+            wsByDish.addRow([cat, rr.name, roundExportNumber(rr.amount), heUnit(rr.unit), rr.dishName])
+            styleDataRow(wsByDish, r2++)
+          })
       }
     }
   }
@@ -780,7 +825,7 @@ export class MenuExportService {
     const categoryToAggregate = new Map<string, { name: string; amount: number; unit: string; cost: number }[]>()
     const addRow = (category: string, name: string, amount: number, unit: string, lineCost: number): void => {
       const arr = categoryToAggregate.get(category) ?? []
-      const existing = arr.find(x => x.name === name && x.unit === unit)
+      const existing = arr.find((x) => x.name === name && x.unit === unit)
       if (existing) {
         existing.amount += amount
         existing.cost += lineCost
@@ -798,12 +843,12 @@ export class MenuExportService {
         const scaled = this.scaling_.getScaledIngredients(recipe, factor)
         const scaledRecipe: Recipe = {
           ...recipe,
-          ingredients_: (recipe.ingredients_ ?? []).map(ing => ({ ...ing, amount_: (ing.amount_ ?? 0) * factor })),
+          ingredients_: (recipe.ingredients_ ?? []).map((ing) => ({ ...ing, amount_: (ing.amount_ ?? 0) * factor }))
         }
         scaled.forEach((row, i) => {
           const category =
             row.type === 'product'
-              ? (products.find(p => p._id === row.referenceId)?.categories_?.[0] ?? 'כללי')
+              ? (products.find((p) => p._id === row.referenceId)?.categories_?.[0] ?? 'כללי')
               : 'הכנות'
           const ing = scaledRecipe.ingredients_[i]
           addRow(category, row.name, row.amount, row.unit, ing ? this.recipeCost_.getCostForIngredient(ing) : 0)
@@ -811,11 +856,18 @@ export class MenuExportService {
       })
     })
     const ws = wb.addWorksheet('Shopping list', { views: [{ rightToLeft: true }] })
-    ws.addRow([heHeader('category'), heHeader('ingredient'), heHeader('amount'), heHeader('unit'), heHeader('unit_price'), heHeader('line_total')])
+    ws.addRow([
+      heHeader('category'),
+      heHeader('ingredient'),
+      heHeader('amount'),
+      heHeader('unit'),
+      heHeader('unit_price'),
+      heHeader('line_total')
+    ])
     styleHeaderRow(ws, 1)
     let rowNum = 2
     for (const cat of Array.from(categoryToAggregate.keys()).sort()) {
-      ;(categoryToAggregate.get(cat) ?? []).forEach(it => {
+      ;(categoryToAggregate.get(cat) ?? []).forEach((it) => {
         const unitPrice = it.amount > 0 ? it.cost / it.amount : 0
         const row = ws.getRow(rowNum)
         row.getCell(1).value = cat

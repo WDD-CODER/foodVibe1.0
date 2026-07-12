@@ -5,7 +5,6 @@ import { signal } from '@angular/core'
 import { By } from '@angular/platform-browser'
 
 describe('UserMsg', () => {
-  let component: UserMsg
   let fixture: ComponentFixture<UserMsg>
   let mockUserMsgService: jasmine.SpyObj<UserMsgService>
 
@@ -13,19 +12,16 @@ describe('UserMsg', () => {
   const msgSignal = signal<{ txt: string; type: string } | null>(null)
 
   beforeEach(async () => {
-    mockUserMsgService = jasmine.createSpyObj('UserMsgService', ['CloseMsg']);
+    mockUserMsgService = jasmine.createSpyObj('UserMsgService', ['CloseMsg'])
     // Cast to any to override the readonly property for testing
-    (mockUserMsgService as any).msg_ = msgSignal
+    ;(mockUserMsgService as any).msg_ = msgSignal
 
     await TestBed.configureTestingModule({
       imports: [UserMsg],
-      providers: [
-        { provide: UserMsgService, useValue: mockUserMsgService }
-      ]
+      providers: [{ provide: UserMsgService, useValue: mockUserMsgService }]
     }).compileComponents()
 
     fixture = TestBed.createComponent(UserMsg)
-    component = fixture.componentInstance
     fixture.detectChanges()
   })
 

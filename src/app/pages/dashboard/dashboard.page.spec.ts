@@ -11,11 +11,8 @@ import { MetadataManagerComponent } from '../metadata-manager/metadata-manager.p
 import { VenueListComponent } from '../venues/components/venue-list/venue-list.component'
 import { VenueFormComponent } from '../venues/components/venue-form/venue-form.component'
 import { TrashPage } from '../trash/trash.page'
-import {
-  LucideAngularModule,
-  PlusCircle, FilePlus, Utensils, MapPin, Trash2, Truck,
-  ArrowRight, ChevronRight, ChevronLeft, ChevronUp, ChevronDown,
-} from 'lucide-angular'
+import { LucideAngularModule } from 'lucide-angular'
+import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 
 @Component({ selector: 'app-metadata-manager', template: '', standalone: true })
 class MetadataManagerStub {}
@@ -48,10 +45,7 @@ describe('DashboardPage', () => {
     queryParamsSubject = new BehaviorSubject<Record<string, string>>({})
 
     await TestBed.configureTestingModule({
-      imports: [
-        DashboardPage,
-        LucideAngularModule.pick({ PlusCircle, FilePlus, Utensils, MapPin, Trash2, Truck, ArrowRight, ChevronRight, ChevronLeft, ChevronUp, ChevronDown }),
-      ],
+      imports: [DashboardPage, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
@@ -60,16 +54,16 @@ describe('DashboardPage', () => {
           provide: ActivatedRoute,
           useValue: {
             queryParams: queryParamsSubject.asObservable(),
-            snapshot: { queryParams: {} },
-          },
-        },
-      ],
+            snapshot: { queryParams: {} }
+          }
+        }
+      ]
     })
-    .overrideComponent(DashboardPage, {
-      remove: { imports: [MetadataManagerComponent, VenueListComponent, VenueFormComponent, TrashPage] },
-      add: { imports: [MetadataManagerStub, VenueListStub, VenueFormStub, TrashPageStub] },
-    })
-    .compileComponents()
+      .overrideComponent(DashboardPage, {
+        remove: { imports: [MetadataManagerComponent, VenueListComponent, VenueFormComponent, TrashPage] },
+        add: { imports: [MetadataManagerStub, VenueListStub, VenueFormStub, TrashPageStub] }
+      })
+      .compileComponents()
 
     fixture = TestBed.createComponent(DashboardPage)
     component = fixture.componentInstance
@@ -92,7 +86,7 @@ describe('DashboardPage', () => {
       jasmine.objectContaining({
         relativeTo: TestBed.inject(ActivatedRoute),
         queryParams: { tab: 'metadata' },
-        replaceUrl: true,
+        replaceUrl: true
       })
     )
   })
@@ -164,7 +158,7 @@ describe('DashboardPage', () => {
       [],
       jasmine.objectContaining({
         queryParams: {},
-        replaceUrl: true,
+        replaceUrl: true
       })
     )
   })

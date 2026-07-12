@@ -12,6 +12,7 @@ describe('ConfirmModalComponent', () => {
     isOpen: WritableSignal<boolean>
     message: WritableSignal<string>
     saveLabel: WritableSignal<string>
+    headerKey: WritableSignal<string | null>
     variant: () => string
     showSaveButton: () => boolean
     saveButtonLabel: () => string
@@ -22,6 +23,7 @@ describe('ConfirmModalComponent', () => {
     const isOpen = signal(false)
     const message = signal('')
     const saveLabel = signal('save')
+    const headerKey = signal<string | null>(null)
     const variant = signal<'default' | 'danger' | 'warning'>('default')
     const showSaveButton = signal(false)
     const saveButtonLabel = signal('save')
@@ -29,6 +31,7 @@ describe('ConfirmModalComponent', () => {
       isOpen,
       message,
       saveLabel,
+      headerKey,
       variant: variant as () => string,
       showSaveButton: showSaveButton as () => boolean,
       saveButtonLabel: saveButtonLabel as () => string,

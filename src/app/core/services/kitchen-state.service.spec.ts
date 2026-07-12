@@ -110,7 +110,7 @@ describe('KitchenStateService', () => {
 
   describe('Product CRUD', () => {
     it('should call saveProduct (add) and show success message', (done) => {
-      const product = createMockProduct(''); // Empty ID triggers add
+      const product = createMockProduct('') // Empty ID triggers add
       const savedProduct = { ...product, _id: 'p-new' }
       productDataSpy.addProduct.and.returnValue(Promise.resolve(savedProduct))
 

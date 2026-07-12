@@ -1,4 +1,4 @@
-# Session Brief
+﻿# Session Brief
 
 ## Session ID
 2026-04-17-ai-draft-dnd-claude-refactor
@@ -22,4 +22,4 @@ Add CDK drag-and-drop reordering to AI Draft Editor (ingredients, preparation st
 7. All changes committed to feature branch
 
 ## Source
-Reconstructed from session summary provided at end-of-session invocation.
+Reconstructed from session summary provided at /ship invocation.

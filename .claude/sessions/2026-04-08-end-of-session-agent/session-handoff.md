@@ -1,22 +1,22 @@
-# Session Handoff
+﻿# Session Handoff
 
 ## Session ID
-2026-04-08-end-of-session-agent
+2026-04-08-/ship
 
 ## Status
 COMPLETE
 
 ## Summary
-Goal: Create the unified end-of-session agent and migrate all session-closing workflows to use it as a single deterministic pipeline.
-Branch: feat/end-of-session-agent
+Goal: Create the unified /ship and migrate all session-closing workflows to use it as a single deterministic pipeline.
+Branch: feat//ship
 Date: 2026-04-08
 
 ---
 
 ## What Was Done
-- Created unified end-of-session agent with 14 phases (brief check, mid-session check, env detection, state assessment, build gate, techdebt scan, git ops, todo archive, doc refresh, plan cleanup, session evaluation, write report, present to user, sync check)
+- Created unified /ship with 14 phases (brief check, mid-session check, env detection, state assessment, build gate, techdebt scan, git ops, todo archive, doc refresh, plan cleanup, session evaluation, write report, present to user, sync check)
 - Created `/brief` command with proactive and retroactive modes
-- Created end-of-session analysis report (design brief for the agent)
+- Created /ship analysis report (design brief for the agent)
 - Added brief.md threading through plan-implementation, execute-it, validation-checklist, and session-handoff
 - Migrated all session-closing triggers from fragmented skills to unified agent
 - Converted session-handoff/SKILL.md to redirect stub
@@ -24,9 +24,9 @@ Date: 2026-04-08
 
 ## Files Modified
 ```
- .claude/agents/end-of-session-agent.md       | NEW (core agent)
+ .claude/agents//ship (formerly /ship)       | NEW (core agent)
  .claude/commands/brief.md                    | NEW (/brief command)
- .claude/docs/end-of-session-analysis.md      | NEW (analysis report)
+ .claude/docs//ship-analysis.md      | NEW (analysis report)
  .claude/end-session-agent-brife.md           | NEW (specification brief)
  .claude/sessions/                            | NEW (sessions directory)
  .claude/agents/git-agent.md                  |   1 line
@@ -54,7 +54,7 @@ Date: 2026-04-08
 ## Evaluation Against Success Criteria
 | Criterion | Status | Evidence/Reason |
 |-----------|--------|-----------------|
-| Agent file exists | Done | `.claude/agents/end-of-session-agent.md` created |
+| Agent file exists | Done | `.claude/agents//ship (formerly /ship)` created |
 | All 14 phases encoded | Done | Phases 0-14 present in agent file |
 | User confirmation gates defined | Done | 4 gates in agent: P1, P6, P9, P12 |
 | Trigger phrases route to agent | Done | copilot-instructions.md line 42 |
@@ -81,23 +81,23 @@ Date: 2026-04-08
 - Plans marked done: none
 
 ## Agent Notes
-- The specification brief file has a typo in its name (`end-session-agent-brife.md`) — cosmetic only
-- `auto-reflect.ps1` was modified (by linter/user, not by this agent) — changes included in commit
-- `.cursor/rules/session-start.mdc` was also modified externally — included in commit
-- `.claude/truly-open-tasks.md` was deleted externally — included in commit
+- The specification brief file has a typo in its name (`end-session-agent-brife.md`) â€” cosmetic only
+- `auto-reflect.ps1` was modified (by linter/user, not by this agent) â€” changes included in commit
+- `.cursor/rules/session-start.mdc` was also modified externally â€” included in commit
+- `.claude/truly-open-tasks.md` was deleted externally â€” included in commit
 
 ---
 
 ## Next Session
 **Open PRs:**
-- https://github.com/WDD-CODER/foodVibe1.0/pull/94: feat(workflow): unified end-of-session agent + brief threading
+- https://github.com/WDD-CODER/foodVibe1.0/pull/94: feat(workflow): unified /ship + brief threading
 
 **Next task:**
-Plan 259 Task 1: `server/routes/ai.js` — add `GEMINI_SHOTS` helpers
+Plan 259 Task 1: `server/routes/ai.js` â€” add `GEMINI_SHOTS` helpers
 
 **Suggested focus:**
 Merge PR #94, then continue with Plan 259 (DB-Backed Shared Few-Shot Pool)
 
 ---
 Generated: 2026-04-08
-Agent: end-of-session-agent
+Agent: /ship

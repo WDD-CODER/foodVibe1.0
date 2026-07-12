@@ -1,36 +1,36 @@
----
-description: Walk 16 mobile flows at 375×812 RTL, stress-test inputs, report layout breakage
+﻿---
+description: Walk 16 mobile flows at 375Ã—812 RTL, stress-test inputs, report layout breakage
 allowed-tools: [Read, Write, Edit, Bash, Glob, Grep, Agent]
 ---
 
 # /mobile-flow-audit [flags]
 
-Invoke the Mobile Flow Auditor persona to run the full mobile-flow audit.
+Invoke the Mobile flow audit persona to run the full mobile-flow audit.
 
 ## Arguments
 
-- `--only <slug>` — run only the named flow
-- `--skip <slug,slug>` — skip listed flows
-- `--force-signup` — re-run signup flow even if credentials exist
-- `$ARGUMENTS` — parsed as above
+- `--only <slug>` â€” run only the named flow
+- `--skip <slug,slug>` â€” skip listed flows
+- `--force-signup` â€” re-run signup flow even if credentials exist
+- `$ARGUMENTS` â€” parsed as above
 
-## Step 1 — Preflight
+## Step 1 â€” Preflight
 
 Run `/preflight` first. Abort if any check fails.
 
-1. Check dev server: `curl -s -o /dev/null -w "%{http_code}" http://localhost:4200` must return `200`. If not → abort with `"Dev server not running. Start with npm run dev:local."`
-2. Check gstack binary: `ls ~/.claude/skills/gstack/browse/dist/browse`. If missing → abort with `"gstack not installed."`
+1. Check dev server: `curl -s -o /dev/null -w "%{http_code}" http://localhost:4200` must return `200`. If not â†’ abort with `"Dev server not running. Start with npm run dev:local."`
+2. Check gstack binary: `ls ~/.claude/skills/gstack/browse/dist/browse`. If missing â†’ abort with `"gstack not installed."`
 3. Set viewport: `B=~/.claude/skills/gstack/browse/dist/browse; $B viewport 375x812`
 4. Ensure reports directory: `mkdir -p .claude/reports/mobile-audit`
-5. Ensure `.gitignore` contains `.claude/reports/mobile-audit/.credentials.json` — if not, add it.
+5. Ensure `.gitignore` contains `.claude/reports/mobile-audit/.credentials.json` â€” if not, add it.
 
-## Step 2 — Session setup
+## Step 2 â€” Session setup
 
 1. Read `.claude/reports/mobile-audit/.credentials.json`
-2. If missing OR `--force-signup` → set `RUN_SIGNUP=true`
-3. If present → set `RUN_SIGNUP=false`, store `{email, password}` as `CREDS`
+2. If missing OR `--force-signup` â†’ set `RUN_SIGNUP=true`
+3. If present â†’ set `RUN_SIGNUP=false`, store `{email, password}` as `CREDS`
 
-## Step 3 — Load flow catalog
+## Step 3 â€” Load flow catalog
 
 The flow catalog is the source of truth. Load it below and respect `--only` / `--skip` filters.
 
@@ -59,10 +59,10 @@ The flow catalog is the source of truth. Load it below and respect `--only` / `-
 P1 = 40-char Hebrew | P2 = 80-char Hebrew | P3 = Emoji+LTR in RTL | P4 = Two dropdowns open | P5 = Keyboard-open state | P6 = 20+ row list. P5 applies to any input field unless otherwise noted.
 
 ### Skip rules
-- If flow #1 `signup` is in the skip set AND no creds exist → abort with `"Cannot skip signup on first run."`
-- If flow #2 `login` is in the skip set → force-skip all auth-required flows and warn.
+- If flow #1 `signup` is in the skip set AND no creds exist â†’ abort with `"Cannot skip signup on first run."`
+- If flow #2 `login` is in the skip set â†’ force-skip all auth-required flows and warn.
 
-## Step 4 — Execute flows
+## Step 4 â€” Execute flows
 
 ### Dependency gate
 Track `LOGIN_OK=true|false`. Initialize from credentials check.
@@ -73,26 +73,26 @@ For each subsequent flow with `Requires Auth = Yes` in catalog:
 
 For each flow in the filtered catalog:
 
-### 4a — Prepare
+### 4a â€” Prepare
 1. Create folder: `mkdir -p .claude/reports/mobile-audit/<slug>/shots`
 2. Clear old screenshots: `rm -f .claude/reports/mobile-audit/<slug>/shots/*.png`
 3. Reset report.md scaffold:
 
 ```markdown
-# <slug> — Mobile Flow Audit
+# <slug> â€” Mobile Flow Audit
 Run: <ISO date>
-Viewport: 375×812 RTL
-Severity counts: Critical <TBD> · Major <TBD> · Minor <TBD>
+Viewport: 375Ã—812 RTL
+Severity counts: Critical <TBD> Â· Major <TBD> Â· Minor <TBD>
 
 ## Defects
 ```
 
-### 4b — Spawn auditor subagent
+### 4b â€” Spawn auditor subagent
 
 Spawn fresh Agent (general-purpose) with prompt:
 ```
-You are the Mobile Flow Auditor.
-Read .claude/agents/mobile-flow-auditor.md for full protocol.
+You are the Mobile flow audit.
+Read this command file (agent retired — protocol is inline below / above) for full protocol.
 Assigned flow:
 
   Slug: <slug>
@@ -108,28 +108,28 @@ Never modify src/, server/, or app code.
 Return JSON summary on completion.
 ```
 
-### 4c — Collect result
+### 4c â€” Collect result
 1. Parse the returned JSON summary
 2. Append row to `.claude/reports/mobile-audit/INDEX.md` (overwrite matching row if already exists)
 
-## Step 5 — Write INDEX.md
+## Step 5 â€” Write INDEX.md
 
 Format:
 
 ```markdown
 # Mobile Audit Index
 **Last full run:** <ISO date>
-**Viewport:** 375×812 RTL
+**Viewport:** 375Ã—812 RTL
 
 | Flow | Last run | Critical | Major | Minor | Report |
 |------|----------|----------|-------|-------|--------|
-| signup | 2026-04-20 | 0 | 2 | 1 | [→](./signup/report.md) |
+| signup | 2026-04-20 | 0 | 2 | 1 | [â†’](./signup/report.md) |
 | ... | ... | ... | ... | ... | ... |
 ```
 
-## Step 6 — Final summary
+## Step 6 â€” Final summary
 
-Print the Mobile Flow Auditor's standard output block (from persona file).
+Print the Mobile flow audit's standard output block (from persona file).
 
 ## Rules
 - Never commit. The user commits reports manually.

@@ -14,7 +14,7 @@ export class UserMsg {
   userMsgService = inject(UserMsgService)
   public msg_ = this.userMsgService.msg_
 
-  onCloseMsg($event: MouseEvent) {
+  onCloseMsg(_event: MouseEvent) {
     this.userMsgService.CloseMsg()
   }
 

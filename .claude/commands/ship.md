@@ -1,192 +1,228 @@
-# /ship — Session End (chat-scoped commit)
+﻿---
+description: Session end — build, review, commit approval, conditional state/todo (inline, no subagent)
+allowed-tools: Read, Grep, Glob, Bash, Edit, Write
+---
 
-Closes the current session. Repo root = **workspace cwd** (never hardcode a machine path).
+# /ship — Session end (inline pipeline)
 
-Invoking `/ship` **authorizes the agent to commit** this chat’s files after the confirmation
-block (or immediately with `--yes`). This is the execute path. For message-only prep without
-commit, use `git-agent` instead.
+Closes the current session. Repo root = **workspace cwd**. **No subagent spawns** — all phases run inline in this command.
 
-**Aliases / triggers:** `/ship`, `/end-session`, “wrap up”, “ship”, “ship it”, “ship no confirm”.
+**Aliases / triggers:** `/ship`, `/end-session`, “wrap up”, “ship”, “ship it”.
+
+Invoking `/ship` authorizes commit of this chat’s files after explicit **Y** (unless `--yes` / `--skip-review` flags apply as documented below). For message-only prep without commit, use `git-agent`.
+
+## Flags
+
+| Flag | Behavior |
+|------|----------|
+| `/ship` | Full pipeline; wait for **Y** before commit/push |
+| `/ship --yes` | Show confirmation block then commit without waiting (still runs review unless skipped) |
+| `/ship --skip-review "reason"` | Bypass Phase 2 entirely; **reason required**; log `[review-skipped: {reason}]` in the commit message body. No silent skip. |
 
 ---
 
-## Modes
-
-| Invocation | Confirmation |
-|------------|--------------|
-| `/ship` | Show tree + Verify bullets → **wait for Y** (or list edits) → then commit |
-| `/ship --yes` / “ship, no confirm” | Show tree + Verify bullets once → **commit immediately** (no wait) |
-
-Push only when the Human also said “push” / “ship and push”. Default = commit only.
-
----
-
-## Phase 1 — Build gate (HARD)
-
-If dirty or staged files include `.ts` / `.html` / `.scss` / `.css` under `src/` or `server/`:
+## Phase 1 — Build gate (UNCONDITIONAL hard stop)
 
 ```bash
 ng build
 ```
 
-- **Fail** → stop. Fix, then re-run `/ship`.
-- **Docs/workflow-only** (no app code) → skip build, note `Build: SKIPPED`.
+- **Fail** → stop. Do not commit. Fix, then re-run `/ship`.
+- Never make this gate conditional.
 
 ---
 
-## Phase 2 — This-chat file set + confirmation block
+## Phase 2 — Review (unless `--skip-review "reason"`)
 
-### 2.1 Resolve files (NEVER `git add -A` by default)
+1. Invoke `/review` (read `.claude/commands/review.md` and execute it).
+2. On `REVIEW: PASS` → continue.
+3. On `ISSUES FOUND` → fix the listed issues → re-run `/review` **exactly once**.
+4. If still `ISSUES FOUND` → **stop**. Do not commit. Present remaining issues to the user.
+5. Retry cap is hard: one fix-and-recheck cycle only. Never loop indefinitely.
 
-1. Run: `python scripts/session-manifest-ship.py` (from repo root).
-2. Intersect manifest `files` with current dirty paths (`git status --short`).
-3. Parse JSON:
-   - **`files` non-empty, `overlaps` empty** → stage candidates = that list only.
-   - **`overlaps` non-empty** → STOP. Show overlapping branch + paths. Ask: commit
-     non-overlapping only? / abort?
-   - **`no_manifest=true`** → warn. Do **not** fall back to whole-tree add.
-     Prefer files touched in **this conversation** (tool write/edit history ∩ dirty).
-     If still unclear → STOP and ask the Human which paths to include.
-4. **Override** only if Human explicitly said so (“ship everything”, “include X”,
-   “full working tree”).
+If `--skip-review "reason"` was provided:
+- Skip this phase entirely.
+- Require a non-empty reason from the user.
+- Record `Review: SKIPPED ({reason})` in the output summary.
+- Include `[review-skipped: {reason}]` in the commit message body.
 
-Flag secrets / `.env` — never stage them.
+---
 
-**Always include** the session wrap path in the stage list (even if not yet dirty):
-`/sessions/[YYYY-MM-DD].md` (create/append in Phase 3.0 before `git add`).
+## Phase 3 — Manifest check (conditional)
 
-### 2.2 Present confirmation block (always, including `--yes`)
+```bash
+git worktree list | wc -l
+```
 
-Use this exact shape (markdown `text` fence):
+- **ONLY if worktree count > 1** → run `python3 scripts/session-manifest-ship.py` and honor overlap stops (same rules as before: non-empty overlaps → STOP; `no_manifest` → do not `git add -A`; prefer this-chat files).
+- **Otherwise (≤1 worktree)** → skip the manifest script entirely; use normal staging of this-chat dirty paths (tool write/edit history ∩ `git status --short`). Never `git add -A` unless Human overrode scope.
+- Flag secrets / `.env` — never stage them.
+
+---
+
+## Phase 4 — Commit + push (UNCONDITIONAL approval gate)
+
+Present a visual tree, then **wait for explicit "Y"** (unless `--yes`):
 
 ~~~text
 Branch: [branch-name]
+Rename: [old → new]   # only if on feat/session-* placeholder
 
 Proposed commit:
   type(scope): subject
 
   body (why, not what)
+  [review-skipped: reason]   # only when --skip-review was used
 
 Files to stage:
   ├── file1
-  ├── file2
-  ├── sessions/YYYY-MM-DD.md   (session wrap — same commit)
-  └── file3
-
-Verify (you — quick pass):
-  • [concrete check tied to this commit]
-  • [concrete check]
-  • [concrete check]
+  └── file2
 
 Approve? (Y / edit list / abort)
 ~~~
 
-On `--yes`, replace the last line with: `Mode: --yes — committing now.`
+### Semantic branch rename ((semantic rename rules))
 
-### 2.2.1 Unrelated commits on branch (history hygiene)
+If on `feat/session-*`:
+1. `git log main..HEAD --oneline` and `git diff --stat main..HEAD`
+2. Derive semantic slug (`feat|fix|refactor|chore` + 2–4 kebab words; no dates/session filler)
+3. Show `Rename: {old} → {new}` in the tree; rename after approval: `git branch -m`
 
-Before presenting the confirmation block, run:
+### On approval
 
+1. `git add` only listed paths
+2. `git commit` (Conventional Commit; Cursor trailer `Co-authored-by: Cursor <cursoragent@cursor.com>` when applicable)
+3. Rename branch if approved
+4. Push only if Human asked (“push” / “ship and push”): `git push -u origin HEAD`
+5. **Commit-vs-PR judgment** (before any `gh pr create`) — see below. Never open a PR silently.
+
+### Commit-vs-PR judgment
+
+Decide whether this ship is a **feature-complete** commit (push + propose PR) or a **milestone/checkpoint** commit (push only, no PR). Do **not** infer “open PR if applicable.”
+
+**Manual override (check first):** If the user’s ship-time message explicitly says e.g. “open a PR” / “create a PR” → treat as feature-complete and propose a PR. If it says e.g. “just commit” / “checkpoint” / “no PR” → treat as checkpoint; commit + push only, no PR. Skip the brief/ad-hoc check below when an override is present.
+
+**Otherwise — brief used this session** (brief file referenced in conversation or `.claude/todo.md`):
+
+1. Compare the session diff against that brief’s **Done when** list.
+2. **All criteria met** → feature-complete → proceed to propose PR (`gh pr create` on a feature branch, existing flow).
+3. **Not all criteria met** → milestone/checkpoint → commit + push to the branch only; **do not** propose a PR. In the ship summary state explicitly: `Milestone commit — brief not yet complete, no PR proposed`.
+
+**Otherwise — no brief this session** (ad-hoc work, no Done-when to check):
+
+- Do **not** default to opening a PR.
+- Ask once, single-select style: `Is this feature-complete (open a PR) or a checkpoint (push only)?`
+- Follow the user’s answer; do not assume either path.
+
+**Hard rule:** Never open a PR without either (a) the brief’s Done-when fully met, or (b) explicit user instruction (override or ad-hoc answer).
+
+### After opening a PR (feature-complete path only)
+
+After opening the PR, run `gh pr checks --watch` once. If any check fails, offer the user: run the fix loop now (`docs/agent/pr-check-fix-loop.md`) or leave it. Do not auto-run without asking.
+
+### Push conflict guard
+
+If push is rejected (non-fast-forward):
 ```bash
-git log --oneline origin/main..HEAD
+git fetch origin
+git log --oneline HEAD..origin/{branch}
+git diff --stat HEAD...origin/{branch}
+```
+Present choices: (a) rebase (b) merge (c) abort — wait for user choice. On conflicts during rebase/merge: list files, stop, instruct resolve then re-run `/ship`.
+
+If renamed after remote had the old name:
+```bash
+git push origin --delete {old_name}
+git push -u origin {new_name}
 ```
 
-(If `origin/main` is missing, use `main` or the branch’s merge-base with the intended base.)
+### PR merge fallback
 
-**If** any commit in that list is **outside** this chat’s stage list / goal (different scope,
-e.g. auth commit on a docs-only discovery branch):
+If `gh pr merge --merge --delete-branch` fails due to dirty local tree, fall back to:
+```bash
+gh pr merge {pr_number} --merge --auto
+```
+Do not stash/commit unrelated dirty files to unblock merge.
 
-1. Add a warning line under `Branch:` in the confirmation block, e.g.
-   `Warning: unrelated commits on branch — <sha> <subject> (…); rebase/cherry-pick before merge?`
-2. Add one Verify bullet: `Unrelated commits on branch (list SHAs) — rebase/cherry-pick before merge?`
-3. Do **not** silently rewrite history. Surface it; Human decides rebase vs split PR.
-
-Skip this check when every commit ahead of the base clearly belongs to the same PR scope.
-
-### 2.3 Verify bullets (mandatory)
-
-Give the Human a **ready-made evaluation checklist** so they do not invent what to check.
-
-Rules:
-- **3–7 bullets**
-- Each bullet = one concrete action (“Open X — expect Y”, “Run Z — see W”)
-- Derived from **this commit’s paths + this chat’s goal** — not generic QA
-- Pass/fail in seconds (glance, one click, one command)
-- No vague “check quality” / “make sure it works”
-
-### 2.4 Gate
-
-- **Default `/ship`:** wait for `Y` / list edits / abort. On `Y`, proceed to Phase 3.
-- **`--yes` / “no confirm”:** proceed to Phase 3 immediately after printing the block.
+Never commit to `main`. Never force-push. Never amend after push.
 
 ---
 
-## Phase 3 — Session wrap + commit + optional push (one shot)
+## Phase 5 — Session-state (conditional size)
 
-**Goal:** after `/ship` finishes (especially with push), the working tree must **not**
-have a leftover dirty `sessions/*.md` that forces a second push. Session wrap lives in
-the **same** commit as the shipped files.
+Read save target from `.claude/.session-state-path` (fallback `docs/session-state.md`).
 
-### 3.0 Write session wrap BEFORE staging
+Count files changed this session (this-chat stage list / commits).
 
-1. Append (or create) `/sessions/[YYYY-MM-DD].md` with:
-   - Branch, date, short summary, files to be committed, Verify bullets
-   - `Commit: included in this /ship commit` — **do not** put a real SHA in the file
-     (a commit cannot contain its own final hash; printing the SHA is for the
-     chat Output summary only)
-   - `Push: yes | no` (intent from Human request)
-2. Also update `.claude/.session-state-path` / `docs/session-state.md` if that path is
-   the active capsule — same rule: write **before** commit, not after push.
-3. Todo: mark `[x]` only for items the Human confirmed done this session — do not invent.
-   If todo files change, add them to the stage list now.
+- **If ≤1 file changed** → **append one line** (date + sha + summary) under the existing sections. Keep required schema sections intact: `## Session Summary`, `## Next Steps`.
+- **If >1 file changed** → **full rewrite** with schema:
 
-### 3.1 Stage + commit (single commit — no post-commit wrap edits)
+```markdown
+# Session State
 
-1. `git add` **only** the listed paths **plus** the session wrap file(s) from 3.0
-   (never `git add -A` unless Human overrode scope).
-2. `git commit` with the proposed Conventional Commit message.
-   Include trailer when using Cursor: `Co-authored-by: Cursor <cursoragent@cursor.com>`.
-3. **Do not** edit the session wrap again after this commit. No amend-for-SHA.
-   Report the real SHA only in the Output summary (`git rev-parse --short HEAD`).
+## Branch
+{branch_name}
 
-### 3.2 Push (only if Human asked)
+## Date
+{YYYY-MM-DD}
 
-1. `git push -u origin HEAD` only if Human said “push” / “ship and push”.
-2. After successful commit (and push if any): delete
-   `.claude/sessions/<current-branch>/manifest.txt` if it exists.
-3. Confirm `git status --short` is clean for this-chat paths. If the session wrap is
-   still dirty, you violated 3.0–3.1 — fix before ending (do **not** ask the Human for
-   another push for wrap-only dirt you created).
-4. Never commit to `main`. Never force-push. Never amend after push.
+## Session Summary
+{2–4 bullets}
 
-If on `feat/session-*`, propose a semantic rename in the confirmation block; rename
-between commit and push only after Human OK (or as part of `--yes` if they already
-approved the new name in the prompt).
+## Files Modified
+{git diff --stat for this session}
+
+## Commit
+{sha or none}
+
+## PR
+{url or N/A}
+
+## Next Steps
+{first open todo + open session items}
+```
+
+Do not change the resume/read path used by `scripts/session-startup.sh`.
 
 ---
 
-## Output summary
+## Phase 6 — Todo sync (conditional)
+
+- **Only if** `.claude/todo.md` has ≥1 `[ ]` item that plausibly matches a file touched this session (or the user named a completed task) → mark matching items `[x]`; archive fully-complete sections to `.claude/todo-archive.md` under `## Done`.
+- **Otherwise** → skip and note: `Todo: no matching open items — skipped`
+
+---
+
+## Output summary (always)
+
+Always state which commit-vs-PR path was taken and why.
 
 ```
-SESSION WRAP — {branch}
-Build: PASS | SKIPPED | FAIL
-Scope: this-chat ({n} files) | override ({note})
+SESSION WRAP — {final_branch_name}
+Build: PASS | FAIL
+Review: PASS | FIXED+PASS | SKIPPED (reason)
 Commit: {sha or none}
 Push: yes | no
-Verify bullets: {n} shown
-Session state: {path}  (staged in same commit — tree clean after push)
+PR path: PR proposed — brief Done-when met
+       | PR proposed — user override / confirmed feature-complete
+       | Checkpoint commit — brief incomplete
+       | Checkpoint commit — no brief, user confirmed
+       | Checkpoint commit — user override
+PR: {url or N/A}
+Todo: {n marked} | no matching open items — skipped
+Session state: {path} (append | full rewrite)
 ```
+
+When the path is a milestone/checkpoint with an incomplete brief, also include the exact line:
+`Milestone commit — brief not yet complete, no PR proposed`
 
 ---
 
 ## What /ship does NOT do
 
-| Skipped | On-demand alternative |
-|---------|-----------------------|
+| Skipped | On-demand |
+|---------|-----------|
 | Techdebt scan | `/techdebt` |
-| Breadcrumb / doc refresh | `/docs-refresh` |
-| Session evaluation vs brief | `/evaluate-me` |
-| Agent Memory save | `memory_save` / `memory_lesson_save` |
-| Plan archive | Rename `.plan.md` → `.done.plan.md` or mark Plan Contract `[x]` |
-| Message-only prep (no commit) | `git-agent` |
-| Post-push session-file edits | Forbidden — causes leftover dirty tree |
+| Docs refresh | `/docs-refresh` |
+| Session evaluation | `/evaluate-me` |
+| Message-only prep | `git-agent` |

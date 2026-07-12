@@ -4,13 +4,14 @@ import { provideRouter } from '@angular/router'
 import { provideHttpClient } from '@angular/common/http'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { HeaderComponent } from '../core/components/header/header.component'
-import { UserMsg } from "src/app/core/components/user-msg/user-msg.component"
+import { UserMsg } from 'src/app/core/components/user-msg/user-msg.component'
 import { UserMsgService } from '@services/user-msg.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { ConversionService } from '@services/conversion.service'
 import { UnitCreatorModal } from 'src/app/shared/unit-creator/unit-creator.component'
 import { Component, Input, Output, EventEmitter, signal } from '@angular/core'
-import { LucideAngularModule, Menu, X, CircleUserRound, LogOut, Plus, CookingPot, Flame } from 'lucide-angular'
+import { LucideAngularModule } from 'lucide-angular'
+import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 
 // 1. Rigorous Mock to replace the problematic production component
 @Component({
@@ -28,15 +29,11 @@ class MockUnitCreatorModal {
 describe('AppComponent', () => {
   beforeEach(async () => {
     const mockUserMsgService = { msg_: signal(null) }
-    const mockUnitRegistry = { allUnits_: signal([]) }
+    // isCreatorOpen_ true so @defer (when …) mounts unit-creator-modal for the assertion below
+    const mockUnitRegistry = { allUnits_: signal([]), isCreatorOpen_: signal(true) }
 
     await TestBed.configureTestingModule({
-      imports: [
-        AppComponent,
-        HeaderComponent,
-        UserMsg,
-        LucideAngularModule.pick({ Menu, X, CircleUserRound, LogOut, Plus, CookingPot, Flame }),
-      ],
+      imports: [AppComponent, HeaderComponent, UserMsg, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
         provideRouter([]),
         provideHttpClient(),
@@ -46,15 +43,15 @@ describe('AppComponent', () => {
         { provide: ConversionService, useValue: {} }
       ]
     })
-    /**
-     * 2. THE FIX: Override the AppComponent metadata
-     * This REMOVES the real UnitCreatorModal and REPLACES it with our Mock.
-     */
-    .overrideComponent(AppComponent, {
-      remove: { imports: [UnitCreatorModal] },
-      add: { imports: [MockUnitCreatorModal] }
-    })
-    .compileComponents()
+      /**
+       * 2. THE FIX: Override the AppComponent metadata
+       * This REMOVES the real UnitCreatorModal and REPLACES it with our Mock.
+       */
+      .overrideComponent(AppComponent, {
+        remove: { imports: [UnitCreatorModal] },
+        add: { imports: [MockUnitCreatorModal] }
+      })
+      .compileComponents()
   })
 
   it('should create the app', () => {
@@ -63,7 +60,7 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy()
   })
 
-  it(`should have the 'foodVibe1.0' title`, () => {
+  it("should have the 'foodVibe1.0' title", () => {
     const fixture = TestBed.createComponent(AppComponent)
     const app = fixture.componentInstance
     expect(app.title).toEqual('foodVibe1.0')
@@ -73,11 +70,12 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent)
     fixture.detectChanges()
     const compiled = fixture.nativeElement as HTMLElement
-    
-    // Verifying the presence of the selectors
+
+    // Eager shell only — unit-creator-modal is behind @defer (when isCreatorOpen_)
     expect(compiled.querySelector('app-header')).toBeTruthy()
     expect(compiled.querySelector('router-outlet')).toBeTruthy()
     expect(compiled.querySelector('user-msg')).toBeTruthy()
-    expect(compiled.querySelector('unit-creator-modal')).toBeTruthy()
+    expect(compiled.querySelector('app-confirm-modal')).toBeTruthy()
+    expect(compiled.querySelector('app-hero-fab')).toBeTruthy()
   })
 })

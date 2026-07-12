@@ -55,7 +55,7 @@ describe('ConversionService', () => {
 
     it('should calculate waste percentage from quantity', () => {
       expect(service.getWastePercent(200, 1000)).toBe(20)
-      expect(service.getWastePercent(200, 0)).toBe(0); // Zero guard
+      expect(service.getWastePercent(200, 0)).toBe(0) // Zero guard
     })
 
     it('should return base price as suggested purchase price for a full base-unit block', () => {

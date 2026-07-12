@@ -36,14 +36,20 @@ export class RecipeYieldManager {
     this.resetTrigger()
     const all = this.allUnitKeys()
     const conversions = this.form().get('yield_conversions') as FormArray
-    const usedSecondary = conversions?.length > 1
-      ? new Set(conversions.controls.slice(1).map(c => c.get('unit')?.value).filter(Boolean))
-      : new Set<string>()
-    return all.filter(u => !usedSecondary.has(u))
+    const usedSecondary =
+      conversions?.length > 1
+        ? new Set(
+            conversions.controls
+              .slice(1)
+              .map((c) => c.get('unit')?.value)
+              .filter(Boolean)
+          )
+        : new Set<string>()
+    return all.filter((u) => !usedSecondary.has(u))
   })
 
   readonly primaryUnitOptions_ = computed(() => {
-    const units = this.availablePrimaryUnits_().map(u => ({ value: u, label: u }))
+    const units = this.availablePrimaryUnits_().map((u) => ({ value: u, label: u }))
     return [...units, { value: '__add_unit__', label: 'create_new_unit' }]
   })
 
@@ -52,7 +58,7 @@ export class RecipeYieldManager {
     this.resetTrigger()
     const all = this.allUnitKeys()
     const used = this.usedUnits_()
-    return all.filter(u => !used.has(u))
+    return all.filter((u) => !used.has(u))
   })
 
   readonly currentRecipeTypeDisplay_ = computed(() => {
@@ -172,7 +178,7 @@ export class RecipeYieldManager {
       }
     }
     this.isManualOverride_.set(false)
-    this.manualTrigger_.update(v => v + 1)
+    this.manualTrigger_.update((v) => v + 1)
   }
 
   onPrimaryUnitChange(value: string): 'create_unit' | null {
@@ -185,9 +191,7 @@ export class RecipeYieldManager {
     const current = this.primaryAmount_()
     const type = this.form().get('recipe_type')?.value
     const min = type === 'dish' ? 1 : 0
-    const next = delta > 0
-      ? quantityIncrement(current, min, undefined)
-      : quantityDecrement(current, min, undefined)
+    const next = delta > 0 ? quantityIncrement(current, min, undefined) : quantityDecrement(current, min, undefined)
     this.applyPrimaryUpdate(next)
     this.isManualOverride_.set(true)
   }
@@ -216,7 +220,7 @@ export class RecipeYieldManager {
       conversions.at(0).get('amount')?.setValue(sanitizedValue, { emitEvent: true })
     }
 
-    this.manualTrigger_.update(v => v + 1)
+    this.manualTrigger_.update((v) => v + 1)
     this.form().updateValueAndValidity({ emitEvent: true })
   }
 
@@ -226,9 +230,8 @@ export class RecipeYieldManager {
     const current = this.primaryAmount_()
     const type = this.form().get('recipe_type')?.value
     const min = type === 'dish' ? 1 : 0
-    const next = e.key === 'ArrowUp'
-      ? quantityIncrement(current, min, undefined)
-      : quantityDecrement(current, min, undefined)
+    const next =
+      e.key === 'ArrowUp' ? quantityIncrement(current, min, undefined) : quantityDecrement(current, min, undefined)
     this.applyPrimaryUpdate(next)
     this.isManualOverride_.set(true)
   }
@@ -248,7 +251,7 @@ export class RecipeYieldManager {
     })
 
     conversions.push(newUnitGroup)
-    this.manualTrigger_.update(v => v + 1)
+    this.manualTrigger_.update((v) => v + 1)
   }
 
   addSecondaryChipWithDefault(): void {
@@ -259,7 +262,7 @@ export class RecipeYieldManager {
     const conversions = this.form().get('yield_conversions') as FormArray
     const last = conversions.at(conversions.length - 1) as FormGroup
     last.get('amount')?.setValue(1, { emitEvent: true })
-    this.manualTrigger_.update(v => v + 1)
+    this.manualTrigger_.update((v) => v + 1)
   }
 
   onSecondaryAmountInput(group: FormGroup, rawValue: string): void {
@@ -268,7 +271,7 @@ export class RecipeYieldManager {
     if (amountControl) {
       amountControl.patchValue(isNaN(parsed) ? 0 : Math.max(0, parsed), { emitEvent: true })
     }
-    this.manualTrigger_.update(v => v + 1)
+    this.manualTrigger_.update((v) => v + 1)
   }
 
   updateSecondaryAmount(index: number, delta: number): void {
@@ -279,11 +282,9 @@ export class RecipeYieldManager {
     const amountControl = group.get('amount')
     if (!amountControl) return
     const current = amountControl.value ?? 0
-    const next = delta > 0
-      ? quantityIncrement(current, 0, undefined)
-      : quantityDecrement(current, 0, undefined)
+    const next = delta > 0 ? quantityIncrement(current, 0, undefined) : quantityDecrement(current, 0, undefined)
     amountControl.setValue(Math.max(0, next), { emitEvent: true })
-    this.manualTrigger_.update(v => v + 1)
+    this.manualTrigger_.update((v) => v + 1)
   }
 
   onSecondaryScalingChipAmountChange(chipIdx: number, value: number): void {
@@ -295,7 +296,7 @@ export class RecipeYieldManager {
     if (amountControl) {
       amountControl.setValue(Math.max(0, value), { emitEvent: true })
     }
-    this.manualTrigger_.update(v => v + 1)
+    this.manualTrigger_.update((v) => v + 1)
   }
 
   changeSecondaryUnit(chipIndex: number, newUnit: string): void {
@@ -308,7 +309,7 @@ export class RecipeYieldManager {
     const exists = conversions.controls.some((c, i) => i !== groupIndex && c.get('unit')?.value === newUnit)
     if (exists) return
     group.get('unit')?.setValue(newUnit, { emitEvent: true })
-    this.manualTrigger_.update(v => v + 1)
+    this.manualTrigger_.update((v) => v + 1)
   }
 
   onSecondaryAmountKeydown(e: KeyboardEvent, index: number): void {
@@ -320,17 +321,17 @@ export class RecipeYieldManager {
   removeSecondaryUnit(index: number): void {
     const conversions = this.form().get('yield_conversions') as FormArray
     conversions.removeAt(index + 1)
-    this.manualTrigger_.update(v => v + 1)
+    this.manualTrigger_.update((v) => v + 1)
   }
 
-  availableUnitsForSecondaryChip_(chipIdx: number): string[] {
+  availableUnitsForSecondaryChip_(_chipIdx: number): string[] {
     const conversions = this.form().get('yield_conversions') as FormArray
     const used = new Set<string>()
     conversions.controls.forEach((c) => {
       const u = c.get('unit')?.value
       if (u) used.add(u)
     })
-    return this.allUnitKeys().filter(u => !used.has(u))
+    return this.allUnitKeys().filter((u) => !used.has(u))
   }
 
   getSecondaryUnitOptions(chipIdx: number): { value: string; label: string }[] {
@@ -341,7 +342,7 @@ export class RecipeYieldManager {
     if (currentUnit && !available.includes(currentUnit)) {
       units = [currentUnit, ...available]
     }
-    const options = units.map(u => ({ value: u, label: u }))
+    const options = units.map((u) => ({ value: u, label: u }))
     return [...options, { value: '__add_unit__', label: 'create_new_unit' }]
   }
 
@@ -365,13 +366,13 @@ export class RecipeYieldManager {
         conversions.at(0).patchValue({ unit: 'dish' })
       }
     }
-    this.manualTrigger_.update(v => v + 1)
+    this.manualTrigger_.update((v) => v + 1)
     this.form().updateValueAndValidity({ emitEvent: true })
   }
 
   // --- Misc ---
 
   bump(): void {
-    this.manualTrigger_.update(v => v + 1)
+    this.manualTrigger_.update((v) => v + 1)
   }
 }

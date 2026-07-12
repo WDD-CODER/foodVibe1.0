@@ -91,7 +91,7 @@ export class RecipeAiFlowService {
         name_hebrew: ing.name,
         amount_net: ing.amount,
         unit: safeUnit,
-        ...(matched && { referenceId: matched.entity._id, item_type: matched.type }),
+        ...(matched && { referenceId: matched.entity._id, item_type: matched.type })
       })
     }
 
@@ -124,8 +124,8 @@ export class RecipeAiFlowService {
             quantity_: item.quantity,
             phase_: 'both',
             is_critical_: true,
-            name_hebrew_: matched ? '' : item.name,
-          } as any)
+            name_hebrew_: matched ? '' : item.name
+          })
         )
       }
     }
@@ -138,22 +138,26 @@ export class RecipeAiFlowService {
     const primaryYield = this.yieldConversionsArray.at(0)?.getRawValue() ?? { amount: 0, unit: 'gram' }
 
     const ingredients = (this.ingredientsArray.controls as FormGroup[])
-      .map(g => g.getRawValue())
-      .filter(v => v.name_hebrew)
-      .map(v => ({ name: v.name_hebrew as string, amount: (v.amount_net as number) ?? 0, unit: (v.unit as string) ?? 'unit' }))
+      .map((g) => g.getRawValue())
+      .filter((v) => v.name_hebrew)
+      .map((v) => ({
+        name: v.name_hebrew as string,
+        amount: (v.amount_net as number) ?? 0,
+        unit: (v.unit as string) ?? 'unit'
+      }))
 
     const steps = (this.workflowArray.controls as FormGroup[])
-      .map(g => g.getRawValue())
-      .map(v => (v.instruction as string | undefined) ?? (v.preparation_name as string | undefined) ?? '')
-      .filter(s => s.length > 0)
+      .map((g) => g.getRawValue())
+      .map((v) => (v.instruction as string | undefined) ?? (v.preparation_name as string | undefined) ?? '')
+      .filter((s) => s.length > 0)
 
     const equipment = (this.logisticsBaselineArray.controls as FormGroup[])
-      .map(g => g.getRawValue())
-      .filter(v => v.equipment_id_)
-      .map(v => {
-        const eq = this.equipmentData_.allEquipment_().find(
-          e => e._id === v.equipment_id_ || (e as any)._masterId === v.equipment_id_
-        )
+      .map((g) => g.getRawValue())
+      .filter((v) => v.equipment_id_)
+      .map((v) => {
+        const eq = this.equipmentData_
+          .allEquipment_()
+          .find((e) => e._id === v.equipment_id_ || (e as { _masterId?: string })._masterId === v.equipment_id_)
         return { name: eq?.name_hebrew ?? v.equipment_id_, quantity: v.quantity_ as number }
       })
 
@@ -164,7 +168,7 @@ export class RecipeAiFlowService {
       yield_unit: primaryYield.unit,
       ingredients,
       steps,
-      ...(equipment.length > 0 ? { equipment } : {}),
+      ...(equipment.length > 0 ? { equipment } : {})
     }
   }
 
@@ -196,11 +200,11 @@ export class RecipeAiFlowService {
           name_hebrew: ing.name,
           amount_net: ing.amount,
           unit: safeUnit,
-          ...(matched && { referenceId: matched.entity._id, item_type: matched.type }),
+          ...(matched && { referenceId: matched.entity._id, item_type: matched.type })
         })
       }
       if (this.ingredientsArray.length === 0) addNewIngredientRow()
-      ingredientsFormVersion_.update(v => v + 1)
+      ingredientsFormVersion_.update((v) => v + 1)
     }
 
     if (patch.steps !== undefined) {
@@ -234,8 +238,8 @@ export class RecipeAiFlowService {
             quantity_: item.quantity,
             phase_: 'both',
             is_critical_: true,
-            name_hebrew_: matched ? '' : item.name,
-          } as any)
+            name_hebrew_: matched ? '' : item.name
+          })
         )
       }
     }
@@ -252,9 +256,9 @@ export class RecipeAiFlowService {
   private findIngredientMatch_(name: string): { entity: { _id: string }; type: 'product' | 'recipe' } | null {
     const norm = (s: string) => s.trim().toLowerCase()
     const q = norm(name)
-    const product = this.state_.products_().find(p => norm(p.name_hebrew) === q)
+    const product = this.state_.products_().find((p) => norm(p.name_hebrew) === q)
     if (product) return { entity: product, type: 'product' }
-    const recipe = this.state_.recipes_().find(r => norm(r.name_hebrew) === q)
+    const recipe = this.state_.recipes_().find((r) => norm(r.name_hebrew) === q)
     if (recipe) return { entity: recipe, type: 'recipe' }
     return null
   }
@@ -262,6 +266,6 @@ export class RecipeAiFlowService {
   private findEquipmentMatch_(name: string): Equipment | null {
     const norm = (s: string) => s.trim().toLowerCase()
     const q = norm(name)
-    return this.equipmentData_.allEquipment_().find(e => norm(e.name_hebrew) === q) ?? null
+    return this.equipmentData_.allEquipment_().find((e) => norm(e.name_hebrew) === q) ?? null
   }
 }

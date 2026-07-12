@@ -1,4 +1,4 @@
-# Session Handoff
+﻿# Session Handoff
 
 ## Session ID
 2026-04-10-reflect-infrastructure
@@ -14,7 +14,7 @@ Date: 2026-04-10
 ---
 
 ## What Was Done
-- Removed auto-reflect Stop hooks from schdeule-chekup worktree (settings.json, copilot-instructions.md, agent.md, end-of-session-agent.md, auto-reflect.ps1 deleted)
+- Removed auto-reflect Stop hooks from schdeule-chekup worktree (settings.json, copilot-instructions.md, agent.md, /ship (formerly /ship), auto-reflect.ps1 deleted)
 - Pruned stale worktree synthetic-wondering-breeze
 - Created PostToolUse failure logger (.claude/reflect/tool-failure-hook.ps1) -- 89 lines, logs to failure-log.tsv
 - Created /reflect-list command (.claude/commands/reflect-list.md) -- batch processor for failure log
@@ -23,7 +23,7 @@ Date: 2026-04-10
 ## Files Modified
 ```
 WORKTREE (schdeule-chekup) - uncommitted:
- .claude/agents/end-of-session-agent.md |   8 +-
+ .claude/agents//ship (formerly /ship) |   8 +-
  .claude/copilot-instructions.md        |   2 +-
  .claude/reflect/auto-reflect.ps1       | 319 --- (DELETED)
  .claude/settings.json                  |  14 +-
@@ -95,4 +95,4 @@ Complete the 2 missed criteria (settings.json + registrations), commit all chang
 
 ---
 Generated: 2026-04-10T18:36:00
-Agent: end-of-session-agent
+Agent: /ship

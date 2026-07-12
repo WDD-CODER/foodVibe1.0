@@ -139,5 +139,5 @@ Run `memory_smart_search(query="<keywords>", limit=3)` ONLY if task involves an 
 
 Output: `"Tech debt audit complete. [X] unused imports removed, [Y] TODOs logged, [Z] components flagged for refactor. Report saved to .claude/techdebt-reports/techdebt-YYYY-MM-DD.md ([N]/7 reports in archive)."`
 
-If critical logic was changed → invoke QA Engineer for verification before committing.
+If critical logic was changed → invoke CI / ng test for verification before committing.
 

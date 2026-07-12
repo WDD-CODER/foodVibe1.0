@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { FormArray, FormBuilder, ReactiveFormsModule } from '@angular/forms'
-import { LucideAngularModule, ChevronDown, Plus, X } from 'lucide-angular'
+import { provideHttpClient } from '@angular/common/http'
+import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { LucideAngularModule } from 'lucide-angular'
+import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { RecipeHeaderComponent } from './recipe-header.component'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
@@ -14,7 +17,9 @@ describe('RecipeHeaderComponent', () => {
   let fixture: ComponentFixture<RecipeHeaderComponent>
   let fb: FormBuilder
 
-  function createRecipeForm(overrides: { recipe_type?: 'dish' | 'preparation'; serving_portions?: number; yield_conversions?: FormArray } = {}) {
+  function createRecipeForm(
+    overrides: { recipe_type?: 'dish' | 'preparation'; serving_portions?: number; yield_conversions?: FormArray } = {}
+  ) {
     const type = overrides.recipe_type ?? 'preparation'
     const conversions = overrides.yield_conversions ?? fb.array([fb.group({ unit: ['gram'], amount: [1] })])
     return fb.group({
@@ -29,20 +34,26 @@ describe('RecipeHeaderComponent', () => {
 
   beforeEach(async () => {
     const unitRegistrySpy = jasmine.createSpyObj('UnitRegistryService', ['getConversion', 'openUnitCreator'], {
-      allUnitKeys_: signal(['gram', 'kg', 'dish', 'liter'])
+      allUnitKeys_: signal(['gram', 'kg', 'dish', 'liter']),
+      isCreatorOpen_: signal(false)
     })
     unitRegistrySpy.getConversion.and.returnValue(1)
 
     const metadataRegistrySpy = jasmine.createSpyObj('MetadataRegistryService', [], {
-      allLabels_: signal([{ key: 'vegan', color: '#10B981' }, { key: 'gluten-free', color: '#F59E0B' }])
+      allLabels_: signal([
+        { key: 'vegan', color: '#10B981' },
+        { key: 'gluten-free', color: '#F59E0B' }
+      ])
     })
     const labelCreationModalSpy = jasmine.createSpyObj('LabelCreationModalService', ['open'])
     labelCreationModalSpy.open.and.returnValue(Promise.resolve(null))
 
     await TestBed.configureTestingModule({
-      imports: [RecipeHeaderComponent, ReactiveFormsModule, LucideAngularModule.pick({ ChevronDown, Plus, X })],
+      imports: [RecipeHeaderComponent, ReactiveFormsModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
         FormBuilder,
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: UnitRegistryService, useValue: unitRegistrySpy },
         { provide: KitchenStateService, useValue: {} },
         { provide: TranslationService, useValue: { translate: (k: string) => k || '' } },

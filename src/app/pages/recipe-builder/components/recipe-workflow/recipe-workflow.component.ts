@@ -1,4 +1,15 @@
-import { Component, input, output, inject, signal, computed, effect, ViewChildren, QueryList, ElementRef } from '@angular/core'
+import {
+  Component,
+  input,
+  output,
+  inject,
+  signal,
+  computed,
+  effect,
+  ViewChildren,
+  QueryList,
+  ElementRef
+} from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { ReactiveFormsModule, FormArray, FormGroup, FormBuilder } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
@@ -14,7 +25,7 @@ import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.direct
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util'
 import { take } from 'rxjs/operators'
-import { CdkDragDrop, moveItemInArray, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop'
+import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 
 @Component({
@@ -65,7 +76,7 @@ export class RecipeWorkflowComponent {
   }
 
   toggleTimer(index: number): void {
-    this.timerOpenRows_.update(set => {
+    this.timerOpenRows_.update((set) => {
       const next = new Set(set)
       if (next.has(index)) {
         next.delete(index)
@@ -76,7 +87,6 @@ export class RecipeWorkflowComponent {
     })
   }
 
-
   /** Tracks which prep-step rows have the cook-time counter open. */
   cookTimeOpenRows_ = signal<Set<number>>(new Set())
 
@@ -85,7 +95,7 @@ export class RecipeWorkflowComponent {
   }
 
   toggleCookTime(index: number): void {
-    this.cookTimeOpenRows_.update(set => {
+    this.cookTimeOpenRows_.update((set) => {
       const next = new Set(set)
       if (next.has(index)) {
         next.delete(index)
@@ -97,7 +107,7 @@ export class RecipeWorkflowComponent {
   }
 
   toggleAddCategoryPicker() {
-    this.showAddCategoryPicker_.update(v => !v)
+    this.showAddCategoryPicker_.update((v) => !v)
   }
 
   onAddWithCategory(category: string) {
@@ -158,7 +168,7 @@ export class RecipeWorkflowComponent {
     return [
       { value: '', label: 'choose_category' },
       ...cats.map((c) => ({ value: c, label: c })),
-      { value: '__add_new__', label: 'add_preparation_category' },
+      { value: '__add_new__', label: 'add_preparation_category' }
     ]
   }
 
@@ -171,7 +181,7 @@ export class RecipeWorkflowComponent {
     if (val === '__add_unit__') {
       group.get('unit')?.setValue('')
       this.unitRegistry_.openUnitCreator()
-      this.unitRegistry_.unitAdded$.pipe(take(1)).subscribe(newUnit => {
+      this.unitRegistry_.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
         group.get('unit')?.setValue(newUnit)
       })
     } else {
@@ -267,7 +277,6 @@ export class RecipeWorkflowComponent {
     this.editingLaborTimeIndex_.set(null)
   }
 
-
   incrementCookTime(group: FormGroup): void {
     const ctrl = group.get('cooking_time')
     ctrl?.setValue((ctrl?.value ?? 0) + 30)
@@ -347,8 +356,7 @@ export class RecipeWorkflowComponent {
     })
 
     if (choice === 'global') {
-      const onRevert = () =>
-        group.patchValue({ category_name: mainCategory, main_category_name: mainCategory })
+      const onRevert = () => group.patchValue({ category_name: mainCategory, main_category_name: mainCategory })
       await this.prepRegistry_.updatePreparationCategory(preparationName, mainCategory, value, {
         onRevert
       })

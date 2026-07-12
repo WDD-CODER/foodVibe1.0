@@ -1,8 +1,8 @@
 import { APP_INITIALIZER, ApplicationConfig, ErrorHandler, importProvidersFrom, provideZoneChangeDetection } from '@angular/core'
 import { provideAnimations } from '@angular/platform-browser/animations'
 import { GlobalErrorHandler } from './core/services/global-error.handler'
-import { provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
-import { routes } from './app.routes';
+import { provideRouter, withPreloading, PreloadAllModules } from '@angular/router'
+import { routes } from './app.routes'
 import {
   ChefHat,
   AlertCircle,
@@ -79,11 +79,11 @@ import {
   CheckCircle,
   HelpCircle,
   Users
-} from 'lucide-angular';
-import { KitchenStateService } from '@services/kitchen-state.service';
+} from 'lucide-angular'
+import { KitchenStateService } from '@services/kitchen-state.service'
 import { provideHttpClient, withInterceptors } from '@angular/common/http'
 import { authInterceptor } from './core/interceptors/auth.interceptor'
-import { TranslationService } from '@services/translation.service';
+import { TranslationService } from '@services/translation.service'
 import { UserService } from '@services/user.service'
 import { environment } from '../environments/environment'
 import { catchError, of, switchMap } from 'rxjs'
@@ -194,5 +194,5 @@ export const appConfig: ApplicationConfig = {
       })
     )
   ]
-};
+}
 

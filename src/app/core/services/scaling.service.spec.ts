@@ -15,13 +15,10 @@ describe('ScalingService', () => {
     recipesSignal.set([])
     const kitchenSpy = jasmine.createSpyObj('KitchenStateService', [], {
       products_: productsSignal,
-      recipes_: recipesSignal,
+      recipes_: recipesSignal
     })
     TestBed.configureTestingModule({
-      providers: [
-        ScalingService,
-        { provide: KitchenStateService, useValue: kitchenSpy },
-      ],
+      providers: [ScalingService, { provide: KitchenStateService, useValue: kitchenSpy }]
     })
     service = TestBed.inject(ScalingService)
   })
@@ -55,20 +52,18 @@ describe('ScalingService', () => {
         yield_factor_: 1,
         allergens_: [],
         min_stock_level_: 0,
-        expiry_days_default_: 0,
+        expiry_days_default_: 0
       }
       productsSignal.set([product])
       const recipe: Recipe = {
         _id: 'r1',
         name_hebrew: 'Test',
-        ingredients_: [
-          { _id: 'i1', referenceId: 'p1', type: 'product', amount_: 100, unit_: 'gram' },
-        ],
+        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 100, unit_: 'gram' }],
         steps_: [],
         yield_amount_: 1,
         yield_unit_: 'unit',
         default_station_: '',
-        is_approved_: false,
+        is_approved_: false
       }
       const rows = service.getScaledIngredients(recipe, 2)
       expect(rows.length).toBe(1)
@@ -88,20 +83,18 @@ describe('ScalingService', () => {
         yield_amount_: 1,
         yield_unit_: 'unit',
         default_station_: '',
-        is_approved_: false,
+        is_approved_: false
       }
       recipesSignal.set([subRecipe])
       const recipe: Recipe = {
         _id: 'r1',
         name_hebrew: 'Dish',
-        ingredients_: [
-          { _id: 'i1', referenceId: 'sub1', type: 'recipe', amount_: 2, unit_: 'unit' },
-        ],
+        ingredients_: [{ _id: 'i1', referenceId: 'sub1', type: 'recipe', amount_: 2, unit_: 'unit' }],
         steps_: [],
         yield_amount_: 1,
         yield_unit_: 'unit',
         default_station_: '',
-        is_approved_: false,
+        is_approved_: false
       }
       const rows = service.getScaledIngredients(recipe, 3)
       expect(rows.length).toBe(1)
@@ -110,23 +103,24 @@ describe('ScalingService', () => {
       expect(rows[0].type).toBe('recipe')
     })
 
-    it('should return "(לא נמצא)" when product or recipe is missing', () => {
+    it('should mark orphaned references as unlinked when product or recipe is missing', () => {
       productsSignal.set([])
       recipesSignal.set([])
       const recipe: Recipe = {
         _id: 'r1',
         name_hebrew: 'Dish',
         ingredients_: [
-          { _id: 'i1', referenceId: 'missing', type: 'product', amount_: 50, unit_: 'gram' },
+          { _id: 'i1', referenceId: 'missing', type: 'product', amount_: 50, unit_: 'gram', nameSnapshot: 'Gone' }
         ],
         steps_: [],
         yield_amount_: 1,
         yield_unit_: 'unit',
         default_station_: '',
-        is_approved_: false,
+        is_approved_: false
       }
       const rows = service.getScaledIngredients(recipe, 1)
-      expect(rows[0].name).toBe('(לא נמצא)')
+      expect(rows[0].name).toBe('Gone')
+      expect(rows[0].isUnlinked).toBe(true)
       expect(rows[0].amount).toBe(50)
     })
 
@@ -139,7 +133,7 @@ describe('ScalingService', () => {
         yield_amount_: 1,
         yield_unit_: 'unit',
         default_station_: '',
-        is_approved_: false,
+        is_approved_: false
       }
       expect(service.getScaledIngredients(recipe, 2)).toEqual([])
     })
@@ -156,9 +150,7 @@ describe('ScalingService', () => {
         yield_unit_: 'unit',
         default_station_: '',
         is_approved_: false,
-        prep_items_: [
-          { preparation_name: 'Chop onions', quantity: 2, unit: 'unit', category_name: 'Veg' },
-        ],
+        prep_items_: [{ preparation_name: 'Chop onions', quantity: 2, unit: 'unit', category_name: 'Veg' }]
       }
       const rows = service.getScaledPrepItems(recipe, 3)
       expect(rows.length).toBe(1)
@@ -181,9 +173,9 @@ describe('ScalingService', () => {
         prep_categories_: [
           {
             category_name: 'Mise',
-            items: [{ item_name: 'Garlic', quantity: 1, unit: 'unit' }],
-          },
-        ],
+            items: [{ item_name: 'Garlic', quantity: 1, unit: 'unit' }]
+          }
+        ]
       }
       const rows = service.getScaledPrepItems(recipe, 4)
       expect(rows.length).toBe(1)
@@ -200,7 +192,7 @@ describe('ScalingService', () => {
         yield_amount_: 1,
         yield_unit_: 'unit',
         default_station_: '',
-        is_approved_: false,
+        is_approved_: false
       }
       expect(service.getScaledPrepItems(recipe, 1)).toEqual([])
     })

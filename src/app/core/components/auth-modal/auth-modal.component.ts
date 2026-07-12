@@ -117,21 +117,21 @@ export class AuthModalComponent {
     if (this.isSubmitting() || this.uploadingImage_()) return
 
     const nameErr = validateUsername(this.name)
-    if (nameErr) { this.errorKey.set(nameErr); return; }
+    if (nameErr) { this.errorKey.set(nameErr); return }
 
     if (this.isSignUp) {
       const emailErr = validateEmail(this.email)
-      if (emailErr) { this.errorKey.set(emailErr); return; }
+      if (emailErr) { this.errorKey.set(emailErr); return }
 
       const passwordErr = validatePassword(this.password, this.name, this.email)
-      if (passwordErr) { this.errorKey.set(passwordErr); return; }
+      if (passwordErr) { this.errorKey.set(passwordErr); return }
 
       if (this.password !== this.confirmPassword) {
         this.errorKey.set('passwords_do_not_match')
         return
       }
     } else {
-      if (!this.password.trim()) { this.errorKey.set('password_required'); return; }
+      if (!this.password.trim()) { this.errorKey.set('password_required'); return }
     }
 
     this.errorKey.set(null)
@@ -158,7 +158,7 @@ export class AuthModalComponent {
     if (environment.useBackendAuth) {
       this.userService.loginAsGuestBackend().subscribe({
         next: () => this._onSuccess(),
-        error: () => { this._reset(); this.modalService.close(); }
+        error: () => { this._reset(); this.modalService.close() }
       })
       return
     }

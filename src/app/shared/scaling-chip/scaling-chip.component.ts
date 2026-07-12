@@ -1,12 +1,4 @@
-import {
-  Component,
-  input,
-  output,
-  effect,
-  inject,
-  ViewChild,
-  OnDestroy,
-} from '@angular/core'
+import { Component, input, output, effect, ViewChild, OnDestroy } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormControl, ReactiveFormsModule } from '@angular/forms'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
@@ -26,10 +18,10 @@ const ADD_NEW_UNIT_VALUE = '__add_unit__'
     CustomSelectComponent,
     CounterComponent,
     TranslatePipe,
-    LucideAngularModule,
+    LucideAngularModule
   ],
   templateUrl: './scaling-chip.component.html',
-  styleUrl: './scaling-chip.component.scss',
+  styleUrl: './scaling-chip.component.scss'
 })
 export class ScalingChipComponent implements OnDestroy {
   value = input.required<number>()
@@ -55,9 +47,7 @@ export class ScalingChipComponent implements OnDestroy {
       const u = this.unit()
       this.unitControl.setValue(u ?? '', { emitEvent: false })
     })
-    this.subscription = this.unitControl.valueChanges.subscribe((v) =>
-      this.onUnitSelect(v)
-    )
+    this.subscription = this.unitControl.valueChanges.subscribe((v) => this.onUnitSelect(v))
   }
 
   ngOnDestroy(): void {

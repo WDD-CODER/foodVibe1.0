@@ -1,11 +1,14 @@
-import { Routes } from '@angular/router';
-import { productResolver } from './core/resolvers/product.resolver';
-import { recipeResolver } from './core/resolvers/recipe.resolver';
-import { equipmentResolver } from './core/resolvers/equipment.resolver';
-import { venueResolver } from './core/resolvers/venue.resolver';
-import { supplierResolver } from './core/resolvers/supplier.resolver';
-import { pendingChangesGuard } from './core/guards/pending-changes.guard';
-import { authGuard } from './core/guards/auth.guard';
+import { Routes } from '@angular/router'
+import { productResolver } from './core/resolvers/product.resolver'
+import { recipeResolver } from './core/resolvers/recipe.resolver'
+import { equipmentResolver } from './core/resolvers/equipment.resolver'
+import { venueResolver } from './core/resolvers/venue.resolver'
+import { venuesEnsureLoadedResolver } from './core/resolvers/venues-ensure-loaded.resolver'
+import { menuEventsEnsureLoadedResolver } from './core/resolvers/menu-events-ensure-loaded.resolver'
+import { menuSectionCategoriesEnsureLoadedResolver } from './core/resolvers/menu-section-categories-ensure-loaded.resolver'
+import { supplierResolver } from './core/resolvers/supplier.resolver'
+import { pendingChangesGuard } from './core/guards/pending-changes.guard'
+import { authGuard } from './core/guards/auth.guard'
 
 export const routes: Routes = [
   {
@@ -33,6 +36,7 @@ export const routes: Routes = [
   {
     path: 'venues',
     loadComponent: () => import('./pages/venues/venues.page').then(m => m.VenuesPage),
+    resolve: { venuesLoaded: venuesEnsureLoadedResolver },
     children: [
       { path: '', redirectTo: 'list', pathMatch: 'full' },
       {
@@ -116,18 +120,27 @@ export const routes: Routes = [
   {
     path: 'menu-library',
     loadComponent: () => import('@pages/menu-library/menu-library.page').then(m => m.MenuLibraryPage),
+    resolve: { menuEventsLoaded: menuEventsEnsureLoadedResolver },
   },
   {
     path: 'menu-intelligence',
     loadComponent: () => import('@pages/menu-intelligence/menu-intelligence.page').then(m => m.MenuIntelligencePage),
     canActivate: [authGuard],
     canDeactivate: [pendingChangesGuard],
+    resolve: {
+      menuEventsLoaded: menuEventsEnsureLoadedResolver,
+      sectionCategoriesLoaded: menuSectionCategoriesEnsureLoadedResolver,
+    },
   },
   {
     path: 'menu-intelligence/:id',
     loadComponent: () => import('@pages/menu-intelligence/menu-intelligence.page').then(m => m.MenuIntelligencePage),
     canActivate: [authGuard],
     canDeactivate: [pendingChangesGuard],
+    resolve: {
+      menuEventsLoaded: menuEventsEnsureLoadedResolver,
+      sectionCategoriesLoaded: menuSectionCategoriesEnsureLoadedResolver,
+    },
   },
   {
     path: 'cook',
@@ -171,4 +184,4 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-];
+]

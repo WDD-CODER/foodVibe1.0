@@ -39,7 +39,7 @@ export class UnitRegistryService {
   private readonly logging = inject(LoggingService)
   private readonly translationService = inject(TranslationService)
   private readonly keyResolution = inject(KeyResolutionService)
-  private readonly STORAGE_KEY = 'KITCHEN_UNITS'; // Standardized key
+  private readonly STORAGE_KEY = 'KITCHEN_UNITS' // Standardized key
 
   public readonly unitAdded$ = new Subject<string>()
 
@@ -91,7 +91,7 @@ export class UnitRegistryService {
       } else {
         const units = { ...existingRegistry.units }
         // Merge system units over storage so their values are never overwritten
-        Object.keys(SYSTEM_UNITS).forEach(k => { units[k] = SYSTEM_UNITS[k]; })
+        Object.keys(SYSTEM_UNITS).forEach(k => { units[k] = SYSTEM_UNITS[k] })
         if (skipOverwriteIfNewer) {
           const currentKeys = Object.keys(this.globalUnits_())
           if (currentKeys.length > Object.keys(units).length) return

@@ -27,13 +27,34 @@ export class MenuSectionCategoriesService {
   private categories_ = signal<string[]>([])
   readonly sectionCategories_ = this.categories_.asReadonly()
 
+  private loaded_ = false
+  private loadPromise_: Promise<void> | null = null
+
   constructor() {
-    this.load().catch(() => {})
+    // Deferred: load on ensureLoaded() via menu-intelligence / metadata routes.
+  }
+
+  hasLoaded(): boolean {
+    return this.loaded_
+  }
+
+  async ensureLoaded(): Promise<void> {
+    if (this.loaded_) return
+    if (this.loadPromise_) return this.loadPromise_
+    this.loadPromise_ = this.load()
+      .catch(() => {})
+      .finally(() => {
+        this.loaded_ = true
+        this.loadPromise_ = null
+      })
+    return this.loadPromise_
   }
 
   /** Re-read from storage (e.g. after backup restore). */
   async reloadFromStorage(): Promise<void> {
-    await this.load()
+    this.loaded_ = false
+    this.loadPromise_ = null
+    await this.ensureLoaded()
   }
 
   private async load(): Promise<void> {

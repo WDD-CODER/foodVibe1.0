@@ -1,4 +1,4 @@
-# Session Handoff
+﻿# Session Handoff
 
 ## Session ID
 2026-04-14-security-audit-sprint
@@ -14,7 +14,7 @@ Date: 2026-04-14
 ---
 
 ## What Was Done
-- Ran /cso full security audit — 5 vulnerabilities found
+- Ran /cso full security audit â€” 5 vulnerabilities found
 - Fixed CRITICAL SSRF: added DNS-based `isSafeUrl()` validator on `/generate-from-url` blocking private/loopback/link-local IPs
 - Fixed HIGH shots poisoning: added `GEMINI_SHOTS` and `GEMINI_USAGE` to `BLOCKED_ENTITY_TYPES` in `generic.js`
 - Fixed HIGH prompt injection: added `escapeForPrompt()` helper used in `buildFewShotBlock`
@@ -22,7 +22,7 @@ Date: 2026-04-14
 - Implemented JWT secret split: `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` with `|| JWT_SECRET` fallbacks for zero-downtime rollout
 - Added `role` field to all JWT access token payloads
 - All fixes shipped via PR #111 (commit `6a1373a`), merged to main
-- gstack upgraded: 0.16.3.0 → 0.16.4.0
+- gstack upgraded: 0.16.3.0 â†’ 0.16.4.0
 
 ## Files Modified
 ```
@@ -34,7 +34,7 @@ server/routes/generic.js    |  2 +-
 ```
 
 ## What Was Skipped or Blocked
-- Vite CVEs (GHSA-4w7w-66w2-5vf9, GHSA-p9ff-h696-f583): deferred — dev-only vulnerabilities, require Angular 21 upgrade
+- Vite CVEs (GHSA-4w7w-66w2-5vf9, GHSA-p9ff-h696-f583): deferred â€” dev-only vulnerabilities, require Angular 21 upgrade
 - JWT_SECRET cleanup (Render env var removal + fallback stripping): intentionally deferred ~30 days for zero-downtime rollout
 
 ---
@@ -52,12 +52,12 @@ server/routes/generic.js    |  2 +-
 | JWT_SECRET cleanup scheduled | Done | Follow-up date set: 2026-05-14 |
 
 ## Validation Checklist
-- [x] Build passes (ng build production — 0 errors, pre-existing warnings only)
+- [x] Build passes (ng build production â€” 0 errors, pre-existing warnings only)
 - [x] Changes committed: `6a1373a`
 - [x] PR created and merged: PR #111 (WDD-CODER/foodVibe1.0#111)
-- [x] Techdebt scan: skipped (no Angular/TS/SCSS changes this session — server JS only)
+- [x] Techdebt scan: skipped (no Angular/TS/SCSS changes this session â€” server JS only)
 - [ ] Manual verification needed:
-  - Smoke test `/generate-from-url` with a private IP (e.g. 192.168.x.x) — should return 400
+  - Smoke test `/generate-from-url` with a private IP (e.g. 192.168.x.x) â€” should return 400
   - Confirm `POST /shots` returns 403 for non-admin users
   - Confirm JWT tokens issued after deploy contain `role` field (decode one in jwt.io)
   - Verify Render deploy completed successfully and app is live
@@ -72,8 +72,8 @@ server/routes/generic.js    |  2 +-
 
 ## Agent Notes
 - The `isSafeUrl()` DNS resolution adds async latency to `/generate-from-url`; acceptable tradeoff for SSRF protection
-- Guest admin `role: 'admin'` in dev-only `/guest` endpoint — not a prod concern since that endpoint is localhost-gated
-- `JWT_SECRET` fallback is intentional for zero-downtime; it is NOT a security gap — new tokens use dedicated secrets immediately
+- Guest admin `role: 'admin'` in dev-only `/guest` endpoint â€” not a prod concern since that endpoint is localhost-gated
+- `JWT_SECRET` fallback is intentional for zero-downtime; it is NOT a security gap â€” new tokens use dedicated secrets immediately
 - Vite CVEs are dev-server only; production builds are not affected
 
 ---
@@ -83,14 +83,14 @@ server/routes/generic.js    |  2 +-
 - None (all merged)
 
 **Next task:**
-Plan 234 — Run stamp migration against Atlas; verify in Compass (todo.md, first open `[ ]` item)
+Plan 234 â€” Run stamp migration against Atlas; verify in Compass (todo.md, first open `[ ]` item)
 
 **Suggested focus:**
-Plan 234 operational tasks — several items marked as re-opened after archive audit 2026-04-13; assess which are stale/redundant vs. genuinely pending, then close out
+Plan 234 operational tasks â€” several items marked as re-opened after archive audit 2026-04-13; assess which are stale/redundant vs. genuinely pending, then close out
 
 **Follow-up scheduled:**
-2026-05-14 — Remove `JWT_SECRET` from Render env vars; strip `|| process.env.JWT_SECRET` fallbacks from `middleware/auth.js` and `routes/auth.js`; deploy
+2026-05-14 â€” Remove `JWT_SECRET` from Render env vars; strip `|| process.env.JWT_SECRET` fallbacks from `middleware/auth.js` and `routes/auth.js`; deploy
 
 ---
 Generated: 2026-04-14
-Agent: end-of-session-agent
+Agent: /ship

@@ -140,7 +140,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       if (typeof window === 'undefined') return
       const q = window.matchMedia('(max-width: 768px)')
       if (q.matches) this.isPanelOpen_.set(false)
-      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false); })
+      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false) })
     })
   }
 
@@ -456,8 +456,8 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     if (!await this.confirmModal.open('האם אתה בטוח שברצונך למחוק חומר גלם זה?', { variant: 'danger' })) return
     this.deletingId_.set(_id)
     this.kitchenStateService.deleteProduct(_id).subscribe({
-      next: () => { this.deletingId_.set(null); },
-      error: () => { this.deletingId_.set(null); }
+      next: () => { this.deletingId_.set(null) },
+      error: () => { this.deletingId_.set(null) }
     })
   }
 
@@ -564,8 +564,8 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     const updated: Product = { ...product, sources_: newSources.length ? newSources : [{ supplierId: '', price: buyPriceGlobal, addedAt: Date.now() }] }
     this.savingPriceId_.set(product._id ?? '')
     this.kitchenStateService.saveProduct(updated).subscribe({
-      next: () => { this.savingPriceId_.set(null); },
-      error: () => { this.savingPriceId_.set(null); }
+      next: () => { this.savingPriceId_.set(null) },
+      error: () => { this.savingPriceId_.set(null) }
     })
   }
 

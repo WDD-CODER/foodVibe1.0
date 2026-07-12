@@ -1,4 +1,4 @@
-# Session Handoff
+﻿# Session Handoff
 
 ## Session ID
 2026-04-20-nutrition-badge-workflow-audit
@@ -7,32 +7,32 @@
 INCOMPLETE
 
 ## Summary
-Goal: Nutrition Badge feature build + Workflow Audit cleanup (Briefs A–H)
+Goal: Nutrition Badge feature build + Workflow Audit cleanup (Briefs Aâ€“H)
 Branch: feat/cleanup-brief-4
 Date: 2026-04-20
 
 ---
 
-## What Was Done (This Session — cumulative across all branches)
+## What Was Done (This Session â€” cumulative across all branches)
 
 ### Nutrition Badge
 - Diagnosed root cause of tooltip misplacement: `container-type: inline-size` on `.list-container` and `.ingredients-container` intercepts `position: fixed` per CSS Containment spec
-- Added `findFixedContainingBlock_()` to `NutritionBadgeComponent` — walks DOM ancestors checking `containerType`, `transform`, `filter`, `perspective`, `willChange`
+- Added `findFixedContainingBlock_()` to `NutritionBadgeComponent` â€” walks DOM ancestors checking `containerType`, `transform`, `filter`, `perspective`, `willChange`
 - Rewrote `onMouseEnter()` coordinate calculation with containing-block-relative space + horizontal clamping
 - Added `isBelow_` signal; bound `[class.nb-tooltip--below]` in template
 - Renamed CSS class `--flipped` to `--below`; build passes (0 errors, 3 pre-existing warnings)
 
-### Workflow Audit — Brief 1 (Foundation cleanup)
+### Workflow Audit â€” Brief 1 (Foundation cleanup)
 - Removed `auto-reflect.ps1` (deprecated PowerShell script)
 - Added `scripts/prune-merged-worktrees.sh` and `scripts/prune-old-sessions.sh`
 - Archived all `plans/workflow-audit/` files to `plans/archive/workflow-audit-2026-04/`
 - Updated `.claude/skills/end-session/SKILL.md` deprecation stub
 
-### Workflow Audit — Brief 2 (Reflect test-drive harness)
+### Workflow Audit â€” Brief 2 (Reflect test-drive harness)
 - Created `.claude/reflect/test-drive/` with `decision-criteria.md`, `log.md`, `rubric.md`
 - 7-day evaluation window; decision checkpoint: 2026-04-28
 
-### Workflow Audit — Brief 3 (Path commands + CLAUDE.md slim)
+### Workflow Audit â€” Brief 3 (Path commands + CLAUDE.md slim)
 - Created 5 path commands: `.claude/commands/feat.md`, `fix.md`, `plan.md`, `refactor.md`, `security.md`
 - Slimmed `CLAUDE.md` to compact hard-rules + path router table
 - Moved session preflight, post-execution gate, commands reference, agent roster into `copilot-instructions.md`
@@ -42,7 +42,7 @@ Date: 2026-04-20
 ### Config / Scripts
 - Added explicit allow entries for `.claude/reflect/`, `.claude/sessions/`, `docs/`, `notes/` to `.claude/settings.json`
 - Updated `failure-log.tsv` with new session entries
-- Added `scripts/push-master-to-atlas.js` — upserts local `__master__` docs into Atlas via `MONGO_ATLAS_DIRECT_URI`
+- Added `scripts/push-master-to-atlas.js` â€” upserts local `__master__` docs into Atlas via `MONGO_ATLAS_DIRECT_URI`
 - Added `docs/session-state-feat-session-20260420-1401-1.md`
 
 ## Files Modified
@@ -67,9 +67,9 @@ src/.../nutrition-badge.component.scss            |  12 +-
 ```
 
 ## What Was Skipped or Blocked
-- `<app-nutrition-badge>` tag still missing from `inventory-product-list.component.html` and `recipe-ingredients-table.component.html` — feature built but not visually wired
+- `<app-nutrition-badge>` tag still missing from `inventory-product-list.component.html` and `recipe-ingredients-table.component.html` â€” feature built but not visually wired
 - Brief B remaining: reflect.md line 69, git rm last-session-context.md, D-9 renames, D-11 rename
-- Briefs C–G: not started
+- Briefs Câ€“G: not started
 - Brief H: blocked (JSON bug precondition unconfirmed)
 - PR not created: feature incomplete (template wiring missing)
 
@@ -80,18 +80,18 @@ src/.../nutrition-badge.component.scss            |  12 +-
 | Criterion | Status | Evidence/Reason |
 |-----------|--------|-----------------|
 | NutritionPer100g interface + normalizeProduct() wiring | Done | Committed in prior session (b969e35); product.model.ts + product-data.service.ts confirmed |
-| NutritionBadgeComponent created (standalone, OnPush, icons, tooltip) | Done | src/app/shared/nutrition-badge/ — 3 files exist; build passes |
-| Badge wired into inventory and recipe host templates | Partial | imports[] wired in .ts files; `<app-nutrition-badge>` tag missing from .html files — feature invisible in the app |
+| NutritionBadgeComponent created (standalone, OnPush, icons, tooltip) | Done | src/app/shared/nutrition-badge/ â€” 3 files exist; build passes |
+| Badge wired into inventory and recipe host templates | Partial | imports[] wired in .ts files; `<app-nutrition-badge>` tag missing from .html files â€” feature invisible in the app |
 | Tooltip flip logic (correct positioning with containing-block awareness) | Done | findFixedContainingBlock_() implemented; isBelow_ signal; coordinate calc updated; build passes |
 | ng build passes with zero errors | Done | 0 errors, 3 pre-existing warnings (bundle size, cook-view.scss, exceljs CommonJS) |
-| Brief A complete — verification findings documented | Done | plans/archive/workflow-audit-2026-04/verification-findings.md committed |
-| Brief B complete — D-1, D-2, D-3, D-9, D-11 committed | Partial | D-1/D-2/D-3 committed (2d66312); D-9/D-11 renames not executed |
+| Brief A complete â€” verification findings documented | Done | plans/archive/workflow-audit-2026-04/verification-findings.md committed |
+| Brief B complete â€” D-1, D-2, D-3, D-9, D-11 committed | Partial | D-1/D-2/D-3 committed (2d66312); D-9/D-11 renames not executed |
 
 ## Validation Checklist
-- [x] Build passes (0 errors — npx ng build 2026-04-20)
+- [x] Build passes (0 errors â€” npx ng build 2026-04-20)
 - [x] Changes committed: 5d7519c, 5981704, 99ff3fd, c8f8255, fc7ab5b, 444f10f
 - [x] Pushed to origin/feat/cleanup-brief-4
-- [ ] PR not created — feature incomplete (template wiring missing)
+- [ ] PR not created â€” feature incomplete (template wiring missing)
 - [x] Techdebt: 3 pre-existing warnings, 0 new critical issues
 - [ ] Manual verification needed:
   - Add `<app-nutrition-badge [nutrition]="product.nutrition_per_100g">` to `inventory-product-list.component.html`
@@ -111,9 +111,9 @@ src/.../nutrition-badge.component.scss            |  12 +-
 
 ## Agent Notes
 - CSS Containment spec root cause: any ancestor with `container-type` (not `normal`) acts as fixed-position containing block. Affects ANY `position: fixed` inside a CSS container. Future fixed overlays in these views need `findFixedContainingBlock_()`.
-- `agent.md` is now a pure stub — all content lives in `copilot-instructions.md`. No behavioral change for agents that read `agent.md`; they get a redirect.
+- `agent.md` is now a pure stub â€” all content lives in `copilot-instructions.md`. No behavioral change for agents that read `agent.md`; they get a redirect.
 - `scripts/push-master-to-atlas.js` requires `MONGO_ATLAS_DIRECT_URI` in `server/.env`. Not yet in `.env.example`.
-- Reflect test-drive harness (Brief 2) has a 7-day evaluation window — decision on 2026-04-28.
+- Reflect test-drive harness (Brief 2) has a 7-day evaluation window â€” decision on 2026-04-28.
 
 ---
 
@@ -133,4 +133,4 @@ Template wiring is 2 HTML lines and unblocks the visible feature. Do that first,
 
 ---
 Generated: 2026-04-20
-Agent: end-of-session-agent
+Agent: /ship

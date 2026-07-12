@@ -81,6 +81,7 @@ export class VenueFormComponent implements OnInit {
   )
 
   ngOnInit(): void {
+    void this.venueData.ensureLoaded()
     this.buildForm()
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((data) => {
       const venue = data['venue'] as VenueProfile | null | undefined

@@ -1,18 +1,17 @@
-# /feat — New Feature Path
+﻿# /feat â€” New Feature Path
 
 Use this path for building new features. Loads Angular + domain standards automatically.
 
 ## Loads
 
-- `.claude/rules/angular.md` — Signals, Components, CSS (Layers), Angular conventions
-- `.claude/rules/domain.md` — FoodVibe domain model, data flow, naming conventions
-- `/_shared/tech-stack.md` — stack overrides
+- `docs/agent/standards-angular.md` â€” Signals, Components, CSS (Layers), Angular conventions
+- `docs/agent/standards-domain.md` â€” FoodVibe domain model, data flow, naming conventions
+- `/_shared/tech-stack.md` â€” stack overrides
 
 ## Invokes
 
-- `/plan` — read-only phase: codebase scan → Plan Contract (Architect authors, saved to `plans/`)
-- `/review-it` — review phase: Reviewer checks plan-match, conventions, and the Verify gate
-- `team-leader` — review-time coordinator only (`qa-engineer` + `security-officer` on complex / security-sensitive milestones)
+- `/plan` â€” read-only phase: codebase scan â†’ Plan Contract (Architect authors, saved to `plans/`)
+- `/review-it` â€” review phase: Reviewer checks plan-match, conventions, and the Verify gate
 
 ## Typical flow
 
@@ -28,4 +27,4 @@ Use this path for building new features. Loads Angular + domain standards automa
 
 - No semicolons in `.ts` files. Single quotes in TS, double quotes in HTML.
 - `ng build` / `ng lint` must pass before declaring a milestone ready.
-- Branch guard enforced — never write on `main`.
+- Branch guard enforced â€” never write on `main`.

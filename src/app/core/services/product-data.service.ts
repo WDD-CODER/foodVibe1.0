@@ -24,7 +24,7 @@ export class ProductDataService {
 
   readonly allAllergens_ = computed(() => {
     const Products = this.ProductsStore_()
-    const allergens = Products.flatMap(Product => Product.allergens_ || []); // Refactored
+    const allergens = Products.flatMap(Product => Product.allergens_ || []) // Refactored
     return Array.from(new Set(allergens))
   })
 

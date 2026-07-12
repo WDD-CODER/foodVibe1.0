@@ -117,3 +117,7 @@ apply-*.js
 
 # GCM diagnostic log — dumps all env vars including secrets
 gcm-diagnose.log
+
+# Local MongoDB data (dev-only instance on :27018)
+.mongo-local/
+

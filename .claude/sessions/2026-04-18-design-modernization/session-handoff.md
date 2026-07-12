@@ -1,4 +1,4 @@
-# Session Handoff
+﻿# Session Handoff
 
 ## Session ID
 2026-04-18-design-modernization
@@ -19,4 +19,4 @@ Full evaluation report is in:
 
 ---
 Generated: 2026-04-19
-Agent: end-of-session-agent
+Agent: /ship
