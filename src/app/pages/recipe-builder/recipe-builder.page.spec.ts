@@ -3,7 +3,8 @@ import { ActivatedRoute } from '@angular/router'
 import { provideHttpClient } from '@angular/common/http'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { RecipeBuilderPage } from './recipe-builder.page'
-import { LucideAngularModule, PlusCircle, ChevronDown, Plus, Trash2, Timer, Search, Minus, ArrowUpDown, X, Printer, GripVertical } from 'lucide-angular'
+import { LucideAngularModule } from 'lucide-angular'
+import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 
 describe('RecipeBuilderComponent', () => {
   let component: RecipeBuilderPage
@@ -11,7 +12,7 @@ describe('RecipeBuilderComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RecipeBuilderPage, LucideAngularModule.pick({ PlusCircle, ChevronDown, Plus, Trash2, Timer, Search, Minus, ArrowUpDown, X, Printer, GripVertical })],
+      imports: [RecipeBuilderPage, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),

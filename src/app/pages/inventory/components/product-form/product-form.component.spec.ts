@@ -10,22 +10,8 @@ import { UserMsgService } from '@services/user-msg.service'
 import { ActivatedRoute, Router } from '@angular/router'
 import { of, Subject } from 'rxjs'
 import { signal } from '@angular/core'
-import {
-  LucideAngularModule,
-  ShieldAlert,
-  X,
-  FlaskConical,
-  Plus,
-  Trash2,
-  ArrowRight,
-  Save,
-  ChevronDown,
-  ChevronUp,
-  Tags,
-  Truck,
-  Package,
-  CalendarClock
-} from 'lucide-angular'
+import { LucideAngularModule } from 'lucide-angular'
+import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { Product } from '@models/product.model'
 import { TranslationService } from '@services/translation.service'
 import { TranslationKeyModalService } from '@services/translation-key-modal.service'
@@ -84,25 +70,7 @@ describe('ProductFormComponent', () => {
     } as Product)
 
     await TestBed.configureTestingModule({
-      imports: [
-        ProductFormComponent,
-        ReactiveFormsModule,
-        LucideAngularModule.pick({
-          ShieldAlert,
-          X,
-          FlaskConical,
-          Plus,
-          Trash2,
-          ArrowRight,
-          Save,
-          ChevronDown,
-          ChevronUp,
-          Tags,
-          Truck,
-          Package,
-          CalendarClock
-        })
-      ],
+      imports: [ProductFormComponent, ReactiveFormsModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
         { provide: Router, useValue: mockRouter },
         { provide: ConversionService, useValue: mockConversionService },

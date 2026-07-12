@@ -3,7 +3,8 @@ import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { HeaderComponent } from './header.component'
 import { provideRouter, RouterLinkWithHref } from '@angular/router'
 import { By } from '@angular/platform-browser'
-import { LucideAngularModule, Menu, X, CircleUserRound, LogOut } from 'lucide-angular'
+import { LucideAngularModule } from 'lucide-angular'
+import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent
@@ -11,14 +12,14 @@ describe('HeaderComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick({ Menu, X, CircleUserRound, LogOut })],
+      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
         // מספקים נתיבים ריקים כדי לאפשר ל-RouterLink לעבוד בבדיקה
         provideRouter([
           { path: 'dashboard', redirectTo: '' },
           { path: 'inventory', redirectTo: '' },
           { path: 'recipe-builder', redirectTo: '' },
-          { path: 'recipe-book', redirectTo: '' },
+          { path: 'recipe-book', redirectTo: '' }
         ])
       ]
     }).compileComponents()
@@ -35,9 +36,9 @@ describe('HeaderComponent', () => {
   it('should have correct router links', () => {
     // איתור כל האלמנטים שמשתמשים ב-RouterLink
     const linkDebugElements = fixture.debugElement.queryAll(By.directive(RouterLinkWithHref))
-    
+
     // שליפת הכתובות אליהן הקישורים מצביעים
-    const hrefs = linkDebugElements.map(de => de.attributes['routerLink'])
+    const hrefs = linkDebugElements.map((de) => de.attributes['routerLink'])
 
     expect(hrefs).toContain('/dashboard')
     expect(hrefs).toContain('/inventory')

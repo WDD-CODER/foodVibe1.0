@@ -5,7 +5,8 @@ import { RecipeCostService } from '@services/recipe-cost.service'
 import { Router, ActivatedRoute } from '@angular/router'
 import { signal } from '@angular/core'
 import { of } from 'rxjs'
-import { LucideAngularModule, Search, Trash2, Pencil, Plus, Menu, X, ShieldAlert, ArrowUpDown, ArrowUp, ArrowDown, ChevronRight, ChevronLeft, ChevronDown, BookOpen, Tag, CircleX, CookingPot, CookingPotIcon, Sparkles } from 'lucide-angular'
+import { LucideAngularModule } from 'lucide-angular'
+import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { Recipe } from '@models/recipe.model'
 import { TranslationService } from '@services/translation.service'
 import { UserService } from '@services/user.service'
@@ -46,22 +47,32 @@ describe('RecipeBookListComponent', () => {
     }
 
     await TestBed.configureTestingModule({
-      imports: [
-        RecipeBookListComponent,
-        LucideAngularModule.pick({ Search, Trash2, Pencil, Plus, Menu, X, ShieldAlert, ArrowUpDown, ArrowUp, ArrowDown, ChevronRight, ChevronLeft, ChevronDown, BookOpen, Tag, CircleX, CookingPot, CookingPotIcon, Sparkles })
-      ],
+      imports: [RecipeBookListComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
         { provide: KitchenStateService, useValue: mockKitchenState },
         { provide: RecipeCostService, useValue: { computeRecipeCost: () => 10 } },
         { provide: Router, useValue: jasmine.createSpyObj('Router', ['navigate']) },
-        { provide: ActivatedRoute, useValue: { queryParams: of({}), params: of({}), snapshot: { queryParams: {}, params: {} } } },
+        {
+          provide: ActivatedRoute,
+          useValue: { queryParams: of({}), params: of({}), snapshot: { queryParams: {}, params: {} } }
+        },
         { provide: TranslationService, useValue: { translate: (k: string) => k || '' } },
-        { provide: UserService, useValue: { isLoggedIn: () => true } },
+        { provide: UserService, useValue: { isLoggedIn: () => true, user_: signal({ _id: 'u1', role: 'admin' }) } },
         { provide: UserMsgService, useValue: { onSetWarningMsg: () => {} } },
         { provide: AuthModalService, useValue: { open: () => {} } },
-        { provide: HeroFabService, useValue: { setPageActions: jasmine.createSpy('setPageActions'), clearPageActions: jasmine.createSpy('clearPageActions') } },
+        {
+          provide: HeroFabService,
+          useValue: {
+            setPageActions: jasmine.createSpy('setPageActions'),
+            clearPageActions: jasmine.createSpy('clearPageActions')
+          }
+        },
         { provide: AiRecipeModalService, useValue: { open: jasmine.createSpy('open'), isOpen: signal(false) } },
-        { provide: MetadataRegistryService, useValue: { allLabels_: signal([]), getLabelColor: () => '#78716C' } }
+        { provide: MetadataRegistryService, useValue: { allLabels_: signal([]), getLabelColor: () => '#78716C' } },
+        {
+          provide: ConfirmModalService,
+          useValue: { open: jasmine.createSpy('open').and.returnValue(Promise.resolve(true)) }
+        }
       ]
     }).compileComponents()
 
@@ -87,18 +98,18 @@ describe('RecipeBookListComponent', () => {
   })
 
   it('should change sort order when sort column is clicked', () => {
-    (component as any).setSort('name')
+    ;(component as any).setSort('name')
     expect((component as any).sortBy_()).toBe('name')
-    expect((component as any).sortOrder_()).toBe('asc');
+    expect((component as any).sortOrder_()).toBe('asc')
 
-    (component as any).setSort('name')
-    expect((component as any).sortOrder_()).toBe('desc');
+    ;(component as any).setSort('name')
+    expect((component as any).sortOrder_()).toBe('desc')
 
-    (component as any).setSort('cost')
+    ;(component as any).setSort('cost')
     expect((component as any).sortBy_()).toBe('cost')
-    expect((component as any).sortOrder_()).toBe('asc');
+    expect((component as any).sortOrder_()).toBe('asc')
 
-    (component as any).setSort('dateAdded')
+    ;(component as any).setSort('dateAdded')
     expect((component as any).sortBy_()).toBe('dateAdded')
     expect((component as any).sortOrder_()).toBe('asc')
   })
@@ -116,14 +127,14 @@ describe('RecipeBookListComponent', () => {
   it('should filter list when search input is set', () => {
     let filtered = (component as any).filteredRecipes_()
     expect(filtered.length).toBe(1)
-    expect(filtered[0].name_hebrew).toBe('סלט ירקות');
+    expect(filtered[0].name_hebrew).toBe('סלט ירקות')
 
-    (component as any).searchQuery_.set('סלט')
+    ;(component as any).searchQuery_.set('סלט')
     fixture.detectChanges()
     filtered = (component as any).filteredRecipes_()
-    expect(filtered.length).toBe(1);
+    expect(filtered.length).toBe(1)
 
-    (component as any).searchQuery_.set('לא קיים')
+    ;(component as any).searchQuery_.set('לא קיים')
     fixture.detectChanges()
     filtered = (component as any).filteredRecipes_()
     expect(filtered.length).toBe(0)
@@ -131,9 +142,9 @@ describe('RecipeBookListComponent', () => {
 
   it('should call deleteRecipe when delete is confirmed', async () => {
     const confirmModal = TestBed.inject(ConfirmModalService)
-    spyOn(confirmModal, 'open').and.returnValue(Promise.resolve(true))
-    const stateService = TestBed.inject(KitchenStateService);
-    (stateService.deleteRecipe as jasmine.Spy).and.returnValue({ subscribe: () => {} })
+    ;(confirmModal.open as jasmine.Spy).and.returnValue(Promise.resolve(true))
+    const stateService = TestBed.inject(KitchenStateService)
+    ;(stateService.deleteRecipe as jasmine.Spy).and.returnValue({ subscribe: () => {} })
 
     const recipe = mockRecipesSignal()[0]
     await (component as any).onDeleteRecipe(recipe)
@@ -144,7 +155,7 @@ describe('RecipeBookListComponent', () => {
 
   it('should not call deleteRecipe when delete is cancelled', async () => {
     const confirmModal = TestBed.inject(ConfirmModalService)
-    spyOn(confirmModal, 'open').and.returnValue(Promise.resolve(false))
+    ;(confirmModal.open as jasmine.Spy).and.returnValue(Promise.resolve(false))
     const stateService = TestBed.inject(KitchenStateService)
 
     const recipe = mockRecipesSignal()[0]

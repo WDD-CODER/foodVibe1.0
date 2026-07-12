@@ -5,27 +5,8 @@ import { MetadataManagerComponent } from './metadata-manager.page.component'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { ProductDataService } from '@services/product-data.service'
-import {
-  LucideAngularModule,
-  Scale,
-  AlertTriangle,
-  X,
-  ChevronLeft,
-  Tag,
-  Tags,
-  Trash2,
-  UtensilsCrossed,
-  Pencil,
-  Package,
-  Archive,
-  Download,
-  RotateCcw,
-  Upload,
-  CookingPot,
-  BookOpen,
-  MapPin,
-  Lock,
-} from 'lucide-angular'
+import { LucideAngularModule } from 'lucide-angular'
+import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { signal } from '@angular/core'
 import { TranslationService } from '@services/translation.service'
 
@@ -33,7 +14,7 @@ describe('MetadataManagerPageComponent', () => {
   let component: MetadataManagerComponent
   let fixture: ComponentFixture<MetadataManagerComponent>
 
-  // LOGIC CHANGE: Standardized English keys for Mock Signals 
+  // LOGIC CHANGE: Standardized English keys for Mock Signals
   const mockUnits = signal(['gram', 'ml'])
   const mockAllergens = signal(['gluten', 'nuts'])
   const mockCategories = signal(['vegetables', 'meat'])
@@ -43,7 +24,7 @@ describe('MetadataManagerPageComponent', () => {
 
   beforeEach(async () => {
     // Mocking Services
-    // REPLACEMENT: Changed 'allUnits_' to 'allUnitKeys_' to match the refactored Service 
+    // REPLACEMENT: Changed 'allUnits_' to 'allUnitKeys_' to match the refactored Service
     const unitRegistrySpy = jasmine.createSpyObj('UnitRegistryService', ['getConversion', 'registerUnit'], {
       allUnitKeys_: mockUnits
     })
@@ -62,10 +43,7 @@ describe('MetadataManagerPageComponent', () => {
     })
 
     await TestBed.configureTestingModule({
-      imports: [
-        MetadataManagerComponent,
-        LucideAngularModule.pick({ Scale, AlertTriangle, X, ChevronLeft, Tag, Tags, Trash2, UtensilsCrossed, Pencil, Package, Archive, Download, RotateCcw, Upload, CookingPot, BookOpen, MapPin, Lock })
-      ],
+      imports: [MetadataManagerComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),

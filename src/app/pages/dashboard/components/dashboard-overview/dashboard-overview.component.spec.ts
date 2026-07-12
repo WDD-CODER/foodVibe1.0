@@ -6,10 +6,8 @@ import { provideHttpClient } from '@angular/common/http'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
 
 import { DashboardOverviewComponent } from './dashboard-overview.component'
-import {
-  LucideAngularModule,
-  MapPin, Trash2, Truck, ChevronRight, ChevronLeft, ChevronUp, ChevronDown,
-} from 'lucide-angular'
+import { LucideAngularModule } from 'lucide-angular'
+import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { ActivityLogService, ActivityEntry, ActivityAction, ActivityEntityType } from '@services/activity-log.service'
 import { UserService } from '@services/user.service'
@@ -34,7 +32,7 @@ describe('DashboardOverviewComponent', () => {
     entityId: 'p1',
     entityName: 'Test Product',
     timestamp: Date.now(),
-    ...overrides,
+    ...overrides
   })
 
   beforeEach(async () => {
@@ -46,29 +44,27 @@ describe('DashboardOverviewComponent', () => {
     mockRouter = jasmine.createSpyObj('Router', ['navigate'])
     mockRouter.navigate.and.returnValue(Promise.resolve(true))
 
-    mockActivityLog = jasmine.createSpyObj('ActivityLogService', [
-      'syncFromStorage',
-      'getRecentEntriesFromStorage',
-    ])
+    mockActivityLog = jasmine.createSpyObj('ActivityLogService', ['syncFromStorage', 'getRecentEntriesFromStorage'])
     mockActivityLog.getRecentEntriesFromStorage.and.returnValue([])
 
     const mockKitchenState = {
       products_: mockProducts.asReadonly(),
       recipes_: mockRecipes.asReadonly(),
-      lowStockProducts_: mockLowStock.asReadonly(),
+      lowStockProducts_: mockLowStock.asReadonly()
     }
 
     const mockTranslation = jasmine.createSpyObj('TranslationService', [
-      'translate', 'resolveUnit', 'resolveCategory', 'resolveAllergen',
-      'resolveSectionCategory', 'resolvePreparationCategory',
+      'translate',
+      'resolveUnit',
+      'resolveCategory',
+      'resolveAllergen',
+      'resolveSectionCategory',
+      'resolvePreparationCategory'
     ])
     mockTranslation.translate.and.callFake((k: string) => k)
 
     await TestBed.configureTestingModule({
-      imports: [
-        DashboardOverviewComponent,
-        LucideAngularModule.pick({ MapPin, Trash2, Truck, ChevronRight, ChevronLeft, ChevronUp, ChevronDown }),
-      ],
+      imports: [DashboardOverviewComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
@@ -76,8 +72,8 @@ describe('DashboardOverviewComponent', () => {
         { provide: ActivityLogService, useValue: mockActivityLog },
         { provide: UserService, useValue: { isLoggedIn: mockIsLoggedIn } },
         { provide: Router, useValue: mockRouter },
-        { provide: TranslationService, useValue: mockTranslation },
-      ],
+        { provide: TranslationService, useValue: mockTranslation }
+      ]
     }).compileComponents()
 
     fixture = TestBed.createComponent(DashboardOverviewComponent)
@@ -129,7 +125,7 @@ describe('DashboardOverviewComponent', () => {
     mockRecipes.set([
       { is_approved_: false } as unknown as Recipe,
       { is_approved_: false } as unknown as Recipe,
-      { is_approved_: true } as unknown as Recipe,
+      { is_approved_: true } as unknown as Recipe
     ])
     fixture.detectChanges()
     const kpiVal = fixture.debugElement.query(By.css('[data-testid="kpi-unapproved"] .kpi-value'))
@@ -144,10 +140,7 @@ describe('DashboardOverviewComponent', () => {
   })
 
   it('should render activity items when entries exist', () => {
-    mockActivityLog.getRecentEntriesFromStorage.and.returnValue([
-      makeEntry({ id: 'e1' }),
-      makeEntry({ id: 'e2' }),
-    ])
+    mockActivityLog.getRecentEntriesFromStorage.and.returnValue([makeEntry({ id: 'e1' }), makeEntry({ id: 'e2' })])
     fixture.detectChanges()
     const items = fixture.debugElement.queryAll(By.css('[data-testid="activity-item"]'))
     expect(items.length).toBe(2)
@@ -216,7 +209,7 @@ describe('DashboardOverviewComponent', () => {
 
   it('should open popover on toggleChangePopover call', () => {
     mockActivityLog.getRecentEntriesFromStorage.and.returnValue([
-      makeEntry({ changes: [{ field: 'price', label: 'activity_field_price' }] }),
+      makeEntry({ changes: [{ field: 'price', label: 'activity_field_price' }] })
     ])
     fixture.detectChanges()
     const changeTag = fixture.debugElement.query(By.css('.change-tag'))
@@ -226,7 +219,7 @@ describe('DashboardOverviewComponent', () => {
 
   it('should close popover on second click of same change tag', () => {
     mockActivityLog.getRecentEntriesFromStorage.and.returnValue([
-      makeEntry({ changes: [{ field: 'price', label: 'activity_field_price' }] }),
+      makeEntry({ changes: [{ field: 'price', label: 'activity_field_price' }] })
     ])
     fixture.detectChanges()
     const changeTag = fixture.debugElement.query(By.css('.change-tag'))
