@@ -12,7 +12,11 @@ Use plain `gh` / `git` / `npx` / `npm` shell only — identical from Claude Code
 
 | GitHub check (job) | Workflow | Classify failures by failed step |
 | --- | --- | --- |
-| `ci` | `.github/workflows/ci.yml` | ESLint → `[lint]`; Build → `[build]`; Unit tests → `[test]`; Secret scan (gitleaks) → `[security-scan]` |
+| `lint` | `.github/workflows/ci.yml` | ESLint → `[lint]` |
+| `build` | `.github/workflows/ci.yml` | Build → `[build]` |
+| `test` | `.github/workflows/ci.yml` | Unit tests → `[test]` |
+| `gitleaks` | `.github/workflows/ci.yml` | Secret scan (gitleaks) → `[security-scan]` |
+| `ci` | `.github/workflows/ci.yml` | Aggregator — if red, inspect failed dependency (`lint` / `build` / `test` / `gitleaks`). Docs-only PRs may skip `lint`/`build`/`test` while `gitleaks` + `ci` still run. |
 | `security` | `.github/workflows/security.yml` | npm audit (root/server) → `[audit]`; Semgrep OWASP Top Ten → `[security-scan]` |
 
 ---
@@ -44,7 +48,7 @@ Classify each failure into exactly one bucket:
 
 ### `[lint]`
 
-ESLint / prettier errors in the `ci` job (step **ESLint**).
+ESLint / prettier errors in the `lint` job (step **ESLint**).
 
 - Auto-fixable: `npx eslint --fix` on the reported files.
 - Hand-fix remaining violations per project conventions (`AGENTS.md`, `docs/agent/conventions.md`).
@@ -52,14 +56,14 @@ ESLint / prettier errors in the `ci` job (step **ESLint**).
 
 ### `[build]`
 
-`ng build` / compile errors in the `ci` job (step **Build**).
+`ng build` / compile errors in the `build` job (step **Build**).
 
 - Fix the compile error in application code directly.
 - Re-verify locally with `npx ng build` before committing.
 
 ### `[test]`
 
-Failing unit specs in the `ci` job (step **Unit tests**).
+Failing unit specs in the `test` job (step **Unit tests**).
 
 - Fix the test **or** the production code, whichever the failure log shows is wrong.
 - **Never** delete, skip, or weaken a test (`xit`, `xdescribe`, `pending`, empty expectations) to make CI green.
@@ -75,7 +79,7 @@ Failing unit specs in the `ci` job (step **Unit tests**).
 
 ### `[security-scan]`
 
-gitleaks (ci step **Secret scan (gitleaks)**) or Semgrep (security step **Semgrep OWASP Top Ten**).
+gitleaks (`gitleaks` job step **Secret scan (gitleaks)**) or Semgrep (security step **Semgrep OWASP Top Ten**).
 
 - **NEVER auto-fix** and **NEVER auto-dismiss**, even on round 1.
 - Stop the fix loop for that finding: present the hit (file, rule/secret type, snippet location) to the user and wait for human judgment.
