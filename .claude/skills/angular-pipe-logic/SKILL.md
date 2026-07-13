@@ -18,12 +18,9 @@ description: Scaffolds, implements, and tests Angular Pipes and Directives follo
 
 ---
 
-## Phase 0 — Agent Memory Orient (MANDATORY before any file reads)
+## Phase 0 — docs/brain Orient (CONDITIONAL)
 
-1. Run `memory_smart_search(query="pipe directive transform angular", limit=3)` to surface existing pipe/directive patterns and past decisions.
-2. If results found → review for existing implementations, constraints, or known patterns.
-3. If MCP unavailable → skip silently and continue to Phase 1.
-4. Report in completion message whether Agent Memory was consulted.
+If the task involves an unfamiliar area, an architectural choice, or known-recurring pipe/directive debt: read `docs/brain/index.md`, then only the relevant sub-file (`gotchas.md`, `decisions/`, `patterns/`, etc.). Default: skip for routine scaffolding. Do not call optional MCP memory tools.
 
 ---
 

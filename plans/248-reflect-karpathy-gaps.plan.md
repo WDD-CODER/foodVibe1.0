@@ -5,6 +5,8 @@ todos: []
 isProject: false
 ---
 
+> RETIRED — MemPalace/claude-mem/reflect automation retired in July 2026 cutover. Do not execute. Prefer docs/brain/.
+
 # Goal
 
 Redesign /reflect to close three structural gaps vs. Karpathy's autoresearch:

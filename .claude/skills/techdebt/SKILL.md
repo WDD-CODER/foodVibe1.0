@@ -45,8 +45,9 @@ description: Scans for duplicated code, dead code, style violations, and TODO de
 
 ---
 
-## Phase 0 — Agent Memory Orient (CONDITIONAL)
-Run `memory_smart_search(query="<keywords>", limit=3)` ONLY if task involves an unfamiliar code area or known-recurring debt category. Skip for routine cleanup or pattern application. Default: skip. If MCP unavailable: skip silently.
+## Phase 0 — docs/brain Orient (CONDITIONAL)
+
+If the task involves an unfamiliar area, an architectural choice, or known-recurring debt: read `docs/brain/index.md`, then only the relevant sub-file (`gotchas.md`, `decisions/`, `patterns/`, etc.). Default: skip for routine cleanup or pattern application. Do not call optional MCP memory tools.
 
 ---
 

@@ -5,6 +5,8 @@ todos: []
 isProject: false
 ---
 
+> RETIRED — MemPalace/claude-mem/reflect automation retired in July 2026 cutover. Do not execute. Prefer docs/brain/.
+
 ## Goal
 Integrate claude-mem (v12.0.1) as a sixth memory layer into FoodVibe 1.0 via targeted augmentation — add semantic cross-session search through hooks + MCP without replacing any existing infrastructure (breadcrumbs, session handoffs, reflect loop, todo/plans, git-agent).
 
