@@ -2,6 +2,15 @@
 
 ---
 
+## Angular 22 Migration (deferred)
+
+- Remaining root `npm audit --audit-level=high` findings (Angular/* cluster + related CLI/build toolchain highs: vite, piscina, http-proxy-middleware, serialize-javascript) are blocked on the Angular 22 major upgrade.
+- Do **not** run `npm audit fix --force`.
+- Server `npm audit` is clean (0 vulnerabilities).
+- CI temporarily uses `--audit-level=critical` in `.github/workflows/security.yml` until migration; restore `--audit-level=high` afterward.
+
+---
+
 ### Plan 289 â€” App Load Optimization (`plans/289-app-load-optimization.plan.md`)
 > Phase 2 after Save Latency Fix (M1â€“3 already executed in session 2026-07-09). Contractor executed M4â€“6 2026-07-09 â€” Human/Reviewer marks `[x]`.
 
