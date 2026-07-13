@@ -52,3 +52,4 @@ you to commit/push, prepare via the repo's git-agent conventions and only procee
 explicit approval.
 After any successful push off `main`, end with the Merge Gate from
 `docs/agent/standards-git.md` and wait — do not stop at "pushed" / PR URL alone.
+Brain capture proposal is part of that gate (not `/ship`-only); confirm-to-write.

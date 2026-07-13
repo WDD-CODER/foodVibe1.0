@@ -5,3 +5,4 @@ alwaysApply: false
 Follow `docs/agent/standards-git.md` and `.claude/agents/git-agent.md` for commit/push/PR prep.
 After any successful push or PR create, enforce the Post-push Merge Gate in
 `docs/agent/standards-git.md` (visual block + wait — never end at "pushed" alone).
+Brain capture proposal is part of that gate (not `/ship`-only); confirm-to-write before any `docs/brain/` write.
