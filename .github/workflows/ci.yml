@@ -51,6 +51,10 @@ jobs:
           echo "Changed files:"
           printf '%s\n' "${FILES[@]}"
           echo "Decision: run-gates=${run_gates}"
+      - name: Brain staleness check (advisory)
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        run: node scripts/brain-review-check.mjs --scope=dead-refs --base="origin/${GITHUB_BASE_REF:-main}"
 
   lint:
     needs: changes
