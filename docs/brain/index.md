@@ -22,4 +22,6 @@ Distilled project knowledge: history and reasoning, not current state. **Current
 
 ## Maintenance
 
+Brain capture is **auto-evoked** on push / PR / Merge Gate (agent proposal + GitHub sticky reminder) — not `/ship`-only. **Confirm-to-write** still applies: never silent-write to this folder; Human replies `brain approve` | `brain skip` / `brain:none` | `brain edit …`. See [[0003-auto-evoke-brain-on-pr]] and `docs/agent/standards-git.md` Post-push Merge Gate.
+
 `scripts/brain-review-check.mjs --scope=dead-refs` runs non-blocking in CI on every PR (catches this-PR breakage only). `--scope=full` runs on `/ship`'s feature-complete/PR path (whole-repo dead refs + past-due `review-by` dates). Both are advisory only — never auto-edit, never auto-delete.

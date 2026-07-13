@@ -161,12 +161,18 @@ Never commit to `main`. Never force-push. Never amend after push.
 
 ## Phase 4.5 — Merge Gate (mandatory after successful push)
 
-Follow `docs/agent/standards-git.md` → **Post-push Merge Gate**. Copy the visual block exactly; wait for Human reply. Do not skip because a PR URL was already printed.
+Follow `docs/agent/standards-git.md` → **Post-push Merge Gate**. Copy the combined MERGE GATE + BRAIN CAPTURE visual block exactly; wait for Human reply. Do not skip because a PR URL was already printed.
 
-- **Feature-complete / PR path:** show MERGE GATE. On `merge` → create PR if missing, then `gh pr merge --merge --delete-branch` (use PR merge fallback above if dirty tree). On `later` → stop with PR in Next Steps. On `open-pr-only` → ensure PR exists, do not merge.
-- **Checkpoint / milestone path:** show CHECKPOINT — DO NOT MERGE YET. Do not offer merge.
+- **Feature-complete / PR path:** show MERGE GATE + Brain capture. On `merge` → create PR if missing, then `gh pr merge --merge --delete-branch` (use PR merge fallback above if dirty tree). On `later` → stop with PR in Next Steps. On `open-pr-only` → ensure PR exists, do not merge.
+- **Checkpoint / milestone path:** show CHECKPOINT — DO NOT MERGE YET (+ Brain capture when durable). Do not offer merge.
+- **Brain re-show:** If Phase 4 skipped the brain block (ad-hoc commit/push, deferred, or nothing staged then) but something durable happened in the session, **re-show** the Brain capture proposal here. Omit only when nothing durable.
+- **Brain replies** (confirm-to-write — never silent-write to `docs/brain/`):
+  - `brain approve` → write the proposed entry (append gotcha/pattern or new `decisions/NNNN-*.md`), then commit + push to the PR branch when possible (tiny follow-up PR if already merged).
+  - `brain skip` / `brain:none` → explicit no-op.
+  - `brain edit …` → revise draft, re-show banner, wait again.
+  - Combined replies are fine (e.g. `merge + brain approve`, `merge, brain skip`).
 
-Never auto-merge without Human `merge` / clear `Y`.
+Never auto-merge without Human `merge` / clear `Y`. Never write brain files without `brain approve` (or an edited re-approve).
 
 ---
 
