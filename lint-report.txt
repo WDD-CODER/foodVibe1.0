@@ -1,0 +1,185 @@
+﻿node.exe : npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm 
+help npmrc` for supported config options.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn Unknow...config options.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\core\components\user-msg\user-msg.component.spec.ts
+   8:7   error  'component' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  18:28  error  Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\core\components\user-msg\user-msg.component.ts
+  17:14  error  '$event' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\core\resolvers\product.resolver.ts
+  7:67  error  'state' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\core\services\async-storage.service.spec.ts
+  43:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\core\services\conversion.service.ts
+  65:50  error  'conversionRate' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\core\services\equipment-data.service.ts
+  1:30  error  'inject' is defined but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+  3:10  error  'StorageService' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  4:10  error  'LoggingService' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\core\services\kitchen-state.service.spec.ts
+  21:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  21:60  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  99:12  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\core\services\menu-export.service.ts
+  36:3  error  'styleExcelSeparator' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\core\services\menu-intelligence.service.spec.ts
+  6:21  error  'MenuItemSelection' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  6:40  error  'MenuSection' is defined but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\core\services\metadata-registry.service.ts
+  1:30  error  'computed' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\core\services\preparation-registry.service.ts
+  9:15  error  'Recipe' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\core\services\product-data.service.spec.ts
+  1:36  error  'flush' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\core\services\scaling.service.ts
+  4:10  error  'FlatPrepItem' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\core\services\supplier-data.service.ts
+  1:30  error  'inject' is defined but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+  3:10  error  'StorageService' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  4:10  error  'LoggingService' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\core\services\venue-data.service.ts
+  1:30  error  'inject' is defined but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+  3:10  error  'StorageService' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  4:10  error  'LoggingService' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\core\utils\list-state.util.ts
+  133:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  156:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\core\utils\recipe-yield-manager.util.ts
+  326:35  error  'chipIdx' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\pages\cook-view\cook-view.page.ts
+  12:47  error  'ScaledPrepRow' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\pages\inventory\components\inventory-product-list\inventory-product-list.component.spec.ts
+   46:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   80:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   81:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   90:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   91:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   92:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   94:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   97:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  103:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  104:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  107:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  123:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\pages\inventory\components\product-form\product-form.component.spec.ts
+    2:31  error  'FormArray' is defined but never used. Allowed unused vars must match /^_/u           @typescript-eslint/no-unused-vars
+   29:9   error  'mockUnits' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  120:28  error  Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+  134:21  error  Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+  150:21  error  Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+  152:21  error  Unexpected any. Specify a different type                                              @typescript-eslint/no-explicit-any
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\pages\inventory\components\product-form\product-form.component.ts
+  104:31  error  Unexpected any. Specify a different type                                                @typescript-eslint/no-explicit-any
+  626:11  error  'globalPrice' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\pages\inventory\inventory.page.spec.ts
+  7:7  error  'component' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\pages\menu-intelligence\menu-intelligence.page.ts
+   23:10  error  'SelectOnFocusDirective' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  696:13  error  'items' is assigned a value but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\pages\metadata-manager\metadata-manager.page.component.ts
+  23:72  error  'MenuTypeDefinition' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\pages\recipe-book\components\recipe-book-list\recipe-book-list.component.spec.ts
+   78:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   85:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   90:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   91:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   92:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   94:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   95:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   97:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   98:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   99:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  101:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  102:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  103:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  107:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  108:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  112:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  113:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  117:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  121:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  123:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  126:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  128:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  139:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  151:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\pages\recipe-builder\components\recipe-ingredients-table\recipe-ingredients-table.component.ts
+   22:15  error  'Recipe' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+  328:35  error  'rowIndex' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\pages\recipe-builder\components\recipe-workflow\recipe-workflow.component.ts
+  17:23  error  'moveItemInArray' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\pages\recipe-builder\recipe-builder.page.ts
+   796:34   error  Unexpected any. Specify a different type                             @typescript-eslint/no-explicit-any
+  1237:108  error  'i' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\pages\recipe-builder\services\recipe-ai-flow.service.ts
+  128:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  155:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  238:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\shared\add-item-modal\add-item-modal.component.spec.ts
+  46:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  51:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  57:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\shared\ai-menu-modal\ai-menu-modal.component.ts
+  118:70  error  'si' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\shared\counter\counter.component.spec.ts
+  4:10  error  'TranslatePipe' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\shared\custom-select\custom-select.component.spec.ts
+  2:10  error  'signal' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\shared\rating-stars\rating-stars.component.ts
+  51:13  error  'threshold' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\shared\scaling-chip\scaling-chip.component.ts
+  6:3  error  'inject' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\shared\supplier-modal\supplier-modal.component.ts
+  4:10  error  'TranslatePipe' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\shared\translation-key-modal\translation-key-modal.component.spec.ts
+  51:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  56:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  64:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\coding projects\Cursor\foodVibe1.0\src\app\shared\unit-creator\unit-creator.component.ts
+  78:16  error  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+Γ£û 98 problems (98 errors, 0 warnings)
+
