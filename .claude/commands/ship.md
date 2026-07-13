@@ -115,7 +115,7 @@ Decide whether this ship is a **feature-complete** commit (push + propose PR) or
 
 1. Compare the session diff against that brief’s **Done when** list.
 2. **All criteria met** → feature-complete → run `node scripts/brain-review-check.mjs --scope=full` (advisory only — findings never block the PR, just get reported), then proceed to propose PR (`gh pr create` on a feature branch, existing flow).
-3. **Not all criteria met** → milestone/checkpoint → commit + push to the branch only; **do not** propose a PR; **do not** run the `--scope=full` brain check (checkpoint commits only get the CI `--scope=dead-refs` pass). In the ship summary state explicitly: `Milestone commit — brief not yet complete, no PR proposed`.
+3. **Not all criteria met** → milestone/checkpoint → commit + push to the branch only; **do not** propose a PR; **do not** run the `--scope=full` brain check (checkpoint commits only get the CI `--scope=dead-refs` pass). In the ship summary state explicitly: `Milestone commit — brief not yet complete, no PR proposed`. Then **Phase 4.5** with the CHECKPOINT banner.
 
 **Otherwise — no brief this session** (ad-hoc work, no Done-when to check):
 
@@ -128,6 +128,8 @@ Decide whether this ship is a **feature-complete** commit (push + propose PR) or
 ### After opening a PR (feature-complete path only)
 
 After opening the PR, run `gh pr checks --watch` once. If any check fails, offer the user: run the fix loop now (`docs/agent/pr-check-fix-loop.md`) or leave it. Do not auto-run without asking.
+
+Then proceed to **Phase 4.5 — Merge Gate** (mandatory).
 
 ### Push conflict guard
 
@@ -154,6 +156,17 @@ gh pr merge {pr_number} --merge --auto
 Do not stash/commit unrelated dirty files to unblock merge.
 
 Never commit to `main`. Never force-push. Never amend after push.
+
+---
+
+## Phase 4.5 — Merge Gate (mandatory after successful push)
+
+Follow `docs/agent/standards-git.md` → **Post-push Merge Gate**. Copy the visual block exactly; wait for Human reply. Do not skip because a PR URL was already printed.
+
+- **Feature-complete / PR path:** show MERGE GATE. On `merge` → create PR if missing, then `gh pr merge --merge --delete-branch` (use PR merge fallback above if dirty tree). On `later` → stop with PR in Next Steps. On `open-pr-only` → ensure PR exists, do not merge.
+- **Checkpoint / milestone path:** show CHECKPOINT — DO NOT MERGE YET. Do not offer merge.
+
+Never auto-merge without Human `merge` / clear `Y`.
 
 ---
 
@@ -218,6 +231,7 @@ PR path: PR proposed — brief Done-when met
        | Checkpoint commit — no brief, user confirmed
        | Checkpoint commit — user override
 PR: {url or N/A}
+Merge: offered | merged {sha} | deferred | N/A (checkpoint)
 Brain review: {--scope=full summary, e.g. "no issues found" | "2 advisory findings — see above"} | N/A (checkpoint, not run)
 Todo: {n marked} | no matching open items — skipped
 Session state: {path} (append | full rewrite)

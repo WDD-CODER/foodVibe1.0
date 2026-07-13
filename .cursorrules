@@ -50,3 +50,5 @@ Secrets live in .env only. Never read, print, hardcode, or commit them. Never we
 Never commit. Never push. That's the Human's job by default. If Human explicitly asks
 you to commit/push, prepare via the repo's git-agent conventions and only proceed with
 explicit approval.
+After any successful push off `main`, end with the Merge Gate from
+`docs/agent/standards-git.md` and wait — do not stop at "pushed" / PR URL alone.
