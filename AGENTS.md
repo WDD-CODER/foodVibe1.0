@@ -16,7 +16,27 @@ Single source of truth for hard rules, conventions, and skill triggers. Claude C
 - Secrets live in `.env` only. Never read, print, hardcode, or commit them.
 - Hebrew UI strings always through `translatePipe` + `dictionary.json`.
 - Browser interaction goes through gstack `/browse` — never raw Playwright MCP directly.
-- **Todo checkboxes (all agents):** Do **not** mark `.claude/todo.md` / plan Atomic Sub-tasks `[x]` while still executing or only “ready for review.” **After Human validation, you MUST mark matching items `[x]` and include those files in the same ship commit** (before push) so the Human does not need a second push for checkboxes. Human validation = `/ship` Approve **Y** / `--yes`, or an explicit “mark done / verified / approved.” Order on ship: **Y → mark `[x]` → stage with job → commit → push.** Mid-milestone STOP for review is unchanged. Never skip with “Contractor does not mark.”
+- **Job validation (all agents):** A job is **not done** until the Human validates it. Never self-mark todos. Full procedure: `docs/agent/job-validation.md`.
+
+## Job validation (all agents)
+
+A requested job stays open until Human validation. Mid-milestone STOP for review is unchanged.
+
+**Validation (counts):** `/ship` Approve **Y** / `--yes`; chat `done` / `mark done` / `mark it` / `verified` / `approved` / `LGTM for this job`; `/done` then confirm.  
+**Does not count:** `thanks` / `ok` / `cool` / silence / CI green alone.
+
+**When you finish a job and are not immediately running `/ship`:** end the turn with:
+
+```text
+JOB DONE — awaiting your validation
+Matched todos (still [ ]):
+  - …
+Reply: done  |  not yet  |  edit list
+```
+
+**On validation:** MUST mark matching `.claude/todo.md` / plan Atomic Sub-tasks `[x]`.  
+**On `/ship` Y:** mark → stage with job → commit → push (one commit; see ship Phase 4).  
+Never skip with “Contractor does not mark.” Detail: `docs/agent/job-validation.md`.
 
 ## Skill triggers
 
@@ -41,6 +61,8 @@ Single source of truth for hard rules, conventions, and skill triggers. Claude C
 | List available skills | `.claude/commands/skills.md` |
 | List available commands | `.claude/commands/commands.md` |
 | Finishing a feature | `/ship` (runs review automatically; `--skip-review "reason"` for trivial changes; commits are PR'd only when feature-complete; milestone commits push without a PR). After any successful push off `main`, the Post-push Merge Gate in `docs/agent/standards-git.md` is mandatory — including Brain capture proposal (not `/ship`-only; confirm-to-write). |
+| Agent finished a job / user says done, mark done, verified, approved (no ship) | `docs/agent/job-validation.md` + `/done` — close-out ask, then mark todos on Human confirm |
+| Job validation / when to mark todos `[x]` | `docs/agent/job-validation.md` |
 | PR checks failing | Run `docs/agent/pr-check-fix-loop.md` (via `/fix-pr-checks` in either tool). Bounded: 2 rounds max, security-scan findings always surface to the user. |
 | Session start on unfamiliar work | Read `docs/brain/index.md`, then only the relevant sub-file |
 | Architectural choice | Check `docs/brain/decisions/` first; supersede, never edit in place |
@@ -57,6 +79,7 @@ Single source of truth for hard rules, conventions, and skill triggers. Claude C
 | `docs/agent/standards-backend.md` | New entity types, persisted fields, CRUD/data services, backend API contract |
 | `docs/agent/standards-git.md` | Committing, pushing, PRs, branch renames, any git write; includes mandatory Post-push Merge Gate + Brain capture confirm-to-write |
 | `docs/agent/brain-capture.md` | Proposing or writing any `docs/brain/` entry — extraction procedure, required shapes, usefulness gate, proposal format |
+| `docs/agent/job-validation.md` | When a job is done; Human validation; close-out ask; marking todos `[x]` (ship Y or chat `done`) |
 
 Stack detail: `/_shared/tech-stack.md`.
 

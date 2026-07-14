@@ -86,7 +86,7 @@ Also proposing a brain entry:   # only when durable; may be 2 lines (pattern + p
 Approve? (Y / edit list / abort)
 ~~~
 
-**Todo lines in the tree:** If matching open todos exist for this job, list the todo/plan paths above *before* Y (still `[ ]` on disk). On **Y**, mark them `[x]` and stage them in the **same** commit as the job — Human must not need a second push just for checkboxes.
+**Todo lines in the tree:** If matching open todos exist for this job, list the todo/plan paths above *before* Y (still `[ ]` on disk). On **Y**, mark them `[x]` and stage them in the **same** commit as the job — Human must not need a second push just for checkboxes. Chat-only jobs (no ship): use `docs/agent/job-validation.md` Path B / `/done`.
 
 When a brain entry is proposed, print each entry's **full draft body** in a fenced markdown block directly below the tree — the tree line carries only path + title.
 

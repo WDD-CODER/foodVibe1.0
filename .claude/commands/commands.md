@@ -40,6 +40,7 @@ Show all registered slash commands with short descriptions and file locations.
 | `/commands` | List all registered slash commands, categories, and paths | `.claude/commands/commands.md` | UTIL | SHARED |
 | `/context-override` | Override session context defaults / disable context warnings temporarily | `.claude/commands/context-override.md` | UTIL | SHARED |
 | `/docs-refresh` | On-demand documentation refresh (breadcrumbs + project docs) | `.claude/commands/docs-refresh.md` | UTIL | SHARED |
+| `/done` | Validate a finished chat job — close-out ask, then mark matching todos `[x]` | `.claude/commands/done.md` | UTIL | SHARED |
 | `/evaluate-me` | Agent session retrospective â€” grades the session | `.claude/commands/evaluate-me.md` | FLOW | SHARED |
 | `/feat` | New-feature path â€” rules, `/plan`, Contractor + `/review-it` | `.claude/commands/feat.md` | FLOW | SHARED |
 | `/fix` | Bug fix path â€” matching rules + elegant-fix | `.claude/commands/fix.md` | FLOW | SHARED |

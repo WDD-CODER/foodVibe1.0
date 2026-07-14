@@ -47,6 +47,7 @@ See `README_WORKFLOW.md` and `CLAUDE.md`.
 | Command | What it does |
 |---------|-------------|
 | `/ship` | Session end â€” build gate, this-chat file tree + Verify bullets, agent commits (`--yes` skips wait) |
+| `/done` | Validate a finished chat job â€” close-out ask, then mark matching todos `[x]` |
 | `/brief` | Capture or generate a session brief |
 | `/evaluate-me` | Agent session retrospective â€” grades the session |
 
