@@ -16,7 +16,7 @@ Single source of truth for hard rules, conventions, and skill triggers. Claude C
 - Secrets live in `.env` only. Never read, print, hardcode, or commit them.
 - Hebrew UI strings always through `translatePipe` + `dictionary.json`.
 - Browser interaction goes through gstack `/browse` — never raw Playwright MCP directly.
-- **Todo checkboxes (all agents):** Do **not** mark `.claude/todo.md` / plan Atomic Sub-tasks `[x]` while still executing or only “ready for review.” **After Human validation of that job, you MUST mark matching items `[x]`.** Human validation includes: `/ship` Approve **Y** (the commit that delivered the job), or an explicit “mark done / verified / approved.” Mid-milestone STOP for review is unchanged — mark only once the validated ship (or equivalent confirm) has landed. `/ship` Phase 6 is mandatory when items match; never skip with “Contractor does not mark.”
+- **Todo checkboxes (all agents):** Do **not** mark `.claude/todo.md` / plan Atomic Sub-tasks `[x]` while still executing or only “ready for review.” **After Human validation, you MUST mark matching items `[x]` and include those files in the same ship commit** (before push) so the Human does not need a second push for checkboxes. Human validation = `/ship` Approve **Y** / `--yes`, or an explicit “mark done / verified / approved.” Order on ship: **Y → mark `[x]` → stage with job → commit → push.** Mid-milestone STOP for review is unchanged. Never skip with “Contractor does not mark.”
 
 ## Skill triggers
 
@@ -56,6 +56,7 @@ Single source of truth for hard rules, conventions, and skill triggers. Claude C
 | `docs/agent/standards-domain.md` | Translation keys, Hebrew canonical values, Lucide icons, ingredient ledger |
 | `docs/agent/standards-backend.md` | New entity types, persisted fields, CRUD/data services, backend API contract |
 | `docs/agent/standards-git.md` | Committing, pushing, PRs, branch renames, any git write; includes mandatory Post-push Merge Gate + Brain capture confirm-to-write |
+| `docs/agent/brain-capture.md` | Proposing or writing any `docs/brain/` entry — extraction procedure, required shapes, usefulness gate, proposal format |
 
 Stack detail: `/_shared/tech-stack.md`.
 

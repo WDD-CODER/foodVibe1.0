@@ -77,18 +77,28 @@ Proposed commit:
 Files to stage:
   ├── file1
   └── file2
+  ├── .claude/todo.md          # when matching items will be marked [x] on Y
+  └── plans/….plan.md          # when matching Atomic Sub-tasks will be marked [x] on Y
 
-Also proposing a brain entry:   # only when this session produced a durable decision/pattern/gotcha
-  docs/brain/{gotchas.md | patterns/*.md | decisions/NNNN-*.md} — "one-line summary"
+Also proposing a brain entry:   # only when durable; may be 2 lines (pattern + paired gotcha)
+  docs/brain/{gotchas.md | patterns/*.md | decisions/NNNN-*.md} — "one-line title"
 
 Approve? (Y / edit list / abort)
 ~~~
 
+**Todo lines in the tree:** If matching open todos exist for this job, list the todo/plan paths above *before* Y (still `[ ]` on disk). On **Y**, mark them `[x]` and stage them in the **same** commit as the job — Human must not need a second push just for checkboxes.
+
+When a brain entry is proposed, print each entry's **full draft body** in a fenced markdown block directly below the tree — the tree line carries only path + title.
+
 ### Brain-entry capture (no new gate)
 
-If this session produced something durable — a decision worth an ADR, a proven pattern, or a gotcha that cost time — draft the entry and add it as an extra line item in the same tree above, under "Also proposing a brain entry." If nothing durable happened, omit that block entirely; do not print it for trivial sessions.
+Follow `docs/agent/brain-capture.md`: run the extraction procedure (mine `sessions/YYYY-MM-DD.md` Decisions / review findings — not the diff alone), pick the artifact type(s), draft the full body per the required shape, then run the usefulness gate.
 
-This rides the existing `Approve? (Y / edit list / abort)` answer — there is no separate Y/N for the brain entry. Saying "edit list" also covers dropping the brain entry (treat it like any other stageable item the user can remove). On approval, write the entry to its `docs/brain/` file (append for `gotchas.md`/`patterns/`, new numbered file for `decisions/`) and stage it alongside the rest.
+- **Required shapes** — Pattern: Problem / Solution / When to use. Gotcha: What hurt / Why the obvious fix is wrong / What to do instead. Decision: Context / Decision / Consequences (ADR, next number). Templates: `docs/brain/patterns/_TEMPLATE.md`, `docs/brain/decisions/_TEMPLATE.md`.
+- **One-liner-only proposals are forbidden** — a title that restates the commit subject is not an entry. No draft body that fills the shape → nothing durable → omit the block entirely (the common case for chores).
+- **Split when both apply** — a pattern (happy path) and its paired gotcha (the trap that looked like success) are two lines + two fenced drafts, cross-linked.
+
+This rides the existing `Approve? (Y / edit list / abort)` answer — there is no separate Y/N for the brain entry. Saying "edit list" also covers dropping or revising a brain entry (treat it like any other stageable item). On approval, write each approved draft **verbatim** to its `docs/brain/` file (append for `gotchas.md`, new file under `patterns/`, new numbered file for `decisions/`) and stage it alongside the rest.
 
 ### Semantic branch rename ((semantic rename rules))
 
@@ -97,13 +107,19 @@ If on `feat/session-*`:
 2. Derive semantic slug (`feat|fix|refactor|chore` + 2–4 kebab words; no dates/session filler)
 3. Show `Rename: {old} → {new}` in the tree; rename after approval: `git branch -m`
 
-### On approval
+### On approval (order is hard — do not reorder)
 
-1. `git add` only listed paths
-2. `git commit` (Conventional Commit; Cursor trailer `Co-authored-by: Cursor <cursoragent@cursor.com>` when applicable)
-3. Rename branch if approved
-4. Push only if Human asked (“push” / “ship and push”): `git push -u origin HEAD`
-5. **Commit-vs-PR judgment** (before any `gh pr create`) — see below. Never open a PR silently.
+Approve **Y** (or `--yes`) **is** Human validation of the job. Then:
+
+1. **Todo sync (mandatory when items match)** — Mark matching `.claude/todo.md` / plan Atomic Sub-tasks `[x]`; archive fully-complete plan sections to `.claude/todo-archive.md` under `## Done`. Never invent completion for work not in this ship. Never skip with “Contractor does not mark.” If nothing matches → note `Todo: no matching open items — skipped` and continue.
+2. **Write brain drafts** (if proposed and not dropped via edit list) — verbatim to `docs/brain/**` as above.
+3. **`git add` only listed paths** — include the todo/plan/brain paths just updated. Happy path = **one commit** with job + todos (+ brain). Do **not** commit the job first and leave todos for a later push.
+4. **`git commit`** (Conventional Commit; Cursor trailer `Co-authored-by: Cursor <cursoragent@cursor.com>` when applicable)
+5. Rename branch if approved
+6. Push only if Human asked (“push” / “ship and push”): `git push -u origin HEAD`
+7. **Commit-vs-PR judgment** (before any `gh pr create`) — see below. Never open a PR silently.
+
+**Recovery only:** If a prior ship already committed/pushed the job without todos (agent bug or mid-flight rule change), immediately mark matching `[x]` and push a tiny follow-up commit on the same branch — do not leave checkboxes open.
 
 ### Commit-vs-PR judgment
 
@@ -165,9 +181,9 @@ Follow `docs/agent/standards-git.md` → **Post-push Merge Gate**. Copy the comb
 
 - **Feature-complete / PR path:** show MERGE GATE + Brain capture. On `merge` → create PR if missing, then `gh pr merge --merge --delete-branch` (use PR merge fallback above if dirty tree). On `later` → stop with PR in Next Steps. On `open-pr-only` → ensure PR exists, do not merge.
 - **Checkpoint / milestone path:** show CHECKPOINT — DO NOT MERGE YET (+ Brain capture when durable). Do not offer merge.
-- **Brain re-show:** If Phase 4 skipped the brain block (ad-hoc commit/push, deferred, or nothing staged then) but something durable happened in the session, **re-show** the Brain capture proposal here. Omit only when nothing durable.
+- **Brain re-show:** If Phase 4 skipped the brain block (ad-hoc commit/push, deferred, or nothing staged then) but something durable happened in the session, **re-show** the Brain capture proposal here — per `docs/agent/brain-capture.md`: banner line = path + one-line title, full draft body in a fenced block below the banner, usefulness gate already passed. Omit only when nothing durable.
 - **Brain replies** (confirm-to-write — never silent-write to `docs/brain/`):
-  - `brain approve` → write the proposed entry (append gotcha/pattern or new `decisions/NNNN-*.md`), then commit + push to the PR branch when possible (tiny follow-up PR if already merged).
+  - `brain approve` → write the approved fenced draft verbatim (append gotcha, new pattern file, or new `decisions/NNNN-*.md`), then commit + push to the PR branch when possible (tiny follow-up PR if already merged).
   - `brain skip` / `brain:none` → explicit no-op.
   - `brain edit …` → revise draft, re-show banner, wait again.
   - Combined replies are fine (e.g. `merge + brain approve`, `merge, brain skip`).
@@ -214,13 +230,9 @@ Do not change the resume/read path used by `scripts/session-startup.sh`.
 
 ---
 
-## Phase 6 — Todo sync (after Human ship approval)
+## Phase 6 — Todo sync
 
-Ship Approve **Y** (or `--yes`) **is** Human validation of the job in that commit. All agents (including Contractor) **must** update todos here — do **not** leave `[ ]` with a note that “Contractor does not mark.”
-
-- **If** `.claude/todo.md` (and the plan’s Atomic Sub-tasks, when the same IDs exist) has ≥1 `[ ]` item that matches the shipped job (files touched, milestone ID, or user-named task) → mark those items `[x]`; archive fully-complete plan sections to `.claude/todo-archive.md` under `## Done`. Include todo/plan checkbox updates in a follow-up commit on the same branch when the ship commit already pushed without them, or stage them in the ship commit when still pre-commit.
-- **Otherwise** → skip and note: `Todo: no matching open items — skipped`
-- **Never** invent completion for work not in this ship. **Never** skip marking when items clearly match.
+**Done in Phase 4 “On approval” step 1** (before commit). Do not run a second todo pass after push unless using the recovery path in Phase 4.
 
 ---
 

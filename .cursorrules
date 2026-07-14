@@ -27,8 +27,8 @@ Hard rules, non-negotiable:
 ## Execution protocol
 1. Execute ONE milestone at a time from the named plan file, then STOP.
 2. Do **not** mark todos/`[x]` while only “ready for review.” **After Human validates the job
-   (ship Approve Y for the commit that delivered it, or explicit “mark done”), you MUST mark
-   matching `.claude/todo.md` / plan Atomic Sub-tasks `[x]`.** See AGENTS.md hard rule.
+   (ship Approve Y / `--yes`, or explicit “mark done”), you MUST mark matching todos `[x]` and
+   include them in the same ship commit (Y → mark → stage with job → commit → push).** See AGENTS.md.
 3. NEVER start the next milestone without explicit instruction.
 4. NEVER modify architecture, models, or public interfaces beyond what the plan
    declares (unless Human explicitly asked you to plan/architect that change).
