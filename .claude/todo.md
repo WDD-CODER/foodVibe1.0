@@ -12,18 +12,18 @@
 ---
 
 ### Plan 289 â€” App Load Optimization (`plans/289-app-load-optimization.plan.md`)
-> Phase 2 after Save Latency Fix (M1â€“3 already executed in session 2026-07-09). Contractor executed M4â€“6 2026-07-09 â€” Human/Reviewer marks `[x]`.
+> Phase 2 after Save Latency Fix (M1â€“3 already executed in session 2026-07-09). M4 shipped earlier; M5 marked `[x]` after ship Approve Y (`4e051d3` / PR #158). M6 still open.
 
-- [ ] 4.1 Record baseline: `ng build --configuration production` â€” note initial/main bundle size *(done in session: 920.70 kB)*
-- [ ] 4.2 `app.component.html` + `.ts` â€” `@defer` the 3 AI modals (`ai-recipe`, `ai-menu`, `ai-product`) on their open signals; verify open + rebuild size
-- [ ] 4.3 Defer remaining root modals (pass 2) â€” leave `app-confirm-modal` / `app-auth-modal` eager if first-open latency is noticeable
-- [ ] 4.4 Manual verify: all deferred modals open; confirm/auth still snappy; no pendingChangesGuard regression
-- [ ] 4.5 Record after numbers from production build output (main vs deferred chunks) *(after: 670.83 kB, âˆ’249.87 kB)*
-- [ ] 5.1 Audit: grep `allEquipment_` / venues / menu-events / preparations / section-categories usages â€” exclude any read from dashboard *(Equipment + Preparations kept eager)*
-- [ ] 5.2 For each safe service: remove constructor `loadInitialData()`; add `ensureLoaded()` with `loaded_` guard
-- [ ] 5.3 Wire `ensureLoaded()` into route resolvers (equipment, venues, menu-intelligence, metadata-manager as applicable)
-- [ ] 5.4 Keep Recipe/Dish/Product/Supplier/Unit/Metadata registries eager â€” do not touch
-- [ ] 5.5 Manual: `/dashboard` Network tab has no EQUIPMENT/VENUE/MENU_EVENT/PREPARATIONS/SECTION_CATEGORIES GETs until navigation
+- [x] 4.1 Record baseline: `ng build --configuration production` â€” note initial/main bundle size *(done in session: 920.70 kB)*
+- [x] 4.2 `app.component.html` + `.ts` â€” `@defer` the 3 AI modals (`ai-recipe`, `ai-menu`, `ai-product`) on their open signals; verify open + rebuild size
+- [x] 4.3 Defer remaining root modals (pass 2) â€” leave `app-confirm-modal` / `app-auth-modal` eager if first-open latency is noticeable
+- [x] 4.4 Manual verify: all deferred modals open; confirm/auth still snappy; no pendingChangesGuard regression
+- [x] 4.5 Record after numbers from production build output (main vs deferred chunks) *(after: 670.83 kB, âˆ’249.87 kB)*
+- [x] 5.1 Audit: grep candidate usages â€” defer safe services; Equipment + Preparations deferred in M5 ship (were wrongly kept eager before)
+- [x] 5.2 For each safe service: remove constructor `loadInitialData()`; add `ensureLoaded()` with `loaded_` guard
+- [x] 5.3 Wire `ensureLoaded()` into route resolvers (equipment, venues, menu-intelligence, metadata-manager as applicable)
+- [x] 5.4 Keep Recipe/Dish/Product/Supplier/Unit/Metadata registries eager â€” do not touch
+- [x] 5.5 Manual: `/dashboard` Network tab has no GETs for deferred collections until navigation *(Human verify on PR #158 test plan)*
 - [ ] 6.1 `server/routes/generic.js` PUT `/:type` â€” parallelize `deleteMany` + stillTaken `_id` lookup via `Promise.all`
 - [ ] 6.2 Manual: trash empty-all + backup-import still correct; contract (`X-Confirm-Replace`) unchanged
 

@@ -26,7 +26,9 @@ Hard rules, non-negotiable:
 
 ## Execution protocol
 1. Execute ONE milestone at a time from the named plan file, then STOP.
-2. Do not mark a milestone complete yourself unless Human explicitly asks after verify.
+2. Job validation: see AGENTS.md **Job validation** + `docs/agent/job-validation.md`. Never
+   self-mark. On ship Y: mark → stage with job → commit → push. On chat finish: JOB DONE
+   close-out ask; on Human `done` mark `[x]`. `/done` for chat-only path.
 3. NEVER start the next milestone without explicit instruction.
 4. NEVER modify architecture, models, or public interfaces beyond what the plan
    declares (unless Human explicitly asked you to plan/architect that change).
@@ -53,3 +55,5 @@ explicit approval.
 After any successful push off `main`, end with the Merge Gate from
 `docs/agent/standards-git.md` and wait — do not stop at "pushed" / PR URL alone.
 Brain capture proposal is part of that gate (not `/ship`-only); confirm-to-write.
+Brain proposals follow `docs/agent/brain-capture.md` (usefulness gate + full draft
+body below the banner; title-only proposals are invalid).

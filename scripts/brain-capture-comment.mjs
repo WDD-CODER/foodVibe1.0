@@ -58,7 +58,7 @@ Auto-evoke (confirm-to-write). Drafting stays with the agent session — this co
 ### Checklist
 
 - [ ] Durable learning from this PR? (gotcha / pattern / decision / **none**)
-- [ ] If yes: agent drafted path + one-line summary in Merge Gate (or reply below)
+- [ ] If yes: agent drafted path + title **plus full draft body** in Merge Gate (per \`docs/agent/brain-capture.md\` — a title-only proposal is invalid)
 - [ ] Confirm write: \`brain approve\` — or skip: \`brain skip\` / \`brain:none\` / label \`brain:none\`
 - [ ] Or revise: \`brain edit …\` then re-approve
 

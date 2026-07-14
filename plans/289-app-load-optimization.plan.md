@@ -13,7 +13,7 @@ Reduce "app takes a while to load" by (a) stopping 15 root modals from shipping 
 
 **Context for executing agent:** Root cause of slow initial load is (1) all root-level modals in `app.component` shipping in the initial JS chunk regardless of route, and (2) 11+ `providedIn: 'root'` data services calling `loadInitialData()` from constructors on bootstrap whether or not the current route needs that data.
 
-**Execution protocol (Contractor):** ONE milestone at a time, then STOP. Never mark a milestone complete. Never start the next without explicit Human instruction. Write `/sessions/[today ISO date].md` after each milestone. Run production build / Network checks as declared in Done when. Stay on `feat/` branch — never `main`.
+**Execution protocol (Contractor):** ONE milestone at a time, then STOP for review. Do not mark `[x]` until Human validates the job (`/ship` Approve Y or explicit mark-done) — then **must** mark matching todos. Never start the next without explicit Human instruction. Write `/sessions/[today ISO date].md` after each milestone. Run production build / Network checks as declared in Done when. Stay on `feat/` branch — never `main`.
 
 ---
 
@@ -61,11 +61,11 @@ Stop shipping all 15 root-level modals in the main bundle; load each only when i
 
 ## Atomic Sub-tasks
 
-- [ ] 4.1 Record baseline: `ng build --configuration production` — note initial/main bundle size
-- [ ] 4.2 `app.component.html` + `.ts` — `@defer` the 3 AI modals on their open signals; verify open + rebuild size
-- [ ] 4.3 Defer remaining root modals (pass 2) — leave confirm/auth eager if first-open latency is noticeable
-- [ ] 4.4 Manual verify: all deferred modals open; confirm/auth still snappy; no pendingChangesGuard regression
-- [ ] 4.5 Record after numbers from production build output (main vs deferred chunks)
+- [x] 4.1 Record baseline: `ng build --configuration production` — note initial/main bundle size
+- [x] 4.2 `app.component.html` + `.ts` — `@defer` the 3 AI modals on their open signals; verify open + rebuild size
+- [x] 4.3 Defer remaining root modals (pass 2) — leave confirm/auth eager if first-open latency is noticeable
+- [x] 4.4 Manual verify: all deferred modals open; confirm/auth still snappy; no pendingChangesGuard regression
+- [x] 4.5 Record after numbers from production build output (main vs deferred chunks)
 
 ## Done when
 
@@ -119,11 +119,11 @@ Stop firing network requests for equipment / venues / menu-events / preparations
 
 ## Atomic Sub-tasks
 
-- [ ] 5.1 Audit: grep candidate service signal usages — exclude any read from dashboard / always-on surfaces
-- [ ] 5.2 For each safe service: remove constructor load; add `ensureLoaded()` with `loaded_` guard
-- [ ] 5.3 Wire `ensureLoaded()` into route resolvers for the owning lazy sections
-- [ ] 5.4 Keep Recipe/Dish/Product/Supplier/Unit/Metadata registries eager — do not touch
-- [ ] 5.5 Manual: `/dashboard` Network tab has no GETs for deferred collections until navigation; target pages still populate on first visit
+- [x] 5.1 Audit: grep candidate service signal usages — exclude any read from dashboard / always-on surfaces
+- [x] 5.2 For each safe service: remove constructor load; add `ensureLoaded()` with `loaded_` guard
+- [x] 5.3 Wire `ensureLoaded()` into route resolvers for the owning lazy sections
+- [x] 5.4 Keep Recipe/Dish/Product/Supplier/Unit/Metadata registries eager — do not touch
+- [x] 5.5 Manual: `/dashboard` Network tab has no GETs for deferred collections until navigation; target pages still populate on first visit
 
 ## Done when
 
