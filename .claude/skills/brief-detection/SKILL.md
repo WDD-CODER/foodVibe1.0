@@ -57,7 +57,7 @@ c. Discussion only — no execution
 ## What this skill does NOT do
 
 - Does not write or modify code
-- Does not invoke Agent Memory
+- Does not consult second-brain (`docs/brain/`) or optional MCP memory tools
 - Does not invoke other agents
 - Does not pre-load standards files
 

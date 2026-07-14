@@ -118,7 +118,7 @@ Moved from todo.md to reduce token load.
 - [x] `.claude/copilot-instructions.md` â€” add memory search trigger Â§0, token budget Â§0.2, priority hierarchy Â§0.1
 - [x] Provide user with Bun + claude-mem install commands + worker health check
 
-> **NOTE:** This plan originally used `claude-mem`. The project has since migrated to **MemPalace** (MCP server `mcp__mempalace__*`). All memory/knowledge-graph tooling now goes through MemPalace. `claude-mem` is no longer active.
+> **NOTE (RETIRED):** This plan originally used `claude-mem`, then MemPalace. Both are retired (July 2026). Project second-brain is `docs/brain/`. Do not use MemPalace or Agent Memory MCP as a default skill step.
 
 ---
 

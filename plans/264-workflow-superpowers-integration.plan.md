@@ -5,6 +5,8 @@ todos: []
 isProject: true
 ---
 
+> RETIRED — MemPalace/claude-mem/reflect automation retired in July 2026 cutover. Do not execute. Prefer docs/brain/.
+
 # Workflow Superpowers Integration — Executive Brief
 
 > **For the Team Leader agent:** This is a multi-file, multi-subsystem project. Read this entire document before assembling your task force. Each sub-brief below is a self-contained work unit that can be assigned to an agent. Dependencies are marked — respect the execution order.
