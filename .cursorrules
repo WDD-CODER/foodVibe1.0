@@ -55,3 +55,5 @@ explicit approval.
 After any successful push off `main`, end with the Merge Gate from
 `docs/agent/standards-git.md` and wait — do not stop at "pushed" / PR URL alone.
 Brain capture proposal is part of that gate (not `/ship`-only); confirm-to-write.
+Brain proposals follow `docs/agent/brain-capture.md` (usefulness gate + full draft
+body below the banner; title-only proposals are invalid).

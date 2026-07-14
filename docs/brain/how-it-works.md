@@ -59,10 +59,12 @@ docs/brain/
 ├── gotchas.md          ← ⚠️  traps that already hurt
 ├── glossary.md         ← 📖  domain vocabulary
 ├── decisions/          ← 🏛️  ADRs (append-only)
+│   ├── _TEMPLATE.md
 │   ├── 0001-lean-native-workflow.md
 │   ├── 0002-file-based-memory-over-tool-memory.md
 │   └── 0003-auto-evoke-brain-on-pr.md
 └── patterns/           ← ✅  proven solutions (one file each)
+    ├── _TEMPLATE.md
     ├── signals-only-state.md
     ├── gemini-backend-proxy.md
     ├── tombstone-soft-delete.md
@@ -158,6 +160,23 @@ sequenceDiagram
 | `brain edit …` | Change the draft, then approve |
 
 Silent auto-write is **forbidden**. See [[0003-auto-evoke-brain-on-pr]].
+
+### Thin vs useful — same milestone (few-shot)
+
+Real case: the defer-eager-data session (Plan 289 M5).
+
+❌ **Thin (reject):**
+
+> `docs/brain/patterns/defer-singleton-data.md — "use ensureLoaded for deferred services"`
+
+That's a label, not a lesson — it restates what the diff already shows. A cold agent learns nothing about *when* to defer, *what to audit first*, or *which trap looks like success*.
+
+✅ **Useful (approve) — two entries, cross-linked:**
+
+- A **pattern** carrying the judgment: the audit rule ("read from an always-on surface → leave it eager"), the 5-step recipe, and the when-not-to. → [[defer-singleton-data-ensureLoaded]]
+- A paired **gotcha** naming the trap: login reload calls `reloadFromStorage()` unconditionally, so removing the constructor fetch alone *looks* done but isn't. → "Login reload bypasses deferred constructor load" in `gotchas.md`
+
+Drafting rules, required shapes, and the usefulness gate live in `docs/agent/brain-capture.md`. Templates: `docs/brain/patterns/_TEMPLATE.md`, `docs/brain/decisions/_TEMPLATE.md`.
 
 ---
 
