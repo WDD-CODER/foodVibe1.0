@@ -2,6 +2,8 @@
 
 Distilled project knowledge: history and reasoning, not current state. **Current work status lives in `docs/session-state.md` and `.claude/todo.md` — not here.**
 
+> **Visual tour:** [how-it-works.md](./how-it-works.md) — diagrams of layers, folder map, capture loop, and what to save.
+
 ## Reading order (session start on unfamiliar work)
 
 1. `projectbrief.md` — what FoodVibe is, goals, hard constraints

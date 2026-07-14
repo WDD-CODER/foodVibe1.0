@@ -7,3 +7,5 @@
 - **Tombstone / soft-delete** — deleting an entity moves it to its `TRASH_*` counterpart instead of destroying it. See [[tombstone-soft-delete]].
 - **Ingredient ledger** — the recipe/dish → product quantity tracking that Hebrew canonical resolution and unit registries feed into.
 - **Lucide icon registration** — every `<lucide-icon>` used in a template must be imported (PascalCase) and added to `LucideAngularModule.pick({...})` in `app.config.ts`, or it throws at runtime.
+- **Second brain (`docs/brain/`)** — distilled durable project memory (brief, decisions, patterns, gotchas, glossary). History and reasoning only — not current work status (`docs/session-state.md`, `.claude/todo.md`). See [how-it-works.md](./how-it-works.md).
+- **confirm-to-write** — agents may propose brain entries at push / PR / Merge Gate, but never silent-write to `docs/brain/`. Human replies `brain approve` | `brain skip` / `brain:none` | `brain edit …` before any brain file changes land.
