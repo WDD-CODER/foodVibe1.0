@@ -61,11 +61,11 @@ Stop shipping all 15 root-level modals in the main bundle; load each only when i
 
 ## Atomic Sub-tasks
 
-- [ ] 4.1 Record baseline: `ng build --configuration production` — note initial/main bundle size
-- [ ] 4.2 `app.component.html` + `.ts` — `@defer` the 3 AI modals on their open signals; verify open + rebuild size
-- [ ] 4.3 Defer remaining root modals (pass 2) — leave confirm/auth eager if first-open latency is noticeable
-- [ ] 4.4 Manual verify: all deferred modals open; confirm/auth still snappy; no pendingChangesGuard regression
-- [ ] 4.5 Record after numbers from production build output (main vs deferred chunks)
+- [x] 4.1 Record baseline: `ng build --configuration production` — note initial/main bundle size
+- [x] 4.2 `app.component.html` + `.ts` — `@defer` the 3 AI modals on their open signals; verify open + rebuild size
+- [x] 4.3 Defer remaining root modals (pass 2) — leave confirm/auth eager if first-open latency is noticeable
+- [x] 4.4 Manual verify: all deferred modals open; confirm/auth still snappy; no pendingChangesGuard regression
+- [x] 4.5 Record after numbers from production build output (main vs deferred chunks)
 
 ## Done when
 
