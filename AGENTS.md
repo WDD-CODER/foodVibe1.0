@@ -39,7 +39,7 @@ Single source of truth for hard rules, conventions, and skill triggers. Claude C
 | User says "setup worktree" / "new worktree" (on-demand only) | `.claude/skills/worktree-setup/SKILL.md` |
 | List available skills | `.claude/commands/skills.md` |
 | List available commands | `.claude/commands/commands.md` |
-| Finishing a feature | `/ship` (runs review automatically; `--skip-review "reason"` for trivial changes; commits are PR'd only when feature-complete; milestone commits push without a PR) |
+| Finishing a feature | `/ship` (runs review automatically; `--skip-review "reason"` for trivial changes; commits are PR'd only when feature-complete; milestone commits push without a PR). After any successful push off `main`, the Post-push Merge Gate in `docs/agent/standards-git.md` is mandatory — including Brain capture proposal (not `/ship`-only; confirm-to-write). |
 | PR checks failing | Run `docs/agent/pr-check-fix-loop.md` (via `/fix-pr-checks` in either tool). Bounded: 2 rounds max, security-scan findings always surface to the user. |
 | Session start on unfamiliar work | Read `docs/brain/index.md`, then only the relevant sub-file |
 | Architectural choice | Check `docs/brain/decisions/` first; supersede, never edit in place |
@@ -54,7 +54,7 @@ Single source of truth for hard rules, conventions, and skill triggers. Claude C
 | `docs/agent/standards-security.md` | Auth, guards, interceptors, storage, crypto, security reviews, go-live |
 | `docs/agent/standards-domain.md` | Translation keys, Hebrew canonical values, Lucide icons, ingredient ledger |
 | `docs/agent/standards-backend.md` | New entity types, persisted fields, CRUD/data services, backend API contract |
-| `docs/agent/standards-git.md` | Committing, pushing, PRs, branch renames, any git write |
+| `docs/agent/standards-git.md` | Committing, pushing, PRs, branch renames, any git write; includes mandatory Post-push Merge Gate + Brain capture confirm-to-write |
 
 Stack detail: `/_shared/tech-stack.md`.
 
