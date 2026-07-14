@@ -65,8 +65,11 @@ export class UserService {
         import('./recipe-data.service').then((m) => this.injector.get(m.RecipeDataService).reloadFromStorage()),
         import('./dish-data.service').then((m) => this.injector.get(m.DishDataService).reloadFromStorage()),
         import('./supplier-data.service').then((m) => this.injector.get(m.SupplierDataService).reloadFromStorage()),
-        import('./equipment-data.service').then((m) => this.injector.get(m.EquipmentDataService).reloadFromStorage()),
         // Deferred services: only rehydrate if already loaded this session (avoid bootstrap GETs).
+        import('./equipment-data.service').then((m) => {
+          const s = this.injector.get(m.EquipmentDataService)
+          return s.hasLoaded() ? s.reloadFromStorage() : Promise.resolve()
+        }),
         import('./venue-data.service').then((m) => {
           const s = this.injector.get(m.VenueDataService)
           return s.hasLoaded() ? s.reloadFromStorage() : Promise.resolve()
@@ -79,9 +82,10 @@ export class UserService {
           const s = this.injector.get(m.MenuSectionCategoriesService)
           return s.hasLoaded() ? s.reloadFromStorage() : Promise.resolve()
         }),
-        import('./preparation-registry.service').then((m) =>
-          this.injector.get(m.PreparationRegistryService).reloadFromStorage()
-        )
+        import('./preparation-registry.service').then((m) => {
+          const s = this.injector.get(m.PreparationRegistryService)
+          return s.hasLoaded() ? s.reloadFromStorage() : Promise.resolve()
+        })
       ])
     } finally {
       this._isDataReloading_.set(false)

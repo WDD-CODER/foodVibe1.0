@@ -65,7 +65,8 @@ docs/brain/
 └── patterns/           ← ✅  proven solutions (one file each)
     ├── signals-only-state.md
     ├── gemini-backend-proxy.md
-    └── tombstone-soft-delete.md
+    ├── tombstone-soft-delete.md
+    └── defer-singleton-data-ensureLoaded.md
 ```
 
 ```mermaid

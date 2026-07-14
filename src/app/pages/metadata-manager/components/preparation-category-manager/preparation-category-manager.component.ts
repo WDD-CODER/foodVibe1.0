@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core'
+import { Component, inject, OnInit, signal } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { PreparationRegistryService } from '@services/preparation-registry.service'
@@ -17,7 +17,7 @@ import { AuthModalService } from '@services/auth-modal.service'
   templateUrl: './preparation-category-manager.component.html',
   styleUrl: './preparation-category-manager.component.scss'
 })
-export class PreparationCategoryManagerComponent {
+export class PreparationCategoryManagerComponent implements OnInit {
   private readonly prepRegistry = inject(PreparationRegistryService)
   private readonly kitchenState = inject(KitchenStateService)
   private readonly confirmModal = inject(ConfirmModalService)
@@ -30,6 +30,10 @@ export class PreparationCategoryManagerComponent {
   protected readonly categories_ = this.prepRegistry.preparationCategories_
   protected readonly editingKey_ = signal<string | null>(null)
 
+  ngOnInit(): void {
+    void this.prepRegistry.ensureLoaded()
+  }
+
   private requireSignIn(): boolean {
     if (this.isLoggedIn()) return true
     this.userMsg.onSetWarningMsg(this.translation.translate('sign_in_to_use'))
@@ -38,10 +42,13 @@ export class PreparationCategoryManagerComponent {
   }
 
   private countRecipesUsingCategory(key: string): number {
-    return this.kitchenState.recipes_().filter(r =>
-      (r.prep_items_ ?? []).some(p => p.category_name === key) ||
-      (r.prep_categories_ ?? []).some(c => c.category_name === key)
-    ).length
+    return this.kitchenState
+      .recipes_()
+      .filter(
+        (r) =>
+          (r.prep_items_ ?? []).some((p) => p.category_name === key) ||
+          (r.prep_categories_ ?? []).some((c) => c.category_name === key)
+      ).length
   }
 
   async onAdd(hebrewLabel: string, inputEl: HTMLInputElement): Promise<void> {
@@ -49,7 +56,7 @@ export class PreparationCategoryManagerComponent {
     const sanitized = hebrewLabel.trim()
     if (!sanitized) return
 
-    const existingLabels = this.categories_().map(k => this.translation.translate(k))
+    const existingLabels = this.categories_().map((k) => this.translation.translate(k))
     if (existingLabels.includes(sanitized)) {
       this.userMsg.onSetErrorMsg(this.translation.translate('metadata_category_exists'))
       return
@@ -79,8 +86,7 @@ export class PreparationCategoryManagerComponent {
 
     const usageCount = this.countRecipesUsingCategory(key)
     if (usageCount > 0) {
-      const msg = this.translation.translate('metadata_cannot_delete_in_use')
-        .replace('{n}', String(usageCount))
+      const msg = this.translation.translate('metadata_cannot_delete_in_use').replace('{n}', String(usageCount))
       this.userMsg.onSetErrorMsg(msg)
       return
     }
@@ -109,15 +115,13 @@ export class PreparationCategoryManagerComponent {
 
     const usageCount = this.countRecipesUsingCategory(oldKey)
     if (usageCount > 0) {
-      const msg = this.translation.translate('metadata_rename_affects_recipes')
-        .replace('{n}', String(usageCount))
+      const msg = this.translation.translate('metadata_rename_affects_recipes').replace('{n}', String(usageCount))
       const confirmed = await this.confirmModal.open(msg, { variant: 'warning', saveLabel: 'save' })
       if (!confirmed) return
     } else {
-      const confirmed = await this.confirmModal.open(
-        this.translation.translate('metadata_confirm_rename_category'),
-        { saveLabel: 'save' }
-      )
+      const confirmed = await this.confirmModal.open(this.translation.translate('metadata_confirm_rename_category'), {
+        saveLabel: 'save'
+      })
       if (!confirmed) return
     }
 

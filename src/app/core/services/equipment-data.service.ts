@@ -15,7 +15,8 @@ export class EquipmentDataService extends BaseEntityDataService<Equipment> {
   readonly allEquipment_: Signal<Equipment[]> = this.all_
 
   constructor() {
-    super(ENTITY)
+    // Deferred: load on ensureLoaded() via equipment / recipe-builder / venues routes.
+    super(ENTITY, false)
   }
 
   async getEquipmentById(_id: string): Promise<Equipment> {

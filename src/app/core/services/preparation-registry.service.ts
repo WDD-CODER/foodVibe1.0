@@ -36,6 +36,9 @@ export class PreparationRegistryService {
   readonly preparationCategories_ = this.categories_.asReadonly()
   readonly allPreparations_ = this.preparations_.asReadonly()
 
+  private loaded_ = false
+  private loadPromise_: Promise<void> | null = null
+
   getPreparationsByCategory_ = computed(() => {
     const preps = this.allPreparations_()
     const byCategory = new Map<string, PreparationEntry[]>()
@@ -48,12 +51,30 @@ export class PreparationRegistryService {
   })
 
   constructor() {
-    this.initRegistry().catch(() => {})
+    // Deferred: load on ensureLoaded() via recipe-builder / metadata preparation manager.
+  }
+
+  hasLoaded(): boolean {
+    return this.loaded_
+  }
+
+  async ensureLoaded(): Promise<void> {
+    if (this.loaded_) return
+    if (this.loadPromise_) return this.loadPromise_
+    this.loadPromise_ = this.initRegistry()
+      .catch(() => {})
+      .finally(() => {
+        this.loaded_ = true
+        this.loadPromise_ = null
+      })
+    return this.loadPromise_
   }
 
   /** Reload categories and preparations from storage (e.g. after demo data load). */
   async reloadFromStorage(): Promise<void> {
-    await this.initRegistry()
+    this.loaded_ = false
+    this.loadPromise_ = null
+    await this.ensureLoaded()
   }
 
   private async initRegistry(): Promise<void> {
