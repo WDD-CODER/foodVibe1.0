@@ -2,10 +2,12 @@ import { Routes } from '@angular/router'
 import { productResolver } from './core/resolvers/product.resolver'
 import { recipeResolver } from './core/resolvers/recipe.resolver'
 import { equipmentResolver } from './core/resolvers/equipment.resolver'
+import { equipmentEnsureLoadedResolver } from './core/resolvers/equipment-ensure-loaded.resolver'
 import { venueResolver } from './core/resolvers/venue.resolver'
 import { venuesEnsureLoadedResolver } from './core/resolvers/venues-ensure-loaded.resolver'
 import { menuEventsEnsureLoadedResolver } from './core/resolvers/menu-events-ensure-loaded.resolver'
 import { menuSectionCategoriesEnsureLoadedResolver } from './core/resolvers/menu-section-categories-ensure-loaded.resolver'
+import { preparationsEnsureLoadedResolver } from './core/resolvers/preparations-ensure-loaded.resolver'
 import { supplierResolver } from './core/resolvers/supplier.resolver'
 import { pendingChangesGuard } from './core/guards/pending-changes.guard'
 import { authGuard } from './core/guards/auth.guard'
@@ -14,6 +16,7 @@ export const routes: Routes = [
   {
     path: 'equipment',
     loadComponent: () => import('./pages/equipment/equipment.page').then(m => m.EquipmentPage),
+    resolve: { equipmentLoaded: equipmentEnsureLoadedResolver },
     children: [
       { path: '', redirectTo: 'list', pathMatch: 'full' },
       {
@@ -46,12 +49,16 @@ export const routes: Routes = [
       {
         path: 'add',
         loadComponent: () => import('./pages/venues/components/venue-form/venue-form.component').then(m => m.VenueFormComponent),
+        resolve: { equipmentLoaded: equipmentEnsureLoadedResolver },
         canActivate: [authGuard],
       },
       {
         path: 'edit/:id',
         loadComponent: () => import('./pages/venues/components/venue-form/venue-form.component').then(m => m.VenueFormComponent),
-        resolve: { venue: venueResolver },
+        resolve: {
+          venue: venueResolver,
+          equipmentLoaded: equipmentEnsureLoadedResolver,
+        },
         canActivate: [authGuard],
       },
     ],
@@ -81,16 +88,21 @@ export const routes: Routes = [
       {
         path: 'equipment',
         loadComponent: () => import('./pages/equipment/components/equipment-list/equipment-list.component').then(m => m.EquipmentListComponent),
+        resolve: { equipmentLoaded: equipmentEnsureLoadedResolver },
       },
       {
         path: 'equipment/add',
         loadComponent: () => import('./pages/equipment/components/equipment-form/equipment-form.component').then(m => m.EquipmentFormComponent),
+        resolve: { equipmentLoaded: equipmentEnsureLoadedResolver },
         canActivate: [authGuard],
       },
       {
         path: 'equipment/edit/:id',
         loadComponent: () => import('./pages/equipment/components/equipment-form/equipment-form.component').then(m => m.EquipmentFormComponent),
-        resolve: { equipment: equipmentResolver },
+        resolve: {
+          equipmentLoaded: equipmentEnsureLoadedResolver,
+          equipment: equipmentResolver,
+        },
         canActivate: [authGuard],
       },
     ],
@@ -103,13 +115,21 @@ export const routes: Routes = [
   {
     path: 'recipe-builder',
     loadComponent: () => import('./pages/recipe-builder/recipe-builder.page').then(m => m.RecipeBuilderPage),
+    resolve: {
+      equipmentLoaded: equipmentEnsureLoadedResolver,
+      preparationsLoaded: preparationsEnsureLoadedResolver,
+    },
     canActivate: [authGuard],
     canDeactivate: [pendingChangesGuard],
   },
   {
     path: 'recipe-builder/:id',
     loadComponent: () => import('./pages/recipe-builder/recipe-builder.page').then(m => m.RecipeBuilderPage),
-    resolve: { recipe: recipeResolver },
+    resolve: {
+      recipe: recipeResolver,
+      equipmentLoaded: equipmentEnsureLoadedResolver,
+      preparationsLoaded: preparationsEnsureLoadedResolver,
+    },
     canActivate: [authGuard],
     canDeactivate: [pendingChangesGuard],
   },

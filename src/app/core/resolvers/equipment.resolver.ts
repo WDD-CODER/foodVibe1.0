@@ -12,12 +12,15 @@ export const equipmentResolver: ResolveFn<Equipment | null> = (route) => {
 
   if (!id) return null
 
-  return equipmentDataService.getEquipmentById(id).then(
-    (equipment) => equipment,
-    () => {
-      userMsgService.onSetErrorMsg('הציוד לא נמצא')
-      router.navigate(['/equipment/list'])
-      return null
-    }
-  )
+  return equipmentDataService
+    .ensureLoaded()
+    .then(() => equipmentDataService.getEquipmentById(id))
+    .then(
+      (equipment) => equipment,
+      () => {
+        userMsgService.onSetErrorMsg('הציוד לא נמצא')
+        router.navigate(['/equipment/list'])
+        return null
+      }
+    )
 }

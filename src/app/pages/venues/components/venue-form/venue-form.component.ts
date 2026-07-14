@@ -7,7 +7,7 @@ import {
   input,
   OnInit,
   output,
-  signal,
+  signal
 } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
@@ -19,31 +19,29 @@ import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { VenueDataService } from '@services/venue-data.service'
 import { EquipmentDataService } from '@services/equipment-data.service'
 import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
-import {
-  VenueProfile,
-  VenueInfraItem,
-  EnvironmentType,
-} from '@models/venue.model'
+import { VenueProfile, VenueInfraItem, EnvironmentType } from '@models/venue.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 
-const ENV_TYPES: EnvironmentType[] = [
-  'professional_kitchen',
-  'outdoor_field',
-  'client_home',
-  'popup_venue',
-]
+const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', 'client_home', 'popup_venue']
 
 @Component({
   selector: 'app-venue-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CustomSelectComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    LucideAngularModule,
+    TranslatePipe,
+    LoaderComponent,
+    CustomSelectComponent
+  ],
   templateUrl: './venue-form.component.html',
   styleUrl: './venue-form.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class VenueFormComponent implements OnInit {
   embeddedInDashboard = input<boolean>(false)
@@ -82,6 +80,7 @@ export class VenueFormComponent implements OnInit {
 
   ngOnInit(): void {
     void this.venueData.ensureLoaded()
+    void this.equipmentData.ensureLoaded()
     this.buildForm()
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((data) => {
       const venue = data['venue'] as VenueProfile | null | undefined
@@ -94,16 +93,19 @@ export class VenueFormComponent implements OnInit {
 
   private buildForm(): void {
     this.venueForm_ = this.fb.group({
-      name_hebrew: ['', [
-        Validators.required,
-        duplicateEntityNameValidator(
-          () => this.venueData.allVenues_(),
-          () => (this.route.snapshot.data['venue'] as VenueProfile)?._id ?? null
-        ),
-      ]],
+      name_hebrew: [
+        '',
+        [
+          Validators.required,
+          duplicateEntityNameValidator(
+            () => this.venueData.allVenues_(),
+            () => (this.route.snapshot.data['venue'] as VenueProfile)?._id ?? null
+          )
+        ]
+      ],
       environment_type_: ['outdoor_field', [Validators.required]],
       notes_: [''],
-      available_infrastructure_: this.fb.array([]),
+      available_infrastructure_: this.fb.array([])
     })
   }
 
@@ -111,15 +113,15 @@ export class VenueFormComponent implements OnInit {
     this.venueForm_.patchValue({
       name_hebrew: v.name_hebrew ?? '',
       environment_type_: v.environment_type_ ?? 'outdoor_field',
-      notes_: v.notes_ ?? '',
+      notes_: v.notes_ ?? ''
     })
     const arr = this.infraArray
-    arr.clear();
-    (v.available_infrastructure_ ?? []).forEach((item) => {
+    arr.clear()
+    ;(v.available_infrastructure_ ?? []).forEach((item) => {
       arr.push(
         this.fb.group({
           equipment_id_: [item.equipment_id_, Validators.required],
-          available_quantity_: [item.available_quantity_, [Validators.required, Validators.min(0)]],
+          available_quantity_: [item.available_quantity_, [Validators.required, Validators.min(0)]]
         })
       )
     })
@@ -129,7 +131,7 @@ export class VenueFormComponent implements OnInit {
     this.infraArray.push(
       this.fb.group({
         equipment_id_: ['', Validators.required],
-        available_quantity_: [1, [Validators.required, Validators.min(0)]],
+        available_quantity_: [1, [Validators.required, Validators.min(0)]]
       })
     )
   }
@@ -160,7 +162,7 @@ export class VenueFormComponent implements OnInit {
         .filter((row: { equipment_id_: string }) => row.equipment_id_)
         .map((row: { equipment_id_: string; available_quantity_: number }) => ({
           equipment_id_: row.equipment_id_,
-          available_quantity_: Number(row.available_quantity_),
+          available_quantity_: Number(row.available_quantity_)
         }))
 
       const now = new Date().toISOString()
@@ -172,7 +174,7 @@ export class VenueFormComponent implements OnInit {
           name_hebrew: v.name_hebrew,
           environment_type_: v.environment_type_,
           notes_: v.notes_ || undefined,
-          available_infrastructure_: infra,
+          available_infrastructure_: infra
         })
       } else {
         await this.venueData.addVenue({
@@ -180,7 +182,7 @@ export class VenueFormComponent implements OnInit {
           environment_type_: v.environment_type_,
           notes_: v.notes_ || undefined,
           available_infrastructure_: infra,
-          created_at_: now,
+          created_at_: now
         })
       }
       if (this.embeddedInDashboard()) {

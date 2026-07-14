@@ -61,3 +61,13 @@ Running list. Each entry: what hurt / why the obvious fix is wrong / what to do 
 **Why the obvious fix is wrong:** `--force` looks like the fast way to clear audit noise, but it silently majors-bumps a framework dependency outside any planned migration window, which can break the build in ways unrelated to the actual vulnerability.
 
 **What to do instead:** Leave these findings alone until the Angular 22 migration. CI temporarily runs `--audit-level=critical` in `.github/workflows/security.yml` as the interim gate; restore `--audit-level=high` after the migration. Server-side `npm audit` is already clean. See `.claude/todo.md`.
+
+---
+
+## Login reload bypasses deferred constructor load
+
+**What hurt:** Plan 289 deferred venue / menu-event / section-category constructor fetches, but Equipment and Preparations still hit the network on cold dashboard after login. Removing constructor `loadInitialData()` alone was not enough — `UserService._reloadDataServices()` still called `reloadFromStorage()` unconditionally for those services on every auth hydrate.
+
+**Why the obvious fix is wrong:** Treating “no constructor load” as “no bootstrap GET” ignores the login/guest path, which constructs the service and forces a full rehydrate. Keeping the service eager “because recipe-builder needs it” also skips the cheaper fix: wire `ensureLoaded()` on the recipe-builder route.
+
+**What to do instead:** For every deferred singleton data service, gate login reload with `hasLoaded()` (skip until first route/tab hydrate). Wire `ensureLoaded()` on owning resolvers / first UI surface. See [[defer-singleton-data-ensureLoaded]].
