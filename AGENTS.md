@@ -16,6 +16,7 @@ Single source of truth for hard rules, conventions, and skill triggers. Claude C
 - Secrets live in `.env` only. Never read, print, hardcode, or commit them.
 - Hebrew UI strings always through `translatePipe` + `dictionary.json`.
 - Browser interaction goes through gstack `/browse` — never raw Playwright MCP directly.
+- **Todo checkboxes (all agents):** Do **not** mark `.claude/todo.md` / plan Atomic Sub-tasks `[x]` while still executing or only “ready for review.” **After Human validation of that job, you MUST mark matching items `[x]`.** Human validation includes: `/ship` Approve **Y** (the commit that delivered the job), or an explicit “mark done / verified / approved.” Mid-milestone STOP for review is unchanged — mark only once the validated ship (or equivalent confirm) has landed. `/ship` Phase 6 is mandatory when items match; never skip with “Contractor does not mark.”
 
 ## Skill triggers
 

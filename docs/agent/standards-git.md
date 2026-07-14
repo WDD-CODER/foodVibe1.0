@@ -15,6 +15,7 @@
 * Lint gate: `ng lint` must pass before milestone sign-off.
 * Prefer Conventional Commits (`type(scope): subject`). Focus the body on why, not what.
 * Never force-push to `main`/`master`. Avoid destructive git ops unless Human explicitly requests them.
+* **Todo sync after ship approval:** `/ship` Approve **Y** is Human validation — agents **must** mark matching `.claude/todo.md` / plan Atomic Sub-tasks `[x]` (see `AGENTS.md` + `/ship` Phase 6). Do not leave checkboxes open because “Contractor does not mark.”
 
 ---
 

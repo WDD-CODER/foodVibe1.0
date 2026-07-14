@@ -214,10 +214,13 @@ Do not change the resume/read path used by `scripts/session-startup.sh`.
 
 ---
 
-## Phase 6 — Todo sync (conditional)
+## Phase 6 — Todo sync (after Human ship approval)
 
-- **Only if** `.claude/todo.md` has ≥1 `[ ]` item that plausibly matches a file touched this session (or the user named a completed task) → mark matching items `[x]`; archive fully-complete sections to `.claude/todo-archive.md` under `## Done`.
+Ship Approve **Y** (or `--yes`) **is** Human validation of the job in that commit. All agents (including Contractor) **must** update todos here — do **not** leave `[ ]` with a note that “Contractor does not mark.”
+
+- **If** `.claude/todo.md` (and the plan’s Atomic Sub-tasks, when the same IDs exist) has ≥1 `[ ]` item that matches the shipped job (files touched, milestone ID, or user-named task) → mark those items `[x]`; archive fully-complete plan sections to `.claude/todo-archive.md` under `## Done`. Include todo/plan checkbox updates in a follow-up commit on the same branch when the ship commit already pushed without them, or stage them in the ship commit when still pre-commit.
 - **Otherwise** → skip and note: `Todo: no matching open items — skipped`
+- **Never** invent completion for work not in this ship. **Never** skip marking when items clearly match.
 
 ---
 

@@ -20,8 +20,8 @@ Use this path for building new features. Loads Angular + domain standards automa
 3. User reviews and approves the plan.
 4. Contractor executes **one milestone at a time**, writes `/sessions/[date].md`, stops.
 5. After a milestone: `/review-it` for the Reviewer pass.
-6. On APPROVE: Human runs Verify, commits, marks the milestone `[x]`.
-7. `/ship` for session wrap prep (Human still commits / pushes).
+6. On review APPROVE: Human runs Verify (or proceeds to `/ship`).
+7. `/ship` — Human Approve **Y** validates the job; agent **must** mark matching todos/`[x]` in Phase 6 (see `AGENTS.md`).
 
 ## Hard rules (inherited from CLAUDE.md / .cursorrules)
 
