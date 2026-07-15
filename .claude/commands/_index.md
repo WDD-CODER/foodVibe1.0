@@ -60,6 +60,7 @@ See `README_WORKFLOW.md` and `CLAUDE.md`.
 | `/brief-detect` | Manually invoke brief-detection gate |
 | `/cleanup` | Session & worktree pruning â€” removes stale branches and worktrees |
 | `/sweep-stale-todos` | Find and close todos that are no longer relevant |
+| `/done` | Chat-path job validation (also listed under Session Lifecycle) |
 | `/docs-refresh` | On-demand documentation refresh â€” updates breadcrumbs and project docs |
 | `/auto-solve` | Autonomous plan executor (legacy; prefer milestone-by-milestone Contractor) |
 | `/context-override` | Override session context defaults |
