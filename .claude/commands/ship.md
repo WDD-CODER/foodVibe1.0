@@ -48,14 +48,22 @@ If `--skip-review "reason"` was provided:
 
 ---
 
-## Phase 3 — Manifest check (conditional)
+## Phase 3 — Manifest check (staleness-aware, not worktree-count-only)
+
+`git worktree list` alone misses same-directory concurrent sessions (two agents/tools sharing one working tree, no separate worktree) — see `docs/brain/gotchas.md` "Same-directory concurrent session breaks the plans/ numbering scan". Check both:
 
 ```bash
 git worktree list | wc -l
+git branch --show-current
+git rev-parse HEAD
 ```
 
-- **ONLY if worktree count > 1** → run `python3 scripts/session-manifest-ship.py` and honor overlap stops (same rules as before: non-empty overlaps → STOP; `no_manifest` → do not `git add -A`; prefer this-chat files).
-- **Otherwise (≤1 worktree)** → skip the manifest script entirely; use normal staging of this-chat dirty paths (tool write/edit history ∩ `git status --short`). Never `git add -A` unless Human overrode scope.
+- **If worktree count > 1** → run `python3 scripts/session-manifest-ship.py` and honor overlap stops (same rules as before: non-empty overlaps → STOP; `no_manifest` → do not `git add -A`; prefer this-chat files).
+- **If worktree count ≤ 1** → compare current branch + HEAD against this ship invocation's baseline (branch + HEAD sha noted when `/ship` started, e.g. at Phase 1):
+  - **Branch changed** → **STOP**. Something else switched HEAD in this shared working directory mid-ship. Show the Human both branch names; do not stage or commit until they confirm which branch is intended.
+  - **HEAD moved but branch unchanged** (new commits landed, not made by this session) → treat as a same-directory overlap signal: re-run `git status --short` fresh (don't reuse an earlier snapshot from this conversation), re-`Read` any file about to be staged immediately before `git add` rather than trusting an earlier in-session read, and note in the ship summary that concurrent commits were detected on this branch.
+  - **Neither changed** → proceed with normal this-chat-file staging.
+- Either path: stage only this-chat dirty paths (tool write/edit history ∩ `git status --short`). Never `git add -A` unless Human overrode scope.
 - Flag secrets / `.env` — never stage them.
 
 ---

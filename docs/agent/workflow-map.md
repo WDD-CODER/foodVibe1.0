@@ -129,7 +129,7 @@ Cursor rule files: `add-recipe-must-use-skill`, `angular-component-structure`, `
 | Script | Called by |
 | --- | --- |
 | `plan-name-similarity.mjs` | save-plan Phase 0 (both agents), `plan-write-guard.sh` |
-| `session-manifest-ship.py` | `/ship` Phase 3 (worktree count > 1) |
+| `session-manifest-ship.py` | `/ship` Phase 3 (worktree count > 1) — or a branch/HEAD-drift check when ≤1 worktree, same phase |
 | `brain-review-check.mjs` | `/ship` feature-complete path (advisory) |
 | `brain-capture-comment.mjs` | PR sticky brain-capture comment |
 | `pre-commit-no-semi.mjs`, `pre-commit-secret-scan.mjs`, `pre-commit-security-grep.mjs` | pre-commit hooks (source of truth for enforcement per `AGENTS.md`) |
@@ -192,7 +192,7 @@ Human describes feature
 ```
 Phase 1  ng build            — unconditional hard stop on fail
 Phase 2  /review             — one fix-and-recheck cycle max (or --skip-review "reason")
-Phase 3  manifest check      — only when >1 worktree (session-manifest-ship.py)
+Phase 3  manifest check      — >1 worktree: session-manifest-ship.py; ≤1 worktree: branch/HEAD-drift check (baseline captured at ship start)
 Phase 4  approval gate       — visual tree; Human Y = job validation
          on Y (hard order): mark todos/plan [x] → write approved brain drafts
                             → git add listed paths → one commit → rename branch → push if asked
