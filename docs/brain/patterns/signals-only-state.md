@@ -1,3 +1,4 @@
+<!-- ADR-0004 gate, reviewed 2026-07-20: keep-as-is (Human override — retain founding why) -->
 # Pattern: Signals-only state
 
 ## Problem
@@ -10,4 +11,4 @@ All component and service state uses Angular signals exclusively: `signal()` / `
 
 ## When to use
 
-Every new component or service. This is a hard rule in `AGENTS.md` and detailed in `docs/agent/standards-angular.md` — this pattern file records the "why" (single reactivity model, no subscription leaks), not the syntax checklist.
+Every new component or service. This is a hard rule in `AGENTS.md` and detailed in `docs/agent/standards-angular.md` / `docs/agent/conventions.md` — this pattern file records the "why" (single reactivity model, no subscription leaks), not the syntax checklist.

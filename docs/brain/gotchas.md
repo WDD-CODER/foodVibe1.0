@@ -1,6 +1,6 @@
 # Gotchas
 
-Running list. Each entry: what hurt / why the obvious fix is wrong / what to do instead. Append new entries at the bottom; never delete a still-true entry.
+Running list. Each entry: what hurt / why the obvious fix is wrong / what to do instead. Append new entries at the bottom; never delete a still-true entry. If this file exceeds ~150 lines / ~10 entries, propose a split by domain (e.g. `gotchas/ci.md`, `gotchas/git-workflow.md`, `gotchas/angular.md`) as a brain proposal at the next Merge Gate, rather than letting it grow unbounded.
 
 ---
 

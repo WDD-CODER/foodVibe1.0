@@ -21,3 +21,7 @@ Easier: approvals judge a real entry, not a label; Cursor and Claude Code can't 
 ## Review
 
 At review-by: did the last ~3 approved entries pass without "too thin" edits? Are skips still common?
+
+## Review log
+
+**2026-07-20 (early self-review, ahead of review-by):** Entries since 0004 (07-14 → 07-20) — [[defer-singleton-data-ensureLoaded]] + login-reload gotcha, the two pasted-plans / save-plan gotchas, and ADR 0005 — all carry full Problem/Solution/When or What-hurt/Why-wrong/What-instead shapes; none are one-liners; no "too thin" edit cycle observed in session logs. Skips (`none durable`) have not yet been exercised in a logged session — open question whether that means chores correctly omit proposals, or agents still over-propose. Re-check at review-by.

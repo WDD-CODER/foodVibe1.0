@@ -78,17 +78,17 @@ report):
 - `docs/brain/index.md`
 
 **Atomic Sub-tasks:**
-- [ ] `docs/agent/brain-capture.md` — add a short section (after "Extraction procedure",
+- [x] `docs/agent/brain-capture.md` — add a short section (after "Extraction procedure",
       before "Usefulness gate"): whenever a session's decision was actually shaped by an
       existing `docs/brain/` entry (not just "this area is covered by brain" — a specific
       entry that changed what the agent did), add one line to that day's
       `sessions/YYYY-MM-DD.md` under `### Decisions`: `Informed by: [[entry-name]]`. State
       explicitly this is for entries that changed a choice, not a blanket citation habit —
       most sessions will have none, and that's expected.
-- [ ] `docs/brain/index.md` — Maintenance section: one line noting the `Informed by:`
+- [x] `docs/brain/index.md` — Maintenance section: one line noting the `Informed by:`
       convention exists in session logs, so a future audit can `grep -r "Informed by:"
       sessions/` instead of re-deriving reuse from commit archaeology.
-- [ ] Retroactively add one `Informed by: [[0005-scope-npm-audit-to-production-deps]]`-style
+- [x] Retroactively add one `Informed by: [[0005-scope-npm-audit-to-production-deps]]`-style
       note is **not** required for past sessions — this is forward-only; do not rewrite
       `sessions/2026-07-20.md`.
 
@@ -105,17 +105,17 @@ the new convention text in both files; no existing `sessions/*.md` files are mod
 - `docs/brain/patterns/tombstone-soft-delete.md`
 
 **Atomic Sub-tasks:**
-- [ ] For each of the 3 files, run the `docs/agent/brain-capture.md` usefulness gate
+- [x] For each of the 3 files, run the `docs/agent/brain-capture.md` usefulness gate
       checklist against its current content and record the verdict as a one-line HTML
       comment at the top of the file: `<!-- ADR-0004 gate, reviewed 2026-07-20: keep-as-is
       | strengthened | flag-for-removal -->`.
-- [ ] Where the gate fails (content is inferable from `AGENTS.md` alone, no named trap or
+- [x] Where the gate fails (content is inferable from `AGENTS.md` alone, no named trap or
       exception) — do **not** delete unilaterally. Instead strengthen the "why" with the
       actual judgment/trap if one exists (e.g. does the Gemini proxy pattern name a
       specific near-miss, not just "key leak" in the abstract?), or draft a one-line
       removal recommendation for Human review in the milestone's `sessions/[date].md`
       entry under `### Reviewer should scrutinize`.
-- [ ] Do not remove any file in this milestone — output is the gate verdict + optional
+- [x] Do not remove any file in this milestone — output is the gate verdict + optional
       strengthened text + a removal recommendation list for Human decision, per the
       Non-goals section above.
 
@@ -131,12 +131,12 @@ shows only these 3 files touched; no file under `docs/brain/patterns/` was delet
 - `docs/agent/brain-capture.md`
 
 **Atomic Sub-tasks:**
-- [ ] `docs/brain/gotchas.md` — add one line under the top-of-file note ("Running list...
+- [x] `docs/brain/gotchas.md` — add one line under the top-of-file note ("Running list...
       never delete a still-true entry"): "If this file exceeds ~150 lines / ~10 entries,
       propose a split by domain (e.g. `gotchas/ci.md`, `gotchas/git-workflow.md`,
       `gotchas/angular.md`) as a brain proposal at the next Merge Gate, rather than letting
       it grow unbounded."
-- [ ] `docs/agent/brain-capture.md` — add a one-line policy: "If the *same* documented gate
+- [x] `docs/agent/brain-capture.md` — add a one-line policy: "If the *same* documented gate
       (script/hook naming a specific bypass) is reported bypassed a second time via a new
       path, name that explicitly in the new gotcha's 'Why the obvious fix is wrong' section
       as a structural-fix signal, not just another instruction restated" — cross-reference
@@ -154,7 +154,7 @@ docs/agent/brain-capture.md` shows both additions.
 - `docs/brain/decisions/0004-full-draft-brain-proposals.md`
 
 **Atomic Sub-tasks:**
-- [ ] Add a `## Review log` section at the bottom of the file (below "Review") with a
+- [x] Add a `## Review log` section at the bottom of the file (below "Review") with a
       dated entry answering the two questions ADR 0004's own Review section already asks:
       *"did the last ~3 approved entries pass without 'too thin' edits? Are skips still
       common?"* Base the answer on the actual entries since 0004 landed (07-14 → 07-20):
@@ -163,7 +163,7 @@ docs/agent/brain-capture.md` shows both additions.
       What-hurt/Why-wrong/What-instead shapes, none are one-liners; "skip" (`none
       durable`) has not yet been exercised in a logged session, which is itself worth
       recording as an open question rather than assumed compliance.
-- [ ] Keep the addition to 5–8 lines — this is a log entry, not a rewrite of the ADR's
+- [x] Keep the addition to 5–8 lines — this is a log entry, not a rewrite of the ADR's
       original Context/Decision/Consequences.
 
 **Verify:** `docs/brain/decisions/0004-full-draft-brain-proposals.md` has a `## Review log`
@@ -175,15 +175,15 @@ addition, no deletions above the `## Review` heading).
 
 ## Done when
 
-- [ ] `docs/agent/brain-capture.md` documents the `Informed by:` convention and the
+- [x] `docs/agent/brain-capture.md` documents the `Informed by:` convention and the
       bypass-escalation policy
-- [ ] `docs/brain/index.md` points to the reuse-tracking convention
-- [ ] All 3 founding patterns carry an ADR-0004 gate verdict comment; none deleted without
+- [x] `docs/brain/index.md` points to the reuse-tracking convention
+- [x] All 3 founding patterns carry an ADR-0004 gate verdict comment; none deleted without
       Human sign-off
-- [ ] `docs/brain/gotchas.md` states its own split threshold
-- [ ] `docs/brain/decisions/0004-full-draft-brain-proposals.md` has a dated `## Review log`
+- [x] `docs/brain/gotchas.md` states its own split threshold
+- [x] `docs/brain/decisions/0004-full-draft-brain-proposals.md` has a dated `## Review log`
       entry
-- [ ] `ng build` passes (unchanged — this plan touches no Angular code)
+- [x] `ng build` passes (unchanged — this plan touches no Angular code)
 
 ## Risk notes
 

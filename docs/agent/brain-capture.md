@@ -35,6 +35,10 @@ Cite only entries that changed a choice. Most sessions will have none, and that 
 
 **A one-liner-only proposal is invalid.** If there isn't enough judgment to fill the required shape, there is nothing durable — propose `none durable` instead of a slogan.
 
+## Bypass escalation (gotchas)
+
+If the *same* documented gate (script/hook naming a specific bypass) is reported bypassed a second time via a new path, name that explicitly in the new gotcha's **Why the obvious fix is wrong** section as a **structural-fix signal**, not just another instruction restated. Worked example: [[Existing save-plan mitigations still let a plan skip plans/]] (second bypass after the pasted-plans gotcha → Plan 291 structural hardening).
+
 ## Proposal format (ship tree / Merge Gate banner)
 
 - The banner or tree line stays short: **path + quoted one-line title** (keeps the ASCII box readable).

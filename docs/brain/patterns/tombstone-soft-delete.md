@@ -1,3 +1,4 @@
+<!-- ADR-0004 gate, reviewed 2026-07-20: keep-as-is -->
 # Pattern: Tombstone soft-delete
 
 ## Problem
@@ -10,4 +11,4 @@ Every major entity type has a parallel `TRASH_*` entity type (`TRASH_RECIPES`, `
 
 ## When to use
 
-Any new entity type that supports user-initiated delete should get a matching `TRASH_*` type rather than a real `DELETE`. See the full entity registry and new-collection checklist in `docs/agent/standards-backend.md` §1 and §3 — this pattern file doesn't restate that checklist, just the "why."
+Any new entity type that supports user-initiated delete should get a matching `TRASH_*` type rather than a real `DELETE`. See the full entity registry and new-collection checklist in `docs/agent/standards-backend.md` §1 and §3 — this pattern file doesn't restate that checklist, just the "why." Not for ephemeral UI-only state (modals, draft form fields) that never hits the entity registry.

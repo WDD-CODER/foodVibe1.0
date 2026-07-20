@@ -2,13 +2,14 @@
 
 ---
 
-### Plan 294 — Second Brain Reuse Instrumentation & Founding-Entry Cleanup (`plans/294-second-brain-reuse-instrumentation-and-cleanup.plan.md`)
-> Follow-up to the docs/brain value audit (2026-07-20 session): make brain-entry reuse visible in session logs, re-audit the 4 founding patterns against ADR 0004's usefulness gate, and set a growth threshold for gotchas.md. Doc-only. Contractor (Cursor) executes one milestone at a time on `chore/brain-reuse-instrumentation`.
+### Plan 296 — Fix Blank Inventory List Rows (`plans/296-fix-blank-inventory-list-rows.plan.md`)
+> Chromium blank list cells until nutrition hover. M1 (::before) verified insufficient by Human. M2: remove table-area blur entirely + cell layer promotion. Contractor (Cursor).
 
-- [ ] M1 `docs/agent/brain-capture.md` + `docs/brain/index.md` — add "Informed by: [[entry]]" reuse-tracking convention for session logs
-- [ ] M2 `docs/brain/patterns/gemini-backend-proxy.md` + `signals-only-state.md` + `tombstone-soft-delete.md` — gate verdict review against ADR 0004, recommend (don't delete)
-- [ ] M3 `docs/brain/gotchas.md` + `docs/agent/brain-capture.md` — growth threshold (~150 lines) + bypass-escalation policy
-- [ ] M4 `docs/brain/decisions/0004-full-draft-brain-proposals.md` — run its own prescribed self-review, log dated verdict
+- [ ] M1a `src/app/shared/list-shell/list-shell.component.scss` — move `backdrop-filter` to `::before`; stack header/body above
+- [ ] M1b `src/styles.scss` — `.c-list-body-cell`: `color` + `isolation: isolate`
+- [ ] M1c Manual inventory cold-load + `ng lint` + session note
+- [ ] M2a `list-shell.component.scss` — delete `.table-area::before` / z-index stack; no blur on `.table-area`
+- [ ] M2b `styles.scss` — drop `isolation`; `transform: translateZ(0)` on `.c-list-body-cell`; keep `color`
 
 ---
 
