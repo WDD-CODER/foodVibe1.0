@@ -83,8 +83,14 @@ Files to stage:
 Also proposing a brain entry:   # only when durable; may be 2 lines (pattern + paired gotcha)
   docs/brain/{gotchas.md | patterns/*.md | decisions/NNNN-*.md} — "one-line title"
 
+HOW TO VALIDATE
+  - {action} → {expected result}
+  - …
+
 Approve? (Y / edit list / abort)
 ~~~
+
+**HOW TO VALIDATE:** Mandatory before Approve? — plain-language action → expected result bullets per `docs/agent/job-validation.md`. Include happy path and any edge/failure rules this ship introduced. If no user-visible effect, one line explaining why no click-test is needed. Never omit the section.
 
 **Todo lines in the tree:** If matching open todos exist for this job, list the todo/plan paths above *before* Y (still `[ ]` on disk). On **Y**, mark them `[x]` and stage them in the **same** commit as the job — Human must not need a second push just for checkboxes. Chat-only jobs (no ship): use `docs/agent/job-validation.md` Path B / `/done`.
 
@@ -111,7 +117,7 @@ If on `feat/session-*`:
 
 Approve **Y** (or `--yes`) **is** Human validation of the job. Then:
 
-1. **Todo sync (mandatory when items match)** — Mark matching `.claude/todo.md` / plan Atomic Sub-tasks `[x]`; archive fully-complete plan sections to `.claude/todo-archive.md` under `## Done`. Never invent completion for work not in this ship. Never skip with “Contractor does not mark.” If nothing matches → note `Todo: no matching open items — skipped` and continue.
+1. **Todo sync (mandatory when items match)** — Mark matching `.claude/todo.md` / plan Atomic Sub-tasks `[x]`; then run `node scripts/todo-archive.mjs` to move any fully-`[x]` plan sections into `.claude/todo-archive/NNN.md` volumes (max 300 lines; rolls automatically). Never invent completion for work not in this ship. Never skip with “Contractor does not mark.” If nothing matches → note `Todo: no matching open items — skipped` and continue.
 2. **Write brain drafts** (if proposed and not dropped via edit list) — verbatim to `docs/brain/**` as above.
 3. **`git add` only listed paths** — include the todo/plan/brain paths just updated. Happy path = **one commit** with job + todos (+ brain). Do **not** commit the job first and leave todos for a later push.
 4. **`git commit`** (Conventional Commit; Cursor trailer `Co-authored-by: Cursor <cursoragent@cursor.com>` when applicable)

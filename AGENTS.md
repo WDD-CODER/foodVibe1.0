@@ -27,17 +27,23 @@ A requested job stays open until Human validation. Mid-milestone STOP for review
 **Validation (counts):** `/ship` Approve **Y** / `--yes`; chat `done` / `mark done` / `mark it` / `verified` / `approved` / `LGTM for this job`; `/done` then confirm.  
 **Does not count:** `thanks` / `ok` / `cool` / silence / CI green alone.
 
-**When you finish a job and are not immediately running `/ship`:** end the turn with:
+**When you finish a job and are not immediately running `/ship`:** end the turn with HOW TO VALIDATE bullets, then the JOB DONE ask:
 
 ```text
+HOW TO VALIDATE
+- {action} → {expected result}
+- …
+
 JOB DONE — awaiting your validation
 Matched todos (still [ ]):
   - …
-Reply: done  |  not yet  |  edit list
+Reply: done  |  not yet  |  verify  |  edit list
 ```
 
+Never show the JOB DONE ask without HOW TO VALIDATE above it (or a one-line “no user-visible effect” note). Full bullet rules: `docs/agent/job-validation.md`.
+
 **On validation:** MUST mark matching `.claude/todo.md` / plan Atomic Sub-tasks `[x]`.  
-**On `/ship` Y:** mark → stage with job → commit → push (one commit; see ship Phase 4).  
+**On `/ship` Y:** mark → stage with job → commit → push (one commit; see ship Phase 4). Ship Phase 4 must also show HOW TO VALIDATE before Approve **Y**.  
 Never skip with “Contractor does not mark.” Detail: `docs/agent/job-validation.md`.
 
 ## Skill triggers

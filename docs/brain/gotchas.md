@@ -121,3 +121,13 @@ actually resolves on disk. Collapse to one plan-path convention
 Milestones/Atomic-Sub-tasks shape *before* offering the brief a/b/c gate,
 routing Plan-Contract-shaped pastes to save-plan first. See
 `plans/291-plan-persistence-brief-sync-hardening.plan.md`.
+
+---
+
+## Orphaned instruction file looks wired but nothing loads it
+
+**What hurt:** `.claude/instructions/validation-checklist.md` fully specified HOW TO VALIDATE, but it was only `@`-included from `execute-it.md`. After that command was removed, agents still had JOB DONE close-out and looked compliant — Humans never got click-test bullets.
+
+**Why the obvious fix is wrong:** Adding more “remember to show a checklist” reminders (or leaving the orphan file intact) does not restore enforcement. Agents follow hard gates they already load (`job-validation`, ship, done), not orphaned instruction paths.
+
+**What to do instead:** Move the live rules onto `docs/agent/job-validation.md` and the close-out templates agents must print; leave the old path as a pointer stub. Audit `@include` / skill triggers whenever deleting a command that was the only loader. See [[how-to-validate-on-job-gate]].

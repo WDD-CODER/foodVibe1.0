@@ -206,8 +206,9 @@ Phase 6  (todo sync already done in Phase 4)
 ### F4 — Job validation without ship (Path B)
 
 ```
-Agent finishes job → MUST print "JOB DONE — awaiting your validation" block
+Agent finishes job → MUST print HOW TO VALIDATE bullets, then "JOB DONE" block
   → Human: done/verified/approved → mark matching todo + plan [x] on disk
+  → verify → agent walks checklist, then re-show JOB DONE
   → not yet → keep [ ]   |   edit list → revise, re-show
 (thanks/ok/silence/CI-green never count)
 ```
