@@ -7,22 +7,25 @@ fix/inventory-missing-more-vertical-icon
 2026-07-20
 
 ## Session Summary
-- Diagnosed blank inventory rows: unregistered Lucide `more-vertical` aborted `@for` CD
-- Registered `MoreVertical` in `app.config.ts`; reverted paint-theory CSS experiments
-- Captured gotcha in `docs/brain/gotchas.md`; archived Plan 296 in todo-archive 009
+- Plan 283: re-verified Cluster 10 touch targets (trash + recipe-book); TRIAGE majors resolved
+- Fallout: portaled row-actions-menu popover to document.body to escape list-shell .table-area containing block
+- Brain: gotcha on position:fixed under backdrop-filter + overflow:hidden
+- Plan 283 archived from todo.md into todo-archive/009.md
 
 ## Files Modified
-- src/app/app.config.ts
-- plans/296-fix-blank-inventory-list-rows.plan.md
-- .claude/todo.md / .claude/todo-archive/009.md
-- sessions/2026-07-20.md
+- src/app/shared/row-actions-menu/* (portal + clamp + 44px targets)
+- .claude/reports/mobile-audit/{INDEX,TRIAGE,recipe-book-list,trash-restore}
+- plans/283-mobile-audit-touch-target-size.plan.md
 - docs/brain/gotchas.md
+- .claude/todo.md + todo-archive/009.md
+- sessions/2026-07-20.md
 
 ## Commit
-ae0126d5a778b474b2e8ba1c38a2d22bf4a9363c
+7ea0f9b
 
 ## PR
-pending
+N/A (pending feature-complete vs checkpoint)
 
 ## Next Steps
-- Merge PR after CI; open Plan 291 if continuing plan-persistence work
+- Confirm PR vs checkpoint for this branch (also carries inventory MoreVertical icon fix)
+- Remaining mobile-audit cluster plans still open in todo.md

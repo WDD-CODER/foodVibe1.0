@@ -1,4 +1,4 @@
-﻿# Active Tasks
+# Active Tasks
 
 ---
 
@@ -362,16 +362,6 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 - [x] Run `ng build` â€” 0 errors
 - [ ] Re-run `/mobile-flow-audit --only inventory-edit-product --only inventory-add-product --only recipe-builder-new-dish`
 - [ ] Update TRIAGE.md â€” Cluster 8 + DEF-IE-02 âœ“ resolved
-
----
-
-### Plan 283 â€” Mobile audit fix: touch-target-size (`plans/283-mobile-audit-touch-target-size.plan.md`)
-- [x] `trash.page.scss` `.btn-item` â€” add `min-block-size: 2.75rem`
-- [x] `trash.page.scss` `.btn-action` â€” add `min-block-size: 2.75rem`
-- [x] `recipe-book-list.component.scss` â€” row action buttons: add `min-inline-size: 2.75rem; min-block-size: 2.75rem`
-- [x] Run `ng build` â€” 0 errors
-- [ ] Re-run `/mobile-flow-audit --only trash-restore --only recipe-book-list`
-- [ ] Update TRIAGE.md â€” Cluster 10 âœ“ resolved
 
 ## Where things live
 

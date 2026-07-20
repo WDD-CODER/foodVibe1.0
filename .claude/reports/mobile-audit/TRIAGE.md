@@ -216,21 +216,22 @@ Plans **276–283**: implementation largely present in tree (`a9c56f7`, Plan 280
 
 ### Cluster 10 — touch-target-size
 **Signature:** Action buttons rendered below 44×44px minimum — affects high-stakes actions (delete, restore)  
-**Severity mix:** major 3, minor 2  
+**Severity mix:** major 0 resolved (plan 283), minor 2 remaining  
+**Status:** ✓ majors resolved (plan 283) — re-verified 2026-07-20  
 **Affected flows:** recipe-book-list, trash-restore  
 **Suspect code:**
-- `src/app/pages/trash/trash.page.scss` — `.btn-item`, `.btn-action` height (measured 30px)
-- `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.scss` — row action button width (measured 24px), search wrapper height (measured 39px)
+- `src/app/pages/trash/trash.page.scss` — `.btn-item`, `.btn-action` — fixed `min-block-size: 2.75rem`
+- `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.scss` — row action buttons — fixed `min-inline-size` + `min-block-size: 2.75rem` @ max-width 620px
 
 **Defects:**
 
-| Flow | Severity | Element | Summary | Screenshot |
-|---|---|---|---|---|
-| trash-restore | major | `.btn-item` ("משחזר", "ממחק לצמיתות", "היסטוריה") | All row action buttons 30px tall — below 44px minimum; "permanent delete" only 30px | — |
-| trash-restore | major | `.btn-action.btn-restore`, `.btn-action.btn-dispose` | Section-level action buttons also 30px — same root cause | — |
-| recipe-book-list | major | row action buttons (הוסף למועדפים / בישול / מחיקה) | 24×44px — width only 24px; 3 buttons in 80px strip (need 132px for 44px each) | [→](./recipe-book-list/shots/06-row-actions.png) |
-| recipe-book-list | minor | `.c-input-wrapper` (search field) | Search wrapper 39px tall — 5px below 44px minimum | [→](./recipe-book-list/shots/03-search-focused.png) |
-| suppliers-add | minor | delivery day checkboxes + labels | 7 checkboxes at ~28px tap target — borderline; no overflow but tight | [→](./suppliers-add/shots/01-baseline.png) |
+| Flow | Severity | Element | Summary | Screenshot | Status |
+|---|---|---|---|---|---|
+| trash-restore | major | `.btn-item` ("משחזר", "ממחק לצמיתות", "היסטוריה") | Was 30px tall — now **44px** | [→](./trash-restore/shots/02-row-actions.png) | ✓ resolved (plan 283) |
+| trash-restore | major | `.btn-action.btn-restore`, `.btn-action.btn-dispose` | Was 30px — now **51px** | [→](./trash-restore/shots/01-baseline.png) | ✓ resolved (plan 283) |
+| recipe-book-list | major | row action buttons (הוסף למועדפים / בישול / מחיקה) | Was 24×44 — now **44×44** in `.ram-popover` | [→](./recipe-book-list/shots/06-row-actions.png) | ✓ resolved (plan 283) |
+| recipe-book-list | minor | `.c-input-wrapper` (search field) | Search wrapper 39px tall — 5px below 44px minimum | [→](./recipe-book-list/shots/03-search-focused.png) | open |
+| suppliers-add | minor | delivery day checkboxes + labels | 7 checkboxes at ~28px tap target — borderline; no overflow but tight | [→](./suppliers-add/shots/01-baseline.png) | open |
 
 ---
 

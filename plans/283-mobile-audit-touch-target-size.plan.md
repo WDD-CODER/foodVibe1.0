@@ -30,13 +30,14 @@ Several action buttons render below the 44×44px WCAG minimum touch target:
 4. `ng build` passes with 0 errors
 
 ## Atomic Sub-tasks
-- [ ] Read `.claude/skills/cssLayer/SKILL.md` before editing any `.scss`
-- [ ] `src/app/pages/trash/trash.page.scss` — in `.btn-item` rule (line ~167): add `min-block-size: 2.75rem;`
-- [ ] Same file — in `.btn-action` rule (line ~88): add `min-block-size: 2.75rem;`
-- [ ] `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.scss` — read the full file to locate row action button selectors (`.c-icon-btn`, `.favorite-btn`, or similar); add `min-inline-size: 2.75rem; min-block-size: 2.75rem;`
-- [ ] Run `ng build` — must be 0 errors
-- [ ] Re-run `/mobile-flow-audit --only trash-restore --only recipe-book-list`
-- [ ] Update TRIAGE.md — mark Cluster 10 (touch-target-size) defects tr/MAJOR-1, tr/MAJOR-2, rbl/MAJOR-01 as ✓ resolved (plan 283)
+- [x] Read `.claude/skills/cssLayer/SKILL.md` before editing any `.scss`
+- [x] `src/app/pages/trash/trash.page.scss` — in `.btn-item` rule (line ~167): add `min-block-size: 2.75rem;`
+- [x] Same file — in `.btn-action` rule (line ~88): add `min-block-size: 2.75rem;`
+- [x] `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.scss` — read the full file to locate row action button selectors (`.c-icon-btn`, `.favorite-btn`, or similar); add `min-inline-size: 2.75rem; min-block-size: 2.75rem;`
+- [x] Run `ng build` — must be 0 errors
+- [x] Re-run `/mobile-flow-audit --only trash-restore --only recipe-book-list`
+- [x] Update TRIAGE.md — mark Cluster 10 (touch-target-size) defects tr/MAJOR-1, tr/MAJOR-2, rbl/MAJOR-01 as ✓ resolved (plan 283)
+- [x] Fallout: `row-actions-menu` popover clipped by `.table-area` (`backdrop-filter` + `overflow: hidden`) — portal popover/backdrop to `document.body`, clamp into viewport, tighten gap/padding; keep ≥44×44 action buttons
 
 ## Validation (mobile)
 - Viewport 375×812 RTL

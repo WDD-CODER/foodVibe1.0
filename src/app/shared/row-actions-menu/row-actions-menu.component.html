@@ -1,18 +1,17 @@
-<button
-  type="button"
-  class="ram-trigger"
-  (click)="toggle($event)"
-  aria-label="Actions"
-  [attr.aria-expanded]="isOpen()">
+<button type="button" class="ram-trigger" (click)="toggle($event)" aria-label="Actions" [attr.aria-expanded]="isOpen()">
   <lucide-icon name="more-vertical" [size]="16"></lucide-icon>
 </button>
 
-<div class="ram-backdrop" [class.visible]="isOpen()" (click)="close(); $event.stopPropagation()"></div>
+<div #backdrop class="ram-backdrop" [class.visible]="isOpen()" (click)="close(); $event.stopPropagation()"></div>
 
-<div class="ram-popover"
+<div
+  #popover
+  class="ram-popover"
   [class.is-open]="isOpen()"
   [style.bottom.px]="popoverPos()?.bottom"
+  [style.top.px]="popoverPos()?.top"
   [style.left.px]="popoverPos()?.left"
-  [style.min-height.px]="popoverPos()?.minHeight">
+  [style.min-height.px]="popoverPos()?.minHeight"
+>
   <ng-content></ng-content>
 </div>

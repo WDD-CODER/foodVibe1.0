@@ -7,7 +7,7 @@
 | signup | 2026-04-20 | 0 | 3 | 2 | [→](./signup/report.md) |
 | login | 2026-04-20 | 0 | 2 | 2 | [→](./login/report.md) |
 | dashboard | 2026-04-20 | 0 | 2 | 2 | [→](./dashboard/report.md) |
-| recipe-book-list | 2026-04-20 | 0 | 4 | 3 | [→](./recipe-book-list/report.md) |
+| recipe-book-list | 2026-07-20 | 0 | 3 | 3 | [→](./recipe-book-list/report.md) |
 | recipe-builder-new-prep | 2026-04-20 | 4 | 5 | 3 | [→](./recipe-builder-new-prep/report.md) |
 | recipe-builder-new-dish | 2026-04-20 | 2 | 4 | 2 | [→](./recipe-builder-new-dish/report.md) |
 | recipe-builder-edit | 2026-04-20 | 0 | 2 | 2 | [→](./recipe-builder-edit/report.md) |
@@ -19,7 +19,7 @@
 | venues-add | 2026-04-20 | 0 | 2 | 3 | [→](./venues-add/report.md) |
 | menu-intelligence-event | 2026-04-20 | 2 | 2 | 2 | [→](./menu-intelligence-event/report.md) |
 | metadata-manager-all-tabs | 2026-04-20 | 0 | 2 | 4 | [→](./metadata-manager-all-tabs/report.md) |
-| trash-restore | 2026-04-20 | 0 | 2 | 3 | [→](./trash-restore/report.md) |
+| trash-restore | 2026-07-20 | 0 | 0 | 3 | [→](./trash-restore/report.md) |
 
 ---
 
@@ -28,9 +28,9 @@
 | Severity | Count |
 |----------|-------|
 | **Critical** | **11** |
-| **Major** | **43** |
+| **Major** | **40** |
 | **Minor** | **41** |
-| **Total** | **95** |
+| **Total** | **92** |
 
 ---
 

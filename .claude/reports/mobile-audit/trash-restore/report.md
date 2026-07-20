@@ -1,77 +1,51 @@
-# Mobile Audit — trash-restore
-**Viewport:** 375×812 RTL  
-**Date:** 2026-04-20  
-**Flow:** /trash — view trashed item, restore it  
-**Screenshots:** 4 (shots/01-baseline.png … shots/04-after-confirm.png)
+# trash-restore — Mobile Flow Audit
+Run: 2026-07-20 (Plan 283 re-verify — touch-target-size)
+Viewport: 375×812 RTL
+Auth: Guest (Dev)
+Severity counts: Critical 0 · Major 0 · Minor 3
 
----
+## Re-verify — Cluster 10 (Plan 283)
 
-## Known cross-page issues (excluded)
-- FAB left:8px wrong RTL
-- Bottom nav covers 56px
-- Dropdowns don't dismiss on Escape
-- Content behind sticky header
+| Check | Before | After | Result |
+|---|---|---|---|
+| `.btn-item` height (משחזר / ממחק לצמיתות / היסטוריה) | 30px | **44px** (`min-block-size: 2.75rem`) | PASS |
+| `.btn-action` height (משחזר הכל / ממחק את כל התוכן) | 30px | **51px** (`min-block-size: 2.75rem`) | PASS |
+| Modal confirm button | 47px | not re-measured (already passing) | n/a |
 
----
+**tr/MAJOR-1** — RESOLVED (plan 283)  
+**tr/MAJOR-2** — RESOLVED (plan 283)
 
-## New defects
+Screenshots: `shots/01-baseline.png`, `shots/02-row-actions.png`
 
-### MAJOR-1 — All row action buttons below 44px touch target height
-**Severity:** Major  
-**Element:** `.btn-item` buttons — "משחזר", "ממחק לצמיתות", "היסטוריה"  
-**Measured:** height = 30px on all three buttons (restore: 74×30, delete: 115×30, history: 67×30)  
-**Required:** ≥44px per WCAG 2.5.5 / Apple HIG  
-**Impact:** High miss-tap rate on a destructive-action screen. "ממחק לצמיתות" (permanent delete) is 30px tall — user can accidentally miss-tap.
-
----
-
-### MAJOR-2 — Section-level action buttons also 30px tall
-**Severity:** Major  
-**Element:** `.btn-action.btn-restore`, `.btn-action.btn-dispose`  
-**Measured:** height = 30px  
-**Same root cause as MAJOR-1** — the entire button system on this page uses 30px height.
-
----
+## Defects (remaining from 2026-04-20 — not in Plan 283 scope)
 
 ### MINOR-1 — Item action row has asymmetric RTL margin
 **Severity:** Minor  
 **Element:** `.trash-item-actions`  
-**Measured:** left=45, right=308 inside card (card: left=33, right=342). Right/start gap = 34px, left/end gap = 12px.  
-**Expected in RTL:** start side (right) should have equal or smaller margin than end side (left). Action row not flush to RTL start edge.
-
----
+Unchanged from prior audit — out of Plan 283 scope.
 
 ### MINOR-2 — Success toast overlaps page header on restore confirm
 **Severity:** Minor  
-**Element:** Green success toast "כל המתכונים שוחזרו"  
-**Observed:** Toast renders at top of viewport over the "אשפה" heading and sticky top bar. Heading text illegible for toast duration.  
-**Screenshot:** shots/04-after-confirm.png
-
----
+Not re-exercised this run — out of Plan 283 scope.
 
 ### MINOR-3 — Confirmation modal CTA says "משחזר הכל" for single-item restore
 **Severity:** Minor  
-**Element:** `.c-modal-card` confirm button  
-**Context:** Per-item restore triggers modal with title "לשחזר פריט זה?" (singular) but confirm CTA reads "משחזר הכל" (Restore All) — contradicts the singular framing.
-
----
+Not re-exercised this run — out of Plan 283 scope.
 
 ## Checklist
 
 | Check | Result |
 |---|---|
-| Restore button tap-target ≥44px | FAIL — 30px |
+| Restore button tap-target ≥44px | PASS — 44px |
+| Section action buttons ≥44px | PASS — 51px |
 | Row action buttons clip within card | PASS |
-| Confirmation modal fits at 375px | PASS — 343px wide, 16px margins |
-| Modal confirm button ≥44px | PASS — 47px |
-| Restore flow completes | PASS — item removed from trash |
-
----
+| Confirmation modal fits at 375px | not re-checked |
+| Restore flow completes | not re-exercised (measure-only re-verify) |
 
 ## Summary
 | Severity | Count |
 |---|---|
 | Critical | 0 |
-| Major | 2 |
+| Major | 0 (was 2 — both resolved by plan 283) |
 | Minor | 3 |
-| Screenshots | 4 |
+| Screenshots | 2 (this run) |
