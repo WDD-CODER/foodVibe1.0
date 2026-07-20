@@ -2,17 +2,6 @@
 
 ---
 
-### Plan 296 — Fix Blank Inventory List Rows (`plans/296-fix-blank-inventory-list-rows.plan.md`)
-> Chromium blank list cells until nutrition hover. M1 (::before) verified insufficient by Human. M2: remove table-area blur entirely + cell layer promotion. Contractor (Cursor).
-
-- [ ] M1a `src/app/shared/list-shell/list-shell.component.scss` — move `backdrop-filter` to `::before`; stack header/body above
-- [ ] M1b `src/styles.scss` — `.c-list-body-cell`: `color` + `isolation: isolate`
-- [ ] M1c Manual inventory cold-load + `ng lint` + session note
-- [ ] M2a `list-shell.component.scss` — delete `.table-area::before` / z-index stack; no blur on `.table-area`
-- [ ] M2b `styles.scss` — drop `isolation`; `transform: translateZ(0)` on `.c-list-body-cell`; keep `color`
-
----
-
 ### Plan 291 — Plan Persistence & Brief Sync Hardening (`plans/291-plan-persistence-brief-sync-hardening.plan.md`)
 > Closes the gap that let Plan 285 (AI Menu Phase 1) execute brief-by-brief without ever being persisted under `plans/`. Contractor (Cursor) executes one milestone at a time.
 
