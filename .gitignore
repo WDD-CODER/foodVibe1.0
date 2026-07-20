@@ -50,6 +50,11 @@ testem.log
 .claude/settings.local.json
 .claude/worktrees/
 .claude/.plan-write-ack
+.claude/.session-state-path
+
+# Session-state PPID scratch / legacy numbered handoffs (local only — never re-add)
+# Stable handoff is docs/session-state-${BRANCH}.md (no trailing -PID)
+docs/session-state-*-[0-9]*.md
 
 # Environment & secrets (never commit)
 .env

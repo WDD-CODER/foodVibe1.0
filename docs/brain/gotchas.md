@@ -141,3 +141,13 @@ routing Plan-Contract-shaped pastes to save-plan first. See
 **Why the obvious fix is wrong:** Re-running the archive script “successfully” looks healthy while orphan all-`[x]` sections remain. A “slim” Active/Planned index still costs ~90 lines every session and mostly duplicates stale catalog state.
 
 **What to do instead:** Keep every `### Plan` block above the file footer (`## Where things live`). Do not maintain a Plan Index table in `todo.md` — open work is the sections; Done is `todo-archive/`; all files are under `plans/`. Archive only via `node scripts/todo-archive.mjs`. See `docs/agent/job-validation.md` → Todo archive volumes.
+
+---
+
+## Tracked session-state pointer dirties every ship/merge
+
+**What hurt:** `.claude/.session-state-path` was tracked in git but rewritten on every SessionStart (`session-startup.sh`) to a PPID-keyed path. `/ship` also wrote session-state *after* commit/push. Result: perpetual dirty trees and `gh pr merge --delete-branch` failing on local checkout.
+
+**Why the obvious fix is wrong:** Committing the updated pointer “to clean the tree” just schedules the next SessionStart to dirty it again. Leaving Phase 5 until after push guarantees an uncommitted handoff file.
+
+**What to do instead:** Keep `.claude/.session-state-path` gitignored (local pointer only). Save to stable `docs/session-state-${BRANCH}.md` (no PPID). On `/ship`, write that file after commit, amend before push. See Plan 295 / `.claude/commands/ship.md` Phase 5.
