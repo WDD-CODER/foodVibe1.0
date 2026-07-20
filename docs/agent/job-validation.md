@@ -75,3 +75,15 @@ Human (or agent after finishing work) may run `/done` → follow `.claude/comman
 ## Matching todos
 
 Mark only items that clearly match **this** validated job (milestone ID, files touched, or Human-named task). Never invent completion for unrelated open checkboxes.
+
+---
+
+## Plan file sync (mid-flight)
+
+If during a brief you discover work that was not in the parent plan (review fallout, extra stage, Human-added scope):
+
+1. **Before** doing that work, append a new `[ ]` item under Atomic Sub-tasks in the parent `plans/….plan.md` (and a milestone row if needed).
+2. Mirror the same `[ ]` into `.claude/todo.md` under that Plan section.
+3. Only then execute. On later Human validation, mark both places `[x]`.
+
+Do not leave new stages only in chat or only in a session brief.

@@ -47,7 +47,7 @@ Show all registered skills with trigger patterns and file locations.
 | After a hacky fix, before a "not ideal" PR, or when duplicate/special-case logic appears | `.claude/skills/elegant-fix/SKILL.md` | SHARED |
 | Session start or after time away (once per calendar day) | `.claude/skills/github-sync/SKILL.md` | SHARED |
 | Before workflows that touch dev server / browser / database | `.claude/skills/preflight/SKILL.md` | SHARED |
-| User says "save the plan" / "save plan" / confirm plan persist | `.claude/skills/save-plan/SKILL.md` | SHARED |
+| User says "save the plan" / "save plan" / confirm plan persist, **or** pastes a Plan Contract / big plan | `.claude/skills/save-plan/SKILL.md` (+ `scripts/plan-name-similarity.mjs`) | SHARED |
 | End of session, before PR, after large features, or "audit tech debt" | `.claude/skills/techdebt/SKILL.md` | SHARED |
 | After significant features/components/services, or before a PR | `.claude/skills/update-docs/SKILL.md` | SHARED |
 | User says "setup worktree" / "new worktree" (on-demand only) | `.claude/skills/worktree-setup/SKILL.md` | SHARED |

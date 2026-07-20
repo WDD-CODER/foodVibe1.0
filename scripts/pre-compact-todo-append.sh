@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 # PreCompact: append open TODOs / unresolved signals to .claude/todo.md before compaction.
 set -e
 ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
@@ -25,7 +25,21 @@ if [ -z "$TRANSCRIPT" ] || [ ! -f "$TRANSCRIPT" ]; then
   TRANSCRIPT=$(cat /tmp/claude-transcript-path 2>/dev/null || true)
 fi
 if [ -n "$TRANSCRIPT" ] && [ -f "$TRANSCRIPT" ]; then
-  SIZE=$(wc -c < "$TRANSCRIPT" 2>/dev/null || echo 0)
-  echo "$SIZE" > /tmp/claude-compact-baseline
+  # Strict token anchors: avoid PASS/FAIL review tables and "Verify cmd" prose.
+  # Truncate each match — transcript lines are often multi-KB JSONL.
+  SIGNALS=$(
+    grep -E '\bUPGRADE_AVAILABLE\b|\bROUTING_DECLINED\b|\bBLOCKED\b|(^|[^A-Za-z0-9_/])FAIL([^A-Za-z0-9_]|$)|(^|[^A-Za-z0-9_])Verify:[[:space:]]' "$TRANSCRIPT" \
+      | tail -n 20 \
+      | cut -c1-300 \
+      || true
+  )
+  if [ -n "$SIGNALS" ]; then
+    {
+      echo ""
+      echo "### Unresolved signals detected at compact time"
+      echo ""
+      echo "$SIGNALS"
+    } >> "$TODO"
+  fi
 fi
 exit 0

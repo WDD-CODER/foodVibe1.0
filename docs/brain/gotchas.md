@@ -71,3 +71,23 @@ Running list. Each entry: what hurt / why the obvious fix is wrong / what to do 
 **Why the obvious fix is wrong:** Treating “no constructor load” as “no bootstrap GET” ignores the login/guest path, which constructs the service and forces a full rehydrate. Keeping the service eager “because recipe-builder needs it” also skips the cheaper fix: wire `ensureLoaded()` on the recipe-builder route.
 
 **What to do instead:** For every deferred singleton data service, gate login reload with `hasLoaded()` (skip until first route/tab hydrate). Wire `ensureLoaded()` on owning resolvers / first UI surface. See [[defer-singleton-data-ensureLoaded]].
+
+---
+
+## Pasted plans that never hit `plans/`
+
+**What hurt:** Big plans authored in one IDE (or chat) were copy-pasted into Cursor/Claude for brief-by-brief execution, but nothing forced a write under `plans/`. Mid-flight stages lived only in conversation or `.claude/todo.md`, so agents could not see the live contract.
+
+**Why the obvious fix is wrong:** Relying on “remember to save the plan” fails — save-plan only ran on an explicit phrase, and number-collision checks did not catch same-topic renames.
+
+**What to do instead:** Any pasted Plan Contract triggers `.claude/skills/save-plan/SKILL.md` first. Run `node scripts/plan-name-similarity.mjs --name="…"`. Ask rewrite/save-as-new/cancel **only** on similar name hits. Append mid-brief tasks to the parent plan’s Atomic Sub-tasks + ledger. Claude PreToolUse: `scripts/plan-write-guard.sh`; Cursor: `.cursor/rules/save-plan-must-use-skill.mdc`.
+
+---
+
+## PreCompact FAIL substring matches review PASS/FAIL
+
+**What hurt:** A PreCompact transcript grep used loose `FAIL` / `Verify:` tokens. Ordinary `/review-it` tables (`| PASS/FAIL |`, `| Verify cmd |`) and quoted session text were dumped into `.claude/todo.md` as “unresolved signals,” polluting the compact-time ledger.
+
+**Why the obvious fix is wrong:** Dropping signal capture entirely loses the Brief 1 goal (preserve open blockers across `/compact`). Matching only “FAIL” with `\b` still hits `PASS/FAIL` because `/` is a word boundary.
+
+**What to do instead:** Anchor real tool tokens (`UPGRADE_AVAILABLE`, `ROUTING_DECLINED`, `BLOCKED`); require `Verify:` + whitespace; require `FAIL` with a non-`/` predecessor; truncate each match (`cut -c1-300`) so JSONL lines cannot flood `todo.md`.

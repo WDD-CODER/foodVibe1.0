@@ -1,63 +1,132 @@
 ﻿---
 name: save-plan
-description: Determines the next plan number, syncs atomic sub-tasks to the ledger, and writes the plan file to plans/ when the user confirms a plan.
+description: >
+  Persist a Plan Contract to plans/ with name-similarity validation, ledger sync,
+  and Human confirm on collisions. Use when the user pastes/approves a big plan,
+  says save the plan, or any agent (Claude or Cursor) receives a Plan Contract to execute.
 ---
 
 # Skill: save-plan
-**Model Guidance:** Use Haiku/Flash for Phases 1 and 3. Use Sonnet for Phase 2 only when validating PRD alignment on a complex plan.
 
-**Trigger:** User says "save the plan", "save plan", or confirms a plan and asks to persist it.
+**Model Guidance:** Use Haiku/Flash for Phases 0–1 and 3. Use Sonnet for Phase 2 only when validating PRD alignment on a complex plan.
 
-**Plan Rules (inline — no guide read required):**
-- Plan numbering: `NNN = highest existing + 1`, zero-padded to 3 digits (e.g. `001`, `002`)
+## Triggers (any agent — Claude Code or Cursor)
+
+Run this skill **before executing milestones** when any of these is true:
+
+- User says "save the plan" / "save plan" / confirms a plan and asks to persist it
+- User pastes a **Plan Contract** / big plan (milestones, Atomic Sub-tasks, Goals)
+- User says "here is the plan" / "execute this plan" / drops a plan body into chat
+- Architect `/plan` or Cursor plan mode produced a contract that is not yet under `plans/`
+
+**Hard rule:** Do not start Brief/milestone execution until the plan is on disk under `plans/` (or Human explicitly cancels save).
+
+---
+
+## Plan Rules (inline)
+
+- Plan numbering: `NNN = highest existing + 1`, zero-padded to 3 digits
 - Refactor variant suffix: `NNN-R`
 - No plans yet → start at `001`
 - Write to `plans/<NNN>-<slug>.plan.md` in project root only — never `~/.cursor/plans/`
-- Todo update happens FIRST — before writing the plan file
-- Every sub-task formatted as `[ ] Brief description of target file(s)`
-- Medium/Large plan touching auth/storage → note security surface — rely on pre-commit security grep + CI before execution
+- Preferred H1 shape: `# Plan NNN — <Human Title>` (name must describe the work — similarity depends on it)
+- Todo / Atomic Sub-tasks sync happens as part of save (see phases)
+- Every sub-task: `[ ] Brief description of target file(s)`
+- Medium/Large plan touching auth/storage → note security surface
 - Not on a worktree + plan involves code changes → suggest `feat/` branch checkout
 
 ---
 
-## Phase 1: Ledger Sync 
+## Phase 0: Detect + Name Similarity Gate (mandatory)
 
-**Todo Update (first action):** Extract `# Atomic Sub-tasks` from the plan and append to `.claude/todo.md` before anything else.
+1. Extract a **plan display name** from the H1 / YAML `name:` / first heading (e.g. `Project Memory Bank`).
+2. Propose a slug: lowercase kebab-case from that name (e.g. `project-memory-bank`).
+3. Run the shared checker (Claude and Cursor — same script):
 
-**Sub-task Formatting:** Prepend every task with `[ ]` and include a brief description of the target file(s).
+```bash
+node scripts/plan-name-similarity.mjs --name="<Plan Display Name>"
+```
 
-**State Verification:** Confirm all previous session tasks are `[x]` or moved to "Deferred" before starting the new feature. If open tasks exist → surface them to the user before proceeding.
+4. Interpret stdout:
 
-**Numbering:** List files in `plans/` to determine next number. `NNN = highest + 1`, zero-padded. Refactor variant: `NNN-R`. No plans yet → start at `001`.
+| Result | Action |
+| --- | --- |
+| `no similar plans` | Proceed to Phase 1 — **do not** ask rewrite/new/cancel |
+| `similar plan(s)` | **Stop.** Show Human a short validation block (below). Wait for answer |
 
-**Collision Guard (concurrent worktree safety):**
+### Human validation block (only when hits exist)
+
+Copy the script output into chat, then ask exactly:
+
+```text
+Similar plan(s) found — validate:
+- <path> — <title>
+  why: similar because name shares: <tokens>
+  excerpt: <one short line>
+
+Reply: rewrite existing | save as new | cancel
+```
+
+- **rewrite existing** → Edit/overwrite the chosen existing path; sync its Atomic Sub-tasks + `.claude/todo.md`; do **not** allocate a new `NNN`.
+- **save as new** → Continue Phase 1 with next `NNN`. Before Write, put the relative path in `.claude/.plan-write-ack` (one line, e.g. `plans/291-foo.plan.md`) so the PreToolUse guard allows the create.
+- **cancel** → Stop. Do not write. Do not execute briefs.
+
+---
+
+## Phase 1: Ledger Sync
+
+**Todo Update:** Extract `# Atomic Sub-tasks` (or equivalent checklist) and append/update `.claude/todo.md` under `### Plan NNN — <Title>`.
+
+**Sub-task Formatting:** Every task `[ ]` with target file(s) when known.
+
+**State Verification:** If unrelated open tasks exist → surface them before proceeding.
+
+**Numbering (save as new only):** List `plans/` → `NNN = highest + 1`. Collision guard:
+
 1. After determining `NNN`, check if `plans/<NNN>-*.plan.md` already exists
-2. If file exists but was created in the last 60 seconds → collision likely from parallel worktree
-3. Re-scan `plans/` and increment to next available number
-4. If in a worktree (`.worktree-root` exists): also check main repo's `plans/` via `git -C $(cat .worktree-root) ls-files plans/`
-5. Use the higher of (local max + 1) or (main repo max + 1)
+2. If created in the last 60 seconds → re-scan and increment
+3. Worktree: also check main repo `plans/` via `git -C $(cat .worktree-root) ls-files plans/`
+4. Use the higher of (local max + 1) or (main repo max + 1)
 
 ---
 
-## Phase 2: Logic Validation 
+## Phase 2: Logic Validation
 
-**PRD Alignment:** Verify atomic sub-tasks satisfy 100% of the plan's requirements — no requirement left without a corresponding task.
+**PRD Alignment:** Atomic sub-tasks cover the plan requirements — no requirement without a task.
 
-**Risk Audit:** If the plan is Medium or Large and touches auth/storage → note security surface — rely on pre-commit security grep + CI now, before execution begins.
+**Risk Audit:** Medium/Large + auth/storage → note security surface; rely on pre-commit security grep + CI.
 
 ---
 
-## Phase 3: Environment Prep 
+## Phase 3: Write Plan File
 
-**Worktree Verification:** If not on a worktree and plan involves code changes → suggest `feat/` branch checkout before execution.
+**Worktree Verification:** If not on a worktree and plan involves code changes → suggest `feat/` branch checkout.
 
-**Port Discovery:** Ensure `.worktree-port` is mapped if the plan involves UI changes.
+**Write:**
 
-**Write Plan File:** Write to `plans/<NNN>-<slug>.plan.md` in project root only — never `~/.cursor/plans/`.
+- rewrite → overwrite the existing plan path Human confirmed
+- save as new → write `plans/<NNN>-<slug>.plan.md` (after `.claude/.plan-write-ack` if the write-guard may block)
+
+Never write under `~/.cursor/plans/`.
+
+---
+
+## Phase 4: Brief / mid-flight sync (ongoing — not only at save)
+
+After the plan is saved, **any agent** executing a brief from it must keep the plan file live:
+
+1. Brief must name its **parent plan path** (e.g. `plans/290-….plan.md`).
+2. If review fail / fallout / Human adds a stage → **append** a new `[ ]` Atomic Sub-task (and milestone row if needed) to that plan file **and** `.claude/todo.md` **before** doing the new work.
+3. On Human validation (`done` / ship Y) → mark matching plan + ledger items `[x]` (see `docs/agent/job-validation.md`).
 
 ---
 
 ## Completion Gate
 
-Output: `"Plan saved. Ledger updated. Ready to execute Task 1: [Task Name]."`
+Output:
 
+```text
+Plan saved: plans/<NNN>-<slug>.plan.md
+Ledger updated. Similarity: <none | rewrite | save-as-new>
+Ready to execute Task 1: [Task Name].
+```

@@ -71,6 +71,11 @@
             "type": "command",
             "command": "\"C:/Program Files/Git/bin/bash.exe\" scripts/branch-guard.sh",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "\"C:/Program Files/Git/bin/bash.exe\" scripts/plan-write-guard.sh",
+            "timeout": 15
           }
         ]
       }
@@ -106,6 +111,11 @@
           {
             "type": "command",
             "command": "\"C:/Program Files/Git/bin/bash.exe\" scripts/pre-compact-todo-append.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"C:/Program Files/Git/bin/bash.exe\" scripts/pre-compact-reminder.sh",
             "timeout": 5
           }
         ]

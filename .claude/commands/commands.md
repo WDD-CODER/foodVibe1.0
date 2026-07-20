@@ -1,4 +1,4 @@
-﻿---
+---
 description: List all registered slash commands, categories, and file paths
 allowed-tools: Read, Glob, Bash
 ---
@@ -38,7 +38,6 @@ Show all registered slash commands with short descriptions and file locations.
 | `/brief-detect` | Manually invoke brief-detection gate | `.claude/commands/brief-detect.md` | UTIL | CC |
 | `/cleanup` | Session & worktree pruning | `.claude/commands/cleanup.md` | UTIL | SHARED |
 | `/commands` | List all registered slash commands, categories, and paths | `.claude/commands/commands.md` | UTIL | SHARED |
-| `/context-override` | Override session context defaults / disable context warnings temporarily | `.claude/commands/context-override.md` | UTIL | SHARED |
 | `/docs-refresh` | On-demand documentation refresh (breadcrumbs + project docs) | `.claude/commands/docs-refresh.md` | UTIL | SHARED |
 | `/done` | Validate a finished chat job — close-out ask, then mark matching todos `[x]` | `.claude/commands/done.md` | UTIL | SHARED |
 | `/evaluate-me` | Agent session retrospective â€” grades the session | `.claude/commands/evaluate-me.md` | FLOW | SHARED |

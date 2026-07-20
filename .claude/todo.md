@@ -662,7 +662,7 @@ Completed entries are in [todo-archive.md](todo-archive.md).
 - [x] Task 1: Create `.claude/config/model-context-windows.json` â€” model â†’ context-window map
 - [x] Task 2: Create `scripts/context-monitor.py` â€” token-based, session-scoped, 3-tier warnings, override support
 - [x] Task 3: Create `.claude/commands/context-override.md` â€” slash command to suppress warnings 30 min
-- [ ] Task 4: Simplify `scripts/pre-compact-reminder.sh` â€” remove baseline block, add SESSION SAVE TARGET reference + Post-Compact Resume instruction
-- [ ] Task 5: Update `scripts/session-startup.sh` â€” add post-compact resume reminder line
+- [x] Task 4: ~~Simplify `scripts/pre-compact-reminder.sh` (Plan 284 design)~~ — **obsolete**: Brief 1 (`compaction-pipeline-r1`) superseded Plan 284 by removing the context-monitor system; reminder was slimmed to systemMessage-only (no SESSION SAVE TARGET / Post-Compact Resume from Plan 284)
+- [x] Task 5: ~~Update `scripts/session-startup.sh` (Plan 284 post-compact resume line)~~ — **obsolete**: Brief 1 removed the context-monitor reset path these tasks depended on; do not reintroduce percentage/token monitors
 - [x] Task 6: Update `.claude/settings.json` â€” swap .sh â†’ .py in PostToolUse hook
 

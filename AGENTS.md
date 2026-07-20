@@ -1,4 +1,4 @@
-﻿# AGENTS.md — FoodVibe 1.0 (tool-agnostic)
+# AGENTS.md — FoodVibe 1.0 (tool-agnostic)
 
 Single source of truth for hard rules, conventions, and skill triggers. Claude Code and Cursor both defer here.
 
@@ -16,7 +16,9 @@ Single source of truth for hard rules, conventions, and skill triggers. Claude C
 - Secrets live in `.env` only. Never read, print, hardcode, or commit them.
 - Hebrew UI strings always through `translatePipe` + `dictionary.json`.
 - Browser interaction goes through gstack `/browse` — never raw Playwright MCP directly.
+- Compaction: when a context-full warning appears, state open signals/todos in chat first, then prefer `/compact focus on <current job + open signals>`. Between unrelated tasks prefer `/clear` + session-state reload over `/compact`.
 - **Job validation (all agents):** A job is **not done** until the Human validates it. Never self-mark todos. Full procedure: `docs/agent/job-validation.md`.
+- **Plan Contracts (all agents):** A pasted/approved big plan must be persisted under `plans/` via `.claude/skills/save-plan/SKILL.md` before milestone execution. Run `node scripts/plan-name-similarity.mjs --name="…"` first — ask rewrite/save-as-new/cancel **only** when similar name hits exist. Mid-brief new tasks must be appended to that plan’s Atomic Sub-tasks and `.claude/todo.md`.
 
 ## Job validation (all agents)
 
@@ -54,7 +56,8 @@ Never skip with “Contractor does not mark.” Detail: `docs/agent/job-validati
 | After a hacky fix, before a "not ideal" PR, or when duplicate/special-case logic appears | `.claude/skills/elegant-fix/SKILL.md` |
 | Session start or after time away (once per calendar day) | `.claude/skills/github-sync/SKILL.md` |
 | Before workflows that touch dev server / browser / database | `.claude/skills/preflight/SKILL.md` |
-| User says "save the plan" / "save plan" / confirm plan persist | `.claude/skills/save-plan/SKILL.md` |
+| User says "save the plan" / "save plan" / confirm plan persist, **or** pastes a Plan Contract / big plan to execute | `.claude/skills/save-plan/SKILL.md` (+ `scripts/plan-name-similarity.mjs`) |
+| Brief execution adds a new stage / review fallout task | Append `[ ]` to parent `plans/….plan.md` Atomic Sub-tasks + `.claude/todo.md` before doing the work |
 | End of session, before PR, after large features, or "audit tech debt" | `.claude/skills/techdebt/SKILL.md` |
 | After significant features/components/services, or before a PR | `.claude/skills/update-docs/SKILL.md` |
 | User says "setup worktree" / "new worktree" (on-demand only) | `.claude/skills/worktree-setup/SKILL.md` |
