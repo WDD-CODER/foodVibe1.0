@@ -50,7 +50,7 @@ Cursor rule files: `add-recipe-must-use-skill`, `angular-component-structure`, `
 | `/brief` | see §6 flow F2; syncs parent plan via save-plan Phase 4 | `git diff/log`, `.claude/todo.md` (retroactive mode) | `.claude/sessions/{session-id}/brief.md` |
 | `/brief-detect` | forces the brief-detection gate (skill) below threshold | user message | — |
 | `/review-it` | Reviewer protocol | newest `sessions/*.md`, parent plan in `plans/`, milestone files | verdict in chat only (never `[x]`, never commits) |
-| `/ship` | invokes `/review`; runs `scripts/session-manifest-ship.py` (multi-worktree), `scripts/brain-review-check.mjs --scope=full` (feature-complete path) | `.claude/.session-state-path`, brief Done-when | commit; marks `.claude/todo.md` + plan `[x]`; `docs/brain/**` (on `brain approve`); session-state file |
+| `/ship` | invokes `/review`; runs `scripts/session-manifest-ship.py` (multi-worktree), `scripts/brain-review-check.mjs --scope=full` (feature-complete path) | `.claude/.session-state-path`, brief Done-when | commit; marks `.claude/todo.md` + plan `[x]`; `docs/brain/**` (auto-writes on `Y`, unless `no brain`); session-state file |
 | `/done` | job-validation Path B close-out | `.claude/todo.md`, parent plan | marks `[x]` on Human confirm |
 | `/review` | standalone review pass (used by `/ship` Phase 2) | session diff | report only |
 | `/end-session` | alias territory of `/ship` ("wrap up") | — | — |
@@ -129,7 +129,7 @@ Cursor rule files: `add-recipe-must-use-skill`, `angular-component-structure`, `
 | Script | Called by |
 | --- | --- |
 | `plan-name-similarity.mjs` | save-plan Phase 0 (both agents), `plan-write-guard.sh` |
-| `session-manifest-ship.py` | `/ship` Phase 3 (worktree count > 1) |
+| `session-manifest-ship.py` | `/ship` Phase 3 (worktree count > 1) — or a branch/HEAD-drift check when ≤1 worktree, same phase |
 | `brain-review-check.mjs` | `/ship` feature-complete path (advisory) |
 | `brain-capture-comment.mjs` | PR sticky brain-capture comment |
 | `pre-commit-no-semi.mjs`, `pre-commit-secret-scan.mjs`, `pre-commit-security-grep.mjs` | pre-commit hooks (source of truth for enforcement per `AGENTS.md`) |
@@ -149,7 +149,7 @@ Data-repair scripts (not workflow): `backup-before-repair.mjs`, `diagnose-broken
 | `.claude/sessions/{session-id}/brief.md` | `/brief` | `/ship` Done-when check, `/evaluate-me` |
 | `sessions/YYYY-MM-DD.md` | Contractor after each milestone | `/review-it` step 1 (handoff) |
 | `docs/session-state*.md` (target in `.claude/.session-state-path`) | `/ship` Phase 5 | `session-startup.sh` on next session |
-| `docs/brain/**` | `/ship` brain capture (confirm-to-write only) | session start on unfamiliar work; architectural choices |
+| `docs/brain/**` | `/ship` brain capture (auto-write on gate reply, opt out with `no brain`) | session start on unfamiliar work; architectural choices |
 | `.claude/.plan-write-ack` | save-plan (save-as-new after Human confirm) | consumed once by `plan-write-guard.sh` |
 | `notes/github-sync/YYYY-MM-DD.md` | github-sync skill | — |
 | `.qa-reports/` | QA/audit runs | audits |
@@ -192,13 +192,13 @@ Human describes feature
 ```
 Phase 1  ng build            — unconditional hard stop on fail
 Phase 2  /review             — one fix-and-recheck cycle max (or --skip-review "reason")
-Phase 3  manifest check      — only when >1 worktree (session-manifest-ship.py)
+Phase 3  manifest check      — >1 worktree: session-manifest-ship.py; ≤1 worktree: branch/HEAD-drift check (baseline captured at ship start)
 Phase 4  approval gate       — visual tree; Human Y = job validation
          on Y (hard order): mark todos/plan [x] → write approved brain drafts
                             → git add listed paths → one commit → rename branch → push if asked
          commit-vs-PR judgment: brief Done-when met → PR; else checkpoint (no PR); ad-hoc → ask
 Phase 4.5 Merge Gate         — mandatory after any successful push (standards-git.md)
-         replies: merge | later | open-pr-only  ×  brain approve | skip | edit
+         replies: merge | later | open-pr-only (brain draft auto-writes; add "no brain" to opt out, "brain edit …" to revise)
 Phase 5  session-state write — target from .claude/.session-state-path
 Phase 6  (todo sync already done in Phase 4)
 ```
@@ -237,7 +237,7 @@ PR checks fail → /fix-pr-checks → docs/agent/pr-check-fix-loop.md
 Durable learning in session (decision/gotcha/pattern)
   → /ship Phase 4/4.5 proposes: path + title + FULL draft body (fenced)
   → usefulness gate; one-liner proposals forbidden
-  → Human: brain approve → write verbatim to docs/brain/** and commit
+  → auto-writes verbatim to docs/brain/** on the gate reply (Y / merge / later / open-pr-only); "no brain" opts out
   → next sessions: read docs/brain/index.md → relevant sub-file only
 ```
 
@@ -256,7 +256,7 @@ plan-write-guard.sh --gates--> Write/Edit on plans/*.plan.md; --runs--> plan-nam
 branch-guard.sh     --gates--> all Write/Edit (blocks main)
 brief-detection     --gates--> structured pasted briefs; --routes--> /feat | discussion
 job-validation      --gates--> marking any [x]; --requires--> Human done / ship Y
-brain-capture.md    --gates--> any docs/brain write (confirm-to-write)
+brain-capture.md    --gates--> any docs/brain write (shown, then auto-writes; "no brain" opts out)
 standards-git.md    --gates--> post-push (Merge Gate, mandatory)
 pre-commit hooks    --gate--> every commit (no-semi, secret-scan, security-grep) [shared with Cursor]
 ```

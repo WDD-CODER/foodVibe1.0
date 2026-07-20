@@ -1,6 +1,6 @@
 name: brain-capture-reminder
 
-# Non-blocking sticky PR reminder for confirm-to-write brain capture.
+# Non-blocking sticky PR reminder for brain capture (auto-write on gate reply, opt out with "no brain").
 # No LLM. GITHUB_TOKEN only. Never fails the PR.
 
 on:

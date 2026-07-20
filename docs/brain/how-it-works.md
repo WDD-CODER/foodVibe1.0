@@ -127,9 +127,9 @@ flowchart LR
 
 ---
 
-## Capture loop (confirm-to-write)
+## Capture loop (shown-before-written, auto-write on the gate reply)
 
-Nothing lands in the brain without you.
+You always see the full draft before it lands. It writes automatically with whatever reply closes the gate — no separate confirmation step. Say the word and it doesn't happen.
 
 ```mermaid
 sequenceDiagram
@@ -139,15 +139,15 @@ sequenceDiagram
   participant Brain as docs/brain/
 
   Dev->>Gate: push feature/fix/chore branch
-  Gate->>Dev: propose Brain capture block
+  Gate->>Dev: propose Brain capture block (full draft shown)
   Gate->>GH: upsert reminder comment
-  alt brain approve
-    Dev->>Brain: write / append entry
-  else brain skip / brain:none
-    Dev-->>Brain: no write
+  alt Y / merge / later / open-pr-only
+    Dev->>Brain: write / append entry, then do the reply's normal action
+  else no brain / skip brain (said alongside the reply)
+    Dev-->>Brain: no write; reply's normal action still happens
   else brain edit …
     Dev->>Dev: revise proposal
-    Dev->>Brain: write after re-approve
+    Dev->>Brain: write after re-showing, on next reply
   end
 ```
 
@@ -155,11 +155,11 @@ sequenceDiagram
 
 | Reply | Effect |
 | --- | --- |
-| `brain approve` | Write the proposed entry |
-| `brain skip` / `brain:none` | Explicit no-op |
-| `brain edit …` | Change the draft, then approve |
+| `Y` / `merge` / `later` / `open-pr-only` | Write the proposed entry, then do that reply's normal action |
+| `no brain` / `skip brain` (combined with the above) | Explicit no-op on the brain write only |
+| `brain edit …` | Change the draft, re-show it, then write on the next reply |
 
-Silent auto-write is **forbidden**. See [[0003-auto-evoke-brain-on-pr]].
+The old separate `brain approve` reply is gone — see [[0006-auto-write-brain-capture-by-default]] (supersedes the confirm-to-write clause of [[0003-auto-evoke-brain-on-pr]]). You still see every draft before it writes; opting out just takes one word instead of withholding a second approval.
 
 ### Thin vs useful — same milestone (few-shot)
 

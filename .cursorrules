@@ -68,6 +68,6 @@ you to commit/push, prepare via the repo's git-agent conventions and only procee
 explicit approval.
 After any successful push off `main`, end with the Merge Gate from
 `docs/agent/standards-git.md` and wait — do not stop at "pushed" / PR URL alone.
-Brain capture proposal is part of that gate (not `/ship`-only); confirm-to-write.
+Brain capture proposal is part of that gate (not `/ship`-only); the full draft is shown, then it auto-writes on the reply that closes the gate (`merge` / `later` / `open-pr-only`) — say `no brain` / `skip brain` to opt out for that ship. See `docs/brain/decisions/0006-auto-write-brain-capture-by-default.md`.
 Brain proposals follow `docs/agent/brain-capture.md` (usefulness gate + full draft
 body below the banner; title-only proposals are invalid).
