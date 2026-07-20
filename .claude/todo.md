@@ -2,6 +2,19 @@
 
 ---
 
+### Plan 291 — Plan Persistence & Brief Sync Hardening (`plans/291-plan-persistence-brief-sync-hardening.plan.md`)
+> Closes the gap that let Plan 285 (AI Menu Phase 1) execute brief-by-brief without ever being persisted under `plans/`. Contractor (Cursor) executes one milestone at a time.
+
+- [ ] M1 `scripts/plan-ledger-check.mjs` — new: verify todo.md/brief plan refs exist, report duplicate NNNs + unnumbered strays
+- [ ] M2 `.husky/pre-commit` + `.claude/commands/ship.md` — wire ledger check into pre-commit (cross-agent) and ship Phase 1
+- [ ] M3 `.claude/commands/plan.md` + `feat.md` — remove `_v[N]` convention fork, align to `NNN-slug.plan.md`
+- [ ] M4 `.claude/skills/brief-detection/SKILL.md` — detect Plan Contract shape (Milestones/Atomic Sub-tasks), route to save-plan instead of a/b/c gate
+- [ ] M5 `.claude/commands/brief.md` — STOP when `## Parent plan` path doesn't resolve on disk
+- [ ] M6 `.claude/skills/save-plan/SKILL.md` — NNN allocation also checks `origin/main` plans/ tree
+- [ ] M7 `plans/285-ai-menu-phase1.plan.md` — reconstruct from todo.md history, resolve ledger-check hard failure
+
+---
+
 ## Angular 22 Migration (deferred)
 
 - Remaining root `npm audit --audit-level=high` findings (Angular/* cluster + related CLI/build toolchain highs: vite, piscina, http-proxy-middleware, serialize-javascript) are blocked on the Angular 22 major upgrade.
