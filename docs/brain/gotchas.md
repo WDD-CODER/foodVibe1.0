@@ -131,3 +131,13 @@ routing Plan-Contract-shaped pastes to save-plan first. See
 **Why the obvious fix is wrong:** Adding more “remember to show a checklist” reminders (or leaving the orphan file intact) does not restore enforcement. Agents follow hard gates they already load (`job-validation`, ship, done), not orphaned instruction paths.
 
 **What to do instead:** Move the live rules onto `docs/agent/job-validation.md` and the close-out templates agents must print; leave the old path as a pointer stub. Audit `@include` / skill triggers whenever deleting a command that was the only loader. See [[how-to-validate-on-job-gate]].
+
+---
+
+## Todo archive footer wording and Plan Index placement
+
+**What hurt:** Fully-done `### Plan` sections sitting *below* `## Plan Index` were invisible to `scripts/todo-archive.mjs` (footer cut-off), so dead weight stayed in `todo.md`. Separately, changing the `## Done` stub text away from a recognized phrase caused the stub to be swallowed into the last archived plan section. Keeping a large Plan Index table in `todo.md` also re-bloated the open-work file after Done rows were moved out.
+
+**Why the obvious fix is wrong:** Re-running the archive script “successfully” looks healthy while orphan all-`[x]` sections remain. A “slim” Active/Planned index still costs ~90 lines every session and mostly duplicates stale catalog state.
+
+**What to do instead:** Keep every `### Plan` block above the file footer (`## Where things live`). Do not maintain a Plan Index table in `todo.md` — open work is the sections; Done is `todo-archive/`; all files are under `plans/`. Archive only via `node scripts/todo-archive.mjs`. See `docs/agent/job-validation.md` → Todo archive volumes.

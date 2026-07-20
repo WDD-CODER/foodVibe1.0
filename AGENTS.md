@@ -1,4 +1,4 @@
-# AGENTS.md — FoodVibe 1.0 (tool-agnostic)
+﻿# AGENTS.md — FoodVibe 1.0 (tool-agnostic)
 
 Single source of truth for hard rules, conventions, and skill triggers. Claude Code and Cursor both defer here.
 
@@ -17,7 +17,7 @@ Single source of truth for hard rules, conventions, and skill triggers. Claude C
 - Hebrew UI strings always through `translatePipe` + `dictionary.json`.
 - Browser interaction goes through gstack `/browse` — never raw Playwright MCP directly.
 - Compaction: when a context-full warning appears, state open signals/todos in chat first, then prefer `/compact focus on <current job + open signals>`. Between unrelated tasks prefer `/clear` + session-state reload over `/compact`.
-- **Job validation (all agents):** A job is **not done** until the Human validates it. Never self-mark todos. Full procedure: `docs/agent/job-validation.md`.
+- **Job validation (all agents):** A job is **not done** until the Human validates it. Never self-mark todos. Full procedure: `docs/agent/job-validation.md`. Fully-done plan sections leave `.claude/todo.md` via `node scripts/todo-archive.mjs` into `.claude/todo-archive/NNN.md` (max 300 lines); see that doc’s Todo archive volumes section.
 - **Plan Contracts (all agents):** A pasted/approved big plan must be persisted under `plans/` via `.claude/skills/save-plan/SKILL.md` before milestone execution. Run `node scripts/plan-name-similarity.mjs --name="…"` first — ask rewrite/save-as-new/cancel **only** when similar name hits exist. Mid-brief new tasks must be appended to that plan’s Atomic Sub-tasks and `.claude/todo.md`.
 
 ## Job validation (all agents)

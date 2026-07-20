@@ -204,7 +204,7 @@ Commands:
 
 ### ARCHIVAL PRECONDITION (enforced before ANY archive action)
 
-Before any edit to `todo.md` that removes a section, or any append to `todo-archive.md`, ALL three rules below must be satisfied:
+Before any edit to `todo.md` that removes a section, or any run of `node scripts/todo-archive.mjs`, ALL three rules below must be satisfied:
 
 1. **Approval required** â€” the user must have typed the literal string `"approve"` or `"approve and stop"` in the current session. Inference from file state, commit history, pre-validation results, or any other source does NOT satisfy this precondition. If the precondition is not met, stop and ask.
 2. **Pre-validated-done plans still need approval** â€” if Phase 2 pre-validation determined a plan is already fully done, Phase 5 must still be surfaced with all tasks marked DONE, and the user must still type "approve" before archiving. Pre-validated-done plans do not skip the approval gate.
@@ -225,9 +225,8 @@ After marking a plan complete, run `git status --short`. If output is non-empty:
   2. If collision detected (another worktree created same-numbered plan), rename current plan to next available number and update `todo.md` reference
   3. Commit with conventional message (read `.claude/agents/git-agent.md`)
   4. **Archive the completed plan** (run immediately after commit, or after pre-validate-all-DONE approval):
-     - Extract the full `### Plan NNN â€” ...` block from `.claude/todo.md` (header line + all checkbox lines)
-     - Append it to `.claude/todo-archive.md` under the `## Done` section (after the last `---` entry)
-     - Remove the block from `.claude/todo.md`, collapsing the surrounding `---` separators so no double-`---` is left behind
+     - Run `node scripts/todo-archive.mjs` — moves fully-`[x]` `### Plan` sections from `.claude/todo.md` into `.claude/todo-archive/NNN.md` volumes (max 300 lines; rolls automatically)
+     - Do **not** hand-append to a monolithic `todo-archive.md`
   5. Loop back to Phase 0 for next plan
 - **"approve and stop"** â†’ Commit (Human via `git-agent` prep), archive the plan (same step 4 above), then `/ship`
 - **"show diff"** â†’ Run `git diff`, then wait for next command
