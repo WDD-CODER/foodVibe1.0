@@ -121,9 +121,10 @@ Approve **Y** (or `--yes`) **is** Human validation of the job. Then:
 2. **Write brain drafts** (if proposed and not dropped via edit list) — verbatim to `docs/brain/**` as above.
 3. **`git add` only listed paths** — include the todo/plan/brain paths just updated. Happy path = **one commit** with job + todos (+ brain). Do **not** commit the job first and leave todos for a later push.
 4. **`git commit`** (Conventional Commit; Cursor trailer `Co-authored-by: Cursor <cursoragent@cursor.com>` when applicable)
-5. Rename branch if approved
-6. Push only if Human asked (“push” / “ship and push”): `git push -u origin HEAD`
-7. **Commit-vs-PR judgment** (before any `gh pr create`) — see below. Never open a PR silently.
+5. **Session-state fold (Plan 295 — before push)** — see Phase 5 below: write stable `docs/session-state-${BRANCH}.md`, `git add` it, **`git commit --amend --no-edit`** into the ship commit (only because this commit is ours and **not yet pushed**). Never leave session-state dirty after ship.
+6. Rename branch if approved
+7. Push only if Human asked (“push” / “ship and push”): `git push -u origin HEAD`
+8. **Commit-vs-PR judgment** (before any `gh pr create`) — see below. Never open a PR silently.
 
 **Recovery only:** If a prior ship already committed/pushed the job without todos (agent bug or mid-flight rule change), immediately mark matching `[x]` and push a tiny follow-up commit on the same branch — do not leave checkboxes open.
 
@@ -198,14 +199,15 @@ Never auto-merge without Human `merge` / clear `Y`. Never write brain files with
 
 ---
 
-## Phase 5 — Session-state (conditional size)
+## Phase 5 — Session-state (fold into ship commit before push)
 
-Read save target from `.claude/.session-state-path` (fallback `docs/session-state.md`).
+Runs as **On approval step 5** — after `git commit`, **before** push. Do not defer until after Merge Gate.
 
-Count files changed this session (this-chat stage list / commits).
-
-- **If ≤1 file changed** → **append one line** (date + sha + summary) under the existing sections. Keep required schema sections intact: `## Session Summary`, `## Next Steps`.
-- **If >1 file changed** → **full rewrite** with schema:
+1. Read save target from `.claude/.session-state-path` (local pointer; gitignored). Fallback: `docs/session-state-${BRANCH}.md` then `docs/session-state.md`.
+2. **Stable path only:** write `docs/session-state-${BRANCH}.md` (no PPID suffix). Never write a new `docs/session-state-*-{pid}.md` for ship.
+3. Count files changed this session (this-chat stage list / commits):
+   - **If ≤1 file changed** → **append one line** (date + sha + summary) under the existing sections. Keep required schema sections intact: `## Session Summary`, `## Next Steps`.
+   - **If >1 file changed** → **full rewrite** with schema:
 
 ```markdown
 # Session State
@@ -232,7 +234,12 @@ Count files changed this session (this-chat stage list / commits).
 {first open todo + open session items}
 ```
 
+4. `git add` the stable session-state file (and only that handoff path).
+5. `git commit --amend --no-edit` — allowed here because HEAD is the ship commit just created by this agent and has **not** been pushed yet. Do **not** amend if already pushed.
+6. Continue On approval (rename → push → PR judgment).
+
 Do not change the resume/read path used by `scripts/session-startup.sh`.
+`.claude/.session-state-path` must remain **untracked** (gitignored).
 
 ---
 

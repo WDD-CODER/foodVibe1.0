@@ -3,14 +3,11 @@
 # Automatically loads the previous session's state into context,
 # so the AI picks up exactly where it left off.
 #
-# Parallel-session safe (Option B):
-#   - Each Claude Code process gets a unique state file keyed by branch + PPID.
-#   - On start: loads the most recently modified state file for this branch.
-#   - On end: Claude writes to the PPID-keyed file (path injected into context).
-#   - Cleanup: removes PPID-keyed files older than 7 days automatically.
-#   - Falls back to docs/session-state.md if no branch-specific files exist.
-#
-# Set SESSION_STATE_PATH to override all auto-detection.
+# Branch-canonical save target (Plan 295):
+#   - SAVE_PATH = docs/session-state-${BRANCH}.md (no PPID — safe to commit on /ship)
+#   - .claude/.session-state-path is local-only (gitignored) so SessionStart never dirties git
+#   - Override both with SESSION_STATE_PATH for rare parallel-window cases
+#   - Falls back to docs/session-state.md if no branch file exists
 #
 # Hook type: SessionStart (matcher: "startup")
 # Timeout: 10s
@@ -22,25 +19,23 @@ else
   BRANCH=$(git branch --show-current 2>/dev/null | sed 's/[^a-zA-Z0-9]/-/g')
   BRANCH="${BRANCH:-main}"
 
-  # This session's unique save target (branch + parent PID = one file per Claude Code window)
-  SAVE_PATH="docs/session-state-${BRANCH}-${PPID}.md"
+  # Stable per-branch handoff (committed on /ship amend-before-push)
+  SAVE_PATH="docs/session-state-${BRANCH}.md"
 
-  # Record save path so Claude can read it when wrapping up
+  # Local pointer only — gitignored (Plan 295)
   mkdir -p .claude
   echo "$SAVE_PATH" > .claude/.session-state-path
 
-  # Cleanup: remove PPID-keyed state files older than 7 days
-  find docs -maxdepth 1 -name "session-state-${BRANCH}-*.md" -mtime +7 -exec rm -f {} + 2>/dev/null || true
-
-  # Load the most recently modified state file for this branch
-  # Priority: PPID-keyed files → branch-canonical → global fallback
-  LATEST=$(ls -t docs/session-state-${BRANCH}-*.md 2>/dev/null | head -1)
-  if [ -n "$LATEST" ]; then
-    SESSION_STATE="$LATEST"
-  elif [ -f "docs/session-state-${BRANCH}.md" ]; then
-    SESSION_STATE="docs/session-state-${BRANCH}.md"
+  # Prefer branch-canonical; fall back to newest legacy PPID file, then global
+  if [ -f "$SAVE_PATH" ]; then
+    SESSION_STATE="$SAVE_PATH"
   else
-    SESSION_STATE="docs/session-state.md"
+    LATEST=$(ls -t docs/session-state-${BRANCH}-*.md 2>/dev/null | head -1)
+    if [ -n "$LATEST" ]; then
+      SESSION_STATE="$LATEST"
+    else
+      SESSION_STATE="docs/session-state.md"
+    fi
   fi
 fi
 
@@ -51,13 +46,12 @@ if [ -f "$SESSION_STATE" ]; then
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
     "decision": {
-      "additionalContext": "Previous session state loaded from: $SESSION_STATE\\n$CONTENT\\n\\n---\\nSESSION SAVE TARGET: $SAVE_PATH\\nWhen ending this session, write session-state to the path above (not docs/session-state.md directly). This prevents parallel sessions on the same branch from overwriting each other."
+      "additionalContext": "Previous session state loaded from: $SESSION_STATE\\n$CONTENT\\n\\n---\\nSESSION SAVE TARGET: $SAVE_PATH\\nWhen ending this session, write session-state to the path above (not docs/session-state.md directly). The pointer file .claude/.session-state-path is local-only (gitignored)."
     }
   }
 }
 EOF
 else
-  # No prior state — still inject save target so Claude knows where to write
   cat <<EOF
 {
   "hookSpecificOutput": {
