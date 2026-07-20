@@ -21,12 +21,16 @@ jobs:
       - name: Install server
         run: npm ci
         working-directory: server
-      # TODO: restore --audit-level=high after Angular 22 migration (tracked in .claude/todo.md)
+      # --omit=dev: devDependencies are build/dev-server tooling (Angular CLI, vite,
+      # webpack-dev-server, ...) that never ships to production, so their audit
+      # findings are noise for this app's real attack surface — permanent, not a
+      # workaround. --audit-level=critical stays until the Angular 22 migration
+      # (tracked in .claude/todo.md) clears the current @angular/* high findings;
+      # restore --audit-level=high on production deps after that migration lands.
       - name: npm audit (root)
-        run: npm audit --audit-level=critical
-      # TODO: restore --audit-level=high after Angular 22 migration (tracked in .claude/todo.md)
+        run: npm audit --omit=dev --audit-level=critical
       - name: npm audit (server)
-        run: npm audit --audit-level=critical
+        run: npm audit --omit=dev --audit-level=critical
         working-directory: server
       - name: Semgrep OWASP Top Ten
         uses: semgrep/semgrep-action@v1

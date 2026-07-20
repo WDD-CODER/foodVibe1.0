@@ -2,12 +2,56 @@
 
 ---
 
+### Plan 294 — Second Brain Reuse Instrumentation & Founding-Entry Cleanup (`plans/294-second-brain-reuse-instrumentation-and-cleanup.plan.md`)
+> Follow-up to the docs/brain value audit (2026-07-20 session): make brain-entry reuse visible in session logs, re-audit the 4 founding patterns against ADR 0004's usefulness gate, and set a growth threshold for gotchas.md. Doc-only. Contractor (Cursor) executes one milestone at a time on `chore/brain-reuse-instrumentation`.
+
+- [ ] M1 `docs/agent/brain-capture.md` + `docs/brain/index.md` — add "Informed by: [[entry]]" reuse-tracking convention for session logs
+- [ ] M2 `docs/brain/patterns/gemini-backend-proxy.md` + `signals-only-state.md` + `tombstone-soft-delete.md` — gate verdict review against ADR 0004, recommend (don't delete)
+- [ ] M3 `docs/brain/gotchas.md` + `docs/agent/brain-capture.md` — growth threshold (~150 lines) + bypass-escalation policy
+- [ ] M4 `docs/brain/decisions/0004-full-draft-brain-proposals.md` — run its own prescribed self-review, log dated verdict
+
+---
+
+### Plan 293 — Wire HOW TO VALIDATE checklist (`plans/293-wire-how-to-validate-checklist.plan.md`)
+> HOW TO VALIDATE bullets mandatory before every JOB DONE / ship Y close-out for both agents.
+
+- [x] M1 Save plan + mirror ledger in `.claude/todo.md`
+- [x] M2 `docs/agent/job-validation.md` — add HOW TO VALIDATE section; wire Path A + Path B close-out
+- [x] M3 `AGENTS.md` — update close-out template + hard rule line
+- [x] M4 `.cursorrules` — execution protocol + handoff require checklist
+- [x] M5 `.claude/commands/done.md` + `ship.md` — checklist in close-out / Phase 4 tree
+- [x] M6 `.claude/instructions/validation-checklist.md` — replace with pointer stub
+
+---
+
+### Plan 292 — Todo Archive Volume Rotation (`plans/292-todo-archive-volume-rotation.plan.md`)
+> Keep todo.md open-work-only: fully-done plan sections move into numbered `.claude/todo-archive/NNN.md` volumes (max 300 lines). Slim Plan Index to non-Done. Similarity checks last 2 volumes. Contractor executes one milestone at a time.
+
+- [ ] M1 `scripts/todo-archive.mjs` + `.claude/todo-archive/README.md` — parse/move all-[x], 300-line roll, `--migrate` / `--dry-run`
+- [ ] M2 Wire ship/done/sweep/auto-solve + `plan-name-similarity.mjs` last-2 volumes + job-validation note
+- [ ] M3 Run migrate; slim Plan Index to INDEX.md; stub legacy `todo-archive.md`
+
+---
+
+### Plan 291 — Plan Persistence & Brief Sync Hardening (`plans/291-plan-persistence-brief-sync-hardening.plan.md`)
+> Closes the gap that let Plan 285 (AI Menu Phase 1) execute brief-by-brief without ever being persisted under `plans/`. Contractor (Cursor) executes one milestone at a time.
+
+- [ ] M1 `scripts/plan-ledger-check.mjs` — new: verify todo.md/brief plan refs exist, report duplicate NNNs + unnumbered strays
+- [ ] M2 `.husky/pre-commit` + `.claude/commands/ship.md` — wire ledger check into pre-commit (cross-agent) and ship Phase 1
+- [ ] M3 `.claude/commands/plan.md` + `feat.md` — remove `_v[N]` convention fork, align to `NNN-slug.plan.md`
+- [ ] M4 `.claude/skills/brief-detection/SKILL.md` — detect Plan Contract shape (Milestones/Atomic Sub-tasks), route to save-plan instead of a/b/c gate
+- [ ] M5 `.claude/commands/brief.md` — STOP when `## Parent plan` path doesn't resolve on disk
+- [ ] M6 `.claude/skills/save-plan/SKILL.md` — NNN allocation also checks `origin/main` plans/ tree
+- [ ] M7 `plans/285-ai-menu-phase1.plan.md` — reconstruct from todo.md history, resolve ledger-check hard failure
+
+---
+
 ## Angular 22 Migration (deferred)
 
-- Remaining root `npm audit --audit-level=high` findings (Angular/* cluster + related CLI/build toolchain highs: vite, piscina, http-proxy-middleware, serialize-javascript) are blocked on the Angular 22 major upgrade.
+- Remaining `npm audit --omit=dev --audit-level=high` findings are all `@angular/*` (XSS in template/attribute namespace + two-way binding sanitization, DoS via OOM in formatDate/digitsInfo, HttpTransferCache cache-key/info-leak) — blocked on the Angular 22 major upgrade.
 - Do **not** run `npm audit fix --force`.
-- Server `npm audit` is clean (0 vulnerabilities).
-- CI temporarily uses `--audit-level=critical` in `.github/workflows/security.yml` until migration; restore `--audit-level=high` afterward.
+- Server `npm audit --omit=dev` is clean (0 vulnerabilities).
+- CI (`.github/workflows/security.yml`) runs `npm audit --omit=dev --audit-level=critical`. `--omit=dev` is permanent (devDependency build-tooling churn — Angular CLI, vite, webpack-dev-server — is noise for a never-shipped tree, not app risk); restore `--audit-level=high` on top of `--omit=dev` after the migration clears the `@angular/*` findings above. See `docs/brain/decisions/0005-scope-npm-audit-to-production-deps.md`.
 
 ---
 
@@ -29,33 +73,6 @@
 
 ---
 
-### Plan 285 â€” AI Menu Phase 1 (`plans/285-ai-menu-phase1.plan.md`)
-
-- [x] 1.1.1 `server/routes/ai.js` â€” add MENU_GENERATE_SYSTEM_PROMPT
-- [x] 1.1.2 `server/routes/ai.js` â€” add validateMenuDraft() helper
-- [x] 1.1.3 `server/routes/ai.js` â€” add POST /generate-menu endpoint
-- [x] 1.1.4 `server/routes/ai.js` â€” add MENU_PATCH_SYSTEM_PROMPT
-- [x] 1.1.5 `server/routes/ai.js` â€” add POST /patch-menu endpoint
-- [x] 1.2.1 `src/app/core/models/ai-menu-draft.model.ts` â€” create
-- [x] 1.2.2 `src/app/core/utils/recipe-match.util.ts` â€” create
-- [x] 1.2.3 `src/app/core/services/gemini.service.ts` â€” add generateMenu() + patchMenu()
-- [x] 1.2.4 `src/app/pages/menu-intelligence/services/menu-ai-flow.service.ts` â€” create
-- [x] 1.3.1 `src/app/shared/ai-menu-modal/ai-menu-modal.service.ts` â€” create
-- [x] 1.3.2 `src/app/shared/ai-menu-modal/ai-menu-modal.component.ts` â€” create
-- [x] 1.3.3 `src/app/shared/ai-menu-modal/ai-menu-modal.component.html` â€” create
-- [x] 1.3.4 `src/app/shared/ai-menu-modal/ai-menu-modal.component.scss` â€” create
-- [x] 1.3.5 `src/app/appRoot/app.component.html` â€” add `<app-ai-menu-modal/>`
-- [x] 1.3.6 `src/app/appRoot/app.component.ts` â€” import AiMenuModalComponent
-- [x] 1.3.7 `public/assets/data/dictionary.json` â€” add 19 ai_menu_* keys
-- [x] 1.4.1 `menu-intelligence.page.ts` â€” providers + inject + ngOnInit init()
-- [x] 1.4.2 `menu-intelligence.page.ts` â€” openAiMenuModal() + buildAiMenuSnapshot_()
-- [x] 1.4.3 `menu-intelligence.page.html` â€” add AI button
-- [x] 1.4.4 `menu-library-list.component.ts + .html` â€” onCreateWithAi() + button
-- [x] 1.4.5 `public/assets/data/dictionary.json` â€” add 4 integration keys
-- [x] BG â€” ng build 0 errors
-
----
-
 ### Plan 234 â€” Per-User Collections + Render Deployment â€” operational tasks re-opened (`plans/234-per-user-collections-render-deploy.plan.md`)
 > Partially re-opened after archive audit 2026-04-13 â€” see `.qa-reports/plan-234-archive-audit.md`
 
@@ -72,19 +89,6 @@
 
 ---
 
-### Plan 262 â€” Mobile Layout Audit 375Ã—812 (`plans/262-mobile-layout-audit.plan.md`)
-
-- [x] 1.1 Create ROUTE_INVENTORY.md from app.routes.ts â€” all paths, auth guards, children, page components
-- [x] 1.2 Read all page .component.html files â€” catalog interactive elements
-- [x] 1.3 Read shared/*.component.html files â€” catalog reusable interactive components
-- [x] 1.4 Write INTERACTIVE_CATALOG.md â€” page | element_selector | trigger_action | expected_behavior
-- [x] 2.1 /browse audit: launch localhost:4200 at 375Ã—812, confirm RTL, screenshot all public pages
-- [x] 2.2 /browse audit: trigger all interactive elements per INTERACTIVE_CATALOG.md, screenshot each state
-- [x] 2.3 /browse audit: auth-required pages (login, then repeat crawl) â€” all auth pages captured; only /menu-library rows and /menu-intelligence/:id skipped (no DB data)
-- [x] 3.1 Create MOBILE_AUDIT_REPORT.md â€” critical/major/minor issues, clean pages, pass/fail checklist
-
----
-
 ### Plan 259 â€” DB-Backed Shared Few-Shot Pool (`plans/259-gemini-shots-db-pool.plan.md`)
 
 - [ ] Task 1: `server/routes/ai.js` â€” add `GEMINI_SHOTS` helpers (`saveShot`, `getApprovedShots`, `computeSoftWarnings`), remove `buildFewShotBlock` from body path
@@ -95,23 +99,6 @@
 - [ ] Task 6: `gemini.service.ts` â€” remove `getGeminiShots` import and `shots` from request bodies
 - [ ] Task 7: Deprecate `gemini-shots.util.ts` â€” remove `addGeminiShot` call from modal
 - [ ] Task 8: `ng build` + smoke test
-
----
-
-### Plan 258 â€” Quick-Edit Product Panel (`plans/258-quick-edit-product-panel.plan.md`)
-
-- [x] Create `src/app/core/services/quick-edit-product-modal.service.ts`
-- [x] Create `src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.ts`
-- [x] Create `src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.html`
-- [x] Create `src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.scss`
-- [x] Create `src/app/shared/quick-edit-product-modal/quick-edit-product-modal.component.ts`
-- [x] Create `src/app/shared/quick-edit-product-modal/quick-edit-product-modal.component.html`
-- [x] Create `src/app/shared/quick-edit-product-modal/quick-edit-product-modal.component.scss`
-- [x] Edit `src/app/appRoot/app.component.ts` â€” register QuickEditProductModalComponent
-- [x] Edit `src/app/appRoot/app.component.html` â€” add <app-quick-edit-product-modal/>
-- [x] Edit `recipe-ingredients-table.component.ts` â€” signals, helpers, badge handlers
-- [x] Edit `recipe-ingredients-table.component.html` â€” replace badge clicks, add accordion
-- [x] Edit `recipe-ingredients-table.component.scss` â€” .quick-edit-accordion grid-column
 
 ---
 
@@ -142,26 +129,6 @@
 - [ ] Task 3: Update `GeminiService.generateRecipe()` to call `getGeminiShots()` and pass shots to backend
 - [ ] Task 4: Repeat for `generateFromImage()` and `generateFromUrl()` (all generate endpoints)
 - [ ] Task 5: Verify `ng build` passes and test end-to-end in dev
-
----
-
-### Plan 254 â€” Recipe Ref Repair + Name Snapshot (`plans/254-recipe-ref-repair-and-name-snapshot.plan.md`)
-
-- [x] Task 1: `git checkout -b fix/recipe-ref-repair` â€” create new branch
-- [x] Task 2: Write `scripts/backup-before-repair.mjs`
-- [x] Task 3: Run backup â€” confirm non-empty
-- [x] Task 4: Write `scripts/repair-recipe-references.mjs`
-- [x] Task 5: Run dry-run â€” confirm counts
-- [x] Task 6: Run `--write` â€” confirm 118 fixed
-- [x] Task 7: `ingredient.model.ts` â€” add `nameSnapshot?: string`
-- [x] Task 8: `recipe-form.service.ts` `createIngredientGroup` â€” add nameSnapshot control
-- [x] Task 9: `recipe-form.service.ts` `buildRecipeFromForm` â€” persist nameSnapshot
-- [x] Task 10: `recipe-form.service.ts` `patchFormFromRecipe` â€” patch nameSnapshot
-- [x] Task 11: `recipe-ingredients-table.component.ts` `onItemSelected` â€” write nameSnapshot
-- [x] Task 12: `recipe-ingredients-table.component.ts` `getDisplayName` â€” nameSnapshot fallback
-- [x] Task 13: `recipe-ingredients-table.component.html` â€” unlinked marker
-- [x] Task 14: Run `--write --backfill-snapshot`
-- [x] Task 15: `scripts/seed-from-dump.js` â€” add count safety check
 
 ---
 
@@ -221,44 +188,13 @@
 
 ## ðŸ”´ Quick Fixes
 
-### Plan 251 â€” Recipe Builder Ingredient Name Display Fix (`plans/251-recipe-builder-ingredient-name-display.plan.md`)
-- [x] Task 1: `recipe-form.service.ts` â€” add `name_hebrew` to `lastGroup.patchValue(...)` in `patchFormFromRecipe`
-- [x] Task 2: `recipe-ingredients-table.component.ts` â€” add `protected getDisplayName(group: FormGroup): string` method in GETTERS section
-- [x] Task 3: `recipe-ingredients-table.component.html` â€” replace `{{ group.get('name_hebrew')?.value }}` with `{{ getDisplayName(group) }}`
-
 ---
-
-## ðŸ”´ Quick Fixes
-
-### Plan 134 â€” Translation and confirmation modals unified (`plans/134-translation-confirmation-modals-unified.plan.md`) [TRIAGED 2026-04-02]
-
-- [x] Other entry points: align with resolve first â†’ modal if needed â†’ already in parameter (metadata-manager, preparation-*, menu-section-categories, add-equipment-modal, recipe-workflow, add-supplier-flow)
 
 ### Plan 074 â€” Tech debt remediation (`plans/074-tech-debt-remediation.plan.md`) [TRIAGED 2026-04-02]
 
 - [x] Refactor menu-intelligence.page.scss into partials (deferred)
 
-### Plan 167 â€” Category/unit add-new audit (`plans/167-category-unit-add-new-audit.plan.md`) [TRIAGED 2026-04-02]
-- [x] Optional: Cook-view â€œadd new unitâ€ so user can add from there
-
 ---
-
-## ðŸŸ¡ Medium
-
-### Plan 182 + 163 â€” Visual & UX fix backlog (`plans/182-tofix-verification-undone.plan.md`, `plans/163-tofix-audit-prd.plan.md`)
-- [x] Recipe builder: remove up/down arrows in section titles â€” no such buttons exist (N/A)
-- [x] Recipe builder: clicking a card header collapses/expands it â€” already implemented on all 3 sections
-- [x] Logistics: chip labels get cut off â€” fixed flex-wrap + flex-shrink + fit-content
-- [x] Activity: â€œwhat changedâ€ tag should show the old and new value (e.g. â€œUnit: kg â†’ gâ€) â€” already done
-- [x] Add new category modal: focus flows Hebrew first â€” inline inputs, no focus gap found (N/A)
-- [x] App-wide: audit every category/unit dropdown â€” add â€œadd newâ€ option â€” added NEW_UNIT sentinel to product-form UOM select
-- [x] Labels: you should be able to select existing labels â€” already works via app-custom-multi-select
-- [x] Menu library: keyboard navigation â€” app-custom-select already has built-in keyboard nav
-- [x] Lists: sidebar aligns correctly to the list container on smaller screens (768px) â€” already fixed on branch
-
----
-
-## ðŸŸ  Large Refactors
 
 ### Plan 089 â€” Menu Intelligence Upgrade (`plans/089-menu-intelligence-upgrade.plan.md`)
 
@@ -272,6 +208,8 @@
 - [x] E2: Create floating FAB on right side with pop-up buttons for toolbar and back navigation
 - [x] Dictionary: Add new Hebrew dictionary keys for new labels
 
+---
+
 ### Plan 081 â€” toFix Detailed Plans (`plans/081-tofix-detailed-plans.plan.md`)
 
 - [ ] Section 1 â€” Sign-in / Sign-up: auto-focus, dev user dropdown, Enter-to-submit, field-level errors
@@ -284,12 +222,16 @@
 - [ ] Section 8 â€” Add-equipment modal: single-step category creation quick-save flow
 - [ ] Section 9 â€” Labels: selectable existing labels in delete UI and recipe builder
 
+---
+
 ### Plan 133 â€” List quick-edit inline (`plans/unused-133-list-quick-edit-inline.plan.md`)
 
 - [ ] Inventory product list: editable cells (supplier, category, unit); value click â†’ inline dropdown; row click â†’ edit page
 - [ ] Supplier list: keep panel on row click; add quick-edit for chosen cells (e.g. contact, delivery, min order)
 - [ ] Keyboard and a11y: focus model, focus trap in inline control, Esc/Enter, return focus, screen reader labels (partial: aria-label on buttons)
 - [ ] Venue list / Recipe-book list: optional quick-edit columns as needed
+
+---
 
 ### Plan 072 â€” Robust login, app-wide logging, security (`plans/072-robust-login-app-logging-security.plan.md`)
 
@@ -302,17 +244,23 @@
 
 ## ðŸ”µ Infrastructure / Planning
 
+---
+
 ### Plan 222 â€” Dev Machine Open Ports Security Hardening (`plans/222-dev-machine-open-ports-security.plan.md`)
 - [ ] Disable Dell SupportAssist service in `services.msc` â€” verify port 9012 closed
 - [ ] Identify and resolve port 5700 (VMware/Hyper-V/Windows component)
 - [ ] Verify MongoDB auth enabled in `mongod.cfg` â€” confirm `--auth` flag present
 - [ ] Evaluate SMB usage â€” disable ports 445/139 if not file-sharing on LAN
 
+---
+
 ### Plan 200 â€” Lite skills refactor validation report (`plans/200-lite-skills-refactor-validation-report.plan.md`)
 - [ ] Pre-write verification: content check (`toBe/skills/commit-to-github.md`, `toBe/agents/breadcrumb-navigator.md`); Master Â§3â€“5 completeness in `toBe/copilot-instructions.md`; confirm no legacy `quick-chat` skill
 - [ ] Write `notes/comparative-analysis-report.md` (15 sections + appendices Aâ€“C per plan)
 - [ ] Cross-check Go/No-Go Â§9 vs Plan 198; reference Plans 198 and 199 in report
 - [ ] Post-write: tables render, Appendix B sums match session headline, internal consistency pass
+
+---
 
 ### Plan 199 â€” Lite refactor workflow comparative analysis (`plans/199-lite-refactor-workflow-comparative-analysis.plan.md`)
 - [ ] Policy: Treat Master (`copilot-instructions.md`) as OS; agents/skills as thin apps â€” no duplicate rule blocks in agent files
@@ -321,12 +269,16 @@
 - [ ] Track context-load goal (~73% reduction vs Legacy) when editing agent/skill bundles â€” avoid re-bloating personas
 - [ ] Cross-link: execution work continues under Plan 198 (promote `.claude/toBe/`, Â§0.5 Model Routing, security migration QA)
 
+---
+
 ### Plan 196 â€” Commit flow speed audit (`plans/196-commit-flow-speed-audit.plan.md`)
 - [ ] Add approved-tree drift check before any git write and auto-replan logic
 - [ ] Rebase/sync branch before commit plan generation when behind origin/main
 - [ ] Create conflict-resolution policy for known files with auto/manual boundaries
 - [ ] Split PR merge and remote branch deletion into explicit verified steps
 - [ ] Record per-phase timing metrics for each commit workflow run
+
+---
 
 ### Plan 122 â€” AI Chatbot Gemini scope (`plans/122-ai-chatbot-gemini-scope.plan.md`)
 
@@ -354,9 +306,13 @@
 - [ ] **Plan 018 â€” Backend API Preparation**: Formalize `IStorageAdapter`, document REST API contract, audit adapter compliance.
 - [ ] **Deployment Pipeline**: Validate and activate GitHub Actions workflow for GitHub Pages.
 
+---
+
 ### Plan 060 â€” Data persistence and backup (`plans/060-data-persistence-and-backup.plan.md`)
 
 - [ ] Optional: debounced auto-download per category for physical JSON on every change.
+
+---
 
 ### Plan 059 â€” Unify design engine (`plans/059-unify-design-engine.plan.md`)
 
@@ -365,9 +321,23 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 - [ ] Phase 9: Deferred â€” grid header/cell too coupled to display:contents layout
 - [ ] Phase 10: Deferred â€” breakpoint/transition standardization for follow-up
 
-### Plan 047 â€” Recipe Builder Polish (`plans/047-recipe-builder-polish.plan.md`)
+---
 
-- [x] B3: Volume conversion fix (unverifiable without spec; needs acceptance criteria)
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
 
 ---
 

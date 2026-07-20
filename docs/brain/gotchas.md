@@ -91,3 +91,43 @@ Running list. Each entry: what hurt / why the obvious fix is wrong / what to do 
 **Why the obvious fix is wrong:** Dropping signal capture entirely loses the Brief 1 goal (preserve open blockers across `/compact`). Matching only “FAIL” with `\b` still hits `PASS/FAIL` because `/` is a word boundary.
 
 **What to do instead:** Anchor real tool tokens (`UPGRADE_AVAILABLE`, `ROUTING_DECLINED`, `BLOCKED`); require `Verify:` + whitespace; require `FAIL` with a non-`/` predecessor; truncate each match (`cut -c1-300`) so JSONL lines cannot flood `todo.md`.
+
+---
+
+## Existing save-plan mitigations still let a plan skip plans/
+
+**What hurt:** The gotcha above ("Pasted plans that never hit `plans/`") already
+documents save-plan + `plan-write-guard.sh` + the Cursor `.mdc` rule as the fix —
+yet Plan 285 (AI Menu Phase 1) still executed end-to-end with ~22 `.claude/todo.md`
+items marked `[x]` and no `plans/285-*.plan.md` ever created. The mitigations
+existed on paper and were still bypassed, silently, with no error.
+
+**Why the obvious fix is wrong:** Assuming "the gate exists" means "the gate
+caught it" ignores two concrete bypass paths neither gate covers: (1)
+`.claude/commands/plan.md` / `feat.md` / `review-it.md` documented a second,
+ungated plan-path convention (`plans/[feature]_v[N].md`) that
+`plan-name-similarity.mjs` and `plan-write-guard.sh` never recognized — a plan
+saved under that name skips both checks; (2) `brief-detection`'s 3-marker H2
+threshold also matches a genuine Plan Contract (Milestones + Atomic Sub-tasks),
+and its execute-as-is route goes straight to `/feat` without ever mentioning
+save-plan.
+
+**What to do instead:** Treat "the skill exists" as necessary but not
+sufficient — verify with a ledger-integrity check
+(`scripts/plan-ledger-check.mjs`, wired into `.husky/pre-commit` and `/ship`
+Phase 1) that every plan path referenced in `.claude/todo.md` / session briefs
+actually resolves on disk. Collapse to one plan-path convention
+(`plans/NNN-slug.plan.md` only). Make `brief-detection` check for a
+Milestones/Atomic-Sub-tasks shape *before* offering the brief a/b/c gate,
+routing Plan-Contract-shaped pastes to save-plan first. See
+`plans/291-plan-persistence-brief-sync-hardening.plan.md`.
+
+---
+
+## Orphaned instruction file looks wired but nothing loads it
+
+**What hurt:** `.claude/instructions/validation-checklist.md` fully specified HOW TO VALIDATE, but it was only `@`-included from `execute-it.md`. After that command was removed, agents still had JOB DONE close-out and looked compliant — Humans never got click-test bullets.
+
+**Why the obvious fix is wrong:** Adding more “remember to show a checklist” reminders (or leaving the orphan file intact) does not restore enforcement. Agents follow hard gates they already load (`job-validation`, ship, done), not orphaned instruction paths.
+
+**What to do instead:** Move the live rules onto `docs/agent/job-validation.md` and the close-out templates agents must print; leave the old path as a pointer stub. Audit `@include` / skill triggers whenever deleting a command that was the only loader. See [[how-to-validate-on-job-gate]].

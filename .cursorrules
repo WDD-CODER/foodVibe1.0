@@ -38,8 +38,10 @@ When the Human pastes a big plan / Plan Contract (or says save/execute the plan)
 ## Execution protocol
 1. Execute ONE milestone at a time from the named plan file, then STOP.
 2. Job validation: see AGENTS.md **Job validation** + `docs/agent/job-validation.md`. Never
-   self-mark. On ship Y: mark → stage with job → commit → push. On chat finish: JOB DONE
-   close-out ask; on Human `done` mark `[x]`. `/done` for chat-only path.
+   self-mark. On ship Y: mark → stage with job → commit → push. On chat finish / milestone
+   STOP: show HOW TO VALIDATE bullets then the JOB DONE close-out ask; on Human `done`
+   mark `[x]`. `/done` for chat-only path. Never ask for validation without HOW TO VALIDATE
+   above it (or a one-line no-user-visible-effect note).
 3. NEVER start the next milestone without explicit instruction.
 4. NEVER modify architecture, models, or public interfaces beyond what the plan
    declares (unless Human explicitly asked you to plan/architect that change).
@@ -53,7 +55,8 @@ When the Human pastes a big plan / Plan Contract (or says save/execute the plan)
 ## Handoff
 After every milestone, write an execution summary to /sessions/[today ISO date].md:
 milestone ID, files touched, decisions made, anything the Reviewer should scrutinize,
-lint/test status. Then STOP.
+lint/test status. End the chat turn with HOW TO VALIDATE + JOB DONE per
+`docs/agent/job-validation.md`. Then STOP.
 
 ## Security
 Secrets live in .env only. Never read, print, hardcode, or commit them. Never weaken
