@@ -1,6 +1,6 @@
 # Sweep Stale Todos
 
-Scan `todo.md` for plan sections where all items are `[x]` and no safety exceptions apply. Propose archival of qualifying sections to `todo-archive.md`.
+Scan `todo.md` for plan sections where all items are `[x]` and no safety exceptions apply. Archive qualifying sections via `node scripts/todo-archive.mjs` into numbered `.claude/todo-archive/NNN.md` volumes (max 300 lines).
 
 ## When to Run
 
@@ -29,8 +29,16 @@ gh pr list --state merged --search "<plan-keyword>" # merged PR
 ```
 If **neither** returns results → flag as "unverifiable" and exclude from the archive proposal. Add to **Sections Kept** with reason: "all [x] but no git verification found — manual review needed."
 
-### Step 4 — Archive immediately
-Move each qualifying section (heading + all items) from `todo.md` to `todo-archive.md`, appended under `## Done`. No confirmation gate — all-`[x]` sections that passed git verification are archived on the spot.
+### Step 4 — Archive via script
+If Step 3 left any **unverifiable** candidates, stop and report them under Sections Kept — do **not** run the script until the Human confirms.
+
+Otherwise run:
+
+```bash
+node scripts/todo-archive.mjs
+```
+
+The script moves every all-`[x]` section (skipping deferred/skipped/`[~]`) from `todo.md` into the latest `.claude/todo-archive/NNN.md` volume, rolling to `NNN+1` when an append would exceed 300 lines. No hand-edits to a monolithic `todo-archive.md`.
 
 ### Step 6 — Report
 

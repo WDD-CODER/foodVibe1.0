@@ -163,8 +163,9 @@ When matching todos are marked `[x]` and a plan section is **fully** done:
 1. Run `node scripts/todo-archive.mjs` (ship / done / sweep do this — do not hand-append).
 2. Fully-done sections leave `.claude/todo.md` and land in `.claude/todo-archive/NNN.md`
    (max **300 lines** per volume; rolls to the next number).
-3. Keep `.claude/todo.md` **open-work-only**. The Plan Index stays slim: Active / Planned /
-   Partial rows only; Done rows live in `.claude/todo-archive/INDEX.md` (after migrate).
+3. Keep `.claude/todo.md` **open-work-only** (`### Plan` checkbox sections). No Plan Index
+   table in this file — Done history is `.claude/todo-archive/` (+ `INDEX.md` for old
+   catalog rows); all plan files live under `plans/`.
 4. Skip archiving sections that contain `(deferred)`, `(skipped)`, or `[~]`.
 5. Duplicate-name checks (`scripts/plan-name-similarity.mjs`) also scan the **last two**
    archive volumes — agents must not reload the full archive history on every save-plan.
