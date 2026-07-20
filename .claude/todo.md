@@ -17,10 +17,10 @@
 
 ## Angular 22 Migration (deferred)
 
-- Remaining root `npm audit --audit-level=high` findings (Angular/* cluster + related CLI/build toolchain highs: vite, piscina, http-proxy-middleware, serialize-javascript) are blocked on the Angular 22 major upgrade.
+- Remaining `npm audit --omit=dev --audit-level=high` findings are all `@angular/*` (XSS in template/attribute namespace + two-way binding sanitization, DoS via OOM in formatDate/digitsInfo, HttpTransferCache cache-key/info-leak) — blocked on the Angular 22 major upgrade.
 - Do **not** run `npm audit fix --force`.
-- Server `npm audit` is clean (0 vulnerabilities).
-- CI temporarily uses `--audit-level=critical` in `.github/workflows/security.yml` until migration; restore `--audit-level=high` afterward.
+- Server `npm audit --omit=dev` is clean (0 vulnerabilities).
+- CI (`.github/workflows/security.yml`) runs `npm audit --omit=dev --audit-level=critical`. `--omit=dev` is permanent (devDependency build-tooling churn — Angular CLI, vite, webpack-dev-server — is noise for a never-shipped tree, not app risk); restore `--audit-level=high` on top of `--omit=dev` after the migration clears the `@angular/*` findings above. See `docs/brain/decisions/0005-scope-npm-audit-to-production-deps.md`.
 
 ---
 
