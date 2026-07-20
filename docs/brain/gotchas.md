@@ -134,6 +134,45 @@ routing Plan-Contract-shaped pastes to save-plan first. See
 
 ---
 
+## Same-directory concurrent session breaks the plans/ numbering scan
+
+**What hurt:** Saving Plan 294 needed two renumbers (292 → 293 → 294) within
+minutes, and separately, five rounds of unrelated docs edits (the auto-write
+brain-capture policy change) kept getting silently reverted mid-session.
+`ls plans/` / `plan-name-similarity.mjs` were run once early, then the actual
+`Write`/`Edit` calls happened several tool calls later. A concurrent Cursor
+session on the *same* branch, in the *same* (non-worktree) working directory,
+landed its own commits and full-file rewrites in that gap — including
+branch switches that changed HEAD out from under an in-progress edit.
+`/ship` Phase 3's overlap check only runs when `git worktree list` shows more
+than one worktree — this was a single working directory the whole time, so
+the check that exists for exactly this failure mode never fired.
+
+**Why the obvious fix is wrong:** Assuming "I already scanned this
+conversation" is safe ignores that the scan/read and the `Write`/`Edit`
+aren't atomic — any gap (including waiting on a Human reply) is a window for
+another session to land files, rewrite a whole file from a stale read, or
+switch branches. Re-running `plan-name-similarity.mjs` doesn't catch a
+same-number-different-topic collision either — it only compares *titles*.
+Retrying an `Edit` immediately after a revert doesn't help either if the
+other session is mid-way through its own multi-file batch — it just races
+again on the next round.
+
+**What to do instead:** Re-list `plans/` (or re-`git log -3 --oneline`)
+immediately before a `Write`/`Edit` on a shared file, not only once earlier
+in the conversation — treat any gap of more than a couple tool calls (or a
+Human-reply wait) as stale. Since `git worktree list` doesn't detect
+same-directory concurrent sessions, don't rely on it as the sole staleness
+trigger. When repeated reverts hit the same shared files, stop making
+one-file-at-a-time edits with round-trips in between — batch every remaining
+edit into a single parallel tool-call message, then commit immediately, to
+minimize the window another session has to land a conflicting full-file
+write. Related to [[0001-lean-native-workflow]] and the cross-worktree NNN
+hardening in `plans/291-plan-persistence-brief-sync-hardening.plan.md` M6,
+which covers stale *origin* state but not same-directory local races.
+
+---
+
 ## Todo archive footer wording and Plan Index placement
 
 **What hurt:** Fully-done `### Plan` sections sitting *below* `## Plan Index` were invisible to `scripts/todo-archive.mjs` (footer cut-off), so dead weight stayed in `todo.md`. Separately, changing the `## Done` stub text away from a recognized phrase caused the stub to be swallowed into the last archived plan section. Keeping a large Plan Index table in `todo.md` also re-bloated the open-work file after Done rows were moved out.

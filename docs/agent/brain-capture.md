@@ -17,6 +17,14 @@ Goal: every proposal extracts the **judgment that made the session expensive**, 
 4. **Draft the full file body** from the matching template: `docs/brain/patterns/_TEMPLATE.md`, `docs/brain/decisions/_TEMPLATE.md`, or the gotcha shape stated at the top of `docs/brain/gotchas.md`. Match the length of the good examples ([[defer-singleton-data-ensureLoaded]], [[tombstone-soft-delete]]) — one screen or less, never a session dump. Cross-link related entries with `[[wiki-links]]`.
 5. **Write a one-line title** for the banner. The title names the entry; it is **never** the entry.
 
+## Reuse tracking (session logs)
+
+Whenever a session's decision was actually shaped by an existing `docs/brain/` entry — a specific entry that changed what the agent did, not merely "this area is covered by brain" — add one line under `### Decisions` in that day's `sessions/YYYY-MM-DD.md`:
+
+`Informed by: [[entry-name]]`
+
+Cite only entries that changed a choice. Most sessions will have none, and that is expected. Forward-only: do not rewrite past session logs to backfill citations. A future audit can `grep -r "Informed by:" sessions/` instead of re-deriving reuse from commit archaeology.
+
 ## Usefulness gate (all must pass, or expand / skip)
 
 - [ ] Would this change a future agent's wrong default? If it only describes what we did, `sessions/` already holds it — skip.
@@ -34,7 +42,7 @@ Goal: every proposal extracts the **judgment that made the session expensive**, 
 - Two entries in one proposal are allowed and often right (pattern + paired gotcha): one banner line + one fenced draft each.
 - `brain approve` writes the fenced body **verbatim** (append to `gotchas.md`, new file under `patterns/`, next-numbered file under `decisions/`). `brain edit …` revises the draft and re-shows it.
 
-## Constraints (unchanged)
+## Constraints (updated 2026-07-20 — see [[0006-auto-write-brain-capture-by-default]])
 
-- **Never silent-write** — confirm-to-write per [[0003-auto-evoke-brain-on-pr]] always applies.
+- **Auto-writes by default, opt-out per ship.** The full draft is always shown before it lands — that hasn't changed — but it no longer needs its own separate `brain approve` reply. It writes as part of the reply that closes the surrounding gate (`Y` at `/ship` Phase 4; `merge` / `later` / `open-pr-only` at the Post-push Merge Gate). Say `no brain` / `skip brain` alongside that reply to opt out for this ship, or `brain edit …` to revise first. This supersedes ADR 0003's confirm-to-write clause only — auto-evoke and the ADR 0004 usefulness gate below are unchanged.
 - Don't move coding rules into the brain; don't duplicate plan Done-when lists or session logs.

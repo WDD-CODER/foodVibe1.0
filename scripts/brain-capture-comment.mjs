@@ -51,7 +51,7 @@ const findingsBlock =
 const body = `<!-- brain-capture-bot -->
 ## Brain capture reminder
 
-Auto-evoke (confirm-to-write). Drafting stays with the agent session — this comment is visibility only. See \`docs/brain/index.md\` and ADR \`docs/brain/decisions/0003-auto-evoke-brain-on-pr.md\`.
+Auto-evoke, auto-write on the gate reply. Drafting stays with the agent session — this comment is visibility only. See \`docs/brain/index.md\` and ADR \`docs/brain/decisions/0006-auto-write-brain-capture-by-default.md\` (supersedes the confirm-to-write clause of \`0003-auto-evoke-brain-on-pr.md\`).
 
 **PR:** ${title}
 
@@ -59,15 +59,16 @@ Auto-evoke (confirm-to-write). Drafting stays with the agent session — this co
 
 - [ ] Durable learning from this PR? (gotcha / pattern / decision / **none**)
 - [ ] If yes: agent drafted path + title **plus full draft body** in Merge Gate (per \`docs/agent/brain-capture.md\` — a title-only proposal is invalid)
-- [ ] Confirm write: \`brain approve\` — or skip: \`brain skip\` / \`brain:none\` / label \`brain:none\`
-- [ ] Or revise: \`brain edit …\` then re-approve
+- [ ] Draft shown → **writes automatically** with the reply that closes the gate (\`merge\` / \`later\` / \`open-pr-only\`)
+- [ ] To opt out for this PR: reply \`no brain\` / \`skip brain\` alongside the gate reply
+- [ ] Or revise first: \`brain edit …\`
 
 ### Heuristic changed files (not a draft)
 
 ${fileList}
 
 ${findingsBlock}
-**Never silent-write** to \`docs/brain/\`. Reply in chat or ask the agent after Merge Gate.
+Draft is always shown before it writes — reply \`no brain\` / \`skip brain\` in chat to opt out, or ask the agent after Merge Gate.
 `
 
 process.stdout.write(body)

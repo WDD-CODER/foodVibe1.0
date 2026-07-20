@@ -69,7 +69,7 @@ Never skip with “Contractor does not mark.” Detail: `docs/agent/job-validati
 | User says "setup worktree" / "new worktree" (on-demand only) | `.claude/skills/worktree-setup/SKILL.md` |
 | List available skills | `.claude/commands/skills.md` |
 | List available commands | `.claude/commands/commands.md` |
-| Finishing a feature | `/ship` (runs review automatically; `--skip-review "reason"` for trivial changes; commits are PR'd only when feature-complete; milestone commits push without a PR). After any successful push off `main`, the Post-push Merge Gate in `docs/agent/standards-git.md` is mandatory — including Brain capture proposal (not `/ship`-only; confirm-to-write). |
+| Finishing a feature | `/ship` (runs review automatically; `--skip-review "reason"` for trivial changes; commits are PR'd only when feature-complete; milestone commits push without a PR). After any successful push off `main`, the Post-push Merge Gate in `docs/agent/standards-git.md` is mandatory — including Brain capture proposal (not `/ship`-only; auto-writes on the gate reply, see `docs/brain/decisions/0006-auto-write-brain-capture-by-default.md`). |
 | Agent finished a job / user says done, mark done, verified, approved (no ship) | `docs/agent/job-validation.md` + `/done` — close-out ask, then mark todos on Human confirm |
 | Job validation / when to mark todos `[x]` | `docs/agent/job-validation.md` |
 | PR checks failing | Run `docs/agent/pr-check-fix-loop.md` (via `/fix-pr-checks` in either tool). Bounded: 2 rounds max, security-scan findings always surface to the user. |
@@ -86,7 +86,7 @@ Never skip with “Contractor does not mark.” Detail: `docs/agent/job-validati
 | `docs/agent/standards-security.md` | Auth, guards, interceptors, storage, crypto, security reviews, go-live |
 | `docs/agent/standards-domain.md` | Translation keys, Hebrew canonical values, Lucide icons, ingredient ledger |
 | `docs/agent/standards-backend.md` | New entity types, persisted fields, CRUD/data services, backend API contract |
-| `docs/agent/standards-git.md` | Committing, pushing, PRs, branch renames, any git write; includes mandatory Post-push Merge Gate + Brain capture confirm-to-write |
+| `docs/agent/standards-git.md` | Committing, pushing, PRs, branch renames, any git write; includes mandatory Post-push Merge Gate + Brain capture (auto-write on gate reply, opt out with `no brain`) |
 | `docs/agent/brain-capture.md` | Proposing or writing any `docs/brain/` entry — extraction procedure, required shapes, usefulness gate, proposal format |
 | `docs/agent/job-validation.md` | When a job is done; Human validation; close-out ask; marking todos `[x]` (ship Y or chat `done`) |
 
