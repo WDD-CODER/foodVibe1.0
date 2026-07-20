@@ -2,27 +2,10 @@
 # pre-compact-reminder.sh — PreCompact hook
 # Fires when context is about to be compressed. Reminds the AI to save
 # critical state before earlier conversation details are lost.
-# Also records the transcript size at compact time so context-monitor.sh
-# can measure delta-since-last-compact instead of total file size, preventing
-# false "context full" warnings immediately after /compact.
+# Pairs with pre-compact-todo-append.sh (todo dump + unresolved signal grep).
 #
 # Hook type: PreCompact (matcher: "")
 # Timeout: 5s
-
-INPUT=$(cat)
-
-# Record transcript size at compact time.
-# PreCompact hooks may not receive transcript_path in their own input, so we
-# first try parsing it from INPUT, then fall back to the path saved by
-# context-monitor.sh (which runs on every PostToolUse and always has it).
-TRANSCRIPT=$(echo "$INPUT" | sed -n 's/.*"transcript_path" *: *"\([^"]*\)".*/\1/p' | head -1 | tr '\\\\' '/' 2>/dev/null)
-if [ -z "$TRANSCRIPT" ] || [ ! -f "$TRANSCRIPT" ]; then
-  TRANSCRIPT=$(cat /tmp/claude-transcript-path 2>/dev/null)
-fi
-if [ -n "$TRANSCRIPT" ] && [ -f "$TRANSCRIPT" ]; then
-  SIZE=$(wc -c < "$TRANSCRIPT" 2>/dev/null || echo 0)
-  echo "$SIZE" > /tmp/claude-compact-baseline
-fi
 
 cat <<'EOF'
 {

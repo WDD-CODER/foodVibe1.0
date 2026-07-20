@@ -15,12 +15,6 @@
 # Hook type: SessionStart (matcher: "startup")
 # Timeout: 10s
 
-# Signal context-monitor.sh to reset its compact baseline.
-# Covers the case where /clear triggers SessionStart but reuses the same
-# transcript file — without this, SIZE would measure from the old baseline
-# and immediately fire false "context full" warnings.
-touch /tmp/claude-context-reset
-
 if [ -n "$SESSION_STATE_PATH" ]; then
   SESSION_STATE="$SESSION_STATE_PATH"
   SAVE_PATH="$SESSION_STATE_PATH"

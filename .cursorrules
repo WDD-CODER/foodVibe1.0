@@ -24,6 +24,17 @@ Hard rules, non-negotiable:
 - Gemini calls proxied through server/routes/ai.js only — never a client-side key.
 - Never write on `main`. Stay on the feature/fix/chore branch.
 
+## Plan Contracts (before any brief)
+When the Human pastes a big plan / Plan Contract (or says save/execute the plan):
+1. Follow `.claude/skills/save-plan/SKILL.md` before milestone work.
+2. Run `node scripts/plan-name-similarity.mjs --name="<Plan Display Name>"`.
+3. No similar hits → save as next `NNN` (no rewrite prompt).
+4. Similar hits → show path + title + short why/excerpt; ask rewrite existing /
+   save as new / cancel. On save-as-new after a hit, write `.claude/.plan-write-ack`
+   then create the file.
+5. While executing briefs: any new mid-flight task goes into the parent plan’s
+   Atomic Sub-tasks and `.claude/todo.md` before you do the work.
+
 ## Execution protocol
 1. Execute ONE milestone at a time from the named plan file, then STOP.
 2. Job validation: see AGENTS.md **Job validation** + `docs/agent/job-validation.md`. Never

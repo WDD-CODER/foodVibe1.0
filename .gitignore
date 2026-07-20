@@ -49,6 +49,7 @@ testem.log
 # Claude Code local config (never commit)
 .claude/settings.local.json
 .claude/worktrees/
+.claude/.plan-write-ack
 
 # Environment & secrets (never commit)
 .env
