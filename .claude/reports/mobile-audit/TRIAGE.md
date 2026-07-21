@@ -171,26 +171,28 @@ Plans **276–283**: implementation largely present in tree (`a9c56f7`, Plan 280
 ---
 
 ### Cluster 8 — dropdown-z-index
+**Status:** partial ✓ resolved (plan 282) — ChipSearchDropdown path (inventory category close-on-select, Escape, mobile `40vh` scroll); DEF-IE-02 validator. Labels (`app-custom-multi-select`), recipe-book filters, and stacked `c-dropdown` minors remain open / out of plan 282 scope.  
 **Signature:** Dropdown panels (ng-select, custom dropdowns): don't dismiss on Escape, don't flip upward at viewport bottom, and allow concurrent open state with no collision guard — one instance causes data integrity risk  
 **Severity mix:** critical 1, major 3, minor 4  
 **Affected flows:** inventory-edit-product, recipe-builder-new-dish, recipe-builder-new-prep, inventory-add-product, recipe-builder-edit, recipe-book-list  
 **Suspect code:**
 - `src/styles.scss` — global `.ng-dropdown-panel` / `.c-dropdown` Escape/dismiss logic
 - `src/app/pages/inventory/` SCSS + TS — category dropdown close-on-select, flip-up logic
+- `src/app/shared/chip-search-dropdown/` — actual fix surface (plan 282; not ng-select)
 - `src/app/pages/recipe-builder/` SCSS — labels dropdown
 
 **Defects:**
 
 | Flow | Severity | Element | Summary | Screenshot |
 |---|---|---|---|---|
-| inventory-edit-product | critical | category dropdown `.ng-dropdown-panel` | Dropdown stays open after selection; second category tag added (implicit multi-select); 3rd purchase-option row inaccessible behind open panel | [→](./inventory-edit-product/shots/03-category-change.png) |
-| recipe-builder-new-dish | major | תוויות labels `.ng-dropdown-panel` | Dropdown remains open after Escape; blocks אינדקס מרכיבים section | [→](./recipe-builder-new-dish/shots/07-labels-p4.png) |
-| recipe-builder-new-prep | major | תוויות labels dropdown | Dropdown opens over ingredient table — no backdrop or scroll boundary | [→](./recipe-builder-new-prep/shots/08-labels-p4.png) |
-| inventory-edit-product | major | category dropdown | List clips at viewport bottom — "הוסף" and last 3 options hidden; no upward-flip | [→](./inventory-edit-product/shots/03-category-change.png) |
-| inventory-add-product | minor | category dropdown | Opens downward and covers "יחידה בסיס" input row above | [→](./inventory-add-product/shots/04b-both-dropdowns.png) |
-| inventory-add-product | minor | all dropdowns | Escape key unreliable for dismiss (cross-page) | — |
-| recipe-builder-edit | minor | yield unit + ingredient unit dropdowns | Two `c-dropdown` elements at Y=702 and Y=767 — ambiguous stacked selection | [→](./recipe-builder-edit/shots/04-yield-unit-p4.png) |
-| recipe-book-list | minor | תאריך + סוג filter dropdowns | Both remain expanded simultaneously — combined height pushes remaining filters off-screen | [→](./recipe-book-list/shots/05-two-dropdowns.png) |
+| inventory-edit-product | critical | category dropdown `.ng-dropdown-panel` | ✓ resolved (plan 282) — ChipSearchDropdown closes on select (`closeDropdown()`); multi-category chips remain intentional | [→](./inventory-edit-product/shots/03-category-change.png) |
+| recipe-builder-new-dish | major | תוויות labels `.ng-dropdown-panel` | Open — labels use `app-custom-multi-select`, not ChipSearchDropdown (plan 282 Escape path) | [→](./recipe-builder-new-dish/shots/07-labels-p4.png) |
+| recipe-builder-new-prep | major | תוויות labels dropdown | Open — same labels control / overlay boundary (out of plan 282 ChipSearch fix) | [→](./recipe-builder-new-prep/shots/08-labels-p4.png) |
+| inventory-edit-product | major | category dropdown | ✓ resolved (plan 282) — mobile `max-block-size: 40vh; overflow-y: auto` (scroll; no upward-flip) | [→](./inventory-edit-product/shots/03-category-change.png) |
+| inventory-add-product | minor | category dropdown | ✓ mitigated (plan 282) — same `40vh` scroll panel; covers base-unit row less often | [→](./inventory-add-product/shots/04b-both-dropdowns.png) |
+| inventory-add-product | minor | all dropdowns | ✓ resolved (plan 282) for ChipSearchDropdown Escape; other dropdown types not covered | — |
+| recipe-builder-edit | minor | yield unit + ingredient unit dropdowns | Deferred — out of plan 282 scope | [→](./recipe-builder-edit/shots/04-yield-unit-p4.png) |
+| recipe-book-list | minor | תאריך + סוג filter dropdowns | Deferred — out of plan 282 scope (plan Notes) | [→](./recipe-book-list/shots/05-two-dropdowns.png) |
 
 ---
 
@@ -261,7 +263,7 @@ Plans **276–283**: implementation largely present in tree (`a9c56f7`, Plan 280
 
 | Flow | Severity | Element | Summary | Screenshot |
 |---|---|---|---|---|
-| inventory-edit-product | critical | duplicate-name validator | Stale validation "כבר קיים חומר גלם בשם זה" fires on load for existing product (name unchanged) | [→](./inventory-edit-product/shots/03-category-change.png) |
+| inventory-edit-product | critical | duplicate-name validator | ✓ resolved (plan 282) — `duplicateNameValidator` excludes current product `_id` | [→](./inventory-edit-product/shots/03-category-change.png) |
 | suppliers-add | major | `<label>min_order</label>` | Raw i18n key `min_order` displayed instead of Hebrew label | [→](./suppliers-add/shots/04-form-filled.png) |
 | menu-intelligence-event | major | toolbar / Gemini panel buttons | "פתח סרגל כלים", "בונה מתכונים", "פעולות מהירות" present in ARIA but clicking opens no panel — Gemini generation unreachable on mobile | [→](./menu-intelligence-event/shots/06-gemini.png) |
 | metadata-manager-all-tabs | major | `/metadata-manager` route | Route silently redirects to `/dashboard?tab=metadata` with no tab UI shown | [→](./metadata-manager-all-tabs/shots/01-baseline.png) |
@@ -326,9 +328,9 @@ Plans **276–283**: implementation largely present in tree (`a9c56f7`, Plan 280
 | sticky-header-safe-zone | [plans/279-mobile-audit-sticky-header-safe-zone.plan.md](../../plans/279-mobile-audit-sticky-header-safe-zone.plan.md) |
 | rtl-layout | [plans/280-mobile-audit-rtl-layout.plan.md](../../plans/280-mobile-audit-rtl-layout.plan.md) |
 | input-overflow | [plans/281-mobile-audit-input-overflow.plan.md](../../plans/281-mobile-audit-input-overflow.plan.md) |
-| dropdown-z-index | [plans/282-mobile-audit-dropdown-z-index.plan.md](../../plans/282-mobile-audit-dropdown-z-index.plan.md) |
+| dropdown-z-index | partial ✓ — plan 282 (ChipSearch / inventory + DEF-IE-02); labels + filter minors still open — [plans/282-mobile-audit-dropdown-z-index.plan.md](../../plans/282-mobile-audit-dropdown-z-index.plan.md) |
 | touch-target-size | [plans/283-mobile-audit-touch-target-size.plan.md](../../plans/283-mobile-audit-touch-target-size.plan.md) |
 | approve-stamp-overflow | deferred — see above |
 | floating-avatar | deferred — pending plan 279 |
 | modal-viewport-fit | deferred — pending re-audit |
-| single-flow-bug | partial — DEF-IE-02 folded into plan 282; majors/minors deferred above |
+| single-flow-bug | partial — DEF-IE-02 ✓ resolved (plan 282); majors/minors deferred above |
