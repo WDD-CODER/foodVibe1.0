@@ -136,7 +136,8 @@
   "enableAllProjectMcpServers": false,
   "disabledMcpjsonServers": [
     "github",
-    "context7"
+    "context7",
+    "playwright"
   ],
   "enabledPlugins": {
     "security-guidance@claude-plugins-official": true
