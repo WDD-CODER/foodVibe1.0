@@ -15,9 +15,36 @@ Invoking `/ship` authorizes commit of this chat’s files after explicit **Y** (
 
 | Flag | Behavior |
 |------|----------|
-| `/ship` | Full pipeline; wait for **Y** before commit/push |
+| `/ship` | Auto-detect lane (Phase 0), then run that lane's pipeline; wait for **Y** unless the lane is ULTRA-TRIVIAL |
+| `/ship fast` | Force FAST lane regardless of auto-classification — Human is asserting the diff is safe to skip full review/brain-mining for |
+| `/ship regular` | Force REGULAR lane regardless of auto-classification — today's full pipeline, no shortcuts |
 | `/ship --yes` | Show confirmation block then commit without waiting (still runs review unless skipped) |
 | `/ship --skip-review "reason"` | Bypass Phase 2 entirely; **reason required**; log `[review-skipped: {reason}]` in the commit message body. No silent skip. |
+
+Flags compose: `/ship fast --yes` is valid.
+
+---
+
+## Phase 0 — Lane classification (auto-detect FAST vs REGULAR)
+
+Runs first, before the build gate. This is what makes `/ship` fast for small changes without cutting corners on risky ones — it decides how much of the pipeline below actually executes, it doesn't remove any phase's *existence*.
+
+```bash
+git status --short
+git diff --stat
+git diff --cached --stat
+```
+
+Classify the this-chat diff (same file set Phase 3 will stage — working tree ∩ staged) by file count, total lines changed (insertions + deletions), and touched paths:
+
+- **SENSITIVE_PATHS** (any match forces REGULAR, no matter how small the diff): paths matching `auth|crypto|guard|interceptor|security|payment|migration|schema|\.env|server/routes|package(-lock)?\.json|\.github/workflows|\.claude/(settings|commands/ship)\.`. These are the places where a small diff can still be a big risk.
+- **ULTRA-TRIVIAL** → exactly 1 file changed, ≤10 lines changed, and the file matches `docs/session-state-.*\.md | \.claude/todo\.md | CHANGELOG\.md | docs/.*\.md` (pure handoff/doc content, nothing executable). No sensitive-path match.
+- **FAST** → ≤3 files changed, ≤40 lines changed, no sensitive-path match, and not already ULTRA-TRIVIAL.
+- **REGULAR** → everything else. This is the default whenever the diff doesn't clearly qualify — when in doubt, run the full pipeline.
+
+`/ship fast` / `/ship regular` override the classification outright (skip this Phase's logic, go straight to the forced lane). Bare `/ship` always classifies.
+
+Announce the pick before continuing, e.g. `Lane: FAST (2 files, 14 lines, no sensitive paths)` or `Lane: REGULAR (touches server/routes/ai.js)` — the Human should always know which pipeline is about to run and why, even when nothing stops for approval.
 
 ---
 
@@ -32,15 +59,21 @@ ng build
 
 ---
 
-## Phase 2 — Review (unless `--skip-review "reason"`)
+## Phase 2 — Review (unless `--skip-review "reason"`, or Lane = FAST / ULTRA-TRIVIAL)
 
+**Lane = REGULAR:**
 1. Invoke `/review` (read `.claude/commands/review.md` and execute it).
 2. On `REVIEW: PASS` → continue.
 3. On `ISSUES FOUND` → fix the listed issues → re-run `/review` **exactly once**.
 4. If still `ISSUES FOUND` → **stop**. Do not commit. Present remaining issues to the user.
 5. Retry cap is hard: one fix-and-recheck cycle only. Never loop indefinitely.
 
-If `--skip-review "reason"` was provided:
+**Lane = FAST or ULTRA-TRIVIAL:** skip the full `/review` invocation — Phase 0 already established the diff is small and touches no sensitive path, which is what `/review` would mostly be checking for anyway. Instead:
+- Run `npx eslint --fix` (cheap, already expected proactively per CLAUDE.md enforcement).
+- Read the actual diff once for obvious correctness issues (typos, wrong variable, broken import) — not a full multi-pass review, just a sanity pass.
+- Record `Review: SKIPPED (fast-lane: {n} files/{m} lines, no sensitive paths)` in the output summary and `[review-skipped: fast-lane]` in the commit body — same mechanism as manual `--skip-review`, just an auto-generated reason instead of a Human-typed one.
+
+If `--skip-review "reason"` was provided explicitly (independent of lane):
 - Skip this phase entirely.
 - Require a non-empty reason from the user.
 - Record `Review: SKIPPED ({reason})` in the output summary.
@@ -70,7 +103,13 @@ git rev-parse HEAD
 
 ## Phase 4 — Commit + push (UNCONDITIONAL approval gate)
 
-Present a visual tree, then **wait for explicit "Y"** (unless `--yes`):
+**Lane = REGULAR:** unchanged below — one Y here for commit, a separate gate at Phase 4.5 for merge.
+
+**Lane = FAST:** same tree, same required HOW TO VALIDATE section, but the single Y answers commit + push + (PR creation if feature-complete) + (merge if eligible) all at once. The Approve line accepts any Phase 4.5 reply token directly (`Y`, `merge`, `later`, `open-pr-only`, `abort`) instead of waiting for a second stop — Phase 0 already bounded the blast radius, so there's nothing a second round-trip would catch that the first one wouldn't. Phase 4.5's actions still happen, just triggered by this same answer instead of a follow-up prompt.
+
+**Lane = ULTRA-TRIVIAL:** skip the interactive gate entirely. Commit + push happen automatically (checkpoint only — by definition an ultra-trivial diff is docs/handoff-only, never feature-complete, so no PR is proposed). Immediately after acting, print the same tree block as a receipt, tagged `[auto-approved: ultra-trivial]`, so the Human sees exactly what happened and can revert via normal git tooling if it was wrong to auto-proceed. HOW TO VALIDATE becomes the one-line "no user-visible effect" form, since ultra-trivial diffs never touch application code.
+
+Present a visual tree, then **wait for explicit "Y"** (unless `--yes`, or Lane = ULTRA-TRIVIAL):
 
 ~~~text
 Branch: [branch-name]
@@ -106,7 +145,9 @@ When a brain entry is proposed, print each entry's **full draft body** in a fenc
 
 ### Brain-entry capture (no new gate)
 
-Follow `docs/agent/brain-capture.md`: run the extraction procedure (mine `sessions/YYYY-MM-DD.md` Decisions / review findings — not the diff alone), pick the artifact type(s), draft the full body per the required shape, then run the usefulness gate.
+**Lane = FAST or ULTRA-TRIVIAL:** skip the extraction/mining procedure by default — a 2-3 file, sub-40-line diff rarely produced a durable pattern/gotcha/decision worth mining `sessions/*.md` for, and that mining pass is one of the slower parts of `/ship`. Exception: run it anyway if the diff itself touches `docs/brain/**`, or the Human says "check brain" / "brain capture" in the ship-time message. Omit the brain block from the tree entirely rather than running the full procedure to conclude nothing's there.
+
+**Lane = REGULAR:** unchanged — follow `docs/agent/brain-capture.md`: run the extraction procedure (mine `sessions/YYYY-MM-DD.md` Decisions / review findings — not the diff alone), pick the artifact type(s), draft the full body per the required shape, then run the usefulness gate.
 
 - **Required shapes** — Pattern: Problem / Solution / When to use. Gotcha: What hurt / Why the obvious fix is wrong / What to do instead. Decision: Context / Decision / Consequences (ADR, next number). Templates: `docs/brain/patterns/_TEMPLATE.md`, `docs/brain/decisions/_TEMPLATE.md`.
 - **One-liner-only proposals are forbidden** — a title that restates the commit subject is not an entry. No draft body that fills the shape → nothing durable → omit the block entirely (the common case for chores).
@@ -131,7 +172,7 @@ Approve **Y** (or `--yes`) **is** Human validation of the job. Then:
 4. **`git commit`** (Conventional Commit; Cursor trailer `Co-authored-by: Cursor <cursoragent@cursor.com>` when applicable)
 5. **Session-state fold (Plan 295 — before push)** — see Phase 5 below: write stable `docs/session-state-${BRANCH}.md`, `git add` it, **`git commit --amend --no-edit`** into the ship commit (only because this commit is ours and **not yet pushed**). Never leave session-state dirty after ship.
 6. Rename branch if approved
-7. Push only if Human asked (“push” / “ship and push”): `git push -u origin HEAD`
+7. Push only if Human asked (“push” / “ship and push”): `git push -u origin HEAD`. **Lane = FAST / ULTRA-TRIVIAL:** push is implied by the single Y (or auto-approve) — no separate "push" keyword needed, since Phase 0 already bounded what this diff can touch.
 8. **Commit-vs-PR judgment** (before any `gh pr create`) — see below. Never open a PR silently.
 
 **Recovery only:** If a prior ship already committed/pushed the job without todos (agent bug or mid-flight rule change), immediately mark matching `[x]` and push a tiny follow-up commit on the same branch — do not leave checkboxes open.
@@ -191,6 +232,8 @@ Never commit to `main`. Never force-push. Never amend after push.
 ---
 
 ## Phase 4.5 — Merge Gate (mandatory after successful push)
+
+**Lane = FAST:** this phase's decision already happened at Phase 4 (combined single Y) — nothing to wait for here, just execute the reply that was given there. **Lane = REGULAR / ULTRA-TRIVIAL (checkpoint):** unchanged below.
 
 Follow `docs/agent/standards-git.md` → **Post-push Merge Gate**. Copy the combined MERGE GATE + BRAIN CAPTURE visual block exactly; wait for Human reply. Do not skip because a PR URL was already printed.
 
@@ -263,6 +306,7 @@ Always state which commit-vs-PR path was taken and why.
 
 ```
 SESSION WRAP — {final_branch_name}
+Lane: FAST | ULTRA-TRIVIAL | REGULAR ({reason})
 Build: PASS | FAIL
 Review: PASS | FIXED+PASS | SKIPPED (reason)
 Commit: {sha or none}

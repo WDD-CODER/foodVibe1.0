@@ -1,0 +1,9 @@
+---
+description: Mid-task session handoff before context exhaustion, or explicit /checkpoint
+alwaysApply: false
+---
+Follow `.claude/skills/context-management/SKILL.md` for a mid-task checkpoint before context
+exhaustion, or when the user asks to checkpoint. Claude Code's version is also driven by a
+`PreCompact` hook (`.claude/settings.json`); Cursor has no hook system, so this rule is
+best-effort — it relies on the agent noticing the conversation is getting long, not a guaranteed
+trigger the way the hook is.

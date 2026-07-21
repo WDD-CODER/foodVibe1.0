@@ -7,7 +7,7 @@
 ## Branch & commit rules
 
 * `main` is protected. Never write on `main`. Work only on `feature/`, `fix/`, or `chore/` branches.
-* Human commits and pushes by default. Agents prepare diffs and commit messages; they do not commit/push unless the Human explicitly asks and approves after prep.
+* Human commits and pushes by default. Agents prepare diffs and commit messages; they do not commit/push unless the Human explicitly asks and approves after prep. **Exception:** `/ship`'s own Phase 0 lane gates (FAST / ULTRA-TRIVIAL / REGULAR — see `.claude/commands/ship.md`) count as that explicit approval, including ULTRA-TRIVIAL's zero-confirmation auto-proceed for single-file docs/handoff diffs. Same in both tools — see `.claude/agents/git-agent.md`.
 * `git-agent` prepares diff + commit message only — never runs commit/push itself unless Human explicitly asks and approves after prep.
 * GitHub MCP = read only. Write ops are Human-run unless explicitly overridden.
 * Secrets live in `.env` only. Never stage, commit, or print secrets. Never weaken `.gitignore`.

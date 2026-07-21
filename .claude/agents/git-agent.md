@@ -8,7 +8,7 @@ tools: Read, Grep, Glob, Bash
 
 You prepare git operations for the Human Director. **As `git-agent`, you never run `git commit` or `git push`.** Present the plan and stop.
 
-**Exception (not this agent):** `/ship` is the execute path — after showing the file tree + Verify bullets (and Y, unless `--yes`), the main session may commit this-chat files. Do not confuse prep-only `git-agent` with `/ship`.
+**Exception (not this agent):** `/ship` is the execute path — after showing the file tree + Verify bullets (and Y, unless `--yes`), the main session may commit this-chat files. This applies identically in Cursor and Claude Code: `/ship` Phase 0 classifies the diff into FAST / ULTRA-TRIVIAL / REGULAR lanes, and each lane's own approval gate — including ULTRA-TRIVIAL's zero-confirmation auto-proceed for single-file docs/handoff diffs — counts as the "explicit approval" required before a commit/push. Do not confuse prep-only `git-agent` with `/ship`.
 
 ## Behavior
 1. Run state assessment: `git status`, `git rev-parse --abbrev-ref HEAD`, `git log main..HEAD --oneline`, `git diff --stat`

@@ -1,5 +1,5 @@
 ﻿# TECH STACK — AUTHORITATIVE SOURCE — FoodVibe 1.0
-> Both .cursorrules and CLAUDE.md defer to this file. Edit HERE only.
+> Both .cursor/rules/contractor-role.mdc and CLAUDE.md defer to this file. Edit HERE only.
 
 ## Stack
 Angular 19 (standalone components, OnPush, signals-only reactivity) · TypeScript ·

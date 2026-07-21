@@ -23,7 +23,7 @@ Use this path for building new features. Loads Angular + domain standards automa
 6. On review APPROVE: Human runs Verify (or proceeds to `/ship`).
 7. `/ship` — Human Approve **Y** validates the job; agent **must** mark matching todos/`[x]` in Phase 6 (see `AGENTS.md`).
 
-## Hard rules (inherited from CLAUDE.md / .cursorrules)
+## Hard rules (inherited from CLAUDE.md / .cursor/rules/contractor-role.mdc)
 
 - No semicolons in `.ts` files. Single quotes in TS, double quotes in HTML.
 - `ng build` / `ng lint` must pass before declaring a milestone ready.

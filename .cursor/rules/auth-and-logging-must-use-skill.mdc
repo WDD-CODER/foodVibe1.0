@@ -1,0 +1,6 @@
+---
+description: Auth and logging skill
+globs: "{server/middleware/**,server/routes/auth.js,src/app/core/guards/**,src/app/core/interceptors/**}"
+alwaysApply: false
+---
+Follow `.claude/skills/auth-and-logging/SKILL.md` when touching auth guards, interceptors, user services, HTTP CRUD, or protected access. Pairs with `docs/agent/standards-security.md` (see `security.mdc`).

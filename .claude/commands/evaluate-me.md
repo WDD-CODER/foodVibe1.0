@@ -71,7 +71,7 @@ Target files for suggestions:
 - `.claude/CLAUDE.md` — base rules, conventions
 - `.claude/skills/*.md` — skill definitions
 - `.claude/commands/*.md` — command prompts
-- `CLAUDE.md` / `.cursorrules` — IDE-level guidance
+- `CLAUDE.md` / `.cursor/rules/*.mdc` — IDE-level guidance
 - `~/.claude/plugins/cache/.../superpowers/` — superpowers skills (edits here are fragile — overwritten on plugin version bump; prefer local project overrides when available; always note cache edits in `CLAUDE.md`)
 
 ## Step 5: Save Report

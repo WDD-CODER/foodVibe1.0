@@ -40,7 +40,7 @@ Rules of thumb:
 ## Authoritative files
 
 - Reviewer rules (default + overrides): `CLAUDE.md`
-- Contractor rules (default + overrides): `.cursorrules`
+- Contractor rules (default + overrides): `.cursor/rules/contractor-role.mdc`
 - Stack: `/_shared/tech-stack.md`
 - Current state capsule: `/_shared/current-state.md`
 - Path-scoped standards: `.claude/rules/{angular,security,domain,backend}.md`
