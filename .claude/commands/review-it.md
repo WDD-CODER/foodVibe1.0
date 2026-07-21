@@ -10,7 +10,7 @@ You are the Reviewer. Follow CLAUDE.md. Report findings; never silently fix; nev
 
 1. **Session handoff** — List `/sessions/` and read the newest file (by filename date / mtime). That is Cursor's execution summary. If `/sessions/` is empty, STOP and tell the Human: no handoff found.
 
-2. **Plan** — From the session file, identify the plan path under `/plans/` (new convention: `[feature]_v[N].md`). Read it. Identify the milestone under review. Do not review other milestones.
+2. **Plan** — From the session file, identify the plan path under `plans/` (`NNN-slug.plan.md`). Read it. Identify the milestone under review. Do not review other milestones.
 
 3. **Checks** (scoped to milestone files only):
    - **Plan-match**: Did Cursor implement only what the milestone declared?

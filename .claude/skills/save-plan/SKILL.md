@@ -86,7 +86,11 @@ Reply: rewrite existing | save as new | cancel
 1. After determining `NNN`, check if `plans/<NNN>-*.plan.md` already exists
 2. If created in the last 60 seconds → re-scan and increment
 3. Worktree: also check main repo `plans/` via `git -C $(cat .worktree-root) ls-files plans/`
-4. Use the higher of (local max + 1) or (main repo max + 1)
+4. Also check `origin/main`'s `plans/` tree (stale local / parallel-branch race):  
+   `git ls-tree -r origin/main --name-only -- plans/`  
+   (fetch not required if already fresh). Take the higher of (local max + 1) vs (origin/main max + 1) vs (main-repo worktree max + 1).  
+   Closes: parallel Cursor/Claude sessions on different branches both computing `NNN` from stale local state.
+5. Use the higher of those maxima for the final `NNN`
 
 ---
 

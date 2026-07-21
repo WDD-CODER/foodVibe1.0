@@ -21,7 +21,10 @@ agent evaluates against.
 ## Step 2a: Proactive Mode
 
 1. Parse the user's description
-2. **Parent plan (required when executing from a Plan Contract):** identify `plans/<NNN>-*.plan.md`. If the brief extends an existing plan, record that path. If mid-flight work adds stages, append `[ ]` Atomic Sub-tasks to that plan **and** `.claude/todo.md` before execution (see `.claude/skills/save-plan/SKILL.md` Phase 4).
+2. **Parent plan (required when executing from a Plan Contract):** identify `plans/<NNN>-*.plan.md`. If the brief extends an existing plan, record that path.
+   - **Disk check (hard stop):** If a parent plan path is named and the file does **not** exist on disk → **STOP**. Do not write `brief.md`. Tell the Human the named plan is missing and offer exactly:
+     `run save-plan now | proceed ad-hoc (parent plan: none) | cancel`
+   - If the brief extends an existing plan that **does** resolve, and mid-flight work adds stages, append `[ ]` Atomic Sub-tasks to that plan **and** `.claude/todo.md` before execution (see `.claude/skills/save-plan/SKILL.md` Phase 4).
 3. Generate session ID: `YYYY-MM-DD-{2-4-word-slug}` (lowercase, no special chars)
 4. **Collision check:** If `.claude/sessions/{session-id}/` already exists → append `-2`, `-3`, etc.
 5. Write brief to `.claude/sessions/{session-id}/brief.md` using template:
@@ -58,12 +61,15 @@ agent evaluates against.
    - `git log --oneline -10` (recent commits)
    - Read `.claude/todo.md` for `[x]` tasks completed today
    - Scan conversation for key decisions and changes
-2. Synthesize into a brief using the same template (include Parent plan when known)
-3. Generate session ID from the synthesized goal
-4. **Collision check:** same as Step 2a
-5. Print: "Reconstructed from session activity. Adjust as needed."
-6. On confirmation → write to `.claude/sessions/{session-id}/brief.md`
-7. On adjustment → update, re-confirm.
+2. Infer Parent plan from `.claude/todo.md` / conversation when known.
+   - **Disk check (hard stop):** If a parent plan path is inferred/named and the file does **not** exist on disk → **STOP**. Do not write `brief.md`. Offer:
+     `run save-plan now | proceed ad-hoc (parent plan: none) | cancel`
+3. Synthesize into a brief using the same template (include Parent plan when known — or `none (ad-hoc)` after Human chooses ad-hoc)
+4. Generate session ID from the synthesized goal
+5. **Collision check:** same as Step 2a
+6. Print: "Reconstructed from session activity. Adjust as needed."
+7. On confirmation → write to `.claude/sessions/{session-id}/brief.md`
+8. On adjustment → update, re-confirm.
 
 ## Completion
 

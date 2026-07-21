@@ -16,7 +16,7 @@ Use this path for building new features. Loads Angular + domain standards automa
 ## Typical flow
 
 1. User describes feature goal.
-2. Invoke `/plan` (produces a Plan Contract in `/plans/[feature]_v[N].md`).
+2. Invoke `/plan` (produces a Plan Contract in `plans/NNN-slug.plan.md` via save-plan).
 3. User reviews and approves the plan.
 4. Contractor executes **one milestone at a time**, writes `/sessions/[date].md`, stops.
 5. After a milestone: `/review-it` for the Reviewer pass.

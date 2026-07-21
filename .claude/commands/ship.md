@@ -52,10 +52,11 @@ Announce the pick before continuing, e.g. `Lane: FAST (2 files, 14 lines, no sen
 
 ```bash
 ng build
+node scripts/plan-ledger-check.mjs
 ```
 
-- **Fail** → stop. Do not commit. Fix, then re-run `/ship`.
-- Never make this gate conditional.
+- **Fail** (`ng build` or `plan-ledger-check.mjs`) → stop. Do not commit. Fix, then re-run `/ship`.
+- Never make this gate conditional. Ledger check exit 1 (missing plan refs in `.claude/todo.md` / session briefs) blocks the same as a failed build; duplicate-NNN / stray-name warnings are advisory and do not fail the gate.
 
 ---
 

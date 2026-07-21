@@ -13,7 +13,7 @@ See `README_WORKFLOW.md` and `CLAUDE.md`.
 
 | Command | What it does |
 |---------|-------------|
-| `/plan` | Planning / Plan Contract path â€” Architect authors `/plans/[feature]_v[N].md` |
+| `/plan` | Planning / Plan Contract path — Architect authors `plans/NNN-slug.plan.md` via save-plan |
 | `/feat` | New-feature path â€” loads rules, routes through `/plan` then Contractor + `/review-it` |
 | `/review-it` | Reviewer pass â€” plan-match, conventions, Verify gate; report-only by default |
 
