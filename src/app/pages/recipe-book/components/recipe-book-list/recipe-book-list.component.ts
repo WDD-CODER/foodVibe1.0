@@ -1,4 +1,14 @@
-import { Component, inject, ChangeDetectionStrategy, signal, computed, effect, afterNextRender, OnInit, OnDestroy } from '@angular/core'
+import {
+  Component,
+  inject,
+  ChangeDetectionStrategy,
+  signal,
+  computed,
+  effect,
+  OnInit,
+  OnDestroy,
+  WritableSignal
+} from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
@@ -26,14 +36,24 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
-import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component'
+import {
+  CarouselHeaderComponent,
+  CarouselHeaderColumnDirective
+} from 'src/app/shared/carousel-header/carousel-header.component'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
 import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component'
 import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
-import { useListState, StringParam, NullableStringParam, FilterRecordParam, StringArrayParam, BooleanParam } from 'src/app/core/utils/list-state.util'
-import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util'
+import {
+  useListState,
+  StringParam,
+  NullableStringParam,
+  FilterRecordParam,
+  StringArrayParam,
+  BooleanParam
+} from 'src/app/core/utils/list-state.util'
+import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
 import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util'
 import { resolveRecipeAllergens, MAX_ALLERGEN_RECURSION } from 'src/app/core/utils/recipe-allergens.util'
 import { CellExpandState } from 'src/app/core/utils/cell-expand-state.util'
@@ -46,10 +66,29 @@ type RecipeBulkField = 'labels_' | 'recipe_type_'
 @Component({
   selector: 'recipe-book-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, ClickOutSideDirective, VersionHistoryPanelComponent, LoaderComponent, ScrollableDropdownComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective, ListRowCheckboxComponent, SelectionBarComponent, EmptyStateComponent, RatingStarsComponent, RowActionsMenuComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    LucideAngularModule,
+    TranslatePipe,
+    ClickOutSideDirective,
+    VersionHistoryPanelComponent,
+    LoaderComponent,
+    ScrollableDropdownComponent,
+    CellCarouselComponent,
+    CellCarouselSlideDirective,
+    ListShellComponent,
+    CarouselHeaderComponent,
+    CarouselHeaderColumnDirective,
+    ListRowCheckboxComponent,
+    SelectionBarComponent,
+    EmptyStateComponent,
+    RatingStarsComponent,
+    RowActionsMenuComponent
+  ],
   templateUrl: './recipe-book-list.component.html',
   styleUrl: './recipe-book-list.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RecipeBookListComponent implements OnInit, OnDestroy {
   private readonly kitchenState = inject(KitchenStateService)
@@ -67,7 +106,15 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.heroFab.setPageActions(
-      [{ labelKey: 'add_recipe_ai', icon: 'sparkles', run: () => { void this.aiRecipeModal.open() } }],
+      [
+        {
+          labelKey: 'add_recipe_ai',
+          icon: 'sparkles',
+          run: () => {
+            void this.aiRecipeModal.open()
+          }
+        }
+      ],
       'replace'
     )
   }
@@ -83,7 +130,8 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected searchQuery_ = signal<string>('')
   protected sortBy_ = signal<SortField | null>(null)
   protected sortOrder_ = signal<'asc' | 'desc'>('asc')
-  protected isPanelOpen_ = signal<boolean>(true)
+  protected readonly isPanelOpen_: WritableSignal<boolean>
+  private readonly togglePanelState_: () => void
   protected dateFrom_ = signal<string | null>(null)
   protected dateTo_ = signal<string | null>(null)
   protected showFavoritesOnly_ = signal<boolean>(false)
@@ -91,25 +139,21 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected dateIncludeByUpdated_ = signal<boolean>(false)
 
   constructor() {
-    this.isPanelOpen_.set(getPanelOpen('recipe-book'))
-    useListState('recipe-book', [
-      { urlParam: 'q',               signal: this.searchQuery_,          serializer: StringParam },
-      { urlParam: 'sort',            signal: this.sortBy_,               serializer: NullableStringParam },
-      { urlParam: 'order',           signal: this.sortOrder_,             serializer: StringParam },
-      { urlParam: 'filters',         signal: this.activeFilters_,        serializer: FilterRecordParam },
-      { urlParam: 'ingredients',     signal: this.selectedProductIds_,  serializer: StringArrayParam },
-      { urlParam: 'dateFrom',        signal: this.dateFrom_,             serializer: NullableStringParam },
-      { urlParam: 'dateTo',          signal: this.dateTo_,               serializer: NullableStringParam },
-      { urlParam: 'dateByUpdated',   signal: this.dateIncludeByUpdated_, serializer: BooleanParam },
-      { urlParam: 'favorites',       signal: this.showFavoritesOnly_,   serializer: BooleanParam },
-    ])
+    const panel = useResponsivePanelState('recipe-book')
+    this.isPanelOpen_ = panel.isPanelOpen_
+    this.togglePanelState_ = panel.togglePanel
 
-    afterNextRender(() => {
-      if (typeof window === 'undefined') return
-      const q = window.matchMedia('(max-width: 768px)')
-      if (q.matches) this.isPanelOpen_.set(false)
-      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false) })
-    })
+    useListState('recipe-book', [
+      { urlParam: 'q', signal: this.searchQuery_, serializer: StringParam },
+      { urlParam: 'sort', signal: this.sortBy_, serializer: NullableStringParam },
+      { urlParam: 'order', signal: this.sortOrder_, serializer: StringParam },
+      { urlParam: 'filters', signal: this.activeFilters_, serializer: FilterRecordParam },
+      { urlParam: 'ingredients', signal: this.selectedProductIds_, serializer: StringArrayParam },
+      { urlParam: 'dateFrom', signal: this.dateFrom_, serializer: NullableStringParam },
+      { urlParam: 'dateTo', signal: this.dateTo_, serializer: NullableStringParam },
+      { urlParam: 'dateByUpdated', signal: this.dateIncludeByUpdated_, serializer: BooleanParam },
+      { urlParam: 'favorites', signal: this.showFavoritesOnly_, serializer: BooleanParam }
+    ])
 
     // Expand any filter category that has selected values (e.g. when opened via URL like ?filters=Approved:false).
     effect(() => {
@@ -128,12 +172,14 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     // Reset expanded allergen/labels cells when user lands on recipe-book list (e.g. navigates back).
     const events = this.router.events
     if (events) {
-      events.pipe(
-        filter((e): e is NavigationEnd => e instanceof NavigationEnd),
-        takeUntilDestroyed(),
-      ).subscribe(() => {
-        if (this.router.url.includes('recipe-book')) this.resetExpandedCells()
-      })
+      events
+        .pipe(
+          filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+          takeUntilDestroyed()
+        )
+        .subscribe(() => {
+          if (this.router.url.includes('recipe-book')) this.resetExpandedCells()
+        })
     }
   }
 
@@ -158,18 +204,18 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     {
       key: 'labels_',
       label: 'labels',
-      options: this.metadataRegistry.allLabels_().map(l => ({ value: l.key, label: l.key })),
-      multi: true,
+      options: this.metadataRegistry.allLabels_().map((l) => ({ value: l.key, label: l.key })),
+      multi: true
     },
     {
       key: 'recipe_type_',
       label: 'recipe_type',
       options: [
         { value: 'dish', label: 'dish' },
-        { value: 'preparation', label: 'preparation' },
+        { value: 'preparation', label: 'preparation' }
       ],
-      multi: false,
-    },
+      multi: false
+    }
   ])
   protected ingredientSearchQuery_ = signal<string>('')
   protected selectedProductIds_ = signal<string[]>([])
@@ -181,11 +227,11 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   protected categoryDisplayKey(internalName: string): string {
     const map: Record<string, string> = {
-      'Labels': 'labels',
-      'Type': 'type',
-      'Allergens': 'allergens',
-      'Approved': 'approved',
-      'Station': 'station'
+      Labels: 'labels',
+      Type: 'type',
+      Allergens: 'allergens',
+      Approved: 'approved',
+      Station: 'station'
     }
     return map[internalName] ?? internalName.toLowerCase()
   }
@@ -198,14 +244,14 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected getLabelColor(keyOrDisplay: string): string {
     const byKey = this.metadataRegistry.getLabelColor(keyOrDisplay)
     if (byKey !== '#78716C') return byKey
-    const byDisplay = this.metadataRegistry.allLabels_().find(
-      (def) => this.translationService.translate(def.key) === keyOrDisplay
-    )
+    const byDisplay = this.metadataRegistry
+      .allLabels_()
+      .find((def) => this.translationService.translate(def.key) === keyOrDisplay)
     return byDisplay?.color ?? byKey
   }
 
   protected toggleFilterCategory(name: string): void {
-    this.expandedFilterCategories_.update(set => {
+    this.expandedFilterCategories_.update((set) => {
       const next = new Set(set)
       if (next.has(name)) next.delete(name)
       else next.add(name)
@@ -218,8 +264,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   protected togglePanel(): void {
-    this.isPanelOpen_.update(v => !v)
-    setPanelOpen('recipe-book', this.isPanelOpen_())
+    this.togglePanelState_()
   }
 
   protected filterCategories_ = computed(() => {
@@ -227,21 +272,21 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     const filters = this.activeFilters_()
     const categories: Record<string, Set<string>> = {}
 
-    recipes.forEach(recipe => {
+    recipes.forEach((recipe) => {
       const isDish = this.isRecipeDish(recipe)
       const typeVal = isDish ? 'dish' : 'preparation'
       if (!categories['Type']) categories['Type'] = new Set()
       categories['Type'].add(typeVal)
 
       const allergens = this.getRecipeAllergens(recipe)
-      allergens.forEach(a => {
+      allergens.forEach((a) => {
         if (!categories['Allergens']) categories['Allergens'] = new Set()
         categories['Allergens'].add(a)
       })
 
       const recipeLabels = this.getAllRecipeLabels(recipe)
       if (recipeLabels.length > 0) {
-        recipeLabels.forEach(l => {
+        recipeLabels.forEach((l) => {
           if (!categories['Labels']) categories['Labels'] = new Set()
           categories['Labels'].add(l)
         })
@@ -268,10 +313,10 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       return value
     }
 
-    return Object.keys(categories).map(name => ({
+    return Object.keys(categories).map((name) => ({
       name,
       displayKey: this.categoryDisplayKey(name),
-      options: Array.from(categories[name]).map(option => ({
+      options: Array.from(categories[name]).map((option) => ({
         label: optionLabel(name, option),
         value: option,
         checked_: (filters[name] || []).includes(option)
@@ -296,7 +341,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     const selectedIds = this.selectedProductIds_()
 
     if (Object.keys(filters).length > 0) {
-      recipes = recipes.filter(recipe => {
+      recipes = recipes.filter((recipe) => {
         return Object.entries(filters).every(([category, selectedValues]) => {
           let recipeValues: string[] = []
           if (category === 'Type') {
@@ -304,7 +349,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
           } else if (category === 'Allergens') {
             recipeValues = this.getRecipeAllergens(recipe)
             // "Do not include allergens": show only recipes that have NONE of the selected allergens
-            return selectedValues.every(v => !recipeValues.includes(v))
+            return selectedValues.every((v) => !recipeValues.includes(v))
           } else if (category === 'Labels') {
             const labels = this.getAllRecipeLabels(recipe)
             recipeValues = labels.length > 0 ? labels : ['no_label']
@@ -314,17 +359,17 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
             const st = (recipe.default_station_ || '').trim() || '_none'
             recipeValues = [st]
           }
-          return selectedValues.some(v => recipeValues.includes(v))
+          return selectedValues.some((v) => recipeValues.includes(v))
         })
       })
     }
 
     if (selectedIds.length > 0) {
-      recipes = recipes.filter(r => this.recipeContainsAllProducts(r, selectedIds))
+      recipes = recipes.filter((r) => this.recipeContainsAllProducts(r, selectedIds))
     }
 
     if (search) {
-      recipes = recipes.filter(r => (r.name_hebrew ?? '').toLowerCase().includes(search))
+      recipes = recipes.filter((r) => (r.name_hebrew ?? '').toLowerCase().includes(search))
     }
 
     const dateFrom = this.dateFrom_()
@@ -333,7 +378,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     if (dateFrom != null || dateTo != null) {
       const fromMs = dateFrom != null ? this.parseDateToStartOfDay(dateFrom) : null
       const toMs = dateTo != null ? this.parseDateToEndOfDay(dateTo) : null
-      recipes = recipes.filter(recipe => {
+      recipes = recipes.filter((recipe) => {
         const inRange = (ts: number) => {
           if (fromMs != null && ts < fromMs) return false
           if (toMs != null && ts > toMs) return false
@@ -347,7 +392,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
     if (this.showFavoritesOnly_()) {
       const uid = this.currentUserId_()
-      recipes = uid ? recipes.filter(r => (r.favoritedBy_ ?? []).includes(uid)) : []
+      recipes = uid ? recipes.filter((r) => (r.favoritedBy_ ?? []).includes(uid)) : []
     }
 
     if (sortBy) {
@@ -363,7 +408,9 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   /** Visible recipe IDs for header select-all. */
   protected filteredRecipeIds_ = computed(() =>
-    this.filteredRecipes_().map(r => r._id ?? '').filter(Boolean)
+    this.filteredRecipes_()
+      .map((r) => r._id ?? '')
+      .filter(Boolean)
   )
 
   protected isEmptyList_ = computed(() => this.kitchenState.visibleRecipes_().length === 0)
@@ -376,12 +423,12 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   protected activeCostTooltipRecipe_ = computed(() => {
     const id = this.hoveredCostRecipeId_() ?? this.tappedCostRecipeId_()
-    return id ? this.filteredRecipes_().find(r => r._id === id) ?? null : null
+    return id ? (this.filteredRecipes_().find((r) => r._id === id) ?? null) : null
   })
 
   protected activeDateTooltipRecipe_ = computed(() => {
     const id = this.hoveredDateRecipeId_()
-    return id ? this.filteredRecipes_().find(r => r._id === id) ?? null : null
+    return id ? (this.filteredRecipes_().find((r) => r._id === id) ?? null) : null
   })
 
   protected isRecipeDish(recipe: Recipe): boolean {
@@ -433,7 +480,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected recipeContainsAllProducts(recipe: Recipe, productIds: string[]): boolean {
     if (productIds.length === 0) return true
     const ids = this.getRecipeProductIds(recipe)
-    return productIds.every(id => ids.has(id))
+    return productIds.every((id) => ids.has(id))
   }
 
   private getRecipeProductIds(recipe: Recipe, depth = 0): Set<string> {
@@ -445,8 +492,8 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       if (ing.type === 'product') {
         set.add(ing.referenceId)
       } else if (ing.type === 'recipe') {
-        const sub = recipes.find(r => r._id === ing.referenceId)
-        if (sub) this.getRecipeProductIds(sub, depth + 1).forEach(id => set.add(id))
+        const sub = recipes.find((r) => r._id === ing.referenceId)
+        if (sub) this.getRecipeProductIds(sub, depth + 1).forEach((id) => set.add(id))
       }
     }
     return set
@@ -460,18 +507,15 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       case 'type': {
         const aType = this.isRecipeDish(a) ? 'dish' : 'preparation'
         const bType = this.isRecipeDish(b) ? 'dish' : 'preparation'
-        return hebrewCompare(
-          this.translationService.translate(aType),
-          this.translationService.translate(bType)
-        )
+        return hebrewCompare(this.translationService.translate(aType), this.translationService.translate(bType))
       }
       case 'cost':
         return this.recipeCostService.computeRecipeCost(a) - this.recipeCostService.computeRecipeCost(b)
       case 'labels': {
         const aLabels = this.getAllRecipeLabels(a)
         const bLabels = this.getAllRecipeLabels(b)
-        const aStr = aLabels.length > 0 ? aLabels.map(l => this.translationService.translate(l)).join(', ') : ''
-        const bStr = bLabels.length > 0 ? bLabels.map(l => this.translationService.translate(l)).join(', ') : ''
+        const aStr = aLabels.length > 0 ? aLabels.map((l) => this.translationService.translate(l)).join(', ') : ''
+        const bStr = bLabels.length > 0 ? bLabels.map((l) => this.translationService.translate(l)).join(', ') : ''
         return hebrewCompare(aStr, bStr)
       }
       case 'allergens': {
@@ -503,7 +547,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected setSort(field: SortField): void {
     const current = this.sortBy_()
     if (current === field) {
-      this.sortOrder_.update(o => o === 'asc' ? 'desc' : 'asc')
+      this.sortOrder_.update((o) => (o === 'asc' ? 'desc' : 'asc'))
     } else {
       this.sortBy_.set(field)
       this.sortOrder_.set('asc')
@@ -537,11 +581,11 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   protected toggleFilter(categoryName: string, optionValue: string): void {
-    this.activeFilters_.update(prev => {
+    this.activeFilters_.update((prev) => {
       const current = { ...prev }
       const values = current[categoryName] || []
       if (values.includes(optionValue)) {
-        current[categoryName] = values.filter(v => v !== optionValue)
+        current[categoryName] = values.filter((v) => v !== optionValue)
         if (current[categoryName].length === 0) delete current[categoryName]
       } else {
         current[categoryName] = [...values, optionValue]
@@ -558,15 +602,16 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     this.showFavoritesOnly_.set(false)
   }
 
-  protected hasActiveFilters_ = computed(() =>
-    Object.values(this.activeFilters_()).some(arr => arr.length > 0) ||
-    this.dateFrom_() != null ||
-    this.dateTo_() != null ||
-    this.showFavoritesOnly_()
+  protected hasActiveFilters_ = computed(
+    () =>
+      Object.values(this.activeFilters_()).some((arr) => arr.length > 0) ||
+      this.dateFrom_() != null ||
+      this.dateTo_() != null ||
+      this.showFavoritesOnly_()
   )
 
   protected selectedCountInCategory(category: { options: { checked_: boolean }[] }): number {
-    return category.options.filter(o => o.checked_).length
+    return category.options.filter((o) => o.checked_).length
   }
 
   protected showCostTooltip(recipeId: string, event?: Event): void {
@@ -582,7 +627,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   protected toggleCostTooltipTap(recipeId: string, event?: Event): void {
     const wasOpen = this.tappedCostRecipeId_() === recipeId
-    this.tappedCostRecipeId_.update(id => (id === recipeId ? null : recipeId))
+    this.tappedCostRecipeId_.update((id) => (id === recipeId ? null : recipeId))
     if (!wasOpen && recipeId) {
       const el = event?.currentTarget as HTMLElement | undefined
       if (el) this.costTooltipAnchor_.set(el.getBoundingClientRect())
@@ -609,12 +654,12 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   protected addIngredientProduct(product: Product): void {
     if (this.selectedProductIds_().includes(product._id)) return
-    this.selectedProductIds_.update(ids => [...ids, product._id])
+    this.selectedProductIds_.update((ids) => [...ids, product._id])
     this.ingredientSearchQuery_.set('')
   }
 
   protected removeIngredientProduct(productId: string): void {
-    this.selectedProductIds_.update(ids => ids.filter(id => id !== productId))
+    this.selectedProductIds_.update((ids) => ids.filter((id) => id !== productId))
   }
 
   protected clearIngredientProducts(): void {
@@ -623,7 +668,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   protected getSelectedProducts(): Product[] {
     const ids = this.selectedProductIds_()
-    return this.kitchenState.products_().filter(p => ids.includes(p._id))
+    return this.kitchenState.products_().filter((p) => ids.includes(p._id))
   }
 
   protected onAddRecipe(): void {
@@ -649,7 +694,15 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   protected onRowClick(recipe: Recipe, event: MouseEvent): void {
     const el = event.target as HTMLElement
-    if (el.closest('button') || el.closest('a') || el.closest('.cost-cell-wrap') || el.closest('.allergen-btn-wrapper') || el.closest('.labels-btn-wrapper') || el.closest('app-list-row-checkbox')) return
+    if (
+      el.closest('button') ||
+      el.closest('a') ||
+      el.closest('.cost-cell-wrap') ||
+      el.closest('.allergen-btn-wrapper') ||
+      el.closest('.labels-btn-wrapper') ||
+      el.closest('app-list-row-checkbox')
+    )
+      return
     if (this.selection.selectionMode()) {
       this.selection.toggle(recipe._id ?? '')
       return
@@ -663,38 +716,54 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   protected async onDeleteRecipe(recipe: Recipe): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return
-    if (!await this.confirmModal.open('האם אתה בטוח שברצונך למחוק?', { variant: 'danger' })) return
+    if (!(await this.confirmModal.open('האם אתה בטוח שברצונך למחוק?', { variant: 'danger' }))) return
     this.deletingId_.set(recipe._id)
     this.kitchenState.deleteRecipe(recipe).subscribe({
-      next: () => { this.deletingId_.set(null) },
-      error: () => { this.deletingId_.set(null) }
+      next: () => {
+        this.deletingId_.set(null)
+      },
+      error: () => {
+        this.deletingId_.set(null)
+      }
     })
   }
 
   private onHideRecipe(recipe: Recipe): void {
     this.removingId_.set(recipe._id)
     this.kitchenState.hideRecipe(recipe).subscribe({
-      next: () => { this.removingId_.set(null) },
-      error: () => { this.removingId_.set(null) }
+      next: () => {
+        this.removingId_.set(null)
+      },
+      error: () => {
+        this.removingId_.set(null)
+      }
     })
   }
 
   private async onPermanentlyDeleteRecipe(recipe: Recipe): Promise<void> {
-    if (!await this.confirmModal.open('מחיקה קבועה — לא ניתן לשחזר. להמשיך?', { variant: 'danger' })) return
+    if (!(await this.confirmModal.open('מחיקה קבועה — לא ניתן לשחזר. להמשיך?', { variant: 'danger' }))) return
     this.removingId_.set(recipe._id)
     this.kitchenState.permanentlyDeleteRecipe(recipe).subscribe({
-      next: () => { this.removingId_.set(null) },
-      error: () => { this.removingId_.set(null) }
+      next: () => {
+        this.removingId_.set(null)
+      },
+      error: () => {
+        this.removingId_.set(null)
+      }
     })
   }
 
   protected async onRemoveRecipe(recipe: Recipe): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return
-    if (!await this.confirmModal.open('האם אתה בטוח שברצונך למחוק?', { variant: 'danger' })) return
+    if (!(await this.confirmModal.open('האם אתה בטוח שברצונך למחוק?', { variant: 'danger' }))) return
     this.removingId_.set(recipe._id)
     this.kitchenState.deleteRecipe(recipe).subscribe({
-      next: () => { this.removingId_.set(null) },
-      error: () => { this.removingId_.set(null) }
+      next: () => {
+        this.removingId_.set(null)
+      },
+      error: () => {
+        this.removingId_.set(null)
+      }
     })
   }
 
@@ -702,7 +771,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     const field = event.field as RecipeBulkField
     const recipes = this.kitchenState.recipes_()
     for (const id of event.ids) {
-      const recipe = recipes.find(r => r._id === id)
+      const recipe = recipes.find((r) => r._id === id)
       if (!recipe) continue
       let updated: Recipe
       if (field === 'labels_') {
@@ -719,7 +788,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
     if (ids.length === 0) return
     if (!this.requireAuthService.requireAuth()) return
-    if (!await this.confirmModal.open(`למחוק ${ids.length} מתכונים?`, { variant: 'danger' })) return
+    if (!(await this.confirmModal.open(`למחוק ${ids.length} מתכונים?`, { variant: 'danger' }))) return
     const recipes = this.kitchenState.recipes_().filter((r) => ids.includes(r._id ?? ''))
     recipes.forEach((recipe) => {
       this.kitchenState.deleteRecipe(recipe).subscribe({ next: () => {}, error: () => {} })
@@ -735,8 +804,12 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     clone.is_approved_ = false
     this.duplicatingId_.set(recipe._id)
     this.kitchenState.saveRecipe(clone).subscribe({
-      next: () => { this.duplicatingId_.set(null) },
-      error: () => { this.duplicatingId_.set(null) }
+      next: () => {
+        this.duplicatingId_.set(null)
+      },
+      error: () => {
+        this.duplicatingId_.set(null)
+      }
     })
   }
 
@@ -751,9 +824,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     const current = recipe.favoritedBy_ ?? []
     const updated: Recipe = {
       ...recipe,
-      favoritedBy_: current.includes(uid)
-        ? current.filter(id => id !== uid)
-        : [...current, uid],
+      favoritedBy_: current.includes(uid) ? current.filter((id) => id !== uid) : [...current, uid]
     }
     this.kitchenState.saveRecipe(updated).subscribe()
   }

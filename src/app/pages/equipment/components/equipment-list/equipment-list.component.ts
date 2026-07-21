@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, afterNextRender, OnInit, OnDestroy } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+  OnInit,
+  OnDestroy,
+  WritableSignal
+} from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms'
 import { Router, RouterLink, RouterLinkActive } from '@angular/router'
@@ -15,7 +24,10 @@ import { LoggingService } from '@services/logging.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
-import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component'
+import {
+  CarouselHeaderComponent,
+  CarouselHeaderColumnDirective
+} from 'src/app/shared/carousel-header/carousel-header.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
@@ -23,7 +35,7 @@ import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-ba
 import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model'
 import { useListState, StringParam, NullableBooleanParam, StringSetParam } from 'src/app/core/utils/list-state.util'
 import { ClickOutSideDirective } from '@directives/click-out-side'
-import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util'
+import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
 import { HeroFabService } from '@services/hero-fab.service'
 import { AddItemModalService } from '@services/add-item-modal.service'
 import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service'
@@ -38,10 +50,29 @@ type EquipmentBulkField = 'category_' | 'is_consumable_'
 @Component({
   selector: 'app-equipment-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, RouterLinkActive, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective, CustomSelectComponent, ListRowCheckboxComponent, SelectionBarComponent, ClickOutSideDirective, RowActionsMenuComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    RouterLink,
+    RouterLinkActive,
+    LucideAngularModule,
+    TranslatePipe,
+    LoaderComponent,
+    CellCarouselComponent,
+    CellCarouselSlideDirective,
+    ListShellComponent,
+    CarouselHeaderComponent,
+    CarouselHeaderColumnDirective,
+    CustomSelectComponent,
+    ListRowCheckboxComponent,
+    SelectionBarComponent,
+    ClickOutSideDirective,
+    RowActionsMenuComponent
+  ],
   templateUrl: './equipment-list.component.html',
   styleUrl: './equipment-list.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EquipmentListComponent implements OnInit, OnDestroy {
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
@@ -68,7 +99,8 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   }
 
   protected searchQuery_ = signal('')
-  protected isPanelOpen_ = signal(true)
+  protected readonly isPanelOpen_: WritableSignal<boolean>
+  private readonly togglePanelState_: () => void
   protected carouselHeaderIndex_ = signal(0)
 
   private get panelContext(): 'inventory' | 'equipment' {
@@ -76,26 +108,25 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   }
 
   constructor() {
-    this.isPanelOpen_.set(getPanelOpen(this.panelContext))
+    const panel = useResponsivePanelState(this.panelContext)
+    this.isPanelOpen_ = panel.isPanelOpen_
+    this.togglePanelState_ = panel.togglePanel
+
     this.buildEditForm()
     useListState('equipment', [
-      { urlParam: 'q',          signal: this.searchQuery_,        serializer: StringParam },
-      { urlParam: 'sort',       signal: this.sortBy_,             serializer: StringParam },
-      { urlParam: 'order',      signal: this.sortOrder_,          serializer: StringParam },
+      { urlParam: 'q', signal: this.searchQuery_, serializer: StringParam },
+      { urlParam: 'sort', signal: this.sortBy_, serializer: StringParam },
+      { urlParam: 'order', signal: this.sortOrder_, serializer: StringParam },
       { urlParam: 'categories', signal: this.selectedCategories_, serializer: StringSetParam },
-      { urlParam: 'consumable', signal: this.consumableFilter_,   serializer: NullableBooleanParam },
+      { urlParam: 'consumable', signal: this.consumableFilter_, serializer: NullableBooleanParam }
     ])
-
-    afterNextRender(() => {
-      if (typeof window === 'undefined') return
-      const q = window.matchMedia('(max-width: 768px)')
-      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false) })
-    })
   }
 
   ngOnInit(): void {
     this.heroFab.setPageActions(
-      [{ labelKey: 'add_equipment', icon: 'plus', run: () => this.router.navigate([...this.equipmentBasePath, 'add']) }],
+      [
+        { labelKey: 'add_equipment', icon: 'plus', run: () => this.router.navigate([...this.equipmentBasePath, 'add']) }
+      ],
       'replace'
     )
   }
@@ -120,15 +151,18 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     {
       key: 'category_',
       label: 'category',
-      options: this.categories.map(c => ({ value: c, label: c })),
-      multi: false,
+      options: this.categories.map((c) => ({ value: c, label: c })),
+      multi: false
     },
     {
       key: 'is_consumable_',
       label: 'consumable',
-      options: [{ value: 'true', label: 'yes' }, { value: 'false', label: 'no' }],
-      multi: false,
-    },
+      options: [
+        { value: 'true', label: 'yes' },
+        { value: 'false', label: 'no' }
+      ],
+      multi: false
+    }
   ])
   protected editForm_!: FormGroup
 
@@ -147,13 +181,13 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     const order = this.sortOrder_()
 
     if (search) {
-      list = list.filter(e => (e.name_hebrew ?? '').toLowerCase().includes(search))
+      list = list.filter((e) => (e.name_hebrew ?? '').toLowerCase().includes(search))
     }
     if (cats.size > 0) {
-      list = list.filter(e => cats.has(e.category_))
+      list = list.filter((e) => cats.has(e.category_))
     }
     if (consumableOnly !== null) {
-      list = list.filter(e => e.is_consumable_ === consumableOnly)
+      list = list.filter((e) => e.is_consumable_ === consumableOnly)
     }
     list = [...list].sort((a, b) => {
       let cmp = 0
@@ -171,7 +205,9 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
 
   /** Visible equipment IDs for header select-all. */
   protected filteredEquipmentIds_ = computed(() =>
-    this.filteredEquipment_().map(e => e._id ?? '').filter(Boolean)
+    this.filteredEquipment_()
+      .map((e) => e._id ?? '')
+      .filter(Boolean)
   )
 
   protected categories: EquipmentCategory[] = [
@@ -180,7 +216,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     'container',
     'packaging',
     'infrastructure',
-    'consumable',
+    'consumable'
   ]
   protected customCategories_ = signal<string[]>([])
   protected categoryOptions = computed(() => {
@@ -188,7 +224,9 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     const persisted = this.equipmentCategoryRegistry.customCategories_()
     const hydrated = this.customCategories_()
     const merged = Array.from(new Set([...persisted, ...hydrated]))
-    const custom = merged.filter(c => !this.categories.includes(c as EquipmentCategory)).map((c) => ({ value: c, label: c }))
+    const custom = merged
+      .filter((c) => !this.categories.includes(c as EquipmentCategory))
+      .map((c) => ({ value: c, label: c }))
     return [...fixed, ...custom, { value: ADD_NEW_CATEGORY_VALUE, label: 'add_new_category' }]
   })
 
@@ -202,7 +240,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
       scaling_enabled_: [false],
       per_guests_: [25, [Validators.min(1)]],
       min_quantity_: [1, [Validators.min(0)]],
-      max_quantity_: [null as number | null],
+      max_quantity_: [null as number | null]
     })
   }
 
@@ -221,7 +259,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
       scaling_enabled_: !!e.scaling_rule_,
       per_guests_: e.scaling_rule_?.per_guests_ ?? 25,
       min_quantity_: e.scaling_rule_?.min_quantity_ ?? 1,
-      max_quantity_: e.scaling_rule_?.max_quantity_ ?? null,
+      max_quantity_: e.scaling_rule_?.max_quantity_ ?? null
     })
   }
 
@@ -272,8 +310,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   }
 
   protected togglePanel(): void {
-    this.isPanelOpen_.update(v => !v)
-    setPanelOpen(this.panelContext, this.isPanelOpen_())
+    this.togglePanelState_()
   }
 
   protected onCarouselHeaderChange(index: number): void {
@@ -281,7 +318,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   }
 
   protected toggleCategory(cat: EquipmentCategory): void {
-    this.selectedCategories_.update(set => {
+    this.selectedCategories_.update((set) => {
       const next = new Set(set)
       if (next.has(cat)) next.delete(cat)
       else next.add(cat)
@@ -296,7 +333,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
 
   protected setSort(field: SortField): void {
     if (this.sortBy_() === field) {
-      this.sortOrder_.update(o => (o === 'asc' ? 'desc' : 'asc'))
+      this.sortOrder_.update((o) => (o === 'asc' ? 'desc' : 'asc'))
     } else {
       this.sortBy_.set(field)
       this.sortOrder_.set('asc')
@@ -309,7 +346,13 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
 
   protected onRowClick(item: Equipment, event: MouseEvent): void {
     const el = event.target as HTMLElement
-    if (el.closest('button') || el.closest('a') || el.closest('.inline-edit-panel') || el.closest('app-list-row-checkbox')) return
+    if (
+      el.closest('button') ||
+      el.closest('a') ||
+      el.closest('.inline-edit-panel') ||
+      el.closest('app-list-row-checkbox')
+    )
+      return
     if (this.selection.selectionMode()) {
       this.selection.toggle(item._id ?? '')
       return
@@ -358,7 +401,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
         ? {
             per_guests_: Number(v.per_guests_),
             min_quantity_: Number(v.min_quantity_),
-            max_quantity_: v.max_quantity_ != null && v.max_quantity_ !== '' ? Number(v.max_quantity_) : undefined,
+            max_quantity_: v.max_quantity_ != null && v.max_quantity_ !== '' ? Number(v.max_quantity_) : undefined
           }
         : undefined
       const updated: Equipment = {
@@ -369,7 +412,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
         is_consumable_: !!v.is_consumable_,
         notes_: v.notes_ ?? undefined,
         scaling_rule_: scalingRule,
-        updated_at_: now,
+        updated_at_: now
       }
       await this.equipmentData.updateEquipment(updated)
       return true
@@ -409,7 +452,12 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
 
   async onDelete(item: Equipment): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return
-    if (!await this.confirmModal.open('האם למחוק את פריט הציוד "' + (item.name_hebrew ?? '') + '"?', { variant: 'danger' })) return
+    if (
+      !(await this.confirmModal.open('האם למחוק את פריט הציוד "' + (item.name_hebrew ?? '') + '"?', {
+        variant: 'danger'
+      }))
+    )
+      return
     this.deletingId_.set(item._id)
     try {
       await this.equipmentData.deleteEquipment(item._id)
@@ -424,7 +472,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     const field = event.field as EquipmentBulkField
     const equipment = this.equipmentData.allEquipment_()
     for (const id of event.ids) {
-      const item = equipment.find(e => e._id === id)
+      const item = equipment.find((e) => e._id === id)
       if (!item) continue
       let updated: Equipment
       if (field === 'category_') {
@@ -439,7 +487,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
     if (ids.length === 0) return
     if (!this.requireAuthService.requireAuth()) return
-    if (!await this.confirmModal.open(`למחוק ${ids.length} פריטי ציוד?`, { variant: 'danger' })) return
+    if (!(await this.confirmModal.open(`למחוק ${ids.length} פריטי ציוד?`, { variant: 'danger' }))) return
     for (const id of ids) {
       this.deletingId_.set(id)
       try {

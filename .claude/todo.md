@@ -2,6 +2,19 @@
 
 ---
 
+### Plan 297 — Sidebar Filter Panel Unification (`plans/297-sidebar-filter-panel-unification.plan.md`)
+> From `.claude/reports/sidebar-filter-panel-audit.md`. Logic-only fix (no CSS/visual changes) for the 5 list-page filter panels (Inventory, Recipe Book, Venues, Suppliers, Equipment): wrong open-by-default, missing mobile initial-load check, missing SSR guard, no restore-to-desktop on resize. Contractor = Cursor, one milestone at a time.
+
+- [ ] M1 `src/app/core/utils/panel-preference.util.ts` — fix `getPanelOpen()` default to `true`, add `useResponsivePanelState()`
+- [ ] M2a `venue-list.component.ts` — migrate to shared helper (also fixes missing SSR guard)
+- [ ] M2b `supplier-list.component.ts` — migrate to shared helper
+- [ ] M2c `equipment-list.component.ts` — migrate to shared helper
+- [ ] M2d `inventory-product-list.component.ts` — migrate to shared helper (dedup only)
+- [ ] M2e `recipe-book-list.component.ts` — migrate to shared helper (dedup only)
+- [ ] M3 Manual verify (browse): desktop open-by-default, mobile closed-by-default, resize restore, no visual regression — all 5 pages
+
+---
+
 ### Plan 291 — Plan Persistence & Brief Sync Hardening (`plans/291-plan-persistence-brief-sync-hardening.plan.md`)
 > Closes the gap that let Plan 285 (AI Menu Phase 1) execute brief-by-brief without ever being persisted under `plans/`. Contractor (Cursor) executes one milestone at a time.
 
@@ -360,8 +373,8 @@ Execution plan: `plans/059-1-unify-design-engine-refactor.plan.md`
 - [x] `styles.scss` â€” add global Escape dismiss for ng-select dropdowns if missing
 - [x] Inventory SCSS â€” add `max-height: 40vh; overflow-y: auto` for category dropdown panel at â‰¤620px
 - [x] Run `ng build` â€” 0 errors
-- [ ] Re-run `/mobile-flow-audit --only inventory-edit-product --only inventory-add-product --only recipe-builder-new-dish`
-- [ ] Update TRIAGE.md â€” Cluster 8 + DEF-IE-02 âœ“ resolved
+- [x] Re-run `/mobile-flow-audit --only inventory-edit-product --only inventory-add-product --only recipe-builder-new-dish`
+- [x] Update TRIAGE.md â€” Cluster 8 + DEF-IE-02 âœ“ resolved
 
 ---
 

@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, inject, output, signal, afterNextRender, OnInit, OnDestroy } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  output,
+  signal,
+  OnInit,
+  OnDestroy,
+  WritableSignal
+} from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
@@ -14,7 +24,10 @@ import { VenueProfile, EnvironmentType } from '@models/venue.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
-import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component'
+import {
+  CarouselHeaderComponent,
+  CarouselHeaderColumnDirective
+} from 'src/app/shared/carousel-header/carousel-header.component'
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
@@ -22,15 +35,10 @@ import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-ba
 import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model'
 import { useListState, StringParam, StringSetParam } from 'src/app/core/utils/list-state.util'
 import { HeroFabService } from '@services/hero-fab.service'
-import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util'
+import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 
-const ENV_TYPES: EnvironmentType[] = [
-  'professional_kitchen',
-  'outdoor_field',
-  'client_home',
-  'popup_venue',
-]
+const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', 'client_home', 'popup_venue']
 type VenueBulkField = 'environment_type_'
 
 @Component({
@@ -49,12 +57,12 @@ type VenueBulkField = 'environment_type_'
     CellCarouselSlideDirective,
     ListRowCheckboxComponent,
     SelectionBarComponent,
-    RowActionsMenuComponent,
+    RowActionsMenuComponent
   ],
   templateUrl: './venue-list.component.html',
   styleUrl: './venue-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  inputs: ['embeddedInDashboard'],
+  inputs: ['embeddedInDashboard']
 })
 export class VenueListComponent implements OnInit, OnDestroy {
   private readonly venueData = inject(VenueDataService)
@@ -73,7 +81,8 @@ export class VenueListComponent implements OnInit, OnDestroy {
 
   protected searchQuery_ = signal('')
   protected deletingId_ = signal<string | null>(null)
-  protected isPanelOpen_ = signal(true)
+  protected readonly isPanelOpen_: WritableSignal<boolean>
+  private readonly togglePanelState_: () => void
   protected carouselHeaderIndex_ = signal(0)
   protected selectedEnvTypes_ = signal<Set<EnvironmentType>>(new Set())
   protected selection = new ListSelectionState()
@@ -84,32 +93,27 @@ export class VenueListComponent implements OnInit, OnDestroy {
     {
       key: 'environment_type_',
       label: 'environment_type',
-      options: this.envTypes.map(e => ({ value: e, label: e })),
-      multi: false,
-    },
+      options: this.envTypes.map((e) => ({ value: e, label: e })),
+      multi: false
+    }
   ])
 
   constructor() {
-    this.isPanelOpen_.set(getPanelOpen('venues'))
+    const panel = useResponsivePanelState('venues')
+    this.isPanelOpen_ = panel.isPanelOpen_
+    this.togglePanelState_ = panel.togglePanel
+
     if (!this.embeddedInDashboard) {
       useListState('venues', [
-        { urlParam: 'q',        signal: this.searchQuery_,      serializer: StringParam },
-        { urlParam: 'envTypes',  signal: this.selectedEnvTypes_, serializer: StringSetParam },
+        { urlParam: 'q', signal: this.searchQuery_, serializer: StringParam },
+        { urlParam: 'envTypes', signal: this.selectedEnvTypes_, serializer: StringSetParam }
       ])
     }
-
-    afterNextRender(() => {
-      const q = window.matchMedia('(max-width: 768px)')
-      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false) })
-    })
   }
 
   ngOnInit(): void {
     void this.venueData.ensureLoaded()
-    this.heroFab.setPageActions(
-      [{ labelKey: 'add_venue', icon: 'plus', run: () => this.onAddPlace() }],
-      'replace'
-    )
+    this.heroFab.setPageActions([{ labelKey: 'add_venue', icon: 'plus', run: () => this.onAddPlace() }], 'replace')
   }
 
   ngOnDestroy(): void {
@@ -117,8 +121,7 @@ export class VenueListComponent implements OnInit, OnDestroy {
   }
 
   protected togglePanel(): void {
-    this.isPanelOpen_.update((v) => !v)
-    setPanelOpen('venues', this.isPanelOpen_())
+    this.togglePanelState_()
   }
 
   protected onCarouselHeaderChange(index: number): void {
@@ -142,7 +145,9 @@ export class VenueListComponent implements OnInit, OnDestroy {
 
   /** Visible venue IDs for header select-all. */
   protected filteredVenueIds_ = computed(() =>
-    this.filteredVenues_().map(v => v._id ?? '').filter(Boolean)
+    this.filteredVenues_()
+      .map((v) => v._id ?? '')
+      .filter(Boolean)
   )
 
   protected filteredVenues_ = computed(() => {
@@ -159,9 +164,7 @@ export class VenueListComponent implements OnInit, OnDestroy {
     if (selectedEnv.size > 0) {
       list = list.filter((v) => selectedEnv.has(v.environment_type_))
     }
-    return [...list].sort((a, b) =>
-      (a.name_hebrew ?? '').localeCompare(b.name_hebrew ?? '', 'he')
-    )
+    return [...list].sort((a, b) => (a.name_hebrew ?? '').localeCompare(b.name_hebrew ?? '', 'he'))
   })
 
   protected envTypeLabel(env: EnvironmentType): string {
@@ -199,7 +202,7 @@ export class VenueListComponent implements OnInit, OnDestroy {
     const field = event.field as VenueBulkField
     const venues = this.venueData.allVenues_()
     for (const id of event.ids) {
-      const item = venues.find(v => v._id === id)
+      const item = venues.find((v) => v._id === id)
       if (!item) continue
       if (field === 'environment_type_') {
         void this.venueData.updateVenue({ ...item, environment_type_: event.value as EnvironmentType })
@@ -210,7 +213,7 @@ export class VenueListComponent implements OnInit, OnDestroy {
   protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
     if (ids.length === 0) return
     if (!this.requireAuthService.requireAuth()) return
-    if (!await this.confirmModal.open(`למחוק ${ids.length} מיקומים?`, { variant: 'danger' })) return
+    if (!(await this.confirmModal.open(`למחוק ${ids.length} מיקומים?`, { variant: 'danger' }))) return
     for (const id of ids) {
       this.deletingId_.set(id)
       try {
@@ -226,7 +229,8 @@ export class VenueListComponent implements OnInit, OnDestroy {
 
   async onDelete(item: VenueProfile): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return
-    if (!await this.confirmModal.open('למחוק את המיקום "' + (item.name_hebrew ?? '') + '"?', { variant: 'danger' })) return
+    if (!(await this.confirmModal.open('למחוק את המיקום "' + (item.name_hebrew ?? '') + '"?', { variant: 'danger' })))
+      return
     this.deletingId_.set(item._id)
     try {
       await this.venueData.deleteVenue(item._id)
