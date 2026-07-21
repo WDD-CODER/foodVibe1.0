@@ -36,15 +36,15 @@ Dropdown panels across the app have three related issues:
 5. `ng build` passes with 0 errors
 
 ## Atomic Sub-tasks
-- [ ] Find inventory edit product component TS — `Glob src/app/pages/inventory/**/*.ts` then read the file that handles category selection
-- [ ] Inventory component TS — locate `onCategorySelect` or `(ngModelChange)` for category field; ensure dropdown panel closes after selection (call `categoryDropdown.close()` or set `closeOnSelect: true`)
-- [ ] Inventory component template — verify category ng-select has `[multiple]="false"` or no `[multiple]` attribute; remove if present
-- [ ] Inventory component TS — locate duplicate-name validator; add exclusion for current product ID: `products.filter(p => p._id !== this.currentProductId).some(p => p.name === value)`
-- [ ] `src/styles.scss` — search for global Escape handler on `.ng-dropdown-panel` or ng-select; if missing, add `ng-select` config `closeOnEsc: true` or global `(document:keydown.escape)` service call
-- [ ] Inventory product SCSS — add `@media (max-width: 620px)` rule for category dropdown: `max-height: 40vh; overflow-y: auto`; add upward-flip logic (position absolute; `bottom: 100%` when near viewport bottom)
-- [ ] Run `ng build` — must be 0 errors
-- [ ] Re-run `/mobile-flow-audit --only inventory-edit-product --only inventory-add-product --only recipe-builder-new-dish`
-- [ ] Update TRIAGE.md — mark Cluster 8 (dropdown-z-index) defects as ✓ resolved (plan 282); mark DEF-IE-02 in single-flow-bug cluster as ✓ resolved (plan 282)
+- [x] Find inventory edit product component TS — `Glob src/app/pages/inventory/**/*.ts` then read the file that handles category selection
+- [x] Inventory component TS — locate `onCategorySelect` or `(ngModelChange)` for category field; ensure dropdown panel closes after selection (call `categoryDropdown.close()` or set `closeOnSelect: true`)
+- [x] Inventory component template — verify category ng-select has `[multiple]="false"` or no `[multiple]` attribute; remove if present
+- [x] Inventory component TS — locate duplicate-name validator; add exclusion for current product ID: `products.filter(p => p._id !== this.currentProductId).some(p => p.name === value)`
+- [x] `src/styles.scss` — search for global Escape handler on `.ng-dropdown-panel` or ng-select; if missing, add `ng-select` config `closeOnEsc: true` or global `(document:keydown.escape)` service call
+- [x] Inventory product SCSS — add `@media (max-width: 620px)` rule for category dropdown: `max-height: 40vh; overflow-y: auto`; add upward-flip logic (position absolute; `bottom: 100%` when near viewport bottom)
+- [x] Run `ng build` — must be 0 errors
+- [x] Re-run `/mobile-flow-audit --only inventory-edit-product --only inventory-add-product --only recipe-builder-new-dish`
+- [x] Update TRIAGE.md — mark Cluster 8 (dropdown-z-index) defects as ✓ resolved (plan 282); mark DEF-IE-02 in single-flow-bug cluster as ✓ resolved (plan 282)
 
 ## Validation (mobile)
 - Viewport 375×812 RTL
