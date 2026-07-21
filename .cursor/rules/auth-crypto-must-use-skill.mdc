@@ -1,0 +1,6 @@
+---
+description: Auth crypto skill
+globs: "**/auth-crypto.ts"
+alwaysApply: false
+---
+Follow `.claude/skills/auth-crypto/SKILL.md` when implementing or refactoring hashing/encryption/tokens in `auth-crypto.ts`.

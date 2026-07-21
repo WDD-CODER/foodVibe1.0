@@ -4,7 +4,7 @@
 > script, rule source, and state store in this project, plus how they connect.
 > Written for a visualization agent — every node is a real file path; every edge is
 > labeled `invokes`, `loads`, `reads`, `writes`, `gates`, or `triggers`.
-> Snapshot date: 2026-07-20.
+> Snapshot date: 2026-07-21 (Plan 298 update — Cursor parity fixes; original snapshot 2026-07-20).
 
 ---
 
@@ -28,12 +28,20 @@ Rule: **a job is never done until the Human validates it** (`docs/agent/job-vali
 | --- | --- | --- |
 | `AGENTS.md` | Both agents | Single source of truth: hard rules, skill triggers, standards index, job validation, Plan Contracts |
 | `CLAUDE.md` | Claude Code only | Imports `AGENTS.md` + addendum: branch guard, session hooks, "Yes chef!" gate |
-| `.cursor/rules/*.mdc` (11 files) | Cursor only | Mirrors of hard rules; key one: `save-plan-must-use-skill.mdc` (alwaysApply) |
+| `.cursor/rules/*.mdc` (23 files) | Cursor only | Two `alwaysApply: true` rules: `save-plan-must-use-skill.mdc`, `contractor-role.mdc` (role/execution-protocol/handoff — folded in from the now-deleted root `.cursorrules`, see `.claude/reports/cursor-claude-parity-audit.md` §0.2). The rest are glob- or Agent-Requested-triggered skill/convention mirrors. |
 | `docs/agent/` (9 files) | Both, load-on-demand | conventions, standards-angular/-security/-domain/-backend/-git, brain-capture, job-validation, pr-check-fix-loop |
 | `_shared/tech-stack.md` | Both | Stack detail |
 | `docs/brain/` | Both | Second brain: `index.md`, `gotchas.md`, `patterns/`, `decisions/` (ADRs), `glossary.md`, `projectbrief.md`, `how-it-works.md` |
 
-Cursor rule files: `add-recipe-must-use-skill`, `angular-component-structure`, `brain-memory-session-start`, `core-angular`, `git-commit-must-use-skill`, `lucide-icons-must-register-in-app-config`, `save-plan-must-use-skill`, `scss-styling-must-use-cssLayer`, `security`, `translation` (`.mdc` each).
+Cursor rule files (10 original + 1 role rule + 12 skill-enforcement rules added by Plan 298):
+`add-recipe-must-use-skill`, `angular-component-structure`, `angular-pipe-logic-must-use-skill`,
+`auth-and-logging-must-use-skill`, `auth-crypto-must-use-skill`, `brain-memory-session-start`,
+`breadcrumb-navigator-must-use-skill`, `brief-detection-must-use-skill`, `contractor-role`,
+`context-management-must-use-skill`, `core-angular`, `elegant-fix-must-use-skill`,
+`git-commit-must-use-skill`, `github-sync-must-use-skill`,
+`lucide-icons-must-register-in-app-config`, `preflight-must-use-skill`, `save-plan-must-use-skill`,
+`scss-styling-must-use-cssLayer`, `security`, `techdebt-must-use-skill`, `translation`,
+`update-docs-must-use-skill`, `worktree-setup-must-use-skill` (`.mdc` each).
 
 ---
 
@@ -50,7 +58,7 @@ Cursor rule files: `add-recipe-must-use-skill`, `angular-component-structure`, `
 | `/brief` | see §6 flow F2; syncs parent plan via save-plan Phase 4 | `git diff/log`, `.claude/todo.md` (retroactive mode) | `.claude/sessions/{session-id}/brief.md` |
 | `/brief-detect` | forces the brief-detection gate (skill) below threshold | user message | — |
 | `/review-it` | Reviewer protocol | newest `sessions/*.md`, parent plan in `plans/`, milestone files | verdict in chat only (never `[x]`, never commits) |
-| `/ship` | invokes `/review`; runs `scripts/session-manifest-ship.py` (multi-worktree), `scripts/brain-review-check.mjs --scope=full` (feature-complete path) | `.claude/.session-state-path`, brief Done-when | commit; marks `.claude/todo.md` + plan `[x]`; `docs/brain/**` (auto-writes on `Y`, unless `no brain`); session-state file |
+| `/ship` | Phase 0 classifies FAST/ULTRA-TRIVIAL/REGULAR first (`/ship fast`\|`regular` overrides); REGULAR invokes `/review`; runs `scripts/session-manifest-ship.py` (multi-worktree), `scripts/brain-review-check.mjs --scope=full` (feature-complete path) | `.claude/.session-state-path`, brief Done-when | commit; marks `.claude/todo.md` + plan `[x]`; `docs/brain/**` (auto-writes on `Y`, unless `no brain`; skipped by default on FAST/ULTRA-TRIVIAL); session-state file |
 | `/done` | job-validation Path B close-out | `.claude/todo.md`, parent plan | marks `[x]` on Human confirm |
 | `/review` | standalone review pass (used by `/ship` Phase 2) | session diff | report only |
 | `/end-session` | alias territory of `/ship` ("wrap up") | — | — |
@@ -81,31 +89,48 @@ Cursor rule files: `add-recipe-must-use-skill`, `angular-component-structure`, `
 | `deploy-github-pages` | wraps deploy skill |
 | `fix-pr-checks` | same loop as Claude Code version |
 | `done` | job-validation close-out (Cursor side) |
-| `quick-chat` | lightweight Q&A mode |
+| `ship` | redirect stub → `.claude/commands/ship.md` (same pipeline, incl. Phase 0 lanes below); exists purely so `/ship` autocompletes in Cursor's palette — Cursor's agent already followed the Claude Code file directly even before this stub existed |
+
+**Added by Plan 298** (same one-line redirect-stub pattern as `done`/`fix-pr-checks`/`ship` —
+palette discoverability only, no new logic): `feat`, `fix`, `plan`, `refactor`, `security`,
+`review`, `review-it`, `brief`, `brief-detect`, `docs-refresh`, `cleanup`, `sweep-stale-todos`,
+`evaluate-me`.
+
+**Removed by Plan 298:** `quick-chat` — was a dead stub ("Retired — three-agent cutover").
+
+**Deliberately not stubbed** (subagent/Playwright-MCP dependent — Cursor's equivalent, if any,
+needs its own design pass, not a copy-paste redirect): `mobile-flow-audit`, `render-flow-audit`,
+`auto-solve`. See `.claude/reports/cursor-claude-parity-audit.md` §1.
 
 ---
 
 ## 4. Skills (`.claude/skills/*/SKILL.md`) — shared by both agents
 
-| Skill | Trigger | Key connections |
-| --- | --- | --- |
-| `save-plan` | Plan Contract pasted / "save the plan" / plan not yet under `plans/` | runs `scripts/plan-name-similarity.mjs`; writes `plans/NNN-slug.plan.md` + `.claude/todo.md`; `.claude/.plan-write-ack` handshake with `plan-write-guard.sh`; Phase 4 = mid-flight brief↔plan sync |
-| `brief-detection` | 3+ structured H2 markers in first message | gates execution → routes to `/feat` (option b) or discussion |
-| `add-recipe` | recipe/dish from image/URL/text | writes RECIPE_LIST / DISH_LIST ledger |
-| `angularComponentStructure` | any component class work | class structure + CRDUL ordering |
-| `angular-pipe-logic` | pipe/directive work | — |
-| `auth-and-logging` | guards, interceptors, HTTP CRUD | pairs with `standards-security.md` |
-| `auth-crypto` | `auth-crypto.ts` hashing/tokens | — |
-| `breadcrumb-navigator` | new subtree / structural change | maintains `breadcrumbs.md` files |
-| `context-management` | `/checkpoint` mid-task | session handoff before context exhaustion |
-| `cssLayer` | any `.scss`/`.css` edit | `.c-*` engine placement, token tiers |
-| `deploy-github-pages` | explicit deploy request | — |
-| `elegant-fix` | after hacky fix / duplicate logic | — |
-| `github-sync` | session start, once per day | writes `notes/github-sync/YYYY-MM-DD.md` |
-| `preflight` | before dev server / browser / DB workflows | env check |
-| `techdebt` | end of session / before PR / audit | — |
-| `update-docs` | after significant features / before PR | — |
-| `worktree-setup` | "setup worktree" (explicit only) | — |
+| Skill | Trigger | Key connections | Cursor `.mdc` |
+| --- | --- | --- | --- |
+| `save-plan` | Plan Contract pasted / "save the plan" / plan not yet under `plans/` | runs `scripts/plan-name-similarity.mjs`; writes `plans/NNN-slug.plan.md` + `.claude/todo.md`; `.claude/.plan-write-ack` handshake with `plan-write-guard.sh`; Phase 4 = mid-flight brief↔plan sync | `save-plan-must-use-skill` (pre-existing) |
+| `brief-detection` | 3+ structured H2 markers in first message | gates execution → routes to `/feat` (option b) or discussion | `brief-detection-must-use-skill` (Plan 298) — closes the "no Cursor enforcement" half of known inconsistency #5 below; the routing race itself is unchanged |
+| `add-recipe` | recipe/dish from image/URL/text | writes RECIPE_LIST / DISH_LIST ledger | `add-recipe-must-use-skill` (pre-existing) |
+| `angularComponentStructure` | any component class work | class structure + CRDUL ordering | `angular-component-structure` (pre-existing) |
+| `angular-pipe-logic` | pipe/directive work | — | `angular-pipe-logic-must-use-skill` (Plan 298) |
+| `auth-and-logging` | guards, interceptors, HTTP CRUD | pairs with `standards-security.md` | `auth-and-logging-must-use-skill` (Plan 298) |
+| `auth-crypto` | `auth-crypto.ts` hashing/tokens | — | `auth-crypto-must-use-skill` (Plan 298) |
+| `breadcrumb-navigator` | new subtree / structural change | maintains `breadcrumbs.md` files | `breadcrumb-navigator-must-use-skill` (Plan 298) |
+| `context-management` | `/checkpoint` mid-task | session handoff before context exhaustion | `context-management-must-use-skill` (Plan 298) — best-effort, no `PreCompact`-hook equivalent in Cursor |
+| `cssLayer` | any `.scss`/`.css` edit | `.c-*` engine placement, token tiers | `scss-styling-must-use-cssLayer` (pre-existing) |
+| `deploy-github-pages` | explicit deploy request | — | wraps via `.cursor/commands/deploy-github-pages.md` (pre-existing) |
+| `elegant-fix` | after hacky fix / duplicate logic | — | `elegant-fix-must-use-skill` (Plan 298) |
+| `github-sync` | session start, once per day | writes `notes/github-sync/YYYY-MM-DD.md` | `github-sync-must-use-skill` (Plan 298) — best-effort, no `SessionStart`-hook equivalent in Cursor |
+| `preflight` | before dev server / browser / DB workflows | env check | `preflight-must-use-skill` (Plan 298) |
+| `techdebt` | end of session / before PR / audit | — | `techdebt-must-use-skill` (Plan 298) |
+| `update-docs` | after significant features / before PR | — | `update-docs-must-use-skill` (Plan 298) |
+| `worktree-setup` | "setup worktree" (explicit only) | — | `worktree-setup-must-use-skill` (Plan 298) |
+
+Before Plan 298, only 4 of these 17 skills had any Cursor-side `.mdc` enforcement (`save-plan`,
+`add-recipe`, `angularComponentStructure`, `cssLayer`) — `brief-detection` had none despite being
+implicated in known inconsistency #5 below. The other 12 existed only as files nothing in Cursor
+proactively pointed at. See `.claude/reports/cursor-claude-parity-audit.md` §2 for the severity
+ranking behind the fix order.
 
 ---
 
@@ -190,14 +215,17 @@ Human describes feature
 ### F3 — Ship pipeline (`/ship`)
 
 ```
-Phase 1  ng build            — unconditional hard stop on fail
-Phase 2  /review             — one fix-and-recheck cycle max (or --skip-review "reason")
+Phase 0  lane classification — FAST / ULTRA-TRIVIAL / REGULAR by diff size + sensitive-path check; /ship fast|regular overrides
+Phase 1  ng build            — unconditional hard stop on fail, all lanes
+Phase 2  /review             — REGULAR: one fix-and-recheck cycle max (or --skip-review "reason"); FAST/ULTRA-TRIVIAL: eslint --fix + single diff read instead, brain-mining skipped too
 Phase 3  manifest check      — >1 worktree: session-manifest-ship.py; ≤1 worktree: branch/HEAD-drift check (baseline captured at ship start)
-Phase 4  approval gate       — visual tree; Human Y = job validation
+Phase 4  approval gate       — REGULAR: visual tree, Human Y = job validation, separate Phase 4.5 wait
+                                FAST: same tree, single Y also answers Phase 4.5 (merge/later/open-pr-only)
+                                ULTRA-TRIVIAL: no wait — auto-commit+push, tree printed as receipt after
          on Y (hard order): mark todos/plan [x] → write approved brain drafts
                             → git add listed paths → one commit → rename branch → push if asked
          commit-vs-PR judgment: brief Done-when met → PR; else checkpoint (no PR); ad-hoc → ask
-Phase 4.5 Merge Gate         — mandatory after any successful push (standards-git.md)
+Phase 4.5 Merge Gate         — mandatory after any successful push (standards-git.md); folded into Phase 4's single Y for FAST lane
          replies: merge | later | open-pr-only (brain draft auto-writes; add "no brain" to opt out, "brain edit …" to revise)
 Phase 5  session-state write — target from .claude/.session-state-path
 Phase 6  (todo sync already done in Phase 4)
@@ -269,6 +297,7 @@ pre-commit hooks    --gate--> every commit (no-semi, secret-scan, security-grep)
 2. **Convention fork** — `/plan`, `/feat`, `/review-it` describe a "new convention" `plans/[feature]_v[N].md`; save-plan, `plan-write-guard.sh`, and `plan-name-similarity.mjs` only recognize `NNN-slug.plan.md` (`*.plan.md` suffix). Zero files on disk use the `_v[N]` form — and any that did would bypass both the guard and the similarity check.
 3. **Duplicate NNN** — pairs exist for 234, 239, 241, 247, 248, 250, 259, 268 (parallel sessions/worktrees defeat the 60-second collision guard).
 4. **Unnumbered strays** — `plans/nightly-audit-implementation.plan.md`, `plans/tofix.md_verification_report_b26bdf9a.plan.md`, `plans/unused-*.plan.md`.
-5. **brief-detection vs save-plan race** — a pasted Plan Contract contains the same H2 markers that trigger brief-detection; option `b` routes straight to `/feat` execution without ever mentioning save-plan.
+5. **brief-detection vs save-plan race** — a pasted Plan Contract contains the same H2 markers that trigger brief-detection; option `b` routes straight to `/feat` execution without ever mentioning save-plan. **Unchanged by Plan 298** — `brief-detection-must-use-skill.mdc` now makes Cursor aware of the skill (closing the discoverability gap), but the routing bug inside the skill itself is untouched, so the race can now happen in Cursor too, not just Claude Code.
 6. **No ledger integrity check** — nothing verifies that plan paths referenced in `.claude/todo.md` / briefs actually exist (would have caught #1 immediately).
-7. **Cursor enforcement is advisory** — `plan-write-guard.sh` is a Claude Code hook; Cursor only has the `.mdc` rule text. Shared pre-commit hooks are the only hard gate Cursor passes through.
+7. **Cursor enforcement is advisory** — `plan-write-guard.sh` is a Claude Code hook; Cursor only has the `.mdc` rule text. Shared pre-commit hooks are the only hard gate Cursor passes through. Plan 298 grew `.mdc` coverage from 10 to 23 files (12 skills gained enforcement that had none), which narrows this gap in breadth but doesn't change its kind — `.mdc` rules are still advisory (the agent has to notice and follow them), not a hard gate the way a Claude Code hook is. `context-management` and `github-sync` in particular have no real Cursor equivalent to the `PreCompact`/`SessionStart` hooks they rely on in Claude Code — their new rules are explicitly best-effort.
+8. **Legacy `.cursorrules` removed** — the root `.cursorrules` file (duplicated content already in `.cursor/rules/*.mdc`) was folded into `.cursor/rules/contractor-role.mdc` and deleted by Plan 298. If you're reading an old session/plan file that references `.cursorrules`, that's historical — the live pointer is `.cursor/rules/contractor-role.mdc`.
