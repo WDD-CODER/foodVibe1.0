@@ -286,18 +286,18 @@ brief-detection     --gates--> structured pasted briefs; --routes--> /feat | dis
 job-validation      --gates--> marking any [x]; --requires--> Human done / ship Y
 brain-capture.md    --gates--> any docs/brain write (shown, then auto-writes; "no brain" opts out)
 standards-git.md    --gates--> post-push (Merge Gate, mandatory)
-pre-commit hooks    --gate--> every commit (no-semi, secret-scan, security-grep) [shared with Cursor]
+pre-commit hooks    --gate--> every commit (no-semi, secret-scan, security-grep, plan-ledger-check) [shared with Cursor]
 ```
 
 ---
 
 ## 9. Known inconsistencies (as of 2026-07-20 — flag these in the visual)
 
-1. **Ghost plan 285** — `.claude/todo.md` tracks `plans/285-ai-menu-phase1.plan.md` with ~22 `[x]` items; the file does not exist. Proof the persist gate was bypassed.
-2. **Convention fork** — `/plan`, `/feat`, `/review-it` describe a "new convention" `plans/[feature]_v[N].md`; save-plan, `plan-write-guard.sh`, and `plan-name-similarity.mjs` only recognize `NNN-slug.plan.md` (`*.plan.md` suffix). Zero files on disk use the `_v[N]` form — and any that did would bypass both the guard and the similarity check.
+1. **Ghost plan 285 (closed by Plan 291 M7)** — `plans/285-ai-menu-phase1.plan.md` reconstructed from todo-archive history; ledger check should no longer hard-fail on this path.
+2. **Convention fork (closed by Plan 291 M3)** — `/plan`, `/feat`, `/review-it` previously described a dead `plans/[feature]_vN.md`-style name; tooling only recognized `NNN-slug.plan.md`. Commands now align to `plans/NNN-slug.plan.md` only.
 3. **Duplicate NNN** — pairs exist for 234, 239, 241, 247, 248, 250, 259, 268 (parallel sessions/worktrees defeat the 60-second collision guard).
 4. **Unnumbered strays** — `plans/nightly-audit-implementation.plan.md`, `plans/tofix.md_verification_report_b26bdf9a.plan.md`, `plans/unused-*.plan.md`.
-5. **brief-detection vs save-plan race** — a pasted Plan Contract contains the same H2 markers that trigger brief-detection; option `b` routes straight to `/feat` execution without ever mentioning save-plan. **Unchanged by Plan 298** — `brief-detection-must-use-skill.mdc` now makes Cursor aware of the skill (closing the discoverability gap), but the routing bug inside the skill itself is untouched, so the race can now happen in Cursor too, not just Claude Code.
-6. **No ledger integrity check** — nothing verifies that plan paths referenced in `.claude/todo.md` / briefs actually exist (would have caught #1 immediately).
+5. **brief-detection vs save-plan race (closed by Plan 291 M4)** — Plan Contract shape (`## Milestones` / `## Atomic Sub-tasks` / `# Plan`) now routes to save-plan before the brief a/b/c gate. Genuine briefs (3+ markers, no Plan Contract shape) keep the a/b/c gate.
+6. **Ledger integrity check (added by Plan 291 M1–M2)** — `scripts/plan-ledger-check.mjs` verifies plan paths referenced in `.claude/todo.md` / briefs exist; wired into `.husky/pre-commit` and `/ship` Phase 1.
 7. **Cursor enforcement is advisory** — `plan-write-guard.sh` is a Claude Code hook; Cursor only has the `.mdc` rule text. Shared pre-commit hooks are the only hard gate Cursor passes through. Plan 298 grew `.mdc` coverage from 10 to 23 files (12 skills gained enforcement that had none), which narrows this gap in breadth but doesn't change its kind — `.mdc` rules are still advisory (the agent has to notice and follow them), not a hard gate the way a Claude Code hook is. `context-management` and `github-sync` in particular have no real Cursor equivalent to the `PreCompact`/`SessionStart` hooks they rely on in Claude Code — their new rules are explicitly best-effort.
 8. **Legacy `.cursorrules` removed** — the root `.cursorrules` file (duplicated content already in `.cursor/rules/*.mdc`) was folded into `.cursor/rules/contractor-role.mdc` and deleted by Plan 298. If you're reading an old session/plan file that references `.cursorrules`, that's historical — the live pointer is `.cursor/rules/contractor-role.mdc`.

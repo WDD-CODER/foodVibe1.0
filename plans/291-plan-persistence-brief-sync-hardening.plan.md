@@ -70,20 +70,20 @@ N is reviewed.
 - `scripts/plan-ledger-check.mjs` (new)
 
 **Atomic Sub-tasks:**
-- [ ] `scripts/plan-ledger-check.mjs` — parse `.claude/todo.md`; for every
+- [x] `scripts/plan-ledger-check.mjs` — parse `.claude/todo.md`; for every
       `plans/....plan.md` path referenced under a `### Plan NNN — ...` heading,
       verify the file exists under `plans/` (recursive, including `plans/1-100/`)
-- [ ] Same script — parse every `.claude/sessions/*/brief.md` `## Parent plan`
+- [x] Same script — parse every `.claude/sessions/*/brief.md` `## Parent plan`
       line (skip `none (ad-hoc)`); verify the referenced file exists
-- [ ] Same script — scan `plans/**/*.plan.md` filenames; report any numeric
+- [x] Same script — scan `plans/**/*.plan.md` filenames; report any numeric
       prefix `NNN` used by 2+ files (duplicate-number report, non-blocking)
-- [ ] Same script — report any `plans/*.plan.md` file whose name does not match
+- [x] Same script — report any `plans/*.plan.md` file whose name does not match
       `NNN-slug.plan.md` or `NNN-R-slug.plan.md` (unnumbered/legacy strays,
       non-blocking)
-- [ ] Exit code: **1** if any referenced plan path is missing (hard failure);
+- [x] Exit code: **1** if any referenced plan path is missing (hard failure);
       **0** with warnings printed for duplicate-number / stray-name findings
       (advisory only, matches `plan-name-similarity.mjs`'s advisory pattern)
-- [ ] `--json` flag for machine-readable output (mirror
+- [x] `--json` flag for machine-readable output (mirror
       `plan-name-similarity.mjs` CLI conventions: `--json`, plain args, no deps
       beyond `fs`/`path`)
 
@@ -100,10 +100,10 @@ before M6 fixes it.
 - `.claude/commands/ship.md`
 
 **Atomic Sub-tasks:**
-- [ ] `.husky/pre-commit` — add `node scripts/plan-ledger-check.mjs` after the
+- [x] `.husky/pre-commit` — add `node scripts/plan-ledger-check.mjs` after the
       existing three `pre-commit-*.mjs` calls (runs for both Claude Code and
       Cursor commits — this is the cross-agent hard gate)
-- [ ] `.claude/commands/ship.md` Phase 1 (Build gate) — add a line: run
+- [x] `.claude/commands/ship.md` Phase 1 (Build gate) — add a line: run
       `node scripts/plan-ledger-check.mjs`; hard failure blocks commit same as
       `ng build` (append to the existing unconditional-stop language, do not
       create a new phase)
@@ -121,14 +121,14 @@ blocked by the hook; then confirm a clean state commits normally.
 - `.claude/commands/feat.md`
 
 **Atomic Sub-tasks:**
-- [ ] `.claude/commands/plan.md` — replace both `/plans/[feature]_v[N].md`
+- [x] `.claude/commands/plan.md` — replace both `/plans/[feature]_v[N].md`
       references (Invokes section + Typical flow step 3) with
       `plans/NNN-slug.plan.md`; delete the trailing "Legacy `plans/NNN-name.plan.md`
       files coexist; new work uses `[feature]_v[N].md`" note (inverted — the
       numbered form *is* the live convention, tooling only supports it)
-- [ ] `.claude/commands/feat.md` — replace `/plans/[feature]_v[N].md` reference
+- [x] `.claude/commands/feat.md` — replace `/plans/[feature]_v[N].md` reference
       (Invokes section) with `plans/NNN-slug.plan.md`
-- [ ] Grep repo for any other `_v[N]` / `_v{N}` plan-path references
+- [x] Grep repo for any other `_v[N]` / `_v{N}` plan-path references
       (`docs/agent/`, `.cursor/`) and align them to the numbered convention
 
 **Verify:** `grep -rn "_v\[N\]\|_v{N}" .claude/commands docs/agent .cursor` returns
@@ -142,16 +142,16 @@ no plan-path hits.
 - `.claude/skills/brief-detection/SKILL.md`
 
 **Atomic Sub-tasks:**
-- [ ] Add a **Plan Contract shape check** ahead of the existing H2-marker
+- [x] Add a **Plan Contract shape check** ahead of the existing H2-marker
       threshold: if the pasted text also contains `## Milestones` or
       `## Atomic Sub-tasks` (or a `# Plan` / `Plan Contract` H1), treat it as a
       Plan Contract, not a brief
-- [ ] On Plan Contract shape detected → do not show the a/b/c gate; instead state
+- [x] On Plan Contract shape detected → do not show the a/b/c gate; instead state
       "Detected Plan Contract — routing to save-plan" and hand off to
       `.claude/skills/save-plan/SKILL.md` Phase 0 directly
-- [ ] Keep existing brief-only routing (a/b/c) unchanged for genuine briefs
+- [x] Keep existing brief-only routing (a/b/c) unchanged for genuine briefs
       (3+ markers, no Milestones/Atomic-Sub-tasks section)
-- [ ] Update the skill's "What this skill does NOT do" list if it now touches
+- [x] Update the skill's "What this skill does NOT do" list if it now touches
       save-plan handoff (still does not write plan files itself — save-plan does)
 
 **Verify:** Paste a synthetic Plan Contract (Goal + Milestones + Atomic Sub-tasks
@@ -167,11 +167,11 @@ a/b/c gate still fires.
 - `.claude/commands/brief.md`
 
 **Atomic Sub-tasks:**
-- [ ] Step 2a (Proactive mode) — after identifying the `## Parent plan` path,
+- [x] Step 2a (Proactive mode) — after identifying the `## Parent plan` path,
       verify the file exists on disk before writing `brief.md`; if it does not
       exist → STOP, tell the Human the named plan is missing, offer:
       "run save-plan now | proceed ad-hoc (parent plan: none) | cancel"
-- [ ] Step 2b (Retroactive mode) — same check when a parent plan is inferred from
+- [x] Step 2b (Retroactive mode) — same check when a parent plan is inferred from
       `.claude/todo.md` context
 
 **Verify:** Manually invoke `/brief` naming a nonexistent `plans/999-fake.plan.md`
@@ -185,12 +185,12 @@ a/b/c gate still fires.
 - `.claude/skills/save-plan/SKILL.md`
 
 **Atomic Sub-tasks:**
-- [ ] Phase 1 Numbering — add: before finalizing `NNN`, also run
+- [x] Phase 1 Numbering — add: before finalizing `NNN`, also run
       `git ls-tree -r origin/main --name-only -- plans/` (fetch not required if
       already fresh) and take the higher of (local max + 1) vs (origin/main max + 1)
       — extends the existing "Worktree: also check main repo `plans/`" rule to
       cover branches that haven't fetched recent origin/main plan additions
-- [ ] Document the failure mode this closes (parallel Cursor/Claude Code sessions
+- [x] Document the failure mode this closes (parallel Cursor/Claude Code sessions
       on different branches both computing `NNN` from stale local state) as a
       one-line comment in the skill file, not a separate doc
 
@@ -205,14 +205,14 @@ the added rule reads correctly and doesn't contradict existing Phase 1 language.
 - `plans/285-ai-menu-phase1.plan.md` (new — reconstructed)
 
 **Atomic Sub-tasks:**
-- [ ] Reconstruct `plans/285-ai-menu-phase1.plan.md` from the existing
+- [x] Reconstruct `plans/285-ai-menu-phase1.plan.md` from the existing
       `.claude/todo.md` "Plan 285 — AI Menu Phase 1" section (22 sub-tasks, all
       already `[x]`) — use the standard Plan Contract shape (`# Plan 285 — AI Menu
       Phase 1`, `## Goal`, `## Atomic Sub-tasks` with the same items, all `[x]`)
-- [ ] Add a one-line provenance note under the H1: reconstructed on 2026-07-20
+- [x] Add a one-line provenance note under the H1: reconstructed on 2026-07-20
       from `.claude/todo.md` history; original plan was never persisted (this
       plan, M7)
-- [ ] Run `node scripts/plan-ledger-check.mjs` — confirm the Plan 285 hard
+- [x] Run `node scripts/plan-ledger-check.mjs` — confirm the Plan 285 hard
       failure from M1's baseline run is now resolved
 
 **Verify:** `node scripts/plan-ledger-check.mjs` exits 0 (or only advisory
@@ -223,14 +223,14 @@ of scope for this plan).
 
 ## Done when
 
-- [ ] `node scripts/plan-ledger-check.mjs` exits 0 against current repo state
+- [x] `node scripts/plan-ledger-check.mjs` exits 0 against current repo state
       (Plan 285 resolved; duplicate/stray findings are advisory-only, expected)
-- [ ] Pre-commit hook blocks a commit that introduces a dangling plan reference
+- [x] Pre-commit hook blocks a commit that introduces a dangling plan reference
       (M2 verify reproduced)
-- [ ] No `_v[N]` plan-path convention referenced anywhere in `.claude/commands`,
+- [x] No `_v[N]` plan-path convention referenced anywhere in `.claude/commands`,
       `docs/agent`, or `.cursor`
-- [ ] A synthetic Plan Contract paste routes to save-plan, not the brief a/b/c gate
-- [ ] `ng build` passes (unchanged — this plan touches no Angular code)
+- [x] A synthetic Plan Contract paste routes to save-plan, not the brief a/b/c gate
+- [x] `ng build` passes (unchanged — this plan touches no Angular code)
 
 ## Risk notes
 

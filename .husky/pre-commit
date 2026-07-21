@@ -5,3 +5,4 @@ npx lint-staged
 node scripts/pre-commit-no-semi.mjs
 node scripts/pre-commit-secret-scan.mjs
 node scripts/pre-commit-security-grep.mjs
+node scripts/plan-ledger-check.mjs

@@ -10,6 +10,25 @@ description: Detects structured briefs in user messages and gates execution. Sou
 
 ## Trigger
 
+### Plan Contract shape check (runs FIRST)
+
+Before counting brief H2 markers, inspect the pasted text for Plan Contract shape.
+Treat it as a **Plan Contract** (not a brief) when any of these are true:
+
+- Contains `## Milestones` or `## Atomic Sub-tasks` (case-insensitive heading match)
+- H1 matches `# Plan …` or contains `Plan Contract`
+
+On Plan Contract shape:
+
+```
+Detected Plan Contract — routing to save-plan
+```
+
+Hand off immediately to `.claude/skills/save-plan/SKILL.md` **Phase 0**.
+Do **not** show the a/b/c brief gate. Do **not** write plan files here — save-plan does.
+
+### Brief H2 markers (only if Plan Contract shape did NOT match)
+
 User's first message in a turn contains 3+ of these markdown H2 headers (case-insensitive):
 
 - `## Goal` or `## Objective`
@@ -22,7 +41,7 @@ User's first message in a turn contains 3+ of these markdown H2 headers (case-in
 
 | Markers found | Action |
 |---|---|
-| 3+ | Trigger gate |
+| 3+ (and no Plan Contract shape) | Trigger brief a/b/c gate |
 | 2 | Ambiguous — do NOT auto-gate |
 | 0–1 | Not a brief — no action |
 
@@ -53,11 +72,12 @@ c. Discussion only — no execution
 ## Override
 
 `/brief-detect` or `/gate-brief` forces the gate even below threshold.
+If Plan Contract shape also matches, still route to save-plan (shape check wins).
 
 ## What this skill does NOT do
 
 - Does not write or modify code
+- Does not write plan files under `plans/` (hands Plan Contracts to save-plan)
 - Does not consult second-brain (`docs/brain/`) or optional MCP memory tools
-- Does not invoke other agents
+- Does not invoke other agents (save-plan handoff is same-agent skill follow-through)
 - Does not pre-load standards files
-
