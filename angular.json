@@ -59,7 +59,12 @@
                   "maximumError": "28kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "optimization": {
+                "scripts": true,
+                "styles": true,
+                "fonts": false
+              }
             },
             "development": {
               "optimization": false,
@@ -95,7 +100,11 @@
                   "with": "src/environments/environment.gh-pages.ts"
                 }
               ],
-              "optimization": true,
+              "optimization": {
+                "scripts": true,
+                "styles": true,
+                "fonts": false
+              },
               "outputHashing": "all",
               "sourceMap": false,
               "extractLicenses": true,

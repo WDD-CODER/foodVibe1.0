@@ -1,4 +1,4 @@
-﻿# AGENTS.md — FoodVibe 1.0 (tool-agnostic)
+# AGENTS.md — FoodVibe 1.0 (tool-agnostic)
 
 Single source of truth for hard rules, conventions, and skill triggers. Claude Code and Cursor both defer here.
 
@@ -91,9 +91,3 @@ Never skip with “Contractor does not mark.” Detail: `docs/agent/job-validati
 | `docs/agent/job-validation.md` | When a job is done; Human validation; close-out ask; marking todos `[x]` (ship Y or chat `done`) |
 
 Stack detail: `/_shared/tech-stack.md`.
-
-## Enforcement
-
-Enforcement is automated via pre-commit hooks and CI — agents should run `npx eslint --fix` proactively but the hooks are the source of truth.
-
-
