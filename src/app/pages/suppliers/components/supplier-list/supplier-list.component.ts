@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, inject, output, signal, afterNextRender, OnInit, OnDestroy } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  output,
+  signal,
+  OnInit,
+  OnDestroy,
+  WritableSignal
+} from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
@@ -17,7 +27,10 @@ import { LoggingService } from '@services/logging.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
-import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component'
+import {
+  CarouselHeaderComponent,
+  CarouselHeaderColumnDirective
+} from 'src/app/shared/carousel-header/carousel-header.component'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
@@ -25,30 +38,39 @@ import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-ba
 import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { useListState, StringParam, BooleanParam, NumberSetParam } from 'src/app/core/utils/list-state.util'
-import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util'
+import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
 import { HeroFabService } from '@services/hero-fab.service'
 import { getSupplierIds } from '@utils/product-source.util'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 
-const DAY_LABELS = [
-  'day_sun',
-  'day_mon',
-  'day_tue',
-  'day_wed',
-  'day_thu',
-  'day_fri',
-  'day_sat',
-]
+const DAY_LABELS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fri', 'day_sat']
 type SupplierBulkField = 'delivery_days_' | 'lead_time_days_'
 
 @Component({
   selector: 'app-supplier-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CellCarouselComponent, CellCarouselSlideDirective, ListShellComponent, CarouselHeaderComponent, CarouselHeaderColumnDirective, ClickOutSideDirective, ListRowCheckboxComponent, SelectionBarComponent, EmptyStateComponent, RowActionsMenuComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    LucideAngularModule,
+    TranslatePipe,
+    LoaderComponent,
+    CellCarouselComponent,
+    CellCarouselSlideDirective,
+    ListShellComponent,
+    CarouselHeaderComponent,
+    CarouselHeaderColumnDirective,
+    ClickOutSideDirective,
+    ListRowCheckboxComponent,
+    SelectionBarComponent,
+    EmptyStateComponent,
+    RowActionsMenuComponent
+  ],
   templateUrl: './supplier-list.component.html',
   styleUrl: './supplier-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  inputs: ['embeddedInDashboard'],
+  inputs: ['embeddedInDashboard']
 })
 export class SupplierListComponent implements OnInit, OnDestroy {
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
@@ -73,7 +95,8 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   protected editingId_ = signal<string | null>(null)
   protected closingId_ = signal<string | null>(null)
   protected isSavingEdit_ = signal(false)
-  protected isPanelOpen_ = signal(true)
+  protected readonly isPanelOpen_: WritableSignal<boolean>
+  private readonly togglePanelState_: () => void
   protected carouselHeaderIndex_ = signal(0)
   protected selection = new ListSelectionState()
   protected dayLabels = DAY_LABELS
@@ -84,44 +107,43 @@ export class SupplierListComponent implements OnInit, OnDestroy {
       key: 'delivery_days_',
       label: 'delivery_days',
       options: DAY_LABELS.map((label, i) => ({ value: String(i), label })),
-      multi: true,
+      multi: true
     },
     {
       key: 'lead_time_days_',
       label: 'lead_time',
-      options: ['1', '2', '3', '5', '7', '10', '14', '21', '30'].map(d => ({ value: d, label: d })),
-      multi: false,
-    },
+      options: ['1', '2', '3', '5', '7', '10', '14', '21', '30'].map((d) => ({ value: d, label: d })),
+      multi: false
+    }
   ]
 
   constructor() {
-    this.isPanelOpen_.set(getPanelOpen('suppliers'))
+    const panel = useResponsivePanelState('suppliers')
+    this.isPanelOpen_ = panel.isPanelOpen_
+    this.togglePanelState_ = panel.togglePanel
+
     this.buildEditForm()
     if (!this.embeddedInDashboard) {
       useListState('suppliers', [
-        { urlParam: 'q',          signal: this.searchQuery_,   serializer: StringParam },
-        { urlParam: 'days',       signal: this.selectedDays_,  serializer: NumberSetParam },
-        { urlParam: 'linkedOnly', signal: this.hasLinkedOnly_, serializer: BooleanParam },
+        { urlParam: 'q', signal: this.searchQuery_, serializer: StringParam },
+        { urlParam: 'days', signal: this.selectedDays_, serializer: NumberSetParam },
+        { urlParam: 'linkedOnly', signal: this.hasLinkedOnly_, serializer: BooleanParam }
       ])
     }
-
-    afterNextRender(() => {
-      if (typeof window === 'undefined') return
-      const q = window.matchMedia('(max-width: 768px)')
-      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false) })
-    })
   }
 
   ngOnInit(): void {
     if (!this.embeddedInDashboard) {
       this.heroFab.setPageActions(
-        [{
-          labelKey: 'add_supplier',
-          icon: 'plus',
-          run: () => {
-            if (this.requireAuthService.requireAuth()) this.supplierModal.openAdd()
+        [
+          {
+            labelKey: 'add_supplier',
+            icon: 'plus',
+            run: () => {
+              if (this.requireAuthService.requireAuth()) this.supplierModal.openAdd()
+            }
           }
-        }],
+        ],
         'replace'
       )
     }
@@ -140,7 +162,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   protected hasActiveFilters_ = computed(() => {
     const days = this.selectedDays_()
     const linked = this.hasLinkedOnly_()
-    return (days.size > 0) || linked
+    return days.size > 0 || linked
   })
 
   protected filteredSuppliers_ = computed(() => {
@@ -151,30 +173,29 @@ export class SupplierListComponent implements OnInit, OnDestroy {
 
     if (search) {
       list = list.filter(
-        s =>
+        (s) =>
           (s.name_hebrew ?? '').toLowerCase().includes(search) ||
           (s.contact_person_ ?? '').toLowerCase().includes(search)
       )
     }
     if (days.size > 0) {
-      list = list.filter(s => (s.delivery_days_ ?? []).some(d => days.has(d)))
+      list = list.filter((s) => (s.delivery_days_ ?? []).some((d) => days.has(d)))
     }
     if (linkedOnly) {
-      list = list.filter(s => this.linkedProductCount_(s._id) > 0)
+      list = list.filter((s) => this.linkedProductCount_(s._id) > 0)
     }
-    return [...list].sort((a, b) =>
-      (a.name_hebrew ?? '').localeCompare(b.name_hebrew ?? '', 'he')
-    )
+    return [...list].sort((a, b) => (a.name_hebrew ?? '').localeCompare(b.name_hebrew ?? '', 'he'))
   })
 
   /** Visible supplier IDs for header select-all. */
   protected filteredSupplierIds_ = computed(() =>
-    this.filteredSuppliers_().map(s => s._id ?? '').filter(Boolean)
+    this.filteredSuppliers_()
+      .map((s) => s._id ?? '')
+      .filter(Boolean)
   )
 
   protected togglePanel(): void {
-    this.isPanelOpen_.update(v => !v)
-    setPanelOpen('suppliers', this.isPanelOpen_())
+    this.togglePanelState_()
   }
 
   protected onCarouselHeaderChange(index: number): void {
@@ -182,7 +203,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   }
 
   protected toggleDay(day: number): void {
-    this.selectedDays_.update(set => {
+    this.selectedDays_.update((set) => {
       const next = new Set(set)
       if (next.has(day)) next.delete(day)
       else next.add(day)
@@ -202,7 +223,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
       contact_person_: [''],
       delivery_days_: daysArray,
       min_order_mov_: [0, [Validators.required, Validators.min(0)]],
-      lead_time_days_: [0, [Validators.required, Validators.min(0)]],
+      lead_time_days_: [0, [Validators.required, Validators.min(0)]]
     })
   }
 
@@ -220,14 +241,12 @@ export class SupplierListComponent implements OnInit, OnDestroy {
       name_hebrew: s.name_hebrew ?? '',
       contact_person_: s.contact_person_ ?? '',
       min_order_mov_: s.min_order_mov_ ?? 0,
-      lead_time_days_: s.lead_time_days_ ?? 0,
+      lead_time_days_: s.lead_time_days_ ?? 0
     })
   }
 
   protected linkedProductCount_(supplierId: string): number {
-    return this.kitchenState.products_().filter(p =>
-      getSupplierIds(p).includes(supplierId)
-    ).length
+    return this.kitchenState.products_().filter((p) => getSupplierIds(p).includes(supplierId)).length
   }
 
   protected onAdd(): void {
@@ -241,7 +260,13 @@ export class SupplierListComponent implements OnInit, OnDestroy {
 
   protected onRowClick(item: Supplier, event: MouseEvent): void {
     const el = event.target as HTMLElement
-    if (el.closest('button') || el.closest('a') || el.closest('.inline-edit-panel') || el.closest('app-list-row-checkbox')) return
+    if (
+      el.closest('button') ||
+      el.closest('a') ||
+      el.closest('.inline-edit-panel') ||
+      el.closest('app-list-row-checkbox')
+    )
+      return
     if (this.selection.selectionMode()) {
       this.selection.toggle(item._id ?? '')
       return
@@ -294,7 +319,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
         contact_person_: raw.contact_person_ || undefined,
         delivery_days_,
         min_order_mov_: Number(raw.min_order_mov_) || 0,
-        lead_time_days_: Number(raw.lead_time_days_) || 0,
+        lead_time_days_: Number(raw.lead_time_days_) || 0
       }
       await this.supplierData.updateSupplier({ ...supplier, ...payload })
       return true
@@ -344,8 +369,11 @@ export class SupplierListComponent implements OnInit, OnDestroy {
     if (!this.requireAuthService.requireAuth()) return
     const count = this.linkedProductCount_(item._id)
     if (count > 0) {
-      if (!await this.confirmModal.open('supplier_in_use_cannot_delete', { variant: 'warning' })) return
-    } else if (!await this.confirmModal.open('למחוק את הספק "' + (item.name_hebrew ?? '') + '"?', { variant: 'danger' })) return
+      if (!(await this.confirmModal.open('supplier_in_use_cannot_delete', { variant: 'warning' }))) return
+    } else if (
+      !(await this.confirmModal.open('למחוק את הספק "' + (item.name_hebrew ?? '') + '"?', { variant: 'danger' }))
+    )
+      return
     this.deletingId_.set(item._id)
     try {
       await this.supplierData.removeSupplier(item._id)
@@ -359,7 +387,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
     if (ids.length === 0) return
     if (!this.requireAuthService.requireAuth()) return
-    if (!await this.confirmModal.open(`למחוק ${ids.length} ספקים?`, { variant: 'danger' })) return
+    if (!(await this.confirmModal.open(`למחוק ${ids.length} ספקים?`, { variant: 'danger' }))) return
     for (const id of ids) {
       this.deletingId_.set(id)
       try {
@@ -377,7 +405,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
     const field = event.field as SupplierBulkField
     const suppliers = this.supplierData.allSuppliers_()
     for (const id of event.ids) {
-      const supplier = suppliers.find(s => s._id === id)
+      const supplier = suppliers.find((s) => s._id === id)
       if (!supplier) continue
       let updated: Supplier
       if (field === 'delivery_days_') {
@@ -398,6 +426,6 @@ export class SupplierListComponent implements OnInit, OnDestroy {
 
   protected deliveryDaysDisplay(days: number[] | undefined): string {
     if (!days?.length) return '—'
-    return days.map(d => this.translation.translate(DAY_LABELS[d]) || String(d)).join(', ')
+    return days.map((d) => this.translation.translate(DAY_LABELS[d]) || String(d)).join(', ')
   }
 }

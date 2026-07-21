@@ -1,4 +1,13 @@
-import { Component, inject, ChangeDetectionStrategy, signal, computed, OnInit, OnDestroy, afterNextRender } from '@angular/core'
+import {
+  Component,
+  inject,
+  ChangeDetectionStrategy,
+  signal,
+  computed,
+  OnInit,
+  OnDestroy,
+  WritableSignal
+} from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router'
@@ -18,17 +27,31 @@ import { UserService } from '@services/user.service'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
-import { CarouselHeaderComponent, CarouselHeaderColumnDirective } from 'src/app/shared/carousel-header/carousel-header.component'
+import {
+  CarouselHeaderComponent,
+  CarouselHeaderColumnDirective
+} from 'src/app/shared/carousel-header/carousel-header.component'
 import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component'
 import { HeroFabService } from '@services/hero-fab.service'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
 import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
-import { useListState, StringParam, NullableStringParam, FilterRecordParam, BooleanParam } from 'src/app/core/utils/list-state.util'
-import { getPanelOpen, setPanelOpen } from 'src/app/core/utils/panel-preference.util'
+import {
+  useListState,
+  StringParam,
+  NullableStringParam,
+  FilterRecordParam,
+  BooleanParam
+} from 'src/app/core/utils/list-state.util'
+import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
 import { getPricePerUnit, calcBuyPriceGlobal } from 'src/app/core/utils/product-price.util'
-import { getProductValidationStatus, getProductMissingFields, VALIDATION_FIELD_ICONS, ProductValidationStatus } from 'src/app/core/utils/product-validation.util'
+import {
+  getProductValidationStatus,
+  getProductMissingFields,
+  VALIDATION_FIELD_ICONS,
+  ProductValidationStatus
+} from 'src/app/core/utils/product-validation.util'
 import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
 import { NutritionBadgeComponent } from 'src/app/shared/nutrition-badge/nutrition-badge.component'
 import { ProductDataService } from '@services/product-data.service'
@@ -59,11 +82,11 @@ type ProductBulkField = 'categories_' | 'supplierIds_' | 'allergens_' | 'base_un
     SelectionBarComponent,
     EmptyStateComponent,
     NutritionBadgeComponent,
-    RowActionsMenuComponent,
+    RowActionsMenuComponent
   ],
   templateUrl: './inventory-product-list.component.html',
   styleUrl: './inventory-product-list.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InventoryProductListComponent implements OnInit, OnDestroy {
   private readonly kitchenStateService = inject(KitchenStateService)
@@ -86,7 +109,8 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected searchQuery_ = signal<string>('')
   protected sortBy_ = signal<SortField | null>(null)
   protected sortOrder_ = signal<'asc' | 'desc'>('asc')
-  protected isPanelOpen_ = signal<boolean>(getPanelOpen('inventory'))
+  protected readonly isPanelOpen_: WritableSignal<boolean>
+  private readonly togglePanelState_: () => void
   protected expandedFilterCategories_ = signal<Set<string>>(new Set())
   protected allergenPopoverProductId_ = signal<string | null>(null)
   protected allergenExpandAll_ = signal<boolean>(false)
@@ -103,52 +127,49 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     {
       key: 'categories_',
       label: 'category',
-      options: this.metadataRegistry.allCategories_().map(c => ({ value: c, label: c })),
-      multi: true,
+      options: this.metadataRegistry.allCategories_().map((c) => ({ value: c, label: c })),
+      multi: true
     },
     {
       key: 'supplierIds_',
       label: 'supplier',
-      options: this.kitchenStateService.suppliers_().map(s => ({ value: s._id, label: s.name_hebrew })),
-      multi: true,
+      options: this.kitchenStateService.suppliers_().map((s) => ({ value: s._id, label: s.name_hebrew })),
+      multi: true
     },
     {
       key: 'allergens_',
       label: 'allergens',
-      options: this.metadataRegistry.allAllergens_().map(a => ({ value: a, label: a })),
-      multi: true,
+      options: this.metadataRegistry.allAllergens_().map((a) => ({ value: a, label: a })),
+      multi: true
     },
     {
       key: 'base_unit_',
       label: 'unit',
-      options: this.unitRegistry.allUnitKeys_().map(u => ({ value: u, label: u })),
-      multi: false,
-    },
+      options: this.unitRegistry.allUnitKeys_().map((u) => ({ value: u, label: u })),
+      multi: false
+    }
   ])
 
   constructor() {
-    useListState('inventory', [
-      { urlParam: 'q',        signal: this.searchQuery_,    serializer: StringParam },
-      { urlParam: 'sort',     signal: this.sortBy_,         serializer: NullableStringParam },
-      { urlParam: 'order',    signal: this.sortOrder_,      serializer: StringParam },
-      { urlParam: 'filters',  signal: this.activeFilters_,  serializer: FilterRecordParam },
-      { urlParam: 'lowStock',    signal: this.lowStockOnly_,     serializer: BooleanParam },
-      { urlParam: 'nutrition',   signal: this.nutritionFilter_,  serializer: StringParam },
-    ])
+    const panel = useResponsivePanelState('inventory')
+    this.isPanelOpen_ = panel.isPanelOpen_
+    this.togglePanelState_ = panel.togglePanel
 
-    afterNextRender(() => {
-      if (typeof window === 'undefined') return
-      const q = window.matchMedia('(max-width: 768px)')
-      if (q.matches) this.isPanelOpen_.set(false)
-      q.addEventListener('change', (e) => { if (e.matches) this.isPanelOpen_.set(false) })
-    })
+    useListState('inventory', [
+      { urlParam: 'q', signal: this.searchQuery_, serializer: StringParam },
+      { urlParam: 'sort', signal: this.sortBy_, serializer: NullableStringParam },
+      { urlParam: 'order', signal: this.sortOrder_, serializer: StringParam },
+      { urlParam: 'filters', signal: this.activeFilters_, serializer: FilterRecordParam },
+      { urlParam: 'lowStock', signal: this.lowStockOnly_, serializer: BooleanParam },
+      { urlParam: 'nutrition', signal: this.nutritionFilter_, serializer: StringParam }
+    ])
   }
 
   ngOnInit(): void {
     this.heroFab.setPageActions(
       [
         { labelKey: 'add_product', icon: 'plus', run: () => this.router.navigate(['/inventory/add']) },
-        { labelKey: 'ai_product_create_new', icon: 'sparkles', run: () => this.openAiCreateModal() },
+        { labelKey: 'ai_product_create_new', icon: 'sparkles', run: () => this.openAiCreateModal() }
       ],
       'replace'
     )
@@ -166,7 +187,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
         expiry_days_default_: draft.expiry_days_default_,
         // purchase_options_ deliberately omitted: AI unit symbols don't map to UnitRegistry keys
         purchase_options_: [],
-        sources_: [],
+        sources_: []
       }
       const created = await this.productData_.addProduct(payload)
       void this.router.navigate(['/inventory/edit', created._id])
@@ -182,27 +203,27 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     const products = this.kitchenStateService.products_()
     const filters = this.activeFilters_()
     const categories: Record<string, Set<string>> = {}
-    products.forEach(product => {
+    products.forEach((product) => {
       if (product.allergens_?.length) {
         if (!categories['Allergens']) categories['Allergens'] = new Set()
-        product.allergens_.forEach(a => categories['Allergens'].add(a))
+        product.allergens_.forEach((a) => categories['Allergens'].add(a))
       }
       const cats = product.categories_ ?? []
-      cats.forEach(cat => {
+      cats.forEach((cat) => {
         if (!categories['Category']) categories['Category'] = new Set()
         categories['Category'].add(cat)
       })
       const supplierIds = getSupplierIds(product)
-      supplierIds.forEach(id => {
+      supplierIds.forEach((id) => {
         if (!categories['Supplier']) categories['Supplier'] = new Set()
         categories['Supplier'].add(id)
       })
     })
 
-    return Object.keys(categories).map(name => ({
+    return Object.keys(categories).map((name) => ({
       name,
       displayKey: this.categoryDisplayKey(name),
-      options: Array.from(categories[name]).map(option => ({
+      options: Array.from(categories[name]).map((option) => ({
         label: name === 'Supplier' ? this.getSupplierName(option) : option,
         value: option,
         checked_: (filters[name] || []).includes(option)
@@ -212,15 +233,15 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
   protected categoryDisplayKey(internalName: string): string {
     const map: Record<string, string> = {
-      'Category': 'category',
-      'Allergens': 'allergens',
-      'Supplier': 'supplier'
+      Category: 'category',
+      Allergens: 'allergens',
+      Supplier: 'supplier'
     }
     return map[internalName] ?? internalName.toLowerCase()
   }
 
   protected toggleFilterCategory(name: string): void {
-    this.expandedFilterCategories_.update(set => {
+    this.expandedFilterCategories_.update((set) => {
       const next = new Set(set)
       if (next.has(name)) next.delete(name)
       else next.add(name)
@@ -233,8 +254,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   protected onPanelToggled(): void {
-    this.isPanelOpen_.update(v => !v)
-    setPanelOpen('inventory', this.isPanelOpen_())
+    this.togglePanelState_()
   }
 
   protected onCarouselHeaderChange(index: number): void {
@@ -255,11 +275,11 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     const nutritionFilter = this.nutritionFilter_()
 
     if (lowStockOnly) {
-      products = products.filter(p => (p.min_stock_level_ ?? 0) > 0)
+      products = products.filter((p) => (p.min_stock_level_ ?? 0) > 0)
     }
 
     if (showInvalidOnly || showIncompleteOnly) {
-      products = products.filter(p => {
+      products = products.filter((p) => {
         const status = getProductValidationStatus(p)
         if (showInvalidOnly && status === 'invalid') return true
         if (showIncompleteOnly && status === 'incomplete') return true
@@ -268,27 +288,27 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     }
 
     if (nutritionFilter === 'has') {
-      products = products.filter(p => !!p.nutrition_per_100g)
+      products = products.filter((p) => !!p.nutrition_per_100g)
     } else if (nutritionFilter === 'missing') {
-      products = products.filter(p => !p.nutrition_per_100g)
+      products = products.filter((p) => !p.nutrition_per_100g)
     }
 
     // 1. Apply filters
     if (Object.keys(filters).length > 0) {
-      products = products.filter(product => {
+      products = products.filter((product) => {
         return Object.entries(filters).every(([category, selectedValues]) => {
           let productValues: string[] = []
           if (category === 'Allergens') productValues = product.allergens_ || []
           else if (category === 'Category') productValues = product.categories_ ?? []
           else if (category === 'Supplier') productValues = getSupplierIds(product)
-          return selectedValues.some(v => productValues.includes(v))
+          return selectedValues.some((v) => productValues.includes(v))
         })
       })
     }
 
     // 2. Apply search (within filtered results)
     if (search) {
-      products = products.filter(p => (p.name_hebrew ?? '').toLowerCase().includes(search))
+      products = products.filter((p) => (p.name_hebrew ?? '').toLowerCase().includes(search))
     }
 
     // 3. Apply sort
@@ -304,12 +324,13 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
   /** Visible product IDs for header select-all. */
   protected filteredProductIds_ = computed(() =>
-    this.filteredProducts_().map(p => p._id ?? '').filter(Boolean)
+    this.filteredProducts_()
+      .map((p) => p._id ?? '')
+      .filter(Boolean)
   )
 
   private compareProducts(a: Product, b: Product, field: SortField): number {
-    const hebrewCompare = (aStr: string, bStr: string) =>
-      (aStr || '').localeCompare(bStr || '', 'he')
+    const hebrewCompare = (aStr: string, bStr: string) => (aStr || '').localeCompare(bStr || '', 'he')
     switch (field) {
       case 'name':
         return hebrewCompare(a.name_hebrew || '', b.name_hebrew || '')
@@ -335,7 +356,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected setSort(field: SortField): void {
     const current = this.sortBy_()
     if (current === field) {
-      this.sortOrder_.update(o => o === 'asc' ? 'desc' : 'asc')
+      this.sortOrder_.update((o) => (o === 'asc' ? 'desc' : 'asc'))
     } else {
       this.sortBy_.set(field)
       this.sortOrder_.set('asc')
@@ -343,13 +364,13 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   protected toggleAllergenExpandAll(): void {
-    this.allergenExpandAll_.update(v => !v)
+    this.allergenExpandAll_.update((v) => !v)
     this.allergenPopoverProductId_.set(null)
   }
 
   protected toggleAllergenPopover(productId: string): void {
     this.allergenExpandAll_.set(false)
-    this.allergenPopoverProductId_.update(id => (id === productId ? null : productId))
+    this.allergenPopoverProductId_.update((id) => (id === productId ? null : productId))
   }
 
   protected closeAllergenView(clickTarget?: EventTarget | null): void {
@@ -367,11 +388,11 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
   // FILTERING
   protected toggleFilter(categoryName: string, optionValue: string): void {
-    this.activeFilters_.update(prev => {
+    this.activeFilters_.update((prev) => {
       const current = { ...prev }
       const values = current[categoryName] || []
       if (values.includes(optionValue)) {
-        current[categoryName] = values.filter(v => v !== optionValue)
+        current[categoryName] = values.filter((v) => v !== optionValue)
         if (current[categoryName].length === 0) delete current[categoryName]
       } else {
         current[categoryName] = [...values, optionValue]
@@ -389,7 +410,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   protected toggleNutritionFilter(value: 'has' | 'missing'): void {
-    this.nutritionFilter_.update(current => current === value ? 'all' : value)
+    this.nutritionFilter_.update((current) => (current === value ? 'all' : value))
   }
 
   protected isLowStock(product: Product): boolean {
@@ -410,27 +431,28 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   protected toggleShowInvalidOnly(): void {
-    this.showInvalidOnly_.update(v => !v)
+    this.showInvalidOnly_.update((v) => !v)
   }
 
   protected toggleShowIncompleteOnly(): void {
-    this.showIncompleteOnly_.update(v => !v)
+    this.showIncompleteOnly_.update((v) => !v)
   }
 
-  protected hasActiveFilters_ = computed(() =>
-    this.lowStockOnly_() ||
-    this.showInvalidOnly_() ||
-    this.showIncompleteOnly_() ||
-    this.nutritionFilter_() !== 'all' ||
-    Object.values(this.activeFilters_()).some(arr => arr.length > 0)
+  protected hasActiveFilters_ = computed(
+    () =>
+      this.lowStockOnly_() ||
+      this.showInvalidOnly_() ||
+      this.showIncompleteOnly_() ||
+      this.nutritionFilter_() !== 'all' ||
+      Object.values(this.activeFilters_()).some((arr) => arr.length > 0)
   )
 
   protected toggleLowStockOnly(): void {
-    this.lowStockOnly_.update(v => !v)
+    this.lowStockOnly_.update((v) => !v)
   }
 
   protected selectedCountInCategory(category: { options: { checked_: boolean }[] }): number {
-    return category.options.filter(o => o.checked_).length
+    return category.options.filter((o) => o.checked_).length
   }
 
   protected onAddProduct(): void {
@@ -443,7 +465,13 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
   protected onRowClick(product: Product, event: MouseEvent): void {
     const el = event.target as HTMLElement
-    if (el.closest('button') || el.closest('a') || el.closest('.allergen-btn-wrapper') || el.closest('app-list-row-checkbox')) return
+    if (
+      el.closest('button') ||
+      el.closest('a') ||
+      el.closest('.allergen-btn-wrapper') ||
+      el.closest('app-list-row-checkbox')
+    )
+      return
     if (this.selection.selectionMode()) {
       this.selection.toggle(product._id ?? '')
       return
@@ -453,18 +481,22 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
   // DELETE
   protected async onDeleteProduct(_id: string): Promise<void> {
-    if (!await this.confirmModal.open('האם אתה בטוח שברצונך למחוק חומר גלם זה?', { variant: 'danger' })) return
+    if (!(await this.confirmModal.open('האם אתה בטוח שברצונך למחוק חומר גלם זה?', { variant: 'danger' }))) return
     this.deletingId_.set(_id)
     this.kitchenStateService.deleteProduct(_id).subscribe({
-      next: () => { this.deletingId_.set(null) },
-      error: () => { this.deletingId_.set(null) }
+      next: () => {
+        this.deletingId_.set(null)
+      },
+      error: () => {
+        this.deletingId_.set(null)
+      }
     })
   }
 
   protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
     if (ids.length === 0) return
-    if (!await this.confirmModal.open(`למחוק ${ids.length} מוצרים?`, { variant: 'danger' })) return
-    ids.forEach(id => {
+    if (!(await this.confirmModal.open(`למחוק ${ids.length} מוצרים?`, { variant: 'danger' }))) return
+    ids.forEach((id) => {
       this.kitchenStateService.deleteProduct(id).subscribe({ next: () => {}, error: () => {} })
     })
     this.selection.clear()
@@ -472,12 +504,15 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
   protected getSupplierName(supplierId: string): string {
     if (!supplierId) return ''
-    const supplier = this.kitchenStateService.suppliers_().find(s => s._id === supplierId)
+    const supplier = this.kitchenStateService.suppliers_().find((s) => s._id === supplierId)
     return supplier?.name_hebrew ?? supplierId
   }
 
   protected getSupplierNames(ids: string[] | undefined): string {
-    return (ids ?? []).map(id => this.getSupplierName(id)).filter(Boolean).join(', ')
+    return (ids ?? [])
+      .map((id) => this.getSupplierName(id))
+      .filter(Boolean)
+      .join(', ')
   }
 
   protected getProductSupplierNames(product: Product): string {
@@ -485,7 +520,12 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   protected getCategoryDisplay(ids: string[] | undefined): string {
-    return ((ids ?? []).map(id => this.translationService.translate(id)).filter(Boolean).join(', ')) || ''
+    return (
+      (ids ?? [])
+        .map((id) => this.translationService.translate(id))
+        .filter(Boolean)
+        .join(', ') || ''
+    )
   }
 
   /** Price per 1 of the given unit (converted from buy_price_global_ which is per base_unit) */
@@ -499,7 +539,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     const oldPrice = getEffectivePrice(product)
     let newPrice = oldPrice
     if (newUnit !== oldBase) {
-      const opt = (product.purchase_options_ || []).find(o => o.unit_symbol_ === newUnit)
+      const opt = (product.purchase_options_ || []).find((o) => o.unit_symbol_ === newUnit)
       if (opt?.conversion_rate_) {
         newPrice = oldPrice * opt.conversion_rate_
       } else {
@@ -508,8 +548,12 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
         if (baseConv && unitConv) newPrice = oldPrice * (unitConv / baseConv)
       }
     }
-    const newSources = (product.sources_ ?? []).map(s => ({ ...s, price: newPrice }))
-    const updated: Product = { ...product, base_unit_: newUnit, sources_: newSources.length ? newSources : [{ supplierId: '', price: newPrice, addedAt: Date.now() }] }
+    const newSources = (product.sources_ ?? []).map((s) => ({ ...s, price: newPrice }))
+    const updated: Product = {
+      ...product,
+      base_unit_: newUnit,
+      sources_: newSources.length ? newSources : [{ supplierId: '', price: newPrice, addedAt: Date.now() }]
+    }
     this.kitchenStateService.saveProduct(updated).subscribe({ next: () => {}, error: () => {} })
   }
 
@@ -521,7 +565,12 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected async onPriceBlur(product: Product, displayUnit: string, event: Event, inputEl: HTMLInputElement): Promise<void> {
+  protected async onPriceBlur(
+    product: Product,
+    displayUnit: string,
+    event: Event,
+    inputEl: HTMLInputElement
+  ): Promise<void> {
     const newValue = parseFloat((event.target as HTMLInputElement).value) || 0
     const originalValue = this.lastPriceEdit_.value
     if (Math.abs(newValue - originalValue) < 0.001) return
@@ -538,7 +587,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     const field = event.field as ProductBulkField
     const products = this.kitchenStateService.products_()
     for (const id of event.ids) {
-      const product = products.find(p => p._id === id)
+      const product = products.find((p) => p._id === id)
       if (!product) continue
       let updated: Product
       if (field === 'supplierIds_') {
@@ -560,14 +609,19 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected onPriceChange(product: Product, displayUnit: string, value: string | number): void {
     const pricePerUnit = typeof value === 'string' ? parseFloat(value) || 0 : (value as number)
     const buyPriceGlobal = calcBuyPriceGlobal(product, displayUnit, pricePerUnit, this.unitRegistry)
-    const newSources = (product.sources_ ?? []).map(s => ({ ...s, price: buyPriceGlobal }))
-    const updated: Product = { ...product, sources_: newSources.length ? newSources : [{ supplierId: '', price: buyPriceGlobal, addedAt: Date.now() }] }
+    const newSources = (product.sources_ ?? []).map((s) => ({ ...s, price: buyPriceGlobal }))
+    const updated: Product = {
+      ...product,
+      sources_: newSources.length ? newSources : [{ supplierId: '', price: buyPriceGlobal, addedAt: Date.now() }]
+    }
     this.savingPriceId_.set(product._id ?? '')
     this.kitchenStateService.saveProduct(updated).subscribe({
-      next: () => { this.savingPriceId_.set(null) },
-      error: () => { this.savingPriceId_.set(null) }
+      next: () => {
+        this.savingPriceId_.set(null)
+      },
+      error: () => {
+        this.savingPriceId_.set(null)
+      }
     })
   }
-
-
 }
