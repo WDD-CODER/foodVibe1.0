@@ -14,8 +14,8 @@
 ### Plan 255 — Dead Code Cleanup — prod confirm before delete (`plans/255-dead-code-cleanup.plan.md`)
 > Scripts still on disk. Confirm repair / master migration done in prod, then delete.
 
-- [ ] Task 8: Investigate repair script trio (`backup-before-repair.mjs`, `diagnose-broken-refs.mjs`, `repair-recipe-references.mjs`) — confirm repair is complete, then delete all three
-- [ ] Task 9: Investigate migration pair (`migrate-to-master.mjs`, `link-users-to-master.mjs`) — confirm master-layer migration is done in prod, then delete both
+- [x] Task 8: Investigate repair script trio (`backup-before-repair.mjs`, `diagnose-broken-refs.mjs`, `repair-recipe-references.mjs`) — confirm repair is complete, then delete all three
+- [x] Task 9: Investigate migration pair (`migrate-to-master.mjs`, `link-users-to-master.mjs`) — confirm master-layer migration is done in prod, then delete both
 
 ---
 
