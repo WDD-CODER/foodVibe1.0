@@ -11,13 +11,6 @@
 
 ---
 
-### Plan 289 — App Load Optimization — remaining verify (`plans/289-app-load-optimization.plan.md`)
-> M4–M5 shipped. Audit: **6.1 already in code** (`Promise.all` in `generic.js`) — belongs in §3 below; **6.2** is the real verify leftover.
-
-- [x] 6.2 Manual: trash empty-all + backup-import still correct; contract (`X-Confirm-Replace`) unchanged
-
----
-
 ### Plan 255 — Dead Code Cleanup — prod confirm before delete (`plans/255-dead-code-cleanup.plan.md`)
 > Scripts still on disk. Confirm repair / master migration done in prod, then delete.
 
