@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const mongoose = require('mongoose');
-const { verifyToken, requireAdmin } = require('../middleware/auth');
+const { verifyToken } = require('../middleware/auth');
 const dns = require('node:dns').promises;
 
 const PRIVATE_IP_RANGES = [
@@ -103,6 +103,61 @@ const CANONICAL_UNITS = new Set([
 
 const RECIPE_TYPES = new Set(['dish', 'preparation']);
 
+// Common non-canonical unit words Gemini sometimes substitutes for a
+// count-based ingredient (e.g. "4 cloves of garlic" -> unit: "clove").
+// Mapped to "unit" — the canonical key for countable ingredients — instead
+// of failing validation and discarding an otherwise-correct recipe.
+const UNIT_SYNONYMS = {
+  clove: 'unit', cloves: 'unit',
+  piece: 'unit', pieces: 'unit',
+  slice: 'unit', slices: 'unit',
+  leaf: 'unit', leaves: 'unit',
+  stalk: 'unit', stalks: 'unit',
+  sprig: 'unit', sprigs: 'unit',
+  can: 'unit', cans: 'unit',
+  bunch: 'unit', bunches: 'unit',
+};
+
+/**
+ * Rewrites known non-canonical unit synonyms to their canonical key in place.
+ */
+function normalizeIngredientUnits(recipe) {
+  if (!recipe || !Array.isArray(recipe.ingredients)) return;
+  for (const ing of recipe.ingredients) {
+    if (!ing || typeof ing.unit !== 'string') continue;
+    const canonical = UNIT_SYNONYMS[ing.unit.trim().toLowerCase()];
+    if (canonical) ing.unit = canonical;
+  }
+}
+
+/**
+ * Extracts a JSON payload from a Gemini text response. Strips markdown code
+ * fences first; if a direct parse still fails (e.g. Gemini echoed surrounding
+ * prose or a few-shot "prompt:/output:" label instead of returning bare
+ * JSON), falls back to slicing the outermost {...} block and retrying.
+ * Returns { value } on success or { error: 'empty' | 'invalid' } on failure.
+ */
+function extractJsonPayload(raw) {
+  const fencePattern = /```(?:json)?\s*([\s\S]*?)```/i;
+  const fenceMatch = fencePattern.exec(raw);
+  const cleaned = (fenceMatch ? fenceMatch[1] : raw).trim();
+  if (!cleaned) return { error: 'empty' };
+  try {
+    return { value: JSON.parse(cleaned) };
+  } catch {
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    if (start !== -1 && end > start) {
+      try {
+        return { value: JSON.parse(cleaned.slice(start, end + 1)) };
+      } catch {
+        return { error: 'invalid' };
+      }
+    }
+    return { error: 'invalid' };
+  }
+}
+
 /**
  * Validates the shape and unit values of a Gemini-generated AiRecipeDraft.
  * Returns an array of error strings; empty means valid.
@@ -184,6 +239,37 @@ function shotsCol() {
   return mongoose.connection.db.collection(SHOTS_COLLECTION);
 }
 
+// Approved shots are injected verbatim into every user's future /generate
+// prompt (getApprovedShots -> buildFewShotBlock). Since any logged-in user
+// (not just admins) can now submit shots, free-text fields are screened for
+// instruction-like content before an 'approved' shot is allowed in — the
+// same pattern-based check standards-security.md prescribes for scanning
+// untrusted content, applied here to protect *other users'* Gemini calls
+// rather than the agent itself.
+const INJECTION_PATTERNS = [
+  /ignore (all |any )?(previous|prior|above) instructions/i,
+  /disregard (your|the|all) (rules|instructions)/i,
+  /you are now/i,
+  /repeat after me/i,
+  /system prompt/i,
+  /התעלם מ(כל )?ה?הוראות/,
+  /התעלם מההנחיות/,
+  /אתה עכשיו/,
+];
+
+function containsInjectionPattern(text) {
+  return typeof text === 'string' && INJECTION_PATTERNS.some(re => re.test(text));
+}
+
+function scanRecipeDraftForInjection(draft) {
+  if (!draft || typeof draft !== 'object') return false;
+  const fields = [draft.name_hebrew];
+  if (Array.isArray(draft.steps)) fields.push(...draft.steps);
+  if (Array.isArray(draft.ingredients)) fields.push(...draft.ingredients.map(ing => ing?.name));
+  if (Array.isArray(draft.equipment)) fields.push(...draft.equipment.map(eq => eq?.name));
+  return fields.some(containsInjectionPattern);
+}
+
 /**
  * Computes soft quality warnings for a recipe draft without blocking save.
  */
@@ -204,14 +290,30 @@ function computeSoftWarnings(draft) {
   return warnings;
 }
 
+const SHOTS_CAP = 50;
+
 /**
  * Saves a shot to the GEMINI_SHOTS collection. Non-blocking — never throws.
+ * Prunes to the most recent SHOTS_CAP shots (mirrors GEMINI_MENU_SHOTS) —
+ * now that any logged-in user can write here, nothing else bounds growth.
  * Returns the computed warnings array.
  */
-async function saveShot(prompt, draft, status, source) {
+async function saveShot(prompt, draft, status, source, userId) {
   try {
     const warnings = computeSoftWarnings(draft);
-    await shotsCol().insertOne({ prompt, draft, status, source, warnings, createdAt: new Date() });
+    await shotsCol().insertOne({ prompt, draft, status, source, warnings, userId, createdAt: new Date() });
+
+    const count = await shotsCol().countDocuments();
+    if (count > SHOTS_CAP) {
+      const oldest = await shotsCol()
+        .find({})
+        .sort({ createdAt: 1 })
+        .limit(count - SHOTS_CAP)
+        .toArray();
+      const ids = oldest.map(d => d._id);
+      if (ids.length > 0) await shotsCol().deleteMany({ _id: { $in: ids } });
+    }
+
     return warnings;
   } catch {
     return [];
@@ -280,11 +382,20 @@ router.post('/generate', verifyToken, async (req, res) => {
   const shots = await getApprovedShots(2);
 
   try {
+    // Counted here, not on success — this is the actual "action towards
+    // Gemini" the daily budget protects. A guard clause above (missing key,
+    // limit already reached, missing prompt) never reaches this line and so
+    // never counts; anything past this point spent a real Gemini call even
+    // if we later reject its response.
+    await incrementUsage();
+
     const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: buildFewShotBlock(shots) + SYSTEM_PROMPT + prompt.trim() }] }],
+        contents: [{ parts: [{
+          text: buildFewShotBlock(shots) + SYSTEM_PROMPT + '\n\n## הבקשה הנוכחית — החזר JSON בלבד עבורה:\n' + prompt.trim(),
+        }] }],
       }),
       signal: AbortSignal.timeout(30000),
     });
@@ -299,22 +410,17 @@ router.post('/generate', verifyToken, async (req, res) => {
     const data = await geminiRes.json();
     const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
 
-    // Strip markdown fences if Gemini wraps the JSON
-    const fencePattern = /```(?:json)?\s*([\s\S]*?)```/i;
-    const fenceMatch = fencePattern.exec(raw);
-    const cleaned = (fenceMatch ? fenceMatch[1] : raw).trim();
-
-    if (!cleaned) {
+    const parsed = extractJsonPayload(raw);
+    if (parsed.error === 'empty') {
       return res.status(502).json({ error: 'Gemini returned an empty response' });
     }
-
-    let recipe;
-    try {
-      recipe = JSON.parse(cleaned);
-    } catch {
+    if (parsed.error === 'invalid') {
       console.error('[ai/generate] JSON parse failed, raw:', raw);
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
     }
+
+    const recipe = parsed.value;
+    normalizeIngredientUnits(recipe);
 
     const validationErrors = validateRecipeDraft(recipe);
     if (validationErrors.length > 0) {
@@ -322,7 +428,6 @@ router.post('/generate', verifyToken, async (req, res) => {
       return res.status(502).json({ error: 'Gemini returned a malformed recipe', details: validationErrors });
     }
 
-    await incrementUsage();
     return res.json({ recipe });
   } catch (err) {
     if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
@@ -406,6 +511,8 @@ router.post('/parse-text', verifyToken, async (req, res) => {
   }
 
   try {
+    await incrementUsage();
+
     const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -423,24 +530,16 @@ router.post('/parse-text', verifyToken, async (req, res) => {
     const data = await geminiRes.json();
     const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
 
-    const fencePattern = /```(?:json)?\s*([\s\S]*?)```/i;
-    const fenceMatch = fencePattern.exec(raw);
-    const cleaned = (fenceMatch ? fenceMatch[1] : raw).trim();
-
-    if (!cleaned) {
+    const parsed = extractJsonPayload(raw);
+    if (parsed.error === 'empty') {
       return res.status(502).json({ error: 'Gemini returned an empty response' });
     }
-
-    let result;
-    try {
-      result = JSON.parse(cleaned);
-    } catch {
+    if (parsed.error === 'invalid') {
       console.error('[ai/parse-text] JSON parse failed, raw:', raw);
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
     }
 
-    await incrementUsage();
-    return res.json({ result });
+    return res.json({ result: parsed.value });
   } catch (err) {
     if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
       console.error('[ai/parse-text] timeout');
@@ -529,6 +628,8 @@ router.post('/patch-recipe', verifyToken, async (req, res) => {
   const userContent = `CURRENT RECIPE:\n${JSON.stringify(currentRecipe, null, 2)}\n\nUSER INSTRUCTION:\n${instruction.trim()}`;
 
   try {
+    await incrementUsage();
+
     const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -546,28 +647,20 @@ router.post('/patch-recipe', verifyToken, async (req, res) => {
     const data = await geminiRes.json();
     const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
 
-    const fencePattern = /```(?:json)?\s*([\s\S]*?)```/i;
-    const fenceMatch = fencePattern.exec(raw);
-    const cleaned = (fenceMatch ? fenceMatch[1] : raw).trim();
-
-    if (!cleaned) {
+    const parsed = extractJsonPayload(raw);
+    if (parsed.error === 'empty') {
       return res.status(502).json({ error: 'Gemini returned an empty response' });
     }
-
-    let parsed;
-    try {
-      parsed = JSON.parse(cleaned);
-    } catch {
+    if (parsed.error === 'invalid') {
       console.error('[ai/patch-recipe] JSON parse failed, raw:', raw);
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
     }
 
-    if (!parsed.changes || typeof parsed.changes !== 'object') {
+    if (!parsed.value.changes || typeof parsed.value.changes !== 'object') {
       return res.status(502).json({ error: 'Gemini response missing "changes" key' });
     }
 
-    await incrementUsage();
-    return res.json({ changes: parsed.changes });
+    return res.json({ changes: parsed.value.changes });
   } catch (err) {
     if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
       console.error('[ai/patch-recipe] timeout');
@@ -690,6 +783,8 @@ router.post('/generate-menu', verifyToken, async (req, res) => {
   const menuShots = await getApprovedMenuShots(2);
 
   try {
+    await incrementUsage();
+
     const userContent = buildMenuFewShotBlock(menuShots) + rawText;
     const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: 'POST',
@@ -709,25 +804,24 @@ router.post('/generate-menu', verifyToken, async (req, res) => {
     }
 
     const geminiData = await geminiRes.json();
-    let raw = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-    raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+    const raw = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
 
-    let parsed;
-    try {
-      parsed = JSON.parse(raw);
-    } catch {
+    const parsed = extractJsonPayload(raw);
+    if (parsed.error === 'empty') {
+      return res.status(502).json({ error: 'Gemini returned an empty response' });
+    }
+    if (parsed.error === 'invalid') {
       console.error('[ai/generate-menu] JSON parse failed:', raw);
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
     }
 
-    const validationErrors = validateMenuDraft(parsed);
+    const validationErrors = validateMenuDraft(parsed.value);
     if (validationErrors.length > 0) {
       console.error('[ai/generate-menu] validation failed:', validationErrors);
       return res.status(502).json({ error: 'Gemini returned invalid menu draft', details: validationErrors });
     }
 
-    await incrementUsage();
-    return res.json({ menu: parsed });
+    return res.json({ menu: parsed.value });
   } catch (err) {
     if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
       console.error('[ai/generate-menu] timeout');
@@ -804,6 +898,8 @@ router.post('/patch-menu', verifyToken, async (req, res) => {
   }
 
   try {
+    await incrementUsage();
+
     const userMessage = `CURRENT MENU:\n${JSON.stringify(currentMenu, null, 2)}\n\nUSER INSTRUCTION:\n${instruction}`;
 
     const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
@@ -824,24 +920,23 @@ router.post('/patch-menu', verifyToken, async (req, res) => {
     }
 
     const geminiData = await geminiRes.json();
-    let raw = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-    raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+    const raw = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
 
-    let parsed;
-    try {
-      parsed = JSON.parse(raw);
-    } catch {
+    const parsed = extractJsonPayload(raw);
+    if (parsed.error === 'empty') {
+      return res.status(502).json({ error: 'Gemini returned an empty response' });
+    }
+    if (parsed.error === 'invalid') {
       console.error('[ai/patch-menu] JSON parse failed:', raw);
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
     }
 
-    if (!parsed.changes || typeof parsed.changes !== 'object') {
-      console.error('[ai/patch-menu] missing changes key:', parsed);
+    if (!parsed.value.changes || typeof parsed.value.changes !== 'object') {
+      console.error('[ai/patch-menu] missing changes key:', parsed.value);
       return res.status(502).json({ error: 'Gemini returned invalid patch format' });
     }
 
-    await incrementUsage();
-    return res.json({ changes: parsed.changes });
+    return res.json({ changes: parsed.value.changes });
   } catch (err) {
     if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
       console.error('[ai/patch-menu] timeout');
@@ -917,6 +1012,8 @@ router.post('/generate-product', verifyToken, async (req, res) => {
   }
 
   try {
+    await incrementUsage();
+
     const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -935,25 +1032,24 @@ router.post('/generate-product', verifyToken, async (req, res) => {
     }
 
     const geminiData = await geminiRes.json();
-    let raw = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-    raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+    const raw = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
 
-    let parsed;
-    try {
-      parsed = JSON.parse(raw);
-    } catch {
+    const parsed = extractJsonPayload(raw);
+    if (parsed.error === 'empty') {
+      return res.status(502).json({ error: 'Gemini returned an empty response' });
+    }
+    if (parsed.error === 'invalid') {
       console.error('[ai/generate-product] JSON parse failed:', raw);
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
     }
 
-    const validationErrors = validateProductDraft(parsed);
+    const validationErrors = validateProductDraft(parsed.value);
     if (validationErrors.length > 0) {
-      console.error('[ai/generate-product] validation failed:', validationErrors, parsed);
+      console.error('[ai/generate-product] validation failed:', validationErrors, parsed.value);
       return res.status(502).json({ error: 'Gemini returned invalid product structure', details: validationErrors });
     }
 
-    await incrementUsage();
-    return res.json({ product: parsed });
+    return res.json({ product: parsed.value });
   } catch (err) {
     if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
       console.error('[ai/generate-product] timeout');
@@ -1025,6 +1121,8 @@ router.post('/patch-product', verifyToken, async (req, res) => {
   }
 
   try {
+    await incrementUsage();
+
     const userMessage = `CURRENT PRODUCT:\n${JSON.stringify(currentProduct, null, 2)}\n\nUSER INSTRUCTION:\n${instruction}`;
 
     const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
@@ -1045,24 +1143,23 @@ router.post('/patch-product', verifyToken, async (req, res) => {
     }
 
     const geminiData = await geminiRes.json();
-    let raw = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-    raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+    const raw = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
 
-    let parsed;
-    try {
-      parsed = JSON.parse(raw);
-    } catch {
+    const parsed = extractJsonPayload(raw);
+    if (parsed.error === 'empty') {
+      return res.status(502).json({ error: 'Gemini returned an empty response' });
+    }
+    if (parsed.error === 'invalid') {
       console.error('[ai/patch-product] JSON parse failed:', raw);
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
     }
 
-    if (!parsed.changes || typeof parsed.changes !== 'object') {
-      console.error('[ai/patch-product] missing changes key:', parsed);
+    if (!parsed.value.changes || typeof parsed.value.changes !== 'object') {
+      console.error('[ai/patch-product] missing changes key:', parsed.value);
       return res.status(502).json({ error: 'Gemini returned invalid patch format' });
     }
 
-    await incrementUsage();
-    return res.json({ changes: parsed.changes });
+    return res.json({ changes: parsed.value.changes });
   } catch (err) {
     if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
       console.error('[ai/patch-product] timeout');
@@ -1103,6 +1200,8 @@ router.post('/generate-from-image', verifyToken, async (req, res) => {
   const shots = await getApprovedShots(2);
 
   try {
+    await incrementUsage();
+
     const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1125,21 +1224,17 @@ router.post('/generate-from-image', verifyToken, async (req, res) => {
     const data = await geminiRes.json();
     const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
 
-    const fencePattern = /```(?:json)?\s*([\s\S]*?)```/i;
-    const fenceMatch = fencePattern.exec(raw);
-    const cleaned = (fenceMatch ? fenceMatch[1] : raw).trim();
-
-    if (!cleaned) {
+    const parsed = extractJsonPayload(raw);
+    if (parsed.error === 'empty') {
       return res.status(502).json({ error: 'Gemini returned an empty response' });
     }
-
-    let recipe;
-    try {
-      recipe = JSON.parse(cleaned);
-    } catch {
+    if (parsed.error === 'invalid') {
       console.error('[ai/generate-from-image] JSON parse failed, raw:', raw);
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
     }
+
+    const recipe = parsed.value;
+    normalizeIngredientUnits(recipe);
 
     const validationErrors = validateRecipeDraft(recipe);
     if (validationErrors.length > 0) {
@@ -1147,7 +1242,6 @@ router.post('/generate-from-image', verifyToken, async (req, res) => {
       return res.status(502).json({ error: 'Gemini returned a malformed recipe', details: validationErrors });
     }
 
-    await incrementUsage();
     return res.json({ recipe });
   } catch (err) {
     if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
@@ -1257,6 +1351,8 @@ router.post('/generate-from-url', verifyToken, async (req, res) => {
   const shots = await getApprovedShots(2);
 
   try {
+    await incrementUsage();
+
     const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1274,21 +1370,17 @@ router.post('/generate-from-url', verifyToken, async (req, res) => {
     const data = await geminiRes.json();
     const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
 
-    const fencePattern = /```(?:json)?\s*([\s\S]*?)```/i;
-    const fenceMatch = fencePattern.exec(raw);
-    const cleaned = (fenceMatch ? fenceMatch[1] : raw).trim();
-
-    if (!cleaned) {
+    const parsed = extractJsonPayload(raw);
+    if (parsed.error === 'empty') {
       return res.status(502).json({ error: 'Gemini returned an empty response' });
     }
-
-    let recipe;
-    try {
-      recipe = JSON.parse(cleaned);
-    } catch {
+    if (parsed.error === 'invalid') {
       console.error('[ai/generate-from-url] JSON parse failed, raw:', raw);
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
     }
+
+    const recipe = parsed.value;
+    normalizeIngredientUnits(recipe);
 
     const validationErrors = validateRecipeDraft(recipe);
     if (validationErrors.length > 0) {
@@ -1296,7 +1388,6 @@ router.post('/generate-from-url', verifyToken, async (req, res) => {
       return res.status(502).json({ error: 'Gemini returned a malformed recipe', details: validationErrors });
     }
 
-    await incrementUsage();
     return res.json({ recipe });
   } catch (err) {
     if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
@@ -1315,7 +1406,7 @@ router.post('/generate-from-url', verifyToken, async (req, res) => {
 // Requires a valid JWT.
 // ---------------------------------------------------------------------------
 
-router.post('/shots', verifyToken, requireAdmin, async (req, res) => {
+router.post('/shots', verifyToken, async (req, res) => {
   const { prompt, draft, status, source } = req.body;
 
   if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
@@ -1337,9 +1428,16 @@ router.post('/shots', verifyToken, requireAdmin, async (req, res) => {
     if (errors.length > 0) {
       return res.status(400).json({ saved: false, errors });
     }
+    // Approved shots are injected verbatim (prompt + draft) into every user's
+    // future /generate call — screen for instruction-like content before
+    // anything from any logged-in user enters that shared pool.
+    if (containsInjectionPattern(prompt) || scanRecipeDraftForInjection(draft)) {
+      console.error('[ai/shots] rejected: suspected prompt injection content', { userId: req.user._id });
+      return res.status(400).json({ saved: false, errors: ['content rejected — instruction-like text is not allowed in an approved shot'] });
+    }
   }
 
-  const warnings = await saveShot(prompt.trim(), draft, status, source);
+  const warnings = await saveShot(prompt.trim(), draft, status, source, req.user._id);
   return res.json({ saved: true, warnings });
 });
 

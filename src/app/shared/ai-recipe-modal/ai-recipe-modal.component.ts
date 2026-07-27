@@ -21,10 +21,17 @@ type InputMode = 'text' | 'image' | 'url'
 @Component({
   selector: 'app-ai-recipe-modal',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, TranslatePipe, LoaderComponent, AiDraftEditorComponent, ScrollIndicatorsDirective],
+  imports: [
+    CommonModule,
+    LucideAngularModule,
+    TranslatePipe,
+    LoaderComponent,
+    AiDraftEditorComponent,
+    ScrollIndicatorsDirective
+  ],
   templateUrl: './ai-recipe-modal.component.html',
   styleUrl: './ai-recipe-modal.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AiRecipeModalComponent implements OnInit {
   protected readonly modalService = inject(AiRecipeModalService)
@@ -82,8 +89,9 @@ export class AiRecipeModalComponent implements OnInit {
   }
 
   refreshUsage(): void {
-    this.geminiUsage_.set(getGeminiUsage())           // show local cache instantly
-    fetchGeminiUsageFromServer().then(usage => {       // then update with real server count
+    this.geminiUsage_.set(getGeminiUsage()) // show local cache instantly
+    fetchGeminiUsageFromServer().then((usage) => {
+      // then update with real server count
       this.geminiUsage_.set(usage)
     })
   }
@@ -109,7 +117,11 @@ export class AiRecipeModalComponent implements OnInit {
   onGenerateAgain(): void {
     const draft = this.draft_()
     if (draft) {
-      this.shots.saveShot(this.prompt_(), draft, 'rejected', this.inputMode_()).subscribe()
+      this.shots.saveShot(this.prompt_(), draft, 'rejected', this.inputMode_()).subscribe({
+        error: () => {
+          /* non-blocking */
+        }
+      })
     }
     this.draft_.set(null)
     this.shotWarnings_.set([])
@@ -189,7 +201,8 @@ export class AiRecipeModalComponent implements OnInit {
       if (msg.includes('not found (404)')) return 'ai_recipe_url_not_found'
       if (msg.includes('access denied') || msg.includes('bot protection')) return 'ai_recipe_url_blocked'
       if (msg.includes('server error')) return 'ai_recipe_url_server_error'
-      if (msg.includes('Could not fetch') || msg.includes('resolves to a disallowed')) return 'ai_recipe_url_fetch_failed'
+      if (msg.includes('Could not fetch') || msg.includes('resolves to a disallowed'))
+        return 'ai_recipe_url_fetch_failed'
       if (msg.includes('No usable text')) return 'ai_recipe_url_no_content'
 
       // Gemini response issues
@@ -200,14 +213,20 @@ export class AiRecipeModalComponent implements OnInit {
 
   onDraftApproved(draft: AiRecipeDraft): void {
     this.pendingApprovedDraft_.set(draft)
-    this.shots.saveShot(this.prompt_(), draft, 'approved', this.inputMode_()).subscribe(result => {
-      if (result.warnings?.length) {
-        this.shotWarnings_.set(result.warnings)
-        this.awaitingWarningConfirm_.set(true)
-      } else {
-        this.navigateToBuilder_(draft)
+    // Shot curation is fire-and-forget — reaching the recipe builder must never
+    // depend on (or wait for) whether the background shot save succeeds.
+    this.shots.saveShot(this.prompt_(), draft, 'approved', this.inputMode_()).subscribe({
+      error: () => {
+        /* non-blocking — approval must not depend on shot curation */
       }
     })
+    const warnings = this.shots.computeWarnings(draft)
+    if (warnings.length) {
+      this.shotWarnings_.set(warnings)
+      this.awaitingWarningConfirm_.set(true)
+    } else {
+      this.navigateToBuilder_(draft)
+    }
   }
 
   onConfirmWarnings(): void {
@@ -232,7 +251,11 @@ export class AiRecipeModalComponent implements OnInit {
   onClearDraft(): void {
     const draft = this.draft_()
     if (draft) {
-      this.shots.saveShot(this.prompt_(), draft, 'rejected', this.inputMode_()).subscribe()
+      this.shots.saveShot(this.prompt_(), draft, 'rejected', this.inputMode_()).subscribe({
+        error: () => {
+          /* non-blocking */
+        }
+      })
     }
     this.draft_.set(null)
     this.shotWarnings_.set([])
@@ -295,7 +318,11 @@ export class AiRecipeModalComponent implements OnInit {
   onClose(): void {
     const draft = this.draft_()
     if (draft) {
-      this.shots.saveShot(this.prompt_(), draft, 'rejected', this.inputMode_()).subscribe()
+      this.shots.saveShot(this.prompt_(), draft, 'rejected', this.inputMode_()).subscribe({
+        error: () => {
+          /* non-blocking */
+        }
+      })
     }
     this.modalService.close()
     this.resetLocalState_()
