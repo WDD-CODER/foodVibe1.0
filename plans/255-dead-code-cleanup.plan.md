@@ -38,12 +38,14 @@ Full findings and reasoning: `reports/dead-code-audit.md`
 
 ### Phase 2 — Script Investigation (probable dead — requires a human decision first)
 
-- [ ] Task 8: Investigate repair trio — ask: was the broken-ref repair fully applied in prod?
+- [x] Task 8: Investigate repair trio — ask: was the broken-ref repair fully applied in prod?
   - If YES → delete `scripts/backup-before-repair.mjs`, `scripts/diagnose-broken-refs.mjs`, `scripts/repair-recipe-references.mjs`
   - If NO / unsure → add a comment in each file documenting why it still exists, and add an npm script entry so it is no longer invisible
-- [ ] Task 9: Investigate migration pair — ask: is the master-layer migration complete in production?
+  - Answered 2026-07-27: No / unsure — already satisfied (STATUS comments + `repair:backup`/`repair:diagnose`/`repair:refs` npm entries present)
+- [x] Task 9: Investigate migration pair — ask: is the master-layer migration complete in production?
   - If YES → delete `scripts/migrate-to-master.mjs` and `scripts/link-users-to-master.mjs`
   - If NO / unsure → document status in each file header
+  - Answered 2026-07-27: No / unsure — already satisfied (STATUS comments present in both files)
 - [ ] Task 10: Investigate `scripts/trim-demo-data.mjs` — ask: is demo trimming a recurring operation or a one-time step?
   - If recurring → add `npm run trim-demo` entry in `package.json`
   - If one-time and done → delete

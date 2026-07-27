@@ -10,6 +10,7 @@
 * Human commits and pushes by default. Agents prepare diffs and commit messages; they do not commit/push unless the Human explicitly asks and approves after prep. **Exception:** `/ship`'s own Phase 0 lane gates (FAST / ULTRA-TRIVIAL / REGULAR — see `.claude/commands/ship.md`) count as that explicit approval, including ULTRA-TRIVIAL's zero-confirmation auto-proceed for single-file docs/handoff diffs. Same in both tools — see `.claude/agents/git-agent.md`.
 * `git-agent` prepares diff + commit message only — never runs commit/push itself unless Human explicitly asks and approves after prep.
 * GitHub MCP = read only. Write ops are Human-run unless explicitly overridden.
+* **`gh`/git write ops in agent sessions:** Claude Code scopes agentic shells to a limited `GITHUB_TOKEN` (fine-grained PAT, no push/merge permission on this repo) even though the keyring holds a full-scope `repo`+`workflow` OAuth token (`gho_...`, inactive while `GITHUB_TOKEN` is set). Prefix `git push`, `gh pr create`, and `gh pr merge` with `env -u GITHUB_TOKEN` so they run against the keyring credential instead of 403ing/retrying against the scoped one. Confirm with `gh auth status` if unsure which credential is active. See [[github-token-precedence]] memory for history.
 * Secrets live in `.env` only. Never stage, commit, or print secrets. Never weaken `.gitignore`.
 * Build gate: `ng build` must pass before any commit.
 * Lint gate: `ng lint` must pass before milestone sign-off.

@@ -165,8 +165,8 @@ Remove the extra **sequential** round-trip in the bulk-replace route so trash-cl
 
 ## Atomic Sub-tasks
 
-- [ ] 6.1 `server/routes/generic.js` PUT `/:type` — parallelize `deleteMany` + stillTaken `_id` lookup via `Promise.all` (or equivalent safe concurrent form); keep conflict reassignment
-- [ ] 6.2 Manual: trash empty-all + backup-import still correct; contract unchanged
+- [x] 6.1 `server/routes/generic.js` PUT `/:type` — parallelize `deleteMany` + stillTaken `_id` lookup via `Promise.all` (or equivalent safe concurrent form); keep conflict reassignment
+- [x] 6.2 Manual: trash empty-all + backup-import still correct; contract unchanged
 
 ## Done when
 
