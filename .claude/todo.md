@@ -19,7 +19,7 @@
 - [x] pre-commit security grep + CI review (Brief 2) — historical CI logs expired (90-day retention); security-grep patterns (innerHTML sanitization, PII-in-logs) applied by hand to generic.js/auth.js/clone-master.js/sync-master.js — clean
 - [x] pre-commit security grep + CI review (Brief 3) — same patterns applied to user.service.ts (refreshToken/storeToken/login logging) — no PII values logged, only userId in log context
 - [x] Build + serve verification (Brief 4) — prod build served through Express: SPA deep-route fallback 200s, `/api/` 404 guard returns JSON not index.html, `/api/v1/health` OK
-- [ ] Manual deploy + smoke test
+- [x] Manual deploy + smoke test — confirmed 2026-07-27 by Human: deployed to Render, live URL loads the app, deep routes work, login/data loads correctly
 
 ---
 

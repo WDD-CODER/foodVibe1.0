@@ -88,7 +88,7 @@ const CLONEABLE_TYPES = [
 - [x] Rewrite `render.yaml` — fix buildCommand (npm ci + server install + Angular build); fix MONGO_URI key; JWT_SECRET generateValue; keep existing ALLOWED_ORIGIN; remove hardcoded PORT
 - [x] `package.json` (root) — add `"engines": { "node": ">=20" }`
 - [x] PR + merge `feat/render-deploy` — PR #53, merged 2026-04-04, confirmed via `gh pr view 53`
-- [ ] Manual: set MONGO_URI in Render dashboard; trigger deploy; smoke test
+- [x] Manual: set MONGO_URI in Render dashboard; trigger deploy; smoke test — confirmed 2026-07-27 by Human: deployed, live URL loads, deep routes work, login/data loads correctly
 
 ## Backend Impact
 
