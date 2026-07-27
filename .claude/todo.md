@@ -14,7 +14,7 @@
 ### Plan 289 — App Load Optimization — remaining verify (`plans/289-app-load-optimization.plan.md`)
 > M4–M5 shipped. Audit: **6.1 already in code** (`Promise.all` in `generic.js`) — belongs in §3 below; **6.2** is the real verify leftover.
 
-- [ ] 6.2 Manual: trash empty-all + backup-import still correct; contract (`X-Confirm-Replace`) unchanged
+- [x] 6.2 Manual: trash empty-all + backup-import still correct; contract (`X-Confirm-Replace`) unchanged
 
 ---
 
