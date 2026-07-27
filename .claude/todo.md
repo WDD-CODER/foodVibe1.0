@@ -11,18 +11,6 @@
 
 ---
 
-### Plan 234 — Per-User Collections — ops smoke only (`plans/234-per-user-collections-render-deploy.plan.md`)
-> Code shipped via PR #53. Keep only unverified ops. PR-merge bookkeeping rows moved to §5 DISCARD.
-
-- [x] Run stamp migration against Atlas; verify in Compass — resolved 2026-07-27: not needed. Human checked Compass — every document in `CLONEABLE_TYPES` collections already has a real `userId`; no orphaned pre-migration data exists to convert. Script deliberately **not** restored (see Plan 234 note below).
-- [x] Build verification + manual API test (Brief 2) — `npm run build:render` passed; live CRUD test against `/api/v1/data/:type` confirmed userId-scoped GET/POST and spoof-safe PUT (userId/_masterId in body ignored)
-- [x] pre-commit security grep + CI review (Brief 2) — historical CI logs expired (90-day retention); security-grep patterns (innerHTML sanitization, PII-in-logs) applied by hand to generic.js/auth.js/clone-master.js/sync-master.js — clean
-- [x] pre-commit security grep + CI review (Brief 3) — same patterns applied to user.service.ts (refreshToken/storeToken/login logging) — no PII values logged, only userId in log context
-- [x] Build + serve verification (Brief 4) — prod build served through Express: SPA deep-route fallback 200s, `/api/` 404 guard returns JSON not index.html, `/api/v1/health` OK
-- [x] Manual deploy + smoke test — confirmed 2026-07-27 by Human: deployed to Render, live URL loads the app, deep routes work, login/data loads correctly
-
----
-
 ## 6. KEEP DEFERRED — intentional park
 
 > Do not execute against current policy / product decisions.

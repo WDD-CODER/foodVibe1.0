@@ -132,6 +132,17 @@ function splitPlanSections(text) {
     let end = s + 1 < sectionStarts.length ? sectionStarts[s + 1] : footerStart
     if (end > footerStart) end = footerStart
 
+    // A non-"### Plan" heading (e.g. "## 6. KEEP DEFERRED") between this plan
+    // and the next one must also close the section — otherwise unrelated
+    // sibling content (and any "(deferred)" wording in it) gets absorbed into
+    // this plan's block and corrupts its checkbox/deferred stats.
+    for (let i = start + 1; i < end; i++) {
+      if (/^## /.test(lines[i])) {
+        end = i
+        break
+      }
+    }
+
     const chunk = lines.slice(start, end)
     while (chunk.length && /^\s*$/.test(chunk[chunk.length - 1])) chunk.pop()
     while (chunk.length > 1 && /^---\s*$/.test(chunk[chunk.length - 1])) {
@@ -240,30 +251,22 @@ function appendBlocksToVolumes(blocks, { dryRun: dry, startN = null }) {
 
 function removeSectionsFromTodo(todoText, headingsToRemove) {
   const removeSet = new Set(headingsToRemove)
-  const { sections, lines, sectionStarts, footerStart } = splitPlanSections(todoText)
+  const { sections, lines, sectionStarts } = splitPlanSections(todoText)
 
   if (!sectionStarts.length) return todoText
 
-  const preambleLines = lines.slice(0, sectionStarts[0])
-  const footer = lines.slice(footerStart)
-  const kept = sections.filter(sec => !removeSet.has(sec.heading)).map(sec => sec.full)
+  // Excise only the exact [start, end) line ranges of removed sections, leaving
+  // every other line — including non-"### Plan" content sitting between two
+  // plan sections (e.g. "## 6. KEEP DEFERRED") — completely untouched.
+  const removeRanges = sections
+    .filter(sec => removeSet.has(sec.heading))
+    .map(sec => [sec.start, sec.end])
 
-  let pre = preambleLines.join('\n').replace(/\s*$/, '')
-  if (pre && !/\n---\s*$/.test(pre) && !/^---\s*$/.test(pre)) {
-    pre += '\n\n---'
-  }
+  const isRemoved = i => removeRanges.some(([start, end]) => i >= start && i < end)
 
-  const middle = kept.length
-    ? kept.map(s => s.replace(/\s*$/, '')).join('\n\n---\n\n')
-    : ''
+  const keptLines = lines.filter((_, i) => !isRemoved(i))
 
-  const foot = footer.join('\n').replace(/^\s+/, '')
-  const parts = []
-  if (pre) parts.push(pre)
-  if (middle) parts.push(middle)
-  if (foot) parts.push(foot.startsWith('##') ? foot : foot)
-
-  let out = parts.join('\n\n')
+  let out = keptLines.join('\n')
   out = out.replace(/\n{3,}/g, '\n\n')
   if (!out.endsWith('\n')) out += '\n'
   return out
