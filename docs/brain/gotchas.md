@@ -209,3 +209,13 @@ which covers stale *origin* state but not same-directory local races.
 
 **What to do instead:** Set `optimization.fonts: false` for `production` and `gh-pages` in `angular.json`. Keep the CSS `@import` so browsers still load fonts at runtime when the CDN is available. Self-host fonts only if you need offline runtime too.
 
+---
+
+## `scripts/todo-archive.mjs` section-splitting silently corrupts or drops sibling content
+
+**What hurt:** `splitPlanSections()` only split `.claude/todo.md` on `### Plan` headers. A non-Plan heading sitting between two plan sections (e.g. `## 6. KEEP DEFERRED`) got absorbed into the *preceding* plan's captured text instead of being its own boundary. This silently broke two different things: the swallowed text's literal wording (e.g. `(deferred)`) false-flagged the preceding plan as blocked/deferred, so `isFullyDone()` refused to archive it even when every checkbox was `[x]`.
+
+**Why the obvious fix is wrong:** Narrowing the section boundary (stop at any `## ` heading, not just the next `### Plan`) fixes the false-flagging — but if you stop there, you've introduced a worse bug. `removeSectionsFromTodo()` reconstructed the file from `preamble + kept-sections + footer` only. Once the sibling content is correctly excluded from every section's captured range, it isn't part of *any* section, the preamble, or the footer — so it falls into a gap the reconstruction never accounts for and gets silently deleted the next time a neighboring plan is archived. A partial fix (only the boundary detection) trades a visible bug (false "no all-[x] sections" message) for a silent one (real content vanishing from a tracked file).
+
+**What to do instead:** When a text-splitting function's caller reconstructs the whole document from the parsed pieces, verify the reconstruction accounts for *every* byte of the original — not just the pieces you meant to keep. Prefer excising exact `[start, end)` line ranges of the pieces you're removing from the original line array over rebuilding from `kept.join(...)` fragments; the former can't lose content that was never part of what you're removing. Verify with `--dry-run` before applying, and diff the *unrelated* surrounding content, not just the target section.
+
