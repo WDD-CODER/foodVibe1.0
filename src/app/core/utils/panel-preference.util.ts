@@ -42,17 +42,24 @@ export interface ResponsivePanelState {
  * on every crossing into mobile width, and restores the persisted preference
  * when the viewport crosses back to desktop.
  *
+ * The mobile check on the initial value must happen synchronously, not inside
+ * afterNextRender — the panel's full-viewport backdrop is interactive whenever
+ * this signal reads true, so seeding it true-by-default on mobile (even
+ * briefly, until afterNextRender corrects it) creates a window where that
+ * backdrop can swallow the very first tap on a slow page load, before the
+ * user ever sees anything wrong. See docs/brain/gotchas.md.
+ *
  * Must be called synchronously from a component constructor — it relies on
  * afterNextRender's ambient injection context, same as calling inject()
  * directly in a field initializer.
  */
 export function useResponsivePanelState(context: string): ResponsivePanelState {
-  const isPanelOpen_ = signal<boolean>(getPanelOpen(context))
+  const isInitiallyMobile = typeof window !== 'undefined' && window.matchMedia(MOBILE_QUERY).matches
+  const isPanelOpen_ = signal<boolean>(isInitiallyMobile ? false : getPanelOpen(context))
 
   afterNextRender(() => {
     if (typeof window === 'undefined') return
     const q = window.matchMedia(MOBILE_QUERY)
-    if (q.matches) isPanelOpen_.set(false)
     q.addEventListener('change', (e) => {
       isPanelOpen_.set(e.matches ? false : getPanelOpen(context))
     })

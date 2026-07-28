@@ -356,6 +356,96 @@ function buildFewShotBlock(shots) {
   return `## דוגמאות מאושרות מהמשתמש\n${examples}\n\n`;
 }
 
+/**
+ * One attempt at calling Gemini for a recipe draft: dispatch, parse, normalize
+ * units, validate. Counts as a real Gemini call the moment it's dispatched
+ * (incrementUsage), regardless of what happens after — including a caller
+ * retrying this same function again, which counts a second time for the
+ * same reason (see the daily-budget-must-reflect-real-spend logic below).
+ * Returns a discriminated result — never throws.
+ */
+async function callGeminiForRecipe(apiKey, requestBody, timeoutMs, logTag) {
+  await incrementUsage();
+  try {
+    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+
+    if (!geminiRes.ok) {
+      const errBody = await geminiRes.json().catch(() => ({}));
+      const geminiMsg = errBody?.error?.message ?? '';
+      console.error(`${logTag} Gemini API error:`, geminiRes.status, geminiMsg);
+      return { kind: 'gemini_error', status: geminiRes.status, message: geminiMsg };
+    }
+
+    const data = await geminiRes.json();
+    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+
+    const parsed = extractJsonPayload(raw);
+    if (parsed.error === 'empty') return { kind: 'empty' };
+    if (parsed.error === 'invalid') {
+      console.error(`${logTag} JSON parse failed, raw:`, raw);
+      return { kind: 'invalid_json' };
+    }
+
+    const recipe = parsed.value;
+    normalizeIngredientUnits(recipe);
+
+    const validationErrors = validateRecipeDraft(recipe);
+    if (validationErrors.length > 0) {
+      console.error(`${logTag} validation failed:`, validationErrors, 'raw:', raw);
+      return { kind: 'validation_failed', errors: validationErrors };
+    }
+
+    return { kind: 'success', recipe };
+  } catch (err) {
+    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
+      console.error(`${logTag} timeout`);
+      return { kind: 'timeout' };
+    }
+    console.error(logTag, err);
+    return { kind: 'server_error' };
+  }
+}
+
+/**
+ * Retries once when Gemini responded but its content was unusable (bad JSON,
+ * or JSON that fails our schema) — not on API-level errors (bad key, model
+ * overloaded) or timeouts, which a fresh attempt is unlikely to fix. Each
+ * attempt dispatched here is a real Gemini call and is counted independently
+ * by callGeminiForRecipe, never assumed free just because it's a retry.
+ */
+async function callGeminiForRecipeWithRetry(apiKey, requestBody, timeoutMs, logTag) {
+  let result = await callGeminiForRecipe(apiKey, requestBody, timeoutMs, logTag);
+  if (result.kind === 'invalid_json' || result.kind === 'validation_failed') {
+    console.error(`${logTag} retrying once after`, result.kind);
+    result = await callGeminiForRecipe(apiKey, requestBody, timeoutMs, logTag);
+  }
+  return result;
+}
+
+function respondFromRecipeResult(res, result) {
+  switch (result.kind) {
+    case 'success':
+      return res.json({ recipe: result.recipe });
+    case 'gemini_error':
+      return res.status(502).json({ error: `Gemini API error: ${result.status}`, geminiMessage: result.message });
+    case 'empty':
+      return res.status(502).json({ error: 'Gemini returned an empty response' });
+    case 'invalid_json':
+      return res.status(502).json({ error: 'Gemini returned invalid JSON' });
+    case 'validation_failed':
+      return res.status(502).json({ error: 'Gemini returned a malformed recipe', details: result.errors });
+    case 'timeout':
+      return res.status(504).json({ error: 'Gemini request timed out' });
+    default:
+      return res.status(500).json({ error: 'Server error' });
+  }
+}
+
 // ---------------------------------------------------------------------------
 // POST /generate
 // Accepts { prompt: string }, calls Gemini with DB-fetched few-shot examples,
@@ -380,63 +470,14 @@ router.post('/generate', verifyToken, async (req, res) => {
   }
 
   const shots = await getApprovedShots(2);
+  const requestBody = {
+    contents: [{ parts: [{
+      text: buildFewShotBlock(shots) + SYSTEM_PROMPT + '\n\n## הבקשה הנוכחית — החזר JSON בלבד עבורה:\n' + prompt.trim(),
+    }] }],
+  };
 
-  try {
-    // Counted here, not on success — this is the actual "action towards
-    // Gemini" the daily budget protects. A guard clause above (missing key,
-    // limit already reached, missing prompt) never reaches this line and so
-    // never counts; anything past this point spent a real Gemini call even
-    // if we later reject its response.
-    await incrementUsage();
-
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{
-          text: buildFewShotBlock(shots) + SYSTEM_PROMPT + '\n\n## הבקשה הנוכחית — החזר JSON בלבד עבורה:\n' + prompt.trim(),
-        }] }],
-      }),
-      signal: AbortSignal.timeout(30000),
-    });
-
-    if (!geminiRes.ok) {
-      const errBody = await geminiRes.json().catch(() => ({}));
-      const geminiMsg = errBody?.error?.message ?? '';
-      console.error('[ai/generate] Gemini API error:', geminiRes.status, geminiMsg);
-      return res.status(502).json({ error: `Gemini API error: ${geminiRes.status}`, geminiMessage: geminiMsg });
-    }
-
-    const data = await geminiRes.json();
-    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-
-    const parsed = extractJsonPayload(raw);
-    if (parsed.error === 'empty') {
-      return res.status(502).json({ error: 'Gemini returned an empty response' });
-    }
-    if (parsed.error === 'invalid') {
-      console.error('[ai/generate] JSON parse failed, raw:', raw);
-      return res.status(502).json({ error: 'Gemini returned invalid JSON' });
-    }
-
-    const recipe = parsed.value;
-    normalizeIngredientUnits(recipe);
-
-    const validationErrors = validateRecipeDraft(recipe);
-    if (validationErrors.length > 0) {
-      console.error('[ai/generate] validation failed:', validationErrors, 'raw:', raw);
-      return res.status(502).json({ error: 'Gemini returned a malformed recipe', details: validationErrors });
-    }
-
-    return res.json({ recipe });
-  } catch (err) {
-    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      console.error('[ai/generate] timeout');
-      return res.status(504).json({ error: 'Gemini request timed out' });
-    }
-    console.error('[ai/generate]', err);
-    return res.status(500).json({ error: 'Server error' });
-  }
+  const result = await callGeminiForRecipeWithRetry(apiKey, requestBody, 30000, '[ai/generate]');
+  return respondFromRecipeResult(res, result);
 });
 
 // ---------------------------------------------------------------------------
@@ -1198,59 +1239,17 @@ router.post('/generate-from-image', verifyToken, async (req, res) => {
   }
 
   const shots = await getApprovedShots(2);
+  const requestBody = {
+    contents: [{
+      parts: [
+        { text: buildFewShotBlock(shots) + SYSTEM_PROMPT },
+        { inlineData: { mimeType, data: imageBase64 } },
+      ],
+    }],
+  };
 
-  try {
-    await incrementUsage();
-
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          parts: [
-            { text: buildFewShotBlock(shots) + SYSTEM_PROMPT },
-            { inlineData: { mimeType, data: imageBase64 } },
-          ],
-        }],
-      }),
-      signal: AbortSignal.timeout(30000),
-    });
-
-    if (!geminiRes.ok) {
-      console.error('[ai/generate-from-image] Gemini API error:', geminiRes.status);
-      return res.status(502).json({ error: `Gemini API error: ${geminiRes.status}` });
-    }
-
-    const data = await geminiRes.json();
-    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-
-    const parsed = extractJsonPayload(raw);
-    if (parsed.error === 'empty') {
-      return res.status(502).json({ error: 'Gemini returned an empty response' });
-    }
-    if (parsed.error === 'invalid') {
-      console.error('[ai/generate-from-image] JSON parse failed, raw:', raw);
-      return res.status(502).json({ error: 'Gemini returned invalid JSON' });
-    }
-
-    const recipe = parsed.value;
-    normalizeIngredientUnits(recipe);
-
-    const validationErrors = validateRecipeDraft(recipe);
-    if (validationErrors.length > 0) {
-      console.error('[ai/generate-from-image] validation failed:', validationErrors, 'raw:', raw);
-      return res.status(502).json({ error: 'Gemini returned a malformed recipe', details: validationErrors });
-    }
-
-    return res.json({ recipe });
-  } catch (err) {
-    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      console.error('[ai/generate-from-image] timeout');
-      return res.status(504).json({ error: 'Gemini request timed out' });
-    }
-    console.error('[ai/generate-from-image]', err);
-    return res.status(500).json({ error: 'Server error' });
-  }
+  const result = await callGeminiForRecipeWithRetry(apiKey, requestBody, 30000, '[ai/generate-from-image]');
+  return respondFromRecipeResult(res, result);
 });
 
 // ---------------------------------------------------------------------------
@@ -1349,54 +1348,12 @@ router.post('/generate-from-url', verifyToken, async (req, res) => {
   }
 
   const shots = await getApprovedShots(2);
+  const requestBody = {
+    contents: [{ parts: [{ text: buildFewShotBlock(shots) + SYSTEM_PROMPT + '\n\nטקסט לניתוח:\n' + pageText }] }],
+  };
 
-  try {
-    await incrementUsage();
-
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: buildFewShotBlock(shots) + SYSTEM_PROMPT + '\n\nטקסט לניתוח:\n' + pageText }] }],
-      }),
-      signal: AbortSignal.timeout(30000),
-    });
-
-    if (!geminiRes.ok) {
-      console.error('[ai/generate-from-url] Gemini API error:', geminiRes.status);
-      return res.status(502).json({ error: `Gemini API error: ${geminiRes.status}` });
-    }
-
-    const data = await geminiRes.json();
-    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-
-    const parsed = extractJsonPayload(raw);
-    if (parsed.error === 'empty') {
-      return res.status(502).json({ error: 'Gemini returned an empty response' });
-    }
-    if (parsed.error === 'invalid') {
-      console.error('[ai/generate-from-url] JSON parse failed, raw:', raw);
-      return res.status(502).json({ error: 'Gemini returned invalid JSON' });
-    }
-
-    const recipe = parsed.value;
-    normalizeIngredientUnits(recipe);
-
-    const validationErrors = validateRecipeDraft(recipe);
-    if (validationErrors.length > 0) {
-      console.error('[ai/generate-from-url] validation failed:', validationErrors, 'raw:', raw);
-      return res.status(502).json({ error: 'Gemini returned a malformed recipe', details: validationErrors });
-    }
-
-    return res.json({ recipe });
-  } catch (err) {
-    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      console.error('[ai/generate-from-url] timeout');
-      return res.status(504).json({ error: 'Gemini request timed out' });
-    }
-    console.error('[ai/generate-from-url]', err);
-    return res.status(500).json({ error: 'Server error' });
-  }
+  const result = await callGeminiForRecipeWithRetry(apiKey, requestBody, 30000, '[ai/generate-from-url]');
+  return respondFromRecipeResult(res, result);
 });
 
 // ---------------------------------------------------------------------------
