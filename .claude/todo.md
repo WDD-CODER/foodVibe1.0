@@ -9,8 +9,6 @@
 
 > Audit says: do these.
 
----
-
 ## 6. KEEP DEFERRED — intentional park
 
 > Do not execute against current policy / product decisions.

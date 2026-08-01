@@ -4,6 +4,34 @@ Running list. Each entry: what hurt / why the obvious fix is wrong / what to do 
 
 ---
 
+## Flipping a blocklist to an allowlist without reconciling every real client caller
+
+**What hurt:** `server/routes/generic.js` gated the generic data API with a
+`BLOCKED_ENTITY_TYPES` set (deny a few known-bad names, allow everything else).
+Swapping it for an allowlist (`ALL_USER_ENTITY_TYPES`, deny everything not listed) is
+strictly safer against arbitrary collection creation — but `ALL_USER_ENTITY_TYPES` had
+never been the actual source of truth for "what the client calls," because the blocklist
+never needed it to be. Two real, working storage keys —
+`EQUIPMENT_CUSTOM_CATEGORIES` (`equipment-category-registry.service.ts`) and
+`MENU_EVENT_TYPES` (`menu-event-type.service.ts`) — were missing from it and would have
+started 403'ing on the next deploy, despite `ng build` passing and the diff looking complete.
+
+**Why the obvious fix is wrong:** The allowlist file existed before this change and looked
+authoritative (it's already imported elsewhere, e.g. `admin.js`), so it's tempting to trust
+it as complete. Nothing had ever forced it to stay in sync with every literal storage key
+used client-side — a blocklist doesn't care about that list, only an allowlist does.
+
+**What to do instead:** Before flipping any deny-list to an allow-list, grep every literal
+key passed to the relevant client call sites (here:
+`grep -rn "replaceAll(\|query<\|\.put(\|\.post(" src/app/core/services/*.ts`, resolving
+`const`-aliased keys back to their string literals) and diff that set against the
+allowlist. Treat any gap as a hard blocker, not a warning — add the missing entries before
+the allowlist ships, don't discover them from a support ticket.
+
+See also: [[atomic-bulk-replace-with-standalone-fallback]]
+
+---
+
 ## Removing a git worktree from inside itself
 
 **What hurt:** `git worktree remove <path>` fails (or leaves a dangling lock) when the shell's cwd is still inside that worktree — the process holds an open handle on the directory.
