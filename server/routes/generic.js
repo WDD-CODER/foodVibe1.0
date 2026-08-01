@@ -1,16 +1,18 @@
 const { Router } = require('express');
 const mongoose = require('mongoose');
 const { verifyToken, optionalToken } = require('../middleware/auth');
+const { ALL_USER_ENTITY_TYPES } = require('../constants/all-user-entity-types');
 
 const router = Router();
 
 // Write routes (POST/PUT/DELETE) require a valid JWT. Reads are public.
 
-// The auth entity type is managed exclusively by the auth router.
-// Block direct access via the generic data API.
-const BLOCKED_ENTITY_TYPES = new Set(['signed-users-db', 'users', 'GEMINI_SHOTS', 'GEMINI_USAGE']);
+// Only known user-data entity types may be read/written through the generic data API.
+// Everything else (auth's signed-users-db/users, ai.js's GEMINI_SHOTS/GEMINI_USAGE,
+// or any arbitrary string) is rejected — prevents ad-hoc collection creation.
+const ALLOWED_ENTITY_TYPES = new Set(ALL_USER_ENTITY_TYPES);
 router.use('/:type', (req, res, next) => {
-  if (BLOCKED_ENTITY_TYPES.has(req.params.type)) {
+  if (!ALLOWED_ENTITY_TYPES.has(req.params.type)) {
     return res.status(403).json({ error: 'Access to this entity type is not permitted' });
   }
   next();
@@ -149,7 +151,7 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     const { userId: _, _masterId: __, _userModified: ___, ...safeBody } = req.body;
 
     const result = await col(req.params.type).findOneAndUpdate(
-      { _id: req.params.id, userId: req.user.userId },
+      { _id: req.params.id, userId: req.user.userId, _userDeleted: { $ne: true } },
       { $set: { ...safeBody, _userModified: true } },
       { returnDocument: 'after' }
     );
@@ -163,9 +165,59 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
   }
 });
 
+/**
+ * Runs deleteMany + insertMany as one atomic unit for the given userId/docs.
+ * Prefers a real Mongo transaction (works whenever the deployment is a replica set —
+ * Atlas always is). Standalone Mongo (common in local dev) rejects transactions with
+ * error code 20 ("Transaction numbers are only allowed on a replica set member or
+ * mongos"); on that specific error we fall back to a pending-flag swap: insert the new
+ * docs first (flagged), delete the old (unflagged) docs, then clear the flag. A crash
+ * mid-fallback can leave a stray _pendingReplace flag or a brief duplicate window, but
+ * it never leaves the user with an empty collection.
+ */
+async function replaceCollection(type, userId, docs) {
+  let session;
+  try {
+    session = await mongoose.connection.startSession();
+  } catch (err) {
+    return replaceCollectionFallback(type, userId, docs);
+  }
+  try {
+    await session.withTransaction(async () => {
+      await col(type).deleteMany({ userId }, { session });
+      if (docs.length > 0) {
+        await col(type).insertMany(docs, { ordered: true, session });
+      }
+    });
+  } catch (err) {
+    const isStandalone = err.code === 20 || /replica set|mongos/i.test(err.message || '');
+    if (isStandalone) {
+      return replaceCollectionFallback(type, userId, docs);
+    }
+    throw err;
+  } finally {
+    await session.endSession();
+  }
+}
+
+async function replaceCollectionFallback(type, userId, docs) {
+  if (docs.length > 0) {
+    await col(type).insertMany(
+      docs.map(d => ({ ...d, _pendingReplace: true })),
+      { ordered: true }
+    );
+  }
+  await col(type).deleteMany({ userId, _pendingReplace: { $ne: true } });
+  if (docs.length > 0) {
+    await col(type).updateMany({ userId, _pendingReplace: true }, { $unset: { _pendingReplace: '' } });
+  }
+}
+
 // ---------------------------------------------------------------------------
 // PUT /api/v1/data/:type  (no id segment)
-// Replaces the entire collection for the authenticated user — deleteMany + insertMany.
+// Replaces the entire collection for the authenticated user — deleteMany + insertMany,
+// run atomically via replaceCollection() so a mid-request failure/crash can never leave
+// the user with a partially-deleted or empty collection.
 // Body must be an array of entity objects. Each must have _id.
 // ---------------------------------------------------------------------------
 router.put('/:type', verifyToken, async (req, res) => {
@@ -182,34 +234,34 @@ router.put('/:type', verifyToken, async (req, res) => {
       ? entities.map(e => e._id).filter(Boolean)
       : [];
 
-    // Delete this user's docs and check other-user id conflicts in parallel.
-    // Conflict query excludes this userId so it does not race with deleteMany.
-    const [, conflictDocs] = await Promise.all([
-      col(req.params.type).deleteMany({ userId: req.user.userId }),
-      incomingIds.length > 0
-        ? col(req.params.type)
-            .find(
-              { _id: { $in: incomingIds }, userId: { $ne: req.user.userId } },
-              { projection: { _id: 1 } }
-            )
-            .toArray()
-        : Promise.resolve([]),
-    ]);
+    // Conflict query runs before any delete — no race with the eventual deleteMany.
+    const conflictDocs = incomingIds.length > 0
+      ? await col(req.params.type)
+          .find(
+            { _id: { $in: incomingIds }, userId: { $ne: req.user.userId } },
+            { projection: { _id: 1 } }
+          )
+          .toArray()
+      : [];
 
-    if (entities.length > 0) {
-      const stillTaken = new Set(conflictDocs.map(d => d._id));
+    const stillTaken = new Set(conflictDocs.map(d => d._id));
 
-      const docs = entities.map(e => {
-        const { userId: _u, _masterId: _m, _userModified: _um, ...safeEntity } = e;
-        return {
-          ...safeEntity,
-          _id: stillTaken.has(safeEntity._id) ? makeId() : (safeEntity._id || makeId()),
-          userId: req.user.userId,
-          _masterId: null,
-          _userModified: false,
-        };
-      });
-      await col(req.params.type).insertMany(docs, { ordered: false });
+    const docs = entities.map(e => {
+      const { userId: _u, _masterId: _m, _userModified: _um, ...safeEntity } = e;
+      return {
+        ...safeEntity,
+        _id: stillTaken.has(safeEntity._id) ? makeId() : (safeEntity._id || makeId()),
+        userId: req.user.userId,
+        _masterId: null,
+        _userModified: false,
+      };
+    });
+
+    try {
+      await replaceCollection(req.params.type, req.user.userId, docs);
+    } catch (txErr) {
+      console.error('[data/replaceAll] transaction aborted', txErr);
+      return res.status(500).json({ error: 'Replace failed, no changes were made' });
     }
 
     res.json({ ok: true });

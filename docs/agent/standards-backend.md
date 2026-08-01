@@ -109,7 +109,7 @@ All routes require `Authorization: Bearer <token>` (see `standards-security.md �
 | `PUT` | `/api/v1/data/:type` | Replace all (requires `X-Confirm-Replace: true` header) |
 | `DELETE` | `/api/v1/data/:type/:id` | Remove one |
 
-> `BLOCKED_ENTITY_TYPES`: `signed-users-db` and `users` return `403` from the generic router — managed exclusively by the auth router.
+> Allowlist guard: only types in `ALL_USER_ENTITY_TYPES` (`server/constants/all-user-entity-types.js`) are reachable through the generic router — everything else, including `signed-users-db`, `users` (auth router only), and `GEMINI_SHOTS`/`GEMINI_USAGE` (`ai.js` only), returns `403`. Adding a new entity type means adding it to `ALL_USER_ENTITY_TYPES` first.
 
 ---
 
