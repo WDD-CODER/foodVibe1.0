@@ -84,7 +84,7 @@ If `--skip-review "reason"` was provided explicitly (independent of lane):
 
 ## Phase 3 — Manifest check (staleness-aware, not worktree-count-only)
 
-`git worktree list` alone misses same-directory concurrent sessions (two agents/tools sharing one working tree, no separate worktree) — see `docs/brain/gotchas.md` "Same-directory concurrent session breaks the plans/ numbering scan". Check both:
+`git worktree list` alone misses same-directory concurrent sessions (two agents/tools sharing one working tree, no separate worktree) — see `docs/brain/gotchas/agent-workflow.md` "Same-directory concurrent session breaks the plans/ numbering scan". Check both:
 
 ```bash
 git worktree list | wc -l
@@ -129,7 +129,7 @@ Files to stage:
   └── plans/….plan.md          # when matching Atomic Sub-tasks will be marked [x] on Y
 
 Also proposing a brain entry:   # only when durable; may be 2 lines (pattern + paired gotcha)
-  docs/brain/{gotchas.md | patterns/*.md | decisions/NNNN-*.md} — "one-line title"
+  docs/brain/{gotchas/<domain>.md | patterns/*.md | decisions/NNNN-*.md} — "one-line title"
 
 HOW TO VALIDATE
   - {action} → {expected result}
@@ -154,7 +154,7 @@ When a brain entry is proposed, print each entry's **full draft body** in a fenc
 - **One-liner-only proposals are forbidden** — a title that restates the commit subject is not an entry. No draft body that fills the shape → nothing durable → omit the block entirely (the common case for chores).
 - **Split when both apply** — a pattern (happy path) and its paired gotcha (the trap that looked like success) are two lines + two fenced drafts, cross-linked.
 
-This rides the existing `Approve? (Y / edit list / abort)` answer — there is no separate Y/N for the brain entry. Say `no brain` / `skip brain` alongside `Y` to opt out for this ship, or "edit list" to revise it (treat it like any other stageable item). On approval, write each approved draft **verbatim** to its `docs/brain/` file (append for `gotchas.md`, new file under `patterns/`, new numbered file for `decisions/`) and stage it alongside the rest. See `docs/brain/decisions/0006-auto-write-brain-capture-by-default.md`.
+This rides the existing `Approve? (Y / edit list / abort)` answer — there is no separate Y/N for the brain entry. Say `no brain` / `skip brain` alongside `Y` to opt out for this ship, or "edit list" to revise it (treat it like any other stageable item). On approval, write each approved draft **verbatim** to its `docs/brain/` file (for a gotcha: append to the matching `gotchas/<domain>.md` per the routing table in `docs/brain/gotchas.md`; new file under `patterns/`; new numbered file for `decisions/`) and stage it alongside the rest. See `docs/brain/decisions/0006-auto-write-brain-capture-by-default.md`.
 
 ### Semantic branch rename ((semantic rename rules))
 

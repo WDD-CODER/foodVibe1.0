@@ -9,7 +9,7 @@ Distilled project knowledge: history and reasoning, not current state. **Current
 1. `projectbrief.md` — what FoodVibe is, goals, hard constraints
 2. `decisions/` — architectural choices, append-only (never edit in place — supersede)
 3. `patterns/` — proven solutions, one file each
-4. `gotchas.md` — what hurt before, and what to do instead
+4. `gotchas.md` — index into `gotchas/` (what hurt before, and what to do instead), split by domain
 5. `glossary.md` — domain vocabulary
 
 ## When to read what

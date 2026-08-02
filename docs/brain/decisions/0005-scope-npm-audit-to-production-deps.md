@@ -23,7 +23,7 @@ threshold further (masks real prod findings too — rejected), disable the
 security workflow on doc-only PRs via path filters (hides genuine prod-dep
 regressions in future doc-adjacent PRs — rejected), `npm audit fix --force`
 (forces an unplanned Angular major bump outside any planned migration window —
-already rejected, see `docs/brain/gotchas.md` "`npm audit fix --force` would
+already rejected, see `docs/brain/gotchas/ci.md` "`npm audit fix --force` would
 force an unplanned Angular major bump").
 
 ## Decision
