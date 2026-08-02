@@ -57,7 +57,7 @@ Dirty-tree merge fallback (same as `/ship`): if `gh pr merge --merge --delete-br
 
 ### Brain capture — auto-write with opt-out
 
-Write the approved fenced draft **verbatim** to `docs/brain/**` (append `gotchas.md`, new file under `patterns/`, next-numbered file under `decisions/`) as part of handling `merge` / `later` / `open-pr-only`, then commit on the PR branch (or open a tiny follow-up PR/commit if already merged). Skip the write only on an explicit `no brain` / `skip brain` reply. `brain edit …` revises the draft and re-shows it before writing. See [[0006-auto-write-brain-capture-by-default]] for why this no longer needs a separate `brain approve` token.
+Write the approved fenced draft **verbatim** to `docs/brain/**` (for a gotcha: append to the matching `gotchas/<domain>.md` per the routing table in `docs/brain/gotchas.md`; new file under `patterns/`; next-numbered file under `decisions/`) as part of handling `merge` / `later` / `open-pr-only`, then commit on the PR branch (or open a tiny follow-up PR/commit if already merged). Skip the write only on an explicit `no brain` / `skip brain` reply. `brain edit …` revises the draft and re-shows it before writing. See [[0006-auto-write-brain-capture-by-default]] for why this no longer needs a separate `brain approve` token.
 
 ### Checkpoint / milestone push
 

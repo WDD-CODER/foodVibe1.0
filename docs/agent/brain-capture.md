@@ -14,7 +14,7 @@ Goal: every proposal extracts the **judgment that made the session expensive**, 
    - **Pattern** — the happy path we'd repeat. Shape: **Problem / Solution / When to use**.
    - **Gotcha** — the trap that looked like success. Shape: **What hurt / Why the obvious fix is wrong / What to do instead**.
    - **Decision (ADR)** — a choice between real alternatives. Shape: **Context / Decision / Consequences** + frontmatter. One decision per file; supersede, never edit in place.
-4. **Draft the full file body** from the matching template: `docs/brain/patterns/_TEMPLATE.md`, `docs/brain/decisions/_TEMPLATE.md`, or the gotcha shape stated at the top of `docs/brain/gotchas.md`. Match the length of the good examples ([[defer-singleton-data-ensureLoaded]], [[tombstone-soft-delete]]) — one screen or less, never a session dump. Cross-link related entries with `[[wiki-links]]`.
+4. **Draft the full file body** from the matching template: `docs/brain/patterns/_TEMPLATE.md`, `docs/brain/decisions/_TEMPLATE.md`, or the gotcha shape stated in `docs/brain/gotchas.md`. Match the length of the good examples ([[defer-singleton-data-ensureLoaded]], [[tombstone-soft-delete]]) — one screen or less, never a session dump. Cross-link related entries with `[[wiki-links]]`. A gotcha's domain file (which `gotchas/<domain>.md` to append to) comes from the routing table in `docs/brain/gotchas.md`.
 5. **Write a one-line title** for the banner. The title names the entry; it is **never** the entry.
 
 ## Reuse tracking (session logs)
@@ -44,7 +44,7 @@ If the *same* documented gate (script/hook naming a specific bypass) is reported
 - The banner or tree line stays short: **path + quoted one-line title** (keeps the ASCII box readable).
 - The **full draft body** follows directly *below* the tree/banner as a fenced markdown block — one fence per entry.
 - Two entries in one proposal are allowed and often right (pattern + paired gotcha): one banner line + one fenced draft each.
-- `brain approve` writes the fenced body **verbatim** (append to `gotchas.md`, new file under `patterns/`, next-numbered file under `decisions/`). `brain edit …` revises the draft and re-shows it.
+- `brain approve` writes the fenced body **verbatim** (for a gotcha: append to the matching `docs/brain/gotchas/<domain>.md`, routed per `docs/brain/gotchas.md`; new file under `patterns/`; next-numbered file under `decisions/`). `brain edit …` revises the draft and re-shows it.
 
 ## Constraints (updated 2026-07-20 — see [[0006-auto-write-brain-capture-by-default]])
 

@@ -56,7 +56,13 @@ docs/brain/
 ├── index.md            ← 🗺️  reading order + maintenance
 ├── how-it-works.md     ← 👀  this visual tour
 ├── projectbrief.md     ← 🎯  what FoodVibe is + hard constraints
-├── gotchas.md          ← ⚠️  traps that already hurt
+├── gotchas.md          ← ⚠️  index into gotchas/ by domain
+├── gotchas/            ← ⚠️  traps that already hurt, split by domain
+│   ├── agent-workflow.md
+│   ├── backend.md
+│   ├── angular.md
+│   ├── ci.md
+│   └── git-workflow.md
 ├── glossary.md         ← 📖  domain vocabulary
 ├── decisions/          ← 🏛️  ADRs (append-only)
 │   ├── _TEMPLATE.md
@@ -174,7 +180,7 @@ That's a label, not a lesson — it restates what the diff already shows. A cold
 ✅ **Useful (approve) — two entries, cross-linked:**
 
 - A **pattern** carrying the judgment: the audit rule ("read from an always-on surface → leave it eager"), the 5-step recipe, and the when-not-to. → [[defer-singleton-data-ensureLoaded]]
-- A paired **gotcha** naming the trap: login reload calls `reloadFromStorage()` unconditionally, so removing the constructor fetch alone *looks* done but isn't. → "Login reload bypasses deferred constructor load" in `gotchas.md`
+- A paired **gotcha** naming the trap: login reload calls `reloadFromStorage()` unconditionally, so removing the constructor fetch alone *looks* done but isn't. → "Login reload bypasses deferred constructor load" in `docs/brain/gotchas/angular.md`
 
 Drafting rules, required shapes, and the usefulness gate live in `docs/agent/brain-capture.md`. Templates: `docs/brain/patterns/_TEMPLATE.md`, `docs/brain/decisions/_TEMPLATE.md`.
 

@@ -31,7 +31,7 @@ Rule: **a job is never done until the Human validates it** (`docs/agent/job-vali
 | `.cursor/rules/*.mdc` (23 files) | Cursor only | Two `alwaysApply: true` rules: `save-plan-must-use-skill.mdc`, `contractor-role.mdc` (role/execution-protocol/handoff — folded in from the now-deleted root `.cursorrules`, see `.claude/reports/cursor-claude-parity-audit.md` §0.2). The rest are glob- or Agent-Requested-triggered skill/convention mirrors. |
 | `docs/agent/` (9 files) | Both, load-on-demand | conventions, standards-angular/-security/-domain/-backend/-git, brain-capture, job-validation, pr-check-fix-loop |
 | `_shared/tech-stack.md` | Both | Stack detail |
-| `docs/brain/` | Both | Second brain: `index.md`, `gotchas.md`, `patterns/`, `decisions/` (ADRs), `glossary.md`, `projectbrief.md`, `how-it-works.md` |
+| `docs/brain/` | Both | Second brain: `index.md`, `gotchas.md` (index) + `gotchas/` (domain files), `patterns/`, `decisions/` (ADRs), `glossary.md`, `projectbrief.md`, `how-it-works.md` |
 
 Cursor rule files (10 original + 1 role rule + 12 skill-enforcement rules added by Plan 298):
 `add-recipe-must-use-skill`, `angular-component-structure`, `angular-pipe-logic-must-use-skill`,
