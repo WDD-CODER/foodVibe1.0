@@ -17,14 +17,38 @@ export class DishDataService {
   private dishesStore_ = signal<Recipe[]>([])
   readonly allDishes_ = this.dishesStore_.asReadonly()
 
+  private loaded_ = false
+  private loadPromise_: Promise<void> | null = null
+
   constructor() {
-    this.loadInitialData().catch(() => {})
+    void this.ensureLoaded()
+  }
+
+  /** True after at least one successful (or attempted) hydrate. */
+  hasLoaded(): boolean {
+    return this.loaded_
+  }
+
+  /** Loads from storage once. Safe to call repeatedly — concurrent callers share one promise. */
+  async ensureLoaded(): Promise<void> {
+    if (this.loaded_) return
+    if (this.loadPromise_) return this.loadPromise_
+    this.loadPromise_ = this.loadInitialData()
+      .catch(() => {})
+      .finally(() => {
+        this.loaded_ = true
+        this.loadPromise_ = null
+      })
+    return this.loadPromise_
   }
 
   /** Re-read from storage and refresh the signal. Used by demo loader after replacing data. */
   async reloadFromStorage(): Promise<void> {
+    this.loaded_ = false
+    this.loadPromise_ = null
     this.dishesStore_.set([])
     await this.loadInitialData()
+    this.loaded_ = true
   }
 
   /** Normalize legacy mise_categories_ into prep_categories_ when loading from storage. */
@@ -40,7 +64,7 @@ export class DishDataService {
   private async loadInitialData(): Promise<void> {
     try {
       const data = await this.storage.query<Recipe & { mise_categories_?: PrepCategory[] }>(ENTITY)
-      const normalized = data.map(d => this.normalizeDish(d))
+      const normalized = data.map((d) => this.normalizeDish(d))
       this.dishesStore_.set(normalized)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
@@ -63,9 +87,14 @@ export class DishDataService {
     try {
       const now = Date.now()
       const userId = this.userService.user_()?._id
-      const toCreate = { ...newDish, addedAt_: now, updatedAt_: now, ...(userId ? { createdBy: userId } : {}) } as Recipe
+      const toCreate = {
+        ...newDish,
+        addedAt_: now,
+        updatedAt_: now,
+        ...(userId ? { createdBy: userId } : {})
+      } as Recipe
       const saved = await this.storage.post<Recipe>(ENTITY, toCreate)
-      this.dishesStore_.update(dishes => [...dishes, saved])
+      this.dishesStore_.update((dishes) => [...dishes, saved])
       return saved
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
@@ -82,12 +111,10 @@ export class DishDataService {
         addedAt_: dish.addedAt_ ?? existing?.addedAt_,
         updatedAt_: Date.now(),
         createdBy: existing?.createdBy ?? dish.createdBy,
-        hiddenBy: existing?.hiddenBy ?? dish.hiddenBy,
+        hiddenBy: existing?.hiddenBy ?? dish.hiddenBy
       }
       const updated = await this.storage.put<Recipe>(ENTITY, toSave)
-      this.dishesStore_.update(dishes =>
-        dishes.map(d => (d._id === updated._id ? updated : d))
-      )
+      this.dishesStore_.update((dishes) => dishes.map((d) => (d._id === updated._id ? updated : d)))
       return updated
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
@@ -103,7 +130,7 @@ export class DishDataService {
       const dish = await this.storage.get<Recipe>(ENTITY, _id)
       const hiddenBy = [...new Set([...(dish.hiddenBy ?? []), userId])]
       const updated = await this.storage.put<Recipe>(ENTITY, { ...dish, hiddenBy })
-      this.dishesStore_.update(dishes => dishes.map(d => (d._id === _id ? updated : d)))
+      this.dishesStore_.update((dishes) => dishes.map((d) => (d._id === _id ? updated : d)))
       return updated
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
@@ -115,11 +142,19 @@ export class DishDataService {
   async permanentlyDeleteDish(_id: string): Promise<void> {
     try {
       await this.storage.remove(ENTITY, _id)
-      this.dishesStore_.update(dishes => dishes.filter(d => d._id !== _id))
-      this.logging.info({ event: 'crud.dish.hardDelete', message: 'Dish permanently deleted', context: { entityType: ENTITY, id: _id } })
+      this.dishesStore_.update((dishes) => dishes.filter((d) => d._id !== _id))
+      this.logging.info({
+        event: 'crud.dish.hardDelete',
+        message: 'Dish permanently deleted',
+        context: { entityType: ENTITY, id: _id }
+      })
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.dish.hardDelete_error', message: 'Failed to permanently delete dish', context: { err } })
+      this.logging.error({
+        event: 'crud.dish.hardDelete_error',
+        message: 'Failed to permanently delete dish',
+        context: { err }
+      })
       throw err
     }
   }
@@ -130,7 +165,7 @@ export class DishDataService {
       const withDeleted = { ...dish, deletedAt: Date.now() } as Recipe & { deletedAt: number }
       await this.storage.appendExisting(TRASH_KEY, withDeleted)
       await this.storage.remove(ENTITY, _id)
-      this.dishesStore_.update(dishes => dishes.filter(d => d._id !== _id))
+      this.dishesStore_.update((dishes) => dishes.filter((d) => d._id !== _id))
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({ event: 'crud.dish.delete_error', message: 'Failed to delete dish', context: { err } })
@@ -151,13 +186,13 @@ export class DishDataService {
   async restoreDish(_id: string): Promise<Recipe> {
     try {
       const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY, 0)
-      const item = trash.find(d => d._id === _id)
+      const item = trash.find((d) => d._id === _id)
       if (!item) throw new Error(`Dish ${_id} not found in trash`)
       const { deletedAt: _, ...dish } = item
-      const rest = trash.filter(d => d._id !== _id)
+      const rest = trash.filter((d) => d._id !== _id)
       await this.storage.replaceAll(TRASH_KEY, rest)
       await this.storage.appendExisting(ENTITY, dish)
-      this.dishesStore_.update(dishes => [...dishes, dish])
+      this.dishesStore_.update((dishes) => [...dishes, dish])
       return dish
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
@@ -169,7 +204,7 @@ export class DishDataService {
   async disposeDish(_id: string): Promise<void> {
     try {
       const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY, 0)
-      const rest = trash.filter(d => d._id !== _id)
+      const rest = trash.filter((d) => d._id !== _id)
       if (rest.length === trash.length) throw new Error(`Dish ${_id} not found in trash`)
       await this.storage.replaceAll(TRASH_KEY, rest)
     } catch (err) {
@@ -189,11 +224,15 @@ export class DishDataService {
         restored.push(dish)
       }
       await this.storage.replaceAll(TRASH_KEY, [])
-      this.dishesStore_.update(dishes => [...dishes, ...restored])
+      this.dishesStore_.update((dishes) => [...dishes, ...restored])
       return restored
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.dish.restoreAll_error', message: 'Failed to restore all dishes', context: { err } })
+      this.logging.error({
+        event: 'crud.dish.restoreAll_error',
+        message: 'Failed to restore all dishes',
+        context: { err }
+      })
       throw err
     }
   }
@@ -203,7 +242,11 @@ export class DishDataService {
       await this.storage.replaceAll(TRASH_KEY, [])
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.dish.disposeAll_error', message: 'Failed to dispose all dishes', context: { err } })
+      this.logging.error({
+        event: 'crud.dish.disposeAll_error',
+        message: 'Failed to dispose all dishes',
+        context: { err }
+      })
       throw err
     }
   }

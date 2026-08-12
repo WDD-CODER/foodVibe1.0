@@ -17,14 +17,38 @@ export class RecipeDataService {
   private recipesStore_ = signal<Recipe[]>([])
   readonly allRecipes_ = this.recipesStore_.asReadonly()
 
+  private loaded_ = false
+  private loadPromise_: Promise<void> | null = null
+
   constructor() {
-    this.loadInitialData().catch(() => {})
+    void this.ensureLoaded()
+  }
+
+  /** True after at least one successful (or attempted) hydrate. */
+  hasLoaded(): boolean {
+    return this.loaded_
+  }
+
+  /** Loads from storage once. Safe to call repeatedly — concurrent callers share one promise. */
+  async ensureLoaded(): Promise<void> {
+    if (this.loaded_) return
+    if (this.loadPromise_) return this.loadPromise_
+    this.loadPromise_ = this.loadInitialData()
+      .catch(() => {})
+      .finally(() => {
+        this.loaded_ = true
+        this.loadPromise_ = null
+      })
+    return this.loadPromise_
   }
 
   /** Re-read from storage and refresh the signal. Used by demo loader after replacing data. */
   async reloadFromStorage(): Promise<void> {
+    this.loaded_ = false
+    this.loadPromise_ = null
     this.recipesStore_.set([])
     await this.loadInitialData()
+    this.loaded_ = true
   }
 
   private async loadInitialData(): Promise<void> {
@@ -52,10 +76,19 @@ export class RecipeDataService {
     try {
       const now = Date.now()
       const userId = this.userService.user_()?._id
-      const toCreate = { ...newRecipe, addedAt_: now, updatedAt_: now, ...(userId ? { createdBy: userId } : {}) } as Recipe
+      const toCreate = {
+        ...newRecipe,
+        addedAt_: now,
+        updatedAt_: now,
+        ...(userId ? { createdBy: userId } : {})
+      } as Recipe
       const saved = await this.storage.post<Recipe>(ENTITY, toCreate)
-      this.recipesStore_.update(recipes => [...recipes, saved])
-      this.logging.info({ event: 'crud.recipe.create', message: 'Recipe created', context: { entityType: ENTITY, id: saved._id } })
+      this.recipesStore_.update((recipes) => [...recipes, saved])
+      this.logging.info({
+        event: 'crud.recipe.create',
+        message: 'Recipe created',
+        context: { entityType: ENTITY, id: saved._id }
+      })
       return saved
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
@@ -72,13 +105,15 @@ export class RecipeDataService {
         addedAt_: recipe.addedAt_ ?? existing?.addedAt_,
         updatedAt_: Date.now(),
         createdBy: existing?.createdBy ?? recipe.createdBy,
-        hiddenBy: existing?.hiddenBy ?? recipe.hiddenBy,
+        hiddenBy: existing?.hiddenBy ?? recipe.hiddenBy
       }
       const updated = await this.storage.put<Recipe>(ENTITY, toSave)
-      this.recipesStore_.update(recipes =>
-        recipes.map(r => (r._id === updated._id ? updated : r))
-      )
-      this.logging.info({ event: 'crud.recipe.update', message: 'Recipe updated', context: { entityType: ENTITY, id: updated._id } })
+      this.recipesStore_.update((recipes) => recipes.map((r) => (r._id === updated._id ? updated : r)))
+      this.logging.info({
+        event: 'crud.recipe.update',
+        message: 'Recipe updated',
+        context: { entityType: ENTITY, id: updated._id }
+      })
       return updated
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
@@ -94,8 +129,12 @@ export class RecipeDataService {
       const recipe = await this.storage.get<Recipe>(ENTITY, _id)
       const hiddenBy = [...new Set([...(recipe.hiddenBy ?? []), userId])]
       const updated = await this.storage.put<Recipe>(ENTITY, { ...recipe, hiddenBy })
-      this.recipesStore_.update(recipes => recipes.map(r => (r._id === _id ? updated : r)))
-      this.logging.info({ event: 'crud.recipe.hide', message: 'Recipe hidden by user', context: { entityType: ENTITY, id: _id, userId } })
+      this.recipesStore_.update((recipes) => recipes.map((r) => (r._id === _id ? updated : r)))
+      this.logging.info({
+        event: 'crud.recipe.hide',
+        message: 'Recipe hidden by user',
+        context: { entityType: ENTITY, id: _id, userId }
+      })
       return updated
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
@@ -107,11 +146,19 @@ export class RecipeDataService {
   async permanentlyDeleteRecipe(_id: string): Promise<void> {
     try {
       await this.storage.remove(ENTITY, _id)
-      this.recipesStore_.update(recipes => recipes.filter(r => r._id !== _id))
-      this.logging.info({ event: 'crud.recipe.hardDelete', message: 'Recipe permanently deleted', context: { entityType: ENTITY, id: _id } })
+      this.recipesStore_.update((recipes) => recipes.filter((r) => r._id !== _id))
+      this.logging.info({
+        event: 'crud.recipe.hardDelete',
+        message: 'Recipe permanently deleted',
+        context: { entityType: ENTITY, id: _id }
+      })
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.recipe.hardDelete_error', message: 'Failed to permanently delete recipe', context: { err } })
+      this.logging.error({
+        event: 'crud.recipe.hardDelete_error',
+        message: 'Failed to permanently delete recipe',
+        context: { err }
+      })
       throw err
     }
   }
@@ -122,8 +169,12 @@ export class RecipeDataService {
       const withDeleted = { ...recipe, deletedAt: Date.now() } as Recipe & { deletedAt: number }
       await this.storage.appendExisting(TRASH_KEY, withDeleted)
       await this.storage.remove(ENTITY, _id)
-      this.recipesStore_.update(recipes => recipes.filter(r => r._id !== _id))
-      this.logging.info({ event: 'crud.recipe.delete', message: 'Recipe deleted', context: { entityType: ENTITY, id: _id } })
+      this.recipesStore_.update((recipes) => recipes.filter((r) => r._id !== _id))
+      this.logging.info({
+        event: 'crud.recipe.delete',
+        message: 'Recipe deleted',
+        context: { entityType: ENTITY, id: _id }
+      })
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({ event: 'crud.recipe.delete_error', message: 'Failed to delete recipe', context: { err } })
@@ -136,7 +187,11 @@ export class RecipeDataService {
       return this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY, 0)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.recipe.getTrash_error', message: 'Failed to get trash recipes', context: { err } })
+      this.logging.error({
+        event: 'crud.recipe.getTrash_error',
+        message: 'Failed to get trash recipes',
+        context: { err }
+      })
       throw err
     }
   }
@@ -144,13 +199,13 @@ export class RecipeDataService {
   async restoreRecipe(_id: string): Promise<Recipe> {
     try {
       const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY, 0)
-      const item = trash.find(r => r._id === _id)
+      const item = trash.find((r) => r._id === _id)
       if (!item) throw new Error(`Recipe ${_id} not found in trash`)
       const { deletedAt: _, ...recipe } = item
-      const rest = trash.filter(r => r._id !== _id)
+      const rest = trash.filter((r) => r._id !== _id)
       await this.storage.replaceAll(TRASH_KEY, rest)
       await this.storage.appendExisting(ENTITY, recipe)
-      this.recipesStore_.update(recipes => [...recipes, recipe])
+      this.recipesStore_.update((recipes) => [...recipes, recipe])
       return recipe
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
@@ -162,7 +217,7 @@ export class RecipeDataService {
   async disposeRecipe(_id: string): Promise<void> {
     try {
       const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY, 0)
-      const rest = trash.filter(r => r._id !== _id)
+      const rest = trash.filter((r) => r._id !== _id)
       if (rest.length === trash.length) throw new Error(`Recipe ${_id} not found in trash`)
       await this.storage.replaceAll(TRASH_KEY, rest)
     } catch (err) {
@@ -182,11 +237,15 @@ export class RecipeDataService {
         restored.push(recipe)
       }
       await this.storage.replaceAll(TRASH_KEY, [])
-      this.recipesStore_.update(recipes => [...recipes, ...restored])
+      this.recipesStore_.update((recipes) => [...recipes, ...restored])
       return restored
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.recipe.restoreAll_error', message: 'Failed to restore all recipes', context: { err } })
+      this.logging.error({
+        event: 'crud.recipe.restoreAll_error',
+        message: 'Failed to restore all recipes',
+        context: { err }
+      })
       throw err
     }
   }
@@ -196,7 +255,11 @@ export class RecipeDataService {
       await this.storage.replaceAll(TRASH_KEY, [])
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.recipe.disposeAll_error', message: 'Failed to dispose all recipes', context: { err } })
+      this.logging.error({
+        event: 'crud.recipe.disposeAll_error',
+        message: 'Failed to dispose all recipes',
+        context: { err }
+      })
       throw err
     }
   }

@@ -182,6 +182,17 @@ function buildImport(raw, opts = {}) {
   const ingredientsByRecipeNo = groupBy(raw.recipeProductsRaw, 'recipeNo');
   const stepsByRecipeNo = groupBy(raw.instructionsRaw, 'recipeNo');
 
+  // Lookups by raw sqlRecipeNo (not the yet-to-be-populated `recipes`/`dishes`
+  // output arrays) so a dish can resolve a sub-recipe's display name/category
+  // for its prep list regardless of declaration order — same reasoning as the
+  // `recipeIdMap` two-pass id allocation above.
+  const finalNameByRecipeNo = new Map(shells.map(s => [s.row.recipeNo, s.finalName]));
+  const categoryIdByRecipeNo = new Map(raw.recipesRaw.map(r => [r.recipeNo, r.categoryId]));
+  // Plain-product name lookup for the same reason — a dish's prep list can name a
+  // product line directly (see prepItemRows below), not only sub-recipes.
+  const productNameBySqlId = new Map(raw.productsRaw.map(r => [r.product, (r.productName || '').trim()]));
+  const FALLBACK_PREP_CATEGORY = 'הכנות';
+
   let droppedIngredients = 0;
 
   const recipes = [];
@@ -193,6 +204,27 @@ function buildImport(raw, opts = {}) {
       .sort((a, b) => a.recipeLine - b.recipeLine);
 
     const ingredients_ = [];
+    // For dishes only: the "mise en place" prep list, reshaped into the
+    // flat/grouped shape the recipe-builder dish-workflow UI actually reads
+    // (RecipeFormService.getPrepRowsFromRecipe() — see Recipe.prep_items_/
+    // prep_categories_). Not persisted for preparations (row.RecipeOrDish !== 2).
+    //
+    // Every ingredient line of a dish belongs here, not just sub-recipe
+    // components — a מיזאנפלס item can be a prepared sub-recipe OR a plain
+    // product the cook needs staged to assemble the dish (confirmed by the
+    // domain owner; see plan 300 Finding 5). There is no field in the source
+    // schema distinguishing "assembly component" from "generic ingredient" —
+    // tblInstructions was checked as a candidate signal but is inconsistent
+    // free text (sometimes one component per row, sometimes several crammed
+    // into one row via embedded newlines, sometimes full narrative prose
+    // unrelated to any single ingredient) and unsafe to parse structurally.
+    // Including every ingredient line is the conservative choice: it cannot
+    // under-report (the original bug), only ever over-report, and is exactly
+    // what the raw ingredient list already unambiguously says belongs to the
+    // dish. This only affects import derivation for already-existing legacy
+    // data — dishes created going forward in the app itself have their
+    // mise-en-place list entered directly by the user, not derived.
+    const prepItemRows = [];
     for (const ing of ingredientRows) {
       const unitKey = MEASURE_UNIT_MAP[ing.measureUnit];
       if (!unitKey) {
@@ -218,6 +250,32 @@ function buildImport(raw, opts = {}) {
         amount_: ing.quantity ?? 0,
         unit_: unitKey || 'gram',
       });
+
+      if (row.RecipeOrDish === 2) {
+        const preparation_name = isSubRecipe
+          ? (finalNameByRecipeNo.get(ing.product) || '')
+          : (productNameBySqlId.get(ing.product) || '');
+        const subCat = isSubRecipe ? CATEGORY_MASTER_MAP[categoryIdByRecipeNo.get(ing.product)] : undefined;
+        prepItemRows.push({
+          preparation_name,
+          category_name: (subCat && subCat.hebrew) || FALLBACK_PREP_CATEGORY,
+          quantity: ing.quantity ?? 0,
+          unit: unitKey || 'gram',
+        });
+      }
+    }
+
+    let prep_items_;
+    let prep_categories_;
+    if (prepItemRows.length > 0) {
+      prep_items_ = prepItemRows;
+      const byCategory = new Map();
+      for (const item of prepItemRows) {
+        const list = byCategory.get(item.category_name) ?? [];
+        list.push({ item_name: item.preparation_name, unit: item.unit, quantity: item.quantity });
+        byCategory.set(item.category_name, list);
+      }
+      prep_categories_ = Array.from(byCategory.entries()).map(([category_name, items]) => ({ category_name, items }));
     }
 
     const stepRows = (stepsByRecipeNo.get(row.recipeNo) || [])
@@ -261,6 +319,8 @@ function buildImport(raw, opts = {}) {
       is_approved_: !!row.isChecked,
       recipe_type_: row.RecipeOrDish === 2 ? 'dish' : 'preparation',
       labels_: labels_.length ? labels_ : undefined,
+      prep_items_,
+      prep_categories_,
       addedAt_: now,
       updatedAt_: now,
       userId: '__master__',

@@ -8,6 +8,7 @@ import { venuesEnsureLoadedResolver } from './core/resolvers/venues-ensure-loade
 import { menuEventsEnsureLoadedResolver } from './core/resolvers/menu-events-ensure-loaded.resolver'
 import { menuSectionCategoriesEnsureLoadedResolver } from './core/resolvers/menu-section-categories-ensure-loaded.resolver'
 import { preparationsEnsureLoadedResolver } from './core/resolvers/preparations-ensure-loaded.resolver'
+import { kitchenDataEnsureLoadedResolver } from './core/resolvers/kitchen-data-ensure-loaded.resolver'
 import { supplierResolver } from './core/resolvers/supplier.resolver'
 import { pendingChangesGuard } from './core/guards/pending-changes.guard'
 import { authGuard } from './core/guards/auth.guard'
@@ -118,6 +119,7 @@ export const routes: Routes = [
     resolve: {
       equipmentLoaded: equipmentEnsureLoadedResolver,
       preparationsLoaded: preparationsEnsureLoadedResolver,
+      kitchenDataLoaded: kitchenDataEnsureLoadedResolver,
     },
     canActivate: [authGuard],
     canDeactivate: [pendingChangesGuard],
@@ -129,6 +131,7 @@ export const routes: Routes = [
       recipe: recipeResolver,
       equipmentLoaded: equipmentEnsureLoadedResolver,
       preparationsLoaded: preparationsEnsureLoadedResolver,
+      kitchenDataLoaded: kitchenDataEnsureLoadedResolver,
     },
     canActivate: [authGuard],
     canDeactivate: [pendingChangesGuard],
@@ -136,6 +139,7 @@ export const routes: Routes = [
   {
     path: 'recipe-book',
     loadComponent: () => import('@pages/recipe-book/recipe-book.page').then(m => m.RecipeBookPage),
+    resolve: { kitchenDataLoaded: kitchenDataEnsureLoadedResolver },
   },
   {
     path: 'menu-library',
@@ -165,11 +169,12 @@ export const routes: Routes = [
   {
     path: 'cook',
     loadComponent: () => import('./pages/cook-view/cook-view.page').then(m => m.CookViewPage),
+    resolve: { kitchenDataLoaded: kitchenDataEnsureLoadedResolver },
   },
   {
     path: 'cook/:id',
     loadComponent: () => import('./pages/cook-view/cook-view.page').then(m => m.CookViewPage),
-    resolve: { recipe: recipeResolver },
+    resolve: { recipe: recipeResolver, kitchenDataLoaded: kitchenDataEnsureLoadedResolver },
     canDeactivate: [pendingChangesGuard],
   },
   {

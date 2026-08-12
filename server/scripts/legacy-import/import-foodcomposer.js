@@ -34,7 +34,7 @@ const { readSqlDumpAsUtf8, extractInserts } = require('./lib/sql-parser');
 const { buildImport } = require('./lib/transform');
 const { NEW_UNIT_DICTIONARY_ENTRIES, NEW_CATEGORY_DICTIONARY_ENTRIES, CATEGORY_MASTER_MAP } = require('./lib/mappings');
 
-const DEFAULT_SQL_PATH = 'c:\\coding projects\\foodcostdatabase\\fullDATA.sql';
+const DEFAULT_SQL_PATH = path.resolve(__dirname, 'source-data', 'fullDATA_utf8.sql');
 const DICTIONARY_PATH = path.resolve(__dirname, '..', '..', '..', 'public', 'assets', 'data', 'dictionary.json');
 
 function parseArgs(argv) {

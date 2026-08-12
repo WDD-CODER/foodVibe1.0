@@ -44,7 +44,17 @@ function makeId(length = 5) {
 router.get('/:type', optionalToken, async (req, res) => {
   try {
     const userId = req.user ? req.user.userId : '__master__';
-    const limit = Math.min(parseInt(req.query.limit) || 500, 1000);
+    // Was capped at 500 (max 1000) — safe when no account had more than a few hundred
+    // docs per collection. The legacy FoodComposer import (plan 300) pushed real
+    // accounts past that (PRODUCT_LIST/RECIPE_LIST/DISH_LIST now run 1,000-1,500+ docs
+    // for an imported account), and the client never sends ?limit= for a full-collection
+    // load — so every list fetch was silently truncated, not just for the importing user.
+    // Raised well above current real-world collection sizes; still bounded (not
+    // unlimited) to keep a ceiling on worst-case response size/memory for a single
+    // request. gzip compression (see index.js) keeps the wire cost of a large response
+    // low. Proper server-side search/pagination (so full-collection loads aren't needed
+    // at all for most UI) is tracked separately — see plan 301.
+    const limit = Math.min(parseInt(req.query.limit) || 20000, 20000);
     const skip = parseInt(req.query.skip) || 0;
     const filter = { userId, _userDeleted: { $ne: true } };
     if (req.query.filterEntityType) {

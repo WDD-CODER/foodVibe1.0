@@ -8,10 +8,16 @@
  *   3. User-modified clone (_userModified: true)              → skip (user's version wins)
  *   4. Deleted master item                                    → skip (no removal from user)
  *
- * Ingredient referenceId remapping (Rule 1 only):
- *   When a new master recipe/dish is cloned to a user, its ingredient referenceIds
- *   point to master product _ids. We remap them to the user's corresponding product _ids
- *   using _masterId linkage so the ingredients resolve correctly.
+ * Ingredient referenceId remapping (Rules 1 & 2):
+ *   When a master recipe/dish is cloned (or refreshed) for a user, its ingredient
+ *   referenceIds point to master _ids — either a master product (`type: 'product'`)
+ *   or a master sub-recipe/preparation (`type: 'recipe'`, itself a RECIPE_LIST or
+ *   DISH_LIST doc). We remap both kinds to the user's corresponding _ids using
+ *   _masterId linkage so the ingredients resolve correctly. The recipe/dish map is
+ *   built incrementally as new RECIPE_LIST/DISH_LIST clones are allocated during
+ *   this same sync run (see `newCloneId` below), so a sub-recipe referencing
+ *   a sibling sub-recipe that's *also* being cloned for the first time in this run
+ *   resolves too, regardless of which order `masterDocs` happens to return them in.
  */
 
 'use strict';
@@ -26,11 +32,17 @@ function makeId(length = 5) {
   return id;
 }
 
-/** Remap ingredient referenceIds from master IDs to user-scoped IDs. */
-function remapIngredients(ingredients, idMap) {
+/**
+ * Remap ingredient referenceIds from master IDs to user-scoped IDs.
+ * Dispatches on `ing.type`: `'recipe'` (a sub-recipe/preparation used as a
+ * component of this recipe/dish) uses `recipeIdMap`; everything else
+ * (`'product'`, or legacy rows with no `type`) uses `productIdMap`.
+ */
+function remapIngredients(ingredients, productIdMap, recipeIdMap) {
   if (!Array.isArray(ingredients)) return ingredients;
   return ingredients.map(ing => {
     if (!ing.referenceId) return ing;
+    const idMap = ing.type === 'recipe' ? recipeIdMap : productIdMap;
     const remapped = idMap.get(String(ing.referenceId));
     return remapped ? { ...ing, referenceId: remapped } : ing;
   });
@@ -72,6 +84,22 @@ async function syncMasterToUser(userId) {
       .toArray();
     productIdMap = new Map(userProducts.map(p => [String(p._masterId), String(p._id)]));
     return productIdMap;
+  }
+
+  // Build masterRecipeId → userRecipeId map for sub-recipe ingredient remapping
+  // (ingredients with type: 'recipe'). Spans BOTH RECIPE_LIST and DISH_LIST — a
+  // sub-recipe/prep can live in either collection. Loaded once from already-cloned
+  // docs, then kept up to date below as new clones are allocated during this run.
+  let recipeIdMap = null;
+
+  async function getRecipeIdMap() {
+    if (recipeIdMap) return recipeIdMap;
+    const [userRecipes, userDishes] = await Promise.all([
+      db.collection('RECIPE_LIST').find({ userId, _masterId: { $ne: null } }).project({ _id: 1, _masterId: 1 }).toArray(),
+      db.collection('DISH_LIST').find({ userId, _masterId: { $ne: null } }).project({ _id: 1, _masterId: 1 }).toArray(),
+    ]);
+    recipeIdMap = new Map([...userRecipes, ...userDishes].map(d => [String(d._masterId), String(d._id)]));
+    return recipeIdMap;
   }
 
   // Build masterEquipmentId → userEquipmentId map for logistics baseline remapping.
@@ -123,6 +151,50 @@ async function syncMasterToUser(userId) {
   // added from RECIPE_LIST also blocks cloning it again from DISH_LIST (and vice versa).
   const pendingNames = new Set();
 
+  // Pre-decide which RECIPE_LIST/DISH_LIST master docs will be newly cloned
+  // (Rule 1) and allocate their user-scoped ids — for BOTH collections at
+  // once, before either one's main pass runs. A sub-recipe/prep ingredient
+  // can reference a doc in *either* collection regardless of which type the
+  // referencing doc itself is (a RECIPE_LIST preparation can list a DISH_LIST
+  // dish as a component, not just the reverse) — since CLONEABLE_TYPES only
+  // processes RECIPE_LIST then DISH_LIST once each, doing this per-entityType
+  // instead of combined would leave RECIPE_LIST → DISH_LIST references
+  // (the "backwards" direction relative to processing order) unresolved.
+  // `newCloneId` is the single source of truth for both the collision check
+  // and the id — the main per-entityType pass below only reads it.
+  const newCloneId = new Map(); // masterId -> newId, for RECIPE_LIST/DISH_LIST masters cloned this run
+  let recipeDishPrepassDone = false;
+
+  async function ensureRecipeDishPrepass() {
+    if (recipeDishPrepassDone) return;
+    recipeDishPrepassDone = true;
+    await getRecipeIdMap();
+    for (const type of ['RECIPE_LIST', 'DISH_LIST']) {
+      const col2 = db.collection(type);
+      const [masterDocs2, userDocs2] = await Promise.all([
+        col2.find({ userId: '__master__' }).project({ _id: 1, name_hebrew: 1 }).toArray(),
+        col2.find({ userId, _masterId: { $ne: null } }).project({ _id: 1, _masterId: 1 }).toArray(),
+      ]);
+      const userByMasterId2 = new Map(userDocs2.map(d => [String(d._masterId), d]));
+      for (const master of masterDocs2) {
+        const masterId = String(master._id);
+        if (userByMasterId2.has(masterId)) continue; // Rule 2/3 — not a new clone
+        const masterName = master.name_hebrew?.trim();
+        if (masterName) {
+          const crossNames = await getCrossCollectionNameSet();
+          if (crossNames.has(masterName) || pendingNames.has(masterName)) {
+            console.log(`[sync-master]   ${type}: skipping clone — cross-collection name collision "${masterName}"`);
+            continue;
+          }
+        }
+        const newId = makeId();
+        newCloneId.set(masterId, newId);
+        recipeIdMap.set(masterId, newId);
+        if (masterName) pendingNames.add(masterName);
+      }
+    }
+  }
+
   for (const entityType of CLONEABLE_TYPES) {
     const col = db.collection(entityType);
 
@@ -167,24 +239,25 @@ async function syncMasterToUser(userId) {
     const toInsert = [];
     const toUpdate = [];
 
+    // RECIPE_LIST/DISH_LIST: run the combined pre-pass (see above) once,
+    // the first time either collection is reached — it covers both, so the
+    // second encounter is a no-op.
+    if (NAMED_TYPES.has(entityType)) {
+      await ensureRecipeDishPrepass();
+    }
+
     for (const master of masterDocs) {
       const masterId = String(master._id);
       const existing = userByMasterId.get(masterId);
 
       if (!existing) {
         // Rule 1: new master item — clone to user
-        // Skip if the user already has any item with the same name in EITHER
-        // RECIPE_LIST or DISH_LIST — these two collections share a name namespace,
-        // so a name present in the sibling collection is also a collision.
-        if (NAMED_TYPES.has(entityType)) {
-          const masterName = master.name_hebrew?.trim();
-          if (masterName) {
-            const crossNames = await getCrossCollectionNameSet();
-            if (crossNames.has(masterName) || pendingNames.has(masterName)) {
-              console.log(`[sync-master]   ${entityType}: skipping clone — cross-collection name collision "${masterName}"`);
-              continue;
-            }
-          }
+        // RECIPE_LIST/DISH_LIST: the collision check + id already happened in
+        // the pre-pass above (same name namespace rule: these two collections
+        // share one namespace, so a name present in the sibling collection is
+        // also a collision) — a doc absent from newCloneId was skipped there.
+        if (NAMED_TYPES.has(entityType) && !newCloneId.has(masterId)) {
+          continue;
         }
         // Skip if the user already has a product with the same name (any origin).
         if (entityType === 'PRODUCT_LIST') {
@@ -195,7 +268,7 @@ async function syncMasterToUser(userId) {
             continue;
           }
         }
-        const newId = makeId();
+        const newId = NAMED_TYPES.has(entityType) ? newCloneId.get(masterId) : makeId();
         const { _id: _mid, userId: _u, _masterId: _m, _userModified: _um, ...rest } = master;
         const clone = {
           ...rest,
@@ -204,16 +277,12 @@ async function syncMasterToUser(userId) {
           _masterId: masterId,
           _userModified: false,
         };
-        // Track this name so sibling-collection items with the same name are skipped.
-        if (NAMED_TYPES.has(entityType) && clone.name_hebrew?.trim()) {
-          pendingNames.add(clone.name_hebrew.trim());
-        }
 
-        // Remap ingredient refs so they point to user's products, not master products.
-        // Remap logistics equipment_id_ so they point to user's equipment, not master equipment.
+        // Remap ingredient refs so they point to user's products/sub-recipes,
+        // not master ones. Remap logistics equipment_id_ likewise.
         if (entityType === 'RECIPE_LIST' || entityType === 'DISH_LIST') {
-          const [productMap, eqMap] = await Promise.all([getProductIdMap(), getEquipmentIdMap()]);
-          clone.ingredients_ = remapIngredients(clone.ingredients_, productMap);
+          const [productMap, eqMap, recMap] = await Promise.all([getProductIdMap(), getEquipmentIdMap(), getRecipeIdMap()]);
+          clone.ingredients_ = remapIngredients(clone.ingredients_, productMap, recMap);
           clone.logistics_ = remapLogistics(clone.logistics_, eqMap);
         }
 
@@ -235,11 +304,11 @@ async function syncMasterToUser(userId) {
         // Rule 2: unmodified clone — overwrite with latest master data
         const { _id: _mid, userId: _u, _masterId: _m, _userModified: _um, ...masterRest } = master;
 
-        // Remap ingredient refs so user's product IDs are preserved (same guard as Rule 1).
-        // Remap logistics equipment_id_ so user's equipment IDs are preserved.
+        // Remap ingredient refs so user's product/sub-recipe IDs are preserved
+        // (same guard as Rule 1). Remap logistics equipment_id_ likewise.
         if (entityType === 'RECIPE_LIST' || entityType === 'DISH_LIST') {
-          const [productMap, eqMap] = await Promise.all([getProductIdMap(), getEquipmentIdMap()]);
-          masterRest.ingredients_ = remapIngredients(masterRest.ingredients_, productMap);
+          const [productMap, eqMap, recMap] = await Promise.all([getProductIdMap(), getEquipmentIdMap(), getRecipeIdMap()]);
+          masterRest.ingredients_ = remapIngredients(masterRest.ingredients_, productMap, recMap);
           masterRest.logistics_ = remapLogistics(masterRest.logistics_, eqMap);
         }
 
