@@ -142,3 +142,13 @@ which covers stale *origin* state but not same-directory local races.
 **Why the obvious fix is wrong:** Assuming a backtick-quoted path is safe because it "looks like a relative link from this file" ignores how the checker actually works — `extractRefs()` pulls the raw backtick text and joins it straight onto the repo root (`join(repoRoot, ref)`), with no awareness of which file it came from. There is no such thing as a directory-relative ref as far as the checker is concerned.
 
 **What to do instead:** Inside `docs/brain/**`, always write backtick-quoted cross-references as full repo-relative paths (`` `docs/brain/gotchas/agent-workflow.md` ``), even for a file referencing its own sibling in the same subfolder. Verify with `node scripts/brain-review-check.mjs --scope=full` before shipping any `docs/brain/` restructure.
+
+---
+
+## `.claude/todo.md` unchecked box doesn't mean the work wasn't done
+
+**What hurt:** After a mid-session crash, plan 301 Milestone 1 looked "not started" from `.claude/todo.md` alone — every box was still `[ ]`. In reality the work was fully implemented and self-verified (`ng build` pass, curl tests, live app test — see the session doc) in the crashed session; it just never got committed or human-validated before the machine dropped.
+
+**Why the obvious fix is wrong:** Trusting the todo checkbox state as a proxy for "has this been attempted" leads to either re-doing already-finished work from scratch, or (worse) assuming a stale unchecked item is safe to ignore when it's actually sitting live in the working tree.
+
+**What to do instead:** After any session interruption, before touching a plan's unchecked items: run `git status` for uncommitted changes and check for a same-day `sessions/YYYY-MM-DD-*.md` file before assuming "unchecked" means "not started." A checkbox only reflects Human validation status (per `docs/agent/job-validation.md`), never implementation status.

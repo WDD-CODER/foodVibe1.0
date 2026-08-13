@@ -33,3 +33,13 @@ Scope: worktrees, `gh` auth/PR mechanics, and repo-tracked files that interact w
 **Why the obvious fix is wrong:** Committing the updated pointer “to clean the tree” just schedules the next SessionStart to dirty it again. Leaving Phase 5 until after push guarantees an uncommitted handoff file.
 
 **What to do instead:** Keep `.claude/.session-state-path` gitignored (local pointer only). Save to stable `docs/session-state-${BRANCH}.md` (no PPID). On `/ship`, write that file after commit, amend before push. See Plan 295 / `.claude/commands/ship.md` Phase 5.
+
+---
+
+## Splitting one file's uncommitted diff across two branches: no `git stash -p` available
+
+**What hurt:** `server/db.js` had two unrelated uncommitted hunks (a plan 301 search-index addition and unrelated mongo connection-visibility listeners) that needed to land on two different branches. The normal tool for this, `git stash push -p` / `git add -p`, is interactive, and this environment's Bash tool explicitly does not support interactive flags.
+
+**Why the obvious fix is wrong:** Trying to script `git add -p` with piped `y`/`n` answers is fragile and easy to get wrong silently (wrong hunk staged, file left in a half-applied state).
+
+**What to do instead:** Read the file, `git diff` it to see the exact hunks, then use Edit to manually remove the unwanted hunk on branch A (reverting it to match what branch B should not have), commit, then switch to branch B and manually re-add just that hunk via Edit using the diff text already captured. Slower but deterministic and auditable — confirm with a final `git diff` before each commit.
