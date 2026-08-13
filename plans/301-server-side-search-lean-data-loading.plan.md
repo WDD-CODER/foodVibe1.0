@@ -64,14 +64,14 @@ Dedicated lightweight count endpoints (`GET /api/v1/data/:type/count?filter=...`
 
 # Atomic Sub-tasks
 
-## Milestone 1 (do first)
-- [ ] Confirm exact lean field list the ingredient-search dropdown needs (read `ingredient-search.component.html` template) before designing the `/search` response shape
-- [ ] Add `{ userId: 1, name_hebrew: 1 }` index (or equivalent) to `server/db.js` for `PRODUCT_LIST`/`RECIPE_LIST`/`DISH_LIST`
-- [ ] Add `GET /api/v1/data/:type/search?q=&limit=` to `server/routes/generic.js` — prefix match on `name_hebrew`, lean projection, restricted to an allowlist of searchable entity types
-- [ ] Add `search<T>()` to `HttpStorageAdapter`/`StorageService` mirroring the existing `query()`/`queryFiltered()` shape
-- [ ] Refactor `ingredient-search.component.ts` to debounce + call the new search endpoint instead of filtering `KitchenStateService.products_()`/`recipes_()` in full
-- [ ] Refactor `recipe-book-list.component.ts`'s `filteredProductsForIngredientSearch_` the same way
-- [ ] Verify per the Verification section above (build, curl, live typeahead behavior, no regression on inventory/recipe-book, no keystroke-spam requests)
+## Milestone 1 (do first) — done, merged to `main` (PR #177), Human-validated 2026-08-13
+- [x] Confirm exact lean field list the ingredient-search dropdown needs (read `ingredient-search.component.html` template) before designing the `/search` response shape
+- [x] Add `{ userId: 1, name_hebrew: 1 }` index (or equivalent) to `server/db.js` for `PRODUCT_LIST`/`RECIPE_LIST`/`DISH_LIST`
+- [x] Add `GET /api/v1/data/:type/search?q=&limit=` to `server/routes/generic.js` — prefix match on `name_hebrew`, lean projection, restricted to an allowlist of searchable entity types
+- [x] Add `search<T>()` to `HttpStorageAdapter`/`StorageService` mirroring the existing `query()`/`queryFiltered()` shape
+- [x] Refactor `ingredient-search.component.ts` to debounce + call the new search endpoint instead of filtering `KitchenStateService.products_()`/`recipes_()` in full
+- [x] Refactor `recipe-book-list.component.ts`'s `filteredProductsForIngredientSearch_` the same way
+- [x] Verify per the Verification section above (build, curl, live typeahead behavior, no regression on inventory/recipe-book, no keystroke-spam requests)
 
 ## Milestone 2 (separate, larger — scope its own plan once Milestone 1 is validated)
 - [ ] Design faceted server-side search/pagination for `inventory-product-list` and `recipe-book-list` (out of scope for this plan's execution — placeholder so it isn't lost)
