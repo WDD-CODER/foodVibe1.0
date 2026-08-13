@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const { CLONEABLE_TYPES } = require('./constants/cloneable-types')
+const { SEARCHABLE_ENTITY_TYPES } = require('./constants/searchable-entity-types')
 
 async function connectDb() {
   const isLocal = process.env.NODE_ENV === 'development'
@@ -30,6 +31,15 @@ async function connectDb() {
     { background: true }
   )
   console.log('VERSION_HISTORY compound index ensured (userId, entityType, entityId)')
+
+  // Compound index for the lean prefix-match /search endpoint (plan 301, Milestone 1).
+  // Supports { userId, name_hebrew: ^prefix } queries without a collection scan.
+  await Promise.all(
+    SEARCHABLE_ENTITY_TYPES.map(type =>
+      db.collection(type).createIndex({ userId: 1, name_hebrew: 1 }, { background: true })
+    )
+  )
+  console.log(`name_hebrew search indexes ensured for ${SEARCHABLE_ENTITY_TYPES.join(', ')}`)
 }
 
 module.exports = { connectDb }

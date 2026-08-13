@@ -1,15 +1,35 @@
-import { Component, inject, signal, computed, output, input, viewChild, effect, untracked, ElementRef } from '@angular/core'
+import {
+  Component,
+  inject,
+  signal,
+  computed,
+  output,
+  input,
+  viewChild,
+  effect,
+  untracked,
+  ElementRef
+} from '@angular/core'
+import { toObservable, toSignal } from '@angular/core/rxjs-interop'
+import { debounceTime, map, switchMap } from 'rxjs'
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
-import { KitchenStateService } from '@services/kitchen-state.service'
+import { ProductDataService } from '@services/product-data.service'
+import { RecipeDataService } from '@services/recipe-data.service'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
-import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util'
 import { QuickAddProductModalService } from '@services/quick-add-product-modal.service'
 import type { Product } from '@models/product.model'
 import type { Recipe } from '@models/recipe.model'
+
+/** Typeahead never needs more than what's visible in the dropdown. */
+const SEARCH_LIMIT = 25
+/** Matches preparation-search.component.ts's existing minimum — also avoids firing a request per single keystroke. */
+const MIN_QUERY_LENGTH = 2
+/** Matches the debounce window used elsewhere in the app for async lookups (recipe-builder.page.ts's duplicate-name validator). */
+const SEARCH_DEBOUNCE_MS = 250
 
 /** Product or Recipe with item_type_ for search results and emit. */
 export type SearchableItem = (Product | Recipe) & { item_type_: 'product' | 'recipe' }
@@ -17,12 +37,20 @@ export type SearchableItem = (Product | Recipe) & { item_type_: 'product' | 'rec
 @Component({
   selector: 'app-ingredient-search',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, ClickOutSideDirective, ScrollableDropdownComponent, TranslatePipe, SelectOnFocusDirective],
+  imports: [
+    CommonModule,
+    LucideAngularModule,
+    ClickOutSideDirective,
+    ScrollableDropdownComponent,
+    TranslatePipe,
+    SelectOnFocusDirective
+  ],
   templateUrl: './ingredient-search.component.html',
   styleUrl: './ingredient-search.component.scss'
 })
 export class IngredientSearchComponent {
-  private readonly state = inject(KitchenStateService)
+  private readonly productData = inject(ProductDataService)
+  private readonly recipeData = inject(RecipeDataService)
   private readonly quickAddModalService = inject(QuickAddProductModalService)
 
   /** Row index for focus trigger; when focusTrigger matches this row, we focus. */
@@ -53,7 +81,9 @@ export class IngredientSearchComponent {
   private ignoreFirstClickOutside = true
 
   constructor() {
-    setTimeout(() => { this.ignoreFirstClickOutside = false }, 0)
+    setTimeout(() => {
+      this.ignoreFirstClickOutside = false
+    }, 0)
     effect(() => {
       const trigger = this.focusTrigger()
       const row = this.rowIndex()
@@ -87,21 +117,37 @@ export class IngredientSearchComponent {
     this.searchInputRef()?.nativeElement?.focus()
   }
 
-  // Combine products and recipes; exclude ingredients already in the recipe; filter by "starts with" + script
+  /**
+   * Server-side prefix search (plan 301, Milestone 1) — debounced + cancels stale
+   * in-flight requests via switchMap so fast typing doesn't fire one request per
+   * keystroke or race an old query's results ahead of a newer one. Replaces the old
+   * computed() that filtered the full in-memory products_()/recipes_() on every
+   * keystroke, which got slow once a catalog reached 1,000+ docs.
+   */
+  private searchResults_ = toSignal(
+    toObservable(this.searchQuery_).pipe(
+      map((q) => (q ?? '').trim()),
+      debounceTime(SEARCH_DEBOUNCE_MS),
+      switchMap((raw): Promise<SearchableItem[]> => {
+        if (raw.length < MIN_QUERY_LENGTH) return Promise.resolve([])
+        return Promise.all([
+          this.productData.searchProducts(raw, SEARCH_LIMIT),
+          this.recipeData.searchRecipes(raw, SEARCH_LIMIT)
+        ]).then(([products, recipes]) => [
+          ...products.map((p) => ({ ...p, item_type_: 'product' as const })),
+          ...recipes.map((r) => ({ ...r, item_type_: 'recipe' as const }))
+        ])
+      })
+    ),
+    { initialValue: [] as SearchableItem[] }
+  )
+
+  // Exclude ingredients already in the recipe — layered as its own computed() so it
+  // re-runs on excludeNames() changes without triggering a new network search.
   protected filteredResults_ = computed(() => {
-    const raw = (this.searchQuery_() ?? '').trim()
-    if (!raw) return []
-
-    const excludeSet = new Set(
-      (this.excludeNames() ?? []).map(n => (n ?? '').trim().toLowerCase()).filter(Boolean)
-    )
-
-    const products = this.state.products_().map(p => ({ ...p, item_type_: 'product' as const }))
-    const recipes = this.state.recipes_().map(r => ({ ...r, item_type_: 'recipe' as const }))
-    const candidates = [...products, ...recipes].filter(
-      (item) => !excludeSet.has((item.name_hebrew ?? '').trim().toLowerCase())
-    )
-    return filterOptionsByStartsWith(candidates, raw, (item) => (item.name_hebrew ?? '').trim())
+    if ((this.searchQuery_() ?? '').trim().length < MIN_QUERY_LENGTH) return []
+    const excludeSet = new Set((this.excludeNames() ?? []).map((n) => (n ?? '').trim().toLowerCase()).filter(Boolean))
+    return this.searchResults_().filter((item) => !excludeSet.has((item.name_hebrew ?? '').trim().toLowerCase()))
   })
 
   selectItem(item: SearchableItem) {
@@ -135,13 +181,13 @@ export class IngredientSearchComponent {
 
     if (key === 'ArrowDown') {
       e.preventDefault()
-      this.highlightedIndex_.update(i => (i < 0 ? 0 : (i < addItemIndex ? i + 1 : 0)))
+      this.highlightedIndex_.update((i) => (i < 0 ? 0 : i < addItemIndex ? i + 1 : 0))
       this.scrollHighlightedIntoView()
       return
     }
     if (key === 'ArrowUp') {
       e.preventDefault()
-      this.highlightedIndex_.update(i => (i <= 0 ? addItemIndex : i - 1))
+      this.highlightedIndex_.update((i) => (i <= 0 ? addItemIndex : i - 1))
       this.scrollHighlightedIntoView()
       return
     }

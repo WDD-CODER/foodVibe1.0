@@ -18,31 +18,55 @@ export class ProductDataService {
 
   readonly allTopCategories_ = computed(() => {
     const Products = this.ProductsStore_()
-    const categories = Products.flatMap(p => p.categories_ ?? []).filter((cat): cat is string => !!cat)
+    const categories = Products.flatMap((p) => p.categories_ ?? []).filter((cat): cat is string => !!cat)
     return Array.from(new Set(categories))
   })
 
   readonly allAllergens_ = computed(() => {
     const Products = this.ProductsStore_()
-    const allergens = Products.flatMap(Product => Product.allergens_ || []) // Refactored
+    const allergens = Products.flatMap((Product) => Product.allergens_ || []) // Refactored
     return Array.from(new Set(allergens))
   })
 
+  private loaded_ = false
+  private loadPromise_: Promise<void> | null = null
+
   constructor() {
-    this.loadInitialData().catch(() => {})
+    void this.ensureLoaded()
+  }
+
+  /** True after at least one successful (or attempted) hydrate. */
+  hasLoaded(): boolean {
+    return this.loaded_
+  }
+
+  /** Loads from storage once. Safe to call repeatedly — concurrent callers share one promise. */
+  async ensureLoaded(): Promise<void> {
+    if (this.loaded_) return
+    if (this.loadPromise_) return this.loadPromise_
+    this.loadPromise_ = this.loadInitialData()
+      .catch(() => {})
+      .finally(() => {
+        this.loaded_ = true
+        this.loadPromise_ = null
+      })
+    return this.loadPromise_
   }
 
   /** Re-read from storage and refresh the signal. Used by demo loader after replacing data. */
   async reloadFromStorage(): Promise<void> {
+    this.loaded_ = false
+    this.loadPromise_ = null
     await this.loadInitialData()
+    this.loaded_ = true
   }
 
-// LIST
+  // LIST
 
   private async loadInitialData(): Promise<void> {
     try {
       const raw = await this.storage.query<Record<string, unknown>>(ENTITY)
-      const products = raw.map(row => this.normalizeProduct(row))
+      const products = raw.map((row) => this.normalizeProduct(row))
       this.ProductsStore_.set(products)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
@@ -65,9 +89,12 @@ export class ProductDataService {
     let sources_ = (legacy.sources_ ?? []) as ProductSource[]
     if (sources_.length === 0) {
       const price = legacy.buy_price_global_ ?? 0
-      sources_ = legacySupplierIds.length > 0
-        ? legacySupplierIds.map(sid => ({ supplierId: sid, price, addedAt: legacy.addedAt_ }))
-        : price > 0 ? [{ supplierId: '', price, addedAt: legacy.addedAt_ }] : []
+      sources_ =
+        legacySupplierIds.length > 0
+          ? legacySupplierIds.map((sid) => ({ supplierId: sid, price, addedAt: legacy.addedAt_ }))
+          : price > 0
+            ? [{ supplierId: '', price, addedAt: legacy.addedAt_ }]
+            : []
     }
 
     return {
@@ -86,7 +113,28 @@ export class ProductDataService {
       name_english: legacy.name_english,
       seeded_: legacy.seeded_,
       allergen_source_: legacy.allergen_source_,
-      nutrition_per_100g: legacy.nutrition_per_100g,
+      nutrition_per_100g: legacy.nutrition_per_100g
+    }
+  }
+
+  /**
+   * Server-side prefix search (plan 301, Milestone 1) — for typeahead components on large
+   * catalogs. Returns lean results normalized through the same normalizeProduct() as the
+   * full-collection load, so callers get a fully-typed Product with sane defaults for any
+   * field the server's lean projection omitted (e.g. categories_/allergens_).
+   */
+  async searchProducts(query: string, limit = 25): Promise<Product[]> {
+    try {
+      const raw = await this.storage.search<Record<string, unknown>>(ENTITY, query, limit)
+      return raw.map((row) => this.normalizeProduct(row))
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) throw err
+      this.logging.error({
+        event: 'crud.products.search_error',
+        message: 'Failed to search products',
+        context: { err }
+      })
+      return []
     }
   }
 
@@ -107,21 +155,29 @@ export class ProductDataService {
       const toCreate = {
         ...newProduct,
         addedAt_: newProduct.addedAt_ ?? now,
-        updatedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       } as Product
       const saved = await this.storage.post<Product & { _merged?: boolean }>(ENTITY, toCreate)
       const wasMerged = !!(saved as { _merged?: boolean })._merged
       if (wasMerged) {
         // Silent merge: update existing product in store instead of appending
         const normalized = this.normalizeProduct(saved as unknown as Record<string, unknown>)
-        this.ProductsStore_.update(products => {
-          const idx = products.findIndex(p => p._id === normalized._id)
-          return idx >= 0 ? products.map((p, i) => i === idx ? normalized : p) : [...products, normalized]
+        this.ProductsStore_.update((products) => {
+          const idx = products.findIndex((p) => p._id === normalized._id)
+          return idx >= 0 ? products.map((p, i) => (i === idx ? normalized : p)) : [...products, normalized]
         })
-        this.logging.info({ event: 'crud.product.merged', message: 'Product merged with existing', context: { entityType: ENTITY, id: saved._id } })
+        this.logging.info({
+          event: 'crud.product.merged',
+          message: 'Product merged with existing',
+          context: { entityType: ENTITY, id: saved._id }
+        })
       } else {
-        this.ProductsStore_.update(products => [...products, saved])
-        this.logging.info({ event: 'crud.product.create', message: 'Product created', context: { entityType: ENTITY, id: saved._id } })
+        this.ProductsStore_.update((products) => [...products, saved])
+        this.logging.info({
+          event: 'crud.product.create',
+          message: 'Product created',
+          context: { entityType: ENTITY, id: saved._id }
+        })
       }
       return saved
     } catch (err) {
@@ -137,13 +193,15 @@ export class ProductDataService {
       const toSave: Product = {
         ...product,
         addedAt_: product.addedAt_ ?? existing?.addedAt_,
-        updatedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       }
       const updated = await this.storage.put<Product>(ENTITY, toSave)
-      this.ProductsStore_.update(products =>
-        products.map(p => p._id === updated._id ? updated : p)
-      )
-      this.logging.info({ event: 'crud.product.update', message: 'Product updated', context: { entityType: ENTITY, id: updated._id } })
+      this.ProductsStore_.update((products) => products.map((p) => (p._id === updated._id ? updated : p)))
+      this.logging.info({
+        event: 'crud.product.update',
+        message: 'Product updated',
+        context: { entityType: ENTITY, id: updated._id }
+      })
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({ event: 'crud.product.update_error', message: 'Failed to update product', context: { err } })
@@ -157,8 +215,12 @@ export class ProductDataService {
       const withDeleted = { ...product, deletedAt: Date.now() } as Product & { deletedAt: number }
       await this.storage.appendExisting(TRASH_KEY, withDeleted)
       await this.storage.remove(ENTITY, _id)
-      this.ProductsStore_.update(products => products.filter(p => p._id !== _id))
-      this.logging.info({ event: 'crud.product.delete', message: 'Product deleted', context: { entityType: ENTITY, id: _id } })
+      this.ProductsStore_.update((products) => products.filter((p) => p._id !== _id))
+      this.logging.info({
+        event: 'crud.product.delete',
+        message: 'Product deleted',
+        context: { entityType: ENTITY, id: _id }
+      })
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({ event: 'crud.product.delete_error', message: 'Failed to delete product', context: { err } })
@@ -169,16 +231,25 @@ export class ProductDataService {
   async getTrashProducts(): Promise<(Product & { deletedAt: number })[]> {
     try {
       const raw = await this.storage.query<Record<string, unknown>>(TRASH_KEY, 0)
-      return raw.map(row => this.normalizeTrashProduct(row as Partial<Product> & { deletedAt: number }))
+      return raw.map((row) => this.normalizeTrashProduct(row as Partial<Product> & { deletedAt: number }))
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.product.getTrash_error', message: 'Failed to get trash products', context: { err } })
+      this.logging.error({
+        event: 'crud.product.getTrash_error',
+        message: 'Failed to get trash products',
+        context: { err }
+      })
       throw err
     }
   }
 
   private normalizeTrashProduct(row: Partial<Product> & { deletedAt: number }): Product & { deletedAt: number } {
-    const legacy = row as Partial<Product> & { category_?: string; is_dairy_?: boolean; supplierId_?: string; deletedAt: number }
+    const legacy = row as Partial<Product> & {
+      category_?: string
+      is_dairy_?: boolean
+      supplierId_?: string
+      deletedAt: number
+    }
     const product = this.normalizeProduct(legacy as Record<string, unknown>)
     return { ...product, deletedAt: legacy.deletedAt }
   }
@@ -186,17 +257,21 @@ export class ProductDataService {
   async restoreProduct(_id: string): Promise<Product> {
     try {
       const trash = await this.getTrashProducts()
-      const item = trash.find(p => p._id === _id)
+      const item = trash.find((p) => p._id === _id)
       if (!item) throw new Error(`Product ${_id} not found in trash`)
       const { deletedAt: _, ...product } = item
-      const rest = trash.filter(p => p._id !== _id)
+      const rest = trash.filter((p) => p._id !== _id)
       await this.storage.replaceAll(TRASH_KEY, rest)
       await this.storage.appendExisting(ENTITY, product)
-      this.ProductsStore_.update(products => [...products, product])
+      this.ProductsStore_.update((products) => [...products, product])
       return product
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.product.restore_error', message: 'Failed to restore product', context: { err } })
+      this.logging.error({
+        event: 'crud.product.restore_error',
+        message: 'Failed to restore product',
+        context: { err }
+      })
       throw err
     }
   }
@@ -204,12 +279,16 @@ export class ProductDataService {
   async disposeProduct(_id: string): Promise<void> {
     try {
       const trash = await this.getTrashProducts()
-      const rest = trash.filter(p => p._id !== _id)
+      const rest = trash.filter((p) => p._id !== _id)
       if (rest.length === trash.length) throw new Error(`Product ${_id} not found in trash`)
       await this.storage.replaceAll(TRASH_KEY, rest)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.product.dispose_error', message: 'Failed to dispose product', context: { err } })
+      this.logging.error({
+        event: 'crud.product.dispose_error',
+        message: 'Failed to dispose product',
+        context: { err }
+      })
       throw err
     }
   }
@@ -224,11 +303,15 @@ export class ProductDataService {
         restored.push(product)
       }
       await this.storage.replaceAll(TRASH_KEY, [])
-      this.ProductsStore_.update(products => [...products, ...restored])
+      this.ProductsStore_.update((products) => [...products, ...restored])
       return restored
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.product.restoreAll_error', message: 'Failed to restore all products', context: { err } })
+      this.logging.error({
+        event: 'crud.product.restoreAll_error',
+        message: 'Failed to restore all products',
+        context: { err }
+      })
       throw err
     }
   }
@@ -238,7 +321,11 @@ export class ProductDataService {
       await this.storage.replaceAll(TRASH_KEY, [])
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.product.disposeAll_error', message: 'Failed to dispose all products', context: { err } })
+      this.logging.error({
+        event: 'crud.product.disposeAll_error',
+        message: 'Failed to dispose all products',
+        context: { err }
+      })
       throw err
     }
   }

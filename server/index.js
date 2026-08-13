@@ -6,6 +6,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
+const compression = require('compression');
 const { connectDb } = require('./db');
 const { seedMasterData } = require('./services/seed-master');
 const authRouter = require('./routes/auth');
@@ -45,6 +46,15 @@ app.use(helmet({
     }
   }
 }));
+
+// ---------------------------------------------------------------------------
+// gzip/deflate compression — large JSON list responses (PRODUCT_LIST,
+// RECIPE_LIST, DISH_LIST can run 100s of KB–1MB+ for accounts with big
+// catalogs) shrink ~70-90% over the wire for near-zero CPU cost. Runs after
+// Helmet (headers still apply to compressed responses) and before every
+// route that produces a body.
+// ---------------------------------------------------------------------------
+app.use(compression());
 
 // ---------------------------------------------------------------------------
 // Static files — served AFTER Helmet so assets also carry security headers.

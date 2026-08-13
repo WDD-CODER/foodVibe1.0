@@ -41,6 +41,7 @@ const TOKEN_KEY = 'fv_token'
  *   replaceAll   → PUT    /api/v1/data/:entityType        (body is full array, no :id segment)
  *   queryFiltered → GET   /api/v1/data/:entityType?filterEntityType=&filterEntityId=
  *   deleteBulk   → DELETE /api/v1/data/:entityType/bulk   (body: { ids })
+ *   search        → GET   /api/v1/data/:entityType/search?q=&limit=
  */
 @Injectable({ providedIn: 'root' })
 export class HttpStorageAdapter {
@@ -86,6 +87,21 @@ export class HttpStorageAdapter {
     })
     return firstValueFrom(
       this.http.get<T[]>(`${this.base}/api/v1/data/${entityType}?${params.toString()}`, {
+        headers: this.headers(),
+        withCredentials: true
+      })
+    )
+  }
+
+  /**
+   * Lean prefix-match typeahead search (plan 301, Milestone 1). Returns only the
+   * server's lean projection for the entity type, not full documents — the point
+   * is a small response regardless of collection size.
+   */
+  async search<T>(entityType: string, q: string, limit = 25): Promise<T[]> {
+    const params = new URLSearchParams({ q, limit: String(limit) })
+    return firstValueFrom(
+      this.http.get<T[]>(`${this.base}/api/v1/data/${entityType}/search?${params.toString()}`, {
         headers: this.headers(),
         withCredentials: true
       })

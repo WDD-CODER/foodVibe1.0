@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core'
 import { ACTIVITY_STORAGE_KEY } from './activity-log.service'
 import { environment } from '../../../environments/environment'
 import { HttpStorageAdapter } from './http-storage.adapter'
+import { filterOptionsByStartsWith } from '../utils/filter-starts-with.util'
 
 export type EntityId = {
   _id: string
@@ -12,11 +13,28 @@ export const STORAGE_ERROR_MESSAGE = 'Storage failed: quota or access denied'
 
 /** Entity types that are mirrored to backup_<key> after every successful save. */
 export const BACKUP_ENTITY_TYPES = new Set<string>([
-  'PRODUCT_LIST', 'RECIPE_LIST', 'DISH_LIST', 'KITCHEN_SUPPLIERS', 'EQUIPMENT_LIST',
-  'VENUE_PROFILES', 'MENU_EVENT_LIST',
-  'TRASH_RECIPES', 'TRASH_DISHES', 'TRASH_PRODUCTS', 'TRASH_EQUIPMENT', 'TRASH_VENUES', 'TRASH_MENU_EVENTS',
-  'VERSION_HISTORY', ACTIVITY_STORAGE_KEY, 'KITCHEN_UNITS', 'KITCHEN_PREPARATIONS',
-  'KITCHEN_CATEGORIES', 'KITCHEN_ALLERGENS', 'KITCHEN_LABELS', 'MENU_TYPES', 'MENU_SECTION_CATEGORIES'
+  'PRODUCT_LIST',
+  'RECIPE_LIST',
+  'DISH_LIST',
+  'KITCHEN_SUPPLIERS',
+  'EQUIPMENT_LIST',
+  'VENUE_PROFILES',
+  'MENU_EVENT_LIST',
+  'TRASH_RECIPES',
+  'TRASH_DISHES',
+  'TRASH_PRODUCTS',
+  'TRASH_EQUIPMENT',
+  'TRASH_VENUES',
+  'TRASH_MENU_EVENTS',
+  'VERSION_HISTORY',
+  ACTIVITY_STORAGE_KEY,
+  'KITCHEN_UNITS',
+  'KITCHEN_PREPARATIONS',
+  'KITCHEN_CATEGORIES',
+  'KITCHEN_ALLERGENS',
+  'KITCHEN_LABELS',
+  'MENU_TYPES',
+  'MENU_SECTION_CATEGORIES'
 ])
 
 @Injectable({
@@ -46,7 +64,7 @@ export class StorageService {
   async get<T extends EntityId>(entityType: string, entityId: string): Promise<T> {
     if (environment.useBackend) return this.httpAdapter.get<T>(entityType, entityId)
     const entities = await this.query<T>(entityType)
-    const entity = entities.find(entity => entity._id === entityId)
+    const entity = entities.find((entity) => entity._id === entityId)
     if (!entity) throw new Error(`Cannot get, Item ${entityId} of type: ${entityType} does not exist`)
     return entity
   }
@@ -63,7 +81,7 @@ export class StorageService {
   async put<T extends EntityId>(entityType: string, updatedEntity: T): Promise<T> {
     if (environment.useBackend) return this.httpAdapter.put<T>(entityType, updatedEntity)
     const entities = await this.query<T>(entityType, 0)
-    const idx = entities.findIndex(entity => entity._id === updatedEntity._id)
+    const idx = entities.findIndex((entity) => entity._id === updatedEntity._id)
     if (idx === -1) throw new Error(`Cannot update, product ${updatedEntity._id} does not exist`)
 
     entities[idx] = updatedEntity
@@ -74,7 +92,7 @@ export class StorageService {
   async remove(entityType: string, entityId: string): Promise<void> {
     if (environment.useBackend) return this.httpAdapter.remove(entityType, entityId)
     const entities = await this.query<EntityId>(entityType, 0)
-    const idx = entities.findIndex(entity => entity._id === entityId)
+    const idx = entities.findIndex((entity) => entity._id === entityId)
     if (idx !== -1) {
       entities.splice(idx, 1)
       this._save(entityType, entities)
@@ -119,7 +137,21 @@ export class StorageService {
       return this.httpAdapter.queryFiltered<T>(entityType, filterEntityType, filterEntityId)
     }
     const all = await this.query<T>(entityType, 0)
-    return all.filter(e => e.entityType === filterEntityType && e.entityId === filterEntityId)
+    return all.filter((e) => e.entityType === filterEntityType && e.entityId === filterEntityId)
+  }
+
+  /**
+   * Lean prefix-match typeahead search (plan 301, Milestone 1).
+   * Backend: GET /:type/search?q=&limit= — server does the prefix match, returns a
+   * lean projection only.
+   * localStorage: filters the full in-memory array with the same "starts with" +
+   * script semantics the typeahead components used to apply themselves, so behaviour
+   * is unchanged in dev/demo mode.
+   */
+  async search<T extends { name_hebrew?: string }>(entityType: string, q: string, limit = 25): Promise<T[]> {
+    if (environment.useBackend) return this.httpAdapter.search<T>(entityType, q, limit)
+    const all = await this.query<T>(entityType, 0)
+    return filterOptionsByStartsWith(all, q, (item) => (item.name_hebrew ?? '').trim()).slice(0, limit)
   }
 
   /**
@@ -131,7 +163,10 @@ export class StorageService {
     if (ids.length === 0) return
     const idSet = new Set(ids)
     const list = await this.query<EntityId>(entityType, 0)
-    this._save(entityType, list.filter(e => !idSet.has(e._id)))
+    this._save(
+      entityType,
+      list.filter((e) => !idSet.has(e._id))
+    )
   }
 
   private _save<T>(entityType: string, entities: T[]): void {

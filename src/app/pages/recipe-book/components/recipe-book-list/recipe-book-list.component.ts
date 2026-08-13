@@ -9,14 +9,15 @@ import {
   OnDestroy,
   WritableSignal
 } from '@angular/core'
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { Router, NavigationEnd } from '@angular/router'
-import { filter } from 'rxjs'
+import { filter, debounceTime, map, switchMap } from 'rxjs'
 import { LucideAngularModule } from 'lucide-angular'
 
 import { KitchenStateService } from '@services/kitchen-state.service'
+import { ProductDataService } from '@services/product-data.service'
 import { HeroFabService } from '@services/hero-fab.service'
 import { AiRecipeModalService } from 'src/app/shared/ai-recipe-modal/ai-recipe-modal.service'
 import { RecipeCostService } from '@services/recipe-cost.service'
@@ -54,7 +55,6 @@ import {
   BooleanParam
 } from 'src/app/core/utils/list-state.util'
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
-import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util'
 import { resolveRecipeAllergens, MAX_ALLERGEN_RECURSION } from 'src/app/core/utils/recipe-allergens.util'
 import { CellExpandState } from 'src/app/core/utils/cell-expand-state.util'
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
@@ -62,6 +62,11 @@ import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-act
 
 export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens' | 'dateAdded' | 'dateUpdated' | 'rating'
 type RecipeBulkField = 'labels_' | 'recipe_type_'
+
+/** Ingredient-filter typeahead search (plan 301, Milestone 1) — same tuning as ingredient-search.component.ts. */
+const INGREDIENT_SEARCH_LIMIT = 25
+const INGREDIENT_SEARCH_MIN_LENGTH = 2
+const INGREDIENT_SEARCH_DEBOUNCE_MS = 250
 
 @Component({
   selector: 'recipe-book-list',
@@ -92,6 +97,7 @@ type RecipeBulkField = 'labels_' | 'recipe_type_'
 })
 export class RecipeBookListComponent implements OnInit, OnDestroy {
   private readonly kitchenState = inject(KitchenStateService)
+  private readonly productData = inject(ProductDataService)
   private readonly router = inject(Router)
   private readonly recipeCostService = inject(RecipeCostService)
   private readonly translationService = inject(TranslationService)
@@ -324,12 +330,31 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     }))
   })
 
+  /**
+   * Server-side prefix search (plan 301, Milestone 1) — debounced + cancels stale
+   * in-flight requests via switchMap. Replaces filtering the full in-memory
+   * kitchenState.products_() on every keystroke, which got slow once a catalog
+   * reached 1,000+ docs (same fix as ingredient-search.component.ts).
+   */
+  private ingredientSearchResults_ = toSignal(
+    toObservable(this.ingredientSearchQuery_).pipe(
+      map((q) => (q ?? '').trim()),
+      debounceTime(INGREDIENT_SEARCH_DEBOUNCE_MS),
+      switchMap((raw): Promise<Product[]> =>
+        raw.length < INGREDIENT_SEARCH_MIN_LENGTH
+          ? Promise.resolve([])
+          : this.productData.searchProducts(raw, INGREDIENT_SEARCH_LIMIT)
+      )
+    ),
+    { initialValue: [] as Product[] }
+  )
+
+  // Exclude already-selected products — layered as its own computed() so it re-runs on
+  // selectedProductIds_() changes without triggering a new network search.
   protected filteredProductsForIngredientSearch_ = computed(() => {
-    const raw = this.ingredientSearchQuery_().trim()
-    if (!raw) return []
+    if (this.ingredientSearchQuery_().trim().length < INGREDIENT_SEARCH_MIN_LENGTH) return []
     const selected = new Set(this.selectedProductIds_())
-    const candidates = this.kitchenState.products_().filter((p) => !selected.has(p._id))
-    return filterOptionsByStartsWith(candidates, raw, (p) => (p.name_hebrew ?? '').trim())
+    return this.ingredientSearchResults_().filter((p) => !selected.has(p._id))
   })
 
   protected filteredRecipes_ = computed(() => {
