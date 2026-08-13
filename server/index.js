@@ -1,3 +1,4 @@
+const BOOT_START = Date.now(); // 1d: captured at module load, logged once listen() succeeds — the delta is the real cold-start cost (DNS/env setup + all requires + Atlas connect + seedMasterData).
 require('node:dns').setServers(['8.8.8.8', '8.8.4.4']);
 require('dotenv').config();
 const path = require('path');
@@ -57,12 +58,22 @@ app.use(helmet({
 app.use(compression());
 
 // ---------------------------------------------------------------------------
+// Request logging — MUST come before express.static: express.static terminates
+// the response for any file it matches, so requests for static assets never
+// reach morgan if it's registered after. Format includes :response-time (stops
+// at headers-written, not body-transfer-complete — a fast number here does not
+// prove a large JSON response was fast for the user) and :res[content-length]
+// (logs "-" for compressed responses since compression() switches to chunked
+// transfer encoding and drops the header; see [data/query] logging in
+// generic.js for the real pre-compression byte count).
+// ---------------------------------------------------------------------------
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
+
+// ---------------------------------------------------------------------------
 // Static files — served AFTER Helmet so assets also carry security headers.
 // MUST still come before /api/ catch-all.
 // ---------------------------------------------------------------------------
 app.use(express.static(STATIC_DIR))
-
-app.use(morgan('tiny'));
 
 const corsOptions = {
   origin(origin, callback) {
@@ -125,7 +136,7 @@ connectDb()
   .then(() => seedMasterData())
   .then(() => {
     app.listen(PORT, () => {
-      console.log(`foodVibe server listening on port ${PORT}`);
+      console.log(`foodVibe server listening on port ${PORT} (boot ${Date.now() - BOOT_START}ms)`);
       console.log(`CORS origins: ${ALLOWED_ORIGINS.join(', ')}`);
     });
   })

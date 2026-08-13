@@ -43,6 +43,10 @@ function makeId(length = 5) {
 // Optional ?filterEntityType=&filterEntityId= narrow the find (e.g. VERSION_HISTORY).
 // ---------------------------------------------------------------------------
 router.get('/:type', optionalToken, async (req, res) => {
+  // 1c perf instrumentation — opt-in via PERF_LOG=1. JSON.stringify-ing the response
+  // purely to measure its size is real CPU on a 0.1-shared-CPU Render instance, so it
+  // stays off by default rather than running on every request in production.
+  const perfLog = process.env.PERF_LOG === '1';
   try {
     const userId = req.user ? req.user.userId : '__master__';
     // Was capped at 500 (max 1000) — safe when no account had more than a few hundred
@@ -64,11 +68,21 @@ router.get('/:type', optionalToken, async (req, res) => {
     if (req.query.filterEntityId) {
       filter.entityId = String(req.query.filterEntityId);
     }
+    const findStart = perfLog ? Date.now() : 0;
     const docs = await col(req.params.type)
       .find(filter)
       .skip(skip)
       .limit(limit)
       .toArray();
+    if (perfLog) {
+      const mongoMs = Date.now() - findStart;
+      const serializeStart = Date.now();
+      // Pre-compression byte count — what actually went over the wire before
+      // compression() shrinks it is invisible to :res[content-length] (see index.js).
+      const bytes = Buffer.byteLength(JSON.stringify(docs));
+      const serializeMs = Date.now() - serializeStart;
+      console.log(`[data/query] ${req.params.type} docs=${docs.length} bytes=${bytes} mongo=${mongoMs}ms serialize=${serializeMs}ms`);
+    }
     res.json(docs);
   } catch (err) {
     console.error('[data/query]', err);
