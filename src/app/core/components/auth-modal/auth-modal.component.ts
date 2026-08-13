@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, effect, ElementRef, inject, signal, viewChild } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  effect,
+  ElementRef,
+  inject,
+  signal,
+  viewChild
+} from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
@@ -70,19 +79,22 @@ export class AuthModalComponent {
     this.errorKey.set(null)
     this.uploadingImage_.set(true)
     this.cdr.markForCheck()
-    this.cloudinary.upload(file).pipe(take(1)).subscribe({
-      next: url => {
-        this.imgCloudinaryUrl = url
-        this.imgPreview.set(url)
-        this.uploadingImage_.set(false)
-        this.cdr.markForCheck()
-      },
-      error: () => {
-        this.uploadingImage_.set(false)
-        this.errorKey.set('image_upload_failed')
-        this.cdr.markForCheck()
-      },
-    })
+    this.cloudinary
+      .upload(file)
+      .pipe(take(1))
+      .subscribe({
+        next: (url) => {
+          this.imgCloudinaryUrl = url
+          this.imgPreview.set(url)
+          this.uploadingImage_.set(false)
+          this.cdr.markForCheck()
+        },
+        error: () => {
+          this.uploadingImage_.set(false)
+          this.errorKey.set('image_upload_failed')
+          this.cdr.markForCheck()
+        }
+      })
   }
 
   protected onNameBlur(): void {
@@ -117,34 +129,53 @@ export class AuthModalComponent {
     if (this.isSubmitting() || this.uploadingImage_()) return
 
     const nameErr = validateUsername(this.name)
-    if (nameErr) { this.errorKey.set(nameErr); return }
+    if (nameErr) {
+      this.errorKey.set(nameErr)
+      return
+    }
 
     if (this.isSignUp) {
       const emailErr = validateEmail(this.email)
-      if (emailErr) { this.errorKey.set(emailErr); return }
+      if (emailErr) {
+        this.errorKey.set(emailErr)
+        return
+      }
 
       const passwordErr = validatePassword(this.password, this.name, this.email)
-      if (passwordErr) { this.errorKey.set(passwordErr); return }
+      if (passwordErr) {
+        this.errorKey.set(passwordErr)
+        return
+      }
 
       if (this.password !== this.confirmPassword) {
         this.errorKey.set('passwords_do_not_match')
         return
       }
     } else {
-      if (!this.password.trim()) { this.errorKey.set('password_required'); return }
+      if (!this.password.trim()) {
+        this.errorKey.set('password_required')
+        return
+      }
     }
 
     this.errorKey.set(null)
     this.isSubmitting.set(true)
 
     if (this.isSignUp) {
-      this.userService.signup(
-        { name: this.name.trim(), email: this.email.trim(), imgUrl: this.imgCloudinaryUrl ?? undefined, role: 'user' },
-        this.password.trim()
-      ).subscribe({
-        next: () => this._onSuccess(),
-        error: (err: Error) => this._onError(err)
-      })
+      this.userService
+        .signup(
+          {
+            name: this.name.trim(),
+            email: this.email.trim(),
+            imgUrl: this.imgCloudinaryUrl ?? undefined,
+            role: 'user'
+          },
+          this.password.trim()
+        )
+        .subscribe({
+          next: () => this._onSuccess(),
+          error: (err: Error) => this._onError(err)
+        })
     } else {
       this.userService.login({ name: this.name.trim(), password: this.password.trim() }).subscribe({
         next: () => this._onSuccess(),
@@ -158,7 +189,10 @@ export class AuthModalComponent {
     if (environment.useBackendAuth) {
       this.userService.loginAsGuestBackend().subscribe({
         next: () => this._onSuccess(),
-        error: () => { this._reset(); this.modalService.close() }
+        error: () => {
+          this._reset()
+          this.modalService.close()
+        }
       })
       return
     }
@@ -192,8 +226,16 @@ export class AuthModalComponent {
       this.errorKey.set('email_invalid')
     } else if (err.message === 'PASSWORD_REQUIRED') {
       this.errorKey.set('password_required')
-    } else {
+    } else if (err.message === 'ACCOUNT_LOCKED') {
+      this.errorKey.set('account_locked')
+    } else if (err.message === 'RATE_LIMITED') {
+      this.errorKey.set('rate_limited')
+    } else if (err.message === 'SERVER_ERROR') {
+      this.errorKey.set('server_error')
+    } else if (err.message === 'USER_NOT_FOUND') {
       this.errorKey.set('user_not_found')
+    } else {
+      this.errorKey.set('server_error')
     }
   }
 

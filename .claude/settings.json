@@ -69,12 +69,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"C:/Program Files/Git/bin/bash.exe\" scripts/branch-guard.sh",
+            "command": "\"C:/Program Files/Git/bin/bash.exe\" \"${CLAUDE_PROJECT_DIR}/scripts/branch-guard.sh\"",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "\"C:/Program Files/Git/bin/bash.exe\" scripts/plan-write-guard.sh",
+            "command": "\"C:/Program Files/Git/bin/bash.exe\" \"${CLAUDE_PROJECT_DIR}/scripts/plan-write-guard.sh\"",
             "timeout": 15
           }
         ]
@@ -86,7 +86,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"C:/Program Files/Git/bin/bash.exe\" scripts/session-startup.sh",
+            "command": "\"C:/Program Files/Git/bin/bash.exe\" \"${CLAUDE_PROJECT_DIR}/scripts/session-startup.sh\"",
             "timeout": 10
           }
         ]
@@ -98,7 +98,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 scripts/session-manifest-hook.py",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/scripts/session-manifest-hook.py\"",
             "timeout": 5
           }
         ]
@@ -110,12 +110,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"C:/Program Files/Git/bin/bash.exe\" scripts/pre-compact-todo-append.sh",
+            "command": "\"C:/Program Files/Git/bin/bash.exe\" \"${CLAUDE_PROJECT_DIR}/scripts/pre-compact-todo-append.sh\"",
             "timeout": 5
           },
           {
             "type": "command",
-            "command": "\"C:/Program Files/Git/bin/bash.exe\" scripts/pre-compact-reminder.sh",
+            "command": "\"C:/Program Files/Git/bin/bash.exe\" \"${CLAUDE_PROJECT_DIR}/scripts/pre-compact-reminder.sh\"",
             "timeout": 5
           }
         ]
@@ -126,7 +126,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"C:/Program Files/Git/bin/bash.exe\" scripts/handoff-check.sh",
+            "command": "\"C:/Program Files/Git/bin/bash.exe\" \"${CLAUDE_PROJECT_DIR}/scripts/handoff-check.sh\"",
             "timeout": 10
           }
         ]
