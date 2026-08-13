@@ -38,7 +38,7 @@ Without this you will not be able to tell which of the fixes below actually work
 
 ### A1. Render free tier is spinning your server down 🔴 CRITICAL
 
-`render.yaml:4`
+`render.yaml:5`
 
 ```yaml
 plan: free
@@ -230,7 +230,7 @@ const [masterDocs, userDocs, allUserDocs] = await Promise.all([
 
 That's ~42 queries per run, several of them scanning 1,500-document collections. Plus `getCrossCollectionNameSet()` and `ensureRecipeDishPrepass()` add more full scans of `RECIPE_LIST` and `DISH_LIST`.
 
-Also note `sync-master.js:272-273`:
+Also note `sync-master.js:273-274`:
 
 ```js
 for (const master of masterDocs) {
