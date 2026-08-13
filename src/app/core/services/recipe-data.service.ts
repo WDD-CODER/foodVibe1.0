@@ -61,6 +61,22 @@ export class RecipeDataService {
     }
   }
 
+  /**
+   * Server-side prefix search (plan 301, Milestone 1) — for typeahead components on large
+   * catalogs. Returns the server's lean projection (not the full Recipe shape); callers
+   * must only rely on the fields the /search endpoint actually returns for RECIPE_LIST
+   * (_id, name_hebrew, yield_unit_).
+   */
+  async searchRecipes(query: string, limit = 25): Promise<Recipe[]> {
+    try {
+      return await this.storage.search<Recipe>(ENTITY, query, limit)
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) throw err
+      this.logging.error({ event: 'crud.recipes.search_error', message: 'Failed to search recipes', context: { err } })
+      return []
+    }
+  }
+
   async getRecipeById(_id: string): Promise<Recipe> {
     try {
       return this.storage.get<Recipe>(ENTITY, _id)

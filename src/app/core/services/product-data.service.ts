@@ -117,6 +117,27 @@ export class ProductDataService {
     }
   }
 
+  /**
+   * Server-side prefix search (plan 301, Milestone 1) — for typeahead components on large
+   * catalogs. Returns lean results normalized through the same normalizeProduct() as the
+   * full-collection load, so callers get a fully-typed Product with sane defaults for any
+   * field the server's lean projection omitted (e.g. categories_/allergens_).
+   */
+  async searchProducts(query: string, limit = 25): Promise<Product[]> {
+    try {
+      const raw = await this.storage.search<Record<string, unknown>>(ENTITY, query, limit)
+      return raw.map((row) => this.normalizeProduct(row))
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) throw err
+      this.logging.error({
+        event: 'crud.products.search_error',
+        message: 'Failed to search products',
+        context: { err }
+      })
+      return []
+    }
+  }
+
   async getProductById(_id: string): Promise<Product> {
     try {
       const Product = await this.storage.get<Product>(ENTITY, _id)

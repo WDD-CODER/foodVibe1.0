@@ -2,6 +2,7 @@ const { Router } = require('express');
 const mongoose = require('mongoose');
 const { verifyToken, optionalToken } = require('../middleware/auth');
 const { ALL_USER_ENTITY_TYPES } = require('../constants/all-user-entity-types');
+const { SEARCHABLE_ENTITY_TYPES } = require('../constants/searchable-entity-types');
 
 const router = Router();
 
@@ -71,6 +72,58 @@ router.get('/:type', optionalToken, async (req, res) => {
     res.json(docs);
   } catch (err) {
     console.error('[data/query]', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Lean field projection per searchable type — only what the typeahead components
+// actually render/consume (ingredient-search.component.ts, recipe-book-list.component.ts's
+// filteredProductsForIngredientSearch_) rides along; not the full document. See plan 301.
+const SEARCH_PROJECTIONS = {
+  PRODUCT_LIST: { _id: 1, name_hebrew: 1, base_unit_: 1, purchase_options_: 1 },
+  RECIPE_LIST: { _id: 1, name_hebrew: 1, yield_unit_: 1 },
+  DISH_LIST: { _id: 1, name_hebrew: 1, yield_unit_: 1 },
+};
+
+/** Escapes regex metacharacters so a raw query is safe to anchor into a RegExp. */
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/v1/data/:type/search?q=&limit=
+// Case-insensitive prefix match on name_hebrew, restricted to SEARCHABLE_ENTITY_TYPES
+// and returning only the lean projection above — the point is a tiny response
+// regardless of collection size (plan 301, Milestone 1). Must be registered before
+// GET /:type/:id so "search" is never swallowed as an :id.
+// Mirrors filterOptionsByStartsWith's client-side semantics: Hebrew queries have no
+// case, so a plain (case-sensitive) anchored regex stays index-friendly; a Latin query
+// adds the 'i' flag for case-insensitive matching (Mongo can't use the index for that
+// case, but Latin queries are the rare path here).
+// ---------------------------------------------------------------------------
+router.get('/:type/search', optionalToken, async (req, res) => {
+  try {
+    if (!SEARCHABLE_ENTITY_TYPES.includes(req.params.type)) {
+      return res.status(403).json({ error: 'Search is not available for this entity type' });
+    }
+    const q = String(req.query.q || '').trim();
+    if (!q) return res.json([]);
+
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 25, 1), 50);
+    const userId = req.user ? req.user.userId : '__master__';
+    const isLatin = /[a-zA-Z]/.test(q);
+    const regex = new RegExp('^' + escapeRegex(q), isLatin ? 'i' : '');
+
+    const docs = await col(req.params.type)
+      .find(
+        { userId, _userDeleted: { $ne: true }, name_hebrew: regex },
+        { projection: SEARCH_PROJECTIONS[req.params.type] }
+      )
+      .limit(limit)
+      .toArray();
+    res.json(docs);
+  } catch (err) {
+    console.error('[data/search]', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
