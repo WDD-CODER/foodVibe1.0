@@ -176,6 +176,7 @@ async function syncMasterToUser(userId) {
         col2.find({ userId, _masterId: { $ne: null } }).project({ _id: 1, _masterId: 1 }).toArray(),
       ]);
       const userByMasterId2 = new Map(userDocs2.map(d => [String(d._masterId), d]));
+      let collisionCount = 0;
       for (const master of masterDocs2) {
         const masterId = String(master._id);
         if (userByMasterId2.has(masterId)) continue; // Rule 2/3 — not a new clone
@@ -183,7 +184,7 @@ async function syncMasterToUser(userId) {
         if (masterName) {
           const crossNames = await getCrossCollectionNameSet();
           if (crossNames.has(masterName) || pendingNames.has(masterName)) {
-            console.log(`[sync-master]   ${type}: skipping clone — cross-collection name collision "${masterName}"`);
+            collisionCount++;
             continue;
           }
         }
@@ -191,6 +192,12 @@ async function syncMasterToUser(userId) {
         newCloneId.set(masterId, newId);
         recipeIdMap.set(masterId, newId);
         if (masterName) pendingNames.add(masterName);
+      }
+      // One summary line per collection instead of one per skipped item — this can
+      // legitimately fire hundreds of times for an account with a lot of overlapping
+      // legacy/duplicate-named data, and per-item logging drowned out real signal.
+      if (collisionCount > 0) {
+        console.log(`[sync-master]   ${type}: skipped ${collisionCount} clone(s) — cross-collection name collision`);
       }
     }
   }
@@ -238,6 +245,7 @@ async function syncMasterToUser(userId) {
 
     const toInsert = [];
     const toUpdate = [];
+    let productNameCollisions = 0;
 
     // RECIPE_LIST/DISH_LIST: run the combined pre-pass (see above) once,
     // the first time either collection is reached — it covers both, so the
@@ -264,7 +272,7 @@ async function syncMasterToUser(userId) {
           const masterName = master.name_hebrew?.trim();
           const allProductNames = new Set(allUserDocs.map(d => d.name_hebrew?.trim()).filter(Boolean));
           if (masterName && allProductNames.has(masterName)) {
-            console.log(`[sync-master]   PRODUCT_LIST: skipping clone — name collision "${masterName}"`);
+            productNameCollisions++;
             continue;
           }
         }
@@ -339,6 +347,10 @@ async function syncMasterToUser(userId) {
       }
       // Rule 3: _userModified === true → skip
       // Rule 4: deleted master items → skip (absence in masterDocs means no action)
+    }
+
+    if (productNameCollisions > 0) {
+      console.log(`[sync-master]   PRODUCT_LIST: skipped ${productNameCollisions} clone(s) — name collision`);
     }
 
     if (toInsert.length > 0) {
