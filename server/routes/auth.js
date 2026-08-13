@@ -55,6 +55,20 @@ function makeId(length = 5) {
 }
 
 /**
+ * True for Mongo/Mongoose connectivity failures (unreachable cluster, IP not allow-listed,
+ * serverSelectionTimeoutMS expiry, buffering timeout) as opposed to application-level errors.
+ * Routes use this to report DB_UNAVAILABLE instead of a misleading business-rule rejection.
+ */
+function isDbUnavailableError(err) {
+  return (
+    err.name === 'MongooseServerSelectionError' ||
+    err.name === 'MongoNetworkError' ||
+    err.name === 'MongoServerSelectionError' ||
+    /buffering timed out/i.test(err.message || '')
+  );
+}
+
+/**
  * Constant-time string comparison. Returns false if lengths differ (no timing leak via length).
  */
 function safeCompare(a, b) {
@@ -149,6 +163,12 @@ router.post('/signup', signupLimiter, async (req, res) => {
     return res.status(201).json({ token, user: publicUser });
   } catch (err) {
     console.error('[auth/signup]', err);
+    // True duplicate-key race (the pre-checks above passed but another request won the insert).
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyPattern || err.keyValue || {})[0];
+      return res.status(409).json({ error: field === 'email' ? 'EMAIL_TAKEN' : 'USERNAME_TAKEN' });
+    }
+    if (isDbUnavailableError(err)) return res.status(503).json({ error: 'DB_UNAVAILABLE' });
     return res.status(500).json({ error: 'Server error' });
   }
 });
@@ -210,6 +230,7 @@ router.post('/login', loginLimiter, async (req, res) => {
     return res.json({ token, user: publicUser });
   } catch (err) {
     console.error('[auth/login]', err);
+    if (isDbUnavailableError(err)) return res.status(503).json({ error: 'DB_UNAVAILABLE' });
     return res.status(500).json({ error: 'Server error' });
   }
 });
@@ -255,6 +276,7 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
     return res.json({ token });
   } catch (err) {
     console.error('[auth/refresh]', err);
+    if (isDbUnavailableError(err)) return res.status(503).json({ error: 'DB_UNAVAILABLE' });
     return res.status(500).json({ error: 'Server error' });
   }
 });
@@ -318,6 +340,7 @@ router.post('/guest', async (req, res) => {
     });
   } catch (err) {
     console.error('[auth/guest]', err);
+    if (isDbUnavailableError(err)) return res.status(503).json({ error: 'DB_UNAVAILABLE' });
     return res.status(500).json({ error: 'Server error' });
   }
 });

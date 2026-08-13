@@ -1,40 +1,58 @@
 @if (modalService.isOpen()) {
   <div class="c-modal-overlay" (click)="onClose()">
     <div class="c-modal-card c-modal-card--md" dir="rtl" (click)="$event.stopPropagation()">
-
       <div class="auth-tabs">
-        <button type="button"
-                class="auth-tab"
-                [class.active]="!isSignUp"
-                (click)="switchMode('sign-in')">
+        <button type="button" class="auth-tab" [class.active]="!isSignUp" (click)="switchMode('sign-in')">
           {{ 'sign_in' | translatePipe }}
         </button>
-        <button type="button"
-                class="auth-tab"
-                [class.active]="isSignUp"
-                (click)="switchMode('sign-up')">
+        <button type="button" class="auth-tab" [class.active]="isSignUp" (click)="switchMode('sign-up')">
           {{ 'sign_up' | translatePipe }}
         </button>
       </div>
 
       <form (ngSubmit)="onSubmit()" (keydown.enter)="onSubmit()" class="c-modal-body">
         <div class="auth-form-fields">
-
           <!-- Username -->
           <div class="c-input-stack">
             <label for="auth-name">{{ 'username' | translatePipe }}</label>
-            <input id="auth-name"
-                   #nameInput
-                   type="text"
-                   [(ngModel)]="name"
-                   (input)="errorKey.set(null)"
-                   (blur)="onNameBlur()"
-                   name="name"
-                   autocomplete="username"
-                   required
-                   [class.c-input--invalid]="errorKey() === 'name_required' || errorKey() === 'username_taken' || errorKey() === 'username_too_short' || errorKey() === 'username_too_long' || errorKey() === 'username_invalid_chars'"
-                   [attr.aria-invalid]="(errorKey() === 'name_required' || errorKey() === 'username_taken' || errorKey() === 'username_too_short' || errorKey() === 'username_too_long' || errorKey() === 'username_invalid_chars') ? true : null" />
-            @if (errorKey() === 'user_not_found' || errorKey() === 'name_required' || errorKey() === 'username_taken' || errorKey() === 'username_too_short' || errorKey() === 'username_too_long' || errorKey() === 'username_invalid_chars') {
+            <input
+              id="auth-name"
+              #nameInput
+              type="text"
+              [(ngModel)]="name"
+              (input)="errorKey.set(null)"
+              (blur)="onNameBlur()"
+              name="name"
+              autocomplete="username"
+              required
+              [class.c-input--invalid]="
+                errorKey() === 'name_required' ||
+                errorKey() === 'username_taken' ||
+                errorKey() === 'username_too_short' ||
+                errorKey() === 'username_too_long' ||
+                errorKey() === 'username_invalid_chars'
+              "
+              [attr.aria-invalid]="
+                errorKey() === 'name_required' ||
+                errorKey() === 'username_taken' ||
+                errorKey() === 'username_too_short' ||
+                errorKey() === 'username_too_long' ||
+                errorKey() === 'username_invalid_chars'
+                  ? true
+                  : null
+              "
+            />
+            @if (
+              errorKey() === 'user_not_found' ||
+              errorKey() === 'name_required' ||
+              errorKey() === 'username_taken' ||
+              errorKey() === 'username_too_short' ||
+              errorKey() === 'username_too_long' ||
+              errorKey() === 'username_invalid_chars' ||
+              errorKey() === 'account_locked' ||
+              errorKey() === 'rate_limited' ||
+              errorKey() === 'server_error'
+            ) {
               <p class="auth-error">{{ errorKey()! | translatePipe }}</p>
             }
           </div>
@@ -43,16 +61,24 @@
             <!-- Email (sign-up only) -->
             <div class="c-input-stack">
               <label for="auth-email">{{ 'email' | translatePipe }}</label>
-              <input id="auth-email"
-                     type="email"
-                     [(ngModel)]="email"
-                     (input)="errorKey.set(null)"
-                     (blur)="onEmailBlur()"
-                     name="email"
-                     autocomplete="email"
-                     required
-                     [class.c-input--invalid]="errorKey() === 'email_required' || errorKey() === 'email_invalid' || errorKey() === 'email_taken'"
-                     [attr.aria-invalid]="(errorKey() === 'email_required' || errorKey() === 'email_invalid' || errorKey() === 'email_taken') ? true : null" />
+              <input
+                id="auth-email"
+                type="email"
+                [(ngModel)]="email"
+                (input)="errorKey.set(null)"
+                (blur)="onEmailBlur()"
+                name="email"
+                autocomplete="email"
+                required
+                [class.c-input--invalid]="
+                  errorKey() === 'email_required' || errorKey() === 'email_invalid' || errorKey() === 'email_taken'
+                "
+                [attr.aria-invalid]="
+                  errorKey() === 'email_required' || errorKey() === 'email_invalid' || errorKey() === 'email_taken'
+                    ? true
+                    : null
+                "
+              />
               @if (errorKey() === 'email_required' || errorKey() === 'email_invalid' || errorKey() === 'email_taken') {
                 <p class="auth-error">{{ errorKey()! | translatePipe }}</p>
               }
@@ -63,24 +89,48 @@
           <div class="c-input-stack">
             <label for="auth-password">{{ 'password' | translatePipe }}</label>
             <div class="password-field-wrap">
-              <input id="auth-password"
-                     [type]="showPassword_() ? 'text' : 'password'"
-                     [(ngModel)]="password"
-                     (input)="errorKey.set(null)"
-                     (blur)="onPasswordBlur()"
-                     name="password"
-                     [autocomplete]="isSignUp ? 'new-password' : 'current-password'"
-                     required
-                     [class.c-input--invalid]="errorKey() === 'password_required' || errorKey() === 'password_too_short' || errorKey() === 'password_needs_letter_and_number' || errorKey() === 'password_matches_username' || errorKey() === 'password_contains_email'"
-                     [attr.aria-invalid]="(errorKey() === 'password_required' || errorKey() === 'password_too_short' || errorKey() === 'password_needs_letter_and_number' || errorKey() === 'password_matches_username' || errorKey() === 'password_contains_email') ? true : null" />
-              <button type="button"
-                      class="password-toggle"
-                      (click)="showPassword_.set(!showPassword_())"
-                      [attr.aria-label]="(showPassword_() ? 'hide_password' : 'show_password') | translatePipe">
+              <input
+                id="auth-password"
+                [type]="showPassword_() ? 'text' : 'password'"
+                [(ngModel)]="password"
+                (input)="errorKey.set(null)"
+                (blur)="onPasswordBlur()"
+                name="password"
+                [autocomplete]="isSignUp ? 'new-password' : 'current-password'"
+                required
+                [class.c-input--invalid]="
+                  errorKey() === 'password_required' ||
+                  errorKey() === 'password_too_short' ||
+                  errorKey() === 'password_needs_letter_and_number' ||
+                  errorKey() === 'password_matches_username' ||
+                  errorKey() === 'password_contains_email'
+                "
+                [attr.aria-invalid]="
+                  errorKey() === 'password_required' ||
+                  errorKey() === 'password_too_short' ||
+                  errorKey() === 'password_needs_letter_and_number' ||
+                  errorKey() === 'password_matches_username' ||
+                  errorKey() === 'password_contains_email'
+                    ? true
+                    : null
+                "
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="showPassword_.set(!showPassword_())"
+                [attr.aria-label]="(showPassword_() ? 'hide_password' : 'show_password') | translatePipe"
+              >
                 <lucide-icon [name]="showPassword_() ? 'eye-off' : 'eye'" [size]="16"></lucide-icon>
               </button>
             </div>
-            @if (errorKey() === 'password_required' || errorKey() === 'password_too_short' || errorKey() === 'password_needs_letter_and_number' || errorKey() === 'password_matches_username' || errorKey() === 'password_contains_email') {
+            @if (
+              errorKey() === 'password_required' ||
+              errorKey() === 'password_too_short' ||
+              errorKey() === 'password_needs_letter_and_number' ||
+              errorKey() === 'password_matches_username' ||
+              errorKey() === 'password_contains_email'
+            ) {
               <p class="auth-error">{{ errorKey()! | translatePipe }}</p>
             }
           </div>
@@ -90,20 +140,24 @@
             <div class="c-input-stack">
               <label for="auth-confirm-password">{{ 'confirm_password' | translatePipe }}</label>
               <div class="password-field-wrap">
-                <input id="auth-confirm-password"
-                       [type]="showConfirmPassword_() ? 'text' : 'password'"
-                       [(ngModel)]="confirmPassword"
-                       (input)="errorKey.set(null)"
-                       (blur)="onConfirmBlur()"
-                       name="confirmPassword"
-                       autocomplete="new-password"
-                       required
-                       [class.c-input--invalid]="errorKey() === 'passwords_do_not_match'"
-                       [attr.aria-invalid]="errorKey() === 'passwords_do_not_match' ? true : null" />
-                <button type="button"
-                        class="password-toggle"
-                        (click)="showConfirmPassword_.set(!showConfirmPassword_())"
-                        [attr.aria-label]="(showConfirmPassword_() ? 'hide_password' : 'show_password') | translatePipe">
+                <input
+                  id="auth-confirm-password"
+                  [type]="showConfirmPassword_() ? 'text' : 'password'"
+                  [(ngModel)]="confirmPassword"
+                  (input)="errorKey.set(null)"
+                  (blur)="onConfirmBlur()"
+                  name="confirmPassword"
+                  autocomplete="new-password"
+                  required
+                  [class.c-input--invalid]="errorKey() === 'passwords_do_not_match'"
+                  [attr.aria-invalid]="errorKey() === 'passwords_do_not_match' ? true : null"
+                />
+                <button
+                  type="button"
+                  class="password-toggle"
+                  (click)="showConfirmPassword_.set(!showConfirmPassword_())"
+                  [attr.aria-label]="(showConfirmPassword_() ? 'hide_password' : 'show_password') | translatePipe"
+                >
                   <lucide-icon [name]="showConfirmPassword_() ? 'eye-off' : 'eye'" [size]="16"></lucide-icon>
                 </button>
               </div>
@@ -130,33 +184,36 @@
                 <label class="image-upload-btn" for="auth-img" [class.disabled]="uploadingImage_()">
                   {{ 'choose_image' | translatePipe }}
                 </label>
-                <input id="auth-img"
-                       type="file"
-                       accept="image/*"
-                       (change)="onFileSelected($event)"
-                       [disabled]="uploadingImage_()"
-                       class="visually-hidden" />
+                <input
+                  id="auth-img"
+                  type="file"
+                  accept="image/*"
+                  (change)="onFileSelected($event)"
+                  [disabled]="uploadingImage_()"
+                  class="visually-hidden"
+                />
               </div>
               @if (errorKey() === 'image_upload_failed') {
                 <p class="auth-warn">{{ errorKey()! | translatePipe }}</p>
               }
             </div>
-
           }
-
         </div>
       </form>
 
       <div class="c-modal-actions">
         @if (isDev) {
-          <button type="button" class="c-btn-ghost dev-guest-btn" (click)="loginAsGuest()">
-            Guest (Dev)
-          </button>
+          <button type="button" class="c-btn-ghost dev-guest-btn" (click)="loginAsGuest()">Guest (Dev)</button>
         }
         <button type="button" class="c-btn-ghost" (click)="onClose()">
           {{ 'cancel' | translatePipe }}
         </button>
-        <button type="button" class="c-btn-primary" [disabled]="isSubmitting() || uploadingImage_()" (click)="onSubmit()">
+        <button
+          type="button"
+          class="c-btn-primary"
+          [disabled]="isSubmitting() || uploadingImage_()"
+          (click)="onSubmit()"
+        >
           @if (isSubmitting()) {
             {{ 'saving' | translatePipe }}
           } @else if (isSignUp) {
@@ -166,7 +223,6 @@
           }
         </button>
       </div>
-
     </div>
   </div>
 }

@@ -222,10 +222,13 @@ export class UserService {
         map(({ user }) => user),
         catchError((err: HttpErrorResponse) => {
           const body = err.error?.error
+          if (body === 'USERNAME_TAKEN') return throwError(() => new Error('USERNAME_TAKEN'))
           if (body === 'EMAIL_TAKEN') return throwError(() => new Error('EMAIL_TAKEN'))
           if (body === 'INVALID_USERNAME') return throwError(() => new Error('INVALID_USERNAME'))
           if (body === 'INVALID_EMAIL') return throwError(() => new Error('INVALID_EMAIL'))
-          return throwError(() => new Error('USERNAME_TAKEN'))
+          // Anything unrecognized (DB_UNAVAILABLE, network failure, etc.) is a real server
+          // problem — never assume it means the username is taken.
+          return throwError(() => new Error('SERVER_ERROR'))
         })
       )
     }
@@ -290,7 +293,12 @@ export class UserService {
         catchError((err: HttpErrorResponse) => {
           if (err.status === 423) return throwError(() => new Error('ACCOUNT_LOCKED'))
           if (err.status === 429) return throwError(() => new Error('RATE_LIMITED'))
-          return throwError(() => new Error('USER_NOT_FOUND'))
+          if (err.error?.error === 'USER_NOT_FOUND' || err.status === 401) {
+            return throwError(() => new Error('USER_NOT_FOUND'))
+          }
+          // Anything unrecognized (DB_UNAVAILABLE, network failure, etc.) is a real server
+          // problem — never assume it means invalid credentials.
+          return throwError(() => new Error('SERVER_ERROR'))
         })
       )
     }

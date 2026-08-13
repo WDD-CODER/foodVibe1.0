@@ -13,6 +13,13 @@ async function connectDb() {
   await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000, minPoolSize: 1, maxPoolSize: 10 })
   console.log(`MongoDB connected → ${uri.startsWith('mongodb+srv') ? 'Atlas' : 'local'}`)
 
+  // Runtime visibility — the initial connect() above only guards startup. Without these,
+  // a mid-session Atlas drop (network blip, IP de-allowlisted, cluster maintenance) is
+  // invisible until a request happens to hit it and time out.
+  mongoose.connection.on('error', err => console.error('[mongo] connection error:', err.message))
+  mongoose.connection.on('disconnected', () => console.error('[mongo] disconnected'))
+  mongoose.connection.on('reconnected', () => console.log('[mongo] reconnected'))
+
   // Ensure userId index on every entity collection.
   // createIndex is idempotent — safe to call on every startup.
   // background: true is a no-op on MongoDB 4.2+ but harmless for older drivers.
