@@ -8,7 +8,7 @@ This file split on 2026-08-01 once the single flat file crossed ~280 lines / 21 
 
 | File | Scope | Entries |
 | --- | --- | --- |
-| [agent-workflow](./gotchas/agent-workflow.md) (`docs/brain/gotchas/agent-workflow.md`) | Session/context management, plan persistence and numbering, `.claude/todo.md` archiving, brain-capture gating | 9 |
+| [agent-workflow](./gotchas/agent-workflow.md) (`docs/brain/gotchas/agent-workflow.md`) | Session/context management, plan persistence and numbering, `.claude/todo.md` archiving, brain-capture gating | 10 |
 | [backend](./gotchas/backend.md) (`docs/brain/gotchas/backend.md`) | `server/` routes, data access, the Gemini AI proxy, logging transport | 7 |
 | [angular](./gotchas/angular.md) (`docs/brain/gotchas/angular.md`) | `src/app/` components, signals-based state, routing, change-detection behavior | 3 |
 | [ci](./gotchas/ci.md) (`docs/brain/gotchas/ci.md`) | `.github/workflows/*`, `ng build`/`angular.json`, `npm audit` | 2 |
