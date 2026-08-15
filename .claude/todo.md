@@ -34,7 +34,7 @@
 - [ ] Deploy; collect ~24h of real-use numbers from Render logs
 - [ ] Record observed numbers in `reports/performance-audit-2026-08-13.md` under a new "Observed" section
 - [ ] Confirm from M1 logs whether cold starts actually occur during business hours — if not, stop and re-prioritise
-- [ ] Human: approve billing change; set `plan: free` → `plan: starter` in `render.yaml:4`
+- [ ] Human: approve billing change; set `plan: free` → `plan: starter` in `render.yaml:5`
 - [ ] Human: verify Atlas cluster region matches Render service region; report findings
 - [ ] Human: check whether `MONGO_URI` points at an M0 free cluster; report findings
 - [ ] Move `seedMasterData()` to run after `app.listen()` — `server/index.js:125-131`
@@ -58,7 +58,7 @@
 - [ ] M1 — Record before/after costs + allergens for 10 representative recipes (nested, depth-limited, broken-ref, price-override)
 - [ ] M2 — Precomputed row model for recipe-book + inventory; remove the 8 per-row template function calls
 - [ ] M2 — Separate commit: convert the remaining 29 components to `ChangeDetectionStrategy.OnPush`
-- [ ] M3 — Hoist the rebuilt `allProductNames` Set above the master loop — `server/services/sync-master.js:272-273`
+- [ ] M3 — Hoist the rebuilt `allProductNames` Set above the master loop — `server/services/sync-master.js:273-274`
 - [ ] M3 — Remove `syncMasterToUser` from `POST /refresh` (or version-gate it) — `server/routes/auth.js:274`
 - [ ] M3 — Regression test: brand-new account signup still receives correctly cloned + remapped master data
 

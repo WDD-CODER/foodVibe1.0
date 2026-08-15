@@ -152,3 +152,13 @@ which covers stale *origin* state but not same-directory local races.
 **Why the obvious fix is wrong:** Trusting the todo checkbox state as a proxy for "has this been attempted" leads to either re-doing already-finished work from scratch, or (worse) assuming a stale unchecked item is safe to ignore when it's actually sitting live in the working tree.
 
 **What to do instead:** After any session interruption, before touching a plan's unchecked items: run `git status` for uncommitted changes and check for a same-day `sessions/YYYY-MM-DD-*.md` file before assuming "unchecked" means "not started." A checkbox only reflects Human validation status (per `docs/agent/job-validation.md`), never implementation status.
+
+---
+
+## `/design-sync` isn't a skill here, and the synced project isn't a flat export
+
+**What hurt:** A session brief said "run `/design-sync` first — this is the source of truth, not a manual export." There is no `design-sync` entry in `.claude/skills/`, so the slash command does nothing. Separately, once the design *was* pulled, the "foodCo Design System" project turned out to be three layers that disagree with each other (a written design-system README + 19 specimen cards, a clickable multi-screen prototype under ui_kits/foodco-app/, and cook-view explorations under designs/) — the README specifies Heebo/Lucide/no-emoji/no-native-`<select>` while the prototype ships Rubik + Space Grotesk, two hand-rolled SVG icon sets, emoji, and native `<select>`.
+
+**Why the obvious fix is wrong:** Reporting "`/design-sync` failed" and stopping wastes the turn — the underlying `DesignSync` MCP tool is available and does the whole job. And treating whichever layer you read first as "the design" produces a gap analysis that is confidently wrong about typography, icons, and component inventory, because the layers contradict each other on exactly those points.
+
+**What to do instead:** Drive the tool directly: `list_projects` → pick the project → `list_files` → `get_file` per path (read methods need no plan; only writes require `finalize_plan`). Then read *every* layer before concluding anything — README.md/SKILL.md for stated intent, ui_kits/ for what was actually built, designs/ for explorations — and record layer disagreements as explicit `unclear` rows rather than silently picking a winner. Note that the designs/ HTML files here are thin harnesses that all render the same cook.js from the UI kit, so three files can be one design. (Paths in this entry are inside the remote design project, deliberately un-backticked so `brain-review-check.mjs` doesn't read them as repo-relative dead refs.)

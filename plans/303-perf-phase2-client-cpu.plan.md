@@ -161,7 +161,7 @@ It is already correctly fire-and-forget on `/refresh` so it does not block the t
 
 ### 3b. Hoist the rebuilt `Set` out of the loop
 
-`server/services/sync-master.js:272-273`:
+`server/services/sync-master.js:273-274` — verified against `main` **after** commit `e7b9198` (collision-log summarization). An earlier draft of this plan cited `272-273`, which was correct only for the pre-`e7b9198` working tree; if you are reading a checkout without that commit, subtract 8.
 
 ```js
 for (const master of masterDocs) {
@@ -210,7 +210,7 @@ It only fires on the `!existing` branch (new clones), so steady-state logins ski
 - [ ] Separate commit: convert the remaining 29 components to `ChangeDetectionStrategy.OnPush`
 
 ## Milestone 3 — sync-master frequency & Set hoist
-- [ ] Hoist the `allProductNames` Set construction above the master loop — `server/services/sync-master.js:272-273`
+- [ ] Hoist the `allProductNames` Set construction above the master loop — `server/services/sync-master.js:273-274`
 - [ ] Remove `syncMasterToUser` from `POST /refresh` (or implement the `masterDataVersion` gate) — `server/routes/auth.js:274`
 - [ ] Decide and document which of the two approaches was taken, and why
 - [ ] Regression test: brand-new account signup receives correctly cloned + remapped master data

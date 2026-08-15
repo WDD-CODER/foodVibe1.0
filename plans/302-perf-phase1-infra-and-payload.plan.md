@@ -12,7 +12,7 @@ All findings below were verified read-only against the working tree on 2026-08-1
 
 | Finding | File / evidence | Why it costs time |
 | --- | --- | --- |
-| Render free tier | `render.yaml:4` → `plan: free` | Instance suspends after 15 min idle. Cold start boots Node, connects Atlas, runs ~20 `createIndex` calls and `seedMasterData()` **before** `app.listen()` (`server/index.js:125-131`). Realistic cold start 50-90s. Tier also caps at 0.1 shared CPU / 512 MB. |
+| Render free tier | `render.yaml:5` → `plan: free` | Instance suspends after 15 min idle. Cold start boots Node, connects Atlas, runs ~20 `createIndex` calls and `seedMasterData()` **before** `app.listen()` (`server/index.js:125-131`). Realistic cold start 50-90s. Tier also caps at 0.1 shared CPU / 512 MB. |
 | No static cache headers | `server/index.js:63` → bare `express.static(STATIC_DIR)` | Defaults to `maxAge: 0`. ~30 conditional GETs per page load, each a round-trip to a possibly-cold origin. Build uses `"outputHashing": "all"` (`angular.json`) so filenames are content-hashed and safe to cache for a year. |
 | `PreloadAllModules` | `src/app/app.config.ts:96` | Defeats the lazy routes in `app.routes.ts` — downloads all 2.8 MB of JS right after bootstrap, competing with catalog fetches for bandwidth. |
 | ExcelJS static import | `menu-export.service.ts:8`, `recipe-export.service.ts:8` | `import { Workbook } from 'exceljs'` pulls a **996 KB** chunk (`chunk-ORWVK2QB.js`). `ExportService` is injected by `cook-view.page.ts:82`, `menu-intelligence.page.ts:102`, `recipe-builder.page.ts:114`. With `PreloadAllModules` it downloads for every user, always. |
@@ -101,7 +101,7 @@ Every time that line appears in Render's logs during normal business hours, you 
 
 Do not start until M1's numbers exist. If the boot line from 1d is **not** appearing during normal use, this milestone's premise is wrong — say so and re-prioritise rather than upgrading on faith.
 
-- **`render.yaml:4`** — change `plan: free` to `plan: starter`. This is a billing change; it needs explicit Human sign-off, not an agent decision.
+- **`render.yaml:5`** — change `plan: free` to `plan: starter`. This is a billing change; it needs explicit Human sign-off, not an agent decision.
 - **Atlas region** — confirm the cluster region matches the Render service region. A cross-region hop adds 80-150 ms to *every* query, and `syncMasterToUser` issues ~40 per page load (see plan 303 M3). Not visible from the repo — needs a Human to check the Atlas and Render dashboards.
 - **Atlas tier** — if `MONGO_URI` points at an M0 free cluster, that is shared CPU on the database side too. Check and report; upgrading is a separate call.
 - **`server/index.js:125-131`** — move `seedMasterData()` to run *after* `app.listen()`. It is idempotent and exits after one `findOne` (`seed-master.js:81-86`), but it is still an Atlas round-trip in front of your first byte on every cold start.
@@ -217,7 +217,7 @@ const { Workbook } = await import('exceljs')
 
 ## Milestone 2 — Render tier & cold starts (needs M1 numbers + Human billing approval)
 - [ ] Confirm from M1 logs whether cold starts actually occur during business hours — if not, stop and re-prioritise
-- [ ] Human: approve billing change; set `plan: free` → `plan: starter` in `render.yaml:4`
+- [ ] Human: approve billing change; set `plan: free` → `plan: starter` in `render.yaml:5`
 - [ ] Human: verify Atlas cluster region matches Render service region; report findings
 - [ ] Human: check whether `MONGO_URI` points at an M0 free cluster; report findings
 - [ ] Move `seedMasterData()` to run after `app.listen()` — `server/index.js:125-131`
