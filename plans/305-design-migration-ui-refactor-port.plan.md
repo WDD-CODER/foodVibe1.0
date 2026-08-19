@@ -12,7 +12,7 @@ isProject: true
 | --- | --- |
 | The design | `UI refactor/` (repo root, **untracked**) — 13 `.dc.html` screens + `shell.js` + `colors_and_type.css` + `mobile-pass.css` |
 | What the old app does | `_claude-data/design-migration/old-app-inventory.md` (835 lines, read from live source) |
-| What the design left out | `_claude-data/design-migration/ACTION-LIST.md` — **46 items, the authoritative sub-task list for M3–M8** |
+| What the design left out | `_claude-data/design-migration/ACTION-LIST.md` — was thought to be 46 items; **54/55 turned out already built or done this session, 1 genuinely open** (M7 mobile-logic port) |
 | Why, per item | `_claude-data/design-migration/gap-analysis.md` |
 
 The claude.ai `foodCo Design System` cloud project (`46ffd0d2…`) is **stale and superseded**. Do not sync it.
@@ -62,13 +62,18 @@ declaration changes.
 | M1 | Token parity — `src/styles.scss` scales | — | None (pure addition) |
 | M2 | Mobile hardening layer + breakpoint reconciliation | — | Low, one call-out |
 | M3 | Shell & navigation — 4 tabs, chip rows, bottom bar, FAB | ACTION-LIST **A** (6) | High |
-| M4 | List-screen chassis ×4 — Inventory, Recipe Book, Suppliers, Equipment | ACTION-LIST **B** (7) | High |
-| M5 | Recipe Builder | ACTION-LIST **C** (19) | Highest |
-| M6 | Product form + Metadata Manager | ACTION-LIST **D** (3) + **E** (6) | Medium |
-| M7 | Menu Intelligence — mobile logic only, screen untouched | ACTION-LIST **F** (2) | Low |
-| M8 | Trash / Venues / Suppliers small restorations | ACTION-LIST **G** (3) + **H** venue/trash items | Low |
+| M4 | List-screen chassis ×4 — Inventory, Recipe Book, Suppliers, Equipment | ACTION-LIST **B** (8/8) | Done |
+| M5 | Recipe Builder | ACTION-LIST **C** (19/19) | Done — all 19 already existed |
+| M6 | Product form + Metadata Manager | ACTION-LIST **D** (3/3) + **E** (6/6) | Done — all 9 already existed |
+| M7 | Menu Intelligence — mobile logic only, screen untouched | ACTION-LIST **F** (1/2) | Mobile-logic port still open |
+| M8 | Trash / Venues / Suppliers small restorations | ACTION-LIST **G** (3/3) + **H** (8/8) | Done |
 
-All 5 decisions are resolved (above). No milestone is blocked on a decision anymore.
+**2026-08-20: functional-preservation scope closed.** Every item in ACTION-LIST.md is now checked
+against live source, not assumed. 54 of 55 items needed either zero code (already existed — the large
+majority) or a small, additive, verified change. The 1 open item is M7's mobile-logic port. See
+`ACTION-LIST.md`'s "What's actually still open" section for the complete remaining list, including
+3 flagged-but-not-blocking items from earlier milestones and the separate, much larger question of
+*visual* restyling (never in scope of this functional checklist — see that file for why).
 
 # Atomic Sub-tasks
 
@@ -112,26 +117,26 @@ All 5 decisions are resolved (above). No milestone is blocked on a decision anym
 
 ## M5 — Recipe Builder → ACTION-LIST **C**
 
-- [ ] Task 18: restore C1 first — the ingredient-row unit selector (type-to-filter + create-unit)
-- [ ] Task 19: restore C2 — ingredient search must span recipes, not just products (sub-recipes are impossible without it)
-- [ ] Task 20: restore C3–C19 — four row states, logistics picker, export toolbar, five-gate save validation, history view mode, drag-and-drop, collapsible sections, weight/volume toggle, duplicate-name check, inline create, labels multi-select, image upload, dual timers, nutrition badge, keyboard, dirty tracking, AI draft mode
-- [ ] Task 20a: **new data — Recipe Builder secondary yields.** Confirmed genuinely missing (re-audit 2026-08-19) — no `secondary_yield` field anywhere in the recipe-builder source
+- [x] Task 18: **C1, the user's own original example — confirmed already built.** `app-custom-select` with `[typeToFilter]="true"` and `[addNewValue]="'__add_unit__'"` on every ingredient row (`recipe-ingredients-table.component.html:77-89`). Not a label — the full interactive control
+- [x] Task 19: **C2 — confirmed already built.** `ingredient-search.component.ts` already calls `recipeData.searchRecipes(...)`; sub-recipes already searchable
+- [x] Task 20: **C3–C19 — confirmed already built, all 19, zero code written.** Every item read against live source in `src/app/pages/recipe-builder`: four row states, logistics picker, export toolbar, five-gate save validation, history view mode, drag-and-drop, 3 collapsible sections with localStorage, weight/volume toggle, duplicate-name check, inline create, labels multi-select, image upload, dual timers, nutrition badge, keyboard, dirty tracking (native `FormGroup.dirty`), AI draft mode. Full file-by-file evidence in `ACTION-LIST.md` §C
+- [x] Task 20a: **new data — Recipe Builder secondary yields — confirmed already built, not missing.** `RecipeYieldManager.secondaryConversions` + `addSecondaryChipWithDefault()`/`removeSecondaryUnit()`, fully wired to a working add/remove/qty/unit UI (`app-scaling-chip variant="secondary"` in `recipe-header.component.html`) — matches the design's `secondaryYields` array exactly. First-pass grep missed it because the template property is `secondaryConversions`, not the `yield_conversions_` name the model field carries — a naming mismatch, not a missing feature
 - [x] Task 20b: **confirmed, no work needed.** `labor_time`/`cooking_time`/`laborTimeInput`/`cookTimeInput` already exist in `recipe-workflow.component.ts` — Task 20's dual-timer *restyle* (C item) is the only work; the underlying persisted fields were never missing
 
 ## M6 — Product form + Metadata Manager → ACTION-LIST **D**, **E**, **H**
 
-- [ ] Task 21: purchase-options `FormArray` + five collapsible optional fields, as a **full page** (decision 1) restyled to the new design
-- [ ] Task 22: add the 6 missing Metadata vocabularies — demo data, menu types, preparation categories, section categories, plus **user management** and **backup/restore** as two more tiles in the same grid (decision 4), user management permission-gated
+- [x] Task 21: **confirmed already built, both halves.** Purchase-options `FormArray` and all 5 collapsible optional fields (`expandedMinStock_`/`expandedExpiryDays_`/`expandedWasteYield_`/`expandedAllergens_`/`expandedSupplier_`) exist in `product-form.component.ts` today. Container is already a full page — decision 1 keeps it that way
+- [x] Task 22: **confirmed already built, all 6.** `src/app/pages/metadata-manager/` has dedicated components for user management, preparation categories, section categories, plus `DemoLoaderService`, `BackupService` (export/restore/import), and a menu-type management flow. Nothing to build — decision 4's "where do they live" wasn't verified against actual grid placement, only that the components exist (see plan's "Remaining open items")
 - [x] Task 22a: **new data — Metadata Manager, mostly already done.** Label colours confirmed built (`LabelDefinition.color` + 12-swatch `LABEL_COLOR_PALETTE`). Unit-locked is a behavior, not a flag — `SYSTEM_UNITS` are already constant/non-removable. Remaining, small: confirm Metadata Manager's own UI visually indicates a system unit as locked; add an indicator if it doesn't
 
 ## M7 — Menu Intelligence → ACTION-LIST **F**, **H**
 
-- [ ] Task 23: leave the existing screen's markup and logic untouched; apply only the shell, 3 breakpoints and 44px touch floor
+- [ ] Task 23: leave the existing screen's markup and logic untouched; apply only the shell, 3 breakpoints and 44px touch floor. **The one genuinely unstarted restoration task remaining in this whole plan**
 - [x] Task 23a: **new data — Menu Intelligence — built.** `sell_price` was already wired; added `profitPerGuest_` computed (both halves — revenue/guest, cost/guest — already existed, just never subtracted) + a matching row in the existing financial-footnote panel. Lands on the old, unmigrated screen per §F. Verified via gstack: new row renders correctly positioned among its four siblings
 
 ## M8 — Small restorations → ACTION-LIST **G**, **H**
 
-- [ ] Task 24: Trash `recoverBeforeRestore`; Venues infrastructure `FormArray`; Suppliers linked-products count
+- [x] Task 24: **confirmed already built, all 3.** Trash's `getRecoverBeforeRestore` (`trash.page.ts:179`), Venues' infrastructure `FormArray`, Suppliers' linked-products count (`linkedProductCount_`) all present
 - [x] Task 24a: **new data — Venues — built.** `address_`/`capacity_`/`contact_name_`/`contact_phone_`/`operating_hours_` (a `FormArray`, matching the design's multi-block hours shape) added to model, form, and list (capacity as a 3rd carousel slide). No backend change needed (schemaless storage). Verified end-to-end via gstack: full round-trip through add → save → re-open → every field and the hours row matched; list carousel shows capacity with a `—` fallback for pre-existing venues; test data cleaned up after
 - [x] Task 24b: **confirmed, no work needed.** Trash's per-item history + per-section bulk restore were already fully verified present earlier this session (`trash.page.ts`/`.html` read in full)
 

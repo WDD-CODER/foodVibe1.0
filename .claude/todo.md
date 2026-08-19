@@ -104,18 +104,13 @@
 - [x] M4 Task 17a — row edit panel desktop-only DONE for Equipment+Suppliers (Inventory/Recipe Book use full-page nav, decision 2 N/A there). Fixed a real containing-block bug (modal pinned to `.table-area` instead of viewport) + a real dirty-check asymmetry between the two screens. Verified via gstack at 1280px + 390px
 - [x] M4 Task 17b — new data: Inventory supplier+low-stock — already built (`.col-supplier`, `.low-stock-badge`)
 - [x] M4 Task 17c — new data: Equipment scaling rule — already built
-- [x] H re-audit 2026-08-19 — 6/8 new-data items already satisfied without code. 1 genuine gap remains: Recipe Builder secondary yields. Menu Intelligence profit-per-portion is half-done (sell_price field exists, the calc doesn't)
 - [x] M8 Task 24a — new data: Venues address/capacity/contact/hours BUILT (model + form + list carousel column). Verified full round-trip via gstack (add → save → re-open → every field + hours row matched); test data cleaned up
-- [x] M7 Task 23a — new data: Menu Intelligence profit-per-guest BUILT (`profitPerGuest_` computed + new financial-footnote row). Only Recipe Builder secondary yields left in ACTION-LIST H now (7/8 done)
-- [ ] M5 Tasks 18-20 — Recipe Builder + ACTION-LIST C (19); unit selector first
-- [ ] M5 Task 20a — new data: Recipe Builder secondary yields
-- [ ] M5 Task 20b — confirm dual-timer restoration also satisfies labor/cook-time new-data item (no duplicate build)
-- [ ] M6 Tasks 21-22 — product form (full page, decision 1) + Metadata Manager (+user mgmt/backup tiles, decision 4) + ACTION-LIST D (3), E (6)
-- [ ] M6 Task 22a — new data: Metadata Manager label colours + unit locked flag
-- [ ] M7 Task 23 — Menu Intelligence: mobile logic only, screen untouched + ACTION-LIST F (2)
-- [ ] M7 Task 23a — new data: Menu Intelligence sell price/profit-per-portion (new work on the OLD screen)
-- [ ] M8 Task 24 — Trash / Venues / Suppliers restorations + ACTION-LIST G (3)
-- [ ] M8 Tasks 24a-24b — new data: Venues address/capacity/contact/hours, Trash history (confirm UI is design-complete first)
+- [x] M7 Task 23a — new data: Menu Intelligence profit-per-guest BUILT (`profitPerGuest_` computed + new financial-footnote row)
+- [x] M5 Tasks 18-20 + 20a — **all 19 Recipe Builder C-items + secondary yields confirmed already built** by reading live source, zero code written. Includes C1, the user's original unit-selector example, and secondary yields (`RecipeYieldManager.secondaryConversions`, missed on first grep pass due to a naming mismatch, not an actual gap)
+- [x] M6 Tasks 21-22 + 22a — **product form + all 6 Metadata Manager vocabularies confirmed already built**, plus label colours; unit-locked is a confirmed-existing behavior (`SYSTEM_UNITS`), UI indicator unconfirmed (small, listed under "still open")
+- [ ] M7 Task 23 — Menu Intelligence: mobile logic only, screen untouched — **the one genuinely open restoration task remaining in the entire plan**
+- [x] M8 Task 24 — Trash/Venues/Suppliers restorations confirmed already built (all 3)
+- [x] **2026-08-20 — ACTION-LIST.md closed out at 54/55.** Every one of the original ~46 items plus the 8 new-data (H) items checked against live source, not assumed. Full detail + the "What's actually still open" list (M7 port, 3 flagged breakpoint/nav items, Metadata tile-layout/unit-locked-indicator confirmations, and the separate, much larger *visual restyling* question — never part of this functional checklist) is in `ACTION-LIST.md` itself
 
 ## 6. KEEP DEFERRED — intentional park
 
