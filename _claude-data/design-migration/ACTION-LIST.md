@@ -99,7 +99,7 @@ components/services under `src/app/pages/metadata-manager/`: `user-management.co
 ## F. Menu Intelligence — settled
 
 - [x] **Keep the existing screen exactly as it is.** Unchanged this whole migration — no design markup ported here
-- [~] **Port only the mobile logic onto it — partial.** Screen already had its own responsive handling at 600px/620px (`_paper-ui.scss`), separate from the design's 3-tier system — left that alone rather than force a rewrite of an 803-line stylesheet without dedicated visual QA time. Did the one clear, safe, verifiable piece: the toolbar's 5 pill buttons had no minimum height (`padding: 5px 14px` on 0.7rem type ≈ 26-30px tall) — added `min-height: var(--tap)`, nothing else about them changed. Verified via gstack: all 5 now measure exactly 44px. **Not done:** the shell/3-breakpoint alignment and the smaller nested toolbar-glass-btn icon buttons — those need a proper mobile-audit pass (the codebase already has a pattern for this, plans 276-283), not a rushed one
+- [~] **Port only the mobile logic onto it — partial, and confirmed low-risk.** Screen already had its own responsive handling at 600px/620px (`_paper-ui.scss`), separate from the design's 3-tier system. Checked whether that mismatch is an active bug before treating it as one: tested 390/620/767px via gstack — **zero horizontal overflow at any width, 575px of clear space between the toolbar and the bottom nav bar.** The screen works today; the breakpoint numbers just don't match the new system's vocabulary, which is a consistency debt, not a functional gap. Did the one clear, safe, verifiable piece with real user impact: the toolbar's 5 pill buttons had no minimum height (`padding: 5px 14px` on 0.7rem type ≈ 26-30px tall) — added `min-height: var(--tap)`, nothing else about them changed. Verified via gstack: all 5 now measure exactly 44px. **Not done, and now known to be non-urgent:** renaming the screen's breakpoint numbers to the 3-tier system, and the smaller nested `toolbar-glass-btn` icons inside the export dropdowns — a naming/consistency pass for a dedicated session (plans 276-283 pattern), not a functional fix
 
 ---
 
@@ -164,7 +164,7 @@ correct them any time, nothing downstream breaks.
 Everything above that's checked required either zero code (already existed) or a small, verified,
 additive change. What's left:
 
-1. **F — Menu Intelligence mobile-logic port, rest of it.** Toolbar touch-floor done. Still open: reconciling the screen's own 600px/620px breakpoints with the design's 3-tier system, and the smaller nested `toolbar-glass-btn` icon buttons inside the export dropdowns — deliberately left for a dedicated mobile-audit pass rather than rushed changes to an 803-line stylesheet with no live visual QA to catch a regression.
+1. **F — Menu Intelligence mobile-logic port, rest of it — confirmed non-urgent.** Toolbar touch-floor done. Tested for actual breakage (390/620/767px, zero overflow, healthy clearance everywhere) before leaving the rest open — it isn't broken, the breakpoint numbers just don't match the new naming. Reconciling `_paper-ui.scss`'s 600px/620px to the 3-tier system, and the smaller nested `toolbar-glass-btn` icons, is a consistency pass for a dedicated session, not a fix for something currently wrong.
 2. **Three flagged-not-fixed items from earlier milestones**, none blocking:
    - `$break-mobile` (768px) vs `$break-phone-max` (767px) breakpoint collision (M2)
    - A third breakpoint number, 620px, in the header's own mobile collapse (M3)
