@@ -36,6 +36,7 @@ import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-fi
 import { useListState, StringParam, NullableBooleanParam, StringSetParam } from 'src/app/core/utils/list-state.util'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
+import { useIsDesktop } from 'src/app/core/utils/desktop-detection.util'
 import { HeroFabService } from '@services/hero-fab.service'
 import { AddItemModalService } from '@services/add-item-modal.service'
 import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service'
@@ -102,6 +103,17 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   protected readonly isPanelOpen_: WritableSignal<boolean>
   private readonly togglePanelState_: () => void
   protected carouselHeaderIndex_ = signal(0)
+
+  /** Row edit panel: inline on desktop, modal on tablet + mobile (plan 305 decision 2). */
+  protected readonly isDesktop_ = useIsDesktop()
+
+  /** The item behind editingId_/closingId_ — needed once the modal path renders the
+   * panel outside the row @for loop (see shell-modal projection in the template). */
+  protected readonly editingItem_ = computed(() => {
+    const id = this.editingId_() ?? this.closingId_()
+    if (!id) return null
+    return this.filteredEquipment_().find((e) => e._id === id) ?? null
+  })
 
   private get panelContext(): 'inventory' | 'equipment' {
     return this.router.url.startsWith('/inventory/equipment') ? 'inventory' : 'equipment'
@@ -447,6 +459,21 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   }
 
   protected onInlineCancel(): void {
+    this.closeWithAnimation()
+  }
+
+  /** Close inline panel on click outside; confirm if form has unsaved changes.
+   * The explicit Cancel button (onInlineCancel) skips this — matching the same
+   * split already established in supplier-list.component.ts: a deliberate Cancel
+   * click doesn't need re-confirming, only an accidental outside-click does. */
+  protected async onInlinePanelClickOutside(): Promise<void> {
+    if (this.editForm_.dirty) {
+      const discard = await this.confirmModal.open(
+        this.translation.translate('unsaved_changes_confirm') ?? 'יש שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?',
+        { variant: 'warning', saveLabel: 'leave_without_saving' }
+      )
+      if (!discard) return
+    }
     this.closeWithAnimation()
   }
 

@@ -30,8 +30,8 @@ around them gets replaced.
 Do once, apply four times.
 
 - [ ] **Bulk edit** — select many, change a field once. Design has bulk *delete* only.
-- [ ] **Row edit panel — desktop only.** Restore the old inline expanding panel (200ms close animation, `clickOutside`, `isSavingEdit_` loader, dirty-row-switch prompt) for desktop widths. Tablet and mobile keep the design's centred modal. *Settled 2026-08-19 — your call.*
-- [ ] **Dirty-row-switch prompt** — leaving a half-edited row must offer to save first. (Desktop: part of the row edit panel above. Tablet/mobile: needs its own hook into the modal.)
+- [x] **Row edit panel — desktop only.** Done for Equipment + Suppliers (the only 2 of the 4 list screens that had an inline panel to begin with — Inventory and Recipe Book already navigate to a full page, so decision 2 doesn't apply to them). Built as one shared form template (`ng-template #panelBody`) rendered two ways: inline in the row `@for` on desktop, or via a new `[shell-modal]` slot on tablet/mobile. Found and fixed a real bug along the way: the modal wrapper was originally nested inside `.table-area`, which has `backdrop-filter` — that makes it the CSS containing block for any `position: fixed` descendant, so the modal was pinned to the table's box, not the viewport (~31px short of the true bottom edge). Fixed by adding a `[shell-modal]` projection point in `list-shell.component.html`, outside `.table-area`. Verified via gstack at 1280px (inline, no modal) and 390px (modal flush to all four viewport edges) for both screens
+- [x] **Dirty-row-switch prompt** — desktop: unchanged, already worked. Tablet/mobile: same `onInlinePanelClickOutside`/equivalent now fires from the overlay's click handler too. Found and fixed a real asymmetry while restoring this: Suppliers' explicit Cancel button always skipped the dirty check (by design — a deliberate click doesn't need re-confirming) while its outside-click path had it; Equipment's Cancel button and outside-click both shared one undifferentiated method with no check at all. Split Equipment's into two methods matching Suppliers' established pattern, rather than picking one behavior arbitrarily
 - [ ] **Per-row deleting loader**
 - [ ] **Empty-database vs no-results** — two different states, design has one.
 - [ ] **Keyboard on sort headers** — Enter / Space.
@@ -109,7 +109,7 @@ renders them; the app must gain the underlying data. Detail: `gap-analysis.md` �
 - [ ] **Secondary yields on a recipe** — Recipe Builder
 - [ ] **Per-step labor time and cook time** — Recipe Builder. *Likely satisfied by C's "Per-step dual timers" restoration — that item already carries labor + cook as separate fields. Confirm when C is built; don't duplicate the work.*
 - [ ] **Sell price per menu dish → profit per portion** — Menu Intelligence. **New field on the OLD screen** — Menu Intelligence's UI stays exactly as it is (§F), so this is the one item in this section that isn't "copy what the design shows," it's new work landing on old code.
-- [ ] **Equipment scaling rule** (per-guests / min / max) — Equipment
+- [x] **Equipment scaling rule** (per-guests / min / max) — **already built, not missing.** `scaling_enabled_`, `per_guests_`, `min_quantity_`, `max_quantity_` are all live fields in Equipment's inline edit panel today (found while restoring the row-edit-panel item above). Closing without new work
 - [ ] **Venue address, capacity, contact, operating hours** — Venues. Design's UI already renders a contact block + hours (§6, no-action list) — likely UI is free, only the backend fields are new. Confirm before assuming a UI build is needed.
 - [ ] **Per-item trash history + per-section bulk restore** — Trash. Design's UI already has this (§6, no-action list) — same caveat, confirm before assuming a UI build is needed.
 - [ ] **Label colours; unit locked flag** — Metadata Manager
@@ -150,13 +150,13 @@ not ones you specified — correct them any time before that milestone lands and
 
 ## Progress
 
-- **A. Global** — 0 / 6
-- **B. List screens** — 0 / 8
+- **A. Global** — 5 / 6 (5 already existed and are wired; only Hebrew re-key is ongoing work, in progress)
+- **B. List screens** — 2 / 8
 - **C. Recipe Builder** — 0 / 19
 - **D. Product form** — 0 / 3
 - **E. Metadata** — 0 / 6
 - **F. Menu Intelligence** — 0 / 2
 - **G. Small** — 0 / 3
-- **H. New data concepts** — 0 / 8
+- **H. New data concepts** — 1 / 8 (Equipment scaling rule already existed)
 
-**Total: 0 / 55**
+**Total: 8 / 55**

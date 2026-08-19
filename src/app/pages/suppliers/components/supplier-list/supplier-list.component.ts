@@ -39,6 +39,7 @@ import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-fi
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { useListState, StringParam, BooleanParam, NumberSetParam } from 'src/app/core/utils/list-state.util'
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
+import { useIsDesktop } from 'src/app/core/utils/desktop-detection.util'
 import { HeroFabService } from '@services/hero-fab.service'
 import { getSupplierIds } from '@utils/product-source.util'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
@@ -98,6 +99,18 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   protected readonly isPanelOpen_: WritableSignal<boolean>
   private readonly togglePanelState_: () => void
   protected carouselHeaderIndex_ = signal(0)
+
+  /** Row edit panel: inline on desktop, modal on tablet + mobile (plan 305 decision 2). */
+  protected readonly isDesktop_ = useIsDesktop()
+
+  /** The item behind editingId_/closingId_ — needed once the modal path renders the
+   * panel outside the row @for loop (see shell-modal projection in the template). */
+  protected readonly editingItem_ = computed(() => {
+    const id = this.editingId_() ?? this.closingId_()
+    if (!id) return null
+    return this.filteredSuppliers_().find((s) => s._id === id) ?? null
+  })
+
   protected selection = new ListSelectionState()
   protected dayLabels = DAY_LABELS
   protected editForm_!: FormGroup

@@ -2,9 +2,11 @@
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
   [gridTemplate]="'2fr 1fr minmax(48px, 0.8fr) 0.8fr 80px auto'"
-  [mobileGridTemplate]="'2fr 1fr 40px 28px'">
-
-  <h2 shell-title class="page-title">{{ isUnderInventory ? ('logistics' | translatePipe) : ('equipment_list' | translatePipe) }}</h2>
+  [mobileGridTemplate]="'2fr 1fr 40px 28px'"
+>
+  <h2 shell-title class="page-title">
+    {{ isUnderInventory ? ('logistics' | translatePipe) : ('equipment_list' | translatePipe) }}
+  </h2>
 
   <ng-container shell-search>
     <label class="visually-hidden" for="equipment-search">{{ 'search' | translatePipe }}</label>
@@ -21,9 +23,13 @@
   </ng-container>
 
   <ng-container shell-actions>
-    <button type="button" class="c-btn-primary" (click)="onAdd()"
+    <button
+      type="button"
+      class="c-btn-primary"
+      (click)="onAdd()"
       [disabled]="!isLoggedIn()"
-      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+    >
       <lucide-icon name="plus" [size]="18"></lucide-icon>
       {{ 'add_equipment' | translatePipe }}
     </button>
@@ -34,18 +40,44 @@
       [selectionState]="selection"
       [editableFields]="editableFields_()"
       (bulkDelete)="onBulkDeleteSelected($event)"
-      (bulkEdit)="onBulkEdit($event)" />
+      (bulkEdit)="onBulkEdit($event)"
+    />
   </ng-container>
 
   <ng-container shell-table-header>
-    <div class="col-name c-grid-header-cell c-sortable-header" (click)="setSort('name')" (keydown.enter)="setSort('name')" (keydown.space)="$event.preventDefault(); setSort('name')" role="columnheader" tabindex="0">
+    <div
+      class="col-name c-grid-header-cell c-sortable-header"
+      (click)="setSort('name')"
+      (keydown.enter)="setSort('name')"
+      (keydown.space)="$event.preventDefault(); setSort('name')"
+      role="columnheader"
+      tabindex="0"
+    >
       {{ 'name' | translatePipe }}
     </div>
     <app-carousel-header [activeIndex]="carouselHeaderIndex_()" (activeIndexChange)="onCarouselHeaderChange($event)">
-      <div class="col-category c-grid-header-cell c-sortable-header" carouselHeaderColumn label="category" (click)="setSort('category')" (keydown.enter)="setSort('category')" (keydown.space)="$event.preventDefault(); setSort('category')" role="button" tabindex="0">
+      <div
+        class="col-category c-grid-header-cell c-sortable-header"
+        carouselHeaderColumn
+        label="category"
+        (click)="setSort('category')"
+        (keydown.enter)="setSort('category')"
+        (keydown.space)="$event.preventDefault(); setSort('category')"
+        role="button"
+        tabindex="0"
+      >
         {{ 'category' | translatePipe }}
       </div>
-      <div class="col-owned c-grid-header-cell c-sortable-header" carouselHeaderColumn label="owned_quantity" (click)="setSort('owned')" (keydown.enter)="setSort('owned')" (keydown.space)="$event.preventDefault(); setSort('owned')" role="button" tabindex="0">
+      <div
+        class="col-owned c-grid-header-cell c-sortable-header"
+        carouselHeaderColumn
+        label="owned_quantity"
+        (click)="setSort('owned')"
+        (keydown.enter)="setSort('owned')"
+        (keydown.space)="$event.preventDefault(); setSort('owned')"
+        role="button"
+        tabindex="0"
+      >
         {{ 'owned_quantity' | translatePipe }}
       </div>
       <div class="col-consumable c-grid-header-cell" carouselHeaderColumn label="is_consumable" role="presentation">
@@ -54,7 +86,10 @@
     </app-carousel-header>
     <div class="c-col-actions c-grid-header-cell" role="columnheader">{{ 'actions' | translatePipe }}</div>
     <div class="col-select c-grid-header-cell" role="columnheader">
-      <app-list-row-checkbox [checked]="filteredEquipmentIds_().length > 0 && selection.allSelected(filteredEquipmentIds_())" (toggle)="selection.toggleSelectAll(filteredEquipmentIds_())" />
+      <app-list-row-checkbox
+        [checked]="filteredEquipmentIds_().length > 0 && selection.allSelected(filteredEquipmentIds_())"
+        (toggle)="selection.toggleSelectAll(filteredEquipmentIds_())"
+      />
     </div>
   </ng-container>
 
@@ -65,30 +100,48 @@
       </div>
     }
     @for (item of filteredEquipment_(); track item._id) {
-      <div class="equipment-grid-row c-list-row" role="button" tabindex="0"
+      <div
+        class="equipment-grid-row c-list-row"
+        role="button"
+        tabindex="0"
         (click)="onRowClick(item, $event)"
         (keydown.enter)="toggleRowEdit(item)"
-        (keydown.space)="$event.preventDefault(); toggleRowEdit(item)">
+        (keydown.space)="$event.preventDefault(); toggleRowEdit(item)"
+      >
         <div class="col-name c-list-body-cell" role="cell">{{ item.name_hebrew }}</div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
-          <div class="col-category c-list-body-cell" cellCarouselSlide [label]="'category' | translatePipe">{{ item.category_ | translatePipe }}</div>
-          <div class="col-owned c-list-body-cell" cellCarouselSlide [label]="'owned_quantity' | translatePipe">{{ item.owned_quantity_ }}</div>
-          <div class="col-consumable c-list-body-cell" cellCarouselSlide [label]="'is_consumable' | translatePipe">{{ item.is_consumable_ ? ('approved_yes' | translatePipe) : ('approved_no' | translatePipe) }}</div>
+          <div class="col-category c-list-body-cell" cellCarouselSlide [label]="'category' | translatePipe">
+            {{ item.category_ | translatePipe }}
+          </div>
+          <div class="col-owned c-list-body-cell" cellCarouselSlide [label]="'owned_quantity' | translatePipe">
+            {{ item.owned_quantity_ }}
+          </div>
+          <div class="col-consumable c-list-body-cell" cellCarouselSlide [label]="'is_consumable' | translatePipe">
+            {{ item.is_consumable_ ? ('approved_yes' | translatePipe) : ('approved_no' | translatePipe) }}
+          </div>
         </app-cell-carousel>
         <app-row-actions-menu class="c-col-actions c-list-body-cell" role="cell">
-          <button type="button" class="c-icon-btn" (click)="onEdit(item); $event.stopPropagation()"
+          <button
+            type="button"
+            class="c-icon-btn"
+            (click)="onEdit(item); $event.stopPropagation()"
             [attr.aria-label]="'edit' | translatePipe"
             [disabled]="!isLoggedIn()"
-            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+          >
             <lucide-icon name="pencil" [size]="18"></lucide-icon>
           </button>
           @if (deletingId_() === item._id) {
             <app-loader size="small" [inline]="true" />
           } @else {
-            <button type="button" class="c-icon-btn danger" (click)="onDelete(item); $event.stopPropagation()"
+            <button
+              type="button"
+              class="c-icon-btn danger"
+              (click)="onDelete(item); $event.stopPropagation()"
               [attr.aria-label]="'delete' | translatePipe"
               [disabled]="!isLoggedIn()"
-              [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+              [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+            >
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>
             </button>
           }
@@ -97,96 +150,139 @@
           <app-list-row-checkbox [checked]="selection.isSelected(item._id)" (toggle)="selection.toggle(item._id)" />
         </div>
       </div>
-      @if (editingId_() === item._id || closingId_() === item._id) {
-        <div class="inline-edit-panel" [class.closing]="closingId_() === item._id" [formGroup]="editForm_" (clickOutside)="onInlineCancel()">
-          <h3 class="inline-edit-title">{{ 'edit' | translatePipe }}: {{ item.name_hebrew }}</h3>
-
-          <div class="inline-edit-section">
-            <div class="inline-edit-grid">
-              <div class="inline-edit-field">
-                <label for="inline-name">{{ 'name' | translatePipe }}</label>
-                <input id="inline-name" type="text" formControlName="name_hebrew" class="c-input" />
-              </div>
-              <div class="inline-edit-field">
-                <label for="inline-category">{{ 'category' | translatePipe }}</label>
-                <app-custom-select
-                  triggerId="inline-category"
-                  formControlName="category_"
-                  [options]="categoryOptions()"
-                  placeholder="category"
-                  [typeToFilter]="true"
-                  [addNewValue]="'__add_new__'"
-                  (valueChange)="onCategoryValueChange($event, 'inline')" />
-              </div>
-              <div class="inline-edit-field">
-                <label for="inline-owned">{{ 'owned_quantity' | translatePipe }}</label>
-                <input id="inline-owned" type="number" formControlName="owned_quantity_" min="0" class="c-input" />
-              </div>
-            </div>
-            <div class="inline-edit-checkboxes">
-              <label class="inline-edit-check">
-                <input type="checkbox" formControlName="is_consumable_" />
-                <span>{{ 'is_consumable' | translatePipe }}</span>
-              </label>
-              <label class="inline-edit-check">
-                <input type="checkbox" formControlName="scaling_enabled_" />
-                <span>{{ 'scaling_enabled' | translatePipe }}</span>
-              </label>
-            </div>
-            <div class="inline-edit-field inline-edit-notes">
-              <label for="inline-notes">{{ 'notes' | translatePipe }}</label>
-              <textarea id="inline-notes" formControlName="notes_" rows="2" class="c-input"></textarea>
-            </div>
-          </div>
-
-          @if (editForm_.get('scaling_enabled_')?.value) {
-            <div class="inline-edit-section inline-edit-scaling">
-              <h4 class="inline-edit-section-title">{{ 'scaling_rule' | translatePipe }}</h4>
-              <div class="inline-edit-grid inline-edit-scaling-grid">
-                <div class="inline-edit-field">
-                  <label for="inline-per-guests">{{ 'per_guests' | translatePipe }}</label>
-                  <input id="inline-per-guests" type="number" formControlName="per_guests_" min="1" class="c-input" />
-                </div>
-                <div class="inline-edit-field">
-                  <label for="inline-min-qty">{{ 'min_quantity' | translatePipe }}</label>
-                  <input id="inline-min-qty" type="number" formControlName="min_quantity_" min="0" class="c-input" />
-                </div>
-                <div class="inline-edit-field">
-                  <label for="inline-max-qty">{{ 'max_quantity' | translatePipe }}</label>
-                  <input id="inline-max-qty" type="number" formControlName="max_quantity_" min="0" placeholder="—" class="c-input" />
-                </div>
-              </div>
-            </div>
-          }
-
-          <div class="inline-edit-actions">
-            <button type="button" class="c-btn-ghost" (click)="onInlineCancel()">
-              {{ 'cancel' | translatePipe }}
-            </button>
-            <button type="button" class="c-btn-primary" (click)="onInlineSave()"
-              [disabled]="editForm_.invalid || isSavingEdit_()">
-              @if (isSavingEdit_()) {
-                <app-loader size="small" [inline]="true" />
-              }
-              {{ 'save' | translatePipe }}
-            </button>
-          </div>
+      @if (isDesktop_() && (editingId_() === item._id || closingId_() === item._id)) {
+        <div
+          class="inline-edit-panel"
+          [class.closing]="closingId_() === item._id"
+          [formGroup]="editForm_"
+          (clickOutside)="onInlinePanelClickOutside()"
+        >
+          <ng-container [ngTemplateOutlet]="panelBody" [ngTemplateOutletContext]="{ item }"></ng-container>
         </div>
       }
     }
   </ng-container>
 
+  <!-- Tablet + mobile: same form, rendered via [shell-modal] so it escapes .table-area's
+       backdrop-filter (fixed-position containing block — see list-shell.component.html). -->
+  @if (!isDesktop_() && editingItem_(); as item) {
+    <ng-container shell-modal>
+      <div class="c-modal-overlay" (click)="onInlinePanelClickOutside()"></div>
+      <div
+        class="inline-edit-panel as-modal"
+        [class.closing]="closingId_() === item._id"
+        [formGroup]="editForm_"
+        (clickOutside)="onInlinePanelClickOutside()"
+      >
+        <ng-container [ngTemplateOutlet]="panelBody" [ngTemplateOutletContext]="{ item }"></ng-container>
+      </div>
+    </ng-container>
+  }
+
+  <ng-template #panelBody let-item="item">
+    <h3 class="inline-edit-title">{{ 'edit' | translatePipe }}: {{ item.name_hebrew }}</h3>
+
+    <div class="inline-edit-section">
+      <div class="inline-edit-grid">
+        <div class="inline-edit-field">
+          <label for="inline-name">{{ 'name' | translatePipe }}</label>
+          <input id="inline-name" type="text" formControlName="name_hebrew" class="c-input" />
+        </div>
+        <div class="inline-edit-field">
+          <label for="inline-category">{{ 'category' | translatePipe }}</label>
+          <app-custom-select
+            triggerId="inline-category"
+            formControlName="category_"
+            [options]="categoryOptions()"
+            placeholder="category"
+            [typeToFilter]="true"
+            [addNewValue]="'__add_new__'"
+            (valueChange)="onCategoryValueChange($event, 'inline')"
+          />
+        </div>
+        <div class="inline-edit-field">
+          <label for="inline-owned">{{ 'owned_quantity' | translatePipe }}</label>
+          <input id="inline-owned" type="number" formControlName="owned_quantity_" min="0" class="c-input" />
+        </div>
+      </div>
+      <div class="inline-edit-checkboxes">
+        <label class="inline-edit-check">
+          <input type="checkbox" formControlName="is_consumable_" />
+          <span>{{ 'is_consumable' | translatePipe }}</span>
+        </label>
+        <label class="inline-edit-check">
+          <input type="checkbox" formControlName="scaling_enabled_" />
+          <span>{{ 'scaling_enabled' | translatePipe }}</span>
+        </label>
+      </div>
+      <div class="inline-edit-field inline-edit-notes">
+        <label for="inline-notes">{{ 'notes' | translatePipe }}</label>
+        <textarea id="inline-notes" formControlName="notes_" rows="2" class="c-input"></textarea>
+      </div>
+    </div>
+
+    @if (editForm_.get('scaling_enabled_')?.value) {
+      <div class="inline-edit-section inline-edit-scaling">
+        <h4 class="inline-edit-section-title">{{ 'scaling_rule' | translatePipe }}</h4>
+        <div class="inline-edit-grid inline-edit-scaling-grid">
+          <div class="inline-edit-field">
+            <label for="inline-per-guests">{{ 'per_guests' | translatePipe }}</label>
+            <input id="inline-per-guests" type="number" formControlName="per_guests_" min="1" class="c-input" />
+          </div>
+          <div class="inline-edit-field">
+            <label for="inline-min-qty">{{ 'min_quantity' | translatePipe }}</label>
+            <input id="inline-min-qty" type="number" formControlName="min_quantity_" min="0" class="c-input" />
+          </div>
+          <div class="inline-edit-field">
+            <label for="inline-max-qty">{{ 'max_quantity' | translatePipe }}</label>
+            <input
+              id="inline-max-qty"
+              type="number"
+              formControlName="max_quantity_"
+              min="0"
+              placeholder="—"
+              class="c-input"
+            />
+          </div>
+        </div>
+      </div>
+    }
+
+    <div class="inline-edit-actions">
+      <button type="button" class="c-btn-ghost" (click)="onInlineCancel()">
+        {{ 'cancel' | translatePipe }}
+      </button>
+      <button
+        type="button"
+        class="c-btn-primary"
+        (click)="onInlineSave()"
+        [disabled]="editForm_.invalid || isSavingEdit_()"
+      >
+        @if (isSavingEdit_()) {
+          <app-loader size="small" [inline]="true" />
+        }
+        {{ 'save' | translatePipe }}
+      </button>
+    </div>
+  </ng-template>
+
   <ng-container shell-filters>
     @if (isUnderInventory) {
       <nav class="control-nav" aria-label="Inventory and logistics">
-        <a routerLink="/inventory/list" routerLinkActive="active" class="control-nav-link">{{ 'product_list' | translatePipe }}</a>
-        <a routerLink="/inventory/equipment" routerLinkActive="active" class="control-nav-link">{{ 'logistics' | translatePipe }}</a>
+        <a routerLink="/inventory/list" routerLinkActive="active" class="control-nav-link">{{
+          'product_list' | translatePipe
+        }}</a>
+        <a routerLink="/inventory/equipment" routerLinkActive="active" class="control-nav-link">{{
+          'logistics' | translatePipe
+        }}</a>
       </nav>
     }
     <div class="c-filter-section">
       <div class="c-filter-section-header">
         @if (hasActiveFilters_()) {
-          <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">{{ 'clear_filters' | translatePipe }}</button>
+          <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">
+            {{ 'clear_filters' | translatePipe }}
+          </button>
         }
       </div>
       <div class="c-filter-category">
@@ -204,20 +300,34 @@
         <span class="c-filter-category-label">{{ 'is_consumable' | translatePipe }}</span>
         <div class="c-filter-options c-filter-options--inline">
           <label class="c-filter-option">
-            <input type="radio" name="consumable" [checked]="consumableFilter_() === null" (change)="consumableFilter_.set(null)" />
+            <input
+              type="radio"
+              name="consumable"
+              [checked]="consumableFilter_() === null"
+              (change)="consumableFilter_.set(null)"
+            />
             <span>{{ 'all' | translatePipe }}</span>
           </label>
           <label class="c-filter-option">
-            <input type="radio" name="consumable" [checked]="consumableFilter_() === true" (change)="consumableFilter_.set(true)" />
+            <input
+              type="radio"
+              name="consumable"
+              [checked]="consumableFilter_() === true"
+              (change)="consumableFilter_.set(true)"
+            />
             <span>{{ 'approved_yes' | translatePipe }}</span>
           </label>
           <label class="c-filter-option">
-            <input type="radio" name="consumable" [checked]="consumableFilter_() === false" (change)="consumableFilter_.set(false)" />
+            <input
+              type="radio"
+              name="consumable"
+              [checked]="consumableFilter_() === false"
+              (change)="consumableFilter_.set(false)"
+            />
             <span>{{ 'approved_no' | translatePipe }}</span>
           </label>
         </div>
       </div>
     </div>
   </ng-container>
-
 </app-list-shell>

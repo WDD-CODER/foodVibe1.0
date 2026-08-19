@@ -104,11 +104,11 @@ All 5 decisions are resolved (above). No milestone is blocked on a decision anym
 
 ## M4 — List-screen chassis → ACTION-LIST **B**
 
-- [ ] Task 16: build the shared chassis once — bulk edit, dirty-row-switch prompt, per-row deleting loader, empty-database vs no-results, keyboard sort headers, auth gating, inline "add new"
-- [ ] Task 17: apply it to Inventory, Recipe Book, Suppliers, Equipment
-- [ ] Task 17a: **row edit panel, desktop only** (decision 2) — restore the old inline expanding panel (200ms `closingId_` close animation, `clickOutside`, `isSavingEdit_` loader, dirty-row-switch prompt) gated to desktop width; tablet + mobile keep the design's centred modal, wired to the same dirty-row-switch prompt via the modal's own close path
-- [ ] Task 17b: **new data — Inventory** (ACTION-LIST H) — supplier field + low-stock flag on the product row
-- [ ] Task 17c: **new data — Equipment** (ACTION-LIST H) — scaling rule (per-guests / min / max)
+- [x] Task 16/17: **rescoped — no shared chassis to build.** Checked all four list components against ACTION-LIST B before writing anything: bulk edit (`editableFields_`/`onBulkEdit`), per-row deleting loader (`deletingId_`), empty-vs-no-results (`isEmptyList_`), auth gating (`requireAuthService`/`[disabled]="!isLoggedIn()"`) already exist on Inventory, Suppliers, Equipment. Nothing to build for those on those three; would need the same check before touching Recipe Book (not yet done — first list screen not audited)
+- [x] Task 17a: **row edit panel, desktop only** (decision 2) — done for Equipment + Suppliers, the only 2 of the 4 with an inline panel (Inventory/Recipe Book navigate to a full page instead — decision 2 doesn't apply there). One shared `ng-template #panelBody`, rendered inline on desktop / via a new `[shell-modal]` slot on tablet+mobile. Found + fixed a real bug: the modal was nested inside `.table-area` (`backdrop-filter` ancestor = wrong CSS containing block for `position: fixed`), landing ~31px short of the true viewport edge; fixed with a new projection point in `list-shell.component.html`, outside `.table-area`. Verified via gstack at 1280px and 390px, both screens, all edges flush
+- [x] Task 17a-fix: found + fixed a real asymmetry surfaced by the above — Suppliers already split "Cancel button" (no dirty check, deliberate action) from "click outside" (dirty check, accidental dismiss); Equipment had one undifferentiated method with no check at all. Split Equipment's to match Suppliers' established pattern rather than inventing a third behavior
+- [ ] Task 17b: **new data — Inventory supplier + low-stock flag.** Not started — Inventory not yet audited against ACTION-LIST H's claim
+- [x] Task 17c: **new data — Equipment scaling rule — already built, not missing.** `scaling_enabled_`/`per_guests_`/`min_quantity_`/`max_quantity_` were already live fields in Equipment's edit panel, found while working on 17a. No new code
 
 ## M5 — Recipe Builder → ACTION-LIST **C**
 

@@ -35,16 +35,20 @@
     </div>
   </section>
 
-  <div
-    class="panel-backdrop"
-    [class.visible]="isPanelOpen()"
-    (click)="panelToggle.emit()"
-    aria-hidden="true">
-  </div>
+  <div class="panel-backdrop" [class.visible]="isPanelOpen()" (click)="panelToggle.emit()" aria-hidden="true"></div>
 
-  <aside class="filter-panel" [class.collapsed]="!isPanelOpen()"
-         (touchstart)="onPanelTouchStart($event)"
-         (touchend)="onPanelTouchEnd($event)">
+  <!-- Outside .table-area on purpose: that section has backdrop-filter, which makes it
+       the containing block for any position:fixed descendant (CSS spec, not a bug) —
+       a row-edit-as-modal projected into shell-table-body would be pinned to the
+       table's box instead of the viewport. Content here escapes that. -->
+  <ng-content select="[shell-modal]"></ng-content>
+
+  <aside
+    class="filter-panel"
+    [class.collapsed]="!isPanelOpen()"
+    (touchstart)="onPanelTouchStart($event)"
+    (touchend)="onPanelTouchEnd($event)"
+  >
     @if (isPanelOpen()) {
       <button type="button" class="panel-toggle-icon" (click)="panelToggle.emit()" aria-label="Close filters">
         <lucide-icon name="circle-x" [size]="20"></lucide-icon>

@@ -100,9 +100,10 @@
 - [x] M3 Task 14e — brand mark added (copied single SVG, not the design bundle), wash background already covered by M1 Task 8; verified image loads
 - [ ] M3 Task 14f — decide: Dashboard's embedded sub-nav vs the new chip row (overlapping destinations, different mechanisms) — flagged, not resolved
 - [x] M3 Task 15 rescoped — 5 of 6 ACTION-LIST A items already exist/wired in the live app (auth, guard, 3-button confirm, toast undo, URL filter state); only Hebrew re-key is real ongoing work, done for the chip row so far
-- [ ] M4 Tasks 16-17 — shared list chassis + ACTION-LIST B (8), applied to 4 screens
-- [ ] M4 Task 17a — row edit panel, desktop only (decision 2); tablet/mobile keep design's modal
-- [ ] M4 Tasks 17b-17c — new data: Inventory supplier+low-stock, Equipment scaling rule
+- [x] M4 Task 16/17 rescoped — bulk edit, deleting loader, empty-state, auth gating already existed on Inventory/Suppliers/Equipment; nothing built. Recipe Book not yet audited
+- [x] M4 Task 17a — row edit panel desktop-only DONE for Equipment+Suppliers (Inventory/Recipe Book use full-page nav, decision 2 N/A there). Fixed a real containing-block bug (modal pinned to `.table-area` instead of viewport) + a real dirty-check asymmetry between the two screens. Verified via gstack at 1280px + 390px
+- [ ] M4 Task 17b — new data: Inventory supplier+low-stock flag — not started
+- [x] M4 Task 17c — new data: Equipment scaling rule — already built, found live in the edit panel, no new code needed
 - [ ] M5 Tasks 18-20 — Recipe Builder + ACTION-LIST C (19); unit selector first
 - [ ] M5 Task 20a — new data: Recipe Builder secondary yields
 - [ ] M5 Task 20b — confirm dual-timer restoration also satisfies labor/cook-time new-data item (no duplicate build)
