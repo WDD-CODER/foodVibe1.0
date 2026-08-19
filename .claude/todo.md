@@ -106,6 +106,7 @@
 - [x] M4 Task 17c — new data: Equipment scaling rule — already built
 - [x] H re-audit 2026-08-19 — 6/8 new-data items already satisfied without code. 1 genuine gap remains: Recipe Builder secondary yields. Menu Intelligence profit-per-portion is half-done (sell_price field exists, the calc doesn't)
 - [x] M8 Task 24a — new data: Venues address/capacity/contact/hours BUILT (model + form + list carousel column). Verified full round-trip via gstack (add → save → re-open → every field + hours row matched); test data cleaned up
+- [x] M7 Task 23a — new data: Menu Intelligence profit-per-guest BUILT (`profitPerGuest_` computed + new financial-footnote row). Only Recipe Builder secondary yields left in ACTION-LIST H now (7/8 done)
 - [ ] M5 Tasks 18-20 — Recipe Builder + ACTION-LIST C (19); unit selector first
 - [ ] M5 Task 20a — new data: Recipe Builder secondary yields
 - [ ] M5 Task 20b — confirm dual-timer restoration also satisfies labor/cook-time new-data item (no duplicate build)

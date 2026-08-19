@@ -127,7 +127,7 @@ All 5 decisions are resolved (above). No milestone is blocked on a decision anym
 ## M7 — Menu Intelligence → ACTION-LIST **F**, **H**
 
 - [ ] Task 23: leave the existing screen's markup and logic untouched; apply only the shell, 3 breakpoints and 44px touch floor
-- [ ] Task 23a: **new data — Menu Intelligence, half-done.** `sell_price` is already a real wired field throughout `menu-intelligence.page.ts` — not missing. The derived profit-per-portion calculation (sell price minus recipe cost) is genuinely absent — no `profit` anywhere in that file. Remaining work is the calculation + display only. Lands on the **old, unmigrated** screen per §F
+- [x] Task 23a: **new data — Menu Intelligence — built.** `sell_price` was already wired; added `profitPerGuest_` computed (both halves — revenue/guest, cost/guest — already existed, just never subtracted) + a matching row in the existing financial-footnote panel. Lands on the old, unmigrated screen per §F. Verified via gstack: new row renders correctly positioned among its four siblings
 
 ## M8 — Small restorations → ACTION-LIST **G**, **H**
 

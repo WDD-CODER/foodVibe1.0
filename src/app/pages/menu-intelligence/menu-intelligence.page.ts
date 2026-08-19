@@ -212,6 +212,16 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     return this.eventCost_() / guestCount
   })
 
+  /** Plan 305 ACTION-LIST H — sell_price was already a wired field; this derived
+   * profit-per-guest calculation was the missing half. Revenue per guest minus
+   * ingredient cost per guest — both already computed above, just never subtracted. */
+  protected readonly profitPerGuest_ = computed(() => {
+    this.formValueVersion_() // depend on form changes
+    const guestCount = this.getGuestCount()
+    if (guestCount <= 0) return 0
+    return this.totalRevenue_() / guestCount - this.costPerGuest_()
+  })
+
   protected readonly menuTypeOptions_ = computed(() => this.metadataRegistry.allMenuTypes_().map((t) => t.key))
 
   protected readonly servingTypeOptions_ = computed(() =>
