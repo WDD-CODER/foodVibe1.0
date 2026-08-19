@@ -123,7 +123,7 @@ data. Re-audited against live source before building anything: **7 of 8 already 
 - [x] **Equipment scaling rule** — already built (`scaling_enabled_`/`per_guests_`/`min_quantity_`/`max_quantity_`)
 - [x] **Venue address, capacity, contact, operating hours** — built this session: model, form (4 inputs + an `operating_hours_` FormArray), list carousel column. Verified full round-trip via gstack
 - [x] **Per-item trash history + per-section bulk restore** — already built
-- [x] **Label colours; unit locked** — label colours already built (`LabelDefinition.color`). Unit-locked is a behavior, not a flag — `SYSTEM_UNITS` are already constant/non-removable
+- [x] **Label colours; unit locked** — label colours already built (`LabelDefinition.color`). Unit-locked, both the behavior *and* the visual signal are already built: `isSystemUnit()` gates a `lock` icon badge (`unit-default-badge`, tooltip "unit_default_unremovable") in place of the delete button for every system unit in Metadata Manager — confirmed in `metadata-manager.page.component.html:178-181`, not assumed
 
 ---
 
@@ -151,7 +151,7 @@ These are equal or better in the new design. Don't spend time on them.
 | 1 | Product form: full page or redesigned modal? | **Full page.** *You said "not sure" — this is my default. See §D.* |
 | 2 | Row editing: design's modal or old inline panel? | **Both, split by width.** Built for Equipment + Suppliers. See §B. |
 | 3 | Build the 9 new data concepts, or drop the visual? | **Build them.** Done — see §H. |
-| 4 | Where do user management + backup/restore live? | **Two more tiles in the Metadata Manager grid.** *You said "ok" — this is my default. See §E.* Not yet verified they're actually placed this way — the components exist, their exact layout position wasn't checked |
+| 4 | Where do user management + backup/restore live? | **Two more tiles in the Metadata Manager grid.** *You said "ok" — this is my default. See §E.* Verified: `<app-user-management />` and the backup/restore `<section>` both already sit inside the same `.admin-grid`/`.manager-card` pattern as every vocabulary card — confirmed, not just assumed |
 | 5 | Inline creation: restore, or force through Metadata Manager? | **Restore.** Already how the app works — see §C, §D. |
 
 Items flagged *"this is my default"* above (1, 4) are the two calls made without your explicit answer —
@@ -165,16 +165,12 @@ Everything above that's checked required either zero code (already existed) or a
 additive change. What's left:
 
 1. **F — Menu Intelligence mobile-logic port, rest of it.** Toolbar touch-floor done. Still open: reconciling the screen's own 600px/620px breakpoints with the design's 3-tier system, and the smaller nested `toolbar-glass-btn` icon buttons inside the export dropdowns — deliberately left for a dedicated mobile-audit pass rather than rushed changes to an 803-line stylesheet with no live visual QA to catch a regression.
-2. **Metadata Manager tile layout** — confirm user management + backup/restore actually render as
-   grid tiles the way decision 4 assumed, not some other layout.
-3. **Unit-locked visual indicator** — confirm Metadata Manager's UI shows a system unit as locked
-   (the underlying protection already exists; only the visual signal is unconfirmed).
-4. **Three flagged-not-fixed items from earlier milestones**, none blocking:
+2. **Three flagged-not-fixed items from earlier milestones**, none blocking:
    - `$break-mobile` (768px) vs `$break-phone-max` (767px) breakpoint collision (M2)
    - A third breakpoint number, 620px, in the header's own mobile collapse (M3)
    - Dashboard's embedded sub-nav overlapping 3 of the new chip row's destinations via a different
      mechanism (M3) — works, just two paths to the same place
-5. **Visual restyling.** This entire file was about not losing *functionality* — and functionality is
+3. **Visual restyling.** This entire file was about not losing *functionality* — and functionality is
    now confirmed intact everywhere. It was never about making every screen look like `UI refactor/`.
    That's a separate, much larger, and more subjective undertaking: hundreds of components' worth of
    CSS to bring in line with the design's specific visual language (glass surfaces, teal accents, the
