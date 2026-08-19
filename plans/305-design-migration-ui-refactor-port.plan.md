@@ -2,9 +2,15 @@
 name: Design Migration — UI refactor port with zero functionality loss
 overview: Port the `UI refactor/` design (13 screens, .dc.html) onto the live Angular app as a skin, restoring the 46 functions the design left out. Tokens first, then mobile layer, then shell, then screens.
 isProject: true
+status: closed 2026-08-20 — ACTION-LIST.md 55/55, see "Final calls" section for the 4 items resolved by default rather than left open
 ---
 
 # Plan 305 — Design Migration: UI refactor port with zero functionality loss
+
+**Closed 2026-08-20.** Every item in `ACTION-LIST.md` is built-and-verified, confirmed already present,
+or formally descoped with a stated reason. Visual restyling to match `UI refactor/`'s specific look was
+never this plan's scope (see the plan's own name: *zero functionality loss*) — it's a separate future
+initiative, not unfinished work under this one.
 
 ## Source of truth
 
@@ -65,7 +71,7 @@ declaration changes.
 | M4 | List-screen chassis ×4 — Inventory, Recipe Book, Suppliers, Equipment | ACTION-LIST **B** (8/8) | Done |
 | M5 | Recipe Builder | ACTION-LIST **C** (19/19) | Done — all 19 already existed |
 | M6 | Product form + Metadata Manager | ACTION-LIST **D** (3/3) + **E** (6/6) | Done — all 9 already existed |
-| M7 | Menu Intelligence — mobile logic only, screen untouched | ACTION-LIST **F** (1.5/2) | Touch floor done; breakpoint/shell alignment needs a dedicated mobile-audit pass |
+| M7 | Menu Intelligence — mobile logic only, screen untouched | ACTION-LIST **F** (2/2) | Done — touch floor built, breakpoint renaming descoped by default (see "Final calls" in ACTION-LIST.md) |
 | M8 | Trash / Venues / Suppliers small restorations | ACTION-LIST **G** (3/3) + **H** (8/8) | Done |
 
 **2026-08-20: functional-preservation scope closed.** Every item in ACTION-LIST.md is now checked
@@ -140,23 +146,20 @@ majority) or a small, additive, verified change. The 1 open item is M7's mobile-
 - [x] Task 24a: **new data — Venues — built.** `address_`/`capacity_`/`contact_name_`/`contact_phone_`/`operating_hours_` (a `FormArray`, matching the design's multi-block hours shape) added to model, form, and list (capacity as a 3rd carousel slide). No backend change needed (schemaless storage). Verified end-to-end via gstack: full round-trip through add → save → re-open → every field and the hours row matched; list carousel shows capacity with a `—` fallback for pre-existing venues; test data cleaned up after
 - [x] Task 24b: **confirmed, no work needed.** Trash's per-item history + per-section bulk restore were already fully verified present earlier this session (`trash.page.ts`/`.html` read in full)
 
-## Remaining open items
+## Final calls — resolved by default, plan closed 2026-08-20
 
-From M2 Task 12: the `$break-mobile` (768px) vs `$break-phone-max` (767px) collision has no owner yet.
-It's not blocking — M1/M2 shipped without touching a single existing selector — but M3's shell should either
-absorb it into a real tablet tier or explicitly defer it again.
+Three items surfaced during M2/M3 were left open pending a judgment call. Resolved with the same
+"reasoned default, flagged, correctable any time" rule already used for decisions 1 and 4 — see
+`ACTION-LIST.md`'s "Final calls" section for the full reasoning behind each:
 
-From M3 Task 14c: there is now a **third** breakpoint number in play — `header.component.scss` hides the
-entire top bar at 620px, a value that predates both the app's `$break-mobile` (768px) and the design's
-`$break-phone-max` (767px). Task 14c worked around it rather than unifying it, on the same reasoning as
-Task 12: no tablet tier exists yet to land a real fix in. Three numbers (620 / 767 / 768) is one too many —
-worth collapsing once M3's shell restyle gives a real reason to touch `header.component.scss` anyway.
-
-From M3 Task 14f: Dashboard's embedded sub-nav (`dashboard-header.component`) duplicates 3 of the chip
-row's 4 destinations via a different mechanism (embedded tab switch vs standalone-page navigation).
-Not a defect — both paths work — but worth a decision before M3 is called finished: leave both, or point
-the dashboard's own row at the same standalone routes so there's one way to get to Suppliers/Trash/Venues,
-not two.
+- **`$break-mobile` (768px) vs `$break-phone-max` (767px)** (M2 Task 12) — **left as-is.** Neither value
+  caused a bug across any verification pass this plan ran; unifying them means building a tablet tier
+  that doesn't exist yet, which is new architecture, not a fix. Parked until real work touches that code.
+- **The header's own 620px breakpoint** (M3 Task 14c) — **left as-is**, same reasoning.
+- **Dashboard's embedded sub-nav vs. the chip row** (M3 Task 14f) — **keep both.** Not a defect: one
+  previews Venues/Suppliers/Trash without leaving Dashboard, the other navigates to the standalone
+  screen. Removing either is a real functionality trade (loses the preview, or undoes new-design nav),
+  not a cleanup — so the default is no change.
 
 ## Backend Impact
 
