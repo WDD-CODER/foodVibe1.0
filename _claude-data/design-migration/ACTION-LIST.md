@@ -105,14 +105,16 @@ Design covers 6 vocabularies. These 6 are missing:
 Not a restoration — none of these existed in the old app either. The design implies or partly
 renders them; the app must gain the underlying data. Detail: `gap-analysis.md` §7.
 
-- [ ] **Supplier on the product row + low-stock flag** — Inventory
-- [ ] **Secondary yields on a recipe** — Recipe Builder
-- [ ] **Per-step labor time and cook time** — Recipe Builder. *Likely satisfied by C's "Per-step dual timers" restoration — that item already carries labor + cook as separate fields. Confirm when C is built; don't duplicate the work.*
-- [ ] **Sell price per menu dish → profit per portion** — Menu Intelligence. **New field on the OLD screen** — Menu Intelligence's UI stays exactly as it is (§F), so this is the one item in this section that isn't "copy what the design shows," it's new work landing on old code.
-- [x] **Equipment scaling rule** (per-guests / min / max) — **already built, not missing.** `scaling_enabled_`, `per_guests_`, `min_quantity_`, `max_quantity_` are all live fields in Equipment's inline edit panel today (found while restoring the row-edit-panel item above). Closing without new work
-- [ ] **Venue address, capacity, contact, operating hours** — Venues. Design's UI already renders a contact block + hours (§6, no-action list) — likely UI is free, only the backend fields are new. Confirm before assuming a UI build is needed.
-- [ ] **Per-item trash history + per-section bulk restore** — Trash. Design's UI already has this (§6, no-action list) — same caveat, confirm before assuming a UI build is needed.
-- [ ] **Label colours; unit locked flag** — Metadata Manager
+**Re-audited against live source 2026-08-19 before building anything — 5 of 8 were already there:**
+
+- [x] **Supplier on the product row + low-stock flag** — **already built.** Inventory's row template has `.col-supplier` (`getProductSupplierNames(product)`) and a `.low-stock-badge`, both already wired to `min_stock_level_`/`lowStockOnly_` filtering. No new work
+- [ ] **Secondary yields on a recipe** — Recipe Builder. Confirmed genuinely missing — no `secondary_yield` field anywhere in `src/app/pages/recipe-builder`
+- [x] **Per-step labor time and cook time** — **already built.** `labor_time`/`cooking_time` form fields, `laborTimeInput`/`cookTimeInput`, `cookTimeOpenRows_` all exist in `recipe-workflow.component.ts` today — this is what C's "dual timers" item restyles, not builds. No separate work
+- [~] **Sell price per menu dish → profit per portion** — **half-built.** `sell_price` is a real, wired form field throughout `menu-intelligence.page.ts` (not missing). The *derived* profit-per-portion calculation (sell price minus recipe cost) is not — no `profit` anywhere in that page. Remaining work is the calculation + its display, not the field. Still lands on the **old** screen per §F
+- [x] **Equipment scaling rule** (per-guests / min / max) — **already built.** `scaling_enabled_`, `per_guests_`, `min_quantity_`, `max_quantity_` are all live fields in Equipment's inline edit panel today (found while restoring the row-edit-panel item, §B). No new work
+- [ ] **Venue address, capacity, contact, operating hours** — Confirmed genuinely missing. `venue.model.ts`'s `VenueProfile` has only `name_hebrew`/`environment_type_`/`available_infrastructure_`/`notes_` — no address, capacity, contact, or hours field exists anywhere. The design's contact+hours UI (§6) has no backend to read from yet; this is real new work, model through form through display
+- [x] **Per-item trash history + per-section bulk restore** — confirmed already built in an earlier pass this session (`trash.page.ts`/`.html` read in full): confirm variants, `recoverBeforeRestore`, per-section bulk actions. No new work
+- [x] **Label colours; unit locked flag** — **label colours already built** (`LabelDefinition.color` + `LABEL_COLOR_PALETTE`, 12 swatches). **Unit locked is a behavior, not a flag** — `SYSTEM_UNITS` in `unit-registry.service.ts` are already constant and non-removable; the underlying protection exists. Not yet confirmed whether Metadata Manager's UI *shows* a locked indicator for them — small, worth a quick check before this closes, but not comparable in size to the two genuine gaps above
 
 ---
 
@@ -157,6 +159,6 @@ not ones you specified — correct them any time before that milestone lands and
 - **E. Metadata** — 0 / 6
 - **F. Menu Intelligence** — 0 / 2
 - **G. Small** — 0 / 3
-- **H. New data concepts** — 1 / 8 (Equipment scaling rule already existed)
+- **H. New data concepts** — 6 / 8 already satisfied (5 already existed + label colours; unit-locked behavior exists, UI indicator unconfirmed). 2 genuine gaps remain: secondary yields, venue address/capacity/contact/hours. Profit-per-portion is half-done (field exists, calculation doesn't)
 
-**Total: 8 / 55**
+**Total: 13 / 55** (before re-audit this would have read "6/55 to build" — 8 of the 13 needed no code at all, just verification)

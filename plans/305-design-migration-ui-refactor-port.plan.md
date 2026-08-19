@@ -104,10 +104,10 @@ All 5 decisions are resolved (above). No milestone is blocked on a decision anym
 
 ## M4 — List-screen chassis → ACTION-LIST **B**
 
-- [x] Task 16/17: **rescoped — no shared chassis to build.** Checked all four list components against ACTION-LIST B before writing anything: bulk edit (`editableFields_`/`onBulkEdit`), per-row deleting loader (`deletingId_`), empty-vs-no-results (`isEmptyList_`), auth gating (`requireAuthService`/`[disabled]="!isLoggedIn()"`) already exist on Inventory, Suppliers, Equipment. Nothing to build for those on those three; would need the same check before touching Recipe Book (not yet done — first list screen not audited)
+- [x] Task 16/17: **rescoped — no shared chassis to build.** Checked all four list components against ACTION-LIST B before writing anything: bulk edit (`editableFields_`/`onBulkEdit`), per-row deleting loader (`deletingId_`), empty-vs-no-results (`isEmptyList_`), auth gating (`requireAuthService`/`[disabled]="!isLoggedIn()"`) confirmed present on **all four** — Inventory, Suppliers, Equipment, and Recipe Book (`recipe-book-list.component.ts`). Nothing to build
 - [x] Task 17a: **row edit panel, desktop only** (decision 2) — done for Equipment + Suppliers, the only 2 of the 4 with an inline panel (Inventory/Recipe Book navigate to a full page instead — decision 2 doesn't apply there). One shared `ng-template #panelBody`, rendered inline on desktop / via a new `[shell-modal]` slot on tablet+mobile. Found + fixed a real bug: the modal was nested inside `.table-area` (`backdrop-filter` ancestor = wrong CSS containing block for `position: fixed`), landing ~31px short of the true viewport edge; fixed with a new projection point in `list-shell.component.html`, outside `.table-area`. Verified via gstack at 1280px and 390px, both screens, all edges flush
 - [x] Task 17a-fix: found + fixed a real asymmetry surfaced by the above — Suppliers already split "Cancel button" (no dirty check, deliberate action) from "click outside" (dirty check, accidental dismiss); Equipment had one undifferentiated method with no check at all. Split Equipment's to match Suppliers' established pattern rather than inventing a third behavior
-- [ ] Task 17b: **new data — Inventory supplier + low-stock flag.** Not started — Inventory not yet audited against ACTION-LIST H's claim
+- [x] Task 17b: **new data — Inventory supplier + low-stock flag — already built.** `.col-supplier` (`getProductSupplierNames`) and `.low-stock-badge` both already present and wired in the row template. No new work
 - [x] Task 17c: **new data — Equipment scaling rule — already built, not missing.** `scaling_enabled_`/`per_guests_`/`min_quantity_`/`max_quantity_` were already live fields in Equipment's edit panel, found while working on 17a. No new code
 
 ## M5 — Recipe Builder → ACTION-LIST **C**
@@ -115,25 +115,25 @@ All 5 decisions are resolved (above). No milestone is blocked on a decision anym
 - [ ] Task 18: restore C1 first — the ingredient-row unit selector (type-to-filter + create-unit)
 - [ ] Task 19: restore C2 — ingredient search must span recipes, not just products (sub-recipes are impossible without it)
 - [ ] Task 20: restore C3–C19 — four row states, logistics picker, export toolbar, five-gate save validation, history view mode, drag-and-drop, collapsible sections, weight/volume toggle, duplicate-name check, inline create, labels multi-select, image upload, dual timers, nutrition badge, keyboard, dirty tracking, AI draft mode
-- [ ] Task 20a: **new data — Recipe Builder** (ACTION-LIST H) — secondary yields on a recipe
-- [ ] Task 20b: confirm Task 20's dual-timer restoration (C item) already carries labor time + cook time as separate persisted fields — if so, close the corresponding ACTION-LIST H item without extra work; do not build it twice
+- [ ] Task 20a: **new data — Recipe Builder secondary yields.** Confirmed genuinely missing (re-audit 2026-08-19) — no `secondary_yield` field anywhere in the recipe-builder source
+- [x] Task 20b: **confirmed, no work needed.** `labor_time`/`cooking_time`/`laborTimeInput`/`cookTimeInput` already exist in `recipe-workflow.component.ts` — Task 20's dual-timer *restyle* (C item) is the only work; the underlying persisted fields were never missing
 
 ## M6 — Product form + Metadata Manager → ACTION-LIST **D**, **E**, **H**
 
 - [ ] Task 21: purchase-options `FormArray` + five collapsible optional fields, as a **full page** (decision 1) restyled to the new design
 - [ ] Task 22: add the 6 missing Metadata vocabularies — demo data, menu types, preparation categories, section categories, plus **user management** and **backup/restore** as two more tiles in the same grid (decision 4), user management permission-gated
-- [ ] Task 22a: **new data — Metadata Manager** (ACTION-LIST H) — label colours, unit locked flag
+- [x] Task 22a: **new data — Metadata Manager, mostly already done.** Label colours confirmed built (`LabelDefinition.color` + 12-swatch `LABEL_COLOR_PALETTE`). Unit-locked is a behavior, not a flag — `SYSTEM_UNITS` are already constant/non-removable. Remaining, small: confirm Metadata Manager's own UI visually indicates a system unit as locked; add an indicator if it doesn't
 
 ## M7 — Menu Intelligence → ACTION-LIST **F**, **H**
 
 - [ ] Task 23: leave the existing screen's markup and logic untouched; apply only the shell, 3 breakpoints and 44px touch floor
-- [ ] Task 23a: **new data — Menu Intelligence** (ACTION-LIST H) — sell price per menu dish → profit per portion. This is new work landing on the **old, unmigrated** screen — not a design copy, since the old screen's UI stays as-is
+- [ ] Task 23a: **new data — Menu Intelligence, half-done.** `sell_price` is already a real wired field throughout `menu-intelligence.page.ts` — not missing. The derived profit-per-portion calculation (sell price minus recipe cost) is genuinely absent — no `profit` anywhere in that file. Remaining work is the calculation + display only. Lands on the **old, unmigrated** screen per §F
 
 ## M8 — Small restorations → ACTION-LIST **G**, **H**
 
 - [ ] Task 24: Trash `recoverBeforeRestore`; Venues infrastructure `FormArray`; Suppliers linked-products count
-- [ ] Task 24a: **new data — Venues** (ACTION-LIST H) — address, capacity, contact, operating hours. Design's UI already renders a contact block + hours (gap-analysis §6) — confirm whether that's UI-complete already and only backend fields are missing before scoping a UI build
-- [ ] Task 24b: **new data — Trash** (ACTION-LIST H) — per-item trash history + per-section bulk restore. Same caveat — design's UI already claims this (gap-analysis §6); confirm before assuming new UI work
+- [ ] Task 24a: **new data — Venues, confirmed genuinely missing.** `VenueProfile` (`venue.model.ts`) has only `name_hebrew`/`environment_type_`/`available_infrastructure_`/`notes_` — no address, capacity, contact, or hours field anywhere. Real work: model, form, display, all three layers
+- [x] Task 24b: **confirmed, no work needed.** Trash's per-item history + per-section bulk restore were already fully verified present earlier this session (`trash.page.ts`/`.html` read in full)
 
 ## Remaining open items
 
