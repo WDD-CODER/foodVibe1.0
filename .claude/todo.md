@@ -75,6 +75,30 @@
 - [ ] M3 — Add `cdk-virtual-scroll` or pagination to inventory + recipe-book lists (after 303 M2)
 - [ ] Hand-off — re-assess plan 301 M2's scope against measured results
 
+### Plan 305 — Design Migration: UI refactor port (`plans/305-design-migration-ui-refactor-port.plan.md`)
+
+> Source of truth is `UI refactor/` (untracked), **not** the stale claude.ai cloud project. Governing rule: the design is a skin — never lose a function. The 46 restorations live in `_claude-data/design-migration/ACTION-LIST.md`; M3+ are blocked on the 5 open decisions at the foot of that file.
+
+- [x] M1 Task 1 — type scale `--fs-xs`…`--fs-3xl` in `src/styles.scss` `:root`
+- [x] M1 Task 2 — weight tokens `--fw-regular`…`--fw-extrabold`
+- [x] M1 Task 3 — line-height `--lh-*` + tracking `--tracking-*`
+- [x] M1 Task 4 — 8-pt spacing scale `--space-0`…`--space-12`
+- [x] M1 Task 5 — `--dur-fast/base/slow` + `--tap: 44px`
+- [x] M1 Task 6 — add `--font-display`; drop Space Grotesk from `--font-mono`
+- [x] M1 Task 7 — trim Google Fonts `@import` to Heebo only (supersedes plan 273's Rubik migration)
+- [x] M1 Task 8 — superseded, no code written: `.ambient-bg` is unused by all 13 design screens; app's existing `body::before` is the same gradients at higher opacity, already unconditional
+- [x] M1 Task 9 — `ng build` 0 errors; verified all 8 token groups + zero Rubik/Space-Grotesk in output CSS
+- [x] M2 Task 10 — port `.m-*` mobile utilities from `UI refactor/mobile-pass.css` (dropped `overflow-x:hidden` — breaks existing sticky headers; dropped `::after` checkmark — app uses SVG background)
+- [x] M2 Task 11 — ≤767px iOS focus-zoom guard + compact checkbox/radio, token-based sizing
+- [x] M2 Task 12 — 768 vs 767 collision **recorded, not resolved** — no tablet tier exists yet to fall back to; deferred to M3 shell. Added `$break-xs-max`/`$break-phone-max`/`$break-tablet-max` as a parallel tier, existing breakpoints untouched
+- [x] M2 Task 13 — `ng build` 0 errors; all 7 `.m-*` classes confirmed in output CSS. Live-viewport pass deferred to M3 (nothing consumes these classes yet)
+- [ ] M3 Tasks 14-15 — shell (4 tabs, chips, bottom bar, FAB) + ACTION-LIST A (6)
+- [ ] M4 Tasks 16-17 — shared list chassis + ACTION-LIST B (7), applied to 4 screens
+- [ ] M5 Tasks 18-20 — Recipe Builder + ACTION-LIST C (19); unit selector first
+- [ ] M6 Tasks 21-22 — product form + Metadata Manager + ACTION-LIST D (3), E (6)
+- [ ] M7 Task 23 — Menu Intelligence: mobile logic only, screen untouched + ACTION-LIST F (2)
+- [ ] M8 Task 24 — Trash / Venues / Suppliers restorations + ACTION-LIST G (3)
+
 ## 6. KEEP DEFERRED — intentional park
 
 > Do not execute against current policy / product decisions.
@@ -193,5 +217,51 @@ Open unchecked items at compact time:
 - [ ] Update all remaining `TranslationService` injection sites to `VocabularyService`
 - [ ] Delete `translation-pipe.pipe.ts` and `translation.service.ts`
 - [ ] Verify `ng build` passes and `{{ 'cup' | transloco }}` renders `כוס` in the app
+
+Unresolved tool signals: re-add any pending Verify/Fail/blocker notes under this heading after compact if still open.
+
+## PreCompact signal dump (2026-08-19T15:04:47Z)
+
+Open unchecked items at compact time:
+- [ ] (Milestone 2/3/4 — see plan file; not started, lower priority, scope separately)
+- [ ] Deploy; collect ~24h of real-use numbers from Render logs
+- [ ] Record observed numbers in `reports/performance-audit-2026-08-13.md` under a new "Observed" section
+- [ ] Confirm from M1 logs whether cold starts actually occur during business hours — if not, stop and re-prioritise
+- [ ] Human: approve billing change; set `plan: free` → `plan: starter` in `render.yaml:5`
+- [ ] Human: verify Atlas cluster region matches Render service region; report findings
+- [ ] Human: check whether `MONGO_URI` points at an M0 free cluster; report findings
+- [ ] Move `seedMasterData()` to run after `app.listen()` — `server/index.js:125-131`
+- [ ] Determine whether both `foodvibe` and `foodvibe-api` Render services exist; document which is canonical
+- [ ] Add `maxAge: '1y'`, `immutable: true`, and the `index.html` → `no-cache` `setHeaders` guard — `server/index.js:63`
+- [ ] Set `Cache-Control: no-cache` on the SPA fallback `res.sendFile(index.html)` — `server/index.js:103-108`
+- [ ] Verify a fresh deploy is still picked up by a returning browser (guards the fallback caching bug)
+- [ ] Remove `withPreloading(PreloadAllModules)` and its now-unused import — `src/app/app.config.ts:4,96`
+- [ ] Convert `menu-export.service.ts:8` and `recipe-export.service.ts:8` to `await import('exceljs')` at point of use
+- [ ] Propagate resulting `async` signature changes through `export.service.ts` and its 3 consumers
+- [ ] Manually verify Excel export still produces a valid `.xlsx` from all three consumer pages
+- [ ] Re-confirm `food-compos-logo.png` (1.88 MB) is unreferenced; delete if so
+- [ ] Convert `recipe_placeholder.png` (1.27 MB) to WebP or inline SVG — update `recipe-header.component.ts:133`
+- [ ] Convert both approve-stamp PNGs to WebP — update `approve-stamp.component.ts:20,22`
+- [ ] M1 — Map-based lookups: add `productsById_`/`recipesById_` computed Maps; replace the 4 O(n) `.find()` scans in `recipe-cost.service.ts:260,282` and `recipe-allergens.util.ts:22,25`
+- [ ] M1 — Record before/after costs + allergens for 10 representative recipes (nested, depth-limited, broken-ref, price-override)
+- [ ] M2 — Precomputed row model for recipe-book + inventory; remove the 8 per-row template function calls
+- [ ] M2 — Separate commit: convert the remaining 29 components to `ChangeDetectionStrategy.OnPush`
+- [ ] M3 — Hoist the rebuilt `allProductNames` Set above the master loop — `server/services/sync-master.js:273-274`
+- [ ] M3 — Remove `syncMasterToUser` from `POST /refresh` (or version-gate it) — `server/routes/auth.js:274`
+- [ ] M3 — Regression test: brand-new account signup still receives correctly cloned + remapped master data
+- [ ] Prerequisite gate — confirm 302 M1/M2 + 303 M1/M2 shipped and re-measured; reduce or drop scope if no longer justified
+- [ ] M1 — List projections on `GET /:type` mirroring `SEARCH_PROJECTIONS` — `server/routes/generic.js:45-77,82-86`
+- [ ] M1 — Verify edit flows fetch full documents so a lean list doc cannot round-trip through a save and erase fields
+- [ ] M2 — Defer `RecipeDataService`/`DishDataService` to `autoLoad: false`; confirm resolver coverage first
+- [ ] M2 — Regression test: cold-load a nested-sub-recipe recipe by direct URL; no ingredient unlinking (plan 300 finding 3)
+- [ ] M2 — Collapse the post-login double fetch — `user.service.ts:54-93` (same item as plan 301 M4; mark both)
+- [ ] M3 — Add `cdk-virtual-scroll` or pagination to inventory + recipe-book lists (after 303 M2)
+- [ ] Hand-off — re-assess plan 301 M2's scope against measured results
+- [ ] Decide chat placement (sidebar / floating button / dedicated Assistant page)
+- [ ] Decide first use case (dictation → recipe and/or create menu for N people)
+- [ ] Decide backend approach for Gemini API key (proxy / serverless / existing API)
+- [ ] Decide language (Hebrew / English / both) for prompts and bot replies
+- [ ] Decide confirmation pattern (open edit screen with draft vs inline draft in chat vs both)
+- [ ] Write designated implementation plan once clarifications are set
 
 Unresolved tool signals: re-add any pending Verify/Fail/blocker notes under this heading after compact if still open.
