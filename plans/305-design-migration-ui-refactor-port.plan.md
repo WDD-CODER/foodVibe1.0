@@ -132,7 +132,7 @@ All 5 decisions are resolved (above). No milestone is blocked on a decision anym
 ## M8 — Small restorations → ACTION-LIST **G**, **H**
 
 - [ ] Task 24: Trash `recoverBeforeRestore`; Venues infrastructure `FormArray`; Suppliers linked-products count
-- [ ] Task 24a: **new data — Venues, confirmed genuinely missing.** `VenueProfile` (`venue.model.ts`) has only `name_hebrew`/`environment_type_`/`available_infrastructure_`/`notes_` — no address, capacity, contact, or hours field anywhere. Real work: model, form, display, all three layers
+- [x] Task 24a: **new data — Venues — built.** `address_`/`capacity_`/`contact_name_`/`contact_phone_`/`operating_hours_` (a `FormArray`, matching the design's multi-block hours shape) added to model, form, and list (capacity as a 3rd carousel slide). No backend change needed (schemaless storage). Verified end-to-end via gstack: full round-trip through add → save → re-open → every field and the hours row matched; list carousel shows capacity with a `—` fallback for pre-existing venues; test data cleaned up after
 - [x] Task 24b: **confirmed, no work needed.** Trash's per-item history + per-section bulk restore were already fully verified present earlier this session (`trash.page.ts`/`.html` read in full)
 
 ## Remaining open items

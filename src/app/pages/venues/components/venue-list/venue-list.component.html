@@ -1,10 +1,10 @@
 <app-list-shell
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
-  [gridTemplate]="'2fr 1fr 0.8fr 80px auto'"
+  [gridTemplate]="'2fr 1fr 0.8fr 0.6fr 80px auto'"
   [mobileGridTemplate]="'2fr 1fr 40px 28px'"
-  [dir]="'rtl'">
-
+  [dir]="'rtl'"
+>
   <h2 shell-title class="page-title">{{ 'venue_list' | translatePipe }}</h2>
 
   <ng-container shell-search>
@@ -21,17 +21,25 @@
     </div>
   </ng-container>
 
-  <button type="button" shell-back-btn class="header-btn header-btn--back"
+  <button
+    type="button"
+    shell-back-btn
+    class="header-btn header-btn--back"
     data-testid="btn-back-to-dashboard-venues"
-    (click)="backToDashboard()">
+    (click)="backToDashboard()"
+  >
     <lucide-icon name="layout-dashboard" size="16"></lucide-icon>
     {{ 'dashboard' | translatePipe }}
   </button>
 
   <ng-container shell-actions>
-    <button type="button" class="c-btn-primary" (click)="onAddPlace()"
+    <button
+      type="button"
+      class="c-btn-primary"
+      (click)="onAddPlace()"
       [disabled]="!isLoggedIn()"
-      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+    >
       <lucide-icon name="plus" [size]="18"></lucide-icon>
       {{ 'add_venue' | translatePipe }}
     </button>
@@ -42,18 +50,29 @@
       [selectionState]="selection"
       [editableFields]="editableFields_()"
       (bulkDelete)="onBulkDeleteSelected($event)"
-      (bulkEdit)="onBulkEdit($event)" />
+      (bulkEdit)="onBulkEdit($event)"
+    />
   </ng-container>
 
   <ng-container shell-table-header>
     <div class="col-name c-grid-header-cell" role="columnheader">{{ 'name' | translatePipe }}</div>
     <app-carousel-header [activeIndex]="carouselHeaderIndex_()" (activeIndexChange)="onCarouselHeaderChange($event)">
-      <div class="col-env c-grid-header-cell" carouselHeaderColumn label="environment_type" role="presentation">{{ 'environment_type' | translatePipe }}</div>
-      <div class="col-infra c-grid-header-cell" carouselHeaderColumn label="infrastructure_items" role="presentation">{{ 'infrastructure_items' | translatePipe }}</div>
+      <div class="col-env c-grid-header-cell" carouselHeaderColumn label="environment_type" role="presentation">
+        {{ 'environment_type' | translatePipe }}
+      </div>
+      <div class="col-infra c-grid-header-cell" carouselHeaderColumn label="infrastructure_items" role="presentation">
+        {{ 'infrastructure_items' | translatePipe }}
+      </div>
+      <div class="col-capacity c-grid-header-cell" carouselHeaderColumn label="capacity" role="presentation">
+        {{ 'capacity' | translatePipe }}
+      </div>
     </app-carousel-header>
     <div class="c-col-actions c-grid-header-cell" role="columnheader">{{ 'actions' | translatePipe }}</div>
     <div class="col-select c-grid-header-cell" role="columnheader">
-      <app-list-row-checkbox [checked]="filteredVenueIds_().length > 0 && selection.allSelected(filteredVenueIds_())" (toggle)="selection.toggleSelectAll(filteredVenueIds_())" />
+      <app-list-row-checkbox
+        [checked]="filteredVenueIds_().length > 0 && selection.allSelected(filteredVenueIds_())"
+        (toggle)="selection.toggleSelectAll(filteredVenueIds_())"
+      />
     </div>
   </ng-container>
 
@@ -62,29 +81,48 @@
       <div class="no-results">{{ 'no_venues_match' | translatePipe }}</div>
     }
     @for (item of filteredVenues_(); track item._id) {
-      <div class="venue-grid-row c-list-row" role="button" tabindex="0"
+      <div
+        class="venue-grid-row c-list-row"
+        role="button"
+        tabindex="0"
         (click)="onRowClick(item, $event)"
         (keydown.enter)="onEdit(item._id)"
-        (keydown.space)="$event.preventDefault(); onEdit(item._id)">
+        (keydown.space)="$event.preventDefault(); onEdit(item._id)"
+      >
         <div class="col-name c-list-body-cell" role="cell">{{ item.name_hebrew }}</div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
-          <div class="col-env c-list-body-cell" cellCarouselSlide [label]="'environment_type' | translatePipe">{{ item.environment_type_ | translatePipe }}</div>
-          <div class="col-infra c-list-body-cell" cellCarouselSlide [label]="'infrastructure_items' | translatePipe">{{ item.available_infrastructure_.length }}</div>
+          <div class="col-env c-list-body-cell" cellCarouselSlide [label]="'environment_type' | translatePipe">
+            {{ item.environment_type_ | translatePipe }}
+          </div>
+          <div class="col-infra c-list-body-cell" cellCarouselSlide [label]="'infrastructure_items' | translatePipe">
+            {{ item.available_infrastructure_.length }}
+          </div>
+          <div class="col-capacity c-list-body-cell" cellCarouselSlide [label]="'capacity' | translatePipe">
+            {{ item.capacity_ ?? '—' }}
+          </div>
         </app-cell-carousel>
         <app-row-actions-menu class="c-col-actions c-list-body-cell" role="cell">
-          <button type="button" class="c-icon-btn" (click)="onEdit(item._id); $event.stopPropagation()"
+          <button
+            type="button"
+            class="c-icon-btn"
+            (click)="onEdit(item._id); $event.stopPropagation()"
             [attr.aria-label]="'edit' | translatePipe"
             [disabled]="!isLoggedIn()"
-            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+          >
             <lucide-icon name="pencil" [size]="18"></lucide-icon>
           </button>
           @if (deletingId_() === item._id) {
             <app-loader size="small" [inline]="true" />
           } @else {
-            <button type="button" class="c-icon-btn danger" (click)="onDelete(item); $event.stopPropagation()"
+            <button
+              type="button"
+              class="c-icon-btn danger"
+              (click)="onDelete(item); $event.stopPropagation()"
               [attr.aria-label]="'delete' | translatePipe"
               [disabled]="!isLoggedIn()"
-              [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+              [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+            >
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>
             </button>
           }
@@ -100,7 +138,9 @@
     <div class="c-filter-section">
       <div class="c-filter-section-header">
         @if (hasActiveFilters_()) {
-          <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">{{ 'clear_filters' | translatePipe }}</button>
+          <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">
+            {{ 'clear_filters' | translatePipe }}
+          </button>
         }
       </div>
       <div class="c-filter-category">
@@ -116,5 +156,4 @@
       </div>
     </div>
   </ng-container>
-
 </app-list-shell>
