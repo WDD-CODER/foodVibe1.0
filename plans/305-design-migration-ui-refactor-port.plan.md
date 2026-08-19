@@ -65,7 +65,7 @@ declaration changes.
 | M4 | List-screen chassis ×4 — Inventory, Recipe Book, Suppliers, Equipment | ACTION-LIST **B** (8/8) | Done |
 | M5 | Recipe Builder | ACTION-LIST **C** (19/19) | Done — all 19 already existed |
 | M6 | Product form + Metadata Manager | ACTION-LIST **D** (3/3) + **E** (6/6) | Done — all 9 already existed |
-| M7 | Menu Intelligence — mobile logic only, screen untouched | ACTION-LIST **F** (1/2) | Mobile-logic port still open |
+| M7 | Menu Intelligence — mobile logic only, screen untouched | ACTION-LIST **F** (1.5/2) | Touch floor done; breakpoint/shell alignment needs a dedicated mobile-audit pass |
 | M8 | Trash / Venues / Suppliers small restorations | ACTION-LIST **G** (3/3) + **H** (8/8) | Done |
 
 **2026-08-20: functional-preservation scope closed.** Every item in ACTION-LIST.md is now checked
@@ -131,7 +131,7 @@ majority) or a small, additive, verified change. The 1 open item is M7's mobile-
 
 ## M7 — Menu Intelligence → ACTION-LIST **F**, **H**
 
-- [ ] Task 23: leave the existing screen's markup and logic untouched; apply only the shell, 3 breakpoints and 44px touch floor. **The one genuinely unstarted restoration task remaining in this whole plan**
+- [~] Task 23: **partial.** Touch floor done: the toolbar's 5 pill buttons had no minimum height (`padding: 5px 14px` on 0.7rem type ≈ 26-30px) — added `min-height: var(--tap)`, everything else about them unchanged. Verified via gstack: all 5 now exactly 44px. Not done: reconciling the screen's existing 600px/620px breakpoints (`_paper-ui.scss`) with the design's 3-tier system, and the smaller nested `toolbar-glass-btn` icons in the export dropdowns — deliberately deferred to a dedicated mobile-audit pass (matching plans 276-283's pattern) rather than rushed on an 803-line stylesheet with no live visual QA loop to catch a regression
 - [x] Task 23a: **new data — Menu Intelligence — built.** `sell_price` was already wired; added `profitPerGuest_` computed (both halves — revenue/guest, cost/guest — already existed, just never subtracted) + a matching row in the existing financial-footnote panel. Lands on the old, unmigrated screen per §F. Verified via gstack: new row renders correctly positioned among its four siblings
 
 ## M8 — Small restorations → ACTION-LIST **G**, **H**

@@ -99,7 +99,7 @@ components/services under `src/app/pages/metadata-manager/`: `user-management.co
 ## F. Menu Intelligence — settled
 
 - [x] **Keep the existing screen exactly as it is.** Unchanged this whole migration — no design markup ported here
-- [ ] **Port only the mobile logic onto it** — shell, 3 breakpoints, 44px touch floor. Not started — the one item in this file that's genuinely still open
+- [~] **Port only the mobile logic onto it — partial.** Screen already had its own responsive handling at 600px/620px (`_paper-ui.scss`), separate from the design's 3-tier system — left that alone rather than force a rewrite of an 803-line stylesheet without dedicated visual QA time. Did the one clear, safe, verifiable piece: the toolbar's 5 pill buttons had no minimum height (`padding: 5px 14px` on 0.7rem type ≈ 26-30px tall) — added `min-height: var(--tap)`, nothing else about them changed. Verified via gstack: all 5 now measure exactly 44px. **Not done:** the shell/3-breakpoint alignment and the smaller nested toolbar-glass-btn icon buttons — those need a proper mobile-audit pass (the codebase already has a pattern for this, plans 276-283), not a rushed one
 
 ---
 
@@ -164,7 +164,7 @@ correct them any time, nothing downstream breaks.
 Everything above that's checked required either zero code (already existed) or a small, verified,
 additive change. What's left:
 
-1. **F — Menu Intelligence mobile-logic port.** The only unchecked restoration item in this file.
+1. **F — Menu Intelligence mobile-logic port, rest of it.** Toolbar touch-floor done. Still open: reconciling the screen's own 600px/620px breakpoints with the design's 3-tier system, and the smaller nested `toolbar-glass-btn` icon buttons inside the export dropdowns — deliberately left for a dedicated mobile-audit pass rather than rushed changes to an 803-line stylesheet with no live visual QA to catch a regression.
 2. **Metadata Manager tile layout** — confirm user management + backup/restore actually render as
    grid tiles the way decision 4 assumed, not some other layout.
 3. **Unit-locked visual indicator** — confirm Metadata Manager's UI shows a system unit as locked
@@ -191,10 +191,9 @@ additive change. What's left:
 - **C. Recipe Builder** — 19 / 19
 - **D. Product form** — 3 / 3
 - **E. Metadata** — 6 / 6
-- **F. Menu Intelligence** — 1 / 2 (mobile-logic port still open)
+- **F. Menu Intelligence** — 1.5 / 2 (touch floor done; breakpoint/shell alignment still needs a real mobile-audit pass)
 - **G. Small** — 3 / 3
 - **H. New data concepts** — 8 / 8
 
-**Total: 54 / 55.** The 1 remaining item (F's mobile-logic port) is the only genuine restoration work
-left in this file. Everything else that's checked was either already working or has been built and
-verified this session.
+**Total: 54.5 / 55.** What's left of F is deliberately not rushed — a proper pass on an 803-line,
+already-responsive, complex screen needs dedicated visual QA, not a same-session guess.
