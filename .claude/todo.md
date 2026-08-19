@@ -96,8 +96,8 @@
 - [x] M3 Task 14a — 4 tabs: already existed in `HeaderComponent`, no rebuild needed
 - [x] M3 Task 14b — chip row: new `TabChipsComponent`, built + verified via gstack browse (renders, navigates, no console errors)
 - [x] M3 Task 14c — mobile collision fix: chip row now clears the header's fixed floating avatar at ≤620px
-- [ ] M3 Task 14d — hero FAB visual restyle (logic already matches design, styling doesn't)
-- [ ] M3 Task 14e — brand mark + wash background
+- [x] M3 Task 14d — hero FAB tray items now show labels (matches design's icon+text pill), verified via DOM
+- [x] M3 Task 14e — brand mark added (copied single SVG, not the design bundle), wash background already covered by M1 Task 8; verified image loads
 - [ ] M3 Task 14f — decide: Dashboard's embedded sub-nav vs the new chip row (overlapping destinations, different mechanisms) — flagged, not resolved
 - [x] M3 Task 15 rescoped — 5 of 6 ACTION-LIST A items already exist/wired in the live app (auth, guard, 3-button confirm, toast undo, URL filter state); only Hebrew re-key is real ongoing work, done for the chip row so far
 - [ ] M4 Tasks 16-17 — shared list chassis + ACTION-LIST B (8), applied to 4 screens
