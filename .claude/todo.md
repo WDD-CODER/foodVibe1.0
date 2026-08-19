@@ -92,12 +92,26 @@
 - [x] M2 Task 11 — ≤767px iOS focus-zoom guard + compact checkbox/radio, token-based sizing
 - [x] M2 Task 12 — 768 vs 767 collision **recorded, not resolved** — no tablet tier exists yet to fall back to; deferred to M3 shell. Added `$break-xs-max`/`$break-phone-max`/`$break-tablet-max` as a parallel tier, existing breakpoints untouched
 - [x] M2 Task 13 — `ng build` 0 errors; all 7 `.m-*` classes confirmed in output CSS. Live-viewport pass deferred to M3 (nothing consumes these classes yet)
-- [ ] M3 Tasks 14-15 — shell (4 tabs, chips, bottom bar, FAB) + ACTION-LIST A (6)
-- [ ] M4 Tasks 16-17 — shared list chassis + ACTION-LIST B (7), applied to 4 screens
+- [x] Decisions 1-5 resolved 2026-08-19 (Human answers 2, 3, 5; my flagged defaults 1, 4) — see plan 305 "Decisions" table and `ACTION-LIST.md`. No milestone blocked on a decision anymore.
+- [x] M3 Task 14a — 4 tabs: already existed in `HeaderComponent`, no rebuild needed
+- [x] M3 Task 14b — chip row: new `TabChipsComponent`, built + verified via gstack browse (renders, navigates, no console errors)
+- [x] M3 Task 14c — mobile collision fix: chip row now clears the header's fixed floating avatar at ≤620px
+- [ ] M3 Task 14d — hero FAB visual restyle (logic already matches design, styling doesn't)
+- [ ] M3 Task 14e — brand mark + wash background
+- [ ] M3 Task 14f — decide: Dashboard's embedded sub-nav vs the new chip row (overlapping destinations, different mechanisms) — flagged, not resolved
+- [x] M3 Task 15 rescoped — 5 of 6 ACTION-LIST A items already exist/wired in the live app (auth, guard, 3-button confirm, toast undo, URL filter state); only Hebrew re-key is real ongoing work, done for the chip row so far
+- [ ] M4 Tasks 16-17 — shared list chassis + ACTION-LIST B (8), applied to 4 screens
+- [ ] M4 Task 17a — row edit panel, desktop only (decision 2); tablet/mobile keep design's modal
+- [ ] M4 Tasks 17b-17c — new data: Inventory supplier+low-stock, Equipment scaling rule
 - [ ] M5 Tasks 18-20 — Recipe Builder + ACTION-LIST C (19); unit selector first
-- [ ] M6 Tasks 21-22 — product form + Metadata Manager + ACTION-LIST D (3), E (6)
+- [ ] M5 Task 20a — new data: Recipe Builder secondary yields
+- [ ] M5 Task 20b — confirm dual-timer restoration also satisfies labor/cook-time new-data item (no duplicate build)
+- [ ] M6 Tasks 21-22 — product form (full page, decision 1) + Metadata Manager (+user mgmt/backup tiles, decision 4) + ACTION-LIST D (3), E (6)
+- [ ] M6 Task 22a — new data: Metadata Manager label colours + unit locked flag
 - [ ] M7 Task 23 — Menu Intelligence: mobile logic only, screen untouched + ACTION-LIST F (2)
+- [ ] M7 Task 23a — new data: Menu Intelligence sell price/profit-per-portion (new work on the OLD screen)
 - [ ] M8 Task 24 — Trash / Venues / Suppliers restorations + ACTION-LIST G (3)
+- [ ] M8 Tasks 24a-24b — new data: Venues address/capacity/contact/hours, Trash history (confirm UI is design-complete first)
 
 ## 6. KEEP DEFERRED — intentional park
 

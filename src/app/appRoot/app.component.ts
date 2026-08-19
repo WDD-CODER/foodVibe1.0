@@ -1,9 +1,17 @@
 import { Component, inject, signal } from '@angular/core'
-import { Router, RouterOutlet, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router'
+import {
+  Router,
+  RouterOutlet,
+  NavigationStart,
+  NavigationEnd,
+  NavigationCancel,
+  NavigationError
+} from '@angular/router'
 import { filter } from 'rxjs'
 import { UserService } from '../core/services/user.service'
 import { ServerHeartbeatService } from '../core/services/server-heartbeat.service'
 import { HeaderComponent } from '../core/components/header/header.component'
+import { TabChipsComponent } from '../core/components/tab-chips/tab-chips.component'
 import { UserMsg } from 'src/app/core/components/user-msg/user-msg.component'
 import { UnitCreatorModal } from 'src/app/shared/unit-creator/unit-creator.component'
 import { TranslationKeyModalComponent } from 'src/app/shared/translation-key-modal/translation-key-modal.component'
@@ -41,6 +49,7 @@ import { RestoreChoiceModalService } from '@services/restore-choice-modal.servic
   imports: [
     RouterOutlet,
     HeaderComponent,
+    TabChipsComponent,
     UserMsg,
     UnitCreatorModal,
     TranslationKeyModalComponent,
@@ -58,10 +67,10 @@ import { RestoreChoiceModalService } from '@services/restore-choice-modal.servic
     SupplierModalComponent,
     AiRecipeModalComponent,
     AiMenuModalComponent,
-    AiProductModalComponent,
+    AiProductModalComponent
   ],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss',
+  styleUrl: './app.component.scss'
 })
 export class AppComponent {
   title = 'foodVibe1.0'
@@ -89,11 +98,18 @@ export class AppComponent {
 
   constructor() {
     this.serverHeartbeat_.start()
-    this.router.events.pipe(
-      filter((e): e is NavigationStart | NavigationEnd | NavigationCancel | NavigationError =>
-        e instanceof NavigationStart || e instanceof NavigationEnd || e instanceof NavigationCancel || e instanceof NavigationError)
-    ).subscribe(event => {
-      this.isRouteLoading.set(event instanceof NavigationStart)
-    })
+    this.router.events
+      .pipe(
+        filter(
+          (e): e is NavigationStart | NavigationEnd | NavigationCancel | NavigationError =>
+            e instanceof NavigationStart ||
+            e instanceof NavigationEnd ||
+            e instanceof NavigationCancel ||
+            e instanceof NavigationError
+        )
+      )
+      .subscribe((event) => {
+        this.isRouteLoading.set(event instanceof NavigationStart)
+      })
   }
 }

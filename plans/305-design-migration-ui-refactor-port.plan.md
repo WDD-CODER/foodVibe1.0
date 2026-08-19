@@ -24,6 +24,18 @@ A replacement is acceptable only if equal or better. "The design doesn't have it
 Worked example: the ingredient-row unit selector — the design renders unit as read-only text
 (`RecipeBuilder.dc.html`: `unitLabel: i.product ? (UNIT_LABELS[…]) : '—'`). The full select must be rebuilt.
 
+## Decisions — resolved 2026-08-19
+
+| # | Question | Answer |
+| --- | --- | --- |
+| 1 | Product form container | **Full page**, restyled. *Your answer was "not sure" — this is my default, flag if wrong.* Purchase-options `FormArray` + 5 collapsible sections exceed anything the design puts in a modal |
+| 2 | Row editing | **Split by width.** Desktop restores the old inline expanding panel. Tablet + mobile keep the design's modal |
+| 3 | New data concepts (9, gap-analysis §7) | **Build all of them** |
+| 4 | User management + backup/restore location | **Two more tiles in the Metadata Manager grid.** *Your answer was "ok" — this is my default, not a specified location, flag if wrong* |
+| 5 | Inline creation (unit/label/category) | **Restore it**, on top of the design's dropdowns |
+
+Full detail and per-item notes: `ACTION-LIST.md` §B, §D, §E, §H, and its "Decisions — resolved" table.
+
 ## Settled decisions
 
 - **Typeface: Heebo.** Plan 273's Rubik + Space Grotesk migration is superseded — the design settled back on Heebo. `--font-mono` drops Space Grotesk for `ui-monospace`.
@@ -54,9 +66,9 @@ declaration changes.
 | M5 | Recipe Builder | ACTION-LIST **C** (19) | Highest |
 | M6 | Product form + Metadata Manager | ACTION-LIST **D** (3) + **E** (6) | Medium |
 | M7 | Menu Intelligence — mobile logic only, screen untouched | ACTION-LIST **F** (2) | Low |
-| M8 | Trash / Venues / Suppliers small restorations | ACTION-LIST **G** (3) | Low |
+| M8 | Trash / Venues / Suppliers small restorations | ACTION-LIST **G** (3) + **H** venue/trash items | Low |
 
-M1 and M2 are unblocked. M3 onward needs the 5 open decisions at the foot of `ACTION-LIST.md`.
+All 5 decisions are resolved (above). No milestone is blocked on a decision anymore.
 
 # Atomic Sub-tasks
 
@@ -81,41 +93,65 @@ M1 and M2 are unblocked. M3 onward needs the 5 open decisions at the foot of `AC
 
 ## M3 — Shell & navigation → ACTION-LIST **A**
 
-- [ ] Task 14: rebuild the shell per `UI refactor/shell.js` — 4 tabs (דשבורד / מלאי / ספר מתכונים / תפריטים), per-tab chip rows, bottom tab bar, hero FAB
-- [ ] Task 15: restore ACTION-LIST A1–A6 — auth guards & logged-out states, `pendingChangesGuard`, 3-button confirm (Cancel/Save/Discard), toast undo, URL filter state (`q`/`sort`/`order`/`categories`/`?tab=`/`?lowStock=1`), re-key every hard-coded Hebrew string through `translatePipe` + `dictionary.json`
+- [~] Task 14: rebuild the shell per `UI refactor/shell.js` — **rescoped and partially done**, see notes below
+  - [x] 14a: **4 tabs already exist.** `HeaderComponent` (top nav-pills + bottom tab bar, ≤620px) already reproduces the design's 4-tab structure (dashboard/inventory/recipe-book/menu-library), already glass-pill styled, already fully re-keyed. No rebuild needed
+  - [x] 14b: **chip row — new, built.** `TabChipsComponent` (`src/app/core/components/tab-chips/`) — genuinely new UI (no old-app equivalent), composes the existing `.c-tab-pill` engine class rather than inventing one, reads the current URL via Router to pick a chip group, added to `app.component.html` under `<app-header/>`. Verified via `gstack browse`: renders + highlights correctly on `/dashboard`, `/inventory`; navigation confirmed (`/venues` click → `/venues/list`); no console errors attributable to it; visible per `is visible` assertion
+  - [x] 14c: mobile collision fixed — `app-header` hides its entire top bar at ≤620px and floats a `position: fixed` avatar button instead; the chip row, now first-in-flow at that width, was landing under it. Added scoped top-clearance padding at the same 620px breakpoint (`src/styles.scss` `.c-tab-chips`)
+  - [ ] 14d: **not done — hero FAB visual restyle.** `HeroFabComponent` already matches the design's *behavior* (page-specific actions, chef-hat shortcut hidden only on recipe-builder) — logic doesn't need rework, only its `.html`/`.scss` need restyling to the design's tray/fab visual treatment
+  - [ ] 14e: **not done — brand mark + wash background.** Design's `.top` bar has a logo mark (`assets/fc-mark.svg`) and full-bleed ambient wash; current header has neither
+  - [ ] 14f: **flagged, not resolved — Dashboard's own embedded sub-nav overlaps the new chip row.** `dashboard-header.component.html` already has its own "ספקים / אשפה / מיקומי אירוע / הגדרות ליבה" row, but it switches an *embedded* view inside `/dashboard` (`tabChange.emit(...)`), while the new chip row navigates to the *standalone* pages (`/suppliers`, `/trash`, `/venues`, `/dashboard?tab=metadata`). Both work, but the dashboard now shows two navigation rows offering overlapping-looking destinations. Old-app behavior, not introduced by this task — needs a decision, not a fix, before M3 is called done: keep both, or have the dashboard's own row link out to the same standalone pages instead of switching an embedded view
+- [ ] Task 15: restore ACTION-LIST A1–A6 — **rescoped 2026-08-19: 5 of 6 already exist and are already wired** (auth, `pendingChangesGuard`, the 3-button confirm, toast undo, URL filter state all present in the live app — see `ACTION-LIST.md` §A for the exact services). Only re-keying Hebrew is real, ongoing work, done so far for the chip row. Remaining real work under this task is verification, not construction: confirm Task 14d/14e/14f don't drop any of the 5 existing wire-ups when the visual restyle lands
 
 ## M4 — List-screen chassis → ACTION-LIST **B**
 
 - [ ] Task 16: build the shared chassis once — bulk edit, dirty-row-switch prompt, per-row deleting loader, empty-database vs no-results, keyboard sort headers, auth gating, inline "add new"
 - [ ] Task 17: apply it to Inventory, Recipe Book, Suppliers, Equipment
+- [ ] Task 17a: **row edit panel, desktop only** (decision 2) — restore the old inline expanding panel (200ms `closingId_` close animation, `clickOutside`, `isSavingEdit_` loader, dirty-row-switch prompt) gated to desktop width; tablet + mobile keep the design's centred modal, wired to the same dirty-row-switch prompt via the modal's own close path
+- [ ] Task 17b: **new data — Inventory** (ACTION-LIST H) — supplier field + low-stock flag on the product row
+- [ ] Task 17c: **new data — Equipment** (ACTION-LIST H) — scaling rule (per-guests / min / max)
 
 ## M5 — Recipe Builder → ACTION-LIST **C**
 
 - [ ] Task 18: restore C1 first — the ingredient-row unit selector (type-to-filter + create-unit)
 - [ ] Task 19: restore C2 — ingredient search must span recipes, not just products (sub-recipes are impossible without it)
 - [ ] Task 20: restore C3–C19 — four row states, logistics picker, export toolbar, five-gate save validation, history view mode, drag-and-drop, collapsible sections, weight/volume toggle, duplicate-name check, inline create, labels multi-select, image upload, dual timers, nutrition badge, keyboard, dirty tracking, AI draft mode
+- [ ] Task 20a: **new data — Recipe Builder** (ACTION-LIST H) — secondary yields on a recipe
+- [ ] Task 20b: confirm Task 20's dual-timer restoration (C item) already carries labor time + cook time as separate persisted fields — if so, close the corresponding ACTION-LIST H item without extra work; do not build it twice
 
-## M6 — Product form + Metadata Manager → ACTION-LIST **D**, **E**
+## M6 — Product form + Metadata Manager → ACTION-LIST **D**, **E**, **H**
 
-- [ ] Task 21: purchase-options `FormArray` + five collapsible optional fields; container decision per open question 1
-- [ ] Task 22: add the 6 missing Metadata vocabularies — user management (permission-gated), backup/restore, demo data, menu types, preparation categories, section categories
+- [ ] Task 21: purchase-options `FormArray` + five collapsible optional fields, as a **full page** (decision 1) restyled to the new design
+- [ ] Task 22: add the 6 missing Metadata vocabularies — demo data, menu types, preparation categories, section categories, plus **user management** and **backup/restore** as two more tiles in the same grid (decision 4), user management permission-gated
+- [ ] Task 22a: **new data — Metadata Manager** (ACTION-LIST H) — label colours, unit locked flag
 
-## M7 — Menu Intelligence → ACTION-LIST **F**
+## M7 — Menu Intelligence → ACTION-LIST **F**, **H**
 
 - [ ] Task 23: leave the existing screen's markup and logic untouched; apply only the shell, 3 breakpoints and 44px touch floor
+- [ ] Task 23a: **new data — Menu Intelligence** (ACTION-LIST H) — sell price per menu dish → profit per portion. This is new work landing on the **old, unmigrated** screen — not a design copy, since the old screen's UI stays as-is
 
-## M8 — Small restorations → ACTION-LIST **G**
+## M8 — Small restorations → ACTION-LIST **G**, **H**
 
 - [ ] Task 24: Trash `recoverBeforeRestore`; Venues infrastructure `FormArray`; Suppliers linked-products count
+- [ ] Task 24a: **new data — Venues** (ACTION-LIST H) — address, capacity, contact, operating hours. Design's UI already renders a contact block + hours (gap-analysis §6) — confirm whether that's UI-complete already and only backend fields are missing before scoping a UI build
+- [ ] Task 24b: **new data — Trash** (ACTION-LIST H) — per-item trash history + per-section bulk restore. Same caveat — design's UI already claims this (gap-analysis §6); confirm before assuming new UI work
 
-## Open decisions (block M3+)
+## Remaining open items
 
-See the foot of `ACTION-LIST.md` — product form container, row editing (modal vs inline panel), which new data
-concepts to build, where user management + backup/restore live, inline creation vs Metadata-Manager-only.
-
-Plus, from M2 Task 12: the `$break-mobile` (768px) vs `$break-phone-max` (767px) collision has no owner yet.
+From M2 Task 12: the `$break-mobile` (768px) vs `$break-phone-max` (767px) collision has no owner yet.
 It's not blocking — M1/M2 shipped without touching a single existing selector — but M3's shell should either
 absorb it into a real tablet tier or explicitly defer it again.
+
+From M3 Task 14c: there is now a **third** breakpoint number in play — `header.component.scss` hides the
+entire top bar at 620px, a value that predates both the app's `$break-mobile` (768px) and the design's
+`$break-phone-max` (767px). Task 14c worked around it rather than unifying it, on the same reasoning as
+Task 12: no tablet tier exists yet to land a real fix in. Three numbers (620 / 767 / 768) is one too many —
+worth collapsing once M3's shell restyle gives a real reason to touch `header.component.scss` anyway.
+
+From M3 Task 14f: Dashboard's embedded sub-nav (`dashboard-header.component`) duplicates 3 of the chip
+row's 4 destinations via a different mechanism (embedded tab switch vs standalone-page navigation).
+Not a defect — both paths work — but worth a decision before M3 is called finished: leave both, or point
+the dashboard's own row at the same standalone routes so there's one way to get to Suppliers/Trash/Venues,
+not two.
 
 ## Backend Impact
 

@@ -1,7 +1,7 @@
 import { APP_INITIALIZER, ApplicationConfig, ErrorHandler, importProvidersFrom, provideZoneChangeDetection } from '@angular/core'
 import { provideAnimations } from '@angular/platform-browser/animations'
 import { GlobalErrorHandler } from './core/services/global-error.handler'
-import { provideRouter, withPreloading, PreloadAllModules } from '@angular/router'
+import { provideRouter } from '@angular/router'
 import { routes } from './app.routes'
 import {
   ChefHat,
@@ -64,6 +64,7 @@ import {
   Trash2,
   Truck,
   Upload,
+  Wrench,
   Utensils,
   UtensilsCrossed,
   X,
@@ -93,7 +94,11 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideAnimations(),
-    provideRouter(routes, withPreloading(PreloadAllModules)),
+    // No preloading strategy: PreloadAllModules defeated the lazy routes in
+    // app.routes.ts by downloading every chunk right after bootstrap, competing
+    // with the catalog fetches for bandwidth on exactly the connections this app
+    // is used on. Routes now load on navigation.
+    provideRouter(routes),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     KitchenStateService,
     provideHttpClient(withInterceptors([authInterceptor])),
@@ -145,6 +150,7 @@ export const appConfig: ApplicationConfig = {
         Menu,
         MoreVertical,
         Truck,
+        Wrench,
         Package,
         CalendarClock,
         RefreshCw,

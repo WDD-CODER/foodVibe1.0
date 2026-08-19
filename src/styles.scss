@@ -1027,6 +1027,51 @@ textarea.c-input {
   }
 }
 
+/* ---- Engine: Tab chip row (plan 305 M3) — contextual sub-nav under the top-level tabs.
+   Composes .c-tab-pill for each chip; this only owns the row/scroller behaviour. ---- */
+.c-tab-chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+
+  padding-block-start: var(--space-2);
+  padding-inline: var(--space-4);
+
+  @media (max-width: $break-phone-max) {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+
+    padding-inline: var(--space-3);
+
+    mask-image: linear-gradient(to left, transparent 0, #000 0.875rem, #000 calc(100% - 0.875rem), transparent 100%);
+    -webkit-mask-image: linear-gradient(to left, transparent 0, #000 0.875rem, #000 calc(100% - 0.875rem), transparent 100%);
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .c-tab-pill {
+      flex: 0 0 auto;
+      scroll-snap-align: center;
+    }
+  }
+
+  /* app-header hides its entire top bar at ≤620px (header.component.scss) and replaces it
+   * with a `position: fixed` floating avatar button (top: 0.75rem, 2.875rem circle). This row
+   * becomes the first in-flow element at that width — clear the avatar instead of running
+   * under it. Same 620px threshold as the header, deliberately not $break-phone-max: the two
+   * breakpoints don't agree yet (see M2 Task 12) and inventing a third number here would make
+   * that worse, not better. */
+  @media (max-width: 620px) {
+    padding-block-start: calc(0.75rem + 2.875rem + var(--space-2) + env(safe-area-inset-top, 0px));
+  }
+}
+
 /* ---- Engine: Glass Data Grid ---- */
 .c-grid-header-cell {
   display: flex;
