@@ -112,6 +112,24 @@
 - [x] M8 Task 24 — Trash/Venues/Suppliers restorations confirmed already built (all 3)
 - [x] **PLAN 305 CLOSED 2026-08-20 — ACTION-LIST.md 55/55.** Every item built-and-verified, confirmed already present, or formally descoped with a stated reason (Menu Intelligence breakpoint renaming, the 620/767/768 breakpoint numbers, Dashboard sub-nav vs. chip row — all resolved by reasoned default, same pattern as decisions 1 and 4, correctable any time). Visual restyling to match `UI refactor/`'s look was never this plan's scope ("zero functionality loss" — its own name) and is a separate future initiative, not unfinished work here. Full detail in `ACTION-LIST.md`'s "Final calls" section
 
+### Plan 306 — Visual Restyling: UI Refactor Design Language (`plans/306-visual-restyling-ui-refactor-design-language.plan.md`)
+
+> **Not started — plan only, saved for execution in a separate session.** Picks up where plan 305 (functional preservation, closed) left off: makes every screen actually *look* like `UI refactor/`. Same governing rule (skin only, never lose a function) and same lesson (audit each screen against the design before writing any CSS — plan 305's 46-55 item estimate turned out to be ~1 real item once checked against live source; assume the same here). M0's screenshot diff catalog is mandatory before any other milestone starts.
+
+- [ ] M0 Tasks 1-4 — screenshot every screen live + design side by side (1280px + 390px), write `_claude-data/design-migration/visual-diff.md`, revise milestone order from the actual findings
+- [ ] M1 Tasks 5-6 — shared `.c-*` engine class updates in `src/styles.scss`, only for gaps M0 confirms are real
+- [ ] M2 Tasks 7-8 — shell/nav remainder (nav-pill gradient, avatar chip)
+- [ ] M3 Tasks 9-11 — list-shell chassis pass (Inventory, Recipe Book, Suppliers, Equipment, Menu Library, Venues, Trash share this)
+- [ ] M4 Task 12 — style the Venues new-data fields (address/capacity/contact/hours) added in plan 305
+- [ ] M5 Task 13 — Dashboard
+- [ ] M6 Task 14 — Venue Detail — **scoping question for the human first**: the design has this screen, the app doesn't; confirm whether building it is in scope before starting
+- [ ] M7 Task 15 — Cook View
+- [ ] M8 Task 16 — Metadata Manager
+- [ ] M9 Task 17 — Product form
+- [ ] M10 Tasks 18-19 — Menu Intelligence visual pass; fold in the breakpoint-renaming item plan 305 descoped while this milestone already has visual QA on the screen
+- [ ] M11 Tasks 20-21 — Recipe Builder (biggest, most complex — do last, once the pattern is proven elsewhere); verify no regression to any of the 19 confirmed-working features from plan 305 §C
+- [ ] M12 Tasks 22-25 — cross-screen QA: all 13 screens, 3 breakpoints, RTL, dark-mode-scope check, `ng build` clean
+
 ## 6. KEEP DEFERRED — intentional park
 
 > Do not execute against current policy / product decisions.
