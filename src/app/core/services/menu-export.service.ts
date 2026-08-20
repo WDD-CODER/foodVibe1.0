@@ -5,7 +5,11 @@
  */
 
 import { Injectable, inject } from '@angular/core'
-import { Workbook } from 'exceljs'
+// Type-only — erased at compile time, so importing it costs zero bytes. The runtime
+// ExcelJS module is pulled in via `await import('exceljs')` at each point of use below
+// a value import here would drag the ~1 MB library into the boot bundle for every user,
+// including the ones who never click Export (plan 302 M4b).
+import type { Workbook } from 'exceljs'
 
 import { Recipe } from '@models/recipe.model'
 import { MenuEvent, MenuSection, MenuItemSelection, ServingType } from '@models/menu-event.model'
@@ -53,7 +57,8 @@ export class MenuExportService {
    * Filename: menu-info_{menuName}.xlsx (no date for menu).
    */
   async exportMenuInfo(menu: MenuEvent, _recipes: Recipe[]): Promise<void> {
-    const wb = new Workbook()
+    const ExcelJS = await import('exceljs')
+    const wb = new ExcelJS.Workbook()
 
     const coverWs = wb.addWorksheet('Menu info')
     const coverData: (string | number)[][] = [
@@ -144,7 +149,8 @@ export class MenuExportService {
       })
     })
 
-    const wb = new Workbook()
+    const ExcelJS = await import('exceljs')
+    const wb = new ExcelJS.Workbook()
     const ws = wb.addWorksheet('Shopping list', { views: [{ rightToLeft: true }] })
     ws.addRow(['Category', 'Ingredient', 'Amount', 'Unit', 'Unit price', 'Line total'])
     styleHeaderRow(ws, 1)
@@ -185,7 +191,8 @@ export class MenuExportService {
     mode: 'by_dish' | 'by_category' | 'by_station'
   ): Promise<void> {
     const recipeMap = new Map(recipes.map((r) => [r._id, r]))
-    const wb = new Workbook()
+    const ExcelJS = await import('exceljs')
+    const wb = new ExcelJS.Workbook()
 
     if (mode === 'by_dish') {
       const ws = wb.addWorksheet('Checklist', { views: [{ rightToLeft: true }] })
@@ -330,7 +337,8 @@ export class MenuExportService {
     products: Product[],
     checklistMode: 'by_dish' | 'by_category' | 'by_station' = 'by_category'
   ): Promise<void> {
-    const wb = new Workbook()
+    const ExcelJS = await import('exceljs')
+    const wb = new ExcelJS.Workbook()
     const recipeMap = new Map(recipes.map((r) => [r._id, r]))
 
     const coverWs = wb.addWorksheet('Menu info', { views: [{ rightToLeft: true }] })

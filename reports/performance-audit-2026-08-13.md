@@ -372,3 +372,175 @@ GET /dashboard 200 5417 - 1.956 ms      ← SPA fallback also logged
 - Typical `docs=`/`bytes=` for the three big collections under real account data (set `PERF_LOG=1` in the Render env to capture — currently off by default)
 
 M2 (Render tier upgrade, billing change) stays blocked on these numbers per the plan's gate.
+
+Update 2026-08-17: `PERF_LOG=1` is now declared in `render.yaml`, so the `[data/query]` lines
+will start flowing on the next deploy. It is a **temporary** diagnostic — set it to `"0"` or
+remove the entry once the 24h sample is captured.
+
+---
+
+## Observed (plan 302 Milestones 3-5)
+
+Measured 2026-08-17 on branch `feat/perf-phase1-m3-m5`. Before/after were captured the same
+way — `ng build`, then a real dashboard load through headless Chromium against the Express
+server serving `dist/` — with only the four Angular source files stashed in between, so the
+two runs differ by nothing else.
+
+### The headline: what the browser actually downloads
+
+| Dashboard load (cold cache) | Before | After | Change |
+| --- | --- | --- | --- |
+| JS requests | 87 | 61 | −26 |
+| JS bytes downloaded | 2,519,067 B | 829,679 B | **−1,689,388 B (−67%)** |
+| ExcelJS chunk (996,505 B) | downloaded | **absent** | on-demand only |
+
+### Correction to the plan's expected numbers
+
+Plan 302 M4's verification step predicted "total JS should fall from 2.8 MB to roughly
+600-800 KB". That framing conflated two different quantities and the prediction is wrong as
+written:
+
+- **Total JS emitted to `dist/` is unchanged**: 2,713,927 B → 2,714,089 B (+162 B). Removing
+  a preloading strategy and making an import dynamic does not delete code from disk — it
+  changes *when* the browser fetches it.
+- **Initial bundle is also essentially unchanged**: 645.38 kB → 643.85 kB raw
+  (176.45 → 176.36 kB transfer). ExcelJS was never in the initial bundle.
+
+The real win is the download table above, and it comes from two independent changes:
+`PreloadAllModules` was pulling *every* lazy chunk down right after bootstrap, and ExcelJS
+was statically imported by two services that three pages inject, so its ~1 MB chunk came
+down for anyone who opened recipe-builder, cook-view, or menu-intelligence. Now the boot
+fetches the initial bundle plus only the landed route's chunk, and ExcelJS arrives only when
+an Export button is clicked.
+
+### M3 — cache headers verified
+
+Against the Express server serving the real `dist/`:
+
+```
+GET /main-K2UGCN5R.js   → Cache-Control: public, max-age=31536000, immutable
+GET /                   → Cache-Control: no-cache
+GET /recipe-book        → Cache-Control: no-cache      ← SPA fallback path
+GET /index.html         → Cache-Control: no-cache
+```
+
+All three routes that can serve `index.html` return `no-cache`, including the
+`res.sendFile()` fallback that bypasses `express.static`'s `setHeaders` — that was the
+caching bug the plan warned about.
+
+### M5 — images
+
+| File | Size | Action |
+| --- | --- | --- |
+| `food-compos-logo.png` | 1,884,522 B | **Deleted** — unreferenced across `src/`, `public/`, `index.html`, all SCSS. The synced design system keeps its own copy. |
+| `recipe_placeholder.png` | 1,276,764 B | **Deleted** — replaced by a ~400 B inline `data:` SVG in `recipe-header.component.ts` |
+| `stamp-approved.png` | 161,418 B | Deferred |
+| `stamp-not-approved.png` | 177,305 B | Deferred |
+
+`public/assets` dropped from ~3.7 MB to 594 KB.
+
+The placeholder swap is invisible in the UI by construction: whenever it renders,
+`.img-upload-prompt` covers it edge-to-edge with a 60%-opaque `--bg-muted` layer plus the
+camera icon, so the 1.27 MB PNG only ever contributed a faint tint. Verified in-browser:
+`naturalWidth/Height = 120x120` (intrinsic size present, so `object-fit: cover` behaves),
+rendered 118×118 inside the 1px border, `complete = true`, no console errors.
+
+**Stamps deferred, not forgotten.** They are real designed artwork rendered at size, so
+unlike the placeholder they cannot be swapped for a generated SVG without a design decision,
+and no WebP encoder is available on the dev machine (no `sharp`, no ImageMagick, no `cwebp`,
+no PIL). Converting them needs either a new devDependency or a design call. The two M5 stamp
+sub-tasks stay open in `plans/302-…` and `.claude/todo.md`.
+
+### Pre-existing warnings (confirmed present in the baseline build too, not introduced here)
+
+- `bundle initial exceeded maximum budget` — 645.38 kB before, 643.85 kB after, against a
+  500 kB `maximumWarning` in `angular.json`.
+- `Module 'exceljs' … is not ESM` — exceljs 4.4.0 is CommonJS; there is no
+  `allowedCommonJsDependencies` entry in `angular.json`.
+- `cook-view.page.scss exceeded maximum budget` by 361 B.
+
+---
+
+## Observed — D3 double fetch confirmed in the browser (2026-08-19)
+
+Not addressed in the plan 302 M3-M5 work; recorded here so the fix does not have to
+re-derive it. Tracked as **plan 301 M4** and **plan 304 M2** (same item — see
+`.claude/todo.md`). Captured from a DevTools network trace of a local boot.
+
+Every collection is fetched **twice**, identically:
+
+| Collection | Size (each) | Fetches |
+| --- | --- | --- |
+| `DISH_LIST` | 294 kB | 2 |
+| `RECIPE_LIST` | 254 kB | 2 |
+| `PRODUCT_LIST` | 67.7 kB | 2 |
+| `KITCHEN_SUPPLIERS` | 2.7 kB | 2 |
+| `KITCHEN_LABELS` / `MENU_TYPES` | 1.8 kB | 2 each |
+| `KITCHEN_ALLERGENS` | 1.7 kB | 2 |
+| `KITCHEN_UNITS` | 1.6 kB | 2 |
+| `KITCHEN_CATEGORIES` | 1.4 kB | 2 |
+
+**~627 kB is downloaded a second time for no benefit**, at ~1.3-1.6 s per request for the
+three big collections. The `POST /auth/guest` that separates the two passes took **2.85 s**
+on its own — worth a look alongside the fetch fix.
+
+Observed ordering makes the mechanism explicit: `refresh` → `guest` (2.85 s) →
+`KITCHEN_UNITS` → `KITCHEN_UNITS` again.
+
+1. `AppComponent` constructs at bootstrap and injects `UnitRegistryService`
+   (`app.component.ts:76`) plus modal services that reach `KitchenStateService`, which
+   injects the four heavy data services (`kitchen-state.service.ts:22-25`).
+2. Each constructor calls `ensureLoaded()` → **pass 1**, fired while auth is still in flight.
+3. Guest login resolves → `UserService._reloadDataServices()` (`user.service.ts:54-93`)
+   calls `reloadFromStorage()` on all of them → **pass 2**.
+
+**Discount the `204` preflight rows in the trace** — they are a local-dev artifact of running
+the app on `:4200` against the API on `:3000` (cross-origin). Production is same-origin
+(`environment.prod.ts` has `apiUrl: ''`), so no preflights occur there. Do not optimise for them.
+
+---
+
+## How to test the M3 cache headers locally (read this before concluding they are broken)
+
+**`ng serve` can never show these headers.** `npm run dev:local` / `npm run dev:remote` are
+`ng serve -c local` / `ng serve -c remote` — the Angular dev server. It serves from memory and
+never executes `server/index.js`, so `express.static` is not in the request path at all. It
+hard-codes its own headers instead. Measured side by side on 2026-08-19:
+
+```
+ng serve  :4200/main.js            → Cache-Control: no-cache          ← always 304s, by design
+Express   :3999/main-K2UGCN5R.js   → Cache-Control: public, max-age=31536000, immutable
+```
+
+Testing cache headers against `ng serve` will always show 304s no matter what the server code
+says. This is correct dev-server behaviour (you want instant rebuild pickup), not a bug.
+
+**Production-equivalent local test** — same `server/index.js`, same `dist/`, no Render deploy:
+
+```bash
+npm run build
+cd server && PORT=3999 node index.js
+# then open http://localhost:3999
+```
+
+**Two DevTools settings that will fake a failure:**
+
+1. **Uncheck "Disable cache"** in the Network tab. While checked, Chrome sends
+   `If-None-Match` on every request and you will see 304s regardless of any header.
+2. **Do not use hard reload** (`Ctrl+Shift+R`) — it forces revalidation. Use a fresh
+   navigation (new tab, or re-enter the URL). Chrome's normal reload (`F5`) does not
+   revalidate subresources.
+
+**A 304 is not a failure even when it happens.** Verified against the running server: a
+revalidating request returns `304` with **0 bytes** versus `200` with **122,089 bytes**. The
+`ETag` is kept deliberately so the revalidation path stays cheap; `max-age=31536000` is what
+stops the browser asking in the first place. Note Chrome does not implement the `immutable`
+directive (Firefox and Safari do) — on Chrome the long `max-age` plus its reload optimisation
+does the work.
+
+**Why `npm run dev:remote` misbehaves:** it serves the app from `localhost:4200` while
+`environment.remote.ts` points the API at `https://foodvibe-api.onrender.com` — cross-origin
+to Render, whose `ALLOWED_ORIGIN` does not include `localhost:4200`, so the API calls are
+CORS-rejected. It is the wrong tool for testing server behaviour regardless. Note also the
+known collision: root `dev:remote` is `ng serve -c remote`, while `server/package.json`'s
+`dev:remote` is the Node server against Atlas — same name, different things.

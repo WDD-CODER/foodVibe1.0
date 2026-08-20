@@ -101,3 +101,29 @@ See also: [[atomic-bulk-replace-with-standalone-fallback]]
 **Why the obvious fix is wrong:** Upgrading the morgan *format* to add `:response-time`/`:res[content-length]` (plan 302 M1's actual goal) doesn't fix this — you get richer logs for whatever traffic still reaches morgan, while static assets remain completely absent, and it's easy to mistake "no static-asset log lines" for "the app makes very few static requests" instead of "the logger never sees them."
 
 **What to do instead:** Any middleware that can fully terminate a response (`express.static`, a catch-all `res.sendFile()`, an early `res.json()`) must be registered **after** the request logger, not before. To verify the fix actually worked, `curl` a known static asset path directly and confirm a log line appears for that specific 200 — the absence of a log line for a request you know succeeded is the tell, not the presence of errors.
+
+## A blanket `immutable` cache on `express.static` poisons every unhashed asset
+
+**What hurt:** Plan 302 M3 said to add `maxAge: '1y', immutable: true` to
+`express.static`, justified by `"outputHashing": "all"` in `angular.json`. That option
+only hashes the JS/CSS bundles Angular *generates*. Everything under `public/` is copied
+verbatim and keeps its name across deploys - including
+`public/assets/data/dictionary.json`, which every Hebrew UI string flows through per
+AGENTS.md. Shipping the blanket option
+would have pinned a stale dictionary in returning browsers for a year, with `immutable`
+telling them not even to ask.
+
+**Why the obvious fix is wrong:** Guarding only `index.html` (which the plan does call
+out) feels like the whole job, because index.html is the file everyone thinks of as "the
+unhashed one". It isn't. Every `public/` asset shares that property, and they fail
+silently - no error, just users on stale translations with no way to self-recover short
+of a hard reload.
+
+**What to do instead:** Never apply `immutable` to a whole static directory. Gate it on
+the filename actually being content-hashed, and default everything else to `no-cache`:
+`const HASHED_ASSET = /-[A-Z0-9]{8,}\.[a-z0-9]+$/` checked inside `setHeaders`.
+`no-cache` still yields a 0-byte 304, so the unhashed path costs nothing versus before.
+Related: you cannot test any of this through `ng serve` (`npm run dev:local` /
+`dev:remote`) - it never executes `server/index.js` and hard-codes its own
+`Cache-Control: no-cache`, so cache headers always look broken there. Use
+`npm run serve:prod`, and uncheck DevTools "Disable cache" before concluding anything.
