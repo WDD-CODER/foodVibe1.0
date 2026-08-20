@@ -107,8 +107,9 @@ See also: [[atomic-bulk-replace-with-standalone-fallback]]
 **What hurt:** Plan 302 M3 said to add `maxAge: '1y', immutable: true` to
 `express.static`, justified by `"outputHashing": "all"` in `angular.json`. That option
 only hashes the JS/CSS bundles Angular *generates*. Everything under `public/` is copied
-verbatim and keeps its name across deploys - including `assets/data/dictionary.json`,
-which every Hebrew UI string flows through per AGENTS.md. Shipping the blanket option
+verbatim and keeps its name across deploys - including
+`public/assets/data/dictionary.json`, which every Hebrew UI string flows through per
+AGENTS.md. Shipping the blanket option
 would have pinned a stale dictionary in returning browsers for a year, with `immutable`
 telling them not even to ask.
 
