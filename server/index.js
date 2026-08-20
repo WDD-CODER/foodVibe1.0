@@ -70,10 +70,38 @@ app.use(compression());
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
 
 // ---------------------------------------------------------------------------
-// Static files — served AFTER Helmet so assets also carry security headers.
+// Static files — served AFTER Helmet so assets also carry security headers,
+// and AFTER morgan so asset requests are logged (see the morgan block above).
 // MUST still come before /api/ catch-all.
+//
+// `ng build` content-hashes the JS/CSS bundles it generates ("outputHashing": "all"
+// in angular.json), so those filenames can never change content — safe to cache for a
+// year and skip revalidation entirely. Before this, express.static defaulted to
+// maxAge: 0 and every page load spent ~30 conditional GETs round-tripping to a
+// possibly-cold origin just to be told "304 Not Modified".
+//
+// Only the content-hashed bundles are safe to pin: their name changes whenever their
+// content does. Everything else copied out of `public/` keeps its name across deploys —
+// `assets/data/dictionary.json` above all, which every Hebrew UI string flows through —
+// so pinning those would leave returning browsers stuck on a stale copy for a year with
+// `immutable` telling them not to even ask. Those keep `no-cache`: they still revalidate
+// and still return a 0-byte 304 when unchanged, exactly as before this change.
+//
+// index.html is in that same unhashed group. `index: false` additionally keeps
+// express.static from serving it for "/" — that falls through to the SPA fallback below,
+// which sets the same no-cache header in one place.
 // ---------------------------------------------------------------------------
-app.use(express.static(STATIC_DIR))
+const HASHED_ASSET = /-[A-Z0-9]{8,}\.[a-z0-9]+$/
+
+app.use(express.static(STATIC_DIR, {
+  index: false,
+  setHeaders: (res, filePath) => {
+    res.setHeader(
+      'Cache-Control',
+      HASHED_ASSET.test(filePath) ? 'public, max-age=31536000, immutable' : 'no-cache'
+    )
+  }
+}))
 
 const corsOptions = {
   origin(origin, callback) {
@@ -110,11 +138,17 @@ app.get('/api/v1/health', (_req, res) => res.json({ ok: true, ts: Date.now() }))
 // ---------------------------------------------------------------------------
 // Angular SPA fallback — catch-all after all /api/ routes
 // API 404s must return JSON, not index.html.
+//
+// This path serves index.html itself and therefore bypasses the setHeaders
+// callback on express.static above entirely. It must set Cache-Control on its
+// own, or every deep-linked route ("/", "/recipe-book", …) would be cached for
+// a year and returning browsers would never pick up a new deploy.
 // ---------------------------------------------------------------------------
 app.get('*', (req, res) => {
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ error: 'Not found' })
   }
+  res.set('Cache-Control', 'no-cache')
   res.sendFile(path.join(STATIC_DIR, 'index.html'))
 })
 

@@ -224,21 +224,21 @@ const { Workbook } = await import('exceljs')
 - [ ] Determine whether both `foodvibe` and `foodvibe-api` Render services exist; document which is canonical
 
 ## Milestone 3 — Static asset cache headers
-- [ ] Add `maxAge: '1y'`, `immutable: true`, and the `index.html` → `no-cache` `setHeaders` guard to `express.static` — `server/index.js:63`
-- [ ] Set `Cache-Control: no-cache` on the SPA fallback `res.sendFile(index.html)` — `server/index.js:103-108`
+- [x] Add `maxAge: '1y'`, `immutable: true`, and the `index.html` → `no-cache` `setHeaders` guard to `express.static` — `server/index.js:63`
+- [x] Set `Cache-Control: no-cache` on the SPA fallback `res.sendFile(index.html)` — `server/index.js:103-108`
 - [ ] Verify repeat loads serve hashed assets from disk cache with zero network rows
 - [ ] Verify a fresh deploy is still picked up by a returning browser (guards the fallback caching bug)
 
 ## Milestone 4 — Bundle diet
-- [ ] Remove `withPreloading(PreloadAllModules)` and its now-unused import — `src/app/app.config.ts:4,96`
-- [ ] Convert `menu-export.service.ts:8` to `await import('exceljs')` at point of use
-- [ ] Convert `recipe-export.service.ts:8` to `await import('exceljs')` at point of use
-- [ ] Propagate any resulting `async` signature changes through `export.service.ts` and its three consumers (`cook-view.page.ts:82`, `menu-intelligence.page.ts:102`, `recipe-builder.page.ts:114`)
-- [ ] Re-measure `dist/` total JS and record before/after in the audit report
+- [x] Remove `withPreloading(PreloadAllModules)` and its now-unused import — `src/app/app.config.ts:4,96`
+- [x] Convert `menu-export.service.ts:8` to `await import('exceljs')` at point of use
+- [x] Convert `recipe-export.service.ts:8` to `await import('exceljs')` at point of use
+- [x] Propagate any resulting `async` signature changes through `export.service.ts` and its three consumers (`cook-view.page.ts:82`, `menu-intelligence.page.ts:102`, `recipe-builder.page.ts:114`)
+- [x] Re-measure `dist/` total JS and record before/after in the audit report
 - [ ] Manually verify Excel export still produces a valid `.xlsx` from all three consumer pages
 
 ## Milestone 5 — Image compression
-- [ ] Re-confirm `food-compos-logo.png` is unreferenced across `src/`, `public/`, `index.html`; delete if so
-- [ ] Convert `recipe_placeholder.png` to WebP at display dimensions (or replace with inline SVG / CSS gradient) — update `recipe-header.component.ts:133`
+- [x] Re-confirm `food-compos-logo.png` is unreferenced across `src/`, `public/`, `index.html`; delete if so
+- [x] Convert `recipe_placeholder.png` to WebP at display dimensions (or replace with inline SVG / CSS gradient) — update `recipe-header.component.ts:133`
 - [ ] Convert `stamp-approved.png` and `stamp-not-approved.png` to WebP — update `approve-stamp.component.ts:20,22`
 - [ ] Visual regression check on recipe-builder placeholder and both approve-stamp states

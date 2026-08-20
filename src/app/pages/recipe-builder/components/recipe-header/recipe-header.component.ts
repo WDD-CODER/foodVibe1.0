@@ -18,10 +18,38 @@ import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directi
 import { RecipeYieldManager } from 'src/app/core/utils/recipe-yield-manager.util'
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
 
+/**
+ * Inline stand-in for the 120x120 image thumbnail before a photo is uploaded.
+ *
+ * Replaces a 1.27 MB PNG (plan 302 M5) that was never really seen: whenever it renders,
+ * `.img-upload-prompt` covers it edge-to-edge with a 60%-opaque `--bg-muted` layer and the
+ * camera icon, so all it ever contributed was a faint tint. A flat slate gradient is
+ * visually indistinguishable and costs ~400 bytes inside the bundle instead of a request.
+ *
+ * Colours are literals, not `var(--…)`: a data: URI renders as its own isolated document
+ * and cannot see the page's custom properties. These match `--bg-muted`/`--border-default`
+ * in `src/styles.scss` — update both together if the palette changes.
+ *
+ * `preserveAspectRatio="xMidYMid slice"` plus explicit width/height give it an intrinsic
+ * size, which is what the `object-fit: cover` on `.header-img` needs to behave.
+ */
+const IMAGE_PLACEHOLDER_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1f5f9"/><stop offset="1" stop-color="#e2e8f0"/></linearGradient></defs><rect width="120" height="120" fill="url(#a)"/></svg>'
+
 @Component({
   selector: 'app-recipe-header',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, ClickOutSideDirective, TranslatePipe, CustomMultiSelectComponent, ScalingChipComponent, ScrollIndicatorsDirective, RatingStarsComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    LucideAngularModule,
+    ClickOutSideDirective,
+    TranslatePipe,
+    CustomMultiSelectComponent,
+    ScalingChipComponent,
+    ScrollIndicatorsDirective,
+    RatingStarsComponent
+  ],
   templateUrl: './recipe-header.component.html',
   styleUrl: './recipe-header.component.scss'
 })
@@ -91,7 +119,7 @@ export class RecipeHeaderComponent {
     {
       totalWeightG: this.totalWeightG,
       totalVolumeMl: this.totalVolumeMl,
-      getConversion: (key: string) => this.unitRegistryService.getConversion(key),
+      getConversion: (key: string) => this.unitRegistryService.getConversion(key)
     }
   )
 
@@ -129,8 +157,7 @@ export class RecipeHeaderComponent {
   }
 
   // SIGNALS & CONSTANTS
-  // TODO: replace with Cloudinary URL once uploaded — https://res.cloudinary.com/dsxi4o2gb/image/upload/f_auto,q_auto/<public_id>
-  readonly placeholderPath = 'assets/style/img/recipe_placeholder.png'
+  readonly placeholderPath = `data:image/svg+xml,${encodeURIComponent(IMAGE_PLACEHOLDER_SVG)}`
   readonly uploadingImage_ = signal(false)
 
   // LABELS
@@ -162,10 +189,11 @@ export class RecipeHeaderComponent {
 
   protected async toggleTypeWrapper(): Promise<void> {
     if (this.form().dirty) {
-      const confirmed = await this.confirmModal.open(
-        'type_change_confirm_message',
-        { saveLabel: 'confirm', headerKey: 'type_change_confirm_header', variant: 'warning' }
-      )
+      const confirmed = await this.confirmModal.open('type_change_confirm_message', {
+        saveLabel: 'confirm',
+        headerKey: 'type_change_confirm_header',
+        variant: 'warning'
+      })
       if (!confirmed) return
     }
     this.yield.toggleType()
@@ -203,12 +231,12 @@ export class RecipeHeaderComponent {
   metricsNoticeOpen_ = signal(false)
 
   toggleMetricsDisplayMode(): void {
-    this.metricsDisplayMode_.update(m => m === 'weight' ? 'volume' : 'weight')
+    this.metricsDisplayMode_.update((m) => (m === 'weight' ? 'volume' : 'weight'))
     this.metricsNoticeOpen_.set(false)
   }
 
   toggleMetricsNotice(): void {
-    this.metricsNoticeOpen_.update(v => !v)
+    this.metricsNoticeOpen_.update((v) => !v)
   }
 
   closeMetricsNotice(): void {
@@ -238,17 +266,15 @@ export class RecipeHeaderComponent {
   }
 
   protected unconvertibleNamesForCurrentMode_ = computed(() => {
-    return this.metricsDisplayMode_() === 'weight'
-      ? this.unconvertibleForWeight()
-      : this.unconvertibleForVolume()
+    return this.metricsDisplayMode_() === 'weight' ? this.unconvertibleForWeight() : this.unconvertibleForVolume()
   })
 
   protected unconvertibleNamesFiltered_ = computed(() =>
-    this.unconvertibleNamesForCurrentMode_().filter((n) => (n != null && String(n).trim().length > 0))
+    this.unconvertibleNamesForCurrentMode_().filter((n) => n != null && String(n).trim().length > 0)
   )
 
-  protected showMetricsNoticeIcon_ = computed(() =>
-    this.metricsDisplayMode_() === 'volume' && this.unconvertibleNamesFiltered_().length > 0
+  protected showMetricsNoticeIcon_ = computed(
+    () => this.metricsDisplayMode_() === 'volume' && this.unconvertibleNamesFiltered_().length > 0
   )
 
   // LABELS ACTIONS
@@ -264,7 +290,9 @@ export class RecipeHeaderComponent {
       await this.metadataRegistry.registerLabel(result.key, result.color, result.autoTriggers)
       const current = (this.form().get('labels')?.value ?? []) as string[]
       if (!current.includes(result.key)) {
-        this.form().get('labels')?.setValue([...current, result.key], { emitEvent: true })
+        this.form()
+          .get('labels')
+          ?.setValue([...current, result.key], { emitEvent: true })
       }
     } catch {
       // Error already shown by registry
@@ -277,12 +305,15 @@ export class RecipeHeaderComponent {
     const file = (event.target as HTMLInputElement).files?.[0]
     if (!file) return
     this.uploadingImage_.set(true)
-    this.cloudinary.upload(file).pipe(take(1)).subscribe({
-      next: url => {
-        this.imageChange.emit(url)
-        this.uploadingImage_.set(false)
-      },
-      error: () => this.uploadingImage_.set(false),
-    })
+    this.cloudinary
+      .upload(file)
+      .pipe(take(1))
+      .subscribe({
+        next: (url) => {
+          this.imageChange.emit(url)
+          this.uploadingImage_.set(false)
+        },
+        error: () => this.uploadingImage_.set(false)
+      })
   }
 }

@@ -43,3 +43,24 @@ Scope: worktrees, `gh` auth/PR mechanics, and repo-tracked files that interact w
 **Why the obvious fix is wrong:** Trying to script `git add -p` with piped `y`/`n` answers is fragile and easy to get wrong silently (wrong hunk staged, file left in a half-applied state).
 
 **What to do instead:** Read the file, `git diff` it to see the exact hunks, then use Edit to manually remove the unwanted hunk on branch A (reverting it to match what branch B should not have), commit, then switch to branch B and manually re-add just that hunk via Edit using the diff text already captured. Slower but deterministic and auditable — confirm with a final `git diff` before each commit.
+
+## A concurrent session's `git add -A` can steal your uncommitted change
+
+**What hurt:** Mid-`/ship`, a second session working in the same directory switched the
+branch from `feat/perf-phase1-m3-m5` to `feat/design-migration` and committed. Its commit
+`012d3c9` swept up `src/app/app.config.ts` - an uncommitted edit belonging to the *other*
+session's work - into an unrelated design-migration commit. Switching back to the perf
+branch then restored the pre-edit version, so the change had silently vanished from the
+working tree while living on in a foreign commit.
+
+**Why the obvious fix is wrong:** `git worktree list` returns 1, so the usual concurrency
+check sees nothing. Two agents sharing one working tree are invisible to it. Trusting a
+`git status` snapshot taken earlier in the conversation is also wrong - the tree can
+change between reading it and staging.
+
+**What to do instead:** Compare branch *and* HEAD against the values captured when the
+workflow started, and hard-stop on any change (`/ship` Phase 3 does this - honor it).
+Before staging, re-run `git status --short` fresh rather than reusing an earlier snapshot.
+After any forced branch switch, diff your expected changes against the tree and re-apply
+anything a concurrent commit absorbed. And never `git add -A` in a shared working
+directory - stage explicit paths only.

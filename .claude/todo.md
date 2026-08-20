@@ -39,15 +39,15 @@
 - [ ] Human: check whether `MONGO_URI` points at an M0 free cluster; report findings
 - [ ] Move `seedMasterData()` to run after `app.listen()` — `server/index.js:125-131`
 - [ ] Determine whether both `foodvibe` and `foodvibe-api` Render services exist; document which is canonical
-- [ ] Add `maxAge: '1y'`, `immutable: true`, and the `index.html` → `no-cache` `setHeaders` guard — `server/index.js:63`
-- [ ] Set `Cache-Control: no-cache` on the SPA fallback `res.sendFile(index.html)` — `server/index.js:103-108`
+- [x] Add `maxAge: '1y'`, `immutable: true`, and the `index.html` → `no-cache` `setHeaders` guard — `server/index.js:63`
+- [x] Set `Cache-Control: no-cache` on the SPA fallback `res.sendFile(index.html)` — `server/index.js:103-108`
 - [ ] Verify a fresh deploy is still picked up by a returning browser (guards the fallback caching bug)
-- [ ] Remove `withPreloading(PreloadAllModules)` and its now-unused import — `src/app/app.config.ts:4,96`
-- [ ] Convert `menu-export.service.ts:8` and `recipe-export.service.ts:8` to `await import('exceljs')` at point of use
-- [ ] Propagate resulting `async` signature changes through `export.service.ts` and its 3 consumers
+- [x] Remove `withPreloading(PreloadAllModules)` and its now-unused import — `src/app/app.config.ts:4,96`
+- [x] Convert `menu-export.service.ts:8` and `recipe-export.service.ts:8` to `await import('exceljs')` at point of use
+- [x] Propagate resulting `async` signature changes through `export.service.ts` and its 3 consumers
 - [ ] Manually verify Excel export still produces a valid `.xlsx` from all three consumer pages
-- [ ] Re-confirm `food-compos-logo.png` (1.88 MB) is unreferenced; delete if so
-- [ ] Convert `recipe_placeholder.png` (1.27 MB) to WebP or inline SVG — update `recipe-header.component.ts:133`
+- [x] Re-confirm `food-compos-logo.png` (1.88 MB) is unreferenced; delete if so
+- [x] Convert `recipe_placeholder.png` (1.27 MB) to WebP or inline SVG — update `recipe-header.component.ts:133`
 - [ ] Convert both approve-stamp PNGs to WebP — update `approve-stamp.component.ts:20,22`
 
 ### Plan 303 — Perf Phase 2: Client CPU & Interaction Lag (`plans/303-perf-phase2-client-cpu.plan.md`)

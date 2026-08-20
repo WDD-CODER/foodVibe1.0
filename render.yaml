@@ -14,6 +14,13 @@ services:
         generateValue: true
       - key: MONGO_URI
         sync: false
+      # TEMPORARY diagnostic (plan 302 M1). Enables the [data/query] doc-count/byte-count/
+      # Mongo-timing lines in server/routes/generic.js so ~24h of real-use numbers can be
+      # collected from the Render logs. It costs real CPU on this 0.1-shared-CPU tier
+      # (JSON.stringify runs purely to measure payload size), so set it to "0" or remove
+      # it once the sample is captured and written into the audit's Observed section.
+      - key: PERF_LOG
+        value: "1"
       # Set in Render dashboard — never commit the value
       - key: GEMINI_API_KEY
         sync: false
