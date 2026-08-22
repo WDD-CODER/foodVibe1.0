@@ -5,12 +5,14 @@ export const MAX_ALLERGEN_RECURSION = 5
 
 /**
  * Resolve all allergens for a recipe, including sub-recipe allergens up to maxDepth.
- * Pure function — no Angular DI.
+ * Pure function — no Angular DI. Takes id-keyed Maps (not arrays) so callers can pass
+ * KitchenStateService's memoized productsById_/recipesById_ for O(1) lookups (plan 303 M1)
+ * instead of paying an O(n) scan per ingredient.
  */
 export function resolveRecipeAllergens(
   recipe: Recipe,
-  allRecipes: Recipe[],
-  allProducts: Product[],
+  recipesById: Map<string, Recipe>,
+  productsById: Map<string, Product>,
   maxDepth = MAX_ALLERGEN_RECURSION,
   depth = 0
 ): string[] {
@@ -19,13 +21,12 @@ export function resolveRecipeAllergens(
 
   for (const ing of recipe.ingredients_) {
     if (ing.type === 'product') {
-      const product = allProducts.find(p => p._id === ing.referenceId) as Product | undefined
-      ;(product?.allergens_ || []).forEach(a => set.add(a))
+      const product = ing.referenceId ? productsById.get(ing.referenceId) : undefined
+      ;(product?.allergens_ || []).forEach((a) => set.add(a))
     } else if (ing.type === 'recipe') {
-      const subRecipe = allRecipes.find(r => r._id === ing.referenceId)
+      const subRecipe = ing.referenceId ? recipesById.get(ing.referenceId) : undefined
       if (subRecipe) {
-        resolveRecipeAllergens(subRecipe, allRecipes, allProducts, maxDepth, depth + 1)
-          .forEach(a => set.add(a))
+        resolveRecipeAllergens(subRecipe, recipesById, productsById, maxDepth, depth + 1).forEach((a) => set.add(a))
       }
     }
   }

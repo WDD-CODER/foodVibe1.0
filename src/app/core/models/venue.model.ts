@@ -1,12 +1,15 @@
-export type EnvironmentType =
-  | 'professional_kitchen'
-  | 'outdoor_field'
-  | 'client_home'
-  | 'popup_venue'
+export type EnvironmentType = 'professional_kitchen' | 'outdoor_field' | 'client_home' | 'popup_venue'
 
 export interface VenueInfraItem {
   equipment_id_: string
   available_quantity_: number
+}
+
+/** One schedule block, e.g. { days_: 'א׳-ה׳', time_: '08:00–23:00' } — a venue can have
+ * more than one (weekday vs weekend), matching UI refactor/VenueDetail.dc.html. */
+export interface VenueOperatingHours {
+  days_: string
+  time_: string
 }
 
 export interface VenueProfile {
@@ -16,4 +19,10 @@ export interface VenueProfile {
   available_infrastructure_: VenueInfraItem[]
   notes_?: string
   created_at_: string
+  /** Plan 305 ACTION-LIST H — new data concept, no old-app equivalent. */
+  address_?: string
+  capacity_?: number
+  contact_name_?: string
+  contact_phone_?: string
+  operating_hours_?: VenueOperatingHours[]
 }

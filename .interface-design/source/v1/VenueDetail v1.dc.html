@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="./colors_and_type.css">
+  <script src="./image-slot.js"></script>
+  <style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    body { margin: 0; }
+    a { color: var(--color-primary); text-decoration: none; }
+    a:hover { color: var(--color-primary-hover); }
+  </style>
+</helmet>
+
+<div dir="rtl" style="position: relative; min-height: 100vh; background: var(--bg-body); font-family: var(--font-sans); overflow-x: hidden;">
+  <div style="position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse 700px 480px at 85% 15%, rgba(20,184,166,0.12), transparent), radial-gradient(ellipse 550px 550px at 15% 75%, rgba(251,191,36,0.08), transparent), radial-gradient(ellipse 450px 350px at 50% 50%, rgba(14,165,233,0.06), transparent);"></div>
+
+  <div style="position: relative; z-index: 1;">
+    <!-- TOP NAV -->
+    <nav style="position: sticky; top: 0; z-index: 50; display: flex; align-items: center; height: 3.5rem; padding: 0 var(--space-6); gap: var(--space-6); background: var(--bg-frosted-nav); backdrop-filter: var(--blur-nav); -webkit-backdrop-filter: var(--blur-nav); border-bottom: 1px solid var(--border-glass); box-shadow: var(--shadow-nav);">
+      <div style="display: flex; align-items: center; gap: var(--space-2); flex-shrink: 0;">
+        <div style="width: 32px; height: 32px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)); display: grid; place-content: center; color: var(--color-text-on-primary); font-weight: var(--fw-extrabold); font-size: var(--fs-sm); box-shadow: var(--shadow-glow);">fC</div>
+        <span style="font-weight: var(--fw-bold); font-size: var(--fs-lg); color: var(--color-text-main); letter-spacing: var(--tracking-tight);">foodCo</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 2px; padding: 4px; background: var(--bg-subtle); border: 1px solid var(--border-glass); border-radius: var(--radius-full); margin-inline-start: var(--space-4);">
+        <a href="Dashboard.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
+          דשבורד
+        </a>
+        <a href="Inventory.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="M12 22V12"></path><path d="M3.29 7 12 12l8.71-5"></path><path d="m7.5 4.27 9 5.15"></path></svg>
+          מלאי
+        </a>
+        <a href="RecipeBook.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg>
+          ספר מתכונים
+        </a>
+        <a href="MenuIntelligence.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 6 4 14"></path><path d="M12 6v14"></path><path d="M8 8v12"></path><path d="M4 4v16"></path></svg>
+          בניית תפריטים
+        </a>
+        <a href="MenuLibrary.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"></path></svg>
+          ספריית תפריטים
+        </a>
+        <a href="Venues.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); color: #fff; box-shadow: var(--shadow-glow);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          אתרים
+        </a>
+        <a href="Suppliers.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path><path d="M15 18H9"></path><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path><circle cx="17" cy="18" r="2"></circle><circle cx="7" cy="18" r="2"></circle></svg>
+          ספקים
+        </a>
+        <a href="Equipment.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+          ציוד
+        </a>
+        <a href="MetadataManager.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v6m0 10v6M4.22 4.22l4.24 4.24m6.28 6.28 4.24 4.24M1 12h6m10 0h6M4.22 19.78l4.24-4.24m6.28-6.28 4.24-4.24"></path></svg>
+          מטא-דאטה
+        </a>
+        <a href="Trash.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          אשפה
+        </a>
+      </div>
+      <div style="display: flex; align-items: center; gap: var(--space-2); margin-inline-start: auto; flex-shrink: 0;">
+        <div style="display: inline-flex; align-items: center; gap: var(--space-2); padding: 4px 10px 4px 4px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-full);">
+          <span style="display: grid; place-content: center; width: 26px; height: 26px; background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)); color: #fff; border-radius: 50%; font-weight: var(--fw-bold); font-size: var(--fs-xs);">רכ</span>
+          <span style="font-weight: var(--fw-semibold); font-size: var(--fs-sm); color: var(--color-text-main);">רועי כהן</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- MAIN -->
+    <div style="max-width: 1200px; margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-12);">
+      <a href="Venues.dc.html" style="display: inline-flex; align-items: center; gap: 6px; margin-bottom: var(--space-4); font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--color-text-secondary);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
+        כל האתרים
+      </a>
+
+      <div style="display: grid; grid-template-columns: 260px 1fr; gap: var(--space-6); margin-bottom: var(--space-6);" class="vd-hero">
+        <image-slot id="{{ imgId }}" shape="rounded" radius="16" placeholder="הוסף תמונת אתר" style="width: 100%; height: 200px;"></image-slot>
+        <div style="display: flex; flex-direction: column; justify-content: center;">
+          <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: 6px; flex-wrap: wrap;">
+            <h1 style="margin: 0; font-size: var(--fs-2xl); font-weight: var(--fw-bold); letter-spacing: var(--tracking-tight); color: var(--color-text-main);">{{ venue.name }}</h1>
+            <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: var(--radius-full); font-size: var(--fs-xs); font-weight: var(--fw-semibold); {{ venue.statusStyle }}">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></span>
+              {{ venue.statusLabel }}
+            </span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 5px; font-size: var(--fs-sm); color: var(--color-text-muted); margin-bottom: var(--space-4);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            {{ venue.address }}
+          </div>
+          <div style="display: flex; gap: var(--space-6); flex-wrap: wrap;">
+            <div>
+              <div style="font-size: var(--fs-xs); color: var(--color-text-muted);">קיבולת</div>
+              <div style="font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--color-text-main);">{{ venue.capacity }}</div>
+            </div>
+            <div>
+              <div style="font-size: var(--fs-xs); color: var(--color-text-muted);">תפריטים משויכים</div>
+              <div style="font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--color-text-main);">{{ venue.menuCount }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); margin-bottom: var(--space-5);" class="vd-grid">
+        <div style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); padding: var(--space-5);">
+          <h2 style="margin: 0 0 var(--space-3); font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--color-text-muted);">איש קשר</h2>
+          <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3);">
+            <span style="display: grid; place-content: center; width: 36px; height: 36px; border-radius: 50%; background: var(--color-primary-soft); color: var(--color-primary-hover); font-weight: var(--fw-bold); font-size: var(--fs-sm);">{{ venue.contactInitials }}</span>
+            <div>
+              <div style="font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--color-text-main);">{{ venue.contactName }}</div>
+              <div style="font-size: var(--fs-xs); color: var(--color-text-muted);">אחראי אתר</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px; font-size: var(--fs-sm); color: var(--color-text-secondary);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"></path></svg>
+            {{ venue.contactPhone }}
+          </div>
+        </div>
+
+        <div style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); padding: var(--space-5);">
+          <h2 style="margin: 0 0 var(--space-3); font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--color-text-muted);">שעות פעילות</h2>
+          <sc-for list="{{ venue.hours }}" as="h" hint-placeholder-count="2">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--border-default); font-size: var(--fs-sm);">
+              <span style="color: var(--color-text-secondary);">{{ h.days }}</span>
+              <span style="font-weight: var(--fw-semibold); color: var(--color-text-main);">{{ h.time }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); padding: var(--space-5);">
+        <h2 style="margin: 0 0 var(--space-3); font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--color-text-muted);">תפריטים משויכים</h2>
+        <sc-if value="{{ venue.hasMenus }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+            <sc-for list="{{ venue.menus }}" as="m" hint-placeholder-count="2">
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: var(--space-3); background: var(--bg-subtle); border: 1px solid var(--border-row); border-radius: var(--radius-md);">
+                <div>
+                  <div style="font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--color-text-main);">{{ m.name }}</div>
+                  <div style="font-size: var(--fs-xs); color: var(--color-text-muted);">{{ m.date }} · {{ m.guestCount }} אורחים</div>
+                </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-text-muted-light);"><path d="m9 18 6-6-6-6"></path></svg>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ venue.noMenus }}" hint-placeholder-val="{{ false }}">
+          <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-muted);">אין תפריטים משויכים לאתר זה</p>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const VENUES = {
+  1: { name: 'אולם גני התערוכה', address: 'דרך השלום 12, תל אביב', capacity: 220, active: true,
+    contactName: 'דנה לוי', contactPhone: '050-1234567',
+    hours: [{ days: 'א׳-ה׳', time: '08:00–23:00' }, { days: 'ו׳-שבת', time: '10:00–00:00' }],
+    menus: [{ name: 'תפריט חתונת רועי ומאיה', date: '12.09.2026', guestCount: 80 }, { name: 'כנס עסקי Q3', date: '02.10.2026', guestCount: 150 }, { name: 'ערב גאלה', date: '18.11.2026', guestCount: 220 }] },
+  2: { name: 'חצר המסגריה', address: 'הרצל 84, יפו', capacity: 90, active: true,
+    contactName: 'עומר שגיא', contactPhone: '052-9876543',
+    hours: [{ days: 'א׳-שבת', time: '09:00–01:00' }],
+    menus: [{ name: 'יום הולדת 30 לנעה', date: '05.09.2026', guestCount: 60 }] },
+  3: { name: 'גג הצפון', address: 'דיזנגוף 210, תל אביב', capacity: 60, active: false,
+    contactName: 'טל ברוך', contactPhone: '054-5551122',
+    hours: [{ days: 'סגור לעונה', time: '—' }],
+    menus: [] },
+  4: { name: 'וילת הכרם', address: 'שביל הכרמים 5, זכרון יעקב', capacity: 140, active: true,
+    contactName: 'מיכל אבידן', contactPhone: '053-3344556',
+    hours: [{ days: 'א׳-ה׳', time: '10:00–22:00' }, { days: 'ו׳-שבת', time: '10:00–23:30' }],
+    menus: [{ name: 'ברית מילה משפחת כהן', date: '20.08.2026', guestCount: 45 }, { name: 'אירוע חברה שנתי', date: '30.09.2026', guestCount: 140 }] }
+};
+
+class Component extends DCLogic {
+  state = { id: 1 };
+
+  componentDidMount() {
+    const params = new URLSearchParams(window.location.search);
+    const id = parseInt(params.get('id')) || 1;
+    this.setState({ id });
+  }
+
+  renderVals() {
+    const raw = VENUES[this.state.id] || VENUES[1];
+    const initials = raw.contactName.split(' ').map(w => w[0]).join('');
+    const venue = {
+      name: raw.name,
+      address: raw.address,
+      capacity: raw.capacity,
+      menuCount: raw.menus.length,
+      statusLabel: raw.active ? 'פעיל' : 'לא פעיל',
+      statusStyle: raw.active ? 'background: var(--bg-success); color: var(--text-success);' : 'background: var(--bg-muted); color: var(--color-text-muted);',
+      contactInitials: initials,
+      contactName: raw.contactName,
+      contactPhone: raw.contactPhone,
+      hours: raw.hours,
+      hasMenus: raw.menus.length > 0,
+      noMenus: raw.menus.length === 0,
+      menus: raw.menus
+    };
+    return { venue, imgId: 'venue-detail-photo-' + this.state.id };
+  }
+}
+</script>
+</body>
+</html>

@@ -19,7 +19,7 @@ import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { VenueDataService } from '@services/venue-data.service'
 import { EquipmentDataService } from '@services/equipment-data.service'
 import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
-import { VenueProfile, VenueInfraItem, EnvironmentType } from '@models/venue.model'
+import { VenueProfile, VenueInfraItem, VenueOperatingHours, EnvironmentType } from '@models/venue.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
@@ -69,6 +69,10 @@ export class VenueFormComponent implements OnInit {
     return this.venueForm_?.get('available_infrastructure_') as FormArray
   }
 
+  protected get hoursArray(): FormArray {
+    return this.venueForm_?.get('operating_hours_') as FormArray
+  }
+
   protected get allEquipment_() {
     return this.equipmentData.allEquipment_()
   }
@@ -105,7 +109,12 @@ export class VenueFormComponent implements OnInit {
       ],
       environment_type_: ['outdoor_field', [Validators.required]],
       notes_: [''],
-      available_infrastructure_: this.fb.array([])
+      available_infrastructure_: this.fb.array([]),
+      address_: [''],
+      capacity_: [null],
+      contact_name_: [''],
+      contact_phone_: [''],
+      operating_hours_: this.fb.array([])
     })
   }
 
@@ -113,7 +122,11 @@ export class VenueFormComponent implements OnInit {
     this.venueForm_.patchValue({
       name_hebrew: v.name_hebrew ?? '',
       environment_type_: v.environment_type_ ?? 'outdoor_field',
-      notes_: v.notes_ ?? ''
+      notes_: v.notes_ ?? '',
+      address_: v.address_ ?? '',
+      capacity_: v.capacity_ ?? null,
+      contact_name_: v.contact_name_ ?? '',
+      contact_phone_: v.contact_phone_ ?? ''
     })
     const arr = this.infraArray
     arr.clear()
@@ -122,6 +135,16 @@ export class VenueFormComponent implements OnInit {
         this.fb.group({
           equipment_id_: [item.equipment_id_, Validators.required],
           available_quantity_: [item.available_quantity_, [Validators.required, Validators.min(0)]]
+        })
+      )
+    })
+    const hours = this.hoursArray
+    hours.clear()
+    ;(v.operating_hours_ ?? []).forEach((item) => {
+      hours.push(
+        this.fb.group({
+          days_: [item.days_, Validators.required],
+          time_: [item.time_, Validators.required]
         })
       )
     })
@@ -138,6 +161,19 @@ export class VenueFormComponent implements OnInit {
 
   protected removeInfraRow(index: number): void {
     this.infraArray.removeAt(index)
+  }
+
+  protected addHoursRow(): void {
+    this.hoursArray.push(
+      this.fb.group({
+        days_: ['', Validators.required],
+        time_: ['', Validators.required]
+      })
+    )
+  }
+
+  protected removeHoursRow(index: number): void {
+    this.hoursArray.removeAt(index)
   }
 
   private validateForm_(): boolean {
@@ -164,6 +200,9 @@ export class VenueFormComponent implements OnInit {
           equipment_id_: row.equipment_id_,
           available_quantity_: Number(row.available_quantity_)
         }))
+      const hours: VenueOperatingHours[] = (v.operating_hours_ ?? [])
+        .filter((row: { days_: string; time_: string }) => row.days_ && row.time_)
+        .map((row: { days_: string; time_: string }) => ({ days_: row.days_, time_: row.time_ }))
 
       const now = new Date().toISOString()
 
@@ -174,7 +213,12 @@ export class VenueFormComponent implements OnInit {
           name_hebrew: v.name_hebrew,
           environment_type_: v.environment_type_,
           notes_: v.notes_ || undefined,
-          available_infrastructure_: infra
+          available_infrastructure_: infra,
+          address_: v.address_ || undefined,
+          capacity_: v.capacity_ != null && v.capacity_ !== '' ? Number(v.capacity_) : undefined,
+          contact_name_: v.contact_name_ || undefined,
+          contact_phone_: v.contact_phone_ || undefined,
+          operating_hours_: hours
         })
       } else {
         await this.venueData.addVenue({
@@ -182,6 +226,11 @@ export class VenueFormComponent implements OnInit {
           environment_type_: v.environment_type_,
           notes_: v.notes_ || undefined,
           available_infrastructure_: infra,
+          address_: v.address_ || undefined,
+          capacity_: v.capacity_ != null && v.capacity_ !== '' ? Number(v.capacity_) : undefined,
+          contact_name_: v.contact_name_ || undefined,
+          contact_phone_: v.contact_phone_ || undefined,
+          operating_hours_: hours,
           created_at_: now
         })
       }

@@ -1,17 +1,28 @@
 <app-list-shell
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
-  [gridTemplate]="hideDateColumn_() ? '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(80px, 0.7fr) minmax(72px, 0.85fr) 80px auto' : '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) minmax(80px, 0.7fr) 0.8fr 80px auto'"
-  [mobileGridTemplate]="'2fr 0.7fr 1fr 0.8fr 40px 28px'">
-
+  [gridTemplate]="
+    hideDateColumn_()
+      ? '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(80px, 0.7fr) minmax(72px, 0.85fr) 80px auto'
+      : '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) minmax(80px, 0.7fr) 0.8fr 80px auto'
+  "
+  [mobileGridTemplate]="'2fr 0.7fr 1fr 0.8fr 40px 28px'"
+  [resultCount]="filteredRecipes_().length"
+  [resultTotal]="kitchenState.visibleRecipes_().length"
+>
   <h2 shell-title class="page-title">{{ 'recipe_book' | translatePipe }}</h2>
 
   <ng-container shell-search>
     <label class="visually-hidden" for="recipe-search">{{ 'search' | translatePipe }}</label>
     <div class="c-input-wrapper">
       <lucide-icon name="search" [size]="18"></lucide-icon>
-      <input id="recipe-search" type="text" [ngModel]="searchQuery_()" (ngModelChange)="searchQuery_.set($event)"
-        [placeholder]="'search' | translatePipe" />
+      <input
+        id="recipe-search"
+        type="text"
+        [ngModel]="searchQuery_()"
+        (ngModelChange)="searchQuery_.set($event)"
+        [placeholder]="'search' | translatePipe"
+      />
     </div>
   </ng-container>
 
@@ -20,47 +31,112 @@
       [selectionState]="selection"
       [editableFields]="editableFields_()"
       (bulkDelete)="onBulkDeleteSelected($event)"
-      (bulkEdit)="onBulkEdit($event)" />
+      (bulkEdit)="onBulkEdit($event)"
+    />
   </ng-container>
 
   <ng-container shell-actions>
-    <button type="button" class="c-btn-primary" (click)="onAddRecipe()"
+    <button
+      type="button"
+      class="c-btn-primary"
+      (click)="onAddRecipe()"
       [disabled]="!isLoggedIn()"
-      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+    >
       <lucide-icon name="plus" [size]="18"></lucide-icon>
       {{ 'add_recipe_dish' | translatePipe }}
     </button>
   </ng-container>
 
   <ng-container shell-table-header>
-    <div class="col-name c-grid-header-cell c-sortable-header" (click)="setSort('name')" (keydown.enter)="setSort('name')" (keydown.space)="$event.preventDefault(); setSort('name')" role="button" tabindex="0">
+    <div
+      class="col-name c-grid-header-cell c-sortable-header"
+      (click)="setSort('name')"
+      (keydown.enter)="setSort('name')"
+      (keydown.space)="$event.preventDefault(); setSort('name')"
+      role="button"
+      tabindex="0"
+    >
       {{ 'name' | translatePipe }}
     </div>
-    <div class="col-type c-grid-header-cell c-sortable-header" (click)="setSort('type')" (keydown.enter)="setSort('type')" (keydown.space)="$event.preventDefault(); setSort('type')" role="button" tabindex="0">
+    <div
+      class="col-type c-grid-header-cell c-sortable-header"
+      (click)="setSort('type')"
+      (keydown.enter)="setSort('type')"
+      (keydown.space)="$event.preventDefault(); setSort('type')"
+      role="button"
+      tabindex="0"
+    >
       {{ 'type' | translatePipe }}
     </div>
     <app-carousel-header [activeIndex]="carouselHeaderIndex_()" (activeIndexChange)="onCarouselHeaderChange($event)">
-      <div class="col-labels c-grid-header-cell c-sortable-header c-dense-chip-col" carouselHeaderColumn label="labels" (click)="labelsExpand.toggleAll()" (keydown.enter)="labelsExpand.toggleAll()" (keydown.space)="$event.preventDefault(); labelsExpand.toggleAll()" role="button" tabindex="0">
+      <div
+        class="col-labels c-grid-header-cell c-sortable-header c-dense-chip-col"
+        carouselHeaderColumn
+        label="labels"
+        (click)="labelsExpand.toggleAll()"
+        (keydown.enter)="labelsExpand.toggleAll()"
+        (keydown.space)="$event.preventDefault(); labelsExpand.toggleAll()"
+        role="button"
+        tabindex="0"
+      >
         {{ 'labels' | translatePipe }}
       </div>
-      <div class="col-allergens c-grid-header-cell c-sortable-header c-dense-chip-col" carouselHeaderColumn label="allergens" (click)="allergenExpand.toggleAll()" (keydown.enter)="allergenExpand.toggleAll()" (keydown.space)="$event.preventDefault(); allergenExpand.toggleAll()" role="button" tabindex="0">
+      <div
+        class="col-allergens c-grid-header-cell c-sortable-header c-dense-chip-col"
+        carouselHeaderColumn
+        label="allergens"
+        (click)="allergenExpand.toggleAll()"
+        (keydown.enter)="allergenExpand.toggleAll()"
+        (keydown.space)="$event.preventDefault(); allergenExpand.toggleAll()"
+        role="button"
+        tabindex="0"
+      >
         {{ 'allergens' | translatePipe }}
       </div>
       @if (!hideDateColumn_()) {
-        <div class="col-date c-grid-header-cell c-sortable-header" carouselHeaderColumn label="date_added" (click)="setSort('dateAdded')" (keydown.enter)="setSort('dateAdded')" (keydown.space)="$event.preventDefault(); setSort('dateAdded')" role="button" tabindex="0">
+        <div
+          class="col-date c-grid-header-cell c-sortable-header"
+          carouselHeaderColumn
+          label="date_added"
+          (click)="setSort('dateAdded')"
+          (keydown.enter)="setSort('dateAdded')"
+          (keydown.space)="$event.preventDefault(); setSort('dateAdded')"
+          role="button"
+          tabindex="0"
+        >
           {{ 'date_added' | translatePipe }}
         </div>
       }
-      <div class="col-rating c-grid-header-cell c-sortable-header" carouselHeaderColumn label="rating" (click)="setSort('rating')" (keydown.enter)="setSort('rating')" (keydown.space)="$event.preventDefault(); setSort('rating')" role="button" tabindex="0">
+      <div
+        class="col-rating c-grid-header-cell c-sortable-header"
+        carouselHeaderColumn
+        label="rating"
+        (click)="setSort('rating')"
+        (keydown.enter)="setSort('rating')"
+        (keydown.space)="$event.preventDefault(); setSort('rating')"
+        role="button"
+        tabindex="0"
+      >
         {{ 'rating' | translatePipe }}
       </div>
     </app-carousel-header>
-    <div class="col-cost c-grid-header-cell c-sortable-header" (click)="setSort('cost')" (keydown.enter)="setSort('cost')" (keydown.space)="$event.preventDefault(); setSort('cost')" role="button" tabindex="0">
+    <div
+      class="col-cost c-grid-header-cell c-sortable-header"
+      (click)="setSort('cost')"
+      (keydown.enter)="setSort('cost')"
+      (keydown.space)="$event.preventDefault(); setSort('cost')"
+      role="button"
+      tabindex="0"
+    >
       {{ 'cost' | translatePipe }}
     </div>
     <div class="c-col-actions c-grid-header-cell">{{ 'actions' | translatePipe }}</div>
     <div class="col-select c-grid-header-cell" role="columnheader">
-      <app-list-row-checkbox [checked]="filteredRecipeIds_().length > 0 && selection.allSelected(filteredRecipeIds_())" (toggle)="selection.toggleSelectAll(filteredRecipeIds_())" />
+      <app-list-row-checkbox
+        [checked]="filteredRecipeIds_().length > 0 && selection.allSelected(filteredRecipeIds_())"
+        (toggle)="selection.toggleSelectAll(filteredRecipeIds_())"
+      />
     </div>
   </ng-container>
 
@@ -68,30 +144,58 @@
     @if (filteredRecipes_().length === 0) {
       <div class="no-results">
         @if (isEmptyList_()) {
-          <app-empty-state messageKey="empty_recipe_book" icon="book-open"
-            ctaLabelKey="add_first_recipe" [ctaDisabled]="!isLoggedIn()"
-            (ctaClick)="onAddRecipe()" />
+          <app-empty-state
+            messageKey="empty_recipe_book"
+            icon="book-open"
+            ctaLabelKey="add_first_recipe"
+            [ctaDisabled]="!isLoggedIn()"
+            (ctaClick)="onAddRecipe()"
+          />
         } @else {
           {{ 'no_recipes_match' | translatePipe }}
         }
       </div>
     }
-    @for (recipe of filteredRecipes_(); track recipe._id) {
-      <div class="recipe-grid-row c-list-row" (click)="onRowClick(recipe, $event)" role="button" tabindex="0" (keydown.enter)="onEditRecipe(recipe)" (keydown.space)="$event.preventDefault(); onEditRecipe(recipe)">
-        <div class="col-name c-list-body-cell">{{ recipe.name_hebrew }}</div>
-        <div class="col-type c-list-body-cell">{{ (isRecipeDish(recipe) ? 'dish' : 'preparation') | translatePipe }}</div>
+    @for (row of displayRows_(); track row.recipe._id) {
+      <div
+        class="recipe-grid-row c-list-row"
+        (click)="onRowClick(row.recipe, $event)"
+        role="button"
+        tabindex="0"
+        (keydown.enter)="onEditRecipe(row.recipe)"
+        (keydown.space)="$event.preventDefault(); onEditRecipe(row.recipe)"
+      >
+        <div class="col-name c-list-body-cell">{{ row.recipe.name_hebrew }}</div>
+        <div class="col-type c-list-body-cell">
+          {{ (isRecipeDish(row.recipe) ? 'dish' : 'preparation') | translatePipe }}
+        </div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()">
-          <div class="col-labels c-list-body-cell c-dense-chip-col" cellCarouselSlide [label]="'labels' | translatePipe">
-            @if (getAllRecipeLabels(recipe).length) {
-              <div class="labels-btn-wrapper" [class.labels-expanded-open]="labelsExpand.isExpanded(recipe._id)" (click)="labelsExpand.toggleOne(recipe._id); $event.stopPropagation()" (clickOutside)="closeLabelsView($event)" role="button" tabindex="0" (keydown.enter)="labelsExpand.toggleOne(recipe._id)" (keydown.space)="$event.preventDefault(); labelsExpand.toggleOne(recipe._id)">
+          <div
+            class="col-labels c-list-body-cell c-dense-chip-col"
+            cellCarouselSlide
+            [label]="'labels' | translatePipe"
+          >
+            @if (row.labels.length) {
+              <div
+                class="labels-btn-wrapper"
+                [class.labels-expanded-open]="labelsExpand.isExpanded(row.recipe._id)"
+                (click)="labelsExpand.toggleOne(row.recipe._id); $event.stopPropagation()"
+                (clickOutside)="closeLabelsView($event)"
+                role="button"
+                tabindex="0"
+                (keydown.enter)="labelsExpand.toggleOne(row.recipe._id)"
+                (keydown.space)="$event.preventDefault(); labelsExpand.toggleOne(row.recipe._id)"
+              >
                 <button type="button" class="labels-btn">
                   <lucide-icon name="tag" [size]="16"></lucide-icon>
-                  {{ getAllRecipeLabels(recipe).length }}
+                  {{ row.labels.length }}
                 </button>
-                @if (labelsExpand.isExpanded(recipe._id)) {
+                @if (labelsExpand.isExpanded(row.recipe._id)) {
                   <div class="c-dense-chip-grid">
-                    @for (label of getAllRecipeLabels(recipe); track label) {
-                      <span class="label-chip" [style.background-color]="getLabelColor(label)">{{ label | translatePipe }}</span>
+                    @for (label of row.labels; track label) {
+                      <span class="label-chip" [style.background-color]="getLabelColor(label)">{{
+                        label | translatePipe
+                      }}</span>
                     }
                   </div>
                 }
@@ -100,16 +204,24 @@
               <span class="placeholder-dash">—</span>
             }
           </div>
-          <div class="col-allergens c-list-body-cell c-dense-chip-col" cellCarouselSlide [label]="'allergens' | translatePipe">
-            @if (getRecipeAllergens(recipe).length) {
-              <div class="allergen-btn-wrapper" [class.allergen-expanded-open]="allergenExpand.isExpanded(recipe._id)" (clickOutside)="closeAllergenView($event)">
-                <button type="button" class="allergen-btn" (click)="allergenExpand.toggleOne(recipe._id)">
+          <div
+            class="col-allergens c-list-body-cell c-dense-chip-col"
+            cellCarouselSlide
+            [label]="'allergens' | translatePipe"
+          >
+            @if (row.allergens.length) {
+              <div
+                class="allergen-btn-wrapper"
+                [class.allergen-expanded-open]="allergenExpand.isExpanded(row.recipe._id)"
+                (clickOutside)="closeAllergenView($event)"
+              >
+                <button type="button" class="allergen-btn" (click)="allergenExpand.toggleOne(row.recipe._id)">
                   <lucide-icon name="shield-alert" [size]="16"></lucide-icon>
-                  {{ getRecipeAllergens(recipe).length }}
+                  {{ row.allergens.length }}
                 </button>
-                @if (allergenExpand.isExpanded(recipe._id)) {
+                @if (allergenExpand.isExpanded(row.recipe._id)) {
                   <div class="c-dense-chip-grid">
-                    @for (a of getRecipeAllergens(recipe); track a) {
+                    @for (a of row.allergens; track a) {
                       <span class="allergen-pill">{{ a | translatePipe }}</span>
                     }
                   </div>
@@ -120,48 +232,87 @@
             }
           </div>
           @if (!hideDateColumn_()) {
-            <div class="col-date c-list-body-cell date-cell-wrap" cellCarouselSlide [label]="'date_added' | translatePipe" (mouseenter)="showDateTooltip(recipe._id, $event)" (mouseleave)="hideDateTooltip()" [attr.aria-describedby]="hoveredDateRecipeId_() === recipe._id ? 'date-tooltip-' + recipe._id : null">
-              {{ formatAddedAt(recipe.addedAt_) }}
+            <div
+              class="col-date c-list-body-cell date-cell-wrap"
+              cellCarouselSlide
+              [label]="'date_added' | translatePipe"
+              (mouseenter)="showDateTooltip(row.recipe._id, $event)"
+              (mouseleave)="hideDateTooltip()"
+              [attr.aria-describedby]="
+                hoveredDateRecipeId_() === row.recipe._id ? 'date-tooltip-' + row.recipe._id : null
+              "
+            >
+              {{ formatAddedAt(row.recipe.addedAt_) }}
             </div>
           }
-          <div class="col-rating c-list-body-cell" cellCarouselSlide [label]="'rating' | translatePipe" (click)="$event.stopPropagation()">
+          <div
+            class="col-rating c-list-body-cell"
+            cellCarouselSlide
+            [label]="'rating' | translatePipe"
+            (click)="$event.stopPropagation()"
+          >
             <app-rating-stars
-              [value]="recipe.rating_ ?? 0"
+              [value]="row.recipe.rating_ ?? 0"
               [readonly]="!isLoggedIn()"
               size="sm"
-              (ratingChange)="onRatingChange(recipe, $event)"
+              (ratingChange)="onRatingChange(row.recipe, $event)"
             />
           </div>
         </app-cell-carousel>
-        <div class="col-cost c-list-body-cell cost-cell-wrap" (mouseenter)="showCostTooltip(recipe._id, $event)" (mouseleave)="hideCostTooltip()" (click)="toggleCostTooltipTap(recipe._id, $event)" [attr.aria-describedby]="(hoveredCostRecipeId_() === recipe._id || tappedCostRecipeId_() === recipe._id) ? 'cost-tooltip-' + recipe._id : null">
-          ₪{{ getRecipeCost(recipe) | number:'1.2-2' }}
+        <div
+          class="col-cost c-list-body-cell cost-cell-wrap"
+          (mouseenter)="showCostTooltip(row.recipe._id, $event)"
+          (mouseleave)="hideCostTooltip()"
+          (click)="toggleCostTooltipTap(row.recipe._id, $event)"
+          [attr.aria-describedby]="
+            hoveredCostRecipeId_() === row.recipe._id || tappedCostRecipeId_() === row.recipe._id
+              ? 'cost-tooltip-' + row.recipe._id
+              : null
+          "
+        >
+          ₪{{ row.cost | number: '1.2-2' }}
         </div>
         <app-row-actions-menu class="c-col-actions c-list-body-cell">
-          <button type="button"
+          <button
+            type="button"
             class="c-icon-btn favorite-btn"
-            [class.is-favorited]="isFavoritedByCurrentUser_(recipe)"
-            (click)="onToggleFavorite(recipe); $event.stopPropagation()"
-            [attr.aria-label]="(isFavoritedByCurrentUser_(recipe) ? 'remove_from_favorites' : 'add_to_favorites') | translatePipe"
-            [disabled]="!isLoggedIn()">
+            [class.is-favorited]="isFavoritedByCurrentUser_(row.recipe)"
+            (click)="onToggleFavorite(row.recipe); $event.stopPropagation()"
+            [attr.aria-label]="
+              (isFavoritedByCurrentUser_(row.recipe) ? 'remove_from_favorites' : 'add_to_favorites') | translatePipe
+            "
+            [disabled]="!isLoggedIn()"
+          >
             <lucide-icon name="heart" [size]="18"></lucide-icon>
           </button>
-          <button type="button" class="c-icon-btn" (click)="onCookRecipe(recipe); $event.stopPropagation()"
-            [attr.aria-label]="'cook' | translatePipe">
+          <button
+            type="button"
+            class="c-icon-btn"
+            (click)="onCookRecipe(row.recipe); $event.stopPropagation()"
+            [attr.aria-label]="'cook' | translatePipe"
+          >
             <lucide-icon name="cooking-pot" [size]="18"></lucide-icon>
           </button>
           @if (isLoggedIn()) {
-            @if (removingId_() === recipe._id) {
+            @if (removingId_() === row.recipe._id) {
               <app-loader size="small" [inline]="true" />
             } @else {
-              <button type="button" class="c-icon-btn danger" (click)="onRemoveRecipe(recipe); $event.stopPropagation()"
-                [attr.aria-label]="'delete' | translatePipe">
+              <button
+                type="button"
+                class="c-icon-btn danger"
+                (click)="onRemoveRecipe(row.recipe); $event.stopPropagation()"
+                [attr.aria-label]="'delete' | translatePipe"
+              >
                 <lucide-icon name="trash-2" [size]="18"></lucide-icon>
               </button>
             }
           }
         </app-row-actions-menu>
         <div class="col-select c-list-body-cell" role="cell">
-          <app-list-row-checkbox [checked]="selection.isSelected(recipe._id)" (toggle)="selection.toggle(recipe._id)" />
+          <app-list-row-checkbox
+            [checked]="selection.isSelected(row.recipe._id)"
+            (toggle)="selection.toggle(row.recipe._id)"
+          />
         </div>
       </div>
     }
@@ -171,9 +322,11 @@
     @if (isLoggedIn()) {
       <div class="c-filter-category favorites-filter-category">
         <label class="c-filter-option">
-          <input type="checkbox"
+          <input
+            type="checkbox"
             [checked]="showFavoritesOnly_()"
-            (change)="showFavoritesOnly_.set(!showFavoritesOnly_())" />
+            (change)="showFavoritesOnly_.set(!showFavoritesOnly_())"
+          />
           <span>{{ 'show_favorites_only' | translatePipe }}</span>
         </label>
       </div>
@@ -182,8 +335,12 @@
       <div class="ingredient-search-block">
         <div class="ingredient-search-input-wrap">
           <lucide-icon name="search" [size]="18"></lucide-icon>
-          <input type="text" [ngModel]="ingredientSearchQuery_()" (ngModelChange)="ingredientSearchQuery_.set($event)"
-            [placeholder]="'search_by_ingredients' | translatePipe" />
+          <input
+            type="text"
+            [ngModel]="ingredientSearchQuery_()"
+            (ngModelChange)="ingredientSearchQuery_.set($event)"
+            [placeholder]="'search_by_ingredients' | translatePipe"
+          />
         </div>
         @if (ingredientSearchQuery_().trim()) {
           <app-scrollable-dropdown [maxHeight]="200">
@@ -199,10 +356,14 @@
         }
         <div class="ingredient-chips-wrap">
           @for (p of getSelectedProducts(); track p._id) {
-            <button type="button" class="c-filter-chip" (click)="removeIngredientProduct(p._id)">{{ p.name_hebrew }}</button>
+            <button type="button" class="c-filter-chip" (click)="removeIngredientProduct(p._id)">
+              {{ p.name_hebrew }}
+            </button>
           }
           @if (getSelectedProducts().length) {
-            <button type="button" class="ingredient-clear-btn" (click)="clearIngredientProducts()">{{ 'clear' | translatePipe }}</button>
+            <button type="button" class="ingredient-clear-btn" (click)="clearIngredientProducts()">
+              {{ 'clear' | translatePipe }}
+            </button>
           }
         </div>
       </div>
@@ -210,11 +371,18 @@
     <div class="c-filter-section">
       <div class="c-filter-section-header">
         @if (hasActiveFilters_()) {
-          <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">{{ 'clear_filters' | translatePipe }}</button>
+          <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">
+            {{ 'clear_filters' | translatePipe }}
+          </button>
         }
       </div>
       <div class="c-filter-category date-filter-category">
-        <button type="button" class="c-filter-category-header" [class.expanded]="isCategoryExpanded('Date')" (click)="toggleFilterCategory('Date')">
+        <button
+          type="button"
+          class="c-filter-category-header"
+          [class.expanded]="isCategoryExpanded('Date')"
+          (click)="toggleFilterCategory('Date')"
+        >
           <span>{{ 'date_filter' | translatePipe }}</span>
           @if (dateFrom_() != null || dateTo_() != null) {
             <span class="c-filter-category-count" aria-hidden="true">1</span>
@@ -224,8 +392,12 @@
         @if (isCategoryExpanded('Date')) {
           <div class="c-filter-options date-filter-options">
             <div class="date-sort-buttons">
-              <button type="button" class="c-btn-ghost--sm" (click)="setSortDateNewestFirst()">{{ 'sort_newest_first' | translatePipe }}</button>
-              <button type="button" class="c-btn-ghost--sm" (click)="setSortDateOldestFirst()">{{ 'sort_oldest_first' | translatePipe }}</button>
+              <button type="button" class="c-btn-ghost--sm" (click)="setSortDateNewestFirst()">
+                {{ 'sort_newest_first' | translatePipe }}
+              </button>
+              <button type="button" class="c-btn-ghost--sm" (click)="setSortDateOldestFirst()">
+                {{ 'sort_oldest_first' | translatePipe }}
+              </button>
             </div>
             <div class="date-range-inputs">
               <label class="date-range-label">
@@ -238,7 +410,11 @@
               </label>
             </div>
             <label class="c-filter-option">
-              <input type="checkbox" [checked]="dateIncludeByUpdated_()" (change)="dateIncludeByUpdated_.set(!dateIncludeByUpdated_())" />
+              <input
+                type="checkbox"
+                [checked]="dateIncludeByUpdated_()"
+                (change)="dateIncludeByUpdated_.set(!dateIncludeByUpdated_())"
+              />
               <span>{{ 'date_filter_by_updated' | translatePipe }}</span>
             </label>
           </div>
@@ -246,19 +422,37 @@
       </div>
       @for (category of filterCategories_(); track category.name) {
         <div class="c-filter-category">
-          <button type="button" class="c-filter-category-header" [class.expanded]="isCategoryExpanded(category.name)" (click)="toggleFilterCategory(category.name)">
-            <span>{{ (category.name === 'Allergens' ? 'do_not_include_allergens' : category.displayKey) | translatePipe }}</span>
+          <button
+            type="button"
+            class="c-filter-category-header"
+            [class.expanded]="isCategoryExpanded(category.name)"
+            (click)="toggleFilterCategory(category.name)"
+          >
+            <span>{{
+              (category.name === 'Allergens' ? 'do_not_include_allergens' : category.displayKey) | translatePipe
+            }}</span>
             @if (selectedCountInCategory(category) > 0) {
               <span class="c-filter-category-count" aria-hidden="true">{{ selectedCountInCategory(category) }}</span>
             }
-            <lucide-icon [name]="isCategoryExpanded(category.name) ? 'chevron-down' : 'chevron-left'" [size]="16"></lucide-icon>
+            <lucide-icon
+              [name]="isCategoryExpanded(category.name) ? 'chevron-down' : 'chevron-left'"
+              [size]="16"
+            ></lucide-icon>
           </button>
           @if (isCategoryExpanded(category.name)) {
             <div class="c-filter-options">
               @for (option of category.options; track option.value) {
                 <label class="c-filter-option">
-                  <input type="checkbox" [checked]="option.checked_" (change)="toggleFilter(category.name, option.value)" />
-                  <span>{{ option.label | translatePipe }}</span>
+                  <input
+                    type="checkbox"
+                    [checked]="option.checked_"
+                    (change)="toggleFilter(category.name, option.value)"
+                  />
+                  @if (option.color) {
+                    <span class="c-filter-option-dot" [style.background-color]="option.color" aria-hidden="true"></span>
+                  }
+                  <span class="c-filter-option-label">{{ option.label | translatePipe }}</span>
+                  <span class="c-filter-option-count" aria-hidden="true">{{ option.count }}</span>
                 </label>
               }
             </div>
@@ -267,13 +461,17 @@
       }
     </div>
   </ng-container>
-
 </app-list-shell>
 
 @if (activeCostTooltipRecipe_(); as recipe) {
   @if (costTooltipAnchor_(); as anchor) {
-    <div class="cost-tooltip cost-tooltip-fixed" [id]="'cost-tooltip-' + recipe._id" (clickOutside)="closeCostTooltipTap()"
-      [style.top.px]="anchor.bottom + 4" [style.left.px]="anchor.left + anchor.width / 2">
+    <div
+      class="cost-tooltip cost-tooltip-fixed"
+      [id]="'cost-tooltip-' + recipe._id"
+      (clickOutside)="closeCostTooltipTap()"
+      [style.top.px]="anchor.bottom + 4"
+      [style.left.px]="anchor.left + anchor.width / 2"
+    >
       {{ 'price_for' | translatePipe }}{{ getRecipeYieldDescription(recipe) }}
     </div>
   }
@@ -281,8 +479,12 @@
 
 @if (activeDateTooltipRecipe_(); as recipe) {
   @if (dateTooltipAnchor_(); as anchor) {
-    <div class="date-tooltip date-tooltip-fixed" [id]="'date-tooltip-' + recipe._id"
-      [style.top.px]="anchor.bottom + 4" [style.left.px]="anchor.left + anchor.width / 2">
+    <div
+      class="date-tooltip date-tooltip-fixed"
+      [id]="'date-tooltip-' + recipe._id"
+      [style.top.px]="anchor.bottom + 4"
+      [style.left.px]="anchor.left + anchor.width / 2"
+    >
       {{ 'date_updated' | translatePipe }}: {{ formatUpdatedAtWithTime(recipe.updatedAt_) }}
     </div>
   }

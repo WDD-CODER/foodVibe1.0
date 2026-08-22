@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./colors_and_type.css">
+  <link rel="stylesheet" href="./mobile-pass.css">
+  <script src="./shell.js"></script>
+  <script src="./image-slot.js"></script>
+  <style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.96) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+    body { margin: 0; }
+    a { color: var(--color-primary); text-decoration: none; }
+    a:hover { color: var(--color-primary-hover); }
+    input:focus, textarea:focus { outline: none; border-color: var(--border-focus) !important; box-shadow: var(--shadow-focus); }
+    .venue-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-5); }
+    .venue-card { background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); overflow: hidden; transition: transform 0.25s var(--ease-spring), box-shadow 0.25s var(--ease-spring); animation: fadeIn 0.3s var(--ease-spring); display: block; }
+    .venue-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+      a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(20,184,166,0.35) !important; }
+    @keyframes skelPulse { 0%,100% { opacity: 1 } 50% { opacity: .55 } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  
+    /* ── pass 2: touch ergonomics (one rule, all screens) ── */
+    [class*="car-arrow"] { display: none !important; }
+    /* ── pass 4: motion system ── */
+    @keyframes pageEnter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    app-shell > * { animation: pageEnter .28s var(--ease-spring) both; }
+    button, a[role="button"] { transition: transform .15s var(--ease-spring), background-color .2s var(--ease-smooth), color .2s var(--ease-smooth), box-shadow .25s var(--ease-smooth); }
+    button:active, a[role="button"]:active { transform: scale(0.97); }
+    input[type="checkbox"], input[type="radio"] {
+      appearance: none; -webkit-appearance: none; width: 24px; height: 24px; margin: 0; flex: none;
+      display: inline-grid; place-content: center; cursor: pointer;
+      background: var(--bg-pure); border: 1.5px solid var(--border-strong); border-radius: 7px;
+      box-shadow: inset 0 1px 2px rgba(15,23,42,0.06);
+      transition: background-color .16s var(--ease-smooth), border-color .16s var(--ease-smooth), box-shadow .2s var(--ease-smooth), transform .2s var(--ease-spring);
+    }
+    input[type="radio"] { border-radius: 50%; }
+    input[type="checkbox"]::after {
+      content: ""; width: 6px; height: 11px; opacity: 0;
+      border-right: 2.6px solid var(--color-text-on-primary); border-bottom: 2.6px solid var(--color-text-on-primary);
+      transform: rotate(45deg) translate(-1px, -2px) scale(0.6);
+      transition: opacity .14s var(--ease-smooth), transform .2s var(--ease-spring);
+    }
+    input[type="radio"]::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--color-text-on-primary); opacity: 0; transition: opacity .14s var(--ease-smooth); }
+    input[type="checkbox"]:hover, input[type="radio"]:hover { border-color: var(--color-primary); background: var(--color-primary-soft); }
+    input[type="checkbox"]:checked, input[type="radio"]:checked {
+      background: var(--color-primary); border-color: var(--color-primary);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 2px 8px -2px var(--color-primary-glow);
+    }
+    input[type="checkbox"]:checked::after { opacity: 1; transform: rotate(45deg) translate(-1px, -2px) scale(1); }
+    input[type="radio"]:checked::after { opacity: 1; }
+    input[type="checkbox"]:active, input[type="radio"]:active { transform: scale(0.94); }
+
+    @media (max-width: 767px) {
+      button, a[role="button"], select { min-height: 44px !important; min-width: 44px !important; }
+      input:not([type="checkbox"]):not([type="radio"]) { min-height: 44px !important; }
+      input[type="checkbox"], input[type="radio"] { width: 24px !important; height: 24px !important; padding: 10px !important; box-sizing: content-box !important; }
+      a[href]:not([style*="font-size: var(--fs-xs)"]) { min-height: 44px; display: inline-flex; align-items: center; }
+      [style*="grid-template-columns: 260px"], [style*="grid-template-columns: 320px"], [style*="grid-template-columns: 140px"] { grid-template-columns: 1fr !important; }
+      [style*="max-width: 1520px"], [style*="max-width: 1200px"], [style*="max-width: 1100px"], [style*="max-width: 720px"] { padding-inline: var(--space-4) !important; }
+    }
+    /* ── pass 5: mobile pass (≤767 only) ── */
+    @media (max-width: 767px) {
+      .venue-grid { grid-template-columns: 1fr !important; gap: var(--space-4) !important; }
+      .venue-card:hover { transform: none; }
+      .venue-card h1, .venue-card { -webkit-tap-highlight-color: transparent; }
+    }
+
+    /* ── pass 6: mobile cards (≤767 only) ── */
+    @media (max-width: 767px) {
+      /* the whole card is an <a>; keep it a block (the 44px touch rule turns links into inline-flex) */
+      .venue-card { display: block !important; min-height: 0 !important; }
+      .venue-card > div:first-child { height: auto !important; padding: var(--space-2) var(--space-2) 0 !important; }
+      .venue-card > div:first-child image-slot { display: block; width: 100% !important; height: 132px !important; border-radius: var(--radius-md) !important; overflow: hidden !important; }
+      .venue-card > div:first-child > span { top: 18px !important; right: 18px !important; }
+      .venue-card > div:last-child > div:last-child { gap: var(--space-4) !important; }
+      .venue-card > div:last-child > div:last-child > div:first-child { flex: 1 1 auto; }
+      .venue-card > div:last-child > div:last-child > div:last-child { flex: 0 0 auto; text-align: end; }
+    }
+  </style>
+</helmet>
+
+<app-shell dir="rtl" page="venues" fab='[{"id":"add-venue","label":"הוספת אתר","icon":"plus"}]'>
+  <div style="position: relative; z-index: 1;">
+
+    <!-- MAIN -->
+    <div style="max-width: 1200px; margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-12);">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-6); flex-wrap: wrap;">
+        <div>
+          <h1 style="margin: 0; font-size: var(--fs-xl); font-weight: var(--fw-bold); letter-spacing: var(--tracking-tight); color: var(--color-text-main);">אתרים</h1>
+          <p style="margin: 2px 0 0; font-size: var(--fs-sm); color: var(--color-text-muted);">ניהול מיקומים ואתרי הפעלה</p>
+        </div>
+        <button onClick="{{ openAddModal }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 0 var(--space-4); height: 38px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); border: none; border-radius: var(--radius-full); color: #fff; font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer; box-shadow: var(--shadow-glow);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+          הוספת אתר
+        </button>
+      </div>
+
+      <div class="venue-grid">
+        <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+          <div aria-busy="true" aria-label="טוען נתונים" style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); box-shadow: var(--shadow-glass); border-radius: var(--radius-lg); padding: var(--space-4); display: flex; flex-direction: column; gap: 12px; margin-bottom: var(--space-3);">
+            <sc-for list="{{ skeletonRows }}" as="row" hint-placeholder-count="6">
+              <div style="display: flex; align-items: center; gap: var(--space-3); animation: skelPulse 1.4s var(--ease-smooth) infinite;">
+                <div style="flex: 2; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.07);"></div>
+                <div style="flex: 1; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.05);"></div>
+                <div style="width: 84px; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.05);"></div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ loadFailed }}" hint-placeholder-val="{{ false }}">
+          <div role="alert" style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); box-shadow: var(--shadow-glass); border-radius: var(--radius-lg); padding: var(--space-10) var(--space-4); margin-bottom: var(--space-3); display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center;">
+            <i data-lucide="cloud-off" style="width: 28px; height: 28px; color: var(--color-danger);"></i>
+            <div style="font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--color-text-main);">הטעינה נכשלה</div>
+            <p style="margin: 0; max-width: 34ch; font-size: var(--fs-sm); color: var(--color-text-muted); line-height: var(--lh-relaxed);">אין חיבור לשרת כרגע. אפשר לנסות שוב.</p>
+            <button onClick="{{ retryLoad }}" style="min-height: 44px; padding: 0 20px; border: none; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-text-on-primary); font-family: inherit; font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer; box-shadow: var(--shadow-glow);">נסה שוב</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-10) var(--space-4); text-align: center;">
+            <i data-lucide="map-pin" style="width: 26px; height: 26px; color: var(--color-text-muted-light);"></i>
+            <div style="font-size: var(--fs-sm); color: var(--color-text-muted);">לא נמצאו אתרים</div>
+          </div>
+        </sc-if>
+
+        <sc-for list="{{ venues }}" as="v" hint-placeholder-count="4">
+          <a href="{{ v.href }}" class="venue-card">
+            <div style="position: relative; height: 140px;">
+              <image-slot id="{{ v.imgId }}" shape="rect" placeholder="הוסף תמונת אתר" style="width: 100%; height: 100%;"></image-slot>
+              <span style="position: absolute; top: 10px; right: 10px; display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: var(--radius-full); font-size: var(--fs-xs); font-weight: var(--fw-semibold); backdrop-filter: var(--blur-glass); {{ v.statusStyle }}">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></span>
+                {{ v.statusLabel }}
+              </span>
+            </div>
+            <div style="padding: var(--space-4);">
+              <div style="font-size: var(--fs-md); font-weight: var(--fw-bold); color: var(--color-text-main); margin-bottom: 4px;">{{ v.name }}</div>
+              <div style="display: flex; align-items: center; gap: 5px; font-size: var(--fs-sm); color: var(--color-text-muted); margin-bottom: var(--space-3);">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                <span>{{ v.address }}</span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; padding-top: var(--space-3); border-top: 1px dashed var(--border-default);">
+                <div style="display: flex; align-items: center; gap: 5px; font-size: var(--fs-xs); color: var(--color-text-secondary);">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                  {{ v.capacity }} מקומות
+                </div>
+                <div style="font-size: var(--fs-xs); color: var(--color-primary-hover); font-weight: var(--fw-semibold);">{{ v.menuCountLabel }}</div>
+              </div>
+            </div>
+          </a>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD VENUE MODAL -->
+  <sc-if value="{{ addModalOpen }}" hint-placeholder-val="{{ false }}">
+    <div class="m-sheet" style="position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; background: var(--overlay-backdrop); backdrop-filter: var(--blur-modal); animation: overlayIn 0.2s var(--ease-smooth);" onClick="{{ closeAddModal }}">
+      <div class="m-sheet-card m-scroll-y" style="width: min(420px, 92vw); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-modal); padding: var(--space-6); animation: popIn 0.2s var(--ease-spring);" onClick="{{ stopProp }}">
+        <h2 style="margin: 0 0 var(--space-4); font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--color-text-main);">הוספת אתר חדש</h2>
+        <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+          <div>
+            <label style="display: block; margin-bottom: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-secondary);">שם האתר</label>
+            <input type="text" value="{{ newVenueName }}" onChange="{{ onNewNameChange }}" placeholder="לדוגמה: אולם גני התערוכה" style="width: 100%; box-sizing: border-box; padding: 9px 12px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); font-size: var(--fs-sm); font-family: var(--font-sans); color: var(--color-text-main);">
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-secondary);">כתובת</label>
+            <input type="text" value="{{ newVenueAddress }}" onChange="{{ onNewAddressChange }}" placeholder="רחוב, עיר" style="width: 100%; box-sizing: border-box; padding: 9px 12px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); font-size: var(--fs-sm); font-family: var(--font-sans); color: var(--color-text-main);">
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-secondary);">קיבולת (מקומות ישיבה)</label>
+            <input type="number" value="{{ newVenueCapacity }}" onChange="{{ onNewCapacityChange }}" min="0" style="width: 100%; box-sizing: border-box; padding: 9px 12px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); font-size: var(--fs-sm); font-family: var(--font-sans); color: var(--color-text-main);">
+          </div>
+        </div>
+        <div style="display: flex; gap: var(--space-2); margin-top: var(--space-5); justify-content: flex-end;">
+          <button onClick="{{ closeAddModal }}" style="padding: 0 var(--space-4); height: 38px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-full); color: var(--color-text-secondary); font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer;">ביטול</button>
+          <button onClick="{{ saveNewVenue }}" style="padding: 0 var(--space-4); height: 38px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); border: none; border-radius: var(--radius-full); color: #fff; font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer; box-shadow: var(--shadow-glow);">שמירת אתר</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- TOAST -->
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <div class="m-toast" style="position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%); z-index: 400; display: flex; align-items: center; gap: var(--space-2); padding: 11px 20px; background: var(--color-text-main); color: #fff; border-radius: var(--radius-full); font-size: var(--fs-sm); font-weight: var(--fw-medium); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring);">
+      {{ toastMessage }}
+    </div>
+  </sc-if>
+</app-shell>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;viewState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ready&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;ready&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;States&quot;}}">
+const VENUES = [
+  { id: 1, name: 'אולם גני התערוכה', address: 'דרך השלום 12, תל אביב', capacity: 220, menuCount: 3, active: true },
+  { id: 2, name: 'חצר המסגריה', address: 'הרצל 84, יפו', capacity: 90, menuCount: 1, active: true },
+  { id: 3, name: 'גג הצפון', address: 'דיזנגוף 210, תל אביב', capacity: 60, menuCount: 0, active: false },
+  { id: 4, name: 'וילת הכרם', address: 'שביל הכרמים 5, זכרון יעקב', capacity: 140, menuCount: 2, active: true }
+];
+
+class Component extends DCLogic {
+  state = {
+    addModalOpen: false,
+    newVenueName: '',
+    newVenueAddress: '',
+    newVenueCapacity: '',
+    toastVisible: false,
+    toastMessage: ''
+  };
+
+  showToast(msg) {
+    clearTimeout(this._toastTimer);
+    this.setState({ toastVisible: true, toastMessage: msg });
+    this._toastTimer = setTimeout(() => this.setState({ toastVisible: false }), 2200);
+  }
+  openAddModal() { this.setState({ addModalOpen: true, newVenueName: '', newVenueAddress: '', newVenueCapacity: '' }); }
+  closeAddModal() { this.setState({ addModalOpen: false }); }
+  stopProp(e) { e.stopPropagation(); }
+  saveNewVenue() {
+    if (!this.state.newVenueName.trim()) return;
+    this.setState({ addModalOpen: false });
+    this.showToast('האתר נוסף בהצלחה');
+  }
+
+  renderVals() {
+    const b = this.baseVals();
+    const vs = this.state.__vs || this.props.viewState || 'ready';
+    const loading = vs === 'loading', failed = vs === 'error';
+    if (vs !== 'ready') { b.venues = []; b.isEmpty = vs === 'empty'; }
+    return Object.assign(b, {
+      loading, loadFailed: failed, ready: !loading && !failed,
+      skeletonRows: [1, 2, 3, 4, 5, 6].map(i => ({ i })),
+      retryLoad: () => this.setState({ __vs: 'ready' })
+    });
+  }
+
+  baseVals() {
+    const s = this.state;
+    const venues = VENUES.map(v => ({
+      id: v.id,
+      href: 'VenueDetail.dc.html?id=' + v.id,
+      imgId: 'venue-photo-' + v.id,
+      name: v.name,
+      address: v.address,
+      capacity: v.capacity,
+      menuCountLabel: v.menuCount > 0 ? (v.menuCount + ' תפריטים משויכים') : 'אין תפריטים',
+      statusLabel: v.active ? 'פעיל' : 'לא פעיל',
+      statusStyle: v.active
+        ? 'background: rgba(20,184,166,0.85); color: #fff;'
+        : 'background: rgba(100,116,139,0.75); color: #fff;'
+    }));
+
+    return {
+      venues,
+      addModalOpen: s.addModalOpen,
+      openAddModal: () => this.openAddModal(),
+      closeAddModal: () => this.closeAddModal(),
+      stopProp: (e) => this.stopProp(e),
+      newVenueName: s.newVenueName,
+      onNewNameChange: (v) => this.setState({ newVenueName: v }),
+      newVenueAddress: s.newVenueAddress,
+      onNewAddressChange: (v) => this.setState({ newVenueAddress: v }),
+      newVenueCapacity: s.newVenueCapacity,
+      onNewCapacityChange: (v) => this.setState({ newVenueCapacity: v }),
+      saveNewVenue: () => this.saveNewVenue(),
+      toastVisible: s.toastVisible,
+      toastMessage: s.toastMessage
+    };
+  }
+}
+</script>
+</body>
+</html>

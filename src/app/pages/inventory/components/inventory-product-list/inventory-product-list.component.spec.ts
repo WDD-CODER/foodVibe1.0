@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { InventoryProductListComponent } from './inventory-product-list.component'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { Router, ActivatedRoute } from '@angular/router'
-import { signal } from '@angular/core'
+import { signal, computed } from '@angular/core'
 import { of } from 'rxjs'
 import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
@@ -55,6 +55,7 @@ describe('InventoryProductListComponent', () => {
     const mockKitchenState = {
       products_: mockProductsSignal,
       suppliers_: mockSuppliersSignal,
+      suppliersById_: computed(() => new Map(mockSuppliersSignal().map((s) => [s._id, s]))),
       deleteProduct: jasmine.createSpy('deleteProduct'),
       saveProduct: jasmine.createSpy('saveProduct').and.returnValue({ subscribe: () => {} })
     }

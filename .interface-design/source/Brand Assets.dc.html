@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./colors_and_type.css">
+  <link rel="icon" type="image/svg+xml" href="assets/fc-favicon.svg">
+  <style>
+    body { margin: 0; background: var(--bg-body); }
+    a { color: var(--color-primary); text-decoration: none; }
+    a:hover { color: var(--color-primary-hover); }
+  </style>
+</helmet>
+
+<div style="position: relative; min-height: 100vh; font-family: 'Heebo', system-ui, sans-serif; color: var(--color-text-main);">
+  <div style="position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse 700px 480px at 85% 15%, rgba(20,184,166,0.12), transparent), radial-gradient(ellipse 550px 550px at 15% 75%, rgba(251,191,36,0.08), transparent);"></div>
+
+  <div style="position: relative; max-width: 1200px; margin: 0 auto; padding: 56px 40px 88px;">
+
+    <div style="display: inline-flex; padding: 4px 12px; margin-bottom: 12px; background: var(--color-primary-soft); color: var(--color-primary-hover); border-radius: var(--radius-full); font-size: var(--fs-xs); font-weight: 700;">Brand assets · 3a adopted</div>
+    <h1 style="margin: 0 0 8px; font-size: var(--fs-2xl); font-weight: 700; letter-spacing: var(--tracking-tight);">Food Composer identity</h1>
+    <p style="margin: 0 0 44px; max-width: 72ch; font-size: var(--fs-base); color: var(--color-text-secondary); line-height: var(--lh-relaxed); text-wrap: pretty;">Five files in <code>assets/</code>, all vector. The shell serves the mark in the top bar and registers the favicon on every screen, so the app picks these up with no per-screen work. Explorations stay in <a href="Food Composer Logo.dc.html">Food Composer Logo</a>.</p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 22px; margin-bottom: 44px;">
+
+      <div style="display: flex; flex-direction: column; gap: 18px; padding: 26px; background: var(--bg-glass-strong); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-glass);">
+        <div style="display: grid; place-content: center; min-height: 190px;">
+          <img src="assets/fc-seal.svg" width="176" height="176" alt="Food Composer seal">
+        </div>
+        <div>
+          <div style="font-size: var(--fs-md); font-weight: 700;">Primary seal</div>
+          <code style="display: inline-block; margin: 6px 0 8px; font-size: var(--fs-xs);">assets/fc-seal.svg</code>
+          <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Splash, sign-in, print, marketing. Never below 96px — below that it turns to texture.</p>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 18px; padding: 26px; background: var(--bg-glass-strong); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 24px; min-height: 190px;">
+          <img src="assets/fc-mark.svg" width="88" height="88" alt="Food Composer mark">
+          <img src="assets/fc-mark.svg" width="44" height="44" alt="">
+          <img src="assets/fc-mark.svg" width="30" height="30" alt="">
+          <img src="assets/fc-mark.svg" width="16" height="16" alt="">
+        </div>
+        <div>
+          <div style="font-size: var(--fs-md); font-weight: 700;">App mark</div>
+          <code style="display: inline-block; margin: 6px 0 8px; font-size: var(--fs-xs);">assets/fc-mark.svg</code>
+          <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Top bar, tabs, anywhere under 64px. FC is knocked out of the pot, so contrast survives the reduction.</p>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 18px; padding: 26px; background: rgba(15,23,42,0.94); border-radius: var(--radius-xl); box-shadow: var(--shadow-card);">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 24px; min-height: 190px;">
+          <img src="assets/fc-mark-kitchen.svg" width="88" height="88" alt="Food Composer mark, kitchen mode">
+          <img src="assets/fc-mark-kitchen.svg" width="44" height="44" alt="">
+          <img src="assets/fc-mark-kitchen.svg" width="30" height="30" alt="">
+          <img src="assets/fc-mark-kitchen.svg" width="16" height="16" alt="">
+        </div>
+        <div>
+          <div style="font-size: var(--fs-md); font-weight: 700; color: #f1f5f4;">Kitchen mark</div>
+          <code style="display: inline-block; margin: 6px 0 8px; font-size: var(--fs-xs); background: rgba(255,255,255,0.08); color: #a7f3ea;">assets/fc-mark-kitchen.svg</code>
+          <p style="margin: 0; font-size: var(--fs-sm); color: rgba(232,250,247,0.7); line-height: var(--lh-relaxed);">Cook View and any dark surface. Same geometry in kitchen teal — the shell swaps to it on <code style="background: rgba(255,255,255,0.08); color: #a7f3ea;">theme="kitchen"</code>.</p>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 18px; padding: 26px; background: var(--bg-glass-strong); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-glass);">
+        <div style="display: grid; place-content: center; min-height: 190px;">
+          <img src="assets/fc-seal-ink.svg" width="176" height="176" alt="Food Composer seal, one ink">
+        </div>
+        <div>
+          <div style="font-size: var(--fs-md); font-weight: 700;">One ink</div>
+          <code style="display: inline-block; margin: 6px 0 8px; font-size: var(--fs-xs);">assets/fc-seal-ink.svg</code>
+          <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Embroidery, foil, stamps, single-colour print. No cream field, no shading strokes — one paint value only.</p>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 18px; padding: 26px; background: var(--bg-glass-strong); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 24px; min-height: 190px;">
+          <img src="assets/fc-favicon.svg" width="96" height="96" alt="Food Composer favicon">
+          <img src="assets/fc-favicon.svg" width="32" height="32" alt="">
+          <img src="assets/fc-favicon.svg" width="16" height="16" alt="">
+        </div>
+        <div>
+          <div style="font-size: var(--fs-md); font-weight: 700;">Favicon</div>
+          <code style="display: inline-block; margin: 6px 0 8px; font-size: var(--fs-xs);">assets/fc-favicon.svg</code>
+          <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Cream mark on a teal rounded tile, so it holds its own against a browser tab strip. Registered by the shell automatically.</p>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 18px; padding: 26px; background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; flex-direction: column; justify-content: center; gap: 22px; min-height: 190px;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <img src="assets/fc-mark.svg" width="46" height="46" alt="">
+            <span style="font-size: 25px; letter-spacing: -0.02em; line-height: 1;"><b style="font-weight: 800;">Food</b> <span style="font-weight: 300;">Composer</span></span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px;">
+            <img src="assets/fc-seal.svg" width="64" height="64" alt="">
+            <span style="font-size: 21px; letter-spacing: -0.02em; line-height: 1.1;"><b style="font-weight: 800;">Food</b> <span style="font-weight: 300;">Composer</span></span>
+            <span style="font-size: 9px; font-weight: 600; letter-spacing: 0.28em; color: var(--color-accent-gold);">KITCHEN WORKBENCH</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size: var(--fs-md); font-weight: 700;">Lock-ups</div>
+          <p style="margin: 8px 0 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Horizontal uses the app mark, stacked uses the seal. Wordmark is Heebo — 800 on Food, 300 on Composer, −0.02em tracking. Clear space equals the pot's width on every side.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="padding: 26px 28px; background: var(--bg-glass-strong); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-glass);">
+      <div style="font-size: var(--fs-md); font-weight: 700; margin-bottom: 14px;">Where it is already wired</div>
+      <ul style="margin: 0; padding-inline-start: 20px; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed); display: flex; flex-direction: column; gap: 7px;">
+        <li>Top bar on all 13 screens, through <code>shell.js</code> — light mark by default, kitchen mark under <code>theme="kitchen"</code>.</li>
+        <li>Favicon injected by the shell on every screen, so nothing needs adding per file.</li>
+        <li>The old <code>food-compos-logo.png</code> is no longer referenced anywhere.</li>
+      </ul>
+      <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border-row); font-size: var(--fs-sm); color: var(--color-text-muted); line-height: var(--lh-relaxed);">Not yet placed, say the word: sign-in screen, empty-state watermark, PDF and print headers, app store / PWA icons at 192 and 512, and a Hebrew ring-text cut of the seal.</div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

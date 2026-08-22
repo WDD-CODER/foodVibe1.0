@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./colors_and_type.css">
+  <script src="./shell.js"></script>
+  <style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.96) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    body { margin: 0; }
+    a { color: var(--color-primary); text-decoration: none; }
+    a:hover { color: var(--color-primary-hover); }
+    input[type="checkbox"] {
+      appearance: none; -webkit-appearance: none; width: 24px; height: 24px; margin: 0; flex: none;
+      display: inline-grid; place-content: center; cursor: pointer;
+      background: var(--bg-pure); border: 1.5px solid var(--border-strong); border-radius: 7px;
+      box-shadow: inset 0 1px 2px rgba(15,23,42,0.06);
+      transition: background-color .16s var(--ease-smooth), border-color .16s var(--ease-smooth), box-shadow .2s var(--ease-smooth), transform .2s var(--ease-spring);
+    }
+    input[type="checkbox"]::after {
+      content: ""; width: 6px; height: 11px; opacity: 0;
+      border-right: 2.6px solid var(--color-text-on-primary); border-bottom: 2.6px solid var(--color-text-on-primary);
+      transform: rotate(45deg) translate(-1px, -2px) scale(0.6);
+      transition: opacity .14s var(--ease-smooth), transform .2s var(--ease-spring);
+    }
+    input[type="checkbox"]:hover { border-color: var(--color-primary); background: var(--color-primary-soft); }
+    input[type="checkbox"]:checked {
+      background: var(--color-primary); border-color: var(--color-primary);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 2px 8px -2px var(--color-primary-glow);
+    }
+    input[type="checkbox"]:checked::after { opacity: 1; transform: rotate(45deg) translate(-1px, -2px) scale(1); }
+    input[type="checkbox"]:active { transform: scale(0.94); }
+    input:focus, button:focus { outline: none; }
+    ::selection { background: var(--color-primary-soft); }
+    .sup-minorder-cell, .sup-contact-cell, .sup-lead-cell, .sup-linked-cell { justify-content: center; text-align: center; }
+    .suppliers-header-row > div, .sup-actions-cell, .sup-select-cell { justify-content: center; }
+.suppliers-header-row > div { display: flex; align-items: center; min-height: 22px; line-height: 1.2; }
+    .sup-car-outer, .sup-car-track { display: contents; }
+    .sup-car-arrow { display: none !important; }
+    .sup-contact-cell { order: 2; }
+    .sup-days-cell { order: 3; }
+    .sup-minorder-cell { order: 4; }
+    .sup-lead-cell { order: 5; }
+    .sup-linked-cell { order: 6; }
+    .sup-actions-cell { order: 7; }
+    .sup-select-cell { order: 8; }
+    @media (max-width: 1023px) {
+      .suppliers-main-layout { flex-direction: column !important; align-items: stretch !important; }
+      .suppliers-main { display: contents; }
+      .suppliers-toolbar { order: 1; flex-wrap: wrap !important; }
+      .suppliers-aside { order: 2; position: static !important; width: 100% !important; max-width: none !important; align-self: stretch; margin: 0 0 var(--space-4); box-sizing: border-box; }
+      .suppliers-aside > div { width: 100%; min-width: 0; box-sizing: border-box; }
+      .suppliers-selection-bar { order: 3; }
+      .suppliers-list-container { order: 4; }
+    }
+    @media (max-width: 479px) {
+      .suppliers-toolbar > input, .suppliers-toolbar > div:has(input[placeholder]) { min-width: 0 !important; flex: 1 1 100% !important; order: 3; }
+      .suppliers-toolbar > button:last-child { order: 2; margin-inline-start: 0 !important; }
+      .day-count { display: none !important; }
+
+      .suppliers-header-row { display: none !important; }
+      .suppliers-list-container { background: none !important; border: none !important; box-shadow: none !important; overflow: visible !important; padding: 0 !important; display: flex !important; flex-direction: column; gap: 6px; }
+
+      .suppliers-row {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px;
+        box-sizing: border-box;
+        padding: 8px 10px !important;
+        margin: 0 !important;
+        border-radius: var(--radius-md) !important;
+        background: var(--bg-glass-hover);
+        border: 1px solid var(--border-glass) !important;
+        box-shadow: none !important;
+        position: relative;
+      }
+      .suppliers-row > .sup-name-cell { order: 1; flex: 1 1 auto; min-width: 0; display: block !important; font-size: var(--fs-sm) !important; font-weight: var(--fw-medium) !important; text-align: start; padding-bottom: 0 !important; border-bottom: none !important; margin-bottom: 0 !important; }
+      .suppliers-row > .sup-minorder-cell { order: 2; flex: 0 0 auto !important; font-size: var(--fs-sm) !important; white-space: nowrap; }
+      .suppliers-row > .sup-actions-cell { order: 4; flex: 0 0 auto; gap: 0 !important; }
+      .suppliers-row > .sup-actions-cell button { width: 26px !important; height: 26px !important; }
+      .sup-select-cell { order: 5; flex: 0 0 auto; }
+      .suppliers-row > .sup-car-outer { order: 3; display: block !important; position: relative; flex: 0 0 108px; width: 108px; box-sizing: border-box; padding: 0 14px; }
+      .sup-car-track > div { order: 0; }
+      .sup-car-track { display: flex !important; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; background: var(--bg-subtle); border-radius: var(--radius-sm); scrollbar-width: none; height: 44px; }
+      .sup-car-track::-webkit-scrollbar { display: none; }
+      .sup-car-track > div { flex: 0 0 100%; width: 100%; box-sizing: border-box; scroll-snap-align: start; scroll-snap-stop: always; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 1px; padding: 2px 6px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; font-size: var(--fs-xs); line-height: 1.15; }
+      .sup-car-track > div::before { content: attr(data-label); font-size: 12px; font-weight: var(--fw-semibold); color: var(--color-text-muted-light); text-transform: uppercase; line-height: 1; }
+    }
+      a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(20,184,166,0.35) !important; }
+    @keyframes skelPulse { 0%,100% { opacity: 1 } 50% { opacity: .55 } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  
+    /* ── pass 2: touch ergonomics (one rule, all screens) ── */
+    [class*="car-arrow"] { display: none !important; }
+    /* ── pass 4: motion system ── */
+    @keyframes pageEnter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    app-shell > * { animation: pageEnter .28s var(--ease-spring) both; }
+    button, a[role="button"] { transition: transform .15s var(--ease-spring), background-color .2s var(--ease-smooth), color .2s var(--ease-smooth), box-shadow .25s var(--ease-smooth); }
+    button:active, a[role="button"]:active { transform: scale(0.97); }
+    input[type="checkbox"], input[type="radio"] { accent-color: var(--color-primary); width: 24px; height: 24px; cursor: pointer; }
+
+    @media (max-width: 767px) {
+      button, a[role="button"], select { min-height: 44px !important; min-width: 44px !important; }
+      input:not([type="checkbox"]):not([type="radio"]) { min-height: 44px !important; }
+      input[type="checkbox"], input[type="radio"] { width: 24px !important; height: 24px !important; padding: 10px !important; box-sizing: content-box !important; }
+      a[href]:not([style*="font-size: var(--fs-xs)"]) { min-height: 44px; display: inline-flex; align-items: center; }
+      [style*="grid-template-columns: 260px"], [style*="grid-template-columns: 320px"], [style*="grid-template-columns: 140px"] { grid-template-columns: 1fr !important; }
+      [style*="max-width: 1520px"], [style*="max-width: 1200px"], [style*="max-width: 1100px"], [style*="max-width: 720px"] { padding-inline: var(--space-4) !important; }
+    }
+  </style>
+</helmet>
+
+<app-shell dir="rtl" page="suppliers" fab='[{"id":"add-supplier","label":"הוספת ספק","icon":"plus"}]'>
+  <div style="position: relative; z-index: 1;">
+
+    <!-- MAIN -->
+    <div class="suppliers-main-layout" style="max-width: 1520px; margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-12); display: flex; gap: var(--space-5); align-items: flex-start; position: static">
+
+      <!-- FILTERS PANEL -->
+      <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ true }}">
+        <aside class="suppliers-aside" style="width: clamp(220px, 18vw, 320px); flex-shrink: 0; position: sticky; top: calc(3.5rem + var(--space-5)); animation: fadeIn 0.25s var(--ease-spring);">
+          <div style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); padding: var(--space-4);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4);">
+              <h3 style="margin: 0; font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--color-text-main);">סינון</h3>
+              <sc-if value="{{ hasActiveFilters }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ clearFilters }}" style="background: none; border: none; padding: 0; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-primary); cursor: pointer;">נקה סינון</button>
+              </sc-if>
+            </div>
+
+            <label style="display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) 0; cursor: pointer; border-bottom: 1px solid var(--border-row); margin-bottom: var(--space-3);">
+              <input type="checkbox" checked="{{ linkedOnly }}" onChange="{{ toggleLinkedOnly }}">
+              <span style="font-size: var(--fs-sm); color: var(--color-text-secondary); font-weight: var(--fw-medium);">מוצרים מקושרים בלבד</span>
+            </label>
+
+            <div>
+              <div style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">ימי אספקה</div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 2px 8px;">
+                <sc-for list="{{ dayOptions }}" as="d" hint-placeholder-count="7">
+                  <label style="display: flex; align-items: center; gap: 6px; padding: 5px 0; cursor: pointer; min-width: 0;">
+                    <input type="checkbox" checked="{{ d.checked }}" onChange="{{ d.onToggle }}">
+                    <span style="font-size: var(--fs-sm); color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ d.label }}</span>
+                  </label>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </sc-if>
+
+      <!-- LIST -->
+      <main class="suppliers-main" style="flex: 1; min-width: 0;">
+        <div class="suppliers-toolbar" style="display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-5); flex-wrap: wrap;">
+          <button onClick="{{ togglePanel }}" style="display: grid; place-content: center; width: 38px; height: 38px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--color-text-muted); cursor: pointer; flex-shrink: 0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+          </button>
+
+          <div>
+            <h1 style="margin: 0; font-size: var(--fs-xl); font-weight: var(--fw-bold); letter-spacing: var(--tracking-tight); color: var(--color-text-main);">ספקים</h1>
+            <p style="margin: 2px 0 0; font-size: var(--fs-sm); color: var(--color-text-muted);">{{ filteredCount }} מתוך {{ totalCount }} ספקים</p>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: var(--space-2); background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 0 var(--space-3); height: 38px; min-width: 220px; backdrop-filter: var(--blur-glass);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-text-muted-light); flex-shrink: 0;"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+            <input type="text" placeholder="חיפוש ספק" value="{{ search }}" onChange="{{ onSearchChange }}" style="border: none; background: none; outline: none; font-size: var(--fs-sm); color: var(--color-text-main); font-family: var(--font-sans); width: 100%;">
+          </div>
+
+          <button onClick="{{ openAddModal }}" style="margin-inline-start: auto; display: inline-flex; align-items: center; gap: var(--space-2); padding: 0 var(--space-4); height: 38px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); color: var(--color-text-on-primary); border: none; border-radius: var(--radius-full); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer; box-shadow: var(--shadow-glow);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+            הוסף ספק
+          </button>
+        </div>
+
+        <sc-if value="{{ hasSelection }}" hint-placeholder-val="{{ false }}">
+          <div class="suppliers-selection-bar" style="display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4); margin-bottom: var(--space-3); background: var(--color-primary-soft); border: 1px solid var(--border-focus); border-radius: var(--radius-md); animation: popIn 0.2s var(--ease-spring);">
+            <span style="font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--color-text-main);">{{ selectedCount }} נבחרו</span>
+            <button onClick="{{ askBulkDelete }}" style="display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid rgba(220,38,38,0.3); color: var(--color-danger); padding: 6px 12px; border-radius: var(--radius-md); font-size: var(--fs-xs); font-weight: var(--fw-semibold); cursor: pointer;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              מחק נבחרים
+            </button>
+            <button onClick="{{ clearSelection }}" style="background: none; border: none; color: var(--color-text-muted); font-size: var(--fs-xs); cursor: pointer; margin-inline-start: auto;">בטל בחירה</button>
+          </div>
+        </sc-if>
+
+        <div class="suppliers-list-container" style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); overflow: hidden;">
+
+          <div class="suppliers-header-row" style="display: grid; grid-template-columns: 1.7fr 1.1fr 1.5fr 0.8fr 0.8fr 0.9fr 76px 28px; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-default); background: var(--bg-muted);">
+            <div onClick="{{ setSortName }}" style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); cursor: pointer;">
+              ספק
+              <sc-if value="{{ nameSortUp }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></sc-if>
+              <sc-if value="{{ nameSortDown }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></sc-if>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide);">איש קשר</div>
+            <div style="display: flex; align-items: center; justify-content: center; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide);">ימי אספקה</div>
+            <div onClick="{{ setSortMinOrder }}" style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); cursor: pointer;">
+              מינ׳ הזמנה
+              <sc-if value="{{ minOrderSortUp }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></sc-if>
+              <sc-if value="{{ minOrderSortDown }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></sc-if>
+            </div>
+            <div onClick="{{ setSortLead }}" style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); cursor: pointer;">
+              זמן אספקה
+              <sc-if value="{{ leadSortUp }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></sc-if>
+              <sc-if value="{{ leadSortDown }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></sc-if>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide);">מוצרים מקושרים</div>
+            <div style="display: flex; align-items: center; justify-content: center; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide);">פעולות</div>
+            <div style="display: flex; align-items: center; justify-content: center;">
+              <input type="checkbox" checked="{{ allSelected }}" onChange="{{ toggleSelectAll }}">
+            </div>
+          </div>
+
+          <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+            <div aria-busy="true" aria-label="טוען נתונים" style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); box-shadow: var(--shadow-glass); border-radius: var(--radius-lg); padding: var(--space-4); display: flex; flex-direction: column; gap: 12px; margin-bottom: var(--space-3);">
+              <sc-for list="{{ skeletonRows }}" as="row" hint-placeholder-count="6">
+                <div style="display: flex; align-items: center; gap: var(--space-3); animation: skelPulse 1.4s var(--ease-smooth) infinite;">
+                  <div style="flex: 2; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.07);"></div>
+                  <div style="flex: 1; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.05);"></div>
+                  <div style="width: 84px; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.05);"></div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ loadFailed }}" hint-placeholder-val="{{ false }}">
+            <div role="alert" style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); box-shadow: var(--shadow-glass); border-radius: var(--radius-lg); padding: var(--space-10) var(--space-4); margin-bottom: var(--space-3); display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center;">
+              <i data-lucide="cloud-off" style="width: 28px; height: 28px; color: var(--color-danger);"></i>
+              <div style="font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--color-text-main);">הטעינה נכשלה</div>
+              <p style="margin: 0; max-width: 34ch; font-size: var(--fs-sm); color: var(--color-text-muted); line-height: var(--lh-relaxed);">אין חיבור לשרת כרגע. אפשר לנסות שוב.</p>
+              <button onClick="{{ retryLoad }}" style="min-height: 44px; padding: 0 20px; border: none; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-text-on-primary); font-family: inherit; font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer; box-shadow: var(--shadow-glow);">נסה שוב</button>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="padding: var(--space-12) var(--space-4); text-align: center; color: var(--color-text-muted); font-size: var(--fs-sm);">לא נמצאו ספקים התואמים לחיפוש</div>
+          </sc-if>
+
+          <sc-for list="{{ suppliers }}" as="sup" hint-placeholder-count="6">
+            <div class="suppliers-row" style="{{ sup.rowStyle }}">
+              <div class="sup-name-cell" style="display: flex; align-items: center; font-size: var(--fs-base); font-weight: var(--fw-medium); color: var(--color-text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ sup.name }}</div>
+              <div class="sup-minorder-cell" style="display: flex; align-items: center; gap: 3px; font-size: var(--fs-sm); color: var(--color-text-secondary); font-variant-numeric: tabular-nums;">
+                <span style="display: flex; align-items: baseline; gap: 4px;"><span>{{ sup.minOrderLabel }}</span><span style="color: var(--color-text-muted-light); font-size: var(--fs-xs);">₪</span></span>
+              </div>
+              <div class="sup-car-outer" data-car-outer>
+              <div class="sup-car-track" data-car-track>
+              <div class="sup-contact-cell" data-label="איש קשר" style="display: flex; align-items: center; font-size: var(--fs-sm); color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ sup.contact }}</div>
+              <div class="sup-days-cell" data-label="ימי אספקה" style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: center;">
+                  <sc-if value="{{ sup.allDays }}" hint-placeholder-val="{{ false }}">
+                    <span style="display: inline-flex; align-items: center; padding: 3px 9px; border-radius: var(--radius-sm); background: var(--color-primary-soft); color: var(--color-primary-hover); font-size: var(--fs-xs); font-weight: var(--fw-semibold);">כל השבוע</span>
+                  </sc-if>
+                  <sc-for list="{{ sup.dayChips }}" as="dc" hint-placeholder-count="3">
+                    <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 4px; border-radius: var(--radius-sm); background: var(--color-primary-soft); color: var(--color-primary-hover); font-size: var(--fs-xs); font-weight: var(--fw-semibold);">{{ dc.label }}</span>
+                  </sc-for>
+                  <sc-if value="{{ sup.noDays }}" hint-placeholder-val="{{ false }}">
+                    <span style="color: var(--color-text-muted-light); font-size: var(--fs-sm);">—</span>
+                  </sc-if>
+              </div>
+              <div class="sup-lead-cell" data-label="זמן אספקה" style="display: flex; align-items: center; font-size: var(--fs-sm); color: var(--color-text-secondary);"><span>{{ sup.leadLabel }}</span></div>
+              <div class="sup-linked-cell" data-label="מוצרים מקושרים" style="display: flex; align-items: center; font-size: var(--fs-sm); color: var(--color-text-secondary);"><span>{{ sup.linkedCount }}</span></div>
+              </div>
+              <button type="button" class="sup-car-arrow sup-car-prev" onClick="{{ carPrev }}">‹</button>
+              <button type="button" class="sup-car-arrow sup-car-next" onClick="{{ carNext }}">›</button>
+              </div>
+              <div class="sup-actions-cell" style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                <button onClick="{{ sup.onEdit }}" style="display: grid; place-content: center; width: 30px; height: 30px; background: none; border: none; border-radius: var(--radius-sm); color: var(--color-text-muted); cursor: pointer;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg>
+                </button>
+                <button onClick="{{ sup.onDelete }}" style="display: grid; place-content: center; width: 30px; height: 30px; background: none; border: none; border-radius: var(--radius-sm); color: var(--color-danger); cursor: pointer;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+              </div>
+              <div class="sup-select-cell" style="display: flex; align-items: center; justify-content: center;">
+                <input type="checkbox" checked="{{ sup.selected }}" onChange="{{ sup.onToggleSelect }}">
+              </div>
+            </div>
+          </sc-for>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ADD / EDIT MODAL -->
+  <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" style="position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; background: var(--overlay-backdrop); backdrop-filter: blur(6px); animation: fadeIn 0.15s ease;">
+      <div onClick="{{ stopPropagation }}" style="width: 92%; max-width: 460px; max-height: 86vh; overflow-y: auto; padding: var(--space-6); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-5);">
+          <h3 style="margin: 0; font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--color-text-main);">{{ modalTitle }}</h3>
+          <button onClick="{{ closeModal }}" style="width: 30px; height: 30px; display: grid; place-content: center; border: 1px solid var(--border-default); background: var(--bg-glass); border-radius: var(--radius-sm); cursor: pointer; color: var(--color-text-muted);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+          </button>
+        </div>
+
+        <label style="display: block; margin-bottom: var(--space-4);">
+          <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">שם הספק</span>
+          <input type="text" value="{{ draftName }}" onChange="{{ setDraftName }}" placeholder="לדוגמה: ירקות השדה" style="width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: var(--fs-base); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1.5px solid var(--border-default); border-radius: var(--radius-md);">
+        </label>
+
+        <label style="display: block; margin-bottom: var(--space-4);">
+          <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">איש קשר</span>
+          <input type="text" value="{{ draftContact }}" onChange="{{ setDraftContact }}" placeholder="שם איש הקשר" style="width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: var(--fs-base); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1.5px solid var(--border-default); border-radius: var(--radius-md);">
+        </label>
+
+        <div style="margin-bottom: var(--space-4);">
+          <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">ימי אספקה</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <sc-for list="{{ draftDayOptions }}" as="d" hint-placeholder-count="7">
+              <button onClick="{{ d.onToggle }}" style="{{ d.style }}">{{ d.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-5);">
+          <label style="display: block;">
+            <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">מינימום הזמנה (₪)</span>
+            <input type="number" value="{{ draftMinOrder }}" onChange="{{ setDraftMinOrder }}" placeholder="0" style="width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: var(--fs-base); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1.5px solid var(--border-default); border-radius: var(--radius-md);">
+          </label>
+          <label style="display: block;">
+            <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">זמן אספקה (ימים)</span>
+            <input type="number" value="{{ draftLead }}" onChange="{{ setDraftLead }}" placeholder="0" style="width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: var(--fs-base); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1.5px solid var(--border-default); border-radius: var(--radius-md);">
+          </label>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--border-default);">
+          <button onClick="{{ closeModal }}" style="padding: 9px 18px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--color-text-secondary); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">ביטול</button>
+          <button onClick="{{ saveDraft }}" style="padding: 9px 20px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); border: none; border-radius: var(--radius-md); color: #fff; font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer; box-shadow: var(--shadow-glow);">שמירה</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- CONFIRM DIALOG -->
+  <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; background: var(--overlay-backdrop); backdrop-filter: blur(6px); animation: fadeIn 0.15s ease;">
+      <div style="width: 90%; max-width: 380px; padding: var(--space-6); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring); text-align: center;">
+        <div style="width: 44px; height: 44px; margin: 0 auto var(--space-4); border-radius: 50%; background: var(--bg-danger-subtle); display: grid; place-content: center; color: var(--color-danger);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+        </div>
+        <p style="margin: 0 0 var(--space-5); font-size: var(--fs-base); font-weight: var(--fw-medium); color: var(--color-text-main);">{{ confirmMessage }}</p>
+        <div style="display: flex; gap: var(--space-3);">
+          <button onClick="{{ cancelConfirm }}" style="flex: 1; padding: 10px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--color-text-secondary); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">ביטול</button>
+          <button onClick="{{ runConfirm }}" style="flex: 1; padding: 10px; background: var(--color-danger); border: none; border-radius: var(--radius-md); color: #fff; font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">מחיקה</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- TOAST -->
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 400; display: flex; align-items: center; gap: var(--space-2); padding: 11px 20px; background: var(--color-text-main); color: #fff; border-radius: var(--radius-full); font-size: var(--fs-sm); font-weight: var(--fw-medium); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring);">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);"><path d="M20 6 9 17l-5-5"></path></svg>
+      {{ toastMessage }}
+    </div>
+  </sc-if>
+</app-shell>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;viewState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ready&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;ready&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;States&quot;}}">
+const DAY_LABELS_SHORT = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'];
+const DAY_LABELS_FULL = ['יום א׳', 'יום ב׳', 'יום ג׳', 'יום ד׳', 'יום ה׳', 'יום ו׳', 'שבת'];
+
+const BASE_SUPPLIERS = [
+  { _id: 'sup_vegetable', name: 'ירקות השדה', contact: 'משה לוי', days: [0, 2, 4], minOrder: 150, lead: 1, linkedCount: 5 },
+  { _id: 'sup_meat', name: 'קצביית הצפון', contact: 'דני אברהם', days: [1, 3], minOrder: 400, lead: 2, linkedCount: 4 },
+  { _id: 'sup_dry', name: 'סיטונאי יבש', contact: 'רונית שגיא', days: [0, 1, 2, 3, 4], minOrder: 300, lead: 3, linkedCount: 7 },
+  { _id: 'sup_spices', name: 'תבליני המזרח', contact: 'יוסי מזרחי', days: [2], minOrder: 100, lead: 5, linkedCount: 5 },
+  { _id: 'sup_fish', name: 'דגי החוף', contact: 'אבי כהן', days: [0, 3], minOrder: 250, lead: 1, linkedCount: 0 },
+  { _id: 'sup_dairy', name: 'מחלבת הגליל', contact: 'שירה בן דוד', days: [1, 2, 3, 4, 5], minOrder: 200, lead: 1, linkedCount: 0 },
+  { _id: 'sup_bakery', name: 'מאפיית הבוקר', contact: '', days: [0, 1, 2, 3, 4, 5, 6], minOrder: 80, lead: 1, linkedCount: 1 }
+];
+
+class Component extends DCLogic {
+  componentDidMount() {
+    import('./carousel-helpers.js').then(m => { this._car = m; this._carDispose = m.attachCarouselWatcher(); });
+  }
+  componentWillUnmount() {
+    if (this._carDispose) this._carDispose();
+  }
+  carPrev(e) { if (this._car) this._car.scrollCarousel(e.currentTarget, -1); }
+  carNext(e) { if (this._car) this._car.scrollCarousel(e.currentTarget, 1); }
+  carDot(e) { if (this._car) this._car.scrollCarouselToDot(e.currentTarget); }
+
+  state = {
+    suppliers: BASE_SUPPLIERS.map(s => ({ ...s, days: [...s.days] })),
+    search: '',
+    dayFilters: new Set(),
+    linkedOnly: false,
+    sortBy: null,
+    sortDir: 'asc',
+    selected: new Set(),
+    panelOpen: true,
+    modalOpen: false,
+    modalMode: 'add',
+    modalId: null,
+    draft: { name: '', contact: '', days: new Set(), minOrder: '', lead: '' },
+    confirmOpen: false,
+    confirmMessage: '',
+    confirmAction: null,
+    confirmTargetId: null,
+    toastVisible: false,
+    toastMessage: ''
+  };
+
+  showToast(msg) {
+    clearTimeout(this._toastTimer);
+    this.setState({ toastVisible: true, toastMessage: msg });
+    this._toastTimer = setTimeout(() => this.setState({ toastVisible: false }), 2500);
+  }
+
+  onSearchChange(v) { this.setState({ search: v }); }
+  toggleDayFilter(day) {
+    this.setState(s => {
+      const next = new Set(s.dayFilters);
+      next.has(day) ? next.delete(day) : next.add(day);
+      return { dayFilters: next };
+    });
+  }
+  toggleLinkedOnly() { this.setState(s => ({ linkedOnly: !s.linkedOnly })); }
+  clearFilters() { this.setState({ dayFilters: new Set(), linkedOnly: false }); }
+  togglePanel() { this.setState(s => ({ panelOpen: !s.panelOpen })); }
+
+  setSort(field) {
+    this.setState(s => s.sortBy === field
+      ? { sortDir: s.sortDir === 'asc' ? 'desc' : 'asc' }
+      : { sortBy: field, sortDir: 'asc' });
+  }
+
+  toggleSelect(id) {
+    this.setState(s => {
+      const next = new Set(s.selected);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return { selected: next };
+    });
+  }
+  toggleSelectAll(visibleIds) {
+    this.setState(s => {
+      const allSel = visibleIds.length > 0 && visibleIds.every(id => s.selected.has(id));
+      return { selected: allSel ? new Set() : new Set(visibleIds) };
+    });
+  }
+  clearSelection() { this.setState({ selected: new Set() }); }
+  stopPropagation(e) { if (e && e.stopPropagation) e.stopPropagation(); }
+
+  openAddModal() {
+    this.setState({ modalOpen: true, modalMode: 'add', modalId: null, draft: { name: '', contact: '', days: new Set(), minOrder: '', lead: '' } });
+  }
+  openEditModal(id) {
+    const s0 = this.state.suppliers.find(x => x._id === id);
+    if (!s0) return;
+    this.setState({ modalOpen: true, modalMode: 'edit', modalId: id, draft: { name: s0.name, contact: s0.contact, days: new Set(s0.days), minOrder: String(s0.minOrder), lead: String(s0.lead) } });
+  }
+  closeModal() { this.setState({ modalOpen: false }); }
+  setDraftName(v) { this.setState(s => ({ draft: { ...s.draft, name: v } })); }
+  setDraftContact(v) { this.setState(s => ({ draft: { ...s.draft, contact: v } })); }
+  setDraftMinOrder(v) { this.setState(s => ({ draft: { ...s.draft, minOrder: v } })); }
+  setDraftLead(v) { this.setState(s => ({ draft: { ...s.draft, lead: v } })); }
+  toggleDraftDay(day) {
+    this.setState(s => {
+      const next = new Set(s.draft.days);
+      next.has(day) ? next.delete(day) : next.add(day);
+      return { draft: { ...s.draft, days: next } };
+    });
+  }
+
+  saveDraft() {
+    const { draft, modalMode, modalId, suppliers } = this.state;
+    if (!draft.name.trim()) return;
+    const minOrder = parseFloat(draft.minOrder) || 0;
+    const lead = parseInt(draft.lead, 10) || 0;
+    const days = Array.from(draft.days).sort((a, b) => a - b);
+    if (modalMode === 'add') {
+      const newSupplier = { _id: 'sup_new_' + Date.now(), name: draft.name.trim(), contact: draft.contact.trim(), days, minOrder, lead, linkedCount: 0 };
+      this.setState({ suppliers: [newSupplier, ...suppliers], modalOpen: false });
+      this.showToast('הספק נוסף בהצלחה');
+    } else {
+      const next = suppliers.map(s => s._id === modalId ? { ...s, name: draft.name.trim(), contact: draft.contact.trim(), days, minOrder, lead } : s);
+      this.setState({ suppliers: next, modalOpen: false });
+      this.showToast('הספק עודכן בהצלחה');
+    }
+  }
+
+  askDeleteSupplier(id) {
+    const s0 = this.state.suppliers.find(x => x._id === id);
+    if (s0 && s0.linkedCount > 0) {
+      this.setState({ confirmOpen: true, confirmMessage: 'לא ניתן למחוק ספק עם מוצרים מקושרים', confirmAction: null, confirmTargetId: null });
+      return;
+    }
+    this.setState({ confirmOpen: true, confirmMessage: 'האם למחוק את "' + (s0 ? s0.name : '') + '"?', confirmAction: 'delete', confirmTargetId: id });
+  }
+  askBulkDelete() {
+    if (this.state.selected.size === 0) return;
+    this.setState({ confirmOpen: true, confirmMessage: 'למחוק ' + this.state.selected.size + ' ספקים?', confirmAction: 'bulkDelete', confirmTargetId: null });
+  }
+  cancelConfirm() { this.setState({ confirmOpen: false, confirmAction: null, confirmTargetId: null }); }
+  runConfirm() {
+    const { confirmAction, confirmTargetId, suppliers, selected } = this.state;
+    if (confirmAction === 'delete') {
+      this.setState({ suppliers: suppliers.filter(s => s._id !== confirmTargetId), confirmOpen: false });
+      this.showToast('הספק נמחק');
+    } else if (confirmAction === 'bulkDelete') {
+      this.setState({ suppliers: suppliers.filter(s => !selected.has(s._id)), selected: new Set(), confirmOpen: false });
+      this.showToast('הספקים נמחקו');
+    } else {
+      this.setState({ confirmOpen: false });
+    }
+  }
+
+  renderVals() {
+    const b = this.baseVals();
+    const vs = this.state.__vs || this.props.viewState || 'ready';
+    const loading = vs === 'loading', failed = vs === 'error';
+    if (vs !== 'ready') { b.suppliers = []; b.isEmpty = vs === 'empty'; }
+    return Object.assign(b, {
+      loading, loadFailed: failed, ready: !loading && !failed,
+      skeletonRows: [1, 2, 3, 4, 5, 6].map(i => ({ i })),
+      retryLoad: () => this.setState({ __vs: 'ready' })
+    });
+  }
+
+  baseVals() {
+    const s = this.state;
+    let suppliers = s.suppliers.map(sup => ({ ...sup }));
+
+    if (s.linkedOnly) suppliers = suppliers.filter(sup => sup.linkedCount > 0);
+    if (s.dayFilters.size > 0) suppliers = suppliers.filter(sup => sup.days.some(d => s.dayFilters.has(d)));
+    const search = s.search.trim();
+    if (search) suppliers = suppliers.filter(sup => sup.name.includes(search) || (sup.contact || '').includes(search));
+
+    if (s.sortBy) {
+      const dir = s.sortDir === 'asc' ? 1 : -1;
+      suppliers = [...suppliers].sort((a, b) => {
+        let cmp = 0;
+        if (s.sortBy === 'name') cmp = a.name.localeCompare(b.name, 'he');
+        else if (s.sortBy === 'minOrder') cmp = a.minOrder - b.minOrder;
+        else if (s.sortBy === 'lead') cmp = a.lead - b.lead;
+        return cmp * dir;
+      });
+    } else {
+      suppliers = [...suppliers].sort((a, b) => a.name.localeCompare(b.name, 'he'));
+    }
+
+    const visibleIds = suppliers.map(sup => sup._id);
+    const allSelected = visibleIds.length > 0 && visibleIds.every(id => s.selected.has(id));
+
+    const supplierRows = suppliers.map(sup => ({
+      _id: sup._id,
+      name: sup.name,
+      contact: sup.contact || '—',
+      dayChips: sup.days.length === 7 ? [] : sup.days.map(d => ({ key: d, label: DAY_LABELS_SHORT[d] })),
+      noDays: sup.days.length === 0,
+      allDays: sup.days.length === 7,
+      minOrderLabel: sup.minOrder.toFixed(0),
+      leadLabel: sup.lead + (sup.lead === 1 ? ' יום' : ' ימים'),
+      linkedCount: sup.linkedCount,
+      selected: s.selected.has(sup._id),
+      rowStyle: { display: 'grid', gridTemplateColumns: '1.7fr 1.1fr 1.5fr 0.8fr 0.8fr 0.9fr 76px 28px', gap: 'var(--space-2)', padding: 'var(--space-3) var(--space-4)', borderBottom: '1px solid var(--border-row)', alignItems: 'center' },
+      onEdit: () => this.openEditModal(sup._id),
+      onDelete: () => this.askDeleteSupplier(sup._id),
+      onToggleSelect: () => this.toggleSelect(sup._id)
+    }));
+
+    const dayCounts = DAY_LABELS_SHORT.map((_, i) => s.suppliers.filter(sup => sup.days.includes(i)).length);
+    const dayOptions = DAY_LABELS_FULL.map((label, i) => ({
+      key: i, label, count: dayCounts[i],
+      checked: s.dayFilters.has(i),
+      onToggle: () => this.toggleDayFilter(i)
+    }));
+
+    const chipStyle = (active) => ({
+      padding: '7px 14px', borderRadius: '999px', fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer',
+      border: active ? 'none' : '1px solid var(--border-default)',
+      background: active ? 'linear-gradient(180deg, var(--color-primary), var(--color-primary-hover))' : 'var(--bg-glass)',
+      color: active ? '#fff' : 'var(--color-text-secondary)'
+    });
+    const draftDayOptions = DAY_LABELS_SHORT.map((label, i) => ({
+      key: i, label, style: chipStyle(s.draft.days.has(i)), onToggle: () => this.toggleDraftDay(i)
+    }));
+
+    return {
+      carPrev: (e) => this.carPrev(e),
+      carNext: (e) => this.carNext(e),
+      carDot: (e) => this.carDot(e),
+      panelOpen: s.panelOpen,
+      togglePanel: () => this.togglePanel(),
+      hasActiveFilters: s.dayFilters.size > 0 || s.linkedOnly,
+      clearFilters: () => this.clearFilters(),
+      linkedOnly: s.linkedOnly,
+      toggleLinkedOnly: () => this.toggleLinkedOnly(),
+      dayOptions,
+
+      search: s.search,
+      onSearchChange: (v) => this.onSearchChange(v),
+      totalCount: s.suppliers.length,
+      filteredCount: suppliers.length,
+      isEmpty: suppliers.length === 0,
+      openAddModal: () => this.openAddModal(),
+
+      hasSelection: s.selected.size > 0,
+      selectedCount: s.selected.size,
+      askBulkDelete: () => this.askBulkDelete(),
+      clearSelection: () => this.clearSelection(),
+
+      setSortName: () => this.setSort('name'),
+      setSortMinOrder: () => this.setSort('minOrder'),
+      setSortLead: () => this.setSort('lead'),
+      nameSortUp: s.sortBy === 'name' && s.sortDir === 'asc',
+      nameSortDown: s.sortBy === 'name' && s.sortDir === 'desc',
+      minOrderSortUp: s.sortBy === 'minOrder' && s.sortDir === 'asc',
+      minOrderSortDown: s.sortBy === 'minOrder' && s.sortDir === 'desc',
+      leadSortUp: s.sortBy === 'lead' && s.sortDir === 'asc',
+      leadSortDown: s.sortBy === 'lead' && s.sortDir === 'desc',
+
+      allSelected,
+      toggleSelectAll: () => this.toggleSelectAll(visibleIds),
+      suppliers: supplierRows,
+
+      modalOpen: s.modalOpen,
+      modalTitle: s.modalMode === 'add' ? 'הוספת ספק' : 'עריכת ספק',
+      closeModal: () => this.closeModal(),
+      stopPropagation: (e) => this.stopPropagation(e),
+      draftName: s.draft.name,
+      setDraftName: (v) => this.setDraftName(v),
+      draftContact: s.draft.contact,
+      setDraftContact: (v) => this.setDraftContact(v),
+      draftMinOrder: s.draft.minOrder,
+      setDraftMinOrder: (v) => this.setDraftMinOrder(v),
+      draftLead: s.draft.lead,
+      setDraftLead: (v) => this.setDraftLead(v),
+      draftDayOptions,
+      saveDraft: () => this.saveDraft(),
+
+      confirmOpen: s.confirmOpen,
+      confirmMessage: s.confirmMessage,
+      cancelConfirm: () => this.cancelConfirm(),
+      runConfirm: () => this.runConfirm(),
+
+      toastVisible: s.toastVisible,
+      toastMessage: s.toastMessage
+    };
+  }
+}
+
+</script>
+</body>
+</html>

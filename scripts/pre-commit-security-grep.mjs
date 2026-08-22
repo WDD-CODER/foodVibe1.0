@@ -10,6 +10,11 @@ const staged = execSync('git diff --cached --name-only --diff-filter=ACMR', { en
   .split('\n')
   .map(f => f.trim())
   .filter(f => /\.(ts|html|js)$/.test(f))
+  // .interface-design/source/ is a frozen, third-party design-tool export (vendored
+  // reference snapshot) — never imported into the Angular build, never executes in the
+  // shipped app. Its own template runtime (support.js) legitimately uses innerHTML to
+  // render {{ }} bindings. Real app source is unaffected by this exclusion.
+  .filter(f => !f.startsWith('.interface-design/source/'))
 
 const PII_NAMES = /\b(email|password|token|fullName|full_name|phone|ssn|creditCard|credit_card)\b/i
 let failed = false

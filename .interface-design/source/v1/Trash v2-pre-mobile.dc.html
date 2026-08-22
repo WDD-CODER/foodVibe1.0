@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./colors_and_type.css">
+  <script src="./shell.js"></script>
+  <style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.96) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    body { margin: 0; }
+    a { color: var(--color-primary); text-decoration: none; }
+    a:hover { color: var(--color-primary-hover); }
+    input:focus, button:focus { outline: none; }
+    ::selection { background: var(--color-primary-soft); }
+    .tr-item { transition: box-shadow 0.2s ease; }
+    .tr-item-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tr-btn-restore:hover { background: var(--bg-warning) !important; }
+    .tr-btn-dispose:hover { background: var(--bg-danger-subtle) !important; }
+    .tr-btn-history:hover { background: var(--bg-glass-hover) !important; border-color: var(--border-strong) !important; }
+    @media (max-width: 479px) {
+      .tr-item { padding: 8px 10px !important; gap: 8px !important; }
+      .tr-item-meta { display: none !important; }
+      .tr-item-name { flex-basis: auto !important; }
+      .tr-item-actions { margin-inline-end: 0 !important; }
+      .tr-btn-restore span, .tr-btn-dispose span { display: none; }
+      .tr-section-header { flex-direction: column; align-items: stretch !important; }
+      .tr-section-actions { display: flex !important; }
+      .tr-section-actions button { flex: 1; justify-content: center; }
+    }
+      a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(20,184,166,0.35) !important; }
+    @keyframes skelPulse { 0%,100% { opacity: 1 } 50% { opacity: .55 } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  
+    /* ── pass 2: touch ergonomics (one rule, all screens) ── */
+    [class*="car-arrow"] { display: none !important; }
+    /* ── pass 4: motion system ── */
+    @keyframes pageEnter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    app-shell > * { animation: pageEnter .28s var(--ease-spring) both; }
+    button, a[role="button"] { transition: transform .15s var(--ease-spring), background-color .2s var(--ease-smooth), color .2s var(--ease-smooth), box-shadow .25s var(--ease-smooth); }
+    button:active, a[role="button"]:active { transform: scale(0.97); }
+    input[type="checkbox"], input[type="radio"] {
+      appearance: none; -webkit-appearance: none; width: 24px; height: 24px; margin: 0; flex: none;
+      display: inline-grid; place-content: center; cursor: pointer;
+      background: var(--bg-pure); border: 1.5px solid var(--border-strong); border-radius: 7px;
+      box-shadow: inset 0 1px 2px rgba(15,23,42,0.06);
+      transition: background-color .16s var(--ease-smooth), border-color .16s var(--ease-smooth), box-shadow .2s var(--ease-smooth), transform .2s var(--ease-spring);
+    }
+    input[type="radio"] { border-radius: 50%; }
+    input[type="checkbox"]::after {
+      content: ""; width: 6px; height: 11px; opacity: 0;
+      border-right: 2.6px solid var(--color-text-on-primary); border-bottom: 2.6px solid var(--color-text-on-primary);
+      transform: rotate(45deg) translate(-1px, -2px) scale(0.6);
+      transition: opacity .14s var(--ease-smooth), transform .2s var(--ease-spring);
+    }
+    input[type="radio"]::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--color-text-on-primary); opacity: 0; transition: opacity .14s var(--ease-smooth); }
+    input[type="checkbox"]:hover, input[type="radio"]:hover { border-color: var(--color-primary); background: var(--color-primary-soft); }
+    input[type="checkbox"]:checked, input[type="radio"]:checked {
+      background: var(--color-primary); border-color: var(--color-primary);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 2px 8px -2px var(--color-primary-glow);
+    }
+    input[type="checkbox"]:checked::after { opacity: 1; transform: rotate(45deg) translate(-1px, -2px) scale(1); }
+    input[type="radio"]:checked::after { opacity: 1; }
+    input[type="checkbox"]:active, input[type="radio"]:active { transform: scale(0.94); }
+
+    @media (max-width: 767px) {
+      button, a[role="button"], select { min-height: 44px !important; min-width: 44px !important; }
+      input:not([type="checkbox"]):not([type="radio"]) { min-height: 44px !important; }
+      input[type="checkbox"], input[type="radio"] { width: 24px !important; height: 24px !important; padding: 10px !important; box-sizing: content-box !important; }
+      a[href]:not([style*="font-size: var(--fs-xs)"]) { min-height: 44px; display: inline-flex; align-items: center; }
+      [style*="grid-template-columns: 260px"], [style*="grid-template-columns: 320px"], [style*="grid-template-columns: 140px"] { grid-template-columns: 1fr !important; }
+      [style*="max-width: 1520px"], [style*="max-width: 1200px"], [style*="max-width: 1100px"], [style*="max-width: 720px"] { padding-inline: var(--space-4) !important; }
+    }
+  </style>
+</helmet>
+
+<app-shell dir="rtl" page="trash" fab='[]'>
+  <div style="position: relative; z-index: 1;">
+
+    <div style="max-width: 720px; margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-12);">
+      <div style="display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-6); flex-wrap: wrap;">
+        <div>
+          <h1 style="margin: 0; font-size: var(--fs-xl); font-weight: var(--fw-bold); letter-spacing: var(--tracking-tight); color: var(--color-text-main);">אשפה</h1>
+          <p style="margin: 2px 0 0; font-size: var(--fs-sm); color: var(--color-text-muted);">{{ totalCount }} פריטים באשפה</p>
+        </div>
+        <button onClick="{{ refresh }}" disabled="{{ loading }}" style="margin-inline-start: auto; display: inline-flex; align-items: center; gap: 6px; padding: 0 var(--space-4); height: 38px; background: var(--bg-glass); color: var(--color-text-secondary); font-size: var(--fs-sm); font-weight: var(--fw-medium); border: 1px solid var(--border-default); border-radius: var(--radius-full); backdrop-filter: var(--blur-glass); cursor: pointer;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"></path><path d="M21 3v6h-6"></path></svg>
+          {{ refreshLabel }}
+        </button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: var(--space-6);">
+        <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+          <div aria-busy="true" aria-label="טוען נתונים" style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); box-shadow: var(--shadow-glass); border-radius: var(--radius-lg); padding: var(--space-4); display: flex; flex-direction: column; gap: 12px; margin-bottom: var(--space-3);">
+            <sc-for list="{{ skeletonRows }}" as="row" hint-placeholder-count="6">
+              <div style="display: flex; align-items: center; gap: var(--space-3); animation: skelPulse 1.4s var(--ease-smooth) infinite;">
+                <div style="flex: 2; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.07);"></div>
+                <div style="flex: 1; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.05);"></div>
+                <div style="width: 84px; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.05);"></div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ loadFailed }}" hint-placeholder-val="{{ false }}">
+          <div role="alert" style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); box-shadow: var(--shadow-glass); border-radius: var(--radius-lg); padding: var(--space-10) var(--space-4); margin-bottom: var(--space-3); display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center;">
+            <i data-lucide="cloud-off" style="width: 28px; height: 28px; color: var(--color-danger);"></i>
+            <div style="font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--color-text-main);">הטעינה נכשלה</div>
+            <p style="margin: 0; max-width: 34ch; font-size: var(--fs-sm); color: var(--color-text-muted); line-height: var(--lh-relaxed);">אין חיבור לשרת כרגע. אפשר לנסות שוב.</p>
+            <button onClick="{{ retryLoad }}" style="min-height: 44px; padding: 0 20px; border: none; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-text-on-primary); font-family: inherit; font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer; box-shadow: var(--shadow-glow);">נסה שוב</button>
+          </div>
+        </sc-if>
+
+        <sc-for list="{{ sections }}" as="sec" hint-placeholder-count="3">
+          <section style="padding: var(--space-5); background: var(--bg-glass-strong); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); backdrop-filter: var(--blur-glass);">
+            <div class="tr-section-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-4);">
+              <h2 style="margin: 0; font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--color-text-main);">{{ sec.title }}</h2>
+              <sc-if value="{{ sec.hasItems }}" hint-placeholder-val="{{ false }}">
+                <div class="tr-section-actions" style="display: flex; gap: var(--space-2);">
+                  <button class="tr-btn-restore" onClick="{{ sec.onRestoreAll }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; min-height: 38px; background: var(--bg-warning); color: var(--text-warning); border: 1px solid var(--border-warning); border-radius: var(--radius-md); font-size: var(--fs-xs); font-weight: var(--fw-semibold); cursor: pointer;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg>
+                    שחזר הכל
+                  </button>
+                  <button class="tr-btn-dispose" onClick="{{ sec.onDisposeAll }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; min-height: 38px; background: var(--bg-danger-subtle); color: var(--color-danger); border: 1px solid var(--color-danger); border-radius: var(--radius-md); font-size: var(--fs-xs); font-weight: var(--fw-semibold); cursor: pointer;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    מחק לצמיתות הכל
+                  </button>
+                </div>
+              </sc-if>
+            </div>
+
+            <sc-if value="{{ sec.isEmpty }}" hint-placeholder-val="{{ false }}">
+              <p style="margin: 0; padding: var(--space-2) 0; color: var(--color-text-muted); font-size: var(--fs-sm);">האשפה ריקה</p>
+            </sc-if>
+
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <sc-for list="{{ sec.items }}" as="it" hint-placeholder-count="2">
+                <div class="tr-item" style="display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3); padding: 10px 12px; background: var(--bg-pure); border: 1px solid var(--border-default); border-radius: var(--radius-sm);">
+                  <span class="tr-item-name" style="font-weight: var(--fw-medium); color: var(--color-text-main); flex: 1 1 140px; min-width: 0;">{{ it.name }}</span>
+                  <span class="tr-item-meta" style="font-size: var(--fs-xs); color: var(--color-text-muted); flex-shrink: 0;">נמחק: {{ it.deletedAt }}</span>
+                  <div class="tr-item-actions" style="display: flex; gap: 6px; margin-inline-end: auto;">
+                    <button class="tr-btn-history" onClick="{{ it.onHistory }}" style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 10px; min-height: 38px; background: var(--bg-glass); color: var(--color-text-muted); border: 1px solid var(--border-default); border-radius: var(--radius-xs); font-size: var(--fs-xs); cursor: pointer;">היסטוריה</button>
+                    <button class="tr-btn-restore" onClick="{{ it.onRestore }}" style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 10px; min-height: 38px; background: var(--bg-warning); color: var(--text-warning); border: 1px solid var(--border-warning); border-radius: var(--radius-xs); font-size: var(--fs-xs); cursor: pointer;">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg>
+                      <span>שחזר</span>
+                    </button>
+                    <button class="tr-btn-dispose" onClick="{{ it.onDispose }}" style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 10px; min-height: 38px; background: var(--bg-danger-subtle); color: var(--color-danger); border: 1px solid var(--color-danger); border-radius: var(--radius-xs); font-size: var(--fs-xs); cursor: pointer;">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                      <span>מחק לצמיתות</span>
+                    </button>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <sc-if value="{{ historyOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeHistory }}" style="position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; background: var(--overlay-backdrop); backdrop-filter: blur(6px); animation: fadeIn 0.15s ease;">
+      <div onClick="{{ stopPropagation }}" style="width: 92%; max-width: 479px; max-height: 80vh; overflow-y: auto; padding: var(--space-6); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4);">
+          <h3 style="margin: 0; font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--color-text-main);">היסטוריית שינויים · {{ historyName }}</h3>
+          <button onClick="{{ closeHistory }}" style="width: 30px; height: 30px; display: grid; place-content: center; border: 1px solid var(--border-default); background: var(--bg-glass); border-radius: var(--radius-sm); cursor: pointer; color: var(--color-text-muted);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+          </button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+          <sc-for list="{{ historyEntries }}" as="h" hint-placeholder-count="3">
+            <div style="display: flex; gap: var(--space-3); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border-row);">
+              <span style="{{ h.actionChipStyle }}">{{ h.actionLabel }}</span>
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-size: var(--fs-sm); color: var(--color-text-main);">{{ h.summary }}</div>
+                <div style="font-size: var(--fs-xs); color: var(--color-text-muted); margin-top: 2px;">{{ h.timestamp }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; inset: 0; z-index: 400; display: flex; align-items: center; justify-content: center; background: var(--overlay-backdrop); backdrop-filter: blur(6px); animation: fadeIn 0.15s ease;">
+      <div style="width: 90%; max-width: 380px; padding: var(--space-6); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring); text-align: center;">
+        <div style="{{ confirmIconWrapStyle }}">
+          <sc-if value="{{ confirmIsDanger }}" hint-placeholder-val="{{ true }}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </sc-if>
+          <sc-if value="{{ confirmIsWarning }}" hint-placeholder-val="{{ false }}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg>
+          </sc-if>
+        </div>
+        <p style="margin: 0 0 var(--space-5); font-size: var(--fs-base); font-weight: var(--fw-medium); color: var(--color-text-main);">{{ confirmMessage }}</p>
+        <div style="display: flex; gap: var(--space-3);">
+          <button onClick="{{ cancelConfirm }}" style="flex: 1; padding: 10px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--color-text-secondary); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">ביטול</button>
+          <button onClick="{{ runConfirm }}" style="{{ confirmActionButtonStyle }}">{{ confirmActionLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 500; display: flex; align-items: center; gap: var(--space-2); padding: 11px 20px; background: var(--color-text-main); color: #fff; border-radius: var(--radius-full); font-size: var(--fs-sm); font-weight: var(--fw-medium); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring);">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);"><path d="M20 6 9 17l-5-5"></path></svg>
+      {{ toastMessage }}
+    </div>
+  </sc-if>
+</app-shell>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;viewState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ready&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;ready&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;States&quot;}}">
+
+function fmtDate(ts) {
+  return new Date(ts).toLocaleString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+const NOW = Date.now();
+const BASE = {
+  dishes: [
+    { _id: 'd1', name: 'סלט קינואה עם ירקות קלויים', deletedAt: NOW - 2 * 3600 * 1000 },
+    { _id: 'd2', name: 'עוף בתנור עם לימון ותימין', deletedAt: NOW - 26 * 3600 * 1000 }
+  ],
+  recipes: [
+    { _id: 'r1', name: 'מרק עדשים כתום', deletedAt: NOW - 5 * 24 * 3600 * 1000 }
+  ],
+  products: [
+    { _id: 'p1', name: 'שמן זית כתית מעולה 5 ליטר', deletedAt: NOW - 1 * 24 * 3600 * 1000 },
+    { _id: 'p2', name: 'קמח תופח 25 ק"ג', deletedAt: NOW - 3 * 24 * 3600 * 1000 },
+    { _id: 'p3', name: 'רסק עגבניות מרוכז', deletedAt: NOW - 9 * 24 * 3600 * 1000 }
+  ]
+};
+
+const HISTORY_SAMPLE = [
+  { action: 'created', summary: 'הפריט נוצר', ts: NOW - 40 * 24 * 3600 * 1000 },
+  { action: 'updated', summary: 'מחיר: 12 → 14', ts: NOW - 20 * 24 * 3600 * 1000 },
+  { action: 'updated', summary: 'יחידה: ק"ג → גרם', ts: NOW - 10 * 24 * 3600 * 1000 },
+  { action: 'deleted', summary: 'הועבר לאשפה', ts: NOW - 2 * 24 * 3600 * 1000 }
+];
+
+const SECTION_META = {
+  dishes: { title: 'מנות' },
+  recipes: { title: 'מתכונים' },
+  products: { title: 'מוצרים' }
+};
+
+class Component extends DCLogic {
+  state = {
+    loading: false,
+    dishes: BASE.dishes.map(x => ({ ...x })),
+    recipes: BASE.recipes.map(x => ({ ...x })),
+    products: BASE.products.map(x => ({ ...x })),
+    historyOpen: false,
+    historyName: '',
+    confirmOpen: false,
+    confirmMessage: '',
+    confirmVariant: 'danger',
+    confirmActionLabel: '',
+    confirmAction: null,
+    toastVisible: false,
+    toastMessage: ''
+  };
+
+  showToast(msg) {
+    clearTimeout(this._toastTimer);
+    this.setState({ toastVisible: true, toastMessage: msg });
+    this._toastTimer = setTimeout(() => this.setState({ toastVisible: false }), 2500);
+  }
+
+  refresh() {
+    this.setState({ loading: true });
+    setTimeout(() => { this.setState({ loading: false }); this.showToast('הרשימה עודכנה'); }, 500);
+  }
+
+  openHistory(name) { this.setState({ historyOpen: true, historyName: name }); }
+  closeHistory() { this.setState({ historyOpen: false }); }
+  stopPropagation(e) { if (e && e.stopPropagation) e.stopPropagation(); }
+
+  askConfirm(message, variant, actionLabel, action) {
+    this.setState({ confirmOpen: true, confirmMessage: message, confirmVariant: variant, confirmActionLabel: actionLabel, confirmAction: action });
+  }
+  cancelConfirm() { this.setState({ confirmOpen: false, confirmAction: null }); }
+  runConfirm() {
+    const action = this.state.confirmAction;
+    this.setState({ confirmOpen: false, confirmAction: null });
+    if (action) action();
+  }
+
+  restoreOne(field, id, name) {
+    this.askConfirm('לשחזר את "' + name + '"?', 'warning', 'שחזר', () => {
+      this.setState(s => ({ [field]: s[field].filter(x => x._id !== id) }));
+      this.showToast('הפריט שוחזר');
+    });
+  }
+  disposeOne(field, id, name) {
+    this.askConfirm('למחוק לצמיתות את "' + name + '"? לא ניתן לשחזר פעולה זו.', 'danger', 'מחק לצמיתות', () => {
+      this.setState(s => ({ [field]: s[field].filter(x => x._id !== id) }));
+      this.showToast('הפריט נמחק לצמיתות');
+    });
+  }
+  restoreAll(field) {
+    const count = this.state[field].length;
+    if (!count) return;
+    this.askConfirm('לשחזר את כל ' + count + ' הפריטים?', 'warning', 'שחזר הכל', () => {
+      this.setState({ [field]: [] });
+      this.showToast('כל הפריטים שוחזרו');
+    });
+  }
+  disposeAll(field) {
+    const count = this.state[field].length;
+    if (!count) return;
+    this.askConfirm('למחוק לצמיתות את כל ' + count + ' הפריטים? לא ניתן לשחזר פעולה זו.', 'danger', 'מחק לצמיתות הכל', () => {
+      this.setState({ [field]: [] });
+      this.showToast('כל הפריטים נמחקו לצמיתות');
+    });
+  }
+
+  renderVals() {
+    const b = this.baseVals();
+    const vs = this.state.__vs || this.props.viewState || 'ready';
+    const loading = vs === 'loading', failed = vs === 'error';
+    if (vs !== 'ready') { b.sections = []; b.historyEntries = []; }
+    return Object.assign(b, {
+      loading, loadFailed: failed, ready: !loading && !failed,
+      skeletonRows: [1, 2, 3, 4, 5, 6].map(i => ({ i })),
+      retryLoad: () => this.setState({ __vs: 'ready' })
+    });
+  }
+
+  baseVals() {
+    const s = this.state;
+    const fields = ['dishes', 'recipes', 'products'];
+
+    const sections = fields.map(field => ({
+      key: field,
+      title: SECTION_META[field].title,
+      hasItems: s[field].length > 0,
+      isEmpty: s[field].length === 0,
+      onRestoreAll: () => this.restoreAll(field),
+      onDisposeAll: () => this.disposeAll(field),
+      items: s[field].map(it => ({
+        key: it._id,
+        name: it.name,
+        deletedAt: fmtDate(it.deletedAt),
+        onHistory: () => this.openHistory(it.name),
+        onRestore: () => this.restoreOne(field, it._id, it.name),
+        onDispose: () => this.disposeOne(field, it._id, it.name)
+      }))
+    }));
+
+    const actionLabels = { created: 'נוצר', updated: 'עודכן', deleted: 'נמחק' };
+    const actionColors = {
+      created: { bg: 'var(--color-primary-soft)', color: 'var(--color-primary-hover)' },
+      updated: { bg: 'var(--bg-warning)', color: 'var(--text-warning)' },
+      deleted: { bg: 'var(--bg-danger-subtle)', color: 'var(--color-danger)' }
+    };
+    const historyEntries = HISTORY_SAMPLE.map((h, i) => ({
+      key: i,
+      actionLabel: actionLabels[h.action],
+      summary: h.summary,
+      timestamp: fmtDate(h.ts),
+      actionChipStyle: {
+        flexShrink: 0, alignSelf: 'flex-start', padding: '3px 10px', borderRadius: 'var(--radius-sm)', fontSize: 'var(--fs-xs)', fontWeight: 600,
+        background: actionColors[h.action].bg, color: actionColors[h.action].color
+      }
+    }));
+
+    const isDanger = s.confirmVariant === 'danger';
+    const totalCount = s.dishes.length + s.recipes.length + s.products.length;
+
+    return {
+      loading: s.loading,
+      refreshLabel: s.loading ? 'מרענן…' : 'רענן',
+      refresh: () => this.refresh(),
+      totalCount,
+      sections,
+
+      historyOpen: s.historyOpen,
+      historyName: s.historyName,
+      historyEntries,
+      closeHistory: () => this.closeHistory(),
+      stopPropagation: (e) => this.stopPropagation(e),
+
+      confirmOpen: s.confirmOpen,
+      confirmMessage: s.confirmMessage,
+      confirmActionLabel: s.confirmActionLabel,
+      confirmIsDanger: isDanger,
+      confirmIsWarning: !isDanger,
+      confirmIconWrapStyle: {
+        width: '44px', height: '44px', margin: '0 auto var(--space-4)', borderRadius: '50%',
+        background: isDanger ? 'var(--bg-danger-subtle)' : 'var(--bg-warning)',
+        display: 'grid', placeContent: 'center',
+        color: isDanger ? 'var(--color-danger)' : 'var(--text-warning)'
+      },
+      confirmActionButtonStyle: {
+        flex: 1, padding: '10px', border: 'none', borderRadius: 'var(--radius-md)', color: '#fff',
+        fontWeight: 'var(--fw-semibold)', fontSize: 'var(--fs-sm)', cursor: 'pointer',
+        background: isDanger ? 'var(--color-danger)' : 'var(--color-warning)'
+      },
+      cancelConfirm: () => this.cancelConfirm(),
+      runConfirm: () => this.runConfirm(),
+
+      toastVisible: s.toastVisible,
+      toastMessage: s.toastMessage
+    };
+  }
+}
+
+</script>
+</body>
+</html>

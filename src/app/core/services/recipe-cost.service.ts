@@ -69,9 +69,7 @@ export class RecipeCostService {
     const convs = recipe.yield_conversions_
     if (convs?.length) {
       const u = (unit ?? '').trim().toLowerCase()
-      const entry = convs.find(
-        (c) => (c?.unit ?? '').trim().toLowerCase() === u
-      )
+      const entry = convs.find((c) => (c?.unit ?? '').trim().toLowerCase() === u)
       if (entry != null && entry.amount != null && entry.amount > 0) {
         const yieldAmount = recipe.yield_amount_ ?? 1
         return amount * (yieldAmount / entry.amount)
@@ -104,14 +102,14 @@ export class RecipeCostService {
     const key = UNIT_ALIASES[unit] ?? unit
     if (MASS_UNITS.has(key) || MASS_UNITS.has(unit)) return true
     if (row.referenceId && row.item_type === 'product') {
-      const product = this.kitchenState_.products_().find(p => p._id === row.referenceId) as Product | undefined
+      const product = this.kitchenState_.productsById_().get(row.referenceId) as Product | undefined
       if (product?.purchase_options_?.length && product.base_unit_) {
         const baseKey = (UNIT_ALIASES[product.base_unit_] ?? product.base_unit_).toLowerCase()
         if (baseKey === 'gram' || baseKey === 'kg' || MASS_UNITS.has(baseKey)) return true
       }
     }
     if (row.referenceId && row.item_type === 'recipe') {
-      const subRecipe = this.kitchenState_.recipes_().find(r => r._id === row.referenceId) as Recipe | undefined
+      const subRecipe = this.kitchenState_.recipesById_().get(row.referenceId) as Recipe | undefined
       if (subRecipe?.yield_unit_) {
         const yieldKey = (UNIT_ALIASES[subRecipe.yield_unit_] ?? subRecipe.yield_unit_).toLowerCase()
         if (yieldKey === 'gram' || yieldKey === 'kg' || MASS_UNITS.has(yieldKey)) return true
@@ -131,10 +129,10 @@ export class RecipeCostService {
     }
 
     if (row.referenceId && row.item_type === 'product') {
-      const product = this.kitchenState_.products_().find(p => p._id === row.referenceId) as Product | undefined
+      const product = this.kitchenState_.productsById_().get(row.referenceId) as Product | undefined
       if (product) {
-        const opt = product.purchase_options_?.find(o =>
-          (o.unit_symbol_ ?? '').toLowerCase() === unit || (o.unit_symbol_ ?? '').toLowerCase() === key
+        const opt = product.purchase_options_?.find(
+          (o) => (o.unit_symbol_ ?? '').toLowerCase() === unit || (o.unit_symbol_ ?? '').toLowerCase() === key
         )
         if (opt?.conversion_rate_ && product.base_unit_) {
           const baseKey = (UNIT_ALIASES[product.base_unit_] ?? product.base_unit_).toLowerCase()
@@ -148,7 +146,7 @@ export class RecipeCostService {
     }
 
     if (row.referenceId && row.item_type === 'recipe') {
-      const subRecipe = this.kitchenState_.recipes_().find(r => r._id === row.referenceId) as Recipe | undefined
+      const subRecipe = this.kitchenState_.recipesById_().get(row.referenceId) as Recipe | undefined
       if (subRecipe?.yield_unit_) {
         const yieldKey = UNIT_ALIASES[subRecipe.yield_unit_] ?? subRecipe.yield_unit_
         const yieldFactor = this.unitRegistry_.getConversion(yieldKey)
@@ -189,7 +187,7 @@ export class RecipeCostService {
 
   private getYieldFactorForRow(row: IngredientWeightRow): number {
     if (row.referenceId && row.item_type === 'product') {
-      const product = this.kitchenState_.products_().find(p => p._id === row.referenceId) as Product | undefined
+      const product = this.kitchenState_.productsById_().get(row.referenceId) as Product | undefined
       return product?.yield_factor_ ?? 1
     }
     if (row.referenceId && row.item_type === 'recipe') {
@@ -257,11 +255,11 @@ export class RecipeCostService {
 
   private computeIngredientCost(ing: Ingredient, depth: number): number {
     if (ing.type === 'product') {
-      const product = this.kitchenState_.products_().find(p => p._id === ing.referenceId) as Product | undefined
+      const product = this.kitchenState_.productsById_().get(ing.referenceId ?? '') as Product | undefined
       if (!product) return 0
       const yieldFactor = product.yield_factor_ || 1
       const price = getEffectivePrice(product)
-      const unitOption = product.purchase_options_?.find(o => o.unit_symbol_ === ing.unit_)
+      const unitOption = product.purchase_options_?.find((o) => o.unit_symbol_ === ing.unit_)
       let normalizedAmount: number
       if (unitOption) {
         if (unitOption.price_override_ != null && unitOption.price_override_ > 0) {
@@ -279,7 +277,7 @@ export class RecipeCostService {
     }
 
     if (ing.type === 'recipe') {
-      const subRecipe = this.kitchenState_.recipes_().find(r => r._id === ing.referenceId) as Recipe | undefined
+      const subRecipe = this.kitchenState_.recipesById_().get(ing.referenceId ?? '') as Recipe | undefined
       if (!subRecipe) return 0
       const costPerUnit = this.getRecipeCostPerUnit(subRecipe, depth + 1)
       const amountInYieldUnit = this.amountInRecipeYieldUnit(ing.amount_, ing.unit_, subRecipe)

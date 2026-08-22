@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./colors_and_type.css">
+  <link rel="stylesheet" href="./mobile-pass.css">
+  <script src="./shell.js"></script>
+  <style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.96) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    body { margin: 0; }
+    a { color: var(--color-primary); text-decoration: none; }
+    a:hover { color: var(--color-primary-hover); }
+    input[type="checkbox"], input[type="radio"] {
+      appearance: none; -webkit-appearance: none; width: 24px; height: 24px; margin: 0; flex: none;
+      display: inline-grid; place-content: center; cursor: pointer;
+      background: var(--bg-pure); border: 1.5px solid var(--border-strong); border-radius: 7px;
+      box-shadow: inset 0 1px 2px rgba(15,23,42,0.06);
+      transition: background-color .16s var(--ease-smooth), border-color .16s var(--ease-smooth), box-shadow .2s var(--ease-smooth), transform .2s var(--ease-spring);
+    }
+    input[type="radio"] { border-radius: 50%; }
+    input[type="checkbox"]::after {
+      content: ""; width: 6px; height: 11px; opacity: 0;
+      border-right: 2.6px solid var(--color-text-on-primary); border-bottom: 2.6px solid var(--color-text-on-primary);
+      transform: rotate(45deg) translate(-1px, -2px) scale(0.6);
+      transition: opacity .14s var(--ease-smooth), transform .2s var(--ease-spring);
+    }
+    input[type="radio"]::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--color-text-on-primary); opacity: 0; transition: opacity .14s var(--ease-smooth); }
+    input[type="checkbox"]:hover, input[type="radio"]:hover { border-color: var(--color-primary); background: var(--color-primary-soft); }
+    input[type="checkbox"]:checked, input[type="radio"]:checked {
+      background: var(--color-primary); border-color: var(--color-primary);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 2px 8px -2px var(--color-primary-glow);
+    }
+    input[type="checkbox"]:checked::after { opacity: 1; transform: rotate(45deg) translate(-1px, -2px) scale(1); }
+    input[type="radio"]:checked::after { opacity: 1; }
+    input[type="checkbox"]:active, input[type="radio"]:active { transform: scale(0.94); }
+
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .inv-aside { width: 100% !important; max-width: none !important; }
+      .inv-aside > div { display: flex !important; flex-direction: column; gap: var(--space-3); }
+      .inv-filter-group { display: flex !important; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; width: 100%; margin-bottom: 0 !important; }
+      .inv-filter-group > div:first-child { flex: 0 0 auto !important; margin-bottom: 0 !important; }
+    }
+    .inv-header-row > div { display: flex; align-items: center; min-height: 22px; line-height: 1.2; }
+    .inv-row > div, .inv-car-track > div { justify-content: center; text-align: center; }
+    .inv-row > .inv-name-cell { justify-content: flex-start; text-align: start; }
+    .inv-header-row > div { justify-content: center; }
+    .inv-header-row > div:first-child { justify-content: flex-start; }
+    .inv-car-outer, .inv-car-track { display: contents; }
+    .inv-car-arrow { display: none !important; }
+    @media (max-width: 1023px) {
+      .inv-main-layout { flex-direction: column !important; align-items: stretch !important; }
+      .inv-main { display: contents; }
+      .inv-toolbar { order: 1; flex-wrap: wrap !important; }
+      .inv-aside { order: 2; position: static !important; width: 100% !important; max-width: none !important; align-self: stretch; margin: 0 0 var(--space-4); box-sizing: border-box; }
+      .inv-aside > div { width: 100%; min-width: 0; box-sizing: border-box; }
+      .inv-list-container { order: 3; }
+    }
+    @media (max-width: 767px) {
+      .product-name-cell { white-space: normal !important; overflow: visible !important; text-overflow: unset !important; word-break: break-word; }
+      .inv-toolbar > div:has(input[placeholder]) { min-width: 0 !important; flex: 1 1 100% !important; order: 3; }
+      .inv-toolbar > button:last-child { order: 2; margin-inline-start: 0 !important; }
+      .inv-filter-group { display: flex !important; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+      .inv-filter-group > div:first-child { flex: 1 0 100%; margin-bottom: 4px !important; }
+      .inv-filter-label { flex: 0 0 auto !important; padding: 6px 12px !important; background: var(--bg-subtle); border-radius: var(--radius-full); }
+      .inv-header-row { display: none !important; }
+      .inv-list-container { background: none !important; border: none !important; box-shadow: none !important; overflow: visible !important; padding: 0 !important; display: flex !important; flex-direction: column; gap: 6px; }
+      .inv-row {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px;
+        box-sizing: border-box;
+        padding: 8px 10px !important;
+        margin: 0 !important;
+        border-radius: var(--radius-md) !important;
+        background: var(--bg-glass-hover);
+        border: 1px solid var(--border-glass) !important;
+        box-shadow: none !important;
+        position: relative;
+      }
+      .inv-row > .inv-name-cell { flex: 1 1 auto; min-width: 0; }
+      .inv-row > .inv-name-cell .product-name-cell { white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; font-size: var(--fs-sm) !important; }
+      .inv-row > .inv-price-cell { flex: 0 0 auto; font-size: var(--fs-sm) !important; white-space: nowrap; }
+      .inv-row > .inv-actions-cell { flex: 0 0 auto; gap: 0 !important; }
+      .inv-row > .inv-actions-cell button { width: 44px !important; height: 44px !important; }
+      .inv-select-cell { flex: 0 0 auto; }
+      .inv-row > .inv-car-outer { display: block !important; position: relative; flex: 0 0 104px; width: 104px; box-sizing: border-box; padding: 0; }
+      .inv-car-track { display: flex !important; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; background: var(--bg-subtle); border-radius: var(--radius-md); scrollbar-width: none; height: 44px; }
+      .inv-car-track::-webkit-scrollbar { display: none; }
+      .inv-car-track > div { flex: 0 0 100%; width: 100%; box-sizing: border-box; scroll-snap-align: start; scroll-snap-stop: always; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 1px; padding: 2px 6px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; font-size: var(--fs-xs); line-height: 1.15; }
+      .inv-car-track > div::before { content: attr(data-label); font-size: 12px; font-weight: var(--fw-semibold); color: var(--color-text-muted-light); line-height: 1; }
+    }
+    input:focus, button:focus { outline: none; }
+    input:focus-visible, button:focus-visible, a:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(20,184,166,0.35) !important; }
+    @keyframes skelPulse { 0%,100% { opacity: 1 } 50% { opacity: .55 } }
+    @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+    ::selection { background: var(--color-primary-soft); }
+  
+    /* ── pass 2: touch ergonomics (one rule, all screens) ── */
+    [class*="car-arrow"] { display: none !important; }
+    /* ── pass 4: motion system ── */
+    @keyframes pageEnter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    app-shell > * { animation: pageEnter .28s var(--ease-spring) both; }
+    button, a[role="button"] { transition: transform .15s var(--ease-spring), background-color .2s var(--ease-smooth), color .2s var(--ease-smooth), box-shadow .25s var(--ease-smooth); }
+    button:active, a[role="button"]:active { transform: scale(0.97); }
+    
+
+    @media (max-width: 767px) {
+      button, a[role="button"], select { min-height: 44px !important; min-width: 44px !important; }
+      input:not([type="checkbox"]):not([type="radio"]) { min-height: 44px !important; }
+      input[type="checkbox"], input[type="radio"] { width: 24px !important; height: 24px !important; padding: 10px !important; box-sizing: content-box !important; }
+      a[href]:not([style*="font-size: var(--fs-xs)"]) { min-height: 44px; display: inline-flex; align-items: center; }
+      [style*="grid-template-columns: 260px"], [style*="grid-template-columns: 320px"], [style*="grid-template-columns: 140px"] { grid-template-columns: 1fr !important; }
+      [style*="max-width: 1520px"], [style*="max-width: 1200px"], [style*="max-width: 1100px"], [style*="max-width: 720px"] { padding-inline: var(--space-4) !important; }
+    }
+    /* ── pass 5: mobile pass (≤767 only) ── */
+    @media (max-width: 767px) {
+      .inv-list-container { display: flex !important; flex-direction: column; gap: 8px; }
+      .inv-row { flex-wrap: wrap; gap: 8px 10px; padding: 10px 12px !important; }
+      /* zero-height flex break: primary line above, meta line below */
+      .inv-row::before { content: ""; order: 4; flex: 1 0 100%; height: 0; }
+      .inv-select-cell { order: 0; }
+      .inv-row > .inv-name-cell { order: 1; }
+      .inv-row > .inv-name-cell .product-name-cell { font-size: var(--fs-base) !important; }
+      .inv-row > .inv-price-cell { order: 2; font-size: var(--fs-base) !important; }
+      .inv-row > .inv-actions-cell { order: 3; }
+      /* meta fields read inline with labels instead of hiding inside a 104px carousel */
+      .inv-row > .inv-car-outer, .inv-row .inv-car-track { display: contents !important; }
+      .inv-car-track > div {
+        order: 5; flex: 0 0 auto !important; width: auto !important; max-width: 100%; min-width: 0;
+        display: flex !important; flex-direction: column !important;
+        align-items: flex-start !important; justify-content: center !important;
+        gap: 1px; padding: 0 !important; height: auto !important;
+        background: none !important; text-align: start !important;
+        font-size: var(--fs-sm) !important; line-height: 1.2;
+        white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;
+      }
+      .inv-car-track > div::before { content: attr(data-label); font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted-light); line-height: 1; text-transform: uppercase; letter-spacing: var(--tracking-wide); }
+      .inv-car-arrow, .inv-car-prev, .inv-car-next { display: none !important; }
+      .inv-toolbar > div:first-of-type h1 { font-size: var(--fs-lg) !important; }
+    }
+
+    /* ── pass 6: mobile cards (≤767 only) ── */
+    @media (max-width: 767px) {
+      .inv-header-row { display: none !important; }
+      .inv-list-container { display: flex !important; flex-direction: column; gap: 10px; background: none !important; border: none !important; box-shadow: none !important; overflow: visible !important; }
+      .inv-row {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto auto !important;
+        gap: 6px 10px;
+        align-items: center;
+        padding: 10px 12px !important;
+        background: var(--bg-glass); border: 1px solid var(--border-glass) !important;
+        border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);
+        position: relative;
+      }
+      .inv-row::before { display: none !important; content: none !important; }
+      .inv-row > .inv-name-cell { grid-area: 1 / 1 / 2 / 2; min-width: 0; align-self: start; font-size: var(--fs-base) !important; justify-content: flex-start !important; text-align: start !important; }
+      .inv-row > .inv-price-cell { grid-area: 1 / 2 / 2 / 3; align-self: start; white-space: nowrap; font-size: var(--fs-base) !important; }
+      .inv-row > .inv-select-cell { grid-area: 1 / 3 / 2 / 4; align-self: start; justify-content: flex-end !important; }
+      .inv-row > .inv-car-outer { display: contents !important; }
+      .inv-row .inv-car-track {
+        display: grid !important; grid-area: 2 / 1 / 3 / 4;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 2px 6px;
+        padding: 8px 0 0 !important; margin: 0 !important;
+        border-top: 1px solid var(--border-row);
+        background: none !important; overflow: visible !important; width: auto !important;
+      }
+      .inv-car-track > div {
+        display: grid !important; grid-template-rows: 14px 24px;
+        justify-items: center !important; align-items: center !important; text-align: center !important;
+        flex: 0 0 auto !important; width: auto !important; min-width: 0 !important; max-width: 100%;
+        padding: 0 !important; height: auto !important; background: none !important;
+        font-size: var(--fs-sm) !important; line-height: 1.2;
+        overflow: hidden !important;
+      }
+      .inv-car-track > div::before {
+        content: attr(data-label); font-size: 11px; font-weight: var(--fw-semibold); line-height: 14px;
+        color: var(--color-text-muted-light); letter-spacing: normal; text-transform: none;
+        max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .inv-car-track > div > * { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+      .inv-row > .inv-actions-cell {
+        grid-area: 3 / 1 / 4 / 4; display: flex !important; align-items: center;
+        justify-content: space-between !important; gap: 0 !important;
+        padding-top: 6px; border-top: 1px solid var(--border-row);
+      }
+      .inv-row > .inv-actions-cell button { width: 40px !important; height: 40px !important; min-width: 40px !important; min-height: 40px !important; }
+      .inv-allergen-cell button { min-width: 0 !important; min-height: 0 !important; height: 20px !important; padding: 0 7px !important; font-size: 11px !important; gap: 3px !important; border-radius: var(--radius-full) !important; }
+      .inv-allergen-cell button svg { width: 10px; height: 10px; }
+      .inv-name-cell .product-name-cell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    }
+  </style>
+</helmet>
+
+<app-shell dir="rtl" page="inventory" fab='[{"id":"add-product","label":"הוספת מוצר","icon":"plus"}]' style="font-family: var(--font-sans);">
+
+    <!-- INVENTORY SCREEN -->
+      <div class="inv-main-layout" style="max-width: 1520px; margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-12); display: flex; gap: var(--space-5); align-items: flex-start;">
+
+        <!-- FILTERS PANEL -->
+        <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ true }}">
+          <aside class="inv-aside" style="width: 250px; flex-shrink: 0; position: sticky; top: calc(3.5rem + var(--space-5)); animation: fadeIn 0.25s var(--ease-spring);">
+            <div style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); padding: var(--space-4);">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4);">
+                <h3 style="margin: 0; font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--color-text-main);">סינון</h3>
+                <sc-if value="{{ hasActiveFilters }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ clearFilters }}" style="background: none; border: none; padding: 0; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-primary); cursor: pointer;">נקה סינון</button>
+                </sc-if>
+              </div>
+
+              <label style="display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) 0; cursor: pointer; border-bottom: 1px solid var(--border-row); margin-bottom: var(--space-3);">
+                <input type="checkbox" checked="{{ lowStockOnly }}" onChange="{{ toggleLowStock }}" />
+                <span style="font-size: var(--fs-sm); color: var(--color-text-secondary); font-weight: var(--fw-medium);">מלאי נמוך בלבד</span>
+              </label>
+
+              <div class="inv-filter-group" style="margin-bottom: var(--space-4);">
+                <div style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">קטגוריה</div>
+                <sc-for list="{{ categoryOptions }}" as="cat" hint-placeholder-count="4">
+                  <label class="inv-filter-label" style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: 5px 0; cursor: pointer;">
+                    <span style="display: flex; align-items: center; gap: var(--space-2);">
+                      <input type="checkbox" checked="{{ cat.checked }}" onChange="{{ cat.onToggle }}" />
+                      <span style="font-size: var(--fs-sm); color: var(--color-text-secondary);">{{ cat.label }}</span>
+                    </span>
+                    <span style="font-size: var(--fs-xs); color: var(--color-text-muted-light);">{{ cat.count }}</span>
+                  </label>
+                </sc-for>
+              </div>
+
+              <div class="inv-filter-group">
+                <div style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">אלרגנים</div>
+                <sc-for list="{{ allergenOptions }}" as="alg" hint-placeholder-count="6">
+                  <label class="inv-filter-label" style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: 5px 0; cursor: pointer;">
+                    <span style="display: flex; align-items: center; gap: var(--space-2);">
+                      <input type="checkbox" checked="{{ alg.checked }}" onChange="{{ alg.onToggle }}" />
+                      <span style="font-size: var(--fs-sm); color: var(--color-text-secondary);">{{ alg.label }}</span>
+                    </span>
+                    <span style="font-size: var(--fs-xs); color: var(--color-text-muted-light);">{{ alg.count }}</span>
+                  </label>
+                </sc-for>
+              </div>
+            </div>
+          </aside>
+        </sc-if>
+
+        <!-- MAIN -->
+        <main class="inv-main" style="flex: 1; min-width: 0;">
+
+          <div class="inv-toolbar" style="display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-5); flex-wrap: wrap;">
+            <button onClick="{{ togglePanel }}" style="display: grid; place-content: center; width: 38px; height: 38px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--color-text-muted); cursor: pointer; flex-shrink: 0;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+            </button>
+
+            <div>
+              <h1 style="margin: 0; font-size: var(--fs-xl); font-weight: var(--fw-bold); letter-spacing: var(--tracking-tight); color: var(--color-text-main);">רשימת מוצרים</h1>
+              <p style="margin: 2px 0 0; font-size: var(--fs-sm); color: var(--color-text-muted);">{{ filteredCount }} מתוך {{ totalCount }} מוצרים במלאי</p>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: var(--space-2); background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 0 var(--space-3); height: 38px; min-width: 220px; backdrop-filter: var(--blur-glass);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-text-muted-light); flex-shrink: 0;"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+              <input type="text" placeholder="חיפוש מוצר" value="{{ search }}" onChange="{{ onSearchChange }}" style="border: none; background: none; outline: none; font-size: var(--fs-sm); color: var(--color-text-main); font-family: var(--font-sans); width: 100%;" />
+            </div>
+
+            <button onClick="{{ openAddModal }}" style="margin-inline-start: auto; display: inline-flex; align-items: center; gap: var(--space-2); padding: 0 var(--space-4); height: 38px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); color: var(--color-text-on-primary); border: none; border-radius: var(--radius-full); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer; box-shadow: var(--shadow-glow);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+              הוסף מוצר
+            </button>
+          </div>
+
+          <sc-if value="{{ hasSelection }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4); margin-bottom: var(--space-3); background: var(--color-primary-soft); border: 1px solid var(--border-focus); border-radius: var(--radius-md); animation: popIn 0.2s var(--ease-spring);">
+              <span style="font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--color-text-main);">{{ selectedCount }} נבחרו</span>
+              <button onClick="{{ askBulkDelete }}" style="display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid rgba(220,38,38,0.3); color: var(--color-danger); padding: 6px 12px; border-radius: var(--radius-md); font-size: var(--fs-xs); font-weight: var(--fw-semibold); cursor: pointer;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                מחק נבחרים
+              </button>
+              <button onClick="{{ clearSelection }}" style="background: none; border: none; color: var(--color-text-muted); font-size: var(--fs-xs); cursor: pointer; margin-inline-start: auto;">בטל בחירה</button>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+            <div style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); padding: var(--space-4); display: flex; flex-direction: column; gap: 10px;" aria-busy="true" aria-label="טוען מוצרים">
+              <sc-for list="{{ skeletonRows }}" as="row" hint-placeholder-count="6">
+                <div style="display: flex; align-items: center; gap: var(--space-3); animation: skelPulse 1.4s var(--ease-smooth) infinite;">
+                  <div style="width: 22px; height: 22px; border-radius: var(--radius-xs); background: rgba(15,23,42,0.07);"></div>
+                  <div style="flex: 2; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.07);"></div>
+                  <div style="flex: 1; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.05);"></div>
+                  <div style="flex: 1; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.05);"></div>
+                  <div style="width: 84px; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.05);"></div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+          <div class="inv-list-container" style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); overflow: hidden;">
+
+            <div class="inv-header-row" style="display: grid; grid-template-columns: 2.1fr 1fr 1fr 1fr 0.7fr 0.9fr 84px 36px; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-default); background: var(--bg-muted);">
+              <div onClick="{{ setSortName }}" style="display: flex; align-items: center; gap: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); cursor: pointer;">
+                מוצר
+                <sc-if value="{{ nameSortUp }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></sc-if>
+                <sc-if value="{{ nameSortDown }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></sc-if>
+              </div>
+              <div onClick="{{ setSortCategory }}" style="display: flex; align-items: center; gap: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); cursor: pointer;">
+                קטגוריה
+                <sc-if value="{{ categorySortUp }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></sc-if>
+                <sc-if value="{{ categorySortDown }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></sc-if>
+              </div>
+              <div style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide);">אלרגנים</div>
+              <div onClick="{{ setSortSupplier }}" style="display: flex; align-items: center; gap: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); cursor: pointer;">
+                ספק
+                <sc-if value="{{ supplierSortUp }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></sc-if>
+                <sc-if value="{{ supplierSortDown }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></sc-if>
+              </div>
+              <div style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide);">יחידה</div>
+              <div onClick="{{ setSortPrice }}" style="display: flex; align-items: center; gap: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); cursor: pointer;">
+                מחיר
+                <sc-if value="{{ priceSortUp }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></sc-if>
+                <sc-if value="{{ priceSortDown }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></sc-if>
+              </div>
+              <div style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide);">פעולות</div>
+              <div style="display: flex; align-items: center;">
+                <input type="checkbox" checked="{{ allSelected }}" onChange="{{ toggleSelectAll }}" />
+              </div>
+            </div>
+
+            <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+              <div style="padding: var(--space-12) var(--space-4); text-align: center; color: var(--color-text-muted); font-size: var(--fs-sm);">לא נמצאו מוצרים התואמים לחיפוש</div>
+            </sc-if>
+
+            <sc-for list="{{ products }}" as="p" hint-placeholder-count="8">
+              <div class="inv-row" style="{{ p.rowStyle }}">
+                <div class="inv-name-cell" style="display: flex; align-items: center; gap: var(--space-2); min-width: 0;">
+                  <span class="product-name-cell" title="{{ p.name }}" style="font-size: var(--fs-base); font-weight: var(--fw-medium); color: var(--color-text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ p.name }}</span>
+                  <sc-if value="{{ p.lowStock }}" hint-placeholder-val="{{ false }}">
+                    <span title="{{ p.lowStockTooltip }}" style="flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: var(--bg-warning); color: var(--text-warning); cursor: help;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+                    </span>
+                  </sc-if>
+                </div>
+              <div class="inv-car-outer" data-car-outer>
+              <div class="inv-car-track" data-car-track>
+                <div class="inv-category-cell" data-label="קטגוריה" style="display: flex; align-items: center; font-size: var(--fs-sm); color: var(--color-text-secondary);">{{ p.categoryLabel }}</div>
+                <div class="inv-allergen-cell" data-label="אלרגנים" style="display: flex; align-items: center; justify-content: center;">
+                  <sc-if value="{{ p.hasAllergens }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ p.onTogglePopover }}" style="display: inline-flex; align-items: center; gap: 5px; background: var(--bg-danger-subtle); border: 1px solid rgba(220,38,38,0.2); color: var(--color-allergen-text); padding: 4px 9px; border-radius: var(--radius-full); font-size: var(--fs-xs); font-weight: var(--fw-semibold); cursor: pointer;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.35 8.95a1 1 0 0 1-.6.03C8.06 20.55 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>
+                      {{ p.allergenCount }}
+                    </button>
+                  </sc-if>
+                  <sc-if value="{{ p.noAllergens }}" hint-placeholder-val="{{ true }}">
+                    <span style="color: var(--color-text-muted-light);">—</span>
+                  </sc-if>
+                </div>
+                <div class="inv-supplier-cell" data-label="ספק" style="display: flex; align-items: center; font-size: var(--fs-sm); color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ p.supplierName }}</div>
+                <div class="inv-unit-cell" data-label="יחידה" style="display: flex; align-items: center; font-size: var(--fs-sm); color: var(--color-text-secondary);">{{ p.unitLabel }}</div>
+              </div>
+              <button type="button" class="inv-car-arrow inv-car-prev" onClick="{{ carPrev }}">‹</button>
+              <button type="button" class="inv-car-arrow inv-car-next" onClick="{{ carNext }}">›</button>
+              </div>
+              <sc-if value="{{ p.popoverOpen }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ stopPropagation }}" style="position: absolute; top: calc(100% + 4px); right: 20%; z-index: 20; display: flex; flex-wrap: wrap; gap: 4px; width: 160px; padding: var(--space-2); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-md); box-shadow: var(--shadow-modal); animation: popIn 0.15s var(--ease-spring);">
+                  <sc-for list="{{ p.allergenChips }}" as="a" hint-placeholder-count="2">
+                    <span style="font-size: var(--fs-xs); padding: 3px 8px; border-radius: var(--radius-full); background: var(--bg-danger-subtle); color: var(--color-allergen-text);">{{ a.label }}</span>
+                  </sc-for>
+                </div>
+              </sc-if>
+                <div class="inv-price-cell" style="display: flex; align-items: center; gap: 3px; font-size: var(--fs-base); font-weight: var(--fw-semibold); color: var(--color-text-main); font-variant-numeric: tabular-nums;">
+                  {{ p.priceLabel }}<span style="color: var(--color-text-muted-light); font-weight: var(--fw-regular); font-size: var(--fs-xs);">₪</span>
+                </div>
+                <div class="inv-actions-cell" style="display: flex; align-items: center; gap: 4px;">
+                  <button onClick="{{ p.onEdit }}" style="display: grid; place-content: center; width: 30px; height: 30px; background: none; border: none; border-radius: var(--radius-sm); color: var(--color-text-muted); cursor: pointer;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg>
+                  </button>
+                  <button onClick="{{ p.onDelete }}" style="display: grid; place-content: center; width: 30px; height: 30px; background: none; border: none; border-radius: var(--radius-sm); color: var(--color-danger); cursor: pointer;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
+                </div>
+                <div class="inv-select-cell" style="display: flex; align-items: center;">
+                  <input type="checkbox" checked="{{ p.selected }}" onChange="{{ p.onToggleSelect }}" />
+                </div>
+              </div>
+            </sc-for>
+
+          </div>
+          </sc-if>
+        </main>
+      </div>
+
+  <!-- ADD / EDIT MODAL -->
+  <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" class="m-sheet" style="position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; background: var(--overlay-backdrop); backdrop-filter: blur(6px); animation: fadeIn 0.15s ease;">
+      <div onClick="{{ stopPropagation }}" class="m-sheet-card m-scroll-y" style="width: 92%; max-width: 440px; max-height: 86vh; overflow-y: auto; padding: var(--space-6); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-5);">
+          <h3 style="margin: 0; font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--color-text-main);">{{ modalTitle }}</h3>
+          <button onClick="{{ closeModal }}" style="width: 30px; height: 30px; display: grid; place-content: center; border: 1px solid var(--border-default); background: var(--bg-glass); border-radius: var(--radius-sm); cursor: pointer; color: var(--color-text-muted);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+          </button>
+        </div>
+
+        <label style="display: block; margin-bottom: var(--space-4);">
+          <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">שם המוצר</span>
+          <sc-if value="{{ hasNameError }}" hint-placeholder-val="{{ false }}">
+            <span style="display: block; margin-top: 6px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-danger);">{{ nameError }}</span>
+          </sc-if>
+          <input type="text" value="{{ draftName }}" onChange="{{ setDraftName }}" placeholder="לדוגמה: בצל צהוב" style="width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: var(--fs-base); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1.5px solid var(--border-default); border-radius: var(--radius-md);" />
+        </label>
+
+        <div style="margin-bottom: var(--space-4);">
+          <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">קטגוריה</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <sc-for list="{{ draftCategoryOptions }}" as="c" hint-placeholder-count="4">
+              <button onClick="{{ c.onSelect }}" style="{{ c.style }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-4);">
+          <div>
+            <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">יחידה</span>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              <sc-for list="{{ draftUnitOptions }}" as="u" hint-placeholder-count="3">
+                <button onClick="{{ u.onSelect }}" style="{{ u.style }}">{{ u.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <label style="display: block;">
+            <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">מחיר (₪)</span>
+            <input type="number" value="{{ draftPrice }}" onChange="{{ setDraftPrice }}" placeholder="0.00" style="width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: var(--fs-base); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1.5px solid var(--border-default); border-radius: var(--radius-md);" />
+          </label>
+        </div>
+
+        <div style="margin-bottom: var(--space-4);">
+          <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">אלרגנים</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <sc-for list="{{ draftAllergenOptions }}" as="a" hint-placeholder-count="6">
+              <button onClick="{{ a.onToggle }}" style="{{ a.style }}">{{ a.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <label style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-5); cursor: pointer;">
+          <input type="checkbox" checked="{{ draftLowStock }}" onChange="{{ toggleDraftLowStock }}" />
+          <span style="font-size: var(--fs-sm); color: var(--color-text-secondary);">סמן כמלאי נמוך</span>
+        </label>
+
+        <div style="display: flex; justify-content: flex-end; gap: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--border-default);">
+          <button onClick="{{ closeModal }}" style="padding: 9px 18px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--color-text-secondary); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">ביטול</button>
+          <button onClick="{{ saveDraft }}" style="padding: 9px 20px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); border: none; border-radius: var(--radius-md); color: #fff; font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer; box-shadow: var(--shadow-glow);">שמירה</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- CONFIRM DIALOG -->
+  <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+    <div class="m-sheet" style="position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; background: var(--overlay-backdrop); backdrop-filter: blur(6px); animation: fadeIn 0.15s ease;">
+      <div class="m-sheet-card" style="width: 90%; max-width: 380px; padding: var(--space-6); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring); text-align: center;">
+        <div style="width: 44px; height: 44px; margin: 0 auto var(--space-4); border-radius: 50%; background: var(--bg-danger-subtle); display: grid; place-content: center; color: var(--color-danger);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+        </div>
+        <p style="margin: 0 0 var(--space-5); font-size: var(--fs-base); font-weight: var(--fw-medium); color: var(--color-text-main);">{{ confirmMessage }}</p>
+        <div style="display: flex; gap: var(--space-3);">
+          <button onClick="{{ cancelConfirm }}" style="flex: 1; padding: 10px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--color-text-secondary); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">ביטול</button>
+          <button onClick="{{ runConfirm }}" style="flex: 1; padding: 10px; background: var(--color-danger); border: none; border-radius: var(--radius-md); color: #fff; font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">מחיקה</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- TOAST -->
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <div class="m-toast" style="position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 400; display: flex; align-items: center; gap: var(--space-2); padding: 11px 20px; background: var(--color-text-main); color: #fff; border-radius: var(--radius-full); font-size: var(--fs-sm); font-weight: var(--fw-medium); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring);">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);"><path d="M20 6 9 17l-5-5"></path></svg>
+      {{ toastMessage }}
+    </div>
+  </sc-if>
+</app-shell>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;viewState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ready&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;ready&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;States&quot;}}">
+const CATEGORY_LABELS = { vegetables: 'ירקות', meat: 'בשר ועוף', dry: 'מוצרים יבשים', spices: 'תבלינים ורטבים' };
+const UNIT_LABELS = { kg: 'ק"ג', liter: 'ליטר', unit: 'יחידה' };
+const ALLERGEN_LABELS = { gluten: 'גלוטן', eggs: 'ביצים', nuts: 'אגוזים', soy: 'סויה', mustard: 'חרדל', sesame: 'שומשום' };
+const SUPPLIER_NAMES = { sup_vegetable: 'ירקות השדה', sup_meat: 'קצביית הצפון', sup_dry: 'סיטונאי יבש', sup_spices: 'תבליני המזרח' };
+
+const BASE_PRODUCTS = [
+  { _id: 'demo_001', name: 'בצל צהוב', category: 'vegetables', unit: 'kg', price: 4.9, supplierId: 'sup_vegetable', allergens: [], lowStock: false },
+  { _id: 'demo_004', name: 'שום', category: 'vegetables', unit: 'kg', price: 45, supplierId: 'sup_vegetable', allergens: [], lowStock: false },
+  { _id: 'demo_007', name: 'מלפפון', category: 'vegetables', unit: 'kg', price: 5, supplierId: 'sup_vegetable', allergens: [], lowStock: false },
+  { _id: 'demo_144', name: 'עגבניות שרי צבעוניות', category: 'vegetables', unit: 'kg', price: 23.9, supplierId: 'sup_vegetable', allergens: [], lowStock: false },
+  { _id: 'demo_141', name: 'בננה', category: 'vegetables', unit: 'kg', price: 11.9, supplierId: 'sup_vegetable', allergens: [], lowStock: false },
+  { _id: 'demo_037', name: 'חזה עוף טרי', category: 'meat', unit: 'kg', price: 41.9, supplierId: 'sup_meat', allergens: [], lowStock: false },
+  { _id: 'demo_124', name: 'קציצת בורגר', category: 'meat', unit: 'kg', price: 69, supplierId: 'sup_meat', allergens: [], lowStock: false },
+  { _id: 'demo_127', name: 'פרגיות', category: 'meat', unit: 'kg', price: 69.9, supplierId: 'sup_meat', allergens: [], lowStock: true, stockQty: 1.5, minStock: 5 },
+  { _id: 'demo_101', name: 'נקניקת עוף', category: 'meat', unit: 'unit', price: 3.5, supplierId: 'sup_meat', allergens: [], lowStock: false },
+  { _id: 'demo_052', name: 'סוכר חום', category: 'dry', unit: 'kg', price: 12.9, supplierId: 'sup_dry', allergens: [], lowStock: false },
+  { _id: 'demo_137', name: 'קמח אורז', category: 'dry', unit: 'kg', price: 18, supplierId: 'sup_dry', allergens: [], lowStock: true, stockQty: 2, minStock: 8 },
+  { _id: 'demo_147', name: 'אורז עגול', category: 'dry', unit: 'kg', price: 20.9, supplierId: 'sup_dry', allergens: [], lowStock: false },
+  { _id: 'demo_139', name: 'שמן רגיל / שמן טיגון', category: 'dry', unit: 'liter', price: 11, supplierId: 'sup_dry', allergens: [], lowStock: false },
+  { _id: 'demo_104', name: 'לחמניה', category: 'dry', unit: 'unit', price: 2.2, supplierId: 'sup_dry', allergens: ['gluten'], lowStock: false },
+  { _id: 'demo_106', name: 'מיונז', category: 'dry', unit: 'kg', price: 29, supplierId: 'sup_dry', allergens: ['eggs'], lowStock: false },
+  { _id: 'demo_132', name: 'חמאת בוטנים', category: 'dry', unit: 'kg', price: 24.9, supplierId: 'sup_dry', allergens: ['nuts'], lowStock: false },
+  { _id: 'demo_128', name: 'טופו מטוגן', category: 'dry', unit: 'kg', price: 46, supplierId: 'sup_dry', allergens: ['soy'], lowStock: false },
+  { _id: 'demo_073', name: 'מלח ים', category: 'spices', unit: 'kg', price: 1.9, supplierId: 'sup_spices', allergens: [], lowStock: false },
+  { _id: 'demo_074', name: 'פלפל שחור גרוס', category: 'spices', unit: 'kg', price: 17, supplierId: 'sup_spices', allergens: [], lowStock: true, stockQty: 0.4, minStock: 2 },
+  { _id: 'demo_084', name: 'חרדל', category: 'spices', unit: 'kg', price: 30, supplierId: 'sup_spices', allergens: ['mustard'], lowStock: false },
+  { _id: 'demo_085', name: 'רוטב סויה', category: 'spices', unit: 'liter', price: 35, supplierId: 'sup_spices', allergens: ['soy'], lowStock: false },
+  { _id: 'demo_086', name: 'טחינה', category: 'spices', unit: 'kg', price: 37.6, supplierId: 'sup_spices', allergens: ['sesame'], lowStock: false },
+  { _id: 'demo_173', name: 'שומשום שחור', category: 'spices', unit: 'kg', price: 65, supplierId: 'sup_spices', allergens: ['sesame'], lowStock: false },
+  { _id: 'demo_116', name: 'ג\'ינג\'ר', category: 'spices', unit: 'kg', price: 45, supplierId: 'sup_spices', allergens: [], lowStock: false }
+];
+
+class Component extends DCLogic {
+  componentDidMount() {
+    this._loadTimer = setTimeout(() => this.setState({ loading: false }), 650);
+    this._fabHandler = (e) => { if (e.detail && e.detail.id === 'add-product') this.openAddModal(); };
+    document.addEventListener('hero-fab-action', this._fabHandler);
+    import('./carousel-helpers.js').then(m => { this._car = m; this._carDispose = m.attachCarouselWatcher(); });
+  }
+  componentWillUnmount() {
+    if (this._carDispose) this._carDispose();
+  }
+  carPrev(e) { if (this._car) this._car.scrollCarousel(e.currentTarget, -1); }
+  carNext(e) { if (this._car) this._car.scrollCarousel(e.currentTarget, 1); }
+  carDot(e) { if (this._car) this._car.scrollCarouselToDot(e.currentTarget); }
+
+  state = {
+    loading: true,
+    nameError: '',
+    activeTab: 'inventory',
+    products: BASE_PRODUCTS.map(p => ({ ...p, allergens: [...p.allergens] })),
+    search: '',
+    categoryFilters: new Set(),
+    allergenFilters: new Set(),
+    lowStockOnly: false,
+    sortBy: null,
+    sortDir: 'asc',
+    selected: new Set(),
+    panelOpen: true,
+    popoverId: null,
+    modalOpen: false,
+    modalMode: 'add',
+    modalId: null,
+    draft: { name: '', category: 'vegetables', unit: 'kg', price: '', allergens: new Set(), lowStock: false },
+    confirmOpen: false,
+    confirmMessage: '',
+    confirmAction: null,
+    confirmTargetId: null,
+    toastVisible: false,
+    toastMessage: ''
+  };
+
+  showToast(msg) {
+    clearTimeout(this._toastTimer);
+    this.setState({ toastVisible: true, toastMessage: msg });
+    this._toastTimer = setTimeout(() => this.setState({ toastVisible: false }), 2500);
+  }
+
+  setTab(tab) { this.setState({ activeTab: tab, selected: new Set(), popoverId: null }); }
+  onSearchChange(v) { this.setState({ search: v }); }
+
+  toggleCategory(key) {
+    this.setState(s => {
+      const next = new Set(s.categoryFilters);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return { categoryFilters: next };
+    });
+  }
+  toggleAllergenFilter(key) {
+    this.setState(s => {
+      const next = new Set(s.allergenFilters);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return { allergenFilters: next };
+    });
+  }
+  toggleLowStock() { this.setState(s => ({ lowStockOnly: !s.lowStockOnly })); }
+  clearFilters() { this.setState({ categoryFilters: new Set(), allergenFilters: new Set(), lowStockOnly: false }); }
+  togglePanel() { this.setState(s => ({ panelOpen: !s.panelOpen })); }
+
+  setSort(field) {
+    this.setState(s => s.sortBy === field
+      ? { sortDir: s.sortDir === 'asc' ? 'desc' : 'asc' }
+      : { sortBy: field, sortDir: 'asc' });
+  }
+
+  toggleSelect(id) {
+    this.setState(s => {
+      const next = new Set(s.selected);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return { selected: next };
+    });
+  }
+  toggleSelectAll(visibleIds) {
+    this.setState(s => {
+      const allSel = visibleIds.length > 0 && visibleIds.every(id => s.selected.has(id));
+      return { selected: allSel ? new Set() : new Set(visibleIds) };
+    });
+  }
+  clearSelection() { this.setState({ selected: new Set() }); }
+  togglePopover(id) { this.setState(s => ({ popoverId: s.popoverId === id ? null : id })); }
+  stopPropagation(e) { if (e && e.stopPropagation) e.stopPropagation(); }
+
+  openAddModal() {
+    this.setState({ modalOpen: true, modalMode: 'add', modalId: null, draft: { name: '', category: 'vegetables', unit: 'kg', price: '', allergens: new Set(), lowStock: false } });
+  }
+  openEditModal(id) {
+    const p = this.state.products.find(x => x._id === id);
+    if (!p) return;
+    this.setState({ modalOpen: true, modalMode: 'edit', modalId: id, draft: { name: p.name, category: p.category, unit: p.unit, price: String(p.price), allergens: new Set(p.allergens), lowStock: p.lowStock } });
+  }
+  closeModal() { this.setState({ modalOpen: false }); }
+  setDraftName(v) { this.setState(s => ({ draft: { ...s.draft, name: v } })); }
+  setDraftPrice(v) { this.setState(s => ({ draft: { ...s.draft, price: v } })); }
+  selectDraftCategory(k) { this.setState(s => ({ draft: { ...s.draft, category: k } })); }
+  selectDraftUnit(k) { this.setState(s => ({ draft: { ...s.draft, unit: k } })); }
+  toggleDraftLowStock() { this.setState(s => ({ draft: { ...s.draft, lowStock: !s.draft.lowStock } })); }
+  toggleDraftAllergen(k) {
+    this.setState(s => {
+      const next = new Set(s.draft.allergens);
+      next.has(k) ? next.delete(k) : next.add(k);
+      return { draft: { ...s.draft, allergens: next } };
+    });
+  }
+
+  saveDraft() {
+    const { draft, modalMode, modalId, products } = this.state;
+    if (!draft.name.trim()) { this.setState({ nameError: 'שדה חובה' }); return; }
+    if (this.state.nameError) this.setState({ nameError: '' });
+    const price = parseFloat(draft.price) || 0;
+    if (modalMode === 'add') {
+      const newProduct = { _id: 'demo_new_' + Date.now(), name: draft.name.trim(), category: draft.category, unit: draft.unit, price, supplierId: '', allergens: Array.from(draft.allergens), lowStock: draft.lowStock };
+      this.setState({ products: [newProduct, ...products], modalOpen: false });
+      this.showToast('המוצר נוסף בהצלחה');
+    } else {
+      const next = products.map(p => p._id === modalId ? { ...p, name: draft.name.trim(), category: draft.category, unit: draft.unit, price, allergens: Array.from(draft.allergens), lowStock: draft.lowStock } : p);
+      this.setState({ products: next, modalOpen: false });
+      this.showToast('המוצר עודכן בהצלחה');
+    }
+  }
+
+  askDeleteProduct(id) {
+    const p = this.state.products.find(x => x._id === id);
+    this.setState({ confirmOpen: true, confirmMessage: 'האם למחוק את "' + (p ? p.name : '') + '"?', confirmAction: 'delete', confirmTargetId: id });
+  }
+  askBulkDelete() {
+    if (this.state.selected.size === 0) return;
+    this.setState({ confirmOpen: true, confirmMessage: 'למחוק ' + this.state.selected.size + ' מוצרים?', confirmAction: 'bulkDelete', confirmTargetId: null });
+  }
+  cancelConfirm() { this.setState({ confirmOpen: false, confirmAction: null, confirmTargetId: null }); }
+  runConfirm() {
+    const { confirmAction, confirmTargetId, products, selected } = this.state;
+    if (confirmAction === 'delete') {
+      this.setState({ products: products.filter(p => p._id !== confirmTargetId), confirmOpen: false });
+      this.showToast('המוצר נמחק');
+    } else if (confirmAction === 'bulkDelete') {
+      this.setState({ products: products.filter(p => !selected.has(p._id)), selected: new Set(), confirmOpen: false });
+      this.showToast('המוצרים נמחקו');
+    }
+  }
+
+  renderVals() {
+    const b = this.baseVals();
+    const vs = this.state.__vs || this.props.viewState || 'ready';
+    const loading = vs === 'loading' || !!b.loading, failed = vs === 'error';
+    if (vs !== 'ready') { b.products = []; b.isEmpty = vs === 'empty'; }
+    return Object.assign(b, {
+      loading, loadFailed: failed, ready: !loading && !failed,
+      skeletonRows: [1, 2, 3, 4, 5, 6].map(i => ({ i })),
+      retryLoad: () => this.setState({ __vs: 'ready' })
+    });
+  }
+
+  baseVals() {
+    const s = this.state;
+    const navBase = { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', fontSize: '13px', fontWeight: 600, borderRadius: '999px', cursor: 'pointer', transition: 'all .2s ease', whiteSpace: 'nowrap' };
+    const navActive = { ...navBase, background: 'linear-gradient(180deg, var(--color-primary), var(--color-primary-hover))', color: '#fff', boxShadow: 'var(--shadow-glow)' };
+    const navInactive = { ...navBase, color: 'var(--color-text-muted)' };
+
+    let products = s.products.map(p => ({ ...p }));
+
+    if (s.lowStockOnly) products = products.filter(p => p.lowStock);
+    if (s.categoryFilters.size > 0) products = products.filter(p => s.categoryFilters.has(p.category));
+    if (s.allergenFilters.size > 0) products = products.filter(p => p.allergens.some(a => s.allergenFilters.has(a)));
+    const search = s.search.trim();
+    if (search) products = products.filter(p => p.name.includes(search));
+
+    if (s.sortBy) {
+      const dir = s.sortDir === 'asc' ? 1 : -1;
+      products = [...products].sort((a, b) => {
+        let cmp = 0;
+        if (s.sortBy === 'name') cmp = a.name.localeCompare(b.name, 'he');
+        else if (s.sortBy === 'category') cmp = CATEGORY_LABELS[a.category].localeCompare(CATEGORY_LABELS[b.category], 'he');
+        else if (s.sortBy === 'supplier') cmp = (SUPPLIER_NAMES[a.supplierId] || '').localeCompare(SUPPLIER_NAMES[b.supplierId] || '', 'he');
+        else if (s.sortBy === 'price') cmp = a.price - b.price;
+        return cmp * dir;
+      });
+    }
+
+    const visibleIds = products.map(p => p._id);
+    const allSelected = visibleIds.length > 0 && visibleIds.every(id => s.selected.has(id));
+
+    const productRows = products.map(p => ({
+      _id: p._id,
+      name: p.name,
+      categoryLabel: CATEGORY_LABELS[p.category] || p.category,
+      unitLabel: UNIT_LABELS[p.unit] || p.unit,
+      supplierName: SUPPLIER_NAMES[p.supplierId] || '—',
+      priceLabel: p.price.toFixed(2),
+      lowStock: p.lowStock,
+      lowStockTooltip: p.lowStock ? ('מלאי נוכחי: ' + p.stockQty + ' ' + (UNIT_LABELS[p.unit] || p.unit) + ' (מתחת לסף ' + p.minStock + ')') : '',
+      hasAllergens: p.allergens.length > 0,
+      noAllergens: p.allergens.length === 0,
+      allergenCount: p.allergens.length,
+      allergenChips: p.allergens.map(a => ({ key: a, label: ALLERGEN_LABELS[a] || a })),
+      popoverOpen: s.popoverId === p._id,
+      selected: s.selected.has(p._id),
+      rowStyle: { display: 'grid', gridTemplateColumns: '2.1fr 1fr 1fr 1fr 0.7fr 0.9fr 84px 36px', gap: 'var(--space-2)', padding: 'var(--space-3) var(--space-4)', borderBottom: '1px solid var(--border-row)', alignItems: 'center', transition: 'background .15s ease' },
+      onTogglePopover: () => this.togglePopover(p._id),
+      onEdit: () => this.openEditModal(p._id),
+      onDelete: () => this.askDeleteProduct(p._id),
+      onToggleSelect: () => this.toggleSelect(p._id)
+    }));
+
+    const catCounts = {};
+    const algCounts = {};
+    s.products.forEach(p => {
+      catCounts[p.category] = (catCounts[p.category] || 0) + 1;
+      p.allergens.forEach(a => { algCounts[a] = (algCounts[a] || 0) + 1; });
+    });
+
+    const categoryOptions = Object.keys(CATEGORY_LABELS).map(key => ({
+      key, label: CATEGORY_LABELS[key], count: catCounts[key] || 0,
+      checked: s.categoryFilters.has(key),
+      onToggle: () => this.toggleCategory(key)
+    }));
+    const allergenOptions = Object.keys(algCounts).map(key => ({
+      key, label: ALLERGEN_LABELS[key] || key, count: algCounts[key],
+      checked: s.allergenFilters.has(key),
+      onToggle: () => this.toggleAllergenFilter(key)
+    }));
+
+    const chipStyle = (active) => ({
+      padding: '7px 14px', borderRadius: '999px', fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer',
+      border: active ? 'none' : '1px solid var(--border-default)',
+      background: active ? 'linear-gradient(180deg, var(--color-primary), var(--color-primary-hover))' : 'var(--bg-glass)',
+      color: active ? '#fff' : 'var(--color-text-secondary)'
+    });
+
+    const draftCategoryOptions = Object.keys(CATEGORY_LABELS).map(key => ({
+      key, label: CATEGORY_LABELS[key], style: chipStyle(s.draft.category === key), onSelect: () => this.selectDraftCategory(key)
+    }));
+    const draftUnitOptions = Object.keys(UNIT_LABELS).map(key => ({
+      key, label: UNIT_LABELS[key], style: chipStyle(s.draft.unit === key), onSelect: () => this.selectDraftUnit(key)
+    }));
+    const draftAllergenOptions = Object.keys(ALLERGEN_LABELS).map(key => ({
+      key, label: ALLERGEN_LABELS[key], style: chipStyle(s.draft.allergens.has(key)), onToggle: () => this.toggleDraftAllergen(key)
+    }));
+
+    return {
+      carPrev: (e) => this.carPrev(e),
+      carNext: (e) => this.carNext(e),
+      carDot: (e) => this.carDot(e),
+      isInventoryTab: s.activeTab === 'inventory',
+      isOtherTab: s.activeTab !== 'inventory',
+      otherTabLabel: { dashboard: 'הדשבורד', recipes: 'ספר המתכונים', menus: 'בניית התפריטים', venues: 'ניהול האתרים' }[s.activeTab] || '',
+      goDashboard: () => this.setTab('dashboard'),
+      goInventory: () => this.setTab('inventory'),
+      goRecipes: () => this.setTab('recipes'),
+      goMenus: () => this.setTab('menus'),
+      goVenues: () => this.setTab('venues'),
+      navStyleDashboard: s.activeTab === 'dashboard' ? navActive : navInactive,
+      navStyleInventory: s.activeTab === 'inventory' ? navActive : navInactive,
+      navStyleRecipes: s.activeTab === 'recipes' ? navActive : navInactive,
+      navStyleMenus: s.activeTab === 'menus' ? navActive : navInactive,
+      navStyleVenues: s.activeTab === 'venues' ? navActive : navInactive,
+
+      panelOpen: s.panelOpen,
+      togglePanel: () => this.togglePanel(),
+      hasActiveFilters: s.categoryFilters.size > 0 || s.allergenFilters.size > 0 || s.lowStockOnly,
+      clearFilters: () => this.clearFilters(),
+      lowStockOnly: s.lowStockOnly,
+      toggleLowStock: () => this.toggleLowStock(),
+      categoryOptions,
+      allergenOptions,
+
+      search: s.search,
+      onSearchChange: (v) => this.onSearchChange(v),
+      totalCount: s.products.length,
+      filteredCount: products.length,
+      isEmpty: products.length === 0,
+      openAddModal: () => this.openAddModal(),
+
+      hasSelection: s.selected.size > 0,
+      selectedCount: s.selected.size,
+      askBulkDelete: () => this.askBulkDelete(),
+      clearSelection: () => this.clearSelection(),
+
+      setSortName: () => this.setSort('name'),
+      setSortCategory: () => this.setSort('category'),
+      setSortSupplier: () => this.setSort('supplier'),
+      setSortPrice: () => this.setSort('price'),
+      nameSortUp: s.sortBy === 'name' && s.sortDir === 'asc',
+      nameSortDown: s.sortBy === 'name' && s.sortDir === 'desc',
+      categorySortUp: s.sortBy === 'category' && s.sortDir === 'asc',
+      categorySortDown: s.sortBy === 'category' && s.sortDir === 'desc',
+      supplierSortUp: s.sortBy === 'supplier' && s.sortDir === 'asc',
+      supplierSortDown: s.sortBy === 'supplier' && s.sortDir === 'desc',
+      priceSortUp: s.sortBy === 'price' && s.sortDir === 'asc',
+      priceSortDown: s.sortBy === 'price' && s.sortDir === 'desc',
+
+      allSelected,
+      toggleSelectAll: () => this.toggleSelectAll(visibleIds),
+      products: productRows,
+
+      loading: s.loading,
+      ready: !s.loading,
+      skeletonRows: [1,2,3,4,5,6],
+      nameError: s.nameError,
+      nameErrorStyle: s.nameError ? 'width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: var(--fs-base); font-family: inherit; color: var(--color-text-main); background: var(--bg-pure); border: 1px solid var(--color-danger); border-radius: var(--radius-md); outline: none;' : '',
+      hasNameError: !!s.nameError,
+      modalOpen: s.modalOpen,
+      modalTitle: s.modalMode === 'add' ? 'הוספת מוצר' : 'עריכת מוצר',
+      closeModal: () => this.closeModal(),
+      stopPropagation: (e) => this.stopPropagation(e),
+      draftName: s.draft.name,
+      setDraftName: (v) => this.setDraftName(v),
+      draftPrice: s.draft.price,
+      setDraftPrice: (v) => this.setDraftPrice(v),
+      draftLowStock: s.draft.lowStock,
+      toggleDraftLowStock: () => this.toggleDraftLowStock(),
+      draftCategoryOptions,
+      draftUnitOptions,
+      draftAllergenOptions,
+      saveDraft: () => this.saveDraft(),
+
+      confirmOpen: s.confirmOpen,
+      confirmMessage: s.confirmMessage,
+      cancelConfirm: () => this.cancelConfirm(),
+      runConfirm: () => this.runConfirm(),
+
+      toastVisible: s.toastVisible,
+      toastMessage: s.toastMessage
+    };
+  }
+}
+</script>
+</body>
+</html>

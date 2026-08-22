@@ -15,13 +15,23 @@
           }
         </div>
         <div class="user-meta">
-          <button type="button" class="auth-username-btn" (click)="logout()" [attr.aria-label]="'log_out' | translatePipe">
+          <button
+            type="button"
+            class="auth-username-btn"
+            (click)="logout()"
+            [attr.aria-label]="'log_out' | translatePipe"
+          >
             {{ user_()!.name }}
           </button>
         </div>
       </div>
     } @else {
-      <button type="button" class="avatar-guest" (click)="openAuth('sign-in')" [attr.aria-label]="'sign_in' | translatePipe">
+      <button
+        type="button"
+        class="avatar-guest"
+        (click)="openAuth('sign-in')"
+        [attr.aria-label]="'sign_in' | translatePipe"
+      >
         <lucide-icon name="circle-user-round" [size]="22"></lucide-icon>
       </button>
       <button type="button" class="auth-link" (click)="openAuth('sign-in')">{{ 'sign_in' | translatePipe }}</button>
@@ -51,10 +61,24 @@
     </a>
   </div>
 
+  <!-- Opposite end from the user chip — matches the design's header layout
+       (brand mark on the far side from the avatar, nav pills centered between). -->
+  <div class="brand-section">
+    <a class="brand-mark" routerLink="/dashboard" aria-label="foodCo">
+      <img src="/assets/style/img/fc-mark.svg" alt="" width="28" height="28" />
+      <span class="brand-mark__name">foodCo</span>
+    </a>
+  </div>
+
   <!-- Mobile drawer nav — hidden on desktop, revealed by hamburger on small tablets -->
   <ul [class.menu-open]="isMobileMenuOpen()">
     <li>
-      <button type="button" class="mobile-close-btn" (click)="closeMobileMenu()" [attr.aria-label]="'close' | translatePipe">
+      <button
+        type="button"
+        class="mobile-close-btn"
+        (click)="closeMobileMenu()"
+        [attr.aria-label]="'close' | translatePipe"
+      >
         <lucide-icon name="x" size="24"></lucide-icon>
       </button>
     </li>
@@ -101,21 +125,18 @@
   </ul>
 </nav>
 
-<div
-  class="mobile-nav-backdrop"
-  [class.open]="isMobileMenuOpen()"
-  (click)="closeMobileMenu()"
-  aria-hidden="true">
-</div>
+<div class="mobile-nav-backdrop" [class.open]="isMobileMenuOpen()" (click)="closeMobileMenu()" aria-hidden="true"></div>
 
 <!-- Mobile floating avatar FAB — mobile only (≤ 620px), shown via CSS -->
 <div class="mobile-avatar-fab">
   @if (isLoggedIn()) {
-    <button type="button"
-            class="mobile-fab-btn"
-            (click)="toggleMobileAvatar()"
-            [attr.aria-expanded]="mobileAvatarOpen()"
-            [attr.aria-label]="'log_out' | translatePipe">
+    <button
+      type="button"
+      class="mobile-fab-btn"
+      (click)="toggleMobileAvatar()"
+      [attr.aria-expanded]="mobileAvatarOpen()"
+      [attr.aria-label]="'log_out' | translatePipe"
+    >
       <div class="avatar-wrapper">
         @if (user_()?.imgUrl) {
           <img [src]="user_()!.imgUrl" alt="" class="avatar-img" />
@@ -135,7 +156,12 @@
       </button>
     }
   } @else {
-    <button type="button" class="mobile-fab-btn mobile-fab-btn--guest" (click)="openAuth('sign-in')" [attr.aria-label]="'sign_in' | translatePipe">
+    <button
+      type="button"
+      class="mobile-fab-btn mobile-fab-btn--guest"
+      (click)="openAuth('sign-in')"
+      [attr.aria-label]="'sign_in' | translatePipe"
+    >
       <lucide-icon name="circle-user-round" [size]="24"></lucide-icon>
     </button>
   }

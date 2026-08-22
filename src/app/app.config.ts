@@ -64,6 +64,7 @@ import {
   Trash2,
   Truck,
   Upload,
+  Wrench,
   Utensils,
   UtensilsCrossed,
   X,
@@ -79,7 +80,10 @@ import {
   Waves,
   CheckCircle,
   HelpCircle,
-  Users
+  Users,
+  Phone,
+  Moon,
+  Sun
 } from 'lucide-angular'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { provideHttpClient, withInterceptors } from '@angular/common/http'
@@ -149,6 +153,7 @@ export const appConfig: ApplicationConfig = {
         Menu,
         MoreVertical,
         Truck,
+        Wrench,
         Package,
         CalendarClock,
         RefreshCw,
@@ -196,7 +201,10 @@ export const appConfig: ApplicationConfig = {
         Waves,
         CheckCircle,
         HelpCircle,
-        Users
+        Users,
+        Phone,
+        Moon,
+        Sun
       })
     )
   ]

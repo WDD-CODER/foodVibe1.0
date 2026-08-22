@@ -1,53 +1,54 @@
-<app-header/>
+<app-header />
+<app-tab-chips />
 <div class="app-content">
-  @if (isRouteLoading() || isDataReloading_()) {
+  @if (isRouteLoading() || isDataReloading_() || loading_.isLoading_()) {
     <app-loader size="large" label="loader_please_wait" [overlay]="true" />
   }
   <router-outlet></router-outlet>
 </div>
-<user-msg/>
+<user-msg />
 
 @defer (when unitRegistry.isCreatorOpen_()) {
-  <unit-creator-modal/>
+  <unit-creator-modal />
 }
 @defer (when translationKeyModal.isOpen_()) {
-  <translation-key-modal/>
+  <translation-key-modal />
 }
 @defer (when labelCreationModal.isOpen_()) {
-  <app-label-creation-modal/>
+  <app-label-creation-modal />
 }
 @defer (when addItemModal.isOpen_()) {
-  <add-item-modal/>
+  <add-item-modal />
 }
 @defer (when quickAddProductModal.isOpen_()) {
-  <app-quick-add-product-modal/>
+  <app-quick-add-product-modal />
 }
 @defer (when quickEditProductModal.isOpen_()) {
-  <app-quick-edit-product-modal/>
+  <app-quick-edit-product-modal />
 }
 @defer (when addEquipmentModal.isOpen_()) {
-  <add-equipment-modal/>
+  <add-equipment-modal />
 }
 @defer (when globalSpecificModal.isOpen()) {
-  <app-global-specific-modal/>
+  <app-global-specific-modal />
 }
 
 <!-- Eager: confirm + auth used early in typical sessions -->
-<app-confirm-modal/>
+<app-confirm-modal />
 @defer (when supplierModal.isOpen()) {
-  <app-supplier-modal/>
+  <app-supplier-modal />
 }
 @defer (when aiRecipeModal.isOpen()) {
-  <app-ai-recipe-modal/>
+  <app-ai-recipe-modal />
 }
 @defer (when aiMenuModal.isOpen()) {
-  <app-ai-menu-modal/>
+  <app-ai-menu-modal />
 }
 @defer (when aiProductModal.isOpen()) {
-  <app-ai-product-modal/>
+  <app-ai-product-modal />
 }
 @defer (when restoreChoiceModal.isOpen()) {
-  <app-restore-choice-modal/>
+  <app-restore-choice-modal />
 }
-<app-hero-fab/>
-<app-auth-modal/>
+<app-hero-fab />
+<app-auth-modal />

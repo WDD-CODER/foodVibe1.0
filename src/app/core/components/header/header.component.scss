@@ -28,14 +28,6 @@
   border-block-end: 1px solid var(--border-glass);
   box-shadow: var(--shadow-nav);
 
-  // Mirror spacer: gives pills a symmetrical counterpart so they stay
-  // truly centered regardless of chip width.
-  &::after {
-    content: '';
-    flex: 1;
-    min-width: 0;
-  }
-
   .mobile-menu-btn,
   .mobile-close-btn {
     display: none;
@@ -91,7 +83,10 @@
   border-radius: var(--radius-full);
 
   cursor: pointer;
-  transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+  transition:
+    color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
 
   lucide-icon {
     opacity: 0.7;
@@ -102,27 +97,62 @@
     color: var(--color-text-main);
     background: rgba(255, 255, 255, 0.5);
 
-    lucide-icon { opacity: 1; }
+    lucide-icon {
+      opacity: 1;
+    }
   }
 
   &.active {
     background: linear-gradient(180deg, var(--color-primary-light), var(--color-primary));
     color: var(--color-text-on-primary);
-    box-shadow: 0 4px 12px -4px var(--color-primary-glow), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    box-shadow:
+      0 4px 12px -4px var(--color-primary-glow),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25);
 
-    lucide-icon { opacity: 1; }
+    lucide-icon {
+      opacity: 1;
+    }
   }
 }
 
 // ─── AUTH SECTION ──────────────────────────────────────────────────────────
+// Both this and .brand-section are flex:1 — equal growth on each side keeps
+// .nav-pills perfectly centered regardless of chip/logo width, and puts the
+// user chip and brand mark on opposite ends (matches the design).
 .auth-section {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 
-  // flex: 1 mirrors the ::after spacer — chip stays in its column,
-  // pills stay centered, no margin tricks needed.
   flex: 1;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  flex: 1;
+}
+
+.brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  color: var(--color-text-main);
+  text-decoration: none;
+
+  img {
+    display: block;
+  }
+}
+
+.brand-mark__name {
+  font-size: 0.9375rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
 .user-chip {
@@ -207,7 +237,9 @@
   border: 1.5px solid var(--bg-pure);
   border-radius: var(--radius-full);
 
-  lucide-icon { display: block; }
+  lucide-icon {
+    display: block;
+  }
 }
 
 .avatar-guest {
@@ -224,7 +256,10 @@
   border-radius: var(--radius-full);
 
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 
   &:hover {
     background: var(--bg-glass-hover);
@@ -299,7 +334,6 @@
   pointer-events: none;
 }
 
-
 // ─── TABLET (768px – 1023px) — inline nav pills with tighter padding ───────
 @media (min-width: 768px) and (max-width: 1023px) {
   .header-nav {
@@ -314,17 +348,24 @@
   }
 
   // Tablet never shows hamburger or bottom nav
-  .mobile-menu-btn { display: none !important; }
-  .bottom-nav { display: none !important; }
+  .mobile-menu-btn {
+    display: none !important;
+  }
+  .bottom-nav {
+    display: none !important;
+  }
 }
-
 
 // ─── MOBILE (≤ 620px) — no top header; floating avatar FAB + bottom tab bar ──
 @media (max-width: 620px) {
   // Entire top bar hidden — FAB + bottom nav replace it
-  .header-nav { display: none; }
+  .header-nav {
+    display: none;
+  }
 
-  .mobile-nav-backdrop { display: none !important; }
+  .mobile-nav-backdrop {
+    display: none !important;
+  }
 
   // ── Floating avatar FAB ──
   .mobile-avatar-fab {
@@ -352,14 +393,18 @@
     box-shadow: var(--shadow-nav);
 
     cursor: pointer;
-    transition: box-shadow 0.2s ease, background 0.2s ease;
+    transition:
+      box-shadow 0.2s ease,
+      background 0.2s ease;
 
     &:hover {
       background: var(--bg-pure);
       box-shadow: var(--shadow-glow);
     }
 
-    &--guest { color: var(--color-text-muted); }
+    &--guest {
+      color: var(--color-text-muted);
+    }
 
     .avatar-img,
     .avatar-initials {
@@ -367,7 +412,9 @@
       height: 2.25rem;
     }
 
-    .avatar-initials { font-size: 0.9375rem; }
+    .avatar-initials {
+      font-size: 0.9375rem;
+    }
   }
 
   .mobile-fab-name {
@@ -393,7 +440,9 @@
     box-shadow: var(--shadow-nav);
 
     cursor: pointer;
-    transition: color 0.2s ease, background 0.2s ease;
+    transition:
+      color 0.2s ease,
+      background 0.2s ease;
 
     animation: fab-name-in 0.15s ease;
 
@@ -404,8 +453,14 @@
   }
 
   @keyframes fab-name-in {
-    from { opacity: 0; transform: translateY(-6px) scale(0.95); }
-    to   { opacity: 1; transform: translateY(0)   scale(1); }
+    from {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
 
   // ── Bottom tab bar ──
@@ -448,18 +503,24 @@
       white-space: nowrap;
 
       border-radius: var(--radius-sm);
-      transition: color 0.2s ease, background 0.2s ease;
+      transition:
+        color 0.2s ease,
+        background 0.2s ease;
 
       lucide-icon {
         flex-shrink: 0;
         opacity: 0.65;
-        transition: opacity 0.2s ease, transform 0.2s var(--ease-spring);
+        transition:
+          opacity 0.2s ease,
+          transform 0.2s var(--ease-spring);
       }
 
       &:hover {
         color: var(--color-text-main);
         background: var(--bg-glass);
-        lucide-icon { opacity: 0.9; }
+        lucide-icon {
+          opacity: 0.9;
+        }
       }
 
       &.active {

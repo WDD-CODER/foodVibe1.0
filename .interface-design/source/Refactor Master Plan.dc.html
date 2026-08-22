@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="omelette-owns-print" content="1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="colors_and_type.css">
+<style>
+  body { margin: 0; font-family: 'Heebo', system-ui, sans-serif; background: var(--bg-body); }
+  a { color: var(--color-primary); text-decoration: none; }
+  a:hover { color: var(--color-primary-hover); text-decoration: underline; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 7px 10px; font-size: var(--fs-xs); border-bottom: 1px solid var(--border-row); white-space: nowrap; }
+  th { font-weight: 700; color: var(--color-text-secondary); position: sticky; top: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(8px); }
+  code { font-size: 0.92em; background: rgba(15,23,42,0.05); padding: 1px 5px; border-radius: 4px; }
+  @media (max-width: 767px) { .two { grid-template-columns: 1fr !important; } }
+</style>
+</helmet>
+
+<div style="position: relative; min-height: 100vh; color: var(--color-text-main);">
+  <div style="position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse 700px 480px at 85% 15%, rgba(20,184,166,0.12), transparent), radial-gradient(ellipse 550px 550px at 15% 75%, rgba(251,191,36,0.08), transparent), radial-gradient(ellipse 450px 350px at 50% 50%, rgba(14,165,233,0.06), transparent);"></div>
+
+  <div style="position: relative; max-width: 1000px; margin: 0 auto; padding: var(--space-8) var(--space-6) var(--space-12);">
+
+    <div style="margin-bottom: var(--space-6);">
+      <div style="display: inline-flex; gap: 6px; padding: 4px 12px; margin-bottom: var(--space-3); background: var(--color-primary-soft); color: var(--color-primary-hover); border-radius: var(--radius-full); font-size: var(--fs-xs); font-weight: var(--fw-bold);">Audit + master plan — nothing changed yet</div>
+      <h1 style="margin: 0; font-size: var(--fs-2xl); font-weight: var(--fw-bold); letter-spacing: var(--tracking-tight);">Making FoodVibe feel like one product</h1>
+      <p style="margin: var(--space-3) 0 0; font-size: var(--fs-base); color: var(--color-text-secondary); max-width: 68ch; line-height: var(--lh-relaxed); text-wrap: pretty;">I loaded all 13 screens side by side and measured each one at three real viewport widths — 390 (phone), 768 (tablet), 1440 (desktop) — then read every file for tokens, states, icons, breakpoints and accessibility. Below: the verdict, every defect I found with the screen it lives on, the target system, and the execution plan with a sign-off list.</p>
+    </div>
+
+    <div class="two" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-8);">
+      <div style="padding: var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="font-size: var(--fs-sm); font-weight: 700; color: var(--color-success); margin-bottom: var(--space-3);">The good news</div>
+        <ul style="margin: 0; padding-inline-start: 18px; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed); display: flex; flex-direction: column; gap: 6px;">
+          <li><b>Zero layout breaks.</b> No horizontal overflow, no clipped text, no overlapping elements on any screen at any of the three widths.</li>
+          <li><b>Token discipline is high.</b> 179–473 <code>var(--…)</code> uses per screen; almost no stray hex.</li>
+          <li>Page width, padding, titles, radius, buttons and shadows were already unified in the previous pass.</li>
+        </ul>
+      </div>
+      <div style="padding: var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="font-size: var(--fs-sm); font-weight: 700; color: var(--color-danger); margin-bottom: var(--space-3);">What still separates us from the top tier</div>
+        <ul style="margin: 0; padding-inline-start: 18px; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed); display: flex; flex-direction: column; gap: 6px;">
+          <li>The app has <b>no shared shell</b> — nav and background are copy-pasted 13 times and have already drifted.</li>
+          <li><b>9 different breakpoints</b> across 13 files. Two screens have none at all.</li>
+          <li><b>Mobile is desktop-shrunk</b>, not designed: 36px controls, no bottom tab bar, 7–151 sub-44px targets per screen.</li>
+          <li><b>No loading, error or focus-state system</b>, and zero accessibility labels app-wide.</li>
+          <li><b>300+ hand-drawn inline SVG icons</b> instead of the mandated Lucide set.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 style="margin: 0 0 var(--space-2); font-size: var(--fs-lg); font-weight: 700;">1 — Defect register</h2>
+    <p style="margin: 0 0 var(--space-4); font-size: var(--fs-sm); color: var(--color-text-muted);">Measured, not guessed. Severity: <span style="color: var(--color-danger); font-weight: 700;">P1</span> breaks the one-product feeling or usability · <span style="color: var(--color-warning); font-weight: 700;">P2</span> visible side by side · <span style="color: var(--color-text-muted); font-weight: 700;">P3</span> polish.</p>
+
+    <div style="display: flex; flex-direction: column; gap: var(--space-3); margin-bottom: var(--space-8);">
+
+      <div style="padding: var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-2);">
+          <span style="font-size: var(--fs-xs); font-weight: 700; color: #fff; background: var(--color-danger); padding: 2px 8px; border-radius: var(--radius-full);">P1</span>
+          <b style="font-size: var(--fs-md);">1. No app shell — the chrome is duplicated 13 times</b>
+        </div>
+        <p style="margin: 0 0 var(--space-3); font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Every screen carries its own copy of the top nav, the ambient gradient and the nav link list. It has already drifted: <b>Inventory, Recipe Builder and Venue Detail have no self-link</b>, so their active pill renders differently from the other ten. <b>Recipe Builder and Cook View are missing from the nav entirely</b> — Recipe Builder is only reachable from Recipe Book, Cook View only from Recipe Book. Venue Detail is reachable only from Venues. Ten nav items is also past the point where a flat pill row works.</p>
+        <div style="padding: var(--space-3) var(--space-4); background: var(--color-primary-soft); border-radius: var(--radius-md); font-size: var(--fs-sm);"><b>Fix:</b> one <code>AppShell</code> component holding nav + gradient + page header, imported by all 13 screens, driven by a single nav list with a <code>current</code> prop. One place to change nav forever after. Group the 10 items into 3 sections (Kitchen · Catalog · Setup).</div>
+      </div>
+
+      <div style="padding: var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-2);">
+          <span style="font-size: var(--fs-xs); font-weight: 700; color: #fff; background: var(--color-danger); padding: 2px 8px; border-radius: var(--radius-full);">P1</span>
+          <b style="font-size: var(--fs-md);">2. Nine breakpoints, two screens with none</b>
+        </div>
+        <p style="margin: 0 0 var(--space-3); font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">In use today: <code>480</code>, <code>599</code>, <code>640</code>, <code>699</code>, <code>700</code>, <code>768</code>, <code>860</code>, <code>900</code>, <code>1023</code>. The design system defines exactly two edges (767 / 1023). Result: resize the browser and each screen reflows at a different moment. <b>Venues and Venue Detail have zero media queries</b> — Venue Detail keeps a 260px sidebar column down to phone width.</p>
+        <div style="padding: var(--space-3) var(--space-4); background: var(--color-primary-soft); border-radius: var(--radius-md); font-size: var(--fs-sm);"><b>Fix:</b> exactly three edges everywhere — <code>≤479</code> small phone (optional density step), <code>≤767</code> mobile, <code>≤1023</code> tablet. Every other value is rewritten to the nearest edge. Venues and Venue Detail get real mobile layouts.</div>
+      </div>
+
+      <div style="padding: var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-2);">
+          <span style="font-size: var(--fs-xs); font-weight: 700; color: #fff; background: var(--color-danger); padding: 2px 8px; border-radius: var(--radius-full);">P1</span>
+          <b style="font-size: var(--fs-md);">3. Mobile is a shrunk desktop, not a designed screen</b>
+        </div>
+        <ul style="margin: 0 0 var(--space-3); padding-inline-start: 18px; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed); display: flex; flex-direction: column; gap: 5px;">
+          <li>At 390px I counted controls below the 44px minimum on every screen: <b>Inventory 151, Recipe Book 81, Recipe Builder 80, Equipment 58, Suppliers 52, Metadata 49, Menu Intelligence 41, Menu Library 31, Trash 25, Dashboard 16, Cook View 16, Venues 7, Venue Detail 7</b>. Nav pills are 36px tall on all of them.</li>
+          <li>The design system specifies a <b>bottom tab bar (3.5rem, safe-area aware)</b> on mobile. No screen has one — all 13 use a horizontally scrolling pill row where items 6–10 are invisible until you scroll.</li>
+          <li>Mobile card mode for data tables is built with <b>46–59 <code>!important</code> overrides</b> per file (Inventory 49, Recipe Book 59, Equipment 50, Suppliers 46) fighting the desktop inline styles. It works, but any future edit is a coin flip.</li>
+          <li>Off-scale type at phone size: <code>8px</code> and <code>11px</code> on Inventory, Recipe Book, Suppliers, Equipment — below the 12px floor.</li>
+        </ul>
+        <div style="padding: var(--space-3) var(--space-4); background: var(--color-primary-soft); border-radius: var(--radius-md); font-size: var(--fs-sm);"><b>Fix:</b> a real mobile spec — bottom tab bar with the 5 primary destinations (rest under "More"), 44px minimum on every tappable element, 12px type floor, and card mode expressed as its own layout branch instead of <code>!important</code> patches.</div>
+      </div>
+
+      <div style="padding: var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-2);">
+          <span style="font-size: var(--fs-xs); font-weight: 700; color: #fff; background: var(--color-danger); padding: 2px 8px; border-radius: var(--radius-full);">P1</span>
+          <b style="font-size: var(--fs-md);">4. No state system — loading, empty, error, focus</b>
+        </div>
+        <ul style="margin: 0 0 var(--space-3); padding-inline-start: 18px; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed); display: flex; flex-direction: column; gap: 5px;">
+          <li><b>Loading: nothing, anywhere.</b> Not one skeleton in 13 screens. Top-tier products all show structure before data.</li>
+          <li><b>Empty states missing</b> on Dashboard, Recipe Builder, Menu Intelligence, Metadata Manager; the ones that exist (Inventory, Recipe Book, Suppliers, Equipment, Trash, Menu Library) are each hand-written differently.</li>
+          <li><b>Error / validation states</b> exist only as a red border in a couple of modals. No field error text, no failed-save path.</li>
+          <li><b>Focus rings:</b> present on 9 screens, absent on Dashboard, Cook View, Venue Detail. Keyboard users lose the caret there.</li>
+          <li><b>Zero <code>prefers-reduced-motion</code></b> blocks, though the system requires it.</li>
+        </ul>
+        <div style="padding: var(--space-3) var(--space-4); background: var(--color-primary-soft); border-radius: var(--radius-md); font-size: var(--fs-sm);"><b>Fix:</b> four shared patterns — skeleton row/card, empty state (icon + line + optional action), inline field error, and one focus ring token applied globally. Plus one reduced-motion block in the shell.</div>
+      </div>
+
+      <div style="padding: var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-2);">
+          <span style="font-size: var(--fs-xs); font-weight: 700; color: #fff; background: var(--color-warning); padding: 2px 8px; border-radius: var(--radius-full);">P2</span>
+          <b style="font-size: var(--fs-md);">5. Icons are hand-drawn, not a set</b>
+        </div>
+        <p style="margin: 0 0 var(--space-3); font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Between 10 and 38 inline <code>&lt;svg&gt;</code> per screen — over 300 in total — and <b>zero Lucide</b>, which the design system mandates and the codebase lints for. Stroke weight, corner treatment and optical size therefore vary from screen to screen, which is exactly the thing that makes an app read as "assembled" rather than "designed". None of them carry a label, so a screen reader announces nothing.</p>
+        <div style="padding: var(--space-3) var(--space-4); background: var(--color-primary-soft); border-radius: var(--radius-md); font-size: var(--fs-sm);"><b>Fix:</b> load Lucide once in the shell, replace the inline set with named Lucide icons at 16/22px, 1.5 stroke, <code>currentColor</code>. Icon-only buttons get an <code>aria-label</code> in the same pass.</div>
+      </div>
+
+      <div style="padding: var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-2);">
+          <span style="font-size: var(--fs-xs); font-weight: 700; color: #fff; background: var(--color-warning); padding: 2px 8px; border-radius: var(--radius-full);">P2</span>
+          <b style="font-size: var(--fs-md);">6. Cook View lives in a different product</b>
+        </div>
+        <p style="margin: 0 0 var(--space-3); font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Dark palette (<code>#0a1614</code>, <code>#0f2e2a</code>, <code>#5eead4</code>), 29 raw <code>rgba()</code> values, 123 token uses against 400+ on comparable screens, its own nav that is not the app nav, its own breakpoint (860), no focus states, a 20px-tall back link and 27px stepper buttons. As a deliberate hands-free kitchen mode a dark theme is defensible — but then it needs to be a <i>declared mode</i> of the same system, not an exception.</p>
+        <div style="padding: var(--space-3) var(--space-4); background: var(--color-primary-soft); border-radius: var(--radius-md); font-size: var(--fs-sm);"><b>Fix (your call, see questions):</b> either (a) promote it to an official <b>Kitchen mode</b> — dark tokens added to the system, same shell, same components, 56px touch targets for wet hands; or (b) bring it back to the light glass system like everything else.</div>
+      </div>
+
+      <div style="padding: var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-2);">
+          <span style="font-size: var(--fs-xs); font-weight: 700; color: #fff; background: var(--color-warning); padding: 2px 8px; border-radius: var(--radius-full);">P2</span>
+          <b style="font-size: var(--fs-md);">7. Motion is declared but barely used</b>
+        </div>
+        <p style="margin: 0 0 var(--space-3); font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">The system defines two easings, three durations, hover lift, press scale and seven entrance keyframes. In the files: <code>transition:</code> appears 0–5 times per screen and 5 of 13 screens have none. There is no page-enter animation, no card-in stagger, no modal transition. The app feels static next to the products we are benchmarking against. Metadata Manager also hand-writes a raw <code>cubic-bezier</code> instead of the token.</p>
+        <div style="padding: var(--space-3) var(--space-4); background: var(--color-primary-soft); border-radius: var(--radius-md); font-size: var(--fs-sm);"><b>Fix:</b> a motion pass — <code>pageEnter</code> on the content column, <code>cardIn</code> stagger on grids/lists, hover lift + press scale on every card and button, modal in/out, all on the two token easings, all disabled under reduced motion.</div>
+      </div>
+
+      <div style="padding: var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-2);">
+          <span style="font-size: var(--fs-xs); font-weight: 700; color: #fff; background: var(--color-text-muted); padding: 2px 8px; border-radius: var(--radius-full);">P3</span>
+          <b style="font-size: var(--fs-md);">8. Residue</b>
+        </div>
+        <ul style="margin: 0; padding-inline-start: 18px; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed); display: flex; flex-direction: column; gap: 5px;">
+          <li><b>Stray hex values:</b> Recipe Book and Recipe Builder repeat <code>#14b8a6 #10b981 #a0833f #0ea5e9</code> — all four are tokens. Metadata Manager hardcodes six label colors that belong in a token set. Cook View has seven.</li>
+          <li><b>Nav pill font is a literal <code>13px</code></b> in all 13 files — consistent by luck, not by token.</li>
+          <li><b>Venue Detail is the thinnest screen:</b> no transitions, no easing tokens, no toast system, no focus ring, no breakpoints. It reads like a draft next to Venues.</li>
+          <li><b>Carousel arrows</b> on the data screens use an <code>11px</code> glyph in a 20px hit area.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 style="margin: 0 0 var(--space-3); font-size: var(--fs-lg); font-weight: 700;">2 — Screen scorecard</h2>
+    <div style="overflow-x: auto; margin-bottom: var(--space-8); padding: var(--space-3) var(--space-4); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+      <table>
+        <thead><tr><th>Screen</th><th>Breakpoints</th><th>&lt;44px targets @390</th><th>!important</th><th>Off-scale type</th><th>Stray hex</th><th>Empty</th><th>Focus</th><th>Motion</th><th>Nav self-link</th></tr></thead>
+        <tbody>
+          <tr><td><a href="Dashboard.dc.html">Dashboard</a></td><td>599 · 699 · 1023</td><td>16</td><td>0</td><td>—</td><td>—</td><td style="color: var(--color-danger);">missing</td><td style="color: var(--color-danger);">none</td><td>1</td><td>✓</td></tr>
+          <tr><td><a href="Inventory.dc.html">Inventory</a></td><td>480 · 1023</td><td style="color: var(--color-danger); font-weight: 700;">151</td><td style="color: var(--color-danger);">49</td><td>8 · 11px</td><td>—</td><td>✓</td><td>3</td><td>2</td><td style="color: var(--color-danger);">missing</td></tr>
+          <tr><td><a href="RecipeBook.dc.html">Recipe Book</a></td><td>480 · 1023</td><td style="color: var(--color-danger); font-weight: 700;">81</td><td style="color: var(--color-danger);">59</td><td>8 · 11px</td><td>4</td><td>✓</td><td>1</td><td>0</td><td>✓</td></tr>
+          <tr><td><a href="RecipeBuilder.dc.html">Recipe Builder</a></td><td>640 · 700</td><td style="color: var(--color-danger); font-weight: 700;">80</td><td>11</td><td>—</td><td>4</td><td style="color: var(--color-danger);">missing</td><td>4</td><td>0</td><td style="color: var(--color-danger);">missing</td></tr>
+          <tr><td><a href="CookView.dc.html">Cook View</a></td><td>860</td><td>16</td><td>0</td><td>—</td><td style="color: var(--color-danger);">6 (dark)</td><td>✓</td><td style="color: var(--color-danger);">none</td><td>5</td><td>own nav</td></tr>
+          <tr><td><a href="MenuIntelligence.dc.html">Menu Intelligence</a></td><td>640</td><td>41</td><td>3</td><td>—</td><td>2</td><td style="color: var(--color-danger);">missing</td><td>2</td><td>0</td><td>✓</td></tr>
+          <tr><td><a href="MenuLibrary.dc.html">Menu Library</a></td><td>768</td><td>31</td><td>11</td><td>—</td><td>—</td><td>✓</td><td>3</td><td>0</td><td>✓</td></tr>
+          <tr><td><a href="MetadataManager.dc.html">Metadata</a></td><td>900</td><td>49</td><td>2</td><td>—</td><td style="color: var(--color-danger);">6</td><td style="color: var(--color-danger);">missing</td><td>2</td><td>1 raw</td><td>✓</td></tr>
+          <tr><td><a href="Suppliers.dc.html">Suppliers</a></td><td>480 · 1023</td><td>52</td><td style="color: var(--color-danger);">46</td><td>8 · 11px</td><td>—</td><td>✓</td><td>3</td><td>0</td><td>✓</td></tr>
+          <tr><td><a href="Equipment.dc.html">Equipment</a></td><td>480 · 1023</td><td>58</td><td style="color: var(--color-danger);">50</td><td>8 · 11px</td><td>—</td><td>✓</td><td>4</td><td>0</td><td>✓</td></tr>
+          <tr><td><a href="Trash.dc.html">Trash</a></td><td>480</td><td>25</td><td>11</td><td>—</td><td>—</td><td>✓</td><td>2</td><td>1</td><td>✓</td></tr>
+          <tr><td><a href="Venues.dc.html">Venues</a></td><td style="color: var(--color-danger);">none</td><td>7</td><td>1</td><td>—</td><td>—</td><td>✓</td><td>4</td><td>1</td><td>✓</td></tr>
+          <tr><td><a href="VenueDetail.dc.html">Venue Detail</a></td><td style="color: var(--color-danger);">none</td><td>7</td><td>0</td><td>—</td><td>—</td><td>weak</td><td style="color: var(--color-danger);">none</td><td>0</td><td style="color: var(--color-danger);">missing</td></tr>
+        </tbody>
+      </table>
+      <p style="margin: var(--space-3) 0 0; font-size: var(--fs-xs); color: var(--color-text-muted);">Accessibility labels: <b>0 across all 13 screens</b> — no <code>aria-label</code>, no <code>role</code>, no image <code>alt</code> except two on Recipe Builder.</p>
+    </div>
+
+    <h2 style="margin: 0 0 var(--space-3); font-size: var(--fs-lg); font-weight: 700;">3 — The target system</h2>
+    <p style="margin: 0 0 var(--space-4); font-size: var(--fs-sm); color: var(--color-text-muted); max-width: 68ch;">One page anyone on the team can hold in their head. Everything in the plan below serves this.</p>
+    <div class="two" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-bottom: var(--space-8);">
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-glass-strong); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="font-size: var(--fs-sm); font-weight: 700; margin-bottom: var(--space-2);">Shell</div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">One <code>AppShell</code>: ambient wash, frosted top nav (desktop/tablet), bottom tab bar (mobile), page header slot, toast host. Screens supply only content.</p>
+      </div>
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-glass-strong); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="font-size: var(--fs-sm); font-weight: 700; margin-bottom: var(--space-2);">Breakpoints</div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);"><code>≤479</code> compact phone · <code>≤767</code> phone · <code>≤1023</code> tablet · <code>≥1024</code> desktop. Three widths: 1520 data · 1200 standard · 720 narrow.</p>
+      </div>
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-glass-strong); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="font-size: var(--fs-sm); font-weight: 700; margin-bottom: var(--space-2);">Controls</div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Desktop 38px, mobile 44px minimum — every button, pill, input, icon button, row action. Type floor 12px.</p>
+      </div>
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-glass-strong); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="font-size: var(--fs-sm); font-weight: 700; margin-bottom: var(--space-2);">States</div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Every list and form ships five: default · loading skeleton · empty · error · success/toast. Focus ring token on every interactive element.</p>
+      </div>
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-glass-strong); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="font-size: var(--fs-sm); font-weight: 700; margin-bottom: var(--space-2);">Icons</div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Lucide only. 16px inline, 22px nav, 1.5 stroke, <code>currentColor</code>. Icon-only buttons always labelled.</p>
+      </div>
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-glass-strong); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="font-size: var(--fs-sm); font-weight: 700; margin-bottom: var(--space-2);">Motion</div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Two easings, three durations. Page enter, card stagger, hover lift −2px, press 0.97, modal in/out. Clamped under reduced motion.</p>
+      </div>
+    </div>
+
+    <h2 style="margin: 0 0 var(--space-3); font-size: var(--fs-lg); font-weight: 700;">4 — Execution plan</h2>
+    <div style="display: flex; flex-direction: column; gap: var(--space-3); margin-bottom: var(--space-8);">
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="font-size: var(--fs-sm); font-weight: 700; margin-bottom: 6px;">Pass 1 · Foundation <span style="color: var(--color-text-muted); font-weight: 400;">— fixes 1, 2, 8</span></div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Build <code>AppShell</code> (nav + wash + header + toast host + reduced-motion block). Convert all 13 screens onto it. Collapse 9 breakpoints to 3. Add Recipe Builder / Cook View / Venue Detail to navigation and fix the three missing self-links. Kill stray hex, 13px literals, 8/11px type.</p>
+      </div>
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="font-size: var(--fs-sm); font-weight: 700; margin-bottom: 6px;">Pass 2 · Mobile <span style="color: var(--color-text-muted); font-weight: 400;">— fixes 3</span></div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Bottom tab bar. 44px minimums across every screen. Rebuild the four data-screen card modes as a proper layout branch, removing ~200 <code>!important</code>. Real mobile layouts for Venues and Venue Detail. Re-measure at 390 and 360.</p>
+      </div>
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="font-size: var(--fs-sm); font-weight: 700; margin-bottom: 6px;">Pass 3 · States <span style="color: var(--color-text-muted); font-weight: 400;">— fixes 4</span></div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Skeleton, empty, error and focus patterns built once and applied to all 13 screens. A demo toggle so you can see each state without faking data.</p>
+      </div>
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="font-size: var(--fs-sm); font-weight: 700; margin-bottom: 6px;">Pass 4 · Icons &amp; polish <span style="color: var(--color-text-muted); font-weight: 400;">— fixes 5, 7</span></div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Lucide swap with <code>aria-label</code>s. Motion pass. Cook View decision applied.</p>
+      </div>
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="font-size: var(--fs-sm); font-weight: 700; margin-bottom: 6px;">Pass 5 · Sign-off</div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Re-run the measurement harness on all 13 screens at 360 / 390 / 768 / 1024 / 1440 and publish the validation table below, filled in.</p>
+      </div>
+    </div>
+
+    <h2 style="margin: 0 0 var(--space-3); font-size: var(--fs-lg); font-weight: 700;">5 — Validation list (definition of done)</h2>
+    <div style="padding: var(--space-5); background: var(--bg-glass-strong); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+      <ol style="margin: 0; padding-inline-start: 20px; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed); display: flex; flex-direction: column; gap: 7px;">
+        <li>All 13 screens import one shell; the nav list exists in exactly one place; every screen highlights itself.</li>
+        <li>Grep finds only <code>479</code>, <code>767</code>, <code>1023</code> as breakpoint values. No screen without media queries.</li>
+        <li>At 360 and 390: zero horizontal overflow, zero clipped text, <b>zero</b> tappable elements under 44px, no type under 12px.</li>
+        <li>At 768 and 1440: zero overflow, content column at one of the three approved widths.</li>
+        <li>Every list screen demonstrates loading, empty and error states; every form field can show an error.</li>
+        <li>Every interactive element has a visible focus ring; tab order walks each screen sensibly.</li>
+        <li>Every icon is Lucide; every icon-only control has an accessible label; every image has <code>alt</code>.</li>
+        <li>No stray hex outside the token file; no font-size literal below 12px; <code>!important</code> count under 5 per file.</li>
+        <li>Hover lift, press scale and page-enter present on every screen; everything clamps under reduced motion.</li>
+        <li>Screenshot sheet: 13 screens × 3 widths, reviewed side by side as one family.</li>
+      </ol>
+    </div>
+
+    <p style="margin: var(--space-6) 0 0; font-size: var(--fs-sm); color: var(--color-text-muted); max-width: 68ch;">I have sent you a short form with the six decisions I cannot make for you. Answer it and I will run passes 1 → 5 without stopping.</p>
+
+  </div>
+</div>
+
+</x-dc>
+</body>
+</html>

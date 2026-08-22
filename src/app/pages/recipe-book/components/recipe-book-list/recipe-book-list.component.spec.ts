@@ -3,7 +3,7 @@ import { RecipeBookListComponent } from './recipe-book-list.component'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { RecipeCostService } from '@services/recipe-cost.service'
 import { Router, ActivatedRoute } from '@angular/router'
-import { signal } from '@angular/core'
+import { signal, computed } from '@angular/core'
 import { of } from 'rxjs'
 import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
@@ -43,6 +43,8 @@ describe('RecipeBookListComponent', () => {
       recipes_: mockRecipesSignal,
       visibleRecipes_: mockRecipesSignal,
       products_: mockProductsSignal,
+      recipesById_: computed(() => new Map(mockRecipesSignal().map((r) => [r._id, r]))),
+      productsById_: computed(() => new Map(mockProductsSignal().map((p) => [p._id, p]))),
       deleteRecipe: jasmine.createSpy('deleteRecipe').and.returnValue({ subscribe: () => {} })
     }
 

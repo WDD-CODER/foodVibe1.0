@@ -57,6 +57,7 @@ import {
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
 import { resolveRecipeAllergens, MAX_ALLERGEN_RECURSION } from 'src/app/core/utils/recipe-allergens.util'
 import { CellExpandState } from 'src/app/core/utils/cell-expand-state.util'
+import { buildFilterOptionCounts, attachFilterCheckedState } from 'src/app/core/utils/filter-category-counts.util'
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 
@@ -96,7 +97,7 @@ const INGREDIENT_SEARCH_DEBOUNCE_MS = 250
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RecipeBookListComponent implements OnInit, OnDestroy {
-  private readonly kitchenState = inject(KitchenStateService)
+  protected readonly kitchenState = inject(KitchenStateService)
   private readonly productData = inject(ProductDataService)
   private readonly router = inject(Router)
   private readonly recipeCostService = inject(RecipeCostService)
@@ -162,15 +163,17 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     ])
 
     // Expand any filter category that has selected values (e.g. when opened via URL like ?filters=Approved:false).
+    // Categories start expanded by default now, so this only has to un-collapse ones the user had closed.
     effect(() => {
       const filters = this.activeFilters_()
       const withValues = Object.keys(filters).filter((name) => (filters[name]?.length ?? 0) > 0)
       const hasDateRange = this.dateFrom_() != null || this.dateTo_() != null
       if (withValues.length === 0 && !hasDateRange) return
-      this.expandedFilterCategories_.update((set) => {
+      this.collapsedFilterCategories_.update((set) => {
+        if (set.size === 0) return set
         const next = new Set(set)
-        withValues.forEach((name) => next.add(name))
-        if (hasDateRange) next.add('Date')
+        withValues.forEach((name) => next.delete(name))
+        if (hasDateRange) next.delete('Date')
         return next
       })
     })
@@ -194,7 +197,10 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     this.labelsExpand.reset()
   }
 
-  protected expandedFilterCategories_ = signal<Set<string>>(new Set())
+  /** Tracks explicitly *collapsed* categories — every real filter group starts expanded
+   *  (matches the design), except 'Date' which the mockup doesn't show at all; it starts
+   *  collapsed so it doesn't dominate the panel above the categories the design leads with. */
+  protected collapsedFilterCategories_ = signal<Set<string>>(new Set(['Date']))
   protected readonly allergenExpand = new CellExpandState()
   protected readonly labelsExpand = new CellExpandState()
   protected hoveredCostRecipeId_ = signal<string | null>(null)
@@ -257,7 +263,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   protected toggleFilterCategory(name: string): void {
-    this.expandedFilterCategories_.update((set) => {
+    this.collapsedFilterCategories_.update((set) => {
       const next = new Set(set)
       if (next.has(name)) next.delete(name)
       else next.add(name)
@@ -266,68 +272,56 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   protected isCategoryExpanded(name: string): boolean {
-    return this.expandedFilterCategories_().has(name)
+    return !this.collapsedFilterCategories_().has(name)
   }
 
   protected togglePanel(): void {
     this.togglePanelState_()
   }
 
-  protected filterCategories_ = computed(() => {
+  // Catalog-only pass — recomputes when the recipe list changes, NOT on every
+  // filter-checkbox toggle (see filter-category-counts.util.ts).
+  private filterOptionCounts_ = computed(() => {
     const recipes = this.kitchenState.visibleRecipes_()
-    const filters = this.activeFilters_()
-    const categories: Record<string, Set<string>> = {}
+    const counts = buildFilterOptionCounts(recipes, (recipe, bump) => {
+      bump('Type', this.isRecipeDish(recipe) ? 'dish' : 'preparation')
 
-    recipes.forEach((recipe) => {
-      const isDish = this.isRecipeDish(recipe)
-      const typeVal = isDish ? 'dish' : 'preparation'
-      if (!categories['Type']) categories['Type'] = new Set()
-      categories['Type'].add(typeVal)
-
-      const allergens = this.getRecipeAllergens(recipe)
-      allergens.forEach((a) => {
-        if (!categories['Allergens']) categories['Allergens'] = new Set()
-        categories['Allergens'].add(a)
-      })
+      this.getRecipeAllergens(recipe).forEach((a) => bump('Allergens', a))
 
       const recipeLabels = this.getAllRecipeLabels(recipe)
-      if (recipeLabels.length > 0) {
-        recipeLabels.forEach((l) => {
-          if (!categories['Labels']) categories['Labels'] = new Set()
-          categories['Labels'].add(l)
-        })
-      } else {
-        if (!categories['Labels']) categories['Labels'] = new Set()
-        categories['Labels'].add('no_label')
-      }
+      if (recipeLabels.length > 0) recipeLabels.forEach((l) => bump('Labels', l))
+      else bump('Labels', 'no_label')
 
-      if (!categories['Approved']) categories['Approved'] = new Set()
-      categories['Approved'].add(recipe.is_approved_ ? 'true' : 'false')
+      bump('Approved', recipe.is_approved_ ? 'true' : 'false')
 
       const station = (recipe.default_station_ || '').trim() || '_none'
-      if (!categories['Station']) categories['Station'] = new Set()
-      categories['Station'].add(station)
+      bump('Station', station)
     })
 
-    // Always show both Approved options (כן/לא) so the sidebar can show selected state when filtering by URL.
-    if (!categories['Approved']) categories['Approved'] = new Set()
-    categories['Approved'].add('true').add('false')
+    // Always show both Approved options (כן/לא), even at 0, so the sidebar can show
+    // selected state when filtering by URL.
+    if (!counts['Approved']) counts['Approved'] = new Map()
+    if (!counts['Approved'].has('true')) counts['Approved'].set('true', 0)
+    if (!counts['Approved'].has('false')) counts['Approved'].set('false', 0)
 
+    return counts
+  })
+
+  // Filters-only pass — cheap, bounded by option count, not catalog size.
+  protected filterCategories_ = computed(() => {
     const optionLabel = (name: string, value: string): string => {
       if (name === 'Approved') return value === 'true' ? 'approved_yes' : 'approved_no'
       if (name === 'Station' && value === '_none') return 'no_station'
       return value
     }
 
-    return Object.keys(categories).map((name) => ({
-      name,
-      displayKey: this.categoryDisplayKey(name),
-      options: Array.from(categories[name]).map((option) => ({
-        label: optionLabel(name, option),
-        value: option,
-        checked_: (filters[name] || []).includes(option)
-      }))
-    }))
+    return attachFilterCheckedState(
+      this.filterOptionCounts_(),
+      this.activeFilters_(),
+      (name) => this.categoryDisplayKey(name),
+      optionLabel,
+      (name, value) => (name === 'Labels' && value !== 'no_label' ? this.getLabelColor(value) : null)
+    )
   })
 
   /**
@@ -438,6 +432,21 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       .filter(Boolean)
   )
 
+  /**
+   * Precomputed per-row values (plan 303 M2). getAllRecipeLabels/getRecipeAllergens/getRecipeCost
+   * are cheap after the M1 Map lookups, but the template still called them 2-3x per row on every
+   * change-detection pass (every click/keystroke/scroll). This derives each row's display values
+   * once per data change instead, so the template just reads plain properties.
+   */
+  protected readonly displayRows_ = computed(() =>
+    this.filteredRecipes_().map((recipe) => ({
+      recipe,
+      labels: this.getAllRecipeLabels(recipe),
+      allergens: this.getRecipeAllergens(recipe),
+      cost: this.getRecipeCost(recipe)
+    }))
+  )
+
   protected isEmptyList_ = computed(() => this.kitchenState.visibleRecipes_().length === 0)
 
   protected isFavoritedByCurrentUser_(recipe: Recipe): boolean {
@@ -461,7 +470,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   protected getRecipeAllergens(recipe: Recipe): string[] {
-    return resolveRecipeAllergens(recipe, this.kitchenState.recipes_(), this.kitchenState.products_())
+    return resolveRecipeAllergens(recipe, this.kitchenState.recipesById_(), this.kitchenState.productsById_())
   }
 
   /** Parse YYYY-MM-DD to start of day (00:00:00.000) in local timezone. */
@@ -511,13 +520,13 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   private getRecipeProductIds(recipe: Recipe, depth = 0): Set<string> {
     if (depth >= MAX_ALLERGEN_RECURSION || !recipe?.ingredients_?.length) return new Set()
     const set = new Set<string>()
-    const recipes = this.kitchenState.recipes_()
+    const recipesById = this.kitchenState.recipesById_()
     for (const ing of recipe.ingredients_) {
       if (!ing.referenceId) continue
       if (ing.type === 'product') {
         set.add(ing.referenceId)
       } else if (ing.type === 'recipe') {
-        const sub = recipes.find((r) => r._id === ing.referenceId)
+        const sub = recipesById.get(ing.referenceId)
         if (sub) this.getRecipeProductIds(sub, depth + 1).forEach((id) => set.add(id))
       }
     }

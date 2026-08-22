@@ -2,14 +2,21 @@ import { Injectable, signal, inject } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
 import { StorageService } from './async-storage.service'
 import { LoggingService } from './logging.service'
+import { LoadingService } from './loading.service'
 import { TranslationService } from './translation.service'
 import { KeyResolutionService } from './key-resolution.service'
 
 const STORAGE_KEY = 'MENU_SECTION_CATEGORIES'
 
 const DEFAULT_SECTION_CATEGORIES = [
-  'Amuse-Bouche', 'Appetizers', 'Soups', 'Salads',
-  'Main Course', 'Sides', 'Desserts', 'Beverages',
+  'Amuse-Bouche',
+  'Appetizers',
+  'Soups',
+  'Salads',
+  'Main Course',
+  'Sides',
+  'Desserts',
+  'Beverages'
 ]
 
 interface MenuSectionCategoriesDoc {
@@ -21,6 +28,7 @@ interface MenuSectionCategoriesDoc {
 export class MenuSectionCategoriesService {
   private readonly storage = inject(StorageService)
   private readonly logging = inject(LoggingService)
+  private readonly loading_ = inject(LoadingService)
   private readonly translationService = inject(TranslationService)
   private readonly keyResolution = inject(KeyResolutionService)
 
@@ -59,7 +67,7 @@ export class MenuSectionCategoriesService {
 
   private async load(): Promise<void> {
     try {
-      const registries = await this.storage.query<MenuSectionCategoriesDoc>(STORAGE_KEY)
+      const registries = await this.loading_.track(this.storage.query<MenuSectionCategoriesDoc>(STORAGE_KEY))
       const doc = registries[0]
       const items = doc?.items
       if (Array.isArray(items) && items.length > 0) {
@@ -77,7 +85,11 @@ export class MenuSectionCategoriesService {
       this.categories_.set([...DEFAULT_SECTION_CATEGORIES])
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.logging.error({ event: 'crud.menuSectionCategories.hydrate_error', message: 'Failed to load menu section categories', context: { err } })
+      this.logging.error({
+        event: 'crud.menuSectionCategories.hydrate_error',
+        message: 'Failed to load menu section categories',
+        context: { err }
+      })
       this.categories_.set([...DEFAULT_SECTION_CATEGORIES])
     }
   }
@@ -93,7 +105,7 @@ export class MenuSectionCategoriesService {
   }
 
   async removeCategory(name: string): Promise<void> {
-    const updated = this.categories_().filter(c => c !== name)
+    const updated = this.categories_().filter((c) => c !== name)
     if (updated.length === this.categories_().length) return
     await this.persist(updated)
   }
@@ -101,7 +113,7 @@ export class MenuSectionCategoriesService {
   async renameCategory(oldName: string, newName: string): Promise<void> {
     const trimmed = newName.trim()
     if (!trimmed || trimmed === oldName) return
-    const updated = this.categories_().map(c => c === oldName ? trimmed : c)
+    const updated = this.categories_().map((c) => (c === oldName ? trimmed : c))
     await this.persist(updated)
   }
 
@@ -109,9 +121,7 @@ export class MenuSectionCategoriesService {
     try {
       const registries = await this.storage.query<MenuSectionCategoriesDoc>(STORAGE_KEY)
       const doc = registries[0]
-      const payload: MenuSectionCategoriesDoc & { _id?: string } = doc
-        ? { ...doc, items }
-        : { items }
+      const payload: MenuSectionCategoriesDoc & { _id?: string } = doc ? { ...doc, items } : { items }
       if (doc?._id) {
         await this.storage.put(STORAGE_KEY, { ...payload, _id: doc._id })
       } else {
@@ -120,7 +130,11 @@ export class MenuSectionCategoriesService {
       this.categories_.set(items)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.logging.error({ event: 'crud.menuSectionCategories.persist_error', message: 'Failed to persist menu section categories', context: { err } })
+      this.logging.error({
+        event: 'crud.menuSectionCategories.persist_error',
+        message: 'Failed to persist menu section categories',
+        context: { err }
+      })
       this.categories_.set(items)
     }
   }

@@ -1,0 +1,45 @@
+/* mobile-pass.css — shared ≤767px hardening. Nothing here applies to tablet/desktop. */
+@media (max-width: 767px) {
+  html, body { overflow-x: hidden; }
+
+  /* no iOS focus-zoom */
+  input:not([type="checkbox"]):not([type="radio"]), textarea { font-size: 16px !important; }
+
+  /* checkboxes read as compact marks on phones — a quarter of the desktop footprint.
+     Higher specificity than the per-screen 24px rules, so this is the single source of truth. */
+  app-shell input[type="checkbox"], app-shell input[type="radio"] {
+    width: 14px !important; height: 14px !important; padding: 5px !important;
+    box-sizing: content-box !important; flex: none !important; border-radius: 4px !important;
+  }
+  app-shell input[type="radio"] { border-radius: 50% !important; }
+  app-shell input[type="checkbox"]::after { width: 4px !important; height: 7px !important; border-width: 0 2px 2px 0 !important; }
+  app-shell input[type="radio"]::after { width: 6px !important; height: 6px !important; }
+  app-shell input[type="checkbox"]:checked::after { transform: rotate(45deg) translate(-1px, -1px) !important; }
+
+  /* horizontal scrollers behave like scrollers, not page hijackers */
+  .m-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; scrollbar-width: none; }
+  .m-scroll::-webkit-scrollbar { display: none; }
+  .m-scroll-y { overscroll-behavior: contain; }
+
+  /* fixed page footer must clear the shell's bottom tab bar (56px + safe area, z 95) */
+  .m-above-tabbar { bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important; z-index: 96 !important; }
+  .m-fab-lift .fabwrap, app-shell.m-fab-lift .fabwrap { inset-block-end: calc(56px + 128px + env(safe-area-inset-bottom, 0px)) !important; }
+
+  /* centered dialogs become bottom sheets */
+  .m-sheet { align-items: flex-end !important; }
+  .m-sheet-card {
+    width: 100% !important; max-width: none !important; max-height: 86dvh !important;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0 !important;
+    padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* toasts clear the tab bar (and a page save bar, when present) */
+  .m-toast { bottom: calc(56px + 20px + env(safe-area-inset-bottom, 0px)) !important; width: max-content; max-width: calc(100vw - 32px); }
+  .m-toast-abovebar { bottom: calc(56px + 132px + env(safe-area-inset-bottom, 0px)) !important; }
+
+  /* full-height panels: dvh, not vh (mobile browser chrome) */
+  .m-dvh { min-height: calc(100dvh - 3.5rem) !important; }
+
+  /* utility: collapse a fixed multi-column grid to one column */
+  .m-stack { grid-template-columns: 1fr !important; }
+}

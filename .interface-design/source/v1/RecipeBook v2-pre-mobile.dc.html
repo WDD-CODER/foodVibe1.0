@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./colors_and_type.css">
+  <script src="./shell.js"></script>
+  <style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.96) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    body { margin: 0; }
+    a { color: var(--color-primary); text-decoration: none; }
+    a:hover { color: var(--color-primary-hover); }
+    input[type="checkbox"], input[type="radio"] {
+      appearance: none; -webkit-appearance: none; width: 24px; height: 24px; margin: 0; flex: none;
+      display: inline-grid; place-content: center; cursor: pointer;
+      background: var(--bg-pure); border: 1.5px solid var(--border-strong); border-radius: 7px;
+      box-shadow: inset 0 1px 2px rgba(15,23,42,0.06);
+      transition: background-color .16s var(--ease-smooth), border-color .16s var(--ease-smooth), box-shadow .2s var(--ease-smooth), transform .2s var(--ease-spring);
+    }
+    input[type="radio"] { border-radius: 50%; }
+    input[type="checkbox"]::after {
+      content: ""; width: 6px; height: 11px; opacity: 0;
+      border-right: 2.6px solid var(--color-text-on-primary); border-bottom: 2.6px solid var(--color-text-on-primary);
+      transform: rotate(45deg) translate(-1px, -2px) scale(0.6);
+      transition: opacity .14s var(--ease-smooth), transform .2s var(--ease-spring);
+    }
+    input[type="radio"]::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--color-text-on-primary); opacity: 0; transition: opacity .14s var(--ease-smooth); }
+    input[type="checkbox"]:hover, input[type="radio"]:hover { border-color: var(--color-primary); background: var(--color-primary-soft); }
+    input[type="checkbox"]:checked, input[type="radio"]:checked {
+      background: var(--color-primary); border-color: var(--color-primary);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 2px 8px -2px var(--color-primary-glow);
+    }
+    input[type="checkbox"]:checked::after { opacity: 1; transform: rotate(45deg) translate(-1px, -2px) scale(1); }
+    input[type="radio"]:checked::after { opacity: 1; }
+    input[type="checkbox"]:active, input[type="radio"]:active { transform: scale(0.94); }
+    .rb-row > div, .rb-car-track > div { justify-content: center; text-align: center; }
+    .rb-row > .rb-name-cell { justify-content: flex-start; text-align: start; }
+    .rb-header-row > div { justify-content: center; }
+    .rb-header-row > div:first-child { justify-content: flex-start; }
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .rb-aside { width: 100% !important; max-width: none !important; }
+      .rb-aside > div { display: flex !important; flex-direction: column; gap: var(--space-3); }
+      .rb-filter-group { display: flex !important; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; width: 100%; margin-bottom: 0 !important; }
+      .rb-filter-group > div:first-child { flex: 0 0 auto !important; margin-bottom: 0 !important; }
+    }
+    .rb-header-row > div { display: flex; align-items: center; min-height: 22px; line-height: 1.2; }
+    .rb-car-outer, .rb-car-track { display: contents; }
+    .rb-car-arrow, .rb-chip-mobile, .rb-actions-mobile { display: none; }
+    .rb-type-cell { order: 2; }
+    .rb-labels-cell { order: 3; }
+    .rb-allergen-cell { order: 4; }
+    .rb-rating-cell { order: 5; }
+    .rb-cost-cell { order: 6; }
+    .rb-actions-cell { order: 7; }
+    .rb-select-cell { order: 8; }
+    @media (max-width: 1023px) {
+      .rb-main-layout { flex-direction: column !important; align-items: stretch !important; }
+      .rb-main { display: contents; }
+      .rb-toolbar { order: 1; flex-wrap: wrap !important; }
+      .rb-aside { order: 2; position: static !important; width: 100% !important; max-width: none !important; align-self: stretch; margin: 0 0 var(--space-4); box-sizing: border-box; }
+      .rb-aside > div { width: 100%; min-width: 0; box-sizing: border-box; }
+      .rb-list-container { order: 3; }
+    }
+    @media (max-width: 479px) {
+      .recipe-name-cell { white-space: normal !important; overflow: visible !important; text-overflow: unset !important; word-break: break-word; }
+      .rb-toolbar > div:has(input[placeholder]) { min-width: 0 !important; flex: 1 1 100% !important; order: 3; }
+      .rb-toolbar > a:last-child { order: 2; margin-inline-start: 0 !important; }
+      .rb-filter-group { display: flex !important; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+      .rb-filter-group > div:first-child { flex: 1 0 100%; margin-bottom: 4px !important; }
+      .rb-filter-label { flex: 0 0 auto !important; padding: 6px 12px !important; background: var(--bg-subtle); border-radius: var(--radius-full); }
+      .rb-header-row { display: none !important; }
+      .rb-list-container { background: none !important; border: none !important; box-shadow: none !important; overflow: visible !important; padding: 0 !important; display: flex !important; flex-direction: column; gap: 6px; }
+      .rb-row {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px;
+        box-sizing: border-box;
+        padding: 8px 10px !important;
+        margin: 0 !important;
+        border-radius: var(--radius-md) !important;
+        background: var(--bg-glass-hover);
+        border: 1px solid var(--border-glass) !important;
+        box-shadow: none !important;
+        position: relative;
+      }
+      .rb-row > .rb-name-cell { order: 1; flex: 1 1 auto; min-width: 0; display: flex !important; justify-content: flex-start; font-size: var(--fs-sm) !important; font-weight: var(--fw-medium) !important; text-align: start; padding-bottom: 0 !important; border-bottom: none !important; margin-bottom: 0 !important; }
+      .rb-row > .rb-cost-cell { order: 2; flex: 0 0 auto !important; font-size: var(--fs-sm) !important; white-space: nowrap; }
+      .rb-row > .rb-actions-cell { order: 4; flex: 0 0 auto; padding-top: 0 !important; border-top: none !important; justify-content: center !important; }
+      .rb-actions-desktop { display: none !important; }
+      .rb-actions-mobile { display: flex !important; }
+      .rb-actions-mobile button { width: 26px !important; height: 26px !important; }
+      .rb-select-cell { order: 5; flex: 0 0 auto; }
+      .rb-row > .rb-car-outer { order: 3; display: block !important; position: relative; flex: 0 0 108px; width: 108px; box-sizing: border-box; padding: 0 14px; }
+      .rb-car-track > div { order: 0; }
+      .rb-car-track { display: flex !important; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; background: var(--bg-subtle); border-radius: var(--radius-sm); scrollbar-width: none; height: 44px; }
+      .rb-car-track::-webkit-scrollbar { display: none; }
+      .rb-car-track > div { flex: 0 0 100%; width: 100%; box-sizing: border-box; scroll-snap-align: start; scroll-snap-stop: always; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 1px; padding: 2px 6px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; font-size: var(--fs-xs); line-height: 1.15; }
+      .rb-car-track > div::before { content: attr(data-label); font-size: 12px; font-weight: var(--fw-semibold); color: var(--color-text-muted-light); text-transform: uppercase; line-height: 1; }
+      .rb-chip-desktop { display: none !important; }
+      .rb-chip-mobile { display: flex !important; flex-wrap: wrap; gap: 3px; justify-content: center; overflow: visible; white-space: normal !important; }
+    }
+      a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(20,184,166,0.35) !important; }
+    @keyframes skelPulse { 0%,100% { opacity: 1 } 50% { opacity: .55 } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  
+    /* ── pass 2: touch ergonomics (one rule, all screens) ── */
+    [class*="car-arrow"] { display: none !important; }
+    /* ── pass 4: motion system ── */
+    @keyframes pageEnter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    app-shell > * { animation: pageEnter .28s var(--ease-spring) both; }
+    button, a[role="button"] { transition: transform .15s var(--ease-spring), background-color .2s var(--ease-smooth), color .2s var(--ease-smooth), box-shadow .25s var(--ease-smooth); }
+    button:active, a[role="button"]:active { transform: scale(0.97); }
+    
+
+    @media (max-width: 767px) {
+      button, a[role="button"], select { min-height: 44px !important; min-width: 44px !important; }
+      input:not([type="checkbox"]):not([type="radio"]) { min-height: 44px !important; }
+      input[type="checkbox"], input[type="radio"] { width: 24px !important; height: 24px !important; padding: 10px !important; box-sizing: content-box !important; }
+      a[href]:not([style*="font-size: var(--fs-xs)"]) { min-height: 44px; display: inline-flex; align-items: center; }
+      [style*="grid-template-columns: 260px"], [style*="grid-template-columns: 320px"], [style*="grid-template-columns: 140px"] { grid-template-columns: 1fr !important; }
+      [style*="max-width: 1520px"], [style*="max-width: 1200px"], [style*="max-width: 1100px"], [style*="max-width: 720px"] { padding-inline: var(--space-4) !important; }
+    }
+  </style>
+</helmet>
+
+<app-shell dir="rtl" page="recipe-book" fab='[{"id":"add-recipe","label":"הוספת מתכון","icon":"plus"}]'>
+  <div style="position: relative; z-index: 1;">
+
+    <div class="rb-main-layout" style="max-width: 1520px; margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-12); display: flex; gap: var(--space-5); align-items: flex-start;">
+
+      <!-- FILTERS -->
+      <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ true }}">
+        <aside class="rb-aside" style="width: 250px; flex-shrink: 0; position: sticky; top: calc(3.5rem + var(--space-5)); animation: fadeIn 0.25s var(--ease-spring);">
+          <div style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); padding: var(--space-4);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4);">
+              <h3 style="margin: 0; font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--color-text-main);">סינון</h3>
+              <sc-if value="{{ hasActiveFilters }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ clearFilters }}" style="background: none; border: none; padding: 0; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-primary); cursor: pointer;">נקה סינון</button>
+              </sc-if>
+            </div>
+
+            <label style="display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) 0; cursor: pointer; border-bottom: 1px solid var(--border-row); margin-bottom: var(--space-3);">
+              <input type="checkbox" checked="{{ favoritesOnly }}" onChange="{{ toggleFavoritesOnly }}" />
+              <span style="font-size: var(--fs-sm); color: var(--color-text-secondary); font-weight: var(--fw-medium);">מועדפים בלבד</span>
+            </label>
+
+            <div class="rb-filter-group" style="margin-bottom: var(--space-4);">
+              <div style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">סוג</div>
+              <sc-for list="{{ typeOptions }}" as="t" hint-placeholder-count="2">
+                <label style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: 5px 0; cursor: pointer;">
+                  <span style="display: flex; align-items: center; gap: var(--space-2);">
+                    <input type="checkbox" checked="{{ t.checked }}" onChange="{{ t.onToggle }}" />
+                    <span style="font-size: var(--fs-sm); color: var(--color-text-secondary);">{{ t.label }}</span>
+                  </span>
+                  <span style="font-size: var(--fs-xs); color: var(--color-text-muted-light);">{{ t.count }}</span>
+                </label>
+              </sc-for>
+            </div>
+
+            <div class="rb-filter-group" style="margin-bottom: var(--space-4);">
+              <div style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">סטטוס אישור</div>
+              <sc-for list="{{ approvalOptions }}" as="ap" hint-placeholder-count="2">
+                <label class="rb-filter-label" style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: 5px 0; cursor: pointer;">
+                  <span style="display: flex; align-items: center; gap: var(--space-2);">
+                    <input type="checkbox" checked="{{ ap.checked }}" onChange="{{ ap.onToggle }}" />
+                    <span style="font-size: var(--fs-sm); color: var(--color-text-secondary);">{{ ap.label }}</span>
+                  </span>
+                  <span style="font-size: var(--fs-xs); color: var(--color-text-muted-light);">{{ ap.count }}</span>
+                </label>
+              </sc-for>
+            </div>
+
+            <div class="rb-filter-group" style="margin-bottom: var(--space-4);">
+              <div style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">תוויות</div>
+              <sc-for list="{{ labelOptions }}" as="l" hint-placeholder-count="4">
+                <label class="rb-filter-label" style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: 5px 0; cursor: pointer;">
+                  <span style="display: flex; align-items: center; gap: var(--space-2);">
+                    <input type="checkbox" checked="{{ l.checked }}" onChange="{{ l.onToggle }}" />
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: {{ l.color }}; flex-shrink: 0;"></span>
+                    <span style="font-size: var(--fs-sm); color: var(--color-text-secondary);">{{ l.label }}</span>
+                  </span>
+                  <span style="font-size: var(--fs-xs); color: var(--color-text-muted-light);">{{ l.count }}</span>
+                </label>
+              </sc-for>
+            </div>
+
+            <div class="rb-filter-group">
+              <div style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">הסתר מתכונים עם אלרגן</div>
+              <sc-for list="{{ allergenOptions }}" as="a" hint-placeholder-count="4">
+                <label class="rb-filter-label" style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: 5px 0; cursor: pointer;">
+                  <span style="display: flex; align-items: center; gap: var(--space-2);">
+                    <input type="checkbox" checked="{{ a.checked }}" onChange="{{ a.onToggle }}" />
+                    <span style="font-size: var(--fs-sm); color: var(--color-text-secondary);">{{ a.label }}</span>
+                  </span>
+                  <span style="font-size: var(--fs-xs); color: var(--color-text-muted-light);">{{ a.count }}</span>
+                </label>
+              </sc-for>
+            </div>
+          </div>
+        </aside>
+      </sc-if>
+
+      <!-- MAIN -->
+      <main class="rb-main" style="flex: 1; min-width: 0;">
+        <div class="rb-toolbar" style="display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-5); flex-wrap: wrap;">
+          <button onClick="{{ togglePanel }}" style="display: grid; place-content: center; width: 38px; height: 38px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--color-text-muted); cursor: pointer; flex-shrink: 0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+          </button>
+          <div>
+            <h1 style="margin: 0; font-size: var(--fs-xl); font-weight: var(--fw-bold); letter-spacing: var(--tracking-tight); color: var(--color-text-main);">ספר מתכונים</h1>
+            <p style="margin: 2px 0 0; font-size: var(--fs-sm); color: var(--color-text-muted);">{{ filteredCount }} מתוך {{ totalCount }} מתכונים</p>
+          </div>
+          <div style="display: flex; align-items: center; gap: var(--space-2); background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 0 var(--space-3); height: 38px; min-width: 220px; backdrop-filter: var(--blur-glass);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-text-muted-light); flex-shrink: 0;"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+            <input type="text" placeholder="חיפוש מתכון" value="{{ search }}" onChange="{{ onSearchChange }}" style="border: none; background: none; outline: none; font-size: var(--fs-sm); color: var(--color-text-main); font-family: var(--font-sans); width: 100%;" />
+          </div>
+          <a href="RecipeBuilder.dc.html" style="margin-inline-start: auto; display: inline-flex; align-items: center; gap: var(--space-2); padding: 0 var(--space-4); height: 38px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); color: var(--color-text-on-primary); border: none; border-radius: var(--radius-full); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer; box-shadow: var(--shadow-glow);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+            הוסף מתכון
+          </a>
+        </div>
+
+        <sc-if value="{{ hasSelection }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4); margin-bottom: var(--space-3); background: var(--color-primary-soft); border: 1px solid var(--border-focus); border-radius: var(--radius-md); animation: popIn 0.2s var(--ease-spring);">
+            <span style="font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--color-text-main);">{{ selectedCount }} נבחרו</span>
+            <button onClick="{{ askBulkDelete }}" style="display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid rgba(220,38,38,0.3); color: var(--color-danger); padding: 6px 12px; border-radius: var(--radius-md); font-size: var(--fs-xs); font-weight: var(--fw-semibold); cursor: pointer;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              מחק נבחרים
+            </button>
+            <button onClick="{{ clearSelection }}" style="background: none; border: none; color: var(--color-text-muted); font-size: var(--fs-xs); cursor: pointer; margin-inline-start: auto;">בטל בחירה</button>
+          </div>
+        </sc-if>
+
+        <div class="rb-list-container" style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); overflow: hidden;">
+          <div class="rb-header-row" style="display: grid; grid-template-columns: 2fr 0.8fr 0.9fr 0.9fr 0.9fr 0.8fr 104px 36px; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-default); background: var(--bg-muted);">
+            <div onClick="{{ setSortName }}" style="display: flex; align-items: center; gap: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); cursor: pointer;">
+              שם
+              <sc-if value="{{ nameSortUp }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></sc-if>
+              <sc-if value="{{ nameSortDown }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></sc-if>
+            </div>
+            <div onClick="{{ setSortType }}" style="display: flex; align-items: center; gap: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); cursor: pointer;">
+              סוג
+              <sc-if value="{{ typeSortUp }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></sc-if>
+              <sc-if value="{{ typeSortDown }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></sc-if>
+            </div>
+            <div style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide);">תוויות</div>
+            <div style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide);">אלרגנים</div>
+            <div onClick="{{ setSortRating }}" style="display: flex; align-items: center; gap: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); cursor: pointer;">
+              דירוג
+              <sc-if value="{{ ratingSortUp }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></sc-if>
+              <sc-if value="{{ ratingSortDown }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></sc-if>
+            </div>
+            <div onClick="{{ setSortCost }}" style="display: flex; align-items: center; gap: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); cursor: pointer;">
+              עלות
+              <sc-if value="{{ costSortUp }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></sc-if>
+              <sc-if value="{{ costSortDown }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></sc-if>
+            </div>
+            <div style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide);">פעולות</div>
+            <div style="display: flex; align-items: center;"><input type="checkbox" checked="{{ allSelected }}" onChange="{{ toggleSelectAll }}" /></div>
+          </div>
+
+          <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+            <div aria-busy="true" aria-label="טוען נתונים" style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); box-shadow: var(--shadow-glass); border-radius: var(--radius-lg); padding: var(--space-4); display: flex; flex-direction: column; gap: 12px; margin-bottom: var(--space-3);">
+              <sc-for list="{{ skeletonRows }}" as="row" hint-placeholder-count="6">
+                <div style="display: flex; align-items: center; gap: var(--space-3); animation: skelPulse 1.4s var(--ease-smooth) infinite;">
+                  <div style="flex: 2; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.07);"></div>
+                  <div style="flex: 1; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.05);"></div>
+                  <div style="width: 84px; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.05);"></div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ loadFailed }}" hint-placeholder-val="{{ false }}">
+            <div role="alert" style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); box-shadow: var(--shadow-glass); border-radius: var(--radius-lg); padding: var(--space-10) var(--space-4); margin-bottom: var(--space-3); display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center;">
+              <i data-lucide="cloud-off" style="width: 28px; height: 28px; color: var(--color-danger);"></i>
+              <div style="font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--color-text-main);">הטעינה נכשלה</div>
+              <p style="margin: 0; max-width: 34ch; font-size: var(--fs-sm); color: var(--color-text-muted); line-height: var(--lh-relaxed);">אין חיבור לשרת כרגע. אפשר לנסות שוב.</p>
+              <button onClick="{{ retryLoad }}" style="min-height: 44px; padding: 0 20px; border: none; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-text-on-primary); font-family: inherit; font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer; box-shadow: var(--shadow-glow);">נסה שוב</button>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="padding: var(--space-12) var(--space-4); text-align: center; color: var(--color-text-muted); font-size: var(--fs-sm);">לא נמצאו מתכונים התואמים לחיפוש</div>
+          </sc-if>
+
+          <sc-for list="{{ recipes }}" as="r" hint-placeholder-count="8">
+            <div class="rb-row" onClick="{{ r.onEdit }}" style="display: grid; grid-template-columns: 2fr 0.8fr 0.9fr 0.9fr 0.9fr 0.8fr 104px 36px; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-row); align-items: center; cursor: pointer;">
+              <div class="rb-name-cell" style="display: flex; align-items: center; gap: var(--space-2); min-width: 0;">
+                <span class="recipe-name-cell" title="{{ r.name }}" style="font-size: var(--fs-base); font-weight: var(--fw-medium); color: var(--color-text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ r.name }}</span>
+                <sc-if value="{{ r.unapproved }}" hint-placeholder-val="{{ false }}">
+                  <span title="ממתין לאישור" style="flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: rgba(14,165,233,0.14); color: var(--color-info); cursor: help;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  </span>
+                </sc-if>
+              </div>
+              <div class="rb-cost-cell" data-label="עלות" title="{{ r.costTooltip }}" style="display: flex; align-items: center; gap: 3px; font-size: var(--fs-base); font-weight: var(--fw-semibold); color: var(--color-text-main); font-variant-numeric: tabular-nums; cursor: help;">
+                {{ r.costLabel }}<span style="color: var(--color-text-muted-light); font-weight: var(--fw-regular); font-size: var(--fs-xs);">₪</span>
+              </div>
+              <div class="rb-car-outer" data-car-outer>
+              <div class="rb-car-track" data-car-track>
+              <div class="rb-type-cell" data-label="סוג" style="font-size: var(--fs-sm); color: var(--color-text-secondary);">{{ r.typeLabel }}</div>
+              <div class="rb-labels-cell" data-label="תוויות" style="position: relative;">
+                <div class="rb-chip-desktop">
+                <sc-if value="{{ r.hasLabels }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ r.onToggleLabelsPopover }}" style="display: inline-flex; align-items: center; gap: 5px; background: var(--bg-muted); border: 1px solid var(--border-default); color: var(--color-text-secondary); padding: 4px 9px; border-radius: var(--radius-full); font-size: var(--fs-xs); font-weight: var(--fw-semibold); cursor: pointer;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"></path><circle cx="7.5" cy="7.5" r="0.5" fill="currentColor"></circle></svg>
+                    {{ r.labelCount }}
+                  </button>
+                  <sc-if value="{{ r.labelsPopoverOpen }}" hint-placeholder-val="{{ false }}">
+                    <div style="position: absolute; top: calc(100% + 6px); right: 0; z-index: 20; display: flex; flex-wrap: wrap; gap: 4px; width: 170px; padding: var(--space-2); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-md); box-shadow: var(--shadow-modal); animation: popIn 0.15s var(--ease-spring);">
+                      <sc-for list="{{ r.labelChips }}" as="lc" hint-placeholder-count="2">
+                        <span style="font-size: var(--fs-xs); padding: 3px 8px; border-radius: var(--radius-full); color: #fff; background: {{ lc.color }};">{{ lc.label }}</span>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </sc-if>
+                <sc-if value="{{ r.noLabels }}" hint-placeholder-val="{{ true }}"><span style="color: var(--color-text-muted-light);">—</span></sc-if>
+                </div>
+                <div class="rb-chip-mobile" style="display: none;">
+                  <sc-if value="{{ r.hasLabels }}" hint-placeholder-val="{{ false }}">
+                    <sc-for list="{{ r.labelChips }}" as="lc" hint-placeholder-count="2">
+                      <span style="font-size: var(--fs-xs); padding: 3px 8px; border-radius: var(--radius-full); color: #fff; background: {{ lc.color }};">{{ lc.label }}</span>
+                    </sc-for>
+                  </sc-if>
+                  <sc-if value="{{ r.noLabels }}" hint-placeholder-val="{{ true }}"><span style="color: var(--color-text-muted-light);">—</span></sc-if>
+                </div>
+              </div>
+              <div class="rb-allergen-cell" data-label="אלרגנים" style="position: relative;">
+                <div class="rb-chip-desktop">
+                <sc-if value="{{ r.hasAllergens }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ r.onToggleAllergenPopover }}" style="display: inline-flex; align-items: center; gap: 5px; background: var(--bg-danger-subtle); border: 1px solid rgba(220,38,38,0.2); color: var(--color-allergen-text); padding: 4px 9px; border-radius: var(--radius-full); font-size: var(--fs-xs); font-weight: var(--fw-semibold); cursor: pointer;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.35 8.95a1 1 0 0 1-.6.03C8.06 20.55 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>
+                    {{ r.allergenCount }}
+                  </button>
+                  <sc-if value="{{ r.allergenPopoverOpen }}" hint-placeholder-val="{{ false }}">
+                    <div style="position: absolute; top: calc(100% + 6px); right: 0; z-index: 20; display: flex; flex-wrap: wrap; gap: 4px; width: 160px; padding: var(--space-2); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-md); box-shadow: var(--shadow-modal); animation: popIn 0.15s var(--ease-spring);">
+                      <sc-for list="{{ r.allergenChips }}" as="ac" hint-placeholder-count="2">
+                        <span style="font-size: var(--fs-xs); padding: 3px 8px; border-radius: var(--radius-full); background: var(--bg-danger-subtle); color: var(--color-allergen-text);">{{ ac.label }}</span>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </sc-if>
+                <sc-if value="{{ r.noAllergens }}" hint-placeholder-val="{{ true }}"><span style="color: var(--color-text-muted-light);">—</span></sc-if>
+                </div>
+                <div class="rb-chip-mobile" style="display: none;">
+                  <sc-if value="{{ r.hasAllergens }}" hint-placeholder-val="{{ false }}">
+                    <sc-for list="{{ r.allergenChips }}" as="ac" hint-placeholder-count="2">
+                      <span style="font-size: var(--fs-xs); padding: 3px 8px; border-radius: var(--radius-full); background: var(--bg-danger-subtle); color: var(--color-allergen-text);">{{ ac.label }}</span>
+                    </sc-for>
+                  </sc-if>
+                  <sc-if value="{{ r.noAllergens }}" hint-placeholder-val="{{ true }}"><span style="color: var(--color-text-muted-light);">—</span></sc-if>
+                </div>
+              </div>
+              <div class="rb-rating-cell" data-label="דירוג" style="display: flex; gap: 1px; color: var(--color-accent-gold);">
+                <sc-for list="{{ r.stars }}" as="star" hint-placeholder-count="5">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="{{ star.fill }}" stroke="currentColor" stroke-width="1.5"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679 5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638.882 5.14a.53.53 0 0 1-.77.56L12 15.347l-4.62 2.428a.53.53 0 0 1-.77-.56l.881-5.139-3.735-3.638a.53.53 0 0 1 .294-.906l5.165-.755z"></path></svg>
+                </sc-for>
+              </div>
+              </div>
+              <button type="button" class="rb-car-arrow rb-car-prev" onClick="{{ carPrev }}">‹</button>
+              <button type="button" class="rb-car-arrow rb-car-next" onClick="{{ carNext }}">›</button>
+              </div>
+              <div class="rb-actions-cell">
+                <div class="rb-actions-desktop" style="display: flex; align-items: center; gap: 2px;">
+                <button onClick="{{ r.onToggleFavorite }}" style="display: grid; place-content: center; width: 28px; height: 28px; background: none; border: none; border-radius: var(--radius-sm); color: {{ r.favoriteColor }}; cursor: pointer;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="{{ r.favoriteFill }}" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>
+                </button>
+                <button onClick="{{ r.onCook }}" style="display: grid; place-content: center; width: 28px; height: 28px; background: none; border: none; border-radius: var(--radius-sm); color: var(--color-text-muted); cursor: pointer;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h20"></path><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"></path><path d="m4 8 16-4"></path><path d="m8.86 6.78-.45-1.81a2 2 0 0 1 1.45-2.43l1.94-.48a2 2 0 0 1 2.43 1.46l.45 1.8"></path></svg>
+                </button>
+                <button onClick="{{ r.onDelete }}" style="display: grid; place-content: center; width: 28px; height: 28px; background: none; border: none; border-radius: var(--radius-sm); color: var(--color-danger); cursor: pointer;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+                </div>
+                <div class="rb-actions-mobile" style="display: none; position: relative;">
+                  <button onClick="{{ r.onToggleActionsMenu }}" style="display: grid; place-content: center; width: 32px; height: 32px; background: none; border: none; border-radius: var(--radius-sm); color: var(--color-text-muted); cursor: pointer;">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                  </button>
+                  <sc-if value="{{ r.actionsMenuOpen }}" hint-placeholder-val="{{ false }}">
+                    <div onClick="{{ stopPropagation }}" style="position: absolute; top: calc(100% + 4px); left: 50%; transform: translateX(-50%); z-index: 20; display: flex; flex-direction: column; min-width: 140px; padding: 6px; background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-md); box-shadow: var(--shadow-modal); animation: popIn 0.15s var(--ease-spring);">
+                      <button onClick="{{ r.onToggleFavorite }}" style="display: flex; align-items: center; gap: 8px; padding: 9px 10px; background: none; border: none; border-radius: var(--radius-sm); color: {{ r.favoriteColor }}; font-size: var(--fs-sm); cursor: pointer; text-align: right;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="{{ r.favoriteFill }}" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>
+                        {{ r.favoriteLabel }}
+                      </button>
+                      <button onClick="{{ r.onCook }}" style="display: flex; align-items: center; gap: 8px; padding: 9px 10px; background: none; border: none; border-radius: var(--radius-sm); color: var(--color-text-main); font-size: var(--fs-sm); cursor: pointer; text-align: right;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h20"></path><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"></path><path d="m4 8 16-4"></path><path d="m8.86 6.78-.45-1.81a2 2 0 0 1 1.45-2.43l1.94-.48a2 2 0 0 1 2.43 1.46l.45 1.8"></path></svg>
+                        בשל
+                      </button>
+                      <button onClick="{{ r.onDelete }}" style="display: flex; align-items: center; gap: 8px; padding: 9px 10px; background: none; border: none; border-radius: var(--radius-sm); color: var(--color-danger); font-size: var(--fs-sm); cursor: pointer; text-align: right;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        מחק
+                      </button>
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+              <div class="rb-select-cell" style="display: flex; align-items: center;"><input type="checkbox" checked="{{ r.selected }}" onChange="{{ r.onToggleSelect }}" /></div>
+            </div>
+          </sc-for>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ADD / EDIT MODAL -->
+  <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" style="position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; background: var(--overlay-backdrop); backdrop-filter: blur(6px); animation: fadeIn 0.15s ease;">
+      <div onClick="{{ stopPropagation }}" style="width: 92%; max-width: 460px; max-height: 86vh; overflow-y: auto; padding: var(--space-6); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-5);">
+          <h3 style="margin: 0; font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--color-text-main);">{{ modalTitle }}</h3>
+          <button onClick="{{ closeModal }}" style="width: 30px; height: 30px; display: grid; place-content: center; border: 1px solid var(--border-default); background: var(--bg-glass); border-radius: var(--radius-sm); cursor: pointer; color: var(--color-text-muted);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+          </button>
+        </div>
+
+        <label style="display: block; margin-bottom: var(--space-4);">
+          <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">שם המתכון</span>
+          <input type="text" value="{{ draftName }}" onChange="{{ setDraftName }}" placeholder="לדוגמה: פסטה ברוטב שמנת" style="width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: var(--fs-base); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1.5px solid var(--border-default); border-radius: var(--radius-md);" />
+        </label>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-4);">
+          <div>
+            <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">סוג</span>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              <sc-for list="{{ draftTypeOptions }}" as="t" hint-placeholder-count="2">
+                <button onClick="{{ t.onSelect }}" style="{{ t.style }}">{{ t.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <label style="display: block;">
+            <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">עלות (₪)</span>
+            <input type="number" value="{{ draftCost }}" onChange="{{ setDraftCost }}" placeholder="0.00" style="width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: var(--fs-base); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1.5px solid var(--border-default); border-radius: var(--radius-md);" />
+          </label>
+        </div>
+
+        <div style="margin-bottom: var(--space-4);">
+          <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">דירוג</span>
+          <div style="display: flex; gap: 4px;">
+            <sc-for list="{{ draftStarOptions }}" as="ds" hint-placeholder-count="5">
+              <button onClick="{{ ds.onSelect }}" style="background: none; border: none; padding: 2px; cursor: pointer; color: var(--color-accent-gold);">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="{{ ds.fill }}" stroke="currentColor" stroke-width="1.5"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679 5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638.882 5.14a.53.53 0 0 1-.77.56L12 15.347l-4.62 2.428a.53.53 0 0 1-.77-.56l.881-5.139-3.735-3.638a.53.53 0 0 1 .294-.906l5.165-.755z"></path></svg>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="margin-bottom: var(--space-4);">
+          <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">תוויות</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <sc-for list="{{ draftLabelOptions }}" as="dl" hint-placeholder-count="4">
+              <button onClick="{{ dl.onToggle }}" style="{{ dl.style }}">{{ dl.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="margin-bottom: var(--space-4);">
+          <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">אלרגנים</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <sc-for list="{{ draftAllergenOptions }}" as="da" hint-placeholder-count="6">
+              <button onClick="{{ da.onToggle }}" style="{{ da.style }}">{{ da.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <label style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-5); cursor: pointer;">
+          <input type="checkbox" checked="{{ draftApproved }}" onChange="{{ toggleDraftApproved }}" />
+          <span style="font-size: var(--fs-sm); color: var(--color-text-secondary);">מאושר לתפריט</span>
+        </label>
+
+        <div style="display: flex; justify-content: flex-end; gap: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--border-default);">
+          <button onClick="{{ closeModal }}" style="padding: 9px 18px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--color-text-secondary); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">ביטול</button>
+          <button onClick="{{ saveDraft }}" style="padding: 9px 20px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); border: none; border-radius: var(--radius-md); color: #fff; font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer; box-shadow: var(--shadow-glow);">שמירה</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- CONFIRM DIALOG -->
+  <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; background: var(--overlay-backdrop); backdrop-filter: blur(6px); animation: fadeIn 0.15s ease;">
+      <div style="width: 90%; max-width: 380px; padding: var(--space-6); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring); text-align: center;">
+        <div style="width: 44px; height: 44px; margin: 0 auto var(--space-4); border-radius: 50%; background: var(--bg-danger-subtle); display: grid; place-content: center; color: var(--color-danger);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+        </div>
+        <p style="margin: 0 0 var(--space-5); font-size: var(--fs-base); font-weight: var(--fw-medium); color: var(--color-text-main);">{{ confirmMessage }}</p>
+        <div style="display: flex; gap: var(--space-3);">
+          <button onClick="{{ cancelConfirm }}" style="flex: 1; padding: 10px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--color-text-secondary); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">ביטול</button>
+          <button onClick="{{ runConfirm }}" style="flex: 1; padding: 10px; background: var(--color-danger); border: none; border-radius: var(--radius-md); color: #fff; font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">מחיקה</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- TOAST -->
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 400; display: flex; align-items: center; gap: var(--space-2); padding: 11px 20px; background: var(--color-text-main); color: #fff; border-radius: var(--radius-full); font-size: var(--fs-sm); font-weight: var(--fw-medium); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring);">
+      {{ toastMessage }}
+    </div>
+  </sc-if>
+</app-shell>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;viewState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ready&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;ready&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;States&quot;}}">
+const TYPE_LABELS = { dish: 'מנה', preparation: 'הכנה' };
+const ALLERGEN_LABELS = { gluten: 'גלוטן', eggs: 'ביצים', nuts: 'אגוזים', soy: 'סויה', mustard: 'חרדל', sesame: 'שומשום', dairy: 'חלב' };
+const LABEL_DEFS = {
+  quick: { label: 'מהיר', color: '#14b8a6' },
+  vegan: { label: 'טבעוני', color: '#10b981' },
+  popular: { label: 'פופולרי', color: '#a0833f' },
+  new: { label: 'חדש', color: '#0ea5e9' }
+};
+
+const BASE_RECIPES = [
+  { _id: 'r1', name: 'פסטה ברוטב שמנת פטריות', type: 'dish', labels: ['popular'], allergens: ['gluten', 'dairy'], rating: 4, cost: 32.5, approved: true, favorite: true },
+  { _id: 'r2', name: 'עוף בגריל עם ירקות קלויים', type: 'dish', labels: ['quick', 'popular'], allergens: [], rating: 5, cost: 45, approved: true, favorite: false },
+  { _id: 'r3', name: 'סלט יווני', type: 'dish', labels: ['quick', 'vegan'], allergens: ['dairy'], rating: 4, cost: 22, approved: true, favorite: true },
+  { _id: 'r4', name: 'מרק עדשים כתום', type: 'dish', labels: ['vegan'], allergens: [], rating: 3, cost: 14, approved: false, favorite: false },
+  { _id: 'r5', name: 'בורגר טבעוני עם צ׳יפס', type: 'dish', labels: ['vegan', 'new'], allergens: ['gluten', 'soy'], rating: 4, cost: 38, approved: true, favorite: false },
+  { _id: 'r6', name: 'רוטב טחינה בסיסי', type: 'preparation', labels: ['quick', 'vegan'], allergens: ['sesame'], rating: 5, cost: 6, approved: true, favorite: true },
+  { _id: 'r7', name: 'ציר עוף ביתי', type: 'preparation', labels: [], allergens: [], rating: 4, cost: 9, approved: true, favorite: false },
+  { _id: 'r8', name: 'עוגת שוקולד עשירה', type: 'dish', labels: ['popular'], allergens: ['gluten', 'eggs', 'dairy'], rating: 5, cost: 28, approved: false, favorite: false },
+  { _id: 'r9', name: 'חמאת בוטנים תוצרת בית', type: 'preparation', labels: [], allergens: ['nuts'], rating: 3, cost: 11, approved: false, favorite: false },
+  { _id: 'r10', name: 'פוקה יאסאי טופו', type: 'dish', labels: ['new', 'vegan'], allergens: ['soy', 'sesame'], rating: 4, cost: 41, approved: true, favorite: true },
+  { _id: 'r11', name: 'סלט קינואה ואבוקדו', type: 'dish', labels: ['quick', 'vegan'], allergens: [], rating: 4, cost: 26, approved: true, favorite: false },
+  { _id: 'r12', name: 'מיונז ביתי', type: 'preparation', labels: [], allergens: ['eggs'], rating: 3, cost: 8, approved: true, favorite: false },
+  { _id: 'r13', name: 'פלפל ממולא בבורגול', type: 'dish', labels: ['vegan'], allergens: [], rating: 4, cost: 24, approved: false, favorite: false },
+  { _id: 'r14', name: 'גלייז קוריאני גוצ׳וג׳אנג', type: 'preparation', labels: ['new'], allergens: [], rating: 5, cost: 15, approved: true, favorite: true }
+];
+
+class Component extends DCLogic {
+  componentDidMount() {
+    import('./carousel-helpers.js').then(m => { this._car = m; this._carDispose = m.attachCarouselWatcher(); });
+  }
+  componentWillUnmount() {
+    if (this._carDispose) this._carDispose();
+  }
+  carPrev(e) { if (this._car) this._car.scrollCarousel(e.currentTarget, -1); }
+  carNext(e) { if (this._car) this._car.scrollCarousel(e.currentTarget, 1); }
+  carDot(e) { if (this._car) this._car.scrollCarouselToDot(e.currentTarget); }
+
+  state = {
+    recipes: BASE_RECIPES.map(r => ({ ...r, labels: [...r.labels], allergens: [...r.allergens] })),
+    search: '',
+    typeFilters: new Set(),
+    approvalFilters: new Set(),
+    labelFilters: new Set(),
+    allergenFilters: new Set(),
+    favoritesOnly: false,
+    sortBy: null,
+    sortDir: 'asc',
+    selected: new Set(),
+    panelOpen: true,
+    labelsPopoverId: null,
+    allergenPopoverId: null,
+    actionsMenuId: null,
+    modalOpen: false,
+    modalMode: 'add',
+    modalId: null,
+    draft: { name: '', type: 'dish', cost: '', rating: 0, labels: new Set(), allergens: new Set(), approved: true },
+    confirmOpen: false,
+    confirmMessage: '',
+    confirmAction: null,
+    confirmTargetId: null,
+    toastVisible: false,
+    toastMessage: ''
+  };
+
+  showToast(msg) {
+    clearTimeout(this._toastTimer);
+    this.setState({ toastVisible: true, toastMessage: msg });
+    this._toastTimer = setTimeout(() => this.setState({ toastVisible: false }), 2200);
+  }
+  notReady() { this.showToast('המסך הזה בבנייה'); }
+  onSearchChange(v) { this.setState({ search: v }); }
+  togglePanel() { this.setState(s => ({ panelOpen: !s.panelOpen })); }
+  toggleFavoritesOnly() { this.setState(s => ({ favoritesOnly: !s.favoritesOnly })); }
+
+  toggleSetFilter(key, value) {
+    this.setState(s => {
+      const next = new Set(s[key]);
+      next.has(value) ? next.delete(value) : next.add(value);
+      return { [key]: next };
+    });
+  }
+  clearFilters() { this.setState({ typeFilters: new Set(), approvalFilters: new Set(), labelFilters: new Set(), allergenFilters: new Set(), favoritesOnly: false }); }
+
+  setSort(field) {
+    this.setState(s => s.sortBy === field ? { sortDir: s.sortDir === 'asc' ? 'desc' : 'asc' } : { sortBy: field, sortDir: 'asc' });
+  }
+
+  toggleSelect(id) { this.setState(s => { const n = new Set(s.selected); n.has(id) ? n.delete(id) : n.add(id); return { selected: n }; }); }
+  toggleSelectAll(ids) { this.setState(s => { const all = ids.length > 0 && ids.every(id => s.selected.has(id)); return { selected: all ? new Set() : new Set(ids) }; }); }
+  clearSelection() { this.setState({ selected: new Set() }); }
+  toggleLabelsPopover(id) { this.setState(s => ({ labelsPopoverId: s.labelsPopoverId === id ? null : id })); }
+  toggleAllergenPopover(id) { this.setState(s => ({ allergenPopoverId: s.allergenPopoverId === id ? null : id })); }
+  toggleActionsMenu(id) { this.setState(s => ({ actionsMenuId: s.actionsMenuId === id ? null : id })); }
+  stopPropagation(e) { if (e && e.stopPropagation) e.stopPropagation(); }
+  toggleFavorite(id) { this.setState(s => ({ recipes: s.recipes.map(r => r._id === id ? { ...r, favorite: !r.favorite } : r) })); }
+  onCook() { window.location.href = 'CookView.dc.html'; }
+
+  goToBuilder() { window.location.href = 'RecipeBuilder.dc.html'; }
+  openAddModal() { this.setState({ modalOpen: true, modalMode: 'add', modalId: null, draft: { name: '', type: 'dish', cost: '', rating: 0, labels: new Set(), allergens: new Set(), approved: true } }); }
+  openEditModal(id) {
+    const r = this.state.recipes.find(x => x._id === id);
+    if (!r) return;
+    this.setState({ modalOpen: true, modalMode: 'edit', modalId: id, draft: { name: r.name, type: r.type, cost: String(r.cost), rating: r.rating, labels: new Set(r.labels), allergens: new Set(r.allergens), approved: r.approved } });
+  }
+  closeModal() { this.setState({ modalOpen: false }); }
+  setDraftName(v) { this.setState(s => ({ draft: { ...s.draft, name: v } })); }
+  setDraftCost(v) { this.setState(s => ({ draft: { ...s.draft, cost: v } })); }
+  selectDraftType(k) { this.setState(s => ({ draft: { ...s.draft, type: k } })); }
+  setDraftRating(v) { this.setState(s => ({ draft: { ...s.draft, rating: v } })); }
+  toggleDraftApproved() { this.setState(s => ({ draft: { ...s.draft, approved: !s.draft.approved } })); }
+  toggleDraftSet(field, key) {
+    this.setState(s => {
+      const next = new Set(s.draft[field]);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return { draft: { ...s.draft, [field]: next } };
+    });
+  }
+
+  saveDraft() {
+    const { draft, modalMode, modalId, recipes } = this.state;
+    if (!draft.name.trim()) return;
+    const cost = parseFloat(draft.cost) || 0;
+    if (modalMode === 'add') {
+      const newRecipe = { _id: 'r_new_' + Date.now(), name: draft.name.trim(), type: draft.type, cost, rating: draft.rating, labels: Array.from(draft.labels), allergens: Array.from(draft.allergens), approved: draft.approved, favorite: false };
+      this.setState({ recipes: [newRecipe, ...recipes], modalOpen: false });
+      this.showToast('המתכון נוסף בהצלחה');
+    } else {
+      const next = recipes.map(r => r._id === modalId ? { ...r, name: draft.name.trim(), type: draft.type, cost, rating: draft.rating, labels: Array.from(draft.labels), allergens: Array.from(draft.allergens), approved: draft.approved } : r);
+      this.setState({ recipes: next, modalOpen: false });
+      this.showToast('המתכון עודכן בהצלחה');
+    }
+  }
+
+  askDeleteRecipe(id) {
+    const r = this.state.recipes.find(x => x._id === id);
+    this.setState({ confirmOpen: true, confirmMessage: 'האם למחוק את "' + (r ? r.name : '') + '"?', confirmAction: 'delete', confirmTargetId: id });
+  }
+  askBulkDelete() {
+    if (this.state.selected.size === 0) return;
+    this.setState({ confirmOpen: true, confirmMessage: 'למחוק ' + this.state.selected.size + ' מתכונים?', confirmAction: 'bulkDelete', confirmTargetId: null });
+  }
+  cancelConfirm() { this.setState({ confirmOpen: false, confirmAction: null, confirmTargetId: null }); }
+  runConfirm() {
+    const { confirmAction, confirmTargetId, recipes, selected } = this.state;
+    if (confirmAction === 'delete') {
+      this.setState({ recipes: recipes.filter(r => r._id !== confirmTargetId), confirmOpen: false });
+      this.showToast('המתכון נמחק');
+    } else if (confirmAction === 'bulkDelete') {
+      this.setState({ recipes: recipes.filter(r => !selected.has(r._id)), selected: new Set(), confirmOpen: false });
+      this.showToast('המתכונים נמחקו');
+    }
+  }
+
+  renderVals() {
+    const b = this.baseVals();
+    const vs = this.state.__vs || this.props.viewState || 'ready';
+    const loading = vs === 'loading', failed = vs === 'error';
+    if (vs !== 'ready') { b.recipes = []; b.isEmpty = vs === 'empty'; }
+    return Object.assign(b, {
+      loading, loadFailed: failed, ready: !loading && !failed,
+      skeletonRows: [1, 2, 3, 4, 5, 6].map(i => ({ i })),
+      retryLoad: () => this.setState({ __vs: 'ready' })
+    });
+  }
+
+  baseVals() {
+    const s = this.state;
+    let recipes = s.recipes.map(r => ({ ...r }));
+
+    if (s.favoritesOnly) recipes = recipes.filter(r => r.favorite);
+    if (s.typeFilters.size > 0) recipes = recipes.filter(r => s.typeFilters.has(r.type));
+    if (s.approvalFilters.size > 0) recipes = recipes.filter(r => s.approvalFilters.has(r.approved ? 'true' : 'false'));
+    if (s.labelFilters.size > 0) recipes = recipes.filter(r => r.labels.some(l => s.labelFilters.has(l)));
+    if (s.allergenFilters.size > 0) recipes = recipes.filter(r => !r.allergens.some(a => s.allergenFilters.has(a)));
+    const search = s.search.trim();
+    if (search) recipes = recipes.filter(r => r.name.includes(search));
+
+    if (s.sortBy) {
+      const dir = s.sortDir === 'asc' ? 1 : -1;
+      recipes = [...recipes].sort((a, b) => {
+        let cmp = 0;
+        if (s.sortBy === 'name') cmp = a.name.localeCompare(b.name, 'he');
+        else if (s.sortBy === 'type') cmp = TYPE_LABELS[a.type].localeCompare(TYPE_LABELS[b.type], 'he');
+        else if (s.sortBy === 'rating') cmp = a.rating - b.rating;
+        else if (s.sortBy === 'cost') cmp = a.cost - b.cost;
+        return cmp * dir;
+      });
+    }
+
+    const visibleIds = recipes.map(r => r._id);
+    const allSelected = visibleIds.length > 0 && visibleIds.every(id => s.selected.has(id));
+
+    const recipeRows = recipes.map(r => ({
+      _id: r._id,
+      name: r.name,
+      unapproved: !r.approved,
+      typeLabel: TYPE_LABELS[r.type],
+      hasLabels: r.labels.length > 0,
+      noLabels: r.labels.length === 0,
+      labelCount: r.labels.length,
+      labelChips: r.labels.map(k => ({ key: k, label: LABEL_DEFS[k].label, color: LABEL_DEFS[k].color })),
+      labelsPopoverOpen: s.labelsPopoverId === r._id,
+      hasAllergens: r.allergens.length > 0,
+      noAllergens: r.allergens.length === 0,
+      allergenCount: r.allergens.length,
+      allergenChips: r.allergens.map(a => ({ key: a, label: ALLERGEN_LABELS[a] || a })),
+      allergenPopoverOpen: s.allergenPopoverId === r._id,
+      actionsMenuOpen: s.actionsMenuId === r._id,
+      onToggleActionsMenu: (e) => { this.stopPropagation(e); this.toggleActionsMenu(r._id); },
+      stars: [1, 2, 3, 4, 5].map(n => ({ fill: n <= r.rating ? 'currentColor' : 'none' })),
+      costLabel: r.cost.toFixed(2),
+      costTooltip: 'מחיר ל-4 מנות',
+      favoriteFill: r.favorite ? 'currentColor' : 'none',
+      favoriteColor: r.favorite ? 'var(--color-favorite)' : 'var(--color-text-muted)',
+      favoriteLabel: r.favorite ? 'הסר ממועדפים' : 'הוסף למועדפים',
+      selected: s.selected.has(r._id),
+      onEdit: () => this.goToBuilder(),
+      onToggleLabelsPopover: (e) => { this.stopPropagation(e); this.toggleLabelsPopover(r._id); },
+      onToggleAllergenPopover: (e) => { this.stopPropagation(e); this.toggleAllergenPopover(r._id); },
+      onToggleFavorite: (e) => { this.stopPropagation(e); this.toggleFavorite(r._id); },
+      onCook: (e) => { this.stopPropagation(e); this.onCook(); },
+      onDelete: (e) => { this.stopPropagation(e); this.askDeleteRecipe(r._id); },
+      onToggleSelect: (e) => { this.stopPropagation(e); this.toggleSelect(r._id); }
+    }));
+
+    const typeCounts = {}, approvalCounts = { true: 0, false: 0 }, labelCounts = {}, allergenCounts = {};
+    s.recipes.forEach(r => {
+      typeCounts[r.type] = (typeCounts[r.type] || 0) + 1;
+      approvalCounts[r.approved ? 'true' : 'false']++;
+      r.labels.forEach(l => { labelCounts[l] = (labelCounts[l] || 0) + 1; });
+      r.allergens.forEach(a => { allergenCounts[a] = (allergenCounts[a] || 0) + 1; });
+    });
+
+    const typeOptions = Object.keys(TYPE_LABELS).map(key => ({ key, label: TYPE_LABELS[key], count: typeCounts[key] || 0, checked: s.typeFilters.has(key), onToggle: () => this.toggleSetFilter('typeFilters', key) }));
+    const approvalOptions = [
+      { key: 'true', label: 'מאושר', count: approvalCounts.true, checked: s.approvalFilters.has('true'), onToggle: () => this.toggleSetFilter('approvalFilters', 'true') },
+      { key: 'false', label: 'ממתין לאישור', count: approvalCounts.false, checked: s.approvalFilters.has('false'), onToggle: () => this.toggleSetFilter('approvalFilters', 'false') }
+    ];
+    const labelOptions = Object.keys(labelCounts).map(key => ({ key, label: LABEL_DEFS[key].label, color: LABEL_DEFS[key].color, count: labelCounts[key], checked: s.labelFilters.has(key), onToggle: () => this.toggleSetFilter('labelFilters', key) }));
+    const allergenOptions = Object.keys(allergenCounts).map(key => ({ key, label: ALLERGEN_LABELS[key] || key, count: allergenCounts[key], checked: s.allergenFilters.has(key), onToggle: () => this.toggleSetFilter('allergenFilters', key) }));
+
+    const chipStyle = (active, color) => ({
+      padding: '7px 14px', borderRadius: '999px', fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer',
+      border: active ? 'none' : '1px solid var(--border-default)',
+      background: active ? (color || 'linear-gradient(180deg, var(--color-primary), var(--color-primary-hover))') : 'var(--bg-glass)',
+      color: active ? '#fff' : 'var(--color-text-secondary)'
+    });
+
+    const draftTypeOptions = Object.keys(TYPE_LABELS).map(key => ({ key, label: TYPE_LABELS[key], style: chipStyle(s.draft.type === key), onSelect: () => this.selectDraftType(key) }));
+    const draftLabelOptions = Object.keys(LABEL_DEFS).map(key => ({ key, label: LABEL_DEFS[key].label, style: chipStyle(s.draft.labels.has(key), LABEL_DEFS[key].color), onToggle: () => this.toggleDraftSet('labels', key) }));
+    const draftAllergenOptions = Object.keys(ALLERGEN_LABELS).map(key => ({ key, label: ALLERGEN_LABELS[key], style: chipStyle(s.draft.allergens.has(key)), onToggle: () => this.toggleDraftSet('allergens', key) }));
+    const draftStarOptions = [1, 2, 3, 4, 5].map(n => ({ n, fill: n <= s.draft.rating ? 'currentColor' : 'none', onSelect: () => this.setDraftRating(n) }));
+
+    return {
+      carPrev: (e) => this.carPrev(e),
+      carNext: (e) => this.carNext(e),
+      carDot: (e) => this.carDot(e),
+      notReady: () => this.notReady(),
+      panelOpen: s.panelOpen,
+      togglePanel: () => this.togglePanel(),
+      hasActiveFilters: s.typeFilters.size > 0 || s.approvalFilters.size > 0 || s.labelFilters.size > 0 || s.allergenFilters.size > 0 || s.favoritesOnly,
+      clearFilters: () => this.clearFilters(),
+      favoritesOnly: s.favoritesOnly,
+      toggleFavoritesOnly: () => this.toggleFavoritesOnly(),
+      typeOptions, approvalOptions, labelOptions, allergenOptions,
+
+      search: s.search,
+      onSearchChange: (v) => this.onSearchChange(v),
+      totalCount: s.recipes.length,
+      filteredCount: recipes.length,
+      isEmpty: recipes.length === 0,
+      openAddModal: () => this.openAddModal(),
+
+      hasSelection: s.selected.size > 0,
+      selectedCount: s.selected.size,
+      askBulkDelete: () => this.askBulkDelete(),
+      clearSelection: () => this.clearSelection(),
+
+      setSortName: () => this.setSort('name'),
+      setSortType: () => this.setSort('type'),
+      setSortRating: () => this.setSort('rating'),
+      setSortCost: () => this.setSort('cost'),
+      nameSortUp: s.sortBy === 'name' && s.sortDir === 'asc',
+      nameSortDown: s.sortBy === 'name' && s.sortDir === 'desc',
+      typeSortUp: s.sortBy === 'type' && s.sortDir === 'asc',
+      typeSortDown: s.sortBy === 'type' && s.sortDir === 'desc',
+      ratingSortUp: s.sortBy === 'rating' && s.sortDir === 'asc',
+      ratingSortDown: s.sortBy === 'rating' && s.sortDir === 'desc',
+      costSortUp: s.sortBy === 'cost' && s.sortDir === 'asc',
+      costSortDown: s.sortBy === 'cost' && s.sortDir === 'desc',
+
+      allSelected,
+      toggleSelectAll: () => this.toggleSelectAll(visibleIds),
+      recipes: recipeRows,
+
+      modalOpen: s.modalOpen,
+      modalTitle: s.modalMode === 'add' ? 'הוספת מתכון' : 'עריכת מתכון',
+      closeModal: () => this.closeModal(),
+      stopPropagation: (e) => this.stopPropagation(e),
+      draftName: s.draft.name,
+      setDraftName: (v) => this.setDraftName(v),
+      draftCost: s.draft.cost,
+      setDraftCost: (v) => this.setDraftCost(v),
+      draftApproved: s.draft.approved,
+      toggleDraftApproved: () => this.toggleDraftApproved(),
+      draftTypeOptions, draftLabelOptions, draftAllergenOptions, draftStarOptions,
+      saveDraft: () => this.saveDraft(),
+
+      confirmOpen: s.confirmOpen,
+      confirmMessage: s.confirmMessage,
+      cancelConfirm: () => this.cancelConfirm(),
+      runConfirm: () => this.runConfirm(),
+
+      toastVisible: s.toastVisible,
+      toastMessage: s.toastMessage
+    };
+  }
+}
+</script>
+</body>
+</html>

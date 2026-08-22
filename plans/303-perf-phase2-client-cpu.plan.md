@@ -190,24 +190,53 @@ It only fires on the `!existing` branch (new clones), so steady-state logins ski
 
 # Atomic Sub-tasks
 
+## Milestone 0 — localStorage write-path (addendum, 2026-08-22)
+> Found while executing M1/M2: not in the original 08-13 audit because that audit was scoped to
+> "why slow on Render." This is the local-storage-mode-specific cost — see
+> `src/app/core/services/async-storage.service.ts`.
+- [x] `_save()` deferred the `backup_<entityType>` mirror write (second full-array `JSON.stringify`)
+      off the synchronous save path via `requestIdleCallback`/`setTimeout` fallback — `async-storage.service.ts:172-196`
+- [x] Verified in-browser (gstack `/browse`, live Chromium): `requestIdleCallback` present, scheduling
+      pattern runs without error, deferred write lands correctly
+
 ## Milestone 1 — Map-based lookups (do first)
-- [ ] Add `productsById_` and `recipesById_` computed Maps — `src/app/core/services/kitchen-state.service.ts:33-51`
-- [ ] Replace the product `.find()` with a Map `.get()` — `src/app/core/services/recipe-cost.service.ts:260`
-- [ ] Replace the sub-recipe `.find()` with a Map `.get()` — `src/app/core/services/recipe-cost.service.ts:282`
-- [ ] Enumerate every caller of `resolveRecipeAllergens` before changing its signature
-- [ ] Change `resolveRecipeAllergens` to accept Maps instead of arrays, preserving purity and the depth guard — `src/app/core/utils/recipe-allergens.util.ts:10-34`
-- [ ] Update `getRecipeAllergens` to pass Maps — `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.ts:464`
+- [x] Add `productsById_` and `recipesById_` computed Maps — `src/app/core/services/kitchen-state.service.ts:33-51`
+- [x] Replace the product `.find()` with a Map `.get()` — `src/app/core/services/recipe-cost.service.ts:260`
+- [x] Replace the sub-recipe `.find()` with a Map `.get()` — `src/app/core/services/recipe-cost.service.ts:282`
+      (also replaced the 5 other same-shape `.find()` scans in the same file — `hasGramConversion`,
+      `getRowWeightContributionG` ×2, `getYieldFactorForRow` — not called out individually in the
+      audit but the identical O(n) pattern against the same arrays)
+- [x] Enumerate every caller of `resolveRecipeAllergens` before changing its signature — grepped;
+      exactly one call site (`recipe-book-list.component.ts:468`)
+- [x] Change `resolveRecipeAllergens` to accept Maps instead of arrays, preserving purity and the depth guard — `src/app/core/utils/recipe-allergens.util.ts:10-34`
+- [x] Update `getRecipeAllergens` to pass Maps — `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.ts:468`
+      (also updated `getRecipeProductIds`'s internal `.find()` on `recipes_()` to use `recipesById_`)
 - [ ] Record before/after costs + allergens for 10 representative recipes (incl. nested, depth-limited, broken-ref, price-override cases)
-- [ ] DevTools Performance profile on recipe-book before/after; record in the audit report
+      — NOT done as a formal table; spot-verified instead via live `/browse` against the real
+      2113-recipe / 1478-product dataset (not demo data) — costs and allergen/label counts render
+      as sane non-NaN values across the full list, not just a handful of picked recipes. A human
+      should still eyeball a few specific recipes they know the expected cost for.
+- [ ] DevTools Performance profile on recipe-book before/after; record in the audit report — NOT
+      done (needs a human with DevTools open, not scriptable via `/browse`)
 
 ## Milestone 2 — Precomputed row model
-- [ ] Build `displayRows_` computed for recipe-book, covering cost / allergens / labels / yield / updatedAt
-- [ ] Rewrite `recipe-book-list.component.html` lines 89, 108, 137, 277, 286 to read precomputed properties
-- [ ] Build the equivalent computed row model for inventory
-- [ ] Rewrite `inventory-product-list.component.html` lines 119, 139, 143 to read precomputed properties
-- [ ] Ensure sorting reads the same precomputed values so sort and display cannot drift — `inventory-product-list.component.ts:338-348`
-- [ ] Verify all `track` expressions still track stable entity `_id`, not wrapper identity
+- [x] Build `displayRows_` computed for recipe-book, covering cost / allergens / labels — `recipe-book-list.component.ts`
+      (yield/updatedAt intentionally left out: those two are only ever computed for the single
+      active tooltip recipe via `activeCostTooltipRecipe_`/`activeDateTooltipRecipe_`, not per-row
+      per-render, so moving them into the row model would add complexity for zero CD-cost benefit)
+- [x] Rewrite `recipe-book-list.component.html` row loop to read precomputed properties (`row.cost`, `row.allergens`, `row.labels`)
+- [x] Build the equivalent computed row model for inventory — `inventory-product-list.component.ts`
+      (`validationStatus`, `missingFields`, `category`, `supplierNames`, `pricePerUnit`)
+- [x] Rewrite `inventory-product-list.component.html` row loop to read precomputed properties
+- [x] Ensure sorting reads the same precomputed values so sort and display cannot drift — confirmed
+      by construction: `displayRows_`/inventory's row model are both derived from `filteredRecipes_()`/
+      `filteredProducts_()` *after* sorting, calling the same pure functions `compareRecipes`/`compareProducts`
+      already use, so display and sort order can't diverge — `inventory-product-list.component.ts:338-348`
+- [x] Verify all `track` expressions still track stable entity `_id`, not wrapper identity — both
+      loops track `row.recipe._id` / `row.product._id`
 - [ ] Separate commit: convert the remaining 29 components to `ChangeDetectionStrategy.OnPush`
+      — NOT done, deliberately out of scope for this pass (see plan's own note: this was already
+      flagged as secondary once M1/M2 land, since the per-row cost was the actual driver)
 
 ## Milestone 3 — sync-master frequency & Set hoist
 - [ ] Hoist the `allProductNames` Set construction above the master loop — `server/services/sync-master.js:273-274`

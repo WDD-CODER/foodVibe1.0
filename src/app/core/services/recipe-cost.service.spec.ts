@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing'
-import { signal } from '@angular/core'
+import { signal, computed } from '@angular/core'
 import { RecipeCostService } from './recipe-cost.service'
 import { KitchenStateService } from './kitchen-state.service'
 import { UnitRegistryService } from './unit-registry.service'
@@ -24,7 +24,7 @@ describe('RecipeCostService', () => {
       yield_factor_: overrides.yield_factor_ ?? 1,
       allergens_: overrides.allergens_ ?? [],
       min_stock_level_: overrides.min_stock_level_ ?? 0,
-      expiry_days_default_: overrides.expiry_days_default_ ?? 0,
+      expiry_days_default_: overrides.expiry_days_default_ ?? 0
     }
   }
 
@@ -38,7 +38,7 @@ describe('RecipeCostService', () => {
       yield_unit_: overrides.yield_unit_ ?? 'unit',
       ...(overrides.yield_conversions_ != null && { yield_conversions_: overrides.yield_conversions_ }),
       default_station_: overrides.default_station_ ?? '',
-      is_approved_: overrides.is_approved_ ?? false,
+      is_approved_: overrides.is_approved_ ?? false
     }
   }
 
@@ -48,6 +48,8 @@ describe('RecipeCostService', () => {
     const kitchenSpy = jasmine.createSpyObj('KitchenStateService', [], {
       products_: productsSignal,
       recipes_: recipesSignal,
+      productsById_: computed(() => new Map(productsSignal().map((p) => [p._id, p]))),
+      recipesById_: computed(() => new Map(recipesSignal().map((r) => [r._id, r])))
     })
     const unitRegistrySpy = jasmine.createSpyObj('UnitRegistryService', ['getConversion'])
     unitRegistrySpy.getConversion.and.callFake((key: string) => {
@@ -58,8 +60,8 @@ describe('RecipeCostService', () => {
       providers: [
         RecipeCostService,
         { provide: KitchenStateService, useValue: kitchenSpy },
-        { provide: UnitRegistryService, useValue: unitRegistrySpy },
-      ],
+        { provide: UnitRegistryService, useValue: unitRegistrySpy }
+      ]
     })
     service = TestBed.inject(RecipeCostService)
   })
@@ -74,7 +76,7 @@ describe('RecipeCostService', () => {
       productsSignal.set([])
       const recipe = createRecipe({
         _id: 'r1',
-        ingredients_: [{ _id: 'i1', referenceId: 'missing', type: 'product', amount_: 100, unit_: 'gram' }],
+        ingredients_: [{ _id: 'i1', referenceId: 'missing', type: 'product', amount_: 100, unit_: 'gram' }]
       })
       expect(service.computeRecipeCost(recipe)).toBe(0)
     })
@@ -85,12 +87,12 @@ describe('RecipeCostService', () => {
         buy_price_global_: 10,
         base_unit_: 'gram',
         yield_factor_: 1,
-        purchase_options_: [],
+        purchase_options_: []
       })
       productsSignal.set([product])
       const recipe = createRecipe({
         _id: 'r1',
-        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 500, unit_: 'gram' }],
+        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 500, unit_: 'gram' }]
       })
       expect(service.computeRecipeCost(recipe)).toBe(5000) // 500g * 10 per gram
     })
@@ -101,12 +103,12 @@ describe('RecipeCostService', () => {
         buy_price_global_: 100,
         base_unit_: 'gram',
         yield_factor_: 0.8,
-        purchase_options_: [],
+        purchase_options_: []
       })
       productsSignal.set([product])
       const recipe = createRecipe({
         _id: 'r1',
-        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 100, unit_: 'gram' }],
+        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 100, unit_: 'gram' }]
       })
       // (100 / 0.8) * (100/1000) if buy_price_global_ is per kg? Recipe cost service: normalizedAmount = ing.amount_ / (unitOption.conversion_rate_ || 1) when unitOption exists; else normalizedAmount = ing.amount_. Then return (normalizedAmount / yieldFactor) * price. So price is buy_price_global_ - need to see what that is per. In the code it's just price = product.buy_price_global_. So (100/0.8)*100 = 12500. That seems like price is per unit (gram). So 100g at 100 per gram with 0.8 yield = 100/0.8 * 100 = 12500. So buy_price_global_ might be per base_unit_ (per gram). Let me use smaller numbers: buy_price_global_: 1 (per gram), 100g, yield 0.8 → (100/0.8)*1 = 125.
       product.sources_ = [{ supplierId: '', price: 1, addedAt: Date.now() }]
@@ -121,7 +123,7 @@ describe('RecipeCostService', () => {
       const recipe = createRecipe({
         _id: 'r1',
         yield_amount_: 4,
-        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 400, unit_: 'gram' }],
+        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 400, unit_: 'gram' }]
       })
       const total = service.computeRecipeCost(recipe) // 400*2 = 800
       expect(total).toBe(800)
@@ -133,7 +135,7 @@ describe('RecipeCostService', () => {
     it('should sum weight in grams for rows with mass units', () => {
       const rows = [
         { amount_net: 100, unit: 'gram', referenceId: '', item_type: undefined as string | undefined },
-        { amount_net: 1, unit: 'kg', referenceId: '', item_type: undefined as string | undefined },
+        { amount_net: 1, unit: 'kg', referenceId: '', item_type: undefined as string | undefined }
       ]
       expect(service.computeTotalWeightG(rows)).toBe(1100) // 100 + 1000
     })
@@ -142,12 +144,10 @@ describe('RecipeCostService', () => {
       const product = createProduct({
         _id: 'p1',
         base_unit_: 'kg',
-        purchase_options_: [{ unit_symbol_: 'unit', conversion_rate_: 0.3 }],
+        purchase_options_: [{ unit_symbol_: 'unit', conversion_rate_: 0.3 }]
       })
       productsSignal.set([product])
-      const rows = [
-        { amount_net: 1, unit: 'unit', referenceId: 'p1', item_type: 'product' },
-      ]
+      const rows = [{ amount_net: 1, unit: 'unit', referenceId: 'p1', item_type: 'product' }]
       // 1 unit * 0.3 kg/unit = 0.3 kg = 300 g
       expect(service.computeTotalWeightG(rows)).toBe(300)
     })
@@ -162,7 +162,7 @@ describe('RecipeCostService', () => {
     it('should return totalL and unconvertibleNames', () => {
       const rows = [
         { amount_net: 500, unit: 'ml', name_hebrew: 'Milk' },
-        { amount_net: 2, unit: 'liter', name_hebrew: 'Water' },
+        { amount_net: 2, unit: 'liter', name_hebrew: 'Water' }
       ]
       const result = service.computeTotalVolumeL(rows)
       expect(result.totalL).toBeCloseTo(2.5, 4)
@@ -170,9 +170,7 @@ describe('RecipeCostService', () => {
     })
 
     it('should list names that cannot be converted to volume', () => {
-      const rows = [
-        { amount_net: 1, unit: 'portion', name_hebrew: 'Secret sauce' },
-      ]
+      const rows = [{ amount_net: 1, unit: 'portion', name_hebrew: 'Secret sauce' }]
       const result = service.computeTotalVolumeL(rows)
       expect(result.totalL).toBe(0)
       expect(result.unconvertibleNames).toContain('Secret sauce')
@@ -197,12 +195,12 @@ describe('RecipeCostService', () => {
         buy_price_global_: 10,
         base_unit_: 'kg',
         yield_factor_: 1,
-        purchase_options_: [{ unit_symbol_: 'unit', conversion_rate_: 0.3 }],
+        purchase_options_: [{ unit_symbol_: 'unit', conversion_rate_: 0.3 }]
       })
       productsSignal.set([product])
       const recipe = createRecipe({
         _id: 'r1',
-        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 1, unit_: 'unit' }],
+        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 1, unit_: 'unit' }]
       })
       // 1 unit = 0.3 kg; cost = (0.3 / 1) * 10 = 3
       expect(service.computeRecipeCost(recipe)).toBe(3)
@@ -214,12 +212,12 @@ describe('RecipeCostService', () => {
         buy_price_global_: 10,
         base_unit_: 'kg',
         yield_factor_: 1,
-        purchase_options_: [{ unit_symbol_: 'unit', conversion_rate_: 0.3, price_override_: 4.9 }],
+        purchase_options_: [{ unit_symbol_: 'unit', conversion_rate_: 0.3, price_override_: 4.9 }]
       })
       productsSignal.set([product])
       const recipe = createRecipe({
         _id: 'r1',
-        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 1, unit_: 'unit' }],
+        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 1, unit_: 'unit' }]
       })
       expect(service.computeRecipeCost(recipe)).toBe(4.9)
     })
@@ -234,9 +232,9 @@ describe('RecipeCostService', () => {
         yield_conversions_: [
           { amount: 446, unit: 'gram' },
           { amount: 1, unit: 'unit' },
-          { amount: 1, unit: 'כפות' },
+          { amount: 1, unit: 'כפות' }
         ],
-        ingredients_: [],
+        ingredients_: []
       })
       expect(service.amountInRecipeYieldUnit(1, 'unit', recipe)).toBe(446)
       expect(service.amountInRecipeYieldUnit(1, 'כפות', recipe)).toBe(446)
@@ -249,8 +247,11 @@ describe('RecipeCostService', () => {
         _id: 'r1',
         yield_amount_: 446,
         yield_unit_: 'gram',
-        yield_conversions_: [{ amount: 446, unit: 'gram' }, { amount: 1, unit: 'unit' }],
-        ingredients_: [],
+        yield_conversions_: [
+          { amount: 446, unit: 'gram' },
+          { amount: 1, unit: 'unit' }
+        ],
+        ingredients_: []
       })
       // kg not in conversions; registry has kg: 1000, gram: 1 → 1 kg = 1000 in gram terms
       expect(service.amountInRecipeYieldUnit(1, 'kg', recipe)).toBe(1000)
@@ -262,7 +263,7 @@ describe('RecipeCostService', () => {
         buy_price_global_: 0.01,
         base_unit_: 'gram',
         yield_factor_: 1,
-        purchase_options_: [],
+        purchase_options_: []
       })
       productsSignal.set([product])
       const subRecipe = createRecipe({
@@ -271,9 +272,9 @@ describe('RecipeCostService', () => {
         yield_unit_: 'gram',
         yield_conversions_: [
           { amount: 446, unit: 'gram' },
-          { amount: 1, unit: 'unit' },
+          { amount: 1, unit: 'unit' }
         ],
-        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 446, unit_: 'gram' }],
+        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 446, unit_: 'gram' }]
       })
       recipesSignal.set([subRecipe])
       const costFor446Gram = service.getCostForIngredient({
@@ -281,14 +282,14 @@ describe('RecipeCostService', () => {
         referenceId: 'sub',
         type: 'recipe',
         amount_: 446,
-        unit_: 'gram',
+        unit_: 'gram'
       })
       const costFor1Unit = service.getCostForIngredient({
         _id: 'i2',
         referenceId: 'sub',
         type: 'recipe',
         amount_: 1,
-        unit_: 'unit',
+        unit_: 'unit'
       })
       expect(costFor1Unit).toBe(costFor446Gram)
       expect(costFor446Gram).toBeCloseTo(4.46, 2) // 446 * 0.01
@@ -301,16 +302,14 @@ describe('RecipeCostService', () => {
         yield_unit_: 'gram',
         yield_conversions_: [
           { amount: 446, unit: 'gram' },
-          { amount: 1, unit: 'unit' },
+          { amount: 1, unit: 'unit' }
         ],
-        ingredients_: [
-          { _id: 'i1', referenceId: 'p1', type: 'product', amount_: 446, unit_: 'gram' },
-        ],
+        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 446, unit_: 'gram' }]
       })
       const product = createProduct({
         _id: 'p1',
         base_unit_: 'gram',
-        purchase_options_: [],
+        purchase_options_: []
       })
       productsSignal.set([product])
       recipesSignal.set([subRecipe])

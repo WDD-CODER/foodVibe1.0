@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="colors_and_type.css">
+<style>
+ body{margin:0;font-family:'Heebo',system-ui,sans-serif;background:var(--bg-body)}
+ a{color:var(--color-primary)}a:hover{color:var(--color-primary-hover)}
+ @keyframes heroHalo{0%,100%{box-shadow:var(--shadow-glow),0 4px 16px rgba(0,0,0,.18),0 0 0 0 rgba(20,184,166,.35)}50%{box-shadow:var(--shadow-glow),0 4px 16px rgba(0,0,0,.18),0 0 0 10px rgba(20,184,166,0)}}
+ @media (max-width:900px){.hfrow{grid-template-columns:1fr !important}}
+ @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important}}
+</style>
+</helmet>
+
+<div dir="rtl" style="position:relative;min-height:100vh;padding:var(--space-6);background:var(--bg-body);color:var(--color-text-main);">
+  <div style="position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse 700px 480px at 85% 15%, rgba(20,184,166,0.12), transparent),radial-gradient(ellipse 550px 550px at 15% 75%, rgba(251,191,36,0.08), transparent);"></div>
+
+  <div style="position:relative;max-width:1200px;margin:0 auto;">
+    <div style="margin-bottom:var(--space-6);">
+      <h1 style="margin:0;font-size:var(--fs-xl);font-weight:700;letter-spacing:var(--tracking-tight);">כפתור הגיבור — שלוש גרסאות עיצוב</h1>
+      <p style="margin:var(--space-2) 0 0;font-size:var(--fs-sm);color:var(--color-text-secondary);line-height:var(--lh-relaxed);max-width:70ch;">הלוגיקה זהה למקור: להבה שנפתחת ב־45°, פעולות הדף מעל הכפתור (הוספת מוצר), כובע שף לבניית מתכון תמיד נוכח, לחיצה על פעולה מריצה וסוגרת. רק העיצוב משתנה. לחצו על כל אחת מהן.</p>
+    </div>
+
+    <div class="hfrow" style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4);">
+
+      <div style="padding:var(--space-4);background:var(--bg-glass);backdrop-filter:var(--blur-glass);-webkit-backdrop-filter:var(--blur-glass);border:1px solid var(--border-glass);border-radius:var(--radius-lg);box-shadow:var(--shadow-glass);">
+        <div style="font-size:var(--fs-sm);font-weight:700;margin-bottom:4px;">A · נאמן למקור, מחודד</div>
+        <p style="margin:0 0 var(--space-3);font-size:var(--fs-xs);color:var(--color-text-muted);line-height:var(--lh-normal);">אותו כפתור, 56px, טיאל אחיד, צל חזק יותר ועיגולי פעולה מזוגגים במקום שקופים.</p>
+        <div style="position:relative;height:300px;border-radius:var(--radius-md);background:var(--bg-pure);overflow:hidden;border:1px solid var(--border-default);">
+          <div style="padding:12px;display:flex;flex-direction:column;gap:8px;">
+            <div style="height:30px;background:rgba(15,23,42,.05);border-radius:8px;"></div>
+            <div style="height:30px;background:rgba(15,23,42,.05);border-radius:8px;"></div>
+            <div style="height:30px;background:rgba(15,23,42,.05);border-radius:8px;"></div>
+            <div style="height:30px;background:rgba(15,23,42,.05);border-radius:8px;"></div>
+          </div>
+          <div style="position:absolute;inset-inline:0;bottom:0;height:52px;display:flex;align-items:center;justify-content:space-around;background:var(--bg-frosted-nav);backdrop-filter:var(--blur-nav);-webkit-backdrop-filter:var(--blur-nav);border-top:1px solid var(--border-glass);font-size:12px;color:var(--color-text-muted);">
+            <span style="color:var(--color-primary);font-weight:700;">מלאי</span><span>מתכונים</span><span>תפריטים</span><span>דשבורד</span>
+          </div>
+          <div style="position:absolute;inset-inline-end:12px;bottom:64px;display:flex;flex-direction:column-reverse;align-items:center;gap:8px;">
+            <button type="button" aria-label="פעולות מהירות" onClick="{{ toggleA }}" style="display:grid;place-content:center;width:56px;height:56px;border:0;border-radius:50%;background:var(--color-primary);color:var(--color-text-on-primary);cursor:pointer;box-shadow:var(--shadow-glow),0 6px 20px rgba(0,0,0,.2);transition:transform .3s var(--ease-spring),background .2s ease;transform:{{ rotA }};">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"/></svg>
+            </button>
+            <div style="display:flex;flex-direction:column-reverse;align-items:center;gap:8px;opacity:{{ opA }};transform:{{ scaleA }};pointer-events:{{ peA }};transition:opacity .25s var(--ease-spring),transform .25s var(--ease-spring);">
+              <button type="button" aria-label="הוספת מוצר" onClick="{{ toggleA }}" style="display:grid;place-content:center;width:44px;height:44px;border:1px solid var(--border-glass);border-radius:50%;background:var(--bg-glass-strong);backdrop-filter:var(--blur-glass);-webkit-backdrop-filter:var(--blur-glass);color:var(--color-primary);cursor:pointer;box-shadow:var(--shadow-card);transition:background .15s ease;" style-hover="background:var(--color-primary-soft);border-color:var(--color-primary);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+              </button>
+              <button type="button" aria-label="בניית מתכון" onClick="{{ toggleA }}" style="display:grid;place-content:center;width:44px;height:44px;border:1px solid var(--border-glass);border-radius:50%;background:var(--bg-glass-strong);backdrop-filter:var(--blur-glass);-webkit-backdrop-filter:var(--blur-glass);color:var(--color-primary);cursor:pointer;box-shadow:var(--shadow-card);transition:background .15s ease;" style-hover="background:var(--color-primary-soft);border-color:var(--color-primary);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21a1 1 0 0 0 1-1v-5.35a7 7 0 1 0-12 0V20a1 1 0 0 0 1 1Z"/><path d="M6 17h12"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:var(--space-4);background:var(--bg-glass);backdrop-filter:var(--blur-glass);-webkit-backdrop-filter:var(--blur-glass);border:1px solid var(--border-glass);border-radius:var(--radius-lg);box-shadow:var(--shadow-glass);">
+        <div style="font-size:var(--fs-sm);font-weight:700;margin-bottom:4px;">B · מודגש, עם תוויות</div>
+        <p style="margin:0 0 var(--space-3);font-size:var(--fs-xs);color:var(--color-text-muted);line-height:var(--lh-normal);">גרדיאנט טיאל, הילה נושמת בזמן מנוחה, וכל פעולה נפתחת כגלולה עם שם — אף אחד לא מנחש מה הכפתור עושה.</p>
+        <div style="position:relative;height:300px;border-radius:var(--radius-md);background:var(--bg-pure);overflow:hidden;border:1px solid var(--border-default);">
+          <div style="padding:12px;display:flex;flex-direction:column;gap:8px;">
+            <div style="height:30px;background:rgba(15,23,42,.05);border-radius:8px;"></div>
+            <div style="height:30px;background:rgba(15,23,42,.05);border-radius:8px;"></div>
+            <div style="height:30px;background:rgba(15,23,42,.05);border-radius:8px;"></div>
+            <div style="height:30px;background:rgba(15,23,42,.05);border-radius:8px;"></div>
+          </div>
+          <div style="position:absolute;inset-inline:0;bottom:0;height:52px;display:flex;align-items:center;justify-content:space-around;background:var(--bg-frosted-nav);backdrop-filter:var(--blur-nav);-webkit-backdrop-filter:var(--blur-nav);border-top:1px solid var(--border-glass);font-size:12px;color:var(--color-text-muted);">
+            <span style="color:var(--color-primary);font-weight:700;">מלאי</span><span>מתכונים</span><span>תפריטים</span><span>דשבורד</span>
+          </div>
+          <div style="position:absolute;inset-inline-end:12px;bottom:64px;display:flex;flex-direction:column-reverse;align-items:flex-end;gap:8px;">
+            <button type="button" aria-label="פעולות מהירות" onClick="{{ toggleB }}" style="display:grid;place-content:center;width:56px;height:56px;border:0;border-radius:50%;background:linear-gradient(180deg,var(--color-primary),var(--color-primary-hover));color:var(--color-text-on-primary);cursor:pointer;box-shadow:var(--shadow-glow),0 6px 20px rgba(0,0,0,.2);transition:transform .3s var(--ease-spring);transform:{{ rotB }};animation:{{ haloB }};">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"/></svg>
+            </button>
+            <div style="display:flex;flex-direction:column-reverse;align-items:flex-end;gap:8px;opacity:{{ opB }};transform:{{ scaleB }};pointer-events:{{ peB }};transition:opacity .25s var(--ease-spring),transform .25s var(--ease-spring);">
+              <button type="button" onClick="{{ toggleB }}" style="display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 6px 0 14px;border:1px solid var(--border-glass);border-radius:var(--radius-full);background:var(--bg-glass-strong);backdrop-filter:var(--blur-glass);-webkit-backdrop-filter:var(--blur-glass);color:var(--color-text-main);font-family:inherit;font-size:var(--fs-sm);font-weight:600;cursor:pointer;box-shadow:var(--shadow-card);" style-hover="background:var(--color-primary-soft);border-color:var(--color-primary);">
+                <span>הוספת מוצר</span>
+                <span style="display:grid;place-content:center;width:32px;height:32px;border-radius:50%;background:var(--color-primary-soft);color:var(--color-primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+              </button>
+              <button type="button" onClick="{{ toggleB }}" style="display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 6px 0 14px;border:1px solid var(--border-glass);border-radius:var(--radius-full);background:var(--bg-glass-strong);backdrop-filter:var(--blur-glass);-webkit-backdrop-filter:var(--blur-glass);color:var(--color-text-main);font-family:inherit;font-size:var(--fs-sm);font-weight:600;cursor:pointer;box-shadow:var(--shadow-card);" style-hover="background:var(--color-primary-soft);border-color:var(--color-primary);">
+                <span>בניית מתכון</span>
+                <span style="display:grid;place-content:center;width:32px;height:32px;border-radius:50%;background:var(--color-primary-soft);color:var(--color-primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21a1 1 0 0 0 1-1v-5.35a7 7 0 1 0-12 0V20a1 1 0 0 0 1 1Z"/><path d="M6 17h12"/></svg></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:var(--space-4);background:var(--bg-glass);backdrop-filter:var(--blur-glass);-webkit-backdrop-filter:var(--blur-glass);border:1px solid var(--border-glass);border-radius:var(--radius-lg);box-shadow:var(--shadow-glass);">
+        <div style="font-size:var(--fs-sm);font-weight:700;margin-bottom:4px;">C · זכוכית נוזלית</div>
+        <p style="margin:0 0 var(--space-3);font-size:var(--fs-xs);color:var(--color-text-muted);line-height:var(--lh-normal);">הכפתור עצמו מזוגג וטבול בטיאל עם הדגשה פנימית — הכי נאמן ל־Liquid Glass; בפתיחה נפרש מגש זכוכית עם התוויות.</p>
+        <div style="position:relative;height:300px;border-radius:var(--radius-md);background:var(--bg-pure);overflow:hidden;border:1px solid var(--border-default);">
+          <div style="padding:12px;display:flex;flex-direction:column;gap:8px;">
+            <div style="height:30px;background:rgba(15,23,42,.05);border-radius:8px;"></div>
+            <div style="height:30px;background:rgba(15,23,42,.05);border-radius:8px;"></div>
+            <div style="height:30px;background:rgba(15,23,42,.05);border-radius:8px;"></div>
+            <div style="height:30px;background:rgba(15,23,42,.05);border-radius:8px;"></div>
+          </div>
+          <div style="position:absolute;inset-inline:0;bottom:0;height:52px;display:flex;align-items:center;justify-content:space-around;background:var(--bg-frosted-nav);backdrop-filter:var(--blur-nav);-webkit-backdrop-filter:var(--blur-nav);border-top:1px solid var(--border-glass);font-size:12px;color:var(--color-text-muted);">
+            <span style="color:var(--color-primary);font-weight:700;">מלאי</span><span>מתכונים</span><span>תפריטים</span><span>דשבורד</span>
+          </div>
+          <div style="position:absolute;inset-inline-end:12px;bottom:64px;display:flex;flex-direction:column-reverse;align-items:flex-end;gap:10px;">
+            <button type="button" aria-label="פעולות מהירות" onClick="{{ toggleC }}" style="display:grid;place-content:center;width:56px;height:56px;border:1px solid rgba(255,255,255,.5);border-radius:50%;background:linear-gradient(180deg,rgba(20,184,166,.92),rgba(13,148,136,.92));backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--color-text-on-primary);cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),var(--shadow-glow),0 8px 24px rgba(0,0,0,.2);transition:transform .3s var(--ease-spring);transform:{{ rotC }};">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"/></svg>
+            </button>
+            <div style="display:flex;flex-direction:column;gap:2px;padding:6px;border:1px solid var(--border-glass);border-radius:var(--radius-lg);background:var(--bg-glass-strong);backdrop-filter:var(--blur-glass);-webkit-backdrop-filter:var(--blur-glass);box-shadow:var(--shadow-hover);opacity:{{ opC }};transform:{{ scaleC }};pointer-events:{{ peC }};transform-origin:bottom right;transition:opacity .2s var(--ease-smooth),transform .25s var(--ease-spring);">
+              <button type="button" onClick="{{ toggleC }}" style="display:flex;align-items:center;gap:10px;height:44px;padding:0 12px;border:0;border-radius:var(--radius-md);background:transparent;color:var(--color-text-main);font-family:inherit;font-size:var(--fs-sm);font-weight:600;cursor:pointer;white-space:nowrap;" style-hover="background:var(--color-primary-soft);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                הוספת מוצר
+              </button>
+              <button type="button" onClick="{{ toggleC }}" style="display:flex;align-items:center;gap:10px;height:44px;padding:0 12px;border:0;border-radius:var(--radius-md);background:transparent;color:var(--color-text-main);font-family:inherit;font-size:var(--fs-sm);font-weight:600;cursor:pointer;white-space:nowrap;" style-hover="background:var(--color-primary-soft);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21a1 1 0 0 0 1-1v-5.35a7 7 0 1 0-12 0V20a1 1 0 0 0 1 1Z"/><path d="M6 17h12"/></svg>
+                בניית מתכון
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="margin-top:var(--space-5);padding:var(--space-4) var(--space-5);background:var(--bg-glass-strong);border:1px solid var(--border-glass);border-radius:var(--radius-lg);box-shadow:var(--shadow-glass);font-size:var(--fs-sm);color:var(--color-text-secondary);line-height:var(--lh-relaxed);">
+      <b style="color:var(--color-text-main);">הלוגיקה שנשמרת בכל הגרסאות</b> — כפתור להבה קבוע בפינה התחתונה (inset-inline-end, לא left), 56px, סיבוב 45° בפתיחה; פעולות הדף נרשמות לפי מסך (הוספת מוצר / מתכון / ספק / ציוד / אתר / תפריט חדש; במסך בניית מתכון: בישול וייצוא); כובע שף לבניית מתכון נוכח בכל מסך חוץ מבניית מתכון עצמו; לחיצה על פעולה מריצה וסוגרת; במובייל הכפתור מתרומם מעל סרגל הטאבים לפי safe-area; במסך בניית תפריטים הוא יושב מעל הסרגל הפיננסי.
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { a: false, b: false, c: false };
+  t(k) { return () => this.setState(s => ({ [k]: !s[k] })); }
+  renderVals() {
+    const on = k => this.state[k];
+    return {
+      toggleA: this.t('a'), toggleB: this.t('b'), toggleC: this.t('c'),
+      rotA: on('a') ? 'rotate(45deg)' : 'none',
+      rotB: on('b') ? 'rotate(45deg)' : 'none',
+      rotC: on('c') ? 'rotate(45deg)' : 'none',
+      haloB: on('b') ? 'none' : 'heroHalo 2.8s ease-in-out infinite',
+      opA: on('a') ? 1 : 0, opB: on('b') ? 1 : 0, opC: on('c') ? 1 : 0,
+      scaleA: on('a') ? 'scale(1)' : 'scale(0.4) translateY(8px)',
+      scaleB: on('b') ? 'scale(1)' : 'scale(0.4) translateY(8px)',
+      scaleC: on('c') ? 'scale(1)' : 'scale(0.85) translateY(8px)',
+      peA: on('a') ? 'auto' : 'none', peB: on('b') ? 'auto' : 'none', peC: on('c') ? 'auto' : 'none'
+    };
+  }
+}
+</script>
+</body>
+</html>

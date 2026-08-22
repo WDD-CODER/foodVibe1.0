@@ -1,295 +1,173 @@
-# New Design Functionality Inventory — Claude Design "foodCo Design System"
+# New Design Inventory — `UI refactor/` (local)
 
-## How this was pulled
+> **Supersedes the previous version of this file**, which inventoried the claude.ai
+> `foodCo Design System` project. That project is **stale (last write 2026-05-24)** and is
+> no longer the design of record. It has no recipe builder, no menu intelligence editor and
+> no hero FAB — all three exist here. Do not sync from it again.
 
-There is **no `/design-sync` skill installed** in this repo (`.claude/skills/` has no `design-sync`), so the sync was done with the **DesignSync tool** directly against claude.ai/design.
-
-- `list_projects` returned two writable projects: **`foodCo Design System`** (`46ffd0d2-8169-4fb5-ab1c-fb90107539ba`, updated 2026-05-24) and `Baby Tracker` (unrelated).
-- `list_files` on the foodCo project returned **58 paths**.
-- Files read in full: `README.md`, `SKILL.md`, `ui_kits/foodco-app/README.md`, `app.html`, `screens.js`, `cook.js`, `data.js`, `icons.js`, `GlassComponents.jsx`, `designs/Cook View.html`, `designs/cook-variant.html`, `designs/cook-preview.html`.
-- Not read in full (binary or styling-only): `assets/*.png`, `screenshots/*.png` (18 screenshots), `preview/*.html` (19 specimen cards), `colors_and_type.css`, `styles.css`, `cook.css`, `preview/_card.css`, `ui_kits/foodco-app/index.html`.
-
-> **This is not a single flat export.** It is three layers that do not fully agree with each other — see §0.
+**Source of truth:** `UI refactor/` at the repo root. Read 2026-08-19.
 
 ---
 
-## 0. What actually synced — three layers, and they diverge
+## 0. What this is
 
-### Layer A — Design-system documentation (`README.md`, `SKILL.md`, `colors_and_type.css`, `preview/*`)
-A written brand/system spec plus 19 HTML specimen cards. Describes: **Liquid Glass**, teal `#14b8a6` primary, **Heebo** typeface, **Lucide** icons, no emoji, no hero imagery, native `<select>` disallowed.
+A **13-screen click-through prototype** in a custom template DSL, not production markup —
+but far closer to production than a mockup: every screen carries real component state,
+computed values, and working handlers.
 
-### Layer B — The app UI kit (`ui_kits/foodco-app/`)
-A clickable multi-screen HTML/JS prototype (`app.html` + `screens.js` + `data.js` + `styles.css`), plus a React component file (`GlassComponents.jsx`) and the cook-view re-skin (`cook.js` + `cook.css`).
+**Format:** `.dc.html` files, one per screen. Runtime is `support.js` (`DCLogic` base class,
+`setState`, `renderVals()`). Template tags: `<app-shell>`, `<sc-if value="{{ }}">`,
+`<sc-for list="{{ }}" as="x">`, `{{ }}` bindings. Styling is inline `style=""` plus
+`colors_and_type.css` (tokens) and `mobile-pass.css`.
 
-### Layer C — Cook-view design explorations (`designs/`)
-`Cook View.html` is a presentation page (annotated feature cards + an iframe); `cook-preview.html` is an auto-scaling wrapper; `cook-variant.html` is a thin harness that just calls `openCook('r1')`. **All three ultimately render `ui_kits/foodco-app/cook.js`** — so there is exactly one cook-view design, not three.
+**Supporting files**
 
-### Divergences between the layers (flagging, not judging)
-| Topic | Layer A says | Layer B does |
-|---|---|---|
-| Typeface | **Heebo**, one family | **Rubik** (sans) + **Space Grotesk** (mono/numeric), two families |
-| Icons | **Lucide**, loaded from unpkg | Hand-rolled inline SVG set (`icons.js`, 40 glyphs) and a second hand-rolled set in `GlassComponents.jsx` (17 glyphs) |
-| Emoji | **"None" in the UI** | Emoji used in cook view (`🎉`, `⏱`, `⌚`, `💡`) and in the phone-swap bar (`🧪`, `⏱`), plus `🛒 📋 🖨 📦`-style pills in the old menu toolbar concept |
-| Native `<select>` | **Disallowed** | Used in the add-product modal and the settings screen |
-| Glass opacity | `rgba(255,255,255,0.35–0.82)` | `GlassComponents.jsx` uses `0.88–0.98` — much more opaque |
-| Approve stamp | Raster **stamp graphics** | Cook view renders a **text/icon button**, not the stamp image (`GlassComponents.jsx` still has the image `Stamp`) |
-
-The `screenshots/` folder (18 PNGs, including `cook-v1-*`, `cook-v2-deck1..4`, `uikit-modern`, `uikit-final`) shows this was an iterative exploration; the surviving live artefacts are the ones listed above.
-
----
-
-## 1. Global app shell (`ui_kits/foodco-app/app.html`)
-
-`<html lang="he" dir="rtl">`. Layout: `.shell` → sticky `.topnav` + `.shell-main` → `main.page#app`, plus a detached `#cook-root` and a single global modal.
-
-### 1.1 Top navigation
-| Element | Behaviour |
+| File | Role |
 |---|---|
-| Brand block (`fC` mark + "foodCo") | Clicks → `#/dashboard` |
-| Nav buttons | Rendered from a `NAV` array; active state derived from the hash |
-| **Global search** | Input with a magnifier + a **`⌘K` kbd hint**. Purely visual — no handler |
-| **Notifications bell** | Icon button with an accent dot. No handler |
-| **Help button** | Icon button. No handler |
-| **User chip** | Avatar initials + **name + role line** ("אבי כהן" / "המטבח בריינה"). Clicks → `#/settings` |
-| Hamburger (`sb-toggle`) | `toggleSidebar()` — toggles `.open` on the topnav plus a `#sb-scrim` backdrop; `nav()` auto-closes it below **900px** |
+| `shell.js` | The one shared shell — nav, chip rows, bottom tab bar, FAB, wash, focus rings, reduced motion, Lucide loader, Kitchen dark theme |
+| `colors_and_type.css` | Token layer — **Heebo** `--font-sans` / `--font-display` |
+| `mobile-pass.css` | Shared mobile ergonomics rules |
+| `support.js` | Template runtime |
+| `audit-harness.html` | Loads all 13 screens in resizable frames, reports measured numbers on demand |
+| `v1/` | Per-screen `v1` and `v2-pre-mobile` snapshots — the refactor history is preserved |
+| `assets/` | `fc-seal.svg`, `fc-mark.svg`, `fc-mark-kitchen.svg`, `fc-seal-ink.svg`, `fc-favicon.svg`, stamps |
+| `Refactor Master Plan.dc.html` | The audit that drove the work — defect register, scorecard |
+| `Refactor Progress.dc.html` | What shipped, measured after the fact |
 
-**Nav destinations (7):** Dashboard, Inventory, Recipe book, Menu library, **Venues**, **Suppliers**, **Trash**.
-**Nav badges:** a hard-coded `NAV_BADGES` map puts a warning-toned count on Inventory (`7`, low stock) and Recipe book (`3`, pending approval).
+**Resolved design decisions** (these settle the contradictions the old cloud project had):
 
-### 1.2 Routing
-Hash router (`#/name/id`) with a `try/catch` that prints the raw error into the page on failure. Routes: `dashboard`, `inventory`, `product/:id`, `recipes`, `recipe/:id`, `menus`, `venues`, `suppliers`, `trash`, `settings`; anything unknown falls back to dashboard. `window.scrollTo(0,0)` on each route.
-
-### 1.3 Global modal
-One modal shell (title / body / footer) with three hard-coded `kind`s:
-- **`add-product`** — 5 fields: name (+ hint), category (**native `<select>`**), base unit, price, cost. Footer: Cancel / Save.
-- **`add-recipe`** — 4 fields: name, yield, yield unit, short description textarea. Footer: Cancel / Create.
-- **anything else** (`ai`, …) — a placeholder body reading *"תצוגה מוקדמת — תוכן מלא ממתין להטמעה"* ("preview — full content pending implementation").
-Backdrop click closes. No form state, no validation, no submission.
-
-### 1.4 Cook-view keyboard shortcuts (app.html level)
-When `#cook-root` has content: **Escape** closes, **ArrowLeft** = next step, **ArrowRight** = previous step (RTL-correct). Note `cook.js` registers its **own** Escape handler as well, so Escape is bound twice.
+- **Typeface: Heebo.** `colors_and_type.css:11-12`, `shell.js:98`. Rubik / Space Grotesk are gone.
+- **Icons: Lucide**, loaded once in the shell from unpkg (`shell.js:38-48`), `<i data-lucide>` in screens.
+- **Breakpoints: 3** — 479 / 767 / 1023. Down from 9.
+- **Touch floor: 44px**; checkboxes are a 24px glyph inside a 44px hit area; Cook View is 56px.
+- **Type floor: 12px.** All 8px and 11px values removed.
+- **Themes: 2** — light glass, plus **Kitchen** (dark) as a declared mode owned by Cook View.
 
 ---
 
-## 2. Dashboard (`#/dashboard`)
+## 1. Shell (`shell.js`) — mounted by all 13 screens
 
-- **Page header pattern** (shared `S.pageHeader`): an **eyebrow** ("Dashboard · Apr 18"), an `h1` **greeting** ("ברוך הבא, אבי"), and a **lede sentence** summarising the day ("4 מוצרים דורשים תשומת לב היום · 3 מתכונים מחכים לאישור"). Actions: ghost **"AI מתכון"** (opens the placeholder modal) and dark **"מוצר חדש"**.
-- **4 KPI cards**, each clickable as a whole (`onclick="nav(link)"`):
-  | Card | Value | New vs. old |
-  |---|---|---|
-  | סה״כ מוצרים | 124 | adds a **delta pill** `+8 השבוע` |
-  | סה״כ מתכונים | 38 | adds `+2 השבוע` |
-  | מלאי נמוך | 7 | adds `+3 מיום ב׳` (down-toned) |
-  | מחכים לאישור | `3` + **`/45` unit suffix** | adds a `hold` delta `93% מאושרים` |
-  Each has an icon chip, a **sparkline SVG**, and a single `צפה ←` link in the footer. Card tones: `info` / `warn`.
-- **Activity feed**: a section head with an eyebrow ("Live feed"), an `h2`, and a decorative **"All entities" chip** (no dropdown behind it). Four hard-coded rows: entity avatar letter, entity type tag (`Product` / `Dish` / `Prep`), name, change tags rendered as `Label from → to`, and a status pill (`updated` / `created` / `deleted`).
+### 1.1 Primary nav — 4 tabs
 
-**Not present on this screen:** empty state, loading state, popovers on change tags, horizontal scroll controls for the change strip, vertical scroll indicators, disabled/logged-out states, tab navigation to Core settings / Venues / Trash / Suppliers (those moved into the main nav).
+| id | Label | Icon | Target |
+|---|---|---|---|
+| `dashboard` | דשבורד | `layout-dashboard` | `Dashboard.dc.html` |
+| `inventory` | מלאי | `package` | `Inventory.dc.html` |
+| `recipes` | ספר מתכונים | `book-open` | `RecipeBook.dc.html` |
+| `menus` | תפריטים | `library` | `MenuLibrary.dc.html` |
 
----
+Same 4 items render as the **mobile bottom tab bar**. This replaces the old 10-item flat pill row.
 
-## 3. Inventory (`#/inventory`)
+### 1.2 Chip rows — secondary destinations, per tab
 
-- Page header: eyebrow "Inventory", title "מלאי", **lede with a live count and a freshness line** ("N מוצרים פעילים · עדכון אחרון לפני 12 דקות"). Actions: ghost **"ייצוא"** (export) and dark **"מוצר חדש"**.
-- **Category tab-pill row** with counts: הכל / ירקות / חלב / שמנים / קמחים / **מלאי נמוך**. Static — no click handlers, counts hard-coded.
-- **Toolbar**: search input (`חיפוש מוצר...`), then ghost **"סינון"** (filter) and **"מיון"** (sort) buttons. All three are inert.
-- **Table** (`.table-card` → `<table class="table">`) with 8 columns: מוצר / קטגוריה / מלאי / יחידה / עלות / מחיר / ספק / status.
-  - Product cell: a **glyph tile** (single Hebrew letter) + name + an uppercase **SKU-style sub-line** (`P1`, `P2`, …).
-  - Stock cell: current quantity plus a muted `(min N)`.
-  - Status: `תקין` / `נמוך` pill.
-  - **Whole row navigates** to `#/product/:id`.
-
-**New data concepts** this screen introduces that the old app does not have: **current stock quantity**, **cost** as a field distinct from price, and a **product SKU/code**.
-
-**Not present:** allergens, nutrition, validation badges, per-row action menu, edit/delete buttons, selection checkboxes, bulk edit, sortable headers, the filter panel (allergen / category / supplier / low-stock / invalid / incomplete / nutrition), inline price editing, column carousel, empty state, no-results state, logged-out disabling, equipment/logistics sub-nav.
-
----
-
-## 4. Product detail (`#/product/:id`) — **new screen, no old-app equivalent**
-
-The old app routes straight from list → edit form. The new design inserts a **read-only detail page**:
-
-- **Breadcrumb** (`מלאי / <product>`) — a new navigation pattern (`S.breadcrumb`, `/` separators).
-- **Hero**: glyph thumb, name, tagline (`category · SKU · supplier`), and **4 hero stats**: current stock, price, cost, and a computed **margin %** (`(1 − cost/price)`).
-- **Action stack**: ערוך (edit) / **שכפל (duplicate)** / מחק (delete).
-- **Panel: units & alternatives** — base unit, one alternative conversion, **yield %**, **density** (density is a new field, shown as `—`).
-- **Panel: used in recipes** — lists recipes that use this product, each row clickable through to the recipe. **New functionality** (the old app can only do the inverse lookup implicitly).
-- **Panel: price history** — a 30-day **area chart** (SVG with gradient fill). **New functionality.**
-- **Panel: supplier** — contact person, minimum order, lead time.
-
-All values are static; no edit affordance is wired.
-
----
-
-## 5. Recipe book (`#/recipes`)
-
-**Format change: table → card grid.**
-
-- Page header: eyebrow "Recipe book", title, lede (`N מתכונים · 3 מחכים לאישור`). Actions: ghost **"AI מתכון"** (placeholder modal), dark **"מתכון חדש"** (add-recipe modal).
-- **Category tab pills** with counts, including an amber-tinted **"מחכים לאישור"** pill. Static.
-- Toolbar: search + inert "סינון".
-- **Recipe cards** (`.mcard`): a **banner** that shows either a photo (`r.img`) or an accent-tinted placeholder with an image icon, an overlaid **category tag**, and the recipe name over the banner. Body shows **difficulty**, **time in minutes** (clock icon), **yield + unit** (scale icon), and a **status pill** (`מאושר` / `ממתין` / `טיוטה`). Whole card navigates to `#/recipe/:id`.
-
-**New data concepts:** recipe **photo**, **difficulty**, **total time in minutes**, and a **three-state status** (approved / pending / draft) rather than the old boolean `is_approved_`.
-
-**Not present:** labels chips (and label colours), allergen chips, rating stars, cost column, favourite toggle, **cook button on the row**, delete, sortable columns, ingredient-based search, date-range filter, favourites filter, "do not include allergens" inverted filter, station/type/approved filter groups, selection + bulk edit, empty state, no-results state, dish-vs-preparation distinction.
-
----
-
-## 6. Recipe detail (`#/recipe/:id`) — **new screen**
-
-- Breadcrumb, then a **hero**: accent-gradient glyph thumb, name, tagline (`category · difficulty`), and 4 hero stats — yield, time, **cost per portion**, and status pill.
-- Action stack: **"מצב בישול" (cook mode) as the primary button** → `openCook(id)`, plus ערוך and הדפסה.
-- **Panel: preparation steps** — a numbered list; each step has a **title**, a body paragraph, and a **per-step time** on the left. (Step *titles* are new — the old model has `instruction_` only.)
-- **Panel: ingredients** — name + optional **note** ("בשלות, חתוכות לקוביות") + quantity + unit. (Per-ingredient prep notes are new.)
-- **Panel: nutrition per serving** — calories / protein / fat / carbs. (Recipe-level nutrition is new; the old app only has per-100 g product nutrition.)
-
-There is **no recipe *builder*** anywhere in the new design — see §12.
-
----
-
-## 7. Menu library (`#/menus`)
-
-- Page header + a single dark **"תפריט חדש"** action. Toolbar: search + inert "סינון".
-- **Menu cards**: accent banner with the menu name as large type, then title, **season/context line** ("קיץ 2025", "אירועים"), and a footer with **item count** and an arrow.
-- Cards are **not clickable** — there is no `onclick`, and no menu editor screen exists.
-
-**Not present:** food cost %, total revenue, guest count, event type / serving style / date filters, sort control + direction toggle, clone, delete, edit, per-card loaders, empty state.
-
----
-
-## 8. Venues (`#/venues`)
-
-Simple table: שם (with pin icon) / **עיר** / **כתובת** / **מקומות ישיבה** / **פעילות מ-** (opened year) / status pill (`פעיל` / `בהכנה`). One dark "מקום חדש" action. Rows are not clickable; there are no row actions.
-
-**New fields:** city, street address, seat count, opened year, an active/preparing status.
-**Not present:** environment type, the **available-infrastructure / equipment linkage** (the old venue form's whole second half), notes, search, filters, edit, delete, selection/bulk, dashboard-embedded mode.
-
----
-
-## 9. Suppliers (`#/suppliers`)
-
-Table: ספק (truck icon) / איש קשר / **טלפון** / **מוצרים** (count) / **דירוג** (star + numeric rating) / a `more` glyph in the last cell (**not a button — no handler**). One dark "ספק חדש" action.
-
-**New fields:** phone number, star rating.
-**Not present:** delivery days, minimum order, lead time, search, filters (delivery day, has-linked-products), inline edit panel, delete, selection/bulk, empty state, back-to-dashboard button.
-
----
-
-## 10. Trash (`#/trash`)
-
-- Page header with lede **"פריטים שנמחקו נשמרים 30 ימים לפני מחיקה סופית"** — a new, explicit retention policy — and a danger-toned **"רוקן את הפח" (empty trash)** action.
-- An informational **`.trash-note` callout** explaining that trashed items are hidden from inventory/recipes/search but recoverable.
-- **One unified table** (not three sections): סוג (type chip: Product / Recipe / **Menu** / **Supplier**) / שם / **נמחק על ידי** / מתי (relative time: "לפני 2 שעות", "אתמול") / a **שחזר (restore)** button.
-
-**New:** deleted-by attribution, relative timestamps, 30-day retention messaging, Menu and Supplier as trashable types, a global empty-trash action.
-**Not present:** the three separate Dishes / Recipes / Products sections, per-section restore-all and dispose-all, **per-item permanent dispose**, per-item **version history**, loading state, error state + retry, per-section empty states, confirm dialogs.
-
----
-
-## 11. Settings (`#/settings`) — **new screen**
-
-Left **settings nav** with 7 entries: **חשבון** (active), צוות ומשתמשים, התראות, מדידה וסטנדרטים, חשבוניות ותשלום, אינטגרציות, `API & פיתוח`. Only the account pane is built; the other six are labels only.
-
-Account pane contains three panels:
-1. **פרופיל** — avatar circle with initials + name + email + a **"החלף תמונה"** button; then fields for full name, **role/title**, email, **phone** (`dir="ltr"`).
-2. **התראות** — 4 **toggle switches** with title + description: low stock, recipe awaiting approval, supplier price updates (>5%), weekly report. **Entirely new functionality** — the old app has no notification system.
-3. **יחידות מידה** — **currency** select (₪ / $) and **weight system** select (metric / imperial), with Cancel / Save actions. **New** (the old app is ₪-only and metric-only).
-
-**Not present anywhere in settings** (the old app's "Core settings" / metadata manager): units & conversions registry, product categories, global allergens, recipe labels + colours + auto-triggers, menu types + dish-field configuration, preparation categories, section categories, **user management (admin-only list + delete)**, backup export / restore / import, demo-data loader.
-
----
-
-## 12. Cook view (`cook.js` + `cook.css`, launched via `openCook(id)`)
-
-**The only old-app screen that was re-skinned feature-for-feature.** The file header states it "mirrors `cook-view.page.html` structure 1:1", and `designs/Cook View.html` annotates the preserved features explicitly.
-
-### 12.1 Preserved
-- **Edit mode** with an `edit-mode-banner`, and Save-changes / Undo-changes replacing the Edit button.
-- **Scaled view** with a banner (`קנה־מידה ל־ <amount> <unit> <name>`) and a **"חזרה למתכון מלא"** reset button; the multiplier chips and scale bar hide in this mode.
-- **Multiplier chips** with an active state.
-- **Quantity counter** (−/value/+) + **unit selector** + a **conversion badge** `×ratio` shown when the ratio ≠ 1.
-- **Phone-only pane-swap bar** (🧪 רכיבים / ⏱ תהליך הכנה).
-- **Ingredient pane**: header with a progress **badge `done/total`** that flips to **"הכל מוכן!"** when complete, plus a **progress fill bar**; tap-to-check rows with a check dot; per-ingredient **notes** rendered inline.
-- **Set-by-ingredient flow**: per-row scale button → inline amount input → **המר (convert)** / **בטל (cancel)** → enters scaled view.
-- **Edit-mode ingredient table**: name / −-input-+ / unit select + remove, with a **`field-changed`** row highlight.
-- **Step pane** with a `done/total` counter and **three card states** — active (teal head, "פעיל עכשיו", big "סמן שלב כהושלם" button), done (done label + **`↩ בטל` un-do chip**), pending (**tap-to-jump** to make active).
-- **Per-step countdown timer**, rendered **only when the step has a configured cooking time**, with a live in-place text update and a **timer-finished alert pill** (`⏱ טיימר הסתיים ✕`) that persists on done/pending cards until dismissed.
-- **Per-step stopwatch** with play/pause, which keeps showing as a pill on the card after the step is marked done.
-- **`markStepDone` auto-advances** to the next undone step.
-- **Completion banner** (`🎉 הבישול הושלם — בתאבון!`).
-- **Rating stars** (interactive, with a numeric readout).
-- **Cost display** (scaled with yield) and an **approved badge**.
-- **Export bar**: main "ייצוא" button expanding a strip of three label + view + download triples (מתכון / קניות / שלבי הכנה — switching the third to צ׳קליסט when `isDish`).
-- **Approve stamp** as a floating bottom-right control.
-- **Empty state**: chef icon, "בחר מתכון כדי להתחיל לבשל", a recipe-book CTA, and **recent-recipe chips** — and unlike the old app these chips show recipe **names**, not raw ids.
-- **Escape** closes.
-
-### 12.2 Changed or thinner than the old cook view
-- Multiplier chips are hard-coded **×0.5 / ×1 / ×2 / ×3 / ×4** with `×N` labels, not translation keys.
-- The **approve stamp is a text/icon button**, not the raster stamp graphic.
-- **No per-row unit-override select** in view mode (the old view mode lets you switch a row's display unit when it has more than one available unit).
-- **No dish variant**: `window.cookIsDish` is hard-coded `false`, so the **mise-en-place prep-item card list never renders** — only the preparation/steps variant is designed.
-- `markStepDone` only searches **forward** for the next undone step; the old implementation also wraps backwards.
-- **No scroll indicators** on either pane.
-- **No pendingChanges / unsaved-changes handling**, no save persistence, no approve-with-unsaved confirm.
-- The unit selector, the export view/download buttons, and the edit-mode ± steppers are **buttons without handlers**.
-- `renderCook()` re-renders the whole subtree on every interaction, so any focus/scroll position is lost (prototype artefact, but it shapes the interaction feel).
-
----
-
-## 13. Design-system layer — token and component coverage
-
-### 13.1 Documented tokens (`README.md`, `colors_and_type.css`)
-Body/glass surfaces, primary + hover + soft tint, accent gold, a 4-step **text ladder**, **6 semantic pairs** (success, warning, danger, info, allergen, accent), a 8-value type scale, an 8-point spacing scale, 6 border radii, **4 shadow tiers + a glow ring + a focus ring**, 2 easing curves with 3 durations, hover/press transforms, 7 named entrance keyframes, `prefers-reduced-motion` clamping, and per-surface blur values (nav 20 / cards 16 / modal 24 / scrim 6, stepping down on mobile).
-
-### 13.2 Preview specimen cards (19)
-`brand-icons`, `brand-logo`, `brand-stamps`, `colors-primary`, `colors-semantic`, `colors-surfaces`, `colors-text`, `radii`, `shadows`, `spacing-scale`, `type-heebo`, `type-kpi`, `type-scale`, and **7 component cards**: `components-activity`, `components-buttons`, `components-chips`, `components-inputs`, `components-kpi-card`, `components-nav`, `components-pills`.
-
-**No specimen exists for:** tables, list shell / filter panel, selection bar, dropdowns and multi-selects, counters / steppers, scaling chips, rating stars, nutrition badge, loaders, toasts, empty states, confirm/auth/AI modals, column carousels, row action menus, tab pills, breadcrumbs, toggles, cards with banner images.
-
-### 13.3 React components (`GlassComponents.jsx`, 12 exports)
-`Icon`, `Button` (primary / ghost / **dark** / danger, 2 sizes, disabled), `HeaderPill` (active + `trash` variant), `GlassCard` (hover lift + optional radial glow), `KPICard` (tone, delta with trend up/down/hold, sparkline, optional link footer), `Chip` (5 tones), `Input` (label / placeholder / **error** / hint / focus ring), `TopNav`, `ActivityItem`, `Modal`, `Stamp`, `SectionHeader`.
-
-`TopNav` here is a **different nav from `app.html`**: 4 items only (dashboard / inventory / recipes / menus), a centred pill group, search + bell icon buttons, and — notably — a **`user` prop with sign-in ("כניסה") and logout states**. This is the only place in the whole synced design where an authentication affordance exists.
-
-### 13.4 Assets
-`food-compos-logo.png`, `stamp-approved.png`, `stamp-not-approved.png`, `add_ingredient.png`, `recipe_placeholder.png`, `favicon.ico`. (Note the design system spells it `add_ingredient.png`; the old app references `add_ingrediant.png`.)
-
----
-
-## 14. States present in the new design
-
-| State type | Coverage |
+| Parent tab | Chips |
 |---|---|
-| **Empty** | Cook view only (rich: icon + copy + CTA + recent chips). No empty state on any list or on the activity feed. |
-| **Loading** | None anywhere — no spinners, skeletons, or overlay loaders. |
-| **Error** | None, except the router's raw `try/catch` error dump and the `Input` component's `error` prop. |
-| **Disabled** | `Button` has a `disabled` prop; cook view's edit-mode minus buttons. No permission-driven disabling. |
-| **Permission / auth** | None in the app prototype. `GlassComponents.TopNav` has sign-in/logout props, unused. No auth modal, no "sign in to use" pattern, no admin-only surfaces. |
-| **Validation** | `Input` error + hint props only. No form validation anywhere in the screens. |
-| **Read-only / history** | None. |
-| **Selection / bulk** | None. |
-| **Active / done / pending** | Cook view step cards only. |
-| **Hover / press / focus** | Well specified in tokens and implemented in `GlassComponents.jsx`. |
-| **Responsive** | `app.html` collapses the nav below **900px** via a hamburger + scrim. Cook view has a phone pane-swap bar. No bottom tab bar, no column carousel, no mobile row-action menu, no swipeable filter panel. (Full breakpoint behaviour lives in `styles.css` / `cook.css`, which were not read.) |
-| **RTL** | `dir="rtl"` on `app.html` and the cook view; Hebrew content throughout; RTL-aware arrow choices in `GlassComponents.KPICard` and the app.html arrow-key bindings. Breadcrumbs use `/` separators. |
+| `dashboard` | אתרים · מטא-דאטה · ספקים · אשפה |
+| `inventory` | ציוד |
+| `recipes` | בניית מתכון · מצב בישול |
+| `menus` | ספריית תפריטים · בניית תפריטים |
+
+This is how the 13 screens fit behind 4 tabs. Recipe Builder and Cook View are **reachable from the nav for the first time** — in the old app they were only reachable from Recipe Book.
+
+### 1.3 Also owned by the shell
+
+- **Hero FAB** — flame, 45° rotate on open, page-registered actions via the `fab` attribute, chef-hat shortcut, tray collapses to zero height, Esc / outside-click close, sits above the bottom tab bar on mobile. Rebuilt from the old `HeroFabComponent`.
+- Ambient gradient wash, focus-ring token, `prefers-reduced-motion` clamp, Lucide loader, favicon registration, brand mark (kitchen variant under dark theme).
+
+### 1.4 Four view states on every screen
+
+Every screen exposes a `viewState` tweak — `ready` · `loading` · `empty` · `error` — so any
+state is reviewable without faking data. The patterns are identical everywhere:
+
+- **loading** — glass skeleton rows (`skeletonRows`, pulse animation)
+- **empty** — centred Lucide glyph + one line of copy
+- **error** — `cloud-off` glyph, `הטעינה נכשלה`, "אין חיבור לשרת כרגע. אפשר לנסות שוב.", 44px `נסה שוב` retry
+- **ready** — the real screen
 
 ---
 
-## 15. Screens that exist in the old app but have **no counterpart anywhere in the synced design**
+## 2. Screens
 
-Listed here as observations for Step 3, not as judgements:
+### 2.1 Dashboard
+4 KPI cards with sparklines and deep links: total products (24) → Inventory, total recipes (14) → Recipe Book, low stock (3, warning tone) → Inventory, recipes pending approval (2, info tone) → Recipe Book. Then a **recent-activity feed**: avatar letter, entity label, name, change text, relative time, action label. `isOtherView` renders a "בקרוב / המסך הזה עדיין בבנייה" placeholder for unbuilt sub-views.
 
-- **Recipe builder** (`/recipe-builder`) — the largest screen in the product: yield/scaling dock, ingredient table with drag-and-drop and four row states, the dual workflow editors (numbered steps vs mise-en-place), the logistics/tool picker, the export toolbar, the five-gate save flow, history view mode.
-- **Menu intelligence editor** (`/menu-intelligence`) — the "menu paper", section/dish authoring, keyboard-driven field order, per-dish metadata driven by menu types, the financial footnote bar.
-- **Equipment / logistics** (`/equipment`, `/inventory/equipment`) — list, inline edit panel, scaling rules.
-- **Product form**, **supplier form**, **venue form**, **equipment form** — all four full forms.
-- **Metadata manager** (units, categories, allergens, labels, menu types, prep categories, section categories, user management, backup/restore/import, demo data).
-- **Auth modal** (sign in / sign up / profile image / the ~18 validation error states).
-- **All AI modals** — recipe (text/image/URL), menu, product; the usage meter; the generate → preview → apply flow.
-- **Utility modals** — unit creator, translation-key modal, label creation, add-item, quick-add product, quick-edit product panel, add-equipment, supplier modal, confirm modal, restore-choice, global-specific.
-- **Version history panel** and the history overlays.
-- **Export preview** ("paper" dialog with recipe-sheet and generic-sections layouts).
-- **Global toast / user-msg** with undo.
-- **Hero FAB** with page-registered quick actions.
+### 2.2 Inventory
+Full list shell. **Filter panel**: low-stock-only toggle, category checkboxes with counts, allergen checkboxes with counts, clear-filters. **Table**: checkbox column, product (with low-stock dot), category, allergens (count button → popover with chips), supplier, unit, price, actions. Sortable on name / category / supplier / price with up-down indicators. **Selection + bulk delete** with an "N נבחרו" bar. **Add/edit modal**: name (with inline `nameError`), category chips, unit chips, price, allergen toggle chips, low-stock checkbox. **Confirm dialog** for delete. Toast. Mobile: card mode, carousel arrows replaced by swipe.
+
+### 2.3 Recipe Book
+Same list shell. **Filter panel**: favourites-only, type, approval status, labels, and an **inverted allergen filter** ("הסתר מתכונים עם אלרגן") — all with counts. **Table**: name (+ unapproved marker), cost, type, labels (count → popover), allergens (count → popover), star rating, actions. Sortable on name / type / rating / cost. Row actions: favourite toggle, cook, delete, plus an overflow actions menu. **Selection + bulk delete.** Add/edit modal with name, type chips, cost, star rating, label chips, allergen chips, "מאושר לתפריט" checkbox. "הוסף מתכון" links to `RecipeBuilder.dc.html`.
+
+### 2.4 Recipe Builder
+The largest screen, and fully interactive.
+
+- **Type toggle** מנה ↔ הכנה (`toggleType`) — reshapes the workflow section
+- Name input, **5-star rating**
+- **Yield dock**: portions counter (−/+), portion-unit dropdown (מנות · יח׳ · ק"ג · גרם · ליטר), plus **secondary yields** — add/remove rows each with its own qty counter and unit dropdown (יח׳ · ק"ג · גרם · ליטר)
+- **Label chips** — 4 hard-coded: מהיר · טבעוני · פופולרי · חדש
+- **Metrics**: total cost (₪) and total weight (g)
+- **Ingredient table** — רכיב · יחידה · כמות · אחוז · עלות. Per row: product picker (opens a searchable modal listing name · ₪price / unit), unit label, qty −/+ with **unit-aware step** (0.05 for kg/litre, 1 for discrete units), **percent of total weight**, computed cost, remove. "הוסף שורה" adds a row.
+- **Workflow, dish variant** (`isDishType`) — "רשימת הכנה": prep steps with name input, category dropdown (חיתוך · בישול · אפייה · רטבים), qty dropdown with counter and unit options (יחידה · גרם · ק"ג · ליטר), remove, add
+- **Workflow, preparation variant** (`isPreparationType`) — "שלבי הכנה": numbered steps with auto-index, instruction textarea, **labor time** and **cook time** number inputs in minutes, remove, add
+- **Approve stamp** — image toggle, approved / "לחץ לאישור", with toast
+- **Save** — label switches שמירת מנה / שמירת מתכון
+- All four view states; `notReady()` shows "המסך הזה בבנייה" for anything unimplemented
+
+### 2.5 Cook View — Kitchen mode
+Own dark theme toggle driving `theme="kitchen"`. Recipe name, **hero timer**, progress bar with percentage, **yield multiplier buttons** that rescale quantities, ingredient checklist with checked count, step checklist with per-step **timers** (start / reset), and a **celebration overlay** ("המנה מוכנה!") when every step is done. 56px controls for wet hands. Skeleton and error cards use kitchen surfaces, not light glass.
+
+### 2.6 Menu Intelligence
+Toolbar: רשימת קניות · צ׳קליסט · הדפסה · הכל (all `notReady`) and **שמירת תפריט**. Header: event-type dropdown · serving-type dropdown, menu name, guest count, event date. **Sections** — each with a name dropdown, remove, and a list of dishes. Per dish: recipe name, expandable meta (food cost per portion, total food cost for N guests, profit per portion), sell-price input, remove. Empty slots show a **dish search** with live results. "הוסף מנה" per section, "+ הוסף מקטע" for a new section. **Financial footer**: total cost · food-cost % · total revenue · cost per guest.
+
+### 2.7 Menu Library
+Card grid. Search, "אירוע תפריט חדש", filters (event type, serving style, date-from), sort (date · name · food cost · guest count) with direction toggle. Cards show name, subtitle, food cost, revenue, guest count, and open / clone / delete actions. Confirm dialog + toast.
+
+### 2.8 Suppliers
+List shell. Filters: linked-products-only, delivery-day checkboxes. Table: supplier, contact, delivery days (chips, "כל השבוע" when all), min order, lead time, linked product count, actions. Sortable on name / min order / lead. Selection + bulk delete. Modal: name, contact, delivery-day toggle chips, min order, lead days.
+
+### 2.9 Equipment
+List shell. Filters: category checkboxes, consumable radio (הכל / כן / לא). Table: name, category, owned qty, consumable, **scaling rule**, actions. Modal: name, category chips, owned qty, "פריט מתכלה" checkbox, notes textarea, and a **scaling rule block** — "כלל שינוי כמות לפי מספר סועדים" checkbox revealing per-guests, min qty, max qty.
+
+### 2.10 Metadata Manager
+Six managed vocabularies, each a card with a text input + "הוסף" and a deletable chip list:
+**תוויות מתכונים** (with a colour-cycle button per label) · **קטגוריות מוצר** · **אלרגנים גלובליים** ·
+**יחידות מידה** (locked units cannot be deleted) · **סוגי אירועים** · **סטיילי הגשה**.
+Quick-jump buttons at the top. Confirm dialog + toast.
+
+### 2.11 Trash
+Three sections — dishes, recipes, products — each with per-section "שחזר הכל" / "מחק לצמיתות הכל" and an empty state. Per item: name, deleted-at, and **היסטוריה** / **שחזר** / **מחק לצמיתות**. History opens a panel listing action label, summary and timestamp. Confirm dialog supports **danger and warning variants**. Refresh button.
+
+### 2.12 Venues
+Card list: status label, name, address, capacity ("N מקומות"), linked menu count. "הוספת אתר" opens a modal with name, address, capacity.
+
+### 2.13 Venue Detail
+Hero: name, status, address, capacity, linked menu count. Panels: **contact** (initials avatar, name, role, phone), **operating hours** (day-range → time rows), **linked menus** (name, date, guest count) with an empty state.
+
+---
+
+## 3. Data concepts the design assumes
+
+Present in the design, and each needs a decision about whether the app gains it:
+
+| Concept | Where |
+|---|---|
+| Product **supplier** on the row, low-stock flag | Inventory |
+| **Secondary yields** on a recipe | Recipe Builder |
+| Per-step **labor time** and **cook time** | Recipe Builder (preparation variant) |
+| **Sell price** per menu dish, profit per portion | Menu Intelligence |
+| Equipment **scaling rule** (per-guests / min / max) | Equipment |
+| Venue **address, capacity, contact, operating hours** | Venues, Venue Detail |
+| Trash **history** per item, per-section bulk restore | Trash |
+| Label **colours** | Metadata Manager |
+| Unit **locked** flag | Metadata Manager |
+
+---
+
+## 4. Known debt, stated by the design itself
+
+From `Refactor Progress.dc.html`, left open deliberately:
+
+- The four data screens (Inventory, Recipe Book, Suppliers, Equipment) keep their mobile
+  card-mode `!important` override blocks. That count only drops when card mode becomes its
+  own layout branch.
+- Icons inside screen bodies are Lucide **path geometry** inline rather than `<i data-lucide>`
+  tags. Cosmetic cleanup, not a visual difference.

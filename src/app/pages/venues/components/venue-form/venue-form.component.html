@@ -11,9 +11,14 @@
     <div class="form-section">
       <div class="form-group">
         <label for="name_hebrew">{{ 'name' | translatePipe }}</label>
-        <input id="name_hebrew" type="text" formControlName="name_hebrew" class="c-input"
+        <input
+          id="name_hebrew"
+          type="text"
+          formControlName="name_hebrew"
+          class="c-input"
           [class.c-input--invalid]="validationErrors_()['name_hebrew']"
-          [attr.aria-invalid]="validationErrors_()['name_hebrew'] ? true : null" />
+          [attr.aria-invalid]="validationErrors_()['name_hebrew'] ? true : null"
+        />
         @if (venueForm_.get('name_hebrew')?.errors?.['duplicateName'] && venueForm_.get('name_hebrew')?.touched) {
           <span class="form-error">{{ 'duplicate_venue_name' | translatePipe }}</span>
         }
@@ -28,12 +33,53 @@
           formControlName="environment_type_"
           [options]="envOptions"
           [placeholder]="'environment_type'"
-          [typeToFilter]="true" />
+          [typeToFilter]="true"
+        />
       </div>
       <div class="form-group">
         <label for="notes_">{{ 'notes' | translatePipe }}</label>
         <textarea id="notes_" formControlName="notes_" rows="2" class="c-input"></textarea>
       </div>
+      <div class="form-group">
+        <label for="address_">{{ 'address' | translatePipe }}</label>
+        <input id="address_" type="text" formControlName="address_" class="c-input" />
+      </div>
+      <div class="form-group">
+        <label for="capacity_">{{ 'capacity' | translatePipe }}</label>
+        <input id="capacity_" type="number" formControlName="capacity_" min="0" class="c-input" />
+      </div>
+      <div class="form-group">
+        <label for="contact_name_">{{ 'contact_name' | translatePipe }}</label>
+        <input id="contact_name_" type="text" formControlName="contact_name_" class="c-input" />
+      </div>
+      <div class="form-group">
+        <label for="contact_phone_">{{ 'contact_phone' | translatePipe }}</label>
+        <input id="contact_phone_" type="tel" formControlName="contact_phone_" class="c-input" />
+      </div>
+    </div>
+
+    <div class="form-section infra-section" formArrayName="operating_hours_">
+      <div class="infra-header">
+        <h3>{{ 'operating_hours' | translatePipe }}</h3>
+        <button type="button" class="c-btn-ghost" (click)="addHoursRow()">
+          <lucide-icon name="plus" [size]="16"></lucide-icon>
+          {{ 'add_row' | translatePipe }}
+        </button>
+      </div>
+      @for (ctrl of hoursArray.controls; track $index; let i = $index) {
+        <div class="infra-row" [formGroupName]="i">
+          <input type="text" formControlName="days_" [placeholder]="'days' | translatePipe" class="c-input" />
+          <input type="text" formControlName="time_" [placeholder]="'time' | translatePipe" class="c-input" />
+          <button
+            type="button"
+            class="btn-icon"
+            (click)="removeHoursRow(i)"
+            [attr.aria-label]="'remove' | translatePipe"
+          >
+            <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+          </button>
+        </div>
+      }
     </div>
 
     <div class="form-section infra-section" formArrayName="available_infrastructure_">
@@ -51,9 +97,15 @@
             [options]="equipmentOptions_()"
             [placeholder]="'choose_equipment'"
             [typeToFilter]="true"
-            [translateLabels]="false" />
+            [translateLabels]="false"
+          />
           <input type="number" formControlName="available_quantity_" min="0" placeholder="0" />
-          <button type="button" class="btn-icon" (click)="removeInfraRow(i)" [attr.aria-label]="'remove' | translatePipe">
+          <button
+            type="button"
+            class="btn-icon"
+            (click)="removeInfraRow(i)"
+            [attr.aria-label]="'remove' | translatePipe"
+          >
             <lucide-icon name="trash-2" [size]="16"></lucide-icon>
           </button>
         </div>

@@ -32,30 +32,30 @@ export class KitchenStateService {
   // CORE SIGNALS
   products_ = computed(() => this.productDataService.allProducts_())
   /** Combined recipes (preparations) + dishes for ingredient search and lookup. */
-  recipes_ = computed(() => [
-    ...this.recipeDataService.allRecipes_(),
-    ...this.dishDataService.allDishes_()
-  ])
+  recipes_ = computed(() => [...this.recipeDataService.allRecipes_(), ...this.dishDataService.allDishes_()])
+  /** O(1) id lookups for cost/allergen resolution (plan 303 M1) — rebuilt only when products_ changes. */
+  productsById_ = computed(() => new Map(this.products_().map((p) => [p._id, p])))
+  /** O(1) id lookups for cost/allergen resolution (plan 303 M1) — rebuilt only when recipes_ changes. */
+  recipesById_ = computed(() => new Map(this.recipes_().map((r) => [r._id, r])))
   /** Recipes visible to the current user — hides entries where the user's id is in hiddenBy[]. */
   visibleRecipes_ = computed(() => {
     const userId = this.userService.user_()?._id
-    return this.recipes_().filter(r => !userId || !(r.hiddenBy ?? []).includes(userId))
+    return this.recipes_().filter((r) => !userId || !(r.hiddenBy ?? []).includes(userId))
   })
   suppliers_ = computed(() => this.supplierDataService.allSuppliers_())
+  /** O(1) id lookups for supplier-name resolution — same rationale as productsById_/recipesById_. */
+  suppliersById_ = computed(() => new Map(this.suppliers_().map((s) => [s._id, s])))
   selectedProductId_ = signal<string | null>(null)
   isDrawerOpen_ = signal<boolean>(false)
 
   // COMPUTED SIGNALS
-  lowStockProducts_ = computed(() =>
-    this.products_().filter(p => p.min_stock_level_ > 0)
-  )
+  lowStockProducts_ = computed(() => this.products_().filter((p) => p.min_stock_level_ > 0))
 
   saveProduct(product: Product): Observable<void> {
     const isUpdate = !!(product._id && product._id.trim() !== '')
 
-    const isDuplicate = this.products_().some(p =>
-      p.name_hebrew.trim() === product.name_hebrew.trim() &&
-      p._id !== product._id
+    const isDuplicate = this.products_().some(
+      (p) => p.name_hebrew.trim() === product.name_hebrew.trim() && p._id !== product._id
     )
 
     if (isDuplicate) {
@@ -64,7 +64,7 @@ export class KitchenStateService {
     }
 
     if (isUpdate) {
-      const previous = this.products_().find(p => p._id === product._id) ?? null
+      const previous = this.products_().find((p) => p._id === product._id) ?? null
       const changes = previous ? this.buildProductChanges(previous, product) : []
 
       return from(this.productDataService.updateProduct(product)).pipe(
@@ -75,7 +75,7 @@ export class KitchenStateService {
             entityType: 'product',
             entityId: product._id,
             entityName: product.name_hebrew,
-            changes,
+            changes
           })
           if (previous) {
             void this.versionHistoryService
@@ -84,19 +84,19 @@ export class KitchenStateService {
                 entityId: previous._id,
                 entityName: previous.name_hebrew,
                 snapshot: previous,
-                changes,
+                changes
               })
-              .catch(err => {
+              .catch((err) => {
                 this.logging.error({
                   event: 'crud.versionHistory.addVersion_fireAndForget_error',
                   message: 'Version history write failed after product save',
-                  context: { err },
+                  context: { err }
                 })
               })
           }
         }),
         map(() => undefined as void),
-        catchError(err => {
+        catchError((err) => {
           this.userMsgService.onSetErrorMsg('שגיאה בעדכון המוצר')
           return throwError(() => err)
         })
@@ -111,11 +111,11 @@ export class KitchenStateService {
             entityType: 'product',
             entityId: saved._id,
             entityName: saved.name_hebrew,
-            changes: [],
+            changes: []
           })
         }),
         map(() => undefined as void),
-        catchError(err => {
+        catchError((err) => {
           this.userMsgService.onSetErrorMsg('שגיאה בהוספת המוצר')
           return throwError(() => err)
         })
@@ -132,7 +132,7 @@ export class KitchenStateService {
         field: 'name',
         label: 'activity_field_name',
         from: prev.name_hebrew,
-        to: next.name_hebrew,
+        to: next.name_hebrew
       })
     }
     const prevPrice = getEffectivePrice(prev)
@@ -142,7 +142,7 @@ export class KitchenStateService {
         field: 'price',
         label: 'activity_field_price',
         from: `${prevPrice} ₪`,
-        to: `${nextPrice} ₪`,
+        to: `${nextPrice} ₪`
       })
     }
     if (prev.base_unit_ !== next.base_unit_) {
@@ -150,7 +150,7 @@ export class KitchenStateService {
         field: 'unit',
         label: 'activity_field_unit',
         from: prev.base_unit_,
-        to: next.base_unit_,
+        to: next.base_unit_
       })
     }
     const prevSupp = getSupplierIds(prev).slice().sort().join(',')
@@ -160,7 +160,7 @@ export class KitchenStateService {
         field: 'supplier',
         label: 'activity_field_supplier',
         from: prevSupp || undefined,
-        to: nextSupp || undefined,
+        to: nextSupp || undefined
       })
     }
     const prevCat = (prev.categories_ ?? []).slice().sort().join(',')
@@ -170,7 +170,7 @@ export class KitchenStateService {
         field: 'category',
         label: 'activity_field_category',
         from: prevCat || undefined,
-        to: nextCat || undefined,
+        to: nextCat || undefined
       })
     }
     const prevAll = (prev.allergens_ ?? []).slice().sort().join(',')
@@ -180,7 +180,7 @@ export class KitchenStateService {
         field: 'allergens',
         label: 'activity_field_allergens',
         from: prevAll || undefined,
-        to: nextAll || undefined,
+        to: nextAll || undefined
       })
     }
     if ((prev.min_stock_level_ ?? 0) !== (next.min_stock_level_ ?? 0)) {
@@ -188,7 +188,7 @@ export class KitchenStateService {
         field: 'min_stock_level',
         label: 'activity_field_min_stock',
         from: String(prev.min_stock_level_ ?? 0),
-        to: String(next.min_stock_level_ ?? 0),
+        to: String(next.min_stock_level_ ?? 0)
       })
     }
     if ((prev.expiry_days_default_ ?? 0) !== (next.expiry_days_default_ ?? 0)) {
@@ -196,7 +196,7 @@ export class KitchenStateService {
         field: 'expiry_days_default',
         label: 'activity_field_expiry_days',
         from: String(prev.expiry_days_default_ ?? 0),
-        to: String(next.expiry_days_default_ ?? 0),
+        to: String(next.expiry_days_default_ ?? 0)
       })
     }
     if (Math.abs((prev.yield_factor_ ?? 1) - (next.yield_factor_ ?? 1)) > 0.001) {
@@ -204,29 +204,29 @@ export class KitchenStateService {
         field: 'yield_factor',
         label: 'activity_field_yield_factor',
         from: String(prev.yield_factor_ ?? 1),
-        to: String(next.yield_factor_ ?? 1),
+        to: String(next.yield_factor_ ?? 1)
       })
     }
     if ((prev.purchase_options_?.length ?? 0) !== (next.purchase_options_?.length ?? 0)) {
-      const prevUnits = (prev.purchase_options_ ?? []).map(o => o.unit_symbol_).join(', ')
-      const nextUnits = (next.purchase_options_ ?? []).map(o => o.unit_symbol_).join(', ')
+      const prevUnits = (prev.purchase_options_ ?? []).map((o) => o.unit_symbol_).join(', ')
+      const nextUnits = (next.purchase_options_ ?? []).map((o) => o.unit_symbol_).join(', ')
       changes.push({
         field: 'purchase_options',
         label: 'activity_field_purchase_options',
         from: prevUnits || undefined,
-        to: nextUnits || undefined,
+        to: nextUnits || undefined
       })
     } else if ((prev.purchase_options_?.length ?? 0) > 0) {
       const prevOpts = JSON.stringify(prev.purchase_options_ ?? [])
       const nextOpts = JSON.stringify(next.purchase_options_ ?? [])
       if (prevOpts !== nextOpts) {
-        const prevUnits = (prev.purchase_options_ ?? []).map(o => o.unit_symbol_).join(', ')
-        const nextUnits = (next.purchase_options_ ?? []).map(o => o.unit_symbol_).join(', ')
+        const prevUnits = (prev.purchase_options_ ?? []).map((o) => o.unit_symbol_).join(', ')
+        const nextUnits = (next.purchase_options_ ?? []).map((o) => o.unit_symbol_).join(', ')
         changes.push({
           field: 'purchase_options',
           label: 'activity_field_purchase_options',
           from: prevUnits || undefined,
-          to: nextUnits || undefined,
+          to: nextUnits || undefined
         })
       }
     }
@@ -234,12 +234,12 @@ export class KitchenStateService {
   }
 
   deleteProduct(_id: string): Observable<void> {
-    const existing = this.products_().find(p => p._id === _id)
+    const existing = this.products_().find((p) => p._id === _id)
     const entityName = existing?.name_hebrew ?? _id
 
     return of(null).pipe(
       switchMap(() => {
-        const exists = this.products_().some(p => p._id === _id)
+        const exists = this.products_().some((p) => p._id === _id)
         if (!exists) return throwError(() => new Error('NOT_FOUND'))
 
         return from(this.productDataService.deleteProduct(_id))
@@ -250,10 +250,10 @@ export class KitchenStateService {
           action: 'deleted',
           entityType: 'product',
           entityId: _id,
-          entityName,
+          entityName
         })
       }),
-      catchError(err => {
+      catchError((err) => {
         const msg = err.message === 'NOT_FOUND' ? 'הפריט לא נמצא' : 'שגיאה בעת המחיקה'
         this.userMsgService.onSetErrorMsg(msg)
         return throwError(() => err)
@@ -276,7 +276,7 @@ export class KitchenStateService {
           action: 'deleted',
           entityType: isDish ? 'dish' : 'recipe',
           entityId: recipe._id,
-          entityName: recipe.name_hebrew,
+          entityName: recipe.name_hebrew
         })
       }),
       catchError(() => {
@@ -294,9 +294,10 @@ export class KitchenStateService {
       : from(this.recipeDataService.hideRecipe(recipe._id))
     return operation$.pipe(
       catchError((err: unknown) => {
-        const msg = err instanceof Error && err.message === 'NOT_AUTHENTICATED'
-          ? 'יש להתחבר כדי להסתיר מתכון'
-          : 'שגיאה בהסתרת המתכון'
+        const msg =
+          err instanceof Error && err.message === 'NOT_AUTHENTICATED'
+            ? 'יש להתחבר כדי להסתיר מתכון'
+            : 'שגיאה בהסתרת המתכון'
         this.userMsgService.onSetErrorMsg(msg)
         return throwError(() => err)
       })
@@ -318,7 +319,7 @@ export class KitchenStateService {
           action: 'deleted',
           entityType: isDish ? 'dish' : 'recipe',
           entityId: recipe._id,
-          entityName: recipe.name_hebrew,
+          entityName: recipe.name_hebrew
         })
       }),
       catchError(() => {
@@ -331,13 +332,13 @@ export class KitchenStateService {
   saveRecipe(recipe: Recipe): Observable<Recipe> {
     const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length)
     const isUpdate = !!(recipe._id && recipe._id.trim() !== '')
-    const previous = isUpdate ? this.recipes_().find(r => r._id === recipe._id) : null
+    const previous = isUpdate ? this.recipes_().find((r) => r._id === recipe._id) : null
     const previousIsDish = previous
-      ? (previous.recipe_type_ === 'dish' || !!(previous.prep_items_?.length || previous.prep_categories_?.length))
+      ? previous.recipe_type_ === 'dish' || !!(previous.prep_items_?.length || previous.prep_categories_?.length)
       : false
     const typeChanged = isUpdate && !!previous && previousIsDish !== isDish
-    const entityType = isDish ? 'dish' as const : 'recipe' as const
-    const previousEntityType = previousIsDish ? 'dish' as const : 'recipe' as const
+    const entityType = isDish ? ('dish' as const) : ('recipe' as const)
+    const previousEntityType = previousIsDish ? ('dish' as const) : ('recipe' as const)
 
     const operation$ = typeChanged
       ? this.deleteRecipe(previous!).pipe(
@@ -348,33 +349,41 @@ export class KitchenStateService {
               : from(this.recipeDataService.addRecipe(payload as Omit<Recipe, '_id'>))
           })
         )
-      : (isDish
-          ? (isUpdate
-              ? from(this.dishDataService.updateDish(recipe))
-              : from(this.dishDataService.addDish(recipe as Omit<Recipe, '_id'>)))
-          : (isUpdate
-              ? from(this.recipeDataService.updateRecipe(recipe))
-              : from(this.recipeDataService.addRecipe(recipe as Omit<Recipe, '_id'>))))
+      : isDish
+        ? isUpdate
+          ? from(this.dishDataService.updateDish(recipe))
+          : from(this.dishDataService.addDish(recipe as Omit<Recipe, '_id'>))
+        : isUpdate
+          ? from(this.recipeDataService.updateRecipe(recipe))
+          : from(this.recipeDataService.addRecipe(recipe as Omit<Recipe, '_id'>))
 
     const fallbackErrorMsg = isDish
-      ? (isUpdate ? 'שגיאה בעדכון המנה' : 'שגיאה בשמירת המנה')
-      : (isUpdate ? 'שגיאה בעדכון המתכון' : 'שגיאה בשמירת המתכון')
+      ? isUpdate
+        ? 'שגיאה בעדכון המנה'
+        : 'שגיאה בשמירת המנה'
+      : isUpdate
+        ? 'שגיאה בעדכון המתכון'
+        : 'שגיאה בשמירת המתכון'
 
     return operation$.pipe(
       tap((saved) => {
         const msg = typeChanged
           ? 'המתכון/המנה שונה לסוג החדש ונשמר בהצלחה'
           : isDish
-            ? (isUpdate ? 'המנה עודכנה בהצלחה' : 'המנה נשמרה בהצלחה')
-            : (isUpdate ? 'המתכון עודכן בהצלחה' : 'המתכון נשמר בהצלחה')
+            ? isUpdate
+              ? 'המנה עודכנה בהצלחה'
+              : 'המנה נשמרה בהצלחה'
+            : isUpdate
+              ? 'המתכון עודכן בהצלחה'
+              : 'המתכון נשמר בהצלחה'
         this.userMsgService.onSetSuccessMsg(msg)
         const changes = isUpdate && previous ? this.buildRecipeChanges(previous, saved) : []
         this.activityLogService.recordActivity({
-          action: typeChanged ? 'created' : (isUpdate ? 'updated' : 'created'),
+          action: typeChanged ? 'created' : isUpdate ? 'updated' : 'created',
           entityType: isDish ? 'dish' : 'recipe',
           entityId: saved._id,
           entityName: saved.name_hebrew,
-          changes,
+          changes
         })
         if (isUpdate && previous) {
           void this.versionHistoryService
@@ -383,13 +392,13 @@ export class KitchenStateService {
               entityId: previous._id,
               entityName: previous.name_hebrew,
               snapshot: previous,
-              changes: this.buildRecipeChanges(previous, recipe),
+              changes: this.buildRecipeChanges(previous, recipe)
             })
-            .catch(err => {
+            .catch((err) => {
               this.logging.error({
                 event: 'crud.versionHistory.addVersion_fireAndForget_error',
                 message: 'Version history write failed after recipe/dish save',
-                context: { err },
+                context: { err }
               })
             })
         }
@@ -414,7 +423,7 @@ export class KitchenStateService {
         field: 'name',
         label: 'activity_field_name',
         from: prev.name_hebrew,
-        to: next.name_hebrew,
+        to: next.name_hebrew
       })
     }
     if ((prev.ingredients_?.length ?? 0) !== (next.ingredients_?.length ?? 0)) {
@@ -422,7 +431,7 @@ export class KitchenStateService {
         field: 'ingredients_count',
         label: 'activity_field_ingredients_count',
         from: String(prev.ingredients_?.length ?? 0),
-        to: String(next.ingredients_?.length ?? 0),
+        to: String(next.ingredients_?.length ?? 0)
       })
     }
     if ((prev.steps_?.length ?? 0) !== (next.steps_?.length ?? 0)) {
@@ -430,15 +439,18 @@ export class KitchenStateService {
         field: 'steps_count',
         label: 'activity_field_steps_count',
         from: String(prev.steps_?.length ?? 0),
-        to: String(next.steps_?.length ?? 0),
+        to: String(next.steps_?.length ?? 0)
       })
     }
-    if ((prev.yield_amount_ ?? 0) !== (next.yield_amount_ ?? 0) || (prev.yield_unit_ ?? '') !== (next.yield_unit_ ?? '')) {
+    if (
+      (prev.yield_amount_ ?? 0) !== (next.yield_amount_ ?? 0) ||
+      (prev.yield_unit_ ?? '') !== (next.yield_unit_ ?? '')
+    ) {
       changes.push({
         field: 'yield',
         label: 'activity_field_yield',
         from: `${prev.yield_amount_ ?? 0} ${prev.yield_unit_ ?? ''}`.trim(),
-        to: `${next.yield_amount_ ?? 0} ${next.yield_unit_ ?? ''}`.trim(),
+        to: `${next.yield_amount_ ?? 0} ${next.yield_unit_ ?? ''}`.trim()
       })
     }
     if ((prev.prep_items_?.length ?? 0) !== (next.prep_items_?.length ?? 0)) {
@@ -446,7 +458,7 @@ export class KitchenStateService {
         field: 'prep_items',
         label: 'activity_field_prep_items',
         from: String(prev.prep_items_?.length ?? 0),
-        to: String(next.prep_items_?.length ?? 0),
+        to: String(next.prep_items_?.length ?? 0)
       })
     }
     return changes

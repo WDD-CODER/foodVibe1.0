@@ -1,14 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  output,
-  signal,
-  OnInit,
-  OnDestroy,
-  WritableSignal
-} from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, inject, output, signal, OnInit, OnDestroy } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
@@ -23,20 +13,12 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
 import { VenueProfile, EnvironmentType } from '@models/venue.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
-import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
-import {
-  CarouselHeaderComponent,
-  CarouselHeaderColumnDirective
-} from 'src/app/shared/carousel-header/carousel-header.component'
-import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
 import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component'
 import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model'
 import { useListState, StringParam, StringSetParam } from 'src/app/core/utils/list-state.util'
 import { HeroFabService } from '@services/hero-fab.service'
-import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
-import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 
 const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', 'client_home', 'popup_venue']
 type VenueBulkField = 'environment_type_'
@@ -50,14 +32,8 @@ type VenueBulkField = 'environment_type_'
     LucideAngularModule,
     TranslatePipe,
     LoaderComponent,
-    ListShellComponent,
-    CarouselHeaderComponent,
-    CarouselHeaderColumnDirective,
-    CellCarouselComponent,
-    CellCarouselSlideDirective,
     ListRowCheckboxComponent,
-    SelectionBarComponent,
-    RowActionsMenuComponent
+    SelectionBarComponent
   ],
   templateUrl: './venue-list.component.html',
   styleUrl: './venue-list.component.scss',
@@ -81,9 +57,6 @@ export class VenueListComponent implements OnInit, OnDestroy {
 
   protected searchQuery_ = signal('')
   protected deletingId_ = signal<string | null>(null)
-  protected readonly isPanelOpen_: WritableSignal<boolean>
-  private readonly togglePanelState_: () => void
-  protected carouselHeaderIndex_ = signal(0)
   protected selectedEnvTypes_ = signal<Set<EnvironmentType>>(new Set())
   protected selection = new ListSelectionState()
 
@@ -98,11 +71,15 @@ export class VenueListComponent implements OnInit, OnDestroy {
     }
   ])
 
-  constructor() {
-    const panel = useResponsivePanelState('venues')
-    this.isPanelOpen_ = panel.isPanelOpen_
-    this.togglePanelState_ = panel.togglePanel
+  /** "N מתוך M פריטים" under the title — same wording as the list-shell chassis. */
+  protected resultCountText_ = computed(() =>
+    this.translation
+      .translate('list_result_count')
+      .replace('{n}', String(this.filteredVenues_().length))
+      .replace('{m}', String(this.venueData.allVenues_().length))
+  )
 
+  constructor() {
     if (!this.embeddedInDashboard) {
       useListState('venues', [
         { urlParam: 'q', signal: this.searchQuery_, serializer: StringParam },
@@ -118,14 +95,6 @@ export class VenueListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.heroFab.clearPageActions()
-  }
-
-  protected togglePanel(): void {
-    this.togglePanelState_()
-  }
-
-  protected onCarouselHeaderChange(index: number): void {
-    this.carouselHeaderIndex_.set(index)
   }
 
   protected toggleEnvType(env: EnvironmentType): void {
@@ -195,7 +164,22 @@ export class VenueListComponent implements OnInit, OnDestroy {
       this.selection.toggle(item._id ?? '')
       return
     }
-    this.router.navigate(['/venues/edit', item._id])
+    // Card click opens the read-only detail screen; the pencil icon (onEdit) still
+    // jumps straight to the edit form for a quicker power-user path.
+    this.router.navigate(['/venues/view', item._id])
+  }
+
+  /** Keyboard equivalent of a card click (Enter/Space) — same destination and same
+   * nested-interactive-element guard as onRowClick (a keyboard user tabbed onto the
+   * card's own edit/delete button must not also trigger the card's navigate/select). */
+  protected onCardActivate(item: VenueProfile, event: Event): void {
+    const el = event.target as HTMLElement
+    if (el.closest('button') || el.closest('a') || el.closest('app-list-row-checkbox')) return
+    if (this.selection.selectionMode()) {
+      this.selection.toggle(item._id ?? '')
+      return
+    }
+    this.router.navigate(['/venues/view', item._id])
   }
 
   protected onBulkEdit(event: { field: string; value: string; ids: string[] }): void {

@@ -23,7 +23,10 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
+
+  min-height: var(--tap); /* plan 305 M7 — touch floor; padding/type/color otherwise untouched */
   padding: 5px 14px;
+
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid #d0c8b4;
   border-radius: 20px;
@@ -31,7 +34,9 @@
   font-size: 0.7rem;
   color: #5a4a2a;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
   white-space: nowrap;
 
   &:hover:not(:disabled) {
@@ -65,7 +70,7 @@
   background: var(--bg-pure, #fff);
   border: 1px solid #d0c8b4;
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   overflow: hidden;
 }
 
@@ -78,7 +83,7 @@
   background: var(--bg-pure, #fff);
   border: 1px solid #d0c8b4;
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   overflow: hidden;
 }
 
@@ -98,7 +103,7 @@
   transition: background 0.15s;
 
   &:hover {
-    background: var(--bg-glass-hover, rgba(0,0,0,0.04));
+    background: var(--bg-glass-hover, rgba(0, 0, 0, 0.04));
   }
 }
 
@@ -136,7 +141,7 @@
   transition: background 0.15s;
 
   &:hover {
-    background: rgba(0,0,0,0.04);
+    background: rgba(0, 0, 0, 0.04);
   }
 
   &.icon {

@@ -1,0 +1,16 @@
+@if (chips_().length) {
+  <nav class="c-tab-chips" dir="rtl" aria-label="מסכי משנה">
+    @for (chip of chips_(); track chip.id) {
+      <a
+        class="c-tab-pill"
+        [routerLink]="chip.path"
+        [queryParams]="chip.queryParams ?? null"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: !!chip.queryParams }"
+      >
+        <lucide-icon [name]="chip.icon" [size]="15"></lucide-icon>
+        {{ chip.labelKey | translatePipe }}
+      </a>
+    }
+  </nav>
+}

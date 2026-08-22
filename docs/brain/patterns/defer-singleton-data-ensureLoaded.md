@@ -18,4 +18,4 @@ Keep Recipe / Dish / Product / Supplier / UnitRegistry / MetadataRegistry eager 
 
 Adding or refactoring a root data service whose collection is only needed inside a lazy route (or a dashboard tab that is not the default overview). Prefer extending the existing resolver + `ensureLoaded` pattern over inventing a new loader framework.
 
-See also: gotcha **Login reload bypasses deferred constructor load**.
+See also: gotcha **Login reload bypasses deferred constructor load**; pattern **Global loading feedback via `LoadingService.track()`** — wraps this pattern's `loadInitialData()` fetch so the user sees the pot-with-steam overlay while an `ensureLoaded()` call (eager or deferred) is in flight.

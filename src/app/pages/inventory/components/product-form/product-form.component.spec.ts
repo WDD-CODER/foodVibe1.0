@@ -9,7 +9,7 @@ import { UtilService } from '@services/util.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { ActivatedRoute, Router } from '@angular/router'
 import { of, Subject } from 'rxjs'
-import { signal } from '@angular/core'
+import { signal, computed } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { Product } from '@models/product.model'
@@ -29,6 +29,7 @@ describe('ProductFormComponent', () => {
   const mockAllergens = signal(['gluten', 'peanuts'])
   const mockUnitKeys = signal(['ק"ג', 'גרם'])
   const mockIsCreatorOpen = signal(false) // Add this signal mock
+  const mockSuppliersSignal = signal<{ _id: string; name_hebrew: string }[]>([])
   beforeEach(async () => {
     mockRouter = jasmine.createSpyObj('Router', ['navigate'])
     mockConversionService = jasmine.createSpyObj('ConversionService', [
@@ -82,7 +83,8 @@ describe('ProductFormComponent', () => {
           provide: KitchenStateService,
           useValue: {
             saveProduct: () => of(null),
-            suppliers_: signal([])
+            suppliers_: mockSuppliersSignal,
+            suppliersById_: computed(() => new Map(mockSuppliersSignal().map((s) => [s._id, s])))
           }
         },
         {

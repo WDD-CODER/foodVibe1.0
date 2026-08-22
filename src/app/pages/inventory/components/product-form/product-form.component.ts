@@ -581,7 +581,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   }
 
   protected getSupplierName(supplierId: string): string {
-    const supplier = this.kitchenStateService.suppliers_().find((s) => s._id === supplierId)
+    const supplier = this.kitchenStateService.suppliersById_().get(supplierId)
     return supplier?.name_hebrew ?? supplierId
   }
 

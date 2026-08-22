@@ -5,6 +5,7 @@ import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
 import { KeyResolutionService } from './key-resolution.service'
 import { LoggingService } from './logging.service'
+import { LoadingService } from './loading.service'
 import { DishDataService } from './dish-data.service'
 import type { FlatPrepItem, PrepCategory } from '../models/recipe.model'
 
@@ -28,6 +29,7 @@ export class PreparationRegistryService {
   private readonly translationService = inject(TranslationService)
   private readonly keyResolution = inject(KeyResolutionService)
   private readonly logging = inject(LoggingService)
+  private readonly loading_ = inject(LoadingService)
   private readonly dishDataService = inject(DishDataService)
 
   private categories_ = signal<string[]>([])
@@ -79,7 +81,7 @@ export class PreparationRegistryService {
 
   private async initRegistry(): Promise<void> {
     try {
-      const registries = await this.storageService.query<PreparationRegistryDoc>(STORAGE_KEY)
+      const registries = await this.loading_.track(this.storageService.query<PreparationRegistryDoc>(STORAGE_KEY))
       const doc = registries[0]
       if (doc?.categories?.length !== undefined) {
         this.categories_.set(doc.categories)

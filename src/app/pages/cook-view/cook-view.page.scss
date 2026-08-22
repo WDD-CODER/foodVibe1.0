@@ -1,90 +1,98 @@
+/* Cook View — mirrors UI refactor/CookView.dc.html's visual system: glass panels,
+   pill controls, a photo hero with progress bar, and a "kitchen" dark theme toggle.
+   The mockup's markup is a simplified single-flow screen; this component keeps our
+   richer functionality (edit mode, timers, stopwatch, ingredient scaling, focus-mode
+   active/done/pending steps) and re-skins it with the design's token language instead
+   of the mockup's literal (inline-styled) DOM. */
+
 :host {
   display: block;
-  background: var(--cv-bg-page);
-  --cv-header-start: var(--color-primary-soft);
-  --cv-header-end: var(--bg-success);
-  --cv-radius-xl: var(--radius-xl);
-  --cv-radius-2xl: var(--radius-lg);
-  --cv-radius-full: var(--radius-full);
-  --cv-radius-md: var(--radius-md);
-  --cv-radius-sm: var(--radius-sm);
-  --cv-accent: var(--color-primary);
-  --cv-section-bg: var(--bg-glass);
-  --cv-border-edit: var(--border-warning);
-  --cv-bg-banner: var(--bg-warning);
-  --cv-text-banner: var(--text-warning);
-  --cv-bg-success: var(--bg-success);
-  --cv-text-success: var(--text-success);
-  --cv-border-success: var(--color-success);
-  --cv-border-warning: var(--border-warning);
-  --cv-text-heading: var(--color-text-main);
-  --cv-border-accent-strong: rgba(20, 184, 166, 0.3);
-  --cv-accent-soft: var(--color-primary-soft);
-  /* Focus Mode tokens */
-  --cv-active-border: #1D9E75;
-  --cv-active-bg: #E1F5EE;
-  --cv-active-text: #0F6E56;
-  --cv-inactive-opacity: 0.62;
-  --cv-done-circle-bg: #d4ede6;
-  --cv-done-circle-color: #1d9e75;
-  --cv-timer-bg: #FAEEDA;
-  --cv-timer-color: #633806;
-  --cv-timer-alert-bg: #fee2e2;
-  --cv-timer-alert-color: #b91c1c;
-  --cv-timer-alert-border: #fca5a5;
-  --cv-step-done-btn-bg: #1D9E75;
-  --cv-step-done-btn-color: #E1F5EE;
+
   --cv-tap-min: 44px;
-  /* Cook-view green palette tokens */
-  --cv-bg-page: #f0f7f5;
-  --cv-gradient-start: #f8fdfb;
-  --cv-border-soft: #c8e6db;
-  --cv-bg-soft: #e8f7f1;
-  --cv-gradient-mid: #5DCAA5;
-  --cv-bg-row: #fafffe;
-  --cv-border-muted: #e0f0ea;
-  --cv-bg-active-gradient: #d6f0e6;
-  --cv-text-muted-green: #8aa89f;
-  --cv-muted: #888;
+
+  /* ── Design-system tokens — light (default) branch of CookView.dc.html's baseVals() ── */
+  --cv-page-bg: var(--bg-body);
+  --cv-nav-bg: var(--bg-frosted-nav);
+  --cv-nav-border: var(--border-glass);
+  --cv-segment-bg: var(--bg-subtle);
+  --cv-main-text: var(--color-text-main);
+  --cv-muted-text: var(--color-text-muted);
+  --cv-panel-bg: var(--bg-glass);
+  --cv-panel-border: var(--border-glass);
+  --cv-panel-shadow: var(--shadow-glass);
+  --cv-hero-shadow: var(--shadow-hover);
+  --cv-chip-bg: var(--color-primary-soft);
+  --cv-accent: var(--color-primary);
+  --cv-accent-hover: var(--color-primary-hover);
+  --cv-accent-glow: var(--color-primary-glow);
+  --cv-row-bg: transparent;
+  --cv-timer-idle-bg: var(--cv-segment-bg);
+  --cv-timer-idle-border: var(--cv-nav-border);
+  --cv-active-ring: 0 0 0 2px var(--cv-accent-glow);
 }
 
+/* ── Kitchen dark mode (M13 — plan 306 round 2) ─────────────────────────────
+   Design source: UI refactor/CookView.dc.html — near-black "kitchen" theme,
+   toggled per-session via the sun/moon button in .cv-nav (default: dark, matching
+   the mockup's `isDark: true` default). */
+.cook-view-container.theme-kitchen {
+  --cv-page-bg: radial-gradient(ellipse 1200px 800px at 50% -10%, #0f2e2a, #0a1614 60%);
+  --cv-nav-bg: rgba(10, 22, 20, 0.75);
+  --cv-nav-border: rgba(255, 255, 255, 0.1);
+  --cv-segment-bg: rgba(255, 255, 255, 0.06);
+  --cv-main-text: #f1f5f4;
+  --cv-muted-text: rgba(226, 240, 236, 0.74);
+  --cv-panel-bg: rgba(255, 255, 255, 0.05);
+  --cv-panel-border: rgba(255, 255, 255, 0.1);
+  --cv-panel-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
+  --cv-hero-shadow: 0 30px 70px -25px rgba(0, 0, 0, 0.7);
+  --cv-chip-bg: rgba(20, 184, 166, 0.18);
+  --cv-timer-idle-bg: rgba(255, 255, 255, 0.06);
+  --cv-timer-idle-border: rgba(255, 255, 255, 0.15);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Shell / page background
+   ───────────────────────────────────────────────────────────────────────── */
 .cook-view-container {
   display: block;
 
   max-width: 1100px;
 
-  background: var(--bg-pure);
-
-  border: 1px solid rgba(29, 158, 117, 0.18);
-  border-radius: 24px;
-  box-shadow: 0 4px 32px rgba(29, 158, 117, 0.08);
+  background: var(--cv-page-bg);
+  border-radius: var(--radius-xl);
   margin-inline: auto;
   margin-block: 1.5rem;
+  padding: 0 0 var(--space-8);
+
+  transition: background 0.3s var(--ease-smooth);
 }
 
 .cook-view-empty {
   display: block;
 
-  background: var(--bg-glass-strong);
-  color: inherit;
+  background: var(--cv-panel-bg);
+  color: var(--cv-main-text);
   font-size: inherit;
   text-align: center;
 
-  border: 1px solid var(--border-glass);
+  border: 1px solid var(--cv-panel-border);
   border-radius: var(--radius-xl);
   padding: 3rem 2rem;
 
-  box-shadow: var(--shadow-glass);
+  box-shadow: var(--cv-panel-shadow);
   backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
 
   p {
     font-size: 1.1rem;
+    color: var(--cv-muted-text);
 
     margin: 0 0 1rem;
   }
 
   a {
-    color: var(--color-primary);
+    color: var(--cv-accent);
     font-weight: 600;
     text-decoration: underline;
   }
@@ -92,7 +100,7 @@
   lucide-icon {
     display: block;
 
-    color: var(--color-primary);
+    color: var(--cv-accent);
     opacity: 0.9;
 
     margin: 0 auto 1rem;
@@ -101,17 +109,17 @@
 
 .cv-shell {
   display: grid;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto auto auto auto 1fr;
 
   height: calc(100vh - 6rem);
   height: calc(100dvh - 6rem);
   overflow: hidden;
 
   &.edit-mode {
-    background: var(--cv-section-bg);
+    background: var(--cv-panel-bg);
 
-    border: 1px solid var(--cv-border-edit);
-    border-radius: var(--cv-radius-xl);
+    border: 1px solid var(--border-warning);
+    border-radius: var(--radius-xl);
     padding: 1rem;
 
     height: auto;
@@ -119,10 +127,10 @@
   }
 
   &.scaled-view {
-    background: var(--cv-accent-soft);
+    background: var(--cv-chip-bg);
 
-    border: 2px solid var(--cv-border-accent-strong);
-    border-radius: var(--cv-radius-xl);
+    border: 2px solid var(--cv-accent-glow);
+    border-radius: var(--radius-xl);
     padding: 1rem;
 
     box-shadow: var(--shadow-glow);
@@ -132,13 +140,13 @@
 .edit-mode-banner {
   display: block;
 
-  background: var(--cv-bg-banner);
-  color: var(--cv-text-banner);
+  background: var(--bg-warning);
+  color: var(--text-warning);
   font-size: 0.875rem;
   font-weight: 600;
   text-align: center;
 
-  border-radius: var(--cv-radius-2xl);
+  border-radius: var(--radius-full);
   margin: 0 0 0.5rem;
   padding: 0.5rem 1rem;
 }
@@ -151,94 +159,270 @@
 }
 
 .save-btn {
-  background: var(--cv-bg-success);
-  color: var(--cv-text-success);
+  background: var(--bg-success);
+  color: var(--text-success);
 
-  border-color: var(--cv-border-success);
+  border-color: var(--color-success);
 }
 
 .undo-btn {
-  background: var(--cv-bg-banner);
-  color: var(--cv-text-banner);
+  background: var(--bg-warning);
+  color: var(--text-warning);
 
-  border-color: var(--cv-border-warning);
+  border-color: var(--border-warning);
 }
 
-.cv-header-bar {
+/* ─────────────────────────────────────────────────────────────────────────
+   Page-local nav — title + kitchen dark-mode toggle
+   ───────────────────────────────────────────────────────────────────────── */
+.cv-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
 
-  background: linear-gradient(135deg, var(--cv-active-border), var(--cv-active-text));
-
-  border-radius: 24px 24px 0 0;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
+  padding: var(--space-4) var(--space-5) 0;
 }
 
-.cv-recipe-name {
-  color: white;
-  font-size: 1.25rem;
-  font-weight: 800;
-
-  margin: 0;
+.cv-nav-title {
+  color: var(--cv-main-text);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
 }
 
-.cv-name-rating {
-  display: flex;
-  flex-direction: column;
-
-  gap: 0.25rem;
-}
-
-.cv-header-meta {
-  display: flex;
-  align-items: center;
-
-  gap: 0.5rem;
-}
-
-.cv-approved-badge {
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.7rem;
-  font-weight: 600;
-}
-
-.cv-header-actions {
-  display: flex;
-  align-items: center;
-
-  gap: 0.75rem;
-}
-
-.cv-cost {
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.edit-btn {
+.cv-theme-toggle {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
 
-  gap: 0.5rem;
+  width: var(--cv-tap-min);
+  height: var(--cv-tap-min);
 
-  background: var(--bg-pure);
-  color: var(--cv-accent);
-  font-size: 0.875rem;
+  background: var(--cv-segment-bg);
+  color: var(--cv-main-text);
 
-  border: 1px solid var(--cv-border-accent-strong);
-  border-radius: var(--cv-radius-2xl);
-  padding: 0.5rem 0.875rem;
+  border: 1px solid var(--cv-nav-border);
+  border-radius: var(--radius-full);
 
   cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
+  transition:
+    background 0.2s var(--ease-smooth),
+    transform 0.15s var(--ease-spring);
 
   &:hover {
-    background: var(--cv-accent-soft);
-    transform: scale(1.02);
+    background: var(--cv-chip-bg);
+    transform: scale(1.05);
   }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Hero — recipe photo + gradient scrim + name + prep-progress bar
+   ───────────────────────────────────────────────────────────────────────── */
+.cv-hero {
+  position: relative;
+
+  overflow: hidden;
+
+  min-height: 150px;
+
+  background: var(--cv-panel-bg);
+  border: 1px solid var(--cv-panel-border);
+  border-radius: var(--radius-xl);
+  margin: var(--space-4) var(--space-5) 0;
+
+  box-shadow: var(--cv-hero-shadow);
+  transition: min-height 0.3s var(--ease-smooth);
+
+  &.cv-hero--photo {
+    min-height: 320px;
+  }
+}
+
+/* No-photo placeholder — small centered icon, matching the mockup's image-slot state
+   instead of filling the hero with a solid brand-color card. */
+.cv-hero-placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+
+  color: var(--cv-accent);
+  opacity: 0.35;
+}
+
+.cv-hero-img {
+  display: block;
+
+  inline-size: 100%;
+  block-size: 100%;
+
+  object-fit: cover;
+
+  position: absolute;
+  inset: 0;
+}
+
+.cv-hero-scrim {
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.2) 35%, rgba(0, 0, 0, 0.75) 100%);
+
+  pointer-events: none;
+}
+
+.cv-hero-top {
+  position: relative;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.cv-hero-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  gap: var(--space-2);
+}
+
+.cv-hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 6px;
+}
+
+.cv-hero-badge {
+  color: var(--color-text-on-primary);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+
+  backdrop-filter: blur(6px);
+
+  &--approved {
+    background: rgba(20, 184, 166, 0.9);
+  }
+}
+
+.cv-hero-title {
+  color: var(--color-text-on-primary);
+  font-size: 1.75rem;
+  font-weight: var(--fw-extrabold);
+  letter-spacing: var(--tracking-tight);
+  text-wrap: pretty;
+
+  margin: 0;
+
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+.cv-hero-timer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 2px;
+  padding: 10px 18px;
+
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-lg);
+
+  backdrop-filter: blur(10px);
+
+  &--alert {
+    background: rgba(217, 119, 6, 0.85);
+    animation: cv-timer-pulse 1.2s infinite;
+  }
+}
+
+.cv-hero-timer-label {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+}
+
+.cv-hero-timer-value {
+  color: var(--color-text-on-primary);
+  font-size: 1.375rem;
+  font-weight: var(--fw-extrabold);
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes cv-timer-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0);
+  }
+}
+
+.cv-hero-progress {
+  position: relative;
+
+  padding: 0 var(--space-5) var(--space-5);
+}
+
+.cv-hero-progress-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 6px;
+
+  span:first-child {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+  }
+
+  span:last-child {
+    color: var(--color-text-on-primary);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
+  }
+}
+
+.cv-hero-progress-track {
+  overflow: hidden;
+
+  height: 8px;
+
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-full);
+}
+
+.cv-hero-progress-fill {
+  height: 100%;
+
+  background: linear-gradient(90deg, var(--cv-accent), #5eead4);
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 12px rgba(20, 184, 166, 0.7);
+
+  transition: width 0.4s var(--ease-spring);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Actions row — edit / export controls
+   ───────────────────────────────────────────────────────────────────────── */
+.cv-actions-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 0.75rem;
+  padding: var(--space-3) var(--space-5) 0;
 }
 
 .export-bar-wrap {
@@ -265,7 +449,7 @@
 
 .export-bar-label {
   font-size: 0.75rem;
-  color: var(--color-text-muted);
+  color: var(--cv-muted-text);
 
   margin-inline-end: 0.25rem;
 }
@@ -274,142 +458,80 @@
   display: inline-flex;
 }
 
+.edit-btn {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 0.5rem;
+
+  background: var(--cv-segment-bg);
+  color: var(--cv-main-text);
+  font-size: 0.875rem;
+
+  border: 1px solid var(--cv-nav-border);
+  border-radius: var(--radius-full);
+  padding: 0.5rem 0.875rem;
+
+  cursor: pointer;
+  transition:
+    background 0.2s var(--ease-smooth),
+    transform 0.15s var(--ease-spring);
+
+  &:hover {
+    background: var(--cv-chip-bg);
+    transform: scale(1.02);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Scale bar — multiplier pills + quantity segmented control.
+   Lives inside the ingredient panel header (mirrors the mockup's in-panel
+   "כמות מנות" row) instead of its own full-width bar above the grid.
+   ───────────────────────────────────────────────────────────────────────── */
 .cv-scale-bar {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
 
-  background: linear-gradient(180deg, rgba(29,158,117,0.08) 0%, var(--cv-bg-page) 100%);
-
-  border-bottom: 1px solid var(--cv-border-soft);
   gap: 0.5rem;
-  padding: 0.5rem 1.25rem;
-}
+  padding: 0 1rem var(--space-3);
 
-/* Phone-only pane swap buttons */
-.cv-phone-swap-bar {
-  display: none;
-  align-items: center;
-
-  background: var(--bg-pure);
-
-  border-bottom: 2px solid var(--cv-border-soft);
-  gap: 0;
-}
-
-.cv-phone-swap-btn {
-  flex: 1;
-  text-align: center;
-
-  background: transparent;
-  color: #888;
-  font-size: 0.8rem;
-  font-weight: 600;
-
-  border: none;
-  cursor: pointer;
-  padding: 10px 0 8px;
-
-  transition: color 0.15s;
-
-  &.active {
-    color: var(--cv-active-border);
-
-    border-bottom: 2px solid var(--cv-active-border);
-    margin-bottom: -2px;
-  }
-}
-
-.cv-phone-swap-hint {
-  display: none;
-
-  color: #8aaa99;
-  font-size: 0.72rem;
-  text-align: center;
-
-  padding: 4px 0 2px;
-}
-
-.cv-pane-divider {
-  display: none;
-}
-
-.cv-complete-banner {
-  background: var(--cv-active-bg);
-  color: var(--cv-active-text);
-  font-size: 1rem;
-  font-weight: 700;
-  text-align: center;
-
-  border: 2px solid var(--cv-active-border);
-  border-radius: 12px;
-  margin: 0.75rem;
-  padding: 1rem;
-}
-
-.quantity-control-wrap {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-
-  background: var(--bg-pure);
-
-  border: 1.5px solid var(--cv-border-soft);
-  border-radius: 12px;
-  gap: 0.875rem;
-  padding-block: 0.25rem;
-  padding-inline: 0.5rem;
-}
-
-.quantity-label {
-  font-weight: 600;
-  color: var(--cv-text-heading);
-}
-
-.qty-btn {
-  background: transparent;
-  color: var(--cv-accent);
-
-  border: none;
-  padding: 0.5rem 0.875rem;
-
-  cursor: pointer;
-  transition: background 0.2s;
-
-  &:hover:not(:disabled) {
-    background: var(--cv-accent-soft);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  border-bottom: 1px dashed var(--cv-panel-border);
 }
 
 .cv-multiplier-chips {
   display: flex;
   flex-wrap: wrap;
 
-  gap: 0.5rem;
+  gap: 2px;
+  padding: 4px;
 
-  // margin-block-end: 0.75rem;
+  background: var(--cv-segment-bg);
+  border: 1px solid var(--cv-nav-border);
+  border-radius: var(--radius-full);
 }
 
 .cv-chip-btn {
+  color: var(--cv-muted-text);
+  font-size: 13px;
+  font-weight: 700;
+
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 6px 14px;
+
   cursor: pointer;
-
-  border: 1.5px solid var(--cv-border-soft);
-  border-radius: 20px;
-
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s var(--ease-smooth),
+    color 0.2s var(--ease-smooth);
 }
 
 .cv-chip--active {
-  background: var(--cv-accent);
   color: var(--color-text-on-primary);
 
-  border-color: var(--cv-accent);
-  box-shadow: 0 2px 8px rgba(29, 158, 117, 0.3);
+  background: linear-gradient(180deg, var(--cv-accent), var(--cv-accent-hover));
+  box-shadow: var(--shadow-glow);
 }
 
 .cv-recent-chips {
@@ -425,25 +547,143 @@
 .cv-recent-label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-text-muted);
+  color: var(--cv-muted-text);
 }
 
+.quantity-control-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 0.5rem;
+  padding-block: 4px;
+  padding-inline: 4px 0.75rem;
+
+  background: var(--cv-segment-bg);
+  border: 1px solid var(--cv-nav-border);
+  border-radius: var(--radius-full);
+}
+
+.quantity-label {
+  color: var(--cv-muted-text);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+
+.qty-btn {
+  background: transparent;
+  color: var(--cv-accent);
+
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 0.5rem 0.75rem;
+
+  cursor: pointer;
+  transition: background 0.2s var(--ease-smooth);
+
+  &:hover:not(:disabled) {
+    background: var(--cv-chip-bg);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Phone-only pane swap tabs
+   ───────────────────────────────────────────────────────────────────────── */
+.cv-phone-swap-bar {
+  display: none;
+  align-items: center;
+
+  gap: 4px;
+  margin: var(--space-3) var(--space-5) 0;
+  padding: 4px;
+
+  background: var(--cv-segment-bg);
+  border: 1px solid var(--cv-nav-border);
+  border-radius: var(--radius-full);
+}
+
+.cv-phone-swap-btn {
+  flex: 1;
+  text-align: center;
+
+  background: transparent;
+  color: var(--cv-muted-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  padding: 8px 0;
+
+  transition:
+    background 0.15s var(--ease-smooth),
+    color 0.15s var(--ease-smooth);
+
+  &.active {
+    color: var(--color-text-on-primary);
+
+    background: linear-gradient(180deg, var(--cv-accent), var(--cv-accent-hover));
+  }
+}
+
+.cv-phone-swap-hint {
+  display: none;
+
+  color: var(--cv-muted-text);
+  font-size: 0.72rem;
+  text-align: center;
+
+  padding: 4px 0 0;
+}
+
+.cv-pane-divider {
+  display: none;
+}
+
+.cv-complete-banner {
+  color: var(--cv-accent);
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+
+  background: var(--cv-chip-bg);
+  border: 1px solid var(--cv-accent-glow);
+  border-radius: var(--radius-lg);
+  margin: 0.75rem;
+  padding: 1rem;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Two-column body — glass ingredient panel + step list
+   ───────────────────────────────────────────────────────────────────────── */
 .cv-body {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 320px 1fr;
 
   overflow: hidden;
+  gap: var(--space-4);
+  margin: var(--space-4) var(--space-5) 0;
+  padding-bottom: var(--space-4);
+
   height: 100%;
 }
 
 .cv-ing-pane,
 .cv-step-pane {
-  background: var(--bg-pure);
+  background: var(--cv-panel-bg);
 
-  border: 1px solid rgba(29, 158, 117, 0.12);
-  border-radius: 16px;
+  border: 1px solid var(--cv-panel-border);
+  border-radius: var(--radius-lg);
 
-  box-shadow: 0 2px 12px rgba(29, 158, 117, 0.06);
+  box-shadow: var(--cv-panel-shadow);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
 }
 
 .cv-ing-pane {
@@ -462,9 +702,10 @@
   align-items: center;
   flex-shrink: 0;
 
-  background: var(--cv-bg-soft);
+  background: var(--cv-segment-bg);
 
-  border-bottom: 1px solid rgba(29, 158, 117, 0.1);
+  border-bottom: 1px solid var(--cv-panel-border);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   padding-block: 0.625rem;
 }
 
@@ -482,9 +723,9 @@
 
   gap: 0.375rem;
 
-  color: var(--cv-active-text);
-  font-size: 0.95rem;
-  font-weight: 700;
+  color: var(--cv-main-text);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
 
   lucide-icon {
     flex-shrink: 0;
@@ -494,38 +735,39 @@
 
 .cv-ing-badge,
 .cv-step-counter {
-  font-size: 0.8rem;
+  font-size: var(--fs-xs);
   font-weight: 600;
   color: var(--cv-accent);
 
-  background: var(--cv-accent-soft);
+  background: var(--cv-chip-bg);
 
-  border-radius: var(--cv-radius-full);
+  border-radius: var(--radius-full);
   margin-inline-start: auto;
   padding-block: 0.125rem;
   padding-inline: 0.5rem;
 }
 
 .cv-ing-badge--complete {
-  background: var(--cv-active-bg);
-  color: var(--cv-active-text);
+  color: var(--color-text-on-primary);
+
+  background: linear-gradient(180deg, var(--cv-accent), var(--cv-accent-hover));
 }
 
 .cv-ing-progress-bar {
-  width: 100%;
-  height: 4px;
+  inline-size: 100%;
+  block-size: 4px;
 
-  background: var(--cv-border-soft);
+  background: var(--cv-nav-border);
 
-  border-radius: 4px;
+  border-radius: var(--radius-full);
 }
 
 .cv-ing-progress-fill {
-  height: 100%;
+  block-size: 100%;
 
-  background: linear-gradient(90deg, var(--cv-active-border) 0%, var(--cv-gradient-mid) 100%);
+  background: linear-gradient(90deg, var(--cv-accent) 0%, #5eead4 100%);
 
-  border-radius: 2px;
+  border-radius: var(--radius-full);
 
   transition: width 0.4s ease-out;
 }
@@ -536,8 +778,13 @@
 }
 
 @keyframes cv-progress-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .cv-ing-row {
@@ -547,26 +794,28 @@
   gap: 0.75rem;
   min-height: var(--cv-tap-min);
 
-  background: var(--cv-bg-row);
+  background: var(--cv-row-bg);
   direction: rtl;
 
-  border: 1px solid rgba(29, 158, 117, 0.14);
-  border-radius: 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
   margin-bottom: 3px;
   padding-block: 0.625rem;
   padding-inline: 1rem;
 
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s var(--ease-smooth),
+    border-color 0.15s var(--ease-smooth);
 
   &:hover {
-    background: var(--cv-bg-soft);
-    border-color: rgba(29, 158, 117, 0.28);
+    background: var(--cv-segment-bg);
+    border-color: var(--cv-panel-border);
   }
 }
 
 .cv-ing-row--done {
-  opacity: var(--cv-inactive-opacity);
+  --cv-row-bg: var(--cv-chip-bg);
 
   .cv-ing-name {
     text-decoration: line-through;
@@ -579,24 +828,26 @@
   justify-content: center;
   flex-shrink: 0;
 
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
 
-  border: 1.5px solid var(--border-default);
-  border-radius: 50%;
+  border: 1.5px solid var(--cv-nav-border);
+  border-radius: 6px;
 
-  transition: background 0.2s, border-color 0.2s;
+  transition:
+    background 0.2s var(--ease-smooth),
+    border-color 0.2s var(--ease-smooth);
 }
 
 .cv-ing-check--done {
-  background: var(--cv-active-border);
+  background: var(--cv-accent);
 
-  border-color: var(--cv-active-border);
+  border-color: transparent;
 
   &::after {
     content: '✓';
 
-    color: white;
+    color: var(--color-text-on-primary);
     font-size: 0.7rem;
     font-weight: 700;
   }
@@ -606,21 +857,30 @@
   flex: 1;
   min-width: 0;
 
+  color: var(--cv-main-text);
   font-weight: 500;
 }
 
+.cv-ing-row--done .cv-ing-name {
+  color: var(--cv-muted-text);
+}
+
 .cv-ing-amt {
-  color: var(--cv-active-border);
-  font-size: 1.125rem;
-  font-weight: 800;
+  color: var(--cv-main-text);
+  font-size: 1rem;
+  font-weight: 700;
 
   min-width: 3rem;
   text-align: left;
 }
 
+.cv-ing-row--done .cv-ing-amt {
+  color: var(--cv-muted-text);
+}
+
 .cv-ing-unit {
   font-size: 0.75rem;
-  color: var(--color-text-muted);
+  color: var(--cv-muted-text);
 }
 
 .cv-step-pane {
@@ -646,7 +906,7 @@
   min-height: 1.5rem;
   padding-block: 0.25rem;
 
-  color: var(--color-text-muted);
+  color: var(--cv-muted-text);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s var(--ease-smooth);
@@ -654,12 +914,12 @@
 
 .cv-pane-scroll-indicator--top {
   top: 0;
-  background: linear-gradient(to bottom, var(--bg-glass-strong) 0%, transparent 100%);
+  background: linear-gradient(to bottom, var(--cv-panel-bg) 0%, transparent 100%);
 }
 
 .cv-pane-scroll-indicator--bottom {
   bottom: 0;
-  background: linear-gradient(to top, var(--bg-glass-strong) 0%, transparent 100%);
+  background: linear-gradient(to top, var(--cv-panel-bg) 0%, transparent 100%);
 }
 
 /* Show top chevron when list can scroll up */
@@ -677,7 +937,7 @@
 .cv-step-pane-header {
   justify-content: space-between;
 
-  padding-inline: 0.5rem;
+  padding-inline: 1rem;
 }
 
 .cv-ing-body,
@@ -694,6 +954,7 @@
 
   min-height: 0;
   overflow-y: auto;
+  padding: 0.5rem;
 }
 
 .cv-step-body {
@@ -708,30 +969,33 @@
   padding: 0.75rem;
 }
 
-
+/* ─────────────────────────────────────────────────────────────────────────
+   Step cards — pending (default) / active (in-progress) / done (checked)
+   ───────────────────────────────────────────────────────────────────────── */
 .cv-step-card {
-  background: var(--bg-pure);
+  background: var(--cv-panel-bg);
 
-  border: 1px solid var(--cv-border-muted);
-  border-radius: 10px;
+  border: 1px solid var(--cv-panel-border);
+  border-radius: var(--radius-lg);
 
   overflow: hidden;
-  opacity: var(--cv-inactive-opacity);
-  transition: opacity 0.2s, border-color 0.2s, box-shadow 0.2s;
+  transition:
+    opacity 0.2s var(--ease-smooth),
+    border-color 0.2s var(--ease-smooth),
+    box-shadow 0.2s var(--ease-smooth);
 }
 
 .cv-step-card--active {
-  background: var(--cv-active-bg);
+  background: var(--cv-chip-bg);
 
-  border: 2px solid var(--cv-active-border);
-  border-radius: 12px;
-
-  box-shadow: 0 4px 16px rgba(29, 158, 117, 0.18);
-  opacity: 1;
+  border-color: var(--cv-accent-glow);
 }
 
 .cv-step-card--done {
-  opacity: var(--cv-inactive-opacity);
+  background: var(--cv-chip-bg);
+
+  border-color: var(--cv-accent-glow);
+  opacity: 0.75;
 }
 
 /* Pending steps are tappable — cursor indicates this */
@@ -739,15 +1003,13 @@
   cursor: pointer;
 
   &:hover {
-    opacity: 0.8;
+    border-color: var(--cv-accent-glow);
   }
 }
 
 .cv-step-card--timer-alert {
-  // !important overrides the 2px active-border shorthand (active and done/pending states are mutually exclusive in the template)
-  border-color: var(--cv-timer-alert-border) !important;
+  border-color: var(--color-danger) !important;
   border-width: 1.5px !important;
-  opacity: var(--cv-inactive-opacity);
 }
 
 .cv-step-card-head {
@@ -759,10 +1021,7 @@
 }
 
 .cv-step-card--active .cv-step-card-head {
-  background: var(--cv-active-border);
-
-  gap: 8px;
-  padding: 7px 12px;
+  padding: 8px 12px 4px;
 }
 
 .cv-step-num {
@@ -771,39 +1030,36 @@
   justify-content: center;
   flex-shrink: 0;
 
-  background: #e8f7f1;
-  color: var(--cv-active-text);
-  font-size: 0.6rem;
+  width: 22px;
+  height: 22px;
+
+  background: var(--cv-segment-bg);
+  color: var(--cv-muted-text);
+  font-size: 0.7rem;
   font-weight: 800;
 
   border-radius: 50%;
-  width: 18px;
-  height: 18px;
 }
 
 .cv-step-num--active {
-  background: rgba(255, 255, 255, 0.25);
-  color: white;
-
-  width: 22px;
-  height: 22px;
-  font-size: 0.7rem;
+  background: var(--cv-accent);
+  color: var(--color-text-on-primary);
 }
 
 .cv-step-num--done {
-  background: var(--cv-done-circle-bg);
-  color: var(--cv-done-circle-color);
+  background: var(--cv-accent);
+  color: var(--color-text-on-primary);
 }
 
 .cv-step-active-label {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--cv-accent);
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.05em;
 }
 
 .cv-step-done-label {
-  color: #7aaa94;
+  color: var(--cv-muted-text);
   font-size: 0.6rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -814,83 +1070,84 @@
   min-width: 0;
 
   font-weight: 500;
-  color: var(--cv-text-heading);
+  color: var(--cv-main-text);
 }
 
 .cv-step-status-chip {
   font-size: 0.7rem;
   font-weight: 600;
+  color: var(--cv-muted-text);
 
-  border: 1px solid var(--border-default);
-  border-radius: var(--cv-radius-full);
+  border: 1px solid var(--cv-nav-border);
+  border-radius: var(--radius-full);
   padding-block: 0.125rem;
   padding-inline: 0.5rem;
 }
 
-.cv-step-status-chip--active {
-  background: var(--cv-active-border);
-  color: var(--bg-pure);
-
-  border-color: var(--cv-active-border);
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 700;
-  padding-block: 3px;
-  padding-inline: 10px;
-}
-
 .cv-step-status-chip--done {
-  color: var(--color-text-muted);
   text-decoration: line-through;
 
   opacity: 0.7;
 }
 
 .cv-step-status-chip--pending {
-  background: var(--cv-bg-page);
-  color: var(--cv-text-muted-green);
+  background: var(--cv-segment-bg);
+  color: var(--cv-muted-text);
 
-  border-color: var(--cv-border-muted);
+  border-color: var(--cv-nav-border);
 }
 
 .cv-step-card-body {
-  padding: 10px 12px 0;
+  padding: 6px 12px 12px;
 
   p {
     margin: 0;
-    color: #0a4a38;
-    font-size: 0.88rem;
-    line-height: 1.65;
+    color: var(--cv-main-text);
+    font-size: 0.9rem;
+    line-height: var(--lh-relaxed);
   }
 }
 
 .cv-step-card:not(.cv-step-card--active) .cv-step-card-body p {
-  color: #4a6a5a;
-  font-size: 0.78rem;
-  line-height: 1.55;
+  color: var(--cv-muted-text);
+  font-size: 0.85rem;
+  line-height: var(--lh-normal);
 }
 
 .cv-step-card--done .cv-step-card-body p {
   text-decoration: line-through;
 }
 
+/* Timer/stopwatch pills under the step text (mirrors mockup's timerBtnLabel placement) */
+.cv-step-tools-row {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 6px;
+  margin-block-start: 6px;
+}
+
 .cv-timer-pill {
   display: inline-flex;
   align-items: center;
+
   gap: 0.375rem;
-  background: var(--cv-bg-soft);
-  color: var(--cv-active-border);
-  font-size: 0.8125rem;
-  border: 1px solid var(--cv-active-border);
-  border-radius: 6px;
   min-height: 28px;
   padding: 0.2rem 0.5rem;
-  cursor: pointer;
+
+  background: var(--cv-timer-idle-bg);
+  color: var(--cv-accent);
+  font-size: 0.8125rem;
   font-weight: 500;
+
+  border: 1px solid var(--cv-accent);
+  border-radius: var(--radius-full);
+
+  cursor: pointer;
 }
 
 .cv-timer-pill--active {
-  background: var(--cv-active-border);
+  background: var(--cv-accent);
   color: var(--color-text-on-primary);
   font-weight: 600;
 }
@@ -909,7 +1166,7 @@
   }
 }
 
-/* Tools live inline in the step card header — sits between label and status chip */
+/* Tools live inline in the active step card header — sits between label and status chip */
 .cv-step-tools {
   display: flex;
   align-items: center;
@@ -924,31 +1181,33 @@
   gap: 0.2rem;
   border: none;
   background: transparent;
-  color: var(--cv-active-border);
+  color: var(--cv-accent);
   cursor: pointer;
   padding: 0.25rem;
-  border-radius: var(--cv-radius, 8px);
-  opacity: 0.45;
+  border-radius: var(--radius-md);
+  opacity: 0.6;
   font-size: 0.75rem;
-  transition: opacity 0.15s, background 0.15s;
+  transition:
+    opacity 0.15s var(--ease-smooth),
+    background 0.15s var(--ease-smooth);
 
   &:hover {
-    opacity: 0.9;
-    background: var(--cv-bg-soft);
+    opacity: 1;
+    background: var(--cv-chip-bg);
   }
 }
 
 .cv-stopwatch-icon--active {
   opacity: 1;
   font-weight: 600;
-  background: var(--cv-bg-soft);
+  background: var(--cv-chip-bg);
   padding: 0.25rem 0.5rem;
-  border-radius: var(--cv-radius, 8px);
+  border-radius: var(--radius-md);
 }
 
 .cv-stopwatch-icon--paused {
   opacity: 0.65;
-  color: var(--cv-muted);
+  color: var(--cv-muted-text);
 }
 
 .cv-stopwatch-close {
@@ -957,16 +1216,18 @@
   justify-content: center;
   border: none;
   background: transparent;
-  color: var(--cv-active-border);
+  color: var(--cv-accent);
   cursor: pointer;
   padding: 0.2rem;
   border-radius: 50%;
-  opacity: 0.45;
-  transition: opacity 0.15s, background 0.15s;
+  opacity: 0.6;
+  transition:
+    opacity 0.15s var(--ease-smooth),
+    background 0.15s var(--ease-smooth);
 
   &:hover {
-    opacity: 0.9;
-    background: var(--cv-bg-soft);
+    opacity: 1;
+    background: var(--cv-chip-bg);
   }
 }
 
@@ -978,8 +1239,8 @@
 
 .cv-timer-input {
   width: 4rem;
-  border: 1px solid var(--cv-active-border);
-  border-radius: 4px;
+  border: 1px solid var(--cv-accent);
+  border-radius: var(--radius-sm);
   padding: 0.15rem 0.3rem;
   font-size: 0.8125rem;
   text-align: center;
@@ -993,7 +1254,7 @@
   align-items: center;
   justify-content: center;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   padding: 0.15rem 0.35rem;
   font-size: 0.8125rem;
@@ -1001,7 +1262,7 @@
 }
 
 .cv-timer-confirm {
-  background: var(--cv-active-border);
+  background: var(--cv-accent);
   color: var(--color-text-on-primary);
 }
 
@@ -1012,24 +1273,29 @@
 }
 
 .cv-step-done-btn {
-  display: block;
-  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-  background: var(--cv-active-border);
-  color: white;
-  font-size: 0.88rem;
+  min-height: var(--cv-tap-min);
+
+  background: linear-gradient(180deg, var(--cv-accent), var(--cv-accent-hover));
+  color: var(--color-text-on-primary);
+  font-size: 0.8rem;
   font-weight: 700;
 
   border: none;
+  border-radius: var(--radius-full);
   cursor: pointer;
-  margin-top: 10px;
-  padding: 10px;
-  min-height: var(--cv-tap-min);
+  margin: 0 12px 12px;
+  padding: 0 16px;
 
   letter-spacing: 0.02em;
 
+  transition: filter 0.2s var(--ease-smooth);
+
   &:hover {
-    background: #0f6e56;
+    filter: brightness(1.08);
   }
 }
 
@@ -1038,13 +1304,13 @@
   display: inline-flex;
   align-items: center;
 
-  background: #e8f7f1;
-  color: var(--cv-active-text);
+  background: var(--cv-chip-bg);
+  color: var(--cv-accent);
   font-size: 0.62rem;
   font-weight: 600;
 
-  border: 1px solid #c8e6db;
-  border-radius: 6px;
+  border: 1px solid var(--cv-accent-glow);
+  border-radius: var(--radius-sm);
   gap: 3px;
   margin-inline-start: auto;
   padding: 2px 7px;
@@ -1053,44 +1319,36 @@
 }
 
 .cv-step-timer-pill--alert {
-  background: var(--cv-timer-alert-bg);
-  color: var(--cv-timer-alert-color);
+  background: rgba(217, 119, 6, 0.18);
+  color: #d97706;
 
-  border-color: var(--cv-timer-alert-border);
+  border-color: rgba(217, 119, 6, 0.4);
   font-weight: 700;
 
   cursor: pointer;
 }
 
-/* Active step: timer/stopwatch tool buttons in the green header */
+/* Active step: timer/stopwatch tool pills in the card head */
 .cv-step-tool-btn {
   display: inline-flex;
   align-items: center;
 
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
+  background: var(--cv-timer-idle-bg);
+  color: var(--cv-accent);
   font-size: 0.65rem;
+  font-weight: 700;
 
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 6px;
+  border: 1px solid var(--cv-timer-idle-border);
+  border-radius: var(--radius-full);
   cursor: pointer;
   gap: 3px;
-  padding: 3px 8px;
-
-  &:first-of-type {
-    margin-inline-start: auto;
-  }
-
-  & + & {
-    margin-inline-start: 4px;
-  }
+  padding: 4px 10px;
 }
-
 
 .ingredients-table {
   overflow: hidden;
 
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--cv-panel-border);
   border-radius: var(--radius-md);
 }
 
@@ -1105,22 +1363,23 @@
 }
 
 .ingredients-table-header {
-  background: linear-gradient(180deg, var(--cv-header-end) 0%, var(--cv-header-start) 100%);
+  background: var(--cv-segment-bg);
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--cv-text-heading);
+  color: var(--cv-main-text);
 }
 
 .ingredients-table-row {
-  background: var(--bg-pure);
+  background: var(--cv-panel-bg);
 
-  border-block-start: 1px solid var(--bg-muted);
+  border-block-start: 1px solid var(--cv-panel-border);
 
   &:nth-child(even) {
-    background: var(--bg-glass);
+    background: var(--cv-segment-bg);
   }
 
   .col-name {
+    color: var(--cv-main-text);
     font-weight: 500;
   }
 
@@ -1157,8 +1416,9 @@
 
 .conversion-badge {
   font-size: 0.8rem;
+  color: var(--cv-accent);
 
-  background: var(--color-primary-soft);
+  background: var(--cv-chip-bg);
 
   border-radius: var(--radius-sm);
   margin-inline-end: 8px;
@@ -1177,6 +1437,7 @@
 
   .amount-input {
     background: transparent;
+    color: var(--cv-main-text);
   }
 }
 
@@ -1185,12 +1446,12 @@
   color: var(--color-danger);
 
   border: none;
-  border-radius: var(--cv-radius-sm);
+  border-radius: var(--radius-sm);
   margin-inline-start: 0.5rem;
   padding: 0.25rem;
 
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s var(--ease-smooth);
 
   &:hover {
     background: var(--bg-danger-subtle);
@@ -1198,13 +1459,15 @@
 }
 
 .row-highlight {
-  box-shadow: 0 0 0 1px var(--border-focus), var(--shadow-glow);
+  box-shadow:
+    0 0 0 1px var(--border-focus),
+    var(--shadow-glow);
 }
 
 .setting-by {
-  background: var(--cv-accent-soft);
+  background: var(--cv-chip-bg);
 
-  border: 1px solid var(--cv-border-accent-strong);
+  border: 1px solid var(--cv-accent-glow);
 
   box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.45);
 }
@@ -1227,12 +1490,14 @@
   color: var(--cv-accent);
   font-size: 0.75rem;
 
-  border: 1px solid var(--cv-border-accent-strong);
-  border-radius: var(--cv-radius-md);
+  border: 1px solid var(--cv-accent-glow);
+  border-radius: var(--radius-md);
   padding: 0.25rem 0.5rem;
 
   cursor: pointer;
-  transition: background 0.2s, opacity 0.2s;
+  transition:
+    background 0.2s var(--ease-smooth),
+    opacity 0.2s var(--ease-smooth);
   opacity: 0;
 
   .cv-ing-row:hover & {
@@ -1246,13 +1511,15 @@
   text-align: center;
   width: 3.5rem;
 
-  border: 1px solid var(--border-default);
-  border-radius: var(--cv-radius-md);
+  color: var(--cv-main-text);
+
+  border: 1px solid var(--cv-nav-border);
+  border-radius: var(--radius-md);
   padding: 0.25rem 0.5rem;
 }
 
 .set-by-amount .amount-input {
-  background: var(--bg-pure);
+  background: var(--cv-panel-bg);
 }
 
 .convert-scale-btn {
@@ -1267,11 +1534,11 @@
   font-weight: 600;
 
   border: none;
-  border-radius: var(--cv-radius-md);
+  border-radius: var(--radius-md);
   padding: 0.25rem 0.5rem;
 
   cursor: pointer;
-  transition: filter 0.2s;
+  transition: filter 0.2s var(--ease-smooth);
 
   &:hover {
     filter: brightness(1.08);
@@ -1280,18 +1547,18 @@
 
 .cancel-set-by-btn {
   background: transparent;
-  color: var(--color-text-muted);
+  color: var(--cv-muted-text);
   font-size: 0.8rem;
 
-  border: 1px solid var(--border-default);
-  border-radius: var(--cv-radius-md);
+  border: 1px solid var(--cv-nav-border);
+  border-radius: var(--radius-md);
   padding: 0.25rem 0.5rem;
 
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s var(--ease-smooth);
 
   &:hover {
-    background: var(--bg-muted);
+    background: var(--cv-segment-bg);
   }
 }
 
@@ -1301,18 +1568,19 @@
   justify-content: space-between;
   flex-wrap: wrap;
 
-  background: var(--cv-accent-soft);
+  background: var(--cv-chip-bg);
 
-  border: 1px solid var(--cv-border-accent-strong);
-  border-radius: var(--cv-radius-md);
+  border: 1px solid var(--cv-accent-glow);
+  border-radius: var(--radius-md);
   gap: 0.75rem;
+  margin: var(--space-3) var(--space-5) 0;
   padding: 0.625rem 1rem;
 }
 
 .scaled-view-text {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--cv-text-heading);
+  color: var(--cv-main-text);
 }
 
 .back-to-full-recipe-btn {
@@ -1327,11 +1595,11 @@
   font-weight: 600;
 
   border: none;
-  border-radius: var(--cv-radius-2xl);
+  border-radius: var(--radius-full);
   padding: 0.375rem 0.75rem;
 
   cursor: pointer;
-  transition: filter 0.2s;
+  transition: filter 0.2s var(--ease-smooth);
 
   &:hover {
     filter: brightness(1.08);
@@ -1339,7 +1607,7 @@
 }
 
 .empty-state-text {
-  color: var(--color-text-muted);
+  color: var(--cv-muted-text);
   font-style: italic;
 
   margin: 0;
@@ -1347,6 +1615,14 @@
 }
 
 @media (max-width: 48rem) {
+  .cv-nav,
+  .cv-hero,
+  .cv-actions-row,
+  .cv-phone-swap-bar,
+  .cv-body {
+    margin-inline: var(--space-3);
+  }
+
   .cv-shell {
     display: block;
 
@@ -1400,15 +1676,19 @@
   .cv-pane-divider {
     display: block;
 
-    background: linear-gradient(90deg, transparent, var(--cv-border-soft), transparent);
+    background: linear-gradient(90deg, transparent, var(--cv-panel-border), transparent);
     height: 2px;
     order: 1.5;
 
-    margin: 0.5rem 1rem;
+    margin: 0.5rem 0;
   }
 
   .cv-chip-btn {
     min-inline-size: 44px;
     min-block-size: 44px;
+  }
+
+  .cv-hero-title {
+    font-size: 1.375rem;
   }
 }

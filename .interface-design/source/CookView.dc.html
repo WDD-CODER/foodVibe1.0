@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./colors_and_type.css">
+  <link rel="stylesheet" href="./mobile-pass.css">
+  <script src="./shell.js"></script>
+  <script src="./image-slot.js"></script>
+  <style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideDown { from { opacity: 0; transform: translate(-50%, -12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+    @keyframes checkPop { 0% { transform: scale(0.4) rotate(-10deg); opacity: 0; } 60% { transform: scale(1.15) rotate(4deg); opacity: 1; } 100% { transform: scale(1) rotate(0deg); } }
+    @keyframes screenGlow { 0%,100% { box-shadow: inset 0 0 0 0 rgba(245,158,11,0); } 50% { box-shadow: inset 0 0 120px 10px rgba(245,158,11,0.5); } }
+    @keyframes timerPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.6); } 50% { box-shadow: 0 0 0 8px rgba(245,158,11,0); } }
+    body { margin: 0; }
+    a { color: var(--color-primary); text-decoration: none; }
+    a:hover { color: var(--color-primary-hover); }
+    .step-row { transition: background 0.2s var(--ease-smooth), border-color 0.2s var(--ease-smooth); }
+    .ing-row { transition: background 0.15s var(--ease-smooth); box-sizing: border-box; }
+    .cv-grid { display: grid; grid-template-columns: 320px 1fr; gap: var(--space-5); align-items: start; }
+    @media (max-width: 767px) { .cv-grid { grid-template-columns: 1fr; } }
+    .glow-frame { position: fixed; inset: 0; z-index: 250; pointer-events: none; animation: screenGlow 1.6s ease-in-out infinite; }
+      a:focus-visible, button:focus-visible, input:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(20,184,166,0.4) !important; }
+    /* kitchen mode: wet-hands targets */
+    .cv-tap { min-width: 56px !important; min-height: 56px !important; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  
+    /* ── pass 2: touch ergonomics (one rule, all screens) ── */
+    [class*="car-arrow"] { display: none !important; }
+    /* ── pass 4: motion system ── */
+    @keyframes pageEnter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    app-shell > * { animation: pageEnter .28s var(--ease-spring) both; }
+    button, a[role="button"] { transition: transform .15s var(--ease-spring), background-color .2s var(--ease-smooth), color .2s var(--ease-smooth), box-shadow .25s var(--ease-smooth); }
+    button:active, a[role="button"]:active { transform: scale(0.97); }
+    input[type="checkbox"], input[type="radio"] {
+      appearance: none; -webkit-appearance: none; width: 24px; height: 24px; margin: 0; flex: none;
+      display: inline-grid; place-content: center; cursor: pointer;
+      background: var(--bg-pure); border: 1.5px solid var(--border-strong); border-radius: 7px;
+      box-shadow: inset 0 1px 2px rgba(15,23,42,0.06);
+      transition: background-color .16s var(--ease-smooth), border-color .16s var(--ease-smooth), box-shadow .2s var(--ease-smooth), transform .2s var(--ease-spring);
+    }
+    input[type="radio"] { border-radius: 50%; }
+    input[type="checkbox"]::after {
+      content: ""; width: 6px; height: 11px; opacity: 0;
+      border-right: 2.6px solid var(--color-text-on-primary); border-bottom: 2.6px solid var(--color-text-on-primary);
+      transform: rotate(45deg) translate(-1px, -2px) scale(0.6);
+      transition: opacity .14s var(--ease-smooth), transform .2s var(--ease-spring);
+    }
+    input[type="radio"]::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--color-text-on-primary); opacity: 0; transition: opacity .14s var(--ease-smooth); }
+    input[type="checkbox"]:hover, input[type="radio"]:hover { border-color: var(--color-primary); background: var(--color-primary-soft); }
+    input[type="checkbox"]:checked, input[type="radio"]:checked {
+      background: var(--color-primary); border-color: var(--color-primary);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 2px 8px -2px var(--color-primary-glow);
+    }
+    input[type="checkbox"]:checked::after { opacity: 1; transform: rotate(45deg) translate(-1px, -2px) scale(1); }
+    input[type="radio"]:checked::after { opacity: 1; }
+    input[type="checkbox"]:active, input[type="radio"]:active { transform: scale(0.94); }
+
+    @media (max-width: 767px) {
+      button, a[role="button"], select { min-height: 44px !important; min-width: 44px !important; }
+      input:not([type="checkbox"]):not([type="radio"]) { min-height: 44px !important; }
+      input[type="checkbox"], input[type="radio"] { width: 24px !important; height: 24px !important; padding: 10px !important; box-sizing: content-box !important; }
+      a[href]:not([style*="font-size: var(--fs-xs)"]) { min-height: 44px; display: inline-flex; align-items: center; }
+      [style*="grid-template-columns: 260px"], [style*="grid-template-columns: 320px"], [style*="grid-template-columns: 140px"] { grid-template-columns: 1fr !important; }
+      [style*="max-width: 1520px"], [style*="max-width: 1200px"], [style*="max-width: 1100px"], [style*="max-width: 720px"] { padding-inline: var(--space-4) !important; }
+    }
+    /* ── pass 5: mobile pass (≤767 only) ── */
+    @media (max-width: 767px) {
+      .cv-page { min-height: 100dvh !important; }
+      .cv-nav { padding: 0 var(--space-4) !important; }
+      /* hero: the 34px title + badge + progress bar overflowed the 150px frame */
+      .cv-hero { height: auto !important; min-height: 220px; }
+      .cv-hero-top { position: static !important; flex-direction: column; padding: var(--space-4) var(--space-4) var(--space-8); }
+      .cv-title { font-size: 22px !important; line-height: 1.2; text-wrap: pretty; }
+      .cv-hero-progress { position: static !important; padding: 0 var(--space-4) var(--space-4); }
+      .cv-hero-scrim { background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.45) 50%, rgba(0,0,0,0.8) 100%) !important; }
+      /* a sticky ingredient panel in a one-column stack just fights the page scroll */
+      .cv-ing-panel { position: static !important; }
+      .cv-celebrate { top: calc(3.5rem + 12px) !important; width: calc(100vw - 24px); box-sizing: border-box; }
+    }
+  </style>
+</helmet>
+
+<app-shell dir="rtl" page="cook-view" theme="{{ shellTheme }}" fab='[{"id":"finish","label":"סיום בישול","icon":"circle-check"}]'>
+<div class="cv-page" style="position: relative; min-height: 100vh; font-family: var(--font-sans); overflow-x: hidden; background: {{ pageBg }}; transition: background 0.3s var(--ease-smooth);">
+  <div style="position: fixed; inset: 0; z-index: 0; pointer-events: none; background: {{ ambientBg }};"></div>
+  <sc-if value="{{ anyTimerExpired }}" hint-placeholder-val="{{ false }}">
+    <div class="glow-frame"></div>
+  </sc-if>
+
+  <div style="position: relative; z-index: 1;">
+    <!-- TOP BAR -->
+    <nav class="cv-nav" style="position: sticky; top: 0; z-index: 50; display: flex; align-items: center; height: 3.5rem; padding: 0 var(--space-6); gap: var(--space-4); background: {{ navBg }}; backdrop-filter: var(--blur-nav); -webkit-backdrop-filter: var(--blur-nav); border-bottom: 1px solid {{ navBorder }}; box-shadow: var(--shadow-nav);">
+
+      <div style="width: 1px; height: 20px; background: {{ navBorder }};"></div>
+      <span style="font-weight: var(--fw-bold); font-size: var(--fs-md); color: {{ mainText }};">מסך בישול</span>
+
+      <div style="display: flex; align-items: center; gap: var(--space-2); margin-inline-start: auto; flex-shrink: 0;">
+        <button onClick="{{ toggleDark }}" style="display: grid; place-content: center; width: 56px; height: 56px; background: {{ segmentBg }}; border: 1px solid {{ navBorder }}; border-radius: var(--radius-full); color: {{ mainText }}; cursor: pointer;">
+          <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+          </sc-if>
+          <sc-if value="{{ isLight }}" hint-placeholder-val="{{ false }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+          </sc-if>
+        </button>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <div style="max-width: 1100px; margin: 0 auto; padding: var(--space-5) var(--space-6) 0;">
+      <div class="cv-hero" style="position: relative; border-radius: var(--radius-xl); overflow: hidden; height: {{ heroHeight }}; transition: height 0.3s var(--ease-smooth); box-shadow: {{ heroShadow }};">
+        <image-slot id="cook-hero-photo" shape="rect" placeholder="הוסף תמונת מנה" style="width: 100%; height: 100%;"></image-slot>
+        <div class="cv-hero-scrim" style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.25) 35%, rgba(0,0,0,0.8) 100%); pointer-events: none;"></div>
+
+        <div class="cv-hero-top" style="position: absolute; top: var(--space-5); right: var(--space-5); left: var(--space-5); display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); pointer-events: none;">
+          <div>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: rgba(20,184,166,0.9); border-radius: var(--radius-full); color: #fff; font-size: var(--fs-xs); font-weight: var(--fw-bold); margin-bottom: var(--space-2); backdrop-filter: blur(6px);">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              מטבח ראשי
+            </div>
+            <h1 class="cv-title" style="margin: 0; font-size: 34px; font-weight: var(--fw-extrabold); color: #fff; letter-spacing: var(--tracking-tight); text-shadow: 0 2px 12px rgba(0,0,0,0.4);">{{ recipeName }}</h1>
+          </div>
+          <sc-if value="{{ heroTimerVisible }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 18px; background: {{ heroTimerBg }}; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius-lg); {{ heroTimerAnim }}">
+              <span style="font-size: var(--fs-xs); color: rgba(255,255,255,0.8); font-weight: var(--fw-medium);">{{ heroTimerLabel }}</span>
+              <span style="font-size: 26px; font-weight: var(--fw-extrabold); color: #fff; font-variant-numeric: tabular-nums;">{{ heroTimerDisplay }}</span>
+            </div>
+          </sc-if>
+        </div>
+
+        <div class="cv-hero-progress" style="position: absolute; bottom: var(--space-5); right: var(--space-5); left: var(--space-5); pointer-events: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <span style="font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: rgba(255,255,255,0.9);">{{ progressLabel }}</span>
+            <span style="font-size: var(--fs-sm); font-weight: var(--fw-bold); color: #fff;">{{ progressPct }}%</span>
+          </div>
+          <div style="height: 8px; border-radius: var(--radius-full); background: rgba(255,255,255,0.2); overflow: hidden;">
+            <div style="height: 100%; width: {{ progressPct }}%; background: linear-gradient(90deg, var(--color-primary), #5eead4); border-radius: var(--radius-full); transition: width 0.4s var(--ease-spring); box-shadow: 0 0 12px rgba(20,184,166,0.7);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div style="max-width: 1100px; margin: 0 auto; padding: var(--space-5) var(--space-6) var(--space-12);">
+      <div class="cv-grid">
+
+        <!-- INGREDIENTS PANEL -->
+        <div class="cv-ing-panel" style="background: {{ panelBg }}; backdrop-filter: var(--blur-glass); border: 1px solid {{ panelBorder }}; border-radius: var(--radius-lg); box-shadow: {{ panelShadow }}; padding: var(--space-5); position: sticky; top: 4.5rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-3);">
+            <h2 style="margin: 0; font-size: var(--fs-md); font-weight: var(--fw-bold); color: {{ mainText }};">מצרכים</h2>
+            <span style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-primary); background: {{ chipBg }}; padding: 3px 10px; border-radius: var(--radius-full);">{{ ingredientsCheckedLabel }}</span>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px dashed {{ navBorder }};">
+            <span style="font-size: var(--fs-xs); font-weight: var(--fw-medium); color: {{ mutedText }};">כמות מנות</span>
+            <div style="display: flex; align-items: center; gap: 2px; padding: 4px; background: {{ segmentBg }}; border: 1px solid {{ navBorder }}; border-radius: var(--radius-full);">
+              <sc-for list="{{ yieldOptions }}" as="y" hint-placeholder-count="3">
+                <button onClick="{{ y.onSelect }}" style="{{ y.style }}">{{ y.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <sc-for list="{{ ingredients }}" as="ing" hint-placeholder-count="6">
+              <div class="ing-row" onClick="{{ ing.onToggle }}" style="display: flex; align-items: center; gap: var(--space-3); padding: 9px 8px; border-radius: var(--radius-md); cursor: pointer; background: {{ ing.rowBg }};">
+                <span style="{{ ing.checkStyle }}">
+                  <sc-if value="{{ ing.checked }}" hint-placeholder-val="{{ false }}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+                  </sc-if>
+                </span>
+                <span style="flex: 1; font-size: var(--fs-sm); {{ ing.textStyle }}">{{ ing.name }}</span>
+                <span style="font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: {{ ing.qtyColor }}; white-space: nowrap;">{{ ing.qtyLabel }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- STEPS -->
+        <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <h2 style="margin: 0; font-size: var(--fs-md); font-weight: var(--fw-bold); color: {{ mainText }};">שלבי הכנה</h2>
+            <span style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: {{ mutedText }};">{{ stepsCheckedLabel }}</span>
+          </div>
+
+          <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+            <div aria-busy="true" aria-label="טוען נתונים" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(94,234,212,0.18); border-radius: var(--radius-lg); padding: var(--space-4); display: flex; flex-direction: column; gap: 12px; margin-bottom: var(--space-3);">
+              <sc-for list="{{ skeletonRows }}" as="row" hint-placeholder-count="6">
+                <div style="display: flex; align-items: center; gap: var(--space-3); animation: skelPulse 1.4s var(--ease-smooth) infinite;">
+                  <div style="flex: 2; height: 14px; border-radius: var(--radius-full); background: rgba(255,255,255,0.10);"></div>
+                  <div style="flex: 1; height: 14px; border-radius: var(--radius-full); background: rgba(255,255,255,0.06);"></div>
+                  <div style="width: 84px; height: 14px; border-radius: var(--radius-full); background: rgba(255,255,255,0.06);"></div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ loadFailed }}" hint-placeholder-val="{{ false }}">
+            <div role="alert" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(94,234,212,0.18); border-radius: var(--radius-lg); padding: var(--space-10) var(--space-4); margin-bottom: var(--space-3); display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center;">
+              <i data-lucide="cloud-off" style="width: 28px; height: 28px; color: var(--color-danger);"></i>
+              <div style="font-size: var(--fs-md); font-weight: var(--fw-semibold); color: #e8faf7;">הטעינה נכשלה</div>
+              <p style="margin: 0; max-width: 34ch; font-size: var(--fs-sm); color: rgba(232,250,247,0.62); line-height: var(--lh-relaxed);">אין חיבור לשרת כרגע. אפשר לנסות שוב.</p>
+              <button onClick="{{ retryLoad }}" style="min-height: 44px; padding: 0 20px; border: none; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-text-on-primary); font-family: inherit; font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer; box-shadow: var(--shadow-glow);">נסה שוב</button>
+            </div>
+          </sc-if>
+
+          <sc-for list="{{ steps }}" as="st" hint-placeholder-count="5">
+            <div class="step-row" style="display: flex; gap: var(--space-4); padding: var(--space-4); background: {{ st.rowBg }}; border: 1px solid {{ st.rowBorder }}; border-radius: var(--radius-lg); box-shadow: {{ st.rowShadow }};">
+              <button onClick="{{ st.onToggle }}" style="{{ st.checkStyle }}">
+                <sc-if value="{{ st.checked }}" hint-placeholder-val="{{ false }}">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="animation: checkPop 0.3s var(--ease-spring);"><path d="M20 6 9 17l-5-5"></path></svg>
+                </sc-if>
+                <sc-if value="{{ st.unchecked }}" hint-placeholder-val="{{ true }}">
+                  <span style="font-size: var(--fs-sm); font-weight: var(--fw-bold);">{{ st.index }}</span>
+                </sc-if>
+              </button>
+              <div style="flex: 1;">
+                <p style="margin: 0 0 6px; font-size: var(--fs-base); line-height: var(--lh-snug); {{ st.textStyle }}">{{ st.text }}</p>
+                <sc-if value="{{ st.hasTimer }}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <button onClick="{{ st.onTimerClick }}" style="{{ st.timerBtnStyle }}">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                      {{ st.timerBtnLabel }}
+                    </button>
+                    <sc-if value="{{ st.showReset }}" hint-placeholder-val="{{ false }}">
+                      <button onClick="{{ st.onTimerReset }}" title="אתחול טיימר" style="display: grid; place-content: center; width: 26px; height: 26px; border-radius: 999px; border: 1px solid {{ navBorder }}; background: {{ segmentBg }}; color: {{ mutedText }}; cursor: pointer;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg>
+                      </button>
+                    </sc-if>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CELEBRATION -->
+  <sc-if value="{{ showCelebration }}" hint-placeholder-val="{{ false }}">
+    <div class="cv-celebrate" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 300; display: flex; align-items: center; gap: var(--space-3); background: {{ panelBg }}; backdrop-filter: blur(4px); border: 1px solid {{ panelBorder }}; border-radius: var(--radius-full); box-shadow: var(--shadow-modal); padding: var(--space-3) var(--space-5); animation: slideDown 0.3s var(--ease-spring);">
+      <div style="width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--color-primary), #5eead4); display: grid; place-content: center; flex-shrink: 0;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+      </div>
+      <div>
+        <div style="font-size: var(--fs-sm); font-weight: var(--fw-bold); color: {{ mainText }};">המנה מוכנה!</div>
+        <div style="font-size: var(--fs-xs); color: {{ mutedText }};">כל השלבים הושלמו בהצלחה</div>
+      </div>
+      <button onClick="{{ dismissCelebration }}" style="display: grid; place-content: center; width: 26px; height: 26px; background: transparent; border: none; color: {{ mutedText }}; cursor: pointer; margin-inline-start: var(--space-2);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+      </button>
+    </div>
+  </sc-if>
+
+  <!-- TOAST -->
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <div class="m-toast" style="position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%); z-index: 400; display: flex; align-items: center; gap: var(--space-2); padding: 11px 20px; background: {{ toastBg }}; color: {{ toastText }}; border-radius: var(--radius-full); font-size: var(--fs-sm); font-weight: var(--fw-medium); box-shadow: var(--shadow-modal);">
+      {{ toastMessage }}
+    </div>
+  </sc-if>
+</div>
+</app-shell>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;viewState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ready&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;ready&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;States&quot;}}">
+const RECIPE_NAME = 'עוף בגריל עם ירקות קלויים';
+
+const BASE_INGREDIENTS = [
+  { id: 1, name: 'חזה עוף שלם', qty: 1.2, unit: 'ק"ג' },
+  { id: 2, name: 'שמן זית', qty: 3, unit: 'כפות' },
+  { id: 3, name: 'פפריקה מתוקה', qty: 1, unit: 'כפית' },
+  { id: 4, name: 'תפוחי אדמה', qty: 500, unit: 'גרם' },
+  { id: 5, name: 'גזר', qty: 300, unit: 'גרם' },
+  { id: 6, name: 'בצל סגול', qty: 200, unit: 'גרם' },
+  { id: 7, name: 'מלח ופלפל שחור', qty: null, unit: 'לפי הטעם' }
+];
+
+const STEPS = [
+  { id: 1, text: 'הוציאו את חזה העוף מהמקרר 20 דקות לפני הבישול והביאו לטמפרטורת חדר.', timerSeconds: 20 * 60 },
+  { id: 2, text: 'תבלו את העוף במלח, פלפל שחור, פפריקה מתוקה ושמן זית משני הצדדים.' },
+  { id: 3, text: 'חממו גריל פחמים לחום גבוה עד להיווצרות גחלים לבנות.', timerSeconds: 10 * 60 },
+  { id: 4, text: 'צלו את העוף על הגריל כ-6 דקות מכל צד עד להשחמה אחידה.', timerSeconds: 12 * 60 },
+  { id: 5, text: 'קלו את תפוחי האדמה, הגזר והבצל בתנור בחום 200 מעלות למשך 25 דקות.', timerSeconds: 25 * 60 },
+  { id: 6, text: 'הוציאו את העוף מהאש ותנו לו לנוח 5 דקות לפני החיתוך וההגשה.', timerSeconds: 5 * 60 }
+];
+
+function fmtTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+class Component extends DCLogic {
+  state = {
+    isDark: true,
+    yieldMultiplier: 1,
+    checkedIngredients: {},
+    checkedSteps: {},
+    timers: {},
+    heroFilled: false,
+    showCelebration: false,
+    toastVisible: false,
+    toastMessage: ''
+  };
+
+  componentDidMount() {
+    this._tick = setInterval(() => {
+      this.setState(s => {
+        let changed = false;
+        const timers = { ...s.timers };
+        for (const id in timers) {
+          const t = timers[id];
+          if (t.running && t.remaining > 0) {
+            timers[id] = { ...t, remaining: t.remaining - 1 };
+            changed = true;
+          } else if (t.running && t.remaining === 0) {
+            timers[id] = { ...t, running: false, expired: true };
+            changed = true;
+          }
+        }
+        return changed ? { timers } : null;
+      });
+    }, 1000);
+
+    const el = this.querySelector ? this.querySelector('#cook-hero-photo') : document.getElementById('cook-hero-photo');
+    if (el) {
+      const sync = () => this.setState({ heroFilled: el.hasAttribute('data-filled') });
+      sync();
+      this._heroObserver = new MutationObserver(sync);
+      this._heroObserver.observe(el, { attributes: true, attributeFilter: ['data-filled'] });
+    }
+  }
+  componentWillUnmount() {
+    clearInterval(this._tick);
+    if (this._heroObserver) this._heroObserver.disconnect();
+  }
+
+  showToast(msg) {
+    clearTimeout(this._toastTimer);
+    this.setState({ toastVisible: true, toastMessage: msg });
+    this._toastTimer = setTimeout(() => this.setState({ toastVisible: false }), 2200);
+  }
+  toggleDark() { this.setState(s => ({ isDark: !s.isDark })); }
+  setYield(v) { this.setState({ yieldMultiplier: v }); }
+  toggleIngredient(id) {
+    this.setState(s => ({ checkedIngredients: { ...s.checkedIngredients, [id]: !s.checkedIngredients[id] } }));
+  }
+  toggleStep(id) {
+    this.setState(s => {
+      const checkedSteps = { ...s.checkedSteps, [id]: !s.checkedSteps[id] };
+      const allDone = STEPS.every(st => checkedSteps[st.id]);
+      return { checkedSteps, showCelebration: allDone };
+    });
+  }
+  timerClick(id, seconds) {
+    this.setState(s => {
+      const cur = s.timers[id];
+      let next;
+      if (!cur || cur.expired) next = { remaining: seconds, running: true, expired: false, initial: seconds };
+      else if (cur.running) next = { ...cur, running: false };
+      else next = { ...cur, running: true };
+      return { timers: { ...s.timers, [id]: next } };
+    });
+  }
+  timerReset(id) {
+    this.setState(s => {
+      const timers = { ...s.timers };
+      delete timers[id];
+      return { timers };
+    });
+  }
+  dismissCelebration() { this.setState({ showCelebration: false }); }
+
+  renderVals() {
+    const b = this.baseVals();
+    const vs = this.state.__vs || this.props.viewState || 'ready';
+    const loading = vs === 'loading', failed = vs === 'error';
+    if (vs !== 'ready') { b.steps = []; b.isEmpty = vs === 'empty'; }
+    return Object.assign(b, {
+      loading, loadFailed: failed, ready: !loading && !failed,
+      skeletonRows: [1, 2, 3, 4, 5, 6].map(i => ({ i })),
+      retryLoad: () => this.setState({ __vs: 'ready' })
+    });
+  }
+
+  baseVals() {
+    const s = this.state;
+    const dark = s.isDark;
+
+    const pageBg = dark
+      ? 'radial-gradient(ellipse 1200px 800px at 50% -10%, #0f2e2a, #0a1614 60%)'
+      : 'var(--bg-body)';
+    const ambientBg = dark
+      ? 'radial-gradient(ellipse 700px 480px at 85% 10%, rgba(20,184,166,0.18), transparent), radial-gradient(ellipse 550px 550px at 10% 80%, rgba(251,191,36,0.06), transparent)'
+      : 'radial-gradient(ellipse 700px 480px at 85% 15%, rgba(20,184,166,0.12), transparent), radial-gradient(ellipse 550px 550px at 15% 75%, rgba(251,191,36,0.08), transparent)';
+    const navBg = dark ? 'rgba(10,22,20,0.75)' : 'var(--bg-frosted-nav)';
+    const navBorder = dark ? 'rgba(255,255,255,0.1)' : 'var(--border-glass)';
+    const segmentBg = dark ? 'rgba(255,255,255,0.06)' : 'var(--bg-subtle)';
+    const mainText = dark ? '#f1f5f4' : 'var(--color-text-main)';
+    const mutedText = dark ? 'rgba(226,240,236,0.74)' : 'var(--color-text-muted)';
+    const panelBg = dark ? 'rgba(255,255,255,0.05)' : 'var(--bg-glass)';
+    const panelBorder = dark ? 'rgba(255,255,255,0.1)' : 'var(--border-glass)';
+    const panelShadow = dark ? '0 20px 50px -20px rgba(0,0,0,0.6)' : 'var(--shadow-glass)';
+    const heroShadow = dark ? '0 30px 70px -25px rgba(0,0,0,0.7)' : 'var(--shadow-hover)';
+    const chipBg = dark ? 'rgba(20,184,166,0.18)' : 'var(--color-primary-soft)';
+    const toastBg = dark ? '#f1f5f4' : 'var(--color-text-main)';
+    const toastText = dark ? '#0a1614' : '#fff';
+    const heroHeight = s.heroFilled ? '320px' : '150px';
+
+    const yieldOptions = [1, 2, 3].map(m => {
+      const active = s.yieldMultiplier === m;
+      return {
+        key: m, label: 'x' + m,
+        onSelect: () => this.setYield(m),
+        style: {
+          padding: '6px 14px', border: 'none', borderRadius: '999px', fontSize: '13px', fontWeight: 700, cursor: 'pointer',
+          background: active ? 'linear-gradient(180deg, var(--color-primary), var(--color-primary-hover))' : 'transparent',
+          color: active ? '#fff' : mutedText,
+          boxShadow: active ? 'var(--shadow-glow)' : 'none'
+        }
+      };
+    });
+
+    const mult = s.yieldMultiplier;
+    const ingredients = BASE_INGREDIENTS.map(ing => {
+      const checked = !!s.checkedIngredients[ing.id];
+      const qtyLabel = ing.qty == null ? ing.unit : (Math.round(ing.qty * mult * 10) / 10) + ' ' + ing.unit;
+      return {
+        id: ing.id, name: ing.name, qtyLabel, checked,
+        onToggle: () => this.toggleIngredient(ing.id),
+        rowBg: checked ? chipBg : 'transparent',
+        checkStyle: {
+          boxSizing: 'border-box', display: 'grid', placeContent: 'center', width: '20px', height: '20px', borderRadius: '6px', flexShrink: 0,
+          border: checked ? '1.5px solid transparent' : (dark ? '1.5px solid rgba(255,255,255,0.25)' : '1.5px solid var(--border-strong)'),
+          background: checked ? 'var(--color-primary)' : 'transparent'
+        },
+        textStyle: 'color: ' + (checked ? mutedText : mainText) + '; text-decoration: ' + (checked ? 'line-through' : 'none') + ';',
+        qtyColor: checked ? mutedText : mainText
+      };
+    });
+    const ingCheckedCount = ingredients.filter(i => i.checked).length;
+
+    let anyExpired = false;
+    let heroTimer = null;
+    const steps = STEPS.map((st, i) => {
+      const checked = !!s.checkedSteps[st.id];
+      const timer = s.timers[st.id];
+      const status = !timer ? 'idle' : timer.expired ? 'expired' : timer.running ? 'running' : 'paused';
+      if (status === 'expired') anyExpired = true;
+      if ((status === 'running' || status === 'expired') && !heroTimer) heroTimer = { index: i + 1, status, remaining: timer.remaining };
+
+      let timerBtnLabel;
+      if (status === 'idle') timerBtnLabel = 'התחלת טיימר · ' + fmtTime(st.timerSeconds || 0);
+      else if (status === 'running') timerBtnLabel = 'השהיה · ' + fmtTime(timer.remaining);
+      else if (status === 'paused') timerBtnLabel = 'המשך · ' + fmtTime(timer.remaining);
+      else timerBtnLabel = 'הטיימר הסתיים · לחצו לאיפוס';
+
+      return {
+        id: st.id, index: i + 1, text: st.text,
+        checked, unchecked: !checked,
+        onToggle: () => this.toggleStep(st.id),
+        hasTimer: !!st.timerSeconds,
+        timerBtnLabel,
+        onTimerClick: () => this.timerClick(st.id, st.timerSeconds),
+        showReset: status !== 'idle',
+        onTimerReset: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.timerReset(st.id); },
+        timerBtnStyle: {
+          display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '6px 12px', borderRadius: '999px',
+          border: (status === 'running' || status === 'expired') ? 'none' : (dark ? '1px solid rgba(255,255,255,0.15)' : '1px solid var(--border-default)'),
+          background: status === 'expired' ? 'linear-gradient(180deg, #f59e0b, #d97706)' : status === 'running' ? 'linear-gradient(180deg, var(--color-primary), var(--color-primary-hover))' : (dark ? 'rgba(255,255,255,0.06)' : 'var(--bg-glass)'),
+          color: (status === 'running' || status === 'expired') ? '#fff' : mutedText, fontSize: '12px', fontWeight: 700, cursor: 'pointer',
+          fontVariantNumeric: 'tabular-nums',
+          animation: status === 'expired' ? 'timerPulse 1.2s infinite' : 'none'
+        },
+        rowBg: checked ? chipBg : panelBg,
+        rowBorder: checked ? 'rgba(20,184,166,0.35)' : panelBorder,
+        rowShadow: checked ? 'none' : panelShadow,
+        checkStyle: {
+          display: 'grid', placeContent: 'center', width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0, cursor: 'pointer', border: 'none',
+          background: checked ? 'var(--color-primary)' : (dark ? 'rgba(255,255,255,0.08)' : 'var(--bg-subtle)'),
+          color: checked ? '#fff' : mutedText
+        },
+        textStyle: 'color: ' + (checked ? mutedText : mainText) + '; text-decoration: ' + (checked ? 'line-through' : 'none') + ';'
+      };
+    });
+    const stepCheckedCount = steps.filter(st => st.checked).length;
+    const progressPct = Math.round((stepCheckedCount / STEPS.length) * 100);
+
+    return {
+      pageBg, ambientBg, navBg, navBorder, segmentBg, mainText, mutedText,
+      panelBg, panelBorder, panelShadow, heroShadow, chipBg, toastBg, toastText, heroHeight,
+      shellTheme: dark ? 'kitchen' : 'light',
+      isDark: dark, isLight: !dark, toggleDark: () => this.toggleDark(),
+      recipeName: RECIPE_NAME,
+      yieldOptions,
+      ingredients, ingredientsCheckedLabel: ingCheckedCount + '/' + ingredients.length,
+      steps, stepsCheckedLabel: stepCheckedCount + '/' + STEPS.length + ' הושלמו',
+      progressLabel: 'התקדמות הכנה', progressPct,
+      anyTimerExpired: anyExpired,
+      heroTimerVisible: !!heroTimer,
+      heroTimerLabel: heroTimer ? (heroTimer.status === 'expired' ? 'שלב ' + heroTimer.index + ' · הסתיים' : 'שלב ' + heroTimer.index) : '',
+      heroTimerDisplay: heroTimer ? fmtTime(heroTimer.remaining) : '',
+      heroTimerBg: heroTimer && heroTimer.status === 'expired' ? 'rgba(217,119,6,0.85)' : 'rgba(0,0,0,0.55)',
+      heroTimerAnim: heroTimer && heroTimer.status === 'expired' ? 'animation: timerPulse 1.2s infinite;' : '',
+      showCelebration: s.showCelebration,
+      dismissCelebration: () => this.dismissCelebration(),
+      toastVisible: s.toastVisible,
+      toastMessage: s.toastMessage
+    };
+  }
+}
+</script>
+</body>
+</html>

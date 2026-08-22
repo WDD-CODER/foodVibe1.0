@@ -10,3 +10,12 @@
     padding-block-end: calc(3.5rem + env(safe-area-inset-bottom, 0px));
   }
 }
+
+// ≤620px: header hides entirely in favor of the floating avatar FAB (top-end,
+// fixed) + bottom tab bar — reserve clearance so page content that starts flush
+// against the top edge (e.g. dashboard's quick-tab row) never renders under it.
+@media (max-width: 620px) {
+  .app-content {
+    padding-block-start: calc(3.75rem + env(safe-area-inset-top, 0px));
+  }
+}

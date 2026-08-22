@@ -97,6 +97,11 @@ mine-progress.ps1
 *.jpg
 *.jpeg
 
+# Design snapshot assets are real deliverables, not stray screenshots — carve out
+# assets/ and uploads/ (screenshots/ stays ignored: iteration shots, not design-of-record)
+!.interface-design/source/assets/*.png
+!.interface-design/source/uploads/*.png
+
 # System files
 .DS_Store
 Thumbs.db
@@ -126,4 +131,7 @@ gcm-diagnose.log
 
 # Local MongoDB data (dev-only instance on :27018)
 .mongo-local/
+
+# Design snapshot vendor drop — extracted into .interface-design/source/, zip not needed after that
+/UI refactor and design.zip
 

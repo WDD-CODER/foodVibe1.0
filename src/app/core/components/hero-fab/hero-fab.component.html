@@ -1,30 +1,38 @@
 <div class="hero-fab-container" [class.above-bar]="isOnMenuIntelligence_()">
   <div class="fab-actions" [class.expanded]="isExpanded_()">
     @for (action of effectiveActions_(); track action.labelKey + action.icon) {
-      <button type="button"
-              class="fab-action"
-              [attr.aria-label]="action.labelKey | translatePipe"
-              (click)="runAction(action)">
-        <lucide-icon [name]="action.icon" size="20"></lucide-icon>
+      <button
+        type="button"
+        class="fab-action"
+        [attr.aria-label]="action.labelKey | translatePipe"
+        (click)="runAction(action)"
+      >
+        <lucide-icon [name]="action.icon" size="18"></lucide-icon>
+        <span class="fab-action__label">{{ action.labelKey | translatePipe }}</span>
       </button>
     }
 
     @if (!isOnRecipeBuilder_()) {
-      <button type="button"
-              class="fab-action"
-              [attr.aria-label]="'recipe_builder' | translatePipe"
-              (click)="goToRecipeBuilder()">
-        <lucide-icon name="chef-hat" size="20"></lucide-icon>
+      <button
+        type="button"
+        class="fab-action"
+        [attr.aria-label]="'recipe_builder' | translatePipe"
+        (click)="goToRecipeBuilder()"
+      >
+        <lucide-icon name="chef-hat" size="18"></lucide-icon>
+        <span class="fab-action__label">{{ 'recipe_builder' | translatePipe }}</span>
       </button>
     }
   </div>
 
-  <button type="button"
-          class="fab-main"
-          [class.active]="isExpanded_()"
-          [class.grow-only]="useGrowAnimation_()"
-          (click)="toggle()"
-          [attr.aria-label]="'quick_actions' | translatePipe">
+  <button
+    type="button"
+    class="fab-main"
+    [class.active]="isExpanded_()"
+    [class.grow-only]="useGrowAnimation_()"
+    (click)="toggle()"
+    [attr.aria-label]="'quick_actions' | translatePipe"
+  >
     <lucide-icon name="flame" size="26"></lucide-icon>
   </button>
 </div>

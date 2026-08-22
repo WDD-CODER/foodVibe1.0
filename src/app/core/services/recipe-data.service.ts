@@ -2,6 +2,7 @@ import { Injectable, signal, inject } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
 import { StorageService } from './async-storage.service'
 import { LoggingService } from './logging.service'
+import { LoadingService } from './loading.service'
 import { UserService } from './user.service'
 import { Recipe } from '../models/recipe.model'
 
@@ -12,6 +13,7 @@ const TRASH_KEY = 'TRASH_RECIPES'
 export class RecipeDataService {
   private storage = inject(StorageService)
   private logging = inject(LoggingService)
+  private loading_ = inject(LoadingService)
   private userService = inject(UserService)
 
   private recipesStore_ = signal<Recipe[]>([])
@@ -53,7 +55,7 @@ export class RecipeDataService {
 
   private async loadInitialData(): Promise<void> {
     try {
-      const data = await this.storage.query<Recipe>(ENTITY)
+      const data = await this.loading_.track(this.storage.query<Recipe>(ENTITY))
       this.recipesStore_.set(data)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return

@@ -1,9 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Rubik:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@100..900&display=swap');
 
 /* Global breakpoints (use in @media, not in :root) */
 $break-mobile: 768px;
 $break-tablet: 900px;
 $break-desktop: 1200px;
+
+/* Design-system tiers (plan 305 — `UI refactor/`: 479 / 767 / 1023).
+ * Ported markup uses these; legacy markup keeps $break-mobile/$break-tablet/$break-desktop above.
+ * KNOWN COLLISION: $break-mobile (768px) overlaps $break-phone-max (767px) by one pixel — an iPad in
+ * portrait is exactly 768px. Today it gets the app's full mobile treatment. Narrowing $break-mobile to
+ * 767px would drop it to desktop layout, because there is no tablet tier yet. Resolve in M3, when the
+ * ported shell gains one. Do not "unify" these before then. */
+$break-xs-max: 479px;
+$break-phone-max: 767px;
+$break-tablet-max: 1023px;
 
 /* Designated global tokens (cssLayer): Liquid Glass design system
  * Theme: Liquid Glass — frosted surfaces (--bg-glass, --blur-glass), teal primary (--color-primary).
@@ -12,11 +22,52 @@ $break-desktop: 1200px;
  * New styles: use var(--*) and rem/em; prefer engines over one-off classes. See .claude/skills/cssLayer/SKILL.md
  */
 :root {
-  font-family: 'Heebo', 'Rubik', system-ui, sans-serif;
+  font-family: 'Heebo', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   /* ---- Font families ---- */
-  --font-sans: 'Heebo', 'Rubik', system-ui, sans-serif;
-  --font-mono: 'Space Grotesk', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --font-sans: 'Heebo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Heebo', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* ---- Type scale ---- */
+  --fs-xs: 0.75rem;     /* 12 — meta, tags (design's floor) */
+  --fs-sm: 0.8125rem;   /* 13 — labels */
+  --fs-base: 0.875rem;  /* 14 — body */
+  --fs-md: 1rem;        /* 16 — emphasis body */
+  --fs-lg: 1.125rem;    /* 18 — section title */
+  --fs-xl: 1.5rem;      /* 24 — page title */
+  --fs-2xl: 1.75rem;    /* 28 — KPI value */
+  --fs-3xl: 2.25rem;    /* 36 — hero */
+
+  /* ---- Weights ---- */
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-extrabold: 800;
+
+  /* ---- Line heights ---- */
+  --lh-tight: 1.2;
+  --lh-snug: 1.35;
+  --lh-normal: 1.5;
+  --lh-relaxed: 1.6;
+
+  /* ---- Letter spacing ---- */
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.02em;
+
+  /* ---- Spacing (8-pt scale) ---- */
+  --space-0: 0;
+  --space-1: 0.25rem;  /* 4 */
+  --space-2: 0.5rem;   /* 8 */
+  --space-3: 0.75rem;  /* 12 */
+  --space-4: 1rem;     /* 16 */
+  --space-5: 1.25rem;  /* 20 */
+  --space-6: 1.5rem;   /* 24 */
+  --space-8: 2rem;     /* 32 */
+  --space-10: 2.5rem;  /* 40 */
+  --space-12: 3rem;    /* 48 */
 
   /* ---- Surfaces ---- */
   --bg-body: #f0f4f8;
@@ -112,6 +163,18 @@ $break-desktop: 1200px;
   /* ---- Animation easing ---- */
   --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---- Motion durations ---- */
+  --dur-fast: 0.15s;
+  --dur-base: 0.2s;
+  --dur-slow: 0.25s;
+
+  /* ---- Touch floor (design minimum hit target) ---- */
+  --tap: 44px;
+
+  /* ---- Mobile chrome heights (plan 305 M2; consumed by the .m-* layer) ---- */
+  --tabbar-h: 3.5rem;      /* 56 — bottom tab bar, introduced in M3 */
+  --topnav-h: 3.5rem;      /* 56 — top nav bar */
 
   /* ---- Breakpoints (CSS) ---- */
   --break-sm: 48rem;
@@ -964,6 +1027,51 @@ textarea.c-input {
   }
 }
 
+/* ---- Engine: Tab chip row (plan 305 M3) — contextual sub-nav under the top-level tabs.
+   Composes .c-tab-pill for each chip; this only owns the row/scroller behaviour. ---- */
+.c-tab-chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+
+  padding-block-start: var(--space-2);
+  padding-inline: var(--space-4);
+
+  @media (max-width: $break-phone-max) {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+
+    padding-inline: var(--space-3);
+
+    mask-image: linear-gradient(to left, transparent 0, #000 0.875rem, #000 calc(100% - 0.875rem), transparent 100%);
+    -webkit-mask-image: linear-gradient(to left, transparent 0, #000 0.875rem, #000 calc(100% - 0.875rem), transparent 100%);
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .c-tab-pill {
+      flex: 0 0 auto;
+      scroll-snap-align: center;
+    }
+  }
+
+  /* app-header hides its entire top bar at ≤620px (header.component.scss) and replaces it
+   * with a `position: fixed` floating avatar button (top: 0.75rem, 2.875rem circle). This row
+   * becomes the first in-flow element at that width — clear the avatar instead of running
+   * under it. Same 620px threshold as the header, deliberately not $break-phone-max: the two
+   * breakpoints don't agree yet (see M2 Task 12) and inventing a third number here would make
+   * that worse, not better. */
+  @media (max-width: 620px) {
+    padding-block-start: calc(0.75rem + 2.875rem + var(--space-2) + env(safe-area-inset-top, 0px));
+  }
+}
+
 /* ---- Engine: Glass Data Grid ---- */
 .c-grid-header-cell {
   display: flex;
@@ -1292,6 +1400,43 @@ textarea.c-input {
   animation: inline-edit-expand 0.2s ease-out;
   overflow: visible;
   z-index: 1;
+
+  /* Tablet + mobile: the same panel, same form, rendered as a modal instead of
+   * in-flow under the row (plan 305 decision 2 — desktop keeps the inline panel
+   * unchanged, only this width range gets a wrapper change). Paired with a sibling
+   * `.c-modal-overlay` backdrop in the template — this class only handles the
+   * panel's own position, since the overlay's flex-centering can't reach a sibling. */
+  &.as-modal {
+    position: fixed;
+    inset-inline: var(--space-4);
+    inset-block-start: 50%;
+    z-index: 1001;
+
+    max-width: 32rem;
+    max-height: calc(100dvh - var(--space-8));
+    margin: 0 auto;
+
+    overflow-y: auto;
+    transform: translateY(-50%);
+
+    @media (max-width: $break-phone-max) {
+      inset-inline: 0;
+      inset-block: auto 0;
+      z-index: 1001;
+
+      max-width: none;
+      max-height: 86dvh;
+      margin-inline: 0;
+
+      border-end-end-radius: 0;
+      border-end-start-radius: 0;
+      border-start-start-radius: var(--radius-xl);
+      border-start-end-radius: var(--radius-xl);
+      padding-block-end: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+
+      transform: none;
+    }
+  }
 }
 
 .inline-edit-title {
@@ -1572,35 +1717,31 @@ textarea.c-input {
   align-items: center;
 
   width: 100%;
-  margin: 0 0 0.375rem 0;
-  padding: 0.4rem 0.625rem;
+  margin: 0 0 0.25rem 0;
+  padding: 0.25rem 0.125rem;
 
   font-size: 0.8125rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-text-muted);
   background: transparent;
 
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
+  border: none;
+  border-radius: var(--radius-sm);
 
   cursor: pointer;
-  transition: background 0.2s var(--ease-smooth), color 0.2s var(--ease-smooth), border-color 0.2s var(--ease-smooth), box-shadow 0.2s var(--ease-smooth);
+  transition: color 0.2s var(--ease-smooth);
 
   &:hover {
     color: var(--color-text-main);
-    background: var(--bg-glass);
-    border-color: var(--border-strong);
   }
 
   &.expanded {
-    color: var(--color-primary-hover);
-    background: var(--color-primary-soft);
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 1px var(--color-primary-soft);
+    color: var(--color-text-main);
   }
 
   lucide-icon {
     flex-shrink: 0;
+    color: var(--color-text-muted);
 
     transition: transform 0.2s var(--ease-spring);
   }
@@ -1619,12 +1760,12 @@ textarea.c-input {
 .c-filter-category-count {
   margin-inline-start: auto;
   margin-inline-end: 0.375rem;
-  padding: 0.1rem 0.5rem;
+  padding: 0 0.4rem;
 
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--color-primary-hover);
-  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  background: transparent;
 
   border-radius: var(--radius-full);
   line-height: 1.4;
@@ -1699,6 +1840,30 @@ textarea.c-input {
     }
   }
 
+  .c-filter-option-label {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .c-filter-option-dot {
+    flex-shrink: 0;
+
+    width: 0.5rem;
+    height: 0.5rem;
+
+    border-radius: var(--radius-full);
+  }
+
+  .c-filter-option-count {
+    flex-shrink: 0;
+
+    margin-inline-start: auto;
+
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+
   input[type="radio"] {
     border-radius: var(--radius-full);
 
@@ -1731,6 +1896,114 @@ textarea.c-input {
   &:hover {
     background: rgba(20, 184, 166, 0.2);
     transform: scale(0.97);
+  }
+}
+
+/* ============================================================
+   Plan 305 M2 — Mobile hardening layer (`UI refactor/mobile-pass.css`)
+   Phone-only (≤ $break-phone-max). Nothing here applies to tablet or desktop.
+   Opt-in utilities: add the `.m-*` class to the element that needs the behaviour.
+
+   Deliberately NOT ported from the design:
+   - `html, body { overflow-x: hidden }` — creates a scroll container that breaks
+     `position: sticky` on descendants, and this app has sticky list headers
+     (plan 279). If a ported screen overflows, fix the overflow, not the symptom.
+   - the `input::after` checkmark geometry — this app renders the tick as a
+     `background-image` SVG that scales with the box, so sizing alone is enough.
+   ============================================================ */
+@media (max-width: $break-phone-max) {
+  /* iOS zooms the viewport when a focused field is under 16px. */
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea {
+    font-size: 1rem !important;
+  }
+
+  /* Checkboxes read as compact marks on phones — roughly a quarter of the
+     desktop footprint. Higher specificity than the per-screen rules, so this is
+     the single source of truth for phone checkbox size. */
+  app-root input[type="checkbox"],
+  app-root input[type="radio"] {
+    flex: none !important;
+
+    width: 0.875rem !important;
+    height: 0.875rem !important;
+
+    padding: 0.3125rem !important;
+    box-sizing: content-box !important;
+    border-radius: var(--radius-xs) !important;
+  }
+
+  app-root input[type="radio"] {
+    border-radius: var(--radius-full) !important;
+  }
+
+  /* Horizontal scrollers behave like scrollers, not page hijackers. */
+  .m-scroll {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .m-scroll-y {
+    overscroll-behavior: contain;
+  }
+
+  /* A fixed page footer must clear the shell's bottom tab bar (M3). */
+  .m-above-tabbar {
+    z-index: 96 !important;
+    inset-block-end: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Deviation from the design: applied directly to the FAB wrapper rather than
+     to a `.fabwrap` descendant of the shell. Bound in M3. */
+  .m-fab-lift {
+    /* tab bar + 128px thumb clearance, per the design */
+    inset-block-end: calc(var(--tabbar-h) + 8rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Centred dialogs become bottom sheets. */
+  .m-sheet {
+    align-items: flex-end !important;
+  }
+
+  .m-sheet-card {
+    width: 100% !important;
+    max-width: none !important;
+    max-height: 86dvh !important;
+
+    padding-block-end: calc(var(--space-4) + env(safe-area-inset-bottom, 0px)) !important;
+    border-start-start-radius: var(--radius-xl);
+    border-start-end-radius: var(--radius-xl);
+    border-end-end-radius: 0;
+    border-end-start-radius: 0;
+  }
+
+  /* Toasts clear the tab bar, and a page save bar when one is present. */
+  .m-toast {
+    width: max-content;
+    max-width: calc(100vw - var(--space-8));
+
+    inset-block-end: calc(var(--tabbar-h) + var(--space-5) + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .m-toast-abovebar {
+    /* tab bar + 132px, per the design — clears a page save bar as well */
+    inset-block-end: calc(var(--tabbar-h) + 8.25rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Full-height panels use dvh — vh does not account for mobile browser chrome. */
+  .m-dvh {
+    min-height: calc(100dvh - var(--topnav-h)) !important;
+  }
+
+  /* Collapse a fixed multi-column grid to one column. */
+  .m-stack {
+    grid-template-columns: 1fr !important;
   }
 }
 
