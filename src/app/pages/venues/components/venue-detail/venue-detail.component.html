@@ -1,0 +1,96 @@
+<div class="venue-detail" dir="rtl">
+  @if (venue_(); as venue) {
+    <div class="detail-topbar">
+      <button type="button" class="c-btn-ghost--sm" (click)="backToList()">
+        <lucide-icon name="arrow-right" [size]="18"></lucide-icon>
+        {{ 'venue_list' | translatePipe }}
+      </button>
+      <button
+        type="button"
+        class="c-btn-primary"
+        (click)="onEdit()"
+        [disabled]="!isLoggedIn()"
+        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+      >
+        <lucide-icon name="pencil" [size]="16"></lucide-icon>
+        {{ 'edit' | translatePipe }}
+      </button>
+    </div>
+
+    <div class="detail-hero c-glass-panel">
+      <div class="detail-hero-media">
+        <lucide-icon name="map-pin" [size]="40"></lucide-icon>
+      </div>
+      <div class="detail-hero-info">
+        <h1 class="venue-name">{{ venue.name_hebrew }}</h1>
+        @if (venue.address_) {
+          <p class="venue-address">
+            <lucide-icon name="map-pin" [size]="15"></lucide-icon>
+            {{ venue.address_ }}
+          </p>
+        }
+        <div class="detail-stats">
+          <div class="detail-stat">
+            <span class="detail-stat-label">{{ 'infrastructure_items' | translatePipe }}</span>
+            <span class="detail-stat-value">{{ (venue.available_infrastructure_ ?? []).length }}</span>
+          </div>
+          <div class="detail-stat">
+            <span class="detail-stat-label">{{ 'capacity' | translatePipe }}</span>
+            <span class="detail-stat-value">{{ venue.capacity_ ?? '—' }}</span>
+          </div>
+        </div>
+        <span class="venue-env-chip">{{ venue.environment_type_ | translatePipe }}</span>
+      </div>
+    </div>
+
+    <div class="detail-cards">
+      <section class="detail-card c-glass-panel">
+        <header class="detail-card-header">
+          <lucide-icon name="calendar-clock" [size]="18"></lucide-icon>
+          <h2>{{ 'operating_hours' | translatePipe }}</h2>
+        </header>
+        @if (venue.operating_hours_?.length) {
+          <ul class="hours-list">
+            @for (block of venue.operating_hours_; track $index) {
+              <li class="hours-row">
+                <span class="hours-days">{{ block.days_ }}</span>
+                <span class="hours-time">{{ block.time_ }}</span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="detail-empty">—</p>
+        }
+      </section>
+
+      <section class="detail-card c-glass-panel">
+        <header class="detail-card-header">
+          <lucide-icon name="phone" [size]="18"></lucide-icon>
+          <h2>{{ 'contact_name' | translatePipe }}</h2>
+        </header>
+        @if (venue.contact_name_ || venue.contact_phone_) {
+          <p class="contact-name">{{ venue.contact_name_ || '—' }}</p>
+          @if (venue.contact_phone_) {
+            <p class="contact-phone">
+              <lucide-icon name="phone" [size]="14"></lucide-icon>
+              {{ venue.contact_phone_ }}
+            </p>
+          }
+        } @else {
+          <p class="detail-empty">—</p>
+        }
+      </section>
+    </div>
+
+    @if (venue.notes_) {
+      <section class="detail-card c-glass-panel">
+        <header class="detail-card-header">
+          <h2>{{ 'notes' | translatePipe }}</h2>
+        </header>
+        <p class="venue-notes">{{ venue.notes_ }}</p>
+      </section>
+    }
+  } @else {
+    <app-empty-state messageKey="venue_not_found" icon="map-pin" />
+  }
+</div>

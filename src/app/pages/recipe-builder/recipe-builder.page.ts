@@ -164,10 +164,11 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   /** User-assigned rating (0 = unrated, 1–5 = rated); lives outside the form. */
   protected recipeRating_ = signal<number>(0)
 
-  /** Section cards collapsed by default (true = collapsed). */
-  protected tableLogicCollapsed_ = signal(true)
-  protected workflowLogicCollapsed_ = signal(true)
-  protected logisticsLogicCollapsed_ = signal(true)
+  /** Section cards expanded by default (matches the design) — collapsed only once the
+   *  user closes one, which persists via localStorage below (true = collapsed). */
+  protected tableLogicCollapsed_ = signal(false)
+  protected workflowLogicCollapsed_ = signal(false)
+  protected logisticsLogicCollapsed_ = signal(false)
 
   /** Export toolbar overlay (blur header, same pattern as menu-intelligence). */
   protected exportToolbarOpen_ = signal(false)

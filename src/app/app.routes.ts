@@ -54,6 +54,11 @@ export const routes: Routes = [
         canActivate: [authGuard],
       },
       {
+        path: 'view/:id',
+        loadComponent: () => import('./pages/venues/components/venue-detail/venue-detail.component').then(m => m.VenueDetailComponent),
+        resolve: { venue: venueResolver },
+      },
+      {
         path: 'edit/:id',
         loadComponent: () => import('./pages/venues/components/venue-form/venue-form.component').then(m => m.VenueFormComponent),
         resolve: {

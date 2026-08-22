@@ -312,3 +312,55 @@ Unresolved tool signals: re-add any pending Verify/Fail/blocker notes under this
 
 {"parentUuid":"69dd47f1-ac7c-47bd-b4e3-dceef8b1f214","isSidechain":false,"promptId":"285123da-b575-4e2f-b0ef-139d2983ab23","type":"user","message":{"role":"user","content":[{"type":"text","text":"Base directory for this skill: C:\\coding projects\\Cursor\\foodVibe1.0\\.claude\\skills\\preflight\n\n#
 {"parentUuid":"711fedf7-7e57-4648-88ff-5018ee4f147d","isSidechain":false,"promptId":"285123da-b575-4e2f-b0ef-139d2983ab23","type":"user","message":{"role":"user","content":[{"type":"text","text":"Base directory for this skill: C:\\Users\\danwe\\.claude\\skills\\browse\n\n<!-- AUTO-GENERATED from SKI
+
+## PreCompact signal dump (2026-08-22T14:27:20Z)
+
+Open unchecked items at compact time:
+- [ ] (Milestone 2/3/4 — see plan file; not started, lower priority, scope separately)
+- [ ] Deploy; collect ~24h of real-use numbers from Render logs
+- [ ] Record observed numbers in `reports/performance-audit-2026-08-13.md` under a new "Observed" section
+- [ ] Confirm from M1 logs whether cold starts actually occur during business hours — if not, stop and re-prioritise
+- [ ] Human: approve billing change; set `plan: free` → `plan: starter` in `render.yaml:5`
+- [ ] Human: verify Atlas cluster region matches Render service region; report findings
+- [ ] Human: check whether `MONGO_URI` points at an M0 free cluster; report findings
+- [ ] Move `seedMasterData()` to run after `app.listen()` — `server/index.js:125-131`
+- [ ] Determine whether both `foodvibe` and `foodvibe-api` Render services exist; document which is canonical
+- [ ] Add `maxAge: '1y'`, `immutable: true`, and the `index.html` → `no-cache` `setHeaders` guard — `server/index.js:63`
+- [ ] Set `Cache-Control: no-cache` on the SPA fallback `res.sendFile(index.html)` — `server/index.js:103-108`
+- [ ] Verify a fresh deploy is still picked up by a returning browser (guards the fallback caching bug)
+- [ ] Remove `withPreloading(PreloadAllModules)` and its now-unused import — `src/app/app.config.ts:4,96`
+- [ ] Convert `menu-export.service.ts:8` and `recipe-export.service.ts:8` to `await import('exceljs')` at point of use
+- [ ] Propagate resulting `async` signature changes through `export.service.ts` and its 3 consumers
+- [ ] Manually verify Excel export still produces a valid `.xlsx` from all three consumer pages
+- [ ] Re-confirm `food-compos-logo.png` (1.88 MB) is unreferenced; delete if so
+- [ ] Convert `recipe_placeholder.png` (1.27 MB) to WebP or inline SVG — update `recipe-header.component.ts:133`
+- [ ] Convert both approve-stamp PNGs to WebP — update `approve-stamp.component.ts:20,22`
+- [ ] M1 — Record before/after costs + allergens for 10 representative recipes (nested, depth-limited, broken-ref, price-override) — spot-verified live instead; formal table still not done
+- [ ] M2 — Separate commit: convert the remaining 29 components to `ChangeDetectionStrategy.OnPush`
+- [ ] M3 — Hoist the rebuilt `allProductNames` Set above the master loop — `server/services/sync-master.js:273-274` (out of scope: server-only, doesn't affect local-storage mode)
+- [ ] M3 — Remove `syncMasterToUser` from `POST /refresh` (or version-gate it) — `server/routes/auth.js:274` (out of scope, same reason)
+- [ ] M3 — Regression test: brand-new account signup still receives correctly cloned + remapped master data (out of scope, same reason)
+- [ ] Prerequisite gate — confirm 302 M1/M2 + 303 M1/M2 shipped and re-measured; reduce or drop scope if no longer justified
+- [ ] M1 — List projections on `GET /:type` mirroring `SEARCH_PROJECTIONS` — `server/routes/generic.js:45-77,82-86`
+- [ ] M1 — Verify edit flows fetch full documents so a lean list doc cannot round-trip through a save and erase fields
+- [ ] M2 — Defer `RecipeDataService`/`DishDataService` to `autoLoad: false`; confirm resolver coverage first
+- [ ] M2 — Regression test: cold-load a nested-sub-recipe recipe by direct URL; no ingredient unlinking (plan 300 finding 3)
+- [ ] M2 — Collapse the post-login double fetch — `user.service.ts:54-93` (same item as plan 301 M4; mark both)
+- [ ] M3 — Add `cdk-virtual-scroll` or pagination to inventory + recipe-book lists (after 303 M2)
+- [ ] Hand-off — re-assess plan 301 M2's scope against measured results
+- [ ] M0 Tasks 1-4 — screenshot every screen live + design side by side (1280px + 390px), write `_claude-data/design-migration/visual-diff.md`, revise milestone order from the actual findings
+- [ ] M1 Tasks 5-6 — shared `.c-*` engine class updates in `src/styles.scss`, only for gaps M0 confirms are real
+- [ ] M2 Tasks 7-8 — shell/nav remainder (nav-pill gradient, avatar chip)
+- [ ] M3 Tasks 9-11 — list-shell chassis pass (Inventory, Recipe Book, Suppliers, Equipment, Menu Library, Venues, Trash share this)
+- [ ] M4 Task 12 — style the Venues new-data fields (address/capacity/contact/hours) added in plan 305
+- [ ] M5 Task 13 — Dashboard
+- [ ] M6 Task 14 — Venue Detail — **scoping question for the human first**: the design has this screen, the app doesn't; confirm whether building it is in scope before starting
+- [ ] M7 Task 15 — Cook View
+
+Unresolved tool signals: re-add any pending Verify/Fail/blocker notes under this heading after compact if still open.
+
+### Unresolved signals detected at compact time
+
+{"parentUuid":"69dd47f1-ac7c-47bd-b4e3-dceef8b1f214","isSidechain":false,"promptId":"285123da-b575-4e2f-b0ef-139d2983ab23","type":"user","message":{"role":"user","content":[{"type":"text","text":"Base directory for this skill: C:\\coding projects\\Cursor\\foodVibe1.0\\.claude\\skills\\preflight\n\n#
+{"parentUuid":"711fedf7-7e57-4648-88ff-5018ee4f147d","isSidechain":false,"promptId":"285123da-b575-4e2f-b0ef-139d2983ab23","type":"user","message":{"role":"user","content":[{"type":"text","text":"Base directory for this skill: C:\\Users\\danwe\\.claude\\skills\\browse\n\n<!-- AUTO-GENERATED from SKI
+{"parentUuid":"8e51c6da-3b13-4fc5-a292-d0a22737ed67","isSidechain":false,"attachment":{"type":"invoked_skills","skills":[{"name":"angularComponentStructure","path":"projectSettings:angularComponentStructure","content":"Base directory for this skill: C:\\coding projects\\Cursor\\foodVibe1.0\\.claude\

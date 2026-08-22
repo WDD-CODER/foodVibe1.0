@@ -10,6 +10,9 @@
     </div>
     <div class="header-start">
       <ng-content select="[shell-title]"></ng-content>
+      @if (resultCountText(); as text) {
+        <p class="list-result-count">{{ text }}</p>
+      }
     </div>
     <div class="header-spacer"></div>
     <div class="header-search">
@@ -55,6 +58,7 @@
       </button>
     }
     <div class="panel-content">
+      <h3 class="panel-heading">{{ 'filter' | translatePipe }}</h3>
       <ng-content select="[shell-filters]"></ng-content>
     </div>
   </aside>

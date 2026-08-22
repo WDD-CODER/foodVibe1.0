@@ -28,14 +28,6 @@
   border-block-end: 1px solid var(--border-glass);
   box-shadow: var(--shadow-nav);
 
-  // Mirror spacer: gives pills a symmetrical counterpart so they stay
-  // truly centered regardless of chip width.
-  &::after {
-    content: '';
-    flex: 1;
-    min-width: 0;
-  }
-
   .mobile-menu-btn,
   .mobile-close-btn {
     display: none;
@@ -124,13 +116,22 @@
 }
 
 // ─── AUTH SECTION ──────────────────────────────────────────────────────────
+// Both this and .brand-section are flex:1 — equal growth on each side keeps
+// .nav-pills perfectly centered regardless of chip/logo width, and puts the
+// user chip and brand mark on opposite ends (matches the design).
 .auth-section {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 
-  // flex: 1 mirrors the ::after spacer — chip stays in its column,
-  // pills stay centered, no margin tricks needed.
+  flex: 1;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
   flex: 1;
 }
 
@@ -138,10 +139,6 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-
-  margin-inline-end: 0.5rem;
-  padding-inline-end: 0.5rem;
-  border-inline-end: 1px solid var(--border-default);
 
   color: var(--color-text-main);
   text-decoration: none;

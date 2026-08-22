@@ -1,6 +1,9 @@
 <div class="dashboard-overview" dir="rtl">
   <header class="dashboard-header">
-    <h1 class="page-title">{{ 'dashboard' | translatePipe }}</h1>
+    <div class="header-title-block">
+      <h1 class="page-title">{{ 'dashboard' | translatePipe }}</h1>
+      <p class="page-subtitle">{{ 'dashboard_subtitle' | translatePipe }}</p>
+    </div>
     <div class="header-actions" role="group" aria-label="Dashboard actions">
       <nav class="header-actions__nav" aria-label="Dashboard sections">
         <button
@@ -42,7 +45,6 @@
 
   <main class="dashboard-main">
     <section class="kpi-grid">
-
       <!-- Total Products -->
       <article class="kpi-card" data-testid="kpi-total-products">
         <div class="kpi-top">
@@ -56,9 +58,14 @@
           <button type="button" class="link-btn" data-testid="btn-view-inventory" (click)="goToInventory()">
             {{ 'view_inventory' | translatePipe }}
           </button>
-          <button type="button" class="link-btn" data-testid="btn-add-product" (click)="goToAddProduct()"
+          <button
+            type="button"
+            class="link-btn"
+            data-testid="btn-add-product"
+            (click)="goToAddProduct()"
             [disabled]="!isLoggedIn()"
-            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+          >
             {{ 'add_product' | translatePipe }}
           </button>
         </div>
@@ -78,7 +85,14 @@
             {{ 'view_recipes' | translatePipe }}
           </button>
           <svg width="60" height="18" viewBox="0 0 60 18" aria-hidden="true" class="kpi-sparkline">
-            <path d="M0 12 L10 13 L20 10 L30 11 L40 7 L50 8 L60 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path
+              d="M0 12 L10 13 L20 10 L30 11 L40 7 L50 8 L60 4"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
         </div>
       </article>
@@ -97,7 +111,14 @@
             {{ 'view_inventory' | translatePipe }}
           </button>
           <svg width="60" height="18" viewBox="0 0 60 18" aria-hidden="true" class="kpi-sparkline">
-            <path d="M0 8 L10 10 L20 7 L30 12 L40 11 L50 15 L60 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path
+              d="M0 8 L10 10 L20 7 L30 12 L40 11 L50 15 L60 14"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
         </div>
       </article>
@@ -116,11 +137,17 @@
             {{ 'view_recipes' | translatePipe }}
           </button>
           <svg width="60" height="18" viewBox="0 0 60 18" aria-hidden="true" class="kpi-sparkline">
-            <path d="M0 10 L10 9 L20 11 L30 8 L40 9 L50 6 L60 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path
+              d="M0 10 L10 9 L20 11 L30 8 L40 9 L50 6 L60 5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
         </div>
       </article>
-
     </section>
 
     <section class="activity-section">
@@ -133,19 +160,16 @@
           <div class="activity-list" data-testid="activity-list" scrollIndicators>
             @for (item of getRecentActivity(); track item.id) {
               <div class="activity-item" data-testid="activity-item">
-
                 <span class="act-avatar">{{
-                  item.entityType === 'product' ? 'P' :
-                  item.entityType === 'recipe' ? 'R' : 'D'
+                  item.entityType === 'product' ? 'P' : item.entityType === 'recipe' ? 'R' : 'D'
                 }}</span>
 
                 <div class="act-middle">
                   <span class="entity-type-tag" [attr.data-entity]="item.entityType">
-                    {{ (item.entityType === 'product'
-                      ? 'product'
-                      : item.entityType === 'dish'
-                        ? 'dish'
-                        : 'preparation') | translatePipe }}
+                    {{
+                      (item.entityType === 'product' ? 'product' : item.entityType === 'dish' ? 'dish' : 'preparation')
+                        | translatePipe
+                    }}
                   </span>
                   <span class="act-sep" aria-hidden="true"></span>
                   <span class="activity-name">
@@ -169,7 +193,10 @@
                         class="change-tag"
                         (click)="toggleChangePopover(item.id, change.field, $event)"
                       >
-                        {{ change.label | translatePipe }}@if (change.from || change.to) {: {{ change.from }} → {{ change.to }}}
+                        {{ change.label | translatePipe }}
+                        @if (change.from || change.to) {
+                          : {{ change.from }} → {{ change.to }}
+                        }
                       </button>
                     }
                   </div>
@@ -184,7 +211,7 @@
                 </div>
 
                 <span class="activity-type" [attr.data-action]="item.action">
-                  {{ ('activity_' + item.action) | translatePipe }}
+                  {{ 'activity_' + item.action | translatePipe }}
                 </span>
               </div>
             }

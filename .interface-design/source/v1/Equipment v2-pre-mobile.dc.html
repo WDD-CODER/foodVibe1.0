@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./colors_and_type.css">
+  <script src="./shell.js"></script>
+  <style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.96) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    body { margin: 0; }
+    a { color: var(--color-primary); text-decoration: none; }
+    a:hover { color: var(--color-primary-hover); }
+    input[type="checkbox"], input[type="radio"] { accent-color: var(--color-primary); width: 16px; height: 16px; cursor: pointer; }
+    input:focus, button:focus, select:focus { outline: none; }
+    ::selection { background: var(--color-primary-soft); }
+    .equip-row > div, .eq-car-track > div { justify-content: center; text-align: center; }
+    .equip-row > .eq-name-cell { justify-content: flex-start; text-align: start; }
+    .equip-header-row > div { justify-content: center; }
+    .equip-header-row > div:first-child { justify-content: flex-start; }
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .equip-aside { width: 100% !important; max-width: none !important; }
+      .equip-aside > div { display: flex !important; flex-direction: column; gap: var(--space-3); }
+      .eq-filter-group { display: flex !important; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; width: 100%; margin-bottom: 0 !important; }
+      .eq-filter-group > div:first-child { flex: 0 0 auto !important; margin-bottom: 0 !important; }
+    }
+    .equip-header-row > div { display: flex; align-items: center; min-height: 22px; line-height: 1.2; }
+    .eq-car-outer, .eq-car-track { display: contents; }
+    .eq-car-arrow { display: none !important; }
+    .eq-category-cell { order: 2; }
+    .eq-owned-cell { order: 3; }
+    .eq-consumable-cell { order: 4; }
+    .eq-scaling-cell { order: 5; }
+    .eq-actions-cell { order: 6; }
+    .eq-select-cell { order: 7; }
+    @media (max-width: 1023px) {
+      .equip-main-layout { flex-direction: column !important; align-items: stretch !important; }
+      .equip-main { display: contents; }
+      .equip-toolbar { order: 1; flex-wrap: wrap !important; }
+      .equip-aside { order: 2; position: static !important; width: 100% !important; max-width: none !important; align-self: stretch; margin: 0 0 var(--space-4); box-sizing: border-box; }
+      .equip-aside > div { width: 100%; min-width: 0; box-sizing: border-box; }
+      .equip-selection-bar { order: 3; }
+      .equip-list-container { order: 4; }
+    }
+    @media (max-width: 479px) {
+      .equip-toolbar > div:has(input[placeholder]) { min-width: 0 !important; flex: 1 1 100% !important; order: 3; }
+      .equip-toolbar > button:last-child { order: 2; margin-inline-start: 0 !important; }
+      .eq-filter-group { display: flex !important; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+      .eq-filter-group > div:first-child { flex: 1 0 100%; margin-bottom: 4px !important; }
+      .eq-filter-group > div:not(:first-child) { display: contents !important; }
+      .eq-filter-label { flex: 0 0 auto !important; padding: 6px 12px !important; background: var(--bg-subtle); border-radius: var(--radius-full); }
+
+      .equip-header-row { display: none !important; }
+      .equip-list-container { background: none !important; border: none !important; box-shadow: none !important; overflow: visible !important; padding: 0 !important; display: flex !important; flex-direction: column; gap: 6px; }
+
+      .equip-row {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px;
+        box-sizing: border-box;
+        padding: 8px 10px !important;
+        margin: 0 !important;
+        border-radius: var(--radius-md) !important;
+        background: var(--bg-glass-hover);
+        border: 1px solid var(--border-glass) !important;
+        box-shadow: none !important;
+        position: relative;
+      }
+      .equip-row > .eq-name-cell { order: 1; flex: 1 1 auto; min-width: 0; display: block !important; font-size: var(--fs-sm) !important; font-weight: var(--fw-medium) !important; text-align: start; padding-bottom: 0 !important; border-bottom: none !important; margin-bottom: 0 !important; }
+      .equip-row > .eq-owned-cell { order: 2; flex: 0 0 auto !important; font-size: var(--fs-sm) !important; white-space: nowrap; }
+      .equip-row > .eq-actions-cell { order: 4; flex: 0 0 auto; gap: 0 !important; }
+      .equip-row > .eq-actions-cell button { width: 26px !important; height: 26px !important; }
+      .eq-select-cell { order: 5; flex: 0 0 auto; }
+      .equip-row > .eq-car-outer { order: 3; display: block !important; position: relative; flex: 0 0 108px; width: 108px; box-sizing: border-box; padding: 0 14px; }
+      .eq-car-track > div { order: 0; }
+      .eq-car-track { display: flex !important; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; background: var(--bg-subtle); border-radius: var(--radius-sm); scrollbar-width: none; height: 44px; }
+      .eq-car-track::-webkit-scrollbar { display: none; }
+      .eq-car-track > div { flex: 0 0 100%; width: 100%; box-sizing: border-box; scroll-snap-align: start; scroll-snap-stop: always; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 1px; padding: 2px 6px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; font-size: var(--fs-xs); line-height: 1.15; }
+      .eq-car-track > div::before { content: attr(data-label); font-size: 12px; font-weight: var(--fw-semibold); color: var(--color-text-muted-light); text-transform: uppercase; line-height: 1; }
+    }
+      a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(20,184,166,0.35) !important; }
+    @keyframes skelPulse { 0%,100% { opacity: 1 } 50% { opacity: .55 } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  
+    /* ── pass 2: touch ergonomics (one rule, all screens) ── */
+    [class*="car-arrow"] { display: none !important; }
+    /* ── pass 4: motion system ── */
+    @keyframes pageEnter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    app-shell > * { animation: pageEnter .28s var(--ease-spring) both; }
+    button, a[role="button"] { transition: transform .15s var(--ease-spring), background-color .2s var(--ease-smooth), color .2s var(--ease-smooth), box-shadow .25s var(--ease-smooth); }
+    button:active, a[role="button"]:active { transform: scale(0.97); }
+    input[type="checkbox"], input[type="radio"] {
+      appearance: none; -webkit-appearance: none; width: 24px; height: 24px; margin: 0; flex: none;
+      display: inline-grid; place-content: center; cursor: pointer;
+      background: var(--bg-pure); border: 1.5px solid var(--border-strong); border-radius: 7px;
+      box-shadow: inset 0 1px 2px rgba(15,23,42,0.06);
+      transition: background-color .16s var(--ease-smooth), border-color .16s var(--ease-smooth), box-shadow .2s var(--ease-smooth), transform .2s var(--ease-spring);
+    }
+    input[type="radio"] { border-radius: 50%; }
+    input[type="checkbox"]::after {
+      content: ""; width: 6px; height: 11px; opacity: 0;
+      border-right: 2.6px solid var(--color-text-on-primary); border-bottom: 2.6px solid var(--color-text-on-primary);
+      transform: rotate(45deg) translate(-1px, -2px) scale(0.6);
+      transition: opacity .14s var(--ease-smooth), transform .2s var(--ease-spring);
+    }
+    input[type="radio"]::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--color-text-on-primary); opacity: 0; transition: opacity .14s var(--ease-smooth); }
+    input[type="checkbox"]:hover, input[type="radio"]:hover { border-color: var(--color-primary); background: var(--color-primary-soft); }
+    input[type="checkbox"]:checked, input[type="radio"]:checked {
+      background: var(--color-primary); border-color: var(--color-primary);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 2px 8px -2px var(--color-primary-glow);
+    }
+    input[type="checkbox"]:checked::after { opacity: 1; transform: rotate(45deg) translate(-1px, -2px) scale(1); }
+    input[type="radio"]:checked::after { opacity: 1; }
+    input[type="checkbox"]:active, input[type="radio"]:active { transform: scale(0.94); }
+
+    @media (max-width: 767px) {
+      button, a[role="button"], select { min-height: 44px !important; min-width: 44px !important; }
+      input:not([type="checkbox"]):not([type="radio"]) { min-height: 44px !important; }
+      input[type="checkbox"], input[type="radio"] { width: 24px !important; height: 24px !important; padding: 10px !important; box-sizing: content-box !important; }
+      a[href]:not([style*="font-size: var(--fs-xs)"]) { min-height: 44px; display: inline-flex; align-items: center; }
+      [style*="grid-template-columns: 260px"], [style*="grid-template-columns: 320px"], [style*="grid-template-columns: 140px"] { grid-template-columns: 1fr !important; }
+      [style*="max-width: 1520px"], [style*="max-width: 1200px"], [style*="max-width: 1100px"], [style*="max-width: 720px"] { padding-inline: var(--space-4) !important; }
+    }
+  </style>
+</helmet>
+
+<app-shell dir="rtl" page="equipment" fab='[{"id":"add-equipment","label":"הוספת ציוד","icon":"plus"}]'>
+  <div style="position: relative; z-index: 1;">
+
+    <div class="equip-main-layout" style="max-width: 1520px; margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-12); display: flex; gap: var(--space-5); align-items: flex-start; position: static">
+
+      <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ true }}">
+        <aside class="equip-aside" style="width: clamp(220px, 18vw, 320px); flex-shrink: 0; position: sticky; top: calc(3.5rem + var(--space-5)); animation: fadeIn 0.25s var(--ease-spring);">
+          <div style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); padding: var(--space-4);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4);">
+              <h3 style="margin: 0; font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--color-text-main);">סינון</h3>
+              <sc-if value="{{ hasActiveFilters }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ clearFilters }}" style="background: none; border: none; padding: 0; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-primary); cursor: pointer;">נקה סינון</button>
+              </sc-if>
+            </div>
+
+            <div class="eq-filter-group" style="margin-bottom: var(--space-4);">
+              <div style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">קטגוריה</div>
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <sc-for list="{{ categoryOptions }}" as="c" hint-placeholder-count="6">
+                  <label class="eq-filter-label" style="display: flex; align-items: center; gap: 8px; padding: 5px 0; cursor: pointer;">
+                    <input type="checkbox" checked="{{ c.checked }}" onChange="{{ c.onToggle }}">
+                    <span style="font-size: var(--fs-sm); color: var(--color-text-secondary);">{{ c.label }}</span>
+                  </label>
+                </sc-for>
+              </div>
+            </div>
+
+            <div class="eq-filter-group">
+              <div style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">מתכלה</div>
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <label class="eq-filter-label" style="display: flex; align-items: center; gap: 8px; padding: 5px 0; cursor: pointer;">
+                  <input type="radio" name="consumable" checked="{{ consumableAll }}" onChange="{{ setConsumableAll }}">
+                  <span style="font-size: var(--fs-sm); color: var(--color-text-secondary);">הכל</span>
+                </label>
+                <label class="eq-filter-label" style="display: flex; align-items: center; gap: 8px; padding: 5px 0; cursor: pointer;">
+                  <input type="radio" name="consumable" checked="{{ consumableYes }}" onChange="{{ setConsumableYes }}">
+                  <span style="font-size: var(--fs-sm); color: var(--color-text-secondary);">כן</span>
+                </label>
+                <label class="eq-filter-label" style="display: flex; align-items: center; gap: 8px; padding: 5px 0; cursor: pointer;">
+                  <input type="radio" name="consumable" checked="{{ consumableNo }}" onChange="{{ setConsumableNo }}">
+                  <span style="font-size: var(--fs-sm); color: var(--color-text-secondary);">לא</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </sc-if>
+
+      <main class="equip-main" style="flex: 1; min-width: 0;">
+        <div class="equip-toolbar" style="display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-5); flex-wrap: wrap;">
+          <button onClick="{{ togglePanel }}" style="display: grid; place-content: center; width: 38px; height: 38px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--color-text-muted); cursor: pointer; flex-shrink: 0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+          </button>
+
+          <div>
+            <h1 style="margin: 0; font-size: var(--fs-xl); font-weight: var(--fw-bold); letter-spacing: var(--tracking-tight); color: var(--color-text-main);">ציוד</h1>
+            <p style="margin: 2px 0 0; font-size: var(--fs-sm); color: var(--color-text-muted);">{{ filteredCount }} מתוך {{ totalCount }} פריטים</p>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: var(--space-2); background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 0 var(--space-3); height: 38px; min-width: 220px; backdrop-filter: var(--blur-glass);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-text-muted-light); flex-shrink: 0;"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+            <input type="text" placeholder="חיפוש ציוד" value="{{ search }}" onChange="{{ onSearchChange }}" style="border: none; background: none; outline: none; font-size: var(--fs-sm); color: var(--color-text-main); font-family: var(--font-sans); width: 100%;">
+          </div>
+
+          <button onClick="{{ openAddModal }}" style="margin-inline-start: auto; display: inline-flex; align-items: center; gap: var(--space-2); padding: 0 var(--space-4); height: 38px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); color: var(--color-text-on-primary); border: none; border-radius: var(--radius-full); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer; box-shadow: var(--shadow-glow);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+            הוסף ציוד
+          </button>
+        </div>
+
+        <sc-if value="{{ hasSelection }}" hint-placeholder-val="{{ false }}">
+          <div class="equip-selection-bar" style="display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4); margin-bottom: var(--space-3); background: var(--color-primary-soft); border: 1px solid var(--border-focus); border-radius: var(--radius-md); animation: popIn 0.2s var(--ease-spring);">
+            <span style="font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--color-text-main);">{{ selectedCount }} נבחרו</span>
+            <button onClick="{{ askBulkDelete }}" style="display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid rgba(220,38,38,0.3); color: var(--color-danger); padding: 6px 12px; border-radius: var(--radius-md); font-size: var(--fs-xs); font-weight: var(--fw-semibold); cursor: pointer;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              מחק נבחרים
+            </button>
+            <button onClick="{{ clearSelection }}" style="background: none; border: none; color: var(--color-text-muted); font-size: var(--fs-xs); cursor: pointer; margin-inline-start: auto;">בטל בחירה</button>
+          </div>
+        </sc-if>
+
+        <div class="equip-list-container" style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); overflow: hidden;">
+
+          <div class="equip-header-row" style="display: grid; grid-template-columns: 1.8fr 1.1fr 0.9fr 0.9fr 1.4fr 76px 28px; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-default); background: var(--bg-muted);">
+            <div onClick="{{ setSortName }}" style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); cursor: pointer;">
+              שם
+              <sc-if value="{{ nameSortUp }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></sc-if>
+              <sc-if value="{{ nameSortDown }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></sc-if>
+            </div>
+            <div onClick="{{ setSortCategory }}" style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); cursor: pointer;">
+              קטגוריה
+              <sc-if value="{{ categorySortUp }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></sc-if>
+              <sc-if value="{{ categorySortDown }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></sc-if>
+            </div>
+            <div onClick="{{ setSortOwned }}" style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); cursor: pointer;">
+              כמות
+              <sc-if value="{{ ownedSortUp }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></sc-if>
+              <sc-if value="{{ ownedSortDown }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></sc-if>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide);">מתכלה</div>
+            <div style="display: flex; align-items: center; justify-content: center; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide);">כלל שינוי כמות</div>
+            <div style="display: flex; align-items: center; justify-content: center; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide);">פעולות</div>
+            <div style="display: flex; align-items: center; justify-content: center;">
+              <input type="checkbox" checked="{{ allSelected }}" onChange="{{ toggleSelectAll }}">
+            </div>
+          </div>
+
+          <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+            <div aria-busy="true" aria-label="טוען נתונים" style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); box-shadow: var(--shadow-glass); border-radius: var(--radius-lg); padding: var(--space-4); display: flex; flex-direction: column; gap: 12px; margin-bottom: var(--space-3);">
+              <sc-for list="{{ skeletonRows }}" as="row" hint-placeholder-count="6">
+                <div style="display: flex; align-items: center; gap: var(--space-3); animation: skelPulse 1.4s var(--ease-smooth) infinite;">
+                  <div style="flex: 2; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.07);"></div>
+                  <div style="flex: 1; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.05);"></div>
+                  <div style="width: 84px; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.05);"></div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ loadFailed }}" hint-placeholder-val="{{ false }}">
+            <div role="alert" style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); box-shadow: var(--shadow-glass); border-radius: var(--radius-lg); padding: var(--space-10) var(--space-4); margin-bottom: var(--space-3); display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center;">
+              <i data-lucide="cloud-off" style="width: 28px; height: 28px; color: var(--color-danger);"></i>
+              <div style="font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--color-text-main);">הטעינה נכשלה</div>
+              <p style="margin: 0; max-width: 34ch; font-size: var(--fs-sm); color: var(--color-text-muted); line-height: var(--lh-relaxed);">אין חיבור לשרת כרגע. אפשר לנסות שוב.</p>
+              <button onClick="{{ retryLoad }}" style="min-height: 44px; padding: 0 20px; border: none; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-text-on-primary); font-family: inherit; font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer; box-shadow: var(--shadow-glow);">נסה שוב</button>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="padding: var(--space-12) var(--space-4); text-align: center; color: var(--color-text-muted); font-size: var(--fs-sm);">לא נמצא ציוד התואם לחיפוש</div>
+          </sc-if>
+
+          <sc-for list="{{ items }}" as="it" hint-placeholder-count="6">
+            <div class="equip-row" style="{{ it.rowStyle }}">
+              <div class="eq-name-cell" style="display: flex; align-items: center; font-size: var(--fs-base); font-weight: var(--fw-medium); color: var(--color-text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ it.name }}</div>
+              <div class="eq-owned-cell" style="display: flex; align-items: center; gap: 3px; font-size: var(--fs-base); font-weight: var(--fw-semibold); color: var(--color-text-main); font-variant-numeric: tabular-nums;"><span>{{ it.ownedLabel }}</span></div>
+              <div class="eq-car-outer" data-car-outer>
+              <div class="eq-car-track" data-car-track>
+              <div class="eq-category-cell" data-label="קטגוריה" style="display: flex; align-items: center; font-size: var(--fs-sm); color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ it.categoryLabel }}</div>
+              <div class="eq-consumable-cell" data-label="מתכלה" style="display: flex; align-items: center;">
+                <span style="{{ it.consumableChipStyle }}">{{ it.consumableLabel }}</span>
+              </div>
+              <div class="eq-scaling-cell" data-label="כלל שינוי כמות" style="display: flex; align-items: center; font-size: var(--fs-sm); color: var(--color-text-secondary);"><span>{{ it.scalingLabel }}</span></div>
+              </div>
+              <button type="button" class="eq-car-arrow eq-car-prev" onClick="{{ carPrev }}">‹</button>
+              <button type="button" class="eq-car-arrow eq-car-next" onClick="{{ carNext }}">›</button>
+              </div>
+              <div class="eq-actions-cell" style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                <button onClick="{{ it.onEdit }}" style="display: grid; place-content: center; width: 30px; height: 30px; background: none; border: none; border-radius: var(--radius-sm); color: var(--color-text-muted); cursor: pointer;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg>
+                </button>
+                <button onClick="{{ it.onDelete }}" style="display: grid; place-content: center; width: 30px; height: 30px; background: none; border: none; border-radius: var(--radius-sm); color: var(--color-danger); cursor: pointer;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+              </div>
+              <div class="eq-select-cell" style="display: flex; align-items: center; justify-content: center;">
+                <input type="checkbox" checked="{{ it.selected }}" onChange="{{ it.onToggleSelect }}">
+              </div>
+            </div>
+          </sc-for>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" style="position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; background: var(--overlay-backdrop); backdrop-filter: blur(6px); animation: fadeIn 0.15s ease;">
+      <div onClick="{{ stopPropagation }}" style="width: 92%; max-width: 460px; max-height: 86vh; overflow-y: auto; padding: var(--space-6); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-5);">
+          <h3 style="margin: 0; font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--color-text-main);">{{ modalTitle }}</h3>
+          <button onClick="{{ closeModal }}" style="width: 30px; height: 30px; display: grid; place-content: center; border: 1px solid var(--border-default); background: var(--bg-glass); border-radius: var(--radius-sm); cursor: pointer; color: var(--color-text-muted);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+          </button>
+        </div>
+
+        <label style="display: block; margin-bottom: var(--space-4);">
+          <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">שם הפריט</span>
+          <input type="text" value="{{ draftName }}" onChange="{{ setDraftName }}" placeholder="לדוגמה: תנור קונבקציה" style="width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: var(--fs-base); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1.5px solid var(--border-default); border-radius: var(--radius-md);">
+        </label>
+
+        <div style="margin-bottom: var(--space-4);">
+          <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">קטגוריה</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <sc-for list="{{ draftCategoryOptions }}" as="c" hint-placeholder-count="6">
+              <button onClick="{{ c.onSelect }}" style="{{ c.style }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-4);">
+          <label style="display: block;">
+            <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">כמות ברשות</span>
+            <input type="number" value="{{ draftOwned }}" onChange="{{ setDraftOwned }}" placeholder="0" style="width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: var(--fs-base); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1.5px solid var(--border-default); border-radius: var(--radius-md);">
+          </label>
+          <label style="display: flex; align-items: flex-end; padding-bottom: 11px; gap: 8px; cursor: pointer;">
+            <input type="checkbox" checked="{{ draftConsumable }}" onChange="{{ toggleDraftConsumable }}">
+            <span style="font-size: var(--fs-sm); color: var(--color-text-secondary); font-weight: var(--fw-medium);">פריט מתכלה</span>
+          </label>
+        </div>
+
+        <label style="display: block; margin-bottom: var(--space-4);">
+          <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">הערות</span>
+          <textarea rows="2" value="{{ draftNotes }}" onChange="{{ setDraftNotes }}" placeholder="הערות נוספות" style="width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: var(--fs-base); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1.5px solid var(--border-default); border-radius: var(--radius-md); resize: vertical;"></textarea>
+        </label>
+
+        <label style="display: flex; align-items: center; gap: 8px; padding: var(--space-2) 0; cursor: pointer; border-top: 1px solid var(--border-row); padding-top: var(--space-4); margin-bottom: var(--space-4);">
+          <input type="checkbox" checked="{{ draftScalingEnabled }}" onChange="{{ toggleDraftScaling }}">
+          <span style="font-size: var(--fs-sm); color: var(--color-text-main); font-weight: var(--fw-semibold);">כלל שינוי כמות לפי מספר סועדים</span>
+        </label>
+
+        <sc-if value="{{ draftScalingEnabled }}" hint-placeholder-val="{{ false }}">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); margin-bottom: var(--space-5);">
+            <label style="display: block;">
+              <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">לכל כמה סועדים</span>
+              <input type="number" value="{{ draftPerGuests }}" onChange="{{ setDraftPerGuests }}" placeholder="25" style="width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: var(--fs-base); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1.5px solid var(--border-default); border-radius: var(--radius-md);">
+            </label>
+            <label style="display: block;">
+              <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">מינימום</span>
+              <input type="number" value="{{ draftMinQty }}" onChange="{{ setDraftMinQty }}" placeholder="1" style="width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: var(--fs-base); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1.5px solid var(--border-default); border-radius: var(--radius-md);">
+            </label>
+            <label style="display: block;">
+              <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">מקסימום</span>
+              <input type="number" value="{{ draftMaxQty }}" onChange="{{ setDraftMaxQty }}" placeholder="—" style="width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: var(--fs-base); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1.5px solid var(--border-default); border-radius: var(--radius-md);">
+            </label>
+          </div>
+        </sc-if>
+
+        <div style="display: flex; justify-content: flex-end; gap: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--border-default);">
+          <button onClick="{{ closeModal }}" style="padding: 9px 18px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--color-text-secondary); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">ביטול</button>
+          <button onClick="{{ saveDraft }}" style="padding: 9px 20px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); border: none; border-radius: var(--radius-md); color: #fff; font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer; box-shadow: var(--shadow-glow);">שמירה</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; background: var(--overlay-backdrop); backdrop-filter: blur(6px); animation: fadeIn 0.15s ease;">
+      <div style="width: 90%; max-width: 380px; padding: var(--space-6); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring); text-align: center;">
+        <div style="width: 44px; height: 44px; margin: 0 auto var(--space-4); border-radius: 50%; background: var(--bg-danger-subtle); display: grid; place-content: center; color: var(--color-danger);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+        </div>
+        <p style="margin: 0 0 var(--space-5); font-size: var(--fs-base); font-weight: var(--fw-medium); color: var(--color-text-main);">{{ confirmMessage }}</p>
+        <div style="display: flex; gap: var(--space-3);">
+          <button onClick="{{ cancelConfirm }}" style="flex: 1; padding: 10px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--color-text-secondary); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">ביטול</button>
+          <button onClick="{{ runConfirm }}" style="flex: 1; padding: 10px; background: var(--color-danger); border: none; border-radius: var(--radius-md); color: #fff; font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">מחיקה</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 400; display: flex; align-items: center; gap: var(--space-2); padding: 11px 20px; background: var(--color-text-main); color: #fff; border-radius: var(--radius-full); font-size: var(--fs-sm); font-weight: var(--fw-medium); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring);">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);"><path d="M20 6 9 17l-5-5"></path></svg>
+      {{ toastMessage }}
+    </div>
+  </sc-if>
+</app-shell>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;viewState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ready&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;ready&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;States&quot;}}">
+
+const CATEGORIES = ['heat_source', 'tool', 'container', 'packaging', 'infrastructure', 'consumable'];
+const CATEGORY_LABELS = {
+  heat_source: 'מקור חום',
+  tool: 'כלי עבודה',
+  container: 'מכל',
+  packaging: 'אריזה',
+  infrastructure: 'תשתית',
+  consumable: 'מתכלה'
+};
+
+const BASE_EQUIPMENT = [
+  { _id: 'eq_oven', name: 'תנור קונבקציה', category: 'heat_source', owned: 3, consumable: false, notes: '', scaling: null },
+  { _id: 'eq_pot_large', name: 'סיר גדול 40 ליטר', category: 'container', owned: 6, consumable: false, notes: '', scaling: { perGuests: 25, min: 1, max: 4 } },
+  { _id: 'eq_chafing', name: 'צלחת חימום (Chafing)', category: 'infrastructure', owned: 14, consumable: false, notes: '', scaling: { perGuests: 20, min: 2, max: null } },
+  { _id: 'eq_knife', name: 'סכין שף', category: 'tool', owned: 10, consumable: false, notes: '', scaling: null },
+  { _id: 'eq_gloves', name: 'כפפות ניטריל', category: 'consumable', owned: 500, consumable: true, notes: 'קופסאות של 100', scaling: { perGuests: 50, min: 1, max: null } },
+  { _id: 'eq_foil', name: 'נייר כסף', category: 'packaging', owned: 20, consumable: true, notes: '', scaling: null },
+  { _id: 'eq_tray', name: 'מגש הגשה', category: 'container', owned: 30, consumable: false, notes: '', scaling: { perGuests: 15, min: 2, max: 10 } },
+  { _id: 'eq_cutting_board', name: 'קרש חיתוך', category: 'tool', owned: 8, consumable: false, notes: '', scaling: null }
+];
+
+class Component extends DCLogic {
+  componentDidMount() {
+    import('./carousel-helpers.js').then(m => { this._car = m; this._carDispose = m.attachCarouselWatcher(); });
+  }
+  componentWillUnmount() {
+    if (this._carDispose) this._carDispose();
+  }
+  carPrev(e) { if (this._car) this._car.scrollCarousel(e.currentTarget, -1); }
+  carNext(e) { if (this._car) this._car.scrollCarousel(e.currentTarget, 1); }
+  carDot(e) { if (this._car) this._car.scrollCarouselToDot(e.currentTarget); }
+
+  state = {
+    items: BASE_EQUIPMENT.map(e => ({ ...e })),
+    search: '',
+    categoryFilters: new Set(),
+    consumableFilter: null,
+    sortBy: null,
+    sortDir: 'asc',
+    selected: new Set(),
+    panelOpen: true,
+    modalOpen: false,
+    modalMode: 'add',
+    modalId: null,
+    draft: { name: '', category: 'tool', owned: '', consumable: false, notes: '', scalingEnabled: false, perGuests: '25', minQty: '1', maxQty: '' },
+    confirmOpen: false,
+    confirmMessage: '',
+    confirmAction: null,
+    confirmTargetId: null,
+    toastVisible: false,
+    toastMessage: ''
+  };
+
+  showToast(msg) {
+    clearTimeout(this._toastTimer);
+    this.setState({ toastVisible: true, toastMessage: msg });
+    this._toastTimer = setTimeout(() => this.setState({ toastVisible: false }), 2500);
+  }
+
+  onSearchChange(v) { this.setState({ search: v }); }
+  toggleCategoryFilter(cat) {
+    this.setState(s => {
+      const next = new Set(s.categoryFilters);
+      next.has(cat) ? next.delete(cat) : next.add(cat);
+      return { categoryFilters: next };
+    });
+  }
+  setConsumableFilter(v) { this.setState({ consumableFilter: v }); }
+  clearFilters() { this.setState({ categoryFilters: new Set(), consumableFilter: null }); }
+  togglePanel() { this.setState(s => ({ panelOpen: !s.panelOpen })); }
+
+  setSort(field) {
+    this.setState(s => s.sortBy === field
+      ? { sortDir: s.sortDir === 'asc' ? 'desc' : 'asc' }
+      : { sortBy: field, sortDir: 'asc' });
+  }
+
+  toggleSelect(id) {
+    this.setState(s => {
+      const next = new Set(s.selected);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return { selected: next };
+    });
+  }
+  toggleSelectAll(visibleIds) {
+    this.setState(s => {
+      const allSel = visibleIds.length > 0 && visibleIds.every(id => s.selected.has(id));
+      return { selected: allSel ? new Set() : new Set(visibleIds) };
+    });
+  }
+  clearSelection() { this.setState({ selected: new Set() }); }
+  stopPropagation(e) { if (e && e.stopPropagation) e.stopPropagation(); }
+
+  openAddModal() {
+    this.setState({ modalOpen: true, modalMode: 'add', modalId: null, draft: { name: '', category: 'tool', owned: '', consumable: false, notes: '', scalingEnabled: false, perGuests: '25', minQty: '1', maxQty: '' } });
+  }
+  openEditModal(id) {
+    const e0 = this.state.items.find(x => x._id === id);
+    if (!e0) return;
+    this.setState({
+      modalOpen: true, modalMode: 'edit', modalId: id,
+      draft: {
+        name: e0.name, category: e0.category, owned: String(e0.owned), consumable: e0.consumable, notes: e0.notes || '',
+        scalingEnabled: !!e0.scaling,
+        perGuests: String(e0.scaling ? e0.scaling.perGuests : 25),
+        minQty: String(e0.scaling ? e0.scaling.min : 1),
+        maxQty: e0.scaling && e0.scaling.max != null ? String(e0.scaling.max) : ''
+      }
+    });
+  }
+  closeModal() { this.setState({ modalOpen: false }); }
+  setDraftName(v) { this.setState(s => ({ draft: { ...s.draft, name: v } })); }
+  setDraftCategory(v) { this.setState(s => ({ draft: { ...s.draft, category: v } })); }
+  setDraftOwned(v) { this.setState(s => ({ draft: { ...s.draft, owned: v } })); }
+  toggleDraftConsumable() { this.setState(s => ({ draft: { ...s.draft, consumable: !s.draft.consumable } })); }
+  setDraftNotes(v) { this.setState(s => ({ draft: { ...s.draft, notes: v } })); }
+  toggleDraftScaling() { this.setState(s => ({ draft: { ...s.draft, scalingEnabled: !s.draft.scalingEnabled } })); }
+  setDraftPerGuests(v) { this.setState(s => ({ draft: { ...s.draft, perGuests: v } })); }
+  setDraftMinQty(v) { this.setState(s => ({ draft: { ...s.draft, minQty: v } })); }
+  setDraftMaxQty(v) { this.setState(s => ({ draft: { ...s.draft, maxQty: v } })); }
+
+  saveDraft() {
+    const { draft, modalMode, modalId, items } = this.state;
+    if (!draft.name.trim()) return;
+    const owned = parseInt(draft.owned, 10) || 0;
+    const scaling = draft.scalingEnabled
+      ? { perGuests: parseInt(draft.perGuests, 10) || 25, min: parseInt(draft.minQty, 10) || 0, max: draft.maxQty.trim() ? parseInt(draft.maxQty, 10) : null }
+      : null;
+    if (modalMode === 'add') {
+      const newItem = { _id: 'eq_new_' + Date.now(), name: draft.name.trim(), category: draft.category, owned, consumable: draft.consumable, notes: draft.notes.trim(), scaling };
+      this.setState({ items: [newItem, ...items], modalOpen: false });
+      this.showToast('הפריט נוסף בהצלחה');
+    } else {
+      const next = items.map(e => e._id === modalId ? { ...e, name: draft.name.trim(), category: draft.category, owned, consumable: draft.consumable, notes: draft.notes.trim(), scaling } : e);
+      this.setState({ items: next, modalOpen: false });
+      this.showToast('הפריט עודכן בהצלחה');
+    }
+  }
+
+  askDeleteItem(id) {
+    const e0 = this.state.items.find(x => x._id === id);
+    this.setState({ confirmOpen: true, confirmMessage: 'האם למחוק את "' + (e0 ? e0.name : '') + '"?', confirmAction: 'delete', confirmTargetId: id });
+  }
+  askBulkDelete() {
+    if (this.state.selected.size === 0) return;
+    this.setState({ confirmOpen: true, confirmMessage: 'למחוק ' + this.state.selected.size + ' פריטים?', confirmAction: 'bulkDelete', confirmTargetId: null });
+  }
+  cancelConfirm() { this.setState({ confirmOpen: false, confirmAction: null, confirmTargetId: null }); }
+  runConfirm() {
+    const { confirmAction, confirmTargetId, items, selected } = this.state;
+    if (confirmAction === 'delete') {
+      this.setState({ items: items.filter(e => e._id !== confirmTargetId), confirmOpen: false });
+      this.showToast('הפריט נמחק');
+    } else if (confirmAction === 'bulkDelete') {
+      this.setState({ items: items.filter(e => !selected.has(e._id)), selected: new Set(), confirmOpen: false });
+      this.showToast('הפריטים נמחקו');
+    } else {
+      this.setState({ confirmOpen: false });
+    }
+  }
+
+  renderVals() {
+    const b = this.baseVals();
+    const vs = this.state.__vs || this.props.viewState || 'ready';
+    const loading = vs === 'loading', failed = vs === 'error';
+    if (vs !== 'ready') { b.items = []; b.isEmpty = vs === 'empty'; }
+    return Object.assign(b, {
+      loading, loadFailed: failed, ready: !loading && !failed,
+      skeletonRows: [1, 2, 3, 4, 5, 6].map(i => ({ i })),
+      retryLoad: () => this.setState({ __vs: 'ready' })
+    });
+  }
+
+  baseVals() {
+    const s = this.state;
+    let items = s.items.map(e => ({ ...e }));
+
+    if (s.categoryFilters.size > 0) items = items.filter(e => s.categoryFilters.has(e.category));
+    if (s.consumableFilter !== null) items = items.filter(e => e.consumable === s.consumableFilter);
+    const search = s.search.trim();
+    if (search) items = items.filter(e => e.name.includes(search));
+
+    if (s.sortBy) {
+      const dir = s.sortDir === 'asc' ? 1 : -1;
+      items = [...items].sort((a, b) => {
+        let cmp = 0;
+        if (s.sortBy === 'name') cmp = a.name.localeCompare(b.name, 'he');
+        else if (s.sortBy === 'category') cmp = CATEGORY_LABELS[a.category].localeCompare(CATEGORY_LABELS[b.category], 'he');
+        else if (s.sortBy === 'owned') cmp = a.owned - b.owned;
+        return cmp * dir;
+      });
+    } else {
+      items = [...items].sort((a, b) => a.name.localeCompare(b.name, 'he'));
+    }
+
+    const visibleIds = items.map(e => e._id);
+    const allSelected = visibleIds.length > 0 && visibleIds.every(id => s.selected.has(id));
+
+    const rows = items.map(e => ({
+      _id: e._id,
+      name: e.name,
+      categoryLabel: CATEGORY_LABELS[e.category],
+      ownedLabel: String(e.owned),
+      consumableLabel: e.consumable ? 'כן' : 'לא',
+      consumableChipStyle: {
+        display: 'inline-flex', alignItems: 'center', padding: '3px 10px', borderRadius: 'var(--radius-sm)', fontSize: 'var(--fs-xs)', fontWeight: 600,
+        background: e.consumable ? 'var(--color-primary-soft)' : 'var(--bg-muted)',
+        color: e.consumable ? 'var(--color-primary-hover)' : 'var(--color-text-muted)'
+      },
+      scalingLabel: e.scaling ? (e.scaling.perGuests + ' אורחים · מינ׳ ' + e.scaling.min + (e.scaling.max != null ? '–' + e.scaling.max : '')) : '—',
+      selected: s.selected.has(e._id),
+      rowStyle: { display: 'grid', gridTemplateColumns: '1.8fr 1.1fr 0.9fr 0.9fr 1.4fr 76px 28px', gap: 'var(--space-2)', padding: 'var(--space-3) var(--space-4)', borderBottom: '1px solid var(--border-row)', alignItems: 'center' },
+      onEdit: () => this.openEditModal(e._id),
+      onDelete: () => this.askDeleteItem(e._id),
+      onToggleSelect: () => this.toggleSelect(e._id)
+    }));
+
+    const categoryOptions = CATEGORIES.map(cat => ({
+      key: cat, label: CATEGORY_LABELS[cat],
+      checked: s.categoryFilters.has(cat),
+      onToggle: () => this.toggleCategoryFilter(cat)
+    }));
+
+    const chipStyle = (active) => ({
+      padding: '7px 14px', borderRadius: '999px', fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer',
+      border: active ? 'none' : '1px solid var(--border-default)',
+      background: active ? 'linear-gradient(180deg, var(--color-primary), var(--color-primary-hover))' : 'var(--bg-glass)',
+      color: active ? '#fff' : 'var(--color-text-secondary)'
+    });
+    const draftCategoryOptions = CATEGORIES.map(cat => ({
+      key: cat, label: CATEGORY_LABELS[cat], style: chipStyle(s.draft.category === cat), onSelect: () => this.setDraftCategory(cat)
+    }));
+
+    return {
+      carPrev: (e) => this.carPrev(e),
+      carNext: (e) => this.carNext(e),
+      carDot: (e) => this.carDot(e),
+      panelOpen: s.panelOpen,
+      togglePanel: () => this.togglePanel(),
+      hasActiveFilters: s.categoryFilters.size > 0 || s.consumableFilter !== null,
+      clearFilters: () => this.clearFilters(),
+      categoryOptions,
+      consumableAll: s.consumableFilter === null,
+      consumableYes: s.consumableFilter === true,
+      consumableNo: s.consumableFilter === false,
+      setConsumableAll: () => this.setConsumableFilter(null),
+      setConsumableYes: () => this.setConsumableFilter(true),
+      setConsumableNo: () => this.setConsumableFilter(false),
+
+      search: s.search,
+      onSearchChange: (v) => this.onSearchChange(v),
+      totalCount: s.items.length,
+      filteredCount: items.length,
+      isEmpty: items.length === 0,
+      openAddModal: () => this.openAddModal(),
+
+      hasSelection: s.selected.size > 0,
+      selectedCount: s.selected.size,
+      askBulkDelete: () => this.askBulkDelete(),
+      clearSelection: () => this.clearSelection(),
+
+      setSortName: () => this.setSort('name'),
+      setSortCategory: () => this.setSort('category'),
+      setSortOwned: () => this.setSort('owned'),
+      nameSortUp: s.sortBy === 'name' && s.sortDir === 'asc',
+      nameSortDown: s.sortBy === 'name' && s.sortDir === 'desc',
+      categorySortUp: s.sortBy === 'category' && s.sortDir === 'asc',
+      categorySortDown: s.sortBy === 'category' && s.sortDir === 'desc',
+      ownedSortUp: s.sortBy === 'owned' && s.sortDir === 'asc',
+      ownedSortDown: s.sortBy === 'owned' && s.sortDir === 'desc',
+
+      allSelected,
+      toggleSelectAll: () => this.toggleSelectAll(visibleIds),
+      items: rows,
+
+      modalOpen: s.modalOpen,
+      modalTitle: s.modalMode === 'add' ? 'הוספת ציוד' : 'עריכת ציוד',
+      closeModal: () => this.closeModal(),
+      stopPropagation: (e) => this.stopPropagation(e),
+      draftName: s.draft.name,
+      setDraftName: (v) => this.setDraftName(v),
+      draftCategoryOptions,
+      draftOwned: s.draft.owned,
+      setDraftOwned: (v) => this.setDraftOwned(v),
+      draftConsumable: s.draft.consumable,
+      toggleDraftConsumable: () => this.toggleDraftConsumable(),
+      draftNotes: s.draft.notes,
+      setDraftNotes: (v) => this.setDraftNotes(v),
+      draftScalingEnabled: s.draft.scalingEnabled,
+      toggleDraftScaling: () => this.toggleDraftScaling(),
+      draftPerGuests: s.draft.perGuests,
+      setDraftPerGuests: (v) => this.setDraftPerGuests(v),
+      draftMinQty: s.draft.minQty,
+      setDraftMinQty: (v) => this.setDraftMinQty(v),
+      draftMaxQty: s.draft.maxQty,
+      setDraftMaxQty: (v) => this.setDraftMaxQty(v),
+      saveDraft: () => this.saveDraft(),
+
+      confirmOpen: s.confirmOpen,
+      confirmMessage: s.confirmMessage,
+      cancelConfirm: () => this.cancelConfirm(),
+      runConfirm: () => this.runConfirm(),
+
+      toastVisible: s.toastVisible,
+      toastMessage: s.toastMessage
+    };
+  }
+}
+
+</script>
+</body>
+</html>

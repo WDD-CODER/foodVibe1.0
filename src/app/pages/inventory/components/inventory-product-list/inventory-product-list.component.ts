@@ -53,6 +53,7 @@ import {
   ProductValidationStatus
 } from 'src/app/core/utils/product-validation.util'
 import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
+import { buildFilterOptionCounts, attachFilterCheckedState } from '@utils/filter-category-counts.util'
 import { NutritionBadgeComponent } from 'src/app/shared/nutrition-badge/nutrition-badge.component'
 import { ProductDataService } from '@services/product-data.service'
 import { AiProductModalService } from 'src/app/shared/ai-product-modal/ai-product-modal.service'
@@ -201,37 +202,26 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   // LISTING
-  protected filterCategories_ = computed(() => {
+  // Catalog-only pass — recomputes when the product list changes, NOT on every
+  // filter-checkbox toggle (see filter-category-counts.util.ts).
+  private filterOptionCounts_ = computed(() => {
     const products = this.kitchenStateService.products_()
-    const filters = this.activeFilters_()
-    const categories: Record<string, Set<string>> = {}
-    products.forEach((product) => {
-      if (product.allergens_?.length) {
-        if (!categories['Allergens']) categories['Allergens'] = new Set()
-        product.allergens_.forEach((a) => categories['Allergens'].add(a))
-      }
-      const cats = product.categories_ ?? []
-      cats.forEach((cat) => {
-        if (!categories['Category']) categories['Category'] = new Set()
-        categories['Category'].add(cat)
-      })
-      const supplierIds = getSupplierIds(product)
-      supplierIds.forEach((id) => {
-        if (!categories['Supplier']) categories['Supplier'] = new Set()
-        categories['Supplier'].add(id)
-      })
+    return buildFilterOptionCounts(products, (product, bump) => {
+      product.allergens_?.forEach((a) => bump('Allergens', a))
+      ;(product.categories_ ?? []).forEach((cat) => bump('Category', cat))
+      getSupplierIds(product).forEach((id) => bump('Supplier', id))
     })
-
-    return Object.keys(categories).map((name) => ({
-      name,
-      displayKey: this.categoryDisplayKey(name),
-      options: Array.from(categories[name]).map((option) => ({
-        label: name === 'Supplier' ? this.getSupplierName(option) : option,
-        value: option,
-        checked_: (filters[name] || []).includes(option)
-      }))
-    }))
   })
+
+  // Filters-only pass — cheap, bounded by option count, not catalog size.
+  protected filterCategories_ = computed(() =>
+    attachFilterCheckedState(
+      this.filterOptionCounts_(),
+      this.activeFilters_(),
+      (name) => this.categoryDisplayKey(name),
+      (name, value) => (name === 'Supplier' ? this.getSupplierName(value) : value)
+    )
+  )
 
   protected categoryDisplayKey(internalName: string): string {
     const map: Record<string, string> = {

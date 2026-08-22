@@ -1,38 +1,32 @@
-<app-list-shell
-  [isPanelOpen]="isPanelOpen_()"
-  (panelToggle)="togglePanel()"
-  [gridTemplate]="'2fr 1fr 0.8fr 0.6fr 80px auto'"
-  [mobileGridTemplate]="'2fr 1fr 40px 28px'"
-  [dir]="'rtl'"
->
-  <h2 shell-title class="page-title">{{ 'venue_list' | translatePipe }}</h2>
+<div class="venue-grid-container" dir="rtl">
+  <div class="action-bar">
+    <button
+      type="button"
+      class="header-btn header-btn--back"
+      data-testid="btn-back-to-dashboard-venues"
+      (click)="backToDashboard()"
+    >
+      <lucide-icon name="layout-dashboard" size="16"></lucide-icon>
+      {{ 'dashboard' | translatePipe }}
+    </button>
 
-  <ng-container shell-search>
-    <label class="visually-hidden" for="venue-search">{{ 'search' | translatePipe }}</label>
-    <div class="c-input-wrapper">
-      <lucide-icon name="search" [size]="18"></lucide-icon>
-      <input
-        id="venue-search"
-        type="text"
-        [ngModel]="searchQuery_()"
-        (ngModelChange)="searchQuery_.set($event)"
-        [placeholder]="'search' | translatePipe"
-      />
+    <h2 class="page-title">{{ 'venue_list' | translatePipe }}</h2>
+    <p class="result-count">{{ resultCountText_() }}</p>
+
+    <div class="search-wrap">
+      <label class="visually-hidden" for="venue-search">{{ 'search' | translatePipe }}</label>
+      <div class="c-input-wrapper">
+        <lucide-icon name="search" [size]="18"></lucide-icon>
+        <input
+          id="venue-search"
+          type="text"
+          [ngModel]="searchQuery_()"
+          (ngModelChange)="searchQuery_.set($event)"
+          [placeholder]="'search' | translatePipe"
+        />
+      </div>
     </div>
-  </ng-container>
 
-  <button
-    type="button"
-    shell-back-btn
-    class="header-btn header-btn--back"
-    data-testid="btn-back-to-dashboard-venues"
-    (click)="backToDashboard()"
-  >
-    <lucide-icon name="layout-dashboard" size="16"></lucide-icon>
-    {{ 'dashboard' | translatePipe }}
-  </button>
-
-  <ng-container shell-actions>
     <button
       type="button"
       class="c-btn-primary"
@@ -43,65 +37,83 @@
       <lucide-icon name="plus" [size]="18"></lucide-icon>
       {{ 'add_venue' | translatePipe }}
     </button>
-  </ng-container>
+  </div>
 
-  <ng-container shell-selection-bar>
-    <app-selection-bar
-      [selectionState]="selection"
-      [editableFields]="editableFields_()"
-      (bulkDelete)="onBulkDeleteSelected($event)"
-      (bulkEdit)="onBulkEdit($event)"
-    />
-  </ng-container>
+  <div class="filters-bar">
+    @if (filteredVenueIds_().length > 0) {
+      <label class="select-all-pill">
+        <app-list-row-checkbox
+          [checked]="selection.allSelected(filteredVenueIds_())"
+          (toggle)="selection.toggleSelectAll(filteredVenueIds_())"
+        />
+        <span>{{ 'select_all' | translatePipe }}</span>
+      </label>
+    }
+    @for (env of envTypes; track env) {
+      <label class="env-filter-pill" [class.active]="selectedEnvTypes_().has(env)">
+        <input type="checkbox" [checked]="selectedEnvTypes_().has(env)" (change)="toggleEnvType(env)" />
+        <span>{{ env | translatePipe }}</span>
+      </label>
+    }
+    @if (hasActiveFilters_()) {
+      <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">
+        {{ 'clear_filters' | translatePipe }}
+      </button>
+    }
+  </div>
 
-  <ng-container shell-table-header>
-    <div class="col-name c-grid-header-cell" role="columnheader">{{ 'name' | translatePipe }}</div>
-    <app-carousel-header [activeIndex]="carouselHeaderIndex_()" (activeIndexChange)="onCarouselHeaderChange($event)">
-      <div class="col-env c-grid-header-cell" carouselHeaderColumn label="environment_type" role="presentation">
-        {{ 'environment_type' | translatePipe }}
-      </div>
-      <div class="col-infra c-grid-header-cell" carouselHeaderColumn label="infrastructure_items" role="presentation">
-        {{ 'infrastructure_items' | translatePipe }}
-      </div>
-      <div class="col-capacity c-grid-header-cell" carouselHeaderColumn label="capacity" role="presentation">
-        {{ 'capacity' | translatePipe }}
-      </div>
-    </app-carousel-header>
-    <div class="c-col-actions c-grid-header-cell" role="columnheader">{{ 'actions' | translatePipe }}</div>
-    <div class="col-select c-grid-header-cell" role="columnheader">
-      <app-list-row-checkbox
-        [checked]="filteredVenueIds_().length > 0 && selection.allSelected(filteredVenueIds_())"
-        (toggle)="selection.toggleSelectAll(filteredVenueIds_())"
-      />
-    </div>
-  </ng-container>
+  <app-selection-bar
+    [selectionState]="selection"
+    [editableFields]="editableFields_()"
+    (bulkDelete)="onBulkDeleteSelected($event)"
+    (bulkEdit)="onBulkEdit($event)"
+  />
 
-  <ng-container shell-table-body>
+  <div class="venues-grid">
     @if (filteredVenues_().length === 0) {
       <div class="no-results">{{ 'no_venues_match' | translatePipe }}</div>
     }
     @for (item of filteredVenues_(); track item._id) {
-      <div
-        class="venue-grid-row c-list-row"
+      <article
+        class="venue-card c-glass-card"
         role="button"
         tabindex="0"
         (click)="onRowClick(item, $event)"
-        (keydown.enter)="onEdit(item._id)"
-        (keydown.space)="$event.preventDefault(); onEdit(item._id)"
+        (keydown.enter)="onCardActivate(item, $event)"
+        (keydown.space)="$event.preventDefault(); onCardActivate(item, $event)"
       >
-        <div class="col-name c-list-body-cell" role="cell">{{ item.name_hebrew }}</div>
-        <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
-          <div class="col-env c-list-body-cell" cellCarouselSlide [label]="'environment_type' | translatePipe">
-            {{ item.environment_type_ | translatePipe }}
+        <div class="venue-card-select">
+          <app-list-row-checkbox [checked]="selection.isSelected(item._id)" (toggle)="selection.toggle(item._id)" />
+        </div>
+
+        <div class="venue-card-media" [attr.data-env]="item.environment_type_">
+          <lucide-icon name="map-pin" [size]="28"></lucide-icon>
+        </div>
+
+        <div class="venue-card-body">
+          <h3 class="venue-card-name">{{ item.name_hebrew }}</h3>
+          @if (item.address_) {
+            <p class="venue-card-address">
+              <lucide-icon name="map-pin" [size]="14"></lucide-icon>
+              {{ item.address_ }}
+            </p>
+          }
+          <div class="venue-card-meta">
+            <span class="venue-env-chip">{{ item.environment_type_ | translatePipe }}</span>
+            @if (item.capacity_) {
+              <span class="venue-capacity">
+                <lucide-icon name="users" [size]="14"></lucide-icon>
+                {{ item.capacity_ }}
+              </span>
+            }
+            <span class="venue-infra-count">
+              <lucide-icon name="package" [size]="14"></lucide-icon>
+              {{ (item.available_infrastructure_ ?? []).length }}
+            </span>
           </div>
-          <div class="col-infra c-list-body-cell" cellCarouselSlide [label]="'infrastructure_items' | translatePipe">
-            {{ item.available_infrastructure_.length }}
-          </div>
-          <div class="col-capacity c-list-body-cell" cellCarouselSlide [label]="'capacity' | translatePipe">
-            {{ item.capacity_ ?? '—' }}
-          </div>
-        </app-cell-carousel>
-        <app-row-actions-menu class="c-col-actions c-list-body-cell" role="cell">
+        </div>
+
+        <div class="venue-card-actions">
           <button
             type="button"
             class="c-icon-btn"
@@ -110,7 +122,7 @@
             [disabled]="!isLoggedIn()"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
           >
-            <lucide-icon name="pencil" [size]="18"></lucide-icon>
+            <lucide-icon name="pencil" [size]="16"></lucide-icon>
           </button>
           @if (deletingId_() === item._id) {
             <app-loader size="small" [inline]="true" />
@@ -123,37 +135,11 @@
               [disabled]="!isLoggedIn()"
               [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
             >
-              <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+              <lucide-icon name="trash-2" [size]="16"></lucide-icon>
             </button>
           }
-        </app-row-actions-menu>
-        <div class="col-select c-list-body-cell" role="cell">
-          <app-list-row-checkbox [checked]="selection.isSelected(item._id)" (toggle)="selection.toggle(item._id)" />
         </div>
-      </div>
+      </article>
     }
-  </ng-container>
-
-  <ng-container shell-filters>
-    <div class="c-filter-section">
-      <div class="c-filter-section-header">
-        @if (hasActiveFilters_()) {
-          <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">
-            {{ 'clear_filters' | translatePipe }}
-          </button>
-        }
-      </div>
-      <div class="c-filter-category">
-        <span class="c-filter-category-label">{{ 'environment_type' | translatePipe }}</span>
-        <div class="c-filter-options">
-          @for (env of envTypes; track env) {
-            <label class="c-filter-option">
-              <input type="checkbox" [checked]="selectedEnvTypes_().has(env)" (change)="toggleEnvType(env)" />
-              <span>{{ env | translatePipe }}</span>
-            </label>
-          }
-        </div>
-      </div>
-    </div>
-  </ng-container>
-</app-list-shell>
+  </div>
+</div>

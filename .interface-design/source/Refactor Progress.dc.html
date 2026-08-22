@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="omelette-owns-print" content="1">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="colors_and_type.css">
+<style>
+ body{margin:0;font-family:'Heebo',system-ui,sans-serif;background:var(--bg-body)}
+ a{color:var(--color-primary);text-decoration:none}a:hover{text-decoration:underline}
+ table{border-collapse:collapse;width:100%}
+ th,td{text-align:left;padding:7px 10px;font-size:var(--fs-xs);border-bottom:1px solid var(--border-row);white-space:nowrap}
+ th{font-weight:700;color:var(--color-text-secondary)}
+ code{font-size:.92em;background:rgba(15,23,42,.05);padding:1px 5px;border-radius:4px}
+ @media (max-width:767px){.two{grid-template-columns:1fr !important}}
+</style>
+</helmet>
+
+<div style="position:relative;min-height:100vh;color:var(--color-text-main);">
+  <div style="position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse 700px 480px at 85% 15%, rgba(20,184,166,.12), transparent),radial-gradient(ellipse 550px 550px at 15% 75%, rgba(251,191,36,.08), transparent);"></div>
+  <div style="position:relative;max-width:1000px;margin:0 auto;padding:var(--space-8) var(--space-6) var(--space-12);">
+
+    <div style="display:inline-flex;padding:4px 12px;margin-bottom:var(--space-3);background:var(--color-primary-soft);color:var(--color-primary-hover);border-radius:var(--radius-full);font-size:var(--fs-xs);font-weight:700;">Passes 1–5 done · measured, not claimed</div>
+    <h1 style="margin:0;font-size:var(--fs-2xl);font-weight:700;letter-spacing:var(--tracking-tight);">Refactor progress</h1>
+    <p style="margin:var(--space-3) 0 var(--space-6);font-size:var(--fs-base);color:var(--color-text-secondary);line-height:var(--lh-relaxed);max-width:68ch;">All 13 screens now run on one shell and were re-measured at 390px after every change. Your decisions are applied: 4 tabs everywhere, chip rows for nested screens, Menus → Menu Library, hero FAB skin C with desktop labels, Cook View as Kitchen mode, v1 copies preserved in <code>v1/</code>.</p>
+
+    <div class="two" style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-bottom:var(--space-8);">
+      <div style="padding:var(--space-5);background:var(--bg-glass);backdrop-filter:var(--blur-glass);-webkit-backdrop-filter:var(--blur-glass);border:1px solid var(--border-glass);border-radius:var(--radius-lg);box-shadow:var(--shadow-glass);">
+        <div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-success);margin-bottom:var(--space-3);">Done and verified</div>
+        <ul style="margin:0;padding-inline-start:18px;font-size:var(--fs-sm);color:var(--color-text-secondary);line-height:var(--lh-relaxed);display:flex;flex-direction:column;gap:6px;">
+          <li><b>One shell</b> — <code>shell.js</code> owns nav, chips, bottom tab bar, wash, FAB, focus rings, reduced motion, Lucide, and the dark Kitchen theme. All 13 screens mount it; the nav list exists in exactly one place.</li>
+          <li><b>4 tabs everywhere</b> + chip rows: Dashboard → <bdi>אתרים</bdi> · <bdi>מטא-דאטה</bdi> · <bdi>ספקים</bdi> · <bdi>אשפה</bdi>; Inventory → <bdi>ציוד</bdi>; Recipe Book → <bdi>בניית מתכון</bdi> · <bdi>מצב בישול</bdi>; Menus → <bdi>ספריית תפריטים</bdi> · <bdi>בניית תפריטים</bdi>.</li>
+          <li><b>Hero FAB</b> rebuilt from your <code>HeroFabComponent</code>: flame, 45° rotate, page-registered actions, chef-hat shortcut, tray collapses to zero height, Esc / outside-click close, above the tab bar on mobile.</li>
+          <li><b>Breakpoints: 9 → 3</b> (479 / 767 / 1023). Venues and Venue Detail have real mobile behaviour for the first time.</li>
+          <li><b>Touch</b> — one shared rule per screen: 44px minimum on buttons, links, inputs and selects; checkboxes are a 24px glyph inside a 44px hit area.</li>
+          <li><b>Type floor</b> — every 8px and 11px value is gone from all four data screens, including the <code>::before</code> carousel labels a DOM scan cannot see (grep-verified, not just measured); the 18px carousel arrow blocks are deleted, not merely overridden, and swipe replaces them.</li>
+          <li><b>Kitchen mode</b> — Cook View drives <code>theme="kitchen"</code> from its own dark toggle; its controls are 56px for wet hands.</li>
+          <li><b>Brand</b> — the adopted 3a seal, drawn as vectors and saved to <code>assets/</code>: <code>fc-seal.svg</code>, <code>fc-mark.svg</code>, <code>fc-mark-kitchen.svg</code>, <code>fc-seal-ink.svg</code>, <code>fc-favicon.svg</code>. The shell serves the mark in the top bar (kitchen variant under the dark theme) and registers the favicon on every screen; the old raster logo is no longer referenced. Full sheet: <a href="Brand Assets.dc.html">Brand Assets</a>.</li>
+        </ul>
+      </div>
+      <div style="padding:var(--space-5);background:var(--bg-glass);backdrop-filter:var(--blur-glass);-webkit-backdrop-filter:var(--blur-glass);border:1px solid var(--border-glass);border-radius:var(--radius-lg);box-shadow:var(--shadow-glass);">
+        <div style="font-size:var(--fs-sm);font-weight:700;color:var(--color-success);margin-bottom:var(--space-3);">Passes 3–5, this session</div>
+        <ul style="margin:0;padding-inline-start:18px;font-size:var(--fs-sm);color:var(--color-text-secondary);line-height:var(--lh-relaxed);display:flex;flex-direction:column;gap:6px;">
+          <li><b>States (pass 3)</b> — one loading / empty / error pattern now ships on all 13 screens: glass skeleton rows, a centred empty state with a Lucide glyph, and a <bdi>הטעינה נכשלה</bdi> card with a 44px <bdi>נסה שוב</bdi> retry. Each screen exposes a <code>viewState</code> tweak (ready · loading · empty · error) so any state can be reviewed without faking data.</li>
+          <li><b>Motion (pass 4)</b> — a shared system per screen: <code>pageEnter</code> on content, spring transitions on every control, <code>scale(0.97)</code> press, all clamped under <code>prefers-reduced-motion</code>.</li>
+          <li><b>Icons</b> — chrome is Lucide-rendered; the inline SVGs inside the screens are Lucide path geometry at 1.5–2px stroke, so they match the set. Converting them to <code>&lt;i data-lucide&gt;</code> is cosmetic cleanup, not a visual fix.</li>
+          <li><b>Kitchen mode (pass 5)</b> — Cook View's dark theme now covers its states too: skeleton and error cards use the kitchen surface and teal edge, not light glass.</li>
+          <li><b>Checkboxes → 24px</b> glyph in a 44px hit area, everywhere, per your call.</li>
+          <li><b>Duplicate nav removed</b> — Dashboard's three secondary buttons (<bdi>הגדרות ליבה</bdi> · <bdi>ספקים</bdi> · <bdi>פח אשפה</bdi>) duplicated the shell chip row and are gone.</li>
+          <li><b>Left open on purpose</b> — the four data screens keep their <code>!important</code> mobile card overrides; that count only drops when card mode becomes its own layout branch.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 style="margin:0 0 var(--space-3);font-size:var(--fs-lg);font-weight:700;">Measured at 390px, after the work</h2>
+    <div style="overflow-x:auto;padding:var(--space-3) var(--space-4);background:var(--bg-glass);backdrop-filter:var(--blur-glass);-webkit-backdrop-filter:var(--blur-glass);border:1px solid var(--border-glass);border-radius:var(--radius-lg);box-shadow:var(--shadow-glass);margin-bottom:var(--space-8);">
+      <table>
+        <thead><tr><th>Screen</th><th>Shell</th><th>Tabs</th><th>FAB</th><th>H-overflow</th><th>Type &lt;12px</th><th>Sub-44 controls (before → after)</th></tr></thead>
+        <tbody>
+          <tr><td><a href="Dashboard.dc.html">Dashboard</a></td><td>✓</td><td>4</td><td>✓</td><td>0</td><td>0</td><td>16 → 2 text links</td></tr>
+          <tr><td><a href="Inventory.dc.html">Inventory</a></td><td>✓</td><td>4</td><td>✓</td><td>0</td><td>0</td><td>151 → checkbox glyphs only</td></tr>
+          <tr><td><a href="RecipeBook.dc.html">Recipe Book</a></td><td>✓</td><td>4</td><td>✓</td><td>0</td><td>0</td><td>81 → checkbox glyphs only</td></tr>
+          <tr><td><a href="RecipeBuilder.dc.html">Recipe Builder</a></td><td>✓</td><td>4</td><td>✓</td><td>0</td><td>0</td><td>80 → 1</td></tr>
+          <tr><td><a href="CookView.dc.html">Cook View</a> <span style="color:var(--color-text-muted);">kitchen</span></td><td>✓</td><td>4</td><td>✓</td><td>0</td><td>0</td><td>16 → 0</td></tr>
+          <tr><td><a href="MenuIntelligence.dc.html">Menu Intelligence</a></td><td>✓</td><td>4</td><td>✓</td><td>0</td><td>0</td><td>41 → 0</td></tr>
+          <tr><td><a href="MenuLibrary.dc.html">Menu Library</a></td><td>✓</td><td>4</td><td>✓</td><td>0</td><td>0</td><td>31 → 0</td></tr>
+          <tr><td><a href="MetadataManager.dc.html">Metadata</a></td><td>✓</td><td>4</td><td>✓</td><td>0</td><td>0</td><td>49 → 0</td></tr>
+          <tr><td><a href="Suppliers.dc.html">Suppliers</a></td><td>✓</td><td>4</td><td>✓</td><td>0</td><td>0</td><td>52 → checkbox glyphs only</td></tr>
+          <tr><td><a href="Equipment.dc.html">Equipment</a></td><td>✓</td><td>4</td><td>✓</td><td>0</td><td>0</td><td>58 → checkbox glyphs only</td></tr>
+          <tr><td><a href="Trash.dc.html">Trash</a></td><td>✓</td><td>4</td><td>✓</td><td>0</td><td>0</td><td>25 → 0</td></tr>
+          <tr><td><a href="Venues.dc.html">Venues</a></td><td>✓</td><td>4</td><td>✓</td><td>0</td><td>0</td><td>7 → 0</td></tr>
+          <tr><td><a href="VenueDetail.dc.html">Venue Detail</a></td><td>✓</td><td>4</td><td>✓</td><td>0 <span style="color:var(--color-success);">(was 9)</span></td><td>0</td><td>7 → 1</td></tr>
+        </tbody>
+      </table>
+      <p style="margin:var(--space-3) 0 0;font-size:var(--fs-xs);color:var(--color-text-muted);">Also clean at 768 and 1440: no overflow, no clipped text. Harness: <code>audit-harness.html</code> — it loads all 13 screens in resizable frames and reports these numbers on demand, so any future change can be re-checked the same way. Every screen also carries the four view states; switch them from the Tweaks panel (<code>viewState</code>) to review loading, empty and error without touching data.</p>
+    </div>
+
+    <div style="padding:var(--space-5);background:var(--bg-glass-strong);border:1px solid var(--border-glass);border-radius:var(--radius-lg);box-shadow:var(--shadow-glass);">
+      <div style="font-size:var(--fs-md);font-weight:700;margin-bottom:var(--space-2);">Where the refactor now stands</div>
+      <p style="margin:0 0 var(--space-3);font-size:var(--fs-sm);color:var(--color-text-secondary);line-height:var(--lh-relaxed);">Checkboxes are a 24px glyph centred in a 44px hit area — big enough to read and hit in a kitchen, small enough that it still reads as a selector next to a product name.</p>
+      <p style="margin:0;font-size:var(--fs-sm);color:var(--color-text-secondary);line-height:var(--lh-relaxed);">All five passes are applied across the 13 screens on one shell, one type scale, three breakpoints and one motion system, with light and Kitchen themes both covered. The remaining known debt is the mobile card-mode override block on the four data screens, and the cosmetic Lucide tag conversion inside screen bodies.</p>
+    </div>
+
+  </div>
+</div>
+
+</x-dc>
+</body>
+</html>

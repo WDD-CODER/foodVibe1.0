@@ -57,6 +57,7 @@ import {
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
 import { resolveRecipeAllergens, MAX_ALLERGEN_RECURSION } from 'src/app/core/utils/recipe-allergens.util'
 import { CellExpandState } from 'src/app/core/utils/cell-expand-state.util'
+import { buildFilterOptionCounts, attachFilterCheckedState } from 'src/app/core/utils/filter-category-counts.util'
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 
@@ -196,9 +197,10 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     this.labelsExpand.reset()
   }
 
-  /** Tracks explicitly *collapsed* categories — empty by default so every filter group
-   *  starts expanded (matches the design), while still letting the user collapse one. */
-  protected collapsedFilterCategories_ = signal<Set<string>>(new Set())
+  /** Tracks explicitly *collapsed* categories — every real filter group starts expanded
+   *  (matches the design), except 'Date' which the mockup doesn't show at all; it starts
+   *  collapsed so it doesn't dominate the panel above the categories the design leads with. */
+  protected collapsedFilterCategories_ = signal<Set<string>>(new Set(['Date']))
   protected readonly allergenExpand = new CellExpandState()
   protected readonly labelsExpand = new CellExpandState()
   protected hoveredCostRecipeId_ = signal<string | null>(null)
@@ -277,61 +279,49 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     this.togglePanelState_()
   }
 
-  protected filterCategories_ = computed(() => {
+  // Catalog-only pass — recomputes when the recipe list changes, NOT on every
+  // filter-checkbox toggle (see filter-category-counts.util.ts).
+  private filterOptionCounts_ = computed(() => {
     const recipes = this.kitchenState.visibleRecipes_()
-    const filters = this.activeFilters_()
-    const categories: Record<string, Set<string>> = {}
+    const counts = buildFilterOptionCounts(recipes, (recipe, bump) => {
+      bump('Type', this.isRecipeDish(recipe) ? 'dish' : 'preparation')
 
-    recipes.forEach((recipe) => {
-      const isDish = this.isRecipeDish(recipe)
-      const typeVal = isDish ? 'dish' : 'preparation'
-      if (!categories['Type']) categories['Type'] = new Set()
-      categories['Type'].add(typeVal)
-
-      const allergens = this.getRecipeAllergens(recipe)
-      allergens.forEach((a) => {
-        if (!categories['Allergens']) categories['Allergens'] = new Set()
-        categories['Allergens'].add(a)
-      })
+      this.getRecipeAllergens(recipe).forEach((a) => bump('Allergens', a))
 
       const recipeLabels = this.getAllRecipeLabels(recipe)
-      if (recipeLabels.length > 0) {
-        recipeLabels.forEach((l) => {
-          if (!categories['Labels']) categories['Labels'] = new Set()
-          categories['Labels'].add(l)
-        })
-      } else {
-        if (!categories['Labels']) categories['Labels'] = new Set()
-        categories['Labels'].add('no_label')
-      }
+      if (recipeLabels.length > 0) recipeLabels.forEach((l) => bump('Labels', l))
+      else bump('Labels', 'no_label')
 
-      if (!categories['Approved']) categories['Approved'] = new Set()
-      categories['Approved'].add(recipe.is_approved_ ? 'true' : 'false')
+      bump('Approved', recipe.is_approved_ ? 'true' : 'false')
 
       const station = (recipe.default_station_ || '').trim() || '_none'
-      if (!categories['Station']) categories['Station'] = new Set()
-      categories['Station'].add(station)
+      bump('Station', station)
     })
 
-    // Always show both Approved options (כן/לא) so the sidebar can show selected state when filtering by URL.
-    if (!categories['Approved']) categories['Approved'] = new Set()
-    categories['Approved'].add('true').add('false')
+    // Always show both Approved options (כן/לא), even at 0, so the sidebar can show
+    // selected state when filtering by URL.
+    if (!counts['Approved']) counts['Approved'] = new Map()
+    if (!counts['Approved'].has('true')) counts['Approved'].set('true', 0)
+    if (!counts['Approved'].has('false')) counts['Approved'].set('false', 0)
 
+    return counts
+  })
+
+  // Filters-only pass — cheap, bounded by option count, not catalog size.
+  protected filterCategories_ = computed(() => {
     const optionLabel = (name: string, value: string): string => {
       if (name === 'Approved') return value === 'true' ? 'approved_yes' : 'approved_no'
       if (name === 'Station' && value === '_none') return 'no_station'
       return value
     }
 
-    return Object.keys(categories).map((name) => ({
-      name,
-      displayKey: this.categoryDisplayKey(name),
-      options: Array.from(categories[name]).map((option) => ({
-        label: optionLabel(name, option),
-        value: option,
-        checked_: (filters[name] || []).includes(option)
-      }))
-    }))
+    return attachFilterCheckedState(
+      this.filterOptionCounts_(),
+      this.activeFilters_(),
+      (name) => this.categoryDisplayKey(name),
+      optionLabel,
+      (name, value) => (name === 'Labels' && value !== 'no_label' ? this.getLabelColor(value) : null)
+    )
   })
 
   /**

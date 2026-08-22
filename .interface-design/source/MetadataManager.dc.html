@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./colors_and_type.css">
+  <link rel="stylesheet" href="./mobile-pass.css">
+  <script src="./shell.js"></script>
+  <style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.96) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    body { margin: 0; }
+    a { color: var(--color-primary); text-decoration: none; }
+    a:hover { color: var(--color-primary-hover); }
+    input:focus, button:focus { outline: none; }
+    ::selection { background: var(--color-primary-soft); }
+    .mm-del { opacity: 0; transition: opacity 0.2s ease, background 0.2s ease, color 0.2s ease, transform 0.2s var(--ease-spring); }
+    .mm-item:hover .mm-del { opacity: 1; }
+    .mm-del:hover { background: var(--bg-danger-subtle); color: var(--color-danger); transform: scale(1.12) rotate(8deg); }
+    .mm-pill .mm-del { opacity: 1; }
+    section[id^="mm-sec-"] { scroll-margin-top: 4.5rem; }
+    @media (max-width: 767px) {
+      .mm-grid { grid-template-columns: 1fr !important; }
+      .mm-tabs { display: flex !important; }
+    }
+      a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(20,184,166,0.35) !important; }
+    @keyframes skelPulse { 0%,100% { opacity: 1 } 50% { opacity: .55 } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  
+    /* ── pass 2: touch ergonomics (one rule, all screens) ── */
+    [class*="car-arrow"] { display: none !important; }
+    /* ── pass 4: motion system ── */
+    @keyframes pageEnter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    app-shell > * { animation: pageEnter .28s var(--ease-spring) both; }
+    button, a[role="button"] { transition: transform .15s var(--ease-spring), background-color .2s var(--ease-smooth), color .2s var(--ease-smooth), box-shadow .25s var(--ease-smooth); }
+    button:active, a[role="button"]:active { transform: scale(0.97); }
+    input[type="checkbox"], input[type="radio"] {
+      appearance: none; -webkit-appearance: none; width: 24px; height: 24px; margin: 0; flex: none;
+      display: inline-grid; place-content: center; cursor: pointer;
+      background: var(--bg-pure); border: 1.5px solid var(--border-strong); border-radius: 7px;
+      box-shadow: inset 0 1px 2px rgba(15,23,42,0.06);
+      transition: background-color .16s var(--ease-smooth), border-color .16s var(--ease-smooth), box-shadow .2s var(--ease-smooth), transform .2s var(--ease-spring);
+    }
+    input[type="radio"] { border-radius: 50%; }
+    input[type="checkbox"]::after {
+      content: ""; width: 6px; height: 11px; opacity: 0;
+      border-right: 2.6px solid var(--color-text-on-primary); border-bottom: 2.6px solid var(--color-text-on-primary);
+      transform: rotate(45deg) translate(-1px, -2px) scale(0.6);
+      transition: opacity .14s var(--ease-smooth), transform .2s var(--ease-spring);
+    }
+    input[type="radio"]::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--color-text-on-primary); opacity: 0; transition: opacity .14s var(--ease-smooth); }
+    input[type="checkbox"]:hover, input[type="radio"]:hover { border-color: var(--color-primary); background: var(--color-primary-soft); }
+    input[type="checkbox"]:checked, input[type="radio"]:checked {
+      background: var(--color-primary); border-color: var(--color-primary);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 2px 8px -2px var(--color-primary-glow);
+    }
+    input[type="checkbox"]:checked::after { opacity: 1; transform: rotate(45deg) translate(-1px, -2px) scale(1); }
+    input[type="radio"]:checked::after { opacity: 1; }
+    input[type="checkbox"]:active, input[type="radio"]:active { transform: scale(0.94); }
+
+    @media (max-width: 767px) {
+      button, a[role="button"], select { min-height: 44px !important; min-width: 44px !important; }
+      input:not([type="checkbox"]):not([type="radio"]) { min-height: 44px !important; }
+      input[type="checkbox"], input[type="radio"] { width: 24px !important; height: 24px !important; padding: 10px !important; box-sizing: content-box !important; }
+      a[href]:not([style*="font-size: var(--fs-xs)"]) { min-height: 44px; display: inline-flex; align-items: center; }
+      [style*="grid-template-columns: 260px"], [style*="grid-template-columns: 320px"], [style*="grid-template-columns: 140px"] { grid-template-columns: 1fr !important; }
+      [style*="max-width: 1520px"], [style*="max-width: 1200px"], [style*="max-width: 1100px"], [style*="max-width: 720px"] { padding-inline: var(--space-4) !important; }
+    }
+    /* ── pass 5: mobile pass (≤767 only) ── */
+    @media (max-width: 767px) {
+      /* the auto-fit 340px/120px/110px tracks overflowed a 360px viewport */
+      .mm-grid > section > div[style*="repeat(auto-fit"] { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)) !important; }
+      .mm-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+      .mm-tabs::-webkit-scrollbar { display: none; }
+      .mm-item .mm-del { width: 44px !important; height: 44px !important; opacity: 1; }
+    }
+
+    /* ── pass 6: mobile cards (≤767 only) ── */
+    @media (max-width: 767px) {
+      /* pills and their inner controls keep their drawn size — the 44px floor is for standalone buttons */
+      .mm-pill { padding: 3px 8px !important; gap: 6px !important; font-size: var(--fs-xs) !important; }
+      .mm-pill button { min-width: 0 !important; min-height: 0 !important; }
+      .mm-pill > button:first-child { width: 10px !important; height: 10px !important; }
+      .mm-pill .mm-del { width: 16px !important; height: 16px !important; }
+      .mm-pill .mm-del svg { width: 10px; height: 10px; }
+      .mm-item { padding: 7px 10px !important; font-size: var(--fs-sm) !important; }
+      .mm-item .mm-del { width: 30px !important; height: 30px !important; min-width: 30px !important; min-height: 30px !important; }
+      .mm-item .mm-del svg { width: 13px; height: 13px; }
+    }
+  </style>
+</helmet>
+
+<app-shell dir="rtl" page="metadata" fab='[]'>
+  <div style="position: relative; z-index: 1;">
+
+    <!-- MAIN -->
+    <div style="max-width: 1200px; margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-12);">
+      <div style="margin-bottom: var(--space-6);">
+        <h1 style="margin: 0; font-size: var(--fs-xl); font-weight: var(--fw-bold); letter-spacing: var(--tracking-tight); color: var(--color-text-main);">ניהול מטא-דאטה</h1>
+        <p style="margin: var(--space-2) 0 0; font-size: var(--fs-sm); color: var(--color-text-muted);">קטגוריות, אלרגנים, יחידות ותוויות המשמשות בכל המערכת</p>
+      </div>
+
+      <div class="mm-tabs" style="display: none; gap: 6px; padding: 4px; margin-bottom: var(--space-4); background: var(--bg-subtle); border: 1px solid var(--border-glass); border-radius: var(--radius-full); overflow-x: auto; scrollbar-width: none;">
+        <button onClick="{{ selectLabels }}" style="flex-shrink: 0; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); border: none; cursor: pointer; white-space: nowrap; background: {{ labelsTabBg }}; color: {{ labelsTabColor }};">תוויות</button>
+        <button onClick="{{ selectCategories }}" style="flex-shrink: 0; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); border: none; cursor: pointer; white-space: nowrap; background: {{ categoriesTabBg }}; color: {{ categoriesTabColor }};">קטגוריות</button>
+        <button onClick="{{ selectAllergens }}" style="flex-shrink: 0; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); border: none; cursor: pointer; white-space: nowrap; background: {{ allergensTabBg }}; color: {{ allergensTabColor }};">אלרגנים</button>
+        <button onClick="{{ selectUnits }}" style="flex-shrink: 0; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); border: none; cursor: pointer; white-space: nowrap; background: {{ unitsTabBg }}; color: {{ unitsTabColor }};">יחידות</button>
+        <button onClick="{{ selectEventTypes }}" style="flex-shrink: 0; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); border: none; cursor: pointer; white-space: nowrap; background: {{ eventTypesTabBg }}; color: {{ eventTypesTabColor }};">סוגי אירועים</button>
+        <button onClick="{{ selectServingStyles }}" style="flex-shrink: 0; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); border: none; cursor: pointer; white-space: nowrap; background: {{ servingStylesTabBg }}; color: {{ servingStylesTabColor }};">סטיילי הגשה</button>
+      </div>
+
+      <div class="mm-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: var(--space-6);">
+
+        <!-- LABELS (moved to top) -->
+        <section id="mm-sec-labels" ref="{{ refLabels }}" style="order: {{ orderLabels }}; padding: var(--space-6); background: var(--bg-glass-strong); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); backdrop-filter: var(--blur-glass);">
+          <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border-default);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-info);"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"></path><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"></circle><path d="M17.5 8.5 9 17"></path></svg>
+            <h2 style="margin: 0; font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--color-text-main);">תוויות מתכונים</h2>
+          </div>
+          <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);">
+            <input type="text" placeholder="הוסף תווית..." value="{{ labelInput }}" onChange="{{ onLabelInputChange }}" onKeyDown="{{ onLabelKeyDown }}" style="flex: 1; padding: 0 12px; height: 38px; background: var(--bg-glass); font-size: var(--fs-sm); color: var(--color-text-main); border: 1px solid var(--border-default); border-radius: var(--radius-md); font-family: var(--font-sans);">
+            <button onClick="{{ onAddLabel }}" style="padding: 0 var(--space-4); height: 38px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); color: var(--color-text-on-primary); border: none; border-radius: var(--radius-md); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">הוסף</button>
+          </div>
+          <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+            <div aria-busy="true" aria-label="טוען נתונים" style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); box-shadow: var(--shadow-glass); border-radius: var(--radius-lg); padding: var(--space-4); display: flex; flex-direction: column; gap: 12px; margin-bottom: var(--space-3);">
+              <sc-for list="{{ skeletonRows }}" as="row" hint-placeholder-count="6">
+                <div style="display: flex; align-items: center; gap: var(--space-3); animation: skelPulse 1.4s var(--ease-smooth) infinite;">
+                  <div style="flex: 2; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.07);"></div>
+                  <div style="flex: 1; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.05);"></div>
+                  <div style="width: 84px; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.05);"></div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ loadFailed }}" hint-placeholder-val="{{ false }}">
+            <div role="alert" style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); box-shadow: var(--shadow-glass); border-radius: var(--radius-lg); padding: var(--space-10) var(--space-4); margin-bottom: var(--space-3); display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center;">
+              <i data-lucide="cloud-off" style="width: 28px; height: 28px; color: var(--color-danger);"></i>
+              <div style="font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--color-text-main);">הטעינה נכשלה</div>
+              <p style="margin: 0; max-width: 34ch; font-size: var(--fs-sm); color: var(--color-text-muted); line-height: var(--lh-relaxed);">אין חיבור לשרת כרגע. אפשר לנסות שוב.</p>
+              <button onClick="{{ retryLoad }}" style="min-height: 44px; padding: 0 20px; border: none; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-text-on-primary); font-family: inherit; font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer; box-shadow: var(--shadow-glow);">נסה שוב</button>
+            </div>
+          </sc-if>
+
+          <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+            <sc-for list="{{ labels }}" as="it" hint-placeholder-count="4">
+              <div class="mm-pill" style="display: inline-flex; align-items: center; gap: var(--space-2); padding: 6px 12px; background: var(--bg-glass-strong); color: var(--color-text-main); border: 1px solid var(--border-default); border-radius: var(--radius-full); font-size: var(--fs-sm); font-weight: var(--fw-semibold);">
+                <button onClick="{{ it.onCycleColor }}" title="שנה צבע" style="width: 12px; height: 12px; border-radius: 50%; background: {{ it.color }}; border: none; padding: 0; cursor: pointer; flex-shrink: 0;"></button>
+                <span>{{ it.label }}</span>
+                <button class="mm-del" onClick="{{ it.onDelete }}" style="display: grid; place-content: center; width: 18px; height: 18px; background: transparent; border: none; color: var(--color-text-muted); cursor: pointer; opacity: 0.7;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+                </button>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <!-- CATEGORIES -->
+        <section id="mm-sec-categories" ref="{{ refCategories }}" style="order: {{ orderCategories }}; padding: var(--space-6); background: var(--bg-glass-strong); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); backdrop-filter: var(--blur-glass);">
+          <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border-default);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"></path><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"></circle></svg>
+            <h2 style="margin: 0; font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--color-text-main);">קטגוריות מוצר</h2>
+          </div>
+          <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);">
+            <input type="text" placeholder="הוסף קטגוריה..." value="{{ categoryInput }}" onChange="{{ onCategoryInputChange }}" onKeyDown="{{ onCategoryKeyDown }}" style="flex: 1; padding: 0 12px; height: 38px; background: var(--bg-glass); font-size: var(--fs-sm); color: var(--color-text-main); border: 1px solid var(--border-default); border-radius: var(--radius-md); font-family: var(--font-sans);">
+            <button onClick="{{ onAddCategory }}" style="padding: 0 var(--space-4); height: 38px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); color: var(--color-text-on-primary); border: none; border-radius: var(--radius-md); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">הוסף</button>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, auto)); gap: var(--space-2);">
+            <sc-for list="{{ categories }}" as="it" hint-placeholder-count="5">
+              <div class="mm-item" style="display: grid; grid-template-columns: 1fr auto; align-items: center; gap: var(--space-2); padding: 10px 12px; background: var(--bg-glass); border: 1px solid transparent; border-radius: var(--radius-md); font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--color-text-main);">
+                <span>{{ it.label }}</span>
+                <button class="mm-del" onClick="{{ it.onDelete }}" style="display: grid; place-content: center; width: 26px; height: 26px; background: transparent; border: none; border-radius: var(--radius-sm); color: var(--color-text-muted); cursor: pointer;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <!-- ALLERGENS -->
+        <section id="mm-sec-allergens" ref="{{ refAllergens }}" style="order: {{ orderAllergens }}; padding: var(--space-6); background: var(--bg-glass-strong); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); backdrop-filter: var(--blur-glass);">
+          <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border-default);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-danger);"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+            <h2 style="margin: 0; font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--color-text-main);">אלרגנים גלובליים</h2>
+          </div>
+          <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);">
+            <input type="text" placeholder="הוסף אלרגן..." value="{{ allergenInput }}" onChange="{{ onAllergenInputChange }}" onKeyDown="{{ onAllergenKeyDown }}" style="flex: 1; padding: 0 12px; height: 38px; background: var(--bg-glass); font-size: var(--fs-sm); color: var(--color-text-main); border: 1px solid var(--border-default); border-radius: var(--radius-md); font-family: var(--font-sans);">
+            <button onClick="{{ onAddAllergen }}" style="padding: 0 var(--space-4); height: 38px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); color: var(--color-text-on-primary); border: none; border-radius: var(--radius-md); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">הוסף</button>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+            <sc-for list="{{ allergens }}" as="it" hint-placeholder-count="5">
+              <div class="mm-pill" style="display: inline-flex; align-items: center; gap: var(--space-2); padding: 6px 12px; background: var(--bg-danger-subtle); color: var(--color-allergen-text); border: 1px solid rgba(254,205,213,0.6); border-radius: var(--radius-full); font-size: var(--fs-sm); font-weight: var(--fw-semibold);">
+                <span>{{ it.label }}</span>
+                <button class="mm-del" onClick="{{ it.onDelete }}" style="display: grid; place-content: center; width: 18px; height: 18px; background: transparent; border: none; color: inherit; cursor: pointer; opacity: 0.7;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+                </button>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <!-- UNITS -->
+        <section id="mm-sec-units" ref="{{ refUnits }}" style="order: {{ orderUnits }}; padding: var(--space-6); background: var(--bg-glass-strong); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); backdrop-filter: var(--blur-glass);">
+          <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border-default);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-success);"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10"></path><path d="M12 3v18"></path><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path></svg>
+            <h2 style="margin: 0; font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--color-text-main);">יחידות מידה</h2>
+          </div>
+          <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);">
+            <input type="text" placeholder="הוסף יחידה..." value="{{ unitInput }}" onChange="{{ onUnitInputChange }}" onKeyDown="{{ onUnitKeyDown }}" style="flex: 1; padding: 0 12px; height: 38px; background: var(--bg-glass); font-size: var(--fs-sm); color: var(--color-text-main); border: 1px solid var(--border-default); border-radius: var(--radius-md); font-family: var(--font-sans);">
+            <button onClick="{{ onAddUnit }}" style="padding: 0 var(--space-4); height: 38px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); color: var(--color-text-on-primary); border: none; border-radius: var(--radius-md); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">הוסף</button>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, auto)); gap: var(--space-2);">
+            <sc-for list="{{ units }}" as="it" hint-placeholder-count="5">
+              <div class="mm-item" style="display: grid; grid-template-columns: 1fr auto; align-items: center; gap: var(--space-2); padding: 10px 12px; background: var(--bg-glass); border: 1px solid transparent; border-radius: var(--radius-md); font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--color-text-main);">
+                <span>{{ it.label }}</span>
+                <sc-if value="{{ it.locked }}" hint-placeholder-val="{{ false }}">
+                  <span title="יחידת מערכת, לא ניתנת להסרה" style="display: grid; place-content: center; width: 26px; height: 26px; color: var(--color-text-muted-light);">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                  </span>
+                </sc-if>
+                <sc-if value="{{ it.unlocked }}" hint-placeholder-val="{{ true }}">
+                  <button class="mm-del" onClick="{{ it.onDelete }}" style="display: grid; place-content: center; width: 26px; height: 26px; background: transparent; border: none; border-radius: var(--radius-sm); color: var(--color-text-muted); cursor: pointer;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <!-- EVENT TYPES -->
+        <section id="mm-sec-event-types" ref="{{ refEventTypes }}" style="order: {{ orderEventTypes }}; padding: var(--space-6); background: var(--bg-glass-strong); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); backdrop-filter: var(--blur-glass);">
+          <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border-default);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-info);"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>
+            <h2 style="margin: 0; font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--color-text-main);">סוגי אירועים</h2>
+          </div>
+          <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);">
+            <input type="text" placeholder="הוסף סוג אירוע..." value="{{ eventTypeInput }}" onChange="{{ onEventTypeInputChange }}" onKeyDown="{{ onEventTypeKeyDown }}" style="flex: 1; padding: 0 12px; height: 38px; background: var(--bg-glass); font-size: var(--fs-sm); color: var(--color-text-main); border: 1px solid var(--border-default); border-radius: var(--radius-md); font-family: var(--font-sans);">
+            <button onClick="{{ onAddEventType }}" style="padding: 0 var(--space-4); height: 38px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); color: var(--color-text-on-primary); border: none; border-radius: var(--radius-md); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">הוסף</button>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+            <sc-for list="{{ eventTypes }}" as="it" hint-placeholder-count="5">
+              <div class="mm-item" style="display: grid; grid-template-columns: 1fr auto; align-items: center; gap: var(--space-2); padding: 10px 12px; background: var(--bg-glass); border: 1px solid transparent; border-radius: var(--radius-md); font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--color-text-main);">
+                <span>{{ it.label }}</span>
+                <button class="mm-del" onClick="{{ it.onDelete }}" style="display: grid; place-content: center; width: 26px; height: 26px; background: transparent; border: none; border-radius: var(--radius-sm); color: var(--color-text-muted); cursor: pointer;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <!-- SERVING STYLES -->
+        <section id="mm-sec-serving-styles" ref="{{ refServingStyles }}" style="order: {{ orderServingStyles }}; padding: var(--space-6); background: var(--bg-glass-strong); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); backdrop-filter: var(--blur-glass);">
+          <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border-default);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);"><path d="m16 2-2.3 2.3a3 3 0 0 0-.7 1.9v5.7l-8.6 8.5c-.9.9-.9 2.4 0 3.2 1 .9 2.4.9 3.3 0l8.6-8.5h5.7a3 3 0 0 0 1.9-.7L22 12"></path></svg>
+            <h2 style="margin: 0; font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--color-text-main);">סטיילי הגשה</h2>
+          </div>
+          <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);">
+            <input type="text" placeholder="הוסף סטייל הגשה..." value="{{ servingStyleInput }}" onChange="{{ onServingStyleInputChange }}" onKeyDown="{{ onServingStyleKeyDown }}" style="flex: 1; padding: 0 12px; height: 38px; background: var(--bg-glass); font-size: var(--fs-sm); color: var(--color-text-main); border: 1px solid var(--border-default); border-radius: var(--radius-md); font-family: var(--font-sans);">
+            <button onClick="{{ onAddServingStyle }}" style="padding: 0 var(--space-4); height: 38px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); color: var(--color-text-on-primary); border: none; border-radius: var(--radius-md); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">הוסף</button>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+            <sc-for list="{{ servingStyles }}" as="it" hint-placeholder-count="3">
+              <div class="mm-item" style="display: grid; grid-template-columns: 1fr auto; align-items: center; gap: var(--space-2); padding: 10px 12px; background: var(--bg-glass); border: 1px solid transparent; border-radius: var(--radius-md); font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--color-text-main);">
+                <span>{{ it.label }}</span>
+                <button class="mm-del" onClick="{{ it.onDelete }}" style="display: grid; place-content: center; width: 26px; height: 26px; background: transparent; border: none; border-radius: var(--radius-sm); color: var(--color-text-muted); cursor: pointer;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIRM DIALOG -->
+  <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+    <div class="m-sheet" style="position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; background: var(--overlay-backdrop); backdrop-filter: blur(6px); animation: fadeIn 0.15s ease;">
+      <div class="m-sheet-card" style="width: 90%; max-width: 380px; padding: var(--space-6); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring); text-align: center;">
+        <div style="width: 44px; height: 44px; margin: 0 auto var(--space-4); border-radius: 50%; background: var(--bg-danger-subtle); display: grid; place-content: center; color: var(--color-danger);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+        </div>
+        <p style="margin: 0 0 var(--space-5); font-size: var(--fs-base); font-weight: var(--fw-medium); color: var(--color-text-main);">{{ confirmMessage }}</p>
+        <div style="display: flex; gap: var(--space-3);">
+          <button onClick="{{ cancelConfirm }}" style="flex: 1; padding: 10px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--color-text-secondary); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">ביטול</button>
+          <button onClick="{{ runConfirm }}" style="flex: 1; padding: 10px; background: var(--color-danger); border: none; border-radius: var(--radius-md); color: #fff; font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">מחיקה</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- TOAST -->
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <div class="m-toast" style="position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 400; display: flex; align-items: center; gap: var(--space-2); padding: 11px 20px; background: var(--color-text-main); color: #fff; border-radius: var(--radius-full); font-size: var(--fs-sm); font-weight: var(--fw-medium); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring);">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);"><path d="M20 6 9 17l-5-5"></path></svg>
+      {{ toastMessage }}
+    </div>
+  </sc-if>
+</app-shell>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;viewState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ready&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;ready&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;States&quot;}}">
+const LABEL_COLORS = ['#16a34a', '#65a30d', '#f59e0b', '#dc2626', '#0ea5e9', '#8b5cf6'];
+
+class Component extends DCLogic {
+  state = {
+    categories: ['בשרים', 'עופות', 'ירקות', 'מוצרי חלב', 'מאפים', 'רטבים'],
+    allergens: ['גלוטן', 'אגוזים', 'חלב', 'ביצים', 'סויה', 'שומשום'],
+    units: [
+      { key: 'קג', locked: true }, { key: 'גרם', locked: true }, { key: 'יח׳', locked: true },
+      { key: 'ליטר', locked: false }, { key: 'מ״ל', locked: false }, { key: 'מגש', locked: false }
+    ],
+    eventTypes: ['חתונה', 'בר/בת מצווה', 'כנס עסקי', 'יום הולדת', 'קוקטייל ערב'],
+    servingStyles: ['בופה משפחתי', 'מנות בישיבה', 'קוקטייל מוגש'],
+    labels: [
+      { key: 'צמחוני', color: '#16a34a' }, { key: 'טבעוני', color: '#65a30d' },
+      { key: 'ללא גלוטן', color: '#f59e0b' }, { key: 'חריף', color: '#dc2626' }
+    ],
+    categoryInput: '', allergenInput: '', unitInput: '', eventTypeInput: '', servingStyleInput: '', labelInput: '',
+    confirmOpen: false, confirmMessage: '', confirmAction: null,
+    toastVisible: false, toastMessage: '',
+    order: ['labels', 'categories', 'allergens', 'units', 'eventTypes', 'servingStyles']
+  };
+
+  sectionRefs = {};
+  setRef(type) { return (el) => { if (el) this.sectionRefs[type] = el; }; }
+
+  selectType(type) {
+    if (this.state.order[0] === type) return;
+    const rects = {};
+    Object.keys(this.sectionRefs).forEach(k => { rects[k] = this.sectionRefs[k].getBoundingClientRect(); });
+    this._prevRects = rects;
+    this.setState(s => ({ order: [type, ...s.order.filter(t => t !== type)] }));
+  }
+
+  componentDidUpdate() {
+    if (!this._prevRects) return;
+    const prevRects = this._prevRects;
+    this._prevRects = null;
+    Object.keys(this.sectionRefs).forEach(k => {
+      const el = this.sectionRefs[k];
+      const prev = prevRects[k];
+      if (!el || !prev) return;
+      const next = el.getBoundingClientRect();
+      const dx = prev.left - next.left;
+      const dy = prev.top - next.top;
+      if (dx || dy) {
+        el.style.transition = 'none';
+        el.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+        requestAnimationFrame(() => {
+          el.style.transition = 'transform 0.35s cubic-bezier(0.22,1,0.36,1)';
+          el.style.transform = '';
+        });
+      }
+    });
+  }
+
+  showToast(msg) {
+    clearTimeout(this._toastTimer);
+    this.setState({ toastVisible: true, toastMessage: msg });
+    this._toastTimer = setTimeout(() => this.setState({ toastVisible: false }), 2000);
+  }
+
+  askDelete(message, action) {
+    this.setState({ confirmOpen: true, confirmMessage: message, confirmAction: action });
+  }
+  cancelConfirm() { this.setState({ confirmOpen: false, confirmAction: null }); }
+  runConfirm() {
+    const action = this.state.confirmAction;
+    this.setState({ confirmOpen: false, confirmAction: null });
+    if (action) action();
+    this.showToast('הפריט נמחק');
+  }
+
+  addSimple(field, inputField) {
+    const v = (this.state[inputField] || '').trim();
+    if (!v) return;
+    if (this.state[field].includes(v)) { this.showToast('הערך כבר קיים ברשימה'); return; }
+    this.setState(s => ({ [field]: [...s[field], v], [inputField]: '' }));
+    this.showToast('הפריט נוסף');
+  }
+  removeSimple(field, value) {
+    this.askDelete('האם למחוק את "' + value + '"?', () => {
+      this.setState(s => ({ [field]: s[field].filter(x => x !== value) }));
+    });
+  }
+
+  onAddCategory() { this.addSimple('categories', 'categoryInput'); }
+  onAddAllergen() { this.addSimple('allergens', 'allergenInput'); }
+  onAddEventType() { this.addSimple('eventTypes', 'eventTypeInput'); }
+  onAddServingStyle() { this.addSimple('servingStyles', 'servingStyleInput'); }
+
+  onAddUnit() {
+    const v = (this.state.unitInput || '').trim();
+    if (!v) return;
+    if (this.state.units.some(u => u.key === v)) { this.showToast('הערך כבר קיים ברשימה'); return; }
+    this.setState(s => ({ units: [...s.units, { key: v, locked: false }], unitInput: '' }));
+    this.showToast('הפריט נוסף');
+  }
+  removeUnit(key) {
+    this.askDelete('האם למחוק את "' + key + '"?', () => {
+      this.setState(s => ({ units: s.units.filter(u => u.key !== key) }));
+    });
+  }
+
+  onAddLabel() {
+    const v = (this.state.labelInput || '').trim();
+    if (!v) return;
+    if (this.state.labels.some(l => l.key === v)) { this.showToast('הערך כבר קיים ברשימה'); return; }
+    const color = LABEL_COLORS[this.state.labels.length % LABEL_COLORS.length];
+    this.setState(s => ({ labels: [...s.labels, { key: v, color }], labelInput: '' }));
+    this.showToast('הפריט נוסף');
+  }
+  removeLabel(key) {
+    this.askDelete('האם למחוק את "' + key + '"?', () => {
+      this.setState(s => ({ labels: s.labels.filter(l => l.key !== key) }));
+    });
+  }
+  cycleLabelColor(key) {
+    this.setState(s => ({
+      labels: s.labels.map(l => {
+        if (l.key !== key) return l;
+        const idx = LABEL_COLORS.indexOf(l.color);
+        return { ...l, color: LABEL_COLORS[(idx + 1) % LABEL_COLORS.length] };
+      })
+    }));
+  }
+
+  onKeyDownFactory(addFn) { return (e) => { if (e && e.key === 'Enter') addFn(); }; }
+
+  renderVals() {
+    const b = this.baseVals();
+    const vs = this.state.__vs || this.props.viewState || 'ready';
+    const loading = vs === 'loading', failed = vs === 'error';
+    if (vs !== 'ready') { b.labels = []; b.categories = []; b.allergens = []; b.units = []; b.eventTypes = []; b.servingStyles = []; }
+    return Object.assign(b, {
+      loading, loadFailed: failed, ready: !loading && !failed,
+      skeletonRows: [1, 2, 3, 4, 5, 6].map(i => ({ i })),
+      retryLoad: () => this.setState({ __vs: 'ready' })
+    });
+  }
+
+  baseVals() {
+    const s = this.state;
+    const simpleRow = (field, removeFn) => s[field].map(v => ({ key: v, label: v, onDelete: () => removeFn(v) }));
+
+    const order = s.order;
+    return {
+      activeType: order[0],
+      orderLabels: order.indexOf('labels'),
+      orderCategories: order.indexOf('categories'),
+      orderAllergens: order.indexOf('allergens'),
+      orderUnits: order.indexOf('units'),
+      orderEventTypes: order.indexOf('eventTypes'),
+      orderServingStyles: order.indexOf('servingStyles'),
+      refLabels: this.setRef('labels'),
+      refCategories: this.setRef('categories'),
+      refAllergens: this.setRef('allergens'),
+      refUnits: this.setRef('units'),
+      refEventTypes: this.setRef('eventTypes'),
+      refServingStyles: this.setRef('servingStyles'),
+      isActiveLabels: order[0] === 'labels',
+      isActiveCategories: order[0] === 'categories',
+      isActiveAllergens: order[0] === 'allergens',
+      isActiveUnits: order[0] === 'units',
+      isActiveEventTypes: order[0] === 'eventTypes',
+      isActiveServingStyles: order[0] === 'servingStyles',
+      selectLabels: () => this.selectType('labels'),
+      selectCategories: () => this.selectType('categories'),
+      selectAllergens: () => this.selectType('allergens'),
+      selectUnits: () => this.selectType('units'),
+      selectEventTypes: () => this.selectType('eventTypes'),
+      selectServingStyles: () => this.selectType('servingStyles'),
+      tabBg: (type) => order[0] === type ? 'linear-gradient(180deg, var(--color-primary), var(--color-primary-hover))' : 'transparent',
+      tabColor: (type) => order[0] === type ? '#fff' : 'var(--color-text-muted)',
+      labelsTabBg: order[0] === 'labels' ? 'linear-gradient(180deg, var(--color-primary), var(--color-primary-hover))' : 'transparent',
+      labelsTabColor: order[0] === 'labels' ? '#fff' : 'var(--color-text-muted)',
+      categoriesTabBg: order[0] === 'categories' ? 'linear-gradient(180deg, var(--color-primary), var(--color-primary-hover))' : 'transparent',
+      categoriesTabColor: order[0] === 'categories' ? '#fff' : 'var(--color-text-muted)',
+      allergensTabBg: order[0] === 'allergens' ? 'linear-gradient(180deg, var(--color-primary), var(--color-primary-hover))' : 'transparent',
+      allergensTabColor: order[0] === 'allergens' ? '#fff' : 'var(--color-text-muted)',
+      unitsTabBg: order[0] === 'units' ? 'linear-gradient(180deg, var(--color-primary), var(--color-primary-hover))' : 'transparent',
+      unitsTabColor: order[0] === 'units' ? '#fff' : 'var(--color-text-muted)',
+      eventTypesTabBg: order[0] === 'eventTypes' ? 'linear-gradient(180deg, var(--color-primary), var(--color-primary-hover))' : 'transparent',
+      eventTypesTabColor: order[0] === 'eventTypes' ? '#fff' : 'var(--color-text-muted)',
+      servingStylesTabBg: order[0] === 'servingStyles' ? 'linear-gradient(180deg, var(--color-primary), var(--color-primary-hover))' : 'transparent',
+      servingStylesTabColor: order[0] === 'servingStyles' ? '#fff' : 'var(--color-text-muted)',
+
+      categories: simpleRow('categories', (v) => this.removeSimple('categories', v)),
+      categoryInput: s.categoryInput,
+      onCategoryInputChange: (v) => this.setState({ categoryInput: v }),
+      onCategoryKeyDown: this.onKeyDownFactory(() => this.onAddCategory()),
+      onAddCategory: () => this.onAddCategory(),
+
+      allergens: simpleRow('allergens', (v) => this.removeSimple('allergens', v)),
+      allergenInput: s.allergenInput,
+      onAllergenInputChange: (v) => this.setState({ allergenInput: v }),
+      onAllergenKeyDown: this.onKeyDownFactory(() => this.onAddAllergen()),
+      onAddAllergen: () => this.onAddAllergen(),
+
+      units: s.units.map(u => ({ key: u.key, label: u.key, locked: u.locked, unlocked: !u.locked, onDelete: () => this.removeUnit(u.key) })),
+      unitInput: s.unitInput,
+      onUnitInputChange: (v) => this.setState({ unitInput: v }),
+      onUnitKeyDown: this.onKeyDownFactory(() => this.onAddUnit()),
+      onAddUnit: () => this.onAddUnit(),
+
+      eventTypes: simpleRow('eventTypes', (v) => this.removeSimple('eventTypes', v)),
+      eventTypeInput: s.eventTypeInput,
+      onEventTypeInputChange: (v) => this.setState({ eventTypeInput: v }),
+      onEventTypeKeyDown: this.onKeyDownFactory(() => this.onAddEventType()),
+      onAddEventType: () => this.onAddEventType(),
+
+      servingStyles: simpleRow('servingStyles', (v) => this.removeSimple('servingStyles', v)),
+      servingStyleInput: s.servingStyleInput,
+      onServingStyleInputChange: (v) => this.setState({ servingStyleInput: v }),
+      onServingStyleKeyDown: this.onKeyDownFactory(() => this.onAddServingStyle()),
+      onAddServingStyle: () => this.onAddServingStyle(),
+
+      labels: s.labels.map(l => ({ key: l.key, label: l.key, color: l.color, onDelete: () => this.removeLabel(l.key), onCycleColor: () => this.cycleLabelColor(l.key) })),
+      labelInput: s.labelInput,
+      onLabelInputChange: (v) => this.setState({ labelInput: v }),
+      onLabelKeyDown: this.onKeyDownFactory(() => this.onAddLabel()),
+      onAddLabel: () => this.onAddLabel(),
+
+      confirmOpen: s.confirmOpen,
+      confirmMessage: s.confirmMessage,
+      cancelConfirm: () => this.cancelConfirm(),
+      runConfirm: () => this.runConfirm(),
+
+      toastVisible: s.toastVisible,
+      toastMessage: s.toastMessage
+    };
+  }
+}
+
+</script>
+</body>
+</html>

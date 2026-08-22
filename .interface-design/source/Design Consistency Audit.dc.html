@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="omelette-owns-print" content="1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="colors_and_type.css">
+<style>
+  body { margin: 0; font-family: 'Heebo', system-ui, sans-serif; background: var(--bg-body); }
+  a { color: var(--color-primary); }
+  a:hover { color: var(--color-primary-hover); }
+  @media (max-width: 767px) { .au-grid { grid-template-columns: 1fr !important; } }
+</style>
+</helmet>
+
+<div style="position: relative; min-height: 100vh; background: var(--bg-body); color: var(--color-text-main);">
+  <div style="position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse 700px 480px at 85% 15%, rgba(20,184,166,0.12), transparent), radial-gradient(ellipse 550px 550px at 15% 75%, rgba(251,191,36,0.08), transparent), radial-gradient(ellipse 450px 350px at 50% 50%, rgba(14,165,233,0.06), transparent);"></div>
+
+  <div style="position: relative; max-width: 940px; margin: 0 auto; padding: var(--space-8) var(--space-6) var(--space-12);">
+
+    <div style="margin-bottom: var(--space-6);">
+      <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; margin-bottom: var(--space-3); background: var(--color-primary-soft); color: var(--color-primary-hover); border-radius: var(--radius-full); font-size: var(--fs-xs); font-weight: var(--fw-bold);">Audit — no changes made</div>
+      <h1 style="margin: 0; font-size: var(--fs-2xl); font-weight: var(--fw-bold); letter-spacing: var(--tracking-tight);">Design consistency across the 13 screens</h1>
+      <p style="margin: var(--space-2) 0 0; font-size: var(--fs-base); color: var(--color-text-muted); max-width: 62ch; text-wrap: pretty;">I compared every screen on the things that make a family: page shell, header, container radius, buttons, shadows, type scale. The chrome is already unified. The differences are almost all in the page body — width, padding, and the title block. Below: what is consistent, what is not, and what I would change.</p>
+    </div>
+
+    <div style="padding: var(--space-4) var(--space-5); margin-bottom: var(--space-6); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+      <div style="font-size: var(--fs-sm); font-weight: var(--fw-bold); margin-bottom: var(--space-3);">Already consistent — do not touch</div>
+      <div class="au-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2) var(--space-5);">
+        <div style="font-size: var(--fs-sm); color: var(--color-text-secondary);">Top nav — identical on all 11 app screens: sticky, 3.5rem, frosted, same pill spec, same user chip.</div>
+        <div style="font-size: var(--fs-sm); color: var(--color-text-secondary);">Ambient gradient wash — byte-identical everywhere.</div>
+        <div style="font-size: var(--fs-sm); color: var(--color-text-secondary);">Modals — <code>--radius-xl</code>, glass-strong fill, modal blur + shadow on every screen.</div>
+        <div style="font-size: var(--fs-sm); color: var(--color-text-secondary);">Type — the <code>--fs-*</code> scale and the text-color ladder are used almost everywhere.</div>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: var(--space-3); margin: var(--space-8) 0 var(--space-4);">
+      <span style="display: grid; place-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--color-danger); color: #fff; font-size: 12px; font-weight: var(--fw-bold);">1</span>
+      <h2 style="margin: 0; font-size: var(--fs-lg); font-weight: var(--fw-bold);">High impact — these are what break the "one app" feeling</h2>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+
+      <div style="padding: var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-3);">
+          <div style="font-size: var(--fs-md); font-weight: var(--fw-bold);">A. Page width — 8 different values</div>
+          <span style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-danger); background: var(--bg-danger-subtle); padding: 3px 10px; border-radius: var(--radius-full);">most visible issue</span>
+        </div>
+        <p style="margin: 0 0 var(--space-3); font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Recipe Book 1560 · Inventory / Equipment / Suppliers 1520 · Dashboard / Venues / Metadata 1200 · Recipe Builder 1000 · Venue Detail 920 · Menu Library 900 · Trash 720 · Menu Intelligence 660. Moving between screens, the content column jumps sideways every time.</p>
+        <div style="padding: var(--space-3) var(--space-4); background: var(--color-primary-soft); border-radius: var(--radius-md); font-size: var(--fs-sm); color: var(--color-text-main);"><b>Proposal:</b> three widths only. <b>1520</b> for data screens with a side filter panel (Inventory, Recipe Book, Equipment, Suppliers). <b>1200</b> for everything standard (Dashboard, Venues, Metadata, Menu Library, Recipe Builder, Venue Detail). <b>720</b> for deliberately narrow ones (Trash, Menu Intelligence). Recipe Book 1560 → 1520; Menu Library 900 → 1200; Menu Intelligence 660 → 720.</div>
+      </div>
+
+      <div style="padding: var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="font-size: var(--fs-md); font-weight: var(--fw-bold); margin-bottom: var(--space-3);">B. Page padding — 6 variants</div>
+        <p style="margin: 0 0 var(--space-3); font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Most screens use <code>space-6 / space-6 / space-12</code>. Metadata uses <code>space-8</code> all round, Menu Library <code>space-8 space-8 space-12</code>, Trash <code>space-8 space-6 space-12</code>, Recipe Builder <code>space-6 space-6 8rem</code>, Menu Intelligence <code>0 space-6 7rem</code>. So the first card sits at a different height on almost every screen.</p>
+        <div style="padding: var(--space-3) var(--space-4); background: var(--color-primary-soft); border-radius: var(--radius-md); font-size: var(--fs-sm);"><b>Proposal:</b> one rule — <code>space-6</code> top and sides, <code>space-12</code> bottom. Screens with a sticky action footer (Recipe Builder, Menu Intelligence) keep their larger bottom padding, nothing else changes.</div>
+      </div>
+
+      <div style="padding: var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="font-size: var(--fs-md); font-weight: var(--fw-bold); margin-bottom: var(--space-3);">C. Page title — three sizes, and two screens have none</div>
+        <p style="margin: 0 0 var(--space-3); font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Nine screens: <code>--fs-xl</code> bold + a muted <code>--fs-sm</code> subtitle. Metadata: <code>--fs-2xl</code> <b>extrabold</b> plus a bottom border divider no other screen has. Venue Detail: <code>--fs-2xl</code>. Cook View: raw <code>34px</code> (fine, it is a hero). Menu Intelligence and Recipe Builder have no page title at all — you land there and lose your place in the hierarchy.</p>
+        <div style="padding: var(--space-3) var(--space-4); background: var(--color-primary-soft); border-radius: var(--radius-md); font-size: var(--fs-sm);"><b>Proposal:</b> list &amp; tool screens = <code>--fs-xl</code> bold + subtitle; entity-detail screens (Venue Detail, Recipe Builder) = <code>--fs-2xl</code> bold. Drop the extrabold and the divider on Metadata. Give Menu Intelligence and Recipe Builder a real title row.</div>
+      </div>
+
+      <div style="padding: var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="font-size: var(--fs-md); font-weight: var(--fw-bold); margin-bottom: var(--space-3);">D. Header block — four different layouts</div>
+        <ul style="margin: 0 0 var(--space-3); padding-inline-start: 18px; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">
+          <li><b>Data-screen header</b> — panel toggle + title + count + inline search + filters: Inventory, Recipe Book, Equipment, Suppliers. This is the strongest pattern you have.</li>
+          <li><b>Overview header</b> — title + subtitle left, actions right: Dashboard, Venues, Trash.</li>
+          <li><b>Inline</b> — title sits in the same row as search, no subtitle: Menu Library.</li>
+          <li><b>None</b> — Menu Intelligence, Recipe Builder.</li>
+        </ul>
+        <div style="padding: var(--space-3) var(--space-4); background: var(--color-primary-soft); border-radius: var(--radius-md); font-size: var(--fs-sm);"><b>Proposal:</b> keep exactly two — data-screen header and overview header — and move Menu Library onto the data-screen one (it already has search). Same 38px control height, same search field spec, subtitle always present with a live count.</div>
+      </div>
+
+    </div>
+
+    <div style="display: flex; align-items: center; gap: var(--space-3); margin: var(--space-8) 0 var(--space-4);">
+      <span style="display: grid; place-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--color-warning); color: #fff; font-size: 12px; font-weight: var(--fw-bold);">2</span>
+      <h2 style="margin: 0; font-size: var(--fs-lg); font-weight: var(--fw-bold);">Medium — noticeable side by side</h2>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+
+      <div style="padding: var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="font-size: var(--fs-md); font-weight: var(--fw-bold); margin-bottom: var(--space-3);">E. Corner radius — no rule for which container gets which</div>
+        <p style="margin: 0 0 var(--space-3); font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Cards are <code>--radius-lg</code> on Dashboard and Recipe Builder but <code>--radius-md</code> on Equipment, Inventory, Suppliers, Metadata — <code>--radius-md</code> is used 13–19 times per file, <code>--radius-lg</code> only 2–3. Trash has raw <code>4px</code> and <code>6px</code> radii that exist nowhere else.</p>
+        <div style="padding: var(--space-3) var(--space-4); background: var(--color-primary-soft); border-radius: var(--radius-md); font-size: var(--fs-sm);"><b>Proposal — one ladder, applied everywhere:</b> cards &amp; panels <code>--radius-lg</code> (16) · inner rows, inputs, icon buttons <code>--radius-md</code> (12) · chips &amp; pills <code>--radius-full</code> · modals <code>--radius-xl</code> (20). Trash's 4/6px become <code>--radius-xs</code>/<code>--radius-sm</code>.</div>
+      </div>
+
+      <div style="padding: var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="font-size: var(--fs-md); font-weight: var(--fw-bold); margin-bottom: var(--space-3);">F. Primary button — two gradients, three paddings</div>
+        <p style="margin: 0 0 var(--space-3); font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Some screens use <code>linear-gradient(180deg …)</code>, others <code>135deg</code>; padding is <code>9px 18px</code> / <code>8px 16px</code> / <code>8px 20px</code>; font is <code>--fs-sm</code> on some and <code>--fs-xs</code> on Dashboard. Secondary buttons vary the same way.</p>
+        <div style="padding: var(--space-3) var(--space-4); background: var(--color-primary-soft); border-radius: var(--radius-md); font-size: var(--fs-sm);"><b>Proposal:</b> primary = 180deg teal gradient, <code>--radius-full</code>, <code>9px 18px</code>, <code>--fs-sm</code>/600, <code>--shadow-glow</code>. Ghost = glass fill, <code>--border-default</code>, same size. 135deg stays only on the avatar chip.</div>
+      </div>
+
+      <div style="padding: var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="font-size: var(--fs-md); font-weight: var(--fw-bold); margin-bottom: var(--space-3);">G. Shadows — mostly tokenised, a few escapes</div>
+        <p style="margin: 0 0 var(--space-3); font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Cards use <code>--shadow-glass</code>, but Equipment and Suppliers also carry a one-off <code>--shadow-card</code> and a <code>box-shadow: none !important</code> override, and Menu Intelligence has a hand-written <code>0 24px 50px -24px …</code>. Small, but it is why some cards read heavier than others.</p>
+        <div style="padding: var(--space-3) var(--space-4); background: var(--color-primary-soft); border-radius: var(--radius-md); font-size: var(--fs-sm);"><b>Proposal:</b> resting card <code>--shadow-glass</code>, hover <code>--shadow-hover</code>, modal <code>--shadow-modal</code>, primary button <code>--shadow-glow</code>. Delete the one-offs.</div>
+      </div>
+
+    </div>
+
+    <div style="display: flex; align-items: center; gap: var(--space-3); margin: var(--space-8) 0 var(--space-4);">
+      <span style="display: grid; place-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--color-text-muted); color: #fff; font-size: 12px; font-weight: var(--fw-bold);">3</span>
+      <h2 style="margin: 0; font-size: var(--fs-lg); font-weight: var(--fw-bold);">Low — cleanup, worth doing while we are in there</h2>
+    </div>
+
+    <div style="padding: var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+      <ul style="margin: 0; padding-inline-start: 18px; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed); display: flex; flex-direction: column; gap: var(--space-2);">
+        <li><b>Off-scale font sizes.</b> <code>10px</code>, <code>10.5px</code> and <code>8px</code> appear on Dashboard, Suppliers and Recipe Builder — below the smallest token (<code>--fs-xs</code>, 12px). Raise to 12.</li>
+        <li><b>The nav pills use a literal <code>13px</code></b> in every file. Consistent, but it should be a token so it can never drift.</li>
+        <li><b>Inventory's nav is missing its own self-link</b> — its active item is not the same element as on the other screens.</li>
+        <li><b>Empty states</b> exist on Dashboard and Inventory (muted line, 320px) but not on the other list screens. One empty-state component for all of them.</li>
+        <li><b>Mobile touch targets.</b> Controls are 38px and nav pills ~30px; the design system asks for 44×44 minimum on mobile. Also: the system specifies a bottom tab bar on mobile, and we use a horizontally scrolling pill row instead. That is a decision, not a bug — tell me which one you want.</li>
+      </ul>
+    </div>
+
+    <div style="margin-top: var(--space-8); padding: var(--space-5); background: var(--bg-glass-strong); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+      <div style="font-size: var(--fs-md); font-weight: var(--fw-bold); margin-bottom: var(--space-3);">If you approve, I would do it in this order</div>
+      <ol style="margin: 0; padding-inline-start: 20px; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed); display: flex; flex-direction: column; gap: 6px;">
+        <li><b>Pass 1 — the shell (A, B, C).</b> Width, padding and title block on all 13 screens. Mechanical, low risk, and it is 80% of the "same family" feeling.</li>
+        <li><b>Pass 2 — header block (D).</b> Menu Library onto the data-screen header; title rows for Menu Intelligence and Recipe Builder.</li>
+        <li><b>Pass 3 — the ladder (E, F, G).</b> Radius, buttons, shadows. Touches many lines but each change is small.</li>
+        <li><b>Pass 4 — cleanup + mobile decision.</b></li>
+      </ol>
+      <p style="margin: var(--space-4) 0 0; font-size: var(--fs-sm); color: var(--color-text-muted);">Pass 1 and 2 can go in one turn. Tell me which passes to run, or which individual items to drop.</p>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

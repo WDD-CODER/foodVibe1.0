@@ -1,9 +1,5 @@
 <nav class="header-nav" dir="rtl">
   <div class="auth-section">
-    <a class="brand-mark" routerLink="/dashboard" aria-label="foodCo">
-      <img src="/assets/style/img/fc-mark.svg" alt="" width="28" height="28" />
-      <span class="brand-mark__name">foodCo</span>
-    </a>
     @if (isLoggedIn()) {
       <div class="user-chip">
         <div class="avatar-wrapper">
@@ -62,6 +58,15 @@
     <a class="nav-pill" routerLink="/menu-library" routerLinkActive="active" (click)="closeMobileMenu()">
       {{ 'menu_library' | translatePipe }}
       <lucide-icon name="library" [size]="16"></lucide-icon>
+    </a>
+  </div>
+
+  <!-- Opposite end from the user chip — matches the design's header layout
+       (brand mark on the far side from the avatar, nav pills centered between). -->
+  <div class="brand-section">
+    <a class="brand-mark" routerLink="/dashboard" aria-label="foodCo">
+      <img src="/assets/style/img/fc-mark.svg" alt="" width="28" height="28" />
+      <span class="brand-mark__name">foodCo</span>
     </a>
   </div>
 

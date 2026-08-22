@@ -78,7 +78,7 @@ type EquipmentBulkField = 'category_' | 'is_consumable_'
 export class EquipmentListComponent implements OnInit, OnDestroy {
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   private readonly requireAuthService = inject(RequireAuthService)
-  private readonly equipmentData = inject(EquipmentDataService)
+  protected readonly equipmentData = inject(EquipmentDataService)
   private readonly router = inject(Router)
   private readonly heroFab = inject(HeroFabService)
   private readonly userMsg = inject(UserMsgService)

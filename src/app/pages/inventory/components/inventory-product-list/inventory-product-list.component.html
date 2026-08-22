@@ -4,6 +4,8 @@
   [gridTemplate]="'2fr 1fr 1fr 1fr minmax(48px, 0.8fr) 0.8fr 80px auto'"
   [mobileGridTemplate]="'2fr 1fr 0.8fr 0.8fr 40px 28px'"
   [dir]="'rtl'"
+  [resultCount]="filteredProducts_().length"
+  [resultTotal]="kitchenStateService.products_().length"
 >
   <h2 shell-title class="page-title">{{ 'product_list' | translatePipe }}</h2>
 
@@ -309,7 +311,8 @@
                     [checked]="option.checked_"
                     (change)="toggleFilter(category.name, option.value)"
                   />
-                  <span>{{ option.label | translatePipe }}</span>
+                  <span class="c-filter-option-label">{{ option.label | translatePipe }}</span>
+                  <span class="c-filter-option-count" aria-hidden="true">{{ option.count }}</span>
                 </label>
               }
             </div>

@@ -95,6 +95,8 @@ export class CookViewPage implements OnInit, OnDestroy {
   /** Per-row unit override (index -> unit key). */
   protected unitOverrides_ = signal<Record<number, string>>({})
   protected editMode_ = signal<boolean>(false)
+  /** Kitchen dark-mode skin (design's default is dark). Session-only, not persisted. */
+  protected isDarkTheme_ = signal<boolean>(true)
   /** Snapshot when entering edit mode; restored on Undo. */
   private originalRecipe_ = signal<Recipe | null>(null)
   private readonly saving = useSavingState()
@@ -281,6 +283,13 @@ export class CookViewPage implements OnInit, OnDestroy {
       return this.stepDoneSet_().size >= this.scaledPrep_().length && this.scaledPrep_().length > 0
     }
     return this.stepDoneSet_().size >= (recipe.steps_?.length ?? 0) && (recipe.steps_?.length ?? 0) > 0
+  })
+
+  /** Step/prep-item completion percent, 0–100 — drives the hero progress bar. */
+  protected heroProgressPct_ = computed(() => {
+    const total = this.isDish_() ? this.scaledPrep_().length : (this.recipe_()?.steps_?.length ?? 0)
+    if (total === 0) return 0
+    return Math.round((this.stepDoneSet_().size / total) * 100)
   })
 
   /** Formatted timer display (m:ss under 1h, h:mm:ss at 1h+). */
@@ -704,6 +713,10 @@ export class CookViewPage implements OnInit, OnDestroy {
 
   protected toggleExportBar(): void {
     this.exportBarExpanded_.update((v: boolean) => !v)
+  }
+
+  protected toggleTheme(): void {
+    this.isDarkTheme_.update((v: boolean) => !v)
   }
 
   /** For route guard (PendingChangesComponent interface): true when in edit mode with unsaved changes. */

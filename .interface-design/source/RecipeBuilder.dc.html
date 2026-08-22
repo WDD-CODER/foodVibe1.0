@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./colors_and_type.css">
+  <script src="./shell.js"></script>
+  <script src="./image-slot.js"></script>
+  <style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.96) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    body { margin: 0; }
+    a { color: var(--color-primary); text-decoration: none; }
+    a:hover { color: var(--color-primary-hover); }
+    input[type="checkbox"], input[type="radio"] {
+      appearance: none; -webkit-appearance: none; width: 24px; height: 24px; margin: 0; flex: none;
+      display: inline-grid; place-content: center; cursor: pointer;
+      background: var(--bg-pure); border: 1.5px solid var(--border-strong); border-radius: 7px;
+      box-shadow: inset 0 1px 2px rgba(15,23,42,0.06);
+      transition: background-color .16s var(--ease-smooth), border-color .16s var(--ease-smooth), box-shadow .2s var(--ease-smooth), transform .2s var(--ease-spring);
+    }
+    input[type="radio"] { border-radius: 50%; }
+    input[type="checkbox"]::after {
+      content: ""; width: 6px; height: 11px; opacity: 0;
+      border-right: 2.6px solid var(--color-text-on-primary); border-bottom: 2.6px solid var(--color-text-on-primary);
+      transform: rotate(45deg) translate(-1px, -2px) scale(0.6);
+      transition: opacity .14s var(--ease-smooth), transform .2s var(--ease-spring);
+    }
+    input[type="radio"]::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--color-text-on-primary); opacity: 0; transition: opacity .14s var(--ease-smooth); }
+    input[type="checkbox"]:hover, input[type="radio"]:hover { border-color: var(--color-primary); background: var(--color-primary-soft); }
+    input[type="checkbox"]:checked, input[type="radio"]:checked {
+      background: var(--color-primary); border-color: var(--color-primary);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 2px 8px -2px var(--color-primary-glow);
+    }
+    input[type="checkbox"]:checked::after { opacity: 1; transform: rotate(45deg) translate(-1px, -2px) scale(1); }
+    input[type="radio"]:checked::after { opacity: 1; }
+    input[type="checkbox"]:active, input[type="radio"]:active { transform: scale(0.94); }
+    input:focus, textarea:focus, button:focus { outline: none; }
+    .rb-ing-head, .rb-ing-row { display: grid; grid-template-columns: 20px minmax(110px, 1fr) 60px 104px 50px 76px 30px; gap: var(--space-2); align-items: center; }
+    .ing-carousel-outer { display: contents; }
+    .ing-carousel { display: contents; }
+    .ing-car-arrow, .ing-car-dots { display: none; }
+    .ing-top, .ing-bottom, .ing-fixed-group { display: contents; }
+    .rb-prep-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3) var(--space-4); }
+    .rb-prep-row .prep-del { margin-inline-start: auto; align-self: center; }
+    .rb-prep-top, .rb-prep-bottom { display: contents; }
+    @media (max-width: 767px) {
+      .rb-header-grid { grid-template-columns: 1fr !important; justify-items: center; text-align: center; }
+      .rb-header-grid .rb-center-controls { align-items: center; }
+      .rb-header-grid .rb-center-controls > * { justify-content: center; }
+      .rb-header-grid .rb-metrics { width: 100% !important; height: auto !important; box-sizing: border-box; }
+      .rb-ing-row { display: flex !important; flex-wrap: nowrap; align-items: center; gap: var(--space-1); min-width: 0 !important; }
+      .rb-ing-row .ing-name { flex: 1 1 auto; min-width: 40px; }
+      .rb-ing-row .ing-carousel-outer { display: block; flex: 0 0 auto; width: 70px; position: relative; padding: 0 17px; box-sizing: content-box; }
+      .rb-ing-row .ing-carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; background: var(--bg-subtle); border-radius: var(--radius-sm); scrollbar-width: none; -ms-overflow-style: none; }
+      .rb-ing-row .ing-carousel::-webkit-scrollbar { display: none; }
+      .rb-ing-row .ing-carousel > div { flex: 0 0 100%; width: 100%; box-sizing: border-box; scroll-snap-align: start; scroll-snap-stop: always; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 4px 16px; min-height: 26px; }
+      .rb-ing-row .ing-carousel > div::before { content: attr(data-label); font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); }
+      .rb-ing-row .ing-car-arrow { display: flex; align-items: center; justify-content: center; position: absolute; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; padding: 0; border-radius: 50%; background: var(--bg-glass-strong); border: 1px solid var(--border-default); color: var(--color-text-muted); cursor: pointer; z-index: 2; font-size: var(--fs-xs); line-height: 1; }
+      .rb-ing-row .ing-car-prev { inset-inline-start: 0; }
+      .rb-ing-row .ing-car-next { inset-inline-end: 0; }
+      .rb-ing-row .ing-car-dots { position: absolute; bottom: -8px; left: 0; right: 0; display: flex; justify-content: center; gap: 3px; }
+      .rb-ing-row .ing-car-dots button { width: 4px; height: 4px; padding: 0; border-radius: 50%; background: var(--border-strong); border: none; cursor: pointer; }
+      .rb-ing-row .ing-fixed-group { display: flex; align-items: center; gap: var(--space-1); flex: 0 0 auto; }
+      .rb-ing-row .ing-percent, .rb-ing-row .ing-cost { white-space: nowrap; }
+      .ing-scroll-wrap { overflow-x: visible !important; }
+      .rb-ing-head { display: none !important; }
+      .rb-prep-row { flex-direction: column; align-items: stretch; }
+      .rb-prep-top { display: flex; align-items: center; gap: var(--space-3); width: 100%; }
+      .rb-prep-bottom { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); width: 100%; }
+    }
+    @media (max-width: 767px) {
+      .rb-ins-row { flex-direction: column !important; }
+      .rb-ins-row .ins-timers { flex-direction: row !important; width: 100% !important; gap: var(--space-4) !important; }
+    }
+      a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(20,184,166,0.35) !important; }
+    @keyframes skelPulse { 0%,100% { opacity: 1 } 50% { opacity: .55 } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  
+    /* ── pass 2: touch ergonomics (one rule, all screens) ── */
+    [class*="car-arrow"] { display: none !important; }
+    /* ── pass 4: motion system ── */
+    @keyframes pageEnter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    app-shell > * { animation: pageEnter .28s var(--ease-spring) both; }
+    button, a[role="button"] { transition: transform .15s var(--ease-spring), background-color .2s var(--ease-smooth), color .2s var(--ease-smooth), box-shadow .25s var(--ease-smooth); }
+    button:active, a[role="button"]:active { transform: scale(0.97); }
+    
+
+    @media (max-width: 767px) {
+      button, a[role="button"], select { min-height: 44px !important; min-width: 44px !important; }
+      input:not([type="checkbox"]):not([type="radio"]) { min-height: 44px !important; }
+      input[type="checkbox"], input[type="radio"] { width: 24px !important; height: 24px !important; padding: 10px !important; box-sizing: content-box !important; }
+      a[href]:not([style*="font-size: var(--fs-xs)"]) { min-height: 44px; display: inline-flex; align-items: center; }
+      [style*="grid-template-columns: 260px"], [style*="grid-template-columns: 320px"], [style*="grid-template-columns: 140px"] { grid-template-columns: 1fr !important; }
+      [style*="max-width: 1520px"], [style*="max-width: 1200px"], [style*="max-width: 1100px"], [style*="max-width: 720px"] { padding-inline: var(--space-4) !important; }
+    }
+
+    /* ── pass 5: mobile pass (≤767 only — desktop/tablet untouched) ── */
+    @media (max-width: 767px) {
+      html, body { overflow-x: hidden; }
+
+      /* page must clear BOTH the save bar and the shell's bottom tab bar */
+      .rb-page { padding-bottom: calc(196px + env(safe-area-inset-bottom, 0px)) !important; }
+
+      /* no iOS focus-zoom: editable fields at 16px */
+      input:not([type="checkbox"]):not([type="radio"]), textarea { font-size: 16px !important; }
+      .ins-timers input { width: 64px !important; flex: 0 0 auto; }
+
+      /* metrics: side-by-side instead of a tall block */
+      .rb-metrics { flex-direction: row !important; justify-content: space-around !important; align-items: center !important; gap: var(--space-4) !important; padding: var(--space-3) var(--space-4) !important; }
+      .rb-metrics > div { margin-bottom: 0 !important; }
+      .rb-metrics-div { width: 1px !important; height: 34px !important; margin-bottom: 0 !important; flex: none; }
+
+      /* ingredients: stacked two-line row, no horizontal carousel */
+      .rb-ing-row { display: grid !important; grid-template-columns: 1fr; gap: var(--space-2) !important; padding: var(--space-3) var(--space-1) !important; }
+      .rb-ing-row .ing-top { display: flex !important; align-items: center; gap: var(--space-2); min-width: 0; }
+      .rb-ing-row .ing-name { flex: 1 1 auto; min-width: 0; }
+      .rb-ing-row .ing-bottom { display: flex !important; flex-wrap: wrap; align-items: flex-end; gap: var(--space-2) var(--space-4); min-width: 0; }
+      .rb-ing-row .ing-carousel-outer, .rb-ing-row .ing-carousel { display: contents !important; width: auto !important; padding: 0 !important; overflow: visible !important; background: none !important; }
+      .rb-ing-row .ing-fixed-group { display: flex !important; align-items: flex-end; gap: var(--space-4); flex: 1 1 auto; min-width: 0; }
+      .rb-ing-row .ing-carousel > div,
+      .rb-ing-row .ing-unit, .rb-ing-row .ing-qty, .rb-ing-row .ing-percent, .rb-ing-row .ing-cost {
+        display: flex !important; flex-direction: column; align-items: flex-start; gap: 2px;
+        flex: 0 0 auto !important; width: auto !important; min-height: 0 !important; padding: 0 !important; }
+      .rb-ing-row [data-label]::before { content: attr(data-label); font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); }
+      .rb-ing-row .ing-del { margin-inline-start: auto; }
+      .rb-ing-row .ing-car-dots, .rb-ing-row .ing-car-arrow { display: none !important; }
+
+      /* save bar sits ABOVE the shell tab bar (z 95) instead of under it */
+      .rb-savebar { bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important; z-index: 96 !important; padding: var(--space-3) var(--space-4) !important; gap: var(--space-2) var(--space-3) !important; justify-content: space-between !important; }
+      .rb-savebar .rb-save-btn { flex: 1 1 100%; justify-content: center; min-height: 48px !important; padding: 12px 20px !important; }
+      .rb-savebar .rb-stamp img { height: 32px !important; }
+      app-shell .fabwrap { inset-block-end: calc(56px + 128px + env(safe-area-inset-bottom, 0px)) !important; }
+      .rb-toast { bottom: calc(56px + 132px + env(safe-area-inset-bottom, 0px)) !important; width: max-content; max-width: calc(100vw - 32px); }
+
+      /* ingredient picker becomes a bottom sheet */
+      .rb-picker { align-items: flex-end !important; }
+      .rb-picker-card { width: 100% !important; max-width: none !important; max-height: 86dvh !important; border-radius: var(--radius-xl) var(--radius-xl) 0 0 !important; padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px)) !important; }
+      .rb-picker-list { overscroll-behavior: contain; }
+
+      /* prep dropdowns can't exceed the viewport */
+      .prep-qty-menu { width: auto !important; min-width: 190px; max-width: calc(100vw - 64px); }
+      .rb-prep-bottom { gap: var(--space-2) !important; }
+    }
+
+    /* ── pass 6: mobile cards (≤767 only) ── */
+    @media (max-width: 767px) {
+      .rb-ing-row {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        gap: 8px 10px !important;
+        align-items: center;
+        min-width: 0 !important;
+        padding: 10px !important;
+        margin-bottom: 8px;
+        background: var(--bg-glass); border: 1px solid var(--border-glass) !important;
+        border-radius: var(--radius-md); box-shadow: var(--shadow-glass);
+      }
+      .rb-ing-row .ing-top { grid-area: 1 / 1 / 2 / 2; display: flex !important; align-items: center; gap: 6px; min-width: 0; }
+      .rb-ing-row .ing-bottom,
+      .rb-ing-row .ing-carousel-outer,
+      .rb-ing-row .ing-carousel,
+      .rb-ing-row .ing-fixed-group { display: contents !important; }
+      .rb-ing-row .ing-del { grid-area: 1 / 2 / 2 / 3; justify-self: end; align-self: start; margin: 0 !important; width: 34px !important; height: 34px !important; min-width: 34px !important; min-height: 34px !important; }
+      /* rows 2 and 3 span the full width, so the name row keeps the card's width */
+      .rb-ing-row .ing-cost { grid-area: 2 / 1 / 3 / -1; justify-self: start; }
+      .rb-ing-row .ing-percent { grid-area: 2 / 1 / 3 / -1; justify-self: end; }
+      .rb-ing-row .ing-unit { grid-area: 3 / 1 / 4 / -1; justify-self: start; }
+      .rb-ing-row .ing-qty { grid-area: 3 / 1 / 4 / -1; justify-self: end; }
+      .rb-ing-row .ing-cost, .rb-ing-row .ing-percent, .rb-ing-row .ing-unit, .rb-ing-row .ing-qty {
+        display: flex !important; flex-direction: row !important; align-items: center !important;
+        gap: 8px; flex: 0 0 auto !important; width: auto !important; padding: 0 !important; min-height: 0 !important;
+      }
+      .rb-ing-row [data-label]::before { font-size: 10px !important; letter-spacing: normal !important; text-transform: none !important; color: var(--color-text-muted-light) !important; white-space: nowrap; }
+      .rb-ing-row .ing-drag { flex: none; }
+      .rb-ing-row .ing-qty button { min-width: 0 !important; min-height: 0 !important; width: 26px !important; height: 26px !important; }
+      .rb-ing-row .ing-car-dots, .rb-ing-row .ing-car-arrow { display: none !important; }
+    }
+  </style>
+</helmet>
+
+<app-shell dir="rtl" page="recipe-builder" fab='[{"id":"cook","label":"מצב בישול","icon":"flame"},{"id":"export","label":"ייצוא","icon":"printer"}]'>
+  <div style="position: relative; z-index: 1;">
+
+    <div class="rb-page" style="max-width: 1200px; margin: 0 auto; padding: var(--space-6) var(--space-6) 8rem;">
+
+      <a href="RecipeBook.dc.html" style="display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--color-text-muted); margin-bottom: var(--space-4);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>
+        חזרה לספר המתכונים
+      </a>
+
+      <!-- HEADER CARD -->
+      <div style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); padding: var(--space-5); margin-bottom: var(--space-5);">
+        <div class="rb-header-grid" style="display: grid; grid-template-columns: 140px 1fr 150px; gap: var(--space-5); align-items: center">
+
+          <image-slot id="recipe-photo" shape="rounded" radius="16" placeholder="הוסף תמונת מנה" style="width: 140px; height: 140px;"></image-slot>
+
+          <div class="rb-center-controls">
+            <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); flex-wrap: wrap;">
+              <button onClick="{{ toggleType }}" style="{{ typeToggleStyle }}">{{ typeLabel }}</button>
+              <input type="text" value="{{ name }}" onChange="{{ onNameChange }}" placeholder="שם המתכון..." style="flex: 1; padding: 10px 14px; font-size: var(--fs-lg); font-weight: var(--fw-bold); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1.5px solid var(--border-default); border-radius: var(--radius-md);">
+            </div>
+
+            <div style="display: flex; gap: 3px; color: var(--color-accent-gold); margin-bottom: var(--space-3);">
+              <sc-for list="{{ stars }}" as="star" hint-placeholder-count="5">
+                <button onClick="{{ star.onSelect }}" style="background: none; border: none; padding: 2px; cursor: pointer; color: var(--color-accent-gold);">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="{{ star.fill }}" stroke="currentColor" stroke-width="1.5"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679 5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638.882 5.14a.53.53 0 0 1-.77.56L12 15.347l-4.62 2.428a.53.53 0 0 1-.77-.56l.881-5.139-3.735-3.638a.53.53 0 0 1 .294-.906l5.165-.755z"></path></svg>
+                </button>
+              </sc-for>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3); flex-wrap: wrap;">
+              <span style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide);">תפוקה</span>
+              <div style="display: inline-flex; align-items: center; gap: 2px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-full); padding: 3px;">
+                <button onClick="{{ decrementPortions }}" style="display: grid; place-content: center; width: 26px; height: 26px; background: none; border: none; border-radius: 50%; color: var(--color-text-muted); cursor: pointer;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path></svg>
+                </button>
+                <span style="min-width: 34px; text-align: center; font-weight: var(--fw-bold); font-size: var(--fs-base); color: var(--color-text-main);">{{ portions }}</span>
+                <button onClick="{{ incrementPortions }}" style="display: grid; place-content: center; width: 26px; height: 26px; background: none; border: none; border-radius: 50%; color: var(--color-text-muted); cursor: pointer;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                </button>
+                <div style="position: relative;">
+                  <button onClick="{{ togglePortionUnitDropdown }}" style="display: flex; align-items: center; gap: 3px; padding: 0 8px; background: none; border: none; font-size: var(--fs-sm); color: var(--color-text-secondary); font-weight: var(--fw-medium); cursor: pointer;">
+                    {{ portionUnitLabel }}
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
+                  </button>
+                  <sc-if value="{{ portionUnitDropdownOpen }}" hint-placeholder-val="{{ false }}">
+                    <div style="position: absolute; top: calc(100% + 4px); right: 0; z-index: 20; display: flex; flex-direction: column; background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); box-shadow: var(--shadow-modal); overflow: hidden; min-width: 70px; animation: popIn 0.15s var(--ease-spring);">
+                      <sc-for list="{{ portionUnitOptions }}" as="u" hint-placeholder-count="5">
+                        <button onClick="{{ u.onSelect }}" style="{{ u.style }}">{{ u.label }}</button>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+
+              <sc-for list="{{ secondaryYields }}" as="sy" hint-placeholder-count="0">
+                <div style="display: inline-flex; align-items: center; gap: 2px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-full); padding: 3px;">
+                  <button onClick="{{ sy.onDecrement }}" style="display: grid; place-content: center; width: 24px; height: 24px; background: none; border: none; border-radius: 50%; color: var(--color-text-muted); cursor: pointer;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path></svg>
+                  </button>
+                  <span style="min-width: 28px; text-align: center; font-weight: var(--fw-bold); font-size: var(--fs-sm); color: var(--color-text-main);">{{ sy.qty }}</span>
+                  <button onClick="{{ sy.onIncrement }}" style="display: grid; place-content: center; width: 24px; height: 24px; background: none; border: none; border-radius: 50%; color: var(--color-text-muted); cursor: pointer;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                  </button>
+                  <div style="position: relative;">
+                    <button onClick="{{ sy.onToggleUnitDropdown }}" style="display: flex; align-items: center; gap: 3px; padding: 0 8px; background: none; border: none; font-size: var(--fs-sm); color: var(--color-text-secondary); font-weight: var(--fw-medium); cursor: pointer;">
+                      {{ sy.unit }}
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
+                    </button>
+                    <sc-if value="{{ sy.unitDropdownOpen }}" hint-placeholder-val="{{ false }}">
+                      <div style="position: absolute; top: calc(100% + 4px); right: 0; z-index: 20; display: flex; flex-direction: column; background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); box-shadow: var(--shadow-modal); overflow: hidden; min-width: 70px; animation: popIn 0.15s var(--ease-spring);">
+                        <sc-for list="{{ sy.unitOptions }}" as="u" hint-placeholder-count="4">
+                          <button onClick="{{ u.onSelect }}" style="{{ u.style }}">{{ u.label }}</button>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                  </div>
+                  <button onClick="{{ sy.onRemove }}" style="display: grid; place-content: center; width: 22px; height: 22px; background: none; border: none; color: var(--color-text-muted-light); cursor: pointer;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+                  </button>
+                </div>
+              </sc-for>
+
+              <button onClick="{{ addSecondaryYield }}" title="הוסף יחידת תפוקה נוספת" style="display: grid; place-content: center; width: 32px; height: 32px; background: var(--bg-glass); border: 1px dashed var(--border-strong); border-radius: 50%; color: var(--color-primary-hover); cursor: pointer;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+              </button>
+            </div>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              <sc-for list="{{ labelOptions }}" as="l" hint-placeholder-count="4">
+                <button onClick="{{ l.onToggle }}" style="{{ l.style }}">{{ l.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+
+          <div class="rb-metrics" style="width: 140px; height: 140px; box-sizing: border-box; background: var(--bg-muted); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: var(--space-3); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+            <div style="margin-bottom: var(--space-2);">
+              <div style="font-size: var(--fs-xs); color: var(--color-text-muted); font-weight: var(--fw-medium); margin-bottom: 2px;">עלות</div>
+              <div style="font-size: var(--fs-lg); font-weight: var(--fw-extrabold); color: var(--color-text-main);">₪{{ totalCostLabel }}</div>
+            </div>
+            <div class="rb-metrics-div" style="width: 100%; height: 1px; background: var(--border-default); margin-bottom: var(--space-2);"></div>
+            <div>
+              <div style="font-size: var(--fs-xs); color: var(--color-text-muted); font-weight: var(--fw-medium); margin-bottom: 2px;">משקל</div>
+              <div style="font-size: var(--fs-lg); font-weight: var(--fw-extrabold); color: var(--color-text-main);">{{ totalWeightLabel }}<span style="font-size: var(--fs-xs); font-weight: var(--fw-regular); color: var(--color-text-muted-light);">g</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INGREDIENTS CARD -->
+      <div style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); padding: var(--space-5); margin-bottom: var(--space-5);">
+        <h2 style="margin: 0 0 var(--space-4); font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--color-text-main);">מדד מרכיבים</h2>
+
+        <div class="ing-scroll-wrap" style="overflow-x: auto;">
+        <div class="rb-ing-head" style="min-width: 460px; padding: 0 var(--space-2) var(--space-2); margin-bottom: var(--space-1); border-bottom: 1px solid var(--border-default); font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide);">
+          <span></span><span>רכיב</span><span>יחידה</span><span>כמות</span><span>אחוז</span><span>עלות</span><span></span>
+        </div>
+
+        <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+          <div aria-busy="true" aria-label="טוען נתונים" style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); box-shadow: var(--shadow-glass); border-radius: var(--radius-lg); padding: var(--space-4); display: flex; flex-direction: column; gap: 12px; margin-bottom: var(--space-3);">
+            <sc-for list="{{ skeletonRows }}" as="row" hint-placeholder-count="6">
+              <div style="display: flex; align-items: center; gap: var(--space-3); animation: skelPulse 1.4s var(--ease-smooth) infinite;">
+                <div style="flex: 2; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.07);"></div>
+                <div style="flex: 1; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.05);"></div>
+                <div style="width: 84px; height: 14px; border-radius: var(--radius-full); background: rgba(15,23,42,0.05);"></div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ loadFailed }}" hint-placeholder-val="{{ false }}">
+          <div role="alert" style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); box-shadow: var(--shadow-glass); border-radius: var(--radius-lg); padding: var(--space-10) var(--space-4); margin-bottom: var(--space-3); display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center;">
+            <i data-lucide="cloud-off" style="width: 28px; height: 28px; color: var(--color-danger);"></i>
+            <div style="font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--color-text-main);">הטעינה נכשלה</div>
+            <p style="margin: 0; max-width: 34ch; font-size: var(--fs-sm); color: var(--color-text-muted); line-height: var(--lh-relaxed);">אין חיבור לשרת כרגע. אפשר לנסות שוב.</p>
+            <button onClick="{{ retryLoad }}" style="min-height: 44px; padding: 0 20px; border: none; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-text-on-primary); font-family: inherit; font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer; box-shadow: var(--shadow-glow);">נסה שוב</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-10) var(--space-4); text-align: center;">
+            <i data-lucide="list-plus" style="width: 26px; height: 26px; color: var(--color-text-muted-light);"></i>
+            <div style="font-size: var(--fs-sm); color: var(--color-text-muted);">טרם נוספו מרכיבים</div>
+          </div>
+        </sc-if>
+
+        <sc-for list="{{ ingredients }}" as="ing" hint-placeholder-count="4">
+          <div class="rb-ing-row" style="min-width: 460px; padding: var(--space-2); border-bottom: 1px solid var(--border-row);">
+            <div class="ing-top">
+            <span class="ing-drag" style="color: var(--color-text-muted-light); cursor: grab;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="1.4"></circle><circle cx="9" cy="12" r="1.4"></circle><circle cx="9" cy="19" r="1.4"></circle><circle cx="15" cy="5" r="1.4"></circle><circle cx="15" cy="12" r="1.4"></circle><circle cx="15" cy="19" r="1.4"></circle></svg>
+            </span>
+            <div class="ing-name">
+              <input type="text" readonly value="{{ ing.productName }}" onFocus="{{ ing.onOpenPicker }}" onClick="{{ ing.onOpenPicker }}" placeholder="בחר רכיב — לחץ לחיפוש" style="width: 100%; box-sizing: border-box; padding: 7px 10px; font-size: var(--fs-sm); font-weight: var(--fw-medium); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-sm); cursor: pointer;">
+            </div>
+            </div>
+            <div class="ing-bottom">
+            <div class="ing-carousel-outer">
+            <div class="ing-carousel">
+            <div class="ing-unit" data-label="יחידה">
+              <span style="font-size: var(--fs-sm); color: var(--color-text-secondary);">{{ ing.unitLabel }}</span>
+            </div>
+            <div class="ing-qty" data-label="כמות">
+              <div style="display: inline-flex; align-items: center; gap: 2px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-full); padding: 2px;">
+                <button onClick="{{ ing.onDecrement }}" style="display: grid; place-content: center; width: 22px; height: 22px; background: none; border: none; border-radius: 50%; color: var(--color-text-muted); cursor: pointer;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14"></path></svg>
+                </button>
+                <span style="min-width: 34px; text-align: center; font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--color-text-main);">{{ ing.qtyLabel }}</span>
+                <button onClick="{{ ing.onIncrement }}" style="display: grid; place-content: center; width: 22px; height: 22px; background: none; border: none; border-radius: 50%; color: var(--color-text-muted); cursor: pointer;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                </button>
+              </div>
+            </div>
+            </div>
+            <button type="button" class="ing-car-arrow ing-car-prev" onClick="{{ ingCarouselPrev }}">‹</button>
+            <button type="button" class="ing-car-arrow ing-car-next" onClick="{{ ingCarouselNext }}">›</button>
+            <div class="ing-car-dots">
+              <button type="button" data-idx="0" onClick="{{ ingCarouselDot }}"></button>
+              <button type="button" data-idx="1" onClick="{{ ingCarouselDot }}"></button>
+            </div>
+            </div>
+            <div class="ing-fixed-group">
+            <div class="ing-percent" data-label="אחוז">
+              <span style="font-size: var(--fs-sm); color: var(--color-text-muted);">{{ ing.percentLabel }}%</span>
+            </div>
+            <div class="ing-cost" data-label="עלות">
+              <span style="font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--color-text-main);">₪{{ ing.costLabel }}</span>
+            </div>
+            <button class="ing-del" onClick="{{ ing.onRemove }}" style="display: grid; place-content: center; width: 28px; height: 28px; background: none; border: none; border-radius: var(--radius-sm); color: var(--color-danger); cursor: pointer;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+            </div>
+            </div>
+          </div>
+        </sc-for>
+        </div>
+
+        <button onClick="{{ addIngredientRow }}" style="display: inline-flex; align-items: center; gap: 6px; margin-top: var(--space-3); padding: 8px 14px; background: var(--bg-glass); border: 1px dashed var(--border-strong); border-radius: var(--radius-md); color: var(--color-primary-hover); font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+          הוסף שורה
+        </button>
+      </div>
+
+      <!-- WORKFLOW CARD -->
+      <div style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); padding: var(--space-5); margin-bottom: var(--space-5);">
+        <h2 style="margin: 0 0 var(--space-4); font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--color-text-main);">{{ workflowTitle }}</h2>
+
+        <!-- DISH: PREP LIST -->
+        <sc-if value="{{ isDishType }}" hint-placeholder-val="{{ true }}">
+          <sc-for list="{{ prepSteps }}" as="p" hint-placeholder-count="2">
+            <div class="rb-prep-row" style="padding: var(--space-3) var(--space-2); border-bottom: 1px solid var(--border-row);">
+              <div class="rb-prep-top">
+              <span class="prep-drag" style="color: var(--color-text-muted-light); flex-shrink: 0;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="1.4"></circle><circle cx="9" cy="12" r="1.4"></circle><circle cx="9" cy="19" r="1.4"></circle><circle cx="15" cy="5" r="1.4"></circle><circle cx="15" cy="12" r="1.4"></circle><circle cx="15" cy="19" r="1.4"></circle></svg>
+              </span>
+              <input class="prep-name" type="text" value="{{ p.name }}" onChange="{{ p.onNameChange }}" placeholder="שם ההכנה" style="flex: 1 1 140px; padding: 8px 10px; font-size: var(--fs-sm); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-sm); box-sizing: border-box;">
+              </div>
+              <div class="rb-prep-bottom">
+              <div class="prep-cat" style="position: relative; flex: 0 0 auto;">
+                <button onClick="{{ p.onToggleCategoryDropdown }}" style="display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 6px 10px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-sm); color: var(--color-text-main); font-size: var(--fs-xs); font-weight: var(--fw-medium); cursor: pointer;">
+                  {{ p.category }}
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="m6 9 6 6 6-6"></path></svg>
+                </button>
+                <sc-if value="{{ p.categoryDropdownOpen }}" hint-placeholder-val="{{ false }}">
+                  <div style="position: absolute; top: calc(100% + 4px); right: 0; left: 0; z-index: 20; display: flex; flex-direction: column; background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); box-shadow: var(--shadow-modal); overflow: hidden; animation: popIn 0.15s var(--ease-spring);">
+                    <sc-for list="{{ p.categoryOptions }}" as="c" hint-placeholder-count="4">
+                      <button onClick="{{ c.onSelect }}" style="{{ c.style }}">{{ c.label }}</button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+              <div class="prep-qty" style="position: relative; flex: 0 0 auto;">
+                <button onClick="{{ p.onToggleQtyDropdown }}" style="display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-sm); color: var(--color-text-secondary); font-size: var(--fs-xs); font-weight: var(--fw-medium); cursor: pointer;">
+                  ×{{ p.qty }} {{ p.unit }}
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="m6 9 6 6 6-6"></path></svg>
+                </button>
+                <sc-if value="{{ p.qtyDropdownOpen }}" hint-placeholder-val="{{ false }}">
+                  <div class="prep-qty-menu" style="position: absolute; top: calc(100% + 4px); right: 0; z-index: 20; width: 170px; padding: var(--space-2); display: flex; flex-direction: column; gap: var(--space-2); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); box-shadow: var(--shadow-modal); animation: popIn 0.15s var(--ease-spring);">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                      <button onClick="{{ p.onDecrementQty }}" style="display: grid; place-content: center; width: 24px; height: 24px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: 50%; color: var(--color-text-muted); cursor: pointer;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14"></path></svg>
+                      </button>
+                      <span style="min-width: 24px; text-align: center; font-weight: var(--fw-bold); font-size: var(--fs-sm);">{{ p.qty }}</span>
+                      <button onClick="{{ p.onIncrementQty }}" style="display: grid; place-content: center; width: 24px; height: 24px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: 50%; color: var(--color-text-muted); cursor: pointer;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                      </button>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 4px; justify-content: center;">
+                      <sc-for list="{{ p.unitOptions }}" as="u" hint-placeholder-count="4">
+                        <button onClick="{{ u.onSelect }}" style="{{ u.style }}">{{ u.label }}</button>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+              <button class="prep-del" onClick="{{ p.onRemove }}" style="display: grid; place-content: center; width: 28px; height: 28px; background: none; border: none; border-radius: var(--radius-sm); color: var(--color-danger); cursor: pointer;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+              </div>
+            </div>
+          </sc-for>
+          <button onClick="{{ addPrepStep }}" style="display: inline-flex; align-items: center; gap: 6px; margin-top: var(--space-3); padding: 8px 14px; background: var(--bg-glass); border: 1px dashed var(--border-strong); border-radius: var(--radius-md); color: var(--color-primary-hover); font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+            הוסף שלב הכנה
+          </button>
+        </sc-if>
+
+        <!-- PREPARATION: INSTRUCTIONS -->
+        <sc-if value="{{ isPreparationType }}" hint-placeholder-val="{{ false }}">
+          <sc-for list="{{ instructionSteps }}" as="ins" hint-placeholder-count="2">
+            <div class="rb-ins-row" style="display: flex; gap: var(--space-3); padding: var(--space-3) var(--space-2); border-bottom: 1px solid var(--border-row); align-items: flex-start;">
+              <span style="flex-shrink: 0; display: grid; place-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--color-primary-soft); color: var(--color-primary-hover); font-weight: var(--fw-bold); font-size: var(--fs-xs); margin-top: 4px;">{{ ins.index }}</span>
+              <textarea value="{{ ins.instruction }}" onChange="{{ ins.onInstructionChange }}" placeholder="תיאור השלב..." rows="2" style="flex: 1; padding: 8px 10px; font-size: var(--fs-sm); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-sm); resize: vertical; box-sizing: border-box; width: 100%;"></textarea>
+              <div class="ins-timers" style="flex-shrink: 0; display: flex; flex-direction: column; gap: 4px; width: 130px;">
+                <div style="display: flex; align-items: center; gap: 4px; font-size: var(--fs-xs); color: var(--color-text-muted);">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  זמן עבודה
+                  <input type="number" value="{{ ins.laborTime }}" onChange="{{ ins.onLaborTimeChange }}" min="0" style="width: 44px; padding: 3px 6px; font-size: var(--fs-xs); font-family: var(--font-sans); background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-xs);"> דק׳
+                </div>
+                <div style="display: flex; align-items: center; gap: 4px; font-size: var(--fs-xs); color: var(--color-text-muted);">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2 2"></path><path d="M9 2h6"></path></svg>
+                  זמן בישול
+                  <input type="number" value="{{ ins.cookTime }}" onChange="{{ ins.onCookTimeChange }}" min="0" style="width: 44px; padding: 3px 6px; font-size: var(--fs-xs); font-family: var(--font-sans); background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-xs);"> דק׳
+                </div>
+              </div>
+              <button onClick="{{ ins.onRemove }}" style="flex-shrink: 0; display: grid; place-content: center; width: 28px; height: 28px; background: none; border: none; border-radius: var(--radius-sm); color: var(--color-danger); cursor: pointer;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
+          </sc-for>
+          <button onClick="{{ addInstructionStep }}" style="display: inline-flex; align-items: center; gap: 6px; margin-top: var(--space-3); padding: 8px 14px; background: var(--bg-glass); border: 1px dashed var(--border-strong); border-radius: var(--radius-md); color: var(--color-primary-hover); font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+            הוסף שלב
+          </button>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+
+  <!-- INGREDIENT PICKER MODAL -->
+  <sc-if value="{{ pickerOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closePicker }}" class="rb-picker" style="position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; background: var(--overlay-backdrop); backdrop-filter: blur(6px); animation: fadeIn 0.15s ease;">
+      <div onClick="{{ stopPropagation }}" class="rb-picker-card" style="width: 92%; max-width: 400px; max-height: 76vh; display: flex; flex-direction: column; padding: var(--space-5); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4);">
+          <h3 style="margin: 0; font-size: var(--fs-md); font-weight: var(--fw-bold); color: var(--color-text-main);">בחר רכיב</h3>
+          <button onClick="{{ closePicker }}" style="width: 28px; height: 28px; display: grid; place-content: center; border: 1px solid var(--border-default); background: var(--bg-glass); border-radius: var(--radius-sm); cursor: pointer; color: var(--color-text-muted);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+          </button>
+        </div>
+        <div style="display: flex; align-items: center; gap: var(--space-2); background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 0 var(--space-3); height: 38px; margin-bottom: var(--space-3); flex-shrink: 0;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-text-muted-light);"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+          <input type="text" value="{{ pickerQuery }}" onChange="{{ onPickerQueryChange }}" placeholder="חיפוש רכיב" style="border: none; background: none; outline: none; font-size: var(--fs-sm); color: var(--color-text-main); font-family: var(--font-sans); width: 100%;">
+        </div>
+        <div class="rb-picker-list" style="overflow-y: auto; display: flex; flex-direction: column; gap: 3px;">
+          <sc-for list="{{ pickerOptions }}" as="opt" hint-placeholder-count="5">
+            <button onClick="{{ opt.onSelect }}" style="text-align: right; padding: 9px 12px; background: var(--bg-glass); border: 1px solid var(--border-row); border-radius: var(--radius-md); color: var(--color-text-main); font-size: var(--fs-sm); font-family: var(--font-sans); cursor: pointer;">{{ opt.name }} <span style="color: var(--color-text-muted-light); font-size: var(--fs-xs);">· ₪{{ opt.priceLabel }} / {{ opt.unit }}</span></button>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- SAVE FOOTER -->
+  <div class="rb-savebar" style="position: fixed; bottom: 0; inset-inline: 0; z-index: 80; background: var(--bg-glass-strong); backdrop-filter: var(--blur-nav); -webkit-backdrop-filter: var(--blur-nav); border-top: 1px solid var(--border-glass); box-shadow: var(--shadow-nav-footer); padding: var(--space-3) var(--space-6); display: flex; align-items: center; justify-content: flex-end; gap: var(--space-4); flex-wrap: wrap;">
+    <button onClick="{{ toggleApproved }}" class="rb-stamp" style="display: inline-flex; align-items: center; gap: var(--space-2); background: none; border: none; cursor: pointer; padding: 0; margin-inline-end: auto;">
+      <sc-if value="{{ approved }}" hint-placeholder-val="{{ true }}">
+        <img src="./assets/stamp-approved.png" alt="approved" style="height: 40px;">
+      </sc-if>
+      <sc-if value="{{ notApproved }}" hint-placeholder-val="{{ false }}">
+        <img src="./assets/stamp-not-approved.png" alt="not approved" style="height: 40px;">
+      </sc-if>
+      <span style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted);">{{ approveLabel }}</span>
+    </button>
+    <span style="font-size: var(--fs-sm); color: var(--color-text-muted);">עלות כוללת: <b style="color: var(--color-text-main);">₪{{ totalCostLabel }}</b></span>
+    <button onClick="{{ saveRecipe }}" class="rb-save-btn" style="display: inline-flex; align-items: center; gap: var(--space-2); padding: 10px 28px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); color: #fff; border: none; border-radius: var(--radius-full); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer; box-shadow: var(--shadow-glow);">{{ saveLabel }}</button>
+  </div>
+
+  <!-- TOAST -->
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <div class="rb-toast" style="position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%); z-index: 400; display: flex; align-items: center; gap: var(--space-2); padding: 11px 20px; background: var(--color-text-main); color: #fff; border-radius: var(--radius-full); font-size: var(--fs-sm); font-weight: var(--fw-medium); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring);">
+      {{ toastMessage }}
+    </div>
+  </sc-if>
+</app-shell>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;viewState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ready&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;ready&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;States&quot;}}">
+const LABEL_DEFS = {
+  quick: { label: 'מהיר', color: '#14b8a6' },
+  vegan: { label: 'טבעוני', color: '#10b981' },
+  popular: { label: 'פופולרי', color: '#a0833f' },
+  new: { label: 'חדש', color: '#0ea5e9' }
+};
+const CATEGORIES = ['חיתוך', 'בישול', 'אפייה', 'רטבים'];
+const PREP_UNITS = ['יחידה', 'גרם', 'ק"ג', 'ליטר'];
+const YIELD_UNITS = ['יח\u05f3', 'ק"ג', 'גרם', 'ליטר'];
+const PORTION_UNITS = ['מנות', 'יח\u05f3', 'ק"ג', 'גרם', 'ליטר'];
+const PRODUCTS = [
+  { key: 'pasta', name: 'פסטה יבשה', unit: 'kg', price: 9.9 },
+  { key: 'cream', name: 'שמנת מתוקה', unit: 'liter', price: 18 },
+  { key: 'garlic', name: 'שום', unit: 'kg', price: 45 },
+  { key: 'parmesan', name: 'פרמזן מגורד', unit: 'kg', price: 89 },
+  { key: 'butter', name: 'חמאה', unit: 'kg', price: 32 },
+  { key: 'salt', name: 'מלח ים', unit: 'kg', price: 1.9 },
+  { key: 'onion', name: 'בצל צהוב', unit: 'kg', price: 4.9 },
+  { key: 'chicken_breast', name: 'חזה עוף טרי', unit: 'kg', price: 41.9 },
+  { key: 'olive_oil', name: 'שמן זית', unit: 'liter', price: 38 },
+  { key: 'pepper', name: 'פלפל שחור גרוס', unit: 'kg', price: 17 }
+];
+const UNIT_LABELS = { kg: 'ק"ג', liter: 'ליטר', unit: 'יחידה' };
+const WEIGHT_FACTOR = { kg: 1000, liter: 1000, unit: 150 };
+
+function findProduct(key) { return PRODUCTS.find(p => p.key === key); }
+
+class Component extends DCLogic {
+  state = {
+    type: 'dish',
+    name: 'פסטה ברוטב שמנת פטריות',
+    rating: 4,
+    portions: 4,
+    portionUnit: 'מנות',
+    portionUnitDropdownOpen: false,
+    secondaryYields: [],
+    nextSecondaryYieldId: 1,
+    secondaryYieldUnitDropdownOpenId: null,
+    labels: new Set(['popular']),
+    ingredients: [
+      { id: 1, productKey: 'pasta', qty: 0.4 },
+      { id: 2, productKey: 'cream', qty: 0.3 },
+      { id: 3, productKey: 'garlic', qty: 0.02 },
+      { id: 4, productKey: 'parmesan', qty: 0.08 },
+      { id: 5, productKey: 'butter', qty: 0.05 },
+      { id: 6, productKey: 'salt', qty: 0.01 }
+    ],
+    nextIngredientId: 7,
+    prepSteps: [
+      { id: 1, name: 'קילוף ופריסת שום', category: 'חיתוך', qty: 1, unit: 'יחידה' },
+      { id: 2, name: 'הרתחת מים לפסטה', category: 'בישול', qty: 1, unit: 'יחידה' }
+    ],
+    nextPrepId: 3,
+    instructionSteps: [
+      { id: 1, instruction: 'להמיס חמאה בסיר על אש בינונית ולהוסיף שום קצוץ.', laborTime: 3, cookTime: 2 },
+      { id: 2, instruction: 'להוסיף שמנת ולבשל עד סמיך, לתבל במלח ופלפל.', laborTime: 2, cookTime: 6 }
+    ],
+    nextInstructionId: 3,
+    pickerOpen: false,
+    pickerRowId: null,
+    pickerQuery: '',
+    categoryDropdownOpenId: null,
+    qtyDropdownOpenId: null,
+    approved: true,
+    toastVisible: false,
+    toastMessage: ''
+  };
+
+  showToast(msg) {
+    clearTimeout(this._toastTimer);
+    this.setState({ toastVisible: true, toastMessage: msg });
+    this._toastTimer = setTimeout(() => this.setState({ toastVisible: false }), 2200);
+  }
+  notReady() { this.showToast('המסך הזה בבנייה'); }
+  stopPropagation(e) { if (e && e.stopPropagation) e.stopPropagation(); }
+
+  toggleType() { this.setState(s => ({ type: s.type === 'dish' ? 'preparation' : 'dish' })); }
+  onNameChange(v) { this.setState({ name: v }); }
+  setRating(n) { this.setState({ rating: n }); }
+  incrementPortions() { this.setState(s => ({ portions: s.portions + 1 })); }
+  decrementPortions() { this.setState(s => ({ portions: Math.max(1, s.portions - 1) })); }
+  togglePortionUnitDropdown() { this.setState(s => ({ portionUnitDropdownOpen: !s.portionUnitDropdownOpen })); }
+  setPortionUnit(unit) { this.setState({ portionUnit: unit, portionUnitDropdownOpen: false }); }
+  toggleLabel(key) { this.setState(s => { const n = new Set(s.labels); n.has(key) ? n.delete(key) : n.add(key); return { labels: n }; }); }
+
+  addSecondaryYield() {
+    this.setState(s => ({ secondaryYields: [...s.secondaryYields, { id: s.nextSecondaryYieldId, qty: 2, unit: YIELD_UNITS[0] }], nextSecondaryYieldId: s.nextSecondaryYieldId + 1 }));
+  }
+  removeSecondaryYield(id) { this.setState(s => ({ secondaryYields: s.secondaryYields.filter(y => y.id !== id) })); }
+  changeSecondaryYieldQty(id, delta) { this.setState(s => ({ secondaryYields: s.secondaryYields.map(y => y.id === id ? { ...y, qty: Math.max(0, Math.round((y.qty + delta) * 100) / 100) } : y) })); }
+  setSecondaryYieldUnit(id, unit) { this.setState(s => ({ secondaryYields: s.secondaryYields.map(y => y.id === id ? { ...y, unit } : y), secondaryYieldUnitDropdownOpenId: null })); }
+  toggleSecondaryYieldUnitDropdown(id) { this.setState(s => ({ secondaryYieldUnitDropdownOpenId: s.secondaryYieldUnitDropdownOpenId === id ? null : id })); }
+
+  componentDidMount() {
+    requestAnimationFrame(() => this.measureAllIngCarousels());
+    this._ingResizeHandler = () => this.measureAllIngCarousels();
+    window.addEventListener('resize', this._ingResizeHandler);
+  }
+
+  componentWillUnmount() {
+    if (this._ingResizeHandler) window.removeEventListener('resize', this._ingResizeHandler);
+  }
+
+  // Ingredient rows now stack on mobile — no carousel to size. Clear any stale inline width.
+  measureAllIngCarousels() {
+    document.querySelectorAll('.ing-carousel-outer').forEach((el) => { el.style.width = ''; });
+  }
+
+  measureIngCarousel(el) {
+    if (!el) return;
+    const track = el.querySelector('.ing-carousel');
+    if (!track) return;
+    let max = 0;
+    track.querySelectorAll(':scope > div').forEach((d) => {
+      const child = d.firstElementChild;
+      const cs = getComputedStyle(d);
+      const pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+      const contentW = child ? child.getBoundingClientRect().width : d.scrollWidth;
+      max = Math.max(max, Math.ceil(contentW + pad));
+    });
+    if (max) el.style.width = max + 'px';
+    this.updateIngCarouselArrows(track);
+    if (!track.dataset.scrollBound) {
+      track.dataset.scrollBound = '1';
+      track.addEventListener('scroll', () => this.updateIngCarouselArrows(track));
+    }
+  }
+
+  updateIngCarouselArrows(track) {
+    const outer = track.closest('.ing-carousel-outer');
+    if (!outer) return;
+    const prev = outer.querySelector('.ing-car-prev');
+    const next = outer.querySelector('.ing-car-next');
+    const rtl = getComputedStyle(track).direction === 'rtl';
+    const pos = rtl ? -track.scrollLeft : track.scrollLeft;
+    const maxScroll = track.scrollWidth - track.clientWidth;
+    if (prev) prev.style.visibility = pos <= 1 ? 'hidden' : 'visible';
+    if (next) next.style.visibility = pos >= maxScroll - 1 ? 'hidden' : 'visible';
+  }
+
+  scrollIngCarousel(e, dir) {
+    const wrap = e.currentTarget.closest('.ing-carousel-outer');
+    const track = wrap && wrap.querySelector('.ing-carousel');
+    if (!track) return;
+    const rtl = getComputedStyle(track).direction === 'rtl';
+    const w = track.clientWidth;
+    track.scrollBy({ left: rtl ? -dir * w : dir * w, behavior: 'smooth' });
+  }
+
+  scrollIngCarouselToDot(e) {
+    const idx = Number(e.currentTarget.dataset.idx || 0);
+    const wrap = e.currentTarget.closest('.ing-carousel-outer');
+    const track = wrap && wrap.querySelector('.ing-carousel');
+    if (!track) return;
+    const rtl = getComputedStyle(track).direction === 'rtl';
+    const w = track.clientWidth;
+    track.scrollTo({ left: rtl ? -idx * w : idx * w, behavior: 'smooth' });
+  }
+
+  addIngredientRow() {
+    this.setState(s => ({ ingredients: [...s.ingredients, { id: s.nextIngredientId, productKey: null, qty: 1 }], nextIngredientId: s.nextIngredientId + 1 }));
+  }
+  removeIngredient(id) { this.setState(s => ({ ingredients: s.ingredients.filter(i => i.id !== id) })); }
+  changeIngredientQty(id, delta) {
+    this.setState(s => ({ ingredients: s.ingredients.map(i => i.id === id ? { ...i, qty: Math.max(0, Math.round((i.qty + delta) * 1000) / 1000) } : i) }));
+  }
+  openPicker(rowId) { this.setState({ pickerOpen: true, pickerRowId: rowId, pickerQuery: '' }); }
+  closePicker() { this.setState({ pickerOpen: false, pickerRowId: null }); }
+  onPickerQueryChange(v) { this.setState({ pickerQuery: v }); }
+  selectProductForRow(productKey) {
+    const rowId = this.state.pickerRowId;
+    this.setState(s => ({ ingredients: s.ingredients.map(i => i.id === rowId ? { ...i, productKey } : i), pickerOpen: false, pickerRowId: null }));
+  }
+
+  addPrepStep() {
+    this.setState(s => ({ prepSteps: [...s.prepSteps, { id: s.nextPrepId, name: '', category: CATEGORIES[0], qty: 1, unit: 'יחידה' }], nextPrepId: s.nextPrepId + 1 }));
+  }
+  removePrepStep(id) { this.setState(s => ({ prepSteps: s.prepSteps.filter(p => p.id !== id) })); }
+  setPrepName(id, v) { this.setState(s => ({ prepSteps: s.prepSteps.map(p => p.id === id ? { ...p, name: v } : p) })); }
+  setPrepCategory(id, cat) { this.setState(s => ({ prepSteps: s.prepSteps.map(p => p.id === id ? { ...p, category: cat } : p), categoryDropdownOpenId: null })); }
+  toggleCategoryDropdown(id) { this.setState(s => ({ categoryDropdownOpenId: s.categoryDropdownOpenId === id ? null : id, qtyDropdownOpenId: null })); }
+  toggleQtyDropdown(id) { this.setState(s => ({ qtyDropdownOpenId: s.qtyDropdownOpenId === id ? null : id, categoryDropdownOpenId: null })); }
+  setPrepUnit(id, unit) { this.setState(s => ({ prepSteps: s.prepSteps.map(p => p.id === id ? { ...p, unit } : p) })); }
+  changePrepQty(id, delta) { this.setState(s => ({ prepSteps: s.prepSteps.map(p => p.id === id ? { ...p, qty: Math.max(0, p.qty + delta) } : p) })); }
+
+  addInstructionStep() {
+    this.setState(s => ({ instructionSteps: [...s.instructionSteps, { id: s.nextInstructionId, instruction: '', laborTime: 0, cookTime: 0 }], nextInstructionId: s.nextInstructionId + 1 }));
+  }
+  removeInstructionStep(id) { this.setState(s => ({ instructionSteps: s.instructionSteps.filter(i => i.id !== id) })); }
+  setInstructionField(id, field, v) { this.setState(s => ({ instructionSteps: s.instructionSteps.map(i => i.id === id ? { ...i, [field]: v } : i) })); }
+
+  toggleApproved() {
+    this.setState(s => ({ approved: !s.approved }));
+    this.showToast(this.state.approved ? 'המתכון סומן כלא מאושר' : 'המתכון אושר');
+  }
+  saveRecipe() { this.showToast('המתכון נשמר בהצלחה'); }
+
+  renderVals() {
+    const b = this.baseVals();
+    const vs = this.state.__vs || this.props.viewState || 'ready';
+    const loading = vs === 'loading', failed = vs === 'error';
+    if (vs !== 'ready') { b.ingredients = []; b.isEmpty = vs === 'empty'; }
+    return Object.assign(b, {
+      loading, loadFailed: failed, ready: !loading && !failed,
+      skeletonRows: [1, 2, 3, 4, 5, 6].map(i => ({ i })),
+      retryLoad: () => this.setState({ __vs: 'ready' })
+    });
+  }
+
+  baseVals() {
+    const s = this.state;
+
+    const ingredientsComputed = s.ingredients.map(i => {
+      const product = i.productKey ? findProduct(i.productKey) : null;
+      const weight = product ? i.qty * (WEIGHT_FACTOR[product.unit] || 1000) : 0;
+      const cost = product ? i.qty * product.price : 0;
+      return { ...i, product, weight, cost };
+    });
+    const totalWeight = ingredientsComputed.reduce((sum, i) => sum + i.weight, 0);
+    const totalCost = ingredientsComputed.reduce((sum, i) => sum + i.cost, 0);
+
+    const ingredients = ingredientsComputed.map(i => ({
+      id: i.id,
+      hasProduct: !!i.product,
+      noProduct: !i.product,
+      productName: i.product ? i.product.name : '',
+      unitLabel: i.product ? (UNIT_LABELS[i.product.unit] || i.product.unit) : '—',
+      qtyLabel: i.qty,
+      percentLabel: totalWeight > 0 ? Math.round((i.weight / totalWeight) * 100) : 0,
+      costLabel: i.cost.toFixed(2),
+      onOpenPicker: () => this.openPicker(i.id),
+      onIncrement: () => this.changeIngredientQty(i.id, i.product && i.product.unit === 'unit' ? 1 : 0.05),
+      onDecrement: () => this.changeIngredientQty(i.id, i.product && i.product.unit === 'unit' ? -1 : -0.05),
+      onRemove: () => this.removeIngredient(i.id)
+    }));
+
+    const pickerQuery = s.pickerQuery.trim();
+    const pickerOptions = PRODUCTS.filter(p => !pickerQuery || p.name.includes(pickerQuery)).map(p => ({
+      key: p.key, name: p.name, unit: UNIT_LABELS[p.unit] || p.unit, priceLabel: p.price.toFixed(2),
+      onSelect: () => this.selectProductForRow(p.key)
+    }));
+
+    const chipStyle = (active, color) => ({
+      padding: '6px 12px', borderRadius: '999px', fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer',
+      border: active ? 'none' : '1px solid var(--border-default)',
+      background: active ? (color || 'linear-gradient(180deg, var(--color-primary), var(--color-primary-hover))') : 'var(--bg-glass)',
+      color: active ? '#fff' : 'var(--color-text-secondary)'
+    });
+
+    const labelOptions = Object.keys(LABEL_DEFS).map(key => ({
+      key, label: LABEL_DEFS[key].label, style: chipStyle(s.labels.has(key), LABEL_DEFS[key].color), onToggle: () => this.toggleLabel(key)
+    }));
+
+    const dropdownOptionStyle = (active) => ({
+      padding: '8px 12px', border: 'none', background: active ? 'var(--color-primary-soft)' : 'transparent',
+      color: active ? 'var(--color-primary-hover)' : 'var(--color-text-secondary)', fontSize: 'var(--fs-xs)', fontWeight: 600,
+      textAlign: 'right', cursor: 'pointer'
+    });
+    const prepSteps = s.prepSteps.map(p => ({
+      id: p.id, name: p.name, qty: p.qty, unit: p.unit, category: p.category,
+      categoryDropdownOpen: s.categoryDropdownOpenId === p.id,
+      qtyDropdownOpen: s.qtyDropdownOpenId === p.id,
+      onToggleCategoryDropdown: () => this.toggleCategoryDropdown(p.id),
+      onToggleQtyDropdown: () => this.toggleQtyDropdown(p.id),
+      onIncrementQty: () => this.changePrepQty(p.id, 1),
+      onDecrementQty: () => this.changePrepQty(p.id, -1),
+      onNameChange: (v) => this.setPrepName(p.id, v),
+      onRemove: () => this.removePrepStep(p.id),
+      categoryOptions: CATEGORIES.map(cat => ({ key: cat, label: cat, style: dropdownOptionStyle(p.category === cat), onSelect: () => this.setPrepCategory(p.id, cat) })),
+      unitOptions: PREP_UNITS.map(u => ({ key: u, label: u, style: chipStyle(p.unit === u), onSelect: () => this.setPrepUnit(p.id, u) }))
+    }));
+
+    const instructionSteps = s.instructionSteps.map((ins, idx) => ({
+      id: ins.id, index: idx + 1, instruction: ins.instruction, laborTime: ins.laborTime, cookTime: ins.cookTime,
+      onInstructionChange: (v) => this.setInstructionField(ins.id, 'instruction', v),
+      onLaborTimeChange: (v) => this.setInstructionField(ins.id, 'laborTime', parseInt(v) || 0),
+      onCookTimeChange: (v) => this.setInstructionField(ins.id, 'cookTime', parseInt(v) || 0),
+      onRemove: () => this.removeInstructionStep(ins.id)
+    }));
+
+    return {
+      notReady: () => this.notReady(),
+      typeLabel: s.type === 'dish' ? 'מנה' : 'הכנה',
+      typeToggleStyle: { padding: '9px 18px', borderRadius: 'var(--radius-full)', border: 'none', fontWeight: 700, fontSize: 'var(--fs-sm)', cursor: 'pointer', background: s.type === 'dish' ? 'linear-gradient(180deg, var(--color-primary), var(--color-primary-hover))' : 'var(--bg-muted)', color: s.type === 'dish' ? '#fff' : 'var(--color-text-secondary)' },
+      toggleType: () => this.toggleType(),
+      name: s.name,
+      onNameChange: (v) => this.onNameChange(v),
+      stars: [1, 2, 3, 4, 5].map(n => ({ fill: n <= s.rating ? 'currentColor' : 'none', onSelect: () => this.setRating(n) })),
+      portions: s.portions,
+      portionUnitLabel: s.portionUnit,
+      incrementPortions: () => this.incrementPortions(),
+      decrementPortions: () => this.decrementPortions(),
+      portionUnitDropdownOpen: s.portionUnitDropdownOpen,
+      togglePortionUnitDropdown: () => this.togglePortionUnitDropdown(),
+      portionUnitOptions: PORTION_UNITS.map(u => ({ key: u, label: u, style: dropdownOptionStyle(s.portionUnit === u), onSelect: () => this.setPortionUnit(u) })),
+      secondaryYields: s.secondaryYields.map(y => ({
+        id: y.id, qty: y.qty, unit: y.unit,
+        unitDropdownOpen: s.secondaryYieldUnitDropdownOpenId === y.id,
+        onIncrement: () => this.changeSecondaryYieldQty(y.id, 1),
+        onDecrement: () => this.changeSecondaryYieldQty(y.id, -1),
+        onRemove: () => this.removeSecondaryYield(y.id),
+        onToggleUnitDropdown: () => this.toggleSecondaryYieldUnitDropdown(y.id),
+        unitOptions: YIELD_UNITS.map(u => ({ key: u, label: u, style: dropdownOptionStyle(y.unit === u), onSelect: () => this.setSecondaryYieldUnit(y.id, u) }))
+      })),
+      addSecondaryYield: () => this.addSecondaryYield(),
+      labelOptions,
+      totalCostLabel: totalCost.toFixed(2),
+      totalWeightLabel: Math.round(totalWeight),
+
+      ingredients,
+      addIngredientRow: () => this.addIngredientRow(),
+      ingCarouselPrev: (e) => this.scrollIngCarousel(e, -1),
+      ingCarouselNext: (e) => this.scrollIngCarousel(e, 1),
+      ingCarouselDot: (e) => this.scrollIngCarouselToDot(e),
+
+      workflowTitle: s.type === 'dish' ? 'רשימת הכנה' : 'שלבי הכנה',
+      isDishType: s.type === 'dish',
+      isPreparationType: s.type === 'preparation',
+      prepSteps,
+      addPrepStep: () => this.addPrepStep(),
+      instructionSteps,
+      addInstructionStep: () => this.addInstructionStep(),
+
+      pickerOpen: s.pickerOpen,
+      pickerQuery: s.pickerQuery,
+      onPickerQueryChange: (v) => this.onPickerQueryChange(v),
+      pickerOptions,
+      closePicker: () => this.closePicker(),
+      stopPropagation: (e) => this.stopPropagation(e),
+
+      approved: s.approved,
+      notApproved: !s.approved,
+      approveLabel: s.approved ? 'מאושר' : 'לחץ לאישור',
+      toggleApproved: () => this.toggleApproved(),
+      saveLabel: s.type === 'dish' ? 'שמירת מנה' : 'שמירת מתכון',
+      saveRecipe: () => this.saveRecipe(),
+
+      toastVisible: s.toastVisible,
+      toastMessage: s.toastMessage
+    };
+  }
+}
+</script>
+</body>
+</html>

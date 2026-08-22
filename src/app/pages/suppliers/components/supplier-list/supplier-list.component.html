@@ -3,6 +3,8 @@
   (panelToggle)="togglePanel()"
   [gridTemplate]="'2fr 1fr minmax(48px, 0.8fr) 0.8fr 0.8fr 0.8fr 80px auto'"
   [mobileGridTemplate]="'2fr 1fr 40px 28px'"
+  [resultCount]="filteredSuppliers_().length"
+  [resultTotal]="supplierData.allSuppliers_().length"
 >
   <h2 shell-title class="page-title">{{ 'supplier_list' | translatePipe }}</h2>
 

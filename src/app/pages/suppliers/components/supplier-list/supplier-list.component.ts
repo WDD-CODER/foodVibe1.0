@@ -75,7 +75,7 @@ type SupplierBulkField = 'delivery_days_' | 'lead_time_days_'
 })
 export class SupplierListComponent implements OnInit, OnDestroy {
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
-  private readonly supplierData = inject(SupplierDataService)
+  protected readonly supplierData = inject(SupplierDataService)
   private readonly kitchenState = inject(KitchenStateService)
   private readonly supplierModal = inject(SupplierModalService)
   private readonly heroFab = inject(HeroFabService)

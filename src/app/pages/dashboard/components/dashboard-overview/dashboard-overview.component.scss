@@ -32,8 +32,14 @@
     .header-actions__nav {
       width: 100%;
     }
-
   }
+}
+
+.header-title-block {
+  display: flex;
+  flex-direction: column;
+
+  gap: 0.125rem;
 }
 
 .page-title {
@@ -43,6 +49,13 @@
   font-weight: 700;
   color: var(--color-text-main);
   letter-spacing: -0.01em;
+}
+
+.page-subtitle {
+  margin: 0;
+
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
 }
 
 .header-actions {
@@ -62,15 +75,14 @@
   gap: 0.5rem;
 }
 
-
+// Stacked, full-width — matches the design: KPI grid on top, one chronological
+// activity list below it. (Previously a 2-column grid put the activity list in
+// its own narrow side column; that's not what the design shows.)
 .dashboard-main {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(450px, 1fr);
-  gap: 1.5rem;
+  display: flex;
+  flex-direction: column;
 
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
+  gap: 1.5rem;
 }
 
 .kpi-grid {
@@ -81,6 +93,11 @@
   @media (max-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
+  }
+
+  // Matches the design: one full-width card per row on phone, not a 2×2 grid.
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -102,7 +119,9 @@
   -webkit-backdrop-filter: var(--blur-glass);
   box-shadow: var(--shadow-soft);
   cursor: pointer;
-  transition: transform 0.25s var(--ease-spring), box-shadow 0.25s var(--ease-spring);
+  transition:
+    transform 0.25s var(--ease-spring),
+    box-shadow 0.25s var(--ease-spring);
 
   &::before {
     content: '';
@@ -139,7 +158,9 @@
   @media (hover: hover) {
     &:hover {
       transform: translateY(-2px);
-      box-shadow: var(--shadow-hover), 0 4px 16px var(--color-primary-soft);
+      box-shadow:
+        var(--shadow-hover),
+        0 4px 16px var(--color-primary-soft);
     }
   }
 
@@ -359,7 +380,9 @@
   border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid var(--border-glass-strong);
-  box-shadow: inset 0 1px 0 var(--border-glass-strong), 0 4px 10px -6px rgba(15, 23, 42, 0.08);
+  box-shadow:
+    inset 0 1px 0 var(--border-glass-strong),
+    0 4px 10px -6px rgba(15, 23, 42, 0.08);
   transition: background 0.15s ease;
 
   &:last-child {
@@ -450,17 +473,17 @@
     flex-shrink: 0;
   }
 
-  &[data-action="created"] {
+  &[data-action='created'] {
     background: rgba(16, 185, 129, 0.14);
     color: var(--color-success-emphasis);
   }
 
-  &[data-action="updated"] {
+  &[data-action='updated'] {
     background: var(--bg-warning);
     color: var(--text-warning);
   }
 
-  &[data-action="deleted"] {
+  &[data-action='deleted'] {
     background: var(--bg-danger-subtle);
     color: var(--color-danger);
   }
@@ -493,17 +516,17 @@
   background: var(--color-primary-soft);
   color: var(--color-text-muted-light);
 
-  &[data-entity="product"] {
+  &[data-entity='product'] {
     background: var(--color-primary-soft);
     color: var(--color-primary-hover);
   }
 
-  &[data-entity="recipe"] {
+  &[data-entity='recipe'] {
     background: var(--color-primary-soft);
     color: var(--color-primary-hover);
   }
 
-  &[data-entity="dish"] {
+  &[data-entity='dish'] {
     background: rgba(16, 185, 129, 0.12);
     color: var(--color-success-emphasis);
   }
@@ -564,7 +587,9 @@
   background: var(--border-default);
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 
   &:hover {
     background: var(--border-strong);

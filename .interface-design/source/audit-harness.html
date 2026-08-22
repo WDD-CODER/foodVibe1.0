@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+body{margin:0;font:12px system-ui;background:#222;color:#fff}
+.wrap{display:flex;flex-wrap:wrap;gap:8px;padding:8px}
+figure{margin:0}figcaption{padding:2px 4px}
+iframe{border:0;background:#fff;height:1100px;display:block}
+</style></head><body>
+<div class="wrap" id="wrap"></div>
+<script>
+const screens=["Dashboard","Inventory","RecipeBook","RecipeBuilder","CookView","MenuIntelligence","MenuLibrary","MetadataManager","Suppliers","Equipment","Trash","Venues","VenueDetail"];
+const wrap=document.getElementById('wrap');
+for(const s of screens){const fig=document.createElement('figure');fig.innerHTML='<figcaption>'+s+'</figcaption>';
+ const f=document.createElement('iframe');f.src=s+'.dc.html';f.dataset.name=s;f.width=390;fig.appendChild(f);wrap.appendChild(fig);}
+window.setW=w=>document.querySelectorAll('iframe').forEach(f=>f.width=w);
+window.audit=()=>{const res={};
+ document.querySelectorAll('iframe').forEach(f=>{
+  try{
+   const d=f.contentDocument,w=f.contentWindow,vw=d.documentElement.clientWidth;
+   const shell=d.querySelector('app-shell');
+   const isScrollAnc=el=>{let p=el.parentElement;while(p&&p!==d.body){const o=w.getComputedStyle(p);if(/auto|scroll|hidden/.test(o.overflowX))return true;p=p.parentElement;}return false;};
+   const over=[],tap=[],small=[];
+   const all=[...d.body.querySelectorAll('*'),...(shell&&shell.shadowRoot?shell.shadowRoot.querySelectorAll('*'):[])];
+   all.forEach(el=>{const r=el.getBoundingClientRect();if(!r.width&&!r.height)return;const cs=w.getComputedStyle(el);
+    if(!isScrollAnc(el)&&cs.position!=='fixed'&&(r.right>vw+1.5||r.left<-1.5)&&el.children.length<=2)over.push(el.tagName+' R'+Math.round(r.right)+' «'+(el.textContent||'').trim().slice(0,14)+'»');
+    const fs=parseFloat(cs.fontSize);if(fs&&fs<12&&(el.textContent||'').trim()&&el.children.length===0)small.push(fs+' «'+(el.textContent||'').trim().slice(0,10)+'»');
+    if(el.tagName==='BUTTON'||el.tagName==='A'||el.tagName==='INPUT'){const m=Math.min(r.width,r.height);if(m<44&&m>3)tap.push(Math.round(r.width)+'x'+Math.round(r.height)+' «'+(el.textContent||el.placeholder||'').trim().slice(0,12)+'»');}
+   });
+   const u=a=>[...new Set(a)];
+   res[f.dataset.name]={vw,shell:!!shell,tabs:shell&&shell.shadowRoot?shell.shadowRoot.querySelectorAll('.tab').length:0,fab:!!(shell&&shell.shadowRoot&&shell.shadowRoot.querySelector('.fab')),
+     scroll:d.documentElement.scrollWidth,overN:over.length,over:u(over).slice(0,5),tapN:tap.length,tap:u(tap).slice(0,6),smallN:small.length,small:u(small).slice(0,4)};
+  }catch(e){res[f.dataset.name]='ERR '+e.message;}
+ });return res;};
+</script></body></html>

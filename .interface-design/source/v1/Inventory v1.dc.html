@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="./colors_and_type.css">
+  <style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.96) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    body { margin: 0; }
+    a { color: var(--color-primary); text-decoration: none; }
+    a:hover { color: var(--color-primary-hover); }
+    input[type="checkbox"] { accent-color: var(--color-primary); width: 16px; height: 16px; cursor: pointer; }
+    .inv-car-outer, .inv-car-track { display: contents; }
+    .inv-car-arrow { display: none; }
+    @media (max-width: 1023px) {
+      .inv-main-layout { flex-direction: column !important; align-items: stretch !important; }
+      .inv-main { display: contents; }
+      .inv-toolbar { order: 1; flex-wrap: wrap !important; }
+      .inv-aside { order: 2; position: static !important; width: 100% !important; max-width: none !important; align-self: stretch; margin: 0 0 var(--space-4); box-sizing: border-box; }
+      .inv-aside > div { width: 100%; min-width: 0; box-sizing: border-box; }
+      .inv-list-container { order: 3; }
+    }
+    @media (max-width: 480px) {
+      .product-name-cell { white-space: normal !important; overflow: visible !important; text-overflow: unset !important; word-break: break-word; }
+      .inv-toolbar > div:has(input[placeholder]) { min-width: 0 !important; flex: 1 1 100% !important; order: 3; }
+      .inv-toolbar > button:last-child { order: 2; margin-inline-start: 0 !important; }
+      .inv-filter-group { display: flex !important; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+      .inv-filter-group > div:first-child { flex: 1 0 100%; margin-bottom: 4px !important; }
+      .inv-filter-label { flex: 0 0 auto !important; padding: 6px 12px !important; background: var(--bg-subtle); border-radius: var(--radius-full); }
+      .inv-header-row { display: none !important; }
+      .inv-list-container { background: none !important; border: none !important; box-shadow: none !important; overflow: visible !important; padding: 0 !important; display: flex !important; flex-direction: column; gap: 6px; }
+      .inv-row {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px;
+        box-sizing: border-box;
+        padding: 8px 10px !important;
+        margin: 0 !important;
+        border-radius: var(--radius-md) !important;
+        background: var(--bg-glass-hover);
+        border: 1px solid var(--border-glass) !important;
+        box-shadow: none !important;
+        position: relative;
+      }
+      .inv-row > .inv-name-cell { flex: 1 1 auto; min-width: 0; }
+      .inv-row > .inv-name-cell .product-name-cell { white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; font-size: var(--fs-sm) !important; }
+      .inv-row > .inv-price-cell { flex: 0 0 auto; font-size: var(--fs-sm) !important; white-space: nowrap; }
+      .inv-row > .inv-actions-cell { flex: 0 0 auto; gap: 0 !important; }
+      .inv-row > .inv-actions-cell button { width: 26px !important; height: 26px !important; }
+      .inv-select-cell { flex: 0 0 auto; }
+      .inv-row > .inv-car-outer { display: block !important; position: relative; flex: 0 0 108px; width: 108px; box-sizing: border-box; padding: 0 14px; }
+      .inv-car-track { display: flex !important; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; background: var(--bg-subtle); border-radius: var(--radius-sm); scrollbar-width: none; height: 34px; }
+      .inv-car-track::-webkit-scrollbar { display: none; }
+      .inv-car-track > div { flex: 0 0 100%; width: 100%; box-sizing: border-box; scroll-snap-align: start; scroll-snap-stop: always; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 1px; padding: 2px 6px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; font-size: var(--fs-xs); line-height: 1.15; }
+      .inv-car-track > div::before { content: attr(data-label); font-size: 8px; font-weight: var(--fw-semibold); color: var(--color-text-muted-light); text-transform: uppercase; line-height: 1; }
+      .inv-car-arrow { display: flex !important; align-items: center; justify-content: center; position: absolute; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; padding: 0; border-radius: 50%; background: var(--bg-glass-strong); border: 1px solid var(--border-default); color: var(--color-text-muted); cursor: pointer; z-index: 2; font-size: 11px; line-height: 1; }
+      .inv-car-prev { inset-inline-start: -2px; }
+      .inv-car-next { inset-inline-end: -2px; }
+    }
+    input:focus, button:focus { outline: none; }
+    ::selection { background: var(--color-primary-soft); }
+  </style>
+</helmet>
+
+<div dir="rtl" style="position: relative; min-height: 100vh; background: var(--bg-body); font-family: var(--font-sans); overflow-x: hidden;">
+  <div style="position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse 700px 480px at 85% 15%, rgba(20,184,166,0.12), transparent), radial-gradient(ellipse 550px 550px at 15% 75%, rgba(251,191,36,0.08), transparent), radial-gradient(ellipse 450px 350px at 50% 50%, rgba(14,165,233,0.06), transparent);"></div>
+
+  <div style="position: relative; z-index: 1;">
+
+    <!-- TOP NAV -->
+    <nav style="position: sticky; top: 0; z-index: 50; display: flex; align-items: center; height: 3.5rem; padding: 0 var(--space-6); gap: var(--space-6); background: var(--bg-frosted-nav); backdrop-filter: var(--blur-nav); -webkit-backdrop-filter: var(--blur-nav); border-bottom: 1px solid var(--border-glass); box-shadow: var(--shadow-nav);">
+      <div style="display: flex; align-items: center; gap: var(--space-2); flex-shrink: 0;">
+        <div style="width: 32px; height: 32px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)); display: grid; place-content: center; color: var(--color-text-on-primary); font-weight: var(--fw-extrabold); font-size: var(--fs-sm); box-shadow: var(--shadow-glow);">fC</div>
+        <span style="font-weight: var(--fw-bold); font-size: var(--fs-lg); color: var(--color-text-main); letter-spacing: var(--tracking-tight);">foodCo</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 2px; padding: 4px; background: var(--bg-subtle); border: 1px solid var(--border-glass); border-radius: var(--radius-full); margin-inline-start: var(--space-4);">
+        <a href="Dashboard.dc.html" style="{{ navStyleDashboard }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
+          דשבורד
+        </a>
+        <a onClick="{{ goInventory }}" style="{{ navStyleInventory }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="M12 22V12"></path><path d="M3.29 7 12 12l8.71-5"></path><path d="m7.5 4.27 9 5.15"></path></svg>
+          מלאי
+        </a>
+        <a href="RecipeBook.dc.html" style="{{ navStyleRecipes }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg>
+          ספר מתכונים
+        </a>
+        <a href="MenuIntelligence.dc.html" style="{{ navStyleMenus }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 6 4 14"></path><path d="M12 6v14"></path><path d="M8 8v12"></path><path d="M4 4v16"></path></svg>
+          בניית תפריטים
+        </a>
+        <a href="MenuLibrary.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"></path></svg>
+          ספריית תפריטים
+        </a>
+        <a href="Venues.dc.html" style="{{ navStyleVenues }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          אתרים
+        </a>
+        <a href="Suppliers.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path><path d="M15 18H9"></path><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path><circle cx="17" cy="18" r="2"></circle><circle cx="7" cy="18" r="2"></circle></svg>
+          ספקים
+        </a>
+        <a href="Equipment.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+          ציוד
+        </a>
+        <a href="MetadataManager.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v6m0 10v6M4.22 4.22l4.24 4.24m6.28 6.28 4.24 4.24M1 12h6m10 0h6M4.22 19.78l4.24-4.24m6.28-6.28 4.24-4.24"></path></svg>
+          מטא-דאטה
+        </a>
+        <a href="Trash.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          אשפה
+        </a>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: var(--space-2); margin-inline-start: auto; flex-shrink: 0;">
+        <button style="display: grid; place-content: center; width: 34px; height: 34px; background: var(--bg-glass); color: var(--color-text-muted); border: 1px solid var(--border-default); border-radius: var(--radius-md); cursor: pointer;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+        </button>
+        <div style="display: inline-flex; align-items: center; gap: var(--space-2); padding: 4px 10px 4px 4px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-full);">
+          <span style="display: grid; place-content: center; width: 26px; height: 26px; background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)); color: #fff; border-radius: 50%; font-weight: var(--fw-bold); font-size: var(--fs-xs);">רכ</span>
+          <span style="font-weight: var(--fw-semibold); font-size: var(--fs-sm); color: var(--color-text-main);">רועי כהן</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- INVENTORY SCREEN -->
+    <sc-if value="{{ isInventoryTab }}" hint-placeholder-val="{{ true }}">
+      <div class="inv-main-layout" style="max-width: 1520px; margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-12); display: flex; gap: var(--space-5); align-items: flex-start;">
+
+        <!-- FILTERS PANEL -->
+        <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ true }}">
+          <aside class="inv-aside" style="width: 250px; flex-shrink: 0; position: sticky; top: calc(3.5rem + var(--space-5)); animation: fadeIn 0.25s var(--ease-spring);">
+            <div style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); padding: var(--space-4);">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4);">
+                <h3 style="margin: 0; font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--color-text-main);">סינון</h3>
+                <sc-if value="{{ hasActiveFilters }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ clearFilters }}" style="background: none; border: none; padding: 0; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-primary); cursor: pointer;">נקה סינון</button>
+                </sc-if>
+              </div>
+
+              <label style="display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) 0; cursor: pointer; border-bottom: 1px solid var(--border-row); margin-bottom: var(--space-3);">
+                <input type="checkbox" checked="{{ lowStockOnly }}" onChange="{{ toggleLowStock }}" />
+                <span style="font-size: var(--fs-sm); color: var(--color-text-secondary); font-weight: var(--fw-medium);">מלאי נמוך בלבד</span>
+              </label>
+
+              <div class="inv-filter-group" style="margin-bottom: var(--space-4);">
+                <div style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">קטגוריה</div>
+                <sc-for list="{{ categoryOptions }}" as="cat" hint-placeholder-count="4">
+                  <label class="inv-filter-label" style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: 5px 0; cursor: pointer;">
+                    <span style="display: flex; align-items: center; gap: var(--space-2);">
+                      <input type="checkbox" checked="{{ cat.checked }}" onChange="{{ cat.onToggle }}" />
+                      <span style="font-size: var(--fs-sm); color: var(--color-text-secondary);">{{ cat.label }}</span>
+                    </span>
+                    <span style="font-size: var(--fs-xs); color: var(--color-text-muted-light);">{{ cat.count }}</span>
+                  </label>
+                </sc-for>
+              </div>
+
+              <div class="inv-filter-group">
+                <div style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">אלרגנים</div>
+                <sc-for list="{{ allergenOptions }}" as="alg" hint-placeholder-count="6">
+                  <label class="inv-filter-label" style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: 5px 0; cursor: pointer;">
+                    <span style="display: flex; align-items: center; gap: var(--space-2);">
+                      <input type="checkbox" checked="{{ alg.checked }}" onChange="{{ alg.onToggle }}" />
+                      <span style="font-size: var(--fs-sm); color: var(--color-text-secondary);">{{ alg.label }}</span>
+                    </span>
+                    <span style="font-size: var(--fs-xs); color: var(--color-text-muted-light);">{{ alg.count }}</span>
+                  </label>
+                </sc-for>
+              </div>
+            </div>
+          </aside>
+        </sc-if>
+
+        <!-- MAIN -->
+        <main class="inv-main" style="flex: 1; min-width: 0;">
+
+          <div class="inv-toolbar" style="display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-5); flex-wrap: wrap;">
+            <button onClick="{{ togglePanel }}" style="display: grid; place-content: center; width: 38px; height: 38px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--color-text-muted); cursor: pointer; flex-shrink: 0;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+            </button>
+
+            <div>
+              <h1 style="margin: 0; font-size: var(--fs-xl); font-weight: var(--fw-bold); letter-spacing: var(--tracking-tight); color: var(--color-text-main);">רשימת מוצרים</h1>
+              <p style="margin: 2px 0 0; font-size: var(--fs-sm); color: var(--color-text-muted);">{{ filteredCount }} מתוך {{ totalCount }} מוצרים במלאי</p>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: var(--space-2); background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); padding: 0 var(--space-3); height: 38px; min-width: 220px; backdrop-filter: var(--blur-glass);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-text-muted-light); flex-shrink: 0;"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+              <input type="text" placeholder="חיפוש מוצר" value="{{ search }}" onChange="{{ onSearchChange }}" style="border: none; background: none; outline: none; font-size: var(--fs-sm); color: var(--color-text-main); font-family: var(--font-sans); width: 100%;" />
+            </div>
+
+            <button onClick="{{ openAddModal }}" style="margin-inline-start: auto; display: inline-flex; align-items: center; gap: var(--space-2); padding: 0 var(--space-4); height: 38px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); color: var(--color-text-on-primary); border: none; border-radius: var(--radius-full); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer; box-shadow: var(--shadow-glow);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+              הוסף מוצר
+            </button>
+          </div>
+
+          <sc-if value="{{ hasSelection }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4); margin-bottom: var(--space-3); background: var(--color-primary-soft); border: 1px solid var(--border-focus); border-radius: var(--radius-md); animation: popIn 0.2s var(--ease-spring);">
+              <span style="font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--color-text-main);">{{ selectedCount }} נבחרו</span>
+              <button onClick="{{ askBulkDelete }}" style="display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid rgba(220,38,38,0.3); color: var(--color-danger); padding: 6px 12px; border-radius: var(--radius-md); font-size: var(--fs-xs); font-weight: var(--fw-semibold); cursor: pointer;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                מחק נבחרים
+              </button>
+              <button onClick="{{ clearSelection }}" style="background: none; border: none; color: var(--color-text-muted); font-size: var(--fs-xs); cursor: pointer; margin-inline-start: auto;">בטל בחירה</button>
+            </div>
+          </sc-if>
+
+          <div class="inv-list-container" style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); overflow: hidden;">
+
+            <div class="inv-header-row" style="display: grid; grid-template-columns: 2.1fr 1fr 1fr 1fr 0.7fr 0.9fr 84px 36px; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-default); background: var(--bg-muted);">
+              <div onClick="{{ setSortName }}" style="display: flex; align-items: center; gap: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); cursor: pointer;">
+                מוצר
+                <sc-if value="{{ nameSortUp }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></sc-if>
+                <sc-if value="{{ nameSortDown }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></sc-if>
+              </div>
+              <div onClick="{{ setSortCategory }}" style="display: flex; align-items: center; gap: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); cursor: pointer;">
+                קטגוריה
+                <sc-if value="{{ categorySortUp }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></sc-if>
+                <sc-if value="{{ categorySortDown }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></sc-if>
+              </div>
+              <div style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide);">אלרגנים</div>
+              <div onClick="{{ setSortSupplier }}" style="display: flex; align-items: center; gap: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); cursor: pointer;">
+                ספק
+                <sc-if value="{{ supplierSortUp }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></sc-if>
+                <sc-if value="{{ supplierSortDown }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></sc-if>
+              </div>
+              <div style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide);">יחידה</div>
+              <div onClick="{{ setSortPrice }}" style="display: flex; align-items: center; gap: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); cursor: pointer;">
+                מחיר
+                <sc-if value="{{ priceSortUp }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></sc-if>
+                <sc-if value="{{ priceSortDown }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></sc-if>
+              </div>
+              <div style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide);">פעולות</div>
+              <div style="display: flex; align-items: center;">
+                <input type="checkbox" checked="{{ allSelected }}" onChange="{{ toggleSelectAll }}" />
+              </div>
+            </div>
+
+            <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+              <div style="padding: var(--space-12) var(--space-4); text-align: center; color: var(--color-text-muted); font-size: var(--fs-sm);">לא נמצאו מוצרים התואמים לחיפוש</div>
+            </sc-if>
+
+            <sc-for list="{{ products }}" as="p" hint-placeholder-count="8">
+              <div class="inv-row" style="{{ p.rowStyle }}">
+                <div class="inv-name-cell" style="display: flex; align-items: center; gap: var(--space-2); min-width: 0;">
+                  <span class="product-name-cell" title="{{ p.name }}" style="font-size: var(--fs-base); font-weight: var(--fw-medium); color: var(--color-text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ p.name }}</span>
+                  <sc-if value="{{ p.lowStock }}" hint-placeholder-val="{{ false }}">
+                    <span title="{{ p.lowStockTooltip }}" style="flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: var(--bg-warning); color: var(--text-warning); cursor: help;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+                    </span>
+                  </sc-if>
+                </div>
+              <div class="inv-car-outer" data-car-outer>
+              <div class="inv-car-track" data-car-track>
+                <div class="inv-category-cell" data-label="קטגוריה" style="display: flex; align-items: center; font-size: var(--fs-sm); color: var(--color-text-secondary);">{{ p.categoryLabel }}</div>
+                <div class="inv-allergen-cell" data-label="אלרגנים" style="display: flex; align-items: center; justify-content: center;">
+                  <sc-if value="{{ p.hasAllergens }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ p.onTogglePopover }}" style="display: inline-flex; align-items: center; gap: 5px; background: var(--bg-danger-subtle); border: 1px solid rgba(220,38,38,0.2); color: var(--color-allergen-text); padding: 4px 9px; border-radius: var(--radius-full); font-size: var(--fs-xs); font-weight: var(--fw-semibold); cursor: pointer;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.35 8.95a1 1 0 0 1-.6.03C8.06 20.55 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>
+                      {{ p.allergenCount }}
+                    </button>
+                  </sc-if>
+                  <sc-if value="{{ p.noAllergens }}" hint-placeholder-val="{{ true }}">
+                    <span style="color: var(--color-text-muted-light);">—</span>
+                  </sc-if>
+                </div>
+                <div class="inv-supplier-cell" data-label="ספק" style="display: flex; align-items: center; font-size: var(--fs-sm); color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ p.supplierName }}</div>
+                <div class="inv-unit-cell" data-label="יחידה" style="display: flex; align-items: center; font-size: var(--fs-sm); color: var(--color-text-secondary);">{{ p.unitLabel }}</div>
+              </div>
+              <button type="button" class="inv-car-arrow inv-car-prev" onClick="{{ carPrev }}">‹</button>
+              <button type="button" class="inv-car-arrow inv-car-next" onClick="{{ carNext }}">›</button>
+              </div>
+              <sc-if value="{{ p.popoverOpen }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ stopPropagation }}" style="position: absolute; top: calc(100% + 4px); right: 20%; z-index: 20; display: flex; flex-wrap: wrap; gap: 4px; width: 160px; padding: var(--space-2); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-md); box-shadow: var(--shadow-modal); animation: popIn 0.15s var(--ease-spring);">
+                  <sc-for list="{{ p.allergenChips }}" as="a" hint-placeholder-count="2">
+                    <span style="font-size: var(--fs-xs); padding: 3px 8px; border-radius: var(--radius-full); background: var(--bg-danger-subtle); color: var(--color-allergen-text);">{{ a.label }}</span>
+                  </sc-for>
+                </div>
+              </sc-if>
+                <div class="inv-price-cell" style="display: flex; align-items: center; gap: 3px; font-size: var(--fs-base); font-weight: var(--fw-semibold); color: var(--color-text-main); font-variant-numeric: tabular-nums;">
+                  {{ p.priceLabel }}<span style="color: var(--color-text-muted-light); font-weight: var(--fw-regular); font-size: var(--fs-xs);">₪</span>
+                </div>
+                <div class="inv-actions-cell" style="display: flex; align-items: center; gap: 4px;">
+                  <button onClick="{{ p.onEdit }}" style="display: grid; place-content: center; width: 30px; height: 30px; background: none; border: none; border-radius: var(--radius-sm); color: var(--color-text-muted); cursor: pointer;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg>
+                  </button>
+                  <button onClick="{{ p.onDelete }}" style="display: grid; place-content: center; width: 30px; height: 30px; background: none; border: none; border-radius: var(--radius-sm); color: var(--color-danger); cursor: pointer;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </button>
+                </div>
+                <div class="inv-select-cell" style="display: flex; align-items: center;">
+                  <input type="checkbox" checked="{{ p.selected }}" onChange="{{ p.onToggleSelect }}" />
+                </div>
+              </div>
+            </sc-for>
+
+          </div>
+        </main>
+      </div>
+    </sc-if>
+
+    <!-- COMING SOON PLACEHOLDER -->
+    <sc-if value="{{ isOtherTab }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 3.5rem); padding: var(--space-6);">
+        <div style="text-align: center; background: var(--bg-glass); backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-glass); padding: var(--space-10) var(--space-12); animation: fadeIn 0.25s var(--ease-spring);">
+          <div style="width: 56px; height: 56px; margin: 0 auto var(--space-4); border-radius: var(--radius-lg); background: var(--color-primary-soft); display: grid; place-content: center; color: var(--color-primary);">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4"></path><path d="M12 16h.01"></path><circle cx="12" cy="12" r="10"></circle></svg>
+          </div>
+          <h2 style="margin: 0 0 var(--space-2); font-size: var(--fs-lg); font-weight: var(--fw-semibold); color: var(--color-text-main);">{{ otherTabLabel }} בקרוב</h2>
+          <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-muted); max-width: 320px;">המסך הזה עדיין בבנייה בסבב הראשון של הרפקטור</p>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+
+  <!-- ADD / EDIT MODAL -->
+  <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" style="position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; background: var(--overlay-backdrop); backdrop-filter: blur(6px); animation: fadeIn 0.15s ease;">
+      <div onClick="{{ stopPropagation }}" style="width: 92%; max-width: 440px; max-height: 86vh; overflow-y: auto; padding: var(--space-6); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-5);">
+          <h3 style="margin: 0; font-size: var(--fs-lg); font-weight: var(--fw-bold); color: var(--color-text-main);">{{ modalTitle }}</h3>
+          <button onClick="{{ closeModal }}" style="width: 30px; height: 30px; display: grid; place-content: center; border: 1px solid var(--border-default); background: var(--bg-glass); border-radius: var(--radius-sm); cursor: pointer; color: var(--color-text-muted);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+          </button>
+        </div>
+
+        <label style="display: block; margin-bottom: var(--space-4);">
+          <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">שם המוצר</span>
+          <input type="text" value="{{ draftName }}" onChange="{{ setDraftName }}" placeholder="לדוגמה: בצל צהוב" style="width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: var(--fs-base); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1.5px solid var(--border-default); border-radius: var(--radius-md);" />
+        </label>
+
+        <div style="margin-bottom: var(--space-4);">
+          <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">קטגוריה</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <sc-for list="{{ draftCategoryOptions }}" as="c" hint-placeholder-count="4">
+              <button onClick="{{ c.onSelect }}" style="{{ c.style }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-4);">
+          <div>
+            <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">יחידה</span>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              <sc-for list="{{ draftUnitOptions }}" as="u" hint-placeholder-count="3">
+                <button onClick="{{ u.onSelect }}" style="{{ u.style }}">{{ u.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <label style="display: block;">
+            <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">מחיר (₪)</span>
+            <input type="number" value="{{ draftPrice }}" onChange="{{ setDraftPrice }}" placeholder="0.00" style="width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: var(--fs-base); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1.5px solid var(--border-default); border-radius: var(--radius-md);" />
+          </label>
+        </div>
+
+        <div style="margin-bottom: var(--space-4);">
+          <span style="display: block; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2);">אלרגנים</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <sc-for list="{{ draftAllergenOptions }}" as="a" hint-placeholder-count="6">
+              <button onClick="{{ a.onToggle }}" style="{{ a.style }}">{{ a.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <label style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-5); cursor: pointer;">
+          <input type="checkbox" checked="{{ draftLowStock }}" onChange="{{ toggleDraftLowStock }}" />
+          <span style="font-size: var(--fs-sm); color: var(--color-text-secondary);">סמן כמלאי נמוך</span>
+        </label>
+
+        <div style="display: flex; justify-content: flex-end; gap: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--border-default);">
+          <button onClick="{{ closeModal }}" style="padding: 9px 18px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--color-text-secondary); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">ביטול</button>
+          <button onClick="{{ saveDraft }}" style="padding: 9px 20px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); border: none; border-radius: var(--radius-md); color: #fff; font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer; box-shadow: var(--shadow-glow);">שמירה</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- CONFIRM DIALOG -->
+  <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; inset: 0; z-index: 300; display: flex; align-items: center; justify-content: center; background: var(--overlay-backdrop); backdrop-filter: blur(6px); animation: fadeIn 0.15s ease;">
+      <div style="width: 90%; max-width: 380px; padding: var(--space-6); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring); text-align: center;">
+        <div style="width: 44px; height: 44px; margin: 0 auto var(--space-4); border-radius: 50%; background: var(--bg-danger-subtle); display: grid; place-content: center; color: var(--color-danger);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+        </div>
+        <p style="margin: 0 0 var(--space-5); font-size: var(--fs-base); font-weight: var(--fw-medium); color: var(--color-text-main);">{{ confirmMessage }}</p>
+        <div style="display: flex; gap: var(--space-3);">
+          <button onClick="{{ cancelConfirm }}" style="flex: 1; padding: 10px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--color-text-secondary); font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">ביטול</button>
+          <button onClick="{{ runConfirm }}" style="flex: 1; padding: 10px; background: var(--color-danger); border: none; border-radius: var(--radius-md); color: #fff; font-weight: var(--fw-semibold); font-size: var(--fs-sm); cursor: pointer;">מחיקה</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- TOAST -->
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 400; display: flex; align-items: center; gap: var(--space-2); padding: 11px 20px; background: var(--color-text-main); color: #fff; border-radius: var(--radius-full); font-size: var(--fs-sm); font-weight: var(--fw-medium); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring);">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);"><path d="M20 6 9 17l-5-5"></path></svg>
+      {{ toastMessage }}
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const CATEGORY_LABELS = { vegetables: 'ירקות', meat: 'בשר ועוף', dry: 'מוצרים יבשים', spices: 'תבלינים ורטבים' };
+const UNIT_LABELS = { kg: 'ק"ג', liter: 'ליטר', unit: 'יחידה' };
+const ALLERGEN_LABELS = { gluten: 'גלוטן', eggs: 'ביצים', nuts: 'אגוזים', soy: 'סויה', mustard: 'חרדל', sesame: 'שומשום' };
+const SUPPLIER_NAMES = { sup_vegetable: 'ירקות השדה', sup_meat: 'קצביית הצפון', sup_dry: 'סיטונאי יבש', sup_spices: 'תבליני המזרח' };
+
+const BASE_PRODUCTS = [
+  { _id: 'demo_001', name: 'בצל צהוב', category: 'vegetables', unit: 'kg', price: 4.9, supplierId: 'sup_vegetable', allergens: [], lowStock: false },
+  { _id: 'demo_004', name: 'שום', category: 'vegetables', unit: 'kg', price: 45, supplierId: 'sup_vegetable', allergens: [], lowStock: false },
+  { _id: 'demo_007', name: 'מלפפון', category: 'vegetables', unit: 'kg', price: 5, supplierId: 'sup_vegetable', allergens: [], lowStock: false },
+  { _id: 'demo_144', name: 'עגבניות שרי צבעוניות', category: 'vegetables', unit: 'kg', price: 23.9, supplierId: 'sup_vegetable', allergens: [], lowStock: false },
+  { _id: 'demo_141', name: 'בננה', category: 'vegetables', unit: 'kg', price: 11.9, supplierId: 'sup_vegetable', allergens: [], lowStock: false },
+  { _id: 'demo_037', name: 'חזה עוף טרי', category: 'meat', unit: 'kg', price: 41.9, supplierId: 'sup_meat', allergens: [], lowStock: false },
+  { _id: 'demo_124', name: 'קציצת בורגר', category: 'meat', unit: 'kg', price: 69, supplierId: 'sup_meat', allergens: [], lowStock: false },
+  { _id: 'demo_127', name: 'פרגיות', category: 'meat', unit: 'kg', price: 69.9, supplierId: 'sup_meat', allergens: [], lowStock: true, stockQty: 1.5, minStock: 5 },
+  { _id: 'demo_101', name: 'נקניקת עוף', category: 'meat', unit: 'unit', price: 3.5, supplierId: 'sup_meat', allergens: [], lowStock: false },
+  { _id: 'demo_052', name: 'סוכר חום', category: 'dry', unit: 'kg', price: 12.9, supplierId: 'sup_dry', allergens: [], lowStock: false },
+  { _id: 'demo_137', name: 'קמח אורז', category: 'dry', unit: 'kg', price: 18, supplierId: 'sup_dry', allergens: [], lowStock: true, stockQty: 2, minStock: 8 },
+  { _id: 'demo_147', name: 'אורז עגול', category: 'dry', unit: 'kg', price: 20.9, supplierId: 'sup_dry', allergens: [], lowStock: false },
+  { _id: 'demo_139', name: 'שמן רגיל / שמן טיגון', category: 'dry', unit: 'liter', price: 11, supplierId: 'sup_dry', allergens: [], lowStock: false },
+  { _id: 'demo_104', name: 'לחמניה', category: 'dry', unit: 'unit', price: 2.2, supplierId: 'sup_dry', allergens: ['gluten'], lowStock: false },
+  { _id: 'demo_106', name: 'מיונז', category: 'dry', unit: 'kg', price: 29, supplierId: 'sup_dry', allergens: ['eggs'], lowStock: false },
+  { _id: 'demo_132', name: 'חמאת בוטנים', category: 'dry', unit: 'kg', price: 24.9, supplierId: 'sup_dry', allergens: ['nuts'], lowStock: false },
+  { _id: 'demo_128', name: 'טופו מטוגן', category: 'dry', unit: 'kg', price: 46, supplierId: 'sup_dry', allergens: ['soy'], lowStock: false },
+  { _id: 'demo_073', name: 'מלח ים', category: 'spices', unit: 'kg', price: 1.9, supplierId: 'sup_spices', allergens: [], lowStock: false },
+  { _id: 'demo_074', name: 'פלפל שחור גרוס', category: 'spices', unit: 'kg', price: 17, supplierId: 'sup_spices', allergens: [], lowStock: true, stockQty: 0.4, minStock: 2 },
+  { _id: 'demo_084', name: 'חרדל', category: 'spices', unit: 'kg', price: 30, supplierId: 'sup_spices', allergens: ['mustard'], lowStock: false },
+  { _id: 'demo_085', name: 'רוטב סויה', category: 'spices', unit: 'liter', price: 35, supplierId: 'sup_spices', allergens: ['soy'], lowStock: false },
+  { _id: 'demo_086', name: 'טחינה', category: 'spices', unit: 'kg', price: 37.6, supplierId: 'sup_spices', allergens: ['sesame'], lowStock: false },
+  { _id: 'demo_173', name: 'שומשום שחור', category: 'spices', unit: 'kg', price: 65, supplierId: 'sup_spices', allergens: ['sesame'], lowStock: false },
+  { _id: 'demo_116', name: 'ג\'ינג\'ר', category: 'spices', unit: 'kg', price: 45, supplierId: 'sup_spices', allergens: [], lowStock: false }
+];
+
+class Component extends DCLogic {
+  componentDidMount() {
+    import('./carousel-helpers.js').then(m => { this._car = m; this._carDispose = m.attachCarouselWatcher(); });
+  }
+  componentWillUnmount() {
+    if (this._carDispose) this._carDispose();
+  }
+  carPrev(e) { if (this._car) this._car.scrollCarousel(e.currentTarget, -1); }
+  carNext(e) { if (this._car) this._car.scrollCarousel(e.currentTarget, 1); }
+  carDot(e) { if (this._car) this._car.scrollCarouselToDot(e.currentTarget); }
+
+  state = {
+    activeTab: 'inventory',
+    products: BASE_PRODUCTS.map(p => ({ ...p, allergens: [...p.allergens] })),
+    search: '',
+    categoryFilters: new Set(),
+    allergenFilters: new Set(),
+    lowStockOnly: false,
+    sortBy: null,
+    sortDir: 'asc',
+    selected: new Set(),
+    panelOpen: true,
+    popoverId: null,
+    modalOpen: false,
+    modalMode: 'add',
+    modalId: null,
+    draft: { name: '', category: 'vegetables', unit: 'kg', price: '', allergens: new Set(), lowStock: false },
+    confirmOpen: false,
+    confirmMessage: '',
+    confirmAction: null,
+    confirmTargetId: null,
+    toastVisible: false,
+    toastMessage: ''
+  };
+
+  showToast(msg) {
+    clearTimeout(this._toastTimer);
+    this.setState({ toastVisible: true, toastMessage: msg });
+    this._toastTimer = setTimeout(() => this.setState({ toastVisible: false }), 2500);
+  }
+
+  setTab(tab) { this.setState({ activeTab: tab, selected: new Set(), popoverId: null }); }
+  onSearchChange(v) { this.setState({ search: v }); }
+
+  toggleCategory(key) {
+    this.setState(s => {
+      const next = new Set(s.categoryFilters);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return { categoryFilters: next };
+    });
+  }
+  toggleAllergenFilter(key) {
+    this.setState(s => {
+      const next = new Set(s.allergenFilters);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return { allergenFilters: next };
+    });
+  }
+  toggleLowStock() { this.setState(s => ({ lowStockOnly: !s.lowStockOnly })); }
+  clearFilters() { this.setState({ categoryFilters: new Set(), allergenFilters: new Set(), lowStockOnly: false }); }
+  togglePanel() { this.setState(s => ({ panelOpen: !s.panelOpen })); }
+
+  setSort(field) {
+    this.setState(s => s.sortBy === field
+      ? { sortDir: s.sortDir === 'asc' ? 'desc' : 'asc' }
+      : { sortBy: field, sortDir: 'asc' });
+  }
+
+  toggleSelect(id) {
+    this.setState(s => {
+      const next = new Set(s.selected);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return { selected: next };
+    });
+  }
+  toggleSelectAll(visibleIds) {
+    this.setState(s => {
+      const allSel = visibleIds.length > 0 && visibleIds.every(id => s.selected.has(id));
+      return { selected: allSel ? new Set() : new Set(visibleIds) };
+    });
+  }
+  clearSelection() { this.setState({ selected: new Set() }); }
+  togglePopover(id) { this.setState(s => ({ popoverId: s.popoverId === id ? null : id })); }
+  stopPropagation(e) { if (e && e.stopPropagation) e.stopPropagation(); }
+
+  openAddModal() {
+    this.setState({ modalOpen: true, modalMode: 'add', modalId: null, draft: { name: '', category: 'vegetables', unit: 'kg', price: '', allergens: new Set(), lowStock: false } });
+  }
+  openEditModal(id) {
+    const p = this.state.products.find(x => x._id === id);
+    if (!p) return;
+    this.setState({ modalOpen: true, modalMode: 'edit', modalId: id, draft: { name: p.name, category: p.category, unit: p.unit, price: String(p.price), allergens: new Set(p.allergens), lowStock: p.lowStock } });
+  }
+  closeModal() { this.setState({ modalOpen: false }); }
+  setDraftName(v) { this.setState(s => ({ draft: { ...s.draft, name: v } })); }
+  setDraftPrice(v) { this.setState(s => ({ draft: { ...s.draft, price: v } })); }
+  selectDraftCategory(k) { this.setState(s => ({ draft: { ...s.draft, category: k } })); }
+  selectDraftUnit(k) { this.setState(s => ({ draft: { ...s.draft, unit: k } })); }
+  toggleDraftLowStock() { this.setState(s => ({ draft: { ...s.draft, lowStock: !s.draft.lowStock } })); }
+  toggleDraftAllergen(k) {
+    this.setState(s => {
+      const next = new Set(s.draft.allergens);
+      next.has(k) ? next.delete(k) : next.add(k);
+      return { draft: { ...s.draft, allergens: next } };
+    });
+  }
+
+  saveDraft() {
+    const { draft, modalMode, modalId, products } = this.state;
+    if (!draft.name.trim()) return;
+    const price = parseFloat(draft.price) || 0;
+    if (modalMode === 'add') {
+      const newProduct = { _id: 'demo_new_' + Date.now(), name: draft.name.trim(), category: draft.category, unit: draft.unit, price, supplierId: '', allergens: Array.from(draft.allergens), lowStock: draft.lowStock };
+      this.setState({ products: [newProduct, ...products], modalOpen: false });
+      this.showToast('המוצר נוסף בהצלחה');
+    } else {
+      const next = products.map(p => p._id === modalId ? { ...p, name: draft.name.trim(), category: draft.category, unit: draft.unit, price, allergens: Array.from(draft.allergens), lowStock: draft.lowStock } : p);
+      this.setState({ products: next, modalOpen: false });
+      this.showToast('המוצר עודכן בהצלחה');
+    }
+  }
+
+  askDeleteProduct(id) {
+    const p = this.state.products.find(x => x._id === id);
+    this.setState({ confirmOpen: true, confirmMessage: 'האם למחוק את "' + (p ? p.name : '') + '"?', confirmAction: 'delete', confirmTargetId: id });
+  }
+  askBulkDelete() {
+    if (this.state.selected.size === 0) return;
+    this.setState({ confirmOpen: true, confirmMessage: 'למחוק ' + this.state.selected.size + ' מוצרים?', confirmAction: 'bulkDelete', confirmTargetId: null });
+  }
+  cancelConfirm() { this.setState({ confirmOpen: false, confirmAction: null, confirmTargetId: null }); }
+  runConfirm() {
+    const { confirmAction, confirmTargetId, products, selected } = this.state;
+    if (confirmAction === 'delete') {
+      this.setState({ products: products.filter(p => p._id !== confirmTargetId), confirmOpen: false });
+      this.showToast('המוצר נמחק');
+    } else if (confirmAction === 'bulkDelete') {
+      this.setState({ products: products.filter(p => !selected.has(p._id)), selected: new Set(), confirmOpen: false });
+      this.showToast('המוצרים נמחקו');
+    }
+  }
+
+  renderVals() {
+    const s = this.state;
+    const navBase = { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', fontSize: '13px', fontWeight: 600, borderRadius: '999px', cursor: 'pointer', transition: 'all .2s ease', whiteSpace: 'nowrap' };
+    const navActive = { ...navBase, background: 'linear-gradient(180deg, var(--color-primary), var(--color-primary-hover))', color: '#fff', boxShadow: 'var(--shadow-glow)' };
+    const navInactive = { ...navBase, color: 'var(--color-text-muted)' };
+
+    let products = s.products.map(p => ({ ...p }));
+
+    if (s.lowStockOnly) products = products.filter(p => p.lowStock);
+    if (s.categoryFilters.size > 0) products = products.filter(p => s.categoryFilters.has(p.category));
+    if (s.allergenFilters.size > 0) products = products.filter(p => p.allergens.some(a => s.allergenFilters.has(a)));
+    const search = s.search.trim();
+    if (search) products = products.filter(p => p.name.includes(search));
+
+    if (s.sortBy) {
+      const dir = s.sortDir === 'asc' ? 1 : -1;
+      products = [...products].sort((a, b) => {
+        let cmp = 0;
+        if (s.sortBy === 'name') cmp = a.name.localeCompare(b.name, 'he');
+        else if (s.sortBy === 'category') cmp = CATEGORY_LABELS[a.category].localeCompare(CATEGORY_LABELS[b.category], 'he');
+        else if (s.sortBy === 'supplier') cmp = (SUPPLIER_NAMES[a.supplierId] || '').localeCompare(SUPPLIER_NAMES[b.supplierId] || '', 'he');
+        else if (s.sortBy === 'price') cmp = a.price - b.price;
+        return cmp * dir;
+      });
+    }
+
+    const visibleIds = products.map(p => p._id);
+    const allSelected = visibleIds.length > 0 && visibleIds.every(id => s.selected.has(id));
+
+    const productRows = products.map(p => ({
+      _id: p._id,
+      name: p.name,
+      categoryLabel: CATEGORY_LABELS[p.category] || p.category,
+      unitLabel: UNIT_LABELS[p.unit] || p.unit,
+      supplierName: SUPPLIER_NAMES[p.supplierId] || '—',
+      priceLabel: p.price.toFixed(2),
+      lowStock: p.lowStock,
+      lowStockTooltip: p.lowStock ? ('מלאי נוכחי: ' + p.stockQty + ' ' + (UNIT_LABELS[p.unit] || p.unit) + ' (מתחת לסף ' + p.minStock + ')') : '',
+      hasAllergens: p.allergens.length > 0,
+      noAllergens: p.allergens.length === 0,
+      allergenCount: p.allergens.length,
+      allergenChips: p.allergens.map(a => ({ key: a, label: ALLERGEN_LABELS[a] || a })),
+      popoverOpen: s.popoverId === p._id,
+      selected: s.selected.has(p._id),
+      rowStyle: { display: 'grid', gridTemplateColumns: '2.1fr 1fr 1fr 1fr 0.7fr 0.9fr 84px 36px', gap: 'var(--space-2)', padding: 'var(--space-3) var(--space-4)', borderBottom: '1px solid var(--border-row)', alignItems: 'center', transition: 'background .15s ease' },
+      onTogglePopover: () => this.togglePopover(p._id),
+      onEdit: () => this.openEditModal(p._id),
+      onDelete: () => this.askDeleteProduct(p._id),
+      onToggleSelect: () => this.toggleSelect(p._id)
+    }));
+
+    const catCounts = {};
+    const algCounts = {};
+    s.products.forEach(p => {
+      catCounts[p.category] = (catCounts[p.category] || 0) + 1;
+      p.allergens.forEach(a => { algCounts[a] = (algCounts[a] || 0) + 1; });
+    });
+
+    const categoryOptions = Object.keys(CATEGORY_LABELS).map(key => ({
+      key, label: CATEGORY_LABELS[key], count: catCounts[key] || 0,
+      checked: s.categoryFilters.has(key),
+      onToggle: () => this.toggleCategory(key)
+    }));
+    const allergenOptions = Object.keys(algCounts).map(key => ({
+      key, label: ALLERGEN_LABELS[key] || key, count: algCounts[key],
+      checked: s.allergenFilters.has(key),
+      onToggle: () => this.toggleAllergenFilter(key)
+    }));
+
+    const chipStyle = (active) => ({
+      padding: '7px 14px', borderRadius: '999px', fontSize: 'var(--fs-xs)', fontWeight: 600, cursor: 'pointer',
+      border: active ? 'none' : '1px solid var(--border-default)',
+      background: active ? 'linear-gradient(180deg, var(--color-primary), var(--color-primary-hover))' : 'var(--bg-glass)',
+      color: active ? '#fff' : 'var(--color-text-secondary)'
+    });
+
+    const draftCategoryOptions = Object.keys(CATEGORY_LABELS).map(key => ({
+      key, label: CATEGORY_LABELS[key], style: chipStyle(s.draft.category === key), onSelect: () => this.selectDraftCategory(key)
+    }));
+    const draftUnitOptions = Object.keys(UNIT_LABELS).map(key => ({
+      key, label: UNIT_LABELS[key], style: chipStyle(s.draft.unit === key), onSelect: () => this.selectDraftUnit(key)
+    }));
+    const draftAllergenOptions = Object.keys(ALLERGEN_LABELS).map(key => ({
+      key, label: ALLERGEN_LABELS[key], style: chipStyle(s.draft.allergens.has(key)), onToggle: () => this.toggleDraftAllergen(key)
+    }));
+
+    return {
+      carPrev: (e) => this.carPrev(e),
+      carNext: (e) => this.carNext(e),
+      carDot: (e) => this.carDot(e),
+      isInventoryTab: s.activeTab === 'inventory',
+      isOtherTab: s.activeTab !== 'inventory',
+      otherTabLabel: { dashboard: 'הדשבורד', recipes: 'ספר המתכונים', menus: 'בניית התפריטים', venues: 'ניהול האתרים' }[s.activeTab] || '',
+      goDashboard: () => this.setTab('dashboard'),
+      goInventory: () => this.setTab('inventory'),
+      goRecipes: () => this.setTab('recipes'),
+      goMenus: () => this.setTab('menus'),
+      goVenues: () => this.setTab('venues'),
+      navStyleDashboard: s.activeTab === 'dashboard' ? navActive : navInactive,
+      navStyleInventory: s.activeTab === 'inventory' ? navActive : navInactive,
+      navStyleRecipes: s.activeTab === 'recipes' ? navActive : navInactive,
+      navStyleMenus: s.activeTab === 'menus' ? navActive : navInactive,
+      navStyleVenues: s.activeTab === 'venues' ? navActive : navInactive,
+
+      panelOpen: s.panelOpen,
+      togglePanel: () => this.togglePanel(),
+      hasActiveFilters: s.categoryFilters.size > 0 || s.allergenFilters.size > 0 || s.lowStockOnly,
+      clearFilters: () => this.clearFilters(),
+      lowStockOnly: s.lowStockOnly,
+      toggleLowStock: () => this.toggleLowStock(),
+      categoryOptions,
+      allergenOptions,
+
+      search: s.search,
+      onSearchChange: (v) => this.onSearchChange(v),
+      totalCount: s.products.length,
+      filteredCount: products.length,
+      isEmpty: products.length === 0,
+      openAddModal: () => this.openAddModal(),
+
+      hasSelection: s.selected.size > 0,
+      selectedCount: s.selected.size,
+      askBulkDelete: () => this.askBulkDelete(),
+      clearSelection: () => this.clearSelection(),
+
+      setSortName: () => this.setSort('name'),
+      setSortCategory: () => this.setSort('category'),
+      setSortSupplier: () => this.setSort('supplier'),
+      setSortPrice: () => this.setSort('price'),
+      nameSortUp: s.sortBy === 'name' && s.sortDir === 'asc',
+      nameSortDown: s.sortBy === 'name' && s.sortDir === 'desc',
+      categorySortUp: s.sortBy === 'category' && s.sortDir === 'asc',
+      categorySortDown: s.sortBy === 'category' && s.sortDir === 'desc',
+      supplierSortUp: s.sortBy === 'supplier' && s.sortDir === 'asc',
+      supplierSortDown: s.sortBy === 'supplier' && s.sortDir === 'desc',
+      priceSortUp: s.sortBy === 'price' && s.sortDir === 'asc',
+      priceSortDown: s.sortBy === 'price' && s.sortDir === 'desc',
+
+      allSelected,
+      toggleSelectAll: () => this.toggleSelectAll(visibleIds),
+      products: productRows,
+
+      modalOpen: s.modalOpen,
+      modalTitle: s.modalMode === 'add' ? 'הוספת מוצר' : 'עריכת מוצר',
+      closeModal: () => this.closeModal(),
+      stopPropagation: (e) => this.stopPropagation(e),
+      draftName: s.draft.name,
+      setDraftName: (v) => this.setDraftName(v),
+      draftPrice: s.draft.price,
+      setDraftPrice: (v) => this.setDraftPrice(v),
+      draftLowStock: s.draft.lowStock,
+      toggleDraftLowStock: () => this.toggleDraftLowStock(),
+      draftCategoryOptions,
+      draftUnitOptions,
+      draftAllergenOptions,
+      saveDraft: () => this.saveDraft(),
+
+      confirmOpen: s.confirmOpen,
+      confirmMessage: s.confirmMessage,
+      cancelConfirm: () => this.cancelConfirm(),
+      runConfirm: () => this.runConfirm(),
+
+      toastVisible: s.toastVisible,
+      toastMessage: s.toastMessage
+    };
+  }
+}
+</script>
+</body>
+</html>

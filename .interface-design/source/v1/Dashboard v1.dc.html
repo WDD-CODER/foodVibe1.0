@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="./colors_and_type.css">
+  <style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.96) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    body { margin: 0; }
+    a { color: var(--color-primary); text-decoration: none; }
+    a:hover { color: var(--color-primary-hover); }
+    ::selection { background: var(--color-primary-soft); }
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); }
+    @media (max-width: 1023px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 599px) { .kpi-grid { grid-template-columns: 1fr; } }
+    .activity-row { display: grid; grid-template-columns: auto 1fr auto auto; gap: var(--space-3); align-items: center; }
+    @media (max-width: 699px) { .activity-row { grid-template-columns: auto 1fr; row-gap: 6px; } .activity-row .activity-changes, .activity-row .activity-badge { grid-column: 2; } }
+  </style>
+</helmet>
+
+<div dir="rtl" style="position: relative; min-height: 100vh; background: var(--bg-body); font-family: var(--font-sans); overflow-x: hidden;">
+  <div style="position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse 700px 480px at 85% 15%, rgba(20,184,166,0.12), transparent), radial-gradient(ellipse 550px 550px at 15% 75%, rgba(251,191,36,0.08), transparent), radial-gradient(ellipse 450px 350px at 50% 50%, rgba(14,165,233,0.06), transparent);"></div>
+
+  <div style="position: relative; z-index: 1;">
+
+    <!-- TOP NAV -->
+    <nav style="position: sticky; top: 0; z-index: 50; display: flex; align-items: center; height: 3.5rem; padding: 0 var(--space-6); gap: var(--space-6); background: var(--bg-frosted-nav); backdrop-filter: var(--blur-nav); -webkit-backdrop-filter: var(--blur-nav); border-bottom: 1px solid var(--border-glass); box-shadow: var(--shadow-nav);">
+      <div style="display: flex; align-items: center; gap: var(--space-2); flex-shrink: 0;">
+        <div style="width: 32px; height: 32px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)); display: grid; place-content: center; color: var(--color-text-on-primary); font-weight: var(--fw-extrabold); font-size: var(--fs-sm); box-shadow: var(--shadow-glow);">fC</div>
+        <span style="font-weight: var(--fw-bold); font-size: var(--fs-lg); color: var(--color-text-main); letter-spacing: var(--tracking-tight);">foodCo</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 2px; padding: 4px; background: var(--bg-subtle); border: 1px solid var(--border-glass); border-radius: var(--radius-full); margin-inline-start: var(--space-4);">
+        <a href="Dashboard.dc.html" style="{{ navStyleDashboard }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
+          דשבורד
+        </a>
+        <a href="Inventory.dc.html" style="{{ navStyleInventory }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="M12 22V12"></path><path d="M3.29 7 12 12l8.71-5"></path><path d="m7.5 4.27 9 5.15"></path></svg>
+          מלאי
+        </a>
+        <a href="RecipeBook.dc.html" style="{{ navStyleRecipes }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg>
+          ספר מתכונים
+        </a>
+        <a href="MenuIntelligence.dc.html" style="{{ navStyleMenus }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 6 4 14"></path><path d="M12 6v14"></path><path d="M8 8v12"></path><path d="M4 4v16"></path></svg>
+          בניית תפריטים
+        </a>
+        <a href="MenuLibrary.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"></path></svg>
+          ספריית תפריטים
+        </a>
+        <a href="Venues.dc.html" style="{{ navStyleVenues }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          אתרים
+        </a>
+        <a href="Suppliers.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path><path d="M15 18H9"></path><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path><circle cx="17" cy="18" r="2"></circle><circle cx="7" cy="18" r="2"></circle></svg>
+          ספקים
+        </a>
+        <a href="Equipment.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+          ציוד
+        </a>
+        <a href="MetadataManager.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v6m0 10v6M4.22 4.22l4.24 4.24m6.28 6.28 4.24 4.24M1 12h6m10 0h6M4.22 19.78l4.24-4.24m6.28-6.28 4.24-4.24"></path></svg>
+          מטא-דאטה
+        </a>
+        <a href="Trash.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          אשפה
+        </a>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: var(--space-2); margin-inline-start: auto; flex-shrink: 0;">
+        <button style="display: grid; place-content: center; width: 34px; height: 34px; background: var(--bg-glass); color: var(--color-text-muted); border: 1px solid var(--border-default); border-radius: var(--radius-md); cursor: pointer;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+        </button>
+        <div style="display: inline-flex; align-items: center; gap: var(--space-2); padding: 4px 10px 4px 4px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-full);">
+          <span style="display: grid; place-content: center; width: 26px; height: 26px; background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)); color: #fff; border-radius: 50%; font-weight: var(--fw-bold); font-size: var(--fs-xs);">רכ</span>
+          <span style="font-weight: var(--fw-semibold); font-size: var(--fs-sm); color: var(--color-text-main);">רועי כהן</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- MAIN -->
+    <sc-if value="{{ isMainView }}" hint-placeholder-val="{{ true }}">
+      <div style="max-width: 1200px; margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-12);">
+
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-6); flex-wrap: wrap;">
+          <div>
+            <h1 style="margin: 0; font-size: var(--fs-xl); font-weight: var(--fw-bold); letter-spacing: var(--tracking-tight); color: var(--color-text-main);">דשבורד</h1>
+            <p style="margin: 2px 0 0; font-size: var(--fs-sm); color: var(--color-text-muted);">סקירה כללית של המטבח</p>
+          </div>
+          <div style="display: flex; gap: var(--space-2);">
+            <button onClick="{{ notReady }}" style="padding: 8px 16px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-full); color: var(--color-text-secondary); font-weight: var(--fw-semibold); font-size: var(--fs-xs); cursor: pointer;">הגדרות ליבה</button>
+            <button onClick="{{ notReady }}" style="padding: 8px 16px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-full); color: var(--color-text-secondary); font-weight: var(--fw-semibold); font-size: var(--fs-xs); cursor: pointer;">ספקים</button>
+            <button onClick="{{ notReady }}" style="padding: 8px 16px; background: var(--bg-glass); border: 1px solid rgba(220,38,38,0.25); border-radius: var(--radius-full); color: var(--color-danger); font-weight: var(--fw-semibold); font-size: var(--fs-xs); cursor: pointer;">פח אשפה</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid" style="margin-bottom: var(--space-6);">
+
+          <div style="position: relative; overflow: hidden; padding: var(--space-4) var(--space-5); border-radius: var(--radius-lg); border: 1px solid var(--border-glass); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); box-shadow: var(--shadow-glass); animation: fadeIn 0.3s var(--ease-spring);">
+            <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3);">
+              <span style="display: grid; place-content: center; width: 24px; height: 24px; border-radius: var(--radius-sm); background: var(--color-primary-soft); color: var(--color-primary-hover);">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="M12 22V12"></path></svg>
+              </span>
+              <span style="font-size: var(--fs-xs); font-weight: var(--fw-medium); color: var(--color-text-muted);">סה"כ מוצרים</span>
+            </div>
+            <div class="kpi-number" style="margin-bottom: var(--space-3);">24</div>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding-top: var(--space-3); border-top: 1px dashed var(--border-default);">
+              <a href="Inventory.dc.html" style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-primary-hover); display: inline-flex; align-items: center; gap: 4px;">
+                צפייה במלאי
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+              </a>
+              <svg width="52" height="18" viewBox="0 0 60 18" style="color: var(--color-text-main);"><path d="M0 12 L10 11 L20 9 L30 10 L40 6 L50 7 L60 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </div>
+          </div>
+
+          <div style="position: relative; overflow: hidden; padding: var(--space-4) var(--space-5); border-radius: var(--radius-lg); border: 1px solid var(--border-glass); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); box-shadow: var(--shadow-glass); animation: fadeIn 0.3s var(--ease-spring);">
+            <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3);">
+              <span style="display: grid; place-content: center; width: 24px; height: 24px; border-radius: var(--radius-sm); background: var(--color-primary-soft); color: var(--color-primary-hover);">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg>
+              </span>
+              <span style="font-size: var(--fs-xs); font-weight: var(--fw-medium); color: var(--color-text-muted);">סה"כ מתכונים</span>
+            </div>
+            <div class="kpi-number" style="margin-bottom: var(--space-3);">14</div>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding-top: var(--space-3); border-top: 1px dashed var(--border-default);">
+              <a href="RecipeBook.dc.html" style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-primary-hover); display: inline-flex; align-items: center; gap: 4px;">
+                צפייה במתכונים
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+              </a>
+              <svg width="52" height="18" viewBox="0 0 60 18" style="color: var(--color-text-main);"><path d="M0 12 L10 13 L20 10 L30 11 L40 7 L50 8 L60 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </div>
+          </div>
+
+          <div style="position: relative; overflow: hidden; padding: var(--space-4) var(--space-5); border-radius: var(--radius-lg); border: 1px solid var(--border-glass); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); box-shadow: var(--shadow-glass); animation: fadeIn 0.3s var(--ease-spring);">
+            <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3);">
+              <span style="display: grid; place-content: center; width: 24px; height: 24px; border-radius: var(--radius-sm); background: var(--bg-warning); color: var(--text-warning);">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+              </span>
+              <span style="font-size: var(--fs-xs); font-weight: var(--fw-medium); color: var(--color-text-muted);">מלאי נמוך</span>
+            </div>
+            <div class="kpi-number" style="color: var(--text-warning); margin-bottom: var(--space-3);">3</div>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding-top: var(--space-3); border-top: 1px dashed var(--border-default);">
+              <a href="Inventory.dc.html" style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-primary-hover); display: inline-flex; align-items: center; gap: 4px;">
+                צפייה במלאי
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+              </a>
+              <svg width="52" height="18" viewBox="0 0 60 18" style="color: var(--text-warning);"><path d="M0 8 L10 10 L20 7 L30 12 L40 11 L50 15 L60 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </div>
+          </div>
+
+          <div style="position: relative; overflow: hidden; padding: var(--space-4) var(--space-5); border-radius: var(--radius-lg); border: 1px solid var(--border-glass); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); box-shadow: var(--shadow-glass); animation: fadeIn 0.3s var(--ease-spring);">
+            <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3);">
+              <span style="display: grid; place-content: center; width: 24px; height: 24px; border-radius: var(--radius-sm); background: rgba(14,165,233,0.12); color: var(--color-info);">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              </span>
+              <span style="font-size: var(--fs-xs); font-weight: var(--fw-medium); color: var(--color-text-muted);">מתכונים ממתינות לאישור</span>
+            </div>
+            <div class="kpi-number" style="color: var(--color-info); margin-bottom: var(--space-3);">2</div>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding-top: var(--space-3); border-top: 1px dashed var(--border-default);">
+              <a href="RecipeBook.dc.html" style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-primary-hover); display: inline-flex; align-items: center; gap: 4px;">
+                צפייה במתכונים
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+              </a>
+              <svg width="52" height="18" viewBox="0 0 60 18" style="color: var(--color-info);"><path d="M0 10 L10 9 L20 11 L30 8 L40 9 L50 6 L60 5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass); padding: var(--space-5);">
+          <h2 style="margin: 0 0 var(--space-4); font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--color-text-main);">פעילות אחרונה</h2>
+
+          <sc-for list="{{ activity }}" as="item" hint-placeholder-count="5">
+            <div class="activity-row" style="padding: var(--space-3) var(--space-3); border-radius: var(--radius-md); margin-bottom: 6px; background: rgba(255,255,255,0.4);">
+              <span style="display: grid; place-content: center; width: 30px; height: 30px; border-radius: var(--radius-md); background: var(--color-primary-soft); color: var(--color-primary-hover); font-weight: var(--fw-bold); font-size: var(--fs-xs); flex-shrink: 0;">{{ item.avatarLetter }}</span>
+              <div style="display: flex; align-items: center; gap: var(--space-2); min-width: 0;">
+                <span style="font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-muted-light); text-transform: uppercase; letter-spacing: var(--tracking-wide); flex-shrink: 0;">{{ item.entityLabel }}</span>
+                <span style="font-size: var(--fs-base); font-weight: var(--fw-medium); color: var(--color-text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ item.name }}</span>
+              </div>
+              <div class="activity-changes" style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <sc-if value="{{ item.hasChange }}" hint-placeholder-val="{{ false }}">
+                  <span style="font-size: var(--fs-xs); font-family: var(--font-mono); padding: 4px 9px; border-radius: var(--radius-sm); background: var(--color-primary-soft); color: var(--color-primary-hover);">{{ item.changeText }}</span>
+                </sc-if>
+                <span style="font-size: var(--fs-xs); color: var(--color-text-muted-light);">{{ item.time }}</span>
+              </div>
+              <span class="activity-badge" style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: var(--radius-full); background: {{ item.badgeBg }}; color: {{ item.badgeColor }}; font-size: var(--fs-xs); font-weight: var(--fw-semibold); letter-spacing: var(--tracking-wide); text-transform: uppercase;">{{ item.actionLabel }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- COMING SOON -->
+    <sc-if value="{{ isOtherView }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 3.5rem); padding: var(--space-6);">
+        <div style="text-align: center; background: var(--bg-glass); backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-xl); box-shadow: var(--shadow-glass); padding: var(--space-10) var(--space-12); animation: fadeIn 0.25s var(--ease-spring);">
+          <div style="width: 56px; height: 56px; margin: 0 auto var(--space-4); border-radius: var(--radius-lg); background: var(--color-primary-soft); display: grid; place-content: center; color: var(--color-primary);">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4"></path><path d="M12 16h.01"></path><circle cx="12" cy="12" r="10"></circle></svg>
+          </div>
+          <h2 style="margin: 0 0 var(--space-2); font-size: var(--fs-lg); font-weight: var(--fw-semibold); color: var(--color-text-main);">{{ otherViewLabel }} בקרוב</h2>
+          <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-muted); max-width: 320px;">המסך הזה עדיין בבנייה בסבב הראשון של הרפקטור</p>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+
+  <!-- TOAST -->
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 400; display: flex; align-items: center; gap: var(--space-2); padding: 11px 20px; background: var(--color-text-main); color: #fff; border-radius: var(--radius-full); font-size: var(--fs-sm); font-weight: var(--fw-medium); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring);">
+      {{ toastMessage }}
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const ACTIVITY = [
+  { id: 1, entity: 'product', entityLabel: 'מוצר', name: 'פרגיות', field: 'מחיר', from: '65', to: '69.9', action: 'updated', time: 'לפני 2 דק׳' },
+  { id: 2, entity: 'recipe', entityLabel: 'מתכון', name: 'פסטה ברוטב שמנת', action: 'created', time: 'לפני 15 דק׳' },
+  { id: 3, entity: 'product', entityLabel: 'מוצר', name: 'קמח אורז', field: 'מלאי מינימלי', from: '0', to: '8', action: 'updated', time: 'לפני 40 דק׳' },
+  { id: 4, entity: 'recipe', entityLabel: 'מתכון', name: 'סלט יווני', action: 'deleted', time: 'לפני שעה' },
+  { id: 5, entity: 'product', entityLabel: 'מוצר', name: 'טחינה', field: 'מחיר', from: '35', to: '37.6', action: 'updated', time: 'לפני 3 שעות' },
+  { id: 6, entity: 'recipe', entityLabel: 'מתכון', name: 'עוגת שוקולד', field: 'סטטוס', from: 'ממתין', to: 'מאושר', action: 'updated', time: 'אתמול' },
+  { id: 7, entity: 'product', entityLabel: 'מוצר', name: 'בצל צהוב', action: 'created', time: 'אתמול' }
+];
+
+class Component extends DCLogic {
+  state = {
+    view: 'main',
+    toastVisible: false,
+    toastMessage: ''
+  };
+
+  showToast(msg) {
+    clearTimeout(this._toastTimer);
+    this.setState({ toastVisible: true, toastMessage: msg });
+    this._toastTimer = setTimeout(() => this.setState({ toastVisible: false }), 2200);
+  }
+  notReady() { this.showToast('המסך הזה בבנייה'); }
+  setView(v) { this.setState({ view: v }); }
+
+  renderVals() {
+    const s = this.state;
+    const navBase = { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', fontSize: '13px', fontWeight: 600, borderRadius: '999px', cursor: 'pointer', transition: 'all .2s ease', whiteSpace: 'nowrap' };
+    const navActive = { ...navBase, background: 'linear-gradient(180deg, var(--color-primary), var(--color-primary-hover))', color: '#fff', boxShadow: 'var(--shadow-glow)' };
+    const navInactive = { ...navBase, color: 'var(--color-text-muted)' };
+
+    const actionMap = {
+      created: { bg: 'var(--bg-success)', color: 'var(--text-success)', label: 'נוצר' },
+      updated: { bg: 'var(--bg-warning)', color: 'var(--text-warning)', label: 'עודכן' },
+      deleted: { bg: 'var(--bg-danger-subtle)', color: 'var(--color-danger)', label: 'נמחק' }
+    };
+    const activity = ACTIVITY.map(a => ({
+      avatarLetter: a.entity === 'product' ? 'מ' : 'ת',
+      entityLabel: a.entityLabel,
+      name: a.name,
+      hasChange: !!a.field,
+      changeText: a.field ? (a.field + ': ' + a.from + ' \u2192 ' + a.to) : '',
+      time: a.time,
+      badgeBg: actionMap[a.action].bg,
+      badgeColor: actionMap[a.action].color,
+      actionLabel: actionMap[a.action].label
+    }));
+
+    return {
+      isMainView: s.view === 'main',
+      isOtherView: s.view !== 'main',
+      otherViewLabel: { recipes: 'ספר המתכונים', menus: 'בניית התפריטים', venues: 'ניהול האתרים' }[s.view] || '',
+      goRecipes: () => this.setView('recipes'),
+      goMenus: () => this.setView('menus'),
+      goVenues: () => this.setView('venues'),
+      navStyleDashboard: navActive,
+      navStyleInventory: navInactive,
+      navStyleRecipes: s.view === 'recipes' ? navActive : navInactive,
+      navStyleMenus: s.view === 'menus' ? navActive : navInactive,
+      navStyleVenues: s.view === 'venues' ? navActive : navInactive,
+      notReady: () => this.notReady(),
+      activity,
+      toastVisible: s.toastVisible,
+      toastMessage: s.toastMessage
+    };
+  }
+}
+</script>
+</body>
+</html>

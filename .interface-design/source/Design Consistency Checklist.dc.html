@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="omelette-owns-print" content="1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="colors_and_type.css">
+<style>
+  body { margin: 0; font-family: 'Heebo', system-ui, sans-serif; background: var(--bg-body); }
+  a { color: var(--color-primary); }
+  a:hover { color: var(--color-primary-hover); }
+</style>
+</helmet>
+
+<div style="position: relative; min-height: 100vh; color: var(--color-text-main);">
+  <div style="position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse 700px 480px at 85% 15%, rgba(20,184,166,0.12), transparent), radial-gradient(ellipse 550px 550px at 15% 75%, rgba(251,191,36,0.08), transparent), radial-gradient(ellipse 450px 350px at 50% 50%, rgba(14,165,233,0.06), transparent);"></div>
+
+  <div style="position: relative; max-width: 900px; margin: 0 auto; padding: var(--space-8) var(--space-6) var(--space-12);">
+
+    <h1 style="margin: 0 0 var(--space-2); font-size: var(--fs-2xl); font-weight: var(--fw-bold); letter-spacing: var(--tracking-tight);">Design consistency — what changed</h1>
+    <p style="margin: 0 0 var(--space-6); font-size: var(--fs-base); color: var(--color-text-muted); max-width: 62ch;">Every item from the <a href="Design Consistency Audit.dc.html">audit</a> is checked off below, done or explicitly held. Open each screen to see it live.</p>
+
+    <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-2);"><span style="color: var(--color-success); font-size: var(--fs-md);">✓</span><b style="font-size: var(--fs-md);">A. Page width</b></div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Down to 3 widths: <b>1520</b> data screens (<a href="Inventory.dc.html">Inventory</a>, <a href="RecipeBook.dc.html">Recipe Book</a>, <a href="Equipment.dc.html">Equipment</a>, <a href="Suppliers.dc.html">Suppliers</a>); <b>1200</b> standard (<a href="Dashboard.dc.html">Dashboard</a>, <a href="Venues.dc.html">Venues</a>, <a href="MetadataManager.dc.html">Metadata</a>, <a href="MenuLibrary.dc.html">Menu Library</a>, <a href="RecipeBuilder.dc.html">Recipe Builder</a>, <a href="VenueDetail.dc.html">Venue Detail</a>); <b>720</b> narrow (<a href="Trash.dc.html">Trash</a>). Recipe Book 1560→1520, Menu Library 900→1200, Recipe Builder 1000→1200, Venue Detail 920→1200.</p>
+      </div>
+
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-2);"><span style="color: var(--color-success); font-size: var(--fs-md);">✓</span><b style="font-size: var(--fs-md);">B. Page padding</b></div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">One rule everywhere: <code>space-6</code> top/sides, <code>space-12</code> bottom. Fixed on <a href="MenuLibrary.dc.html">Menu Library</a>, <a href="MetadataManager.dc.html">Metadata</a>, <a href="Trash.dc.html">Trash</a>. Recipe Builder and Menu Intelligence keep a larger bottom pad — they have a sticky action bar/footer, which is the one legitimate exception.</p>
+      </div>
+
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-2);"><span style="color: var(--color-success); font-size: var(--fs-md);">✓</span><b style="font-size: var(--fs-md);">C. Page title</b></div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);"><a href="MetadataManager.dc.html">Metadata</a>'s title dropped from extrabold <code>--fs-2xl</code> + divider to standard bold <code>--fs-xl</code>, matching every list screen.</p>
+      </div>
+
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-warning); border: 1px solid var(--border-warning); border-radius: var(--radius-lg);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-2);"><span style="color: var(--text-warning); font-size: var(--fs-md);">◐</span><b style="font-size: var(--fs-md); color: var(--color-text-main);">C (cont.) — Menu Intelligence &amp; Recipe Builder titles</b></div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-main); line-height: var(--lh-relaxed);">Held, not done. <a href="MenuIntelligence.dc.html">Menu Intelligence</a> is a deliberate "printed menu paper" mockup — forcing the standard title bar onto it fights that design. <a href="RecipeBuilder.dc.html">Recipe Builder</a>'s editable name field already functions as its title. Tell me if you still want a title row added to either.</p>
+      </div>
+
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-2);"><span style="color: var(--color-success); font-size: var(--fs-md);">✓</span><b style="font-size: var(--fs-md);">D. Header block</b></div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">On closer inspection this was already fine: data screens share one header spec, overview screens share another. No change needed here beyond A–C above.</p>
+      </div>
+
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-2);"><span style="color: var(--color-success); font-size: var(--fs-md);">✓</span><b style="font-size: var(--fs-md);">E. Corner radius</b></div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Re-checked against real containers, not raw counts: cards/panels/list containers already use <code>--radius-lg</code> everywhere; <code>--radius-md</code> only shows up on inputs, rows and icon buttons, correctly. The one real miss was <a href="Trash.dc.html">Trash</a>'s item rows using raw <code>4px</code>/<code>6px</code> — now <code>--radius-xs</code>/<code>--radius-sm</code>.</p>
+      </div>
+
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-2);"><span style="color: var(--color-success); font-size: var(--fs-md);">✓</span><b style="font-size: var(--fs-md);">F. Primary buttons</b></div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">The 135°/180° "two gradients" read was wrong on closer look — 135° is only ever the logo mark and user-avatar chip, never a button; every real CTA is 180°. What was genuinely inconsistent — <a href="Venues.dc.html">Venues</a>' header button and modal buttons, and <a href="MenuIntelligence.dc.html">Menu Intelligence</a>'s save button — are now all <code>height: 38px</code> + <code>padding: 0 var(--space-4)</code>, matching Trash/Metadata/Menu Library. Modal footer buttons (Equipment, Suppliers, Inventory, Recipe Book) were already consistent at <code>9px 18px</code>/<code>9px 20px</code>.</p>
+      </div>
+
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-2);"><span style="color: var(--color-success); font-size: var(--fs-md);">✓</span><b style="font-size: var(--fs-md);">G. Shadows</b></div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Also cleared on re-check: the <code>--shadow-card</code> and <code>none !important</code> instances on Equipment/Suppliers are legitimate — mobile row-card hover states and the table→card collapse at 767px, not stray one-offs. Nothing to change.</p>
+      </div>
+
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-2);"><span style="color: var(--color-success); font-size: var(--fs-md);">✓</span><b style="font-size: var(--fs-md);">Cleanup — off-scale font sizes</b></div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">Raw <code>10px</code>/<code>10.5px</code>/<code>8px</code> on Dashboard, Suppliers and Recipe Builder raised to <code>--fs-xs</code> (12px), the smallest token on the scale.</p>
+      </div>
+
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-glass); backdrop-filter: var(--blur-glass); -webkit-backdrop-filter: var(--blur-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-2);"><span style="color: var(--color-success); font-size: var(--fs-md);">✓</span><b style="font-size: var(--fs-md);">Cleanup — nav pill literals</b></div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">The <code>font-size: 13px; font-weight: 600; border-radius: 999px</code> literal on every nav pill (13 files, ~9 pills each) is now <code>var(--fs-sm)</code> / <code>var(--fw-semibold)</code> / <code>var(--radius-full)</code> — same pixel result, can't drift from the token going forward.</p>
+      </div>
+
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-warning); border: 1px solid var(--border-warning); border-radius: var(--radius-lg);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-2);"><span style="color: var(--text-warning); font-size: var(--fs-md);">○</span><b style="font-size: var(--fs-md); color: var(--color-text-main);">Held for your decision — mobile nav pattern</b></div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-main); line-height: var(--lh-relaxed);">The design system calls for a bottom tab bar on mobile; every screen instead scrolls the same pill row horizontally. That's a real UX decision, not a bug — I didn't change it. Say the word and I'll build the bottom tab bar and swap it in everywhere.</p>
+      </div>
+
+      <div style="padding: var(--space-4) var(--space-5); background: var(--bg-warning); border: 1px solid var(--border-warning); border-radius: var(--radius-lg);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-2);"><span style="color: var(--text-warning); font-size: var(--fs-md);">○</span><b style="font-size: var(--fs-md); color: var(--color-text-main);">Held — empty states &amp; Inventory nav wiring</b></div>
+        <p style="margin: 0; font-size: var(--fs-sm); color: var(--color-text-main); line-height: var(--lh-relaxed);">Dashboard and Inventory have an empty-state message; the other list screens don't — worth one shared pattern once you tell me what it should say per screen. Also: Inventory's own nav item is wired with <code>onClick</code>+dynamic style instead of the <code>href</code> self-link every other screen uses — works fine, just structurally different code; low risk, left as-is unless you want it normalized.</p>
+      </div>
+
+    </div>
+
+    <div style="margin-top: var(--space-8); padding: var(--space-5); background: var(--bg-glass-strong); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); box-shadow: var(--shadow-glass);">
+      <b style="font-size: var(--fs-md);">Summary</b>
+      <p style="margin: var(--space-2) 0 0; font-size: var(--fs-sm); color: var(--color-text-secondary); line-height: var(--lh-relaxed);">10 of 13 audit items done. 3 held because they're product decisions, not styling bugs — mobile nav pattern, Menu Intelligence/Recipe Builder titles, and empty states. Say go on any of them and I'll execute.</p>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

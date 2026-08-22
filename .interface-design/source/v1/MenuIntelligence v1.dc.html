@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="./colors_and_type.css">
+  <link href="https://fonts.googleapis.com/css2?family=Suez+One&amp;family=Rubik:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.96) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    body { margin: 0; }
+    a { color: var(--color-primary); text-decoration: none; }
+    a:hover { color: var(--color-primary-hover); }
+    input:focus, button:focus { outline: none; }
+    .menu-leader { flex: 1; height: 1px; border-bottom: 1.5px dotted rgba(160,131,63,0.4); margin: 0 var(--space-2); transform: translateY(-3px); min-width: 12px; }
+    .menu-rule { flex: 1; max-width: 60px; height: 1px; background: linear-gradient(90deg, transparent, rgba(191,161,90,0.6)); }
+    .menu-rule.right { background: linear-gradient(90deg, rgba(191,161,90,0.6), transparent); }
+    .dish-desc { font-style: italic; font-size: var(--fs-xs); color: rgba(160,131,63,0.85); margin-top: 2px; }
+    @media (max-width: 640px) {
+      .fin-bar { flex-wrap: wrap !important; gap: var(--space-3) var(--space-5) !important; justify-content: center !important; }
+      .menu-leader { display: none; }
+    }
+  </style>
+</helmet>
+
+<div dir="rtl" style="position: relative; min-height: 100vh; background: var(--bg-body); font-family: var(--font-sans); overflow-x: hidden;">
+  <div style="position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse 700px 480px at 85% 15%, rgba(20,184,166,0.12), transparent), radial-gradient(ellipse 550px 550px at 15% 75%, rgba(251,191,36,0.08), transparent), radial-gradient(ellipse 450px 350px at 50% 50%, rgba(14,165,233,0.06), transparent);"></div>
+
+  <div style="position: relative; z-index: 1;">
+    <!-- TOP NAV -->
+    <nav style="position: sticky; top: 0; z-index: 50; display: flex; align-items: center; height: 3.5rem; padding: 0 var(--space-6); gap: var(--space-6); background: var(--bg-frosted-nav); backdrop-filter: var(--blur-nav); -webkit-backdrop-filter: var(--blur-nav); border-bottom: 1px solid var(--border-glass); box-shadow: var(--shadow-nav);">
+      <div style="display: flex; align-items: center; gap: var(--space-2); flex-shrink: 0;">
+        <div style="width: 32px; height: 32px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)); display: grid; place-content: center; color: var(--color-text-on-primary); font-weight: var(--fw-extrabold); font-size: var(--fs-sm); box-shadow: var(--shadow-glow);">fC</div>
+        <span style="font-weight: var(--fw-bold); font-size: var(--fs-lg); color: var(--color-text-main); letter-spacing: var(--tracking-tight);">foodCo</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 2px; padding: 4px; background: var(--bg-subtle); border: 1px solid var(--border-glass); border-radius: var(--radius-full); margin-inline-start: var(--space-4);">
+        <a href="Dashboard.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
+          דשבורד
+        </a>
+        <a href="Inventory.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="M12 22V12"></path><path d="M3.29 7 12 12l8.71-5"></path><path d="m7.5 4.27 9 5.15"></path></svg>
+          מלאי
+        </a>
+        <a href="RecipeBook.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg>
+          ספר מתכונים
+        </a>
+        <a href="MenuIntelligence.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); color: #fff; box-shadow: var(--shadow-glow);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 6 4 14"></path><path d="M12 6v14"></path><path d="M8 8v12"></path><path d="M4 4v16"></path></svg>
+          בניית תפריטים
+        </a>
+        <a href="MenuLibrary.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"></path></svg>
+          ספריית תפריטים
+        </a>
+        <a href="Venues.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          אתרים
+        </a>
+        <a href="Suppliers.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path><path d="M15 18H9"></path><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path><circle cx="17" cy="18" r="2"></circle><circle cx="7" cy="18" r="2"></circle></svg>
+          ספקים
+        </a>
+        <a href="Equipment.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+          ציוד
+        </a>
+        <a href="MetadataManager.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v6m0 10v6M4.22 4.22l4.24 4.24m6.28 6.28 4.24 4.24M1 12h6m10 0h6M4.22 19.78l4.24-4.24m6.28-6.28 4.24-4.24"></path></svg>
+          מטא-דאטה
+        </a>
+        <a href="Trash.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); border-radius: var(--radius-full); color: var(--color-text-muted);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          אשפה
+        </a>
+      </div>
+      <div style="display: flex; align-items: center; gap: var(--space-2); margin-inline-start: auto; flex-shrink: 0;">
+        <div style="display: inline-flex; align-items: center; gap: var(--space-2); padding: 4px 10px 4px 4px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-full);">
+          <span style="display: grid; place-content: center; width: 26px; height: 26px; background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)); color: #fff; border-radius: 50%; font-weight: var(--fw-bold); font-size: var(--fs-xs);">רכ</span>
+          <span style="font-weight: var(--fw-semibold); font-size: var(--fs-sm); color: var(--color-text-main);">רועי כהן</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- TOOLBAR PILLS -->
+    <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-2); flex-wrap: wrap; padding: var(--space-4) var(--space-6);">
+      <button onClick="{{ notReady }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-full); color: var(--color-text-secondary); font-size: var(--fs-xs); font-weight: var(--fw-semibold); cursor: pointer; backdrop-filter: var(--blur-glass);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg>
+        רשימת קניות
+      </button>
+      <button onClick="{{ notReady }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-full); color: var(--color-text-secondary); font-size: var(--fs-xs); font-weight: var(--fw-semibold); cursor: pointer; backdrop-filter: var(--blur-glass);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M9 12h6"></path><path d="M9 16h6"></path></svg>
+        צ׳קליסט
+      </button>
+      <button onClick="{{ notReady }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-full); color: var(--color-text-secondary); font-size: var(--fs-xs); font-weight: var(--fw-semibold); cursor: pointer; backdrop-filter: var(--blur-glass);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect width="12" height="8" x="6" y="14"></rect></svg>
+        הדפסה
+      </button>
+      <button onClick="{{ notReady }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-full); color: var(--color-text-secondary); font-size: var(--fs-xs); font-weight: var(--fw-semibold); cursor: pointer; backdrop-filter: var(--blur-glass);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="M12 22V12"></path><path d="M3.29 7 12 12l8.71-5"></path></svg>
+        הכל
+      </button>
+      <button onClick="{{ saveMenu }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 0 var(--space-4); height: 38px; background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover)); border: none; border-radius: var(--radius-full); color: #fff; font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer; box-shadow: var(--shadow-glow);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+        שמירת תפריט
+      </button>
+    </div>
+
+    <!-- PAPER -->
+    <div style="max-width: 660px; margin: 0 auto; padding: 0 var(--space-6) 7rem;">
+      <div style="background: linear-gradient(180deg, #fffdf8, #fdf9ef); border: 1.5px solid rgba(160,131,63,0.28); border-radius: var(--radius-sm); box-shadow: 0 24px 50px -24px rgba(15,23,42,0.2), 0 2px 10px rgba(15,23,42,0.05); padding: var(--space-8) var(--space-6); font-family: 'Rubik', var(--font-sans);">
+
+        <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(160,131,63,0.5), transparent); margin-bottom: var(--space-5);"></div>
+
+        <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-2); margin-bottom: var(--space-4); flex-wrap: wrap;">
+          <div style="position: relative;">
+            <button onClick="{{ toggleEventTypeDropdown }}" style="padding: 5px 16px; background: none; border: 1px solid rgba(160,131,63,0.4); border-radius: var(--radius-full); color: var(--color-accent-gold); font-family: 'Rubik', var(--font-sans); font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer;">{{ eventType }}</button>
+            <sc-if value="{{ eventTypeDropdownOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="position: absolute; top: calc(100% + 4px); right: 50%; transform: translateX(50%); z-index: 20; display: flex; flex-direction: column; background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-md); box-shadow: var(--shadow-modal); overflow: hidden; min-width: 150px; animation: popIn 0.15s var(--ease-spring);">
+                <sc-for list="{{ eventTypeOptions }}" as="e" hint-placeholder-count="5">
+                  <button onClick="{{ e.onSelect }}" style="{{ e.style }}">{{ e.label }}</button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+          <span style="color: rgba(160,131,63,0.5);">·</span>
+          <div style="position: relative;">
+            <button onClick="{{ toggleServingTypeDropdown }}" style="padding: 5px 16px; background: none; border: 1px solid var(--border-default); border-radius: var(--radius-full); color: var(--color-text-secondary); font-family: 'Rubik', var(--font-sans); font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer;">{{ servingType }}</button>
+            <sc-if value="{{ servingTypeDropdownOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="position: absolute; top: calc(100% + 4px); right: 50%; transform: translateX(50%); z-index: 20; display: flex; flex-direction: column; background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-md); box-shadow: var(--shadow-modal); overflow: hidden; min-width: 150px; animation: popIn 0.15s var(--ease-spring);">
+                <sc-for list="{{ servingTypeOptions }}" as="sv" hint-placeholder-count="3">
+                  <button onClick="{{ sv.onSelect }}" style="{{ sv.style }}">{{ sv.label }}</button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+
+        <input type="text" value="{{ menuName }}" onChange="{{ onMenuNameChange }}" placeholder="שם האירוע..." style="display: block; width: 100%; box-sizing: border-box; text-align: center; padding: var(--space-2); font-size: var(--fs-3xl); font-weight: var(--fw-regular); font-family: 'Suez One', var(--font-sans); color: var(--color-text-main); background: none; border: none; letter-spacing: 0; margin-bottom: var(--space-3);">
+
+        <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-2); margin-bottom: var(--space-5); flex-wrap: wrap;">
+          <span style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-full); font-size: var(--fs-sm); color: var(--color-text-secondary);">
+            <input type="number" value="{{ guestCount }}" onChange="{{ onGuestCountChange }}" min="0" style="width: 40px; text-align: center; background: none; border: none; font-weight: var(--fw-bold); color: var(--color-text-main); font-family: var(--font-sans); font-size: var(--fs-sm);">
+            אורחים
+          </span>
+          <span style="color: var(--color-text-muted-light);">·</span>
+          <span style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-full); font-size: var(--fs-sm); color: var(--color-text-secondary);">
+            <input type="date" value="{{ eventDate }}" onChange="{{ onEventDateChange }}" style="background: none; border: none; font-weight: var(--fw-medium); color: var(--color-text-main); font-family: var(--font-sans); font-size: var(--fs-sm);">
+          </span>
+        </div>
+
+        <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(160,131,63,0.45), transparent); margin-bottom: var(--space-6);"></div>
+
+        <sc-for list="{{ sections }}" as="sec" hint-placeholder-count="3">
+          <div style="margin-bottom: var(--space-8);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-3);">
+              <div style="position: relative;">
+                <button onClick="{{ sec.onToggleDropdown }}" style="background: none; border: none; padding: 0; font-family: 'Suez One', var(--font-sans); font-size: var(--fs-lg); font-weight: var(--fw-regular); color: var(--color-accent-gold); letter-spacing: 0.02em; cursor: pointer;">{{ sec.name }}</button>
+                <sc-if value="{{ sec.dropdownOpen }}" hint-placeholder-val="{{ false }}">
+                  <div style="position: absolute; top: calc(100% + 4px); right: 0; z-index: 20; display: flex; flex-direction: column; background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-md); box-shadow: var(--shadow-modal); overflow: hidden; min-width: 140px; animation: popIn 0.15s var(--ease-spring);">
+                    <sc-for list="{{ sec.nameOptions }}" as="n" hint-placeholder-count="4">
+                      <button onClick="{{ n.onSelect }}" style="{{ n.style }}">{{ n.label }}</button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+              <button onClick="{{ sec.onRemove }}" style="display: grid; place-content: center; width: 26px; height: 26px; background: none; border: none; border-radius: var(--radius-sm); color: var(--color-danger); cursor: pointer;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
+
+            <sc-for list="{{ sec.items }}" as="it" hint-placeholder-count="2">
+              <div style="margin-bottom: var(--space-2); padding: var(--space-3); background: var(--bg-glass); border: 1px solid var(--border-row); border-radius: var(--radius-md);">
+                <sc-if value="{{ it.hasRecipe }}" hint-placeholder-val="{{ true }}">
+                  <div style="display: flex; align-items: center; gap: var(--space-2);">
+                    <button onClick="{{ it.onStartEditName }}" style="flex: 1; text-align: right; background: none; border: none; padding: 0; font-family: 'Rubik', var(--font-sans); font-size: var(--fs-base); font-weight: var(--fw-medium); color: var(--color-text-main); cursor: pointer;">{{ it.recipeName }}</button>
+                    <button onClick="{{ it.onToggleMeta }}" style="display: grid; place-content: center; width: 26px; height: 26px; background: none; border: none; border-radius: var(--radius-sm); color: var(--color-text-muted); cursor: pointer;">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                    </button>
+                    <span style="display: inline-flex; align-items: center; gap: 3px; padding: 4px 8px; background: var(--bg-muted); border-radius: var(--radius-sm);">
+                      <span style="font-size: var(--fs-xs); color: var(--color-text-muted-light);">₪</span>
+                      <input type="number" value="{{ it.sellPrice }}" onChange="{{ it.onSellPriceChange }}" min="0" style="width: 44px; background: none; border: none; font-weight: var(--fw-semibold); font-size: var(--fs-sm); color: var(--color-text-main); font-family: 'Rubik', var(--font-sans);">
+                    </span>
+                    <button onClick="{{ it.onRemove }}" style="display: grid; place-content: center; width: 26px; height: 26px; background: none; border: none; border-radius: var(--radius-sm); color: var(--color-danger); cursor: pointer;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                  </div>
+                  <sc-if value="{{ it.metaExpanded }}" hint-placeholder-val="{{ false }}">
+                    <div style="display: flex; gap: var(--space-4); margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px dashed var(--border-default); flex-wrap: wrap;">
+                      <div>
+                        <div style="font-size: var(--fs-xs); color: var(--color-text-muted);">עלות מזון למנה</div>
+                        <div style="font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--color-text-main);">₪{{ it.foodCostPerPortion }}</div>
+                      </div>
+                      <div>
+                        <div style="font-size: var(--fs-xs); color: var(--color-text-muted);">עלות מזון כוללת ({{ it.guestCount }} מנות)</div>
+                        <div style="font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--color-text-main);">₪{{ it.foodCostTotal }}</div>
+                      </div>
+                      <div>
+                        <div style="font-size: var(--fs-xs); color: var(--color-text-muted);">רווח למנה</div>
+                        <div style="font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--text-success);">₪{{ it.profitPerPortion }}</div>
+                      </div>
+                    </div>
+                  </sc-if>
+                </sc-if>
+                <sc-if value="{{ it.noRecipe }}" hint-placeholder-val="{{ false }}">
+                  <div style="position: relative;">
+                    <input type="text" value="{{ it.searchQuery }}" onChange="{{ it.onSearchChange }}" placeholder="חיפוש מנה..." style="width: 100%; box-sizing: border-box; padding: 8px 12px; font-size: var(--fs-sm); font-family: var(--font-sans); color: var(--color-text-main); background: var(--bg-glass); border: 1px solid var(--border-default); border-radius: var(--radius-sm);">
+                    <sc-if value="{{ it.hasSearchResults }}" hint-placeholder-val="{{ false }}">
+                      <div style="position: absolute; top: calc(100% + 4px); right: 0; left: 0; z-index: 20; display: flex; flex-direction: column; gap: 2px; padding: var(--space-1); background: var(--bg-glass-strong); backdrop-filter: var(--blur-modal); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); box-shadow: var(--shadow-modal); animation: popIn 0.15s var(--ease-spring);">
+                        <sc-for list="{{ it.searchResults }}" as="rr" hint-placeholder-count="3">
+                          <button onClick="{{ rr.onSelect }}" style="text-align: right; padding: 7px 10px; background: none; border: none; border-radius: var(--radius-xs); color: var(--color-text-main); font-size: var(--fs-sm); font-family: var(--font-sans); cursor: pointer;">{{ rr.name }}</button>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+
+            <button onClick="{{ sec.onAddItem }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: none; border: none; color: var(--color-primary-hover); font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+              הוסף מנה
+            </button>
+          </div>
+        </sc-for>
+
+        <button onClick="{{ addSection }}" style="display: block; margin: 0 auto; padding: 8px 20px; background: var(--bg-glass); border: 1px dashed var(--border-strong); border-radius: var(--radius-md); color: var(--color-primary-hover); font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer;">
+          + הוסף מקטע
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINANCIAL FOOTER -->
+  <div class="fin-bar" style="position: fixed; bottom: 0; inset-inline: 0; z-index: 80; display: flex; align-items: center; justify-content: center; gap: var(--space-8); background: var(--bg-glass-strong); backdrop-filter: var(--blur-nav); -webkit-backdrop-filter: var(--blur-nav); border-top: 1px solid var(--border-glass); box-shadow: var(--shadow-nav-footer); padding: var(--space-3) var(--space-6);">
+    <div style="text-align: center;">
+      <div style="font-size: var(--fs-xs); color: var(--color-text-muted);">עלות כוללת</div>
+      <div style="font-size: var(--fs-md); font-weight: var(--fw-extrabold); color: var(--color-text-main);">₪{{ totalCostLabel }}</div>
+    </div>
+    <div style="text-align: center;">
+      <div style="font-size: var(--fs-xs); color: var(--color-text-muted);">אחוז עלות מזון</div>
+      <div style="font-size: var(--fs-md); font-weight: var(--fw-extrabold); color: {{ foodCostColor }};">{{ foodCostPctLabel }}%</div>
+    </div>
+    <div style="text-align: center;">
+      <div style="font-size: var(--fs-xs); color: var(--color-text-muted);">הכנסה כוללת</div>
+      <div style="font-size: var(--fs-md); font-weight: var(--fw-extrabold); color: var(--color-text-main);">₪{{ totalRevenueLabel }}</div>
+    </div>
+    <div style="text-align: center;">
+      <div style="font-size: var(--fs-xs); color: var(--color-text-muted);">עלות לאורח</div>
+      <div style="font-size: var(--fs-md); font-weight: var(--fw-extrabold); color: var(--color-text-main);">₪{{ costPerGuestLabel }}</div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; bottom: 88px; left: 50%; transform: translateX(-50%); z-index: 400; display: flex; align-items: center; gap: var(--space-2); padding: 11px 20px; background: var(--color-text-main); color: #fff; border-radius: var(--radius-full); font-size: var(--fs-sm); font-weight: var(--fw-medium); box-shadow: var(--shadow-modal); animation: popIn 0.2s var(--ease-spring);">
+      {{ toastMessage }}
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const EVENT_TYPES = ['חתונה', 'בר מצווה', 'כנס עסקי', 'יום הולדת', 'אירוע חברה'];
+const SERVING_TYPES = ['מוגש בצלחת', 'בופה', 'תחנות אוכל'];
+const SECTION_NAMES = ['מנה ראשונה', 'מנה עיקרית', 'קינוח', 'תוספות'];
+const RECIPES = [
+  { key: 'pasta_cream', name: 'פסטה ברוטב שמנת פטריות', cost: 32.5, desc: 'פטריות יער מוקפצות בחמאה, שמנת מתובלת ופרמזן מגורר טרי' },
+  { key: 'chicken_grill', name: 'עוף בגריל עם ירקות קלויים', cost: 45, desc: 'חצי עוף על גריל פחמים, ירקות שורש קלויים בתנור עצים' },
+  { key: 'greek_salad', name: 'סלט יווני', cost: 22, desc: 'עגבניות שרי, מלפפון, זיתי קלמטה וגבינת פטה בשמן זית כתית' },
+  { key: 'veg_burger', name: 'בורגר טבעוני עם צ׳יפס', cost: 38, desc: 'קציצת ירקות ביתית, רוטב טחינה וצ׳יפס פריך' },
+  { key: 'chocolate_cake', name: 'עוגת שוקולד עשירה', cost: 28, desc: 'שוקולד מריר 70%, לב זורם וקצפת וניל' },
+  { key: 'poke_tofu', name: 'פוקה יאסאי טופו', cost: 41, desc: 'טופו קריספי, אורז סושי, אבוקדו ורוטב יאסאי' },
+  { key: 'quinoa_salad', name: 'סלט קינואה ואבוקדו', cost: 26, desc: 'קינואה, אבוקדו, עגבניות ולימון כבוש' }
+];
+function findRecipe(key) { return RECIPES.find(r => r.key === key); }
+
+let uid = 100;
+function nextId() { return ++uid; }
+
+class Component extends DCLogic {
+  state = {
+    eventType: 'חתונה',
+    eventTypeDropdownOpen: false,
+    servingType: 'מוגש בצלחת',
+    servingTypeDropdownOpen: false,
+    menuName: 'תפריט חתונת רועי ומאיה',
+    guestCount: 80,
+    eventDate: '2026-09-12',
+    sections: [
+      { id: 1, name: 'מנה ראשונה', dropdownOpen: false, items: [{ id: 1, recipeKey: 'greek_salad', sellPrice: 42, metaExpanded: false, searchQuery: '' }] },
+      { id: 2, name: 'מנה עיקרית', dropdownOpen: false, items: [
+        { id: 2, recipeKey: 'chicken_grill', sellPrice: 89, metaExpanded: false, searchQuery: '' },
+        { id: 3, recipeKey: 'veg_burger', sellPrice: 76, metaExpanded: false, searchQuery: '' }
+      ] },
+      { id: 3, name: 'קינוח', dropdownOpen: false, items: [{ id: 4, recipeKey: 'chocolate_cake', sellPrice: 34, metaExpanded: false, searchQuery: '' }] }
+    ],
+    toastVisible: false,
+    toastMessage: ''
+  };
+
+  showToast(msg) {
+    clearTimeout(this._toastTimer);
+    this.setState({ toastVisible: true, toastMessage: msg });
+    this._toastTimer = setTimeout(() => this.setState({ toastVisible: false }), 2200);
+  }
+  notReady() { this.showToast('התכונה הזו בבנייה'); }
+  saveMenu() { this.showToast('התפריט נשמר בהצלחה'); }
+
+  toggleEventTypeDropdown() { this.setState(s => ({ eventTypeDropdownOpen: !s.eventTypeDropdownOpen, servingTypeDropdownOpen: false })); }
+  setEventType(v) { this.setState({ eventType: v, eventTypeDropdownOpen: false }); }
+  toggleServingTypeDropdown() { this.setState(s => ({ servingTypeDropdownOpen: !s.servingTypeDropdownOpen, eventTypeDropdownOpen: false })); }
+  setServingType(v) { this.setState({ servingType: v, servingTypeDropdownOpen: false }); }
+  onMenuNameChange(v) { this.setState({ menuName: v }); }
+  onGuestCountChange(v) { this.setState({ guestCount: Math.max(0, parseInt(v) || 0) }); }
+  onEventDateChange(v) { this.setState({ eventDate: v }); }
+
+  addSection() {
+    const id = nextId();
+    this.setState(s => ({ sections: [...s.sections, { id, name: 'מקטע חדש', dropdownOpen: false, items: [] }] }));
+  }
+  removeSection(id) { this.setState(s => ({ sections: s.sections.filter(sec => sec.id !== id) })); }
+  toggleSectionDropdown(id) {
+    this.setState(s => ({ sections: s.sections.map(sec => ({ ...sec, dropdownOpen: sec.id === id ? !sec.dropdownOpen : false })) }));
+  }
+  setSectionName(id, name) {
+    this.setState(s => ({ sections: s.sections.map(sec => sec.id === id ? { ...sec, name, dropdownOpen: false } : sec) }));
+  }
+  addItem(sectionId) {
+    const id = nextId();
+    this.setState(s => ({ sections: s.sections.map(sec => sec.id === sectionId ? { ...sec, items: [...sec.items, { id, recipeKey: null, sellPrice: 0, metaExpanded: false, searchQuery: '' }] } : sec) }));
+  }
+  removeItem(sectionId, itemId) {
+    this.setState(s => ({ sections: s.sections.map(sec => sec.id === sectionId ? { ...sec, items: sec.items.filter(it => it.id !== itemId) } : sec) }));
+  }
+  updateItem(sectionId, itemId, patch) {
+    this.setState(s => ({ sections: s.sections.map(sec => sec.id === sectionId ? { ...sec, items: sec.items.map(it => it.id === itemId ? { ...it, ...patch } : it) } : sec) }));
+  }
+
+  renderVals() {
+    const s = this.state;
+    const guestCount = s.guestCount;
+
+    const dropdownStyle = (active) => ({
+      padding: '8px 14px', border: 'none', background: active ? 'var(--color-primary-soft)' : 'transparent',
+      color: active ? 'var(--color-primary-hover)' : 'var(--color-text-secondary)', fontSize: 'var(--fs-sm)', fontWeight: 600,
+      textAlign: 'right', cursor: 'pointer'
+    });
+
+    let totalCost = 0, totalRevenue = 0;
+
+    const sections = s.sections.map(sec => {
+      const items = sec.items.map(it => {
+        const recipe = it.recipeKey ? findRecipe(it.recipeKey) : null;
+        const foodCostPerPortion = recipe ? recipe.cost : 0;
+        const foodCostTotal = foodCostPerPortion * guestCount;
+        const revenueTotal = (it.sellPrice || 0) * guestCount;
+        if (recipe) { totalCost += foodCostTotal; totalRevenue += revenueTotal; }
+        const query = it.searchQuery.trim();
+        const searchResults = query ? RECIPES.filter(r => r.name.includes(query)).map(r => ({
+          key: r.key, name: r.name, onSelect: () => this.updateItem(sec.id, it.id, { recipeKey: r.key, searchQuery: '' })
+        })) : [];
+        return {
+          id: it.id,
+          hasRecipe: !!recipe,
+          noRecipe: !recipe,
+          recipeName: recipe ? recipe.name : '',
+          recipeDesc: recipe ? (recipe.desc || '') : '',
+          sellPrice: it.sellPrice,
+          metaExpanded: it.metaExpanded,
+          guestCount,
+          foodCostPerPortion: foodCostPerPortion.toFixed(2),
+          foodCostTotal: foodCostTotal.toFixed(2),
+          profitPerPortion: ((it.sellPrice || 0) - foodCostPerPortion).toFixed(2),
+          searchQuery: it.searchQuery,
+          hasSearchResults: searchResults.length > 0,
+          searchResults,
+          onStartEditName: () => this.updateItem(sec.id, it.id, { recipeKey: null, searchQuery: '' }),
+          onToggleMeta: () => this.updateItem(sec.id, it.id, { metaExpanded: !it.metaExpanded }),
+          onSellPriceChange: (v) => this.updateItem(sec.id, it.id, { sellPrice: parseFloat(v) || 0 }),
+          onSearchChange: (v) => this.updateItem(sec.id, it.id, { searchQuery: v }),
+          onRemove: () => this.removeItem(sec.id, it.id)
+        };
+      });
+      return {
+        id: sec.id, name: sec.name, dropdownOpen: sec.dropdownOpen, items,
+        onToggleDropdown: () => this.toggleSectionDropdown(sec.id),
+        onRemove: () => this.removeSection(sec.id),
+        onAddItem: () => this.addItem(sec.id),
+        nameOptions: SECTION_NAMES.map(n => ({ key: n, label: n, style: dropdownStyle(sec.name === n), onSelect: () => this.setSectionName(sec.id, n) }))
+      };
+    });
+
+    const foodCostPct = totalRevenue > 0 ? (totalCost / totalRevenue) * 100 : 0;
+
+    return {
+      notReady: () => this.notReady(),
+      saveMenu: () => this.saveMenu(),
+
+      eventType: s.eventType,
+      eventTypeDropdownOpen: s.eventTypeDropdownOpen,
+      toggleEventTypeDropdown: () => this.toggleEventTypeDropdown(),
+      eventTypeOptions: EVENT_TYPES.map(t => ({ key: t, label: t, style: dropdownStyle(s.eventType === t), onSelect: () => this.setEventType(t) })),
+
+      servingType: s.servingType,
+      servingTypeDropdownOpen: s.servingTypeDropdownOpen,
+      toggleServingTypeDropdown: () => this.toggleServingTypeDropdown(),
+      servingTypeOptions: SERVING_TYPES.map(t => ({ key: t, label: t, style: dropdownStyle(s.servingType === t), onSelect: () => this.setServingType(t) })),
+
+      menuName: s.menuName,
+      onMenuNameChange: (v) => this.onMenuNameChange(v),
+      guestCount: s.guestCount,
+      onGuestCountChange: (v) => this.onGuestCountChange(v),
+      eventDate: s.eventDate,
+      onEventDateChange: (v) => this.onEventDateChange(v),
+
+      sections,
+      addSection: () => this.addSection(),
+
+      totalCostLabel: totalCost.toFixed(2),
+      totalRevenueLabel: totalRevenue.toFixed(2),
+      foodCostPctLabel: foodCostPct.toFixed(1),
+      foodCostColor: foodCostPct > 33 ? 'var(--text-warning)' : 'var(--color-text-main)',
+      costPerGuestLabel: guestCount > 0 ? (totalCost / guestCount).toFixed(2) : '0.00',
+
+      toastVisible: s.toastVisible,
+      toastMessage: s.toastMessage
+    };
+  }
+}
+</script>
+</body>
+</html>
