@@ -89,7 +89,7 @@ type ProductBulkField = 'categories_' | 'supplierIds_' | 'allergens_' | 'base_un
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InventoryProductListComponent implements OnInit, OnDestroy {
-  private readonly kitchenStateService = inject(KitchenStateService)
+  protected readonly kitchenStateService = inject(KitchenStateService)
   private readonly route = inject(ActivatedRoute)
   private readonly router = inject(Router)
   private readonly heroFab = inject(HeroFabService)
@@ -111,7 +111,9 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected sortOrder_ = signal<'asc' | 'desc'>('asc')
   protected readonly isPanelOpen_: WritableSignal<boolean>
   private readonly togglePanelState_: () => void
-  protected expandedFilterCategories_ = signal<Set<string>>(new Set())
+  /** Tracks explicitly *collapsed* categories — empty by default so every filter group
+   *  starts expanded (matches the design), while still letting the user collapse one. */
+  protected collapsedFilterCategories_ = signal<Set<string>>(new Set())
   protected allergenPopoverProductId_ = signal<string | null>(null)
   protected allergenExpandAll_ = signal<boolean>(false)
   protected lowStockOnly_ = signal<boolean>(false)
@@ -241,7 +243,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   protected toggleFilterCategory(name: string): void {
-    this.expandedFilterCategories_.update((set) => {
+    this.collapsedFilterCategories_.update((set) => {
       const next = new Set(set)
       if (next.has(name)) next.delete(name)
       else next.add(name)
@@ -250,7 +252,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   protected isCategoryExpanded(name: string): boolean {
-    return this.expandedFilterCategories_().has(name)
+    return !this.collapsedFilterCategories_().has(name)
   }
 
   protected onPanelToggled(): void {
@@ -327,6 +329,25 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     this.filteredProducts_()
       .map((p) => p._id ?? '')
       .filter(Boolean)
+  )
+
+  /**
+   * Precomputed per-row values (plan 303 M2). The template previously called
+   * getValidationStatus/getCategoryDisplay/getProductSupplierNames/getPricePerUnit
+   * directly per row on every change-detection pass. Derive them once per data change instead.
+   */
+  protected readonly displayRows_ = computed(() =>
+    this.filteredProducts_().map((product) => {
+      const validationStatus = this.getValidationStatus(product)
+      return {
+        product,
+        validationStatus,
+        missingFields: validationStatus === 'valid' ? [] : this.getMissingFields(product),
+        category: this.getCategoryDisplay(product.categories_),
+        supplierNames: this.getProductSupplierNames(product),
+        pricePerUnit: this.getPricePerUnit(product, product.base_unit_)
+      }
+    })
   )
 
   private compareProducts(a: Product, b: Product, field: SortField): number {
@@ -504,7 +525,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
   protected getSupplierName(supplierId: string): string {
     if (!supplierId) return ''
-    const supplier = this.kitchenStateService.suppliers_().find((s) => s._id === supplierId)
+    const supplier = this.kitchenStateService.suppliersById_().get(supplierId)
     return supplier?.name_hebrew ?? supplierId
   }
 

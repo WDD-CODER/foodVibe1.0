@@ -96,7 +96,7 @@ const INGREDIENT_SEARCH_DEBOUNCE_MS = 250
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RecipeBookListComponent implements OnInit, OnDestroy {
-  private readonly kitchenState = inject(KitchenStateService)
+  protected readonly kitchenState = inject(KitchenStateService)
   private readonly productData = inject(ProductDataService)
   private readonly router = inject(Router)
   private readonly recipeCostService = inject(RecipeCostService)
@@ -162,15 +162,17 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     ])
 
     // Expand any filter category that has selected values (e.g. when opened via URL like ?filters=Approved:false).
+    // Categories start expanded by default now, so this only has to un-collapse ones the user had closed.
     effect(() => {
       const filters = this.activeFilters_()
       const withValues = Object.keys(filters).filter((name) => (filters[name]?.length ?? 0) > 0)
       const hasDateRange = this.dateFrom_() != null || this.dateTo_() != null
       if (withValues.length === 0 && !hasDateRange) return
-      this.expandedFilterCategories_.update((set) => {
+      this.collapsedFilterCategories_.update((set) => {
+        if (set.size === 0) return set
         const next = new Set(set)
-        withValues.forEach((name) => next.add(name))
-        if (hasDateRange) next.add('Date')
+        withValues.forEach((name) => next.delete(name))
+        if (hasDateRange) next.delete('Date')
         return next
       })
     })
@@ -194,7 +196,9 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     this.labelsExpand.reset()
   }
 
-  protected expandedFilterCategories_ = signal<Set<string>>(new Set())
+  /** Tracks explicitly *collapsed* categories — empty by default so every filter group
+   *  starts expanded (matches the design), while still letting the user collapse one. */
+  protected collapsedFilterCategories_ = signal<Set<string>>(new Set())
   protected readonly allergenExpand = new CellExpandState()
   protected readonly labelsExpand = new CellExpandState()
   protected hoveredCostRecipeId_ = signal<string | null>(null)
@@ -257,7 +261,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   protected toggleFilterCategory(name: string): void {
-    this.expandedFilterCategories_.update((set) => {
+    this.collapsedFilterCategories_.update((set) => {
       const next = new Set(set)
       if (next.has(name)) next.delete(name)
       else next.add(name)
@@ -266,7 +270,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   protected isCategoryExpanded(name: string): boolean {
-    return this.expandedFilterCategories_().has(name)
+    return !this.collapsedFilterCategories_().has(name)
   }
 
   protected togglePanel(): void {
@@ -438,6 +442,21 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       .filter(Boolean)
   )
 
+  /**
+   * Precomputed per-row values (plan 303 M2). getAllRecipeLabels/getRecipeAllergens/getRecipeCost
+   * are cheap after the M1 Map lookups, but the template still called them 2-3x per row on every
+   * change-detection pass (every click/keystroke/scroll). This derives each row's display values
+   * once per data change instead, so the template just reads plain properties.
+   */
+  protected readonly displayRows_ = computed(() =>
+    this.filteredRecipes_().map((recipe) => ({
+      recipe,
+      labels: this.getAllRecipeLabels(recipe),
+      allergens: this.getRecipeAllergens(recipe),
+      cost: this.getRecipeCost(recipe)
+    }))
+  )
+
   protected isEmptyList_ = computed(() => this.kitchenState.visibleRecipes_().length === 0)
 
   protected isFavoritedByCurrentUser_(recipe: Recipe): boolean {
@@ -461,7 +480,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   protected getRecipeAllergens(recipe: Recipe): string[] {
-    return resolveRecipeAllergens(recipe, this.kitchenState.recipes_(), this.kitchenState.products_())
+    return resolveRecipeAllergens(recipe, this.kitchenState.recipesById_(), this.kitchenState.productsById_())
   }
 
   /** Parse YYYY-MM-DD to start of day (00:00:00.000) in local timezone. */
@@ -511,13 +530,13 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   private getRecipeProductIds(recipe: Recipe, depth = 0): Set<string> {
     if (depth >= MAX_ALLERGEN_RECURSION || !recipe?.ingredients_?.length) return new Set()
     const set = new Set<string>()
-    const recipes = this.kitchenState.recipes_()
+    const recipesById = this.kitchenState.recipesById_()
     for (const ing of recipe.ingredients_) {
       if (!ing.referenceId) continue
       if (ing.type === 'product') {
         set.add(ing.referenceId)
       } else if (ing.type === 'recipe') {
-        const sub = recipes.find((r) => r._id === ing.referenceId)
+        const sub = recipesById.get(ing.referenceId)
         if (sub) this.getRecipeProductIds(sub, depth + 1).forEach((id) => set.add(id))
       }
     }

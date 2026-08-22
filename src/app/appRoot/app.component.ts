@@ -10,6 +10,7 @@ import {
 import { filter } from 'rxjs'
 import { UserService } from '../core/services/user.service'
 import { ServerHeartbeatService } from '../core/services/server-heartbeat.service'
+import { LoadingService } from '../core/services/loading.service'
 import { HeaderComponent } from '../core/components/header/header.component'
 import { TabChipsComponent } from '../core/components/tab-chips/tab-chips.component'
 import { UserMsg } from 'src/app/core/components/user-msg/user-msg.component'
@@ -77,6 +78,7 @@ export class AppComponent {
   private readonly router = inject(Router)
   private readonly userService = inject(UserService)
   private readonly serverHeartbeat_ = inject(ServerHeartbeatService)
+  protected readonly loading_ = inject(LoadingService)
 
   // Open signals for @defer (when …) — services stay root singletons; only the modal component chunks defer.
   protected readonly aiRecipeModal = inject(AiRecipeModalService)

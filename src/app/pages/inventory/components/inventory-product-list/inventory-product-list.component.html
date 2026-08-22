@@ -3,8 +3,10 @@
   (panelToggle)="onPanelToggled()"
   [gridTemplate]="'2fr 1fr 1fr 1fr minmax(48px, 0.8fr) 0.8fr 80px auto'"
   [mobileGridTemplate]="'2fr 1fr 0.8fr 0.8fr 40px 28px'"
-  [dir]="'rtl'">
-
+  [dir]="'rtl'"
+  [resultCount]="filteredProducts_().length"
+  [resultTotal]="kitchenStateService.products_().length"
+>
   <h2 shell-title class="page-title">{{ 'product_list' | translatePipe }}</h2>
 
   <ng-container shell-search>
@@ -26,30 +28,69 @@
       [selectionState]="selection"
       [editableFields]="editableFields_()"
       (bulkDelete)="onBulkDeleteSelected($event)"
-      (bulkEdit)="onBulkEdit($event)" />
+      (bulkEdit)="onBulkEdit($event)"
+    />
   </ng-container>
 
   <ng-container shell-actions>
-    <button type="button" class="c-btn-primary" (click)="onAddProduct()"
+    <button
+      type="button"
+      class="c-btn-primary"
+      (click)="onAddProduct()"
       [disabled]="!isLoggedIn()"
-      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+    >
       <lucide-icon name="plus" [size]="18"></lucide-icon>
       {{ 'add_product' | translatePipe }}
     </button>
   </ng-container>
 
   <ng-container shell-table-header>
-    <div class="col-name c-grid-header-cell c-sortable-header" (click)="setSort('name')" (keydown.enter)="setSort('name')" (keydown.space)="$event.preventDefault(); setSort('name')" role="columnheader" tabindex="0">
+    <div
+      class="col-name c-grid-header-cell c-sortable-header"
+      (click)="setSort('name')"
+      (keydown.enter)="setSort('name')"
+      (keydown.space)="$event.preventDefault(); setSort('name')"
+      role="columnheader"
+      tabindex="0"
+    >
       {{ 'product' | translatePipe }}
     </div>
     <app-carousel-header [activeIndex]="carouselHeaderIndex_()" (activeIndexChange)="onCarouselHeaderChange($event)">
-      <div class="col-category c-grid-header-cell c-sortable-header" carouselHeaderColumn label="category" (click)="setSort('category')" (keydown.enter)="setSort('category')" (keydown.space)="$event.preventDefault(); setSort('category')" role="button" tabindex="0">
+      <div
+        class="col-category c-grid-header-cell c-sortable-header"
+        carouselHeaderColumn
+        label="category"
+        (click)="setSort('category')"
+        (keydown.enter)="setSort('category')"
+        (keydown.space)="$event.preventDefault(); setSort('category')"
+        role="button"
+        tabindex="0"
+      >
         {{ 'category' | translatePipe }}
       </div>
-      <div class="col-allergens c-grid-header-cell c-sortable-header" carouselHeaderColumn label="allergens" (click)="toggleAllergenExpandAll()" (keydown.enter)="toggleAllergenExpandAll()" (keydown.space)="$event.preventDefault(); toggleAllergenExpandAll()" role="button" tabindex="0">
+      <div
+        class="col-allergens c-grid-header-cell c-sortable-header"
+        carouselHeaderColumn
+        label="allergens"
+        (click)="toggleAllergenExpandAll()"
+        (keydown.enter)="toggleAllergenExpandAll()"
+        (keydown.space)="$event.preventDefault(); toggleAllergenExpandAll()"
+        role="button"
+        tabindex="0"
+      >
         {{ 'allergens' | translatePipe }}
       </div>
-      <div class="col-supplier c-grid-header-cell c-sortable-header" carouselHeaderColumn label="supplier" (click)="setSort('supplier')" (keydown.enter)="setSort('supplier')" (keydown.space)="$event.preventDefault(); setSort('supplier')" role="button" tabindex="0">
+      <div
+        class="col-supplier c-grid-header-cell c-sortable-header"
+        carouselHeaderColumn
+        label="supplier"
+        (click)="setSort('supplier')"
+        (keydown.enter)="setSort('supplier')"
+        (keydown.space)="$event.preventDefault(); setSort('supplier')"
+        role="button"
+        tabindex="0"
+      >
         {{ 'supplier' | translatePipe }}
       </div>
     </app-carousel-header>
@@ -57,7 +98,10 @@
     <div class="col-price c-grid-header-cell" role="columnheader">{{ 'price' | translatePipe }}</div>
     <div class="c-col-actions c-grid-header-cell" role="columnheader">{{ 'actions' | translatePipe }}</div>
     <div class="col-select c-grid-header-cell" role="columnheader">
-      <app-list-row-checkbox [checked]="filteredProductIds_().length > 0 && selection.allSelected(filteredProductIds_())" (toggle)="selection.toggleSelectAll(filteredProductIds_())" />
+      <app-list-row-checkbox
+        [checked]="filteredProductIds_().length > 0 && selection.allSelected(filteredProductIds_())"
+        (toggle)="selection.toggleSelectAll(filteredProductIds_())"
+      />
     </div>
   </ng-container>
 
@@ -65,31 +109,40 @@
     @if (filteredProducts_().length === 0) {
       <div class="no-results">
         @if (isEmptyList_()) {
-          <app-empty-state messageKey="empty_inventory" icon="package"
-            ctaLabelKey="add_first_product" [ctaDisabled]="!isLoggedIn()"
-            (ctaClick)="onAddProduct()" />
+          <app-empty-state
+            messageKey="empty_inventory"
+            icon="package"
+            ctaLabelKey="add_first_product"
+            [ctaDisabled]="!isLoggedIn()"
+            (ctaClick)="onAddProduct()"
+          />
         } @else {
           {{ 'no_products_match' | translatePipe }}
         }
       </div>
     }
-    @for (product of filteredProducts_(); track product._id) {
-      <div class="product-grid-row c-list-row"
-        [class.row--invalid]="getValidationStatus(product) === 'invalid'"
-        [class.row--incomplete]="getValidationStatus(product) === 'incomplete'"
-        role="button" tabindex="0"
-        (click)="onRowClick(product, $event)"
-        (keydown.enter)="onEditProduct(product._id)"
-        (keydown.space)="$event.preventDefault(); onEditProduct(product._id)">
+    @for (row of displayRows_(); track row.product._id) {
+      <div
+        class="product-grid-row c-list-row"
+        [class.row--invalid]="row.validationStatus === 'invalid'"
+        [class.row--incomplete]="row.validationStatus === 'incomplete'"
+        role="button"
+        tabindex="0"
+        (click)="onRowClick(row.product, $event)"
+        (keydown.enter)="onEditProduct(row.product._id)"
+        (keydown.space)="$event.preventDefault(); onEditProduct(row.product._id)"
+      >
         <div class="col-name c-list-body-cell" role="cell">
-          @if (isLowStock(product)) {
-            <span class="low-stock-badge" [attr.title]="'low_stock' | translatePipe">{{ 'low_stock' | translatePipe }}</span>
+          @if (isLowStock(row.product)) {
+            <span class="low-stock-badge" [attr.title]="'low_stock' | translatePipe">{{
+              'low_stock' | translatePipe
+            }}</span>
           }
-          @if (getValidationStatus(product) === 'invalid') {
+          @if (row.validationStatus === 'invalid') {
             <span class="validation-badge validation-badge--invalid">
               <lucide-icon name="alert-circle" [size]="13"></lucide-icon>
               <span class="validation-tooltip">
-                @for (field of getMissingFields(product); track field) {
+                @for (field of row.missingFields; track field) {
                   <span class="tooltip-chip tooltip-chip--invalid">
                     <lucide-icon [name]="getFieldIcon(field)" [size]="11"></lucide-icon>
                     {{ field | translatePipe }}
@@ -97,11 +150,11 @@
                 }
               </span>
             </span>
-          } @else if (getValidationStatus(product) === 'incomplete') {
+          } @else if (row.validationStatus === 'incomplete') {
             <span class="validation-badge validation-badge--incomplete">
               <lucide-icon name="alert-triangle" [size]="13"></lucide-icon>
               <span class="validation-tooltip">
-                @for (field of getMissingFields(product); track field) {
+                @for (field of row.missingFields; track field) {
                   <span class="tooltip-chip tooltip-chip--incomplete">
                     <lucide-icon [name]="getFieldIcon(field)" [size]="11"></lucide-icon>
                     {{ field | translatePipe }}
@@ -110,23 +163,29 @@
               </span>
             </span>
           }
-          {{ product.name_hebrew }}
-          @if (product.nutrition_per_100g) {
-            <app-nutrition-badge [nutrition]="product.nutrition_per_100g"></app-nutrition-badge>
+          {{ row.product.name_hebrew }}
+          @if (row.product.nutrition_per_100g) {
+            <app-nutrition-badge [nutrition]="row.product.nutrition_per_100g"></app-nutrition-badge>
           }
         </div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
-          <div class="col-category c-list-body-cell" cellCarouselSlide [label]="'category' | translatePipe">{{ getCategoryDisplay(product.categories_) || '—' }}</div>
+          <div class="col-category c-list-body-cell" cellCarouselSlide [label]="'category' | translatePipe">
+            {{ row.category || '—' }}
+          </div>
           <div class="col-allergens c-list-body-cell" cellCarouselSlide [label]="'allergens' | translatePipe">
-            @if (product.allergens_.length) {
-              <div class="allergen-btn-wrapper" [class.allergen-expanded-open]="allergenExpandAll_() || allergenPopoverProductId_() === product._id" (clickOutside)="closeAllergenView($event)">
-                <button type="button" class="allergen-btn" (click)="toggleAllergenPopover(product._id)">
+            @if (row.product.allergens_.length) {
+              <div
+                class="allergen-btn-wrapper"
+                [class.allergen-expanded-open]="allergenExpandAll_() || allergenPopoverProductId_() === row.product._id"
+                (clickOutside)="closeAllergenView($event)"
+              >
+                <button type="button" class="allergen-btn" (click)="toggleAllergenPopover(row.product._id)">
                   <lucide-icon name="shield-alert" [size]="16"></lucide-icon>
-                  {{ product.allergens_.length }}
+                  {{ row.product.allergens_.length }}
                 </button>
-                @if (allergenExpandAll_() || allergenPopoverProductId_() === product._id) {
+                @if (allergenExpandAll_() || allergenPopoverProductId_() === row.product._id) {
                   <div class="allergen-expanded dense-grid">
-                    @for (a of product.allergens_; track a) {
+                    @for (a of row.product.allergens_; track a) {
                       <span class="allergen-pill">{{ a | translatePipe }}</span>
                     }
                   </div>
@@ -136,33 +195,46 @@
               <span class="placeholder-dash">—</span>
             }
           </div>
-          <div class="col-supplier c-list-body-cell" cellCarouselSlide [label]="'supplier' | translatePipe">{{ getProductSupplierNames(product) || '—' }}</div>
+          <div class="col-supplier c-list-body-cell" cellCarouselSlide [label]="'supplier' | translatePipe">
+            {{ row.supplierNames || '—' }}
+          </div>
         </app-cell-carousel>
-        <div class="col-unit c-list-body-cell" role="cell">{{ product.base_unit_ | translatePipe }}</div>
+        <div class="col-unit c-list-body-cell" role="cell">{{ row.product.base_unit_ | translatePipe }}</div>
         <div class="col-price col-price-readonly c-list-body-cell" role="cell">
-          <span class="price-value">{{ getPricePerUnit(product, product.base_unit_) | number:'1.2-2' }}</span>
+          <span class="price-value">{{ row.pricePerUnit | number: '1.2-2' }}</span>
           <span class="price-suffix">₪</span>
         </div>
         <app-row-actions-menu class="c-col-actions c-list-body-cell" role="cell">
-          <button type="button" class="c-icon-btn" (click)="onEditProduct(product._id); $event.stopPropagation()"
+          <button
+            type="button"
+            class="c-icon-btn"
+            (click)="onEditProduct(row.product._id); $event.stopPropagation()"
             [attr.aria-label]="'edit' | translatePipe"
             [disabled]="!isLoggedIn()"
-            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+          >
             <lucide-icon name="pencil" [size]="18"></lucide-icon>
           </button>
-          @if (deletingId_() === product._id) {
+          @if (deletingId_() === row.product._id) {
             <app-loader size="small" [inline]="true" />
           } @else {
-            <button type="button" class="c-icon-btn danger" (click)="onDeleteProduct(product._id); $event.stopPropagation()"
+            <button
+              type="button"
+              class="c-icon-btn danger"
+              (click)="onDeleteProduct(row.product._id); $event.stopPropagation()"
               [attr.aria-label]="'delete' | translatePipe"
               [disabled]="!isLoggedIn()"
-              [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+              [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+            >
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>
             </button>
           }
         </app-row-actions-menu>
         <div class="col-select c-list-body-cell" role="cell">
-          <app-list-row-checkbox [checked]="selection.isSelected(product._id)" (toggle)="selection.toggle(product._id)" />
+          <app-list-row-checkbox
+            [checked]="selection.isSelected(row.product._id)"
+            (toggle)="selection.toggle(row.product._id)"
+          />
         </div>
       </div>
     }
@@ -170,13 +242,19 @@
 
   <ng-container shell-filters>
     <nav class="control-nav" aria-label="Inventory and logistics">
-      <a routerLink="/inventory/list" routerLinkActive="active" class="control-nav-link">{{ 'product_list' | translatePipe }}</a>
-      <a routerLink="/inventory/equipment" routerLinkActive="active" class="control-nav-link">{{ 'logistics' | translatePipe }}</a>
+      <a routerLink="/inventory/list" routerLinkActive="active" class="control-nav-link">{{
+        'product_list' | translatePipe
+      }}</a>
+      <a routerLink="/inventory/equipment" routerLinkActive="active" class="control-nav-link">{{
+        'logistics' | translatePipe
+      }}</a>
     </nav>
     <div class="c-filter-section">
       <div class="c-filter-section-header">
         @if (hasActiveFilters_()) {
-          <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">{{ 'clear_filters' | translatePipe }}</button>
+          <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">
+            {{ 'clear_filters' | translatePipe }}
+          </button>
         }
       </div>
       <label class="c-filter-option low-stock-toggle">
@@ -199,24 +277,40 @@
         <span>{{ 'filter_has_nutrition' | translatePipe }}</span>
       </label>
       <label class="c-filter-option nutrition-filter-option nutrition-filter-option--missing">
-        <input type="checkbox" [checked]="nutritionFilter_() === 'missing'" (change)="toggleNutritionFilter('missing')" />
+        <input
+          type="checkbox"
+          [checked]="nutritionFilter_() === 'missing'"
+          (change)="toggleNutritionFilter('missing')"
+        />
         <lucide-icon name="circle-slash" [size]="13"></lucide-icon>
         <span>{{ 'filter_missing_nutrition' | translatePipe }}</span>
       </label>
       @for (category of filterCategories_(); track category.name) {
         <div class="c-filter-category">
-          <button type="button" class="c-filter-category-header" [class.expanded]="isCategoryExpanded(category.name)" (click)="toggleFilterCategory(category.name)">
+          <button
+            type="button"
+            class="c-filter-category-header"
+            [class.expanded]="isCategoryExpanded(category.name)"
+            (click)="toggleFilterCategory(category.name)"
+          >
             <span>{{ category.displayKey | translatePipe }}</span>
             @if (selectedCountInCategory(category) > 0) {
               <span class="c-filter-category-count" aria-hidden="true">{{ selectedCountInCategory(category) }}</span>
             }
-            <lucide-icon [name]="isCategoryExpanded(category.name) ? 'chevron-down' : 'chevron-left'" [size]="16"></lucide-icon>
+            <lucide-icon
+              [name]="isCategoryExpanded(category.name) ? 'chevron-down' : 'chevron-left'"
+              [size]="16"
+            ></lucide-icon>
           </button>
           @if (isCategoryExpanded(category.name)) {
             <div class="c-filter-options">
               @for (option of category.options; track option.value) {
                 <label class="c-filter-option">
-                  <input type="checkbox" [checked]="option.checked_" (change)="toggleFilter(category.name, option.value)" />
+                  <input
+                    type="checkbox"
+                    [checked]="option.checked_"
+                    (change)="toggleFilter(category.name, option.value)"
+                  />
                   <span>{{ option.label | translatePipe }}</span>
                 </label>
               }
@@ -226,5 +320,4 @@
       }
     </div>
   </ng-container>
-
 </app-list-shell>

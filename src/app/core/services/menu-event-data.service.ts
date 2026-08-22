@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
 import { StorageService } from './async-storage.service'
 import { LoggingService } from './logging.service'
+import { LoadingService } from './loading.service'
 import { MenuEvent } from '@models/menu-event.model'
 
 const ENTITY = 'MENU_EVENT_LIST'
@@ -11,6 +12,7 @@ const TRASH_KEY = 'TRASH_MENU_EVENTS'
 export class MenuEventDataService {
   private readonly storage = inject(StorageService)
   private readonly logging = inject(LoggingService)
+  private readonly loading_ = inject(LoadingService)
 
   private readonly eventsStore_ = signal<MenuEvent[]>([])
   readonly allMenuEvents_ = this.eventsStore_.asReadonly()
@@ -46,11 +48,15 @@ export class MenuEventDataService {
 
   private async loadInitialData(): Promise<void> {
     try {
-      const data = await this.storage.query<MenuEvent>(ENTITY)
+      const data = await this.loading_.track(this.storage.query<MenuEvent>(ENTITY))
       this.eventsStore_.set(data)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.logging.error({ event: 'crud.menuEvents.hydrate_error', message: 'Failed to load menu events', context: { err } })
+      this.logging.error({
+        event: 'crud.menuEvents.hydrate_error',
+        message: 'Failed to load menu events',
+        context: { err }
+      })
     }
   }
 
@@ -67,11 +73,15 @@ export class MenuEventDataService {
   async addMenuEvent(newEvent: Omit<MenuEvent, '_id'>): Promise<MenuEvent> {
     try {
       const saved = await this.storage.post<MenuEvent>(ENTITY, newEvent as MenuEvent)
-      this.eventsStore_.update(events => [...events, saved])
+      this.eventsStore_.update((events) => [...events, saved])
       return saved
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.menuEvent.create_error', message: 'Failed to add menu event', context: { err } })
+      this.logging.error({
+        event: 'crud.menuEvent.create_error',
+        message: 'Failed to add menu event',
+        context: { err }
+      })
       throw err
     }
   }
@@ -79,11 +89,15 @@ export class MenuEventDataService {
   async updateMenuEvent(event: MenuEvent): Promise<MenuEvent> {
     try {
       const updated = await this.storage.put<MenuEvent>(ENTITY, event)
-      this.eventsStore_.update(events => events.map(e => (e._id === updated._id ? updated : e)))
+      this.eventsStore_.update((events) => events.map((e) => (e._id === updated._id ? updated : e)))
       return updated
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.menuEvent.update_error', message: 'Failed to update menu event', context: { err } })
+      this.logging.error({
+        event: 'crud.menuEvent.update_error',
+        message: 'Failed to update menu event',
+        context: { err }
+      })
       throw err
     }
   }
@@ -94,10 +108,14 @@ export class MenuEventDataService {
       const withDeleted = { ...item, deletedAt: Date.now() } as MenuEvent & { deletedAt: number }
       await this.storage.appendExisting(TRASH_KEY, withDeleted)
       await this.storage.remove(ENTITY, _id)
-      this.eventsStore_.update(events => events.filter(e => e._id !== _id))
+      this.eventsStore_.update((events) => events.filter((e) => e._id !== _id))
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.menuEvent.delete_error', message: 'Failed to delete menu event', context: { err } })
+      this.logging.error({
+        event: 'crud.menuEvent.delete_error',
+        message: 'Failed to delete menu event',
+        context: { err }
+      })
       throw err
     }
   }
@@ -108,7 +126,7 @@ export class MenuEventDataService {
     const cloned: Omit<MenuEvent, '_id'> = {
       ...rest,
       name_: `${source.name_} (Copy)`,
-      created_from_template_id_: source._id,
+      created_from_template_id_: source._id
     }
     return this.addMenuEvent(cloned)
   }
@@ -117,7 +135,7 @@ export class MenuEventDataService {
   async updateServingTypeForAll(oldServingType: string, newServingType: string): Promise<void> {
     if (oldServingType === newServingType) return
     const events = this.eventsStore_()
-    const toUpdate = events.filter(e => e.serving_type_ === oldServingType)
+    const toUpdate = events.filter((e) => e.serving_type_ === oldServingType)
     for (const event of toUpdate) {
       await this.updateMenuEvent({ ...event, serving_type_: newServingType })
     }

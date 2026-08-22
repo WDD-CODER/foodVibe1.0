@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { StorageService } from './async-storage.service'
 import { UserService } from './user.service'
 import { LoggingService } from './logging.service'
+import { LoadingService } from './loading.service'
 import { Recipe, PrepCategory } from '../models/recipe.model'
 
 const ENTITY = 'DISH_LIST'
@@ -13,6 +14,7 @@ export class DishDataService {
   private storage = inject(StorageService)
   private userService = inject(UserService)
   private logging = inject(LoggingService)
+  private loading_ = inject(LoadingService)
 
   private dishesStore_ = signal<Recipe[]>([])
   readonly allDishes_ = this.dishesStore_.asReadonly()
@@ -63,7 +65,7 @@ export class DishDataService {
 
   private async loadInitialData(): Promise<void> {
     try {
-      const data = await this.storage.query<Recipe & { mise_categories_?: PrepCategory[] }>(ENTITY)
+      const data = await this.loading_.track(this.storage.query<Recipe & { mise_categories_?: PrepCategory[] }>(ENTITY))
       const normalized = data.map((d) => this.normalizeDish(d))
       this.dishesStore_.set(normalized)
     } catch (err) {

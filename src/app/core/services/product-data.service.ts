@@ -2,6 +2,7 @@ import { Injectable, signal, inject, computed } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
 import { StorageService } from './async-storage.service'
 import { LoggingService } from './logging.service'
+import { LoadingService } from './loading.service'
 import { Product, ProductSource } from '../models/product.model'
 
 const ENTITY = 'PRODUCT_LIST'
@@ -11,6 +12,7 @@ const TRASH_KEY = 'TRASH_PRODUCTS'
 export class ProductDataService {
   private storage = inject(StorageService)
   private logging = inject(LoggingService)
+  private loading_ = inject(LoadingService)
 
   // Signal now stores Product objects
   private ProductsStore_ = signal<Product[]>([])
@@ -65,7 +67,7 @@ export class ProductDataService {
 
   private async loadInitialData(): Promise<void> {
     try {
-      const raw = await this.storage.query<Record<string, unknown>>(ENTITY)
+      const raw = await this.loading_.track(this.storage.query<Record<string, unknown>>(ENTITY))
       const products = raw.map((row) => this.normalizeProduct(row))
       this.ProductsStore_.set(products)
     } catch (err) {

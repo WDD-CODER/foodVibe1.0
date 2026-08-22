@@ -11,6 +11,9 @@ export type EntityId = {
 /** Thrown when localStorage.setItem fails (quota exceeded, private mode, disabled). */
 export const STORAGE_ERROR_MESSAGE = 'Storage failed: quota or access denied'
 
+/** Max time a deferred backup write can be starved by requestIdleCallback before it's forced to run. */
+const BACKUP_WRITE_MAX_DELAY_MS = 2000
+
 /** Entity types that are mirrored to backup_<key> after every successful save. */
 export const BACKUP_ENTITY_TYPES = new Set<string>([
   'PRODUCT_LIST',
@@ -169,18 +172,68 @@ export class StorageService {
     )
   }
 
+  /** entityType -> latest entities awaiting a deferred backup write. One pending write per
+   *  entityType at a time — a burst of saves (e.g. bulk delete) coalesces onto whichever
+   *  write is already scheduled instead of queueing a full re-stringify per save. */
+  private readonly pendingBackups_ = new Map<string, unknown[]>()
+  private backupFlushListenerAttached_ = false
+
   private _save<T>(entityType: string, entities: T[]): void {
     try {
       localStorage.setItem(entityType, JSON.stringify(entities))
-      if (BACKUP_ENTITY_TYPES.has(entityType)) {
-        try {
-          localStorage.setItem(`backup_${entityType}`, JSON.stringify(entities))
-        } catch {
-          // Backup write failed; main save succeeded — log only, do not fail
-        }
-      }
     } catch {
       throw new Error(STORAGE_ERROR_MESSAGE)
     }
+    if (BACKUP_ENTITY_TYPES.has(entityType)) {
+      // Off the critical path (plan 303 addendum): the backup mirror is a second full-array
+      // JSON.stringify + setItem, which scales with the whole collection's size, not the one
+      // row that changed. Scheduling it after the current task lets the UI update (and the
+      // caller's Promise resolve) without waiting on that second stringify.
+      this._scheduleBackupWrite(entityType, entities)
+    }
+  }
+
+  private _scheduleBackupWrite<T>(entityType: string, entities: T[]): void {
+    const alreadyScheduled = this.pendingBackups_.has(entityType)
+    this.pendingBackups_.set(entityType, entities)
+    this._ensureBackupFlushOnUnload()
+    // A callback is already queued for this entityType — it'll pick up this newer payload
+    // when it fires, so a second save arriving before then shouldn't schedule a second write.
+    if (alreadyScheduled) return
+
+    const flush = () => this._flushBackup(entityType)
+    const ric = (globalThis as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number })
+      .requestIdleCallback
+    if (typeof ric === 'function') {
+      // Bounded timeout: a busy main thread with no idle periods would otherwise starve this
+      // callback indefinitely, drifting the backup mirror further from the main key.
+      ric(flush, { timeout: BACKUP_WRITE_MAX_DELAY_MS })
+    } else {
+      setTimeout(flush, 0)
+    }
+  }
+
+  private _flushBackup(entityType: string): void {
+    const entities = this.pendingBackups_.get(entityType)
+    if (entities === undefined) return
+    this.pendingBackups_.delete(entityType)
+    try {
+      localStorage.setItem(`backup_${entityType}`, JSON.stringify(entities))
+    } catch {
+      // Backup write failed; main save already succeeded — log only, do not fail
+    }
+  }
+
+  /** Synchronously flush any still-pending backup writes before the tab closes/reloads, so a
+   *  deferred write can't get silently dropped in the window between the main save and the
+   *  idle callback firing. */
+  private _ensureBackupFlushOnUnload(): void {
+    if (this.backupFlushListenerAttached_ || typeof window === 'undefined') return
+    this.backupFlushListenerAttached_ = true
+    window.addEventListener('pagehide', () => {
+      for (const entityType of Array.from(this.pendingBackups_.keys())) {
+        this._flushBackup(entityType)
+      }
+    })
   }
 }

@@ -2,6 +2,7 @@ import { Signal, signal, inject } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
 import { StorageService } from './async-storage.service'
 import { LoggingService } from './logging.service'
+import { LoadingService } from './loading.service'
 
 /**
  * Abstract base for simple entity data services that:
@@ -16,6 +17,7 @@ import { LoggingService } from './logging.service'
 export abstract class BaseEntityDataService<T> {
   protected readonly storage = inject(StorageService)
   protected readonly logging = inject(LoggingService)
+  private readonly loading_ = inject(LoadingService)
 
   private readonly store_ = signal<T[]>([])
   private loaded_ = false
@@ -74,11 +76,15 @@ export abstract class BaseEntityDataService<T> {
 
   private async loadInitialData(): Promise<void> {
     try {
-      const data = await this.storage.query<T>(this.storageKey)
+      const data = await this.loading_.track(this.storage.query<T>(this.storageKey))
       this.store_.set(Array.isArray(data) ? data : [])
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.logging.error({ event: 'crud.entity.hydrate_error', message: `Failed to load ${this.storageKey}`, context: { err } })
+      this.logging.error({
+        event: 'crud.entity.hydrate_error',
+        message: `Failed to load ${this.storageKey}`,
+        context: { err }
+      })
     }
   }
 }
