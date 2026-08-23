@@ -3,6 +3,7 @@
  * (more-vertical, arrow-up/down, arrow-up-down, plus-circle) used by child templates.
  */
 import {
+  Activity,
   AlertCircle,
   AlertTriangle,
   Archive,
@@ -85,6 +86,7 @@ import {
 } from 'lucide-angular'
 
 export const TEST_LUCIDE_ICONS = {
+  Activity,
   AlertCircle,
   AlertTriangle,
   Archive,

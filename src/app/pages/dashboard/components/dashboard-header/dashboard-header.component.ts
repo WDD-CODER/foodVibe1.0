@@ -12,7 +12,7 @@ import type { DashboardTab } from '../../dashboard.page'
   imports: [CommonModule, LucideAngularModule, TranslatePipe],
   templateUrl: './dashboard-header.component.html',
   styleUrl: './dashboard-header.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardHeaderComponent {
   readonly activeTab = input.required<DashboardTab>()
@@ -26,5 +26,11 @@ export class DashboardHeaderComponent {
 
   protected backToDashboard(): void {
     this.tabChange.emit('overview')
+  }
+
+  /** Scrolls the pressed header-nav item into view within its (horizontally-scrollable on mobile) container. */
+  protected scrollNavItemIntoView(event: Event): void {
+    const el = event.currentTarget as HTMLElement
+    el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' })
   }
 }

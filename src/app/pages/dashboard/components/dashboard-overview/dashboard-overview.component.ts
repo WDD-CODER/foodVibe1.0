@@ -17,7 +17,7 @@ import type { DashboardTab } from '../../dashboard.page'
   imports: [CommonModule, LucideAngularModule, TranslatePipe, ScrollIndicatorsDirective, ChangePopoverComponent],
   templateUrl: './dashboard-overview.component.html',
   styleUrl: './dashboard-overview.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardOverviewComponent {
   readonly activeTab = input.required<DashboardTab>()
@@ -39,22 +39,14 @@ export class DashboardOverviewComponent {
     this.activityLog.syncFromStorage()
   }
 
-  protected readonly totalProducts_ = computed(
-    () => this.kitchenState.products_().length
-  )
+  protected readonly totalProducts_ = computed(() => this.kitchenState.products_().length)
 
-  protected readonly totalRecipes_ = computed(
-    () => this.kitchenState.recipes_().length
-  )
+  protected readonly totalRecipes_ = computed(() => this.kitchenState.recipes_().length)
 
-  protected readonly lowStockCount_ = computed(
-    () => this.kitchenState.lowStockProducts_().length
-  )
+  protected readonly lowStockCount_ = computed(() => this.kitchenState.lowStockProducts_().length)
 
   protected readonly unapprovedCount_ = computed(() => {
-    return this.kitchenState
-      .recipes_()
-      .filter(r => !r.is_approved_).length
+    return this.kitchenState.recipes_().filter((r) => !r.is_approved_).length
   })
 
   /** Recent activity: read directly from localStorage so the list always reflects current storage (not in-memory cache). */
@@ -72,13 +64,13 @@ export class DashboardOverviewComponent {
       this.openChange_.set(null)
       return
     }
-    const el = (event.currentTarget as HTMLElement)
+    const el = event.currentTarget as HTMLElement
     const rect = el.getBoundingClientRect()
     this.openChange_.set({
       activityId,
       field,
       top: rect.bottom + 4,
-      left: rect.left + rect.width / 2,
+      left: rect.left + rect.width / 2
     })
   }
 
@@ -91,7 +83,7 @@ export class DashboardOverviewComponent {
   protected getOpenActivity(): ActivityEntry | undefined {
     const open = this.openChange_()
     if (!open) return undefined
-    return this.getRecentActivity().find(e => e.id === open.activityId)
+    return this.getRecentActivity().find((e) => e.id === open.activityId)
   }
 
   /** Close popover when clicking outside; ignore clicks on change tags (they toggle instead). */
@@ -126,18 +118,24 @@ export class DashboardOverviewComponent {
   protected goToRecipeBookUnapproved(): void {
     void this.router.navigate(['/recipe-book'], {
       queryParams: { filters: 'Approved:false' },
-      queryParamsHandling: 'merge',
+      queryParamsHandling: 'merge'
     })
   }
 
   protected goToInventoryLowStock(): void {
     void this.router.navigate(['/inventory'], {
       queryParams: { lowStock: '1' },
-      queryParamsHandling: 'merge',
+      queryParamsHandling: 'merge'
     })
   }
 
   protected goToSuppliers(): void {
     void this.router.navigate(['/suppliers'])
+  }
+
+  /** Scrolls the pressed header-nav item into view within its (horizontally-scrollable on mobile) container. */
+  protected scrollNavItemIntoView(event: Event): void {
+    const el = event.currentTarget as HTMLElement
+    el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' })
   }
 }

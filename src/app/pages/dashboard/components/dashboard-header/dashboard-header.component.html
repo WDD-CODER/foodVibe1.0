@@ -3,27 +3,52 @@
   <div class="header-actions" role="group" aria-label="Dashboard actions">
     <nav class="header-actions__nav" aria-label="Dashboard sections">
       @if (activeTab() === 'metadata') {
-      <button type="button" class="header-btn header-btn--back" data-testid="btn-back-to-dashboard" (click)="backToDashboard()">
-        <lucide-icon name="arrow-right" size="16"></lucide-icon>
-        {{ 'back_to_dashboard' | translatePipe }}
-      </button>
+        <button
+          type="button"
+          class="header-btn header-btn--back"
+          data-testid="btn-back-to-dashboard"
+          (click)="scrollNavItemIntoView($event); backToDashboard()"
+        >
+          <lucide-icon name="arrow-right" size="16"></lucide-icon>
+          {{ 'back_to_dashboard' | translatePipe }}
+        </button>
       } @else {
-      <button type="button" class="header-btn" data-testid="btn-nav-metadata" [class.active]="activeTab() === 'metadata'"
-        (click)="tabChange.emit('metadata')">
-        {{ 'core_settings' | translatePipe }}
-      </button>
+        <button
+          type="button"
+          class="header-btn"
+          data-testid="btn-nav-metadata"
+          [class.active]="activeTab() === 'metadata'"
+          (click)="scrollNavItemIntoView($event); tabChange.emit('metadata')"
+        >
+          {{ 'core_settings' | translatePipe }}
+        </button>
       }
-      <button type="button" class="header-btn" data-testid="btn-nav-venues" [class.active]="activeTab() === 'venues'"
-        (click)="tabChange.emit('venues')">
+      <button
+        type="button"
+        class="header-btn"
+        data-testid="btn-nav-venues"
+        [class.active]="activeTab() === 'venues'"
+        (click)="scrollNavItemIntoView($event); tabChange.emit('venues')"
+      >
         <lucide-icon name="map-pin" size="16"></lucide-icon>
         {{ 'venue_list' | translatePipe }}
       </button>
-      <button type="button" class="header-btn" data-testid="btn-nav-suppliers" (click)="goToSuppliers()">
+      <button
+        type="button"
+        class="header-btn"
+        data-testid="btn-nav-suppliers"
+        (click)="scrollNavItemIntoView($event); goToSuppliers()"
+      >
         <lucide-icon name="truck" size="16"></lucide-icon>
         <span>{{ 'suppliers' | translatePipe }}</span>
       </button>
-      <button type="button" class="header-btn header-btn--trash" data-testid="btn-nav-trash" [class.active]="activeTab() === 'trash'"
-        (click)="tabChange.emit('trash')">
+      <button
+        type="button"
+        class="header-btn header-btn--trash"
+        data-testid="btn-nav-trash"
+        [class.active]="activeTab() === 'trash'"
+        (click)="scrollNavItemIntoView($event); tabChange.emit('trash')"
+      >
         <lucide-icon name="trash-2" size="16"></lucide-icon>
         {{ 'trash' | translatePipe }}
       </button>

@@ -11,7 +11,7 @@
           class="c-tab-pill"
           data-testid="btn-nav-metadata"
           [class.active]="activeTab() === 'metadata'"
-          (click)="tabChange.emit('metadata')"
+          (click)="scrollNavItemIntoView($event); tabChange.emit('metadata')"
         >
           {{ 'core_settings' | translatePipe }}
         </button>
@@ -20,7 +20,7 @@
           class="c-tab-pill"
           data-testid="btn-nav-venues"
           [class.active]="activeTab() === 'venues'"
-          (click)="tabChange.emit('venues')"
+          (click)="scrollNavItemIntoView($event); tabChange.emit('venues')"
         >
           {{ 'venue_list' | translatePipe }}
           <lucide-icon name="map-pin" size="16"></lucide-icon>
@@ -30,12 +30,17 @@
           class="c-tab-pill trash"
           data-testid="btn-nav-trash"
           [class.active]="activeTab() === 'trash'"
-          (click)="tabChange.emit('trash')"
+          (click)="scrollNavItemIntoView($event); tabChange.emit('trash')"
         >
           {{ 'trash' | translatePipe }}
           <lucide-icon name="trash-2" size="16"></lucide-icon>
         </button>
-        <button type="button" class="c-tab-pill" data-testid="btn-nav-suppliers" (click)="goToSuppliers()">
+        <button
+          type="button"
+          class="c-tab-pill"
+          data-testid="btn-nav-suppliers"
+          (click)="scrollNavItemIntoView($event); goToSuppliers()"
+        >
           <span>{{ 'suppliers' | translatePipe }}</span>
           <lucide-icon name="truck" size="16"></lucide-icon>
         </button>
@@ -57,6 +62,7 @@
         <div class="kpi-foot">
           <button type="button" class="link-btn" data-testid="btn-view-inventory" (click)="goToInventory()">
             {{ 'view_inventory' | translatePipe }}
+            <lucide-icon name="chevron-left" [size]="11"></lucide-icon>
           </button>
           <button
             type="button"
@@ -83,6 +89,7 @@
         <div class="kpi-foot">
           <button type="button" class="link-btn" data-testid="btn-view-recipes" (click)="goToRecipeBook()">
             {{ 'view_recipes' | translatePipe }}
+            <lucide-icon name="chevron-left" [size]="11"></lucide-icon>
           </button>
           <svg width="60" height="18" viewBox="0 0 60 18" aria-hidden="true" class="kpi-sparkline">
             <path
@@ -109,6 +116,7 @@
         <div class="kpi-foot">
           <button type="button" class="link-btn" data-testid="btn-view-low-stock" (click)="goToInventoryLowStock()">
             {{ 'view_inventory' | translatePipe }}
+            <lucide-icon name="chevron-left" [size]="11"></lucide-icon>
           </button>
           <svg width="60" height="18" viewBox="0 0 60 18" aria-hidden="true" class="kpi-sparkline">
             <path
@@ -135,6 +143,7 @@
         <div class="kpi-foot">
           <button type="button" class="link-btn" data-testid="btn-view-unapproved" (click)="goToRecipeBookUnapproved()">
             {{ 'view_recipes' | translatePipe }}
+            <lucide-icon name="chevron-left" [size]="11"></lucide-icon>
           </button>
           <svg width="60" height="18" viewBox="0 0 60 18" aria-hidden="true" class="kpi-sparkline">
             <path
@@ -226,9 +235,12 @@
           </div>
         </div>
       } @else {
-        <p class="empty-copy" data-testid="activity-empty">
-          {{ 'no_recent_activity' | translatePipe }}
-        </p>
+        <div class="activity-empty" data-testid="activity-empty">
+          <lucide-icon class="activity-empty-icon" name="activity" [size]="26"></lucide-icon>
+          <p class="empty-copy">
+            {{ 'no_recent_activity' | translatePipe }}
+          </p>
+        </div>
       }
     </section>
   </main>
