@@ -113,6 +113,17 @@ write. Related to [[0001-lean-native-workflow]] and the cross-worktree NNN
 hardening in `plans/291-plan-persistence-brief-sync-hardening.plan.md` M6,
 which covers stale *origin* state but not same-directory local races.
 
+**2026-08-23 confirming case:** the same failure mode hit a shared *reference* file,
+not just `plans/`. Mid-session, a concurrent same-directory session staged ~3.5M
+lines of deletions under `tools/catalog-seeder/`, plus live edits to `.gitignore`
+and `src/styles.scss` — a file this session was actively reading for its exact
+`.c-*` engine values. `git reset -- <paths>` to unstage the unrelated deletions
+looked sufficient, but the other session **re-staged the same paths** later in
+the conversation, silently, between that reset and the eventual commit. The fix:
+treat `git reset` as a snapshot, not a guarantee — re-run `git diff --cached --stat`
+immediately before every `git commit` on a shared working directory, not just
+once after the initial `git add`.
+
 ---
 
 ## Todo archive footer wording and Plan Index placement

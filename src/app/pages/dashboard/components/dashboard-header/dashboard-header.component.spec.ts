@@ -17,20 +17,21 @@ describe('DashboardHeaderComponent', () => {
     router.navigate.and.returnValue(Promise.resolve(true))
 
     mockTranslation = jasmine.createSpyObj('TranslationService', [
-      'translate', 'resolveUnit', 'resolveCategory', 'resolveAllergen',
-      'resolveSectionCategory', 'resolvePreparationCategory',
+      'translate',
+      'resolveUnit',
+      'resolveCategory',
+      'resolveAllergen',
+      'resolveSectionCategory',
+      'resolvePreparationCategory'
     ])
     mockTranslation.translate.and.callFake((k: string) => k)
 
     await TestBed.configureTestingModule({
-      imports: [
-        DashboardHeaderComponent,
-        LucideAngularModule.pick({ ArrowRight, MapPin, Trash2, Truck }),
-      ],
+      imports: [DashboardHeaderComponent, LucideAngularModule.pick({ ArrowRight, MapPin, Trash2, Truck })],
       providers: [
         { provide: Router, useValue: router },
-        { provide: TranslationService, useValue: mockTranslation },
-      ],
+        { provide: TranslationService, useValue: mockTranslation }
+      ]
     }).compileComponents()
 
     fixture = TestBed.createComponent(DashboardHeaderComponent)
@@ -77,6 +78,15 @@ describe('DashboardHeaderComponent', () => {
     spyOn(component.tabChange, 'emit')
     fixture.debugElement.query(By.css('[data-testid="btn-nav-metadata"]')).nativeElement.click()
     expect(component.tabChange.emit).toHaveBeenCalledWith('metadata')
+  })
+
+  it('should scroll the pressed nav button into view on click', () => {
+    fixture.componentRef.setInput('activeTab', 'overview')
+    fixture.detectChanges()
+    const btn = fixture.debugElement.query(By.css('[data-testid="btn-nav-metadata"]')).nativeElement
+    spyOn(btn, 'scrollIntoView')
+    btn.click()
+    expect(btn.scrollIntoView).toHaveBeenCalledWith({ block: 'nearest', inline: 'nearest', behavior: 'smooth' })
   })
 
   it('should emit venues when venue-list button is clicked', () => {
