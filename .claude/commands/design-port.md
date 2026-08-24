@@ -215,9 +215,12 @@ visual treatment and no handler.
 ### Step 5 — Verify
 
 - `ng build` — 0 errors. `ng test` — no new failures.
-- **Render the screen's `.dc.html` live at 1280px and 390px**, render the app at the same widths,
-  compare side by side. Report both. (Optionally run `audit-harness.html` first as a design-side
-  baseline.)
+- Cross-check the built screen against every row in Inventory 3 — confirm each mapped design value
+  (surface, spacing, type, color, etc.) was actually applied in the shipped code, not just planned.
+  Report any row where the applied value diverges from what Inventory 3 specified.
+- Live visual comparison at 1280px/390px is performed by the Human, not by Claude Code. Claude Code
+  does not attempt browser-based self-validation of visual fidelity — report readiness for Human
+  review instead.
 - Re-read Inventory 1 and confirm every row still exists in the code. Report the count.
 - Update `_registry.md`: status → `done`, with the spec path.
 
