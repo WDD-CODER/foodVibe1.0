@@ -4,6 +4,7 @@ import { GlobalErrorHandler } from './core/services/global-error.handler'
 import { provideRouter } from '@angular/router'
 import { routes } from './app.routes'
 import {
+  Activity,
   ChefHat,
   AlertCircle,
   AlertTriangle,
@@ -126,6 +127,7 @@ export const appConfig: ApplicationConfig = {
     },
     importProvidersFrom(
       LucideAngularModule.pick({
+        Activity,
         Camera,
         Minus,
         Plus,

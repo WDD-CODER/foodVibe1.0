@@ -43,3 +43,23 @@ Scope: `src/app/` — components, signals-based state, routing, template/CD beha
 **Why the obvious fix is wrong:** The bug was invisible in every manual test this session, because every reachable navigation path into this route goes through `/venues/list` first (a genuine route change, so Angular destroys/recreates the component). It only bites on a same-route param-only transition — a bookmark, browser back/forward across two venue URLs, or any future in-page "next venue" link — none of which existed yet to trigger it.
 
 **What to do instead:** For any component that reads resolver data, use `toSignal(this.route.data)` (reactive) instead of `this.route.snapshot.data` (read-once) unless the route config is provably always destroy/recreate for every reachable navigation into it. See `venue-detail.component.ts`.
+
+---
+
+## Local per-page nav duplicates already-existing shared chip row
+
+**What hurt:** Dashboard showed two identical contextual nav rows stacked on mobile (venues/metadata/suppliers/trash), and the extra row very likely also broke mobile page scroll. The prior Dashboard restyle session (commit 77695f2) brought `dashboard-overview.component.html`/`dashboard-header.component.html`'s own `.header-actions__nav` up to full design-token fidelity, never noticing `TabChipsComponent` (`src/app/core/components/tab-chips/tab-chips.component.ts`, mounted once in `app.component.html` above `<router-outlet>`) already renders the identical 4 destinations for the `dashboard` route group via `CHIPS_BY_GROUP`.
+
+**Why the obvious fix is wrong:** Restyling the local nav to match the design pixel-for-pixel (which that session did correctly) still leaves the duplication — visual fidelity isn't the same question as "should this markup exist at all." A screen-scoped `/design-port` session that only reads the target screen's own component files, without checking `app.component.html`'s always-mounted children, will restyle a nav that should have been deleted.
+
+**What to do instead:** Before restyling or building any per-page contextual nav, check `TabChipsComponent`'s `GROUP_BY_PATH_PREFIX`/`CHIPS_BY_GROUP` (`tab-chips.component.ts`) for whether the current route's group already has these destinations covered. If it does, delete the local nav instead of restyling it — the design source confirms this too: `shell.js` renders exactly one `<nav class="chips">` app-wide, and per-screen `.dc.html` files never contain their own `<nav>`. Only build a local nav for destinations that genuinely aren't in `CHIPS_BY_GROUP` for that route.
+
+---
+
+## Component-scoped SCSS can't reach styles.scss's $break-* breakpoint variables
+
+**What hurt:** `metadata-manager.page.component.scss` needed a 768px/1023px breakpoint matching `header.component.scss`'s own tablet/desktop split exactly. `src/styles.scss` already defines `$break-mobile: 768px` and `$break-tablet-max: 1023px` — the obviously "correct" move per `docs/agent/conventions.md` ("use project tokens, never hardcode pixel breakpoints") is to reference those variables directly.
+
+**Why the obvious fix is wrong:** `angular.json` has no `stylePreprocessorOptions.includePaths` and no shared `@use`/`@forward` setup between `src/styles.scss` and component-scoped `.scss` files — each component stylesheet compiles as its own isolated Sass module. Referencing `$break-mobile` from a component file fails to compile (undefined variable); it isn't a lint nitpick, it's a hard build error. `cell-carousel.component.scss` already hit this and worked around it by declaring its own local `$cell-carousel-break` with a comment noting the value "matches global $break-mobile" — i.e. the established mitigation is already duplication-by-convention, not actual sharing.
+
+**What to do instead:** In component-scoped SCSS, hardcode the pixel breakpoint value and add a comment citing the canonical source (the styles.scss token name, or whichever component's own breakpoint you're matching) — do not attempt to `@use`/reference `$break-*` directly. If cross-file breakpoint sharing ever becomes a real need, the actual fix is adding a shared `@use` entry point, not fighting this per-component; flag that as a real (currently-undone) infrastructure gap rather than a documentation gap.

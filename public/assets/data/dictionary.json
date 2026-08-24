@@ -714,6 +714,8 @@
     "password_contains_email": "סיסמה לא יכולה להכיל את האימייל",
     "metadata_preparations_title": "הכנות וקטגוריות",
     "metadata_preparations_desc": "ניהול קטגוריות הכנה והכנות גלובליות לשימוש במתכונים",
+    "mm_jump_nav_prev": "הקודם",
+    "mm_jump_nav_next": "הבא",
     "metadata_units_and_conversions_title": "יחידות והמרות",
     "metadata_product_categories_title": "קטגוריות מוצרים",
     "metadata_global_allergens_title": "מאגר אלרגנים גלובלי",

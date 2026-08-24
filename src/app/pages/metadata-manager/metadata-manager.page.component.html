@@ -2,48 +2,112 @@
   @if (isImporting_()) {
     <app-loader size="large" label="loader_cooking_up" [overlay]="true" />
   }
+
+  <!-- Mobile/tablet-only jump nav — tapping a tab makes that section the first one in the grid
+       below (real CSS order change, no scroll, no overlay). Desktop hides this entirely; grid
+       layout is unaffected either way. Tablet-only prev/next arrows scroll the tab row itself
+       (mobile relies on touch swipe). -->
+  <div class="mm-jump-nav-row">
+    <button
+      type="button"
+      class="mm-jump-nav-arrow mm-jump-nav-arrow--prev"
+      [class.mm-jump-nav-arrow--hidden]="!canScrollNavPrev_()"
+      (click)="scrollJumpNav('prev')"
+      [attr.aria-label]="'mm_jump_nav_prev' | translatePipe"
+    >
+      <lucide-icon name="chevron-right" [size]="16"></lucide-icon>
+    </button>
+    <nav
+      class="mm-jump-nav"
+      #jumpNavEl
+      (scroll)="updateJumpNavScrollState()"
+      [attr.aria-label]="'metadata_manager' | translatePipe"
+    >
+      @for (s of jumpSections; track s.id) {
+        <button type="button" class="c-tab-pill" [class.active]="isFront(s.id)" (click)="bringToFront(s.id)">
+          {{ s.labelKey | translatePipe }}
+        </button>
+      }
+    </nav>
+    <button
+      type="button"
+      class="mm-jump-nav-arrow mm-jump-nav-arrow--next"
+      [class.mm-jump-nav-arrow--hidden]="!canScrollNavNext_()"
+      (click)="scrollJumpNav('next')"
+      [attr.aria-label]="'mm_jump_nav_next' | translatePipe"
+    >
+      <lucide-icon name="chevron-left" [size]="16"></lucide-icon>
+    </button>
+  </div>
+
   <div class="admin-grid">
-    <ng-container *ngTemplateOutlet="managerCard; context: { 
-      title: 'metadata_units_and_conversions_title', 
-      icon: 'scale', 
-      colorClass: 'icon-success',
-      items: allUnitKeys_(),
-      type: 'unit'
-    }"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="
+        managerCard;
+        context: {
+          title: 'metadata_units_and_conversions_title',
+          icon: 'scale',
+          colorClass: 'icon-success',
+          items: allUnitKeys_(),
+          type: 'unit'
+        }
+      "
+    ></ng-container>
 
-    <ng-container *ngTemplateOutlet="managerCard; context: { 
-      title: 'metadata_product_categories_title', 
-      icon: 'tag', 
-      colorClass: 'icon-primary',
-      items: allCategories_(),
-      type: 'category'
-    }"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="
+        managerCard;
+        context: {
+          title: 'metadata_product_categories_title',
+          icon: 'tag',
+          colorClass: 'icon-primary',
+          items: allCategories_(),
+          type: 'category'
+        }
+      "
+    ></ng-container>
 
-    <ng-container *ngTemplateOutlet="managerCard; context: { 
-      title: 'metadata_global_allergens_title', 
-      icon: 'alert-triangle', 
-      colorClass: 'icon-danger',
-      items: allAllergens_(),
-      type: 'allergen'
-    }"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="
+        managerCard;
+        context: {
+          title: 'metadata_global_allergens_title',
+          icon: 'alert-triangle',
+          colorClass: 'icon-danger',
+          items: allAllergens_(),
+          type: 'allergen'
+        }
+      "
+    ></ng-container>
 
-    <ng-container *ngTemplateOutlet="managerCard; context: { 
-      title: 'metadata_recipe_labels_title', 
-      icon: 'tags', 
-      colorClass: 'icon-info',
-      items: allLabelKeys_(),
-      type: 'label'
-    }"></ng-container>
+    <ng-container
+      *ngTemplateOutlet="
+        managerCard;
+        context: {
+          title: 'metadata_recipe_labels_title',
+          icon: 'tags',
+          colorClass: 'icon-info',
+          items: allLabelKeys_(),
+          type: 'label'
+        }
+      "
+    ></ng-container>
 
-    <section class="manager-card menu-types-card">
+    <section class="manager-card menu-types-card" id="mm-sec-menu-type" [style.order]="orderFor('mm-sec-menu-type')">
       <div class="card-title">
         <lucide-icon name="utensils-crossed" class="icon-primary"></lucide-icon>
         <h2>{{ 'metadata_menu_types_title' | translatePipe }}</h2>
       </div>
       <p class="card-desc">{{ 'metadata_menu_types_desc' | translatePipe }}</p>
-      <button type="button" class="c-btn-primary" (click)="onAddMenuType()"
+      <button
+        type="button"
+        class="c-btn-primary"
+        (click)="onAddMenuType()"
         [disabled]="!isLoggedIn()"
-        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">{{ 'metadata_add_menu_type' | translatePipe }}</button>
+        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+      >
+        {{ 'metadata_add_menu_type' | translatePipe }}
+      </button>
       <div class="list-container">
         @if (allMenuTypes_().length > 0) {
           <div class="list-stack">
@@ -55,40 +119,63 @@
                     <div class="field-checkboxes">
                       @for (f of ALL_DISH_FIELDS; track f.key) {
                         <label class="field-check">
-                          <input type="checkbox" [checked]="isMenuTypeFieldSelected(f.key)" (change)="toggleMenuTypeField(f.key)">
+                          <input
+                            type="checkbox"
+                            [checked]="isMenuTypeFieldSelected(f.key)"
+                            (change)="toggleMenuTypeField(f.key)"
+                          />
                           {{ f.labelKey | translatePipe }}
                         </label>
                       }
                     </div>
                     <div class="edit-actions">
-                      <button type="button" class="c-btn-primary" (click)="onSaveMenuTypeFields()">{{ 'save' | translatePipe }}</button>
-                      <button type="button" class="c-btn-ghost--sm" (click)="onCancelEditMenuType()">{{ 'cancel' | translatePipe }}</button>
+                      <button type="button" class="c-btn-primary" (click)="onSaveMenuTypeFields()">
+                        {{ 'save' | translatePipe }}
+                      </button>
+                      <button type="button" class="c-btn-ghost--sm" (click)="onCancelEditMenuType()">
+                        {{ 'cancel' | translatePipe }}
+                      </button>
                     </div>
                   </div>
                 } @else {
-                  <input type="text" class="menu-type-key-input" [value]="def.key"
+                  <input
+                    type="text"
+                    class="menu-type-key-input"
+                    [value]="def.key"
                     (blur)="onMenuTypeNameBlur(def.key, $any($event.target).value)"
-                    (keydown.enter)="$any($event.target).blur()" />
+                    (keydown.enter)="$any($event.target).blur()"
+                  />
                   <div class="field-pills">
                     @for (f of def.fields; track f) {
-                      <button type="button" class="field-pill field-pill-removable"
+                      <button
+                        type="button"
+                        class="field-pill field-pill-removable"
                         (click)="removeFieldFromMenuType(def.key, f)"
                         [disabled]="!isLoggedIn()"
-                        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+                        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+                      >
                         {{ getDishFieldLabelKey(f) | translatePipe }}
                       </button>
                     }
                   </div>
-                  <button type="button" class="btn-edit" (click)="onEditMenuType(def.key)"
+                  <button
+                    type="button"
+                    class="btn-edit"
+                    (click)="onEditMenuType(def.key)"
                     [attr.aria-label]="'edit' | translatePipe"
                     [disabled]="!isLoggedIn()"
-                    [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+                    [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+                  >
                     <lucide-icon name="pencil" [size]="14"></lucide-icon>
                   </button>
-                  <button type="button" class="c-icon-btn danger" (click)="onRemoveMenuType(def.key)"
+                  <button
+                    type="button"
+                    class="c-icon-btn danger"
+                    (click)="onRemoveMenuType(def.key)"
                     [attr.aria-label]="'remove' | translatePipe"
                     [disabled]="!isLoggedIn()"
-                    [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+                    [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+                  >
                     <lucide-icon name="trash-2" [size]="16"></lucide-icon>
                   </button>
                 }
@@ -101,26 +188,26 @@
       </div>
     </section>
 
-    <app-preparation-category-manager />
-    <app-section-category-manager />
-    <app-user-management />
+    <app-preparation-category-manager id="mm-sec-preparation" [style.order]="orderFor('mm-sec-preparation')" />
+    <app-section-category-manager id="mm-sec-section" [style.order]="orderFor('mm-sec-section')" />
+    <app-user-management id="mm-sec-user" [style.order]="orderFor('mm-sec-user')" />
 
     @if (!isProduction_) {
-    <section class="manager-card">
-      <div class="card-title">
-        <lucide-icon name="package" class="icon-warning"></lucide-icon>
-        <h2>{{ 'load_demo_data' | translatePipe }}</h2>
-      </div>
-      <p class="card-desc">{{ 'metadata_demo_data_desc' | translatePipe }}</p>
-      <div class="card-actions">
-        <button type="button" class="btn-demo" (click)="onLoadDemoData()">
-          {{ 'load_demo_data' | translatePipe }}
-        </button>
-      </div>
-    </section>
+      <section class="manager-card" style="order: 20">
+        <div class="card-title">
+          <lucide-icon name="package" class="icon-warning"></lucide-icon>
+          <h2>{{ 'load_demo_data' | translatePipe }}</h2>
+        </div>
+        <p class="card-desc">{{ 'metadata_demo_data_desc' | translatePipe }}</p>
+        <div class="card-actions">
+          <button type="button" class="btn-demo" (click)="onLoadDemoData()">
+            {{ 'load_demo_data' | translatePipe }}
+          </button>
+        </div>
+      </section>
     }
 
-    <section class="manager-card">
+    <section class="manager-card" style="order: 21">
       <div class="card-title">
         <lucide-icon name="archive" class="icon-accent"></lucide-icon>
         <h2>{{ 'backup_restore' | translatePipe }}</h2>
@@ -139,59 +226,94 @@
           <lucide-icon name="upload" [size]="18"></lucide-icon>
           {{ 'backup_import' | translatePipe }}
         </button>
-        <input #fileInputRef type="file" accept=".json,application/json" class="backup-file-input"
-          (change)="onImportBackupFile($event)" />
+        <input
+          #fileInputRef
+          type="file"
+          accept=".json,application/json"
+          class="backup-file-input"
+          (change)="onImportBackupFile($event)"
+        />
       </div>
     </section>
   </div>
 </div>
 
-<ng-template #managerCard let-title="title" let-icon="icon" let-colorClass="colorClass" let-items="items"
-  let-type="type">
-  <section class="manager-card" [attr.data-type]="type">
+<ng-template
+  #managerCard
+  let-title="title"
+  let-icon="icon"
+  let-colorClass="colorClass"
+  let-items="items"
+  let-type="type"
+>
+  <section
+    class="manager-card"
+    [attr.data-type]="type"
+    [attr.id]="'mm-sec-' + type"
+    [style.order]="orderFor('mm-sec-' + type)"
+  >
     <div class="card-title">
       <lucide-icon [name]="icon" [class]="colorClass"></lucide-icon>
       <h2>{{ title | translatePipe }}</h2>
     </div>
 
     <div class="input-group">
-      <input #newInput type="text" [placeholder]="('add' | translatePipe) + ' ' + (title | translatePipe) + '...'"
-        (keyup.enter)="onAddMetadata(newInput.value, type, newInput)">
+      <input
+        #newInput
+        type="text"
+        [placeholder]="('add' | translatePipe) + ' ' + (title | translatePipe) + '...'"
+        (keyup.enter)="onAddMetadata(newInput.value, type, newInput)"
+      />
 
-      <button (click)="onAddMetadata(newInput.value, type, newInput)" class="c-btn-primary"
+      <button
+        (click)="onAddMetadata(newInput.value, type, newInput)"
+        class="c-btn-primary"
         [disabled]="!isLoggedIn()"
-        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
+        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+      >
         {{ 'add' | translatePipe }}
       </button>
     </div>
 
     <div class="list-container">
       @if (items.length > 0) {
-      <div [class]="type === 'allergen' ? 'allergen-pool' : (type === 'label' ? 'label-pool' : 'list-stack')">
-        @for (item of items; track item) {
-        <div [class]="type === 'allergen' ? 'allergen-pill' : (type === 'label' ? 'label-pill' : 'list-item group')">
-          @if (type === 'label') {
-            <span class="label-color-dot" [style.background-color]="getLabelColor(item)"></span>
-          }
-          <span>{{ item | translatePipe }}</span>
+        <div [class]="type === 'allergen' ? 'allergen-pool' : type === 'label' ? 'label-pool' : 'list-stack'">
+          @for (item of items; track item) {
+            <div [class]="type === 'allergen' ? 'allergen-pill' : type === 'label' ? 'label-pill' : 'list-item group'">
+              @if (type === 'label') {
+                <span class="label-color-dot" [style.background-color]="getLabelColor(item)"></span>
+              }
+              <span>{{ item | translatePipe }}</span>
 
-          @if (type === 'unit' && isSystemUnit(item)) {
-          <span class="unit-default-badge" [attr.title]="'unit_default_unremovable' | translatePipe" aria-label="default unit">
-            <lucide-icon name="lock" [size]="14"></lucide-icon>
-          </span>
-          } @else if (type !== 'unit' || !isSystemUnit(item)) {
-          <button class="c-icon-btn danger" (click)="onRemoveMetadata(item, type)"
-            [disabled]="!isLoggedIn()"
-            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null">
-            <lucide-icon [name]="type === 'allergen' ? 'x' : 'trash-2'"
-              [size]="type === 'allergen' ? 14 : 16"></lucide-icon>
-          </button>
+              @if (type === 'unit' && isSystemUnit(item)) {
+                <span
+                  class="unit-default-badge"
+                  [attr.title]="'unit_default_unremovable' | translatePipe"
+                  aria-label="default unit"
+                >
+                  <lucide-icon name="lock" [size]="14"></lucide-icon>
+                </span>
+              } @else if (type !== 'unit' || !isSystemUnit(item)) {
+                <button
+                  class="c-icon-btn danger"
+                  (click)="onRemoveMetadata(item, type)"
+                  [disabled]="!isLoggedIn()"
+                  [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+                >
+                  <lucide-icon
+                    [name]="type === 'allergen' ? 'x' : 'trash-2'"
+                    [size]="type === 'allergen' ? 14 : 16"
+                  ></lucide-icon>
+                </button>
+              }
+            </div>
           }
         </div>
-        }
-      </div>
       } @else {
-      <div class="empty-state">{{ 'metadata_no_items_prefix' | translatePipe }} {{ title | translatePipe }} {{ 'metadata_no_items_suffix' | translatePipe }}</div>
+        <div class="empty-state">
+          {{ 'metadata_no_items_prefix' | translatePipe }} {{ title | translatePipe }}
+          {{ 'metadata_no_items_suffix' | translatePipe }}
+        </div>
       }
     </div>
   </section>
