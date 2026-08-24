@@ -15,6 +15,16 @@ Tracks the 13-screen port from `.interface-design/source/` onto the Angular app,
 | 6 | Venues (+ VenueDetail) | `src/app/pages/venues/` (incl. `components/venue-detail/`) | `Venues.dc.html` + `VenueDetail.dc.html` | todo | — |
 | 7 | Menu Library | `src/app/pages/menu-library/` | `MenuLibrary.dc.html` | todo | — |
 | 8 | Metadata Manager | `src/app/pages/metadata-manager/` | `MetadataManager.dc.html` | todo | — |
+
+> **Metadata Manager note:** the mobile/tablet (≤1023px, hidden on desktop) 8-tab jump-nav
+> (`.mm-jump-nav-row`/`.mm-jump-nav` — units, product categories, allergens, recipe labels, menu
+> types, preparation categories, section categories, user management) was pre-built ahead of this
+> row's session (scoped addition, no colors/spacing/card styling touched). Tapping a tab brings
+> that section to the front via a real CSS `order` change (page never scrolls) — each section
+> carries a stable `#mm-sec-*` id used only for this order-matching, not for scroll targeting.
+> Tablet-only (768–1023px) prev/next arrows scroll the tab row itself and hide once there's
+> nothing further that way. The future full `/design-port` session for this screen should treat
+> this nav + reorder behavior as already done and exclude it from its own spec.
 | 9 | Trash | `src/app/pages/trash/` | `Trash.dc.html` | todo | — |
 | 10 | Recipe Builder | `src/app/pages/recipe-builder/` | `RecipeBuilder.dc.html` | todo | — |
 | 11 | Cook View | `src/app/pages/cook-view/` | `CookView.dc.html` | todo | — |

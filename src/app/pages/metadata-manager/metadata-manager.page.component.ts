@@ -1,4 +1,14 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core'
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  HostListener,
+  inject,
+  OnInit,
+  signal,
+  computed,
+  viewChild
+} from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { UnitRegistryService, SYSTEM_UNITS } from '@services/unit-registry.service'
@@ -43,7 +53,7 @@ type MetadataType = 'category' | 'allergen' | 'unit' | 'label'
   templateUrl: './metadata-manager.page.component.html',
   styleUrl: './metadata-manager.page.component.scss'
 })
-export class MetadataManagerComponent implements OnInit {
+export class MetadataManagerComponent implements OnInit, AfterViewInit {
   private unitRegistry = inject(UnitRegistryService)
   private metadataRegistry = inject(MetadataRegistryService)
   private productData = inject(ProductDataService)
@@ -64,6 +74,10 @@ export class MetadataManagerComponent implements OnInit {
 
   ngOnInit(): void {
     void this.menuEventData.ensureLoaded()
+  }
+
+  ngAfterViewInit(): void {
+    requestAnimationFrame(() => this.updateJumpNavScrollState())
   }
 
   /** Returns false if not signed in (shows message and opens sign-in modal). */
@@ -87,6 +101,70 @@ export class MetadataManagerComponent implements OnInit {
 
   readonly ALL_DISH_FIELDS = ALL_DISH_FIELDS
   readonly DEFAULT_DISH_FIELDS = DEFAULT_DISH_FIELDS
+
+  /**
+   * Mobile/tablet jump-nav destinations, in page order. Built from the app's real 8 sections
+   * (not the design's tab list) — Demo Data / Backup & Restore are intentionally excluded.
+   */
+  protected readonly jumpSections = [
+    { id: 'mm-sec-unit', labelKey: 'metadata_units_and_conversions_title' },
+    { id: 'mm-sec-category', labelKey: 'metadata_product_categories_title' },
+    { id: 'mm-sec-allergen', labelKey: 'metadata_global_allergens_title' },
+    { id: 'mm-sec-label', labelKey: 'metadata_recipe_labels_title' },
+    { id: 'mm-sec-menu-type', labelKey: 'metadata_menu_types_title' },
+    { id: 'mm-sec-preparation', labelKey: 'metadata_prep_categories' },
+    { id: 'mm-sec-section', labelKey: 'metadata_section_categories_title' },
+    { id: 'mm-sec-user', labelKey: 'user_management' }
+  ] as const
+
+  /** Which section (if any) has been brought to the front of the grid; null = natural page order. */
+  protected readonly frontSectionId_ = signal<string | null>(null)
+
+  private readonly jumpNavEl = viewChild<ElementRef<HTMLElement>>('jumpNavEl')
+
+  protected bringToFront(id: string): void {
+    this.frontSectionId_.set(id)
+  }
+
+  protected isFront(id: string): boolean {
+    return this.frontSectionId_() === id
+  }
+
+  /** CSS `order` for a jump-nav section: 0 (first) when it's the front one, else its natural
+   *  page-order position (1-8) — so bringing one to the front never disturbs the relative order
+   *  of the rest. Demo Data / Backup & Restore carry their own fixed order (20/21) in the
+   *  template and are never part of this reordering. */
+  protected orderFor(id: string): number {
+    if (this.isFront(id)) return 0
+    const index = this.jumpSections.findIndex((s) => s.id === id)
+    return index === -1 ? 1 : index + 1
+  }
+
+  /** Tablet-only prev/next arrows for the jump-nav row (mobile relies on touch swipe). */
+  protected scrollJumpNav(direction: 'prev' | 'next'): void {
+    const el = this.jumpNavEl()?.nativeElement
+    if (!el) return
+    const amount = Math.max(160, el.clientWidth * 0.6)
+    el.scrollBy({ left: direction === 'next' ? amount : -amount, behavior: 'smooth' })
+  }
+
+  /** Whether the jump-nav row has more content to scroll to on each side — same "hide the arrow
+   *  once there's nothing left that way" behavior as this app's other carousels. */
+  protected readonly canScrollNavPrev_ = signal(false)
+  protected readonly canScrollNavNext_ = signal(false)
+
+  @HostListener('window:resize')
+  protected updateJumpNavScrollState(): void {
+    const el = this.jumpNavEl()?.nativeElement
+    if (!el) return
+    const threshold = 1
+    const maxScroll = el.scrollWidth - el.clientWidth
+    // RTL-safe: modern browsers report scrollLeft as 0 at the start, going negative toward the
+    // end — abs() makes this direction-agnostic regardless of LTR/RTL scrollLeft sign convention.
+    const scrolled = Math.abs(el.scrollLeft)
+    this.canScrollNavPrev_.set(scrolled > threshold)
+    this.canScrollNavNext_.set(scrolled < maxScroll - threshold)
+  }
 
   protected getLabelColor(key: string): string {
     return this.metadataRegistry.getLabelColor(key)
