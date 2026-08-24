@@ -190,29 +190,6 @@ describe('DashboardOverviewComponent', () => {
     )
   })
 
-  it('should navigate to /suppliers on goToSuppliers', () => {
-    fixture.detectChanges()
-    fixture.debugElement.query(By.css('[data-testid="btn-nav-suppliers"]')).nativeElement.click()
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/suppliers'])
-  })
-
-  // --- tabChange output ---
-
-  it('should emit metadata when metadata nav button is clicked', () => {
-    fixture.detectChanges()
-    spyOn(component.tabChange, 'emit')
-    fixture.debugElement.query(By.css('[data-testid="btn-nav-metadata"]')).nativeElement.click()
-    expect(component.tabChange.emit).toHaveBeenCalledWith('metadata')
-  })
-
-  it('should scroll the pressed nav button into view on click', () => {
-    fixture.detectChanges()
-    const btn = fixture.debugElement.query(By.css('[data-testid="btn-nav-metadata"]')).nativeElement
-    spyOn(btn, 'scrollIntoView')
-    btn.click()
-    expect(btn.scrollIntoView).toHaveBeenCalledWith({ block: 'nearest', inline: 'nearest', behavior: 'smooth' })
-  })
-
   // --- Popover ---
 
   it('should open popover on toggleChangePopover call', () => {

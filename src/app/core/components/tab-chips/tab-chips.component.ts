@@ -89,4 +89,10 @@ export class TabChipsComponent {
       )
       .subscribe((e) => this.currentUrl_.set(e.urlAfterRedirects))
   }
+
+  /** Scrolls the pressed chip into view within this row's (horizontally-scrollable on mobile) container. */
+  protected scrollChipIntoView(event: Event): void {
+    const el = event.currentTarget as HTMLElement
+    el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' })
+  }
 }

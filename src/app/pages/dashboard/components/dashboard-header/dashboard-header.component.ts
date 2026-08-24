@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core'
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
@@ -15,22 +14,13 @@ import type { DashboardTab } from '../../dashboard.page'
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardHeaderComponent {
+  // Kept for API parity with dashboard.page.html's binding (Inventory 1 do-not-touch) even
+  // though this component only ever mounts on the metadata tab now that the nav duplicating
+  // app-tab-chips (venues/metadata/suppliers/trash) has been removed — see tab-chips.component.ts.
   readonly activeTab = input.required<DashboardTab>()
   readonly tabChange = output<DashboardTab>()
 
-  private readonly router = inject(Router)
-
-  protected goToSuppliers(): void {
-    void this.router.navigate(['/suppliers'])
-  }
-
   protected backToDashboard(): void {
     this.tabChange.emit('overview')
-  }
-
-  /** Scrolls the pressed header-nav item into view within its (horizontally-scrollable on mobile) container. */
-  protected scrollNavItemIntoView(event: Event): void {
-    const el = event.currentTarget as HTMLElement
-    el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' })
   }
 }

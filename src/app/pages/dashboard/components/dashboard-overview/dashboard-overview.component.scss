@@ -22,14 +22,6 @@
     .page-title {
       text-align: center;
     }
-
-    .header-actions {
-      align-items: stretch;
-    }
-
-    .header-actions__nav {
-      width: 100%;
-    }
   }
 }
 
@@ -54,23 +46,6 @@
 
   color: var(--color-text-muted);
   font-size: var(--fs-sm);
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-
-  gap: 0.5rem;
-}
-
-.header-actions__nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-evenly;
-  flex-wrap: wrap;
-
-  gap: 0.5rem;
 }
 
 // Stacked, full-width — matches the design: KPI grid on top, one chronological

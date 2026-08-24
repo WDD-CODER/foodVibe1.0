@@ -79,8 +79,10 @@ describe('DashboardPage', () => {
   })
 
   it('should navigate with query param when setTab(metadata) is called', () => {
-    const metaBtn = fixture.debugElement.query(By.css('[data-testid="btn-nav-metadata"]'))
-    metaBtn?.nativeElement.click()
+    // The metadata destination is now driven by the shared app-tab-chips row (mounted
+    // app-wide, outside this page's own tree) rather than a page-local nav button —
+    // call the protected handler directly instead of clicking a button that no longer exists here.
+    ;(component as unknown as { setTab: (tab: string) => void }).setTab('metadata')
     expect(router.navigate).toHaveBeenCalledWith(
       [],
       jasmine.objectContaining({

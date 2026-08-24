@@ -4,48 +4,6 @@
       <h1 class="page-title">{{ 'dashboard' | translatePipe }}</h1>
       <p class="page-subtitle">{{ 'dashboard_subtitle' | translatePipe }}</p>
     </div>
-    <div class="header-actions" role="group" aria-label="Dashboard actions">
-      <nav class="header-actions__nav" aria-label="Dashboard sections">
-        <button
-          type="button"
-          class="c-tab-pill"
-          data-testid="btn-nav-metadata"
-          [class.active]="activeTab() === 'metadata'"
-          (click)="scrollNavItemIntoView($event); tabChange.emit('metadata')"
-        >
-          {{ 'core_settings' | translatePipe }}
-        </button>
-        <button
-          type="button"
-          class="c-tab-pill"
-          data-testid="btn-nav-venues"
-          [class.active]="activeTab() === 'venues'"
-          (click)="scrollNavItemIntoView($event); tabChange.emit('venues')"
-        >
-          {{ 'venue_list' | translatePipe }}
-          <lucide-icon name="map-pin" size="16"></lucide-icon>
-        </button>
-        <button
-          type="button"
-          class="c-tab-pill trash"
-          data-testid="btn-nav-trash"
-          [class.active]="activeTab() === 'trash'"
-          (click)="scrollNavItemIntoView($event); tabChange.emit('trash')"
-        >
-          {{ 'trash' | translatePipe }}
-          <lucide-icon name="trash-2" size="16"></lucide-icon>
-        </button>
-        <button
-          type="button"
-          class="c-tab-pill"
-          data-testid="btn-nav-suppliers"
-          (click)="scrollNavItemIntoView($event); goToSuppliers()"
-        >
-          <span>{{ 'suppliers' | translatePipe }}</span>
-          <lucide-icon name="truck" size="16"></lucide-icon>
-        </button>
-      </nav>
-    </div>
   </header>
 
   <main class="dashboard-main">

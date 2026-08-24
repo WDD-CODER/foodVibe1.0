@@ -128,14 +128,4 @@ export class DashboardOverviewComponent {
       queryParamsHandling: 'merge'
     })
   }
-
-  protected goToSuppliers(): void {
-    void this.router.navigate(['/suppliers'])
-  }
-
-  /** Scrolls the pressed header-nav item into view within its (horizontally-scrollable on mobile) container. */
-  protected scrollNavItemIntoView(event: Event): void {
-    const el = event.currentTarget as HTMLElement
-    el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' })
-  }
 }
