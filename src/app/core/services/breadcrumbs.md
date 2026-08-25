@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Singleton services for data, state, modals, HTTP concerns, logging, export, backup, and cross-cutting behavior. Pages and shared components use `inject()`. Domain persistence goes through `StorageService` (async-storage); data services use shared storage keys and signals where applicable.
+Singleton services for data, state, modals, HTTP concerns, logging, export, and cross-cutting behavior. Pages and shared components use `inject()`. Domain persistence goes through `StorageService` (async-storage); data services use shared storage keys and signals where applicable.
 
 ## Navigation
 
@@ -43,12 +43,10 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, back
 | global-specific-modal.service.ts | Global vs specific choice | GlobalSpecificModalService |
 | restore-choice-modal.service.ts | Restore-from-trash choice | RestoreChoiceModalService |
 | translation-key-modal.service.ts | English key + Hebrew modal | TranslationKeyModalService |
-| demo-loader.service.ts | Load demo JSON | DemoLoaderService |
 | user.service.ts | User/session | UserService, LoginCredentials |
 | util.service.ts | Shared utilities | UtilService |
 | hero-fab.service.ts | Floating action button state per route | HeroFabService |
 | export.service.ts | Data export orchestration | ExportService |
-| backup.service.ts | Backup/restore flows | BackupService |
 | global-error.handler.ts | Angular ErrorHandler implementation | GlobalErrorHandler |
 
 ## Architecture Context
@@ -69,14 +67,14 @@ Services live under `core/` and are injected into pages and shared UI. Data serv
 ## Development Notes
 
 - New entity CRUD: model in `core/models/`, service here, resolver in `core/resolvers/`, routes in `app.routes.ts`.
-- Demo data: `DemoLoaderService` + `public/assets/data/demo-*.json`.
 - Jasmine specs colocated as `*.spec.ts`.
 
 ## Recent Changes
 
+- 2026-08-24: Removed `demo-loader.service.ts` (`DemoLoaderService`) and `backup.service.ts` (`BackupService`) — dead UI features purged from the Metadata Manager page. `BACKUP_ENTITY_TYPES` and its always-on `backup_<key>` mirror-write in `async-storage.service.ts` are unrelated always-on infrastructure and were kept.
 - 2026-03-22: Synced file list with repo (auth, export, backup, logging, key-resolution, menu-section-categories, modals, global error handler).
 - 2026-03-22: Removed unused commented `ingredient.service.ts` stub (no imports).
 
 ---
-*Last updated: 2026-03-22*
+*Last updated: 2026-08-24*
 *Updated by: breadcrumb-navigator*

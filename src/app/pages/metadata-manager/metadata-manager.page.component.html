@@ -1,8 +1,4 @@
 <div class="metadata-page" dir="rtl">
-  @if (isImporting_()) {
-    <app-loader size="large" label="loader_cooking_up" [overlay]="true" />
-  }
-
   <!-- Mobile/tablet-only jump nav — tapping a tab makes that section the first one in the grid
        below (real CSS order change, no scroll, no overlay). Desktop hides this entirely; grid
        layout is unaffected either way. Tablet-only prev/next arrows scroll the tab row itself
@@ -191,50 +187,6 @@
     <app-preparation-category-manager id="mm-sec-preparation" [style.order]="orderFor('mm-sec-preparation')" />
     <app-section-category-manager id="mm-sec-section" [style.order]="orderFor('mm-sec-section')" />
     <app-user-management id="mm-sec-user" [style.order]="orderFor('mm-sec-user')" />
-
-    @if (!isProduction_) {
-      <section class="manager-card" style="order: 20">
-        <div class="card-title">
-          <lucide-icon name="package" class="icon-warning"></lucide-icon>
-          <h2>{{ 'load_demo_data' | translatePipe }}</h2>
-        </div>
-        <p class="card-desc">{{ 'metadata_demo_data_desc' | translatePipe }}</p>
-        <div class="card-actions">
-          <button type="button" class="btn-demo" (click)="onLoadDemoData()">
-            {{ 'load_demo_data' | translatePipe }}
-          </button>
-        </div>
-      </section>
-    }
-
-    <section class="manager-card" style="order: 21">
-      <div class="card-title">
-        <lucide-icon name="archive" class="icon-accent"></lucide-icon>
-        <h2>{{ 'backup_restore' | translatePipe }}</h2>
-      </div>
-      <p class="card-desc">{{ 'backup_restore_desc' | translatePipe }}</p>
-      <div class="card-actions">
-        <button type="button" class="btn-backup btn-export" (click)="onExportBackup()">
-          <lucide-icon name="download" [size]="18"></lucide-icon>
-          {{ 'backup_export' | translatePipe }}
-        </button>
-        <button type="button" class="btn-backup btn-restore" (click)="onRestoreFromBackup()">
-          <lucide-icon name="rotate-ccw" [size]="18"></lucide-icon>
-          {{ 'backup_restore_from_backup' | translatePipe }}
-        </button>
-        <button type="button" class="btn-backup btn-import" (click)="fileInputRef.click()">
-          <lucide-icon name="upload" [size]="18"></lucide-icon>
-          {{ 'backup_import' | translatePipe }}
-        </button>
-        <input
-          #fileInputRef
-          type="file"
-          accept=".json,application/json"
-          class="backup-file-input"
-          (change)="onImportBackupFile($event)"
-        />
-      </div>
-    </section>
   </div>
 </div>
 
