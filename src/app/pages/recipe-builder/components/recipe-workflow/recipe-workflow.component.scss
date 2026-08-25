@@ -10,10 +10,10 @@
   height: 1rem;
 }
 
-.icon-muted { color: var(--color-text-muted); }
-
 // ---- Column alignment ----
-.col-center { text-align: center; }
+.col-center {
+  text-align: center;
+}
 
 .workflow-grid {
   background: var(--bg-glass-strong);
@@ -43,7 +43,9 @@
     border: 1px solid color-mix(in srgb, var(--color-primary) 20%, var(--border-glass));
     border-radius: var(--radius-md);
 
-    transition: background 0.15s ease, border-color 0.15s ease;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease;
 
     &:hover {
       background: color-mix(in srgb, var(--color-primary) 10%, var(--bg-glass-strong));
@@ -61,7 +63,9 @@
   gap: 0.375rem;
   cursor: grab;
   color: var(--color-text-muted);
-  &:active { cursor: grabbing; }
+  &:active {
+    cursor: grabbing;
+  }
 }
 
 .col-step-actions {
@@ -214,45 +218,6 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
     }
   }
 
-  .quantity-controls {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
-
-  .qty-btn {
-    display: grid;
-    place-content: center;
-    width: 2rem;
-    height: 2rem;
-    padding: 0;
-    background: var(--bg-glass);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
-
-    &:hover:not(:disabled) {
-      background: var(--bg-glass-hover);
-      border-color: var(--border-strong);
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
-
-  .amount-value {
-    flex: 1;
-    min-width: 2.5rem;
-    text-align: center;
-    padding: 0.5rem;
-    background-color: var(--bg-pure);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-sm);
-  }
-
   .grid-select {
     width: 100%;
     padding: 0.5rem;
@@ -293,7 +258,9 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
   resize: none;
   overflow-y: hidden;
   field-sizing: content;
-  transition: border-color 0.2s ease, background 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
 
   &:focus {
     border-color: var(--border-default);
@@ -317,7 +284,10 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
   border-radius: var(--radius-sm);
 
   cursor: pointer;
-  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
 
   &:hover {
     background: var(--bg-glass);
@@ -370,7 +340,9 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
     border: 1px solid var(--border-default);
     border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease;
 
     &:hover:not(:disabled) {
       background: var(--bg-glass-hover);
@@ -458,21 +430,6 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
     .col-prep-actions {
       display: none;
     }
-
-    .quantity-controls .qty-btn {
-      opacity: 0;
-      width: 0;
-      padding: 0;
-      border: none;
-      overflow: hidden;
-      transition: opacity 0.15s ease, width 0.15s ease;
-    }
-    .quantity-controls:hover .qty-btn,
-    .quantity-controls:focus-within .qty-btn {
-      opacity: 1;
-      width: 2rem;
-      border: 1px solid var(--border-default);
-    }
   }
 }
 
@@ -482,7 +439,9 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
   align-items: center;
   justify-content: center;
   color: var(--color-text-muted);
-  &:active { cursor: grabbing; }
+  &:active {
+    cursor: grabbing;
+  }
 }
 
 .cdk-drag-preview {
@@ -509,32 +468,4 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
 .grid-body.cdk-drop-list-dragging .grid-row:not(.cdk-drag-placeholder),
 .grid-body.cdk-drop-list-dragging .prep-grid-row:not(.cdk-drag-placeholder) {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-.inline-category-picker-wrapper {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-top: 0.25rem;
-  z-index: 50;
-  min-width: 200px;
-  background: var(--bg-pure);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
-}
-
-.category-option-item {
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  transition: background 0.15s ease;
-  border-bottom: 1px solid var(--border-default);
-  color: var(--color-text-main);
-  &:last-child {
-    border-bottom: none;
-  }
-  &:hover {
-    background: var(--bg-glass-hover);
-  }
 }

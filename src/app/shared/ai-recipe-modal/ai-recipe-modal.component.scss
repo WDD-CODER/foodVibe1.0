@@ -21,34 +21,10 @@
   margin: 0;
 }
 
-.ai-config-panel,
 .ai-prompt-panel {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-}
-
-.ai-config-label {
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-  margin: 0;
-}
-
-.ai-key-input {
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text-main);
-  font-size: 0.875rem;
-  direction: ltr;
-  text-align: left;
-
-  &:focus {
-    outline: none;
-    border-color: var(--color-primary);
-  }
 }
 
 .ai-prompt-textarea {
@@ -101,8 +77,12 @@
   justify-content: center;
   z-index: 2;
 
-  &--top { top: 0; }
-  &--bottom { bottom: 0; }
+  &--top {
+    top: 0;
+  }
+  &--bottom {
+    bottom: 0;
+  }
 }
 
 .ai-scroll-indicator {
@@ -112,7 +92,7 @@
   width: 1.25rem;
   height: 1.25rem;
   border-radius: 50%;
-  background: var(--bg-glass, rgba(255,255,255,0.8));
+  background: var(--bg-glass, rgba(255, 255, 255, 0.8));
   backdrop-filter: blur(4px);
   border: 1px solid var(--border-default);
   color: var(--color-text-muted);
@@ -145,25 +125,6 @@
   flex-wrap: wrap;
 }
 
-.ai-configure-link {
-  font-size: 0.8rem;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  color: var(--color-text-muted);
-}
-
-.ai-config-inline {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  width: 100%;
-
-  .ai-key-input {
-    flex: 1;
-  }
-}
-
 .ai-draft-preview {
   display: flex;
   flex-direction: column;
@@ -172,37 +133,6 @@
   background: var(--color-surface-raised, var(--color-surface));
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-}
-
-.ai-draft-field {
-  display: flex;
-  gap: 0.5rem;
-  align-items: flex-start;
-}
-
-.ai-draft-label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  min-width: 80px;
-  flex-shrink: 0;
-}
-
-.ai-draft-value {
-  font-size: 0.875rem;
-  color: var(--color-text-main);
-}
-
-.ai-key-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.ai-key-label {
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-  margin: 0;
 }
 
 .ai-status-bar {
@@ -227,140 +157,6 @@
   &.ai-status--error {
     color: var(--color-danger);
     border-color: var(--color-danger);
-  }
-}
-
-// ── Draft preview structured layout ──
-
-.ai-draft-header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.ai-draft-labeled-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.ai-draft-field-title {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  text-decoration: underline;
-  text-decoration-color: var(--color-primary);
-  text-underline-offset: 0.2em;
-  text-decoration-thickness: 2px;
-}
-
-.ai-draft-field-value {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.ai-draft-name {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text-main);
-  margin: 0;
-}
-
-.ai-draft-badge {
-  padding: 0.1rem 0.4rem;
-  border-radius: var(--radius-xs);
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.ai-draft-yield {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--color-text-main);
-}
-
-.ai-draft-section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-}
-
-.ai-draft-section-title {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  text-align: center;
-  text-decoration: underline;
-  text-decoration-color: var(--color-border);
-  text-underline-offset: 0.2em;
-  text-decoration-thickness: 1px;
-}
-
-.ai-draft-ingredient-table {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xs);
-  overflow: hidden;
-}
-
-.ai-draft-ingredient-row {
-  display: grid;
-  grid-template-columns: 1fr 4.5rem 3.5rem;
-  align-items: center;
-  font-size: 0.85rem;
-  color: var(--color-text-main);
-
-  &:not(:last-child) {
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  &:nth-child(even) {
-    background: var(--bg-muted);
-  }
-}
-
-.ai-draft-ing-name {
-  font-weight: 500;
-  padding: 0.35rem 0.5rem;
-  min-width: 0;
-}
-
-.ai-draft-ing-unit {
-  color: var(--color-text-secondary);
-  font-size: 0.8rem;
-  white-space: nowrap;
-  padding: 0.35rem 0.5rem;
-  text-align: center;
-  border-inline-start: 1px solid var(--color-border);
-}
-
-.ai-draft-ing-qty {
-  color: var(--color-text-main);
-  font-size: 0.8rem;
-  font-weight: 500;
-  white-space: nowrap;
-  padding: 0.35rem 0.5rem;
-  text-align: center;
-  border-inline-start: 1px solid var(--color-border);
-}
-
-.ai-draft-steps {
-  margin: 0;
-  padding-inline-start: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-
-  li {
-    font-size: 0.85rem;
-    color: var(--color-text-main);
-    line-height: 1.45;
   }
 }
 
@@ -394,7 +190,10 @@
   background: var(--color-surface);
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
 
   &:hover {
     background: var(--color-danger);
@@ -424,8 +223,12 @@
   font-weight: 600;
   color: var(--color-text-main);
 
-  .ai-usage-bar[data-status='warning'] & { color: var(--border-warning); }
-  .ai-usage-bar[data-status='danger']  & { color: var(--color-danger); }
+  .ai-usage-bar[data-status='warning'] & {
+    color: var(--border-warning);
+  }
+  .ai-usage-bar[data-status='danger'] & {
+    color: var(--color-danger);
+  }
 }
 
 .ai-usage-track {
@@ -478,7 +281,10 @@
   background: transparent;
   cursor: pointer;
 
-  transition: color 0.15s, background 0.15s, border-color 0.15s;
+  transition:
+    color 0.15s,
+    background 0.15s,
+    border-color 0.15s;
 
   &:hover {
     color: var(--color-text-main);
@@ -510,7 +316,9 @@
   border-radius: var(--radius-sm);
   cursor: pointer;
 
-  transition: border-color 0.15s, color 0.15s;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
 
   &:hover {
     color: var(--color-primary);
@@ -585,6 +393,10 @@
   background: var(--color-primary);
   transition: width 0.3s ease;
 
-  .ai-usage-bar[data-status='warning'] & { background: var(--border-warning); }
-  .ai-usage-bar[data-status='danger']  & { background: var(--color-danger); }
+  .ai-usage-bar[data-status='warning'] & {
+    background: var(--border-warning);
+  }
+  .ai-usage-bar[data-status='danger'] & {
+    background: var(--color-danger);
+  }
 }
