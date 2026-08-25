@@ -69,18 +69,19 @@ migration-dump.json
 tools/**/.claude/
 
 # Catalog seeder — runtime output (never commit)
-tools/catalog-seeder/output/pending-review.json
-tools/catalog-seeder/output/pending-manual.json
-tools/catalog-seeder/output/off-bulk-cache.csv.gz
-tools/catalog-seeder/output/review-list.txt
-tools/catalog-seeder/output/review-table.txt
-tools/catalog-seeder/output/to-enrich.json
-tools/catalog-seeder/output/*.csv.gz
-tools/catalog-seeder/output/*.json.gz
-tools/catalog-seeder/output/enriched.json
+tools/catalog-seeder/output/*
+tools/catalog-seeder/dumps/
+tools/catalog-seeder/logging.log
+!tools/catalog-seeder/output/.gitkeep
 # seed-products.json IS committed after admin review — intentionally not ignored
+!tools/catalog-seeder/output/seed-products.json
 tools/catalog-seeder/__pycache__/
 tools/catalog-seeder/*.pyc
+
+# Legacy FoodComposer SQL source — plan 300 closed with 0 mismatches on the
+# final full-database sweep; re-obtain from the original export if a future
+# re-audit is needed (see server/scripts/legacy-import/source-data/README.md)
+server/scripts/legacy-import/source-data/*.sql
 
 # MemPalace runtime data (vector DB, knowledge graph, config — never commit)
 chroma.sqlite3
