@@ -64,3 +64,37 @@ Before staging, re-run `git status --short` fresh rather than reusing an earlier
 After any forced branch switch, diff your expected changes against the tree and re-apply
 anything a concurrent commit absorbed. And never `git add -A` in a shared working
 directory - stage explicit paths only.
+
+---
+
+## Recovering a shared working directory after a live `.git/index.lock`
+
+**What hurt:** Mid-`/ship`, staging hit `fatal: Unable to create '.git/index.lock': File
+exists` — a second tool (Cursor, same directory, no separate worktree, so
+`git worktree list` showed 1) was actively touching git. The working tree also had ~15
+files dirty that this session never edited, spanning at least three unrelated bodies of
+work (two earlier sessions' still-uncommitted plans plus the live Cursor session).
+Related to the `git add -A` entry above, but this is the recovery procedure once you're
+already mid-collision rather than the prevention step.
+
+**Why the obvious fix is wrong:** Deleting the lock on sight risks corrupting whatever
+the other process is mid-write on. Bundling the whole dirty tree into one commit (or
+worse, one PR) silently ships someone else's unreviewed, possibly-incomplete work under
+your name — and a botched `git add -p` retry after a lock error can leave the index in
+a half-staged state.
+
+**What to do instead:** Check `tasklist` (Windows) / `ps` for an actual running `git`
+process before touching the lock — none running means it's stale, safe to clear with
+plain `rm` (not `rm -f`, which this environment's global deny blocks anyway). Then
+classify the unfamiliar dirty files by diff shape before staging anything: pure
+deletions with zero insertions cross-reference cleanly against `.claude/todo.md`/
+`plans/*.md` claims of "done" work; any insertions mixed in usually mean a different,
+undocumented body of work touched the same file and needs its own bucket. Commit your
+own bucket **first**, directly on the pre-existing HEAD, so its branch pointer stays a
+clean, PR-able diff against main. Stack any recovered/other-session buckets after it via
+`git branch <name> <sha>` — never checkout a different branch in the shared directory to
+do this, since checkout would overwrite files a live concurrent editor may still have
+open; if you need a branch actually checked out (e.g. to append a file after PR checks
+already passed), use `git worktree add <scratch-path> <branch>` instead, work there, then
+`git worktree remove` it. Never invent a PR for a bucket you didn't author or fully
+verify — push it as a checkpoint and say so explicitly.
