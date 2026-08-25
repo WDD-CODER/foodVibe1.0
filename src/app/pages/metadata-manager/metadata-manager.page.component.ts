@@ -14,8 +14,6 @@ import { FormsModule } from '@angular/forms'
 import { UnitRegistryService, SYSTEM_UNITS } from '@services/unit-registry.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { ProductDataService } from '@services/product-data.service'
-import { DemoLoaderService } from '@services/demo-loader.service'
-import { BackupService } from '@services/backup.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
@@ -29,12 +27,10 @@ import { UserService } from '@services/user.service'
 import { AuthModalService } from '@services/auth-modal.service'
 import { LoggingService } from '@services/logging.service'
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service'
-import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { ALL_DISH_FIELDS, DEFAULT_DISH_FIELDS, type DishFieldKey } from '@models/menu-event.model'
 import { PreparationCategoryManagerComponent } from './components/preparation-category-manager/preparation-category-manager.component'
 import { SectionCategoryManagerComponent } from './components/section-category-manager/section-category-manager.component'
 import { UserManagementComponent } from './components/user-management/user-management.component'
-import { environment } from '../../../environments/environment'
 
 type MetadataType = 'category' | 'allergen' | 'unit' | 'label'
 @Component({
@@ -45,7 +41,6 @@ type MetadataType = 'category' | 'allergen' | 'unit' | 'label'
     FormsModule,
     LucideAngularModule,
     TranslatePipe,
-    LoaderComponent,
     PreparationCategoryManagerComponent,
     SectionCategoryManagerComponent,
     UserManagementComponent
@@ -57,8 +52,6 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
   private unitRegistry = inject(UnitRegistryService)
   private metadataRegistry = inject(MetadataRegistryService)
   private productData = inject(ProductDataService)
-  private demoLoader = inject(DemoLoaderService)
-  private backupService = inject(BackupService)
   private confirmModal = inject(ConfirmModalService)
   private translationService = inject(TranslationService)
   private userMsgService = inject(UserMsgService)
@@ -70,7 +63,6 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   private readonly authModal = inject(AuthModalService)
   private readonly logging = inject(LoggingService)
-  protected readonly isProduction_ = environment.production
 
   ngOnInit(): void {
     void this.menuEventData.ensureLoaded()
@@ -95,7 +87,6 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
   allLabels_ = this.metadataRegistry.allLabels_
   allLabelKeys_ = computed(() => this.allLabels_().map((l) => l.key))
   allMenuTypes_ = this.metadataRegistry.allMenuTypes_
-  protected isImporting_ = signal(false)
   protected editingMenuTypeKey_ = signal<string | null>(null)
   protected editingMenuTypeFields_ = signal<DishFieldKey[]>([])
 
@@ -104,7 +95,7 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
 
   /**
    * Mobile/tablet jump-nav destinations, in page order. Built from the app's real 8 sections
-   * (not the design's tab list) — Demo Data / Backup & Restore are intentionally excluded.
+   * (not the design's tab list).
    */
   protected readonly jumpSections = [
     { id: 'mm-sec-unit', labelKey: 'metadata_units_and_conversions_title' },
@@ -132,8 +123,7 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
 
   /** CSS `order` for a jump-nav section: 0 (first) when it's the front one, else its natural
    *  page-order position (1-8) — so bringing one to the front never disturbs the relative order
-   *  of the rest. Demo Data / Backup & Restore carry their own fixed order (20/21) in the
-   *  template and are never part of this reordering. */
+   *  of the rest. */
   protected orderFor(id: string): number {
     if (this.isFront(id)) return 0
     const index = this.jumpSections.findIndex((s) => s.id === id)
@@ -343,60 +333,6 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
         return this.allLabelKeys_()
       default:
         return []
-    }
-  }
-
-  async onLoadDemoData(): Promise<void> {
-    if (!this.requireSignIn()) return
-    const message = this.translationService.translate('load_demo_data_confirm')
-    const confirmed = await this.confirmModal.open(message, { variant: 'warning', saveLabel: 'load_demo_data' })
-    if (!confirmed) return
-    this.isImporting_.set(true)
-    try {
-      await this.demoLoader.loadDemoData()
-    } finally {
-      this.isImporting_.set(false)
-    }
-  }
-
-  async onExportBackup(): Promise<void> {
-    if (!this.requireSignIn()) return
-    await this.backupService.exportAllToFile()
-  }
-
-  async onRestoreFromBackup(): Promise<void> {
-    if (!this.requireSignIn()) return
-    const message = this.translationService.translate('backup_restore_confirm')
-    const confirmed = await this.confirmModal.open(message, {
-      variant: 'warning',
-      saveLabel: 'backup_restore_from_backup'
-    })
-    if (!confirmed) return
-    this.isImporting_.set(true)
-    try {
-      await this.backupService.restoreFromBackup()
-    } finally {
-      this.isImporting_.set(false)
-    }
-  }
-
-  async onImportBackupFile(event: Event): Promise<void> {
-    if (!this.requireSignIn()) return
-    const input = event.target as HTMLInputElement
-    const file = input.files?.[0]
-    if (!file) return
-    const message = this.translationService.translate('backup_import_confirm')
-    const confirmed = await this.confirmModal.open(message, { variant: 'warning', saveLabel: 'backup_import' })
-    if (!confirmed) {
-      input.value = ''
-      return
-    }
-    this.isImporting_.set(true)
-    try {
-      await this.backupService.importFromFile(file)
-    } finally {
-      this.isImporting_.set(false)
-      input.value = ''
     }
   }
 

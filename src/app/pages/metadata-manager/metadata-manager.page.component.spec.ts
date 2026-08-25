@@ -137,15 +137,6 @@ describe('MetadataManagerPageComponent', () => {
     expect(fixture.debugElement.query(By.css('#mm-sec-unit')).nativeElement.style.order).toBe('0')
   })
 
-  it('should keep Demo Data / Backup & Restore pinned after everything else regardless of which section is front', () => {
-    fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-tab-pill'))[7].nativeElement.click() // User Management
-    fixture.detectChanges()
-    const backupOrder = Number(
-      fixture.debugElement.query(By.css('.btn-backup')).nativeElement.closest('.manager-card').style.order
-    )
-    expect(backupOrder).toBeGreaterThan(8)
-  })
-
   it('should show tablet-only prev/next arrows that scroll the jump-nav row', () => {
     const nav = fixture.debugElement.query(By.css('.mm-jump-nav')).nativeElement
     spyOn(nav, 'scrollBy')
