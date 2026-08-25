@@ -18,7 +18,7 @@ $break-tablet-max: 1023px;
 /* Designated global tokens (cssLayer): Liquid Glass design system
  * Theme: Liquid Glass — frosted surfaces (--bg-glass, --blur-glass), teal primary (--color-primary).
  * Engines: .c-glass-card (hover lift), .c-glass-panel (no lift), .c-btn-primary, .c-btn-ghost,
- * .c-input, .c-input-wrapper, .c-select, .c-modal-*, .c-dropdown, .c-chip, .c-table-wrap, etc.
+ * .c-input, .c-input-wrapper, .c-select, .c-modal-*, .c-dropdown, .c-chip, etc.
  * New styles: use var(--*) and rem/em; prefer engines over one-off classes. See .claude/skills/cssLayer/SKILL.md
  */
 :root {
@@ -313,15 +313,11 @@ lucide-icon {
   font-size: 0.875rem;
   white-space: nowrap;
 
-  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
+  background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover));
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   cursor: pointer;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    inset 0 -1px 0 rgba(15, 118, 110, 0.3),
-    0 2px 4px var(--color-primary-soft),
-    0 8px 20px -8px var(--color-primary-glow);
+  box-shadow: var(--shadow-glow);
   transition: transform 0.18s var(--ease-spring), box-shadow 0.18s ease;
 
   @media (hover: hover) {
@@ -338,41 +334,6 @@ lucide-icon {
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
-  }
-}
-
-/* ---- Engine: Dark Button ---- */
-.c-btn-dark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-
-  padding-inline: 1.125rem;
-  padding-block: 0.625rem;
-
-  color: var(--color-text-on-primary);
-  font-family: var(--font-sans);
-  font-weight: 600;
-  font-size: 0.875rem;
-  white-space: nowrap;
-
-  background: var(--color-text-main);
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  box-shadow: 0 4px 12px -4px rgba(15, 23, 42, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.10);
-  transition: transform 0.18s var(--ease-spring), background 0.18s ease;
-
-  @media (hover: hover) {
-    &:hover {
-      background: var(--color-text-secondary);
-      transform: translateY(-1px);
-    }
-  }
-
-  &:active:not(:disabled) {
-    transform: scale(0.97);
   }
 }
 
@@ -410,19 +371,6 @@ lucide-icon {
   &:active:not(:disabled) {
     transform: scale(0.97);
   }
-}
-
-/* ---- Engine: Button size modifiers ---- */
-.c-btn-sm {
-  padding-inline: 0.875rem;
-  padding-block: 0.5rem;
-  font-size: 0.8125rem;
-}
-
-.c-btn-lg {
-  padding-inline: 1.375rem;
-  padding-block: 0.8125rem;
-  font-size: 0.9375rem;
 }
 
 /* ---- Engine: Glass Input ---- */
@@ -784,23 +732,6 @@ textarea.c-input {
   opacity: 0.7;
 }
 
-/* ---- Engine: Page Title ---- */
-.c-page-title {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-text-main);
-  letter-spacing: -0.01em;
-}
-
-/* ---- Engine: Section Title ---- */
-.c-section-title {
-  margin: 0;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--color-text-main);
-}
-
 /* ---- Engine: Action Icon Button ---- */
 .c-icon-btn {
   display: grid;
@@ -896,79 +827,6 @@ textarea.c-input {
     background: var(--bg-danger-subtle);
     color: var(--color-danger);
     border-color: rgba(220, 38, 38, 0.2);
-  }
-}
-
-/* ---- Engine: Status Pill ---- */
-.c-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3125rem;
-
-  padding-inline: 0.5625rem;
-  padding-block: 0.25rem;
-
-  color: currentColor;
-  font-family: var(--font-mono);
-  font-size: 0.65625rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  line-height: 1;
-
-  border-radius: var(--radius-full);
-
-  &::before {
-    content: '';
-    flex-shrink: 0;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: currentColor;
-  }
-
-  &.created, &.ok, &.approved {
-    background: rgba(16, 185, 129, 0.14);
-    color: var(--color-success-emphasis);
-  }
-
-  &.updated, &.pending, &.warn {
-    background: var(--bg-warning);
-    color: var(--text-warning);
-  }
-
-  &.deleted, &.rejected {
-    background: var(--bg-danger-subtle);
-    color: var(--color-danger);
-  }
-
-  &.draft {
-    background: rgba(15, 23, 42, 0.08);
-    color: var(--color-text-muted);
-  }
-}
-
-/* ---- Engine: Eyebrow Label ---- */
-.c-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-
-  color: var(--color-primary-hover);
-  font-family: var(--font-mono);
-  font-size: 0.65625rem;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  line-height: 1;
-
-  &::before {
-    content: '';
-    flex-shrink: 0;
-    width: 20px;
-    height: 1.5px;
-    background: var(--color-primary);
-    border-radius: 2px;
   }
 }
 
@@ -1078,13 +936,15 @@ textarea.c-input {
   align-items: center;
   justify-content: center;
 
-  padding-inline: 0.75rem;
+  padding-inline: var(--space-4);
   padding-block: 0.625rem;
-  background: var(--bg-glass);
+  background: var(--bg-muted);
   color: var(--color-text-muted);
-  font-size: 0.8125rem;
+  font-size: var(--fs-xs);
   font-weight: 600;
   text-align: center;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
   border-block-end: 1px solid var(--border-default);
   backdrop-filter: var(--blur-glass);
   cursor: default;
@@ -1115,16 +975,6 @@ textarea.c-input {
 
 .row--incomplete .c-list-body-cell {
   background: var(--bg-warning-soft);
-}
-
-.c-grid-cell {
-  padding-inline: 0.75rem;
-  padding-block: 0.625rem;
-  background: transparent;
-  color: var(--color-text-main);
-  font-size: 0.875rem;
-  border-block-end: 1px solid var(--border-row);
-  transition: background 0.15s ease;
 }
 
 /* ---- Engine: Visually Hidden (accessibility) ---- */
@@ -1220,32 +1070,6 @@ textarea.c-input {
   font-size: 0.875rem;
 }
 
-/* ---- Engine: Glass Table Wrapper ---- */
-.c-table-wrap {
-  overflow-x: auto;
-
-  background: var(--bg-glass-strong);
-
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-glass);
-  backdrop-filter: var(--blur-glass);
-  -webkit-backdrop-filter: var(--blur-glass);
-}
-
-/* ---- Engine: Glass Table Card (upgrade of c-table-wrap with xl radius) ---- */
-.c-table-card {
-  overflow: hidden;
-
-  background: rgba(255, 255, 255, 0.85);
-
-  border: 1px solid rgba(255, 255, 255, 0.95);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-soft);
-  backdrop-filter: var(--blur-glass);
-  -webkit-backdrop-filter: var(--blur-glass);
-}
-
 /* ---- Engine: Modern Data Table ---- */
 .c-table {
   width: 100%;
@@ -1293,40 +1117,6 @@ textarea.c-input {
     &:last-child td {
       border-block-end: none;
     }
-  }
-}
-
-/* ---- Engine: Data Table (th/td base) ---- */
-.c-data-table {
-  width: 100%;
-
-  border-collapse: collapse;
-
-  th,
-  td {
-    padding-inline: 0.75rem;
-    padding-block: 0.625rem;
-
-    border-block-end: 1px solid var(--border-default);
-    text-align: justify;
-  }
-
-  th {
-    background: var(--bg-glass);
-    color: var(--color-text-muted);
-    font-size: 0.8125rem;
-    font-weight: 600;
-
-    backdrop-filter: var(--blur-glass);
-  }
-
-  .col-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 0.25rem;
-
-    text-align: end;
   }
 }
 
@@ -1591,38 +1381,6 @@ textarea.c-input {
   }
 }
 
-/* ---- Engine: Chip Variants ---- */
-.c-chip--warning {
-  background: rgba(254, 243, 199, 0.5);
-  color: var(--text-warning);
-}
-
-.c-chip--success {
-  background: var(--bg-success);
-  color: var(--text-success);
-}
-
-/* ---- Engine: Grid Input (inline table controls) ---- */
-.c-grid-input {
-  padding-inline: 0.625rem;
-  padding-block: 0.375rem;
-
-  background: var(--bg-glass);
-  font-size: 0.875rem;
-
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-sm);
-  outline: none;
-  box-sizing: border-box;
-
-  transition: border-color 0.2s var(--ease-smooth), box-shadow 0.2s var(--ease-smooth);
-
-  &:focus {
-    border-color: var(--border-focus);
-    box-shadow: var(--shadow-focus);
-  }
-}
-
 /* ---- Part 7: Animation keyframes (use in components) ---- */
 @keyframes focusPulse {
   0%   { box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.4); }
@@ -1720,9 +1478,11 @@ textarea.c-input {
   margin: 0 0 0.25rem 0;
   padding: 0.25rem 0.125rem;
 
-  font-size: 0.8125rem;
+  font-size: var(--fs-xs);
   font-weight: 600;
   color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
   background: transparent;
 
   border: none;
@@ -1783,6 +1543,22 @@ textarea.c-input {
     flex-wrap: wrap;
 
     gap: 0.5rem;
+    padding-inline-start: 0;
+  }
+
+  /* Dense pack: each option sizes to its own label width and options wrap
+     side by side (short items like most allergens sit several to a row)
+     instead of one full-width row each — shrinks the whole filter panel.
+     Flex-wrap, not CSS grid: grid's shared column-track widths squeezed
+     short and long labels alike into the same track width, cutting text
+     off — flex-wrap lets every item keep its own natural width. */
+  &.c-filter-options--dense {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+
+    gap: 0.5rem 0.875rem;
     padding-inline-start: 0;
   }
 }
