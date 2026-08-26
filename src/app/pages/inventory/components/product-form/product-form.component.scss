@@ -28,9 +28,9 @@
   padding: 2rem;
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-glass);
-  backdrop-filter: var(--blur-glass);
-  -webkit-backdrop-filter: var(--blur-glass);
+  box-shadow: var(--shadow-modal);
+  backdrop-filter: var(--blur-modal);
+  -webkit-backdrop-filter: var(--blur-modal);
 
   .form-header {
     display: block;
@@ -126,9 +126,11 @@
 
     label {
       place-content: baseline;
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: var(--color-text-secondary);
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-semibold);
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
       height: 24px;
       text-align: center;
 
@@ -138,7 +140,7 @@
     }
 
     // Fix 2: remove spinner arrows from number inputs in regular form groups
-    input[type="number"] {
+    input[type='number'] {
       -moz-appearance: textfield;
 
       &::-webkit-inner-spin-button,
@@ -154,14 +156,16 @@
       place-content: center;
     }
 
-    input:not(.form-input--no-focus-ring),
+    input,
     select {
       border: 1px solid var(--border-default);
       border-radius: var(--radius-md);
       padding-inline: 0.75rem;
       padding-block: 0.5rem;
       outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
       background: var(--bg-glass);
 
       &:focus {
@@ -170,7 +174,6 @@
       }
     }
   }
-
 
   // Specialized Input Containers
   .relative-input {
@@ -185,7 +188,6 @@
       &.yield-factor-input {
         padding-inline-start: 1rem;
       }
-
     }
 
     .prefix {
@@ -205,7 +207,9 @@
     border-radius: var(--radius-md);
     border: 1px dashed var(--border-default);
     /* No backdrop-filter: creates stacking context and hides custom-select dropdown behind next row */
-    transition: border-color 0.2s ease, background 0.2s ease;
+    transition:
+      border-color 0.2s ease,
+      background 0.2s ease;
 
     &.row-invalid {
       border-inline-end: 3px solid var(--color-danger);
@@ -213,7 +217,6 @@
     }
 
     .input-wrapper.field-error {
-
       input,
       select {
         border-color: var(--color-danger);
@@ -253,7 +256,7 @@
         font-weight: 600;
         color: var(--color-text-secondary);
 
-        input[type="checkbox"] {
+        input[type='checkbox'] {
           width: 1rem;
           height: 1rem;
           accent-color: var(--color-primary);
@@ -355,15 +358,6 @@
         height: 1.1rem;
       }
     }
-
-  }
-
-
-
-
-  // Section headings
-  .form-section__heading {
-    margin-bottom: 0.75rem;
   }
 
   // Collapsible optional blocks
@@ -421,18 +415,6 @@
     }
   }
 
-  .btn-add-option {
-    margin-block-start: 0.35rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0.25rem 0;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--color-success);
-  }
-
-
   select[multiple] {
     min-height: 4.5rem;
   }
@@ -480,9 +462,15 @@
 }
 
 // ---- Icon color utilities ----
-.icon-muted   { color: var(--color-text-muted); }
-.icon-primary { color: var(--color-primary); }
-.icon-warning { color: var(--text-warning); }
+.icon-muted {
+  color: var(--color-text-muted);
+}
+.icon-primary {
+  color: var(--color-primary);
+}
+.icon-warning {
+  color: var(--text-warning);
+}
 
 // ---- Label with icon (for non-collapsible labels) ----
 .label-row {
@@ -544,4 +532,3 @@
     color: var(--text-success);
   }
 }
-

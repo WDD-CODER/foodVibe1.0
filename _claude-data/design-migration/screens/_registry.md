@@ -8,8 +8,8 @@ Tracks the 13-screen port from `.interface-design/source/` onto the Angular app,
 | # | Screen | Angular path | Design source file | Status | Spec |
 |---|---|---|---|---|---|
 | 1 | Dashboard | `src/app/pages/dashboard/` | `Dashboard.dc.html` | done | `01-dashboard.port-spec.md` |
-| 2 | Inventory | `src/app/pages/inventory/` | `Inventory.dc.html` | todo | — |
-| 3 | Recipe Book | `src/app/pages/recipe-book/` | `RecipeBook.dc.html` | todo | — |
+| 2 | Inventory | `src/app/pages/inventory/` | `Inventory.dc.html` | done | `02-inventory.port-spec.md` |
+| 3 | Recipe Book | `src/app/pages/recipe-book/` | `RecipeBook.dc.html` | done | `03-recipe-book.port-spec.md` |
 | 4 | Suppliers | `src/app/pages/suppliers/` | `Suppliers.dc.html` | todo | — |
 | 5 | Equipment | `src/app/pages/equipment/` | `Equipment.dc.html` | todo | — |
 | 6 | Venues (+ VenueDetail) | `src/app/pages/venues/` (incl. `components/venue-detail/`) | `Venues.dc.html` + `VenueDetail.dc.html` | todo | — |

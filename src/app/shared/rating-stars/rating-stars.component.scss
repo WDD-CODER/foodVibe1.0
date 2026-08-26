@@ -10,9 +10,18 @@
 }
 
 /* ─── Size Variants ──────────────────────────────────────── */
-.rating-stars--sm lucide-icon { --lucide-size: 12px; }
-.rating-stars--md lucide-icon { --lucide-size: 16px; }
-.rating-stars--lg lucide-icon { --lucide-size: 22px; }
+/* rating-stars--sm/--md/--lg are composed at runtime via a template literal in
+ * rating-stars.component.ts:52 (`sizeClass_`) — static analysis / dead-CSS scans
+ * will always report these as unreferenced. They are not dead; do not remove. */
+.rating-stars--sm lucide-icon {
+  --lucide-size: 12px;
+}
+.rating-stars--md lucide-icon {
+  --lucide-size: 16px;
+}
+.rating-stars--lg lucide-icon {
+  --lucide-size: 22px;
+}
 
 /* ─── Star Button ────────────────────────────────────────── */
 .rating-stars__star {
@@ -24,14 +33,16 @@
   background: transparent;
   cursor: default;
   color: var(--color-border, #d1d5db);
-  transition: color 150ms ease, transform 100ms ease;
+  transition:
+    color 150ms ease,
+    transform 100ms ease;
 
   &--full {
-    color: var(--color-warning, #f59e0b);
+    color: var(--color-accent-gold, #a0833f);
   }
 
   &--half {
-    color: var(--color-warning, #f59e0b);
+    color: var(--color-accent-gold, #a0833f);
     opacity: 0.5;
   }
 

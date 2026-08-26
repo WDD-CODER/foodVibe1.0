@@ -165,7 +165,20 @@
         (keydown.enter)="onEditRecipe(row.recipe)"
         (keydown.space)="$event.preventDefault(); onEditRecipe(row.recipe)"
       >
-        <div class="col-name c-list-body-cell">{{ row.recipe.name_hebrew }}</div>
+        <div class="col-name c-list-body-cell">
+          {{ row.recipe.name_hebrew }}
+          @if (!row.recipe.is_approved_) {
+            <button
+              type="button"
+              class="approval-pending-badge"
+              [attr.aria-label]="'approve_recipe' | translatePipe"
+              [attr.title]="'recipe_pending_approval' | translatePipe"
+              (click)="onToggleApproval(row.recipe); $event.stopPropagation()"
+            >
+              <lucide-icon name="clock" [size]="12"></lucide-icon>
+            </button>
+          }
+        </div>
         <div class="col-type c-list-body-cell">
           {{ (isRecipeDish(row.recipe) ? 'dish' : 'preparation') | translatePipe }}
         </div>

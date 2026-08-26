@@ -2,7 +2,20 @@ import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { signal } from '@angular/core'
 import { Router } from '@angular/router'
 import { RouterTestingModule } from '@angular/router/testing'
-import { LucideAngularModule, Plus, Search, ChevronRight, ChevronLeft, ChevronDown, Trash2, Pencil, X, CircleX, Menu } from 'lucide-angular'
+import {
+  LucideAngularModule,
+  Plus,
+  Search,
+  ChevronRight,
+  ChevronLeft,
+  ChevronDown,
+  Trash2,
+  Pencil,
+  X,
+  CircleX,
+  Menu,
+  SlidersVertical
+} from 'lucide-angular'
 import { EquipmentListComponent } from './equipment-list.component'
 import { EquipmentDataService } from '@services/equipment-data.service'
 import { UserService } from '@services/user.service'
@@ -26,15 +39,31 @@ describe('EquipmentListComponent', () => {
       imports: [
         EquipmentListComponent,
         RouterTestingModule.withRoutes([{ path: 'equipment', component: EquipmentListComponent }]),
-        LucideAngularModule.pick({ Plus, Search, ChevronRight, ChevronLeft, ChevronDown, Trash2, Pencil, X, CircleX, Menu })
+        LucideAngularModule.pick({
+          Plus,
+          Search,
+          ChevronRight,
+          ChevronLeft,
+          ChevronDown,
+          Trash2,
+          Pencil,
+          X,
+          CircleX,
+          Menu,
+          SlidersVertical
+        })
       ],
       providers: [
         {
           provide: EquipmentDataService,
           useValue: {
             allEquipment_: mockEquipment,
-            saveEquipment: jasmine.createSpy('saveEquipment').and.returnValue({ subscribe: (fn: () => void) => fn?.() }),
-            deleteEquipment: jasmine.createSpy('deleteEquipment').and.returnValue({ subscribe: (fn: () => void) => fn?.() })
+            saveEquipment: jasmine
+              .createSpy('saveEquipment')
+              .and.returnValue({ subscribe: (fn: () => void) => fn?.() }),
+            deleteEquipment: jasmine
+              .createSpy('deleteEquipment')
+              .and.returnValue({ subscribe: (fn: () => void) => fn?.() })
           }
         },
         { provide: UserService, useValue: { isLoggedIn: signal(true) } },
@@ -42,10 +71,22 @@ describe('EquipmentListComponent', () => {
         { provide: TranslationService, useValue: { translate: (k: string) => k || '' } },
         { provide: RequireAuthService, useValue: {} },
         { provide: LoggingService, useValue: { log: jasmine.createSpy('log') } },
-        { provide: ConfirmModalService, useValue: { open: jasmine.createSpy('open').and.returnValue(Promise.resolve(true)) } },
-        { provide: HeroFabService, useValue: { setPageActions: jasmine.createSpy('setPageActions'), clearPageActions: jasmine.createSpy('clearPageActions') } },
+        {
+          provide: ConfirmModalService,
+          useValue: { open: jasmine.createSpy('open').and.returnValue(Promise.resolve(true)) }
+        },
+        {
+          provide: HeroFabService,
+          useValue: {
+            setPageActions: jasmine.createSpy('setPageActions'),
+            clearPageActions: jasmine.createSpy('clearPageActions')
+          }
+        },
         { provide: AddItemModalService, useValue: {} },
-        { provide: TranslationKeyModalService, useValue: { open: jasmine.createSpy('open').and.returnValue(Promise.resolve(null)) } }
+        {
+          provide: TranslationKeyModalService,
+          useValue: { open: jasmine.createSpy('open').and.returnValue(Promise.resolve(null)) }
+        }
       ]
     }).compileComponents()
 

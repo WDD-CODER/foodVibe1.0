@@ -416,6 +416,7 @@
     "approval_success": "המתכון/המנה סומן כמאושר",
     "unapproval_success": "בוטל אישור המתכון/המנה",
     "approval_error": "שגיאה בעדכון סטטוס האישור",
+    "recipe_pending_approval": "ממתין לאישור",
     "no_station": "ללא תחנה",
     "hot_line": "פס חם",
     "main_category": "קטגוריה ראשית",

@@ -30,7 +30,9 @@
   border-radius: var(--radius-md);
   backdrop-filter: var(--blur-glass);
   cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
 
   &:hover:not(:disabled) {
     background: var(--bg-glass-hover);
@@ -41,11 +43,6 @@
     opacity: 0.6;
     cursor: not-allowed;
   }
-}
-
-.trash-loading {
-  margin: 1rem 0;
-  color: var(--color-text-muted);
 }
 
 .trash-sections {
@@ -233,8 +230,8 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
-      "title   title"
-      "back    refresh";
+      'title   title'
+      'back    refresh';
     gap: 0.5rem 0.75rem;
 
     h1 {

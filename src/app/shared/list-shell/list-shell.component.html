@@ -1,10 +1,8 @@
-<div class="list-container" [class.panel-open]="isPanelOpen()" [attr.dir]="dir()">
+<div class="list-container" [attr.dir]="dir()">
   <header class="list-header">
-    @if (!isPanelOpen()) {
-      <button type="button" class="open-panel-btn" (click)="panelToggle.emit()" aria-label="Toggle filters">
-        <lucide-icon name="menu" [size]="24"></lucide-icon>
-      </button>
-    }
+    <button type="button" class="open-panel-btn" (click)="panelToggle.emit()" aria-label="Toggle filters">
+      <lucide-icon name="sliders-vertical" [size]="16"></lucide-icon>
+    </button>
     <div class="header-back-btn">
       <ng-content select="[shell-back-btn]"></ng-content>
     </div>
@@ -38,25 +36,13 @@
     </div>
   </section>
 
-  <div class="panel-backdrop" [class.visible]="isPanelOpen()" (click)="panelToggle.emit()" aria-hidden="true"></div>
-
   <!-- Outside .table-area on purpose: that section has backdrop-filter, which makes it
        the containing block for any position:fixed descendant (CSS spec, not a bug) —
        a row-edit-as-modal projected into shell-table-body would be pinned to the
        table's box instead of the viewport. Content here escapes that. -->
   <ng-content select="[shell-modal]"></ng-content>
 
-  <aside
-    class="filter-panel"
-    [class.collapsed]="!isPanelOpen()"
-    (touchstart)="onPanelTouchStart($event)"
-    (touchend)="onPanelTouchEnd($event)"
-  >
-    @if (isPanelOpen()) {
-      <button type="button" class="panel-toggle-icon" (click)="panelToggle.emit()" aria-label="Close filters">
-        <lucide-icon name="circle-x" [size]="20"></lucide-icon>
-      </button>
-    }
+  <aside class="filter-panel" [class.collapsed]="!isPanelOpen()">
     <div class="panel-content">
       <h3 class="panel-heading">{{ 'filter' | translatePipe }}</h3>
       <ng-content select="[shell-filters]"></ng-content>
