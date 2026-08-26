@@ -1,7 +1,7 @@
 # 03 — Recipe Book Port Spec
 
-Procedure: `.claude/commands/design-port.md` §6. Status: **Step 2 — spec written, no code, awaiting
-Human approval.**
+Procedure: `.claude/commands/design-port.md` §6. Status: **Step 4 executed, Step 5 verified,
+Human-validated — done.**
 
 - Angular path: `src/app/pages/recipe-book/` — `recipe-book.page.{ts,html,scss}` (thin
   `<recipe-book-list />` shell), `components/recipe-book-list/recipe-book-list.component.{ts,html,scss}`
