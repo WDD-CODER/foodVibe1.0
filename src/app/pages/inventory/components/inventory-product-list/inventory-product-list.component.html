@@ -303,7 +303,7 @@
             ></lucide-icon>
           </button>
           @if (isCategoryExpanded(category.name)) {
-            <div class="c-filter-options c-filter-options--dense">
+            <div class="c-filter-options">
               @for (option of category.options; track option.value) {
                 <label class="c-filter-option">
                   <input

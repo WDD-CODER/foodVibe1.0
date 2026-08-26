@@ -63,3 +63,23 @@ Scope: `src/app/` — components, signals-based state, routing, template/CD beha
 **Why the obvious fix is wrong:** `angular.json` has no `stylePreprocessorOptions.includePaths` and no shared `@use`/`@forward` setup between `src/styles.scss` and component-scoped `.scss` files — each component stylesheet compiles as its own isolated Sass module. Referencing `$break-mobile` from a component file fails to compile (undefined variable); it isn't a lint nitpick, it's a hard build error. `cell-carousel.component.scss` already hit this and worked around it by declaring its own local `$cell-carousel-break` with a comment noting the value "matches global $break-mobile" — i.e. the established mitigation is already duplication-by-convention, not actual sharing.
 
 **What to do instead:** In component-scoped SCSS, hardcode the pixel breakpoint value and add a comment citing the canonical source (the styles.scss token name, or whichever component's own breakpoint you're matching) — do not attempt to `@use`/reference `$break-*` directly. If cross-file breakpoint sharing ever becomes a real need, the actual fix is adding a shared `@use` entry point, not fighting this per-component; flag that as a real (currently-undone) infrastructure gap rather than a documentation gap.
+
+---
+
+## CSS Grid `auto-fill` shares column-track widths across rows — squeezes mixed-length labels
+
+**What hurt:** Inventory's filter-panel checkboxes (category/allergen groups) needed to pack densely on tablet/mobile so short labels (most allergens) sit several per row instead of one per row. First attempt used `display:grid; grid-template-columns:repeat(auto-fill, minmax(0, max-content)); grid-auto-flow:dense`. It compiled and built clean, but the Human immediately reported it unreadable — labels visibly cramped/cut off.
+
+**Why the obvious fix is wrong:** `auto-fill` computes a fixed number of column tracks, and every track's width is shared across *all* rows at that column index — it isn't "size each item to its own content," it's "size each column to the widest item that ever lands in it, across the whole grid." When items vary a lot in natural width (a 3-character allergen next to a long category name), auto-placement can drop a wide item into a track sized for a narrower one, clipping its text. Nothing errors on this — it's a purely visual defect a build/test pass cannot catch.
+
+**What to do instead:** For "pack chip-like items of varying width, wrap to the next line" layouts, use `display:flex; flex-wrap:wrap` — each flex item keeps its own natural content width independent of its neighbors, and simply wraps. Reach for CSS Grid dense-packing only when items are meant to share a uniform track size on purpose (e.g. a card grid); for free-width label/chip wrapping, flex-wrap is the correct default, not grid.
+
+---
+
+## Nested `overflow:auto` inside a `max-height`-capped grid row traps scroll instead of letting the page scroll
+
+**What hurt:** `list-shell`'s tablet/mobile layout (shared by Inventory, Recipe Book, Suppliers, Equipment) capped `.list-container` at `max-height:90dvh` with a `1fr` grid row for the table area, while `.table-body` kept its own `overflow-y:auto` (needed for the desktop fixed-height widget). On tablet, opening the filter panel pushed content down, but the page could not scroll past the panel to reach the list below it — even though `.list-container` itself was set to `overflow:visible`.
+
+**Why the obvious fix is wrong:** `overflow:visible` on the *outer* grid container does nothing to stop an *inner* element's own `overflow-y:auto` from claiming all vertical scroll input once that inner box's content exceeds its available height. A `1fr` row inside a `max-height`-bounded grid still computes a bounded height for that row — exactly the budget the inner `overflow:auto` box then scrolls internally instead of letting the outer page take over. Nothing throws or fails a test here; it silently traps input only on real devices at real widths.
+
+**What to do instead:** When a grid layout needs to switch from "internal scroll region" (desktop, fixed-height widget) to "grows with the page" (mobile, page itself scrolls) at a breakpoint, change all three together: the container's height constraint (`max-height` → remove, use `auto`), the row sizing (`1fr` → `auto`, since there's no longer a fixed budget to fill a fraction of), and the previously-scrolling descendant's own `overflow` (`auto` → `visible`). Changing only the outermost `overflow` value is not sufficient on its own.

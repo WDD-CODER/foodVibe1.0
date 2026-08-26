@@ -479,3 +479,26 @@ index — short and long labels landing in the same track got squeezed to a comm
 text. Replaced with `display:flex; flex-wrap:wrap` — every option now sizes to its own natural
 width and simply wraps to the next line, no shared-track squeeze (`src/styles.scss`). Re-verified
 `ng build --configuration production` — 0 errors, same pre-existing warnings only.
+
+### Step 4 — Third follow-up: made the wrap behavior engine-level, tablet/mobile only (2026-08-26)
+
+Human asked for two things: (1) the standalone toggles (low-stock, invalid/incomplete, has/missing
+nutrition) should wrap the same way as category/allergens, not just the `@for`-looped groups; (2)
+this should apply automatically to **every screen with a filter panel** (Recipe Book, Suppliers,
+Equipment, Venues, …), not just Inventory — and **only at tablet/mobile widths**, not desktop.
+
+Removed the per-template `.c-filter-options--dense` modifier from the previous fix (no longer
+needed) and replaced it with a `@media (max-width: $break-tablet-max)` block (`$break-tablet-max` =
+`1023px`, already defined in `src/styles.scss`, same value as the design's own breakpoint and
+`list-shell`'s `$panel-overlay-break`) targeting the shared engine classes directly:
+`.c-filter-section` becomes `flex-wrap` (so the standalone toggle `<label>`s wrap among each other);
+`.c-filter-section-header` and `.c-filter-category` are pinned to `flex:1 0 100%` so the "clear
+filters" row and each category group still get their own full-width row instead of competing for
+space with the toggles; `.c-filter-options` gets the same row/wrap treatment as before. Because
+these are the same shared classes already used by `supplier-list`, `supplier-form`,
+`recipe-book-list`, and `equipment-list` (grep-confirmed), this now applies everywhere those classes
+are used without touching any of those screens' own templates — exactly the ask. Above
+`$break-tablet-max` (desktop), nothing changed — the vertical one-per-row sidebar list is untouched.
+
+Re-verified: `ng build --configuration production` — 0 errors, same pre-existing warnings only.
+`ng test --watch=false --browsers=ChromeHeadless` — **311/311 SUCCESS**.

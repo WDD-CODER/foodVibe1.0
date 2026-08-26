@@ -1545,18 +1545,35 @@ textarea.c-input {
     gap: 0.5rem;
     padding-inline-start: 0;
   }
+}
 
-  /* Dense pack: each option sizes to its own label width and options wrap
-     side by side (short items like most allergens sit several to a row)
-     instead of one full-width row each — shrinks the whole filter panel.
-     Flex-wrap, not CSS grid: grid's shared column-track widths squeezed
-     short and long labels alike into the same track width, cutting text
-     off — flex-wrap lets every item keep its own natural width. */
-  &.c-filter-options--dense {
+/* ---- Tablet/mobile only: every filter panel on every screen packs its
+   options side by side instead of one per row — shrinks the whole panel so
+   it doesn't dominate the screen at narrower widths. Desktop (>1023px, the
+   design's own breakpoint) keeps the vertical sidebar list untouched.
+   Flex-wrap, not CSS grid: grid's shared column-track widths would squeeze
+   short and long labels alike into the same track width, cutting text off —
+   flex-wrap lets every item keep its own natural width. Engine-level so it
+   applies automatically wherever `.c-filter-section`/`.c-filter-options`/
+   `.c-filter-option` are used (Inventory, Recipe Book, Suppliers, Equipment,
+   Venues, …) — no per-screen opt-in needed. ---- */
+@media (max-width: $break-tablet-max) {
+  .c-filter-section {
     display: flex;
-    flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
+
+    gap: 0.5rem 0.875rem;
+  }
+
+  .c-filter-section-header,
+  .c-filter-category {
+    flex: 1 0 100%;
+  }
+
+  .c-filter-options {
+    flex-direction: row;
+    flex-wrap: wrap;
 
     gap: 0.5rem 0.875rem;
     padding-inline-start: 0;
