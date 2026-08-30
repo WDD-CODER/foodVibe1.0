@@ -124,22 +124,27 @@
 
 ### Plan 306 — Visual Restyling: UI Refactor Design Language (`plans/306-visual-restyling-ui-refactor-design-language.plan.md`)
 
-> **Not started — plan only, saved for execution in a separate session.** Picks up where plan 305 (functional preservation, closed) left off: makes every screen actually *look* like `UI refactor/`. Same governing rule (skin only, never lose a function) and same lesson (audit each screen against the design before writing any CSS — plan 305's 46-55 item estimate turned out to be ~1 real item once checked against live source; assume the same here). M0's screenshot diff catalog is mandatory before any other milestone starts.
-> Note 2026-08-26: a separate, undocumented design-port initiative (screens registry under `_claude-data/design-migration/screens/`) has independently started porting Inventory + Recipe Book screens on `feat/session-20260824` — not tracked against this plan's milestones. Worth reconciling the two before either goes further.
+> **RECONCILED 2026-08-26 — superseded for all screen-scoped milestones by `/design-port`**
+> (`.claude/commands/design-port.md`), which has already shipped Dashboard, Inventory, and Recipe
+> Book (PR #187) against the same design generation. Screen-by-screen work now runs there —
+> `_claude-data/design-migration/screens/_registry.md` is the live tracker. Full rationale in
+> `plans/306-visual-restyling-ui-refactor-design-language.plan.md`'s supersession note. Only M9
+> (Product form) and M12 (final cross-screen QA, deferred until all `/design-port` screens are
+> `done`) remain open from this plan.
 
-- [ ] M0 Tasks 1-4 — screenshot every screen live + design side by side (1280px + 390px), write `_claude-data/design-migration/visual-diff.md`, revise milestone order from the actual findings
-- [ ] M1 Tasks 5-6 — shared `.c-*` engine class updates in `src/styles.scss`, only for gaps M0 confirms are real
-- [ ] M2 Tasks 7-8 — shell/nav remainder (nav-pill gradient, avatar chip)
-- [ ] M3 Tasks 9-11 — list-shell chassis pass (Inventory, Recipe Book, Suppliers, Equipment, Menu Library, Venues, Trash share this)
-- [ ] M4 Task 12 — style the Venues new-data fields (address/capacity/contact/hours) added in plan 305
-- [ ] M5 Task 13 — Dashboard
-- [ ] M6 Task 14 — Venue Detail — **scoping question for the human first**: the design has this screen, the app doesn't; confirm whether building it is in scope before starting
-- [ ] M7 Task 15 — Cook View
-- [ ] M8 Task 16 — Metadata Manager
-- [ ] M9 Task 17 — Product form
-- [ ] M10 Tasks 18-19 — Menu Intelligence visual pass; fold in the breakpoint-renaming item plan 305 descoped while this milestone already has visual QA on the screen
-- [ ] M11 Tasks 20-21 — Recipe Builder (biggest, most complex — do last, once the pattern is proven elsewhere); verify no regression to any of the 19 confirmed-working features from plan 305 §C
-- [ ] M12 Tasks 22-25 — cross-screen QA: all 13 screens, 3 breakpoints, RTL, dark-mode-scope check, `ng build` clean
+- [ ] ~~M0 Tasks 1-4 — screenshot diff catalog~~ — **superseded**; each `/design-port` session's Inventory 3 does this per-screen instead
+- [ ] ~~M1 Tasks 5-6 — shared `.c-*` engine class updates~~ — **superseded**; folded into each `/design-port` session's Inventory 3
+- [ ] ~~M2 Tasks 7-8 — shell/nav remainder~~ — **superseded** by `/design-port`
+- [ ] ~~M3 Tasks 9-11 — list-shell chassis pass (Inventory, Recipe Book, Suppliers, Equipment, Menu Library, Venues, Trash)~~ — **superseded**; each screen ported individually via `/design-port`
+- [ ] ~~M4 Task 12 — Venues new-data field styling~~ — **superseded**; folds into `/design-port`'s Venues+VenueDetail session
+- [ ] ~~M5 Task 13 — Dashboard~~ — **superseded**; done via `/design-port` (`01-dashboard.port-spec.md`, Human-validated there)
+- [ ] ~~M6 Task 14 — Venue Detail~~ — **superseded**; covered by `/design-port`'s Venues+VenueDetail session
+- [ ] ~~M7 Task 15 — Cook View~~ — **superseded** by `/design-port`
+- [ ] ~~M8 Task 16 — Metadata Manager~~ — **superseded** by `/design-port`
+- [ ] M9 Task 17 — Product form (still open — no `/design-port` screen covers this)
+- [ ] ~~M10 Tasks 18-19 — Menu Intelligence visual pass~~ — **superseded** by `/design-port`
+- [ ] ~~M11 Tasks 20-21 — Recipe Builder~~ — **superseded** by `/design-port`
+- [ ] M12 Tasks 22-25 — cross-screen QA: all 13 screens, 3 breakpoints, RTL, dark-mode-scope check, `ng build` clean (deferred — revisit once `/design-port` registry shows all screens `done`)
 
 ## 6. KEEP DEFERRED — intentional park
 
