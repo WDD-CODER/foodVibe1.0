@@ -47,7 +47,6 @@
 
     border-block-end: 1px solid var(--border-default);
     background: var(--bg-glass-strong);
-
   }
 
   .linked-only-toggle {
@@ -92,16 +91,12 @@
       background: var(--bg-glass-hover);
     }
   }
-
 }
 
-// T18 — outside @layer so it beats the unlayered .c-grid-header-cell { display: flex }
-@media (max-width: 620px) {
-  .col-lead,
-  .col-linked {
-    display: none;
-  }
-}
+// T18's `.col-lead`/`.col-linked` mobile-hide rule was removed here — both moved into the
+// contact/delivery/lead/linked carousel (design-port screen 04, Unmapped #1: re-mapped the
+// carousel column set to match Suppliers.dc.html). They're no longer separate fixed columns;
+// the shared `cell-carousel`/`carousel-header` engine now owns their responsive visibility.
 
 // .header-btn and its modifiers (--back, --trash, .active, compact @620px)
 // are defined globally in styles.scss as an engine class.
