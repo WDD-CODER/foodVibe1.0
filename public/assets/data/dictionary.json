@@ -606,6 +606,8 @@
     "per_guests": "לכל אורחים",
     "min_quantity": "כמות מינימלית",
     "max_quantity": "כמות מקסימלית",
+    "scaling_summary": "{n} אורחים · מינ׳ {range}",
+    "no_scaling": "—",
     "no_equipment_match": "אין ציוד התואם את הסינון",
     "heat_source": "מקור חום",
     "tool": "כלי",

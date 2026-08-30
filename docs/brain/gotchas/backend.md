@@ -127,3 +127,25 @@ Related: you cannot test any of this through `ng serve` (`npm run dev:local` /
 `dev:remote`) - it never executes `server/index.js` and hard-codes its own
 `Cache-Control: no-cache`, so cache headers always look broken there. Use
 `npm run serve:prod`, and uncheck DevTools "Disable cache" before concluding anything.
+
+---
+
+## Running `node index.js` directly never picks up server code changes
+
+**What hurt:** Editing `server/` files and testing against a manually-launched `node index.js`
+process kept serving stale behavior — new routes/logic just didn't appear, with no error to
+explain why. Cost time on both a Human session and this session independently (this session hit
+`EADDRINUSE: address already in use :::3000` repeatedly — a previous plain `node index.js` was
+still bound to the port from an earlier test, invisibly serving old code the whole time).
+
+**Why the obvious fix is wrong:** `server/package.json`'s `"start": "node index.js"` script (and
+launching it that way directly, which is the natural thing to type) has no file-watching at all —
+Node only reloads code on process restart. It *looks* like a normal dev server, so nothing about
+running it suggests a restart is needed after every edit.
+
+**What to do instead:** Use `npm run dev:local` (or `dev:remote`) from `server/`, not
+`node index.js` — that script is `node --watch index.js`, which auto-restarts on file changes. If a
+restart still doesn't seem to take effect, check for a leftover process on port 3000 first
+(`netstat -ano | findstr :3000` on Windows, kill the PID) before assuming the code change is wrong —
+`--watch` restarts cleanly but a stray manually-launched instance from an earlier session won't have
+been killed by it.

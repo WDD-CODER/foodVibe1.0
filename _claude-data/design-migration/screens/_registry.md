@@ -11,10 +11,18 @@ Tracks the 13-screen port from `.interface-design/source/` onto the Angular app,
 | 2 | Inventory | `src/app/pages/inventory/` | `Inventory.dc.html` | done | `02-inventory.port-spec.md` |
 | 3 | Recipe Book | `src/app/pages/recipe-book/` | `RecipeBook.dc.html` | done | `03-recipe-book.port-spec.md` |
 | 4 | Suppliers | `src/app/pages/suppliers/` | `Suppliers.dc.html` | done | `04-suppliers.port-spec.md` |
-| 5 | Equipment | `src/app/pages/equipment/` | `Equipment.dc.html` | todo | — |
+| 5 | Equipment | `src/app/pages/equipment/` | `Equipment.dc.html` | done | `05-equipment.port-spec.md` |
 | 6 | Venues (+ VenueDetail) | `src/app/pages/venues/` (incl. `components/venue-detail/`) | `Venues.dc.html` + `VenueDetail.dc.html` | todo | — |
 | 7 | Menu Library | `src/app/pages/menu-library/` | `MenuLibrary.dc.html` | todo | — |
 | 8 | Metadata Manager | `src/app/pages/metadata-manager/` | `MetadataManager.dc.html` | todo | — |
+
+> **Concurrent-session note (added 2026-08-26, resolved 2026-08-30):** Suppliers (row 4) and
+> Equipment (row 5) were worked in parallel by two separate sessions, each in its own dedicated git
+> worktree (`../foodVibe1.0-wt-design-port-suppliers` on `feat/design-port-suppliers`,
+> `../foodVibe1.0-wt-design-port-equipment` on `feat/design-port-equipment`). Both shipped as
+> expected: the anticipated merge conflict landed on this registry file and (harmlessly, duplicate
+> values only) on `.inline-edit-panel`/`.as-modal` tokens in `src/styles.scss` — resolved during
+> Equipment's rebase onto `main` post-Suppliers-merge, no functional impact either way.
 
 > **Metadata Manager note:** the mobile/tablet (≤1023px, hidden on desktop) 8-tab jump-nav
 > (`.mm-jump-nav-row`/`.mm-jump-nav` — units, product categories, allergens, recipe labels, menu
