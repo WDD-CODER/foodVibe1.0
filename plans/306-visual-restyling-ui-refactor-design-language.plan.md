@@ -8,6 +8,33 @@ isProject: true
 
 **Plan only — not executed.** Written to be picked up and run in a separate session.
 
+> **SUPERSEDED (2026-08-26) for all screen-scoped milestones by the `/design-port` procedure**
+> (`.claude/commands/design-port.md`), which independently started against the same design
+> generation (this plan's `UI refactor/` source and `/design-port`'s vendored
+> `.interface-design/source/` are the same 13-`.dc.html` export) and has already shipped 3 screens
+> (Dashboard, Inventory, Recipe Book — merged via PR #187) using a more rigorous per-screen
+> three-inventory spec-then-approve process that this plan's milestones never had.
+>
+> **Superseded, do not execute from this plan:** M0 (screenshot baseline), M2 (Shell/Nav),
+> M3 (list-shell chassis — Inventory/Recipe Book/Suppliers/Equipment/Menu Library/Venues/Trash, all
+> `/design-port` screens), M4 (Venues new-field styling — folds into `/design-port`'s Venues+VenueDetail
+> session), M5 (Dashboard — **done**, see `_claude-data/design-migration/screens/01-dashboard.port-spec.md`),
+> M6 (Venue Detail), M7 (Cook View), M8 (Metadata Manager), M10 (Menu Intelligence), M11 (Recipe Builder).
+> Each of these screens gets its own port-spec under `_claude-data/design-migration/screens/` instead —
+> see `_registry.md` for live status.
+>
+> **M1 (shared engine classes)** isn't separately executed either — each `/design-port` session's
+> Inventory 3 (visual spec) maps every design value to an existing `.c-*` engine or flags an
+> "Unmapped — needs a call" gap on the spot, so this happens per-screen instead of as its own pass.
+>
+> **Still open, NOT covered by `/design-port`** (its 13-screen scope is the `.dc.html` screens only):
+> - **M9 (Product form)** — remains active, untouched by this supersession. No design-port screen
+>   corresponds to it.
+> - **M12 (cross-screen QA)** — revisit once all `/design-port` screens reach `done`; not redone by
+>   any single `/design-port` session.
+>
+> See `.claude/todo.md` for the corresponding todo-line annotations.
+
 ## Where this picks up
 
 Plan 305 ("Design Migration — UI refactor port with zero functionality loss", closed 2026-08-20)
