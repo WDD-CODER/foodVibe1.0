@@ -12,7 +12,7 @@ Tracks the 13-screen port from `.interface-design/source/` onto the Angular app,
 | 3 | Recipe Book | `src/app/pages/recipe-book/` | `RecipeBook.dc.html` | done | `03-recipe-book.port-spec.md` |
 | 4 | Suppliers | `src/app/pages/suppliers/` | `Suppliers.dc.html` | done | `04-suppliers.port-spec.md` |
 | 5 | Equipment | `src/app/pages/equipment/` | `Equipment.dc.html` | done | `05-equipment.port-spec.md` |
-| 6 | Venues (+ VenueDetail) | `src/app/pages/venues/` (incl. `components/venue-detail/`) | `Venues.dc.html` + `VenueDetail.dc.html` | todo | — |
+| 6 | Venues (+ VenueDetail) | `src/app/pages/venues/` (incl. `components/venue-detail/`) | `Venues.dc.html` + `VenueDetail.dc.html` | spec-pending-approval | `06-venues.port-spec.md` |
 | 7 | Menu Library | `src/app/pages/menu-library/` | `MenuLibrary.dc.html` | todo | — |
 | 8 | Metadata Manager | `src/app/pages/metadata-manager/` | `MetadataManager.dc.html` | todo | — |
 
