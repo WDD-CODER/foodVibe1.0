@@ -286,3 +286,60 @@ The uncontested, token-only fixes (#6, #7, #8's token half, #10, #11, #12) are s
 "go" — the data-model items (#1–#3) and the two genuine judgment calls (#5, #9, and #8's icon-keeping
 half) need their own explicit answers, the default for all of them absent instruction being **no
 change** (leave as today), same convention Equipment's spec used for its own "needs a call" section.
+
+---
+
+## Step 4 — Execute (done, 2026-08-30)
+
+Human approved all 12 items, including building #1–#3 in full — for #3 specifically, asked and
+confirmed **full round-trip** (a real venue-picker on menu creation, not just the read side).
+
+- **`venue.model.ts`** — added `active_?: boolean` and `photo_url_?: string` to `VenueProfile`. No
+  server change needed (generic `VENUE_PROFILES` entity type, schema-less at the Mongo level, same
+  pattern as every prior field added under Plan 305).
+- **`venue-form.component.ts/.html/.scss`** — added an `active_` checkbox (`form-group--active`,
+  defaults `true` for new venues) and a photo-upload square reusing `CloudinaryService` (same pattern
+  as `recipe-header.component.ts`'s `onImageSelected`/`imageChange`) with its own `photoUrl_`/
+  `uploadingPhoto_` signals; both fields hydrate on edit and serialize on save (add + update paths).
+- **`venue-list.component.html/.scss`** — status pill (top-inline-start corner of the card media, to
+  land on the physical-right corner the design pins to without colliding with the top-inline-end
+  select checkbox), photo (`photo_url_` with icon fallback), `.page-title` → `--fs-xl`/`--fw-bold`/
+  `--tracking-tight`, `.venues-grid` → `minmax(17.5rem,1fr)`/`--space-5` gap (280px/20px, design-exact),
+  `.venue-grid-container` → `max-width:75rem` centered + `--space-6`/`--space-12` padding, `.venue-card-meta`
+  gained the dashed `--space-3`/`--border-default` divider.
+- **`venue-detail.component.ts/.html/.scss`** — status badge in the hero title row, hero photo,
+  `contactInitials_`/`associatedMenus_` computeds (the latter filters `MenuEventDataService.
+  allMenuEvents_()` by `logistics_.venue_profile_id_`, `ngOnInit` calls `menuEventData.ensureLoaded()`),
+  `.venue-name` → `--fs-2xl`/`--fw-bold`/`--tracking-tight`, contact/hours `<section>` DOM order
+  swapped, `.detail-card` background overridden to `--bg-glass` (component-scoped, `.c-glass-panel`
+  engine itself untouched), `.detail-card-header` → `--fs-sm`/`--fw-semibold`/`--color-text-muted`
+  (icons kept per the approved recommendation), `.hours-row` divider → dashed, no `:last-child`
+  exclusion, contact-card avatar+initials, and a new "associated_menus" card (real linked-menu rows
+  when present, `no_associated_menus` empty text otherwise) — kept as an addition alongside the
+  existing infrastructure-items stat rather than replacing it (Inventory 1 do-not-touch).
+- **New `src/app/shared/venue-link-chip/venue-link-chip.component.{ts,html,scss}`** — the write side
+  of #3. Fully self-contained: injects `MenuEventDataService` + `VenueDataService` directly, drives a
+  `CustomSelectComponent` (`variant="chip"`) through a local `FormControl`, and calls
+  `updateMenuEvent()` itself on selection (defaulting `logistics_.environment_type_` from the chosen
+  venue, `resolved_items_: []`). Placed into `menu-intelligence.page.html`'s existing `.event-meta-line`
+  (one new line, `[eventId]="editingId_()"` — reads the page's own pre-existing signal) with the
+  `class="event-chip-select"` reused from the serving-type chip so the trigger inherits that chip's
+  exact `_paper-ui.scss` styling via the same `::ng-deep` rule, no new CSS needed in that file.
+  `menu-intelligence.page.ts` (growth-frozen) gained exactly 2 lines — one import, one `imports[]`
+  entry — mirroring the existing `RecipeHeaderComponent` precedent in `recipe-builder.page.ts`; no new
+  signal, computed, or method was added to the page itself.
+- **`dictionary.json`** — added `venue_active`, `venue_inactive`, `venue_photo`, `venue_manager`,
+  `associated_menus`, `no_associated_menus`, `select_venue`, `no_venue_selected`.
+
+### Step 5 — Verify
+
+- `ng build` — 0 errors. Only pre-existing warnings remain (the same venue nullish-coalescing ×2,
+  bundle budget, cook-view.page.scss budget, exceljs CJS notice already present before this session —
+  confirmed unchanged from Equipment's own verification list).
+- `ng test --watch=false --browsers=ChromeHeadless` — **311/311 SUCCESS**, no new failures.
+- Inventory 1 re-read against current code: every signal/computed/injected-service/deep-link-param/
+  guard listed there is still present and untouched; every change this session was additive (new
+  fields, new computeds, new markup) except the two approved pure-reorders (detail-card DOM order,
+  meta-divider insertion).
+- Live browser verification (1280px/390px, actual data round-trip through the new venue-link-chip) is
+  the Human's per §6 Step 5 — not attempted here.

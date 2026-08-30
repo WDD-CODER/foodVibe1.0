@@ -1,0 +1,15 @@
+@layer components.venue-link-chip {
+  :host {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .venue-link-chip {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 4px;
+
+    color: var(--color-text-muted);
+  }
+}

@@ -258,6 +258,8 @@
               (keydown)="onDateKeydown($event)"
             />
           </span>
+          <span class="event-chip-sep">·</span>
+          <app-venue-link-chip class="event-chip-select" [eventId]="editingId_()" />
         </div>
 
         <!-- Ornamental rule -->

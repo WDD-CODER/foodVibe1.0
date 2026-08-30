@@ -50,6 +50,7 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
 import { AiMenuModalService } from '../../shared/ai-menu-modal/ai-menu-modal.service'
 import { MenuAiFlowService } from './services/menu-ai-flow.service'
 import type { AiMenuDraft, MatchedMenu } from '@models/ai-menu-draft.model'
+import { VenueLinkChipComponent } from 'src/app/shared/venue-link-chip/venue-link-chip.component'
 
 type MenuItemForm = {
   recipe_id_: string
@@ -79,7 +80,8 @@ type MenuSectionFormRaw = { _id?: string; name_?: string; items_?: MenuItemForm[
     ScrollableDropdownComponent,
     CustomSelectComponent,
     ExportPreviewComponent,
-    MenuDishRowComponent
+    MenuDishRowComponent,
+    VenueLinkChipComponent
   ],
   templateUrl: './menu-intelligence.page.html',
   styleUrl: './menu-intelligence.page.scss',
