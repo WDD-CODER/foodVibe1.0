@@ -242,6 +242,16 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     return [...fixed, ...custom, { value: ADD_NEW_CATEGORY_VALUE, label: 'add_new_category' }]
   })
 
+  /** List-row scaling-rule summary (e.g. "25 guests · min 1–4"), matching the design's
+   * `Equipment.dc.html:351,680` per-row label. `null` max renders as a bare min, no dash. */
+  protected scalingSummary(rule: ScalingRule | undefined): string {
+    if (!rule) return this.translation.translate('no_scaling') ?? '—'
+    const range = rule.max_quantity_ != null ? `${rule.min_quantity_}–${rule.max_quantity_}` : `${rule.min_quantity_}`
+    return (this.translation.translate('scaling_summary') ?? '{n} guests · min {range}')
+      .replace('{n}', String(rule.per_guests_))
+      .replace('{range}', range)
+  }
+
   private buildEditForm(): void {
     this.editForm_ = this.fb.group({
       name_hebrew: ['', [Validators.required]],

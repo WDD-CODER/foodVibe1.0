@@ -1197,7 +1197,11 @@ textarea.c-input {
    * in-flow under the row (plan 305 decision 2 — desktop keeps the inline panel
    * unchanged, only this width range gets a wrapper change). Paired with a sibling
    * `.c-modal-overlay` backdrop in the template — this class only handles the
-   * panel's own position, since the overlay's flex-centering can't reach a sibling. */
+   * panel's own position, since the overlay's flex-centering can't reach a sibling.
+   * Surface tokens (background/border/shadow/blur) come from the base rule above,
+   * shared with the desktop-inline variant since design-port screen 04 (Suppliers)
+   * — both match the design's one shared glass-modal surface (Equipment.dc.html:377
+   * confirms the same tokens at this breakpoint), nothing to override here. */
   &.as-modal {
     position: fixed;
     inset-inline: var(--space-4);
