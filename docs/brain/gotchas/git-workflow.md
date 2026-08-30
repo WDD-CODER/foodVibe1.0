@@ -98,3 +98,21 @@ open; if you need a branch actually checked out (e.g. to append a file after PR 
 already passed), use `git worktree add <scratch-path> <branch>` instead, work there, then
 `git worktree remove` it. Never invent a PR for a bucket you didn't author or fully
 verify — push it as a checkpoint and say so explicitly.
+
+---
+
+## A stale dev server on a different port can present as a design-port regression
+
+**What hurt:** After fixing Suppliers' mobile carousel column mapping, the Human reported the
+same breakage still happening in the 620-768px range. Re-testing the worktree's own dev server
+(port 4201) showed the fix already worked cleanly at every width. The actual source was a second,
+unrelated dev server (port 4200 — the main repo's own already-running instance, serving the
+pre-fix code) that the Human was unknowingly looking at instead.
+
+**Why the obvious fix is wrong:** Assuming the fix was incomplete and re-diffing already-correct
+CSS/HTML would have wasted time chasing a bug that doesn't exist in the worktree's code.
+
+**What to do instead:** When a Human reports a visual bug against work done in an isolated
+worktree, confirm which port/URL they're actually viewing before touching code again.
+`netstat -ano | findstr LISTENING` (or `git worktree list`) surfaces other dev servers that might
+be serving a different branch's stale code on a similar-looking URL.
