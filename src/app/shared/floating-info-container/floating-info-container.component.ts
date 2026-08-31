@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core'
+import { ChangeDetectionStrategy, Component, input } from '@angular/core'
 import { ScrollIndicatorsDirective } from '../../core/directives/scroll-indicators.directive'
 import { LucideAngularModule } from 'lucide-angular'
 
@@ -8,6 +8,7 @@ import { LucideAngularModule } from 'lucide-angular'
   imports: [LucideAngularModule, ScrollIndicatorsDirective],
   templateUrl: './floating-info-container.component.html',
   styleUrl: './floating-info-container.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FloatingInfoContainerComponent {
   /** 'vertical' = scrollable area with arrow indicators; 'none' = no scroll wrapper. */

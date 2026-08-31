@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { ClickOutSideDirective } from '@directives/click-out-side'
@@ -10,7 +10,8 @@ import { AddItemModalService } from '@services/add-item-modal.service'
   standalone: true,
   imports: [CommonModule, FormsModule, ClickOutSideDirective, TranslatePipe],
   templateUrl: './add-item-modal.component.html',
-  styleUrl: './add-item-modal.component.scss'
+  styleUrl: './add-item-modal.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddItemModalComponent {
   protected modalService = inject(AddItemModalService)

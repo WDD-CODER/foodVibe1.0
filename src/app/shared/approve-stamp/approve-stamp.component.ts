@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core'
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 
 @Component({
@@ -6,7 +6,8 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
   standalone: true,
   imports: [TranslatePipe],
   templateUrl: './approve-stamp.component.html',
-  styleUrl: './approve-stamp.component.scss'
+  styleUrl: './approve-stamp.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ApproveStampComponent {
   /** When true, show approved stamp (teal image); click will unapprove. */

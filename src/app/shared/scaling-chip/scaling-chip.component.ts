@@ -1,4 +1,4 @@
-import { Component, input, output, effect, ViewChild, OnDestroy } from '@angular/core'
+import { ChangeDetectionStrategy, Component, input, output, effect, ViewChild, OnDestroy } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormControl, ReactiveFormsModule } from '@angular/forms'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
@@ -21,7 +21,8 @@ const ADD_NEW_UNIT_VALUE = '__add_unit__'
     LucideAngularModule
   ],
   templateUrl: './scaling-chip.component.html',
-  styleUrl: './scaling-chip.component.scss'
+  styleUrl: './scaling-chip.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ScalingChipComponent implements OnDestroy {
   value = input.required<number>()

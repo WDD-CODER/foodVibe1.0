@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   input,
   output,
@@ -22,18 +23,11 @@ import { dedupeAndFilterOptions } from '../../core/utils/dedupe-select-options.u
   selector: 'app-custom-select',
   standalone: true,
   host: { tabIndex: '-1' },
-  imports: [
-    CommonModule,
-    TranslatePipe,
-    ClickOutSideDirective,
-    ScrollableDropdownComponent,
-    LucideAngularModule
-  ],
-  providers: [
-    { provide: NG_VALUE_ACCESSOR, useExisting: CustomSelectComponent, multi: true }
-  ],
+  imports: [CommonModule, TranslatePipe, ClickOutSideDirective, ScrollableDropdownComponent, LucideAngularModule],
+  providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: CustomSelectComponent, multi: true }],
   templateUrl: './custom-select.component.html',
-  styleUrl: './custom-select.component.scss'
+  styleUrl: './custom-select.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomSelectComponent implements ControlValueAccessor {
   options = input.required<{ value: string; label: string }[]>()
@@ -94,23 +88,20 @@ export class CustomSelectComponent implements ControlValueAccessor {
     const addNewOpt = opts.find((o) => o.value === addNewVal)
     const rest = addNewOpt ? opts.filter((o) => o.value !== addNewVal) : opts
     const currentValue = this._value()
-    const deduped = dedupeAndFilterOptions(
-      rest, raw, currentValue,
-      (k) => this.translateLabels() ? this.translationService.translate(k) : k
+    const deduped = dedupeAndFilterOptions(rest, raw, currentValue, (k) =>
+      this.translateLabels() ? this.translationService.translate(k) : k
     )
     return addNewOpt ? [...deduped, addNewOpt] : deduped
   })
 
   /** The add-new option from the full options list, or null if not present. */
-  protected addNewOption_ = computed(() =>
-    this.options().find(o => o.value === this.addNewValue()) ?? null
-  )
+  protected addNewOption_ = computed(() => this.options().find((o) => o.value === this.addNewValue()) ?? null)
 
   /** Options for the scrollable list — excludes the add-new sentinel (rendered separately as footer). */
   protected visibleOptions_ = computed(() => {
     const all = this.typeToFilter() ? this.filteredOptions_() : this.options()
     const addNewVal = this.addNewValue()
-    return all.filter(o => o.value !== addNewVal)
+    return all.filter((o) => o.value !== addNewVal)
   })
 
   /** Input display value: when open show search query, when closed show selected label (translated if needed). */
@@ -179,10 +170,8 @@ export class CustomSelectComponent implements ControlValueAccessor {
     this.open.set(true)
     this.searchQuery_.set('')
     const filtered = this.filteredOptions_()
-    const currentIdx = this._value()
-      ? filtered.findIndex((o) => o.value === this._value())
-      : -1
-    this.highlightedIndex.set(currentIdx >= 0 ? currentIdx : (filtered.length > 0 ? 0 : -1))
+    const currentIdx = this._value() ? filtered.findIndex((o) => o.value === this._value()) : -1
+    this.highlightedIndex.set(currentIdx >= 0 ? currentIdx : filtered.length > 0 ? 0 : -1)
     setTimeout(() => this.inputRef?.nativeElement?.focus(), 0)
   }
 

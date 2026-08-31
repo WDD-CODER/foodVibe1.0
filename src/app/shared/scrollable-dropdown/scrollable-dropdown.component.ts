@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core'
+import { ChangeDetectionStrategy, Component, input } from '@angular/core'
 import { ScrollIndicatorsDirective } from '../../core/directives/scroll-indicators.directive'
 import { LucideAngularModule } from 'lucide-angular'
 
@@ -7,7 +7,8 @@ import { LucideAngularModule } from 'lucide-angular'
   standalone: true,
   imports: [LucideAngularModule, ScrollIndicatorsDirective],
   templateUrl: './scrollable-dropdown.component.html',
-  styleUrl: './scrollable-dropdown.component.scss'
+  styleUrl: './scrollable-dropdown.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ScrollableDropdownComponent {
   /** Max height in px for the scrollable list. Default 240. */

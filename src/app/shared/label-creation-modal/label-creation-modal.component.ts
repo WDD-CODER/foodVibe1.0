@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, inject, computed, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { ClickOutSideDirective } from '@directives/click-out-side'
@@ -13,6 +13,7 @@ import { LABEL_COLOR_PALETTE } from '@models/label.model'
   imports: [CommonModule, FormsModule, ClickOutSideDirective, TranslatePipe],
   templateUrl: './label-creation-modal.component.html',
   styleUrl: './label-creation-modal.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LabelCreationModalComponent {
   protected readonly modal = inject(LabelCreationModalService)
@@ -24,8 +25,8 @@ export class LabelCreationModalComponent {
   protected readonly palette = LABEL_COLOR_PALETTE
 
   protected triggerOptions_ = computed(() => {
-    const categories = this.metadataRegistry.allCategories_().map(c => ({ value: c, type: 'category' as const }))
-    const allergens = this.metadataRegistry.allAllergens_().map(a => ({ value: a, type: 'allergen' as const }))
+    const categories = this.metadataRegistry.allCategories_().map((c) => ({ value: c, type: 'category' as const }))
+    const allergens = this.metadataRegistry.allAllergens_().map((a) => ({ value: a, type: 'allergen' as const }))
     return [...categories, ...allergens]
   })
 

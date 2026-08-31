@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   input,
   output,
@@ -29,18 +30,11 @@ export interface CustomMultiSelectOption {
   selector: 'app-custom-multi-select',
   standalone: true,
   host: { tabIndex: '-1' },
-  imports: [
-    CommonModule,
-    TranslatePipe,
-    ClickOutSideDirective,
-    ScrollableDropdownComponent,
-    LucideAngularModule
-  ],
-  providers: [
-    { provide: NG_VALUE_ACCESSOR, useExisting: CustomMultiSelectComponent, multi: true }
-  ],
+  imports: [CommonModule, TranslatePipe, ClickOutSideDirective, ScrollableDropdownComponent, LucideAngularModule],
+  providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: CustomMultiSelectComponent, multi: true }],
   templateUrl: './custom-multi-select.component.html',
-  styleUrl: './custom-multi-select.component.scss'
+  styleUrl: './custom-multi-select.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomMultiSelectComponent implements ControlValueAccessor {
   options = input.required<CustomMultiSelectOption[]>()
@@ -80,9 +74,7 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
 
   /** Returns the display text for an option — translated when translateLabels is true. */
   private getDisplayText_(label: string): string {
-    return this.translateLabels()
-      ? (this._translationService.translate(label) || label)
-      : label
+    return this.translateLabels() ? this._translationService.translate(label) || label : label
   }
 
   /** Options to show in dropdown: exclude already selected and readonly chips, with optional search filter. */
@@ -112,9 +104,7 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
     if (!this.searchable()) return false
     const query = this.searchQuery_().trim()
     if (!query) return false
-    return !this.dropdownOptions_().some(
-      (o) => this.getDisplayText_(o.label).toLowerCase() === query.toLowerCase()
-    )
+    return !this.dropdownOptions_().some((o) => this.getDisplayText_(o.label).toLowerCase() === query.toLowerCase())
   })
 
   @HostListener('focus')
@@ -198,9 +188,12 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   }
 
   private focusSearchInput_(): void {
-    afterNextRender(() => {
-      this.searchInputRef?.nativeElement?.focus()
-    }, { injector: this._injector })
+    afterNextRender(
+      () => {
+        this.searchInputRef?.nativeElement?.focus()
+      },
+      { injector: this._injector }
+    )
   }
 
   protected onTriggerBlur(): void {

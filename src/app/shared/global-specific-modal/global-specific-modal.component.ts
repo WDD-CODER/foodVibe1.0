@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core'
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { GlobalSpecificModalService } from '@services/global-specific-modal.service'
@@ -9,7 +9,8 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
   standalone: true,
   imports: [CommonModule, LucideAngularModule, TranslatePipe],
   templateUrl: './global-specific-modal.component.html',
-  styleUrl: './global-specific-modal.component.scss'
+  styleUrl: './global-specific-modal.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GlobalSpecificModalComponent {
   protected readonly modalService = inject(GlobalSpecificModalService)

@@ -1,4 +1,14 @@
-import { Component, inject, signal, computed, effect, viewChild, ElementRef, untracked } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+  computed,
+  effect,
+  viewChild,
+  ElementRef,
+  untracked
+} from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { ClickOutSideDirective } from '@directives/click-out-side'
@@ -10,7 +20,8 @@ import { TranslationKeyModalService } from '@services/translation-key-modal.serv
   standalone: true,
   imports: [CommonModule, FormsModule, ClickOutSideDirective, TranslatePipe],
   templateUrl: './translation-key-modal.component.html',
-  styleUrl: './translation-key-modal.component.scss'
+  styleUrl: './translation-key-modal.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TranslationKeyModalComponent {
   protected modalService = inject(TranslationKeyModalService)

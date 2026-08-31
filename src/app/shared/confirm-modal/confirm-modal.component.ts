@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core'
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
@@ -8,7 +8,8 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
   standalone: true,
   imports: [CommonModule, TranslatePipe],
   templateUrl: './confirm-modal.component.html',
-  styleUrl: './confirm-modal.component.scss'
+  styleUrl: './confirm-modal.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConfirmModalComponent {
   protected readonly modalService = inject(ConfirmModalService)

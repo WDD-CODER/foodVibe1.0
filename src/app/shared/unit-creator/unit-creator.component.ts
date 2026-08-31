@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal, output, input } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, output, input } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
@@ -22,7 +22,8 @@ import { useSavingState } from 'src/app/core/utils/saving-state.util'
     TranslatePipe
   ],
   templateUrl: './unit-creator.component.html',
-  styleUrl: './unit-creator.component.scss'
+  styleUrl: './unit-creator.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UnitCreatorModal {
   private unitRegistryService = inject(UnitRegistryService)
