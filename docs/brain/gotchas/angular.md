@@ -93,3 +93,23 @@ Scope: `src/app/` — components, signals-based state, routing, template/CD beha
 **Why the obvious fix is wrong:** DOM nesting and Angular's dependency-injection view of a template are not the same thing. `<ng-template #panelBody>`'s content is compiled against the injector context of where the `<ng-template>` is *declared* in the source, not against wherever `ngTemplateOutlet` later projects its instantiated view. Since `#panelBody` was declared as a top-level sibling (outside any `[formGroup]`-bearing element), every `formControlName` inside it looks for a `ControlContainer` up its *declaration-site* ancestry — finds none — and throws, regardless of which real DOM element the outlet renders it into. Putting `[formGroup]` on the two outlet call sites (desktop inline, tablet/mobile modal) looks right and changes nothing.
 
 **What to do instead:** Put `[formGroup]` (or any `ControlContainer`-providing directive) on an element *inside* the `<ng-template>`'s own declared content, not on the element(s) that `ngTemplateOutlet` renders it into. A `<ng-container [formGroup]="form">` wrapping the template's content works and adds no DOM node, so it can't break surrounding flex/grid layout. Reusing one `<ng-template>` from multiple outlet call sites (as here, for a desktop vs. tablet/mobile variant) makes this doubly worth checking — fix it once, inside the template, not once per call site.
+
+---
+
+## A service that both `autoLoad`s in its constructor and exposes `reloadFromStorage()` double-fetches on every session bootstrap
+
+**What hurt:** Network capture (`gstack browse network`) showed `PRODUCT_LIST` (739KB), `RECIPE_LIST` (1.69MB), `DISH_LIST` (2.6MB), and five smaller collections each fetched twice, back-to-back, on every page load — ~5MB of duplicate JSON per boot. Every copy returned 200; nothing errored, `ng build` stayed clean, no console warning.
+
+**Why the obvious fix is wrong:** The instinct is to hunt for two separate call sites firing the fetch — but there's only one call chain. `UserService._reloadDataServices()` runs `this.injector.get(SomeDataService).reloadFromStorage()` after login/guest-auth resolves. `injector.get(...)` *constructs* the service in that same expression if nothing touched it yet, and the constructor immediately fires `void this.ensureLoaded()` — fire-and-forget, but it sets `this.loadPromise_` synchronously (an async function runs synchronously up to its first `await`). The very next statement on the same line then calls `.reloadFromStorage()` on that freshly-constructed instance — which, if it unconditionally resets `loaded_`/`loadPromise_` and starts a new load without checking for the one already in flight, races a second concurrent fetch against the first. Searching for a second `ensureLoaded()`/`reloadFromStorage()` call site elsewhere finds nothing, because there isn't one — it's one call site invoking two overlapping code paths.
+
+**What to do instead:** Any `reloadFromStorage()` (or equivalent force-refresh method) on a service that also `autoLoad`s in its constructor must check for an in-flight load first and await it instead of starting a new one:
+```ts
+async reloadFromStorage(): Promise<void> {
+  if (this.loadPromise_) { await this.loadPromise_; return }
+  this.loaded_ = false
+  this.loadPromise_ = null
+  await this.loadInitialData()
+  this.loaded_ = true
+}
+```
+This preserves normal force-refresh behavior for the common case (called long after the initial load finished, `loadPromise_` is null) while closing the one narrow window — `injector.get()` on a not-yet-constructed service — where it actually races. Applied across `base-entity-data.service.ts`, `product-data.service.ts`, `recipe-data.service.ts`, `dish-data.service.ts`, `menu-event-data.service.ts`, `menu-section-categories.service.ts`, `preparation-registry.service.ts`, and `metadata-registry.service.ts` (plans 301 M4).
