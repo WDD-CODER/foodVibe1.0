@@ -57,6 +57,13 @@ export class ProductDataService {
 
   /** Re-read from storage and refresh the signal. Used by demo loader after replacing data. */
   async reloadFromStorage(): Promise<void> {
+    if (this.loadPromise_) {
+      // A load is already in flight — e.g. this service was just constructed via
+      // injector.get() and its constructor's ensureLoaded() hasn't resolved yet.
+      // Await it instead of firing a redundant concurrent fetch for the same data.
+      await this.loadPromise_
+      return
+    }
     this.loaded_ = false
     this.loadPromise_ = null
     await this.loadInitialData()
