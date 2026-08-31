@@ -9,6 +9,8 @@
 
 > Audit says: do these.
 
+- [ ] `feat/optimization` — active in worktree `../foodVibe1.0-wt-optimization` (port 4201). Scope not yet defined by Human — set up 2026-08-31 for an "optimization loop", target TBD.
+
 ### Plan 308 — Dead CSS Purge: Orphan Component Classes And Engine Blocks (`plans/308-dead-css-purge-orphan-classes.plan.md`)
 
 > SCSS-only session (session 2 of a 3-session split); zero `.ts`/`.html` edits by rule.
@@ -136,9 +138,9 @@
 - [ ] ~~M1 Tasks 5-6 — shared `.c-*` engine class updates~~ — **superseded**; folded into each `/design-port` session's Inventory 3
 - [ ] ~~M2 Tasks 7-8 — shell/nav remainder~~ — **superseded** by `/design-port`
 - [ ] ~~M3 Tasks 9-11 — list-shell chassis pass (Inventory, Recipe Book, Suppliers, Equipment, Menu Library, Venues, Trash)~~ — **superseded**; each screen ported individually via `/design-port`
-- [ ] ~~M4 Task 12 — Venues new-data field styling~~ — **superseded**; folds into `/design-port`'s Venues+VenueDetail session
+- [ ] ~~M4 Task 12 — Venues new-data field styling~~ — **superseded**; done via `/design-port` (`06-venues.port-spec.md`, Human-validated there)
 - [ ] ~~M5 Task 13 — Dashboard~~ — **superseded**; done via `/design-port` (`01-dashboard.port-spec.md`, Human-validated there)
-- [ ] ~~M6 Task 14 — Venue Detail~~ — **superseded**; covered by `/design-port`'s Venues+VenueDetail session
+- [ ] ~~M6 Task 14 — Venue Detail~~ — **superseded**; done via `/design-port` (`06-venues.port-spec.md`, Human-validated there)
 - [ ] ~~M7 Task 15 — Cook View~~ — **superseded** by `/design-port`
 - [ ] ~~M8 Task 16 — Metadata Manager~~ — **superseded** by `/design-port`
 - [ ] M9 Task 17 — Product form (still open — no `/design-port` screen covers this)

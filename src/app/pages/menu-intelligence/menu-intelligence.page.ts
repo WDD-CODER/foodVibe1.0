@@ -600,7 +600,11 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       const now = Date.now()
       const id = this.editingId_()
       if (id) {
-        await this.menuEventData.updateMenuEvent({ ...event, _id: id, updated_at_: now })
+        // buildEventFromForm() doesn't carry logistics_ (the form has no control for it) —
+        // preserve whatever's already stored so a normal save can't silently drop the
+        // venue link set via app-venue-link-chip (design-port session 6).
+        const existingLogistics = this.menuEventData.allMenuEvents_().find((e) => e._id === id)?.logistics_
+        await this.menuEventData.updateMenuEvent({ ...event, _id: id, updated_at_: now, logistics_: existingLogistics })
       } else {
         const created = await this.menuEventData.addMenuEvent({ ...event, created_at_: now, updated_at_: now })
         this.editingId_.set(created._id)
@@ -1115,7 +1119,10 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       const now = Date.now()
       const id = this.editingId_()
       if (id) {
-        await this.menuEventData.updateMenuEvent({ ...event, _id: id, updated_at_: now })
+        // Same preservation as saveAndWait() above — buildEventFromForm() has no
+        // logistics_ control, don't let a normal save wipe the venue link.
+        const existingLogistics = this.menuEventData.allMenuEvents_().find((e) => e._id === id)?.logistics_
+        await this.menuEventData.updateMenuEvent({ ...event, _id: id, updated_at_: now, logistics_: existingLogistics })
       } else {
         const created = await this.menuEventData.addMenuEvent({ ...event, created_at_: now, updated_at_: now })
         this.editingId_.set(created._id)
