@@ -33,10 +33,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authModal = inject(AuthModalService)
   const router = inject(Router)
 
+  // Only our own backend should ever see this token — third-party APIs called directly
+  // from the browser (e.g. CloudinaryService's direct upload) must never get it, and
+  // sending it cross-origin triggers a CORS preflight that provider won't allow anyway.
+  const isOwnBackendRequest = req.url.startsWith(environment.apiUrl) || req.url.startsWith(environment.authApiUrl)
   const token = userService.getToken()
-  const outgoing = token
-    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
-    : req
+  const outgoing = token && isOwnBackendRequest ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req
 
   return next(outgoing).pipe(
     catchError((err: HttpErrorResponse) => {
@@ -61,7 +63,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           return refreshSubject$.pipe(
             filter((token): token is string | null => token !== undefined),
             take(1),
-            switchMap(token => {
+            switchMap((token) => {
               if (token === null) return throwError(() => err)
               const retried = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
               return next(retried)
@@ -82,7 +84,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             const retried = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
             return next(retried)
           }),
-          catchError(refreshErr => {
+          catchError((refreshErr) => {
             isRefreshing = false
             // Emit null so queued requests unblock and propagate their original 401 error
             refreshSubject$.next(null)
