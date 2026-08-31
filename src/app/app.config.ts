@@ -1,5 +1,5 @@
 import { APP_INITIALIZER, ApplicationConfig, ErrorHandler, importProvidersFrom, provideZoneChangeDetection } from '@angular/core'
-import { provideAnimations } from '@angular/platform-browser/animations'
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async'
 import { GlobalErrorHandler } from './core/services/global-error.handler'
 import { provideRouter } from '@angular/router'
 import { routes } from './app.routes'
@@ -98,7 +98,11 @@ import { catchError, of, switchMap } from 'rxjs'
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideAnimations(),
+    // Only one component in the app (selection-bar) uses trigger-based animations, and it
+    // never renders on first paint (list-selection toolbar, shown after the user selects a
+    // row) — the async provider defers loading the animation engine's chunk until the first
+    // trigger actually needs it instead of bundling it into every page's initial load.
+    provideAnimationsAsync(),
     // No preloading strategy: PreloadAllModules defeated the lazy routes in
     // app.routes.ts by downloading every chunk right after bootstrap, competing
     // with the catalog fetches for bandwidth on exactly the connections this app
