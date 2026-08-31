@@ -1,4 +1,14 @@
-import { Component, input, inject, output, signal, computed, ChangeDetectorRef, effect } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  inject,
+  output,
+  signal,
+  computed,
+  ChangeDetectorRef,
+  effect
+} from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
@@ -51,7 +61,8 @@ const IMAGE_PLACEHOLDER_SVG =
     RatingStarsComponent
   ],
   templateUrl: './recipe-header.component.html',
-  styleUrl: './recipe-header.component.scss'
+  styleUrl: './recipe-header.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RecipeHeaderComponent {
   // INJECTED
