@@ -30,6 +30,79 @@
     gap: 1.5rem;
   }
 
+  .venue-photo-upload {
+    align-self: center;
+  }
+
+  .venue-photo-label {
+    position: relative;
+    display: grid;
+    place-content: center;
+
+    inline-size: 8rem;
+    block-size: 8rem;
+
+    overflow: hidden;
+
+    background: var(--bg-glass-strong);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+  }
+
+  .venue-photo-img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+
+  .venue-photo-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 0.25rem;
+
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+    text-align: center;
+  }
+
+  .venue-photo-loader {
+    position: absolute;
+    inset: 0;
+
+    display: grid;
+    place-content: center;
+
+    background: var(--overlay-backdrop);
+  }
+
+  .venue-photo-file-input {
+    position: absolute;
+    inset: 0;
+
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .form-group--active {
+    .active-toggle {
+      display: inline-flex;
+      align-items: center;
+
+      gap: 0.5rem;
+
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+
+      input[type='checkbox'] {
+        width: auto;
+      }
+    }
+  }
+
   .form-section {
     display: flex;
     flex-direction: column;

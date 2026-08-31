@@ -14,11 +14,13 @@ import { CommonModule } from '@angular/common'
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
+import { take } from 'rxjs/operators'
 import { duplicateEntityNameValidator } from 'src/app/core/validators/item.validators'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { VenueDataService } from '@services/venue-data.service'
 import { EquipmentDataService } from '@services/equipment-data.service'
 import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
+import { CloudinaryService } from '@services/cloudinary.service'
 import { VenueProfile, VenueInfraItem, VenueOperatingHours, EnvironmentType } from '@models/venue.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
@@ -57,6 +59,7 @@ export class VenueFormComponent implements OnInit {
   private readonly requireAuth = inject(RequireAuthService)
   private readonly userMsg = inject(UserMsgService)
   private readonly translation = inject(TranslationService)
+  private readonly cloudinary = inject(CloudinaryService)
 
   protected venueForm_!: FormGroup
   protected isEditMode_ = signal(false)
@@ -64,6 +67,9 @@ export class VenueFormComponent implements OnInit {
   protected readonly isSaving_ = this.saving.isSaving_
   protected envTypes = ENV_TYPES
   protected validationErrors_ = signal<Record<string, string>>({})
+  /** design-port session 6 — Cloudinary-hosted venue photo, same pattern as recipe-header's imageUrl_. */
+  protected readonly photoUrl_ = signal<string | null>(null)
+  protected readonly uploadingPhoto_ = signal(false)
 
   protected get infraArray(): FormArray {
     return this.venueForm_?.get('available_infrastructure_') as FormArray
@@ -114,7 +120,8 @@ export class VenueFormComponent implements OnInit {
       capacity_: [null],
       contact_name_: [''],
       contact_phone_: [''],
-      operating_hours_: this.fb.array([])
+      operating_hours_: this.fb.array([]),
+      active_: [true]
     })
   }
 
@@ -126,8 +133,10 @@ export class VenueFormComponent implements OnInit {
       address_: v.address_ ?? '',
       capacity_: v.capacity_ ?? null,
       contact_name_: v.contact_name_ ?? '',
-      contact_phone_: v.contact_phone_ ?? ''
+      contact_phone_: v.contact_phone_ ?? '',
+      active_: v.active_ ?? true
     })
+    this.photoUrl_.set(v.photo_url_ ?? null)
     const arr = this.infraArray
     arr.clear()
     ;(v.available_infrastructure_ ?? []).forEach((item) => {
@@ -148,6 +157,22 @@ export class VenueFormComponent implements OnInit {
         })
       )
     })
+  }
+
+  protected onPhotoSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0]
+    if (!file) return
+    this.uploadingPhoto_.set(true)
+    this.cloudinary
+      .upload(file)
+      .pipe(take(1))
+      .subscribe({
+        next: (url) => {
+          this.photoUrl_.set(url)
+          this.uploadingPhoto_.set(false)
+        },
+        error: () => this.uploadingPhoto_.set(false)
+      })
   }
 
   protected addInfraRow(): void {
@@ -218,7 +243,9 @@ export class VenueFormComponent implements OnInit {
           capacity_: v.capacity_ != null && v.capacity_ !== '' ? Number(v.capacity_) : undefined,
           contact_name_: v.contact_name_ || undefined,
           contact_phone_: v.contact_phone_ || undefined,
-          operating_hours_: hours
+          operating_hours_: hours,
+          active_: v.active_,
+          photo_url_: this.photoUrl_() ?? undefined
         })
       } else {
         await this.venueData.addVenue({
@@ -231,7 +258,9 @@ export class VenueFormComponent implements OnInit {
           contact_name_: v.contact_name_ || undefined,
           contact_phone_: v.contact_phone_ || undefined,
           operating_hours_: hours,
-          created_at_: now
+          created_at_: now,
+          active_: v.active_,
+          photo_url_: this.photoUrl_() ?? undefined
         })
       }
       if (this.embeddedInDashboard()) {

@@ -96,6 +96,26 @@ Scope: `src/app/` — components, signals-based state, routing, template/CD beha
 
 ---
 
+## Global `HttpInterceptorFn` that unconditionally attaches `Authorization` breaks any direct-to-third-party `HttpClient` call
+
+**What hurt:** `CloudinaryService.upload()` posts a `FormData` directly to `https://api.cloudinary.com/v1_1/.../image/upload` via Angular's `HttpClient`. Uploading a venue photo (mirroring the already-existing recipe-photo upload pattern) failed with a browser CORS error: `Request header field authorization is not allowed by Access-Control-Allow-Headers in preflight response`. Nothing in `CloudinaryService` itself looked wrong — it doesn't set an `Authorization` header at all.
+
+**Why the obvious fix is wrong:** `authInterceptor` (`src/app/core/interceptors/auth.interceptor.ts`) is registered globally and unconditionally cloned every outgoing request with `Authorization: Bearer <token>` whenever a token existed — no URL filtering. Angular's `HttpClient` routes *every* request, including calls to third-party domains, through the same interceptor chain, so Cloudinary's request got the app's session token attached too. Cloudinary's CORS preflight doesn't allowlist `Authorization`, so the browser blocks the request before it ever reaches Cloudinary — this reads like a Cloudinary config problem, but it's entirely interceptor-side. The same bug already existed for the recipe-photo upload (identical `CloudinaryService` call site); it simply hadn't been exercised in a way that surfaced the error until this session's venue-photo upload.
+
+**What to do instead:** A global auth interceptor must scope the token to requests targeting your own backend explicitly — e.g. `req.url.startsWith(environment.apiUrl) || req.url.startsWith(environment.authApiUrl)` — never attach it based on token presence alone. Any direct-to-third-party `HttpClient` call (upload providers, external APIs) will otherwise silently inherit your app's bearer token and can fail CORS preflight, or worse, leak the token to that third party if its CORS policy happens to allow the header.
+
+---
+
+## A form-rebuilt save payload silently drops any model field the form has no control for
+
+**What hurt:** `menu-intelligence.page.ts`'s `save()`/`saveAndWait()` call `buildEventFromForm()` to construct the `MenuEvent` object it PUTs on save. A new feature (`app-venue-link-chip`) started writing to `MenuEvent.logistics_.venue_profile_id_` directly via `MenuEventDataService.updateMenuEvent()`, outside the page's own form/save cycle. The venue link would persist immediately, then vanish the next time the user hit the normal Save button — no error, just silently gone.
+
+**Why the obvious fix is wrong:** `buildEventFromForm()` returns a brand-new object assembled field-by-field from `this.form_.getRawValue()` — it was never written to preserve fields the reactive form doesn't have a control for (`logistics_`, and also `cuisine_tags_`/`created_from_template_id_`). Spreading that object straight into `updateMenuEvent({...event, _id, updated_at_})` (a full PUT) means any field absent from the form's own shape gets silently dropped on every save, not just the new one — it looked like the new venue-link component had a bug, but the actual defect was in the pre-existing, unrelated save path, which had simply never mattered before because nothing had ever written to `logistics_` in the first place.
+
+**What to do instead:** Before wiring a new writer to a field a page's own form-rebuilt save payload doesn't cover, check whether that save path reconstructs the object from form values (drops anything the form doesn't model) vs. patches the existing stored object (preserves everything by default). If it reconstructs, either add the field to the form, or explicitly merge it back in at each save call site from the currently-stored record before the PUT — don't assume "the object round-trips" just because the field itself saves correctly in isolation.
+
+---
+
 ## A service that both `autoLoad`s in its constructor and exposes `reloadFromStorage()` double-fetches on every session bootstrap
 
 **What hurt:** Network capture (`gstack browse network`) showed `PRODUCT_LIST` (739KB), `RECIPE_LIST` (1.69MB), `DISH_LIST` (2.6MB), and five smaller collections each fetched twice, back-to-back, on every page load — ~5MB of duplicate JSON per boot. Every copy returned 200; nothing errored, `ng build` stayed clean, no console warning.

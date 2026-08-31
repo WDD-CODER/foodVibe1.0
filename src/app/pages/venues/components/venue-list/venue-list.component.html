@@ -87,7 +87,15 @@
         </div>
 
         <div class="venue-card-media" [attr.data-env]="item.environment_type_">
-          <lucide-icon name="map-pin" [size]="28"></lucide-icon>
+          @if (item.photo_url_) {
+            <img [src]="item.photo_url_" class="venue-card-photo" alt="" />
+          } @else {
+            <lucide-icon name="map-pin" [size]="28"></lucide-icon>
+          }
+          <span class="venue-status-pill" [class.venue-status-pill--inactive]="item.active_ === false">
+            <span class="venue-status-dot"></span>
+            {{ (item.active_ === false ? 'venue_inactive' : 'venue_active') | translatePipe }}
+          </span>
         </div>
 
         <div class="venue-card-body">
