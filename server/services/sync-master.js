@@ -224,6 +224,14 @@ async function syncMasterToUser(userId) {
     // clones that would collide with a user-created product.
     // Also clean up any stale clones that already conflict (created before this
     // guard existed) — these cause the "name is taken" false-positive on edit.
+    //
+    // allProductNames is used below by the per-master loop's Rule 1 collision
+    // check — built once here (loop-invariant: it only depends on allUserDocs,
+    // fetched once above) instead of once per master doc. With ~1500 master
+    // products and a similarly-sized user catalog, rebuilding this Set inside
+    // the loop meant up to ~1500 redundant O(n) Set constructions per sync run
+    // (every signup, and every 13-minute token refresh — server/routes/auth.js:274).
+    let allProductNames = null;
     if (entityType === 'PRODUCT_LIST') {
       const cloneIds = new Set(userDocs.map(d => String(d._id)));
       const userCreatedNames = new Set(
@@ -241,6 +249,7 @@ async function syncMasterToUser(userId) {
           userByMasterId.delete(String(sc._masterId));
         }
       }
+      allProductNames = new Set(allUserDocs.map(d => d.name_hebrew?.trim()).filter(Boolean));
     }
 
     const toInsert = [];
@@ -270,7 +279,6 @@ async function syncMasterToUser(userId) {
         // Skip if the user already has a product with the same name (any origin).
         if (entityType === 'PRODUCT_LIST') {
           const masterName = master.name_hebrew?.trim();
-          const allProductNames = new Set(allUserDocs.map(d => d.name_hebrew?.trim()).filter(Boolean));
           if (masterName && allProductNames.has(masterName)) {
             productNameCollisions++;
             continue;
