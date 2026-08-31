@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   input,
   output,
@@ -46,7 +47,8 @@ import { CounterComponent } from 'src/app/shared/counter/counter.component'
     CounterComponent
   ],
   templateUrl: './recipe-workflow.component.html',
-  styleUrl: './recipe-workflow.component.scss'
+  styleUrl: './recipe-workflow.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RecipeWorkflowComponent {
   private fb = inject(FormBuilder)
