@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { MenuSectionCategoriesService } from '@services/menu-section-categories.service'
@@ -14,7 +14,8 @@ import { AuthModalService } from '@services/auth-modal.service'
   standalone: true,
   imports: [LucideAngularModule, TranslatePipe],
   templateUrl: './section-category-manager.component.html',
-  styleUrl: './section-category-manager.component.scss'
+  styleUrl: './section-category-manager.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SectionCategoryManagerComponent implements OnInit {
   private readonly sectionCategories = inject(MenuSectionCategoriesService)
@@ -41,9 +42,7 @@ export class SectionCategoryManagerComponent implements OnInit {
   }
 
   private countMenuEventsUsingSection(name: string): number {
-    return this.menuEventData.allMenuEvents_().filter(e =>
-      (e.sections_ ?? []).some(s => s.name_ === name)
-    ).length
+    return this.menuEventData.allMenuEvents_().filter((e) => (e.sections_ ?? []).some((s) => s.name_ === name)).length
   }
 
   async onAdd(value: string, inputEl: HTMLInputElement): Promise<void> {
@@ -66,8 +65,7 @@ export class SectionCategoryManagerComponent implements OnInit {
 
     const usageCount = this.countMenuEventsUsingSection(name)
     if (usageCount > 0) {
-      const msg = this.translation.translate('metadata_section_in_use')
-        .replace('{n}', String(usageCount))
+      const msg = this.translation.translate('metadata_section_in_use').replace('{n}', String(usageCount))
       this.userMsg.onSetErrorMsg(msg)
       return
     }
@@ -92,15 +90,13 @@ export class SectionCategoryManagerComponent implements OnInit {
 
     const usageCount = this.countMenuEventsUsingSection(oldName)
     if (usageCount > 0) {
-      const msg = this.translation.translate('metadata_rename_affects_menus')
-        .replace('{n}', String(usageCount))
+      const msg = this.translation.translate('metadata_rename_affects_menus').replace('{n}', String(usageCount))
       const confirmed = await this.confirmModal.open(msg, { variant: 'warning', saveLabel: 'save' })
       if (!confirmed) return
     } else {
-      const confirmed = await this.confirmModal.open(
-        this.translation.translate('metadata_confirm_rename_section'),
-        { saveLabel: 'save' }
-      )
+      const confirmed = await this.confirmModal.open(this.translation.translate('metadata_confirm_rename_section'), {
+        saveLabel: 'save'
+      })
       if (!confirmed) return
     }
 
@@ -112,11 +108,9 @@ export class SectionCategoryManagerComponent implements OnInit {
   private async updateMenuEventSections(oldName: string, newName: string): Promise<void> {
     const events = this.menuEventData.allMenuEvents_()
     for (const event of events) {
-      const hasMatch = (event.sections_ ?? []).some(s => s.name_ === oldName)
+      const hasMatch = (event.sections_ ?? []).some((s) => s.name_ === oldName)
       if (!hasMatch) continue
-      const updatedSections = event.sections_.map(s =>
-        s.name_ === oldName ? { ...s, name_: newName } : s
-      )
+      const updatedSections = event.sections_.map((s) => (s.name_ === oldName ? { ...s, name_: newName } : s))
       await this.menuEventData.updateMenuEvent({ ...event, sections_: updatedSections })
     }
   }
