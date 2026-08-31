@@ -1,4 +1,15 @@
-import { Component, inject, input, signal, computed, output, effect, viewChild, ElementRef } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  input,
+  signal,
+  computed,
+  output,
+  effect,
+  viewChild,
+  ElementRef
+} from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { PreparationRegistryService, type PreparationEntry } from '@services/preparation-registry.service'
@@ -11,9 +22,17 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 @Component({
   selector: 'app-preparation-search',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, ClickOutSideDirective, TranslatePipe, ScrollableDropdownComponent, SelectOnFocusDirective],
+  imports: [
+    CommonModule,
+    LucideAngularModule,
+    ClickOutSideDirective,
+    TranslatePipe,
+    ScrollableDropdownComponent,
+    SelectOnFocusDirective
+  ],
   templateUrl: './preparation-search.component.html',
-  styleUrl: './preparation-search.component.scss'
+  styleUrl: './preparation-search.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PreparationSearchComponent {
   private readonly prepRegistry = inject(PreparationRegistryService)

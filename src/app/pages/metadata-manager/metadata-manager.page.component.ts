@@ -1,5 +1,6 @@
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   HostListener,
@@ -46,7 +47,8 @@ type MetadataType = 'category' | 'allergen' | 'unit' | 'label'
     UserManagementComponent
   ],
   templateUrl: './metadata-manager.page.component.html',
-  styleUrl: './metadata-manager.page.component.scss'
+  styleUrl: './metadata-manager.page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataManagerComponent implements OnInit, AfterViewInit {
   private unitRegistry = inject(UnitRegistryService)

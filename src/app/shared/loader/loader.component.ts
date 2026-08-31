@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core'
+import { ChangeDetectionStrategy, Component, input } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 
@@ -7,7 +7,8 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
   standalone: true,
   imports: [CommonModule, TranslatePipe],
   templateUrl: './loader.component.html',
-  styleUrl: './loader.component.scss'
+  styleUrl: './loader.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoaderComponent {
   /** 'large' (48px), 'medium' (32px), 'small' (20px). Default: medium. */

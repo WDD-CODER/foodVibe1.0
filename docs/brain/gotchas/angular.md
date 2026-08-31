@@ -113,3 +113,23 @@ Scope: `src/app/` — components, signals-based state, routing, template/CD beha
 **Why the obvious fix is wrong:** `buildEventFromForm()` returns a brand-new object assembled field-by-field from `this.form_.getRawValue()` — it was never written to preserve fields the reactive form doesn't have a control for (`logistics_`, and also `cuisine_tags_`/`created_from_template_id_`). Spreading that object straight into `updateMenuEvent({...event, _id, updated_at_})` (a full PUT) means any field absent from the form's own shape gets silently dropped on every save, not just the new one — it looked like the new venue-link component had a bug, but the actual defect was in the pre-existing, unrelated save path, which had simply never mattered before because nothing had ever written to `logistics_` in the first place.
 
 **What to do instead:** Before wiring a new writer to a field a page's own form-rebuilt save payload doesn't cover, check whether that save path reconstructs the object from form values (drops anything the form doesn't model) vs. patches the existing stored object (preserves everything by default). If it reconstructs, either add the field to the form, or explicitly merge it back in at each save call site from the currently-stored record before the PUT — don't assume "the object round-trips" just because the field itself saves correctly in isolation.
+
+---
+
+## A service that both `autoLoad`s in its constructor and exposes `reloadFromStorage()` double-fetches on every session bootstrap
+
+**What hurt:** Network capture (`gstack browse network`) showed `PRODUCT_LIST` (739KB), `RECIPE_LIST` (1.69MB), `DISH_LIST` (2.6MB), and five smaller collections each fetched twice, back-to-back, on every page load — ~5MB of duplicate JSON per boot. Every copy returned 200; nothing errored, `ng build` stayed clean, no console warning.
+
+**Why the obvious fix is wrong:** The instinct is to hunt for two separate call sites firing the fetch — but there's only one call chain. `UserService._reloadDataServices()` runs `this.injector.get(SomeDataService).reloadFromStorage()` after login/guest-auth resolves. `injector.get(...)` *constructs* the service in that same expression if nothing touched it yet, and the constructor immediately fires `void this.ensureLoaded()` — fire-and-forget, but it sets `this.loadPromise_` synchronously (an async function runs synchronously up to its first `await`). The very next statement on the same line then calls `.reloadFromStorage()` on that freshly-constructed instance — which, if it unconditionally resets `loaded_`/`loadPromise_` and starts a new load without checking for the one already in flight, races a second concurrent fetch against the first. Searching for a second `ensureLoaded()`/`reloadFromStorage()` call site elsewhere finds nothing, because there isn't one — it's one call site invoking two overlapping code paths.
+
+**What to do instead:** Any `reloadFromStorage()` (or equivalent force-refresh method) on a service that also `autoLoad`s in its constructor must check for an in-flight load first and await it instead of starting a new one:
+```ts
+async reloadFromStorage(): Promise<void> {
+  if (this.loadPromise_) { await this.loadPromise_; return }
+  this.loaded_ = false
+  this.loadPromise_ = null
+  await this.loadInitialData()
+  this.loaded_ = true
+}
+```
+This preserves normal force-refresh behavior for the common case (called long after the initial load finished, `loadPromise_` is null) while closing the one narrow window — `injector.get()` on a not-yet-constructed service — where it actually races. Applied across `base-entity-data.service.ts`, `product-data.service.ts`, `recipe-data.service.ts`, `dish-data.service.ts`, `menu-event-data.service.ts`, `menu-section-categories.service.ts`, `preparation-registry.service.ts`, and `metadata-registry.service.ts` (plans 301 M4).

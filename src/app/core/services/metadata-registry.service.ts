@@ -39,12 +39,25 @@ export class MetadataRegistryService {
   public allLabels_ = this.labels_.asReadonly()
   public allMenuTypes_ = this.menuTypes_.asReadonly()
 
+  private initPromise_: Promise<void> | null = null
+
   constructor() {
-    this.initMetadata().catch(() => {})
+    this.initPromise_ = this.initMetadata()
+      .catch(() => {})
+      .finally(() => {
+        this.initPromise_ = null
+      })
   }
 
   /** Reload all metadata signals from storage after a backup import/restore. */
   async reloadFromStorage(): Promise<void> {
+    if (this.initPromise_) {
+      // A load is already in flight — e.g. this service was just constructed via
+      // injector.get() and its constructor's initMetadata() hasn't resolved yet.
+      // Await it instead of firing a redundant concurrent fetch for the same data.
+      await this.initPromise_
+      return
+    }
     await this.initMetadata()
   }
 

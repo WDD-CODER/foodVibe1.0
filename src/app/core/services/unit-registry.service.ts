@@ -8,8 +8,7 @@ import { KeyResolutionService } from './key-resolution.service'
 import { Subject } from 'rxjs'
 
 export type RegisterUnitResult =
-  | { success: true; alreadyInRegistry?: boolean }
-  | { success: false; alreadyOnProduct?: boolean; error?: string }
+  { success: true; alreadyInRegistry?: boolean } | { success: false; alreadyOnProduct?: boolean; error?: string }
 
 /** System units: constant, non-removable, values never overwritten. */
 /** Shape of the single registry document stored under KITCHEN_UNITS. */
@@ -29,7 +28,7 @@ export const SYSTEM_UNITS: Readonly<Record<string, number>> = {
   teaspoon: 5,
   cup: 240,
   pinch: 1,
-  portion: 1,
+  portion: 1
 }
 
 @Injectable({ providedIn: 'root' })
@@ -58,8 +57,16 @@ export class UnitRegistryService {
   // COMPUTED
   allUnitKeys_ = computed(() => Object.keys(this.globalUnits_()))
 
+  /** Tracks the in-flight initUnits() call so a reload racing the constructor's own
+   *  initial hydration awaits it instead of firing a redundant concurrent fetch. */
+  private initPromise_: Promise<void> | null = null
+
   constructor() {
-    this.initUnits().catch(() => {})
+    this.initPromise_ = this.initUnits()
+      .catch(() => {})
+      .finally(() => {
+        this.initPromise_ = null
+      })
   }
 
   /**
@@ -71,9 +78,8 @@ export class UnitRegistryService {
       const registries = await this.storageService.query<UnitRegistryEntry>(this.STORAGE_KEY)
       const existingRegistry = registries[0]
 
-      const hasNoUnits = !existingRegistry ||
-        !existingRegistry.units ||
-        Object.keys(existingRegistry.units).length === 0
+      const hasNoUnits =
+        !existingRegistry || !existingRegistry.units || Object.keys(existingRegistry.units).length === 0
 
       if (hasNoUnits) {
         const defaultUnits = { ...SYSTEM_UNITS }
@@ -91,7 +97,9 @@ export class UnitRegistryService {
       } else {
         const units = { ...existingRegistry.units }
         // Merge system units over storage so their values are never overwritten
-        Object.keys(SYSTEM_UNITS).forEach(k => { units[k] = SYSTEM_UNITS[k] })
+        Object.keys(SYSTEM_UNITS).forEach((k) => {
+          units[k] = SYSTEM_UNITS[k]
+        })
         if (skipOverwriteIfNewer) {
           const currentKeys = Object.keys(this.globalUnits_())
           if (currentKeys.length > Object.keys(units).length) return
@@ -117,11 +125,22 @@ export class UnitRegistryService {
 
   /** Re-load units from storage so dropdowns show the latest (e.g. after add in another tab or previous session). */
   async refreshFromStorage(): Promise<void> {
+    if (this.initPromise_) {
+      // A load is already in flight — e.g. this service was just constructed via
+      // injector.get() and its constructor's initUnits() hasn't resolved yet. Await
+      // it instead of firing a redundant concurrent fetch for the same data.
+      await this.initPromise_
+      return
+    }
     await this.initUnits(false)
   }
 
   /** Reload from storage after a backup import/restore. */
   async reloadFromStorage(): Promise<void> {
+    if (this.initPromise_) {
+      await this.initPromise_
+      return
+    }
     await this.initUnits(false)
   }
 
@@ -148,8 +167,8 @@ export class UnitRegistryService {
     const context = this.unitCreatorContext()
 
     // 1. Unit already on this product's purchase list (compare by resolved key): reject
-    const existingResolved = (context?.existingUnitSymbols ?? []).map((s) =>
-      this.translationService.resolveUnit(s ?? '') ?? (s ?? '').trim().toLowerCase()
+    const existingResolved = (context?.existingUnitSymbols ?? []).map(
+      (s) => this.translationService.resolveUnit(s ?? '') ?? (s ?? '').trim().toLowerCase()
     )
     if (existingResolved.includes(key)) {
       return { success: false, alreadyOnProduct: true }

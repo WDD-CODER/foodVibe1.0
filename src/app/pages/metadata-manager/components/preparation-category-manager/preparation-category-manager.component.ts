@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { PreparationRegistryService } from '@services/preparation-registry.service'
@@ -15,7 +15,8 @@ import { AuthModalService } from '@services/auth-modal.service'
   standalone: true,
   imports: [LucideAngularModule, TranslatePipe],
   templateUrl: './preparation-category-manager.component.html',
-  styleUrl: './preparation-category-manager.component.scss'
+  styleUrl: './preparation-category-manager.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PreparationCategoryManagerComponent implements OnInit {
   private readonly prepRegistry = inject(PreparationRegistryService)

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core'
 import {
   Router,
   RouterOutlet,
@@ -71,7 +71,8 @@ import { RestoreChoiceModalService } from '@services/restore-choice-modal.servic
     AiProductModalComponent
   ],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './app.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent {
   title = 'foodVibe1.0'

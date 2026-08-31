@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core'
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 
 @Component({
@@ -6,7 +6,8 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
   standalone: true,
   imports: [TranslatePipe],
   templateUrl: './approve-stamp.component.html',
-  styleUrl: './approve-stamp.component.scss'
+  styleUrl: './approve-stamp.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ApproveStampComponent {
   /** When true, show approved stamp (teal image); click will unapprove. */
@@ -16,10 +17,10 @@ export class ApproveStampComponent {
 
   readonly approve = output<void>()
 
-  /** Teal APPROVED stamp (PNG, transparent background). */
-  protected readonly stampApprovedUrl = 'assets/images/stamp-approved.png'
-  /** Red NOT APPROVED stamp (PNG, transparent background). */
-  protected readonly stampNotApprovedUrl = 'assets/images/stamp-not-approved.png'
+  /** Teal APPROVED stamp (WebP, transparent background — plan 302 M5, 161KB PNG -> 54.6KB). */
+  protected readonly stampApprovedUrl = 'assets/images/stamp-approved.webp'
+  /** Red NOT APPROVED stamp (WebP, transparent background — plan 302 M5, 177KB PNG -> 64.9KB). */
+  protected readonly stampNotApprovedUrl = 'assets/images/stamp-not-approved.webp'
 
   protected onStampClick(): void {
     if (this.disabled()) return

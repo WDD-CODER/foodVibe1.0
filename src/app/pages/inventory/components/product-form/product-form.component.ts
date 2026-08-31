@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   inject,
   OnInit,
@@ -81,7 +82,8 @@ interface ProductFormValue {
   ],
   providers: [ProductAiFlowService],
   templateUrl: './product-form.component.html',
-  styleUrl: './product-form.component.scss'
+  styleUrl: './product-form.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProductFormComponent implements OnInit, AfterViewInit {
   initialProduct_ = input<Product | null>(null)

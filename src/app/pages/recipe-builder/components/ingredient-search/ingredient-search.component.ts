@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   inject,
   signal,
@@ -46,7 +47,8 @@ export type SearchableItem = (Product | Recipe) & { item_type_: 'product' | 'rec
     SelectOnFocusDirective
   ],
   templateUrl: './ingredient-search.component.html',
-  styleUrl: './ingredient-search.component.scss'
+  styleUrl: './ingredient-search.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class IngredientSearchComponent {
   private readonly productData = inject(ProductDataService)

@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   input,
   output,
@@ -8,16 +9,12 @@ import {
   ViewChild,
   ElementRef,
   AfterViewChecked,
-  OnDestroy,
+  OnDestroy
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
-import {
-  quantityIncrement,
-  quantityDecrement,
-  QuantityStepOptions,
-} from 'src/app/core/utils/quantity-step.util'
+import { quantityIncrement, quantityDecrement, QuantityStepOptions } from 'src/app/core/utils/quantity-step.util'
 
 @Component({
   selector: 'app-counter',
@@ -25,6 +22,7 @@ import {
   imports: [CommonModule, SelectOnFocusDirective, TranslatePipe],
   templateUrl: './counter.component.html',
   styleUrl: './counter.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CounterComponent implements AfterViewChecked, OnDestroy {
   // INPUTS
@@ -169,8 +167,8 @@ export class CounterComponent implements AfterViewChecked, OnDestroy {
   }
 
   protected onEnterKey(e: Event): void {
-    e.preventDefault();
-    (e.target as HTMLInputElement)?.blur()
+    e.preventDefault()
+    ;(e.target as HTMLInputElement)?.blur()
   }
 
   protected onKeydown(e: KeyboardEvent): void {
@@ -181,12 +179,9 @@ export class CounterComponent implements AfterViewChecked, OnDestroy {
     const opts = this.stepOptions()
     const kbOpts: QuantityStepOptions = { ...(opts ?? {}) }
     const next =
-      e.key === 'ArrowUp'
-        ? quantityIncrement(current, minV, kbOpts)
-        : quantityDecrement(current, minV, kbOpts)
+      e.key === 'ArrowUp' ? quantityIncrement(current, minV, kbOpts) : quantityDecrement(current, minV, kbOpts)
     const maxV = this.maxVal_()
-    const clamped =
-      maxV != null ? Math.min(next, maxV) : Math.max(next, minV)
+    const clamped = maxV != null ? Math.min(next, maxV) : Math.max(next, minV)
     this.emitValue(clamped)
   }
 
@@ -200,7 +195,7 @@ export class CounterComponent implements AfterViewChecked, OnDestroy {
     const opts = this.stepOptions()
     const merged: QuantityStepOptions = {
       ...(opts ?? {}),
-      ...(continuousPress ? { continuousPress: true } : {}),
+      ...(continuousPress ? { continuousPress: true } : {})
     }
     const next = quantityDecrement(current, minV, merged)
     this.emitValue(next)
@@ -217,7 +212,7 @@ export class CounterComponent implements AfterViewChecked, OnDestroy {
     const opts = this.stepOptions()
     const merged: QuantityStepOptions = {
       ...(opts ?? {}),
-      ...(continuousPress ? { continuousPress: true } : {}),
+      ...(continuousPress ? { continuousPress: true } : {})
     }
     let next = quantityIncrement(current, minV, merged)
     const maxV = this.maxVal_()

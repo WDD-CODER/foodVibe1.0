@@ -1,4 +1,4 @@
-import { Component, output, ViewEncapsulation } from '@angular/core'
+import { ChangeDetectionStrategy, Component, output, ViewEncapsulation } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 
@@ -8,7 +8,8 @@ import { ClickOutSideDirective } from '@directives/click-out-side'
   imports: [CommonModule, ClickOutSideDirective],
   templateUrl: './export-toolbar-overlay.component.html',
   styleUrl: './export-toolbar-overlay.component.scss',
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExportToolbarOverlayComponent {
   /** Emitted when user clicks outside the overlay (e.g. to close). */

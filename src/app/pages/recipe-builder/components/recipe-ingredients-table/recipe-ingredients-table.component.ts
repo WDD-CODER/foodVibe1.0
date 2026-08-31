@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   input,
   output,
@@ -58,7 +59,8 @@ import { NutritionBadgeComponent } from 'src/app/shared/nutrition-badge/nutritio
     NutritionBadgeComponent
   ],
   templateUrl: './recipe-ingredients-table.component.html',
-  styleUrl: './recipe-ingredients-table.component.scss'
+  styleUrl: './recipe-ingredients-table.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RecipeIngredientsTableComponent {
   //INJECTIONS

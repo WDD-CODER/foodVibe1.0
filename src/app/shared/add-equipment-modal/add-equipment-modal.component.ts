@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, effect } from '@angular/core'
+import { ChangeDetectionStrategy, Component, inject, signal, computed, effect } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
@@ -17,7 +17,8 @@ const ADD_NEW_VALUE = '__add_new__'
   standalone: true,
   imports: [CommonModule, FormsModule, TranslatePipe, CustomSelectComponent],
   templateUrl: './add-equipment-modal.component.html',
-  styleUrl: './add-equipment-modal.component.scss'
+  styleUrl: './add-equipment-modal.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddEquipmentModalComponent {
   private modalService = inject(AddEquipmentModalService)
@@ -40,7 +41,12 @@ export class AddEquipmentModalComponent {
   }
 
   protected readonly fixedCategories: EquipmentCategory[] = [
-    'heat_source', 'tool', 'container', 'packaging', 'infrastructure', 'consumable'
+    'heat_source',
+    'tool',
+    'container',
+    'packaging',
+    'infrastructure',
+    'consumable'
   ]
 
   protected categoryOptions = computed(() => {
