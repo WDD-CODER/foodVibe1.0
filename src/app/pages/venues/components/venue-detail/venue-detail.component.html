@@ -19,10 +19,20 @@
 
     <div class="detail-hero c-glass-panel">
       <div class="detail-hero-media">
-        <lucide-icon name="map-pin" [size]="40"></lucide-icon>
+        @if (venue.photo_url_) {
+          <img [src]="venue.photo_url_" class="detail-hero-photo" alt="" />
+        } @else {
+          <lucide-icon name="map-pin" [size]="40"></lucide-icon>
+        }
       </div>
       <div class="detail-hero-info">
-        <h1 class="venue-name">{{ venue.name_hebrew }}</h1>
+        <div class="detail-hero-title-row">
+          <h1 class="venue-name">{{ venue.name_hebrew }}</h1>
+          <span class="venue-status-badge" [class.venue-status-badge--inactive]="venue.active_ === false">
+            <span class="venue-status-dot"></span>
+            {{ (venue.active_ === false ? 'venue_inactive' : 'venue_active') | translatePipe }}
+          </span>
+        </div>
         @if (venue.address_) {
           <p class="venue-address">
             <lucide-icon name="map-pin" [size]="15"></lucide-icon>
@@ -38,12 +48,42 @@
             <span class="detail-stat-label">{{ 'capacity' | translatePipe }}</span>
             <span class="detail-stat-value">{{ venue.capacity_ ?? '—' }}</span>
           </div>
+          <div class="detail-stat">
+            <span class="detail-stat-label">{{ 'associated_menus' | translatePipe }}</span>
+            <span class="detail-stat-value">{{ associatedMenus_().length }}</span>
+          </div>
         </div>
         <span class="venue-env-chip">{{ venue.environment_type_ | translatePipe }}</span>
       </div>
     </div>
 
     <div class="detail-cards">
+      <section class="detail-card c-glass-panel">
+        <header class="detail-card-header">
+          <lucide-icon name="phone" [size]="18"></lucide-icon>
+          <h2>{{ 'contact_name' | translatePipe }}</h2>
+        </header>
+        @if (venue.contact_name_ || venue.contact_phone_) {
+          <div class="contact-row">
+            @if (contactInitials_()) {
+              <span class="contact-avatar">{{ contactInitials_() }}</span>
+            }
+            <div>
+              <p class="contact-name">{{ venue.contact_name_ || '—' }}</p>
+              <p class="contact-role">{{ 'venue_manager' | translatePipe }}</p>
+            </div>
+          </div>
+          @if (venue.contact_phone_) {
+            <p class="contact-phone">
+              <lucide-icon name="phone" [size]="14"></lucide-icon>
+              {{ venue.contact_phone_ }}
+            </p>
+          }
+        } @else {
+          <p class="detail-empty">—</p>
+        }
+      </section>
+
       <section class="detail-card c-glass-panel">
         <header class="detail-card-header">
           <lucide-icon name="calendar-clock" [size]="18"></lucide-icon>
@@ -62,25 +102,30 @@
           <p class="detail-empty">—</p>
         }
       </section>
-
-      <section class="detail-card c-glass-panel">
-        <header class="detail-card-header">
-          <lucide-icon name="phone" [size]="18"></lucide-icon>
-          <h2>{{ 'contact_name' | translatePipe }}</h2>
-        </header>
-        @if (venue.contact_name_ || venue.contact_phone_) {
-          <p class="contact-name">{{ venue.contact_name_ || '—' }}</p>
-          @if (venue.contact_phone_) {
-            <p class="contact-phone">
-              <lucide-icon name="phone" [size]="14"></lucide-icon>
-              {{ venue.contact_phone_ }}
-            </p>
-          }
-        } @else {
-          <p class="detail-empty">—</p>
-        }
-      </section>
     </div>
+
+    <section class="detail-card c-glass-panel">
+      <header class="detail-card-header">
+        <h2>{{ 'associated_menus' | translatePipe }}</h2>
+      </header>
+      @if (associatedMenus_().length) {
+        <ul class="menus-list">
+          @for (m of associatedMenus_(); track m._id) {
+            <li class="menu-row">
+              <div>
+                <span class="menu-row-name">{{ m.name_ }}</span>
+                <span class="menu-row-meta"
+                  >{{ m.event_date_ }} · {{ m.guest_count_ }} {{ 'menu_guests' | translatePipe }}</span
+                >
+              </div>
+              <lucide-icon name="chevron-left" [size]="16"></lucide-icon>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="detail-empty">{{ 'no_associated_menus' | translatePipe }}</p>
+      }
+    </section>
 
     @if (venue.notes_) {
       <section class="detail-card c-glass-panel">

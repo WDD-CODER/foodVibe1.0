@@ -25,4 +25,8 @@ export interface VenueProfile {
   contact_name_?: string
   contact_phone_?: string
   operating_hours_?: VenueOperatingHours[]
+  /** design-port session 6 — matches Venues.dc.html/VenueDetail.dc.html's active/inactive pill. */
+  active_?: boolean
+  /** design-port session 6 — Cloudinary-hosted URL, same pattern as recipe.model.ts's imageUrl_. */
+  photo_url_?: string
 }

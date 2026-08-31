@@ -1,0 +1,12 @@
+<span class="venue-link-chip">
+  <lucide-icon name="map-pin" [size]="12"></lucide-icon>
+  <app-custom-select
+    [formControl]="venueControl_"
+    [options]="venueOptions_()"
+    [placeholder]="'select_venue'"
+    [translateLabels]="false"
+    [typeToFilter]="true"
+    [compact]="true"
+    variant="chip"
+  />
+</span>
