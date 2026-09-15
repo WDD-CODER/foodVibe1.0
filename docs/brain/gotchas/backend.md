@@ -149,3 +149,13 @@ restart still doesn't seem to take effect, check for a leftover process on port 
 (`netstat -ano | findstr :3000` on Windows, kill the PID) before assuming the code change is wrong —
 `--watch` restarts cleanly but a stray manually-launched instance from an earlier session won't have
 been killed by it.
+
+---
+
+## New `__master__` write paths must remember to bump the sync version
+
+**What hurt:** `syncMasterToUser` ran a full multi-collection diff on every `POST /refresh` (every ~13 min per session) even though master docs are essentially never written live — auditing every write path in `server/` turned up only `seed-master.js` and one-off `legacy-import/` scripts. Version-gating (`server/services/master-version.js`) skips the sync when nothing changed, comparing `User.lastSyncedMasterVersion` against a single shared `MASTER_META.lastModified`.
+
+**Why the obvious fix is wrong:** There is no automatic trigger that bumps the version — it's not derived from the docs themselves (no reliable `updatedAt_` field exists across the 13 `CLONEABLE_TYPES` collections; backfilling it just to compute a version would be a bigger migration than the problem warranted). A future script — or worse, a future *live* endpoint — that writes `userId: '__master__'` docs without calling `bumpMasterVersion()` will not error; it will just leave every user's next refresh silently comparing against a stale version and skipping a sync that should have run.
+
+**What to do instead:** Any new code path that writes/edits/removes a `__master__` document — script or live endpoint — must call `bumpMasterVersion()` (`server/services/master-version.js`) afterward, or run `node server/scripts/bump-master-version.js`. If a *live* write path to master docs is ever added (none exists today), version-gating design should be revisited — a shared single-doc version model assumes rare, developer-driven writes, not concurrent live ones.
